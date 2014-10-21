@@ -1,3 +1,4 @@
+include_directories("${HEADER_BASE}")
 
 if(BUILD_SHARED_LIBS)
     set(OGVR_PLUGINKIT_STATIC FALSE)

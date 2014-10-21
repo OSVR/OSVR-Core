@@ -4,9 +4,9 @@
     @date 2014
 
     @author
-Ryan Pavlik
-<ryan@sensics.com>
-<http://sensics.com>
+    Ryan Pavlik
+    <ryan@sensics.com>
+    <http://sensics.com>
 
 */
 
@@ -25,7 +25,7 @@ Ryan Pavlik
 // limitations under the License.
 
 // Internal Includes
-#include "PluginRegistration.h"
+#include <ogvr/PluginKit/PluginRegistration.h>
 
 // Library/third-party includes
 // - none
