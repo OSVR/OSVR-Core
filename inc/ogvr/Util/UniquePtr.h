@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2014
 
@@ -24,8 +24,11 @@ Ryan Pavlik
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef INCLUDED_UniquePtr_h_GUID_3CF3C525_BAAB_41B2_D659_A4D166EABB52
+#define INCLUDED_UniquePtr_h_GUID_3CF3C525_BAAB_41B2_D659_A4D166EABB52
+
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistration.h>
+// - none
 
 // Library/third-party includes
 // - none
@@ -33,10 +36,4 @@ Ryan Pavlik
 // Standard includes
 // - none
 
-namespace ogvr {
-
-/// Implementation must be here to handle std::unique_ptr's requirements
-/// for destruction of incomplete types.
-PluginRegistrationContext::~PluginRegistrationContext() {}
-
-} // end of namespace ogvr
+#endif // INCLUDED_UniquePtr_h_GUID_3CF3C525_BAAB_41B2_D659_A4D166EABB52

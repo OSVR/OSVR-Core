@@ -1,5 +1,5 @@
 /** @file
-    @brief Auto-configured header
+    @brief Header
 
     Must be c-safe!
 
@@ -19,7 +19,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// 	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,22 +28,35 @@
 // limitations under the License.
 */
 
-#ifndef INCLUDED_Export_h_GUID_A0A0E42A_8D8E_4AB9_72FD_BF642390C9ED
-#define INCLUDED_Export_h_GUID_A0A0E42A_8D8E_4AB9_72FD_BF642390C9ED
+#ifndef INCLUDED_PluginRegistrationC_h_GUID_C019DFA9_5B54_4791_B0A4_040EA20501BA
+#define INCLUDED_PluginRegistrationC_h_GUID_C019DFA9_5B54_4791_B0A4_040EA20501BA
 
-#cmakedefine OGVR_PLUGINKIT_STATIC
+/* Internal Includes */
+#include <ogvr/PluginKit/Export.h>
 
-#if defined(_WIN32) && !defined(OGVR_PLUGINKIT_STATIC)
-#ifdef ogvrPluginKit_EXPORTS
-/* We're building this library */
-#define OGVR_PLUGINKIT_EXPORT __declspec(dllexport)
+/* Library/third-party includes */
+/* none */
+
+/* Standard includes */
+/* none */
+
+#ifdef __cplusplus
+#define OGVR_C_ONLY(X)
+#define OGVR_CPP_ONLY(X) X
 #else
-/* We're being included. */
-#define OGVR_PLUGINKIT_EXPORT __declspec(dllimport)
+#define OGVR_C_ONLY(X) X
+#define OGVR_CPP_ONLY(X)
 #endif
-#else
-/* Right now no visibility macros for non-Windows platforms. */
-#define OGVR_PLUGINKIT_EXPORT
-#endif
+
+OGVR_CPP_ONLY(namespace ogvr { class PluginRegistrationContext; })
+
+OGVR_CPP_ONLY(extern "C" {)
+
+OGVR_CPP_ONLY(namespace ogvr { class PluginRegistrationContext;
+})
+
+
+OGVR_CPP_ONLY(
+}) /* end of extern "C" */
 
 #endif

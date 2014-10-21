@@ -1,18 +1,15 @@
 /** @file
     @brief Header
 
-    Must be c-safe!
-
     @date 2014
 
     @author
-Ryan Pavlik
-<ryan@sensics.com>
-<http://sensics.com>
+    Ryan Pavlik
+    <ryan@sensics.com>
+    <http://sensics.com>
 
 */
 
-/*
 // Copyright 2014 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,18 +23,39 @@ Ryan Pavlik
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-*/
 
-#ifndef INCLUDED_PluginRegistration_ch_GUID_C019DFA9_5B54_4791_B0A4_040EA20501BA
-#define INCLUDED_PluginRegistration_ch_GUID_C019DFA9_5B54_4791_B0A4_040EA20501BA
+#ifndef INCLUDED_PluginRegistration_h_GUID_4F5D6422_2977_40A9_8BA0_F86FD6245CE9
+#define INCLUDED_PluginRegistration_h_GUID_4F5D6422_2977_40A9_8BA0_F86FD6245CE9
 
-/* Internal Includes */
-/* none */
+// Internal Includes
+#include <ogvr/PluginKit/Export.h>
+#include <ogvr/Util/UniquePtr.h>
 
-/* Library/third-party includes */
-/* none */
+// Library/third-party includes
+// - none
 
-/* Standard includes */
-/* none */
+// Standard includes
+#include <cstddef>
+#include <string>
 
-#endif
+namespace ogvr {
+class PluginRegistrationContext_impl;
+class PluginRegistrationContext {
+  public:
+    ~PluginRegistrationContext();
+    void PluginRegisterContents(std::string const &contents);
+    void PluginRegisterContents(const char *contents);
+    /// @overload
+    /// Provides template-driven automatic handling of the size of string
+    /// literals.
+    template <std::size_t LEN>
+    void PluginRegisterContents(const char(&contents)[LEN]) {
+        PluginRegisterContents(std::string(contents, LEN));
+    }
+
+  private:
+};
+
+} // end of namespace ogvr
+
+#endif // INCLUDED_PluginRegistration_h_GUID_4F5D6422_2977_40A9_8BA0_F86FD6245CE9

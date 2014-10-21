@@ -4,9 +4,9 @@
     @date 2014
 
     @author
-Ryan Pavlik
-<ryan@sensics.com>
-<http://sensics.com>
+    Ryan Pavlik
+    <ryan@sensics.com>
+    <http://sensics.com>
 
 */
 
@@ -32,11 +32,3 @@ Ryan Pavlik
 
 // Standard includes
 // - none
-
-namespace ogvr {
-
-/// Implementation must be here to handle std::unique_ptr's requirements
-/// for destruction of incomplete types.
-PluginRegistrationContext::~PluginRegistrationContext() {}
-
-} // end of namespace ogvr
