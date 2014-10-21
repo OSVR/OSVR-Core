@@ -48,15 +48,27 @@
 #define OGVR_CPP_ONLY(X)
 #endif
 
-OGVR_CPP_ONLY(namespace ogvr { class PluginRegistrationContext; })
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-OGVR_CPP_ONLY(extern "C" {)
+typedef char ogvrPluginReturnCode;
+#define OGVR_PLUGIN_REG_SUCCESS 0
+#define OGVR_PLUGIN_REG_FAILURE 1
 
-OGVR_CPP_ONLY(namespace ogvr { class PluginRegistrationContext;
-})
+typedef void *ogvrPluginRegContext;
+typedef void *ogvrPluginHardwarePollContext;
 
+typedef ogvrPluginReturnCode (*ogvrHardwarePollCallback)(
+    ogvrPluginHardwarePollContext, void *);
 
-OGVR_CPP_ONLY(
-}) /* end of extern "C" */
+OGVR_PLUGINKIT_EXPORT ogvrPluginReturnCode
+    ogvrPluginRegisterHardwarePollCallback(
+        ogvrPluginRegContext ctx, ogvrHardwarePollCallback pollcallback,
+        void *userdata);
+
+#ifdef __cplusplus
+} /* end of extern "C" */
+#endif
 
 #endif
