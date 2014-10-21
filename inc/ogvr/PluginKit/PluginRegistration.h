@@ -42,6 +42,7 @@ namespace ogvr {
 class PluginRegistrationContext_impl;
 class PluginRegistrationContext {
   public:
+    PluginRegistrationContext();
     ~PluginRegistrationContext();
     void PluginRegisterContents(std::string const &contents);
     void PluginRegisterContents(const char *contents);
@@ -54,6 +55,7 @@ class PluginRegistrationContext {
     }
 
   private:
+    unique_ptr<PluginRegistrationContext_impl> m_impl;
 };
 
 } // end of namespace ogvr

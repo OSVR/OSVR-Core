@@ -4,9 +4,9 @@
     @date 2014
 
     @author
-Ryan Pavlik
-<ryan@sensics.com>
-<http://sensics.com>
+    Ryan Pavlik
+    <ryan@sensics.com>
+    <http://sensics.com>
 
 */
 
@@ -34,6 +34,11 @@ Ryan Pavlik
 // - none
 
 namespace ogvr {
+
+class PluginRegistrationContext_impl {};
+
+PluginRegistrationContext::PluginRegistrationContext()
+    : m_impl(new PluginRegistrationContext_impl) {}
 
 /// Implementation must be here to handle std::unique_ptr's requirements
 /// for destruction of incomplete types.
