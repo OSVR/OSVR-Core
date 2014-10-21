@@ -35,7 +35,7 @@
 #include <ogvr/PluginKit/Export.h>
 
 /* Library/third-party includes */
-/* none */
+#include <libfunctionality/PluginInterface.h>
 
 /* Standard includes */
 /* none */
@@ -66,6 +66,9 @@ OGVR_PLUGINKIT_EXPORT ogvrPluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
         ogvrPluginRegContext ctx, ogvrHardwarePollCallback pollcallback,
         void *userdata);
+
+/** @brief This macro begins your entry point function of your plugin. */
+#define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN_NO_PARAM(PLUGIN_NAME)
 
 #ifdef __cplusplus
 } /* end of extern "C" */

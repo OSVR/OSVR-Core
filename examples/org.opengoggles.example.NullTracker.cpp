@@ -4,9 +4,9 @@
     @date 2014
 
     @author
-Ryan Pavlik
-<ryan@sensics.com>
-<http://sensics.com>
+    Ryan Pavlik
+    <ryan@sensics.com>
+    <http://sensics.com>
 
 */
 
@@ -25,10 +25,12 @@ Ryan Pavlik
 // limitations under the License.
 
 // Internal Includes
-#include "org.opengoggles.example.NullTracker.h"
+#include <ogvr/PluginKit/PluginRegistrationC.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+OGVR_PLUGIN(org_opengoggles_example_NullTracker) { return LIBFUNC_SUCCESS; }
