@@ -91,7 +91,8 @@ SORT_MEMBER_DOCS       = NO
 
 # For config item INPUT, default is 
 INPUT                  = src \
-                         README.md
+                         README.md \
+                         HACKING.md
 
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
