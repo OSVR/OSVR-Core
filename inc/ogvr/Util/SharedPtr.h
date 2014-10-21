@@ -1,5 +1,5 @@
 /** @file
-    @brief Header to bring unique_ptr into our namespace.
+    @brief Header to bring shared_ptr into our namespace.
 
     @date 2014
 
@@ -24,8 +24,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_UniquePtr_h_GUID_3CF3C525_BAAB_41B2_D659_A4D166EABB52
-#define INCLUDED_UniquePtr_h_GUID_3CF3C525_BAAB_41B2_D659_A4D166EABB52
+#ifndef INCLUDED_SharedPtr_h_GUID_E9C5BC8D_7D3A_4896_1552_6F4F5292783C
+#define INCLUDED_SharedPtr_h_GUID_E9C5BC8D_7D3A_4896_1552_6F4F5292783C
 
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
 #error "Not supported before VS 2010"
@@ -33,10 +33,11 @@
 #else
 #include <memory>
 
-namespace ogvr {
-using std::unique_ptr;
-}
+/// @todo handle shared_ptr out of TR1
 
+namespace ogvr {
+using std::shared_ptr;
+} // end of namespace ogvr
 #endif
 
-#endif // INCLUDED_UniquePtr_h_GUID_3CF3C525_BAAB_41B2_D659_A4D166EABB52
+#endif // INCLUDED_SharedPtr_h_GUID_E9C5BC8D_7D3A_4896_1552_6F4F5292783C

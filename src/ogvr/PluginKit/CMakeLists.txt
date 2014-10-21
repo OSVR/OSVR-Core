@@ -17,6 +17,7 @@ set(API
 
 set(SOURCE
     "${HEADER_BASE}/ogvr/Util/UniquePtr.h"
+    "${HEADER_BASE}/ogvr/Util/SharedPtr.h"
     Export.h.in
     PluginRegistration.cpp
     PluginRegistrationC.cpp)
