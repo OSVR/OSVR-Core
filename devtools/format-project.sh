@@ -12,7 +12,7 @@ cd ..
 runClangFormatOnDir src
 runClangFormatOnDir inc
 runClangFormatOnDir tests
-#runClangFormatOnDir examples
+runClangFormatOnDir examples
 
 #echo "Press enter to continue." && read
 )
