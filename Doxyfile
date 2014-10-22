@@ -41,8 +41,7 @@ OUTPUT_DIRECTORY       = doxygen
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
 # For config item STRIP_FROM_PATH, default is 
-STRIP_FROM_PATH        =  \
-                         src \
+STRIP_FROM_PATH        = src \
                          inc
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
@@ -53,7 +52,8 @@ STRIP_FROM_PATH        =  \
 # using the -I flag.
 
 # For config item STRIP_FROM_INC_PATH, default is 
-STRIP_FROM_INC_PATH    = src inc
+STRIP_FROM_INC_PATH    = src \
+                         inc
 
 # If you use STL classes (i.e. std::string, std::vector, etc.) but do not want
 # to include (a tag file for) the STL sources as input, then you should set this
@@ -101,7 +101,8 @@ SORT_MEMBER_DOCS       = NO
 # For config item INPUT, default is 
 INPUT                  = src \
                          README.md \
-                         HACKING.md
+                         HACKING.md \
+                         inc
 
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
