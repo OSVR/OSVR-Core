@@ -51,6 +51,7 @@ extern "C" {
 */
 typedef void *OGVRDevice;
 
+/** @} */
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif

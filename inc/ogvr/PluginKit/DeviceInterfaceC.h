@@ -90,7 +90,7 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
    function.
     @param name A unique name for the device, abiding by the rules for an
    element (directory) in a URL. The library makes a copy of this string.
-    @outparam device Will contain the unique device token assigned to your
+    @param [out] device Will contain the unique device token assigned to your
    synchronous device.
 */
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
@@ -118,7 +118,7 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
    function.
     @param name A unique name for the device, abiding by the rules for an
    element (directory) in a URL. The library makes a copy of this string.
-    @outparam device Will contain the unique device token assigned to your
+    @param [out] device Will contain the unique device token assigned to your
    asynchronous device.
 */
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
