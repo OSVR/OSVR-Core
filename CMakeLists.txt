@@ -16,6 +16,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CTest)
 include(GNUInstallDirs)
 
+###
+# Dependencies
+###
+find_package(libfunctionality REQUIRED)
 
 ###
 # Set up build directories
