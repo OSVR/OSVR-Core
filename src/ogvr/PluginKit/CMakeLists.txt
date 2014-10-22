@@ -13,16 +13,25 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 set(API
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
+    "${HEADER_LOCATION}/RegistrationContext.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
+source_group(inc\\ogvr\\PluginKit FILES ${API})
+
+set(UTIL_API
+    "${HEADER_BASE}/ogvr/Util/UniquePtr.h"
+    "${HEADER_BASE}/ogvr/Util/SharedPtr.h")
+source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
 set(SOURCE
-    "${HEADER_BASE}/ogvr/Util/UniquePtr.h"
-    "${HEADER_BASE}/ogvr/Util/SharedPtr.h"
     Export.h.in
     PluginRegistration.cpp
-    PluginRegistrationC.cpp)
+    PluginRegistrationC.cpp
+    PluginSpecificRegistrationContext.cpp
+    PluginSpecificRegistrationContext.h
+    RegistrationContext.cpp)
+source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 
-add_library(ogvrPluginKit ${API} ${SOURCE})
+add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})
 
 set_property(TARGET ogvrPluginKit PROPERTY VERSION ${ogvrpluginkit_VERSION})
 set_property(TARGET ogvrPluginKit PROPERTY SOVERSION 0)
