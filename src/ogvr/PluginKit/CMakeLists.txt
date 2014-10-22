@@ -23,3 +23,36 @@ set(SOURCE
     PluginRegistrationC.cpp)
 
 add_library(ogvrPluginKit ${API} ${SOURCE})
+
+set_property(TARGET ogvrPluginKit PROPERTY VERSION ${ogvrpluginkit_VERSION})
+set_property(TARGET ogvrPluginKit PROPERTY SOVERSION 0)
+set_property(TARGET ogvrPluginKit PROPERTY INTERFACE_ogvrPluginKit_MAJOR_VERSION 0)
+set_property(TARGET ogvrPluginKit APPEND PROPERTY
+    COMPATIBLE_INTERFACE_STRING ogvrPluginKit_MAJOR_VERSION
+)
+
+target_include_directories(ogvrPluginKit
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>
+    $<BUILD_INTERFACE:${HEADER_BASE}}>
+    $<INSTALL_INTERFACE:include>)
+
+
+###
+# Install library and headers
+###
+install(TARGETS ogvrPluginKit
+    EXPORT ogvrTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(
+    FILES
+    ${API}
+    DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/PluginKit
+    COMPONENT
+    Devel)
+
