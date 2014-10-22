@@ -34,7 +34,7 @@ set_property(TARGET ogvrPluginKit APPEND PROPERTY
 target_include_directories(ogvrPluginKit
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>
-    $<BUILD_INTERFACE:${HEADER_BASE}}>
+    $<BUILD_INTERFACE:${HEADER_BASE}>
     $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(ogvrPluginKit

@@ -62,14 +62,14 @@ extern "C" {
 
     Treat it as if it were a function declaration, since that is what it will
    expand to. The function body you write calls some subset of the plugin
-   registration methods, then returns either success (OGVR_PLUGIN_REG_SUCCESS)
-   or failure (OGVR_PLUGIN_REG_FAILURE).
+   registration methods, then returns either success (OGVR_PLUGIN_SUCCESS)
+   or failure (OGVR_PLUGIN_FAILURE).
 
     Your function body receives a single argument, of type OGVRPluginRegContext,
    named `ctx`. You will need to pass this to registration functions that you
    call.
 */
-#define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN_NO_PARAM(PLUGIN_NAME)
+#define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
 
 /** @name Return Codes
     @{
@@ -77,9 +77,9 @@ extern "C" {
 /** @brief Return type from C plugin API OGVR functions. */
 typedef char OGVRPluginReturnCode;
 /** @brief The "success" value for an OGVRPluginReturnCode */
-#define OGVR_PLUGIN_REG_SUCCESS LIBFUNC_RETURN_SUCCESS
+#define OGVR_PLUGIN_SUCCESS LIBFUNC_RETURN_SUCCESS
 /** @brief The "failure" value for an OGVRPluginReturnCode */
-#define OGVR_PLUGIN_REG_FAILURE LIBFUNC_RETURN_FAILURE
+#define OGVR_PLUGIN_FAILURE LIBFUNC_RETURN_FAILURE
 /** @} */
 
 /** @name Opaque "context" pointers

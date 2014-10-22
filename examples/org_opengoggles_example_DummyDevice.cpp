@@ -82,6 +82,7 @@ class DummySyncDevice {
   private:
     OGVRPluginReturnCode m_update() {
         // get some data
+        char *mydata = NULL;
         ogvrDeviceSendData(m_dev, mydata);
     }
     OGVRDevice m_dev;
@@ -100,7 +101,7 @@ class DummyAsyncDevice {
     /// as long as things are running. So this function waits for the next
     /// message from the device and passes it on.
     static OGVRPluginReturnCode wait(void *userData) {
-        return static_cast<DummySyncDevice *>(userData)->m_wait();
+        return static_cast<DummyAsyncDevice *>(userData)->m_wait();
     }
     ~DummyAsyncDevice() {
         std::cout << "Destroying dummy asynchronous (threaded) device"
@@ -108,9 +109,10 @@ class DummyAsyncDevice {
     }
 
   private:
-    OGVRPluginReturnCode m_update() {
+    OGVRPluginReturnCode m_wait() {
         // block on waiting for data.
         // once we have enough, call
+        char *mydata = NULL;
         ogvrDeviceSendData(m_dev, mydata);
     }
     OGVRDevice m_dev;
@@ -125,7 +127,8 @@ OGVR_PLUGIN(org_opengoggles_example_DummyDevice) {
     /// Create a "device" that actually does nothing.
     DummyDevice *myDevice = new DummyDevice();
     /// Must ask the core to tell us to delete it.
-    ogvrPluginRegisterDataWithDeleteCallback(ctx, &generic_deleter<DummyDevice>, static_cast<void *>(myDevice);
+    ogvrPluginRegisterDataWithDeleteCallback(ctx, &generic_deleter<DummyDevice>,
+                                             static_cast<void *>(myDevice));
 
     {
         /// Create a synchronous (in the mainloop) device
@@ -135,21 +138,27 @@ OGVR_PLUGIN(org_opengoggles_example_DummyDevice) {
                                // device so ogvrDeviceSendData knows that it
                                // doesn't need to acquire a lock.
         DummySyncDevice *mySync = new DummySyncDevice(d);
-        ogvrPluginRegisterDataWithDeleteCallback(ctx, &generic_deleter<DummySyncDevice>, static_cast<void *>(mySync);
-        ogvrDeviceSyncRegisterUpdateCallback(ctx, &DummySyncDevice::update, static_cast<void *>(mySync));
+        ogvrPluginRegisterDataWithDeleteCallback(
+            ctx, &generic_deleter<DummySyncDevice>,
+            static_cast<void *>(mySync));
+        ogvrDeviceSyncRegisterUpdateCallback(ctx, &DummySyncDevice::update,
+                                             static_cast<void *>(mySync));
     }
-    
+
     {
-        /// Create a synchronous (in the mainloop) device
+        /// Create an asynchronous (threaded) device
         OGVRDevice d;
         ogvrDeviceAsyncInit(ctx, "My Async Device",
                             d); // Puts an object in d that knows it's a
                                 // threaded device so ogvrDeviceSendData knows
                                 // that it needs to get a connection lock first.
-        DummySyncDevice *myAsync = new DummyAsyncDevice(d);
-        ogvrPluginRegisterDataWithDeleteCallback(ctx, &generic_deleter<DummyAsyncDevice>, static_cast<void *>(myAsync);
-        ogvrDeviceAsyncStartWaitLoop(ctx, &DummyAsyncDevice::wait, static_cast<void *>(myAsync));
+        DummyAsyncDevice *myAsync = new DummyAsyncDevice(d);
+        ogvrPluginRegisterDataWithDeleteCallback(
+            ctx, &generic_deleter<DummyAsyncDevice>,
+            static_cast<void *>(myAsync));
+        ogvrDeviceAsyncStartWaitLoop(ctx, &DummyAsyncDevice::wait,
+                                     static_cast<void *>(myAsync));
     }
-    
+
     return OGVR_PLUGIN_SUCCESS;
 }
