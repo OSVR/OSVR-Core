@@ -71,6 +71,10 @@ extern "C" {
 */
 #define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
 
+/// @brief Forward declarations of things not yet implemented
+/// @todo this doesn't belong in this header
+typedef void *OGVRDevice;
+
 /** @name Return Codes
     @{
 */

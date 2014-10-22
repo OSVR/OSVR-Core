@@ -1,2 +1,9 @@
-add_library(org_opengoggles_example_DummyDevice MODULE org_opengoggles_example_DummyDevice.cpp)
-target_link_libraries(org_opengoggles_example_DummyDevice ogvrPluginKit)
+foreach(name
+    org_opengoggles_example_NullPlugin
+    org_opengoggles_example_NullDevice
+    org_opengoggles_example_DummyHardwarePoll
+    org_opengoggles_example_DummyAsync
+    org_opengoggles_example_DummySync)
+    add_library(${name} MODULE ${name}.cpp GenericDeleter.h)
+    target_link_libraries(${name} ogvrPluginKit)
+endforeach()
