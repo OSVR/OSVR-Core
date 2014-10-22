@@ -41,10 +41,13 @@ namespace ogvr {
 class PluginSpecificRegistrationContext;
 /// @brief Internal class responsible for the registration and destruction of
 /// plugins.
+/// @todo make noncopyable
 class RegistrationContext {
   public:
+#if 0
     /// @brief basic constructor
     RegistrationContext();
+#endif
     /// @brief Destructor responsible for destroying plugins in reverse order.
     ~RegistrationContext();
 
@@ -55,14 +58,12 @@ class RegistrationContext {
 
     /// @}
 
-    /// @name Plugin API
-    /// @brief Called by the C API wrappers in the plugin registration headers.
-    /// @{
-
-    /// @}
   private:
+    /// @brief Pointer with ownership semantics for cleanup of plugins.
     typedef unique_ptr<PluginSpecificRegistrationContext> PluginRegPtr;
+    /// @brief List of owning pointers for plugin registration.
     typedef std::vector<PluginRegPtr> PluginRegList;
+
     PluginRegList m_regList;
 };
 } // end of namespace ogvr
