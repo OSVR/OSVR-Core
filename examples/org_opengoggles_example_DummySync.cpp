@@ -53,6 +53,7 @@ class DummySyncDevice {
         // get some data
         char *mydata = NULL;
         ogvrDeviceSendData(m_dev, mydata, 0);
+        return OGVR_PLUGIN_SUCCESS;
     }
     OGVRDevice m_dev;
 };
@@ -71,4 +72,3 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
                                          static_cast<void *>(mySync));
     return OGVR_PLUGIN_SUCCESS;
 }
-

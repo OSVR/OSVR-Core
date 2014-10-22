@@ -59,6 +59,7 @@ class DummyAsyncDevice {
         // once we have enough, call
         char *mydata = NULL;
         ogvrDeviceSendData(m_dev, mydata, 0);
+        return OGVR_PLUGIN_SUCCESS;
     }
     OGVRDevice m_dev;
 };
