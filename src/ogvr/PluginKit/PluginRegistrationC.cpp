@@ -25,10 +25,28 @@
 // limitations under the License.
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistration.h>
+#include <ogvr/PluginKit/PluginRegistrationC.h>
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+OGVRPluginReturnCode
+ogvrPluginRegisterHardwarePollCallback(OGVRPluginRegContext ctx,
+                                       OGVRHardwarePollCallback pollCallback,
+									   void *userData) {
+	/// @todo implement - replace stub
+    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
+    return OGVR_PLUGIN_SUCCESS;
+}
+
+OGVRPluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
+    OGVRPluginRegContext ctx, OGVRPluginDataDeleteCallback deleteCallback,
+    void *pluginData) {
+	/// @todo implement - replace stub
+    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
+    return OGVR_PLUGIN_SUCCESS;
+}
