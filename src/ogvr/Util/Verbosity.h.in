@@ -31,11 +31,11 @@
 #ifdef OGVR_UTIL_DEV_VERBOSE
 
 #include <iostream>
-#define OGVR_DEV_VERBOSE(X) std::cout << X << std::endl
+#define OGVR_DEV_VERBOSE(X) do {std::cout << X << std::endl;} while (0)
 
 #else
 
-#define OGVR_DEV_VERBOSE(X)
+#define OGVR_DEV_VERBOSE(X) do { } while (0)
 
 #endif
 
