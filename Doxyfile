@@ -151,6 +151,16 @@ EXPAND_ONLY_PREDEF     = YES
 # For config item PREDEFINED, default is 
 PREDEFINED             = _cplusplus
 
+# If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
+# tag can be used to specify a list of macro names that should be expanded. The
+# macro definition that is found in the sources will be used. Use the PREDEFINED
+# tag if you want to use a different macro definition that overrules the
+# definition found in the source code.
+# This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
+
+# For config item EXPAND_AS_DEFINED, default is 
+EXPAND_AS_DEFINED      = OGVR_CPP_ONLY \
+                         OGVR_C_ONLY
 # If you set the HAVE_DOT tag to YES then doxygen will assume the dot tool is
 # available from the path. This tool is part of Graphviz (see:
 # http://www.graphviz.org/), a graph visualization toolkit from AT&T and Lucent
