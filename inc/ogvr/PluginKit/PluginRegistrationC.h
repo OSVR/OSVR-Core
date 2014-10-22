@@ -106,4 +106,7 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
 } /* end of extern "C" */
 #endif
 
+#undef OGVR_CPP_ONLY
+#undef OGVR_C_ONLY
+
 #endif
