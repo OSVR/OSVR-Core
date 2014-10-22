@@ -3,6 +3,8 @@
 
     @date 2014
 
+    @todo handle shared_ptr out of TR1
+
     @author
     Ryan Pavlik
     <ryan@sensics.com>
@@ -32,8 +34,6 @@
 
 #else
 #include <memory>
-
-/// @todo handle shared_ptr out of TR1
 
 namespace ogvr {
 using std::shared_ptr;

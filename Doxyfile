@@ -40,6 +40,8 @@ OUTPUT_DIRECTORY       = doxygen
 STRIP_FROM_INC_PATH    = src \
                          inc
 
+STRIP_FROM_PATH        = inc
+
 # If you use STL classes (i.e. std::string, std::vector, etc.) but do not want
 # to include (a tag file for) the STL sources as input, then you should set this
 # tag to YES in order to let doxygen match functions declarations and
@@ -170,3 +172,6 @@ EXPAND_AS_DEFINED      = OGVR_CPP_ONLY \
 
 # For config item HAVE_DOT, default is 0
 HAVE_DOT               = YES
+
+GENERATE_TREEVIEW = YES
+DISABLE_INDEX=YES

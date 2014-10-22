@@ -43,6 +43,8 @@
 /** @defgroup plugin_registration Plugin Registration
     @brief How to start writing a plugin and advertise your capabilities to the
    core library.
+
+   @{
 */
 #ifdef __cplusplus
 #define OGVR_C_ONLY(X)
@@ -102,7 +104,7 @@ typedef void *OGVRPluginHardwarePollContext;
 
 /** @brief Function type of a Hardware Poll callback */
 typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
-    OGVRPluginHardwarePollContext pollContext, void *userdata);
+    OGVRPluginHardwarePollContext pollContext, void *userData);
 
 /** @brief Register a callback in your plugin to be notified when hardware
    should be polled again.
@@ -114,7 +116,7 @@ typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
 
    @param ctx The registration context passed to your entry point.
    @param pollCallback The address of your callback function
-   @param userdata An optional opaque pointer that will be returned to you when
+   @param userData An optional opaque pointer that will be returned to you when
    the callback you register here is called.
 */
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
@@ -163,5 +165,7 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
 
 #undef OGVR_CPP_ONLY
 #undef OGVR_C_ONLY
+
+/** @} */
 
 #endif
