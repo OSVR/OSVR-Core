@@ -51,21 +51,53 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @name Return Codes
+    @{
+*/
+/** @brief Return type from C API OGVR functions. */
+typedef char OGVRPluginReturnCode;
+/** @brief The "success" value for an OGVRPluginReturnCode */
+#define OGVR_PLUGIN_REG_SUCCESS LIBFUNC_RETURN_SUCCESS
+/** @brief The "failure" value for an OGVRPluginReturnCode */
+#define OGVR_PLUGIN_REG_FAILURE LIBFUNC_RETURN_FAILURE
+/** @} */
 
-typedef char ogvrPluginReturnCode;
-#define OGVR_PLUGIN_REG_SUCCESS 0
-#define OGVR_PLUGIN_REG_FAILURE 1
+/** @name Opaque "context" pointers
+    @brief These are passed through various methods to avoid global state.
+    @{
+*/
+/** @brief A context pointer passed in to your plugin's entry point */
+typedef void *OGVRPluginRegContext;
 
-typedef void *ogvrPluginRegContext;
-typedef void *ogvrPluginHardwarePollContext;
+/** @brief A context pointer passed in to your hardware poll callback, if any.
+ */
+typedef void *OGVRPluginHardwarePollContext;
+/** @} */
 
-typedef ogvrPluginReturnCode (*ogvrHardwarePollCallback)(
-    ogvrPluginHardwarePollContext, void *);
+/** @name Hardware Polling
+    @{
+*/
 
-OGVR_PLUGINKIT_EXPORT ogvrPluginReturnCode
+/** @brief Function type of a Hardware Poll callback */
+typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
+    OGVRPluginHardwarePollContext pollContext, void *userdata);
+
+/** @brief Register a callback in your plugin to be notified when hardware
+   should be polled again.
+
+    When your callback, a function of type OGVRHardwarePollCallback, is invoked,
+   it
+    will receive the same userdata you provide here (if any). Your plugin should
+   do
+    whatever probing necessary to detect devices you can handle and instantiate
+   the
+    device drivers.
+*/
+OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
-        ogvrPluginRegContext ctx, ogvrHardwarePollCallback pollcallback,
+        OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollcallback,
         void *userdata);
+/** @} */
 
 /** @brief This macro begins your entry point function of your plugin. */
 #define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN_NO_PARAM(PLUGIN_NAME)
