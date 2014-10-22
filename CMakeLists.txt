@@ -44,6 +44,7 @@ endif()
 # Building
 ###
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 add_subdirectory(inc/ogvr)
 add_subdirectory(src/ogvr)
 if(BUILD_TESTING)

@@ -1,5 +1,5 @@
 include_directories("${HEADER_BASE}")
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/../..")
+include_directories("${BUILDTREE_HEADER_BASE}")
 
 if(BUILD_SHARED_LIBS)
     set(OGVR_PLUGINKIT_STATIC FALSE)
