@@ -33,4 +33,4 @@
 // Standard includes
 // - none
 
-OGVR_PLUGIN(org_opengoggles_example_NullTracker) { return LIBFUNC_SUCCESS; }
+OGVR_PLUGIN(org_opengoggles_example_NullTracker) { return OGVR_PLUGIN_SUCCESS; }
