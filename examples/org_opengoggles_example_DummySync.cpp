@@ -67,7 +67,8 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
     DummySyncDevice *mySync = new DummySyncDevice(d);
     ogvrPluginRegisterDataWithDeleteCallback(
         ctx, &generic_deleter<DummySyncDevice>, static_cast<void *>(mySync));
-    ogvrDeviceSyncRegisterUpdateCallback(ctx, &DummySyncDevice::update,
+    ogvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
                                          static_cast<void *>(mySync));
     return OGVR_PLUGIN_SUCCESS;
 }
+

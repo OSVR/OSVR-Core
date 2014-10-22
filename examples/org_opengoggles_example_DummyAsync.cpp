@@ -73,7 +73,7 @@ OGVR_PLUGIN(org_opengoggles_example_DummyAsync) {
     DummyAsyncDevice *myAsync = new DummyAsyncDevice(d);
     ogvrPluginRegisterDataWithDeleteCallback(
         ctx, &generic_deleter<DummyAsyncDevice>, static_cast<void *>(myAsync));
-    ogvrDeviceAsyncStartWaitLoop(ctx, &DummyAsyncDevice::wait,
+    ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
                                  static_cast<void *>(myAsync));
     return OGVR_PLUGIN_SUCCESS;
 }
