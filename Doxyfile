@@ -17,16 +17,16 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 
-# For config item OUTPUT_DIRECTORY, default is 
-
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded by
 # double-quotes, unless you are using Doxywizard) that should identify the
 # project for which the documentation is generated. This name is used in the
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
+# For config item PROJECT_NAME, default is My Project
 PROJECT_NAME           = "OGVR Plugin Kit"
 
+# For config item OUTPUT_DIRECTORY, default is 
 OUTPUT_DIRECTORY       = doxygen
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
