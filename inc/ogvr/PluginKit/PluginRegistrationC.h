@@ -87,9 +87,6 @@ typedef char OGVRPluginReturnCode;
 /** @brief A context pointer passed in to your plugin's entry point */
 typedef void *OGVRPluginRegContext;
 
-/** @brief A context pointer passed in to your hardware poll callback, if any.
- */
-typedef void *OGVRPluginHardwarePollContext;
 /** @} */
 
 /** @name Hardware Polling
@@ -97,6 +94,11 @@ typedef void *OGVRPluginHardwarePollContext;
     you'll want to register for hardware polling.
     @{
 */
+
+/** @brief An opaque context pointer passed in to your hardware poll callback,
+ * if any.
+*/
+typedef void *OGVRPluginHardwarePollContext;
 
 /** @brief Function type of a Hardware Poll callback */
 typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
@@ -111,14 +113,48 @@ typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
    instantiate the device drivers.
 
    @param ctx The registration context passed to your entry point.
-   @param pollcallback The address of your callback function
+   @param pollCallback The address of your callback function
    @param userdata An optional opaque pointer that will be returned to you when
    the callback you register here is called.
 */
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
-        OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollcallback,
-        void *userdata OGVR_CPP_ONLY(= nullptr));
+        OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollCallback,
+        void *userData OGVR_CPP_ONLY(= nullptr));
+/** @} */
+
+/** @name Plugin Instance Data
+    @brief Plugins "own" the modules instantiated in them. Lifetime must be
+    managed appropriately: destroyed on shutdown.
+
+    You can store the instances in any way you would like, as long as you
+    register them with appropriate deleter callbacks here.
+
+    @{
+*/
+
+/** @brief Function type of a Plugin Data Delete callback */
+typedef OGVRPluginReturnCode (*OGVRPluginDataDeleteCallback)(void *pluginData);
+
+/** @brief Register plugin data along with an appropriate deleter callback.
+
+    When your callback, a function of type OGVRPluginDataDeleteCallback, is
+   invoked, it will receive the plugin data pointer you provide here. Your
+   deleter is responsible for appropriately deleting/freeing/destructing all
+   data associated with that pointer.
+
+    This function may be called more than once, to register multiple plugin data
+   objects. Callbacks will be called in reverse order of registration.
+
+    @param ctx The registration context passed to your entry point.
+    @param deleteCallback The address of your deleter callback function
+    @param pluginData A pointer to your data, treated as opaque by this library,
+   and passed to your deleter.
+*/
+OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+    ogvrPluginRegisterDataWithDeleteCallback(
+        OGVRPluginRegContext ctx, OGVRPluginDataDeleteCallback deleteCallback,
+        void *pluginData);
 /** @} */
 
 #ifdef __cplusplus
