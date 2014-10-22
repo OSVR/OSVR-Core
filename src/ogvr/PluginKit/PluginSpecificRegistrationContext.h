@@ -45,6 +45,14 @@ class PluginSpecificRegistrationContext {
     /// @brief Destructor responsible for destroying plugin data in reverse
     /// order.
     ~PluginSpecificRegistrationContext();
+    /// @name Plugin API
+    /// @brief Called by the C API wrappers in the plugin registration headers.
+    /// @{
+
+    /// @}
+
+  private:
+    std::string const m_name;
 };
 } // end of namespace ogvr
 

@@ -25,9 +25,26 @@
 
 // Internal Includes
 #include "PluginSpecificRegistrationContext.h"
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+namespace ogvr {
+PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
+    std::string const &name)
+    : m_name(name) {
+    OGVR_DEV_VERBOSE("Creating a plugin registration context for " << m_name);
+}
+
+PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
+    /// @todo run deleter callbacks in reverse order of registration.
+
+    OGVR_DEV_VERBOSE("Destroying plugin reg context: Here's where we'd call "
+                     "deleter callbacks for "
+                     << m_name);
+}
+
+} // end of namespace ogvr
