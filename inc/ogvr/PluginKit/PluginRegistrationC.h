@@ -136,7 +136,7 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
 */
 
 /** @brief Function type of a Plugin Data Delete callback */
-typedef OGVRPluginReturnCode (*OGVRPluginDataDeleteCallback)(void *pluginData);
+typedef void (*OGVRPluginDataDeleteCallback)(void *pluginData);
 
 /** @brief Register plugin data along with an appropriate deleter callback.
 
