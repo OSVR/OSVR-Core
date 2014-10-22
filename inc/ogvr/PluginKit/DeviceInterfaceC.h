@@ -97,7 +97,29 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrDeviceSyncInit(OGVRPluginRegContext ctx, const char *name,
                        OGVRDevice *device);
 
+/** @brief Function type of a an Sync Device Update callback */
+typedef OGVRPluginReturnCode (*OGVRSyncDeviceUpdateCallback)(void *userData);
+
+/** @brief Register the update callback of a synchronous device.
+
+    The callback you provide will be called in the main update loop, potentially
+   as soon as this call completes.
+
+    When your callback, a function of type OGVRSyncDeviceUpdateCallback, is
+   invoked,
+    it will receive the same userdata you provide here (if any).
+
+    @param ctx The registration context passed to your entry point.
+    @param updateCallback The address of your callback function
+    @param userData An opaque pointer that will be returned to you when
+    the callback you register here is called. Technically optional, but hard to
+    support multiple instances without it.
+*/
+OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
+    OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
+    void *userData OGVR_CPP_ONLY(= nullptr));
 /** @} */
+
 /** @name Asynchronous Devices
 
     These devices are more event-based: either it's convenient for your
@@ -124,6 +146,28 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrDeviceAsyncInit(OGVRPluginRegContext ctx, const char *name,
                         OGVRDevice *device);
+
+/** @brief Function type of a an Async Device Wait callback */
+typedef OGVRPluginReturnCode (*OGVRAsyncDeviceWaitCallback)(void *userData);
+
+/** @brief Start the sampling/waiting thread of an asynchronous device.
+
+    The callback you provide will immediately and repeatedly be called in its
+   own thread until stopped.
+
+    When your callback, a function of type OGVRAsyncDeviceWaitCallback, is
+   invoked, it will receive the same userdata you provide here (if any).
+
+    @param ctx The registration context passed to your entry point.
+    @param waitCallback The address of your callback function
+    @param userData An opaque pointer that will be returned to you when
+    the callback you register here is called. Technically optional, but hard to
+   support multiple instances without it.
+*/
+OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+    ogvrDeviceAsyncStartWaitLoop(OGVRDevice device,
+                                 OGVRAsyncDeviceWaitCallback waitCallback,
+                                 void *userData OGVR_CPP_ONLY(= nullptr));
 
 /** @} */
 

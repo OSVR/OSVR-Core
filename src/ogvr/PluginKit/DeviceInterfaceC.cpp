@@ -48,9 +48,26 @@ OGVRPluginReturnCode ogvrDeviceSyncInit(OGVRPluginRegContext ctx,
     return OGVR_PLUGIN_SUCCESS;
 }
 
+OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
+    OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
+    void *userData) {
+    /// @todo implement - replace stub
+    OGVR_DEV_VERBOSE("In ogvrDeviceSyncRegisterUpdateCallback");
+    return OGVR_PLUGIN_SUCCESS;
+}
+
 OGVRPluginReturnCode ogvrDeviceAsyncInit(OGVRPluginRegContext ctx,
                                          const char *name, OGVRDevice *device) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncInit for a device named " << name);
+    return OGVR_PLUGIN_SUCCESS;
+}
+
+OGVRPluginReturnCode
+ogvrDeviceAsyncStartWaitLoop(OGVRDevice device,
+                             OGVRAsyncDeviceWaitCallback waitCallback,
+                             void *userData) {
+    /// @todo implement - replace stub
+    OGVR_DEV_VERBOSE("In ogvrDeviceAsyncStartWaitLoop");
     return OGVR_PLUGIN_SUCCESS;
 }
