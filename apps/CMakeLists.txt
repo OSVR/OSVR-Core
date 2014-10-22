@@ -1,0 +1,3 @@
+
+add_executable(BasicPluginLoader BasicPluginLoader.cpp)
+target_link_libraries(BasicPluginLoader ogvrPluginKit)

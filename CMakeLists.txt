@@ -50,6 +50,7 @@ add_subdirectory(inc/ogvr)
 add_subdirectory(src/ogvr)
 if(BUILD_TESTING)
     add_subdirectory(examples)
+    add_subdirectory(apps)
     add_subdirectory(tests)
 endif()
 
