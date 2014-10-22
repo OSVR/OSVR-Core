@@ -37,8 +37,8 @@
 OGVRPluginReturnCode
 ogvrPluginRegisterHardwarePollCallback(OGVRPluginRegContext ctx,
                                        OGVRHardwarePollCallback pollCallback,
-									   void *userData) {
-	/// @todo implement - replace stub
+                                       void *userData) {
+    /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
     return OGVR_PLUGIN_SUCCESS;
 }
@@ -46,7 +46,7 @@ ogvrPluginRegisterHardwarePollCallback(OGVRPluginRegContext ctx,
 OGVRPluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     OGVRPluginRegContext ctx, OGVRPluginDataDeleteCallback deleteCallback,
     void *pluginData) {
-	/// @todo implement - replace stub
+    /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
     return OGVR_PLUGIN_SUCCESS;
 }

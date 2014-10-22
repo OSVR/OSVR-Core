@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistrationC.h>
+#include <ogvr/PluginKit/PluginInterfaceC.h>
 #include "GenericDeleter.h"
 
 // Library/third-party includes

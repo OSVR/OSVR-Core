@@ -33,6 +33,7 @@
 
 /* Internal Includes */
 #include <ogvr/PluginKit/Export.h>
+#include <ogvr/PluginKit/CommonC.h>
 
 /* Library/third-party includes */
 #include <libfunctionality/PluginInterface.h>
@@ -43,16 +44,10 @@
 /** @defgroup plugin_registration Plugin Registration
     @brief How to start writing a plugin and advertise your capabilities to the
    core library.
+   @ingroup plugin_api
 
    @{
 */
-#ifdef __cplusplus
-#define OGVR_C_ONLY(X)
-#define OGVR_CPP_ONLY(X) X
-#else
-#define OGVR_C_ONLY(X) X
-#define OGVR_CPP_ONLY(X)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,21 +65,6 @@ extern "C" {
    call.
 */
 #define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
-
-/// @brief Forward declarations of things not yet implemented
-/// @todo this doesn't belong in this header
-typedef void *OGVRDevice;
-
-/** @name Return Codes
-    @{
-*/
-/** @brief Return type from C plugin API OGVR functions. */
-typedef char OGVRPluginReturnCode;
-/** @brief The "success" value for an OGVRPluginReturnCode */
-#define OGVR_PLUGIN_SUCCESS LIBFUNC_RETURN_SUCCESS
-/** @brief The "failure" value for an OGVRPluginReturnCode */
-#define OGVR_PLUGIN_FAILURE LIBFUNC_RETURN_FAILURE
-/** @} */
 
 /** @name Opaque "context" pointers
     @brief These are passed through various methods to avoid global state.
@@ -167,9 +147,6 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif
-
-#undef OGVR_CPP_ONLY
-#undef OGVR_C_ONLY
 
 /** @} */
 

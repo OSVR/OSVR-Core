@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header shared between multiple C API headers.
 
     Must be c-safe!
 
@@ -27,29 +27,40 @@
 // limitations under the License.
 */
 
-#ifndef INCLUDED_DeviceInterfaceC_h_GUID_8B82B108_1B20_4D80_9FE5_C31E424E3652
-#define INCLUDED_DeviceInterfaceC_h_GUID_8B82B108_1B20_4D80_9FE5_C31E424E3652
+#ifndef INCLUDED_CommonC_h_GUID_F7DD3E37_D90E_4FB4_0BB5_907FDB52F9B7
+#define INCLUDED_CommonC_h_GUID_F7DD3E37_D90E_4FB4_0BB5_907FDB52F9B7
 
 /* Internal Includes */
-/* none */
+#include <ogvr/PluginKit/Export.h>
 
 /* Library/third-party includes */
-/* none */
+#include <libfunctionality/PluginInterface.h>
 
 /* Standard includes */
 /* none */
 
 #ifdef __cplusplus
+#define OGVR_C_ONLY(X)
+#define OGVR_CPP_ONLY(X) X
+#else
+#define OGVR_C_ONLY(X) X
+#define OGVR_CPP_ONLY(X)
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
-/** @defgroup plugin_c_device_api Plugin C API for Devices
-    @brief How to create and report from a device in your plugin.
-    @ingroup plugin_api
+
+/** @name Return Codes
 @{
 */
-/** @brief Opaque type of a registered device within the core library.
-*/
-typedef void *OGVRDevice;
+/** @brief Return type from C plugin API OGVR functions. */
+typedef char OGVRPluginReturnCode;
+/** @brief The "success" value for an OGVRPluginReturnCode */
+#define OGVR_PLUGIN_SUCCESS LIBFUNC_RETURN_SUCCESS
+/** @brief The "failure" value for an OGVRPluginReturnCode */
+#define OGVR_PLUGIN_FAILURE LIBFUNC_RETURN_FAILURE
+/** @} */
 
 #ifdef __cplusplus
 } /* end of extern "C" */

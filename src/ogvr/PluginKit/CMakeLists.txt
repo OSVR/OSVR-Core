@@ -11,7 +11,9 @@ configure_file(Export.h.in "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
+    "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
+    "${HEADER_LOCATION}/PluginInterfaceC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
     "${HEADER_LOCATION}/RegistrationContext.h"

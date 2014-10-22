@@ -27,32 +27,17 @@
 // limitations under the License.
 */
 
-#ifndef INCLUDED_DeviceInterfaceC_h_GUID_8B82B108_1B20_4D80_9FE5_C31E424E3652
-#define INCLUDED_DeviceInterfaceC_h_GUID_8B82B108_1B20_4D80_9FE5_C31E424E3652
+#ifndef INCLUDED_PluginInterfaceC_h_GUID_0C44C990_0B88_43AF_10D4_4CA29408DE3C
+#define INCLUDED_PluginInterfaceC_h_GUID_0C44C990_0B88_43AF_10D4_4CA29408DE3C
 
 /* Internal Includes */
-/* none */
+#include <ogvr/PluginKit/PluginRegistrationC.h>
+#include <ogvr/PluginKit/DeviceInterfaceC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
 /* none */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-/** @defgroup plugin_c_device_api Plugin C API for Devices
-    @brief How to create and report from a device in your plugin.
-    @ingroup plugin_api
-@{
-*/
-/** @brief Opaque type of a registered device within the core library.
-*/
-typedef void *OGVRDevice;
-
-#ifdef __cplusplus
-} /* end of extern "C" */
-#endif
 
 #endif

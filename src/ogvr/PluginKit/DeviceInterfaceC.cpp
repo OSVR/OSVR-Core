@@ -24,12 +24,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include "DeviceInterfaceC.h"
+#include <ogvr/PluginKit/DeviceInterfaceC.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
-
-
