@@ -40,6 +40,10 @@
 /* Standard includes */
 /* none */
 
+/** @defgroup plugin_registration Plugin Registration
+    @brief How to start writing a plugin and advertise your capabilities to the
+   core library.
+*/
 #ifdef __cplusplus
 #define OGVR_C_ONLY(X)
 #define OGVR_CPP_ONLY(X) X
@@ -51,10 +55,24 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** @brief This macro begins the entry point function of your plugin.
+
+    Treat it as if it were a function declaration, since that is what it will
+   expand to. The function body you write calls some subset of the plugin
+   registration methods, then returns either success (OGVR_PLUGIN_REG_SUCCESS)
+   or failure (OGVR_PLUGIN_REG_FAILURE).
+
+    Your function body receives a single argument, of type OGVRPluginRegContext,
+   named `ctx`. You will need to pass this to registration functions that you
+   call.
+*/
+#define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN_NO_PARAM(PLUGIN_NAME)
+
 /** @name Return Codes
     @{
 */
-/** @brief Return type from C API OGVR functions. */
+/** @brief Return type from C plugin API OGVR functions. */
 typedef char OGVRPluginReturnCode;
 /** @brief The "success" value for an OGVRPluginReturnCode */
 #define OGVR_PLUGIN_REG_SUCCESS LIBFUNC_RETURN_SUCCESS
@@ -75,6 +93,8 @@ typedef void *OGVRPluginHardwarePollContext;
 /** @} */
 
 /** @name Hardware Polling
+    @brief If your plugin contains drivers for devices that you can detect,
+    you'll want to register for hardware polling.
     @{
 */
 
@@ -85,22 +105,21 @@ typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
 /** @brief Register a callback in your plugin to be notified when hardware
    should be polled again.
 
-    When your callback, a function of type OGVRHardwarePollCallback, is invoked,
-   it
-    will receive the same userdata you provide here (if any). Your plugin should
-   do
-    whatever probing necessary to detect devices you can handle and instantiate
-   the
-    device drivers.
+   When your callback, a function of type OGVRHardwarePollCallback, is invoked,
+   it will receive the same userdata you provide here (if any). Your plugin
+   should do whatever probing necessary to detect devices you can handle and
+   instantiate the device drivers.
+
+   @param ctx The registration context passed to your entry point.
+   @param pollcallback The address of your callback function
+   @param userdata An optional opaque pointer that will be returned to you when
+   the callback you register here is called.
 */
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
         OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollcallback,
-        void *userdata);
+        void *userdata OGVR_CPP_ONLY(= nullptr));
 /** @} */
-
-/** @brief This macro begins your entry point function of your plugin. */
-#define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN_NO_PARAM(PLUGIN_NAME)
 
 #ifdef __cplusplus
 } /* end of extern "C" */
