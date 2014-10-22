@@ -58,7 +58,7 @@ class DummyAsyncDevice {
         // block on waiting for data.
         // once we have enough, call
         char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, mydata);
+        ogvrDeviceSendData(m_dev, mydata, 0);
     }
     OGVRDevice m_dev;
 };
@@ -67,9 +67,9 @@ OGVR_PLUGIN(org_opengoggles_example_DummyAsync) {
     /// Create an asynchronous (threaded) device
     OGVRDevice d;
     ogvrDeviceAsyncInit(ctx, "My Async Device",
-                        d); // Puts an object in d that knows it's a
-                            // threaded device so ogvrDeviceSendData knows
-                            // that it needs to get a connection lock first.
+                        &d); // Puts an object in d that knows it's a
+                             // threaded device so ogvrDeviceSendData knows
+                             // that it needs to get a connection lock first.
     DummyAsyncDevice *myAsync = new DummyAsyncDevice(d);
     ogvrPluginRegisterDataWithDeleteCallback(
         ctx, &generic_deleter<DummyAsyncDevice>, static_cast<void *>(myAsync));

@@ -40,4 +40,19 @@
 /* Standard includes */
 /* none */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+/** @defgroup plugin_c_api C API for Plugin Writing
+@brief The APIs you might wish to use in your plugin.
+@{
+*/
+/** @brief Opaque type of a registered device within the core library.
+*/
+typedef void *OGVRDevice;
+
+#ifdef __cplusplus
+} /* end of extern "C" */
+#endif
+
 #endif

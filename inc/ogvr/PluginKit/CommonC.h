@@ -52,7 +52,8 @@ extern "C" {
 #endif
 
 /** @name Return Codes
-@{
+    @ingroup plugin_c_api
+    @{
 */
 /** @brief Return type from C plugin API OGVR functions. */
 typedef char OGVRPluginReturnCode;
@@ -61,6 +62,11 @@ typedef char OGVRPluginReturnCode;
 /** @brief The "failure" value for an OGVRPluginReturnCode */
 #define OGVR_PLUGIN_FAILURE LIBFUNC_RETURN_FAILURE
 /** @} */
+
+/** @brief A context pointer passed in to your plugin's entry point
+    @ingroup plugin_c_api
+*/
+typedef void *OGVRPluginRegContext;
 
 #ifdef __cplusplus
 } /* end of extern "C" */

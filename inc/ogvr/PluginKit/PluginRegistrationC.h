@@ -66,15 +66,6 @@ extern "C" {
 */
 #define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
 
-/** @name Opaque "context" pointers
-    @brief These are passed through various methods to avoid global state.
-    @{
-*/
-/** @brief A context pointer passed in to your plugin's entry point */
-typedef void *OGVRPluginRegContext;
-
-/** @} */
-
 /** @name Hardware Polling
     @brief If your plugin contains drivers for devices that you can detect,
     you'll want to register for hardware polling.

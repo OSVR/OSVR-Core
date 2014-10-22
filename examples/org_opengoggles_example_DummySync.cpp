@@ -52,7 +52,7 @@ class DummySyncDevice {
     OGVRPluginReturnCode m_update() {
         // get some data
         char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, mydata);
+        ogvrDeviceSendData(m_dev, mydata, 0);
     }
     OGVRDevice m_dev;
 };
@@ -61,9 +61,9 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
     /// Create a synchronous (in the mainloop) device
     OGVRDevice d;
     ogvrDeviceSyncInit(ctx, "My Sync Device",
-                       d); // Puts an object in d that knows it's a sync
-                           // device so ogvrDeviceSendData knows that it
-                           // doesn't need to acquire a lock.
+                       &d); // Puts a token in d that knows it's a sync
+                            // device so ogvrDeviceSendData knows that it
+                            // doesn't need to acquire a lock.
     DummySyncDevice *mySync = new DummySyncDevice(d);
     ogvrPluginRegisterDataWithDeleteCallback(
         ctx, &generic_deleter<DummySyncDevice>, static_cast<void *>(mySync));
