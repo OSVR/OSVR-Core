@@ -37,6 +37,9 @@ target_include_directories(ogvrPluginKit
     $<BUILD_INTERFACE:${HEADER_BASE}}>
     $<INSTALL_INTERFACE:include>)
 
+target_link_libraries(ogvrPluginKit
+    PUBLIC
+    libfunctionality::functionality)
 
 ###
 # Install library and headers
