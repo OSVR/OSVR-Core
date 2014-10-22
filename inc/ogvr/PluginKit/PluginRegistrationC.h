@@ -146,7 +146,8 @@ typedef void (*OGVRPluginDataDeleteCallback)(void *pluginData);
    data associated with that pointer.
 
     This function may be called more than once, to register multiple plugin data
-   objects. Callbacks will be called in reverse order of registration.
+   objects. Callbacks will be called, sorted first by plugin, in reverse order
+   of registration.
 
     @param ctx The registration context passed to your entry point.
     @param deleteCallback The address of your deleter callback function
