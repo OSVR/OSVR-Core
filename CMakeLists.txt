@@ -19,7 +19,7 @@ include(GNUInstallDirs)
 ###
 # Dependencies
 ###
-find_package(libfunctionality REQUIRED)
+find_package(libfunctionality)
 
 ###
 # Set up build directories
