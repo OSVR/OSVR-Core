@@ -33,15 +33,4 @@
 // Standard includes
 // - none
 
-namespace ogvr {
-
-class PluginRegistrationContext_impl {};
-
-PluginRegistrationContext::PluginRegistrationContext()
-    : m_impl(new PluginRegistrationContext_impl) {}
-
-/// Implementation must be here to handle std::unique_ptr's requirements
-/// for destruction of incomplete types.
-PluginRegistrationContext::~PluginRegistrationContext() {}
-
-} // end of namespace ogvr
+namespace ogvr {} // end of namespace ogvr
