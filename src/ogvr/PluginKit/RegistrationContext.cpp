@@ -27,6 +27,7 @@
 // Internal Includes
 #include <ogvr/PluginKit/RegistrationContext.h>
 #include "PluginSpecificRegistrationContext.h"
+#include "ResetPointerList.h"
 
 // Library/third-party includes
 // - none
@@ -35,19 +36,14 @@
 #include <algorithm>
 
 namespace ogvr {
-namespace {
-    /// @brief Functor for resetting smart pointers, for use with for_each or
-    /// similar.
-    template <typename SmartPointerType> struct PointerResetter {
-        void operator()(SmartPointerType &p) { p.reset(); }
-    };
-} // end of anonymous namespace
+RegistrationContext::RegistrationContext() {}
 
 RegistrationContext::~RegistrationContext() {
     // Reset the plugins in reverse order.
-    std::for_each(m_regList.rbegin(), m_regList.rend(),
-                  PointerResetter<PluginRegPtr>());
-    m_regList.clear();
+    detail::resetPointerListReverseOrder(m_regList);
+}
+void loadPlugin(std::string const &pluginName) {
+    PluginRegPtr pluginReg; /// @todo finish implementing.
 }
 
 } // end of namespace ogvr

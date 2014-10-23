@@ -26,6 +26,7 @@
 // Internal Includes
 #include "PluginSpecificRegistrationContext.h"
 #include <ogvr/Util/Verbosity.h>
+#include "ResetPointerList.h"
 
 // Library/third-party includes
 // - none
@@ -38,13 +39,13 @@ PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
     : m_name(name) {
     OGVR_DEV_VERBOSE("Creating a plugin registration context for " << m_name);
 }
-
 PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
-    /// @todo run deleter callbacks in reverse order of registration.
-
     OGVR_DEV_VERBOSE("Destroying plugin reg context: Here's where we'd call "
                      "deleter callbacks for "
                      << m_name);
+
+    // Delete the data in reverse order.
+    detail::resetPointerListReverseOrder(m_dataList);
 }
 
 } // end of namespace ogvr

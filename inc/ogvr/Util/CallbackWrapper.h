@@ -35,4 +35,11 @@
 // Standard includes
 // - none
 
+namespace ogvr {
+template <typename FunctionType> class CallbackWrapper {
+
+  private:
+    FunctionType m_f;
+};
+} // end of namespace ogvr
 #endif // INCLUDED_CallbackWrapper_h_GUID_6169ADE2_5BA1_4A81_47C9_9E492F6405ED

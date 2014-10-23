@@ -27,13 +27,14 @@
 #define INCLUDED_PluginSpecificRegistrationContext_h_GUID_E8A348C1_28DC_4691_6214_32F75A6665F0
 
 // Internal Includes
-// - none
+#include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <string>
+#include <vector>
 
 namespace ogvr {
 /// @brief Internal class backing the context of registrations performed by a
@@ -53,6 +54,12 @@ class PluginSpecificRegistrationContext {
 
   private:
     std::string const m_name;
+    /// @brief Pointer with ownership semantics for deletion of plugin data.
+    typedef unique_ptr<void> PluginDataPtr;
+    /// @brief List of plugin data.
+    typedef std::vector<PluginDataPtr> PluginDataList;
+
+    PluginDataList m_dataList;
 };
 } // end of namespace ogvr
 

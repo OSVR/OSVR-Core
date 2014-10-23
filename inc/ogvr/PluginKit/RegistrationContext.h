@@ -44,10 +44,9 @@ class PluginSpecificRegistrationContext;
 /// @todo make noncopyable
 class RegistrationContext {
   public:
-#if 0
     /// @brief basic constructor
     RegistrationContext();
-#endif
+
     /// @brief Destructor responsible for destroying plugins in reverse order.
     ~RegistrationContext();
 
