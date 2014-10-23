@@ -28,14 +28,14 @@
 
 namespace ogvr {
 namespace detail {
-    /// Generic deleter function - the kind of thing easily hidden in a
-    /// header-only
-    /// C++ wrapper.
+    /// @brief Generic deleter function
+    ///
+    /// Used in header-only C++ wrappers over C APIs.
     template <typename T> inline void generic_deleter(void *obj) {
         T *o = static_cast<T *>(obj);
         delete o;
     }
 } // end of namespace detail
-} // end of anonymous namespace
+} // end of namespace ogvr
 
 #endif // INCLUDED_GenericDeleter_h_GUID_FF10B285_AE30_45B6_BFD4_D84F98FB1EF0

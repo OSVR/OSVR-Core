@@ -1,0 +1,6 @@
+
+namespace ogvr {
+/** @brief Contains C++ API regarding plugin registration.
+*/
+namespace plugin {}
+}
