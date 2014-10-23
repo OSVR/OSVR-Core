@@ -106,11 +106,10 @@ typedef OGVRPluginReturnCode (*OGVRSyncDeviceUpdateCallback)(void *userData);
    as soon as this call completes.
 
     When your callback, a function of type OGVRSyncDeviceUpdateCallback, is
-   invoked,
-    it will receive the same userdata you provide here (if any).
+   invoked, it will receive the same userdata you provide here (if any).
 
-    @param ctx The registration context passed to your entry point.
-    @param updateCallback The address of your callback function
+    @param device The device token.
+    @param updateCallback The address of your callback function.
     @param userData An opaque pointer that will be returned to you when
     the callback you register here is called. Technically optional, but hard to
     support multiple instances without it.
@@ -158,8 +157,8 @@ typedef OGVRPluginReturnCode (*OGVRAsyncDeviceWaitCallback)(void *userData);
     When your callback, a function of type OGVRAsyncDeviceWaitCallback, is
    invoked, it will receive the same userdata you provide here (if any).
 
-    @param ctx The registration context passed to your entry point.
-    @param waitCallback The address of your callback function
+    @param device Your device token.
+    @param waitCallback The address of your callback function.
     @param userData An opaque pointer that will be returned to you when
     the callback you register here is called. Technically optional, but hard to
    support multiple instances without it.

@@ -176,3 +176,35 @@ HAVE_DOT               = YES
 
 GENERATE_TREEVIEW = YES
 DISABLE_INDEX=YES
+
+
+# Extra items for an external doxygen build.
+
+# If the HIDE_UNDOC_MEMBERS tag is set to YES, Doxygen will hide all
+# undocumented members of documented classes, files or namespaces.
+# If set to NO (the default) these members will be included in the
+# various overviews, but no documentation section is generated.
+# This option has no effect if EXTRACT_ALL is enabled.
+
+HIDE_UNDOC_MEMBERS     = YES
+
+# If the HIDE_UNDOC_CLASSES tag is set to YES, Doxygen will hide all
+# undocumented classes that are normally visible in the class hierarchy.
+# If set to NO (the default) these classes will be included in the various
+# overviews. This option has no effect if EXTRACT_ALL is enabled.
+
+HIDE_UNDOC_CLASSES     = YES
+
+# If the HIDE_FRIEND_COMPOUNDS tag is set to YES, Doxygen will hide all
+# friend (class|struct|union) declarations.
+# If set to NO (the default) these declarations will be included in the
+# documentation.
+
+HIDE_FRIEND_COMPOUNDS  = YES
+
+# The GENERATE_TODOLIST tag can be used to enable (YES) or
+# disable (NO) the todo list. This list is created by putting \todo
+# commands in the documentation.
+
+GENERATE_TODOLIST      = NO
+
