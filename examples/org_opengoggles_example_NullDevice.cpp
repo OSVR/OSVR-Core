@@ -25,7 +25,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/PluginRegistrationC.h>
-#include "GenericDeleter.h"
+#include <ogvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
 // - none
@@ -47,8 +47,9 @@ OGVR_PLUGIN(org_opengoggles_example_NullDevice) {
     /// Create a "device" that actually does nothing.
     DummyDevice *myDevice = new DummyDevice();
     /// Must ask the core to tell us to delete it.
-    ogvrPluginRegisterDataWithDeleteCallback(ctx, &generic_deleter<DummyDevice>,
-                                             static_cast<void *>(myDevice));
+    ogvrPluginRegisterDataWithDeleteCallback(
+        ctx, &ogvr::detail::generic_deleter<DummyDevice>,
+        static_cast<void *>(myDevice));
 
     return OGVR_PLUGIN_SUCCESS;
 }

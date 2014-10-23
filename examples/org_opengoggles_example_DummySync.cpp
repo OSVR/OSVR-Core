@@ -25,7 +25,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/PluginInterfaceC.h>
-#include "GenericDeleter.h"
+#include <ogvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
 // - none
@@ -67,7 +67,8 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
                             // doesn't need to acquire a lock.
     DummySyncDevice *mySync = new DummySyncDevice(d);
     ogvrPluginRegisterDataWithDeleteCallback(
-        ctx, &generic_deleter<DummySyncDevice>, static_cast<void *>(mySync));
+        ctx, &ogvr::detail::generic_deleter<DummySyncDevice>,
+        static_cast<void *>(mySync));
     ogvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
                                          static_cast<void *>(mySync));
     return OGVR_PLUGIN_SUCCESS;

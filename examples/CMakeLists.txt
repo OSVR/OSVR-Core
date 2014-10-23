@@ -4,6 +4,6 @@ foreach(name
     org_opengoggles_example_DummyHardwarePoll
     org_opengoggles_example_DummyAsync
     org_opengoggles_example_DummySync)
-    add_library(${name} MODULE ${name}.cpp GenericDeleter.h)
+    add_library(${name} MODULE ${name}.cpp)
     target_link_libraries(${name} ogvrPluginKit)
 endforeach()

@@ -1,5 +1,8 @@
 install(
     FILES
+    CallbackWrapper.h
+    GenericDeleter.h
+    ResourcePath.h
     SharedPtr.h
     UniquePtr.h
     DESTINATION

@@ -25,7 +25,6 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/PluginRegistrationC.h>
-#include "GenericDeleter.h"
 
 // Library/third-party includes
 // - none
