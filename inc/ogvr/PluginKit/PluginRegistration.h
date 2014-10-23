@@ -28,8 +28,8 @@
 #define INCLUDED_PluginRegistration_h_GUID_4F5D6422_2977_40A9_8BA0_F86FD6245CE9
 
 // Internal Includes
-#include <ogvr/PluginKit/Export.h>
-#include <ogvr/Util/UniquePtr.h>
+#include <ogvr/PluginKit/PluginRegistrationC.h>
+#include <ogvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
 // - none
@@ -39,25 +39,29 @@
 #include <string>
 
 namespace ogvr {
-class PluginRegistrationContext_impl;
-class PluginRegistrationContext {
-  public:
-    PluginRegistrationContext();
-    ~PluginRegistrationContext();
-    void PluginRegisterContents(std::string const &contents);
-    void PluginRegisterContents(const char *contents);
-    /// @overload
-    /// Provides template-driven automatic handling of the size of string
-    /// literals.
-    template <std::size_t LEN>
-    void PluginRegisterContents(const char(&contents)[LEN]) {
-        PluginRegisterContents(std::string(contents, LEN));
+namespace plugin {
+    /// @brief Registers an object to be destroyed with delete when the plugin
+    /// is unloaded.
+    ///
+    /// The template parameter does not need to be specified - it is deduced
+    /// automatically.
+    ///
+    /// The plugin remains nominally the owner of the object, but your code
+    /// should no longer concern itself with the destruction of this object.
+    /// Thus, if you have it in a smart pointer of any kind, release it from
+    /// that pointer when you pass it to your function.
+    ///
+    /// @param ctx The registration context passed to your entry point.
+    /// @param obj A pointer to your object to register for deletion.
+    ///
+    /// Internally uses ogvrPluginRegisterDataWithDeleteCallback()
+    template <typename T>
+    inline OGVRPluginReturnCode
+    registerObjectForDeletion(OGVRPluginRegContext ctx, T *obj) {
+        return ogvrPluginRegisterDataWithDeleteCallback(
+            ctx, &detail::generic_deleter<T>, static_cast<void *>(obj));
     }
-
-  private:
-    unique_ptr<PluginRegistrationContext_impl> m_impl;
-};
-
+} // end of namespace plugin
 } // end of namespace ogvr
 
 #endif // INCLUDED_PluginRegistration_h_GUID_4F5D6422_2977_40A9_8BA0_F86FD6245CE9
