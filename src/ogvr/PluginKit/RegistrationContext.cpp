@@ -28,9 +28,10 @@
 #include <ogvr/PluginKit/RegistrationContext.h>
 #include "PluginSpecificRegistrationContext.h"
 #include "ResetPointerList.h"
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
-// - none
+#include <libfunctionality/LoadPlugin.h>
 
 // Standard includes
 #include <algorithm>
@@ -42,8 +43,16 @@ RegistrationContext::~RegistrationContext() {
     // Reset the plugins in reverse order.
     detail::resetPointerListReverseOrder(m_regList);
 }
-void loadPlugin(std::string const &pluginName) {
-    PluginRegPtr pluginReg; /// @todo finish implementing.
+void RegistrationContext::loadPlugin(std::string const &pluginName) {
+    PluginRegPtr pluginReg(new PluginSpecificRegistrationContext(pluginName));
+    OGVR_DEV_VERBOSE("Plugin context created, loading plugin");
+    libfunc::PluginHandle plugin =
+        libfunc::loadPluginByName(pluginName, pluginReg.get());
+    OGVR_DEV_VERBOSE("Plugin loaded, assuming ownership of plugin handle and "
+                     "storing context");
+    pluginReg->takePluginHandle(std::move(plugin));
+    m_regList.push_back(pluginReg);
+    OGVR_DEV_VERBOSE("Completed RegistrationContext::loadPlugin");
 }
 
 } // end of namespace ogvr

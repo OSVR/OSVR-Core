@@ -28,7 +28,7 @@
 #define INCLUDED_RegistrationContext_h_GUID_9FF83E64_B2E1_40B7_E072_929AC0F94A10
 
 // Internal Includes
-#include <ogvr/Util/UniquePtr.h>
+#include <ogvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -58,7 +58,8 @@ class RegistrationContext : boost::noncopyable {
 
   private:
     /// @brief Pointer with ownership semantics for cleanup of plugins.
-    typedef unique_ptr<PluginSpecificRegistrationContext> PluginRegPtr;
+    /// @todo why did unique_ptr not work here?
+    typedef shared_ptr<PluginSpecificRegistrationContext> PluginRegPtr;
     /// @brief List of owning pointers for plugin registration.
     typedef std::vector<PluginRegPtr> PluginRegList;
 

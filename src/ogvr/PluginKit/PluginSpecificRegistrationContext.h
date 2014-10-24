@@ -27,10 +27,11 @@
 #define INCLUDED_PluginSpecificRegistrationContext_h_GUID_E8A348C1_28DC_4691_6214_32F75A6665F0
 
 // Internal Includes
+#include <ogvr/PluginKit/PluginInterfaceC.h>
 #include <ogvr/Util/UniquePtr.h>
-#include <libfunctionality/PluginHandle.h>
 
 // Library/third-party includes
+#include <libfunctionality/PluginHandle.h>
 #include <boost/noncopyable.hpp>
 
 // Standard includes
@@ -61,7 +62,7 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
   private:
     std::string const m_name;
     /// @brief Pointer with ownership semantics for deletion of plugin data.
-    typedef unique_ptr<void> PluginDataPtr;
+    typedef unique_ptr<void, OGVRPluginDataDeleteCallback> PluginDataPtr;
     /// @brief List of plugin data.
     typedef std::vector<PluginDataPtr> PluginDataList;
 
