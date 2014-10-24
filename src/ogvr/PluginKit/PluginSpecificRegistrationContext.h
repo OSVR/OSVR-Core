@@ -50,7 +50,7 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
 
     /// @brief Assume ownership of the plugin handle keeping the plugin library
     /// loaded.
-    void takePluginHandle(libfunc::PluginHandle &&handle);
+    void takePluginHandle(libfunc::PluginHandle &handle);
 
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.

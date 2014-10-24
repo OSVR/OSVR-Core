@@ -49,7 +49,7 @@ PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
 }
 
 void PluginSpecificRegistrationContext::takePluginHandle(
-    libfunc::PluginHandle &&handle) {
+    libfunc::PluginHandle &handle) {
     m_handle = handle;
 }
 
