@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "CallbackWrapper.h"
+#include <ogvr/Util/CallbackWrapper.h>
 
 // Library/third-party includes
 // - none

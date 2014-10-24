@@ -25,7 +25,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "ResourcePath.h"
+#include <ogvr/Util/ResourcePath.h>
 
 // Library/third-party includes
 // - none

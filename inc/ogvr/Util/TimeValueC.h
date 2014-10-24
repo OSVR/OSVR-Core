@@ -1,5 +1,6 @@
 /** @file
-    @brief Header defining a dependency-free, cross-platform substitute for struct timeval
+    @brief Header defining a dependency-free, cross-platform substitute for
+   struct timeval
 
     Must be c-safe!
 
@@ -31,13 +32,43 @@
 #define INCLUDED_TimeValueC_h_GUID_A02C6917_124D_4CB3_E63E_07F2DA7144E9
 
 /* Internal Includes */
-/* none */
+#include <ogvr/Util/Export.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
-/* none */
+#include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+/** @brief Standardized, portable parallel to struct timeval for representing
+   both absolute times and time intervals.
+
+   Where interpreted as an absolute time, its meaning is to be considered the
+   same as that of the POSIX struct timeval:
+   time since 00:00 Coordinated Universal Time (UTC), January 1, 1970.
+
+   For best results, please keep normalized.
+   */
+struct OGVR_TimeValue {
+    /** @brief Seconds portion of the time value. */
+    int64_t seconds;
+    /** @brief Microseconds portion of the time value. */
+    int64_t microseconds;
+};
+/** @brief "Normalizes" a time value so that the absolute number of microseconds
+    is less than 1,000,000, and that the sign of both components is the same.
+
+    @param tv Address of a struct TimeValue to normalize in place.
+
+    If the given pointer is NULL, this function returns without doing anything.
+*/
+OGVR_UTIL_EXPORT void ogvrTimeValueNormalize(struct OGVR_TimeValue *tv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
