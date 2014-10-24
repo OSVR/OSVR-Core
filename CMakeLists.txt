@@ -21,6 +21,7 @@ include(GNUInstallDirs)
 # Dependencies
 ###
 find_package(libfunctionality)
+find_package(Boost)
 
 ###
 # Set up build directories

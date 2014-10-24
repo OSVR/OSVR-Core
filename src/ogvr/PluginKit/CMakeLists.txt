@@ -53,6 +53,10 @@ target_include_directories(ogvrPluginKit
     $<BUILD_INTERFACE:${HEADER_BASE}>
     $<INSTALL_INTERFACE:include>)
 
+target_include_directories(ogvrPluginKit
+    PRIVATE
+   ${Boost_INCLUDE_DIR})
+
 target_link_libraries(ogvrPluginKit
     PUBLIC
     libfunctionality::functionality)
