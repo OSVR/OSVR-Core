@@ -47,9 +47,6 @@ extern "C" {
 @brief The APIs you might wish to use in your plugin.
 @{
 */
-/** @brief Opaque type of a registered device within the core library.
-*/
-typedef void *OGVRDevice;
 
 /** @} */
 #ifdef __cplusplus

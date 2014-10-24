@@ -35,7 +35,7 @@
 
 class DummySyncDevice {
   public:
-    DummySyncDevice(OGVRDevice d) : m_dev(d) {
+    DummySyncDevice(OGVR_DeviceToken d) : m_dev(d) {
         std::cout << "Constructing dummy synchronous device" << std::endl;
     }
 
@@ -55,12 +55,12 @@ class DummySyncDevice {
         ogvrDeviceSendData(m_dev, mydata, 0);
         return OGVR_PLUGIN_SUCCESS;
     }
-    OGVRDevice m_dev;
+    OGVR_DeviceToken m_dev;
 };
 
 OGVR_PLUGIN(org_opengoggles_example_DummySync) {
     /// Create a synchronous (in the mainloop) device
-    OGVRDevice d;
+    OGVR_DeviceToken d;
     ogvrDeviceSyncInit(ctx, "My Sync Device",
                        &d); // Puts a token in d that knows it's a sync
                             // device so ogvrDeviceSendData knows that it

@@ -33,40 +33,41 @@
 // Standard includes
 // - none
 
-OGVR_PluginReturnCode ogvrDeviceSendData(OGVRDevice dev, const char *bytestream,
-                                         size_t len) {
+OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_DeviceToken dev,
+                                         const char *bytestream, size_t len) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVRPluginRegContext ctx,
-                                         const char *name, OGVRDevice *device) {
+OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVR_PluginRegContext ctx,
+                                         const char *name,
+                                         OGVR_DeviceToken *device) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncInit for a device named " << name);
     return OGVR_PLUGIN_SUCCESS;
 }
 
 OGVR_PluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
-    OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
+    OGVR_DeviceToken device, OGVR_SyncDeviceUpdateCallback updateCallback,
     void *userData) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncRegisterUpdateCallback");
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVRPluginRegContext ctx,
+OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_PluginRegContext ctx,
                                           const char *name,
-                                          OGVRDevice *device) {
+                                          OGVR_DeviceToken *device) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncInit for a device named " << name);
     return OGVR_PLUGIN_SUCCESS;
 }
 
 OGVR_PluginReturnCode
-ogvrDeviceAsyncStartWaitLoop(OGVRDevice device,
-                             OGVRAsyncDeviceWaitCallback waitCallback,
+ogvrDeviceAsyncStartWaitLoop(OGVR_DeviceToken device,
+                             OGVR_AsyncDeviceWaitCallback waitCallback,
                              void *userData) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncStartWaitLoop");

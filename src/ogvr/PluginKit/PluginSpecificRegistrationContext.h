@@ -62,7 +62,7 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
   private:
     std::string const m_name;
     /// @brief Pointer with ownership semantics for deletion of plugin data.
-    typedef unique_ptr<void, OGVRPluginDataDeleteCallback> PluginDataPtr;
+    typedef unique_ptr<void, OGVR_PluginDataDeleteCallback> PluginDataPtr;
     /// @brief List of plugin data.
     typedef std::vector<PluginDataPtr> PluginDataList;
 

@@ -60,7 +60,8 @@ extern "C" {
    registration methods, then returns either success (OGVR_PLUGIN_SUCCESS)
    or failure (OGVR_PLUGIN_FAILURE).
 
-    Your function body receives a single argument, of type OGVRPluginRegContext,
+    Your function body receives a single argument, of type
+   OGVR_PluginRegContext,
    named `ctx`. You will need to pass this to registration functions that you
    call.
 */
@@ -96,7 +97,7 @@ typedef OGVR_PluginReturnCode (*OGVRHardwarePollCallback)(
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
-        OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollCallback,
+        OGVR_PluginRegContext ctx, OGVRHardwarePollCallback pollCallback,
         void *userData OGVR_CPP_ONLY(= NULL));
 /** @} */
 
@@ -111,11 +112,11 @@ OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
 */
 
 /** @brief Function type of a Plugin Data Delete callback */
-typedef void (*OGVRPluginDataDeleteCallback)(void *pluginData);
+typedef void (*OGVR_PluginDataDeleteCallback)(void *pluginData);
 
 /** @brief Register plugin data along with an appropriate deleter callback.
 
-    When your callback, a function of type OGVRPluginDataDeleteCallback, is
+    When your callback, a function of type OGVR_PluginDataDeleteCallback, is
    invoked, it will receive the plugin data pointer you provide here. Your
    deleter is responsible for appropriately deleting/freeing/destructing all
    data associated with that pointer.
@@ -131,7 +132,7 @@ typedef void (*OGVRPluginDataDeleteCallback)(void *pluginData);
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrPluginRegisterDataWithDeleteCallback(
-        OGVRPluginRegContext ctx, OGVRPluginDataDeleteCallback deleteCallback,
+        OGVR_PluginRegContext ctx, OGVR_PluginDataDeleteCallback deleteCallback,
         void *pluginData);
 /** @} */
 

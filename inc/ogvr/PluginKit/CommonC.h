@@ -66,7 +66,7 @@ typedef char OGVR_PluginReturnCode;
 /** @brief A context pointer passed in to your plugin's entry point
     @ingroup plugin_c_api
 */
-typedef void *OGVRPluginRegContext;
+typedef void *OGVR_PluginRegContext;
 
 #ifdef __cplusplus
 } /* end of extern "C" */

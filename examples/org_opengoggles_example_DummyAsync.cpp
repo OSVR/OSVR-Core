@@ -35,7 +35,7 @@
 
 class DummyAsyncDevice {
   public:
-    DummyAsyncDevice(OGVRDevice d) : m_dev(d) {
+    DummyAsyncDevice(OGVR_DeviceToken d) : m_dev(d) {
         std::cout << "Constructing dummy asynchronous (threaded) device"
                   << std::endl;
     }
@@ -61,12 +61,12 @@ class DummyAsyncDevice {
         ogvrDeviceSendData(m_dev, mydata, 0);
         return OGVR_PLUGIN_SUCCESS;
     }
-    OGVRDevice m_dev;
+    OGVR_DeviceToken m_dev;
 };
 
 OGVR_PLUGIN(org_opengoggles_example_DummyAsync) {
     /// Create an asynchronous (threaded) device
-    OGVRDevice d;
+    OGVR_DeviceToken d;
     ogvrDeviceAsyncInit(ctx, "My Async Device",
                         &d); // Puts an object in d that knows it's a
                              // threaded device so ogvrDeviceSendData knows
