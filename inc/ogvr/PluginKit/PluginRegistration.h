@@ -56,7 +56,7 @@ namespace plugin {
     ///
     /// Internally uses ogvrPluginRegisterDataWithDeleteCallback()
     template <typename T>
-    inline OGVRPluginReturnCode
+    inline OGVR_PluginReturnCode
     registerObjectForDeletion(OGVRPluginRegContext ctx, T *obj) {
         return ogvrPluginRegisterDataWithDeleteCallback(
             ctx, &detail::generic_deleter<T>, static_cast<void *>(obj));

@@ -45,7 +45,7 @@ class DummyAsyncDevice {
     /// function
     /// as long as things are running. So this function waits for the next
     /// message from the device and passes it on.
-    static OGVRPluginReturnCode wait(void *userData) {
+    static OGVR_PluginReturnCode wait(void *userData) {
         return static_cast<DummyAsyncDevice *>(userData)->m_wait();
     }
     ~DummyAsyncDevice() {
@@ -54,7 +54,7 @@ class DummyAsyncDevice {
     }
 
   private:
-    OGVRPluginReturnCode m_wait() {
+    OGVR_PluginReturnCode m_wait() {
         // block on waiting for data.
         // once we have enough, call
         char *mydata = NULL;

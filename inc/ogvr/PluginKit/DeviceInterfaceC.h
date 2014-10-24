@@ -64,7 +64,7 @@ typedef void *OGVRDevice;
 
     @todo include a message type ID
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrDeviceSendData(OGVRDevice dev, const char *bytestream, size_t len);
 
 /** @name Synchronous Devices
@@ -93,12 +93,12 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     @param [out] device Will contain the unique device token assigned to your
    synchronous device.
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrDeviceSyncInit(OGVRPluginRegContext ctx, const char *name,
                        OGVRDevice *device);
 
 /** @brief Function type of a an Sync Device Update callback */
-typedef OGVRPluginReturnCode (*OGVRSyncDeviceUpdateCallback)(void *userData);
+typedef OGVR_PluginReturnCode (*OGVRSyncDeviceUpdateCallback)(void *userData);
 
 /** @brief Register the update callback of a synchronous device.
 
@@ -114,9 +114,10 @@ typedef OGVRPluginReturnCode (*OGVRSyncDeviceUpdateCallback)(void *userData);
     the callback you register here is called. Technically optional, but hard to
     support multiple instances without it.
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
-    OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
-    void *userData OGVR_CPP_ONLY(= NULL));
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
+    ogvrDeviceSyncRegisterUpdateCallback(
+        OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
+        void *userData OGVR_CPP_ONLY(= NULL));
 /** @} */
 
 /** @name Asynchronous Devices
@@ -142,12 +143,12 @@ OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
     @param [out] device Will contain the unique device token assigned to your
    asynchronous device.
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrDeviceAsyncInit(OGVRPluginRegContext ctx, const char *name,
                         OGVRDevice *device);
 
 /** @brief Function type of a an Async Device Wait callback */
-typedef OGVRPluginReturnCode (*OGVRAsyncDeviceWaitCallback)(void *userData);
+typedef OGVR_PluginReturnCode (*OGVRAsyncDeviceWaitCallback)(void *userData);
 
 /** @brief Start the sampling/waiting thread of an asynchronous device.
 
@@ -163,7 +164,7 @@ typedef OGVRPluginReturnCode (*OGVRAsyncDeviceWaitCallback)(void *userData);
     the callback you register here is called. Technically optional, but hard to
    support multiple instances without it.
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrDeviceAsyncStartWaitLoop(OGVRDevice device,
                                  OGVRAsyncDeviceWaitCallback waitCallback,
                                  void *userData OGVR_CPP_ONLY(= NULL));

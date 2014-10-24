@@ -34,7 +34,7 @@
 
 static int sampleHardwareUserdata = 1;
 
-static OGVRPluginReturnCode
+static OGVR_PluginReturnCode
 pollForHardwareChange(OGVRPluginHardwarePollContext /*pollContext*/,
                       void *userData) {
     int &data = *static_cast<int *>(userData);

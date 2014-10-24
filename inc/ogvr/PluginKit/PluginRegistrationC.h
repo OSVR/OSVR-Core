@@ -78,7 +78,7 @@ extern "C" {
 typedef void *OGVRPluginHardwarePollContext;
 
 /** @brief Function type of a Hardware Poll callback */
-typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
+typedef OGVR_PluginReturnCode (*OGVRHardwarePollCallback)(
     OGVRPluginHardwarePollContext pollContext, void *userData);
 
 /** @brief Register a callback in your plugin to be notified when hardware
@@ -94,7 +94,7 @@ typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
    @param userData An optional opaque pointer that will be returned to you when
    the callback you register here is called.
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
         OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollCallback,
         void *userData OGVR_CPP_ONLY(= NULL));
@@ -129,7 +129,7 @@ typedef void (*OGVRPluginDataDeleteCallback)(void *pluginData);
     @param pluginData A pointer to your data, treated as opaque by this library,
    and passed to your deleter.
 */
-OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrPluginRegisterDataWithDeleteCallback(
         OGVRPluginRegContext ctx, OGVRPluginDataDeleteCallback deleteCallback,
         void *pluginData);

@@ -56,10 +56,10 @@ extern "C" {
     @{
 */
 /** @brief Return type from C plugin API OGVR functions. */
-typedef char OGVRPluginReturnCode;
-/** @brief The "success" value for an OGVRPluginReturnCode */
+typedef char OGVR_PluginReturnCode;
+/** @brief The "success" value for an OGVR_PluginReturnCode */
 #define OGVR_PLUGIN_SUCCESS LIBFUNC_RETURN_SUCCESS
-/** @brief The "failure" value for an OGVRPluginReturnCode */
+/** @brief The "failure" value for an OGVR_PluginReturnCode */
 #define OGVR_PLUGIN_FAILURE LIBFUNC_RETURN_FAILURE
 /** @} */
 

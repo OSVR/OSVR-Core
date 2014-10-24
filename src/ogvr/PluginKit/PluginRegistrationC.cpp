@@ -34,7 +34,7 @@
 // Standard includes
 // - none
 
-OGVRPluginReturnCode
+OGVR_PluginReturnCode
 ogvrPluginRegisterHardwarePollCallback(OGVRPluginRegContext ctx,
                                        OGVRHardwarePollCallback pollCallback,
                                        void *userData) {
@@ -43,7 +43,7 @@ ogvrPluginRegisterHardwarePollCallback(OGVRPluginRegContext ctx,
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVRPluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
+OGVR_PluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     OGVRPluginRegContext ctx, OGVRPluginDataDeleteCallback deleteCallback,
     void *pluginData) {
     /// @todo implement - replace stub

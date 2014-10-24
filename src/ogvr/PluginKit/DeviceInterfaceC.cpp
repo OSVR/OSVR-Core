@@ -33,22 +33,22 @@
 // Standard includes
 // - none
 
-OGVRPluginReturnCode ogvrDeviceSendData(OGVRDevice dev, const char *bytestream,
-                                        size_t len) {
+OGVR_PluginReturnCode ogvrDeviceSendData(OGVRDevice dev, const char *bytestream,
+                                         size_t len) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVRPluginReturnCode ogvrDeviceSyncInit(OGVRPluginRegContext ctx,
-                                        const char *name, OGVRDevice *device) {
+OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVRPluginRegContext ctx,
+                                         const char *name, OGVRDevice *device) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncInit for a device named " << name);
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
+OGVR_PluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
     OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
     void *userData) {
     /// @todo implement - replace stub
@@ -56,14 +56,15 @@ OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVRPluginReturnCode ogvrDeviceAsyncInit(OGVRPluginRegContext ctx,
-                                         const char *name, OGVRDevice *device) {
+OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVRPluginRegContext ctx,
+                                          const char *name,
+                                          OGVRDevice *device) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncInit for a device named " << name);
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVRPluginReturnCode
+OGVR_PluginReturnCode
 ogvrDeviceAsyncStartWaitLoop(OGVRDevice device,
                              OGVRAsyncDeviceWaitCallback waitCallback,
                              void *userData) {

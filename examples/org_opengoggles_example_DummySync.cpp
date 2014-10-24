@@ -41,7 +41,7 @@ class DummySyncDevice {
 
     /// Trampoline: C-compatible callback bouncing into a member function.
     /// Also something we can wrap.
-    static OGVRPluginReturnCode update(void *userData) {
+    static OGVR_PluginReturnCode update(void *userData) {
         return static_cast<DummySyncDevice *>(userData)->m_update();
     }
     ~DummySyncDevice() {
@@ -49,7 +49,7 @@ class DummySyncDevice {
     }
 
   private:
-    OGVRPluginReturnCode m_update() {
+    OGVR_PluginReturnCode m_update() {
         // get some data
         char *mydata = NULL;
         ogvrDeviceSendData(m_dev, mydata, 0);
