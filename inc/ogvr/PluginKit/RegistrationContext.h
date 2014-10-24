@@ -31,7 +31,7 @@
 #include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
@@ -41,8 +41,7 @@ namespace ogvr {
 class PluginSpecificRegistrationContext;
 /// @brief Internal class responsible for the registration and destruction of
 /// plugins.
-/// @todo make noncopyable
-class RegistrationContext {
+class RegistrationContext : boost::noncopyable {
   public:
     /// @brief basic constructor
     RegistrationContext();

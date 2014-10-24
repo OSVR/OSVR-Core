@@ -31,7 +31,7 @@
 #include <libfunctionality/PluginHandle.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
@@ -40,7 +40,7 @@
 namespace ogvr {
 /// @brief Internal class backing the context of registrations performed by a
 /// single plugin.
-class PluginSpecificRegistrationContext {
+class PluginSpecificRegistrationContext : boost::noncopyable {
   public:
     /// @brief Constructor
     PluginSpecificRegistrationContext(std::string const &name);
