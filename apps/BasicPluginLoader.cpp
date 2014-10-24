@@ -25,10 +25,10 @@
 // limitations under the License.
 
 // Internal Includes
-// - none
+#include <ogvr/PluginKit/RegistrationContext.h>
 
 // Library/third-party includes
-#include <libfunctionality/LoadPlugin.h>
+// - none
 
 // Standard includes
 #include <iostream>
@@ -40,9 +40,11 @@ int main(int argc, char * argv[]) {
         std::cerr << "Must supply a plugin name to load." << std::endl;
         return 1;
     }
+	ogvr::RegistrationContext ctx;
+
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;
-        libfunc::PluginHandle plugin = libfunc::loadPluginByName(argv[1], NULL /* context would go here in real loader */);
+		ctx.loadPlugin(argv[1]);
         std::cout << "Successfully loaded plugin, control returned to host application!" << std::endl;
         return 0;
     } catch (std::exception & e) {
