@@ -1,8 +1,22 @@
+###
+# Internal Verbosity Header
+###
 if(BUILD_DEV_VERBOSE)
     set(OGVR_UTIL_DEV_VERBOSE TRUE)
 endif()
 configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
+###
+# Platform Config Header
+###
+include(CheckStructHasMember)
+check_struct_has_member("struct timeval" tv_sec sys/time.h OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H LANGUAGE C)
+check_struct_has_member("struct timeval" tv_sec winsock2.h OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H LANGUAGE C)
+configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
+
+###
+# Library build
+###
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Util")
 
 set(API
@@ -13,7 +27,8 @@ set(API
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
     "${HEADER_LOCATION}/UniquePtr.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/Export.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
 source_group(inc\\ogvr\\Util FILES ${API})
 
 set(SOURCE
