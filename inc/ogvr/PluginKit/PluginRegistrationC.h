@@ -39,7 +39,7 @@
 #include <libfunctionality/PluginInterface.h>
 
 /* Standard includes */
-/* none */
+#include <stddef.h>
 
 /** @defgroup plugin_registration Plugin Registration
     @brief How to start writing a plugin and advertise your capabilities to the
@@ -97,7 +97,7 @@ typedef OGVRPluginReturnCode (*OGVRHardwarePollCallback)(
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
         OGVRPluginRegContext ctx, OGVRHardwarePollCallback pollCallback,
-        void *userData OGVR_CPP_ONLY(= nullptr));
+        void *userData OGVR_CPP_ONLY(= NULL));
 /** @} */
 
 /** @name Plugin Instance Data

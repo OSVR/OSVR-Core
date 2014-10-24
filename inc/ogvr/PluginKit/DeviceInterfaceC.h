@@ -116,7 +116,7 @@ typedef OGVRPluginReturnCode (*OGVRSyncDeviceUpdateCallback)(void *userData);
 */
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
     OGVRDevice device, OGVRSyncDeviceUpdateCallback updateCallback,
-    void *userData OGVR_CPP_ONLY(= nullptr));
+    void *userData OGVR_CPP_ONLY(= NULL));
 /** @} */
 
 /** @name Asynchronous Devices
@@ -166,7 +166,7 @@ typedef OGVRPluginReturnCode (*OGVRAsyncDeviceWaitCallback)(void *userData);
 OGVR_PLUGINKIT_EXPORT OGVRPluginReturnCode
     ogvrDeviceAsyncStartWaitLoop(OGVRDevice device,
                                  OGVRAsyncDeviceWaitCallback waitCallback,
-                                 void *userData OGVR_CPP_ONLY(= nullptr));
+                                 void *userData OGVR_CPP_ONLY(= NULL));
 
 /** @} */
 
