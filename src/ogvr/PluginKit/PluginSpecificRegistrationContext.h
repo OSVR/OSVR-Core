@@ -28,6 +28,7 @@
 
 // Internal Includes
 #include <ogvr/Util/UniquePtr.h>
+#include <libfunctionality/PluginHandle.h>
 
 // Library/third-party includes
 // - none
@@ -46,6 +47,11 @@ class PluginSpecificRegistrationContext {
     /// @brief Destructor responsible for destroying plugin data in reverse
     /// order.
     ~PluginSpecificRegistrationContext();
+
+    /// @brief Assume ownership of the plugin handle keeping the plugin library
+    /// loaded.
+    void takePluginHandle(libfunc::PluginHandle &&handle);
+
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.
     /// @{
@@ -60,6 +66,7 @@ class PluginSpecificRegistrationContext {
     typedef std::vector<PluginDataPtr> PluginDataList;
 
     PluginDataList m_dataList;
+    libfunc::PluginHandle m_handle;
 };
 } // end of namespace ogvr
 

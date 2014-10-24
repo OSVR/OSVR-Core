@@ -48,4 +48,9 @@ PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
     detail::resetPointerListReverseOrder(m_dataList);
 }
 
+void PluginSpecificRegistrationContext::takePluginHandle(
+    libfunc::PluginHandle &&handle) {
+    m_handle = handle;
+}
+
 } // end of namespace ogvr
