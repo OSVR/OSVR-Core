@@ -29,6 +29,7 @@
 
 // Internal Includes
 #include <ogvr/Util/SharedPtr.h>
+#include <ogvr/PluginKit/Export.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -44,15 +45,15 @@ class PluginSpecificRegistrationContext;
 class RegistrationContext : boost::noncopyable {
   public:
     /// @brief basic constructor
-    RegistrationContext();
+    OGVR_PLUGINKIT_EXPORT RegistrationContext();
 
     /// @brief Destructor responsible for destroying plugins in reverse order.
-    ~RegistrationContext();
+    OGVR_PLUGINKIT_EXPORT ~RegistrationContext();
 
     /// @name Host-side (internal) API
     /// @{
     /// @brief load a plugin in this context
-    void loadPlugin(std::string const &pluginName);
+    OGVR_PLUGINKIT_EXPORT void loadPlugin(std::string const &pluginName);
 
     /// @}
 
