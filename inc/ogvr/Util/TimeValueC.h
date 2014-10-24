@@ -33,6 +33,7 @@
 
 /* Internal Includes */
 #include <ogvr/Util/Export.h>
+#include <ogvr/Util/PlatformConfig.h>
 
 /* Library/third-party includes */
 /* none */
@@ -43,6 +44,24 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @defgroup C API for time interaction.
+
+    This provides a level of interoperability with struct timeval on systems
+   with that facility. It provides a neutral representation with sufficiently
+   large types.
+
+    For C++ code, use of boost::chrono instead is recommended.
+
+    @{
+*/
+
+/** @brief The signed integer type storing the seconds in a struct
+ * OGVR_TimeValue */
+typedef int64_t OGVR_TimeValue_Seconds;
+/** @brief The signed integer type storing the microseconds in a struct
+ * OGVR_TimeValue */
+typedef int32_t OGVR_TimeValue_Microseconds;
+
 /** @brief Standardized, portable parallel to struct timeval for representing
    both absolute times and time intervals.
 
@@ -50,14 +69,44 @@ extern "C" {
    same as that of the POSIX struct timeval:
    time since 00:00 Coordinated Universal Time (UTC), January 1, 1970.
 
-   For best results, please keep normalized.
+   For best results, please keep normalized. Output of all functions here
+   is normalized.
    */
 struct OGVR_TimeValue {
     /** @brief Seconds portion of the time value. */
-    int64_t seconds;
+    OGVR_TimeValue_Seconds seconds;
     /** @brief Microseconds portion of the time value. */
-    int64_t microseconds;
+    OGVR_TimeValue_Microseconds microseconds;
 };
+
+#ifdef OGVR_HAVE_STRUCT_TIMEVAL
+struct timeval; /* forward declaration */
+
+/** @brief Converts from a TimeValue struct to your system's struct timeval.
+
+    @param dest Pointer to an empty struct timeval for your platform.
+    @param src A pointer to an OGVR_TimeValue you'd like to convert from.
+
+    If either parameter is NULL, the function will return without doing
+   anything.
+*/
+OGVR_UTIL_EXPORT void
+ogvrTimeValueToStructTimeval(struct timeval *dest,
+                             const struct OGVR_TimeValue *src);
+
+/** @brief Converts from a TimeValue struct to your system's struct timeval.
+    @param dest An OGVR_TimeValue destination pointer.
+    @param src Pointer to a struct timeval you'd like to convert from.
+
+    The result is normalized.
+
+    If either parameter is NULL, the function will return without doing
+   anything.
+*/
+OGVR_UTIL_EXPORT void ogvrStructTimevalToTimeValue(struct OGVR_TimeValue *dest,
+                                                   const struct timeval *src);
+#endif
+
 /** @brief "Normalizes" a time value so that the absolute number of microseconds
     is less than 1,000,000, and that the sign of both components is the same.
 
@@ -67,8 +116,37 @@ struct OGVR_TimeValue {
 */
 OGVR_UTIL_EXPORT void ogvrTimeValueNormalize(struct OGVR_TimeValue *tv);
 
+/** @brief Sums two time values, replacing the first with the result.
+
+    @param tvA Destination and first source.
+    @param tvB second source
+
+    If a given pointer is NULL, this function returns without doing anything.
+
+    Both parameters are expected to be in normalized form.
+*/
+OGVR_UTIL_EXPORT void ogvrTimeValueSum(struct OGVR_TimeValue *tvA,
+                                       const struct OGVR_TimeValue *tvB);
+
+/** @brief Computes the difference between two time values, replacing the first
+   with the result.
+
+    Effectively, `*tvA = *tvA - *tvB`
+
+    @param tvA Destination and first source.
+    @param tvB second source
+
+    If a given pointer is NULL, this function returns without doing anything.
+
+    Both parameters are expected to be in normalized form.
+*/
+OGVR_UTIL_EXPORT void ogvrTimeValueDifference(struct OGVR_TimeValue *tvA,
+                                              const struct OGVR_TimeValue *tvB);
+
+/** @} */
+
 #ifdef __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 #endif
