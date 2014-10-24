@@ -12,6 +12,7 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
     "${HEADER_LOCATION}/CommonC.h"
+    "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
     "${HEADER_LOCATION}/PluginInterfaceC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
