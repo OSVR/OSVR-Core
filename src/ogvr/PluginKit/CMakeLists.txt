@@ -55,16 +55,25 @@ target_include_directories(ogvrPluginKit
 
 target_include_directories(ogvrPluginKit
     PRIVATE
-   ${Boost_INCLUDE_DIR})
+    ${Boost_INCLUDE_DIR})
 
 target_link_libraries(ogvrPluginKit
     PUBLIC
     libfunctionality::functionality)
 
 ###
+# Internal "interface" target for host applications to use - they need more includes.
+###
+add_library(ogvrPluginKit-hostinterface INTERFACE)
+target_include_directories(ogvrPluginKit-hostinterface
+    INTERFACE
+    ${Boost_INCLUDE_DIR})
+target_link_libraries(ogvrPluginKit-hostinterface INTERFACE ogvrPluginKit)
+
+###
 # Install library and headers
 ###
-install(TARGETS ogvrPluginKit
+install(TARGETS ogvrPluginKit ogvrPluginKit-hostinterface
     EXPORT ogvrTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
