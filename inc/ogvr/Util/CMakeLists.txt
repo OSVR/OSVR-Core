@@ -4,6 +4,8 @@ install(
     GenericDeleter.h
     ResourcePath.h
     SharedPtr.h
+    TimeValue.h
+    TimeValueC.h
     UniquePtr.h
     DESTINATION
     ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/Util

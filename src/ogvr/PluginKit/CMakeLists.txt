@@ -26,6 +26,8 @@ set(UTIL_API
     "${HEADER_BASE}/ogvr/Util/GenericDeleter.h"
     "${HEADER_BASE}/ogvr/Util/ResourcePath.h"
     "${HEADER_BASE}/ogvr/Util/UniquePtr.h"
+    "${HEADER_BASE}/ogvr/Util/TimeValue.h"
+    "${HEADER_BASE}/ogvr/Util/TimeValueC.h"
     "${HEADER_BASE}/ogvr/Util/SharedPtr.h")
 source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
