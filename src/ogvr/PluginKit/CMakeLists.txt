@@ -35,7 +35,8 @@ set(SOURCE
     PluginRegistrationC.cpp
     PluginSpecificRegistrationContext.cpp
     PluginSpecificRegistrationContext.h
-    RegistrationContext.cpp)
+    RegistrationContext.cpp
+    ResetPointerList.h)
 source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 
 add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})
