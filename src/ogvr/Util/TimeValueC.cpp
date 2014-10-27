@@ -25,8 +25,12 @@
 // Standard includes
 #if defined(OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H)
 #include <sys/time.h>
+typedef time_t tv_seconds_type;
+typedef suseconds_t tv_microseconds_type;
 #elif defined(OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H)
 #include <winsock2.h>
+typedef long tv_seconds_type;
+typedef long tv_microseconds_type;
 #endif
 
 #define OGVR_USEC_PER_SEC 1000000;
@@ -76,8 +80,8 @@ void ogvrTimeValueToStructTimeval(struct timeval *dest,
     if (!dest || !src) {
         return;
     }
-    dest->tv_sec = src->seconds;
-    dest->tv_usec = src->microseconds;
+    dest->tv_sec = tv_seconds_type(src->seconds);
+    dest->tv_usec = tv_microseconds_type(src->microseconds);
 }
 
 void ogvrStructTimevalToTimeValue(struct OGVR_TimeValue *dest,
