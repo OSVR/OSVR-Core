@@ -37,23 +37,7 @@ namespace detail {
         void operator()(SmartPointerType &p) { p.reset(); }
     };
 
-    /// @brief Reset every smart pointer in a container one by one, from
-    /// beginning to end.
-    template <typename ListType>
-    inline void resetPointerList(ListType &ptrlist) {
-        typedef typename ListType::value_type PointerType;
-        std::for_each(ptrlist.begin(), ptrlist.end(),
-                      PointerResetter<PointerType>());
-    }
-    /// @brief Reset every smart pointer in a container one by one in reverse
-    /// order.
-    template <typename ListType>
-    inline void resetPointerListReverseOrder(ListType &ptrlist) {
-        typedef typename ListType::value_type PointerType;
-        std::for_each(ptrlist.rbegin(), ptrlist.rend(),
-                      PointerResetter<PointerType>());
-    }
-
+    /// @brief Reset every smart pointer in a container one by one
     template <typename RangeType>
     inline void resetPointerRange(RangeType &range) {
         typedef typename RangeType::type IteratorType;

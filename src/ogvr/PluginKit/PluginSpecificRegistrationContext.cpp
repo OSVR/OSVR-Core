@@ -22,7 +22,7 @@
 #include "ResetPointerList.h"
 
 // Library/third-party includes
-// - none
+#include <boost/range/adaptor/reversed.hpp>
 
 // Standard includes
 // - none
@@ -38,7 +38,7 @@ PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
                      << m_name);
 
     // Delete the data in reverse order.
-    detail::resetPointerListReverseOrder(m_dataList);
+    detail::resetPointerRange(m_dataList | boost::adaptors::reversed);
 }
 
 void PluginSpecificRegistrationContext::takePluginHandle(
