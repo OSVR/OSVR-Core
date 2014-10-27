@@ -76,6 +76,16 @@ target_include_directories(ogvrPluginHost
 target_link_libraries(ogvrPluginHost INTERFACE ogvrPluginKit)
 
 ###
+# Grab DLLs please.
+###
+if(WIN32)
+    add_custom_command(TARGET ogvrPluginKit POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:libfunctionality::functionality> $<TARGET_FILE_DIR:ogvrPluginKit>
+        COMMENT Copying required DLL
+        VERBATIM)
+endif()
+
+###
 # Install library and headers
 ###
 install(TARGETS ogvrPluginKit ogvrPluginHost

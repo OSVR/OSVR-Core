@@ -1,0 +1,3 @@
+[submodule "vendor/vrpn"]
+	path = vendor/vrpn
+	url = https://github.com/rpavlik/vrpn.git
