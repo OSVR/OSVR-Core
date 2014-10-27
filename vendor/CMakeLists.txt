@@ -1,0 +1,12 @@
+if(BUILD_TESTING)
+    if(WIN32)
+        set(gtest_force_shared_crt ON)
+    endif()
+    add_subdirectory(gtest-1.7.0)
+endif()
+set(BUILD_SHARED_LIBS OFF)
+# Build VRPN as subproject
+set(VRPN_GPL_SERVER FALSE CACHE INTERNAL "" FORCE)
+set(VRPN_BUILD_SERVER_LIBRARY TRUE CACHE INTERNAL "" FORCE)
+set(VRPN_BUILD_CLIENT_LIBRARY TRUE CACHE INTERNAL "" FORCE)
+add_subdirectory(vrpn)

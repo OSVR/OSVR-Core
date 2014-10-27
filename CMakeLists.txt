@@ -45,6 +45,7 @@ endif()
 ###
 # Building
 ###
+add_subdirectory(vendor)
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 add_subdirectory(src/ogvr)
