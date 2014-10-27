@@ -69,16 +69,16 @@ target_link_libraries(ogvrPluginKit
 ###
 # Internal "interface" target for host applications to use - they need more includes.
 ###
-add_library(ogvrPluginKit-hostinterface INTERFACE)
-target_include_directories(ogvrPluginKit-hostinterface
+add_library(ogvrPluginHost INTERFACE)
+target_include_directories(ogvrPluginHost
     INTERFACE
     ${Boost_INCLUDE_DIR})
-target_link_libraries(ogvrPluginKit-hostinterface INTERFACE ogvrPluginKit)
+target_link_libraries(ogvrPluginHost INTERFACE ogvrPluginKit)
 
 ###
 # Install library and headers
 ###
-install(TARGETS ogvrPluginKit ogvrPluginKit-hostinterface
+install(TARGETS ogvrPluginKit ogvrPluginHost
     EXPORT ogvrTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
