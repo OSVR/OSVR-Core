@@ -23,7 +23,7 @@
 // - none
 
 // Library/third-party includes
-// - none
+#include <boost/range/algorithm/for_each.hpp>
 
 // Standard includes
 #include <algorithm>
@@ -52,6 +52,13 @@ namespace detail {
         typedef typename ListType::value_type PointerType;
         std::for_each(ptrlist.rbegin(), ptrlist.rend(),
                       PointerResetter<PointerType>());
+    }
+
+    template <typename RangeType>
+    inline void resetPointerRange(RangeType &range) {
+        typedef typename RangeType::type IteratorType;
+        typedef typename IteratorType::value_type PointerType;
+        boost::for_each(range, PointerResetter<PointerType>());
     }
 }
 }

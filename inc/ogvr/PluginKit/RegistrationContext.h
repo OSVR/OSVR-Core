@@ -29,7 +29,7 @@
 
 // Standard includes
 #include <string>
-#include <vector>
+#include <map>
 
 namespace ogvr {
 class PluginSpecificRegistrationContext;
@@ -54,10 +54,10 @@ class RegistrationContext : boost::noncopyable {
     /// @brief Pointer with ownership semantics for cleanup of plugins.
     /// @todo why did unique_ptr not work here?
     typedef shared_ptr<PluginSpecificRegistrationContext> PluginRegPtr;
-    /// @brief List of owning pointers for plugin registration.
-    typedef std::vector<PluginRegPtr> PluginRegList;
+    /// @brief Map of plugin names to owning pointers for plugin registration.
+    typedef std::map<std::string, PluginRegPtr> PluginRegMap;
 
-    PluginRegList m_regList;
+    PluginRegMap m_regMap;
 };
 } // end of namespace ogvr
 

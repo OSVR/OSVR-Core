@@ -25,6 +25,8 @@
 
 // Library/third-party includes
 #include <libfunctionality/LoadPlugin.h>
+#include <boost/range/adaptor/map.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 // Standard includes
 #include <algorithm>
@@ -34,7 +36,8 @@ RegistrationContext::RegistrationContext() {}
 
 RegistrationContext::~RegistrationContext() {
     // Reset the plugins in reverse order.
-    detail::resetPointerListReverseOrder(m_regList);
+    detail::resetPointerRange(m_regMap | boost::adaptors::map_values |
+                              boost::adaptors::reversed);
 }
 void RegistrationContext::loadPlugin(std::string const &pluginName) {
     PluginRegPtr pluginReg(new PluginSpecificRegistrationContext(pluginName));
@@ -44,7 +47,7 @@ void RegistrationContext::loadPlugin(std::string const &pluginName) {
     OGVR_DEV_VERBOSE("Plugin loaded, assuming ownership of plugin handle and "
                      "storing context");
     pluginReg->takePluginHandle(std::move(plugin));
-    m_regList.push_back(pluginReg);
+    m_regMap.insert(std::make_pair(pluginName, pluginReg));
     OGVR_DEV_VERBOSE("Completed RegistrationContext::loadPlugin");
 }
 
