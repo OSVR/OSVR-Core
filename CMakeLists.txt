@@ -21,7 +21,7 @@ include(GNUInstallDirs)
 # Dependencies
 ###
 find_package(libfunctionality)
-find_package(Boost)
+find_package(Boost 1.43) # Lower version bound of 1.43 for range adapters
 
 ###
 # Set up build directories
