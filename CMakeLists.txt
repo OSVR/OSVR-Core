@@ -46,6 +46,9 @@ endif()
 # Building
 ###
 add_subdirectory(vendor)
+if(WIN32)
+    set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "add a postfix, usually d on windows" FORCE)
+endif()
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 add_subdirectory(src/ogvr)
