@@ -32,6 +32,7 @@ PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
     : m_name(name) {
     OGVR_DEV_VERBOSE("Creating a plugin registration context for " << m_name);
 }
+
 PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
     OGVR_DEV_VERBOSE("Destroying plugin reg context: Here's where we'd call "
                      "deleter callbacks for "
@@ -44,6 +45,11 @@ PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
 void PluginSpecificRegistrationContext::takePluginHandle(
     libfunc::PluginHandle &handle) {
     m_handle = handle;
+}
+
+void PluginSpecificRegistrationContext::registerDataWithDeleteCallback(
+    OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData) {
+    m_dataList.emplace_back(PluginDataPtr(pluginData, deleteCallback));
 }
 
 } // end of namespace ogvr

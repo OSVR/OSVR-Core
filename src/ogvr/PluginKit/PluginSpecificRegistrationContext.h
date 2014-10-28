@@ -50,6 +50,11 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     /// @brief Called by the C API wrappers in the plugin registration headers.
     /// @{
 
+    /// @brief Register data and a delete callback to be called on plugin
+    /// unload.
+    void
+    registerDataWithDeleteCallback(OGVR_PluginDataDeleteCallback deleteCallback,
+                                   void *pluginData);
     /// @}
 
   private:

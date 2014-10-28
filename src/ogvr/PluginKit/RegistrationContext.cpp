@@ -39,6 +39,7 @@ RegistrationContext::~RegistrationContext() {
     detail::resetPointerRange(m_regMap | boost::adaptors::map_values |
                               boost::adaptors::reversed);
 }
+
 void RegistrationContext::loadPlugin(std::string const &pluginName) {
     PluginRegPtr pluginReg(new PluginSpecificRegistrationContext(pluginName));
     OGVR_DEV_VERBOSE("Plugin context created, loading plugin");
