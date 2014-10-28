@@ -41,7 +41,7 @@ template <typename FunctionPtrType> class CallbackWrapper {
         typename boost::function_traits<FunctionType>::result_type ReturnType;
 
     /// @brief Function call operator with non-void return
-    template <typename... Args> ReturnType operator()(Args &&... args) {
+    template <typename... Args> ReturnType operator()(Args &&... args) const {
         return (*m_f)(std::forward<Args>(args)..., m_ud);
     }
 
