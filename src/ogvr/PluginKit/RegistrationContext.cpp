@@ -43,14 +43,18 @@ RegistrationContext::~RegistrationContext() {
 
 void RegistrationContext::loadPlugin(std::string const &pluginName) {
     PluginRegPtr pluginReg(new PluginSpecificRegistrationContext(pluginName));
-    OGVR_DEV_VERBOSE("Plugin context created, loading plugin");
+    OGVR_DEV_VERBOSE("RegistrationContext:\t"
+                     "Plugin context created, loading plugin");
     libfunc::PluginHandle plugin =
         libfunc::loadPluginByName(pluginName, pluginReg.get());
-    OGVR_DEV_VERBOSE("Plugin loaded, assuming ownership of plugin handle and "
+    OGVR_DEV_VERBOSE("RegistrationContext:\t"
+                     "Plugin loaded, assuming ownership of plugin handle and "
                      "storing context");
-    pluginReg->takePluginHandle(std::move(plugin));
+    pluginReg->takePluginHandle(plugin);
     m_regMap.insert(std::make_pair(pluginName, pluginReg));
-    OGVR_DEV_VERBOSE("Completed RegistrationContext::loadPlugin");
+    OGVR_DEV_VERBOSE("RegistrationContext:\t"
+                     "Completed RegistrationContext::loadPlugin");
+}
 
 void RegistrationContext::triggerHardwarePoll() {
     boost::for_each(m_regMap | boost::adaptors::map_values,

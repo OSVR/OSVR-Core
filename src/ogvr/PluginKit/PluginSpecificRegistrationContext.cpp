@@ -44,12 +44,14 @@ namespace {
 PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
     std::string const &name)
     : m_name(name) {
-    OGVR_DEV_VERBOSE("Creating a plugin registration context for " << m_name);
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                     << "Creating a plugin registration context for "
+                     << m_name);
 }
 
 PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
-    OGVR_DEV_VERBOSE("Destroying plugin reg context: Here's where we'd call "
-                     "deleter callbacks for "
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                     "Destroying plugin reg context for "
                      << m_name);
 
     // Delete the data in reverse order.
@@ -66,12 +68,21 @@ const std::string &PluginSpecificRegistrationContext::getName() const {
 }
 
 void PluginSpecificRegistrationContext::callHardwarePollCallbacks() {
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                     "In callHardwarePollCallbacks for "
+                     << m_name);
+
     boost::for_each(m_hardwarePollCallbacks, HardwarePollCaller(this));
 }
 
 void PluginSpecificRegistrationContext::registerDataWithDeleteCallback(
     OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData) {
     m_dataList.emplace_back(PluginDataPtr(pluginData, deleteCallback));
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                     "Now have "
+                     << m_dataList.size()
+                     << " data delete callbacks registered for " << m_name);
+}
 
 void PluginSpecificRegistrationContext::registerHardwarePollCallback(
     OGVRHardwarePollCallback pollCallback, void *userData) {
