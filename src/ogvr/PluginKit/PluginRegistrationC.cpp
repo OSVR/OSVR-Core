@@ -39,7 +39,9 @@ ogvrPluginRegisterHardwarePollCallback(OGVR_PluginRegContext ctx,
 OGVR_PluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     OGVR_PluginRegContext ctx, OGVR_PluginDataDeleteCallback deleteCallback,
     void *pluginData) {
-    /// @todo implement - replace stub
-    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
+    assert(ctx);
+    ogvr::PluginSpecificRegistrationContext *context =
+        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
+    context->registerDataWithDeleteCallback(deleteCallback, pluginData);
     return OGVR_PLUGIN_SUCCESS;
 }
