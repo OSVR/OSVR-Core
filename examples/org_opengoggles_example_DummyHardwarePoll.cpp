@@ -28,8 +28,7 @@
 static int sampleHardwareUserdata = 1;
 
 static OGVR_PluginReturnCode
-pollForHardwareChange(OGVRPluginHardwarePollContext /*pollContext*/,
-                      void *userData) {
+pollForHardwareChange(OGVR_PluginRegContext /*ctx*/, void *userData) {
     int &data = *static_cast<int *>(userData);
     std::cout << "Got a poll for hardware change, with user data " << data
               << std::endl;

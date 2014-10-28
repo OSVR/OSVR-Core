@@ -66,19 +66,14 @@ extern "C" {
     @{
 */
 
-/** @brief An opaque context pointer passed in to your hardware poll callback,
- * if any.
-*/
-typedef void *OGVRPluginHardwarePollContext;
-
 /** @brief Function type of a Hardware Poll callback */
 typedef OGVR_PluginReturnCode (*OGVRHardwarePollCallback)(
-    OGVRPluginHardwarePollContext pollContext, void *userData);
+    OGVR_PluginRegContext ctx, void *userData);
 
 /** @brief Register a callback in your plugin to be notified when hardware
    should be polled again.
 
-   When your callback, a function of type OGVRHardwarePollCallback, is invoked,
+   When your callback, a function of type OGVR_HardwarePollCallback, is invoked,
    it will receive the same userdata you provide here (if any). Your plugin
    should do whatever probing necessary to detect devices you can handle and
    instantiate the device drivers.
