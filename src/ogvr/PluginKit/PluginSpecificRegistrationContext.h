@@ -50,6 +50,9 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     /// @brief Call all hardware poll callbacks registered by this plugin.
     void callHardwarePollCallbacks();
 
+    /// @brief Accessor for plugin name.
+    const std::string &getName() const;
+
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.
     /// @{

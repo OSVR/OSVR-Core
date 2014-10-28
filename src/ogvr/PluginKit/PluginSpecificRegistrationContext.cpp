@@ -61,6 +61,10 @@ void PluginSpecificRegistrationContext::takePluginHandle(
     m_handle = handle;
 }
 
+const std::string &PluginSpecificRegistrationContext::getName() const {
+    return m_name;
+}
+
 void PluginSpecificRegistrationContext::callHardwarePollCallbacks() {
     boost::for_each(m_hardwarePollCallbacks, HardwarePollCaller(this));
 }
