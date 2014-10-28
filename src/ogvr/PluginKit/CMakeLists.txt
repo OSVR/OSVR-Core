@@ -15,6 +15,7 @@ set(API
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
     "${HEADER_LOCATION}/PluginInterfaceC.h"
+    "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
     "${HEADER_LOCATION}/RegistrationContext.h"
@@ -33,6 +34,7 @@ source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
 set(SOURCE
     DeviceInterfaceC.cpp
+    DeviceToken.cpp
     Export.h.in
     PluginRegistration.cpp
     PluginRegistrationC.cpp
