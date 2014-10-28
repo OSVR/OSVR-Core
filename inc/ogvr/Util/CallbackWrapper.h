@@ -28,6 +28,7 @@
 
 // Standard includes
 #include <type_traits>
+#include <utility>
 
 namespace ogvr {
 
@@ -39,17 +40,8 @@ template <typename FunctionPtrType> class CallbackWrapper {
     typedef
         typename boost::function_traits<FunctionType>::result_type ReturnType;
 
-    /// @brief Function call operator with void return
-    template <typename... Args>
-    typename std::enable_if<std::is_void<ReturnType>::value>::type
-    operator()(Args &&... args) {
-        (*m_f)(std::forward<Args>(args)..., m_ud);
-    }
-
     /// @brief Function call operator with non-void return
-    template <typename... Args>
-    typename std::enable_if<!std::is_void<ReturnType>::value, ReturnType>::type
-    operator()(Args &&... args) {
+    template <typename... Args> ReturnType operator()(Args &&... args) {
         return (*m_f)(std::forward<Args>(args)..., m_ud);
     }
 
