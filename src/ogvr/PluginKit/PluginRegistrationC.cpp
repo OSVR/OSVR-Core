@@ -20,19 +20,24 @@
 // Internal Includes
 #include <ogvr/PluginKit/PluginRegistrationC.h>
 #include <ogvr/Util/Verbosity.h>
+#include "PluginSpecificRegistrationContext.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <assert.h>
 
 OGVR_PluginReturnCode
 ogvrPluginRegisterHardwarePollCallback(OGVR_PluginRegContext ctx,
                                        OGVRHardwarePollCallback pollCallback,
                                        void *userData) {
+    assert(ctx);
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
+
+    ogvr::PluginSpecificRegistrationContext *context =
+        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
     return OGVR_PLUGIN_SUCCESS;
 }
 
