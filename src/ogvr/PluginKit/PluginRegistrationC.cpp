@@ -33,11 +33,12 @@ ogvrPluginRegisterHardwarePollCallback(OGVR_PluginRegContext ctx,
                                        OGVRHardwarePollCallback pollCallback,
                                        void *userData) {
     assert(ctx);
-    /// @todo implement - replace stub
-    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback");
+    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback with context "
+                     << ctx);
 
     ogvr::PluginSpecificRegistrationContext *context =
         static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
+    context->registerHardwarePollCallback(pollCallback, userData);
     return OGVR_PLUGIN_SUCCESS;
 }
 

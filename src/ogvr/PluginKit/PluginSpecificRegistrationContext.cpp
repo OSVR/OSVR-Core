@@ -68,6 +68,17 @@ void PluginSpecificRegistrationContext::callHardwarePollCallbacks() {
 void PluginSpecificRegistrationContext::registerDataWithDeleteCallback(
     OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData) {
     m_dataList.emplace_back(PluginDataPtr(pluginData, deleteCallback));
+
+void PluginSpecificRegistrationContext::registerHardwarePollCallback(
+    OGVRHardwarePollCallback pollCallback, void *userData) {
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                     "In registerHardwarePollCallback");
+    m_hardwarePollCallbacks.emplace_back(
+        CallbackWrapper<OGVRHardwarePollCallback>(pollCallback, userData));
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                     "Now have "
+                     << m_hardwarePollCallbacks.size()
+                     << " hardware poll callbacks registered for " << m_name);
 }
 
 } // end of namespace ogvr

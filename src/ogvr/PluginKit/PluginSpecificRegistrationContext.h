@@ -61,7 +61,7 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
                                    void *pluginData);
 
     void registerHardwarePollCallback(OGVRHardwarePollCallback pollCallback,
-                                      void *pluginData);
+                                      void *userData);
     /// @}
 
   private:

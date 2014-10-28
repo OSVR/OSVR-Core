@@ -48,6 +48,9 @@ class RegistrationContext : boost::noncopyable {
     /// @brief load a plugin in this context
     OGVR_PLUGINKIT_EXPORT void loadPlugin(std::string const &pluginName);
 
+    /// @brief Trigger any registered hardware poll callbacks.
+    OGVR_PLUGINKIT_EXPORT void triggerHardwarePoll();
+
     /// @}
 
   private:

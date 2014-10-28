@@ -27,6 +27,7 @@
 #include <libfunctionality/LoadPlugin.h>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/algorithm/for_each.hpp>
 
 // Standard includes
 #include <algorithm>
@@ -50,6 +51,12 @@ void RegistrationContext::loadPlugin(std::string const &pluginName) {
     pluginReg->takePluginHandle(std::move(plugin));
     m_regMap.insert(std::make_pair(pluginName, pluginReg));
     OGVR_DEV_VERBOSE("Completed RegistrationContext::loadPlugin");
+
+void RegistrationContext::triggerHardwarePoll() {
+    boost::for_each(m_regMap | boost::adaptors::map_values,
+                    [](PluginRegPtr &pluginPtr) {
+        pluginPtr->callHardwarePollCallbacks();
+    });
 }
 
 } // end of namespace ogvr
