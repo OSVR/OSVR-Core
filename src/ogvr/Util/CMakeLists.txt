@@ -49,7 +49,10 @@ target_include_directories(ogvrUtil
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
     $<BUILD_INTERFACE:${HEADER_BASE}>
     $<INSTALL_INTERFACE:include>)
-    
+
+target_include_directories(ogvrUtil
+    PUBLIC
+    ${Boost_INCLUDE_DIR})
 ###
 # Install library and headers
 ###

@@ -23,16 +23,40 @@
 // - none
 
 // Library/third-party includes
-// - none
+#include <boost/type_traits/function_traits.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 // Standard includes
-// - none
+#include <type_traits>
 
 namespace ogvr {
-template <typename FunctionType> class CallbackWrapper {
+
+template <typename FunctionPtrType> class CallbackWrapper {
+  public:
+    CallbackWrapper(FunctionPtrType f, void *userData)
+        : m_f(f), m_ud(userData) {}
+    typedef typename boost::remove_pointer<FunctionPtrType>::type FunctionType;
+    typedef
+        typename boost::function_traits<FunctionType>::result_type ReturnType;
+
+    /// @brief Function call operator with void return
+    template <typename... Args>
+    typename std::enable_if<std::is_void<ReturnType>::value>::type
+    operator()(Args &&... args) {
+        (*m_f)(std::forward<Args>(args)..., m_ud);
+    }
+
+    /// @brief Function call operator with non-void return
+    template <typename... Args>
+    typename std::enable_if<!std::is_void<ReturnType>::value, ReturnType>::type
+    operator()(Args &&... args) {
+        return (*m_f)(std::forward<Args>(args)..., m_ud);
+    }
 
   private:
-    FunctionType m_f;
+    FunctionPtrType m_f;
+    void *m_ud;
 };
+
 } // end of namespace ogvr
 #endif // INCLUDED_CallbackWrapper_h_GUID_6169ADE2_5BA1_4A81_47C9_9E492F6405ED
