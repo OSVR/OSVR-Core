@@ -27,6 +27,20 @@
 // Standard includes
 // - none
 namespace ogvr {
+namespace {
+    class HardwarePollCaller {
+      public:
+        HardwarePollCaller(PluginSpecificRegistrationContext *ctx)
+            : m_ctx(ctx) {}
+        template <typename F> OGVR_PluginReturnCode operator()(F func) {
+            return func(static_cast<void *>(m_ctx));
+        }
+
+      private:
+        PluginSpecificRegistrationContext *m_ctx;
+    };
+} // end of anonymous namespace
+
 PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
     std::string const &name)
     : m_name(name) {
@@ -45,6 +59,10 @@ PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
 void PluginSpecificRegistrationContext::takePluginHandle(
     libfunc::PluginHandle &handle) {
     m_handle = handle;
+}
+
+void PluginSpecificRegistrationContext::callHardwarePollCallbacks() {
+    boost::for_each(m_hardwarePollCallbacks, HardwarePollCaller(this));
 }
 
 void PluginSpecificRegistrationContext::registerDataWithDeleteCallback(

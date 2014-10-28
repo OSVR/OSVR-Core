@@ -22,6 +22,7 @@
 // Internal Includes
 #include <ogvr/PluginKit/PluginInterfaceC.h>
 #include <ogvr/Util/UniquePtr.h>
+#include <ogvr/Util/CallbackWrapper.h>
 
 // Library/third-party includes
 #include <libfunctionality/PluginHandle.h>
@@ -46,6 +47,9 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     /// loaded.
     void takePluginHandle(libfunc::PluginHandle &handle);
 
+    /// @brief Call all hardware poll callbacks registered by this plugin.
+    void callHardwarePollCallbacks();
+
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.
     /// @{
@@ -55,6 +59,9 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     void
     registerDataWithDeleteCallback(OGVR_PluginDataDeleteCallback deleteCallback,
                                    void *pluginData);
+
+    void registerHardwarePollCallback(OGVRHardwarePollCallback pollCallback,
+                                      void *pluginData);
     /// @}
 
   private:
@@ -66,6 +73,10 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
 
     PluginDataList m_dataList;
     libfunc::PluginHandle m_handle;
+
+    typedef CallbackWrapper<OGVRHardwarePollCallback> HardwarePollCallback;
+    typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
+    HardwarePollCallbackList m_hardwarePollCallbacks;
 };
 } // end of namespace ogvr
 
