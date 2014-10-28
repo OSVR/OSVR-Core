@@ -1,3 +1,6 @@
 
 add_executable(BasicPluginLoader BasicPluginLoader.cpp)
 target_link_libraries(BasicPluginLoader ogvrPluginHost)
+
+add_executable(BasicPluginLoaderWithPoll BasicPluginLoaderWithPoll.cpp)
+target_link_libraries(BasicPluginLoaderWithPoll ogvrPluginHost)
