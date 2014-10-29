@@ -39,7 +39,7 @@ namespace detail {
 
     /// @brief Reset every smart pointer in a container one by one
     template <typename RangeType>
-    inline void resetPointerRange(RangeType &range) {
+    inline void resetPointerRange(RangeType range) {
         typedef typename RangeType::type IteratorType;
         typedef typename IteratorType::value_type PointerType;
         boost::for_each(range, PointerResetter<PointerType>());
