@@ -26,7 +26,7 @@
 // - none
 
 namespace ogvr {
-	DeviceToken::DeviceToken(std::string const& name);
+DeviceToken::DeviceToken(std::string const &name) : m_name(name) {}
 	DeviceToken::~DeviceToken() {}
 
 	AsyncDeviceToken * DeviceToken::asAsyncDevice() {
