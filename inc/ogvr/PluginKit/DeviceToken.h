@@ -26,6 +26,20 @@
 // - none
 
 // Standard includes
-// - none
+#include <string>
+
+namespace ogvr {
+	class AsyncDeviceToken;
+	class SyncDeviceToken;
+	class DeviceToken {
+	public:
+		DeviceToken(std::string const& name);
+		virtual ~DeviceToken();
+
+		virtual AsyncDeviceToken * asAsyncDevice();
+		virtual SyncDeviceToken * asSyncDevice();
+
+	};
+} // end of namespace ogvr
 
 #endif // INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387

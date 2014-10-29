@@ -24,3 +24,16 @@
 
 // Standard includes
 // - none
+
+namespace ogvr {
+	DeviceToken::DeviceToken(std::string const& name);
+	DeviceToken::~DeviceToken() {}
+
+	AsyncDeviceToken * DeviceToken::asAsyncDevice() {
+		return NULL;
+	}
+
+	SyncDeviceToken * DeviceToken::asSyncDevice() {
+		return NULL;
+	}
+}
