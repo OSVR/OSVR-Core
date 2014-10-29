@@ -29,17 +29,21 @@
 #include <string>
 
 namespace ogvr {
-	class AsyncDeviceToken;
-	class SyncDeviceToken;
-	class DeviceToken {
-	public:
-		DeviceToken(std::string const& name);
-		virtual ~DeviceToken();
+class AsyncDeviceToken;
+class SyncDeviceToken;
+class DeviceToken {
+  public:
+    DeviceToken(std::string const &name);
+    virtual ~DeviceToken();
 
-		virtual AsyncDeviceToken * asAsyncDevice();
-		virtual SyncDeviceToken * asSyncDevice();
+    virtual AsyncDeviceToken *asAsyncDevice();
+    virtual SyncDeviceToken *asSyncDevice();
 
-	};
+    std::string const &getName() const;
+
+  private:
+    std::string const m_name;
+};
 } // end of namespace ogvr
 
 #endif // INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387
