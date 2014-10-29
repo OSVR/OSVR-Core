@@ -11,7 +11,7 @@ endif()
 
 if(COMPILER_SUPPORTS_CXX11)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
-elif(COMPILER_SUPPORTS_CXX0X)
+elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_REQUIRED_FLAGS "-std=c++0x")
 endif()
 
