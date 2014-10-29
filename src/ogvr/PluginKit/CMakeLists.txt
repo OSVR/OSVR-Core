@@ -65,18 +65,22 @@ target_include_directories(ogvrPluginKit
     PRIVATE
     ${Boost_INCLUDE_DIR})
 
+target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
+
 target_link_libraries(ogvrPluginKit
     PUBLIC
     ogvrUtil
     libfunctionality::functionality)
 
 ###
-# Internal "interface" target for host applications to use - they need more includes.
+# Internal "interface" target for host applications to use - they need more includes
+# and C++11 support.
 ###
 add_library(ogvrPluginHost INTERFACE)
 target_include_directories(ogvrPluginHost
     INTERFACE
     ${Boost_INCLUDE_DIR})
+target_compile_options(ogvrPluginHost INTERFACE ${OGVR_CXX11_FLAGS})
 target_link_libraries(ogvrPluginHost INTERFACE ogvrPluginKit)
 
 ###

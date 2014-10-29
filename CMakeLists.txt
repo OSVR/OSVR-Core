@@ -9,7 +9,7 @@ option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
 option(BUILD_DEV_VERBOSE "Build with verbose development messages?" ON)
 
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 ###
 # CMake Modules
@@ -22,6 +22,8 @@ include(GNUInstallDirs)
 ###
 find_package(libfunctionality)
 find_package(Boost 1.43) # Lower version bound of 1.43 for range adapters
+
+include(CompilerFeatures)
 
 ###
 # Set up build directories

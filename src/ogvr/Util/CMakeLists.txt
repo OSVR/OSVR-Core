@@ -53,6 +53,11 @@ target_include_directories(ogvrUtil
 target_include_directories(ogvrUtil
     PUBLIC
     ${Boost_INCLUDE_DIR})
+
+# TODO: make two targets here too so that we can explain that C++ clients
+# of this lib require C++11 flags but not C clients?
+target_compile_options(ogvrUtil PRIVATE ${OGVR_CXX11_FLAGS})
+
 ###
 # Install library and headers
 ###
