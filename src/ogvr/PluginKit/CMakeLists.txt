@@ -12,6 +12,7 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
     "${HEADER_LOCATION}/CommonC.h"
+    "${HEADER_LOCATION}/CreatePluginSpecificRegistrationContext.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
     "${HEADER_LOCATION}/PluginInterfaceC.h"
@@ -33,6 +34,7 @@ set(UTIL_API
 source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
 set(SOURCE
+    CreatePluginSpecificRegistrationContext.cpp
     DeviceInterfaceC.cpp
     DeviceToken.cpp
     Export.h.in

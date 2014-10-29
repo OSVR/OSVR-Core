@@ -23,6 +23,7 @@
 // Internal Includes
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginKit/Export.h>
+#include <ogvr/PluginKit/CreatePluginSpecificRegistrationContext.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -32,7 +33,7 @@
 #include <map>
 
 namespace ogvr {
-class PluginSpecificRegistrationContext;
+
 /// @brief Internal class responsible for the registration and destruction of
 /// plugins.
 class RegistrationContext : boost::noncopyable {
@@ -45,8 +46,12 @@ class RegistrationContext : boost::noncopyable {
 
     /// @name Host-side (internal) API
     /// @{
-    /// @brief load a plugin in this context
+    /// @brief Load a plugin from a dynamic library in this context
     OGVR_PLUGINKIT_EXPORT void loadPlugin(std::string const &pluginName);
+
+    /// @brief Assume ownership of a plugin-specific registration context
+    /// created and initialized outside of loadPlugin.
+    OGVR_PLUGINKIT_EXPORT void adoptPluginRegistrationContext(PluginRegPtr ctx);
 
     /// @brief Trigger any registered hardware poll callbacks.
     OGVR_PLUGINKIT_EXPORT void triggerHardwarePoll();
@@ -54,9 +59,6 @@ class RegistrationContext : boost::noncopyable {
     /// @}
 
   private:
-    /// @brief Pointer with ownership semantics for cleanup of plugins.
-    /// @todo why did unique_ptr not work here?
-    typedef shared_ptr<PluginSpecificRegistrationContext> PluginRegPtr;
     /// @brief Map of plugin names to owning pointers for plugin registration.
     typedef std::map<std::string, PluginRegPtr> PluginRegMap;
 

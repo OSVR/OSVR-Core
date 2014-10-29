@@ -42,18 +42,23 @@ RegistrationContext::~RegistrationContext() {
 }
 
 void RegistrationContext::loadPlugin(std::string const &pluginName) {
-    PluginRegPtr pluginReg(new PluginSpecificRegistrationContext(pluginName));
+    PluginRegPtr pluginReg(createPluginSpecificRegistrationContext(pluginName));
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Plugin context created, loading plugin");
-    libfunc::PluginHandle plugin =
-        libfunc::loadPluginByName(pluginName, pluginReg.get());
+    libfunc::PluginHandle plugin = libfunc::loadPluginByName(
+        pluginName, extractPluginRegistrationContext(pluginReg));
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Plugin loaded, assuming ownership of plugin handle and "
                      "storing context");
     pluginReg->takePluginHandle(plugin);
-    m_regMap.insert(std::make_pair(pluginName, pluginReg));
+    adoptPluginRegistrationContext(pluginReg);
+}
+
+void RegistrationContext::adoptPluginRegistrationContext(PluginRegPtr ctx) {
+    m_regMap.insert(std::make_pair(ctx->getName(), ctx));
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
-                     "Completed RegistrationContext::loadPlugin");
+                     "Adopted registration context for "
+                     << ctx->getName());
 }
 
 void RegistrationContext::triggerHardwarePoll() {

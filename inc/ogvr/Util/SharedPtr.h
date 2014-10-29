@@ -30,6 +30,7 @@
 
 namespace ogvr {
 using std::shared_ptr;
+using std::make_shared;
 } // end of namespace ogvr
 #endif
 
