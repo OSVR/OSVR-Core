@@ -32,11 +32,18 @@
 
 namespace ogvr {
 
+/// @brief A class template turning a callback with some number of arguments,
+/// with a userdata pointer last, into a function object.
 template <typename FunctionPtrType> class CallbackWrapper {
   public:
+    /// @brief Constructor from function pointer and user data pointer.
     CallbackWrapper(FunctionPtrType f, void *userData)
         : m_f(f), m_ud(userData) {}
+
+    /// @brief Function type (remove pointer - computed)
     typedef typename boost::remove_pointer<FunctionPtrType>::type FunctionType;
+
+    /// @brief Return type of the function (computed)
     typedef
         typename boost::function_traits<FunctionType>::result_type ReturnType;
 
