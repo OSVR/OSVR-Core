@@ -50,5 +50,7 @@ VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
     return ConnectionDevicePtr();
 }
 
+void VrpnBasedConnection::m_process() { m_vrpnConnection->mainloop(); }
+
 VrpnBasedConnection::~VrpnBasedConnection() {}
 }

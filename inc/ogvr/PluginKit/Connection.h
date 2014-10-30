@@ -65,10 +65,16 @@ class Connection : boost::noncopyable {
     /// @brief Register (or retrieve registration) of a message type.
     OGVR_PLUGINKIT_EXPORT MessageTypePtr
         registerMessageType(std::string const &messageId);
+
     /// @brief Register a full device name. This should be namespaced with the
     /// plugin name.
     OGVR_PLUGINKIT_EXPORT ConnectionDevicePtr
         registerDevice(std::string const &deviceName);
+
+    /// @brief Process messages. This shouldn't block.
+    ///
+    /// Someone needs to call this method frequently.
+    OGVR_PLUGINKIT_EXPORT void process();
 
     /// @brief Destructor
     OGVR_PLUGINKIT_EXPORT virtual ~Connection();
@@ -78,9 +84,13 @@ class Connection : boost::noncopyable {
     /// a message type.
     virtual MessageTypePtr
     m_registerMessageType(std::string const &messageId) = 0;
+
     /// @brief (Subclass implementation) Register a full device name.
     virtual ConnectionDevicePtr
     m_registerDevice(std::string const &deviceName) = 0;
+
+    /// @brief (Subclass implementation) Process messages. This shouldn't block.
+    virtual void m_process() = 0;
 
     /// brief Constructor
     Connection();

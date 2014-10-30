@@ -40,11 +40,9 @@ class VrpnBasedConnection : public Connection {
     virtual ~VrpnBasedConnection();
 
   private:
-    /// @brief Register (or retrieve registration) of a message type.
     virtual MessageTypePtr m_registerMessageType(std::string const &messageId);
-    /// @brief Register a full device name. This should be namespaced with the
-    /// plugin name.
     virtual ConnectionDevicePtr m_registerDevice(std::string const &deviceName);
+    virtual void m_process();
 
     vrpn_ConnectionPtr m_vrpnConnection;
 };

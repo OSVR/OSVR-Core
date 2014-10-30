@@ -70,6 +70,11 @@ ConnectionDevicePtr Connection::registerDevice(std::string const &deviceName) {
     return m_registerDevice(deviceName);
 }
 
+/// Wraps the derived implementation for future expandability.
+void Connection::process() {
+	m_process();
+}
+
 Connection::Connection() { OGVR_DEV_VERBOSE("In Connection constructor"); }
 
 Connection::~Connection() { OGVR_DEV_VERBOSE("In Connection destructor"); }
