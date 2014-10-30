@@ -82,7 +82,7 @@ export(EXPORT ogvrTargets
 
 configure_file(ogvrConfig.cmake
     "${BUILD_CONFIG_BASE}Config.cmake"
-    COPY_ONLY)
+    COPYONLY)
 
 install(EXPORT ogvrTargets
     FILE

@@ -6,4 +6,5 @@ foreach(name
     org_opengoggles_example_DummySync)
     add_library(${name} MODULE ${name}.cpp)
     target_link_libraries(${name} ogvrPluginKit)
+    set_target_properties(${name} PROPERTIES PREFIX "")
 endforeach()

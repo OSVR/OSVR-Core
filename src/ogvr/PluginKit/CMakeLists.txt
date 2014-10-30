@@ -81,10 +81,11 @@ target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS})
 
 target_link_libraries(ogvrPluginKit
-    PUBLIC
+    INTERFACE
+    libfunctionality::functionality-plugininterface
+    PRIVATE
     ogvrUtil
     libfunctionality::functionality
-    PRIVATE
     ${VRPN_SERVER_LIBRARY})
 
 ###
@@ -96,7 +97,9 @@ target_include_directories(ogvrPluginHost
     INTERFACE
     ${Boost_INCLUDE_DIR})
 target_compile_options(ogvrPluginHost INTERFACE ${OGVR_CXX11_FLAGS})
-target_link_libraries(ogvrPluginHost INTERFACE ogvrPluginKit)
+target_link_libraries(ogvrPluginHost INTERFACE ogvrPluginKit
+    ogvrUtil
+    libfunctionality::functionality)
 
 ###
 # Grab DLLs please.
