@@ -22,12 +22,13 @@
 // Internal Includes
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginKit/Export.h>
+#include <ogvr/PluginKit/MessageTypePtr.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace ogvr {
 
@@ -36,7 +37,7 @@ class Connection;
 typedef shared_ptr<Connection> ConnectionPtr;
 
 /// @brief Class wrapping a messaging transport (server or internal) connection.
-class Connection {
+class Connection : boost::noncopyable {
   public:
     /// @name Factory methods
     ///
@@ -47,6 +48,14 @@ class Connection {
     /// @brief Factory method to create a shared connection
     OGVR_PLUGINKIT_EXPORT static ConnectionPtr createSharedConnection();
     /// @}
+
+    /// @brief Register (or retrieve registration) of a message type.
+    OGVR_PLUGINKIT_EXPORT virtual MessageTypePtr
+    registerMessageType(std::string const &messageId) = 0;
+    /// @brief Register a full device name. This should be namespaced with the
+    /// plugin name.
+    OGVR_PLUGINKIT_EXPORT virtual MessageTypePtr
+    registerDevice(std::string const &deviceName) = 0;
 
     OGVR_PLUGINKIT_EXPORT virtual ~Connection();
 
