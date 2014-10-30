@@ -84,4 +84,8 @@ void PluginSpecificRegistrationContext::registerHardwarePollCallback(
                      << " hardware poll callbacks registered for " << m_name);
 }
 
+AnyMap &PluginSpecificRegistrationContext::data() { return m_data; }
+
+AnyMap const &PluginSpecificRegistrationContext::data() const { return m_data; }
+
 } // end of namespace ogvr

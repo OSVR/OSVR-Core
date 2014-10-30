@@ -22,6 +22,7 @@
 
 // Internal Includes
 #include <ogvr/Util/SharedPtr.h>
+#include <ogvr/Util/AnyMap.h>
 #include <ogvr/PluginKit/Export.h>
 #include <ogvr/PluginKit/CreatePluginSpecificRegistrationContext.h>
 
@@ -56,6 +57,11 @@ class RegistrationContext : boost::noncopyable {
     /// @brief Trigger any registered hardware poll callbacks.
     OGVR_PLUGINKIT_EXPORT void triggerHardwarePoll();
 
+    /// @brief Access the data storage map.
+    OGVR_PLUGINKIT_EXPORT AnyMap &data();
+
+    /// @brief Const access the data storage map.
+    OGVR_PLUGINKIT_EXPORT AnyMap const &data() const;
     /// @}
 
   private:
@@ -63,6 +69,7 @@ class RegistrationContext : boost::noncopyable {
     typedef std::map<std::string, PluginRegPtr> PluginRegMap;
 
     PluginRegMap m_regMap;
+    AnyMap m_data;
 };
 } // end of namespace ogvr
 

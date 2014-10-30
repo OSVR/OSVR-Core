@@ -23,6 +23,7 @@
 #include <ogvr/PluginKit/PluginInterfaceC.h>
 #include <ogvr/Util/UniquePtr.h>
 #include <ogvr/Util/CallbackWrapper.h>
+#include <ogvr/Util/AnyMap.h>
 
 // Library/third-party includes
 #include <libfunctionality/PluginHandle.h>
@@ -53,6 +54,12 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     /// @brief Accessor for plugin name.
     const std::string &getName() const;
 
+    /// @brief Access the data storage map.
+    AnyMap &data();
+
+    /// @brief Const access the data storage map.
+    AnyMap const &data() const;
+
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.
     /// @{
@@ -80,6 +87,8 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     typedef CallbackWrapper<OGVRHardwarePollCallback> HardwarePollCallback;
     typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
     HardwarePollCallbackList m_hardwarePollCallbacks;
+
+    AnyMap m_data;
 };
 } // end of namespace ogvr
 
