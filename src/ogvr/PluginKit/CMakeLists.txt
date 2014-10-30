@@ -66,18 +66,21 @@ target_include_directories(ogvrPluginKit
     PUBLIC
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
     $<BUILD_INTERFACE:${HEADER_BASE}>
-    $<INSTALL_INTERFACE:include>)
-
-target_include_directories(ogvrPluginKit
+    $<INSTALL_INTERFACE:include>
     PRIVATE
+    ${VRPN_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR})
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 
+target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_INCLUDE_DIRS})
+
 target_link_libraries(ogvrPluginKit
     PUBLIC
     ogvrUtil
-    libfunctionality::functionality)
+    libfunctionality::functionality
+    PRIVATE
+    ${VRPN_SERVER_LIBRARY})
 
 ###
 # Internal "interface" target for host applications to use - they need more includes
