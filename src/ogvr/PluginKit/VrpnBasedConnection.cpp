@@ -24,3 +24,17 @@
 
 // Standard includes
 // - none
+
+namespace ogvr {
+VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
+    switch (type) {
+    case VRPN_LOCAL_ONLY: {
+        m_vrpnConnection =
+            vrpn_ConnectionPtr::create_server_connection("127.0.0.1");
+    }
+    case VRPN_SHARED: {
+        m_vrpnConnection = vrpn_ConnectionPtr::create_server_connection();
+    }
+    }
+}
+}

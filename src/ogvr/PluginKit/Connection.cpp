@@ -18,6 +18,8 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/Connection.h>
+#include <ogvr/Util/SharedPtr.h>
+#include "VrpnBasedConnection.h"
 
 // Library/third-party includes
 // - none
@@ -27,6 +29,11 @@
 
 namespace ogvr {
 ConnectionPtr Connection::createLocalConnection() {
+    ConnectionPtr conn(
+        make_shared<VrpnBasedConnection>(VrpnBasedConnection::VRPN_LOCAL_ONLY));
+    return conn;
+}
+ConnectionPtr Connection::createSharedConnection() {
     /// @todo implement
     return ConnectionPtr();
 }

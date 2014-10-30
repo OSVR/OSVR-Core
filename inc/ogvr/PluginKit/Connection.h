@@ -44,11 +44,13 @@ class Connection {
     /// @{
     /// @brief Factory method to create a local-machine-only connection
     OGVR_PLUGINKIT_EXPORT static ConnectionPtr createLocalConnection();
+    /// @brief Factory method to create a shared connection
+    OGVR_PLUGINKIT_EXPORT static ConnectionPtr createSharedConnection();
     /// @}
 
     OGVR_PLUGINKIT_EXPORT virtual ~Connection();
 
-  private:
+  protected:
     Connection();
 };
 }

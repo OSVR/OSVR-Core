@@ -24,8 +24,22 @@
 
 // Library/third-party includes
 #include <vrpn_Connection.h>
+#include <qvrpn/vrpn_ConnectionPtr.h>
 
 // Standard includes
 // - none
 
+namespace ogvr {
+class VrpnBasedConnection : public Connection {
+  public:
+    enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
+
+    /// @brief Constructor for the VRPN connection.
+    VrpnBasedConnection(ConnectionType type);
+
+  private:
+    vrpn_ConnectionPtr m_vrpnConnection;
+};
+
+} // end of namespace ogvr
 #endif // INCLUDED_VrpnBasedConnection_h_GUID_49F2C30F_D807_43B1_A754_9B645D3A1809
