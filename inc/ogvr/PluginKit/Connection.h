@@ -32,6 +32,8 @@
 
 namespace ogvr {
 
+class RegistrationContext;
+
 class Connection;
 /// @brief How one must hold a Connection.
 typedef shared_ptr<Connection> ConnectionPtr;
@@ -47,6 +49,16 @@ class Connection : boost::noncopyable {
     OGVR_PLUGINKIT_EXPORT static ConnectionPtr createLocalConnection();
     /// @brief Factory method to create a shared connection
     OGVR_PLUGINKIT_EXPORT static ConnectionPtr createSharedConnection();
+    /// @}
+
+    /// @name Context Storage
+    /// @{
+    /// @brief Retrieve a connection pointer from a RegistrationContext
+    OGVR_PLUGINKIT_EXPORT static ConnectionPtr
+    retrieveConnection(const RegistrationContext &ctx);
+    /// @brief Store a connection pointer in a RegistrationContext
+    OGVR_PLUGINKIT_EXPORT static void storeConnection(RegistrationContext &ctx,
+                                                      ConnectionPtr conn);
     /// @}
 
     /// @brief Register (or retrieve registration) of a message type.

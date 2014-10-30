@@ -19,6 +19,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/RegistrationContext.h>
+#include <ogvr/PluginKit/Connection.h>
 
 // Library/third-party includes
 // - none
@@ -34,6 +35,8 @@ int main(int argc, char * argv[]) {
         return 1;
     }
 	ogvr::RegistrationContext ctx;
+	ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
+	ogvr::Connection::storeConnection(ctx, conn);
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;
