@@ -74,7 +74,7 @@ target_include_directories(ogvrPluginKit
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 
-target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_INCLUDE_DIRS})
+target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS})
 
 target_link_libraries(ogvrPluginKit
     PUBLIC
