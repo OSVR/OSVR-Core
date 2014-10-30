@@ -57,9 +57,9 @@ class AnyMap {
     /// @brief Get the data for this key.
     ///
     /// Returns an empty boost::any if the key doesn't exist.
-    OGVR_UTIL_EXPORT boost::any get(std::string const &key);
+    OGVR_UTIL_EXPORT boost::any get(std::string const &key) const;
     /// @overload
-    OGVR_UTIL_EXPORT boost::any get(const char *key);
+    OGVR_UTIL_EXPORT boost::any get(const char *key) const;
 
     /// @brief Clears the data for this key.
     ///

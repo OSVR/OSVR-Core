@@ -44,15 +44,15 @@ void AnyMap::set(const char *key, boost::any const &value) {
     set(std::string(key), value);
 }
 
-boost::any AnyMap::get(std::string const &key) {
-    Contents::iterator location = m_contents.find(key);
+boost::any AnyMap::get(std::string const &key) const {
+    Contents::const_iterator location = m_contents.find(key);
     if (location == m_contents.end()) {
         return boost::any();
     }
     return location->second;
 }
 
-boost::any AnyMap::get(const char *key) { return get(std::string(key)); }
+boost::any AnyMap::get(const char *key) const { return get(std::string(key)); }
 
 void AnyMap::erase(std::string const &key) {
     Contents::iterator location = m_contents.find(key);
