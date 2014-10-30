@@ -51,6 +51,12 @@ add_subdirectory(vendor)
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "add a postfix, usually d on windows" FORCE)
 endif()
+
+# Set RPATH for dynamic library search.
+if(NOT WIN32 AND NOT APPLE)
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 add_subdirectory(src/ogvr)
