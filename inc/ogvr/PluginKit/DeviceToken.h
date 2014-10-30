@@ -20,7 +20,8 @@
 #define INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387
 
 // Internal Includes
-// - none
+#include <ogvr/Util/UniquePtr.h>
+#include <ogvr/PluginKit/ConnectionPtr.h>
 
 // Library/third-party includes
 // - none
@@ -29,20 +30,43 @@
 #include <string>
 
 namespace ogvr {
+class PluginSpecificRegistrationContext;
 class AsyncDeviceToken;
 class SyncDeviceToken;
+class DeviceToken;
+typedef unique_ptr<DeviceToken> DeviceTokenPtr;
+
 class DeviceToken {
   public:
-    DeviceToken(std::string const &name);
+    /// @name Factory functions
+    /// @{
+    static DeviceTokenPtr createAsyncDevice(std::string const &name,
+                                            ConnectionPtr conn);
+    static DeviceTokenPtr createSyncDevice(std::string const &name,
+                                           ConnectionPtr conn);
+    /// @}
+
+    /// @brief Destructor
     virtual ~DeviceToken();
 
+    /// @brief "Casting" function - returns a valid pointer if and only if this
+    /// is an AsyncDeviceToken
     virtual AsyncDeviceToken *asAsyncDevice();
+
+    /// @brief "Casting" function - returns a valid pointer if and only if this
+    /// is a SyncDeviceToken
     virtual SyncDeviceToken *asSyncDevice();
 
+    /// @brief Accessor for name property
     std::string const &getName() const;
+
+  protected:
+    DeviceToken(std::string const &name);
+    ConnectionPtr m_getConnection();
 
   private:
     std::string const m_name;
+    ConnectionPtr m_conn;
 };
 } // end of namespace ogvr
 

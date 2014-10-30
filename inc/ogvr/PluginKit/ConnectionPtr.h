@@ -16,8 +16,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
-#ifndef INCLUDED_ConnectionDevicePtr_h_GUID_6D454990_4426_4DAC_27C4_BB2571DF7F60
-#define INCLUDED_ConnectionDevicePtr_h_GUID_6D454990_4426_4DAC_27C4_BB2571DF7F60
+#ifndef INCLUDED_ConnectionPtr_h_GUID_55F79639_DA70_4BBA_A11C_84797F38288E
+#define INCLUDED_ConnectionPtr_h_GUID_55F79639_DA70_4BBA_A11C_84797F38288E
 
 // Internal Includes
 #include <ogvr/Util/SharedPtr.h>
@@ -29,9 +29,9 @@
 // - none
 
 namespace ogvr {
-class ConnectionDevice;
-/// @brief How to hold on to a ConnectionDevice
-typedef shared_ptr<ConnectionDevice> ConnectionDevicePtr;
+class Connection;
+/// @brief How one must hold a Connection.
+typedef shared_ptr<Connection> ConnectionPtr;
 } // end of namespace ogvr
 
-#endif // INCLUDED_ConnectionDevicePtr_h_GUID_6D454990_4426_4DAC_27C4_BB2571DF7F60
+#endif // INCLUDED_ConnectionPtr_h_GUID_55F79639_DA70_4BBA_A11C_84797F38288E

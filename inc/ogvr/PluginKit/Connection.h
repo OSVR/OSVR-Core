@@ -20,10 +20,10 @@
 #define INCLUDED_Connection_h_GUID_61C65986_E2C9_498F_59F0_8EFC712BA183
 
 // Internal Includes
-#include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginKit/Export.h>
 #include <ogvr/PluginKit/MessageTypePtr.h>
 #include <ogvr/PluginKit/ConnectionDevicePtr.h>
+#include <ogvr/PluginKit/ConnectionPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -34,10 +34,6 @@
 namespace ogvr {
 
 class RegistrationContext;
-
-class Connection;
-/// @brief How one must hold a Connection.
-typedef shared_ptr<Connection> ConnectionPtr;
 
 /// @brief Class wrapping a messaging transport (server or internal) connection.
 class Connection : boost::noncopyable {
@@ -95,5 +91,5 @@ class Connection : boost::noncopyable {
     /// brief Constructor
     Connection();
 };
-}
+} // end of namespace ogvr
 #endif // INCLUDED_Connection_h_GUID_61C65986_E2C9_498F_59F0_8EFC712BA183
