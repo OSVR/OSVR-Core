@@ -35,8 +35,12 @@ int main(int argc, char * argv[]) {
         return 1;
     }
 	ogvr::RegistrationContext ctx;
-	ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
-	ogvr::Connection::storeConnection(ctx, conn);
+	{
+		// This way our pointer goes out of scope after we store the connection in the context,
+		// as a test to ensure shared ownership is working.
+		ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
+		ogvr::Connection::storeConnection(ctx, conn);
+	}
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;
