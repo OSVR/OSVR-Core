@@ -55,6 +55,7 @@ void RegistrationContext::loadPlugin(std::string const &pluginName) {
 }
 
 void RegistrationContext::adoptPluginRegistrationContext(PluginRegPtr ctx) {
+    ctx->setParent(*this);
     m_regMap.insert(std::make_pair(ctx->getName(), ctx));
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Adopted registration context for "

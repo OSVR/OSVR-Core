@@ -34,21 +34,43 @@
 #include <vector>
 
 namespace ogvr {
+// forward declaration
+class RegistrationContext;
+
 /// @brief Internal class backing the context of registrations performed by a
 /// single plugin.
 class PluginSpecificRegistrationContext : boost::noncopyable {
   public:
     /// @brief Constructor
     PluginSpecificRegistrationContext(std::string const &name);
-    /// @brief Destructor responsible for destroying plugin data in reverse
-    /// order.
+
+    /// @brief Destructor
+    ///
+    /// Responsible for destroying plugin data in reverse order.
     ~PluginSpecificRegistrationContext();
 
     /// @brief Assume ownership of the plugin handle keeping the plugin library
     /// loaded.
     void takePluginHandle(libfunc::PluginHandle &handle);
 
-    /// @brief Call all hardware poll callbacks registered by this plugin.
+    /// @brief Set parent registration context
+    ///
+    /// Should be called only by RegistrationContext, and only once.
+    /// @throws std::logic_error if called when a parent is already set.
+    void setParent(RegistrationContext &parent);
+
+    /// @brief Get parent registration context
+    ///
+    /// @throws std::logic_error if called when no parent is yet set.
+    RegistrationContext &getParent();
+
+    /// @brief Get parent registration context
+    ///
+    /// @throws std::logic_error if called when no parent is yet set.
+    RegistrationContext const &getParent() const;
+
+    /// @brief Call all hardware poll callbacks registered by this plugin, if
+    /// any.
     void callHardwarePollCallbacks();
 
     /// @brief Accessor for plugin name.
@@ -83,6 +105,7 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
 
     PluginDataList m_dataList;
     libfunc::PluginHandle m_handle;
+    RegistrationContext *m_parent;
 
     typedef CallbackWrapper<OGVRHardwarePollCallback> HardwarePollCallback;
     typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;

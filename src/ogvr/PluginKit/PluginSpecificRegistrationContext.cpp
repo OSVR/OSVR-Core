@@ -25,12 +25,13 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 // Standard includes
-// - none
+#include <stdexcept>
+
 namespace ogvr {
 
 PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
     std::string const &name)
-    : m_name(name) {
+    : m_name(name), m_parent(NULL) {
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      << "Creating a plugin registration context for "
                      << m_name);
@@ -43,11 +44,37 @@ PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
 
     // Delete the data in reverse order.
     detail::resetPointerRange(m_dataList | boost::adaptors::reversed);
+    m_parent = NULL; // before anything else destructs, for safety?
 }
 
 void PluginSpecificRegistrationContext::takePluginHandle(
     libfunc::PluginHandle &handle) {
     m_handle = handle;
+}
+
+void PluginSpecificRegistrationContext::setParent(RegistrationContext &parent) {
+    if (m_parent != NULL) {
+        throw std::logic_error(
+            "Can't set the registration context parent - already set!");
+    }
+    m_parent = &parent;
+}
+
+RegistrationContext &PluginSpecificRegistrationContext::getParent() {
+    if (m_parent == NULL) {
+        throw std::logic_error(
+            "Can't access the registration context parent - it is null!");
+    }
+    return *m_parent;
+}
+
+RegistrationContext const &
+PluginSpecificRegistrationContext::getParent() const {
+    if (m_parent == NULL) {
+        throw std::logic_error(
+            "Can't access the registration context parent - it is null!");
+    }
+    return *m_parent;
 }
 
 const std::string &PluginSpecificRegistrationContext::getName() const {
