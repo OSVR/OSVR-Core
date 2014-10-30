@@ -39,14 +39,15 @@ VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
 }
 
 MessageTypePtr
-VrpnBasedConnection::registerMessageType(std::string const &messageId) {
+VrpnBasedConnection::m_registerMessageType(std::string const &messageId) {
     ///@todo implement
     return MessageTypePtr();
 }
-MessageTypePtr
-VrpnBasedConnection::registerDevice(std::string const &deviceName) {
+
+ConnectionDevicePtr
+VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
     ///@todo implement
-    return MessageTypePtr();
+    return ConnectionDevicePtr();
 }
 
 VrpnBasedConnection::~VrpnBasedConnection() {}

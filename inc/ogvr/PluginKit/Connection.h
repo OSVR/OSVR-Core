@@ -23,6 +23,7 @@
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginKit/Export.h>
 #include <ogvr/PluginKit/MessageTypePtr.h>
+#include <ogvr/PluginKit/ConnectionDevicePtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -62,16 +63,26 @@ class Connection : boost::noncopyable {
     /// @}
 
     /// @brief Register (or retrieve registration) of a message type.
-    OGVR_PLUGINKIT_EXPORT virtual MessageTypePtr
-    registerMessageType(std::string const &messageId) = 0;
+    OGVR_PLUGINKIT_EXPORT MessageTypePtr
+        registerMessageType(std::string const &messageId);
     /// @brief Register a full device name. This should be namespaced with the
     /// plugin name.
-    OGVR_PLUGINKIT_EXPORT virtual MessageTypePtr
-    registerDevice(std::string const &deviceName) = 0;
+    OGVR_PLUGINKIT_EXPORT ConnectionDevicePtr
+        registerDevice(std::string const &deviceName);
 
+    /// @brief Destructor
     OGVR_PLUGINKIT_EXPORT virtual ~Connection();
 
   protected:
+    /// @brief (Subclass implementation) Register (or retrieve registration) of
+    /// a message type.
+    virtual MessageTypePtr
+    m_registerMessageType(std::string const &messageId) = 0;
+    /// @brief (Subclass implementation) Register a full device name.
+    virtual ConnectionDevicePtr
+    m_registerDevice(std::string const &deviceName) = 0;
+
+    /// brief Constructor
     Connection();
 };
 }
