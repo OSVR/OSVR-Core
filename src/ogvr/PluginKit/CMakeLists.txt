@@ -42,6 +42,7 @@ set(SOURCE
     DeviceInterfaceC.cpp
     DeviceToken.cpp
     Export.h.in
+    HandleNullContext.h
     MessageType.cpp
     PluginRegistration.cpp
     PluginRegistrationC.cpp
