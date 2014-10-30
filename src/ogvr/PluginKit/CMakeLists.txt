@@ -12,11 +12,13 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
     "${HEADER_LOCATION}/CommonC.h"
+    "${HEADER_LOCATION}/Connection.h"
     "${HEADER_LOCATION}/CreatePluginSpecificRegistrationContext.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
-    "${HEADER_LOCATION}/PluginInterfaceC.h"
     "${HEADER_LOCATION}/DeviceToken.h"
+    "${HEADER_LOCATION}/MessageType.h"
+    "${HEADER_LOCATION}/PluginInterfaceC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
     "${HEADER_LOCATION}/RegistrationContext.h"
@@ -34,10 +36,12 @@ set(UTIL_API
 source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
 set(SOURCE
+    Connection.cpp
     CreatePluginSpecificRegistrationContext.cpp
     DeviceInterfaceC.cpp
     DeviceToken.cpp
     Export.h.in
+    MessageType.cpp
     PluginRegistration.cpp
     PluginRegistrationC.cpp
     PluginSpecificRegistrationContext.cpp
