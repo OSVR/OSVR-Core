@@ -1,5 +1,5 @@
 
-foreach(HOST BasicPluginLoader BasicPluginLoaderWithPoll)
+foreach(HOST BasicPluginLoader BasicPluginLoaderWithPoll ConnectionHost)
     add_executable(${HOST} ${HOST}.cpp)
     target_link_libraries(${HOST} ogvrPluginHost)
 
