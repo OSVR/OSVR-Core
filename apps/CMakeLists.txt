@@ -1,15 +1,12 @@
 
-add_executable(BasicPluginLoader BasicPluginLoader.cpp)
-target_link_libraries(BasicPluginLoader ogvrPluginHost)
+foreach(HOST BasicPluginLoader BasicPluginLoaderWithPoll)
+    add_executable(${HOST} ${HOST}.cpp)
+    target_link_libraries(${HOST} ogvrPluginHost)
 
-add_executable(BasicPluginLoaderWithPoll BasicPluginLoaderWithPoll.cpp)
-target_link_libraries(BasicPluginLoaderWithPoll ogvrPluginHost)
-
-if(BUILD_TESTING)
-    foreach(HOST BasicPluginLoader BasicPluginLoaderWithPoll)
+    if(BUILD_TESTING)
         foreach(PLUGIN DummyAsync DummyHardwarePoll DummySync NullDevice NullPlugin)
             add_test(NAME "run_${HOST}_${PLUGIN}"
                 COMMAND ${HOST} org_opengoggles_example_${PLUGIN})
         endforeach()
-    endforeach()
-endif()
+    endif()
+endforeach()
