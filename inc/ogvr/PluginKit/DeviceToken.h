@@ -22,6 +22,7 @@
 // Internal Includes
 #include <ogvr/Util/UniquePtr.h>
 #include <ogvr/PluginKit/ConnectionPtr.h>
+#include <ogvr/PluginKit/ConnectionDevicePtr.h>
 
 // Library/third-party includes
 // - none
@@ -41,9 +42,9 @@ class DeviceToken {
     /// @name Factory functions
     /// @{
     static DeviceTokenPtr createAsyncDevice(std::string const &name,
-                                            ConnectionPtr conn);
+                                            ConnectionPtr const &conn);
     static DeviceTokenPtr createSyncDevice(std::string const &name,
-                                           ConnectionPtr conn);
+                                           ConnectionPtr const &conn);
     /// @}
 
     /// @brief Destructor
@@ -63,10 +64,13 @@ class DeviceToken {
   protected:
     DeviceToken(std::string const &name);
     ConnectionPtr m_getConnection();
+    ConnectionDevicePtr m_getConnectionDevice();
 
   private:
+    void m_sharedInit(ConnectionPtr const &conn);
     std::string const m_name;
     ConnectionPtr m_conn;
+    ConnectionDevicePtr m_dev;
 };
 } // end of namespace ogvr
 

@@ -43,6 +43,7 @@ RegistrationContext::~RegistrationContext() {
 
 void RegistrationContext::loadPlugin(std::string const &pluginName) {
     PluginRegPtr pluginReg(createPluginSpecificRegistrationContext(pluginName));
+    pluginReg->setParent(*this);
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Plugin context created, loading plugin");
     libfunc::PluginHandle plugin = libfunc::loadPluginByName(
@@ -55,7 +56,7 @@ void RegistrationContext::loadPlugin(std::string const &pluginName) {
 }
 
 void RegistrationContext::adoptPluginRegistrationContext(PluginRegPtr ctx) {
-    ctx->setParent(*this);
+    /// @todo check to make sure we have setParent on the child context!
     m_regMap.insert(std::make_pair(ctx->getName(), ctx));
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Adopted registration context for "
