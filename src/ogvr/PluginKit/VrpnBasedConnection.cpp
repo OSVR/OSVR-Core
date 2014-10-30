@@ -17,19 +17,10 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/Connection.h>
+#include "VrpnBasedConnection.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
-
-namespace ogvr {
-ConnectionPtr Connection::createLocalConnection() {
-    /// @todo implement
-    return ConnectionPtr();
-}
-Connection::~Connection() {}
-Connection::Connection() {}
-} // end of namespace ogvr

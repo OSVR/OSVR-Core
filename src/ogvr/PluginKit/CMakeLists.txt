@@ -18,6 +18,7 @@ set(API
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/MessageType.h"
+    "${HEADER_LOCATION}/MessageTypePtr.h"
     "${HEADER_LOCATION}/PluginInterfaceC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
@@ -47,7 +48,9 @@ set(SOURCE
     PluginSpecificRegistrationContext.cpp
     PluginSpecificRegistrationContext.h
     RegistrationContext.cpp
-    ResetPointerList.h)
+    ResetPointerList.h
+    VrpnBasedConnection.cpp
+    VrpnBasedConnection.h)
 source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 
 add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})

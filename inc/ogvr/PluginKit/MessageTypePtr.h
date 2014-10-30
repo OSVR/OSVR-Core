@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2014
 
@@ -16,8 +16,11 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#ifndef INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8
+#define INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8
+
 // Internal Includes
-#include <ogvr/PluginKit/Connection.h>
+// - none
 
 // Library/third-party includes
 // - none
@@ -25,11 +28,4 @@
 // Standard includes
 // - none
 
-namespace ogvr {
-ConnectionPtr Connection::createLocalConnection() {
-    /// @todo implement
-    return ConnectionPtr();
-}
-Connection::~Connection() {}
-Connection::Connection() {}
-} // end of namespace ogvr
+#endif // INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8
