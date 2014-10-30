@@ -34,8 +34,10 @@ ConnectionPtr Connection::createLocalConnection() {
     return conn;
 }
 ConnectionPtr Connection::createSharedConnection() {
-    /// @todo implement
-    return ConnectionPtr();
+    ConnectionPtr conn(
+        make_shared<VrpnBasedConnection>(VrpnBasedConnection::VRPN_SHARED));
+    return conn;
+}
 }
 Connection::~Connection() {}
 Connection::Connection() {}
