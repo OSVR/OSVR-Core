@@ -59,7 +59,8 @@ set(SOURCE
     ResetPointerList.h
     SyncDeviceToken.cpp
     VrpnBasedConnection.cpp
-    VrpnBasedConnection.h)
+    VrpnBasedConnection.h
+    VrpnMessageType.h)
 source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 
 add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})

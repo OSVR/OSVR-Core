@@ -20,12 +20,30 @@
 #define INCLUDED_MessageType_h_GUID_61B56482_02E5_47B5_8CFA_EAF4286F309F
 
 // Internal Includes
-// - none
+#include <ogvr/PluginKit/MessageTypePtr.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
+namespace ogvr {
+/// @brief Base class for connection-specific message type registration
+class MessageType : boost::noncopyable {
+  public:
+    /// @brief destructor
+    virtual ~MessageType();
+
+    /// @brief accessor for message name
+    std::string const &getName() const;
+
+  protected:
+    /// @brief Constructor for use by derived classes only.
+    MessageType(std::string const &name);
+
+  private:
+    std::string const m_name;
+};
+} // end of namespace ogvr
 #endif // INCLUDED_MessageType_h_GUID_61B56482_02E5_47B5_8CFA_EAF4286F309F

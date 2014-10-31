@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include "VrpnBasedConnection.h"
+#include "VrpnMessageType.h"
 #include <ogvr/PluginKit/ConnectionDevice.h>
 #include <ogvr/Util/UniquePtr.h>
 
@@ -52,9 +53,8 @@ namespace {
     class VrpnConnectionDevice : public ConnectionDevice {
       public:
         VrpnConnectionDevice(std::string const &name,
-                             vrpn_ConnectionPtr const &vrpnConn,
-                             VrpnBasedConnection *conn)
-            : ConnectionDevice(name), m_conn(conn) {
+                             vrpn_ConnectionPtr const &vrpnConn)
+            : ConnectionDevice(name) {
             m_baseobj.reset(
                 new vrpn_BaseFlexServer(name.c_str(), vrpnConn.get()));
         }
@@ -62,7 +62,6 @@ namespace {
         virtual void m_process() { m_baseobj->mainloop(); }
 
       private:
-        VrpnBasedConnection *m_conn;
         unique_ptr<vrpn_BaseFlexServer> m_baseobj;
     };
 }
@@ -81,15 +80,14 @@ VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
 
 MessageTypePtr
 VrpnBasedConnection::m_registerMessageType(std::string const &messageId) {
-    ///@todo implement
-    return MessageTypePtr();
+    MessageTypePtr ret(new VrpnMessageType(messageId, m_vrpnConnection));
+    return ret;
 }
 
 ConnectionDevicePtr
 VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
-    ///@todo implement
     ConnectionDevicePtr ret =
-        make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection, this);
+        make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
     return ret;
 }
 

@@ -26,6 +26,8 @@
 // Standard includes
 #include <iostream>
 
+OGVR_MessageType dummyMessage;
+
 class DummySyncDevice {
   public:
     DummySyncDevice(OGVR_DeviceToken d) : m_dev(d) {
@@ -45,7 +47,7 @@ class DummySyncDevice {
     OGVR_PluginReturnCode m_update() {
         // get some data
         char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, mydata, 0);
+        ogvrDeviceSendData(m_dev, dummyMessage, mydata, 0);
         return OGVR_PLUGIN_SUCCESS;
     }
     OGVR_DeviceToken m_dev;
@@ -62,6 +64,8 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
     ogvrPluginRegisterDataWithDeleteCallback(
         ctx, &ogvr::detail::generic_deleter<DummySyncDevice>,
         static_cast<void *>(mySync));
+
+    ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
     ogvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
                                          static_cast<void *>(mySync));
     return OGVR_PLUGIN_SUCCESS;

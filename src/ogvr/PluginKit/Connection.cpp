@@ -20,6 +20,7 @@
 #include <ogvr/PluginKit/Connection.h>
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginKit/RegistrationContext.h>
+#include <ogvr/PluginKit/MessageType.h>
 #include "VrpnBasedConnection.h"
 #include <ogvr/Util/Verbosity.h>
 

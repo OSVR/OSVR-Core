@@ -20,7 +20,7 @@
 #define INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8
 
 // Internal Includes
-#include <ogvr/Util/SharedPtr.h>
+#include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 // - none
@@ -29,7 +29,7 @@
 // - none
 namespace ogvr {
 class MessageType;
-/// @brief a ref-counted handle for holding a message type registration.
-typedef shared_ptr<MessageType> MessageTypePtr;
+/// @brief a uniquely-owned handle for holding a message type registration.
+typedef unique_ptr<MessageType> MessageTypePtr;
 }
 #endif // INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8

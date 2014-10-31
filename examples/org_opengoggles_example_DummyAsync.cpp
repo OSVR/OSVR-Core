@@ -27,6 +27,8 @@
 // Standard includes
 #include <iostream>
 
+OGVR_MessageType dummyMessage;
+
 class DummyAsyncDevice {
   public:
     DummyAsyncDevice(OGVR_DeviceToken d) : m_dev(d) {
@@ -52,7 +54,7 @@ class DummyAsyncDevice {
         // block on waiting for data.
         // once we have enough, call
         char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, mydata, 0);
+        ogvrDeviceSendData(m_dev, dummyMessage, mydata, 0);
         return OGVR_PLUGIN_SUCCESS;
     }
     OGVR_DeviceToken m_dev;
@@ -67,6 +69,7 @@ OGVR_PLUGIN(org_opengoggles_example_DummyAsync) {
                              // that it needs to get a connection lock first.
     DummyAsyncDevice *myAsync =
         ogvr::plugin::registerObjectForDeletion(ctx, new DummyAsyncDevice(d));
+    ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
     ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
                                  static_cast<void *>(myAsync));
     return OGVR_PLUGIN_SUCCESS;

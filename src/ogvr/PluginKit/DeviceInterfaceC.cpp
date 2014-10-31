@@ -18,7 +18,9 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/DeviceInterfaceC.h>
+#include <ogvr/PluginKit/PluginRegistration.h>
 #include <ogvr/PluginKit/DeviceToken.h>
+#include <ogvr/PluginKit/MessageType.h>
 #include <ogvr/PluginKit/Connection.h>
 #include <ogvr/Util/Verbosity.h>
 #include "HandleNullContext.h"
@@ -31,10 +33,36 @@
 // - none
 
 OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_DeviceToken dev,
+                                         OGVR_MessageType msg,
                                          const char *bytestream, size_t len) {
     /// @todo implement - replace stub
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
+    return OGVR_PLUGIN_SUCCESS;
+}
+
+OGVR_PluginReturnCode ogvrDeviceRegisterMessageType(OGVR_PluginRegContext ctx,
+                                                    const char *name,
+                                                    OGVR_MessageType *msgtype) {
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceRegisterMessageType", ctx);
+    OGVR_DEV_VERBOSE("In ogvrDeviceRegisterMessageType for a message named "
+                     << name);
+
+    ogvr::PluginSpecificRegistrationContext *context =
+        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
+    // Extract the connection from the overall context
+    ogvr::ConnectionPtr conn =
+        ogvr::Connection::retrieveConnection(context->getParent());
+    ogvr::MessageTypePtr ret = conn->registerMessageType(name);
+    try {
+        *msgtype = ogvr::plugin::registerObjectForDeletion(ctx, ret.release());
+    } catch (std::exception &e) {
+        std::cerr << "Error in ogvrDeviceRegisterMessageType: " << e.what()
+                  << std::endl;
+        return OGVR_PLUGIN_FAILURE;
+    } catch (...) {
+        return OGVR_PLUGIN_FAILURE;
+    }
     return OGVR_PLUGIN_SUCCESS;
 }
 

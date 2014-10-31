@@ -50,16 +50,35 @@ extern "C" {
 */
 typedef void *OGVR_DeviceToken;
 
+/** @brief Opaque type of a registered message type within the core library.
+
+Common device types will have pre-defined message types, while more specific
+or unique devices may need to define their own.
+*/
+typedef void *OGVR_MessageType;
+
+/** @brief Register (or recall) a message type by name.
+
+@param ctx The plugin registration context received by your entry point
+function.
+@param name A unique name for the message type. The library makes a copy of this
+string.
+@param [out] msgtype Will contain the message type identifier you've
+registered..
+*/
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
+    ogvrDeviceRegisterMessageType(OGVR_PluginRegContext ctx, const char *name,
+                                  OGVR_MessageType *msgtype);
+
 /** @brief Send a raw bytestream from your device.
 
     @note The same function is used for synchronous and asynchronous devices:
    the device token is sufficient to determine whether locking is needed.
 
-    @todo include a message type ID
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceSendData(OGVR_DeviceToken dev, const char *bytestream,
-                       size_t len);
+    ogvrDeviceSendData(OGVR_DeviceToken dev, OGVR_MessageType msg,
+                       const char *bytestream, size_t len);
 
 /** @name Synchronous Devices
 
