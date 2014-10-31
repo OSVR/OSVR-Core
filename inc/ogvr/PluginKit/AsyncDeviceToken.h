@@ -21,9 +21,11 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/DeviceToken.h>
+#include <ogvr/PluginKit/DeviceInterfaceC.h>
+#include <ogvr/Util/CallbackWrapper.h>
 
 // Library/third-party includes
-// - none
+#include <boost/optional.hpp>
 
 // Standard includes
 // - none
@@ -35,7 +37,11 @@ class AsyncDeviceToken : public DeviceToken {
 
     virtual AsyncDeviceToken *asAsyncDevice();
 
+    void setWaitCallback(OGVR_AsyncDeviceWaitCallback cb, void *userData);
+
   private:
+    void m_sendData(MessageType *type, const char *bytestream, size_t len);
+    boost::optional<CallbackWrapper<OGVR_AsyncDeviceWaitCallback> > m_cb;
 };
 } // end of namespace ogvr
 #endif // INCLUDED_AsyncDeviceToken_h_GUID_654218B0_3900_4B89_E86F_D314EB6C0ABF

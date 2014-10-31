@@ -45,6 +45,12 @@ namespace {
             /// @todo service device here
             server_mainloop();
         }
+        void sendData(vrpn_uint32 msgID, const char *bytestream, size_t len) {
+            struct timeval now;
+            vrpn_gettimeofday(&now, NULL);
+            d_connection->pack_message(len, now, msgID, d_sender_id, bytestream,
+                                       vrpn_CONNECTION_LOW_LATENCY);
+        }
 
       protected:
         virtual int register_types() { return 0; }
@@ -60,6 +66,11 @@ namespace {
         }
         virtual ~VrpnConnectionDevice() {}
         virtual void m_process() { m_baseobj->mainloop(); }
+        virtual void m_sendData(MessageType *type, const char *bytestream,
+                                size_t len) {
+            VrpnMessageType *msgtype = static_cast<VrpnMessageType *>(type);
+            m_baseobj->sendData(msgtype->getID(), bytestream, len);
+        }
 
       private:
         unique_ptr<vrpn_BaseFlexServer> m_baseobj;

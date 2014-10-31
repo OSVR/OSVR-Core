@@ -33,4 +33,14 @@ AsyncDeviceToken::~AsyncDeviceToken() {}
 
 AsyncDeviceToken *AsyncDeviceToken::asAsyncDevice() { return this; }
 
+void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
+                                       void *userData) {
+    m_cb = CallbackWrapper<OGVR_AsyncDeviceWaitCallback>(cb, userData);
+}
+
+void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
+                                  size_t len) {
+    /// @todo implement
+}
+
 } // end of namespace ogvr

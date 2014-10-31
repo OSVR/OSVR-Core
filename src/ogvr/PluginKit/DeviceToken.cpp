@@ -53,6 +53,11 @@ SyncDeviceToken *DeviceToken::asSyncDevice() { return NULL; }
 
 std::string const &DeviceToken::getName() const { return m_name; }
 
+void DeviceToken::sendData(MessageType *type, const char *bytestream,
+                           size_t len) {
+    m_sendData(type, bytestream, len);
+}
+
 ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
 
 ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }

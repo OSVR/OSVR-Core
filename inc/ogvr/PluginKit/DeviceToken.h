@@ -31,6 +31,7 @@
 #include <string>
 
 namespace ogvr {
+class MessageType;
 class PluginSpecificRegistrationContext;
 class AsyncDeviceToken;
 class SyncDeviceToken;
@@ -61,10 +62,15 @@ class DeviceToken {
     /// @brief Accessor for name property
     std::string const &getName() const;
 
+    /// @brief Send data
+    void sendData(MessageType *type, const char *bytestream, size_t len);
+
   protected:
     DeviceToken(std::string const &name);
     ConnectionPtr m_getConnection();
     ConnectionDevicePtr m_getConnectionDevice();
+    virtual void m_sendData(MessageType *type, const char *bytestream,
+                            size_t len) = 0;
 
   private:
     void m_sharedInit(ConnectionPtr const &conn);

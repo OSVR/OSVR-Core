@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/SyncDeviceToken.h>
+#include <ogvr/PluginKit/ConnectionDevice.h>
 
 // Library/third-party includes
 // - none
@@ -31,5 +32,15 @@ SyncDeviceToken::SyncDeviceToken(std::string const &name) : DeviceToken(name) {}
 SyncDeviceToken::~SyncDeviceToken() {}
 
 SyncDeviceToken *SyncDeviceToken::asSyncDevice() { return this; }
+
+void SyncDeviceToken::setUpdateCallback(OGVR_SyncDeviceUpdateCallback cb,
+                                        void *userData) {
+    m_cb = CallbackWrapper<OGVR_SyncDeviceUpdateCallback>(cb, userData);
+}
+
+void SyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
+                                 size_t len) {
+    m_getConnectionDevice()->sendData(type, bytestream, len);
+}
 
 } // end of namespace ogvr

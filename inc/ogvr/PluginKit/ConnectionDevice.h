@@ -29,6 +29,8 @@
 #include <string>
 
 namespace ogvr {
+class MessageType;
+
 /// @brief Base class for connection-specific device data, owned by a
 /// DeviceToken.
 class ConnectionDevice : boost::noncopyable {
@@ -44,9 +46,16 @@ class ConnectionDevice : boost::noncopyable {
     /// Someone needs to call this method frequently.
     void process();
 
+    /// @brief Send message.
+    void sendData(MessageType *type, const char *bytestream, size_t len);
+
   protected:
     /// @brief (Subclass implementation) Process messages. This shouldn't block.
     virtual void m_process() = 0;
+
+    /// @brief (Subclass implementation) Send message.
+    virtual void m_sendData(MessageType *type, const char *bytestream,
+                            size_t len) = 0;
 
     /// @brief Constructor for use by derived classes only.
     ConnectionDevice(std::string const &name);
