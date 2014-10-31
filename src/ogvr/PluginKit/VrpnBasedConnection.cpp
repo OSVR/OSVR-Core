@@ -18,6 +18,10 @@
 
 // Internal Includes
 #include "VrpnBasedConnection.h"
+#include <ogvr/PluginKit/ConnectionDevice.h>
+#include <ogvr/Util/UniquePtr.h>
+
+#include <vrpn_BaseClass.h>
 
 // Library/third-party includes
 // - none
@@ -26,6 +30,43 @@
 // - none
 
 namespace ogvr {
+
+namespace {
+    class vrpn_BaseFlexServer : public vrpn_BaseClass {
+      public:
+        vrpn_BaseFlexServer(const char *name, vrpn_Connection *conn)
+            : vrpn_BaseClass(name, conn) {
+            vrpn_BaseClass::init();
+        }
+        virtual ~vrpn_BaseFlexServer() {}
+
+        virtual void mainloop() {
+            /// @todo service device here
+            server_mainloop();
+        }
+
+      protected:
+        virtual int register_types() { return 0; }
+    };
+
+    class VrpnConnectionDevice : public ConnectionDevice {
+      public:
+        VrpnConnectionDevice(std::string const &name,
+                             vrpn_ConnectionPtr const &vrpnConn,
+                             VrpnBasedConnection *conn)
+            : ConnectionDevice(name), m_conn(conn) {
+            m_baseobj.reset(
+                new vrpn_BaseFlexServer(name.c_str(), vrpnConn.get()));
+        }
+        virtual ~VrpnConnectionDevice() {}
+        virtual void m_process() { m_baseobj->mainloop(); }
+
+      private:
+        VrpnBasedConnection *m_conn;
+        unique_ptr<vrpn_BaseFlexServer> m_baseobj;
+    };
+}
+
 VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
     switch (type) {
     case VRPN_LOCAL_ONLY: {
@@ -47,7 +88,9 @@ VrpnBasedConnection::m_registerMessageType(std::string const &messageId) {
 ConnectionDevicePtr
 VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
     ///@todo implement
-    return ConnectionDevicePtr();
+    ConnectionDevicePtr ret =
+        make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection, this);
+    return ret;
 }
 
 void VrpnBasedConnection::m_process() { m_vrpnConnection->mainloop(); }
