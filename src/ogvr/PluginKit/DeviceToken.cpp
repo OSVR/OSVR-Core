@@ -19,6 +19,7 @@
 // Internal Includes
 #include <ogvr/PluginKit/DeviceToken.h>
 #include <ogvr/PluginKit/AsyncDeviceToken.h>
+#include <ogvr/PluginKit/SyncDeviceToken.h>
 #include <ogvr/PluginKit/Connection.h>
 
 // Library/third-party includes
@@ -31,6 +32,13 @@ namespace ogvr {
 DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
                                               ConnectionPtr const &conn) {
     DeviceTokenPtr ret(new AsyncDeviceToken(name));
+    ret->m_sharedInit(conn);
+    return ret;
+}
+
+DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
+                                             ConnectionPtr const &conn) {
+    DeviceTokenPtr ret(new SyncDeviceToken(name));
     ret->m_sharedInit(conn);
     return ret;
 }
