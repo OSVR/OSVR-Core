@@ -16,8 +16,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
-#ifndef INCLUDED_VrpnFlexBaseServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
-#define INCLUDED_VrpnFlexBaseServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
+#ifndef INCLUDED_VrpnBaseFlexServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
+#define INCLUDED_VrpnBaseFlexServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
 
 // Internal Includes
 #include <ogvr/Util/Verbosity.h>
@@ -54,4 +54,4 @@ class vrpn_BaseFlexServer : public vrpn_BaseClass {
     virtual int register_types() { return 0; }
 };
 } // end of namespace ogvr
-#endif // INCLUDED_VrpnFlexBaseServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
+#endif // INCLUDED_VrpnBaseFlexServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE

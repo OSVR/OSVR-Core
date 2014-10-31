@@ -23,7 +23,7 @@
 #include <ogvr/PluginKit/ConnectionDevice.h>
 #include <ogvr/PluginKit/DeviceToken.h>
 #include <ogvr/Util/UniquePtr.h>
-#include "VrpnFlexBaseServer.h"
+#include "VrpnBaseFlexServer.h"
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
