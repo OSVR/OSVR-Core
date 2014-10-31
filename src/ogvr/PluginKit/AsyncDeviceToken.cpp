@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/AsyncDeviceToken.h>
+#include <ogvr/PluginKit/ConnectionDevice.h>
 
 // Library/third-party includes
 // - none
@@ -26,21 +27,22 @@
 // - none
 
 namespace ogvr {
+using boost::unique_lock;
+using boost::mutex;
+
 AsyncDeviceToken::AsyncDeviceToken(std::string const &name)
-    : DeviceToken(name), m_done(false), m_interactionEnabled(false) {}
+    : DeviceToken(name), m_requestToSend(false), m_clearToSend(false),
+      m_done(false) {}
 
 AsyncDeviceToken::~AsyncDeviceToken() {
     m_done = true;
-#ifdef TRY_WITH_THREADS
     m_callbackThread.join();
-#endif
 }
 
 AsyncDeviceToken *AsyncDeviceToken::asAsyncDevice() { return this; }
 
 void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
                                        void *userData) {
-#ifdef TRY_WITH_THREADS
     m_done = true;
     m_callbackThread.join();
 
@@ -48,52 +50,48 @@ void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
     m_cb = CallbackWrapper<OGVR_AsyncDeviceWaitCallback>(cb, userData);
     m_callbackThread =
         boost::thread(&AsyncDeviceToken::m_waitCallbackLoop, this);
-#endif
 }
 void AsyncDeviceToken::m_waitCallbackLoop() {
-#ifdef TRY_WITH_THREADS
     if (!m_cb) {
         return;
     }
     while (!m_done) {
         (*m_cb)();
     }
-#endif
 }
 
 void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
                                   size_t len) {
-#ifdef TRY_WITH_THREADS
-    /// @todo block until control flow enters m_connectionInteract, then block
-    /// that method while sending.
-    boost::unique_lock<boost::mutex> haveDataLock(m_dataWaiting);
-    boost::unique_lock<boost::mutex> checkInteractionLock(m_conditionMut);
-    while (!m_interactionEnabled) {
-        m_cond.wait(checkInteractionLock);
+    unique_lock<mutex> lockRTS(m_rtsMutex);
+    assert(m_requestToSend == false);
+    m_requestToSend = true;
+    // Must hold on to rtsMutex until we're safely in the loop, to
+    // keep connectionInteract back at the beginning
+    unique_lock<mutex> lockCTS(m_ctsMutex);
+    while (!m_clearToSend) {
+        if (lockRTS.owns_lock()) {
+            lockRTS.unlock();
+        }
+        m_ctsCond.wait(lockCTS);
     }
-#endif
+    m_getConnectionDevice()->sendData(type, bytestream, len);
+    m_requestToSend = false;
+    m_sendFinished = true;
+    m_sendFinishedCond.notify_one();
 }
 
 void AsyncDeviceToken::m_connectionInteract() {
-#ifdef TRY_WITH_THREADS
-    boost::unique_lock<boost::mutex> checkWaiting(m_dataWaiting,
-                                                  boost::try_to_lock);
-    if (checkWaiting.owns_lock()) {
-        // OK, then the other thread isn't waiting to interact.
-        return;
-    }
-    {
-        boost::lock_guard<boost::mutex> lock(m_conditionMut);
-        m_interactionEnabled = true;
-    }
-    m_cond.notify_one();
-    {
-        boost::unique_lock<boost::mutex> lock(m_conditionMut);
-        while (m_interactionEnabled) {
+    unique_lock<mutex> lockRTS(m_rtsMutex);
+    if (m_requestToSend) {
+        unique_lock<mutex> lockCTS(m_ctsMutex);
+        m_clearToSend = true;
+        m_sendFinished = false;
+        m_ctsCond.notify_all();
+        while (!m_sendFinished) {
+            m_sendFinishedCond.wait(lockCTS);
         }
+        m_clearToSend = false;
     }
-/// @todo implement
-#endif
 }
 
 } // end of namespace ogvr

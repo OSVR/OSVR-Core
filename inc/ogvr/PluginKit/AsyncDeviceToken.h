@@ -26,10 +26,7 @@
 
 // Library/third-party includes
 #include <boost/optional.hpp>
-
-#ifdef TRY_WITH_THREADS
 #include <boost/thread.hpp>
-#endif
 
 // Standard includes
 // - none
@@ -50,15 +47,18 @@ class AsyncDeviceToken : public DeviceToken {
     virtual void m_connectionInteract();
     boost::optional<CallbackWrapper<OGVR_AsyncDeviceWaitCallback> > m_cb;
 
-#ifdef TRY_WITH_THREADS
     boost::thread m_callbackThread;
 
-    boost::mutex m_dataWaiting;
-    boost::mutex m_interacting;
-    boost::mutex m_conditionMut;
-    boost::condition_variable m_cond;
-#endif
-    volatile bool m_interactionEnabled;
+    boost::mutex m_rtsMutex;
+    boost::mutex m_ctsMutex;
+    boost::condition_variable m_ctsCond;
+    boost::condition_variable m_sendFinishedCond;
+    /// @brief Controlled by condition variable.
+    /// @{
+    volatile bool m_requestToSend;
+    volatile bool m_clearToSend;
+    volatile bool m_sendFinished;
+    /// @}
     volatile bool m_done;
 };
 } // end of namespace ogvr
