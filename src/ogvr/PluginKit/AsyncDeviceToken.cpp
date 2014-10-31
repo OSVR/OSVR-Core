@@ -31,11 +31,13 @@ using boost::unique_lock;
 using boost::mutex;
 
 AsyncDeviceToken::AsyncDeviceToken(std::string const &name)
-    : DeviceToken(name), m_requestToSend(false), m_clearToSend(false),
-      m_done(false) {}
+    : DeviceToken(name), m_requestToSend(false), m_clearToSend(false), m_run() {
+}
 
 AsyncDeviceToken::~AsyncDeviceToken() {
-    m_done = true;
+    m_run.signalShutdown();
+    m_ctsCond.notify_all(); // get the thread unblocked from writing
+    m_run.signalAndWaitForShutdown();
     m_callbackThread.join();
 }
 
@@ -43,19 +45,17 @@ AsyncDeviceToken *AsyncDeviceToken::asAsyncDevice() { return this; }
 
 void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
                                        void *userData) {
-    m_done = true;
-    m_callbackThread.join();
-
-    m_done = false;
     m_cb = CallbackWrapper<OGVR_AsyncDeviceWaitCallback>(cb, userData);
     m_callbackThread =
         boost::thread(&AsyncDeviceToken::m_waitCallbackLoop, this);
+    m_run.signalAndWaitForStart();
 }
 void AsyncDeviceToken::m_waitCallbackLoop() {
     if (!m_cb) {
         return;
     }
-    while (!m_done) {
+    util::LoopGuard guard(m_run);
+    while (m_run.shouldContinue()) {
         (*m_cb)();
     }
 }
@@ -68,11 +68,19 @@ void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
     // Must hold on to rtsMutex until we're safely in the loop, to
     // keep connectionInteract back at the beginning
     unique_lock<mutex> lockCTS(m_ctsMutex);
-    while (!m_clearToSend) {
+    while (!m_clearToSend && m_run.shouldContinue()) {
         if (lockRTS.owns_lock()) {
             lockRTS.unlock();
         }
         m_ctsCond.wait(lockCTS);
+    }
+
+    if (!m_run.shouldContinue()) {
+        /// Quitting instead of sending -
+        /// told to stop, not given permission
+        OGVR_DEV_VERBOSE(
+            "AsyncDeviceToken::m_sendData quitting instead of sending");
+        return;
     }
     m_getConnectionDevice()->sendData(type, bytestream, len);
     m_requestToSend = false;
