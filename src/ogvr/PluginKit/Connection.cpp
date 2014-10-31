@@ -47,11 +47,12 @@ ConnectionPtr Connection::createSharedConnection() {
 ConnectionPtr Connection::retrieveConnection(const RegistrationContext &ctx) {
     ConnectionPtr ret;
     boost::any anyConn = ctx.data().get(CONNECTION_KEY);
-    if (!anyConn.empty()) {
-        ConnectionPtr *ptrRet = boost::any_cast<ConnectionPtr *>(anyConn);
-        if (ptrRet) {
-            ret = *ptrRet;
-        }
+    if (anyConn.empty()) {
+        return ret;
+    }
+    ConnectionPtr *retPtr = boost::any_cast<ConnectionPtr>(&anyConn);
+    if (retPtr) {
+        ret = *retPtr;
     }
     return ret;
 }
