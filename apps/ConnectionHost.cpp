@@ -46,8 +46,9 @@ int main(int argc, char * argv[]) {
 		std::cerr << "Caught exception tring to load " << argv[1] << ": " << e.what() << std::endl;
 		return 1;
 	}
-	std::cout << "Running connection processing 500 times" << std::endl;
-	for (int i = 0; i < 500; ++i) {
+	int count = 20;
+	std::cout << "Running connection processing " << count << " times" << std::endl;
+	for (int i = 0; i < count; ++i) {
 		conn->process();
 	}
 
