@@ -59,9 +59,7 @@ void DeviceToken::sendData(MessageType *type, const char *bytestream,
     m_sendData(type, bytestream, len);
 }
 
-void DeviceToken::connectionInteract() {
-    m_connectionInteract();
-}
+void DeviceToken::connectionInteract() { m_connectionInteract(); }
 
 ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
 
