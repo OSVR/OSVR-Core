@@ -45,9 +45,10 @@ class DummySyncDevice {
 
   private:
     OGVR_PluginReturnCode m_update() {
+        std::cout << "In DummySyncDevice::m_update" << std::endl;
         // get some data
-        char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, dummyMessage, mydata, 0);
+        const char mydata[] = "something";
+        ogvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
         return OGVR_PLUGIN_SUCCESS;
     }
     OGVR_DeviceToken m_dev;
@@ -56,7 +57,7 @@ class DummySyncDevice {
 OGVR_PLUGIN(org_opengoggles_example_DummySync) {
     /// Create a synchronous (in the mainloop) device
     OGVR_DeviceToken d;
-    ogvrDeviceSyncInit(ctx, "My Sync Device",
+    ogvrDeviceSyncInit(ctx, "MySyncDevice",
                        &d); // Puts a token in d that knows it's a sync
                             // device so ogvrDeviceSendData knows that it
                             // doesn't need to acquire a lock.
