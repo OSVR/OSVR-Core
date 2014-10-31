@@ -60,6 +60,8 @@ set(SOURCE
     SyncDeviceToken.cpp
     VrpnBasedConnection.cpp
     VrpnBasedConnection.h
+    VrpnConnectionDevice.h
+    VrpnFlexBaseServer.h
     VrpnMessageType.h)
 source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
