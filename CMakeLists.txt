@@ -21,7 +21,7 @@ include(GNUInstallDirs)
 # Dependencies
 ###
 find_package(libfunctionality)
-find_package(Boost 1.43) # Lower version bound of 1.43 for range adapters
+find_package(Boost 1.43 COMPONENTS thread system date_time system) # Lower version bound of 1.43 for range adapters
 
 include(CompilerFeatures)
 

@@ -62,7 +62,7 @@ set(SOURCE
     VrpnBasedConnection.h
     VrpnMessageType.h)
 source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
-
+add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})
 
 set_property(TARGET ogvrPluginKit PROPERTY VERSION ${ogvrpluginkit_VERSION})
@@ -84,7 +84,7 @@ target_include_directories(ogvrPluginKit
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 
-target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS})
+target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS} BOOST_DYN_LINK_ALL)
 
 target_link_libraries(ogvrPluginKit
     INTERFACE
@@ -92,7 +92,11 @@ target_link_libraries(ogvrPluginKit
     PRIVATE
     ogvrUtil
     libfunctionality::functionality
-    ${VRPN_SERVER_LIBRARY})
+    ${VRPN_SERVER_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_DATE_TIME_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_CHRONO_LIBRARY})
 
 ###
 # Internal "interface" target for host applications to use - they need more includes
