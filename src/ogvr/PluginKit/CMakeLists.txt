@@ -87,7 +87,10 @@ target_include_directories(ogvrPluginKit
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 
-target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS} BOOST_DYN_LINK_ALL)
+target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS} ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+if(NOT Boost_USE_STATIC_LIBS)
+    target_compile_definitions(ogvrPluginKit PRIVATE BOOST_ALL_DYN_LINK)
+endif()
 
 target_link_libraries(ogvrPluginKit
     INTERFACE
@@ -99,7 +102,10 @@ target_link_libraries(ogvrPluginKit
     ${Boost_THREAD_LIBRARY}
     ${Boost_DATE_TIME_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
-    ${Boost_CHRONO_LIBRARY})
+    ${Boost_CHRONO_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT})
+
+enable_extra_compiler_warnings(ogvrPluginKit)
 
 ###
 # Internal "interface" target for host applications to use - they need more includes

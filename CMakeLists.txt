@@ -16,12 +16,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 ###
 include(CTest)
 include(GNUInstallDirs)
+include(EnableExtraCompilerWarnings)
 
 ###
 # Dependencies
 ###
-find_package(libfunctionality)
-find_package(Boost 1.43 COMPONENTS thread system date_time system) # Lower version bound of 1.43 for range adapters
+find_package(libfunctionality REQUIRED)
+find_package(Boost 1.43 COMPONENTS thread system date_time chrono REQUIRED) # Lower version bound of 1.43 for range adapters
+find_package(Threads REQUIRED)
 
 include(CompilerFeatures)
 
