@@ -21,6 +21,8 @@
 #include <ogvr/PluginKit/AsyncDeviceToken.h>
 #include <ogvr/PluginKit/SyncDeviceToken.h>
 #include <ogvr/PluginKit/Connection.h>
+#include <ogvr/PluginKit/ConnectionDevice.h>
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -58,7 +60,10 @@ void DeviceToken::sendData(MessageType *type, const char *bytestream,
     m_sendData(type, bytestream, len);
 }
 
-void DeviceToken::connectionInteract() { m_connectionInteract(); }
+void DeviceToken::connectionInteract() {
+    OGVR_DEV_VERBOSE("In DeviceToken::connectionInteract");
+    m_connectionInteract();
+}
 
 ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
 
@@ -67,6 +72,7 @@ ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
 void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
     m_conn = conn;
     m_dev = conn->registerDevice(m_name);
+    m_dev->setDeviceToken(*this);
 }
 
 } // end of namespace ogvr

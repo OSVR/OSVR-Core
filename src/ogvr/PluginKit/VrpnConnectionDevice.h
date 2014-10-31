@@ -21,8 +21,10 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/ConnectionDevice.h>
+#include <ogvr/PluginKit/DeviceToken.h>
 #include <ogvr/Util/UniquePtr.h>
 #include "VrpnFlexBaseServer.h"
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <qvrpn/vrpn_ConnectionPtr.h>
@@ -42,6 +44,7 @@ class VrpnConnectionDevice : public ConnectionDevice {
     virtual ~VrpnConnectionDevice() {}
     virtual void m_process() {
         OGVR_DEV_VERBOSE("In VrpnConnectionDevice::m_process");
+        m_getDeviceToken().connectionInteract();
         m_baseobj->mainloop();
     }
     virtual void m_sendData(MessageType *type, const char *bytestream,

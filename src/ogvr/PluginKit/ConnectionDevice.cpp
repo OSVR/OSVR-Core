@@ -23,19 +23,29 @@
 // - none
 
 // Standard includes
-// - none
+#include <cassert>
 
 namespace ogvr {
 ConnectionDevice::~ConnectionDevice() {}
 
 std::string const &ConnectionDevice::getName() const { return m_name; }
-ConnectionDevice::ConnectionDevice(std::string const &name) : m_name(name) {}
+ConnectionDevice::ConnectionDevice(std::string const &name)
+    : m_name(name), m_token(NULL) {}
 
 void ConnectionDevice::process() { m_process(); }
 
 void ConnectionDevice::sendData(MessageType *type, const char *bytestream,
                                 size_t len) {
     m_sendData(type, bytestream, len);
+}
+void ConnectionDevice::setDeviceToken(DeviceToken &token) {
+    assert(m_token == NULL);
+    m_token = &token;
+}
+
+DeviceToken &ConnectionDevice::m_getDeviceToken() {
+    assert(m_token);
+    return *m_token;
 }
 
 } // end of namespace ogvr
