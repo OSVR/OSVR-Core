@@ -19,6 +19,8 @@
 // Internal Includes
 #include <ogvr/PluginKit/DeviceInterfaceC.h>
 #include <ogvr/PluginKit/PluginRegistration.h>
+#include <ogvr/PluginKit/AsyncDeviceToken.h>
+#include <ogvr/PluginKit/SyncDeviceToken.h>
 #include <ogvr/PluginKit/DeviceToken.h>
 #include <ogvr/PluginKit/MessageType.h>
 #include <ogvr/PluginKit/Connection.h>
@@ -35,9 +37,13 @@
 OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_DeviceToken dev,
                                          OGVR_MessageType msg,
                                          const char *bytestream, size_t len) {
-    /// @todo implement - replace stub
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSendData device token", dev);
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSendData message type", msg);
+    ogvr::DeviceToken *device = static_cast<ogvr::DeviceToken *>(dev);
+    ogvr::MessageType *msgType = static_cast<ogvr::MessageType *>(msg);
+    device->sendData(msgType, bytestream, len);
     return OGVR_PLUGIN_SUCCESS;
 }
 
@@ -120,8 +126,16 @@ OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVR_PluginRegContext ctx,
 OGVR_PluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
     OGVR_DeviceToken device, OGVR_SyncDeviceUpdateCallback updateCallback,
     void *userData) {
-    /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncRegisterUpdateCallback");
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT(
+        "ogvrDeviceSyncRegisterUpdateCallback device token", device);
+    ogvr::SyncDeviceToken *syncdev =
+        static_cast<ogvr::DeviceToken *>(device)->asSyncDevice();
+    if (!syncdev) {
+        OGVR_DEV_VERBOSE("This isn't a synchronous device token!");
+        return OGVR_PLUGIN_FAILURE;
+    }
+    syncdev->setUpdateCallback(updateCallback, userData);
     return OGVR_PLUGIN_SUCCESS;
 }
 
@@ -138,7 +152,15 @@ OGVR_PluginReturnCode
 ogvrDeviceAsyncStartWaitLoop(OGVR_DeviceToken device,
                              OGVR_AsyncDeviceWaitCallback waitCallback,
                              void *userData) {
-    /// @todo implement - replace stub
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncStartWaitLoop");
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAsyncStartWaitLoop device token",
+                                    device);
+    ogvr::AsyncDeviceToken *asyncdev =
+        static_cast<ogvr::DeviceToken *>(device)->asAsyncDevice();
+    if (!asyncdev) {
+        OGVR_DEV_VERBOSE("This isn't an asynchronous device token!");
+        return OGVR_PLUGIN_FAILURE;
+    }
+    asyncdev->setWaitCallback(waitCallback, userData);
     return OGVR_PLUGIN_SUCCESS;
 }
