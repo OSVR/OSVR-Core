@@ -64,6 +64,9 @@ OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_PluginRegContext ctx,
         static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
     // Compute the name by combining plugin name with the given name
     std::string qualifiedName = context->getName() + "/" + name;
+
+    OGVR_DEV_VERBOSE("Qualified name: " << qualifiedName);
+
     ogvr::RegistrationContext &overallContext(context->getParent());
     // Extract the connection from the overall context
     ogvr::ConnectionPtr conn =
