@@ -30,27 +30,26 @@
 
 
 int main(int argc, char * argv[]) {
-    if (argc < 2) {
-        std::cerr << "Must supply a plugin name to load." << std::endl;
-        return 1;
-    }
+	if (argc < 2) {
+		std::cerr << "Must supply a plugin name to load." << std::endl;
+		return 1;
+	}
 	ogvr::RegistrationContext ctx;
-	{
-		// This way our pointer goes out of scope after we store the connection in the context,
-		// as a test to ensure shared ownership is working.
-		ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
-		ogvr::Connection::storeConnection(ctx, conn);
+	ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
+	ogvr::Connection::storeConnection(ctx, conn);
+
+	try {
+		std::cout << "Trying to load plugin " << argv[1] << std::endl;
+		ctx.loadPlugin(argv[1]);
+		std::cout << "Successfully loaded plugin, control returned to host application!" << std::endl;
+	} catch (std::exception & e) {
+		std::cerr << "Caught exception tring to load " << argv[1] << ": " << e.what() << std::endl;
+		return 1;
+	}
+	std::cout << "Running connection processing 500 times" << std::endl;
+	for (int i = 0; i < 500; ++i) {
+		conn->process();
 	}
 
-    try {
-        std::cout << "Trying to load plugin " << argv[1] << std::endl;
-		ctx.loadPlugin(argv[1]);
-        std::cout << "Successfully loaded plugin, control returned to host application!" << std::endl;
-        return 0;
-    } catch (std::exception & e) {
-        std::cerr << "Caught exception tring to load " << argv[1] << ": " << e.what() << std::endl;
-        return 1;
-    }
-    std::cerr << "Failed in a weird way - not a std::exception." << std::endl;
-    return 2;
+	return 0;
 }
