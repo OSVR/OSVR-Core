@@ -21,11 +21,10 @@
 #include "VrpnMessageType.h"
 #include <ogvr/PluginKit/ConnectionDevice.h>
 #include <ogvr/Util/UniquePtr.h>
-
-#include <vrpn_BaseClass.h>
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
-// - none
+#include <vrpn_BaseClass.h>
 
 // Standard includes
 // - none
@@ -42,6 +41,7 @@ namespace {
         virtual ~vrpn_BaseFlexServer() {}
 
         virtual void mainloop() {
+            OGVR_DEV_VERBOSE("In vrpn_BaseFlexServer::mainloop");
             /// @todo service device here
             server_mainloop();
         }
@@ -65,7 +65,10 @@ namespace {
                 new vrpn_BaseFlexServer(name.c_str(), vrpnConn.get()));
         }
         virtual ~VrpnConnectionDevice() {}
-        virtual void m_process() { m_baseobj->mainloop(); }
+        virtual void m_process() {
+            OGVR_DEV_VERBOSE("In VrpnConnectionDevice::m_process");
+            m_baseobj->mainloop();
+        }
         virtual void m_sendData(MessageType *type, const char *bytestream,
                                 size_t len) {
             VrpnMessageType *msgtype = static_cast<VrpnMessageType *>(type);
