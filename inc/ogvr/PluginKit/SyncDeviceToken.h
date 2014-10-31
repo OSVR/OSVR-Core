@@ -42,6 +42,7 @@ class SyncDeviceToken : public DeviceToken {
 
   protected:
     void m_sendData(MessageType *type, const char *bytestream, size_t len);
+    virtual void m_connectionInteract();
 
   private:
     boost::optional<CallbackWrapper<OGVR_SyncDeviceUpdateCallback> > m_cb;

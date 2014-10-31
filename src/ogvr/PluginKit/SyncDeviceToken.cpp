@@ -43,4 +43,10 @@ void SyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
     m_getConnectionDevice()->sendData(type, bytestream, len);
 }
 
+void SyncDeviceToken::m_connectionInteract() {
+    if (m_cb) {
+        (*m_cb)();
+    }
+}
+
 } // end of namespace ogvr

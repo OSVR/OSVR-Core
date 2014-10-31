@@ -62,8 +62,16 @@ class DeviceToken {
     /// @brief Accessor for name property
     std::string const &getName() const;
 
-    /// @brief Send data
+    /// @brief Send data.
+    ///
+    /// This may block until the next connectionInteract call before forwarding
+    /// on to ConnectionDevice::sendData,
+    /// depending on the type of device token.
     void sendData(MessageType *type, const char *bytestream, size_t len);
+
+    /// @brief Interact with connection. Only legal to end up in
+    /// ConnectionDevice::sendData from within here somehow.
+    void connectionInteract();
 
   protected:
     DeviceToken(std::string const &name);
@@ -71,6 +79,7 @@ class DeviceToken {
     ConnectionDevicePtr m_getConnectionDevice();
     virtual void m_sendData(MessageType *type, const char *bytestream,
                             size_t len) = 0;
+    virtual void m_connectionInteract() = 0;
 
   private:
     void m_sharedInit(ConnectionPtr const &conn);

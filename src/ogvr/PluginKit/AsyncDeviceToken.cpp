@@ -40,6 +40,11 @@ void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
 
 void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
                                   size_t len) {
+    /// @todo block until control flow enters m_connectionInteract, then block
+    /// that method while sending.
+}
+
+void AsyncDeviceToken::m_connectionInteract() {
     /// @todo implement
 }
 

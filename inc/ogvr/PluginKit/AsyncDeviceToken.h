@@ -40,7 +40,9 @@ class AsyncDeviceToken : public DeviceToken {
     void setWaitCallback(OGVR_AsyncDeviceWaitCallback cb, void *userData);
 
   private:
-    void m_sendData(MessageType *type, const char *bytestream, size_t len);
+    virtual void m_sendData(MessageType *type, const char *bytestream,
+                            size_t len);
+    virtual void m_connectionInteract();
     boost::optional<CallbackWrapper<OGVR_AsyncDeviceWaitCallback> > m_cb;
 };
 } // end of namespace ogvr
