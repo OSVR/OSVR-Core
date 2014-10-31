@@ -82,7 +82,8 @@ target_include_directories(ogvrPluginKit
     PRIVATE
     ${VRPN_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/vendor/qvrpn
-    ${Boost_INCLUDE_DIR})
+    ${Boost_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/vendor/util-headers)
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 
