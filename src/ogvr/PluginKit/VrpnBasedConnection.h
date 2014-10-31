@@ -27,7 +27,7 @@
 #include <qvrpn/vrpn_ConnectionPtr.h>
 
 // Standard includes
-// - none
+#include <vector>
 
 namespace ogvr {
 class VrpnBasedConnection : public Connection {
@@ -45,6 +45,8 @@ class VrpnBasedConnection : public Connection {
     virtual void m_process();
 
     vrpn_ConnectionPtr m_vrpnConnection;
+    typedef std::vector<ConnectionDevicePtr> DeviceList;
+    DeviceList m_devices;
 };
 
 } // end of namespace ogvr

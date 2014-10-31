@@ -25,6 +25,7 @@
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
+#include <boost/range/algorithm.hpp>
 
 // Standard includes
 // - none
@@ -102,10 +103,17 @@ ConnectionDevicePtr
 VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
     ConnectionDevicePtr ret =
         make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
+    m_devices.push_back(ret);
     return ret;
 }
 
-void VrpnBasedConnection::m_process() { m_vrpnConnection->mainloop(); }
+void VrpnBasedConnection::m_process() {
+    m_vrpnConnection->mainloop();
+    boost::for_each(m_devices,
+                    [](ConnectionDevicePtr &dev) { dev->process(); });
+}
 
-VrpnBasedConnection::~VrpnBasedConnection() {}
+VrpnBasedConnection::~VrpnBasedConnection() {
+    /// @todo wait until all async threads are done
+}
 }
