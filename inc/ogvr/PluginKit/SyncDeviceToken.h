@@ -28,24 +28,25 @@
 #include <boost/optional.hpp>
 
 // Standard includes
-// - none
+#include <functional>
 
 namespace ogvr {
 class SyncDeviceToken : public DeviceToken {
   public:
+    typedef std::function<OGVR_PluginReturnCode()> UpdateCallback;
     SyncDeviceToken(std::string const &name);
     virtual ~SyncDeviceToken();
 
     virtual SyncDeviceToken *asSyncDevice();
 
-    void setUpdateCallback(OGVR_SyncDeviceUpdateCallback cb, void *userData);
+    void setUpdateCallback(UpdateCallback const &cb);
 
   protected:
     void m_sendData(MessageType *type, const char *bytestream, size_t len);
     virtual void m_connectionInteract();
 
   private:
-    boost::optional<CallbackWrapper<OGVR_SyncDeviceUpdateCallback> > m_cb;
+    UpdateCallback m_cb;
 };
 } // end of namespace ogvr
 #endif // INCLUDED_SyncDeviceToken_h_GUID_0A738016_90A8_4E81_B5C0_247478D59FD2

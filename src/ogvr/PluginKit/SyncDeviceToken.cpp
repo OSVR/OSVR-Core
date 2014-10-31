@@ -19,6 +19,7 @@
 // Internal Includes
 #include <ogvr/PluginKit/SyncDeviceToken.h>
 #include <ogvr/PluginKit/ConnectionDevice.h>
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -33,9 +34,9 @@ SyncDeviceToken::~SyncDeviceToken() {}
 
 SyncDeviceToken *SyncDeviceToken::asSyncDevice() { return this; }
 
-void SyncDeviceToken::setUpdateCallback(OGVR_SyncDeviceUpdateCallback cb,
-                                        void *userData) {
-    m_cb = CallbackWrapper<OGVR_SyncDeviceUpdateCallback>(cb, userData);
+void SyncDeviceToken::setUpdateCallback(UpdateCallback const &cb) {
+    OGVR_DEV_VERBOSE("In SyncDeviceToken::setUpdateCallback");
+    m_cb = cb;
 }
 
 void SyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
@@ -44,8 +45,9 @@ void SyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
 }
 
 void SyncDeviceToken::m_connectionInteract() {
+    OGVR_DEV_VERBOSE("In SyncDeviceToken::m_connectionInteract");
     if (m_cb) {
-        (*m_cb)();
+        m_cb();
     }
 }
 

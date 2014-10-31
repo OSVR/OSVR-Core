@@ -32,7 +32,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <functional>
 
 OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_DeviceToken dev,
                                          OGVR_MessageType msg,
@@ -135,7 +135,7 @@ OGVR_PluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
         OGVR_DEV_VERBOSE("This isn't a synchronous device token!");
         return OGVR_PLUGIN_FAILURE;
     }
-    syncdev->setUpdateCallback(updateCallback, userData);
+    syncdev->setUpdateCallback(std::bind(updateCallback, userData));
     return OGVR_PLUGIN_SUCCESS;
 }
 
