@@ -39,8 +39,7 @@ class vrpn_BaseFlexServer : public vrpn_BaseClass {
     virtual ~vrpn_BaseFlexServer() {}
 
     virtual void mainloop() {
-        OGVR_DEV_VERBOSE("In vrpn_BaseFlexServer::mainloop");
-        /// @todo service device here
+        /// @todo service device here? Device ends up being serviced in this object's owner, the VrpnConnectionDevice.
         server_mainloop();
     }
     void sendData(vrpn_uint32 msgID, const char *bytestream, size_t len) {

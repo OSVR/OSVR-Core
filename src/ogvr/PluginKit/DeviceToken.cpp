@@ -22,7 +22,6 @@
 #include <ogvr/PluginKit/SyncDeviceToken.h>
 #include <ogvr/PluginKit/Connection.h>
 #include <ogvr/PluginKit/ConnectionDevice.h>
-#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -61,7 +60,6 @@ void DeviceToken::sendData(MessageType *type, const char *bytestream,
 }
 
 void DeviceToken::connectionInteract() {
-    OGVR_DEV_VERBOSE("In DeviceToken::connectionInteract");
     m_connectionInteract();
 }
 

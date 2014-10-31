@@ -45,7 +45,6 @@ void SyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
 }
 
 void SyncDeviceToken::m_connectionInteract() {
-    OGVR_DEV_VERBOSE("In SyncDeviceToken::m_connectionInteract");
     if (m_cb) {
         m_cb();
     }
