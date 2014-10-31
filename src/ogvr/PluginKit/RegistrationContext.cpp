@@ -56,7 +56,10 @@ void RegistrationContext::loadPlugin(std::string const &pluginName) {
 }
 
 void RegistrationContext::adoptPluginRegistrationContext(PluginRegPtr ctx) {
-    /// @todo check to make sure we have setParent on the child context!
+    /// This set parent might be a duplicate, but won't be if the plugin reg ctx
+    /// is not created by loadPlugin above.
+    ctx->setParent(*this);
+
     m_regMap.insert(std::make_pair(ctx->getName(), ctx));
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Adopted registration context for "

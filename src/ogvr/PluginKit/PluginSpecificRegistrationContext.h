@@ -55,8 +55,11 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
 
     /// @brief Set parent registration context
     ///
-    /// Should be called only by RegistrationContext, and only once.
-    /// @throws std::logic_error if called when a parent is already set.
+    /// Should usually called only by RegistrationContext, and only once.
+    /// If called multiple times with the same parent, this is OK.
+    ///
+    /// @throws std::logic_error if called when a different parent is already
+    /// set.
     void setParent(RegistrationContext &parent);
 
     /// @brief Get parent registration context
