@@ -7,6 +7,9 @@ set(ogvrpluginkit_VERSION 0.1)
 ###
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
 option(BUILD_DEV_VERBOSE "Build with verbose development messages?" ON)
+if(WIN32)
+    option(Boost_USE_STATIC_LIBS "Build with Boost's static libraries?" ON)
+endif()
 
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
