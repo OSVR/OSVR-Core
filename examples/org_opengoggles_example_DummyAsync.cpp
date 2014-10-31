@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/PluginInterfaceC.h>
+#include <ogvr/PluginKit/PluginRegistration.h>
 #include <ogvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
@@ -60,14 +61,12 @@ class DummyAsyncDevice {
 OGVR_PLUGIN(org_opengoggles_example_DummyAsync) {
     /// Create an asynchronous (threaded) device
     OGVR_DeviceToken d;
-    ogvrDeviceAsyncInit(ctx, "My Async Device",
+    ogvrDeviceAsyncInit(ctx, "MyAsyncDevice",
                         &d); // Puts an object in d that knows it's a
                              // threaded device so ogvrDeviceSendData knows
                              // that it needs to get a connection lock first.
-    DummyAsyncDevice *myAsync = new DummyAsyncDevice(d);
-    ogvrPluginRegisterDataWithDeleteCallback(
-        ctx, &ogvr::detail::generic_deleter<DummyAsyncDevice>,
-        static_cast<void *>(myAsync));
+    DummyAsyncDevice *myAsync =
+        ogvr::plugin::registerObjectForDeletion(ctx, new DummyAsyncDevice(d));
     ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
                                  static_cast<void *>(myAsync));
     return OGVR_PLUGIN_SUCCESS;
