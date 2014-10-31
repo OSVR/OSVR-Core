@@ -25,7 +25,7 @@
 #include <ogvr/PluginKit/ConnectionDevicePtr.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
@@ -38,7 +38,7 @@ class SyncDeviceToken;
 class DeviceToken;
 typedef unique_ptr<DeviceToken> DeviceTokenPtr;
 
-class DeviceToken {
+class DeviceToken : boost::noncopyable {
   public:
     /// @name Factory functions
     /// @{
