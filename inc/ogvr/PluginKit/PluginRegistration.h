@@ -30,6 +30,7 @@
 // Standard includes
 #include <cstddef>
 #include <string>
+#include <stdexcept>
 
 namespace ogvr {
 namespace plugin {
@@ -49,10 +50,13 @@ namespace plugin {
     ///
     /// Internally uses ogvrPluginRegisterDataWithDeleteCallback()
     template <typename T>
-    inline OGVR_PluginReturnCode
-    registerObjectForDeletion(OGVR_PluginRegContext ctx, T *obj) {
-        return ogvrPluginRegisterDataWithDeleteCallback(
+    inline T *registerObjectForDeletion(OGVR_PluginRegContext ctx, T *obj) {
+        OGVR_PluginReturnCode ret = ogvrPluginRegisterDataWithDeleteCallback(
             ctx, &detail::generic_deleter<T>, static_cast<void *>(obj));
+        if (ret != OGVR_PLUGIN_SUCCESS) {
+            throw std::runtime_error("registerObjectForDeletion failed!");
+        }
+        return obj;
     }
 } // end of namespace plugin
 } // end of namespace ogvr
