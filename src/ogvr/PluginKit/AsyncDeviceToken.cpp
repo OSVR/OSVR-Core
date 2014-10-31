@@ -19,6 +19,7 @@
 // Internal Includes
 #include <ogvr/PluginKit/AsyncDeviceToken.h>
 #include <ogvr/PluginKit/ConnectionDevice.h>
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -51,6 +52,7 @@ void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
     m_run.signalAndWaitForStart();
 }
 void AsyncDeviceToken::m_waitCallbackLoop() {
+    OGVR_DEV_VERBOSE("AsyncDeviceToken::m_waitCallbackLoop starting");
     if (!m_cb) {
         return;
     }
@@ -58,10 +60,12 @@ void AsyncDeviceToken::m_waitCallbackLoop() {
     while (m_run.shouldContinue()) {
         (*m_cb)();
     }
+    OGVR_DEV_VERBOSE("AsyncDeviceToken::m_waitCallbackLoop exiting");
 }
 
 void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
                                   size_t len) {
+    OGVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData about to lock RTS");
     unique_lock<mutex> lockRTS(m_rtsMutex);
     assert(m_requestToSend == false);
     m_requestToSend = true;
