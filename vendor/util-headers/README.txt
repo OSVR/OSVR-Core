@@ -1,0 +1,1 @@
+Extracted from https://github.com/rpavlik/util-headers  at commit 94f7934d19090d7f76e3160c49c0dbafdc3ecf29
