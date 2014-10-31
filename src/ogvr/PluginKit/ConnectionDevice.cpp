@@ -24,3 +24,10 @@
 
 // Standard includes
 // - none
+
+namespace ogvr {
+ConnectionDevice::~ConnectionDevice() {}
+
+std::string const &ConnectionDevice::getName() const { return m_name; }
+ConnectionDevice::ConnectionDevice(std::string const &name) : m_name(name) {}
+} // end of namespace ogvr
