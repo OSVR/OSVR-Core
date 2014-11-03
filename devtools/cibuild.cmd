@@ -7,6 +7,7 @@ cd build
 cmake .. -G "Visual Studio 12" "-DCMAKE_INSTALL_PREFIX=%WORKSPACE%\install" %*
 cmake --build . --config Debug
 cmake --build . --config RelWithDebInfo
+cmake --build . --config RelWithDebInfo -- /p:RunCodeAnalysis=True
 cmake --build . --config RelWithDebInfo --target INSTALL
 
 rem bin\Debug\LoadTest.exe --gtest_output=xml:test_details.Debug.xml
