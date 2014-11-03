@@ -20,10 +20,10 @@
 #include <ogvr/PluginKit/ConnectionDevice.h>
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
-#include <cassert>
+// - none
 
 namespace ogvr {
 ConnectionDevice::~ConnectionDevice() {}
@@ -36,15 +36,16 @@ void ConnectionDevice::process() { m_process(); }
 
 void ConnectionDevice::sendData(MessageType *type, const char *bytestream,
                                 size_t len) {
+    BOOST_ASSERT(type);
     m_sendData(type, bytestream, len);
 }
 void ConnectionDevice::setDeviceToken(DeviceToken &token) {
-    assert(m_token == NULL);
+    BOOST_ASSERT(m_token == NULL);
     m_token = &token;
 }
 
 DeviceToken &ConnectionDevice::m_getDeviceToken() {
-    assert(m_token);
+    BOOST_ASSERT(m_token);
     return *m_token;
 }
 

@@ -27,7 +27,7 @@
 // - none
 
 // Standard includes
-#include <assert.h>
+// - none
 
 OGVR_PluginReturnCode
 ogvrPluginRegisterHardwarePollCallback(OGVR_PluginRegContext ctx,
