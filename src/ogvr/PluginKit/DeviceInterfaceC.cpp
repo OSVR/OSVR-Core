@@ -19,8 +19,8 @@
 // Internal Includes
 #include <ogvr/PluginKit/DeviceInterfaceC.h>
 #include <ogvr/PluginKit/PluginRegistration.h>
-#include <ogvr/PluginKit/AsyncDeviceToken.h>
-#include <ogvr/PluginKit/SyncDeviceToken.h>
+#include "AsyncDeviceToken.h"
+#include "SyncDeviceToken.h"
 #include <ogvr/PluginKit/DeviceToken.h>
 #include <ogvr/PluginKit/MessageType.h>
 #include <ogvr/PluginKit/Connection.h>

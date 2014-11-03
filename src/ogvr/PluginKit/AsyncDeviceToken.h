@@ -39,6 +39,9 @@ class AsyncDeviceToken : public DeviceToken {
 
     virtual AsyncDeviceToken *asAsyncDevice();
 
+    void signalShutdown();
+    void signalAndWaitForShutdown();
+
     void setWaitCallback(OGVR_AsyncDeviceWaitCallback cb, void *userData);
 
   private:

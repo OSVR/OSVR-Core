@@ -18,8 +18,8 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/DeviceToken.h>
-#include <ogvr/PluginKit/AsyncDeviceToken.h>
-#include <ogvr/PluginKit/SyncDeviceToken.h>
+#include "AsyncDeviceToken.h"
+#include "SyncDeviceToken.h"
 #include <ogvr/PluginKit/Connection.h>
 #include <ogvr/PluginKit/ConnectionDevice.h>
 

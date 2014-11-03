@@ -11,7 +11,6 @@ configure_file(Export.h.in "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
-    "${HEADER_LOCATION}/AsyncDeviceToken.h"
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/Connection.h"
     "${HEADER_LOCATION}/ConnectionPtr.h"
@@ -27,7 +26,6 @@ set(API
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
     "${HEADER_LOCATION}/RegistrationContext.h"
-    "${HEADER_LOCATION}/SyncDeviceToken.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(inc\\ogvr\\PluginKit FILES ${API})
 
@@ -43,6 +41,7 @@ source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
 set(SOURCE
     AsyncDeviceToken.cpp
+    AsyncDeviceToken.h
     Connection.cpp
     ConnectionDevice.cpp
     CreatePluginSpecificRegistrationContext.cpp
@@ -58,6 +57,7 @@ set(SOURCE
     RegistrationContext.cpp
     ResetPointerList.h
     SyncDeviceToken.cpp
+    SyncDeviceToken.h
     VrpnBasedConnection.cpp
     VrpnBasedConnection.h
     VrpnConnectionDevice.h

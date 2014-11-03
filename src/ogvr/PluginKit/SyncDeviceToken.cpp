@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/SyncDeviceToken.h>
+#include "SyncDeviceToken.h"
 #include <ogvr/PluginKit/ConnectionDevice.h>
 #include <ogvr/Util/Verbosity.h>
 
