@@ -78,7 +78,7 @@ namespace {
         CallbackWrapper<OGVR_AsyncDeviceWaitCallback> m_cb;
         util::RunLoopManagerBase *m_run;
     };
-}
+} // end of anonymous namespace
 
 void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
                                        void *userData) {
