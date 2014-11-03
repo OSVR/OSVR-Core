@@ -1,5 +1,8 @@
 /** @file
-    @brief Header
+    @brief Configured header file for verbosity macros.
+
+    If this filename ends in `.h`, don't edit it: your edits will
+    be lost next time this file is regenerated!
 
     @date 2014
 
