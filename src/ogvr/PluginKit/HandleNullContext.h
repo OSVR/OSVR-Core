@@ -20,6 +20,7 @@
 #define INCLUDED_HandleNullContext_h_GUID_3951FC65_BC2E_49BD_CACD_978BD4D8F337
 
 // Internal Includes
+#include <ogvr/Util/MacroToolsC.h>
 #include <ogvr/PluginKit/CommonC.h>
 
 // Library/third-party includes
@@ -31,12 +32,10 @@
 /// @brief Internal macro for use in C API function implementations to check the
 /// validity of a context parameter.
 #define OGVR_PLUGIN_HANDLE_NULL_CONTEXT(FUNC, CONTEXT_NAME)                    \
-    do {                                                                       \
-        if (!CONTEXT_NAME) {                                                   \
-            std::cerr << "ERROR (" FUNC "): Null context passed!"              \
-                      << std::endl;                                            \
-            return OGVR_PLUGIN_FAILURE;                                        \
-        }                                                                      \
-    } while (0)
+    OGVR_UTIL_MULTILINE_BEGIN if (!CONTEXT_NAME) {                             \
+        std::cerr << "ERROR (" FUNC "): Null context passed!" << std::endl;    \
+        return OGVR_PLUGIN_FAILURE;                                            \
+    }                                                                          \
+    OGVR_UTIL_MULTILINE_END
 
 #endif // INCLUDED_HandleNullContext_h_GUID_3951FC65_BC2E_49BD_CACD_978BD4D8F337
