@@ -26,7 +26,6 @@
 #include "AsyncAccessControl.h"
 
 // Library/third-party includes
-#include <boost/optional.hpp>
 #include <boost/thread.hpp>
 #include <util/RunLoopManagerBoost.h>
 
@@ -43,15 +42,17 @@ class AsyncDeviceToken : public DeviceToken {
     void signalShutdown();
     void signalAndWaitForShutdown();
 
+    /// @brief Runs the given "wait callback" to service the device.
     void setWaitCallback(OGVR_AsyncDeviceWaitCallback cb, void *userData);
 
   private:
-    void m_waitCallbackLoop();
+    /// Called from the async thread - only permitted to actually
+    /// send data when m_connectionInteract says so.
     virtual void m_sendData(MessageType *type, const char *bytestream,
                             size_t len);
+    /// Called from the main thread - services requests to send from
+    /// the async thread.
     virtual void m_connectionInteract();
-    boost::optional<CallbackWrapper<OGVR_AsyncDeviceWaitCallback> > m_cb;
-
     boost::thread m_callbackThread;
 
     AsyncAccessControl m_accessControl;

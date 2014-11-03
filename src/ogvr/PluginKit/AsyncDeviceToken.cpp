@@ -58,24 +58,33 @@ void AsyncDeviceToken::signalAndWaitForShutdown() {
     m_callbackThread.join();
 }
 
-void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
-                                       void *userData) {
-    m_cb = CallbackWrapper<OGVR_AsyncDeviceWaitCallback>(cb, userData);
-    m_callbackThread =
-        boost::thread(&AsyncDeviceToken::m_waitCallbackLoop, this);
-    m_run.signalAndWaitForStart();
+namespace {
+    /// @brief Function object for the wait callback loop of an AsyncDeviceToken
+    class WaitCallbackLoop {
+      public:
+        WaitCallbackLoop(util::RunLoopManagerBase &run,
+                         OGVR_AsyncDeviceWaitCallback cb, void *userData)
+            : m_cb(cb, userData), m_run(&run) {}
+        void operator()() {
+            OGVR_DEV_VERBOSE("WaitCallbackLoop starting");
+            util::LoopGuard guard(*m_run);
+            while (m_run->shouldContinue()) {
+                m_cb();
+            }
+            OGVR_DEV_VERBOSE("WaitCallbackLoop exiting");
+        }
+
+      private:
+        CallbackWrapper<OGVR_AsyncDeviceWaitCallback> m_cb;
+        util::RunLoopManagerBase *m_run;
+    };
 }
 
-void AsyncDeviceToken::m_waitCallbackLoop() {
-    OGVR_DEV_VERBOSE("AsyncDeviceToken::m_waitCallbackLoop starting");
-    if (!m_cb) {
-        return;
-    }
-    util::LoopGuard guard(m_run);
-    while (m_run.shouldContinue()) {
-        (*m_cb)();
-    }
-    OGVR_DEV_VERBOSE("AsyncDeviceToken::m_waitCallbackLoop exiting");
+void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
+                                       void *userData) {
+
+    m_callbackThread = boost::thread(WaitCallbackLoop(m_run, cb, userData));
+    m_run.signalAndWaitForStart();
 }
 
 void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
