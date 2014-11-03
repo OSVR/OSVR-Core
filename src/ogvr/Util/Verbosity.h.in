@@ -26,7 +26,12 @@
 
 #cmakedefine OGVR_UTIL_DEV_VERBOSE
 
-#ifdef OGVR_UTIL_DEV_VERBOSE
+/** @def OGVR_DEV_VERBOSE_DISABLE
+    @brief Define at the top of a file, before including Verbosity.h,
+    to disable verbose messages for that file only.
+*/
+
+#if defined(OGVR_UTIL_DEV_VERBOSE) && !defined(OGVR_DEV_VERBOSE_DISABLE)
 
 #include <iostream>
 #define OGVR_DEV_VERBOSE(X)                                                    \
