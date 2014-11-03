@@ -40,6 +40,8 @@ set(UTIL_API
 source_group(inc\\ogvr\\Util FILES ${UTIL_API})
 
 set(SOURCE
+    AsyncAccessControl.cpp
+    AsyncAccessControl.h
     AsyncDeviceToken.cpp
     AsyncDeviceToken.h
     Connection.cpp

@@ -23,6 +23,7 @@
 #include <ogvr/PluginKit/DeviceToken.h>
 #include <ogvr/PluginKit/DeviceInterfaceC.h>
 #include <ogvr/Util/CallbackWrapper.h>
+#include "AsyncAccessControl.h"
 
 // Library/third-party includes
 #include <boost/optional.hpp>
@@ -53,16 +54,7 @@ class AsyncDeviceToken : public DeviceToken {
 
     boost::thread m_callbackThread;
 
-    boost::mutex m_rtsMutex;
-    boost::mutex m_ctsMutex;
-    boost::condition_variable m_ctsCond;
-    boost::condition_variable m_sendFinishedCond;
-    /// @brief Controlled by condition variable.
-    /// @{
-    volatile bool m_requestToSend;
-    volatile bool m_clearToSend;
-    volatile bool m_sendFinished;
-    /// @}
+    AsyncAccessControl m_accessControl;
 
     util::RunLoopManagerBoost m_run;
 };
