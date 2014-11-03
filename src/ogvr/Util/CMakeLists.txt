@@ -37,6 +37,8 @@ set(SOURCE
     CallbackWrapper.cpp
     ResourcePath.cpp
     TimeValueC.cpp
+    PlatformConfig.h.in
+    Verbosity.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 source_group(src\\ogvr\\Util FILES ${SOURCE})
 
