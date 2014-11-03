@@ -24,16 +24,34 @@
 
 #cmakedefine OGVR_UTIL_DEV_VERBOSE
 
+/* See http://cnicholson.net/2009/03/stupid-c-tricks-dowhile0-and-c4127/ for
+   info on dodging silly warnings when using macros.
+*/
+
+#define OGVR_UTIL_MULTILINE_BEGIN do {
+#ifdef _MSC_VER
+#define OGVR_UTIL_MULTILINE_END                                                \
+    __pragma(warning(push)) __pragma(warning(disable : 4127))                  \
+    }                                                                          \
+    while (0)                                                                  \
+    __pragma(warning(pop))
+#else
+#define OGVR_UTIL_MULTILINE_END                                                \
+    }                                                                          \
+    while (0)
+#endif
+
 #ifdef OGVR_UTIL_DEV_VERBOSE
 
 #include <iostream>
-#define OGVR_DEV_VERBOSE(X) do {std::cout << X << std::endl;} while (0)
+#define OGVR_DEV_VERBOSE(X)                                                    \
+    OGVR_UTIL_MULTILINE_BEGIN std::cout << X << std::endl;                     \
+    OGVR_UTIL_MULTILINE_END
 
 #else
 
-#define OGVR_DEV_VERBOSE(X) do { } while (0)
+#define OGVR_DEV_VERBOSE(X) OGVR_UTIL_MULTILINE_BEGIN OGVR_UTIL_MULTILINE_END
 
 #endif
 
 #endif // INCLUDED_Verbosity_h_GUID_92D43527_D3AC_4BB4_FA39_91252412C1FF
-
