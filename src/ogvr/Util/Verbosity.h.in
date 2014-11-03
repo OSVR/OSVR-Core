@@ -22,24 +22,9 @@
 #ifndef INCLUDED_Verbosity_h_GUID_92D43527_D3AC_4BB4_FA39_91252412C1FF
 #define INCLUDED_Verbosity_h_GUID_92D43527_D3AC_4BB4_FA39_91252412C1FF
 
+#include <ogvr/Util/MacroToolsC.h>
+
 #cmakedefine OGVR_UTIL_DEV_VERBOSE
-
-/* See http://cnicholson.net/2009/03/stupid-c-tricks-dowhile0-and-c4127/ for
-   info on dodging silly warnings when using macros.
-*/
-
-#define OGVR_UTIL_MULTILINE_BEGIN do {
-#ifdef _MSC_VER
-#define OGVR_UTIL_MULTILINE_END                                                \
-    __pragma(warning(push)) __pragma(warning(disable : 4127))                  \
-    }                                                                          \
-    while (0)                                                                  \
-    __pragma(warning(pop))
-#else
-#define OGVR_UTIL_MULTILINE_END                                                \
-    }                                                                          \
-    while (0)
-#endif
 
 #ifdef OGVR_UTIL_DEV_VERBOSE
 

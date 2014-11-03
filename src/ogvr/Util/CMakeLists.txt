@@ -23,6 +23,7 @@ set(API
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
+    "${HEADER_LOCATION}/MacroToolsC.h"
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/SharedPtr.h"
     "${HEADER_LOCATION}/TimeValue.h"
