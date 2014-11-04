@@ -27,6 +27,7 @@
 /* Internal Includes */
 #include <ogvr/PluginKit/Export.h>
 #include <ogvr/PluginKit/CommonC.h>
+#include <ogvr/Util/AnnotationMacrosC.h>
 
 /* Library/third-party includes */
 #include <libfunctionality/PluginInterface.h>
@@ -85,8 +86,10 @@ typedef OGVR_PluginReturnCode (*OGVRHardwarePollCallback)(
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrPluginRegisterHardwarePollCallback(
-        OGVR_PluginRegContext ctx, OGVRHardwarePollCallback pollCallback,
-        void *userData OGVR_CPP_ONLY(= NULL));
+        OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+        OGVR_IN OGVRHardwarePollCallback pollCallback,
+        OGVR_IN_OPT void *userData OGVR_CPP_ONLY(= NULL))
+        OGVR_FUNC_NONNULL((1));
 /** @} */
 
 /** @name Plugin Instance Data
@@ -120,8 +123,9 @@ typedef void (*OGVR_PluginDataDeleteCallback)(void *pluginData);
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
     ogvrPluginRegisterDataWithDeleteCallback(
-        OGVR_PluginRegContext ctx, OGVR_PluginDataDeleteCallback deleteCallback,
-        void *pluginData);
+        OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+        OGVR_IN OGVR_PluginDataDeleteCallback deleteCallback,
+        OGVR_INOUT_PTR void *pluginData) OGVR_FUNC_NONNULL((1, 2, 3));
 /** @} */
 
 #ifdef __cplusplus

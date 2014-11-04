@@ -29,10 +29,9 @@
 // Standard includes
 // - none
 
-OGVR_PluginReturnCode
-ogvrPluginRegisterHardwarePollCallback(OGVR_PluginRegContext ctx,
-                                       OGVRHardwarePollCallback pollCallback,
-                                       void *userData) {
+OGVR_PluginReturnCode ogvrPluginRegisterHardwarePollCallback(
+    OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+    OGVR_IN OGVRHardwarePollCallback pollCallback, OGVR_IN_OPT void *userData) {
 
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrPluginRegisterHardwarePollCallback",
                                     ctx);
@@ -46,8 +45,9 @@ ogvrPluginRegisterHardwarePollCallback(OGVR_PluginRegContext ctx,
 }
 
 OGVR_PluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
-    OGVR_PluginRegContext ctx, OGVR_PluginDataDeleteCallback deleteCallback,
-    void *pluginData) {
+    OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+    OGVR_IN OGVR_PluginDataDeleteCallback deleteCallback,
+    OGVR_INOUT_PTR void *pluginData) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrPluginRegisterDataWithDeleteCallback",
                                     ctx);
     ogvr::PluginSpecificRegistrationContext *context =
