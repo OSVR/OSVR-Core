@@ -20,12 +20,10 @@
 #define INCLUDED_SyncDeviceToken_h_GUID_0A738016_90A8_4E81_B5C0_247478D59FD2
 
 // Internal Includes
-#include <ogvr/PluginKit/DeviceToken.h>
-#include <ogvr/PluginKit/DeviceInterfaceC.h>
-#include <ogvr/Util/CallbackWrapper.h>
+#include <ogvr/Connection/DeviceToken.h>
 
 // Library/third-party includes
-#include <boost/optional.hpp>
+// - none
 
 // Standard includes
 #include <functional>
@@ -33,20 +31,18 @@
 namespace ogvr {
 class SyncDeviceToken : public DeviceToken {
   public:
-    typedef std::function<OGVR_PluginReturnCode()> UpdateCallback;
     SyncDeviceToken(std::string const &name);
     virtual ~SyncDeviceToken();
 
-    virtual SyncDeviceToken *asSyncDevice();
-
-    void setUpdateCallback(UpdateCallback const &cb);
+    void setUpdateCallback(SyncDeviceUpdateCallback const &cb);
 
   protected:
     void m_sendData(MessageType *type, const char *bytestream, size_t len);
     virtual void m_connectionInteract();
 
   private:
-    UpdateCallback m_cb;
+    virtual SyncDeviceToken *asSync();
+    SyncDeviceUpdateCallback m_cb;
 };
 } // end of namespace ogvr
 #endif // INCLUDED_SyncDeviceToken_h_GUID_0A738016_90A8_4E81_B5C0_247478D59FD2

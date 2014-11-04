@@ -20,10 +20,10 @@
 #define INCLUDED_Connection_h_GUID_61C65986_E2C9_498F_59F0_8EFC712BA183
 
 // Internal Includes
-#include <ogvr/PluginKit/Export.h>
-#include <ogvr/PluginKit/MessageTypePtr.h>
-#include <ogvr/PluginKit/ConnectionDevicePtr.h>
-#include <ogvr/PluginKit/ConnectionPtr.h>
+#include <ogvr/Connection/Export.h>
+#include <ogvr/Connection/MessageTypePtr.h>
+#include <ogvr/Connection/ConnectionDevicePtr.h>
+#include <ogvr/Connection/ConnectionPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -43,37 +43,37 @@ class Connection : boost::noncopyable {
     /// More to come.
     /// @{
     /// @brief Factory method to create a local-machine-only connection
-    OGVR_PLUGINKIT_EXPORT static ConnectionPtr createLocalConnection();
+    OGVR_CONNECTION_EXPORT static ConnectionPtr createLocalConnection();
     /// @brief Factory method to create a shared connection
-    OGVR_PLUGINKIT_EXPORT static ConnectionPtr createSharedConnection();
+    OGVR_CONNECTION_EXPORT static ConnectionPtr createSharedConnection();
     /// @}
 
     /// @name Context Storage
     /// @{
     /// @brief Retrieve a connection pointer from a RegistrationContext
-    OGVR_PLUGINKIT_EXPORT static ConnectionPtr
+    OGVR_CONNECTION_EXPORT static ConnectionPtr
     retrieveConnection(const RegistrationContext &ctx);
     /// @brief Store a connection pointer in a RegistrationContext
-    OGVR_PLUGINKIT_EXPORT static void storeConnection(RegistrationContext &ctx,
-                                                      ConnectionPtr conn);
+    OGVR_CONNECTION_EXPORT static void storeConnection(RegistrationContext &ctx,
+                                                       ConnectionPtr conn);
     /// @}
 
     /// @brief Register (or retrieve registration) of a message type.
-    OGVR_PLUGINKIT_EXPORT MessageTypePtr
+    OGVR_CONNECTION_EXPORT MessageTypePtr
         registerMessageType(std::string const &messageId);
 
     /// @brief Register a full device name. This should be namespaced with the
     /// plugin name.
-    OGVR_PLUGINKIT_EXPORT ConnectionDevicePtr
+    OGVR_CONNECTION_EXPORT ConnectionDevicePtr
         registerDevice(std::string const &deviceName);
 
     /// @brief Process messages. This shouldn't block.
     ///
     /// Someone needs to call this method frequently.
-    OGVR_PLUGINKIT_EXPORT void process();
+    OGVR_CONNECTION_EXPORT void process();
 
     /// @brief Destructor
-    OGVR_PLUGINKIT_EXPORT virtual ~Connection();
+    OGVR_CONNECTION_EXPORT virtual ~Connection();
 
   protected:
     /// @brief (Subclass implementation) Register (or retrieve registration) of

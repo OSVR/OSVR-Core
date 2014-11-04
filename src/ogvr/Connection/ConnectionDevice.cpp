@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/ConnectionDevice.h>
+#include "ConnectionDevice.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>

@@ -34,7 +34,7 @@
 #define OGVR_PLUGIN_HANDLE_NULL_CONTEXT(FUNC, CONTEXT_NAME)                    \
     OGVR_UTIL_MULTILINE_BEGIN if (!CONTEXT_NAME) {                             \
         std::cerr << "ERROR (" FUNC "): Null context passed!" << std::endl;    \
-        return OGVR_PLUGIN_FAILURE;                                            \
+        return OGVR_RETURN_FAILURE;                                            \
     }                                                                          \
     OGVR_UTIL_MULTILINE_END
 

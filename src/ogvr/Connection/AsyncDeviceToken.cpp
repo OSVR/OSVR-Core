@@ -18,7 +18,7 @@
 
 // Internal Includes
 #include "AsyncDeviceToken.h"
-#include <ogvr/PluginKit/ConnectionDevice.h>
+#include "ConnectionDevice.h"
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -41,8 +41,6 @@ AsyncDeviceToken::~AsyncDeviceToken() {
     signalAndWaitForShutdown();
 }
 
-AsyncDeviceToken *AsyncDeviceToken::asAsyncDevice() { return this; }
-
 void AsyncDeviceToken::signalShutdown() {
     OGVR_DEV_VERBOSE("AsyncDeviceToken\t"
                      "In signalShutdown");
@@ -63,8 +61,8 @@ namespace {
     class WaitCallbackLoop {
       public:
         WaitCallbackLoop(util::RunLoopManagerBase &run,
-                         OGVR_AsyncDeviceWaitCallback cb, void *userData)
-            : m_cb(cb, userData), m_run(&run) {}
+                         AsyncDeviceWaitCallback const &cb)
+            : m_cb(cb), m_run(&run) {}
         void operator()() {
             OGVR_DEV_VERBOSE("WaitCallbackLoop starting");
             util::LoopGuard guard(*m_run);
@@ -75,18 +73,16 @@ namespace {
         }
 
       private:
-        CallbackWrapper<OGVR_AsyncDeviceWaitCallback> m_cb;
+        AsyncDeviceWaitCallback m_cb;
         util::RunLoopManagerBase *m_run;
     };
 } // end of anonymous namespace
 
-void AsyncDeviceToken::setWaitCallback(OGVR_AsyncDeviceWaitCallback cb,
-                                       void *userData) {
-
-    m_callbackThread = boost::thread(WaitCallbackLoop(m_run, cb, userData));
+void AsyncDeviceToken::setWaitCallback(AsyncDeviceWaitCallback const &cb) {
+    m_callbackThread = boost::thread(WaitCallbackLoop(m_run, cb));
     m_run.signalAndWaitForStart();
 }
-
+AsyncDeviceToken *AsyncDeviceToken::asAsync() { return this; }
 void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
                                   size_t len) {
     OGVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"

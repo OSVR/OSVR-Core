@@ -23,8 +23,8 @@
 // Internal Includes
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/Util/AnyMap.h>
-#include <ogvr/PluginKit/Export.h>
-#include <ogvr/PluginKit/CreatePluginSpecificRegistrationContext.h>
+#include <ogvr/PluginHost/Export.h>
+#include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -40,28 +40,29 @@ namespace ogvr {
 class RegistrationContext : boost::noncopyable {
   public:
     /// @brief basic constructor
-    OGVR_PLUGINKIT_EXPORT RegistrationContext();
+    OGVR_PLUGINHOST_EXPORT RegistrationContext();
 
     /// @brief Destructor responsible for destroying plugins in reverse order.
-    OGVR_PLUGINKIT_EXPORT ~RegistrationContext();
+    OGVR_PLUGINHOST_EXPORT ~RegistrationContext();
 
     /// @name Host-side (internal) API
     /// @{
     /// @brief Load a plugin from a dynamic library in this context
-    OGVR_PLUGINKIT_EXPORT void loadPlugin(std::string const &pluginName);
+    OGVR_PLUGINHOST_EXPORT void loadPlugin(std::string const &pluginName);
 
     /// @brief Assume ownership of a plugin-specific registration context
     /// created and initialized outside of loadPlugin.
-    OGVR_PLUGINKIT_EXPORT void adoptPluginRegistrationContext(PluginRegPtr ctx);
+    OGVR_PLUGINHOST_EXPORT void
+    adoptPluginRegistrationContext(PluginRegPtr ctx);
 
     /// @brief Trigger any registered hardware poll callbacks.
-    OGVR_PLUGINKIT_EXPORT void triggerHardwarePoll();
+    OGVR_PLUGINHOST_EXPORT void triggerHardwarePoll();
 
     /// @brief Access the data storage map.
-    OGVR_PLUGINKIT_EXPORT AnyMap &data();
+    OGVR_PLUGINHOST_EXPORT AnyMap &data();
 
     /// @brief Const access the data storage map.
-    OGVR_PLUGINKIT_EXPORT AnyMap const &data() const;
+    OGVR_PLUGINHOST_EXPORT AnyMap const &data() const;
     /// @}
 
   private:

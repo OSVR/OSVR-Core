@@ -5,7 +5,7 @@
 
     @author
     Ryan Pavlik
-    <ryan@sensics.com>;
+    <ryan@sensics.com>
     <http://sensics.com>
 */
 
@@ -17,10 +17,18 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/Util/CallbackWrapper.h>
+#include <ogvr/Connection/MessageType.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+namespace ogvr {
+MessageType::~MessageType() {}
+
+std::string const &MessageType::getName() const { return m_name; }
+
+MessageType::MessageType(std::string const &name) : m_name(name) {}
+} // end of namespace ogvr

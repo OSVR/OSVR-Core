@@ -27,6 +27,7 @@
 /* Internal Includes */
 #include <ogvr/PluginKit/Export.h>
 #include <ogvr/PluginKit/CommonC.h>
+#include <ogvr/Util/PluginCallbackTypesC.h>
 #include <ogvr/Util/AnnotationMacrosC.h>
 
 /* Library/third-party includes */
@@ -51,8 +52,8 @@ extern "C" {
 
     Treat it as if it were a function declaration, since that is what it will
    expand to. The function body you write calls some subset of the plugin
-   registration methods, then returns either success (OGVR_PLUGIN_SUCCESS)
-   or failure (OGVR_PLUGIN_FAILURE).
+   registration methods, then returns either success (OGVR_RETURN_SUCCESS)
+   or failure (OGVR_RETURN_FAILURE).
 
     Your function body receives a single argument, of type
    OGVR_PluginRegContext,
@@ -67,10 +68,6 @@ extern "C" {
     @{
 */
 
-/** @brief Function type of a Hardware Poll callback */
-typedef OGVR_PluginReturnCode (*OGVRHardwarePollCallback)(
-    OGVR_PluginRegContext ctx, void *userData);
-
 /** @brief Register a callback in your plugin to be notified when hardware
    should be polled again.
 
@@ -84,12 +81,10 @@ typedef OGVR_PluginReturnCode (*OGVRHardwarePollCallback)(
    @param userData An optional opaque pointer that will be returned to you when
    the callback you register here is called.
 */
-OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrPluginRegisterHardwarePollCallback(
-        OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
-        OGVR_IN OGVRHardwarePollCallback pollCallback,
-        OGVR_IN_OPT void *userData OGVR_CPP_ONLY(= NULL))
-        OGVR_FUNC_NONNULL((1));
+OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrPluginRegisterHardwarePollCallback(
+    OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+    OGVR_IN OGVRHardwarePollCallback pollCallback,
+    OGVR_IN_OPT void *userData OGVR_CPP_ONLY(= NULL)) OGVR_FUNC_NONNULL((1));
 /** @} */
 
 /** @name Plugin Instance Data
@@ -101,9 +96,6 @@ OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
 
     @{
 */
-
-/** @brief Function type of a Plugin Data Delete callback */
-typedef void (*OGVR_PluginDataDeleteCallback)(void *pluginData);
 
 /** @brief Register plugin data along with an appropriate deleter callback.
 
@@ -121,11 +113,10 @@ typedef void (*OGVR_PluginDataDeleteCallback)(void *pluginData);
     @param pluginData A pointer to your data, treated as opaque by this library,
    and passed to your deleter.
 */
-OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrPluginRegisterDataWithDeleteCallback(
-        OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
-        OGVR_IN OGVR_PluginDataDeleteCallback deleteCallback,
-        OGVR_INOUT_PTR void *pluginData) OGVR_FUNC_NONNULL((1, 2, 3));
+OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrPluginRegisterDataWithDeleteCallback(
+    OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+    OGVR_IN OGVR_PluginDataDeleteCallback deleteCallback,
+    OGVR_INOUT_PTR void *pluginData) OGVR_FUNC_NONNULL((1, 2, 3));
 /** @} */
 
 #ifdef __cplusplus

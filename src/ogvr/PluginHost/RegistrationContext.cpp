@@ -18,8 +18,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/RegistrationContext.h>
-#include "PluginSpecificRegistrationContext.h"
+#include <ogvr/PluginHost/RegistrationContext.h>
+#include "PluginSpecificRegistrationContextImpl.h"
 #include "ResetPointerList.h"
 #include <ogvr/Util/Verbosity.h>
 
@@ -42,12 +42,13 @@ RegistrationContext::~RegistrationContext() {
 }
 
 void RegistrationContext::loadPlugin(std::string const &pluginName) {
-    PluginRegPtr pluginReg(createPluginSpecificRegistrationContext(pluginName));
+    PluginRegPtr pluginReg(
+        PluginSpecificRegistrationContext::create(pluginName));
     pluginReg->setParent(*this);
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Plugin context created, loading plugin");
     libfunc::PluginHandle plugin = libfunc::loadPluginByName(
-        pluginName, extractPluginRegistrationContext(pluginReg));
+        pluginName, pluginReg->extractOpaquePointer());
     OGVR_DEV_VERBOSE("RegistrationContext:\t"
                      "Plugin loaded, assuming ownership of plugin handle and "
                      "storing context");

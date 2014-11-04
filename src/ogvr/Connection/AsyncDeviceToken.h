@@ -20,8 +20,7 @@
 #define INCLUDED_AsyncDeviceToken_h_GUID_654218B0_3900_4B89_E86F_D314EB6C0ABF
 
 // Internal Includes
-#include <ogvr/PluginKit/DeviceToken.h>
-#include <ogvr/PluginKit/DeviceInterfaceC.h>
+#include <ogvr/Connection/DeviceToken.h>
 #include <ogvr/Util/CallbackWrapper.h>
 #include "AsyncAccessControl.h"
 
@@ -37,15 +36,14 @@ class AsyncDeviceToken : public DeviceToken {
     AsyncDeviceToken(std::string const &name);
     virtual ~AsyncDeviceToken();
 
-    virtual AsyncDeviceToken *asAsyncDevice();
-
     void signalShutdown();
     void signalAndWaitForShutdown();
 
     /// @brief Runs the given "wait callback" to service the device.
-    void setWaitCallback(OGVR_AsyncDeviceWaitCallback cb, void *userData);
+    void setWaitCallback(AsyncDeviceWaitCallback const &cb);
 
   private:
+    virtual AsyncDeviceToken *asAsync();
     /// Called from the async thread - only permitted to actually
     /// send data when m_connectionInteract says so.
     virtual void m_sendData(MessageType *type, const char *bytestream,

@@ -39,7 +39,7 @@ class DummyAsyncDevice {
     /// function
     /// as long as things are running. So this function waits for the next
     /// message from the device and passes it on.
-    static OGVR_PluginReturnCode wait(void *userData) {
+    static OGVR_ReturnCode wait(void *userData) {
         return static_cast<DummyAsyncDevice *>(userData)->m_wait();
     }
     ~DummyAsyncDevice() {
@@ -48,12 +48,12 @@ class DummyAsyncDevice {
     }
 
   private:
-    OGVR_PluginReturnCode m_wait() {
+    OGVR_ReturnCode m_wait() {
         // block on waiting for data.
         // once we have enough, call
         char *mydata = NULL;
         ogvrDeviceSendData(m_dev, mydata, 0);
-        return OGVR_PLUGIN_SUCCESS;
+        return OGVR_RETURN_SUCCESS;
     }
     OGVR_DeviceToken m_dev;
 };
@@ -72,5 +72,5 @@ OGVR_PLUGIN(org_opengoggles_example_selfcontainedDummyAsync) {
         static_cast<void *>(myAsync));
     ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
                                  static_cast<void *>(myAsync));
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }
