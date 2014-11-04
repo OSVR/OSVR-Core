@@ -48,11 +48,21 @@
 #define OGVR_INOUT _Inout_
 #define OGVR_INOUT_PTR _Inout_
 
-#endif
 /* end of msvc section */
+#elif defined(__GNUC__)
+/* section for GCC and GCC-alikes */
 
+#if defined(__clang__)
+/* clang-specific section */
 #endif
+
+#define OGVR_FUNC_NONNULL(X) __attribute__((__nonnull__ X))
+
+/* end of gcc section and compiler detection */
+#endif
+
 /* end of ndef disable analysis */
+#endif
 
 /* Fallback declarations */
 /** @defgroup annotation_macros Utilities: Static analysis annotation macros
@@ -157,7 +167,26 @@
 #endif
 
 /* End of parameter annotations. */
+/** @} */
 
+/** @name Function annotations
+
+    These indicate particular relevant aspects about a function. Some
+    duplicate the effective meaning of parameter annotations: applying both
+    allows the fullest extent of static analysis tools to analyze the code.
+
+    These should be placed after a function declaration (but before the
+   semicolon). Repeating them in the definition is not needed.
+   @{
+*/
+#ifndef OGVR_FUNC_NONNULL
+/** @brief Indicates the parameter(s) that must be non-null.
+
+    @param X A parenthesized list of parameters by number (1-based index)
+*/
+#define OGVR_FUNC_NONNULL(X)
+#endif
+/* End of function annotations. */
 /** @} */
 
 /* End of annotation group. */
