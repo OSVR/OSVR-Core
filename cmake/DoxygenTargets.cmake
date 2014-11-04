@@ -2,6 +2,9 @@
 #
 #  include(DoxygenTargets)
 #  add_doxygen(<doxyfile> [OUTPUT_DIRECTORY <outputdir>]
+#   [EXTRA_INPUT <single path or quoted list of paths>]
+#   [EXTRA_STRIP_FROM_PATH <single path or quoted list of paths>]
+#   [EXTRA_STRIP_FROM_INC_PATH <single path or quoted list of paths>]
 #   [INSTALL_DESTINATION <installdir>
 #   [INSTALL_COMPONENT <installcomponent>]
 #   [INSTALL_PDF_NAME <installpdfname>] ]
@@ -147,6 +150,9 @@ function(add_doxygen _doxyfile)
 	set(_curdest _nowhere)
 	set(_val_args
 		OUTPUT_DIRECTORY
+		EXTRA_INPUT
+		EXTRA_STRIP_FROM_PATH
+		EXTRA_STRIP_FROM_INC_PATH
 		DOC_TARGET
 		INSTALL_DESTINATION
 		INSTALL_COMPONENT
