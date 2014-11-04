@@ -34,9 +34,11 @@
 // Standard includes
 #include <functional>
 
-OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_INOUT OGVR_DeviceToken dev,
-                                         OGVR_IN OGVR_MessageType msg,
-                                         const char *bytestream, size_t len) {
+OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
+                                         OGVR_IN_PTR OGVR_MessageType msg,
+                                         OGVR_IN_READS(len)
+                                             const char *bytestream,
+                                         OGVR_IN size_t len) {
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSendData device token", dev);
@@ -48,9 +50,9 @@ OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_INOUT OGVR_DeviceToken dev,
 }
 
 OGVR_PluginReturnCode
-ogvrDeviceRegisterMessageType(OGVR_INOUT OGVR_PluginRegContext ctx,
+ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
                               OGVR_IN_STRZ const char *name,
-                              OGVR_OUT OGVR_MessageType *msgtype) {
+                              OGVR_OUT_PTR OGVR_MessageType *msgtype) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceRegisterMessageType", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceRegisterMessageType for a message named "
                      << name);
@@ -115,9 +117,10 @@ ogvrDeviceGenericInit(OGVR_PluginRegContext ctx, const char *name,
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
-                                         OGVR_IN_STRZ const char *name,
-                                         OGVR_OUT OGVR_DeviceToken *device) {
+OGVR_PluginReturnCode
+ogvrDeviceSyncInit(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+                   OGVR_IN_STRZ const char *name,
+                   OGVR_OUT_PTR OGVR_DeviceToken *device) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSyncInit", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncInit for a device named " << name);
     return ogvrDeviceGenericInit(ctx, name, device,
@@ -125,7 +128,7 @@ OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
 }
 
 OGVR_PluginReturnCode
-ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT OGVR_DeviceToken device,
+ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT_PTR OGVR_DeviceToken device,
                                      OGVR_IN OGVR_SyncDeviceUpdateCallback
                                          updateCallback,
                                      OGVR_IN_OPT void *userData) {
@@ -142,9 +145,10 @@ ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT OGVR_DeviceToken device,
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
-                                          OGVR_IN_STRZ const char *name,
-                                          OGVR_OUT OGVR_DeviceToken *device) {
+OGVR_PluginReturnCode
+ogvrDeviceAsyncInit(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+                    OGVR_IN_STRZ const char *name,
+                    OGVR_OUT_PTR OGVR_DeviceToken *device) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAsyncInit", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncInit for a device named " << name);
     return ogvrDeviceGenericInit(ctx, name, device,
@@ -152,7 +156,7 @@ OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
 }
 
 OGVR_PluginReturnCode
-ogvrDeviceAsyncStartWaitLoop(OGVR_INOUT OGVR_DeviceToken device,
+ogvrDeviceAsyncStartWaitLoop(OGVR_INOUT_PTR OGVR_DeviceToken device,
                              OGVR_IN OGVR_AsyncDeviceWaitCallback waitCallback,
                              OGVR_IN_OPT void *userData) {
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncStartWaitLoop");
