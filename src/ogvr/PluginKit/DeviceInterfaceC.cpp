@@ -19,14 +19,12 @@
 // Internal Includes
 #include <ogvr/PluginKit/DeviceInterfaceC.h>
 #include <ogvr/PluginKit/PluginRegistration.h>
-#include "AsyncDeviceToken.h"
-#include "SyncDeviceToken.h"
-#include <ogvr/PluginKit/DeviceToken.h>
-#include <ogvr/PluginKit/MessageType.h>
-#include <ogvr/PluginKit/Connection.h>
+#include <ogvr/PluginHost/RegistrationContext.h>
+#include <ogvr/Connection/DeviceToken.h>
+#include <ogvr/Connection/MessageType.h>
+#include <ogvr/Connection/Connection.h>
 #include <ogvr/Util/Verbosity.h>
 #include "HandleNullContext.h"
-#include "PluginSpecificRegistrationContext.h"
 
 // Library/third-party includes
 // - none
@@ -34,11 +32,10 @@
 // Standard includes
 #include <functional>
 
-OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
-                                         OGVR_IN_PTR OGVR_MessageType msg,
-                                         OGVR_IN_READS(len)
-                                             const char *bytestream,
-                                         OGVR_IN size_t len) {
+OGVR_ReturnCode ogvrDeviceSendData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
+                                   OGVR_IN_PTR OGVR_MessageType msg,
+                                   OGVR_IN_READS(len) const char *bytestream,
+                                   OGVR_IN size_t len) {
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSendData device token", dev);
@@ -46,10 +43,10 @@ OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
     ogvr::DeviceToken *device = static_cast<ogvr::DeviceToken *>(dev);
     ogvr::MessageType *msgType = static_cast<ogvr::MessageType *>(msg);
     device->sendData(msgType, bytestream, len);
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }
 
-OGVR_PluginReturnCode
+OGVR_ReturnCode
 ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
                               OGVR_IN_STRZ const char *name,
                               OGVR_OUT_PTR OGVR_MessageType *msgtype) {
@@ -57,11 +54,9 @@ ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
     OGVR_DEV_VERBOSE("In ogvrDeviceRegisterMessageType for a message named "
                      << name);
 
-    ogvr::PluginSpecificRegistrationContext *context =
-        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
     // Extract the connection from the overall context
-    ogvr::ConnectionPtr conn =
-        ogvr::Connection::retrieveConnection(context->getParent());
+    ogvr::ConnectionPtr conn = ogvr::Connection::retrieveConnection(
+        ogvr::PluginSpecificRegistrationContext::get(ctx).getParent());
     ogvr::MessageTypePtr ret = conn->registerMessageType(name);
 
     // Transfer ownership of the message type object to the plugin context.
@@ -70,39 +65,38 @@ ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
     } catch (std::exception &e) {
         std::cerr << "Error in ogvrDeviceRegisterMessageType: " << e.what()
                   << std::endl;
-        return OGVR_PLUGIN_FAILURE;
+        return OGVR_RETURN_FAILURE;
     } catch (...) {
-        return OGVR_PLUGIN_FAILURE;
+        return OGVR_RETURN_FAILURE;
     }
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }
 
 template <typename FactoryFunction>
-inline static OGVR_PluginReturnCode
+inline static OGVR_ReturnCode
 ogvrDeviceGenericInit(OGVR_PluginRegContext ctx, const char *name,
                       OGVR_DeviceToken *device, FactoryFunction f) {
-    ogvr::PluginSpecificRegistrationContext *context =
-        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
     // Compute the name by combining plugin name with the given name
-    std::string qualifiedName = context->getName() + "/" + name;
+    std::string qualifiedName =
+        ogvr::PluginSpecificRegistrationContext::get(ctx).getName() + "/" +
+        name;
 
     OGVR_DEV_VERBOSE("Qualified name: " << qualifiedName);
 
-    ogvr::RegistrationContext &overallContext(context->getParent());
     // Extract the connection from the overall context
-    ogvr::ConnectionPtr conn =
-        ogvr::Connection::retrieveConnection(overallContext);
+    ogvr::ConnectionPtr conn = ogvr::Connection::retrieveConnection(
+        ogvr::PluginSpecificRegistrationContext::get(ctx).getParent());
     if (!conn) {
         OGVR_DEV_VERBOSE(
             "ogvrDeviceGenericInit Got a null Connection pointer - "
             "this shouldn't happen!");
-        return OGVR_PLUGIN_FAILURE;
+        return OGVR_RETURN_FAILURE;
     }
     ogvr::DeviceTokenPtr dev = f(qualifiedName, conn);
     if (!dev) {
         OGVR_DEV_VERBOSE("Device token factory returned a null "
                          "pointer - this shouldn't happen!");
-        return OGVR_PLUGIN_FAILURE;
+        return OGVR_RETURN_FAILURE;
     }
     // Transfer ownership of the device token object to the plugin context.
     try {
@@ -110,24 +104,23 @@ ogvrDeviceGenericInit(OGVR_PluginRegContext ctx, const char *name,
     } catch (std::exception &e) {
         std::cerr << "Error in ogvrDeviceGenericInit: " << e.what()
                   << std::endl;
-        return OGVR_PLUGIN_FAILURE;
+        return OGVR_RETURN_FAILURE;
     } catch (...) {
-        return OGVR_PLUGIN_FAILURE;
+        return OGVR_RETURN_FAILURE;
     }
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }
 
-OGVR_PluginReturnCode
-ogvrDeviceSyncInit(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
-                   OGVR_IN_STRZ const char *name,
-                   OGVR_OUT_PTR OGVR_DeviceToken *device) {
+OGVR_ReturnCode ogvrDeviceSyncInit(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+                                   OGVR_IN_STRZ const char *name,
+                                   OGVR_OUT_PTR OGVR_DeviceToken *device) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSyncInit", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncInit for a device named " << name);
     return ogvrDeviceGenericInit(ctx, name, device,
                                  ogvr::DeviceToken::createSyncDevice);
 }
 
-OGVR_PluginReturnCode
+OGVR_ReturnCode
 ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT_PTR OGVR_DeviceToken device,
                                      OGVR_IN OGVR_SyncDeviceUpdateCallback
                                          updateCallback,
@@ -135,39 +128,44 @@ ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT_PTR OGVR_DeviceToken device,
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncRegisterUpdateCallback");
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT(
         "ogvrDeviceSyncRegisterUpdateCallback device token", device);
-    ogvr::SyncDeviceToken *syncdev =
-        static_cast<ogvr::DeviceToken *>(device)->asSyncDevice();
-    if (!syncdev) {
-        OGVR_DEV_VERBOSE("This isn't a synchronous device token!");
-        return OGVR_PLUGIN_FAILURE;
+    ogvr::DeviceToken *dev = static_cast<ogvr::DeviceToken *>(device);
+    try {
+        dev->setSyncUpdateCallback(std::bind(updateCallback, userData));
+    } catch (std::logic_error &e) {
+        OGVR_DEV_VERBOSE("Caught a logic error setting update callback - "
+                         "likely that this isn't a synchronous device token. "
+                         "Details: "
+                         << e.what());
+        return OGVR_RETURN_FAILURE;
     }
-    syncdev->setUpdateCallback(std::bind(updateCallback, userData));
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }
 
-OGVR_PluginReturnCode
-ogvrDeviceAsyncInit(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
-                    OGVR_IN_STRZ const char *name,
-                    OGVR_OUT_PTR OGVR_DeviceToken *device) {
+OGVR_ReturnCode ogvrDeviceAsyncInit(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
+                                    OGVR_IN_STRZ const char *name,
+                                    OGVR_OUT_PTR OGVR_DeviceToken *device) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAsyncInit", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncInit for a device named " << name);
     return ogvrDeviceGenericInit(ctx, name, device,
                                  ogvr::DeviceToken::createAsyncDevice);
 }
 
-OGVR_PluginReturnCode
+OGVR_ReturnCode
 ogvrDeviceAsyncStartWaitLoop(OGVR_INOUT_PTR OGVR_DeviceToken device,
                              OGVR_IN OGVR_AsyncDeviceWaitCallback waitCallback,
                              OGVR_IN_OPT void *userData) {
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncStartWaitLoop");
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAsyncStartWaitLoop device token",
                                     device);
-    ogvr::AsyncDeviceToken *asyncdev =
-        static_cast<ogvr::DeviceToken *>(device)->asAsyncDevice();
-    if (!asyncdev) {
-        OGVR_DEV_VERBOSE("This isn't an asynchronous device token!");
-        return OGVR_PLUGIN_FAILURE;
+    ogvr::DeviceToken *dev = static_cast<ogvr::DeviceToken *>(device);
+    try {
+        dev->setAsyncWaitCallback(std::bind(waitCallback, userData));
+    } catch (std::logic_error &e) {
+        OGVR_DEV_VERBOSE("Caught a logic error setting update callback - "
+                         "likely that this isn't an asynchronous device token. "
+                         "Details: "
+                         << e.what());
+        return OGVR_RETURN_FAILURE;
     }
-    asyncdev->setWaitCallback(waitCallback, userData);
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }

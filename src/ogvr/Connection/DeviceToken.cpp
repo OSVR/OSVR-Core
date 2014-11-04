@@ -17,11 +17,11 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/DeviceToken.h>
+#include <ogvr/Connection/DeviceToken.h>
 #include "AsyncDeviceToken.h"
 #include "SyncDeviceToken.h"
-#include <ogvr/PluginKit/Connection.h>
-#include <ogvr/PluginKit/ConnectionDevice.h>
+#include <ogvr/Connection/Connection.h>
+#include "ConnectionDevice.h"
 
 // Library/third-party includes
 // - none
@@ -48,10 +48,6 @@ DeviceToken::DeviceToken(std::string const &name) : m_name(name) {}
 
 DeviceToken::~DeviceToken() {}
 
-AsyncDeviceToken *DeviceToken::asAsyncDevice() { return NULL; }
-
-SyncDeviceToken *DeviceToken::asSyncDevice() { return NULL; }
-
 std::string const &DeviceToken::getName() const { return m_name; }
 
 void DeviceToken::sendData(MessageType *type, const char *bytestream,
@@ -59,11 +55,32 @@ void DeviceToken::sendData(MessageType *type, const char *bytestream,
     m_sendData(type, bytestream, len);
 }
 
+void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
+    AsyncDeviceToken *dev = this->asAsync();
+    if (!dev) {
+        throw std::logic_error(
+            "Called setAsyncWaitCallback on a non-async device token!");
+    }
+    dev->setWaitCallback(cb);
+}
+
+void DeviceToken::setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb) {
+    SyncDeviceToken *dev = this->asSync();
+    if (!dev) {
+        throw std::logic_error(
+            "Called setSyncUpdateCallback on a non-sync device token!");
+    }
+    dev->setUpdateCallback(cb);
+}
+
 void DeviceToken::connectionInteract() { m_connectionInteract(); }
 
 ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
 
 ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
+
+AsyncDeviceToken *DeviceToken::asAsync() { return NULL; }
+SyncDeviceToken *DeviceToken::asSync() { return NULL; }
 
 void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
     m_conn = conn;

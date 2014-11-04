@@ -18,8 +18,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/RegistrationContext.h>
-#include <ogvr/PluginKit/Connection.h>
+#include <ogvr/PluginHost/RegistrationContext.h>
+#include <ogvr/Connection/Connection.h>
 
 // Library/third-party includes
 // - none

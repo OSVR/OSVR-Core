@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include "PluginSpecificRegistrationContext.h"
+#include "PluginSpecificRegistrationContextImpl.h"
 #include <ogvr/Util/Verbosity.h>
 #include "ResetPointerList.h"
 
@@ -29,30 +29,31 @@
 
 namespace ogvr {
 
-PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
+PluginSpecificRegistrationContextImpl::PluginSpecificRegistrationContextImpl(
     std::string const &name)
-    : m_name(name), m_parent(NULL) {
-    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
-                     << "Creating a plugin registration context for "
-                     << m_name);
+    : PluginSpecificRegistrationContext(name), m_parent(NULL) {
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContextImpl:\t"
+                     << "Creating a plugin registration context for " << name);
 }
 
-PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {
-    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+PluginSpecificRegistrationContextImpl::
+    ~PluginSpecificRegistrationContextImpl() {
+    OGVR_DEV_VERBOSE("PluginSpecificRegistrationContextImpl:\t"
                      "Destroying plugin reg context for "
-                     << m_name);
+                     << getName());
 
     // Delete the data in reverse order.
     detail::resetPointerRange(m_dataList | boost::adaptors::reversed);
     m_parent = NULL; // before anything else destructs, for safety?
 }
 
-void PluginSpecificRegistrationContext::takePluginHandle(
+void PluginSpecificRegistrationContextImpl::takePluginHandle(
     libfunc::PluginHandle &handle) {
     m_handle = handle;
 }
 
-void PluginSpecificRegistrationContext::setParent(RegistrationContext &parent) {
+void
+PluginSpecificRegistrationContextImpl::setParent(RegistrationContext &parent) {
     if (m_parent != NULL && m_parent != &parent) {
         throw std::logic_error(
             "Can't set the registration context parent - already set!");
@@ -60,7 +61,7 @@ void PluginSpecificRegistrationContext::setParent(RegistrationContext &parent) {
     m_parent = &parent;
 }
 
-RegistrationContext &PluginSpecificRegistrationContext::getParent() {
+RegistrationContext &PluginSpecificRegistrationContextImpl::getParent() {
     if (m_parent == NULL) {
         throw std::logic_error(
             "Can't access the registration context parent - it is null!");
@@ -69,7 +70,7 @@ RegistrationContext &PluginSpecificRegistrationContext::getParent() {
 }
 
 RegistrationContext const &
-PluginSpecificRegistrationContext::getParent() const {
+PluginSpecificRegistrationContextImpl::getParent() const {
     if (m_parent == NULL) {
         throw std::logic_error(
             "Can't access the registration context parent - it is null!");
@@ -77,29 +78,25 @@ PluginSpecificRegistrationContext::getParent() const {
     return *m_parent;
 }
 
-const std::string &PluginSpecificRegistrationContext::getName() const {
-    return m_name;
-}
-
-void PluginSpecificRegistrationContext::callHardwarePollCallbacks() {
+void PluginSpecificRegistrationContextImpl::callHardwarePollCallbacks() {
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "In callHardwarePollCallbacks for "
-                     << m_name);
+                     << getName());
 
     boost::for_each(m_hardwarePollCallbacks,
                     [this](HardwarePollCallback const &f) { f(this); });
 }
 
-void PluginSpecificRegistrationContext::registerDataWithDeleteCallback(
+void PluginSpecificRegistrationContextImpl::registerDataWithDeleteCallback(
     OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData) {
     m_dataList.emplace_back(PluginDataPtr(pluginData, deleteCallback));
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "Now have "
                      << m_dataList.size()
-                     << " data delete callbacks registered for " << m_name);
+                     << " data delete callbacks registered for " << getName());
 }
 
-void PluginSpecificRegistrationContext::registerHardwarePollCallback(
+void PluginSpecificRegistrationContextImpl::registerHardwarePollCallback(
     OGVRHardwarePollCallback pollCallback, void *userData) {
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "In registerHardwarePollCallback");
@@ -108,11 +105,14 @@ void PluginSpecificRegistrationContext::registerHardwarePollCallback(
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "Now have "
                      << m_hardwarePollCallbacks.size()
-                     << " hardware poll callbacks registered for " << m_name);
+                     << " hardware poll callbacks registered for "
+                     << getName());
 }
 
-AnyMap &PluginSpecificRegistrationContext::data() { return m_data; }
+AnyMap &PluginSpecificRegistrationContextImpl::data() { return m_data; }
 
-AnyMap const &PluginSpecificRegistrationContext::data() const { return m_data; }
+AnyMap const &PluginSpecificRegistrationContextImpl::data() const {
+    return m_data;
+}
 
 } // end of namespace ogvr

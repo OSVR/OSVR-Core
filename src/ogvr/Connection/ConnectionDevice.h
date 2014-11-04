@@ -20,7 +20,7 @@
 #define INCLUDED_ConnectionDevice_h_GUID_C04223D7_51D1_49BE_91AB_73FCA9C88515
 
 // Internal Includes
-#include <ogvr/PluginKit/ConnectionDevicePtr.h>
+#include <ogvr/Connection/ConnectionDevicePtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>

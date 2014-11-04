@@ -44,5 +44,5 @@ OGVR_PLUGIN(org_opengoggles_example_NullDevice) {
         ctx, &ogvr::detail::generic_deleter<DummyDevice>,
         static_cast<void *>(myDevice));
 
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }

@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/MessageType.h>
+#include <ogvr/Connection/MessageType.h>
 
 // Library/third-party includes
 // - none

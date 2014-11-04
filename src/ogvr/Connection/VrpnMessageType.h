@@ -20,7 +20,7 @@
 #define INCLUDED_VrpnMessageType_h_GUID_ECDE1AD9_A386_4EA3_CA02_C5D95B16B2D1
 
 // Internal Includes
-#include <ogvr/PluginKit/MessageType.h>
+#include <ogvr/Connection/MessageType.h>
 
 // Library/third-party includes
 #include <qvrpn/vrpn_ConnectionPtr.h>

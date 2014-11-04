@@ -20,15 +20,18 @@
 #define INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387
 
 // Internal Includes
+#include <ogvr/Connection/Export.h>
 #include <ogvr/Util/UniquePtr.h>
-#include <ogvr/PluginKit/ConnectionPtr.h>
-#include <ogvr/PluginKit/ConnectionDevicePtr.h>
+#include <ogvr/Connection/ConnectionPtr.h>
+#include <ogvr/Connection/ConnectionDevicePtr.h>
+#include <ogvr/Util/DeviceCallbackTypesC.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
+#include <functional>
 
 namespace ogvr {
 class MessageType;
@@ -38,36 +41,42 @@ class SyncDeviceToken;
 class DeviceToken;
 typedef unique_ptr<DeviceToken> DeviceTokenPtr;
 
+typedef std::function<OGVR_ReturnCode()> AsyncDeviceWaitCallback;
+typedef std::function<OGVR_ReturnCode()> SyncDeviceUpdateCallback;
+
 class DeviceToken : boost::noncopyable {
   public:
     /// @name Factory functions
     /// @{
-    static DeviceTokenPtr createAsyncDevice(std::string const &name,
-                                            ConnectionPtr const &conn);
-    static DeviceTokenPtr createSyncDevice(std::string const &name,
-                                           ConnectionPtr const &conn);
+    OGVR_CONNECTION_EXPORT static DeviceTokenPtr
+    createAsyncDevice(std::string const &name, ConnectionPtr const &conn);
+    OGVR_CONNECTION_EXPORT static DeviceTokenPtr
+    createSyncDevice(std::string const &name, ConnectionPtr const &conn);
     /// @}
 
     /// @brief Destructor
     virtual ~DeviceToken();
 
-    /// @brief "Casting" function - returns a valid pointer if and only if this
-    /// is an AsyncDeviceToken
-    virtual AsyncDeviceToken *asAsyncDevice();
-
-    /// @brief "Casting" function - returns a valid pointer if and only if this
-    /// is a SyncDeviceToken
-    virtual SyncDeviceToken *asSyncDevice();
-
     /// @brief Accessor for name property
-    std::string const &getName() const;
+    OGVR_CONNECTION_EXPORT std::string const &getName() const;
+
+    /// @brief Sets the wait callback if this is an async device token.
+    /// @throws std::logic_error if it isn't.
+    OGVR_CONNECTION_EXPORT void
+    setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb);
+
+    /// @brief Sets the update callback if this is a sync device token.
+    /// @throws std::logic_error if it isn't.
+    OGVR_CONNECTION_EXPORT void
+    setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb);
 
     /// @brief Send data.
     ///
     /// This may block until the next connectionInteract call before forwarding
     /// on to ConnectionDevice::sendData,
     /// depending on the type of device token.
-    void sendData(MessageType *type, const char *bytestream, size_t len);
+    OGVR_CONNECTION_EXPORT void sendData(MessageType *type,
+                                         const char *bytestream, size_t len);
 
     /// @brief Interact with connection. Only legal to end up in
     /// ConnectionDevice::sendData from within here somehow.
@@ -80,6 +89,9 @@ class DeviceToken : boost::noncopyable {
     virtual void m_sendData(MessageType *type, const char *bytestream,
                             size_t len) = 0;
     virtual void m_connectionInteract() = 0;
+
+    virtual AsyncDeviceToken *asAsync();
+    virtual SyncDeviceToken *asSync();
 
   private:
     void m_sharedInit(ConnectionPtr const &conn);

@@ -1,5 +1,5 @@
 /** @file
-    @brief Header shared between multiple C API headers.
+    @brief Header
 
     Must be c-safe!
 
@@ -7,7 +7,7 @@
 
     @author
     Ryan Pavlik
-    <ryan@sensics.com>;
+    <ryan@sensics.com>
     <http://sensics.com>
 */
 
@@ -20,18 +20,25 @@
 // the Apache License, Version 2.0)
 */
 
-#ifndef INCLUDED_CommonC_h_GUID_F7DD3E37_D90E_4FB4_0BB5_907FDB52F9B7
-#define INCLUDED_CommonC_h_GUID_F7DD3E37_D90E_4FB4_0BB5_907FDB52F9B7
+#ifndef INCLUDED_PluginRegContextC_h_GUID_D52319F2_F80B_46B8_EB90_0575A24B0134
+#define INCLUDED_PluginRegContextC_h_GUID_D52319F2_F80B_46B8_EB90_0575A24B0134
 
 /* Internal Includes */
 #include <ogvr/Util/APIBaseC.h>
-#include <ogvr/Util/ReturnCodesC.h>
-#include <ogvr/Util/PluginRegContextC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
 /* none */
+
+OGVR_EXTERN_C_BEGIN
+
+/** @brief A context pointer passed in to your plugin's entry point
+    @ingroup plugin_c_api
+*/
+typedef void *OGVR_PluginRegContext;
+
+OGVR_EXTERN_C_END
 
 #endif

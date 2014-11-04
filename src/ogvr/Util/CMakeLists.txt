@@ -20,12 +20,17 @@ configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Util")
 
 set(API
+    "${HEADER_LOCATION}/APIBaseC.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
+    "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
+    "${HEADER_LOCATION}/PluginCallbackTypesC.h"
+    "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/ResourcePath.h"
+    "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
@@ -55,17 +60,26 @@ target_include_directories(ogvrUtil
     $<INSTALL_INTERFACE:include>)
 
 target_include_directories(ogvrUtil
-    PUBLIC
+    PRIVATE
     ${Boost_INCLUDE_DIR})
 
-# TODO: make two targets here too so that we can explain that C++ clients
-# of this lib require C++11 flags but not C clients?
 target_compile_options(ogvrUtil PRIVATE ${OGVR_CXX11_FLAGS})
+
+###
+# C++ util library/headers
+###
+add_library(ogvrUtilCpp INTERFACE)
+target_link_libraries(ogvrUtilCpp INTERFACE ogvrUtil)
+target_include_directories(ogvrUtilCpp
+    INTERFACE ${Boost_INCLUDE_DIR})
+
+target_compile_options(ogvrUtilCpp
+    INTERFACE ${OGVR_CXX11_FLAGS})
 
 ###
 # Install library and headers
 ###
-install(TARGETS ogvrUtil
+install(TARGETS ogvrUtil ogvrUtilCpp
     EXPORT ogvrTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

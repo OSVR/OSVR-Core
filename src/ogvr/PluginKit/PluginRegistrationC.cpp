@@ -21,7 +21,7 @@
 #include <ogvr/PluginKit/PluginRegistrationC.h>
 #include "HandleNullContext.h"
 #include <ogvr/Util/Verbosity.h>
-#include "PluginSpecificRegistrationContext.h"
+#include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
 
 // Library/third-party includes
 // - none
@@ -29,7 +29,7 @@
 // Standard includes
 // - none
 
-OGVR_PluginReturnCode ogvrPluginRegisterHardwarePollCallback(
+OGVR_ReturnCode ogvrPluginRegisterHardwarePollCallback(
     OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
     OGVR_IN OGVRHardwarePollCallback pollCallback, OGVR_IN_OPT void *userData) {
 
@@ -41,10 +41,10 @@ OGVR_PluginReturnCode ogvrPluginRegisterHardwarePollCallback(
     ogvr::PluginSpecificRegistrationContext *context =
         static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
     context->registerHardwarePollCallback(pollCallback, userData);
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
+OGVR_ReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
     OGVR_IN OGVR_PluginDataDeleteCallback deleteCallback,
     OGVR_INOUT_PTR void *pluginData) {
@@ -53,5 +53,5 @@ OGVR_PluginReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     ogvr::PluginSpecificRegistrationContext *context =
         static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
     context->registerDataWithDeleteCallback(deleteCallback, pluginData);
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }

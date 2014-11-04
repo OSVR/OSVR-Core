@@ -20,7 +20,7 @@
 #define INCLUDED_MessageType_h_GUID_61B56482_02E5_47B5_8CFA_EAF4286F309F
 
 // Internal Includes
-#include <ogvr/PluginKit/MessageTypePtr.h>
+#include <ogvr/Connection/MessageTypePtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>

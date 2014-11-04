@@ -37,7 +37,7 @@ class DummySyncDevice {
 
     /// Trampoline: C-compatible callback bouncing into a member function.
     /// Also something we can wrap.
-    static OGVR_PluginReturnCode update(void *userData) {
+    static OGVR_ReturnCode update(void *userData) {
         return static_cast<DummySyncDevice *>(userData)->m_update();
     }
     ~DummySyncDevice() {
@@ -45,12 +45,12 @@ class DummySyncDevice {
     }
 
   private:
-    OGVR_PluginReturnCode m_update() {
+    OGVR_ReturnCode m_update() {
         std::cout << "In DummySyncDevice::m_update" << std::endl;
         // get some data
         const char mydata[] = "something";
         ogvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
-        return OGVR_PLUGIN_SUCCESS;
+        return OGVR_RETURN_SUCCESS;
     }
     OGVR_DeviceToken m_dev;
 };
@@ -68,5 +68,5 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
     ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
     ogvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
                                          static_cast<void *>(mySync));
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }

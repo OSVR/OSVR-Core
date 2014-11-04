@@ -27,5 +27,5 @@
 
 OGVR_PLUGIN(org_opengoggles_example_NullPlugin) {
     std::cout << "In plugin EP!" << std::endl;
-    return OGVR_PLUGIN_SUCCESS;
+    return OGVR_RETURN_SUCCESS;
 }

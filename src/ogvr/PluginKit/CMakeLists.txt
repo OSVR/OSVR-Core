@@ -12,59 +12,19 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
     "${HEADER_LOCATION}/CommonC.h"
-    "${HEADER_LOCATION}/Connection.h"
-    "${HEADER_LOCATION}/ConnectionPtr.h"
-    "${HEADER_LOCATION}/ConnectionDevice.h"
-    "${HEADER_LOCATION}/ConnectionDevicePtr.h"
-    "${HEADER_LOCATION}/CreatePluginSpecificRegistrationContext.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
-    "${HEADER_LOCATION}/DeviceToken.h"
-    "${HEADER_LOCATION}/MessageType.h"
-    "${HEADER_LOCATION}/MessageTypePtr.h"
     "${HEADER_LOCATION}/PluginInterfaceC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
-    "${HEADER_LOCATION}/RegistrationContext.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(inc\\ogvr\\PluginKit FILES ${API})
 
-set(UTIL_API
-    "${HEADER_BASE}/ogvr/Util/CallbackWrapper.h"
-    "${HEADER_BASE}/ogvr/Util/GenericDeleter.h"
-    "${HEADER_BASE}/ogvr/Util/ResourcePath.h"
-    "${HEADER_BASE}/ogvr/Util/UniquePtr.h"
-    "${HEADER_BASE}/ogvr/Util/TimeValue.h"
-    "${HEADER_BASE}/ogvr/Util/TimeValueC.h"
-    "${HEADER_BASE}/ogvr/Util/SharedPtr.h")
-source_group(inc\\ogvr\\Util FILES ${UTIL_API})
-
 set(SOURCE
-    AsyncAccessControl.cpp
-    AsyncAccessControl.h
-    AsyncDeviceToken.cpp
-    AsyncDeviceToken.h
-    Connection.cpp
-    ConnectionDevice.cpp
-    CreatePluginSpecificRegistrationContext.cpp
     DeviceInterfaceC.cpp
-    DeviceToken.cpp
     Export.h.in
     HandleNullContext.h
-    MessageType.cpp
-    PluginRegistration.cpp
-    PluginRegistrationC.cpp
-    PluginSpecificRegistrationContext.cpp
-    PluginSpecificRegistrationContext.h
-    RegistrationContext.cpp
-    ResetPointerList.h
-    SyncDeviceToken.cpp
-    SyncDeviceToken.h
-    VrpnBasedConnection.cpp
-    VrpnBasedConnection.h
-    VrpnConnectionDevice.h
-    VrpnBaseFlexServer.h
-    VrpnMessageType.h)
+    PluginRegistrationC.cpp)
 source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})
@@ -82,60 +42,25 @@ target_include_directories(ogvrPluginKit
     $<BUILD_INTERFACE:${HEADER_BASE}>
     $<INSTALL_INTERFACE:include>
     PRIVATE
-    ${VRPN_INCLUDE_DIRS}
-    ${PROJECT_SOURCE_DIR}/vendor/qvrpn
-    ${Boost_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/vendor/util-headers)
+    ${Boost_INCLUDE_DIR})
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
-
-target_compile_definitions(ogvrPluginKit PRIVATE ${VRPN_DEFINITIONS} ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
-if(NOT Boost_USE_STATIC_LIBS)
-    target_compile_definitions(ogvrPluginKit PRIVATE BOOST_ALL_DYN_LINK)
-endif()
 
 target_link_libraries(ogvrPluginKit
     INTERFACE
     libfunctionality::functionality-plugininterface
     PRIVATE
-    ogvrUtil
-    libfunctionality::functionality
-    ${VRPN_SERVER_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_CHRONO_LIBRARY}
-    ${CMAKE_THREAD_LIBS_INIT})
+    ogvrPluginHost
+    ogvrConnection
+    ogvrUtilCpp)
 
 enable_extra_compiler_warnings(ogvrPluginKit)
 
-###
-# Internal "interface" target for host applications to use - they need more includes
-# and C++11 support.
-###
-add_library(ogvrPluginHost INTERFACE)
-target_include_directories(ogvrPluginHost
-    INTERFACE
-    ${Boost_INCLUDE_DIR})
-target_compile_options(ogvrPluginHost INTERFACE ${OGVR_CXX11_FLAGS})
-target_link_libraries(ogvrPluginHost INTERFACE ogvrPluginKit
-    ogvrUtil
-    libfunctionality::functionality)
-
-###
-# Grab DLLs please.
-###
-if(WIN32)
-    add_custom_command(TARGET ogvrPluginKit POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:libfunctionality::functionality> $<TARGET_FILE_DIR:ogvrPluginKit>
-        COMMENT Copying required DLL
-        VERBATIM)
-endif()
 
 ###
 # Install library and headers
 ###
-install(TARGETS ogvrPluginKit ogvrPluginHost
+install(TARGETS ogvrPluginKit
     EXPORT ogvrTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -149,4 +74,3 @@ install(
     ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/PluginKit
     COMPONENT
     Devel)
-
