@@ -36,12 +36,17 @@
 #include <CodeAnalysis/SourceAnnotations.h>
 
 #define OGVR_IN _In_
-#define OGVR_OUT _Out_
-#define OGVR_INOUT _Inout_
+#define OGVR_IN_PTR _In_
 #define OGVR_IN_OPT _In_opt_
+#define OGVR_IN_STRZ _In_z_
+#define OGVR_IN_READS(NUM_ELEMENTS) _In_reads_(NUM_ELEMENTS)
+
+#define OGVR_OUT _Out_
+#define OGVR_OUT_PTR _Out_
 #define OGVR_OUT_OPT _Out_opt_
 
-#define OGVR_IN_STRZ _In_z_
+#define OGVR_INOUT _Inout_
+#define OGVR_INOUT_PTR _Inout_
 
 #endif
 /* end of msvc section */
@@ -64,7 +69,8 @@
     At most one of these should be placed before a parameter's type name in the
    function parameter list, in both the declaration and definition. (They must
    match!)
- */
+   @{
+*/
 #ifndef OGVR_IN
 /** @brief Indicates a required function parameter that serves only as input.
 
@@ -73,25 +79,11 @@
 #define OGVR_IN
 #endif
 
-#ifndef OGVR_OUT
-/** @brief Indicates a required function parameter that serves only as output.
-
-    Place before the parameter's type name in a function parameter list.
-
-    In C code, this typically implies a non-null pointer.
+#ifndef OGVR_IN_PTR
+/** @brief Indicates a required pointer (non-null) function parameter that
+    serves only as input.
 */
-#define OGVR_OUT
-#endif
-
-#ifndef OGVR_INOUT
-/** @brief Indicates a required function parameter that is both read and written
-   to.
-
-    Place before the parameter's type name in a function parameter list.
-
-    In C code, this typically implies a non-null pointer.
-*/
-#define OGVR_INOUT
+#define OGVR_IN_PTR
 #endif
 
 #ifndef OGVR_IN_OPT
@@ -103,6 +95,41 @@
 #define OGVR_IN_OPT
 #endif
 
+#ifndef OGVR_IN_STRZ
+/** @brief Indicates a null-terminated string function parameter that serves
+   only as input.
+
+    Place before the parameter's type name in a function parameter list.
+*/
+#define OGVR_IN_STRZ
+#endif
+
+#ifndef OGVR_IN_READS
+/** @brief Indicates a buffer containing input with the specified number of
+   elements.
+
+    The specified number of elements is typically the name of another parameter.
+
+    Place before the parameter's type name in a function parameter list.
+*/
+#define OGVR_IN_READS(NUM_ELEMENTS)
+#endif
+
+#ifndef OGVR_OUT
+/** @brief Indicates a required function parameter that serves only as output.
+    In C code, since this usually means "pointer", you probably want
+   OGVR_OUT_PTR.
+*/
+#define OGVR_OUT
+#endif
+
+#ifndef OGVR_OUT_PTR
+/** @brief Indicates a required pointer (non-null) function parameter that
+    serves only as output.
+*/
+#define OGVR_OUT_PTR
+#endif
+
 #ifndef OGVR_OUT_OPT
 /** @brief Indicates a function parameter that serves only as output, but is
     optional and might be NULL
@@ -112,17 +139,27 @@
 #define OGVR_OUT_OPT
 #endif
 
-#ifndef OGVR_IN_STRZ
-/** @brief Indicates a null-terminated string function parameter that serves
-   only as input.
+#ifndef OGVR_INOUT
+/** @brief Indicates a required function parameter that is both read and written
+   to.
 
-    Place before the parameter's type name in a function parameter list.
+    In C code, since this usually means "pointer", you probably want
+   OGVR_INOUT_PTR.
 */
-#define OGVR_IN_STRZ
+#define OGVR_INOUT
 #endif
-/** @} */
+
+#ifndef OGVR_INOUT_PTR
+/** @brief Indicates a required pointer (non-null) function parameter that is
+    both read and written to.
+*/
+#define OGVR_INOUT_PTR
+#endif
+
 /* End of parameter annotations. */
 
 /** @} */
+
 /* End of annotation group. */
+/** @} */
 #endif
