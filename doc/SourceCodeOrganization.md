@@ -19,7 +19,9 @@ Note that for clarity, a single compiled library might actually implement the in
 
 - `PluginKit` - This is the interface presented to device and analysis plugins. For binary compatibility, it is a C API with header-only C++ wrappers.
 
-- `PluginHost` - This is the "other side" of PluginKit, primarily consumed by other code in the framework.
+- `PluginHost` - This is the host of plugins that build against PluginKit. It is primarily consumed by other code in the framework.
+
+- `Connection` - The workings of devices and connections for the framework's messaging system.
 
 ## File naming
 There are just a few general file name guidelines that might help you find your way around.
