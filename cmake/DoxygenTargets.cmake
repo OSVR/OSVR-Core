@@ -274,7 +274,7 @@ function(add_doxygen _doxyfile)
 		endif()
 
 		configure_file("${_doxygenmoddir}/DoxygenTargets.doxyfile.in"
-			"${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.additional"
+			"${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.${DOC_TARGET}.additional"
 			@ONLY)
 
 		if(IN_DASHBOARD_SCRIPT)
@@ -286,7 +286,7 @@ function(add_doxygen _doxyfile)
 		add_custom_target(${DOC_TARGET} ${ALL_IN_DASHBOARD}
 			COMMAND
 			"${DOXYGEN_EXECUTABLE}"
-			"${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.additional"
+			"${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.${DOC_TARGET}.additional"
 			WORKING_DIRECTORY
 			"${CMAKE_CURRENT_SOURCE_DIR}"
 			#MAIN_DEPENDENCY ${DOC_TARGET}
