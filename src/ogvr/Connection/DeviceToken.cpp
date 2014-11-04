@@ -27,7 +27,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <stdexcept>
 
 namespace ogvr {
 DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
