@@ -34,11 +34,11 @@ source_group(src\\ogvr\\Connection FILES ${SOURCE})
 
 add_library(ogvrConnection ${API} ${SOURCE})
 
-set_property(TARGET ogvrConnection PROPERTY VERSION ${ogvrpluginkit_VERSION})
+set_property(TARGET ogvrConnection PROPERTY VERSION ${OGVR_VERSION})
 set_property(TARGET ogvrConnection PROPERTY SOVERSION 0)
-set_property(TARGET ogvrConnection PROPERTY INTERFACE_ogvrPluginKit_MAJOR_VERSION 0)
+set_property(TARGET ogvrConnection PROPERTY INTERFACE_ogvrcore_MAJOR_VERSION 0)
 set_property(TARGET ogvrConnection APPEND PROPERTY
-    COMPATIBLE_INTERFACE_STRING ogvrPluginKit_MAJOR_VERSION
+    COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
 )
 
 generate_export_header(ogvrConnection

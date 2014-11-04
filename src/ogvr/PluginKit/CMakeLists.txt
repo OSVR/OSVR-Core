@@ -29,11 +29,11 @@ source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
 add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 add_library(ogvrPluginKit ${API} ${UTIL_API} ${SOURCE})
 
-set_property(TARGET ogvrPluginKit PROPERTY VERSION ${ogvrpluginkit_VERSION})
+set_property(TARGET ogvrPluginKit PROPERTY VERSION ${OGVR_VERSION})
 set_property(TARGET ogvrPluginKit PROPERTY SOVERSION 0)
-set_property(TARGET ogvrPluginKit PROPERTY INTERFACE_ogvrPluginKit_MAJOR_VERSION 0)
+set_property(TARGET ogvrPluginKit PROPERTY INTERFACE_ogvrcore_MAJOR_VERSION 0)
 set_property(TARGET ogvrPluginKit APPEND PROPERTY
-    COMPATIBLE_INTERFACE_STRING ogvrPluginKit_MAJOR_VERSION
+    COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
 )
 
 target_include_directories(ogvrPluginKit

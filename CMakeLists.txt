@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(ogvrpluginkit)
-set(ogvrpluginkit_VERSION 0.1)
+project(ogvrcore)
+set(OGVR_VERSION 0.1)
 
 ###
 # Configuration Options
@@ -97,7 +97,7 @@ set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/ogvr")
 
 write_basic_package_version_file(
     "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
-    VERSION ${ogvrpluginkit_VERSION}
+    VERSION ${OGVR_VERSION}
     COMPATIBILITY AnyNewerVersion)
 
 export(EXPORT ogvrTargets
