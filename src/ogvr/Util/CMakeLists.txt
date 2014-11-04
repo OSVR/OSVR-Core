@@ -20,6 +20,7 @@ configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Util")
 
 set(API
+    "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
