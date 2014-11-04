@@ -24,7 +24,7 @@
 # The default value is: My Project.
 
 # For config item PROJECT_NAME, default is My Project
-PROJECT_NAME           = "OGVR Plugin Kit"
+PROJECT_NAME           = "OpenGoggles VR"
 
 # For config item OUTPUT_DIRECTORY, default is 
 OUTPUT_DIRECTORY       = doxygen
@@ -37,8 +37,7 @@ OUTPUT_DIRECTORY       = doxygen
 # using the -I flag.
 
 # For config item STRIP_FROM_INC_PATH, default is 
-STRIP_FROM_INC_PATH    = src \
-                         inc
+STRIP_FROM_INC_PATH    = inc
 
 STRIP_FROM_PATH        = inc
 
@@ -86,8 +85,7 @@ SORT_MEMBER_DOCS       = NO
 # Note: If this tag is empty the current directory is searched.
 
 # For config item INPUT, default is 
-INPUT                  = src \
-                         README.md \
+INPUT                  = README.md \
                          HACKING.md \
                          inc \
                          doc

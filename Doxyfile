@@ -24,7 +24,7 @@
 # The default value is: My Project.
 
 # For config item PROJECT_NAME, default is My Project
-PROJECT_NAME           = "OGVR Plugin Kit"
+PROJECT_NAME           = "OpenGoggles VR (Internal Docs)"
 
 # For config item OUTPUT_DIRECTORY, default is 
 OUTPUT_DIRECTORY       = doxygen
