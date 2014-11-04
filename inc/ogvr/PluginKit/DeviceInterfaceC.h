@@ -25,6 +25,7 @@
 
 /* Internal Includes */
 #include <ogvr/PluginKit/CommonC.h>
+#include <ogvr/Util/AnnotationMacrosC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -67,8 +68,9 @@ string.
 registered..
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceRegisterMessageType(OGVR_PluginRegContext ctx, const char *name,
-                                  OGVR_MessageType *msgtype);
+    ogvrDeviceRegisterMessageType(OGVR_INOUT OGVR_PluginRegContext ctx,
+                                  OGVR_IN_STRZ const char *name,
+                                  OGVR_OUT OGVR_MessageType *msgtype);
 
 /** @brief Send a raw bytestream from your device.
 
@@ -77,8 +79,9 @@ OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
 
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceSendData(OGVR_DeviceToken dev, OGVR_MessageType msg,
-                       const char *bytestream, size_t len);
+    ogvrDeviceSendData(OGVR_INOUT OGVR_DeviceToken dev,
+                       OGVR_IN OGVR_MessageType msg, const char *bytestream,
+                       size_t len);
 
 /** @name Synchronous Devices
 
@@ -107,8 +110,9 @@ OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
    synchronous device.
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceSyncInit(OGVR_PluginRegContext ctx, const char *name,
-                       OGVR_DeviceToken *device);
+    ogvrDeviceSyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
+                       OGVR_IN_STRZ const char *name,
+                       OGVR_OUT OGVR_DeviceToken *device);
 
 /** @brief Function type of a an Sync Device Update callback */
 typedef OGVR_PluginReturnCode (*OGVR_SyncDeviceUpdateCallback)(void *userData);
@@ -128,9 +132,11 @@ typedef OGVR_PluginReturnCode (*OGVR_SyncDeviceUpdateCallback)(void *userData);
     support multiple instances without it.
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceSyncRegisterUpdateCallback(
-        OGVR_DeviceToken device, OGVR_SyncDeviceUpdateCallback updateCallback,
-        void *userData OGVR_CPP_ONLY(= NULL));
+    ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT OGVR_DeviceToken device,
+                                         OGVR_IN OGVR_SyncDeviceUpdateCallback
+                                             updateCallback,
+                                         OGVR_IN_OPT void *userData
+                                             OGVR_CPP_ONLY(= NULL));
 /** @} */
 
 /** @name Asynchronous Devices
@@ -157,8 +163,9 @@ OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
    asynchronous device.
 */
 OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceAsyncInit(OGVR_PluginRegContext ctx, const char *name,
-                        OGVR_DeviceToken *device);
+    ogvrDeviceAsyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
+                        OGVR_IN_STRZ const char *name,
+                        OGVR_OUT OGVR_DeviceToken *device);
 
 /** @brief Function type of a an Async Device Wait callback */
 typedef OGVR_PluginReturnCode (*OGVR_AsyncDeviceWaitCallback)(void *userData);
@@ -177,10 +184,10 @@ typedef OGVR_PluginReturnCode (*OGVR_AsyncDeviceWaitCallback)(void *userData);
     the callback you register here is called. Technically optional, but hard to
    support multiple instances without it.
 */
-OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode
-    ogvrDeviceAsyncStartWaitLoop(OGVR_DeviceToken device,
-                                 OGVR_AsyncDeviceWaitCallback waitCallback,
-                                 void *userData OGVR_CPP_ONLY(= NULL));
+OGVR_PLUGINKIT_EXPORT OGVR_PluginReturnCode ogvrDeviceAsyncStartWaitLoop(
+    OGVR_INOUT OGVR_DeviceToken device,
+    OGVR_IN OGVR_AsyncDeviceWaitCallback waitCallback,
+    OGVR_IN_OPT void *userData OGVR_CPP_ONLY(= NULL));
 
 /** @} */
 

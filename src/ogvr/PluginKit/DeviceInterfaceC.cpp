@@ -34,8 +34,8 @@
 // Standard includes
 #include <functional>
 
-OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_DeviceToken dev,
-                                         OGVR_MessageType msg,
+OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_INOUT OGVR_DeviceToken dev,
+                                         OGVR_IN OGVR_MessageType msg,
                                          const char *bytestream, size_t len) {
     OGVR_DEV_VERBOSE(
         "In ogvrDeviceSendData, trying to send a message of length " << len);
@@ -47,9 +47,10 @@ OGVR_PluginReturnCode ogvrDeviceSendData(OGVR_DeviceToken dev,
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceRegisterMessageType(OGVR_PluginRegContext ctx,
-                                                    const char *name,
-                                                    OGVR_MessageType *msgtype) {
+OGVR_PluginReturnCode
+ogvrDeviceRegisterMessageType(OGVR_INOUT OGVR_PluginRegContext ctx,
+                              OGVR_IN_STRZ const char *name,
+                              OGVR_OUT OGVR_MessageType *msgtype) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceRegisterMessageType", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceRegisterMessageType for a message named "
                      << name);
@@ -114,18 +115,20 @@ ogvrDeviceGenericInit(OGVR_PluginRegContext ctx, const char *name,
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVR_PluginRegContext ctx,
-                                         const char *name,
-                                         OGVR_DeviceToken *device) {
+OGVR_PluginReturnCode ogvrDeviceSyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
+                                         OGVR_IN_STRZ const char *name,
+                                         OGVR_OUT OGVR_DeviceToken *device) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSyncInit", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncInit for a device named " << name);
     return ogvrDeviceGenericInit(ctx, name, device,
                                  ogvr::DeviceToken::createSyncDevice);
 }
 
-OGVR_PluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
-    OGVR_DeviceToken device, OGVR_SyncDeviceUpdateCallback updateCallback,
-    void *userData) {
+OGVR_PluginReturnCode
+ogvrDeviceSyncRegisterUpdateCallback(OGVR_INOUT OGVR_DeviceToken device,
+                                     OGVR_IN OGVR_SyncDeviceUpdateCallback
+                                         updateCallback,
+                                     OGVR_IN_OPT void *userData) {
     OGVR_DEV_VERBOSE("In ogvrDeviceSyncRegisterUpdateCallback");
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT(
         "ogvrDeviceSyncRegisterUpdateCallback device token", device);
@@ -139,9 +142,9 @@ OGVR_PluginReturnCode ogvrDeviceSyncRegisterUpdateCallback(
     return OGVR_PLUGIN_SUCCESS;
 }
 
-OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_PluginRegContext ctx,
-                                          const char *name,
-                                          OGVR_DeviceToken *device) {
+OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_INOUT OGVR_PluginRegContext ctx,
+                                          OGVR_IN_STRZ const char *name,
+                                          OGVR_OUT OGVR_DeviceToken *device) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAsyncInit", ctx);
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncInit for a device named " << name);
     return ogvrDeviceGenericInit(ctx, name, device,
@@ -149,9 +152,9 @@ OGVR_PluginReturnCode ogvrDeviceAsyncInit(OGVR_PluginRegContext ctx,
 }
 
 OGVR_PluginReturnCode
-ogvrDeviceAsyncStartWaitLoop(OGVR_DeviceToken device,
-                             OGVR_AsyncDeviceWaitCallback waitCallback,
-                             void *userData) {
+ogvrDeviceAsyncStartWaitLoop(OGVR_INOUT OGVR_DeviceToken device,
+                             OGVR_IN OGVR_AsyncDeviceWaitCallback waitCallback,
+                             OGVR_IN_OPT void *userData) {
     OGVR_DEV_VERBOSE("In ogvrDeviceAsyncStartWaitLoop");
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAsyncStartWaitLoop device token",
                                     device);
