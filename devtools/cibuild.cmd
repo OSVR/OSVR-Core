@@ -9,7 +9,7 @@ cmake --build . --config Debug
 cmake --build . --config RelWithDebInfo
 cmake --build . --config RelWithDebInfo --target INSTALL
 
-cmake --build . --config RelWithDebInfo -- /p:RunCodeAnalysis=True
+cmake --build . --config RelWithDebInfo --target ogvrPluginKit -- /p:RunCodeAnalysis=True
 
 rem bin\Debug\LoadTest.exe --gtest_output=xml:test_details.Debug.xml
 rem bin\RelWithDebInfo\LoadTest.exe --gtest_output=xml:test_details.RelWithDebInfo.xml
