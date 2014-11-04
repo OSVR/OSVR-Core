@@ -36,8 +36,6 @@ source_group(inc\\ogvr\\Util FILES ${API})
 
 set(SOURCE
     AnyMap.cpp
-    CallbackWrapper.cpp
-    ResourcePath.cpp
     TimeValueC.cpp
     PlatformConfig.h.in
     Verbosity.h.in
