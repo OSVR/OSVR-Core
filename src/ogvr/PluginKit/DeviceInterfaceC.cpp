@@ -47,6 +47,23 @@ OGVR_ReturnCode ogvrDeviceSendData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
 }
 
 OGVR_ReturnCode
+ogvrDeviceSendTimestampedData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
+                              OGVR_IN_PTR struct OGVR_TimeValue *timestamp,
+                              OGVR_IN_PTR OGVR_MessageType msg,
+                              OGVR_IN_READS(len) const char *bytestream,
+                              OGVR_IN size_t len) {
+    OGVR_DEV_VERBOSE(
+        "In ogvrDeviceSendData, trying to send a timestamped message of length "
+        << len);
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSendData device token", dev);
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceSendData message type", msg);
+    ogvr::DeviceToken *device = static_cast<ogvr::DeviceToken *>(dev);
+    ogvr::MessageType *msgType = static_cast<ogvr::MessageType *>(msg);
+    device->sendData(*timestamp, msgType, bytestream, len);
+    return OGVR_RETURN_SUCCESS;
+}
+
+OGVR_ReturnCode
 ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
                               OGVR_IN_STRZ const char *name,
                               OGVR_OUT_PTR OGVR_MessageType *msgtype) {

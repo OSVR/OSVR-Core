@@ -28,6 +28,7 @@
 #include <ogvr/PluginKit/CommonC.h>
 #include <ogvr/Util/DeviceCallbackTypesC.h>
 #include <ogvr/Util/AnnotationMacrosC.h>
+#include <ogvr/Util/TimeValueC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -85,6 +86,18 @@ OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode
                        OGVR_IN_PTR OGVR_MessageType msg,
                        OGVR_IN_READS(len) const char *bytestream,
                        OGVR_IN size_t len) OGVR_FUNC_NONNULL((1, 2));
+
+/** @brief Send a raw bytestream from your device, with a known timestamp.
+
+    @note The same function is used for synchronous and asynchronous devices:
+    the device token is sufficient to determine whether locking is needed.
+
+*/
+OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrDeviceSendTimestampedData(
+    OGVR_INOUT_PTR OGVR_DeviceToken dev,
+    OGVR_IN_PTR const struct OGVR_TimeValue *timestamp,
+    OGVR_IN_PTR OGVR_MessageType msg, OGVR_IN_READS(len) const char *bytestream,
+    OGVR_IN size_t len) OGVR_FUNC_NONNULL((1, 2, 3));
 
 /** @name Synchronous Devices
 
