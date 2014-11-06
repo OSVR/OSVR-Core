@@ -34,9 +34,12 @@ source_group(src\\ogvr\\Connection FILES ${SOURCE})
 
 add_library(ogvrConnection ${API} ${SOURCE})
 
-set_property(TARGET ogvrConnection PROPERTY VERSION ${OGVR_VERSION})
-set_property(TARGET ogvrConnection PROPERTY SOVERSION 0)
-set_property(TARGET ogvrConnection PROPERTY INTERFACE_ogvrcore_MAJOR_VERSION 0)
+set_target_properties(ogvrConnection PROPERTIES
+    FOLDER "OGVR Libraries"
+    VERSION ${OGVR_VERSION}
+    SOVERSION 0
+    INTERFACE_ogvrcore_MAJOR_VERSION 0)
+
 set_property(TARGET ogvrConnection APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
 )

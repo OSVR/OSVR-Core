@@ -19,9 +19,11 @@ source_group(src\\ogvr\\PluginHost FILES ${SOURCE})
 
 add_library(ogvrPluginHost ${API} ${SOURCE})
 
-set_property(TARGET ogvrPluginHost PROPERTY VERSION ${OGVR_VERSION})
-set_property(TARGET ogvrPluginHost PROPERTY SOVERSION 0)
-set_property(TARGET ogvrPluginHost PROPERTY INTERFACE_ogvrcore_MAJOR_VERSION 0)
+set_target_properties(ogvrPluginHost PROPERTIES
+    FOLDER "OGVR Libraries"
+    VERSION ${OGVR_VERSION}
+    SOVERSION 0
+    INTERFACE_ogvrcore_MAJOR_VERSION 0)
 set_property(TARGET ogvrPluginHost APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
 )

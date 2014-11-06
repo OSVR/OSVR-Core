@@ -49,6 +49,11 @@ source_group(src\\ogvr\\Util FILES ${SOURCE})
 
 add_library(ogvrUtil ${API} ${SOURCE})
 
+set_target_properties(ogvrUtil PROPERTIES
+    FOLDER "OGVR Libraries"
+    VERSION ${OGVR_VERSION}
+    SOVERSION 0)
+
 generate_export_header(ogvrUtil
     BASE_NAME OGVR_UTIL
     EXPORT_FILE_NAME Export.h)

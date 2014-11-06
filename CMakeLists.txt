@@ -21,6 +21,15 @@ include(CTest)
 include(GNUInstallDirs)
 include(EnableExtraCompilerWarnings)
 
+if(MSVC_IDE AND MSVC_VERSION LESS 1700)
+    # At least VS 2013 Express has folder support...
+    option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE. May only work in non-Express Editions!" OFF)
+else()
+    option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE." ON)
+endif()
+set_property(GLOBAL PROPERTY
+    USE_FOLDERS ${BUILD_WITH_PROJECT_FOLDERS})
+
 ###
 # Dependencies
 ###
