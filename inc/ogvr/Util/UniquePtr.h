@@ -28,7 +28,7 @@
 
 namespace ogvr {
 using std::unique_ptr;
-}
+} // namespace ogvr
 
 #endif
 

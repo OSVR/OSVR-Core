@@ -146,6 +146,6 @@ class RequestToSend : boost::noncopyable {
     boost::condition_variable &m_condAsyncThread;
     /// @}
 };
-}
+} // namespace ogvr
 
 #endif // INCLUDED_AsyncAccessControl_h_GUID_4255BCEE_826C_4DB4_9368_9457ADBF9456

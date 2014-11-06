@@ -31,5 +31,5 @@ namespace ogvr {
 class MessageType;
 /// @brief a uniquely-owned handle for holding a message type registration.
 typedef unique_ptr<MessageType> MessageTypePtr;
-}
+} // namespace ogvr
 #endif // INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8

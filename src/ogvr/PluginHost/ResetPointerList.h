@@ -44,7 +44,7 @@ namespace detail {
         typedef typename IteratorType::value_type PointerType;
         boost::for_each(range, PointerResetter<PointerType>());
     }
-}
-}
+} // namespace detail
+} // namespace ogvr
 
 #endif // INCLUDED_ResetPointerList_h_GUID_067DF9C9_67F7_4293_94EF_DBC5B5266801

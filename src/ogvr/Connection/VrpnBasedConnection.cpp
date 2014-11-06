@@ -65,4 +65,4 @@ void VrpnBasedConnection::m_process() {
 VrpnBasedConnection::~VrpnBasedConnection() {
     /// @todo wait until all async threads are done
 }
-}
+} // namespace ogvr
