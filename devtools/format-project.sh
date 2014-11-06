@@ -9,6 +9,7 @@ runClangFormatOnDir() {
 (
 cd $(dirname $0)
 cd ..
+runClangFormatOnDir apps
 runClangFormatOnDir src
 runClangFormatOnDir inc
 runClangFormatOnDir tests
