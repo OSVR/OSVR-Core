@@ -20,7 +20,7 @@
 #include <ogvr/Util/TimeValueC.h>
 
 // Library/third-party includes
-// - none
+#include <vrpn_Shared.h>
 
 // Standard includes
 #if defined(OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H)
@@ -28,7 +28,7 @@
 typedef time_t tv_seconds_type;
 typedef suseconds_t tv_microseconds_type;
 #elif defined(OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H)
-#include <winsock2.h>
+//#include <winsock2.h>
 typedef long tv_seconds_type;
 typedef long tv_microseconds_type;
 #endif
@@ -75,7 +75,14 @@ void ogvrTimeValueDifference(struct OGVR_TimeValue *tvA,
 }
 
 #ifdef OGVR_HAVE_STRUCT_TIMEVAL
-void ogvrTimeValueToStructTimeval(struct timeval *dest,
+
+void ogvrTimeValueGetNow(OGVR_INOUT_PTR struct OGVR_TimeValue *dest) {
+    timeval tv;
+    vrpn_gettimeofday(&tv, NULL);
+    ogvrStructTimevalToTimeValue(dest, &tv);
+}
+
+void ogvrTimeValueToStructTimeval(timeval *dest,
                                   const struct OGVR_TimeValue *src) {
     if (!dest || !src) {
         return;

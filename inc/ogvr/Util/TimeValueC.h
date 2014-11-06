@@ -26,6 +26,7 @@
 
 /* Internal Includes */
 #include <ogvr/Util/Export.h>
+#include <ogvr/Util/AnnotationMacrosC.h>
 #include <ogvr/Util/PlatformConfig.h>
 
 /* Library/third-party includes */
@@ -73,6 +74,10 @@ struct OGVR_TimeValue {
 };
 
 #ifdef OGVR_HAVE_STRUCT_TIMEVAL
+/** @brief Gets the current time in the TimeValue. Parallel to gettimeofday. */
+OGVR_UTIL_EXPORT void
+ogvrTimeValueGetNow(OGVR_INOUT_PTR struct OGVR_TimeValue *dest);
+
 struct timeval; /* forward declaration */
 
 /** @brief Converts from a TimeValue struct to your system's struct timeval.
