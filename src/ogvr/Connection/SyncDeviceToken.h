@@ -37,7 +37,8 @@ class SyncDeviceToken : public DeviceToken {
     void setUpdateCallback(SyncDeviceUpdateCallback const &cb);
 
   protected:
-    void m_sendData(MessageType *type, const char *bytestream, size_t len);
+    void m_sendData(time::TimeValue const &timestamp, MessageType *type,
+                    const char *bytestream, size_t len);
     virtual void m_connectionInteract();
 
   private:

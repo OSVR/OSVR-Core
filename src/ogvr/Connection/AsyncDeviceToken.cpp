@@ -83,7 +83,8 @@ void AsyncDeviceToken::setWaitCallback(AsyncDeviceWaitCallback const &cb) {
     m_run.signalAndWaitForStart();
 }
 AsyncDeviceToken *AsyncDeviceToken::asAsync() { return this; }
-void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
+void AsyncDeviceToken::m_sendData(time::TimeValue const &timestamp,
+                                  MessageType *type, const char *bytestream,
                                   size_t len) {
     OGVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"
                      "about to create RTS object");
@@ -98,7 +99,7 @@ void AsyncDeviceToken::m_sendData(MessageType *type, const char *bytestream,
 
     OGVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"
                      "Have CTS!");
-    m_getConnectionDevice()->sendData(type, bytestream, len);
+    m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     OGVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"
                      "done!");
 }

@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include <ogvr/Util/Verbosity.h>
+#include <ogvr/Util/TimeValue.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -43,9 +44,10 @@ class vrpn_BaseFlexServer : public vrpn_BaseClass {
         /// object's owner, the VrpnConnectionDevice.
         server_mainloop();
     }
-    void sendData(vrpn_uint32 msgID, const char *bytestream, size_t len) {
+    void sendData(time::TimeValue const &timestamp, vrpn_uint32 msgID,
+                  const char *bytestream, size_t len) {
         struct timeval now;
-        vrpn_gettimeofday(&now, NULL);
+        time::toStructTimeval(now, timestamp);
         d_connection->pack_message(len, now, msgID, d_sender_id, bytestream,
                                    vrpn_CONNECTION_LOW_LATENCY);
     }

@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include <ogvr/Connection/ConnectionDevicePtr.h>
+#include <ogvr/Util/TimeValue.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -48,7 +49,8 @@ class ConnectionDevice : boost::noncopyable {
     void process();
 
     /// @brief Send message.
-    void sendData(MessageType *type, const char *bytestream, size_t len);
+    void sendData(time::TimeValue const &timestamp, MessageType *type,
+                  const char *bytestream, size_t len);
 
     /// @brief For use only by DeviceToken
     void setDeviceToken(DeviceToken &token);
@@ -60,8 +62,8 @@ class ConnectionDevice : boost::noncopyable {
     virtual void m_process() = 0;
 
     /// @brief (Subclass implementation) Send message.
-    virtual void m_sendData(MessageType *type, const char *bytestream,
-                            size_t len) = 0;
+    virtual void m_sendData(time::TimeValue const &timestamp, MessageType *type,
+                            const char *bytestream, size_t len) = 0;
 
     /// @brief Constructor for use by derived classes only.
     ConnectionDevice(std::string const &name);

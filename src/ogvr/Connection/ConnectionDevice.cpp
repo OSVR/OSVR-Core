@@ -34,10 +34,11 @@ ConnectionDevice::ConnectionDevice(std::string const &name)
 
 void ConnectionDevice::process() { m_process(); }
 
-void ConnectionDevice::sendData(MessageType *type, const char *bytestream,
+void ConnectionDevice::sendData(time::TimeValue const &timestamp,
+                                MessageType *type, const char *bytestream,
                                 size_t len) {
     BOOST_ASSERT(type);
-    m_sendData(type, bytestream, len);
+    m_sendData(timestamp, type, bytestream, len);
 }
 void ConnectionDevice::setDeviceToken(DeviceToken &token) {
     BOOST_ASSERT(m_token == NULL);
