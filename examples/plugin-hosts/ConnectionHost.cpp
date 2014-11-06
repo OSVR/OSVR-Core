@@ -28,29 +28,31 @@
 #include <iostream>
 #include <exception>
 
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        std::cerr << "Must supply a plugin name to load." << std::endl;
+        return 1;
+    }
+    ogvr::RegistrationContext ctx;
+    ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
+    ogvr::Connection::storeConnection(ctx, conn);
 
-int main(int argc, char * argv[]) {
-	if (argc < 2) {
-		std::cerr << "Must supply a plugin name to load." << std::endl;
-		return 1;
-	}
-	ogvr::RegistrationContext ctx;
-	ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
-	ogvr::Connection::storeConnection(ctx, conn);
+    try {
+        std::cout << "Trying to load plugin " << argv[1] << std::endl;
+        ctx.loadPlugin(argv[1]);
+        std::cout << "Successfully loaded plugin, control returned to host "
+                     "application!" << std::endl;
+    } catch (std::exception &e) {
+        std::cerr << "Caught exception tring to load " << argv[1] << ": "
+                  << e.what() << std::endl;
+        return 1;
+    }
+    int count = 20;
+    std::cout << "Running connection processing " << count << " times"
+              << std::endl;
+    for (int i = 0; i < count; ++i) {
+        conn->process();
+    }
 
-	try {
-		std::cout << "Trying to load plugin " << argv[1] << std::endl;
-		ctx.loadPlugin(argv[1]);
-		std::cout << "Successfully loaded plugin, control returned to host application!" << std::endl;
-	} catch (std::exception & e) {
-		std::cerr << "Caught exception tring to load " << argv[1] << ": " << e.what() << std::endl;
-		return 1;
-	}
-	int count = 20;
-	std::cout << "Running connection processing " << count << " times" << std::endl;
-	for (int i = 0; i < count; ++i) {
-		conn->process();
-	}
-
-	return 0;
+    return 0;
 }

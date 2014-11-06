@@ -27,21 +27,22 @@
 #include <iostream>
 #include <exception>
 
-
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr << "Must supply a plugin name to load." << std::endl;
         return 1;
     }
-	ogvr::RegistrationContext ctx;
+    ogvr::RegistrationContext ctx;
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;
-		ctx.loadPlugin(argv[1]);
-        std::cout << "Successfully loaded plugin, control returned to host application!" << std::endl;
+        ctx.loadPlugin(argv[1]);
+        std::cout << "Successfully loaded plugin, control returned to host "
+                     "application!" << std::endl;
         return 0;
-    } catch (std::exception & e) {
-        std::cerr << "Caught exception tring to load " << argv[1] << ": " << e.what() << std::endl;
+    } catch (std::exception &e) {
+        std::cerr << "Caught exception tring to load " << argv[1] << ": "
+                  << e.what() << std::endl;
         return 1;
     }
     std::cerr << "Failed in a weird way - not a std::exception." << std::endl;
