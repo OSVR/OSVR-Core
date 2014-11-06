@@ -25,6 +25,7 @@ set(API
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
+    "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
