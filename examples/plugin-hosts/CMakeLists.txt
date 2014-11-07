@@ -5,7 +5,7 @@ foreach(HOST BasicPluginLoader BasicPluginLoaderWithPoll ConnectionHost)
     set_target_properties(${HOST} PROPERTIES
         FOLDER "OGVR Example Plugin Hosts")
     if(BUILD_TESTING)
-        foreach(PLUGIN DummyHardwarePoll NullDevice NullPlugin)
+        foreach(PLUGIN DummyHardwarePoll DummyHardwarePollCpp NullDevice NullPlugin)
             add_test(NAME "run_${HOST}_${PLUGIN}"
                 COMMAND ${HOST} org_opengoggles_example_${PLUGIN})
         endforeach()
