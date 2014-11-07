@@ -21,6 +21,7 @@
 
 // Library/third-party includes
 #include <ogvr/Connection/Connection.h>
+#include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <vrpn_Connection.h>
 
 // Standard includes
@@ -29,3 +30,13 @@
 // Sneaky way to get an ID for VRPN.
 /// @todo solve this problem in a more sophisticated way.
 OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
+
+vrpn_Connection *getVRPNConnection(OGVR_PluginRegContext ctx) {
+    ogvr::ConnectionPtr conn = ogvr::Connection::retrieveConnection(
+        ogvr::PluginSpecificRegistrationContext::get(ctx).getParent());
+    vrpn_Connection *ret = NULL;
+    if (std::string(conn->getConnectionKindID()) == getVRPNConnectionKindID()) {
+        ret = static_cast<vrpn_Connection *>(conn->getUnderlyingObject());
+    }
+    return ret;
+}
