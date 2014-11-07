@@ -22,6 +22,8 @@
 // Internal Includes
 #include <ogvr/Server/Export.h>
 #include <ogvr/Server/ServerPtr.h>
+#include <ogvr/Connection/ConnectionPtr.h>
+#include <ogvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 // - none
@@ -30,14 +32,20 @@
 // - none
 
 namespace ogvr {
+class RegistrationContext;
 namespace server {
     class Server {
       public:
-        /// Create a local-only server object.
+        /// @brief Server constructor with an existing Connection
+        /// @throws std::logic_error if a null connection is passed.
+        OGVR_SERVER_EXPORT Server(ConnectionPtr conn);
+
+        /// @brief Create a server object with a local-only connection.
         OGVR_SERVER_EXPORT static ServerPtr createLocal();
 
       private:
-        Server();
+        ConnectionPtr m_conn;
+        shared_ptr<RegistrationContext> m_ctx;
     };
 } // end of namespace server
 } // end of namespace ogvr

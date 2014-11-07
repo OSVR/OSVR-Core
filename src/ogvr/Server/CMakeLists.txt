@@ -43,6 +43,7 @@ endif()
 
 target_link_libraries(ogvrServer
     PRIVATE
+    ogvrConnection
     ogvrPluginHost
     ogvrUtilCpp)
 
