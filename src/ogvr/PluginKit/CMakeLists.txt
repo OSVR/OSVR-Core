@@ -57,6 +57,14 @@ target_link_libraries(ogvrPluginKit
 
 enable_extra_compiler_warnings(ogvrPluginKit)
 
+###
+# C++ (header-only) interface
+###
+# Requires some version of Boost, but not C++11.
+add_library(ogvrPluginKitCpp INTERFACE)
+target_link_libraries(ogvrPluginKitCpp INTERFACE ogvrPluginKit)
+target_include_directories(ogvrUtilCpp
+    INTERFACE ${Boost_INCLUDE_DIR})
 
 ###
 # Install library and headers
