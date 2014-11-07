@@ -116,14 +116,15 @@ namespace functor_trampolines {
 /// in the third, "data" parameter.
 #define OGVR_MAKE_CALLERS(Z, ARITY, RETURNS)                                   \
     template <> struct Caller<this_last_t, ARITY, RETURNS> {                   \
-        template <typename FPtr, typename F>                                   \
-        static OGVR_RETURNTYPE(RETURNS)                                        \
-            call(BOOST_PP_ENUM(ARITY, OGVR_MAKE_PARAMLIST, ~)                  \
-                     BOOST_PP_COMMA_IF(ARITY) void *functor) {                 \
-            F *o = static_cast<F *>(functor);                                  \
-            OGVR_RETURNSTATEMENT(RETURNS) (*o)(                                \
-                BOOST_PP_ENUM_PARAMS(ARITY, OGVR_PARAM_STEM));                 \
-        }                                                                      \
+        template <typename FPtr, typename F> struct Specialized {              \
+            static OGVR_RETURNTYPE(RETURNS)                                    \
+                call(BOOST_PP_ENUM(ARITY, OGVR_MAKE_PARAMLIST, ~)              \
+                         BOOST_PP_COMMA_IF(ARITY) void *functor) {             \
+                F *o = static_cast<F *>(functor);                              \
+                OGVR_RETURNSTATEMENT(RETURNS) (*o)(                            \
+                    BOOST_PP_ENUM_PARAMS(ARITY, OGVR_PARAM_STEM));             \
+            }                                                                  \
+        };                                                                     \
     };                                                                         \
     template <> struct Caller<this_first_t, ARITY, RETURNS> {                  \
         template <typename FPtr, typename F>                                   \
@@ -180,17 +181,19 @@ namespace functor_trampolines {
                     FunctionPtr>::type>,
                 boost::mpl::int_<0>, boost::mpl::int_<1> >::type Returns;
 
-            /// @brief Computed result.
+            /// @brief Computed intermediate result.
             typedef detail::Caller<UnqualifiedThisLocation, Arity::value,
-                                   Returns::value> type;
+                                   Returns::value> GeneralResult;
+
+            /// @brief Computed result.
+            typedef typename GeneralResult::template Specialized<
+                FunctionPtr, FunctionObjectType> type;
         };
     } // end of namespace detail
 
     /// @brief Struct containing a single static function member named "call"
-    /// that
-    /// serves as a converter from a function call with an opaque userdata
-    /// pointer
-    /// to a functor call using the userdata pointer as "this".
+    /// that serves as a converter from a function call with an opaque userdata
+    /// pointer to a functor call using the userdata pointer as "this".
     ///
     /// @tparam FunctionPtr Desired function pointer type
     /// @tparam FunctionObjectType Type of your function object
@@ -203,9 +206,8 @@ namespace functor_trampolines {
                                        ThisLocation>::type {};
 
     /// @brief Get a generic functor caller: a pointer to a function that will
-    /// call an object of your
-    /// specific function object type, expecting the function object address
-    /// passed as a void * as a parameter.
+    /// call an object of your specific function object type, expecting the
+    /// function object address passed as a void * as a parameter.
     ///
     /// @tparam FunctionPtr Desired function pointer type
     /// @tparam FunctionObjectType Type of your function object
