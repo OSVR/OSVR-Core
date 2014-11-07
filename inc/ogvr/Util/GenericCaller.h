@@ -29,6 +29,7 @@
 #include <boost/preprocessor/enum_params.hpp>
 #include <boost/preprocessor/repeat.hpp>
 
+#include <boost/function_types/function_arity.hpp>
 #include <boost/function_types/result_type.hpp>
 #include <boost/function_types/parameter_types.hpp>
 #include <boost/type_traits/is_void.hpp>
@@ -98,7 +99,7 @@ namespace functor_trampolines {
 #define OGVR_MAKE_CALLERS(Z, ARITY, RETURNS)                                   \
     template <> struct CallerThisLast<ARITY, RETURNS> {                        \
         template <typename FPtr, typename F>                                   \
-        OGVR_RETURNTYPE(RETURNS)                                               \
+        static OGVR_RETURNTYPE(RETURNS)                                        \
             call(BOOST_PP_ENUM(ARITY, OGVR_MAKE_PARAMLIST, ~)                  \
                      BOOST_PP_COMMA_IF(ARITY) void *functor) {                 \
             F *o = static_cast<F *>(functor);                                  \
@@ -108,7 +109,7 @@ namespace functor_trampolines {
     };                                                                         \
     template <> struct CallerThisFirst<ARITY, RETURNS> {                       \
         template <typename FPtr, typename F>                                   \
-        OGVR_RETURNTYPE(RETURNS)                                               \
+        static OGVR_RETURNTYPE(RETURNS)                                        \
             call(void *functor BOOST_PP_COMMA_IF(ARITY)                        \
                      BOOST_PP_ENUM(ARITY, OGVR_MAKE_PARAMLIST, ~)) {           \
             F *o = static_cast<F *>(functor);                                  \
@@ -141,7 +142,7 @@ namespace functor_trampolines {
             boost::is_void<
                 typename boost::function_types::result_type<FPtr>::type>,
             boost::mpl::int_<0>, boost::mpl::int_<1> >::type Returns;
-        return &CallerThisFirst<Arity::value, Returns::value>::call;
+        return &detail::CallerThisFirst<Arity::value, Returns::value>::call;
     }
 
     /// @brief Overload for type deduction on the functor.
@@ -157,13 +158,13 @@ namespace functor_trampolines {
     inline FunctionPtr getCallerThisLast() {
         /// @todo static assert that the argument lists are compatible
         /// @todo make this compile time?
-        typedef typename boost::mpl::prior<
-            boost::function_arity<FunctionPtr> >::type Arity;
-        typedef typename boost::mpl::if_<
-            boost::is_void<
-                typename boost::function_types::result_type<FPtr>::type>,
-            boost::mpl::int_<0>, boost::mpl::int_<1> >::type Returns;
-        return &CallerThisFirst<Arity::value, Returns::value>::call;
+        using namespace boost::mpl;
+        using namespace boost::function_types;
+        using boost::is_void;
+        typedef typename prior<function_arity<FunctionPtr> >::type Arity;
+        typedef typename if_<is_void<typename result_type<FunctionPtr>::type>,
+                             int_<0>, int_<1> >::type Returns;
+        return &detail::CallerThisLast<Arity::value, Returns::value>::call;
     }
 
     /// @brief Overload for type deduction on the functor.
