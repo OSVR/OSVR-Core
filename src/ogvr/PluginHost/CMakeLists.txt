@@ -7,7 +7,7 @@ set(API
     "${HEADER_LOCATION}/PluginSpecificRegistrationContext.h"
     "${HEADER_LOCATION}/RegistrationContext.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
-source_group(inc\\ogvr\\PluginHost FILES ${API})
+source_group(API FILES ${API})
 
 set(SOURCE
     PluginSpecificRegistrationContext.cpp
@@ -15,7 +15,6 @@ set(SOURCE
     PluginSpecificRegistrationContextImpl.h
     RegistrationContext.cpp
     ResetPointerList.h)
-source_group(src\\ogvr\\PluginHost FILES ${SOURCE})
 
 add_library(ogvrPluginHost ${API} ${SOURCE})
 

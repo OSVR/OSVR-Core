@@ -19,15 +19,14 @@ set(API
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
-source_group(inc\\ogvr\\PluginKit FILES ${API})
+source_group(API FILES ${API})
 
 set(SOURCE
     DeviceInterfaceC.cpp
     Export.h.in
     HandleNullContext.h
     PluginRegistrationC.cpp)
-source_group(src\\ogvr\\PluginKit FILES ${SOURCE})
-add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+
 add_library(ogvrPluginKit ${API} ${SOURCE})
 set_target_properties(ogvrPluginKit PROPERTIES
     FOLDER "OGVR Libraries"

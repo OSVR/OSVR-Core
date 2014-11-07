@@ -11,7 +11,7 @@ set(API
     "${HEADER_LOCATION}/MessageType.h"
     "${HEADER_LOCATION}/MessageTypePtr.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
-source_group(inc\\ogvr\\Connection FILES ${API})
+source_group(API FILES ${API})
 
 set(SOURCE
     AsyncAccessControl.cpp
@@ -30,7 +30,6 @@ set(SOURCE
     VrpnBasedConnection.h
     VrpnConnectionDevice.h
     VrpnMessageType.h)
-source_group(src\\ogvr\\Connection FILES ${SOURCE})
 
 add_library(ogvrConnection ${API} ${SOURCE})
 
@@ -61,7 +60,6 @@ target_include_directories(ogvrConnection
 
 target_compile_options(ogvrConnection PUBLIC ${OGVR_CXX11_FLAGS})
 
-target_compile_definitions(ogvrConnection PRIVATE ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 if(NOT Boost_USE_STATIC_LIBS)
     target_compile_definitions(ogvrConnection PRIVATE BOOST_ALL_DYN_LINK)
 endif()

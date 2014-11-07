@@ -38,7 +38,7 @@ set(API
     "${HEADER_LOCATION}/UniquePtr.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h"
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
-source_group(inc\\ogvr\\Util FILES ${API})
+source_group(API FILES ${API})
 
 set(SOURCE
     AnyMap.cpp
@@ -46,7 +46,6 @@ set(SOURCE
     PlatformConfig.h.in
     Verbosity.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
-source_group(src\\ogvr\\Util FILES ${SOURCE})
 
 add_library(ogvrUtil ${API} ${SOURCE})
 
