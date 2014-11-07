@@ -23,9 +23,14 @@
 // Internal Includes
 #include <ogvr/PluginKit/PluginRegistrationC.h>
 #include <ogvr/Util/GenericDeleter.h>
+#include <ogvr/Util/GenericCaller.h>
 
 // Library/third-party includes
-// - none
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_pointer.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
+#include <boost/type_traits/is_copy_constructible.hpp>
+#include <boost/static_assert.hpp>
 
 // Standard includes
 #include <cstddef>
@@ -60,43 +65,47 @@ namespace plugin {
     }
 
     namespace detail {
+        /// @brief Traits-based overload to register a hardware poll callback
+        /// where we're given a pointer to a function object.
         template <typename T>
-        inline OGVR_ReturnCode
-        doHardwarePollRegistration(OGVR_PluginRegContext ctx, T *functor) {
+        inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
+            OGVR_PluginRegContext ctx, T functor,
+            boost::enable_if<boost::is_pointer<T> >::type * = NULL) {
+            typedef typename boost::remove_pointer<T>::type FunctorType;
             registerObjectForDeletion(ctx, functor);
             return ogvrPluginRegisterHardwarePollCallback(
-				ctx, &::ogvr::detail::generic_caller0<OGVR_ReturnCode, T>,
+                ctx,
+                &::ogvr::detail::generic_caller0<OGVR_ReturnCode, FunctorType>,
                 static_cast<void *>(functor));
         }
 
-		/// Template partial specializations for pointer vs value check.
+        /// @brief Traits based overload to copy a hardware poll callback passed
+        /// by value then register the copy.
         template <typename T>
-        struct RegisterHardwarePollCallback_RegisterHeapFunctor {
-            static OGVR_ReturnCode run(OGVR_PluginRegContext ctx,
-                                       T functorByValue) {
-                T *functorCopy = new T(functorByValue);
-                return doHardwarePollRegistration(ctx, functorCopy);
-            }
-        };
-
-        template <typename T>
-        struct RegisterHardwarePollCallback_RegisterHeapFunctor<T *> {
-            static OGVR_ReturnCode run(OGVR_PluginRegContext ctx,
-                                       T *functorByPointer) {
-                return doHardwarePollRegistration(ctx, functorByPointer);
-            }
-        };
+        inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
+            OGVR_PluginRegContext ctx, T functor,
+            boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
+            BOOST_STATIC_ASSERT(boost::is_copy_constructible<T>::value,
+                                "Hardware poll callback functors must be "
+                                "either passed as a pointer or be "
+                                "copy-constructible");
+            T *functorCopy = new T(functor);
+            return registerHardwarePollCallbackImpl(ctx, functorCopy);
+        }
     }
     /// @brief Registers a function object to be called when the core requests a
     /// hardware poll.
     ///
     /// Also provides for deletion of the function object.
+    ///
+    /// @param functor An function object (with operator() defined). Pass either
+    /// a pointer, which will transfer ownership, or an object by value, which
+    /// will result in a copy being made.
     template <typename T>
     inline void registerHardwarePollCallback(OGVR_PluginRegContext ctx,
                                              T functor) {
         OGVR_ReturnCode ret =
-            detail::RegisterHardwarePollCallback_RegisterHeapFunctor<T>::run(
-                ctx, functor);
+            detail::registerHardwarePollCallbackImpl(ctx, functor);
         if (ret != OGVR_RETURN_SUCCESS) {
             throw std::runtime_error("registerHardwarePollCallback failed!");
         }
