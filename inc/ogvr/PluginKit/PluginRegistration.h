@@ -85,10 +85,10 @@ namespace plugin {
         inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
             OGVR_PluginRegContext ctx, T functor,
             typename boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
-            BOOST_STATIC_ASSERT(boost::is_copy_constructible<T>::value,
-                                "Hardware poll callback functors must be "
-                                "either passed as a pointer or be "
-                                "copy-constructible");
+            BOOST_STATIC_ASSERT_MSG(boost::is_copy_constructible<T>::value,
+                                    "Hardware poll callback functors must be "
+                                    "either passed as a pointer or be "
+                                    "copy-constructible");
             T *functorCopy = new T(functor);
             return registerHardwarePollCallbackImpl(ctx, functorCopy);
         }
