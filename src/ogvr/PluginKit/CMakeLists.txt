@@ -43,7 +43,7 @@ target_include_directories(ogvrPluginKit
     $<BUILD_INTERFACE:${HEADER_BASE}>
     $<INSTALL_INTERFACE:include>
     PRIVATE
-    ${Boost_INCLUDE_DIR})
+    ${Boost_INCLUDE_DIRS})
 
 target_compile_options(ogvrPluginKit PRIVATE ${OGVR_CXX11_FLAGS})
 
@@ -64,7 +64,7 @@ enable_extra_compiler_warnings(ogvrPluginKit)
 add_library(ogvrPluginKitCpp INTERFACE)
 target_link_libraries(ogvrPluginKitCpp INTERFACE ogvrPluginKit)
 target_include_directories(ogvrPluginKitCpp
-    INTERFACE ${Boost_INCLUDE_DIR})
+    INTERFACE ${Boost_INCLUDE_DIRS})
 
 ###
 # Install library and headers

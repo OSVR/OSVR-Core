@@ -67,7 +67,7 @@ target_include_directories(ogvrUtil
 
 target_include_directories(ogvrUtil
     PRIVATE
-    ${Boost_INCLUDE_DIR})
+    ${Boost_INCLUDE_DIRS})
 
 target_compile_options(ogvrUtil PRIVATE ${OGVR_CXX11_FLAGS})
 
@@ -84,7 +84,7 @@ target_link_libraries(ogvrUtil PRIVATE vrpn)
 add_library(ogvrUtilCpp INTERFACE)
 target_link_libraries(ogvrUtilCpp INTERFACE ogvrUtil)
 target_include_directories(ogvrUtilCpp
-    INTERFACE ${Boost_INCLUDE_DIR})
+    INTERFACE ${Boost_INCLUDE_DIRS})
 
 target_compile_options(ogvrUtilCpp
     INTERFACE ${OGVR_CXX11_FLAGS})
