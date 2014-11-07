@@ -61,7 +61,7 @@ target_include_directories(ogvrConnection
 
 target_compile_options(ogvrConnection PUBLIC ${OGVR_CXX11_FLAGS})
 
-target_compile_definitions(ogvrConnection PRIVATE ${VRPN_DEFINITIONS} ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+target_compile_definitions(ogvrConnection PRIVATE ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 if(NOT Boost_USE_STATIC_LIBS)
     target_compile_definitions(ogvrConnection PRIVATE BOOST_ALL_DYN_LINK)
 endif()
@@ -70,7 +70,7 @@ target_link_libraries(ogvrConnection
     PRIVATE
     ogvrPluginHost
     ogvrUtilCpp
-    ${VRPN_SERVER_LIBRARY}
+    vendored-vrpn
     ${Boost_THREAD_LIBRARY}
     ${Boost_DATE_TIME_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
