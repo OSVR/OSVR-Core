@@ -79,4 +79,8 @@ Connection::Connection() { OGVR_DEV_VERBOSE("In Connection constructor"); }
 
 Connection::~Connection() { OGVR_DEV_VERBOSE("In Connection destructor"); }
 
+void *Connection::getUnderlyingObject() { return NULL; }
+
+const char *Connection::getConnectionKindID() { return NULL; }
+
 } // end of namespace ogvr

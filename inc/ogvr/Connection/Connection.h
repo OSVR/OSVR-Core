@@ -75,6 +75,17 @@ class Connection : boost::noncopyable {
     /// @brief Destructor
     OGVR_CONNECTION_EXPORT virtual ~Connection();
 
+    /// @name Advanced Methods - not for general consumption
+    /// These can break encapsulation rules and/or encourage bad coding habits.
+    /// Avoid if at all possible.
+    /// @{
+    /// @brief Access implementation details.
+    OGVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();
+
+    /// @brief Returns some implementation-defined string based on the dynamic
+    /// type of the connection.
+    OGVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
+    /// @}
   protected:
     /// @brief (Subclass implementation) Register (or retrieve registration) of
     /// a message type.

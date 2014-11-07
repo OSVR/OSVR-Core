@@ -65,4 +65,17 @@ void VrpnBasedConnection::m_process() {
 VrpnBasedConnection::~VrpnBasedConnection() {
     /// @todo wait until all async threads are done
 }
+
+void *VrpnBasedConnection::getUnderlyingObject() {
+    return static_cast<void *>(m_vrpnConnection.get());
+}
+
+OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID() {
+    return "org.opengoggles.vrpn";
+}
+
+const char *VrpnBasedConnection::getConnectionKindID() {
+    return getVRPNConnectionKindID();
+}
+
 } // namespace ogvr

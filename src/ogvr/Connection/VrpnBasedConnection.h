@@ -37,6 +37,9 @@ class VrpnBasedConnection : public Connection {
     /// @brief Constructor for the VRPN connection.
     VrpnBasedConnection(ConnectionType type);
 
+    /// @brief Returns the vrpn_Connection pointer.
+    virtual void *getUnderlyingObject();
+    virtual const char *getConnectionKindID();
     virtual ~VrpnBasedConnection();
 
   private:
