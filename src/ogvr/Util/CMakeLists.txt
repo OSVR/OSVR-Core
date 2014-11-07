@@ -72,11 +72,7 @@ target_include_directories(ogvrUtil
 target_compile_options(ogvrUtil PRIVATE ${OGVR_CXX11_FLAGS})
 
 # TODO VRPN used in this lib only for gettimeofday wrapper: do we need it?
-target_include_directories(ogvrUtil
-    PRIVATE
-    ${VRPN_INCLUDE_DIRS})
-target_compile_definitions(ogvrUtil PRIVATE ${VRPN_DEFINITIONS})
-target_link_libraries(ogvrUtil PRIVATE vrpn)
+target_link_libraries(ogvrUtil PRIVATE vendored-vrpn)
 
 ###
 # C++ util library/headers
