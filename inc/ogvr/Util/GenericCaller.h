@@ -155,8 +155,8 @@ namespace functor_trampolines {
                 ThisLocation>::type>::type UnqualifiedThisLocation;
 
             BOOST_STATIC_ASSERT_MSG(
-                boost::is_same<UnqualifiedThisLocation, this_first_t>::value ||
-                    boost::is_same<UnqualifiedThisLocation, this_last_t>::value,
+                (boost::is_same<UnqualifiedThisLocation, this_first_t>::value ||
+                 boost::is_same<UnqualifiedThisLocation, this_last_t>::value),
                 "ThisLocation must be either this_last_t or this_first_t");
             BOOST_STATIC_ASSERT_MSG(
                 !(boost::is_pointer<FunctionObjectType>::value),
