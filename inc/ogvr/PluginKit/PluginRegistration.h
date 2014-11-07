@@ -74,8 +74,9 @@ namespace plugin {
             typedef typename boost::remove_pointer<T>::type FunctorType;
             registerObjectForDeletion(ctx, functor);
             return ogvrPluginRegisterHardwarePollCallback(
-                ctx, ::ogvr::functor_trampolines::getCallerThisLast<
-                         OGVRHardwarePollCallback, FunctorType>(),
+                ctx, functor_trampolines::getCaller<OGVRHardwarePollCallback,
+                                                    FunctorType>(
+                         functor_trampolines::this_last),
                 static_cast<void *>(functor));
         }
 
