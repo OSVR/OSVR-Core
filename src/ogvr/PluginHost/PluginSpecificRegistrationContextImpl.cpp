@@ -52,8 +52,8 @@ void PluginSpecificRegistrationContextImpl::takePluginHandle(
     m_handle = handle;
 }
 
-void
-PluginSpecificRegistrationContextImpl::setParent(RegistrationContext &parent) {
+void PluginSpecificRegistrationContextImpl::setParent(
+    RegistrationContext &parent) {
     if (m_parent != NULL && m_parent != &parent) {
         throw std::logic_error(
             "Can't set the registration context parent - already set!");
