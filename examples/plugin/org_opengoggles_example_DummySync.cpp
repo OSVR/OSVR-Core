@@ -17,9 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginInterfaceC.h>
-#include <ogvr/PluginKit/PluginRegistration.h>
-#include <ogvr/Util/GenericDeleter.h>
+#include <ogvr/PluginKit/PluginKit.h>
 
 // Library/third-party includes
 // - none

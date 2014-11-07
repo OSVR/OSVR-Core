@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header providing C++ interface wrappers around functionality in
+    PluginRegistrationC.h
 
     @date 2014
 

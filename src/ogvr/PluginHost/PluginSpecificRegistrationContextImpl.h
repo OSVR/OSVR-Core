@@ -20,7 +20,7 @@
 #define INCLUDED_PluginSpecificRegistrationContextImpl_h_GUID_E8A348C1_28DC_4691_6214_32F75A6665F0
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginInterfaceC.h>
+#include <ogvr/PluginKit/PluginKitC.h>
 #include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <ogvr/Util/UniquePtr.h>
 #include <ogvr/Util/CallbackWrapper.h>

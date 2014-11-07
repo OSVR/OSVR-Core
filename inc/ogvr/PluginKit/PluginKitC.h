@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header including the full PluginKit C API
 
     Must be c-safe!
 
@@ -20,8 +20,8 @@
 // the Apache License, Version 2.0)
 */
 
-#ifndef INCLUDED_PluginInterfaceC_h_GUID_0C44C990_0B88_43AF_10D4_4CA29408DE3C
-#define INCLUDED_PluginInterfaceC_h_GUID_0C44C990_0B88_43AF_10D4_4CA29408DE3C
+#ifndef INCLUDED_PluginKitC_h_GUID_0C44C990_0B88_43AF_10D4_4CA29408DE3C
+#define INCLUDED_PluginKitC_h_GUID_0C44C990_0B88_43AF_10D4_4CA29408DE3C
 
 /* Internal Includes */
 #include <ogvr/PluginKit/PluginRegistrationC.h>

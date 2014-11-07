@@ -14,7 +14,8 @@ set(API
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
-    "${HEADER_LOCATION}/PluginInterfaceC.h"
+    "${HEADER_LOCATION}/PluginKit.h"
+    "${HEADER_LOCATION}/PluginKitC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")

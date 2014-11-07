@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header providing C++ interface wrappers around functionality in
+    DeviceInterfaceC.h
 
     @date 2014
 
@@ -20,7 +21,7 @@
 #define INCLUDED_DeviceInterface_h_GUID_A929799C_02F5_4C92_C503_36C7F59D6BA1
 
 // Internal Includes
-// - none
+#include <ogvr/PluginKit/DeviceInterfaceC.h>
 
 // Library/third-party includes
 // - none
