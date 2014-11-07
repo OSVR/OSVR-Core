@@ -28,6 +28,7 @@
 #include <boost/preprocessor/enum.hpp>
 #include <boost/preprocessor/enum_params.hpp>
 #include <boost/preprocessor/repeat.hpp>
+#include <boost/preprocessor/facilities/empty.hpp>
 
 #include <boost/function_types/function_arity.hpp>
 #include <boost/function_types/result_type.hpp>
@@ -107,7 +108,7 @@ namespace functor_trampolines {
 /// @brief Expands to "return" if R==1, nothing if R==0
 ///
 /// @param R value of RETURNS
-#define OGVR_RETURNSTATEMENT(R) BOOST_PP_IF(R, return, )
+#define OGVR_RETURNSTATEMENT(R) BOOST_PP_IF(R, return, BOOST_PP_EMPTY())
 
 /// @brief Generates specializations of CallerThisLast and CallerThisFirst for
 /// the given values of ARITY and RETURNS (matching the template parameters).
