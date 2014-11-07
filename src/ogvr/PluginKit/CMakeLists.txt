@@ -63,7 +63,7 @@ enable_extra_compiler_warnings(ogvrPluginKit)
 # Requires some version of Boost, but not C++11.
 add_library(ogvrPluginKitCpp INTERFACE)
 target_link_libraries(ogvrPluginKitCpp INTERFACE ogvrPluginKit)
-target_include_directories(ogvrUtilCpp
+target_include_directories(ogvrPluginKitCpp
     INTERFACE ${Boost_INCLUDE_DIR})
 
 ###
