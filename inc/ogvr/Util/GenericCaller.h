@@ -216,8 +216,8 @@ namespace functor_trampolines {
     template <typename FunctionPtr, typename FunctionObjectType,
               typename ThisLocation>
     inline FunctionPtr getCaller() {
-		typedef GenericCaller<FunctionPtr, FunctionObjectType,
-			ThisLocation> CallerType;
+        typedef GenericCaller<FunctionPtr, FunctionObjectType, ThisLocation>
+            CallerType;
         return &CallerType::call;
     }
     /// @brief Get a generic functor caller. Specify the location of "this"
