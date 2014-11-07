@@ -70,7 +70,7 @@ namespace plugin {
         template <typename T>
         inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
             OGVR_PluginRegContext ctx, T functor,
-            boost::enable_if<boost::is_pointer<T> >::type * = NULL) {
+            typename boost::enable_if<boost::is_pointer<T> >::type * = NULL) {
             typedef typename boost::remove_pointer<T>::type FunctorType;
             registerObjectForDeletion(ctx, functor);
             return ogvrPluginRegisterHardwarePollCallback(
@@ -84,7 +84,7 @@ namespace plugin {
         template <typename T>
         inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
             OGVR_PluginRegContext ctx, T functor,
-            boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
+            typename boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
             BOOST_STATIC_ASSERT(boost::is_copy_constructible<T>::value,
                                 "Hardware poll callback functors must be "
                                 "either passed as a pointer or be "
