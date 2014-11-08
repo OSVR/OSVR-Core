@@ -28,6 +28,8 @@
 // Standard includes
 // - none
 
+class vrpn_Connection;
+
 vrpn_Connection *getVRPNConnection(OGVR_PluginRegContext ctx);
 
 #endif // INCLUDED_GetVRPNConnection_h_GUID_008AFE04_5378_43B9_BE78_571F7C16D2DD

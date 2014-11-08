@@ -29,13 +29,16 @@
 
 // Sneaky way to get an ID for VRPN.
 /// @todo solve this problem in a more sophisticated way.
+namespace ogvr {
 OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
+} // end of namespace ogvr
 
 vrpn_Connection *getVRPNConnection(OGVR_PluginRegContext ctx) {
     ogvr::ConnectionPtr conn = ogvr::Connection::retrieveConnection(
         ogvr::PluginSpecificRegistrationContext::get(ctx).getParent());
     vrpn_Connection *ret = NULL;
-    if (std::string(conn->getConnectionKindID()) == getVRPNConnectionKindID()) {
+    if (std::string(conn->getConnectionKindID()) ==
+        ogvr::getVRPNConnectionKindID()) {
         ret = static_cast<vrpn_Connection *>(conn->getUnderlyingObject());
     }
     return ret;
