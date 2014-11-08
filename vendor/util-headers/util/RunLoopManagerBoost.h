@@ -7,9 +7,9 @@
 	This GUID can help identify the project: d1dbc94e-e863-49cf-bc08-ab4d9f486613
 
 	This copy of the header is from the revision that Git calls
-	94f7934d19090d7f76e3160c49c0dbafdc3ecf29
+	dac7067bc71590c33c2d1b4d381c7e7239aa10bc
 
-	Commit date: "2014-10-31 15:21:32 -0500"
+	Commit date: "2014-11-07 22:03:54 -0600"
 
         @date 2013
 
@@ -80,10 +80,6 @@ private:
     
     /// protected by condition variable
 	volatile LoopGuardInterface::RunningState currentState_;
-    
-
-    /// One-way signalling flag from outside to the runloop.
-    volatile bool shouldStop_;
 
 };
 
