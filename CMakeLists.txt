@@ -64,9 +64,6 @@ endif()
 # Building
 ###
 add_subdirectory(vendor)
-if(WIN32)
-    set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "add a postfix, usually d on windows" FORCE)
-endif()
 
 # Set RPATH for dynamic library search.
 if(NOT WIN32 AND NOT APPLE)
@@ -75,7 +72,13 @@ if(NOT WIN32 AND NOT APPLE)
 endif()
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
+if(WIN32)
+    set(CMAKE_DEBUG_POSTFIX "d")
+endif()
 add_subdirectory(src/ogvr)
+if(WIN32)
+    set(CMAKE_DEBUG_POSTFIX "")
+endif()
 add_subdirectory(apps)
 add_subdirectory(plugins)
 if(BUILD_TESTING)
