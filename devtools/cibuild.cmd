@@ -7,6 +7,7 @@ cd build
 cmake .. -G "Visual Studio 12" "-DCMAKE_INSTALL_PREFIX=%WORKSPACE%\install" %*
 cmake --build . --config Debug
 cmake --build . --config RelWithDebInfo
+cmake --build . --config Debug --target INSTALL
 cmake --build . --config RelWithDebInfo --target INSTALL
 
 cmake --build . --config RelWithDebInfo --target ogvrPluginKit -- /p:RunCodeAnalysis=True
