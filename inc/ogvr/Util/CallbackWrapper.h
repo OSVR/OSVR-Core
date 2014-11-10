@@ -31,7 +31,7 @@
 #include <utility>
 
 namespace ogvr {
-
+namespace util {
 /// @brief A class template turning a callback with some number of arguments,
 /// with a userdata pointer last, into a function object.
 template <typename FunctionPtrType> class CallbackWrapper {
@@ -56,6 +56,6 @@ template <typename FunctionPtrType> class CallbackWrapper {
     FunctionPtrType m_f;
     void *m_ud;
 };
-
+} // end of namespace util
 } // end of namespace ogvr
 #endif // INCLUDED_CallbackWrapper_h_GUID_6169ADE2_5BA1_4A81_47C9_9E492F6405ED

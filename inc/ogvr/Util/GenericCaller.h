@@ -55,6 +55,7 @@
 #endif
 
 namespace ogvr {
+namespace util {
 namespace functor_trampolines {
 
     /// @brief Tag type indicating the last parameter of the function contains
@@ -257,6 +258,15 @@ namespace functor_trampolines {
     }
 
 } // end of namespace functor_trampolines
+
+// Import symbols into namespace.
+using functor_trampolines::getCaller;
+using functor_trampolines::GenericCaller;
+using functor_trampolines::this_first;
+using functor_trampolines::this_first_t;
+using functor_trampolines::this_last;
+using functor_trampolines::this_last_t;
+} // end of namespace util
 } // end of namespace ogvr
 
 #endif // INCLUDED_GenericCaller_h_GUID_C49A7DEE_89E6_478D_627A_CFFB9ED39EAC

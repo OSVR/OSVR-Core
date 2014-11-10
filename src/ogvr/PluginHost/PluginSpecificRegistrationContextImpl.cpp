@@ -52,8 +52,8 @@ void PluginSpecificRegistrationContextImpl::takePluginHandle(
     m_handle = handle;
 }
 
-void PluginSpecificRegistrationContextImpl::setParent(
-    RegistrationContext &parent) {
+void
+PluginSpecificRegistrationContextImpl::setParent(RegistrationContext &parent) {
     if (m_parent != NULL && m_parent != &parent) {
         throw std::logic_error(
             "Can't set the registration context parent - already set!");
@@ -89,7 +89,7 @@ void PluginSpecificRegistrationContextImpl::callHardwarePollCallbacks() {
 
 void PluginSpecificRegistrationContextImpl::registerDataWithDeleteCallback(
     OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData) {
-    m_dataList.emplace_back(PluginDataPtr(pluginData, deleteCallback));
+    m_dataList.emplace_back(pluginData, deleteCallback);
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "Now have "
                      << m_dataList.size()
@@ -100,8 +100,7 @@ void PluginSpecificRegistrationContextImpl::registerHardwarePollCallback(
     OGVRHardwarePollCallback pollCallback, void *userData) {
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "In registerHardwarePollCallback");
-    m_hardwarePollCallbacks.emplace_back(
-        CallbackWrapper<OGVRHardwarePollCallback>(pollCallback, userData));
+    m_hardwarePollCallbacks.emplace_back(pollCallback, userData);
     OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                      "Now have "
                      << m_hardwarePollCallbacks.size()

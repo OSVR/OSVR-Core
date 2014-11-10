@@ -104,7 +104,8 @@ class PluginSpecificRegistrationContextImpl
     libfunc::PluginHandle m_handle;
     RegistrationContext *m_parent;
 
-    typedef CallbackWrapper<OGVRHardwarePollCallback> HardwarePollCallback;
+    typedef util::CallbackWrapper<OGVRHardwarePollCallback>
+        HardwarePollCallback;
     typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
     HardwarePollCallbackList m_hardwarePollCallbacks;
 

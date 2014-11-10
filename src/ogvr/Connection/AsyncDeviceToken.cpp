@@ -60,12 +60,12 @@ namespace {
     /// @brief Function object for the wait callback loop of an AsyncDeviceToken
     class WaitCallbackLoop {
       public:
-        WaitCallbackLoop(util::RunLoopManagerBase &run,
+        WaitCallbackLoop(::util::RunLoopManagerBase &run,
                          AsyncDeviceWaitCallback const &cb)
             : m_cb(cb), m_run(&run) {}
         void operator()() {
             OGVR_DEV_VERBOSE("WaitCallbackLoop starting");
-            util::LoopGuard guard(*m_run);
+            ::util::LoopGuard guard(*m_run);
             while (m_run->shouldContinue()) {
                 m_cb();
             }
@@ -74,7 +74,7 @@ namespace {
 
       private:
         AsyncDeviceWaitCallback m_cb;
-        util::RunLoopManagerBase *m_run;
+        ::util::RunLoopManagerBase *m_run;
     };
 } // end of anonymous namespace
 
@@ -82,7 +82,9 @@ void AsyncDeviceToken::setWaitCallback(AsyncDeviceWaitCallback const &cb) {
     m_callbackThread = boost::thread(WaitCallbackLoop(m_run, cb));
     m_run.signalAndWaitForStart();
 }
+
 AsyncDeviceToken *AsyncDeviceToken::asAsync() { return this; }
+
 void AsyncDeviceToken::m_sendData(time::TimeValue const &timestamp,
                                   MessageType *type, const char *bytestream,
                                   size_t len) {
