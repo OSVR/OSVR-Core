@@ -21,6 +21,9 @@
 
 // Internal Includes
 #include <ogvr/PluginHost/Export.h>
+#include <ogvr/PluginHost/RegistrationContext_fwd.h>
+#include <ogvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
+#include <ogvr/PluginHost/PluginRegPtr.h>
 #include <ogvr/Util/PluginCallbackTypesC.h>
 #include <ogvr/Util/PluginRegContextC.h>
 #include <ogvr/Util/SharedPtr.h>
@@ -35,13 +38,6 @@
 namespace ogvr {
 namespace pluginhost {
 
-// forward declaration
-class RegistrationContext;
-class PluginSpecificRegistrationContextImpl;
-
-/// @brief Pointer with ownership semantics for cleanup of plugins.
-/// @todo why did unique_ptr not work here?
-typedef shared_ptr<PluginSpecificRegistrationContextImpl> PluginRegPtr;
 /// @brief Class providing the external interface of a registration context
 /// backing a single plugin
 class PluginSpecificRegistrationContext : boost::noncopyable {

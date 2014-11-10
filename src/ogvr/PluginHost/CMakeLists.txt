@@ -4,7 +4,9 @@ include_directories("${BUILDTREE_HEADER_BASE}")
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginHost")
 
 set(API
+    "${HEADER_LOCATION}/PluginSpecificRegistrationContext_fwd.h"
     "${HEADER_LOCATION}/PluginSpecificRegistrationContext.h"
+    "${HEADER_LOCATION}/PluginRegPtr.h"
     "${HEADER_LOCATION}/RegistrationContext_fwd.h"
     "${HEADER_LOCATION}/RegistrationContext.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
