@@ -36,9 +36,8 @@
 /* Standard includes */
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+OGVR_EXTERN_C_BEGIN
+
 /** @defgroup plugin_c_device_api Plugin C API for Devices
     @brief How to create and report from a device in your plugin.
     @ingroup plugin_api
@@ -224,8 +223,6 @@ OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrDeviceAsyncStartWaitLoop(
 
 /** @} */ /* end of group */
 
-#ifdef __cplusplus
-} /* end of extern "C" */
-#endif
+OGVR_EXTERN_C_END
 
 #endif

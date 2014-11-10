@@ -44,9 +44,7 @@
    @{
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+OGVR_EXTERN_C_BEGIN
 
 /** @brief This macro begins the entry point function of your plugin.
 
@@ -119,9 +117,7 @@ OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     OGVR_INOUT_PTR void *pluginData) OGVR_FUNC_NONNULL((1, 2, 3));
 /** @} */
 
-#ifdef __cplusplus
-} /* end of extern "C" */
-#endif
+OGVR_EXTERN_C_END
 
 /** @} */
 
