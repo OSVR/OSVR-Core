@@ -31,9 +31,9 @@
 
 namespace ogvr {
 namespace connection {
-class ConnectionDevice;
-/// @brief How to hold on to a ConnectionDevice
-typedef shared_ptr<ConnectionDevice> ConnectionDevicePtr;
+    class ConnectionDevice;
+    /// @brief How to hold on to a ConnectionDevice
+    typedef shared_ptr<ConnectionDevice> ConnectionDevicePtr;
 } // namespace connection
 } // namespace ogvr
 

@@ -33,29 +33,30 @@
 
 namespace ogvr {
 namespace connection {
-/// @brief ConnectionDevice implementation for a VrpnBasedConnection
-class VrpnConnectionDevice : public ConnectionDevice {
-  public:
-    VrpnConnectionDevice(std::string const &name,
-                         vrpn_ConnectionPtr const &vrpnConn)
-        : ConnectionDevice(name) {
-        m_baseobj.reset(new vrpn_BaseFlexServer(name.c_str(), vrpnConn.get()));
-    }
-    virtual ~VrpnConnectionDevice() {}
-    virtual void m_process() {
-        m_getDeviceToken().connectionInteract();
-        m_baseobj->mainloop();
-    }
-    virtual void m_sendData(util::time::TimeValue const &timestamp,
-                            MessageType *type, const char *bytestream,
-                            size_t len) {
-        VrpnMessageType *msgtype = static_cast<VrpnMessageType *>(type);
-        m_baseobj->sendData(timestamp, msgtype->getID(), bytestream, len);
-    }
+    /// @brief ConnectionDevice implementation for a VrpnBasedConnection
+    class VrpnConnectionDevice : public ConnectionDevice {
+      public:
+        VrpnConnectionDevice(std::string const &name,
+                             vrpn_ConnectionPtr const &vrpnConn)
+            : ConnectionDevice(name) {
+            m_baseobj.reset(
+                new vrpn_BaseFlexServer(name.c_str(), vrpnConn.get()));
+        }
+        virtual ~VrpnConnectionDevice() {}
+        virtual void m_process() {
+            m_getDeviceToken().connectionInteract();
+            m_baseobj->mainloop();
+        }
+        virtual void m_sendData(util::time::TimeValue const &timestamp,
+                                MessageType *type, const char *bytestream,
+                                size_t len) {
+            VrpnMessageType *msgtype = static_cast<VrpnMessageType *>(type);
+            m_baseobj->sendData(timestamp, msgtype->getID(), bytestream, len);
+        }
 
-  private:
-    unique_ptr<vrpn_BaseFlexServer> m_baseobj;
-};
+      private:
+        unique_ptr<vrpn_BaseFlexServer> m_baseobj;
+    };
 } // namespace connection
 } // namespace ogvr
 

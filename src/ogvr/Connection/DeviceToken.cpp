@@ -32,70 +32,71 @@
 namespace ogvr {
 namespace connection {
 
-DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
-                                              ConnectionPtr const &conn) {
-    DeviceTokenPtr ret(new AsyncDeviceToken(name));
-    ret->m_sharedInit(conn);
-    return ret;
-}
-
-DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
-                                             ConnectionPtr const &conn) {
-    DeviceTokenPtr ret(new SyncDeviceToken(name));
-    ret->m_sharedInit(conn);
-    return ret;
-}
-
-DeviceToken::DeviceToken(std::string const &name) : m_name(name) {}
-
-DeviceToken::~DeviceToken() {}
-
-std::string const &DeviceToken::getName() const { return m_name; }
-
-void DeviceToken::sendData(MessageType *type, const char *bytestream,
-                           size_t len) {
-    util::time::TimeValue tv;
-    util::time::getNow(tv);
-    m_sendData(tv, type, bytestream, len);
-}
-void DeviceToken::sendData(util::time::TimeValue const &timestamp,
-                           MessageType *type, const char *bytestream,
-                           size_t len) {
-    m_sendData(timestamp, type, bytestream, len);
-}
-
-void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
-    AsyncDeviceToken *dev = this->asAsync();
-    if (!dev) {
-        throw std::logic_error(
-            "Called setAsyncWaitCallback on a non-async device token!");
+    DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
+                                                  ConnectionPtr const &conn) {
+        DeviceTokenPtr ret(new AsyncDeviceToken(name));
+        ret->m_sharedInit(conn);
+        return ret;
     }
-    dev->setWaitCallback(cb);
-}
 
-void DeviceToken::setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb) {
-    SyncDeviceToken *dev = this->asSync();
-    if (!dev) {
-        throw std::logic_error(
-            "Called setSyncUpdateCallback on a non-sync device token!");
+    DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
+                                                 ConnectionPtr const &conn) {
+        DeviceTokenPtr ret(new SyncDeviceToken(name));
+        ret->m_sharedInit(conn);
+        return ret;
     }
-    dev->setUpdateCallback(cb);
-}
 
-void DeviceToken::connectionInteract() { m_connectionInteract(); }
+    DeviceToken::DeviceToken(std::string const &name) : m_name(name) {}
 
-ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
+    DeviceToken::~DeviceToken() {}
 
-ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
+    std::string const &DeviceToken::getName() const { return m_name; }
 
-AsyncDeviceToken *DeviceToken::asAsync() { return NULL; }
-SyncDeviceToken *DeviceToken::asSync() { return NULL; }
+    void DeviceToken::sendData(MessageType *type, const char *bytestream,
+                               size_t len) {
+        util::time::TimeValue tv;
+        util::time::getNow(tv);
+        m_sendData(tv, type, bytestream, len);
+    }
+    void DeviceToken::sendData(util::time::TimeValue const &timestamp,
+                               MessageType *type, const char *bytestream,
+                               size_t len) {
+        m_sendData(timestamp, type, bytestream, len);
+    }
 
-void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
-    m_conn = conn;
-    m_dev = conn->registerDevice(m_name);
-    m_dev->setDeviceToken(*this);
-}
+    void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
+        AsyncDeviceToken *dev = this->asAsync();
+        if (!dev) {
+            throw std::logic_error(
+                "Called setAsyncWaitCallback on a non-async device token!");
+        }
+        dev->setWaitCallback(cb);
+    }
+
+    void
+    DeviceToken::setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb) {
+        SyncDeviceToken *dev = this->asSync();
+        if (!dev) {
+            throw std::logic_error(
+                "Called setSyncUpdateCallback on a non-sync device token!");
+        }
+        dev->setUpdateCallback(cb);
+    }
+
+    void DeviceToken::connectionInteract() { m_connectionInteract(); }
+
+    ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
+
+    ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
+
+    AsyncDeviceToken *DeviceToken::asAsync() { return NULL; }
+    SyncDeviceToken *DeviceToken::asSync() { return NULL; }
+
+    void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
+        m_conn = conn;
+        m_dev = conn->registerDevice(m_name);
+        m_dev->setDeviceToken(*this);
+    }
 
 } // namespace connection
 } // namespace ogvr

@@ -31,19 +31,19 @@
 namespace ogvr {
 namespace connection {
 
-class VrpnMessageType : public MessageType {
-  public:
-    VrpnMessageType(std::string const &name, vrpn_ConnectionPtr &vrpnConn)
-        : MessageType(name) {
-        m_messageID = vrpnConn->register_message_type(name.c_str());
-    }
-    ~VrpnMessageType() {}
+    class VrpnMessageType : public MessageType {
+      public:
+        VrpnMessageType(std::string const &name, vrpn_ConnectionPtr &vrpnConn)
+            : MessageType(name) {
+            m_messageID = vrpnConn->register_message_type(name.c_str());
+        }
+        ~VrpnMessageType() {}
 
-    vrpn_int32 getID() const { return m_messageID; }
+        vrpn_int32 getID() const { return m_messageID; }
 
-  private:
-    vrpn_int32 m_messageID;
-};
+      private:
+        vrpn_int32 m_messageID;
+    };
 } // namespace connection
 } // namespace ogvr
 

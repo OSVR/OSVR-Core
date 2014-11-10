@@ -30,28 +30,30 @@
 namespace ogvr {
 namespace connection {
 
-SyncDeviceToken::SyncDeviceToken(std::string const &name) : DeviceToken(name) {}
+    SyncDeviceToken::SyncDeviceToken(std::string const &name)
+        : DeviceToken(name) {}
 
-SyncDeviceToken::~SyncDeviceToken() {}
+    SyncDeviceToken::~SyncDeviceToken() {}
 
-void SyncDeviceToken::setUpdateCallback(SyncDeviceUpdateCallback const &cb) {
-    OGVR_DEV_VERBOSE("In SyncDeviceToken::setUpdateCallback");
-    m_cb = cb;
-}
-
-void SyncDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
-                                 MessageType *type, const char *bytestream,
-                                 size_t len) {
-    m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
-}
-
-void SyncDeviceToken::m_connectionInteract() {
-    if (m_cb) {
-        m_cb();
+    void
+    SyncDeviceToken::setUpdateCallback(SyncDeviceUpdateCallback const &cb) {
+        OGVR_DEV_VERBOSE("In SyncDeviceToken::setUpdateCallback");
+        m_cb = cb;
     }
-}
 
-SyncDeviceToken *SyncDeviceToken::asSync() { return this; }
+    void SyncDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
+                                     MessageType *type, const char *bytestream,
+                                     size_t len) {
+        m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
+    }
+
+    void SyncDeviceToken::m_connectionInteract() {
+        if (m_cb) {
+            m_cb();
+        }
+    }
+
+    SyncDeviceToken *SyncDeviceToken::asSync() { return this; }
 
 } // namespace connection
 } // namespace ogvr

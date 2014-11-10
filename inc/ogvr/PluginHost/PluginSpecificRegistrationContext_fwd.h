@@ -19,12 +19,10 @@
 #ifndef INCLUDED_PluginSpecificRegistrationContext_fwd_h_GUID_825E1B5D_BD0A_4B8E_9E64_786A5BC37475
 #define INCLUDED_PluginSpecificRegistrationContext_fwd_h_GUID_825E1B5D_BD0A_4B8E_9E64_786A5BC37475
 
-
 namespace ogvr {
 namespace pluginhost {
-class PluginSpecificRegistrationContext;
+    class PluginSpecificRegistrationContext;
 } // namespace pluginhost
 } // namespace ogvr
 
 #endif // INCLUDED_PluginSpecificRegistrationContext_fwd_h_GUID_825E1B5D_BD0A_4B8E_9E64_786A5BC37475
-

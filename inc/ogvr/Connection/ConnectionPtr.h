@@ -31,9 +31,9 @@
 
 namespace ogvr {
 namespace connection {
-class Connection;
-/// @brief How one must hold a Connection.
-typedef shared_ptr<Connection> ConnectionPtr;
+    class Connection;
+    /// @brief How one must hold a Connection.
+    typedef shared_ptr<Connection> ConnectionPtr;
 } // namespace connection
 } // namespace ogvr
 

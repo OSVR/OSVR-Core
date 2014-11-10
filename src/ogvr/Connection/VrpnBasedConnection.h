@@ -31,27 +31,29 @@
 
 namespace ogvr {
 namespace connection {
-class VrpnBasedConnection : public Connection {
-  public:
-    enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
+    class VrpnBasedConnection : public Connection {
+      public:
+        enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
 
-    /// @brief Constructor for the VRPN connection.
-    VrpnBasedConnection(ConnectionType type);
+        /// @brief Constructor for the VRPN connection.
+        VrpnBasedConnection(ConnectionType type);
 
-    /// @brief Returns the vrpn_Connection pointer.
-    virtual void *getUnderlyingObject();
-    virtual const char *getConnectionKindID();
-    virtual ~VrpnBasedConnection();
+        /// @brief Returns the vrpn_Connection pointer.
+        virtual void *getUnderlyingObject();
+        virtual const char *getConnectionKindID();
+        virtual ~VrpnBasedConnection();
 
-  private:
-    virtual MessageTypePtr m_registerMessageType(std::string const &messageId);
-    virtual ConnectionDevicePtr m_registerDevice(std::string const &deviceName);
-    virtual void m_process();
+      private:
+        virtual MessageTypePtr
+        m_registerMessageType(std::string const &messageId);
+        virtual ConnectionDevicePtr
+        m_registerDevice(std::string const &deviceName);
+        virtual void m_process();
 
-    vrpn_ConnectionPtr m_vrpnConnection;
-    typedef std::vector<ConnectionDevicePtr> DeviceList;
-    DeviceList m_devices;
-};
+        vrpn_ConnectionPtr m_vrpnConnection;
+        typedef std::vector<ConnectionDevicePtr> DeviceList;
+        DeviceList m_devices;
+    };
 
 } // namespace connection
 } // namespace ogvr

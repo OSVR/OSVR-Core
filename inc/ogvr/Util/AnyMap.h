@@ -31,48 +31,49 @@
 
 namespace ogvr {
 namespace util {
-/// @brief A data structure storing "any" by name, to reduce coupling.
-class AnyMap {
-  public:
-    /// @brief Do we have data under this key?
-    OGVR_UTIL_EXPORT bool contains(std::string const &key) const;
-    /// @overload
-    OGVR_UTIL_EXPORT bool contains(const char *key) const;
+    /// @brief A data structure storing "any" by name, to reduce coupling.
+    class AnyMap {
+      public:
+        /// @brief Do we have data under this key?
+        OGVR_UTIL_EXPORT bool contains(std::string const &key) const;
+        /// @overload
+        OGVR_UTIL_EXPORT bool contains(const char *key) const;
 
-    /// @brief Set data for the given key
-    ///
-    /// Silently overwrites existing data at that key.
-    /// @{
-    OGVR_UTIL_EXPORT void set(std::string const &key, boost::any const &value);
-    OGVR_UTIL_EXPORT void set(const char *key, boost::any const &value);
+        /// @brief Set data for the given key
+        ///
+        /// Silently overwrites existing data at that key.
+        /// @{
+        OGVR_UTIL_EXPORT void set(std::string const &key,
+                                  boost::any const &value);
+        OGVR_UTIL_EXPORT void set(const char *key, boost::any const &value);
 
-    template <typename T> void set(std::string const &key, T value) {
-        set(key, boost::any(value));
-    }
+        template <typename T> void set(std::string const &key, T value) {
+            set(key, boost::any(value));
+        }
 
-    template <typename T> void set(const char *key, T value) {
-        set(key, boost::any(value));
-    }
-    /// @}
+        template <typename T> void set(const char *key, T value) {
+            set(key, boost::any(value));
+        }
+        /// @}
 
-    /// @brief Get the data for this key.
-    ///
-    /// Returns an empty boost::any if the key doesn't exist.
-    OGVR_UTIL_EXPORT boost::any get(std::string const &key) const;
-    /// @overload
-    OGVR_UTIL_EXPORT boost::any get(const char *key) const;
+        /// @brief Get the data for this key.
+        ///
+        /// Returns an empty boost::any if the key doesn't exist.
+        OGVR_UTIL_EXPORT boost::any get(std::string const &key) const;
+        /// @overload
+        OGVR_UTIL_EXPORT boost::any get(const char *key) const;
 
-    /// @brief Clears the data for this key.
-    ///
-    /// If the key doesn't exist, this method does nothing
-    OGVR_UTIL_EXPORT void erase(std::string const &key);
-    /// @overload
-    OGVR_UTIL_EXPORT void erase(const char *key);
+        /// @brief Clears the data for this key.
+        ///
+        /// If the key doesn't exist, this method does nothing
+        OGVR_UTIL_EXPORT void erase(std::string const &key);
+        /// @overload
+        OGVR_UTIL_EXPORT void erase(const char *key);
 
-  private:
-    typedef std::map<std::string, boost::any> Contents;
-    Contents m_contents;
-};
+      private:
+        typedef std::map<std::string, boost::any> Contents;
+        Contents m_contents;
+    };
 } // namespace util
 } // namespace ogvr
 

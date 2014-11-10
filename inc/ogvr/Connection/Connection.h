@@ -36,73 +36,80 @@ namespace ogvr {
 /// @brief Messaging transport and device communication functionality
 namespace connection {
 
-/// @brief Class wrapping a messaging transport (server or internal) connection.
-class Connection : boost::noncopyable {
-  public:
-    /// @name Factory methods
-    ///
-    /// More to come.
-    /// @{
-    /// @brief Factory method to create a local-machine-only connection
-    OGVR_CONNECTION_EXPORT static ConnectionPtr createLocalConnection();
-    /// @brief Factory method to create a shared connection
-    OGVR_CONNECTION_EXPORT static ConnectionPtr createSharedConnection();
-    /// @}
+    /// @brief Class wrapping a messaging transport (server or internal)
+    /// connection.
+    class Connection : boost::noncopyable {
+      public:
+        /// @name Factory methods
+        ///
+        /// More to come.
+        /// @{
+        /// @brief Factory method to create a local-machine-only connection
+        OGVR_CONNECTION_EXPORT static ConnectionPtr createLocalConnection();
+        /// @brief Factory method to create a shared connection
+        OGVR_CONNECTION_EXPORT static ConnectionPtr createSharedConnection();
+        /// @}
 
-    /// @name Context Storage
-    /// @{
-    /// @brief Retrieve a connection pointer from a RegistrationContext
-    OGVR_CONNECTION_EXPORT static ConnectionPtr
-    retrieveConnection(const pluginhost::RegistrationContext &ctx);
-    /// @brief Store a connection pointer in a RegistrationContext
-    OGVR_CONNECTION_EXPORT static void
-    storeConnection(pluginhost::RegistrationContext &ctx, ConnectionPtr conn);
-    /// @}
+        /// @name Context Storage
+        /// @{
+        /// @brief Retrieve a connection pointer from a RegistrationContext
+        OGVR_CONNECTION_EXPORT static ConnectionPtr
+        retrieveConnection(const pluginhost::RegistrationContext &ctx);
+        /// @brief Store a connection pointer in a RegistrationContext
+        OGVR_CONNECTION_EXPORT static void
+        storeConnection(pluginhost::RegistrationContext &ctx,
+                        ConnectionPtr conn);
+        /// @}
 
-    /// @brief Register (or retrieve registration) of a message type.
-    OGVR_CONNECTION_EXPORT MessageTypePtr
-    registerMessageType(std::string const &messageId);
+        /// @brief Register (or retrieve registration) of a message type.
+        OGVR_CONNECTION_EXPORT MessageTypePtr
+            registerMessageType(std::string const &messageId);
 
-    /// @brief Register a full device name. This should be namespaced with the
-    /// plugin name.
-    OGVR_CONNECTION_EXPORT ConnectionDevicePtr
-    registerDevice(std::string const &deviceName);
+        /// @brief Register a full device name. This should be namespaced with
+        /// the
+        /// plugin name.
+        OGVR_CONNECTION_EXPORT ConnectionDevicePtr
+            registerDevice(std::string const &deviceName);
 
-    /// @brief Process messages. This shouldn't block.
-    ///
-    /// Someone needs to call this method frequently.
-    OGVR_CONNECTION_EXPORT void process();
+        /// @brief Process messages. This shouldn't block.
+        ///
+        /// Someone needs to call this method frequently.
+        OGVR_CONNECTION_EXPORT void process();
 
-    /// @brief Destructor
-    OGVR_CONNECTION_EXPORT virtual ~Connection();
+        /// @brief Destructor
+        OGVR_CONNECTION_EXPORT virtual ~Connection();
 
-    /// @name Advanced Methods - not for general consumption
-    /// These can break encapsulation rules and/or encourage bad coding habits.
-    /// Avoid if at all possible.
-    /// @{
-    /// @brief Access implementation details.
-    OGVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();
+        /// @name Advanced Methods - not for general consumption
+        /// These can break encapsulation rules and/or encourage bad coding
+        /// habits.
+        /// Avoid if at all possible.
+        /// @{
+        /// @brief Access implementation details.
+        OGVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();
 
-    /// @brief Returns some implementation-defined string based on the dynamic
-    /// type of the connection.
-    OGVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
-    /// @}
-  protected:
-    /// @brief (Subclass implementation) Register (or retrieve registration) of
-    /// a message type.
-    virtual MessageTypePtr
-    m_registerMessageType(std::string const &messageId) = 0;
+        /// @brief Returns some implementation-defined string based on the
+        /// dynamic
+        /// type of the connection.
+        OGVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
+        /// @}
+      protected:
+        /// @brief (Subclass implementation) Register (or retrieve registration)
+        /// of
+        /// a message type.
+        virtual MessageTypePtr
+        m_registerMessageType(std::string const &messageId) = 0;
 
-    /// @brief (Subclass implementation) Register a full device name.
-    virtual ConnectionDevicePtr
-    m_registerDevice(std::string const &deviceName) = 0;
+        /// @brief (Subclass implementation) Register a full device name.
+        virtual ConnectionDevicePtr
+        m_registerDevice(std::string const &deviceName) = 0;
 
-    /// @brief (Subclass implementation) Process messages. This shouldn't block.
-    virtual void m_process() = 0;
+        /// @brief (Subclass implementation) Process messages. This shouldn't
+        /// block.
+        virtual void m_process() = 0;
 
-    /// brief Constructor
-    Connection();
-};
+        /// brief Constructor
+        Connection();
+    };
 } // namespace connection
 } // namespace ogvr
 #endif // INCLUDED_Connection_h_GUID_61C65986_E2C9_498F_59F0_8EFC712BA183

@@ -31,53 +31,53 @@
 namespace ogvr {
 namespace connection {
 
-VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
-    switch (type) {
-    case VRPN_LOCAL_ONLY: {
-        m_vrpnConnection =
-            vrpn_ConnectionPtr::create_server_connection("127.0.0.1");
+    VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
+        switch (type) {
+        case VRPN_LOCAL_ONLY: {
+            m_vrpnConnection =
+                vrpn_ConnectionPtr::create_server_connection("127.0.0.1");
+        }
+        case VRPN_SHARED: {
+            m_vrpnConnection = vrpn_ConnectionPtr::create_server_connection();
+        }
+        }
     }
-    case VRPN_SHARED: {
-        m_vrpnConnection = vrpn_ConnectionPtr::create_server_connection();
+
+    MessageTypePtr
+    VrpnBasedConnection::m_registerMessageType(std::string const &messageId) {
+        MessageTypePtr ret(new VrpnMessageType(messageId, m_vrpnConnection));
+        return ret;
     }
+
+    ConnectionDevicePtr
+    VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
+        ConnectionDevicePtr ret =
+            make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
+        m_devices.push_back(ret);
+        return ret;
     }
-}
 
-MessageTypePtr
-VrpnBasedConnection::m_registerMessageType(std::string const &messageId) {
-    MessageTypePtr ret(new VrpnMessageType(messageId, m_vrpnConnection));
-    return ret;
-}
+    void VrpnBasedConnection::m_process() {
+        m_vrpnConnection->mainloop();
+        boost::for_each(m_devices,
+                        [](ConnectionDevicePtr &dev) { dev->process(); });
+    }
 
-ConnectionDevicePtr
-VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
-    ConnectionDevicePtr ret =
-        make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
-    m_devices.push_back(ret);
-    return ret;
-}
+    VrpnBasedConnection::~VrpnBasedConnection() {
+        /// @todo wait until all async threads are done
+    }
 
-void VrpnBasedConnection::m_process() {
-    m_vrpnConnection->mainloop();
-    boost::for_each(m_devices,
-                    [](ConnectionDevicePtr &dev) { dev->process(); });
-}
+    void *VrpnBasedConnection::getUnderlyingObject() {
+        return static_cast<void *>(m_vrpnConnection.get());
+    }
 
-VrpnBasedConnection::~VrpnBasedConnection() {
-    /// @todo wait until all async threads are done
-}
+    OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
 
-void *VrpnBasedConnection::getUnderlyingObject() {
-    return static_cast<void *>(m_vrpnConnection.get());
-}
+    const char *getVRPNConnectionKindID() { return "org.opengoggles.vrpn"; }
 
-OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
-
-const char *getVRPNConnectionKindID() { return "org.opengoggles.vrpn"; }
-
-const char *VrpnBasedConnection::getConnectionKindID() {
-    return getVRPNConnectionKindID();
-}
+    const char *VrpnBasedConnection::getConnectionKindID() {
+        return getVRPNConnectionKindID();
+    }
 
 } // namespace connection
 } // namespace ogvr

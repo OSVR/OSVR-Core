@@ -32,30 +32,33 @@
 
 namespace ogvr {
 namespace util {
-/// @brief A class template turning a callback with some number of arguments,
-/// with a userdata pointer last, into a function object.
-template <typename FunctionPtrType> class CallbackWrapper {
-  public:
-    /// @brief Constructor from function pointer and user data pointer.
-    CallbackWrapper(FunctionPtrType f, void *userData)
-        : m_f(f), m_ud(userData) {}
+    /// @brief A class template turning a callback with some number of
+    /// arguments,
+    /// with a userdata pointer last, into a function object.
+    template <typename FunctionPtrType> class CallbackWrapper {
+      public:
+        /// @brief Constructor from function pointer and user data pointer.
+        CallbackWrapper(FunctionPtrType f, void *userData)
+            : m_f(f), m_ud(userData) {}
 
-    /// @brief Function type (remove pointer - computed)
-    typedef typename boost::remove_pointer<FunctionPtrType>::type FunctionType;
+        /// @brief Function type (remove pointer - computed)
+        typedef
+            typename boost::remove_pointer<FunctionPtrType>::type FunctionType;
 
-    /// @brief Return type of the function (computed)
-    typedef
-        typename boost::function_traits<FunctionType>::result_type ReturnType;
+        /// @brief Return type of the function (computed)
+        typedef typename boost::function_traits<FunctionType>::result_type
+            ReturnType;
 
-    /// @brief Function call operator with non-void return
-    template <typename... Args> ReturnType operator()(Args &&... args) const {
-        return (*m_f)(std::forward<Args>(args)..., m_ud);
-    }
+        /// @brief Function call operator with non-void return
+        template <typename... Args>
+        ReturnType operator()(Args &&... args) const {
+            return (*m_f)(std::forward<Args>(args)..., m_ud);
+        }
 
-  private:
-    FunctionPtrType m_f;
-    void *m_ud;
-};
+      private:
+        FunctionPtrType m_f;
+        void *m_ud;
+    };
 } // namespace util
 } // namespace ogvr
 #endif // INCLUDED_CallbackWrapper_h_GUID_6169ADE2_5BA1_4A81_47C9_9E492F6405ED

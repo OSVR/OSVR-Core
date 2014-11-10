@@ -28,29 +28,29 @@
 namespace ogvr {
 namespace connection {
 
-ConnectionDevice::~ConnectionDevice() {}
+    ConnectionDevice::~ConnectionDevice() {}
 
-std::string const &ConnectionDevice::getName() const { return m_name; }
-ConnectionDevice::ConnectionDevice(std::string const &name)
-    : m_name(name), m_token(NULL) {}
+    std::string const &ConnectionDevice::getName() const { return m_name; }
+    ConnectionDevice::ConnectionDevice(std::string const &name)
+        : m_name(name), m_token(NULL) {}
 
-void ConnectionDevice::process() { m_process(); }
+    void ConnectionDevice::process() { m_process(); }
 
-void ConnectionDevice::sendData(util::time::TimeValue const &timestamp,
-                                MessageType *type, const char *bytestream,
-                                size_t len) {
-    BOOST_ASSERT(type);
-    m_sendData(timestamp, type, bytestream, len);
-}
-void ConnectionDevice::setDeviceToken(DeviceToken &token) {
-    BOOST_ASSERT(m_token == NULL);
-    m_token = &token;
-}
+    void ConnectionDevice::sendData(util::time::TimeValue const &timestamp,
+                                    MessageType *type, const char *bytestream,
+                                    size_t len) {
+        BOOST_ASSERT(type);
+        m_sendData(timestamp, type, bytestream, len);
+    }
+    void ConnectionDevice::setDeviceToken(DeviceToken &token) {
+        BOOST_ASSERT(m_token == NULL);
+        m_token = &token;
+    }
 
-DeviceToken &ConnectionDevice::m_getDeviceToken() {
-    BOOST_ASSERT(m_token);
-    return *m_token;
-}
+    DeviceToken &ConnectionDevice::m_getDeviceToken() {
+        BOOST_ASSERT(m_token);
+        return *m_token;
+    }
 
 } // namespace connection
 } // namespace ogvr

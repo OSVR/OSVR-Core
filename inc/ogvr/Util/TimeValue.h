@@ -34,19 +34,20 @@ namespace util {
     ///
     /// Note that this is for C API-bordering areas. For purely C++ code, please
     /// use Boost.Chrono for your time needs.
-namespace time {
-    /// @brief C++-friendly typedef for the OGVR_TimeValue structure.
-    typedef ::OGVR_TimeValue TimeValue;
+    namespace time {
+        /// @brief C++-friendly typedef for the OGVR_TimeValue structure.
+        typedef ::OGVR_TimeValue TimeValue;
 
-    /// @brief Set the given TimeValue to the current time.
-    inline void getNow(TimeValue &tv) { ogvrTimeValueGetNow(&tv); }
+        /// @brief Set the given TimeValue to the current time.
+        inline void getNow(TimeValue &tv) { ogvrTimeValueGetNow(&tv); }
 #ifdef OGVR_HAVE_STRUCT_TIMEVAL
-    /// @brief Convert a TimeValue to a struct timeval
-    inline void toStructTimeval(struct timeval &dest, TimeValue const &src) {
-        ogvrTimeValueToStructTimeval(&dest, &src);
-    }
+        /// @brief Convert a TimeValue to a struct timeval
+        inline void toStructTimeval(struct timeval &dest,
+                                    TimeValue const &src) {
+            ogvrTimeValueToStructTimeval(&dest, &src);
+        }
 #endif
-} // namespace time
+    } // namespace time
 } // namespace util
 } // namespace ogvr
 

@@ -40,41 +40,43 @@ namespace pluginhost {
 
     /// @brief Class responsible for hosting plugins, along with their
     /// registration and destruction
-class RegistrationContext : boost::noncopyable {
-  public:
-    /// @brief basic constructor
-    OGVR_PLUGINHOST_EXPORT RegistrationContext();
+    class RegistrationContext : boost::noncopyable {
+      public:
+        /// @brief basic constructor
+        OGVR_PLUGINHOST_EXPORT RegistrationContext();
 
-    /// @brief Destructor responsible for destroying plugins in reverse order.
-    OGVR_PLUGINHOST_EXPORT ~RegistrationContext();
+        /// @brief Destructor responsible for destroying plugins in reverse
+        /// order.
+        OGVR_PLUGINHOST_EXPORT ~RegistrationContext();
 
-    /// @name Host-side (internal) API
-    /// @{
-    /// @brief Load a plugin from a dynamic library in this context
-    OGVR_PLUGINHOST_EXPORT void loadPlugin(std::string const &pluginName);
+        /// @name Host-side (internal) API
+        /// @{
+        /// @brief Load a plugin from a dynamic library in this context
+        OGVR_PLUGINHOST_EXPORT void loadPlugin(std::string const &pluginName);
 
-    /// @brief Assume ownership of a plugin-specific registration context
-    /// created and initialized outside of loadPlugin.
-    OGVR_PLUGINHOST_EXPORT void
-    adoptPluginRegistrationContext(PluginRegPtr ctx);
+        /// @brief Assume ownership of a plugin-specific registration context
+        /// created and initialized outside of loadPlugin.
+        OGVR_PLUGINHOST_EXPORT void
+        adoptPluginRegistrationContext(PluginRegPtr ctx);
 
-    /// @brief Trigger any registered hardware poll callbacks.
-    OGVR_PLUGINHOST_EXPORT void triggerHardwarePoll();
+        /// @brief Trigger any registered hardware poll callbacks.
+        OGVR_PLUGINHOST_EXPORT void triggerHardwarePoll();
 
-    /// @brief Access the data storage map.
-    OGVR_PLUGINHOST_EXPORT util::AnyMap &data();
+        /// @brief Access the data storage map.
+        OGVR_PLUGINHOST_EXPORT util::AnyMap &data();
 
-    /// @brief Const access the data storage map.
-    OGVR_PLUGINHOST_EXPORT util::AnyMap const &data() const;
-    /// @}
+        /// @brief Const access the data storage map.
+        OGVR_PLUGINHOST_EXPORT util::AnyMap const &data() const;
+        /// @}
 
-  private:
-    /// @brief Map of plugin names to owning pointers for plugin registration.
-    typedef std::map<std::string, PluginRegPtr> PluginRegMap;
+      private:
+        /// @brief Map of plugin names to owning pointers for plugin
+        /// registration.
+        typedef std::map<std::string, PluginRegPtr> PluginRegMap;
 
-    PluginRegMap m_regMap;
-    util::AnyMap m_data;
-};
+        PluginRegMap m_regMap;
+        util::AnyMap m_data;
+    };
 } // namespace pluginhost
 } // namespace ogvr
 

@@ -29,31 +29,31 @@
 namespace ogvr {
 namespace pluginhost {
 
-PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {}
+    PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {}
 
-PluginRegPtr
-PluginSpecificRegistrationContext::create(std::string const &name) {
-    PluginRegPtr pluginReg =
-        make_shared<PluginSpecificRegistrationContextImpl>(name);
-    return pluginReg;
-}
+    PluginRegPtr
+    PluginSpecificRegistrationContext::create(std::string const &name) {
+        PluginRegPtr pluginReg =
+            make_shared<PluginSpecificRegistrationContextImpl>(name);
+        return pluginReg;
+    }
 
-PluginSpecificRegistrationContext &
-PluginSpecificRegistrationContext::get(OGVR_PluginRegContext ctx) {
-    return *static_cast<PluginSpecificRegistrationContext *>(ctx);
-}
+    PluginSpecificRegistrationContext &
+    PluginSpecificRegistrationContext::get(OGVR_PluginRegContext ctx) {
+        return *static_cast<PluginSpecificRegistrationContext *>(ctx);
+    }
 
-OGVR_PluginRegContext
-PluginSpecificRegistrationContext::extractOpaquePointer() {
-    return static_cast<OGVR_PluginRegContext>(this);
-}
+    OGVR_PluginRegContext
+    PluginSpecificRegistrationContext::extractOpaquePointer() {
+        return static_cast<OGVR_PluginRegContext>(this);
+    }
 
-const std::string &PluginSpecificRegistrationContext::getName() const {
-    return m_name;
-}
-PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
-    std::string const &name)
-    : m_name(name) {}
+    const std::string &PluginSpecificRegistrationContext::getName() const {
+        return m_name;
+    }
+    PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
+        std::string const &name)
+        : m_name(name) {}
 
 } // namespace pluginhost
 } // namespace ogvr

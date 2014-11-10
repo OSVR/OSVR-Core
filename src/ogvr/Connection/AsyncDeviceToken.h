@@ -33,33 +33,33 @@
 
 namespace ogvr {
 namespace connection {
-class AsyncDeviceToken : public DeviceToken {
-  public:
-    AsyncDeviceToken(std::string const &name);
-    virtual ~AsyncDeviceToken();
+    class AsyncDeviceToken : public DeviceToken {
+      public:
+        AsyncDeviceToken(std::string const &name);
+        virtual ~AsyncDeviceToken();
 
-    void signalShutdown();
-    void signalAndWaitForShutdown();
+        void signalShutdown();
+        void signalAndWaitForShutdown();
 
-    /// @brief Runs the given "wait callback" to service the device.
-    void setWaitCallback(AsyncDeviceWaitCallback const &cb);
+        /// @brief Runs the given "wait callback" to service the device.
+        void setWaitCallback(AsyncDeviceWaitCallback const &cb);
 
-  private:
-    virtual AsyncDeviceToken *asAsync();
-    /// Called from the async thread - only permitted to actually
-    /// send data when m_connectionInteract says so.
-    virtual void m_sendData(util::time::TimeValue const &timestamp,
-                            MessageType *type, const char *bytestream,
-                            size_t len);
-    /// Called from the main thread - services requests to send from
-    /// the async thread.
-    virtual void m_connectionInteract();
-    boost::thread m_callbackThread;
+      private:
+        virtual AsyncDeviceToken *asAsync();
+        /// Called from the async thread - only permitted to actually
+        /// send data when m_connectionInteract says so.
+        virtual void m_sendData(util::time::TimeValue const &timestamp,
+                                MessageType *type, const char *bytestream,
+                                size_t len);
+        /// Called from the main thread - services requests to send from
+        /// the async thread.
+        virtual void m_connectionInteract();
+        boost::thread m_callbackThread;
 
-    AsyncAccessControl m_accessControl;
+        AsyncAccessControl m_accessControl;
 
-    ::util::RunLoopManagerBoost m_run;
-};
+        ::util::RunLoopManagerBoost m_run;
+    };
 } // namespace connection
 } // namespace ogvr
 

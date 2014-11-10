@@ -34,49 +34,51 @@
 
 namespace ogvr {
 namespace pluginhost {
-RegistrationContext::RegistrationContext() {}
+    RegistrationContext::RegistrationContext() {}
 
-RegistrationContext::~RegistrationContext() {
-    // Reset the plugins in reverse order.
-    util::resetPointerRange(m_regMap | boost::adaptors::map_values |
-                              boost::adaptors::reversed);
-}
+    RegistrationContext::~RegistrationContext() {
+        // Reset the plugins in reverse order.
+        util::resetPointerRange(m_regMap | boost::adaptors::map_values |
+                                boost::adaptors::reversed);
+    }
 
-void RegistrationContext::loadPlugin(std::string const &pluginName) {
-    PluginRegPtr pluginReg(
-        PluginSpecificRegistrationContext::create(pluginName));
-    pluginReg->setParent(*this);
-    OGVR_DEV_VERBOSE("RegistrationContext:\t"
-                     "Plugin context created, loading plugin");
-    libfunc::PluginHandle plugin = libfunc::loadPluginByName(
-        pluginName, pluginReg->extractOpaquePointer());
-    OGVR_DEV_VERBOSE("RegistrationContext:\t"
-                     "Plugin loaded, assuming ownership of plugin handle and "
-                     "storing context");
-    pluginReg->takePluginHandle(plugin);
-    adoptPluginRegistrationContext(pluginReg);
-}
+    void RegistrationContext::loadPlugin(std::string const &pluginName) {
+        PluginRegPtr pluginReg(
+            PluginSpecificRegistrationContext::create(pluginName));
+        pluginReg->setParent(*this);
+        OGVR_DEV_VERBOSE("RegistrationContext:\t"
+                         "Plugin context created, loading plugin");
+        libfunc::PluginHandle plugin = libfunc::loadPluginByName(
+            pluginName, pluginReg->extractOpaquePointer());
+        OGVR_DEV_VERBOSE(
+            "RegistrationContext:\t"
+            "Plugin loaded, assuming ownership of plugin handle and "
+            "storing context");
+        pluginReg->takePluginHandle(plugin);
+        adoptPluginRegistrationContext(pluginReg);
+    }
 
-void RegistrationContext::adoptPluginRegistrationContext(PluginRegPtr ctx) {
-    /// This set parent might be a duplicate, but won't be if the plugin reg ctx
-    /// is not created by loadPlugin above.
-    ctx->setParent(*this);
+    void RegistrationContext::adoptPluginRegistrationContext(PluginRegPtr ctx) {
+        /// This set parent might be a duplicate, but won't be if the plugin reg
+        /// ctx
+        /// is not created by loadPlugin above.
+        ctx->setParent(*this);
 
-    m_regMap.insert(std::make_pair(ctx->getName(), ctx));
-    OGVR_DEV_VERBOSE("RegistrationContext:\t"
-                     "Adopted registration context for "
-                     << ctx->getName());
-}
+        m_regMap.insert(std::make_pair(ctx->getName(), ctx));
+        OGVR_DEV_VERBOSE("RegistrationContext:\t"
+                         "Adopted registration context for "
+                         << ctx->getName());
+    }
 
-void RegistrationContext::triggerHardwarePoll() {
-    boost::for_each(m_regMap | boost::adaptors::map_values,
-                    [](PluginRegPtr &pluginPtr) {
-        pluginPtr->callHardwarePollCallbacks();
-    });
-}
+    void RegistrationContext::triggerHardwarePoll() {
+        boost::for_each(m_regMap | boost::adaptors::map_values,
+                        [](PluginRegPtr &pluginPtr) {
+            pluginPtr->callHardwarePollCallbacks();
+        });
+    }
 
-util::AnyMap &RegistrationContext::data() { return m_data; }
+    util::AnyMap &RegistrationContext::data() { return m_data; }
 
-util::AnyMap const &RegistrationContext::data() const { return m_data; }
+    util::AnyMap const &RegistrationContext::data() const { return m_data; }
 } // namespace pluginhost
 } // namespace ogvr

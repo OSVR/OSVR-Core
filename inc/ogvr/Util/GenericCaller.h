@@ -57,46 +57,53 @@
 namespace ogvr {
 namespace util {
 #ifndef OGVR_DOXYGEN_EXTERNAL
-namespace functor_trampolines {
+    namespace functor_trampolines {
 #endif // ifndef OGVR_DOXYGEN_EXTERNAL
 
-    /// @brief Tag type indicating the last parameter of the function contains
-    /// the "this" pointer.
-    /// @relates GenericCaller
-    struct this_last_t {};
-    /// @brief Tag type indicating the first parameter of the function contains
-    /// the "this" pointer.
-    /// @relates GenericCaller
-    struct this_first_t {};
+        /// @brief Tag type indicating the last parameter of the function
+        /// contains
+        /// the "this" pointer.
+        /// @relates GenericCaller
+        struct this_last_t {};
+        /// @brief Tag type indicating the first parameter of the function
+        /// contains
+        /// the "this" pointer.
+        /// @relates GenericCaller
+        struct this_first_t {};
 
-    /// @brief Pass as an argument to a getCaller() overload to indicate the
-    /// last parameter of the function contains the "this" pointer.
-    /// @relates getCaller()
-    BOOST_CONSTEXPR_OR_CONST this_last_t this_last = {};
-    /// @brief Pass as an argument to a getCaller() overload to indicate the
-    /// first parameter of the function contains the "this" pointer.
-    /// @relates getCaller()
-    BOOST_CONSTEXPR_OR_CONST this_first_t this_first = {};
+        /// @brief Pass as an argument to a getCaller() overload to indicate the
+        /// last parameter of the function contains the "this" pointer.
+        /// @relates getCaller()
+        BOOST_CONSTEXPR_OR_CONST this_last_t this_last = {};
+        /// @brief Pass as an argument to a getCaller() overload to indicate the
+        /// first parameter of the function contains the "this" pointer.
+        /// @relates getCaller()
+        BOOST_CONSTEXPR_OR_CONST this_first_t this_first = {};
 
 #ifndef OGVR_DOXYGEN_EXTERNAL
-    namespace detail {
+        namespace detail {
 
-        /// @brief Convenience metafunction to simplify computing the type of a
-        /// particular argument to a function F
-        template <typename F, int C> struct param_at {
-            typedef typename boost::function_types::parameter_types<F>::type
-                ParamTypes;
-            typedef typename boost::mpl::at<ParamTypes,
+            /// @brief Convenience metafunction to simplify computing the type
+            /// of a
+            /// particular argument to a function F
+            template <typename F, int C> struct param_at {
+                typedef typename boost::function_types::parameter_types<F>::type
+                    ParamTypes;
+                typedef
+                    typename boost::mpl::at<ParamTypes,
                                             boost::mpl::int_<C> >::type type;
-        };
-        /// @brief Template that will be specialized to contain callers for
-        /// functors with the "this" pointer as a void * argument.
-        ///
-        /// @tparam ThisLocation either this_last_t or this_first_t to indicate
-        /// the location of the this pointer.
-        /// @tparam Arity arity of the functor (not including "this" pointer)
-        /// @tparam Return 0 if void return, 1 if non-void
-        template <typename ThisLocation, int Arity, int Return> struct Caller;
+            };
+            /// @brief Template that will be specialized to contain callers for
+            /// functors with the "this" pointer as a void * argument.
+            ///
+            /// @tparam ThisLocation either this_last_t or this_first_t to
+            /// indicate
+            /// the location of the this pointer.
+            /// @tparam Arity arity of the functor (not including "this"
+            /// pointer)
+            /// @tparam Return 0 if void return, 1 if non-void
+            template <typename ThisLocation, int Arity, int Return>
+            struct Caller;
 
 /// @brief what do we call our pass-through parameters
 #define OGVR_PARAM_STEM p
@@ -145,135 +152,148 @@ namespace functor_trampolines {
                 BOOST_PP_ENUM_PARAMS(ARITY, OGVR_PARAM_STEM));                 \
         }                                                                      \
     };
-        // Generate specializations for void returns
-        BOOST_PP_REPEAT(OGVR_UTIL_CALLER_MAX_ARITY, OGVR_MAKE_CALLERS, 0)
-        // Generate specializations for  non-void returns
-        BOOST_PP_REPEAT(OGVR_UTIL_CALLER_MAX_ARITY, OGVR_MAKE_CALLERS, 1)
+            // Generate specializations for void returns
+            BOOST_PP_REPEAT(OGVR_UTIL_CALLER_MAX_ARITY, OGVR_MAKE_CALLERS, 0)
+            // Generate specializations for  non-void returns
+            BOOST_PP_REPEAT(OGVR_UTIL_CALLER_MAX_ARITY, OGVR_MAKE_CALLERS, 1)
 
 #undef OGVR_MAKE_CALLERS
 #undef OGVR_RETURNSTATEMENT
 #undef OGVR_RETURNTYPE
 #undef OGVR_MAKE_PARAMLIST
 #undef OGVR_PARAM_STEM
-        /// @brief Internal metafunction to compute which caller you need based
-        /// on the pointer types and this location.
+            /// @brief Internal metafunction to compute which caller you need
+            /// based
+            /// on the pointer types and this location.
+            template <typename FunctionPtr, typename FunctionObjectType,
+                      typename ThisLocation>
+            struct ComputeGenericCaller {
+                /// @brief ThisLocation with any const& removed
+                typedef typename boost::remove_cv<
+                    typename boost::remove_reference<ThisLocation>::type>::type
+                    UnqualifiedThisLocation;
+
+                BOOST_STATIC_ASSERT_MSG(
+                    (boost::is_same<UnqualifiedThisLocation,
+                                    this_first_t>::value ||
+                     boost::is_same<UnqualifiedThisLocation,
+                                    this_last_t>::value),
+                    "ThisLocation must be either this_last_t or this_first_t");
+                BOOST_STATIC_ASSERT_MSG(
+                    !(boost::is_pointer<FunctionObjectType>::value),
+                    "FunctionObjectType must be the type of your function "
+                    "object");
+                BOOST_STATIC_ASSERT_MSG(
+                    boost::is_function<typename boost::remove_pointer<
+                        FunctionPtr>::type>::value &&
+                        boost::is_pointer<FunctionPtr>::value,
+                    "FunctionPtr must be a function pointer type");
+
+                /// @todo static assert that the argument lists are compatible
+
+                /// @brief The function arity without the "this" parameter
+                typedef typename boost::mpl::prior<
+                    boost::function_types::function_arity<FunctionPtr> >::type
+                    Arity;
+
+                /// @brief Whether or not the function returns a value.
+                typedef typename boost::mpl::if_<
+                    boost::is_void<typename boost::function_types::result_type<
+                        FunctionPtr>::type>,
+                    boost::mpl::int_<0>, boost::mpl::int_<1> >::type Returns;
+
+                /// @brief Computed intermediate result.
+                typedef detail::Caller<UnqualifiedThisLocation, Arity::value,
+                                       Returns::value> GeneralResult;
+
+                /// @brief Computed result.
+                typedef typename GeneralResult::template Specialized<
+                    FunctionPtr, FunctionObjectType> type;
+            };
+        } // namespace detail
+#endif    // ifndef OGVR_DOXYGEN_EXTERNAL
+
+        /// @brief Struct containing a single static function member named
+        /// "call"
+        /// that serves as a converter from a function call with an opaque
+        /// userdata
+        /// pointer to a functor call using the userdata pointer as "this".
+        ///
+        /// @tparam FunctionPtr Desired function pointer type
+        /// @tparam FunctionObjectType Type of your function object
+        /// @tparam ThisLocation one of this_first_t or this_last_t indicating
+        /// which
+        /// parameter is the "userdata" this pointer.
         template <typename FunctionPtr, typename FunctionObjectType,
                   typename ThisLocation>
-        struct ComputeGenericCaller {
-            /// @brief ThisLocation with any const& removed
-            typedef typename boost::remove_cv<typename boost::remove_reference<
-                ThisLocation>::type>::type UnqualifiedThisLocation;
+        struct GenericCaller
+            : detail::ComputeGenericCaller<FunctionPtr, FunctionObjectType,
+                                           ThisLocation>::type {};
 
-            BOOST_STATIC_ASSERT_MSG(
-                (boost::is_same<UnqualifiedThisLocation, this_first_t>::value ||
-                 boost::is_same<UnqualifiedThisLocation, this_last_t>::value),
-                "ThisLocation must be either this_last_t or this_first_t");
-            BOOST_STATIC_ASSERT_MSG(
-                !(boost::is_pointer<FunctionObjectType>::value),
-                "FunctionObjectType must be the type of your function object");
-            BOOST_STATIC_ASSERT_MSG(
-                boost::is_function<
-                    typename boost::remove_pointer<FunctionPtr>::type>::value &&
-                    boost::is_pointer<FunctionPtr>::value,
-                "FunctionPtr must be a function pointer type");
+        /// @brief Get a generic functor caller: a pointer to a function that
+        /// will
+        /// call an object of your specific function object type, expecting the
+        /// function object address passed as a void * as a parameter.
+        ///
+        /// @tparam FunctionPtr Desired function pointer type
+        /// @tparam FunctionObjectType Type of your function object
+        /// @tparam ThisLocation one of this_first_t or this_last_t indicating
+        /// which
+        /// parameter is the "userdata" this pointer.
+        ///
+        /// Function wrapper around GenericCaller.
+        template <typename FunctionPtr, typename FunctionObjectType,
+                  typename ThisLocation>
+        inline FunctionPtr getCaller() {
+            typedef GenericCaller<FunctionPtr, FunctionObjectType, ThisLocation>
+                CallerType;
+            return &CallerType::call;
+        }
+        /// @brief Get a generic functor caller. Specify the location of "this"
+        /// through the argument: results in automatic type deduction for
+        /// ThisLocation.
+        ///
+        /// @tparam FunctionPtr Desired function pointer type
+        /// @tparam FunctionObjectType Type of your function object
+        ///
+        /// @overload
+        template <typename FunctionPtr, typename FunctionObjectType,
+                  typename ThisLocation>
+        inline FunctionPtr
+        getCaller(/** Either this_first or this_last */ ThisLocation const &) {
+            return getCaller<FunctionPtr, FunctionObjectType, ThisLocation>();
+        }
 
-            /// @todo static assert that the argument lists are compatible
-
-            /// @brief The function arity without the "this" parameter
-            typedef typename boost::mpl::prior<
-                boost::function_types::function_arity<FunctionPtr> >::type
-                Arity;
-
-            /// @brief Whether or not the function returns a value.
-            typedef typename boost::mpl::if_<
-                boost::is_void<typename boost::function_types::result_type<
-                    FunctionPtr>::type>,
-                boost::mpl::int_<0>, boost::mpl::int_<1> >::type Returns;
-
-            /// @brief Computed intermediate result.
-            typedef detail::Caller<UnqualifiedThisLocation, Arity::value,
-                                   Returns::value> GeneralResult;
-
-            /// @brief Computed result.
-            typedef typename GeneralResult::template Specialized<
-                FunctionPtr, FunctionObjectType> type;
-        };
-    } // namespace detail
-#endif // ifndef OGVR_DOXYGEN_EXTERNAL
-
-    /// @brief Struct containing a single static function member named "call"
-    /// that serves as a converter from a function call with an opaque userdata
-    /// pointer to a functor call using the userdata pointer as "this".
-    ///
-    /// @tparam FunctionPtr Desired function pointer type
-    /// @tparam FunctionObjectType Type of your function object
-    /// @tparam ThisLocation one of this_first_t or this_last_t indicating which
-    /// parameter is the "userdata" this pointer.
-    template <typename FunctionPtr, typename FunctionObjectType,
-              typename ThisLocation>
-    struct GenericCaller
-        : detail::ComputeGenericCaller<FunctionPtr, FunctionObjectType,
-                                       ThisLocation>::type {};
-
-    /// @brief Get a generic functor caller: a pointer to a function that will
-    /// call an object of your specific function object type, expecting the
-    /// function object address passed as a void * as a parameter.
-    ///
-    /// @tparam FunctionPtr Desired function pointer type
-    /// @tparam FunctionObjectType Type of your function object
-    /// @tparam ThisLocation one of this_first_t or this_last_t indicating which
-    /// parameter is the "userdata" this pointer.
-    ///
-    /// Function wrapper around GenericCaller.
-    template <typename FunctionPtr, typename FunctionObjectType,
-              typename ThisLocation>
-    inline FunctionPtr getCaller() {
-        typedef GenericCaller<FunctionPtr, FunctionObjectType, ThisLocation>
-            CallerType;
-        return &CallerType::call;
-    }
-    /// @brief Get a generic functor caller. Specify the location of "this"
-    /// through the argument: results in automatic type deduction for
-    /// ThisLocation.
-    ///
-    /// @tparam FunctionPtr Desired function pointer type
-    /// @tparam FunctionObjectType Type of your function object
-    ///
-    /// @overload
-    template <typename FunctionPtr, typename FunctionObjectType,
-              typename ThisLocation>
-    inline FunctionPtr
-    getCaller(/** Either this_first or this_last */ ThisLocation const &) {
-        return getCaller<FunctionPtr, FunctionObjectType, ThisLocation>();
-    }
-
-    /// @brief Get a generic functor caller. Pass a pointer to a function object
-    /// and specify the location of "this" through the argument: results in
-    /// automatic type deduction for FunctionObjectType and ThisLocation.
-    ///
-    /// Note that nothing is actually done with your function object pointer:
-    /// you still need to pass it along with this function pointer as userdata.
-    ///
-    /// @tparam FunctionPtr Desired function pointer type
-    ///
-    /// @overload
-    template <typename FunctionPtr, typename FunctionObjectType,
-              typename ThisLocation>
-    inline FunctionPtr getCaller(
-        /** A pointer to your functor for type deduction only */ FunctionObjectType const *,
-        /** Either this_first or this_last */ ThisLocation const &) {
-        return getCaller<FunctionPtr, FunctionObjectType, ThisLocation>();
-    }
+        /// @brief Get a generic functor caller. Pass a pointer to a function
+        /// object
+        /// and specify the location of "this" through the argument: results in
+        /// automatic type deduction for FunctionObjectType and ThisLocation.
+        ///
+        /// Note that nothing is actually done with your function object
+        /// pointer:
+        /// you still need to pass it along with this function pointer as
+        /// userdata.
+        ///
+        /// @tparam FunctionPtr Desired function pointer type
+        ///
+        /// @overload
+        template <typename FunctionPtr, typename FunctionObjectType,
+                  typename ThisLocation>
+        inline FunctionPtr getCaller(
+            /** A pointer to your functor for type deduction only */ FunctionObjectType const *,
+            /** Either this_first or this_last */ ThisLocation const &) {
+            return getCaller<FunctionPtr, FunctionObjectType, ThisLocation>();
+        }
 #ifndef OGVR_DOXYGEN_EXTERNAL
-} // namespace functor_trampolines
+    } // namespace functor_trampolines
 
-// Import symbols into namespace.
-using functor_trampolines::getCaller;
-using functor_trampolines::GenericCaller;
-using functor_trampolines::this_first;
-using functor_trampolines::this_first_t;
-using functor_trampolines::this_last;
-using functor_trampolines::this_last_t;
+    // Import symbols into namespace.
+    using functor_trampolines::getCaller;
+    using functor_trampolines::GenericCaller;
+    using functor_trampolines::this_first;
+    using functor_trampolines::this_first_t;
+    using functor_trampolines::this_last;
+    using functor_trampolines::this_last_t;
 
 #endif // ifndef OGVR_DOXYGEN_EXTERNAL
 

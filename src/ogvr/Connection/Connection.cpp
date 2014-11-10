@@ -32,59 +32,61 @@
 
 namespace ogvr {
 namespace connection {
-/// @brief Internal constant string used as key into AnyMap
-static const char CONNECTION_KEY[] = "org.opengoggles.ConnectionPtr";
+    /// @brief Internal constant string used as key into AnyMap
+    static const char CONNECTION_KEY[] = "org.opengoggles.ConnectionPtr";
 
-ConnectionPtr Connection::createLocalConnection() {
-    ConnectionPtr conn(
-        make_shared<VrpnBasedConnection>(VrpnBasedConnection::VRPN_LOCAL_ONLY));
-    return conn;
-}
-ConnectionPtr Connection::createSharedConnection() {
-    ConnectionPtr conn(
-        make_shared<VrpnBasedConnection>(VrpnBasedConnection::VRPN_SHARED));
-    return conn;
-}
+    ConnectionPtr Connection::createLocalConnection() {
+        ConnectionPtr conn(make_shared<VrpnBasedConnection>(
+            VrpnBasedConnection::VRPN_LOCAL_ONLY));
+        return conn;
+    }
+    ConnectionPtr Connection::createSharedConnection() {
+        ConnectionPtr conn(
+            make_shared<VrpnBasedConnection>(VrpnBasedConnection::VRPN_SHARED));
+        return conn;
+    }
 
-ConnectionPtr
-Connection::retrieveConnection(const pluginhost::RegistrationContext &ctx) {
-    ConnectionPtr ret;
-    boost::any anyConn = ctx.data().get(CONNECTION_KEY);
-    if (anyConn.empty()) {
+    ConnectionPtr
+    Connection::retrieveConnection(const pluginhost::RegistrationContext &ctx) {
+        ConnectionPtr ret;
+        boost::any anyConn = ctx.data().get(CONNECTION_KEY);
+        if (anyConn.empty()) {
+            return ret;
+        }
+        ConnectionPtr *retPtr = boost::any_cast<ConnectionPtr>(&anyConn);
+        if (retPtr) {
+            ret = *retPtr;
+        }
         return ret;
     }
-    ConnectionPtr *retPtr = boost::any_cast<ConnectionPtr>(&anyConn);
-    if (retPtr) {
-        ret = *retPtr;
+
+    void Connection::storeConnection(pluginhost::RegistrationContext &ctx,
+                                     ConnectionPtr conn) {
+        ctx.data().set(CONNECTION_KEY, conn);
     }
-    return ret;
-}
 
-void Connection::storeConnection(pluginhost::RegistrationContext &ctx,
-                                 ConnectionPtr conn) {
-    ctx.data().set(CONNECTION_KEY, conn);
-}
+    /// Wraps the derived implementation for future expandability.
+    MessageTypePtr
+    Connection::registerMessageType(std::string const &messageId) {
+        return m_registerMessageType(messageId);
+    }
 
-/// Wraps the derived implementation for future expandability.
-MessageTypePtr Connection::registerMessageType(std::string const &messageId) {
-    return m_registerMessageType(messageId);
-}
+    /// Wraps the derived implementation for future expandability.
+    ConnectionDevicePtr
+    Connection::registerDevice(std::string const &deviceName) {
+        return m_registerDevice(deviceName);
+    }
 
-/// Wraps the derived implementation for future expandability.
-ConnectionDevicePtr Connection::registerDevice(std::string const &deviceName) {
-    return m_registerDevice(deviceName);
-}
+    /// Wraps the derived implementation for future expandability.
+    void Connection::process() { m_process(); }
 
-/// Wraps the derived implementation for future expandability.
-void Connection::process() { m_process(); }
+    Connection::Connection() { OGVR_DEV_VERBOSE("In Connection constructor"); }
 
-Connection::Connection() { OGVR_DEV_VERBOSE("In Connection constructor"); }
+    Connection::~Connection() { OGVR_DEV_VERBOSE("In Connection destructor"); }
 
-Connection::~Connection() { OGVR_DEV_VERBOSE("In Connection destructor"); }
+    void *Connection::getUnderlyingObject() { return NULL; }
 
-void *Connection::getUnderlyingObject() { return NULL; }
-
-const char *Connection::getConnectionKindID() { return NULL; }
+    const char *Connection::getConnectionKindID() { return NULL; }
 
 } // namespace connection
 } // namespace ogvr

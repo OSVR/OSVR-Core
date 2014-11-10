@@ -35,84 +35,88 @@
 namespace ogvr {
 
 namespace pluginhost {
-/// @brief Internal class backing the context of registrations performed by a
-/// single plugin.
-class PluginSpecificRegistrationContextImpl
-    : public PluginSpecificRegistrationContext {
-  public:
-    /// @brief Constructor
-    PluginSpecificRegistrationContextImpl(std::string const &name);
+    /// @brief Internal class backing the context of registrations performed by
+    /// a
+    /// single plugin.
+    class PluginSpecificRegistrationContextImpl
+        : public PluginSpecificRegistrationContext {
+      public:
+        /// @brief Constructor
+        PluginSpecificRegistrationContextImpl(std::string const &name);
 
-    /// @brief Destructor
-    ///
-    /// Responsible for destroying plugin data in reverse order.
-    ~PluginSpecificRegistrationContextImpl();
+        /// @brief Destructor
+        ///
+        /// Responsible for destroying plugin data in reverse order.
+        ~PluginSpecificRegistrationContextImpl();
 
-    /// @brief Assume ownership of the plugin handle keeping the plugin library
-    /// loaded.
-    void takePluginHandle(libfunc::PluginHandle &handle);
+        /// @brief Assume ownership of the plugin handle keeping the plugin
+        /// library
+        /// loaded.
+        void takePluginHandle(libfunc::PluginHandle &handle);
 
-    /// @brief Set parent registration context
-    ///
-    /// Should usually called only by RegistrationContext, and only once.
-    /// If called multiple times with the same parent, this is OK.
-    ///
-    /// @throws std::logic_error if called when a different parent is already
-    /// set.
-    void setParent(RegistrationContext &parent);
+        /// @brief Set parent registration context
+        ///
+        /// Should usually called only by RegistrationContext, and only once.
+        /// If called multiple times with the same parent, this is OK.
+        ///
+        /// @throws std::logic_error if called when a different parent is
+        /// already
+        /// set.
+        void setParent(RegistrationContext &parent);
 
-    /// @brief Get parent registration context
-    ///
-    /// @throws std::logic_error if called when no parent is yet set.
-    virtual RegistrationContext &getParent();
+        /// @brief Get parent registration context
+        ///
+        /// @throws std::logic_error if called when no parent is yet set.
+        virtual RegistrationContext &getParent();
 
-    /// @brief Get parent registration context
-    ///
-    /// @throws std::logic_error if called when no parent is yet set.
-    virtual RegistrationContext const &getParent() const;
+        /// @brief Get parent registration context
+        ///
+        /// @throws std::logic_error if called when no parent is yet set.
+        virtual RegistrationContext const &getParent() const;
 
-    /// @brief Call all hardware poll callbacks registered by this plugin, if
-    /// any.
-    void callHardwarePollCallbacks();
+        /// @brief Call all hardware poll callbacks registered by this plugin,
+        /// if
+        /// any.
+        void callHardwarePollCallbacks();
 
-    /// @brief Access the data storage map.
-    virtual util::AnyMap &data();
+        /// @brief Access the data storage map.
+        virtual util::AnyMap &data();
 
-    /// @brief Const access the data storage map.
-    virtual util::AnyMap const &data() const;
+        /// @brief Const access the data storage map.
+        virtual util::AnyMap const &data() const;
 
-    /// @name Plugin API
-    /// @brief Called by the C API wrappers in the plugin registration headers.
-    /// @{
+        /// @name Plugin API
+        /// @brief Called by the C API wrappers in the plugin registration
+        /// headers.
+        /// @{
 
-    /// @brief Register data and a delete callback to be called on plugin
-    /// unload.
-    virtual void
-    registerDataWithDeleteCallback(OGVR_PluginDataDeleteCallback deleteCallback,
-                                   void *pluginData);
+        /// @brief Register data and a delete callback to be called on plugin
+        /// unload.
+        virtual void registerDataWithDeleteCallback(
+            OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData);
 
-    virtual void
-    registerHardwarePollCallback(OGVRHardwarePollCallback pollCallback,
-                                 void *userData);
-    /// @}
+        virtual void
+        registerHardwarePollCallback(OGVRHardwarePollCallback pollCallback,
+                                     void *userData);
+        /// @}
 
-  private:
-    /// @brief Pointer with ownership semantics for deletion of plugin data.
-    typedef unique_ptr<void, OGVR_PluginDataDeleteCallback> PluginDataPtr;
-    /// @brief List of plugin data.
-    typedef std::vector<PluginDataPtr> PluginDataList;
+      private:
+        /// @brief Pointer with ownership semantics for deletion of plugin data.
+        typedef unique_ptr<void, OGVR_PluginDataDeleteCallback> PluginDataPtr;
+        /// @brief List of plugin data.
+        typedef std::vector<PluginDataPtr> PluginDataList;
 
-    PluginDataList m_dataList;
-    libfunc::PluginHandle m_handle;
-    RegistrationContext *m_parent;
+        PluginDataList m_dataList;
+        libfunc::PluginHandle m_handle;
+        RegistrationContext *m_parent;
 
-    typedef util::CallbackWrapper<OGVRHardwarePollCallback>
-        HardwarePollCallback;
-    typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
-    HardwarePollCallbackList m_hardwarePollCallbacks;
+        typedef util::CallbackWrapper<OGVRHardwarePollCallback>
+            HardwarePollCallback;
+        typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
+        HardwarePollCallbackList m_hardwarePollCallbacks;
 
-    util::AnyMap m_data;
-};
+        util::AnyMap m_data;
+    };
 
 } // namespace pluginhost
 } // namespace ogvr

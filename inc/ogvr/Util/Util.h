@@ -1,5 +1,6 @@
 /** @file
-    @brief Dummy header only introducing the ogvr::util namespace for documentation purposes.
+    @brief Dummy header only introducing the ogvr::util namespace for
+   documentation purposes.
 
     @date 2014
 
@@ -19,12 +20,10 @@
 #ifndef INCLUDED_Util_h_GUID_5EC19CF6_3D49_4795_D7E2_892BFF627311
 #define INCLUDED_Util_h_GUID_5EC19CF6_3D49_4795_D7E2_892BFF627311
 
-
 namespace ogvr {
-/// @brief Functionality not necessarily coupled to any particular core library, serving more as a common base layer behind all systems.
-namespace util {
-} // namespace util
+/// @brief Functionality not necessarily coupled to any particular core library,
+/// serving more as a common base layer behind all systems.
+namespace util {} // namespace util
 } // namespace ogvr
 
 #endif // INCLUDED_Util_h_GUID_5EC19CF6_3D49_4795_D7E2_892BFF627311
-

@@ -36,83 +36,85 @@
 
 namespace ogvr {
 namespace connection {
-class MessageType;
-class AsyncDeviceToken;
-class SyncDeviceToken;
-class DeviceToken;
-typedef unique_ptr<DeviceToken> DeviceTokenPtr;
+    class MessageType;
+    class AsyncDeviceToken;
+    class SyncDeviceToken;
+    class DeviceToken;
+    typedef unique_ptr<DeviceToken> DeviceTokenPtr;
 
-typedef std::function<OGVR_ReturnCode()> AsyncDeviceWaitCallback;
-typedef std::function<OGVR_ReturnCode()> SyncDeviceUpdateCallback;
+    typedef std::function<OGVR_ReturnCode()> AsyncDeviceWaitCallback;
+    typedef std::function<OGVR_ReturnCode()> SyncDeviceUpdateCallback;
 
-class DeviceToken : boost::noncopyable {
-  public:
-    /// @name Factory functions
-    /// @{
-    OGVR_CONNECTION_EXPORT static DeviceTokenPtr
-    createAsyncDevice(std::string const &name, ConnectionPtr const &conn);
-    OGVR_CONNECTION_EXPORT static DeviceTokenPtr
-    createSyncDevice(std::string const &name, ConnectionPtr const &conn);
-    /// @}
+    class DeviceToken : boost::noncopyable {
+      public:
+        /// @name Factory functions
+        /// @{
+        OGVR_CONNECTION_EXPORT static DeviceTokenPtr
+        createAsyncDevice(std::string const &name, ConnectionPtr const &conn);
+        OGVR_CONNECTION_EXPORT static DeviceTokenPtr
+        createSyncDevice(std::string const &name, ConnectionPtr const &conn);
+        /// @}
 
-    /// @brief Destructor
-    virtual ~DeviceToken();
+        /// @brief Destructor
+        virtual ~DeviceToken();
 
-    /// @brief Accessor for name property
-    OGVR_CONNECTION_EXPORT std::string const &getName() const;
+        /// @brief Accessor for name property
+        OGVR_CONNECTION_EXPORT std::string const &getName() const;
 
-    /// @brief Sets the wait callback if this is an async device token.
-    /// @throws std::logic_error if it isn't.
-    OGVR_CONNECTION_EXPORT void
-    setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb);
+        /// @brief Sets the wait callback if this is an async device token.
+        /// @throws std::logic_error if it isn't.
+        OGVR_CONNECTION_EXPORT void
+        setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb);
 
-    /// @brief Sets the update callback if this is a sync device token.
-    /// @throws std::logic_error if it isn't.
-    OGVR_CONNECTION_EXPORT void
-    setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb);
+        /// @brief Sets the update callback if this is a sync device token.
+        /// @throws std::logic_error if it isn't.
+        OGVR_CONNECTION_EXPORT void
+        setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb);
 
-    /// @brief Send data.
-    ///
-    /// The timestamp for the data is assumed to be at the time this call is
-    /// placed.
-    ///
-    /// This may block until the next connectionInteract call before forwarding
-    /// on to ConnectionDevice::sendData,
-    /// depending on the type of device token.
-    OGVR_CONNECTION_EXPORT void sendData(MessageType *type,
-                                         const char *bytestream, size_t len);
+        /// @brief Send data.
+        ///
+        /// The timestamp for the data is assumed to be at the time this call is
+        /// placed.
+        ///
+        /// This may block until the next connectionInteract call before
+        /// forwarding
+        /// on to ConnectionDevice::sendData,
+        /// depending on the type of device token.
+        OGVR_CONNECTION_EXPORT void
+        sendData(MessageType *type, const char *bytestream, size_t len);
 
-    /// @brief Send data.
-    ///
-    /// This may block until the next connectionInteract call before forwarding
-    /// on to ConnectionDevice::sendData,
-    /// depending on the type of device token.
-    OGVR_CONNECTION_EXPORT void sendData(util::time::TimeValue const &timestamp,
-                                         MessageType *type,
-                                         const char *bytestream, size_t len);
+        /// @brief Send data.
+        ///
+        /// This may block until the next connectionInteract call before
+        /// forwarding
+        /// on to ConnectionDevice::sendData,
+        /// depending on the type of device token.
+        OGVR_CONNECTION_EXPORT void
+        sendData(util::time::TimeValue const &timestamp, MessageType *type,
+                 const char *bytestream, size_t len);
 
-    /// @brief Interact with connection. Only legal to end up in
-    /// ConnectionDevice::sendData from within here somehow.
-    void connectionInteract();
+        /// @brief Interact with connection. Only legal to end up in
+        /// ConnectionDevice::sendData from within here somehow.
+        void connectionInteract();
 
-  protected:
-    DeviceToken(std::string const &name);
-    ConnectionPtr m_getConnection();
-    ConnectionDevicePtr m_getConnectionDevice();
-    virtual void m_sendData(util::time::TimeValue const &timestamp,
-                            MessageType *type, const char *bytestream,
-                            size_t len) = 0;
-    virtual void m_connectionInteract() = 0;
+      protected:
+        DeviceToken(std::string const &name);
+        ConnectionPtr m_getConnection();
+        ConnectionDevicePtr m_getConnectionDevice();
+        virtual void m_sendData(util::time::TimeValue const &timestamp,
+                                MessageType *type, const char *bytestream,
+                                size_t len) = 0;
+        virtual void m_connectionInteract() = 0;
 
-    virtual AsyncDeviceToken *asAsync();
-    virtual SyncDeviceToken *asSync();
+        virtual AsyncDeviceToken *asAsync();
+        virtual SyncDeviceToken *asSync();
 
-  private:
-    void m_sharedInit(ConnectionPtr const &conn);
-    std::string const m_name;
-    ConnectionPtr m_conn;
-    ConnectionDevicePtr m_dev;
-};
+      private:
+        void m_sharedInit(ConnectionPtr const &conn);
+        std::string const m_name;
+        ConnectionPtr m_conn;
+        ConnectionDevicePtr m_dev;
+    };
 } // namespace connection
 } // namespace ogvr
 

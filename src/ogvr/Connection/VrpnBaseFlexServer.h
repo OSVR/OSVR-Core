@@ -31,31 +31,31 @@
 
 namespace ogvr {
 namespace connection {
-/// @brief Basic implementation of a vrpn_BaseClass server.
-class vrpn_BaseFlexServer : public vrpn_BaseClass {
-  public:
-    vrpn_BaseFlexServer(const char *name, vrpn_Connection *conn)
-        : vrpn_BaseClass(name, conn) {
-        vrpn_BaseClass::init();
-    }
-    virtual ~vrpn_BaseFlexServer() {}
+    /// @brief Basic implementation of a vrpn_BaseClass server.
+    class vrpn_BaseFlexServer : public vrpn_BaseClass {
+      public:
+        vrpn_BaseFlexServer(const char *name, vrpn_Connection *conn)
+            : vrpn_BaseClass(name, conn) {
+            vrpn_BaseClass::init();
+        }
+        virtual ~vrpn_BaseFlexServer() {}
 
-    virtual void mainloop() {
-        /// @todo service device here? Device ends up being serviced in this
-        /// object's owner, the VrpnConnectionDevice.
-        server_mainloop();
-    }
-    void sendData(util::time::TimeValue const &timestamp, vrpn_uint32 msgID,
-                  const char *bytestream, size_t len) {
-        struct timeval now;
-        util::time::toStructTimeval(now, timestamp);
-        d_connection->pack_message(len, now, msgID, d_sender_id, bytestream,
-                                   vrpn_CONNECTION_LOW_LATENCY);
-    }
+        virtual void mainloop() {
+            /// @todo service device here? Device ends up being serviced in this
+            /// object's owner, the VrpnConnectionDevice.
+            server_mainloop();
+        }
+        void sendData(util::time::TimeValue const &timestamp, vrpn_uint32 msgID,
+                      const char *bytestream, size_t len) {
+            struct timeval now;
+            util::time::toStructTimeval(now, timestamp);
+            d_connection->pack_message(len, now, msgID, d_sender_id, bytestream,
+                                       vrpn_CONNECTION_LOW_LATENCY);
+        }
 
-  protected:
-    virtual int register_types() { return 0; }
-};
+      protected:
+        virtual int register_types() { return 0; }
+    };
 } // namespace connection
 } // namespace ogvr
 #endif // INCLUDED_VrpnBaseFlexServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
