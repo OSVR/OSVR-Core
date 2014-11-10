@@ -22,6 +22,7 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Util")
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
+    "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
@@ -33,6 +34,7 @@ set(API
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
+    "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
     "${HEADER_LOCATION}/UniquePtr.h"

@@ -24,6 +24,7 @@
 #include <ogvr/Util/PluginCallbackTypesC.h>
 #include <ogvr/Util/PluginRegContextC.h>
 #include <ogvr/Util/SharedPtr.h>
+#include <ogvr/Util/AnyMap_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -35,9 +36,6 @@ namespace ogvr {
 // forward declaration
 class RegistrationContext;
 class PluginSpecificRegistrationContextImpl;
-namespace util {
-    class AnyMap;
-}
 
 /// @brief Pointer with ownership semantics for cleanup of plugins.
 /// @todo why did unique_ptr not work here?
