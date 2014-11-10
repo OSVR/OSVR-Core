@@ -73,7 +73,8 @@ registered..
 OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode
     ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
                                   OGVR_IN_STRZ const char *name,
-                                  OGVR_OUT_PTR OGVR_MessageType *msgtype);
+                                  OGVR_OUT_PTR OGVR_MessageType *msgtype)
+        OGVR_FUNC_NONNULL((1, 2, 3));
 
 /** @brief Send a raw bytestream from your device.
 
