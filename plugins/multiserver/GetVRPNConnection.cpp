@@ -31,7 +31,7 @@
 /// @todo solve this problem in a more sophisticated way.
 namespace ogvr {
 namespace connection {
-OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
+    OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
 } // namespace connection
 } // namespace ogvr
 

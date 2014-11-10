@@ -19,57 +19,62 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/PluginKit.h>
+#include <ogvr/Connection/ConnectionDevice.h>
+#include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
-// - none
+#include "hidapi/hidapi.h"
+#include "vrpn_Connection.h"
+#include "vrpn_Tracker_RazerHydra.h"
 
 // Standard includes
 #include <iostream>
+#include <map>
+#include <string>
 
-OGVR_MessageType dummyMessage;
-
-class DummyAsyncDevice {
+template <typename T>
+class VRPNCustomConnectionDevice : public ogvr::connection::ConnectionDevice {
   public:
-    DummyAsyncDevice(OGVR_DeviceToken d) : m_dev(d) {
-        std::cout << "Constructing dummy asynchronous (threaded) device"
-                  << std::endl;
-    }
-    /// Another trampoline.
-    ///
-    /// In this case, the core spawns a thread, with a loop calling this
-    /// function
-    /// as long as things are running. So this function waits for the next
-    /// message from the device and passes it on.
-    static OGVR_ReturnCode wait(void *userData) {
-        return static_cast<DummyAsyncDevice *>(userData)->m_wait();
-    }
-    ~DummyAsyncDevice() {
-        std::cout << "Destroying dummy asynchronous (threaded) device"
-                  << std::endl;
+    VRPNCustomConnectionDevice(std::string const &name, vrpn_Connection *conn)
+        : ogvr::connection::ConnectionDevice(name),
+          m_dev(new T(name.c_str(), conn)) {}
+    virtual void m_process() { m_dev->mainloop(); }
+    virtual void m_sendData(ogvr::util::time::TimeValue const &,
+                            ogvr::connection::MessageType *, const char *,
+                            size_t) {
+        /// Will never be called.
     }
 
   private:
-    OGVR_ReturnCode m_wait() {
-        // block on waiting for data.
-        // once we have enough, call
-        char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, dummyMessage, mydata, 0);
+    ogvr::unique_ptr<T> m_dev;
+};
+
+class VRPNHardwarePoll {
+  public:
+    typedef std::map<std::string, size_t> NameCountMap;
+    OGVR_ReturnCode operator()(OGVR_PluginRegContext ctx) {
+        hid_enumerate(0, 0);
         return OGVR_RETURN_SUCCESS;
     }
-    OGVR_DeviceToken m_dev;
+    size_t assignNumber(std::string const &nameStem) {
+        NameCountMap::iterator it = m_nameCount.find(nameStem);
+        if (it != m_nameCount.end()) {
+            it->second++;
+            return it->second;
+        }
+        m_nameCount[nameStem] = 0;
+        return 0;
+    }
+
+  private:
+    NameCountMap m_nameCount;
 };
 
 OGVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
-    /// Create an asynchronous (threaded) device
-    OGVR_DeviceToken d;
-    ogvrDeviceAsyncInit(ctx, "MyAsyncDevice",
-                        &d); // Puts an object in d that knows it's a
-                             // threaded device so ogvrDeviceSendData knows
-                             // that it needs to get a connection lock first.
-    DummyAsyncDevice *myAsync =
-        ogvr::pluginkit::registerObjectForDeletion(ctx, new DummyAsyncDevice(d));
-    ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
-    ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
-                                 static_cast<void *>(myAsync));
+    ogvr::pluginkit::PluginContext context(ctx);
+
+    ogvr::unique_ptr<VRPNHardwarePoll> poll(new VRPNHardwarePoll);
+
+    context.registerHardwarePollCallback(poll.release());
     return OGVR_RETURN_SUCCESS;
 }
