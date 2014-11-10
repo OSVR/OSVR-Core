@@ -5,7 +5,7 @@ foreach(HOST BasicPluginLoader BasicPluginLoaderWithPoll ConnectionHost)
     set_target_properties(${HOST} PROPERTIES
         FOLDER "OGVR Example Plugin Hosts")
     if(BUILD_TESTING)
-        foreach(PLUGIN DummyHardwarePoll DummyHardwarePollCpp NullDevice NullPlugin)
+        foreach(PLUGIN ${OGVR_EXAMPLE_PLUGINS})
             add_test(NAME "run_${HOST}_${PLUGIN}"
                 COMMAND ${HOST} org_opengoggles_example_${PLUGIN})
         endforeach()
@@ -16,7 +16,7 @@ endforeach()
 set(HOST ConnectionHost)
 if(BUILD_TESTING)
     target_link_libraries(${HOST} ogvrConnection)
-    foreach(PLUGIN DummyAsync DummySync)
+    foreach(PLUGIN ${OGVR_EXAMPLE_DEVICE_PLUGINS})
         add_test(NAME "run_${HOST}_${PLUGIN}"
             COMMAND ${HOST} org_opengoggles_example_${PLUGIN})
     endforeach()
