@@ -35,6 +35,7 @@ set(API
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
+    "${HEADER_LOCATION}/StdInt.h"
     "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
