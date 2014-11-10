@@ -37,7 +37,7 @@ namespace server {
     }
 
     Server::Server(ConnectionPtr conn)
-        : m_conn(conn), m_ctx(make_shared<RegistrationContext>()) {
+        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");

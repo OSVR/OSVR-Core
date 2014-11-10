@@ -24,6 +24,7 @@
 #include <ogvr/Server/ServerPtr.h>
 #include <ogvr/Connection/ConnectionPtr.h>
 #include <ogvr/Util/SharedPtr.h>
+#include <ogvr/PluginHost/RegistrationContext_fwd.h>
 
 // Library/third-party includes
 // - none
@@ -32,7 +33,6 @@
 // - none
 
 namespace ogvr {
-class RegistrationContext;
 namespace server {
     class Server {
       public:
@@ -45,7 +45,7 @@ namespace server {
 
       private:
         ConnectionPtr m_conn;
-        shared_ptr<RegistrationContext> m_ctx;
+        shared_ptr<pluginhost::RegistrationContext> m_ctx;
     };
 } // end of namespace server
 } // end of namespace ogvr

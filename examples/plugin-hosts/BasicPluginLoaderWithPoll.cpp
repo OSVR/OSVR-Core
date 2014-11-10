@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Must supply a plugin name to load." << std::endl;
         return 1;
     }
-    ogvr::RegistrationContext ctx;
+    ogvr::pluginhost::RegistrationContext ctx;
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;

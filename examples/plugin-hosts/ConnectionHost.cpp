@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Must supply a plugin name to load." << std::endl;
         return 1;
     }
-    ogvr::RegistrationContext ctx;
+    ogvr::pluginhost::RegistrationContext ctx;
     ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
     ogvr::Connection::storeConnection(ctx, conn);
 

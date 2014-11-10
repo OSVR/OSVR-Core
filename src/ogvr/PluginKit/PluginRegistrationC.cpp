@@ -38,8 +38,8 @@ OGVR_ReturnCode ogvrPluginRegisterHardwarePollCallback(
     OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback with context "
                      << ctx);
 
-    ogvr::PluginSpecificRegistrationContext *context =
-        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
+    ogvr::pluginhost::PluginSpecificRegistrationContext *context =
+        static_cast<ogvr::pluginhost::PluginSpecificRegistrationContext *>(ctx);
     context->registerHardwarePollCallback(pollCallback, userData);
     return OGVR_RETURN_SUCCESS;
 }
@@ -50,8 +50,8 @@ OGVR_ReturnCode ogvrPluginRegisterDataWithDeleteCallback(
     OGVR_INOUT_PTR void *pluginData) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrPluginRegisterDataWithDeleteCallback",
                                     ctx);
-    ogvr::PluginSpecificRegistrationContext *context =
-        static_cast<ogvr::PluginSpecificRegistrationContext *>(ctx);
+    ogvr::pluginhost::PluginSpecificRegistrationContext *context =
+        static_cast<ogvr::pluginhost::PluginSpecificRegistrationContext *>(ctx);
     context->registerDataWithDeleteCallback(deleteCallback, pluginData);
     return OGVR_RETURN_SUCCESS;
 }

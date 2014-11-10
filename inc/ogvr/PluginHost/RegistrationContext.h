@@ -34,9 +34,12 @@
 #include <map>
 
 namespace ogvr {
+/// @brief PluginHost functionality: loading, hosting, registering, destroying,
+/// and enumerating plugins.
+namespace pluginhost {
 
-/// @brief Internal class responsible for the registration and destruction of
-/// plugins.
+    /// @brief Class responsible for hosting plugins, along with their
+    /// registration and destruction
 class RegistrationContext : boost::noncopyable {
   public:
     /// @brief basic constructor
@@ -72,6 +75,7 @@ class RegistrationContext : boost::noncopyable {
     PluginRegMap m_regMap;
     util::AnyMap m_data;
 };
+} // end of namespace pluginhost
 } // end of namespace ogvr
 
 #endif // INCLUDED_RegistrationContext_h_GUID_9FF83E64_B2E1_40B7_E072_929AC0F94A10

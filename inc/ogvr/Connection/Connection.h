@@ -24,6 +24,7 @@
 #include <ogvr/Connection/MessageTypePtr.h>
 #include <ogvr/Connection/ConnectionDevicePtr.h>
 #include <ogvr/Connection/ConnectionPtr.h>
+#include <ogvr/PluginHost/RegistrationContext_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -32,8 +33,6 @@
 #include <string>
 
 namespace ogvr {
-
-class RegistrationContext;
 
 /// @brief Class wrapping a messaging transport (server or internal) connection.
 class Connection : boost::noncopyable {
@@ -52,10 +51,10 @@ class Connection : boost::noncopyable {
     /// @{
     /// @brief Retrieve a connection pointer from a RegistrationContext
     OGVR_CONNECTION_EXPORT static ConnectionPtr
-    retrieveConnection(const RegistrationContext &ctx);
+    retrieveConnection(const pluginhost::RegistrationContext &ctx);
     /// @brief Store a connection pointer in a RegistrationContext
-    OGVR_CONNECTION_EXPORT static void storeConnection(RegistrationContext &ctx,
-                                                       ConnectionPtr conn);
+    OGVR_CONNECTION_EXPORT static void
+    storeConnection(pluginhost::RegistrationContext &ctx, ConnectionPtr conn);
     /// @}
 
     /// @brief Register (or retrieve registration) of a message type.

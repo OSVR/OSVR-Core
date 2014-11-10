@@ -5,6 +5,7 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginHost")
 
 set(API
     "${HEADER_LOCATION}/PluginSpecificRegistrationContext.h"
+    "${HEADER_LOCATION}/RegistrationContext_fwd.h"
     "${HEADER_LOCATION}/RegistrationContext.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(API FILES ${API})

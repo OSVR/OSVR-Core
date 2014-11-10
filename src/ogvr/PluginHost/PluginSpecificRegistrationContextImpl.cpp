@@ -28,7 +28,7 @@
 #include <stdexcept>
 
 namespace ogvr {
-
+namespace pluginhost {
 PluginSpecificRegistrationContextImpl::PluginSpecificRegistrationContextImpl(
     std::string const &name)
     : PluginSpecificRegistrationContext(name), m_parent(NULL) {
@@ -113,5 +113,5 @@ util::AnyMap &PluginSpecificRegistrationContextImpl::data() { return m_data; }
 util::AnyMap const &PluginSpecificRegistrationContextImpl::data() const {
     return m_data;
 }
-
+} // end of namespace pluginhost
 } // end of namespace ogvr

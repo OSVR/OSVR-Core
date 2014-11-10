@@ -27,6 +27,8 @@
 // - none
 
 namespace ogvr {
+namespace pluginhost {
+
 PluginSpecificRegistrationContext::~PluginSpecificRegistrationContext() {}
 
 PluginRegPtr
@@ -53,4 +55,5 @@ PluginSpecificRegistrationContext::PluginSpecificRegistrationContext(
     std::string const &name)
     : m_name(name) {}
 
+} // end of namespace pluginhost
 } // end of namespace ogvr

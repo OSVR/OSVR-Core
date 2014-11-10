@@ -73,7 +73,8 @@ ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
 
     // Extract the connection from the overall context
     ogvr::ConnectionPtr conn = ogvr::Connection::retrieveConnection(
-        ogvr::PluginSpecificRegistrationContext::get(ctx).getParent());
+        ogvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .getParent());
     ogvr::MessageTypePtr ret = conn->registerMessageType(name);
 
     // Transfer ownership of the message type object to the plugin context.
@@ -96,14 +97,16 @@ ogvrDeviceGenericInit(OGVR_PluginRegContext ctx, const char *name,
                       OGVR_DeviceToken *device, FactoryFunction f) {
     // Compute the name by combining plugin name with the given name
     std::string qualifiedName =
-        ogvr::PluginSpecificRegistrationContext::get(ctx).getName() + "/" +
-        name;
+        ogvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .getName() +
+        "/" + name;
 
     OGVR_DEV_VERBOSE("Qualified name: " << qualifiedName);
 
     // Extract the connection from the overall context
     ogvr::ConnectionPtr conn = ogvr::Connection::retrieveConnection(
-        ogvr::PluginSpecificRegistrationContext::get(ctx).getParent());
+        ogvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .getParent());
     if (!conn) {
         OGVR_DEV_VERBOSE(
             "ogvrDeviceGenericInit Got a null Connection pointer - "

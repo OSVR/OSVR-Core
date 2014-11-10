@@ -33,6 +33,8 @@
 #include <string>
 
 namespace ogvr {
+namespace pluginhost {
+
 // forward declaration
 class RegistrationContext;
 class PluginSpecificRegistrationContextImpl;
@@ -45,8 +47,7 @@ typedef shared_ptr<PluginSpecificRegistrationContextImpl> PluginRegPtr;
 class PluginSpecificRegistrationContext : boost::noncopyable {
   public:
     /// @brief Factory function that creates a plugin-specific registration
-    /// context.
-    /// Ownership is transferred to the caller.
+    /// context. Ownership is transferred to the caller.
     ///
     /// Typically called by a RegistrationContext in the loadPlugin method, this
     /// may also be used for statically-linked "plugins" whether in deployment
@@ -109,5 +110,6 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
   private:
     std::string const m_name;
 };
+} // end of namespace pluginhost
 } // end of namespace ogvr
 #endif // INCLUDED_PluginSpecificRegistrationContext_h_GUID_8C008527_0BF6_408F_3C73_4FE76B77D856

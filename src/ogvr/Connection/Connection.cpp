@@ -45,7 +45,8 @@ ConnectionPtr Connection::createSharedConnection() {
     return conn;
 }
 
-ConnectionPtr Connection::retrieveConnection(const RegistrationContext &ctx) {
+ConnectionPtr
+Connection::retrieveConnection(const pluginhost::RegistrationContext &ctx) {
     ConnectionPtr ret;
     boost::any anyConn = ctx.data().get(CONNECTION_KEY);
     if (anyConn.empty()) {
@@ -58,7 +59,8 @@ ConnectionPtr Connection::retrieveConnection(const RegistrationContext &ctx) {
     return ret;
 }
 
-void Connection::storeConnection(RegistrationContext &ctx, ConnectionPtr conn) {
+void Connection::storeConnection(pluginhost::RegistrationContext &ctx,
+                                 ConnectionPtr conn) {
     ctx.data().set(CONNECTION_KEY, conn);
 }
 

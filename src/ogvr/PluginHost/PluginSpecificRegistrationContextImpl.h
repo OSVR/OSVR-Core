@@ -33,6 +33,8 @@
 #include <vector>
 
 namespace ogvr {
+
+namespace pluginhost {
 /// @brief Internal class backing the context of registrations performed by a
 /// single plugin.
 class PluginSpecificRegistrationContextImpl
@@ -111,6 +113,8 @@ class PluginSpecificRegistrationContextImpl
 
     util::AnyMap m_data;
 };
+
+} // end of namespace pluginhost
 } // end of namespace ogvr
 
 #endif // INCLUDED_PluginSpecificRegistrationContextImpl_h_GUID_E8A348C1_28DC_4691_6214_32F75A6665F0
