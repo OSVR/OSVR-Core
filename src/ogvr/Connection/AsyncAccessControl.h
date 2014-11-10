@@ -30,7 +30,7 @@
 // - none
 
 namespace ogvr {
-
+namespace connection {
 /// @brief Internal class handling the synchronization of an asynchronous thread
 /// wishing to communicate that has to wait for its turn on the communcation
 /// bus.
@@ -146,6 +146,7 @@ class RequestToSend : boost::noncopyable {
     boost::condition_variable &m_condAsyncThread;
     /// @}
 };
+} // namespace connection
 } // namespace ogvr
 
 #endif // INCLUDED_AsyncAccessControl_h_GUID_4255BCEE_826C_4DB4_9368_9457ADBF9456

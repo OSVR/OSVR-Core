@@ -30,6 +30,8 @@
 #include <stdexcept>
 
 namespace ogvr {
+namespace connection {
+
 DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
                                               ConnectionPtr const &conn) {
     DeviceTokenPtr ret(new AsyncDeviceToken(name));
@@ -95,4 +97,5 @@ void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
     m_dev->setDeviceToken(*this);
 }
 
+} // namespace connection
 } // namespace ogvr

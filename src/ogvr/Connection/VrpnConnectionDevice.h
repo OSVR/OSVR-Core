@@ -32,6 +32,7 @@
 #include <string>
 
 namespace ogvr {
+namespace connection {
 /// @brief ConnectionDevice implementation for a VrpnBasedConnection
 class VrpnConnectionDevice : public ConnectionDevice {
   public:
@@ -55,6 +56,7 @@ class VrpnConnectionDevice : public ConnectionDevice {
   private:
     unique_ptr<vrpn_BaseFlexServer> m_baseobj;
 };
+} // namespace connection
 } // namespace ogvr
 
 #endif // INCLUDED_VrpnConnectionDevice_h_GUID_A5D057AB_D92A_4784_885E_3DAAAEE142A5

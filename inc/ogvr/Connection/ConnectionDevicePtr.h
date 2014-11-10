@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header forward-declaring ConnectionDevice and specifying the desired
+   pointer to hold a ConnectionDevice in.
 
     @date 2014
 
@@ -29,9 +30,11 @@
 // - none
 
 namespace ogvr {
+namespace connection {
 class ConnectionDevice;
 /// @brief How to hold on to a ConnectionDevice
 typedef shared_ptr<ConnectionDevice> ConnectionDevicePtr;
+} // namespace connection
 } // namespace ogvr
 
 #endif // INCLUDED_ConnectionDevicePtr_h_GUID_6D454990_4426_4DAC_27C4_BB2571DF7F60

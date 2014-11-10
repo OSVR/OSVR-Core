@@ -33,6 +33,8 @@
 #include <string>
 
 namespace ogvr {
+/// @brief Messaging transport and device communication functionality
+namespace connection {
 
 /// @brief Class wrapping a messaging transport (server or internal) connection.
 class Connection : boost::noncopyable {
@@ -101,5 +103,6 @@ class Connection : boost::noncopyable {
     /// brief Constructor
     Connection();
 };
+} // namespace connection
 } // namespace ogvr
 #endif // INCLUDED_Connection_h_GUID_61C65986_E2C9_498F_59F0_8EFC712BA183

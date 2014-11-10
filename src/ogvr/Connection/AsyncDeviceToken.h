@@ -29,8 +29,10 @@
 #include <util/RunLoopManagerBoost.h>
 
 // Standard includes
-// - none
+#include <string>
+
 namespace ogvr {
+namespace connection {
 class AsyncDeviceToken : public DeviceToken {
   public:
     AsyncDeviceToken(std::string const &name);
@@ -58,5 +60,7 @@ class AsyncDeviceToken : public DeviceToken {
 
     ::util::RunLoopManagerBoost m_run;
 };
+} // namespace connection
 } // namespace ogvr
+
 #endif // INCLUDED_AsyncDeviceToken_h_GUID_654218B0_3900_4B89_E86F_D314EB6C0ABF

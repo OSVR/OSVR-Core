@@ -31,18 +31,19 @@ namespace ogvr {
 namespace server {
 
     ServerPtr Server::createLocal() {
-        ConnectionPtr conn(Connection::createLocalConnection());
+        connection::ConnectionPtr conn(
+            connection::Connection::createLocalConnection());
         ServerPtr ret(make_shared<Server>(conn));
         return ret;
     }
 
-    Server::Server(ConnectionPtr conn)
+    Server::Server(connection::ConnectionPtr conn)
         : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
         }
-        ogvr::Connection::storeConnection(*m_ctx, m_conn);
+        ogvr::connection::Connection::storeConnection(*m_ctx, m_conn);
     }
 
 } // namespace server

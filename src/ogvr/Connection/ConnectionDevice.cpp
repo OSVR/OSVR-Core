@@ -26,6 +26,8 @@
 // - none
 
 namespace ogvr {
+namespace connection {
+
 ConnectionDevice::~ConnectionDevice() {}
 
 std::string const &ConnectionDevice::getName() const { return m_name; }
@@ -50,4 +52,5 @@ DeviceToken &ConnectionDevice::m_getDeviceToken() {
     return *m_token;
 }
 
+} // namespace connection
 } // namespace ogvr

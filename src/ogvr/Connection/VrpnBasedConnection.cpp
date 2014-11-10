@@ -29,6 +29,7 @@
 // - none
 
 namespace ogvr {
+namespace connection {
 
 VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
     switch (type) {
@@ -78,4 +79,5 @@ const char *VrpnBasedConnection::getConnectionKindID() {
     return getVRPNConnectionKindID();
 }
 
+} // namespace connection
 } // namespace ogvr

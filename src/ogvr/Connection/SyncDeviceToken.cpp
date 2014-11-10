@@ -28,6 +28,8 @@
 // - none
 
 namespace ogvr {
+namespace connection {
+
 SyncDeviceToken::SyncDeviceToken(std::string const &name) : DeviceToken(name) {}
 
 SyncDeviceToken::~SyncDeviceToken() {}
@@ -51,4 +53,5 @@ void SyncDeviceToken::m_connectionInteract() {
 
 SyncDeviceToken *SyncDeviceToken::asSync() { return this; }
 
+} // namespace connection
 } // namespace ogvr

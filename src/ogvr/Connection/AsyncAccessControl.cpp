@@ -27,6 +27,8 @@
 #include <stdexcept>
 
 namespace ogvr {
+namespace connection {
+
 using boost::unique_lock;
 using boost::mutex;
 using boost::defer_lock;
@@ -129,4 +131,5 @@ bool AsyncAccessControl::m_handleRTS(boost::unique_lock<boost::mutex> &lock,
     }
 }
 
+} // namespace connection
 } // namespace ogvr

@@ -29,6 +29,7 @@
 #include <string>
 
 namespace ogvr {
+namespace connection {
 /// @brief Base class for connection-specific message type registration
 class MessageType : boost::noncopyable {
   public:
@@ -45,5 +46,6 @@ class MessageType : boost::noncopyable {
   private:
     std::string const m_name;
 };
+} // namespace connection
 } // namespace ogvr
 #endif // INCLUDED_MessageType_h_GUID_61B56482_02E5_47B5_8CFA_EAF4286F309F

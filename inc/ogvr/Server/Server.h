@@ -38,13 +38,13 @@ namespace server {
       public:
         /// @brief Server constructor with an existing Connection
         /// @throws std::logic_error if a null connection is passed.
-        OGVR_SERVER_EXPORT Server(ConnectionPtr conn);
+        OGVR_SERVER_EXPORT Server(connection::ConnectionPtr conn);
 
         /// @brief Create a server object with a local-only connection.
         OGVR_SERVER_EXPORT static ServerPtr createLocal();
 
       private:
-        ConnectionPtr m_conn;
+        connection::ConnectionPtr m_conn;
         shared_ptr<pluginhost::RegistrationContext> m_ctx;
     };
 } // namespace server

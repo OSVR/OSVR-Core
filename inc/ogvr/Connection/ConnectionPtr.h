@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header forward-declaring Connection and specifying the smart pointer
+   to hold a Connection in.
 
     @date 2014
 
@@ -29,9 +30,11 @@
 // - none
 
 namespace ogvr {
+namespace connection {
 class Connection;
 /// @brief How one must hold a Connection.
 typedef shared_ptr<Connection> ConnectionPtr;
+} // namespace connection
 } // namespace ogvr
 
 #endif // INCLUDED_ConnectionPtr_h_GUID_55F79639_DA70_4BBA_A11C_84797F38288E

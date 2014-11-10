@@ -34,8 +34,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     ogvr::pluginhost::RegistrationContext ctx;
-    ogvr::ConnectionPtr conn = ogvr::Connection::createLocalConnection();
-    ogvr::Connection::storeConnection(ctx, conn);
+    ogvr::connection::ConnectionPtr conn =
+        ogvr::connection::Connection::createLocalConnection();
+    ogvr::connection::Connection::storeConnection(ctx, conn);
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;

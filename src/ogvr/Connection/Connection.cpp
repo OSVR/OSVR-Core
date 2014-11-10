@@ -31,6 +31,7 @@
 // - none
 
 namespace ogvr {
+namespace connection {
 /// @brief Internal constant string used as key into AnyMap
 static const char CONNECTION_KEY[] = "org.opengoggles.ConnectionPtr";
 
@@ -85,4 +86,5 @@ void *Connection::getUnderlyingObject() { return NULL; }
 
 const char *Connection::getConnectionKindID() { return NULL; }
 
+} // namespace connection
 } // namespace ogvr

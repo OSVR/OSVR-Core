@@ -35,8 +35,8 @@
 #include <functional>
 
 namespace ogvr {
+namespace connection {
 class MessageType;
-class PluginSpecificRegistrationContext;
 class AsyncDeviceToken;
 class SyncDeviceToken;
 class DeviceToken;
@@ -113,6 +113,7 @@ class DeviceToken : boost::noncopyable {
     ConnectionPtr m_conn;
     ConnectionDevicePtr m_dev;
 };
+} // namespace connection
 } // namespace ogvr
 
 #endif // INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387

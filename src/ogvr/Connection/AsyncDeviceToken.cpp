@@ -28,6 +28,7 @@
 // - none
 
 namespace ogvr {
+namespace connection {
 using boost::unique_lock;
 using boost::mutex;
 
@@ -119,4 +120,5 @@ void AsyncDeviceToken::m_connectionInteract() {
     }
 }
 
+} // namespace connection
 } // namespace ogvr

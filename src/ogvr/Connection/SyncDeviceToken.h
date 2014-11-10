@@ -29,6 +29,7 @@
 #include <functional>
 
 namespace ogvr {
+namespace connection {
 class SyncDeviceToken : public DeviceToken {
   public:
     SyncDeviceToken(std::string const &name);
@@ -45,5 +46,6 @@ class SyncDeviceToken : public DeviceToken {
     virtual SyncDeviceToken *asSync();
     SyncDeviceUpdateCallback m_cb;
 };
+} // namespace connection
 } // namespace ogvr
 #endif // INCLUDED_SyncDeviceToken_h_GUID_0A738016_90A8_4E81_B5C0_247478D59FD2

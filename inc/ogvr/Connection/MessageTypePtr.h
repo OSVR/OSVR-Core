@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header forward declaring MessageType and specifying a smart pointer.
 
     @date 2014
 
@@ -28,8 +28,10 @@
 // Standard includes
 // - none
 namespace ogvr {
+namespace connection {
 class MessageType;
 /// @brief a uniquely-owned handle for holding a message type registration.
 typedef unique_ptr<MessageType> MessageTypePtr;
+} // namespace connection
 } // namespace ogvr
 #endif // INCLUDED_MessageTypePtr_h_GUID_95F4FC92_63B2_4D8F_A13D_290855521ED8
