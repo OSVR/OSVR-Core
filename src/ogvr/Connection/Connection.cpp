@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/Connection/Connection.h>
+#include "ConnectionDevice.h"
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginHost/RegistrationContext.h>
 #include <ogvr/Connection/MessageType.h>
@@ -25,7 +26,7 @@
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
-// - none
+#include <boost/range/algorithm.hpp>
 
 // Standard includes
 // - none
@@ -74,11 +75,24 @@ namespace connection {
     /// Wraps the derived implementation for future expandability.
     ConnectionDevicePtr
     Connection::registerDevice(std::string const &deviceName) {
-        return m_registerDevice(deviceName);
+        ConnectionDevicePtr dev = m_registerDevice(deviceName);
+        if (dev) {
+            addDevice(dev);
+        }
+        return dev;
     }
 
-    /// Wraps the derived implementation for future expandability.
-    void Connection::process() { m_process(); }
+    void Connection::addDevice(ConnectionDevicePtr device) {
+        m_devices.push_back(device);
+    }
+
+    void Connection::process() {
+        // Process the connection first.
+        m_process();
+        // Process all devices.
+        boost::for_each(m_devices,
+                        [](ConnectionDevicePtr &dev) { dev->process(); });
+    }
 
     Connection::Connection() { OGVR_DEV_VERBOSE("In Connection constructor"); }
 

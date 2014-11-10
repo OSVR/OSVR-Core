@@ -31,6 +31,7 @@
 
 // Standard includes
 #include <string>
+#include <vector>
 
 namespace ogvr {
 /// @brief Messaging transport and device communication functionality
@@ -66,10 +67,14 @@ namespace connection {
             registerMessageType(std::string const &messageId);
 
         /// @brief Register a full device name. This should be namespaced with
-        /// the
-        /// plugin name.
+        /// the plugin name.
+        ///
+        /// This also adds the device so created to the device list.
         OGVR_CONNECTION_EXPORT ConnectionDevicePtr
             registerDevice(std::string const &deviceName);
+
+        /// @brief Add an externally-constructed device to the device list.
+        OGVR_CONNECTION_EXPORT void addDevice(ConnectionDevicePtr device);
 
         /// @brief Process messages. This shouldn't block.
         ///
@@ -109,6 +114,10 @@ namespace connection {
 
         /// brief Constructor
         Connection();
+
+      private:
+        typedef std::vector<ConnectionDevicePtr> DeviceList;
+        DeviceList m_devices;
     };
 } // namespace connection
 } // namespace ogvr

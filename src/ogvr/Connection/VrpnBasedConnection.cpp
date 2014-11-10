@@ -23,7 +23,7 @@
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <boost/range/algorithm.hpp>
+// - none
 
 // Standard includes
 // - none
@@ -53,15 +53,10 @@ namespace connection {
     VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
         ConnectionDevicePtr ret =
             make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
-        m_devices.push_back(ret);
         return ret;
     }
 
-    void VrpnBasedConnection::m_process() {
-        m_vrpnConnection->mainloop();
-        boost::for_each(m_devices,
-                        [](ConnectionDevicePtr &dev) { dev->process(); });
-    }
+    void VrpnBasedConnection::m_process() { m_vrpnConnection->mainloop(); }
 
     VrpnBasedConnection::~VrpnBasedConnection() {
         /// @todo wait until all async threads are done
