@@ -4,8 +4,6 @@ runClangFormatOnDir() {
     find "$1" -name "*.cpp" -o -name "*.c" -o -name "*.h" | while read fn; do
         echo "$fn"
         clang-format -style=file -i "$fn"
-        # Clean trailing whitespace.
-        sed -i 's/[ \t]*$//' "$fn"
     done
 }
 (
@@ -16,6 +14,7 @@ runClangFormatOnDir src
 runClangFormatOnDir inc
 runClangFormatOnDir tests
 runClangFormatOnDir examples
+runClangFormatOnDir plugins
 
 #echo "Press enter to continue." && read
 )
