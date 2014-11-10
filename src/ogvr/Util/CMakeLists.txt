@@ -36,6 +36,7 @@ set(API
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
     "${HEADER_LOCATION}/UniquePtr.h"
+    "${HEADER_LOCATION}/Util.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h"
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
 source_group(API FILES ${API})

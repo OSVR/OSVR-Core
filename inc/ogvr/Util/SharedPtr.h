@@ -3,8 +3,6 @@
 
     @date 2014
 
-    @todo handle shared_ptr out of TR1
-
     @author
     Ryan Pavlik
     <ryan@sensics.com>
