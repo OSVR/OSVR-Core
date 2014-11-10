@@ -27,8 +27,8 @@ Note that for clarity, a single compiled library might actually implement the in
 There are just a few general file name guidelines that might help you find your way around.
 
 - For shared library support, each library has a generated `Export.h` file which may not necessarily end up in the documentation due to how it is built.
-- Headers matching the pattern `*_fwd.h` are header files forward-declaring whatever items are more fully declared or defined in the corresponding main header without the trailing `_fwd`.
-- Similarly, headers matching the pattern `*Ptr.h` typically contain a forward declaration as well as a smart pointer typedef intended for use with the corresponding main header.
+- Headers matching the pattern `*_fwd.h` are header files forward-declaring whatever items are more fully declared or defined in the corresponding main header without the trailing `_fwd`. To avoid mis-matches, these should always be included in the main header.
+- Similarly, headers matching the pattern `*Ptr.h` typically contain a forward declaration as well as a smart pointer typedef intended for use with the corresponding main header. These should likewise be included in the main header.
 - Any file matching the pattern `*C.h` is a C API header file, required to be "C-safe". As such, it must contain only valid C code. Notes:
     - Any included files must also be C-safe.
     - No C++-style (`//`) comments.
