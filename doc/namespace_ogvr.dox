@@ -2,8 +2,4 @@
 */
 namespace ogvr {
 
-/** @brief A namespace for implementation details
-*/
-namespace detail {}
-
 }
