@@ -35,6 +35,7 @@
 
 OGVR_DeviceInitOptions
 ogvrDeviceCreateInitOptions(OGVR_INOUT_PTR OGVR_PluginRegContext ctx) {
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceCreateInitOptions", ctx);
     return new OGVR_DeviceInitObject(ctx);
 }
 
