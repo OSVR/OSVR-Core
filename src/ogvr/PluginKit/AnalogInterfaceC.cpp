@@ -18,9 +18,18 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/AnalogInterfaceC.h>
+#include "HandleNullContext.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+OGVR_ReturnCode
+ogvrDeviceAnalogConfigure(OGVR_INOUT_PTR OGVR_DeviceInitOptions opts,
+                          OGVR_IN OGVR_AnalogChanCount numChan) {
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAnalogConfigure", opts);
+    if (numChan == 0) {
+    }
+}

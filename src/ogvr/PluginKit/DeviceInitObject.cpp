@@ -28,3 +28,11 @@
 
 OGVR_DeviceInitObject::OGVR_DeviceInitObject(OGVR_PluginRegContext ctx)
     : context(ogvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)) {}
+
+void OGVR_DeviceInitObject::setAnalogs(OGVR_AnalogChanCount numAnalogs) {
+    if (numAnalogs == 0) {
+        analogs.reset();
+    } else {
+        analogs = numAnalogs;
+    }
+}
