@@ -31,6 +31,7 @@ set(API
     "${HEADER_LOCATION}/MacroToolsC.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
+    "${HEADER_LOCATION}/ResetPointerList.h"
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"

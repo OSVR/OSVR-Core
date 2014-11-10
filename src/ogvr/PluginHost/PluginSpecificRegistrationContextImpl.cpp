@@ -19,7 +19,7 @@
 // Internal Includes
 #include "PluginSpecificRegistrationContextImpl.h"
 #include <ogvr/Util/Verbosity.h>
-#include "ResetPointerList.h"
+#include <ogvr/Util/ResetPointerList.h>
 
 // Library/third-party includes
 #include <boost/range/adaptor/reversed.hpp>
@@ -43,7 +43,7 @@ PluginSpecificRegistrationContextImpl::
                      << getName());
 
     // Delete the data in reverse order.
-    detail::resetPointerRange(m_dataList | boost::adaptors::reversed);
+    util::resetPointerRange(m_dataList | boost::adaptors::reversed);
     m_parent = NULL; // before anything else destructs, for safety?
 }
 

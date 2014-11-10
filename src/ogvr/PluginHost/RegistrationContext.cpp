@@ -20,7 +20,7 @@
 // Internal Includes
 #include <ogvr/PluginHost/RegistrationContext.h>
 #include "PluginSpecificRegistrationContextImpl.h"
-#include "ResetPointerList.h"
+#include <ogvr/Util/ResetPointerList.h>
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -37,7 +37,7 @@ RegistrationContext::RegistrationContext() {}
 
 RegistrationContext::~RegistrationContext() {
     // Reset the plugins in reverse order.
-    detail::resetPointerRange(m_regMap | boost::adaptors::map_values |
+    util::resetPointerRange(m_regMap | boost::adaptors::map_values |
                               boost::adaptors::reversed);
 }
 

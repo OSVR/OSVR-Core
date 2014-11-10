@@ -13,8 +13,7 @@ set(SOURCE
     PluginSpecificRegistrationContext.cpp
     PluginSpecificRegistrationContextImpl.cpp
     PluginSpecificRegistrationContextImpl.h
-    RegistrationContext.cpp
-    ResetPointerList.h)
+    RegistrationContext.cpp)
 
 add_library(ogvrPluginHost ${API} ${SOURCE})
 
