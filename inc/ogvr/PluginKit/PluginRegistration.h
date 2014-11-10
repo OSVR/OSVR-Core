@@ -103,6 +103,7 @@ namespace pluginkit {
     ///
     /// Also provides for deletion of the function object.
     ///
+    /// @param ctx The registration context passed to your entry point.
     /// @param functor An function object (with operator() defined). Pass either
     /// a pointer, which will transfer ownership, or an object by value, which
     /// will result in a copy being made.
