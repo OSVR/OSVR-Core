@@ -74,8 +74,8 @@ void RegistrationContext::triggerHardwarePoll() {
     });
 }
 
-AnyMap &RegistrationContext::data() { return m_data; }
+util::AnyMap &RegistrationContext::data() { return m_data; }
 
-AnyMap const &RegistrationContext::data() const { return m_data; }
+util::AnyMap const &RegistrationContext::data() const { return m_data; }
 
 } // end of namespace ogvr

@@ -44,10 +44,10 @@ class vrpn_BaseFlexServer : public vrpn_BaseClass {
         /// object's owner, the VrpnConnectionDevice.
         server_mainloop();
     }
-    void sendData(time::TimeValue const &timestamp, vrpn_uint32 msgID,
+    void sendData(util::time::TimeValue const &timestamp, vrpn_uint32 msgID,
                   const char *bytestream, size_t len) {
         struct timeval now;
-        time::toStructTimeval(now, timestamp);
+        util::time::toStructTimeval(now, timestamp);
         d_connection->pack_message(len, now, msgID, d_sender_id, bytestream,
                                    vrpn_CONNECTION_LOW_LATENCY);
     }

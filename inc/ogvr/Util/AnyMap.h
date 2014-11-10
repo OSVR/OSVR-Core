@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header declaring the AnyMap structure.
 
     @date 2014
 
@@ -30,6 +30,7 @@
 #include <map>
 
 namespace ogvr {
+namespace util {
 /// @brief A data structure storing "any" by name, to reduce coupling.
 class AnyMap {
   public:
@@ -72,7 +73,7 @@ class AnyMap {
     typedef std::map<std::string, boost::any> Contents;
     Contents m_contents;
 };
-
+} // end of namespace util
 } // end of namespace ogvr
 
 #endif // INCLUDED_AnyMap_h_GUID_794993EB_B778_4E88_16A7_3A047A615587

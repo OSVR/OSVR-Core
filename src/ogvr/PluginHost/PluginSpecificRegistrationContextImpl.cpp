@@ -108,9 +108,9 @@ void PluginSpecificRegistrationContextImpl::registerHardwarePollCallback(
                      << getName());
 }
 
-AnyMap &PluginSpecificRegistrationContextImpl::data() { return m_data; }
+util::AnyMap &PluginSpecificRegistrationContextImpl::data() { return m_data; }
 
-AnyMap const &PluginSpecificRegistrationContextImpl::data() const {
+util::AnyMap const &PluginSpecificRegistrationContextImpl::data() const {
     return m_data;
 }
 

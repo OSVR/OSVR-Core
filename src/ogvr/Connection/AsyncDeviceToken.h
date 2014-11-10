@@ -46,8 +46,9 @@ class AsyncDeviceToken : public DeviceToken {
     virtual AsyncDeviceToken *asAsync();
     /// Called from the async thread - only permitted to actually
     /// send data when m_connectionInteract says so.
-    virtual void m_sendData(time::TimeValue const &timestamp, MessageType *type,
-                            const char *bytestream, size_t len);
+    virtual void m_sendData(util::time::TimeValue const &timestamp,
+                            MessageType *type, const char *bytestream,
+                            size_t len);
     /// Called from the main thread - services requests to send from
     /// the async thread.
     virtual void m_connectionInteract();

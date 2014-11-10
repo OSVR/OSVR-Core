@@ -74,10 +74,10 @@ class PluginSpecificRegistrationContextImpl
     void callHardwarePollCallbacks();
 
     /// @brief Access the data storage map.
-    virtual AnyMap &data();
+    virtual util::AnyMap &data();
 
     /// @brief Const access the data storage map.
-    virtual AnyMap const &data() const;
+    virtual util::AnyMap const &data() const;
 
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.
@@ -109,7 +109,7 @@ class PluginSpecificRegistrationContextImpl
     typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
     HardwarePollCallbackList m_hardwarePollCallbacks;
 
-    AnyMap m_data;
+    util::AnyMap m_data;
 };
 } // end of namespace ogvr
 

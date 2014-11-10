@@ -52,12 +52,13 @@ std::string const &DeviceToken::getName() const { return m_name; }
 
 void DeviceToken::sendData(MessageType *type, const char *bytestream,
                            size_t len) {
-    time::TimeValue tv;
-    time::getNow(tv);
+    util::time::TimeValue tv;
+    util::time::getNow(tv);
     m_sendData(tv, type, bytestream, len);
 }
-void DeviceToken::sendData(time::TimeValue const &timestamp, MessageType *type,
-                           const char *bytestream, size_t len) {
+void DeviceToken::sendData(util::time::TimeValue const &timestamp,
+                           MessageType *type, const char *bytestream,
+                           size_t len) {
     m_sendData(timestamp, type, bytestream, len);
 }
 

@@ -29,6 +29,11 @@
 // - none
 
 namespace ogvr {
+namespace util {
+    /// @brief Functionality related to time and the OGVR_TimeValue abstraction
+    ///
+    /// Note that this is for C API-bordering areas. For purely C++ code, please
+    /// use Boost.Chrono for your time needs.
 namespace time {
     /// @brief C++-friendly typedef for the OGVR_TimeValue structure.
     typedef ::OGVR_TimeValue TimeValue;
@@ -42,7 +47,7 @@ namespace time {
     }
 #endif
 } // end of namespace time
-
+} // end of namespace util
 } // end of namespace ogvr
 
 #endif // INCLUDED_TimeValue_h_GUID_AD9F3D81_382D_4394_433B_A8026BE803B6

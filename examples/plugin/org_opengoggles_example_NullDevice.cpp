@@ -41,7 +41,7 @@ OGVR_PLUGIN(org_opengoggles_example_NullDevice) {
     DummyDevice *myDevice = new DummyDevice();
     /// Must ask the core to tell us to delete it.
     ogvrPluginRegisterDataWithDeleteCallback(
-        ctx, &ogvr::detail::generic_deleter<DummyDevice>,
+        ctx, &ogvr::util::generic_deleter<DummyDevice>,
         static_cast<void *>(myDevice));
 
     return OGVR_RETURN_SUCCESS;

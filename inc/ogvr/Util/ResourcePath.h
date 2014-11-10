@@ -32,7 +32,7 @@
 #include <cstddef>
 
 namespace ogvr {
-
+namespace util {
 class ResourcePath;
 
 /** @brief Class representing a host and resource path in the OGVR logical
@@ -110,6 +110,7 @@ class ResourcePath {
     typedef std::vector<std::size_t> IndexArray;
     IndexArray m_components;
 };
-}
+} // end of namespace util
+} // end of namespace ogvr
 
 #endif // INCLUDED_ResourcePath_h_GUID_00432A94_11D2_47B4_7493_4F66E635FBE2

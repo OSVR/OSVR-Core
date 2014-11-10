@@ -35,7 +35,9 @@ namespace ogvr {
 // forward declaration
 class RegistrationContext;
 class PluginSpecificRegistrationContextImpl;
-class AnyMap;
+namespace util {
+    class AnyMap;
+}
 
 /// @brief Pointer with ownership semantics for cleanup of plugins.
 /// @todo why did unique_ptr not work here?
@@ -79,10 +81,10 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
     getParent() const = 0;
 
     /// @brief Access the data storage map.
-    OGVR_PLUGINHOST_EXPORT virtual AnyMap &data() = 0;
+    OGVR_PLUGINHOST_EXPORT virtual util::AnyMap &data() = 0;
 
     /// @brief Const access the data storage map.
-    OGVR_PLUGINHOST_EXPORT virtual AnyMap const &data() const = 0;
+    OGVR_PLUGINHOST_EXPORT virtual util::AnyMap const &data() const = 0;
 
     /// @name Plugin API
     /// @brief Called by the C API wrappers in the plugin registration headers.

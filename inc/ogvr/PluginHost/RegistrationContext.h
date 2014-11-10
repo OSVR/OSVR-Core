@@ -59,10 +59,10 @@ class RegistrationContext : boost::noncopyable {
     OGVR_PLUGINHOST_EXPORT void triggerHardwarePoll();
 
     /// @brief Access the data storage map.
-    OGVR_PLUGINHOST_EXPORT AnyMap &data();
+    OGVR_PLUGINHOST_EXPORT util::AnyMap &data();
 
     /// @brief Const access the data storage map.
-    OGVR_PLUGINHOST_EXPORT AnyMap const &data() const;
+    OGVR_PLUGINHOST_EXPORT util::AnyMap const &data() const;
     /// @}
 
   private:
@@ -70,7 +70,7 @@ class RegistrationContext : boost::noncopyable {
     typedef std::map<std::string, PluginRegPtr> PluginRegMap;
 
     PluginRegMap m_regMap;
-    AnyMap m_data;
+    util::AnyMap m_data;
 };
 } // end of namespace ogvr
 

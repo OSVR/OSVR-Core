@@ -26,6 +26,7 @@
 // - none
 
 namespace ogvr {
+namespace util {
 /// All the const char * overloads are in case we change the internal
 /// representation to something that works faster with string literals.
 bool AnyMap::contains(std::string const &key) const {
@@ -62,5 +63,5 @@ void AnyMap::erase(std::string const &key) {
 }
 
 void AnyMap::erase(const char *key) { erase(std::string(key)); }
-
+} // end of namespace util
 } // end of namespace ogvr

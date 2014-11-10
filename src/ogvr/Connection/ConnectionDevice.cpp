@@ -34,7 +34,7 @@ ConnectionDevice::ConnectionDevice(std::string const &name)
 
 void ConnectionDevice::process() { m_process(); }
 
-void ConnectionDevice::sendData(time::TimeValue const &timestamp,
+void ConnectionDevice::sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) {
     BOOST_ASSERT(type);

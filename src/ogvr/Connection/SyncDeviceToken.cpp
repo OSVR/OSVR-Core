@@ -37,7 +37,7 @@ void SyncDeviceToken::setUpdateCallback(SyncDeviceUpdateCallback const &cb) {
     m_cb = cb;
 }
 
-void SyncDeviceToken::m_sendData(time::TimeValue const &timestamp,
+void SyncDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
                                  MessageType *type, const char *bytestream,
                                  size_t len) {
     m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);

@@ -87,7 +87,7 @@ class DeviceToken : boost::noncopyable {
     /// This may block until the next connectionInteract call before forwarding
     /// on to ConnectionDevice::sendData,
     /// depending on the type of device token.
-    OGVR_CONNECTION_EXPORT void sendData(time::TimeValue const &timestamp,
+    OGVR_CONNECTION_EXPORT void sendData(util::time::TimeValue const &timestamp,
                                          MessageType *type,
                                          const char *bytestream, size_t len);
 
@@ -99,8 +99,9 @@ class DeviceToken : boost::noncopyable {
     DeviceToken(std::string const &name);
     ConnectionPtr m_getConnection();
     ConnectionDevicePtr m_getConnectionDevice();
-    virtual void m_sendData(time::TimeValue const &timestamp, MessageType *type,
-                            const char *bytestream, size_t len) = 0;
+    virtual void m_sendData(util::time::TimeValue const &timestamp,
+                            MessageType *type, const char *bytestream,
+                            size_t len) = 0;
     virtual void m_connectionInteract() = 0;
 
     virtual AsyncDeviceToken *asAsync();

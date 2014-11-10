@@ -20,15 +20,15 @@
 #define INCLUDED_GenericDeleter_h_GUID_FF10B285_AE30_45B6_BFD4_D84F98FB1EF0
 
 namespace ogvr {
-namespace detail {
-    /// @brief Generic deleter function
+namespace util {
+    /// @brief Generic deleter function, wrapping the stock delete call.
     ///
     /// Used in header-only C++ wrappers over C APIs.
     template <typename T> inline void generic_deleter(void *obj) {
         T *o = static_cast<T *>(obj);
         delete o;
     }
-} // end of namespace detail
+} // end of namespace util
 } // end of namespace ogvr
 
 #endif // INCLUDED_GenericDeleter_h_GUID_FF10B285_AE30_45B6_BFD4_D84F98FB1EF0

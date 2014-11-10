@@ -45,8 +45,9 @@ class VrpnConnectionDevice : public ConnectionDevice {
         m_getDeviceToken().connectionInteract();
         m_baseobj->mainloop();
     }
-    virtual void m_sendData(time::TimeValue const &timestamp, MessageType *type,
-                            const char *bytestream, size_t len) {
+    virtual void m_sendData(util::time::TimeValue const &timestamp,
+                            MessageType *type, const char *bytestream,
+                            size_t len) {
         VrpnMessageType *msgtype = static_cast<VrpnMessageType *>(type);
         m_baseobj->sendData(timestamp, msgtype->getID(), bytestream, len);
     }

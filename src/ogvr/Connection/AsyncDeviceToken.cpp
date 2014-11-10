@@ -85,7 +85,7 @@ void AsyncDeviceToken::setWaitCallback(AsyncDeviceWaitCallback const &cb) {
 
 AsyncDeviceToken *AsyncDeviceToken::asAsync() { return this; }
 
-void AsyncDeviceToken::m_sendData(time::TimeValue const &timestamp,
+void AsyncDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
                                   MessageType *type, const char *bytestream,
                                   size_t len) {
     OGVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"
