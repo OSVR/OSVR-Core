@@ -6,6 +6,7 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Connection")
 set(API
     "${HEADER_LOCATION}/Connection.h"
     "${HEADER_LOCATION}/ConnectionDevicePtr.h"
+    "${HEADER_LOCATION}/ConnectionDevice.h"
     "${HEADER_LOCATION}/ConnectionPtr.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/MessageType.h"
@@ -20,7 +21,6 @@ set(SOURCE
     AsyncDeviceToken.h
     Connection.cpp
     ConnectionDevice.cpp
-    ConnectionDevice.h
     DeviceToken.cpp
     MessageType.cpp
     SyncDeviceToken.cpp

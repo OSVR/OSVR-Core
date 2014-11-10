@@ -20,7 +20,7 @@
 #define INCLUDED_VrpnConnectionDevice_h_GUID_A5D057AB_D92A_4784_885E_3DAAAEE142A5
 
 // Internal Includes
-#include "ConnectionDevice.h"
+#include <ogvr/Connection/ConnectionDevice.h>
 #include <ogvr/Connection/DeviceToken.h>
 #include <ogvr/Util/UniquePtr.h>
 #include "VrpnBaseFlexServer.h"

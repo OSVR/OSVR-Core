@@ -18,7 +18,7 @@
 
 // Internal Includes
 #include <ogvr/Connection/Connection.h>
-#include "ConnectionDevice.h"
+#include <ogvr/Connection/ConnectionDevice.h>
 #include <ogvr/Util/SharedPtr.h>
 #include <ogvr/PluginHost/RegistrationContext.h>
 #include <ogvr/Connection/MessageType.h>

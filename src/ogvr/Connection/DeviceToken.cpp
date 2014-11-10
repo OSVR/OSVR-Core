@@ -21,7 +21,7 @@
 #include "AsyncDeviceToken.h"
 #include "SyncDeviceToken.h"
 #include <ogvr/Connection/Connection.h>
-#include "ConnectionDevice.h"
+#include <ogvr/Connection/ConnectionDevice.h>
 
 // Library/third-party includes
 // - none

@@ -18,7 +18,7 @@
 
 // Internal Includes
 #include "AsyncDeviceToken.h"
-#include "ConnectionDevice.h"
+#include <ogvr/Connection/ConnectionDevice.h>
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
