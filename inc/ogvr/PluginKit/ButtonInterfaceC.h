@@ -24,12 +24,16 @@
 #define INCLUDED_ButtonInterfaceC_h_GUID_64F54A8F_976B_4A87_7BEA_D5CE628B3E6C
 
 /* Internal Includes */
-/* none */
+#include <ogvr/PluginKit/DeviceInterfaceC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
 /* none */
+
+OGVR_EXTERN_C_BEGIN
+
+OGVR_EXTERN_C_END
 
 #endif

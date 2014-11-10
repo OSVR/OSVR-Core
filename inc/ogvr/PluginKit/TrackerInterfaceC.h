@@ -24,12 +24,16 @@
 #define INCLUDED_TrackerInterfaceC_h_GUID_FA1B5B80_FEB5_469D_8F1E_7ED54A27A7AD
 
 /* Internal Includes */
-/* none */
+#include <ogvr/PluginKit/DeviceInterfaceC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
 /* none */
+
+OGVR_EXTERN_C_BEGIN
+
+OGVR_EXTERN_C_END
 
 #endif
