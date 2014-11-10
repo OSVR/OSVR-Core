@@ -1,13 +1,6 @@
 include_directories("${HEADER_BASE}")
 include_directories("${BUILDTREE_HEADER_BASE}")
 
-if(BUILD_SHARED_LIBS)
-    set(OGVR_PLUGINKIT_STATIC FALSE)
-else()
-    set(OGVR_PLUGINKIT_STATIC TRUE)
-endif()
-configure_file(Export.h.in "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
-
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
@@ -23,7 +16,6 @@ source_group(API FILES ${API})
 
 set(SOURCE
     DeviceInterfaceC.cpp
-    Export.h.in
     HandleNullContext.h
     PluginRegistrationC.cpp)
 
@@ -36,6 +28,10 @@ set_target_properties(ogvrPluginKit PROPERTIES
 set_property(TARGET ogvrPluginKit APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
 )
+
+generate_export_header(ogvrPluginKit
+    BASE_NAME OGVR_PLUGINKIT
+    EXPORT_FILE_NAME Export.h)
 
 target_include_directories(ogvrPluginKit
     PUBLIC
