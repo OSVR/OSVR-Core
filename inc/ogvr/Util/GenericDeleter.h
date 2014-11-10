@@ -28,7 +28,7 @@ namespace util {
         T *o = static_cast<T *>(obj);
         delete o;
     }
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_GenericDeleter_h_GUID_FF10B285_AE30_45B6_BFD4_D84F98FB1EF0

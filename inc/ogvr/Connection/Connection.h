@@ -101,5 +101,5 @@ class Connection : boost::noncopyable {
     /// brief Constructor
     Connection();
 };
-} // end of namespace ogvr
+} // namespace ogvr
 #endif // INCLUDED_Connection_h_GUID_61C65986_E2C9_498F_59F0_8EFC712BA183

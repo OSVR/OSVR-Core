@@ -56,6 +56,6 @@ template <typename FunctionPtrType> class CallbackWrapper {
     FunctionPtrType m_f;
     void *m_ud;
 };
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr
 #endif // INCLUDED_CallbackWrapper_h_GUID_6169ADE2_5BA1_4A81_47C9_9E492F6405ED

@@ -129,4 +129,4 @@ bool AsyncAccessControl::m_handleRTS(boost::unique_lock<boost::mutex> &lock,
     }
 }
 
-} // end of namespace ogvr
+} // namespace ogvr

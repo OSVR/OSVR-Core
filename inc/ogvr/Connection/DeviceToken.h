@@ -113,6 +113,6 @@ class DeviceToken : boost::noncopyable {
     ConnectionPtr m_conn;
     ConnectionDevicePtr m_dev;
 };
-} // end of namespace ogvr
+} // namespace ogvr
 
 #endif // INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387

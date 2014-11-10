@@ -95,4 +95,4 @@ void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
     m_dev->setDeviceToken(*this);
 }
 
-} // end of namespace ogvr
+} // namespace ogvr

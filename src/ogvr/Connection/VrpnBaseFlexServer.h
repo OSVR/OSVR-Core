@@ -55,5 +55,5 @@ class vrpn_BaseFlexServer : public vrpn_BaseClass {
   protected:
     virtual int register_types() { return 0; }
 };
-} // end of namespace ogvr
+} // namespace ogvr
 #endif // INCLUDED_VrpnBaseFlexServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE

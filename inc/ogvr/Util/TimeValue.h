@@ -46,8 +46,8 @@ namespace time {
         ogvrTimeValueToStructTimeval(&dest, &src);
     }
 #endif
-} // end of namespace time
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace time
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_TimeValue_h_GUID_AD9F3D81_382D_4394_433B_A8026BE803B6

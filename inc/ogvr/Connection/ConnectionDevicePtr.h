@@ -32,6 +32,6 @@ namespace ogvr {
 class ConnectionDevice;
 /// @brief How to hold on to a ConnectionDevice
 typedef shared_ptr<ConnectionDevice> ConnectionDevicePtr;
-} // end of namespace ogvr
+} // namespace ogvr
 
 #endif // INCLUDED_ConnectionDevicePtr_h_GUID_6D454990_4426_4DAC_27C4_BB2571DF7F60

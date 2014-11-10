@@ -47,7 +47,7 @@ namespace server {
         ConnectionPtr m_conn;
         shared_ptr<pluginhost::RegistrationContext> m_ctx;
     };
-} // end of namespace server
-} // end of namespace ogvr
+} // namespace server
+} // namespace ogvr
 
 #endif // INCLUDED_Server_h_GUID_453158B3_45B7_478D_FB83_F2F694CA5367

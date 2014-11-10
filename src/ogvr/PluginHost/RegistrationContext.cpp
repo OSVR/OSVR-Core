@@ -78,5 +78,5 @@ void RegistrationContext::triggerHardwarePoll() {
 util::AnyMap &RegistrationContext::data() { return m_data; }
 
 util::AnyMap const &RegistrationContext::data() const { return m_data; }
-} // end of namespace pluginhost
-} // end of namespace ogvr
+} // namespace pluginhost
+} // namespace ogvr

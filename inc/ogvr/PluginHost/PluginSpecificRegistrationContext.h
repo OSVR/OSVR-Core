@@ -110,6 +110,6 @@ class PluginSpecificRegistrationContext : boost::noncopyable {
   private:
     std::string const m_name;
 };
-} // end of namespace pluginhost
-} // end of namespace ogvr
+} // namespace pluginhost
+} // namespace ogvr
 #endif // INCLUDED_PluginSpecificRegistrationContext_h_GUID_8C008527_0BF6_408F_3C73_4FE76B77D856

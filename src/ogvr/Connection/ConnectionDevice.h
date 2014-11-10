@@ -73,5 +73,5 @@ class ConnectionDevice : boost::noncopyable {
     std::string const m_name;
     DeviceToken *m_token;
 };
-} // end of namespace ogvr
+} // namespace ogvr
 #endif // INCLUDED_ConnectionDevice_h_GUID_C04223D7_51D1_49BE_91AB_73FCA9C88515

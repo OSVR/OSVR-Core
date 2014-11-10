@@ -63,5 +63,5 @@ void AnyMap::erase(std::string const &key) {
 }
 
 void AnyMap::erase(const char *key) { erase(std::string(key)); }
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr

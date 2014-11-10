@@ -75,7 +75,7 @@ class RegistrationContext : boost::noncopyable {
     PluginRegMap m_regMap;
     util::AnyMap m_data;
 };
-} // end of namespace pluginhost
-} // end of namespace ogvr
+} // namespace pluginhost
+} // namespace ogvr
 
 #endif // INCLUDED_RegistrationContext_h_GUID_9FF83E64_B2E1_40B7_E072_929AC0F94A10

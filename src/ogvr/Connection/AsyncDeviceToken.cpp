@@ -119,4 +119,4 @@ void AsyncDeviceToken::m_connectionInteract() {
     }
 }
 
-} // end of namespace ogvr
+} // namespace ogvr

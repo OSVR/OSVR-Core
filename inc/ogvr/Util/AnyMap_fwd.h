@@ -22,7 +22,7 @@
 namespace ogvr {
 namespace util {
     class AnyMap;
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_AnyMap_fwd_h_GUID_C197B76C_4038_4084_2F93_861AF913CABA

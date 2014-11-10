@@ -71,7 +71,7 @@ namespace pluginkit {
         OGVR_PluginRegContext m_ctx;
     };
 
-} // end of namespace pluginkit
-} // end of namespace ogvr
+} // namespace pluginkit
+} // namespace ogvr
 
 #endif // INCLUDED_PluginKit_h_GUID_1470B278_99B7_4F84_F99B_34FD9B817C89

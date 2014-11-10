@@ -113,5 +113,5 @@ util::AnyMap &PluginSpecificRegistrationContextImpl::data() { return m_data; }
 util::AnyMap const &PluginSpecificRegistrationContextImpl::data() const {
     return m_data;
 }
-} // end of namespace pluginhost
-} // end of namespace ogvr
+} // namespace pluginhost
+} // namespace ogvr

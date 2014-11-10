@@ -42,6 +42,6 @@ class VrpnMessageType : public MessageType {
   private:
     vrpn_int32 m_messageID;
 };
-} // end of namespace ogvr
+} // namespace ogvr
 
 #endif // INCLUDED_VrpnMessageType_h_GUID_ECDE1AD9_A386_4EA3_CA02_C5D95B16B2D1

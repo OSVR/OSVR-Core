@@ -50,4 +50,4 @@ DeviceToken &ConnectionDevice::m_getDeviceToken() {
     return *m_token;
 }
 
-} // end of namespace ogvr
+} // namespace ogvr

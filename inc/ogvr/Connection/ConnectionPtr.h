@@ -32,6 +32,6 @@ namespace ogvr {
 class Connection;
 /// @brief How one must hold a Connection.
 typedef shared_ptr<Connection> ConnectionPtr;
-} // end of namespace ogvr
+} // namespace ogvr
 
 #endif // INCLUDED_ConnectionPtr_h_GUID_55F79639_DA70_4BBA_A11C_84797F38288E

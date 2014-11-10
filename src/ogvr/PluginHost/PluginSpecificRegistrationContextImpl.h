@@ -114,7 +114,7 @@ class PluginSpecificRegistrationContextImpl
     util::AnyMap m_data;
 };
 
-} // end of namespace pluginhost
-} // end of namespace ogvr
+} // namespace pluginhost
+} // namespace ogvr
 
 #endif // INCLUDED_PluginSpecificRegistrationContextImpl_h_GUID_E8A348C1_28DC_4691_6214_32F75A6665F0

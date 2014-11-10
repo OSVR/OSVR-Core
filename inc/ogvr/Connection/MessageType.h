@@ -45,5 +45,5 @@ class MessageType : boost::noncopyable {
   private:
     std::string const m_name;
 };
-} // end of namespace ogvr
+} // namespace ogvr
 #endif // INCLUDED_MessageType_h_GUID_61B56482_02E5_47B5_8CFA_EAF4286F309F

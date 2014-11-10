@@ -198,7 +198,7 @@ namespace functor_trampolines {
             typedef typename GeneralResult::template Specialized<
                 FunctionPtr, FunctionObjectType> type;
         };
-    } // end of namespace detail
+    } // namespace detail
 #endif // ifndef OGVR_DOXYGEN_EXTERNAL
 
     /// @brief Struct containing a single static function member named "call"
@@ -265,7 +265,7 @@ namespace functor_trampolines {
         return getCaller<FunctionPtr, FunctionObjectType, ThisLocation>();
     }
 #ifndef OGVR_DOXYGEN_EXTERNAL
-} // end of namespace functor_trampolines
+} // namespace functor_trampolines
 
 // Import symbols into namespace.
 using functor_trampolines::getCaller;
@@ -277,7 +277,7 @@ using functor_trampolines::this_last_t;
 
 #endif // ifndef OGVR_DOXYGEN_EXTERNAL
 
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_GenericCaller_h_GUID_C49A7DEE_89E6_478D_627A_CFFB9ED39EAC

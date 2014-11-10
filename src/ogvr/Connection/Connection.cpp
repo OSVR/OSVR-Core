@@ -85,4 +85,4 @@ void *Connection::getUnderlyingObject() { return NULL; }
 
 const char *Connection::getConnectionKindID() { return NULL; }
 
-} // end of namespace ogvr
+} // namespace ogvr

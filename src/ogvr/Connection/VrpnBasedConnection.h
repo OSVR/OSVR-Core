@@ -52,5 +52,5 @@ class VrpnBasedConnection : public Connection {
     DeviceList m_devices;
 };
 
-} // end of namespace ogvr
+} // namespace ogvr
 #endif // INCLUDED_VrpnBasedConnection_h_GUID_49F2C30F_D807_43B1_A754_9B645D3A1809

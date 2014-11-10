@@ -23,8 +23,8 @@
 namespace ogvr {
 /// @brief Functionality not necessarily coupled to any particular core library, serving more as a common base layer behind all systems.
 namespace util {
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_Util_h_GUID_5EC19CF6_3D49_4795_D7E2_892BFF627311
 

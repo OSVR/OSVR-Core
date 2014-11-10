@@ -31,4 +31,4 @@ MessageType::~MessageType() {}
 std::string const &MessageType::getName() const { return m_name; }
 
 MessageType::MessageType(std::string const &name) : m_name(name) {}
-} // end of namespace ogvr
+} // namespace ogvr

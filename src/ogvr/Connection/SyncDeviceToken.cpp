@@ -51,4 +51,4 @@ void SyncDeviceToken::m_connectionInteract() {
 
 SyncDeviceToken *SyncDeviceToken::asSync() { return this; }
 
-} // end of namespace ogvr
+} // namespace ogvr

@@ -24,8 +24,8 @@ namespace ogvr {
 namespace util {
     namespace time {
         typedef ::OGVR_TimeValue TimeValue;
-    } // end of namespace time
-} // end of namespace util
-} // end of namespace ogvr
+    } // namespace time
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_TimeValue_fwd_h_GUID_5F1C94A1_49EC_438E_2640_ED67A6F85ED3

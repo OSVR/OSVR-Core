@@ -22,7 +22,7 @@
 namespace ogvr {
 namespace pluginhost {
     class RegistrationContext;
-} // end of namespace pluginhost
-} // end of namespace ogvr
+} // namespace pluginhost
+} // namespace ogvr
 
 #endif // INCLUDED_RegistrationContext_fwd_h_GUID_FBC18DFE_CFCB_4597_A192_0A7E5D612DAA

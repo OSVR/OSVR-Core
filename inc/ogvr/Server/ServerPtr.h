@@ -33,7 +33,7 @@ namespace server {
     class Server;
     /// @brief How one should hold a Server.
     typedef shared_ptr<Server> ServerPtr;
-} // end of namespace server
-} // end of namespace ogvr
+} // namespace server
+} // namespace ogvr
 
 #endif // INCLUDED_ServerPtr_h_GUID_ED06F093_FC19_49B1_8905_16E7CE12D207

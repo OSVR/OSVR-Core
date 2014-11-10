@@ -45,5 +45,5 @@ namespace server {
         ogvr::Connection::storeConnection(*m_ctx, m_conn);
     }
 
-} // end of namespace server
-} // end of namespace ogvr
+} // namespace server
+} // namespace ogvr

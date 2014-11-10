@@ -29,7 +29,7 @@
 namespace ogvr {
 using std::shared_ptr;
 using std::make_shared;
-} // end of namespace ogvr
+} // namespace ogvr
 #endif
 
 #endif // INCLUDED_SharedPtr_h_GUID_E9C5BC8D_7D3A_4896_1552_6F4F5292783C

@@ -58,5 +58,5 @@ class AsyncDeviceToken : public DeviceToken {
 
     ::util::RunLoopManagerBoost m_run;
 };
-} // end of namespace ogvr
+} // namespace ogvr
 #endif // INCLUDED_AsyncDeviceToken_h_GUID_654218B0_3900_4B89_E86F_D314EB6C0ABF

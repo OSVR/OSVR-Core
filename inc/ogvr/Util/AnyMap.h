@@ -73,7 +73,7 @@ class AnyMap {
     typedef std::map<std::string, boost::any> Contents;
     Contents m_contents;
 };
-} // end of namespace util
-} // end of namespace ogvr
+} // namespace util
+} // namespace ogvr
 
 #endif // INCLUDED_AnyMap_h_GUID_794993EB_B778_4E88_16A7_3A047A615587
