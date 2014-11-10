@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/PluginKit/AnalogInterfaceC.h>
+#include "DeviceInitObject.h"
 #include "HandleNullContext.h"
 
 // Library/third-party includes
@@ -30,6 +31,6 @@ OGVR_ReturnCode
 ogvrDeviceAnalogConfigure(OGVR_INOUT_PTR OGVR_DeviceInitOptions opts,
                           OGVR_IN OGVR_AnalogChanCount numChan) {
     OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrDeviceAnalogConfigure", opts);
-    if (numChan == 0) {
-    }
+    opts->setAnalogs(numChan);
+    return OGVR_RETURN_SUCCESS;
 }
