@@ -56,22 +56,29 @@
 
 namespace ogvr {
 namespace util {
+#ifndef OGVR_DOXYGEN_EXTERNAL
 namespace functor_trampolines {
+#endif // ifndef OGVR_DOXYGEN_EXTERNAL
 
     /// @brief Tag type indicating the last parameter of the function contains
     /// the "this" pointer.
+    /// @relates GenericCaller
     struct this_last_t {};
     /// @brief Tag type indicating the first parameter of the function contains
     /// the "this" pointer.
+    /// @relates GenericCaller
     struct this_first_t {};
 
     /// @brief Pass as an argument to a getCaller() overload to indicate the
     /// last parameter of the function contains the "this" pointer.
+    /// @relates getCaller()
     BOOST_CONSTEXPR_OR_CONST this_last_t this_last = {};
     /// @brief Pass as an argument to a getCaller() overload to indicate the
     /// first parameter of the function contains the "this" pointer.
+    /// @relates getCaller()
     BOOST_CONSTEXPR_OR_CONST this_first_t this_first = {};
 
+#ifndef OGVR_DOXYGEN_EXTERNAL
     namespace detail {
 
         /// @brief Convenience metafunction to simplify computing the type of a
@@ -192,6 +199,7 @@ namespace functor_trampolines {
                 FunctionPtr, FunctionObjectType> type;
         };
     } // end of namespace detail
+#endif // ifndef OGVR_DOXYGEN_EXTERNAL
 
     /// @brief Struct containing a single static function member named "call"
     /// that serves as a converter from a function call with an opaque userdata
@@ -256,7 +264,7 @@ namespace functor_trampolines {
         /** Either this_first or this_last */ ThisLocation const &) {
         return getCaller<FunctionPtr, FunctionObjectType, ThisLocation>();
     }
-
+#ifndef OGVR_DOXYGEN_EXTERNAL
 } // end of namespace functor_trampolines
 
 // Import symbols into namespace.
@@ -266,6 +274,9 @@ using functor_trampolines::this_first;
 using functor_trampolines::this_first_t;
 using functor_trampolines::this_last;
 using functor_trampolines::this_last_t;
+
+#endif // ifndef OGVR_DOXYGEN_EXTERNAL
+
 } // end of namespace util
 } // end of namespace ogvr
 
