@@ -78,7 +78,8 @@ ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
 
     // Transfer ownership of the message type object to the plugin context.
     try {
-        *msgtype = ogvr::plugin::registerObjectForDeletion(ctx, ret.release());
+        *msgtype =
+            ogvr::pluginkit::registerObjectForDeletion(ctx, ret.release());
     } catch (std::exception &e) {
         std::cerr << "Error in ogvrDeviceRegisterMessageType: " << e.what()
                   << std::endl;
@@ -117,7 +118,8 @@ ogvrDeviceGenericInit(OGVR_PluginRegContext ctx, const char *name,
     }
     // Transfer ownership of the device token object to the plugin context.
     try {
-        *device = ogvr::plugin::registerObjectForDeletion(ctx, dev.release());
+        *device =
+            ogvr::pluginkit::registerObjectForDeletion(ctx, dev.release());
     } catch (std::exception &e) {
         std::cerr << "Error in ogvrDeviceGenericInit: " << e.what()
                   << std::endl;

@@ -65,8 +65,8 @@ OGVR_PLUGIN(org_opengoggles_example_DummyAsync) {
                         &d); // Puts an object in d that knows it's a
                              // threaded device so ogvrDeviceSendData knows
                              // that it needs to get a connection lock first.
-    DummyAsyncDevice *myAsync =
-        ogvr::plugin::registerObjectForDeletion(ctx, new DummyAsyncDevice(d));
+    DummyAsyncDevice *myAsync = ogvr::pluginkit::registerObjectForDeletion(
+        ctx, new DummyAsyncDevice(d));
     ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
     ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
                                  static_cast<void *>(myAsync));

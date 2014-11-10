@@ -46,14 +46,14 @@ OGVR_PLUGIN(org_opengoggles_example_DummyHardwarePoll) {
     /// Register a polling callback function object: here passing it result of
     /// "new".
     /// Auto-registers for destruction.
-    ogvr::plugin::registerHardwarePollCallback(ctx, new HardwarePoller(0));
+    ogvr::pluginkit::registerHardwarePollCallback(ctx, new HardwarePoller(0));
 
     /// Register a polling callback function object: here passing it a value.
     /// It will make a copy that it auto-registers for destruction.
     HardwarePoller myPoller(10);
-    ogvr::plugin::registerHardwarePollCallback(ctx, myPoller);
+    ogvr::pluginkit::registerHardwarePollCallback(ctx, myPoller);
     /// Registering twice to demonstrate that copying occurs.
-    ogvr::plugin::registerHardwarePollCallback(ctx, myPoller);
+    ogvr::pluginkit::registerHardwarePollCallback(ctx, myPoller);
 
     return OGVR_RETURN_SUCCESS;
 }

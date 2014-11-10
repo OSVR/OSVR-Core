@@ -39,7 +39,7 @@
 #include <stdexcept>
 
 namespace ogvr {
-namespace plugin {
+namespace pluginkit {
     /// @brief Registers an object to be destroyed with delete when the plugin
     /// is unloaded.
     ///
@@ -112,7 +112,7 @@ namespace plugin {
             throw std::runtime_error("registerHardwarePollCallback failed!");
         }
     }
-} // end of namespace plugin
+} // end of namespace pluginkit
 } // end of namespace ogvr
 
 #endif // INCLUDED_PluginRegistration_h_GUID_4F5D6422_2977_40A9_8BA0_F86FD6245CE9

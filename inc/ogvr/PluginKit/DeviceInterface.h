@@ -29,7 +29,7 @@
 // Standard includes
 // - none
 namespace ogvr {
-namespace device {} // end of namespace device
+namespace pluginkit {} // end of namespace pluginkit
 } // end of namespace ogvr
 
 #endif // INCLUDED_DeviceInterface_h_GUID_A929799C_02F5_4C92_C503_36C7F59D6BA1

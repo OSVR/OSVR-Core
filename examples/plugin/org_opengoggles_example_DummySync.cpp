@@ -61,7 +61,7 @@ OGVR_PLUGIN(org_opengoggles_example_DummySync) {
                             // device so ogvrDeviceSendData knows that it
                             // doesn't need to acquire a lock.
     DummySyncDevice *mySync =
-        ogvr::plugin::registerObjectForDeletion(ctx, new DummySyncDevice(d));
+        ogvr::pluginkit::registerObjectForDeletion(ctx, new DummySyncDevice(d));
 
     ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
     ogvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
