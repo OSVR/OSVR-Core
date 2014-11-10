@@ -45,6 +45,8 @@ namespace connection {
     typedef std::function<OGVR_ReturnCode()> AsyncDeviceWaitCallback;
     typedef std::function<OGVR_ReturnCode()> SyncDeviceUpdateCallback;
 
+    /// @brief A DeviceToken connects the generic device interaction code in
+    /// PluginKit's C API with the workings of an actual ConnectionDevice.
     class DeviceToken : boost::noncopyable {
       public:
         /// @name Factory functions
