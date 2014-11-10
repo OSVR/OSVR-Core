@@ -62,6 +62,10 @@ generate_export_header(ogvrUtil
     BASE_NAME OGVR_UTIL
     EXPORT_FILE_NAME Export.h)
 
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(ogvrUtil PUBLIC OGVR_UTIL_STATIC_DEFINE)
+endif()
+
 target_include_directories(ogvrUtil
     PUBLIC
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>

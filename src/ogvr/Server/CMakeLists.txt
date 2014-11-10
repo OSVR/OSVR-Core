@@ -28,6 +28,10 @@ generate_export_header(ogvrServer
     BASE_NAME OGVR_SERVER
     EXPORT_FILE_NAME Export.h)
 
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(ogvrServer PUBLIC OGVR_SERVER_STATIC_DEFINE)
+endif()
+
 target_include_directories(ogvrServer
     PUBLIC
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>

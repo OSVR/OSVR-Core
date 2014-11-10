@@ -33,6 +33,10 @@ generate_export_header(ogvrPluginHost
     BASE_NAME OGVR_PLUGINHOST
     EXPORT_FILE_NAME Export.h)
 
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(ogvrPluginHost PUBLIC OGVR_PLUGINHOST_STATIC_DEFINE)
+endif()
+
 target_include_directories(ogvrPluginHost
     PUBLIC
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
