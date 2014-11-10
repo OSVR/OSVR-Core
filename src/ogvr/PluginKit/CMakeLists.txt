@@ -4,6 +4,8 @@ include_directories("${BUILDTREE_HEADER_BASE}")
 set(HEADER_LOCATION "${HEADER_BASE}/ogvr/PluginKit")
 
 set(API
+    "${HEADER_LOCATION}/AnalogInterfaceC.h"
+    "${HEADER_LOCATION}/ButtonInterfaceC.h"
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
@@ -11,13 +13,19 @@ set(API
     "${HEADER_LOCATION}/PluginKitC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
     "${HEADER_LOCATION}/PluginRegistrationC.h"
+    "${HEADER_LOCATION}/TrackerInterfaceC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(API FILES ${API})
 
 set(SOURCE
+    AnalogInterfaceC.cpp
+    ButtonInterfaceC.cpp
+    DeviceInitObject.cpp
+    DeviceInitObject.h
     DeviceInterfaceC.cpp
     HandleNullContext.h
-    PluginRegistrationC.cpp)
+    PluginRegistrationC.cpp
+    TrackerInterfaceC.cpp)
 
 add_library(ogvrPluginKit ${API} ${SOURCE})
 set_target_properties(ogvrPluginKit PROPERTIES

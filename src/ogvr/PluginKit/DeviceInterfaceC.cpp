@@ -25,12 +25,18 @@
 #include <ogvr/Connection/Connection.h>
 #include <ogvr/Util/Verbosity.h>
 #include "HandleNullContext.h"
+#include "DeviceInitObject.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <functional>
+
+OGVR_DeviceInitOptions
+ogvrDeviceCreateInitOptions(OGVR_INOUT_PTR OGVR_PluginRegContext ctx) {
+    return new OGVR_DeviceInitObject(ctx);
+}
 
 OGVR_ReturnCode ogvrDeviceSendData(OGVR_INOUT_PTR OGVR_DeviceToken dev,
                                    OGVR_IN_PTR OGVR_MessageType msg,

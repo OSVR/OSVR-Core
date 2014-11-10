@@ -61,6 +61,26 @@ or unique devices may need to define their own.
 */
 typedef void *OGVR_MessageType;
 
+/** @brief Opaque type of a device initialization object.
+
+    When creating a device token that implements one or more existing interface
+   types, you'll construct one of these, specify which interfaces you are
+   implementing, then pass it to the device token creation.
+*/
+typedef struct OGVR_DeviceInitObject *OGVR_DeviceInitOptions;
+
+/** @brief Create a OGVR_DeviceInitOptions object.
+
+    There is no corresponding destroy method because it is handed over to a
+   device token constructor that takes ownership of it.
+
+    @param ctx The plugin registration context received by your entry point
+    function.
+*/
+OGVR_PLUGINKIT_EXPORT OGVR_DeviceInitOptions
+    ogvrDeviceCreateInitOptions(OGVR_INOUT_PTR OGVR_PluginRegContext ctx)
+        OGVR_FUNC_NONNULL((1));
+
 /** @brief Register (or recall) a message type by name.
 
 @param ctx The plugin registration context received by your entry point
