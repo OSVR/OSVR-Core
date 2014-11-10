@@ -65,6 +65,8 @@ namespace pluginkit {
         return obj;
     }
 
+#ifndef OGVR_DOXYGEN_EXTERNAL
+    /// @brief Internal implementation-only namespace
     namespace detail {
         /// @brief Traits-based overload to register a hardware poll callback
         /// where we're given a pointer to a function object.
@@ -95,6 +97,8 @@ namespace pluginkit {
             return registerHardwarePollCallbackImpl(ctx, functorCopy);
         }
     }
+#endif
+
     /// @brief Registers a function object to be called when the core requests a
     /// hardware poll.
     ///

@@ -1,5 +1,6 @@
 /** @file
-    @brief Implementation
+    @brief Implementation of a dummy Hardware Poll Callback, using a
+    idiomatic C++ approach than DummyHardwarePoll.
 
     @date 2014
 

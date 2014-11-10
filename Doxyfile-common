@@ -140,6 +140,7 @@ EXPAND_ONLY_PREDEF     = YES
 
 # For config item PREDEFINED, default is 
 PREDEFINED             = _cplusplus \
+                         OGVR_DOXYGEN \
                          OGVR_HAVE_STRUCT_TIMEVAL \
                          OGVR_PLUGINKIT_EXPORT= \
                          OGVR_UTIL_EXPORT= \
