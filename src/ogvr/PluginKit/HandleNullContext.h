@@ -30,11 +30,22 @@
 #include <iostream>
 
 /// @brief Internal macro for use in C API function implementations to check the
-/// validity of a context parameter.
+/// validity of a context parameter for return-code functions.
 #define OGVR_PLUGIN_HANDLE_NULL_CONTEXT(FUNC, CONTEXT_NAME)                    \
     OGVR_UTIL_MULTILINE_BEGIN if (!CONTEXT_NAME) {                             \
-        std::cerr << "ERROR (" FUNC "): Null context passed!" << std::endl;    \
+        std::cerr << "ERROR (" FUNC "): Null context " #CONTEXT_NAME           \
+                     " passed!" << std::endl;                                  \
         return OGVR_RETURN_FAILURE;                                            \
+    }                                                                          \
+    OGVR_UTIL_MULTILINE_END
+
+/// @brief Internal macro for use in C API function implementations to check the
+/// validity of a context parameter for constructor-like functions.
+#define OGVR_PLUGIN_HANDLE_NULL_CONTEXT_CONSTRUCTOR(FUNC, CONTEXT_NAME)        \
+    OGVR_UTIL_MULTILINE_BEGIN if (!CONTEXT_NAME) {                             \
+        std::cerr << "ERROR (" FUNC "): Null context " #CONTEXT_NAME           \
+                     " passed!" << std::endl;                                  \
+        return NULL;                                                           \
     }                                                                          \
     OGVR_UTIL_MULTILINE_END
 
