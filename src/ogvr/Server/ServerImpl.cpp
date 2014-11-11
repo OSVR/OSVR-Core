@@ -31,7 +31,8 @@
 namespace ogvr {
 namespace server {
     ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
-        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()), m_running(false) {
+        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
+          m_running(false) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
@@ -65,8 +66,14 @@ namespace server {
         m_running = false;
     }
 
-    void ServerImpl::loadPlugin(std::string const& pluginName) {
-        m_callControlled(std::bind(&pluginhost::RegistrationContext::loadPlugin, m_ctx, pluginName));
+    void ServerImpl::loadPlugin(std::string const &pluginName) {
+        m_callControlled(std::bind(&pluginhost::RegistrationContext::loadPlugin,
+                                   m_ctx, pluginName));
+    }
+
+    void ServerImpl::triggerHardwarePoll() {
+        m_callControlled(std::bind(
+            &pluginhost::RegistrationContext::triggerHardwarePoll, m_ctx));
     }
 
     bool ServerImpl::loop() {
@@ -75,8 +82,7 @@ namespace server {
         return m_run.shouldContinue();
     }
 
-
-    template<typename Callable>
+    template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running) {

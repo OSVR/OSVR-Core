@@ -50,17 +50,20 @@ namespace server {
         /// @brief Signal the server to stop, and block until it does so.
         void stop();
 
-        /// @brief Load plugin
-        void loadPlugin(std::string const& pluginName);
+        /// @brief Load named plugin
+        void loadPlugin(std::string const &pluginName);
+
+        /// @brief Trigger all hardware poll callbacks
+        void triggerHardwarePoll();
 
         /// @brief The method called from the server thread repeatedly.
         /// @returns true if the loop should continue running
         bool loop();
 
       private:
-        /// @brief Internal function to call a callable if the thread isn't running, or to queue up the callable if it is running.
-        template<typename Callable>
-        void m_callControlled(Callable f);
+        /// @brief Internal function to call a callable if the thread isn't
+        /// running, or to queue up the callable if it is running.
+        template <typename Callable> void m_callControlled(Callable f);
         connection::ConnectionPtr m_conn;
         shared_ptr<pluginhost::RegistrationContext> m_ctx;
 

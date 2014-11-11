@@ -43,7 +43,15 @@ namespace server {
     }
 
     void Server::start() { m_impl->start(); }
+
     void Server::stop() { m_impl->stop(); }
+
+    void Server::loadPlugin(std::string const &plugin) {
+        m_impl->loadPlugin(plugin);
+    }
+
+    void Server::triggerHardwarePoll() { m_impl->triggerHardwarePoll(); }
+
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)
         : m_impl(new ServerImpl(conn)) {}

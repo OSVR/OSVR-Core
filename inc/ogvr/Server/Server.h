@@ -29,7 +29,7 @@
 #include <boost/noncopyable.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace ogvr {
 namespace server {
@@ -76,6 +76,12 @@ namespace server {
         /// @brief Signal the server to stop (if it is running), and block until
         /// it does so.
         OGVR_SERVER_EXPORT void stop();
+
+        /// @brief Load plugin by name.
+        OGVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
+
+        /// @brief Run all hardware poll callbacks.
+        OGVR_SERVER_EXPORT void triggerHardwarePoll();
 
       private:
         unique_ptr<ServerImpl> m_impl;
