@@ -19,7 +19,7 @@
 #ifndef INCLUDED_RegisterShutdownHandlerPOSIXSignal_h_GUID_0B85D38D_08A2_49AA_7FA4_1BED1048FD11
 #define INCLUDED_RegisterShutdownHandlerPOSIXSignal_h_GUID_0B85D38D_08A2_49AA_7FA4_1BED1048FD11
 
-#ifdef OGVR_USE_WIN32_SHUTDOWN_HANDLER
+#ifdef OGVR_USE_POSIX_SIGNAL_SHUTDOWN_HANDLER
 
 // Internal Includes
 // - none
@@ -52,6 +52,6 @@ namespace server {
 } // namespace server
 } // namespace ogvr
 
-#endif // OGVR_USE_WIN32_SHUTDOWN_HANDLER
+#endif // OGVR_USE_POSIX_SIGNAL_SHUTDOWN_HANDLER
 
 #endif // INCLUDED_RegisterShutdownHandlerPOSIXSignal_h_GUID_0B85D38D_08A2_49AA_7FA4_1BED1048FD11
