@@ -75,9 +75,17 @@ namespace server {
         /// @brief Launch a thread running the server.
         OGVR_SERVER_EXPORT void start();
 
+        /// @brief Launch a thread running the server, and block until the
+        /// server shuts down.
+        OGVR_SERVER_EXPORT void startAndAwaitShutdown();
+
         /// @brief Signal the server to stop (if it is running), and block until
         /// it does so.
         OGVR_SERVER_EXPORT void stop();
+
+        /// @brief Signal the server to stop (if it is running) but return
+        /// immediately.
+        OGVR_SERVER_EXPORT void signalStop();
 
         /// @brief Load plugin by name.
         OGVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);

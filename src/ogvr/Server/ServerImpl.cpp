@@ -45,17 +45,24 @@ namespace server {
     void ServerImpl::start() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         m_running = true;
-        // Get a reference that we can capture in the lambda.
-        ::util::LoopGuardInterface &run(m_run);
+
         // Use a lambda to run the loop.
         m_thread = boost::thread([&] {
             bool keepRunning = true;
-            ::util::LoopGuard guard(run);
+            ::util::LoopGuard guard(m_run);
             do {
                 keepRunning = this->loop();
             } while (keepRunning);
+            m_conn.reset();
+            m_ctx.reset();
+            m_running = false;
         });
         m_run.signalAndWaitForStart();
+    }
+
+    void ServerImpl::startAndAwaitShutdown() {
+        start();
+        m_thread.join();
     }
 
     void ServerImpl::stop() {
@@ -63,7 +70,10 @@ namespace server {
         m_run.signalAndWaitForShutdown();
         m_thread.join();
         m_thread = boost::thread();
-        m_running = false;
+    }
+    void ServerImpl::signalStop() {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        m_run.signalShutdown();
     }
 
     void ServerImpl::loadPlugin(std::string const &pluginName) {
@@ -79,6 +89,8 @@ namespace server {
     bool ServerImpl::loop() {
         m_conn->process();
         /// @todo do queued things in here?
+        /// @todo configurable waiting?
+        m_thread.yield();
         return m_run.shouldContinue();
     }
 

@@ -44,7 +44,11 @@ namespace server {
 
     void Server::start() { m_impl->start(); }
 
+    void Server::startAndAwaitShutdown() { m_impl->startAndAwaitShutdown(); }
+
     void Server::stop() { m_impl->stop(); }
+
+    void Server::signalStop() { m_impl->signalStop(); }
 
     void Server::loadPlugin(std::string const &plugin) {
         m_impl->loadPlugin(plugin);

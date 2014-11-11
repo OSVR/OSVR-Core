@@ -47,8 +47,16 @@ namespace server {
         /// @brief Launch a thread running the server.
         void start();
 
+        /// @brief Launch a thread running the server, and block until the
+        /// server shuts down.
+        void startAndAwaitShutdown();
+
         /// @brief Signal the server to stop, and block until it does so.
         void stop();
+
+        /// @brief Signal the server to stop (if it is running) but return
+        /// immediately.
+        void signalStop();
 
         /// @brief Load named plugin
         void loadPlugin(std::string const &pluginName);
