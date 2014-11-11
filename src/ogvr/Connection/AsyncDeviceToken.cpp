@@ -16,6 +16,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OGVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include "AsyncDeviceToken.h"
 #include <ogvr/Connection/ConnectionDevice.h>
@@ -26,8 +28,6 @@
 
 // Standard includes
 // - none
-
-#define OGVR_DEV_VERBOSE_DISABLE
 
 namespace ogvr {
 namespace connection {
