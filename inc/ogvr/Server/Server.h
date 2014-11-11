@@ -23,29 +23,62 @@
 #include <ogvr/Server/Export.h>
 #include <ogvr/Server/ServerPtr.h>
 #include <ogvr/Connection/ConnectionPtr.h>
-#include <ogvr/Util/SharedPtr.h>
-#include <ogvr/PluginHost/RegistrationContext_fwd.h>
+#include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 // - none
 
 namespace ogvr {
 namespace server {
-    class Server {
-      public:
-        /// @brief Server constructor with an existing Connection
-        /// @throws std::logic_error if a null connection is passed.
-        OGVR_SERVER_EXPORT Server(connection::ConnectionPtr conn);
+    // Forward declaration for pimpl idiom.
+    class ServerImpl;
 
+    /// @brief Class handling a run-loop with a registration context and
+    /// connection
+    class Server : boost::noncopyable {
+        /// @brief dummy structure to enforce private construction while
+        /// permitting
+        /// factory member functions to use make_shared.
+        ///
+        /// Based on http://stackoverflow.com/a/8147326/265522
+        struct private_constructor {};
+
+      public:
+        /// @brief Private server constructor
+        ///
+        /// The last argument is a dummy argument to enforce use of the factory
+        /// methods.
+        ///
+        /// @throws std::logic_error if a null connection is passed.
+        Server(connection::ConnectionPtr const &conn,
+               private_constructor const &);
+
+        OGVR_SERVER_EXPORT ~Server();
         /// @brief Create a server object with a local-only connection.
         OGVR_SERVER_EXPORT static ServerPtr createLocal();
 
+        /// @brief Create a server object with a provided connection.
+        ///
+        /// @param conn A non-null connection pointer. Since an
+        /// ogvr::connection::ConnectionPtr is a shared pointer, the server
+        /// takes shared ownership of the connection passed.
+        ///
+        /// @throws std::logic_error if a null connection is passed.
+        OGVR_SERVER_EXPORT static ServerPtr
+        create(connection::ConnectionPtr const &conn);
+
+        /// @brief Launch a thread running the server.
+        OGVR_SERVER_EXPORT void start();
+
+        /// @brief Signal the server to stop (if it is running), and block until
+        /// it does so.
+        OGVR_SERVER_EXPORT void stop();
+
       private:
-        connection::ConnectionPtr m_conn;
-        shared_ptr<pluginhost::RegistrationContext> m_ctx;
+        unique_ptr<ServerImpl> m_impl;
     };
 } // namespace server
 } // namespace ogvr

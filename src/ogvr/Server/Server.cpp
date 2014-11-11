@@ -19,13 +19,13 @@
 // Internal Includes
 #include <ogvr/Server/Server.h>
 #include <ogvr/Connection/Connection.h>
-#include <ogvr/PluginHost/RegistrationContext.h>
+#include "ServerImpl.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <stdexcept>
+// - none
 
 namespace ogvr {
 namespace server {
@@ -33,18 +33,22 @@ namespace server {
     ServerPtr Server::createLocal() {
         connection::ConnectionPtr conn(
             connection::Connection::createLocalConnection());
-        ServerPtr ret(make_shared<Server>(conn));
+        ServerPtr ret(make_shared<Server>(conn, private_constructor{}));
         return ret;
     }
 
-    Server::Server(connection::ConnectionPtr conn)
-        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()) {
-        if (!m_conn) {
-            throw std::logic_error(
-                "Can't pass a null ConnectionPtr into Server constructor!");
-        }
-        ogvr::connection::Connection::storeConnection(*m_ctx, m_conn);
+    ServerPtr Server::create(connection::ConnectionPtr const &conn) {
+        ServerPtr ret(make_shared<Server>(conn, private_constructor{}));
+        return ret;
     }
+
+    void Server::start() { m_impl->start(); }
+    void Server::stop() { m_impl->stop(); }
+    Server::Server(connection::ConnectionPtr const &conn,
+                   private_constructor const &)
+        : m_impl(new ServerImpl(conn)) {}
+
+    Server::~Server() {}
 
 } // namespace server
 } // namespace ogvr

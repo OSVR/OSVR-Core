@@ -10,7 +10,9 @@ set(API
 source_group(API FILES ${API})
 
 set(SOURCE
-    Server.cpp)
+    Server.cpp
+    ServerImpl.cpp
+    ServerImpl.h)
 
 add_library(ogvrServer ${API} ${SOURCE})
 
@@ -49,7 +51,8 @@ target_link_libraries(ogvrServer
     PRIVATE
     ogvrConnection
     ogvrPluginHost
-    ogvrUtilCpp)
+    ogvrUtilCpp
+    util-runloopmanager)
 
 enable_extra_compiler_warnings(ogvrServer)
 
