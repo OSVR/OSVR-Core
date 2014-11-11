@@ -16,6 +16,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OGVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include <ogvr/Connection/Connection.h>
 #include <ogvr/Connection/ConnectionDevice.h>

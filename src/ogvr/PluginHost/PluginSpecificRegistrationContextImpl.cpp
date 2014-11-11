@@ -16,6 +16,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OGVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include "PluginSpecificRegistrationContextImpl.h"
 #include <ogvr/Util/Verbosity.h>
