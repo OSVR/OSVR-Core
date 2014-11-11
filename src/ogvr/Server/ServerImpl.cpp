@@ -30,7 +30,7 @@
 namespace ogvr {
 namespace server {
     ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
-        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()) {
+        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()), m_running(false) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
@@ -41,6 +41,9 @@ namespace server {
     ServerImpl::~ServerImpl() { stop(); }
 
     void ServerImpl::start() {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        m_running = true;
+        // Get a reference that we can capture in the lambda.
         ::util::LoopGuardInterface &run(m_run);
         // Use a lambda to run the loop.
         m_thread = boost::thread([&] {
@@ -53,12 +56,29 @@ namespace server {
         m_run.signalAndWaitForStart();
     }
 
-    void ServerImpl::stop() { m_run.signalAndWaitForShutdown(); }
+    void ServerImpl::stop() {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        m_run.signalAndWaitForShutdown();
+        m_thread.join();
+        m_thread = boost::thread();
+        m_running = false;
+    }
 
     bool ServerImpl::loop() {
 
         /// @todo do things in here.
         return m_run.shouldContinue();
+    }
+
+
+    template<typename Callable>
+    inline void ServerImpl::m_callControlled(Callable f) {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (m_running) {
+            /// @todo not yet implemented
+            throw std::logic_error("not yet implemented");
+        }
+        f();
     }
 
 } // namespace server
