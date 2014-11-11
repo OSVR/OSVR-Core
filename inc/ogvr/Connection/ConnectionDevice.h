@@ -20,6 +20,7 @@
 #define INCLUDED_ConnectionDevice_h_GUID_C04223D7_51D1_49BE_91AB_73FCA9C88515
 
 // Internal Includes
+#include <ogvr/Connection/Export.h>
 #include <ogvr/Connection/ConnectionDevicePtr.h>
 #include <ogvr/Util/TimeValue.h>
 
@@ -39,7 +40,7 @@ namespace connection {
     class ConnectionDevice : boost::noncopyable {
       public:
         /// @brief destructor
-        virtual ~ConnectionDevice();
+        OGVR_CONNECTION_EXPORT virtual ~ConnectionDevice();
 
         /// @brief accessor for device name
         std::string const &getName() const;
@@ -69,7 +70,7 @@ namespace connection {
                                 size_t len) = 0;
 
         /// @brief Constructor for use by derived classes only.
-        ConnectionDevice(std::string const &name);
+        OGVR_CONNECTION_EXPORT ConnectionDevice(std::string const &name);
 
       private:
         std::string const m_name;
