@@ -35,7 +35,7 @@ namespace server {
 #ifndef OGVR_DOXYGEN_EXTERNAL
     namespace detail {
         template <ShutdownHandler F> void handlerWrapper(int) { F(); }
-    }
+    }  // namespace detail
 #endif // #ifndef OGVR_DOXYGEN_EXTERNAL
 
     /// @brief Register a function to be called when some attempt to close the

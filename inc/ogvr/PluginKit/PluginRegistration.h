@@ -95,7 +95,7 @@ namespace pluginkit {
             T *functorCopy = new T(functor);
             return registerHardwarePollCallbackImpl(ctx, functorCopy);
         }
-    }
+    } // namespace detail
 #endif
 
     /// @brief Registers a function object to be called when the core requests a

@@ -49,7 +49,7 @@ namespace server {
                 return FALSE;
             }
         }
-    }
+    }  // namespace detail
 #endif // #ifndef OGVR_DOXYGEN_EXTERNAL
 
     /// @brief Register a function to be called when some attempt to close the
