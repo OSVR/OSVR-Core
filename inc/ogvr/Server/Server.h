@@ -56,7 +56,9 @@ namespace server {
         Server(connection::ConnectionPtr const &conn,
                private_constructor const &);
 
+        /// @brief Destructor - stops the loop and blocks until it's done.
         OGVR_SERVER_EXPORT ~Server();
+
         /// @brief Create a server object with a local-only connection.
         OGVR_SERVER_EXPORT static ServerPtr createLocal();
 
