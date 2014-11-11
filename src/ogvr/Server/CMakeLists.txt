@@ -51,9 +51,10 @@ if(NOT Boost_USE_STATIC_LIBS)
 endif()
 
 target_link_libraries(ogvrServer
-    PRIVATE
+    PUBLIC
     ogvrConnection
     ogvrPluginHost
+    PRIVATE
     ogvrUtilCpp
     util-runloopmanager)
 
