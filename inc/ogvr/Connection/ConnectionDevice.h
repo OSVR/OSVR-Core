@@ -54,8 +54,9 @@ namespace connection {
                       const char *bytestream, size_t len);
 
         /// @brief Stop any additional threads associated with this
-        /// ConnectionDevice or its DeviceToken, if applicable.
+        /// ConnectionDevice
         void stopThreads();
+
         /// @brief For use only by DeviceToken
         void setDeviceToken(DeviceToken &token);
 

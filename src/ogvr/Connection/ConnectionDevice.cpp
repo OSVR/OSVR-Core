@@ -43,12 +43,9 @@ namespace connection {
         BOOST_ASSERT(type);
         m_sendData(timestamp, type, bytestream, len);
     }
-    void ConnectionDevice::stopThreads() {
-        m_stopThreads();
-        if (m_token) {
-            m_token->stopThreads();
-        }
-    }
+
+    void ConnectionDevice::stopThreads() { m_stopThreads(); }
+
     void ConnectionDevice::setDeviceToken(DeviceToken &token) {
         BOOST_ASSERT(m_token == NULL);
         m_token = &token;
