@@ -44,8 +44,6 @@ namespace connection {
         m_sendData(timestamp, type, bytestream, len);
     }
 
-    void ConnectionDevice::stopThreads() { m_stopThreads(); }
-
     void ConnectionDevice::setDeviceToken(DeviceToken &token) {
         BOOST_ASSERT(m_token == NULL);
         m_token = &token;
@@ -55,8 +53,6 @@ namespace connection {
         BOOST_ASSERT(m_token);
         return *m_token;
     }
-
-    void ConnectionDevice::m_stopThreads() {}
 
 } // namespace connection
 } // namespace ogvr

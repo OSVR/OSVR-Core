@@ -53,10 +53,6 @@ namespace connection {
         void sendData(util::time::TimeValue const &timestamp, MessageType *type,
                       const char *bytestream, size_t len);
 
-        /// @brief Stop any additional threads associated with this
-        /// ConnectionDevice
-        void stopThreads();
-
         /// @brief For use only by DeviceToken
         void setDeviceToken(DeviceToken &token);
 
@@ -71,7 +67,7 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
-        virtual void m_stopThreads();
+
         /// @brief Constructor for use by derived classes only.
         ConnectionDevice(std::string const &name);
 
