@@ -44,7 +44,7 @@ target_include_directories(ogvrServer
     $<INSTALL_INTERFACE:include>
     ${Boost_INCLUDE_DIR})
 
-target_compile_options(ogvrServer PRIVATE ${OGVR_CXX11_FLAGS})
+target_compile_options(ogvrServer PUBLIC ${OGVR_CXX11_FLAGS})
 
 if(NOT Boost_USE_STATIC_LIBS)
     target_compile_definitions(ogvrServer PRIVATE BOOST_ALL_DYN_LINK)
