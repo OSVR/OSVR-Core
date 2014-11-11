@@ -29,6 +29,7 @@
 
 // Library/third-party includes
 #include <boost/range/algorithm.hpp>
+#include <boost/assert.hpp>
 
 // Standard includes
 // - none
@@ -85,6 +86,7 @@ namespace connection {
     }
 
     void Connection::addDevice(ConnectionDevicePtr device) {
+        BOOST_ASSERT_MSG(device, "Device must be non-null!");
         m_devices.push_back(device);
     }
 
