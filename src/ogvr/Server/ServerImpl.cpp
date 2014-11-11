@@ -26,6 +26,7 @@
 
 // Standard includes
 #include <stdexcept>
+#include <functional>
 
 namespace ogvr {
 namespace server {
@@ -64,6 +65,9 @@ namespace server {
         m_running = false;
     }
 
+    void ServerImpl::loadPlugin(std::string const& pluginName) {
+        m_callControlled(std::bind(&pluginhost::RegistrationContext::loadPlugin, m_ctx, pluginName));
+    }
 
     bool ServerImpl::loop() {
         m_conn->process();
