@@ -56,11 +56,7 @@ target_include_directories(ogvrConnection
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
     $<BUILD_INTERFACE:${HEADER_BASE}>
     $<INSTALL_INTERFACE:include>
-    ${Boost_INCLUDE_DIR}
-    PRIVATE
-    ${VRPN_INCLUDE_DIRS}
-    ${PROJECT_SOURCE_DIR}/vendor/qvrpn
-    ${PROJECT_SOURCE_DIR}/vendor/util-headers)
+    ${Boost_INCLUDE_DIR})
 
 target_compile_options(ogvrConnection PUBLIC ${OGVR_CXX11_FLAGS})
 
@@ -73,11 +69,8 @@ target_link_libraries(ogvrConnection
     ogvrPluginHost
     ogvrUtilCpp
     vendored-vrpn
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_CHRONO_LIBRARY}
-    ${CMAKE_THREAD_LIBS_INIT})
+    util-runloopmanager
+    qvrpn-headers)
 
 enable_extra_compiler_warnings(ogvrConnection)
 

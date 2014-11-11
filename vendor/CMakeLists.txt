@@ -22,3 +22,26 @@ add_library(vendored-vrpn INTERFACE)
 target_link_libraries(vendored-vrpn INTERFACE ${VRPN_SERVER_LIBRARY})
 target_include_directories(vendored-vrpn INTERFACE ${VRPN_INCLUDE_DIRS})
 target_compile_definitions(vendored-vrpn INTERFACE ${VRPN_DEFINITIONS})
+
+# Interface target for hidapi compiled as part of VRPN.
+add_library(hidapi INTERFACE)
+target_link_libraries(hidapi INTERFACE vendored-vrpn)
+target_include_directories(hidapi INTERFACE vrpn/submodules/hidapi)
+
+# Interface target for util headers
+add_library(util-headers INTERFACE)
+target_include_directories(util-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers")
+
+# Interface target for the run loop manager in util headers
+add_library(util-runloopmanager INTERFACE)
+target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers" ${Boost_INCLUDE_DIRS})
+target_link_libraries(util-runloopmanager INTERFACE
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_DATE_TIME_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_CHRONO_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT})
+
+# Interface target for QVRPN headers
+add_library(qvrpn-headers INTERFACE)
+target_include_directories(qvrpn-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/qvrpn")
