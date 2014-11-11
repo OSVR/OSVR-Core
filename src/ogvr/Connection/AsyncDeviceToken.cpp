@@ -27,6 +27,8 @@
 // Standard includes
 // - none
 
+#define OGVR_DEV_VERBOSE_DISABLE
+
 namespace ogvr {
 namespace connection {
     using boost::unique_lock;
