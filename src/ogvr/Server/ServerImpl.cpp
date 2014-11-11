@@ -64,9 +64,10 @@ namespace server {
         m_running = false;
     }
 
-    bool ServerImpl::loop() {
 
-        /// @todo do things in here.
+    bool ServerImpl::loop() {
+        m_conn->process();
+        /// @todo do queued things in here?
         return m_run.shouldContinue();
     }
 
