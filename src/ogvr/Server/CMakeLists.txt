@@ -6,6 +6,9 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Server")
 set(API
     "${HEADER_LOCATION}/Server.h"
     "${HEADER_LOCATION}/ServerPtr.h"
+    "${HEADER_LOCATION}/RegisterShutdownHandler.h"
+    "${HEADER_LOCATION}/RegisterShutdownHandlerPOSIXSignal.h"
+    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(API FILES ${API})
 
