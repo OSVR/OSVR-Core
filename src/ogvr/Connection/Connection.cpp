@@ -96,7 +96,12 @@ namespace connection {
 
     Connection::Connection() { OGVR_DEV_VERBOSE("In Connection constructor"); }
 
-    Connection::~Connection() { OGVR_DEV_VERBOSE("In Connection destructor"); }
+    Connection::~Connection() {
+        OGVR_DEV_VERBOSE("In Connection destructor");
+        // Stop threads for all devices.
+        boost::for_each(m_devices,
+                        [](ConnectionDevicePtr &dev) { dev->stopThreads(); });
+    }
 
     void *Connection::getUnderlyingObject() { return NULL; }
 

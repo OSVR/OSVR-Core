@@ -85,12 +85,17 @@ namespace connection {
 
     void DeviceToken::connectionInteract() { m_connectionInteract(); }
 
+    void DeviceToken::stopThreads() { m_stopThreads(); }
+
     ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
 
     ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
 
     AsyncDeviceToken *DeviceToken::asAsync() { return NULL; }
+
     SyncDeviceToken *DeviceToken::asSync() { return NULL; }
+
+    void DeviceToken::m_stopThreads() {}
 
     void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
         m_conn = conn;

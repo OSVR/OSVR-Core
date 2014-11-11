@@ -123,5 +123,7 @@ namespace connection {
         }
     }
 
+    void AsyncDeviceToken::m_stopThreads() { signalAndWaitForShutdown(); }
+
 } // namespace connection
 } // namespace ogvr

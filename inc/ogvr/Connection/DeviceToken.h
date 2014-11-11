@@ -99,6 +99,9 @@ namespace connection {
         /// ConnectionDevice::sendData from within here somehow.
         void connectionInteract();
 
+        /// @brief Stop any threads spawned and owned by this DeviceToken
+        void stopThreads();
+
       protected:
         DeviceToken(std::string const &name);
         ConnectionPtr m_getConnection();
@@ -107,6 +110,7 @@ namespace connection {
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
         virtual void m_connectionInteract() = 0;
+        virtual void m_stopThreads();
 
         virtual AsyncDeviceToken *asAsync();
         virtual SyncDeviceToken *asSync();

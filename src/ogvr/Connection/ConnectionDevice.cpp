@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/Connection/ConnectionDevice.h>
+#include <ogvr/Connection/DeviceToken.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -42,6 +43,12 @@ namespace connection {
         BOOST_ASSERT(type);
         m_sendData(timestamp, type, bytestream, len);
     }
+    void ConnectionDevice::stopThreads() {
+        m_stopThreads();
+        if (m_token) {
+            m_token->stopThreads();
+        }
+    }
     void ConnectionDevice::setDeviceToken(DeviceToken &token) {
         BOOST_ASSERT(m_token == NULL);
         m_token = &token;
@@ -51,6 +58,8 @@ namespace connection {
         BOOST_ASSERT(m_token);
         return *m_token;
     }
+
+    void ConnectionDevice::m_stopThreads() {}
 
 } // namespace connection
 } // namespace ogvr

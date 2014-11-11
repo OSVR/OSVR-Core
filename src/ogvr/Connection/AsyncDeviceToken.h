@@ -54,6 +54,8 @@ namespace connection {
         /// Called from the main thread - services requests to send from
         /// the async thread.
         virtual void m_connectionInteract();
+
+        virtual void m_stopThreads();
         boost::thread m_callbackThread;
 
         AsyncAccessControl m_accessControl;
