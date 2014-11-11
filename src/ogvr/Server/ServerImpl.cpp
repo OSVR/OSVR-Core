@@ -53,8 +53,8 @@ namespace server {
             do {
                 keepRunning = this->loop();
             } while (keepRunning);
-            m_conn.reset();
             m_ctx.reset();
+            m_conn.reset();
             m_running = false;
         });
         m_run.signalAndWaitForStart();
