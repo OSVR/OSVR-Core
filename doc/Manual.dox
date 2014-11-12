@@ -1,10 +1,4 @@
 
-/** @page UserManual_DevTasks Developing with OGVR Plugin Kit
-  - @subpage UserManual_WritingPlugin
-  - @subpage UserManual_WritingHostApp
-*/
-
-/** @page UserManual_WritingPlugin
+/** @page UserManual_DevTasks Developing with OGVR-Core
   - @subpage TopicWritingDevicePlugin
-  - @subpage TopicWritingAnalysisPlugin
 */
