@@ -59,28 +59,29 @@ OGVR_EXTERN_C_BEGIN
 */
 #define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
 
-/** @name Hardware Polling
+/** @name Hardware Detection
     @brief If your plugin contains drivers for devices that you can detect,
-    you'll want to register for hardware polling.
+    you'll want to register for hardware detection.
     @{
 */
 
 /** @brief Register a callback in your plugin to be notified when hardware
-   should be polled again.
+   should be detected again.
 
-   When your callback, a function of type OGVR_HardwarePollCallback, is invoked,
+   When your callback, a function of type OGVR_HardwareDetectCallback, is
+   invoked,
    it will receive the same userdata you provide here (if any). Your plugin
    should do whatever probing necessary to detect devices you can handle and
    instantiate the device drivers.
 
    @param ctx The registration context passed to your entry point.
-   @param pollCallback The address of your callback function
+   @param detectCallback The address of your callback function
    @param userData An optional opaque pointer that will be returned to you when
    the callback you register here is called.
 */
-OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrPluginRegisterHardwarePollCallback(
+OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrPluginRegisterHardwareDetectCallback(
     OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
-    OGVR_IN OGVRHardwarePollCallback pollCallback,
+    OGVR_IN OGVR_HardwareDetectCallback detectCallback,
     OGVR_IN_OPT void *userData OGVR_CPP_ONLY(= NULL)) OGVR_FUNC_NONNULL((1));
 /** @} */
 

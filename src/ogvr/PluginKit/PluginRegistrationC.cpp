@@ -29,18 +29,19 @@
 // Standard includes
 // - none
 
-OGVR_ReturnCode ogvrPluginRegisterHardwarePollCallback(
+OGVR_ReturnCode ogvrPluginRegisterHardwareDetectCallback(
     OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
-    OGVR_IN OGVRHardwarePollCallback pollCallback, OGVR_IN_OPT void *userData) {
+    OGVR_IN OGVR_HardwareDetectCallback detectCallback,
+    OGVR_IN_OPT void *userData) {
 
-    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrPluginRegisterHardwarePollCallback",
+    OGVR_PLUGIN_HANDLE_NULL_CONTEXT("ogvrPluginRegisterHardwareDetectCallback",
                                     ctx);
-    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwarePollCallback with context "
+    OGVR_DEV_VERBOSE("In ogvrPluginRegisterHardwareDetectCallback with context "
                      << ctx);
 
     ogvr::pluginhost::PluginSpecificRegistrationContext *context =
         static_cast<ogvr::pluginhost::PluginSpecificRegistrationContext *>(ctx);
-    context->registerHardwarePollCallback(pollCallback, userData);
+    context->registerHardwareDetectCallback(detectCallback, userData);
     return OGVR_RETURN_SUCCESS;
 }
 

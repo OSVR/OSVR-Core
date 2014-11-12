@@ -95,9 +95,10 @@ namespace pluginhost {
         OGVR_PLUGINHOST_EXPORT virtual void registerDataWithDeleteCallback(
             OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData) = 0;
 
-        OGVR_PLUGINHOST_EXPORT virtual void
-        registerHardwarePollCallback(OGVRHardwarePollCallback pollCallback,
-                                     void *userData) = 0;
+        /// @brief Register a callback to be invoked on some hardware detection
+        /// event.
+        OGVR_PLUGINHOST_EXPORT virtual void registerHardwareDetectCallback(
+            OGVR_HardwareDetectCallback detectCallback, void *userData) = 0;
         /// @}
 
         /// @brief Accessor for plugin name.

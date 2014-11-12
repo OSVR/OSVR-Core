@@ -81,13 +81,14 @@ namespace pluginhost {
         return *m_parent;
     }
 
-    void PluginSpecificRegistrationContextImpl::callHardwarePollCallbacks() {
+    void
+    PluginSpecificRegistrationContextImpl::triggerHardwareDetectCallbacks() {
         OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
-                         "In callHardwarePollCallbacks for "
+                         "In triggerHardwareDetectCallbacks for "
                          << getName());
 
-        boost::for_each(m_hardwarePollCallbacks,
-                        [this](HardwarePollCallback const &f) { f(this); });
+        boost::for_each(m_hardwareDetectCallbacks,
+                        [this](HardwareDetectCallback const &f) { f(this); });
     }
 
     void PluginSpecificRegistrationContextImpl::registerDataWithDeleteCallback(
@@ -100,15 +101,15 @@ namespace pluginhost {
                          << getName());
     }
 
-    void PluginSpecificRegistrationContextImpl::registerHardwarePollCallback(
-        OGVRHardwarePollCallback pollCallback, void *userData) {
+    void PluginSpecificRegistrationContextImpl::registerHardwareDetectCallback(
+        OGVR_HardwareDetectCallback detectCallback, void *userData) {
         OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
-                         "In registerHardwarePollCallback");
-        m_hardwarePollCallbacks.emplace_back(pollCallback, userData);
+                         "In registerHardwareDetectCallback");
+        m_hardwareDetectCallbacks.emplace_back(detectCallback, userData);
         OGVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
                          "Now have "
-                         << m_hardwarePollCallbacks.size()
-                         << " hardware poll callbacks registered for "
+                         << m_hardwareDetectCallbacks.size()
+                         << " hardware detect callbacks registered for "
                          << getName());
     }
 

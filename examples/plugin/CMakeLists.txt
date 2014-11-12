@@ -2,9 +2,9 @@
 set(OGVR_EXAMPLE_PLUGINS
     NullPlugin
     NullDevice
-    DummyHardwarePoll
-    DummyHardwarePollCpp
-    DummyHardwarePollCpp2
+    DummyHardwareDetect
+    DummyHardwareDetectCpp
+    DummyHardwareDetectCpp2
     CACHE INTERNAL "" FORCE)
 
 # These plugins need a host with a Connection.

@@ -27,18 +27,18 @@
 
 static int sampleHardwareUserdata = 1;
 
-static OGVR_ReturnCode pollForHardwareChange(OGVR_PluginRegContext /*ctx*/,
-                                             void *userData) {
+static OGVR_ReturnCode detectHardwareChange(OGVR_PluginRegContext /*ctx*/,
+                                            void *userData) {
     int &data = *static_cast<int *>(userData);
-    std::cout << "Got a poll for hardware change, with user data " << data
-              << std::endl;
+    std::cout << "Got a detection request for hardware change, with user data "
+              << data << std::endl;
     return OGVR_RETURN_SUCCESS;
 }
 
-OGVR_PLUGIN(org_opengoggles_example_DummyHardwarePoll) {
-    /// Register a polling callback, with some dummy userdata.
-    ogvrPluginRegisterHardwarePollCallback(ctx, &pollForHardwareChange,
-                                           &sampleHardwareUserdata);
+OGVR_PLUGIN(org_opengoggles_example_DummyHardwareDetect) {
+    /// Register a detect callback, with some dummy userdata.
+    ogvrPluginRegisterHardwareDetectCallback(ctx, &detectHardwareChange,
+                                             &sampleHardwareUserdata);
 
     return OGVR_RETURN_SUCCESS;
 }

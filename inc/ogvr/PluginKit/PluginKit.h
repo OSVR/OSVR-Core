@@ -54,10 +54,10 @@ namespace pluginkit {
         /// @brief Constructor of the context wrapper object
         PluginContext(OGVR_PluginRegContext ctx) : m_ctx(ctx) {}
 
-        /// @brief Register a hardware poll callback
-        /// @sa ::ogvr::pluginkit::registerHardwarePollCallback()
-        template <typename T> void registerHardwarePollCallback(T functor) {
-            ::ogvr::pluginkit::registerHardwarePollCallback(m_ctx, functor);
+        /// @brief Register a hardware detect callback
+        /// @sa ::ogvr::pluginkit::registerHardwareDetectCallback()
+        template <typename T> void registerHardwareDetectCallback(T functor) {
+            ::ogvr::pluginkit::registerHardwareDetectCallback(m_ctx, functor);
         }
 
         /// @brief Register the given object (assumed to be deletable by

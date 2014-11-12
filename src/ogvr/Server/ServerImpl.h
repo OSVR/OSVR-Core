@@ -61,8 +61,8 @@ namespace server {
         /// @brief Load named plugin
         void loadPlugin(std::string const &pluginName);
 
-        /// @brief Trigger all hardware poll callbacks
-        void triggerHardwarePoll();
+        /// @copydoc Server::triggerHardwareDetect()
+        void triggerHardwareDetect();
 
         /// @brief The method called from the server thread repeatedly.
         /// @returns true if the loop should continue running

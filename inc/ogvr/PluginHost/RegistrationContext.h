@@ -60,8 +60,8 @@ namespace pluginhost {
         OGVR_PLUGINHOST_EXPORT void
         adoptPluginRegistrationContext(PluginRegPtr ctx);
 
-        /// @brief Trigger any registered hardware poll callbacks.
-        OGVR_PLUGINHOST_EXPORT void triggerHardwarePoll();
+        /// @brief Trigger any registered hardware detect callbacks.
+        OGVR_PLUGINHOST_EXPORT void triggerHardwareDetect();
 
         /// @brief Access the data storage map.
         OGVR_PLUGINHOST_EXPORT util::AnyMap &data();

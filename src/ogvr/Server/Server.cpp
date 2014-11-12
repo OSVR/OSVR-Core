@@ -54,7 +54,7 @@ namespace server {
         m_impl->loadPlugin(plugin);
     }
 
-    void Server::triggerHardwarePoll() { m_impl->triggerHardwarePoll(); }
+    void Server::triggerHardwareDetect() { m_impl->triggerHardwareDetect(); }
 
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)

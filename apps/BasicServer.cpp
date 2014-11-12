@@ -65,8 +65,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    cout << "Triggering a hardware poll..." << endl;
-    server->triggerHardwarePoll();
+    cout << "Triggering a hardware detection..." << endl;
+    server->triggerHardwareDetect();
 
     cout << "Starting server mainloop..." << endl;
     server->startAndAwaitShutdown();

@@ -91,8 +91,8 @@ namespace server {
         /// @brief Load plugin by name.
         OGVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
 
-        /// @brief Run all hardware poll callbacks.
-        OGVR_SERVER_EXPORT void triggerHardwarePoll();
+        /// @brief Run all hardware detect callbacks.
+        OGVR_SERVER_EXPORT void triggerHardwareDetect();
 
       private:
         unique_ptr<ServerImpl> m_impl;

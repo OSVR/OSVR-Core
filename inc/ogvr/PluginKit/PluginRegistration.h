@@ -42,8 +42,7 @@ namespace ogvr {
 namespace pluginkit {
     /** @defgroup PluginKitCppRegistration Plugin Registration (C++ wrappers)
         @brief How to start writing a plugin and advertise your capabilities to
-       the
-        core library.
+       the core library.
         @ingroup PluginKit
 
         @{
@@ -76,38 +75,39 @@ namespace pluginkit {
 #ifndef OGVR_DOXYGEN_EXTERNAL
     /// @brief Internal implementation-only namespace
     namespace detail {
-        /// @brief Traits-based overload to register a hardware poll callback
+        /// @brief Traits-based overload to register a hardware detect callback
         /// where we're given a pointer to a function object.
         template <typename T>
-        inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
+        inline OGVR_ReturnCode registerHardwareDetectCallbackImpl(
             OGVR_PluginRegContext ctx, T functor,
             typename boost::enable_if<boost::is_pointer<T> >::type * = NULL) {
             typedef typename boost::remove_pointer<T>::type FunctorType;
             registerObjectForDeletion(ctx, functor);
-            return ogvrPluginRegisterHardwarePollCallback(
-                ctx, &util::GenericCaller<OGVRHardwarePollCallback, FunctorType,
-                                          util::this_last_t>::call,
+            return ogvrPluginRegisterHardwareDetectCallback(
+                ctx, &util::GenericCaller<OGVR_HardwareDetectCallback,
+                                          FunctorType, util::this_last_t>::call,
                 static_cast<void *>(functor));
         }
 
-        /// @brief Traits based overload to copy a hardware poll callback passed
+        /// @brief Traits based overload to copy a hardware detect callback
+        /// passed
         /// by value then register the copy.
         template <typename T>
-        inline OGVR_ReturnCode registerHardwarePollCallbackImpl(
+        inline OGVR_ReturnCode registerHardwareDetectCallbackImpl(
             OGVR_PluginRegContext ctx, T functor,
             typename boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
             BOOST_STATIC_ASSERT_MSG(boost::is_copy_constructible<T>::value,
-                                    "Hardware poll callback functors must be "
+                                    "Hardware detect callback functors must be "
                                     "either passed as a pointer or be "
                                     "copy-constructible");
             T *functorCopy = new T(functor);
-            return registerHardwarePollCallbackImpl(ctx, functorCopy);
+            return registerHardwareDetectCallbackImpl(ctx, functorCopy);
         }
     } // namespace detail
 #endif
 
     /// @brief Registers a function object to be called when the core requests a
-    /// hardware poll.
+    /// hardware detection.
     ///
     /// Also provides for deletion of the function object.
     ///
@@ -116,12 +116,12 @@ namespace pluginkit {
     /// a pointer, which will transfer ownership, or an object by value, which
     /// will result in a copy being made.
     template <typename T>
-    inline void registerHardwarePollCallback(OGVR_PluginRegContext ctx,
-                                             T functor) {
+    inline void registerHardwareDetectCallback(OGVR_PluginRegContext ctx,
+                                               T functor) {
         OGVR_ReturnCode ret =
-            detail::registerHardwarePollCallbackImpl(ctx, functor);
+            detail::registerHardwareDetectCallbackImpl(ctx, functor);
         if (ret != OGVR_RETURN_SUCCESS) {
-            throw std::runtime_error("registerHardwarePollCallback failed!");
+            throw std::runtime_error("registerHardwareDetectCallback failed!");
         }
     }
     /// @}

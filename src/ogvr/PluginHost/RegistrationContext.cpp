@@ -72,10 +72,10 @@ namespace pluginhost {
                          << ctx->getName());
     }
 
-    void RegistrationContext::triggerHardwarePoll() {
+    void RegistrationContext::triggerHardwareDetect() {
         boost::for_each(m_regMap | boost::adaptors::map_values,
                         [](PluginRegPtr &pluginPtr) {
-            pluginPtr->callHardwarePollCallbacks();
+            pluginPtr->triggerHardwareDetectCallbacks();
         });
     }
 

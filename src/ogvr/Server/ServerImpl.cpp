@@ -81,9 +81,9 @@ namespace server {
                                    m_ctx, pluginName));
     }
 
-    void ServerImpl::triggerHardwarePoll() {
+    void ServerImpl::triggerHardwareDetect() {
         m_callControlled(std::bind(
-            &pluginhost::RegistrationContext::triggerHardwarePoll, m_ctx));
+            &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));
     }
 
     bool ServerImpl::loop() {

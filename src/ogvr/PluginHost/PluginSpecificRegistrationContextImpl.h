@@ -74,10 +74,9 @@ namespace pluginhost {
         /// @throws std::logic_error if called when no parent is yet set.
         virtual RegistrationContext const &getParent() const;
 
-        /// @brief Call all hardware poll callbacks registered by this plugin,
-        /// if
-        /// any.
-        void callHardwarePollCallbacks();
+        /// @brief Call all hardware detect callbacks registered by this plugin,
+        /// if any.
+        void triggerHardwareDetectCallbacks();
 
         /// @brief Access the data storage map.
         virtual util::AnyMap &data();
@@ -95,9 +94,8 @@ namespace pluginhost {
         virtual void registerDataWithDeleteCallback(
             OGVR_PluginDataDeleteCallback deleteCallback, void *pluginData);
 
-        virtual void
-        registerHardwarePollCallback(OGVRHardwarePollCallback pollCallback,
-                                     void *userData);
+        virtual void registerHardwareDetectCallback(
+            OGVR_HardwareDetectCallback detectCallback, void *userData);
         /// @}
 
       private:
@@ -110,10 +108,10 @@ namespace pluginhost {
         libfunc::PluginHandle m_handle;
         RegistrationContext *m_parent;
 
-        typedef util::CallbackWrapper<OGVRHardwarePollCallback>
-            HardwarePollCallback;
-        typedef std::vector<HardwarePollCallback> HardwarePollCallbackList;
-        HardwarePollCallbackList m_hardwarePollCallbacks;
+        typedef util::CallbackWrapper<OGVR_HardwareDetectCallback>
+            HardwareDetectCallback;
+        typedef std::vector<HardwareDetectCallback> HardwareDetectCallbackList;
+        HardwareDetectCallbackList m_hardwareDetectCallbacks;
 
         util::AnyMap m_data;
     };

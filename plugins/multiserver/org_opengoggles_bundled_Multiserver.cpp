@@ -55,7 +55,7 @@ class VRPNCustomConnectionDevice : public ogvr::connection::ConnectionDevice {
     ogvr::unique_ptr<T> m_dev;
 };
 
-class VRPNHardwarePoll {
+class VRPNHardwareDetect {
   public:
     typedef std::map<std::string, size_t> NameCountMap;
     OGVR_ReturnCode operator()(OGVR_PluginRegContext ctx) {
@@ -112,8 +112,8 @@ class VRPNHardwarePoll {
 OGVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
     ogvr::pluginkit::PluginContext context(ctx);
 
-    ogvr::unique_ptr<VRPNHardwarePoll> poll(new VRPNHardwarePoll);
+    ogvr::unique_ptr<VRPNHardwareDetect> detect(new VRPNHardwareDetect);
 
-    context.registerHardwarePollCallback(poll.release());
+    context.registerHardwareDetectCallback(detect.release());
     return OGVR_RETURN_SUCCESS;
 }

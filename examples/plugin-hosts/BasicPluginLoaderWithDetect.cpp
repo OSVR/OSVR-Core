@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
                   << e.what() << std::endl;
         return 1;
     }
-    std::cout << "Starting polling..." << std::endl;
-    ctx.triggerHardwarePoll();
+    std::cout << "Starting hardware detect..." << std::endl;
+    ctx.triggerHardwareDetect();
     return 0;
 }
