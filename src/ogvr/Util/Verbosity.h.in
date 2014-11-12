@@ -8,7 +8,7 @@
 
     @author
     Ryan Pavlik
-    <ryan@sensics.com>;
+    <ryan@sensics.com>
     <http://sensics.com>
 */
 
