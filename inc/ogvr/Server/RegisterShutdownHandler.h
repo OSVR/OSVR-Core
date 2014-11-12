@@ -41,7 +41,7 @@ namespace server {
 #ifdef _WIN32
 #define OGVR_USE_WIN32_SHUTDOWN_HANDLER
 #else
-/// @file @todo the world isn't exactly Win32 and POSIX signal()
+/// @todo the world isn't just Win32 and POSIX signal()
 #define OGVR_USE_POSIX_SIGNAL_SHUTDOWN_HANDLER
 #endif
 
