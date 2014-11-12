@@ -55,10 +55,10 @@
 #define __STDINT_LONGLONG_SUFFIX LL
 #endif
 
-#if !defined(PASTE)
-#define PASTE2(x, y) x##y
-#define PASTE(x, y) PASTE2(x, y)
-#endif /* PASTE */
+#if !defined(__MSSTDINT_PASTE)
+#define __MSSTDINT_PASTE2(x, y) x##y
+#define __MSSTDINT_PASTE(x, y) __MSSTDINT_PASTE2(x, y)
+#endif /* __MSSTDINT_PASTE */
 
 /* 7.18.1.1  Exact-width integer types */
 typedef signed char int8_t;
@@ -123,19 +123,21 @@ typedef unsigned __STDINT_LONGLONG uintmax_t;
 #define INT8_MIN (-128)
 #define INT16_MIN (-32768)
 #define INT32_MIN (-2147483647 - 1)
-#define INT64_MIN (PASTE(-9223372036854775807, __STDINT_LONGLONG_SUFFIX) - 1)
+#define INT64_MIN                                                              \
+    (__MSSTDINT_PASTE(-9223372036854775807, __STDINT_LONGLONG_SUFFIX) - 1)
 
 #define INT8_MAX 127
 #define INT16_MAX 32767
 #define INT32_MAX 2147483647
-#define INT64_MAX (PASTE(9223372036854775807, __STDINT_LONGLONG_SUFFIX))
+#define INT64_MAX                                                              \
+    (__MSSTDINT_PASTE(9223372036854775807, __STDINT_LONGLONG_SUFFIX))
 
 #define UINT8_MAX 0xff        /* 255U */
 #define UINT16_MAX 0xffff     /* 65535U */
 #define UINT32_MAX 0xffffffff /* 4294967295U */
 #define UINT64_MAX                                                             \
-    (PASTE(0xffffffffffffffffU,                                                \
-           __STDINT_LONGLONG_SUFFIX)) /* 18446744073709551615ULL */
+    (__MSSTDINT_PASTE(0xffffffffffffffffU,                                     \
+                      __STDINT_LONGLONG_SUFFIX)) /* 18446744073709551615ULL */
 
 /* 7.18.2.2  Limits of minimum-width integer types */
 #define INT_LEAST8_MIN INT8_MIN
@@ -235,13 +237,17 @@ typedef unsigned __STDINT_LONGLONG uintmax_t;
 
 #define INT32_C(val) val##L
 #define UINT32_C(val) val##UL
-#define INT64_C(val) (PASTE(val, __STDINT_LONGLONG_SUFFIX))
-#define UINT64_C(val) (PASTE(PASTE(val, U), __STDINT_LONGLONG_SUFFIX))
+#define INT64_C(val) (__MSSTDINT_PASTE(val, __STDINT_LONGLONG_SUFFIX))
+#define UINT64_C(val)                                                          \
+    (__MSSTDINT_PASTE(__MSSTDINT_PASTE(val, U), __STDINT_LONGLONG_SUFFIX))
 
 /* 7.18.4.2  Macros for greatest-width integer constants */
 #define INTMAX_C(val) INT64_C(val)
 #define UINTMAX_C(val) UINT64_C(val)
 
 #endif /* !defined ( __cplusplus) || defined __STDC_CONSTANT_MACROS */
+
+#undef __MSSTDINT_PASTE
+#undef __MSSTDINT_PASTE2
 
 #endif
