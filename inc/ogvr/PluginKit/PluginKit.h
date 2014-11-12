@@ -61,12 +61,11 @@ namespace pluginkit {
         }
 
         /// @brief Register the given object (assumed to be deletable by
-        /// `delete`) to be
-        /// deleted on plugin unload. (Transfers lifetime control to the plugin
-        /// context)
-        /// @sa ::ogvr::pluginkit::registerHardwarePollCallback
+        /// `delete`) to be deleted on plugin unload. (Transfers lifetime
+        /// control to the plugin context)
+        /// @sa ::ogvr::pluginkit::registerObjectForDeletion
         template <typename T> T *registerObjectForDeletion(T *obj) {
-            return ::ogvr::pluginkit::registerHardwarePollCallback(m_ctx, obj);
+            return ::ogvr::pluginkit::registerObjectForDeletion(m_ctx, obj);
         }
 
       private:
