@@ -36,6 +36,7 @@
 namespace ogvr {
 /// @brief PluginHost functionality: loading, hosting, registering, destroying,
 /// and enumerating plugins.
+/// @ingroup PluginHost
 namespace pluginhost {
 
     /// @brief Class responsible for hosting plugins, along with their

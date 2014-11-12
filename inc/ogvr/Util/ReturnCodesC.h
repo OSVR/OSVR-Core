@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header declaring a type and values for simple C return codes.
 
     Must be c-safe!
 
@@ -28,6 +28,9 @@
 
 OGVR_EXTERN_C_BEGIN
 
+/** @addtogroup PluginKit
+    @{
+*/
 /** @name Return Codes
     @{
 */
@@ -38,6 +41,8 @@ typedef char OGVR_ReturnCode;
 /** @brief The "failure" value for an OGVR_ReturnCode */
 #define OGVR_RETURN_FAILURE (1)
 /** @} */
+
+/** @} */ /* end of group */
 
 OGVR_EXTERN_C_END
 

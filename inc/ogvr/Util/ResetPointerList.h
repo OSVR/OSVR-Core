@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header providing a template function to reset a range of smart
+   pointers.
 
     @date 2014
 

@@ -1,5 +1,8 @@
 /** @file
-    @brief Header
+    @brief Header providing templated functions to automate the process of
+   calling a C++ member function (specifically the function call operator) from
+   a facility that accepts a C function pointer and an opaque "userdata"
+   pointer.
 
     @date 2014
 

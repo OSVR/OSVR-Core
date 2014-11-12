@@ -21,8 +21,10 @@
 #define INCLUDED_Util_h_GUID_5EC19CF6_3D49_4795_D7E2_892BFF627311
 
 namespace ogvr {
-/// @brief Functionality not necessarily coupled to any particular core library,
+/// @brief The Util library: Functionality not necessarily coupled to any
+/// particular core library,
 /// serving more as a common base layer behind all systems.
+/// @ingroup Util
 namespace util {} // namespace util
 } // namespace ogvr
 

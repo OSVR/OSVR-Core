@@ -38,9 +38,9 @@
 
 OGVR_EXTERN_C_BEGIN
 
-/** @defgroup plugin_c_device_api Plugin C API for Devices
+/** @defgroup PluginKitCDevices Device-related functionality (base C API)
     @brief How to create and report from a device in your plugin.
-    @ingroup plugin_api
+    @ingroup PluginKit
 @{
 */
 
@@ -87,7 +87,7 @@ function.
 @param name A unique name for the message type. The library makes a copy of this
 string.
 @param [out] msgtype Will contain the message type identifier you've
-registered..
+registered.
 */
 OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode
     ogvrDeviceRegisterMessageType(OGVR_INOUT_PTR OGVR_PluginRegContext ctx,
@@ -111,7 +111,6 @@ OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode
 
     @note The same function is used for synchronous and asynchronous devices:
     the device token is sufficient to determine whether locking is needed.
-
 */
 OGVR_PLUGINKIT_EXPORT OGVR_ReturnCode ogvrDeviceSendTimestampedData(
     OGVR_INOUT_PTR OGVR_DeviceToken dev,

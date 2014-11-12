@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header declaring ogvr::server::Server
 
     @date 2014
 
@@ -32,6 +32,8 @@
 #include <string>
 
 namespace ogvr {
+/// @brief Server functionality
+/// @ingroup Server
 namespace server {
     // Forward declaration for pimpl idiom.
     class ServerImpl;
@@ -40,8 +42,7 @@ namespace server {
     /// connection
     class Server : boost::noncopyable {
         /// @brief dummy structure to enforce private construction while
-        /// permitting
-        /// factory member functions to use make_shared.
+        /// permitting factory member functions to use make_shared.
         ///
         /// Based on http://stackoverflow.com/a/8147326/265522
         struct private_constructor {};

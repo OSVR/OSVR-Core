@@ -35,6 +35,7 @@
 
 namespace ogvr {
 /// @brief Messaging transport and device communication functionality
+/// @ingroup Connection
 namespace connection {
 
     /// @brief Class wrapping a messaging transport (server or internal)

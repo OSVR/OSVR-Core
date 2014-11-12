@@ -38,7 +38,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @defgroup C API for time interaction.
+/** @defgroup UtilTime Timestamp interaction
+    @ingroup Util
 
     This provides a level of interoperability with struct timeval on systems
    with that facility. It provides a neutral representation with sufficiently

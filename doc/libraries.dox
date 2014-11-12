@@ -1,0 +1,28 @@
+/** @defgroup PluginKit PluginKit
+    @brief The PluginKit library exposes a C API, with header-only C++ wrappers, to write plugins for the framework.
+
+    All core functionality that can be accessed through the C++ API is possible to access through the C API as well. However, the C++ wrappers improve the usability of the interface and provide a safer development style. They can also greatly simplify your code and reduce the amount of "boilerplate" needed.
+*/
+
+/** @defgroup InternalAPI Internal APIs
+    @brief APIs that are used by neither plugin developers nor client application developers.
+*/
+
+/** @defgroup PluginHost PluginHost
+    @brief Implements registration-related functionality used by @ref PluginKit and provides for loading and unloading plugins.
+    @ingroup InternalAPI
+*/
+
+/** @defgroup Connection Connection
+    @brief Messaging transport and device communication
+    @ingroup InternalAPI
+*/
+
+/** @defgroup Server Server
+    @brief Combining Connection with PluginHost and adding a run-loop in a thread.
+    @ingroup InternalAPI
+*/
+
+/** @defgroup Util Utility library
+    @brief Includes base definitions/typedefs, some C functionality, some header-only C++ functionality, and some compiled C++ functionality.
+*/

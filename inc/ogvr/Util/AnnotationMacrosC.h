@@ -65,11 +65,13 @@
 #endif
 
 /* Fallback declarations */
-/** @defgroup annotation_macros Utilities: Static analysis annotation macros
-    @brief Wrappers for Microsoft's SAL annotations and others
+/**
+@defgroup annotation_macros Static analysis annotation macros
+@brief Wrappers for Microsoft's SAL annotations and others
+@ingroup Util
 
-    Use of these is optional, but recommended particularly for C APIs,
-    as well as any methods handling a buffer with a length.
+Use of these is optional, but recommended particularly for C APIs,
+as well as any methods handling a buffer with a length.
 @{
 */
 /** @name Parameter annotations

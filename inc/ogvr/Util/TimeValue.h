@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header providing a C++ wrapper around TimeValueC.h
 
     @date 2014
 
@@ -30,7 +30,8 @@
 
 namespace ogvr {
 namespace util {
-    /// @brief Functionality related to time and the OGVR_TimeValue abstraction
+    /// @brief Functionality related to time and the OGVR_TimeValue abstraction.
+    /// @ingroup UtilTime
     ///
     /// Note that this is for C API-bordering areas. For purely C++ code, please
     /// use Boost.Chrono for your time needs.

@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header providing a templated deleter function
 
     @date 2014
 

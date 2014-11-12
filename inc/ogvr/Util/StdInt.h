@@ -1,5 +1,5 @@
 /** @file
-    @brief Header wrapping the <stdint.h> header.
+    @brief Header wrapping the C99 standard `stdint` header.
 
     Must be c-safe!
 

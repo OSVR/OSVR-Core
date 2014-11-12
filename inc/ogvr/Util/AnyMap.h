@@ -1,5 +1,5 @@
 /** @file
-    @brief Header declaring the AnyMap structure.
+    @brief Header declaring the ogvr::util::AnyMap structure.
 
     @date 2014
 

@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header declaring plugin callback types
 
     Must be c-safe!
 
@@ -35,12 +35,16 @@
 
 OGVR_EXTERN_C_BEGIN
 
+/** @addtogroup PluginKit
+@{
+*/
 /** @brief Function type of a Plugin Data Delete callback */
 typedef void (*OGVR_PluginDataDeleteCallback)(void *pluginData);
 
 /** @brief Function type of a Hardware Poll callback */
 typedef OGVR_ReturnCode (*OGVRHardwarePollCallback)(OGVR_PluginRegContext ctx,
                                                     void *userData);
+/** @} */
 
 OGVR_EXTERN_C_END
 

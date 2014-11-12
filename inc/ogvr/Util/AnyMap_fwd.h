@@ -1,5 +1,5 @@
 /** @file
-    @brief Header forward-declaring AnyMap.
+    @brief Header forward-declaring declaring ogvr::util::AnyMap.
 
     @date 2014
 

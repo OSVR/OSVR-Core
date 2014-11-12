@@ -1,5 +1,7 @@
 /** @file
-    @brief Header
+    @brief Header to register a handler for cross-platform shutdown/terminate
+   signals.  WARNING: includes `windows.h` on Windows platforms, can't prevent
+   it!
 
     @date 2014
 

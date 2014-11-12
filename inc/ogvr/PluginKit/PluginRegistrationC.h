@@ -36,10 +36,10 @@
 /* Standard includes */
 #include <stddef.h>
 
-/** @defgroup plugin_registration Plugin Registration
+/** @defgroup PluginKitCRegistration Plugin Registration (base C API)
     @brief How to start writing a plugin and advertise your capabilities to the
    core library.
-   @ingroup plugin_api
+    @ingroup PluginKit
 
    @{
 */
@@ -54,9 +54,8 @@ OGVR_EXTERN_C_BEGIN
    or failure (OGVR_RETURN_FAILURE).
 
     Your function body receives a single argument, of type
-   OGVR_PluginRegContext,
-   named `ctx`. You will need to pass this to registration functions that you
-   call.
+   OGVR_PluginRegContext, named `ctx`. You will need to pass this to most @ref
+   PluginKit functions that you call.
 */
 #define OGVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
 

@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header declaring the opaque plugin registration context type
 
     Must be c-safe!
 
@@ -34,8 +34,9 @@
 
 OGVR_EXTERN_C_BEGIN
 
-/** @brief A context pointer passed in to your plugin's entry point
-    @ingroup plugin_c_api
+/** @brief A context pointer passed in to your plugin's entry point and other
+   locations of control flow transfer into our plugin.
+    @ingroup PluginKit
 */
 typedef void *OGVR_PluginRegContext;
 

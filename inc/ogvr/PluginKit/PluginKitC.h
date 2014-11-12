@@ -36,12 +36,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @defgroup plugin_c_api C API for Plugin Writing
-@brief The APIs you might wish to use in your plugin.
-@{
-*/
 
-/** @} */
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif

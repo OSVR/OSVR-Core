@@ -1,5 +1,5 @@
 /** @file
-    @brief Header to bring unique_ptr into our namespace.
+    @brief Header to bring unique_ptr into the ::ogvr namespace.
 
     @date 2014
 

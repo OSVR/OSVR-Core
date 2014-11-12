@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Implementation header included by RegisterShutdownHandler.h on Win32
+   platforms. WARNING: includes `windows.h`, can't prevent it!
 
     @date 2014
 

@@ -40,6 +40,14 @@
 
 namespace ogvr {
 namespace pluginkit {
+    /** @defgroup PluginKitCppRegistration Plugin Registration (C++ wrappers)
+        @brief How to start writing a plugin and advertise your capabilities to
+       the
+        core library.
+        @ingroup PluginKit
+
+        @{
+    */
     /// @brief Registers an object to be destroyed with delete when the plugin
     /// is unloaded.
     ///
@@ -116,6 +124,7 @@ namespace pluginkit {
             throw std::runtime_error("registerHardwarePollCallback failed!");
         }
     }
+    /// @}
 } // namespace pluginkit
 } // namespace ogvr
 

@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header providing a templated functor wrapping the holding and calling
+   of function pointer and userdata callbacks.
 
     @date 2014
 

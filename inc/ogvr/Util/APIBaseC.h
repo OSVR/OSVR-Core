@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header providing basic C macros for defining API headers.
 
     Must be c-safe!
 

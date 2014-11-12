@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Implementation header included by RegisterShutdownHandler.h on
+   platforms providing `signal()`.
 
     @date 2014
 

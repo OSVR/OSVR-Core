@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header declaring device callback types
 
     Must be c-safe!
 
@@ -33,11 +33,17 @@
 /* none */
 
 OGVR_EXTERN_C_BEGIN
-/** @brief Function type of a an Sync Device Update callback */
+
+/** @addtogroup PluginKit
+    @{
+*/
+/** @brief Function type of a Sync Device Update callback */
 typedef OGVR_ReturnCode (*OGVR_SyncDeviceUpdateCallback)(void *userData);
 
-/** @brief Function type of a an Async Device Wait callback */
+/** @brief Function type of an Async Device Wait callback */
 typedef OGVR_ReturnCode (*OGVR_AsyncDeviceWaitCallback)(void *userData);
+/** @} */
+
 OGVR_EXTERN_C_END
 
 #endif
