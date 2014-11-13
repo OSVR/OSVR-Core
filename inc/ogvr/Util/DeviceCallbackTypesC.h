@@ -24,6 +24,7 @@
 #define INCLUDED_DeviceCallbackTypesC_h_GUID_46F72CEE_3327_478F_2DED_ADAAF2EC783C
 
 /* Internal Includes */
+#include <ogvr/Util/APIBaseC.h>
 #include <ogvr/Util/ReturnCodesC.h>
 
 /* Library/third-party includes */
