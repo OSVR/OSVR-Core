@@ -26,7 +26,8 @@
 #include <iostream>
 
 int main() {
-    OGVR_ClientContext ctx = ogvrClientInit();
+    OGVR_ClientContext ctx =
+        ogvrClientInit("org.opengoggles.exampleclients.MinimalInit");
     std::cout << "OK, library initialized, now going to shut it down."
               << std::endl;
     ogvrClientShutdown(ctx);

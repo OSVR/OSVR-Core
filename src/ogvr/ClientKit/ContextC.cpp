@@ -26,8 +26,9 @@
 // Standard includes
 // - none
 
-OGVR_ClientContext ogvrClientInit(uint32_t /*flags*/) {
-    return new OGVR_ClientContextObject();
+OGVR_ClientContext ogvrClientInit(const char applicationIdentifier[],
+                                  uint32_t /*flags*/) {
+    return new OGVR_ClientContextObject(applicationIdentifier);
 }
 
 OGVR_ReturnCode ogvrClientShutdown(OGVR_ClientContext ctx) {

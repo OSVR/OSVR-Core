@@ -31,6 +31,7 @@
 #include <ogvr/Util/ReturnCodesC.h>
 #include <ogvr/Util/AnnotationMacrosC.h>
 #include <ogvr/Util/StdInt.h>
+#include <ogvr/Util/ClientOpaqueTypesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -40,18 +41,21 @@
 
 OGVR_EXTERN_C_BEGIN
 
-/** @brief Opaque handle that should be retained by your application. You need
-    only and exactly one. */
-typedef struct OGVR_ClientContextObject *OGVR_ClientContext;
+/** @addtogroup ClientKit
+    @{
+*/
 
 /** @brief Initialize the library.
 
+    @param applicationIdentifier A null terminated string identifying your
+   application. Reverse DNS format strongly suggested.
     @param flags initialization options (reserved) - pass 0 for now.
 
     @returns Client context - will be needed for subsequent calls
 */
 OGVR_CLIENTKIT_EXPORT OGVR_ClientContext
-    ogvrClientInit(uint32_t flags OGVR_CPP_ONLY(= 0));
+    ogvrClientInit(const char applicationIdentifier[],
+                   uint32_t flags OGVR_CPP_ONLY(= 0));
 
 /** @brief Shutdown the library.
     @param ctx Client context
@@ -59,6 +63,7 @@ OGVR_CLIENTKIT_EXPORT OGVR_ClientContext
 OGVR_CLIENTKIT_EXPORT OGVR_ReturnCode
     ogvrClientShutdown(OGVR_ClientContext ctx);
 
+/** @} */
 OGVR_EXTERN_C_END
 
 #endif

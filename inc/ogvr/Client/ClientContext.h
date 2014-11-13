@@ -21,17 +21,22 @@
 
 // Internal Includes
 #include <ogvr/Client/Export.h>
-#include <ogvr/ClientKit/ContextC.h>
+#include <ogvr/Util/ClientOpaqueTypesC.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
-struct OGVR_ClientContextObject {
+struct OGVR_ClientContextObject : boost::noncopyable {
   public:
-    OGVR_CLIENT_EXPORT OGVR_ClientContextObject();
+    OGVR_CLIENT_EXPORT OGVR_ClientContextObject(const char appId[]);
+
+    std::string const &getAppId() const;
+
+  private:
+    std::string const m_appId;
 };
 
 namespace ogvr {

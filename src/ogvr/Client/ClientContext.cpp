@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <ogvr/Client/ClientContext.h>
+#include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -25,4 +26,11 @@
 // Standard includes
 // - none
 
-OGVR_ClientContextObject::OGVR_ClientContextObject() {}
+OGVR_ClientContextObject::OGVR_ClientContextObject(const char appId[])
+    : m_appId(appId) {
+    OGVR_DEV_VERBOSE("Client context initialized for " << m_appId);
+}
+
+std::string const &OGVR_ClientContextObject::getAppId() const {
+    return m_appId;
+}
