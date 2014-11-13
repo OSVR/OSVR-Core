@@ -25,12 +25,12 @@
 #include <ogvr/PluginKit/PluginRegistrationC.h>
 #include <ogvr/Util/GenericDeleter.h>
 #include <ogvr/Util/GenericCaller.h>
+#include <ogvr/Util/BoostIsCopyConstructible.h>
 
 // Library/third-party includes
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
-#include <boost/type_traits/is_copy_constructible.hpp>
 #include <boost/static_assert.hpp>
 
 // Standard includes
@@ -96,10 +96,12 @@ namespace pluginkit {
         inline OGVR_ReturnCode registerHardwareDetectCallbackImpl(
             OGVR_PluginRegContext ctx, T functor,
             typename boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
+#ifdef OGVR_HAVE_BOOST_IS_COPY_CONSTRUCTIBLE
             BOOST_STATIC_ASSERT_MSG(boost::is_copy_constructible<T>::value,
                                     "Hardware detect callback functors must be "
                                     "either passed as a pointer or be "
                                     "copy-constructible");
+#endif
             T *functorCopy = new T(functor);
             return registerHardwareDetectCallbackImpl(ctx, functorCopy);
         }
