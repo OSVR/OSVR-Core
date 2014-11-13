@@ -17,10 +17,20 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/Client/ClientC.h>
+#include <ogvr/ClientKit/ContextC.h>
+#include <ogvr/Client/ClientContext.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+OGVR_ClientContext ogvrClientInit(uint32_t /*flags*/) {
+    return new OGVR_ClientContextObject();
+}
+
+OGVR_ReturnCode ogvrClientShutdown(OGVR_ClientContext ctx) {
+    delete ctx;
+    return OGVR_RETURN_SUCCESS;
+}

@@ -20,16 +20,26 @@
 // the Apache License, Version 2.0)
 */
 
-#ifndef INCLUDED_ClientC_h_GUID_CB5C5F9B_08F8_4B8E_9E7C_BE706762E6FB
-#define INCLUDED_ClientC_h_GUID_CB5C5F9B_08F8_4B8E_9E7C_BE706762E6FB
+#ifndef INCLUDED_ClientOpaqueTypes_h_GUID_24B79ED2_5751_4BA2_1690_BBD250EBC0C1
+#define INCLUDED_ClientOpaqueTypes_h_GUID_24B79ED2_5751_4BA2_1690_BBD250EBC0C1
 
 /* Internal Includes */
-/* none */
+#include <ogvr/Util/APIBaseC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
 /* none */
+
+OGVR_EXTERN_C_BEGIN
+
+/** @addtogroup ClientKit
+    @{
+*/
+
+/** @} */
+
+OGVR_EXTERN_C_END
 
 #endif

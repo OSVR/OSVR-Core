@@ -17,19 +17,10 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/ClientKit/ContextC.h>
+#include <ogvr/ClientKit/InterfaceCallbackC.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <iostream>
-
-int main() {
-    OGVR_ClientContext ctx = ogvrClientInit();
-    std::cout << "OK, library initialized, now going to shut it down."
-              << std::endl;
-    ogvrClientShutdown(ctx);
-    std::cout << "Library shut down, exiting." << std::endl;
-    return 0;
-}
+// - none

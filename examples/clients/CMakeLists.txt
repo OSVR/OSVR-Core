@@ -3,9 +3,8 @@ set(CLIENTS
     #sample-tracker-reader
 )
 foreach(name ${CLIENTS})
-    add_library(${name} MODULE ${name}.cpp)
-    target_link_libraries(${name} ogvrClient ogvrUtilCpp)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} ogvrClientKit)
     set_target_properties(${name} PROPERTIES
-        PREFIX ""
         FOLDER "OGVR Example Clients")
 endforeach()

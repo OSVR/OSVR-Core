@@ -1,40 +1,45 @@
 include_directories("${HEADER_BASE}")
 include_directories("${BUILDTREE_HEADER_BASE}")
 
-set(LIBNAME Client)
-string(TOUPPER ${LIBNAME} LIBNAME_CAPS)
-
-set(HEADER_LOCATION "${HEADER_BASE}/ogvr/${LIBNAME}")
+ogvr_setup_lib_vars(ClientKit)
 
 set(API
-    "${HEADER_LOCATION}/ClientContext.h"
+    "${HEADER_LOCATION}/ClientKitC.h"
+    "${HEADER_LOCATION}/ContextC.h"
+    "${HEADER_LOCATION}/InterfaceC.h"
+    "${HEADER_LOCATION}/InterfaceCallbackC.h"
+    "${HEADER_LOCATION}/SystemCallbackC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(API FILES ${API})
 
 set(SOURCE
-    ClientContext.cpp)
+    ClientKitC.cpp
+    ContextC.cpp
+    InterfaceC.cpp
+    InterfaceCallbackC.cpp
+    SystemCallbackC.cpp)
 
-add_library(ogvr${LIBNAME} ${API} ${SOURCE})
+add_library(${LIBNAME_FULL} ${API} ${SOURCE})
 
-set_target_properties(ogvr${LIBNAME} PROPERTIES
-    FOLDER "OGVR Libraries"
+set_target_properties(${LIBNAME_FULL} PROPERTIES
+    FOLDER "${LIB_FOLDER}"
     VERSION ${OGVR_VERSION}
     SOVERSION 0
     INTERFACE_ogvrcore_MAJOR_VERSION 0)
 
-set_property(TARGET ogvr${LIBNAME} APPEND PROPERTY
+set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
 )
 
-generate_export_header(ogvr${LIBNAME}
-    BASE_NAME OGVR_${LIBNAME_CAPS}
+generate_export_header(${LIBNAME_FULL}
+    BASE_NAME ${EXPORT_BASENAME}
     EXPORT_FILE_NAME Export.h)
 
 if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(ogvr${LIBNAME} PUBLIC OGVR_${LIBNAME_CAPS}_STATIC_DEFINE)
+    target_compile_definitions(${LIBNAME_FULL} PUBLIC ${EXPORT_BASENAME}_STATIC_DEFINE)
 endif()
 
-target_include_directories(ogvr${LIBNAME}
+target_include_directories(${LIBNAME_FULL}
     PUBLIC
     $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
     $<BUILD_INTERFACE:${HEADER_BASE}>
@@ -42,18 +47,21 @@ target_include_directories(ogvr${LIBNAME}
     PRIVATE
     ${Boost_INCLUDE_DIRS})
 
-target_compile_options(ogvr${LIBNAME} PRIVATE ${OGVR_CXX11_FLAGS})
-
-target_link_libraries(ogvr${LIBNAME}
+target_compile_options(${LIBNAME_FULL}
     PRIVATE
+    ${OGVR_CXX11_FLAGS})
+
+target_link_libraries(${LIBNAME_FULL}
+    PRIVATE
+    ogvrClient
     ogvrUtilCpp)
 
-enable_extra_compiler_warnings(ogvr${LIBNAME})
+enable_extra_compiler_warnings(${LIBNAME_FULL})
 
 ###
 # Install library and headers
 ###
-install(TARGETS ogvr${LIBNAME}
+install(TARGETS ${LIBNAME_FULL}
     EXPORT ogvrTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
