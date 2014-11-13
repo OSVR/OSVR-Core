@@ -1,20 +1,25 @@
-#include <iostream>
-#include <OGVR.h>
+/** @file
+    @brief a sample application to demonstrate lib init, configuration load and,
+   tracker handling
 
-/*
+    @date 2014
+*/
+
 // Copyright 2014 Sensics, Inc.
 //
 // All rights reserved.
 //
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
-*/
 
-/**
- * @file
- * @brief a sample application to demonstrate lib init, configuration load and
- * tracker handling
- */
+// Internal Includes
+// - none
+
+// Library/third-party includes
+#include <ogvr/Util/ReturnCodesC.h>
+
+// Standard includes
+// - none
 
 /**
  * @brief a quick macro to test the returned result
