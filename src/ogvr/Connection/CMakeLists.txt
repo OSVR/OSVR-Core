@@ -22,6 +22,7 @@ set(SOURCE
     Connection.cpp
     ConnectionDevice.cpp
     DeviceToken.cpp
+    GenericConnectionDevice.h
     MessageType.cpp
     SyncDeviceToken.cpp
     SyncDeviceToken.h

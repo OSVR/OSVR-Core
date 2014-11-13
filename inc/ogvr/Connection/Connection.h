@@ -24,6 +24,7 @@
 #include <ogvr/Connection/MessageTypePtr.h>
 #include <ogvr/Connection/ConnectionDevicePtr.h>
 #include <ogvr/Connection/ConnectionPtr.h>
+#include <ogvr/Util/DeviceCallbackTypesC.h>
 #include <ogvr/PluginHost/RegistrationContext_fwd.h>
 
 // Library/third-party includes
@@ -32,6 +33,7 @@
 // Standard includes
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace ogvr {
 /// @brief Messaging transport and device communication functionality
@@ -90,6 +92,20 @@ namespace connection {
         /// habits.
         /// Avoid if at all possible.
         /// @{
+
+        /// @brief Record a full device name (namespaced with the plugin name)
+        /// associated with a given callback.
+        ///
+        /// This does _not_ register the name in the underlying connection: it
+        /// is an advanced method that assumes you have some other way of doing
+        /// that.
+        ///
+        /// This also adds the device so created to the device list.
+        OGVR_CONNECTION_EXPORT ConnectionDevicePtr
+            registerAdvancedDevice(std::string const &deviceName,
+                                   OGVR_SyncDeviceUpdateCallback updateFunction,
+                                   void *userdata);
+
         /// @brief Access implementation details.
         OGVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();
 

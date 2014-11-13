@@ -23,13 +23,13 @@
 #include <ogvr/PluginHost/RegistrationContext.h>
 #include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <ogvr/Connection/Connection.h>
-#include <ogvr/Connection/ConnectionDevice.h>
 #include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
 #include "vrpn_Connection.h"
 #include "vrpn_Tracker_RazerHydra.h"
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <iostream>
@@ -37,41 +37,27 @@
 #include <string>
 #include <sstream>
 
-template <typename T>
-class VRPNCustomConnectionDevice : public ogvr::connection::ConnectionDevice {
-  public:
-    VRPNCustomConnectionDevice(std::string const &name, vrpn_Connection *conn)
-        : ogvr::connection::ConnectionDevice(name),
-          m_dev(new T(name.c_str(), conn)) {}
-    virtual ~VRPNCustomConnectionDevice() {}
-    virtual void m_process() { m_dev->mainloop(); }
-    virtual void m_sendData(ogvr::util::time::TimeValue const &,
-                            ogvr::connection::MessageType *, const char *,
-                            size_t) {
-        /// Will never be called.
-    }
-
-  private:
-    ogvr::unique_ptr<T> m_dev;
-};
+template <typename T> OGVR_ReturnCode callMainloop(void *userdata) {
+    T *obj = static_cast<T *>(userdata);
+    obj->mainloop();
+    return OGVR_RETURN_SUCCESS;
+}
 
 class VRPNHardwareDetect {
   public:
     typedef std::map<std::string, size_t> NameCountMap;
     OGVR_ReturnCode operator()(OGVR_PluginRegContext ctx) {
-        bool found = false;
-        for (struct hid_device_info *dev = hid_enumerate(0, 0); dev != NULL;
+        struct hid_device_info *enumData = hid_enumerate(0, 0);
+        for (struct hid_device_info *dev = enumData; dev != NULL;
              dev = dev->next) {
-            if (found) {
-                continue;
-            }
             if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
                 // Razer Hydra
-                found = true;
                 constructAndRegister<vrpn_Tracker_RazerHydra>(ctx,
                                                               "RazerHydra");
+                break;
             }
         }
+        hid_free_enumeration(enumData);
         return OGVR_RETURN_SUCCESS;
     }
     template <typename T>
@@ -84,10 +70,11 @@ class VRPNHardwareDetect {
         ogvr::connection::ConnectionPtr conn =
             ogvr::connection::Connection::retrieveConnection(
                 pluginCtx.getParent());
-        ogvr::connection::ConnectionDevicePtr dev(
-            new VRPNCustomConnectionDevice<T>(name, getVRPNConnection(ctx)));
+        ogvr::pluginkit::PluginContext context(ctx);
 
-        conn->addDevice(dev);
+        T *dev = context.registerObjectForDeletion(
+            new T(name.c_str(), getVRPNConnection(ctx)));
+        conn->registerAdvancedDevice(name, &callMainloop<T>, dev);
     }
     std::string assignName(std::string const &nameStem) {
         size_t num = assignNumber(nameStem);

@@ -25,6 +25,7 @@
 #include <ogvr/PluginHost/RegistrationContext.h>
 #include <ogvr/Connection/MessageType.h>
 #include "VrpnBasedConnection.h"
+#include "GenericConnectionDevice.h"
 #include <ogvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -82,6 +83,14 @@ namespace connection {
         if (dev) {
             addDevice(dev);
         }
+        return dev;
+    }
+    ConnectionDevicePtr Connection::registerAdvancedDevice(
+        std::string const &deviceName,
+        OGVR_SyncDeviceUpdateCallback updateFunction, void *userdata) {
+        ConnectionDevicePtr dev(new GenericConnectionDevice(
+            deviceName, std::bind(updateFunction, userdata)));
+        addDevice(dev);
         return dev;
     }
 
