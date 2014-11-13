@@ -24,3 +24,5 @@
 
 // Standard includes
 // - none
+
+OGVR_ClientContextObject::OGVR_ClientContextObject() {}

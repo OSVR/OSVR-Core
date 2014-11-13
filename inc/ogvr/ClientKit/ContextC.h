@@ -26,7 +26,7 @@
 #define INCLUDED_ContextC_h_GUID_3790F330_2425_4486_4C9F_20C300D7DED3
 
 /* Internal Includes */
-#include <ogvr/Client/Export.h>
+#include <ogvr/ClientKit/Export.h>
 #include <ogvr/Util/APIBaseC.h>
 #include <ogvr/Util/ReturnCodesC.h>
 #include <ogvr/Util/AnnotationMacrosC.h>
@@ -50,13 +50,14 @@ typedef struct OGVR_ClientContextObject *OGVR_ClientContext;
 
     @returns Client context - will be needed for subsequent calls
 */
-OGVR_CLIENT_EXPORT OGVR_ClientContext
+OGVR_CLIENTKIT_EXPORT OGVR_ClientContext
     ogvrClientInit(uint32_t flags OGVR_CPP_ONLY(= 0));
 
 /** @brief Shutdown the library.
     @param ctx Client context
 */
-OGVR_CLIENT_EXPORT OGVR_ReturnCode ogvrClientShutdown(OGVR_ClientContext ctx);
+OGVR_CLIENTKIT_EXPORT OGVR_ReturnCode
+    ogvrClientShutdown(OGVR_ClientContext ctx);
 
 OGVR_EXTERN_C_END
 

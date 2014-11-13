@@ -20,6 +20,7 @@
 #define INCLUDED_ContextImpl_h_GUID_9000C62E_3693_4888_83A2_0D26F4591B6A
 
 // Internal Includes
+#include <ogvr/Client/Export.h>
 #include <ogvr/ClientKit/ContextC.h>
 
 // Library/third-party includes
@@ -28,7 +29,10 @@
 // Standard includes
 // - none
 
-struct OGVR_ClientContextObject {};
+struct OGVR_ClientContextObject {
+  public:
+    OGVR_CLIENT_EXPORT OGVR_ClientContextObject();
+};
 
 namespace ogvr {
 namespace client {
