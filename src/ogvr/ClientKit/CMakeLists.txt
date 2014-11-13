@@ -5,8 +5,7 @@ set(API
     "${HEADER_LOCATION}/ContextC.h"
     "${HEADER_LOCATION}/InterfaceC.h"
     "${HEADER_LOCATION}/InterfaceCallbackC.h"
-    "${HEADER_LOCATION}/SystemCallbackC.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
+    "${HEADER_LOCATION}/SystemCallbackC.h")
 
 set(SOURCE
     ClientKitC.cpp

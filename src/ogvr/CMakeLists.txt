@@ -23,6 +23,7 @@ endmacro()
 ## Requires a previous call to ogvr_setup_lib_vars
 ## and definition of API and SOURCE variables.
 macro(ogvr_add_library)
+    list(APPEND API "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
     source_group(API FILES ${API})
     add_library(${LIBNAME_FULL} ${API} ${SOURCE})
 
