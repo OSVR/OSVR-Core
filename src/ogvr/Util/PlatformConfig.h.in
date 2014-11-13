@@ -26,15 +26,22 @@
 #ifndef INCLUDED_PlatformConfig_h_GUID_0D10E644_8114_4294_A839_699F39E1F0E0
 #define INCLUDED_PlatformConfig_h_GUID_0D10E644_8114_4294_A839_699F39E1F0E0
 
-/** @def OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H
-    @brief Does the system have struct timeval in <sys/time.h>?
-*/
-#cmakedefine OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H
-
 /** @def OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H
     @brief Does the system have struct timeval in <winsock2.h>?
 */
 #cmakedefine OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H
+
+/** @def OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H
+    @brief Does the system have struct timeval in <sys/time.h>?
+*/
+
+/*
+    MinGW and similar environments have both winsock and sys/time.h, so
+    we hide this define for disambiguation at the top level.
+*/
+#ifndef OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H
+#cmakedefine OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H
+#endif
 
 #if defined(OGVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H) || defined(OGVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H)
 #define OGVR_HAVE_STRUCT_TIMEVAL
