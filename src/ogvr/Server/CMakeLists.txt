@@ -1,80 +1,40 @@
-include_directories("${HEADER_BASE}")
-include_directories("${BUILDTREE_HEADER_BASE}")
-
-set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Server")
+ogvr_setup_lib_vars(Server)
 
 set(API
     "${HEADER_LOCATION}/Server.h"
     "${HEADER_LOCATION}/ServerPtr.h"
     "${HEADER_LOCATION}/RegisterShutdownHandler.h"
     "${HEADER_LOCATION}/RegisterShutdownHandlerPOSIXSignal.h"
-    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
-source_group(API FILES ${API})
+    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h")
 
 set(SOURCE
     Server.cpp
     ServerImpl.cpp
     ServerImpl.h)
 
-add_library(ogvrServer ${API} ${SOURCE})
+ogvr_add_library()
 
-set_target_properties(ogvrServer PROPERTIES
-    FOLDER "OGVR Libraries"
+set_target_properties(${LIBNAME_FULL} PROPERTIES
     VERSION ${OGVR_VERSION}
     SOVERSION 0
     INTERFACE_ogvrcore_MAJOR_VERSION 0)
 
-set_property(TARGET ogvrServer APPEND PROPERTY
-    COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
-)
+set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
+    COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION)
 
-generate_export_header(ogvrServer
-    BASE_NAME OGVR_SERVER
-    EXPORT_FILE_NAME Export.h)
-
-if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(ogvrServer PUBLIC OGVR_SERVER_STATIC_DEFINE)
-endif()
-
-target_include_directories(ogvrServer
+target_include_directories(${LIBNAME_FULL}
     PUBLIC
-    $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
-    $<BUILD_INTERFACE:${HEADER_BASE}>
-    $<INSTALL_INTERFACE:include>
-    ${Boost_INCLUDE_DIR})
+    ${Boost_INCLUDE_DIRS})
 
-target_compile_options(ogvrServer PUBLIC ${OGVR_CXX11_FLAGS})
+target_compile_options(${LIBNAME_FULL}
+    PUBLIC
+    ${OGVR_CXX11_FLAGS})
 
-if(NOT Boost_USE_STATIC_LIBS)
-    target_compile_definitions(ogvrServer PRIVATE BOOST_ALL_DYN_LINK)
-endif()
-
-target_link_libraries(ogvrServer
+target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     ogvrConnection
     ogvrPluginHost
     PRIVATE
     ogvrUtilCpp
     util-runloopmanager)
-
-enable_extra_compiler_warnings(ogvrServer)
-
-###
-# Install library and headers
-###
-install(TARGETS ogvrServer
-    EXPORT ogvrTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-install(
-    FILES
-    ${API}
-    DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/Server
-    COMPONENT
-    Devel)
 

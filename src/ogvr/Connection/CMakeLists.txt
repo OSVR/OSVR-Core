@@ -1,7 +1,4 @@
-include_directories("${HEADER_BASE}")
-include_directories("${BUILDTREE_HEADER_BASE}")
-
-set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Connection")
+ogvr_setup_lib_vars(Connection)
 
 set(API
     "${HEADER_LOCATION}/Connection.h"
@@ -10,9 +7,7 @@ set(API
     "${HEADER_LOCATION}/ConnectionPtr.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/MessageType.h"
-    "${HEADER_LOCATION}/MessageTypePtr.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
-source_group(API FILES ${API})
+    "${HEADER_LOCATION}/MessageTypePtr.h")
 
 set(SOURCE
     AsyncAccessControl.cpp
@@ -32,64 +27,28 @@ set(SOURCE
     VrpnConnectionDevice.h
     VrpnMessageType.h)
 
-add_library(ogvrConnection ${API} ${SOURCE})
+ogvr_add_library()
 
-set_target_properties(ogvrConnection PROPERTIES
-    FOLDER "OGVR Libraries"
+set_target_properties(${LIBNAME_FULL} PROPERTIES
     VERSION ${OGVR_VERSION}
     SOVERSION 0
     INTERFACE_ogvrcore_MAJOR_VERSION 0)
 
-set_property(TARGET ogvrConnection APPEND PROPERTY
-    COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION
-)
+set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
+    COMPATIBLE_INTERFACE_STRING ogvrcore_MAJOR_VERSION)
 
-generate_export_header(ogvrConnection
-    BASE_NAME OGVR_CONNECTION
-    EXPORT_FILE_NAME Export.h)
-
-if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(ogvrConnection PUBLIC OGVR_CONNECTION_STATIC_DEFINE)
-endif()
-
-target_include_directories(ogvrConnection
+target_include_directories(${LIBNAME_FULL}
     PUBLIC
-    $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
-    $<BUILD_INTERFACE:${HEADER_BASE}>
-    $<INSTALL_INTERFACE:include>
-    ${Boost_INCLUDE_DIR})
+    ${Boost_INCLUDE_DIRS})
 
-target_compile_options(ogvrConnection PUBLIC ${OGVR_CXX11_FLAGS})
+target_compile_options(${LIBNAME_FULL}
+    PUBLIC
+    ${OGVR_CXX11_FLAGS})
 
-if(NOT Boost_USE_STATIC_LIBS)
-    target_compile_definitions(ogvrConnection PRIVATE BOOST_ALL_DYN_LINK)
-endif()
-
-target_link_libraries(ogvrConnection
+target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     ogvrPluginHost
     ogvrUtilCpp
     vendored-vrpn
     util-runloopmanager
     qvrpn-headers)
-
-enable_extra_compiler_warnings(ogvrConnection)
-
-###
-# Install library and headers
-###
-install(TARGETS ogvrConnection
-    EXPORT ogvrTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-install(
-    FILES
-    ${API}
-    DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/Connection
-    COMPONENT
-    Devel)
-

@@ -7,12 +7,14 @@ set(LIB_FOLDER "OGVR Libraries")
 ##  - LIBNAME - the input name
 ##  - LIBNAME_CAPS
 ##  - LIBNAME_FULL - the input prefixed with ogvr
+##  - LIBNAME_FULL_CPP - The name of the C++ interface library if applicable
 ##  - HEADER_LOCATION - the parallel header directory
 ##  - EXPORT_BASENAME - The base of macros defined by Export.h
 macro(ogvr_setup_lib_vars _lib)
     set(LIBNAME ${_lib})
     string(TOUPPER ${LIBNAME} LIBNAME_CAPS)
     set(LIBNAME_FULL "ogvr${LIBNAME}")
+    set(LIBNAME_FULL_CPP "${LIBNAME_FULL}Cpp")
     set(HEADER_LOCATION "${HEADER_BASE}/ogvr/${LIBNAME}")
     set(EXPORT_BASENAME "OGVR_${LIBNAME_CAPS}")
 endmacro()
@@ -64,6 +66,20 @@ macro(ogvr_add_library)
         DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/${LIBNAME}
         COMPONENT Devel)
+endmacro()
+
+## For libraries with a C++ interface "library", this creates the INTERFACE
+## target, links it to the main library, and installs the target
+## appropriately for CMake.
+macro(ogvr_add_cpp_interface_library)
+    add_library(${LIBNAME_FULL_CPP} INTERFACE)
+    target_link_libraries(${LIBNAME_FULL_CPP} INTERFACE ${LIBNAME_FULL})
+    install(TARGETS ${LIBNAME_FULL_CPP}
+        EXPORT ogvrTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endmacro()
 
 add_subdirectory(Util)

@@ -17,17 +17,20 @@ configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h
 ###
 # Library build
 ###
-set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Util")
+ogvr_setup_lib_vars(Util)
 
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
-    "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/AnyMap.h"
+    "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
+    "${HEADER_LOCATION}/ClientCallbackTypesC.h"
+    "${HEADER_LOCATION}/ClientOpaqueTypes.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
+    "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
@@ -36,14 +39,12 @@ set(API
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
     "${HEADER_LOCATION}/StdInt.h"
-    "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
+    "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/Util.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Export.h"
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
-source_group(API FILES ${API})
 
 set(SOURCE
     AnyMap.cpp
@@ -52,63 +53,31 @@ set(SOURCE
     Verbosity.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
-add_library(ogvrUtil ${API} ${SOURCE})
+ogvr_add_library()
 
-set_target_properties(ogvrUtil PROPERTIES
-    FOLDER "OGVR Libraries"
+set_target_properties(${LIBNAME_FULL} PROPERTIES
     VERSION ${OGVR_VERSION}
     SOVERSION 0)
 
-generate_export_header(ogvrUtil
-    BASE_NAME OGVR_UTIL
-    EXPORT_FILE_NAME Export.h)
 
-if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(ogvrUtil PUBLIC OGVR_UTIL_STATIC_DEFINE)
-endif()
-
-target_include_directories(ogvrUtil
-    PUBLIC
-    $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
-    $<BUILD_INTERFACE:${HEADER_BASE}>
-    $<INSTALL_INTERFACE:include>)
-
-target_include_directories(ogvrUtil
+target_include_directories(${LIBNAME_FULL}
     PRIVATE
     ${Boost_INCLUDE_DIRS})
 
-target_compile_options(ogvrUtil PRIVATE ${OGVR_CXX11_FLAGS})
+
+target_compile_options(${LIBNAME_FULL}
+    PRIVATE
+    ${OGVR_CXX11_FLAGS})
 
 # TODO VRPN used in this lib only for gettimeofday wrapper: do we need it?
-target_link_libraries(ogvrUtil PRIVATE vendored-vrpn)
+target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn)
 
 ###
 # C++ util library/headers
 ###
-add_library(ogvrUtilCpp INTERFACE)
-target_link_libraries(ogvrUtilCpp INTERFACE ogvrUtil)
-target_include_directories(ogvrUtilCpp
+ogvr_add_cpp_interface_library()
+target_include_directories(${LIBNAME_FULL_CPP}
     INTERFACE ${Boost_INCLUDE_DIRS})
 
-target_compile_options(ogvrUtilCpp
+target_compile_options(${LIBNAME_FULL_CPP}
     INTERFACE ${OGVR_CXX11_FLAGS})
-
-###
-# Install library and headers
-###
-install(TARGETS ogvrUtil ogvrUtilCpp
-    EXPORT ogvrTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-install(
-    FILES
-    ${API}
-    DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}/ogvr/Util
-    COMPONENT
-    Devel)
-
-
