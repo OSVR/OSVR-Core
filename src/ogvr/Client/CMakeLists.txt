@@ -5,10 +5,16 @@ set(HEADER_LOCATION "${HEADER_BASE}/ogvr/Client")
 
 set(API
     "${HEADER_LOCATION}/ClientC.h"
+    "${HEADER_LOCATION}/ContextC.h"
+    "${HEADER_LOCATION}/InterfaceC.h"
+    "${HEADER_LOCATION}/InterfaceCallbackC.h"
+    "${HEADER_LOCATION}/SystemCallbackC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
 source_group(API FILES ${API})
 
 set(SOURCE
+    ContextC.cpp
+    ContextImpl.h
     ClientC.cpp)
 
 add_library(ogvrClient ${API} ${SOURCE})
