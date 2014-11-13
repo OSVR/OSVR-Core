@@ -19,6 +19,7 @@
 // Internal Includes
 #include <ogvr/ClientKit/ContextC.h>
 #include <ogvr/Client/ClientContext.h>
+#include <ogvr/Client/CreateContext.h>
 
 // Library/third-party includes
 // - none
@@ -28,7 +29,11 @@
 
 OGVR_ClientContext ogvrClientInit(const char applicationIdentifier[],
                                   uint32_t /*flags*/) {
-    return new OGVR_ClientContextObject(applicationIdentifier);
+    return ::ogvr::client::createContext(applicationIdentifier);
+}
+OGVR_ReturnCode ogvrClientUpdate(OGVR_ClientContext ctx) {
+    ctx->update();
+    return OGVR_RETURN_SUCCESS;
 }
 
 OGVR_ReturnCode ogvrClientShutdown(OGVR_ClientContext ctx) {

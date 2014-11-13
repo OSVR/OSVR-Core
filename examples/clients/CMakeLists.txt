@@ -1,5 +1,6 @@
 set(CLIENTS
     MinimalInit
+    TrackerCallback
     #sample-tracker-reader
 )
 foreach(name ${CLIENTS})

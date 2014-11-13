@@ -41,6 +41,10 @@ OGVR_EXTERN_C_BEGIN
     only and exactly one. */
 typedef struct OGVR_ClientContextObject *OGVR_ClientContext;
 
+/** @brief Opaque handle that should be retained by your application. You need
+only and exactly one. */
+typedef struct OGVR_ClientInterfaceObject *OGVR_ClientInterface;
+
 /** @} */
 
 OGVR_EXTERN_C_END

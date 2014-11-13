@@ -57,6 +57,12 @@ OGVR_CLIENTKIT_EXPORT OGVR_ClientContext
     ogvrClientInit(const char applicationIdentifier[],
                    uint32_t flags OGVR_CPP_ONLY(= 0));
 
+/** @brief Updates the state of the context - call regularly in your mainloop.
+
+    @param ctx Client context
+*/
+OGVR_CLIENTKIT_EXPORT OGVR_ReturnCode ogvrClientUpdate(OGVR_ClientContext ctx);
+
 /** @brief Shutdown the library.
     @param ctx Client context
 */

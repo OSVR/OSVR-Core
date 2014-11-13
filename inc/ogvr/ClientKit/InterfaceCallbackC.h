@@ -24,7 +24,7 @@
 #define INCLUDED_InterfaceCallbacksC_h_GUID_8F16E6CB_F998_4ABC_5B6B_4FC1E4B71BC9
 
 /* Internal Includes */
-#include <ogvr/Client/Export.h>
+#include <ogvr/ClientKit/Export.h>
 #include <ogvr/Util/APIBaseC.h>
 #include <ogvr/Util/ReturnCodesC.h>
 #include <ogvr/Util/AnnotationMacrosC.h>
