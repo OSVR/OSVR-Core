@@ -29,6 +29,8 @@ target_include_directories(${LIBNAME_FULL}
     ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${LIBNAME_FULL}
+    PUBLIC
+    ogvrUtil
     PRIVATE
     ogvrClient
     ogvrUtilCpp)
