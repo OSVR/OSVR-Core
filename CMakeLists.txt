@@ -22,6 +22,9 @@ if(GIT_REVISION_DESCRIPTION)
 		GIT_REVISION_DESCRIPTION
 		"${GIT_REVISION_DESCRIPTION}")
 	set(CPACK_PACKAGE_VERSION "${GIT_REVISION_DESCRIPTION}")
+	message(STATUS "Git reports version ${CPACK_PACKAGE_VERSION}")
+else()
+	message(STATUS "Could not get revision information from Git!")
 endif()
 
 if(WIN32)
