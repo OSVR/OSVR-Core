@@ -1,3 +1,6 @@
 [submodule "vendor/vrpn"]
 	path = vendor/vrpn
 	url = https://github.com/vrpn/vrpn.git
+[submodule "vendor/jenkins-ctest-plugin"]
+	path = vendor/jenkins-ctest-plugin
+	url = https://github.com/rpavlik/jenkins-ctest-plugin.git
