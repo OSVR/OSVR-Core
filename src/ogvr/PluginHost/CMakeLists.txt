@@ -45,3 +45,10 @@ if(WIN32)
         COMMENT Copying required DLL
         VERBATIM)
 endif()
+if(WIN32)
+    install(FILES $<TARGET_FILE:libfunctionality::functionality>
+        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+else()
+    install(FILES $<TARGET_FILE:libfunctionality::functionality>
+        DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime)
+endif()
