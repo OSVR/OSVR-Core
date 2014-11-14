@@ -52,15 +52,21 @@ inline void ogvrQuatFromQuatlib(OGVR_Quaternion *dest, q_type const src) {
     ogvrQuatSetZ(dest, src[Q_Z]);
 }
 
+inline void ogvrVec3ToQuatlib(q_vec_type dest, OGVR_Vec3 const *src) {
+    memcpy((void *)(dest), (void const *)(src->data), sizeof(double) * 3);
+}
+
+inline void ogvrVec3FromQuatlib(OGVR_Vec3 *dest, q_vec_type const src) {
+    memcpy((void *)(dest->data), (void const *)(src), sizeof(double) * 3);
+}
+
 inline void ogvrPose3ToQuatlib(q_xyz_quat_type *dest, OGVR_Pose3 const *src) {
-    memcpy((void *)(dest->xyz), (void const *)(src->translation.data),
-           sizeof(double) * 3);
+    ogvrVec3ToQuatlib(dest->xyz, &(src->translation));
     ogvrQuatToQuatlib(dest->quat, &(src->rotation));
 }
 
 inline void ogvrPose3FromQuatlib(OGVR_Pose3 *dest, q_xyz_quat_type const *src) {
-    memcpy((void *)(dest->translation.data), (void const *)(src->xyz),
-           sizeof(double) * 3);
+    ogvrVec3FromQuatlib(&(dest->translation), src->xyz);
     ogvrQuatFromQuatlib(&(dest->rotation), src->quat);
 }
 

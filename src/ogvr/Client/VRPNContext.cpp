@@ -53,9 +53,7 @@ namespace client {
                 OGVR_TimeValue timestamp;
                 ogvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
                 ogvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
-                std::memcpy(static_cast<void *>(report.pose.translation.data),
-                            static_cast<const void *>(info.pos),
-                            sizeof(double) * 3);
+                ogvrVec3FromQuatlib(&(report.pose.translation), info.pos);
                 boost::for_each(self->m_ctx->getInterfaces(),
                                 [&](ClientInterfacePtr const &iface) {
                     iface->triggerCallbacks(timestamp, report);
