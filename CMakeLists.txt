@@ -21,6 +21,11 @@ include(CTest)
 include(GNUInstallDirs)
 include(EnableExtraCompilerWarnings)
 
+include(SetDefaultBuildType)
+set_default_build_type(RelWithDebInfo)
+
+include(MSVCMultipleProcessCompile)
+
 include(CMakeBoostHelper)
 
 if(MSVC_IDE AND MSVC_VERSION LESS 1700)
@@ -79,6 +84,7 @@ add_subdirectory(src/ogvr)
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "")
 endif()
+
 add_subdirectory(apps)
 add_subdirectory(plugins)
 if(BUILD_TESTING)
