@@ -88,7 +88,8 @@ SORT_MEMBER_DOCS       = NO
 INPUT                  = README.md \
                          HACKING.md \
                          inc \
-                         doc
+                         doc \
+                         examples
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
