@@ -13,6 +13,9 @@ macro(run)
     endif()
 endmacro()
 
+# Avoid truncating output.
+message(STATUS "CTEST_FULL_OUTPUT")
+
 message(STATUS "Clearing build...")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E remove_directory "${DIR}")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E make_directory "${DIR}")
