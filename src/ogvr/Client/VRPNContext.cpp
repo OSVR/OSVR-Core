@@ -96,6 +96,9 @@ namespace client {
             "org_opengoggles_bundled_Multiserver/RazerHydra0", m_conn.get(),
             "/me/hands/right", this,
             [](vrpn_TRACKERCB const &info) { return info.sensor == 1; }));
+        m_routers.push_back(createRouter(
+            "org_opengoggles_bundled_Multiserver/RazerHydra0", m_conn.get(),
+            "/me/hands", this, [](vrpn_TRACKERCB const &) { return true; }));
     }
 
     VRPNContext::~VRPNContext() {}
