@@ -35,6 +35,9 @@ set(API
     "${HEADER_LOCATION}/MacroToolsC.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
+    "${HEADER_LOCATION}/Pose3C.h"
+    "${HEADER_LOCATION}/QuaternionC.h"
+    "${HEADER_LOCATION}/QuatlibInteropC.h"
     "${HEADER_LOCATION}/ResetPointerList.h"
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
@@ -45,6 +48,7 @@ set(API
     "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/Util.h"
+    "${HEADER_LOCATION}/Vec3C.h"
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
 
 set(SOURCE
