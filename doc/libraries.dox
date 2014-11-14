@@ -4,7 +4,7 @@
     All core functionality that can be accessed through the C++ API is possible to access through the C API as well. However, the C++ wrappers improve the usability of the interface and provide a safer development style. They can also greatly simplify your code and reduce the amount of "boilerplate" needed.
 
     See examples:
-
+    - Comprehensive (auto-detects hardware and creates device): org_opengoggles_example_DummyDetectAndCreateAsync.cpp
     - org_opengoggles_example_NullPlugin.cpp
     - org_opengoggles_example_NullDevice.cpp
     - org_opengoggles_example_DummyAsync.cpp

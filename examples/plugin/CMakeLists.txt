@@ -11,6 +11,7 @@ set(OGVR_EXAMPLE_PLUGINS
 set(OGVR_EXAMPLE_DEVICE_PLUGINS
     DummyAsync
     DummySync
+    DummyDetectAndCreateAsync
     CACHE INTERNAL "" FORCE)
 foreach(pluginname ${OGVR_EXAMPLE_PLUGINS} ${OGVR_EXAMPLE_DEVICE_PLUGINS})
     set(name org_opengoggles_example_${pluginname})
