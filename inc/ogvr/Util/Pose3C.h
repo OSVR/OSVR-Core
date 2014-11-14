@@ -49,10 +49,6 @@ struct OGVR_Pose3 {
     OGVR_Quaternion rotation;
 };
 
-inline struct OGVR_Pose3 ogvrPose3GetIdentity() {
-    return {{0.0, 0.0, 0.0}, ogvrQuatGetIdentity()};
-}
-
 /** @} */
 
 OGVR_EXTERN_C_END

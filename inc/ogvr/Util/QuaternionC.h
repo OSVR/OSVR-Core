@@ -44,10 +44,6 @@ struct OGVR_Quaternion {
     double data[4];
 };
 
-inline struct OGVR_Quaternion ogvrQuatGetIdentity() {
-    return {{1.0, 0.0, 0.0, 0.0}};
-}
-
 #define OGVR_QUAT_MEMBER(COMPONENT, INDEX)                                     \
     inline double ogvrQuatGet##COMPONENT(OGVR_Quaternion const *q) {           \
         return q->data[INDEX];                                                 \
