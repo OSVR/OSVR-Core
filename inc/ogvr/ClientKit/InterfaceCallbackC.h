@@ -28,6 +28,8 @@
 #include <ogvr/Util/APIBaseC.h>
 #include <ogvr/Util/ReturnCodesC.h>
 #include <ogvr/Util/AnnotationMacrosC.h>
+#include <ogvr/Util/ClientOpaqueTypesC.h>
+#include <ogvr/Util/ClientCallbackTypesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -36,6 +38,11 @@
 /* none */
 
 OGVR_EXTERN_C_BEGIN
+
+OGVR_CLIENTKIT_EXPORT OGVR_ReturnCode
+    ogvrRegisterPoseCallback(OGVR_ClientInterface iface, OGVR_PoseCallback cb,
+                             void *userdata);
+
 OGVR_EXTERN_C_END
 
 #endif

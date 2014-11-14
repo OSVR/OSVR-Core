@@ -23,12 +23,16 @@
 #include <ogvr/Client/Export.h>
 #include <ogvr/Client/ClientContext_fwd.h>
 #include <ogvr/Client/ClientInterfacePtr.h>
+#include <ogvr/Util/ClientOpaqueTypesC.h>
+#include <ogvr/Util/ClientCallbackTypesC.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
+#include <vector>
+#include <functional>
 
 struct OGVR_ClientInterfaceObject : boost::noncopyable {
   private:
@@ -46,10 +50,16 @@ struct OGVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the owning context.
     OGVR_CLIENT_EXPORT::ogvr::client::ClientContext &getContext();
 
+    OGVR_CLIENT_EXPORT void registerCallback(OGVR_PoseCallback cb,
+                                             void *userdata);
+
     /// @brief Update any state.
     void update();
 
   private:
+    std::vector<std::function<void(OGVR_TimeValue, const OGVR_PoseReport)> >
+        m_trackerCB;
+
     ::ogvr::client::ClientContext *m_ctx;
     std::string const m_path;
     friend struct OGVR_ClientContextObject;

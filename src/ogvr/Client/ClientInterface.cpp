@@ -40,6 +40,11 @@ std::string const &OGVR_ClientInterfaceObject::getPath() const {
 ::ogvr::client::ClientContext &OGVR_ClientInterfaceObject::getContext() {
     return *m_ctx;
 }
+void OGVR_ClientInterfaceObject::registerCallback(OGVR_PoseCallback cb,
+                                                  void *userdata) {
+    using namespace std::placeholders;
+    m_trackerCB.push_back(std::bind(cb, userdata, _1, _2));
+}
 
 void OGVR_ClientInterfaceObject::update() {
     OGVR_DEV_VERBOSE("Update in " << m_path);

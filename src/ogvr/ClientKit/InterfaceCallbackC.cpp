@@ -18,9 +18,16 @@
 
 // Internal Includes
 #include <ogvr/ClientKit/InterfaceCallbackC.h>
+#include <ogvr/Client/ClientInterface.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+OGVR_ReturnCode ogvrRegisterPoseCallback(OGVR_ClientInterface iface,
+                                         OGVR_PoseCallback cb, void *userdata) {
+    iface->registerCallback(cb, userdata);
+    return OGVR_RETURN_SUCCESS;
+}

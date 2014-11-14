@@ -26,6 +26,9 @@
 /* Internal Includes */
 #include <ogvr/Util/APIBaseC.h>
 #include <ogvr/Util/ReturnCodesC.h>
+#include <ogvr/Util/Pose3C.h>
+#include <ogvr/Util/TimeValueC.h>
+#include <ogvr/Util/StdInt.h>
 
 /* Library/third-party includes */
 /* none */
@@ -38,9 +41,32 @@ OGVR_EXTERN_C_BEGIN
 /** @addtogroup ClientKit
     @{
 */
+struct OGVR_PositionReport {
+    int32_t sensor;
+    struct OGVR_Vec3 xyz;
+};
+
+typedef void (*OGVR_PositionCallback)(void *userdata,
+                                      const struct OGVR_TimeValue timestamp,
+                                      const struct OGVR_PositionReport report);
+
+struct OGVR_OrientationReport {
+    int32_t sensor;
+    struct OGVR_Quaternion rotation;
+};
+typedef void (*OGVR_OrientationCallback)(
+    void *userdata, const struct OGVR_TimeValue timestamp,
+    const struct OGVR_OrientationReport report);
+
+struct OGVR_PoseReport {
+    int32_t sensor;
+    struct OGVR_Pose3 pose;
+};
+typedef void (*OGVR_PoseCallback)(void *userdata,
+                                  const struct OGVR_TimeValue timestamp,
+                                  const struct OGVR_PoseReport report);
 
 /** @} */
-
 OGVR_EXTERN_C_END
 
 #endif
