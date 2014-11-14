@@ -27,7 +27,7 @@
 // Standard includes
 #include <iostream>
 
-void myTrackerCallback(void * /*userdata*/, OGVR_TimeValue timestamp,
+void myTrackerCallback(void * /*userdata*/, OGVR_TimeValue /*timestamp*/,
                        const OGVR_PoseReport report) {
     std::cout << "Got report: Position = (" << report.pose.translation.data[0]
               << ", " << report.pose.translation.data[1] << ", "
