@@ -33,6 +33,7 @@
 
 struct OGVR_ClientContextObject : boost::noncopyable {
   public:
+    typedef std::vector<::ogvr::client::ClientInterfacePtr> InterfaceList;
     /// @brief Destructor
     virtual ~OGVR_ClientContextObject();
 
@@ -60,6 +61,8 @@ struct OGVR_ClientContextObject : boost::noncopyable {
     OGVR_CLIENT_EXPORT::ogvr::client::ClientInterfacePtr
     releaseInterface(::ogvr::client::ClientInterface *iface);
 
+    InterfaceList const &getInterfaces() const { return m_interfaces; }
+
   protected:
     /// @brief Constructor for derived class use only.
     OGVR_ClientContextObject(const char appId[]);
@@ -67,7 +70,6 @@ struct OGVR_ClientContextObject : boost::noncopyable {
   private:
     virtual void m_update() = 0;
     std::string const m_appId;
-    typedef std::vector<::ogvr::client::ClientInterfacePtr> InterfaceList;
     InterfaceList m_interfaces;
 };
 

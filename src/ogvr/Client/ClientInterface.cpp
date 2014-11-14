@@ -24,7 +24,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <boost/range/algorithm.hpp>
 
 OGVR_ClientInterfaceObject::OGVR_ClientInterfaceObject(
     ::ogvr::client::ClientContext *ctx, std::string const &path,
@@ -45,7 +45,14 @@ void OGVR_ClientInterfaceObject::registerCallback(OGVR_PoseCallback cb,
     using namespace std::placeholders;
     m_trackerCB.push_back(std::bind(cb, userdata, _1, _2));
 }
+void
+OGVR_ClientInterfaceObject::triggerCallbacks(const OGVR_TimeValue &timestamp,
+                                             const OGVR_PoseReport &report) {
 
-void OGVR_ClientInterfaceObject::update() {
-    OGVR_DEV_VERBOSE("Update in " << m_path);
+    boost::for_each(
+        m_trackerCB,
+        [&](std::function<void(OGVR_TimeValue, const OGVR_PoseReport)> const &
+                f) { f(timestamp, report); });
 }
+
+void OGVR_ClientInterfaceObject::update() {}

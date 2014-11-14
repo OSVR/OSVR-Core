@@ -53,6 +53,9 @@ struct OGVR_ClientInterfaceObject : boost::noncopyable {
     OGVR_CLIENT_EXPORT void registerCallback(OGVR_PoseCallback cb,
                                              void *userdata);
 
+    void triggerCallbacks(const OGVR_TimeValue &timestamp,
+                          const OGVR_PoseReport &report);
+
     /// @brief Update any state.
     void update();
 

@@ -21,15 +21,22 @@
 
 // Internal Includes
 #include <ogvr/Client/ClientContext.h>
+#include <ogvr/Util/UniquePtr.h>
 
 // Library/third-party includes
-// - none
+#include <qvrpn/vrpn_ConnectionPtr.h>
 
 // Standard includes
 #include <string>
 
 namespace ogvr {
 namespace client {
+    class CallableObject {
+      public:
+        virtual ~CallableObject();
+        virtual void operator()() = 0;
+    };
+    typedef unique_ptr<CallableObject> CallablePtr;
     class VRPNContext : public ::OGVR_ClientContextObject {
       public:
         VRPNContext(const char appId[], const char host[] = "localhost");
@@ -37,7 +44,9 @@ namespace client {
 
       private:
         virtual void m_update();
+        vrpn_ConnectionPtr m_conn;
         std::string const m_host;
+        std::vector<CallablePtr> m_routers;
     };
 } // namespace client
 } // namespace ogvr
