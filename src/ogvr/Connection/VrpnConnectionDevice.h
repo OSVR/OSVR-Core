@@ -26,7 +26,7 @@
 #include "VrpnBaseFlexServer.h"
 
 // Library/third-party includes
-#include <qvrpn/vrpn_ConnectionPtr.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
 #include <string>

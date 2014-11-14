@@ -24,7 +24,7 @@
 
 // Library/third-party includes
 #include <vrpn_Connection.h>
-#include <qvrpn/vrpn_ConnectionPtr.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
 // - none

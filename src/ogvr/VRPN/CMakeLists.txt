@@ -23,5 +23,4 @@ target_include_directories(${LIBNAME_FULL}
 target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     ogvrUtilCpp
-    vendored-vrpn
-    qvrpn-headers)
+    vendored-vrpn)

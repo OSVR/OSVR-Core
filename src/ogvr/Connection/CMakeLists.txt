@@ -57,5 +57,4 @@ target_link_libraries(${LIBNAME_FULL}
     ogvrPluginHost
     ogvrUtilCpp
     vendored-vrpn
-    util-runloopmanager
-    qvrpn-headers)
+    util-runloopmanager)

@@ -1,4 +1,0 @@
-# cmake launcher templates
-*.cmd.in text eol=crlf
-*.user.in text eol=crlf
-*.sh.in text eol=lf
