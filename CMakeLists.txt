@@ -3,6 +3,11 @@ project(ogvrcore)
 set(OGVR_VERSION 0.1)
 
 ###
+# Package Options
+###
+set(CPACK_PACKAGE_VENDOR "Sensics, Inc")
+
+###
 # Configuration Options
 ###
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
@@ -92,6 +97,34 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+###
+# Install examples
+###
+install(DIRECTORY examples/
+    DESTINATION "${CMAKE_INSTALL_DOC_DIR}/examples"
+    COMPONENT DevelExamples)
+
+###
+# Build and install documentation
+###
+if(WIN32)
+    set(README_DEST .)
+else()
+    set(README_DEST "${CMAKE_INSTALL_DOC_DIR}")
+endif()
+
+find_package(Markdown)
+if(MARKDOWN_FOUND)
+    include(UseMarkdown)
+    add_markdown_target(markdown-readme ${CMAKE_CURRENT_BINARY_DIR} README.md)
+    install_markdown_target(markdown-readme DESTINATION "${README_DEST}" COMPONENT Runtime)
+else()
+    install(FILES README.md
+        DESTINATION "${README_DEST}"
+        COMPONENT Runtime
+        RENAME Readme.txt)
+endif()
+
 include(DoxygenTargets)
 # Internal Doxygen (includes implementation details) - target "doc"
 add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile"
@@ -106,6 +139,8 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     EXTRA_STRIP_FROM_INC_PATH "${CMAKE_CURRENT_BINARY_DIR}/src"
     OUTPUT_DIRECTORY docs-external
     DOC_TARGET doc_external
+    INSTALL_DESTINATION "${CMAKE_INSTALL_DOC_DIR}/api"
+    INSTALL_COMPONENT DevelDocs
     NO_PDF)
 
 
@@ -135,7 +170,9 @@ install(EXPORT ogvrTargets
     NAMESPACE
     ogvr::
     DESTINATION
-    ${CONFIG_INSTALL_DIR})
+    ${CONFIG_INSTALL_DIR}
+    COMPONENT
+    Devel)
 
 install(
     FILES
