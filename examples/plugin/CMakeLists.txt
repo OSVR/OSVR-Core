@@ -20,3 +20,23 @@ foreach(pluginname ${OGVR_EXAMPLE_PLUGINS} ${OGVR_EXAMPLE_DEVICE_PLUGINS})
         PREFIX ""
         FOLDER "OGVR Example Plugins")
 endforeach()
+
+set(CONFIG_FLAGS "-Dogvr_DIR=${PROJECT_BINARY_DIR}/ogvr")
+set(BUILD_FLAGS)
+if(MSVC)
+# TODO this is really for multi-config generators
+    set(BUILD_FLAGS "${BUILD_FLAGS} --config $<CONFIGURATION>")
+endif()
+if(CMAKE_GENERATOR_TOOLSET)
+    set(CONFIG_FLAGS "${CONFIG_FLAGS} -T \"${CMAKE_GENERATOR_TOOLSET}\"")
+endif()
+
+
+configure_file(selfcontained_test.cmake "${CMAKE_CURRENT_BINARY_DIR}/selfcontained_test.cmake" @ONLY)
+add_test(NAME StandalonePluginBuilds
+    COMMAND
+    "${CMAKE_COMMAND}"
+    "-DCONFIG_FLAGS=${CONFIG_FLAGS}"
+    "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/selfcontained"
+    -P "${CMAKE_CURRENT_BINARY_DIR}/selfcontained_test.cmake"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
