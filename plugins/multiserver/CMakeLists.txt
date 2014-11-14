@@ -1,4 +1,4 @@
-add_library(org_opengoggles_bundled_Multiserver MODULE 
+add_library(org_opengoggles_bundled_Multiserver MODULE
     org_opengoggles_bundled_Multiserver.cpp
     GetVRPNConnection.cpp
     GetVRPNConnection.h)
@@ -7,3 +7,6 @@ target_include_directories(org_opengoggles_bundled_Multiserver PRIVATE "${CMAKE_
 set_target_properties(org_opengoggles_bundled_Multiserver PROPERTIES
     PREFIX ""
     FOLDER "OGVR Plugins")
+
+install(TARGETS org_opengoggles_bundled_Multiserver
+    LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
