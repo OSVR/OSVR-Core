@@ -163,13 +163,12 @@ include(DoxygenTargets)
 # Internal Doxygen (includes implementation details) - target "doc"
 add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile"
     EXTRA_INPUT "${CMAKE_CURRENT_BINARY_DIR}/src"
-    EXTRA_STRIP_FROM_PATH "${CMAKE_CURRENT_BINARY_DIR}/src"
+    EXTRA_STRIP_FROM_PATH "${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}"
     EXTRA_STRIP_FROM_INC_PATH "${CMAKE_CURRENT_BINARY_DIR}/src"
     NO_PDF)
 # External Doxygen (only includes interfaces) - target "doc_external"
 add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
-    EXTRA_INPUT "${CMAKE_CURRENT_BINARY_DIR}/src"
-    EXTRA_STRIP_FROM_PATH "${CMAKE_CURRENT_BINARY_DIR}/src"
+    EXTRA_STRIP_FROM_PATH "${CMAKE_CURRENT_SOURCE_DIR}"
     EXTRA_STRIP_FROM_INC_PATH "${CMAKE_CURRENT_BINARY_DIR}/src"
     OUTPUT_DIRECTORY docs-external
     DOC_TARGET doc_external

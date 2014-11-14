@@ -2,6 +2,27 @@
     @brief The PluginKit library exposes a C API, with header-only C++ wrappers, to write plugins for the framework.
 
     All core functionality that can be accessed through the C++ API is possible to access through the C API as well. However, the C++ wrappers improve the usability of the interface and provide a safer development style. They can also greatly simplify your code and reduce the amount of "boilerplate" needed.
+
+    See examples:
+
+    - org_opengoggles_example_NullPlugin.cpp
+    - org_opengoggles_example_NullDevice.cpp
+    - org_opengoggles_example_DummyAsync.cpp
+    - org_opengoggles_example_DummySync.cpp
+    - org_opengoggles_example_DummyHardwareDetect.cpp
+    - org_opengoggles_example_DummyHardwareDetectCpp.cpp
+    - org_opengoggles_example_DummyHardwareDetectCpp2.cpp
+*/
+
+/** @defgroup ClientKit ClientKit
+    @brief The ClientKit library exposes a C API, with header-only C++ wrappers, to write applications using the framework.
+
+    Just as with @ref PluginKit, when possible, the C++ wrappers are recommended.
+
+    See examples:
+
+    - MinimalInit.cpp
+    - TrackerCallback.cpp
 */
 
 /** @defgroup InternalAPI Internal APIs
@@ -23,6 +44,18 @@
     @ingroup InternalAPI
 */
 
+/** @defgroup Client Client
+    @brief Provides functionality for device access and path routing used by @ref ClientKit
+    @ingroup InternalAPI
+*/
+
 /** @defgroup Util Utility library
     @brief Includes base definitions/typedefs, some C functionality, some header-only C++ functionality, and some compiled C++ functionality.
+*/
+
+/** @defgroup UtilMath Math data structures
+    @brief Basic structures and conversion utilities for common math entites.
+    @ingroup Util
+
+    This is not intended to be a full math library. It is expected that you convert the values in these structures into your own math types. If you do not yet have a math library, [Eigen](http://eigen.tuxfamily.net) is highly recommended.
 */
