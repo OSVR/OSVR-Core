@@ -4,9 +4,7 @@ OGVR Core System
 This is the code and libraries to use when developing with OGVR.
 
 - For developing plugins, you'll use the @ref PluginKit library.
-    - See also [examples](examples/plugins)
 - For developing applications using the framework, you'll use the @ref ClientKit library.
-    - See also [examples](examples/clients)
 
 **For support, contact <support@opengoggles.org>.**
 
