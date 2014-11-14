@@ -24,13 +24,13 @@
 // - none
 
 // Standard includes
-// - none
+#include <cstring>
 
 namespace ogvr {
 namespace client {
 
     ClientContext *createContext(const char appId[], const char host[]) {
-        if (!appId || strlen(appId) == 0) {
+        if (!appId || std::strlen(appId) == 0) {
             return NULL;
         }
         VRPNContext *ret = new VRPNContext(appId, host);
