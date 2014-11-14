@@ -52,6 +52,9 @@ endif()
 include(CTest)
 include(CPack)
 include(GNUInstallDirs)
+if(NOT CMAKE_INSTALL_DOCDIR)
+	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
+endif()
 include(EnableExtraCompilerWarnings)
 
 include(SetDefaultBuildType)
@@ -129,7 +132,7 @@ endif()
 # Install examples
 ###
 install(DIRECTORY examples/
-    DESTINATION "${CMAKE_INSTALL_DOC_DIR}/examples"
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}/examples"
     COMPONENT DevelExamples)
 
 ###
@@ -138,7 +141,7 @@ install(DIRECTORY examples/
 if(WIN32)
     set(README_DEST .)
 else()
-    set(README_DEST "${CMAKE_INSTALL_DOC_DIR}")
+    set(README_DEST "${CMAKE_INSTALL_DOCDIR}")
 endif()
 
 find_package(Markdown)
@@ -167,7 +170,7 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     EXTRA_STRIP_FROM_INC_PATH "${CMAKE_CURRENT_BINARY_DIR}/src"
     OUTPUT_DIRECTORY docs-external
     DOC_TARGET doc_external
-    INSTALL_DESTINATION "${CMAKE_INSTALL_DOC_DIR}/api"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_DOCDIR}/api"
     INSTALL_COMPONENT DevelDocs
     NO_PDF)
 
