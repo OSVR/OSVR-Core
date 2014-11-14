@@ -29,6 +29,7 @@ set(API
     "${HEADER_LOCATION}/ClientCallbackTypesC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
+    "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
@@ -68,7 +69,6 @@ set_target_properties(${LIBNAME_FULL} PROPERTIES
 target_include_directories(${LIBNAME_FULL}
     PRIVATE
     ${Boost_INCLUDE_DIRS})
-
 
 target_compile_options(${LIBNAME_FULL}
     PRIVATE
