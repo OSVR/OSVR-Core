@@ -35,7 +35,7 @@ namespace client {
     typedef ::OGVR_ClientInterfaceObject ClientInterface;
     /// @brief Pointer for holding ClientInterface objects safely.
     typedef shared_ptr<ClientInterface> ClientInterfacePtr;
-} // namespace client_impl
+} // namespace client
 } // namespace ogvr
 
 #endif // INCLUDED_ClientInterfacePtr_h_GUID_8B87240D_2BBD_46BC_8D74_BC3436FAAF3A
