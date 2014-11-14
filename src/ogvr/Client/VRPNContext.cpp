@@ -27,9 +27,12 @@
 
 namespace ogvr {
 namespace client {
+
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OGVR_ClientContextObject(appId), m_host(host) {}
+
     VRPNContext::~VRPNContext() {}
+
     void VRPNContext::m_update() {}
 
 } // namespace client
