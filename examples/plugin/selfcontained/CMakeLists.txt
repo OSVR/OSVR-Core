@@ -11,6 +11,9 @@ find_package(ogvr)
 # for an OGVR plugin. Pass as many source files as you need.
 ogvr_add_plugin(org_opengoggles_example_selfcontainedDummyAsync org_opengoggles_example_selfcontainedDummyAsync.cpp)
 
+# This example uses the C++ wrapper, as suggested, so you'll need this line.
+target_link_libraries(org_opengoggles_example_selfcontainedDummyAsync ogvr::ogvrPluginKitCpp)
+
 # If you use other libraries, find them and add a line like:
 # target_link_libraries(org_opengoggles_example_selfcontainedDummyAsync AnyOtherLibraries)
 

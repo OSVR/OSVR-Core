@@ -5,7 +5,7 @@
 
     @author
     Ryan Pavlik
-    <ryan@sensics.com>;
+    <ryan@sensics.com>
     <http://sensics.com>
 */
 
@@ -17,14 +17,15 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginInterfaceC.h>
-#include <ogvr/Util/GenericDeleter.h>
+#include <ogvr/PluginKit/PluginKit.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <iostream>
+
+OGVR_MessageType dummyMessage;
 
 namespace {
 class DummyAsyncDevice {
@@ -52,7 +53,7 @@ class DummyAsyncDevice {
         // block on waiting for data.
         // once we have enough, call
         char *mydata = NULL;
-        ogvrDeviceSendData(m_dev, mydata, 0);
+        ogvrDeviceSendData(m_dev, dummyMessage, mydata, 0);
         return OGVR_RETURN_SUCCESS;
     }
     OGVR_DeviceToken m_dev;
@@ -66,10 +67,9 @@ OGVR_PLUGIN(org_opengoggles_example_selfcontainedDummyAsync) {
                         &d); // Puts an object in d that knows it's a
                              // threaded device so ogvrDeviceSendData knows
                              // that it needs to get a connection lock first.
-    DummyAsyncDevice *myAsync = new DummyAsyncDevice(d);
-    ogvrPluginRegisterDataWithDeleteCallback(
-        ctx, &ogvr::detail::generic_deleter<DummyAsyncDevice>,
-        static_cast<void *>(myAsync));
+    DummyAsyncDevice *myAsync = ogvr::pluginkit::registerObjectForDeletion(
+        ctx, new DummyAsyncDevice(d));
+    ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
     ogvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
                                  static_cast<void *>(myAsync));
     return OGVR_RETURN_SUCCESS;
