@@ -79,8 +79,9 @@ namespace client {
             new VRPNRouter<Predicate>(src, conn, dest, ctx, p));
         return ret;
     }
+
     VRPNContext::VRPNContext(const char appId[], const char host[])
-        : ::OGVR_ClientContextObject(appId), m_host(host), m_conn() {
+        : ::OGVR_ClientContextObject(appId), m_host(host) {
 
         std::string contextDevice = "OGVR@" + m_host;
         m_conn = vrpn_get_connection_by_name(contextDevice.c_str());
