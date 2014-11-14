@@ -5,8 +5,7 @@ set(API
     "${HEADER_LOCATION}/ClientContext_fwd.h"
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
-    "${HEADER_LOCATION}/CreateContext.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Export.h")
+    "${HEADER_LOCATION}/CreateContext.h")
 
 set(SOURCE
     ClientContext.cpp
