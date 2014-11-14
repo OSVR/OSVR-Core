@@ -1,8 +1,7 @@
 set(CLIENTS
     MinimalInit
-    TrackerCallback
-    #sample-tracker-reader
-)
+    TrackerCallback)
+
 foreach(name ${CLIENTS})
     add_executable(${name} ${name}.cpp)
     target_link_libraries(${name} ogvrClientKit)
