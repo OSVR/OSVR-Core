@@ -11,13 +11,3 @@ INPUT                  += src \
                           plugins \
                           apps
 
-# If the SOURCE_BROWSER tag is set to YES then a list of source files will be
-# generated. Documented entities will be cross-referenced with these sources.
-#
-# Note: To get rid of all source code in the generated output, make sure that
-# also VERBATIM_HEADERS is set to NO.
-# The default value is: NO.
-
-# For config item SOURCE_BROWSER, default is 0
-SOURCE_BROWSER         = YES
-VERBATIM_HEADERS       = YES
