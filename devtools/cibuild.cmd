@@ -1,7 +1,5 @@
 cd /d "%~dp0"
 cd ..
-rmdir /s /q install
-rmdir /s /q build
 mkdir build
 cd build
 cmake .. -G "Visual Studio 12" "-DCMAKE_INSTALL_PREFIX=%WORKSPACE%\install"
@@ -13,5 +11,3 @@ call "%WORKSPACE%\vendor\jenkins-ctest-plugin\run-test-and-save.bat" -C RelWithD
 
 cmake --build . --config Debug --target INSTALL
 cmake --build . --config RelWithDebInfo --target INSTALL
-
-cmake --build . --config RelWithDebInfo --target osvrPluginKit -- /p:RunCodeAnalysis=True
