@@ -18,8 +18,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginHost/RegistrationContext.h>
-#include <ogvr/Connection/Connection.h>
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Connection/Connection.h>
 
 // Library/third-party includes
 // - none
@@ -33,10 +33,10 @@ int main(int argc, char *argv[]) {
         std::cerr << "Must supply a plugin name to load." << std::endl;
         return 1;
     }
-    ogvr::pluginhost::RegistrationContext ctx;
-    ogvr::connection::ConnectionPtr conn =
-        ogvr::connection::Connection::createLocalConnection();
-    ogvr::connection::Connection::storeConnection(ctx, conn);
+    osvr::pluginhost::RegistrationContext ctx;
+    osvr::connection::ConnectionPtr conn =
+        osvr::connection::Connection::createLocalConnection();
+    osvr::connection::Connection::storeConnection(ctx, conn);
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;

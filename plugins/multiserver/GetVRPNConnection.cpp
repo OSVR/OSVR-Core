@@ -20,8 +20,8 @@
 #include "GetVRPNConnection.h"
 
 // Library/third-party includes
-#include <ogvr/Connection/Connection.h>
-#include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <vrpn_Connection.h>
 
 // Standard includes
@@ -29,20 +29,20 @@
 
 // Sneaky way to get an ID for VRPN.
 /// @todo solve this problem in a more sophisticated way.
-namespace ogvr {
+namespace osvr {
 namespace connection {
-    OGVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
+    OSVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
 } // namespace connection
-} // namespace ogvr
+} // namespace osvr
 
-vrpn_Connection *getVRPNConnection(OGVR_PluginRegContext ctx) {
-    ogvr::connection::ConnectionPtr conn =
-        ogvr::connection::Connection::retrieveConnection(
-            ogvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+vrpn_Connection *getVRPNConnection(OSVR_PluginRegContext ctx) {
+    osvr::connection::ConnectionPtr conn =
+        osvr::connection::Connection::retrieveConnection(
+            osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
                 .getParent());
     vrpn_Connection *ret = NULL;
     if (std::string(conn->getConnectionKindID()) ==
-        ogvr::connection::getVRPNConnectionKindID()) {
+        osvr::connection::getVRPNConnectionKindID()) {
         ret = static_cast<vrpn_Connection *>(conn->getUnderlyingObject());
     }
     return ret;

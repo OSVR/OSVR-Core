@@ -18,8 +18,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/Server/Server.h>
-#include <ogvr/Server/RegisterShutdownHandler.h>
+#include <osvr/Server/Server.h>
+#include <osvr/Server/RegisterShutdownHandler.h>
 
 // Library/third-party includes
 // - none
@@ -32,7 +32,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-static ogvr::server::ServerPtr server;
+static osvr::server::ServerPtr server;
 
 /// @brief Shutdown handler function - forcing the server pointer to be global.
 void handleShutdown() {
@@ -47,10 +47,10 @@ int main(int argc, char *argv[]) {
     }
     cout << "Creating server..." << endl;
 
-    server = ogvr::server::Server::createLocal();
+    server = osvr::server::Server::createLocal();
 
     cout << "Registering shutdown handler..." << endl;
-    ogvr::server::registerShutdownHandler<&handleShutdown>();
+    osvr::server::registerShutdownHandler<&handleShutdown>();
 
     cout << "Loading plugins..." << endl;
     for (int i = 1; i < argc; ++i) {

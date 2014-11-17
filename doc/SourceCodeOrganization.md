@@ -11,9 +11,9 @@ There are three main code directories in the root of this repository that contri
 [boost-header-policy]: http://www.boost.org/development/header.html
 
 ## Within the parallel interface/implementation trees
-Within `inc` and `src`, the top level directory is `ogvr`, serving as an umbrella for all directly-related framework libraries. Within `ogvr`, a number of directories are present, to divide up the interface (and to a lesser degree, the implementation) into logically-distinct parts.
+Within `inc` and `src`, the top level directory is `osvr`, serving as an umbrella for all directly-related framework libraries. Within `osvr`, a number of directories are present, to divide up the interface (and to a lesser degree, the implementation) into logically-distinct parts.
 
-Note that for clarity, a single compiled library might actually implement the interfaces from two directories under `inc/ogvr` in the case that it presents two different interfaces to different types of consumers. In the build system, though only a single output library might be compiled, additional "interface" targets are added to distinguish the interfaces. If this seems confusing, just ignore it as an implementation detail and pretend that each directory under `inc/ogvr` is a library of its own.
+Note that for clarity, a single compiled library might actually implement the interfaces from two directories under `inc/osvr` in the case that it presents two different interfaces to different types of consumers. In the build system, though only a single output library might be compiled, additional "interface" targets are added to distinguish the interfaces. If this seems confusing, just ignore it as an implementation detail and pretend that each directory under `inc/osvr` is a library of its own.
 
 - `Util` - Contains shared code useful to the framework but not directly pertaining to any particular facet. Much of this code is header-only: either self-configuring headers wrapping include files, C macro definitions, or C++ template code.
 

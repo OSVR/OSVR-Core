@@ -1,5 +1,5 @@
 # These plugins can run on just a bare PluginHost.
-set(OGVR_EXAMPLE_PLUGINS
+set(OSVR_EXAMPLE_PLUGINS
     NullPlugin
     NullDevice
     DummyHardwareDetect
@@ -8,21 +8,21 @@ set(OGVR_EXAMPLE_PLUGINS
     CACHE INTERNAL "" FORCE)
 
 # These plugins need a host with a Connection.
-set(OGVR_EXAMPLE_DEVICE_PLUGINS
+set(OSVR_EXAMPLE_DEVICE_PLUGINS
     DummyAsync
     DummySync
     DummyDetectAndCreateAsync
     CACHE INTERNAL "" FORCE)
-foreach(pluginname ${OGVR_EXAMPLE_PLUGINS} ${OGVR_EXAMPLE_DEVICE_PLUGINS})
+foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS})
     set(name org_opengoggles_example_${pluginname})
     add_library(${name} MODULE ${name}.cpp)
-    target_link_libraries(${name} ogvrPluginKitCpp)
+    target_link_libraries(${name} osvrPluginKitCpp)
     set_target_properties(${name} PROPERTIES
         PREFIX ""
-        FOLDER "OGVR Example Plugins")
+        FOLDER "OSVR Example Plugins")
 endforeach()
 
-set(CONFIG_FLAGS "-Dogvr_DIR=${PROJECT_BINARY_DIR}/ogvr")
+set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}/osvr")
 set(BUILD_FLAGS)
 if(MSVC)
 # TODO this is really for multi-config generators

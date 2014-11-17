@@ -24,7 +24,7 @@
 # The default value is: My Project.
 
 # For config item PROJECT_NAME, default is My Project
-PROJECT_NAME           = "OpenGoggles VR"
+PROJECT_NAME           = "OSVR Framework"
 
 # For config item OUTPUT_DIRECTORY, default is 
 OUTPUT_DIRECTORY       = doxygen
@@ -141,36 +141,36 @@ EXPAND_ONLY_PREDEF     = YES
 
 # For config item PREDEFINED, default is 
 PREDEFINED             = _cplusplus \
-                         OGVR_DOXYGEN \
-                         OGVR_HAVE_STRUCT_TIMEVAL \
-                         OGVR_PLUGINKIT_EXPORT= \
-                         OGVR_UTIL_EXPORT= \
-                         OGVR_CPP_ONLY(X)=X \
-                         OGVR_IN= \
-                         OGVR_IN_PTR= \
-                         OGVR_IN_OPT= \
-                         OGVR_IN_STRZ= \
-                         OGVR_IN_READS(X)= \
-                         OGVR_OUT= \
-                         OGVR_OUT_PTR= \
-                         OGVR_OUT_OPT= \
-                         OGVR_INOUT= \
-                         OGVR_INOUT_PTR= \
-                         OGVR_INOUT_OPT= \
-                         OGVR_FUNC_NONNULL(X)= \
+                         OSVR_DOXYGEN \
+                         OSVR_HAVE_STRUCT_TIMEVAL \
+                         OSVR_PLUGINKIT_EXPORT= \
+                         OSVR_UTIL_EXPORT= \
+                         OSVR_CPP_ONLY(X)=X \
+                         OSVR_IN= \
+                         OSVR_IN_PTR= \
+                         OSVR_IN_OPT= \
+                         OSVR_IN_STRZ= \
+                         OSVR_IN_READS(X)= \
+                         OSVR_OUT= \
+                         OSVR_OUT_PTR= \
+                         OSVR_OUT_OPT= \
+                         OSVR_INOUT= \
+                         OSVR_INOUT_PTR= \
+                         OSVR_INOUT_OPT= \
+                         OSVR_FUNC_NONNULL(X)= \
                          
 ## TODO: turn the SAL information into something useful in the docs?
-                         # OGVR_IN=/**[in]*/ \
-                         # OGVR_IN_PTR=/**[in]*/ \
-                         # OGVR_IN_OPT=/**[in]*/ \
-                         # OGVR_IN_STRZ=/**[in]*/ \
-                         # OGVR_IN_READS(X)=/**[in]*/ \
-                         # OGVR_OUT=/**[out]*/ \
-                         # OGVR_OUT_PTR=/**[out]*/ \
-                         # OGVR_OUT_OPT=/**[out]*/ \
-                         # OGVR_INOUT=/**[in,out]*/ \
-                         # OGVR_INOUT_PTR=/**[in,out]*/ \
-                         # OGVR_INOUT_OPT=/**[in,out]*/
+                         # OSVR_IN=/**[in]*/ \
+                         # OSVR_IN_PTR=/**[in]*/ \
+                         # OSVR_IN_OPT=/**[in]*/ \
+                         # OSVR_IN_STRZ=/**[in]*/ \
+                         # OSVR_IN_READS(X)=/**[in]*/ \
+                         # OSVR_OUT=/**[out]*/ \
+                         # OSVR_OUT_PTR=/**[out]*/ \
+                         # OSVR_OUT_OPT=/**[out]*/ \
+                         # OSVR_INOUT=/**[in,out]*/ \
+                         # OSVR_INOUT_PTR=/**[in,out]*/ \
+                         # OSVR_INOUT_OPT=/**[in,out]*/
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -180,8 +180,8 @@ PREDEFINED             = _cplusplus \
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 # For config item EXPAND_AS_DEFINED, default is 
-EXPAND_AS_DEFINED      = OGVR_CPP_ONLY \
-                         OGVR_C_ONLY
+EXPAND_AS_DEFINED      = OSVR_CPP_ONLY \
+                         OSVR_C_ONLY
 
 # If you set the HAVE_DOT tag to YES then doxygen will assume the dot tool is
 # available from the path. This tool is part of Graphviz (see:

@@ -1,5 +1,5 @@
 /** @brief The main namespace for all C++ elements of the framework.
 */
-namespace ogvr {
+namespace osvr {
 
 }

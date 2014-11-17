@@ -17,8 +17,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistrationC.h>
-#include <ogvr/Util/GenericDeleter.h>
+#include <osvr/PluginKit/PluginRegistrationC.h>
+#include <osvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
 // - none
@@ -35,14 +35,14 @@ class DummyDevice {
   private:
 };
 
-OGVR_PLUGIN(org_opengoggles_example_NullDevice) {
+OSVR_PLUGIN(org_opengoggles_example_NullDevice) {
 
     /// Create a "device" that actually does nothing.
     DummyDevice *myDevice = new DummyDevice();
     /// Must ask the core to tell us to delete it.
-    ogvrPluginRegisterDataWithDeleteCallback(
-        ctx, &ogvr::util::generic_deleter<DummyDevice>,
+    osvrPluginRegisterDataWithDeleteCallback(
+        ctx, &osvr::util::generic_deleter<DummyDevice>,
         static_cast<void *>(myDevice));
 
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }

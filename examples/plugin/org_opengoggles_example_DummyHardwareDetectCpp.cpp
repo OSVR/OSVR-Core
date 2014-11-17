@@ -18,7 +18,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistration.h>
+#include <osvr/PluginKit/PluginRegistration.h>
 
 // Library/third-party includes
 // - none
@@ -29,14 +29,14 @@
 class HardwareDetection {
   public:
     HardwareDetection(int initialVal) : m_data(initialVal) {}
-    OGVR_ReturnCode operator()(OGVR_PluginRegContext /*ctx*/) {
+    OSVR_ReturnCode operator()(OSVR_PluginRegContext /*ctx*/) {
 
         std::cout
             << "Got a detection request for hardware change, with dummy data "
             << m_data << std::endl;
         m_data++;
         std::cout << "Data now " << m_data << std::endl;
-        return OGVR_RETURN_SUCCESS;
+        return OSVR_RETURN_SUCCESS;
     }
 
   private:
@@ -44,19 +44,19 @@ class HardwareDetection {
     int m_data;
 };
 
-OGVR_PLUGIN(org_opengoggles_example_DummyHardwareDetectCpp) {
+OSVR_PLUGIN(org_opengoggles_example_DummyHardwareDetectCpp) {
     /// Register a detection callback function object: here passing it result of
     /// "new".
     /// Auto-registers for destruction.
-    ogvr::pluginkit::registerHardwareDetectCallback(ctx,
+    osvr::pluginkit::registerHardwareDetectCallback(ctx,
                                                     new HardwareDetection(0));
 
     /// Register a detection callback function object: here passing it a value.
     /// It will make a copy that it auto-registers for destruction.
     HardwareDetection myDetect(10);
-    ogvr::pluginkit::registerHardwareDetectCallback(ctx, myDetect);
+    osvr::pluginkit::registerHardwareDetectCallback(ctx, myDetect);
     /// Registering twice to demonstrate that copying occurs.
-    ogvr::pluginkit::registerHardwareDetectCallback(ctx, myDetect);
+    osvr::pluginkit::registerHardwareDetectCallback(ctx, myDetect);
 
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }

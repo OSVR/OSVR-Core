@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistrationC.h>
+#include <osvr/PluginKit/PluginRegistrationC.h>
 
 // Library/third-party includes
 // - none
@@ -25,7 +25,7 @@
 // Standard includes
 #include <iostream>
 
-OGVR_PLUGIN(org_opengoggles_example_NullPlugin) {
+OSVR_PLUGIN(org_opengoggles_example_NullPlugin) {
     std::cout << "In plugin EP!" << std::endl;
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }

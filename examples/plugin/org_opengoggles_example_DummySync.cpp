@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginKit.h>
+#include <osvr/PluginKit/PluginKit.h>
 
 // Library/third-party includes
 // - none
@@ -25,17 +25,17 @@
 // Standard includes
 #include <iostream>
 
-OGVR_MessageType dummyMessage;
+OSVR_MessageType dummyMessage;
 
 class DummySyncDevice {
   public:
-    DummySyncDevice(OGVR_DeviceToken d) : m_dev(d) {
+    DummySyncDevice(OSVR_DeviceToken d) : m_dev(d) {
         std::cout << "Constructing dummy synchronous device" << std::endl;
     }
 
     /// Trampoline: C-compatible callback bouncing into a member function.
     /// Also something we can wrap.
-    static OGVR_ReturnCode update(void *userData) {
+    static OSVR_ReturnCode update(void *userData) {
         return static_cast<DummySyncDevice *>(userData)->m_update();
     }
     ~DummySyncDevice() {
@@ -43,28 +43,28 @@ class DummySyncDevice {
     }
 
   private:
-    OGVR_ReturnCode m_update() {
+    OSVR_ReturnCode m_update() {
         std::cout << "In DummySyncDevice::m_update" << std::endl;
         // get some data
         const char mydata[] = "something";
-        ogvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
-        return OGVR_RETURN_SUCCESS;
+        osvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
+        return OSVR_RETURN_SUCCESS;
     }
-    OGVR_DeviceToken m_dev;
+    OSVR_DeviceToken m_dev;
 };
 
-OGVR_PLUGIN(org_opengoggles_example_DummySync) {
+OSVR_PLUGIN(org_opengoggles_example_DummySync) {
     /// Create a synchronous (in the mainloop) device
-    OGVR_DeviceToken d;
-    ogvrDeviceSyncInit(ctx, "MySyncDevice",
+    OSVR_DeviceToken d;
+    osvrDeviceSyncInit(ctx, "MySyncDevice",
                        &d); // Puts a token in d that knows it's a sync
-                            // device so ogvrDeviceSendData knows that it
+                            // device so osvrDeviceSendData knows that it
                             // doesn't need to acquire a lock.
     DummySyncDevice *mySync =
-        ogvr::pluginkit::registerObjectForDeletion(ctx, new DummySyncDevice(d));
+        osvr::pluginkit::registerObjectForDeletion(ctx, new DummySyncDevice(d));
 
-    ogvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
-    ogvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
+    osvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
+    osvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
                                          static_cast<void *>(mySync));
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }

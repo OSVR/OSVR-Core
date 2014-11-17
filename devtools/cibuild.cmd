@@ -14,4 +14,4 @@ call "%WORKSPACE%\vendor\jenkins-ctest-plugin\run-test-and-save.bat" -C RelWithD
 cmake --build . --config Debug --target INSTALL
 cmake --build . --config RelWithDebInfo --target INSTALL
 
-cmake --build . --config RelWithDebInfo --target ogvrPluginKit -- /p:RunCodeAnalysis=True
+cmake --build . --config RelWithDebInfo --target osvrPluginKit -- /p:RunCodeAnalysis=True

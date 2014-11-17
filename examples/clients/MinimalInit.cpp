@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/ClientKit/ContextC.h>
+#include <osvr/ClientKit/ContextC.h>
 
 // Library/third-party includes
 // - none
@@ -26,16 +26,16 @@
 #include <iostream>
 
 int main() {
-    OGVR_ClientContext ctx =
-        ogvrClientInit("org.opengoggles.exampleclients.MinimalInit");
+    OSVR_ClientContext ctx =
+        osvrClientInit("org.opengoggles.exampleclients.MinimalInit");
     std::cout << "OK, library initialized." << std::endl;
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {
-        ogvrClientUpdate(ctx);
+        osvrClientUpdate(ctx);
     }
 
-    ogvrClientShutdown(ctx);
+    osvrClientShutdown(ctx);
 
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;

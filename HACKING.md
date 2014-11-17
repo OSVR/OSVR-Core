@@ -37,18 +37,18 @@ scripts in `/devtools/`:
 - Be consistent and match surrounding code.
 
 ### C Code (APIs only)
-- Functions should be prefixed by `ogvr` - this means a function is 
-    named like `ogvrMyFunction` 
+- Functions should be prefixed by `osvr` - this means a function is 
+    named like `osvrMyFunction` 
 
-- Types (typedefs, structs) should be prefixed by `OGVR_` - this means a 
-    type is named like `OGVR_MyType` 
+- Types (typedefs, structs) should be prefixed by `OSVR_` - this means a 
+    type is named like `OSVR_MyType` 
 
-- Macros, constants, and enum values should also be prefixed by `OGVR_`
+- Macros, constants, and enum values should also be prefixed by `OSVR_`
 
 ### C++ Code
-- Use lowercase namespaces such as `ogvr`, nested appropriately as required.
+- Use lowercase namespaces such as `osvr`, nested appropriately as required.
 
-- Do not add prefixes (`C`, `I`, `ogvr`, `OGVR`, etc) to the beginning 
+- Do not add prefixes (`C`, `I`, `osvr`, `OSVR`, etc) to the beginning 
     of types or functions - those are either Hungarian notation or made 
     redundant by C++'s support for namespaces. 
 

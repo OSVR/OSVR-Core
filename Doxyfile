@@ -1,7 +1,7 @@
 @INCLUDE = Doxyfile-common
 
 
-PROJECT_NAME           = "OpenGoggles VR (Internal Docs)"
+PROJECT_NAME           = "OSVR Framework (Internal Development Docs)"
 
 STRIP_FROM_INC_PATH    += src
 

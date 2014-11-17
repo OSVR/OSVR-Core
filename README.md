@@ -1,7 +1,7 @@
-OGVR Core System
+OSVR Core System
 ================
 
-This is the code and libraries to use when developing with OGVR.
+This is the code and libraries to use when developing with OSVR.
 
 - For developing plugins, you'll use the @ref PluginKit library.
 - For developing applications using the framework, you'll use the @ref ClientKit library.

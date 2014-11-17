@@ -1,0 +1,47 @@
+/** @file
+    @brief Internal, configured header file for verbosity macros.
+
+    If this filename ends in `.h`, don't edit it: your edits will
+    be lost next time this file is regenerated!
+
+    @date 2014
+
+    @author
+    Ryan Pavlik
+    <ryan@sensics.com>
+    <http://sensics.com>
+*/
+
+// Copyright 2014 Sensics, Inc.
+//
+// All rights reserved.
+//
+// (Final version intended to be licensed under
+// the Apache License, Version 2.0)
+
+#ifndef INCLUDED_Verbosity_h_GUID_92D43527_D3AC_4BB4_FA39_91252412C1FF
+#define INCLUDED_Verbosity_h_GUID_92D43527_D3AC_4BB4_FA39_91252412C1FF
+
+#include <osvr/Util/MacroToolsC.h>
+
+#cmakedefine OSVR_UTIL_DEV_VERBOSE
+
+/** @def OSVR_DEV_VERBOSE_DISABLE
+    @brief Define at the top of a file, before including Verbosity.h,
+    to disable verbose messages for that file only.
+*/
+
+#if defined(OSVR_UTIL_DEV_VERBOSE) && !defined(OSVR_DEV_VERBOSE_DISABLE)
+
+#include <iostream>
+#define OSVR_DEV_VERBOSE(X)                                                    \
+    OSVR_UTIL_MULTILINE_BEGIN std::cout << X << std::endl;                     \
+    OSVR_UTIL_MULTILINE_END
+
+#else
+
+#define OSVR_DEV_VERBOSE(X) OSVR_UTIL_MULTILINE_BEGIN OSVR_UTIL_MULTILINE_END
+
+#endif
+
+#endif // INCLUDED_Verbosity_h_GUID_92D43527_D3AC_4BB4_FA39_91252412C1FF

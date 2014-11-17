@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(ogvrcore)
+project(osvrcore)
 
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -7,13 +7,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 ###
 # Package Options
 ###
-set(CPACK_PACKAGE_NAME "ogvr-core")
+set(CPACK_PACKAGE_NAME "osvr-core")
 set(CPACK_PACKAGE_VENDOR "Sensics, Inc")
 set(CPACK_PACKAGE_CONTACT "<support@opengoggles.org>")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 1)
-set(OGVR_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION ${OGVR_VERSION})
+set(OSVR_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION ${OSVR_VERSION})
 
 include(GetGitRevisionDescription)
 git_describe(GIT_REVISION_DESCRIPTION --tags --match v*)
@@ -119,7 +119,7 @@ set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "d")
 endif()
-add_subdirectory(src/ogvr)
+add_subdirectory(src/osvr)
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "")
 endif()
@@ -181,27 +181,27 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
 # Set Up Package for External Usage
 ###
 include(CMakePackageConfigHelpers)
-set(BUILD_CONFIG_BASE "${CMAKE_CURRENT_BINARY_DIR}/ogvr/ogvr")
-set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/ogvr")
+set(BUILD_CONFIG_BASE "${CMAKE_CURRENT_BINARY_DIR}/osvr/osvr")
+set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
 write_basic_package_version_file(
     "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
-    VERSION ${OGVR_VERSION}
+    VERSION ${OSVR_VERSION}
     COMPATIBILITY AnyNewerVersion)
 
-export(EXPORT ogvrTargets
+export(EXPORT osvrTargets
     FILE "${BUILD_CONFIG_BASE}Targets.cmake"
-    NAMESPACE ogvr::)
+    NAMESPACE osvr::)
 
-configure_file(ogvrConfig.cmake
+configure_file(osvrConfig.cmake
     "${BUILD_CONFIG_BASE}Config.cmake"
     COPYONLY)
 
-install(EXPORT ogvrTargets
+install(EXPORT osvrTargets
     FILE
-    ogvrTargets.cmake
+    osvrTargets.cmake
     NAMESPACE
-    ogvr::
+    osvr::
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT
@@ -209,7 +209,7 @@ install(EXPORT ogvrTargets
 
 install(
     FILES
-    ogvrConfig.cmake
+    osvrConfig.cmake
     "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}

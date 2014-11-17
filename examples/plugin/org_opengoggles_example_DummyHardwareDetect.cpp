@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginKit/PluginRegistrationC.h>
+#include <osvr/PluginKit/PluginRegistrationC.h>
 
 // Library/third-party includes
 // - none
@@ -27,18 +27,18 @@
 
 static int sampleHardwareUserdata = 1;
 
-static OGVR_ReturnCode detectHardwareChange(OGVR_PluginRegContext /*ctx*/,
+static OSVR_ReturnCode detectHardwareChange(OSVR_PluginRegContext /*ctx*/,
                                             void *userData) {
     int &data = *static_cast<int *>(userData);
     std::cout << "Got a detection request for hardware change, with user data "
               << data << std::endl;
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }
 
-OGVR_PLUGIN(org_opengoggles_example_DummyHardwareDetect) {
+OSVR_PLUGIN(org_opengoggles_example_DummyHardwareDetect) {
     /// Register a detect callback, with some dummy userdata.
-    ogvrPluginRegisterHardwareDetectCallback(ctx, &detectHardwareChange,
+    osvrPluginRegisterHardwareDetectCallback(ctx, &detectHardwareChange,
                                              &sampleHardwareUserdata);
 
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }

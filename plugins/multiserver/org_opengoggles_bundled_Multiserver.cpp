@@ -19,11 +19,11 @@
 
 // Internal Includes
 #include "GetVRPNConnection.h"
-#include <ogvr/PluginKit/PluginKit.h>
-#include <ogvr/PluginHost/RegistrationContext.h>
-#include <ogvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <ogvr/Connection/Connection.h>
-#include <ogvr/Util/UniquePtr.h>
+#include <osvr/PluginKit/PluginKit.h>
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
@@ -37,16 +37,16 @@
 #include <string>
 #include <sstream>
 
-template <typename T> OGVR_ReturnCode callMainloop(void *userdata) {
+template <typename T> OSVR_ReturnCode callMainloop(void *userdata) {
     T *obj = static_cast<T *>(userdata);
     obj->mainloop();
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }
 
 class VRPNHardwareDetect {
   public:
     typedef std::map<std::string, size_t> NameCountMap;
-    OGVR_ReturnCode operator()(OGVR_PluginRegContext ctx) {
+    OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
         struct hid_device_info *enumData = hid_enumerate(0, 0);
         for (struct hid_device_info *dev = enumData; dev != NULL;
              dev = dev->next) {
@@ -58,19 +58,19 @@ class VRPNHardwareDetect {
             }
         }
         hid_free_enumeration(enumData);
-        return OGVR_RETURN_SUCCESS;
+        return OSVR_RETURN_SUCCESS;
     }
     template <typename T>
-    void constructAndRegister(OGVR_PluginRegContext ctx,
+    void constructAndRegister(OSVR_PluginRegContext ctx,
                               std::string const &nameStem) {
-        ogvr::pluginhost::PluginSpecificRegistrationContext &pluginCtx =
-            ogvr::pluginhost::PluginSpecificRegistrationContext::get(ctx);
+        osvr::pluginhost::PluginSpecificRegistrationContext &pluginCtx =
+            osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx);
         std::string name = pluginCtx.getName() + "/" + assignName(nameStem);
         std::cout << "Creating " << name << std::endl;
-        ogvr::connection::ConnectionPtr conn =
-            ogvr::connection::Connection::retrieveConnection(
+        osvr::connection::ConnectionPtr conn =
+            osvr::connection::Connection::retrieveConnection(
                 pluginCtx.getParent());
-        ogvr::pluginkit::PluginContext context(ctx);
+        osvr::pluginkit::PluginContext context(ctx);
 
         T *dev = context.registerObjectForDeletion(
             new T(name.c_str(), getVRPNConnection(ctx)));
@@ -96,11 +96,11 @@ class VRPNHardwareDetect {
     NameCountMap m_nameCount;
 };
 
-OGVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
-    ogvr::pluginkit::PluginContext context(ctx);
+OSVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
+    osvr::pluginkit::PluginContext context(ctx);
 
-    ogvr::unique_ptr<VRPNHardwareDetect> detect(new VRPNHardwareDetect);
+    osvr::unique_ptr<VRPNHardwareDetect> detect(new VRPNHardwareDetect);
 
     context.registerHardwareDetectCallback(detect.release());
-    return OGVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }

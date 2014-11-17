@@ -18,7 +18,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <ogvr/PluginHost/RegistrationContext.h>
+#include <osvr/PluginHost/RegistrationContext.h>
 
 // Library/third-party includes
 // - none
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Must supply a plugin name to load." << std::endl;
         return 1;
     }
-    ogvr::pluginhost::RegistrationContext ctx;
+    osvr::pluginhost::RegistrationContext ctx;
 
     try {
         std::cout << "Trying to load plugin " << argv[1] << std::endl;

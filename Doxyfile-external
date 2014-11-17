@@ -1,9 +1,5 @@
 @INCLUDE = Doxyfile-common
 
-
-PROJECT_NAME           = "OpenGoggles VR"
-
-
 # If the HIDE_UNDOC_MEMBERS tag is set to YES, Doxygen will hide all
 # undocumented members of documented classes, files or namespaces.
 # If set to NO (the default) these members will be included in the
@@ -32,4 +28,4 @@ HIDE_FRIEND_COMPOUNDS  = YES
 
 GENERATE_TODOLIST      = NO
 
-PREDEFINED += OGVR_DOXYGEN_EXTERNAL
+PREDEFINED += OSVR_DOXYGEN_EXTERNAL
