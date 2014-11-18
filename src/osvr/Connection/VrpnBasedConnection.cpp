@@ -36,9 +36,11 @@ namespace connection {
         case VRPN_LOCAL_ONLY: {
             m_vrpnConnection =
                 vrpn_ConnectionPtr::create_server_connection("localhost");
+            break;
         }
         case VRPN_SHARED: {
             m_vrpnConnection = vrpn_ConnectionPtr::create_server_connection();
+            break;
         }
         }
     }
