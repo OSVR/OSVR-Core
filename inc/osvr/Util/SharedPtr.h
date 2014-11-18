@@ -28,7 +28,9 @@
 
 namespace osvr {
 using std::shared_ptr;
+using std::weak_ptr;
 using std::make_shared;
+using std::enable_shared_from_this;
 } // namespace osvr
 #endif
 
