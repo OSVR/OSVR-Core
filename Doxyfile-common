@@ -98,6 +98,7 @@ INPUT                  = README.md \
 # For config item RECURSIVE, default is 0
 RECURSIVE              = YES
 
+IMAGE_PATH = doc
 # If the USE_MDFILE_AS_MAINPAGE tag refers to the name of a markdown file that
 # is part of the input, its contents will be placed on the main page
 # (index.html). This can be useful if you have a project on for instance GitHub
