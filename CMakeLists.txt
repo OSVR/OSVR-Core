@@ -67,8 +67,8 @@ include(MSVCMultipleProcessCompile)
 
 include(CMakeBoostHelper)
 
-if(MSVC_IDE AND MSVC_VERSION LESS 1700)
-    # At least VS 2013 Express has folder support...
+if(MSVC_IDE AND MSVC_VERSION LESS 1600)
+    # VS 2012 Express and newer has folder support...
     option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE. May only work in non-Express Editions!" OFF)
 else()
     option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE." ON)
