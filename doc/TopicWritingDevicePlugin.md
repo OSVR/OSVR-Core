@@ -1,13 +1,13 @@
 # Writing a basic device plugin              {#TopicWritingDevicePlugin}
 
-Writing a device plugin means you'll be building against the PluginKit library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure, so you can more easily integrate it with an existing driver codebase. However, the following steps can help you build a plugin from scratch.
+Writing a device plugin means you'll be building against the @ref PluginKit library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure, so you can more easily integrate it with an existing driver codebase. However, the following steps can help you build a plugin from scratch.
 
 1. Make a copy of the directory `/examples/plugin/selfcontained` as the starting point for your new plugin repository.
   - This assumes that your plugin will be "out-of-tree" - that is, not hosted in the main Core repository.
 2. Do what it says in that `README.md` file to change the plugin name and build system.
-3. Implement a hardware poll callback (to determine if your device is connected):
+3. Implement a hardware detection callback (to determine if your device is connected):
   - This can take the form of a class with a function call operator (`operator()`), taking `OSVR_PluginRegContext ctx` and returning `OSVR_ReturnCode`.
-  - See `/examples/plugin/org_opengoggles_example_DummyHardwarePollCpp2.cpp` for a sample.
+  - See `/examples/plugin/org_opengoggles_example_DummyHardwareDetectCpp2.cpp` for a sample.
   - See lines 47-51 to see how to create and register an instance of that class.
   - From within your callback, if the device exists, create a device token (see the `DummyAsync` or `DummySync` examples like `org_opengoggles_example_DummyAsync.cpp`).
 4. In the hardware poll callback, do lines 63-72 of the DummyAsync file (perhaps skip line 70 if you are using an existing message type).
