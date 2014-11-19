@@ -84,7 +84,7 @@ endmacro()
 
 add_subdirectory(Util)
 add_subdirectory(PluginHost)
-add_subdirectory(VRPN)
+#add_subdirectory(VRPN)
 add_subdirectory(Connection)
 add_subdirectory(PluginKit)
 add_subdirectory(Server)
