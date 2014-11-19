@@ -67,11 +67,11 @@ namespace client {
         value_type const &get() const { return m_value; }
 
         template <typename F> void visitChildren(F &visitor) {
-            std::for_each(begin(m_children), end(m_children), visitor)
+            std::for_each(begin(m_children), end(m_children), visitor);
         }
 
         template <typename F> void visitConstChildren(F &visitor) const {
-            std::for_each(begin(m_children), end(m_children), visitor)
+            std::for_each(begin(m_children), end(m_children), visitor);
         }
 
       private:
@@ -111,7 +111,7 @@ namespace client {
             throw std::logic_error("Can't create a child with the same name as "
                                    "an existing child!");
         }
-        TreeNodePtr ret(new TreeNode(parent, name));
+        ptr_type ret(new TreeNode(parent, name));
         parent.m_addChild(ret);
         return *ret;
     }
@@ -126,7 +126,7 @@ namespace client {
     template <typename ValueType>
     inline TreeNode<ValueType> &
     TreeNode<ValueType>::getOrCreateChildByName(std::string const &name) {
-        TreeNodePtr child = m_getChildByName(name);
+        ptr_type child = m_getChildByName(name);
         if (child) {
             return *child;
         }
@@ -143,10 +143,10 @@ namespace client {
     TreeNode<ValueType>::m_getChildByName(std::string const &name) {
         /// @todo Don't use a linear search here - use an unordered map or
         /// something.
-        ChildList::const_iterator it = std::find_if(
+        typename ChildList::const_iterator it = std::find_if(
             begin(m_children), end(m_children),
-            [&](TreeNodePtr const &n) { return n->getName() == name; });
-        TreeNodePtr ret;
+            [&](ptr_type const &n) { return n->getName() == name; });
+        ptr_type ret;
         if (it != end(m_children)) {
             ret = *it;
         }
@@ -160,13 +160,9 @@ namespace client {
     }
 
     template <typename ValueType>
-    inline TreeNode<ValueType>::TreeNode(TreeNode &parent,
+    inline TreeNode<ValueType>::TreeNode(TreeNode<ValueType> &parent,
                                          std::string const &name)
         : m_name(name), m_parent(parent.shared_from_this()), m_children() {
-        if (m_parent.expired()) {
-            throw std::logic_error(
-                "Can't create a named path node with no parent!");
-        }
         if (m_name.empty()) {
             throw std::logic_error(
                 "Can't create a named path node with an empty name!");
