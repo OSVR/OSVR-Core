@@ -6,6 +6,10 @@ if(BUILD_TESTING)
 endif()
 set(BUILD_SHARED_LIBS OFF)
 
+if(NOT EXISTS "vrpn/vrpn_Connection.h" OR NOT EXISTS "vrpn/submodules/hidapi/hidapi/hidapi.h")
+	message(FATAL_ERROR "You are missing the VRPN git submodule or one of its submodules- you must have not done a recursive clone. You can get it now by running git submodule update --init --recursive from the root source directory.")
+endif()
+
 # Build VRPN as subproject
 set(VRPN_GPL_SERVER FALSE CACHE INTERNAL "" FORCE)
 set(VRPN_BUILD_SERVER_LIBRARY TRUE CACHE INTERNAL "" FORCE)
