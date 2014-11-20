@@ -84,11 +84,12 @@ namespace util {
         /// @brief Is the current node a root node?
         bool isRoot() const;
 
+
         /// @brief Reference accessor for contained value.
-        value_type &get() { return m_value; }
+        value_type &value() { return m_value; }
 
         /// @brief Const reference accessor for contained value.
-        value_type const &get() const { return m_value; }
+        value_type const &value() const { return m_value; }
 
         /// @brief Generic visitation method that calls a functor on each of the
         /// children in an undefined order.
