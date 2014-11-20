@@ -48,6 +48,8 @@ TEST(TreeNode, RootInvariants) {
         ASSERT_TRUE(tree->getName().empty());
         ASSERT_FALSE(tree->hasChildren());
         ASSERT_EQ(tree->numChildren(), 0);
+        ASSERT_EQ(tree->value(), 0)
+            << "Default constructed int is 0";
     }
     {
         StringTreePtr tree;
