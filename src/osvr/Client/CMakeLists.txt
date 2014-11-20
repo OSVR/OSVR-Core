@@ -6,6 +6,7 @@ set(API
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/CreateContext.h"
+    "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathTree.h"
     "${HEADER_LOCATION}/TreeNode.h"
     "${HEADER_LOCATION}/TreeNode_fwd.h")
@@ -14,6 +15,7 @@ set(SOURCE
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
+    PathElementTypes.cpp
     PathTree.cpp
     TreeNode.cpp
     VRPNContext.cpp

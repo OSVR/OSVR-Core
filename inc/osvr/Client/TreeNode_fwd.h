@@ -30,13 +30,11 @@
 
 namespace osvr {
 namespace client {
-    template <typename ValueType>
-    class TreeNode;
-    
+    template <typename ValueType> class TreeNode;
+
     /// @brief Dummy struct containing the ownership pointer type for a
     /// TreeNode. (Actually a metafunction...)
-    template <typename ValueType>
-    struct TreeNodePointer {
+    template <typename ValueType> struct TreeNodePointer {
         typedef shared_ptr<TreeNode<ValueType> > type;
     };
 } // namespace client
