@@ -13,6 +13,8 @@ if(COMPILER_SUPPORTS_CXX11)
     set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_REQUIRED_FLAGS "-std=c++0x")
+elseif(MSVC)
+    set(CMAKE_REQUIRED_FLAGS)
 endif()
 
 
