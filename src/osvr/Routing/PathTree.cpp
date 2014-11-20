@@ -29,7 +29,7 @@
 
 namespace osvr {
 namespace routing {
-//    PathTree::PathTree() : m_root(PathTreeNode::createRoot()) {}
+    PathTree::PathTree() : m_root(Node::createRoot()) {}
 
 } // namespace routing
 } // namespace osvr

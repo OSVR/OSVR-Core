@@ -33,8 +33,6 @@
 namespace osvr {
 namespace routing {
 
-    
-
     /// @brief A tree representation, with path/url syntax, of the known OSVR
     /// system.
     class PathTree : boost::noncopyable {
@@ -45,13 +43,9 @@ namespace routing {
         /// @brief Constructor
         OSVR_ROUTING_EXPORT PathTree();
 
-        template<typename F>
-        void visitTree(F & functor) {
-            functor(*m_root);
-        }
+        template <typename F> void visitTree(F &functor) { functor(*m_root); }
 
-        template<typename F>
-        void visitConstTree(F & functor) const {
+        template <typename F> void visitConstTree(F &functor) const {
             functor(*m_root);
         }
 

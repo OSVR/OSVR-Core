@@ -51,6 +51,7 @@ namespace util {
     /// child of the given name (default-constructing one if it doesn't exist)
     ///
     /// @todo methods to remove a child (by pointer and by name)
+    /// @todo We have parent pointers - use them or remove them
     template <typename ValueType>
     class TreeNode : public enable_shared_from_this<TreeNode<ValueType> >,
                      boost::noncopyable {
@@ -58,7 +59,8 @@ namespace util {
         /// @brief This template instantiation's type
         typedef TreeNode<ValueType> type;
 
-        /// @brief The pointer for holding this template instantiation
+        /// @brief The pointer for holding this template instantiation - used
+        /// primarily/only in holding the root node
         typedef typename TreeNodePointer<ValueType>::type ptr_type;
 
         /// @brief The contained value type
