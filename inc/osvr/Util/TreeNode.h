@@ -235,7 +235,8 @@ namespace util {
     template <typename ValueType>
     inline TreeNode<ValueType>::TreeNode(TreeNode<ValueType> &parent,
                                          std::string const &name)
-        : m_name(name), m_parent(parent.shared_from_this()), m_children() {
+        : m_value(), m_children(), m_name(name),
+          m_parent(parent.shared_from_this()) {
         if (m_name.empty()) {
             throw std::logic_error(
                 "Can't create a named path node with an empty name!");
@@ -244,7 +245,7 @@ namespace util {
 
     template <typename ValueType>
     inline TreeNode<ValueType>::TreeNode()
-        : m_name(), m_parent(), m_children() {
+        : m_value(), m_children(), m_name(), m_parent() {
         /// Special root constructor
     }
 
