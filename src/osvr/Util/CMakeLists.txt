@@ -47,6 +47,8 @@ set(API
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
     "${HEADER_LOCATION}/TimeValue_fwd.h"
+    "${HEADER_LOCATION}/TreeNode.h"
+    "${HEADER_LOCATION}/TreeNode_fwd.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/Util.h"
     "${HEADER_LOCATION}/Vec3C.h"

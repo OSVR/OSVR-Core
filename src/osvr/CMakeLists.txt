@@ -90,5 +90,7 @@ add_subdirectory(PluginKit)
 add_subdirectory(Server)
 
 
+add_subdirectory(Routing)
+
 add_subdirectory(Client)
 add_subdirectory(ClientKit)

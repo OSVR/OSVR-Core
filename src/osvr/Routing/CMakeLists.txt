@@ -1,18 +1,13 @@
-osvr_setup_lib_vars(Client)
+osvr_setup_lib_vars(Routing)
 
 set(API
-    "${HEADER_LOCATION}/ClientContext.h"
-    "${HEADER_LOCATION}/ClientContext_fwd.h"
-    "${HEADER_LOCATION}/ClientInterface.h"
-    "${HEADER_LOCATION}/ClientInterfacePtr.h"
-    "${HEADER_LOCATION}/CreateContext.h")
+    "${HEADER_LOCATION}/PathElementTypes.h"
+    "${HEADER_LOCATION}/PathElementTypes_fwd.h"
+    "${HEADER_LOCATION}/PathTree.h")
 
 set(SOURCE
-    ClientContext.cpp
-    ClientInterface.cpp
-    CreateContext.cpp
-    VRPNContext.cpp
-    VRPNContext.h)
+    PathElementTypes.cpp
+    PathTree.cpp)
 
 osvr_add_library()
 
@@ -30,5 +25,4 @@ target_include_directories(${LIBNAME_FULL}
 
 target_link_libraries(${LIBNAME_FULL}
     PRIVATE
-    osvrUtilCpp
-    vendored-vrpn)
+    osvrUtilCpp)

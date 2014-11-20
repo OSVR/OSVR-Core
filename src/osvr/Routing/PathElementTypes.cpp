@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/Client/TreeNode.h>
+#include <osvr/Routing/PathElementTypes.h>
 
 // Library/third-party includes
 // - none
@@ -26,8 +26,7 @@
 // - none
 
 namespace osvr {
-namespace client {
-    typedef TreeNode<std::string> StringTreeNode;
-
+namespace routing {
+    namespace elements {} // namespace elements
 } // namespace client
 } // namespace osvr

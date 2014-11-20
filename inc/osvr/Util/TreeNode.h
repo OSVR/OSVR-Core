@@ -20,7 +20,7 @@
 #define INCLUDED_TreeNode_h_GUID_EEC6C5AF_332A_4780_55C2_D794B3BF5106
 
 // Internal Includes
-#include <osvr/Client/TreeNode_fwd.h>
+#include <osvr/Util/TreeNode_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -33,7 +33,24 @@
 #include <stdexcept>
 
 namespace osvr {
-namespace client {
+namespace util {
+    /// @brief A node in a generic tree, which can contain an object by value.
+    /// @tparam ValueType The contained value type: must be
+    /// default-constructible.
+    ///
+    /// Key features:
+    ///
+    /// - All non-root nodes are named, and children may only be created
+    /// attached to a parent.
+    /// - All children of a given node are uniquely named.
+    /// - Node names are immutable.
+    /// - Contained values are mutable.
+    /// - Traversal is provided for by templated visit methods that accept a
+    /// functor.
+    /// - A "get or create" method is provided that guarantees the return a
+    /// child of the given name (default-constructing one if it doesn't exist)
+    ///
+    /// @todo methods to remove a child (by pointer and by name)
     template <typename ValueType>
     class TreeNode : public enable_shared_from_this<TreeNode<ValueType> >,
                      boost::noncopyable {
@@ -42,15 +59,14 @@ namespace client {
         typedef TreeNode<ValueType> type;
 
         /// @brief The pointer for holding this template instantiation
-        typedef typename TreeNodePointer<type>::type ptr_type;
-
-        /// @brief The weak pointer for accessing this template instantiation
-        typedef weak_ptr<type> weak_ptr_type;
+        typedef typename TreeNodePointer<ValueType>::type ptr_type;
 
         /// @brief The contained value type
         typedef ValueType value_type;
 
         /// @brief Create a path node
+        /// @throws std::logic_error if a child of that name already exists or
+        /// if the name provided is empty.
         static type &create(TreeNode &parent, std::string const &name);
 
         /// @brief Create a root.
@@ -59,19 +75,37 @@ namespace client {
         /// @brief Get the named child, creating it if it doesn't exist.
         type &getOrCreateChildByName(std::string const &name);
 
+        /// @brief Gets the name of the current node. This will be empty if and
+        /// only if this is the root.
         std::string const &getName() const;
 
+        /// @brief Is the current node a root node?
         bool isRoot() const;
 
+        /// @brief Reference accessor for contained value.
         value_type &get() { return m_value; }
+
+        /// @brief Const reference accessor for contained value.
         value_type const &get() const { return m_value; }
 
+        /// @brief Generic visitation method that calls a functor on each of the
+        /// children in an undefined order.
         template <typename F> void visitChildren(F &visitor) {
             std::for_each(begin(m_children), end(m_children), visitor);
         }
 
+        /// @brief Generic constant visitation method that calls a functor on
+        /// each of the children (as const) in an undefined order.
         template <typename F> void visitConstChildren(F &visitor) const {
             std::for_each(begin(m_children), end(m_children), visitor);
+        }
+
+        /// @brief Generic constant visitation method that calls a functor on
+        /// each of the children in an undefined order.
+        /// @todo does this overload clutter the interface and reduce clarity
+        /// between const and non-const visitors?
+        template <typename F> void visitChildren(F &visitor) const {
+            visitConstChildren(visitor);
         }
 
       private:
@@ -98,6 +132,11 @@ namespace client {
 
         /// @brief Name
         std::string const m_name;
+
+        /// @brief The weak pointer for accessing this template instantiation
+        ///
+        /// Used for storing a parent pointer.
+        typedef weak_ptr<type> weak_ptr_type;
 
         /// @brief Weak pointer to parent.
         weak_ptr_type m_parent;
@@ -182,7 +221,7 @@ namespace client {
         return m_name.empty();
     }
 
-} // namespace client
+} // namespace routing
 } // namespace osvr
 
 #endif // INCLUDED_TreeNode_h_GUID_EEC6C5AF_332A_4780_55C2_D794B3BF5106

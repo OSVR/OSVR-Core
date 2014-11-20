@@ -29,7 +29,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace util {
     template <typename ValueType> class TreeNode;
 
     /// @brief Dummy struct containing the ownership pointer type for a
@@ -37,7 +37,7 @@ namespace client {
     template <typename ValueType> struct TreeNodePointer {
         typedef shared_ptr<TreeNode<ValueType> > type;
     };
-} // namespace client
+} // namespace util
 } // namespace osvr
 
 #endif // INCLUDED_TreeNode_fwd_h_GUID_7AEB7FE7_1E26_478B_61DD_D39292047B03
