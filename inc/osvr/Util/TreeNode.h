@@ -84,6 +84,13 @@ namespace util {
         /// @brief Is the current node a root node?
         bool isRoot() const;
 
+        /// @brief Does the node have any children?
+        ///
+        /// May be faster than testing numChildren() != 0
+        bool hasChildren() const;
+
+        /// @brief How many children does the node have?
+        size_t numChildren() const;
 
         /// @brief Reference accessor for contained value.
         value_type &value() { return m_value; }
@@ -181,6 +188,26 @@ namespace util {
     }
 
     template <typename ValueType>
+    inline bool TreeNode<ValueType>::isRoot() const {
+        BOOST_ASSERT_MSG(m_parent.expired() == m_name.empty(),
+                         "The root and only the root should have an empty name "
+                         "and no parent!");
+        return m_name.empty();
+    }
+
+    template <typename ValueType>
+    inline bool TreeNode<ValueType>::hasChildren() const {
+        return !m_children.empty();
+    }
+
+    template <typename ValueType>
+    inline size_t TreeNode<ValueType>::numChildren() const {
+        BOOST_ASSERT_MSG((m_children.size() != 0) == hasChildren(),
+                         "hasChildren should return true iff size != 0!");
+        return m_children.size();
+    }
+
+    template <typename ValueType>
     inline typename TreeNode<ValueType>::ptr_type
     TreeNode<ValueType>::m_getChildByName(std::string const &name) {
         /// @todo Don't use a linear search here - use an unordered map or
@@ -215,13 +242,6 @@ namespace util {
     inline TreeNode<ValueType>::TreeNode()
         : m_name(), m_parent(), m_children() {
         /// Special root constructor
-    }
-    template <typename ValueType>
-    inline bool TreeNode<ValueType>::isRoot() const {
-        BOOST_ASSERT_MSG(m_parent.expired() == m_name.empty(),
-                         "The root and only the root should have an empty name "
-                         "and no parent!");
-        return m_name.empty();
     }
 
 } // namespace routing
