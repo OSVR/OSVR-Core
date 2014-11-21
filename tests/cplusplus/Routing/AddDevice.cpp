@@ -95,6 +95,7 @@ TEST(addDevice, BadInput) {
     ASSERT_THROW(addDevice(tree, "org_opengoggles_sample//"),
                  exceptions::EmptyPathComponent)
         << "Should reject empty second level";
-    ASSERT_THROW(addDevice(tree, "//"), exceptions::InvalidDeviceName) << "Too short to be legit.";
+    ASSERT_THROW(addDevice(tree, "//"), exceptions::InvalidDeviceName)
+        << "Too short to be legit.";
     ASSERT_THROW(addDevice(tree, "///"), exceptions::EmptyPathComponent);
 }
