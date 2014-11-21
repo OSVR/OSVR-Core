@@ -198,29 +198,27 @@ class ConstValueVisitor {
     ValueChecker checker;
 };
 
-TEST(TreeNode, Visiting) {
-    // Setup
+StringTreePtr getFullTree() {
+    // Setup tree in all the different ways possible as above.
     StringTreePtr tree(StringTree::createRoot());
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("A"));
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("A").value() = "myVal")
-        << "Setting child value";
-    ASSERT_NO_THROW((StringTree::create(*tree, "B")));
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("B").value() = "mySecondVal")
-        << "Setting second child value";
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("C").value() = "myThirdVal")
-        << "Creating child and setting value in single getOrCreate expression.";
-    ASSERT_NO_THROW((StringTree::create(*tree, "D").value() = "myFourthVal"))
-        << "Creating child and setting value in single create() expression.";
-    ASSERT_EQ(tree->numChildren(), 4);
+    tree->getOrCreateChildByName("A");
+    tree->getOrCreateChildByName("A").value() = "myVal";
+    StringTree::create(*tree, "B");
+    tree->getOrCreateChildByName("B").value() = "mySecondVal";
+    tree->getOrCreateChildByName("C").value() = "myThirdVal";
+    StringTree::create(*tree, "D").value() = "myFourthVal";
+    return tree;
+}
+TEST(TreeNode, Visitor) {
+    StringTreePtr tree = getFullTree();
+    ValueVisitor visitor;
+    visitor(*tree);
+    ASSERT_EQ(visitor.checker.nodes, 5);
+}
 
-    {
-        ValueVisitor visitor;
-        visitor(*tree);
-        ASSERT_EQ(visitor.checker.nodes, 5);
-    }
-    {
-        ConstValueVisitor visitor;
-        visitor(*tree);
-        ASSERT_EQ(visitor.checker.nodes, 5);
-    }
+TEST(TreeNode, ConstVisitor) {
+    StringTreePtr tree = getFullTree();
+    ConstValueVisitor visitor;
+    visitor(*tree);
+    ASSERT_EQ(visitor.checker.nodes, 5);
 }
