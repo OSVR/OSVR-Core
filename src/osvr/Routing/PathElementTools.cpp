@@ -68,7 +68,7 @@ namespace routing {
         }
 
         void ifNullReplaceWith(PathElement &dest, PathElement const &src) {
-            if (get<NullElement *>(&dest)) {
+            if (get<NullElement>(&dest)) {
                 dest = src;
             }
         }
