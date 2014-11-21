@@ -39,6 +39,7 @@ namespace routing {
         class SensorElement;
         class PhysicalAssociationElement;
         class LogicalElement;
+        class AliasElement;
 
 /// @brief The variant type containing a particular kind of path
 /// element.
@@ -52,8 +53,8 @@ namespace routing {
 #endif
         typedef boost::variant<NullElement, PluginElement, DeviceElement,
                                InterfaceElement, SensorElement,
-                               PhysicalAssociationElement,
-                               LogicalElement> PathElement;
+                               PhysicalAssociationElement, LogicalElement,
+                               AliasElement> PathElement;
     } // namespace elements
 
     using elements::PathElement;

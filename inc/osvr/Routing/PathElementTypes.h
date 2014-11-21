@@ -28,7 +28,7 @@
 #include <boost/variant/variant.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace osvr {
 namespace routing {
@@ -69,6 +69,24 @@ namespace routing {
 
         /// @brief The element type corresponding to a logical grouping.
         class LogicalElement : public ElementBase<LogicalElement> {};
+
+        /// @brief The element type corresponding to a "shallow" path alias -
+        /// does not alias children.
+        class AliasElement : public ElementBase<LogicalElement> {
+          public:
+            /// @brief Sets the target of this alias
+            /// @param targetPath absolute path of the target.
+            /// @todo support relative paths - either here or at a different
+            /// level
+            void setTarget(std::string const &targetPath);
+
+            /// @brief Get the path to the target of this alias.
+            std::string const &getTarget() const;
+
+          private:
+            std::string m_target;
+        };
+
     } // namespace elements
 
 } // namespace routing

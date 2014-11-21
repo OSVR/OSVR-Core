@@ -27,6 +27,13 @@
 
 namespace osvr {
 namespace routing {
-    namespace elements {} // namespace elements
+    namespace elements {
+        void AliasElement::setTarget(std::string const &targetPath) {
+            /// @todo validation?
+            m_target = targetPath;
+        }
+
+        std::string const &AliasElement::getTarget() const { return m_target; }
+    } // namespace elements
 } // namespace routing
 } // namespace osvr

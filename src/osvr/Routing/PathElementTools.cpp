@@ -54,6 +54,7 @@ namespace routing {
             OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
             OSVR_ROUTING_TYPENAME_HANDLER(PhysicalAssociationElement)
             OSVR_ROUTING_TYPENAME_HANDLER(LogicalElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
 #undef OSVR_ROUTING_TYPENAME_HANDLER
         } // namespace detail
 
