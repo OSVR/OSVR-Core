@@ -37,6 +37,12 @@ namespace routing {
         /// static_visitor)
         /// @param elt The element to investigate.
         const char *getTypeName(PathElement const &elt);
+
+        /// @brief If dest is a NullElement, replace it with the provided src
+        /// element.
+        /// @param dest Item to inquire about, and update if needed.
+        /// @param src Replacement for dest if dest is a NullElement.
+        void ifNullReplaceWith(PathElement &dest, PathElement const &src);
     } // namespace elements
 } // namespace routing
 } // namespace osvr

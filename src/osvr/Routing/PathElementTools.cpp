@@ -20,6 +20,7 @@
 #include <osvr/Routing/PathElementTypes.h>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/get.hpp>
 
 // Library/third-party includes
 // - none
@@ -32,6 +33,7 @@ namespace routing {
     namespace elements {
         using boost::static_visitor;
         using boost::apply_visitor;
+        using boost::get;
         namespace {
             class TypeNameVisitor : public static_visitor<const char *> {
               public:
@@ -50,6 +52,12 @@ namespace routing {
         } // namespace
         const char *getTypeName(PathElement const &elt) {
             return boost::apply_visitor(TypeNameVisitor(), elt);
+        }
+
+        void ifNullReplaceWith(PathElement &dest, PathElement const &src) {
+            if (get<NullElement *>(&dest)) {
+                dest = src;
+            }
         }
     } // namespace elements
 } // namespace routing
