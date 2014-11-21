@@ -43,6 +43,8 @@ namespace routing {
         /// @brief Constructor
         OSVR_ROUTING_EXPORT PathTree();
 
+        /// @brief Visitation
+        /// @{
         /// @brief Visit the tree, starting at the root, with the given functor.
         template <typename F> void visitTree(F &functor) { functor(*m_root); }
 
@@ -51,6 +53,7 @@ namespace routing {
         template <typename F> void visitConstTree(F &functor) const {
             functor(const_cast<Node const &>(*m_root));
         }
+        /// @}
 
         /// @brief Returns the node indicated by the path, which must be
         /// absolute (begin with a /)
