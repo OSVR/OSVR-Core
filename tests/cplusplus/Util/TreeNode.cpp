@@ -209,6 +209,15 @@ StringTreePtr getFullTree() {
     StringTree::create(*tree, "D").value() = "myFourthVal";
     return tree;
 }
+
+TEST(TreeNode, Comparisons) {
+    StringTreePtr tree = getFullTree();
+    ASSERT_EQ(*tree, *tree);
+    ASSERT_NE(*tree, tree->getOrCreateChildByName("A"));
+    ASSERT_EQ(tree->getOrCreateChildByName("A"), tree->getOrCreateChildByName("A"));
+    ASSERT_NE(tree->getOrCreateChildByName("A"), tree->getOrCreateChildByName("B"));
+}
+
 TEST(TreeNode, Visitor) {
     StringTreePtr tree = getFullTree();
     ValueVisitor visitor;

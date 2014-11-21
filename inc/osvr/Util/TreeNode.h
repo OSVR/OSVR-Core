@@ -24,6 +24,7 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <boost/operators.hpp>
 #include <boost/assert.hpp>
 
 // Standard includes
@@ -54,7 +55,8 @@ namespace util {
     /// @todo We have parent pointers - use them or remove them
     template <typename ValueType>
     class TreeNode : public enable_shared_from_this<TreeNode<ValueType> >,
-                     boost::noncopyable {
+                     boost::noncopyable,
+                     boost::operators<TreeNode<ValueType> > {
       public:
         /// @brief This template instantiation's type
         typedef TreeNode<ValueType> type;
@@ -121,6 +123,9 @@ namespace util {
         template <typename F> void visitChildren(F &visitor) const {
             visitConstChildren(visitor);
         }
+
+        /// @brief Equality comparison operator - tests object identity.
+        bool operator==(const type &x) const { return this == &x; }
 
       private:
         /// @brief Private constructor for a non-root node
