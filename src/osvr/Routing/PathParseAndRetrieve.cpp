@@ -53,9 +53,9 @@ namespace routing {
         }
         PathTree::Node *ret = &root;
         typedef split_iterator<string::const_iterator> string_split_iterator;
-        for (string_split_iterator It =
-                 make_split_iterator(path | sliced(1, path.size() - 1),
-                                     first_finder("/", is_equal()));
+        auto range_excluding_leading_slash = path | sliced(1, path.size() - 1);
+        for (string_split_iterator It = make_split_iterator(
+                 range_excluding_leading_slash, first_finder("/", is_equal()));
              It != string_split_iterator(); ++It) {
             OSVR_DEV_VERBOSE(boost::copy_range<std::string>(*It));
             ret = &(ret->getOrCreateChildByName(
