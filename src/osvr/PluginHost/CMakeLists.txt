@@ -42,7 +42,7 @@ target_link_libraries(${LIBNAME_FULL}
 if(WIN32)
     add_custom_command(TARGET ${LIBNAME_FULL} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:libfunctionality::functionality> $<TARGET_FILE_DIR:${LIBNAME_FULL}>
-        COMMENT Copying required DLL
+        COMMENT "Copying required DLL"
         VERBATIM)
 endif()
 if(WIN32)
