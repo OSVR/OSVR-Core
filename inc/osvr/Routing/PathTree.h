@@ -55,6 +55,8 @@ namespace routing {
         /// @brief Returns the node indicated by the path, which must be
         /// absolute (begin with a /). Any non-existent nodes will be created
         /// with values of NullElement
+        /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
+        /// exceptions::EmptyPathComponent
         OSVR_ROUTING_EXPORT PathNode &getNodeByPath(std::string const &path);
 
       private:

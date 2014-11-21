@@ -3,6 +3,7 @@ osvr_setup_lib_vars(Routing)
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
     "${HEADER_LOCATION}/Constants.h"
+    "${HEADER_LOCATION}/Exceptions.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"

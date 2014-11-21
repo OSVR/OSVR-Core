@@ -30,6 +30,16 @@
 
 namespace osvr {
 namespace routing {
+    /// @brief Internal method for parsing a path and getting or creating the
+    /// nodes along it.
+    /// @param path An absolute path (beginning with /) - a trailing slash is
+    /// trimmed silently
+    /// @param root The root node of a tree. This is not checked at runtime
+    /// (just a debug assert) since this should only be called from safe,
+    /// internal locations!
+    /// @returns a reference to the leaf node referred to by the path.
+    /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
+    /// exceptions::EmptyPathComponent
     PathNode &pathParseAndRetrieve(std::string const &path, PathNode &root);
 } // namespace routing
 } // namespace osvr

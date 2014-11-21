@@ -39,9 +39,15 @@ namespace routing {
     /// like "/org_opengoggles_plugin/SampleDevice". If a leading slash is
     /// missing, it will be assumed and added.
     ///
+    /// Multiple levels are acceptable: for example,
+    /// "/org_opengoggles_plugin/SampleDriver/Instance1" is valid: Instance1 is
+    /// the device, and org_opengoggles_plugin is the plugin.
+    ///
     /// @returns The device node
-    /// @throws std::runtime_error if an invalid device name (less than two
-    /// components) was passed.
+    /// @throws exceptions::InvalidDeviceName if an invalid device name (less
+    /// than two
+    /// components) was passed, exceptions::EmptyPathComponent if any component
+    /// in the given path is empty after passing initial checks.
     OSVR_ROUTING_EXPORT PathNode &addDevice(PathTree &tree,
                                             std::string const &deviceName);
 } // namespace routing

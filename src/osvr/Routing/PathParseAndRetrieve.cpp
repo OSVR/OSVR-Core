@@ -23,6 +23,7 @@
 #include <osvr/Routing/Constants.h>
 #include <osvr/Routing/PathNode.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Routing/Exceptions.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -45,15 +46,14 @@ namespace routing {
         using boost::is_equal;
         BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
         if (path.empty()) {
-            throw std::runtime_error("Cannot retrieve an empty path!");
+            throw exceptions::EmptyPath();
         }
         if (path == getPathSeparator()) {
             /// @todo is an empty path valid input?
             return root;
         }
         if (path.at(0) != getPathSeparatorCharacter()) {
-            throw std::runtime_error(
-                "Path must be absolute (begin with a forward slash)!");
+            throw exceptions::PathNotAbsolute(path);
         }
         PathNode *ret = &root;
 
@@ -69,14 +69,18 @@ namespace routing {
             "Range excluding leading slash: "
             << boost::copy_range<std::string>(range_excluding_leading_slash));
         // Iterate through the chunks of the path, split by a slash.
+        std::string component;
         typedef split_iterator<string::const_iterator> string_split_iterator;
         for (string_split_iterator It = make_split_iterator(
                  range_excluding_leading_slash,
                  first_finder(getPathSeparator(), is_equal()));
              It != string_split_iterator(); ++It) {
-            OSVR_DEV_VERBOSE(boost::copy_range<std::string>(*It));
-            ret = &(ret->getOrCreateChildByName(
-                boost::copy_range<std::string>(*It)));
+            component = boost::copy_range<std::string>(*It);
+            OSVR_DEV_VERBOSE(component);
+            if (component.empty()) {
+                throw exceptions::EmptyPathComponent(path);
+            }
+            ret = &(ret->getOrCreateChildByName(component));
         }
         return *ret;
     }

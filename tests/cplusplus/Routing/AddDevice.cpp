@@ -21,6 +21,7 @@
 #include "IsType.h"
 #include <osvr/Routing/PathTree.h>
 #include <osvr/Routing/AddDevice.h>
+#include <osvr/Routing/Exceptions.h>
 
 // Library/third-party includes
 #include <boost/variant/get.hpp>
@@ -69,23 +70,31 @@ TEST(addDevice, missingLeadingSlash) {
 
 TEST(addDevice, BadInput) {
     PathTree tree;
-    ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample"), std::runtime_error)
+
+    ASSERT_THROW(addDevice(tree, ""), exceptions::InvalidDeviceName)
+        << "Should reject an empty path";
+    ASSERT_THROW(addDevice(tree, "/"), exceptions::InvalidDeviceName)
+        << "Should reject the root";
+    ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample"),
+                 exceptions::InvalidDeviceName)
         << "Should reject just a single level";
     ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample/"),
-                 std::runtime_error)
+                 exceptions::InvalidDeviceName)
         << "Should reject just a single level with trailing slash";
-    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample"), std::runtime_error)
+    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample"),
+                 exceptions::InvalidDeviceName)
         << "Should reject just a single level w/o leading slash";
-    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample/"), std::runtime_error)
+    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample/"),
+                 exceptions::InvalidDeviceName)
         << "Should reject just a single level with trailing but w/o leading "
            "slash";
 
     ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample//"),
-                 std::runtime_error)
+                 exceptions::EmptyPathComponent)
         << "Should reject empty second level";
     ASSERT_THROW(addDevice(tree, "org_opengoggles_sample//"),
-                 std::runtime_error)
+                 exceptions::EmptyPathComponent)
         << "Should reject empty second level";
-    ASSERT_THROW(addDevice(tree, "//"), std::runtime_error);
-    ASSERT_THROW(addDevice(tree, "///"), std::runtime_error);
+    ASSERT_THROW(addDevice(tree, "//"), exceptions::InvalidDeviceName) << "Too short to be legit.";
+    ASSERT_THROW(addDevice(tree, "///"), exceptions::EmptyPathComponent);
 }

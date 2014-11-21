@@ -21,6 +21,7 @@
 #include <osvr/Routing/PathTreeFull.h>
 #include <osvr/Routing/PathElementTypes.h>
 #include <osvr/Routing/PathNode.h>
+#include <osvr/Routing/Exceptions.h>
 #include "IsType.h"
 
 // Library/third-party includes
@@ -42,10 +43,17 @@ TEST(PathTree, getPathRoot) {
 
 TEST(PathTree, getPathBadInput) {
     PathTree tree;
-    ASSERT_THROW(tree.getNodeByPath(""), std::runtime_error)
+    ASSERT_THROW(tree.getNodeByPath(""), exceptions::EmptyPath)
         << "Empty string not acceptable as path";
-    ASSERT_THROW(tree.getNodeByPath("test"), std::runtime_error)
+    ASSERT_THROW(tree.getNodeByPath("test"), exceptions::PathNotAbsolute)
         << "Missing leading slash not acceptable";
+    ASSERT_THROW(tree.getNodeByPath("//test"), exceptions::EmptyPathComponent)
+        << "Empty component not OK!";
+    ASSERT_THROW(tree.getNodeByPath("/asdf//test"),
+                 exceptions::EmptyPathComponent)
+        << "Empty component not OK!";
+    ASSERT_THROW(tree.getNodeByPath("/asdf//"), exceptions::EmptyPathComponent)
+        << "Empty component not OK!";
 }
 
 TEST(PathTree, getPathSingleLevel) {
