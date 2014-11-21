@@ -7,3 +7,4 @@ function(setup_gtest target)
 endfunction()
 
 add_subdirectory(Util)
+add_subdirectory(Routing)
