@@ -52,8 +52,14 @@ namespace routing {
         }
         PathNode *ret = &root;
 
-        // Get the boost range that excludes the leading slash
-        auto range_excluding_leading_slash = path | sliced(1, path.size());
+        // Determine if there's a trailing slash.
+        const size_t len = path.size();
+        const size_t theEnd =
+            (path[len - 1] == getPathSeparatorCharacter()) ? len - 1 : len;
+
+        // Get the boost range that excludes the leading slash, and a trailing
+        // slash, if any.
+        auto range_excluding_leading_slash = path | sliced(1, theEnd);
         OSVR_DEV_VERBOSE(
             "Range excluding leading slash: "
             << boost::copy_range<std::string>(range_excluding_leading_slash));
