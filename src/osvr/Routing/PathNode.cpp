@@ -43,6 +43,10 @@ namespace routing {
         }
     }
     std::string getFullPath(PathNode const &node) {
+        /// Special case the root
+        if (node.isRoot()) {
+            return getPathSeparator();
+        }
         std::ostringstream os;
         buildPathRecursively(node, os);
         return os.str();
