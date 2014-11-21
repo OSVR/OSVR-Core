@@ -43,10 +43,13 @@ namespace routing {
         /// @brief Constructor
         OSVR_ROUTING_EXPORT PathTree();
 
+        /// @brief Visit the tree, starting at the root, with the given functor.
         template <typename F> void visitTree(F &functor) { functor(*m_root); }
 
+        /// @brief Visit the tree, with const nodes, starting at the root, with
+        /// the given functor.
         template <typename F> void visitConstTree(F &functor) const {
-            functor(*m_root);
+            functor(const_cast<Node const &>(*m_root));
         }
 
       private:
