@@ -33,7 +33,7 @@ namespace routing {
     /// @name Constants
     /// @{
     /// @brief Gets the path separator character - a slash.
-    OSVR_ROUTING_EXPORT const char getPathSeparatorCharacter();
+    OSVR_ROUTING_EXPORT char getPathSeparatorCharacter();
 
     /// @brief Gets the path separator - a slash - as a null-terminated
     /// string.

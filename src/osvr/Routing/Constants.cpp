@@ -27,7 +27,7 @@
 
 namespace osvr {
 namespace routing {
-    const char getPathSeparatorCharacter() { return getPathSeparator()[0]; }
+    char getPathSeparatorCharacter() { return getPathSeparator()[0]; }
 
     const char *getPathSeparator() { return "/"; }
 } // namespace routing
