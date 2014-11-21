@@ -36,7 +36,11 @@ namespace routing {
         return pathParseAndRetrieve(path, *m_root);
     }
 
-    PathNode &PathTree::addDevice(std::string const &deviceName) {
+    PathNode &PathTree::getRoot() { return *m_root; }
+
+    PathNode const &PathTree::getRoot() const { return *m_root; }
+
+    PathNode &addDevice(PathTree &tree, std::string const &deviceName) {
         if (deviceName.size() < 3) { // Minimum size: a/b
             throw std::runtime_error(
                 "Given device name cannot be a full device name: " +
@@ -45,7 +49,7 @@ namespace routing {
         std::string normalized = (deviceName[0] == getPathSeparatorCharacter())
                                      ? (deviceName)
                                      : (getPathSeparator() + deviceName);
-        PathNode &device = getNodeByPath(normalized);
+        PathNode &device = tree.getNodeByPath(normalized);
         PathNodePtr plugin = device.getParent();
         if (!plugin || plugin->isRoot()) {
             /// @todo remove added node here?
@@ -65,10 +69,6 @@ namespace routing {
         elements::ifNullReplaceWith(plugin->value(), elements::PluginElement());
         return device;
     }
-
-    PathNode &PathTree::getRoot() { return *m_root; }
-
-    PathNode const &PathTree::getRoot() const { return *m_root; }
 
 } // namespace routing
 } // namespace osvr

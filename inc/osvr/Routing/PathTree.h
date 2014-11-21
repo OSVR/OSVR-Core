@@ -62,19 +62,23 @@ namespace routing {
         /// @brief Get the root of the tree (const).
         OSVR_ROUTING_EXPORT PathNode const &getRoot() const;
 
-        /// @brief Adds/updates nodes for the basic path to a device.
-        /// @param deviceName A namespaced device name coming from a plugin,
-        /// like "/org_opengoggles_plugin/SampleDevice". If a leading slash is
-        /// missing, it will be assumed and added.
-        /// @returns The device node
-        /// @throws std::runtime_error if an invalid device name (less than two
-        /// components) was passed.
-        OSVR_ROUTING_EXPORT PathNode &addDevice(std::string const &deviceName);
-
       private:
         /// @brief Root node of the tree.
         PathNodePtr m_root;
     };
+
+    /// @brief Adds/updates nodes for the basic path to a device.
+    ///
+    /// @param tree Your path tree.
+    /// @param deviceName A namespaced device name coming from a plugin,
+    /// like "/org_opengoggles_plugin/SampleDevice". If a leading slash is
+    /// missing, it will be assumed and added.
+    ///
+    /// @returns The device node
+    /// @throws std::runtime_error if an invalid device name (less than two
+    /// components) was passed.
+    OSVR_ROUTING_EXPORT PathNode &addDevice(PathTree &tree,
+                                            std::string const &deviceName);
 } // namespace routing
 } // namespace osvr
 
