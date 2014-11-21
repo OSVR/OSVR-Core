@@ -17,6 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
+#include <osvr/Routing/PathElementTools.h>
 #include <osvr/Routing/PathElementTypes.h>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -31,23 +32,32 @@
 namespace osvr {
 namespace routing {
     namespace elements {
+        namespace detail {
+/// Template specialization to implement class name retrieval.
+#define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
+    template <> struct ElementTypeName<CLASS> {                                \
+        OSVR_ROUTING_EXPORT static const char *get() { return #CLASS; }        \
+    };
+            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(PhysicalAssociationElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(LogicalElement)
+#undef OSVR_ROUTING_TYPENAME_HANDLER
+        } // namespace detail
+
         using boost::static_visitor;
         using boost::apply_visitor;
         using boost::get;
         namespace {
             class TypeNameVisitor : public static_visitor<const char *> {
               public:
-#define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
-    const char *operator()(CLASS const &) const { return #CLASS; }
-
-                OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
-                OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
-                OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
-                OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
-                OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
-                OSVR_ROUTING_TYPENAME_HANDLER(PhysicalAssociationElement)
-                OSVR_ROUTING_TYPENAME_HANDLER(LogicalElement)
-#undef OSVR_ROUTING_TYPENAME_HANDLER
+                template <typename ElementType>
+                const char *operator()(ElementType const &) const {
+                    return detail::ElementTypeName<ElementType>::get();
+                }
             };
         } // namespace
         const char *getTypeName(PathElement const &elt) {
