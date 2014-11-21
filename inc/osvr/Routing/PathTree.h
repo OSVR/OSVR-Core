@@ -56,19 +56,37 @@ namespace routing {
         /// @}
 
         /// @brief Returns the node indicated by the path, which must be
-        /// absolute (begin with a /)
-        Node &getNodeByPath(std::string const &path);
+        /// absolute (begin with a /). Any non-existent nodes will be created
+        /// with values of NullElement
+        OSVR_ROUTING_EXPORT Node &getNodeByPath(std::string const &path);
+
+        /// @brief Get the root of the tree.
+        OSVR_ROUTING_EXPORT Node &getRoot();
+
+        /// @brief Get the root of the tree (const).
+        OSVR_ROUTING_EXPORT Node const &getRoot() const;
+
+        /// @brief Adds/updates nodes for the basic path to a device.
+        /// @param deviceName A namespaced device name coming from a plugin,
+        /// like "/org_opengoggles_plugin/SampleDevice". If a leading slash is
+        /// missing, it will be assumed and added.
+        /// @returns The device node
+        /// @throws std::runtime_error if an invalid device name (less than two
+        /// components) was passed.
+        OSVR_ROUTING_EXPORT Node &addDevice(std::string const &deviceName);
 
         /// @brief Gets an identifying string for the node type.
-        static const char *getNodeType(Node const &node);
+        OSVR_ROUTING_EXPORT static const char *getNodeType(Node const &node);
 
+        /// @name Constants
+        /// @{
         /// @brief Gets the path separator character - a slash.
-        static const char getPathSeparatorCharacter();
+        OSVR_ROUTING_EXPORT static const char getPathSeparatorCharacter();
 
         /// @brief Gets the path separator - a slash - as a null-terminated
         /// string.
-        static const char *getPathSeparator();
-
+        OSVR_ROUTING_EXPORT static const char *getPathSeparator();
+        /// @}
       private:
         /// @brief The ownership pointer of the specific tree node.
         typedef ::osvr::util::TreeNodePointer<PathElement>::type NodePtr;
