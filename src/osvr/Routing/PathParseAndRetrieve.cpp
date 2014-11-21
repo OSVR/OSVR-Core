@@ -53,8 +53,10 @@ namespace routing {
         PathNode *ret = &root;
 
         // Get the boost range that excludes the leading slash
-        auto range_excluding_leading_slash = path | sliced(1, path.size() - 1);
-
+        auto range_excluding_leading_slash = path | sliced(1, path.size());
+        OSVR_DEV_VERBOSE(
+            "Range excluding leading slash: "
+            << boost::copy_range<std::string>(range_excluding_leading_slash));
         // Iterate through the chunks of the path, split by a slash.
         typedef split_iterator<string::const_iterator> string_split_iterator;
         for (string_split_iterator It = make_split_iterator(
