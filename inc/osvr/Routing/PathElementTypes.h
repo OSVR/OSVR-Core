@@ -25,7 +25,7 @@
 // - none
 
 // Library/third-party includes
-// - none
+#include <boost/variant/variant.hpp>
 
 // Standard includes
 // - none

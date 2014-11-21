@@ -7,6 +7,8 @@ set(API
 
 set(SOURCE
     PathElementTypes.cpp
+    PathParseAndRetrieve.cpp
+    PathParseAndRetrieve.h
     PathTree.cpp)
 
 osvr_add_library()
