@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace osvr {
 namespace routing {
@@ -51,6 +51,10 @@ namespace routing {
         template <typename F> void visitConstTree(F &functor) const {
             functor(const_cast<Node const &>(*m_root));
         }
+
+        /// @brief Returns the node indicated by the path, which must be
+        /// absolute (begin with a /)
+        Node &getNodeByPath(std::string const &path);
 
       private:
         /// @brief The ownership pointer of the specific tree node.
