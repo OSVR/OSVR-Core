@@ -31,6 +31,11 @@
 namespace osvr {
 namespace routing {
     namespace elements {
+        /// @brief Gets a string that indicates the type of path element. Do not
+        /// use this for conditionals/comparisons unless there's really no
+        /// better way! (There probably is a better way with a variant
+        /// static_visitor)
+        /// @param elt The element to investigate.
         const char *getTypeName(PathElement const &elt);
     } // namespace elements
 } // namespace routing
