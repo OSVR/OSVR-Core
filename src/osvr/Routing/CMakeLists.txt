@@ -1,11 +1,13 @@
 osvr_setup_lib_vars(Routing)
 
 set(API
+    "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
     "${HEADER_LOCATION}/PathTree.h")
 
 set(SOURCE
+    PathElementTools.cpp
     PathElementTypes.cpp
     PathParseAndRetrieve.cpp
     PathParseAndRetrieve.h

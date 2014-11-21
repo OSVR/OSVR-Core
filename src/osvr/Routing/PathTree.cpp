@@ -21,6 +21,7 @@
 #include <osvr/Routing/PathElementTypes.h>
 #include <osvr/Util/TreeNode.h>
 #include "PathParseAndRetrieve.h"
+#include <osvr/Routing/PathElementTools.h>
 
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
@@ -35,5 +36,8 @@ namespace routing {
         return pathParseAndRetrieve(path, *m_root);
     }
 
+    const char *PathTree::getNodeType(PathTree::Node const &node) {
+        return elements::getTypeName(node.value());
+    }
 } // namespace routing
 } // namespace osvr

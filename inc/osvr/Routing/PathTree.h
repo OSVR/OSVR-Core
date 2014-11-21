@@ -56,6 +56,9 @@ namespace routing {
         /// absolute (begin with a /)
         Node &getNodeByPath(std::string const &path);
 
+        /// @brief Gets an identifying string for the node type.
+        static const char *getNodeType(Node const &node);
+
       private:
         /// @brief The ownership pointer of the specific tree node.
         typedef ::osvr::util::TreeNodePointer<PathElement>::type NodePtr;
