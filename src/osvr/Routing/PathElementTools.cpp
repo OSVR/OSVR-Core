@@ -33,6 +33,9 @@ namespace osvr {
 namespace routing {
     namespace elements {
         namespace detail {
+            template <typename ElementType> struct ElementTypeName {
+                OSVR_ROUTING_EXPORT static const char *get();
+            };
 /// Template specialization to implement class name retrieval.
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     template <> struct ElementTypeName<CLASS> {                                \

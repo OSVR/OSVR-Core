@@ -21,7 +21,7 @@
 
 // Internal Includes
 #include <osvr/Routing/Export.h>
-#include <osvr/Routing/PathElementTypes_fwd.h>
+#include <osvr/Routing/PathElementTypes.h>
 
 // Library/third-party includes
 // - none
@@ -32,13 +32,6 @@
 namespace osvr {
 namespace routing {
     namespace elements {
-#ifndef OSVR_DOXYGEN_EXTERNAL
-        namespace detail {
-            template <typename ElementType> struct ElementTypeName {
-                OSVR_ROUTING_EXPORT static const char *get();
-            };
-        } // namespace detail
-#endif
         /// @brief Gets a string that indicates the type of path element. Do not
         /// use this for conditionals/comparisons unless there's really no
         /// better way! (There probably is a better way with a variant
@@ -48,7 +41,7 @@ namespace routing {
 
         /// @brief Gets the string that represents the templated type
         template <typename ElementType> inline const char *getTypeName() {
-            return detail::ElementTypeName<ElementType>::get();
+            return getTypeName(ElementType());
         }
 
         /// @brief If dest is a NullElement, replace it with the provided src
