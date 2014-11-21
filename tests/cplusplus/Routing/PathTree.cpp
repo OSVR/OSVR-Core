@@ -39,6 +39,7 @@ TEST(PathTree, getPathRoot) {
     PathNode *result = NULL;
     ASSERT_NO_THROW(result = &tree.getNodeByPath("/")) << "Get the root.";
     ASSERT_TRUE(result->isRoot());
+    ASSERT_EQ(result->getParent(), nullptr);
 }
 
 TEST(PathTree, getPathBadInput) {
@@ -81,14 +82,14 @@ TEST(PathTree, getPathTwoLevel) {
     ASSERT_EQ(test2->getName(), "test2");
     ASSERT_FALSE(test2->hasChildren()) << "Make sure it has no children.";
     ASSERT_TRUE(isNodeType<elements::NullElement>(*test2)) << "Check type";
-    ASSERT_FALSE(!test2->getParent()) << "Make sure it has a parent.";
+    ASSERT_NE(test2->getParent(), nullptr) << "Make sure it has a parent.";
 
     // Check test1
-    PathNodePtr test1 = test2->getParent();
+    auto test1 = test2->getParent();
     ASSERT_EQ(test1->getName(), "test1");
     ASSERT_TRUE(isNodeType<elements::NullElement>(*test1));
-    ASSERT_FALSE(!test1->getParent()) << "Make sure it has a parent.";
-    PathNodePtr root = test1->getParent();
+    ASSERT_NE(test1->getParent(), nullptr) << "Make sure it has a parent.";
+    auto root = test1->getParent();
 
     ASSERT_TRUE(root->isRoot());
     ASSERT_EQ(tree.getNodeByPath("/"), *root)

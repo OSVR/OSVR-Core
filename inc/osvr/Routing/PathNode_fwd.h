@@ -38,6 +38,9 @@ namespace routing {
     /// @brief The ownership pointer of the specific tree node.
     typedef ::osvr::util::TreeNodePointer<PathElement>::type PathNodePtr;
 
+    /// @brief The weak (non-owning) pointer used to refer to a parent tree node
+    typedef PathNode *PathNodeParentPtr;
+
     /// @brief Gets an identifying string for the node value type.
     OSVR_ROUTING_EXPORT const char *getTypeName(PathNode const &node);
 } // namespace routing

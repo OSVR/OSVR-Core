@@ -42,14 +42,14 @@ TEST(addDevice, normalConditions) {
     ASSERT_EQ(dev->getName(), "MyDevice");
     ASSERT_FALSE(dev->hasChildren()) << "Make sure it has no children.";
     ASSERT_TRUE(isNodeType<elements::DeviceElement>(*dev)) << "Check type";
-    ASSERT_FALSE(!dev->getParent()) << "Make sure it has a parent.";
+    ASSERT_NE(dev->getParent(), nullptr) << "Make sure it has a parent.";
 
     // Check org_opengoggles_sample
-    PathNodePtr plugin = dev->getParent();
+    auto plugin = dev->getParent();
     ASSERT_EQ(plugin->getName(), "org_opengoggles_sample");
     ASSERT_TRUE(isNodeType<elements::PluginElement>(*plugin)) << "Check type";
-    ASSERT_FALSE(!plugin->getParent()) << "Make sure it has a parent.";
-    PathNodePtr root = plugin->getParent();
+    ASSERT_NE(plugin->getParent(), nullptr) << "Make sure it has a parent.";
+    auto root = plugin->getParent();
 
     ASSERT_TRUE(root->isRoot());
     ASSERT_EQ(tree.getNodeByPath("/"), *root)
@@ -61,7 +61,7 @@ TEST(addDevice, normalConditions) {
 TEST(addDevice, missingLeadingSlash) {
     PathTree tree;
 
-    PathNode *dev = NULL;
+    PathNode *dev = nullptr;
     ASSERT_NO_THROW(dev = &addDevice(tree, "org_opengoggles_sample/MyDevice"))
         << "Should forgive a missing leading slash";
     ASSERT_EQ(tree.getNodeByPath("/org_opengoggles_sample/MyDevice"), *dev)

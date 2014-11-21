@@ -43,8 +43,8 @@ namespace routing {
                                      ? (deviceName)
                                      : (getPathSeparator() + deviceName);
         PathNode &device = tree.getNodeByPath(normalized);
-        PathNodePtr plugin = device.getParent();
-        if (!plugin || plugin->isRoot()) {
+        auto plugin = device.getParent();
+        if (plugin == nullptr || plugin->isRoot()) {
             /// @todo remove added node here?
             throw exceptions::InvalidDeviceName(
                 "Given device name did not include both a "
@@ -56,7 +56,8 @@ namespace routing {
         // parent before the root.
         /// @todo What about intermediate paths between a plugin and a device?
         /// (device types, for instance) We leave them null for now.
-        while (plugin->getParent() && !plugin->getParent()->isRoot()) {
+        while (plugin->getParent() != nullptr &&
+               !plugin->getParent()->isRoot()) {
             plugin = plugin->getParent();
         }
         elements::ifNullReplaceWith(device.value(), elements::DeviceElement());

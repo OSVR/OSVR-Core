@@ -241,12 +241,12 @@ class ParentCheckerVisitor {
         if (nodes == 0) {
             // root
             ASSERT_TRUE(node.isRoot());
-            ASSERT_FALSE(node.getParent());
+            ASSERT_EQ(node.getParent(), nullptr);
             root = &node;
         } else {
             // not root
             ASSERT_FALSE(node.isRoot());
-            ASSERT_EQ(node.getParent().get(), root);
+            ASSERT_EQ(node.getParent(), root);
         }
         nodes++;
         node.visitConstChildren(*this);

@@ -59,25 +59,26 @@ namespace util {
         ///
         /// @todo methods to remove a child (by pointer and by name)
         template <typename ValueType>
-        class TreeNode : public enable_shared_from_this<TreeNode<ValueType> >,
-                         boost::noncopyable,
+        class TreeNode : boost::noncopyable,
                          boost::operators<TreeNode<ValueType> > {
           public:
             /// @brief This template instantiation's type
             typedef TreeNode<ValueType> type;
 
             /// @brief The pointer for holding this template instantiation -
-            /// used
-            /// primarily/only in holding the root node
+            /// used primarily/only in holding the root node
             typedef typename TreeNodePointer<ValueType>::type ptr_type;
+
+            /// @brief The pointer for accessing a node's parent. Does not
+            /// confer ownership.
+            typedef type *parent_ptr_type;
 
             /// @brief The contained value type
             typedef ValueType value_type;
 
             /// @brief Create a path node
             /// @throws std::logic_error if a child of that name already exists
-            /// or
-            /// if the name provided is empty.
+            /// or if the name provided is empty.
             static type &create(TreeNode &parent, std::string const &name);
 
             /// @brief Create a root.
@@ -94,10 +95,9 @@ namespace util {
             /// @brief Is the current node a root node?
             bool isRoot() const;
 
-            /// @brief Gets the node's parent, or an invalid pointer if no
-            /// parent
-            /// (root)
-            ptr_type getParent() const;
+            /// @brief Gets the node's parent, or nullptr if no
+            /// parent (root node)
+            parent_ptr_type getParent() const;
 
             /// @brief Does the node have any children?
             ///
@@ -114,16 +114,14 @@ namespace util {
             value_type const &value() const { return m_value; }
 
             /// @brief Generic visitation method that calls a functor on each of
-            /// the
-            /// children in an undefined order.
+            /// the children in an undefined order.
             template <typename F> void visitChildren(F &visitor) {
                 std::for_each(begin(m_children), end(m_children),
                               [&](ptr_type &node) { visitor(*node); });
             }
 
             /// @brief Generic constant visitation method that calls a functor
-            /// on
-            /// each of the children (as const) in an undefined order.
+            /// on each of the children (as const) in an undefined order.
             template <typename F> void visitConstChildren(F &visitor) const {
                 std::for_each(begin(m_children), end(m_children),
                               [&](ptr_type const &node) {
@@ -132,11 +130,9 @@ namespace util {
             }
 
             /// @brief Generic constant visitation method that calls a functor
-            /// on
-            /// each of the children in an undefined order.
+            /// on each of the children in an undefined order.
             /// @todo does this overload clutter the interface and reduce
-            /// clarity
-            /// between const and non-const visitors?
+            /// clarity between const and non-const visitors?
             template <typename F> void visitChildren(F &visitor) const {
                 visitConstChildren(visitor);
             }
@@ -145,6 +141,8 @@ namespace util {
             bool operator==(const type &x) const { return this == &x; }
 
           private:
+            typedef type *weak_ptr_type;
+
             /// @brief Private constructor for a non-root node
             TreeNode(type &parent, std::string const &name);
 
@@ -154,11 +152,10 @@ namespace util {
             /// @brief Internal helper to get child by name, or a null pointer
             /// if no
             /// such child.
-            ptr_type m_getChildByName(std::string const &name);
+            weak_ptr_type m_getChildByName(std::string const &name);
 
             /// @brief Internal helper to add a named child. Assumes no such
-            /// child
-            /// already exists!
+            /// child already exists!
             void m_addChild(ptr_type const &child);
 
             /// @brief Contained value.
@@ -171,14 +168,8 @@ namespace util {
             /// @brief Name
             std::string const m_name;
 
-            /// @brief The weak pointer for accessing this template
-            /// instantiation
-            ///
-            /// Used for storing a parent pointer.
-            typedef weak_ptr<type> weak_ptr_type;
-
             /// @brief Weak pointer to parent.
-            weak_ptr_type m_parent;
+            parent_ptr_type m_parent;
         };
 
         template <typename ValueType>
@@ -205,8 +196,8 @@ namespace util {
         template <typename ValueType>
         inline TreeNode<ValueType> &
         TreeNode<ValueType>::getOrCreateChildByName(std::string const &name) {
-            ptr_type child = m_getChildByName(name);
-            if (child) {
+            weak_ptr_type child = m_getChildByName(name);
+            if (child != nullptr) {
                 return *child;
             }
             return TreeNode::create(*this, name);
@@ -220,16 +211,16 @@ namespace util {
         template <typename ValueType>
         inline bool TreeNode<ValueType>::isRoot() const {
             BOOST_ASSERT_MSG(
-                m_parent.expired() == m_name.empty(),
+                (getParent() == nullptr) == m_name.empty(),
                 "The root and only the root should have an empty name "
                 "and no parent!");
             return m_name.empty();
         }
 
         template <typename ValueType>
-        inline typename TreeNode<ValueType>::ptr_type
+        inline typename TreeNode<ValueType>::parent_ptr_type
         TreeNode<ValueType>::getParent() const {
-            return m_parent.lock();
+            return m_parent;
         }
 
         template <typename ValueType>
@@ -245,16 +236,16 @@ namespace util {
         }
 
         template <typename ValueType>
-        inline typename TreeNode<ValueType>::ptr_type
+        inline typename TreeNode<ValueType>::weak_ptr_type
         TreeNode<ValueType>::m_getChildByName(std::string const &name) {
             /// @todo Don't use a linear search here - use an unordered map or
             /// something.
             typename ChildList::const_iterator it = std::find_if(
                 begin(m_children), end(m_children),
                 [&](ptr_type const &n) { return n->getName() == name; });
-            ptr_type ret;
+            weak_ptr_type ret = nullptr;
             if (it != end(m_children)) {
-                ret = *it;
+                ret = (*it).get();
             }
             return ret;
         }
@@ -268,17 +259,16 @@ namespace util {
         template <typename ValueType>
         inline TreeNode<ValueType>::TreeNode(TreeNode<ValueType> &parent,
                                              std::string const &name)
-            : m_value(), m_children(), m_name(name),
-              m_parent(parent.shared_from_this()) {
+            : m_value(), m_children(), m_name(name), m_parent(&parent) {
             if (m_name.empty()) {
                 throw std::logic_error(
-                    "Can't create a named path node with an empty name!");
+                    "Can't create a named tree node with an empty name!");
             }
         }
 
         template <typename ValueType>
         inline TreeNode<ValueType>::TreeNode()
-            : m_value(), m_children(), m_name(), m_parent() {
+            : m_value(), m_children(), m_name(), m_parent(nullptr) {
             /// Special root constructor
         }
 
