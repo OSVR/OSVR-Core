@@ -52,7 +52,6 @@ namespace util {
     /// child of the given name (default-constructing one if it doesn't exist)
     ///
     /// @todo methods to remove a child (by pointer and by name)
-    /// @todo We have parent pointers - use them or remove them
     template <typename ValueType>
     class TreeNode : public enable_shared_from_this<TreeNode<ValueType> >,
                      boost::noncopyable,
@@ -85,6 +84,10 @@ namespace util {
 
         /// @brief Is the current node a root node?
         bool isRoot() const;
+
+        /// @brief Gets the node's parent, or an invalid pointer if no parent
+        /// (root)
+        ptr_type getParent() const;
 
         /// @brief Does the node have any children?
         ///
@@ -202,6 +205,12 @@ namespace util {
                          "The root and only the root should have an empty name "
                          "and no parent!");
         return m_name.empty();
+    }
+
+    template <typename ValueType>
+    inline typename TreeNode<ValueType>::ptr_type
+    TreeNode<ValueType>::getParent() const {
+        return m_parent.lock();
     }
 
     template <typename ValueType>

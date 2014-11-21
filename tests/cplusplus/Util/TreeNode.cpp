@@ -231,3 +231,30 @@ TEST(TreeNode, ConstVisitor) {
     visitor(*tree);
     ASSERT_EQ(visitor.checker.nodes, 5);
 }
+
+class ParentCheckerVisitor {
+  public:
+    ParentCheckerVisitor() : nodes(0), root(NULL) {}
+    void operator()(StringTree const &node) {
+        if (nodes == 0) {
+            // root
+            ASSERT_TRUE(node.isRoot());
+            ASSERT_FALSE(node.getParent());
+            root = &node;
+        } else {
+            // not root
+            ASSERT_FALSE(node.isRoot());
+            ASSERT_EQ(node.getParent().get(), root);
+        }
+        nodes++;
+        node.visitConstChildren(*this);
+    }
+    size_t nodes;
+    StringTree const *root;
+};
+
+TEST(TreeNode, ParentPointers) {
+    StringTreePtr tree = getFullTree();
+    ParentCheckerVisitor visitor;
+    visitor(*tree);
+}
