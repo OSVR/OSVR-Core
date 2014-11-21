@@ -30,13 +30,17 @@
 
 namespace osvr {
 namespace util {
-    template <typename ValueType> class TreeNode;
+    namespace tree {
+        template <typename ValueType> class TreeNode;
 
-    /// @brief Dummy struct containing the ownership pointer type for a
-    /// TreeNode. (Actually a metafunction...)
-    template <typename ValueType> struct TreeNodePointer {
-        typedef shared_ptr<TreeNode<ValueType> > type;
-    };
+        /// @brief Dummy struct containing the ownership pointer type for a
+        /// TreeNode. (Actually a metafunction...)
+        template <typename ValueType> struct TreeNodePointer {
+            typedef shared_ptr<TreeNode<ValueType> > type;
+        };
+    }
+    using tree::TreeNode;
+    using tree::TreeNodePointer;
 } // namespace util
 } // namespace osvr
 
