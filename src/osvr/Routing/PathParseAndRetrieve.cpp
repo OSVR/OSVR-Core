@@ -44,7 +44,10 @@ namespace routing {
         using boost::first_finder;
         using boost::is_equal;
         BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
-        if (path.empty() || path == getPathSeparator()) {
+        if (path.empty()) {
+            throw std::runtime_error("Cannot retrieve an empty path!");
+        }
+        if (path == getPathSeparator()) {
             /// @todo is an empty path valid input?
             return root;
         }
