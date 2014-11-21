@@ -76,7 +76,7 @@ namespace util {
             /// @brief The contained value type
             typedef ValueType value_type;
 
-            /// @brief Create a path node
+            /// @brief Create a child tree node
             /// @throws std::logic_error if a child of that name already exists
             /// or if the name provided is empty.
             static type &create(TreeNode &parent, std::string const &name);
@@ -214,7 +214,7 @@ namespace util {
                 (getParent() == nullptr) == m_name.empty(),
                 "The root and only the root should have an empty name "
                 "and no parent!");
-            return m_name.empty();
+            return getParent() == nullptr;
         }
 
         template <typename ValueType>
@@ -240,7 +240,7 @@ namespace util {
         TreeNode<ValueType>::m_getChildByName(std::string const &name) {
             /// @todo Don't use a linear search here - use an unordered map or
             /// something.
-            typename ChildList::const_iterator it = std::find_if(
+            auto it = std::find_if(
                 begin(m_children), end(m_children),
                 [&](ptr_type const &n) { return n->getName() == name; });
             weak_ptr_type ret = nullptr;
