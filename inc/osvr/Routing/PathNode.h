@@ -28,6 +28,13 @@
 // - none
 
 // Standard includes
-// - none
+#include <string>
+
+namespace osvr {
+namespace routing {
+    /// @brief Gets the absolute path for the given node..
+    OSVR_ROUTING_EXPORT std::string getFullPath(PathNode const &node);
+} // namespace routing
+} // namespace osvr
 
 #endif // INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0
