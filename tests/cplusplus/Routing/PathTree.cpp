@@ -19,6 +19,8 @@
 
 // Internal Includes
 #include <osvr/Routing/PathTreeFull.h>
+#include <osvr/Routing/PathElementTools.h>
+#include <osvr/Routing/PathElementTypes.h>
 
 // Library/third-party includes
 #include "gtest/gtest.h"
@@ -27,6 +29,16 @@
 // - none
 
 using std::string;
-using osvr::routing::PathTree;
+using namespace osvr::routing;
+// using osvr::routing::PathTree;
+// namespace elements = osvr::routing::elements;
 
 TEST(PathTree, create) { ASSERT_NO_THROW(PathTree()); }
+
+TEST(PathTree, getPath) {
+    PathTree tree;
+    ASSERT_NO_THROW(tree.getNodeByPath("/test"));
+    ASSERT_STREQ(getTypeName(tree.getNodeByPath("/test")), "NullElement");
+    ASSERT_STREQ(elements::getTypeName<elements::NullElement>(), "NullElement");
+    ASSERT_EQ(tree.getNodeByPath("/test").getName(), string("test"));
+}
