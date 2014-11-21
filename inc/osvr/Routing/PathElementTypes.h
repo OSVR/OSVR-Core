@@ -22,7 +22,7 @@
 #define INCLUDED_PathElementTypes_h_GUID_5CC817E5_C7CB_45AE_399D_0B0D39579374
 
 // Internal Includes
-// - none
+#include <osvr/Routing/PathElementTypes_fwd.h>
 
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
