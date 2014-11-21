@@ -33,14 +33,20 @@ namespace osvr {
 namespace routing {
     namespace elements {
         namespace detail {
+            /// Class template, specialized to implement class name retrieval.
             template <typename ElementType> struct ElementTypeName {
-                OSVR_ROUTING_EXPORT static const char *get();
+                static const char *get();
             };
-/// Template specialization to implement class name retrieval.
+
+/// @brief Macro defining a specialization of ElementTypeName to return the type
+/// name as a string literal.
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     template <> struct ElementTypeName<CLASS> {                                \
         OSVR_ROUTING_EXPORT static const char *get() { return #CLASS; }        \
     };
+
+            /// All types included in the bounded typelist of PathElement must
+            /// be in this list.
             OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
             OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
             OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
@@ -51,11 +57,9 @@ namespace routing {
 #undef OSVR_ROUTING_TYPENAME_HANDLER
         } // namespace detail
 
-        using boost::static_visitor;
-        using boost::apply_visitor;
-        using boost::get;
         namespace {
-            class TypeNameVisitor : public static_visitor<const char *> {
+            /// @brief Visitor class used to help getTypeName()
+            class TypeNameVisitor : public boost::static_visitor<const char *> {
               public:
                 template <typename ElementType>
                 const char *operator()(ElementType const &) const {
@@ -63,12 +67,13 @@ namespace routing {
                 }
             };
         } // namespace
+
         const char *getTypeName(PathElement const &elt) {
             return boost::apply_visitor(TypeNameVisitor(), elt);
         }
 
         void ifNullReplaceWith(PathElement &dest, PathElement const &src) {
-            if (get<NullElement>(&dest)) {
+            if (boost::get<NullElement>(&dest)) {
                 dest = src;
             }
         }

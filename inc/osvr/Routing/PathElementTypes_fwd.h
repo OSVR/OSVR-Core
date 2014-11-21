@@ -40,8 +40,16 @@ namespace routing {
         class PhysicalAssociationElement;
         class LogicalElement;
 
-        /// @brief The variant type containing a particular kind of path
-        /// element.
+/// @brief The variant type containing a particular kind of path
+/// element.
+#ifndef OSVR_DOXYGEN_EXTERNAL
+///
+/// NOTE: if you add an element type here, you must make sure it's:
+///
+/// - forward-declared above
+/// - declared in PathElementTypes.h
+/// - included in the name list in PathElementTools.cpp
+#endif
         typedef boost::variant<NullElement, PluginElement, DeviceElement,
                                InterfaceElement, SensorElement,
                                PhysicalAssociationElement,
