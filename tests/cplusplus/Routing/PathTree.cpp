@@ -40,5 +40,9 @@ TEST(PathTree, getPath) {
     ASSERT_NO_THROW(tree.getNodeByPath("/test"));
     ASSERT_STREQ(getTypeName(tree.getNodeByPath("/test")), "NullElement");
     ASSERT_STREQ(elements::getTypeName<elements::NullElement>(), "NullElement");
-    ASSERT_EQ(tree.getNodeByPath("/test").getName(), string("test"));
+    ASSERT_EQ(tree.getNodeByPath("/test").getName(), "test");
+
+    PathNode *result = NULL;
+    ASSERT_NO_THROW(result = &tree.getNodeByPath("/test1/test2"));
+    ASSERT_EQ(result->getName(), "test2");
 }
