@@ -18,9 +18,8 @@
 
 // Internal Includes
 #include "PathParseAndRetrieve.h"
-#include <osvr/Routing/PathElementTypes.h>
-#include <osvr/Util/TreeNode.h>
-#include <osvr/Routing/PathTree.h>
+#include <osvr/Routing/Constants.h>
+#include <osvr/Routing/PathNode.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -34,8 +33,7 @@
 
 namespace osvr {
 namespace routing {
-    PathTree::Node &pathParseAndRetrieve(std::string const &path,
-                                         PathTree::Node &root) {
+    PathNode &pathParseAndRetrieve(std::string const &path, PathNode &root) {
 
         using std::string;
         using boost::split_iterator;
@@ -44,15 +42,15 @@ namespace routing {
         using boost::first_finder;
         using boost::is_equal;
         BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
-        if (path.empty() || path == PathTree::getPathSeparator()) {
+        if (path.empty() || path == getPathSeparator()) {
             /// @todo is an empty path valid input?
             return root;
         }
-        if (path.at(0) != PathTree::getPathSeparatorCharacter()) {
+        if (path.at(0) != getPathSeparatorCharacter()) {
             throw std::runtime_error(
                 "Path must be absolute (begin with a forward slash)!");
         }
-        PathTree::Node *ret = &root;
+        PathNode *ret = &root;
 
         // Get the boost range that excludes the leading slash
         auto range_excluding_leading_slash = path | sliced(1, path.size() - 1);
@@ -61,7 +59,7 @@ namespace routing {
         typedef split_iterator<string::const_iterator> string_split_iterator;
         for (string_split_iterator It = make_split_iterator(
                  range_excluding_leading_slash,
-                 first_finder(PathTree::getPathSeparator(), is_equal()));
+                 first_finder(getPathSeparator(), is_equal()));
              It != string_split_iterator(); ++It) {
             OSVR_DEV_VERBOSE(boost::copy_range<std::string>(*It));
             ret = &(ret->getOrCreateChildByName(

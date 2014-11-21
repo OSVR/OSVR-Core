@@ -1,14 +1,20 @@
 osvr_setup_lib_vars(Routing)
 
 set(API
+    "${HEADER_LOCATION}/Constants.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
-    "${HEADER_LOCATION}/PathTree.h")
+    "${HEADER_LOCATION}/PathNode.h"
+    "${HEADER_LOCATION}/PathNode_fwd.h"
+    "${HEADER_LOCATION}/PathTree.h"
+    "${HEADER_LOCATION}/PathTreeFull.h")
 
 set(SOURCE
+    Constants.cpp
     PathElementTools.cpp
     PathElementTypes.cpp
+    PathNode.cpp
     PathParseAndRetrieve.cpp
     PathParseAndRetrieve.h
     PathTree.cpp)
@@ -28,5 +34,5 @@ target_include_directories(${LIBNAME_FULL}
     ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${LIBNAME_FULL}
-    PRIVATE
+    PUBLIC
     osvrUtilCpp)

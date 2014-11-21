@@ -21,8 +21,7 @@
 
 // Internal Includes
 #include <osvr/Routing/Export.h>
-#include <osvr/Routing/PathElementTypes_fwd.h>
-#include <osvr/Util/TreeNode_fwd.h>
+#include <osvr/Routing/PathNode_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -37,9 +36,6 @@ namespace routing {
     /// system.
     class PathTree : boost::noncopyable {
       public:
-        /// @brief The specific tree node type that contains a path element.
-        typedef ::osvr::util::TreeNode<PathElement> Node;
-
         /// @brief Constructor
         OSVR_ROUTING_EXPORT PathTree();
 
@@ -51,20 +47,20 @@ namespace routing {
         /// @brief Visit the tree, with const nodes, starting at the root, with
         /// the given functor.
         template <typename F> void visitConstTree(F &functor) const {
-            functor(const_cast<Node const &>(*m_root));
+            functor(const_cast<PathNode const &>(*m_root));
         }
         /// @}
 
         /// @brief Returns the node indicated by the path, which must be
         /// absolute (begin with a /). Any non-existent nodes will be created
         /// with values of NullElement
-        OSVR_ROUTING_EXPORT Node &getNodeByPath(std::string const &path);
+        OSVR_ROUTING_EXPORT PathNode &getNodeByPath(std::string const &path);
 
         /// @brief Get the root of the tree.
-        OSVR_ROUTING_EXPORT Node &getRoot();
+        OSVR_ROUTING_EXPORT PathNode &getRoot();
 
         /// @brief Get the root of the tree (const).
-        OSVR_ROUTING_EXPORT Node const &getRoot() const;
+        OSVR_ROUTING_EXPORT PathNode const &getRoot() const;
 
         /// @brief Adds/updates nodes for the basic path to a device.
         /// @param deviceName A namespaced device name coming from a plugin,
@@ -73,25 +69,11 @@ namespace routing {
         /// @returns The device node
         /// @throws std::runtime_error if an invalid device name (less than two
         /// components) was passed.
-        OSVR_ROUTING_EXPORT Node &addDevice(std::string const &deviceName);
+        OSVR_ROUTING_EXPORT PathNode &addDevice(std::string const &deviceName);
 
-        /// @brief Gets an identifying string for the node type.
-        OSVR_ROUTING_EXPORT static const char *getNodeType(Node const &node);
-
-        /// @name Constants
-        /// @{
-        /// @brief Gets the path separator character - a slash.
-        OSVR_ROUTING_EXPORT static const char getPathSeparatorCharacter();
-
-        /// @brief Gets the path separator - a slash - as a null-terminated
-        /// string.
-        OSVR_ROUTING_EXPORT static const char *getPathSeparator();
-        /// @}
       private:
-        /// @brief The ownership pointer of the specific tree node.
-        typedef ::osvr::util::TreeNodePointer<PathElement>::type NodePtr;
-
-        NodePtr m_root;
+        /// @brief Root node of the tree.
+        PathNodePtr m_root;
     };
 } // namespace routing
 } // namespace osvr
