@@ -1,6 +1,7 @@
 osvr_setup_lib_vars(Routing)
 
 set(API
+    "${HEADER_LOCATION}/AddDevice.h"
     "${HEADER_LOCATION}/Constants.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
@@ -8,9 +9,11 @@ set(API
     "${HEADER_LOCATION}/PathNode.h"
     "${HEADER_LOCATION}/PathNode_fwd.h"
     "${HEADER_LOCATION}/PathTree.h"
+    "${HEADER_LOCATION}/PathTree_fwd.h"
     "${HEADER_LOCATION}/PathTreeFull.h")
 
 set(SOURCE
+    AddDevice.cpp
     Constants.cpp
     PathElementTools.cpp
     PathElementTypes.cpp

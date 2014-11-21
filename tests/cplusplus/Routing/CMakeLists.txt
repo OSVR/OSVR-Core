@@ -1,3 +1,8 @@
-add_executable(PathTree PathTree.cpp)
-target_link_libraries(PathTree osvrRouting)
-setup_gtest(PathTree)
+add_executable(Routing
+    AddDevice.cpp
+    IsType.h
+    PathElement.cpp
+    PathNode.cpp
+    PathTree.cpp)
+target_link_libraries(Routing osvrRouting)
+setup_gtest(Routing)

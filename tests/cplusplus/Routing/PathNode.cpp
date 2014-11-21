@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Test Implementation
 
     @date 2014
 
@@ -7,6 +7,7 @@
     Ryan Pavlik
     <ryan@sensics.com>
     <http://sensics.com>
+
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -17,21 +18,20 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/Routing/PathTree.h>
+#include <osvr/Routing/PathTreeFull.h>
 #include <osvr/Routing/PathNode.h>
-#include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
-// - none
+#include "gtest/gtest.h"
 
 // Standard includes
 // - none
 
-namespace osvr {
-namespace routing {
-    PathTree::PathTree() : m_root(PathNode::createRoot()) {}
-    PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return pathParseAndRetrieve(path, *m_root);
-    }
-} // namespace routing
-} // namespace osvr
+using namespace osvr::routing;
+
+TEST(PathNode, getFullPath) {
+    PathTree tree;
+    ASSERT_EQ(
+        getFullPath(tree.getNodeByPath("/org_opengoggles_sample/MyDevice")),
+        "/org_opengoggles_sample/MyDevice");
+}

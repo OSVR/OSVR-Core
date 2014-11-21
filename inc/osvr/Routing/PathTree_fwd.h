@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2014
 
@@ -16,10 +16,11 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#ifndef INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
+#define INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
+
 // Internal Includes
-#include <osvr/Routing/PathTree.h>
-#include <osvr/Routing/PathNode.h>
-#include "PathParseAndRetrieve.h"
+// - none
 
 // Library/third-party includes
 // - none
@@ -29,9 +30,8 @@
 
 namespace osvr {
 namespace routing {
-    PathTree::PathTree() : m_root(PathNode::createRoot()) {}
-    PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return pathParseAndRetrieve(path, *m_root);
-    }
+    class PathTree;
 } // namespace routing
 } // namespace osvr
+
+#endif // INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
