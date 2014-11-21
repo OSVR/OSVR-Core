@@ -23,6 +23,7 @@
 #include <osvr/Routing/PathElementTypes.h>
 
 // Library/third-party includes
+#include <boost/variant/get.hpp>
 #include "gtest/gtest.h"
 
 // Standard includes
@@ -33,23 +34,25 @@ using namespace osvr::routing;
 // using osvr::routing::PathTree;
 // namespace elements = osvr::routing::elements;
 
-#if 0
-// These didn't work for some reason...
-#include <boost/variant/get.hpp>
 template <typename ElementType>
 inline bool isElementType(elements::PathElement const &elt) {
-    return (boost::get<ElementType const *>(&elt) != NULL);
+    return (boost::get<ElementType const>(&elt) != NULL);
 }
 
 template <typename ElementType> inline bool isNodeType(PathNode const &node) {
     return isElementType<ElementType>(node.value());
 }
-#endif
 
 TEST(PathTree, create) { ASSERT_NO_THROW(PathTree()); }
 
 TEST(PathElement, getTypeName) {
     ASSERT_STREQ(elements::getTypeName<elements::NullElement>(), "NullElement");
+}
+
+TEST(PathElement, isElementType) {
+    ASSERT_TRUE(isElementType<elements::NullElement>(elements::NullElement()));
+    ASSERT_FALSE(
+        isElementType<elements::DeviceElement>(elements::NullElement()));
 }
 
 TEST(PathTree, getPathRoot) {
@@ -64,14 +67,8 @@ TEST(PathTree, getPathSingleLevel) {
     PathNode *result = NULL;
     ASSERT_NO_THROW(result = &tree.getNodeByPath("/test"))
         << "Get a new node just a single level in";
-    ASSERT_STREQ(getTypeName(*result), "NullElement")
-        << "Check the type of the new node.";
-#if 0
-    ASSERT_FALSE(isNodeType<elements::DeviceElement>(*result))
-        << "Check the type of the new node.";
     ASSERT_TRUE(isNodeType<elements::NullElement>(*result))
         << "Check the type of the new node.";
-#endif
     ASSERT_EQ(result->getName(), "test") << "Check the name of the new node";
 
     ASSERT_NO_THROW(tree.getNodeByPath("/test")) << "Get the same node again.";
@@ -89,13 +86,13 @@ TEST(PathTree, getPathTwoLevel) {
     // Check test2
     ASSERT_EQ(test2->getName(), "test2");
     ASSERT_FALSE(test2->hasChildren()) << "Make sure it has no children.";
-    ASSERT_STREQ(getTypeName(*test2), "NullElement") << "Check type";
+    ASSERT_TRUE(isNodeType<elements::NullElement>(*test2)) << "Check type";
     ASSERT_FALSE(!test2->getParent()) << "Make sure it has a parent.";
 
     // Check test1
     PathNodePtr test1 = test2->getParent();
     ASSERT_EQ(test1->getName(), "test1");
-    ASSERT_STREQ(getTypeName(*test1), "NullElement");
+    ASSERT_TRUE(isNodeType<elements::NullElement>(*test1));
     ASSERT_FALSE(!test1->getParent()) << "Make sure it has a parent.";
     PathNodePtr root = test1->getParent();
 
@@ -115,13 +112,13 @@ TEST(PathTree, addDevice) {
     // Check Device
     ASSERT_EQ(dev->getName(), "MyDevice");
     ASSERT_FALSE(dev->hasChildren()) << "Make sure it has no children.";
-    ASSERT_STREQ(getTypeName(*dev), "DeviceElement") << "Check type";
+    ASSERT_TRUE(isNodeType<elements::DeviceElement>(*dev)) << "Check type";
     ASSERT_FALSE(!dev->getParent()) << "Make sure it has a parent.";
 
     // Check test1
     PathNodePtr plugin = dev->getParent();
     ASSERT_EQ(plugin->getName(), "org_opengoggles_sample");
-    ASSERT_STREQ(getTypeName(*plugin), "PluginElement");
+    ASSERT_TRUE(isNodeType<elements::PluginElement>(*plugin)) << "Check type";
     ASSERT_FALSE(!plugin->getParent()) << "Make sure it has a parent.";
     PathNodePtr root = plugin->getParent();
 
