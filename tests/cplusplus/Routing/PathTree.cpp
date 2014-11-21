@@ -105,3 +105,29 @@ TEST(PathTree, getPathTwoLevel) {
     ASSERT_EQ(tree.getNodeByPath("/test1/test2"), *test2)
         << "Identity should be preserved";
 }
+
+TEST(PathTree, addDevice) {
+    PathTree tree;
+
+    PathNode *dev = NULL;
+    ASSERT_NO_THROW(dev = &addDevice(tree, "/org_opengoggles_sample/MyDevice"));
+
+    // Check Device
+    ASSERT_EQ(dev->getName(), "MyDevice");
+    ASSERT_FALSE(dev->hasChildren()) << "Make sure it has no children.";
+    ASSERT_STREQ(getTypeName(*dev), "DeviceElement") << "Check type";
+    ASSERT_FALSE(!dev->getParent()) << "Make sure it has a parent.";
+
+    // Check test1
+    PathNodePtr plugin = dev->getParent();
+    ASSERT_EQ(plugin->getName(), "org_opengoggles_sample");
+    ASSERT_STREQ(getTypeName(*plugin), "PluginElement");
+    ASSERT_FALSE(!plugin->getParent()) << "Make sure it has a parent.";
+    PathNodePtr root = plugin->getParent();
+
+    ASSERT_TRUE(root->isRoot());
+    ASSERT_EQ(tree.getNodeByPath("/"), *root)
+        << "Root identity should be preserved";
+    ASSERT_EQ(tree.getNodeByPath("/org_opengoggles_sample/MyDevice"), *dev)
+        << "Identity should be preserved";
+}
