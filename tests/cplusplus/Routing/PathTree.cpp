@@ -21,6 +21,7 @@
 #include <osvr/Routing/PathTreeFull.h>
 #include <osvr/Routing/PathElementTools.h>
 #include <osvr/Routing/PathElementTypes.h>
+#include <osvr/Routing/PathNode.h>
 
 // Library/third-party includes
 #include <boost/variant/get.hpp>
@@ -60,6 +61,14 @@ TEST(PathTree, getPathRoot) {
     PathNode *result = NULL;
     ASSERT_NO_THROW(result = &tree.getNodeByPath("/")) << "Get the root.";
     ASSERT_TRUE(result->isRoot());
+}
+
+TEST(PathTree, getPathBadInput) {
+    PathTree tree;
+    ASSERT_THROW(tree.getNodeByPath(""), std::runtime_error)
+        << "Empty string not acceptable as path";
+    ASSERT_THROW(tree.getNodeByPath("test"), std::runtime_error)
+        << "Missing leading slash not acceptable";
 }
 
 TEST(PathTree, getPathSingleLevel) {
@@ -103,9 +112,31 @@ TEST(PathTree, getPathTwoLevel) {
         << "Identity should be preserved";
 }
 
+TEST(PathTree, addDeviceBadInput) {
+    PathTree tree;
+    ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample"), std::runtime_error)
+        << "Should reject just a single level";
+    ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample/"),
+                 std::runtime_error)
+        << "Should reject just a single level with trailing slash";
+    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample"), std::runtime_error)
+        << "Should reject just a single level w/o leading slash";
+    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample/"), std::runtime_error)
+        << "Should reject just a single level with trailing but w/o leading "
+           "slash";
+
+    ASSERT_THROW(addDevice(tree, "/org_opengoggles_sample//"),
+                 std::runtime_error)
+        << "Should reject empty second level";
+    ASSERT_THROW(addDevice(tree, "org_opengoggles_sample//"),
+                 std::runtime_error)
+        << "Should reject empty second level";
+    ASSERT_THROW(addDevice(tree, "//"), std::runtime_error);
+    ASSERT_THROW(addDevice(tree, "///"), std::runtime_error);
+}
+
 TEST(PathTree, addDevice) {
     PathTree tree;
-
     PathNode *dev = NULL;
     ASSERT_NO_THROW(dev = &addDevice(tree, "/org_opengoggles_sample/MyDevice"));
 
@@ -115,7 +146,45 @@ TEST(PathTree, addDevice) {
     ASSERT_TRUE(isNodeType<elements::DeviceElement>(*dev)) << "Check type";
     ASSERT_FALSE(!dev->getParent()) << "Make sure it has a parent.";
 
-    // Check test1
+    // Check org_opengoggles_sample
+    PathNodePtr plugin = dev->getParent();
+    ASSERT_EQ(plugin->getName(), "org_opengoggles_sample");
+    ASSERT_TRUE(isNodeType<elements::PluginElement>(*plugin)) << "Check type";
+    ASSERT_FALSE(!plugin->getParent()) << "Make sure it has a parent.";
+    PathNodePtr root = plugin->getParent();
+
+    ASSERT_TRUE(root->isRoot());
+    ASSERT_EQ(tree.getNodeByPath("/"), *root)
+        << "Root identity should be preserved";
+    ASSERT_EQ(tree.getNodeByPath("/org_opengoggles_sample/MyDevice"), *dev)
+        << "Identity should be preserved";
+}
+
+TEST(PathTree, addDeviceMissingLeadingSlash) {
+    PathTree tree;
+
+    PathNode *dev = NULL;
+    ASSERT_NO_THROW(dev = &addDevice(tree, "org_opengoggles_sample/MyDevice"))
+        << "Should forgive a missing leading slash";
+    ASSERT_EQ(tree.getNodeByPath("/org_opengoggles_sample/MyDevice"), *dev)
+        << "Should be the same as if the slash had been present";
+}
+
+TEST(PathTree, getFullPath) {
+    PathTree tree;
+    ASSERT_EQ(
+        getFullPath(tree.getNodeByPath("/org_opengoggles_sample/MyDevice")),
+        "/org_opengoggles_sample/MyDevice");
+    PathNode *dev = NULL;
+    ASSERT_NO_THROW(dev = &addDevice(tree, "/org_opengoggles_sample/MyDevice"));
+
+    // Check Device
+    ASSERT_EQ(dev->getName(), "MyDevice");
+    ASSERT_FALSE(dev->hasChildren()) << "Make sure it has no children.";
+    ASSERT_TRUE(isNodeType<elements::DeviceElement>(*dev)) << "Check type";
+    ASSERT_FALSE(!dev->getParent()) << "Make sure it has a parent.";
+
+    // Check org_opengoggles_sample
     PathNodePtr plugin = dev->getParent();
     ASSERT_EQ(plugin->getName(), "org_opengoggles_sample");
     ASSERT_TRUE(isNodeType<elements::PluginElement>(*plugin)) << "Check type";
