@@ -36,10 +36,6 @@ namespace routing {
         return pathParseAndRetrieve(path, *m_root);
     }
 
-    PathNode &PathTree::getRoot() { return *m_root; }
-
-    PathNode const &PathTree::getRoot() const { return *m_root; }
-
     PathNode &addDevice(PathTree &tree, std::string const &deviceName) {
         if (deviceName.size() < 3) { // Minimum size: a/b
             throw std::runtime_error(

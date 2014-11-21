@@ -29,10 +29,4 @@
 using std::string;
 using osvr::routing::PathTree;
 
-TEST(PathTree, create) {
-    ASSERT_NO_THROW(PathTree());
-
-    ASSERT_NO_THROW(PathTree().getRoot());
-    ASSERT_TRUE(PathTree().getRoot().isRoot());
-    ASSERT_EQ(PathTree().getRoot().numChildren(), 0);
-}
+TEST(PathTree, create) { ASSERT_NO_THROW(PathTree()); }

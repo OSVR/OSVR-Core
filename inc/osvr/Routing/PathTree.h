@@ -56,12 +56,6 @@ namespace routing {
         /// with values of NullElement
         OSVR_ROUTING_EXPORT PathNode &getNodeByPath(std::string const &path);
 
-        /// @brief Get the root of the tree.
-        OSVR_ROUTING_EXPORT PathNode &getRoot();
-
-        /// @brief Get the root of the tree (const).
-        OSVR_ROUTING_EXPORT PathNode const &getRoot() const;
-
       private:
         /// @brief Root node of the tree.
         PathNodePtr m_root;
