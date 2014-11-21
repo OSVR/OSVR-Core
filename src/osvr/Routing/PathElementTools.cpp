@@ -19,6 +19,7 @@
 // Internal Includes
 #include <osvr/Routing/PathElementTypes.h>
 #include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 // Library/third-party includes
 // - none
@@ -29,8 +30,10 @@
 namespace osvr {
 namespace routing {
     namespace elements {
+        using boost::static_visitor;
+        using boost::apply_visitor;
         namespace {
-            class TypeNameVisitor : public boost::static_visitor<const char *> {
+            class TypeNameVisitor : public static_visitor<const char *> {
               public:
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     const char *operator()(CLASS const &) const { return #CLASS; }
