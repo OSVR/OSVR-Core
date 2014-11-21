@@ -38,7 +38,9 @@ typedef TreeNodePointer<string>::type StringTreePtr;
 
 TEST(TreeNode, createRoot) {
     ASSERT_NO_THROW((IntTree::createRoot()));
+    ASSERT_NO_THROW((IntTree::createRoot(5)));
     ASSERT_NO_THROW((StringTree::createRoot()));
+    ASSERT_NO_THROW((StringTree::createRoot("Value")));
 }
 
 TEST(TreeNode, RootInvariants) {
@@ -49,6 +51,18 @@ TEST(TreeNode, RootInvariants) {
         ASSERT_FALSE(tree->hasChildren());
         ASSERT_EQ(tree->numChildren(), 0);
         ASSERT_EQ(tree->value(), 0) << "Default constructed int is 0";
+        ASSERT_NO_THROW(tree->value() = 6) << "Can set the value";
+        ASSERT_EQ(tree->value(), 6) << "Retains set value";
+    }
+    {
+        IntTreePtr tree;
+        ASSERT_NO_THROW(tree = IntTree::createRoot(5));
+        ASSERT_TRUE(tree->getName().empty());
+        ASSERT_FALSE(tree->hasChildren());
+        ASSERT_EQ(tree->numChildren(), 0);
+        ASSERT_EQ(tree->value(), 5) << "We created with value 5";
+        ASSERT_NO_THROW(tree->value() = 6) << "Can set the value";
+        ASSERT_EQ(tree->value(), 6) << "Retains set value";
     }
     {
         StringTreePtr tree;
@@ -58,6 +72,16 @@ TEST(TreeNode, RootInvariants) {
         ASSERT_EQ(tree->numChildren(), 0);
         ASSERT_TRUE(tree->value().empty())
             << "Default constructed string is empty";
+        ASSERT_NO_THROW(tree->value() = "myVal") << "Can set the value";
+        ASSERT_EQ(tree->value(), "myVal") << "Retains set value";
+    }
+    {
+        StringTreePtr tree;
+        ASSERT_NO_THROW(tree = StringTree::createRoot("test"));
+        ASSERT_TRUE(tree->getName().empty());
+        ASSERT_FALSE(tree->hasChildren());
+        ASSERT_EQ(tree->numChildren(), 0);
+        ASSERT_EQ(tree->value(), "test") << "Retains original value";
         ASSERT_NO_THROW(tree->value() = "myVal") << "Can set the value";
         ASSERT_EQ(tree->value(), "myVal") << "Retains set value";
     }
@@ -151,6 +175,22 @@ TEST(TreeNode, ChildValues) {
         << "Third child's value retained";
     ASSERT_EQ(tree->getOrCreateChildByName("D").value(), "myFourthVal")
         << "Fourth child's value retained";
+
+    ASSERT_NO_THROW((StringTree::create(*tree, "E", "myFifthVal")))
+        << "Creating child and setting value in single create() call.";
+    ASSERT_EQ(tree->numChildren(), 5);
+    ASSERT_TRUE(tree->value().empty())
+        << "Parent value should still be default";
+    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
+        << "First child value retained";
+    ASSERT_EQ(tree->getOrCreateChildByName("B").value(), "mySecondVal")
+        << "Second child's value retained";
+    ASSERT_EQ(tree->getOrCreateChildByName("C").value(), "myThirdVal")
+        << "Third child's value retained";
+    ASSERT_EQ(tree->getOrCreateChildByName("D").value(), "myFourthVal")
+        << "Fourth child's value retained";
+    ASSERT_EQ(tree->getOrCreateChildByName("E").value(), "myFifthVal")
+        << "Fifth child's value retained";
 }
 
 class ValueChecker {
@@ -172,11 +212,18 @@ class ValueChecker {
         } else if (node.getName() == "D") {
             ASSERT_EQ(node.value(), "myFourthVal")
                 << "Fourth child's value visited";
+        } else if (node.getName() == "E") {
+            ASSERT_EQ(node.value(), "myFifthVal")
+                << "Fourth child's value visited";
         } else {
             FAIL() << "Should only have the root and four child nodes!";
         }
         nodes++;
     }
+
+    void assertNodeCount() { ASSERT_EQ(nodes, 6); }
+
+  private:
     size_t nodes;
 };
 
@@ -207,6 +254,7 @@ StringTreePtr getFullTree() {
     tree->getOrCreateChildByName("B").value() = "mySecondVal";
     tree->getOrCreateChildByName("C").value() = "myThirdVal";
     StringTree::create(*tree, "D").value() = "myFourthVal";
+    StringTree::create(*tree, "E", "myFifthVal");
     return tree;
 }
 
@@ -224,14 +272,14 @@ TEST(TreeNode, Visitor) {
     StringTreePtr tree = getFullTree();
     ValueVisitor visitor;
     visitor(*tree);
-    ASSERT_EQ(visitor.checker.nodes, 5);
+    visitor.checker.assertNodeCount();
 }
 
 TEST(TreeNode, ConstVisitor) {
     StringTreePtr tree = getFullTree();
     ConstValueVisitor visitor;
     visitor(*tree);
-    ASSERT_EQ(visitor.checker.nodes, 5);
+    visitor.checker.assertNodeCount();
 }
 
 class ParentCheckerVisitor {

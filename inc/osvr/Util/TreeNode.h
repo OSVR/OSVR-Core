@@ -81,8 +81,17 @@ namespace util {
             /// or if the name provided is empty.
             static type &create(TreeNode &parent, std::string const &name);
 
+            /// @brief Create a child tree node with a value
+            /// @throws std::logic_error if a child of that name already exists
+            /// or if the name provided is empty.
+            static type &create(TreeNode &parent, std::string const &name,
+                                value_type const &val);
+
             /// @brief Create a root.
             static ptr_type createRoot();
+
+            /// @brief Create a root with a value.
+            static ptr_type createRoot(value_type const &val);
 
             /// @brief Get the named child, creating it if it doesn't exist.
             type &getOrCreateChildByName(std::string const &name);
@@ -146,8 +155,15 @@ namespace util {
             /// @brief Private constructor for a non-root node
             TreeNode(type &parent, std::string const &name);
 
+            /// @brief Private constructor for a non-root node with a value
+            TreeNode(type &parent, std::string const &name,
+                     value_type const &val);
+
             /// @brief Private constructor for a root node
             TreeNode();
+
+            /// @brief Private constructor for a root node with a value
+            explicit TreeNode(value_type const &val);
 
             /// @brief Internal helper to get child by name, or a null pointer
             /// if no
@@ -187,9 +203,31 @@ namespace util {
         }
 
         template <typename ValueType>
+        inline TreeNode<ValueType> &
+        TreeNode<ValueType>::create(TreeNode<ValueType> &parent,
+                                    std::string const &name,
+                                    ValueType const &val) {
+            if (parent.m_getChildByName(name)) {
+                throw std::logic_error(
+                    "Can't create a child with the same name as "
+                    "an existing child!");
+            }
+            ptr_type ret(new TreeNode(parent, name, val));
+            parent.m_addChild(ret);
+            return *ret;
+        }
+
+        template <typename ValueType>
         inline typename TreeNode<ValueType>::ptr_type
         TreeNode<ValueType>::createRoot() {
             ptr_type ret(new TreeNode());
+            return ret;
+        }
+
+        template <typename ValueType>
+        inline typename TreeNode<ValueType>::ptr_type
+        TreeNode<ValueType>::createRoot(ValueType const &val) {
+            ptr_type ret(new TreeNode(val));
             return ret;
         }
 
@@ -267,8 +305,25 @@ namespace util {
         }
 
         template <typename ValueType>
+        inline TreeNode<ValueType>::TreeNode(TreeNode<ValueType> &parent,
+                                             std::string const &name,
+                                             ValueType const &val)
+            : m_value(val), m_children(), m_name(name), m_parent(&parent) {
+            if (m_name.empty()) {
+                throw std::logic_error(
+                    "Can't create a named tree node with an empty name!");
+            }
+        }
+
+        template <typename ValueType>
         inline TreeNode<ValueType>::TreeNode()
             : m_value(), m_children(), m_name(), m_parent(nullptr) {
+            /// Special root constructor
+        }
+
+        template <typename ValueType>
+        inline TreeNode<ValueType>::TreeNode(ValueType const &val)
+            : m_value(val), m_children(), m_name(), m_parent(nullptr) {
             /// Special root constructor
         }
 
