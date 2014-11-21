@@ -28,5 +28,5 @@
 namespace osvr {
 namespace routing {
     namespace elements {} // namespace elements
-} // namespace client
+} // namespace routing
 } // namespace osvr

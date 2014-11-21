@@ -71,7 +71,7 @@ namespace routing {
         class LogicalElement : public ElementBase<LogicalElement> {};
     } // namespace elements
 
-} // namespace client
+} // namespace routing
 } // namespace osvr
 
 #endif // INCLUDED_PathElementTypes_h_GUID_5CC817E5_C7CB_45AE_399D_0B0D39579374

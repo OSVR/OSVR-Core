@@ -67,5 +67,5 @@ namespace routing {
         }
         return *ret;
     }
-} // namespace client
+} // namespace routing
 } // namespace osvr

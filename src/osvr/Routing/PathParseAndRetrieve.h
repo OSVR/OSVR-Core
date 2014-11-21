@@ -31,7 +31,7 @@
 namespace osvr {
 namespace routing {
     PathNode &pathParseAndRetrieve(std::string const &path, PathNode &root);
-} // namespace client
+} // namespace routing
 } // namespace osvr
 
 #endif // INCLUDED_PathParseAndRetrieve_h_GUID_C451663C_0711_4B85_2011_61D26E5C237C
