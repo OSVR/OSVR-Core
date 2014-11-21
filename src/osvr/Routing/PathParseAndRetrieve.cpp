@@ -20,6 +20,7 @@
 #include "PathParseAndRetrieve.h"
 #include <osvr/Routing/PathElementTypes.h>
 #include <osvr/Util/TreeNode.h>
+#include <osvr/Routing/PathTree.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -43,19 +44,24 @@ namespace routing {
         using boost::first_finder;
         using boost::is_equal;
         BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
-        if (path.empty() || path == "/") {
+        if (path.empty() || path == PathTree::getPathSeparator()) {
             /// @todo is an empty path valid input?
             return root;
         }
-        if (path.at(0) != '/') {
+        if (path.at(0) != PathTree::getPathSeparatorCharacter()) {
             throw std::runtime_error(
                 "Path must be absolute (begin with a forward slash)!");
         }
         PathTree::Node *ret = &root;
-        typedef split_iterator<string::const_iterator> string_split_iterator;
+
+        // Get the boost range that excludes the leading slash
         auto range_excluding_leading_slash = path | sliced(1, path.size() - 1);
+
+        // Iterate through the chunks of the path, split by a slash.
+        typedef split_iterator<string::const_iterator> string_split_iterator;
         for (string_split_iterator It = make_split_iterator(
-                 range_excluding_leading_slash, first_finder("/", is_equal()));
+                 range_excluding_leading_slash,
+                 first_finder(PathTree::getPathSeparator(), is_equal()));
              It != string_split_iterator(); ++It) {
             OSVR_DEV_VERBOSE(boost::copy_range<std::string>(*It));
             ret = &(ret->getOrCreateChildByName(

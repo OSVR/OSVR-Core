@@ -39,5 +39,11 @@ namespace routing {
     const char *PathTree::getNodeType(PathTree::Node const &node) {
         return elements::getTypeName(node.value());
     }
+
+    const char PathTree::getPathSeparatorCharacter() {
+        return getPathSeparator()[0];
+    }
+
+    const char *PathTree::getPathSeparator() { return "/"; }
 } // namespace routing
 } // namespace osvr

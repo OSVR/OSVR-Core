@@ -59,6 +59,13 @@ namespace routing {
         /// @brief Gets an identifying string for the node type.
         static const char *getNodeType(Node const &node);
 
+        /// @brief Gets the path separator character - a slash.
+        static const char getPathSeparatorCharacter();
+
+        /// @brief Gets the path separator - a slash - as a null-terminated
+        /// string.
+        static const char *getPathSeparator();
+
       private:
         /// @brief The ownership pointer of the specific tree node.
         typedef ::osvr::util::TreeNodePointer<PathElement>::type NodePtr;
