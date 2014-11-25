@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include "GetVRPNConnection.h"
+#include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Connection/Connection.h>

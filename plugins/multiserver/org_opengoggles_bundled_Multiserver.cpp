@@ -19,6 +19,7 @@
 
 // Internal Includes
 #include "VRPNMultiserver.h"
+#include "DevicesWithParameters.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/Util/UniquePtr.h>
 
@@ -36,8 +37,7 @@
 
 class VRPNHardwareDetect : boost::noncopyable {
   public:
-      VRPNHardwareDetect(VRPNMultiserverData &data)
-          : m_data(data) {}
+    VRPNHardwareDetect(VRPNMultiserverData &data) : m_data(data) {}
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
         BoundServer server(m_data, ctx);
         struct hid_device_info *enumData = hid_enumerate(0, 0);
@@ -55,7 +55,7 @@ class VRPNHardwareDetect : boost::noncopyable {
     }
 
   private:
-      VRPNMultiserverData &m_data;
+    VRPNMultiserverData &m_data;
 };
 
 OSVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
@@ -64,5 +64,9 @@ OSVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
     VRPNMultiserverData &data =
         *context.registerObjectForDeletion(new VRPNMultiserverData);
     context.registerHardwareDetectCallback(new VRPNHardwareDetect(data));
+
+    osvrRegisterDriverInstantiationCallback(
+        ctx, "YEI_3Space_Sensor", &wrappedConstructor<&createYEI>, &data);
+
     return OSVR_RETURN_SUCCESS;
 }
