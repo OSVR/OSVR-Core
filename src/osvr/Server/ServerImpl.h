@@ -75,7 +75,11 @@ namespace server {
         /// @brief Internal function to call a callable if the thread isn't
         /// running, or to queue up the callable if it is running.
         template <typename Callable> void m_callControlled(Callable f);
+
+        /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
+
+        /// @brief Context ownership.
         shared_ptr<pluginhost::RegistrationContext> m_ctx;
 
         /// @brief Callbacks to call in each loop.
