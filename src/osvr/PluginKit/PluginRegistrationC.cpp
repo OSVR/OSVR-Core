@@ -39,9 +39,14 @@ OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
     OSVR_DEV_VERBOSE("In osvrPluginRegisterHardwareDetectCallback with context "
                      << ctx);
 
-    osvr::pluginhost::PluginSpecificRegistrationContext *context =
-        static_cast<osvr::pluginhost::PluginSpecificRegistrationContext *>(ctx);
-    context->registerHardwareDetectCallback(detectCallback, userData);
+    try {
+        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .registerHardwareDetectCallback(detectCallback, userData);
+    } catch (std::exception &e) {
+        std::cerr << "Error in osvrPluginRegisterHardwareDetectCallback - "
+                     "caught exception reporting: " << e.what() << std::endl;
+        return OSVR_RETURN_FAILURE;
+    }
     return OSVR_RETURN_SUCCESS;
 }
 
