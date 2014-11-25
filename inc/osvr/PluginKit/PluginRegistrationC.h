@@ -71,10 +71,9 @@ OSVR_EXTERN_C_BEGIN
    should be detected again.
 
    When your callback, a function of type OSVR_HardwareDetectCallback, is
-   invoked,
-   it will receive the same userdata you provide here (if any). Your plugin
-   should do whatever probing necessary to detect devices you can handle and
-   instantiate the device drivers.
+   invoked, it will receive the same userdata you provide here (if any). Your
+   plugin should do whatever probing necessary to detect devices you can handle
+   and instantiate the device drivers.
 
    @param ctx The registration context passed to your entry point.
    @param detectCallback The address of your callback function
