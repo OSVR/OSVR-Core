@@ -46,7 +46,11 @@ int main(int argc, char *argv[]) {
     std::string configName = "osvr_server_config.json";
     if (argc > 2) {
         configName = argv[1];
+    } else {
+        cout << "Using default config file - pass a filename on the command "
+                "line to use a different one." << endl;
     }
+
     cout << "Loading config file '" << configName << "'" << endl;
     Json::Value root;
     Json::Reader reader;
