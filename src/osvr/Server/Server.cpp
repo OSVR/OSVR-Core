@@ -56,6 +56,10 @@ namespace server {
 
     void Server::triggerHardwareDetect() { m_impl->triggerHardwareDetect(); }
 
+    void Server::registerMainloopMethod(MainloopMethod f) {
+        m_impl->registerMainloopMethod(f);
+    }
+
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)
         : m_impl(new ServerImpl(conn)) {}

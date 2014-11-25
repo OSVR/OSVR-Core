@@ -64,6 +64,9 @@ namespace server {
         /// @copydoc Server::triggerHardwareDetect()
         void triggerHardwareDetect();
 
+        /// @copydoc Server::registerMainloopMethod()
+        void registerMainloopMethod(MainloopMethod f);
+
         /// @brief The method called from the server thread repeatedly.
         /// @returns true if the loop should continue running
         bool loop();
@@ -74,6 +77,9 @@ namespace server {
         template <typename Callable> void m_callControlled(Callable f);
         connection::ConnectionPtr m_conn;
         shared_ptr<pluginhost::RegistrationContext> m_ctx;
+
+        /// @brief Callbacks to call in each loop.
+        std::vector<MainloopMethod> m_mainloopMethods;
 
         /// @brief Mutex controlling ability to check/change state of run loop
         boost::mutex m_runControl;

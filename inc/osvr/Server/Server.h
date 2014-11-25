@@ -30,6 +30,7 @@
 
 // Standard includes
 #include <string>
+#include <functional>
 
 namespace osvr {
 /// @brief Server functionality
@@ -37,6 +38,10 @@ namespace osvr {
 namespace server {
     // Forward declaration for pimpl idiom.
     class ServerImpl;
+
+    /// @brief A function that can be registered by the server app to run in
+    /// each mainloop iteration.
+    typedef std::function<void()> MainloopMethod;
 
     /// @brief Class handling a run-loop with a registration context and
     /// connection
@@ -93,6 +98,8 @@ namespace server {
 
         /// @brief Run all hardware detect callbacks.
         OSVR_SERVER_EXPORT void triggerHardwareDetect();
+
+        OSVR_SERVER_EXPORT void registerMainloopMethod(MainloopMethod f);
 
       private:
         unique_ptr<ServerImpl> m_impl;

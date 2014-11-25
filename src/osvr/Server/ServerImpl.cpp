@@ -86,8 +86,17 @@ namespace server {
             &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));
     }
 
+    void ServerImpl::registerMainloopMethod(MainloopMethod f) {
+        if (f) {
+            m_mainloopMethods.push_back(f);
+        }
+    }
+
     bool ServerImpl::loop() {
         m_conn->process();
+        for (auto &f : m_mainloopMethods) {
+            f();
+        }
         /// @todo do queued things in here?
         /// @todo configurable waiting?
         m_thread.yield();
