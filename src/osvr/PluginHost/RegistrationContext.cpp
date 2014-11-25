@@ -88,6 +88,7 @@ namespace pluginhost {
             throw std::runtime_error("Could not find plugin named " +
                                      pluginName);
         }
+        pluginIt->second->instantiateDriver(driverName, params);
     }
 
     util::AnyMap &RegistrationContext::data() { return m_data; }
