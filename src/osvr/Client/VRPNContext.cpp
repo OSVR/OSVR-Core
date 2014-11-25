@@ -35,7 +35,9 @@
 namespace osvr {
 namespace client {
     CallableObject::~CallableObject() {}
-    template <typename Predicate> class VRPNRouter : public CallableObject {
+
+    template <typename Predicate>
+    class VRPNRouter : public CallableObject {
       public:
         VRPNRouter(const char *src, vrpn_Connection *conn, const char *dest,
                    ClientContext *ctx, Predicate p)
@@ -97,6 +99,11 @@ namespace client {
         m_routers.push_back(createRouter(
             "org_opengoggles_bundled_Multiserver/RazerHydra0", m_conn.get(),
             "/me/hands", this, [](vrpn_TRACKERCB const &) { return true; }));
+
+        m_routers.push_back(createRouter(
+            "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
+            m_conn.get(), "/me/head", this,
+            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; }));
     }
 
     VRPNContext::~VRPNContext() {}
