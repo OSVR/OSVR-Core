@@ -23,6 +23,7 @@
 // - none
 
 // Library/third-party includes
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Util/PluginRegContextC.h>
 
 // Standard includes
@@ -31,5 +32,7 @@
 class vrpn_Connection;
 
 vrpn_Connection *getVRPNConnection(OSVR_PluginRegContext ctx);
+vrpn_Connection *
+getVRPNConnection(osvr::pluginhost::PluginSpecificRegistrationContext &context);
 
 #endif // INCLUDED_GetVRPNConnection_h_GUID_008AFE04_5378_43B9_BE78_571F7C16D2DD

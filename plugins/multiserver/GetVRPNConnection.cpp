@@ -36,10 +36,14 @@ namespace connection {
 } // namespace osvr
 
 vrpn_Connection *getVRPNConnection(OSVR_PluginRegContext ctx) {
+    return getVRPNConnection(
+        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx));
+}
+
+vrpn_Connection *getVRPNConnection(
+    osvr::pluginhost::PluginSpecificRegistrationContext &context) {
     osvr::connection::ConnectionPtr conn =
-        osvr::connection::Connection::retrieveConnection(
-            osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
-                .getParent());
+        osvr::connection::Connection::retrieveConnection(context.getParent());
     vrpn_Connection *ret = NULL;
     if (std::string(conn->getConnectionKindID()) ==
         osvr::connection::getVRPNConnectionKindID()) {

@@ -1,7 +1,9 @@
 add_library(org_opengoggles_bundled_Multiserver MODULE
     org_opengoggles_bundled_Multiserver.cpp
     GetVRPNConnection.cpp
-    GetVRPNConnection.h)
+    GetVRPNConnection.h
+    VRPNMultiserver.cpp
+    VRPNMultiserver.h)
 target_link_libraries(org_opengoggles_bundled_Multiserver osvrPluginKitCpp osvrConnection osvrPluginHost vendored-vrpn)
 target_include_directories(org_opengoggles_bundled_Multiserver PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
 set_target_properties(org_opengoggles_bundled_Multiserver PROPERTIES
