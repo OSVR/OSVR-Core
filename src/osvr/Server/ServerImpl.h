@@ -67,6 +67,11 @@ namespace server {
         /// @copydoc Server::registerMainloopMethod()
         void registerMainloopMethod(MainloopMethod f);
 
+        /// @copydoc Server::instantiateDriver()
+        void instantiateDriver(std::string const &plugin,
+                               std::string const &driver,
+                               std::string const &params);
+
         /// @brief The method called from the server thread repeatedly.
         /// @returns true if the loop should continue running
         bool loop();

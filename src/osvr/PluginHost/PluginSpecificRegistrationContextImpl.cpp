@@ -91,6 +91,22 @@ namespace pluginhost {
                         [this](HardwareDetectCallback const &f) { f(this); });
     }
 
+    void PluginSpecificRegistrationContextImpl::instantiateDriver(
+        const std::string &driverName, const std::string &params) const {
+        auto it = m_driverInstantiationCallbacks.find(driverName);
+        if (it == end(m_driverInstantiationCallbacks)) {
+            throw std::logic_error("No driver initialization callback was "
+                                   "registered for the driver name " +
+                                   driverName);
+        }
+        OSVR_ReturnCode ret = (it->second)(params.c_str());
+        if (ret != OSVR_RETURN_SUCCESS) {
+            throw std::runtime_error("Failure returned from driver "
+                                     "initialization callback by name " +
+                                     driverName);
+        }
+    }
+
     void PluginSpecificRegistrationContextImpl::registerDataWithDeleteCallback(
         OSVR_PluginDataDeleteCallback deleteCallback, void *pluginData) {
         m_dataList.emplace_back(pluginData, deleteCallback);
@@ -111,6 +127,28 @@ namespace pluginhost {
                          << m_hardwareDetectCallbacks.size()
                          << " hardware detect callbacks registered for "
                          << getName());
+    }
+
+    void
+    PluginSpecificRegistrationContextImpl::registerDriverInstantiationCallback(
+        const char *name, OSVR_DriverInstantiationCallback constructor,
+        void *userData) {
+        OSVR_DEV_VERBOSE("PluginSpecificRegistrationContext:\t"
+                         "In registerDriverInstantiationCallback");
+        std::string n(name);
+        if (n.empty()) {
+            throw std::logic_error("Cannot register a driver instantiation "
+                                   "callback with an empty name!");
+        }
+        using namespace std::placeholders;
+        auto it = m_driverInstantiationCallbacks.find(name);
+        if (it != end(m_driverInstantiationCallbacks)) {
+            throw std::logic_error("A driver initialization callback by this "
+                                   "name for this plugin has already been "
+                                   "registered!");
+        }
+        m_driverInstantiationCallbacks[name] =
+            std::bind(constructor, extractOpaquePointer(), _1, userData);
     }
 
     util::AnyMap &PluginSpecificRegistrationContextImpl::data() {

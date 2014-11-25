@@ -96,6 +96,16 @@ namespace server {
         /// @brief Load plugin by name.
         OSVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
 
+        /// @brief Instantiate the named driver with parameters.
+        /// @param plugin The name of a plugin.
+        /// @param driver The name of a driver registered by the plugin for
+        /// creation in this way.
+        /// @param params A string containing parameters. Format is between you
+        /// and the plugin, but JSON is recommended.
+        OSVR_SERVER_EXPORT void
+        instantiateDriver(std::string const &plugin, std::string const &driver,
+                          std::string const &params = std::string());
+
         /// @brief Run all hardware detect callbacks.
         OSVR_SERVER_EXPORT void triggerHardwareDetect();
 

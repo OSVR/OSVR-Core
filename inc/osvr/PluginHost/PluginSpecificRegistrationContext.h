@@ -99,6 +99,20 @@ namespace pluginhost {
         /// event.
         OSVR_PLUGINHOST_EXPORT virtual void registerHardwareDetectCallback(
             OSVR_HardwareDetectCallback detectCallback, void *userData) = 0;
+
+        /// @brief Register a callback for constructing a driver by name with
+        /// parameters.
+        ///
+        /// @param name Driver type name - must be non-empty and unique within
+        /// this plugin.
+        /// @param constructor The callback function.
+        /// @param userData Optional opaque pointer to pass to callback
+        ///
+        /// @throws std::logic_error if name is empty or already used within
+        /// this plugin.
+        OSVR_PLUGINHOST_EXPORT virtual void registerDriverInstantiationCallback(
+            const char *name, OSVR_DriverInstantiationCallback constructor,
+            void *userData) = 0;
         /// @}
 
         /// @brief Accessor for plugin name.

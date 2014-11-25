@@ -81,6 +81,12 @@ namespace server {
                                    m_ctx, pluginName));
     }
 
+    void ServerImpl::instantiateDriver(std::string const &plugin,
+                                       std::string const &driver,
+                                       std::string const &params) {
+        m_ctx->instantiateDriver(plugin, driver, params);
+    }
+
     void ServerImpl::triggerHardwareDetect() {
         m_callControlled(std::bind(
             &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));

@@ -59,9 +59,11 @@ OSVR_EXTERN_C_BEGIN
 */
 #define OSVR_PLUGIN(PLUGIN_NAME) LIBFUNC_PLUGIN(PLUGIN_NAME, ctx)
 
-/** @name Hardware Detection
+/** @name Hardware Detection and Driver Instantiation
     @brief If your plugin contains drivers for devices that you can detect,
-    you'll want to register for hardware detection.
+    you'll want to register for hardware detection. Whether or not you can
+   detect, you may wish to register constructors (instantiation callbacks) that
+   accept parameters.
     @{
 */
 
@@ -83,6 +85,25 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
     OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     OSVR_IN OSVR_HardwareDetectCallback detectCallback,
     OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL)) OSVR_FUNC_NONNULL((1));
+
+/** @brief Register an instantiation callback (constructor) for a driver type.
+    The given constructor may be called with a string containing configuration
+    information, the format of which you should document with your plugin. JSON
+    is recommended.
+
+    @param ctx The plugin registration context received by your entry point
+    function.
+    @param name A unique name for the driver type. The library makes a copy of
+    this string.
+    @param cb Your callback
+    @param userdata An opaque pointer passed to your callback, if desired.
+*/
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrRegisterDriverInstantiationCallback(
+    OSVR_INOUT_PTR OSVR_PluginRegContext ctx, OSVR_IN_STRZ const char *name,
+    OSVR_IN_PTR OSVR_DriverInstantiationCallback cb,
+    OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL))
+    OSVR_FUNC_NONNULL((1, 2, 3));
+
 /** @} */
 
 /** @name Plugin Instance Data

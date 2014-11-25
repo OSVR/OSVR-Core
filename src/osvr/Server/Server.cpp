@@ -54,6 +54,12 @@ namespace server {
         m_impl->loadPlugin(plugin);
     }
 
+    void Server::instantiateDriver(std::string const &plugin,
+                                   std::string const &driver,
+                                   std::string const &params) {
+        m_impl->instantiateDriver(plugin, driver, params);
+    }
+
     void Server::triggerHardwareDetect() { m_impl->triggerHardwareDetect(); }
 
     void Server::registerMainloopMethod(MainloopMethod f) {

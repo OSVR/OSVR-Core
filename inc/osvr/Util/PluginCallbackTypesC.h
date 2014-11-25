@@ -44,6 +44,11 @@ typedef void (*OSVR_PluginDataDeleteCallback)(void *pluginData);
 /** @brief Function type of a Hardware Detect callback */
 typedef OSVR_ReturnCode (*OSVR_HardwareDetectCallback)(
     OSVR_PluginRegContext ctx, void *userData);
+
+/** @brief Function type of a driver instantiation callback */
+typedef OSVR_ReturnCode (*OSVR_DriverInstantiationCallback)(
+    OSVR_PluginRegContext ctx, const char *params, void *userData);
+
 /** @} */
 
 OSVR_EXTERN_C_END

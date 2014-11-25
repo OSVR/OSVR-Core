@@ -31,6 +31,7 @@
 
 // Standard includes
 #include <vector>
+#include <functional>
 
 namespace osvr {
 
@@ -78,6 +79,13 @@ namespace pluginhost {
         /// if any.
         void triggerHardwareDetectCallbacks();
 
+        /// @brief Call a driver instantiation callback for the given driver
+        /// name.
+        /// @throws std::runtime_error if there is no driver registered by that
+        /// name in the given plugin, or if the callback returns failure.
+        void instantiateDriver(const std::string &driverName,
+                               const std::string &params = std::string()) const;
+
         /// @brief Access the data storage map.
         virtual util::AnyMap &data();
 
@@ -96,6 +104,9 @@ namespace pluginhost {
 
         virtual void registerHardwareDetectCallback(
             OSVR_HardwareDetectCallback detectCallback, void *userData);
+        virtual void registerDriverInstantiationCallback(
+            const char *name, OSVR_DriverInstantiationCallback constructor,
+            void *userData);
         /// @}
 
       private:
@@ -112,6 +123,12 @@ namespace pluginhost {
             HardwareDetectCallback;
         typedef std::vector<HardwareDetectCallback> HardwareDetectCallbackList;
         HardwareDetectCallbackList m_hardwareDetectCallbacks;
+
+        typedef std::function<OSVR_ReturnCode(const char *)>
+            DriverInstantiationCallback;
+        typedef std::map<std::string, DriverInstantiationCallback>
+            DriverInstantiationMap;
+        DriverInstantiationMap m_driverInstantiationCallbacks;
 
         util::AnyMap m_data;
     };

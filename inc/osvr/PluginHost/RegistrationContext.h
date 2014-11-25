@@ -63,6 +63,16 @@ namespace pluginhost {
         /// @brief Trigger any registered hardware detect callbacks.
         OSVR_PLUGINHOST_EXPORT void triggerHardwareDetect();
 
+        /// @brief Call a driver instantiation callback for the given plugin
+        /// name and driver name.
+        /// @throws std::runtime_error if the plugin named hasn't been loaded,
+        /// if there is no driver registered by that name in the given plugin,
+        /// or if the constructor returns failure.
+        OSVR_PLUGINHOST_EXPORT void
+        instantiateDriver(const std::string &pluginName,
+                          const std::string &driverName,
+                          const std::string &params = std::string()) const;
+
         /// @brief Access the data storage map.
         OSVR_PLUGINHOST_EXPORT util::AnyMap &data();
 

@@ -79,6 +79,17 @@ namespace pluginhost {
         });
     }
 
+    void
+    RegistrationContext::instantiateDriver(const std::string &pluginName,
+                                           const std::string &driverName,
+                                           const std::string &params) const {
+        auto pluginIt = m_regMap.find(pluginName);
+        if (pluginIt == end(m_regMap)) {
+            throw std::runtime_error("Could not find plugin named " +
+                                     pluginName);
+        }
+    }
+
     util::AnyMap &RegistrationContext::data() { return m_data; }
 
     util::AnyMap const &RegistrationContext::data() const { return m_data; }

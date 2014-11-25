@@ -45,6 +45,21 @@ OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
     return OSVR_RETURN_SUCCESS;
 }
 
+OSVR_ReturnCode osvrRegisterDriverInstantiationCallback(
+    OSVR_INOUT_PTR OSVR_PluginRegContext ctx, OSVR_IN_STRZ const char *name,
+    OSVR_IN_PTR OSVR_DriverInstantiationCallback cb,
+    OSVR_IN_OPT void *userData) {
+    try {
+        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .registerDriverInstantiationCallback(name, cb, userData);
+    } catch (std::exception &e) {
+        std::cerr << "Error in osvrRegisterDriverInstantiationCallback - "
+                     "caught exception reporting: " << e.what() << std::endl;
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
 OSVR_ReturnCode osvrPluginRegisterDataWithDeleteCallback(
     OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     OSVR_IN OSVR_PluginDataDeleteCallback deleteCallback,
