@@ -43,7 +43,7 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
-    std::string configName = "osvrServerConfig.json";
+    std::string configName = "osvr_server_config.json";
     if (argc > 2) {
         configName = argv[1];
     }
