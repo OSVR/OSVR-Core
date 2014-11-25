@@ -86,6 +86,25 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    cout << "Instantiating configured drivers..." << endl;
+    const Json::Value drivers = root["drivers"];
+    for (Json::ArrayIndex i = 0, e = drivers.size(); i < e; ++i) {
+        const Json::Value thisDriver = drivers[i];
+        cout << "Instantiating '" << thisDriver["driver"].asString()
+             << "' from '" << thisDriver["plugin"].asString() << "'..." << endl;
+        try {
+            server->instantiateDriver(thisDriver["plugin"].asString(),
+                                      thisDriver["driver"].asString(),
+
+                                      thisDriver["params"].toStyledString());
+            cout << "Instantiation succeeded!\n" << endl;
+        } catch (std::exception &e) {
+            std::cerr << "Caught exception tring to instantiate: " << e.what()
+                      << std::endl;
+            return 1;
+        }
+    }
+
     cout << "Triggering a hardware detection..." << endl;
     server->triggerHardwareDetect();
 
