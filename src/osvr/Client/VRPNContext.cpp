@@ -27,28 +27,26 @@
 
 // Library/third-party includes
 #include <vrpn_Tracker.h>
-#include <boost/range/algorithm.hpp>
 
 // Standard includes
 #include <cstring>
 
 namespace osvr {
 namespace client {
-    CallableObject::~CallableObject() {}
+    RouterEntry::~RouterEntry() {}
 
-    template <typename Predicate>
-    class VRPNRouter : public CallableObject {
+    template <typename Predicate> class VRPNTrackerRouter : public RouterEntry {
       public:
-        VRPNRouter(const char *src, vrpn_Connection *conn, const char *dest,
-                   ClientContext *ctx, Predicate p)
-            : m_remote(new vrpn_Tracker_Remote(src, conn)), m_dest(dest),
-              m_pred(p), m_ctx(ctx) {
-            m_remote->register_change_handler(this, &VRPNRouter::handle);
+        VRPNTrackerRouter(ClientContext *ctx, vrpn_Connection *conn,
+                          const char *src, const char *dest, Predicate p)
+            : RouterEntry(ctx, dest),
+              m_remote(new vrpn_Tracker_Remote(src, conn)), m_pred(p) {
+            m_remote->register_change_handler(this, &VRPNTrackerRouter::handle);
         }
 
         static void VRPN_CALLBACK handle(void *userdata, vrpn_TRACKERCB info) {
-
-            VRPNRouter *self = static_cast<VRPNRouter *>(userdata);
+            VRPNTrackerRouter *self =
+                static_cast<VRPNTrackerRouter *>(userdata);
             if (self->m_pred(info)) {
                 OSVR_PoseReport report;
                 report.sensor = info.sensor;
@@ -56,29 +54,17 @@ namespace client {
                 osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
                 osvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
                 osvrVec3FromQuatlib(&(report.pose.translation), info.pos);
-                boost::for_each(self->m_ctx->getInterfaces(),
-                                [&](ClientInterfacePtr const &iface) {
+                for (auto const &iface : self->getContext()->getInterfaces()) {
                     iface->triggerCallbacks(timestamp, report);
-                });
+                }
             }
         }
         void operator()() { m_remote->mainloop(); }
 
       private:
         unique_ptr<vrpn_Tracker_Remote> m_remote;
-        std::string const m_dest;
         Predicate m_pred;
-        ClientContext *m_ctx;
     };
-
-    template <typename Predicate>
-    inline unique_ptr<CallableObject>
-    createRouter(const char *src, vrpn_Connection *conn, const char *dest,
-                 ClientContext *ctx, Predicate p) {
-        unique_ptr<CallableObject> ret(
-            new VRPNRouter<Predicate>(src, conn, dest, ctx, p));
-        return ret;
-    }
 
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
@@ -88,29 +74,39 @@ namespace client {
 
         /// @todo this is hardcoded routing, and not well done - just a stop-gap
         /// measure.
-        m_routers.push_back(createRouter(
-            "org_opengoggles_bundled_Multiserver/RazerHydra0", m_conn.get(),
-            "/me/hands/left", this,
-            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; }));
-        m_routers.push_back(createRouter(
-            "org_opengoggles_bundled_Multiserver/RazerHydra0", m_conn.get(),
-            "/me/hands/right", this,
-            [](vrpn_TRACKERCB const &info) { return info.sensor == 1; }));
-        m_routers.push_back(createRouter(
-            "org_opengoggles_bundled_Multiserver/RazerHydra0", m_conn.get(),
-            "/me/hands", this, [](vrpn_TRACKERCB const &) { return true; }));
+        m_addTrackerRouter(
+            "org_opengoggles_bundled_Multiserver/RazerHydra0", "/me/hands/left",
+            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; });
+        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
+                           "/me/hands/right", [](vrpn_TRACKERCB const &info) {
+            return info.sensor == 1;
+        });
+        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
+                           "/me/hands",
+                           [](vrpn_TRACKERCB const &) { return true; });
 
-        m_routers.push_back(createRouter(
+        m_addTrackerRouter(
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            m_conn.get(), "/me/head", this,
-            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; }));
+            "/me/head",
+            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; });
     }
 
     VRPNContext::~VRPNContext() {}
 
     void VRPNContext::m_update() {
+        // mainloop the VRPN connection.
         m_conn->mainloop();
-        boost::for_each(m_routers, [](CallablePtr const &p) { (*p)(); });
+        // Process each of the routers.
+        for (auto const &p : m_routers) {
+            (*p)();
+        }
+    }
+
+    template <typename Predicate>
+    void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
+                                         Predicate pred) {
+        m_routers.emplace_back(new VRPNTrackerRouter<Predicate>(
+            this, m_conn.get(), src, dest, pred));
     }
 
 } // namespace client

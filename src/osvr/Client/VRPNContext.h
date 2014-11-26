@@ -25,18 +25,31 @@
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
 
 namespace osvr {
 namespace client {
-    class CallableObject {
+    class RouterEntry : boost::noncopyable {
       public:
-        virtual ~CallableObject();
+        std::string const &getDest() { return m_dest; }
+        ClientContext *getContext() { return m_ctx; }
+        virtual ~RouterEntry();
         virtual void operator()() = 0;
+
+      protected:
+        RouterEntry(ClientContext *ctx, std::string const &dest)
+            : m_ctx(ctx), m_dest(dest) {}
+
+      private:
+        ClientContext *m_ctx;
+        const std::string m_dest;
     };
-    typedef unique_ptr<CallableObject> CallablePtr;
+
+    typedef unique_ptr<RouterEntry> RouterEntryPtr;
+
     class VRPNContext : public ::OSVR_ClientContextObject {
       public:
         VRPNContext(const char appId[], const char host[] = "localhost");
@@ -44,9 +57,12 @@ namespace client {
 
       private:
         virtual void m_update();
+        template <typename Predicate>
+        void m_addTrackerRouter(const char *src, const char *dest,
+                                Predicate pred);
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;
-        std::vector<CallablePtr> m_routers;
+        std::vector<RouterEntryPtr> m_routers;
     };
 } // namespace client
 } // namespace osvr
