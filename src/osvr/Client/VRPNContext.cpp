@@ -105,6 +105,7 @@ namespace client {
     template <typename Predicate>
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
                                          Predicate pred) {
+        OSVR_DEV_VERBOSE("Adding tracker route for " << dest);
         m_routers.emplace_back(new VRPNTrackerRouter<Predicate>(
             this, m_conn.get(), src, dest, pred));
     }
