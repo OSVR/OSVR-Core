@@ -55,7 +55,9 @@ namespace client {
                 osvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
                 osvrVec3FromQuatlib(&(report.pose.translation), info.pos);
                 for (auto const &iface : self->getContext()->getInterfaces()) {
-                    iface->triggerCallbacks(timestamp, report);
+                    if (iface->getPath() == self->getDest()) {
+                        iface->triggerCallbacks(timestamp, report);
+                    }
                 }
             }
         }
