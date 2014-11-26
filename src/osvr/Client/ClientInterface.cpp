@@ -49,7 +49,7 @@ void
 OSVR_ClientInterfaceObject::triggerCallbacks(const OSVR_TimeValue &timestamp,
                                              const OSVR_PoseReport &report) {
     for (auto const &f : m_trackerCB) {
-        f(timestamp, report);
+        f(&timestamp, &report);
     }
 }
 

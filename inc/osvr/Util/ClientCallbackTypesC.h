@@ -47,24 +47,25 @@ struct OSVR_PositionReport {
 };
 
 typedef void (*OSVR_PositionCallback)(void *userdata,
-                                      const struct OSVR_TimeValue timestamp,
-                                      const struct OSVR_PositionReport report);
+                                      const struct OSVR_TimeValue *timestamp,
+                                      const struct OSVR_PositionReport *report);
 
 struct OSVR_OrientationReport {
     int32_t sensor;
     struct OSVR_Quaternion rotation;
 };
+
 typedef void (*OSVR_OrientationCallback)(
-    void *userdata, const struct OSVR_TimeValue timestamp,
-    const struct OSVR_OrientationReport report);
+    void *userdata, const struct OSVR_TimeValue *timestamp,
+    const struct OSVR_OrientationReport *report);
 
 struct OSVR_PoseReport {
     int32_t sensor;
     struct OSVR_Pose3 pose;
 };
 typedef void (*OSVR_PoseCallback)(void *userdata,
-                                  const struct OSVR_TimeValue timestamp,
-                                  const struct OSVR_PoseReport report);
+                                  const struct OSVR_TimeValue *timestamp,
+                                  const struct OSVR_PoseReport *report);
 
 /** @} */
 OSVR_EXTERN_C_END

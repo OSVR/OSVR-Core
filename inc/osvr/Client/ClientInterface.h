@@ -60,8 +60,8 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     void update();
 
   private:
-    std::vector<std::function<void(OSVR_TimeValue, const OSVR_PoseReport)> >
-        m_trackerCB;
+    std::vector<std::function<void(const OSVR_TimeValue *,
+                                   const OSVR_PoseReport *)> > m_trackerCB;
 
     ::osvr::client::ClientContext *m_ctx;
     std::string const m_path;
