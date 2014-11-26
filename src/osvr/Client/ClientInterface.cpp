@@ -48,11 +48,9 @@ void OSVR_ClientInterfaceObject::registerCallback(OSVR_PoseCallback cb,
 void
 OSVR_ClientInterfaceObject::triggerCallbacks(const OSVR_TimeValue &timestamp,
                                              const OSVR_PoseReport &report) {
-
-    boost::for_each(
-        m_trackerCB,
-        [&](std::function<void(OSVR_TimeValue, const OSVR_PoseReport)> const &
-                f) { f(timestamp, report); });
+    for (auto const &f : m_trackerCB) {
+        f(timestamp, report);
+    }
 }
 
 void OSVR_ClientInterfaceObject::update() {}
