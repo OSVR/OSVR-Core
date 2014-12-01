@@ -45,8 +45,14 @@ endif()
 ###
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
 option(BUILD_DEV_VERBOSE "Build with verbose development messages?" ON)
+option(BUILD_SERVER "Should we build the server libraries and applications?" ON)
+option(BUILD_CLIENT "Should we build the client libraries and applications?" ON)
 if(WIN32)
     option(Boost_USE_STATIC_LIBS "Build with Boost's static libraries?" ON)
+endif()
+
+if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
+    message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
 endif()
 
 ###
