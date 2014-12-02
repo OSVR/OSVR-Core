@@ -90,7 +90,7 @@ namespace client {
         m_addTrackerRouter(
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
             "/me/head",
-            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; });
+            [](vrpn_TRACKERCB const &info) { return info.sensor == 1; });
     }
 
     VRPNContext::~VRPNContext() {}
