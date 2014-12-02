@@ -87,3 +87,18 @@ OSVR_ClientContextObject::releaseInterface(ClientInterface *iface) {
     }
     return ret;
 }
+
+std::string
+OSVR_ClientContextObject::getStringParameter(std::string const &path) const {
+    auto it = m_params.find(path);
+    std::string ret;
+    if (it != m_params.end()) {
+        ret = it->second;
+    }
+    return ret;
+}
+
+void OSVR_ClientContextObject::setParameter(std::string const &path,
+                                            std::string const &value) {
+    m_params[path] = value;
+}

@@ -5,6 +5,7 @@ set(API
     "${HEADER_LOCATION}/ContextC.h"
     "${HEADER_LOCATION}/InterfaceC.h"
     "${HEADER_LOCATION}/InterfaceCallbackC.h"
+    "${HEADER_LOCATION}/ParametersC.h"
     "${HEADER_LOCATION}/SystemCallbackC.h")
 
 set(SOURCE
@@ -12,6 +13,7 @@ set(SOURCE
     ContextC.cpp
     InterfaceC.cpp
     InterfaceCallbackC.cpp
+    ParametersC.cpp
     SystemCallbackC.cpp)
 
 osvr_add_library()

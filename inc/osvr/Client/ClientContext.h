@@ -30,6 +30,7 @@
 // Standard includes
 #include <string>
 #include <vector>
+#include <map>
 
 struct OSVR_ClientContextObject : boost::noncopyable {
   public:
@@ -63,6 +64,13 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     InterfaceList const &getInterfaces() const { return m_interfaces; }
 
+    /// @brief Gets a string parameter value.
+    OSVR_CLIENT_EXPORT std::string
+    getStringParameter(std::string const &path) const;
+
+    /// @brief Sets a string parameter value.
+    void setParameter(std::string const &path, std::string const &value);
+
   protected:
     /// @brief Constructor for derived class use only.
     OSVR_ClientContextObject(const char appId[]);
@@ -71,6 +79,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     virtual void m_update() = 0;
     std::string const m_appId;
     InterfaceList m_interfaces;
+    std::map<std::string, std::string> m_params;
 };
 
 #endif // INCLUDED_ContextImpl_h_GUID_9000C62E_3693_4888_83A2_0D26F4591B6A
