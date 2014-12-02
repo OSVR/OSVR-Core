@@ -44,6 +44,9 @@ int main() {
         osvrClientInit("org.opengoggles.exampleclients.TrackerCallback");
 
     OSVR_ClientInterface lefthand = NULL;
+    // This is just one of the paths. You can also use:
+    // /me/hands/right
+    // /me/head
     osvrClientGetInterface(ctx, "/me/hands/left", &lefthand);
     osvrRegisterPoseCallback(lefthand, &myTrackerCallback, NULL);
 
