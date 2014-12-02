@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include "VRPNContext.h"
+#include "display_json.h"
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/Util/QuatlibInteropC.h>
@@ -91,6 +92,10 @@ namespace client {
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
             "/me/head",
             [](vrpn_TRACKERCB const &info) { return info.sensor == 1; });
+
+        setParameter("/display",
+                     std::string(reinterpret_cast<char *>(display_json),
+                                 display_json_len));
     }
 
     VRPNContext::~VRPNContext() {}
