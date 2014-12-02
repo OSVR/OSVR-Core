@@ -146,6 +146,13 @@ install(DIRECTORY examples/
     COMPONENT DevelExamples)
 
 ###
+# Install schemas
+###
+install(DIRECTORY json-schemas/
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}/json-schemas"
+    COMPONENT Doc)
+
+###
 # Build and install documentation
 ###
 if(WIN32)
