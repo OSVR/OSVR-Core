@@ -11,9 +11,15 @@ Copyright 2014 Sensics, Inc. All rights reserved.
 
 (Intended to be licensed under the Apache License, Version 2.0)
 
-See [the HACKING.md file](HACKING.md) for some development guidelines for working on this codebase itself.
+## Binary Snapshot Documentation
+This snapshot contains documentation, example code, JSON schemas, and JSON descriptor files in the `share/doc/osvrcore` directory.
 
-If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](docs/Building.md).
+That directory may also contain an `api` subdirectory with generated API documentation. If your snapshot does not include this API documentation, [contact us](mailto:support@opengoggles.org?subject=Access%20to%20API%20documentation%20site) for access to a live-updated web site with this documentation.
+
+## Source Documentation
+See [the HACKING file](HACKING.md) for some development guidelines for working on this code base itself.
+
+If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](docs/Building.md). You may also be interested in [contacting us for access to binary snapshots](mailto:support@opengoggles.org?subject=Access%20to%20binary%20snapshots)
 
 ## Vendored Projects
 
