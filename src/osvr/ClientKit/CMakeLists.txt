@@ -6,6 +6,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceC.h"
     "${HEADER_LOCATION}/InterfaceCallbackC.h"
     "${HEADER_LOCATION}/ParametersC.h"
+    "${HEADER_LOCATION}/Parameters.h"
     "${HEADER_LOCATION}/SystemCallbackC.h")
 
 set(SOURCE
@@ -36,3 +37,11 @@ target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     osvrClient
     osvrUtilCpp)
+
+###
+# C++ (header-only) interface
+###
+# Requires some version of Boost, but not C++11.
+osvr_add_cpp_interface_library()
+target_include_directories(${LIBNAME_FULL_CPP}
+    INTERFACE ${Boost_INCLUDE_DIRS})
