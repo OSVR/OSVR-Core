@@ -44,7 +44,7 @@ namespace clientkit {
             return ret;
         }
         boost::scoped_array<char> buf(new char[len]);
-        osvrClientGetStringParameter(ctx, path, buf.get());
+        osvrClientGetStringParameter(ctx, path, buf.get(), len);
         ret.assign(buf.get());
         return ret;
     }

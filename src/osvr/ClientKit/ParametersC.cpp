@@ -41,7 +41,8 @@ OSVR_ReturnCode osvrClientGetStringParameterLength(OSVR_ClientContext ctx,
 }
 
 OSVR_ReturnCode osvrClientGetStringParameter(OSVR_ClientContext ctx,
-                                             const char path[], char *buf) {
+                                             const char path[], char *buf,
+                                             size_t len) {
     if (ctx == nullptr) {
         return OSVR_RETURN_FAILURE;
     }
@@ -50,6 +51,10 @@ OSVR_ReturnCode osvrClientGetStringParameter(OSVR_ClientContext ctx,
     }
 
     std::string val = ctx->getStringParameter(path);
+    if (val.size() + 1 > len) {
+        /// buffer too small.
+        return OSVR_RETURN_FAILURE;
+    }
     val.copy(buf, val.size());
     buf[val.size()] = '\0';
     return OSVR_RETURN_SUCCESS;
