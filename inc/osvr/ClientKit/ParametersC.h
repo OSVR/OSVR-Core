@@ -34,7 +34,7 @@
 /* none */
 
 /* Standard includes */
-/* none */
+#include <stddef.h>
 
 OSVR_EXTERN_C_BEGIN
 /** @addtogroup ClientKit
