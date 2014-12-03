@@ -48,6 +48,8 @@ int main() {
     // /me/hands/right
     // /me/head
     osvrClientGetInterface(ctx, "/me/hands/left", &lefthand);
+
+    // The coordinate system is right-handed, with X to the right, Y up, and Z near.
     osvrRegisterPoseCallback(lefthand, &myTrackerCallback, NULL);
 
     // Pretend that this is your application's mainloop.
