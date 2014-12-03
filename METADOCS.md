@@ -10,4 +10,4 @@
 	- Windows app with good preview (except of course for Doxygen-specific extensions): [MarkPad](http://code52.org/DownmarkerWPF/)
 
 ## Tips
-- To be able to make a nicely structured doc tree, include something like `{#METADOCS}` in the first (heading) line of any markdown file, replacing `METADOCS` with the filename stem. Then, go into `doc/Manual.dox` and add it as a subpage in the appropriate place.
+- To be able to make a nicely structured doc tree, include something like `{#` followed by the file basename followed by `}` in the first (heading) line of any Markdown file. Then, go into `doc/Manual.dox` and add it as a subpage in the appropriate place.

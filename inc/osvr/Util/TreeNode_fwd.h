@@ -36,6 +36,7 @@ namespace util {
         /// @brief Dummy struct containing the ownership pointer type for a
         /// TreeNode. (Actually a metafunction...)
         template <typename ValueType> struct TreeNodePointer {
+            /// @brief Tree node pointer type (metafunction result type)
             typedef shared_ptr<TreeNode<ValueType> > type;
         };
     }

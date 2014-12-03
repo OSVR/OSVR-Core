@@ -4,7 +4,7 @@ Writing a device plugin means you'll be building against the @ref PluginKit libr
 
 1. Make a copy of the directory `/examples/plugin/selfcontained` as the starting point for your new plugin repository.
   - This assumes that your plugin will be "out-of-tree" - that is, not hosted in the main Core repository.
-2. Do what it says in that `README.md` file to change the plugin name and build system.
+2. Do what it says in that `EXAMPLE_PLUGIN_README.md` file to change the plugin name and build system.
 3. Implement a hardware detection callback (to determine if your device is connected):
   - This can take the form of a class with a function call operator (`operator()`), taking `OSVR_PluginRegContext ctx` and returning `OSVR_ReturnCode`.
   - See `/examples/plugin/org_opengoggles_example_DummyHardwareDetectCpp2.cpp` for a sample.

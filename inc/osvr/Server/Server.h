@@ -109,6 +109,8 @@ namespace server {
         /// @brief Run all hardware detect callbacks.
         OSVR_SERVER_EXPORT void triggerHardwareDetect();
 
+        /// @brief Register a method to run during every time through the main
+        /// loop.
         OSVR_SERVER_EXPORT void registerMainloopMethod(MainloopMethod f);
 
       private:

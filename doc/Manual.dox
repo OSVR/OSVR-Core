@@ -1,14 +1,24 @@
 
 /** @page UserManual_DevTasks Developing with OSVR-Core
+  - @subpage TopicWritingClientApplication
   - @subpage TopicWritingDevicePlugin
 */
-/** @page DevManual Contributing to OSVR-Core
-  - @subpage InnerWorkings
-  - @subpage Building
+
+/** @page TopicWritingDevicePlugin Writing a basic device plugin
+  - @subpage PluginExampleReadme
 */
 
-#ifndef OSVR_DOXYGEN_EXTERNAL
-/**
-  - @subpage Metadocs
+#ifdef OSVR_DOXYGEN_EXTERNAL
+/** @page DevManual Contributing to OSVR-Core
+  - @subpage Building
+  - @subpage HACKING
+  - @subpage InnerWorkings
+*/
+#else
+/** @page DevManual Contributing to OSVR-Core
+  - @subpage Building
+  - @subpage HACKING
+  - @subpage METADOCS
+  - @subpage InnerWorkings
 */
 #endif

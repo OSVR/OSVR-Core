@@ -41,13 +41,16 @@ OSVR_EXTERN_C_BEGIN
  * representing 3D rotation.
 */
 struct OSVR_Quaternion {
+    /** @brief Internal data - direct access not recommended */
     double data[4];
 };
 
 #define OSVR_QUAT_MEMBER(COMPONENT, INDEX)                                     \
+    /** @brief Accessor for quaternion component COMPONENT */                  \
     inline double osvrQuatGet##COMPONENT(OSVR_Quaternion const *q) {           \
         return q->data[INDEX];                                                 \
     }                                                                          \
+    /** @brief Setter for quaternion component COMPONENT */                    \
     inline void osvrQuatSet##COMPONENT(OSVR_Quaternion *q, double val) {       \
         q->data[INDEX] = val;                                                  \
     }

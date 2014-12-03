@@ -41,6 +41,7 @@
 
 #ifndef _STDINT_H
 #define _STDINT_H
+#ifndef OSVR_DOXYGEN
 #define __need_wint_t
 #define __need_wchar_t
 #include <wchar.h>
@@ -249,5 +250,5 @@ typedef unsigned __STDINT_LONGLONG uintmax_t;
 
 #undef __MSSTDINT_PASTE
 #undef __MSSTDINT_PASTE2
-
+#endif /* OSVR_DOXYGEN */
 #endif

@@ -38,11 +38,22 @@ OSVR_EXTERN_C_BEGIN
     @{
 */
 /** @brief Opaque handle that should be retained by your application. You need
-    only and exactly one. */
+    only and exactly one.
+
+    Created by osvrClientInit() at application start.
+
+    You are required to clean up this handle with osvrClientShutdown().
+*/
 typedef struct OSVR_ClientContextObject *OSVR_ClientContext;
 
-/** @brief Opaque handle that should be retained by your application. You need
-only and exactly one. */
+/** @brief Opaque handle to an interface used for registering callbacks and
+   getting status.
+
+    You are not required to clean up this handle (it will be automatically
+   cleaned up when the context is), but you can if you are no longer using it,
+   using osvrClientFreeInterface() to inform the context that you no longer need
+   this interface.
+*/
 typedef struct OSVR_ClientInterfaceObject *OSVR_ClientInterface;
 
 /** @} */

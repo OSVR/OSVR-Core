@@ -1,10 +1,15 @@
-# Guidelines for Development/Contributing.
+# Guidelines for Development/Contributing {#HACKING}
 
 Please use `clang-format` to keep the code tidy. The `.clang-format` 
 config file is in the root of the repository. We're basically using the 
 LLVM style, except with 4-space indentation, inner namespace indentation,
 and C++03 (since turning on C++11 in `clang-format` sometimes makes things
 not work in less-compelling compilers).
+
+The `git clang-format` functionality, which runs `clang-format` only on
+staged changes in a Git repo, is a good way to keep your changes clean
+while being careful to not change other files because of some difference
+in clang version, etc.
 
 If you're using Windows, please install a recent [llvm/clang 
 binary][llvmwin], and choose to add the directory to the path. (Makes it 

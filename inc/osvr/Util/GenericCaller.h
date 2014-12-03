@@ -87,15 +87,18 @@ namespace util {
         namespace detail {
 
             /// @brief Convenience metafunction to simplify computing the type
-            /// of a
-            /// particular argument to a function F
+            /// of a particular argument to a function F
             template <typename F, int C> struct param_at {
+#ifndef OSVR_DOXYGEN
                 typedef typename boost::function_types::parameter_types<F>::type
                     ParamTypes;
+#endif
+                /// @brief Result type.
                 typedef
                     typename boost::mpl::at<ParamTypes,
                                             boost::mpl::int_<C> >::type type;
             };
+
             /// @brief Template that will be specialized to contain callers for
             /// functors with the "this" pointer as a void * argument.
             ///
@@ -175,7 +178,7 @@ namespace util {
                 typedef typename boost::remove_cv<
                     typename boost::remove_reference<ThisLocation>::type>::type
                     UnqualifiedThisLocation;
-
+#ifndef OSVR_DOXYGEN
                 BOOST_STATIC_ASSERT_MSG(
                     (boost::is_same<UnqualifiedThisLocation,
                                     this_first_t>::value ||
@@ -191,7 +194,7 @@ namespace util {
                         FunctionPtr>::type>::value &&
                         boost::is_pointer<FunctionPtr>::value,
                     "FunctionPtr must be a function pointer type");
-
+#endif // OSVR_DOXYGEN
                 /// @todo static assert that the argument lists are compatible
 
                 /// @brief The function arity without the "this" parameter

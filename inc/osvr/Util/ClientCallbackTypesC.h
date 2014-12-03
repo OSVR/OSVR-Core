@@ -41,28 +41,48 @@ OSVR_EXTERN_C_BEGIN
 /** @addtogroup ClientKit
     @{
 */
+
+/** @brief Report type for a position callback on a tracker interface */
 struct OSVR_PositionReport {
+    /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
+    /** @brief The position vector */
     struct OSVR_Vec3 xyz;
 };
 
+/** @brief C function type for a position callback on a tracker interface */
 typedef void (*OSVR_PositionCallback)(void *userdata,
                                       const struct OSVR_TimeValue *timestamp,
                                       const struct OSVR_PositionReport *report);
 
+/** @brief Report type for an orientation callback on a tracker interface */
 struct OSVR_OrientationReport {
+    /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
+    /** @brief The rotation unit quaternion */
     struct OSVR_Quaternion rotation;
 };
 
+/** @brief C function type for an orientation callback on a tracker interface */
 typedef void (*OSVR_OrientationCallback)(
     void *userdata, const struct OSVR_TimeValue *timestamp,
     const struct OSVR_OrientationReport *report);
 
+/** @brief Report type for a pose (position and orientation) callback on a
+    tracker interface
+*/
 struct OSVR_PoseReport {
+    /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
+    /** @brief The pose structure, containing a position vector and a rotation
+        quaternion
+    */
     struct OSVR_Pose3 pose;
 };
+
+/** @brief C function type for a pose (position and orientation) callback on a
+    tracker interface
+*/
 typedef void (*OSVR_PoseCallback)(void *userdata,
                                   const struct OSVR_TimeValue *timestamp,
                                   const struct OSVR_PoseReport *report);
