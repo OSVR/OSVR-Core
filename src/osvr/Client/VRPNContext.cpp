@@ -93,9 +93,38 @@ namespace client {
                 osvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
                 osvrVec3FromQuatlib(&(report.pose.translation), info.pos);
                 self->m_transform(report);
+
                 for (auto const &iface : self->getContext()->getInterfaces()) {
                     if (iface->getPath() == self->getDest()) {
                         iface->triggerCallbacks(timestamp, report);
+                    }
+                }
+
+                /// @todo current heuristic for "do we have position data?" is
+                /// "is our position non-zero?"
+                if (util::vecMap(report.pose.translation) !=
+                    Eigen::Vector3d::Zero()) {
+                    OSVR_PositionReport positionReport;
+                    positionReport.sensor = info.sensor;
+                    positionReport.xyz = report.pose.translation;
+                    for (auto const &iface :
+                         self->getContext()->getInterfaces()) {
+                        if (iface->getPath() == self->getDest()) {
+                            iface->triggerCallbacks(timestamp, positionReport);
+                        }
+                    }
+                }
+
+                /// @todo check to see if rotation is useful/provided
+                {
+                    OSVR_OrientationReport oriReport;
+                    oriReport.sensor = info.sensor;
+                    oriReport.rotation = report.pose.rotation;
+                    for (auto const &iface :
+                         self->getContext()->getInterfaces()) {
+                        if (iface->getPath() == self->getDest()) {
+                            iface->triggerCallbacks(timestamp, oriReport);
+                        }
                     }
                 }
             }

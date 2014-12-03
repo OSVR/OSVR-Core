@@ -40,18 +40,7 @@ std::string const &OSVR_ClientInterfaceObject::getPath() const {
 ::osvr::client::ClientContext &OSVR_ClientInterfaceObject::getContext() {
     return *m_ctx;
 }
-void OSVR_ClientInterfaceObject::registerCallback(OSVR_PoseCallback cb,
-                                                  void *userdata) {
-    using namespace std::placeholders;
-    m_trackerCB.push_back(std::bind(cb, userdata, _1, _2));
-}
-void
-OSVR_ClientInterfaceObject::triggerCallbacks(const OSVR_TimeValue &timestamp,
-                                             const OSVR_PoseReport &report) {
-    for (auto const &f : m_trackerCB) {
-        f(&timestamp, &report);
-    }
-}
+
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     void OSVR_ClientInterfaceObject::registerCallback(                         \
         OSVR_##TYPE##Callback cb, void *userdata) {                            \
@@ -65,6 +54,7 @@ OSVR_ClientInterfaceObject::triggerCallbacks(const OSVR_TimeValue &timestamp,
         }                                                                      \
     }
 
+OSVR_CALLBACK_METHODS(Pose)
 OSVR_CALLBACK_METHODS(Position)
 OSVR_CALLBACK_METHODS(Orientation)
 #undef OSVR_CALLBACK_METHODS
