@@ -43,6 +43,14 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
     osvrRegisterPoseCallback(OSVR_ClientInterface iface, OSVR_PoseCallback cb,
                              void *userdata);
 
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+    osvrRegisterPositionCallback(OSVR_ClientInterface iface,
+                                 OSVR_PositionCallback cb, void *userdata);
+
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+    osvrRegisterOrientationCallback(OSVR_ClientInterface iface,
+                                    OSVR_OrientationCallback cb,
+                                    void *userdata);
 OSVR_EXTERN_C_END
 
 #endif

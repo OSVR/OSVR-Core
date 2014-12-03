@@ -26,8 +26,16 @@
 // Standard includes
 // - none
 
-OSVR_ReturnCode osvrRegisterPoseCallback(OSVR_ClientInterface iface,
-                                         OSVR_PoseCallback cb, void *userdata) {
-    iface->registerCallback(cb, userdata);
-    return OSVR_RETURN_SUCCESS;
-}
+#define OSVR_CALLBACK_METHODS(TYPE)                                            \
+    OSVR_ReturnCode osvrRegister##TYPE##Callback(OSVR_ClientInterface iface,   \
+                                                 OSVR_##TYPE##Callback cb,     \
+                                                 void *userdata) {             \
+        iface->registerCallback(cb, userdata);                                 \
+        return OSVR_RETURN_SUCCESS;                                            \
+    }
+
+OSVR_CALLBACK_METHODS(Pose)
+OSVR_CALLBACK_METHODS(Position)
+OSVR_CALLBACK_METHODS(Orientation)
+
+#undef OSVR_CALLBACK_METHODS
