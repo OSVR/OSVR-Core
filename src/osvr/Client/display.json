@@ -2,15 +2,15 @@
   "viewports": {
     "left-eye": {
       "display": {
-        "size": [1280,1024],
+        "size": [960,1080],
         "origin": [0, 0]
       },
       "fov": {
-        "horizontal": 45,
-        "vertical": 45
+        "horizontal": 90,
+        "vertical": 101.25
       },
       "location": {
-        "translate": [-0.325, 0, 0],
+        "translate": [-0.0325, 0, 0],
         "child": {
           "tracker": "/me/head"
         }
@@ -18,15 +18,15 @@
     },
     "right-eye": {
       "display": {
-        "size": [1280,1024],
-        "origin": [0, 1024]
+        "size": [960,1080],
+        "origin": [0, 960]
       },
       "fov": {
-        "horizontal": 45,
-        "vertical": 45
+        "horizontal": 90,
+        "vertical": 101.25
       },
       "location": {
-        "translate": [0.325, 0, 0],
+        "translate": [0.0325, 0, 0],
         "child": {
           "tracker": "/me/head"
         }
