@@ -25,6 +25,7 @@
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/EigenInterop.h>
 
 // Library/third-party includes
 #include <vrpn_Tracker.h>
@@ -35,13 +36,49 @@
 namespace osvr {
 namespace client {
     RouterEntry::~RouterEntry() {}
+    namespace {
+        class TrackerSensorPredicate {
+          public:
+            TrackerSensorPredicate(vrpn_int32 sensor) : m_sensor(sensor) {}
 
-    template <typename Predicate> class VRPNTrackerRouter : public RouterEntry {
+            bool operator()(vrpn_TRACKERCB const &info) {
+                return info.sensor == m_sensor;
+            }
+
+          private:
+            vrpn_int32 m_sensor;
+        };
+        class AlwaysTruePredicate {
+          public:
+            template <typename T> bool operator()(T const &) { return true; }
+        };
+        class NullTrackerTransform {
+          public:
+            void operator()(OSVR_PoseReport &) {}
+        };
+
+        class HydraTrackerTransform {
+          public:
+            void operator()(OSVR_PoseReport &report) {
+                Eigen::Isometry3d pose = util::fromPose(report.pose);
+                // Rotate -90 about X
+                util::toPose(
+                    Eigen::AngleAxisd(-0.5 * M_PI, Eigen::Vector3d::UnitX()) *
+                        pose,
+                    report.pose);
+            }
+        };
+    } // namespace
+
+    template <typename Predicate, typename Transform>
+    class VRPNTrackerRouter : public RouterEntry {
       public:
         VRPNTrackerRouter(ClientContext *ctx, vrpn_Connection *conn,
-                          const char *src, const char *dest, Predicate p)
+                          const char *src, const char *dest, Predicate p,
+                          Transform t)
             : RouterEntry(ctx, dest),
-              m_remote(new vrpn_Tracker_Remote(src, conn)), m_pred(p) {
+              m_remote(new vrpn_Tracker_Remote(src, conn)), m_pred(p),
+              m_transform(t) {
             m_remote->register_change_handler(this, &VRPNTrackerRouter::handle);
         }
 
@@ -55,6 +92,7 @@ namespace client {
                 osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
                 osvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
                 osvrVec3FromQuatlib(&(report.pose.translation), info.pos);
+                self->m_transform(report);
                 for (auto const &iface : self->getContext()->getInterfaces()) {
                     if (iface->getPath() == self->getDest()) {
                         iface->triggerCallbacks(timestamp, report);
@@ -67,6 +105,7 @@ namespace client {
       private:
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         Predicate m_pred;
+        Transform m_transform;
     };
 
     VRPNContext::VRPNContext(const char appId[], const char host[])
@@ -77,21 +116,19 @@ namespace client {
 
         /// @todo this is hardcoded routing, and not well done - just a stop-gap
         /// measure.
-        m_addTrackerRouter(
-            "org_opengoggles_bundled_Multiserver/RazerHydra0", "/me/hands/left",
-            [](vrpn_TRACKERCB const &info) { return info.sensor == 0; });
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
-                           "/me/hands/right", [](vrpn_TRACKERCB const &info) {
-            return info.sensor == 1;
-        });
+                           "/me/hands/left", TrackerSensorPredicate(0),
+                           HydraTrackerTransform());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
-                           "/me/hands",
-                           [](vrpn_TRACKERCB const &) { return true; });
+                           "/me/hands/right", TrackerSensorPredicate(1),
+                           HydraTrackerTransform());
+        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
+                           "/me/hands", AlwaysTruePredicate(),
+                           HydraTrackerTransform());
 
         m_addTrackerRouter(
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "/me/head",
-            [](vrpn_TRACKERCB const &info) { return info.sensor == 1; });
+            "/me/head", TrackerSensorPredicate(1));
 
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
@@ -112,9 +149,15 @@ namespace client {
     template <typename Predicate>
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
                                          Predicate pred) {
+        m_addTrackerRouter(src, dest, pred, NullTrackerTransform());
+    }
+
+    template <typename Predicate, typename Transform>
+    void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
+                                         Predicate pred, Transform xform) {
         OSVR_DEV_VERBOSE("Adding tracker route for " << dest);
-        m_routers.emplace_back(new VRPNTrackerRouter<Predicate>(
-            this, m_conn.get(), src, dest, pred));
+        m_routers.emplace_back(new VRPNTrackerRouter<Predicate, Transform>(
+            this, m_conn.get(), src, dest, pred, xform));
     }
 
 } // namespace client
