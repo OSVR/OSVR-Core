@@ -1,0 +1,20 @@
+msc
+{
+    hscale=auto;
+    a[label="Application", arclinecolor="blue", arctextcolour="blue"], e[label="OSVR Engine"];
+    |||;
+    --- [label="Before using any OSVR functionality"];
+    a => e [label="call osvrClientInit(appID)", url="\ref osvrClientInit"];
+    a << e [label="return ctx: OSVR_ClientContext", url="\ref OSVR_ClientContext"];
+    |||;
+    |||;
+
+    --- [label="In your application's main loop"];
+    a => e [label="call osvrClientUpdate(ctx)", url="\ref osvrClientUpdate"];
+    |||;
+    |||;
+
+    --- [label="At application termination"];
+    a => e [label="call osvrClientShutdown(ctx)", url="\ref osvrClientShutdown"];
+
+}

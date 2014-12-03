@@ -1,0 +1,29 @@
+msc
+{
+    hscale=auto;
+    a[label="Application", arclinecolor="blue", arctextcolour="blue"], e[label="OSVR Engine"];
+    |||;
+    a => e [label="call osvrClientInit(context)"];
+    |||;
+
+    a => e [label="ogvrLoadInterfaceConfig (application name)"];
+    a << e [label="Return: interface configuration"];
+    |||;
+    |||;
+    a note a [label="Use interface configuration to obtain all relevant interface handles"];
+    |||;
+    a => e [label="ogvrInterface_SetParam"];
+    a => e [label="ogvrInterface_GetParam"];
+    |||;
+    a => e [label="Register interface callbacks where needed"];
+    |||;
+    a note a [label="Begin main loop"];
+    |||;
+    a << e [label="callback: new data for interface", linecolor="red", textcolor="red"];
+    a << e [label="callback: new data for interface", linecolor="red", textcolor="red"];
+    |||;
+    a => e [label="Non-blocking read: ogvrInterface_Read"];
+    a << e [label="Return: new interface data"];
+
+
+}
