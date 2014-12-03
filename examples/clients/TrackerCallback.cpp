@@ -73,7 +73,9 @@ int main() {
 
     /// If you just want orientation
     osvrRegisterOrientationCallback(lefthand, &myOrientationCallback, NULL);
+
     /// or position
+    osvrRegisterPositionCallback(lefthand, &myPositionCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {
