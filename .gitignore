@@ -4,6 +4,9 @@
 # CI build
 /build/
 
+# SketchUp Backup Files
+*.skb
+
 # Compiled Object files
 *.slo
 *.lo
