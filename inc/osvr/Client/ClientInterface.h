@@ -50,14 +50,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the owning context.
     OSVR_CLIENT_EXPORT::osvr::client::ClientContext &getContext();
 
-    /// @brief Register a pose callback
-    OSVR_CLIENT_EXPORT void registerCallback(OSVR_PoseCallback cb,
-                                             void *userdata);
-
-    /// @brief Call pose callbacks
-    void triggerCallbacks(const OSVR_TimeValue &timestamp,
-                          const OSVR_PoseReport &report);
-
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
   public:                                                                      \
     /** @brief Register a TYPE callback */                                     \
@@ -73,6 +65,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
                                    const OSVR_##TYPE##Report *)> >             \
         m_callbacks##TYPE;
 
+    OSVR_CALLBACK_METHODS(Pose)
     OSVR_CALLBACK_METHODS(Position)
     OSVR_CALLBACK_METHODS(Orientation)
 #undef OSVR_CALLBACK_METHODS
@@ -81,9 +74,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     void update();
 
   private:
-    std::vector<std::function<void(const OSVR_TimeValue *,
-                                   const OSVR_PoseReport *)> > m_trackerCB;
-
     ::osvr::client::ClientContext *m_ctx;
     std::string const m_path;
     friend struct OSVR_ClientContextObject;
