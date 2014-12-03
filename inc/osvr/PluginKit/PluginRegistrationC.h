@@ -95,7 +95,7 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
     @param name A unique name for the driver type. The library makes a copy of
     this string.
     @param cb Your callback
-    @param userdata An opaque pointer passed to your callback, if desired.
+    @param userData An opaque pointer passed to your callback, if desired.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrRegisterDriverInstantiationCallback(
     OSVR_INOUT_PTR OSVR_PluginRegContext ctx, OSVR_IN_STRZ const char *name,

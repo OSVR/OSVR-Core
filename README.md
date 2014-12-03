@@ -19,7 +19,7 @@ That directory may also contain an `api` subdirectory with generated API documen
 ## Source Documentation
 See [the HACKING file](HACKING.md) for some development guidelines for working on this code base itself.
 
-If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](docs/Building.md). You may also be interested in [contacting us for access to binary snapshots](mailto:support@opengoggles.org?subject=Access%20to%20binary%20snapshots)
+If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](doc/Building.md). You may also be interested in [contacting us for access to binary snapshots](mailto:support@opengoggles.org?subject=Access%20to%20binary%20snapshots)
 
 ## Vendored Projects
 

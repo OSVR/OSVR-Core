@@ -2,3 +2,7 @@
 /** @page UserManual_DevTasks Developing with OSVR-Core
   - @subpage TopicWritingDevicePlugin
 */
+/** @page DevManual Contributing to OSVR-Core
+  - @subpage InnerWorkings
+  - @subpage Building
+*/

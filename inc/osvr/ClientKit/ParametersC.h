@@ -55,10 +55,11 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 /** @brief Get a string parameter associated with the given path.
     @param ctx Client context
     @param path A resource path (null-terminated string)
-    @param[in/out] buf A buffer you allocate of the appropriate size. Must be at
+    @param[in,out] buf A buffer you allocate of the appropriate size. Must be at
    least the length returned by osvrClientGetStringParameterLength. Will contain
-   the null-terminated string parameter value. If the buffer is too short, an
-   error is returned.
+   the null-terminated string parameter value.
+    @param len The length of the buffer you're providing. If the buffer is too
+   short, an error is returned and the buffer is unchanged.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
     osvrClientGetStringParameter(OSVR_ClientContext ctx, const char path[],

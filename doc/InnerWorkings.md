@@ -1,4 +1,4 @@
-# Inner Workings of Devices and Connections
+# Inner Workings of Devices and Connections {#InnerWorkings}
 
 ## Server mainloop call activity
 - `Connection::process()`

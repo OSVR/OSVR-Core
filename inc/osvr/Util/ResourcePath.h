@@ -39,14 +39,13 @@ namespace util {
        system.
 
         Instances of this class always refer to an absolute path, with host and
-       full
-       path from the root. No assertions are made that the path is meaningful.
+       full path from the root. No assertions are made that the path is
+       meaningful.
 
         Paths are essentially URLs, and follow the same rules. Canonical form of
        ResourcePaths does not end in a slash, and usage of the `.` and `..`
        pseudo-entries (for current directory and parent directory) is not
-       supported
-       for simplicity and security.
+       supported for simplicity and security.
 
         Paths are immutable: navigating functions return a new ResourcePath.
 
@@ -89,8 +88,7 @@ namespace util {
         std::string GetHostString() const;
 
         /// @brief Gets the path following the hostname as a string, starting
-        /// with a
-        /// leading slash.
+        /// with a leading slash.
         std::string GetPathString() const;
         /// @}
 
@@ -103,7 +101,7 @@ namespace util {
         /// @brief Gets the identified component, where 0 is the name of
         /// the component immediately under the root.
         ///
-        /// @precondition i < GetDepth()
+        /// Requires that i < GetDepth()
         /// @throws std::out_of_range if precondition violated.
         std::string GetComponent(std::size_t i) const;
         /// @}
