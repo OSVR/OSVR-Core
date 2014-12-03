@@ -6,3 +6,9 @@
   - @subpage InnerWorkings
   - @subpage Building
 */
+
+#ifndef OSVR_DOXYGEN_EXTERNAL
+/**
+  - @subpage Metadocs
+*/
+#endif
