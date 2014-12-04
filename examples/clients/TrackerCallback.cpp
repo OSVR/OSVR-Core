@@ -30,8 +30,9 @@
 void myTrackerCallback(void * /*userdata*/,
                        const OSVR_TimeValue * /*timestamp*/,
                        const OSVR_PoseReport *report) {
-    std::cout << "Got POSE report: Position = (" << report->pose.translation.data[0]
-              << ", " << report->pose.translation.data[1] << ", "
+    std::cout << "Got POSE report: Position = ("
+              << report->pose.translation.data[0] << ", "
+              << report->pose.translation.data[1] << ", "
               << report->pose.translation.data[2] << "), orientation = ("
               << osvrQuatGetW(&(report->pose.rotation)) << ", ("
               << osvrQuatGetX(&(report->pose.rotation)) << ", "
@@ -52,9 +53,9 @@ void myOrientationCallback(void * /*userdata*/,
 void myPositionCallback(void * /*userdata*/,
                         const OSVR_TimeValue * /*timestamp*/,
                         const OSVR_PositionReport *report) {
-    std::cout << "Got POSITION report: Position = (" << report->xyz.data[0] << ", "
-              << report->xyz.data[1] << ", " << report->xyz.data[2] << ")"
-              << std::endl;
+    std::cout << "Got POSITION report: Position = (" << report->xyz.data[0]
+              << ", " << report->xyz.data[1] << ", " << report->xyz.data[2]
+              << ")" << std::endl;
 }
 
 int main() {
