@@ -33,3 +33,8 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     vendored-vrpn
     eigen-headers)
+
+install(FILES
+    display-eileen.json
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}/device-descriptors"
+    COMPONENT Doc)
