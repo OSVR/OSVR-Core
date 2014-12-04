@@ -57,6 +57,7 @@ std::string const &OSVR_ClientInterfaceObject::getPath() const {
 OSVR_CALLBACK_METHODS(Pose)
 OSVR_CALLBACK_METHODS(Position)
 OSVR_CALLBACK_METHODS(Orientation)
+OSVR_CALLBACK_METHODS(Button)
 #undef OSVR_CALLBACK_METHODS
 
 void OSVR_ClientInterfaceObject::update() {}

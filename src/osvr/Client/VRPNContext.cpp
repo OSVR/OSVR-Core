@@ -21,6 +21,8 @@
 #include "display_json.h"
 #include "RouterPredicates.h"
 #include "RouterTransforms.h"
+#include "VRPNAnalogRouter.h"
+#include "VRPNButtonRouter.h"
 #include "VRPNTrackerRouter.h"
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/Client/ClientContext.h>
@@ -46,10 +48,10 @@ namespace client {
         /// @todo this is hardcoded routing, and not well done - just a stop-gap
         /// measure.
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
-                           "/me/hands/left", TrackerSensorPredicate(0),
+                           "/me/hands/left", SensorPredicate(0),
                            HydraTrackerTransform());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
-                           "/me/hands/right", TrackerSensorPredicate(1),
+                           "/me/hands/right", SensorPredicate(1),
                            HydraTrackerTransform());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
                            "/me/hands", AlwaysTruePredicate(),
@@ -57,7 +59,7 @@ namespace client {
 
         m_addTrackerRouter(
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "/me/head", TrackerSensorPredicate(1));
+            "/me/head", SensorPredicate(1));
 
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
@@ -73,6 +75,14 @@ namespace client {
         for (auto const &p : m_routers) {
             (*p)();
         }
+    }
+
+    template <typename Predicate>
+    void VRPNContext::m_addButtonRouter(const char *src, const char *dest,
+                                        Predicate pred) {
+        OSVR_DEV_VERBOSE("Adding button route for " << dest);
+        m_routers.emplace_back(new VRPNButtonRouter<Predicate>(
+            this, m_conn.get(), src, dest, pred));
     }
 
     template <typename Predicate>

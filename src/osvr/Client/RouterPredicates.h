@@ -25,18 +25,23 @@
 // Library/third-party includes
 #include <vrpn_Types.h>
 #include <vrpn_Tracker.h>
+#include <vrpn_Button.h>
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace client {
-    class TrackerSensorPredicate {
+    class SensorPredicate {
       public:
-        TrackerSensorPredicate(vrpn_int32 sensor) : m_sensor(sensor) {}
+        SensorPredicate(vrpn_int32 sensor) : m_sensor(sensor) {}
 
         bool operator()(vrpn_TRACKERCB const &info) {
             return info.sensor == m_sensor;
+        }
+
+        bool operator()(vrpn_BUTTONCB const &info) {
+            return info.button == m_sensor;
         }
 
       private:

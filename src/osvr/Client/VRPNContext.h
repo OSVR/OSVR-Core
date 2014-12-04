@@ -58,6 +58,9 @@ namespace client {
       private:
         virtual void m_update();
         template <typename Predicate>
+        void m_addButtonRouter(const char *src, const char *dest,
+                               Predicate pred);
+        template <typename Predicate>
         void m_addTrackerRouter(const char *src, const char *dest,
                                 Predicate pred);
         template <typename Predicate, typename Transform>

@@ -15,6 +15,8 @@ set(SOURCE
     RouterPredicates.h
     VRPNContext.cpp
     VRPNContext.h
+    VRPNAnalogRouter.h
+    VRPNButtonRouter.h
     VRPNTrackerRouter.h)
 
 osvr_add_library()
