@@ -61,6 +61,22 @@ namespace client {
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
             "/me/head", SensorPredicate(1));
 
+#define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
+    m_addButtonRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
+                      "/controller/left/" NAME, SensorPredicate(SENSOR));      \
+    m_addButtonRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
+                      "/controller/right/" NAME, SensorPredicate(SENSOR + 8))
+
+        OSVR_HYDRA_BUTTON(0, "middle");
+        OSVR_HYDRA_BUTTON(1, "1");
+        OSVR_HYDRA_BUTTON(2, "2");
+        OSVR_HYDRA_BUTTON(3, "3");
+        OSVR_HYDRA_BUTTON(4, "4");
+        OSVR_HYDRA_BUTTON(5, "bumper");
+        OSVR_HYDRA_BUTTON(6, "joystick/button");
+
+#undef OSVR_HYDRA_BUTTON
+
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
                                  display_json_len));

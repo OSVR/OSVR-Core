@@ -43,7 +43,7 @@ namespace client {
             VRPNButtonRouter *self = static_cast<VRPNButtonRouter *>(userdata);
             if (self->m_pred(info)) {
                 OSVR_ButtonReport report;
-                report.sensor = info.sensor;
+                report.sensor = info.button;
                 report.state = static_cast<uint8_t>(info.state);
                 OSVR_TimeValue timestamp;
                 osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
