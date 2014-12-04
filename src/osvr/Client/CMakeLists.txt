@@ -11,8 +11,11 @@ set(SOURCE
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
+    RouterTransforms.h
+    RouterPredicates.h
     VRPNContext.cpp
-    VRPNContext.h)
+    VRPNContext.h
+    VRPNTrackerRouter.h)
 
 osvr_add_library()
 
