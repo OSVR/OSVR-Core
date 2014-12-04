@@ -1,4 +1,9 @@
 {
+  "deviceVendor": "Razer",
+  "deviceName": "Hydra",
+  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "version": 1,
+  "lastModified": "2014-12-04T21:13:07.585Z",
   "interfaces": {
     "tracker": {
       "count": 2,

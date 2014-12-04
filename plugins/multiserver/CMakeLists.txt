@@ -15,6 +15,8 @@ set_target_properties(org_opengoggles_bundled_Multiserver PROPERTIES
 install(TARGETS org_opengoggles_bundled_Multiserver
     LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
-install(FILES org_opengoggles_bundled_Multiserver_RazerHydra.json
+install(FILES
+    org_opengoggles_bundled_Multiserver_RazerHydra.json
+    org_opengoggles_bundled_Multiserver_YEI_3Space_Sensor.json
     DESTINATION "${CMAKE_INSTALL_DOCDIR}/device-descriptors"
     COMPONENT Doc)
