@@ -51,6 +51,24 @@ The base set of semantic paths includes the following:
 - `/me/head` - Head tracking
 - `/display` - a parameter containing a JSON string describing display configuration.
 
+Additionally, these paths are available to access the buttons on the Razer Hydra controllers. Semantic paths will eventually replace them, but this will work for now.
+
+- `/controller/left/1`
+- `/controller/left/2`
+- `/controller/left/3`
+- `/controller/left/4`
+- `/controller/left/bumper`
+- `/controller/left/joystick/button`
+- `/controller/left/middle`
+- `/controller/right/1`
+- `/controller/right/2`
+- `/controller/right/3`
+- `/controller/right/4`
+- `/controller/right/bumper`
+- `/controller/right/joystick/button`
+- `/controller/right/middle`
+
+
 ## Call sequence
 There are three pieces of a minimal application:
 
