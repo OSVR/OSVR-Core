@@ -187,7 +187,8 @@ EXPAND_AS_DEFINED      = OSVR_CPP_ONLY \
                          OSVR_C_ONLY \
                          OSVR_QUAT_MEMBER \
                          OSVR_VEC_MEMBER \
-                         OSVR_CALLBACK_METHODS
+                         OSVR_CALLBACK_METHODS \
+                         OSVR_DEFINE_CLIENT_CALLBACK_TYPE
 
 # If you set the HAVE_DOT tag to YES then doxygen will assume the dot tool is
 # available from the path. This tool is part of Graphviz (see:

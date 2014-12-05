@@ -42,6 +42,11 @@ OSVR_EXTERN_C_BEGIN
     @{
 */
 
+#define OSVR_DEFINE_CLIENT_CALLBACK_TYPE(TYPE)                                 \
+    typedef void (*OSVR_##TYPE##Callback)(                                     \
+        void *userdata, const struct OSVR_TimeValue *timestamp,                \
+        const struct OSVR_##TYPE##Report *report)
+
 /** @brief Report type for a position callback on a tracker interface */
 struct OSVR_PositionReport {
     /** @brief Identifies the sensor that the report comes from */
@@ -103,6 +108,20 @@ typedef void (*OSVR_ButtonCallback)(void *userdata,
                                     const struct OSVR_TimeValue *timestamp,
                                     const struct OSVR_ButtonReport *report);
 
+/** @brief Type of analog channel state */
+typedef double OSVR_AnalogState;
+/** @brief Report type for a callback on an analog interface */
+struct OSVR_AnalogReport {
+    /** @brief Identifies the sensor/channel that the report comes from */
+    int32_t sensor;
+    /** @brief The analog state. */
+    OSVR_AnalogState state;
+};
+
+/** @brief C function type for a callback on an analog interface */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Analog);
+
+#undef OSVR_DEFINE_CALLBACK
 /** @} */
 OSVR_EXTERN_C_END
 
