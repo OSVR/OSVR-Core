@@ -32,9 +32,9 @@
 
 namespace osvr {
 namespace client {
-    class NullTrackerTransform {
+    class NullTransform {
       public:
-        void operator()(OSVR_PoseReport &) {}
+        template <typename T> void operator()(T &) {}
     };
 
     class HydraTrackerTransform {

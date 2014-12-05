@@ -104,7 +104,7 @@ namespace client {
     template <typename Predicate>
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
                                          Predicate pred) {
-        m_addTrackerRouter(src, dest, pred, NullTrackerTransform());
+        m_addTrackerRouter(src, dest, pred, NullTransform());
     }
 
     template <typename Predicate, typename Transform>
