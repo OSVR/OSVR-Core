@@ -27,19 +27,20 @@
 // Standard includes
 #include <iostream>
 
-void myButtonCallback(void * /*userdata*/,
-                       const OSVR_TimeValue * /*timestamp*/,
-                       const OSVR_ButtonReport *report) {
-    std::cout << "Got report: button is " << (report->state ? "pressed" : "released") << std::endl;
+void myButtonCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
+                      const OSVR_ButtonReport *report) {
+    std::cout << "Got report: button is "
+              << (report->state ? "pressed" : "released") << std::endl;
 }
-
 
 int main() {
     OSVR_ClientContext ctx =
         osvrClientInit("org.opengoggles.exampleclients.TrackerCallback");
 
     OSVR_ClientInterface button1 = NULL;
-    // This is just one of the paths: specifically, the Hydra's left controller's button labelled "1". More are in the docs and/or listed on startup
+    // This is just one of the paths: specifically, the Hydra's left
+    // controller's button labelled "1". More are in the docs and/or listed on
+    // startup
     osvrClientGetInterface(ctx, "/controller/left/1", &button1);
 
     osvrRegisterButtonCallback(button1, &myButtonCallback, NULL);
