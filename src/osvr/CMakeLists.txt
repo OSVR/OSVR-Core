@@ -1,5 +1,6 @@
 include(GenerateExportHeader)
 
+include("${CMAKE_CURRENT_SOURCE_DIR}/GenerateForReportTypes.cmake")
 set(LIB_FOLDER "OSVR Libraries")
 
 ## Based on a library name without the osvr prefix, sets the following

@@ -26,8 +26,8 @@ set(API
     "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
-    "${HEADER_LOCATION}/ClientCallbackTypesC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
+    "${HEADER_LOCATION}/ClientReportTypesC.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
     "${HEADER_LOCATION}/EigenInterop.h"
@@ -60,6 +60,9 @@ set(SOURCE
     TimeValueC.cpp
     PlatformConfig.h.in
     Verbosity.h.in
+    ClientCallbackTypesC.h.in
+    ClientCallbackTypesCSnippet.h.in
+    "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
 osvr_add_library()
@@ -68,7 +71,6 @@ set_target_properties(${LIBNAME_FULL} PROPERTIES
     VERSION ${OSVR_VERSION}
     SOVERSION 0)
 
-
 target_include_directories(${LIBNAME_FULL}
     PRIVATE
     ${Boost_INCLUDE_DIRS})
@@ -76,6 +78,15 @@ target_include_directories(${LIBNAME_FULL}
 target_compile_options(${LIBNAME_FULL}
     PRIVATE
     ${OSVR_CXX11_FLAGS})
+
+osvr_generate_for_report_types(ClientCallbackTypesC.h.in
+    ClientCallbackTypesCSnippet.h.in
+    "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
+    DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/osvr/${LIBNAME}
+    COMPONENT Devel)
 
 # TODO VRPN used in this lib only for gettimeofday wrapper: do we need it?
 target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn)

@@ -1,0 +1,4 @@
+/** @brief C function type for a @TYPE@ callback */
+typedef void (*OSVR_@TYPE@Callback)(void *userdata,
+                                     const struct OSVR_TimeValue *timestamp,
+                                     const struct OSVR_@TYPE@Report *report);
