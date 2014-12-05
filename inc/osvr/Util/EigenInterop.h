@@ -24,8 +24,7 @@
 #include <osvr/Util/Pose3C.h>
 
 // Library/third-party includes
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Standard includes
 // - none

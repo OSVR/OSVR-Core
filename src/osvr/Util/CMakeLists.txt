@@ -29,6 +29,7 @@ set(API
     "${HEADER_LOCATION}/ClientCallbackTypesC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
+    "${HEADER_LOCATION}/EigenCoreGeometry.h"
     "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
