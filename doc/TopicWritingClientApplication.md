@@ -68,6 +68,14 @@ Additionally, these paths are available to access the buttons on the Razer Hydra
 - `/controller/right/joystick/button`
 - `/controller/right/middle`
 
+Finally, these are the paths for the analog inputs on the Razer Hydra controllers. Same disclaimer applies.
+
+- `/controller/left/joystick/x`
+- `/controller/left/joystick/y`
+- `/controller/left/trigger`
+- `/controller/right/joystick/x`
+- `/controller/right/joystick/y`
+- `/controller/right/trigger`
 
 ## Call sequence
 There are three pieces of a minimal application:
