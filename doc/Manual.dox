@@ -10,15 +10,20 @@
 
 #ifdef OSVR_DOXYGEN_EXTERNAL
 /** @page DevManual Contributing to OSVR-Core
+
+You may consider looking at the "internal/implementation" documentation build if you want to get your hands dirty with the code inside OSVR.
+
   - @subpage Building
   - @subpage HACKING
-  - @subpage InnerWorkings
 */
 #else
 /** @page DevManual Contributing to OSVR-Core
+
   - @subpage Building
   - @subpage HACKING
-  - @subpage METADOCS
-  - @subpage InnerWorkings
+  - @subpage InternalCodingGuidelines
+  - @subpage InternalProgLang
+  - @subpage InternalMetadocs
+  - @subpage InternalInnerWorkings
 */
 #endif

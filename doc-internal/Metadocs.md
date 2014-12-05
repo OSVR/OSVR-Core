@@ -1,4 +1,4 @@
-# Documentation on Writing Documentation {#METADOCS}
+# Documentation on Writing Documentation {#InternalMetadocs}
 
 ## Tools
 - MSC (Message Sequence Chart) Diagrams
@@ -10,4 +10,4 @@
 	- Windows app with good preview (except of course for Doxygen-specific extensions): [MarkPad](http://code52.org/DownmarkerWPF/)
 
 ## Tips
-- To be able to make a nicely structured doc tree, include something like `{#` followed by the file basename followed by `}` in the first (heading) line of any Markdown file. Then, go into `doc/Manual.dox` and add it as a subpage in the appropriate place.
+- To be able to make a nicely structured doc tree, include something like `{#` followed by some slug like the file basename followed by `}` in the first (heading) line of any Markdown file. Then, go into `doc/Manual.dox` and add it as a subpage in the appropriate place.

@@ -10,5 +10,5 @@ EXTRACT_LOCAL_CLASSES  = YES
 INPUT                  += src \
                           plugins \
                           apps \
-                          METADOCS.md
+                          doc-internal
 
