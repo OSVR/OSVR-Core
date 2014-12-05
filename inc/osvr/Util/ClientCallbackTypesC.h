@@ -92,14 +92,15 @@ typedef void (*OSVR_PoseCallback)(void *userdata,
                                   const struct OSVR_TimeValue *timestamp,
                                   const struct OSVR_PoseReport *report);
 
-/** @brief Report type for a callback on a button interface
-*/
+/** @brief Type of button state */
+typedef uint8_t OSVR_ButtonState;
+
+/** @brief Report type for a callback on a button interface */
 struct OSVR_ButtonReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
-    /** @brief The button state: 1 is pressed, 0 is not pressed.
-    */
-    uint8_t state;
+    /** @brief The button state: 1 is pressed, 0 is not pressed. */
+    OSVR_ButtonState state;
 };
 
 /** @brief C function type for a callback on a button interface
