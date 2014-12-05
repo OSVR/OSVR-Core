@@ -3,27 +3,24 @@ msc
     hscale=auto;
     a[label="Application", arclinecolor="blue", arctextcolour="blue"], e[label="OSVR Engine"];
     |||;
-    a => e [label="call osvrClientInit(context)"];
+    --- [label="At application startup"];
+    a => e [label="call osvrClientInit(appID)", url="\ref osvrClientInit"];
+    a << e [label="return ctx: OSVR_ClientContext", url="\ref OSVR_ClientContext"];    |||;
+    |||;
+    --- [label="Get display data"];
+    |||;
+    --- [label="Get interfaces"];
+    |||;
+    --- [label="Register callbacks, if desired"];
+    |||;
+    --- [label="In your application's main loop"];
+    a => e [label="call osvrClientUpdate(ctx)", url="\ref osvrClientUpdate"];
+    |||;
+    a <= e [label="your callbacks called"];
     |||;
 
-    a => e [label="ogvrLoadInterfaceConfig (application name)"];
-    a << e [label="Return: interface configuration"];
-    |||;
-    |||;
-    a note a [label="Use interface configuration to obtain all relevant interface handles"];
-    |||;
-    a => e [label="ogvrInterface_SetParam"];
-    a => e [label="ogvrInterface_GetParam"];
-    |||;
-    a => e [label="Register interface callbacks where needed"];
-    |||;
-    a note a [label="Begin main loop"];
-    |||;
-    a << e [label="callback: new data for interface", linecolor="red", textcolor="red"];
-    a << e [label="callback: new data for interface", linecolor="red", textcolor="red"];
-    |||;
-    a => e [label="Non-blocking read: ogvrInterface_Read"];
-    a << e [label="Return: new interface data"];
+    --- [label="At application termination"];
+    a => e [label="call osvrClientShutdown(ctx)", url="\ref osvrClientShutdown"];
 
 
 }

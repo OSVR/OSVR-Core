@@ -87,3 +87,5 @@ Of course, such an application doesn't really use OSVR in a productive sense. A 
 - During main loop:
 	- Handle data received by callbacks, if any.
 	- Read state of interfaces, if desired.
+
+@mscfile client-common-diagram.msc
