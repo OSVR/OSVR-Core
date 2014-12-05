@@ -57,6 +57,7 @@ namespace client {
 
       private:
         virtual void m_update();
+        void m_addAnalogRouter(const char *src, const char *dest, int channel);
         template <typename Predicate>
         void m_addButtonRouter(const char *src, const char *dest,
                                Predicate pred);

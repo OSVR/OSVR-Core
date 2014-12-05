@@ -77,6 +77,18 @@ namespace client {
 
 #undef OSVR_HYDRA_BUTTON
 
+#define OSVR_HYDRA_ANALOG(SENSOR, NAME)                                        \
+    m_addAnalogRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
+                      "/controller/left/" NAME, SENSOR);                       \
+    m_addAnalogRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
+                      "/controller/right/" NAME, SENSOR + 3)
+
+        OSVR_HYDRA_ANALOG(0, "joystick/x");
+        OSVR_HYDRA_ANALOG(1, "joystick/y");
+        OSVR_HYDRA_ANALOG(2, "trigger");
+
+#undef OSVR_HYDRA_ANALOG
+
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
                                  display_json_len));
@@ -91,6 +103,16 @@ namespace client {
         for (auto const &p : m_routers) {
             (*p)();
         }
+    }
+
+    void VRPNContext::m_addAnalogRouter(const char *src, const char *dest,
+                                        int channel) {
+        OSVR_DEV_VERBOSE("Adding analog route for " << dest);
+
+        m_routers.emplace_back(
+            new VRPNAnalogRouter<SensorPredicate, NullTransform>(
+                this, m_conn.get(), src, dest, SensorPredicate(channel),
+                NullTransform(), channel));
     }
 
     template <typename Predicate>

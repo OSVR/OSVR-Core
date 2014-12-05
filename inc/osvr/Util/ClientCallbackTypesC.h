@@ -111,6 +111,7 @@ typedef void (*OSVR_ButtonCallback)(void *userdata,
 
 /** @brief Type of analog channel state */
 typedef double OSVR_AnalogState;
+
 /** @brief Report type for a callback on an analog interface */
 struct OSVR_AnalogReport {
     /** @brief Identifies the sensor/channel that the report comes from */

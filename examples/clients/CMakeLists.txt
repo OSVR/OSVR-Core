@@ -1,5 +1,6 @@
 set(CLIENTS
     MinimalInit
+    AnalogCallback
     ButtonCallback
     TrackerCallback
     DisplayParameter)

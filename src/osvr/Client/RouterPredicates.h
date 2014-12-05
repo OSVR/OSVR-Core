@@ -26,6 +26,7 @@
 #include <vrpn_Types.h>
 #include <vrpn_Tracker.h>
 #include <vrpn_Button.h>
+#include <vrpn_Analog.h>
 
 // Standard includes
 // - none
@@ -35,6 +36,11 @@ namespace client {
     class SensorPredicate {
       public:
         SensorPredicate(vrpn_int32 sensor) : m_sensor(sensor) {}
+
+        bool operator()(vrpn_ANALOGCB const &info) {
+            // VRPN analogs transfer their whole state each time
+            return m_sensor < info.num_channel;
+        }
 
         bool operator()(vrpn_TRACKERCB const &info) {
             return info.sensor == m_sensor;
