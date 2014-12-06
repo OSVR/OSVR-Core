@@ -101,7 +101,7 @@ typedef struct OSVR_ButtonReport {
     int32_t sensor;
     /** @brief The button state: 1 is pressed, 0 is not pressed. */
     OSVR_ButtonState state;
-} OSVR_ButtonState;
+} OSVR_ButtonReport;
 
 /** @brief C function type for a callback on a button interface
 */
