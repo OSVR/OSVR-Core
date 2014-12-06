@@ -47,7 +47,7 @@ The base set of semantic paths includes the following:
 - `/me` - a pure container for user-related interfaces
 - `/me/hands` - Provides access to all hand tracking data.
 - `/me/hands/left` - Left hand tracking
-- `/me/hands/right` - Left hand tracking
+- `/me/hands/right` - Right hand tracking
 - `/me/head` - Head tracking
 - `/display` - a parameter containing a JSON string describing display configuration.
 
