@@ -27,7 +27,7 @@
 #include <iostream>
 
 int main() {
-    osvr::clientkit::ClientContext context = osvr::clientkit::ClientContext(
+    osvr::clientkit::ClientContext context(
         "org.opengoggles.exampleclients.DisplayParameter");
 
     std::string displayDescription = context.getStringParameter("/display");

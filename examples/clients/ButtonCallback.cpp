@@ -33,7 +33,7 @@ void myButtonCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
 }
 
 int main() {
-    osvr::clientkit::ClientContext context = osvr::clientkit::ClientContext(
+    osvr::clientkit::ClientContext context(
         "org.opengoggles.exampleclients.ButtonCallback");
 
     // This is just one of the paths: specifically, the Hydra's left

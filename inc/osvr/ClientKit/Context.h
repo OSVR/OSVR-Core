@@ -26,6 +26,7 @@
 #include <osvr/ClientKit/Interface.h>
 
 // Library/third-party includes
+#include <boost/noncopyable.hpp>
 #include <boost/scoped_array.hpp>
 
 // Standard includes
@@ -36,7 +37,7 @@ namespace osvr {
 
 namespace clientkit {
 
-    class ClientContext {
+    class ClientContext : private boost::noncopyable {
       public:
         /// @brief Initialize the library.
         /// @param applicationIdentifier A string identifying your application.
@@ -46,8 +47,7 @@ namespace clientkit {
                       uint32_t flags = 0u);
 
         /// @brief Initialize the context with an existing context.
-        /// @note The ClientContext class takes ownership of the
-        /// OSVR_ClientContext pointer.
+        /// @note The ClientContext class will take ownership of the context.
         ClientContext(OSVR_ClientContext context);
 
         /// @brief Shutdown the library.
@@ -58,11 +58,15 @@ namespace clientkit {
         void update();
 
         /// @brief Get the interface associated with the given path.
-        /// @param path A resource path (null-terminated string)
-        /// @param[out] iface The interface object. May be freed when no longer
-        /// needed, otherwise it will be freed when the context is closed.
+        /// @param path A resource path.
+        /// @returns The interface object.
         InterfacePtr getInterface(const std::string &path);
 
+        /// @brief Get a string parameter value from the given path.
+        /// @param path A resource path.
+        /// @returns parameter value, or empty string if parameter does not
+        /// exist or
+        /// is not a string.
         std::string getStringParameter(const std::string &path);
 
       private:
@@ -79,13 +83,7 @@ namespace clientkit {
         // do nothing
     }
 
-    inline ClientContext::~ClientContext() {
-        // Can't do this unless we have the full class specification for
-        // OSVR_ClientContext defined prior to defining the ClientContext class.
-        // delete m_context;
-        // m_context = NULL;
-        // TODO should we leave m_context dangling or delete it ourselves?
-    }
+    inline ClientContext::~ClientContext() { osvrClientShutdown(m_context); }
 
     inline void ClientContext::update() {
         OSVR_ReturnCode ret = osvrClientUpdate(m_context);
@@ -138,3 +136,4 @@ namespace clientkit {
 } // end namespace osvr
 
 #endif // INCLUDED_Context_h_GUID_DD0155F5_61A4_4A76_8C2E_D9614C7A9EBD
+

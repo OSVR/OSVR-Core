@@ -23,11 +23,11 @@
 // Internal Includes
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
-#include <osvr/ClientKit/InterfacePtr.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
+#include <osvr/ClientKit/InterfacePtr.h>
 
 // Library/third-party includes
-// - none
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 // - none
@@ -36,21 +36,29 @@ namespace osvr {
 
 namespace clientkit {
 
-    class Interface {
+    class Interface : private boost::noncopyable {
       public:
-        // TODO Interface();
+        /// @brief Constructs an Interface object from an OSVR_ClientInterface
+        /// object.
+        /// @note The Interface object will take ownership of the
+        /// OSVR_ClientInterface object.
         Interface(OSVR_ClientInterface interface);
+
+        /// @brief Frees the underlying OSVR_ClientInterface.
         ~Interface();
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline void register##TYPE##Callback(OSVR_##TYPE##Callback cb,             \
                                          void *userdata);
 
+        /// @group Callback methods.
+        //{
         OSVR_CALLBACK_METHODS(Pose)
         OSVR_CALLBACK_METHODS(Position)
         OSVR_CALLBACK_METHODS(Orientation)
         OSVR_CALLBACK_METHODS(Button)
         OSVR_CALLBACK_METHODS(Analog)
+//}
 
 #undef OSVR_CALLBACK_METHODS
 
@@ -58,25 +66,12 @@ namespace clientkit {
         OSVR_ClientInterface m_interface;
     };
 
-    /* TODO
-    inline Interface::Interface(OSVR_ClientContext context, const std::string&
-    path)
-    {
-        // TODO throw exception instead of return code
-        osvrClientGetInterface(OSVR_ClientContext ctx, const char path[],
-                               OSVR_ClientInterface *iface);
-    }
-    */
-
     inline Interface::Interface(OSVR_ClientInterface interface)
         : m_interface(interface) {
         // do nothing
     }
 
-    inline Interface::~Interface() {
-        // do nothing
-        // TODO delete m_interface?
-    }
+    inline Interface::~Interface() { osvrClientFreeInterface(m_interface); }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline void Interface::register##TYPE##Callback(OSVR_##TYPE##Callback cb,  \
