@@ -45,12 +45,12 @@ OSVR_EXTERN_C_BEGIN
 /** @brief A structure defining a 3D (6DOF) rigid body pose: translation and
     rotation.
 */
-struct OSVR_Pose3 {
+typedef struct OSVR_Pose3 {
     /** @brief Position vector */
     OSVR_Vec3 translation;
     /** @brief Orientation as a unit quaternion */
     OSVR_Quaternion rotation;
-};
+} OSVR_Pose3;
 
 /** @} */
 
