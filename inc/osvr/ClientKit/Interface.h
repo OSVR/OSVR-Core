@@ -50,6 +50,7 @@ namespace clientkit {
         OSVR_CALLBACK_METHODS(Position)
         OSVR_CALLBACK_METHODS(Orientation)
         OSVR_CALLBACK_METHODS(Button)
+        OSVR_CALLBACK_METHODS(Analog)
 
 #undef OSVR_CALLBACK_METHODS
 
@@ -88,6 +89,7 @@ namespace clientkit {
     OSVR_CALLBACK_METHODS(Position)
     OSVR_CALLBACK_METHODS(Orientation)
     OSVR_CALLBACK_METHODS(Button)
+    OSVR_CALLBACK_METHODS(Analog)
 
 #undef OSVR_CALLBACK_METHODS
 
