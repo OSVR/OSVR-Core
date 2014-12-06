@@ -6,10 +6,12 @@ set(CLIENTS
     DisplayParameter)
 
 foreach(name ${CLIENTS})
-    add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} osvrClientKitCpp)
-    set_target_properties(${name} PROPERTIES
-        FOLDER "OSVR Example Clients")
-    install(TARGETS ${name}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ExampleClients)
+    foreach(suffix c cpp)
+        add_executable(${name}_${suffix} ${name}.${suffix})
+        target_link_libraries(${name}_${suffix} osvrClientKitCpp)
+        set_target_properties(${name}_${suffix} PROPERTIES
+            FOLDER "OSVR Example Clients")
+        install(TARGETS ${name}_${suffix}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ExampleClients)
+    endforeach()
 endforeach()
