@@ -33,13 +33,11 @@ namespace osvr {
 
 namespace clientkit {
 
-class Interface;
-typedef shared_ptr<Interface> InterfacePtr;
+    class Interface;
+    typedef shared_ptr<Interface> InterfacePtr;
 
 } // end namespace clientkit
 
 } // end namespace osvr
 
-
 #endif // INCLUDED_InterfacePtr_h_GUID_5A93BC25_62BC_44F2_B942_AAB6BCA01B17
-

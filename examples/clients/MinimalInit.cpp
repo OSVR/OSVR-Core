@@ -26,7 +26,8 @@
 #include <iostream>
 
 int main() {
-    osvr::clientkit::ClientContext context = osvr::clientkit::ClientContext("org.opengoggles.exampleclients.MinimalInit");
+    osvr::clientkit::ClientContext context = osvr::clientkit::ClientContext(
+        "org.opengoggles.exampleclients.MinimalInit");
     std::cout << "OK, library initialized." << std::endl;
 
     // Pretend that this is your application's mainloop.

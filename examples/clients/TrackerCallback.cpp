@@ -58,12 +58,14 @@ void myPositionCallback(void * /*userdata*/,
 }
 
 int main() {
-    osvr::clientkit::ClientContext context = osvr::clientkit::ClientContext("org.opengoggles.exampleclients.TrackerCallback");
+    osvr::clientkit::ClientContext context = osvr::clientkit::ClientContext(
+        "org.opengoggles.exampleclients.TrackerCallback");
 
     // This is just one of the paths. You can also use:
     // /me/hands/right
     // /me/head
-    osvr::clientkit::InterfacePtr lefthand = context.getInterface("/me/hands/left");
+    osvr::clientkit::InterfacePtr lefthand =
+        context.getInterface("/me/hands/left");
 
     // The coordinate system is right-handed, with X to the right, Y up, and Z
     // near.

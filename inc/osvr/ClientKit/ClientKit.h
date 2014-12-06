@@ -25,4 +25,3 @@
 //#include <osvr/ClientKit/SystemCallback.h>
 
 #endif // INCLUDED_ClientKit_h_GUID_DD0155F5_61A4_4A76_8C2E_D9614C7A9EBD
-
