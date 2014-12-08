@@ -41,7 +41,7 @@ int main() {
     osvr::clientkit::Interface analogTrigger =
         context.getInterface("/controller/left/trigger");
 
-    analogTrigger.registerAnalogCallback(&myAnalogCallback, NULL);
+    analogTrigger.registerCallback(&myAnalogCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {

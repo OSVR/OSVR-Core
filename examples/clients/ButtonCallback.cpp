@@ -42,7 +42,7 @@ int main() {
     osvr::clientkit::Interface button1 =
         context.getInterface("/controller/left/1");
 
-    button1.registerButtonCallback(&myButtonCallback, NULL);
+    button1.registerCallback(&myButtonCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {

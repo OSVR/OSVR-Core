@@ -69,13 +69,13 @@ int main() {
 
     // The coordinate system is right-handed, with X to the right, Y up, and Z
     // near.
-    lefthand.registerPoseCallback(&myTrackerCallback, NULL);
+    lefthand.registerCallback(&myTrackerCallback, NULL);
 
     /// If you just want orientation
-    lefthand.registerOrientationCallback(&myOrientationCallback, NULL);
+    lefthand.registerCallback(&myOrientationCallback, NULL);
 
     /// or position
-    lefthand.registerPositionCallback(&myPositionCallback, NULL);
+    lefthand.registerCallback(&myPositionCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {

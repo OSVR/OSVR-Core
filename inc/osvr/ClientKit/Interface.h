@@ -26,7 +26,7 @@
 #include <osvr/Util/ClientCallbackTypesC.h>
 
 // Library/third-party includes
-// - none
+#include <boost/function.hpp>
 
 // Standard includes
 // - none
@@ -41,29 +41,26 @@ namespace clientkit {
         /// object.
         Interface(OSVR_ClientInterface interface);
 
-        /// @brief Frees the underlying OSVR_ClientInterface.
-        ~Interface();
-
         /// @brief Copy constructor.
         Interface(const Interface &other);
 
-#define OSVR_CALLBACK_METHODS(TYPE)                                            \
-    inline void register##TYPE##Callback(OSVR_##TYPE##Callback cb,             \
-                                         void *userdata);
+        template <typename T>
+        void registerCallback(T cb, void *userdata);
 
-        /// @group Callback methods.
-        //{
+      private:
+        OSVR_ClientInterface m_interface;
+
+#define OSVR_CALLBACK_METHODS(TYPE)                                            \
+    static boost::function<OSVR_ReturnCode (OSVR_ClientInterface, OSVR_##TYPE##Callback cb, void *userdata)> \
+    getCallbackRegisterFunction(const OSVR_##TYPE##Callback&);
+
         OSVR_CALLBACK_METHODS(Pose)
         OSVR_CALLBACK_METHODS(Position)
         OSVR_CALLBACK_METHODS(Orientation)
         OSVR_CALLBACK_METHODS(Button)
         OSVR_CALLBACK_METHODS(Analog)
-//}
 
 #undef OSVR_CALLBACK_METHODS
-
-      private:
-        OSVR_ClientInterface m_interface;
     };
 
     inline Interface::Interface(OSVR_ClientInterface interface)
@@ -71,15 +68,17 @@ namespace clientkit {
         // do nothing
     }
 
-    inline Interface::~Interface() {
-        // do nothing
+    template <typename T>
+    inline void Interface::registerCallback(T cb, void *userdata)
+    {
+        getCallbackRegisterFunction(cb)(m_interface, cb, userdata);
     }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
-    inline void Interface::register##TYPE##Callback(OSVR_##TYPE##Callback cb,  \
-                                                    void *userdata) {          \
-        osvrRegister##TYPE##Callback(m_interface, cb,                          \
-                                     userdata); /* always returns SUCCESS */   \
+    inline boost::function<OSVR_ReturnCode (OSVR_ClientInterface, OSVR_##TYPE##Callback cb, void *userdata)> \
+    Interface::getCallbackRegisterFunction(const OSVR_##TYPE##Callback&) \
+    { \
+        return osvrRegister##TYPE##Callback; \
     }
 
     OSVR_CALLBACK_METHODS(Pose)
@@ -95,3 +94,4 @@ namespace clientkit {
 } // end namespace osvr
 
 #endif // INCLUDED_Interface_h_GUID_5D5B1FAD_AD72_4216_9FB6_6483D6EE7DF1
+
