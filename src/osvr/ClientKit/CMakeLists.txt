@@ -5,6 +5,7 @@ set(API
     "${HEADER_LOCATION}/ContextC.h"
     "${HEADER_LOCATION}/InterfaceC.h"
     "${HEADER_LOCATION}/InterfaceCallbackC.h"
+    "${HEADER_LOCATION}/InterfaceStateC.h"
     "${HEADER_LOCATION}/ParametersC.h"
     "${HEADER_LOCATION}/Parameters.h"
     "${HEADER_LOCATION}/SystemCallbackC.h")
@@ -14,6 +15,7 @@ set(SOURCE
     ContextC.cpp
     InterfaceC.cpp
     InterfaceCallbackC.cpp
+    InterfaceStateC.cpp
     ParametersC.cpp
     SystemCallbackC.cpp)
 

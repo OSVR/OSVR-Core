@@ -72,7 +72,7 @@ namespace client {
         }
 
         template <typename ReportType> bool hasState() const {
-            return boost::fusion::at_key<ReportType>(m_states);
+            return bool(boost::fusion::at_key<ReportType>(m_states));
         }
 
         template <typename ReportType>
@@ -80,7 +80,8 @@ namespace client {
         getState(util::time::TimeValue &timestamp,
                  typename traits::StateType<ReportType>::type &state) const {
             if (hasState<ReportType>()) {
-                timestamp = boost::fusion::at_key<ReportType>(m_states)->timestamp;
+                timestamp =
+                    boost::fusion::at_key<ReportType>(m_states)->timestamp;
                 state = boost::fusion::at_key<ReportType>(m_states)->state;
             }
             /// @todo do we fail silently or throw exception if we are asked for

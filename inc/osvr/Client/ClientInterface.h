@@ -51,6 +51,19 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the owning context.
     OSVR_CLIENT_EXPORT::osvr::client::ClientContext &getContext();
 
+    /// @brief If state exists for the given ReportType on this interface, it
+    /// will be returned in the arguments, and true will be returned.
+    template <typename ReportType>
+    bool getState(osvr::util::time::TimeValue &timestamp,
+                  typename osvr::client::traits::StateType<ReportType>::type &
+                      state) const {
+        if (!m_state.hasState<ReportType>()) {
+            return false;
+        }
+        m_state.getState<ReportType>(timestamp, state);
+        return true;
+    }
+
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
   public:                                                                      \
     /** @brief Register a TYPE callback */                                     \
@@ -73,17 +86,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     OSVR_CALLBACK_METHODS(Analog)
 #undef OSVR_CALLBACK_METHODS
 
-    /// @brief If state exists for the given ReportType on this interface, it
-    /// will be returned in the arguments, and true will be returned.
-    template <typename ReportType>
-    bool getState(osvr::util::time::TimeValue &timestamp,
-                  typename osvr::client::traits::StateType<ReportType>::type &
-                      state) const {
-        if (!m_state.hasState<ReportType>()) {
-            return false;
-        }
-        m_state.getState(timestamp, state);
-    }
     /// @brief Update any state.
     void update();
 
