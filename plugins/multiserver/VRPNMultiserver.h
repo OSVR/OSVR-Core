@@ -78,9 +78,10 @@ class BoundServer : boost::noncopyable {
     /// @brief Construct and register a device type that doesn't need
     /// anything more than a name and a connection.
     template <typename T>
-    void constructAndRegister(std::string const &nameStem) {
+    DeviceFullName constructAndRegister(std::string const &nameStem) {
         DeviceFullName name(getName(nameStem));
         registerDevice(name, new T(name.get().c_str(), getVRPNConnection()));
+        return name;
     }
 
     /// @brief Register a device for deletion and as an advanced device.
