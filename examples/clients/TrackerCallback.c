@@ -56,7 +56,7 @@ void myPositionCallback(void *userdata, const OSVR_TimeValue *timestamp,
 }
 
 int main() {
-    OSVR_ClientContext context =
+    OSVR_ClientContext ctx =
         osvrClientInit("org.opengoggles.exampleclients.TrackerCallback", 0);
 
     /* This is just one of the paths. You can also use:
@@ -64,7 +64,7 @@ int main() {
      * /me/head
      */
     OSVR_ClientInterface lefthand = NULL;
-    osvrClientGetInterface(context, "/me/hands/left", &lefthand);
+    osvrClientGetInterface(ctx, "/me/hands/left", &lefthand);
 
     /* The coordinate system is right-handed, with X to the right, Y up, and Z
      * near.
@@ -80,7 +80,7 @@ int main() {
     /* Pretend that this is your application's mainloop. */
     int i;
     for (i = 0; i < 1000000; ++i) {
-        osvrClientUpdate(context);
+        osvrClientUpdate(ctx);
     }
 
     osvrClientShutdown(ctx);
