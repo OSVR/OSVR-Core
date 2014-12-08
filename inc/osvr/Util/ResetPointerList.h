@@ -24,26 +24,22 @@
 // - none
 
 // Library/third-party includes
-#include <boost/range/algorithm/for_each.hpp>
+// - none
 
 // Standard includes
-#include <algorithm>
+// - none
 
 namespace osvr {
 namespace util {
-
-    /// @brief Functor for resetting smart pointers, for use with for_each or
-    /// similar.
-    template <typename SmartPointerType> struct PointerResetter {
-        void operator()(SmartPointerType &p) { p.reset(); }
-    };
 
     /// @brief Reset every smart pointer in a container one by one
     template <typename RangeType>
     inline void resetPointerRange(RangeType range) {
         typedef typename RangeType::type IteratorType;
         typedef typename IteratorType::value_type PointerType;
-        boost::for_each(range, PointerResetter<PointerType>());
+        for (auto &ptr : range) {
+            ptr.reset()
+        }
     }
 } // namespace util
 } // namespace osvr

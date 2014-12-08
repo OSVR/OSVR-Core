@@ -103,8 +103,9 @@ namespace connection {
         // Process the connection first.
         m_process();
         // Process all devices.
-        boost::for_each(m_devices,
-                        [](ConnectionDevicePtr &dev) { dev->process(); });
+        for (auto &dev : m_devices) {
+            dev->process();
+        }
     }
 
     Connection::Connection() { OSVR_DEV_VERBOSE("In Connection constructor"); }

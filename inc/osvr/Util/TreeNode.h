@@ -125,17 +125,17 @@ namespace util {
             /// @brief Generic visitation method that calls a functor on each of
             /// the children in an undefined order.
             template <typename F> void visitChildren(F &visitor) {
-                std::for_each(begin(m_children), end(m_children),
-                              [&](ptr_type &node) { visitor(*node); });
+                for (ptr_type &node : m_children) {
+                    visitor(*node);
+                }
             }
 
             /// @brief Generic constant visitation method that calls a functor
             /// on each of the children (as const) in an undefined order.
             template <typename F> void visitConstChildren(F &visitor) const {
-                std::for_each(begin(m_children), end(m_children),
-                              [&](ptr_type const &node) {
+                for (ptr_type const &node : m_children) {
                     visitor(const_cast<type const &>(*node));
-                });
+                }
             }
 
             /// @brief Generic constant visitation method that calls a functor

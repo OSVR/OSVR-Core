@@ -21,7 +21,6 @@
 // Internal Includes
 #include "PluginSpecificRegistrationContextImpl.h"
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Util/ResetPointerList.h>
 
 // Library/third-party includes
 #include <boost/range/adaptor/reversed.hpp>
@@ -46,7 +45,9 @@ namespace pluginhost {
                          << getName());
 
         // Delete the data in reverse order.
-        util::resetPointerRange(m_dataList | boost::adaptors::reversed);
+        for (auto &ptr : m_dataList | boost::adaptors::reversed) {
+            ptr.reset();
+        }
         m_parent = NULL; // before anything else destructs, for safety?
     }
 
@@ -87,8 +88,9 @@ namespace pluginhost {
                          "In triggerHardwareDetectCallbacks for "
                          << getName());
 
-        boost::for_each(m_hardwareDetectCallbacks,
-                        [this](HardwareDetectCallback const &f) { f(this); });
+        for (auto const &f : m_hardwareDetectCallbacks) {
+            f(this);
+        }
     }
 
     void PluginSpecificRegistrationContextImpl::instantiateDriver(
