@@ -23,6 +23,7 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Client/ClientContext_fwd.h>
 #include <osvr/Client/ClientInterfacePtr.h>
+#include <osvr/Client/InterfaceState.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 
@@ -72,12 +73,24 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     OSVR_CALLBACK_METHODS(Analog)
 #undef OSVR_CALLBACK_METHODS
 
+    /// @brief If state exists for the given ReportType on this interface, it
+    /// will be returned in the arguments, and true will be returned.
+    template <typename ReportType>
+    bool getState(osvr::util::time::TimeValue &timestamp,
+                  typename osvr::client::traits::StateType<ReportType>::type &
+                      state) const {
+        if (!m_state.hasState<ReportType>()) {
+            return false;
+        }
+        m_state.getState(timestamp, state);
+    }
     /// @brief Update any state.
     void update();
 
   private:
     ::osvr::client::ClientContext *m_ctx;
     std::string const m_path;
+    osvr::client::InterfaceState m_state;
     friend struct OSVR_ClientContextObject;
 };
 

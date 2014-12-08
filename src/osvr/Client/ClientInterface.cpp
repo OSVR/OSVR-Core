@@ -49,6 +49,7 @@ std::string const &OSVR_ClientInterfaceObject::getPath() const {
     }                                                                          \
     void OSVR_ClientInterfaceObject::triggerCallbacks(                         \
         const OSVR_TimeValue &timestamp, const OSVR_##TYPE##Report &report) {  \
+        m_state.setStateFromReport(timestamp, report);                         \
         for (auto const &f : m_callbacks##TYPE) {                              \
             f(&timestamp, &report);                                            \
         }                                                                      \

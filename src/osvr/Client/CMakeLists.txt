@@ -5,7 +5,9 @@ set(API
     "${HEADER_LOCATION}/ClientContext_fwd.h"
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
-    "${HEADER_LOCATION}/CreateContext.h")
+    "${HEADER_LOCATION}/CreateContext.h"
+    "${HEADER_LOCATION}/InterfaceState.h"
+    "${HEADER_LOCATION}/ReportTypes.h")
 
 set(SOURCE
     ClientContext.cpp
