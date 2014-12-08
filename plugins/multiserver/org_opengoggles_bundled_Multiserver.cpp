@@ -42,7 +42,7 @@ class VRPNHardwareDetect : boost::noncopyable {
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
         BoundServer server(m_data, ctx);
         struct hid_device_info *enumData = hid_enumerate(0, 0);
-        for (struct hid_device_info *dev = enumData; dev != NULL;
+        for (struct hid_device_info *dev = enumData; dev != nullptr;
              dev = dev->next) {
             if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
                 // Razer Hydra

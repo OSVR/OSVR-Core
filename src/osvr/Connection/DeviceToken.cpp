@@ -91,9 +91,9 @@ namespace connection {
 
     ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
 
-    AsyncDeviceToken *DeviceToken::asAsync() { return NULL; }
+    AsyncDeviceToken *DeviceToken::asAsync() { return nullptr; }
 
-    SyncDeviceToken *DeviceToken::asSync() { return NULL; }
+    SyncDeviceToken *DeviceToken::asSync() { return nullptr; }
 
     void DeviceToken::m_stopThreads() {}
 

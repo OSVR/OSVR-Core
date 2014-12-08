@@ -44,7 +44,7 @@ vrpn_Connection *getVRPNConnection(
     osvr::pluginhost::PluginSpecificRegistrationContext &context) {
     osvr::connection::ConnectionPtr conn =
         osvr::connection::Connection::retrieveConnection(context.getParent());
-    vrpn_Connection *ret = NULL;
+    vrpn_Connection *ret = nullptr;
     if (std::string(conn->getConnectionKindID()) ==
         osvr::connection::getVRPNConnectionKindID()) {
         ret = static_cast<vrpn_Connection *>(conn->getUnderlyingObject());

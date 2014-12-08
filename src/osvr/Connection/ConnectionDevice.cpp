@@ -33,7 +33,7 @@ namespace connection {
 
     std::string const &ConnectionDevice::getName() const { return m_name; }
     ConnectionDevice::ConnectionDevice(std::string const &name)
-        : m_name(name), m_token(NULL) {}
+        : m_name(name), m_token(nullptr) {}
 
     void ConnectionDevice::process() { m_process(); }
 
@@ -45,7 +45,7 @@ namespace connection {
     }
 
     void ConnectionDevice::setDeviceToken(DeviceToken &token) {
-        BOOST_ASSERT(m_token == NULL);
+        BOOST_ASSERT(m_token == nullptr);
         m_token = &token;
     }
 

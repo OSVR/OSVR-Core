@@ -78,7 +78,7 @@ void osvrTimeValueDifference(struct OSVR_TimeValue *tvA,
 
 void osvrTimeValueGetNow(OSVR_INOUT_PTR struct OSVR_TimeValue *dest) {
     timeval tv;
-    vrpn_gettimeofday(&tv, NULL);
+    vrpn_gettimeofday(&tv, nullptr);
     osvrStructTimevalToTimeValue(dest, &tv);
 }
 

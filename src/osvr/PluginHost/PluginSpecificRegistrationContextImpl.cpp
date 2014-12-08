@@ -32,7 +32,7 @@ namespace osvr {
 namespace pluginhost {
     PluginSpecificRegistrationContextImpl::
         PluginSpecificRegistrationContextImpl(std::string const &name)
-        : PluginSpecificRegistrationContext(name), m_parent(NULL) {
+        : PluginSpecificRegistrationContext(name), m_parent(nullptr) {
         OSVR_DEV_VERBOSE("PluginSpecificRegistrationContextImpl:\t"
                          << "Creating a plugin registration context for "
                          << name);
@@ -48,7 +48,7 @@ namespace pluginhost {
         for (auto &ptr : m_dataList | boost::adaptors::reversed) {
             ptr.reset();
         }
-        m_parent = NULL; // before anything else destructs, for safety?
+        m_parent = nullptr; // before anything else destructs, for safety?
     }
 
     void PluginSpecificRegistrationContextImpl::takePluginHandle(
@@ -58,7 +58,7 @@ namespace pluginhost {
 
     void PluginSpecificRegistrationContextImpl::setParent(
         RegistrationContext &parent) {
-        if (m_parent != NULL && m_parent != &parent) {
+        if (m_parent != nullptr && m_parent != &parent) {
             throw std::logic_error(
                 "Can't set the registration context parent - already set!");
         }
@@ -66,7 +66,7 @@ namespace pluginhost {
     }
 
     RegistrationContext &PluginSpecificRegistrationContextImpl::getParent() {
-        if (m_parent == NULL) {
+        if (m_parent == nullptr) {
             throw std::logic_error(
                 "Can't access the registration context parent - it is null!");
         }
@@ -75,7 +75,7 @@ namespace pluginhost {
 
     RegistrationContext const &
     PluginSpecificRegistrationContextImpl::getParent() const {
-        if (m_parent == NULL) {
+        if (m_parent == nullptr) {
             throw std::logic_error(
                 "Can't access the registration context parent - it is null!");
         }

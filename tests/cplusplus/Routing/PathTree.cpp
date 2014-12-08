@@ -36,7 +36,7 @@ TEST(PathTree, create) { ASSERT_NO_THROW(PathTree()); }
 
 TEST(PathTree, getPathRoot) {
     PathTree tree;
-    PathNode *result = NULL;
+    PathNode *result = nullptr;
     ASSERT_NO_THROW(result = &tree.getNodeByPath("/")) << "Get the root.";
     ASSERT_TRUE(result->isRoot());
     ASSERT_EQ(result->getParent(), nullptr);
@@ -59,7 +59,7 @@ TEST(PathTree, getPathBadInput) {
 
 TEST(PathTree, getPathSingleLevel) {
     PathTree tree;
-    PathNode *result = NULL;
+    PathNode *result = nullptr;
     ASSERT_NO_THROW(result = &tree.getNodeByPath("/test"))
         << "Get a new node just a single level in";
     ASSERT_TRUE(isNodeType<elements::NullElement>(*result))
@@ -75,7 +75,7 @@ TEST(PathTree, getPathSingleLevel) {
 
 TEST(PathTree, getPathTwoLevel) {
     PathTree tree;
-    PathNode *test2 = NULL;
+    PathNode *test2 = nullptr;
     ASSERT_NO_THROW(test2 = &tree.getNodeByPath("/test1/test2"))
         << "Get a node two new levels in";
     // Check test2

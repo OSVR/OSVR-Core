@@ -31,7 +31,7 @@ namespace client {
 
     ClientContext *createContext(const char appId[], const char host[]) {
         if (!appId || std::strlen(appId) == 0) {
-            return NULL;
+            return nullptr;
         }
         VRPNContext *ret = new VRPNContext(appId, host);
         return ret;

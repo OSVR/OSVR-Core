@@ -284,7 +284,7 @@ TEST(TreeNode, ConstVisitor) {
 
 class ParentCheckerVisitor {
   public:
-    ParentCheckerVisitor() : nodes(0), root(NULL) {}
+      ParentCheckerVisitor() : nodes(0), root(nullptr) {}
     void operator()(StringTree const &node) {
         if (nodes == 0) {
             // root

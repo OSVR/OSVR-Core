@@ -30,7 +30,7 @@
 
 template <typename ElementType>
 inline bool isElementType(osvr::routing::elements::PathElement const &elt) {
-    return (boost::get<ElementType const>(&elt) != NULL);
+    return (boost::get<ElementType const>(&elt) != nullptr);
 }
 
 template <typename ElementType>

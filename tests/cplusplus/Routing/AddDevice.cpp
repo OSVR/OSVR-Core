@@ -35,7 +35,7 @@ using namespace osvr::routing;
 
 TEST(addDevice, normalConditions) {
     PathTree tree;
-    PathNode *dev = NULL;
+    PathNode *dev = nullptr;
     ASSERT_NO_THROW(dev = &addDevice(tree, "/org_opengoggles_sample/MyDevice"));
 
     // Check Device
