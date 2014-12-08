@@ -31,7 +31,7 @@
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.TrackerState");
+        osvrClientInit("org.opengoggles.exampleclients.TrackerState", 0);
 
     OSVR_ClientInterface lefthand = NULL;
     /* This is just one of the paths. You can also use:
@@ -57,13 +57,12 @@ int main() {
                 printf("Got POSE state: Position = (%f, %f, %f), orientation = "
                        "(%f, %f, "
                        "%f, %f)\n",
-                       report->pose.translation.data[0],
-                       report->pose.translation.data[1],
-                       report->pose.translation.data[2],
-                       osvrQuatGetW(&(report->pose.rotation)),
-                       osvrQuatGetX(&(report->pose.rotation)),
-                       osvrQuatGetY(&(report->pose.rotation)),
-                       osvrQuatGetZ(&(report->pose.rotation)));
+                       state.translation.data[0], state.translation.data[1],
+                       state.translation.data[2],
+                       osvrQuatGetW(&(state.rotation)),
+                       osvrQuatGetX(&(state.rotation)),
+                       osvrQuatGetY(&(state.rotation)),
+                       osvrQuatGetZ(&(state.rotation)));
             }
         }
     }
