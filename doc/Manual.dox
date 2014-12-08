@@ -11,7 +11,7 @@
 #ifdef OSVR_DOXYGEN_EXTERNAL
 /** @page DevManual Contributing to OSVR-Core
 
-You may consider looking at the "internal/implementation" documentation build if you want to get your hands dirty with the code inside OSVR.
+You may consider looking at the "internal/implementation" documentation build if you want to get your hands dirty with the code inside OSVR. This section contains more contents in that build.
 
   - @subpage Building
   - @subpage HACKING
