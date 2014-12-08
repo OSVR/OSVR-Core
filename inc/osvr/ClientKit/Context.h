@@ -43,8 +43,7 @@ namespace clientkit {
         /// @param applicationIdentifier A string identifying your application.
         /// Reverse DNS format strongly suggested.
         /// @param flags initialization options (reserved) - pass 0 for now.
-        ClientContext(const std::string &applicationIdentifier,
-                      uint32_t flags = 0u);
+        ClientContext(const char applicationIdentifier[], uint32_t flags = 0u);
 
         /// @brief Initialize the context with an existing context.
         /// @note The ClientContext class will take ownership of the context.
@@ -73,9 +72,9 @@ namespace clientkit {
         OSVR_ClientContext m_context;
     };
 
-    inline ClientContext::ClientContext(
-        const std::string &applicationIdentifier, uint32_t flags) {
-        m_context = osvrClientInit(applicationIdentifier.data(), flags);
+    inline ClientContext::ClientContext(const char applicationIdentifier[],
+                                        uint32_t flags) {
+        m_context = osvrClientInit(applicationIdentifier, flags);
     }
 
     inline ClientContext::ClientContext(OSVR_ClientContext context)
