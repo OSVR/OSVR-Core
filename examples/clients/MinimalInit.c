@@ -28,16 +28,17 @@
 #include <stdio.h>
 
 int main() {
-    OSVR_ClientContext context =
+    OSVR_ClientContext ctx =
         osvrClientInit("org.opengoggles.exampleclients.MinimalInit", 0);
     printf("OK, library initialized.\n");
 
     /* Pretend that this is your application's mainloop. */
     int i;
     for (i = 0; i < 1000000; ++i) {
-        osvrClientUpdate(context);
+        osvrClientUpdate(ctx);
     }
 
+    osvrClientShutdown(ctx);
     printf("Library shut down, exiting.\n");
     return 0;
 }

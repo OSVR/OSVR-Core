@@ -36,7 +36,7 @@ void myButtonCallback(void *userdata, const OSVR_TimeValue *timestamp,
 }
 
 int main() {
-    OSVR_ClientContext context =
+    OSVR_ClientContext ctx =
         osvrClientInit("org.opengoggles.exampleclients.ButtonCallback", 0);
 
     OSVR_ClientInterface button1 = NULL;
@@ -44,17 +44,17 @@ int main() {
      * controller's button labelled "1". More are in the docs and/or listed on
      * startup
      */
-    osvrClientGetInterface(context, "/controller/left/1", &button1);
+    osvrClientGetInterface(ctx, "/controller/left/1", &button1);
 
     osvrRegisterButtonCallback(button1, &myButtonCallback, NULL);
 
     /* Pretend that this is your application's mainloop. */
     int i;
     for (i = 0; i < 1000000; ++i) {
-        osvrClientUpdate(context);
+        osvrClientUpdate(ctx);
     }
 
-    osvrClientShutdown(context);
+    osvrClientShutdown(ctx);
     printf("Library shut down, exiting.\n");
     return 0;
 }

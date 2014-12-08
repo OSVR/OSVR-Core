@@ -83,6 +83,7 @@ int main() {
         osvrClientUpdate(context);
     }
 
+    osvrClientShutdown(ctx);
     printf("Library shut down, exiting.\n");
     return 0;
 }

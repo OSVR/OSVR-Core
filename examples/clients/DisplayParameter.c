@@ -30,21 +30,21 @@
 #include <stdlib.h>
 
 int main() {
-    OSVR_ClientContext context =
+    OSVR_ClientContext ctx =
         osvrClientInit("org.opengoggles.exampleclients.DisplayParameter", 0);
 
     const char *path = "/display";
 
     size_t length;
-    osvrClientGetStringParameterLength(context, path, &length);
+    osvrClientGetStringParameterLength(ctx, path, &length);
 
-    char * displayDescription = malloc(length);
-    osvrClientGetStringParameter(context, path, displayDescription, length);
+    char *displayDescription = malloc(length);
+    osvrClientGetStringParameter(ctx, path, displayDescription, length);
 
     printf("Got value of %s:\n%s\n", path, displayDescription);
 
     free(displayDescription);
-    osvrClientShutdown(context);
+    osvrClientShutdown(ctx);
     printf("Library shut down, exiting.\n");
     return 0;
 }
