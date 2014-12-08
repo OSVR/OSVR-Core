@@ -1,3 +1,5 @@
+# NOTE: When adding examples here, add them to the list in doc/libraries.dox as well!
+
 set(CLIENTS
     MinimalInit
     AnalogCallback

@@ -23,6 +23,9 @@
 
     - MinimalInit.cpp
     - TrackerCallback.cpp
+    - AnalogCallback.cpp
+    - ButtonCallback.cpp
+    - DisplayParameter.cpp
 */
 
 /** @defgroup InternalAPI Internal APIs
