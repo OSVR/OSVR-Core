@@ -40,21 +40,30 @@ OSVR_EXTERN_C_BEGIN
     @{
 */
 
+/** @brief Type of position state */
+typedef struct OSVR_Vec3 OSVR_PositionState;
+
 /** @brief Report type for a position callback on a tracker interface */
 struct OSVR_PositionReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
     /** @brief The position vector */
-    struct OSVR_Vec3 xyz;
+    OSVR_PositionState xyz;
 };
+
+/** @brief Type of orientation state */
+typedef struct OSVR_Quaternion OSVR_OrientationState;
 
 /** @brief Report type for an orientation callback on a tracker interface */
 struct OSVR_OrientationReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
     /** @brief The rotation unit quaternion */
-    struct OSVR_Quaternion rotation;
+    OSVR_OrientationState rotation;
 };
+
+/** @brief Type of pose state */
+typedef struct OSVR_Pose3 OSVR_PoseState;
 
 /** @brief Report type for a pose (position and orientation) callback on a
     tracker interface
@@ -65,7 +74,7 @@ struct OSVR_PoseReport {
     /** @brief The pose structure, containing a position vector and a rotation
         quaternion
     */
-    struct OSVR_Pose3 pose;
+    OSVR_PoseState pose;
 };
 
 /** @brief Type of button state */
