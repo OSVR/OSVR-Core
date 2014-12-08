@@ -27,6 +27,7 @@
 
 /* Standard includes */
 #include <stdio.h>
+#include <stdlib.h>
 
 int main() {
     OSVR_ClientContext context =
@@ -37,11 +38,12 @@ int main() {
     size_t length;
     osvrClientGetStringParameterLength(context, path, &length);
 
-    char displayDescription[length];
+    char * displayDescription = malloc(length);
     osvrClientGetStringParameter(context, path, displayDescription, length);
 
     printf("Got value of %s:\n%s\n", path, displayDescription);
 
+    free(displayDescription);
     osvrClientShutdown(context);
     printf("Library shut down, exiting.\n");
     return 0;
