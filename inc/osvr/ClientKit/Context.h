@@ -134,4 +134,3 @@ namespace clientkit {
 } // end namespace osvr
 
 #endif // INCLUDED_Context_h_GUID_DD0155F5_61A4_4A76_8C2E_D9614C7A9EBD
-
