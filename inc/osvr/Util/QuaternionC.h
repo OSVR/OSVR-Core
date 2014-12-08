@@ -47,11 +47,11 @@ typedef struct OSVR_Quaternion {
 
 #define OSVR_QUAT_MEMBER(COMPONENT, INDEX)                                     \
     /** @brief Accessor for quaternion component COMPONENT */                  \
-    inline double osvrQuatGet##COMPONENT(OSVR_Quaternion const *q) {           \
+    OSVR_INLINE double osvrQuatGet##COMPONENT(OSVR_Quaternion const *q) {      \
         return q->data[INDEX];                                                 \
     }                                                                          \
     /** @brief Setter for quaternion component COMPONENT */                    \
-    inline void osvrQuatSet##COMPONENT(OSVR_Quaternion *q, double val) {       \
+    OSVR_INLINE void osvrQuatSet##COMPONENT(OSVR_Quaternion *q, double val) {  \
         q->data[INDEX] = val;                                                  \
     }
 

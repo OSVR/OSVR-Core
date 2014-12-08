@@ -46,11 +46,11 @@ typedef struct OSVR_Vec3 {
 
 #define OSVR_VEC_MEMBER(COMPONENT, INDEX)                                      \
     /** @brief Accessor for Vec3 component COMPONENT */                        \
-    inline double osvrVec3Get##COMPONENT(OSVR_Vec3 *v) {                       \
+    OSVR_INLINE double osvrVec3Get##COMPONENT(OSVR_Vec3 *v) {                  \
         return v->data[INDEX];                                                 \
     }                                                                          \
     /** @brief Setter for Vec3 component COMPONENT */                          \
-    inline void osvrVecSet##COMPONENT(OSVR_Vec3 *v, double val) {              \
+    OSVR_INLINE void osvrVecSet##COMPONENT(OSVR_Vec3 *v, double val) {         \
         v->data[INDEX] = val;                                                  \
     }
 
