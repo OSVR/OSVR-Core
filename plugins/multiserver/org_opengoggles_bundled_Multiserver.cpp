@@ -27,6 +27,7 @@
 #include "hidapi/hidapi.h"
 #include "vrpn_Connection.h"
 #include "vrpn_Tracker_RazerHydra.h"
+#include "vrpn_Tracker_Filter.h"
 #include <boost/noncopyable.hpp>
 
 // Standard includes
@@ -45,8 +46,19 @@ class VRPNHardwareDetect : boost::noncopyable {
              dev = dev->next) {
             if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
                 // Razer Hydra
-                server.constructAndRegister<vrpn_Tracker_RazerHydra>(
-                    "RazerHydra");
+                DeviceFullName name =
+                    server.constructAndRegister<vrpn_Tracker_RazerHydra>(
+                        "RazerHydra");
+                std::string localName = "*" + name.get();
+
+                // Corresponding filter
+                DeviceFullName filterName = server.getName("OneEuroFilter");
+                osvr::unique_ptr<vrpn_Tracker_FilterOneEuro> filter(
+                    new vrpn_Tracker_FilterOneEuro(
+                        filterName.get().c_str(), server.getVRPNConnection(),
+                        localName.c_str(), 2, 1.15, 1.0, 1.2, 1.5, 5.0, 1.2));
+                server.registerDevice<vrpn_Tracker_FilterOneEuro>(
+                    filterName, filter.release());
                 break;
             }
         }
