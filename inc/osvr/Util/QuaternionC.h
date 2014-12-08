@@ -40,18 +40,18 @@ OSVR_EXTERN_C_BEGIN
 /** @brief A structure defining a quaternion, often a unit quaternion
  * representing 3D rotation.
 */
-struct OSVR_Quaternion {
+typedef struct OSVR_Quaternion {
     /** @brief Internal data - direct access not recommended */
     double data[4];
-};
+} OSVR_Quaternion;
 
 #define OSVR_QUAT_MEMBER(COMPONENT, INDEX)                                     \
     /** @brief Accessor for quaternion component COMPONENT */                  \
-    inline double osvrQuatGet##COMPONENT(OSVR_Quaternion const *q) {           \
+    OSVR_INLINE double osvrQuatGet##COMPONENT(OSVR_Quaternion const *q) {      \
         return q->data[INDEX];                                                 \
     }                                                                          \
     /** @brief Setter for quaternion component COMPONENT */                    \
-    inline void osvrQuatSet##COMPONENT(OSVR_Quaternion *q, double val) {       \
+    OSVR_INLINE void osvrQuatSet##COMPONENT(OSVR_Quaternion *q, double val) {  \
         q->data[INDEX] = val;                                                  \
     }
 

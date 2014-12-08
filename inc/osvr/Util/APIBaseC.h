@@ -28,11 +28,17 @@
 #define OSVR_CPP_ONLY(X) X
 #define OSVR_EXTERN_C_BEGIN extern "C" {
 #define OSVR_EXTERN_C_END }
+#define OSVR_INLINE inline
 #else
 #define OSVR_C_ONLY(X) X
 #define OSVR_CPP_ONLY(X)
 #define OSVR_EXTERN_C_BEGIN
 #define OSVR_EXTERN_C_END
+#ifdef _MSC_VER
+#define OSVR_INLINE static __inline
+#else
+#define OSVR_INLINE static inline
+#endif
 #endif
 
 #endif

@@ -22,7 +22,6 @@
 
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
 #error "Not supported before VS 2010"
-
 #else
 #include <memory>
 

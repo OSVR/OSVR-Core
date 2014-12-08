@@ -1,13 +1,16 @@
 osvr_setup_lib_vars(ClientKit)
 
 set(API
+    "${HEADER_LOCATION}/ClientKit.h"
     "${HEADER_LOCATION}/ClientKitC.h"
+    "${HEADER_LOCATION}/Context.h"
     "${HEADER_LOCATION}/ContextC.h"
+    "${HEADER_LOCATION}/Interface.h"
     "${HEADER_LOCATION}/InterfaceC.h"
     "${HEADER_LOCATION}/InterfaceCallbackC.h"
     "${HEADER_LOCATION}/InterfaceStateC.h"
-    "${HEADER_LOCATION}/ParametersC.h"
     "${HEADER_LOCATION}/Parameters.h"
+    "${HEADER_LOCATION}/ParametersC.h"
     "${HEADER_LOCATION}/SystemCallbackC.h")
 
 set(SOURCE

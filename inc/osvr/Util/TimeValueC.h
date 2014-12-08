@@ -67,12 +67,12 @@ typedef int32_t OSVR_TimeValue_Microseconds;
    For best results, please keep normalized. Output of all functions here
    is normalized.
    */
-struct OSVR_TimeValue {
+typedef struct OSVR_TimeValue {
     /** @brief Seconds portion of the time value. */
     OSVR_TimeValue_Seconds seconds;
     /** @brief Microseconds portion of the time value. */
     OSVR_TimeValue_Microseconds microseconds;
-};
+} OSVR_TimeValue;
 
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
 /** @brief Gets the current time in the TimeValue. Parallel to gettimeofday. */

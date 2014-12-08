@@ -21,12 +21,21 @@
 
     See examples:
 
-    - MinimalInit.cpp
-    - TrackerCallback.cpp
-    - TrackerState.cpp
-    - AnalogCallback.cpp
-    - ButtonCallback.cpp
-    - DisplayParameter.cpp
+    - C++ wrapper-using:
+        - MinimalInit.cpp
+        - TrackerCallback.cpp
+        - TrackerState.cpp
+        - AnalogCallback.cpp
+        - ButtonCallback.cpp
+        - DisplayParameter.cpp
+    - C-only:
+        - MinimalInit.c
+        - TrackerCallback.c
+        - TrackerState.c
+        - AnalogCallback.c
+        - ButtonCallback.c
+        - DisplayParameter.c
+
 */
 
 /** @defgroup InternalAPI Internal APIs
