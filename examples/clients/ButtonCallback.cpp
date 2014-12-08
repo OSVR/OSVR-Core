@@ -17,9 +17,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/ClientKit/ContextC.h>
-#include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/ClientKit/InterfaceCallbackC.h>
+#include <osvr/ClientKit/Context.h>
+#include <osvr/ClientKit/Interface.h>
 
 // Library/third-party includes
 // - none
@@ -34,23 +33,22 @@ void myButtonCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
 }
 
 int main() {
-    OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.ButtonCallback");
+    osvr::clientkit::ClientContext context(
+        "org.opengoggles.exampleclients.ButtonCallback");
 
-    OSVR_ClientInterface button1 = NULL;
     // This is just one of the paths: specifically, the Hydra's left
     // controller's button labelled "1". More are in the docs and/or listed on
     // startup
-    osvrClientGetInterface(ctx, "/controller/left/1", &button1);
+    osvr::clientkit::Interface button1 =
+        context.getInterface("/controller/left/1");
 
-    osvrRegisterButtonCallback(button1, &myButtonCallback, NULL);
+    button1.registerCallback(&myButtonCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {
-        osvrClientUpdate(ctx);
+        context.update();
     }
 
-    osvrClientShutdown(ctx);
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }

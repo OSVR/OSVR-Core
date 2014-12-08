@@ -40,10 +40,10 @@ OSVR_EXTERN_C_BEGIN
 /** @brief A structure defining a quaternion, often a unit quaternion
  * representing 3D rotation.
 */
-struct OSVR_Quaternion {
+typedef struct OSVR_Quaternion {
     /** @brief Internal data - direct access not recommended */
     double data[4];
-};
+} OSVR_Quaternion;
 
 #define OSVR_QUAT_MEMBER(COMPONENT, INDEX)                                     \
     /** @brief Accessor for quaternion component COMPONENT */                  \

@@ -39,10 +39,10 @@ OSVR_EXTERN_C_BEGIN
 */
 /** @brief A structure defining a 3D vector, often a position/translation.
 */
-struct OSVR_Vec3 {
+typedef struct OSVR_Vec3 {
     /** @brief Internal array data. */
     double data[3];
-};
+} OSVR_Vec3;
 
 #define OSVR_VEC_MEMBER(COMPONENT, INDEX)                                      \
     /** @brief Accessor for Vec3 component COMPONENT */                        \

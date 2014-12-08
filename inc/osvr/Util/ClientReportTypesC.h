@@ -44,23 +44,23 @@ OSVR_EXTERN_C_BEGIN
 typedef struct OSVR_Vec3 OSVR_PositionState;
 
 /** @brief Report type for a position callback on a tracker interface */
-struct OSVR_PositionReport {
+typedef struct OSVR_PositionReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
     /** @brief The position vector */
     OSVR_PositionState xyz;
-};
+} OSVR_PositionReport;
 
 /** @brief Type of orientation state */
 typedef struct OSVR_Quaternion OSVR_OrientationState;
 
 /** @brief Report type for an orientation callback on a tracker interface */
-struct OSVR_OrientationReport {
+typedef struct OSVR_OrientationReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
     /** @brief The rotation unit quaternion */
     OSVR_OrientationState rotation;
-};
+} OSVR_OrientationReport;
 
 /** @brief Type of pose state */
 typedef struct OSVR_Pose3 OSVR_PoseState;
@@ -68,36 +68,36 @@ typedef struct OSVR_Pose3 OSVR_PoseState;
 /** @brief Report type for a pose (position and orientation) callback on a
     tracker interface
 */
-struct OSVR_PoseReport {
+typedef struct OSVR_PoseReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
     /** @brief The pose structure, containing a position vector and a rotation
         quaternion
     */
     OSVR_PoseState pose;
-};
+} OSVR_PoseReport;
 
 /** @brief Type of button state */
 typedef uint8_t OSVR_ButtonState;
 
 /** @brief Report type for a callback on a button interface */
-struct OSVR_ButtonReport {
+typedef struct OSVR_ButtonReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
     /** @brief The button state: 1 is pressed, 0 is not pressed. */
     OSVR_ButtonState state;
-};
+} OSVR_ButtonReport;
 
 /** @brief Type of analog channel state */
 typedef double OSVR_AnalogState;
 
 /** @brief Report type for a callback on an analog interface */
-struct OSVR_AnalogReport {
+typedef struct OSVR_AnalogReport {
     /** @brief Identifies the sensor/channel that the report comes from */
     int32_t sensor;
     /** @brief The analog state. */
     OSVR_AnalogState state;
-};
+} OSVR_AnalogReport;
 
 /** @} */
 OSVR_EXTERN_C_END

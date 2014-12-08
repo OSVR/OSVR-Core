@@ -17,7 +17,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/ClientKit/ContextC.h>
+#include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Parameters.h>
 
 // Library/third-party includes
@@ -27,17 +27,13 @@
 #include <iostream>
 
 int main() {
-    OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.DisplayParameter");
+    osvr::clientkit::ClientContext context(
+        "org.opengoggles.exampleclients.DisplayParameter");
 
-    // Using the C++ (header-only) wrapper here, can do the same effective thing
-    // with the bare C API
-    std::string displayDescription =
-        osvr::clientkit::getStringParameter(ctx, "/display");
+    std::string displayDescription = context.getStringParameter("/display");
 
     std::cout << "Got value of /display:\n" << displayDescription << std::endl;
 
-    osvrClientShutdown(ctx);
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }

@@ -17,9 +17,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/ClientKit/ContextC.h>
-#include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/ClientKit/InterfaceCallbackC.h>
+#include <osvr/ClientKit/Context.h>
+#include <osvr/ClientKit/Interface.h>
 
 // Library/third-party includes
 // - none
@@ -59,31 +58,30 @@ void myPositionCallback(void * /*userdata*/,
 }
 
 int main() {
-    OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.TrackerCallback");
+    osvr::clientkit::ClientContext context(
+        "org.opengoggles.exampleclients.TrackerCallback");
 
-    OSVR_ClientInterface lefthand = NULL;
     // This is just one of the paths. You can also use:
     // /me/hands/right
     // /me/head
-    osvrClientGetInterface(ctx, "/me/hands/left", &lefthand);
+    osvr::clientkit::Interface lefthand =
+        context.getInterface("/me/hands/left");
 
     // The coordinate system is right-handed, with X to the right, Y up, and Z
     // near.
-    osvrRegisterPoseCallback(lefthand, &myTrackerCallback, NULL);
+    lefthand.registerCallback(&myTrackerCallback, NULL);
 
     /// If you just want orientation
-    osvrRegisterOrientationCallback(lefthand, &myOrientationCallback, NULL);
+    lefthand.registerCallback(&myOrientationCallback, NULL);
 
     /// or position
-    osvrRegisterPositionCallback(lefthand, &myPositionCallback, NULL);
+    lefthand.registerCallback(&myPositionCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {
-        osvrClientUpdate(ctx);
+        context.update();
     }
 
-    osvrClientShutdown(ctx);
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }
