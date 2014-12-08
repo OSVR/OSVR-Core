@@ -46,14 +46,14 @@ namespace client {
         m_conn = vrpn_get_connection_by_name(contextDevice.c_str());
 
         /// @todo this is hardcoded routing, and not well done - just a stop-gap
-        /// measure.
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
+        /// measure. This one-euro filter connects to the hydra.
+        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
                            "/me/hands/left", SensorPredicate(0),
                            HydraTrackerTransform());
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
+        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
                            "/me/hands/right", SensorPredicate(1),
                            HydraTrackerTransform());
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",
+        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
                            "/me/hands", AlwaysTruePredicate(),
                            HydraTrackerTransform());
 
