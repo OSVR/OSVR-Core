@@ -44,8 +44,9 @@ std::string const &OSVR_ClientContextObject::getAppId() const {
 
 void OSVR_ClientContextObject::update() {
     m_update();
-    std::for_each(begin(m_interfaces), end(m_interfaces),
-                  [](ClientInterfacePtr const &iface) { iface->update(); });
+    for (auto const &iface : m_interfaces) {
+        iface->update();
+    }
 }
 
 ClientInterfacePtr OSVR_ClientContextObject::getInterface(const char path[]) {
