@@ -60,7 +60,7 @@ namespace clientkit {
         /// @brief Get the interface associated with the given path.
         /// @param path A resource path.
         /// @returns The interface object.
-        InterfacePtr getInterface(const std::string &path);
+        Interface getInterface(const std::string &path);
 
         /// @brief Get a string parameter value from the given path.
         /// @param path A resource path.
@@ -92,7 +92,7 @@ namespace clientkit {
         }
     }
 
-    inline InterfacePtr ClientContext::getInterface(const std::string &path) {
+    inline Interface ClientContext::getInterface(const std::string &path) {
         OSVR_ClientInterface interface = NULL;
         OSVR_ReturnCode ret =
             osvrClientGetInterface(m_context, path.c_str(), &interface);
@@ -101,9 +101,7 @@ namespace clientkit {
                 "Couldn't create interface because the path was invalid.");
         }
 
-        InterfacePtr iface = make_shared<Interface>(interface);
-
-        return iface;
+        return interface;
     }
 
     inline std::string

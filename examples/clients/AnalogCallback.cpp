@@ -38,10 +38,10 @@ int main() {
     // This is just one of the paths: specifically, the Hydra's left
     // controller's analog trigger. More are in the docs and/or listed on
     // startup
-    osvr::clientkit::InterfacePtr analogTrigger =
+    osvr::clientkit::Interface analogTrigger =
         context.getInterface("/controller/left/trigger");
 
-    analogTrigger->registerAnalogCallback(&myAnalogCallback, NULL);
+    analogTrigger.registerAnalogCallback(&myAnalogCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {

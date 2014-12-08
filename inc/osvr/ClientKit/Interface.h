@@ -24,10 +24,9 @@
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
-#include <osvr/ClientKit/InterfacePtr.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
+// - none
 
 // Standard includes
 // - none
@@ -36,16 +35,17 @@ namespace osvr {
 
 namespace clientkit {
 
-    class Interface : private boost::noncopyable {
+    class Interface {
       public:
         /// @brief Constructs an Interface object from an OSVR_ClientInterface
         /// object.
-        /// @note The Interface object will take ownership of the
-        /// OSVR_ClientInterface object.
         Interface(OSVR_ClientInterface interface);
 
         /// @brief Frees the underlying OSVR_ClientInterface.
         ~Interface();
+
+        /// @brief Copy constructor.
+        Interface(const Interface &other);
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline void register##TYPE##Callback(OSVR_##TYPE##Callback cb,             \
@@ -71,7 +71,9 @@ namespace clientkit {
         // do nothing
     }
 
-    inline Interface::~Interface() { osvrClientFreeInterface(m_interface); }
+    inline Interface::~Interface() {
+        // do nothing
+    }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline void Interface::register##TYPE##Callback(OSVR_##TYPE##Callback cb,  \

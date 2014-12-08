@@ -64,18 +64,18 @@ int main() {
     // This is just one of the paths. You can also use:
     // /me/hands/right
     // /me/head
-    osvr::clientkit::InterfacePtr lefthand =
+    osvr::clientkit::Interface lefthand =
         context.getInterface("/me/hands/left");
 
     // The coordinate system is right-handed, with X to the right, Y up, and Z
     // near.
-    lefthand->registerPoseCallback(&myTrackerCallback, NULL);
+    lefthand.registerPoseCallback(&myTrackerCallback, NULL);
 
     /// If you just want orientation
-    lefthand->registerOrientationCallback(&myOrientationCallback, NULL);
+    lefthand.registerOrientationCallback(&myOrientationCallback, NULL);
 
     /// or position
-    lefthand->registerPositionCallback(&myPositionCallback, NULL);
+    lefthand.registerPositionCallback(&myPositionCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {
