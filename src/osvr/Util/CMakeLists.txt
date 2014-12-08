@@ -95,8 +95,11 @@ target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn)
 # C++ util library/headers
 ###
 osvr_add_cpp_interface_library()
+# In an installed version, we search and add the dependency in the config script
+# since we don't need the same version in the same place.
 target_include_directories(${LIBNAME_FULL_CPP}
-    INTERFACE ${Boost_INCLUDE_DIRS})
+    INTERFACE
+    $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 
 target_compile_options(${LIBNAME_FULL_CPP}
     INTERFACE ${OSVR_CXX11_FLAGS})
