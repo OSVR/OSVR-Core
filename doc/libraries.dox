@@ -23,6 +23,7 @@
 
     - MinimalInit.cpp
     - TrackerCallback.cpp
+    - TrackerState.cpp
     - AnalogCallback.cpp
     - ButtonCallback.cpp
     - DisplayParameter.cpp

@@ -5,6 +5,7 @@ set(CLIENTS
     AnalogCallback
     ButtonCallback
     TrackerCallback
+    TrackerState
     DisplayParameter)
 
 foreach(name ${CLIENTS})
