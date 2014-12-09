@@ -32,7 +32,9 @@
 
 namespace osvr {
 namespace routing {
-    /// @brief Gets the absolute path for the given node..
+    /// @brief Gets the absolute path for the given node.
+    ///
+    /// @ingroup Routing
     OSVR_ROUTING_EXPORT std::string getFullPath(PathNode const &node);
 } // namespace routing
 } // namespace osvr

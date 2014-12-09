@@ -34,19 +34,21 @@ namespace osvr {
 namespace routing {
     /// @brief Adds/updates nodes for the basic path to a device.
     ///
+    /// @ingroup Routing
+    ///
     /// @param tree Your path tree.
     /// @param deviceName A namespaced device name coming from a plugin,
-    /// like "/org_opengoggles_plugin/SampleDevice". If a leading slash is
+    /// like `/org_opengoggles_plugin/SampleDevice`. If a leading slash is
     /// missing, it will be assumed and added.
     ///
     /// Multiple levels are acceptable: for example,
-    /// "/org_opengoggles_plugin/SampleDriver/Instance1" is valid: Instance1 is
-    /// the device, and org_opengoggles_plugin is the plugin.
+    /// `/org_opengoggles_plugin/SampleDriver/Instance1` is valid: Instance1
+    /// is the device, and org_opengoggles_plugin is the plugin.
     ///
     /// @returns The device node
-    /// @throws exceptions::InvalidDeviceName if an invalid device name (less
-    /// than two
-    /// components) was passed, exceptions::EmptyPathComponent if any component
+    /// @throws osvr::routing::exceptions::InvalidDeviceName if an invalid
+    /// device name (less than two components) was passed
+    /// @throws osvr::routing::exceptions::EmptyPathComponent if any component
     /// in the given path is empty after passing initial checks.
     OSVR_ROUTING_EXPORT PathNode &addDevice(PathTree &tree,
                                             std::string const &deviceName);

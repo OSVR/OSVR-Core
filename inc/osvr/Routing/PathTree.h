@@ -32,6 +32,8 @@
 
 namespace osvr {
 namespace routing {
+    /// @addtogroup Routing
+    /// @{
 
     /// @brief A tree representation, with path/url syntax, of the known OSVR
     /// system.
@@ -63,6 +65,7 @@ namespace routing {
         /// @brief Root node of the tree.
         PathNodePtr m_root;
     };
+    /// @}
 
 } // namespace routing
 } // namespace osvr

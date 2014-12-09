@@ -31,6 +31,7 @@
 namespace osvr {
 namespace routing {
     /// @name Constants
+    /// @ingroup Routing
     /// @{
     /// @brief Gets the path separator character - a slash.
     OSVR_ROUTING_EXPORT char getPathSeparatorCharacter();

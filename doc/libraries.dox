@@ -66,6 +66,11 @@
     @ingroup InternalAPI
 */
 
+/** @defgroup Routing Routing
+    @brief Infrastructure for the path tree, aliases, and the routing graph.
+    @ingroup InternalAPI
+*/
+
 /** @defgroup Util Utility library
     @brief Includes base definitions/typedefs, some C functionality, some header-only C++ functionality, and some compiled C++ functionality.
 */

@@ -32,6 +32,9 @@
 
 namespace osvr {
 namespace routing {
+    /// @addtogroup Routing
+    /// @{
+
     /// @brief The specific tree node type that contains a path element.
     typedef ::osvr::util::TreeNode<PathElement> PathNode;
 
@@ -43,6 +46,7 @@ namespace routing {
 
     /// @brief Gets an identifying string for the node value type.
     OSVR_ROUTING_EXPORT const char *getTypeName(PathNode const &node);
+    /// @}
 } // namespace routing
 } // namespace osvr
 
