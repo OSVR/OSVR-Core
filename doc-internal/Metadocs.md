@@ -27,3 +27,5 @@ There are two sets of documentation built:
 You can use `#ifndef OSVR_DOXYGEN_EXTERNAL` and `#endif` to hide chunks of implementation details in headers from Doxygen's external build. This is particularly useful for the C++ wrappers for ClientKit and PluginKit, since they by definition have to have all their innards exposed in the headers.
 
 For public headers, it is useful to actually fill out the brief description at the top of the file (not just leave it saying `Header` and nothing more), since it will show up in the file list in Doxygen. Don't repeat the whole contents of the file, but give an idea of why someone might care about that file.
+
+If you have a preprocessor macro showing up in your headers that you don't really need in the documentation (think of the export macros, for instance), you can add it to the `PREDEFINED` list in `Doxyfile-common` to basically banish it from the docs.
