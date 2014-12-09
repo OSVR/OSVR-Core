@@ -149,6 +149,7 @@ PREDEFINED             = _cplusplus \
                          OSVR_PLUGINKIT_EXPORT= \
                          OSVR_UTIL_EXPORT= \
                          OSVR_CLIENTKIT_EXPORT= \
+                         OSVR_INLINE= \
                          OSVR_CPP_ONLY(X)=X \
                          OSVR_IN= \
                          OSVR_IN_PTR= \
