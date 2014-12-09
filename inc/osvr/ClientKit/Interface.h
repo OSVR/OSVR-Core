@@ -35,7 +35,7 @@ namespace osvr {
 
 namespace clientkit {
 
-    /// @brief Interface handle object.
+    /// @brief Interface handle object. Typically acquired from a ClientContext.
     /// @ingroup ClientKitCPP
     class Interface {
       public:
@@ -43,9 +43,7 @@ namespace clientkit {
         /// object.
         Interface(OSVR_ClientInterface interface);
 
-        /// @brief Copy constructor.
-        Interface(const Interface &other);
-
+        /// @brief Register a callback for some report type.
         template <typename T> void registerCallback(T cb, void *userdata);
 
       private:
@@ -66,9 +64,7 @@ namespace clientkit {
     };
 
     inline Interface::Interface(OSVR_ClientInterface interface)
-        : m_interface(interface) {
-        // do nothing
-    }
+        : m_interface(interface) {}
 
     template <typename T>
     inline void Interface::registerCallback(T cb, void *userdata) {
