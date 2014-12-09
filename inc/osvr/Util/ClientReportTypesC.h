@@ -40,9 +40,29 @@ OSVR_EXTERN_C_BEGIN
     @{
 */
 
+/** @name State types
+@{
+*/
 /** @brief Type of position state */
 typedef struct OSVR_Vec3 OSVR_PositionState;
 
+/** @brief Type of orientation state */
+typedef struct OSVR_Quaternion OSVR_OrientationState;
+
+/** @brief Type of pose state */
+typedef struct OSVR_Pose3 OSVR_PoseState;
+
+/** @brief Type of button state */
+typedef uint8_t OSVR_ButtonState;
+
+/** @brief Type of analog channel state */
+typedef double OSVR_AnalogState;
+
+/** @} */
+
+/** @name Report types
+    @{
+*/
 /** @brief Report type for a position callback on a tracker interface */
 typedef struct OSVR_PositionReport {
     /** @brief Identifies the sensor that the report comes from */
@@ -51,9 +71,6 @@ typedef struct OSVR_PositionReport {
     OSVR_PositionState xyz;
 } OSVR_PositionReport;
 
-/** @brief Type of orientation state */
-typedef struct OSVR_Quaternion OSVR_OrientationState;
-
 /** @brief Report type for an orientation callback on a tracker interface */
 typedef struct OSVR_OrientationReport {
     /** @brief Identifies the sensor that the report comes from */
@@ -61,9 +78,6 @@ typedef struct OSVR_OrientationReport {
     /** @brief The rotation unit quaternion */
     OSVR_OrientationState rotation;
 } OSVR_OrientationReport;
-
-/** @brief Type of pose state */
-typedef struct OSVR_Pose3 OSVR_PoseState;
 
 /** @brief Report type for a pose (position and orientation) callback on a
     tracker interface
@@ -77,9 +91,6 @@ typedef struct OSVR_PoseReport {
     OSVR_PoseState pose;
 } OSVR_PoseReport;
 
-/** @brief Type of button state */
-typedef uint8_t OSVR_ButtonState;
-
 /** @brief Report type for a callback on a button interface */
 typedef struct OSVR_ButtonReport {
     /** @brief Identifies the sensor that the report comes from */
@@ -88,9 +99,6 @@ typedef struct OSVR_ButtonReport {
     OSVR_ButtonState state;
 } OSVR_ButtonReport;
 
-/** @brief Type of analog channel state */
-typedef double OSVR_AnalogState;
-
 /** @brief Report type for a callback on an analog interface */
 typedef struct OSVR_AnalogReport {
     /** @brief Identifies the sensor/channel that the report comes from */
@@ -98,6 +106,8 @@ typedef struct OSVR_AnalogReport {
     /** @brief The analog state. */
     OSVR_AnalogState state;
 } OSVR_AnalogReport;
+
+/** @} */
 
 /** @} */
 OSVR_EXTERN_C_END
