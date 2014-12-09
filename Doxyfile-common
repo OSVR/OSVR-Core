@@ -143,12 +143,16 @@ EXPAND_ONLY_PREDEF     = YES
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 # For config item PREDEFINED, default is 
-PREDEFINED             = _cplusplus \
+PREDEFINED             = __cplusplus \
                          OSVR_DOXYGEN \
                          OSVR_HAVE_STRUCT_TIMEVAL \
-                         OSVR_PLUGINKIT_EXPORT= \
-                         OSVR_UTIL_EXPORT= \
+                         OSVR_CLIENT_EXPORT= \
                          OSVR_CLIENTKIT_EXPORT= \
+                         OSVR_CONNECTION_EXPORT= \
+                         OSVR_PLUGINHOST_EXPORT= \
+                         OSVR_PLUGINKIT_EXPORT= \
+                         OSVR_ROUTING_EXPORT= \
+                         OSVR_UTIL_EXPORT= \
                          OSVR_INLINE= \
                          OSVR_CPP_ONLY(X)=X \
                          OSVR_IN= \
