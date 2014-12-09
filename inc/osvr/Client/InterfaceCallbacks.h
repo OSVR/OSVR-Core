@@ -22,6 +22,7 @@
 // Internal Includes
 #include <osvr/Client/ReportMap.h>
 #include <osvr/Client/ReportTypes.h>
+#include <osvr/Client/ReportFromCallback.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -52,7 +53,7 @@ namespace client {
       public:
         template <typename CallbackType>
         void addCallback(CallbackType cb, void *userdata) {
-            typedef typename traits::ReportTypeFromCallback<CallbackType>::type
+            typedef typename traits::ReportFromCallback<CallbackType>::type
                 ReportType;
             using namespace std::placeholders;
             boost::fusion::at_key<ReportType>(m_callbacks)

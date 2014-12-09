@@ -21,7 +21,8 @@
 
 // Internal Includes
 #include <osvr/Client/ReportMap.h>
-#include <osvr/Client/ReportTypes.h>
+#include <osvr/Client/StateType.h>
+#include <osvr/Client/ReportState.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes

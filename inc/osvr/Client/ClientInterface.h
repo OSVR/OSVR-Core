@@ -25,6 +25,7 @@
 #include <osvr/Client/ClientInterfacePtr.h>
 #include <osvr/Client/InterfaceState.h>
 #include <osvr/Client/InterfaceCallbacks.h>
+#include <osvr/Client/StateType.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 
