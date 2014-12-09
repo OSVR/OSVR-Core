@@ -20,16 +20,14 @@
 #define INCLUDED_InterfaceState_h_GUID_FFF8951B_3677_4EB5_373A_3A1A697AECDE
 
 // Internal Includes
+#include <osvr/Client/ReportMap.h>
 #include <osvr/Client/ReportTypes.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
-#include <boost/fusion/include/map.hpp>
-#include <boost/fusion/include/pair.hpp>
 #include <boost/fusion/include/has_key.hpp>
 #include <boost/fusion/include/at_key.hpp>
-#include <boost/mpl/transform.hpp>
-#include <boost/fusion/include/mpl.hpp>
+#include <boost/mpl/placeholders.hpp>
 #include <boost/optional.hpp>
 
 // Standard includes
@@ -45,17 +43,15 @@ namespace client {
         util::time::TimeValue timestamp;
     };
 
-    /// @brief Metafunction taking a report type and returning a fusion pair to
-    /// serve as an element of StateMap
-    template <typename ReportType> struct StateMapType {
-        typedef boost::fusion::pair<
-            ReportType, boost::optional<StateMapContents<ReportType> > > type;
+    /// @brief Metafunction taking a report type and returning a state map
+    /// value type.
+    template <typename ReportType> struct StateMapValueType {
+        typedef boost::optional<StateMapContents<ReportType> > type;
     };
 
     /// @brief Data structure mapping from a report type to an optional state
     /// value.
-    typedef boost::fusion::result_of::as_map<boost::mpl::transform<
-        traits::ReportTypes, StateMapType<boost::mpl::_> >::type>::type
+    typedef traits::GenerateReportMap<StateMapValueType<boost::mpl::_1> >::type
         StateMap;
 
     /// @brief Class to maintain state for an interface for each report (and
