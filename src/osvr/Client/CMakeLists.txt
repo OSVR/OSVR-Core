@@ -6,6 +6,7 @@ set(API
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/CreateContext.h"
+    "${HEADER_LOCATION}/InterfaceCallbacks.h"
     "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/ReportTypes.h"
     "${HEADER_LOCATION}/ReportMap.h")

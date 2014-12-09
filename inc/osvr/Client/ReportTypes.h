@@ -36,6 +36,9 @@ namespace client {
         /// @brief Metafunction taking a ReportType and returning the associated
         /// CallbackType
         template <typename T> struct CallbackType {};
+        /// @brief Metafunction taking a CallbackType and returning the
+        /// associated ReportType
+        template <typename T> struct ReportTypeFromCallback {};
 
         /// @brief Metafunction taking a ReportType and returning the associated
         /// StateType
@@ -44,6 +47,9 @@ namespace client {
 #define OSVR_REPORT_TRAITS(TYPE)                                               \
     template <> struct CallbackType<OSVR_##TYPE##Report> {                     \
         typedef OSVR_##TYPE##Callback type;                                    \
+    };                                                                         \
+    template <> struct ReportTypeFromCallback<OSVR_##TYPE##Callback> {         \
+        typedef OSVR_##TYPE##Report type;                                      \
     };                                                                         \
     template <> struct StateType<OSVR_##TYPE##Report> {                        \
         typedef OSVR_##TYPE##State type;                                       \
