@@ -42,6 +42,11 @@
 
 */
 
+/** @defgroup ClientKitCPP C++ wrappers for ClientKit
+    @brief The header-only C++ wrappers around the ClientKit C API.
+    @ingroup ClientKit
+*/
+
 /** @defgroup InternalAPI Internal APIs
     @brief APIs that are used by neither plugin developers nor client application developers.
 */

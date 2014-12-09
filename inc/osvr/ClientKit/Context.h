@@ -36,7 +36,10 @@
 namespace osvr {
 
 namespace clientkit {
-
+    /// @brief Client context object: Create and keep one in your application.
+    /// Handles lifetime management and provides access to ClientKit
+    /// functionality.
+    /// @ingroup ClientKitCPP
     class ClientContext : private boost::noncopyable {
       public:
         /// @brief Initialize the library.
@@ -49,7 +52,7 @@ namespace clientkit {
         /// @note The ClientContext class will take ownership of the context.
         ClientContext(OSVR_ClientContext context);
 
-        /// @brief Shutdown the library.
+        /// @brief Destructor: Shutdown the library.
         ~ClientContext();
 
         /// @brief Updates the state of the context - call regularly in your
@@ -64,8 +67,7 @@ namespace clientkit {
         /// @brief Get a string parameter value from the given path.
         /// @param path A resource path.
         /// @returns parameter value, or empty string if parameter does not
-        /// exist or
-        /// is not a string.
+        /// exist or is not a string.
         std::string getStringParameter(const std::string &path);
 
       private:
@@ -73,14 +75,11 @@ namespace clientkit {
     };
 
     inline ClientContext::ClientContext(const char applicationIdentifier[],
-                                        uint32_t flags) {
-        m_context = osvrClientInit(applicationIdentifier, flags);
-    }
+                                        uint32_t flags)
+        : m_context(osvrClientInit(applicationIdentifier, flags)) {}
 
     inline ClientContext::ClientContext(OSVR_ClientContext context)
-        : m_context(context) {
-        // do nothing
-    }
+        : m_context(context) {}
 
     inline ClientContext::~ClientContext() { osvrClientShutdown(m_context); }
 

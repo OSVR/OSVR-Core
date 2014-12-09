@@ -35,6 +35,8 @@ namespace osvr {
 
 namespace clientkit {
 
+    /// @brief Interface handle object.
+    /// @ingroup ClientKitCPP
     class Interface {
       public:
         /// @brief Constructs an Interface object from an OSVR_ClientInterface
