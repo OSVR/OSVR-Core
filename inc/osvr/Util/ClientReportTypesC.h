@@ -44,13 +44,13 @@ OSVR_EXTERN_C_BEGIN
 @{
 */
 /** @brief Type of position state */
-typedef struct OSVR_Vec3 OSVR_PositionState;
+typedef OSVR_Vec3 OSVR_PositionState;
 
 /** @brief Type of orientation state */
-typedef struct OSVR_Quaternion OSVR_OrientationState;
+typedef OSVR_Quaternion OSVR_OrientationState;
 
 /** @brief Type of pose state */
-typedef struct OSVR_Pose3 OSVR_PoseState;
+typedef OSVR_Pose3 OSVR_PoseState;
 
 /** @brief Type of button state */
 typedef uint8_t OSVR_ButtonState;
