@@ -3,7 +3,7 @@
 
     All core functionality that can be accessed through the C++ API is possible to access through the C API as well. However, the C++ wrappers improve the usability of the interface and provide a safer development style. They can also greatly simplify your code and reduce the amount of "boilerplate" needed.
 
-    The C++ wrappers do require some version of the Boost headers to be available.
+    The C++ wrappers do require some version of the Boost headers to be available. For Windows, the [official binaries](http://sourceforge.net/projects/boost/files/boost-binaries/) are recommended.
 
     See examples:
     - Comprehensive (auto-detects hardware and creates device): org_opengoggles_example_DummyDetectAndCreateAsync.cpp
@@ -21,7 +21,7 @@
 
     Just as with @ref PluginKit, when possible, the C++ wrappers are recommended.
 
-    The C++ wrappers do require some version of the Boost headers to be available.
+    The C++ wrappers do require some version of the Boost headers to be available. For Windows, the [official binaries](http://sourceforge.net/projects/boost/files/boost-binaries/) are recommended.
 
     See examples:
 
