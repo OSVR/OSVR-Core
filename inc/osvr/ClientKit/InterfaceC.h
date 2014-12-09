@@ -48,14 +48,14 @@ OSVR_EXTERN_C_BEGIN
    otherwise it will be freed when the context is closed.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-    osvrClientGetInterface(OSVR_ClientContext ctx, const char path[],
-                           OSVR_ClientInterface *iface);
+osvrClientGetInterface(OSVR_ClientContext ctx, const char path[],
+                       OSVR_ClientInterface *iface);
 
 /** @brief Free an interface object before context closure.
     @param iface The interface object
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-    osvrClientFreeInterface(OSVR_ClientInterface iface);
+osvrClientFreeInterface(OSVR_ClientInterface iface);
 
 /** @} */
 OSVR_EXTERN_C_END

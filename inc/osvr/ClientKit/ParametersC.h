@@ -49,8 +49,8 @@ OSVR_EXTERN_C_BEGIN
 
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-    osvrClientGetStringParameterLength(OSVR_ClientContext ctx,
-                                       const char path[], size_t *len);
+osvrClientGetStringParameterLength(OSVR_ClientContext ctx, const char path[],
+                                   size_t *len);
 
 /** @brief Get a string parameter associated with the given path.
     @param ctx Client context
@@ -62,8 +62,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
    short, an error is returned and the buffer is unchanged.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-    osvrClientGetStringParameter(OSVR_ClientContext ctx, const char path[],
-                                 char *buf, size_t len);
+osvrClientGetStringParameter(OSVR_ClientContext ctx, const char path[],
+                             char *buf, size_t len);
 
 /** @} */
 OSVR_EXTERN_C_END

@@ -67,14 +67,14 @@ namespace connection {
 
         /// @brief Register (or retrieve registration) of a message type.
         OSVR_CONNECTION_EXPORT MessageTypePtr
-            registerMessageType(std::string const &messageId);
+        registerMessageType(std::string const &messageId);
 
         /// @brief Register a full device name. This should be namespaced with
         /// the plugin name.
         ///
         /// This also adds the device so created to the device list.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-            registerDevice(std::string const &deviceName);
+        registerDevice(std::string const &deviceName);
 
         /// @brief Add an externally-constructed device to the device list.
         OSVR_CONNECTION_EXPORT void addDevice(ConnectionDevicePtr device);
@@ -102,9 +102,9 @@ namespace connection {
         ///
         /// This also adds the device so created to the device list.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-            registerAdvancedDevice(std::string const &deviceName,
-                                   OSVR_SyncDeviceUpdateCallback updateFunction,
-                                   void *userdata);
+        registerAdvancedDevice(std::string const &deviceName,
+                               OSVR_SyncDeviceUpdateCallback updateFunction,
+                               void *userdata);
 
         /// @brief Access implementation details.
         OSVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();

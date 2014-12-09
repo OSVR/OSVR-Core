@@ -77,8 +77,8 @@ typedef struct OSVR_DeviceInitObject *OSVR_DeviceInitOptions;
     function.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_DeviceInitOptions
-    osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx)
-        OSVR_FUNC_NONNULL((1));
+osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx)
+    OSVR_FUNC_NONNULL((1));
 
 /** @brief Register (or recall) a message type by name.
 
@@ -90,10 +90,10 @@ string.
 registered.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-    osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
-                                  OSVR_IN_STRZ const char *name,
-                                  OSVR_OUT_PTR OSVR_MessageType *msgtype)
-        OSVR_FUNC_NONNULL((1, 2, 3));
+osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                              OSVR_IN_STRZ const char *name,
+                              OSVR_OUT_PTR OSVR_MessageType *msgtype)
+    OSVR_FUNC_NONNULL((1, 2, 3));
 
 /** @brief Send a raw bytestream from your device.
 
@@ -102,10 +102,10 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
 
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-    osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                       OSVR_IN_PTR OSVR_MessageType msg,
-                       OSVR_IN_READS(len) const char *bytestream,
-                       OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2));
+osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                   OSVR_IN_PTR OSVR_MessageType msg,
+                   OSVR_IN_READS(len) const char *bytestream,
+                   OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Send a raw bytestream from your device, with a known timestamp.
 
@@ -145,10 +145,10 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSendTimestampedData(
    synchronous device.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-    osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
-                       OSVR_IN_STRZ const char *name,
-                       OSVR_OUT_PTR OSVR_DeviceToken *device)
-        OSVR_FUNC_NONNULL((1, 2, 3));
+osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                   OSVR_IN_STRZ const char *name,
+                   OSVR_OUT_PTR OSVR_DeviceToken *device)
+    OSVR_FUNC_NONNULL((1, 2, 3));
 
 /** @brief Register the update callback of a synchronous device.
 
@@ -194,10 +194,10 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSyncRegisterUpdateCallback(
    asynchronous device.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-    osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
-                        OSVR_IN_STRZ const char *name,
-                        OSVR_OUT_PTR OSVR_DeviceToken *device)
-        OSVR_FUNC_NONNULL((1, 2, 3));
+osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                    OSVR_IN_STRZ const char *name,
+                    OSVR_OUT_PTR OSVR_DeviceToken *device)
+    OSVR_FUNC_NONNULL((1, 2, 3));
 
 /** @brief Start the sampling/waiting thread of an asynchronous device.
 
@@ -213,10 +213,11 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
     the callback you register here is called. Technically optional, but hard to
    support multiple instances without it.
 */
-OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceAsyncStartWaitLoop(
-    OSVR_INOUT_PTR OSVR_DeviceToken device,
-    OSVR_IN OSVR_AsyncDeviceWaitCallback waitCallback,
-    OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL)) OSVR_FUNC_NONNULL((1));
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken device,
+                             OSVR_IN OSVR_AsyncDeviceWaitCallback waitCallback,
+                             OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL))
+    OSVR_FUNC_NONNULL((1));
 
 /** @} */
 
