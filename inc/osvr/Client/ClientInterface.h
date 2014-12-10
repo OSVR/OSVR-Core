@@ -50,9 +50,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the path as a string.
     std::string const &getPath() const;
 
-    /// @brief Get the owning context.
-    OSVR_CLIENT_EXPORT::osvr::client::ClientContext &getContext();
-
     /// @brief If state exists for the given ReportType on this interface, it
     /// will be returned in the arguments, and true will be returned.
     template <typename ReportType>

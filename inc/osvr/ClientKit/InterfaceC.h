@@ -52,10 +52,16 @@ osvrClientGetInterface(OSVR_ClientContext ctx, const char path[],
                        OSVR_ClientInterface *iface);
 
 /** @brief Free an interface object before context closure.
+
+    @param ctx Client context
     @param iface The interface object
+
+    @returns OSVR_RETURN_SUCCESS unless a null context or interface was passed
+   or the given interface was not found in the context (i.e. had already been
+   freed)
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientFreeInterface(OSVR_ClientInterface iface);
+osvrClientFreeInterface(OSVR_ClientContext ctx, OSVR_ClientInterface iface);
 
 /** @} */
 OSVR_EXTERN_C_END

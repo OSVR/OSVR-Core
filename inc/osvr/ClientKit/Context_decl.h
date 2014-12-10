@@ -77,6 +77,10 @@ namespace clientkit {
         /// exist or is not a string.
         std::string getStringParameter(const std::string &path);
 
+        /// @brief Frees an interface before it would normally be freed (at
+        /// context close).
+        void free(Interface &iface);
+
       private:
         OSVR_ClientContext m_context;
     };

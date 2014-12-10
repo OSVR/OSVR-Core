@@ -37,8 +37,4 @@ std::string const &OSVR_ClientInterfaceObject::getPath() const {
     return m_path;
 }
 
-::osvr::client::ClientContext &OSVR_ClientInterfaceObject::getContext() {
-    return *m_ctx;
-}
-
 void OSVR_ClientInterfaceObject::update() {}

@@ -35,19 +35,12 @@ namespace osvr {
 
 namespace clientkit {
 
-    inline Interface::Interface(OSVR_ClientInterface iface)
-        : m_interface(iface) {}
+    inline Interface::Interface(ClientContext &ctx, OSVR_ClientInterface iface)
+        : m_ctx(&ctx), m_interface(iface) {}
 
     inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
-    inline void Interface::free() {
-        OSVR_ReturnCode ret = osvrClientFreeInterface(m_interface);
-        if (OSVR_RETURN_SUCCESS != ret) {
-            throw std::logic_error(
-                "Could not free interface: either null or already freed!");
-        }
-        m_interface = NULL;
-    }
+    inline void Interface::free() { m_ctx->free(*this); }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline void Interface::registerCallback(OSVR_##TYPE##Callback cb,          \

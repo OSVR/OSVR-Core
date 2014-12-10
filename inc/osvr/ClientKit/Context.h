@@ -62,7 +62,7 @@ namespace clientkit {
                 "Couldn't create interface because the path was invalid.");
         }
 
-        return Interface(interface);
+        return Interface(*this, interface);
     }
 
     inline std::string
@@ -88,6 +88,16 @@ namespace clientkit {
         }
 
         return std::string(buf.get(), length);
+    }
+
+    inline void ClientContext::free(Interface &iface) {
+        OSVR_ReturnCode ret = osvrClientFreeInterface(m_context, iface.get());
+        if (OSVR_RETURN_SUCCESS != ret) {
+            throw std::logic_error(
+                "Could not free interface: either null or already freed!");
+        }
+        // Null out the interface.
+        iface = Interface(*this, NULL);
     }
 
 } // end namespace clientkit

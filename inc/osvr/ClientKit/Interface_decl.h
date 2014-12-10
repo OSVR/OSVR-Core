@@ -46,7 +46,7 @@ namespace clientkit {
       public:
         /// @brief Constructs an Interface object from an OSVR_ClientInterface
         /// object.
-        Interface(OSVR_ClientInterface iface);
+        Interface(ClientContext &ctx, OSVR_ClientInterface iface);
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     void registerCallback(OSVR_##TYPE##Callback cb, void *userdata);
@@ -74,6 +74,7 @@ namespace clientkit {
         void free();
 
       private:
+        ClientContext *m_ctx;
         OSVR_ClientInterface m_interface;
     };
 } // end namespace clientkit
