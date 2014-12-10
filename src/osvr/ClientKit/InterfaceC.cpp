@@ -31,6 +31,7 @@ OSVR_ReturnCode osvrClientGetInterface(OSVR_ClientContext ctx,
                                        const char path[],
                                        OSVR_ClientInterface *iface) {
     if (nullptr == ctx) {
+        /// Return failure if given a null context
         return OSVR_RETURN_FAILURE;
     }
     ::osvr::client::ClientInterfacePtr ret = ctx->getInterface(path);
