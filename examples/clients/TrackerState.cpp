@@ -17,8 +17,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/ClientKit/ContextC.h>
-#include <osvr/ClientKit/InterfaceC.h>
+#include <osvr/ClientKit/Context.h>
+#include <osvr/ClientKit/Interface.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
 
 // Library/third-party includes
@@ -28,26 +28,29 @@
 #include <iostream>
 
 int main() {
-    OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.TrackerState");
+    osvr::clientkit::ClientContext context(
+        "org.opengoggles.exampleclients.TrackerState");
 
-    OSVR_ClientInterface lefthand = NULL;
     // This is just one of the paths. You can also use:
     // /me/hands/right
     // /me/head
-    osvrClientGetInterface(ctx, "/me/hands/left", &lefthand);
+    osvr::clientkit::Interface lefthand =
+        context.getInterface("/me/hands/left");
 
     // Pretend that this is your application's mainloop.
     for (int i = 0; i < 1000000; ++i) {
-        osvrClientUpdate(ctx);
+        context.update();
         if (i % 100) {
             // Every so often let's read the tracker state.
             // Similar methods exist for all other stock report types.
+
+            // Note that there is not currently a tidy C++ wrapper for
+            // state access, so we're using the C API call directly here.
             OSVR_PoseState state;
             OSVR_TimeValue timestamp;
             OSVR_ReturnCode ret =
-                osvrGetPoseState(lefthand, &timestamp, &state);
-            if (ret != OSVR_RETURN_SUCCESS) {
+                osvrGetPoseState(lefthand.get(), &timestamp, &state);
+            if (OSVR_RETURN_SUCCESS != ret) {
                 std::cout << "No pose state!" << std::endl;
             } else {
                 std::cout << "Got POSE state: Position = ("
@@ -63,7 +66,6 @@ int main() {
         }
     }
 
-    osvrClientShutdown(ctx);
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }
