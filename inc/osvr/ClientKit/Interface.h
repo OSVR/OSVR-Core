@@ -46,6 +46,9 @@ namespace clientkit {
         /// @brief Register a callback for some report type.
         template <typename T> void registerCallback(T cb, void *userdata);
 
+        /// @brief Get the raw OSVR_ClientInterface from this wrapper.
+        OSVR_ClientInterface get();
+
       private:
         OSVR_ClientInterface m_interface;
 
@@ -70,6 +73,8 @@ namespace clientkit {
     inline void Interface::registerCallback(T cb, void *userdata) {
         getCallbackRegisterFunction(cb)(m_interface, cb, userdata);
     }
+
+    inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline boost::function<OSVR_ReturnCode(                                    \
