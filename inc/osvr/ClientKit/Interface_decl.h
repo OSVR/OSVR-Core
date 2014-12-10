@@ -51,11 +51,15 @@ namespace clientkit {
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     void registerCallback(OSVR_##TYPE##Callback cb, void *userdata);
 
+        /// @name Callback registration methods
+        /// @{
         OSVR_CALLBACK_METHODS(Pose)
         OSVR_CALLBACK_METHODS(Position)
         OSVR_CALLBACK_METHODS(Orientation)
         OSVR_CALLBACK_METHODS(Button)
         OSVR_CALLBACK_METHODS(Analog)
+/// @}
+
 #undef OSVR_CALLBACK_METHODS
 
         /// @brief Get the raw OSVR_ClientInterface from this wrapper.
