@@ -55,8 +55,10 @@ namespace clientkit {
         /// a callback is not called with a reference to an already-deleted
         /// object.
         ///
-        /// This will make use of any other copies of this Interface object
-        /// illegal!
+        /// This will make use of this and any other copies of this Interface
+        /// object illegal!
+        ///
+        /// @throws std::logic_error if the interface is null or already freed.
         void free();
 
       private:
@@ -87,8 +89,11 @@ namespace clientkit {
     inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
     inline void Interface::free() {
-        /// @todo return code to exception
-        osvrClientFreeInterface(m_interface);
+        OSVR_ReturnCode ret = osvrClientFreeInterface(m_interface);
+        if (OSVR_RETURN_SUCCESS != ret) {
+            throw std::logic_error(
+                "Could not free interface: either null or already freed!");
+        }
         m_interface = NULL;
     }
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
