@@ -49,6 +49,16 @@ namespace clientkit {
         /// @brief Get the raw OSVR_ClientInterface from this wrapper.
         OSVR_ClientInterface get();
 
+        /// @brief Manually free the interface before the context is closed.
+        ///
+        /// This is not required, but can be used, for instance, to ensure that
+        /// a callback is not called with a reference to an already-deleted
+        /// object.
+        ///
+        /// This will make use of any other copies of this Interface object
+        /// illegal!
+        void free();
+
       private:
         OSVR_ClientInterface m_interface;
 
@@ -76,6 +86,11 @@ namespace clientkit {
 
     inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
+    inline void Interface::free() {
+        /// @todo return code to exception
+        osvrClientFreeInterface(m_interface);
+        m_interface = NULL;
+    }
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline boost::function<OSVR_ReturnCode(                                    \
         OSVR_ClientInterface, OSVR_##TYPE##Callback cb, void *userdata)>       \
