@@ -21,6 +21,7 @@
 #define INCLUDED_Context_h_GUID_DD0155F5_61A4_4A76_8C2E_D9614C7A9EBD
 
 // Internal Includes
+#include <osvr/ClientKit/Context_decl.h>
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/ClientKit/ParametersC.h>
 #include <osvr/ClientKit/Interface.h>
@@ -36,44 +37,6 @@
 namespace osvr {
 
 namespace clientkit {
-    /// @brief Client context object: Create and keep one in your application.
-    /// Handles lifetime management and provides access to ClientKit
-    /// functionality.
-    /// @ingroup ClientKitCPP
-    class ClientContext : private boost::noncopyable {
-      public:
-        /// @brief Initialize the library.
-        /// @param applicationIdentifier A string identifying your application.
-        /// Reverse DNS format strongly suggested.
-        /// @param flags initialization options (reserved) - pass 0 for now.
-        ClientContext(const char applicationIdentifier[], uint32_t flags = 0u);
-
-        /// @brief Initialize the context with an existing context.
-        /// @note The ClientContext class will take ownership of the context.
-        ClientContext(OSVR_ClientContext context);
-
-        /// @brief Destructor: Shutdown the library.
-        ~ClientContext();
-
-        /// @brief Updates the state of the context - call regularly in your
-        /// mainloop.
-        void update();
-
-        /// @brief Get the interface associated with the given path.
-        /// @param path A resource path.
-        /// @returns The interface object.
-        Interface getInterface(const std::string &path);
-
-        /// @brief Get a string parameter value from the given path.
-        /// @param path A resource path.
-        /// @returns parameter value, or empty string if parameter does not
-        /// exist or is not a string.
-        std::string getStringParameter(const std::string &path);
-
-      private:
-        OSVR_ClientContext m_context;
-    };
-
     inline ClientContext::ClientContext(const char applicationIdentifier[],
                                         uint32_t flags)
         : m_context(osvrClientInit(applicationIdentifier, flags)) {}
@@ -99,7 +62,7 @@ namespace clientkit {
                 "Couldn't create interface because the path was invalid.");
         }
 
-        return interface;
+        return Interface(interface);
     }
 
     inline std::string
