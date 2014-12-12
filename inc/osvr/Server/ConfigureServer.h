@@ -27,6 +27,7 @@
 
 // Standard includes
 #include <string>
+#include <iosfwd>
 
 namespace osvr {
 namespace server {
@@ -46,6 +47,10 @@ namespace server {
     /// @throws std::runtime_error if parsing errors occur.
     /// @throws std::out_of_range if an invalid port (<1) is specified.
     ServerPtr configuredConstruction(std::string const &json);
+
+    /// @overload
+    /// @param json An opened istream to read from.
+    ServerPtr configuredConstruction(std::istream &json);
 } // namespace server
 } // namespace osvr
 

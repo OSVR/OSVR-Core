@@ -36,7 +36,7 @@ namespace server {
     static const char LOCAL_KEY[] = "local";
     static const char PORT_KEY[] = "port"; // not the triwizard cup.
 
-    static inline Json::Value parse(std::string const &json) {
+    template <typename T> inline Json::Value parse(T &json) {
         Json::Value root;
         Json::Reader reader;
         bool parsingSuccessful = reader.parse(json, root);
@@ -91,7 +91,12 @@ namespace server {
     }
 
     ServerPtr configuredConstruction(std::string const &json) {
-        Json::Value root = parse(json);
+        Json::Value root(parse(json));
+        return configuredConstruction(root);
+    }
+
+    ServerPtr configuredConstruction(std::istream &json) {
+        Json::Value root(parse(json));
         return configuredConstruction(root);
     }
 
