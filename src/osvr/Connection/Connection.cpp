@@ -45,9 +45,9 @@ namespace connection {
             VrpnBasedConnection::VRPN_LOCAL_ONLY));
         return conn;
     }
-    ConnectionPtr Connection::createSharedConnection() {
-        ConnectionPtr conn(
-            make_shared<VrpnBasedConnection>(VrpnBasedConnection::VRPN_SHARED));
+    ConnectionPtr Connection::createSharedConnection(
+        boost::optional<std::string const &> iface, boost::optional<int> port) {
+        ConnectionPtr conn(make_shared<VrpnBasedConnection>(iface, port));
         return conn;
     }
 

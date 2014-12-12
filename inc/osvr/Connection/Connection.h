@@ -29,6 +29,7 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <string>
@@ -51,7 +52,13 @@ namespace connection {
         /// @brief Factory method to create a local-machine-only connection
         OSVR_CONNECTION_EXPORT static ConnectionPtr createLocalConnection();
         /// @brief Factory method to create a shared connection
-        OSVR_CONNECTION_EXPORT static ConnectionPtr createSharedConnection();
+        /// @param iface The NIC/interface to listen on, an empty string
+        /// or unset (default) means "all interfaces"
+        /// @param port The port to listen on, unset/default means the default
+        /// port for the underlying connection implementation.
+        OSVR_CONNECTION_EXPORT static ConnectionPtr
+        createSharedConnection(boost::optional<std::string const &> iface,
+                               boost::optional<int> port);
         /// @}
 
         /// @name Context Storage

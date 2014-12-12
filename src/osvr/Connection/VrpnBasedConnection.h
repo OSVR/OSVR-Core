@@ -38,12 +38,24 @@ namespace connection {
         /// @brief Constructor for the VRPN connection.
         VrpnBasedConnection(ConnectionType type);
 
+        /// @brief Constructor for a (likely) shared VRPN connection specifying
+        /// the interface to listen on as well as the port.
+        VrpnBasedConnection(boost::optional<std::string const &> iface,
+                            boost::optional<int> port);
+
         /// @brief Returns the vrpn_Connection pointer.
         virtual void *getUnderlyingObject();
         virtual const char *getConnectionKindID();
         virtual ~VrpnBasedConnection();
 
       private:
+        /// @brief Helper method to set up the VRPN server connection
+        /// @param iface String specifying the interface to use. Null means all
+        /// interfaces.
+        /// @param port Port to listen on (both UDP and TCP). 0 means use the
+        /// VRPN default.
+        void m_initConnection(const char NIC[] = nullptr, int port = 0);
+
         virtual MessageTypePtr
         m_registerMessageType(std::string const &messageId);
         virtual ConnectionDevicePtr
