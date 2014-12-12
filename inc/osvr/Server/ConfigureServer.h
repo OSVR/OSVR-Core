@@ -20,6 +20,7 @@
 #define INCLUDED_ConfigureServer_h_GUID_9D9EE94F_8F85_42BE_AFDD_4AA7B0EFA566
 
 // Internal Includes
+#include <osvr/Server/Export.h>
 #include <osvr/Server/ServerPtr.h>
 
 // Library/third-party includes
@@ -46,11 +47,12 @@ namespace server {
     ///
     /// @throws std::runtime_error if parsing errors occur.
     /// @throws std::out_of_range if an invalid port (<1) is specified.
-    ServerPtr configuredConstruction(std::string const &json);
+    OSVR_SERVER_EXPORT ServerPtr
+    configuredConstruction(std::string const &json);
 
     /// @overload
     /// @param json An opened istream to read from.
-    ServerPtr configuredConstruction(std::istream &json);
+    OSVR_SERVER_EXPORT ServerPtr configuredConstruction(std::istream &json);
 } // namespace server
 } // namespace osvr
 
