@@ -54,10 +54,12 @@ int main(int argc, char *argv[]) {
 
     cout << "Using config file '" << configName << "'" << endl;
 
+    osvr::server::ConfigureServer srvConfig;
     cout << "Constructing server as configured..." << endl;
     try {
         std::ifstream config(configName);
-        server = osvr::server::configuredConstruction(config);
+        srvConfig.loadConfig(config);
+        server = srvConfig.constructServer();
     } catch (std::exception &e) {
         cerr << "Caught exception constructing server from JSON config file: "
              << e.what() << endl;

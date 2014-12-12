@@ -36,18 +36,35 @@ namespace server {
     static const char LOCAL_KEY[] = "local";
     static const char PORT_KEY[] = "port"; // not the triwizard cup.
 
-    template <typename T> inline Json::Value parse(T &json) {
-        Json::Value root;
-        Json::Reader reader;
-        bool parsingSuccessful = reader.parse(json, root);
-        if (!parsingSuccessful) {
-            throw std::runtime_error("Error in parsing JSON: " +
-                                     reader.getFormattedErrorMessages());
+    class ConfigureServerData : boost::noncopyable {
+      public:
+        template <typename T> inline void parse(T &json) {
+            Json::Reader reader;
+            bool parsingSuccessful = reader.parse(json, root);
+            if (!parsingSuccessful) {
+                throw std::runtime_error("Error in parsing JSON: " +
+                                         reader.getFormattedErrorMessages());
+            }
         }
-        return root;
+
+        Json::Value root;
+    };
+
+    ConfigureServer::ConfigureServer() : m_data(new ConfigureServerData()) {}
+
+    /// Must be in implementation file to handle deletion of private data class.
+    ConfigureServer::~ConfigureServer() {}
+
+    void ConfigureServer::loadConfig(std::string const &json) {
+        m_data->parse(json);
     }
 
-    static ServerPtr configuredConstruction(Json::Value &root) {
+    void ConfigureServer::loadConfig(std::istream &json) {
+        m_data->parse(json);
+    }
+
+    ServerPtr ConfigureServer::constructServer() {
+        Json::Value &root(m_data->root);
         ServerPtr ret; // Single return value for NRVO
         bool local = true;
         std::string iface;
@@ -81,23 +98,13 @@ namespace server {
         /// Construct a server, or a connection then a server, based on the
         /// configuration we've extracted.
         if (local && !port) {
-            ret = Server::createLocal();
+            m_server = Server::createLocal();
         } else {
             connection::ConnectionPtr connPtr(
                 connection::Connection::createSharedConnection(iface, port));
-            ret = Server::create(connPtr);
+            m_server = Server::create(connPtr);
         }
-        return ret;
-    }
-
-    ServerPtr configuredConstruction(std::string const &json) {
-        Json::Value root(parse(json));
-        return configuredConstruction(root);
-    }
-
-    ServerPtr configuredConstruction(std::istream &json) {
-        Json::Value root(parse(json));
-        return configuredConstruction(root);
+        return m_server;
     }
 
 } // namespace server
