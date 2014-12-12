@@ -19,6 +19,7 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
+#include <osvr/Server/ConfigureServer.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
 
 // Library/third-party includes
@@ -51,7 +52,18 @@ int main(int argc, char *argv[]) {
                 "line to use a different one." << endl;
     }
 
-    cout << "Loading config file '" << configName << "'" << endl;
+    cout << "Using config file '" << configName << "'" << endl;
+
+    cout << "Constructing server as configured..." << endl;
+    try {
+        std::ifstream config(configName);
+        server = osvr::server::configuredConstruction(config);
+    } catch (std::exception &e) {
+        cerr << "Caught exception constructing server from JSON config file: "
+             << e.what() << endl;
+        return 1;
+    }
+
     Json::Value root;
     Json::Reader reader;
     try {
@@ -67,10 +79,6 @@ int main(int argc, char *argv[]) {
              << e.what() << endl;
         return 1;
     }
-
-    cout << "Creating server..." << endl;
-
-    server = osvr::server::Server::createLocal();
 
     cout << "Registering shutdown handler..." << endl;
     osvr::server::registerShutdownHandler<&handleShutdown>();
