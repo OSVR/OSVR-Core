@@ -31,12 +31,6 @@
 
 namespace osvr {
 namespace server {
-    static const char SERVER_KEY[] = "server";
-    static const char INTERFACE_KEY[] = "interface";
-    static const char LOCAL_KEY[] = "local";
-    static const char PORT_KEY[] = "port"; // not the triwizard cup.
-    static const char PLUGINS_KEY[] = "plugins";
-
     class ConfigureServerData : boost::noncopyable {
       public:
         template <typename T> inline void parse(T &json) {
@@ -63,6 +57,11 @@ namespace server {
     void ConfigureServer::loadConfig(std::istream &json) {
         m_data->parse(json);
     }
+
+    static const char SERVER_KEY[] = "server";
+    static const char INTERFACE_KEY[] = "interface";
+    static const char LOCAL_KEY[] = "local";
+    static const char PORT_KEY[] = "port"; // not the triwizard cup.
 
     ServerPtr ConfigureServer::constructServer() {
         Json::Value &root(m_data->root);
@@ -107,6 +106,7 @@ namespace server {
         return m_server;
     }
 
+    static const char PLUGINS_KEY[] = "plugins";
     bool ConfigureServer::loadPlugins() {
         Json::Value &root(m_data->root);
         const Json::Value plugins = root[PLUGINS_KEY];
