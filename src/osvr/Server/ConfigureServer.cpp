@@ -124,12 +124,12 @@ namespace server {
         return success;
     }
 
-    ConfigureServer::PluginList const &
+    ConfigureServer::SuccessList const &
     ConfigureServer::getSuccessfulPlugins() const {
         return m_successfulPlugins;
     }
 
-    ConfigureServer::PluginErrorList const &
+    ConfigureServer::ErrorList const &
     ConfigureServer::getFailedPlugins() const {
         return m_failedPlugins;
     }

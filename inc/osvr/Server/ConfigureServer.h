@@ -77,12 +77,15 @@ namespace server {
         /// @throws std::out_of_range if an invalid port (<1) is specified.
         OSVR_SERVER_EXPORT ServerPtr constructServer();
 
-        /// @brief Container for plugin names
-        typedef std::vector<std::string> PluginList;
+        /// @brief Container for plugin/driver names
+        typedef std::vector<std::string> SuccessList;
 
-        /// @brief Container for plugin names and error messages
-        typedef std::vector<std::pair<std::string, std::string> >
-            PluginErrorList;
+        /// @brief Error information with attribution: `.first` field is
+        /// plugin/driver name, `.second` field is exception text
+        typedef std::pair<std::string, std::string> ErrorPair;
+
+        /// @brief Container for plugin/driver names and error messages
+        typedef std::vector<ErrorPair> ErrorList;
 
         /// @brief Loads the plugins contained in an array with key `plugins` in
         /// the configuration.
@@ -94,19 +97,30 @@ namespace server {
         /// successfully.
         OSVR_SERVER_EXPORT bool loadPlugins();
 
+        /// @name Results of loadPlugins()
+        /// @{
         /// @brief Get a reference to the list of plugins successfully loaded by
         /// loadPlugins()
-        OSVR_SERVER_EXPORT PluginList const &getSuccessfulPlugins() const;
+        OSVR_SERVER_EXPORT SuccessList const &getSuccessfulPlugins() const;
 
         /// @brief Get a reference to the list of plugins loadPlugins() tried
-        /// but failed to load.
-        OSVR_SERVER_EXPORT PluginErrorList const &getFailedPlugins() const;
+        /// but failed to load, along with any exception text.
+        OSVR_SERVER_EXPORT ErrorList const &getFailedPlugins() const;
+        /// @}
 
       private:
+        /// @brief Private implementation data structure.
         unique_ptr<ConfigureServerData> m_data;
+
+        /// @brief Owning pointer for the server under
+        /// construction/configuration.
         ServerPtr m_server;
-        PluginList m_successfulPlugins;
-        PluginErrorList m_failedPlugins;
+
+        /// @name Results data of loadPlugins()
+        /// @{
+        SuccessList m_successfulPlugins;
+        ErrorList m_failedPlugins;
+        /// @}
     };
 } // namespace server
 } // namespace osvr
