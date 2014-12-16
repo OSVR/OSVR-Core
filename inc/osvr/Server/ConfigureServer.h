@@ -59,21 +59,18 @@ namespace server {
         OSVR_SERVER_EXPORT void loadConfig(std::istream &json);
 
         /// @brief Creates a server, choosing the factory method according to
-        /// the
-        /// passed JSON configuration
+        /// the passed JSON configuration
         ///
         /// It first looks for an object under the `server` key - if not
-        /// present, it
-        /// will assume defaults for below. This object is the context for the
-        /// below
-        /// elements.
+        /// present, it will assume defaults for below. This object is the
+        /// context for the below elements.
         ///
         /// If `interface` is defined, it will open a server on that interface
-        /// (with
-        /// an empty string meaning all interfaces)
+        /// (with an empty string meaning all interfaces)
+        ///
         /// Otherwise, `local` is assumed to be true. If it is false, it will
-        /// open
-        /// on all interfaces.
+        /// open on all interfaces.
+        ///
         /// `port` defaults to the assigned VRPN port (3883)
         ///
         /// @throws std::out_of_range if an invalid port (<1) is specified.
