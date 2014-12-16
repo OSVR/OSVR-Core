@@ -25,6 +25,7 @@
 #include <json/value.h>
 #include <json/reader.h>
 #include <boost/optional.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -112,6 +113,15 @@ namespace server {
         const Json::Value plugins = root[PLUGINS_KEY];
         bool success = true;
         for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
+            if (!plugins[i].isString()) {
+                success = false;
+                m_failedPlugins.push_back(std::make_pair(
+                    "Plugin entry " + boost::lexical_cast<std::string>(i),
+                    "Plugin name not string: " + plugins[i].toStyledString()));
+                // skip it!
+                continue;
+            }
+
             const std::string plugin = plugins[i].asString();
             try {
                 m_server->loadPlugin(plugin);
