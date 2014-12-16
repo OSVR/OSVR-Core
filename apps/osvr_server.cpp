@@ -66,6 +66,27 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    {
+        cout << "Loading plugins..." << endl;
+        bool success = srvConfig.loadPlugins();
+        if (success) {
+            cout << "All specified plugins successfully loaded." << endl;
+        }
+        if (!srvConfig.getSuccessfulPlugins().empty()) {
+            cout << "Successful plugins:" << endl;
+            for (auto const &plugin : srvConfig.getSuccessfulPlugins()) {
+                cout << " - " << plugin << endl;
+            }
+        }
+        if (!srvConfig.getFailedPlugins().empty()) {
+            cout << "Failed plugins:" << endl;
+            for (auto const &pluginError : srvConfig.getFailedPlugins()) {
+                cout << " - " << pluginError.first << "\t" << pluginError.second
+                     << endl;
+            }
+        }
+    }
+
     Json::Value root;
     Json::Reader reader;
     try {
@@ -84,21 +105,6 @@ int main(int argc, char *argv[]) {
 
     cout << "Registering shutdown handler..." << endl;
     osvr::server::registerShutdownHandler<&handleShutdown>();
-
-    cout << "Loading plugins..." << endl;
-    const Json::Value plugins = root["plugins"];
-    for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
-        std::string plugin = plugins[i].asString();
-        cout << "Loading plugin '" << plugin << "'..." << endl;
-        try {
-            server->loadPlugin(plugin);
-            cout << "Plugin '" << plugin << "' loaded!\n" << endl;
-        } catch (std::exception &e) {
-            std::cerr << "Caught exception tring to load " << plugin << ": "
-                      << e.what() << std::endl;
-            return 1;
-        }
-    }
 
     cout << "Instantiating configured drivers..." << endl;
     const Json::Value drivers = root["drivers"];

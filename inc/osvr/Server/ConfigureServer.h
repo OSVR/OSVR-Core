@@ -30,6 +30,7 @@
 // Standard includes
 #include <string>
 #include <iosfwd>
+#include <vector>
 
 namespace osvr {
 namespace server {
@@ -76,9 +77,36 @@ namespace server {
         /// @throws std::out_of_range if an invalid port (<1) is specified.
         OSVR_SERVER_EXPORT ServerPtr constructServer();
 
+        /// @brief Container for plugin names
+        typedef std::vector<std::string> PluginList;
+
+        /// @brief Container for plugin names and error messages
+        typedef std::vector<std::pair<std::string, std::string> >
+            PluginErrorList;
+
+        /// @brief Loads the plugins contained in an array with key `plugins` in
+        /// the configuration.
+        ///
+        /// Detailed results of the loading can be retrieved with
+        /// getSuccessfulPlugins() and getFailedPlugins()
+        ///
+        /// @returns true if and only if all specified plugins loaded
+        /// successfully.
+        OSVR_SERVER_EXPORT bool loadPlugins();
+
+        /// @brief Get a reference to the list of plugins successfully loaded by
+        /// loadPlugins()
+        OSVR_SERVER_EXPORT PluginList const &getSuccessfulPlugins() const;
+
+        /// @brief Get a reference to the list of plugins loadPlugins() tried
+        /// but failed to load.
+        OSVR_SERVER_EXPORT PluginErrorList const &getFailedPlugins() const;
+
       private:
         unique_ptr<ConfigureServerData> m_data;
         ServerPtr m_server;
+        PluginList m_successfulPlugins;
+        PluginErrorList m_failedPlugins;
     };
 } // namespace server
 } // namespace osvr

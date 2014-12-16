@@ -35,6 +35,7 @@ namespace server {
     static const char INTERFACE_KEY[] = "interface";
     static const char LOCAL_KEY[] = "local";
     static const char PORT_KEY[] = "port"; // not the triwizard cup.
+    static const char PLUGINS_KEY[] = "plugins";
 
     class ConfigureServerData : boost::noncopyable {
       public:
@@ -105,6 +106,33 @@ namespace server {
             m_server = Server::create(connPtr);
         }
         return m_server;
+    }
+
+    bool ConfigureServer::loadPlugins() {
+        Json::Value &root(m_data->root);
+        const Json::Value plugins = root[PLUGINS_KEY];
+        bool success = true;
+        for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
+            const std::string plugin = plugins[i].asString();
+            try {
+                m_server->loadPlugin(plugin);
+                m_successfulPlugins.push_back(plugin);
+            } catch (std::exception &e) {
+                m_failedPlugins.push_back(std::make_pair(plugin, e.what()));
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    ConfigureServer::PluginList const &
+    ConfigureServer::getSuccessfulPlugins() const {
+        return m_successfulPlugins;
+    }
+
+    ConfigureServer::PluginErrorList const &
+    ConfigureServer::getFailedPlugins() const {
+        return m_failedPlugins;
     }
 
 } // namespace server
