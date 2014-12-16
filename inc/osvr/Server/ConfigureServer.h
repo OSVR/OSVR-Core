@@ -108,6 +108,32 @@ namespace server {
         OSVR_SERVER_EXPORT ErrorList const &getFailedPlugins() const;
         /// @}
 
+        /// @brief Configures and instantiates the drivers as specified.
+        ///
+        /// Looks for an array with the key of `drivers`, containing an array of
+        /// objects. Each object is an instantiation, specifying `driver`,
+        /// `plugin`, and `params` to pass along. `params` is typically nested
+        /// JSON data.
+        ///
+        /// Detailed results of the loading can be retrieved with
+        /// getSuccessfulInstantiations() and getSuccessfulInstantiations()
+        ///
+        /// @returns true if and only if all specified driver instances
+        /// completed successfully.
+        OSVR_SERVER_EXPORT bool instantiateDrivers();
+
+        /// @name Results of loadPlugins()
+        /// @{
+        /// @brief Get a reference to the list of drivers successfully
+        /// instantiated by instantiateDrivers()
+        OSVR_SERVER_EXPORT SuccessList const &
+        getSuccessfulInstantiations() const;
+
+        /// @brief Get a reference to the list of drivers instantiateDrivers()
+        /// tried to instantiate but failed, along with any exception text.
+        OSVR_SERVER_EXPORT ErrorList const &getFailedInstantiations() const;
+        /// @}
+
       private:
         /// @brief Private implementation data structure.
         unique_ptr<ConfigureServerData> m_data;
@@ -120,6 +146,12 @@ namespace server {
         /// @{
         SuccessList m_successfulPlugins;
         ErrorList m_failedPlugins;
+        /// @}
+
+        /// @name Results data of instantiateDrivers()
+        /// @{
+        SuccessList m_successfulInstances;
+        ErrorList m_failedInstances;
         /// @}
     };
 } // namespace server

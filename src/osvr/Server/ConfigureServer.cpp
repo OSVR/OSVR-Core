@@ -144,5 +144,72 @@ namespace server {
         return m_failedPlugins;
     }
 
+    static const char DRIVERS_KEY[] = "drivers";
+    static const char DRIVER_KEY[] = "driver";
+    static const char PLUGIN_KEY[] = "plugin";
+    static const char PARAMS_KEY[] = "params";
+    bool ConfigureServer::instantiateDrivers() {
+        bool success = true;
+        Json::Value &root(m_data->root);
+        const Json::Value drivers = root[DRIVERS_KEY];
+        for (Json::ArrayIndex i = 0, e = drivers.size(); i < e; ++i) {
+            const Json::Value thisDriver = drivers[i];
+            const bool hasPlugin = thisDriver[PLUGIN_KEY].isString();
+            const bool hasDriver = thisDriver[DRIVER_KEY].isString();
+            if (!hasPlugin && !hasDriver) {
+                success = false;
+                m_failedInstances.push_back(std::make_pair(
+                    "?", "Entry present in drivers but lacking both a driver "
+                         "name and a plugin name"));
+                // Skip this one.
+                continue;
+            }
+            if (!hasPlugin) {
+                success = false;
+                m_failedInstances.push_back(
+                    std::make_pair("?/" + thisDriver[DRIVER_KEY].asString(),
+                                   "Entry present in drivers with a driver "
+                                   "name but lacking a plugin name"));
+                // Skip this one.
+                continue;
+            }
+
+            const std::string plugin = thisDriver[PLUGIN_KEY].asString();
+
+            if (!hasPlugin) {
+                success = false;
+                m_failedInstances.push_back(std::make_pair(
+                    plugin + "/?", "Entry present in drivers with a plugin "
+                                   "name but lacking a driver name"));
+                // Skip this one.
+                continue;
+            }
+
+            const std::string driver = thisDriver[DRIVER_KEY].asString();
+
+            try {
+                m_server->instantiateDriver(
+                    plugin, driver, thisDriver[PARAMS_KEY].toStyledString());
+
+                m_successfulInstances.push_back(plugin + "/" + driver);
+            } catch (std::exception &e) {
+                m_failedInstances.push_back(
+                    std::make_pair(plugin + "/" + driver, e.what()));
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    ConfigureServer::SuccessList const &
+    ConfigureServer::getSuccessfulInstantiations() const {
+        return m_successfulInstances;
+    }
+
+    ConfigureServer::ErrorList const &
+    ConfigureServer::getFailedInstantiations() const {
+        return m_failedInstances;
+    }
+
 } // namespace server
 } // namespace osvr
