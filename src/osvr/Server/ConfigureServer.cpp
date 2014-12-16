@@ -66,7 +66,6 @@ namespace server {
 
     ServerPtr ConfigureServer::constructServer() {
         Json::Value &root(m_data->root);
-        ServerPtr ret; // Single return value for NRVO
         bool local = true;
         std::string iface;
         boost::optional<int> port;
