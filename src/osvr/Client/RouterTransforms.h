@@ -37,13 +37,15 @@ namespace client {
         template <typename T> void operator()(T &) {}
     };
 
+    /// The VRPN driver for this device uses the non-native but relatively
+    /// de-facto VRPN standard of right-handed x-right y-far.
     class HydraTrackerTransform {
       public:
         void operator()(OSVR_PoseReport &report) {
             Eigen::Isometry3d pose = util::fromPose(report.pose);
-            // Rotate -90 about X
+            // Rotate +90 about X
             util::toPose(
-                Eigen::AngleAxisd(-0.5 * M_PI, Eigen::Vector3d::UnitX()) * pose,
+                Eigen::AngleAxisd(0.5 * M_PI, Eigen::Vector3d::UnitX()) * pose,
                 report.pose);
         }
     };
