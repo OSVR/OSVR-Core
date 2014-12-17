@@ -55,10 +55,18 @@ int main(int argc, char *argv[]) {
     cout << "Using config file '" << configName << "'" << endl;
 
     {
+        std::ifstream config(configName);
+        if (!config.good()) {
+            cerr << "\n"
+                 << "Could not open config file!" << endl;
+            cerr << "Searched in the current directory; file may be "
+                    "misspelled, missing, or in a different directory." << endl;
+            return 1;
+        }
+
         osvr::server::ConfigureServer srvConfig;
         cout << "Constructing server as configured..." << endl;
         try {
-            std::ifstream config(configName);
             srvConfig.loadConfig(config);
             server = srvConfig.constructServer();
         } catch (std::exception &e) {
