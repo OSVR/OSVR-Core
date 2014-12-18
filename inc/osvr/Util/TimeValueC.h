@@ -28,12 +28,13 @@
 #include <osvr/Util/Export.h>
 #include <osvr/Util/AnnotationMacrosC.h>
 #include <osvr/Util/PlatformConfig.h>
+#include <osvr/Util/StdInt.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
-#include <stdint.h>
+/* none */
 
 #ifdef __cplusplus
 extern "C" {
