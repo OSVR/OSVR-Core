@@ -52,15 +52,31 @@ namespace util {
         return Eigen::Map<const Eigen::Vector3d>(vec.data);
     }
 
+    /// @brief Convert an OSVR_Quaternion to an Eigen::Quaterniond
+    inline Eigen::Quaterniond fromQuat(OSVR_Quaternion const &q) {
+        return Eigen::Quaterniond(osvrQuatGetW(&q), osvrQuatGetX(&q),
+                                  osvrQuatGetY(&q), osvrQuatGetZ(&q));
+    }
+
+    /// @brief Convert an Eigen::Quaterniond to a OSVR_Quaternion
+    inline void toQuat(Eigen::Quaterniond const &src, OSVR_Quaternion &q) {
+        osvrQuatSetW(&q, src.w());
+        osvrQuatSetX(&q, src.x());
+        osvrQuatSetY(&q, src.y());
+        osvrQuatSetZ(&q, src.z());
+    }
+
     /// @brief Turn an OSVR_Pose3 into an Eigen::Transform
     ///
     /// @param pose Input pose
     /// @returns an Eigen::Isometry3d (convertible to an Eigen::Affine3d)
     /// 3-dimensional transform object equivalent to pose.
     inline Eigen::Isometry3d fromPose(OSVR_Pose3 const &pose) {
-        Eigen::Map<const Eigen::Vector3d> xlateVec(pose.translation.data);
-        return Eigen::Translation3d(vecMap(pose.translation)) *
-               Eigen::Quaterniond(pose.rotation.data);
+        Eigen::Isometry3d newPose;
+        newPose.fromPositionOrientationScale(vecMap(pose.translation),
+                                             fromQuat(pose.rotation),
+                                             Eigen::Vector3d::Constant(1));
+        return newPose;
     }
 
     /// @brief Turn an Eigen::Isometry3d (transform) into an OSVR_Pose3
@@ -68,10 +84,9 @@ namespace util {
     /// @param[in] xform Input transform.
     /// @param[out] pose Destination to set based on xform.
     inline void toPose(Eigen::Isometry3d const &xform, OSVR_Pose3 &pose) {
-        Eigen::Vector3d::Map(pose.translation.data) = xform.translation();
+        vecMap(pose.translation) = xform.translation();
         Eigen::Quaterniond quat(xform.rotation());
-        Eigen::Vector3d::Map(&pose.rotation.data[1]) = quat.vec();
-        pose.rotation.data[0] = quat.w();
+        toQuat(quat, pose.rotation);
     }
 
     /** @} */
