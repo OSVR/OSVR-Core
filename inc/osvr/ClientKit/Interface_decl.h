@@ -22,6 +22,7 @@
 
 // Internal Includes
 #include <osvr/Util/ClientCallbackTypesC.h>
+#include <osvr/Util/ClientOpaqueTypesC.h>
 
 // Library/third-party includes
 

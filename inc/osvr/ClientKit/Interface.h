@@ -22,6 +22,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/Interface_decl.h>
+#include <osvr/ClientKit/Context_decl.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
 
