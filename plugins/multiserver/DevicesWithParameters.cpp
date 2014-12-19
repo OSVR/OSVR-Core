@@ -39,7 +39,7 @@ void createYEI(BoundServer &server, const char *params) {
     bool calibrate_gyros_on_setup =
         root.get("calibrate_gyros_on_setup", false).asBool();
     bool tare_on_setup = root.get("tare_on_setup", false).asBool();
-    double frames_per_second = root.get("frames_per_second", 50).asFloat();
+    double frames_per_second = root.get("frames_per_second", 250).asFloat();
 
     DeviceFullName name(server.getName("YEI_3Space_Sensor"));
     server.registerDevice(name,
