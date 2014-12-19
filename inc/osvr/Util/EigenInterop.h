@@ -89,6 +89,18 @@ namespace util {
         toQuat(quat, pose.rotation);
     }
 
+    /// @brief Turn an Eigen::Matrix4d (transform) into an OSVR_Pose3
+    ///
+    /// @param[in] mat Input transform. Assumed to contain only position and
+    /// orientation.
+    /// @param[out] pose Destination to set based on xform.
+    inline void toPose(Eigen::Matrix4d const &mat, OSVR_Pose3 &pose) {
+        Eigen::Affine3d xform(mat);
+        vecMap(pose.translation) = xform.translation();
+        Eigen::Quaterniond quat(xform.rotation());
+        toQuat(quat, pose.rotation);
+    }
+
     /** @} */
 
 } // namespace util
