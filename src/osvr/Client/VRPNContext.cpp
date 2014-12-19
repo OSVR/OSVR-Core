@@ -59,7 +59,10 @@ namespace client {
 
         m_addTrackerRouter(
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "/me/head", SensorPredicate(1));
+            "/me/head", SensorPredicate(1),
+            combineTransforms(ZUpTrackerTransform(),
+                              CustomPostrotateTransform(
+                                  .5 * M_PI, Eigen::Vector3d::UnitX())));
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
     m_addButtonRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
