@@ -113,18 +113,34 @@ namespace connection {
                                OSVR_SyncDeviceUpdateCallback updateFunction,
                                void *userdata);
 
+        /// @brief Type of list of device names.
+        typedef std::vector<std::string> NameList;
+
+        /// @brief Record more than one full device name (namespaced with the
+        /// plugin name) associated with a given callback.
+        ///
+        /// This does _not_ register the names in the underlying connection: it
+        /// is an advanced method that assumes you have some other way of doing
+        /// that.
+        ///
+        /// This also adds the device so created to the device list.
+        ///
+        /// For use when a single device exposes more than one name.
+        OSVR_CONNECTION_EXPORT ConnectionDevicePtr
+        registerAdvancedDevice(NameList const &deviceNames,
+                               OSVR_SyncDeviceUpdateCallback updateFunction,
+                               void *userdata);
+
         /// @brief Access implementation details.
         OSVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();
 
         /// @brief Returns some implementation-defined string based on the
-        /// dynamic
-        /// type of the connection.
+        /// dynamic type of the connection.
         OSVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
         /// @}
       protected:
         /// @brief (Subclass implementation) Register (or retrieve registration)
-        /// of
-        /// a message type.
+        /// of a message type.
         virtual MessageTypePtr
         m_registerMessageType(std::string const &messageId) = 0;
 

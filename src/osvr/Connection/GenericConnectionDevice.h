@@ -38,6 +38,11 @@ namespace connection {
         GenericConnectionDevice(std::string const &name,
                                 std::function<OSVR_ReturnCode()> update)
             : ConnectionDevice(name), m_update(update) {}
+
+        GenericConnectionDevice(ConnectionDevice::NameList const &names,
+                                std::function<OSVR_ReturnCode()> update)
+            : ConnectionDevice(names), m_update(update) {}
+
         virtual ~GenericConnectionDevice() {}
         virtual void m_process() { m_update(); }
         virtual void m_sendData(util::time::TimeValue const &, MessageType *,
