@@ -2,11 +2,11 @@ osvr_setup_lib_vars(VRPNServer)
 
 set(API
     "${HEADER_LOCATION}/GetVRPNConnection.h"
-    "${HEADER_LOCATION}/VRPNDeviceServer.h")
+    "${HEADER_LOCATION}/VRPNDeviceRegistration.h")
 
 set(SOURCE
     GetVRPNConnection.cpp
-    VRPNDeviceServer.cpp)
+    VRPNDeviceRegistration.cpp)
 
 osvr_add_library()
 

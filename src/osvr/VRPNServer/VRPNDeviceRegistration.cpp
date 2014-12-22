@@ -16,7 +16,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/VRPNServer/VRPNDeviceServer.h>
+#include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 #include <osvr/VRPNServer/GetVRPNConnection.h>
 #include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/Connection/Connection.h>

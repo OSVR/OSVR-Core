@@ -33,6 +33,9 @@
 class vrpn_Connection;
 
 namespace osvr {
+
+/// @addtogroup VRPNServer
+/// @{
 /// @brief Contains functions and classes for @ref VRPNServer
 namespace vrpnserver {
     /// @brief Retrieves the vrpn_Connection pointer from an
@@ -46,6 +49,7 @@ namespace vrpnserver {
     OSVR_VRPNSERVER_EXPORT vrpn_Connection *getVRPNConnection(
         osvr::pluginhost::PluginSpecificRegistrationContext &context);
 } // namespace vrpnserver
+/// @}
 } // namespace osvr
 
 #endif // INCLUDED_GetVRPNConnection_h_GUID_008AFE04_5378_43B9_BE78_571F7C16D2DD
