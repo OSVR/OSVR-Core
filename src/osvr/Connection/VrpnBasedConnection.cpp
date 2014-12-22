@@ -20,6 +20,7 @@
 #include "VrpnBasedConnection.h"
 #include "VrpnMessageType.h"
 #include "VrpnConnectionDevice.h"
+#include "VrpnConnectionKind.h"
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -50,7 +51,6 @@ namespace connection {
         if (iface && !(iface->empty())) {
             m_initConnection(iface->c_str(), myPort);
         } else {
-
             m_initConnection(nullptr, myPort);
         }
     }
@@ -85,10 +85,6 @@ namespace connection {
     void *VrpnBasedConnection::getUnderlyingObject() {
         return static_cast<void *>(m_vrpnConnection.get());
     }
-
-    OSVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
-
-    const char *getVRPNConnectionKindID() { return "org.opengoggles.vrpn"; }
 
     const char *VrpnBasedConnection::getConnectionKindID() {
         return getVRPNConnectionKindID();

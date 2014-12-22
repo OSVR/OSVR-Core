@@ -66,6 +66,11 @@
     @ingroup InternalAPI
 */
 
+/** @defgroup VRPNServer VRPNServer
+    @brief Providing a convenient (C++) interface for writing device plugins directly using VRPN instead of PluginKit.
+    @ingroup InternalAPI
+*/
+
 /** @defgroup Client Client
     @brief Provides functionality for device access and path routing used by @ref ClientKit
     @ingroup InternalAPI
