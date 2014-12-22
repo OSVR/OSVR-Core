@@ -20,7 +20,7 @@
 #define INCLUDED_VRPNMultiserver_h_GUID_05913DEF_7B12_4089_FE38_379BEF4A1A7D
 
 // Internal Includes
-#include "GetVRPNConnection.h"
+#include <osvr/VRPNServer/GetVRPNConnection.h>
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
@@ -103,7 +103,9 @@ class BoundServer : boost::noncopyable {
         return m_data.getName(m_ctx, nameStem);
     }
 
-    vrpn_Connection *getVRPNConnection() { return ::getVRPNConnection(m_ctx); }
+    vrpn_Connection *getVRPNConnection() {
+        return osvr::vrpnserver::getVRPNConnection(m_ctx);
+    }
 
   private:
     VRPNMultiserverData &m_data;

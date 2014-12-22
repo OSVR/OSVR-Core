@@ -90,6 +90,7 @@ if(BUILD_SERVER)
     add_subdirectory(Connection)
     add_subdirectory(PluginKit)
     add_subdirectory(Server)
+    add_subdirectory(VRPNServer)
 endif()
 
 add_subdirectory(Routing)
