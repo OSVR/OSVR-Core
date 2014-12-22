@@ -21,10 +21,11 @@
 
 // Internal Includes
 #include <osvr/VRPNServer/Export.h>
-
-// Library/third-party includes
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Util/PluginRegContextC.h>
+
+// Library/third-party includes
+// - none
 
 // Standard includes
 // - none

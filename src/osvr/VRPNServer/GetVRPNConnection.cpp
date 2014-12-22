@@ -28,14 +28,6 @@
 // Standard includes
 // - none
 
-// Sneaky way to get an ID for VRPN.
-/// @todo solve this problem in a more sophisticated way.
-namespace osvr {
-namespace connection {
-    OSVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
-} // namespace connection
-} // namespace osvr
-
 namespace osvr {
 namespace vrpnserver {
     vrpn_Connection *getVRPNConnection(OSVR_PluginRegContext ctx) {
