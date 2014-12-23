@@ -33,6 +33,7 @@ set(API
     "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
+    "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
@@ -58,6 +59,7 @@ set(API
 set(SOURCE
     AnyMap.cpp
     TimeValueC.cpp
+    MessageKeys.cpp
     PlatformConfig.h.in
     Verbosity.h.in
     ClientCallbackTypesC.h.in
