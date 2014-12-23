@@ -31,6 +31,10 @@
 
 namespace osvr {
 namespace connection {
+    namespace messageid {
+        /// @brief Return the string identifying VRPN ping messages
+        const char *vrpnPing();
+    } // namespace messageid
     class VrpnBasedConnection : public Connection {
       public:
         enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
@@ -60,9 +64,14 @@ namespace connection {
         m_registerMessageType(std::string const &messageId);
         virtual ConnectionDevicePtr
         m_registerDevice(std::string const &deviceName);
+        virtual void m_registerConnectionHandler(std::function<void()> handler);
         virtual void m_process();
 
+        static int VRPN_CALLBACK
+        m_connectionHandler(void *userdata, vrpn_HANDLERPARAM);
+
         vrpn_ConnectionPtr m_vrpnConnection;
+        std::vector<std::function<void()> > m_connectionHandlers;
     };
 
 } // namespace connection

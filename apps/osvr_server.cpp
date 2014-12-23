@@ -119,6 +119,8 @@ int main(int argc, char *argv[]) {
             cout << "\n";
         }
 
+        srvConfig.processRoutes();
+
     } // end of scope for server config object
 
     cout << "Registering shutdown handler..." << endl;

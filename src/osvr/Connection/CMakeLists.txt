@@ -21,6 +21,8 @@ set(SOURCE
     MessageType.cpp
     SyncDeviceToken.cpp
     SyncDeviceToken.h
+    VirtualDeviceToken.cpp
+    VirtualDeviceToken.h
     VrpnBaseFlexServer.h
     VrpnBasedConnection.cpp
     VrpnBasedConnection.h

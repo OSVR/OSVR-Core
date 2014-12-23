@@ -28,9 +28,13 @@
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Transform/JSONTransformVisitor.h>
+#include <osvr/Transform/ChangeOfBasis.h>
+#include <osvr/Util/MessageKeys.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
+#include <json/reader.h>
 
 // Standard includes
 #include <cstring>
@@ -39,32 +43,76 @@ namespace osvr {
 namespace client {
     RouterEntry::~RouterEntry() {}
 
+    static inline transform::Transform getTransform(const char *data,
+                                                    size_t len) {
+        std::string json(data, len);
+        Json::Value root;
+        Json::Reader reader;
+        if (!reader.parse(json, root)) {
+            throw std::runtime_error("JSON parse error: " +
+                                     reader.getFormattedErrorMessages());
+        }
+        transform::JSONTransformVisitor xform(root);
+        return xform.getTransform();
+    }
+
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
 
-        std::string contextDevice = "OSVR@" + m_host;
+        std::string contextDevice =
+            std::string(util::messagekeys::systemSender()) + "@" + m_host;
         m_conn = vrpn_get_connection_by_name(contextDevice.c_str());
 
-        /// @todo this is hardcoded routing, and not well done - just a stop-gap
-        /// measure. This one-euro filter connects to the hydra.
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands/left", SensorPredicate(0),
-                           ZUpTrackerTransform());
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands/right", SensorPredicate(1),
-                           ZUpTrackerTransform());
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands", AlwaysTruePredicate(),
-                           ZUpTrackerTransform());
+        setParameter("/display",
+                     std::string(reinterpret_cast<char *>(display_json),
+                                 display_json_len));
 
-        m_addTrackerRouter(
-            "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "/me/head", SensorPredicate(1),
-            combineTransforms(
-                CustomPostrotateTransform(-.5 * M_PI, Eigen::Vector3d::UnitZ()),
-                combineTransforms(ZUpTrackerTransform(),
-                                  CustomPostrotateTransform(
-                                      .5 * M_PI, Eigen::Vector3d::UnitX()))));
+        m_conn->register_handler(
+            m_conn->register_message_type(util::messagekeys::routingData()),
+            &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
+    }
+
+    VRPNContext::~VRPNContext() {}
+
+    int VRPNContext::m_handleRoutingMessage(void *userdata,
+                                            vrpn_HANDLERPARAM p) {
+        VRPNContext *self = static_cast<VRPNContext *>(userdata);
+        self->m_replaceRoutes(std::string(p.buffer, p.payload_len));
+        return 0;
+    }
+    static const char SOURCE_KEY[] = "source";
+    static const char DESTINATION_KEY[] = "destination";
+    static const char SENSOR_KEY[] = "sensor";
+    static const char TRACKER_KEY[] = "tracker";
+    void VRPNContext::m_replaceRoutes(std::string const &routes) {
+
+        Json::Value root;
+        Json::Reader reader;
+        if (!reader.parse(routes, root)) {
+            throw std::runtime_error("JSON parse error: " +
+                                     reader.getFormattedErrorMessages());
+        }
+        OSVR_DEV_VERBOSE("Replacing routes: had "
+                         << m_routers.size() << ", received " << root.size());
+        m_routers.clear();
+        for (Json::ArrayIndex i = 0, e = root.size(); i < e; ++i) {
+            Json::Value route = root[i];
+
+            std::string dest = route[DESTINATION_KEY].asString();
+            boost::optional<int> sensor;
+
+            transform::JSONTransformVisitor xformParse(route[SOURCE_KEY]);
+            Json::Value srcLeaf = xformParse.getLeaf();
+            std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
+            // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
+            // srcDevice.erase(begin(srcDevice)); // remove leading slash
+            if (srcLeaf.isMember(SENSOR_KEY)) {
+                sensor = srcLeaf[SENSOR_KEY].asInt();
+            }
+
+            m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
+                               xformParse.getTransform());
+        }
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
     m_addButtonRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
@@ -94,12 +142,8 @@ namespace client {
 
 #undef OSVR_HYDRA_ANALOG
 
-        setParameter("/display",
-                     std::string(reinterpret_cast<char *>(display_json),
-                                 display_json_len));
+        OSVR_DEV_VERBOSE("Now have " << m_routers.size() << " routes.");
     }
-
-    VRPNContext::~VRPNContext() {}
 
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
@@ -128,18 +172,12 @@ namespace client {
             this, m_conn.get(), src, dest, pred));
     }
 
-    template <typename Predicate>
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
-                                         Predicate pred) {
-        m_addTrackerRouter(src, dest, pred, NullTransform());
-    }
-
-    template <typename Predicate, typename Transform>
-    void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
-                                         Predicate pred, Transform xform) {
+                                         boost::optional<int> sensor,
+                                         transform::Transform const &xform) {
         OSVR_DEV_VERBOSE("Adding tracker route for " << dest);
-        m_routers.emplace_back(new VRPNTrackerRouter<Predicate, Transform>(
-            this, m_conn.get(), src, dest, pred, xform));
+        m_routers.emplace_back(new VRPNTrackerRouter(this, m_conn.get(), src,
+                                                     sensor, dest, xform));
     }
 
 } // namespace client

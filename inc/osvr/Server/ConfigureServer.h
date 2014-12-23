@@ -134,6 +134,8 @@ namespace server {
         OSVR_SERVER_EXPORT ErrorList const &getFailedInstantiations() const;
         /// @}
 
+        OSVR_SERVER_EXPORT bool processRoutes();
+
       private:
         /// @brief Private implementation data structure.
         unique_ptr<ConfigureServerData> m_data;
