@@ -80,6 +80,9 @@ namespace connection {
         /// the plugin name.
         ///
         /// This also adds the device so created to the device list.
+        ///
+        /// ConnectionDevices often assume they're owned by a DeviceToken, so
+        /// doing otherwise is unadvisable.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
         registerDevice(std::string const &deviceName);
 

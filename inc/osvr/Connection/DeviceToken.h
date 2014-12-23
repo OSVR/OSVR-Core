@@ -51,8 +51,13 @@ namespace connection {
       public:
         /// @name Factory functions
         /// @{
+        /// @brief Creates a device token (and underlying ConnectionDevice) that
+        /// has a wait callback that can block, that is called repeatedly in a
+        /// thread of its own (managed by OSVR)
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
         createAsyncDevice(std::string const &name, ConnectionPtr const &conn);
+        /// @brief Creates a device token (and underlying ConnectionDevice) that
+        /// has an update method that runs in the server mainloop.
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
         createSyncDevice(std::string const &name, ConnectionPtr const &conn);
         /// @}
@@ -79,9 +84,8 @@ namespace connection {
         /// placed.
         ///
         /// This may block until the next connectionInteract call before
-        /// forwarding
-        /// on to ConnectionDevice::sendData,
-        /// depending on the type of device token.
+        /// forwarding on to ConnectionDevice::sendData, depending on the type
+        /// of device token.
         OSVR_CONNECTION_EXPORT void
         sendData(MessageType *type, const char *bytestream, size_t len);
 
