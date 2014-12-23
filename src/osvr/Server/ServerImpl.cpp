@@ -123,8 +123,9 @@ namespace server {
     template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
-        if (m_running) {
-            /// @todo not yet implemented
+        if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
+            /// @todo callControlled after the run loop started from outside the
+            /// run loop's thread is not yet implemented
             throw std::logic_error("not yet implemented");
         }
         f();
