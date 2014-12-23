@@ -16,8 +16,6 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
-#define OSVR_DEV_VERBOSE_DISABLE
-
 // Internal Includes
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/ConnectionDevice.h>
@@ -106,6 +104,15 @@ namespace connection {
 
     void Connection::addDevice(ConnectionDevicePtr device) {
         BOOST_ASSERT_MSG(device, "Device must be non-null!");
+        auto const &names = device->getNames();
+        if (names.size() == 1) {
+            OSVR_DEV_VERBOSE("Added device: " << names.front());
+        } else {
+            OSVR_DEV_VERBOSE("Added device with names:");
+            for (auto const &name : names) {
+                OSVR_DEV_VERBOSE(" - " << name);
+            }
+        }
         m_devices.push_back(device);
     }
 
@@ -118,9 +125,9 @@ namespace connection {
         }
     }
 
-    Connection::Connection() { OSVR_DEV_VERBOSE("In Connection constructor"); }
+    Connection::Connection() {}
 
-    Connection::~Connection() { OSVR_DEV_VERBOSE("In Connection destructor"); }
+    Connection::~Connection() {}
 
     void *Connection::getUnderlyingObject() { return nullptr; }
 
