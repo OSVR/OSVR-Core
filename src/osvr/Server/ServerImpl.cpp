@@ -20,6 +20,8 @@
 #include "ServerImpl.h"
 #include <osvr/Connection/Connection.h>
 #include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Util/MessageKeys.h>
+#include <osvr/Connection/MessageType.h>
 
 // Library/third-party includes
 // - none
@@ -38,6 +40,15 @@ namespace server {
                 "Can't pass a null ConnectionPtr into Server constructor!");
         }
         osvr::connection::Connection::storeConnection(*m_ctx, m_conn);
+
+        if (!m_sysDevice) {
+            m_sysDevice = connection::DeviceToken::createVirtualDevice(
+                util::messagekeys::systemSender(), m_conn);
+        }
+        if (!m_routingMessageType) {
+            m_routingMessageType =
+                m_conn->registerMessageType(util::messagekeys::routingData());
+        }
     }
 
     ServerImpl::~ServerImpl() { stop(); }
