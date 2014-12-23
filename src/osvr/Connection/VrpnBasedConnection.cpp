@@ -83,14 +83,18 @@ namespace connection {
     void VrpnBasedConnection::m_registerConnectionHandler(
         std::function<void()> handler) {
         if (m_connectionHandlers.empty()) {
+            /// got connection handler
             m_vrpnConnection->register_handler(
                 m_vrpnConnection->register_message_type(vrpn_got_connection),
                 &m_connectionHandler, static_cast<void *>(this),
                 vrpn_ANY_SENDER);
+/// Ping handler
+#if 0
             m_vrpnConnection->register_handler(
                 m_vrpnConnection->register_message_type(messageid::vrpnPing()),
                 &m_connectionHandler, static_cast<void *>(this),
                 vrpn_ANY_SENDER);
+#endif
         }
         m_connectionHandlers.push_back(handler);
     }
