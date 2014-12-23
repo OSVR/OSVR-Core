@@ -19,7 +19,7 @@
 #define INCLUDED_Transform_h_GUID_8BF4BBD8_CDC1_48BC_DC27_BFDA42A3212E
 
 // Internal Includes
-// - none
+#include <osvr/Transform/Util.h>
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -63,15 +63,19 @@ namespace transform {
             return m_post * input * m_pre;
         }
 
+        Eigen::Matrix4d const &getPre() const { return m_pre; }
+
+        Eigen::Matrix4d const &getPost() const { return m_post; }
+
       private:
         Eigen::Matrix4d m_pre;
         Eigen::Matrix4d m_post;
     };
 
     template <typename T>
-    inline void postRotate(Transform &t, double degrees, T const &axis) {
-        t.post *= Eigen::Isometry3d(Eigen::AngleAxisd(degreesToRadians(degrees),
-                                                      axis)).matrix();
+    inline Eigen::Matrix4d rotate(double degrees, T const &axis) {
+        return Eigen::Isometry3d(
+                   Eigen::AngleAxisd(degreesToRadians(degrees), axis)).matrix();
     }
 
 } // namespace transform

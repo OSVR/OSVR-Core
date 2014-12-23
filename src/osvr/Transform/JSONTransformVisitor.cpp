@@ -96,10 +96,10 @@ namespace transform {
         return ret;
     }
 
-    static const char TRANSLATE_KEY[] = "translate";
-    static const char PRETRANSLATE_KEY[] = "pretranslate";
-    static const char ROTATE_KEY[] = "rotate";
-    static const char PREROTATE_KEY[] = "prerotate";
+    static const char TRANSLATE_KEY[] = "posttranslate";
+    static const char PRETRANSLATE_KEY[] = "translate";
+    static const char ROTATE_KEY[] = "postrotate";
+    static const char PREROTATE_KEY[] = "rotate";
     static const char AXIS_KEY[] = "axis";
     static const char CHANGE_BASIS_KEY[] = "changeBasis";
     static const char X_KEY[] = "x";
