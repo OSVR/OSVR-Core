@@ -94,6 +94,11 @@ namespace connection {
         /// Someone needs to call this method frequently.
         OSVR_CONNECTION_EXPORT void process();
 
+        /// @brief Register a function to be called when a client connects or
+        /// pings.
+        OSVR_CONNECTION_EXPORT void
+        registerConnectionHandler(std::function<void()> handler);
+
         /// @brief Destructor
         OSVR_CONNECTION_EXPORT virtual ~Connection();
 
@@ -150,6 +155,11 @@ namespace connection {
         /// @brief (Subclass implementation) Register a full device name.
         virtual ConnectionDevicePtr
         m_registerDevice(std::string const &deviceName) = 0;
+
+        /// @brief (Subclass implementation) Register a function to handle "new
+        /// connection"/ping messages.
+        virtual void
+        m_registerConnectionHandler(std::function<void()> handler) = 0;
 
         /// @brief (Subclass implementation) Process messages. This shouldn't
         /// block.
