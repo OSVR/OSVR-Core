@@ -31,20 +31,45 @@
 // Standard includes
 #include <stdexcept>
 #include <functional>
+#include <algorithm>
 
 namespace osvr {
 namespace server {
+    static inline Json::Value
+    parseRoutingDirective(std::string const &routingDirective) {
+        Json::Reader reader;
+        Json::Value val;
+        if (!reader.parse(routingDirective, val)) {
+            throw std::runtime_error("Invalid JSON routing directive: " +
+                                     routingDirective);
+        }
+        return val;
+    }
+    static const char DESTINATION_KEY[] = "destination";
 
+    void ServerImpl::addRoute(std::string const &routingDirective) {
+        Json::Value newDirective = parseRoutingDirective(routingDirective);
+        std::string destination = newDirective[DESTINATION_KEY].asString();
+
+        bool replaced = false;
+        std::replace_if(
+            begin(m_routingDirectives),
+            end(m_routingDirectives), [&](std::string const &directive) {
+            Json::Value candidate = parseRoutingDirective(directive);
+            bool match = (candidate[DESTINATION_KEY].asString() == destination);
+            if (match) {
+                replaced = true;
+            }
+            return match;
+        }, routingDirective);
+        if (!replaced) {
+            m_routingDirectives.push_back(routingDirective);
+        }
+    }
     void ServerImpl::m_sendRoutes() {
         Json::Value routes(Json::arrayValue);
         for (auto const &r : m_routingDirectives) {
-            Json::Reader reader;
-            Json::Value val;
-            if (!reader.parse(r, val)) {
-                throw std::runtime_error("Invalid JSON routing directive: " +
-                                         r);
-            }
-            routes.append(val);
+            routes.append(parseRoutingDirective(r));
         }
         Json::FastWriter writer;
         std::string message = writer.write(routes);

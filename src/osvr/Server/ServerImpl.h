@@ -70,6 +70,9 @@ namespace server {
         /// @copydoc Server::registerMainloopMethod()
         void registerMainloopMethod(MainloopMethod f);
 
+        /// @copydoc Server::addRoute()
+        void addRoute(std::string const &routingDirective);
+
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
                                std::string const &driver,
