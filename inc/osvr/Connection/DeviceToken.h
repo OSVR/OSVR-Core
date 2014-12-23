@@ -60,6 +60,11 @@ namespace connection {
         /// has an update method that runs in the server mainloop.
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
         createSyncDevice(std::string const &name, ConnectionPtr const &conn);
+        /// @brief Creates a device token (and underlying ConnectionDevice)
+        /// without a traditional, built-in update method - typically for
+        /// server-internal usage.
+        OSVR_CONNECTION_EXPORT static DeviceTokenPtr
+        createVirtualDevice(std::string const &name, ConnectionPtr const &conn);
         /// @}
 
         /// @brief Destructor
