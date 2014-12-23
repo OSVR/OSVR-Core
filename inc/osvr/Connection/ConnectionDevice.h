@@ -64,6 +64,9 @@ namespace connection {
         void setDeviceToken(DeviceToken &token);
 
       protected:
+        /// @brief Does this connection device have a device token? Should be
+        /// true in nearly every case.
+        bool m_hasDeviceToken() const;
         /// @brief accessor for device token
         DeviceToken &m_getDeviceToken();
         /// @brief (Subclass implementation) Process messages. This shouldn't

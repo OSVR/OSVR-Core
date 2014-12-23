@@ -59,6 +59,10 @@ namespace connection {
         m_token = &token;
     }
 
+    bool ConnectionDevice::m_hasDeviceToken() const {
+        return m_token != nullptr;
+    }
+
     DeviceToken &ConnectionDevice::m_getDeviceToken() {
         BOOST_ASSERT(m_token);
         return *m_token;
