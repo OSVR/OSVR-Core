@@ -22,6 +22,7 @@
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Connection/MessageType.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -49,6 +50,8 @@ namespace server {
             m_routingMessageType =
                 m_conn->registerMessageType(util::messagekeys::routingData());
         }
+        m_conn->registerConnectionHandler(
+            std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
     }
 
     ServerImpl::~ServerImpl() { stop(); }
@@ -99,6 +102,7 @@ namespace server {
     }
 
     void ServerImpl::triggerHardwareDetect() {
+        OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
         m_callControlled(std::bind(
             &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));
     }

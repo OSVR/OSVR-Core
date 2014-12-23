@@ -12,7 +12,8 @@ set(SOURCE
     ConfigureServer.cpp
     Server.cpp
     ServerImpl.cpp
-    ServerImpl.h)
+    ServerImpl.h
+    ServerImpl_JSON.cpp)
 
 osvr_add_library()
 
