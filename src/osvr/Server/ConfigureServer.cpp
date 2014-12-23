@@ -211,5 +211,18 @@ namespace server {
         return m_failedInstances;
     }
 
+    static const char ROUTES_KEY[] = "routes";
+    bool ConfigureServer::processRoutes() {
+        Json::Value &root(m_data->root);
+        bool success = false;
+        const Json::Value routes = root[ROUTES_KEY];
+        for (Json::ArrayIndex i = 0, e = routes.size(); i < e; ++i) {
+            const Json::Value thisRoute = routes[i];
+            m_server->addRoute(thisRoute.toStyledString());
+            success = true;
+        }
+        return success;
+    }
+
 } // namespace server
 } // namespace osvr
