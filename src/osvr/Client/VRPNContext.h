@@ -58,6 +58,9 @@ namespace client {
         virtual ~VRPNContext();
 
       private:
+        static int VRPN_CALLBACK
+        m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
+        void m_replaceRoutes(std::string const &routes);
         virtual void m_update();
         void m_addAnalogRouter(const char *src, const char *dest, int channel);
         template <typename Predicate>

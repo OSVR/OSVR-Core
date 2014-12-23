@@ -30,6 +30,7 @@
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Transform/JSONTransformVisitor.h>
 #include <osvr/Transform/ChangeOfBasis.h>
+#include <osvr/Util/MessageKeys.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -58,30 +59,59 @@ namespace client {
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
 
-        std::string contextDevice = "OSVR@" + m_host;
+        std::string contextDevice =
+            std::string(util::messagekeys::systemSender()) + "@" + m_host;
         m_conn = vrpn_get_connection_by_name(contextDevice.c_str());
 
-        transform::ChangeOfBasis fromZUp;
-        fromZUp.setNewX(Eigen::Vector3d::UnitX());
-        fromZUp.setNewY(Eigen::Vector3d::UnitZ());
-        fromZUp.setNewZ(-Eigen::Vector3d::UnitY());
+        setParameter("/display",
+                     std::string(reinterpret_cast<char *>(display_json),
+                                 display_json_len));
 
-        /// @todo this is hardcoded routing, and not well done - just a stop-gap
-        /// measure. This one-euro filter connects to the hydra.
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands/left", 0, fromZUp.get());
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands/right", 1, fromZUp.get());
-        m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands", boost::optional<int>(), fromZUp.get());
-        {
-            transform::Transform xform;
-            xform.concatPre(transform::rotate(-90, Eigen::Vector3d::UnitZ()));
-            xform.transform(fromZUp.get());
-            xform.concatPre(transform::rotate(90, Eigen::Vector3d::UnitX()));
-            m_addTrackerRouter(
-                "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-                "/me/head", 1, xform);
+        m_conn->register_handler(
+            m_conn->register_message_type(util::messagekeys::routingData()),
+            &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
+    }
+
+    VRPNContext::~VRPNContext() {}
+
+    int VRPNContext::m_handleRoutingMessage(void *userdata,
+                                            vrpn_HANDLERPARAM p) {
+        VRPNContext *self = static_cast<VRPNContext *>(userdata);
+        self->m_replaceRoutes(std::string(p.buffer, p.payload_len));
+        return 0;
+    }
+    static const char SOURCE_KEY[] = "source";
+    static const char DESTINATION_KEY[] = "destination";
+    static const char SENSOR_KEY[] = "sensor";
+    static const char TRACKER_KEY[] = "tracker";
+    void VRPNContext::m_replaceRoutes(std::string const &routes) {
+
+        Json::Value root;
+        Json::Reader reader;
+        if (!reader.parse(routes, root)) {
+            throw std::runtime_error("JSON parse error: " +
+                                     reader.getFormattedErrorMessages());
+        }
+        OSVR_DEV_VERBOSE("Replacing routes: had "
+                         << m_routers.size() << ", received " << root.size());
+        m_routers.clear();
+        for (Json::ArrayIndex i = 0, e = root.size(); i < e; ++i) {
+            Json::Value route = root[i];
+
+            std::string dest = route[DESTINATION_KEY].asString();
+            boost::optional<int> sensor;
+
+            transform::JSONTransformVisitor xformParse(route[SOURCE_KEY]);
+            Json::Value srcLeaf = xformParse.getLeaf();
+            std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
+            // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
+            // srcDevice.erase(begin(srcDevice)); // remove leading slash
+            if (srcLeaf.isMember(SENSOR_KEY)) {
+                sensor = srcLeaf[SENSOR_KEY].asInt();
+            }
+
+            m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
+                               xformParse.getTransform());
         }
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
@@ -112,12 +142,8 @@ namespace client {
 
 #undef OSVR_HYDRA_ANALOG
 
-        setParameter("/display",
-                     std::string(reinterpret_cast<char *>(display_json),
-                                 display_json_len));
+        OSVR_DEV_VERBOSE("Now have " << m_routers.size() << " routes.");
     }
-
-    VRPNContext::~VRPNContext() {}
 
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
