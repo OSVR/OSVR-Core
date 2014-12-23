@@ -125,6 +125,10 @@ namespace connection {
         }
     }
 
+    void Connection::registerConnectionHandler(std::function<void()> handler) {
+        m_registerConnectionHandler(handler);
+    }
+
     Connection::Connection() {}
 
     Connection::~Connection() {}
