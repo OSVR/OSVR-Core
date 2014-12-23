@@ -22,6 +22,7 @@
 // Internal Includes
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Transform/Transform.h>
 
 // Library/third-party includes
 #include <Eigen/Core>
@@ -35,46 +36,6 @@ namespace client {
     class NullTransform {
       public:
         template <typename T> void operator()(T &) {}
-    };
-
-    /// The VRPN driver for some devices uses the non-native but relatively
-    /// de-facto VRPN standard of right-handed x-right y-far z-up.
-    class ZUpTrackerTransform {
-      public:
-        void operator()(OSVR_PoseReport &report) {
-            Eigen::Matrix4d changeOfCS(Eigen::Matrix4d::Zero());
-            changeOfCS(0, 0) = 1;  // X stays the same
-            changeOfCS(1, 2) = 1;  // Z becomes Y
-            changeOfCS(2, 1) = -1; // -Y becomes Z
-            changeOfCS(3, 3) = 1;  // homogeneous
-            Eigen::Matrix4d pose =
-                changeOfCS * util::fromPose(report.pose).matrix() *
-                Eigen::Isometry3d(
-                    Eigen::AngleAxisd(0.5 * M_PI,
-                                      Eigen::Vector3d::UnitX()) /// postrotate
-                                                                /// to adjust
-                                                                /// the sensors
-                    ).matrix();
-
-            util::toPose(pose, report.pose);
-        }
-    };
-
-    class CustomPostrotateTransform {
-      public:
-        CustomPostrotateTransform(double angle, Eigen::Vector3d const &axis)
-            : m_angle(angle), m_axis(axis) {}
-        void operator()(OSVR_PoseReport &report) {
-            Eigen::Matrix4d pose =
-                util::fromPose(report.pose).matrix() *
-                Eigen::Isometry3d(Eigen::AngleAxisd(m_angle, m_axis)).matrix();
-
-            util::toPose(pose, report.pose);
-        }
-
-      private:
-        double m_angle;
-        Eigen::Vector3d m_axis;
     };
 
     template <typename T1, typename T2> class CombinedTransforms {

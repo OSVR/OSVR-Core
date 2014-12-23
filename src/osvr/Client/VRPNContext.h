@@ -21,11 +21,13 @@
 
 // Internal Includes
 #include <osvr/Client/ClientContext.h>
+#include <osvr/Transform/Transform.h>
 #include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <string>
@@ -61,12 +63,10 @@ namespace client {
         template <typename Predicate>
         void m_addButtonRouter(const char *src, const char *dest,
                                Predicate pred);
-        template <typename Predicate>
+
         void m_addTrackerRouter(const char *src, const char *dest,
-                                Predicate pred);
-        template <typename Predicate, typename Transform>
-        void m_addTrackerRouter(const char *src, const char *dest,
-                                Predicate pred, Transform xform);
+                                boost::optional<int> sensor,
+                                transform::Transform const &xform);
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;
         std::vector<RouterEntryPtr> m_routers;

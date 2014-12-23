@@ -28,9 +28,12 @@
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Transform/JSONTransformVisitor.h>
+#include <osvr/Transform/ChangeOfBasis.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
+#include <json/reader.h>
 
 // Standard includes
 #include <cstring>
@@ -39,32 +42,47 @@ namespace osvr {
 namespace client {
     RouterEntry::~RouterEntry() {}
 
+    static inline transform::Transform getTransform(const char *data,
+                                                    size_t len) {
+        std::string json(data, len);
+        Json::Value root;
+        Json::Reader reader;
+        if (!reader.parse(json, root)) {
+            throw std::runtime_error("JSON parse error: " +
+                                     reader.getFormattedErrorMessages());
+        }
+        transform::JSONTransformVisitor xform(root);
+        return xform.getTransform();
+    }
+
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
 
         std::string contextDevice = "OSVR@" + m_host;
         m_conn = vrpn_get_connection_by_name(contextDevice.c_str());
 
+        transform::ChangeOfBasis fromZUp;
+        fromZUp.setNewX(Eigen::Vector3d::UnitX());
+        fromZUp.setNewY(Eigen::Vector3d::UnitZ());
+        fromZUp.setNewZ(-Eigen::Vector3d::UnitY());
+
         /// @todo this is hardcoded routing, and not well done - just a stop-gap
         /// measure. This one-euro filter connects to the hydra.
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands/left", SensorPredicate(0),
-                           ZUpTrackerTransform());
+                           "/me/hands/left", 0, fromZUp.get());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands/right", SensorPredicate(1),
-                           ZUpTrackerTransform());
+                           "/me/hands/right", 1, fromZUp.get());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                           "/me/hands", AlwaysTruePredicate(),
-                           ZUpTrackerTransform());
-
-        m_addTrackerRouter(
-            "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "/me/head", SensorPredicate(1),
-            combineTransforms(
-                CustomPostrotateTransform(-.5 * M_PI, Eigen::Vector3d::UnitZ()),
-                combineTransforms(ZUpTrackerTransform(),
-                                  CustomPostrotateTransform(
-                                      .5 * M_PI, Eigen::Vector3d::UnitX()))));
+                           "/me/hands", boost::optional<int>(), fromZUp.get());
+        {
+            transform::Transform xform;
+            xform.concatPre(transform::rotate(-90, Eigen::Vector3d::UnitZ()));
+            xform.transform(fromZUp.get());
+            xform.concatPre(transform::rotate(90, Eigen::Vector3d::UnitX()));
+            m_addTrackerRouter(
+                "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
+                "/me/head", 1, xform);
+        }
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
     m_addButtonRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \
@@ -128,18 +146,12 @@ namespace client {
             this, m_conn.get(), src, dest, pred));
     }
 
-    template <typename Predicate>
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
-                                         Predicate pred) {
-        m_addTrackerRouter(src, dest, pred, NullTransform());
-    }
-
-    template <typename Predicate, typename Transform>
-    void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
-                                         Predicate pred, Transform xform) {
+                                         boost::optional<int> sensor,
+                                         transform::Transform const &xform) {
         OSVR_DEV_VERBOSE("Adding tracker route for " << dest);
-        m_routers.emplace_back(new VRPNTrackerRouter<Predicate, Transform>(
-            this, m_conn.get(), src, dest, pred, xform));
+        m_routers.emplace_back(new VRPNTrackerRouter(this, m_conn.get(), src,
+                                                     sensor, dest, xform));
     }
 
 } // namespace client
