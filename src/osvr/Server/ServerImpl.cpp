@@ -52,6 +52,8 @@ namespace server {
         }
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
+        m_conn->registerConnectionHandler(
+            std::bind(&ServerImpl::m_sendRoutes, std::ref(*this)));
     }
 
     ServerImpl::~ServerImpl() { stop(); }

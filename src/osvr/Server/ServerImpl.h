@@ -84,6 +84,9 @@ namespace server {
         /// running, or to queue up the callable if it is running.
         template <typename Callable> void m_callControlled(Callable f);
 
+        /// @brief sends route message.
+        void m_sendRoutes();
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -98,6 +101,8 @@ namespace server {
 
         /// @brief Routing data message
         connection::MessageTypePtr m_routingMessageType;
+
+        std::vector<std::string> m_routingDirectives;
 
         /// @brief Mutex controlling ability to check/change state of run loop
         boost::mutex m_runControl;
