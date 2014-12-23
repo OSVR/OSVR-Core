@@ -1,13 +1,13 @@
 {
   "plugins": [
-    "org_opengoggles_bundled_Multiserver"
+    "/data/local/tmp/org_opengoggles_bundled_Multiserver"
   ],
   "drivers": [
     {
-      "plugin": "org_opengoggles_bundled_Multiserver",
+      "plugin": "/data/local/tmp/org_opengoggles_bundled_Multiserver",
       "driver": "YEI_3Space_Sensor",
       "params": {
-        "port": "COM3"
+        "port": "/dev/ttyACM0"
       }
     }
   ]
