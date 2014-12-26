@@ -29,6 +29,7 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <string>
@@ -51,7 +52,13 @@ namespace connection {
         /// @brief Factory method to create a local-machine-only connection
         OSVR_CONNECTION_EXPORT static ConnectionPtr createLocalConnection();
         /// @brief Factory method to create a shared connection
-        OSVR_CONNECTION_EXPORT static ConnectionPtr createSharedConnection();
+        /// @param iface The NIC/interface to listen on, an empty string
+        /// or unset (default) means "all interfaces"
+        /// @param port The port to listen on, unset/default means the default
+        /// port for the underlying connection implementation.
+        OSVR_CONNECTION_EXPORT static ConnectionPtr
+        createSharedConnection(boost::optional<std::string const &> iface,
+                               boost::optional<int> port);
         /// @}
 
         /// @name Context Storage
@@ -67,14 +74,14 @@ namespace connection {
 
         /// @brief Register (or retrieve registration) of a message type.
         OSVR_CONNECTION_EXPORT MessageTypePtr
-            registerMessageType(std::string const &messageId);
+        registerMessageType(std::string const &messageId);
 
         /// @brief Register a full device name. This should be namespaced with
         /// the plugin name.
         ///
         /// This also adds the device so created to the device list.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-            registerDevice(std::string const &deviceName);
+        registerDevice(std::string const &deviceName);
 
         /// @brief Add an externally-constructed device to the device list.
         OSVR_CONNECTION_EXPORT void addDevice(ConnectionDevicePtr device);
@@ -102,22 +109,38 @@ namespace connection {
         ///
         /// This also adds the device so created to the device list.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-            registerAdvancedDevice(std::string const &deviceName,
-                                   OSVR_SyncDeviceUpdateCallback updateFunction,
-                                   void *userdata);
+        registerAdvancedDevice(std::string const &deviceName,
+                               OSVR_SyncDeviceUpdateCallback updateFunction,
+                               void *userdata);
+
+        /// @brief Type of list of device names.
+        typedef std::vector<std::string> NameList;
+
+        /// @brief Record more than one full device name (namespaced with the
+        /// plugin name) associated with a given callback.
+        ///
+        /// This does _not_ register the names in the underlying connection: it
+        /// is an advanced method that assumes you have some other way of doing
+        /// that.
+        ///
+        /// This also adds the device so created to the device list.
+        ///
+        /// For use when a single device exposes more than one name.
+        OSVR_CONNECTION_EXPORT ConnectionDevicePtr
+        registerAdvancedDevice(NameList const &deviceNames,
+                               OSVR_SyncDeviceUpdateCallback updateFunction,
+                               void *userdata);
 
         /// @brief Access implementation details.
         OSVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();
 
         /// @brief Returns some implementation-defined string based on the
-        /// dynamic
-        /// type of the connection.
+        /// dynamic type of the connection.
         OSVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
         /// @}
       protected:
         /// @brief (Subclass implementation) Register (or retrieve registration)
-        /// of
-        /// a message type.
+        /// of a message type.
         virtual MessageTypePtr
         m_registerMessageType(std::string const &messageId) = 0;
 

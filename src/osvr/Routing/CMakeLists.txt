@@ -11,7 +11,8 @@ set(API
     "${HEADER_LOCATION}/PathNode_fwd.h"
     "${HEADER_LOCATION}/PathTree.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
-    "${HEADER_LOCATION}/PathTreeFull.h")
+    "${HEADER_LOCATION}/PathTreeFull.h"
+    "${HEADER_LOCATION}/Routing.h")
 
 set(SOURCE
     AddDevice.cpp

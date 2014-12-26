@@ -22,6 +22,8 @@ foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS})
         FOLDER "OSVR Example Plugins")
 endforeach()
 
+###
+# Set up self-contained example test
 set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}/osvr")
 set(BUILD_FLAGS)
 if(MSVC)

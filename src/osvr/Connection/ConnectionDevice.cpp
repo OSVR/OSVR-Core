@@ -31,9 +31,19 @@ namespace connection {
 
     ConnectionDevice::~ConnectionDevice() {}
 
-    std::string const &ConnectionDevice::getName() const { return m_name; }
+    std::string const &ConnectionDevice::getName() const {
+        return m_names.front();
+    }
+
+    ConnectionDevice::NameList const &ConnectionDevice::getNames() const {
+        return m_names;
+    }
+
     ConnectionDevice::ConnectionDevice(std::string const &name)
-        : m_name(name), m_token(nullptr) {}
+        : m_names(1, name), m_token(nullptr) {}
+
+    ConnectionDevice::ConnectionDevice(ConnectionDevice::NameList const &names)
+        : m_names(names), m_token(nullptr) {}
 
     void ConnectionDevice::process() { m_process(); }
 

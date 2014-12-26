@@ -3,8 +3,8 @@ project(SampleExternalPlugin) # Change this line.
 
 # This looks for an osvrConfig.cmake file - most of the time it can be
 # autodetected but you might need to specify osvr_DIR to be something like
-# C:/Users/Ryan/Desktop/build/OSVR-PluginKit-vc12/osvr in the CMake GUI
-find_package(osvr) 
+# C:/Users/Ryan/Desktop/build/OSVR-Core-vc12/osvr in the CMake GUI
+find_package(osvr)
 
 # This is just a helper function wrapping CMake's add_library command that
 # sets up include dirs, libraries, and naming convention (no leading "lib")

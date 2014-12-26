@@ -9,9 +9,17 @@ foreach(server BasicServer osvr_server)
 endforeach()
 
 target_link_libraries(osvr_server jsoncpp_lib)
-add_custom_command(TARGET osvr_server POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config.json" $<TARGET_FILE_DIR:osvr_server>
-    COMMENT "Copying default JSON config file"
-    VERBATIM)
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config.json"
-    DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+
+set(CONFIG_FILES
+    osvr_server_config.json
+    osvr_server_config.autodetectonly.sample.json
+    osvr_server_config.shared.sample.json)
+
+foreach(FN ${CONFIG_FILES})
+    add_custom_command(TARGET osvr_server POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FN}" $<TARGET_FILE_DIR:osvr_server>
+        COMMENT "Copying JSON config file sample ${FN}"
+        VERBATIM)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
+        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+endforeach()

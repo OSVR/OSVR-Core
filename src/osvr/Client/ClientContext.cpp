@@ -73,12 +73,12 @@ OSVR_ClientContextObject::releaseInterface(ClientInterface *iface) {
     InterfaceList::iterator it =
         std::find_if(begin(m_interfaces), end(m_interfaces),
                      [&](ClientInterfacePtr const &ptr) {
-            if (ptr.get() == iface) {
-                ret = ptr;
-                return true;
-            }
-            return false;
-        });
+        if (ptr.get() == iface) {
+            ret = ptr;
+            return true;
+        }
+        return false;
+    });
     BOOST_ASSERT_MSG(
         (it == end(m_interfaces)) == (!ret),
         "We should have a pointer if and only if we have the iterator");

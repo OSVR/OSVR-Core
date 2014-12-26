@@ -39,18 +39,18 @@
 
 OSVR_EXTERN_C_BEGIN
 
-#define OSVR_CALLBACK_METHODS(TYPE)                                            \
+#define OSVR_INTERFACE_CALLBACK_METHOD(TYPE)                                   \
     /** @brief Register a callback for TYPE reports on an interface */         \
     OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrRegister##TYPE##Callback(        \
         OSVR_ClientInterface iface, OSVR_##TYPE##Callback cb, void *userdata);
 
-OSVR_CALLBACK_METHODS(Pose)
-OSVR_CALLBACK_METHODS(Position)
-OSVR_CALLBACK_METHODS(Orientation)
-OSVR_CALLBACK_METHODS(Button)
-OSVR_CALLBACK_METHODS(Analog)
+OSVR_INTERFACE_CALLBACK_METHOD(Pose)
+OSVR_INTERFACE_CALLBACK_METHOD(Position)
+OSVR_INTERFACE_CALLBACK_METHOD(Orientation)
+OSVR_INTERFACE_CALLBACK_METHOD(Button)
+OSVR_INTERFACE_CALLBACK_METHOD(Analog)
 
-#undef OSVR_CALLBACK_METHODS
+#undef OSVR_INTERFACE_CALLBACK_METHOD
 
 OSVR_EXTERN_C_END
 

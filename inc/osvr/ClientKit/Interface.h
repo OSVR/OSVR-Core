@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header containing the inline implementation of Interface
 
     @date 2014
 
@@ -21,9 +21,10 @@
 #define INCLUDED_Interface_h_GUID_5D5B1FAD_AD72_4216_9FB6_6483D6EE7DF1
 
 // Internal Includes
+#include <osvr/ClientKit/Interface_decl.h>
+#include <osvr/ClientKit/Context_decl.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
-#include <osvr/Util/ClientCallbackTypesC.h>
 
 // Library/third-party includes
 #include <boost/function.hpp>
@@ -35,49 +36,17 @@ namespace osvr {
 
 namespace clientkit {
 
-    class Interface {
-      public:
-        /// @brief Constructs an Interface object from an OSVR_ClientInterface
-        /// object.
-        Interface(OSVR_ClientInterface interface);
+    inline Interface::Interface(ClientContext &ctx, OSVR_ClientInterface iface)
+        : m_ctx(&ctx), m_interface(iface) {}
 
-        /// @brief Copy constructor.
-        Interface(const Interface &other);
+    inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
-        template <typename T> void registerCallback(T cb, void *userdata);
-
-      private:
-        OSVR_ClientInterface m_interface;
+    inline void Interface::free() { m_ctx->free(*this); }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
-    static boost::function<OSVR_ReturnCode(                                    \
-        OSVR_ClientInterface, OSVR_##TYPE##Callback cb, void *userdata)>       \
-    getCallbackRegisterFunction(const OSVR_##TYPE##Callback &);
-
-        OSVR_CALLBACK_METHODS(Pose)
-        OSVR_CALLBACK_METHODS(Position)
-        OSVR_CALLBACK_METHODS(Orientation)
-        OSVR_CALLBACK_METHODS(Button)
-        OSVR_CALLBACK_METHODS(Analog)
-
-#undef OSVR_CALLBACK_METHODS
-    };
-
-    inline Interface::Interface(OSVR_ClientInterface interface)
-        : m_interface(interface) {
-        // do nothing
-    }
-
-    template <typename T>
-    inline void Interface::registerCallback(T cb, void *userdata) {
-        getCallbackRegisterFunction(cb)(m_interface, cb, userdata);
-    }
-
-#define OSVR_CALLBACK_METHODS(TYPE)                                            \
-    inline boost::function<OSVR_ReturnCode(                                    \
-        OSVR_ClientInterface, OSVR_##TYPE##Callback cb, void *userdata)>       \
-    Interface::getCallbackRegisterFunction(const OSVR_##TYPE##Callback &) {    \
-        return osvrRegister##TYPE##Callback;                                   \
+    inline void Interface::registerCallback(OSVR_##TYPE##Callback cb,          \
+                                            void *userdata) {                  \
+        osvrRegister##TYPE##Callback(m_interface, cb, userdata);               \
     }
 
     OSVR_CALLBACK_METHODS(Pose)

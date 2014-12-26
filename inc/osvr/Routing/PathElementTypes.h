@@ -34,6 +34,8 @@ namespace osvr {
 namespace routing {
     /// @brief Namespace for the various element types that may constitute a
     /// node in the path tree.
+    ///
+    /// @ingroup Routing
     namespace elements {
         /// @brief Base, using the CRTP, providing some basic functionality for
         /// path elements.

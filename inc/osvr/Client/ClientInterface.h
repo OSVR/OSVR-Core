@@ -24,6 +24,8 @@
 #include <osvr/Client/ClientContext_fwd.h>
 #include <osvr/Client/ClientInterfacePtr.h>
 #include <osvr/Client/InterfaceState.h>
+#include <osvr/Client/InterfaceCallbacks.h>
+#include <osvr/Client/StateType.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 
@@ -48,9 +50,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the path as a string.
     std::string const &getPath() const;
 
-    /// @brief Get the owning context.
-    OSVR_CLIENT_EXPORT::osvr::client::ClientContext &getContext();
-
     /// @brief If state exists for the given ReportType on this interface, it
     /// will be returned in the arguments, and true will be returned.
     template <typename ReportType>
@@ -64,27 +63,20 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
         return true;
     }
 
-#define OSVR_CALLBACK_METHODS(TYPE)                                            \
-  public:                                                                      \
-    /** @brief Register a TYPE callback */                                     \
-    OSVR_CLIENT_EXPORT void registerCallback(OSVR_##TYPE##Callback cb,         \
-                                             void *userdata);                  \
-                                                                               \
-    /** @brief Call TYPE callbacks */                                          \
-    void triggerCallbacks(const OSVR_TimeValue &timestamp,                     \
-                          const OSVR_##TYPE##Report &report);                  \
-                                                                               \
-  private:                                                                     \
-    std::vector<std::function<void(const OSVR_TimeValue *,                     \
-                                   const OSVR_##TYPE##Report *)> >             \
-        m_callbacks##TYPE;
+    /// @brief Register a callback for a known report type.
+    template <typename CallbackType>
+    void registerCallback(CallbackType cb, void *userdata) {
+        m_callbacks.addCallback(cb, userdata);
+    }
 
-    OSVR_CALLBACK_METHODS(Pose)
-    OSVR_CALLBACK_METHODS(Position)
-    OSVR_CALLBACK_METHODS(Orientation)
-    OSVR_CALLBACK_METHODS(Button)
-    OSVR_CALLBACK_METHODS(Analog)
-#undef OSVR_CALLBACK_METHODS
+    /// @brief Save state and trigger all callbacks for the given known report
+    /// type.
+    template <typename ReportType>
+    void triggerCallbacks(const OSVR_TimeValue &timestamp,
+                          ReportType const &report) {
+        m_state.setStateFromReport(timestamp, report);
+        m_callbacks.triggerCallbacks(timestamp, report);
+    }
 
     /// @brief Update any state.
     void update();
@@ -92,6 +84,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
   private:
     ::osvr::client::ClientContext *m_ctx;
     std::string const m_path;
+    osvr::client::InterfaceCallbacks m_callbacks;
     osvr::client::InterfaceState m_state;
     friend struct OSVR_ClientContextObject;
 };

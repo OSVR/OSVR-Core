@@ -37,16 +37,63 @@ namespace client {
         template <typename T> void operator()(T &) {}
     };
 
-    class HydraTrackerTransform {
+    /// The VRPN driver for some devices uses the non-native but relatively
+    /// de-facto VRPN standard of right-handed x-right y-far z-up.
+    class ZUpTrackerTransform {
       public:
         void operator()(OSVR_PoseReport &report) {
-            Eigen::Isometry3d pose = util::fromPose(report.pose);
-            // Rotate -90 about X
-            util::toPose(
-                Eigen::AngleAxisd(-0.5 * M_PI, Eigen::Vector3d::UnitX()) * pose,
-                report.pose);
+            Eigen::Matrix4d changeOfCS(Eigen::Matrix4d::Zero());
+            changeOfCS(0, 0) = 1;  // X stays the same
+            changeOfCS(1, 2) = 1;  // Z becomes Y
+            changeOfCS(2, 1) = -1; // -Y becomes Z
+            changeOfCS(3, 3) = 1;  // homogeneous
+            Eigen::Matrix4d pose =
+                changeOfCS * util::fromPose(report.pose).matrix() *
+                Eigen::Isometry3d(
+                    Eigen::AngleAxisd(0.5 * M_PI,
+                                      Eigen::Vector3d::UnitX()) /// postrotate
+                                                                /// to adjust
+                                                                /// the sensors
+                    ).matrix();
+
+            util::toPose(pose, report.pose);
         }
     };
+
+    class CustomPostrotateTransform {
+      public:
+        CustomPostrotateTransform(double angle, Eigen::Vector3d const &axis)
+            : m_angle(angle), m_axis(axis) {}
+        void operator()(OSVR_PoseReport &report) {
+            Eigen::Matrix4d pose =
+                util::fromPose(report.pose).matrix() *
+                Eigen::Isometry3d(Eigen::AngleAxisd(m_angle, m_axis)).matrix();
+
+            util::toPose(pose, report.pose);
+        }
+
+      private:
+        double m_angle;
+        Eigen::Vector3d m_axis;
+    };
+
+    template <typename T1, typename T2> class CombinedTransforms {
+      public:
+        CombinedTransforms(T1 const &a, T2 const &b) : m_xforms(a, b) {}
+        template <typename T> void operator()(T &report) {
+            m_xforms.first(report);
+            m_xforms.second(report);
+        }
+
+      private:
+        std::pair<T1, T2> m_xforms;
+    };
+
+    template <typename T1, typename T2>
+    inline CombinedTransforms<T1, T2> combineTransforms(T1 const &a,
+                                                        T2 const &b) {
+        return CombinedTransforms<T1, T2>(a, b);
+    }
 
 } // namespace client
 } // namespace osvr

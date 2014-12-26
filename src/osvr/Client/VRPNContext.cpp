@@ -49,17 +49,22 @@ namespace client {
         /// measure. This one-euro filter connects to the hydra.
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
                            "/me/hands/left", SensorPredicate(0),
-                           HydraTrackerTransform());
+                           ZUpTrackerTransform());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
                            "/me/hands/right", SensorPredicate(1),
-                           HydraTrackerTransform());
+                           ZUpTrackerTransform());
         m_addTrackerRouter("org_opengoggles_bundled_Multiserver/OneEuroFilter0",
                            "/me/hands", AlwaysTruePredicate(),
-                           HydraTrackerTransform());
+                           ZUpTrackerTransform());
 
         m_addTrackerRouter(
             "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "/me/head", SensorPredicate(1));
+            "/me/head", SensorPredicate(1),
+            combineTransforms(
+                CustomPostrotateTransform(-.5 * M_PI, Eigen::Vector3d::UnitZ()),
+                combineTransforms(ZUpTrackerTransform(),
+                                  CustomPostrotateTransform(
+                                      .5 * M_PI, Eigen::Vector3d::UnitX()))));
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
     m_addButtonRouter("org_opengoggles_bundled_Multiserver/RazerHydra0",       \

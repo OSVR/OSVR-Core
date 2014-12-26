@@ -40,9 +40,16 @@ OSVR_EXTERN_C_BEGIN
     @{
 */
 
+/** @name Report callback types
+    @{
+*/
+
 @BODY@
 
 /** @} */
+
+/** @} */
+
 OSVR_EXTERN_C_END
 
 #endif

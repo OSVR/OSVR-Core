@@ -29,6 +29,7 @@
 
 // Standard includes
 #include <string>
+#include <vector>
 
 namespace osvr {
 namespace connection {
@@ -42,15 +43,20 @@ namespace connection {
         /// @brief destructor
         OSVR_CONNECTION_EXPORT virtual ~ConnectionDevice();
 
-        /// @brief accessor for device name
+        typedef std::vector<std::string> NameList;
+
+        /// @brief accessor for (primary) device name
         std::string const &getName() const;
+
+        /// @brief accessor for device names
+        NameList const &getNames() const;
 
         /// @brief Process messages. This shouldn't block.
         ///
         /// Someone needs to call this method frequently.
         void process();
 
-        /// @brief Send message.
+        /// @brief Send message (as primary device name)
         void sendData(util::time::TimeValue const &timestamp, MessageType *type,
                       const char *bytestream, size_t len);
 
@@ -72,8 +78,11 @@ namespace connection {
         /// @brief Constructor for use by derived classes only.
         OSVR_CONNECTION_EXPORT ConnectionDevice(std::string const &name);
 
+        /// @brief Constructor for use by derived classes only.
+        OSVR_CONNECTION_EXPORT ConnectionDevice(NameList const &names);
+
       private:
-        std::string const m_name;
+        NameList m_names;
         DeviceToken *m_token;
     };
 } // namespace connection

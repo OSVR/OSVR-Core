@@ -39,7 +39,7 @@ namespace util {
             /// @brief Tree node pointer type (metafunction result type)
             typedef shared_ptr<TreeNode<ValueType> > type;
         };
-    }
+    } // namespace tree
     using tree::TreeNode;
     using tree::TreeNodePointer;
 } // namespace util

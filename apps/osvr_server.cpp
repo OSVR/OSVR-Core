@@ -19,6 +19,7 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
+#include <osvr/Server/ConfigureServer.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
 
 // Library/third-party includes
@@ -44,70 +45,84 @@ void handleShutdown() {
 
 int main(int argc, char *argv[]) {
     std::string configName = "osvr_server_config.json";
-    if (argc > 2) {
+    if (argc > 1) {
         configName = argv[1];
     } else {
         cout << "Using default config file - pass a filename on the command "
                 "line to use a different one." << endl;
     }
 
-    cout << "Loading config file '" << configName << "'" << endl;
-    Json::Value root;
-    Json::Reader reader;
-    try {
+    cout << "Using config file '" << configName << "'" << endl;
+
+    {
         std::ifstream config(configName);
-        bool parsingSuccessful = reader.parse(config, root);
-        if (!parsingSuccessful) {
-            cerr << "Error in parsing JSON config file" << endl;
-            cerr << reader.getFormattedErrorMessages() << endl;
+        if (!config.good()) {
+            cerr << "\n"
+                 << "Could not open config file!" << endl;
+            cerr << "Searched in the current directory; file may be "
+                    "misspelled, missing, or in a different directory." << endl;
             return 1;
         }
-    } catch (std::exception &e) {
-        cerr << "Caught exception loading and parsing JSON config file: "
-             << e.what() << endl;
-        return 1;
-    }
 
-    cout << "Creating server..." << endl;
+        osvr::server::ConfigureServer srvConfig;
+        cout << "Constructing server as configured..." << endl;
+        try {
+            srvConfig.loadConfig(config);
+            server = srvConfig.constructServer();
+        } catch (std::exception &e) {
+            cerr << "Caught exception constructing server from JSON config "
+                    "file: " << e.what() << endl;
+            return 1;
+        }
 
-    server = osvr::server::Server::createLocal();
+        {
+            cout << "Loading plugins..." << endl;
+            bool success = srvConfig.loadPlugins();
+            if (!srvConfig.getSuccessfulPlugins().empty()) {
+                cout << "Successful plugins:" << endl;
+                for (auto const &plugin : srvConfig.getSuccessfulPlugins()) {
+                    cout << " - " << plugin << endl;
+                }
+                cout << "\n";
+            }
+            if (!srvConfig.getFailedPlugins().empty()) {
+                cout << "Failed plugins:" << endl;
+                for (auto const &pluginError : srvConfig.getFailedPlugins()) {
+                    cout << " - " << pluginError.first << "\t"
+                         << pluginError.second << endl;
+                }
+                cout << "\n";
+            }
+
+            cout << "\n";
+        }
+
+        {
+            cout << "Instantiating configured drivers..." << endl;
+            bool success = srvConfig.instantiateDrivers();
+            if (!srvConfig.getSuccessfulInstantiations().empty()) {
+                cout << "Successes:" << endl;
+                for (auto const &driver :
+                     srvConfig.getSuccessfulInstantiations()) {
+                    cout << " - " << driver << endl;
+                }
+                cout << "\n";
+            }
+            if (!srvConfig.getFailedInstantiations().empty()) {
+                cout << "Errors:" << endl;
+                for (auto const &error : srvConfig.getFailedInstantiations()) {
+                    cout << " - " << error.first << "\t" << error.second
+                         << endl;
+                }
+                cout << "\n";
+            }
+            cout << "\n";
+        }
+
+    } // end of scope for server config object
 
     cout << "Registering shutdown handler..." << endl;
     osvr::server::registerShutdownHandler<&handleShutdown>();
-
-    cout << "Loading plugins..." << endl;
-    const Json::Value plugins = root["plugins"];
-    for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
-        std::string plugin = plugins[i].asString();
-        cout << "Loading plugin '" << plugin << "'..." << endl;
-        try {
-            server->loadPlugin(plugin);
-            cout << "Plugin '" << plugin << "' loaded!\n" << endl;
-        } catch (std::exception &e) {
-            std::cerr << "Caught exception tring to load " << plugin << ": "
-                      << e.what() << std::endl;
-            return 1;
-        }
-    }
-
-    cout << "Instantiating configured drivers..." << endl;
-    const Json::Value drivers = root["drivers"];
-    for (Json::ArrayIndex i = 0, e = drivers.size(); i < e; ++i) {
-        const Json::Value thisDriver = drivers[i];
-        cout << "Instantiating '" << thisDriver["driver"].asString()
-             << "' from '" << thisDriver["plugin"].asString() << "'..." << endl;
-        try {
-            server->instantiateDriver(thisDriver["plugin"].asString(),
-                                      thisDriver["driver"].asString(),
-
-                                      thisDriver["params"].toStyledString());
-            cout << "Instantiation succeeded!\n" << endl;
-        } catch (std::exception &e) {
-            std::cerr << "Caught exception tring to instantiate: " << e.what()
-                      << std::endl;
-            return 1;
-        }
-    }
 
     cout << "Triggering a hardware detection..." << endl;
     server->triggerHardwareDetect();

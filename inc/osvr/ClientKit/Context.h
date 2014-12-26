@@ -21,6 +21,7 @@
 #define INCLUDED_Context_h_GUID_DD0155F5_61A4_4A76_8C2E_D9614C7A9EBD
 
 // Internal Includes
+#include <osvr/ClientKit/Context_decl.h>
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/ClientKit/ParametersC.h>
 #include <osvr/ClientKit/Interface.h>
@@ -36,51 +37,12 @@
 namespace osvr {
 
 namespace clientkit {
-
-    class ClientContext : private boost::noncopyable {
-      public:
-        /// @brief Initialize the library.
-        /// @param applicationIdentifier A string identifying your application.
-        /// Reverse DNS format strongly suggested.
-        /// @param flags initialization options (reserved) - pass 0 for now.
-        ClientContext(const char applicationIdentifier[], uint32_t flags = 0u);
-
-        /// @brief Initialize the context with an existing context.
-        /// @note The ClientContext class will take ownership of the context.
-        ClientContext(OSVR_ClientContext context);
-
-        /// @brief Shutdown the library.
-        ~ClientContext();
-
-        /// @brief Updates the state of the context - call regularly in your
-        /// mainloop.
-        void update();
-
-        /// @brief Get the interface associated with the given path.
-        /// @param path A resource path.
-        /// @returns The interface object.
-        Interface getInterface(const std::string &path);
-
-        /// @brief Get a string parameter value from the given path.
-        /// @param path A resource path.
-        /// @returns parameter value, or empty string if parameter does not
-        /// exist or
-        /// is not a string.
-        std::string getStringParameter(const std::string &path);
-
-      private:
-        OSVR_ClientContext m_context;
-    };
-
     inline ClientContext::ClientContext(const char applicationIdentifier[],
-                                        uint32_t flags) {
-        m_context = osvrClientInit(applicationIdentifier, flags);
-    }
+                                        uint32_t flags)
+        : m_context(osvrClientInit(applicationIdentifier, flags)) {}
 
     inline ClientContext::ClientContext(OSVR_ClientContext context)
-        : m_context(context) {
-        // do nothing
-    }
+        : m_context(context) {}
 
     inline ClientContext::~ClientContext() { osvrClientShutdown(m_context); }
 
@@ -100,7 +62,7 @@ namespace clientkit {
                 "Couldn't create interface because the path was invalid.");
         }
 
-        return interface;
+        return Interface(*this, interface);
     }
 
     inline std::string
@@ -126,6 +88,16 @@ namespace clientkit {
         }
 
         return std::string(buf.get(), length);
+    }
+
+    inline void ClientContext::free(Interface &iface) {
+        OSVR_ReturnCode ret = osvrClientFreeInterface(m_context, iface.get());
+        if (OSVR_RETURN_SUCCESS != ret) {
+            throw std::logic_error(
+                "Could not free interface: either null or already freed!");
+        }
+        // Null out the interface.
+        iface = Interface(*this, NULL);
     }
 
 } // end namespace clientkit

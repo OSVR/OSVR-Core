@@ -1,13 +1,21 @@
 osvr_setup_lib_vars(Client)
 
 set(API
+    "${HEADER_LOCATION}/CallbackType.h"
     "${HEADER_LOCATION}/ClientContext.h"
     "${HEADER_LOCATION}/ClientContext_fwd.h"
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/CreateContext.h"
+    "${HEADER_LOCATION}/InterfaceCallbacks.h"
     "${HEADER_LOCATION}/InterfaceState.h"
-    "${HEADER_LOCATION}/ReportTypes.h")
+    "${HEADER_LOCATION}/ReportFromCallback.h"
+    "${HEADER_LOCATION}/ReportState.h"
+    "${HEADER_LOCATION}/ReportTraits.h"
+    "${HEADER_LOCATION}/ReportTypes.h"
+    "${HEADER_LOCATION}/ReportTypeWrapper.h"
+    "${HEADER_LOCATION}/ReportMap.h"
+    "${HEADER_LOCATION}/StateType.h")
 
 set(SOURCE
     ClientContext.cpp

@@ -20,6 +20,7 @@
 #include "VrpnBasedConnection.h"
 #include "VrpnMessageType.h"
 #include "VrpnConnectionDevice.h"
+#include "VrpnConnectionKind.h"
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -34,15 +35,32 @@ namespace connection {
     VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
         switch (type) {
         case VRPN_LOCAL_ONLY: {
-            m_vrpnConnection =
-                vrpn_ConnectionPtr::create_server_connection("localhost");
+            m_initConnection("localhost");
             break;
         }
         case VRPN_SHARED: {
-            m_vrpnConnection = vrpn_ConnectionPtr::create_server_connection();
+            m_initConnection();
             break;
         }
         }
+    }
+
+    VrpnBasedConnection::VrpnBasedConnection(
+        boost::optional<std::string const &> iface, boost::optional<int> port) {
+        int myPort = port.get_value_or(0);
+        if (iface && !(iface->empty())) {
+            m_initConnection(iface->c_str(), myPort);
+        } else {
+            m_initConnection(nullptr, myPort);
+        }
+    }
+
+    void VrpnBasedConnection::m_initConnection(const char iface[], int port) {
+        if (0 == port) {
+            port = vrpn_DEFAULT_LISTEN_PORT_NO;
+        }
+        m_vrpnConnection = vrpn_ConnectionPtr::create_server_connection(
+            port, nullptr, nullptr, iface);
     }
 
     MessageTypePtr
@@ -67,10 +85,6 @@ namespace connection {
     void *VrpnBasedConnection::getUnderlyingObject() {
         return static_cast<void *>(m_vrpnConnection.get());
     }
-
-    OSVR_CONNECTION_EXPORT const char *getVRPNConnectionKindID();
-
-    const char *getVRPNConnectionKindID() { return "org.opengoggles.vrpn"; }
 
     const char *VrpnBasedConnection::getConnectionKindID() {
         return getVRPNConnectionKindID();

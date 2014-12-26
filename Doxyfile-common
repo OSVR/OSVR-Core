@@ -143,12 +143,17 @@ EXPAND_ONLY_PREDEF     = YES
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 # For config item PREDEFINED, default is 
-PREDEFINED             = _cplusplus \
+PREDEFINED             = __cplusplus \
                          OSVR_DOXYGEN \
                          OSVR_HAVE_STRUCT_TIMEVAL \
-                         OSVR_PLUGINKIT_EXPORT= \
-                         OSVR_UTIL_EXPORT= \
+                         OSVR_CLIENT_EXPORT= \
                          OSVR_CLIENTKIT_EXPORT= \
+                         OSVR_CONNECTION_EXPORT= \
+                         OSVR_PLUGINHOST_EXPORT= \
+                         OSVR_PLUGINKIT_EXPORT= \
+                         OSVR_ROUTING_EXPORT= \
+                         OSVR_UTIL_EXPORT= \
+                         OSVR_INLINE= \
                          OSVR_CPP_ONLY(X)=X \
                          OSVR_IN= \
                          OSVR_IN_PTR= \
@@ -189,7 +194,8 @@ EXPAND_AS_DEFINED      = OSVR_CPP_ONLY \
                          OSVR_QUAT_MEMBER \
                          OSVR_VEC_MEMBER \
                          OSVR_CALLBACK_METHODS \
-                         OSVR_DEFINE_CLIENT_CALLBACK_TYPE
+                         OSVR_DEFINE_CLIENT_CALLBACK_TYPE \
+                         OSVR_INTERFACE_CALLBACK_METHOD
 
 # If you set the HAVE_DOT tag to YES then doxygen will assume the dot tool is
 # available from the path. This tool is part of Graphviz (see:
@@ -215,3 +221,6 @@ DISABLE_INDEX=YES
 # For config item SOURCE_BROWSER, default is 0
 SOURCE_BROWSER         = YES
 VERBATIM_HEADERS       = YES
+
+
+TYPEDEF_HIDES_STRUCT = NO

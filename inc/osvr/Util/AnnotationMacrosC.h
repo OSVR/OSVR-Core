@@ -83,88 +83,90 @@ as well as any methods handling a buffer with a length.
    match!)
    @{
 */
-#ifndef OSVR_IN
-/** @brief Indicates a required function parameter that serves only as input.
-
-    Place before the parameter's type name in a function parameter list.
+/** @def OSVR_IN
+    @brief Indicates a required function parameter that serves only as input.
 */
+#ifndef OSVR_IN
 #define OSVR_IN
 #endif
 
-#ifndef OSVR_IN_PTR
-/** @brief Indicates a required pointer (non-null) function parameter that
+/** @def OSVR_IN_PTR
+    @brief Indicates a required pointer (non-null) function parameter that
     serves only as input.
 */
+#ifndef OSVR_IN_PTR
 #define OSVR_IN_PTR
 #endif
 
-#ifndef OSVR_IN_OPT
-/** @brief Indicates a function parameter that serves only as input, but is
-    optional and might be NULL
-
-    Place before the parameter's type name in a function parameter list.
+/** @def OSVR_IN_OPT
+    @brief Indicates a function parameter (pointer) that serves only as input,
+   but is
+    optional and might be NULL.
 */
+#ifndef OSVR_IN_OPT
 #define OSVR_IN_OPT
 #endif
 
-#ifndef OSVR_IN_STRZ
-/** @brief Indicates a null-terminated string function parameter that serves
+/** @def OSVR_IN_STRZ
+    @brief Indicates a null-terminated string function parameter that serves
    only as input.
-
-    Place before the parameter's type name in a function parameter list.
 */
+#ifndef OSVR_IN_STRZ
 #define OSVR_IN_STRZ
 #endif
 
-#ifndef OSVR_IN_READS
-/** @brief Indicates a buffer containing input with the specified number of
+/** @def OSVR_IN_READS(NUM_ELEMENTS)
+    @brief Indicates a buffer containing input with the specified number of
    elements.
 
     The specified number of elements is typically the name of another parameter.
-
-    Place before the parameter's type name in a function parameter list.
 */
+#ifndef OSVR_IN_READS
 #define OSVR_IN_READS(NUM_ELEMENTS)
 #endif
 
-#ifndef OSVR_OUT
-/** @brief Indicates a required function parameter that serves only as output.
+/** @def OSVR_OUT
+    @brief Indicates a required function parameter that serves only as output.
     In C code, since this usually means "pointer", you probably want
-   OSVR_OUT_PTR.
+   OSVR_OUT_PTR instead.
 */
+#ifndef OSVR_OUT
 #define OSVR_OUT
 #endif
 
-#ifndef OSVR_OUT_PTR
-/** @brief Indicates a required pointer (non-null) function parameter that
+/** @def OSVR_OUT_PTR
+    @brief Indicates a required pointer (non-null) function parameter that
     serves only as output.
 */
+#ifndef OSVR_OUT_PTR
 #define OSVR_OUT_PTR
 #endif
 
-#ifndef OSVR_OUT_OPT
-/** @brief Indicates a function parameter that serves only as output, but is
+/** @def OSVR_OUT_OPT
+    @brief Indicates a function parameter (pointer) that serves only as output,
+   but is
     optional and might be NULL
-
-    Place before the parameter's type name in a function parameter list.
 */
+#ifndef OSVR_OUT_OPT
 #define OSVR_OUT_OPT
 #endif
 
-#ifndef OSVR_INOUT
-/** @brief Indicates a required function parameter that is both read and written
+/** @def OSVR_INOUT
+    @brief Indicates a required function parameter that is both read and written
    to.
 
     In C code, since this usually means "pointer", you probably want
-   OSVR_INOUT_PTR.
+   OSVR_INOUT_PTR instead.
 */
+#ifndef OSVR_INOUT
 #define OSVR_INOUT
 #endif
 
-#ifndef OSVR_INOUT_PTR
-/** @brief Indicates a required pointer (non-null) function parameter that is
+/** @def OSVR_INOUT_PTR
+    @brief Indicates a required pointer (non-null) function parameter that is
     both read and written to.
 */
+#ifndef OSVR_INOUT_PTR
 #define OSVR_INOUT_PTR
 #endif
 
@@ -181,11 +183,12 @@ as well as any methods handling a buffer with a length.
    semicolon). Repeating them in the definition is not needed.
    @{
 */
-#ifndef OSVR_FUNC_NONNULL
-/** @brief Indicates the parameter(s) that must be non-null.
+/** @def OSVR_FUNC_NONNULL(X)
+    @brief Indicates the parameter(s) that must be non-null.
 
     @param X A parenthesized list of parameters by number (1-based index)
 */
+#ifndef OSVR_FUNC_NONNULL
 #define OSVR_FUNC_NONNULL(X)
 #endif
 /* End of function annotations. */

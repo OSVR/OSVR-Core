@@ -1,6 +1,7 @@
 osvr_setup_lib_vars(Server)
 
 set(API
+    "${HEADER_LOCATION}/ConfigureServer.h"
     "${HEADER_LOCATION}/Server.h"
     "${HEADER_LOCATION}/ServerPtr.h"
     "${HEADER_LOCATION}/RegisterShutdownHandler.h"
@@ -8,6 +9,7 @@ set(API
     "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h")
 
 set(SOURCE
+    ConfigureServer.cpp
     Server.cpp
     ServerImpl.cpp
     ServerImpl.h)
@@ -43,5 +45,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrPluginHost
     PRIVATE
     osvrUtilCpp
+    jsoncpp_lib
     util-runloopmanager)
 

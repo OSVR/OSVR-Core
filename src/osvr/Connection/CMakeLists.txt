@@ -25,6 +25,8 @@ set(SOURCE
     VrpnBasedConnection.cpp
     VrpnBasedConnection.h
     VrpnConnectionDevice.h
+    VrpnConnectionKind.cpp
+    VrpnConnectionKind.h
     VrpnMessageType.h)
 
 osvr_add_library()

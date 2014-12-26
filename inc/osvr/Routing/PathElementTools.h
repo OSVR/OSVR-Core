@@ -32,6 +32,9 @@
 namespace osvr {
 namespace routing {
     namespace elements {
+        /// @addtogroup Routing
+        /// @{
+
         /// @brief Gets a string that indicates the type of path element. Do not
         /// use this for conditionals/comparisons unless there's really no
         /// better way! (There probably is a better way with a variant
@@ -49,6 +52,7 @@ namespace routing {
         /// @param dest Item to inquire about, and update if needed.
         /// @param src Replacement for dest if dest is a NullElement.
         void ifNullReplaceWith(PathElement &dest, PathElement const &src);
+        /// @}
     } // namespace elements
 } // namespace routing
 } // namespace osvr

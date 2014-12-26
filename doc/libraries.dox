@@ -3,6 +3,8 @@
 
     All core functionality that can be accessed through the C++ API is possible to access through the C API as well. However, the C++ wrappers improve the usability of the interface and provide a safer development style. They can also greatly simplify your code and reduce the amount of "boilerplate" needed.
 
+    The C++ wrappers do require some version of the Boost headers to be available. For Windows, the [official binaries](http://sourceforge.net/projects/boost/files/boost-binaries/) are recommended.
+
     See examples:
     - Comprehensive (auto-detects hardware and creates device): org_opengoggles_example_DummyDetectAndCreateAsync.cpp
     - org_opengoggles_example_NullPlugin.cpp
@@ -18,6 +20,8 @@
     @brief The ClientKit library exposes a C API, with header-only C++ wrappers, to write applications using the framework.
 
     Just as with @ref PluginKit, when possible, the C++ wrappers are recommended.
+
+    The C++ wrappers do require some version of the Boost headers to be available. For Windows, the [official binaries](http://sourceforge.net/projects/boost/files/boost-binaries/) are recommended.
 
     See examples:
 
@@ -36,6 +40,11 @@
         - ButtonCallback.c
         - DisplayParameter.c
 
+*/
+
+/** @defgroup ClientKitCPP C++ wrappers for ClientKit
+    @brief The header-only C++ wrappers around the ClientKit C API.
+    @ingroup ClientKit
 */
 
 /** @defgroup InternalAPI Internal APIs
@@ -57,8 +66,18 @@
     @ingroup InternalAPI
 */
 
+/** @defgroup VRPNServer VRPNServer
+    @brief Providing a convenient (C++) interface for writing device plugins directly using VRPN instead of PluginKit.
+    @ingroup InternalAPI
+*/
+
 /** @defgroup Client Client
     @brief Provides functionality for device access and path routing used by @ref ClientKit
+    @ingroup InternalAPI
+*/
+
+/** @defgroup Routing Routing
+    @brief Infrastructure for the path tree, aliases, and the routing graph.
     @ingroup InternalAPI
 */
 

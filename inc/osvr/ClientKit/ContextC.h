@@ -54,8 +54,8 @@ OSVR_EXTERN_C_BEGIN
     @returns Client context - will be needed for subsequent calls
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ClientContext
-    osvrClientInit(const char applicationIdentifier[],
-                   uint32_t flags OSVR_CPP_ONLY(= 0));
+osvrClientInit(const char applicationIdentifier[],
+               uint32_t flags OSVR_CPP_ONLY(= 0));
 
 /** @brief Updates the state of the context - call regularly in your mainloop.
 
@@ -67,7 +67,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx);
     @param ctx Client context
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-    osvrClientShutdown(OSVR_ClientContext ctx);
+osvrClientShutdown(OSVR_ClientContext ctx);
 
 /** @} */
 OSVR_EXTERN_C_END
