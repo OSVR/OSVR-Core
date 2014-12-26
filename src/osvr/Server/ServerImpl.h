@@ -24,6 +24,8 @@
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
+#include <osvr/Connection/MessageTypePtr.h>
+#include <osvr/Connection/DeviceToken.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -35,6 +37,7 @@
 
 namespace osvr {
 namespace server {
+
     /// @brief Private implementation class for Server.
     class ServerImpl : boost::noncopyable {
       public:
@@ -67,6 +70,9 @@ namespace server {
         /// @copydoc Server::registerMainloopMethod()
         void registerMainloopMethod(MainloopMethod f);
 
+        /// @copydoc Server::addRoute()
+        void addRoute(std::string const &routingDirective);
+
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
                                std::string const &driver,
@@ -81,6 +87,9 @@ namespace server {
         /// running, or to queue up the callable if it is running.
         template <typename Callable> void m_callControlled(Callable f);
 
+        /// @brief sends route message.
+        void m_sendRoutes();
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -89,6 +98,14 @@ namespace server {
 
         /// @brief Callbacks to call in each loop.
         std::vector<MainloopMethod> m_mainloopMethods;
+
+        /// @brief System device
+        connection::DeviceTokenPtr m_sysDevice;
+
+        /// @brief Routing data message
+        connection::MessageTypePtr m_routingMessageType;
+
+        std::vector<std::string> m_routingDirectives;
 
         /// @brief Mutex controlling ability to check/change state of run loop
         boost::mutex m_runControl;

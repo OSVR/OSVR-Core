@@ -45,7 +45,10 @@ target_include_directories(${LIBNAME_FULL}
 
 target_link_libraries(${LIBNAME_FULL}
     PRIVATE
+    osvrTransform
+    osvrRouting
     osvrUtilCpp
+    jsoncpp_lib
     vendored-vrpn
     eigen-headers)
 

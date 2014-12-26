@@ -31,6 +31,10 @@
 
 namespace osvr {
 namespace connection {
+    namespace messageid {
+        /// @brief Return the string identifying VRPN ping messages
+        const char *vrpnPing() { return "vrpn_Base ping_message"; }
+    } // namespace messageid
 
     VrpnBasedConnection::VrpnBasedConnection(ConnectionType type) {
         switch (type) {
@@ -76,6 +80,34 @@ namespace connection {
         return ret;
     }
 
+    void VrpnBasedConnection::m_registerConnectionHandler(
+        std::function<void()> handler) {
+        if (m_connectionHandlers.empty()) {
+            /// got connection handler
+            m_vrpnConnection->register_handler(
+                m_vrpnConnection->register_message_type(vrpn_got_connection),
+                &m_connectionHandler, static_cast<void *>(this),
+                vrpn_ANY_SENDER);
+/// Ping handler
+#if 0
+            m_vrpnConnection->register_handler(
+                m_vrpnConnection->register_message_type(messageid::vrpnPing()),
+                &m_connectionHandler, static_cast<void *>(this),
+                vrpn_ANY_SENDER);
+#endif
+        }
+        m_connectionHandlers.push_back(handler);
+    }
+
+    int VrpnBasedConnection::m_connectionHandler(void *userdata,
+                                                 vrpn_HANDLERPARAM) {
+        VrpnBasedConnection *conn =
+            static_cast<VrpnBasedConnection *>(userdata);
+        for (auto const &f : conn->m_connectionHandlers) {
+            f();
+        }
+        return 0;
+    }
     void VrpnBasedConnection::m_process() { m_vrpnConnection->mainloop(); }
 
     VrpnBasedConnection::~VrpnBasedConnection() {

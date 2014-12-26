@@ -20,6 +20,7 @@
 #include <osvr/Connection/DeviceToken.h>
 #include "AsyncDeviceToken.h"
 #include "SyncDeviceToken.h"
+#include "VirtualDeviceToken.h"
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/ConnectionDevice.h>
 
@@ -42,6 +43,13 @@ namespace connection {
     DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
                                                  ConnectionPtr const &conn) {
         DeviceTokenPtr ret(new SyncDeviceToken(name));
+        ret->m_sharedInit(conn);
+        return ret;
+    }
+
+    DeviceTokenPtr DeviceToken::createVirtualDevice(std::string const &name,
+                                                    ConnectionPtr const &conn) {
+        DeviceTokenPtr ret(new VirtualDeviceToken(name));
         ret->m_sharedInit(conn);
         return ret;
     }

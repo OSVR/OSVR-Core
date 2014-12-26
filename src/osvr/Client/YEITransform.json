@@ -1,0 +1,19 @@
+{
+  "rotate": {
+    "degrees": 90,
+    "axis": "x"
+  },
+  "child": {
+    "changeBasis": {
+      "x": "x",
+      "y": "z",
+      "z": "-y"
+    },
+    "child": {
+      "rotate": {
+        "degrees": -90,
+        "axis": "z"
+      }
+    }
+  }
+}

@@ -20,6 +20,9 @@
 #include "ServerImpl.h"
 #include <osvr/Connection/Connection.h>
 #include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Util/MessageKeys.h>
+#include <osvr/Connection/MessageType.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -38,6 +41,19 @@ namespace server {
                 "Can't pass a null ConnectionPtr into Server constructor!");
         }
         osvr::connection::Connection::storeConnection(*m_ctx, m_conn);
+
+        if (!m_sysDevice) {
+            m_sysDevice = connection::DeviceToken::createVirtualDevice(
+                util::messagekeys::systemSender(), m_conn);
+        }
+        if (!m_routingMessageType) {
+            m_routingMessageType =
+                m_conn->registerMessageType(util::messagekeys::routingData());
+        }
+        m_conn->registerConnectionHandler(
+            std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
+        m_conn->registerConnectionHandler(
+            std::bind(&ServerImpl::m_sendRoutes, std::ref(*this)));
     }
 
     ServerImpl::~ServerImpl() { stop(); }
@@ -88,6 +104,7 @@ namespace server {
     }
 
     void ServerImpl::triggerHardwareDetect() {
+        OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
         m_callControlled(std::bind(
             &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));
     }
@@ -112,8 +129,9 @@ namespace server {
     template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
-        if (m_running) {
-            /// @todo not yet implemented
+        if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
+            /// @todo callControlled after the run loop started from outside the
+            /// run loop's thread is not yet implemented
             throw std::logic_error("not yet implemented");
         }
         f();

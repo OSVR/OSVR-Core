@@ -66,6 +66,10 @@ namespace server {
         m_impl->registerMainloopMethod(f);
     }
 
+    void Server::addRoute(std::string const &routingDirective) {
+        m_impl->addRoute(routingDirective);
+    }
+
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)
         : m_impl(new ServerImpl(conn)) {}

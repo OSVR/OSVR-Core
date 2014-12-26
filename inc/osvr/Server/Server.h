@@ -113,6 +113,9 @@ namespace server {
         /// loop.
         OSVR_SERVER_EXPORT void registerMainloopMethod(MainloopMethod f);
 
+        /// @brief Register a JSON string as a routing directive.
+        OSVR_SERVER_EXPORT void addRoute(std::string const &routingDirective);
+
       private:
         unique_ptr<ServerImpl> m_impl;
     };
