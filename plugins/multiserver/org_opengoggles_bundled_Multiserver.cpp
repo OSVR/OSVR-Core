@@ -37,6 +37,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 class VRPNHardwareDetect : boost::noncopyable {
   public:
