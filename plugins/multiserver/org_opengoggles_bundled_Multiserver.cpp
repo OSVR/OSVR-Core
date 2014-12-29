@@ -36,6 +36,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <vector>
 
 class VRPNHardwareDetect : boost::noncopyable {
   public:
@@ -44,7 +45,9 @@ class VRPNHardwareDetect : boost::noncopyable {
         struct hid_device_info *enumData = hid_enumerate(0, 0);
         for (struct hid_device_info *dev = enumData; dev != nullptr;
              dev = dev->next) {
-            if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
+            if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300 &&
+                !m_isPathHandled(dev->path)) {
+                m_handlePath(dev->path);
                 /// Decorated name for Hydra
                 std::string name;
                 {
@@ -73,7 +76,15 @@ class VRPNHardwareDetect : boost::noncopyable {
     }
 
   private:
+    bool m_isPathHandled(const char *path) {
+        return std::find(begin(m_handledPaths), end(m_handledPaths),
+                         std::string(path)) != end(m_handledPaths);
+    }
+    void m_handlePath(const char *path) {
+        m_handledPaths.push_back(std::string(path));
+    }
     VRPNMultiserverData &m_data;
+    std::vector<std::string> m_handledPaths;
 };
 
 OSVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
