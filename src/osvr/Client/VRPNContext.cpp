@@ -105,7 +105,7 @@ namespace client {
             Json::Value srcLeaf = xformParse.getLeaf();
             std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
             // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
-            // srcDevice.erase(begin(srcDevice)); // remove leading slash
+            srcDevice.erase(begin(srcDevice)); // remove leading slash
             if (srcLeaf.isMember(SENSOR_KEY)) {
                 sensor = srcLeaf[SENSOR_KEY].asInt();
             }
