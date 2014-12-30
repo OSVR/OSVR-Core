@@ -2,6 +2,11 @@
 
 Writing a client application means you'll be building against the @ref ClientKit library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure for your application, so you can more easily integrate it with your codebase.
 
+## Important Notes
+When running an OSVR application, an OSVR server must be running on the local machine.
+
+While some of the following documentation applies to Unity applications using the OSVR-Unity support, much of it does not. Please see the README file included with the Unity package for Unity-specific documentation.
+
 ## Conventions and Units
 OSVR standardizes internally on a right-handed coordinate system, with X to the right and Y up (and thus Z "near" or toward you). Choice of coordinate system is planned but not yet available.
 
