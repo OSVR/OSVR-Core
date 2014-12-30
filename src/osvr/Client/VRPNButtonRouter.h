@@ -37,6 +37,7 @@ namespace client {
             : RouterEntry(ctx, dest),
               m_remote(new vrpn_Button_Remote(src, conn)), m_pred(p) {
             m_remote->register_change_handler(this, &VRPNButtonRouter::handle);
+            m_remote->shutup = true;
         }
 
         static void VRPN_CALLBACK handle(void *userdata, vrpn_BUTTONCB info) {
