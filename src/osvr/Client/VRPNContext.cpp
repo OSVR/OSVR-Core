@@ -176,8 +176,16 @@ namespace client {
                                          boost::optional<int> sensor,
                                          transform::Transform const &xform) {
         OSVR_DEV_VERBOSE("Adding tracker route for " << dest);
-        m_routers.emplace_back(new VRPNTrackerRouter(this, m_conn.get(), src,
-                                                     sensor, dest, xform));
+        std::string source(src);
+        if (std::string::npos != source.find('@')) {
+            // We found an @ - so this is a device we need a new connection for.
+            m_routers.emplace_back(
+                new VRPNTrackerRouter(this, nullptr, src, sensor, dest, xform));
+        } else {
+            // No @: assume to be at the same location as the context.
+            m_routers.emplace_back(new VRPNTrackerRouter(
+                this, m_conn.get(), src, sensor, dest, xform));
+        }
     }
 
 } // namespace client
