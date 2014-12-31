@@ -46,8 +46,10 @@ class VRPNHardwareDetect : boost::noncopyable {
         struct hid_device_info *enumData = hid_enumerate(0, 0);
         for (struct hid_device_info *dev = enumData; dev != nullptr;
              dev = dev->next) {
-            if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300 &&
-                !m_isPathHandled(dev->path)) {
+            if (m_isPathHandled(dev->path)) {
+                continue;
+            }
+            if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
                 m_handlePath(dev->path);
                 /// Decorated name for Hydra
                 std::string name;
