@@ -3,10 +3,10 @@ foreach(server BasicServer osvr_server)
     target_link_libraries(${server} osvrServer)
     set_target_properties(${server} PROPERTIES
         FOLDER "OSVR Stock Applications")
-
-    install(TARGETS ${server}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endforeach()
+
+install(TARGETS osvr_server
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
 target_link_libraries(osvr_server jsoncpp_lib)
 
