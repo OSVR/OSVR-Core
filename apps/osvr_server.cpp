@@ -22,8 +22,7 @@
 #include <osvr/Server/RegisterShutdownHandler.h>
 
 // Library/third-party includes
-#include <json/value.h>
-#include <json/reader.h>
+// - none
 
 // Standard includes
 #include <iostream>
