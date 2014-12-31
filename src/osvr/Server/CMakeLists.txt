@@ -2,6 +2,7 @@ osvr_setup_lib_vars(Server)
 
 set(API
     "${HEADER_LOCATION}/ConfigureServer.h"
+    "${HEADER_LOCATION}/ConfigureServerFromFile.h"
     "${HEADER_LOCATION}/Server.h"
     "${HEADER_LOCATION}/ServerPtr.h"
     "${HEADER_LOCATION}/RegisterShutdownHandler.h"
