@@ -27,7 +27,9 @@
 #include <vrpn_YEI_3Space.h>
 
 // Standard includes
-// - none
+#include <vector>
+#include <string>
+#include <string.h>
 
 void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
                const char *params) {
@@ -43,10 +45,34 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
     bool tare_on_setup = root.get("tareOnSetup", false).asBool();
     double frames_per_second = root.get("framesPerSecond", 250).asFloat();
 
+    std::vector<std::string> string_reset_commands;
+    Json::Value commands = root.get("resetCommands", Json::arrayValue);
+
+    for (Json::ArrayIndex i = 0, e = commands.size(); i < e; ++i) {
+        string_reset_commands.push_back(commands[i].asString());
+    }
+
+    // Transform the vector of strings into an array of char*, terminated by a
+    // null.
+    size_t num_reset_commands = string_reset_commands.size() + 1;
+    const char **reset_commands = new const char *[num_reset_commands];
+    reset_commands[num_reset_commands - 1] = nullptr;
+    for (size_t i = 0; i < string_reset_commands.size(); i++) {
+        char *command = new char[string_reset_commands[i].size() + 1];
+        strcpy(command, string_reset_commands[i].c_str());
+        reset_commands[i] = command;
+    }
+
     osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
 
     reg.registerDevice(new vrpn_YEI_3Space_Sensor(
         reg.useDecoratedName(data.getName("YEI_3Space_Sensor")).c_str(),
         reg.getVRPNConnection(), port.c_str(), 115200, calibrate_gyros_on_setup,
-        tare_on_setup, frames_per_second, 0, 0, 1, 0));
+        tare_on_setup, frames_per_second, 0, 0, 1, 0, reset_commands));
+
+    // Free the command data
+    for (size_t i = 0; i < num_reset_commands; i++) {
+        delete[] reset_commands[i];
+    }
+    delete[] reset_commands;
 }
