@@ -28,6 +28,7 @@
 #include "hidapi/hidapi.h"
 #include "vrpn_Connection.h"
 #include "vrpn_Tracker_RazerHydra.h"
+#include "vrpn_Tracker_OSVRHackerDevKit.h"
 #include "vrpn_Tracker_Filter.h"
 #include <boost/noncopyable.hpp>
 
@@ -71,6 +72,15 @@ class VRPNHardwareDetect : boost::noncopyable {
                         reg.getVRPNConnection(), localName.c_str(), 2, 1.15,
                         1.0, 1.2, 1.5, 5.0, 1.2));
                 }
+                break;
+            }
+            if ((dev->vendor_id == 0x1532 && dev->product_id == 0x0300) ||
+                (dev->vendor_id == 0x03EB && dev->product_id == 0x2421)) {
+                m_handlePath(dev->path);
+                // OSVR Hacker Dev Kit
+                osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+                reg.constructAndRegisterDevice<vrpn_Tracker_OSVRHackerDevKit>(
+                    m_data.getName("OSVRHackerDevKit"));
                 break;
             }
         }
