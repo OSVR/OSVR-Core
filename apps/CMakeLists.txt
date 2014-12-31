@@ -1,14 +1,15 @@
-foreach(server BasicServer osvr_server)
+foreach(server BasicServer osvr_server osvr_calibrate)
     add_executable(${server} ${server}.cpp)
     target_link_libraries(${server} osvrServer)
     set_target_properties(${server} PROPERTIES
         FOLDER "OSVR Stock Applications")
 endforeach()
 
+target_link_libraries(osvr_server jsoncpp_lib)
+target_link_libraries(osvr_calibrate jsoncpp_lib)
+
 install(TARGETS osvr_server
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
-
-target_link_libraries(osvr_server jsoncpp_lib)
 
 set(CONFIG_FILES
     osvr_server_config.json
