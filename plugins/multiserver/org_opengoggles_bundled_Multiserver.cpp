@@ -55,6 +55,10 @@ class VRPNHardwareDetect : boost::noncopyable {
                     continue;
                 }
 
+
+                if (gotDevice) {
+                    continue;
+                }
                 // Razer Hydra
                 if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
                     gotDevice = true;
@@ -80,7 +84,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                             reg.getVRPNConnection(), localName.c_str(), 2, 1.15,
                             1.0, 1.2, 1.5, 5.0, 1.2));
                     }
-                    break;
+                    continue;
                 }
 
                 // OSVR Hacker Dev Kit
@@ -92,7 +96,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                     reg.constructAndRegisterDevice<
                         vrpn_Tracker_OSVRHackerDevKit>(
                         m_data.getName("OSVRHackerDevKit"));
-                    break;
+                    continue;
                 }
             }
             hid_free_enumeration(enumData);
