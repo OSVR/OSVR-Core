@@ -39,9 +39,9 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
     }
     std::string port = root["port"].asString();
     bool calibrate_gyros_on_setup =
-        root.get("calibrate_gyros_on_setup", false).asBool();
-    bool tare_on_setup = root.get("tare_on_setup", false).asBool();
-    double frames_per_second = root.get("frames_per_second", 250).asFloat();
+        root.get("calibrateGyrosOnSetup", false).asBool();
+    bool tare_on_setup = root.get("tareOnSetup", false).asBool();
+    double frames_per_second = root.get("framesPerSecond", 250).asFloat();
 
     osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
 
