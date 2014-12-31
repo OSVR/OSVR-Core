@@ -12,6 +12,7 @@ target_link_libraries(osvr_server jsoncpp_lib)
 
 set(CONFIG_FILES
     osvr_server_config.json
+    osvr_server_config.xrightydown.json
     osvr_server_config.autodetectonly.sample.json
     osvr_server_config.externalvrpn.sample.json
     osvr_server_config.shared.sample.json)
