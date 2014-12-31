@@ -44,47 +44,59 @@ class VRPNHardwareDetect : boost::noncopyable {
   public:
     VRPNHardwareDetect(VRPNMultiserverData &data) : m_data(data) {}
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
-        struct hid_device_info *enumData = hid_enumerate(0, 0);
-        for (struct hid_device_info *dev = enumData; dev != nullptr;
-             dev = dev->next) {
-            if (m_isPathHandled(dev->path)) {
-                continue;
-            }
-            if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
-                m_handlePath(dev->path);
-                /// Decorated name for Hydra
-                std::string name;
-                {
-                    // Razer Hydra
-                    osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
-                    name = reg.useDecoratedName(m_data.getName("RazerHydra"));
-                    reg.registerDevice(new vrpn_Tracker_RazerHydra(
-                        name.c_str(), reg.getVRPNConnection()));
-                }
-                std::string localName = "*" + name;
+        bool gotDevice;
+        do {
+            gotDevice = false;
+            struct hid_device_info *enumData = hid_enumerate(0, 0);
+            for (struct hid_device_info *dev = enumData; dev != nullptr;
+                 dev = dev->next) {
 
-                {
-                    // Corresponding filter
-                    osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
-                    reg.registerDevice(new vrpn_Tracker_FilterOneEuro(
-                        reg.useDecoratedName(m_data.getName("OneEuroFilter"))
-                            .c_str(),
-                        reg.getVRPNConnection(), localName.c_str(), 2, 1.15,
-                        1.0, 1.2, 1.5, 5.0, 1.2));
+                if (m_isPathHandled(dev->path)) {
+                    continue;
                 }
-                break;
-            }
-            if ((dev->vendor_id == 0x1532 && dev->product_id == 0x0300) ||
-                (dev->vendor_id == 0x03EB && dev->product_id == 0x2421)) {
-                m_handlePath(dev->path);
+
+                // Razer Hydra
+                if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
+                    gotDevice = true;
+                    m_handlePath(dev->path);
+                    /// Decorated name for Hydra
+                    std::string name;
+                    {
+                        // Razer Hydra
+                        osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+                        name =
+                            reg.useDecoratedName(m_data.getName("RazerHydra"));
+                        reg.registerDevice(new vrpn_Tracker_RazerHydra(
+                            name.c_str(), reg.getVRPNConnection()));
+                    }
+                    std::string localName = "*" + name;
+
+                    {
+                        // Corresponding filter
+                        osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+                        reg.registerDevice(new vrpn_Tracker_FilterOneEuro(
+                            reg.useDecoratedName(
+                                    m_data.getName("OneEuroFilter")).c_str(),
+                            reg.getVRPNConnection(), localName.c_str(), 2, 1.15,
+                            1.0, 1.2, 1.5, 5.0, 1.2));
+                    }
+                    break;
+                }
+
                 // OSVR Hacker Dev Kit
-                osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
-                reg.constructAndRegisterDevice<vrpn_Tracker_OSVRHackerDevKit>(
-                    m_data.getName("OSVRHackerDevKit"));
-                break;
+                if ((dev->vendor_id == 0x1532 && dev->product_id == 0x0300) ||
+                    (dev->vendor_id == 0x03EB && dev->product_id == 0x2421)) {
+                    gotDevice = true;
+                    m_handlePath(dev->path);
+                    osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+                    reg.constructAndRegisterDevice<
+                        vrpn_Tracker_OSVRHackerDevKit>(
+                        m_data.getName("OSVRHackerDevKit"));
+                    break;
+                }
             }
-        }
-        hid_free_enumeration(enumData);
+            hid_free_enumeration(enumData);
+        } while (gotDevice);
         return OSVR_RETURN_SUCCESS;
     }
 
