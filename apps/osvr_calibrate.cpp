@@ -22,8 +22,7 @@
 #include <osvr/Server/RegisterShutdownHandler.h>
 
 // Library/third-party includes
-#include <json/value.h>
-#include <json/reader.h>
+#include <boost/program_options.hpp>
 
 // Standard includes
 #include <iostream>
@@ -43,12 +42,50 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
-    std::string configName(osvr::server::getDefaultConfigFilename());
-    if (argc > 1) {
-        configName = argv[1];
-    } else {
-        cout << "Using default config file - pass a filename on the command "
-                "line to use a different one." << endl;
+    std::string configName;
+    std::string outputName;
+    namespace po = boost::program_options;
+    // clang-format off
+    po::options_description desc("Options");
+    desc.add_options()
+        ("help", "produce help message")
+        ("route", po::value<std::string>(), "route to calibrate")
+        ("output,O", po::value<std::string>(&outputName)->default_value(std::string("calibration.json")), "output file")
+        ;
+    po::options_description hidden("Hidden (positional-only) options");
+    hidden.add_options()
+        ("config", po::value<std::string>(&configName)->default_value(std::string(osvr::server::getDefaultConfigFilename())))
+        ;
+    // clang-format on
+
+    po::positional_options_description p;
+    p.add("config", 1);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv)
+                  .options(po::options_description().add(desc).add(hidden))
+                  .positional(p)
+                  .run(),
+              vm);
+    po::notify(vm);
+
+    {
+        /// Deal with command line errors or requests for help
+        bool usage = false;
+
+        if (vm.count("help")) {
+            usage = true;
+        } else if (vm.count("route") != 1) {
+            cout << "Error: --route is a required argument\n" << endl;
+            usage = true;
+        }
+
+        if (usage) {
+            cout << "Usage: osvr_calibrate [config file name] [options]"
+                 << endl;
+            cout << desc << "\n";
+            return 1;
+        }
     }
 
     server = osvr::server::configureServerFromFile(configName);

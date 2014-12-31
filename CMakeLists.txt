@@ -88,7 +88,7 @@ set_property(GLOBAL PROPERTY
 # Dependencies
 ###
 find_package(libfunctionality REQUIRED)
-find_package(Boost 1.43 COMPONENTS thread system date_time chrono REQUIRED) # Lower version bound of 1.43 for range adapters
+find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
 find_package(Threads REQUIRED)
 find_package(jsoncpp REQUIRED)
 
