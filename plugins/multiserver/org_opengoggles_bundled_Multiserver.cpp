@@ -17,6 +17,9 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+// Define this for verbose output during polling.
+#undef OSVR_MULTISERVER_VERBOSE
+
 // Internal Includes
 #include "VRPNMultiserver.h"
 #include "DevicesWithParameters.h"
@@ -32,6 +35,10 @@
 #include "vrpn_Tracker_Filter.h"
 #include <boost/noncopyable.hpp>
 
+#ifdef OSVR_MULTISERVER_VERBOSE
+#include <boost/format.hpp>
+#endif
+
 // Standard includes
 #include <iostream>
 #include <map>
@@ -40,11 +47,18 @@
 #include <vector>
 #include <algorithm>
 
+#ifdef OSVR_MULTISERVER_VERBOSE
+#include <iostream>
+#endif
+
 class VRPNHardwareDetect : boost::noncopyable {
   public:
     VRPNHardwareDetect(VRPNMultiserverData &data) : m_data(data) {}
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
         bool gotDevice;
+#ifdef OSVR_MULTISERVER_VERBOSE
+        bool first = true;
+#endif
         do {
             gotDevice = false;
             struct hid_device_info *enumData = hid_enumerate(0, 0);
@@ -55,6 +69,14 @@ class VRPNHardwareDetect : boost::noncopyable {
                     continue;
                 }
 
+#ifdef OSVR_MULTISERVER_VERBOSE
+                if (first) {
+                    std::cout << "[OSVR Multiserver] HID Enumeration: "
+                              << boost::format("0x%04x") % dev->vendor_id << ":"
+                              << boost::format("0x%04x") % dev->product_id
+                              << std::endl;
+                }
+#endif
 
                 if (gotDevice) {
                     continue;
@@ -100,6 +122,11 @@ class VRPNHardwareDetect : boost::noncopyable {
                 }
             }
             hid_free_enumeration(enumData);
+
+#ifdef OSVR_MULTISERVER_VERBOSE
+            first = false;
+#endif
+
         } while (gotDevice);
         return OSVR_RETURN_SUCCESS;
     }
