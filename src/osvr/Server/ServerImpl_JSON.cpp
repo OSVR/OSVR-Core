@@ -52,6 +52,8 @@ namespace server {
         std::string destination = newDirective[DESTINATION_KEY].asString();
 
         bool replaced = false;
+        /// If a route already exists with the same destination, replace it with
+        /// this new one.
         std::replace_if(
             begin(m_routingDirectives),
             end(m_routingDirectives), [&](std::string const &directive) {
@@ -62,6 +64,8 @@ namespace server {
             }
             return match;
         }, routingDirective);
+
+        /// If we didn't replace an existing route, just add this one.
         if (!replaced) {
             m_routingDirectives.push_back(routingDirective);
         }
