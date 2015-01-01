@@ -116,6 +116,10 @@ namespace server {
         /// @brief Register a JSON string as a routing directive.
         OSVR_SERVER_EXPORT void addRoute(std::string const &routingDirective);
 
+        /// @brief Get a JSON array of all routing directives.
+        /// @param styled Pass `true` if you want the result pretty-printed.
+        OSVR_SERVER_EXPORT std::string getRoutes(bool styled = false) const;
+
       private:
         unique_ptr<ServerImpl> m_impl;
     };

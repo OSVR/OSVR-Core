@@ -66,14 +66,24 @@ namespace server {
             m_routingDirectives.push_back(routingDirective);
         }
     }
-    void ServerImpl::m_sendRoutes() {
+
+    std::string ServerImpl::getRoutes(bool styled) const {
         Json::Value routes(Json::arrayValue);
         for (auto const &r : m_routingDirectives) {
             routes.append(parseRoutingDirective(r));
         }
-        Json::FastWriter writer;
-        std::string message = writer.write(routes);
+        std::string ret;
+        if (styled) {
+            ret = routes.toStyledString();
+        } else {
+            Json::FastWriter writer;
+            ret = writer.write(routes);
+        }
+        return ret;
+    }
 
+    void ServerImpl::m_sendRoutes() {
+        std::string message = getRoutes(false);
         OSVR_DEV_VERBOSE("Transmitting " << m_routingDirectives.size()
                                          << " routes to the client.");
         m_sysDevice->sendData(m_routingMessageType.get(), message.c_str(),

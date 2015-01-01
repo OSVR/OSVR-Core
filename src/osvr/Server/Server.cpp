@@ -70,6 +70,10 @@ namespace server {
         m_impl->addRoute(routingDirective);
     }
 
+    std::string Server::getRoutes(bool styled) const {
+        return m_impl->getRoutes(styled);
+    }
+
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)
         : m_impl(new ServerImpl(conn)) {}

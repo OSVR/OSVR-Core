@@ -73,6 +73,9 @@ namespace server {
         /// @copydoc Server::addRoute()
         void addRoute(std::string const &routingDirective);
 
+        /// @copydoc Server::getRoutes()
+        std::string getRoutes(bool styled) const;
+
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
                                std::string const &driver,
