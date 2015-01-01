@@ -73,9 +73,11 @@ namespace server {
 
     std::string ServerImpl::getRoutes(bool styled) const {
         Json::Value routes(Json::arrayValue);
-        for (auto const &r : m_routingDirectives) {
-            routes.append(parseRoutingDirective(r));
-        }
+        m_callControlled([&] {
+            for (auto const &r : m_routingDirectives) {
+                routes.append(parseRoutingDirective(r));
+            }
+        });
         std::string ret;
         if (styled) {
             ret = routes.toStyledString();
