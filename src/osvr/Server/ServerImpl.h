@@ -90,6 +90,9 @@ namespace server {
         /// running, or to queue up the callable if it is running.
         template <typename Callable> void m_callControlled(Callable f);
 
+        /// @overload
+        template <typename Callable> void m_callControlled(Callable f) const;
+
         /// @brief sends route message.
         void m_sendRoutes();
 
@@ -111,7 +114,8 @@ namespace server {
         std::vector<std::string> m_routingDirectives;
 
         /// @brief Mutex controlling ability to check/change state of run loop
-        boost::mutex m_runControl;
+        /// @todo is mutable OK here?
+        mutable boost::mutex m_runControl;
         /// @name Protected by m_runControl
         /// @{
         boost::thread m_thread;
@@ -119,6 +123,28 @@ namespace server {
         bool m_running;
         /// @}
     };
+
+    template <typename Callable>
+    inline void ServerImpl::m_callControlled(Callable f) {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
+            /// @todo callControlled after the run loop started from outside the
+            /// run loop's thread is not yet implemented
+            throw std::logic_error("not yet implemented");
+        }
+        f();
+    }
+
+    template <typename Callable>
+    inline void ServerImpl::m_callControlled(Callable f) const {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
+            /// @todo callControlled after the run loop started from outside the
+            /// run loop's thread is not yet implemented
+            throw std::logic_error("not yet implemented");
+        }
+        f();
+    }
 
 } // namespace server
 } // namespace osvr
