@@ -118,6 +118,8 @@ namespace server {
     bool ServerImpl::loop() {
         bool shouldContinue;
         {
+            /// @todo More elegant way of running queued things than grabbing a
+            /// mutex each time through?
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
             m_conn->process();
             for (auto &f : m_mainloopMethods) {
@@ -125,7 +127,6 @@ namespace server {
             }
             shouldContinue = m_run.shouldContinue();
         }
-        /// @todo do queued things in here?
         /// @todo configurable waiting?
         m_thread.yield();
         return shouldContinue;
