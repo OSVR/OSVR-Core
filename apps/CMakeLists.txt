@@ -6,7 +6,7 @@ foreach(server BasicServer osvr_server osvr_calibrate)
 endforeach()
 
 target_link_libraries(osvr_server jsoncpp_lib)
-target_link_libraries(osvr_calibrate jsoncpp_lib ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_link_libraries(osvr_calibrate jsoncpp_lib ${Boost_PROGRAM_OPTIONS_LIBRARIES} boost_thread)
 
 # TODO install osvr_calibrate when it's done.
 install(TARGETS osvr_server

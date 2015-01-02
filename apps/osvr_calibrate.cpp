@@ -23,6 +23,8 @@
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 // Standard includes
 #include <iostream>
@@ -34,6 +36,8 @@ using std::cerr;
 using std::endl;
 
 static osvr::server::ServerPtr server;
+
+auto SETTLE_TIME = boost::posix_time::seconds(2);
 
 /// @brief Shutdown handler function - forcing the server pointer to be global.
 void handleShutdown() {
@@ -96,8 +100,19 @@ int main(int argc, char *argv[]) {
     cout << "Registering shutdown handler..." << endl;
     osvr::server::registerShutdownHandler<&handleShutdown>();
 
+    std::string routes = server->getRoutes();
+    cout << "Routes:\n" << routes << endl;
+
     cout << "Starting server mainloop..." << endl;
-    server->startAndAwaitShutdown();
+    server->start();
+
+    cout << "Waiting a few seconds for the server to settle..." << endl;
+    boost::this_thread::sleep(SETTLE_TIME);
+
+    boost::this_thread::sleep(boost::posix_time::seconds(2));
+
+    cout << "Stopping server mainloop..." << endl;
+    server->stop();
 
     cout << "Server mainloop exited." << endl;
 
