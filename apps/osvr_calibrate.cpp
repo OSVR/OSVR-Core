@@ -209,6 +209,10 @@ int main(int argc, char *argv[]) {
                 "route... should not happen!");
         }
 
+        /// Give the server and client time to react, and to get their console
+        /// prints out of the way.
+        boost::this_thread::sleep(SETTLE_TIME);
+
         cout << "\n\nNew calibration applied: please inspect it with the "
                 "Tracker Viewer." << endl;
         if (configName == outputName) {
