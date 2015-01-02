@@ -85,6 +85,9 @@ namespace server {
         /// server shuts down.
         OSVR_SERVER_EXPORT void startAndAwaitShutdown();
 
+        /// @brief Block until the server shuts down.
+        OSVR_SERVER_EXPORT void awaitShutdown();
+
         /// @brief Signal the server to stop (if it is running), and block until
         /// it does so.
         OSVR_SERVER_EXPORT void stop();

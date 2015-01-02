@@ -44,6 +44,8 @@ namespace server {
 
     void Server::start() { m_impl->start(); }
 
+    void Server::awaitShutdown() { m_impl->awaitShutdown(); }
+
     void Server::startAndAwaitShutdown() { m_impl->startAndAwaitShutdown(); }
 
     void Server::stop() { m_impl->stop(); }

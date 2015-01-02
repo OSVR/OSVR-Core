@@ -78,8 +78,10 @@ namespace server {
 
     void ServerImpl::startAndAwaitShutdown() {
         start();
-        m_thread.join();
+        awaitShutdown();
     }
+
+    void ServerImpl::awaitShutdown() { m_thread.join(); }
 
     void ServerImpl::stop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
@@ -87,6 +89,7 @@ namespace server {
         m_thread.join();
         m_thread = boost::thread();
     }
+
     void ServerImpl::signalStop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         m_run.signalShutdown();
