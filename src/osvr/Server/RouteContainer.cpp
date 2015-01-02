@@ -43,6 +43,7 @@ namespace server {
     }
 
     static const char DESTINATION_KEY[] = "destination";
+
     static inline std::string
     getDestination(Json::Value const &routingDirective) {
         return routingDirective.get(DESTINATION_KEY, "").asString();
@@ -83,6 +84,7 @@ namespace server {
         }
     }
 
+    static const char SOURCE_KEY[] = "source";
     std::string
     RouteContainer::getSource(std::string const &destination) const {
         auto it =
@@ -92,10 +94,12 @@ namespace server {
                     destination);
         });
         if (it != end(m_routingDirectives)) {
-            return *it;
-        } else {
-            return std::string();
+            Json::Value directive = parseRoutingDirective(*it);
+            if (directive.isMember(SOURCE_KEY)) {
+                return directive[SOURCE_KEY].toStyledString();
+            }
         }
+        return std::string();
     }
 
     bool RouteContainer::m_addRoute(std::string const &destination,
