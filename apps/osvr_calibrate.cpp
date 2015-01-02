@@ -45,16 +45,15 @@ using std::endl;
 static osvr::server::ServerWeakPtr g_server;
 
 auto SETTLE_TIME = boost::posix_time::seconds(2);
-// auto CHRONO_SETTLE_TIME = boost::chrono::system_clock::duration(2);
 
 /// @brief Shutdown handler function - forcing the server pointer to be global.
 void handleShutdown() {
-    osvr::server::ServerPtr srv(g_server.lock());
-    if (srv) {
+    osvr::server::ServerPtr server(g_server.lock());
+    if (server) {
         cout << "Received shutdown signal..." << endl;
-        srv->signalStop();
+        server->signalStop();
     } else {
-        cout << "Received shutdown signal but server already destroyed..."
+        cout << "Received shutdown signal but server already stopped..."
              << endl;
     }
 }
