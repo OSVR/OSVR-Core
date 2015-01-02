@@ -45,6 +45,15 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
     bool tare_on_setup = root.get("tareOnSetup", false).asBool();
     double frames_per_second = root.get("framesPerSecond", 250).asFloat();
 
+#ifdef _WIN32
+    // Use the Win32 device namespace, if they aren't already.
+    // Have to double the backslashes because they're escape characters.
+    /// @todo device namespace only valid on WinNT-derived windows?
+    if (port.find('\\') == std::string::npos) {
+        port = "\\\\.\\" + port;
+    }
+#endif
+
     std::vector<std::string> string_reset_commands;
     Json::Value commands = root.get("resetCommands", Json::arrayValue);
 
