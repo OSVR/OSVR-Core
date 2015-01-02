@@ -215,14 +215,21 @@ int main(int argc, char *argv[]) {
 
         cout << "\n\nNew calibration applied: please inspect it with the "
                 "Tracker Viewer." << endl;
+        cout << "(If rotations appear incorrect, you may first need to add "
+                "a basisChange transform layer to the route.)" << endl;
         if (configName == outputName) {
             cout << "If you are satisfied and want to OVERWRITE your existing "
-                    "config file with this update, press enter." << endl;
-            cout << "Otherwise, press Ctrl-C to break out of this program."
-                 << endl;
-            cout << "(If rotations appear incorrect, you may first need to add "
-                    "a basisChange transform layer to the route.)" << endl;
-            waitForEnter();
+                    "config file with this update, press y." << endl;
+            cout << "Otherwise, press enter or Ctrl-C to break out of this "
+                    "program.\n" << endl;
+            cout << "Overwrite '" << configName << "'? [yN] ";
+            char confirm;
+            std::cin.get(confirm);
+            cout << endl;
+            if (confirm != 'y' && confirm != 'Y') {
+                cout << "Calibration save cancelled." << endl;
+                return 1;
+            }
         }
         Json::Value root;
         {
