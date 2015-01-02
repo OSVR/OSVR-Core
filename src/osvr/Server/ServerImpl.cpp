@@ -116,14 +116,19 @@ namespace server {
     }
 
     bool ServerImpl::loop() {
-        m_conn->process();
-        for (auto &f : m_mainloopMethods) {
-            f();
+        bool shouldContinue;
+        {
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            m_conn->process();
+            for (auto &f : m_mainloopMethods) {
+                f();
+            }
+            shouldContinue = m_run.shouldContinue();
         }
         /// @todo do queued things in here?
         /// @todo configurable waiting?
         m_thread.yield();
-        return m_run.shouldContinue();
+        return shouldContinue;
     }
 
 } // namespace server

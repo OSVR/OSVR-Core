@@ -114,6 +114,9 @@ namespace server {
         /// @brief JSON routing directives
         std::vector<std::string> m_routingDirectives;
 
+        /// @brief Mutex held by anything executing in the main thread.
+        mutable boost::mutex m_mainThreadMutex;
+
         /// @brief Mutex controlling ability to check/change state of run loop
         /// @todo is mutable OK here?
         mutable boost::mutex m_runControl;
@@ -129,22 +132,22 @@ namespace server {
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            /// @todo callControlled after the run loop started from outside the
-            /// run loop's thread is not yet implemented
-            throw std::logic_error("not yet implemented");
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            f();
+        } else {
+            f();
         }
-        f();
     }
 
     template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) const {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            /// @todo callControlled after the run loop started from outside the
-            /// run loop's thread is not yet implemented
-            throw std::logic_error("not yet implemented");
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            f();
+        } else {
+            f();
         }
-        f();
     }
 
 } // namespace server
