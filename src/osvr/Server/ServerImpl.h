@@ -111,6 +111,7 @@ namespace server {
         /// @brief Routing data message
         connection::MessageTypePtr m_routingMessageType;
 
+        /// @brief JSON routing directives
         std::vector<std::string> m_routingDirectives;
 
         /// @brief Mutex controlling ability to check/change state of run loop
