@@ -78,8 +78,10 @@ namespace server {
 
     void ServerImpl::startAndAwaitShutdown() {
         start();
-        m_thread.join();
+        awaitShutdown();
     }
+
+    void ServerImpl::awaitShutdown() { m_thread.join(); }
 
     void ServerImpl::stop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
@@ -87,6 +89,7 @@ namespace server {
         m_thread.join();
         m_thread = boost::thread();
     }
+
     void ServerImpl::signalStop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         m_run.signalShutdown();
@@ -111,19 +114,56 @@ namespace server {
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
         if (f) {
-            m_mainloopMethods.push_back(f);
+            m_callControlled([&] { m_mainloopMethods.push_back(f); });
         }
     }
 
     bool ServerImpl::loop() {
-        m_conn->process();
-        for (auto &f : m_mainloopMethods) {
-            f();
+        bool shouldContinue;
+        {
+            /// @todo More elegant way of running queued things than grabbing a
+            /// mutex each time through?
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            m_conn->process();
+            for (auto &f : m_mainloopMethods) {
+                f();
+            }
+            shouldContinue = m_run.shouldContinue();
         }
-        /// @todo do queued things in here?
         /// @todo configurable waiting?
         m_thread.yield();
-        return m_run.shouldContinue();
+        return shouldContinue;
+    }
+
+    bool ServerImpl::addRoute(std::string const &routingDirective) {
+        bool wasNew;
+        m_callControlled([&] {
+            wasNew = m_routes.addRoute(routingDirective);
+            if (m_running) {
+                m_sendRoutes();
+            }
+        });
+        return wasNew;
+    }
+
+    std::string ServerImpl::getRoutes(bool styled) const {
+        std::string ret;
+        m_callControlled([&] { ret = m_routes.getRoutes(styled); });
+        return ret;
+    }
+
+    std::string ServerImpl::getSource(std::string const &destination) const {
+        std::string ret;
+        m_callControlled([&] { ret = m_routes.getSource(destination); });
+        return ret;
+    }
+
+    void ServerImpl::m_sendRoutes() {
+        std::string message = m_routes.getRoutes();
+        OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
+                                         << " routes to the client.");
+        m_sysDevice->sendData(m_routingMessageType.get(), message.c_str(),
+                              message.size());
     }
 
 } // namespace server

@@ -61,7 +61,10 @@ namespace client {
 
         std::string contextDevice =
             std::string(util::messagekeys::systemSender()) + "@" + m_host;
-        m_conn = vrpn_get_connection_by_name(contextDevice.c_str());
+        /// Get connection, forcing a re-open for improved thread-safety.
+        m_conn =
+            vrpn_get_connection_by_name(contextDevice.c_str(), nullptr, nullptr,
+                                        nullptr, nullptr, nullptr, true);
 
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),

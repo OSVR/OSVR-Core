@@ -66,4 +66,13 @@ OSVR_QUAT_MEMBER(Z, 3)
 
 OSVR_EXTERN_C_END
 
+#ifdef __cplusplus
+template <typename StreamType>
+inline StreamType &operator<<(StreamType &os, OSVR_Quaternion const &quat) {
+    os << "(" << osvrQuatGetW(&quat) << ", (" << osvrQuatGetX(&quat) << ", "
+       << osvrQuatGetY(&quat) << ", " << osvrQuatGetZ(&quat) << "))";
+    return os;
+}
+#endif
+
 #endif

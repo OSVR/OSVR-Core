@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
+#include <osvr/Server/RouteContainer.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
@@ -54,6 +55,9 @@ namespace server {
         /// server shuts down.
         void startAndAwaitShutdown();
 
+        /// @copydoc Server::awaitShutdown()
+        void awaitShutdown();
+
         /// @brief Signal the server to stop, and block until it does so.
         void stop();
 
@@ -71,10 +75,13 @@ namespace server {
         void registerMainloopMethod(MainloopMethod f);
 
         /// @copydoc Server::addRoute()
-        void addRoute(std::string const &routingDirective);
+        bool addRoute(std::string const &routingDirective);
 
         /// @copydoc Server::getRoutes()
         std::string getRoutes(bool styled) const;
+
+        /// @copydoc Server::getSource()
+        std::string getSource(std::string const &destination) const;
 
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
@@ -111,7 +118,11 @@ namespace server {
         /// @brief Routing data message
         connection::MessageTypePtr m_routingMessageType;
 
-        std::vector<std::string> m_routingDirectives;
+        /// @brief JSON routing directives
+        RouteContainer m_routes;
+
+        /// @brief Mutex held by anything executing in the main thread.
+        mutable boost::mutex m_mainThreadMutex;
 
         /// @brief Mutex controlling ability to check/change state of run loop
         /// @todo is mutable OK here?
@@ -128,22 +139,22 @@ namespace server {
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            /// @todo callControlled after the run loop started from outside the
-            /// run loop's thread is not yet implemented
-            throw std::logic_error("not yet implemented");
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            f();
+        } else {
+            f();
         }
-        f();
     }
 
     template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) const {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            /// @todo callControlled after the run loop started from outside the
-            /// run loop's thread is not yet implemented
-            throw std::logic_error("not yet implemented");
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            f();
+        } else {
+            f();
         }
-        f();
     }
 
 } // namespace server

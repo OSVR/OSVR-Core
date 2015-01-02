@@ -44,6 +44,8 @@ namespace server {
 
     void Server::start() { m_impl->start(); }
 
+    void Server::awaitShutdown() { m_impl->awaitShutdown(); }
+
     void Server::startAndAwaitShutdown() { m_impl->startAndAwaitShutdown(); }
 
     void Server::stop() { m_impl->stop(); }
@@ -66,12 +68,16 @@ namespace server {
         m_impl->registerMainloopMethod(f);
     }
 
-    void Server::addRoute(std::string const &routingDirective) {
-        m_impl->addRoute(routingDirective);
+    bool Server::addRoute(std::string const &routingDirective) {
+        return m_impl->addRoute(routingDirective);
     }
 
     std::string Server::getRoutes(bool styled) const {
         return m_impl->getRoutes(styled);
+    }
+
+    std::string Server::getSource(std::string const &destination) const {
+        return m_impl->getSource(destination);
     }
 
     Server::Server(connection::ConnectionPtr const &conn,

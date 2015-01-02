@@ -64,4 +64,13 @@ OSVR_VEC_MEMBER(Z, 2)
 
 OSVR_EXTERN_C_END
 
+#ifdef __cplusplus
+template <typename StreamType>
+inline StreamType &operator<<(StreamType &os, OSVR_Vec3 const &vec) {
+    os << "(" << vec.data[0] << ", " << vec.data[1] << ", " << vec.data[2]
+       << ")";
+    return os;
+}
+#endif
+
 #endif

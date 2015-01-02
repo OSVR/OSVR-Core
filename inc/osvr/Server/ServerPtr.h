@@ -33,6 +33,8 @@ namespace server {
     class Server;
     /// @brief How one should hold a Server.
     typedef shared_ptr<Server> ServerPtr;
+    /// @brief How one might observe a Server without owning it.
+    typedef weak_ptr<Server> ServerWeakPtr;
 } // namespace server
 } // namespace osvr
 

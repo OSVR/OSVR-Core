@@ -6,10 +6,9 @@ foreach(server BasicServer osvr_server osvr_calibrate)
 endforeach()
 
 target_link_libraries(osvr_server jsoncpp_lib)
-target_link_libraries(osvr_calibrate jsoncpp_lib ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 
-# TODO install osvr_calibrate when it's done.
-install(TARGETS osvr_server
+install(TARGETS osvr_server osvr_calibrate
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 install(TARGETS BasicServer
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)

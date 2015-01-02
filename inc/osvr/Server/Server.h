@@ -85,6 +85,9 @@ namespace server {
         /// server shuts down.
         OSVR_SERVER_EXPORT void startAndAwaitShutdown();
 
+        /// @brief Block until the server shuts down.
+        OSVR_SERVER_EXPORT void awaitShutdown();
+
         /// @brief Signal the server to stop (if it is running), and block until
         /// it does so.
         OSVR_SERVER_EXPORT void stop();
@@ -114,11 +117,22 @@ namespace server {
         OSVR_SERVER_EXPORT void registerMainloopMethod(MainloopMethod f);
 
         /// @brief Register a JSON string as a routing directive.
-        OSVR_SERVER_EXPORT void addRoute(std::string const &routingDirective);
+        ///
+        /// If the server is running, this will trigger a re-transmission of
+        /// routing directives to all clients.
+        ///
+        /// @returns true if the route was new, or false if it replaced an
+        /// existing route for that destination.
+        OSVR_SERVER_EXPORT bool addRoute(std::string const &routingDirective);
 
         /// @brief Get a JSON array of all routing directives.
         /// @param styled Pass `true` if you want the result pretty-printed.
         OSVR_SERVER_EXPORT std::string getRoutes(bool styled = false) const;
+
+        /// @brief Gets the source for a given named destination in the routing
+        /// directives.
+        OSVR_SERVER_EXPORT std::string
+        getSource(std::string const &destination) const;
 
       private:
         unique_ptr<ServerImpl> m_impl;

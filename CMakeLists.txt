@@ -91,6 +91,23 @@ set_property(GLOBAL PROPERTY
 find_package(libfunctionality REQUIRED)
 find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
 find_package(Threads REQUIRED)
+
+add_library(boost_thread INTERFACE)
+target_link_libraries(boost_thread
+    INTERFACE
+    ${Boost_THREAD_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARIES}
+    ${Boost_DATE_TIME_LIBRARIES}
+    ${Boost_CHRONO_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(boost_thread INTERFACE ${Boost_INCLUDE_DIRS})
+if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
+    # Work around a foolish insistence to use DLLs on MXE that don't exist.
+    target_compile_definitions(boost_thread
+        INTERFACE
+        BOOST_THREAD_USE_LIB)
+endif()
+
 find_package(jsoncpp REQUIRED)
 
 include(CompilerFeatures)
