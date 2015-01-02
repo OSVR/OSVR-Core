@@ -66,8 +66,8 @@ namespace server {
         m_impl->registerMainloopMethod(f);
     }
 
-    void Server::addRoute(std::string const &routingDirective) {
-        m_impl->addRoute(routingDirective);
+    bool Server::addRoute(std::string const &routingDirective) {
+        return m_impl->addRoute(routingDirective);
     }
 
     std::string Server::getRoutes(bool styled) const {

@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
+#include <osvr/Server/RouteContainer.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
@@ -71,7 +72,7 @@ namespace server {
         void registerMainloopMethod(MainloopMethod f);
 
         /// @copydoc Server::addRoute()
-        void addRoute(std::string const &routingDirective);
+        bool addRoute(std::string const &routingDirective);
 
         /// @copydoc Server::getRoutes()
         std::string getRoutes(bool styled) const;
@@ -112,7 +113,7 @@ namespace server {
         connection::MessageTypePtr m_routingMessageType;
 
         /// @brief JSON routing directives
-        std::vector<std::string> m_routingDirectives;
+        RouteContainer m_routes;
 
         /// @brief Mutex held by anything executing in the main thread.
         mutable boost::mutex m_mainThreadMutex;
