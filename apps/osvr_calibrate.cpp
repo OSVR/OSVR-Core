@@ -188,6 +188,8 @@ int main(int argc, char *argv[]) {
 
         cout << "Angle: " << rotation.angle()
              << " Axis: " << rotation.axis().transpose() << endl;
+
+        Json::Value newRoute(Json::objectValue);
         {
 
             Json::Value axis(Json::arrayValue);
@@ -195,7 +197,6 @@ int main(int argc, char *argv[]) {
             axis.append(rotation.axis()[1]);
             axis.append(rotation.axis()[2]);
 
-            Json::Value newRoute(Json::objectValue);
             newRoute["destination"] = dest;
             newRoute["source"]["rotate"]["radians"] = rotation.angle();
             newRoute["source"]["rotate"]["axis"] = axis;
@@ -206,35 +207,45 @@ int main(int argc, char *argv[]) {
                 !isNew,
                 "Server claims this is a new, rather than a replacement, "
                 "route... should not happen!");
+        }
 
-            Json::Value root;
-            {
-                std::ifstream config(configName);
-                if (!config.good()) {
-                    cerr << "Could not read the original config file again!"
-                         << endl;
-                    return -1;
-                }
-
-                Json::Reader reader;
-                if (!reader.parse(config, root)) {
-                    cerr << "Could not parse the original config file again! "
-                            "Should never happen!" << endl;
-                    return -1;
-                }
-            }
-            auto &routes = root["routes"];
-            for (auto &fileRoute : routes) {
-                if (fileRoute["destination"] == dest) {
-                    fileRoute = newRoute;
-                }
-            }
-            {
-                cout << "\n\nWriting updated config file to " << outputName
+        cout << "\n\nNew calibration applied: please inspect it with the "
+                "Tracker Viewer." << endl;
+        if (configName == outputName) {
+            cout << "If you are satisfied and want to OVERWRITE your existing "
+                    "config file with this update, press enter." << endl;
+            cout << "Otherwise, press Ctrl-C to break out of this program."
+                 << endl;
+            cout << "(If rotations appear incorrect, you may first need to add "
+                    "a basisChange transform layer to the route.)" << endl;
+            waitForEnter();
+        }
+        Json::Value root;
+        {
+            std::ifstream config(configName);
+            if (!config.good()) {
+                cerr << "Could not read the original config file again!"
                      << endl;
-                std::ofstream outfile(outputName);
-                outfile << root.toStyledString();
+                return -1;
             }
+
+            Json::Reader reader;
+            if (!reader.parse(config, root)) {
+                cerr << "Could not parse the original config file again! "
+                        "Should never happen!" << endl;
+                return -1;
+            }
+        }
+        auto &routes = root["routes"];
+        for (auto &fileRoute : routes) {
+            if (fileRoute["destination"] == dest) {
+                fileRoute = newRoute;
+            }
+        }
+        {
+            cout << "\n\nWriting updated config file to " << outputName << endl;
+            std::ofstream outfile(outputName);
+            outfile << root.toStyledString();
         }
 
         cout << "Awaiting Ctrl-C to trigger server shutdown..." << endl;
