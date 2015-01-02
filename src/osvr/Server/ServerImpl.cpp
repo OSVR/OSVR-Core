@@ -154,7 +154,7 @@ namespace server {
     }
 
     void ServerImpl::m_sendRoutes() {
-        std::string message = getRoutes(false);
+        std::string message = m_routes.getRoutes();
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
                                          << " routes to the client.");
         m_sysDevice->sendData(m_routingMessageType.get(), message.c_str(),
