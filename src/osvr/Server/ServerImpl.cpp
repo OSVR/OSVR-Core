@@ -111,7 +111,7 @@ namespace server {
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
         if (f) {
-            m_mainloopMethods.push_back(f);
+            m_callControlled([&] { m_mainloopMethods.push_back(f); });
         }
     }
 
