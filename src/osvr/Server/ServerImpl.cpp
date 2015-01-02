@@ -131,5 +131,25 @@ namespace server {
         return shouldContinue;
     }
 
+    bool ServerImpl::addRoute(std::string const &routingDirective) {
+        bool wasNew;
+        m_callControlled([&] { wasNew = m_routes.addRoute(routingDirective); });
+        return wasNew;
+    }
+
+    std::string ServerImpl::getRoutes(bool styled) const {
+        std::string ret;
+        m_callControlled([&] { ret = m_routes.getRoutes(styled); });
+        return ret;
+    }
+
+    void ServerImpl::m_sendRoutes() {
+        std::string message = getRoutes(false);
+        OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
+                                         << " routes to the client.");
+        m_sysDevice->sendData(m_routingMessageType.get(), message.c_str(),
+                              message.size());
+    }
+
 } // namespace server
 } // namespace osvr

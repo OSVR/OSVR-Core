@@ -15,7 +15,6 @@ set(SOURCE
     Server.cpp
     ServerImpl.cpp
     ServerImpl.h
-    ServerImpl_JSON.cpp
     RouteContainer.cpp)
 
 osvr_add_library()
