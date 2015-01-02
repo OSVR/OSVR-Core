@@ -144,6 +144,12 @@ namespace server {
         return ret;
     }
 
+    std::string ServerImpl::getSource(std::string const &destination) const {
+        std::string ret;
+        m_callControlled([&] { ret = m_routes.getSource(destination); });
+        return ret;
+    }
+
     void ServerImpl::m_sendRoutes() {
         std::string message = getRoutes(false);
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()

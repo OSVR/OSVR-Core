@@ -122,6 +122,11 @@ namespace server {
         /// @param styled Pass `true` if you want the result pretty-printed.
         OSVR_SERVER_EXPORT std::string getRoutes(bool styled = false) const;
 
+        /// @brief Gets the source for a given named destination in the routing
+        /// directives.
+        OSVR_SERVER_EXPORT std::string
+        getSource(std::string const &destination) const;
+
       private:
         unique_ptr<ServerImpl> m_impl;
     };

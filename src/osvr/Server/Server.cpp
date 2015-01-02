@@ -74,6 +74,10 @@ namespace server {
         return m_impl->getRoutes(styled);
     }
 
+    std::string Server::getSource(std::string const &destination) const {
+        return m_impl->getSource(destination);
+    }
+
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)
         : m_impl(new ServerImpl(conn)) {}

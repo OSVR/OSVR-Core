@@ -55,6 +55,9 @@ namespace server {
         /// server shuts down.
         void startAndAwaitShutdown();
 
+        /// @copydoc Server::awaitShutdown()
+        void awaitShutdown();
+
         /// @brief Signal the server to stop, and block until it does so.
         void stop();
 
@@ -76,6 +79,9 @@ namespace server {
 
         /// @copydoc Server::getRoutes()
         std::string getRoutes(bool styled) const;
+
+        /// @copydoc Server::getSource()
+        std::string getSource(std::string const &destination) const;
 
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
