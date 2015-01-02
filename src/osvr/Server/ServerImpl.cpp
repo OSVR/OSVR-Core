@@ -137,7 +137,12 @@ namespace server {
 
     bool ServerImpl::addRoute(std::string const &routingDirective) {
         bool wasNew;
-        m_callControlled([&] { wasNew = m_routes.addRoute(routingDirective); });
+        m_callControlled([&] {
+            wasNew = m_routes.addRoute(routingDirective);
+            if (m_running) {
+                m_sendRoutes();
+            }
+        });
         return wasNew;
     }
 

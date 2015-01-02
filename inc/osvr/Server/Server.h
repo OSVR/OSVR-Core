@@ -117,7 +117,11 @@ namespace server {
         OSVR_SERVER_EXPORT void registerMainloopMethod(MainloopMethod f);
 
         /// @brief Register a JSON string as a routing directive.
-        /// @brief Returns true if the route was new, or false if it replaced an
+        ///
+        /// If the server is running, this will trigger a re-transmission of
+        /// routing directives to all clients.
+        ///
+        /// @returns true if the route was new, or false if it replaced an
         /// existing route for that destination.
         OSVR_SERVER_EXPORT bool addRoute(std::string const &routingDirective);
 
