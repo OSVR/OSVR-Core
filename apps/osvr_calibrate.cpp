@@ -78,6 +78,33 @@ class ClientMainloop : boost::noncopyable {
     boost::mutex m_mutex;
 };
 
+inline Json::Value removeCalibration(std::string const &input) {
+    Json::Reader reader;
+    Json::Value root;
+    if (!reader.parse(input, root)) {
+        throw std::runtime_error("Could not parse route");
+    }
+    std::vector<Json::Value> levels;
+    Json::Value current = root;
+    while (current.isMember("child") && current["child"].isObject()) {
+        if (current.isMember("calibration") &&
+            current["calibration"].isBool() &&
+            current["calibration"].asBool()) {
+            // calibration level - skip it
+        } else {
+            levels.push_back(current);
+        }
+        current = current["child"];
+    }
+    while (levels.size() > 0) {
+        Json::Value next = levels.back();
+        levels.pop_back();
+        next["child"] = current;
+        current = next;
+    }
+    return current;
+}
+
 int main(int argc, char *argv[]) {
     std::string configName;
     std::string outputName;
@@ -147,6 +174,15 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     cout << dest << " -> " << route << endl;
+    Json::Value pruned = removeCalibration(route);
+    {
+        cout << pruned.toStyledString() << endl;
+        cout << "Submitting cleaned route..." << endl;
+        Json::Value prunedDirective(Json::objectValue);
+        prunedDirective["destination"] = dest;
+        prunedDirective["source"] = pruned;
+        srv->addRoute(prunedDirective.toStyledString());
+    }
     cout << "Starting client..." << endl;
     osvr::clientkit::ClientContext ctx("com.osvr.bundled.osvr_calibrate");
     osvr::clientkit::Interface iface = ctx.getInterface(dest);
@@ -198,9 +234,10 @@ int main(int argc, char *argv[]) {
             axis.append(rotation.axis()[2]);
 
             newRoute["destination"] = dest;
+            newRoute["source"]["calibration"] = true;
             newRoute["source"]["rotate"]["radians"] = rotation.angle();
             newRoute["source"]["rotate"]["axis"] = axis;
-            std::istringstream(route) >> newRoute["source"]["child"];
+            newRoute["source"]["child"] = pruned;
 
             bool isNew = server->addRoute(newRoute.toStyledString());
             BOOST_ASSERT_MSG(
