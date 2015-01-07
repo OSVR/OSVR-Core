@@ -56,10 +56,6 @@
     {
       "destination": "/me/head",
       "source": {
-        "rotate": {
-          "degrees": 90,
-          "axis": "x"
-        },
         "child": {
           "changeBasis": {
             "x": "x",
@@ -68,8 +64,8 @@
           },
           "child": {
             "rotate": {
-              "degrees": -90,
-              "axis": "z"
+              "degrees": 90,
+              "axis": "x"
             },
             "child": {
               "tracker": "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",

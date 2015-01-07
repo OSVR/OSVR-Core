@@ -1,0 +1,30 @@
+{
+   "plugins" : [ "org_opengoggles_bundled_Multiserver" ],
+   "routes" : [
+      {
+         "destination" : "/me/head",
+         "source" : {
+            "calibration" : true,
+            "child" : {
+               "child" : {
+            "rotate" : {
+               "axis" : "-x",
+               "degrees" : 180
+            },
+                  "child" : {
+                     "changeBasis" : {
+                        "x" : "x",
+                        "y" : "-z",
+                        "z" : "-y"
+                     },
+                     "child" : {
+                        "sensor" : 0,
+                        "tracker" : "/org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0"
+                     }
+                  }
+               }
+            }
+         }
+      }
+   ]
+}
