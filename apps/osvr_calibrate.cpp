@@ -18,6 +18,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
+#include "ClientMainloop.h"
 #include "JSONTools.h"
 #include "WrapRoute.h"
 #include <osvr/Server/ConfigureServerFromFile.h>
@@ -61,24 +62,6 @@ void handleShutdown() {
 }
 
 void waitForEnter() { std::cin.ignore(); }
-
-/// @brief Simple class to handle running a client mainloop in another thread,
-/// but easily pausable.
-class ClientMainloop : boost::noncopyable {
-  public:
-    ClientMainloop(osvr::clientkit::ClientContext &ctx) : m_ctx(ctx) {}
-    void mainloop() {
-        boost::unique_lock<boost::mutex> lock(m_mutex, boost::try_to_lock);
-        if (lock) {
-            m_ctx.update();
-        }
-    }
-    boost::mutex &getMutex() { return m_mutex; }
-
-  private:
-    osvr::clientkit::ClientContext &m_ctx;
-    boost::mutex m_mutex;
-};
 
 inline Json::Value removeCalibration(std::string const &input) {
     Json::Reader reader;

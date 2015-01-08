@@ -9,7 +9,7 @@ target_link_libraries(osvr_server jsoncpp_lib)
 target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp osvrRouting eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 
 
-add_executable(osvr_reset_yaw ResetYaw.cpp WrapRoute.h JSONTools.h)
+add_executable(osvr_reset_yaw ResetYaw.cpp WrapRoute.h JSONTools.h ClientMainloop.h)
 target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrVRPN eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 set_target_properties(osvr_reset_yaw PROPERTIES
 	FOLDER "OSVR Stock Applications")
