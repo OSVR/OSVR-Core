@@ -51,7 +51,7 @@ namespace client {
     };
 
     typedef unique_ptr<RouterEntry> RouterEntryPtr;
-
+    class SystemClient;
     class VRPNContext : public ::OSVR_ClientContextObject {
       public:
         VRPNContext(const char appId[], const char host[] = "localhost");
@@ -74,6 +74,11 @@ namespace client {
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;
         std::vector<RouterEntryPtr> m_routers;
+        unique_ptr<SystemClient> m_client;
+        /// @brief sender ID for the application.
+        vrpn_int32 m_sender;
+        /// @brief Message ID for route update.
+        vrpn_int32 m_routeUpdate;
     };
 } // namespace client
 } // namespace osvr

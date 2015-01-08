@@ -171,6 +171,8 @@ namespace server {
                                            std::string const &,
                                            OSVR_TimeValue const &,
                                            std::string const &msg) {
+
+        OSVR_DEV_VERBOSE("Got an updated route from a client.");
         m_routes.addRoute(msg);
         m_sendRoutes();
     }

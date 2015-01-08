@@ -50,6 +50,7 @@ class ClientMainloopThread : boost::noncopyable {
         m_thread = boost::thread([&] {
             while (m_run) {
                 m_mainloop.mainloop();
+                boost::this_thread::yield();
             }
         });
     }
@@ -146,6 +147,8 @@ int main(int argc, char *argv[]) {
         }
 
         boost::this_thread::sleep(SETTLE_TIME);
+
+        std::cin.ignore();
     }
     return 0;
 }

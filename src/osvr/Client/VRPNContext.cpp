@@ -99,6 +99,7 @@ namespace client {
         m_conn =
             vrpn_get_connection_by_name(contextDevice.c_str(), nullptr, nullptr,
                                         nullptr, nullptr, nullptr, true);
+        m_conn->removeReference(); // Remove extra reference.
         m_client.reset(new SystemClient(contextDevice.c_str(), m_conn.get()));
 
         setParameter("/display",

@@ -24,6 +24,10 @@
 // Library/third-party includes
 #include <boost/assert.hpp>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 // Standard includes
 #include <algorithm>
 
@@ -34,9 +38,19 @@ using ::osvr::make_shared;
 OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[])
     : m_appId(appId) {
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
+#ifdef _WIN32
+    WSADATA wsaData;
+    int err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (err != 0) {
+        throw std::runtime_error("Can't initialize Windows Sockets!");
+    }
+#endif
 }
 
-OSVR_ClientContextObject::~OSVR_ClientContextObject() {}
+OSVR_ClientContextObject::~OSVR_ClientContextObject() {
+    m_interfaces.clear();
+    WSACleanup();
+}
 
 std::string const &OSVR_ClientContextObject::getAppId() const {
     return m_appId;
