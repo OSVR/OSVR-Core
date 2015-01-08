@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include <osvr/Connection/Connection.h>
+#include <osvr/VRPN/MessageHandler.h>
 
 // Library/third-party includes
 #include <vrpn_Connection.h>
@@ -80,12 +81,10 @@ namespace connection {
 
         static int VRPN_CALLBACK
         m_connectionHandler(void *userdata, vrpn_HANDLERPARAM);
-        static int VRPN_CALLBACK
-        m_messageHandler(void *userdata, vrpn_HANDLERPARAM param);
 
         vrpn_ConnectionPtr m_vrpnConnection;
         std::vector<std::function<void()> > m_connectionHandlers;
-        std::vector<unique_ptr<HandlerRecord> > m_generalMessageHandlers;
+        unique_ptr<::osvr::vrpn::MessageHandler> m_messageHandler;
     };
 
 } // namespace connection
