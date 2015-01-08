@@ -43,6 +43,38 @@
 
 namespace osvr {
 namespace client {
+
+    class SystemClient : public vrpn_BaseClass {
+      public:
+        SystemClient(const char *name, vrpn_Connection *c = nullptr)
+            : vrpn_BaseClass(name, c) {
+            vrpn_BaseClass::init();
+        }
+
+        vrpn_int32 getRouteUpdateMsgId() const { return m_routeUpdate; }
+        virtual ~SystemClient() {}
+
+        /// Called once through each main loop iteration to handle updates.
+        /// Remote object mainloop() should call client_mainloop() and
+        /// then call d_connection->mainloop().
+        /// Server object mainloop() should service the device and then
+        /// call server_mainloop(), but should not normally call
+        /// d_connection->mainloop().
+        virtual void mainloop() {
+            client_mainloop();
+            d_connection->mainloop();
+        }
+
+      protected:
+        virtual int register_types(void) {
+            m_routeUpdate = d_connection->register_message_type(
+                util::messagekeys::routeUpdate());
+            return 0;
+        }
+
+      private:
+        vrpn_int32 m_routeUpdate;
+    };
     RouterEntry::~RouterEntry() {}
 
     static inline transform::Transform getTransform(const char *data,
@@ -67,11 +99,11 @@ namespace client {
         m_conn =
             vrpn_get_connection_by_name(contextDevice.c_str(), nullptr, nullptr,
                                         nullptr, nullptr, nullptr, true);
+        m_client.reset(new SystemClient(contextDevice.c_str(), m_conn.get()));
 
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
                                  display_json_len));
-
         m_conn->register_handler(
             m_conn->register_message_type(util::messagekeys::routingData()),
             &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
@@ -153,6 +185,7 @@ namespace client {
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
         m_conn->mainloop();
+        m_client->mainloop();
         // Process each of the routers.
         for (auto const &p : m_routers) {
             (*p)();
@@ -161,15 +194,12 @@ namespace client {
 
     void VRPNContext::m_sendRoute(std::string const &route) {
         vrpn_int32 sender =
-            m_conn->register_sender(util::messagekeys::appSender());
-        vrpn_int32 msgType =
-            m_conn->register_message_type(util::messagekeys::routeUpdate());
+            m_conn->register_sender(util::messagekeys::systemSender());
         struct timeval timestamp;
         vrpn_gettimeofday(&timestamp, nullptr);
-        m_conn->pack_message(route.size(), timestamp, msgType, sender,
+        m_conn->pack_message(route.size(), timestamp,
+                             m_client->getRouteUpdateMsgId(), sender,
                              route.c_str(), vrpn_CONNECTION_RELIABLE);
-        OSVR_DEV_VERBOSE(
-            "Context does not support sending routes back to server.");
     }
 
     void VRPNContext::m_addAnalogRouter(const char *src, const char *dest,
