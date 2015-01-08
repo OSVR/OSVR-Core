@@ -150,7 +150,6 @@ namespace client {
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
         m_conn->mainloop();
-        m_client->mainloop();
         // Process each of the routers.
         for (auto const &p : m_routers) {
             (*p)();
