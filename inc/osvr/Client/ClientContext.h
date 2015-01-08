@@ -23,6 +23,7 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Client/ClientContext_fwd.h>
 #include <osvr/Client/ClientInterfacePtr.h>
+#include <osvr/Routing/RouteContainer.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -71,6 +72,9 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @brief Sends a JSON route/transform object to the server.
     OSVR_CLIENT_EXPORT void sendRoute(std::string const &route);
 
+    /// @brief Gets routing directives.
+    OSVR_CLIENT_EXPORT osvr::routing::RouteContainer const &getRoutes() const;
+
     /// @brief Sets a string parameter value.
     void setParameter(std::string const &path, std::string const &value);
 
@@ -78,9 +82,12 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @brief Constructor for derived class use only.
     OSVR_ClientContextObject(const char appId[]);
 
+    osvr::routing::RouteContainer m_routingDirectives;
+
   private:
     virtual void m_update() = 0;
     virtual void m_sendRoute(std::string const &route);
+
     std::string const m_appId;
     InterfaceList m_interfaces;
     std::map<std::string, std::string> m_params;

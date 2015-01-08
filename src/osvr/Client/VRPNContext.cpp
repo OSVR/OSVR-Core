@@ -31,6 +31,8 @@
 #include <osvr/Transform/JSONTransformVisitor.h>
 #include <osvr/Transform/ChangeOfBasis.h>
 #include <osvr/Util/MessageKeys.h>
+#include <osvr/Routing/RouteContainer.h>
+#include <osvr/Routing/RoutingKeys.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -80,31 +82,31 @@ namespace client {
     int VRPNContext::m_handleRoutingMessage(void *userdata,
                                             vrpn_HANDLERPARAM p) {
         VRPNContext *self = static_cast<VRPNContext *>(userdata);
-        self->m_replaceRoutes(std::string(p.buffer, p.payload_len));
+        routing::RouteContainer newDirectives(
+            std::string(p.buffer, p.payload_len));
+        OSVR_DEV_VERBOSE("Replacing routes: had "
+                         << self->m_routingDirectives.size() << ", received "
+                         << newDirectives.size());
+        self->m_routingDirectives = newDirectives;
+        self->m_replaceRoutes();
         return 0;
     }
-    static const char SOURCE_KEY[] = "source";
-    static const char DESTINATION_KEY[] = "destination";
     static const char SENSOR_KEY[] = "sensor";
     static const char TRACKER_KEY[] = "tracker";
-    void VRPNContext::m_replaceRoutes(std::string const &routes) {
-
-        Json::Value root;
-        Json::Reader reader;
-        if (!reader.parse(routes, root)) {
-            throw std::runtime_error("JSON parse error: " +
-                                     reader.getFormattedErrorMessages());
-        }
-        OSVR_DEV_VERBOSE("Replacing routes: had "
-                         << m_routers.size() << ", received " << root.size());
+    void VRPNContext::m_replaceRoutes() {
         m_routers.clear();
-        for (Json::ArrayIndex i = 0, e = root.size(); i < e; ++i) {
-            Json::Value route = root[i];
-
-            std::string dest = route[DESTINATION_KEY].asString();
+        Json::Reader reader;
+        for (auto const &routeString : m_routingDirectives.getRouteList()) {
+            Json::Value route;
+            if (!reader.parse(routeString, route)) {
+                OSVR_DEV_VERBOSE("Got a bad route!");
+                continue;
+            }
+            std::string dest = route[routing::keys::destination()].asString();
             boost::optional<int> sensor;
 
-            transform::JSONTransformVisitor xformParse(route[SOURCE_KEY]);
+            transform::JSONTransformVisitor xformParse(
+                route[routing::keys::source()]);
             Json::Value srcLeaf = xformParse.getLeaf();
             std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
             // OSVR_DEV_VERBOSE("Source device: " << srcDevice);

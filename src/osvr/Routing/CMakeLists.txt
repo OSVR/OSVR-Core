@@ -12,7 +12,9 @@ set(API
     "${HEADER_LOCATION}/PathTree.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
     "${HEADER_LOCATION}/PathTreeFull.h"
-    "${HEADER_LOCATION}/Routing.h")
+    "${HEADER_LOCATION}/RouteContainer.h"
+    "${HEADER_LOCATION}/Routing.h"
+    "${HEADER_LOCATION}/RoutingKeys.h")
 
 set(SOURCE
     AddDevice.cpp
@@ -22,7 +24,9 @@ set(SOURCE
     PathNode.cpp
     PathParseAndRetrieve.cpp
     PathParseAndRetrieve.h
-    PathTree.cpp)
+    PathTree.cpp
+    RouteContainer.cpp
+    RoutingKeys.cpp)
 
 osvr_add_library()
 
@@ -40,4 +44,6 @@ target_include_directories(${LIBNAME_FULL}
 
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
-    osvrUtilCpp)
+    osvrUtilCpp
+    PRIVATE
+    jsoncpp_lib)

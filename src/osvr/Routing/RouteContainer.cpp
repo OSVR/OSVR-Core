@@ -16,7 +16,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/Server/RouteContainer.h>
+#include <osvr/Routing/RouteContainer.h>
+#include <osvr/Routing/RoutingKeys.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -29,7 +30,7 @@
 #include <algorithm>
 
 namespace osvr {
-namespace server {
+namespace routing {
 
     static inline Json::Value
     parseRoutingDirective(std::string const &routingDirective) {
@@ -42,11 +43,9 @@ namespace server {
         return val;
     }
 
-    static const char DESTINATION_KEY[] = "destination";
-
     static inline std::string
     getDestination(Json::Value const &routingDirective) {
-        return routingDirective.get(DESTINATION_KEY, "").asString();
+        return routingDirective.get(keys::destination(), "").asString();
     }
     static inline std::string toFastString(Json::Value const &val) {
         Json::FastWriter writer;
@@ -84,7 +83,6 @@ namespace server {
         }
     }
 
-    static const char SOURCE_KEY[] = "source";
     std::string
     RouteContainer::getSource(std::string const &destination) const {
         auto it =
@@ -95,8 +93,8 @@ namespace server {
         });
         if (it != end(m_routingDirectives)) {
             Json::Value directive = parseRoutingDirective(*it);
-            if (directive.isMember(SOURCE_KEY)) {
-                return directive[SOURCE_KEY].toStyledString();
+            if (directive.isMember(keys::source())) {
+                return directive[keys::source()].toStyledString();
             }
         }
         return std::string();
@@ -124,5 +122,5 @@ namespace server {
         }
         return !replaced;
     }
-} // namespace server
+} // namespace routing
 } // namespace osvr

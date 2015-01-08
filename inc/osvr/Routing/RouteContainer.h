@@ -19,7 +19,7 @@
 #define INCLUDED_RouteContainer_h_GUID_EA5F3FB5_13E4_4299_5B39_1C986BC8E784
 
 // Internal Includes
-#include <osvr/Server/Export.h>
+#include <osvr/Routing/Export.h>
 
 // Library/third-party includes
 // - none
@@ -29,32 +29,36 @@
 #include <string>
 
 namespace osvr {
-namespace server {
+namespace routing {
     class RouteContainer {
       public:
         /// @brief Empty constructor
-        OSVR_SERVER_EXPORT RouteContainer();
+        OSVR_ROUTING_EXPORT RouteContainer();
 
         /// @brief Constructor from a JSON array of routes.
-        OSVR_SERVER_EXPORT explicit RouteContainer(std::string const &routes);
+        OSVR_ROUTING_EXPORT explicit RouteContainer(std::string const &routes);
 
         /// @brief Register a JSON string as a routing directive.
         /// @returns true if the route was new, false if it replaced a previous
         /// route for that destination.
-        OSVR_SERVER_EXPORT bool addRoute(std::string const &routingDirective);
+        OSVR_ROUTING_EXPORT bool addRoute(std::string const &routingDirective);
 
         /// @brief Get a JSON array of all routing directives.
         /// @param styled Pass `true` if you want the result pretty-printed.
-        OSVR_SERVER_EXPORT std::string getRoutes(bool styled = false) const;
+        OSVR_ROUTING_EXPORT std::string getRoutes(bool styled = false) const;
 
         /// @brief Get the source JSON string for a given destination path.
         /// @returns an empty string if the destination was not found.
-        OSVR_SERVER_EXPORT std::string
+        OSVR_ROUTING_EXPORT std::string
         getSource(std::string const &destination) const;
 
         /// @brief Gets the number of directives
-        OSVR_SERVER_EXPORT std::size_t size() const {
+        OSVR_ROUTING_EXPORT std::size_t size() const {
             return m_routingDirectives.size();
+        }
+
+        std::vector<std::string> const &getRouteList() const {
+            return m_routingDirectives;
         }
 
       private:
@@ -66,6 +70,6 @@ namespace server {
                         std::string const &directive);
         std::vector<std::string> m_routingDirectives;
     };
-} // namespace server
+} // namespace routing
 } // namespace osvr
 #endif // INCLUDED_RouteContainer_h_GUID_EA5F3FB5_13E4_4299_5B39_1C986BC8E784
