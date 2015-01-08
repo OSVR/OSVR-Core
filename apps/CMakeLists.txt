@@ -8,7 +8,13 @@ endforeach()
 target_link_libraries(osvr_server jsoncpp_lib)
 target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 
-install(TARGETS osvr_server osvr_calibrate
+
+add_executable(osvr_reset_yaw ResetYaw.cpp)
+target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+set_target_properties(osvr_reset_yaw PROPERTIES
+	FOLDER "OSVR Stock Applications")
+
+install(TARGETS osvr_server osvr_calibrate osvr_reset_yaw
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 install(TARGETS BasicServer
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
