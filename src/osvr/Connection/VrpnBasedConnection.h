@@ -35,6 +35,14 @@ namespace connection {
         /// @brief Return the string identifying VRPN ping messages
         const char *vrpnPing();
     } // namespace messageid
+    class VrpnBasedConnection;
+    struct HandlerRecord {
+        HandlerRecord(Connection::GeneralMessageHandler h,
+                      VrpnBasedConnection &obj)
+            : handler(h), self(&obj) {}
+        Connection::GeneralMessageHandler handler;
+        VrpnBasedConnection *self;
+    };
     class VrpnBasedConnection : public Connection {
       public:
         enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
@@ -65,13 +73,19 @@ namespace connection {
         virtual ConnectionDevicePtr
         m_registerDevice(std::string const &deviceName);
         virtual void m_registerConnectionHandler(std::function<void()> handler);
+        void m_registerMessageHandler(GeneralMessageHandler const &handler,
+                                      std::string const &device,
+                                      std::string const &messageType);
         virtual void m_process();
 
         static int VRPN_CALLBACK
         m_connectionHandler(void *userdata, vrpn_HANDLERPARAM);
+        static int VRPN_CALLBACK
+        m_messageHandler(void *userdata, vrpn_HANDLERPARAM param);
 
         vrpn_ConnectionPtr m_vrpnConnection;
         std::vector<std::function<void()> > m_connectionHandlers;
+        std::vector<unique_ptr<HandlerRecord> > m_generalMessageHandlers;
     };
 
 } // namespace connection

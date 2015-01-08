@@ -31,6 +31,9 @@ namespace util {
         const char *routingData() {
             return "org.opengoggles.system.routingdata";
         }
+
+        const char *appSender() { return "OSVRApp"; }
+        const char *routeUpdate() { return "com.osvr.system.routeupdate"; }
     } // namespace messagekeys
 } // namespace util
 } // namespace osvr

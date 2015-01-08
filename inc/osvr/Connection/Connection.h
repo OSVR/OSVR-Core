@@ -26,6 +26,7 @@
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
+#include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -99,6 +100,17 @@ namespace connection {
         OSVR_CONNECTION_EXPORT void
         registerConnectionHandler(std::function<void()> handler);
 
+        /// params sender, msgType, timestamp, msg
+        typedef std::function<void(std::string const &, std::string const &,
+                                   OSVR_TimeValue const &, std::string const &)>
+            GeneralMessageHandler;
+        /// @brief Register a function to be called for a specific message type
+        /// or device
+        OSVR_CONNECTION_EXPORT void
+        registerMessageHandler(GeneralMessageHandler const &handler,
+                               std::string const &device = std::string(),
+                               std::string const &messageType = std::string());
+
         /// @brief Destructor
         OSVR_CONNECTION_EXPORT virtual ~Connection();
 
@@ -160,6 +172,12 @@ namespace connection {
         /// connection"/ping messages.
         virtual void
         m_registerConnectionHandler(std::function<void()> handler) = 0;
+
+        /// @brief subclass implementation
+        virtual void
+        m_registerMessageHandler(GeneralMessageHandler const &handler,
+                                 std::string const &device,
+                                 std::string const &messageType) = 0;
 
         /// @brief (Subclass implementation) Process messages. This shouldn't
         /// block.

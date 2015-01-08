@@ -34,8 +34,13 @@ namespace util {
     namespace messagekeys {
         /// @brief The sender type for system messages.
         OSVR_UTIL_EXPORT const char *systemSender();
-        /// @brief Return the string identifying routing data messages
+        /// @brief Return the string identifying full routing data messages
         OSVR_UTIL_EXPORT const char *routingData();
+        /// @brief The sender type for client-to-server messages.
+        OSVR_UTIL_EXPORT const char *appSender();
+        /// @brief Return the string identifying individual (non-persistent)
+        /// route additions/updates from client to server
+        OSVR_UTIL_EXPORT const char *routeUpdate();
     } // namespace messagekeys
 } // namespace util
 } // namespace osvr

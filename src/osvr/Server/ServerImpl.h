@@ -118,6 +118,9 @@ namespace server {
         /// @brief Routing data message
         connection::MessageTypePtr m_routingMessageType;
 
+        /// @brief Route update (from client) message
+        connection::MessageTypePtr m_routeUpdateMessageType;
+
         /// @brief JSON routing directives
         RouteContainer m_routes;
 

@@ -27,7 +27,8 @@
 // - none
 
 // Standard includes
-// - none
+#include <memory>
+#include <functional>
 
 namespace osvr {
 namespace connection {
@@ -97,6 +98,40 @@ namespace connection {
 #endif
         }
         m_connectionHandlers.push_back(handler);
+    }
+    void VrpnBasedConnection::m_registerMessageHandler(
+        GeneralMessageHandler const &handler, std::string const &device,
+        std::string const &messageType) {
+
+        boost::optional<vrpn_int32> devID;
+        if (!device.empty()) {
+            devID = m_vrpnConnection->register_sender(device.c_str());
+        }
+        boost::optional<vrpn_int32> msgType;
+        if (!messageType.empty()) {
+            msgType = m_vrpnConnection->register_message_type(device.c_str());
+        }
+        unique_ptr<HandlerRecord> record(new HandlerRecord(handler, *this));
+
+        m_vrpnConnection->register_handler(
+            msgType.get_value_or(vrpn_ANY_SENDER),
+            &VrpnBasedConnection::m_messageHandler, record.get(),
+            devID.get_value_or(vrpn_ANY_SENDER));
+        m_generalMessageHandlers.emplace_back(record.release());
+    }
+
+    int VrpnBasedConnection::m_messageHandler(void *userdata,
+                                              vrpn_HANDLERPARAM param) {
+        HandlerRecord *record = static_cast<HandlerRecord *>(userdata);
+        std::string msgType(
+            record->self->m_vrpnConnection->message_type_name(param.type));
+        std::string sender(
+            record->self->m_vrpnConnection->sender_name(param.sender));
+        OSVR_TimeValue timestamp;
+        osvrStructTimevalToTimeValue(&timestamp, &(param.msg_time));
+        std::string msg(param.buffer, param.payload_len);
+        record->handler(sender, msgType, timestamp, msg);
+        return 0;
     }
 
     int VrpnBasedConnection::m_connectionHandler(void *userdata,

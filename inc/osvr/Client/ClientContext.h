@@ -68,6 +68,9 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     OSVR_CLIENT_EXPORT std::string
     getStringParameter(std::string const &path) const;
 
+    /// @brief Sends a JSON route/transform object to the server.
+    OSVR_CLIENT_EXPORT void sendRoute(std::string const &route);
+
     /// @brief Sets a string parameter value.
     void setParameter(std::string const &path, std::string const &value);
 
@@ -77,6 +80,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
   private:
     virtual void m_update() = 0;
+    virtual void m_sendRoute(std::string const &route);
     std::string const m_appId;
     InterfaceList m_interfaces;
     std::map<std::string, std::string> m_params;

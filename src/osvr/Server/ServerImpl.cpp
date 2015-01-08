@@ -50,10 +50,18 @@ namespace server {
             m_routingMessageType =
                 m_conn->registerMessageType(util::messagekeys::routingData());
         }
+
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::m_sendRoutes, std::ref(*this)));
+
+        // Register handler for receiving a message from the client with a route
+        // update.
+        m_routeUpdateMessageType =
+            m_conn->registerMessageType(util::messagekeys::routeUpdate());
+        /// @todo Register handler for receiving a message from the client with
+        /// a route update.
     }
 
     ServerImpl::~ServerImpl() { stop(); }

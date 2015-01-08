@@ -129,6 +129,12 @@ namespace connection {
         m_registerConnectionHandler(handler);
     }
 
+    void Connection::registerMessageHandler(
+        Connection::GeneralMessageHandler const &handler,
+        std::string const &device, std::string const &messageType) {
+        m_registerMessageHandler(handler, device, messageType);
+    }
+
     Connection::Connection() {}
 
     Connection::~Connection() {}
