@@ -1,10 +1,12 @@
 osvr_setup_lib_vars(VRPN)
 
 set(API
-    "${HEADER_LOCATION}/ConstructVRPNObject.h")
+    "${HEADER_LOCATION}/ConstructVRPNObject.h"
+    "${HEADER_LOCATION}/MessageHandler.h")
 
 set(SOURCE
-    ConstructVRPNObject.cpp)
+    ConstructVRPNObject.cpp
+    MessageHandler.cpp)
 
 osvr_add_library()
 
