@@ -12,5 +12,5 @@ For Linux:
 
 - The above (any reasonably recent Clang or GCC is fine), plus `libusb-1.0-0-dev`
 
-[libfunctionality]:https://github.com/sensics/libfunctionality
-[jsoncpp]:https://github.com/sensics/jsoncpp
+[libfunctionality]:https://github.com/OSVR/libfunctionality
+[jsoncpp]:https://github.com/VRPN/jsoncpp
