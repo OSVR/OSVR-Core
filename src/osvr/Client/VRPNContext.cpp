@@ -69,7 +69,6 @@ namespace client {
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
                                  display_json_len));
-
         m_conn->register_handler(
             m_conn->register_message_type(util::messagekeys::routingData()),
             &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
@@ -151,6 +150,7 @@ namespace client {
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
         m_conn->mainloop();
+        m_client->mainloop();
         // Process each of the routers.
         for (auto const &p : m_routers) {
             (*p)();
