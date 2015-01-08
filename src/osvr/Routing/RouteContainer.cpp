@@ -85,6 +85,18 @@ namespace routing {
 
     std::string
     RouteContainer::getSource(std::string const &destination) const {
+        auto route = getRouteForDestination(destination);
+        if (!route.empty()) {
+            Json::Value directive = parseRoutingDirective(route);
+            if (directive.isMember(keys::source())) {
+                return directive[keys::source()].toStyledString();
+            }
+        }
+        return std::string();
+    }
+
+    std::string RouteContainer::getRouteForDestination(
+        std::string const &destination) const {
         auto it =
             std::find_if(begin(m_routingDirectives), end(m_routingDirectives),
                          [&](std::string const &directive) {
@@ -92,10 +104,7 @@ namespace routing {
                     destination);
         });
         if (it != end(m_routingDirectives)) {
-            Json::Value directive = parseRoutingDirective(*it);
-            if (directive.isMember(keys::source())) {
-                return directive[keys::source()].toStyledString();
-            }
+            return *it;
         }
         return std::string();
     }

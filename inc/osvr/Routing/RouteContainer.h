@@ -52,6 +52,12 @@ namespace routing {
         OSVR_ROUTING_EXPORT std::string
         getSource(std::string const &destination) const;
 
+        /// @brief Get the full routing JSON string for a given destination
+        /// path.
+        /// @returns an empty string if the destination was not found.
+        OSVR_ROUTING_EXPORT std::string
+        getRouteForDestination(std::string const &destination) const;
+
         /// @brief Gets the number of directives
         OSVR_ROUTING_EXPORT std::size_t size() const {
             return m_routingDirectives.size();
