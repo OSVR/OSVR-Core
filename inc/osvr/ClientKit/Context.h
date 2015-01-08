@@ -100,6 +100,8 @@ namespace clientkit {
         iface = Interface(*this, NULL);
     }
 
+    inline OSVR_ClientContext ClientContext::get() { return m_context; }
+
 } // end namespace clientkit
 
 } // end namespace osvr

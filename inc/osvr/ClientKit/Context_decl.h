@@ -81,6 +81,9 @@ namespace clientkit {
         /// context close).
         void free(Interface &iface);
 
+        /// @brief Gets the raw context.
+        OSVR_ClientContext get();
+
       private:
         OSVR_ClientContext m_context;
     };

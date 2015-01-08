@@ -61,6 +61,6 @@ int main(int argc, char *argv[]) {
         }
     }
     osvr::clientkit::ClientContext ctx("com.osvr.bundled.resetyaw");
-
+    osvr::routing::RouteContainer routes = ctx.get()->getRoutes();
     return 0;
 }

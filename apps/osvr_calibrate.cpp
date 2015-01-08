@@ -18,6 +18,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
+#include "JSONTools.h"
+#include "WrapRoute.h"
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
 
@@ -175,10 +177,10 @@ int main(int argc, char *argv[]) {
     }
     cout << dest << " -> " << route << endl;
     Json::Value pruned = removeCalibration(route);
+    Json::Value prunedDirective(Json::objectValue);
     {
         cout << pruned.toStyledString() << endl;
         cout << "Submitting cleaned route..." << endl;
-        Json::Value prunedDirective(Json::objectValue);
         prunedDirective["destination"] = dest;
         prunedDirective["source"] = pruned;
         srv->addRoute(prunedDirective.toStyledString());
@@ -224,21 +226,13 @@ int main(int argc, char *argv[]) {
 
         cout << "Angle: " << rotation.angle()
              << " Axis: " << rotation.axis().transpose() << endl;
-
-        Json::Value newRoute(Json::objectValue);
+        Json::Value newRoute;
         {
-
-            Json::Value axis(Json::arrayValue);
-            axis.append(rotation.axis()[0]);
-            axis.append(rotation.axis()[1]);
-            axis.append(rotation.axis()[2]);
-
-            newRoute["destination"] = dest;
-            newRoute["source"]["calibration"] = true;
-            newRoute["source"]["rotate"]["radians"] = rotation.angle();
-            newRoute["source"]["rotate"]["axis"] = axis;
-            newRoute["source"]["child"] = pruned;
-
+            Json::Value newLayer(Json::objectValue);
+            newLayer["calibration"] = true;
+            newLayer["rotate"]["radians"] = rotation.angle();
+            newLayer["rotate"]["axis"] = toJson(rotation.axis());
+            newRoute = wrapRoute(prunedDirective, newLayer);
             bool isNew = server->addRoute(newRoute.toStyledString());
             BOOST_ASSERT_MSG(
                 !isNew,
