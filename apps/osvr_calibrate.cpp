@@ -164,8 +164,8 @@ int main(int argc, char *argv[]) {
     {
         cout << pruned.toStyledString() << endl;
         cout << "Submitting cleaned route..." << endl;
-        prunedDirective["destination"] = dest;
-        prunedDirective["source"] = pruned;
+        prunedDirective[osvr::routing::keys::destination()] = dest;
+        prunedDirective[osvr::routing::keys::source()] = pruned;
         srv->addRoute(prunedDirective.toStyledString());
     }
     cout << "Starting client..." << endl;

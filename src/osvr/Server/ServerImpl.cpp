@@ -58,10 +58,11 @@ namespace server {
 
         // Register handler for receiving a message from the client with a route
         // update.
-        m_routeUpdateMessageType =
-            m_conn->registerMessageType(util::messagekeys::routeUpdate());
-        /// @todo Register handler for receiving a message from the client with
-        /// a route update.
+        namespace ph = std::placeholders;
+        m_conn->registerMessageHandler(
+            std::bind(&ServerImpl::m_routeUpdateCallback, std::ref(*this),
+                      ph::_1, ph::_2, ph::_3, ph::_4),
+            std::string(), util::messagekeys::routeUpdate());
     }
 
     ServerImpl::~ServerImpl() { stop(); }
@@ -164,6 +165,14 @@ namespace server {
         std::string ret;
         m_callControlled([&] { ret = m_routes.getSource(destination); });
         return ret;
+    }
+
+    void ServerImpl::m_routeUpdateCallback(std::string const &,
+                                           std::string const &,
+                                           OSVR_TimeValue const &,
+                                           std::string const &msg) {
+        m_routes.addRoute(msg);
+        m_sendRoutes();
     }
 
     void ServerImpl::m_sendRoutes() {

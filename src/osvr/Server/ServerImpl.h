@@ -103,6 +103,11 @@ namespace server {
         /// @brief sends route message.
         void m_sendRoutes();
 
+        /// @brief Callback on a route update coming from a client
+        void m_routeUpdateCallback(std::string const &, std::string const &,
+                                   OSVR_TimeValue const &,
+                                   std::string const &msg);
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -117,9 +122,6 @@ namespace server {
 
         /// @brief Routing data message
         connection::MessageTypePtr m_routingMessageType;
-
-        /// @brief Route update (from client) message
-        connection::MessageTypePtr m_routeUpdateMessageType;
 
         /// @brief JSON routing directives
         routing::RouteContainer m_routes;

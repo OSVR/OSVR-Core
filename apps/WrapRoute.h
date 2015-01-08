@@ -28,8 +28,7 @@
 // Standard includes
 // - none
 
-inline Json::Value wrapRoute(Json::Value currentRoute,
-                             Json::Value const &newLevel) {
+inline Json::Value wrapRoute(Json::Value currentRoute, Json::Value newLevel) {
     Json::Value ret = currentRoute;
     Json::Value prevSource = currentRoute[osvr::routing::keys::source()];
     ret[osvr::routing::keys::source()] = newLevel;

@@ -159,6 +159,19 @@ namespace client {
         }
     }
 
+    void VRPNContext::m_sendRoute(std::string const &route) {
+        vrpn_int32 sender =
+            m_conn->register_sender(util::messagekeys::appSender());
+        vrpn_int32 msgType =
+            m_conn->register_message_type(util::messagekeys::routeUpdate());
+        struct timeval timestamp;
+        vrpn_gettimeofday(&timestamp, nullptr);
+        m_conn->pack_message(route.size(), timestamp, msgType, sender,
+                             route.c_str(), vrpn_CONNECTION_RELIABLE);
+        OSVR_DEV_VERBOSE(
+            "Context does not support sending routes back to server.");
+    }
+
     void VRPNContext::m_addAnalogRouter(const char *src, const char *dest,
                                         int channel) {
         OSVR_DEV_VERBOSE("Adding analog route for " << dest);

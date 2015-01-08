@@ -62,6 +62,7 @@ namespace client {
         m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
         void m_replaceRoutes();
         virtual void m_update();
+        virtual void m_sendRoute(std::string const &route);
         void m_addAnalogRouter(const char *src, const char *dest, int channel);
         template <typename Predicate>
         void m_addButtonRouter(const char *src, const char *dest,

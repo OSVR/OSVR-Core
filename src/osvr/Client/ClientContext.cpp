@@ -103,12 +103,12 @@ OSVR_ClientContextObject::getRoutes() const {
     return m_routingDirectives;
 }
 
+void OSVR_ClientContextObject::sendRoute(std::string const &route) {
+    m_sendRoute(route);
+}
+
 void OSVR_ClientContextObject::setParameter(std::string const &path,
                                             std::string const &value) {
     OSVR_DEV_VERBOSE("Parameter set for " << path);
     m_params[path] = value;
-}
-
-void OSVR_ClientContextObject::m_sendRoute(std::string const &) {
-    OSVR_DEV_VERBOSE("Context does not support sending routes back to server.");
 }
