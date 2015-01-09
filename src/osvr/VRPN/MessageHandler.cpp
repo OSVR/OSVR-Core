@@ -40,7 +40,7 @@ namespace vrpn {
             }
             if (!messageType.empty()) {
                 m_msgType =
-                    m_vrpnConnection->register_message_type(device.c_str());
+                    m_vrpnConnection->register_message_type(messageType.c_str());
             }
             m_vrpnConnection->register_handler(
                 m_getMsgType(), &CallbackRecord::s_messageHandler, this,
