@@ -65,7 +65,7 @@ namespace client {
         m_conn =
             vrpn_get_connection_by_name(contextDevice.c_str(), nullptr, nullptr,
                                         nullptr, nullptr, nullptr, true);
-
+        m_conn->removeReference(); // Remove extra reference.
         setParameter("/display",
                      std::string(reinterpret_cast<char *>(display_json),
                                  display_json_len));
