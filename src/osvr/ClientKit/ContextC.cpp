@@ -27,9 +27,16 @@
 // Standard includes
 // - none
 
+static const char HOST_ENV_VAR[] = "OSVR_HOST";
+
 OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
                                   uint32_t /*flags*/) {
-    return ::osvr::client::createContext(applicationIdentifier);
+    char *host = ::getenv(HOST_ENV_VAR);
+    if (nullptr != host) {
+        return ::osvr::client::createContext(applicationIdentifier, host);
+    } else {
+        return ::osvr::client::createContext(applicationIdentifier);
+    }
 }
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
     ctx->update();
