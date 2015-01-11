@@ -162,7 +162,7 @@ namespace client {
 
         m_routers.emplace_back(
             new VRPNAnalogRouter<SensorPredicate, NullTransform>(
-                this, m_conn.get(), src, dest, SensorPredicate(channel),
+                this, m_conn.get(), (src + ("@" + m_host)).c_str(), dest, SensorPredicate(channel),
                 NullTransform(), channel));
     }
 
@@ -171,7 +171,7 @@ namespace client {
                                         Predicate pred) {
         OSVR_DEV_VERBOSE("Adding button route for " << dest);
         m_routers.emplace_back(new VRPNButtonRouter<Predicate>(
-            this, m_conn.get(), src, dest, pred));
+            this, m_conn.get(), (src + ("@" + m_host)).c_str(), dest, pred));
     }
 
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
@@ -186,7 +186,7 @@ namespace client {
         } else {
             // No @: assume to be at the same location as the context.
             m_routers.emplace_back(new VRPNTrackerRouter(
-                this, m_conn.get(), src, sensor, dest, xform));
+                this, m_conn.get(), (src + ("@" + m_host)).c_str(), sensor, dest, xform));
         }
     }
 
