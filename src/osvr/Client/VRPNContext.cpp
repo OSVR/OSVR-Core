@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -162,8 +161,8 @@ namespace client {
 
         m_routers.emplace_back(
             new VRPNAnalogRouter<SensorPredicate, NullTransform>(
-                this, m_conn.get(), (src + ("@" + m_host)).c_str(), dest, SensorPredicate(channel),
-                NullTransform(), channel));
+                this, m_conn.get(), (src + ("@" + m_host)).c_str(), dest,
+                SensorPredicate(channel), NullTransform(), channel));
     }
 
     template <typename Predicate>
@@ -186,7 +185,8 @@ namespace client {
         } else {
             // No @: assume to be at the same location as the context.
             m_routers.emplace_back(new VRPNTrackerRouter(
-                this, m_conn.get(), (src + ("@" + m_host)).c_str(), sensor, dest, xform));
+                this, m_conn.get(), (src + ("@" + m_host)).c_str(), sensor,
+                dest, xform));
         }
     }
 
