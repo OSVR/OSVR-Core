@@ -33,7 +33,7 @@
 
 struct OSVR_ClientContextObject : boost::noncopyable {
   public:
-    typedef std::vector<::osvr::client::ClientInterfacePtr> InterfaceList;
+    typedef std::vector<osvr::client::ClientInterfacePtr> InterfaceList;
     /// @brief Destructor
     virtual ~OSVR_ClientContextObject();
 
