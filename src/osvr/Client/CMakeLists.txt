@@ -18,6 +18,7 @@ set(API
     "${HEADER_LOCATION}/StateType.h")
 
 set(SOURCE
+    "${CMAKE_CURRENT_BINARY_DIR}/display_json.h"
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
@@ -28,6 +29,8 @@ set(SOURCE
     VRPNAnalogRouter.h
     VRPNButtonRouter.h
     VRPNTrackerRouter.h)
+
+osvr_convert_json(display_json display-eileen.json "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
 

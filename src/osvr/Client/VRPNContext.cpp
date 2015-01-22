@@ -17,7 +17,6 @@
 
 // Internal Includes
 #include "VRPNContext.h"
-#include "display_json.h"
 #include "RouterPredicates.h"
 #include "RouterTransforms.h"
 #include "VRPNAnalogRouter.h"
@@ -30,6 +29,8 @@
 #include <osvr/Transform/JSONTransformVisitor.h>
 #include <osvr/Transform/ChangeOfBasis.h>
 #include <osvr/Util/MessageKeys.h>
+
+#include <osvr/Client/display_json.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -66,8 +67,8 @@ namespace client {
                                         nullptr, nullptr, nullptr, true);
         m_conn->removeReference(); // Remove extra reference.
         setParameter("/display",
-                     std::string(reinterpret_cast<char *>(display_json),
-                                 display_json_len));
+                     std::string(display_json,
+                                 sizeof(display_json)));
         m_conn->register_handler(
             m_conn->register_message_type(util::messagekeys::routingData()),
             &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
