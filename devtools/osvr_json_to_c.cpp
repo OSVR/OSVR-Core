@@ -99,10 +99,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::ifstream inFile(inFilename);
+    std::ifstream inFile(inFilename.c_str());
     try {
         if (vm.count("output")) {
-            std::ofstream outFile(vm["output"].as<std::string>());
+            std::ofstream outFile(vm["output"].as<std::string>().c_str());
             convertJsonToLiteral(vm["symbol"].as<std::string>(), inFile,
                                  outFile);
         } else {
