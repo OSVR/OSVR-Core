@@ -14,8 +14,8 @@ function(osvr_add_plugin NAME)
     target_link_libraries(${NAME} osvr::osvrPluginKit)
     set_target_properties(${NAME} PROPERTIES
         PREFIX ""
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/@OSVR_PLUGIN_DIR@"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/@OSVR_PLUGIN_DIR@")
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/@PLUGINDIR@"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/@PLUGINDIR@")
     install(TARGETS ${NAME}
-        LIBRARY DESTINATION @OSVR_PLUGIN_DIR@ COMPONENT Runtime)
+        LIBRARY DESTINATION @PLUGINDIR@ COMPONENT Runtime)
 endfunction()

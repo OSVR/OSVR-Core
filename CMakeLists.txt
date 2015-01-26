@@ -121,7 +121,6 @@ if(WIN32)
 else()
     set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}")
 endif()
-set(EXECUTABLE_BINARY_DIR "")
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
@@ -217,6 +216,7 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
 # Set Up Package for External Usage
 ###
 include(CMakePackageConfigHelpers)
+set(PLUGINDIR ${OSVR_PLUGIN_DIR})
 set(BUILD_CONFIG_BASE "${CMAKE_CURRENT_BINARY_DIR}/osvr/osvr")
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
