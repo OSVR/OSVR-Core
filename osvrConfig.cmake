@@ -1,7 +1,12 @@
+
+# File will only exist in build trees
+include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigBuildTreePaths.cmake" OPTIONAL)
+
 find_package(libfunctionality)
 
 include("${CMAKE_CURRENT_LIST_DIR}/osvrTargets.cmake")
 
+# File will only exist in install trees.
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledBoost.cmake" OPTIONAL)
 
 function(osvr_add_plugin NAME)

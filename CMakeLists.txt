@@ -233,6 +233,10 @@ configure_file(osvrConfig.cmake
     "${BUILD_CONFIG_BASE}Config.cmake"
     @ONLY)
 
+configure_file(osvrConfigBuildTreePaths.cmake
+    "${BUILD_CONFIG_BASE}ConfigBuildTreePaths.cmake"
+    @ONLY)
+
 configure_file(osvrConfigInstalledBoost.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
     @ONLY)
