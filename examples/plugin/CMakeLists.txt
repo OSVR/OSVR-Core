@@ -41,5 +41,6 @@ add_test(NAME StandalonePluginBuilds
     "${CMAKE_COMMAND}"
     "-DCONFIG_FLAGS=${CONFIG_FLAGS}"
     "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/selfcontained"
+    "-DBUILD_FLAGS=${BUILD_FLAGS}"
     -P "${CMAKE_CURRENT_BINARY_DIR}/selfcontained_test.cmake"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
