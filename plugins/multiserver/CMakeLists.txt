@@ -11,7 +11,7 @@ set_target_properties(org_opengoggles_bundled_Multiserver PROPERTIES
     FOLDER "OSVR Plugins")
 
 install(TARGETS org_opengoggles_bundled_Multiserver
-    LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+    LIBRARY DESTINATION ${OSVR_PLUGIN_DIR} COMPONENT Runtime)
 
 install(FILES
     org_opengoggles_bundled_Multiserver_RazerHydra.json
