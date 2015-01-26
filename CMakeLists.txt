@@ -253,7 +253,7 @@ install(EXPORT osvrTargets
 
 install(
     FILES
-    osvrConfig.cmake
+    "${BUILD_CONFIG_BASE}Config.cmake"
     "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
     DESTINATION
