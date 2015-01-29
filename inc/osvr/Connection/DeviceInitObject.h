@@ -35,7 +35,11 @@
 
 /// @brief Structure used internally to construct the desired type of device.
 struct OSVR_DeviceInitObject : boost::noncopyable {
-    OSVR_CONNECTION_EXPORT OSVR_DeviceInitObject(OSVR_PluginRegContext ctx);
+  public:
+    OSVR_CONNECTION_EXPORT explicit OSVR_DeviceInitObject(
+        OSVR_PluginRegContext ctx);
+    OSVR_CONNECTION_EXPORT explicit OSVR_DeviceInitObject(
+        osvr::connection::ConnectionPtr conn);
 
     /// @brief Set the (unqualified) name of the device to create.
     OSVR_CONNECTION_EXPORT void setName(const char *n);
@@ -56,16 +60,21 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     osvr::connection::ConnectionPtr getConnection();
 
     /// @brief Retrieves the plugin context
-    OSVR_CONNECTION_EXPORT osvr::pluginhost::PluginSpecificRegistrationContext &
+    OSVR_CONNECTION_EXPORT osvr::pluginhost::PluginSpecificRegistrationContext *
     getContext();
 
-    boost::optional<OSVR_ChannelCount> analogs;
-    boost::optional<OSVR_ChannelCount> buttons;
-    bool tracker;
+    boost::optional<OSVR_ChannelCount> getAnalogs() const { return m_analogs; }
+    boost::optional<OSVR_ChannelCount> getButtons() const { return m_buttons; }
+    bool getTracker() const { return m_tracker; }
 
   private:
-    osvr::pluginhost::PluginSpecificRegistrationContext &m_context;
+    osvr::pluginhost::PluginSpecificRegistrationContext *m_context;
+    osvr::connection::ConnectionPtr m_conn;
     std::string m_name;
+    std::string m_qualifiedName;
+    boost::optional<OSVR_ChannelCount> m_analogs;
+    boost::optional<OSVR_ChannelCount> m_buttons;
+    bool m_tracker;
 };
 
 namespace osvr {

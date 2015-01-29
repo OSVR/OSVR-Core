@@ -119,7 +119,7 @@ osvrDeviceGenericInit(OSVR_DeviceInitOptions options, OSVR_DeviceToken *device,
     // Transfer ownership of the device token object to the plugin context.
     try {
         *device =
-            options->getContext().registerDataWithGenericDelete(dev.release());
+            options->getContext()->registerDataWithGenericDelete(dev.release());
     } catch (std::exception &e) {
         std::cerr << "Error in osvrDeviceGenericInit: " << e.what()
                   << std::endl;

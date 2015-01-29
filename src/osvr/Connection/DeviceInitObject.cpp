@@ -27,10 +27,21 @@
 // - none
 
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(OSVR_PluginRegContext ctx)
-    : m_context(osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
-      tracker(false) {}
-
-void OSVR_DeviceInitObject::setName(const char *n) { m_name = n; }
+    : m_context(&osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
+      m_conn(osvr::connection::Connection::retrieveConnection(
+          m_context->getParent())),
+      m_tracker(false) {}
+OSVR_DeviceInitObject::OSVR_DeviceInitObject(
+    osvr::connection::ConnectionPtr conn)
+    : m_context(nullptr), m_conn(conn), m_tracker(false) {}
+void OSVR_DeviceInitObject::setName(const char *n) {
+    m_name = n;
+    if (m_context) {
+        m_qualifiedName = m_context->getName() + "/" + m_name;
+    } else {
+        m_qualifiedName = m_name;
+    }
+}
 
 inline void setOptional(OSVR_ChannelCount input,
                         boost::optional<OSVR_ChannelCount> &dest) {
@@ -42,26 +53,24 @@ inline void setOptional(OSVR_ChannelCount input,
 }
 
 void OSVR_DeviceInitObject::setAnalogs(OSVR_ChannelCount num) {
-    setOptional(num, analogs);
+    setOptional(num, m_analogs);
 }
 
 void OSVR_DeviceInitObject::setButtons(OSVR_ChannelCount num) {
-    setOptional(num, buttons);
+    setOptional(num, m_buttons);
 }
 
-void OSVR_DeviceInitObject::setTracker() { tracker = true; }
+void OSVR_DeviceInitObject::setTracker() { m_tracker = true; }
 
 std::string OSVR_DeviceInitObject::getQualifiedName() const {
-    return m_context.getName() + "/" + m_name;
+    return m_qualifiedName;
 }
 
 osvr::connection::ConnectionPtr OSVR_DeviceInitObject::getConnection() {
-    osvr::connection::ConnectionPtr conn =
-        osvr::connection::Connection::retrieveConnection(m_context.getParent());
-    return conn;
+    return m_conn;
 }
 
-osvr::pluginhost::PluginSpecificRegistrationContext &
+osvr::pluginhost::PluginSpecificRegistrationContext *
 OSVR_DeviceInitObject::getContext() {
     return m_context;
 }
