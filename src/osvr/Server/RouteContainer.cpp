@@ -87,12 +87,12 @@ namespace server {
     static const char SOURCE_KEY[] = "source";
     std::string
     RouteContainer::getSource(std::string const &destination) const {
-        auto it =
-            std::find_if(begin(m_routingDirectives), end(m_routingDirectives),
-                         [&](std::string const &directive) {
-            return (getDestination(parseRoutingDirective(directive)) ==
-                    destination);
-        });
+        auto it = std::find_if(
+            begin(m_routingDirectives), end(m_routingDirectives),
+            [&](std::string const &directive) {
+                return (getDestination(parseRoutingDirective(directive)) ==
+                        destination);
+            });
         if (it != end(m_routingDirectives)) {
             Json::Value directive = parseRoutingDirective(*it);
             if (directive.isMember(SOURCE_KEY)) {
@@ -110,13 +110,13 @@ namespace server {
         std::replace_if(
             begin(m_routingDirectives),
             end(m_routingDirectives), [&](std::string const &directive) {
-            Json::Value candidate = parseRoutingDirective(directive);
-            bool match = (getDestination(candidate) == destination);
-            if (match) {
-                replaced = true;
-            }
-            return match;
-        }, routingDirective);
+                Json::Value candidate = parseRoutingDirective(directive);
+                bool match = (getDestination(candidate) == destination);
+                if (match) {
+                    replaced = true;
+                }
+                return match;
+            }, routingDirective);
 
         /// If we didn't replace an existing route, just add this one.
         if (!replaced) {
