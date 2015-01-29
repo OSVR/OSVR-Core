@@ -108,6 +108,16 @@ namespace connection {
         OSVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"
                          "done!");
     }
+    bool
+    AsyncDeviceToken::m_callWhenSafeToSend(std::function<void()> &callback) {
+        RequestToSend rts(m_accessControl);
+
+        if (!rts.request()) {
+            return false; // not cleared to send
+        }
+        callback();
+        return true;
+    }
 
     void AsyncDeviceToken::m_connectionInteract() {
         OSVR_DEV_VERBOSE("AsyncDeviceToken::m_connectionInteract\t"

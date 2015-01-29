@@ -50,6 +50,10 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len);
+        /// Called from the async thread - only calls its callback when
+        /// m_connectionInteract says so.
+        virtual bool m_callWhenSafeToSend(std::function<void()> &callback);
+
         /// Called from the main thread - services requests to send from
         /// the async thread.
         virtual void m_connectionInteract();

@@ -46,6 +46,12 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
+    bool
+    SyncDeviceToken::m_callWhenSafeToSend(std::function<void()> &callback) {
+        callback();
+        return true;
+    }
+
     void SyncDeviceToken::m_connectionInteract() {
         if (m_cb) {
             m_cb();

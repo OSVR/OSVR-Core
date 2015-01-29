@@ -68,6 +68,9 @@ namespace connection {
                                size_t len) {
         m_sendData(timestamp, type, bytestream, len);
     }
+    bool DeviceToken::callWhenSafeToSend(std::function<void()> callback) {
+        return m_callWhenSafeToSend(callback);
+    }
 
     void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
         AsyncDeviceToken *dev = this->asAsync();
