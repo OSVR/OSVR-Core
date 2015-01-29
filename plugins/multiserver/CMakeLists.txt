@@ -2,6 +2,8 @@ add_library(org_opengoggles_bundled_Multiserver MODULE
     org_opengoggles_bundled_Multiserver.cpp
     DevicesWithParameters.cpp
     DevicesWithParameters.h
+    GetSerialPortState.cpp
+    GetSerialPortState.h
     VRPNMultiserver.cpp
     VRPNMultiserver.h)
 target_link_libraries(org_opengoggles_bundled_Multiserver osvrVRPNServer osvrPluginKitCpp osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn)

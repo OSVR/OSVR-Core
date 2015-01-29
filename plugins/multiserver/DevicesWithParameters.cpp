@@ -17,6 +17,7 @@
 
 // Internal Includes
 #include "DevicesWithParameters.h"
+#include "GetSerialPortState.h"
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 
 // Library/third-party includes
@@ -43,7 +44,7 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         root.get("calibrateGyrosOnSetup", false).asBool();
     bool tare_on_setup = root.get("tareOnSetup", false).asBool();
     double frames_per_second = root.get("framesPerSecond", 250).asFloat();
-
+    std::string const origPort(port);
 #ifdef _WIN32
     // Use the Win32 device namespace, if they aren't already.
     // Have to double the backslashes because they're escape characters.
@@ -52,6 +53,7 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         port = "\\\\.\\" + port;
     }
 #endif
+    requireSerialPortAvailable(port, origPort);
 
     std::vector<std::string> string_reset_commands;
     Json::Value commands = root.get("resetCommands", Json::arrayValue);
