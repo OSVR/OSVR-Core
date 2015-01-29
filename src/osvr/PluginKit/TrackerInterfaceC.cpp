@@ -17,6 +17,8 @@
 
 // Internal Includes
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include "DeviceInitObject.h"
+#include "HandleNullContext.h"
 
 // Library/third-party includes
 // - none
