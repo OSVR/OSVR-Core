@@ -80,6 +80,9 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
 namespace osvr {
 namespace connection {
     typedef ::OSVR_DeviceInitObject DeviceInitObject;
+    class AnalogServerInterface;
+    class ButtonServerInterface;
+    class TrackerServerInterface;
 } // namespace connection
 } // namespace osvr
 

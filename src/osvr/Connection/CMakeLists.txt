@@ -1,6 +1,8 @@
 osvr_setup_lib_vars(Connection)
 
 set(API
+    "${HEADER_LOCATION}/AnalogServerInterface.h"
+    "${HEADER_LOCATION}/ButtonServerInterface.h"
     "${HEADER_LOCATION}/Connection.h"
     "${HEADER_LOCATION}/ConnectionDevicePtr.h"
     "${HEADER_LOCATION}/ConnectionDevice.h"
@@ -8,7 +10,8 @@ set(API
     "${HEADER_LOCATION}/DeviceInitObject.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/MessageType.h"
-    "${HEADER_LOCATION}/MessageTypePtr.h")
+    "${HEADER_LOCATION}/MessageTypePtr.h"
+    "${HEADER_LOCATION}/TrackerServerInterface.h")
 
 set(SOURCE
     AsyncAccessControl.cpp
@@ -19,19 +22,23 @@ set(SOURCE
     ConnectionDevice.cpp
     DeviceInitObject.cpp
     DeviceToken.cpp
+    GenerateCompoundServer.h
     GenericConnectionDevice.h
     MessageType.cpp
     SyncDeviceToken.cpp
     SyncDeviceToken.h
     VirtualDeviceToken.cpp
     VirtualDeviceToken.h
+    VrpnAnalogServer.h
     VrpnBaseFlexServer.h
     VrpnBasedConnection.cpp
     VrpnBasedConnection.h
+    VrpnButtonServer.h
     VrpnConnectionDevice.h
     VrpnConnectionKind.cpp
     VrpnConnectionKind.h
-    VrpnMessageType.h)
+    VrpnMessageType.h
+    VrpnTrackerServer.h)
 
 osvr_add_library()
 
