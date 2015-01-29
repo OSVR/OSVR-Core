@@ -72,10 +72,10 @@ namespace connection {
         return ret;
     }
 
-    ConnectionDevicePtr VrpnBasedConnection::m_createConnectionDevice(
-        std::string const &deviceName) {
+    ConnectionDevicePtr
+    VrpnBasedConnection::m_createConnectionDevice(DeviceInitObject &init) {
         ConnectionDevicePtr ret =
-            make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
+            make_shared<VrpnConnectionDevice>(init, m_vrpnConnection);
         return ret;
     }
 

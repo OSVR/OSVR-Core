@@ -42,7 +42,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
         osvr::connection::ConnectionPtr conn);
 
     /// @brief Set the (unqualified) name of the device to create.
-    OSVR_CONNECTION_EXPORT void setName(const char *n);
+    OSVR_CONNECTION_EXPORT void setName(std::string const &n);
 
     /// @brief Set analogs: clears the boost::optional if 0 is passed.
     OSVR_CONNECTION_EXPORT void setAnalogs(OSVR_ChannelCount num);

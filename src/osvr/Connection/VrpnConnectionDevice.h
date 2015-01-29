@@ -35,11 +35,11 @@ namespace connection {
     /// @brief ConnectionDevice implementation for a VrpnBasedConnection
     class VrpnConnectionDevice : public ConnectionDevice {
       public:
-        VrpnConnectionDevice(std::string const &name,
+        VrpnConnectionDevice(DeviceInitObject &init,
                              vrpn_ConnectionPtr const &vrpnConn)
-            : ConnectionDevice(name) {
-            m_baseobj.reset(
-                new vrpn_BaseFlexServer(name.c_str(), vrpnConn.get()));
+            : ConnectionDevice(init.getQualifiedName()) {
+            m_baseobj.reset(new vrpn_BaseFlexServer(
+                init.getQualifiedName().c_str(), vrpnConn.get()));
         }
         virtual ~VrpnConnectionDevice() {}
         virtual void m_process() {

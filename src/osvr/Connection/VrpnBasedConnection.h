@@ -62,7 +62,7 @@ namespace connection {
         virtual MessageTypePtr
         m_registerMessageType(std::string const &messageId);
         virtual ConnectionDevicePtr
-        m_createConnectionDevice(std::string const &deviceName);
+        m_createConnectionDevice(DeviceInitObject &init);
         virtual void m_registerConnectionHandler(std::function<void()> handler);
         virtual void m_process();
 

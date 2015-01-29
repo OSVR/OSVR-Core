@@ -23,6 +23,7 @@
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
 #include <osvr/Connection/ConnectionPtr.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
 
@@ -42,7 +43,7 @@ namespace connection {
 
     /// @brief Class wrapping a messaging transport (server or internal)
     /// connection.
-    class Connection : boost::noncopyable {
+    class Connection : boost::noncopyable, enable_shared_from_this<Connection> {
       public:
         /// @name Factory methods
         ///
@@ -84,6 +85,10 @@ namespace connection {
         /// constructor calls this method), so doing otherwise is unadvisable.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
         createConnectionDevice(std::string const &deviceName);
+
+        /// @overload
+        OSVR_CONNECTION_EXPORT ConnectionDevicePtr
+        createConnectionDevice(DeviceInitObject &init);
 
         /// @brief Add an externally-constructed device to the device list.
         OSVR_CONNECTION_EXPORT void addDevice(ConnectionDevicePtr device);
@@ -153,7 +158,7 @@ namespace connection {
 
         /// @brief (Subclass implementation) Register a full device name.
         virtual ConnectionDevicePtr
-        m_createConnectionDevice(std::string const &deviceName) = 0;
+        m_createConnectionDevice(DeviceInitObject &init) = 0;
 
         /// @brief (Subclass implementation) Register a function to handle "new
         /// connection"/ping messages.

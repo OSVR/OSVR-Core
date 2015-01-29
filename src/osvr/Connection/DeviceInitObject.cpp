@@ -25,16 +25,18 @@
 
 // Standard includes
 // - none
-
+using osvr::pluginhost::PluginSpecificRegistrationContext;
+using osvr::connection::Connection;
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(OSVR_PluginRegContext ctx)
-    : m_context(&osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
-      m_conn(osvr::connection::Connection::retrieveConnection(
-          m_context->getParent())),
+    : m_context(&PluginSpecificRegistrationContext::get(ctx)),
+      m_conn(Connection::retrieveConnection(m_context->getParent())),
       m_tracker(false) {}
+
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(
     osvr::connection::ConnectionPtr conn)
     : m_context(nullptr), m_conn(conn), m_tracker(false) {}
-void OSVR_DeviceInitObject::setName(const char *n) {
+
+void OSVR_DeviceInitObject::setName(std::string const &n) {
     m_name = n;
     if (m_context) {
         m_qualifiedName = m_context->getName() + "/" + m_name;
