@@ -13,14 +13,15 @@ install(TARGETS osvr_server osvr_calibrate
 install(TARGETS BasicServer
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
 
-set(CONFIG_FILES
-    osvr_server_config.json
-    osvr_server_config.xrightydown.json
-    osvr_server_config.autodetectonly.sample.json
-    osvr_server_config.externalvrpn.sample.json
-    osvr_server_config.HDK.sample.json
-    osvr_server_config.HDKnoHydra.sample.json
-    osvr_server_config.shared.sample.json)
+file(GLOB CONFIG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config*.json")
+#set(CONFIG_FILES
+#    osvr_server_config.json
+#    osvr_server_config.xrightydown.json
+#    osvr_server_config.autodetectonly.sample.json
+#    osvr_server_config.externalvrpn.sample.json
+#    osvr_server_config.HDK.sample.json
+#    osvr_server_config.HDKnoHydra.sample.json
+#    osvr_server_config.shared.sample.json)
 
 foreach(FN ${CONFIG_FILES})
     add_custom_command(TARGET osvr_server POST_BUILD
