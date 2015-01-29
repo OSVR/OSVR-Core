@@ -107,7 +107,7 @@ namespace connection {
 
     void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
         m_conn = conn;
-        m_dev = conn->registerDevice(m_name);
+        m_dev = conn->createConnectionDevice(m_name);
         m_dev->setDeviceToken(*this);
     }
 

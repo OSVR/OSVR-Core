@@ -75,8 +75,8 @@ namespace connection {
 
     /// Wraps the derived implementation for future expandability.
     ConnectionDevicePtr
-    Connection::registerDevice(std::string const &deviceName) {
-        ConnectionDevicePtr dev = m_registerDevice(deviceName);
+    Connection::createConnectionDevice(std::string const &deviceName) {
+        ConnectionDevicePtr dev = m_createConnectionDevice(deviceName);
         if (dev) {
             addDevice(dev);
         }
