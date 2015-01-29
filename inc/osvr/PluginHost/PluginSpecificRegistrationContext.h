@@ -94,6 +94,14 @@ namespace pluginhost {
         OSVR_PLUGINHOST_EXPORT virtual void registerDataWithDeleteCallback(
             OSVR_PluginDataDeleteCallback deleteCallback, void *pluginData) = 0;
 
+        /// @brief Register data allocated with new to be deleted on plugin
+        /// unload.
+        template <typename T> T *registerDataWithGenericDelete(T *data) {
+            registerDataWithDeleteCallback(&::osvr::util::generic_deleter<T>,
+                                           static_cast<void *>(data));
+            return data;
+        }
+
         /// @brief Register a callback to be invoked on some hardware detection
         /// event.
         OSVR_PLUGINHOST_EXPORT virtual void registerHardwareDetectCallback(
