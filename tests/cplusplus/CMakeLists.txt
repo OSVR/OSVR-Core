@@ -8,3 +8,4 @@ endfunction()
 
 add_subdirectory(Util)
 add_subdirectory(Routing)
+add_subdirectory(Connection)
