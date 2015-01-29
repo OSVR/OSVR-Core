@@ -47,8 +47,9 @@ typedef struct OSVR_AnalogDeviceInterfaceObject *OSVR_AnalogDeviceInterface;
 /** @brief Specify that your device will implement the Analog interface.
 
     @param opts The device init options object.
-    @param iface An interface object you should retain with the same lifetime as
-   the device token in order to send messages conforming to an analog interface.
+    @param [out] iface An interface object you should retain with the same
+   lifetime as the device token in order to send messages conforming to an
+   analog interface.
     @param numChan The number of channels you will be reporting. This parameter
    may be subject to external limitations (presently 128).
 

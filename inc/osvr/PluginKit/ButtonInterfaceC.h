@@ -46,8 +46,8 @@ typedef struct OSVR_ButtonDeviceInterfaceObject *OSVR_ButtonDeviceInterface;
 /** @brief Specify that your device will implement the Button interface.
 
     @param opts The device init options object.
-    @param iface An interface object you should retain with the same lifetime as
-    the device token in order to send messages conforming to a button
+    @param [out] iface An interface object you should retain with the same
+   lifetime as the device token in order to send messages conforming to a button
    interface.
     @param numChan The number of channels you will be reporting. This parameter
     may be subject to external limitations (presently 256).

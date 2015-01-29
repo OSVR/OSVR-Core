@@ -41,9 +41,9 @@ typedef struct OSVR_TrackerDeviceInterfaceObject *OSVR_TrackerDeviceInterface;
 /** @brief Specify that your device will implement the Tracker interface.
 
     @param opts The device init options object.
-    @param iface An interface object you should retain with the same lifetime as
-    the device token in order to send messages conforming to a tracker
-    interface.
+    @param [out] iface An interface object you should retain with the same
+   lifetime as the device token in order to send messages conforming to a
+   tracker interface.
 
 */
 OSVR_PLUGINKIT_EXPORT
