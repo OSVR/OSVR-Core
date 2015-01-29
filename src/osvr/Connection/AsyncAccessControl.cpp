@@ -31,7 +31,8 @@ namespace connection {
     using boost::defer_lock;
     RequestToSend::RequestToSend(AsyncAccessControl &aac)
         : m_lock(aac.m_mut, defer_lock), m_lockDone(aac.m_mutDone, defer_lock),
-          m_calledRequest(false), m_rts(aac.m_rts), m_done(aac.m_done),
+          m_calledRequest(false), m_nested(false), m_control(aac),
+          m_sharedRts(aac.m_rts), m_sharedDone(aac.m_done),
           m_mainMessage(aac.m_mainMessage),
           m_condMainThread(aac.m_condMainThread),
           m_condAsyncThread(aac.m_condAsyncThread) {}
@@ -40,8 +41,9 @@ namespace connection {
         BOOST_ASSERT_MSG(m_lock.owns_lock() == m_lockDone.owns_lock(),
                          "We should own either both locks or neither.");
         if (m_lock.owns_lock() && m_lockDone.owns_lock()) {
-            m_rts = false;
-            m_done = true;
+            m_sharedRts = false;
+            m_sharedDone = true;
+            m_control.m_currentRequestThread.reset();
             m_lock.unlock();
             m_lockDone.unlock();
             m_condMainThread.notify_one();
@@ -54,17 +56,27 @@ namespace connection {
                          "object lifetime");
         {
             m_lock.lock();
-            BOOST_ASSERT_MSG(m_rts == false,
+            if (true == m_sharedRts &&
+                m_control.m_currentRequestThread ==
+                    boost::this_thread::get_id()) {
+                /// OK, so we're recursive here. Make a note and don't add
+                /// another locking layer
+                m_nested = true;
+                m_lock.unlock();
+                return true;
+            }
+
+            BOOST_ASSERT_MSG(m_sharedRts == false,
                              "Shouldn't happen - inconsistent "
                              "state. Can't get in a request when "
                              "already in one.");
-            m_rts = true;
-            m_done = false;
+            m_sharedRts = true;
+            m_sharedDone = false;
             m_calledRequest = true;
             /// Take the main thread "free to go" status lock.
             {
                 m_lockDone.lock();
-                m_done = false;
+                m_sharedDone = false;
                 while (m_mainMessage == AsyncAccessControl::MTM_WAIT) {
                     m_condAsyncThread.wait(
                         m_lock); // In here we unlock the mutex
@@ -73,7 +85,16 @@ namespace connection {
                 // The mutex is locked again here, until the destructor.
 
                 // Get the return value.
-                return (m_mainMessage == AsyncAccessControl::MTM_CLEAR_TO_SEND);
+                auto ret =
+                    (m_mainMessage == AsyncAccessControl::MTM_CLEAR_TO_SEND);
+                if (ret) {
+                    BOOST_ASSERT_MSG(
+                        !m_control.m_currentRequestThread.is_initialized(),
+                        "Shouldn't be anyone in except us!");
+                    m_control.m_currentRequestThread =
+                        boost::this_thread::get_id();
+                }
+                return ret;
             }
         }
     }

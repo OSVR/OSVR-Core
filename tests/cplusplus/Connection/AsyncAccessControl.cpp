@@ -44,6 +44,7 @@ TEST(AsyncAccessControl, simple) {
     boost::scoped_thread<> asyncThread([&] {
         RequestToSend rts(control);
         ASSERT_TRUE(rts.request()) << "Request should be approved";
+        ASSERT_FALSE(rts.isNested());
         sent = true;
     });
 
@@ -69,12 +70,14 @@ TEST(AsyncAccessControl, serialRequests) {
         {
             RequestToSend rts(control);
             ASSERT_TRUE(rts.request()) << "Request should be approved";
+            ASSERT_FALSE(rts.isNested());
             sent1 = true;
         }
         pleaseSleep();
         {
             RequestToSend rts(control);
             ASSERT_TRUE(rts.request()) << "Request should be approved";
+            ASSERT_FALSE(rts.isNested());
             sent2 = true;
         }
 
@@ -95,6 +98,40 @@ TEST(AsyncAccessControl, serialRequests) {
     }
     ASSERT_TRUE(sent1) << "Should have sent first.";
     ASSERT_TRUE(sent2) << "Should have sent second.";
+
+    ASSERT_FALSE(control.mainThreadCTS())
+        << "CTS should have no tasks waiting.";
+}
+
+TEST(AsyncAccessControl, recursive) {
+    AsyncAccessControl control;
+    volatile bool outer = false;
+    volatile bool inner = false;
+    ASSERT_FALSE(control.mainThreadCTS())
+        << "CTS should have no tasks waiting.";
+
+    boost::scoped_thread<> asyncThread([&] {
+        RequestToSend rts(control);
+        ASSERT_TRUE(rts.request()) << "Request should be approved";
+        ASSERT_FALSE(rts.isNested());
+        outer = true;
+        {
+            RequestToSend rts2(control);
+            ASSERT_TRUE(rts2.request())
+                << "Request should be approved since we're already in it.";
+            inner = true;
+            ASSERT_TRUE(rts2.isNested());
+        }
+    });
+
+    pleaseSleep();
+    ASSERT_FALSE(outer || inner)
+        << "Shouldn't have been permitted to send yet.";
+    while (!control.mainThreadCTS()) {
+        pleaseYield();
+    }
+    ASSERT_TRUE(outer) << "Should have gotten outer permission";
+    ASSERT_TRUE(inner) << "Should have gotten inner permission";
 
     ASSERT_FALSE(control.mainThreadCTS())
         << "CTS should have no tasks waiting.";
