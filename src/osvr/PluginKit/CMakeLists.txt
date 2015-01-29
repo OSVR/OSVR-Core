@@ -17,8 +17,6 @@ set(SOURCE
     AnalogDeviceInterface.h
     AnalogInterfaceC.cpp
     ButtonInterfaceC.cpp
-    DeviceInitObject.cpp
-    DeviceInitObject.h
     DeviceInterfaceC.cpp
     HandleNullContext.h
     PluginRegistrationC.cpp

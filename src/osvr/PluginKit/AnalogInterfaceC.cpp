@@ -17,7 +17,7 @@
 
 // Internal Includes
 #include <osvr/PluginKit/AnalogInterfaceC.h>
-#include "DeviceInitObject.h"
+#include <osvr/Connection/DeviceInitObject.h>
 #include "HandleNullContext.h"
 
 // Library/third-party includes

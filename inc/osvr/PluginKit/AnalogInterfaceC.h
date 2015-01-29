@@ -24,7 +24,7 @@
 
 /* Internal Includes */
 #include <osvr/PluginKit/DeviceInterfaceC.h>
-#include <osvr/Util/StdInt.h>
+#include <osvr/Util/ChannelCountC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -37,7 +37,7 @@ OSVR_EXTERN_C_BEGIN
 /** @brief The integer type specifying the number of channels you'd like for
     your analog.
 */
-typedef uint32_t OSVR_AnalogChanCount;
+typedef OSVR_ChannelCount OSVR_AnalogChanCount;
 
 /** @brief Opaque type used in conjunction with a device token to send data on
     an analog interface.

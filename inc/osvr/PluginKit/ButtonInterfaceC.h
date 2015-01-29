@@ -24,7 +24,7 @@
 
 /* Internal Includes */
 #include <osvr/PluginKit/DeviceInterfaceC.h>
-#include <osvr/Util/StdInt.h>
+#include <osvr/Util/ChannelCountC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -36,7 +36,7 @@ OSVR_EXTERN_C_BEGIN
 
 /** @brief The integer type specifying the number of button channels you'd like.
 */
-typedef uint32_t OSVR_ButtonChanCount;
+typedef OSVR_ChannelCount OSVR_ButtonChanCount;
 
 /** @brief Opaque type used in conjunction with a device token to send data on
     a button interface.

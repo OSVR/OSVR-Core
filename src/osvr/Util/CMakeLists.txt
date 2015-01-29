@@ -26,6 +26,7 @@ set(API
     "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
+    "${HEADER_LOCATION}/ChannelCountC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"

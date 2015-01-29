@@ -24,9 +24,9 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Connection/MessageType.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/Verbosity.h>
 #include "HandleNullContext.h"
-#include "DeviceInitObject.h"
 
 // Library/third-party includes
 // - none

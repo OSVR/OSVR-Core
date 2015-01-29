@@ -16,7 +16,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include "DeviceInitObject.h"
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 
 // Library/third-party includes
@@ -29,8 +29,8 @@ OSVR_DeviceInitObject::OSVR_DeviceInitObject(OSVR_PluginRegContext ctx)
     : context(osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
       tracker(false) {}
 
-template <typename NumType>
-inline void setOptional(NumType input, boost::optional<NumType> &dest) {
+inline void setOptional(OSVR_ChannelCount input,
+                        boost::optional<OSVR_ChannelCount> &dest) {
     if (0 == input) {
         dest.reset();
     } else {
@@ -38,11 +38,11 @@ inline void setOptional(NumType input, boost::optional<NumType> &dest) {
     }
 }
 
-void OSVR_DeviceInitObject::setAnalogs(OSVR_AnalogChanCount num) {
+void OSVR_DeviceInitObject::setAnalogs(OSVR_ChannelCount num) {
     setOptional(num, analogs);
 }
 
-void OSVR_DeviceInitObject::setButtons(OSVR_ButtonChanCount num) {
+void OSVR_DeviceInitObject::setButtons(OSVR_ChannelCount num) {
     setOptional(num, buttons);
 }
 

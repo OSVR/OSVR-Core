@@ -19,12 +19,11 @@
 #define INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064
 
 // Internal Includes
-#include <osvr/PluginKit/DeviceInterfaceC.h>
-#include <osvr/PluginKit/AnalogInterfaceC.h>
-#include <osvr/PluginKit/ButtonInterfaceC.h>
+#include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/PluginRegContextC.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
 #include <osvr/Util/StdInt.h>
+#include <osvr/Connection/Export.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -35,25 +34,27 @@
 
 /// @brief Structure used internally to construct the desired type of device.
 struct OSVR_DeviceInitObject : boost::noncopyable {
-    OSVR_DeviceInitObject(OSVR_PluginRegContext ctx);
+    OSVR_CONNECTION_EXPORT OSVR_DeviceInitObject(OSVR_PluginRegContext ctx);
+
     /// @brief Set analogs: clears the boost::optional if 0 is passed.
-    void setAnalogs(OSVR_AnalogChanCount num);
+    OSVR_CONNECTION_EXPORT void setAnalogs(OSVR_ChannelCount num);
+
     /// @brief Set buttons: clears the boost::optional if 0 is passed.
-    void setButtons(OSVR_ButtonChanCount num);
+    OSVR_CONNECTION_EXPORT void setButtons(OSVR_ChannelCount num);
 
     /// @brief Enables tracker interface
-    void setTracker();
+    OSVR_CONNECTION_EXPORT void setTracker();
 
     osvr::pluginhost::PluginSpecificRegistrationContext &context;
-    boost::optional<OSVR_AnalogChanCount> analogs;
-    boost::optional<OSVR_ButtonChanCount> buttons;
+    boost::optional<OSVR_ChannelCount> analogs;
+    boost::optional<OSVR_ChannelCount> buttons;
     bool tracker;
 };
 
 namespace osvr {
-namespace pluginkit {
+namespace connection {
     typedef ::OSVR_DeviceInitObject DeviceInitObject;
-} // namespace pluginkit
+} // namespace connection
 } // namespace osvr
 
 #endif // INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064
