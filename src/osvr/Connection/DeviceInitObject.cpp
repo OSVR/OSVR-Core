@@ -60,3 +60,8 @@ osvr::connection::ConnectionPtr OSVR_DeviceInitObject::getConnection() {
         osvr::connection::Connection::retrieveConnection(m_context.getParent());
     return conn;
 }
+
+osvr::pluginhost::PluginSpecificRegistrationContext &
+OSVR_DeviceInitObject::getContext() {
+    return m_context;
+}

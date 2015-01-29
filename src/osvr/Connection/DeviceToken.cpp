@@ -32,17 +32,15 @@
 namespace osvr {
 namespace connection {
 
-    DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
-                                                  ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new AsyncDeviceToken(name));
-        ret->m_sharedInit(conn);
+    DeviceTokenPtr DeviceToken::createAsyncDevice(DeviceInitObject &init) {
+        DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
+        ret->m_sharedInit(init.getConnection());
         return ret;
     }
 
-    DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
-                                                 ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new SyncDeviceToken(name));
-        ret->m_sharedInit(conn);
+    DeviceTokenPtr DeviceToken::createSyncDevice(DeviceInitObject &init) {
+        DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
+        ret->m_sharedInit(init.getConnection());
         return ret;
     }
 

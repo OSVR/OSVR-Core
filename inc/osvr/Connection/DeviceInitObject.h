@@ -55,6 +55,10 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     /// @brief Retrieve the connection pointer.
     osvr::connection::ConnectionPtr getConnection();
 
+    /// @brief Retrieves the plugin context
+    OSVR_CONNECTION_EXPORT osvr::pluginhost::PluginSpecificRegistrationContext &
+    getContext();
+
     boost::optional<OSVR_ChannelCount> analogs;
     boost::optional<OSVR_ChannelCount> buttons;
     bool tracker;

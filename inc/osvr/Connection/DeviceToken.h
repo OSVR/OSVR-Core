@@ -23,6 +23,7 @@
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/Util/TimeValue.h>
 
@@ -54,11 +55,11 @@ namespace connection {
         /// has a wait callback that can block, that is called repeatedly in a
         /// thread of its own (managed by OSVR)
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
-        createAsyncDevice(std::string const &name, ConnectionPtr const &conn);
+        createAsyncDevice(DeviceInitObject &init);
         /// @brief Creates a device token (and underlying ConnectionDevice) that
         /// has an update method that runs in the server mainloop.
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
-        createSyncDevice(std::string const &name, ConnectionPtr const &conn);
+        createSyncDevice(DeviceInitObject &init);
         /// @brief Creates a device token (and underlying ConnectionDevice)
         /// without a traditional, built-in update method - typically for
         /// server-internal usage.
