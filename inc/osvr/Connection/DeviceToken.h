@@ -97,9 +97,8 @@ namespace connection {
         /// @brief Send data.
         ///
         /// This may block until the next connectionInteract call before
-        /// forwarding
-        /// on to ConnectionDevice::sendData,
-        /// depending on the type of device token.
+        /// forwarding on to ConnectionDevice::sendData, depending on the type
+        /// of device token.
         OSVR_CONNECTION_EXPORT void
         sendData(util::time::TimeValue const &timestamp, MessageType *type,
                  const char *bytestream, size_t len);
