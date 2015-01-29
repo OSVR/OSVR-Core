@@ -28,7 +28,6 @@
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <iostream>
 
 // Inspired by answer by Yangghi Min on
 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/588b7967-cce4-4412-87e8-593dfeb228b4/getting-the-list-of-available-serial-ports-in-c
