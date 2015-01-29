@@ -39,21 +39,11 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         throw std::runtime_error("Could not parse configuration: " +
                                  reader.getFormattedErrorMessages());
     }
-    std::string port = root["port"].asString();
+    std::string port = normalizeAndVerifySerialPort(root["port"].asString());
     bool calibrate_gyros_on_setup =
         root.get("calibrateGyrosOnSetup", false).asBool();
     bool tare_on_setup = root.get("tareOnSetup", false).asBool();
     double frames_per_second = root.get("framesPerSecond", 250).asFloat();
-    std::string const origPort(port);
-#ifdef _WIN32
-    // Use the Win32 device namespace, if they aren't already.
-    // Have to double the backslashes because they're escape characters.
-    /// @todo device namespace only valid on WinNT-derived windows?
-    if (port.find('\\') == std::string::npos) {
-        port = "\\\\.\\" + port;
-    }
-#endif
-    requireSerialPortAvailable(port, origPort);
 
     std::vector<std::string> string_reset_commands;
     Json::Value commands = root.get("resetCommands", Json::arrayValue);

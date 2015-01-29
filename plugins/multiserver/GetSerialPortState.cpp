@@ -70,26 +70,45 @@ SerialPortState getSerialPortState(std::string const &port) {
     return getSerialPortStateImpl(port);
 }
 
-void requireSerialPortAvailable(std::string const &port, std::string origPort) {
-    if (origPort.empty()) {
-        origPort = port;
+std::string normalizeSerialPort(std::string const &port) {
+    if (port.empty()) {
+        return port;
     }
+#ifdef _WIN32
+    // Use the Win32 device namespace, if they aren't already.
+    // Have to double the backslashes because they're escape characters.
+    /// @todo device namespace only valid on WinNT-derived windows?
+    if (port.find('\\') == std::string::npos) {
+        return "\\\\.\\" + port;
+    }
+#endif
+}
+
+void verifySerialPort(std::string const &port, std::string const &origPort) {
+    std::string const *origPortPtr = origPort.empty() ? &port : &origPort;
     auto portState = getSerialPortState(port);
     if (SERIAL_BUSY == portState) {
-        throw std::runtime_error("Cannot access " + origPort +
+        throw std::runtime_error("Cannot access " + *origPortPtr +
                                  ": currently busy. Do you have another "
                                  "application open using that port?");
     } else if (SERIAL_MISSING == portState) {
-        throw std::runtime_error("Cannot access " + origPort +
+        throw std::runtime_error("Cannot access " + *origPortPtr +
                                  ": port apparently not found. Make sure the "
                                  "device is plugged in and you've specified "
                                  "the right device and the right port.");
     } else if (SERIAL_INVALID == portState) {
-        throw std::runtime_error("Cannot access serial port '" + origPort +
+        throw std::runtime_error("Cannot access serial port '" + *origPortPtr +
                                  "': apparently invalid.");
     } else if (SERIAL_AVAILABLE != portState) {
         /// safety catch-all
-        throw std::runtime_error("Cannot access serial port '" + origPort +
+        throw std::runtime_error("Cannot access serial port '" + *origPortPtr +
                                  "'");
     }
+}
+
+std::string normalizeAndVerifySerialPort(std::string const &port) {
+    std::string ret = normalizeSerialPort(port);
+    verifySerialPort(ret, port);
+
+    return ret;
 }

@@ -31,22 +31,38 @@ enum SerialPortState {
     SERIAL_INVALID,  ///< Something's wrong with the port name you gave
     SERIAL_MISSING,  ///< serial port requested is missing.
     SERIAL_BUSY,     ///< serial port requested is present, but busy (opened for
-                     ///exclusive use).
+                     ///  exclusive use).
     SERIAL_AVAILABLE ///< serial port requested is available and not opened for
-                     ///exclusive use.
+                     ///  exclusive use.
 };
 
 /// @brief Returns an enum value indicating the apparent state of the port.
 SerialPortState getSerialPortState(std::string const &port);
 
-/// @brief Checks the state of the serial port and throws a std::exception
-/// unless it is available.
+/// @brief Normalizes the name of a serial port
 ///
-/// @param port The serial port name
-/// @param origPort Optionally, the port as it should be included in the
-/// exception text (for instance, before prefixing \\.\ on Windows). If empty
-/// (default), will use @p port.
-void requireSerialPortAvailable(std::string const &port,
-                                std::string origPort = std::string());
+/// On Windows, this takes care of prefixing \\.\, for instance.
+///
+/// @param port The serial port name as supplied
+/// @returns the serial port name to use.
+std::string normalizeSerialPort(std::string const &port);
+
+/// @brief Verifies the accessibility of a serial port and throws a
+/// std::exception unless it is available.
+///
+/// @param port The serial port name (already normalized)
+/// @param origPort If specified (and non-empty), the port name
+/// pre-normalization, for use in exceptions.
+void verifySerialPort(std::string const &port,
+                      std::string const &origPort = std::string());
+
+/// @brief Normalizes and verifies the accessibility of a serial port and throws
+/// a std::exception unless it is available.
+///
+/// On Windows, this takes care of prefixing \\.\, for instance.
+///
+/// @param port The serial port name as supplied
+/// @returns the serial port name to use.
+std::string normalizeAndVerifySerialPort(std::string const &port);
 
 #endif // INCLUDED_GetSerialPortState_h_GUID_6A7FD323_CCB5_4093_45E3_9BA7A2943777
