@@ -25,7 +25,8 @@
 #include <osvr/Util/PluginCallbackTypesC.h>
 
 // Standard includes
-// - none
+#include <iostream>
+
 typedef void (*DriverConstructor)(VRPNMultiserverData &data,
                                   OSVR_PluginRegContext ctx,
                                   const char *params);
@@ -37,6 +38,9 @@ OSVR_ReturnCode wrappedConstructor(OSVR_PluginRegContext ctx,
     try {
         F(*data, ctx, params);
         return OSVR_RETURN_SUCCESS;
+    } catch (std::exception &e) {
+        std::cerr << "\nERROR: " << e.what() << "\n" << std::endl;
+        return OSVR_RETURN_FAILURE;
     } catch (...) {
         return OSVR_RETURN_FAILURE;
     }
