@@ -41,8 +41,7 @@ namespace connection {
 
         /// @name
         /// @brief Check for waiting async thread, and give it permission to
-        /// send if
-        /// found.
+        /// send if found.
         ///
         /// Blocks until the async thread completes its work.
         /// @returns true if there was a request to send.
@@ -70,6 +69,11 @@ namespace connection {
             MTM_DENY_SEND,
         };
 
+        /// @brief main mutex (for m_rts and m_mainMessage)
+        typedef boost::mutex MainMutexType;
+        typedef boost::unique_lock<MainMutexType> MainLockType;
+        MainMutexType m_mut;
+
         /// @brief Shared code to handle an RTS and send a message.
         ///
         /// Blocks until the message is handled (the RTS object is destroyed),
@@ -81,17 +85,14 @@ namespace connection {
         ///
         /// @returns true if an RTS was handled
         /// @throws std::logic_error if lock precondition not met
-        bool m_handleRTS(boost::unique_lock<boost::mutex> &lock,
-                         MainThreadMessages response,
+        bool m_handleRTS(MainLockType &lock, MainThreadMessages response,
                          MainThreadMessages postCompletionState = MTM_WAIT);
 
-        /// @brief main mutex (for m_rts and m_mainMessage)
-        boost::mutex m_mut;
-
         /// @brief mutex keeping the main thread from running away before the
-        /// async
-        /// is done.
-        boost::mutex m_mutDone;
+        /// async is done.
+        typedef boost::mutex DoneMutexType;
+        typedef boost::unique_lock<DoneMutexType> DoneLockType;
+        DoneMutexType m_mutDone;
 
         /// @brief For the main thread sleep/wake awaiting completion of the
         /// async
@@ -104,7 +105,7 @@ namespace connection {
 
         /// Written to by async thread, read by main thread
         volatile bool m_rts;
-        /// Written to by async thread, read by main thrad
+        /// Written to by async thread, read by main thread
         volatile bool m_done;
         /// Written to by main thread, read by async thread
         volatile MainThreadMessages m_mainMessage;
@@ -136,10 +137,10 @@ namespace connection {
 
       private:
         /// @brief Lock for AsyncAccessControl::m_mut
-        boost::unique_lock<boost::mutex> m_lock;
+        AsyncAccessControl::MainLockType m_lock;
 
         /// @brief Lock for AsyncAccessControl::m_mutDone
-        boost::unique_lock<boost::mutex> m_lockDone;
+        AsyncAccessControl::DoneLockType m_lockDone;
 
         /// @brief Has the request() method of this instance been called yet?
         bool m_calledRequest;

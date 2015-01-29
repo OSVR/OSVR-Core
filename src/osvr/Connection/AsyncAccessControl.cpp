@@ -28,8 +28,6 @@
 namespace osvr {
 namespace connection {
 
-    using boost::unique_lock;
-    using boost::mutex;
     using boost::defer_lock;
     RequestToSend::RequestToSend(AsyncAccessControl &aac)
         : m_lock(aac.m_mut, defer_lock), m_lockDone(aac.m_mutDone, defer_lock),
@@ -84,17 +82,17 @@ namespace connection {
         : m_rts(false), m_done(false), m_mainMessage(MTM_WAIT) {}
 
     bool AsyncAccessControl::mainThreadCTS() {
-        unique_lock<mutex> lock(m_mut);
+        MainLockType lock(m_mut);
         return m_handleRTS(lock, MTM_CLEAR_TO_SEND);
     }
 
     bool AsyncAccessControl::mainThreadDeny() {
-        unique_lock<mutex> lock(m_mut);
+        MainLockType lock(m_mut);
         return m_handleRTS(lock, MTM_DENY_SEND);
     }
 
     bool AsyncAccessControl::mainThreadDenyPermanently() {
-        unique_lock<mutex> lock(m_mut);
+        MainLockType lock(m_mut);
         bool handled = m_handleRTS(lock, MTM_DENY_SEND, MTM_DENY_SEND);
         if (!handled) {
             BOOST_ASSERT_MSG(lock.owns_lock(),
@@ -102,15 +100,14 @@ namespace connection {
                              "we're supposed to still own the "
                              "lock!");
             // Even if we didn't have any RTS at the time, we still want to set
-            // the
-            // state to DENY
+            // the state to DENY
             m_mainMessage = MTM_DENY_SEND;
         }
         return handled;
     }
 
     bool
-    AsyncAccessControl::m_handleRTS(boost::unique_lock<boost::mutex> &lock,
+    AsyncAccessControl::m_handleRTS(MainLockType &lock,
                                     MainThreadMessages response,
                                     MainThreadMessages postCompletionState) {
         if (!lock.owns_lock() || (lock.mutex() != &m_mut)) {
@@ -127,7 +124,7 @@ namespace connection {
         lock.unlock(); // Unlock to let the requestor through.
         m_condAsyncThread.notify_one();
         {
-            unique_lock<mutex> finishedLock(m_mutDone);
+            DoneLockType finishedLock(m_mutDone);
             while (!m_done) {
                 // Wait for the request to complete.
                 m_condMainThread.wait(finishedLock);
