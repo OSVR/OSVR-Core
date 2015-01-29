@@ -18,6 +18,7 @@
 // Internal Includes
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/Connection/Connection.h>
 
 // Library/third-party includes
 // - none
@@ -26,8 +27,10 @@
 // - none
 
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(OSVR_PluginRegContext ctx)
-    : context(osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
+    : m_context(osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
       tracker(false) {}
+
+void OSVR_DeviceInitObject::setName(const char *n) { m_name = n; }
 
 inline void setOptional(OSVR_ChannelCount input,
                         boost::optional<OSVR_ChannelCount> &dest) {
@@ -47,3 +50,13 @@ void OSVR_DeviceInitObject::setButtons(OSVR_ChannelCount num) {
 }
 
 void OSVR_DeviceInitObject::setTracker() { tracker = true; }
+
+std::string OSVR_DeviceInitObject::getQualifiedName() const {
+    return m_context.getName() + "/" + m_name;
+}
+
+osvr::connection::ConnectionPtr OSVR_DeviceInitObject::getConnection() {
+    osvr::connection::ConnectionPtr conn =
+        osvr::connection::Connection::retrieveConnection(m_context.getParent());
+    return conn;
+}

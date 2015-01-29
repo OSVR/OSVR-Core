@@ -24,17 +24,21 @@
 #include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
 #include <osvr/Util/StdInt.h>
 #include <osvr/Connection/Export.h>
+#include <osvr/Connection/ConnectionPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 /// @brief Structure used internally to construct the desired type of device.
 struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT OSVR_DeviceInitObject(OSVR_PluginRegContext ctx);
+
+    /// @brief Set the (unqualified) name of the device to create.
+    OSVR_CONNECTION_EXPORT void setName(const char *n);
 
     /// @brief Set analogs: clears the boost::optional if 0 is passed.
     OSVR_CONNECTION_EXPORT void setAnalogs(OSVR_ChannelCount num);
@@ -45,10 +49,19 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     /// @brief Enables tracker interface
     OSVR_CONNECTION_EXPORT void setTracker();
 
-    osvr::pluginhost::PluginSpecificRegistrationContext &context;
+    /// @brief Get device name qualified by plugin name
+    std::string getQualifiedName() const;
+
+    /// @brief Retrieve the connection pointer.
+    osvr::connection::ConnectionPtr getConnection();
+
     boost::optional<OSVR_ChannelCount> analogs;
     boost::optional<OSVR_ChannelCount> buttons;
     bool tracker;
+
+  private:
+    osvr::pluginhost::PluginSpecificRegistrationContext &m_context;
+    std::string m_name;
 };
 
 namespace osvr {
