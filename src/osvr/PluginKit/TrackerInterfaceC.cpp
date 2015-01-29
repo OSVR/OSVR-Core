@@ -23,3 +23,12 @@
 
 // Standard includes
 // - none
+
+OSVR_ReturnCode
+osvrDeviceTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+                           OSVR_OUT_PTR OSVR_TrackerDeviceInterface *iface) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceTrackerConfigure", opts);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceTrackerConfigure", iface);
+    opts->setTracker();
+    return OSVR_RETURN_SUCCESS;
+}

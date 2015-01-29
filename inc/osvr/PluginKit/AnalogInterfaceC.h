@@ -35,21 +35,30 @@
 OSVR_EXTERN_C_BEGIN
 
 /** @brief The integer type specifying the number of channels you'd like for
- * your analog. */
+    your analog.
+*/
 typedef uint32_t OSVR_AnalogChanCount;
+
+/** @brief Opaque type used in conjunction with a device token to send data on
+    an analog interface.
+*/
+typedef struct OSVR_AnalogDeviceInterfaceObject *OSVR_AnalogDeviceInterface;
 
 /** @brief Specify that your device will implement the Analog interface.
 
     @param opts The device init options object.
+    @param iface An interface object you should retain with the same lifetime as
+   the device token in order to send messages conforming to an analog interface.
     @param numChan The number of channels you will be reporting. This parameter
    may be subject to external limitations (presently 128).
 
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions
-                                              opts,
-                                          OSVR_IN OSVR_AnalogChanCount numChan)
-    OSVR_FUNC_NONNULL((1));
+OSVR_ReturnCode
+osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+                          OSVR_OUT_PTR OSVR_AnalogDeviceInterface *iface,
+                          OSVR_IN OSVR_AnalogChanCount numChan)
+    OSVR_FUNC_NONNULL((1, 2));
 
 OSVR_EXTERN_C_END
 

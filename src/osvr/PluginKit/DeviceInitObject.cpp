@@ -26,12 +26,24 @@
 // - none
 
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(OSVR_PluginRegContext ctx)
-    : context(osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)) {}
+    : context(osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)),
+      tracker(false) {}
 
-void OSVR_DeviceInitObject::setAnalogs(OSVR_AnalogChanCount numAnalogs) {
-    if (numAnalogs == 0) {
-        analogs.reset();
+template <typename NumType>
+inline void setOptional(NumType input, boost::optional<NumType> &dest) {
+    if (0 == input) {
+        dest.reset();
     } else {
-        analogs = numAnalogs;
+        dest = input;
     }
 }
+
+void OSVR_DeviceInitObject::setAnalogs(OSVR_AnalogChanCount num) {
+    setOptional(num, analogs);
+}
+
+void OSVR_DeviceInitObject::setButtons(OSVR_ButtonChanCount num) {
+    setOptional(num, buttons);
+}
+
+void OSVR_DeviceInitObject::setTracker() { tracker = true; }

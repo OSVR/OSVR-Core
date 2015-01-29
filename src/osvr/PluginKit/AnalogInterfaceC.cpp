@@ -28,8 +28,10 @@
 
 OSVR_ReturnCode
 osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+                          OSVR_OUT_PTR OSVR_AnalogDeviceInterface *iface,
                           OSVR_IN OSVR_AnalogChanCount numChan) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogConfigure", opts);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogConfigure", iface);
     opts->setAnalogs(numChan);
     return OSVR_RETURN_SUCCESS;
 }

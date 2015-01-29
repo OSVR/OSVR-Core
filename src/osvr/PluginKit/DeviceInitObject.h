@@ -21,6 +21,7 @@
 // Internal Includes
 #include <osvr/PluginKit/DeviceInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
+#include <osvr/PluginKit/ButtonInterfaceC.h>
 #include <osvr/Util/PluginRegContextC.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
 #include <osvr/Util/StdInt.h>
@@ -36,10 +37,17 @@
 struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_DeviceInitObject(OSVR_PluginRegContext ctx);
     /// @brief Set analogs: clears the boost::optional if 0 is passed.
-    void setAnalogs(OSVR_AnalogChanCount numAnalogs);
+    void setAnalogs(OSVR_AnalogChanCount num);
+    /// @brief Set buttons: clears the boost::optional if 0 is passed.
+    void setButtons(OSVR_ButtonChanCount num);
+
+    /// @brief Enables tracker interface
+    void setTracker();
 
     osvr::pluginhost::PluginSpecificRegistrationContext &context;
     boost::optional<OSVR_AnalogChanCount> analogs;
+    boost::optional<OSVR_ButtonChanCount> buttons;
+    bool tracker;
 };
 
 namespace osvr {
