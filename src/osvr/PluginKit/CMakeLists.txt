@@ -13,8 +13,6 @@ set(API
     "${HEADER_LOCATION}/TrackerInterfaceC.h")
 
 set(SOURCE
-    AnalogDeviceInterface.cpp
-    AnalogDeviceInterface.h
     AnalogInterfaceC.cpp
     ButtonInterfaceC.cpp
     DeviceInterfaceC.cpp
