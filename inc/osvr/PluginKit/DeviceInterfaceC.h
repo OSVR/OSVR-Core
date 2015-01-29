@@ -149,6 +149,20 @@ osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                    OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3));
 
+/** @copydoc osvrDeviceSyncInit
+    @brief Initialize a synchronous device token with the options specified.
+    @param options The DeviceInitOptions for your device.
+
+    This transfers ownership of the DeviceInitOptions, and all created objects
+   associated with it, to the returned device token.
+*/
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                              OSVR_IN_STRZ const char *name,
+                              OSVR_INOUT_PTR OSVR_DeviceInitOptions options,
+                              OSVR_OUT_PTR OSVR_DeviceToken *device)
+    OSVR_FUNC_NONNULL((1, 2, 3, 4));
+
 /** @brief Register the update callback of a synchronous device.
 
     The callback you provide will be called in the main update loop, potentially
