@@ -66,13 +66,17 @@ OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
                                     timestamp);
-    bool sendResult = false;
+
     osvr::connection::DeviceToken *device =
         static_cast<osvr::connection::DeviceToken *>(dev);
-    bool callResult = device->callWhenSafeToSend(
-        [&] { sendResult = (*iface)->setValue(val, chan, *timestamp); });
-    return (callResult && sendResult) ? OSVR_RETURN_SUCCESS
-                                      : OSVR_RETURN_FAILURE;
+
+    auto guard = device->getSendGuard();
+    if (guard->lock()) {
+        bool sendResult = (*iface)->setValue(val, chan, *timestamp);
+        return sendResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+    }
+
+    return OSVR_RETURN_FAILURE;
 }
 
 OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
@@ -96,7 +100,11 @@ OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
                                     timestamp);
     osvr::connection::DeviceToken *device =
         static_cast<osvr::connection::DeviceToken *>(dev);
-    bool callResult = device->callWhenSafeToSend(
-        [&] { (*iface)->setValues(val, chans, *timestamp); });
-    return callResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+
+    auto guard = device->getSendGuard();
+    if (guard->lock()) {
+        (*iface)->setValues(val, chans, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
+    return OSVR_RETURN_FAILURE;
 }
