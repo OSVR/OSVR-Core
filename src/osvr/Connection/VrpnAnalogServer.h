@@ -35,8 +35,8 @@ namespace connection {
         typedef vrpn_Analog Base;
         VrpnAnalogServer(DeviceConstructionData &init)
             : Base(init.getQualifiedName().c_str(), init.conn) {
-            m_numChannels() = std::min(*init.obj.getAnalogs(),
-                                       OSVR_ChannelCount(vrpn_CHANNEL_MAX));
+            m_setNumChannels(std::min(*init.obj.getAnalogs(),
+                                      OSVR_ChannelCount(vrpn_CHANNEL_MAX)));
             // Initialize data
             memset(Base::channel, 0, sizeof(Base::channel));
             memset(Base::last, 0, sizeof(Base::last));
@@ -46,7 +46,7 @@ namespace connection {
 
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
                               util::time::TimeValue const &timestamp) {
-            if (chan >= m_numChannels()) {
+            if (chan >= m_getNumChannels()) {
                 return false;
             }
             Base::channel[chan] = val;
@@ -55,8 +55,8 @@ namespace connection {
         }
         virtual void setValues(value_type val[], OSVR_ChannelCount chans,
                                util::time::TimeValue const &timestamp) {
-            if (chans > m_numChannels()) {
-                chans = m_numChannels();
+            if (chans > m_getNumChannels()) {
+                chans = m_getNumChannels();
             }
             for (OSVR_ChannelCount i = 0; i < chans; ++i) {
                 Base::channel[i] = val[i];
@@ -65,7 +65,12 @@ namespace connection {
         }
 
       private:
-        vrpn_int32 &m_numChannels() { return Base::num_channel; }
+        OSVR_ChannelCount m_getNumChannels() {
+            return static_cast<OSVR_ChannelCount>(Base::num_channel);
+        }
+        void m_setNumChannels(OSVR_ChannelCount chans) {
+            Base::num_channel = chans;
+        }
         void m_reportChanges(util::time::TimeValue const &timestamp) {
             struct timeval t;
             util::time::toStructTimeval(t, timestamp);

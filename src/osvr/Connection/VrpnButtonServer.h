@@ -36,17 +36,17 @@ namespace connection {
         typedef vrpn_Button_Filter Base;
         VrpnButtonServer(DeviceConstructionData &init)
             : vrpn_Button_Filter(init.getQualifiedName().c_str(), init.conn) {
-            m_numChannels() =
+            m_setNumChannels(
                 std::min(*init.obj.getAnalogs(),
-                         OSVR_ChannelCount(vrpn_BUTTON_MAX_BUTTONS));
+                         OSVR_ChannelCount(vrpn_BUTTON_MAX_BUTTONS)));
             // Initialize data
-            memset(buttons, 0, sizeof(buttons));
-            memset(lastbuttons, 0, sizeof(lastbuttons));
+            memset(Base::buttons, 0, sizeof(Base::buttons));
+            memset(Base::lastbuttons, 0, sizeof(Base::lastbuttons));
         }
 
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
                               util::time::TimeValue const &timestamp) {
-            if (chan >= m_numChannels()) {
+            if (chan >= m_getNumChannels()) {
                 return false;
             }
             Base::buttons[chan] = val;
@@ -56,8 +56,8 @@ namespace connection {
 
         virtual void setValues(value_type val[], OSVR_ChannelCount chans,
                                util::time::TimeValue const &timestamp) {
-            if (chans > m_numChannels()) {
-                chans = m_numChannels();
+            if (chans > m_getNumChannels()) {
+                chans = m_getNumChannels();
             }
             for (OSVR_ChannelCount i = 0; i < chans; ++i) {
                 Base::buttons[i] = val[i];
@@ -66,7 +66,12 @@ namespace connection {
         }
 
       private:
-        vrpn_int32 &m_numChannels() { return Base::num_buttons; }
+        OSVR_ChannelCount m_getNumChannels() {
+            return static_cast<OSVR_ChannelCount>(Base::num_buttons);
+        }
+        void m_setNumChannels(OSVR_ChannelCount chans) {
+            Base::num_buttons = chans;
+        }
         void m_reportChanges(util::time::TimeValue const &timestamp) {
             util::time::toStructTimeval(Base::timestamp, timestamp);
             Base::report_changes();
