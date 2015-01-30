@@ -24,6 +24,7 @@
 
 /* Internal Includes */
 #include <osvr/PluginKit/DeviceInterfaceC.h>
+#include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/ChannelCountC.h>
 
 /* Library/third-party includes */
@@ -59,6 +60,45 @@ osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                           OSVR_OUT_PTR OSVR_ButtonDeviceInterface *iface,
                           OSVR_IN OSVR_ButtonChanCount numChan)
     OSVR_FUNC_NONNULL((1, 2));
+
+/** @brief Report the value of a single channel.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceButtonSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                         OSVR_IN_PTR OSVR_ButtonDeviceInterface
+                                             iface,
+                                         OSVR_IN OSVR_ButtonState val,
+                                         OSVR_IN OSVR_ChannelCount chan)
+    OSVR_FUNC_NONNULL((1, 2));
+
+/** @brief Report the value of a single channel with the supplied timestamp
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceButtonSetValueTimestamped(
+    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_ButtonDeviceInterface iface, OSVR_IN OSVR_ButtonState val,
+    OSVR_IN OSVR_ChannelCount chan, OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 5));
+
+/** @brief Report the value of multiple channels
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceButtonSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                                          OSVR_IN_PTR OSVR_ButtonDeviceInterface
+                                              iface,
+                                          OSVR_IN_PTR OSVR_ButtonState val[],
+                                          OSVR_IN OSVR_ChannelCount chans)
+    OSVR_FUNC_NONNULL((1, 2, 3));
+
+/** @brief Report the value of multiple channels with the supplied timestamp
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceButtonSetValuesTimestamped(
+    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
+    OSVR_IN_PTR OSVR_ButtonState val[], OSVR_IN OSVR_ChannelCount chans,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
 
 OSVR_EXTERN_C_END
 
