@@ -85,7 +85,20 @@ void OSVR_DeviceInitObject::returnButtonInterface(
     *m_buttonIface = &iface;
 }
 
-void OSVR_DeviceInitObject::setTracker() { m_tracker = true; }
+void OSVR_DeviceInitObject::setTracker(
+    osvr::connection::TrackerServerInterface **iface) {
+    if (nullptr != iface) {
+        m_tracker = true;
+    } else {
+        m_tracker = false;
+    }
+    m_trackerIface = iface;
+}
+
+void OSVR_DeviceInitObject::returnTrackerInterface(
+    osvr::connection::TrackerServerInterface &iface) {
+    *m_trackerIface = &iface;
+}
 
 std::string OSVR_DeviceInitObject::getQualifiedName() const {
     return m_qualifiedName;

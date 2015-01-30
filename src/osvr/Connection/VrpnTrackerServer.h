@@ -42,8 +42,7 @@ namespace connection {
             m_resetPos();
             m_resetQuat();
             // Report interface out.
-            /// @todo
-            // init.obj.returnTrackerInterface(*this);
+            init.obj.returnTrackerInterface(*this);
         }
         static const vrpn_uint32 CLASS_OF_SERVICE = vrpn_CONNECTION_LOW_LATENCY;
 

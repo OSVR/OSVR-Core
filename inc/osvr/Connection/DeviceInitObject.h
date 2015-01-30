@@ -68,7 +68,12 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     void returnButtonInterface(osvr::connection::ButtonServerInterface &iface);
 
     /// @brief Enables tracker interface
-    OSVR_CONNECTION_EXPORT void setTracker();
+    OSVR_CONNECTION_EXPORT void
+    setTracker(osvr::connection::TrackerServerInterface **iface);
+
+    /// @brief Returns a tracker interface through the pointer-pointer.
+    void
+    returnTrackerInterface(osvr::connection::TrackerServerInterface &iface);
 
     /// @brief Get device name qualified by plugin name
     std::string getQualifiedName() const;
@@ -94,6 +99,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     boost::optional<OSVR_ChannelCount> m_buttons;
     osvr::connection::ButtonServerInterface **m_buttonIface;
     bool m_tracker;
+    osvr::connection::TrackerServerInterface **m_trackerIface;
 };
 
 namespace osvr {
