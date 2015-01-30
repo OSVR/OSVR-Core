@@ -45,6 +45,24 @@ namespace connection {
     typedef std::function<OSVR_ReturnCode()> AsyncDeviceWaitCallback;
     typedef std::function<OSVR_ReturnCode()> SyncDeviceUpdateCallback;
 
+    /// @brief Class that blocks until the device is safe to send using request,
+    /// then holds that permission until destruction
+    class SendGuard : boost::noncopyable {
+      public:
+        SendGuard(DeviceToken &device);
+        ~SendGuard();
+        bool request();
+        class Implementation : boost::noncopyable {
+          public:
+            static unique_ptr<Implementation> createDummyImplementation();
+            virtual bool request() = 0;
+            virtual ~Implementation();
+        };
+
+      private:
+        unique_ptr<Implementation> m_impl;
+    };
+
     /// @brief A DeviceToken connects the generic device interaction code in
     /// PluginKit's C API with the workings of an actual ConnectionDevice.
     class DeviceToken : boost::noncopyable {
@@ -116,6 +134,8 @@ namespace connection {
         OSVR_CONNECTION_EXPORT bool
         callWhenSafeToSend(std::function<void()> callback);
 
+        unique_ptr<SendGuard::Implementation> getSendGuardImplementation();
+
         /// @brief Interact with connection. Only legal to end up in
         /// ConnectionDevice::sendData from within here somehow.
         void connectionInteract();
@@ -130,7 +150,9 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
-        virtual bool m_callWhenSafeToSend(std::function<void()> &callback) = 0;
+        virtual virtual bool
+        m_callWhenSafeToSend(std::function<void()> &callback) = 0;
+        virtual unique_ptr<SendGuard::Implementation> m_getSendGuard() = 0;
         virtual void m_connectionInteract() = 0;
         virtual void m_stopThreads();
 
@@ -143,6 +165,7 @@ namespace connection {
         ConnectionPtr m_conn;
         ConnectionDevicePtr m_dev;
     };
+
 } // namespace connection
 } // namespace osvr
 

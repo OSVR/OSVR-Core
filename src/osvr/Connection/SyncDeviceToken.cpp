@@ -52,6 +52,10 @@ namespace connection {
         return true;
     }
 
+    unique_ptr<SendGuard::Implementation> SyncDeviceToken::m_getSendGuard() {
+        return SendGuard::Implementation::createDummyImplementation();
+    }
+
     void SyncDeviceToken::m_connectionInteract() {
         if (m_cb) {
             m_cb();

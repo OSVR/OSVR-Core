@@ -45,6 +45,9 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
+    unique_ptr<SendGuard::Implementation> VirtualDeviceToken::m_getSendGuard() {
+        return SendGuard::Implementation::createDummyImplementation();
+    }
     void VirtualDeviceToken::m_connectionInteract() {}
 } // namespace connection
 } // namespace osvr

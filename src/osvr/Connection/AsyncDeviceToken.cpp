@@ -119,6 +119,20 @@ namespace connection {
         return true;
     }
 
+    class AsyncSendGuard : public SendGuard::Implementation {
+      public:
+        AsyncSendGuard(AsyncAccessControl &control) : m_rts(control) {}
+        virtual bool request() { return m_rts.request(); }
+        virtual ~AsyncSendGuard() {}
+
+      private:
+        RequestToSend m_rts;
+    };
+    unique_ptr<SendGuard::Implementation> AsyncDeviceToken::m_getSendGuard() {
+        return unique_ptr<SendGuard::Implementation>(
+            new AsyncSendGuard(m_accessControl));
+    }
+
     void AsyncDeviceToken::m_connectionInteract() {
         OSVR_DEV_VERBOSE("AsyncDeviceToken::m_connectionInteract\t"
                          "Going to send a CTS if waiting");

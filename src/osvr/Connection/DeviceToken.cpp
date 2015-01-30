@@ -32,6 +32,28 @@
 namespace osvr {
 namespace connection {
 
+    SendGuard::SendGuard(DeviceToken &dev)
+        : m_impl(dev.getSendGuardImplementation()) {}
+
+    bool SendGuard::request() {
+        if (!m_impl) {
+            return false;
+        }
+        return m_impl->request();
+    }
+    SendGuard::Implementation::~Implementation() {}
+
+    class DummySendGuard : public SendGuard::Implementation {
+      public:
+        virtual bool request() { return true; }
+        virtual ~DummySendGuard() {}
+    };
+
+    unique_ptr<SendGuard::Implementation>
+    SendGuard::Implementation::createDummyImplementation() {
+        return unique_ptr<SendGuard::Implementation>(new DummySendGuard);
+    }
+
     DeviceTokenPtr DeviceToken::createAsyncDevice(DeviceInitObject &init) {
         DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
         ret->m_sharedInit(init.getConnection());
@@ -70,6 +92,11 @@ namespace connection {
     }
     bool DeviceToken::callWhenSafeToSend(std::function<void()> callback) {
         return m_callWhenSafeToSend(callback);
+    }
+
+    unique_ptr<SendGuard::Implementation>
+    DeviceToken::getSendGuardImplementation() {
+        return m_getSendGuard();
     }
 
     void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
