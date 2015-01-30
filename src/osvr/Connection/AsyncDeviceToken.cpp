@@ -119,18 +119,17 @@ namespace connection {
         return true;
     }
 
-    class AsyncSendGuard : public SendGuard::Implementation {
+    class AsyncSendGuard : public util::GuardInterface {
       public:
         AsyncSendGuard(AsyncAccessControl &control) : m_rts(control) {}
-        virtual bool request() { return m_rts.request(); }
+        virtual bool lock() { return m_rts.request(); }
         virtual ~AsyncSendGuard() {}
 
       private:
         RequestToSend m_rts;
     };
-    unique_ptr<SendGuard::Implementation> AsyncDeviceToken::m_getSendGuard() {
-        return unique_ptr<SendGuard::Implementation>(
-            new AsyncSendGuard(m_accessControl));
+    GuardPtr AsyncDeviceToken::m_getSendGuard() {
+        return GuardPtr(new AsyncSendGuard(m_accessControl));
     }
 
     void AsyncDeviceToken::m_connectionInteract() {

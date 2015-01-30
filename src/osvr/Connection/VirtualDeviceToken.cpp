@@ -19,6 +19,7 @@
 #include "VirtualDeviceToken.h"
 #include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/GuardInterfaceDummy.h>
 
 // Library/third-party includes
 // - none
@@ -45,9 +46,10 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
-    unique_ptr<SendGuard::Implementation> VirtualDeviceToken::m_getSendGuard() {
-        return SendGuard::Implementation::createDummyImplementation();
+    GuardPtr VirtualDeviceToken::m_getSendGuard() {
+        return GuardPtr(new util::DummyGuard);
     }
+
     void VirtualDeviceToken::m_connectionInteract() {}
 } // namespace connection
 } // namespace osvr

@@ -26,6 +26,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/GuardInterface.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -41,27 +42,10 @@ namespace connection {
     class SyncDeviceToken;
     class DeviceToken;
     typedef unique_ptr<DeviceToken> DeviceTokenPtr;
+    typedef unique_ptr<util::GuardInterface> GuardPtr;
 
     typedef std::function<OSVR_ReturnCode()> AsyncDeviceWaitCallback;
     typedef std::function<OSVR_ReturnCode()> SyncDeviceUpdateCallback;
-
-    /// @brief Class that blocks until the device is safe to send using request,
-    /// then holds that permission until destruction
-    class SendGuard : boost::noncopyable {
-      public:
-        SendGuard(DeviceToken &device);
-        ~SendGuard();
-        bool request();
-        class Implementation : boost::noncopyable {
-          public:
-            static unique_ptr<Implementation> createDummyImplementation();
-            virtual bool request() = 0;
-            virtual ~Implementation();
-        };
-
-      private:
-        unique_ptr<Implementation> m_impl;
-    };
 
     /// @brief A DeviceToken connects the generic device interaction code in
     /// PluginKit's C API with the workings of an actual ConnectionDevice.
@@ -134,7 +118,7 @@ namespace connection {
         OSVR_CONNECTION_EXPORT bool
         callWhenSafeToSend(std::function<void()> callback);
 
-        unique_ptr<SendGuard::Implementation> getSendGuardImplementation();
+        GuardPtr getSendGuard();
 
         /// @brief Interact with connection. Only legal to end up in
         /// ConnectionDevice::sendData from within here somehow.
@@ -151,7 +135,7 @@ namespace connection {
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
         virtual bool m_callWhenSafeToSend(std::function<void()> &callback) = 0;
-        virtual unique_ptr<SendGuard::Implementation> m_getSendGuard() = 0;
+        virtual GuardPtr m_getSendGuard() = 0;
         virtual void m_connectionInteract() = 0;
         virtual void m_stopThreads();
 

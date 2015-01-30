@@ -40,7 +40,7 @@ namespace connection {
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
         virtual bool m_callWhenSafeToSend(std::function<void()> &callback);
-        virtual unique_ptr<SendGuard::Implementation> m_getSendGuard();
+        virtual GuardPtr m_getSendGuard();
         virtual void m_connectionInteract();
     };
 } // namespace connection

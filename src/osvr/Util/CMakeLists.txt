@@ -35,6 +35,7 @@ set(API
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/GuardInterface.h"
+    "${HEADER_LOCATION}/GuardInterfaceDummy.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"

@@ -53,7 +53,7 @@ namespace connection {
         /// Called from the async thread - only calls its callback when
         /// m_connectionInteract says so.
         virtual bool m_callWhenSafeToSend(std::function<void()> &callback);
-        virtual unique_ptr<SendGuard::Implementation> m_getSendGuard();
+        virtual GuardPtr m_getSendGuard();
 
         /// Called from the main thread - services requests to send from
         /// the async thread.

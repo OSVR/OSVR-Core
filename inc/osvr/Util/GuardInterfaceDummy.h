@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2015
 
@@ -15,6 +15,9 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#ifndef INCLUDED_GuardInterfaceDummy_h_GUID_3882E1F8_E44A_4D95_E4D3_6C60A9C94F05
+#define INCLUDED_GuardInterfaceDummy_h_GUID_3882E1F8_E44A_4D95_E4D3_6C60A9C94F05
+
 // Internal Includes
 #include <osvr/Util/GuardInterface.h>
 
@@ -26,6 +29,13 @@
 
 namespace osvr {
 namespace util {
-    GuardInterface::~GuardInterface() {}
+    class DummyGuard : public GuardInterface {
+      public:
+        virtual bool lock() { return true; }
+        virtual ~DummyGuard() {}
+    };
+
 } // namespace util
 } // namespace osvr
+
+#endif // INCLUDED_GuardInterfaceDummy_h_GUID_3882E1F8_E44A_4D95_E4D3_6C60A9C94F05

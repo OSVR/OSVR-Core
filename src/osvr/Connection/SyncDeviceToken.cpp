@@ -19,6 +19,7 @@
 #include "SyncDeviceToken.h"
 #include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/GuardInterfaceDummy.h>
 
 // Library/third-party includes
 // - none
@@ -52,8 +53,8 @@ namespace connection {
         return true;
     }
 
-    unique_ptr<SendGuard::Implementation> SyncDeviceToken::m_getSendGuard() {
-        return SendGuard::Implementation::createDummyImplementation();
+    GuardPtr SyncDeviceToken::m_getSendGuard() {
+        return GuardPtr(new util::DummyGuard);
     }
 
     void SyncDeviceToken::m_connectionInteract() {

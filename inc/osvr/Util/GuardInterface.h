@@ -20,6 +20,7 @@
 
 // Internal Includes
 #include <osvr/Util/AnnotationMacrosC.h>
+#include <osvr/Util/Export.h>
 
 // Library/third-party includes
 // - none
@@ -34,7 +35,7 @@ namespace util {
     /// destruction.
     class GuardInterface {
       public:
-        virtual ~GuardInterface();
+        OSVR_UTIL_EXPORT virtual ~GuardInterface();
         /// @brief Attempts to lock/request the resource, and returns true if
         /// successful.
         ///
