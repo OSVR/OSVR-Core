@@ -18,6 +18,9 @@
 // Internal Includes
 #include <osvr/PluginKit/ButtonInterfaceC.h>
 #include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/ButtonServerInterface.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
 
 // Library/third-party includes
@@ -26,12 +29,19 @@
 // Standard includes
 // - none
 
+struct OSVR_ButtonDeviceInterfaceObject {
+    OSVR_ButtonDeviceInterfaceObject() : realIface(nullptr) {}
+    osvr::connection::ButtonServerInterface *realIface;
+};
 OSVR_ReturnCode
 osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                           OSVR_OUT_PTR OSVR_ButtonDeviceInterface *iface,
                           OSVR_IN OSVR_ButtonChanCount numChan) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", iface);
-    opts->setButtons(numChan);
+    OSVR_ButtonDeviceInterface ifaceObj =
+        opts->getContext()->registerDataWithGenericDelete(
+            new OSVR_ButtonDeviceInterfaceObject);
+    opts->setButtons(numChan, &(ifaceObj->realIface));
     return OSVR_RETURN_SUCCESS;
 }

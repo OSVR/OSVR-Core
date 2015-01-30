@@ -33,6 +33,13 @@
 // Standard includes
 #include <string>
 
+namespace osvr {
+namespace connection {
+    class AnalogServerInterface;
+    class ButtonServerInterface;
+    class TrackerServerInterface;
+} // namespace connection
+} // namespace osvr
 /// @brief Structure used internally to construct the desired type of device.
 struct OSVR_DeviceInitObject : boost::noncopyable {
   public:
@@ -45,10 +52,22 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT void setName(std::string const &n);
 
     /// @brief Set analogs: clears the boost::optional if 0 is passed.
-    OSVR_CONNECTION_EXPORT void setAnalogs(OSVR_ChannelCount num);
+    OSVR_CONNECTION_EXPORT void
+    setAnalogs(OSVR_ChannelCount num,
+               osvr::connection::AnalogServerInterface **iface);
+
+    /// @brief Returns a pointer to an analog interface through the
+    /// pointer-pointer.
+    void returnAnalogInterface(osvr::connection::AnalogServerInterface *iface);
 
     /// @brief Set buttons: clears the boost::optional if 0 is passed.
-    OSVR_CONNECTION_EXPORT void setButtons(OSVR_ChannelCount num);
+    OSVR_CONNECTION_EXPORT void
+    setButtons(OSVR_ChannelCount num,
+               osvr::connection::ButtonServerInterface **iface);
+
+    /// @brief Returns a pointer to a button interface through the
+    /// pointer-pointer.
+    void returnButtonInterface(osvr::connection::ButtonServerInterface *iface);
 
     /// @brief Enables tracker interface
     OSVR_CONNECTION_EXPORT void setTracker();
@@ -73,16 +92,15 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     std::string m_name;
     std::string m_qualifiedName;
     boost::optional<OSVR_ChannelCount> m_analogs;
+    osvr::connection::AnalogServerInterface **m_analogIface;
     boost::optional<OSVR_ChannelCount> m_buttons;
+    osvr::connection::ButtonServerInterface **m_buttonIface;
     bool m_tracker;
 };
 
 namespace osvr {
 namespace connection {
     typedef ::OSVR_DeviceInitObject DeviceInitObject;
-    class AnalogServerInterface;
-    class ButtonServerInterface;
-    class TrackerServerInterface;
 } // namespace connection
 } // namespace osvr
 

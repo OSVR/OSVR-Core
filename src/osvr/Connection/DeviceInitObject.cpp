@@ -27,10 +27,11 @@
 // - none
 using osvr::pluginhost::PluginSpecificRegistrationContext;
 using osvr::connection::Connection;
+
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(OSVR_PluginRegContext ctx)
     : m_context(&PluginSpecificRegistrationContext::get(ctx)),
       m_conn(Connection::retrieveConnection(m_context->getParent())),
-      m_tracker(false) {}
+      m_analogIface(nullptr), m_buttonIface(nullptr), m_tracker(false) {}
 
 OSVR_DeviceInitObject::OSVR_DeviceInitObject(
     osvr::connection::ConnectionPtr conn)
@@ -45,21 +46,43 @@ void OSVR_DeviceInitObject::setName(std::string const &n) {
     }
 }
 
-inline void setOptional(OSVR_ChannelCount input,
+template <typename T>
+inline bool setOptional(OSVR_ChannelCount input, T ptr,
                         boost::optional<OSVR_ChannelCount> &dest) {
-    if (0 == input) {
+    if (0 == input || nullptr == ptr) {
         dest.reset();
+        return false;
+    }
+    dest = input;
+    return true;
+}
+
+void OSVR_DeviceInitObject::setAnalogs(
+    OSVR_ChannelCount num, osvr::connection::AnalogServerInterface **iface) {
+    if (setOptional(num, iface, m_analogs)) {
+        m_analogIface = iface;
     } else {
-        dest = input;
+        m_analogIface = nullptr;
     }
 }
 
-void OSVR_DeviceInitObject::setAnalogs(OSVR_ChannelCount num) {
-    setOptional(num, m_analogs);
+void OSVR_DeviceInitObject::returnAnalogInterface(
+    osvr::connection::AnalogServerInterface *iface) {
+    *m_analogIface = iface;
 }
 
-void OSVR_DeviceInitObject::setButtons(OSVR_ChannelCount num) {
-    setOptional(num, m_buttons);
+void OSVR_DeviceInitObject::setButtons(
+    OSVR_ChannelCount num, osvr::connection::ButtonServerInterface **iface) {
+    if (setOptional(num, iface, m_buttons)) {
+        m_buttonIface = iface;
+    } else {
+        m_buttonIface = nullptr;
+    }
+}
+
+void OSVR_DeviceInitObject::returnButtonInterface(
+    osvr::connection::ButtonServerInterface *iface) {
+    *m_buttonIface = iface;
 }
 
 void OSVR_DeviceInitObject::setTracker() { m_tracker = true; }
