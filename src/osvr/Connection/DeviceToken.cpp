@@ -34,20 +34,22 @@ namespace connection {
 
     DeviceTokenPtr DeviceToken::createAsyncDevice(DeviceInitObject &init) {
         DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
-        ret->m_sharedInit(init.getConnection());
+        ret->m_sharedInit(init);
         return ret;
     }
 
     DeviceTokenPtr DeviceToken::createSyncDevice(DeviceInitObject &init) {
         DeviceTokenPtr ret(new SyncDeviceToken(init.getQualifiedName()));
-        ret->m_sharedInit(init.getConnection());
+        ret->m_sharedInit(init);
         return ret;
     }
 
     DeviceTokenPtr DeviceToken::createVirtualDevice(std::string const &name,
                                                     ConnectionPtr const &conn) {
+        DeviceInitObject init(conn);
+        init.setName(name);
         DeviceTokenPtr ret(new VirtualDeviceToken(name));
-        ret->m_sharedInit(conn);
+        ret->m_sharedInit(init);
         return ret;
     }
 
@@ -107,9 +109,9 @@ namespace connection {
 
     void DeviceToken::m_stopThreads() {}
 
-    void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
-        m_conn = conn;
-        m_dev = conn->createConnectionDevice(m_name);
+    void DeviceToken::m_sharedInit(DeviceInitObject &init) {
+        m_conn = init.getConnection();
+        m_dev = m_conn->createConnectionDevice(init);
         m_dev->setDeviceToken(*this);
     }
 

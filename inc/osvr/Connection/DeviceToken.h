@@ -145,7 +145,7 @@ namespace connection {
         virtual SyncDeviceToken *asSync();
 
       private:
-        void m_sharedInit(ConnectionPtr const &conn);
+        void m_sharedInit(DeviceInitObject &init);
         std::string const m_name;
         ConnectionPtr m_conn;
         ConnectionDevicePtr m_dev;
