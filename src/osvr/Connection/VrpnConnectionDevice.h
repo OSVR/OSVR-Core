@@ -23,6 +23,7 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Util/UniquePtr.h>
 #include "VrpnBaseFlexServer.h"
+#include "GenerateVrpnDynamicServer.h"
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -38,12 +39,14 @@ namespace connection {
         VrpnConnectionDevice(DeviceInitObject &init,
                              vrpn_ConnectionPtr const &vrpnConn)
             : ConnectionDevice(init.getQualifiedName()) {
-            m_baseobj.reset(new vrpn_BaseFlexServer(
-                init.getQualifiedName().c_str(), vrpnConn.get()));
+            DeviceConstructionData data(init, vrpnConn.get());
+            m_server.reset(generateVrpnDynamicServer(data));
+            m_baseobj = data.flexServer;
         }
         virtual ~VrpnConnectionDevice() {}
         virtual void m_process() {
             m_getDeviceToken().connectionInteract();
+            m_server->mainloop();
             m_baseobj->mainloop();
         }
         virtual void m_sendData(util::time::TimeValue const &timestamp,
@@ -54,7 +57,8 @@ namespace connection {
         }
 
       private:
-        unique_ptr<vrpn_BaseFlexServer> m_baseobj;
+        vrpn_BaseFlexServer *m_baseobj;
+        unique_ptr<vrpn_MainloopObject> m_server;
     };
 } // namespace connection
 } // namespace osvr

@@ -19,7 +19,7 @@
 #define INCLUDED_GenerateVrpnDynamicServer_h_GUID_6828B8BC_E58A_4DAE_E511_46B854C51C11
 
 // Internal Includes
-#include <osvr/Connection/DeviceInitObject.h>
+#include "DeviceConstructionData.h"
 
 // Library/third-party includes
 #include <vrpn_MainloopObject.h>
@@ -29,8 +29,8 @@
 
 namespace osvr {
 namespace connection {
-    vrpn_MainloopObject *generateVrpnDynamicServer(DeviceInitObject &init,
-                                                   vrpn_Connection *conn);
+    vrpn_MainloopObject *
+    generateVrpnDynamicServer(DeviceConstructionData &init);
 } // namespace connection
 } // namespace osvr
 

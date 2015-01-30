@@ -17,7 +17,6 @@
 
 // Internal Includes
 #include "GenerateVrpnDynamicServer.h"
-#include "DeviceConstructionData.h"
 #include "VrpnBaseFlexServer.h"
 #include "VrpnAnalogServer.h"
 #include "VrpnButtonServer.h"
@@ -117,10 +116,9 @@ namespace connection {
 
     } // namespace detail
 
-    vrpn_MainloopObject *generateVrpnDynamicServer(DeviceInitObject &init,
-                                                   vrpn_Connection *conn) {
-        DeviceConstructionData initData(init, conn);
-        return detail::FilterAndGenerate<>::run(initData);
+    vrpn_MainloopObject *
+    generateVrpnDynamicServer(DeviceConstructionData &init) {
+        return detail::FilterAndGenerate<>::run(init);
     }
 } // namespace connection
 } // namespace osvr

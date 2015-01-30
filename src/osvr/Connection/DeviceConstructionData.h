@@ -22,7 +22,8 @@
 #include <osvr/Connection/DeviceInitObject.h>
 
 // Library/third-party includes
-// - none
+#include <vrpn_Connection.h>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 // - none
@@ -30,7 +31,7 @@
 namespace osvr {
 namespace connection {
     class vrpn_BaseFlexServer;
-    class DeviceConstructionData {
+    class DeviceConstructionData : boost::noncopyable {
       public:
         DeviceConstructionData(DeviceInitObject &initObject,
                                vrpn_Connection *connection)
