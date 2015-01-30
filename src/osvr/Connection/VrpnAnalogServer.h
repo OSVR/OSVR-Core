@@ -19,7 +19,7 @@
 #define INCLUDED_VrpnAnalogServer_h_GUID_16F2A08F_2ECF_4EBB_D7B0_A2B87ACC9272
 
 // Internal Includes
-#include <osvr/Connection/DeviceInitObject.h>
+#include "DeviceConstructionData.h"
 #include <osvr/Connection/AnalogServerInterface.h>
 
 // Library/third-party includes
@@ -33,9 +33,9 @@ namespace connection {
     class VrpnAnalogServer : public vrpn_Analog, public AnalogServerInterface {
       public:
         typedef vrpn_Analog Base;
-        VrpnAnalogServer(DeviceInitObject &init, vrpn_Connection *conn)
-            : Base(init.getQualifiedName().c_str(), conn) {
-            m_numChannels() = std::min(*init.getAnalogs(),
+        VrpnAnalogServer(DeviceConstructionData &init)
+            : Base(init.getQualifiedName().c_str(), init.conn) {
+            m_numChannels() = std::min(*init.obj.getAnalogs(),
                                        OSVR_ChannelCount(vrpn_CHANNEL_MAX));
             // Initialize data
             memset(Base::channel, 0, sizeof(Base::channel));

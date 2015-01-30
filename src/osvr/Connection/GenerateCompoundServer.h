@@ -19,6 +19,7 @@
 #define INCLUDED_GenerateCompoundServer_h_GUID_55F870FA_C398_49B8_9907_A007B3C6F8CA
 
 // Internal Includes
+#include "DeviceConstructionData.h"
 #include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
@@ -55,24 +56,28 @@ namespace connection {
           public:
             typedef typename ComputeBases<Iter>::LeafBase LeafBase;
             typedef typename ComputeBases<Iter>::OtherBase OtherBase;
-            GenerateServer(DeviceInitObject &init, vrpn_Connection *conn)
-                : LeafBase(init, conn), OtherBase(init, conn) {}
+            ServerElement(DeviceConstructionData &init)
+                : LeafBase(init), OtherBase(init) {}
             void mainloop() { LeafBase::server_mainloop(); }
+            vrpn_Connection *connectionPtr() {
+                return LeafBase::connectionPtr();
+            }
         };
 
         /// Base case
         template <typename Iter> class ServerElement<Iter, true> {
           public:
-            GenerateServer(DeviceInitObject &, vrpn_Connection *) {}
+            ServerElement(DeviceConstructionData &) {}
             void mainloop() {}
+            vrpn_Connection *connectionPtr() { return nullptr; }
         };
 
         /// @brief Computed server type
         typedef ServerElement<Begin> type;
 
         /// @brief Create a server, returning it in a unique_ptr.
-        unique_ptr<type> run(DeviceInitObject &init, vrpn_Connection *conn) {
-            return new type(init, conn);
+        static type *run(DeviceConstructionData &init) {
+            return new type(init);
         }
     };
 

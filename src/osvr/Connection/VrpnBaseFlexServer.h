@@ -19,6 +19,7 @@
 #define INCLUDED_VrpnBaseFlexServer_h_GUID_BA2E66A9_F0F3_4BBE_5248_62C5B7E5CBDE
 
 // Internal Includes
+#include "DeviceConstructionData.h"
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TimeValue.h>
 
@@ -36,6 +37,11 @@ namespace connection {
         vrpn_BaseFlexServer(const char *name, vrpn_Connection *conn)
             : vrpn_BaseClass(name, conn) {
             vrpn_BaseClass::init();
+        }
+        vrpn_BaseFlexServer(DeviceConstructionData &init)
+            : vrpn_BaseClass(init.getQualifiedName().c_str(), init.conn) {
+            vrpn_BaseClass::init();
+            init.flexServer = this;
         }
         virtual ~vrpn_BaseFlexServer() {}
 

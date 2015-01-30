@@ -20,9 +20,12 @@ set(SOURCE
     AsyncDeviceToken.h
     Connection.cpp
     ConnectionDevice.cpp
+    DeviceConstructionData.h
     DeviceInitObject.cpp
     DeviceToken.cpp
     GenerateCompoundServer.h
+    GenerateVrpnDynamicServer.cpp
+    GenerateVrpnDynamicServer.h
     GenericConnectionDevice.h
     MessageType.cpp
     SyncDeviceToken.cpp

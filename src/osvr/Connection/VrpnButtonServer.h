@@ -19,7 +19,7 @@
 #define INCLUDED_VrpnButtonServer_h_GUID_264EFE6E_C328_45AE_B296_10980DD053AE
 
 // Internal includes
-#include <osvr/Connection/DeviceInitObject.h>
+#include "DeviceConstructionData.h"
 #include <osvr/Connection/ButtonServerInterface.h>
 
 // Library/third-party includes
@@ -34,10 +34,11 @@ namespace connection {
                              public ButtonServerInterface {
       public:
         typedef vrpn_Button_Filter Base;
-        VrpnButtonServer(DeviceInitObject &init, vrpn_Connection *conn)
-            : vrpn_Button_Filter(init.getQualifiedName().c_str(), conn) {
-            m_numChannels() = std::min(
-                *init.getAnalogs(), OSVR_ChannelCount(vrpn_BUTTON_MAX_BUTTONS));
+        VrpnButtonServer(DeviceConstructionData &init)
+            : vrpn_Button_Filter(init.getQualifiedName().c_str(), init.conn) {
+            m_numChannels() =
+                std::min(*init.obj.getAnalogs(),
+                         OSVR_ChannelCount(vrpn_BUTTON_MAX_BUTTONS));
             // Initialize data
             memset(buttons, 0, sizeof(buttons));
             memset(lastbuttons, 0, sizeof(lastbuttons));

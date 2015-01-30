@@ -19,7 +19,7 @@
 #define INCLUDED_VrpnTrackerServer_h_GUID_15AD76EE_C97F_4FBC_1EC5_A73576D5BAAC
 
 // Internal Includes
-#include <osvr/Connection/DeviceInitObject.h>
+#include "DeviceConstructionData.h"
 #include <osvr/Connection/TrackerServerInterface.h>
 #include <osvr/Util/QuatlibInteropC.h>
 
@@ -36,8 +36,8 @@ namespace connection {
                               public TrackerServerInterface {
       public:
         typedef vrpn_Tracker Base;
-        VrpnTrackerServer(DeviceInitObject &init, vrpn_Connection *conn)
-            : vrpn_Tracker(init.getQualifiedName().c_str(), conn) {
+        VrpnTrackerServer(DeviceConstructionData &init)
+            : vrpn_Tracker(init.getQualifiedName().c_str(), init.conn) {
             // Initialize data
             m_resetPos();
             m_resetQuat();
