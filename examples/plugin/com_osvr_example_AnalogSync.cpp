@@ -44,7 +44,6 @@ class AnalogSyncDevice {
         if (m_myVal > 10.0) {
             m_myVal = 0;
         }
-        std::cout << "Reporting value " << m_myVal << std::endl;
 
         /// Report the value of channel 0
         osvrDeviceAnalogSetValue(m_dev, m_analog, m_myVal, 0);
