@@ -60,7 +60,7 @@ osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
 /** @brief Report the value of a single channel.
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
                                          OSVR_IN_PTR OSVR_AnalogDeviceInterface
                                              iface,
                                          OSVR_IN OSVR_AnalogState val,

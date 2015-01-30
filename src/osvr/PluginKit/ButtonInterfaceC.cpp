@@ -39,9 +39,10 @@ osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                           OSVR_IN OSVR_ButtonChanCount numChan) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", iface);
-    OSVR_ButtonDeviceInterface ifaceObj =
+    OSVR_ButtonDeviceInterface ifaceObj = *iface =
         opts->getContext()->registerDataWithGenericDelete(
             new OSVR_ButtonDeviceInterfaceObject);
     opts->setButtons(numChan, &(ifaceObj->realIface));
+
     return OSVR_RETURN_SUCCESS;
 }
