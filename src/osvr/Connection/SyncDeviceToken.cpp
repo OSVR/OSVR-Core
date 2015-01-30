@@ -47,12 +47,6 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
-    bool
-    SyncDeviceToken::m_callWhenSafeToSend(std::function<void()> &callback) {
-        callback();
-        return true;
-    }
-
     GuardPtr SyncDeviceToken::m_getSendGuard() {
         return GuardPtr(new util::DummyGuard);
     }

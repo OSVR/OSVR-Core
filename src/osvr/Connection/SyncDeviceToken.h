@@ -25,7 +25,7 @@
 // - none
 
 // Standard includes
-#include <functional>
+// - none
 
 namespace osvr {
 namespace connection {
@@ -39,7 +39,6 @@ namespace connection {
       protected:
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
-        virtual bool m_callWhenSafeToSend(std::function<void()> &callback);
         virtual GuardPtr m_getSendGuard();
         virtual void m_connectionInteract();
 

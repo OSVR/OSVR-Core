@@ -108,16 +108,6 @@ namespace connection {
         OSVR_DEV_VERBOSE("AsyncDeviceToken::m_sendData\t"
                          "done!");
     }
-    bool
-    AsyncDeviceToken::m_callWhenSafeToSend(std::function<void()> &callback) {
-        RequestToSend rts(m_accessControl);
-
-        if (!rts.request()) {
-            return false; // not cleared to send
-        }
-        callback();
-        return true;
-    }
 
     class AsyncSendGuard : public util::GuardInterface {
       public:
@@ -128,6 +118,7 @@ namespace connection {
       private:
         RequestToSend m_rts;
     };
+
     GuardPtr AsyncDeviceToken::m_getSendGuard() {
         return GuardPtr(new AsyncSendGuard(m_accessControl));
     }

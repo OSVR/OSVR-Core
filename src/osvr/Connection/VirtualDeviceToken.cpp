@@ -34,12 +34,6 @@ namespace connection {
 
     VirtualDeviceToken::~VirtualDeviceToken() {}
 
-    bool
-    VirtualDeviceToken::m_callWhenSafeToSend(std::function<void()> &callback) {
-        callback();
-        return true;
-    }
-
     void VirtualDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
                                         MessageType *type,
                                         const char *bytestream, size_t len) {

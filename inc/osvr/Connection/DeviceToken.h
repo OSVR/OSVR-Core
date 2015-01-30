@@ -105,21 +105,6 @@ namespace connection {
         sendData(util::time::TimeValue const &timestamp, MessageType *type,
                  const char *bytestream, size_t len);
 
-        /// @brief Waits until we have access to the connection, then calls your
-        /// callback.
-        ///
-        /// This is effectively how to do multiple sendData at once.
-        ///
-        /// This may block until the next connectionInteract call before
-        /// forwarding on to ConnectionDevice::sendData, depending on the type
-        /// of device token.
-        ///
-        /// @returns true if your function was actually called.
-        ///
-        /// @todo remove this method and its parts, it doesn't work right.
-        OSVR_CONNECTION_EXPORT bool
-        callWhenSafeToSend(std::function<void()> callback);
-
         OSVR_CONNECTION_EXPORT GuardPtr getSendGuard();
 
         /// @brief Interact with connection. Only legal to end up in
@@ -136,7 +121,6 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
-        virtual bool m_callWhenSafeToSend(std::function<void()> &callback) = 0;
         virtual GuardPtr m_getSendGuard() = 0;
         virtual void m_connectionInteract() = 0;
         virtual void m_stopThreads();

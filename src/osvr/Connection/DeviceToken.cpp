@@ -70,9 +70,6 @@ namespace connection {
                                size_t len) {
         m_sendData(timestamp, type, bytestream, len);
     }
-    bool DeviceToken::callWhenSafeToSend(std::function<void()> callback) {
-        return m_callWhenSafeToSend(callback);
-    }
 
     GuardPtr DeviceToken::getSendGuard() { return m_getSendGuard(); }
 
