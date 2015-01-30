@@ -27,6 +27,7 @@
 #include <osvr/Util/PluginRegContextC.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Util/AnyMap_fwd.h>
+#include <osvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
