@@ -40,6 +40,9 @@ namespace connection {
             // Initialize data
             memset(Base::channel, 0, sizeof(Base::channel));
             memset(Base::last, 0, sizeof(Base::last));
+
+            // Report interface out.
+            init.obj.returnAnalogInterface(*this);
         }
 
         static const vrpn_uint32 CLASS_OF_SERVICE = vrpn_CONNECTION_LOW_LATENCY;

@@ -42,6 +42,9 @@ namespace connection {
             // Initialize data
             memset(Base::buttons, 0, sizeof(Base::buttons));
             memset(Base::lastbuttons, 0, sizeof(Base::lastbuttons));
+
+            // Report interface out.
+            init.obj.returnButtonInterface(*this);
         }
 
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
