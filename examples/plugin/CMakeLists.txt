@@ -1,20 +1,20 @@
 # These plugins can run on just a bare PluginHost.
 set(OSVR_EXAMPLE_PLUGINS
-    NullPlugin
-    NullDevice
-    DummyHardwareDetect
-    DummyHardwareDetectCpp
-    DummyHardwareDetectCpp2
+    org_opengoggles_example_NullPlugin
+    org_opengoggles_example_NullDevice
+    org_opengoggles_example_DummyHardwareDetect
+    org_opengoggles_example_DummyHardwareDetectCpp
+    org_opengoggles_example_DummyHardwareDetectCpp2
     CACHE INTERNAL "" FORCE)
 
 # These plugins need a host with a Connection.
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
-    DummyAsync
-    DummySync
-    DummyDetectAndCreateAsync
+    org_opengoggles_example_DummyAsync
+    org_opengoggles_example_DummySync
+    org_opengoggles_example_DummyDetectAndCreateAsync
     CACHE INTERNAL "" FORCE)
 foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS})
-    set(name org_opengoggles_example_${pluginname})
+    set(name ${pluginname})
     add_library(${name} MODULE ${name}.cpp)
     target_link_libraries(${name} osvrPluginKitCpp)
     set_target_properties(${name} PROPERTIES
