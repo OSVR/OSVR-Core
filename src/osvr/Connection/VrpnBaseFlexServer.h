@@ -34,10 +34,6 @@ namespace connection {
     /// @brief Basic implementation of a vrpn_BaseClass server.
     class vrpn_BaseFlexServer : public vrpn_BaseClass {
       public:
-        vrpn_BaseFlexServer(const char *name, vrpn_Connection *conn)
-            : vrpn_BaseClass(name, conn) {
-            vrpn_BaseClass::init();
-        }
         vrpn_BaseFlexServer(DeviceConstructionData &init)
             : vrpn_BaseClass(init.getQualifiedName().c_str(), init.conn) {
             vrpn_BaseClass::init();
