@@ -39,7 +39,7 @@ namespace connection {
     }
 
     DeviceTokenPtr DeviceToken::createSyncDevice(DeviceInitObject &init) {
-        DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
+        DeviceTokenPtr ret(new SyncDeviceToken(init.getQualifiedName()));
         ret->m_sharedInit(init.getConnection());
         return ret;
     }
