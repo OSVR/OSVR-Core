@@ -167,7 +167,9 @@ PREDEFINED             = __cplusplus \
                          OSVR_INOUT_PTR= \
                          OSVR_INOUT_OPT= \
                          OSVR_FUNC_NONNULL(X)= \
-                         
+                         OSVR_FUNC_WARN_UNUSED_RESULT= \
+
+
 ## TODO: turn the SAL information into something useful in the docs?
                          # OSVR_IN=/**[in]*/ \
                          # OSVR_IN_PTR=/**[in]*/ \
