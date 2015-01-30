@@ -56,8 +56,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     setAnalogs(OSVR_ChannelCount num,
                osvr::connection::AnalogServerInterface **iface);
 
-    /// @brief Returns a pointer to an analog interface through the
-    /// pointer-pointer.
+    /// @brief Returns an analog interface through the pointer-pointer.
     void returnAnalogInterface(osvr::connection::AnalogServerInterface &iface);
 
     /// @brief Set buttons: clears the boost::optional if 0 is passed.
@@ -65,8 +64,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     setButtons(OSVR_ChannelCount num,
                osvr::connection::ButtonServerInterface **iface);
 
-    /// @brief Returns a pointer to a button interface through the
-    /// pointer-pointer.
+    /// @brief Returns a button interface through the pointer-pointer.
     void returnButtonInterface(osvr::connection::ButtonServerInterface &iface);
 
     /// @brief Enables tracker interface
