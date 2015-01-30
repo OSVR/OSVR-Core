@@ -29,8 +29,13 @@
 
 namespace osvr {
 namespace connection {
+
+    namespace server_generation {
+        /// @brief the type we'll pass to each constructor
+        typedef DeviceConstructionData ConstructorArgument;
+    } // namespace server_generation
     vrpn_MainloopObject *
-    generateVrpnDynamicServer(DeviceConstructionData &init);
+    generateVrpnDynamicServer(server_generation::ConstructorArgument &init);
 } // namespace connection
 } // namespace osvr
 

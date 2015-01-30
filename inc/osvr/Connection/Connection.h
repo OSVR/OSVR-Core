@@ -43,7 +43,8 @@ namespace connection {
 
     /// @brief Class wrapping a messaging transport (server or internal)
     /// connection.
-    class Connection : boost::noncopyable, enable_shared_from_this<Connection> {
+    class Connection : boost::noncopyable,
+                       public enable_shared_from_this<Connection> {
       public:
         /// @name Factory methods
         ///

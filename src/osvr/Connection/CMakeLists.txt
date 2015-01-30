@@ -62,8 +62,11 @@ target_compile_options(${LIBNAME_FULL}
     ${OSVR_CXX11_FLAGS})
 
 target_link_libraries(${LIBNAME_FULL}
-    PRIVATE
+    PUBLIC
     osvrPluginHost
+    INTERFACE
+    osvrUtil
+    PRIVATE
     osvrUtilCpp
     vendored-vrpn
     util-runloopmanager)

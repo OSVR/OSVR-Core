@@ -30,6 +30,7 @@
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/push_back.hpp>
 #include <boost/mpl/empty.hpp>
+#include <boost/utility.hpp>
 
 // Standard includes
 // - none
@@ -37,7 +38,7 @@
 namespace osvr {
 namespace connection {
 
-    namespace detail {
+    namespace server_generation {
         typedef boost::mpl::vector<vrpn_BaseFlexServer, VrpnAnalogServer,
                                    VrpnButtonServer,
                                    VrpnTrackerServer> ServerTypes;
@@ -68,13 +69,45 @@ namespace connection {
             DeviceConstructionData &init) {
             return init.obj.getTracker();
         }
-        typedef boost::mpl::begin<detail::ServerTypes>::type Begin;
+        typedef boost::mpl::begin<ServerTypes>::type Begin;
         typedef boost::mpl::end<ServerTypes>::type End;
 
+        /// @brief Template to invoke construction once sequence filtering is
+        /// complete.
+        template <typename Result, typename Enable = void>
+        struct MakeServerFromSequence;
+
+        /// @brief Don't attempt to construct with an empty sequence.
+        template <typename Result>
+        struct MakeServerFromSequence<
+            Result, typename boost::enable_if<
+                        typename boost::mpl::empty<Result>::type>::type> {
+            static vrpn_MainloopObject *make(DeviceConstructionData &) {
+                return nullptr;
+            }
+        };
+        /// @brief Normal construction case.
+        template <typename Result>
+        struct MakeServerFromSequence<
+            Result, typename boost::disable_if<
+                        typename boost::mpl::empty<Result>::type>::type> {
+            static vrpn_MainloopObject *make(DeviceConstructionData &init) {
+                return vrpn_MainloopObject::wrap(
+                    GenerateServer<Result>::make(init));
+            }
+        };
+
+        /// Template to perform the list filtering.
         template <typename Iter = Begin,
                   typename Result = boost::mpl::vector0<>,
-                  bool = boost::is_same<Iter, End>::value>
-        struct FilterAndGenerate {
+                  typename Enable = void>
+        struct FilterAndGenerate;
+
+        /// Recursive case: Iter is not past the end.
+        template <typename Iter, typename Result>
+        struct FilterAndGenerate<
+            Iter, Result,
+            typename boost::disable_if<boost::is_same<Iter, End> >::type> {
             static vrpn_MainloopObject *run(DeviceConstructionData &init) {
                 typedef typename boost::mpl::deref<Iter>::type CurrentType;
                 typedef typename boost::mpl::next<Iter>::type NextIter;
@@ -91,34 +124,22 @@ namespace connection {
                 }
             }
         };
-        template <typename Result, bool IsEmpty> struct FinishGeneration;
-        /// @brief Don't attempt to construct with an empty list.
-        template <typename Result> struct FinishGeneration<Result, true> {
-            static vrpn_MainloopObject *run(DeviceConstructionData &) {
-                return nullptr;
-            }
-        };
-        /// @brief Normal construction case.
-        template <typename Result> struct FinishGeneration<Result, false> {
-            static vrpn_MainloopObject *run(DeviceConstructionData &init) {
-                return vrpn_MainloopObject::wrap(
-                    GenerateServer<Result>::run(init));
-            }
-        };
 
+        /// Base case: iter is past the end.
         template <typename Iter, typename Result>
-        struct FilterAndGenerate<Iter, Result, true> {
+        struct FilterAndGenerate<
+            Iter, Result,
+            typename boost::enable_if<boost::is_same<Iter, End> >::type> {
             static vrpn_MainloopObject *run(DeviceConstructionData &init) {
-                typedef typename boost::mpl::empty<Result>::type IsEmpty;
-                return FinishGeneration<Result, IsEmpty::value>::run(init);
+                return MakeServerFromSequence<Result>::make(init);
             }
         };
 
-    } // namespace detail
+    } // namespace server_generation
 
     vrpn_MainloopObject *
-    generateVrpnDynamicServer(DeviceConstructionData &init) {
-        return detail::FilterAndGenerate<>::run(init);
+    generateVrpnDynamicServer(server_generation::ConstructorArgument &init) {
+        return server_generation::FilterAndGenerate<>::run(init);
     }
 } // namespace connection
 } // namespace osvr

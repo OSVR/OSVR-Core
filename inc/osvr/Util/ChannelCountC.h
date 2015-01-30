@@ -36,6 +36,8 @@ OSVR_EXTERN_C_BEGIN
 
 /** @addtogroup PluginKit
 @{
+*/
+
 /** @brief The integer type specifying a number of channels/sensors or a
 channel/sensor index.
 */
