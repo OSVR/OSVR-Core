@@ -21,6 +21,7 @@
 // Internal Includes
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/ClientReportTypesC.h>
 
 // Library/third-party includes
 // - none
@@ -32,7 +33,7 @@ namespace osvr {
 namespace connection {
     class ButtonServerInterface {
       public:
-        typedef bool value_type;
+        typedef OSVR_ButtonState value_type;
         /// @brief Sets the value to val at channel chan, and reports changes
         /// with the given timestamp
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
