@@ -120,7 +120,7 @@ namespace connection {
         OSVR_CONNECTION_EXPORT bool
         callWhenSafeToSend(std::function<void()> callback);
 
-        GuardPtr getSendGuard();
+        OSVR_CONNECTION_EXPORT GuardPtr getSendGuard();
 
         /// @brief Interact with connection. Only legal to end up in
         /// ConnectionDevice::sendData from within here somehow.
