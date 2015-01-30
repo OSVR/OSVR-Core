@@ -120,8 +120,8 @@ osvrDeviceGenericInit(OSVR_DeviceInitOptions options, OSVR_DeviceToken *device,
     try {
         *device =
             options->getContext()->registerDataWithGenericDelete(dev.release());
-            /// @todo Is this too late to delete? Can we delete it earlier?
-            options->getContext()->registerDataWithGenericDelete(options);
+        /// @todo Is this too late to delete? Can we delete it earlier?
+        options->getContext()->registerDataWithGenericDelete(options);
     } catch (std::exception &e) {
         std::cerr << "Error in osvrDeviceGenericInit: " << e.what()
                   << std::endl;
@@ -152,11 +152,12 @@ OSVR_ReturnCode osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
 }
 OSVR_ReturnCode
 osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext,
-OSVR_IN_STRZ const char *name,
-OSVR_INOUT_PTR OSVR_DeviceInitOptions options,
-OSVR_OUT_PTR OSVR_DeviceToken *device) {
+                              OSVR_IN_STRZ const char *name,
+                              OSVR_INOUT_PTR OSVR_DeviceInitOptions options,
+                              OSVR_OUT_PTR OSVR_DeviceToken *device) {
     options->setName(name);
-    return osvrDeviceGenericInit(options, device, osvr::connection::DeviceToken::createSyncDevice);
+    return osvrDeviceGenericInit(
+        options, device, osvr::connection::DeviceToken::createSyncDevice);
 }
 
 OSVR_ReturnCode
