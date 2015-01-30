@@ -20,6 +20,7 @@
 
 // Internal Includes
 #include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -32,7 +33,7 @@ namespace osvr {
 namespace connection {
     class AnalogServerInterface {
       public:
-        typedef double value_type;
+        typedef OSVR_AnalogState value_type;
         /// @brief Sets the value to val at channel chan, and reports changes
         /// with the given timestamp
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
