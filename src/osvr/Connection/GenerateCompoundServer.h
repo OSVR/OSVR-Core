@@ -66,12 +66,12 @@ namespace connection {
             template <typename Iter>
             class ServerElement<Iter, true> : public LeafBase<Iter>::type {
               public:
-                typedef typename LeafBase<Iter>::type LeafBase;
+                typedef typename LeafBase<Iter>::type MyLeafBase;
                 /// @brief Constructor passing along.
-                ServerElement(ConstructorArgument &init) : LeafBase(init) {}
-                void mainloop() { LeafBase::server_mainloop(); }
+                ServerElement(ConstructorArgument &init) : MyLeafBase(init) {}
+                void mainloop() { MyLeafBase::server_mainloop(); }
                 vrpn_Connection *connectionPtr() {
-                    return LeafBase::connectionPtr();
+                    return MyLeafBase::connectionPtr();
                 }
             };
 
@@ -81,18 +81,18 @@ namespace connection {
             class ServerElement<Iter, false> : public LeafBase<Iter>::type,
                                                public ChainBase<Iter>::type {
               public:
-                typedef typename LeafBase<Iter>::type LeafBase;
-                typedef typename ChainBase<Iter>::type ChainBase;
+                typedef typename LeafBase<Iter>::type MyLeafBase;
+                typedef typename ChainBase<Iter>::type MyChainBase;
 
                 /// @brief Constructor passing along to both base classes.
                 ServerElement(ConstructorArgument &init)
-                    : LeafBase(init), ChainBase(init) {}
+                    : MyLeafBase(init), MyChainBase(init) {}
 
                 /// @brief Mainloop calls server_mainloop in the leaf.
-                void mainloop() { LeafBase::server_mainloop(); }
+                void mainloop() { MyLeafBase::server_mainloop(); }
 
                 vrpn_Connection *connectionPtr() {
-                    return LeafBase::connectionPtr();
+                    return MyLeafBase::connectionPtr();
                 }
             };
 
