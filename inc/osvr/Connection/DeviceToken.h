@@ -150,8 +150,7 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
-        virtual virtual bool
-        m_callWhenSafeToSend(std::function<void()> &callback) = 0;
+        virtual bool m_callWhenSafeToSend(std::function<void()> &callback) = 0;
         virtual unique_ptr<SendGuard::Implementation> m_getSendGuard() = 0;
         virtual void m_connectionInteract() = 0;
         virtual void m_stopThreads();
