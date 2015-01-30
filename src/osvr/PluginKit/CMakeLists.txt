@@ -18,6 +18,7 @@ set(SOURCE
     DeviceInterfaceC.cpp
     HandleNullContext.h
     PluginRegistrationC.cpp
+    PointerWrapper.h
     TrackerInterfaceC.cpp)
 
 osvr_add_library()

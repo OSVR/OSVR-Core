@@ -21,6 +21,7 @@
 #include <osvr/Connection/AnalogServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include "PointerWrapper.h"
 #include "HandleNullContext.h"
 
 // Library/third-party includes
@@ -29,10 +30,8 @@
 // Standard includes
 // - none
 
-struct OSVR_AnalogDeviceInterfaceObject {
-    OSVR_AnalogDeviceInterfaceObject() : realIface(nullptr) {}
-    osvr::connection::AnalogServerInterface *realIface;
-};
+struct OSVR_AnalogDeviceInterfaceObject
+    : public PointerWrapper<osvr::connection::AnalogServerInterface> {};
 
 OSVR_ReturnCode
 osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
@@ -44,7 +43,7 @@ osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
         opts->getContext()->registerDataWithGenericDelete(
             new OSVR_AnalogDeviceInterfaceObject);
     *iface = ifaceObj;
-    opts->setAnalogs(numChan, &(ifaceObj->realIface));
+    opts->setAnalogs(numChan, ifaceObj->getContainerLocation());
     return OSVR_RETURN_SUCCESS;
 }
 
@@ -70,9 +69,8 @@ OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
     bool sendResult = false;
     osvr::connection::DeviceToken *device =
         static_cast<osvr::connection::DeviceToken *>(dev);
-    bool callResult = device->callWhenSafeToSend([&] {
-        sendResult = iface->realIface->setValue(val, chan, *timestamp);
-    });
+    bool callResult = device->callWhenSafeToSend(
+        [&] { sendResult = (*iface)->setValue(val, chan, *timestamp); });
     return (callResult && sendResult) ? OSVR_RETURN_SUCCESS
                                       : OSVR_RETURN_FAILURE;
 }
@@ -99,6 +97,6 @@ OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
     osvr::connection::DeviceToken *device =
         static_cast<osvr::connection::DeviceToken *>(dev);
     bool callResult = device->callWhenSafeToSend(
-        [&] { iface->realIface->setValues(val, chans, *timestamp); });
+        [&] { (*iface)->setValues(val, chans, *timestamp); });
     return callResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
 }
