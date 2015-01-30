@@ -115,6 +115,8 @@ namespace connection {
         /// of device token.
         ///
         /// @returns true if your function was actually called.
+        ///
+        /// @todo remove this method and its parts, it doesn't work right.
         OSVR_CONNECTION_EXPORT bool
         callWhenSafeToSend(std::function<void()> callback);
 
