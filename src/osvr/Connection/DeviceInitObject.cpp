@@ -67,8 +67,8 @@ void OSVR_DeviceInitObject::setAnalogs(
 }
 
 void OSVR_DeviceInitObject::returnAnalogInterface(
-    osvr::connection::AnalogServerInterface *iface) {
-    *m_analogIface = iface;
+    osvr::connection::AnalogServerInterface &iface) {
+    *m_analogIface = &iface;
 }
 
 void OSVR_DeviceInitObject::setButtons(
@@ -81,8 +81,8 @@ void OSVR_DeviceInitObject::setButtons(
 }
 
 void OSVR_DeviceInitObject::returnButtonInterface(
-    osvr::connection::ButtonServerInterface *iface) {
-    *m_buttonIface = iface;
+    osvr::connection::ButtonServerInterface &iface) {
+    *m_buttonIface = &iface;
 }
 
 void OSVR_DeviceInitObject::setTracker() { m_tracker = true; }

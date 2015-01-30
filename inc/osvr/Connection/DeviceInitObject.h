@@ -58,7 +58,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
 
     /// @brief Returns a pointer to an analog interface through the
     /// pointer-pointer.
-    void returnAnalogInterface(osvr::connection::AnalogServerInterface *iface);
+    void returnAnalogInterface(osvr::connection::AnalogServerInterface &iface);
 
     /// @brief Set buttons: clears the boost::optional if 0 is passed.
     OSVR_CONNECTION_EXPORT void
@@ -67,7 +67,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
 
     /// @brief Returns a pointer to a button interface through the
     /// pointer-pointer.
-    void returnButtonInterface(osvr::connection::ButtonServerInterface *iface);
+    void returnButtonInterface(osvr::connection::ButtonServerInterface &iface);
 
     /// @brief Enables tracker interface
     OSVR_CONNECTION_EXPORT void setTracker();
