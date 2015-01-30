@@ -62,8 +62,7 @@ OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
     OSVR_IN_PTR OSVR_AnalogDeviceInterface iface, OSVR_IN OSVR_AnalogState val,
     OSVR_IN OSVR_ChannelCount chan,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped",
-        dev);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped",
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped",
@@ -97,7 +96,7 @@ OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
     OSVR_IN_PTR OSVR_AnalogState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
-        dev);
+                                    dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
