@@ -24,6 +24,7 @@
 
 /* Internal Includes */
 #include <osvr/Util/APIBaseC.h>
+#include <osvr/Util/AnnotationMacrosC.h>
 
 OSVR_EXTERN_C_BEGIN
 
@@ -33,12 +34,13 @@ OSVR_EXTERN_C_BEGIN
 /** @name Return Codes
     @{
 */
-/** @brief Return type from C API OSVR functions. */
-typedef char OSVR_ReturnCode;
 /** @brief The "success" value for an OSVR_ReturnCode */
 #define OSVR_RETURN_SUCCESS (0)
 /** @brief The "failure" value for an OSVR_ReturnCode */
 #define OSVR_RETURN_FAILURE (1)
+/** @brief Return type from C API OSVR functions. */
+typedef OSVR_RETURN_SUCCESS_CONDITION(
+    return == OSVR_RETURN_SUCCESS) char OSVR_ReturnCode;
 /** @} */
 
 /** @} */ /* end of group */

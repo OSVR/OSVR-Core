@@ -44,10 +44,12 @@
 #define OSVR_OUT _Out_
 #define OSVR_OUT_PTR _Outptr_
 #define OSVR_OUT_OPT _Out_opt_
-#define OSVR_FUNC_WARN_UNUSED_RESULT _Must_inspect_result_
 
 #define OSVR_INOUT _Inout_
 #define OSVR_INOUT_PTR _Inout_
+
+#define OSVR_RETURN_WARN_UNUSED _Must_inspect_result_
+#define OSVR_RETURN_SUCCESS_CONDITION(X) _Return_type_success_(X)
 
 /* end of msvc section */
 #elif defined(__GNUC__) && (__GNUC__ >= 4)
@@ -58,7 +60,7 @@
 #endif
 
 #define OSVR_FUNC_NONNULL(X) __attribute__((__nonnull__ X))
-#define OSVR_FUNC_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#define OSVR_RETURN_WARN_UNUSED __attribute__((warn_unused_result))
 
 /* end of gcc section and compiler detection */
 #endif
@@ -194,18 +196,30 @@ as well as any methods handling a buffer with a length.
 #define OSVR_FUNC_NONNULL(X)
 #endif
 
-/** @def OSVR_FUNC_WARN_UNUSED_RESULT
+/** @def OSVR_RETURN_WARN_UNUSED
     @brief Indicates the function has a return value that must be used (either a
    security problem or an obvious bug if not).
 
     Should be placed before the return value (and virtual keyword, if
    applicable) in both declaration and definition.
 */
-#ifndef OSVR_FUNC_WARN_UNUSED_RESULT
-#define OSVR_FUNC_WARN_UNUSED_RESULT
+#ifndef OSVR_RETURN_WARN_UNUSED
+#define OSVR_RETURN_WARN_UNUSED
 #endif
 /* End of function annotations. */
 /** @} */
+
+/** @def OSVR_RETURN_SUCCESS_CONDITION
+    @brief Applied to a typedef, indicates the condition for `return` under
+   which a function returning it should be considered to have succeeded (thus
+   holding certain specifications).
+
+    Should be placed before the typename in a typedef, with the parameter
+   including the keyword `return` to substitute for the return value.
+*/
+#ifndef OSVR_RETURN_SUCCESS_CONDITION
+#define OSVR_RETURN_SUCCESS_CONDITION(X)
+#endif
 
 /* End of annotation group. */
 /** @} */
