@@ -28,8 +28,6 @@
 // Standard includes
 #include <iostream>
 
-OSVR_MessageType dummyMessage;
-
 class AnalogSyncDevice {
   public:
     AnalogSyncDevice(OSVR_PluginRegContext ctx) : m_myVal(0) {
@@ -43,7 +41,8 @@ class AnalogSyncDevice {
         osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
 
         /// Send JSON descriptor
-        osvrDeviceSendJsonDescriptor(m_dev, com_osvr_example_AnalogSync_json, sizeof(com_osvr_example_AnalogSync_json));
+        osvrDeviceSendJsonDescriptor(m_dev, com_osvr_example_AnalogSync_json,
+                                     sizeof(com_osvr_example_AnalogSync_json));
 
         /// Register update callback
         osvrDeviceSyncRegisterUpdateCallback(m_dev, &AnalogSyncDevice::update,

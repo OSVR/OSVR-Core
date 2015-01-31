@@ -27,8 +27,6 @@
 // Standard includes
 #include <iostream>
 
-OSVR_MessageType dummyMessage;
-
 class MultipleSyncDevice {
   public:
     MultipleSyncDevice(OSVR_PluginRegContext ctx)
