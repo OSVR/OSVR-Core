@@ -29,8 +29,20 @@ OSVR_MessageType dummyMessage;
 
 class AnalogSyncDevice {
   public:
-    AnalogSyncDevice(OSVR_DeviceToken d, OSVR_AnalogDeviceInterface analog)
-        : m_dev(d), m_analog(analog), m_myVal(0) {}
+    AnalogSyncDevice(OSVR_PluginRegContext ctx) : m_myVal(0) {
+        /// Create the initialization options
+        OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
+
+        /// Indicate that we'll want 1 analog channel.
+        osvrDeviceAnalogConfigure(opts, &m_analog, 1);
+
+        /// Create the sync device token with the options
+        osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
+
+        /// Register update callback
+        osvrDeviceSyncRegisterUpdateCallback(m_dev, &AnalogSyncDevice::update,
+                                             this);
+    }
 
     /// Trampoline: C-compatible callback bouncing into a member function.
     static OSVR_ReturnCode update(void *userData) {
@@ -55,20 +67,8 @@ class AnalogSyncDevice {
 };
 
 OSVR_PLUGIN(com_osvr_example_AnalogSync) {
-    /// Create the initialization options
-    OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
-
-    /// Indicate that we'll want 1 analog channel.
-    OSVR_AnalogDeviceInterface analog;
-    osvrDeviceAnalogConfigure(opts, &analog, 1);
-
-    /// Create the sync device token with the options
-    OSVR_DeviceToken d;
-    osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &d);
+    /// Create the device
     AnalogSyncDevice *myDevice = osvr::pluginkit::registerObjectForDeletion(
-        ctx, new AnalogSyncDevice(d, analog));
-
-    osvrDeviceSyncRegisterUpdateCallback(d, &AnalogSyncDevice::update,
-                                         myDevice);
+        ctx, new AnalogSyncDevice(ctx));
     return OSVR_RETURN_SUCCESS;
 }
