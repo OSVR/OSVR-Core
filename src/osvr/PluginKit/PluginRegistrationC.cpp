@@ -32,11 +32,8 @@ OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
     OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     OSVR_IN OSVR_HardwareDetectCallback detectCallback,
     OSVR_IN_OPT void *userData) {
-
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrPluginRegisterHardwareDetectCallback",
                                     ctx);
-    OSVR_DEV_VERBOSE("In osvrPluginRegisterHardwareDetectCallback with context "
-                     << ctx);
 
     try {
         osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)

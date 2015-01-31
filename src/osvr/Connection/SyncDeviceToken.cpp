@@ -15,6 +15,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OSVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include "SyncDeviceToken.h"
 #include <osvr/Connection/ConnectionDevice.h>
