@@ -23,10 +23,10 @@
 // Library/third-party includes
 #include "gtest/gtest.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/scoped_thread.hpp>
+#include <boost/thread/thread.hpp>
 
 // Standard includes
-// - none
+#include <memory>
 
 using std::string;
 using namespace osvr::connection;
@@ -35,18 +35,34 @@ const auto WAIT_TIME = boost::posix_time::seconds(1);
 inline void pleaseYield() { boost::this_thread::yield(); }
 inline void pleaseSleep() { boost::this_thread::sleep(WAIT_TIME); }
 
+/// @brief Quick hack to avoid having to depend on boost::scoped_thread and thus
+/// boost > 1.49.0
+class ScopedThread : boost::noncopyable {
+  public:
+    typedef std::unique_ptr<boost::thread> ThreadHolder;
+    ScopedThread(boost::thread *t) : m_thread(t) {}
+    ~ScopedThread() {
+        if (m_thread) {
+            m_thread->join();
+        }
+    }
+
+  private:
+    ThreadHolder m_thread;
+};
+
 TEST(AsyncAccessControl, simple) {
     AsyncAccessControl control;
     volatile bool sent = false;
     ASSERT_FALSE(control.mainThreadCTS())
         << "CTS should have no tasks waiting.";
 
-    boost::scoped_thread<> asyncThread([&] {
+    ScopedThread asyncThread(new boost::thread([&] {
         RequestToSend rts(control);
         ASSERT_TRUE(rts.request()) << "Request should be approved";
         ASSERT_FALSE(rts.isNested());
         sent = true;
-    });
+    }));
 
     pleaseSleep();
     ASSERT_FALSE(sent) << "Shouldn't have been permitted to send yet.";
@@ -66,7 +82,7 @@ TEST(AsyncAccessControl, serialRequests) {
     ASSERT_FALSE(control.mainThreadCTS())
         << "CTS should have no tasks waiting.";
 
-    boost::scoped_thread<> asyncThread([&] {
+    ScopedThread asyncThread(new boost::thread([&] {
         {
             RequestToSend rts(control);
             ASSERT_TRUE(rts.request()) << "Request should be approved";
@@ -81,7 +97,7 @@ TEST(AsyncAccessControl, serialRequests) {
             sent2 = true;
         }
 
-    });
+    }));
 
     pleaseSleep();
     ASSERT_FALSE(sent1) << "Shouldn't have been permitted to send first yet.";
@@ -110,7 +126,7 @@ TEST(AsyncAccessControl, recursive) {
     ASSERT_FALSE(control.mainThreadCTS())
         << "CTS should have no tasks waiting.";
 
-    boost::scoped_thread<> asyncThread([&] {
+    ScopedThread asyncThread(new boost::thread([&] {
         RequestToSend rts(control);
         ASSERT_TRUE(rts.request()) << "Request should be approved";
         ASSERT_FALSE(rts.isNested());
@@ -122,7 +138,7 @@ TEST(AsyncAccessControl, recursive) {
             inner = true;
             ASSERT_TRUE(rts2.isNested());
         }
-    });
+    }));
 
     pleaseSleep();
     ASSERT_FALSE(outer || inner)
