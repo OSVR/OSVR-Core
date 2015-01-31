@@ -49,7 +49,7 @@ typedef struct OSVR_Vec3 {
         return v->data[INDEX];                                                 \
     }                                                                          \
     /** @brief Setter for Vec3 component COMPONENT */                          \
-    OSVR_INLINE void osvrVecSet##COMPONENT(OSVR_Vec3 *v, double val) {         \
+    OSVR_INLINE void osvrVec3Set##COMPONENT(OSVR_Vec3 *v, double val) {        \
         v->data[INDEX] = val;                                                  \
     }
 
