@@ -31,11 +31,27 @@ OSVR_MessageType dummyMessage;
 
 class MultipleSyncDevice {
   public:
-    MultipleSyncDevice(OSVR_DeviceToken d, OSVR_AnalogDeviceInterface analog,
-                       OSVR_ButtonDeviceInterface button,
-                       OSVR_TrackerDeviceInterface tracker)
-        : m_dev(d), m_analog(analog), m_button(button), m_tracker(tracker),
-          m_myVal(0), m_buttonPressed(false) {}
+    MultipleSyncDevice(OSVR_PluginRegContext ctx)
+        : m_myVal(0), m_buttonPressed(false) {
+        /// Create the initialization options
+        OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
+
+        /// Indicate that we'll want 1 analog channel.
+        osvrDeviceAnalogConfigure(opts, &m_analog, 1);
+
+        /// Indicate that we'll want 1 button.
+        osvrDeviceButtonConfigure(opts, &m_button, 1);
+
+        /// Indicate that we'll report tracking too.
+        osvrDeviceTrackerConfigure(opts, &m_tracker);
+
+        /// Create the sync device token with the options
+        osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
+
+        /// Register update callback
+        osvrDeviceSyncRegisterUpdateCallback(m_dev, &MultipleSyncDevice::update,
+                                             this);
+    }
 
     /// Trampoline: C-compatible callback bouncing into a member function.
     static OSVR_ReturnCode update(void *userData) {
@@ -73,29 +89,11 @@ class MultipleSyncDevice {
     bool m_buttonPressed;
 };
 
-OSVR_PLUGIN(com_osvr_example_AnalogSync) {
-    /// Create the initialization options
-    OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
+OSVR_PLUGIN(com_osvr_example_MultipleSync) {
 
-    /// Indicate that we'll want 1 analog channel.
-    OSVR_AnalogDeviceInterface analog;
-    osvrDeviceAnalogConfigure(opts, &analog, 1);
-
-    /// Indicate that we'll want 2 buttons.
-    OSVR_ButtonDeviceInterface button;
-    osvrDeviceButtonConfigure(opts, &button, 2);
-
-    /// Indicate that we'll report tracking too.
-    OSVR_TrackerDeviceInterface tracker;
-    osvrDeviceTrackerConfigure(opts, &tracker);
-
-    /// Create the sync device token with the options
-    OSVR_DeviceToken d;
-    osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &d);
+    /// Create device object.
     MultipleSyncDevice *myDevice = osvr::pluginkit::registerObjectForDeletion(
-        ctx, new MultipleSyncDevice(d, analog, button, tracker));
+        ctx, new MultipleSyncDevice(ctx));
 
-    osvrDeviceSyncRegisterUpdateCallback(d, &MultipleSyncDevice::update,
-                                         myDevice);
     return OSVR_RETURN_SUCCESS;
 }
