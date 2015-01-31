@@ -15,10 +15,13 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OSVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include "SyncDeviceToken.h"
 #include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/GuardInterfaceDummy.h>
 
 // Library/third-party includes
 // - none
@@ -44,6 +47,10 @@ namespace connection {
                                      MessageType *type, const char *bytestream,
                                      size_t len) {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
+    }
+
+    GuardPtr SyncDeviceToken::m_getSendGuard() {
+        return GuardPtr(new util::DummyGuard);
     }
 
     void SyncDeviceToken::m_connectionInteract() {

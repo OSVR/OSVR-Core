@@ -23,8 +23,10 @@
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/GuardInterface.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -40,6 +42,7 @@ namespace connection {
     class SyncDeviceToken;
     class DeviceToken;
     typedef unique_ptr<DeviceToken> DeviceTokenPtr;
+    typedef unique_ptr<util::GuardInterface> GuardPtr;
 
     typedef std::function<OSVR_ReturnCode()> AsyncDeviceWaitCallback;
     typedef std::function<OSVR_ReturnCode()> SyncDeviceUpdateCallback;
@@ -54,11 +57,11 @@ namespace connection {
         /// has a wait callback that can block, that is called repeatedly in a
         /// thread of its own (managed by OSVR)
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
-        createAsyncDevice(std::string const &name, ConnectionPtr const &conn);
+        createAsyncDevice(DeviceInitObject &init);
         /// @brief Creates a device token (and underlying ConnectionDevice) that
         /// has an update method that runs in the server mainloop.
         OSVR_CONNECTION_EXPORT static DeviceTokenPtr
-        createSyncDevice(std::string const &name, ConnectionPtr const &conn);
+        createSyncDevice(DeviceInitObject &init);
         /// @brief Creates a device token (and underlying ConnectionDevice)
         /// without a traditional, built-in update method - typically for
         /// server-internal usage.
@@ -96,12 +99,13 @@ namespace connection {
         /// @brief Send data.
         ///
         /// This may block until the next connectionInteract call before
-        /// forwarding
-        /// on to ConnectionDevice::sendData,
-        /// depending on the type of device token.
+        /// forwarding on to ConnectionDevice::sendData, depending on the type
+        /// of device token.
         OSVR_CONNECTION_EXPORT void
         sendData(util::time::TimeValue const &timestamp, MessageType *type,
                  const char *bytestream, size_t len);
+
+        OSVR_CONNECTION_EXPORT GuardPtr getSendGuard();
 
         /// @brief Interact with connection. Only legal to end up in
         /// ConnectionDevice::sendData from within here somehow.
@@ -117,6 +121,7 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) = 0;
+        virtual GuardPtr m_getSendGuard() = 0;
         virtual void m_connectionInteract() = 0;
         virtual void m_stopThreads();
 
@@ -124,11 +129,12 @@ namespace connection {
         virtual SyncDeviceToken *asSync();
 
       private:
-        void m_sharedInit(ConnectionPtr const &conn);
+        void m_sharedInit(DeviceInitObject &init);
         std::string const m_name;
         ConnectionPtr m_conn;
         ConnectionDevicePtr m_dev;
     };
+
 } // namespace connection
 } // namespace osvr
 

@@ -49,7 +49,7 @@ typedef struct OSVR_Vec3 {
         return v->data[INDEX];                                                 \
     }                                                                          \
     /** @brief Setter for Vec3 component COMPONENT */                          \
-    OSVR_INLINE void osvrVecSet##COMPONENT(OSVR_Vec3 *v, double val) {         \
+    OSVR_INLINE void osvrVec3Set##COMPONENT(OSVR_Vec3 *v, double val) {        \
         v->data[INDEX] = val;                                                  \
     }
 
@@ -58,6 +58,13 @@ OSVR_VEC_MEMBER(Y, 1)
 OSVR_VEC_MEMBER(Z, 2)
 
 #undef OSVR_VEC_MEMBER
+
+/** @brief Set a Vec3 to the zero vector */
+OSVR_INLINE void osvrVec3Zero(OSVR_Vec3 *v) {
+    osvrVec3SetX(v, 0);
+    osvrVec3SetY(v, 0);
+    osvrVec3SetZ(v, 0);
+}
 
 /** @} */
 

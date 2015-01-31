@@ -32,24 +32,24 @@
 namespace osvr {
 namespace connection {
 
-    DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
-                                                  ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new AsyncDeviceToken(name));
-        ret->m_sharedInit(conn);
+    DeviceTokenPtr DeviceToken::createAsyncDevice(DeviceInitObject &init) {
+        DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
+        ret->m_sharedInit(init);
         return ret;
     }
 
-    DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
-                                                 ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new SyncDeviceToken(name));
-        ret->m_sharedInit(conn);
+    DeviceTokenPtr DeviceToken::createSyncDevice(DeviceInitObject &init) {
+        DeviceTokenPtr ret(new SyncDeviceToken(init.getQualifiedName()));
+        ret->m_sharedInit(init);
         return ret;
     }
 
     DeviceTokenPtr DeviceToken::createVirtualDevice(std::string const &name,
                                                     ConnectionPtr const &conn) {
+        DeviceInitObject init(conn);
+        init.setName(name);
         DeviceTokenPtr ret(new VirtualDeviceToken(name));
-        ret->m_sharedInit(conn);
+        ret->m_sharedInit(init);
         return ret;
     }
 
@@ -70,6 +70,8 @@ namespace connection {
                                size_t len) {
         m_sendData(timestamp, type, bytestream, len);
     }
+
+    GuardPtr DeviceToken::getSendGuard() { return m_getSendGuard(); }
 
     void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
         AsyncDeviceToken *dev = this->asAsync();
@@ -104,9 +106,9 @@ namespace connection {
 
     void DeviceToken::m_stopThreads() {}
 
-    void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
-        m_conn = conn;
-        m_dev = conn->registerDevice(m_name);
+    void DeviceToken::m_sharedInit(DeviceInitObject &init) {
+        m_conn = init.getConnection();
+        m_dev = m_conn->createConnectionDevice(init);
         m_dev->setDeviceToken(*this);
     }
 

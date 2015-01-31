@@ -24,9 +24,9 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Connection/MessageType.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/Verbosity.h>
 #include "HandleNullContext.h"
-#include "DeviceInitObject.h"
 
 // Library/third-party includes
 // - none
@@ -77,6 +77,19 @@ osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode
+osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                             OSVR_IN_READS(len) const char *json,
+                             OSVR_IN size_t len) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor", dev);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor descriptor",
+                                    json);
+
+    /// @todo Register this with the context/device
+
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode
 osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                               OSVR_IN_STRZ const char *name,
                               OSVR_OUT_PTR OSVR_MessageType *msgtype) {
@@ -107,28 +120,10 @@ osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
 
 template <typename FactoryFunction>
 inline static OSVR_ReturnCode
-osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
-                      OSVR_DeviceToken *device, FactoryFunction f) {
-    // Compute the name by combining plugin name with the given name
-    std::string qualifiedName =
-        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
-            .getName() +
-        "/" + name;
+osvrDeviceGenericInit(OSVR_DeviceInitOptions options, OSVR_DeviceToken *device,
+                      FactoryFunction f) {
 
-    OSVR_DEV_VERBOSE("Qualified name: " << qualifiedName);
-
-    // Extract the connection from the overall context
-    osvr::connection::ConnectionPtr conn =
-        osvr::connection::Connection::retrieveConnection(
-            osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
-                .getParent());
-    if (!conn) {
-        OSVR_DEV_VERBOSE(
-            "osvrDeviceGenericInit Got a null Connection pointer - "
-            "this shouldn't happen!");
-        return OSVR_RETURN_FAILURE;
-    }
-    osvr::connection::DeviceTokenPtr dev = f(qualifiedName, conn);
+    osvr::connection::DeviceTokenPtr dev = f(*options);
     if (!dev) {
         OSVR_DEV_VERBOSE("Device token factory returned a null "
                          "pointer - this shouldn't happen!");
@@ -137,7 +132,9 @@ osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
     // Transfer ownership of the device token object to the plugin context.
     try {
         *device =
-            osvr::pluginkit::registerObjectForDeletion(ctx, dev.release());
+            options->getContext()->registerDataWithGenericDelete(dev.release());
+        /// @todo Is this too late to delete? Can we delete it earlier?
+        options->getContext()->registerDataWithGenericDelete(options);
     } catch (std::exception &e) {
         std::cerr << "Error in osvrDeviceGenericInit: " << e.what()
                   << std::endl;
@@ -148,6 +145,16 @@ osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
     return OSVR_RETURN_SUCCESS;
 }
 
+template <typename FactoryFunction>
+inline static OSVR_ReturnCode
+osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
+                      OSVR_DeviceToken *device, FactoryFunction f) {
+    OSVR_DeviceInitOptions options = osvrDeviceCreateInitOptions(ctx);
+    options->setName(name);
+
+    return osvrDeviceGenericInit(options, device, f);
+}
+
 OSVR_ReturnCode osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                                    OSVR_IN_STRZ const char *name,
                                    OSVR_OUT_PTR OSVR_DeviceToken *device) {
@@ -155,6 +162,15 @@ OSVR_ReturnCode osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     OSVR_DEV_VERBOSE("In osvrDeviceSyncInit for a device named " << name);
     return osvrDeviceGenericInit(
         ctx, name, device, osvr::connection::DeviceToken::createSyncDevice);
+}
+OSVR_ReturnCode
+osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext,
+                              OSVR_IN_STRZ const char *name,
+                              OSVR_INOUT_PTR OSVR_DeviceInitOptions options,
+                              OSVR_OUT_PTR OSVR_DeviceToken *device) {
+    options->setName(name);
+    return osvrDeviceGenericInit(
+        options, device, osvr::connection::DeviceToken::createSyncDevice);
 }
 
 OSVR_ReturnCode

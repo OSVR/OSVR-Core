@@ -109,6 +109,20 @@ namespace connection {
                          "done!");
     }
 
+    class AsyncSendGuard : public util::GuardInterface {
+      public:
+        AsyncSendGuard(AsyncAccessControl &control) : m_rts(control) {}
+        virtual bool lock() { return m_rts.request(); }
+        virtual ~AsyncSendGuard() {}
+
+      private:
+        RequestToSend m_rts;
+    };
+
+    GuardPtr AsyncDeviceToken::m_getSendGuard() {
+        return GuardPtr(new AsyncSendGuard(m_accessControl));
+    }
+
     void AsyncDeviceToken::m_connectionInteract() {
         OSVR_DEV_VERBOSE("AsyncDeviceToken::m_connectionInteract\t"
                          "Going to send a CTS if waiting");

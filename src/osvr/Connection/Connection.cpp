@@ -73,10 +73,16 @@ namespace connection {
         return m_registerMessageType(messageId);
     }
 
-    /// Wraps the derived implementation for future expandability.
     ConnectionDevicePtr
-    Connection::registerDevice(std::string const &deviceName) {
-        ConnectionDevicePtr dev = m_registerDevice(deviceName);
+    Connection::createConnectionDevice(std::string const &deviceName) {
+        DeviceInitObject init(shared_from_this());
+        init.setName(deviceName);
+        return createConnectionDevice(init);
+    }
+
+    ConnectionDevicePtr
+    Connection::createConnectionDevice(DeviceInitObject &init) {
+        ConnectionDevicePtr dev = m_createConnectionDevice(init);
         if (dev) {
             addDevice(dev);
         }

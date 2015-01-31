@@ -73,9 +73,9 @@ namespace connection {
     }
 
     ConnectionDevicePtr
-    VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
+    VrpnBasedConnection::m_createConnectionDevice(DeviceInitObject &init) {
         ConnectionDevicePtr ret =
-            make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
+            make_shared<VrpnConnectionDevice>(init, m_vrpnConnection);
         return ret;
     }
 

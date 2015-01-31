@@ -33,6 +33,7 @@
  * http://msdn.microsoft.com/en-us/library/ms182032(v=vs.120).aspx */
 
 #include <CodeAnalysis/SourceAnnotations.h>
+#include <sal.h>
 
 #define OSVR_IN _In_
 #define OSVR_IN_PTR _In_
@@ -41,14 +42,17 @@
 #define OSVR_IN_READS(NUM_ELEMENTS) _In_reads_(NUM_ELEMENTS)
 
 #define OSVR_OUT _Out_
-#define OSVR_OUT_PTR _Out_
+#define OSVR_OUT_PTR _Outptr_
 #define OSVR_OUT_OPT _Out_opt_
 
 #define OSVR_INOUT _Inout_
 #define OSVR_INOUT_PTR _Inout_
 
+#define OSVR_RETURN_WARN_UNUSED _Must_inspect_result_
+#define OSVR_RETURN_SUCCESS_CONDITION(X) _Return_type_success_(X)
+
 /* end of msvc section */
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && (__GNUC__ >= 4)
 /* section for GCC and GCC-alikes */
 
 #if defined(__clang__)
@@ -56,6 +60,7 @@
 #endif
 
 #define OSVR_FUNC_NONNULL(X) __attribute__((__nonnull__ X))
+#define OSVR_RETURN_WARN_UNUSED __attribute__((warn_unused_result))
 
 /* end of gcc section and compiler detection */
 #endif
@@ -99,8 +104,7 @@ as well as any methods handling a buffer with a length.
 
 /** @def OSVR_IN_OPT
     @brief Indicates a function parameter (pointer) that serves only as input,
-   but is
-    optional and might be NULL.
+   but is optional and might be NULL.
 */
 #ifndef OSVR_IN_OPT
 #define OSVR_IN_OPT
@@ -143,8 +147,7 @@ as well as any methods handling a buffer with a length.
 
 /** @def OSVR_OUT_OPT
     @brief Indicates a function parameter (pointer) that serves only as output,
-   but is
-    optional and might be NULL
+   but is optional and might be NULL
 */
 #ifndef OSVR_OUT_OPT
 #define OSVR_OUT_OPT
@@ -176,22 +179,47 @@ as well as any methods handling a buffer with a length.
 
     These indicate particular relevant aspects about a function. Some
     duplicate the effective meaning of parameter annotations: applying both
-    allows the fullest extent of static analysis tools to analyze the code.
+    allows the fullest extent of static analysis tools to analyze the code,
+    and in some compilers, generate warnings.
 
-    These should be placed after a function declaration (but before the
-   semicolon). Repeating them in the definition is not needed.
    @{
 */
 /** @def OSVR_FUNC_NONNULL(X)
     @brief Indicates the parameter(s) that must be non-null.
 
     @param X A parenthesized list of parameters by number (1-based index)
+
+    Should be placed after a function declaration (but before the
+   semicolon). Repeating in the definition is not needed.
 */
 #ifndef OSVR_FUNC_NONNULL
 #define OSVR_FUNC_NONNULL(X)
 #endif
+
+/** @def OSVR_RETURN_WARN_UNUSED
+    @brief Indicates the function has a return value that must be used (either a
+   security problem or an obvious bug if not).
+
+    Should be placed before the return value (and virtual keyword, if
+   applicable) in both declaration and definition.
+*/
+#ifndef OSVR_RETURN_WARN_UNUSED
+#define OSVR_RETURN_WARN_UNUSED
+#endif
 /* End of function annotations. */
 /** @} */
+
+/** @def OSVR_RETURN_SUCCESS_CONDITION
+    @brief Applied to a typedef, indicates the condition for `return` under
+   which a function returning it should be considered to have succeeded (thus
+   holding certain specifications).
+
+    Should be placed before the typename in a typedef, with the parameter
+   including the keyword `return` to substitute for the return value.
+*/
+#ifndef OSVR_RETURN_SUCCESS_CONDITION
+#define OSVR_RETURN_SUCCESS_CONDITION(X)
+#endif
 
 /* End of annotation group. */
 /** @} */

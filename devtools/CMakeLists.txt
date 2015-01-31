@@ -5,6 +5,7 @@ set_target_properties(osvr_json_to_c PROPERTIES
 target_include_directories(osvr_json_to_c PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(osvr_json_to_c jsoncpp_lib ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 install(TARGETS osvr_json_to_c
+    EXPORT osvrTargets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT DevTools)
 
 function(osvr_convert_json _symbol _in _out)

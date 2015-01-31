@@ -61,6 +61,14 @@ OSVR_QUAT_MEMBER(Z, 3)
 
 #undef OSVR_QUAT_MEMBER
 
+/** @brief Set a quaternion to the identity rotation */
+OSVR_INLINE void osvrQuatSetIdentity(OSVR_Quaternion *q) {
+    osvrQuatSetW(q, 1);
+    osvrQuatSetX(q, 0);
+    osvrQuatSetY(q, 0);
+    osvrQuatSetZ(q, 0);
+}
+
 /** @} */
 
 OSVR_EXTERN_C_END

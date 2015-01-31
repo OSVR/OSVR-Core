@@ -67,8 +67,7 @@ namespace client {
                                         nullptr, nullptr, nullptr, true);
         m_conn->removeReference(); // Remove extra reference.
         setParameter("/display",
-                     std::string(display_json,
-                                 sizeof(display_json)));
+                     std::string(display_json, sizeof(display_json)));
         m_conn->register_handler(
             m_conn->register_message_type(util::messagekeys::routingData()),
             &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));

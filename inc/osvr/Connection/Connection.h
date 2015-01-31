@@ -23,6 +23,7 @@
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
 #include <osvr/Connection/ConnectionPtr.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
 
@@ -42,7 +43,8 @@ namespace connection {
 
     /// @brief Class wrapping a messaging transport (server or internal)
     /// connection.
-    class Connection : boost::noncopyable {
+    class Connection : boost::noncopyable,
+                       public enable_shared_from_this<Connection> {
       public:
         /// @name Factory methods
         ///
@@ -75,15 +77,19 @@ namespace connection {
         OSVR_CONNECTION_EXPORT MessageTypePtr
         registerMessageType(std::string const &messageId);
 
-        /// @brief Register a full device name. This should be namespaced with
-        /// the plugin name.
+        /// @brief Create a ConnectionDevice by registering a full device name.
+        /// This should be namespaced with the plugin name.
         ///
         /// This also adds the device so created to the device list.
         ///
-        /// ConnectionDevices often assume they're owned by a DeviceToken, so
-        /// doing otherwise is unadvisable.
+        /// ConnectionDevices often assume they're owned by a DeviceToken (whose
+        /// constructor calls this method), so doing otherwise is unadvisable.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-        registerDevice(std::string const &deviceName);
+        createConnectionDevice(std::string const &deviceName);
+
+        /// @overload
+        OSVR_CONNECTION_EXPORT ConnectionDevicePtr
+        createConnectionDevice(DeviceInitObject &init);
 
         /// @brief Add an externally-constructed device to the device list.
         OSVR_CONNECTION_EXPORT void addDevice(ConnectionDevicePtr device);
@@ -153,7 +159,7 @@ namespace connection {
 
         /// @brief (Subclass implementation) Register a full device name.
         virtual ConnectionDevicePtr
-        m_registerDevice(std::string const &deviceName) = 0;
+        m_createConnectionDevice(DeviceInitObject &init) = 0;
 
         /// @brief (Subclass implementation) Register a function to handle "new
         /// connection"/ping messages.

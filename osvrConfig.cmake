@@ -19,3 +19,12 @@ function(osvr_add_plugin NAME)
     install(TARGETS ${NAME}
         LIBRARY DESTINATION @PLUGINDIR@ COMPONENT Runtime)
 endfunction()
+
+function(osvr_convert_json _symbol _in _out)
+    add_custom_command(OUTPUT "${_out}"
+        COMMAND osvr::osvr_json_to_c --symbol ${_symbol} "${_in}" "${_out}"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${_in}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMENT "Generating string literal header from ${_in}"
+        VERBATIM)
+endfunction()

@@ -50,6 +50,8 @@ namespace connection {
         virtual void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len);
+        virtual GuardPtr m_getSendGuard();
+
         /// Called from the main thread - services requests to send from
         /// the async thread.
         virtual void m_connectionInteract();
