@@ -36,7 +36,7 @@ struct OSVR_ButtonDeviceInterfaceObject
 OSVR_ReturnCode
 osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                           OSVR_OUT_PTR OSVR_ButtonDeviceInterface *iface,
-                          OSVR_IN OSVR_ButtonChanCount numChan) {
+                          OSVR_IN OSVR_ChannelCount numChan) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", iface);
     OSVR_ButtonDeviceInterface ifaceObj = *iface =

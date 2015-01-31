@@ -37,7 +37,6 @@ OSVR_EXTERN_C_BEGIN
 
 /** @brief The integer type specifying the number of button channels you'd like.
 */
-typedef OSVR_ChannelCount OSVR_ButtonChanCount;
 
 /** @brief Opaque type used in conjunction with a device token to send data on
     a button interface.
@@ -58,7 +57,7 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                           OSVR_OUT_PTR OSVR_ButtonDeviceInterface *iface,
-                          OSVR_IN OSVR_ButtonChanCount numChan)
+                          OSVR_IN OSVR_ChannelCount numChan)
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report the value of a single channel.
