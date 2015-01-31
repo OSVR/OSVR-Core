@@ -59,6 +59,13 @@ OSVR_VEC_MEMBER(Z, 2)
 
 #undef OSVR_VEC_MEMBER
 
+/** @brief Set a Vec3 to the zero vector */
+OSVR_INLINE void osvrVec3Zero(OSVR_Vec3 *v) {
+    osvrVec3SetX(v, 0);
+    osvrVec3SetY(v, 0);
+    osvrVec3SetZ(v, 0);
+}
+
 /** @} */
 
 OSVR_EXTERN_C_END
