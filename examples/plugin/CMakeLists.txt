@@ -13,6 +13,7 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS
     org_opengoggles_example_DummySync
     org_opengoggles_example_DummyDetectAndCreateAsync
     com_osvr_example_AnalogSync
+    com_osvr_example_MultipleSync
     CACHE INTERNAL "" FORCE)
 foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS})
     set(name ${pluginname})
