@@ -124,7 +124,7 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSendTimestampedData(
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
 osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
                              OSVR_IN_READS(len) const char *json,
-                             OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2, 3));
+                             OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2));
 
 /** @name Synchronous Devices
 
