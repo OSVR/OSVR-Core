@@ -35,6 +35,12 @@
 
 OSVR_EXTERN_C_BEGIN
 
+/** @defgroup PluginKitCTracker Tracker interface (base C API)
+    @brief Sending tracker reports from a device in your plugin.
+    @ingroup PluginKit
+    @{
+*/
+
 /** @brief Opaque type used in conjunction with a device token to send data on
     a button interface.
 */
@@ -116,6 +122,8 @@ OSVR_ReturnCode osvrDeviceTrackerSendOrientationTimestamped(
     OSVR_IN_PTR OSVR_OrientationState const *val,
     OSVR_IN OSVR_ChannelCount chan, OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
 

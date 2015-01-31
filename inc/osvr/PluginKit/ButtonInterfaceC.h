@@ -35,7 +35,10 @@
 
 OSVR_EXTERN_C_BEGIN
 
-/** @brief The integer type specifying the number of button channels you'd like.
+/** @defgroup PluginKitCButton Button channel interface (base C API)
+    @brief Sending button reports from a device in your plugin.
+    @ingroup PluginKit
+    @{
 */
 
 /** @brief Opaque type used in conjunction with a device token to send data on
@@ -98,6 +101,8 @@ OSVR_ReturnCode osvrDeviceButtonSetValuesTimestamped(
     OSVR_IN_PTR OSVR_ButtonState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
 

@@ -35,6 +35,12 @@
 
 OSVR_EXTERN_C_BEGIN
 
+/** @defgroup PluginKitCAnalog Analog channel interface (base C API)
+    @brief Sending analog reports from a device in your plugin.
+    @ingroup PluginKit
+    @{
+*/
+
 /** @brief Opaque type used in conjunction with a device token to send data on
     an analog interface.
 */
@@ -95,6 +101,8 @@ OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
     OSVR_IN_PTR OSVR_AnalogState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
 
