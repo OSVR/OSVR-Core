@@ -19,6 +19,9 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
+// Generated JSON header file
+#include "com_osvr_example_AnalogSync_json.h"
+
 // Library/third-party includes
 // - none
 
@@ -38,6 +41,9 @@ class AnalogSyncDevice {
 
         /// Create the sync device token with the options
         osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
+
+        /// Send JSON descriptor
+        osvrDeviceSendJsonDescriptor(m_dev, com_osvr_example_AnalogSync_json, sizeof(com_osvr_example_AnalogSync_json));
 
         /// Register update callback
         osvrDeviceSyncRegisterUpdateCallback(m_dev, &AnalogSyncDevice::update,

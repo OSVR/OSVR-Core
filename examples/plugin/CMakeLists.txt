@@ -8,14 +8,18 @@ set(OSVR_EXAMPLE_PLUGINS
     CACHE INTERNAL "" FORCE)
 
 # These plugins need a host with a Connection.
-set(OSVR_EXAMPLE_DEVICE_PLUGINS
+set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
     org_opengoggles_example_DummyAsync
     org_opengoggles_example_DummySync
     org_opengoggles_example_DummyDetectAndCreateAsync
+    com_osvr_example_MultipleSync)
+set(OSVR_EXAMPLE_DEVICE_PLUGINS
     com_osvr_example_AnalogSync
-    com_osvr_example_MultipleSync
+    ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE}
     CACHE INTERNAL "" FORCE)
-foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS})
+
+
+foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
     set(name ${pluginname})
     add_library(${name} MODULE ${name}.cpp)
     target_link_libraries(${name} osvrPluginKitCpp)
@@ -23,6 +27,19 @@ foreach(pluginname ${OSVR_EXAMPLE_PLUGINS} ${OSVR_EXAMPLE_DEVICE_PLUGINS})
         PREFIX ""
         FOLDER "OSVR Example Plugins")
 endforeach()
+
+# Build the example with a json
+
+# Convert a JSON for an example
+osvr_convert_json(com_osvr_example_AnalogSync_json com_osvr_example_AnalogSync.json "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+add_library(com_osvr_example_AnalogSync MODULE com_osvr_example_AnalogSync.cpp "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
+target_link_libraries(com_osvr_example_AnalogSync osvrPluginKitCpp)
+set_target_properties(com_osvr_example_AnalogSync PROPERTIES
+    PREFIX ""
+    FOLDER "OSVR Example Plugins")
+
+
 
 ###
 # Set up self-contained example test
