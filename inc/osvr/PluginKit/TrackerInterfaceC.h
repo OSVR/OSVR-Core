@@ -100,21 +100,21 @@ OSVR_ReturnCode osvrDeviceTrackerSendPositionTimestamped(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
-osvrDeviceTrackerSendPosition(OSVR_IN_PTR OSVR_DeviceToken dev,
-                              OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
-                              OSVR_IN_PTR OSVR_PositionState const *val,
-                              OSVR_IN OSVR_ChannelCount chan)
+osvrDeviceTrackerSendOrientation(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                 OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+                                 OSVR_IN_PTR OSVR_OrientationState const *val,
+                                 OSVR_IN OSVR_ChannelCount chan)
     OSVR_FUNC_NONNULL((1, 2, 3));
 
 /** @brief Report the orientation of an orientation-only sensor with the
     supplied timestamp.
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode osvrDeviceTrackerSendPositionTimestamped(
+OSVR_ReturnCode osvrDeviceTrackerSendOrientationTimestamped(
     OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
-    OSVR_IN_PTR OSVR_PositionState const *val, OSVR_IN OSVR_ChannelCount chan,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_IN_PTR OSVR_OrientationState const *val,
+    OSVR_IN OSVR_ChannelCount chan, OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 3, 5));
 
 OSVR_EXTERN_C_END
