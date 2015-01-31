@@ -117,6 +117,15 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSendTimestampedData(
     OSVR_IN_PTR OSVR_MessageType msg, OSVR_IN_READS(len) const char *bytestream,
     OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2, 3));
 
+/** @brief Submit a JSON self-descriptor string for the device.
+
+    Length does not include null terminator.
+*/
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                             OSVR_IN_READS(len) const char *json,
+                             OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2, 3));
+
 /** @name Synchronous Devices
 
     Devices declaring themselves to be synchronous must abide by strict rules.

@@ -77,6 +77,19 @@ osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode
+osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                             OSVR_IN_READS(len) const char *json,
+                             OSVR_IN size_t len) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor", dev);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor descriptor",
+                                    json);
+
+    /// @todo Register this with the context/device
+
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode
 osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                               OSVR_IN_STRZ const char *name,
                               OSVR_OUT_PTR OSVR_MessageType *msgtype) {
