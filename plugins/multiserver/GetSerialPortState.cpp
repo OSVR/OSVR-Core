@@ -81,6 +81,7 @@ std::string normalizeSerialPort(std::string const &port) {
         return "\\\\.\\" + port;
     }
 #endif
+    return port;
 }
 
 void verifySerialPort(std::string const &port, std::string const &origPort) {
