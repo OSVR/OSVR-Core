@@ -85,7 +85,7 @@ namespace server {
 
         {
             out << "Loading plugins..." << endl;
-            bool success = srvConfig.loadPlugins();
+            srvConfig.loadPlugins();
             if (!srvConfig.getSuccessfulPlugins().empty()) {
                 out << "Successful plugins:" << endl;
                 for (auto const &plugin : srvConfig.getSuccessfulPlugins()) {
