@@ -76,8 +76,8 @@ typedef struct OSVR_TimeValue {
 
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
 /** @brief Gets the current time in the TimeValue. Parallel to gettimeofday. */
-OSVR_UTIL_EXPORT void
-osvrTimeValueGetNow(OSVR_OUT_PTR struct OSVR_TimeValue *dest);
+OSVR_UTIL_EXPORT void osvrTimeValueGetNow(OSVR_OUT OSVR_TimeValue *dest)
+    OSVR_FUNC_NONNULL((1));
 
 struct timeval; /* forward declaration */
 
@@ -90,8 +90,9 @@ struct timeval; /* forward declaration */
    anything.
 */
 OSVR_UTIL_EXPORT void
-osvrTimeValueToStructTimeval(OSVR_OUT_PTR struct timeval *dest,
-                             OSVR_IN_PTR const struct OSVR_TimeValue *src);
+osvrTimeValueToStructTimeval(OSVR_OUT struct timeval *dest,
+                             OSVR_IN_PTR const OSVR_TimeValue *src)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Converts from a TimeValue struct to your system's struct timeval.
     @param dest An OSVR_TimeValue destination pointer.
@@ -103,8 +104,9 @@ osvrTimeValueToStructTimeval(OSVR_OUT_PTR struct timeval *dest,
    anything.
 */
 OSVR_UTIL_EXPORT void
-osvrStructTimevalToTimeValue(OSVR_OUT_PTR struct OSVR_TimeValue *dest,
-                             OSVR_IN_PTR const struct timeval *src);
+osvrStructTimevalToTimeValue(OSVR_OUT OSVR_TimeValue *dest,
+                             OSVR_IN_PTR const struct timeval *src)
+    OSVR_FUNC_NONNULL((1, 2));
 #endif
 
 /** @brief "Normalizes" a time value so that the absolute number of microseconds
@@ -114,8 +116,8 @@ osvrStructTimevalToTimeValue(OSVR_OUT_PTR struct OSVR_TimeValue *dest,
 
     If the given pointer is NULL, this function returns without doing anything.
 */
-OSVR_UTIL_EXPORT void
-osvrTimeValueNormalize(OSVR_INOUT_PTR struct OSVR_TimeValue *tv);
+OSVR_UTIL_EXPORT void osvrTimeValueNormalize(OSVR_INOUT_PTR OSVR_TimeValue *tv)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Sums two time values, replacing the first with the result.
 
@@ -126,9 +128,9 @@ osvrTimeValueNormalize(OSVR_INOUT_PTR struct OSVR_TimeValue *tv);
 
     Both parameters are expected to be in normalized form.
 */
-OSVR_UTIL_EXPORT void
-osvrTimeValueSum(OSVR_INOUT_PTR struct OSVR_TimeValue *tvA,
-                 OSVR_IN_PTR const struct OSVR_TimeValue *tvB);
+OSVR_UTIL_EXPORT void osvrTimeValueSum(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
+                                       OSVR_IN_PTR const OSVR_TimeValue *tvB)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Computes the difference between two time values, replacing the first
    with the result.
@@ -143,8 +145,9 @@ osvrTimeValueSum(OSVR_INOUT_PTR struct OSVR_TimeValue *tvA,
     Both parameters are expected to be in normalized form.
 */
 OSVR_UTIL_EXPORT void
-osvrTimeValueDifference(OSVR_INOUT_PTR struct OSVR_TimeValue *tvA,
-                        OSVR_IN_PTR const struct OSVR_TimeValue *tvB);
+osvrTimeValueDifference(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
+                        OSVR_IN_PTR const OSVR_TimeValue *tvB)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @} */
 
