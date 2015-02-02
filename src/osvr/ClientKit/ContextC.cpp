@@ -27,6 +27,11 @@
 // Standard includes
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+// Don't warn about getenv
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
 OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
