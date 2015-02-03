@@ -89,18 +89,20 @@ namespace connection {
         return dev;
     }
 
-    ConnectionDevicePtr Connection::registerAdvancedDevice(
-        std::string const &deviceName,
-        OSVR_SyncDeviceUpdateCallback updateFunction, void *userdata) {
+    ConnectionDevicePtr
+    Connection::registerAdvancedDevice(std::string const &deviceName,
+                                       OSVR_DeviceUpdateCallback updateFunction,
+                                       void *userdata) {
         ConnectionDevicePtr dev(new GenericConnectionDevice(
             deviceName, std::bind(updateFunction, userdata)));
         addDevice(dev);
         return dev;
     }
 
-    ConnectionDevicePtr Connection::registerAdvancedDevice(
-        NameList const &deviceNames,
-        OSVR_SyncDeviceUpdateCallback updateFunction, void *userdata) {
+    ConnectionDevicePtr
+    Connection::registerAdvancedDevice(NameList const &deviceNames,
+                                       OSVR_DeviceUpdateCallback updateFunction,
+                                       void *userdata) {
         ConnectionDevicePtr dev(new GenericConnectionDevice(
             deviceNames, std::bind(updateFunction, userdata)));
         addDevice(dev);

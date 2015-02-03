@@ -35,9 +35,8 @@ class DummyAsyncDevice {
     /// Another trampoline.
     ///
     /// In this case, the core spawns a thread, with a loop calling this
-    /// function
-    /// as long as things are running. So this function waits for the next
-    /// message from the device and passes it on.
+    /// function as long as things are running. So this function waits for the
+    /// next message from the device and passes it on.
     static OSVR_ReturnCode wait(void *userData) {
         return static_cast<DummyAsyncDevice *>(userData)->m_wait();
     }
@@ -67,7 +66,7 @@ OSVR_PLUGIN(org_opengoggles_example_DummyAsync) {
     DummyAsyncDevice *myAsync = osvr::pluginkit::registerObjectForDeletion(
         ctx, new DummyAsyncDevice(d));
     osvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
-    osvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait,
-                                 static_cast<void *>(myAsync));
+    osvrDeviceRegisterUpdateCallback(d, &DummyAsyncDevice::wait,
+                                     static_cast<void *>(myAsync));
     return OSVR_RETURN_SUCCESS;
 }

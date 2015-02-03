@@ -37,11 +37,8 @@ OSVR_EXTERN_C_BEGIN
 /** @addtogroup PluginKit
     @{
 */
-/** @brief Function type of a Sync Device Update callback */
-typedef OSVR_ReturnCode (*OSVR_SyncDeviceUpdateCallback)(void *userData);
-
-/** @brief Function type of an Async Device Wait callback */
-typedef OSVR_ReturnCode (*OSVR_AsyncDeviceWaitCallback)(void *userData);
+/** @brief Function type of a Device Update callback */
+typedef OSVR_ReturnCode (*OSVR_DeviceUpdateCallback)(void *userData);
 /** @} */
 
 OSVR_EXTERN_C_END

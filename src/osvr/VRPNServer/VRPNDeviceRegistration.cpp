@@ -78,9 +78,8 @@ namespace vrpnserver {
         return ::osvr::vrpnserver::getVRPNConnection(m_ctx);
     }
 
-    void
-    VRPNDeviceRegistration::m_registerDevice(OSVR_SyncDeviceUpdateCallback cb,
-                                             void *dev) {
+    void VRPNDeviceRegistration::m_registerDevice(OSVR_DeviceUpdateCallback cb,
+                                                  void *dev) {
         osvr::connection::ConnectionPtr conn =
             osvr::connection::Connection::retrieveConnection(m_ctx.getParent());
 

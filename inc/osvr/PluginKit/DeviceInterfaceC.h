@@ -126,6 +126,27 @@ osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
                              OSVR_IN_READS(len) const char *json,
                              OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2));
 
+/** @brief Register the update callback of a device.
+
+    The callback you provide will be called potentially as soon as this call
+   completes. If you created a Sync device token, it will be run in the main
+   update loop. If you created an Async device token, it will be run repeatedly
+   in its own thread.
+
+    When your callback, a function of type OSVR_DeviceUpdateCallback, is
+    invoked, it will receive the same userdata you provide here (if any).
+
+    @param device The device token.
+    @param updateCallback The address of your callback function.
+    @param userData An opaque pointer that will be returned to you when
+    the callback you register here is called. Technically optional, but hard to
+    support multiple instances without it.
+*/
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceRegisterUpdateCallback(
+    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN OSVR_DeviceUpdateCallback updateCallback,
+    OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL)) OSVR_FUNC_NONNULL((1));
+
 /** @name Synchronous Devices
 
     Devices declaring themselves to be synchronous must abide by strict rules.
@@ -172,24 +193,6 @@ osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                               OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3, 4));
 
-/** @brief Register the update callback of a synchronous device.
-
-    The callback you provide will be called in the main update loop, potentially
-   as soon as this call completes.
-
-    When your callback, a function of type OSVR_SyncDeviceUpdateCallback, is
-   invoked, it will receive the same userdata you provide here (if any).
-
-    @param device The device token.
-    @param updateCallback The address of your callback function.
-    @param userData An opaque pointer that will be returned to you when
-    the callback you register here is called. Technically optional, but hard to
-    support multiple instances without it.
-*/
-OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSyncRegisterUpdateCallback(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
-    OSVR_IN OSVR_SyncDeviceUpdateCallback updateCallback,
-    OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL)) OSVR_FUNC_NONNULL((1));
 /** @} */
 
 /** @name Asynchronous Devices
@@ -198,7 +201,7 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSyncRegisterUpdateCallback(
     driver to block until full data arrives, or you can't be sure your
     driver can get in and out of an update function very rapidly.
 
-    As a result, devices registered as async have their analog to an update
+    As a result, devices registered as async have their update
    method run in a thread of its own, repeatedly as long as the device exists.
     Calls sending data from an async device are automatically made thread-safe.
 
@@ -220,26 +223,6 @@ osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                     OSVR_IN_STRZ const char *name,
                     OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3));
-
-/** @brief Start the sampling/waiting thread of an asynchronous device.
-
-    The callback you provide will immediately and repeatedly be called in its
-   own thread until stopped.
-
-    When your callback, a function of type OSVR_AsyncDeviceWaitCallback, is
-   invoked, it will receive the same userdata you provide here (if any).
-
-    @param device Your device token.
-    @param waitCallback The address of your callback function.
-    @param userData An opaque pointer that will be returned to you when
-    the callback you register here is called. Technically optional, but hard to
-   support multiple instances without it.
-*/
-OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                             OSVR_IN OSVR_AsyncDeviceWaitCallback waitCallback,
-                             OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL))
-    OSVR_FUNC_NONNULL((1));
 
 /** @} */
 

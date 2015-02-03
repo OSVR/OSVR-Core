@@ -164,13 +164,13 @@ osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext,
 }
 
 OSVR_ReturnCode
-osvrDeviceSyncRegisterUpdateCallback(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                                     OSVR_IN OSVR_SyncDeviceUpdateCallback
-                                         updateCallback,
-                                     OSVR_IN_OPT void *userData) {
-    OSVR_DEV_VERBOSE("In osvrDeviceSyncRegisterUpdateCallback");
+osvrDeviceRegisterUpdateCallback(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                                 OSVR_IN OSVR_DeviceUpdateCallback
+                                     updateCallback,
+                                 OSVR_IN_OPT void *userData) {
+    OSVR_DEV_VERBOSE("In osvrDeviceRegisterUpdateCallback");
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(
-        "osvrDeviceSyncRegisterUpdateCallback device token", dev);
+        "osvrDeviceRegisterUpdateCallback device token", dev);
     dev->setUpdateCallback(std::bind(updateCallback, userData));
     return OSVR_RETURN_SUCCESS;
 }
@@ -182,15 +182,4 @@ OSVR_ReturnCode osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     OSVR_DEV_VERBOSE("In osvrDeviceAsyncInit for a device named " << name);
     return osvrDeviceGenericInit(ctx, name, device,
                                  OSVR_DeviceTokenObject::createAsyncDevice);
-}
-
-OSVR_ReturnCode
-osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                             OSVR_IN OSVR_AsyncDeviceWaitCallback waitCallback,
-                             OSVR_IN_OPT void *userData) {
-    OSVR_DEV_VERBOSE("In osvrDeviceAsyncStartWaitLoop");
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncStartWaitLoop device token",
-                                    dev);
-    dev->setUpdateCallback(std::bind(waitCallback, userData));
-    return OSVR_RETURN_SUCCESS;
 }

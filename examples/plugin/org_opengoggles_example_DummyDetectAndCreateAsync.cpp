@@ -78,7 +78,8 @@ class HardwareDetection {
             DummyAsyncDevice *myAsync =
                 osvr::pluginkit::registerObjectForDeletion(
                     ctx, new DummyAsyncDevice(d));
-            osvrDeviceAsyncStartWaitLoop(d, &DummyAsyncDevice::wait, myAsync);
+            osvrDeviceRegisterUpdateCallback(d, &DummyAsyncDevice::wait,
+                                             myAsync);
         }
         return OSVR_RETURN_SUCCESS;
     }

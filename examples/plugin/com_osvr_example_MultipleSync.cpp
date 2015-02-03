@@ -47,8 +47,8 @@ class MultipleSyncDevice {
         osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
 
         /// Register update callback
-        osvrDeviceSyncRegisterUpdateCallback(m_dev, &MultipleSyncDevice::update,
-                                             this);
+        osvrDeviceRegisterUpdateCallback(m_dev, &MultipleSyncDevice::update,
+                                         this);
     }
 
     /// Trampoline: C-compatible callback bouncing into a member function.

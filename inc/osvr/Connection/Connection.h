@@ -123,7 +123,7 @@ namespace connection {
         /// This also adds the device so created to the device list.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
         registerAdvancedDevice(std::string const &deviceName,
-                               OSVR_SyncDeviceUpdateCallback updateFunction,
+                               OSVR_DeviceUpdateCallback updateFunction,
                                void *userdata);
 
         /// @brief Type of list of device names.
@@ -141,7 +141,7 @@ namespace connection {
         /// For use when a single device exposes more than one name.
         OSVR_CONNECTION_EXPORT ConnectionDevicePtr
         registerAdvancedDevice(NameList const &deviceNames,
-                               OSVR_SyncDeviceUpdateCallback updateFunction,
+                               OSVR_DeviceUpdateCallback updateFunction,
                                void *userdata);
 
         /// @brief Access implementation details.

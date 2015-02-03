@@ -45,8 +45,8 @@ class AnalogSyncDevice {
                                      sizeof(com_osvr_example_AnalogSync_json));
 
         /// Register update callback
-        osvrDeviceSyncRegisterUpdateCallback(m_dev, &AnalogSyncDevice::update,
-                                             this);
+        osvrDeviceRegisterUpdateCallback(m_dev, &AnalogSyncDevice::update,
+                                         this);
     }
 
     /// Trampoline: C-compatible callback bouncing into a member function.

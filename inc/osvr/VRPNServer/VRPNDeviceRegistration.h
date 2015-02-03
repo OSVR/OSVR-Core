@@ -112,7 +112,7 @@ namespace vrpnserver {
 
       private:
         OSVR_VRPNSERVER_EXPORT void
-        m_registerDevice(OSVR_SyncDeviceUpdateCallback cb, void *dev);
+        m_registerDevice(OSVR_DeviceUpdateCallback cb, void *dev);
         pluginhost::PluginSpecificRegistrationContext &m_ctx;
         unique_ptr<VRPNDeviceRegistration_impl> m_impl;
     };

@@ -63,7 +63,7 @@ OSVR_PLUGIN(org_opengoggles_example_DummySync) {
         osvr::pluginkit::registerObjectForDeletion(ctx, new DummySyncDevice(d));
 
     osvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
-    osvrDeviceSyncRegisterUpdateCallback(d, &DummySyncDevice::update,
-                                         static_cast<void *>(mySync));
+    osvrDeviceRegisterUpdateCallback(d, &DummySyncDevice::update,
+                                     static_cast<void *>(mySync));
     return OSVR_RETURN_SUCCESS;
 }
