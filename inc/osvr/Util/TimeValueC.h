@@ -117,7 +117,7 @@ osvrStructTimevalToTimeValue(OSVR_OUT OSVR_TimeValue *dest,
     If the given pointer is NULL, this function returns without doing anything.
 */
 OSVR_UTIL_EXPORT void osvrTimeValueNormalize(OSVR_INOUT_PTR OSVR_TimeValue *tv)
-    OSVR_FUNC_NONNULL((1, 2));
+    OSVR_FUNC_NONNULL((1));
 
 /** @brief Sums two time values, replacing the first with the result.
 
