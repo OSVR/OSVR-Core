@@ -57,7 +57,7 @@ typedef struct OSVR_DeviceTokenObject *OSVR_DeviceToken;
 Common device types will have pre-defined message types, while more specific
 or unique devices may need to define their own.
 */
-typedef void *OSVR_MessageType;
+typedef struct OSVR_MessageTypeObject *OSVR_MessageType;
 
 /** @brief Opaque type of a device initialization object.
 

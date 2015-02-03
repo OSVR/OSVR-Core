@@ -26,9 +26,11 @@
 
 // Standard includes
 // - none
+
+struct OSVR_MessageTypeObject;
 namespace osvr {
 namespace connection {
-    class MessageType;
+    typedef OSVR_MessageTypeObject MessageType;
     /// @brief a uniquely-owned handle for holding a message type registration.
     typedef unique_ptr<MessageType> MessageTypePtr;
 } // namespace connection

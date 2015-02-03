@@ -49,9 +49,7 @@ OSVR_ReturnCode osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
         "In osvrDeviceSendData, trying to send a message of length " << len);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData device token", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData message type", msg);
-    osvr::connection::MessageType *msgType =
-        static_cast<osvr::connection::MessageType *>(msg);
-    dev->sendData(msgType, bytestream, len);
+    dev->sendData(msg, bytestream, len);
     return OSVR_RETURN_SUCCESS;
 }
 
@@ -66,9 +64,7 @@ osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
         << len);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData device token", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData message type", msg);
-    osvr::connection::MessageType *msgType =
-        static_cast<osvr::connection::MessageType *>(msg);
-    dev->sendData(*timestamp, msgType, bytestream, len);
+    dev->sendData(*timestamp, msg, bytestream, len);
     return OSVR_RETURN_SUCCESS;
 }
 

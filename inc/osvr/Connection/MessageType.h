@@ -27,24 +27,20 @@
 // Standard includes
 #include <string>
 
-namespace osvr {
-namespace connection {
-    /// @brief Base class for connection-specific message type registration
-    class MessageType : boost::noncopyable {
-      public:
-        /// @brief destructor
-        virtual ~MessageType();
+/// @brief Base class for connection-specific message type registration
+struct OSVR_MessageTypeObject : boost::noncopyable {
+  public:
+    /// @brief destructor
+    virtual ~OSVR_MessageTypeObject();
 
-        /// @brief accessor for message name
-        std::string const &getName() const;
+    /// @brief accessor for message name
+    std::string const &getName() const;
 
-      protected:
-        /// @brief Constructor for use by derived classes only.
-        MessageType(std::string const &name);
+  protected:
+    /// @brief Constructor for use by derived classes only.
+    OSVR_MessageTypeObject(std::string const &name);
 
-      private:
-        std::string const m_name;
-    };
-} // namespace connection
-} // namespace osvr
+  private:
+    std::string const m_name;
+};
 #endif // INCLUDED_MessageType_h_GUID_61B56482_02E5_47B5_8CFA_EAF4286F309F
