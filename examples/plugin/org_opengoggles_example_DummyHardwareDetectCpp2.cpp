@@ -25,6 +25,8 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
 class HardwareDetection {
   public:
     HardwareDetection(int initialVal) : m_data(initialVal) {}
@@ -42,6 +44,7 @@ class HardwareDetection {
     /// @brief Some dummy example data.
     int m_data;
 };
+} // namespace
 
 OSVR_PLUGIN(org_opengoggles_example_DummyHardwareDetectCpp2) {
     osvr::pluginkit::PluginContext context(ctx);

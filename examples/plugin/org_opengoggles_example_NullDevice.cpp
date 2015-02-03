@@ -25,6 +25,9 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
+
 class DummyDevice {
   public:
     DummyDevice() { std::cout << "Constructing dummy device" << std::endl; }
@@ -33,6 +36,7 @@ class DummyDevice {
 
   private:
 };
+} // namespace
 
 OSVR_PLUGIN(org_opengoggles_example_NullDevice) {
 

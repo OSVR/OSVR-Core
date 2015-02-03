@@ -20,6 +20,7 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
+// Generated JSON header file
 #include "com_osvr_example_selfcontainedDetectAndCreate_json.h"
 
 // Library/third-party includes
@@ -28,6 +29,7 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
 namespace {
 
 class AnalogSyncDevice {

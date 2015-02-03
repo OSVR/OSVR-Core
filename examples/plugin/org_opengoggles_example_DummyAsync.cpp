@@ -24,6 +24,9 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
+
 OSVR_MessageType dummyMessage;
 
 class DummyDevice {
@@ -39,21 +42,25 @@ class DummyDevice {
         // that it needs to get a connection lock first.
 
         /// Sets the update callback
-        osvrDeviceRegisterUpdateCallback(m_dev, &DummyDevice::wait, this);
+        osvrDeviceRegisterUpdateCallback(m_dev, &DummyDevice::update, this);
     }
-    /// Another trampoline.
+
+    /// Trampoline: C-compatible callback bouncing into a member function.
+    /// Future enhancements to the C++ wrappers will make this tiny function
+    /// no longer necessary
     ///
     /// In this case, the core spawns a thread, with a loop calling this
     /// function as long as things are running. So this function waits for the
     /// next message from the device and passes it on.
-    static OSVR_ReturnCode wait(void *userData) {
-        return static_cast<DummyDevice *>(userData)->m_wait();
+    static OSVR_ReturnCode update(void *userData) {
+        return static_cast<DummyDevice *>(userData)->m_update();
     }
 
     ~DummyDevice() { std::cout << "Destroying dummy device" << std::endl; }
 
   private:
-    OSVR_ReturnCode m_wait() {
+    OSVR_ReturnCode m_update() {
+        std::cout << "In DummyDevice::m_update" << std::endl;
         // block on waiting for data.
         // once we have enough, send it.
         const char mydata[] = "something";
@@ -62,6 +69,8 @@ class DummyDevice {
     }
     OSVR_DeviceToken m_dev;
 };
+
+} // namespace
 
 OSVR_PLUGIN(org_opengoggles_example_DummyAsync) {
     /// Register custom message type

@@ -24,6 +24,9 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
+
 OSVR_MessageType dummyMessage;
 
 class DummyDevice {
@@ -42,7 +45,8 @@ class DummyDevice {
     }
 
     /// Trampoline: C-compatible callback bouncing into a member function.
-    /// Also something we can wrap.
+    /// Future enhancements to the C++ wrappers will make this tiny function
+    /// no longer necessary
     static OSVR_ReturnCode update(void *userData) {
         return static_cast<DummyDevice *>(userData)->m_update();
     }
@@ -51,13 +55,14 @@ class DummyDevice {
   private:
     OSVR_ReturnCode m_update() {
         std::cout << "In DummyDevice::m_update" << std::endl;
-        // get some data
+        // get some data, if there is any, and send whatever we find.
         const char mydata[] = "something";
         osvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
         return OSVR_RETURN_SUCCESS;
     }
     OSVR_DeviceToken m_dev;
 };
+} // namespace
 
 OSVR_PLUGIN(org_opengoggles_example_DummySync) {
     /// Register custom message type

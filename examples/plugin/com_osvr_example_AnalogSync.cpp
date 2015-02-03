@@ -28,6 +28,9 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
+
 class AnalogSyncDevice {
   public:
     AnalogSyncDevice(OSVR_PluginRegContext ctx) : m_myVal(0) {
@@ -70,10 +73,10 @@ class AnalogSyncDevice {
     OSVR_AnalogDeviceInterface m_analog;
     double m_myVal;
 };
+} // namespace
 
 OSVR_PLUGIN(com_osvr_example_AnalogSync) {
     /// Create the device
-    AnalogSyncDevice *myDevice = osvr::pluginkit::registerObjectForDeletion(
-        ctx, new AnalogSyncDevice(ctx));
+    osvr::pluginkit::registerObjectForDeletion(ctx, new AnalogSyncDevice(ctx));
     return OSVR_RETURN_SUCCESS;
 }
