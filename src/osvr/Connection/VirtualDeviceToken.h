@@ -31,7 +31,7 @@ namespace osvr {
 namespace connection {
     /// @brief A device token for a device that does not have a standard update
     /// or wait callback - for instance, the system data device.
-    class VirtualDeviceToken : public DeviceToken {
+    class VirtualDeviceToken : public OSVR_DeviceTokenObject {
       public:
         VirtualDeviceToken(std::string const &name);
         virtual ~VirtualDeviceToken();

@@ -33,7 +33,7 @@ namespace osvr {
 namespace connection {
 
     SyncDeviceToken::SyncDeviceToken(std::string const &name)
-        : DeviceToken(name) {}
+        : OSVR_DeviceTokenObject(name) {}
 
     SyncDeviceToken::~SyncDeviceToken() {}
 

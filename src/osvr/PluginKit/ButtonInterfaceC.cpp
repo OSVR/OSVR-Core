@@ -68,10 +68,7 @@ OSVR_ReturnCode osvrDeviceButtonSetValueTimestamped(
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValueTimestamped",
                                     timestamp);
 
-    osvr::connection::DeviceToken *device =
-        static_cast<osvr::connection::DeviceToken *>(dev);
-
-    auto guard = device->getSendGuard();
+    auto guard = dev->getSendGuard();
     if (guard->lock()) {
         bool sendResult = (*iface)->setValue(val, chan, *timestamp);
         return sendResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
@@ -101,10 +98,8 @@ OSVR_ReturnCode osvrDeviceButtonSetValuesTimestamped(
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValuesTimestamped",
                                     timestamp);
-    osvr::connection::DeviceToken *device =
-        static_cast<osvr::connection::DeviceToken *>(dev);
 
-    auto guard = device->getSendGuard();
+    auto guard = dev->getSendGuard();
     if (guard->lock()) {
         (*iface)->setValues(val, chans, *timestamp);
         return OSVR_RETURN_SUCCESS;

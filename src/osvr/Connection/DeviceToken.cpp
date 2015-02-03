@@ -29,88 +29,98 @@
 // Standard includes
 #include <stdexcept>
 
-namespace osvr {
-namespace connection {
+using osvr::connection::DeviceTokenPtr;
+using osvr::connection::DeviceInitObject;
+using osvr::connection::AsyncDeviceToken;
+using osvr::connection::SyncDeviceToken;
+using osvr::connection::VirtualDeviceToken;
+using osvr::connection::ConnectionPtr;
+using osvr::connection::MessageType;
+using osvr::connection::GuardPtr;
+using osvr::connection::ConnectionDevicePtr;
+DeviceTokenPtr
+OSVR_DeviceTokenObject::createAsyncDevice(DeviceInitObject &init) {
+    DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
+    ret->m_sharedInit(init);
+    return ret;
+}
 
-    DeviceTokenPtr DeviceToken::createAsyncDevice(DeviceInitObject &init) {
-        DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
-        ret->m_sharedInit(init);
-        return ret;
+DeviceTokenPtr
+OSVR_DeviceTokenObject::createSyncDevice(DeviceInitObject &init) {
+    DeviceTokenPtr ret(new SyncDeviceToken(init.getQualifiedName()));
+    ret->m_sharedInit(init);
+    return ret;
+}
+
+DeviceTokenPtr
+OSVR_DeviceTokenObject::createVirtualDevice(std::string const &name,
+                                            ConnectionPtr const &conn) {
+    DeviceInitObject init(conn);
+    init.setName(name);
+    DeviceTokenPtr ret(new VirtualDeviceToken(name));
+    ret->m_sharedInit(init);
+    return ret;
+}
+
+OSVR_DeviceTokenObject::OSVR_DeviceTokenObject(std::string const &name)
+    : m_name(name) {}
+
+OSVR_DeviceTokenObject::~OSVR_DeviceTokenObject() {}
+
+std::string const &OSVR_DeviceTokenObject::getName() const { return m_name; }
+
+void OSVR_DeviceTokenObject::sendData(MessageType *type, const char *bytestream,
+                                      size_t len) {
+    osvr::util::time::TimeValue tv;
+    osvr::util::time::getNow(tv);
+    m_sendData(tv, type, bytestream, len);
+}
+void OSVR_DeviceTokenObject::sendData(
+    osvr::util::time::TimeValue const &timestamp, MessageType *type,
+    const char *bytestream, size_t len) {
+    m_sendData(timestamp, type, bytestream, len);
+}
+
+GuardPtr OSVR_DeviceTokenObject::getSendGuard() { return m_getSendGuard(); }
+
+void OSVR_DeviceTokenObject::setAsyncWaitCallback(
+    osvr::connection::AsyncDeviceWaitCallback const &cb) {
+    AsyncDeviceToken *dev = this->asAsync();
+    if (!dev) {
+        throw std::logic_error(
+            "Called setAsyncWaitCallback on a non-async device token!");
     }
+    dev->setWaitCallback(cb);
+}
 
-    DeviceTokenPtr DeviceToken::createSyncDevice(DeviceInitObject &init) {
-        DeviceTokenPtr ret(new SyncDeviceToken(init.getQualifiedName()));
-        ret->m_sharedInit(init);
-        return ret;
+void OSVR_DeviceTokenObject::setSyncUpdateCallback(
+    osvr::connection::SyncDeviceUpdateCallback const &cb) {
+    SyncDeviceToken *dev = this->asSync();
+    if (!dev) {
+        throw std::logic_error(
+            "Called setSyncUpdateCallback on a non-sync device token!");
     }
+    dev->setUpdateCallback(cb);
+}
 
-    DeviceTokenPtr DeviceToken::createVirtualDevice(std::string const &name,
-                                                    ConnectionPtr const &conn) {
-        DeviceInitObject init(conn);
-        init.setName(name);
-        DeviceTokenPtr ret(new VirtualDeviceToken(name));
-        ret->m_sharedInit(init);
-        return ret;
-    }
+void OSVR_DeviceTokenObject::connectionInteract() { m_connectionInteract(); }
 
-    DeviceToken::DeviceToken(std::string const &name) : m_name(name) {}
+void OSVR_DeviceTokenObject::stopThreads() { m_stopThreads(); }
 
-    DeviceToken::~DeviceToken() {}
+ConnectionPtr OSVR_DeviceTokenObject::m_getConnection() { return m_conn; }
 
-    std::string const &DeviceToken::getName() const { return m_name; }
+ConnectionDevicePtr OSVR_DeviceTokenObject::m_getConnectionDevice() {
+    return m_dev;
+}
 
-    void DeviceToken::sendData(MessageType *type, const char *bytestream,
-                               size_t len) {
-        util::time::TimeValue tv;
-        util::time::getNow(tv);
-        m_sendData(tv, type, bytestream, len);
-    }
-    void DeviceToken::sendData(util::time::TimeValue const &timestamp,
-                               MessageType *type, const char *bytestream,
-                               size_t len) {
-        m_sendData(timestamp, type, bytestream, len);
-    }
+AsyncDeviceToken *OSVR_DeviceTokenObject::asAsync() { return nullptr; }
 
-    GuardPtr DeviceToken::getSendGuard() { return m_getSendGuard(); }
+SyncDeviceToken *OSVR_DeviceTokenObject::asSync() { return nullptr; }
 
-    void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
-        AsyncDeviceToken *dev = this->asAsync();
-        if (!dev) {
-            throw std::logic_error(
-                "Called setAsyncWaitCallback on a non-async device token!");
-        }
-        dev->setWaitCallback(cb);
-    }
+void OSVR_DeviceTokenObject::m_stopThreads() {}
 
-    void
-    DeviceToken::setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb) {
-        SyncDeviceToken *dev = this->asSync();
-        if (!dev) {
-            throw std::logic_error(
-                "Called setSyncUpdateCallback on a non-sync device token!");
-        }
-        dev->setUpdateCallback(cb);
-    }
-
-    void DeviceToken::connectionInteract() { m_connectionInteract(); }
-
-    void DeviceToken::stopThreads() { m_stopThreads(); }
-
-    ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
-
-    ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
-
-    AsyncDeviceToken *DeviceToken::asAsync() { return nullptr; }
-
-    SyncDeviceToken *DeviceToken::asSync() { return nullptr; }
-
-    void DeviceToken::m_stopThreads() {}
-
-    void DeviceToken::m_sharedInit(DeviceInitObject &init) {
-        m_conn = init.getConnection();
-        m_dev = m_conn->createConnectionDevice(init);
-        m_dev->setDeviceToken(*this);
-    }
-
-} // namespace connection
-} // namespace osvr
+void OSVR_DeviceTokenObject::m_sharedInit(DeviceInitObject &init) {
+    m_conn = init.getConnection();
+    m_dev = m_conn->createConnectionDevice(init);
+    m_dev->setDeviceToken(*this);
+}

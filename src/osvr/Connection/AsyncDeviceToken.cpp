@@ -34,7 +34,7 @@ namespace connection {
     using boost::mutex;
 
     AsyncDeviceToken::AsyncDeviceToken(std::string const &name)
-        : DeviceToken(name) {}
+        : OSVR_DeviceTokenObject(name) {}
 
     AsyncDeviceToken::~AsyncDeviceToken() {
         OSVR_DEV_VERBOSE("AsyncDeviceToken\t"

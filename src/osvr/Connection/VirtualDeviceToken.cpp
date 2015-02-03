@@ -30,7 +30,7 @@
 namespace osvr {
 namespace connection {
     VirtualDeviceToken::VirtualDeviceToken(std::string const &name)
-        : DeviceToken(name) {}
+        : OSVR_DeviceTokenObject(name) {}
 
     VirtualDeviceToken::~VirtualDeviceToken() {}
 

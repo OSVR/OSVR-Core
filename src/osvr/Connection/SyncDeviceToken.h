@@ -29,7 +29,7 @@
 
 namespace osvr {
 namespace connection {
-    class SyncDeviceToken : public DeviceToken {
+    class SyncDeviceToken : public OSVR_DeviceTokenObject {
       public:
         SyncDeviceToken(std::string const &name);
         virtual ~SyncDeviceToken();

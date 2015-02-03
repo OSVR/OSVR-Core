@@ -32,7 +32,7 @@
 
 namespace osvr {
 namespace connection {
-    class AsyncDeviceToken : public DeviceToken {
+    class AsyncDeviceToken : public OSVR_DeviceTokenObject {
       public:
         AsyncDeviceToken(std::string const &name);
         virtual ~AsyncDeviceToken();

@@ -50,7 +50,7 @@ OSVR_EXTERN_C_BEGIN
     active, as each call from the device into this C device API will
     require it.
 */
-typedef void *OSVR_DeviceToken;
+typedef struct OSVR_DeviceTokenObject *OSVR_DeviceToken;
 
 /** @brief Opaque type of a registered message type within the core library.
 
@@ -187,7 +187,7 @@ osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     support multiple instances without it.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSyncRegisterUpdateCallback(
-    OSVR_INOUT_PTR OSVR_DeviceToken device,
+    OSVR_INOUT_PTR OSVR_DeviceToken dev,
     OSVR_IN OSVR_SyncDeviceUpdateCallback updateCallback,
     OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL)) OSVR_FUNC_NONNULL((1));
 /** @} */
@@ -236,7 +236,7 @@ osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
    support multiple instances without it.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken device,
+osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken dev,
                              OSVR_IN OSVR_AsyncDeviceWaitCallback waitCallback,
                              OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL))
     OSVR_FUNC_NONNULL((1));
