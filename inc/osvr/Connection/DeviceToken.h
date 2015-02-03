@@ -19,6 +19,7 @@
 #define INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387
 
 // Internal Includes
+#include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/Export.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Connection/ConnectionPtr.h>
@@ -37,7 +38,6 @@
 
 namespace osvr {
 namespace connection {
-    class MessageType;
     class AsyncDeviceToken;
     class SyncDeviceToken;
     class DeviceToken;

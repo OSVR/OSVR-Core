@@ -21,6 +21,7 @@
 // Internal Includes
 #include <osvr/Connection/Export.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
+#include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -32,7 +33,6 @@
 
 namespace osvr {
 namespace connection {
-    class MessageType;
     class DeviceToken;
 
     /// @brief Base class for connection-specific device data, owned by a
