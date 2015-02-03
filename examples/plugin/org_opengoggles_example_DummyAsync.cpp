@@ -26,11 +26,20 @@
 
 OSVR_MessageType dummyMessage;
 
-class DummyAsyncDevice {
+class DummyDevice {
   public:
-    DummyAsyncDevice(OSVR_DeviceToken d) : m_dev(d) {
-        std::cout << "Constructing dummy asynchronous (threaded) device"
-                  << std::endl;
+    DummyDevice(OSVR_PluginRegContext ctx) {
+        std::cout << "Constructing dummy device" << std::endl;
+
+        /// Create an asynchronous (threaded) device
+        osvrDeviceAsyncInit(
+            ctx, "MyAsyncDevice",
+            &m_dev); // Puts an object in m_dev that knows it's a
+        // threaded device so osvrDeviceSendData knows
+        // that it needs to get a connection lock first.
+
+        /// Sets the update callback
+        osvrDeviceRegisterUpdateCallback(m_dev, &DummyDevice::wait, this);
     }
     /// Another trampoline.
     ///
@@ -38,35 +47,28 @@ class DummyAsyncDevice {
     /// function as long as things are running. So this function waits for the
     /// next message from the device and passes it on.
     static OSVR_ReturnCode wait(void *userData) {
-        return static_cast<DummyAsyncDevice *>(userData)->m_wait();
+        return static_cast<DummyDevice *>(userData)->m_wait();
     }
-    ~DummyAsyncDevice() {
-        std::cout << "Destroying dummy asynchronous (threaded) device"
-                  << std::endl;
-    }
+
+    ~DummyDevice() { std::cout << "Destroying dummy device" << std::endl; }
 
   private:
     OSVR_ReturnCode m_wait() {
         // block on waiting for data.
-        // once we have enough, call
-        char *mydata = NULL;
-        osvrDeviceSendData(m_dev, dummyMessage, mydata, 0);
+        // once we have enough, send it.
+        const char mydata[] = "something";
+        osvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
         return OSVR_RETURN_SUCCESS;
     }
     OSVR_DeviceToken m_dev;
 };
 
 OSVR_PLUGIN(org_opengoggles_example_DummyAsync) {
-    /// Create an asynchronous (threaded) device
-    OSVR_DeviceToken d;
-    osvrDeviceAsyncInit(ctx, "MyAsyncDevice",
-                        &d); // Puts an object in d that knows it's a
-                             // threaded device so osvrDeviceSendData knows
-                             // that it needs to get a connection lock first.
-    DummyAsyncDevice *myAsync = osvr::pluginkit::registerObjectForDeletion(
-        ctx, new DummyAsyncDevice(d));
+    /// Register custom message type
     osvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
-    osvrDeviceRegisterUpdateCallback(d, &DummyAsyncDevice::wait,
-                                     static_cast<void *>(myAsync));
+
+    /// Create the device and register it for deletion.
+    osvr::pluginkit::registerObjectForDeletion(ctx, new DummyDevice(ctx));
+
     return OSVR_RETURN_SUCCESS;
 }

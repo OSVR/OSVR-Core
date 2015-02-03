@@ -26,24 +26,31 @@
 
 OSVR_MessageType dummyMessage;
 
-class DummySyncDevice {
+class DummyDevice {
   public:
-    DummySyncDevice(OSVR_DeviceToken d) : m_dev(d) {
-        std::cout << "Constructing dummy synchronous device" << std::endl;
+    DummyDevice(OSVR_PluginRegContext ctx) {
+        std::cout << "Constructing dummy device" << std::endl;
+
+        osvrDeviceSyncInit(
+            ctx, "MySyncDevice",
+            &m_dev); // Puts a token in m_dev that knows it's a sync
+        // device so osvrDeviceSendData knows that it
+        // doesn't need to acquire a lock.
+
+        /// Sets the update callback
+        osvrDeviceRegisterUpdateCallback(m_dev, &DummyDevice::update, this);
     }
 
     /// Trampoline: C-compatible callback bouncing into a member function.
     /// Also something we can wrap.
     static OSVR_ReturnCode update(void *userData) {
-        return static_cast<DummySyncDevice *>(userData)->m_update();
+        return static_cast<DummyDevice *>(userData)->m_update();
     }
-    ~DummySyncDevice() {
-        std::cout << "Destroying dummy synchronous device" << std::endl;
-    }
+    ~DummyDevice() { std::cout << "Destroying dummy device" << std::endl; }
 
   private:
     OSVR_ReturnCode m_update() {
-        std::cout << "In DummySyncDevice::m_update" << std::endl;
+        std::cout << "In DummyDevice::m_update" << std::endl;
         // get some data
         const char mydata[] = "something";
         osvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
@@ -53,17 +60,11 @@ class DummySyncDevice {
 };
 
 OSVR_PLUGIN(org_opengoggles_example_DummySync) {
-    /// Create a synchronous (in the mainloop) device
-    OSVR_DeviceToken d;
-    osvrDeviceSyncInit(ctx, "MySyncDevice",
-                       &d); // Puts a token in d that knows it's a sync
-                            // device so osvrDeviceSendData knows that it
-                            // doesn't need to acquire a lock.
-    DummySyncDevice *mySync =
-        osvr::pluginkit::registerObjectForDeletion(ctx, new DummySyncDevice(d));
-
+    /// Register custom message type
     osvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
-    osvrDeviceRegisterUpdateCallback(d, &DummySyncDevice::update,
-                                     static_cast<void *>(mySync));
+
+    /// Create the device and register it for deletion.
+    osvr::pluginkit::registerObjectForDeletion(ctx, new DummyDevice(ctx));
+
     return OSVR_RETURN_SUCCESS;
 }
