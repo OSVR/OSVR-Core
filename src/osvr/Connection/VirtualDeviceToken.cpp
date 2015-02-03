@@ -22,7 +22,7 @@
 #include <osvr/Util/GuardInterfaceDummy.h>
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
 // - none
@@ -33,6 +33,12 @@ namespace connection {
         : OSVR_DeviceTokenObject(name) {}
 
     VirtualDeviceToken::~VirtualDeviceToken() {}
+
+    void VirtualDeviceToken::m_setUpdateCallback(
+        osvr::connection::DeviceUpdateCallback const &) {
+        BOOST_ASSERT_MSG(0, "Should never be called - virtual device tokens "
+                            "don't have typical update callbacks!");
+    }
 
     void VirtualDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
                                         MessageType *type,

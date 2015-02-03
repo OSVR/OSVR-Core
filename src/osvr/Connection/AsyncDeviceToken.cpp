@@ -54,8 +54,10 @@ namespace connection {
         OSVR_DEV_VERBOSE("AsyncDeviceToken\t"
                          "In signalAndWaitForShutdown");
         signalShutdown();
-        m_run.signalAndWaitForShutdown();
-        m_callbackThread.join();
+        if (m_callbackThread.is_initialized()) {
+            m_run.signalAndWaitForShutdown();
+            m_callbackThread->join();
+        }
     }
 
     namespace {
@@ -64,7 +66,7 @@ namespace connection {
         class WaitCallbackLoop {
           public:
             WaitCallbackLoop(::util::RunLoopManagerBase &run,
-                             AsyncDeviceWaitCallback const &cb)
+                             DeviceUpdateCallback const &cb)
                 : m_cb(cb), m_run(&run) {}
             void operator()() {
                 OSVR_DEV_VERBOSE("WaitCallbackLoop starting");
@@ -76,17 +78,21 @@ namespace connection {
             }
 
           private:
-            AsyncDeviceWaitCallback m_cb;
+            DeviceUpdateCallback m_cb;
             ::util::RunLoopManagerBase *m_run;
         };
     } // end of anonymous namespace
 
-    void AsyncDeviceToken::setWaitCallback(AsyncDeviceWaitCallback const &cb) {
-        m_callbackThread = boost::thread(WaitCallbackLoop(m_run, cb));
-        m_run.signalAndWaitForStart();
+    void AsyncDeviceToken::m_setUpdateCallback(DeviceUpdateCallback const &cb) {
+        /// @todo enforce this can't happen when running?
+        m_cb = cb;
     }
-
-    AsyncDeviceToken *AsyncDeviceToken::asAsync() { return this; }
+    void AsyncDeviceToken::m_ensureThreadStarted() {
+        if ((!m_callbackThread.is_initialized()) && m_cb) {
+            m_callbackThread = boost::thread(WaitCallbackLoop(m_run, m_cb));
+            m_run.signalAndWaitForStart();
+        }
+    }
 
     void AsyncDeviceToken::m_sendData(util::time::TimeValue const &timestamp,
                                       MessageType *type, const char *bytestream,
@@ -124,6 +130,7 @@ namespace connection {
     }
 
     void AsyncDeviceToken::m_connectionInteract() {
+        m_ensureThreadStarted();
         OSVR_DEV_VERBOSE("AsyncDeviceToken::m_connectionInteract\t"
                          "Going to send a CTS if waiting");
         bool handled = m_accessControl.mainThreadCTS();

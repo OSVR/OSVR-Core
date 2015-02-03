@@ -40,8 +40,7 @@
 namespace osvr {
 namespace connection {
     typedef unique_ptr<util::GuardInterface> GuardPtr;
-    typedef std::function<OSVR_ReturnCode()> AsyncDeviceWaitCallback;
-    typedef std::function<OSVR_ReturnCode()> SyncDeviceUpdateCallback;
+    typedef std::function<OSVR_ReturnCode()> DeviceUpdateCallback;
 } // namespace connection
 } // namespace osvr
 
@@ -74,15 +73,9 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     /// @brief Accessor for name property
     OSVR_CONNECTION_EXPORT std::string const &getName() const;
 
-    /// @brief Sets the wait callback if this is an async device token.
-    /// @throws std::logic_error if it isn't.
+    /// @brief Sets the update/wait callback.
     OSVR_CONNECTION_EXPORT void
-    setAsyncWaitCallback(osvr::connection::AsyncDeviceWaitCallback const &cb);
-
-    /// @brief Sets the update callback if this is a sync device token.
-    /// @throws std::logic_error if it isn't.
-    OSVR_CONNECTION_EXPORT void
-    setSyncUpdateCallback(osvr::connection::SyncDeviceUpdateCallback const &cb);
+    setUpdateCallback(osvr::connection::DeviceUpdateCallback const &cb);
 
     /// @brief Send data.
     ///
@@ -118,15 +111,14 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     OSVR_DeviceTokenObject(std::string const &name);
     osvr::connection::ConnectionPtr m_getConnection();
     osvr::connection::ConnectionDevicePtr m_getConnectionDevice();
+    virtual void
+    m_setUpdateCallback(osvr::connection::DeviceUpdateCallback const &cb) = 0;
     virtual void m_sendData(osvr::util::time::TimeValue const &timestamp,
                             osvr::connection::MessageType *type,
                             const char *bytestream, size_t len) = 0;
     virtual osvr::connection::GuardPtr m_getSendGuard() = 0;
     virtual void m_connectionInteract() = 0;
     virtual void m_stopThreads();
-
-    virtual osvr::connection::AsyncDeviceToken *asAsync();
-    virtual osvr::connection::SyncDeviceToken *asSync();
 
   private:
     void m_sharedInit(osvr::connection::DeviceInitObject &init);

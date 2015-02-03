@@ -83,24 +83,9 @@ void OSVR_DeviceTokenObject::sendData(
 
 GuardPtr OSVR_DeviceTokenObject::getSendGuard() { return m_getSendGuard(); }
 
-void OSVR_DeviceTokenObject::setAsyncWaitCallback(
-    osvr::connection::AsyncDeviceWaitCallback const &cb) {
-    AsyncDeviceToken *dev = this->asAsync();
-    if (!dev) {
-        throw std::logic_error(
-            "Called setAsyncWaitCallback on a non-async device token!");
-    }
-    dev->setWaitCallback(cb);
-}
-
-void OSVR_DeviceTokenObject::setSyncUpdateCallback(
-    osvr::connection::SyncDeviceUpdateCallback const &cb) {
-    SyncDeviceToken *dev = this->asSync();
-    if (!dev) {
-        throw std::logic_error(
-            "Called setSyncUpdateCallback on a non-sync device token!");
-    }
-    dev->setUpdateCallback(cb);
+void OSVR_DeviceTokenObject::setUpdateCallback(
+    osvr::connection::DeviceUpdateCallback const &cb) {
+    m_setUpdateCallback(cb);
 }
 
 void OSVR_DeviceTokenObject::connectionInteract() { m_connectionInteract(); }
@@ -112,10 +97,6 @@ ConnectionPtr OSVR_DeviceTokenObject::m_getConnection() { return m_conn; }
 ConnectionDevicePtr OSVR_DeviceTokenObject::m_getConnectionDevice() {
     return m_dev;
 }
-
-AsyncDeviceToken *OSVR_DeviceTokenObject::asAsync() { return nullptr; }
-
-SyncDeviceToken *OSVR_DeviceTokenObject::asSync() { return nullptr; }
 
 void OSVR_DeviceTokenObject::m_stopThreads() {}
 

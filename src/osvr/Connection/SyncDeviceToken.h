@@ -34,17 +34,15 @@ namespace connection {
         SyncDeviceToken(std::string const &name);
         virtual ~SyncDeviceToken();
 
-        void setUpdateCallback(SyncDeviceUpdateCallback const &cb);
-
       protected:
+        virtual void m_setUpdateCallback(DeviceUpdateCallback const &cb);
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
         virtual GuardPtr m_getSendGuard();
         virtual void m_connectionInteract();
 
       private:
-        virtual SyncDeviceToken *asSync();
-        SyncDeviceUpdateCallback m_cb;
+        DeviceUpdateCallback m_cb;
     };
 } // namespace connection
 } // namespace osvr

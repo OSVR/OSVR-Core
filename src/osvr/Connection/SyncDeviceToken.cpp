@@ -37,9 +37,8 @@ namespace connection {
 
     SyncDeviceToken::~SyncDeviceToken() {}
 
-    void
-    SyncDeviceToken::setUpdateCallback(SyncDeviceUpdateCallback const &cb) {
-        OSVR_DEV_VERBOSE("In SyncDeviceToken::setUpdateCallback");
+    void SyncDeviceToken::m_setUpdateCallback(DeviceUpdateCallback const &cb) {
+        OSVR_DEV_VERBOSE("In SyncDeviceToken::m_setUpdateCallback");
         m_cb = cb;
     }
 
@@ -58,8 +57,6 @@ namespace connection {
             m_cb();
         }
     }
-
-    SyncDeviceToken *SyncDeviceToken::asSync() { return this; }
 
 } // namespace connection
 } // namespace osvr

@@ -37,6 +37,9 @@ namespace connection {
         virtual ~VirtualDeviceToken();
 
       protected:
+        /// @brief Should never be called.
+        virtual void
+        m_setUpdateCallback(osvr::connection::DeviceUpdateCallback const &);
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
         virtual GuardPtr m_getSendGuard();

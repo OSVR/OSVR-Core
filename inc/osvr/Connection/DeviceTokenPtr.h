@@ -32,8 +32,6 @@ namespace osvr {
 namespace connection {
     typedef OSVR_DeviceTokenObject DeviceToken;
     typedef unique_ptr<DeviceToken> DeviceTokenPtr;
-    class AsyncDeviceToken;
-    class SyncDeviceToken;
 } // namespace connection
 } // namespace osvr
 

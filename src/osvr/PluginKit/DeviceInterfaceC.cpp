@@ -171,15 +171,7 @@ osvrDeviceSyncRegisterUpdateCallback(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     OSVR_DEV_VERBOSE("In osvrDeviceSyncRegisterUpdateCallback");
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(
         "osvrDeviceSyncRegisterUpdateCallback device token", dev);
-    try {
-        dev->setSyncUpdateCallback(std::bind(updateCallback, userData));
-    } catch (std::logic_error &e) {
-        OSVR_DEV_VERBOSE("Caught a logic error setting update callback - "
-                         "likely that this isn't a synchronous device token. "
-                         "Details: "
-                         << e.what());
-        return OSVR_RETURN_FAILURE;
-    }
+    dev->setUpdateCallback(std::bind(updateCallback, userData));
     return OSVR_RETURN_SUCCESS;
 }
 
@@ -199,14 +191,6 @@ osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     OSVR_DEV_VERBOSE("In osvrDeviceAsyncStartWaitLoop");
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncStartWaitLoop device token",
                                     dev);
-    try {
-        dev->setAsyncWaitCallback(std::bind(waitCallback, userData));
-    } catch (std::logic_error &e) {
-        OSVR_DEV_VERBOSE("Caught a logic error setting update callback - "
-                         "likely that this isn't an asynchronous device token. "
-                         "Details: "
-                         << e.what());
-        return OSVR_RETURN_FAILURE;
-    }
+    dev->setUpdateCallback(std::bind(waitCallback, userData));
     return OSVR_RETURN_SUCCESS;
 }

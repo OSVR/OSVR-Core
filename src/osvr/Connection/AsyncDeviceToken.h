@@ -25,6 +25,7 @@
 
 // Library/third-party includes
 #include <boost/thread.hpp>
+#include <boost/optional.hpp>
 #include <util/RunLoopManagerBoost.h>
 
 // Standard includes
@@ -40,11 +41,11 @@ namespace connection {
         void signalShutdown();
         void signalAndWaitForShutdown();
 
-        /// @brief Runs the given "wait callback" to service the device.
-        void setWaitCallback(AsyncDeviceWaitCallback const &cb);
-
       private:
-        virtual AsyncDeviceToken *asAsync();
+        /// @brief Registers the given "wait callback" to service the device.
+        /// The thread will be launched as soon as the first connection
+        /// interaction occurs.
+        virtual void m_setUpdateCallback(DeviceUpdateCallback const &cb);
         /// Called from the async thread - only permitted to actually
         /// send data when m_connectionInteract says so.
         virtual void m_sendData(util::time::TimeValue const &timestamp,
@@ -57,7 +58,10 @@ namespace connection {
         virtual void m_connectionInteract();
 
         virtual void m_stopThreads();
-        boost::thread m_callbackThread;
+
+        void m_ensureThreadStarted();
+        DeviceUpdateCallback m_cb;
+        boost::optional<boost::thread> m_callbackThread;
 
         AsyncAccessControl m_accessControl;
 
