@@ -54,8 +54,8 @@ typedef struct OSVR_DeviceTokenObject *OSVR_DeviceToken;
 
 /** @brief Opaque type of a registered message type within the core library.
 
-Common device types will have pre-defined message types, while more specific
-or unique devices may need to define their own.
+    Common device types will have pre-defined message types, while more specific
+    or unique devices may need to define their own.
 */
 typedef struct OSVR_MessageTypeObject *OSVR_MessageType;
 
@@ -81,12 +81,12 @@ osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx)
 
 /** @brief Register (or recall) a message type by name.
 
-@param ctx The plugin registration context received by your entry point
-function.
-@param name A unique name for the message type. The library makes a copy of this
-string.
-@param [out] msgtype Will contain the message type identifier you've
-registered.
+    @param ctx The plugin registration context received by your entry point
+    function.
+    @param name A unique name for the message type. The library makes a copy of
+   this string.
+    @param [out] msgtype Will contain the message type identifier you've
+    registered.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
 osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
@@ -98,7 +98,6 @@ osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
 
     @note The same function is used for synchronous and asynchronous devices:
    the device token is sufficient to determine whether locking is needed.
-
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
 osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
@@ -111,11 +110,12 @@ osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     @note The same function is used for synchronous and asynchronous devices:
     the device token is sufficient to determine whether locking is needed.
 */
-OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceSendTimestampedData(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
-    OSVR_IN_PTR const struct OSVR_TimeValue *timestamp,
-    OSVR_IN_PTR OSVR_MessageType msg, OSVR_IN_READS(len) const char *bytestream,
-    OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2, 3));
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                              OSVR_IN_PTR const OSVR_TimeValue *timestamp,
+                              OSVR_IN_PTR OSVR_MessageType msg,
+                              OSVR_IN_READS(len) const char *bytestream,
+                              OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2, 3));
 
 /** @brief Submit a JSON self-descriptor string for the device.
 

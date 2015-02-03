@@ -53,12 +53,10 @@ OSVR_ReturnCode osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                              OSVR_IN_PTR struct OSVR_TimeValue *timestamp,
-                              OSVR_IN_PTR OSVR_MessageType msg,
-                              OSVR_IN_READS(len) const char *bytestream,
-                              OSVR_IN size_t len) {
+OSVR_ReturnCode osvrDeviceSendTimestampedData(
+    OSVR_INOUT_PTR OSVR_DeviceToken dev, OSVR_IN_PTR OSVR_TimeValue *timestamp,
+    OSVR_IN_PTR OSVR_MessageType msg, OSVR_IN_READS(len) const char *bytestream,
+    OSVR_IN size_t len) {
     OSVR_DEV_VERBOSE(
         "In osvrDeviceSendData, trying to send a timestamped message of length "
         << len);
