@@ -47,7 +47,7 @@ osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
                                          OSVR_IN_PTR OSVR_AnalogDeviceInterface
                                              iface,
                                          OSVR_IN OSVR_AnalogState val,
@@ -58,7 +58,7 @@ OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_AnalogDeviceInterface iface, OSVR_IN OSVR_AnalogState val,
     OSVR_IN OSVR_ChannelCount chan,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
@@ -91,7 +91,7 @@ OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
     OSVR_IN_PTR OSVR_AnalogState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {

@@ -85,7 +85,7 @@ OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
 /** @brief Report the value of multiple channels
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_IN_PTR OSVR_DeviceToken dev,
                                           OSVR_IN_PTR OSVR_AnalogDeviceInterface
                                               iface,
                                           OSVR_IN_PTR OSVR_AnalogState val[],
@@ -96,7 +96,7 @@ OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
     OSVR_IN_PTR OSVR_AnalogState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp)

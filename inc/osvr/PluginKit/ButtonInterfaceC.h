@@ -58,7 +58,7 @@ typedef struct OSVR_ButtonDeviceInterfaceObject *OSVR_ButtonDeviceInterface;
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
-osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+osvrDeviceButtonConfigure(OSVR_IN_PTR OSVR_DeviceInitOptions opts,
                           OSVR_OUT_PTR OSVR_ButtonDeviceInterface *iface,
                           OSVR_IN OSVR_ChannelCount numChan)
     OSVR_FUNC_NONNULL((1, 2));
@@ -77,7 +77,7 @@ OSVR_ReturnCode osvrDeviceButtonSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceButtonSetValueTimestamped(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_ButtonDeviceInterface iface, OSVR_IN OSVR_ButtonState val,
     OSVR_IN OSVR_ChannelCount chan, OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 5));
@@ -96,7 +96,7 @@ OSVR_ReturnCode osvrDeviceButtonSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceButtonSetValuesTimestamped(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
     OSVR_IN_PTR OSVR_ButtonState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp)
