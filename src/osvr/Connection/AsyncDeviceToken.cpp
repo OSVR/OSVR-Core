@@ -54,7 +54,7 @@ namespace connection {
         OSVR_DEV_VERBOSE("AsyncDeviceToken\t"
                          "In signalAndWaitForShutdown");
         signalShutdown();
-        if (m_callbackThread.is_initialized()) {
+        if (m_callbackThread) {
             m_run.signalAndWaitForShutdown();
             m_callbackThread->join();
         }
@@ -88,8 +88,8 @@ namespace connection {
         m_cb = cb;
     }
     void AsyncDeviceToken::m_ensureThreadStarted() {
-        if ((!m_callbackThread.is_initialized()) && m_cb) {
-            m_callbackThread = boost::thread(WaitCallbackLoop(m_run, m_cb));
+        if ((!m_callbackThread) && m_cb) {
+            m_callbackThread.reset(new boost::thread(WaitCallbackLoop(m_run, m_cb)));
             m_run.signalAndWaitForStart();
         }
     }

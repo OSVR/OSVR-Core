@@ -25,7 +25,6 @@
 
 // Library/third-party includes
 #include <boost/thread.hpp>
-#include <boost/optional.hpp>
 #include <util/RunLoopManagerBoost.h>
 
 // Standard includes
@@ -61,7 +60,7 @@ namespace connection {
 
         void m_ensureThreadStarted();
         DeviceUpdateCallback m_cb;
-        boost::optional<boost::thread> m_callbackThread;
+        unique_ptr<boost::thread> m_callbackThread;
 
         AsyncAccessControl m_accessControl;
 
