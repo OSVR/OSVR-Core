@@ -76,7 +76,7 @@ typedef struct OSVR_DeviceInitObject *OSVR_DeviceInitOptions;
     function.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_DeviceInitOptions
-osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx)
+osvrDeviceCreateInitOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx)
     OSVR_FUNC_NONNULL((1));
 
 /** @brief Register (or recall) a message type by name.
@@ -89,7 +89,7 @@ osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx)
     registered.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+osvrDeviceRegisterMessageType(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                               OSVR_IN_STRZ const char *name,
                               OSVR_OUT_PTR OSVR_MessageType *msgtype)
     OSVR_FUNC_NONNULL((1, 2, 3));
@@ -100,7 +100,7 @@ osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
    the device token is sufficient to determine whether locking is needed.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+osvrDeviceSendData(OSVR_IN_PTR OSVR_DeviceToken dev,
                    OSVR_IN_PTR OSVR_MessageType msg,
                    OSVR_IN_READS(len) const char *bytestream,
                    OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2));
@@ -111,7 +111,7 @@ osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     the device token is sufficient to determine whether locking is needed.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+osvrDeviceSendTimestampedData(OSVR_IN_PTR OSVR_DeviceToken dev,
                               OSVR_IN_PTR const OSVR_TimeValue *timestamp,
                               OSVR_IN_PTR OSVR_MessageType msg,
                               OSVR_IN_READS(len) const char *bytestream,
@@ -122,7 +122,7 @@ osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     Length does not include null terminator.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+osvrDeviceSendJsonDescriptor(OSVR_IN_PTR OSVR_DeviceToken dev,
                              OSVR_IN_READS(len) const char *json,
                              OSVR_IN size_t len) OSVR_FUNC_NONNULL((1, 2));
 
@@ -143,7 +143,7 @@ osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     support multiple instances without it.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceRegisterUpdateCallback(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN OSVR_DeviceUpdateCallback updateCallback,
     OSVR_IN_OPT void *userData OSVR_CPP_ONLY(= NULL)) OSVR_FUNC_NONNULL((1));
 
@@ -174,7 +174,7 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrDeviceRegisterUpdateCallback(
    synchronous device.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+osvrDeviceSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                    OSVR_IN_STRZ const char *name,
                    OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3));
@@ -187,9 +187,9 @@ osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
    associated with it, to the returned device token.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+osvrDeviceSyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                               OSVR_IN_STRZ const char *name,
-                              OSVR_INOUT_PTR OSVR_DeviceInitOptions options,
+                              OSVR_IN_PTR OSVR_DeviceInitOptions options,
                               OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3, 4));
 
@@ -219,7 +219,7 @@ osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
    asynchronous device.
 */
 OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+osvrDeviceAsyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                     OSVR_IN_STRZ const char *name,
                     OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3));

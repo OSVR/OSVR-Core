@@ -35,13 +35,13 @@
 #include <functional>
 
 OSVR_DeviceInitOptions
-osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx) {
+osvrDeviceCreateInitOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT_CONSTRUCTOR("osvrDeviceCreateInitOptions",
                                                 ctx);
     return new OSVR_DeviceInitObject(ctx);
 }
 
-OSVR_ReturnCode osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+OSVR_ReturnCode osvrDeviceSendData(OSVR_IN_PTR OSVR_DeviceToken dev,
                                    OSVR_IN_PTR OSVR_MessageType msg,
                                    OSVR_IN_READS(len) const char *bytestream,
                                    OSVR_IN size_t len) {
@@ -54,7 +54,7 @@ OSVR_ReturnCode osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode osvrDeviceSendTimestampedData(
-    OSVR_INOUT_PTR OSVR_DeviceToken dev, OSVR_IN_PTR OSVR_TimeValue *timestamp,
+    OSVR_IN_PTR OSVR_DeviceToken dev, OSVR_IN_PTR OSVR_TimeValue *timestamp,
     OSVR_IN_PTR OSVR_MessageType msg, OSVR_IN_READS(len) const char *bytestream,
     OSVR_IN size_t len) {
     OSVR_DEV_VERBOSE(
@@ -66,10 +66,10 @@ OSVR_ReturnCode osvrDeviceSendTimestampedData(
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                             OSVR_IN_READS(len) const char *json,
-                             OSVR_IN size_t len) {
+OSVR_ReturnCode osvrDeviceSendJsonDescriptor(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                             OSVR_IN_READS(len)
+                                                 const char *json,
+                                             OSVR_IN size_t len) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor descriptor",
                                     json);
@@ -80,7 +80,7 @@ osvrDeviceSendJsonDescriptor(OSVR_INOUT_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode
-osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+osvrDeviceRegisterMessageType(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                               OSVR_IN_STRZ const char *name,
                               OSVR_OUT_PTR OSVR_MessageType *msgtype) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceRegisterMessageType", ctx);
@@ -145,7 +145,7 @@ osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
     return osvrDeviceGenericInit(options, device, f);
 }
 
-OSVR_ReturnCode osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+OSVR_ReturnCode osvrDeviceSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                                    OSVR_IN_STRZ const char *name,
                                    OSVR_OUT_PTR OSVR_DeviceToken *device) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSyncInit", ctx);
@@ -154,9 +154,9 @@ OSVR_ReturnCode osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                                  OSVR_DeviceTokenObject::createSyncDevice);
 }
 OSVR_ReturnCode
-osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext,
+osvrDeviceSyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
                               OSVR_IN_STRZ const char *name,
-                              OSVR_INOUT_PTR OSVR_DeviceInitOptions options,
+                              OSVR_IN_PTR OSVR_DeviceInitOptions options,
                               OSVR_OUT_PTR OSVR_DeviceToken *device) {
     options->setName(name);
     return osvrDeviceGenericInit(options, device,
@@ -164,7 +164,7 @@ osvrDeviceSyncInitWithOptions(OSVR_INOUT_PTR OSVR_PluginRegContext,
 }
 
 OSVR_ReturnCode
-osvrDeviceRegisterUpdateCallback(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+osvrDeviceRegisterUpdateCallback(OSVR_IN_PTR OSVR_DeviceToken dev,
                                  OSVR_IN OSVR_DeviceUpdateCallback
                                      updateCallback,
                                  OSVR_IN_OPT void *userData) {
@@ -175,7 +175,7 @@ osvrDeviceRegisterUpdateCallback(OSVR_INOUT_PTR OSVR_DeviceToken dev,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+OSVR_ReturnCode osvrDeviceAsyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                                     OSVR_IN_STRZ const char *name,
                                     OSVR_OUT_PTR OSVR_DeviceToken *device) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncInit", ctx);
