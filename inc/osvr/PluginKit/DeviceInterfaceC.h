@@ -224,6 +224,20 @@ osvrDeviceAsyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                     OSVR_OUT_PTR OSVR_DeviceToken *device)
     OSVR_FUNC_NONNULL((1, 2, 3));
 
+/** @copydoc osvrDeviceAsyncInit
+    @brief Initialize an asynchronous device token with the options specified.
+    @param options The DeviceInitOptions for your device.
+
+    This transfers ownership of the DeviceInitOptions, and all created objects
+    associated with it, to the returned device token.
+*/
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+osvrDeviceAsyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx,
+                               OSVR_IN_STRZ const char *name,
+                               OSVR_IN_PTR OSVR_DeviceInitOptions options,
+                               OSVR_OUT_PTR OSVR_DeviceToken *device)
+    OSVR_FUNC_NONNULL((1, 2, 3, 4));
+
 /** @} */
 
 /** @} */ /* end of group */

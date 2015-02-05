@@ -137,12 +137,20 @@ osvrDeviceGenericInit(OSVR_DeviceInitOptions options, OSVR_DeviceToken *device,
 
 template <typename FactoryFunction>
 inline static OSVR_ReturnCode
-osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
+osvrDeviceGenericInit(OSVR_DeviceInitOptions options, const char *name,
                       OSVR_DeviceToken *device, FactoryFunction f) {
-    OSVR_DeviceInitOptions options = osvrDeviceCreateInitOptions(ctx);
     options->setName(name);
 
     return osvrDeviceGenericInit(options, device, f);
+}
+
+template <typename FactoryFunction>
+inline static OSVR_ReturnCode
+osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
+                      OSVR_DeviceToken *device, FactoryFunction f) {
+    OSVR_DeviceInitOptions options = osvrDeviceCreateInitOptions(ctx);
+
+    return osvrDeviceGenericInit(options, name, device, f);
 }
 
 OSVR_ReturnCode osvrDeviceSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
@@ -158,8 +166,8 @@ osvrDeviceSyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
                               OSVR_IN_STRZ const char *name,
                               OSVR_IN_PTR OSVR_DeviceInitOptions options,
                               OSVR_OUT_PTR OSVR_DeviceToken *device) {
-    options->setName(name);
-    return osvrDeviceGenericInit(options, device,
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSyncInitWithOptions", options);
+    return osvrDeviceGenericInit(options, name, device,
                                  OSVR_DeviceTokenObject::createSyncDevice);
 }
 
@@ -181,5 +189,15 @@ OSVR_ReturnCode osvrDeviceAsyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncInit", ctx);
     OSVR_DEV_VERBOSE("In osvrDeviceAsyncInit for a device named " << name);
     return osvrDeviceGenericInit(ctx, name, device,
+                                 OSVR_DeviceTokenObject::createAsyncDevice);
+}
+
+OSVR_ReturnCode
+osvrDeviceAsyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
+                               OSVR_IN_STRZ const char *name,
+                               OSVR_IN_PTR OSVR_DeviceInitOptions options,
+                               OSVR_OUT_PTR OSVR_DeviceToken *device) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncInitWithOptions", options);
+    return osvrDeviceGenericInit(options, name, device,
                                  OSVR_DeviceTokenObject::createAsyncDevice);
 }
