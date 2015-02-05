@@ -89,7 +89,8 @@ namespace connection {
     }
     void AsyncDeviceToken::m_ensureThreadStarted() {
         if ((!m_callbackThread) && m_cb) {
-            m_callbackThread.reset(new boost::thread(WaitCallbackLoop(m_run, m_cb)));
+            m_callbackThread.reset(
+                new boost::thread(WaitCallbackLoop(m_run, m_cb)));
             m_run.signalAndWaitForStart();
         }
     }
