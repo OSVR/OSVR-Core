@@ -17,6 +17,7 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
+#include <osvr/PluginKit/DeviceInterface.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
 // Generated JSON header file
@@ -41,24 +42,17 @@ class AnalogSyncDevice {
         osvrDeviceAnalogConfigure(opts, &m_analog, 1);
 
         /// Create the sync device token with the options
-        osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
+        m_dev.initSync(ctx, "MySyncDevice", opts);
 
         /// Send JSON descriptor
-        osvrDeviceSendJsonDescriptor(m_dev, com_osvr_example_AnalogSync_json,
-                                     sizeof(com_osvr_example_AnalogSync_json));
+        m_dev.sendJsonDescriptor(com_osvr_example_AnalogSync_json,
+                                 sizeof(com_osvr_example_AnalogSync_json));
 
         /// Register update callback
-        osvrDeviceRegisterUpdateCallback(m_dev, &AnalogSyncDevice::update,
-                                         this);
+        m_dev.registerUpdateCallback(this);
     }
 
-    /// Trampoline: C-compatible callback bouncing into a member function.
-    static OSVR_ReturnCode update(void *userData) {
-        return static_cast<AnalogSyncDevice *>(userData)->m_update();
-    }
-
-  private:
-    OSVR_ReturnCode m_update() {
+    OSVR_ReturnCode update() {
         /// Make up some dummy data that changes to report.
         m_myVal = (m_myVal + 0.1);
         if (m_myVal > 10.0) {
@@ -69,7 +63,9 @@ class AnalogSyncDevice {
         osvrDeviceAnalogSetValue(m_dev, m_analog, m_myVal, 0);
         return OSVR_RETURN_SUCCESS;
     }
-    OSVR_DeviceToken m_dev;
+
+  private:
+    osvr::pluginkit::DeviceToken m_dev;
     OSVR_AnalogDeviceInterface m_analog;
     double m_myVal;
 };
