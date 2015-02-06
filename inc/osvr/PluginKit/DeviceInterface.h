@@ -160,6 +160,10 @@ namespace pluginkit {
         /// devices: the device token is sufficient to determine whether locking
         /// is needed.
         ///
+        /// @param msg The registered message type.
+        /// @param bytestream A string of bytes to transmit.
+        /// @param len The length of the string of bytes.
+        ///
         /// @throws std::runtime_error if error in sending.
         void sendData(OSVR_IN_PTR OSVR_MessageType msg,
                       OSVR_IN_READS(len) const char *bytestream = NULL,
@@ -170,6 +174,15 @@ namespace pluginkit {
             if (OSVR_RETURN_SUCCESS != ret) {
                 throw std::runtime_error("Could not send data!");
             }
+        }
+
+        /// @overload
+        ///
+        /// For string literals: automatically deduces the length at compile
+        /// time.
+        template <size_t N>
+        void sendData(OSVR_MessageType msg, const char(&bytestream)[N]) {
+            sendData(msg, bytestream, N);
         }
 
         /// @overload
@@ -199,6 +212,12 @@ namespace pluginkit {
         /// devices: the device token is sufficient to determine whether locking
         /// is needed.
         ///
+        /// @param timestamp The timestamp you want to associate with this
+        /// message.
+        /// @param msg The registered message type.
+        /// @param bytestream A string of bytes to transmit.
+        /// @param len The length of the string of bytes.
+        ///
         /// @throws std::runtime_error if error in sending.
         void sendData(OSVR_IN OSVR_TimeValue const &timestamp,
                       OSVR_IN_PTR OSVR_MessageType msg,
@@ -210,6 +229,17 @@ namespace pluginkit {
                 throw std::runtime_error("Could not send data!");
             }
         }
+
+        /// @overload
+        ///
+        /// For string literals: automatically deduces the length at compile
+        /// time.
+        template <size_t N>
+        void sendData(OSVR_IN OSVR_TimeValue const &timestamp,
+                      OSVR_MessageType msg, const char(&bytestream)[N]) {
+            sendData(timestamp, msg, bytestream, N);
+        }
+
         /// @overload
         void sendData(OSVR_IN OSVR_TimeValue const &timestamp,
                       OSVR_IN_PTR OSVR_MessageType msg,
@@ -232,7 +262,11 @@ namespace pluginkit {
                 sendData(timestamp, msg, bytestream.data(), bytestream.size());
             }
         }
+
         /// @brief Submit a JSON self-descriptor string for the device.
+        ///
+        /// @param json The JSON string to transmit.
+        /// @param len The length of the string.
         ///
         /// @throws std::runtime_error if error in sending.
         void sendJsonDescriptor(OSVR_IN_READS(len) const char *json,
@@ -246,6 +280,14 @@ namespace pluginkit {
         }
 
         /// @overload
+        ///
+        /// For string literals: automatically deduces the length at compile
+        /// time.
+        template <size_t N> void sendJsonDescriptor(const char(&json)[N]) {
+            sendJsonDescriptor(json, N);
+        }
+
+        /// @overload
         void sendJsonDescriptor(OSVR_IN std::string const &json) {
             if (json.empty()) {
                 throw std::runtime_error(
@@ -253,9 +295,10 @@ namespace pluginkit {
             }
             sendJsonDescriptor(json.c_str(), json.length());
         }
-        /// @brief Given a pointer to your object (like `this`)
-        /// that has a public `OSVR_ReturnCode update()` method, registers that
-        /// update method for the device.
+
+        /// @brief Given a pointer to your object that has a public
+        /// `OSVR_ReturnCode update()` method, registers that instance and
+        /// method as the update callback for the device.
         ///
         /// @throws std::runtime_error if update callback registration fails
         template <typename DeviceObjectType>
@@ -274,6 +317,8 @@ namespace pluginkit {
         }
 
       private:
+        /// @brief Verifies that the user calls some init member before using
+        /// other features of the token.
         void m_validateToken() const {
             if (!m_dev) {
                 throw std::logic_error("Attempting an operation on a device "
