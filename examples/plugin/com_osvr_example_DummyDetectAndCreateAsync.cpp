@@ -18,6 +18,7 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
+#include <osvr/PluginKit/DeviceInterface.h>
 
 // Library/third-party includes
 // - none
@@ -25,47 +26,33 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
 namespace {
 OSVR_MessageType dummyMessage;
 
 class DummyDevice {
   public:
     DummyDevice(OSVR_PluginRegContext ctx) {
-        std::cout << "Constructing dummy device" << std::endl;
-
         /// Create an asynchronous (threaded) device
-        osvrDeviceAsyncInit(
-            ctx, "MyAsyncDevice",
-            &m_dev); // Puts an object in m_dev that knows it's a
-        // threaded device so osvrDeviceSendData knows
-        // that it needs to get a connection lock first.
+        m_dev.initAsync(ctx, "MyAsyncDevice");
 
         /// Sets the update callback
-        osvrDeviceRegisterUpdateCallback(m_dev, &DummyDevice::update, this);
+        m_dev.registerUpdateCallback(this);
     }
 
-    /// Trampoline: C-compatible callback bouncing into a member function.
-    /// Future enhancements to the C++ wrappers will make this tiny function
-    /// no longer necessary
-    ///
     /// In this case, the core spawns a thread, with a loop calling this
     /// function as long as things are running. So this function waits for the
     /// next message from the device and passes it on.
-    static OSVR_ReturnCode update(void *userData) {
-        return static_cast<DummyDevice *>(userData)->m_update();
-    }
-
-    ~DummyDevice() { std::cout << "Destroying dummy device" << std::endl; }
-
-  private:
-    OSVR_ReturnCode m_update() {
+    OSVR_ReturnCode update() {
         // block on waiting for data.
         // once we have enough, send it.
         const char mydata[] = "something";
-        osvrDeviceSendData(m_dev, dummyMessage, mydata, sizeof(mydata));
+        m_dev.sendData(dummyMessage, mydata);
         return OSVR_RETURN_SUCCESS;
     }
-    OSVR_DeviceToken m_dev;
+
+  private:
+    osvr::pluginkit::DeviceToken m_dev;
 };
 
 class HardwareDetection {
@@ -79,8 +66,7 @@ class HardwareDetection {
                          "setup stuff!" << std::endl;
             m_found = true;
 
-            /// Create our device object, passing the context, and register
-            /// the function to call
+            /// Create our device object, passing the context
             osvr::pluginkit::registerObjectForDeletion(ctx,
                                                        new DummyDevice(ctx));
         }
@@ -94,7 +80,7 @@ class HardwareDetection {
 };
 } // namespace
 
-OSVR_PLUGIN(org_opengoggles_example_DummyDetectAndCreateAsync) {
+OSVR_PLUGIN(com_osvr_example_DummyDetectAndCreateAsync) {
     /// Register custom message type
     osvrDeviceRegisterMessageType(ctx, "DummyMessage", &dummyMessage);
 

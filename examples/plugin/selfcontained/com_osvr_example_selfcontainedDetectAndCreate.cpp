@@ -47,8 +47,7 @@ class AnalogSyncDevice {
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(
-            com_osvr_example_selfcontainedDetectAndCreate_json,
-            sizeof(com_osvr_example_selfcontainedDetectAndCreate_json));
+            com_osvr_example_selfcontainedDetectAndCreate_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);

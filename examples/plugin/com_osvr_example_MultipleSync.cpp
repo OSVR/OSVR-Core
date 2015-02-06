@@ -27,6 +27,9 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
+
 class MultipleSyncDevice {
   public:
     MultipleSyncDevice(OSVR_PluginRegContext ctx)
@@ -44,20 +47,13 @@ class MultipleSyncDevice {
         osvrDeviceTrackerConfigure(opts, &m_tracker);
 
         /// Create the sync device token with the options
-        osvrDeviceSyncInitWithOptions(ctx, "MySyncDevice", opts, &m_dev);
+        m_dev.initSync(ctx, "MySyncDevice", opts);
 
         /// Register update callback
-        osvrDeviceRegisterUpdateCallback(m_dev, &MultipleSyncDevice::update,
-                                         this);
+        m_dev.registerUpdateCallback(this);
     }
 
-    /// Trampoline: C-compatible callback bouncing into a member function.
-    static OSVR_ReturnCode update(void *userData) {
-        return static_cast<MultipleSyncDevice *>(userData)->m_update();
-    }
-
-  private:
-    OSVR_ReturnCode m_update() {
+    OSVR_ReturnCode update() {
         /// Make up some dummy data that changes to report.
         m_myVal = (m_myVal + 0.1);
         if (m_myVal > 10.0) {
@@ -79,19 +75,22 @@ class MultipleSyncDevice {
         osvrDeviceTrackerSendPose(m_dev, m_tracker, &pose, 0);
         return OSVR_RETURN_SUCCESS;
     }
-    OSVR_DeviceToken m_dev;
+
+  private:
+    osvr::pluginkit::DeviceToken m_dev;
     OSVR_AnalogDeviceInterface m_analog;
     OSVR_ButtonDeviceInterface m_button;
     OSVR_TrackerDeviceInterface m_tracker;
     double m_myVal;
     bool m_buttonPressed;
 };
+} // namespace
 
 OSVR_PLUGIN(com_osvr_example_MultipleSync) {
 
     /// Create device object.
-    MultipleSyncDevice *myDevice = osvr::pluginkit::registerObjectForDeletion(
-        ctx, new MultipleSyncDevice(ctx));
+    osvr::pluginkit::registerObjectForDeletion(ctx,
+                                               new MultipleSyncDevice(ctx));
 
     return OSVR_RETURN_SUCCESS;
 }

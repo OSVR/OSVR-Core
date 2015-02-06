@@ -45,8 +45,7 @@ class AnalogSyncDevice {
         m_dev.initSync(ctx, "MySyncDevice", opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(com_osvr_example_AnalogSync_json,
-                                 sizeof(com_osvr_example_AnalogSync_json));
+        m_dev.sendJsonDescriptor(com_osvr_example_AnalogSync_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
