@@ -49,8 +49,7 @@ namespace pluginkit {
     /// @throws std::runtime_error if message type registration fails
     inline OSVR_MessageType
     registerMessageType(OSVR_IN_PTR OSVR_PluginRegContext ctx,
-                        OSVR_IN_STRZ const char *name)
-        OSVR_FUNC_NONNULL((1, 2)) {
+                        OSVR_IN_STRZ const char *name) {
         OSVR_MessageType msg;
         OSVR_ReturnCode ret = osvrDeviceRegisterMessageType(ctx, name, &msg);
         if (OSVR_RETURN_SUCCESS != ret) {
