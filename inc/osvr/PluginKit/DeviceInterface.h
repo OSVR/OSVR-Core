@@ -260,6 +260,10 @@ namespace pluginkit {
         /// @throws std::runtime_error if update callback registration fails
         template <typename DeviceObjectType>
         void registerUpdateCallback(OSVR_IN_PTR DeviceObjectType *object) {
+            if (!object) {
+                throw std::logic_error(
+                    "Cannot register update callback for a null object!");
+            }
             m_validateToken();
             OSVR_ReturnCode ret = osvrDeviceRegisterUpdateCallback(
                 m_dev, &detail::UpdateTrampoline<DeviceObjectType>::update,
