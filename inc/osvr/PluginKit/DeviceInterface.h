@@ -163,7 +163,7 @@ namespace pluginkit {
         /// @throws std::runtime_error if error in sending.
         void sendData(OSVR_IN_PTR OSVR_MessageType msg,
                       OSVR_IN_READS(len) const char *bytestream = NULL,
-                      OSVR_IN size_t len = 0) OSVR_FUNC_NONNULL((1)) {
+                      OSVR_IN size_t len = 0) {
             m_validateToken();
             OSVR_ReturnCode ret =
                 osvrDeviceSendData(m_dev, msg, bytestream, len);
@@ -174,8 +174,7 @@ namespace pluginkit {
 
         /// @overload
         void sendData(OSVR_IN_PTR OSVR_MessageType msg,
-                      OSVR_IN std::string const &bytestream)
-            OSVR_FUNC_NONNULL((1)) {
+                      OSVR_IN std::string const &bytestream) {
             if (bytestream.empty()) {
                 sendData(msg);
             } else {
@@ -185,8 +184,7 @@ namespace pluginkit {
 
         /// @overload
         void sendData(OSVR_IN_PTR OSVR_MessageType msg,
-                      OSVR_IN std::vector<char> const &bytestream)
-            OSVR_FUNC_NONNULL((1)) {
+                      OSVR_IN std::vector<char> const &bytestream) {
             if (bytestream.empty()) {
                 sendData(msg);
             } else {
@@ -205,7 +203,7 @@ namespace pluginkit {
         void sendData(OSVR_IN OSVR_TimeValue const &timestamp,
                       OSVR_IN_PTR OSVR_MessageType msg,
                       OSVR_IN_READS(len) const char *bytestream = NULL,
-                      OSVR_IN size_t len = 0) OSVR_FUNC_NONNULL((2)) {
+                      OSVR_IN size_t len = 0) {
             OSVR_ReturnCode ret = osvrDeviceSendTimestampedData(
                 m_dev, &timestamp, msg, bytestream, len);
             if (OSVR_RETURN_SUCCESS != ret) {
@@ -215,8 +213,7 @@ namespace pluginkit {
         /// @overload
         void sendData(OSVR_IN OSVR_TimeValue const &timestamp,
                       OSVR_IN_PTR OSVR_MessageType msg,
-                      OSVR_IN std::string const &bytestream)
-            OSVR_FUNC_NONNULL((2)) {
+                      OSVR_IN std::string const &bytestream) {
             if (bytestream.empty()) {
                 sendData(timestamp, msg);
             } else {
@@ -228,8 +225,7 @@ namespace pluginkit {
         /// @overload
         void sendData(OSVR_IN OSVR_TimeValue const &timestamp,
                       OSVR_IN_PTR OSVR_MessageType msg,
-                      OSVR_IN std::vector<char> const &bytestream)
-            OSVR_FUNC_NONNULL((2)) {
+                      OSVR_IN std::vector<char> const &bytestream) {
             if (bytestream.empty()) {
                 sendData(timestamp, msg);
             } else {
@@ -240,7 +236,7 @@ namespace pluginkit {
         ///
         /// @throws std::runtime_error if error in sending.
         void sendJsonDescriptor(OSVR_IN_READS(len) const char *json,
-                                OSVR_IN size_t len) OSVR_FUNC_NONNULL((1)) {
+                                OSVR_IN size_t len) {
             m_validateToken();
             OSVR_ReturnCode ret =
                 osvrDeviceSendJsonDescriptor(m_dev, json, len);
@@ -250,7 +246,7 @@ namespace pluginkit {
         }
 
         /// @overload
-        inline void sendJsonDescriptor(OSVR_IN std::string const &json) {
+        void sendJsonDescriptor(OSVR_IN std::string const &json) {
             if (json.empty()) {
                 throw std::runtime_error(
                     "Cannot send an empty JSON descriptor!");
@@ -263,8 +259,7 @@ namespace pluginkit {
         ///
         /// @throws std::runtime_error if update callback registration fails
         template <typename DeviceObjectType>
-        inline void registerUpdateCallback(OSVR_IN_PTR DeviceObjectType *object)
-            OSVR_FUNC_NONNULL((1)) {
+        void registerUpdateCallback(OSVR_IN_PTR DeviceObjectType *object) {
             m_validateToken();
             OSVR_ReturnCode ret = osvrDeviceRegisterUpdateCallback(
                 m_dev, &detail::UpdateTrampoline<DeviceObjectType>::update,
