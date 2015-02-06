@@ -18,7 +18,6 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
-#include <osvr/PluginKit/DeviceInterface.h>
 
 // Library/third-party includes
 // - none

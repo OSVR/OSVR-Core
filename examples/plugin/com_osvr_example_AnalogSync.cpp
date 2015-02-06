@@ -17,7 +17,6 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
-#include <osvr/PluginKit/DeviceInterface.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
 // Generated JSON header file
