@@ -88,9 +88,20 @@ set_property(GLOBAL PROPERTY
 ###
 # Dependencies
 ###
+
+if(WIN32)
+    # Hints for Windows, given the Chocolatey packages.
+    if(NOT "$ENV{ChocolateyInstall}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{ChocolateyInstall}/lib" CHOCO_LIB)
+        list(APPEND CMAKE_PREFIX_PATH "${CHOCO_LIB}/OpenCV/tools/opencv/build" "${CHOCO_LIB}/OpenCV.2.4.10.20150209/tools/opencv/build")
+    endif()
+    list(APPEND CMAKE_PREFIX_PATH "c:/OpenCV249")
+endif()
+
 find_package(libfunctionality REQUIRED)
 find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
 find_package(Threads REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_library(boost_thread INTERFACE)
 target_link_libraries(boost_thread
