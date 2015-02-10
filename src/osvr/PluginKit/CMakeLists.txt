@@ -41,7 +41,8 @@ target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     osvrPluginHost
     osvrConnection
-    osvrUtilCpp)
+    osvrUtilCpp
+    boost_thread)
 
 ###
 # C++ (header-only) interface

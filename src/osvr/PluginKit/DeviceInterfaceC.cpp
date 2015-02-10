@@ -29,7 +29,7 @@
 #include "HandleNullContext.h"
 
 // Library/third-party includes
-// - none
+#include <boost/thread.hpp>
 
 // Standard includes
 #include <functional>
@@ -200,4 +200,9 @@ osvrDeviceAsyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncInitWithOptions", options);
     return osvrDeviceGenericInit(options, name, device,
                                  OSVR_DeviceTokenObject::createAsyncDevice);
+}
+
+OSVR_ReturnCode osvrDeviceMicrosleep(OSVR_IN uint64_t microseconds) {
+    boost::this_thread::sleep(boost::posix_time::microseconds(microseconds));
+    return OSVR_RETURN_SUCCESS;
 }
