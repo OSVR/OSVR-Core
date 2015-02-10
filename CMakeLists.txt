@@ -85,6 +85,9 @@ endif()
 set_property(GLOBAL PROPERTY
     USE_FOLDERS ${BUILD_WITH_PROJECT_FOLDERS})
 
+# Handle CMake config files from projects that don't provide the whole list of builds
+set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release)
+set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release)
 ###
 # Dependencies
 ###
