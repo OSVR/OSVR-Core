@@ -42,7 +42,8 @@ target_link_libraries(${LIBNAME_FULL}
     osvrPluginHost
     osvrConnection
     osvrUtilCpp
-    boost_thread)
+    boost_thread
+    opencv_core)
 
 ###
 # C++ (header-only) interface
@@ -54,3 +55,8 @@ osvr_add_cpp_interface_library()
 target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
+###
+# Grab DLLs please.
+###
+osvr_copy_dep(${LIBNAME_FULL} opencv_core)
+osvr_copy_dep(${LIBNAME_FULL} opencv_highgui)

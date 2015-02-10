@@ -85,3 +85,18 @@ endmacro()
 macro(osvr_add_cpp_interface_library)
     osvr_add_interface_library(Cpp)
 endmacro()
+
+## Copy and install shared libraries from imported targets as required
+function(osvr_copy_dep _target _dep)
+    if(WIN32)
+        add_custom_command(TARGET ${_target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${_dep}> $<TARGET_FILE_DIR:${_target}>
+            COMMENT "Copying required DLL for dependency ${_dep}"
+            VERBATIM)
+        install(FILES $<TARGET_FILE:${_dep}>
+            DESTINATION ${OSVR_SHARED_LIBRARY_DIR} COMPONENT Runtime)
+    else()
+        install(FILES $<TARGET_FILE:${_dep}>
+            DESTINATION ${OSVR_SHARED_LIBRARY_DIR} COMPONENT Runtime)
+    endif()
+endfunction()
