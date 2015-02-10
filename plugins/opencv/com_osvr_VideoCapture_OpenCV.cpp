@@ -20,6 +20,8 @@
 
 // Library/third-party includes
 #include <opencv2/opencv.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Standard includes
 #include <iostream>
@@ -28,44 +30,44 @@ namespace {
 
 OSVR_MessageType cameraMessage;
 
-class CameraDevice {
+class CameraDevice : boost::noncopyable {
   public:
-    CameraDevice(OSVR_PluginRegContext ctx) {
+    CameraDevice(OSVR_PluginRegContext ctx, int cameraNum = 0, int channel = 0)
+        : m_camera(cameraNum), m_channel(channel) {
         /// Create an asynchronous (threaded) device
-        osvrDeviceAsyncInit(ctx, "Camera", &m_dev);
+        std::ostringstream os;
+        os << "Camera" << cameraNum << "_" << m_channel;
+        m_dev.initAsync(ctx, os.str());
         // Puts an object in m_dev that knows it's a
         // threaded device so osvrDeviceSendData knows
         // that it needs to get a connection lock first.
 
         /// Sets the update callback
-        osvrDeviceRegisterUpdateCallback(m_dev, &CameraDevice::update, this);
+        m_dev.registerUpdateCallback(this);
     }
 
-    /// Trampoline: C-compatible callback bouncing into a member function.
-    /// Future enhancements to the C++ wrappers will make this tiny function
-    /// no longer necessary
-    ///
-    /// In this case, the core spawns a thread, with a loop calling this
-    /// function as long as things are running. So this function waits for the
-    /// next message from the device and passes it on.
-    static OSVR_ReturnCode update(void *userData) {
-        return static_cast<CameraDevice *>(userData)->m_update();
-    }
-
-    ~CameraDevice() { }
-
-  private:
-    OSVR_ReturnCode m_update() {
-        cv::VideoCapture camera(-1);
-        if (!camera.isOpened()) {
+    OSVR_ReturnCode update() {
+        if (!m_camera.isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
             // camera will be plugged back in later.
             return OSVR_RETURN_SUCCESS;
         }
 
-        // Read a frame from the camera
-        cv::Mat frame;
-        camera >> frame;
+        // Trigger a camera grab.
+        std::cout << "Grab" << std::endl;
+        bool grabbed = m_camera.grab();
+        if (!grabbed) {
+            // No frame available.
+            return OSVR_RETURN_SUCCESS;
+        }
+        std::cout << "Retrieve" << std::endl;
+        bool retrieved = m_camera.retrieve(m_frame, m_channel);
+        if (!retrieved) {
+            return OSVR_RETURN_FAILURE;
+        }
+        std::cout << "Size:" << m_frame.size() << std::endl;
+        std::cout << "Channels:" << m_frame.channels() << std::endl;
+        std::cout << "Depth:" << m_frame.depth() << std::endl;
 
         // TODO Send the real frame data along
         const char mydata[] = "something";
@@ -74,7 +76,11 @@ class CameraDevice {
         return OSVR_RETURN_SUCCESS;
     }
 
-    OSVR_DeviceToken m_dev;
+  private:
+    osvr::pluginkit::DeviceToken m_dev;
+    cv::VideoCapture m_camera;
+    int m_channel;
+    cv::Mat m_frame;
 };
 
 class CameraDetection {
@@ -82,14 +88,17 @@ class CameraDetection {
     CameraDetection() : m_found(false) {}
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
-        if (m_found)
+        if (m_found) {
             return OSVR_RETURN_SUCCESS;
+        }
 
-        // Autodetect camera
-        cv::VideoCapture cap(-1);
-        if (!cap.isOpened()) {
-            // Failed to find camera
-            return OSVR_RETURN_FAILURE;
+        {
+            // Autodetect camera
+            cv::VideoCapture cap(0);
+            if (!cap.isOpened()) {
+                // Failed to find camera
+                return OSVR_RETURN_FAILURE;
+            }
         }
 
         m_found = true;
@@ -107,7 +116,7 @@ class CameraDetection {
 
 } // end anonymous namespace
 
-OSVR_PLUGIN(com_osvr_example_MultipleSync) {
+OSVR_PLUGIN(com_osvr_VideoCapture_OpenCV) {
     osvrDeviceRegisterMessageType(ctx, "CameraMessage", &cameraMessage);
 
     osvr::pluginkit::PluginContext context(ctx);
@@ -116,4 +125,3 @@ OSVR_PLUGIN(com_osvr_example_MultipleSync) {
 
     return OSVR_RETURN_SUCCESS;
 }
-
