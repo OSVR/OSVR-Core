@@ -76,6 +76,8 @@ include(CMakeBoostHelper)
 
 include(InstallRequiredSystemLibraries)
 
+include(InternalAddPlugin)
+
 if(MSVC_IDE AND MSVC_VERSION LESS 1600)
     # VS 2012 Express and newer has folder support...
     option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE. May only work in non-Express Editions!" OFF)
@@ -132,14 +134,16 @@ include(CompilerFeatures)
 # Set up shared destination directories to avoid Windows hassle with DLL search paths.
 if(WIN32)
     set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}")
+    set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_BINDIR}")
 else()
     set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}")
+    set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_LIBDIR}")
 endif()
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_PLUGIN_DIR}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_SHARED_LIBRARY_DIR}")
 endif()
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
