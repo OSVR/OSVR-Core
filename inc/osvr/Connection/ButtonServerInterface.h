@@ -31,6 +31,10 @@
 
 namespace osvr {
 namespace connection {
+    /// @brief Interface for external access to generating button reports.
+    ///
+    /// Does not inherit from BaseServerInterface because it wraps an existing
+    /// VRPN class.
     class ButtonServerInterface {
       public:
         typedef OSVR_ButtonState value_type;

@@ -23,8 +23,10 @@
 #include <osvr/Util/PluginRegContextC.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
 #include <osvr/Util/StdInt.h>
+#include <osvr/Util/UniquePtr.h>
 #include <osvr/Connection/Export.h>
 #include <osvr/Connection/ConnectionPtr.h>
+#include <osvr/Connection/ServerInterfaceList.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -71,6 +73,11 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT void
     setTracker(osvr::connection::TrackerServerInterface **iface);
 
+    /// @brief Add a server interface pointer to our list, which will get
+    /// registered when the device is created.
+    OSVR_CONNECTION_EXPORT void
+    addServerInterface(osvr::connection::ServerInterfacePtr const &iface);
+
     /// @brief Returns a tracker interface through the pointer-pointer.
     void
     returnTrackerInterface(osvr::connection::TrackerServerInterface &iface);
@@ -88,6 +95,9 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     boost::optional<OSVR_ChannelCount> getAnalogs() const { return m_analogs; }
     boost::optional<OSVR_ChannelCount> getButtons() const { return m_buttons; }
     bool getTracker() const { return m_tracker; }
+    osvr::connection::ServerInterfaceList const &getServerInterfaces() const {
+        return m_serverInterfaces;
+    }
 
   private:
     osvr::pluginhost::PluginSpecificRegistrationContext *m_context;
@@ -100,6 +110,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     osvr::connection::ButtonServerInterface **m_buttonIface;
     bool m_tracker;
     osvr::connection::TrackerServerInterface **m_trackerIface;
+    osvr::connection::ServerInterfaceList m_serverInterfaces;
 };
 
 namespace osvr {

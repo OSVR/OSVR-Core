@@ -104,4 +104,8 @@ void OSVR_DeviceTokenObject::m_sharedInit(DeviceInitObject &init) {
     m_conn = init.getConnection();
     m_dev = m_conn->createConnectionDevice(init);
     m_dev->setDeviceToken(*this);
+    m_serverInterfaces = init.getServerInterfaces();
+    for (auto &iface : m_serverInterfaces) {
+        iface->registerMessageTypes(*this);
+    }
 }

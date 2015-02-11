@@ -31,6 +31,11 @@
 
 namespace osvr {
 namespace connection {
+
+    /// @brief Interface for external access to generating tracker reports.
+    ///
+    /// Does not inherit from BaseServerInterface because it wraps an existing
+    /// VRPN class.
     class TrackerServerInterface {
       public:
         virtual void sendReport(OSVR_PositionState const &val,

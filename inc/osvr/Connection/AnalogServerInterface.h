@@ -31,6 +31,10 @@
 
 namespace osvr {
 namespace connection {
+    /// @brief Interface for external access to generating analog reports.
+    ///
+    /// Does not inherit from BaseServerInterface because it wraps an existing
+    /// VRPN class.
     class AnalogServerInterface {
       public:
         typedef OSVR_AnalogState value_type;
