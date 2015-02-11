@@ -17,14 +17,18 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
+#include <osvr/PluginKit/ImagingInterface.h>
 
 // Library/third-party includes
-#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/lexical_cast.hpp>
 
 // Standard includes
 #include <iostream>
+#include <sstream>
 
 namespace {
 
@@ -34,10 +38,20 @@ class CameraDevice : boost::noncopyable {
   public:
     CameraDevice(OSVR_PluginRegContext ctx, int cameraNum = 0, int channel = 0)
         : m_camera(cameraNum), m_channel(channel) {
-        /// Create an asynchronous (threaded) device
+
+        /// Create the initialization options
+        OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
+
+        /// Configure an imaging interface (with the default number of sensors,
+        /// 1)
+        m_imaging = osvr::pluginkit::ImagingInterface(opts);
+
+        /// Come up with a device name
         std::ostringstream os;
         os << "Camera" << cameraNum << "_" << m_channel;
-        m_dev.initAsync(ctx, os.str());
+
+        /// Create an asynchronous (threaded) device
+        m_dev.initAsync(ctx, os.str(), opts);
         // Puts an object in m_dev that knows it's a
         // threaded device so osvrDeviceSendData knows
         // that it needs to get a connection lock first.
@@ -65,19 +79,17 @@ class CameraDevice : boost::noncopyable {
         if (!retrieved) {
             return OSVR_RETURN_FAILURE;
         }
-        std::cout << "Size:" << m_frame.size() << std::endl;
-        std::cout << "Channels:" << m_frame.channels() << std::endl;
-        std::cout << "Depth:" << m_frame.depth() << std::endl;
+        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_frame));
 
-        // TODO Send the real frame data along
-        const char mydata[] = "something";
-        osvrDeviceSendData(m_dev, cameraMessage, mydata, sizeof(mydata));
+        osvr::pluginkit::ImagingMessage(m_frame).dump(std::cout);
+        std::cout << std::endl;
 
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
+    osvr::pluginkit::ImagingInterface m_imaging;
     cv::VideoCapture m_camera;
     int m_channel;
     cv::Mat m_frame;

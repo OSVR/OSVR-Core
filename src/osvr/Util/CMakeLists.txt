@@ -39,6 +39,8 @@ set(API
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
+    "${HEADER_LOCATION}/NumberTypeManipulation.h"
+    "${HEADER_LOCATION}/OpenCVTypeDispatch.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/Pose3C.h"

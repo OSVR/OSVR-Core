@@ -6,6 +6,8 @@ set(API
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
+    "${HEADER_LOCATION}/ImagingInterface.h"
+    "${HEADER_LOCATION}/ImagingInterfaceC.h"
     "${HEADER_LOCATION}/PluginKit.h"
     "${HEADER_LOCATION}/PluginKitC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
@@ -17,6 +19,7 @@ set(SOURCE
     ButtonInterfaceC.cpp
     DeviceInterfaceC.cpp
     HandleNullContext.h
+    ImagingInterfaceC.cpp
     PluginRegistrationC.cpp
     PointerWrapper.h
     TrackerInterfaceC.cpp)
@@ -48,13 +51,29 @@ target_link_libraries(${LIBNAME_FULL}
 ###
 # C++ (header-only) interface
 ###
-# Requires some version of Boost, but not C++11.
+# Requires some version of Boost, and util for time, but not C++11.
 osvr_add_cpp_interface_library()
+target_link_libraries(${LIBNAME_INTERFACE}
+    INTERFACE
+    osvrUtil)
 # In an installed version, we search and add the dependency in the config script
 # since we don't need the same version in the same place.
+
 target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
+
+###
+# Imaging interface library
+###
+osvr_add_interface_library(Imaging)
+# In an installed version, we search and add the dependency in the config script
+# since we don't need the same version in the same place.
+target_link_libraries(${LIBNAME_INTERFACE}
+    INTERFACE
+    ${LIBNAME_FULL}Cpp
+    $<BUILD_INTERFACE:opencv_core>)
+
 ###
 # Grab DLLs please.
 ###
