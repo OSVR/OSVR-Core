@@ -1,0 +1,74 @@
+{
+  "plugins": [
+    "org_opengoggles_bundled_Multiserver"
+  ],
+  "routes": [
+    {
+      "destination": "/me/hands/left",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+          "sensor": 0
+        }
+      }
+    },
+    {
+      "destination": "/me/hands/right",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+          "sensor": 1
+        }
+      }
+    },
+    {
+      "destination": "/me/hands",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
+        }
+      }
+    },
+    {
+      "destination": "/me/head",
+      "source": {
+        "rotate": {
+          "degrees": 90,
+          "axis": "x"
+        },
+        "child": {
+          "changeBasis": {
+            "x": "x",
+            "y": "z",
+            "z": "-y"
+          },
+          "child": {
+            "rotate": {
+              "degrees": -90,
+              "axis": "z"
+            },
+            "child": {
+              "tracker": "/YEI0@localhost:3884",
+              "sensor": 1
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -34,7 +33,7 @@
 
 struct OSVR_ClientContextObject : boost::noncopyable {
   public:
-    typedef std::vector<::osvr::client::ClientInterfacePtr> InterfaceList;
+    typedef std::vector<osvr::client::ClientInterfacePtr> InterfaceList;
     /// @brief Destructor
     virtual ~OSVR_ClientContextObject();
 

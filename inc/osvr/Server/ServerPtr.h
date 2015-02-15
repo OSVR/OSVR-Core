@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -33,6 +32,8 @@ namespace server {
     class Server;
     /// @brief How one should hold a Server.
     typedef shared_ptr<Server> ServerPtr;
+    /// @brief How one might observe a Server without owning it.
+    typedef weak_ptr<Server> ServerWeakPtr;
 } // namespace server
 } // namespace osvr
 

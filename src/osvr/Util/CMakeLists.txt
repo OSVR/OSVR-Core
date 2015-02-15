@@ -26,6 +26,7 @@ set(API
     "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
+    "${HEADER_LOCATION}/ChannelCountC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
@@ -33,6 +34,8 @@ set(API
     "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
+    "${HEADER_LOCATION}/GuardInterface.h"
+    "${HEADER_LOCATION}/GuardInterfaceDummy.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
@@ -58,6 +61,7 @@ set(API
 
 set(SOURCE
     AnyMap.cpp
+    GuardInterface.cpp
     TimeValueC.cpp
     MessageKeys.cpp
     PlatformConfig.h.in

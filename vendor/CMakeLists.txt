@@ -51,13 +51,8 @@ target_include_directories(util-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/u
 
 # Interface target for the run loop manager in util headers
 add_library(util-runloopmanager INTERFACE)
-target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers" ${Boost_INCLUDE_DIRS})
-target_link_libraries(util-runloopmanager INTERFACE
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_CHRONO_LIBRARY}
-    ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers")
+target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 
 # Interface target for Eigen 3.2.2
 add_library(eigen-headers INTERFACE)

@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -74,28 +73,36 @@ namespace connection {
         return m_registerMessageType(messageId);
     }
 
-    /// Wraps the derived implementation for future expandability.
     ConnectionDevicePtr
-    Connection::registerDevice(std::string const &deviceName) {
-        ConnectionDevicePtr dev = m_registerDevice(deviceName);
+    Connection::createConnectionDevice(std::string const &deviceName) {
+        DeviceInitObject init(shared_from_this());
+        init.setName(deviceName);
+        return createConnectionDevice(init);
+    }
+
+    ConnectionDevicePtr
+    Connection::createConnectionDevice(DeviceInitObject &init) {
+        ConnectionDevicePtr dev = m_createConnectionDevice(init);
         if (dev) {
             addDevice(dev);
         }
         return dev;
     }
 
-    ConnectionDevicePtr Connection::registerAdvancedDevice(
-        std::string const &deviceName,
-        OSVR_SyncDeviceUpdateCallback updateFunction, void *userdata) {
+    ConnectionDevicePtr
+    Connection::registerAdvancedDevice(std::string const &deviceName,
+                                       OSVR_DeviceUpdateCallback updateFunction,
+                                       void *userdata) {
         ConnectionDevicePtr dev(new GenericConnectionDevice(
             deviceName, std::bind(updateFunction, userdata)));
         addDevice(dev);
         return dev;
     }
 
-    ConnectionDevicePtr Connection::registerAdvancedDevice(
-        NameList const &deviceNames,
-        OSVR_SyncDeviceUpdateCallback updateFunction, void *userdata) {
+    ConnectionDevicePtr
+    Connection::registerAdvancedDevice(NameList const &deviceNames,
+                                       OSVR_DeviceUpdateCallback updateFunction,
+                                       void *userdata) {
         ConnectionDevicePtr dev(new GenericConnectionDevice(
             deviceNames, std::bind(updateFunction, userdata)));
         addDevice(dev);

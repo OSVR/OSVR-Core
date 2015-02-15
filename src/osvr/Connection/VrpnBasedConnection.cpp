@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -74,9 +73,9 @@ namespace connection {
     }
 
     ConnectionDevicePtr
-    VrpnBasedConnection::m_registerDevice(std::string const &deviceName) {
+    VrpnBasedConnection::m_createConnectionDevice(DeviceInitObject &init) {
         ConnectionDevicePtr ret =
-            make_shared<VrpnConnectionDevice>(deviceName, m_vrpnConnection);
+            make_shared<VrpnConnectionDevice>(init, m_vrpnConnection);
         return ret;
     }
 

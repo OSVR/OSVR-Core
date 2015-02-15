@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -35,7 +34,7 @@ typedef long tv_microseconds_type;
 
 #define OSVR_USEC_PER_SEC 1000000;
 
-void osvrTimeValueNormalize(struct OSVR_TimeValue *tv) {
+void osvrTimeValueNormalize(OSVR_INOUT_PTR OSVR_TimeValue *tv) {
     if (!tv) {
         return;
     }
@@ -54,8 +53,8 @@ void osvrTimeValueNormalize(struct OSVR_TimeValue *tv) {
     }
 }
 
-void osvrTimeValueSum(struct OSVR_TimeValue *tvA,
-                      const struct OSVR_TimeValue *tvB) {
+void osvrTimeValueSum(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
+                      OSVR_IN_PTR const OSVR_TimeValue *tvB) {
     if (!tvA || !tvB) {
         return;
     }
@@ -64,8 +63,8 @@ void osvrTimeValueSum(struct OSVR_TimeValue *tvA,
     osvrTimeValueNormalize(tvA);
 }
 
-void osvrTimeValueDifference(struct OSVR_TimeValue *tvA,
-                             const struct OSVR_TimeValue *tvB) {
+void osvrTimeValueDifference(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
+                             OSVR_IN_PTR const OSVR_TimeValue *tvB) {
     if (!tvA || !tvB) {
         return;
     }
@@ -76,14 +75,14 @@ void osvrTimeValueDifference(struct OSVR_TimeValue *tvA,
 
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
 
-void osvrTimeValueGetNow(OSVR_INOUT_PTR struct OSVR_TimeValue *dest) {
+void osvrTimeValueGetNow(OSVR_INOUT_PTR OSVR_TimeValue *dest) {
     timeval tv;
     vrpn_gettimeofday(&tv, nullptr);
     osvrStructTimevalToTimeValue(dest, &tv);
 }
 
-void osvrTimeValueToStructTimeval(timeval *dest,
-                                  const struct OSVR_TimeValue *src) {
+void osvrTimeValueToStructTimeval(OSVR_OUT timeval *dest,
+                                  OSVR_IN_PTR const OSVR_TimeValue *src) {
     if (!dest || !src) {
         return;
     }
@@ -91,8 +90,8 @@ void osvrTimeValueToStructTimeval(timeval *dest,
     dest->tv_usec = tv_microseconds_type(src->microseconds);
 }
 
-void osvrStructTimevalToTimeValue(struct OSVR_TimeValue *dest,
-                                  const struct timeval *src) {
+void osvrStructTimevalToTimeValue(OSVR_OUT OSVR_TimeValue *dest,
+                                  OSVR_IN_PTR const timeval *src) {
     if (!dest || !src) {
         return;
     }

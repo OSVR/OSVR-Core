@@ -6,9 +6,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 /*
@@ -62,8 +61,25 @@ OSVR_QUAT_MEMBER(Z, 3)
 
 #undef OSVR_QUAT_MEMBER
 
+/** @brief Set a quaternion to the identity rotation */
+OSVR_INLINE void osvrQuatSetIdentity(OSVR_Quaternion *q) {
+    osvrQuatSetW(q, 1);
+    osvrQuatSetX(q, 0);
+    osvrQuatSetY(q, 0);
+    osvrQuatSetZ(q, 0);
+}
+
 /** @} */
 
 OSVR_EXTERN_C_END
+
+#ifdef __cplusplus
+template <typename StreamType>
+inline StreamType &operator<<(StreamType &os, OSVR_Quaternion const &quat) {
+    os << "(" << osvrQuatGetW(&quat) << ", (" << osvrQuatGetX(&quat) << ", "
+       << osvrQuatGetY(&quat) << ", " << osvrQuatGetZ(&quat) << "))";
+    return os;
+}
+#endif
 
 #endif

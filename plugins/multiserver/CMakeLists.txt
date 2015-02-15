@@ -2,6 +2,8 @@ add_library(org_opengoggles_bundled_Multiserver MODULE
     org_opengoggles_bundled_Multiserver.cpp
     DevicesWithParameters.cpp
     DevicesWithParameters.h
+    GetSerialPortState.cpp
+    GetSerialPortState.h
     VRPNMultiserver.cpp
     VRPNMultiserver.h)
 target_link_libraries(org_opengoggles_bundled_Multiserver osvrVRPNServer osvrPluginKitCpp osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn)
@@ -11,7 +13,7 @@ set_target_properties(org_opengoggles_bundled_Multiserver PROPERTIES
     FOLDER "OSVR Plugins")
 
 install(TARGETS org_opengoggles_bundled_Multiserver
-    LIBRARY DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+    LIBRARY DESTINATION ${OSVR_PLUGIN_DIR} COMPONENT Runtime)
 
 install(FILES
     org_opengoggles_bundled_Multiserver_RazerHydra.json

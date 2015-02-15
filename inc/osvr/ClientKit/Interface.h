@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Kevin M. Godby
-    <kevin@godby.org>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 
 */
 

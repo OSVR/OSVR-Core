@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -33,8 +32,8 @@
 /// validity of a context parameter for return-code functions.
 #define OSVR_PLUGIN_HANDLE_NULL_CONTEXT(FUNC, CONTEXT_NAME)                    \
     OSVR_UTIL_MULTILINE_BEGIN if (!CONTEXT_NAME) {                             \
-        std::cerr << "ERROR (" FUNC "): Null context " #CONTEXT_NAME           \
-                     " passed!" << std::endl;                                  \
+        std::cerr << "ERROR (" << FUNC                                         \
+                  << "): Null context " #CONTEXT_NAME " passed!" << std::endl; \
         return OSVR_RETURN_FAILURE;                                            \
     }                                                                          \
     OSVR_UTIL_MULTILINE_END
@@ -43,8 +42,8 @@
 /// validity of a context parameter for constructor-like functions.
 #define OSVR_PLUGIN_HANDLE_NULL_CONTEXT_CONSTRUCTOR(FUNC, CONTEXT_NAME)        \
     OSVR_UTIL_MULTILINE_BEGIN if (!CONTEXT_NAME) {                             \
-        std::cerr << "ERROR (" FUNC "): Null context " #CONTEXT_NAME           \
-                     " passed!" << std::endl;                                  \
+        std::cerr << "ERROR (" << FUNC                                         \
+                  << "): Null context " #CONTEXT_NAME " passed!" << std::endl; \
         return nullptr;                                                        \
     }                                                                          \
     OSVR_UTIL_MULTILINE_END

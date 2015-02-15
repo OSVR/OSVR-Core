@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -26,6 +25,9 @@
 // Standard includes
 #include <iostream>
 
+// Anonymous namespace to avoid symbol collision
+namespace {
+
 class DummyDevice {
   public:
     DummyDevice() { std::cout << "Constructing dummy device" << std::endl; }
@@ -34,6 +36,7 @@ class DummyDevice {
 
   private:
 };
+} // namespace
 
 OSVR_PLUGIN(org_opengoggles_example_NullDevice) {
 

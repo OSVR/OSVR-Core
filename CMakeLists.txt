@@ -64,6 +64,7 @@ include(GNUInstallDirs)
 if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
+set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_BINDIR}/extra-sample-apps)
 include(EnableExtraCompilerWarnings)
 
 include(SetDefaultBuildType)
@@ -88,8 +89,27 @@ set_property(GLOBAL PROPERTY
 # Dependencies
 ###
 find_package(libfunctionality REQUIRED)
-find_host_package(Boost 1.43 COMPONENTS thread system date_time chrono REQUIRED) # Lower version bound of 1.43 for range adapters
+
+find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
+
 find_package(Threads REQUIRED)
+
+add_library(boost_thread INTERFACE)
+target_link_libraries(boost_thread
+    INTERFACE
+    ${Boost_THREAD_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARIES}
+    ${Boost_DATE_TIME_LIBRARIES}
+    ${Boost_CHRONO_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(boost_thread INTERFACE ${Boost_INCLUDE_DIRS})
+if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
+    # Work around a foolish insistence to use DLLs on MXE that don't exist.
+    target_compile_definitions(boost_thread
+        INTERFACE
+        BOOST_THREAD_USE_LIB)
+endif()
+
 find_package(jsoncpp REQUIRED)
 
 include(CompilerFeatures)
@@ -98,19 +118,19 @@ include(CompilerFeatures)
 # Set up build directories
 ###
 # Set up shared destination directories to avoid Windows hassle with DLL search paths.
-set(EXECUTABLE_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
+if(WIN32)
+    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}")
+else()
+    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}")
+endif()
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${EXECUTABLE_BINARY_DIR}")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-	if(WIN32)
-		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${EXECUTABLE_BINARY_DIR}")
-	else()
-		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
-	endif()
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_PLUGIN_DIR}")
 endif()
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXECUTABLE_BINARY_DIR}")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
 
 ###
@@ -128,6 +148,7 @@ set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "d")
 endif()
+add_subdirectory(devtools)
 add_subdirectory(src/osvr)
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "")
@@ -197,6 +218,7 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
 # Set Up Package for External Usage
 ###
 include(CMakePackageConfigHelpers)
+set(PLUGINDIR ${OSVR_PLUGIN_DIR})
 set(BUILD_CONFIG_BASE "${CMAKE_CURRENT_BINARY_DIR}/osvr/osvr")
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
@@ -211,7 +233,15 @@ export(EXPORT osvrTargets
 
 configure_file(osvrConfig.cmake
     "${BUILD_CONFIG_BASE}Config.cmake"
-    COPYONLY)
+    @ONLY)
+
+configure_file(osvrConfigBuildTreePaths.cmake
+    "${BUILD_CONFIG_BASE}ConfigBuildTreePaths.cmake"
+    @ONLY)
+
+configure_file(osvrConfigInstalledBoost.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
+    @ONLY)
 
 install(EXPORT osvrTargets
     FILE
@@ -225,8 +255,9 @@ install(EXPORT osvrTargets
 
 install(
     FILES
-    osvrConfig.cmake
+    "${BUILD_CONFIG_BASE}Config.cmake"
     "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT

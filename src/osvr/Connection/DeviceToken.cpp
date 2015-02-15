@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -30,86 +29,79 @@
 // Standard includes
 #include <stdexcept>
 
-namespace osvr {
-namespace connection {
+using osvr::connection::DeviceTokenPtr;
+using osvr::connection::DeviceInitObject;
+using osvr::connection::AsyncDeviceToken;
+using osvr::connection::SyncDeviceToken;
+using osvr::connection::VirtualDeviceToken;
+using osvr::connection::ConnectionPtr;
+using osvr::connection::MessageType;
+using osvr::connection::GuardPtr;
+using osvr::connection::ConnectionDevicePtr;
+DeviceTokenPtr
+OSVR_DeviceTokenObject::createAsyncDevice(DeviceInitObject &init) {
+    DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
+    ret->m_sharedInit(init);
+    return ret;
+}
 
-    DeviceTokenPtr DeviceToken::createAsyncDevice(std::string const &name,
-                                                  ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new AsyncDeviceToken(name));
-        ret->m_sharedInit(conn);
-        return ret;
-    }
+DeviceTokenPtr
+OSVR_DeviceTokenObject::createSyncDevice(DeviceInitObject &init) {
+    DeviceTokenPtr ret(new SyncDeviceToken(init.getQualifiedName()));
+    ret->m_sharedInit(init);
+    return ret;
+}
 
-    DeviceTokenPtr DeviceToken::createSyncDevice(std::string const &name,
-                                                 ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new SyncDeviceToken(name));
-        ret->m_sharedInit(conn);
-        return ret;
-    }
+DeviceTokenPtr
+OSVR_DeviceTokenObject::createVirtualDevice(std::string const &name,
+                                            ConnectionPtr const &conn) {
+    DeviceInitObject init(conn);
+    init.setName(name);
+    DeviceTokenPtr ret(new VirtualDeviceToken(name));
+    ret->m_sharedInit(init);
+    return ret;
+}
 
-    DeviceTokenPtr DeviceToken::createVirtualDevice(std::string const &name,
-                                                    ConnectionPtr const &conn) {
-        DeviceTokenPtr ret(new VirtualDeviceToken(name));
-        ret->m_sharedInit(conn);
-        return ret;
-    }
+OSVR_DeviceTokenObject::OSVR_DeviceTokenObject(std::string const &name)
+    : m_name(name) {}
 
-    DeviceToken::DeviceToken(std::string const &name) : m_name(name) {}
+OSVR_DeviceTokenObject::~OSVR_DeviceTokenObject() {}
 
-    DeviceToken::~DeviceToken() {}
+std::string const &OSVR_DeviceTokenObject::getName() const { return m_name; }
 
-    std::string const &DeviceToken::getName() const { return m_name; }
+void OSVR_DeviceTokenObject::sendData(MessageType *type, const char *bytestream,
+                                      size_t len) {
+    osvr::util::time::TimeValue tv;
+    osvr::util::time::getNow(tv);
+    m_sendData(tv, type, bytestream, len);
+}
+void OSVR_DeviceTokenObject::sendData(
+    osvr::util::time::TimeValue const &timestamp, MessageType *type,
+    const char *bytestream, size_t len) {
+    m_sendData(timestamp, type, bytestream, len);
+}
 
-    void DeviceToken::sendData(MessageType *type, const char *bytestream,
-                               size_t len) {
-        util::time::TimeValue tv;
-        util::time::getNow(tv);
-        m_sendData(tv, type, bytestream, len);
-    }
-    void DeviceToken::sendData(util::time::TimeValue const &timestamp,
-                               MessageType *type, const char *bytestream,
-                               size_t len) {
-        m_sendData(timestamp, type, bytestream, len);
-    }
+GuardPtr OSVR_DeviceTokenObject::getSendGuard() { return m_getSendGuard(); }
 
-    void DeviceToken::setAsyncWaitCallback(AsyncDeviceWaitCallback const &cb) {
-        AsyncDeviceToken *dev = this->asAsync();
-        if (!dev) {
-            throw std::logic_error(
-                "Called setAsyncWaitCallback on a non-async device token!");
-        }
-        dev->setWaitCallback(cb);
-    }
+void OSVR_DeviceTokenObject::setUpdateCallback(
+    osvr::connection::DeviceUpdateCallback const &cb) {
+    m_setUpdateCallback(cb);
+}
 
-    void
-    DeviceToken::setSyncUpdateCallback(SyncDeviceUpdateCallback const &cb) {
-        SyncDeviceToken *dev = this->asSync();
-        if (!dev) {
-            throw std::logic_error(
-                "Called setSyncUpdateCallback on a non-sync device token!");
-        }
-        dev->setUpdateCallback(cb);
-    }
+void OSVR_DeviceTokenObject::connectionInteract() { m_connectionInteract(); }
 
-    void DeviceToken::connectionInteract() { m_connectionInteract(); }
+void OSVR_DeviceTokenObject::stopThreads() { m_stopThreads(); }
 
-    void DeviceToken::stopThreads() { m_stopThreads(); }
+ConnectionPtr OSVR_DeviceTokenObject::m_getConnection() { return m_conn; }
 
-    ConnectionPtr DeviceToken::m_getConnection() { return m_conn; }
+ConnectionDevicePtr OSVR_DeviceTokenObject::m_getConnectionDevice() {
+    return m_dev;
+}
 
-    ConnectionDevicePtr DeviceToken::m_getConnectionDevice() { return m_dev; }
+void OSVR_DeviceTokenObject::m_stopThreads() {}
 
-    AsyncDeviceToken *DeviceToken::asAsync() { return nullptr; }
-
-    SyncDeviceToken *DeviceToken::asSync() { return nullptr; }
-
-    void DeviceToken::m_stopThreads() {}
-
-    void DeviceToken::m_sharedInit(ConnectionPtr const &conn) {
-        m_conn = conn;
-        m_dev = conn->registerDevice(m_name);
-        m_dev->setDeviceToken(*this);
-    }
-
-} // namespace connection
-} // namespace osvr
+void OSVR_DeviceTokenObject::m_sharedInit(DeviceInitObject &init) {
+    m_conn = init.getConnection();
+    m_dev = m_conn->createConnectionDevice(init);
+    m_dev->setDeviceToken(*this);
+}

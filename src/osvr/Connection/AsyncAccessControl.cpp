@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -29,12 +28,11 @@
 namespace osvr {
 namespace connection {
 
-    using boost::unique_lock;
-    using boost::mutex;
     using boost::defer_lock;
     RequestToSend::RequestToSend(AsyncAccessControl &aac)
         : m_lock(aac.m_mut, defer_lock), m_lockDone(aac.m_mutDone, defer_lock),
-          m_calledRequest(false), m_rts(aac.m_rts), m_done(aac.m_done),
+          m_calledRequest(false), m_nested(false), m_control(aac),
+          m_sharedRts(aac.m_rts), m_sharedDone(aac.m_done),
           m_mainMessage(aac.m_mainMessage),
           m_condMainThread(aac.m_condMainThread),
           m_condAsyncThread(aac.m_condAsyncThread) {}
@@ -43,8 +41,9 @@ namespace connection {
         BOOST_ASSERT_MSG(m_lock.owns_lock() == m_lockDone.owns_lock(),
                          "We should own either both locks or neither.");
         if (m_lock.owns_lock() && m_lockDone.owns_lock()) {
-            m_rts = false;
-            m_done = true;
+            m_sharedRts = false;
+            m_sharedDone = true;
+            m_control.m_currentRequestThread.reset();
             m_lock.unlock();
             m_lockDone.unlock();
             m_condMainThread.notify_one();
@@ -57,17 +56,27 @@ namespace connection {
                          "object lifetime");
         {
             m_lock.lock();
-            BOOST_ASSERT_MSG(m_rts == false,
+            if (true == m_sharedRts &&
+                m_control.m_currentRequestThread ==
+                    boost::this_thread::get_id()) {
+                /// OK, so we're recursive here. Make a note and don't add
+                /// another locking layer
+                m_nested = true;
+                m_lock.unlock();
+                return true;
+            }
+
+            BOOST_ASSERT_MSG(m_sharedRts == false,
                              "Shouldn't happen - inconsistent "
                              "state. Can't get in a request when "
                              "already in one.");
-            m_rts = true;
-            m_done = false;
+            m_sharedRts = true;
+            m_sharedDone = false;
             m_calledRequest = true;
             /// Take the main thread "free to go" status lock.
             {
                 m_lockDone.lock();
-                m_done = false;
+                m_sharedDone = false;
                 while (m_mainMessage == AsyncAccessControl::MTM_WAIT) {
                     m_condAsyncThread.wait(
                         m_lock); // In here we unlock the mutex
@@ -76,7 +85,16 @@ namespace connection {
                 // The mutex is locked again here, until the destructor.
 
                 // Get the return value.
-                return (m_mainMessage == AsyncAccessControl::MTM_CLEAR_TO_SEND);
+                auto ret =
+                    (m_mainMessage == AsyncAccessControl::MTM_CLEAR_TO_SEND);
+                if (ret) {
+                    BOOST_ASSERT_MSG(
+                        !m_control.m_currentRequestThread.is_initialized(),
+                        "Shouldn't be anyone in except us!");
+                    m_control.m_currentRequestThread =
+                        boost::this_thread::get_id();
+                }
+                return ret;
             }
         }
     }
@@ -85,17 +103,17 @@ namespace connection {
         : m_rts(false), m_done(false), m_mainMessage(MTM_WAIT) {}
 
     bool AsyncAccessControl::mainThreadCTS() {
-        unique_lock<mutex> lock(m_mut);
+        MainLockType lock(m_mut);
         return m_handleRTS(lock, MTM_CLEAR_TO_SEND);
     }
 
     bool AsyncAccessControl::mainThreadDeny() {
-        unique_lock<mutex> lock(m_mut);
+        MainLockType lock(m_mut);
         return m_handleRTS(lock, MTM_DENY_SEND);
     }
 
     bool AsyncAccessControl::mainThreadDenyPermanently() {
-        unique_lock<mutex> lock(m_mut);
+        MainLockType lock(m_mut);
         bool handled = m_handleRTS(lock, MTM_DENY_SEND, MTM_DENY_SEND);
         if (!handled) {
             BOOST_ASSERT_MSG(lock.owns_lock(),
@@ -103,15 +121,14 @@ namespace connection {
                              "we're supposed to still own the "
                              "lock!");
             // Even if we didn't have any RTS at the time, we still want to set
-            // the
-            // state to DENY
+            // the state to DENY
             m_mainMessage = MTM_DENY_SEND;
         }
         return handled;
     }
 
     bool
-    AsyncAccessControl::m_handleRTS(boost::unique_lock<boost::mutex> &lock,
+    AsyncAccessControl::m_handleRTS(MainLockType &lock,
                                     MainThreadMessages response,
                                     MainThreadMessages postCompletionState) {
         if (!lock.owns_lock() || (lock.mutex() != &m_mut)) {
@@ -128,7 +145,7 @@ namespace connection {
         lock.unlock(); // Unlock to let the requestor through.
         m_condAsyncThread.notify_one();
         {
-            unique_lock<mutex> finishedLock(m_mutDone);
+            DoneLockType finishedLock(m_mutDone);
             while (!m_done) {
                 // Wait for the request to complete.
                 m_condMainThread.wait(finishedLock);

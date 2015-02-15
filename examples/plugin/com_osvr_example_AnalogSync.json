@@ -1,0 +1,23 @@
+{
+  "deviceVendor": "OSVR",
+  "deviceName": "Analog Data Sync Plugin Example",
+  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "version": 1,
+  "lastModified": "2015-01-30T21:13:07.585Z",
+  "interfaces": {
+    "analog": {
+      "count": 1,
+      "traits": [
+        {
+          "min": 0,
+          "max": 10
+        }
+      ]
+    }
+  },
+  "semantics": {
+    "value": {
+      "$target": "analog/0"
+    }
+  }
+}

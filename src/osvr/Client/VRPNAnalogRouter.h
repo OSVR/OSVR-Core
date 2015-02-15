@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -40,6 +39,7 @@ namespace client {
               m_remote(new vrpn_Analog_Remote(src, conn)), m_pred(p),
               m_transform(t) {
             m_remote->register_change_handler(this, &VRPNAnalogRouter::handle);
+            m_remote->shutup = true;
         }
 
         static void VRPN_CALLBACK handle(void *userdata, vrpn_ANALOGCB info) {

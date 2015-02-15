@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -20,16 +19,31 @@
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <stdlib.h>
+
+#ifdef _MSC_VER
+// Don't warn about getenv
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
 OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
                                   uint32_t /*flags*/) {
-    return ::osvr::client::createContext(applicationIdentifier);
+    char *host = ::getenv(HOST_ENV_VAR);
+    if (nullptr != host) {
+        OSVR_DEV_VERBOSE("Connecting to non-default host " << host);
+        return ::osvr::client::createContext(applicationIdentifier, host);
+    } else {
+        OSVR_DEV_VERBOSE("Connecting to default (local) host");
+        return ::osvr::client::createContext(applicationIdentifier);
+    }
 }
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
     ctx->update();

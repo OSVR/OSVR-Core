@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -16,10 +15,13 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OSVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include "SyncDeviceToken.h"
 #include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/GuardInterfaceDummy.h>
 
 // Library/third-party includes
 // - none
@@ -31,13 +33,12 @@ namespace osvr {
 namespace connection {
 
     SyncDeviceToken::SyncDeviceToken(std::string const &name)
-        : DeviceToken(name) {}
+        : OSVR_DeviceTokenObject(name) {}
 
     SyncDeviceToken::~SyncDeviceToken() {}
 
-    void
-    SyncDeviceToken::setUpdateCallback(SyncDeviceUpdateCallback const &cb) {
-        OSVR_DEV_VERBOSE("In SyncDeviceToken::setUpdateCallback");
+    void SyncDeviceToken::m_setUpdateCallback(DeviceUpdateCallback const &cb) {
+        OSVR_DEV_VERBOSE("In SyncDeviceToken::m_setUpdateCallback");
         m_cb = cb;
     }
 
@@ -47,13 +48,15 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
+    GuardPtr SyncDeviceToken::m_getSendGuard() {
+        return GuardPtr(new util::DummyGuard);
+    }
+
     void SyncDeviceToken::m_connectionInteract() {
         if (m_cb) {
             m_cb();
         }
     }
-
-    SyncDeviceToken *SyncDeviceToken::asSync() { return this; }
 
 } // namespace connection
 } // namespace osvr

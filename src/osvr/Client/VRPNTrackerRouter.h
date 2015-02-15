@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -45,6 +44,7 @@ namespace client {
               m_remote(new vrpn_Tracker_Remote(src, conn)), m_transform(t) {
             m_remote->register_change_handler(this, &VRPNTrackerRouter::handle,
                                               sensor.get_value_or(-1));
+            m_remote->shutup = true;
         }
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW

@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -36,7 +35,7 @@ void myTrackerCallback(void * /*userdata*/,
               << osvrQuatGetW(&(report->pose.rotation)) << ", ("
               << osvrQuatGetX(&(report->pose.rotation)) << ", "
               << osvrQuatGetY(&(report->pose.rotation)) << ", "
-              << osvrQuatGetZ(&(report->pose.rotation)) << ")" << std::endl;
+              << osvrQuatGetZ(&(report->pose.rotation)) << "))" << std::endl;
 }
 
 void myOrientationCallback(void * /*userdata*/,
@@ -46,7 +45,7 @@ void myOrientationCallback(void * /*userdata*/,
               << osvrQuatGetW(&(report->rotation)) << ", ("
               << osvrQuatGetX(&(report->rotation)) << ", "
               << osvrQuatGetY(&(report->rotation)) << ", "
-              << osvrQuatGetZ(&(report->rotation)) << ")" << std::endl;
+              << osvrQuatGetZ(&(report->rotation)) << "))" << std::endl;
 }
 
 void myPositionCallback(void * /*userdata*/,

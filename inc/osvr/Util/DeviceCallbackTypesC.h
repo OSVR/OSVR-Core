@@ -6,9 +6,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 /*
@@ -38,11 +37,8 @@ OSVR_EXTERN_C_BEGIN
 /** @addtogroup PluginKit
     @{
 */
-/** @brief Function type of a Sync Device Update callback */
-typedef OSVR_ReturnCode (*OSVR_SyncDeviceUpdateCallback)(void *userData);
-
-/** @brief Function type of an Async Device Wait callback */
-typedef OSVR_ReturnCode (*OSVR_AsyncDeviceWaitCallback)(void *userData);
+/** @brief Function type of a Device Update callback */
+typedef OSVR_ReturnCode (*OSVR_DeviceUpdateCallback)(void *userData);
 /** @} */
 
 OSVR_EXTERN_C_END

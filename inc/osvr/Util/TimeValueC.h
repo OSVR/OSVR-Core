@@ -7,9 +7,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 /*
@@ -26,6 +25,7 @@
 
 /* Internal Includes */
 #include <osvr/Util/Export.h>
+#include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/AnnotationMacrosC.h>
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Util/StdInt.h>
@@ -36,9 +36,8 @@
 /* Standard includes */
 /* none */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+OSVR_EXTERN_C_BEGIN
+
 /** @defgroup UtilTime Timestamp interaction
     @ingroup Util
 
@@ -52,10 +51,10 @@ extern "C" {
 */
 
 /** @brief The signed integer type storing the seconds in a struct
- * OSVR_TimeValue */
+    OSVR_TimeValue */
 typedef int64_t OSVR_TimeValue_Seconds;
 /** @brief The signed integer type storing the microseconds in a struct
- * OSVR_TimeValue */
+    OSVR_TimeValue */
 typedef int32_t OSVR_TimeValue_Microseconds;
 
 /** @brief Standardized, portable parallel to struct timeval for representing
@@ -77,8 +76,8 @@ typedef struct OSVR_TimeValue {
 
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
 /** @brief Gets the current time in the TimeValue. Parallel to gettimeofday. */
-OSVR_UTIL_EXPORT void
-osvrTimeValueGetNow(OSVR_INOUT_PTR struct OSVR_TimeValue *dest);
+OSVR_UTIL_EXPORT void osvrTimeValueGetNow(OSVR_OUT OSVR_TimeValue *dest)
+    OSVR_FUNC_NONNULL((1));
 
 struct timeval; /* forward declaration */
 
@@ -91,8 +90,9 @@ struct timeval; /* forward declaration */
    anything.
 */
 OSVR_UTIL_EXPORT void
-osvrTimeValueToStructTimeval(struct timeval *dest,
-                             const struct OSVR_TimeValue *src);
+osvrTimeValueToStructTimeval(OSVR_OUT struct timeval *dest,
+                             OSVR_IN_PTR const OSVR_TimeValue *src)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Converts from a TimeValue struct to your system's struct timeval.
     @param dest An OSVR_TimeValue destination pointer.
@@ -103,8 +103,10 @@ osvrTimeValueToStructTimeval(struct timeval *dest,
     If either parameter is NULL, the function will return without doing
    anything.
 */
-OSVR_UTIL_EXPORT void osvrStructTimevalToTimeValue(struct OSVR_TimeValue *dest,
-                                                   const struct timeval *src);
+OSVR_UTIL_EXPORT void
+osvrStructTimevalToTimeValue(OSVR_OUT OSVR_TimeValue *dest,
+                             OSVR_IN_PTR const struct timeval *src)
+    OSVR_FUNC_NONNULL((1, 2));
 #endif
 
 /** @brief "Normalizes" a time value so that the absolute number of microseconds
@@ -114,7 +116,8 @@ OSVR_UTIL_EXPORT void osvrStructTimevalToTimeValue(struct OSVR_TimeValue *dest,
 
     If the given pointer is NULL, this function returns without doing anything.
 */
-OSVR_UTIL_EXPORT void osvrTimeValueNormalize(struct OSVR_TimeValue *tv);
+OSVR_UTIL_EXPORT void osvrTimeValueNormalize(OSVR_INOUT_PTR OSVR_TimeValue *tv)
+    OSVR_FUNC_NONNULL((1));
 
 /** @brief Sums two time values, replacing the first with the result.
 
@@ -125,8 +128,9 @@ OSVR_UTIL_EXPORT void osvrTimeValueNormalize(struct OSVR_TimeValue *tv);
 
     Both parameters are expected to be in normalized form.
 */
-OSVR_UTIL_EXPORT void osvrTimeValueSum(struct OSVR_TimeValue *tvA,
-                                       const struct OSVR_TimeValue *tvB);
+OSVR_UTIL_EXPORT void osvrTimeValueSum(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
+                                       OSVR_IN_PTR const OSVR_TimeValue *tvB)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Computes the difference between two time values, replacing the first
    with the result.
@@ -140,13 +144,13 @@ OSVR_UTIL_EXPORT void osvrTimeValueSum(struct OSVR_TimeValue *tvA,
 
     Both parameters are expected to be in normalized form.
 */
-OSVR_UTIL_EXPORT void osvrTimeValueDifference(struct OSVR_TimeValue *tvA,
-                                              const struct OSVR_TimeValue *tvB);
+OSVR_UTIL_EXPORT void
+osvrTimeValueDifference(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
+                        OSVR_IN_PTR const OSVR_TimeValue *tvB)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @} */
 
-#ifdef __cplusplus
-} /* end of extern "C" */
-#endif
+OSVR_EXTERN_C_END
 
 #endif

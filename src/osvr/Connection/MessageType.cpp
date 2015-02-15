@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -25,13 +24,9 @@
 // Standard includes
 // - none
 
-namespace osvr {
-namespace connection {
+OSVR_MessageTypeObject::~OSVR_MessageTypeObject() {}
 
-    MessageType::~MessageType() {}
+std::string const &OSVR_MessageTypeObject::getName() const { return m_name; }
 
-    std::string const &MessageType::getName() const { return m_name; }
-
-    MessageType::MessageType(std::string const &name) : m_name(name) {}
-} // namespace connection
-} // namespace osvr
+OSVR_MessageTypeObject::OSVR_MessageTypeObject(std::string const &name)
+    : m_name(name) {}

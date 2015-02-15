@@ -5,21 +5,21 @@ This is the code and libraries to use when developing with OSVR.
 - For developing plugins, you'll use the @ref PluginKit library.
 - For developing applications using the framework, you'll use the @ref ClientKit library.
 
-**For support, contact <support@opengoggles.org>.**
+> For support, contact <support@osvr.com>.
 
-Copyright 2014 Sensics, Inc. All rights reserved.
+Copyright 2014-2015 Sensics, Inc. All rights reserved.
 
 (Intended to be licensed under the Apache License, Version 2.0)
 
 ## Binary Snapshot Documentation
 This snapshot contains documentation, example code, JSON schemas, and JSON descriptor files in the `share/doc/osvrcore` directory.
 
-That directory may also contain an `api` subdirectory with generated API documentation. If your snapshot does not include this API documentation, [contact us](mailto:support@opengoggles.org?subject=Access%20to%20API%20documentation%20site) for access to a live-updated web site with this documentation.
+That directory may also contain an `api` subdirectory with generated API documentation. If your snapshot does not include this API documentation, visit <http://access.osvr.com> to view it online. If you have access to see this file, you should have access to view the documentation on that site, but if there's any issue, just [contact us](mailto:support@osvr.com?subject=Access%20to%20API%20documentation%20site) and we'll get it taken care of.
 
 ## Source Documentation
 See [the HACKING file](HACKING.md) for some development guidelines for working on this code base itself.
 
-If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](doc/Building.md). You may also be interested in [contacting us for access to binary snapshots](mailto:support@opengoggles.org?subject=Access%20to%20binary%20snapshots)
+If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](doc/Building.md). You may also be interested in binary snapshots at <http://access.osvr.com> .
 
 ## Vendored Projects
 

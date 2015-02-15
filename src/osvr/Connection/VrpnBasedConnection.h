@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -63,7 +62,7 @@ namespace connection {
         virtual MessageTypePtr
         m_registerMessageType(std::string const &messageId);
         virtual ConnectionDevicePtr
-        m_registerDevice(std::string const &deviceName);
+        m_createConnectionDevice(DeviceInitObject &init);
         virtual void m_registerConnectionHandler(std::function<void()> handler);
         virtual void m_process();
 

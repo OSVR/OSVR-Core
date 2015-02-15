@@ -25,20 +25,24 @@
 // - none
 
 // Standard includes
-#include <functional>
+// - none
 
 namespace osvr {
 namespace connection {
     /// @brief A device token for a device that does not have a standard update
     /// or wait callback - for instance, the system data device.
-    class VirtualDeviceToken : public DeviceToken {
+    class VirtualDeviceToken : public OSVR_DeviceTokenObject {
       public:
         VirtualDeviceToken(std::string const &name);
         virtual ~VirtualDeviceToken();
 
       protected:
+        /// @brief Should never be called.
+        virtual void
+        m_setUpdateCallback(osvr::connection::DeviceUpdateCallback const &);
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
+        virtual GuardPtr m_getSendGuard();
         virtual void m_connectionInteract();
     };
 } // namespace connection

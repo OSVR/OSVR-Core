@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -26,25 +25,24 @@
 // - none
 
 // Standard includes
-#include <functional>
+// - none
 
 namespace osvr {
 namespace connection {
-    class SyncDeviceToken : public DeviceToken {
+    class SyncDeviceToken : public OSVR_DeviceTokenObject {
       public:
         SyncDeviceToken(std::string const &name);
         virtual ~SyncDeviceToken();
 
-        void setUpdateCallback(SyncDeviceUpdateCallback const &cb);
-
       protected:
+        virtual void m_setUpdateCallback(DeviceUpdateCallback const &cb);
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
+        virtual GuardPtr m_getSendGuard();
         virtual void m_connectionInteract();
 
       private:
-        virtual SyncDeviceToken *asSync();
-        SyncDeviceUpdateCallback m_cb;
+        DeviceUpdateCallback m_cb;
     };
 } // namespace connection
 } // namespace osvr

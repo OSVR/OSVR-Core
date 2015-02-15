@@ -62,11 +62,12 @@ if(PDFLATEX_COMPILER)
 	set(DOXYGEN_PDFLATEX "YES")
 endif()
 
+set(_PF86 "ProgramFiles(x86)")
 find_program(DOXYGEN_MSCGEN_EXECUTABLE
 	mscgen
 	PATHS
 	"$ENV{ProgramFiles}/Mscgen"
-	"$ENV{ProgramFiles(x86)}/Mscgen"
+	"$ENV{${_PF86}}/Mscgen"
 	"$ENV{ProgramW6432}/Mscgen")
 if(DOXYGEN_MSCGEN_EXECUTABLE)
 	mark_as_advanced(DOXYGEN_MSCGEN_EXECUTABLE)

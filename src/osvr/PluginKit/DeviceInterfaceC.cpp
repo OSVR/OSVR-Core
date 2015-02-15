@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -25,9 +24,9 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Connection/MessageType.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/Verbosity.h>
 #include "HandleNullContext.h"
-#include "DeviceInitObject.h"
 
 // Library/third-party includes
 // - none
@@ -36,13 +35,13 @@
 #include <functional>
 
 OSVR_DeviceInitOptions
-osvrDeviceCreateInitOptions(OSVR_INOUT_PTR OSVR_PluginRegContext ctx) {
+osvrDeviceCreateInitOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT_CONSTRUCTOR("osvrDeviceCreateInitOptions",
                                                 ctx);
     return new OSVR_DeviceInitObject(ctx);
 }
 
-OSVR_ReturnCode osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+OSVR_ReturnCode osvrDeviceSendData(OSVR_IN_PTR OSVR_DeviceToken dev,
                                    OSVR_IN_PTR OSVR_MessageType msg,
                                    OSVR_IN_READS(len) const char *bytestream,
                                    OSVR_IN size_t len) {
@@ -50,35 +49,38 @@ OSVR_ReturnCode osvrDeviceSendData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
         "In osvrDeviceSendData, trying to send a message of length " << len);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData device token", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData message type", msg);
-    osvr::connection::DeviceToken *device =
-        static_cast<osvr::connection::DeviceToken *>(dev);
-    osvr::connection::MessageType *msgType =
-        static_cast<osvr::connection::MessageType *>(msg);
-    device->sendData(msgType, bytestream, len);
+    dev->sendData(msg, bytestream, len);
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrDeviceSendTimestampedData(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                              OSVR_IN_PTR struct OSVR_TimeValue *timestamp,
-                              OSVR_IN_PTR OSVR_MessageType msg,
-                              OSVR_IN_READS(len) const char *bytestream,
-                              OSVR_IN size_t len) {
+OSVR_ReturnCode osvrDeviceSendTimestampedData(
+    OSVR_IN_PTR OSVR_DeviceToken dev, OSVR_IN_PTR OSVR_TimeValue *timestamp,
+    OSVR_IN_PTR OSVR_MessageType msg, OSVR_IN_READS(len) const char *bytestream,
+    OSVR_IN size_t len) {
     OSVR_DEV_VERBOSE(
         "In osvrDeviceSendData, trying to send a timestamped message of length "
         << len);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData device token", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendData message type", msg);
-    osvr::connection::DeviceToken *device =
-        static_cast<osvr::connection::DeviceToken *>(dev);
-    osvr::connection::MessageType *msgType =
-        static_cast<osvr::connection::MessageType *>(msg);
-    device->sendData(*timestamp, msgType, bytestream, len);
+    dev->sendData(*timestamp, msg, bytestream, len);
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrDeviceSendJsonDescriptor(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                             OSVR_IN_READS(len)
+                                                 const char *json,
+                                             OSVR_IN size_t len) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor", dev);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor descriptor",
+                                    json);
+
+    /// @todo Register this with the context/device
+
     return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode
-osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+osvrDeviceRegisterMessageType(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                               OSVR_IN_STRZ const char *name,
                               OSVR_OUT_PTR OSVR_MessageType *msgtype) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceRegisterMessageType", ctx);
@@ -108,28 +110,10 @@ osvrDeviceRegisterMessageType(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
 
 template <typename FactoryFunction>
 inline static OSVR_ReturnCode
-osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
-                      OSVR_DeviceToken *device, FactoryFunction f) {
-    // Compute the name by combining plugin name with the given name
-    std::string qualifiedName =
-        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
-            .getName() +
-        "/" + name;
+osvrDeviceGenericInit(OSVR_DeviceInitOptions options, OSVR_DeviceToken *device,
+                      FactoryFunction f) {
 
-    OSVR_DEV_VERBOSE("Qualified name: " << qualifiedName);
-
-    // Extract the connection from the overall context
-    osvr::connection::ConnectionPtr conn =
-        osvr::connection::Connection::retrieveConnection(
-            osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
-                .getParent());
-    if (!conn) {
-        OSVR_DEV_VERBOSE(
-            "osvrDeviceGenericInit Got a null Connection pointer - "
-            "this shouldn't happen!");
-        return OSVR_RETURN_FAILURE;
-    }
-    osvr::connection::DeviceTokenPtr dev = f(qualifiedName, conn);
+    osvr::connection::DeviceTokenPtr dev = f(*options);
     if (!dev) {
         OSVR_DEV_VERBOSE("Device token factory returned a null "
                          "pointer - this shouldn't happen!");
@@ -138,7 +122,9 @@ osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
     // Transfer ownership of the device token object to the plugin context.
     try {
         *device =
-            osvr::pluginkit::registerObjectForDeletion(ctx, dev.release());
+            options->getContext()->registerDataWithGenericDelete(dev.release());
+        /// @todo Is this too late to delete? Can we delete it earlier?
+        options->getContext()->registerDataWithGenericDelete(options);
     } catch (std::exception &e) {
         std::cerr << "Error in osvrDeviceGenericInit: " << e.what()
                   << std::endl;
@@ -149,63 +135,69 @@ osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceSyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+template <typename FactoryFunction>
+inline static OSVR_ReturnCode
+osvrDeviceGenericInit(OSVR_DeviceInitOptions options, const char *name,
+                      OSVR_DeviceToken *device, FactoryFunction f) {
+    options->setName(name);
+
+    return osvrDeviceGenericInit(options, device, f);
+}
+
+template <typename FactoryFunction>
+inline static OSVR_ReturnCode
+osvrDeviceGenericInit(OSVR_PluginRegContext ctx, const char *name,
+                      OSVR_DeviceToken *device, FactoryFunction f) {
+    OSVR_DeviceInitOptions options = osvrDeviceCreateInitOptions(ctx);
+
+    return osvrDeviceGenericInit(options, name, device, f);
+}
+
+OSVR_ReturnCode osvrDeviceSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                                    OSVR_IN_STRZ const char *name,
                                    OSVR_OUT_PTR OSVR_DeviceToken *device) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSyncInit", ctx);
     OSVR_DEV_VERBOSE("In osvrDeviceSyncInit for a device named " << name);
-    return osvrDeviceGenericInit(
-        ctx, name, device, osvr::connection::DeviceToken::createSyncDevice);
+    return osvrDeviceGenericInit(ctx, name, device,
+                                 OSVR_DeviceTokenObject::createSyncDevice);
+}
+OSVR_ReturnCode
+osvrDeviceSyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
+                              OSVR_IN_STRZ const char *name,
+                              OSVR_IN_PTR OSVR_DeviceInitOptions options,
+                              OSVR_OUT_PTR OSVR_DeviceToken *device) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSyncInitWithOptions", options);
+    return osvrDeviceGenericInit(options, name, device,
+                                 OSVR_DeviceTokenObject::createSyncDevice);
 }
 
 OSVR_ReturnCode
-osvrDeviceSyncRegisterUpdateCallback(OSVR_INOUT_PTR OSVR_DeviceToken device,
-                                     OSVR_IN OSVR_SyncDeviceUpdateCallback
-                                         updateCallback,
-                                     OSVR_IN_OPT void *userData) {
-    OSVR_DEV_VERBOSE("In osvrDeviceSyncRegisterUpdateCallback");
+osvrDeviceRegisterUpdateCallback(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                 OSVR_IN OSVR_DeviceUpdateCallback
+                                     updateCallback,
+                                 OSVR_IN_OPT void *userData) {
+    OSVR_DEV_VERBOSE("In osvrDeviceRegisterUpdateCallback");
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(
-        "osvrDeviceSyncRegisterUpdateCallback device token", device);
-    osvr::connection::DeviceToken *dev =
-        static_cast<osvr::connection::DeviceToken *>(device);
-    try {
-        dev->setSyncUpdateCallback(std::bind(updateCallback, userData));
-    } catch (std::logic_error &e) {
-        OSVR_DEV_VERBOSE("Caught a logic error setting update callback - "
-                         "likely that this isn't a synchronous device token. "
-                         "Details: "
-                         << e.what());
-        return OSVR_RETURN_FAILURE;
-    }
+        "osvrDeviceRegisterUpdateCallback device token", dev);
+    dev->setUpdateCallback(std::bind(updateCallback, userData));
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceAsyncInit(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+OSVR_ReturnCode osvrDeviceAsyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                                     OSVR_IN_STRZ const char *name,
                                     OSVR_OUT_PTR OSVR_DeviceToken *device) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncInit", ctx);
     OSVR_DEV_VERBOSE("In osvrDeviceAsyncInit for a device named " << name);
-    return osvrDeviceGenericInit(
-        ctx, name, device, osvr::connection::DeviceToken::createAsyncDevice);
+    return osvrDeviceGenericInit(ctx, name, device,
+                                 OSVR_DeviceTokenObject::createAsyncDevice);
 }
 
 OSVR_ReturnCode
-osvrDeviceAsyncStartWaitLoop(OSVR_INOUT_PTR OSVR_DeviceToken device,
-                             OSVR_IN OSVR_AsyncDeviceWaitCallback waitCallback,
-                             OSVR_IN_OPT void *userData) {
-    OSVR_DEV_VERBOSE("In osvrDeviceAsyncStartWaitLoop");
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncStartWaitLoop device token",
-                                    device);
-    osvr::connection::DeviceToken *dev =
-        static_cast<osvr::connection::DeviceToken *>(device);
-    try {
-        dev->setAsyncWaitCallback(std::bind(waitCallback, userData));
-    } catch (std::logic_error &e) {
-        OSVR_DEV_VERBOSE("Caught a logic error setting update callback - "
-                         "likely that this isn't an asynchronous device token. "
-                         "Details: "
-                         << e.what());
-        return OSVR_RETURN_FAILURE;
-    }
-    return OSVR_RETURN_SUCCESS;
+osvrDeviceAsyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
+                               OSVR_IN_STRZ const char *name,
+                               OSVR_IN_PTR OSVR_DeviceInitOptions options,
+                               OSVR_OUT_PTR OSVR_DeviceToken *device) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAsyncInitWithOptions", options);
+    return osvrDeviceGenericInit(options, name, device,
+                                 OSVR_DeviceTokenObject::createAsyncDevice);
 }

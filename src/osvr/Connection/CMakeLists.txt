@@ -1,13 +1,18 @@
 osvr_setup_lib_vars(Connection)
 
 set(API
+    "${HEADER_LOCATION}/AnalogServerInterface.h"
+    "${HEADER_LOCATION}/ButtonServerInterface.h"
     "${HEADER_LOCATION}/Connection.h"
     "${HEADER_LOCATION}/ConnectionDevicePtr.h"
     "${HEADER_LOCATION}/ConnectionDevice.h"
     "${HEADER_LOCATION}/ConnectionPtr.h"
+    "${HEADER_LOCATION}/DeviceInitObject.h"
     "${HEADER_LOCATION}/DeviceToken.h"
+    "${HEADER_LOCATION}/DeviceTokenPtr.h"
     "${HEADER_LOCATION}/MessageType.h"
-    "${HEADER_LOCATION}/MessageTypePtr.h")
+    "${HEADER_LOCATION}/MessageTypePtr.h"
+    "${HEADER_LOCATION}/TrackerServerInterface.h")
 
 set(SOURCE
     AsyncAccessControl.cpp
@@ -16,20 +21,28 @@ set(SOURCE
     AsyncDeviceToken.h
     Connection.cpp
     ConnectionDevice.cpp
+    DeviceConstructionData.h
+    DeviceInitObject.cpp
     DeviceToken.cpp
+    GenerateCompoundServer.h
+    GenerateVrpnDynamicServer.cpp
+    GenerateVrpnDynamicServer.h
     GenericConnectionDevice.h
     MessageType.cpp
     SyncDeviceToken.cpp
     SyncDeviceToken.h
     VirtualDeviceToken.cpp
     VirtualDeviceToken.h
+    VrpnAnalogServer.h
     VrpnBaseFlexServer.h
     VrpnBasedConnection.cpp
     VrpnBasedConnection.h
+    VrpnButtonServer.h
     VrpnConnectionDevice.h
     VrpnConnectionKind.cpp
     VrpnConnectionKind.h
-    VrpnMessageType.h)
+    VrpnMessageType.h
+    VrpnTrackerServer.h)
 
 osvr_add_library()
 
@@ -49,16 +62,12 @@ target_compile_options(${LIBNAME_FULL}
     PUBLIC
     ${OSVR_CXX11_FLAGS})
 
-if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
-    # Work around a foolish insistence to use DLLs on MXE that don't exist.
-    target_compile_definitions(${LIBNAME_FULL}
-        PRIVATE
-        BOOST_THREAD_USE_LIB)
-endif()
-
 target_link_libraries(${LIBNAME_FULL}
-    PRIVATE
+    PUBLIC
     osvrPluginHost
+    INTERFACE
+    osvrUtil
+    PRIVATE
     osvrUtilCpp
     vendored-vrpn
     util-runloopmanager)

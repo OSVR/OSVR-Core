@@ -6,9 +6,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 /*
@@ -25,7 +24,8 @@
 
 /* Internal Includes */
 #include <osvr/PluginKit/DeviceInterfaceC.h>
-#include <osvr/Util/StdInt.h>
+#include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/ChannelCountC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -35,22 +35,74 @@
 
 OSVR_EXTERN_C_BEGIN
 
-/** @brief The integer type specifying the number of channels you'd like for
- * your analog. */
-typedef uint32_t OSVR_AnalogChanCount;
+/** @defgroup PluginKitCAnalog Analog channel interface (base C API)
+    @brief Sending analog reports from a device in your plugin.
+    @ingroup PluginKit
+    @{
+*/
+
+/** @brief Opaque type used in conjunction with a device token to send data on
+    an analog interface.
+*/
+typedef struct OSVR_AnalogDeviceInterfaceObject *OSVR_AnalogDeviceInterface;
 
 /** @brief Specify that your device will implement the Analog interface.
 
     @param opts The device init options object.
+    @param [out] iface An interface object you should retain with the same
+   lifetime as the device token in order to send messages conforming to an
+   analog interface.
     @param numChan The number of channels you will be reporting. This parameter
    may be subject to external limitations (presently 128).
 
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions
-                                              opts,
-                                          OSVR_IN OSVR_AnalogChanCount numChan)
-    OSVR_FUNC_NONNULL((1));
+OSVR_ReturnCode
+osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+                          OSVR_OUT_PTR OSVR_AnalogDeviceInterface *iface,
+                          OSVR_IN OSVR_ChannelCount numChan)
+    OSVR_FUNC_NONNULL((1, 2));
+
+/** @brief Report the value of a single channel.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                         OSVR_IN_PTR OSVR_AnalogDeviceInterface
+                                             iface,
+                                         OSVR_IN OSVR_AnalogState val,
+                                         OSVR_IN OSVR_ChannelCount chan)
+    OSVR_FUNC_NONNULL((1, 2));
+
+/** @brief Report the value of a single channel with the supplied timestamp
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
+    OSVR_INOUT_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_AnalogDeviceInterface iface, OSVR_IN OSVR_AnalogState val,
+    OSVR_IN OSVR_ChannelCount chan, OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 5));
+
+/** @brief Report the value of multiple channels
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_IN_PTR OSVR_DeviceToken dev,
+                                          OSVR_IN_PTR OSVR_AnalogDeviceInterface
+                                              iface,
+                                          OSVR_IN_PTR OSVR_AnalogState val[],
+                                          OSVR_IN OSVR_ChannelCount chans)
+    OSVR_FUNC_NONNULL((1, 2, 3));
+
+/** @brief Report the value of multiple channels with the supplied timestamp
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AnalogState val[], OSVR_IN OSVR_ChannelCount chans,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
 

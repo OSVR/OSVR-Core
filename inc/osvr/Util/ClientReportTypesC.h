@@ -6,9 +6,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 /*
@@ -54,6 +53,12 @@ typedef OSVR_Pose3 OSVR_PoseState;
 
 /** @brief Type of button state */
 typedef uint8_t OSVR_ButtonState;
+
+/** @brief OSVR_ButtonState value indicating "button down" */
+#define OSVR_BUTTON_PRESSED (1)
+
+/** @brief OSVR_ButtonState value indicating "button up" */
+#define OSVR_BUTTON_NOT_PRESSED (0)
 
 /** @brief Type of analog channel state */
 typedef double OSVR_AnalogState;

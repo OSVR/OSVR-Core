@@ -4,9 +4,8 @@
     @date 2014
 
     @author
-    Ryan Pavlik
-    <ryan@sensics.com>
-    <http://sensics.com>
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2014 Sensics, Inc.
@@ -78,8 +77,10 @@ namespace server {
 
     void ServerImpl::startAndAwaitShutdown() {
         start();
-        m_thread.join();
+        awaitShutdown();
     }
+
+    void ServerImpl::awaitShutdown() { m_thread.join(); }
 
     void ServerImpl::stop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
@@ -87,6 +88,7 @@ namespace server {
         m_thread.join();
         m_thread = boost::thread();
     }
+
     void ServerImpl::signalStop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         m_run.signalShutdown();
@@ -111,30 +113,56 @@ namespace server {
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
         if (f) {
-            m_mainloopMethods.push_back(f);
+            m_callControlled([&] { m_mainloopMethods.push_back(f); });
         }
     }
 
     bool ServerImpl::loop() {
-        m_conn->process();
-        for (auto &f : m_mainloopMethods) {
-            f();
+        bool shouldContinue;
+        {
+            /// @todo More elegant way of running queued things than grabbing a
+            /// mutex each time through?
+            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            m_conn->process();
+            for (auto &f : m_mainloopMethods) {
+                f();
+            }
+            shouldContinue = m_run.shouldContinue();
         }
-        /// @todo do queued things in here?
         /// @todo configurable waiting?
         m_thread.yield();
-        return m_run.shouldContinue();
+        return shouldContinue;
     }
 
-    template <typename Callable>
-    inline void ServerImpl::m_callControlled(Callable f) {
-        boost::unique_lock<boost::mutex> lock(m_runControl);
-        if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            /// @todo callControlled after the run loop started from outside the
-            /// run loop's thread is not yet implemented
-            throw std::logic_error("not yet implemented");
-        }
-        f();
+    bool ServerImpl::addRoute(std::string const &routingDirective) {
+        bool wasNew;
+        m_callControlled([&] {
+            wasNew = m_routes.addRoute(routingDirective);
+            if (m_running) {
+                m_sendRoutes();
+            }
+        });
+        return wasNew;
+    }
+
+    std::string ServerImpl::getRoutes(bool styled) const {
+        std::string ret;
+        m_callControlled([&] { ret = m_routes.getRoutes(styled); });
+        return ret;
+    }
+
+    std::string ServerImpl::getSource(std::string const &destination) const {
+        std::string ret;
+        m_callControlled([&] { ret = m_routes.getSource(destination); });
+        return ret;
+    }
+
+    void ServerImpl::m_sendRoutes() {
+        std::string message = m_routes.getRoutes();
+        OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
+                                         << " routes to the client.");
+        m_sysDevice->sendData(m_routingMessageType.get(), message.c_str(),
+                              message.size());
     }
 
 } // namespace server

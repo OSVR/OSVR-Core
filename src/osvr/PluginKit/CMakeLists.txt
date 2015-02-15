@@ -15,11 +15,10 @@ set(API
 set(SOURCE
     AnalogInterfaceC.cpp
     ButtonInterfaceC.cpp
-    DeviceInitObject.cpp
-    DeviceInitObject.h
     DeviceInterfaceC.cpp
     HandleNullContext.h
     PluginRegistrationC.cpp
+    PointerWrapper.h
     TrackerInterfaceC.cpp)
 
 osvr_add_library()

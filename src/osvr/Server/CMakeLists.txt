@@ -2,18 +2,20 @@ osvr_setup_lib_vars(Server)
 
 set(API
     "${HEADER_LOCATION}/ConfigureServer.h"
+    "${HEADER_LOCATION}/ConfigureServerFromFile.h"
     "${HEADER_LOCATION}/Server.h"
     "${HEADER_LOCATION}/ServerPtr.h"
     "${HEADER_LOCATION}/RegisterShutdownHandler.h"
     "${HEADER_LOCATION}/RegisterShutdownHandlerPOSIXSignal.h"
-    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h")
+    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h"
+    "${HEADER_LOCATION}/RouteContainer.h")
 
 set(SOURCE
     ConfigureServer.cpp
     Server.cpp
     ServerImpl.cpp
     ServerImpl.h
-    ServerImpl_JSON.cpp)
+    RouteContainer.cpp)
 
 osvr_add_library()
 
@@ -32,13 +34,6 @@ target_include_directories(${LIBNAME_FULL}
 target_compile_options(${LIBNAME_FULL}
     PUBLIC
     ${OSVR_CXX11_FLAGS})
-
-if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
-    # Work around a foolish insistence to use DLLs on MXE that don't exist.
-    target_compile_definitions(${LIBNAME_FULL}
-        PRIVATE
-        BOOST_THREAD_USE_LIB)
-endif()
 
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
