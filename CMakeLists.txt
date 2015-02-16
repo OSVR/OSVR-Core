@@ -90,11 +90,11 @@ set_property(GLOBAL PROPERTY
 ###
 find_package(libfunctionality REQUIRED)
 
-if(__ANDROID__)
-        # Android cmake toolchain bugfix for finding Boost
+if(ANDROID)
+        # Android cmake toolchain bugfix for finding Boos
         find_host_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
 else()
-        find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters 
+        find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters       
 endif()
 
 find_package(Threads REQUIRED)
