@@ -95,11 +95,19 @@ namespace pluginkit {
             cv::Mat const &frame(message.getFrame());
             util::NumberTypeData typedata =
                 util::opencvNumberTypeData(frame.type());
-            OSVR_ReturnCode ret = osvrDeviceImagingReportFrame(
-                dev, m_iface, frame.size[0], frame.size[1], frame.channels(),
-                typedata.getSize(), typedata.isFloatingPoint() ? 1 : 0,
-                typedata.isSigned() ? 1 : 0, frame.data, message.getSensor(),
-                &timestamp);
+            OSVR_ImagingMetadata metadata;
+            metadata.channels = frame.channels();
+            metadata.depth = typedata.getSize();
+            metadata.width = frame.size[0];
+            metadata.height = frame.size[1];
+            metadata.type = typedata.isFloatingPoint()
+                                ? OSVR_IVT_FLOATING_POINT
+                                : (typedata.isSigned() ? OSVR_IVT_SIGNED_INT
+                                                       : OSVR_IVT_UNSIGNED_INT);
+
+            OSVR_ReturnCode ret =
+                osvrDeviceImagingReportFrame(dev, m_iface, metadata, frame.data,
+                                             message.getSensor(), &timestamp);
             if (OSVR_RETURN_SUCCESS != ret) {
                 throw std::runtime_error("Could not send imaging message!");
             }

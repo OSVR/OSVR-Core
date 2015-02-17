@@ -56,18 +56,19 @@ osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceImagingReportFrame(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
-    OSVR_IN_PTR OSVR_ImagingDeviceInterface iface, OSVR_IN size_t height,
-    OSVR_IN size_t width, OSVR_IN size_t channels, OSVR_IN size_t depth,
-    OSVR_IN char isFloatingPoint, OSVR_IN char isSigned,
-    OSVR_IN_PTR void *imageData, OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+OSVR_ReturnCode
+osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken dev,
+                             OSVR_IN_PTR OSVR_ImagingDeviceInterface iface,
+                             OSVR_IN OSVR_ImagingMetadata metadata,
+                             OSVR_IN_PTR void *imageData,
+                             OSVR_IN OSVR_ChannelCount sensor,
+                             OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     auto guard = dev->getSendGuard();
     if (guard->lock()) {
         bool sendResult =
             true; /// @todo (*iface)->setValue(val, chan, *timestamp);
-        OSVR_DEV_VERBOSE("Sending image report " << width << "x" << height);
+        OSVR_DEV_VERBOSE("Sending image report " << metadata.width << "x"
+                                                 << metadata.height);
         return sendResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
     }
 
