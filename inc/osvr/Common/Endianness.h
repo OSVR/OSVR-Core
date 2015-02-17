@@ -90,7 +90,7 @@ namespace common {
         namespace detail {
             /// @brief Stock implementation of a no-op host-network conversion
             template <typename T> struct ByteOrderNoOp {
-                static T apply(T v) { return v }
+                static T apply(T v) { return v; }
             };
 
             template <typename T> struct ByteSwap : boost::false_type {

@@ -120,6 +120,8 @@ namespace common {
             friend class BufferWrapper;
         };
 
+        typedef typename BufferType::value_type ElementType;
+
         /// @brief Constructs an empty buffer
         BufferWrapper(){};
 
@@ -134,7 +136,7 @@ namespace common {
         }
 
         /// @brief Append a byte-array's contents
-        void append(void const * v, size_t n) {
+        void append(ElementType const * v, size_t n) {
             m_buf.insert(m_buf.end(), v, v + n);
         }
 
@@ -149,7 +151,6 @@ namespace common {
         Reader startReading() const { return Reader(m_buf); }
 
       private:
-        typedef typename BufferType::value_type ElementType;
         BufferType m_buf;
     };
 

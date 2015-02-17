@@ -97,7 +97,7 @@ namespace common {
             /// @param v The value to process - in this case, to add to the
             /// buffer.
             template <typename T,
-                      typename Tag = DefaultSerializationTypeTag<T> >
+                      typename Tag = DefaultSerializationTag<T> >
             void operator()(typename boost::call_traits<T>::param_type v,
                             Tag const & = Tag()) {}
 
