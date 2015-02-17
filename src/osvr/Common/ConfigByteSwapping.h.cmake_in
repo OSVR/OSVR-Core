@@ -1,0 +1,24 @@
+/** @file
+    @brief Automatically-generated configuration header - do not edit!
+
+    @date 2015
+
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
+*/
+
+// Copyright 2015 Sensics, Inc.
+//
+// All rights reserved.
+//
+// (Final version intended to be licensed under
+// the Apache License, Version 2.0)
+
+#ifndef INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369
+#define INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369
+
+#cmakedefine OSVR_HAVE_BYTESWAP_H
+
+#endif // INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369
+
