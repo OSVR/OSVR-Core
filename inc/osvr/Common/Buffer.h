@@ -20,7 +20,7 @@
 #define INCLUDED_Buffer_h_GUID_55EB8AAF_57A7_49A4_3A3A_49293A72211D
 
 // Internal Includes
-// - none
+#include <osvr/Common/Buffer_fwd.h>
 
 // Library/third-party includes
 #include <boost/version.hpp>
@@ -78,7 +78,7 @@ namespace common {
 
     /// @brief Given an alignment in bytes, and a current size of a buffer,
     /// return the number of bytes of padding required to align the next field
-    /// to be added to the buffer at the desired alignment.
+    /// to be added to the buffer at the desired alignment within that buffer.
     ///
     /// That is, return some padding such that (currentSize + padding) %
     /// alignment == 0 for alignment > 1.
@@ -88,88 +88,93 @@ namespace common {
     /// @param currentSize Current number of bytes in a buffer
     inline size_t computeAlignmentPadding(size_t alignment,
                                           size_t currentSize) {
-
         size_t ret = 0;
         if (2 > alignment) {
+            /// No alignment requested
             return ret;
         }
         auto leftover = currentSize % alignment;
         if (leftover == 0) {
+            /// Buffer is already aligned
             return ret;
         }
+        /// Buffer needs some padding
         ret = alignment - leftover;
         return ret;
     }
+
+    /// @brief Provides for a single reading pass over a buffer. It is
+    /// important that the buffer not change while a Reader obtained from it
+    /// is still in scope.
+    ///
+    /// Get one by calling Buffer::startReading()
+    template <typename ContainerType> class BufferReader {
+      public:
+        size_t bytesRead() const { return m_readIter - m_begin; }
+        size_t bytesRemaining() const { return m_end - m_readIter; }
+        /// @brief Get the binary representation of a type from a buffer
+        template <typename T> void read(T &v) {
+            if (bytesRemaining() < sizeof(T)) {
+                throw std::runtime_error(
+                    "Not enough data in the buffer to read this type!");
+            }
+            /// Safe to do without violating strict aliasing because
+            /// ElementType is a character type.
+            ElementType *dest = reinterpret_cast<ElementType *>(&v);
+
+            auto readEnd = m_readIter + sizeof(T);
+            std::copy(m_readIter, readEnd, dest);
+            m_readIter = readEnd;
+        }
+
+        /// @brief Get the binary representation of a type from a buffer,
+        /// after skipping the necessary number of bytes to begin the read
+        /// at the given alignment.
+        template <typename T> void readAligned(T &v, size_t const alignment) {
+            skipPadding(computeAlignmentPadding(alignment, bytesRead()));
+            read(v);
+        }
+
+        /// @brief Skip reading the given number of bytes, assumed to be
+        /// padding.
+        void skipPadding(size_t const bytes) {
+            if (bytes == 0) {
+                return;
+            }
+            if (bytesRemaining() < bytes) {
+                throw std::runtime_error("Can't skip that many padding "
+                                         "bytes, not that many bytes "
+                                         "left!");
+            }
+            m_readIter += bytes;
+        }
+
+      private:
+        typedef typename ContainerType::const_iterator const_iterator;
+        BufferReader(ContainerType const &buf)
+            : m_buf(&buf), m_begin(m_buf->begin()), m_readIter(m_buf->begin()),
+              m_end(m_buf->end()) {}
+        ContainerType const *m_buf;
+        const_iterator m_begin;
+        const_iterator m_readIter;
+        const_iterator m_end;
+        typedef typename ContainerType::value_type ElementType;
+        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
+                                "Container must have byte-sized elements");
+        friend class Buffer<ContainerType>; ///< permits construction
+    };
 
     /// @brief A buffer of bytes, built on a byte-vector-like container.
     /// Provides methods for easily appending to the buffer (including alignment
     /// padding), and a nested class for reading from such a buffer.
     template <typename ContainerType = BufferByteVector> class Buffer {
       public:
-        /// @brief Provides for a single reading pass over the buffer. It is
-        /// important that the buffer not change while a Reader obtained from it
-        /// is still in scope.
-        class Reader {
-          public:
-            size_t bytesRead() const { return m_readIter - m_begin; }
-            size_t bytesRemaining() const { return m_end - m_readIter; }
-            /// @brief Get the binary representation of a type from a buffer
-            template <typename T> void read(T &v) {
-                if (bytesRemaining() < sizeof(T)) {
-                    throw std::runtime_error(
-                        "Not enough data in the buffer to read this type!");
-                }
-                /// Safe to do without violating strict aliasing because
-                /// ElementType is a character type.
-                ElementType *dest = reinterpret_cast<ElementType *>(&v);
-
-                auto readEnd = m_readIter + sizeof(T);
-                std::copy(m_readIter, readEnd, dest);
-                m_readIter = readEnd;
-            }
-
-            /// @brief Get the binary representation of a type from a buffer,
-            /// after skipping the necessary number of bytes to begin the read
-            /// at the given alignment.
-            template <typename T>
-            void readAligned(T &v, size_t const alignment) {
-                skipPadding(computeAlignmentPadding(alignment, bytesRead()));
-                read(v);
-            }
-
-            /// @brief Skip reading the given number of bytes, assumed to be
-            /// padding.
-            void skipPadding(size_t const bytes) {
-                if (bytes == 0) {
-                    return;
-                }
-                if (bytesRemaining() < bytes) {
-                    throw std::runtime_error("Can't skip that many padding "
-                                             "bytes, not that many bytes "
-                                             "left!");
-                }
-                m_readIter += bytes;
-            }
-
-          private:
-            typedef typename ContainerType::const_iterator const_iterator;
-            Reader(ContainerType const &buf)
-                : m_buf(&buf), m_begin(m_buf->begin()),
-                  m_readIter(m_buf->begin()), m_end(m_buf->end()) {}
-            ContainerType const *m_buf;
-            const_iterator m_begin;
-            const_iterator m_readIter;
-            const_iterator m_end;
-            typedef typename ContainerType::value_type ElementType;
-            friend class Buffer;
-        };
-
         /// @brief The (necessarily byte-size) type of elements in the
         /// underlying container.
         typedef typename ContainerType::value_type ElementType;
 
-        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
-                                "Container must have byte-sized elements");
+        /// @brief The corresponding BufferReader type.
+        typedef BufferReader<ContainerType> Reader;
 
         /// @brief Constructs an empty buffer
         Buffer() {}
@@ -236,6 +241,9 @@ namespace common {
         /// reader!
         Reader startReading() const { return Reader(m_buf); }
 
+#if 0
+        /// @todo Commented out because YAGNI
+
         typedef typename ContainerType::const_iterator const_iterator;
 
         /// @brief Gets the "begin" iterator
@@ -243,7 +251,7 @@ namespace common {
 
         /// @brief Gets the "past the end" iterator
         const_iterator end() const { return m_buf.end(); }
-
+#endif
         /// @brief Gets the current size, in bytes.
         size_t size() const { return m_buf.size(); }
 
