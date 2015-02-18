@@ -32,6 +32,24 @@ namespace osvr {
 namespace common {
 
     namespace serialization {
+        /// @brief Serialize a value to a buffer, with optional tag to specify
+        /// non-default traits.
+        template <typename T, typename BufferWrapperType,
+                  typename Tag = DefaultSerializationTag<T> >
+        inline void serializeRaw(BufferWrapperType &buf, T const &v,
+                                 Tag const & tag = Tag()) {
+            SerializationTraits<Tag>::buffer(buf, v, tag);
+        }
+
+        /// @brief Deserialize a value from a buffer, with optional tag to
+        /// specify non-default traits.
+        template <typename T, typename BufferReaderType,
+                  typename Tag = DefaultSerializationTag<T> >
+        inline void deserializeRaw(BufferReaderType &reader, T &v,
+                                   Tag const & = Tag()) {
+            SerializationTraits<Tag>::unbuffer(reader, v, tag);
+        }
+
         /// @brief Functor class used by MessageSerializationBase to serialize a
         /// message (passed as the "process" argument to the derived class's
         /// processMessage method).
@@ -40,14 +58,6 @@ namespace common {
           public:
             /// @brief Constructor, taking the buffer
             SerializeFunctor(BufferWrapperType &buf) : m_buf(buf) {}
-
-            /// @brief Implementation of action, using call_traits for optimized
-            /// value handling.
-            template <typename T, typename Tag>
-            void apply(typename boost::call_traits<T>::param_type v,
-                       Tag const &tag = Tag()) {
-                SerializationTraits<Tag>::buffer(m_buf, v, tag);
-            }
 
             /// @brief Main function call operator method.
             ///
@@ -74,6 +84,13 @@ namespace common {
             }
 
           private:
+            /// @brief Implementation of action, using call_traits for optimized
+            /// value handling.
+            template <typename T, typename Tag>
+            void apply(typename boost::call_traits<T>::param_type v,
+                       Tag const &tag = Tag()) {
+                serializeRaw(m_buf, v, tag);
+            }
             BufferWrapperType &m_buf;
         };
 
@@ -83,12 +100,8 @@ namespace common {
         template <typename BufferReaderType>
         class DeserializeFunctor : boost::noncopyable {
           public:
-#if 0
-            typedef BufferWrapper<>::Reader Reader;
-#endif
-            typedef BufferReaderType Reader;
             /// @brief Constructor, taking the buffer reader
-            DeserializeFunctor(Reader &reader) : m_reader(reader) {}
+            DeserializeFunctor(BufferReaderType &reader) : m_reader(reader) {}
 
             /// @brief Main function call operator method.
             ///
@@ -105,7 +118,6 @@ namespace common {
             /// buffer.
             template <typename Tag, typename T>
             void operator()(T &v, Tag const &tag = Tag()) {
-
                 apply<T, Tag>(v, tag);
             }
 
@@ -115,9 +127,9 @@ namespace common {
             template <typename T, typename Tag>
             void apply(typename boost::call_traits<T>::reference v,
                        Tag const &tag = Tag()) {
-                SerializationTraits<Tag>::unbuffer(m_reader, v, tag);
+                deserializeRaw(m_reader, v, tag);
             }
-            Reader &m_reader;
+            BufferReaderType &m_reader;
         };
 
     } // namespace serialization
@@ -147,7 +159,8 @@ namespace common {
     /// needs to perform computation.
     template <typename MessageClass, typename BufferWrapperType>
     void serialize(MessageClass &msg, BufferWrapperType &buf) {
-        /// @todo add another functor to first compute message length and reserve buffer space?
+        /// @todo add another functor to first compute message length and
+        /// reserve buffer space?
         serialization::SerializeFunctor<BufferWrapperType> functor(buf);
         msg.processMessage(functor);
     }
