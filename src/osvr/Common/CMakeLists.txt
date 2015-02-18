@@ -10,10 +10,10 @@ set(API
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/Serialization.h"
+    "${HEADER_LOCATION}/SerializationTraits.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
-    ConfigByteSwapping.h.cmake_in
     MessageRegistration.cpp
     Serialization.cpp)
 
