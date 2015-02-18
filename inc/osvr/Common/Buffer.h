@@ -81,7 +81,6 @@ namespace common {
         auto leftover = currentSize % alignment;
         return (leftover == 0) ? 0 : (alignment - leftover);
     }
-    template <typename T> class BufferReader;
 
     template <typename BufferType = Buffer> class BufferWrapper {
       public:
