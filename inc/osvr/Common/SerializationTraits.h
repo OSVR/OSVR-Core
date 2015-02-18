@@ -63,78 +63,65 @@ namespace common {
         /// buffer(BufferWrapperType &buf, param_type val, Tag const&)`
         /// - `template <typename BufferReaderType> static void
         /// unbuffer(BufferReaderType &buf, reference val, Tag const&)`
+        /// - `static size_t spaceRequired(size_t existingBytes)`
         ///
         /// The tag parameter may be used to pass runtime arguments in (like a
         /// length), if required.
+        ///
+        /// A traits class should inherit from `BaseSerializationTraits<T>` to
+        /// get useful typedefs.
         ///
         /// The dummy template parameter exists for usage of `enable_if`.
         template <typename Tag, typename Dummy = void>
         struct SerializationTraits;
 
-        /// @brief CRTP base of default serialization traits - shared between
-        /// traits with padding (for alignment) and traits without padding.
-        template <typename T, typename Derived> struct BaseSerializationTraits {
+        /// @brief Base of serialization traits, containing useful typedefs.
+        template <typename T> struct BaseSerializationTraits {
             typedef T type;
             typedef typename boost::call_traits<type>::param_type param_type;
             typedef typename boost::call_traits<type>::value_type value_type;
-            typedef typename boost::call_traits<type>::reference reference;
+            typedef typename boost::call_traits<type>::reference reference_type;
+        };
 
+        /// @brief Serialization traits for a given arithmetic type (that is, a
+        /// number type that has a network byte order) with a specified
+        /// alignment
+        template <typename T, size_t Alignment>
+        struct ArithmeticSerializationTraits : BaseSerializationTraits<T> {
+            typedef BaseSerializationTraits<T> Base;
+            typedef T type;
             /// @brief Buffers an object of this type.
             template <typename BufferWrapperType, typename Tag>
-            static void buffer(BufferWrapperType &buf, param_type val,
-                               Tag const &) {
-                buf.appendPadding(Derived::paddingRequired(buf.size()));
-                buf.append(hton(val));
+            static void buffer(BufferWrapperType &buf,
+                               typename Base::param_type val, Tag const &) {
+                buf.appendAligned(hton(val), Alignment);
             }
 
             /// @brief Reads an object of this type from a buffer
             template <typename BufferReaderType, typename Tag>
-            static void unbuffer(BufferReaderType &buf, reference val,
+            static void unbuffer(BufferReaderType &buf,
+                                 typename Base::reference_type val,
                                  Tag const &) {
-                buf.skipPadding(Derived::paddingRequired(buf.bytesRead()));
-                buf.read(val);
+                buf.readAligned(val, Alignment);
                 val = ntoh(val);
             }
 
-            /// @brief Returns the space required to buffer a value of this type
-            /// in a buffer with the given existing size (taking into account
-            /// padding for alignment, if any)
-            static size_t spaceRequired(size_t existingBufferLength) {
-                return Derived::paddingRequired(existingBufferLength) +
-                       sizeof(type);
+            /// @brief Returns the number of bytes required for this type (and
+            /// alignment padding if applicable) to be appended to a buffer of
+            /// the supplied existing size.
+            static size_t spaceRequired(size_t existingBytes) {
+                return computeAlignmentPadding(Alignment, existingBytes) +
+                       sizeof(T);
             }
         };
 
-        /// @brief Default serialization traits for a given type, with alignment
-        /// > 1
-        template <typename T, size_t Alignment>
-        struct DefaultSerializationTraits
-            : BaseSerializationTraits<
-                  T, DefaultSerializationTraits<T, Alignment> > {
-            typedef T type;
-
-            BOOST_STATIC_ASSERT(Alignment > 1);
-            static size_t alignment() { return Alignment; }
-            static size_t paddingRequired(size_t existingBufferLength) {
-                return computeAlignmentPadding(Alignment, existingBufferLength);
-            }
-        };
-
-        /// @brief Default serialization traits for a given type, with alignment
-        /// == 1 which implies no padding required
-        template <typename T>
-        struct DefaultSerializationTraits<T, 1>
-            : BaseSerializationTraits<T, DefaultSerializationTraits<T, 1> > {
-            typedef T type;
-            static size_t paddingRequired(size_t) { return 0; }
-        };
-
-        /// @brief Use the default serialization traits for arithmetic types.
+        /// @brief Set up the default serialization traits for arithmetic types,
+        /// aligning to their type size.
         template <typename T>
         struct SerializationTraits<
             DefaultSerializationTag<T>,
             typename boost::enable_if<boost::is_arithmetic<T> >::type>
-            : DefaultSerializationTraits<T, sizeof(T)> {
+            : ArithmeticSerializationTraits<T, sizeof(T)> {
 
             BOOST_STATIC_ASSERT(boost::alignment_of<T>::value == sizeof(T));
         };
