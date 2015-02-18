@@ -7,6 +7,7 @@ configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/Config
 
 set(API
     "${HEADER_LOCATION}/Buffer.h"
+    "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/Serialization.h"
@@ -14,6 +15,7 @@ set(API
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
+    Common.cpp
     MessageRegistration.cpp
     Serialization.cpp)
 
