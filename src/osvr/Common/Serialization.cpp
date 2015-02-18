@@ -25,5 +25,26 @@
 // - none
 
 namespace osvr {
-namespace common {} // namespace common
+namespace common {
+    class MyClass : public MessageSerializationBase<MyClass> {
+      public:
+        MyClass() : a(1), b(2), c(3) {}
+        template <typename T> void processMessage(T &process) {
+            /*
+            process<int32_t>(a);
+            process<uint32_t>(b);
+            process<int8_t>(c);
+            */
+        }
+        int32_t a;
+        uint32_t b;
+        int8_t c;
+    };
+
+    void trySerializing() {
+        BufferWrapper<> buf;
+        MyClass data;
+        data.serialize(buf);
+    }
+} // namespace common
 } // namespace osvr
