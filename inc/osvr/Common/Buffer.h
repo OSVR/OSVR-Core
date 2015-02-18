@@ -101,8 +101,14 @@ namespace common {
         return ret;
     }
 
+    /// @brief A buffer of bytes, built on a byte-vector-like container.
+    /// Provides methods for easily appending to the buffer (including alignment
+    /// padding), and a nested class for reading from such a buffer.
     template <typename ContainerType = BufferByteVector> class Buffer {
       public:
+        /// @brief Provides for a single reading pass over the buffer. It is
+        /// important that the buffer not change while a Reader obtained from it
+        /// is still in scope.
         class Reader {
           public:
             size_t bytesRead() const { return m_readIter - m_begin; }
@@ -158,7 +164,12 @@ namespace common {
             friend class Buffer;
         };
 
+        /// @brief The (necessarily byte-size) type of elements in the
+        /// underlying container.
         typedef typename ContainerType::value_type ElementType;
+
+        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
+                                "Container must have byte-sized elements");
 
         /// @brief Constructs an empty buffer
         Buffer() {}
@@ -217,7 +228,7 @@ namespace common {
             if (bytes == 0) {
                 return;
             }
-            m_buf.insert(m_buf.end(), bytes, '\0');
+            m_buf.insert(m_buf.end(), bytes, PADDING_ELEMENT);
         }
 
         /// @brief Returns a reader object, for making a single read pass over
@@ -227,13 +238,20 @@ namespace common {
 
         typedef typename ContainerType::const_iterator const_iterator;
 
+        /// @brief Gets the "begin" iterator
         const_iterator begin() const { return m_buf.begin(); }
 
+        /// @brief Gets the "past the end" iterator
         const_iterator end() const { return m_buf.end(); }
 
+        /// @brief Gets the current size, in bytes.
         size_t size() const { return m_buf.size(); }
 
+        /// @brief Provides access to the underlying container.
+        ContainerType &getContents() { return m_buf; }
+
       private:
+        static const ElementType PADDING_ELEMENT = '\0';
         ContainerType m_buf;
     };
 } // namespace common
