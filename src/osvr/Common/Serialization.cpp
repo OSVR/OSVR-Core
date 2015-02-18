@@ -16,7 +16,7 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/Common/Serialization.h>
+// - none
 
 // Library/third-party includes
 // - none
@@ -25,25 +25,5 @@
 // - none
 
 namespace osvr {
-namespace common {
-    class MyClass : public MessageSerializationBase<MyClass> {
-      public:
-        MyClass() : a(1), b(2), c(3) {}
-        template <typename T> void processMessage(T &process) {
-
-            process(a);
-            process(b);
-            process(c);
-        }
-        int32_t a;
-        uint32_t b;
-        int8_t c;
-    };
-
-    void trySerializing() {
-        BufferWrapper<> buf;
-        MyClass data;
-        data.serialize(buf);
-    }
-} // namespace common
+namespace common {} // namespace common
 } // namespace osvr
