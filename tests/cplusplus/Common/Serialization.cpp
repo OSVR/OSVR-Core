@@ -175,6 +175,55 @@ TYPED_TEST(ArithmeticRawSerialization, RoundTripNegative) {
 #pragma warning(pop)
 #endif
 
+class SerializationAlignment : public ::testing::Test {
+  public:
+    virtual void SetUp() {
+        /// Give them some dummy values.
+        in8 = 8;
+        in32 = 32;
+        /// Zero the outputs
+        out8 = 0;
+        out32 = 0;
+    }
+
+    void checkOutput() {
+        ASSERT_EQ(in32, out32);
+        ASSERT_EQ(in8, out8);
+    }
+    int8_t in8;
+    int32_t in32;
+    int8_t out8;
+    int32_t out32;
+    Buffer<> buf;
+};
+
+TEST_F(SerializationAlignment, Buffer32Then8) {
+    osvr::common::serialization::serializeRaw(buf, in32);
+    ASSERT_EQ(buf.size(), sizeof(in32));
+    osvr::common::serialization::serializeRaw(buf, in8);
+    ASSERT_EQ(buf.size(), sizeof(in32) + sizeof(in8))
+        << "No padding should be required here";
+
+    auto reader = buf.startReading();
+    osvr::common::serialization::deserializeRaw(reader, out32);
+    osvr::common::serialization::deserializeRaw(reader, out8);
+    ASSERT_EQ(reader.bytesRemaining(), 0);
+    checkOutput();
+}
+
+TEST_F(SerializationAlignment, Buffer8Then32) {
+    osvr::common::serialization::serializeRaw(buf, in8);
+    ASSERT_EQ(buf.size(), sizeof(in8));
+    osvr::common::serialization::serializeRaw(buf, in32);
+    ASSERT_EQ(buf.size(), 2 * sizeof(in32)) << "Should be padded out to 32bits";
+
+    auto reader = buf.startReading();
+    osvr::common::serialization::deserializeRaw(reader, out8);
+    osvr::common::serialization::deserializeRaw(reader, out32);
+    ASSERT_EQ(reader.bytesRemaining(), 0);
+    checkOutput();
+}
+
 class MyClass {
   public:
     MyClass() : a(0), b(0), c(0) {}
@@ -198,6 +247,9 @@ TEST(Serialization, SelfDescriptive) {
         data.c = 3;
         osvr::common::serialize(buf, data);
     }
+
+    ASSERT_EQ(buf.size(), sizeof(int32_t) + sizeof(uint32_t) + sizeof(int8_t))
+        << "No padding should be needed here.";
 
     {
         MyClass data;
