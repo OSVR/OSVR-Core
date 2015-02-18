@@ -123,6 +123,15 @@ namespace common {
                 m_readIter = readEnd;
             }
 
+            /// @brief Get the binary representation of a type from a buffer,
+            /// after skipping the necessary number of bytes to begin the read
+            /// at the given alignment.
+            template <typename T>
+            void readAligned(T &v, size_t const alignment) {
+                skipPadding(computeAlignmentPadding(alignment, bytesRead()));
+                read(v);
+            }
+
             /// @brief Skip reading the given number of bytes, assumed to be
             /// padding.
             void skipPadding(size_t const bytes) {
@@ -160,16 +169,39 @@ namespace common {
         explicit BufferWrapper(BufferType const &buf) : m_buf(buf) {}
 
         /// @brief Append the binary representation of a value
+        ///
+        /// The value cannot be a pointer here.
         template <typename T> void append(T const v) {
+            BOOST_STATIC_ASSERT(!boost::is_pointer<T>::value);
             /// Safe to do without violating strict aliasing because ElementType
             /// is a character type.
             ElementType const *src = reinterpret_cast<ElementType const *>(&v);
             m_buf.insert(m_buf.end(), src, src + sizeof(T));
         }
 
+        /// @brief Append the binary representation of a value, after adding the
+        /// necessary number of padding bytes to begin the write at the given
+        /// alignment within the buffer.
+        ///
+        /// The value cannot be a pointer here.
+        template <typename T>
+        void appendAligned(T const v, size_t const alignment) {
+            appendPadding(computeAlignmentPadding(alignment, size()));
+            append(v);
+        }
+
         /// @brief Append a byte-array's contents
-        void append(ElementType const *v, size_t n) {
+        void append(ElementType const *v, size_t const n) {
             m_buf.insert(m_buf.end(), v, v + n);
+        }
+
+        /// @brief Append a byte-array's contents, after adding the necessary
+        /// number of padding bytes to begin the write at the given alignment
+        /// within the buffer.
+        void appendAligned(ElementType const *v, size_t const n,
+                           size_t const alignment) {
+            appendPadding(computeAlignmentPadding(alignment, size()));
+            append(v, n);
         }
 
         /// @brief Append the specified number of bytes of padding.
