@@ -89,7 +89,7 @@ set_property(GLOBAL PROPERTY
 # Dependencies
 ###
 find_package(libfunctionality REQUIRED)
-find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
+find_package(Boost 1.44 COMPONENTS thread system date_time chrono program_options filesystem REQUIRED) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
 find_package(Threads REQUIRED)
 
 add_library(boost_thread INTERFACE)
@@ -107,6 +107,14 @@ if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
         INTERFACE
         BOOST_THREAD_USE_LIB)
 endif()
+
+add_library(boost_filesystem INTERFACE)
+target_link_libraries(boost_filesystem
+    INTERFACE
+    ${Boost_FILESYSTEM_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARIES})
+target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
+target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
 
 find_package(jsoncpp REQUIRED)
 
