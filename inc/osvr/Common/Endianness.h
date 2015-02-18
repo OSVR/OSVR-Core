@@ -186,7 +186,7 @@ namespace common {
             BOOST_STATIC_ASSERT(sizeof(Src) == sizeof(Dest));
             Dest ret;
             memcpy(reinterpret_cast<char *>(&ret),
-                   reinterpret_cast<char const *>(src), sizeof(src));
+                   reinterpret_cast<char const *>(&src), sizeof(src));
             return ret;
         }
 
