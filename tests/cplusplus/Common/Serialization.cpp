@@ -19,6 +19,7 @@
 // Internal Includes
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
+#include <osvr/Common/BufferTraits.h>
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
@@ -29,7 +30,7 @@
 
 using osvr::common::Buffer;
 
-TEST(Serialization, BufferWrapperEmptyConstruction) {
+TEST(Buffer, EmptyConstructionAndInvalidRead) {
     osvr::common::Buffer<> buf;
     ASSERT_EQ(buf.size(), 0);
     auto reader = buf.startReading();
@@ -38,6 +39,21 @@ TEST(Serialization, BufferWrapperEmptyConstruction) {
     uint16_t val;
     ASSERT_THROW(reader.read(val), std::runtime_error);
     ASSERT_THROW(reader.readAligned(val, sizeof(val)), std::runtime_error);
+}
+
+TEST(Buffer, TypeTraits) {
+    using osvr::common::is_buffer;
+    using osvr::common::is_buffer_reader;
+    using osvr::common::BufferReader;
+    using osvr::common::BufferByteVector;
+
+    ASSERT_TRUE(is_buffer<Buffer<> >::value);
+    ASSERT_FALSE(is_buffer<BufferReader<BufferByteVector> >::value);
+    ASSERT_FALSE(is_buffer<BufferByteVector>::value);
+
+    ASSERT_FALSE(is_buffer_reader<Buffer<> >::value);
+    ASSERT_TRUE(is_buffer_reader<BufferReader<BufferByteVector> >::value);
+    ASSERT_FALSE(is_buffer_reader<BufferByteVector>::value);
 }
 
 template <typename T> class IntRawSerialization : public ::testing::Test {};
