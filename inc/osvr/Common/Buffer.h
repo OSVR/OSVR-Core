@@ -70,11 +70,11 @@ namespace common {
     typedef std::allocator<BufferElement> BufferAllocator;
 #endif
 
-    /// @brief A typedef for a buffer (a vector of bytes), that might be
+    /// @brief A typedef for a vector of bytes usable as a buffer, that might be
     /// "over-aligned" in some desirable way.
     ///
     /// Check ActualBufferAlignment::value to see if it is actually aligned.
-    typedef std::vector<BufferElement, BufferAllocator> Buffer;
+    typedef std::vector<BufferElement, BufferAllocator> BufferByteVector;
 
     /// @brief Given an alignment in bytes, and a current size of a buffer,
     /// return the number of bytes of padding required to align the next field
@@ -101,22 +101,21 @@ namespace common {
         return ret;
     }
 
-    template <typename BufferType = Buffer> class BufferWrapper {
+    template <typename ContainerType = BufferByteVector> class Buffer {
       public:
         class Reader {
           public:
             size_t bytesRead() const { return m_readIter - m_begin; }
-            size_t remaining() const { return m_end - m_readIter; }
+            size_t bytesRemaining() const { return m_end - m_readIter; }
             /// @brief Get the binary representation of a type from a buffer
             template <typename T> void read(T &v) {
-                if (remaining() < sizeof(T)) {
+                if (bytesRemaining() < sizeof(T)) {
                     throw std::runtime_error(
                         "Not enough data in the buffer to read this type!");
                 }
                 /// Safe to do without violating strict aliasing because
                 /// ElementType is a character type.
-                ElementType const *dest =
-                    reinterpret_cast<ElementType const *>(&v);
+                ElementType *dest = reinterpret_cast<ElementType *>(&v);
 
                 auto readEnd = m_readIter + sizeof(T);
                 std::copy(m_readIter, readEnd, dest);
@@ -138,7 +137,7 @@ namespace common {
                 if (bytes == 0) {
                     return;
                 }
-                if (remaining() < bytes) {
+                if (bytesRemaining() < bytes) {
                     throw std::runtime_error("Can't skip that many padding "
                                              "bytes, not that many bytes "
                                              "left!");
@@ -147,26 +146,35 @@ namespace common {
             }
 
           private:
-            typedef typename BufferType::const_iterator const_iterator;
-            Reader(BufferType const &buf)
+            typedef typename ContainerType::const_iterator const_iterator;
+            Reader(ContainerType const &buf)
                 : m_buf(&buf), m_begin(m_buf->begin()),
                   m_readIter(m_buf->begin()), m_end(m_buf->end()) {}
-            BufferType const *m_buf;
+            ContainerType const *m_buf;
             const_iterator m_begin;
             const_iterator m_readIter;
             const_iterator m_end;
-            typedef typename BufferType::value_type ElementType;
-            friend class BufferWrapper;
+            typedef typename ContainerType::value_type ElementType;
+            friend class Buffer;
         };
 
-        typedef typename BufferType::value_type ElementType;
+        typedef typename ContainerType::value_type ElementType;
 
         /// @brief Constructs an empty buffer
-        BufferWrapper(){};
+        Buffer() {}
 
         /// @brief Constructs a buffer wrapper by copy-constructing the
-        /// contained buffer type.
-        explicit BufferWrapper(BufferType const &buf) : m_buf(buf) {}
+        /// contained type.
+        explicit Buffer(ContainerType const &buf) : m_buf(buf) {}
+
+        /// @brief Constructs a buffer by copying from two input
+        /// iterators, representing a half-open range [beginIt, endIt)
+        ///
+        /// Passed directly to contained type, so semantics are
+        /// identical.
+        template <typename InputIterator>
+        Buffer(InputIterator beginIt, InputIterator endIt)
+            : m_buf(beginIt, endIt) {}
 
         /// @brief Append the binary representation of a value
         ///
@@ -217,7 +225,7 @@ namespace common {
         /// reader!
         Reader startReading() const { return Reader(m_buf); }
 
-        typedef typename BufferType::const_iterator const_iterator;
+        typedef typename ContainerType::const_iterator const_iterator;
 
         const_iterator begin() const { return m_buf.begin(); }
 
@@ -226,27 +234,8 @@ namespace common {
         size_t size() const { return m_buf.size(); }
 
       private:
-        BufferType m_buf;
+        ContainerType m_buf;
     };
-
-    /// @brief Push the binary representation of a type on to a buffer
-    template <typename T> inline void bufferAppend(Buffer &buf, T const v) {
-        BufferElement const *src = reinterpret_cast<BufferElement const *>(&v);
-        buf.insert(buf.end(), src, src + sizeof(T));
-    }
-
-    /// @brief Get the binary representation of a type from a buffer
-    template <typename T>
-    inline void bufferRead(Buffer const &buf, Buffer::const_iterator &it,
-                           Buffer::const_iterator const &end, T &v) {
-        if (end - it < sizeof(T)) {
-            throw std::runtime_error(
-                "Not enough data in the buffer to read this type!");
-        }
-        BufferElement const *dest = reinterpret_cast<BufferElement const *>(&v);
-        std::copy(it, it + sizeof(T), dest);
-        it += sizeof(T);
-    }
 } // namespace common
 } // namespace osvr
 #endif // INCLUDED_Buffer_h_GUID_55EB8AAF_57A7_49A4_3A3A_49293A72211D

@@ -28,7 +28,6 @@
 // - none
 
 // Internal Includes
-#include <osvr/Common/Buffer.h>
 #include <osvr/Common/Endianness.h>
 
 // Library/third-party includes
@@ -59,8 +58,8 @@ namespace common {
         ///
         /// A traits class must implement:
         ///
-        /// - `template <typename BufferWrapperType> static void
-        /// buffer(BufferWrapperType &buf, param_type val, Tag const&)`
+        /// - `template <typename BufferType> static void
+        /// buffer(BufferType &buf, param_type val, Tag const&)`
         /// - `template <typename BufferReaderType> static void
         /// unbuffer(BufferReaderType &buf, reference val, Tag const&)`
         /// - `static size_t spaceRequired(size_t existingBytes)`
@@ -91,9 +90,9 @@ namespace common {
             typedef BaseSerializationTraits<T> Base;
             typedef T type;
             /// @brief Buffers an object of this type.
-            template <typename BufferWrapperType, typename Tag>
-            static void buffer(BufferWrapperType &buf,
-                               typename Base::param_type val, Tag const &) {
+            template <typename BufferType, typename Tag>
+            static void buffer(BufferType &buf, typename Base::param_type val,
+                               Tag const &) {
                 buf.appendAligned(hton(val), Alignment);
             }
 

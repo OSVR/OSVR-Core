@@ -34,10 +34,10 @@ namespace common {
     namespace serialization {
         /// @brief Serialize a value to a buffer, with optional tag to specify
         /// non-default traits.
-        template <typename T, typename BufferWrapperType,
+        template <typename T, typename BufferType,
                   typename Tag = DefaultSerializationTag<T> >
-        inline void serializeRaw(BufferWrapperType &buf, T const &v,
-                                 Tag const & tag = Tag()) {
+        inline void serializeRaw(BufferType &buf, T const &v,
+                                 Tag const &tag = Tag()) {
             SerializationTraits<Tag>::buffer(buf, v, tag);
         }
 
@@ -46,18 +46,18 @@ namespace common {
         template <typename T, typename BufferReaderType,
                   typename Tag = DefaultSerializationTag<T> >
         inline void deserializeRaw(BufferReaderType &reader, T &v,
-                                   Tag const & = Tag()) {
+                                   Tag const &tag = Tag()) {
             SerializationTraits<Tag>::unbuffer(reader, v, tag);
         }
 
         /// @brief Functor class used by MessageSerializationBase to serialize a
         /// message (passed as the "process" argument to the derived class's
         /// processMessage method).
-        template <typename BufferWrapperType>
+        template <typename BufferType>
         class SerializeFunctor : boost::noncopyable {
           public:
             /// @brief Constructor, taking the buffer
-            SerializeFunctor(BufferWrapperType &buf) : m_buf(buf) {}
+            SerializeFunctor(BufferType &buf) : m_buf(buf) {}
 
             /// @brief Main function call operator method.
             ///
@@ -91,7 +91,7 @@ namespace common {
                        Tag const &tag = Tag()) {
                 serializeRaw(m_buf, v, tag);
             }
-            BufferWrapperType &m_buf;
+            BufferType &m_buf;
         };
 
         /// @brief Functor class used by MessageSerializationBase to deserialize
@@ -142,9 +142,8 @@ namespace common {
     template <typename Base> class MessageSerializationBase {
       public:
         /// @brief Serialize to buffer.
-        template <typename BufferWrapperType>
-        void serialize(BufferWrapperType &buf) {
-            serialization::SerializeFunctor<BufferWrapperType> functor(buf);
+        template <typename BufferType> void serialize(BufferType &buf) {
+            serialization::SerializeFunctor<BufferType> functor(buf);
             static_cast<Base *>(this)->processMessage(functor);
         }
     };
@@ -157,11 +156,11 @@ namespace common {
     /// processed so far are guaranteed to contain valid data (in this case, the
     /// same data they started with), in case your `processMessage()` method
     /// needs to perform computation.
-    template <typename MessageClass, typename BufferWrapperType>
-    void serialize(MessageClass &msg, BufferWrapperType &buf) {
+    template <typename MessageClass, typename BufferType>
+    void serialize(BufferType &buf, MessageClass &msg) {
         /// @todo add another functor to first compute message length and
         /// reserve buffer space?
-        serialization::SerializeFunctor<BufferWrapperType> functor(buf);
+        serialization::SerializeFunctor<BufferType> functor(buf);
         msg.processMessage(functor);
     }
     /// @brief Deserializes a message from a buffer, using a `MessageClass`
@@ -173,7 +172,7 @@ namespace common {
     /// data deserialized from the buffer), in case your `processMessage()`
     /// method needs to perform computation.
     template <typename MessageClass, typename BufferReaderType>
-    void deserialize(MessageClass &msg, BufferReaderType &reader) {
+    void deserialize(BufferReaderType &reader, MessageClass &msg) {
         serialization::DeserializeFunctor<BufferReaderType> functor(reader);
         msg.processMessage(functor);
     }
