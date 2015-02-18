@@ -113,6 +113,8 @@ namespace common {
                     throw std::runtime_error(
                         "Not enough data in the buffer to read this type!");
                 }
+                /// Safe to do without violating strict aliasing because
+                /// ElementType is a character type.
                 ElementType const *dest =
                     reinterpret_cast<ElementType const *>(&v);
 
@@ -159,6 +161,8 @@ namespace common {
 
         /// @brief Append the binary representation of a value
         template <typename T> void append(T const v) {
+            /// Safe to do without violating strict aliasing because ElementType
+            /// is a character type.
             ElementType const *src = reinterpret_cast<ElementType const *>(&v);
             m_buf.insert(m_buf.end(), src, src + sizeof(T));
         }
