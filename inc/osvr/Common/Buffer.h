@@ -82,10 +82,11 @@ namespace common {
       public:
         class Reader {
           public:
+            size_t bytesRead() const { return m_readIter - m_begin; }
             size_t remaining() const { return m_end - m_readIter; }
             /// @brief Get the binary representation of a type from a buffer
             template <typename T> void read(T &v) {
-                if (m_end - m_readIter < sizeof(T)) {
+                if (remaining() < sizeof(T)) {
                     throw std::runtime_error(
                         "Not enough data in the buffer to read this type!");
                 }
@@ -100,7 +101,10 @@ namespace common {
             /// @brief Skip reading the given number of bytes, assumed to be
             /// padding.
             void skipPadding(size_t const bytes) {
-                if (m_end - m_readIter < bytes) {
+                if (bytes == 0) {
+                    return;
+                }
+                if (remaining() < bytes) {
                     throw std::runtime_error("Can't skip that many padding "
                                              "bytes, not that many bytes "
                                              "left!");
@@ -111,9 +115,10 @@ namespace common {
           private:
             typedef typename BufferType::const_iterator const_iterator;
             Reader(BufferType const &buf)
-                : m_buf(&buf), m_readIter(m_buf->begin()), m_end(m_buf->end()) {
-            }
+                : m_buf(&buf), m_begin(m_buf->begin()),
+                  m_readIter(m_buf->begin()), m_end(m_buf->end()) {}
             BufferType const *m_buf;
+            const_iterator m_begin;
             const_iterator m_readIter;
             const_iterator m_end;
             typedef typename BufferType::value_type ElementType;
@@ -136,12 +141,15 @@ namespace common {
         }
 
         /// @brief Append a byte-array's contents
-        void append(ElementType const * v, size_t n) {
+        void append(ElementType const *v, size_t n) {
             m_buf.insert(m_buf.end(), v, v + n);
         }
 
         /// @brief Append the specified number of bytes of padding.
         void appendPadding(size_t const bytes) {
+            if (bytes == 0) {
+                return;
+            }
             m_buf.insert(m_buf.end(), bytes, '\0');
         }
 
@@ -149,6 +157,14 @@ namespace common {
         /// the buffer. Do not modify this buffer during the lifetime of a
         /// reader!
         Reader startReading() const { return Reader(m_buf); }
+
+        typedef typename BufferType::const_iterator const_iterator;
+
+        const_iterator begin() const { return m_buf.begin(); }
+
+        const_iterator end() const { return m_buf.end(); }
+
+        size_t size() const { return m_buf.size(); }
 
       private:
         BufferType m_buf;

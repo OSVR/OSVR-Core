@@ -75,34 +75,78 @@ namespace common {
 
         template <typename T, size_t Alignment>
         struct DefaultSerializationTraits {
+            typedef typename boost::call_traits<T>::param_type param_type;
+            typedef typename boost::call_traits<T>::value_type value_type;
+            typedef typename boost::call_traits<T>::reference reference;
+
             BOOST_STATIC_ASSERT(Alignment > 1);
-            static size_t spaceRequired(size_t existingBufferLength) {
+
+            static size_t paddingRequired(size_t existingBufferLength) {
                 auto leftover = existingBufferLength % Alignment;
-                return (leftover == 0) ? sizeof(T)
-                                       : (Alignment - leftover) + sizeof(T);
+                return (leftover == 0) ? 0 : (Alignment - leftover);
+            }
+            static size_t spaceRequired(size_t existingBufferLength) {
+                return paddingRequired(existingBufferLength) + sizeof(T);
+            }
+            /// @brief Buffers an object of this type.
+            template <typename BufferWrapperType>
+            static void buffer(BufferWrapperType &buf, param_type val) {
+                buf.appendPadding(paddingRequired(buf.size()));
+                buf.append(hton(val));
+            }
+
+            /// @brief Reads an object of this type from a buffer
+            template <typename BufferReaderType>
+            static void unbuffer(BufferReaderType &buf, reference val) {
+                buf.skipPadding(paddingRequired(buf.bytesRead()));
+                buf.read(val);
+                val = ntoh(val);
             }
         };
         template <typename T>
         struct SerializationTraits<
             DefaultSerializationTag<T>,
             typename boost::enable_if<boost::is_integral<T> >::type> {};
-        class SerializerFunctor : boost::noncopyable {
+
+        class SerializeFunctor : boost::noncopyable {
           public:
-            /// @brief Constructor, taking in the destination buffer.
-            SerializerFunctor(Buffer &buf) : m_buf(buf) {}
+            /// @brief Constructor, taking the buffer
+            SerializeFunctor(BufferWrapper<> &buf) : m_buf(buf) {}
 
             /// @brief Main function call operator method, optionally taking a
             /// "tag type" to specify serialization-related behavior.
             ///
             /// @param v The value to process - in this case, to add to the
             /// buffer.
-            template <typename T,
-                      typename Tag = DefaultSerializationTag<T> >
+            template <typename T, typename Tag = DefaultSerializationTag<T> >
             void operator()(typename boost::call_traits<T>::param_type v,
-                            Tag const & = Tag()) {}
+                            Tag const & = Tag()) {
+                SerializationTraits<Tag>::buffer(m_buf, v);
+            }
 
           private:
-            Buffer &m_buf;
+            BufferWrapper<> &m_buf;
+        };
+
+        class DeserializeFunctor : boost::noncopyable {
+          public:
+            typedef BufferWrapper<>::Reader Reader;
+            /// @brief Constructor, taking the buffer reader
+            DeserializeFunctor(Reader &reader) : m_reader(reader) {}
+
+            /// @brief Main function call operator method, optionally taking a
+            /// "tag type" to specify serialization-related behavior.
+            ///
+            /// @param v The value to process - in this case, to add to the
+            /// buffer.
+            template <typename T, typename Tag = DefaultSerializationTag<T> >
+            void operator()(typename boost::call_traits<T>::reference v,
+                            Tag const & = Tag()) {
+                SerializationTraits<Tag>::unbuffer(m_reader, v);
+            }
+
+          private:
+            Reader &m_reader;
         };
 
     } // namespace serialization
@@ -110,12 +154,14 @@ namespace common {
     /// serialization/deserialization code. Your class should inherit from this
     /// class (with your class as the template parameter), and implement a
     /// method `template<typename T> void processMessage(T & process)` that
-    /// calls
+    /// calls the function call operator with each member and an optional tag
+    /// type.
     template <typename Base> class MessageSerializationBase {
       public:
-        /// @brief
-        void serialize(Buffer &buf) {
-            serialization::SerializerFunctor functor(buf);
+        /// @brief Serialize to buffer.
+        void serialize(BufferWrapper<> &buf) {
+            serialization::SerializeFunctor functor(buf);
+            static_cast<Base *>(this)->processMessage(functor);
         }
     };
 } // namespace common
