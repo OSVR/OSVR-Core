@@ -76,6 +76,11 @@ namespace common {
     /// Check ActualBufferAlignment::value to see if it is actually aligned.
     typedef std::vector<BufferElement, BufferAllocator> Buffer;
 
+    inline size_t computeAlignmentPadding(size_t alignment,
+                                          size_t currentSize) {
+        auto leftover = currentSize % alignment;
+        return (leftover == 0) ? 0 : (alignment - leftover);
+    }
     template <typename T> class BufferReader;
 
     template <typename BufferType = Buffer> class BufferWrapper {
