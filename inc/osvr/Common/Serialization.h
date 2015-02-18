@@ -136,6 +136,33 @@ namespace common {
             static_cast<Base *>(this)->processMessage(functor);
         }
     };
+
+    /// @brief Serializes a message into a buffer, using a `MessageClass`
+    ///
+    /// Your `MessageClass` class must implement a method `template<typename T>
+    /// void processMessage(T & process)` that calls `process()` with each field
+    /// (optionally providing a tag type). After each such call, the fields
+    /// processed so far are guaranteed to contain valid data (in this case, the
+    /// same data they started with), in case your `processMessage()` method
+    /// needs to perform computation.
+    template <typename MessageClass, typename BufferWrapperType>
+    void serialize(MessageClass &msg, BufferWrapperType &buf) {
+        serialization::SerializeFunctor<BufferWrapperType> functor(buf);
+        msg.processMessage(functor);
+    }
+    /// @brief Deserializes a message from a buffer, using a `MessageClass`
+    ///
+    /// Your `MessageClass` class must implement a method `template<typename T>
+    /// void processMessage(T & process)` that calls `process()` with each field
+    /// (optionally providing a tag type). After each such call, the fields
+    /// processed so far are guaranteed to contain valid data (in this case, the
+    /// data deserialized from the buffer), in case your `processMessage()`
+    /// method needs to perform computation.
+    template <typename MessageClass, typename BufferReaderType>
+    void deserialize(MessageClass &msg, BufferReaderType &reader) {
+        serialization::DeserializeFunctor<BufferReaderType> functor(reader);
+        msg.processMessage(functor);
+    }
 } // namespace common
 } // namespace osvr
 
