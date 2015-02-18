@@ -133,20 +133,6 @@ namespace common {
         };
 
     } // namespace serialization
-    /// @brief Template class, using the CRTP to produce message
-    /// serialization/deserialization code. Your class should inherit from this
-    /// class (with your class as the template parameter), and implement a
-    /// method `template<typename T> void processMessage(T & process)` that
-    /// calls the function call operator with each member and an optional tag
-    /// type.
-    template <typename Base> class MessageSerializationBase {
-      public:
-        /// @brief Serialize to buffer.
-        template <typename BufferType> void serialize(BufferType &buf) {
-            serialization::SerializeFunctor<BufferType> functor(buf);
-            static_cast<Base *>(this)->processMessage(functor);
-        }
-    };
 
     /// @brief Serializes a message into a buffer, using a `MessageClass`
     ///
