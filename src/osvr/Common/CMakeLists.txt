@@ -7,6 +7,7 @@ configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/Config
 
 set(API
     "${HEADER_LOCATION}/Buffer.h"
+    "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/Endianness.h"

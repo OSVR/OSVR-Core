@@ -20,6 +20,7 @@
 
 // Internal Includes
 #include <osvr/Common/SerializationTraits.h>
+#include <osvr/Common/BufferTraits.h>
 
 // Library/third-party includes
 #include <boost/call_traits.hpp>
@@ -142,8 +143,9 @@ namespace common {
     /// processed so far are guaranteed to contain valid data (in this case, the
     /// same data they started with), in case your `processMessage()` method
     /// needs to perform computation.
-    template <typename MessageClass, typename BufferType>
+    template <typename BufferType, typename MessageClass>
     void serialize(BufferType &buf, MessageClass &msg) {
+        BOOST_STATIC_ASSERT(is_buffer<BufferType>::value);
         /// @todo add another functor to first compute message length and
         /// reserve buffer space?
         serialization::SerializeFunctor<BufferType> functor(buf);
@@ -157,8 +159,9 @@ namespace common {
     /// processed so far are guaranteed to contain valid data (in this case, the
     /// data deserialized from the buffer), in case your `processMessage()`
     /// method needs to perform computation.
-    template <typename MessageClass, typename BufferReaderType>
+    template <typename BufferReaderType, typename MessageClass>
     void deserialize(BufferReaderType &reader, MessageClass &msg) {
+        BOOST_STATIC_ASSERT(is_buffer_reader<BufferReaderType>::value);
         serialization::DeserializeFunctor<BufferReaderType> functor(reader);
         msg.processMessage(functor);
     }
