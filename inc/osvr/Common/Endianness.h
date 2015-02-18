@@ -182,7 +182,7 @@ namespace common {
 
             /// @brief Swap the order of bytes of an arbitrary integer type
             template <typename T> inline T integerByteSwap(T const v) {
-                BOOST_STATIC_ASSERT(boost::is_integral<T>::type);
+                BOOST_STATIC_ASSERT(boost::is_integral<T>::value);
                 typedef typename boost::remove_cv<
                     typename boost::remove_reference<T>::type>::type
                     unqualified_type;

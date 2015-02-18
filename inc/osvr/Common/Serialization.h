@@ -73,55 +73,93 @@ namespace common {
         template <typename Tag, typename Dummy = void>
         struct SerializationTraits;
 
-        template <typename T, size_t Alignment>
-        struct DefaultSerializationTraits {
-            typedef typename boost::call_traits<T>::param_type param_type;
-            typedef typename boost::call_traits<T>::value_type value_type;
-            typedef typename boost::call_traits<T>::reference reference;
+        /// @brief CRTP base of standard serialization traits
+        template <typename T, typename Derived> struct BaseSerializationTraits {
+            typedef T type;
+            typedef typename boost::call_traits<type>::param_type param_type;
+            typedef typename boost::call_traits<type>::value_type value_type;
+            typedef typename boost::call_traits<type>::reference reference;
 
-            BOOST_STATIC_ASSERT(Alignment > 1);
-
-            static size_t paddingRequired(size_t existingBufferLength) {
-                auto leftover = existingBufferLength % Alignment;
-                return (leftover == 0) ? 0 : (Alignment - leftover);
-            }
-            static size_t spaceRequired(size_t existingBufferLength) {
-                return paddingRequired(existingBufferLength) + sizeof(T);
-            }
             /// @brief Buffers an object of this type.
             template <typename BufferWrapperType>
             static void buffer(BufferWrapperType &buf, param_type val) {
-                buf.appendPadding(paddingRequired(buf.size()));
+                buf.appendPadding(Derived::paddingRequired(buf.size()));
                 buf.append(hton(val));
             }
 
             /// @brief Reads an object of this type from a buffer
             template <typename BufferReaderType>
             static void unbuffer(BufferReaderType &buf, reference val) {
-                buf.skipPadding(paddingRequired(buf.bytesRead()));
+                buf.skipPadding(Derived::paddingRequired(buf.bytesRead()));
                 buf.read(val);
                 val = ntoh(val);
             }
+
+            static size_t spaceRequired(size_t existingBufferLength) {
+                return Derived::paddingRequired(existingBufferLength) +
+                       sizeof(type);
+            }
         };
+        template <typename T, size_t Alignment>
+        struct DefaultSerializationTraits
+            : BaseSerializationTraits<T, 
+                  DefaultSerializationTraits<T, Alignment> > {
+            typedef T type;
+
+            BOOST_STATIC_ASSERT(Alignment > 1);
+            static size_t paddingRequired(size_t existingBufferLength) {
+                return computeAlignmentPadding(Alignment, existingBufferLength);
+            }
+        };
+
+        // No padding required for alignment of 1
+        template <typename T>
+        struct DefaultSerializationTraits<T, 1>
+            : BaseSerializationTraits<T, DefaultSerializationTraits<T, 1> >{
+            typedef T type;
+            static size_t paddingRequired(size_t) { return 0; }
+        };
+
         template <typename T>
         struct SerializationTraits<
             DefaultSerializationTag<T>,
-            typename boost::enable_if<boost::is_integral<T> >::type> {};
+            typename boost::enable_if<boost::is_arithmetic<T> >::type>
+            : DefaultSerializationTraits<T, sizeof(T)> {};
 
         class SerializeFunctor : boost::noncopyable {
           public:
             /// @brief Constructor, taking the buffer
             SerializeFunctor(BufferWrapper<> &buf) : m_buf(buf) {}
 
-            /// @brief Main function call operator method, optionally taking a
-            /// "tag type" to specify serialization-related behavior.
+            /// @brief Implementation of action, using call_traits for optimized
+            /// value handling.
+            template <typename T, typename Tag>
+            void apply(typename boost::call_traits<T>::param_type v) {
+                SerializationTraits<Tag>::buffer(m_buf, v);
+            }
+
+            /// @brief Main function call operator method.
+            ///
+            /// Thin wrapper around apply() to perform template argument
+            /// deduction.
             ///
             /// @param v The value to process - in this case, to add to the
             /// buffer.
-            template <typename T, typename Tag = DefaultSerializationTag<T> >
-            void operator()(typename boost::call_traits<T>::param_type v,
-                            Tag const & = Tag()) {
-                SerializationTraits<Tag>::buffer(m_buf, v);
+            template <typename T> void operator()(T const &v) {
+                apply<T, DefaultSerializationTag<T> >(v);
+            }
+
+            /// @brief Main function call operator method, taking a "tag type"
+            /// to specify non-default serialization-related behavior.
+            ///
+            /// Thin wrapper around apply() to perform template argument
+            /// deduction.
+            ///
+            /// @param v The value to process - in this case, to add to the
+            /// buffer.
+            template <typename T, typename Tag>
+            void operator()(T const &v, Tag const &) {
+                apply<T, Tag>(v);
             }
 
           private:
@@ -134,10 +172,19 @@ namespace common {
             /// @brief Constructor, taking the buffer reader
             DeserializeFunctor(Reader &reader) : m_reader(reader) {}
 
-            /// @brief Main function call operator method, optionally taking a
-            /// "tag type" to specify serialization-related behavior.
+            /// @brief Main function call operator method.
             ///
-            /// @param v The value to process - in this case, to add to the
+            /// @param v The value to process - in this case, to read from the
+            /// buffer.
+            template <typename T>
+            void operator()(typename boost::call_traits<T>::reference v) {
+                (*this)(v, DefaultSerializationTag<T>());
+            }
+
+            /// @brief Main function call operator method, taking a "tag type"
+            /// to specify non-default serialization-related behavior.
+            ///
+            /// @param v The value to process - in this case, to read from the
             /// buffer.
             template <typename T, typename Tag = DefaultSerializationTag<T> >
             void operator()(typename boost::call_traits<T>::reference v,

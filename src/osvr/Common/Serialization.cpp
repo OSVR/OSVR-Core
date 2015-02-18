@@ -30,11 +30,10 @@ namespace common {
       public:
         MyClass() : a(1), b(2), c(3) {}
         template <typename T> void processMessage(T &process) {
-            /*
-            process<int32_t>(a);
-            process<uint32_t>(b);
-            process<int8_t>(c);
-            */
+
+            process(a);
+            process(b);
+            process(c);
         }
         int32_t a;
         uint32_t b;
