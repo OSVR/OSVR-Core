@@ -102,8 +102,8 @@ namespace common {
         };
         template <typename T, size_t Alignment>
         struct DefaultSerializationTraits
-            : BaseSerializationTraits<T, 
-                  DefaultSerializationTraits<T, Alignment> > {
+            : BaseSerializationTraits<
+                  T, DefaultSerializationTraits<T, Alignment> > {
             typedef T type;
 
             BOOST_STATIC_ASSERT(Alignment > 1);
@@ -115,7 +115,7 @@ namespace common {
         // No padding required for alignment of 1
         template <typename T>
         struct DefaultSerializationTraits<T, 1>
-            : BaseSerializationTraits<T, DefaultSerializationTraits<T, 1> >{
+            : BaseSerializationTraits<T, DefaultSerializationTraits<T, 1> > {
             typedef T type;
             static size_t paddingRequired(size_t) { return 0; }
         };

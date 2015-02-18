@@ -142,64 +142,55 @@ namespace common {
                         reinterpret_cast<char const *>(&v)[sizeof(T) - 1 - i];
                 }
             }
-            template <typename T> struct IntegerByteSwap {
-                typedef typename boost::int_t<sizeof(T) * 8>::exact int_t;
-                typedef typename boost::uint_t<sizeof(T) * 8>::exact uint_t;
-                typedef typename boost::mpl::if_<boost::is_signed<T>, uint_t,
-                                                 int_t>::type
-                    opposite_signedness_type;
-
-                typedef ByteSwap<T> ByteSwapper;
-                typedef ByteSwap<opposite_signedness_type> OppositeByteSwapper;
-
-                /// @brief Gets called when we have an exact match to an
-                /// explicit specialization
-                static inline T apply(
-                    T const v,
-                    typename boost::enable_if<ByteSwapper>::type * = nullptr) {
-                    return ByteSwapper::apply(v);
-                }
-                /// @brief Gets called when we DO NOT have an exact match to an
-                /// explicit specialization, but we do have a match if we switch
-                /// the signedness.
-                static inline T
-                apply(T const v,
-                      typename boost::enable_if<OppositeByteSwapper>::type * =
-                          nullptr) {
-
-                    return reinterpret_cast<T>(OppositeByteSwapper::apply(
-                        reinterpret_cast<opposite_signedness_type>(v)));
-                }
-                /// @brief Gets called if no explicit specialization exists.
-                static inline T
-                apply(T v,
-                      typename boost::disable_if<ByteSwapper>::type * = nullptr,
-                      typename boost::disable_if<OppositeByteSwapper>::type * =
-                          nullptr) {
-                    return genericByteSwap(v);
-                }
-            };
-
-            /// @brief Swap the order of bytes of an arbitrary integer type
-            template <typename T> inline T integerByteSwap(T const v) {
-                BOOST_STATIC_ASSERT(boost::is_integral<T>::value);
-                typedef typename boost::remove_cv<
-                    typename boost::remove_reference<T>::type>::type
-                    unqualified_type;
-                return IntegerByteSwap<unqualified_type>::apply(v);
+            /// @brief Implementation of integerByteSwap(): Gets called when we
+            /// have an exact match to an explicit specialization
+            template <typename T, typename OppositeSignType,
+                      typename ByteSwapper, typename OppositeByteSwapper>
+            inline T integerByteSwapImpl(
+                T const v,
+                typename boost::enable_if<ByteSwapper>::type * = nullptr) {
+                return ByteSwapper::apply(v);
             }
 
-            /// @brief Take the binary representation of a value with one type,
-            /// and return it as another type, without breaking strict aliasing.
-            template <typename Dest, typename Src>
-            inline Dest safe_pun(Src const src) {
-                BOOST_STATIC_ASSERT(sizeof(Src) == sizeof(Dest));
-                Dest ret;
-                memcpy(reinterpret_cast<char *>(&ret),
-                       reinterpret_cast<char const *>(src), sizeof(src));
-                return ret;
+            /// @brief Implementation of integerByteSwap(): Gets called when we
+            /// DO NOT have an exact match to an explicit specialization, but we
+            /// do have a match if we switch the signedness.
+            template <typename T, typename OppositeSignType,
+                      typename ByteSwapper, typename OppositeByteSwapper>
+            inline T integerByteSwapImpl(
+                T const v,
+                typename boost::disable_if<ByteSwapper>::type * = nullptr,
+                typename boost::enable_if<OppositeByteSwapper>::type * =
+                    nullptr) {
+                return static_cast<T>(OppositeByteSwapper::apply(
+                    static_cast<OppositeSignType>(v)));
             }
 
+            /// @brief Implementation of integerByteSwap(): Gets called if no
+            /// explicit specialization exists (for the type or its
+            /// opposite-signedness relative)
+            template <typename T, typename OppositeSignType,
+                      typename ByteSwapper, typename OppositeByteSwapper>
+            inline T integerByteSwapImpl(
+                T v, typename boost::disable_if<ByteSwapper>::type * = nullptr,
+                typename boost::disable_if<OppositeByteSwapper>::type * =
+                    nullptr) {
+                return genericByteSwap(v);
+            }
+        } // namespace detail
+
+        /// @brief Take the binary representation of a value with one type,
+        /// and return it as another type, without breaking strict aliasing.
+        template <typename Dest, typename Src>
+        inline Dest safe_pun(Src const src) {
+            BOOST_STATIC_ASSERT(sizeof(Src) == sizeof(Dest));
+            Dest ret;
+            memcpy(reinterpret_cast<char *>(&ret),
+                   reinterpret_cast<char const *>(src), sizeof(src));
+            return ret;
+        }
+
+        namespace detail {
             /// @brief Stock implementation of a no-op host-network conversion
             template <typename T> struct NoOpHostNetworkConversion {
                 static T hton(T const v) { return v; }
@@ -224,7 +215,6 @@ namespace common {
 
                 typedef NetworkByteOrderTraits<uint_t> IntTraits;
                 static type hton(type const v) {
-                    using detail::safe_pun;
                     return safe_pun<type>(IntTraits::hton(safe_pun<uint_t>(v)));
                 }
                 static type ntoh(type const v) { return hton(v); }
@@ -232,6 +222,31 @@ namespace common {
 
         } // namespace detail
 
+        /// @brief Swap the order of bytes of an arbitrary integer type
+        ///
+        /// @internal
+        /// Primarily a thin wrapper to centralize type manipulation before
+        /// calling a detail::integerByteSwapImpl() overload selected by
+        /// enable_if/disable_if.
+        template <typename Type> inline Type integerByteSwap(Type const v) {
+            BOOST_STATIC_ASSERT(boost::is_integral<Type>::value);
+            typedef typename boost::remove_cv<
+                typename boost::remove_reference<Type>::type>::type T;
+
+            typedef typename boost::int_t<sizeof(T) * 8>::exact int_t;
+            typedef typename boost::uint_t<sizeof(T) * 8>::exact uint_t;
+            typedef
+                typename boost::mpl::if_<boost::is_signed<T>, uint_t,
+                                         int_t>::type opposite_signedness_type;
+
+            typedef detail::ByteSwap<T> ByteSwapper;
+            typedef detail::ByteSwap<opposite_signedness_type>
+                OppositeByteSwapper;
+
+            return detail::integerByteSwapImpl<
+                T, opposite_signedness_type, ByteSwapper, OppositeByteSwapper>(
+                v);
+        }
 #if defined(OSVR_IS_BIG_ENDIAN)
         template <typename T>
         struct NetworkByteOrderTraits<
