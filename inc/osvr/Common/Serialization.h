@@ -147,6 +147,7 @@ namespace common {
     /// needs to perform computation.
     template <typename MessageClass, typename BufferWrapperType>
     void serialize(MessageClass &msg, BufferWrapperType &buf) {
+        /// @todo add another functor to first compute message length and reserve buffer space?
         serialization::SerializeFunctor<BufferWrapperType> functor(buf);
         msg.processMessage(functor);
     }
