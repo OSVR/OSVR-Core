@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 ###
 set(CPACK_PACKAGE_NAME "osvr-core")
 set(CPACK_PACKAGE_VENDOR "Sensics, Inc")
-set(CPACK_PACKAGE_CONTACT "<support@opengoggles.org>")
+set(CPACK_PACKAGE_CONTACT "<support@osvr.com>")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 1)
 set(OSVR_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
@@ -78,6 +78,8 @@ include(InstallRequiredSystemLibraries)
 
 include(InternalAddPlugin)
 
+# Nitpicky TODO: This unnecessarily defaults to project folders off when using
+# an older toolset in a newer IDE...
 if(MSVC_IDE AND MSVC_VERSION LESS 1600)
     # VS 2012 Express and newer has folder support...
     option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE. May only work in non-Express Editions!" OFF)
