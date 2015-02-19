@@ -1,5 +1,11 @@
 # Building the Libraries {#Building}
 
+See the OSVR Wiki page on [Getting Started with Core Development][wiki-getting-started] for more step-by-step instructions, including links to pre-compiled Windows binary dependencies.
+
+[wiki-getting-started]:http://wiki.osvr.com/doku.php?id=startingcore
+
+The rest of the page you're currently reading is targeted at those interested in in-depth development (particularly across platforms), so it leaves a lot of blanks that it assumes you can fill in.
+
 You'll need:
 
 - CMake, fairly recent (2.8.12 or newer, latest preferred.)
