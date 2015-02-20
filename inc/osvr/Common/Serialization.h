@@ -33,26 +33,9 @@ namespace osvr {
 namespace common {
 
     namespace serialization {
-        /// @brief Serialize a value to a buffer, with optional tag to specify
-        /// non-default traits.
-        template <typename T, typename BufferType,
-                  typename Tag = DefaultSerializationTag<T> >
-        inline void serializeRaw(BufferType &buf, T const &v,
-                                 Tag const &tag = Tag()) {
-            SerializationTraits<Tag>::buffer(buf, v, tag);
-        }
 
-        /// @brief Deserialize a value from a buffer, with optional tag to
-        /// specify non-default traits.
-        template <typename T, typename BufferReaderType,
-                  typename Tag = DefaultSerializationTag<T> >
-        inline void deserializeRaw(BufferReaderType &reader, T &v,
-                                   Tag const &tag = Tag()) {
-            SerializationTraits<Tag>::unbuffer(reader, v, tag);
-        }
-
-        /// @brief Functor class used by MessageSerializationBase to serialize a
-        /// message (passed as the "process" argument to the derived class's
+        /// @brief Functor class used by osvr::common::serialize to serialize a
+        /// message (passed as the "process" argument to the class's
         /// processMessage method).
         template <typename BufferType>
         class SerializeFunctor : boost::noncopyable {
@@ -95,9 +78,9 @@ namespace common {
             BufferType &m_buf;
         };
 
-        /// @brief Functor class used by MessageSerializationBase to deserialize
-        /// a message (passed as the "process" argument to the derived class's
-        /// processMessage method).
+        /// @brief Functor class used by osvr::common::deserialize to
+        /// deserialize a message (passed as the "process" argument to the
+        /// class's processMessage method).
         template <typename BufferReaderType>
         class DeserializeFunctor : boost::noncopyable {
           public:

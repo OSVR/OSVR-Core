@@ -110,6 +110,8 @@ namespace common {
     /// Get one by calling Buffer::startReading()
     template <typename ContainerType> class BufferReader {
       public:
+        typedef typename ContainerType::const_iterator const_iterator;
+
         size_t bytesRead() const { return m_readIter - m_begin; }
         size_t bytesRemaining() const { return m_end - m_readIter; }
         /// @brief Get the binary representation of a type from a buffer
@@ -125,6 +127,19 @@ namespace common {
             auto readEnd = m_readIter + sizeof(T);
             std::copy(m_readIter, readEnd, dest);
             m_readIter = readEnd;
+        }
+
+        /// @brief Returns an iterator into the buffer valid for n elements,
+        /// and assumes you'll take care of copying them.
+        const_iterator readBytes(size_t const n) {
+            if (bytesRemaining() < n) {
+                throw std::runtime_error(
+                    std::string("Not enough data in the buffer to read ") + n +
+                    " bytes!");
+            }
+            auto ret = m_readIter;
+            m_readIter += n;
+            return ret;
         }
 
         /// @brief Get the binary representation of a type from a buffer,
@@ -150,7 +165,6 @@ namespace common {
         }
 
       private:
-        typedef typename ContainerType::const_iterator const_iterator;
         BufferReader(ContainerType const &buf)
             : m_buf(&buf), m_begin(m_buf->begin()), m_readIter(m_buf->begin()),
               m_end(m_buf->end()) {}
