@@ -1,0 +1,106 @@
+## Build Instructions for Android platform - 12/26/2014
+
+Building for Android relies on the Android Native Development Kit (NDK) and
+a cmake toolchain file. The toolchain file is located in the github repo:
+
+        https://github.com/taka-no-me/android-cmake
+
+You can Download the NDK here:
+    
+    https://developer.android.com/tools/sdk/ndk/index.html
+
+This build was compiled against android NDK r10c.
+
+# Setup
+In order to use the toolchain file, the user must supply the following flags:
+
+   ANDROID_STL=gnustl_shared 
+   ANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9
+   ANDROID_NATIVE_API_LEVEL=android-19
+
+and additionally set the env var:
+
+   export ANDROID_NDK=/path/to/ndk
+
+# Pre-requisite to building OSVR.
+Because were building the libs for ARM/v7 on Android, it's necessary that any dependency libraries are
+compiled for the platform as well. The following list represents all dependencies required by OSVR as
+of writing this document. 
+
+   Boost - 1.53 Built for armeabi-v7a using https://github.com/MysticTreeGames/Boost-for-Android 
+   VRPN - Built with the toolchain file using above flags: https://git.cs.unc.edu/git/?p=vrpn.git
+   libusb - Built from libusb repo (libusb/android) for armeabi-v7a: https://github.com/libusb/libusb/tree/master/android (Requires NDK build)
+   hidapi - Built from hidapi repo (hidapi/android) https://github.com/signal11/hidapi (Requires NDK build)
+   jsoncpp - Build from VRPN submodule vrpn/submodules/jsoncpp using toolchain file with above flags
+
+For VRPN and jsoncpp, I was able to take advantage of the cmake toolchain file to generate arm .so's.
+For boost, libusb, and hidapi, I had simply followed build instructions from their repos (which both fallback on NDK).
+
+# Building Libfunc and OSVR
+
+Once the above libs are built, you can build libfunctionality and OSVR (in that order) easily. Simply pass the toolchain file, 
+the above flags, and pointers to the lib/inc directories for each dependency to cmake.
+
+My final cmake command looked something like this for libfunctionality:
+
+cmake 
+      -DCMAKE_TOOLCHAIN_FILE=/Users/davidteitelbaum/sensics/3rdparty/android-cmake/android.toolchain.cmake  
+      -DANDROID_STL=gnustl_shared 
+      -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9 
+      -DANDROID_NATIVE_API_LEVEL=android-19
+      -DBUILD_SHARED_LIBS=ON 
+      -DCMAKE_BUILD_TYPE=debug -G "Unix Makefiles" 
+      ../     
+
+and for OSVR
+
+
+cmake 
+      -DCMAKE_TOOLCHAIN_FILE=/Users/davidteitelbaum/sensics/3rdparty/android-cmake/android.toolchain.cmake 
+      -DANDROID_STL=gnustl_shared 
+      -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.9  
+      -DANDROID_NATIVE_API_LEVEL=android-19
+      -DBoost_INCLUDE_DIR=/Users/davidteitelbaum/ogvr_android_buil/deps/Boost-for-Android/boost_1_53_0 
+      -DBOOST_LIBRARYDIR=/Users/davidteitelbaum/ogvr_android_buil/deps/Boost-for-Android/build/lib/  
+      -DCMAKE_PREFIX_PA/Users/davidteitelbaum/sensics/libfunctionality/build;/Users/davidteitelbaum/sensics/OGVR-Core/vendor/vrpn/submodules/jsoncpp/build
+      -DLIBUSB1_INCLUDE_DIR=/Users/davidteitelbaum/ogvr_android_buil/deps/libusbx/libusb/ 
+      -DLIBUSB1_LIBRARY=/Users/davidteitelbaum/ogvr_android_buil/obj/local/armeabi/libusb1.0.so 
+      -DHIDAPI_INCLUDE_DIR=/Users/davidteitelbaum/ogvr_android_buil/deps/hid-api/hidapi/hidapi/ 
+      -DHIDAPI_LIBRARY=/Users/davidteitelbaum/ogvr_android_buil/obj/local/armeabi/libhidapi.so 
+      ../
+
+# Testing / Running on an Android device.
+
+With the binaries built, you can run osvr_server on your rooted, Android device with USB
+host functionality by pushing the osvr_server binary and framework .so's to the /data/local/tmp 
+directory via Android Debug Bridge (ADB).
+
+Simple script: (note the paths will be different on your build)
+
+   adb push ./bin/osvr_server /data/local/tmp
+   adb push ../vendor/vrpn/submodules/jsoncpp/build/lib/libjsoncpp.so /data/local/tmp/libjsoncpp.so.0
+   adb push ./lib/libosvrVRPNServer.so.0 /data/local/tmp
+   adb push ./lib/libosvrUtil.so.0 /data/local/tmp
+   adb push ./lib/libosvrServer.so.0 /data/local/tmp
+   adb push ./lib/libosvrRouting.so.0 /data/local/tmp
+   adb push ./lib/libosvrPluginHost.so.0 /data/local/tmp
+   adb push ../../libfunctionality/build/lib/libfunctionality.so.0 /data/local/tmp
+   adb push ./lib/libosvrPluginKit.so.0 /data/local/tmp
+   adb push ./lib/org_opengoggles_bundled_Multiserver.so /data/local/tmp
+   adb push ./lib/libosvrConnection.so.0 /data/local/tmp
+   adb push ../apps/multiserver/osvr_server_config_pearlyn.json
+
+login to the shell and navigate to /data/local/tmp, enabling root
+
+   adb shell
+   $ cd /data/local/tmp
+   $ su
+
+then set your loader path to the current directory
+
+   # export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+
+then execute osvr_server with config
+
+   # ./osvr_server osvr_server_config_pearlyn.json
+

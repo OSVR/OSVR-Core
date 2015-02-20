@@ -1,0 +1,86 @@
+{
+  "server": {
+    "local": false
+  },
+  "plugins": [
+    "/data/local/tmp/org_opengoggles_bundled_Multiserver"
+  ],
+  "routes": [
+    {
+      "destination": "/me/hands/left",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+          "sensor": 0
+        }
+      }
+    },
+    {
+      "destination": "/me/hands/right",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+          "sensor": 1
+        }
+      }
+    },
+    {
+      "destination": "/me/hands",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
+        }
+      }
+    },
+    {
+      "destination": "/me/head",
+      "source": {
+        "rotate": {
+          "degrees": 90,
+          "axis": "x"
+        },
+        "child": {
+          "changeBasis": {
+            "x": "x",
+            "y": "z",
+            "z": "-y"
+          },
+          "child": {
+            "rotate": {
+              "degrees": -90,
+              "axis": "z"
+            },
+            "child": {
+              "tracker": "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
+              "sensor": 1
+            }
+          }
+        }
+      }
+    }
+  ],
+  "drivers": [
+    {
+      "plugin": "/data/local/tmp/org_opengoggles_bundled_Multiserver",
+      "driver": "YEI_3Space_Sensor",
+      "params": {
+        "port": "/dev/ttyACM0"
+      }
+    }
+  ]
+}
