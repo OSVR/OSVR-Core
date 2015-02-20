@@ -1,11 +1,9 @@
 ## Build Instructions for Android platform - 12/26/2014
 
 Building for Android relies on the Android Native Development Kit (NDK) and
-a cmake toolchain file. The toolchain file was recycled from the github repo:
+a cmake toolchain file. The toolchain file is located in the github repo:
 
         https://github.com/taka-no-me/android-cmake
-
-The toolchain file has been included in ./android strictly for convenience.
 
 You can Download the NDK here:
     
