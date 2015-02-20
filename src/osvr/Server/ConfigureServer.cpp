@@ -19,6 +19,7 @@
 #include <osvr/Server/ConfigureServer.h>
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/PluginHost/SearchPath.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -28,6 +29,8 @@
 
 // Standard includes
 #include <stdexcept>
+#include <iostream>
+#include <vector>
 
 namespace osvr {
 namespace server {
@@ -106,30 +109,29 @@ namespace server {
         return m_server;
     }
 
-    static const char PLUGINS_KEY[] = "plugins";
     bool ConfigureServer::loadPlugins() {
-        Json::Value &root(m_data->root);
-        const Json::Value plugins = root[PLUGINS_KEY];
+        
         bool success = true;
-        for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
-            if (!plugins[i].isString()) {
-                success = false;
-                m_failedPlugins.push_back(std::make_pair(
-                    "Plugin entry " + boost::lexical_cast<std::string>(i),
-                    "Plugin name not string: " + plugins[i].toStyledString()));
-                // skip it!
-                continue;
-            }
+        //find path where all plugins are hiding
+        pluginhost::SearchPath pluginPath(pluginhost::getPluginSearchPath());
+        pluginhost::FileList filesPaths = pluginhost::getAllFilesWithExt(pluginPath, OSVR_PLUGIN_EXTENSION);
 
-            const std::string plugin = plugins[i].asString();
+        for (std::vector<std::string>::iterator it = filesPaths.begin(); it != filesPaths.end(); ++it){
+            
+            const std::string plugin = *it;
+          //  std::cout << "Plugin name is " << plugin << std::endl;
+            
             try {
                 m_server->loadPlugin(plugin);
                 m_successfulPlugins.push_back(plugin);
-            } catch (std::exception &e) {
+            }
+            catch (std::exception &e) {
                 m_failedPlugins.push_back(std::make_pair(plugin, e.what()));
                 success = false;
             }
+            
         }
+
         return success;
     }
 

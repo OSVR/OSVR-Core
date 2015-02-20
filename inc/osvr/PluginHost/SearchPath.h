@@ -20,6 +20,7 @@
 
 // Internal Includes
 #include <osvr/PluginHost/Export.h>
+#include <osvr/PluginHost/PathConfig.h>
 
 // Library/third-party includes
 // - none
@@ -30,10 +31,14 @@
 
 namespace osvr {
 namespace pluginhost {
-    typedef std::vector<std::string> SearchPath;
+    typedef std::string SearchPath;
+    typedef std::vector<std::string> FileList;
 
-    /// Get a list of places to look for plugins
+    /// Find a place where to look for plugins
     OSVR_PLUGINHOST_EXPORT SearchPath getPluginSearchPath();
+    
+    // Get list of files inside the directory with givn extension
+    OSVR_PLUGINHOST_EXPORT FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext);
 } // namespace pluginhost
 } // namespace osvr
 #endif // INCLUDED_SearchPath_h_GUID_D9D19BF6_FEB5_4B82_17A4_C8C397C88523

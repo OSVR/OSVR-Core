@@ -125,9 +125,9 @@ include(CompilerFeatures)
 ###
 # Set up shared destination directories to avoid Windows hassle with DLL search paths.
 if(WIN32)
-    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}")
+    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}/osvr-plugins-0")
 else()
-    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}")
+    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}/osvr-plugins-0")
 endif()
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
