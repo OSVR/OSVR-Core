@@ -18,7 +18,6 @@
 // Internal Includes
 #include <osvr/PluginHost/SearchPath.h>
 #include "BinaryLocation.h"
-#include <osvr/PluginHost/PathConfig.h>
 
 // Library/third-party includes
 #include <boost/filesystem.hpp>
@@ -50,14 +49,44 @@ namespace pluginhost {
         // binDir now normalized to PREFIX/bin
         auto root = binDir.parent_path();
 
-        SearchPath paths;
+        SearchPath path;
 #ifdef _MSC_VER
-        paths.push_back((root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
+        path = (root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string();
+#else
+        path = (root / OSVR_PLUGIN_DIR).string());
 #endif
-        paths.push_back((root / OSVR_PLUGIN_DIR).string());
-
-        return paths;
+        return path;
     }
+
+    FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext){
+
+        FileList filesPaths;
+        boost::filesystem::path directoryPath(dirPath);
+
+        //make sure that directory exists
+        if (!boost::filesystem::exists(directoryPath)){
+            return filesPaths;
+        }
+
+        boost::filesystem::recursive_directory_iterator iter(directoryPath);
+        boost::filesystem::recursive_directory_iterator endIter;
+        
+        //get a list of files inside the dir that match the extension
+        while (iter != endIter){
+
+            if (boost::filesystem::is_regular_file(*iter) && iter->path().extension() == ext){
+                
+                //convert to forward slash
+                std::string path = iter->path().string();
+                std::replace(path.begin(), path.end(), '\\', '/');
+                filesPaths.push_back(path);
+            }
+            iter++;
+        }
+
+        return filesPaths;
+    }
+
 
 } // namespace pluginhost
 } // namespace osvr
