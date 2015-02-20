@@ -166,10 +166,12 @@ namespace common {
             typedef BaseSerializationTraits<std::string> Base;
             typedef DefaultSerializationTag<std::string> tag_type;
 
+            typedef uint32_t length_type;
+
             template <typename BufferType>
             static void buffer(BufferType &buf, Base::param_type val,
                                tag_type const &) {
-                uint32_t len = val.length();
+                length_type len = val.length();
                 serializeRaw(buf, len);
                 buf.append(val.c_str(), len);
             }
@@ -178,7 +180,7 @@ namespace common {
             template <typename BufferReaderType>
             static void unbuffer(BufferReaderType &reader,
                                  Base::reference_type val, tag_type const &) {
-                uint32_t len;
+                length_type len;
                 deserializeRaw(reader, len);
                 auto iter = reader.readBytes(len);
                 val.assign(iter, iter + len);
@@ -190,7 +192,7 @@ namespace common {
             static size_t spaceRequired(size_t existingBytes,
                                         Base::param_type val,
                                         tag_type const &) {
-                return getBufferSpaceRequiredRaw(existingBytes, uint32_t()) +
+                return getBufferSpaceRequiredRaw(existingBytes, length_type()) +
                        val.length();
             }
         };
