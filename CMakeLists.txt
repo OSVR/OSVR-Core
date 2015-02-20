@@ -70,6 +70,8 @@ include(EnableExtraCompilerWarnings)
 include(SetDefaultBuildType)
 set_default_build_type(RelWithDebInfo)
 
+include(CopyImportedTarget)
+
 include(MSVCMultipleProcessCompile)
 
 include(CMakeBoostHelper)
@@ -126,7 +128,7 @@ if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
         BOOST_THREAD_USE_LIB)
 endif()
 
-find_package(jsoncpp REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
 
 include(CompilerFeatures)
 

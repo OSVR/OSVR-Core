@@ -88,15 +88,6 @@ endmacro()
 
 ## Copy and install shared libraries from imported targets as required
 function(osvr_copy_dep _target _dep)
-    if(WIN32)
-        add_custom_command(TARGET ${_target} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${_dep}> $<TARGET_FILE_DIR:${_target}>
-            COMMENT "Copying required DLL for dependency ${_dep}"
-            VERBATIM)
-        install(FILES $<TARGET_FILE:${_dep}>
-            DESTINATION ${OSVR_SHARED_LIBRARY_DIR} COMPONENT Runtime)
-    else()
-        install(FILES $<TARGET_FILE:${_dep}>
-            DESTINATION ${OSVR_SHARED_LIBRARY_DIR} COMPONENT Runtime)
-    endif()
+    copy_imported_targets(${_target} ${_dep})
+    install_imported_target(${_dep} DESTINATION ${OSVR_SHARED_LIBRARY_DIR} COMPONENT Runtime)
 endfunction()
