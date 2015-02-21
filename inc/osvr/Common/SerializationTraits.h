@@ -197,6 +197,87 @@ namespace common {
             }
         };
 
+        /// @brief A tag for use when the only field in a message is a string so
+        /// the length prefix is unnecessary
+        struct StringOnlyMessageTag {};
+
+        /// @brief String, not prefixed by length (only useful if a whole
+        /// message is a string).
+        template <>
+        struct SerializationTraits<StringOnlyMessageTag, void>
+            : BaseSerializationTraits<std::string> {
+
+            typedef BaseSerializationTraits<std::string> Base;
+            typedef StringOnlyMessageTag tag_type;
+
+            template <typename BufferType>
+            static void buffer(BufferType &buf, Base::param_type val,
+                               tag_type const &) {
+                buf.append(val.c_str(), val.length());
+            }
+
+            template <typename BufferReaderType>
+            static void unbuffer(BufferReaderType &reader,
+                                 Base::reference_type val, tag_type const &) {
+                length_type len = reader.bytesRemaining();
+                auto iter = reader.readBytes(len);
+                val.assign(iter, iter + len);
+            }
+
+            /// @brief Returns the number of bytes required for this type (and
+            /// alignment padding if applicable) to be appended to a buffer of
+            /// the supplied existing size.
+            static size_t spaceRequired(size_t, Base::param_type val,
+                                        tag_type const &) {
+                return val.length();
+            }
+        };
+
+        /// @brief A tag for use for raw data (bytestream), optionally aligned
+        ///
+        /// Here, the tag is also used to transport size information to
+        /// serialization/deserialization
+        template <size_t Alignment = 1> struct AlignedDataBufferTag {
+          public:
+            AlignedDataBufferTag(size_t length) : m_length(length) {}
+            size_t length() const { return m_length; }
+
+          private:
+            size_t m_length;
+        };
+
+        /// @brief Serialization traits for a raw data bytestream with the given
+        /// alignment.
+        template <size_t Alignment>
+        struct SerializationTraits<AlignedDataBufferTag<Alignment>, void> {
+            typedef AlignedDataBufferTag<Alignment> tag_type;
+
+            template <typename BufferType, typename DataType>
+            static void buffer(BufferType &buf, DataType *val,
+                               tag_type const &tag) {
+                auto dataPtr =
+                    static_cast<typename BufferType::ElementType const *>(val);
+                buf.appendAligned(dataPtr, tag.length(), Alignment);
+            }
+
+            template <typename BufferReaderType, typename DataType>
+            static void unbuffer(BufferReaderType &reader, DataType *val,
+                                 tag_type const &tag) {
+                auto len = tag.length();
+                auto iter = reader.readBytesAligned(len, Alignment);
+                std::copy(iter, iter + len, val);
+            }
+
+            /// @brief Returns the number of bytes required for this type (and
+            /// alignment padding if applicable) to be appended to a buffer of
+            /// the supplied existing size.
+            template <typename DataType>
+            static size_t spaceRequired(size_t existingBytes, DataType *val,
+                                        tag_type const &tag) {
+                return computeAlignmentPadding(Alignment, existingBytes) +
+                       tag.length();
+            }
+        };
     } // namespace serialization
 
 } // namespace common

@@ -111,6 +111,7 @@ namespace common {
     template <typename ContainerType> class BufferReader {
       public:
         typedef typename ContainerType::const_iterator const_iterator;
+        typedef typename ContainerType::value_type ElementType;
 
         size_t bytesRead() const { return m_readIter - m_begin; }
         size_t bytesRemaining() const { return m_end - m_readIter; }
@@ -150,6 +151,15 @@ namespace common {
             read(v);
         }
 
+        /// @brief Returns an iterator into the buffer valid for n elements,
+        /// after skipping the necessary number of bytes to begin the read at
+        /// the given alignment, and assumes you'll take care of copying them.
+        const_iterator readBytesAligned(size_t const n,
+                                        size_t const alignment) {
+            skipPadding(computeAlignmentPadding(alignment, bytesRead()));
+            return readBytes(n);
+        }
+
         /// @brief Skip reading the given number of bytes, assumed to be
         /// padding.
         void skipPadding(size_t const bytes) {
@@ -172,7 +182,6 @@ namespace common {
         const_iterator m_begin;
         const_iterator m_readIter;
         const_iterator m_end;
-        typedef typename ContainerType::value_type ElementType;
         BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
                                 "Container must have byte-sized elements");
         friend class Buffer<ContainerType>; ///< permits construction
