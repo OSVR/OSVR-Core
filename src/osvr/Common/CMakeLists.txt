@@ -10,6 +10,11 @@ set(API
     "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
     "${HEADER_LOCATION}/Common.h"
+    "${HEADER_LOCATION}/CreateDevice.h"
+    "${HEADER_LOCATION}/BaseDevice.h"
+    "${HEADER_LOCATION}/BaseDevicePtr.h"
+    "${HEADER_LOCATION}/DeviceComponent.h"
+    "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/Serialization.h"
@@ -17,7 +22,11 @@ set(API
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
+    BaseDevice.cpp
     Common.cpp
+    CreateDevice.cpp
+    DeviceComponent.cpp
+    DeviceWrapper.cpp
     MessageRegistration.cpp
     Serialization.cpp)
 
