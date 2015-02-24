@@ -86,6 +86,10 @@ TEST_F(FactoriadicGeneral, BasicFromFactoriadic) {
     testFactoriadicNumber<Factoriadic<2, 1, 1, 0>, 15>();
 }
 
+TEST(Sequence, Generation) {
+    ASSERT_EQ(stringifySequence<sequence::GenerateRange<5>::type>(), "01234");
+}
+
 #if 0
 template <typename T> class UIntEndiannessID : public ::testing::Test {};
 typedef ::testing::Types<uint64_t, uint32_t, uint16_t> UIntTypes;

@@ -99,10 +99,38 @@ namespace common {
             /// @brief Metafunction: pushes an element on to the head of the
             /// provided SmallIntSequence. Result returned in nested typedef
             /// `type`
-            template <typename Sequence, ByteNumber Digit> struct PushHead;
+            template <typename Sequence, ByteNumber Digit> struct PushFront;
             template <ByteNumber... Digits, ByteNumber Digit>
-            struct PushHead<SmallIntSequence<Digits...>, Digit> {
+            struct PushFront<SmallIntSequence<Digits...>, Digit> {
                 typedef SmallIntSequence<Digit, Digits...> type;
+            };
+
+            /// @brief Metafunction: pushes an element on to the back of the
+            /// provided SmallIntSequence. Result returned in nested typedef
+            /// `type`
+            template <typename Sequence, ByteNumber Digit> struct PushBack;
+            template <ByteNumber... Digits, ByteNumber Digit>
+            struct PushBack<SmallIntSequence<Digits...>, Digit> {
+                typedef SmallIntSequence<Digits..., Digit> type;
+            };
+
+            /// @brief Metafunction: generates an integer range with the
+            /// specified number of elements, in order starting from 0.
+            template <ByteNumber DesiredDigits,
+                      typename Sequence = SmallIntSequence<>,
+                      bool = (DesiredDigits == Length<Sequence>::value)>
+            struct GenerateRange;
+
+            template <ByteNumber DesiredDigits, typename Sequence>
+            struct GenerateRange<DesiredDigits, Sequence, true> {
+                typedef Sequence type;
+            };
+
+            template <ByteNumber DesiredDigits, typename Sequence>
+            struct GenerateRange<DesiredDigits, Sequence, false>
+                : GenerateRange<DesiredDigits,
+                                typename PushBack<
+                                    Sequence, Length<Sequence>::value>::type> {
             };
 
             /// @brief Compile-time mechanism of a mixed compile-time/run-time
@@ -217,8 +245,9 @@ namespace common {
                     static const IDType Radix =
                         sequence::Length<Number>::value + 1;
                     static const IDType Remainder = Val % Radix;
-                    typedef typename sequence::PushHead<Number, Remainder>::type
-                        NewNumber;
+                    typedef
+                        typename sequence::PushFront<Number, Remainder>::type
+                            NewNumber;
                     static const IDType Quotient = Val / Radix;
                     typedef typename boost::mpl::if_c<
                         (Quotient > 0), FromIntegerNextRound,
