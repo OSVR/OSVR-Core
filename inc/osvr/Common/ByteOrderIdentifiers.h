@@ -22,9 +22,17 @@
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
+#include <tinympl/as_sequence.hpp>
 #include <tinympl/vector.hpp>
-#include <tinympl/sequence.hpp>
 #include <tinympl/generate_n.hpp>
+#include <tinympl/size.hpp>
+#include <tinympl/all_of.hpp>
+#include <tinympl/logical_and.hpp>
+#include <tinympl/max_element.hpp>
+#include <tinympl/at.hpp>
+#include <tinympl/equal_to.hpp>
+#include <tinympl/minus.hpp>
+#include <tinympl/is_unique.hpp>
 
 // Standard includes
 #include <type_traits>
@@ -397,7 +405,25 @@ namespace common {
             struct GenerateSequence
                 : tinympl::generate_n<NumBytes, sequence::ConvertToByteNumber,
                                       tinympl::vector> {};
+            template <typename Val> struct IsByteNumber {
+                typedef std::is_same<ByteNumber, typename Val::value_type> type;
+            };
 
+            template <typename Sequence> struct IsValidPermutation {
+                typedef tinympl::size<Sequence> size;
+                typedef typename tinympl::max_element<Sequence>::type max_index;
+                typedef typename tinympl::at<max_index::value, Sequence>::type
+                    max_value;
+                typedef typename tinympl::and_<
+                    typename tinympl::all_of<Sequence, IsByteNumber>::
+                        type, // all ByteNumber elements
+                    typename tinympl::equal_to<
+                        tinympl::minus<size, bytenum<1> >,
+                        max_value>::type, // Max value is size-1
+                    typename tinympl::is_unique<Sequence>::type // all elements
+                                                                // unique
+                    >::type type;
+            };
         } // namespace permutations
 
         using factoriadic::Factoriadic;

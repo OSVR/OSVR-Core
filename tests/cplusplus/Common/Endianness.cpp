@@ -130,6 +130,9 @@ TEST(Permutation, General) {
     typedef permutations::GenerateSequence<4>::type SequenceOfFour;
     ASSERT_TRUE((tinympl::is_sequence<
         sequence::SmallIntSequence<1, 2, 3, 4, 5> >::value));
+
+    ASSERT_TRUE(
+        (permutations::IsValidPermutation<SequenceOfFour>::type::value));
 }
 
 #if 0
