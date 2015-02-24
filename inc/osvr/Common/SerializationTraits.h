@@ -29,6 +29,7 @@
 
 // Internal Includes
 #include <osvr/Common/Endianness.h>
+#include <osvr/Util/BoolC.h>
 
 // Library/third-party includes
 #include <boost/call_traits.hpp>
@@ -152,10 +153,36 @@ namespace common {
         template <typename T>
         struct SerializationTraits<
             DefaultSerializationTag<T>,
-            typename boost::enable_if<boost::is_arithmetic<T> >::type>
+            typename std::enable_if<std::is_arithmetic<T>::value &&
+                                    !std::is_same<bool, T>::value>::type>
             : ArithmeticSerializationTraits<T, sizeof(T)> {
 
             BOOST_STATIC_ASSERT(boost::alignment_of<T>::value == sizeof(T));
+        };
+
+        /// @brief Set up the default serialization traits for bool,
+        /// which we'll stick in uint8_t (OSVR_CBool) types.
+        template <>
+        struct SerializationTraits<DefaultSerializationTag<bool>, void>
+            : BaseSerializationTraits<bool> {
+
+            typedef BaseSerializationTraits<bool> Base;
+            typedef DefaultSerializationTag<bool> tag_type;
+
+            template <typename BufferType>
+            static void serialize(BufferType &buf, Base::param_type val,
+                                  tag_type const &) {
+                serializeRaw(
+                    buf, static_cast<OSVR_CBool>(val ? OSVR_TRUE : OSVR_FALSE));
+            }
+            template <typename BufferReaderType>
+            static void deserialize(BufferReaderType &reader,
+                                    Base::reference_type val,
+                                    tag_type const &) {
+                OSVR_CBool cVal;
+                deserializeRaw(reader, cVal);
+                val = (cVal == OSVR_TRUE);
+            }
         };
 
         /// @brief String, length-prefixed.

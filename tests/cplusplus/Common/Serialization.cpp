@@ -190,6 +190,39 @@ TYPED_TEST(ArithmeticRawSerialization, RoundTripNegative) {
 /// Disable "truncation of constant value" warning here.
 #pragma warning(pop)
 #endif
+TEST(BoolSerialization, RoundTripTrue) {
+    Buffer<> buf;
+    typedef OSVR_CBool TypeParam;
+    bool inVal = true;
+    osvr::common::serialization::serializeRaw(buf, inVal);
+    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+
+    auto reader = buf.startReading();
+
+    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
+    bool outVal = false;
+    osvr::common::serialization::deserializeRaw(reader, outVal);
+    ASSERT_EQ(inVal, outVal);
+    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
+    ASSERT_EQ(reader.bytesRemaining(), 0);
+}
+
+TEST(BoolSerialization, RoundTripFalse) {
+    Buffer<> buf;
+    typedef OSVR_CBool TypeParam;
+    bool inVal = false;
+    osvr::common::serialization::serializeRaw(buf, inVal);
+    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+
+    auto reader = buf.startReading();
+
+    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
+    bool outVal = true;
+    osvr::common::serialization::deserializeRaw(reader, outVal);
+    ASSERT_EQ(inVal, outVal);
+    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
+    ASSERT_EQ(reader.bytesRemaining(), 0);
+}
 
 class SerializationAlignment : public ::testing::Test {
   public:
