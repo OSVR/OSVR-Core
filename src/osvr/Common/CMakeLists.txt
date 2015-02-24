@@ -9,6 +9,7 @@ set(API
     "${HEADER_LOCATION}/Buffer.h"
     "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
+    "${HEADER_LOCATION}/ByteOrderIdentifiers.h"
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
