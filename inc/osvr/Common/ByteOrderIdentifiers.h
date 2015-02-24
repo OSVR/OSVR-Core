@@ -76,7 +76,7 @@ namespace common {
             template <typename Sequence> struct Length;
 
             template <>
-            struct Length<void> : std::integral_constant<ByteNumber, 0> {};
+            struct Length<void> : ::std::integral_constant<ByteNumber, 0> {};
 
             template <ByteNumber... Elements>
             struct Length<SmallIntSequence<Elements...> >
