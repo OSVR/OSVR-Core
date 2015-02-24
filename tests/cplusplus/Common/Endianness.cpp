@@ -24,6 +24,7 @@
 // Library/third-party includes
 #include "gtest/gtest.h"
 #include <boost/static_assert.hpp>
+#include <tinympl/is_sequence.hpp>
 
 // Standard includes
 // - none
@@ -90,8 +91,6 @@ TEST(Sequence, Generation) {
     ASSERT_EQ(stringifySequence<sequence::GenerateRange<5>::type>(), "01234");
 }
 
-TEST(Sequence, Unique) {
-
 #if 1
 #define COMPILE_TIME_ASSERT(X)                                                 \
     BOOST_STATIC_ASSERT(X);                                                    \
@@ -103,6 +102,8 @@ TEST(Sequence, Unique) {
 #if 0
 #define COMPILE_TIME_ASSERT(X) BOOST_STATIC_ASSERT(X)
 #endif
+
+TEST(Sequence, Unique) {
     COMPILE_TIME_ASSERT(
         sequence::Length<sequence::SmallIntSequence<> >::value == 0);
     COMPILE_TIME_ASSERT(
@@ -115,12 +116,20 @@ TEST(Sequence, Unique) {
 
     COMPILE_TIME_ASSERT(
         (sequence::Length<sequence::SmallIntSequence<5, 5> >::value == 2));
-    // ASSERT_TRUE((sequence::AllUnique<sequence::SmallIntSequence<> >::value));
+    //    COMPILE_TIME_ASSERT((sequence::AllUnique<sequence::SmallIntSequence<>
+    //    >::value));
     ASSERT_TRUE((sequence::AllUnique<sequence::SmallIntSequence<1> >::value));
     ASSERT_TRUE((sequence::AllUnique<
         sequence::SmallIntSequence<1, 2, 3, 4, 5> >::value));
     ASSERT_FALSE((sequence::AllUnique<
         sequence::SmallIntSequence<1, 2, 3, 4, 4, 5> >::value));
+}
+
+TEST(Permutation, General) {
+    typedef sequence::vector_c<ByteNumber, 1, 2, 3, 4, 5> SamplePermutation;
+    typedef permutations::GenerateSequence<4>::type SequenceOfFour;
+    ASSERT_TRUE((tinympl::is_sequence<
+        sequence::SmallIntSequence<1, 2, 3, 4, 5> >::value));
 }
 
 #if 0

@@ -22,7 +22,9 @@
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
-#include <boost/mpl/if.hpp>
+#include <tinympl/vector.hpp>
+#include <tinympl/sequence.hpp>
+#include <tinympl/generate_n.hpp>
 
 // Standard includes
 #include <type_traits>
@@ -33,6 +35,10 @@ namespace common {
 
         typedef uint8_t ByteNumber;
         typedef uint16_t IDType;
+
+        template <ByteNumber i>
+        using bytenum = std::integral_constant<ByteNumber, i>;
+
         namespace detail {
             template <typename T, T N, typename dummy = void>
             struct Factorial_c;
@@ -50,6 +56,12 @@ namespace common {
         namespace sequence {
             /// @brief A C++11 compile-time sequence of small integers
             template <ByteNumber... Elements> struct SmallIntSequence;
+
+            /// @brief Metafunction converting some integral_constant to a
+            /// bytenum.
+            template <typename IntC> struct ConvertToByteNumber {
+                typedef bytenum<IntC::value> type;
+            };
 
             /// @brief Get the length of a SmallIntSequence: derives from the
             /// corresponding std::integral_constant
@@ -225,6 +237,36 @@ namespace common {
                               HeadElement<Sequence>::value>::value)>::type>
                 : AllUnique<typename GetTail<Sequence>::type> {};
 
+            template <typename ValueType, typename Accum, ValueType... Elements>
+            struct make_vector_c_impl;
+
+            // recursive case: got an element to push_back
+            template <typename ValueType, typename Accum, ValueType Head,
+                      ValueType... Tail>
+            struct make_vector_c_impl<ValueType, Accum, Head, Tail...> {
+                typedef typename Accum::template push_back<
+                    std::integral_constant<ByteNumber, Head> >::type NewAccum;
+                typedef typename make_vector_c_impl<ValueType, NewAccum,
+                                                    Tail...>::type type;
+            };
+
+            // base case: no more elements left
+            template <typename ValueType, typename Accum>
+            struct make_vector_c_impl<ValueType, Accum> {
+                typedef Accum type;
+            };
+
+            /// @brief Metafunction to generate a tinympl::vector<> of
+            /// integral_constants
+            template <typename ValueType, ValueType... Elements>
+            struct make_vector_c
+                : make_vector_c_impl<ValueType, tinympl::vector<>,
+                                     Elements...> {};
+            /// @brief Inherits from a tinympl::vector containing the integral
+            /// constants you specified.
+            template <typename ValueType, ValueType... Elements>
+            struct vector_c : make_vector_c<ValueType, Elements...>::type {};
+
         } // namespace sequence
         namespace factoriadic {
             /// @brief A number in factoriadic number type, with each sequence
@@ -334,12 +376,34 @@ namespace common {
         } // namespace factoriadic
 
         namespace permutations {
-
+#if 0
             template <ByteNumber... Elements>
             using PermutationList = sequence::SmallIntSequence<Elements...>;
+#endif
+            template <ByteNumber NumBytes>
+            struct GenerateSequence
+                : tinympl::generate_n<NumBytes, sequence::ConvertToByteNumber,
+                                      tinympl::vector> {};
 
         } // namespace permutations
 
+    } // namespace byte_order
+} // namespace common
+} // namespace osvr
+
+namespace tinympl {
+/// @brief Provide conversion from our home-grown variadic compile-time integer
+/// sequence to tinympl sequences.
+template <osvr::common::byte_order::ByteNumber... Elements>
+struct as_sequence<
+    osvr::common::byte_order::sequence::SmallIntSequence<Elements...> > {
+    typedef typename osvr::common::byte_order::sequence::make_vector_c<
+        osvr::common::byte_order::ByteNumber, Elements...>::type type;
+};
+}
+namespace osvr {
+namespace common {
+    namespace byte_order {
         using factoriadic::Factoriadic;
 
         template <typename Number>
