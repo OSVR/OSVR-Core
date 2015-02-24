@@ -4,3 +4,6 @@
 [submodule "vendor/jenkins-ctest-plugin"]
 	path = vendor/jenkins-ctest-plugin
 	url = https://github.com/rpavlik/jenkins-ctest-plugin.git
+[submodule "vendor/tinympl"]
+	path = vendor/tinympl
+	url = https://github.com/OSVR/tinympl.git
