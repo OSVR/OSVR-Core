@@ -44,7 +44,7 @@ inline std::string fromInt(IDType num) {
     return ostr.str();
 }
 
-class StringifyFactoriadic {
+class StringifySequence {
   public:
     template <typename T> void operator()(T num) { m_str << int(num); }
 
@@ -54,9 +54,9 @@ class StringifyFactoriadic {
     std::ostringstream m_str;
 };
 
-template <typename Number> inline std::string stringifyFactoriadic() {
-    StringifyFactoriadic f;
-    factoriadic::visitFromLeft<Number>(f);
+template <typename Number> inline std::string stringifySequence() {
+    StringifySequence f;
+    sequence::visitFromLeft<Number>(f);
     return f.get();
 }
 
@@ -68,13 +68,12 @@ class FactoriadicGeneral : public ::testing::Test {
         ASSERT_EQ((FactoriadicToInteger<FactoriadicNumber>::value),
                   integerValue);
 
-        ASSERT_EQ(stringifyFactoriadic<FactoriadicNumber>(),
+        ASSERT_EQ(stringifySequence<FactoriadicNumber>(),
                   fromInt(integerValue));
 
-        ASSERT_EQ(stringifyFactoriadic<FactoriadicNumber>(),
-                  stringifyFactoriadic<
+        ASSERT_EQ(stringifySequence<FactoriadicNumber>(),
+                  stringifySequence<
                       typename factoriadic::FromInteger<integerValue>::type>());
-
     }
 };
 
