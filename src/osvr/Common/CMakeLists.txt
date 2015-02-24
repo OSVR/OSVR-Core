@@ -44,4 +44,5 @@ target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     jsoncpp_lib
     PRIVATE
-    eigen-headers)
+    eigen-headers
+    tinympl)

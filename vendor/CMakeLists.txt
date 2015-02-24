@@ -54,3 +54,7 @@ target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 add_library(eigen-headers INTERFACE)
 target_include_directories(eigen-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.2")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
+
+# Interface target for tinympl
+add_library(tinympl INTERFACE)
+target_include_directories(tinympl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/tinympl")
