@@ -268,6 +268,23 @@ namespace common {
             struct vector_c : make_vector_c<ValueType, Elements...>::type {};
 
         } // namespace sequence
+    }     // namespace byte_order
+} // namespace common
+} // namespace osvr
+
+namespace tinympl {
+/// @brief Provide conversion from our home-grown variadic compile-time integer
+/// sequence to tinympl sequences.
+template <osvr::common::byte_order::ByteNumber... Elements>
+struct as_sequence<
+    osvr::common::byte_order::sequence::SmallIntSequence<Elements...> > {
+    typedef typename osvr::common::byte_order::sequence::make_vector_c<
+        osvr::common::byte_order::ByteNumber, Elements...>::type type;
+};
+}
+namespace osvr {
+namespace common {
+    namespace byte_order {
         namespace factoriadic {
             /// @brief A number in factoriadic number type, with each sequence
             /// element a digit. Includes the trailing 0.
@@ -376,10 +393,6 @@ namespace common {
         } // namespace factoriadic
 
         namespace permutations {
-#if 0
-            template <ByteNumber... Elements>
-            using PermutationList = sequence::SmallIntSequence<Elements...>;
-#endif
             template <ByteNumber NumBytes>
             struct GenerateSequence
                 : tinympl::generate_n<NumBytes, sequence::ConvertToByteNumber,
@@ -387,23 +400,6 @@ namespace common {
 
         } // namespace permutations
 
-    } // namespace byte_order
-} // namespace common
-} // namespace osvr
-
-namespace tinympl {
-/// @brief Provide conversion from our home-grown variadic compile-time integer
-/// sequence to tinympl sequences.
-template <osvr::common::byte_order::ByteNumber... Elements>
-struct as_sequence<
-    osvr::common::byte_order::sequence::SmallIntSequence<Elements...> > {
-    typedef typename osvr::common::byte_order::sequence::make_vector_c<
-        osvr::common::byte_order::ByteNumber, Elements...>::type type;
-};
-}
-namespace osvr {
-namespace common {
-    namespace byte_order {
         using factoriadic::Factoriadic;
 
         template <typename Number>
