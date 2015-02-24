@@ -275,6 +275,32 @@ namespace common {
             template <typename ValueType, ValueType... Elements>
             struct vector_c : make_vector_c<ValueType, Elements...>::type {};
 
+            template <template <class...> class Op, typename State,
+                      typename... Args>
+            struct left_consume_var;
+            template <template <class...> class Op, typename State,
+                      typename Head, typename... Tail>
+            struct left_consume_var<Op, State, Head, Tail...> {
+                typedef typename left_consume_var<
+                    Op, typename Op<State, Head, Tail...>::type, Tail...>::type
+                    type;
+            };
+            template <template <class...> class Op, typename State>
+            struct left_consume_var<Op, State> {
+                typedef State type;
+            };
+
+            /// @brief Like left_fold but passed the entire remaining sequence
+            /// each time, with state kept separate.
+            template <template <class...> class Op, typename State,
+                      typename Sequence>
+            struct left_consume
+                : left_consume<Op, State, tinympl::as_sequence_t<Sequence> > {};
+            template <template <class...> class Op, typename State,
+                      typename... Elements>
+            struct left_consume<Op, State, tinympl::sequence<Elements...> >
+                : left_consume_var<Op, State, Elements...> {};
+
         } // namespace sequence
     }     // namespace byte_order
 } // namespace common
