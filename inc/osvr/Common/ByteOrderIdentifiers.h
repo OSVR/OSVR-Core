@@ -315,7 +315,7 @@ namespace common {
                         typename sequence::PushFront<Number, Remainder>::type
                             NewNumber;
                     static const IDType Quotient = Val / Radix;
-                    typedef typename boost::mpl::if_c<
+                    typedef typename std::conditional<
                         (Quotient > 0), FromIntegerNextRound,
                         FromIntegerDone>::type Iterate;
                     typedef
