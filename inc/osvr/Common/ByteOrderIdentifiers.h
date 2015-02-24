@@ -301,6 +301,32 @@ namespace common {
             struct left_consume<Op, State, tinympl::sequence<Elements...> >
                 : left_consume_var<Op, State, Elements...> {};
 
+            /// @brief Compile-time mechanism of a mixed compile-time/run-time
+            /// algorithm for applying a functor starting at the beginning of a
+            /// sequence
+            template <typename F, typename... Args>
+            struct left_fold_runtime_impl;
+
+            template <typename F, typename Head, typename... Tail>
+            struct left_fold_runtime_impl<F, Head, Tail...> {
+                static void apply(F &f) {
+                    f.operator()<Head>();
+                    left_fold_runtime_impl<F, Tail...>::apply(f);
+                }
+            };
+            template <typename F> struct left_fold_runtime_impl<F> {
+                static void apply(F &) {}
+            };
+            template <typename F, typename... Args>
+            struct left_fold_runtime_impl<F, tinympl::sequence<Args...> >
+                : left_fold_runtime_impl<F, Args...> {};
+
+            template <typename Sequence, typename F>
+            inline void left_fold_runtime(F &f) {
+                left_fold_runtime_impl<
+                    F, tinympl::as_sequence_t<Sequence> >::apply(f);
+            }
+
         } // namespace sequence
     }     // namespace byte_order
 } // namespace common
