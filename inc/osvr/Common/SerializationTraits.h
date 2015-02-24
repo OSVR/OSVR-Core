@@ -82,7 +82,7 @@ namespace common {
                   typename Tag = DefaultSerializationTag<T> >
         inline void serializeRaw(BufferType &buf, T const &v,
                                  Tag const &tag = Tag()) {
-            SerializationTraits<Tag>::buffer(buf, v, tag);
+            SerializationTraits<Tag>::serialize(buf, v, tag);
         }
 
         /// @brief Deserialize a value from a buffer, with optional tag to
@@ -91,7 +91,7 @@ namespace common {
                   typename Tag = DefaultSerializationTag<T> >
         inline void deserializeRaw(BufferReaderType &reader, T &v,
                                    Tag const &tag = Tag()) {
-            SerializationTraits<Tag>::unbuffer(reader, v, tag);
+            SerializationTraits<Tag>::deserialize(reader, v, tag);
         }
 
         /// @brief Get the size a value from a buffer, with optional tag to
@@ -121,16 +121,16 @@ namespace common {
             typedef T type;
             /// @brief Buffers an object of this type.
             template <typename BufferType, typename Tag>
-            static void buffer(BufferType &buf, typename Base::param_type val,
-                               Tag const &) {
+            static void serialize(BufferType &buf,
+                                  typename Base::param_type val, Tag const &) {
                 buf.appendAligned(hton(val), Alignment);
             }
 
             /// @brief Reads an object of this type from a buffer
             template <typename BufferReaderType, typename Tag>
-            static void unbuffer(BufferReaderType &buf,
-                                 typename Base::reference_type val,
-                                 Tag const &) {
+            static void deserialize(BufferReaderType &buf,
+                                    typename Base::reference_type val,
+                                    Tag const &) {
                 buf.readAligned(val, Alignment);
                 val = ntoh(val);
             }
@@ -169,8 +169,8 @@ namespace common {
             typedef uint32_t length_type;
 
             template <typename BufferType>
-            static void buffer(BufferType &buf, Base::param_type val,
-                               tag_type const &) {
+            static void serialize(BufferType &buf, Base::param_type val,
+                                  tag_type const &) {
                 length_type len = val.length();
                 serializeRaw(buf, len);
                 buf.append(val.c_str(), len);
@@ -178,8 +178,9 @@ namespace common {
 
             /// @brief Reads an object of this type from a buffer
             template <typename BufferReaderType>
-            static void unbuffer(BufferReaderType &reader,
-                                 Base::reference_type val, tag_type const &) {
+            static void deserialize(BufferReaderType &reader,
+                                    Base::reference_type val,
+                                    tag_type const &) {
                 length_type len;
                 deserializeRaw(reader, len);
                 auto iter = reader.readBytes(len);
@@ -211,14 +212,15 @@ namespace common {
             typedef StringOnlyMessageTag tag_type;
 
             template <typename BufferType>
-            static void buffer(BufferType &buf, Base::param_type val,
-                               tag_type const &) {
+            static void serialize(BufferType &buf, Base::param_type val,
+                                  tag_type const &) {
                 buf.append(val.c_str(), val.length());
             }
 
             template <typename BufferReaderType>
-            static void unbuffer(BufferReaderType &reader,
-                                 Base::reference_type val, tag_type const &) {
+            static void deserialize(BufferReaderType &reader,
+                                    Base::reference_type val,
+                                    tag_type const &) {
                 length_type len = reader.bytesRemaining();
                 auto iter = reader.readBytes(len);
                 val.assign(iter, iter + len);
@@ -253,16 +255,16 @@ namespace common {
             typedef AlignedDataBufferTag<Alignment> tag_type;
 
             template <typename BufferType, typename DataType>
-            static void buffer(BufferType &buf, DataType *val,
-                               tag_type const &tag) {
+            static void serialize(BufferType &buf, DataType *val,
+                                  tag_type const &tag) {
                 auto dataPtr =
                     static_cast<typename BufferType::ElementType const *>(val);
                 buf.appendAligned(dataPtr, tag.length(), Alignment);
             }
 
             template <typename BufferReaderType, typename DataType>
-            static void unbuffer(BufferReaderType &reader, DataType *val,
-                                 tag_type const &tag) {
+            static void deserialize(BufferReaderType &reader, DataType *val,
+                                    tag_type const &tag) {
                 auto len = tag.length();
                 auto iter = reader.readBytesAligned(len, Alignment);
                 std::copy(iter, iter + len, val);
