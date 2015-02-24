@@ -35,8 +35,6 @@ class FactoriadicGeneral : public ::testing::Test {
     template <typename FactoriadicNumber>
     void testFactoriadicNumber(IDType integerValue) {
         BOOST_STATIC_ASSERT(FactoriadicDigitsInRange<FactoriadicNumber>::value);
-        /*ASSERT_EQ((FromFactoriadic<FactoriadicNumber>::value),
-         * integerValue);*/
         ASSERT_EQ((FactoriadicToInteger<FactoriadicNumber>::value),
                   integerValue);
     }
@@ -44,14 +42,14 @@ class FactoriadicGeneral : public ::testing::Test {
 
 TEST_F(FactoriadicGeneral, BasicFromFactoriadic) {
     testFactoriadicNumber<Factoriadic<0> >(0);
-    ASSERT_EQ((FactoriadicToInteger<Factoriadic<0> >::value), 1);
-    ASSERT_EQ((FactoriadicToInteger<Factoriadic<1, 0> >::value), 1);
-    ASSERT_EQ((FactoriadicToInteger<Factoriadic<1, 0, 0> >::value), 2);
-    ASSERT_EQ((FactoriadicToInteger<Factoriadic<1, 1, 0> >::value), 3);
-    ASSERT_EQ((FactoriadicToInteger<Factoriadic<2, 0, 0> >::value), 4);
-    ASSERT_EQ((FactoriadicToInteger<Factoriadic<2, 1, 1, 0> >::value), 15);
+    testFactoriadicNumber<Factoriadic<1, 0> >(1);
+    testFactoriadicNumber<Factoriadic<1, 0, 0> >(2);
+    testFactoriadicNumber<Factoriadic<1, 1, 0> >(3);
+    testFactoriadicNumber<Factoriadic<2, 0, 0> >(4);
+    testFactoriadicNumber<Factoriadic<2, 1, 1, 0> >(15);
 }
 
+#if 0
 template <typename T> class UIntEndiannessID : public ::testing::Test {};
 typedef ::testing::Types<uint64_t, uint32_t, uint16_t> UIntTypes;
 
@@ -66,3 +64,4 @@ TYPED_TEST(UIntEndiannessID, SwapHalves) {
     // ByteOrderStruct::BIG_ENDIAN>::value;
     // ASSERT_EQ()
 }
+#endif
