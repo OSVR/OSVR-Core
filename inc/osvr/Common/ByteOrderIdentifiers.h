@@ -22,7 +22,7 @@
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
-// - none
+#include <boost/mpl/if.hpp>
 
 // Standard includes
 #include <type_traits>
@@ -65,11 +65,6 @@ namespace common {
             struct GetTail<Factoriadic<Head, Tail...> > {
                 typedef Factoriadic<Tail...> type;
             };
-            /*
-            template <ByteNumber Head> struct GetTail<Factoriadic<Head> > {
-                // typedef Factoriadic<Tail...> type;
-            };
-            */
 
             template <typename Number> struct DigitCount;
 
@@ -142,6 +137,60 @@ namespace common {
                       IDType,
                       HeadValue<Number>::value +
                           ToInteger<typename GetTail<Number>::type>::value> {};
+
+            template <typename Number, ByteNumber Digit> struct PushHead;
+            template <ByteNumber... Digits, ByteNumber Digit>
+            struct PushHead<Factoriadic<Digits...>, Digit> {
+                typedef Factoriadic<Digit, Digits...> type;
+            };
+            template <IDType N> struct FromInteger;
+
+            struct FromIntegerDone {
+                template <typename Number, IDType> struct apply {
+                    typedef Number type;
+                };
+            };
+            struct FromIntegerNextRound {
+                template <typename Number, IDType Val> struct apply {
+                    static const IDType Radix = DigitCount<Number>::value + 1;
+                    static const IDType Remainder = Val % Radix;
+                    typedef
+                        typename PushHead<Number, Remainder>::type NewNumber;
+                    static const IDType Quotient = Val / Radix;
+                    typedef typename boost::mpl::if_c<
+                        (Quotient > 0), FromIntegerNextRound,
+                        FromIntegerDone>::type Iterate;
+                    typedef
+                        typename Iterate::template apply<NewNumber, Quotient>::type type;
+                };
+            };
+
+            template <IDType Val> struct FromInteger {
+                typedef typename FromIntegerNextRound::template apply<Factoriadic<>,
+                                                             Val>::type type;
+            };
+
+            template <typename Number, typename F,
+                      bool = HasTail<Number>::value>
+            struct VisitFromLeft;
+
+            template <typename Number, typename F>
+            struct VisitFromLeft<Number, F, true> {
+                typedef typename GetTail<Number>::type Tail;
+                static void apply(F &f) {
+                    f(HeadDigit<Number>::value);
+                    VisitFromLeft<Tail, F>::apply(f);
+                }
+            };
+            template <typename Number, typename F>
+            struct VisitFromLeft<Number, F, false> {
+                static void apply(F &f) { f(HeadDigit<Number>::value); }
+            };
+
+            template <typename Number, typename F>
+            inline void visitFromLeft(F &f) {
+                VisitFromLeft<Number, F>::apply(f);
+            }
         } // namespace factoriadic
 
         using factoriadic::Factoriadic;

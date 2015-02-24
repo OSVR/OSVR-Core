@@ -30,23 +30,61 @@
 
 using namespace osvr::common::byte_order;
 
+inline void fromIntImpl(std::ostream &os, IDType num, IDType radix = 1) {
+    auto remain = num % radix;
+    auto quot = num / radix;
+    if (quot > 0) {
+        fromIntImpl(os, quot, radix + 1);
+    }
+    os << remain;
+}
+inline std::string fromInt(IDType num) {
+    std::ostringstream ostr;
+    fromIntImpl(ostr, num);
+    return ostr.str();
+}
+
+class StringifyFactoriadic {
+  public:
+    template <typename T> void operator()(T num) { m_str << int(num); }
+
+    std::string get() const { return m_str.str(); }
+
+  private:
+    std::ostringstream m_str;
+};
+
+template <typename Number> inline std::string stringifyFactoriadic() {
+    StringifyFactoriadic f;
+    factoriadic::visitFromLeft<Number>(f);
+    return f.get();
+}
+
 class FactoriadicGeneral : public ::testing::Test {
   public:
-    template <typename FactoriadicNumber>
-    void testFactoriadicNumber(IDType integerValue) {
+    template <typename FactoriadicNumber, IDType integerValue>
+    void testFactoriadicNumber() {
         BOOST_STATIC_ASSERT(FactoriadicDigitsInRange<FactoriadicNumber>::value);
         ASSERT_EQ((FactoriadicToInteger<FactoriadicNumber>::value),
                   integerValue);
+
+        ASSERT_EQ(stringifyFactoriadic<FactoriadicNumber>(),
+                  fromInt(integerValue));
+
+        ASSERT_EQ(stringifyFactoriadic<FactoriadicNumber>(),
+                  stringifyFactoriadic<
+                      typename factoriadic::FromInteger<integerValue>::type>());
+
     }
 };
 
 TEST_F(FactoriadicGeneral, BasicFromFactoriadic) {
-    testFactoriadicNumber<Factoriadic<0> >(0);
-    testFactoriadicNumber<Factoriadic<1, 0> >(1);
-    testFactoriadicNumber<Factoriadic<1, 0, 0> >(2);
-    testFactoriadicNumber<Factoriadic<1, 1, 0> >(3);
-    testFactoriadicNumber<Factoriadic<2, 0, 0> >(4);
-    testFactoriadicNumber<Factoriadic<2, 1, 1, 0> >(15);
+    testFactoriadicNumber<Factoriadic<0>, 0>();
+    testFactoriadicNumber<Factoriadic<1, 0>, 1>();
+    testFactoriadicNumber<Factoriadic<1, 0, 0>, 2>();
+    testFactoriadicNumber<Factoriadic<1, 1, 0>, 3>();
+    testFactoriadicNumber<Factoriadic<2, 0, 0>, 4>();
+    testFactoriadicNumber<Factoriadic<2, 1, 1, 0>, 15>();
 }
 
 #if 0
