@@ -34,6 +34,9 @@
 #include <tinympl/minus.hpp>
 #include <tinympl/is_unique.hpp>
 
+#include <tinympl/count_if.hpp>
+#include <tinympl/greater.hpp>
+
 // Standard includes
 #include <type_traits>
 
@@ -461,21 +464,47 @@ namespace common {
                 typedef std::is_same<ByteNumber, typename Val::value_type> type;
             };
 
-            template <typename Sequence> struct IsValidPermutation {
+            template <typename Sequence> struct CorrectMaxValue {
                 typedef tinympl::size<Sequence> size;
                 typedef typename tinympl::max_element<Sequence>::type max_index;
                 typedef typename tinympl::at<max_index::value, Sequence>::type
                     max_value;
+                typedef typename tinympl::equal_to<
+                    typename tinympl::minus<size, bytenum<1> >::type,
+                    max_value>::type type; // Max value is size-1
+            };
+            template <typename Sequence> struct IsValidPermutation {
                 typedef typename tinympl::and_<
                     typename tinympl::all_of<Sequence, IsByteNumber>::
                         type, // all ByteNumber elements
-                    typename tinympl::equal_to<
-                        tinympl::minus<size, bytenum<1> >,
-                        max_value>::type, // Max value is size-1
+                    typename CorrectMaxValue<Sequence>::type,
                     typename tinympl::is_unique<Sequence>::type // all elements
                                                                 // unique
                     >::type type;
             };
+            template <typename Head, typename... Tail> struct NumLargerThan {};
+
+            template <typename State, typename Head, typename... Tail>
+            struct ToFactoriadicConsumeOp {
+
+                template <typename Val>
+                using LargerThanHead = tinympl::greater<Val, Head>;
+                using NumLargerThanHead =
+                    typename tinympl::count_if<tinympl::sequence<Tail...>,
+                                               LargerThanHead>::type;
+                typedef typename sequence::ConvertToByteNumber<
+                    NumLargerThanHead>::type NewElement;
+                typedef
+                    typename State::template push_back<NewElement>::type type;
+            };
+
+            /// @brief Convert a sequence showing a permutation into a
+            /// factoriadic number (Lehmer code)
+            template <typename Permutation>
+            struct ToFactoriadic
+                : sequence::left_consume<ToFactoriadicConsumeOp,
+                                         tinympl::vector<>, Permutation> {};
+
         } // namespace permutations
 
         using factoriadic::Factoriadic;

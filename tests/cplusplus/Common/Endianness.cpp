@@ -48,6 +48,7 @@ inline std::string fromInt(IDType num) {
 class StringifySequence {
   public:
     template <typename T> void operator()(T num) { m_str << int(num); }
+    template <typename T> void operator()() { m_str << int(T()); }
 
     std::string get() const { return m_str.str(); }
 
@@ -58,6 +59,11 @@ class StringifySequence {
 template <typename Number> inline std::string stringifySequence() {
     StringifySequence f;
     sequence::visitFromLeft<Number>(f);
+    return f.get();
+}
+template <typename Seq> inline std::string stringifyGeneralSequence() {
+    StringifySequence f;
+    sequence::left_fold_runtime<Seq>(f);
     return f.get();
 }
 
@@ -126,13 +132,22 @@ TEST(Sequence, Unique) {
 }
 
 TEST(Permutation, General) {
-    typedef sequence::vector_c<ByteNumber, 1, 2, 3, 4, 5> SamplePermutation;
+    typedef sequence::vector_c<ByteNumber, 0, 1, 2, 3, 4, 5> SamplePermutation;
     typedef permutations::GenerateSequence<4>::type SequenceOfFour;
     ASSERT_TRUE((tinympl::is_sequence<
         sequence::SmallIntSequence<1, 2, 3, 4, 5> >::value));
-
+    ASSERT_TRUE((tinympl::all_of<
+        SequenceOfFour,
+        osvr::common::byte_order::permutations::IsByteNumber>::type::value));
+    ASSERT_TRUE((permutations::CorrectMaxValue<SequenceOfFour>::type::value));
     ASSERT_TRUE(
         (permutations::IsValidPermutation<SequenceOfFour>::type::value));
+}
+
+TEST(Permutation, ToFromFactoriadic) {
+    typedef permutations::GenerateSequence<4>::type SequenceOfFour;
+
+    ASSERT_EQ("0123", stringifyGeneralSequence<SequenceOfFour>());
 }
 
 #if 0
