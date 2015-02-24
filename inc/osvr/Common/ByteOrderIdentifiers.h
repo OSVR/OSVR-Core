@@ -51,6 +51,43 @@ namespace common {
             /// @brief A C++11 compile-time sequence of small integers
             template <ByteNumber... Elements> struct SmallIntSequence;
 
+            /// @brief Get the length of a SmallIntSequence: derives from the
+            /// corresponding std::integral_constant
+            template <typename Sequence> struct Length;
+
+            template <>
+            struct Length<void> : std::integral_constant<ByteNumber, 0> {};
+
+            template <ByteNumber... Elements>
+            struct Length<SmallIntSequence<Elements...> >
+                : std::integral_constant<ByteNumber, sizeof...(Elements)> {};
+
+            /// @brief Determines if there are any elements in a sequence tail
+            /// (that is, length > 1): derives from the std::true_type or
+            /// std::false_type. Useful for partial specialization in compile
+            /// time algorithms.
+            template <typename Sequence, bool = (Length<Sequence>::value > 1)>
+            struct HasTail;
+
+            template <typename Sequence>
+            struct HasTail<Sequence, true> : std::true_type {};
+
+            template <typename Sequence>
+            struct HasTail<Sequence, false> : std::false_type {};
+
+            /// @brief Determines if there are any elements in a sequence
+            /// (that is, length > 0): derives from the std::true_type or
+            /// std::false_type. Useful for partial specialization in compile
+            /// time algorithms.
+            template <typename Sequence, bool = (Length<Sequence>::value > 0)>
+            struct HasElements;
+
+            template <typename Sequence>
+            struct HasElements<Sequence, true> : std::true_type {};
+
+            template <typename Sequence>
+            struct HasElements<Sequence, false> : std::false_type {};
+
             /// @brief Get the head element of a SmallIntSequence: derives from
             /// the corresponding std::integral_constant
             template <typename Sequence> struct HeadElement;
@@ -71,30 +108,6 @@ namespace common {
             struct GetTail<SmallIntSequence<Head, Tail...> > {
                 typedef SmallIntSequence<Tail...> type;
             };
-
-            /// @brief Get the length of a SmallIntSequence: derives from the
-            /// corresponding std::integral_constant
-            template <typename Sequence> struct Length;
-
-            template <>
-            struct Length<void> : std::integral_constant<ByteNumber, 0> {};
-
-            template <ByteNumber... Digits>
-            struct Length<SmallIntSequence<Digits...> >
-                : std::integral_constant<ByteNumber, sizeof...(Digits)> {};
-
-            /// @brief Determines if there are any elements in a sequence tail
-            /// (that is, length > 1): derives from the std::true_type or
-            /// std::false_type. Useful for partial specialization in compile
-            /// time algorithms.
-            template <typename Number> struct HasTail;
-
-            template <ByteNumber Head, ByteNumber... Tail>
-            struct HasTail<SmallIntSequence<Head, Tail...> > : std::true_type {
-            };
-
-            template <ByteNumber Head>
-            struct HasTail<SmallIntSequence<Head> > : std::false_type {};
 
             /// @brief Metafunction: pushes an element on to the head of the
             /// provided SmallIntSequence. Result returned in nested typedef
@@ -159,6 +172,59 @@ namespace common {
             inline void visitFromLeft(F &f) {
                 VisitFromLeft<Sequence, F>::apply(f);
             }
+
+            /// @brief Checks to see if an element exists in the sequence
+            template <typename Sequence, ByteNumber Element,
+                      bool = HasElements<Sequence>::value, typename = void>
+            struct Contains;
+
+            // base case: empty sequence
+            template <typename Sequence, ByteNumber Element>
+            struct Contains<Sequence, Element, false, void> : std::false_type {
+            };
+
+            // base case: head is desired element
+            template <typename Sequence, ByteNumber Element>
+            struct Contains<Sequence, Element, true,
+                            typename std::enable_if<
+                                Element == HeadElement<Sequence>::value>::type>
+                : std::true_type {};
+            // recursive case: head not desired element, but sequence not empty
+            template <typename Sequence, ByteNumber Element>
+            struct Contains<Sequence, Element, true,
+                            typename std::enable_if<
+                                Element != HeadElement<Sequence>::value>::type>
+                : Contains<typename GetTail<Sequence>::type, Element> {};
+
+            /// @brief Checks to see if all sequence elements are unique.
+            template <typename Sequence, typename = void> struct AllUnique;
+
+            // Base case: empty or singleton
+            template <typename Sequence>
+            struct AllUnique<Sequence, typename std::enable_if<(
+                                           Length<Sequence>::value < 2)>::type>
+                : std::true_type {};
+
+            // Base case: head is in the tail.
+            template <typename Sequence>
+            struct AllUnique<
+                Sequence,
+                typename std::enable_if<(
+                    HasTail<Sequence>::value &&
+                    Contains<typename GetTail<Sequence>::type,
+                             HeadElement<Sequence>::value>::value)>::type>
+                : std::false_type {};
+
+            // Recursive case: head is unique, check the tail.
+            template <typename Sequence>
+            struct AllUnique<
+                Sequence,
+                typename std::enable_if<(
+                    HasTail<Sequence>::value &&
+                    !Contains<typename GetTail<Sequence>::type,
+                              HeadElement<Sequence>::value>::value)>::type>
+                : AllUnique<typename GetTail<Sequence>::type> {};
+
         } // namespace sequence
         namespace factoriadic {
             /// @brief A number in factoriadic number type, with each sequence

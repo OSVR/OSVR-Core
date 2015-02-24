@@ -90,6 +90,39 @@ TEST(Sequence, Generation) {
     ASSERT_EQ(stringifySequence<sequence::GenerateRange<5>::type>(), "01234");
 }
 
+TEST(Sequence, Unique) {
+
+#if 1
+#define COMPILE_TIME_ASSERT(X)                                                 \
+    BOOST_STATIC_ASSERT(X);                                                    \
+    ASSERT_TRUE(X)
+#endif
+#if 0
+#define COMPILE_TIME_ASSERT(X) ASSERT_TRUE(X)
+#endif
+#if 0
+#define COMPILE_TIME_ASSERT(X) BOOST_STATIC_ASSERT(X)
+#endif
+    COMPILE_TIME_ASSERT(
+        sequence::Length<sequence::SmallIntSequence<> >::value == 0);
+    COMPILE_TIME_ASSERT(
+        sequence::HasTail<sequence::SmallIntSequence<> >::value == false);
+
+    COMPILE_TIME_ASSERT(
+        sequence::Length<sequence::SmallIntSequence<5> >::value == 1);
+    COMPILE_TIME_ASSERT(
+        sequence::HasTail<sequence::SmallIntSequence<5> >::value == false);
+
+    COMPILE_TIME_ASSERT(
+        (sequence::Length<sequence::SmallIntSequence<5, 5> >::value == 2));
+    // ASSERT_TRUE((sequence::AllUnique<sequence::SmallIntSequence<> >::value));
+    ASSERT_TRUE((sequence::AllUnique<sequence::SmallIntSequence<1> >::value));
+    ASSERT_TRUE((sequence::AllUnique<
+        sequence::SmallIntSequence<1, 2, 3, 4, 5> >::value));
+    ASSERT_FALSE((sequence::AllUnique<
+        sequence::SmallIntSequence<1, 2, 3, 4, 4, 5> >::value));
+}
+
 #if 0
 template <typename T> class UIntEndiannessID : public ::testing::Test {};
 typedef ::testing::Types<uint64_t, uint32_t, uint16_t> UIntTypes;
