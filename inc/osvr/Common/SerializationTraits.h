@@ -21,6 +21,7 @@
 // Internal Includes
 #include <osvr/Common/AlignmentPadding.h>
 #include <osvr/Common/Endianness.h>
+#include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/BoolC.h>
 
 // Library/third-party includes
@@ -38,13 +39,6 @@ namespace osvr {
 namespace common {
 
     namespace serialization {
-        /// @brief The default "type tag" for specifying serialization behavior.
-        ///
-        /// Usage of tag types and matching type traits allows us to serialize
-        /// the same underlying type different ways when requested.
-        template <typename T> struct DefaultSerializationTag {
-            typedef T type;
-        };
 
         /// @brief Traits class indicating how to serialize a type with a given
         /// tag. The default tag for a type `T` is `DefaultSerializationTag<T>`
@@ -153,7 +147,10 @@ namespace common {
         };
 
         /// @brief Set up the default serialization traits for bool,
-        /// which we'll stick in uint8_t (OSVR_CBool) types.
+        /// which we'll stick in uint8_t (OSVR_CBool) types. Note that if you're
+        /// going for VRPN compatibility (re-implementing existing VRPN
+        /// messages), be sure you serialize vrpn_bool, not just bool - VPRN
+        /// uses 16-bits for a bool by default IIRC.
         template <>
         struct SerializationTraits<DefaultSerializationTag<bool>, void>
             : BaseSerializationTraits<bool> {
@@ -177,7 +174,7 @@ namespace common {
             }
         };
 
-        /// @brief String, length-prefixed.
+        /// @brief String, length-prefixed. (default)
         template <>
         struct SerializationTraits<DefaultSerializationTag<std::string>, void>
             : BaseSerializationTraits<std::string> {
@@ -217,12 +214,8 @@ namespace common {
             }
         };
 
-        /// @brief A tag for use when the only field in a message is a string so
-        /// the length prefix is unnecessary
-        struct StringOnlyMessageTag {};
-
-        /// @brief String, not prefixed by length (only useful if a whole
-        /// message is a string).
+        /// @brief Traits for the StringOnlyMessageTag: a string, not prefixed
+        /// by length (only useful if a whole message is a string).
         template <>
         struct SerializationTraits<StringOnlyMessageTag, void>
             : BaseSerializationTraits<std::string> {
@@ -252,19 +245,6 @@ namespace common {
                                         tag_type const &) {
                 return val.length();
             }
-        };
-
-        /// @brief A tag for use for raw data (bytestream), optionally aligned
-        ///
-        /// Here, the tag is also used to transport size information to
-        /// serialization/deserialization
-        template <size_t Alignment = 1> struct AlignedDataBufferTag {
-          public:
-            AlignedDataBufferTag(size_t length) : m_length(length) {}
-            size_t length() const { return m_length; }
-
-          private:
-            size_t m_length;
         };
 
         /// @brief Serialization traits for a raw data bytestream with the given
