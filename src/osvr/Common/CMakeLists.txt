@@ -25,6 +25,7 @@ set(API
     "${HEADER_LOCATION}/RawSenderType.h"
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
+    "${HEADER_LOCATION}/SystemComponent.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
@@ -38,7 +39,8 @@ set(SOURCE
     MessageRegistration.cpp
     RawMessageType.cpp
     RawSenderType.cpp
-    Serialization.cpp)
+    Serialization.cpp
+    SystemComponent.cpp)
 
 osvr_add_library()
 

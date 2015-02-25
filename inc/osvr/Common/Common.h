@@ -28,8 +28,6 @@
 // - none
 
 namespace osvr {
-namespace common {
-    OSVR_COMMON_EXPORT void dummyFunction();
-} // namespace common
+namespace common {} // namespace common
 } // namespace osvr
 #endif // INCLUDED_Common_h_GUID_038DC112_73F9_4285_B646_6D5B8A80270F

@@ -19,20 +19,24 @@
 #define INCLUDED_MessageRegistration_h_GUID_F431F1DB_4193_42AB_3376_C67740E2C6FE
 
 // Internal Includes
-#include <osvr/Util/StdInt.h>
+#include <osvr/Common/RawMessageType.h>
 
 // Library/third-party includes
-#include <boost/optional.hpp>
+// - none
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace common {
-    typedef boost::optional<int32_t> MessageKeyType;
-    class MessageRegistration {
+    /// @brief Class template wrapping message-specific data and/or logic.
+    ///
+    /// @tparam T Your message-specific type: must have a `static const char *
+    /// identifier()`
+    /// method returning the string ID of the message.
+    template <typename T> class MessageRegistration : public T {
       public:
-        virtual MessageKeyType registerMessage(const char *messageName) = 0;
+        RawMessageType type;
     };
 } // namespace common
 } // namespace osvr

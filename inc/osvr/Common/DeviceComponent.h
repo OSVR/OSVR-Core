@@ -21,6 +21,8 @@
 // Internal Includes
 #include <osvr/Common/DeviceComponentPtr.h>
 #include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/MessageHandler.h>
+#include <osvr/Common/BaseMessageTraits.h>
 
 // Library/third-party includes
 // - none
@@ -30,9 +32,6 @@
 
 namespace osvr {
 namespace common {
-    class DeviceComponent;
-    typedef shared_ptr<DeviceComponent> DeviceComponentPtr;
-
     class DeviceComponent {
       public:
         typedef BaseDevice Parent;
@@ -54,6 +53,13 @@ namespace common {
         /// @brief Gets the parent - only call if m_hasParent() is true
         Parent &m_getParent();
 
+        /// @brief Registers a handler whose lifetime is tied to the lifetime of
+        /// the component.
+        ///
+        /// Only call if m_hasParent() is true
+        void m_registerHandler(vrpn_MESSAGEHANDLER handler, void *userdata,
+                               RawMessageType const &msgType);
+
         /// @brief Called once when we have a parent
         virtual void m_parentSet() = 0;
 
@@ -63,6 +69,7 @@ namespace common {
 
       private:
         Parent *m_parent;
+        MessageHandlerList<BaseDeviceMessage> m_messageHandlers;
     };
 } // namespace common
 } // namespace osvr

@@ -17,9 +17,25 @@
 
 // Internal Includes
 #include <osvr/Common/CreateDevice.h>
+#include "DeviceWrapper.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+namespace osvr {
+namespace common {
+    BaseDevicePtr createClientDevice(std::string const &name,
+                                     vrpn_ConnectionPtr const &conn) {
+        auto ret = make_shared<DeviceWrapper>(name, conn, true);
+        return ret;
+    }
+    BaseDevicePtr createServerDevice(std::string const &name,
+                                     vrpn_ConnectionPtr const &conn) {
+        auto ret = make_shared<DeviceWrapper>(name, conn, false);
+        return ret;
+    }
+} // namespace common
+} // namespace osvr

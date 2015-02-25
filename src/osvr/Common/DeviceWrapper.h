@@ -19,17 +19,38 @@
 #define INCLUDED_DeviceWrapper_h_GUID_3524C649_2276_4C87_C116_663BABDC23C6
 
 // Internal Includes
-// - none
+#include <osvr/Common/BaseDevice.h>
+#include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
-// - none
+#include <vrpn_BaseClass.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace osvr {
 namespace common {
-    class DeviceWrapper {};
+    class DeviceWrapper : public vrpn_BaseClass, public BaseDevice {
+      public:
+        DeviceWrapper(std::string const &name, vrpn_ConnectionPtr const &conn,
+                      bool client);
+        virtual ~DeviceWrapper();
+
+      private:
+        /// @name vrpn_BaseClass methods
+        /// @{
+        virtual void mainloop();
+        virtual int register_types();
+        /// @}
+        /// @name BaseDevice methods
+        /// @{
+        virtual RawSenderType m_getSender();
+        virtual void m_update();
+        /// @}
+        vrpn_ConnectionPtr m_conn;
+        bool m_client;
+    };
 } // namespace common
 } // namespace osvr
 

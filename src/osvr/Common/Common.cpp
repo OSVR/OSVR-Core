@@ -25,7 +25,5 @@
 // - none
 
 namespace osvr {
-namespace common {
-    void dummyFunction() {}
-} // namespace common
+namespace common {} // namespace common
 } // namespace osvr

@@ -24,6 +24,7 @@
 #include <osvr/Common/DeviceComponentPtr.h>
 #include <osvr/Common/RawMessageType.h>
 #include <osvr/Common/RawSenderType.h>
+#include <osvr/Common/MessageRegistration.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -42,16 +43,30 @@ namespace common {
         /// @brief Virtual destructor
         OSVR_COMMON_EXPORT virtual ~BaseDevice();
 
-        /// @brief For adding components to a base device.
+        /// @brief Adds a component to a base device.
         /// @throws std::logic_error if you pass a null pointer.
-        void addComponent(DeviceComponentPtr component);
+        template <typename T> T *addComponent(shared_ptr<T> component) {
+            T *ret = component.get();
+            m_addComponent(component);
+            return ret;
+        }
 
         void registerHandler(vrpn_MESSAGEHANDLER handler, void *userdata,
                              RawMessageType const &msgType);
         void unregisterHandler(vrpn_MESSAGEHANDLER handler, void *userdata,
                                RawMessageType const &msgType);
 
-        RawMessageType registerMessageType(const char *msgString);
+        /// @brief Call with a string identifying a message type, and get back
+        /// an identifier.
+        RawMessageType registerMessageType(const char *identifier);
+
+        /// @brief Call with a MessageRegistration object, and the message type
+        /// will be registered and stored in the `type` field.
+        template <typename T>
+        void registerMessageType(MessageRegistration<T> &messageReg) {
+            messageReg.type = registerMessageType(T::identifier())
+        }
+
         RawSenderType getSender();
 
         /// @brief Called from the outside to run the mainloop on the device and
@@ -74,7 +89,7 @@ namespace common {
         /// @brief Constructor
         BaseDevice();
         /// @brief The implementation-specific part of addComponent.
-        virtual void m_addComponent(DeviceComponentPtr component) = 0;
+        virtual void m_addComponent(DeviceComponentPtr component);
         /// @brief Should be called by derived class to set the connection
         void m_setConnection(vrpn_ConnectionPtr conn);
         /// @brief Accessor for underlying connection
@@ -86,6 +101,8 @@ namespace common {
         virtual void m_update() = 0;
 
       private:
+        void m_addComponent(DeviceComponentPtr component);
+
         void m_packMessage(size_t len, const char *buf,
                            util::time::TimeValue const &timestamp,
                            RawMessageType const &msgType,

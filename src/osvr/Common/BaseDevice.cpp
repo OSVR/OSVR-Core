@@ -63,18 +63,18 @@ namespace common {
     RawSenderType BaseDevice::getSender() { return m_getSender(); }
 
     void BaseDevice::update() {
-        m_update();
         for (auto const &component : m_components) {
             component->update();
         }
-        auto conn = m_getConnection();
-        if (conn) {
-            conn->mainloop();
-        }
+        m_update();
     }
 
     void BaseDevice::sendPending() {
         m_getConnection()->send_pending_reports();
+    }
+
+    void BaseDevice::m_addComponent(DeviceComponentPtr) {
+        // default do-nothing
     }
 
     void BaseDevice::m_packMessage(size_t len, const char *buf,

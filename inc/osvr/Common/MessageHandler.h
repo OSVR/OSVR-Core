@@ -21,7 +21,7 @@
 // Internal Includes
 #include <osvr/Common/RawMessageType.h>
 #include <osvr/Common/RawSenderType.h>
-#include <osvr/Util/UniquePtr.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <boost/optional.hpp>
@@ -31,6 +31,13 @@
 
 namespace osvr {
 namespace common {
+    class MessageHandlerBase : boost::noncopyable {
+      public:
+        virtual ~MessageHandlerBase();
+
+      protected:
+        MessageHandlerBase();
+    };
     /// @brief RAII class template managing a message handler callback.
     ///
     /// @tparam MessageTraits Policy class, providing a `handler_type` typedef
@@ -39,7 +46,7 @@ namespace common {
     /// contain `registerHandler` and `unregisterHandler` methods taking the
     /// arguments (HandlerType, void*, RawSenderType, RawMessageType) )
     template <typename MessageTraits>
-    class MessageHandler : boost::noncopyable {
+    class MessageHandler : public MessageHandlerBase {
       public:
         typedef typename MessageTraits::handler_type handler_type;
         typedef typename MessageTraits::registration_type registration_type;
@@ -93,10 +100,13 @@ namespace common {
     };
 
     template <typename MessageTraits>
-    using MessageHandlerPtr = unique_ptr<MessageHandler<MessageTraits> >;
+    using MessageHandlerPtr = shared_ptr<MessageHandler<MessageTraits> >;
 
     template <typename MessageTraits>
     using MessageHandlerList = std::vector<MessageHandlerPtr<MessageTraits> >;
+
+    typedef std::vector<shared_ptr<MessageHandlerBase> >
+        GenericMessageHandlerList;
 } // namespace common
 } // namespace osvr
 #endif // INCLUDED_MessageHandler_h_GUID_A7A258A7_A369_46BA_C44F_6FFE56DB464A

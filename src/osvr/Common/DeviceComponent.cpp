@@ -43,6 +43,15 @@ namespace common {
     DeviceComponent::Parent &DeviceComponent::m_getParent() {
         return *m_parent;
     }
+
+    void DeviceComponent::m_registerHandler(vrpn_MESSAGEHANDLER handler,
+                                            void *userdata,
+                                            RawMessageType const &msgType) {
+        auto h = make_shared<MessageHandler<BaseDeviceMessage> >(
+            handler, userdata, msgType);
+        h->registerHandler(&m_getParent());
+        m_messageHandlers.push_back(h);
+    }
     void DeviceComponent::m_update() {}
 } // namespace common
 } // namespace osvr
