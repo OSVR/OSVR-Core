@@ -47,4 +47,33 @@
 #define OSVR_HAVE_STRUCT_TIMEVAL
 #endif
 
+/**
+ * Platform-specific variables.
+ *
+ * Prefer testing for specific compiler or platform features instead of relying
+ * on these variables.
+ *
+ */
+//@{
+#cmakedefine OSVR_AIX
+#cmakedefine OSVR_BSDOS
+#cmakedefine OSVR_FREEBSD
+#cmakedefine OSVR_HPUX
+#cmakedefine OSVR_IRIX
+#cmakedefine OSVR_LINUX
+#cmakedefine OSVR_KFREEBSD
+#cmakedefine OSVR_NETBSD
+#cmakedefine OSVR_OPENBSD
+#cmakedefine OSVR_OFS1
+#cmakedefine OSVR_SCO_SV
+#cmakedefine OSVR_UNIXWARE
+#cmakedefine OSVR_XENIX
+#cmakedefine OSVR_SUNOS
+#cmakedefine OSVR_TRU64
+#cmakedefine OSVR_ULTRIX
+#cmakedefine OSVR_CYGWIN
+#cmakedefine OSVR_MACOSX
+//@}
+
 #endif
+

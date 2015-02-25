@@ -23,7 +23,7 @@
 #include <osvr/PluginHost/PathConfig.h>
 
 // Library/third-party includes
-// - none
+#include <boost/filesystem.hpp>
 
 // Standard includes
 #include <vector>
@@ -31,14 +31,37 @@
 
 namespace osvr {
 namespace pluginhost {
+
     typedef std::string SearchPath;
     typedef std::vector<std::string> FileList;
 
     /// Find a place where to look for plugins
     OSVR_PLUGINHOST_EXPORT SearchPath getPluginSearchPath();
-    
-    // Get list of files inside the directory with givn extension
-    OSVR_PLUGINHOST_EXPORT FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext);
+
+    /// Get list of files inside the directory with given extension
+    OSVR_PLUGINHOST_EXPORT FileList
+        getAllFilesWithExt(SearchPath dirPath, const std::string &ext);
+
+    /// Helper class that generates an iterable range of directory entries.
+    class recursive_directory_range {
+      public:
+        typedef boost::filesystem::recursive_directory_iterator iterator;
+
+        recursive_directory_range(boost::filesystem::path p) : m_path(p) {}
+
+        iterator begin() {
+            return boost::filesystem::recursive_directory_iterator(m_path);
+        }
+
+        iterator end() {
+            return boost::filesystem::recursive_directory_iterator();
+        }
+
+      private:
+        boost::filesystem::path m_path;
+    };
+
 } // namespace pluginhost
 } // namespace osvr
+
 #endif // INCLUDED_SearchPath_h_GUID_D9D19BF6_FEB5_4B82_17A4_C8C397C88523

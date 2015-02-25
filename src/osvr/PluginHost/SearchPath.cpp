@@ -25,13 +25,6 @@
 // Standard includes
 // - none
 
-/* PathConfig.h contains something like the following:
-
-    #define OSVR_PLUGIN_DIR "bin"
-    #define OSVR_PLUGIN_EXTENSION ".dll"
-
-*/
-
 namespace osvr {
 namespace pluginhost {
     SearchPath getPluginSearchPath() {
@@ -49,44 +42,34 @@ namespace pluginhost {
         // binDir now normalized to PREFIX/bin
         auto root = binDir.parent_path();
 
-        SearchPath path;
 #ifdef _MSC_VER
-        path = (root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string();
+        const SearchPath path = (root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string();
 #else
-        path = (root / OSVR_PLUGIN_DIR).string());
+        const SearchPath path = (root / OSVR_PLUGIN_DIR).string();
 #endif
         return path;
     }
 
-    FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext){
-
+    FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext) {
         FileList filesPaths;
         boost::filesystem::path directoryPath(dirPath);
 
-        //make sure that directory exists
-        if (!boost::filesystem::exists(directoryPath)){
+        // Make sure that directory exists
+        if (!boost::filesystem::exists(directoryPath)) {
             return filesPaths;
         }
 
-        boost::filesystem::recursive_directory_iterator iter(directoryPath);
-        boost::filesystem::recursive_directory_iterator endIter;
-        
-        //get a list of files inside the dir that match the extension
-        while (iter != endIter){
+        // Get a list of files inside the dir that match the extension
+        for (const auto& path : recursive_directory_range(directoryPath)) {
+            if (!boost::filesystem::is_regular_file(path) || path.path().extension() != ext)
+                continue;
 
-            if (boost::filesystem::is_regular_file(*iter) && iter->path().extension() == ext){
-                
-                //convert to forward slash
-                std::string path = iter->path().string();
-                std::replace(path.begin(), path.end(), '\\', '/');
-                filesPaths.push_back(path);
-            }
-            iter++;
+            filesPaths.push_back(path.path().generic_string());
         }
 
         return filesPaths;
     }
 
-
 } // namespace pluginhost
 } // namespace osvr
+
