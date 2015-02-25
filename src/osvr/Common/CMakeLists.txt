@@ -6,17 +6,23 @@ check_include_file(byteswap.h OSVR_HAVE_BYTESWAP_H)
 configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(API
+    "${HEADER_LOCATION}/BaseMessageTraits.h"
     "${HEADER_LOCATION}/Buffer.h"
     "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
     "${HEADER_LOCATION}/Common.h"
+    "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
     "${HEADER_LOCATION}/BaseDevice.h"
     "${HEADER_LOCATION}/BaseDevicePtr.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
+    "${HEADER_LOCATION}/ImagingComponent.h"
+    "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
+    "${HEADER_LOCATION}/RawMessageType.h"
+    "${HEADER_LOCATION}/RawSenderType.h"
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
@@ -27,7 +33,11 @@ set(SOURCE
     CreateDevice.cpp
     DeviceComponent.cpp
     DeviceWrapper.cpp
+    DeviceWrapper.h
+    ImagingComponent.cpp
     MessageRegistration.cpp
+    RawMessageType.cpp
+    RawSenderType.cpp
     Serialization.cpp)
 
 osvr_add_library()
@@ -50,6 +60,8 @@ target_compile_options(${LIBNAME_FULL}
 
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
+    osvrUtilCpp
     jsoncpp_lib
     PRIVATE
+    vendored-vrpn
     eigen-headers)

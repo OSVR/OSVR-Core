@@ -25,12 +25,13 @@
 // - none
 
 // Standard includes
-// - none
+#include <vector>
 
 namespace osvr {
 namespace common {
     class DeviceComponent;
     typedef shared_ptr<DeviceComponent> DeviceComponentPtr;
+    typedef std::vector<DeviceComponentPtr> DeviceComponentList;
 } // namespace common
 } // namespace osvr
 

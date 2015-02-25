@@ -15,8 +15,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
-#ifndef INCLUDED_DeviceWrapper_h_GUID_3524C649_2276_4C87_C116_663BABDC23C6
-#define INCLUDED_DeviceWrapper_h_GUID_3524C649_2276_4C87_C116_663BABDC23C6
+#ifndef INCLUDED_ImagingComponent_h_GUID_BA26C922_01FD_43B3_8EB7_A9AB2777CEBC
+#define INCLUDED_ImagingComponent_h_GUID_BA26C922_01FD_43B3_8EB7_A9AB2777CEBC
 
 // Internal Includes
 // - none
@@ -27,10 +27,4 @@
 // Standard includes
 // - none
 
-namespace osvr {
-namespace common {
-    class DeviceWrapper {};
-} // namespace common
-} // namespace osvr
-
-#endif // INCLUDED_DeviceWrapper_h_GUID_3524C649_2276_4C87_C116_663BABDC23C6
+#endif // INCLUDED_ImagingComponent_h_GUID_BA26C922_01FD_43B3_8EB7_A9AB2777CEBC

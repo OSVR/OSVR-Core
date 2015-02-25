@@ -16,14 +16,10 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include "DeviceWrapper.h"
+#include <osvr/Common/ImagingComponent.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
-
-namespace osvr {
-namespace common {} // namespace common
-} // namespace osvr
