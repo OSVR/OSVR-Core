@@ -65,7 +65,7 @@ namespace common {
         /// will be registered and stored in the `type` field.
         template <typename T>
         void registerMessageType(MessageRegistration<T> &messageReg) {
-            messageReg.type = registerMessageType(T::identifier());
+            messageReg.setMessageType(registerMessageType(T::identifier()));
         }
 
         RawSenderType getSender();

@@ -32,7 +32,7 @@ namespace osvr {
 namespace common {
     namespace messages {
         class RoutesFromServer::MessageSerialization {
-        public:
+          public:
             MessageSerialization(std::string const &str = std::string())
                 : m_str(str) {}
 
@@ -40,7 +40,7 @@ namespace common {
                 p(m_str, serialization::StringOnlyMessageTag());
             }
 
-        private:
+          private:
             std::string m_str;
         };
         const char *RoutesFromServer::identifier() {
@@ -63,7 +63,7 @@ namespace common {
         Buffer<> buf;
         messages::RoutesFromServer::MessageSerialization msg(routes);
         serialize(buf, msg);
-        m_getParent().packMessage(buf, routesOut.type);
+        m_getParent().packMessage(buf, routesOut.getMessageType());
     }
     void SystemComponent::m_parentSet() {
         m_getParent().registerMessageType(routesOut);

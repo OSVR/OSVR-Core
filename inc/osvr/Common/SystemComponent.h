@@ -33,13 +33,14 @@
 namespace osvr {
 namespace common {
     namespace messages {
-        class RoutesFromServer {
+        class RoutesFromServer : public MessageRegistration<RoutesFromServer> {
           public:
             class MessageSerialization;
             static const char *identifier();
         };
 
-        class AppStartupToServer {
+        class AppStartupToServer
+            : public MessageRegistration<AppStartupToServer> {
           public:
             static const char *identifier();
         };
