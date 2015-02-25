@@ -6,6 +6,7 @@ check_include_file(byteswap.h OSVR_HAVE_BYTESWAP_H)
 configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(API
+    "${HEADER_LOCATION}/AlignmentPadding.h"
     "${HEADER_LOCATION}/BaseMessageTraits.h"
     "${HEADER_LOCATION}/Buffer.h"
     "${HEADER_LOCATION}/BufferTraits.h"
@@ -24,6 +25,7 @@ set(API
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
     "${HEADER_LOCATION}/Serialization.h"
+    "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
@@ -36,6 +38,7 @@ set(SOURCE
     DeviceWrapper.cpp
     DeviceWrapper.h
     ImagingComponent.cpp
+    MessageHandler.cpp
     MessageRegistration.cpp
     RawMessageType.cpp
     RawSenderType.cpp

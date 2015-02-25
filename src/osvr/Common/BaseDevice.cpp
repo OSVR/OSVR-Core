@@ -31,7 +31,7 @@ namespace common {
     BaseDevice::BaseDevice() {}
     BaseDevice::~BaseDevice() {}
 
-    void BaseDevice::addComponent(DeviceComponentPtr component) {
+    void BaseDevice::m_addComponentPrivate(DeviceComponentPtr component) {
         if (!component) {
             throw std::logic_error(
                 "Tried to add a null component pointer to a base device!");
@@ -78,14 +78,17 @@ namespace common {
     }
 
     void BaseDevice::m_packMessage(size_t len, const char *buf,
-                                   util::time::TimeValue const &timestamp,
                                    RawMessageType const &msgType,
+                                   util::time::TimeValue const &timestamp,
                                    uint32_t classOfService) {
         struct timeval t;
         util::time::toStructTimeval(t, timestamp);
         auto ret = m_getConnection()->pack_message(
             static_cast<uint32_t>(len), t, msgType.get(), getSender().get(),
             buf, classOfService);
+        if (ret != 0) {
+            throw std::runtime_error("Could not pack message!");
+        }
     }
 
     void BaseDevice::m_setConnection(vrpn_ConnectionPtr conn) { m_conn = conn; }

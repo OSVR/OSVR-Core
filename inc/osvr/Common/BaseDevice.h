@@ -25,6 +25,7 @@
 #include <osvr/Common/RawMessageType.h>
 #include <osvr/Common/RawSenderType.h>
 #include <osvr/Common/MessageRegistration.h>
+#include <osvr/Common/Buffer.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -47,7 +48,7 @@ namespace common {
         /// @throws std::logic_error if you pass a null pointer.
         template <typename T> T *addComponent(shared_ptr<T> component) {
             T *ret = component.get();
-            m_addComponent(component);
+            m_addComponentPrivate(component);
             return ret;
         }
 
@@ -64,25 +65,32 @@ namespace common {
         /// will be registered and stored in the `type` field.
         template <typename T>
         void registerMessageType(MessageRegistration<T> &messageReg) {
-            messageReg.type = registerMessageType(T::identifier())
+            messageReg.type = registerMessageType(T::identifier());
         }
 
         RawSenderType getSender();
 
         /// @brief Called from the outside to run the mainloop on the device and
         /// its components.
-        void update();
+        OSVR_COMMON_EXPORT void update();
 
         /// @brief Called from a component to send pending messages instead of
         /// waiting for next time.
         void sendPending();
 
-        template <typename T, typename Alloc>
-        void packMessage(std::vector<T, Alloc> const &buf,
+        template <typename T>
+        void packMessage(Buffer<T> const &buf, RawMessageType const &msgType,
                          util::time::TimeValue const &timestamp,
-                         RawMessageType const &msgType,
-                         uint32_t classOfService) {
-            m_packMessage(buf.size(), buf.data(), timestamp, msgType);
+                         uint32_t classOfService = vrpn_CONNECTION_RELIABLE) {
+            m_packMessage(buf.size(), buf.data(), msgType, timestamp,
+                          classOfService);
+        }
+        template <typename T>
+        void packMessage(Buffer<T> const &buf, RawMessageType const &msgType,
+                         uint32_t classOfService = vrpn_CONNECTION_RELIABLE) {
+            util::time::TimeValue t;
+            util::time::getNow(t);
+            m_packMessage(buf.size(), buf.data(), msgType, t, classOfService);
         }
 
       protected:
@@ -101,11 +109,12 @@ namespace common {
         virtual void m_update() = 0;
 
       private:
-        void m_addComponent(DeviceComponentPtr component);
+        OSVR_COMMON_EXPORT void
+        m_addComponentPrivate(DeviceComponentPtr component);
 
         void m_packMessage(size_t len, const char *buf,
-                           util::time::TimeValue const &timestamp,
                            RawMessageType const &msgType,
+                           util::time::TimeValue const &timestamp,
                            uint32_t classOfService);
         DeviceComponentList m_components;
         vrpn_ConnectionPtr m_conn;

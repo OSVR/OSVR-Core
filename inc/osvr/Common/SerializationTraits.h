@@ -19,15 +19,7 @@
 #define INCLUDED_SerializationTraits_h_GUID_DF0CDFE0_097F_41B2_2DAE_7D4033D28D43
 
 // Internal Includes
-// - none
-
-// Library/third-party includes
-// - none
-
-// Standard includes
-// - none
-
-// Internal Includes
+#include <osvr/Common/AlignmentPadding.h>
 #include <osvr/Common/Endianness.h>
 #include <osvr/Util/BoolC.h>
 

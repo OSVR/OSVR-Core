@@ -21,6 +21,7 @@
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
+#include <osvr/Common/SerializationTraits.h>
 
 // Library/third-party includes
 // - none
@@ -33,6 +34,18 @@ namespace common {
     namespace messages {
         class RoutesFromServer {
           public:
+            class MessageSerialization {
+              public:
+                MessageSerialization(std::string const &str = std::string())
+                    : m_str(str) {}
+
+                template <typename T> void processMessage(T &p) {
+                    p(m_str, serialization::StringOnlyMessageTag());
+                }
+
+              private:
+                std::string m_str;
+            };
             static const char *identifier();
         };
 
@@ -49,10 +62,12 @@ namespace common {
         /// @brief Get the special device name to be used with this component.
         OSVR_COMMON_EXPORT static const char *deviceName();
 
-        SystemComponent();
+        OSVR_COMMON_EXPORT SystemComponent();
 
         /// @brief Message from server to client, replacing all routes.
         MessageRegistration<messages::RoutesFromServer> routesOut;
+
+        OSVR_COMMON_EXPORT void sendRoutes(std::string const &routes);
 
         /// @brief Message from client to server, notifying of app ID.
         MessageRegistration<messages::AppStartupToServer> appStartup;

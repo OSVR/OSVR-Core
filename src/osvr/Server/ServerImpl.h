@@ -26,6 +26,8 @@
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/DeviceToken.h>
+#include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/SystemComponent.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -112,10 +114,10 @@ namespace server {
         std::vector<MainloopMethod> m_mainloopMethods;
 
         /// @brief System device
-        connection::DeviceTokenPtr m_sysDevice;
+        common::BaseDevicePtr m_systemDevice;
 
-        /// @brief Routing data message
-        connection::MessageTypePtr m_routingMessageType;
+        /// @brief System device component
+        common::SystemComponent *m_systemComponent;
 
         /// @brief JSON routing directives
         RouteContainer m_routes;

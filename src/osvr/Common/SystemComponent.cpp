@@ -17,7 +17,10 @@
 
 // Internal Includes
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/BaseDevice.h>
 #include <osvr/Util/MessageKeys.h>
+#include <osvr/Common/Serialization.h>
+#include <osvr/Common/Buffer.h>
 
 // Library/third-party includes
 // - none
@@ -44,6 +47,12 @@ namespace common {
 
     SystemComponent::SystemComponent() {}
 
+    void SystemComponent::sendRoutes(std::string const &routes) {
+        Buffer<> buf;
+        messages::RoutesFromServer::MessageSerialization msg(routes);
+        serialize(buf, msg);
+        m_getParent().packMessage(buf, routesOut.type);
+    }
     void SystemComponent::m_parentSet() {
         m_getParent().registerMessageType(routesOut);
         m_getParent().registerMessageType(appStartup);

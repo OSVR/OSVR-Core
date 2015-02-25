@@ -36,7 +36,7 @@ namespace common {
         virtual ~MessageHandlerBase();
 
       protected:
-        MessageHandlerBase();
+        MessageHandlerBase() {}
     };
     /// @brief RAII class template managing a message handler callback.
     ///
@@ -66,8 +66,7 @@ namespace common {
         /// type is passed.
         MessageHandler(handler_type handler, void *userdata,
                        RawMessageType msgType)
-            : m_handler(handler), m_data(userdata), m_sender(sender),
-              m_msgType(msgType) {}
+            : m_handler(handler), m_data(userdata), m_msgType(msgType) {}
 
         /// @brief Method if you want to manually unregister your handler.
         ///
