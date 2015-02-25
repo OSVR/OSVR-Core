@@ -31,6 +31,18 @@
 namespace osvr {
 namespace common {
     namespace messages {
+        class RoutesFromServer::MessageSerialization {
+        public:
+            MessageSerialization(std::string const &str = std::string())
+                : m_str(str) {}
+
+            template <typename T> void processMessage(T &p) {
+                p(m_str, serialization::StringOnlyMessageTag());
+            }
+
+        private:
+            std::string m_str;
+        };
         const char *RoutesFromServer::identifier() {
             return util::messagekeys::routingData();
         }

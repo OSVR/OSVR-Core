@@ -21,7 +21,7 @@
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
-#include <osvr/Common/SerializationTraits.h>
+#include <osvr/Common/SerializationTags.h>
 
 // Library/third-party includes
 // - none
@@ -34,18 +34,7 @@ namespace common {
     namespace messages {
         class RoutesFromServer {
           public:
-            class MessageSerialization {
-              public:
-                MessageSerialization(std::string const &str = std::string())
-                    : m_str(str) {}
-
-                template <typename T> void processMessage(T &p) {
-                    p(m_str, serialization::StringOnlyMessageTag());
-                }
-
-              private:
-                std::string m_str;
-            };
+            class MessageSerialization;
             static const char *identifier();
         };
 
