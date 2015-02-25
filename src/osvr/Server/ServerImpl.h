@@ -27,7 +27,7 @@
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/SystemComponent_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>

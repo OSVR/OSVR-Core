@@ -22,7 +22,8 @@
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Connection/MessageType.h>
 #include <osvr/Util/Verbosity.h>
-#include "../Connection/VrpnConnectionKind.h" // Internal header!
+#include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
+#include <osvr/Common/SystemComponent.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
