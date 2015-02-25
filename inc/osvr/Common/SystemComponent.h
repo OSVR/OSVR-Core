@@ -19,6 +19,7 @@
 #define INCLUDED_SystemComponent_h_GUID_F74B8728_915D_44AE_612B_6AB934CA4ED2
 
 // Internal Includes
+#include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>

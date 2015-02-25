@@ -28,6 +28,7 @@ set(API
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
     "${HEADER_LOCATION}/SystemComponent.h"
+    "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
