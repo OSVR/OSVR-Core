@@ -68,18 +68,18 @@ class CameraDevice : boost::noncopyable {
         }
 
         // Trigger a camera grab.
-        std::cout << "Grab" << std::endl;
         bool grabbed = m_camera.grab();
         if (!grabbed) {
             // No frame available.
             return OSVR_RETURN_SUCCESS;
         }
-        std::cout << "Retrieve" << std::endl;
         bool retrieved = m_camera.retrieve(m_frame, m_channel);
         if (!retrieved) {
             return OSVR_RETURN_FAILURE;
         }
-        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_frame));
+        // Sending an 80x100 RoI right now to keep data sizes small.
+        cv::Mat subimage = m_frame(cv::Rect(0, 0, 80, 100));
+        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
 
         osvr::pluginkit::ImagingMessage(m_frame).dump(std::cout);
         std::cout << std::endl;
