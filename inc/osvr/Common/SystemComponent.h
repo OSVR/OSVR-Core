@@ -59,14 +59,14 @@ namespace common {
         OSVR_COMMON_EXPORT SystemComponent();
 
         /// @brief Message from server to client, replacing all routes.
-        MessageRegistration<messages::RoutesFromServer> routesOut;
+        messages::RoutesFromServer routesOut;
 
         OSVR_COMMON_EXPORT void sendRoutes(std::string const &routes);
         OSVR_COMMON_EXPORT void
         registerRoutesHandler(vrpn_MESSAGEHANDLER handler, void *userdata);
 
         /// @brief Message from client to server, notifying of app ID.
-        MessageRegistration<messages::AppStartupToServer> appStartup;
+        messages::AppStartupToServer appStartup;
 
       private:
         virtual void m_parentSet();
