@@ -33,6 +33,11 @@ foreach(name ${CLIENTS})
 endforeach()
 
 ###
+# Some examples should be run as tests
+add_test(NAME DisplayParameter_runs
+    COMMAND DisplayParameter_cpp)
+
+###
 # Set up self-contained example test
 set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}/osvr")
 set(BUILD_FLAGS)
