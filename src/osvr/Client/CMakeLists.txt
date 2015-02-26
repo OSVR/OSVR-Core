@@ -30,7 +30,7 @@ set(SOURCE
     VRPNButtonRouter.h
     VRPNTrackerRouter.h)
 
-osvr_convert_json(display_json display-eileen.json "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
+osvr_convert_json(display_json display-HDK.json "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
 
