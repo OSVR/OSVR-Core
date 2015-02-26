@@ -28,7 +28,8 @@
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Transform/JSONTransformVisitor.h>
 #include <osvr/Transform/ChangeOfBasis.h>
-#include <osvr/Util/MessageKeys.h>
+#include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/SystemComponent.h>
 
 #include <osvr/Client/display_json.h>
 
@@ -59,18 +60,23 @@ namespace client {
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
 
-        std::string contextDevice =
-            std::string(util::messagekeys::systemSender()) + "@" + m_host;
+        std::string sysDeviceName =
+            std::string(common::SystemComponent::deviceName()) + "@" + m_host;
         /// Get connection, forcing a re-open for improved thread-safety.
         m_conn =
-            vrpn_get_connection_by_name(contextDevice.c_str(), nullptr, nullptr,
+            vrpn_get_connection_by_name(sysDeviceName.c_str(), nullptr, nullptr,
                                         nullptr, nullptr, nullptr, true);
         m_conn->removeReference(); // Remove extra reference.
+
+        /// Create the system client device.
+        m_systemDevice = common::createClientDevice(sysDeviceName, m_conn);
+        m_systemComponent = m_systemDevice->addComponent(
+            make_shared<common::SystemComponent>());
+        m_systemComponent->registerRoutesHandler(
+            &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
+
         setParameter("/display",
                      std::string(display_json, sizeof(display_json)));
-        m_conn->register_handler(
-            m_conn->register_message_type(util::messagekeys::routingData()),
-            &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
     }
 
     VRPNContext::~VRPNContext() {}

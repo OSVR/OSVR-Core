@@ -51,6 +51,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrTransform
     osvrRouting
     osvrUtilCpp
+    osvrCommon
     jsoncpp_lib
     vendored-vrpn
     eigen-headers)

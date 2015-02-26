@@ -22,6 +22,8 @@
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Transform/Transform.h>
 #include <osvr/Util/UniquePtr.h>
+#include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/SystemComponent_fwd.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -72,6 +74,9 @@ namespace client {
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;
         std::vector<RouterEntryPtr> m_routers;
+
+        common::BaseDevicePtr m_systemDevice;
+        common::SystemComponent *m_systemComponent;
     };
 } // namespace client
 } // namespace osvr
