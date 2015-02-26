@@ -30,7 +30,8 @@ set(SOURCE
     VRPNButtonRouter.h
     VRPNTrackerRouter.h)
 
-osvr_convert_json(display_json display-HDK.json "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
+set(DISPLAY_JSON display-HDK.json)
+osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
 
@@ -56,6 +57,6 @@ target_link_libraries(${LIBNAME_FULL}
     eigen-headers)
 
 install(FILES
-    display-eileen.json
+    ${DISPLAY_JSON}
     DESTINATION "${CMAKE_INSTALL_DOCDIR}/device-descriptors"
     COMPONENT Doc)
