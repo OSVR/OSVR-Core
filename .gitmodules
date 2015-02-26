@@ -6,4 +6,4 @@
 	url = https://github.com/rpavlik/jenkins-ctest-plugin.git
 [submodule "json-schemas"]
 	path = json-schemas
-	url = https://github.com/OSVR/OSVR-JSON-Schemas.git
+	url = git@github.com:OSVR/OSVR-JSON-Schemas.git
