@@ -69,7 +69,7 @@ namespace common {
 
       private:
         Parent *m_parent;
-        MessageHandlerList<BaseDeviceMessage> m_messageHandlers;
+        MessageHandlerList<BaseDeviceMessageHandleTraits> m_messageHandlers;
     };
 } // namespace common
 } // namespace osvr

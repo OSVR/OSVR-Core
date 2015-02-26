@@ -47,7 +47,7 @@ namespace common {
     void DeviceComponent::m_registerHandler(vrpn_MESSAGEHANDLER handler,
                                             void *userdata,
                                             RawMessageType const &msgType) {
-        auto h = make_shared<MessageHandler<BaseDeviceMessage> >(
+        auto h = make_shared<MessageHandler<BaseDeviceMessageHandleTraits> >(
             handler, userdata, msgType);
         h->registerHandler(&m_getParent());
         m_messageHandlers.push_back(h);

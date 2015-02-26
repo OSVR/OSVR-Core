@@ -38,6 +38,34 @@ namespace common {
       protected:
         MessageHandlerBase() {}
     };
+
+    /// @brief A class template for the common message traits where the
+    /// registrar is passed by pointer, has registerHandler and
+    /// unregisterHandler methods, and doesn't take a RawSenderType because it's
+    /// implied.
+    template <typename Handler, typename Registrar>
+    class ImpliedSenderMessageHandleTraits {
+      public:
+        typedef Handler handler_type;
+        class registration_type {
+          public:
+            registration_type(Registrar *reg) : m_reg(reg) {}
+
+            void registerHandler(handler_type handler, void *userdata,
+                                 RawSenderType const &,
+                                 RawMessageType const &msgType) {
+                m_reg->registerHandler(handler, userdata, msgType);
+            }
+            void unregisterHandler(handler_type handler, void *userdata,
+                                   RawSenderType const &,
+                                   RawMessageType const &msgType) {
+                m_reg->unregisterHandler(handler, userdata, msgType);
+            }
+
+          private:
+            Registrar *m_reg;
+        };
+    };
     /// @brief RAII class template managing a message handler callback.
     ///
     /// @tparam MessageTraits Policy class, providing a `handler_type` typedef
