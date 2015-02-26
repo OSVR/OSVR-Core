@@ -92,12 +92,11 @@ namespace common {
       protected:
         /// @brief Constructor
         OSVR_COMMON_EXPORT BaseDevice();
-        /// @brief Should be called by derived class to set the connection
-        OSVR_COMMON_EXPORT void m_setConnection(vrpn_ConnectionPtr conn);
+        /// @brief Should be called by derived class to set the connection, etc.
+        OSVR_COMMON_EXPORT void m_setup(vrpn_ConnectionPtr conn,
+                                        RawSenderType sender);
         /// @brief Accessor for underlying connection
         vrpn_ConnectionPtr m_getConnection() const;
-        /// @brief Implementation-specific sender retrieval
-        virtual RawSenderType m_getSender() = 0;
         /// @brief Implementation-specific update (call client_mainloop() or
         /// server_mainloop() in it!)
         virtual void m_update() = 0;
@@ -115,6 +114,7 @@ namespace common {
                            uint32_t classOfService);
         DeviceComponentList m_components;
         vrpn_ConnectionPtr m_conn;
+        RawSenderType m_sender;
     };
 } // namespace common
 } // namespace osvr

@@ -32,14 +32,10 @@ namespace common {
         : vrpn_BaseClass(name.c_str(), conn.get()), m_conn(conn),
           m_client(client) {
         vrpn_BaseClass::init();
-        m_setConnection(conn);
+        m_setup(conn, common::RawSenderType(d_sender_id));
     }
 
     DeviceWrapper::~DeviceWrapper() {}
-
-    RawSenderType DeviceWrapper::m_getSender() {
-        return RawSenderType(d_sender_id);
-    }
 
     void DeviceWrapper::mainloop() { update(); }
 

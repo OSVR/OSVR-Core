@@ -49,14 +49,14 @@ namespace common {
                                      void *userdata,
                                      RawMessageType const &msgType) {
         m_getConnection()->register_handler(msgType.get(), handler, userdata,
-                                            m_getSender().get());
+                                            getSender().get());
     }
 
     void BaseDevice::unregisterHandler(vrpn_MESSAGEHANDLER handler,
                                        void *userdata,
                                        RawMessageType const &msgType) {
         m_getConnection()->unregister_handler(msgType.get(), handler, userdata,
-                                              m_getSender().get());
+                                              getSender().get());
     }
 
     RawMessageType BaseDevice::m_registerMessageType(const char *msgString) {
@@ -65,7 +65,7 @@ namespace common {
             m_getConnection()->register_message_type(msgString));
     }
 
-    RawSenderType BaseDevice::getSender() { return m_getSender(); }
+    RawSenderType BaseDevice::getSender() { return m_sender; }
 
     void BaseDevice::update() {
         for (auto const &component : m_components) {
@@ -92,7 +92,10 @@ namespace common {
         }
     }
 
-    void BaseDevice::m_setConnection(vrpn_ConnectionPtr conn) { m_conn = conn; }
+    void BaseDevice::m_setup(vrpn_ConnectionPtr conn, RawSenderType sender) {
+        m_conn = conn;
+        m_sender = sender;
+    }
 
     vrpn_ConnectionPtr BaseDevice::m_getConnection() const { return m_conn; }
 } // namespace common

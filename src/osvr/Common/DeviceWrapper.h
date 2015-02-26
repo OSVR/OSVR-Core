@@ -45,7 +45,6 @@ namespace common {
         /// @}
         /// @name BaseDevice methods
         /// @{
-        virtual RawSenderType m_getSender();
         virtual void m_update();
         /// @}
         vrpn_ConnectionPtr m_conn;

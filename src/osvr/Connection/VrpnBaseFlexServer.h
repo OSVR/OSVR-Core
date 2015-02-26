@@ -38,7 +38,8 @@ namespace connection {
       public:
         vrpn_BaseFlexServer(DeviceConstructionData &init)
             : vrpn_BaseClass(init.getQualifiedName().c_str(), init.conn) {
-            m_setConnection(vrpn_ConnectionPtr(init.conn));
+            m_setup(vrpn_ConnectionPtr(init.conn),
+                    common::RawSenderType(d_sender_id));
             vrpn_BaseClass::init();
             init.flexServer = this;
         }
@@ -63,9 +64,6 @@ namespace connection {
 
       protected:
         virtual int register_types() { return 0; }
-        virtual common::RawSenderType m_getSender() {
-            return common::RawSenderType(d_sender_id);
-        }
         virtual void m_update() {
             // can be empty since we handle things in mainloop above.
         }
