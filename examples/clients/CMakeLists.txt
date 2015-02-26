@@ -5,7 +5,8 @@ set(MAINCLIENTS
     AnalogCallback
     ButtonCallback
     TrackerCallback
-    DisplayParameter)
+    DisplayParameter
+    Imaging)
 # These are "extra"
 set(CLIENTS
     MinimalInit
@@ -13,23 +14,37 @@ set(CLIENTS
 
 foreach(name ${MAINCLIENTS} ${CLIENTS})
     foreach(suffix c cpp)
-        add_executable(${name}_${suffix} ${name}.${suffix})
-        target_link_libraries(${name}_${suffix} osvrClientKitCpp)
-        set_target_properties(${name}_${suffix} PROPERTIES
-            FOLDER "OSVR Example Clients")
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.${suffix}")
+            add_executable(${name}_${suffix} ${name}.${suffix})
+            target_link_libraries(${name}_${suffix} osvrClientKitCpp)
+            set_target_properties(${name}_${suffix} PROPERTIES
+                FOLDER "OSVR Example Clients")
+        endif()
     endforeach()
 endforeach()
 
+target_link_libraries(Imaging_cpp opencv_core opencv_highgui)
+
 foreach(name ${MAINCLIENTS})
-    install(TARGETS ${name}_cpp
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ExampleClients)
-    install(TARGETS ${name}_c
-        RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
+    if(TARGET ${name}_cpp)
+        install(TARGETS ${name}_cpp
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ExampleClients)
+    endif()
+    if(TARGET ${name}_c)
+        install(TARGETS ${name}_c
+            RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
+    endif()
 endforeach()
 
 foreach(name ${CLIENTS})
-    install(TARGETS ${name}_c ${name}_cpp
-        RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
+    if(TARGET ${name}_cpp)
+        install(TARGETS ${name}_cpp
+            RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
+    endif()
+    if(TARGET ${name}_c)
+        install(TARGETS ${name}_c
+            RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
+    endif()
 endforeach()
 
 ###
