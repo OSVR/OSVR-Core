@@ -26,6 +26,8 @@
 #include <json/reader.h>
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>                 // for stem()
+#include <boost/algorithm/string/predicate.hpp> // for iends_with()
 
 // Standard includes
 #include <stdexcept>
@@ -123,26 +125,27 @@ namespace server {
     }
 
     bool ConfigureServer::loadPlugins() {
-        
-        bool success = true;
-        //find path where all plugins are hiding
-        pluginhost::SearchPath pluginPath(pluginhost::getPluginSearchPath());
-        pluginhost::FileList filesPaths = pluginhost::getAllFilesWithExt(pluginPath, OSVR_PLUGIN_EXTENSION);
 
-        for (std::vector<std::string>::iterator it = filesPaths.begin(); it != filesPaths.end(); ++it){
-            
-            const std::string plugin = *it;
-          //  std::cout << "Plugin name is " << plugin << std::endl;
-            
+        bool success = true;
+        // find path where all plugins are hiding
+        pluginhost::SearchPath pluginPath(pluginhost::getPluginSearchPath());
+        pluginhost::FileList filesPaths =
+            pluginhost::getAllFilesWithExt(pluginPath, OSVR_PLUGIN_EXTENSION);
+
+        for (const auto &plugin : filesPaths) {
+            if (boost::iends_with(boost::filesystem::path(plugin).stem().generic_string(),
+                                  OSVR_PLUGIN_IGNORE_SUFFIX)) {
+                std::cout << "Ignoring plugin marked for manual loading " << boost::filesystem::path(plugin).stem().generic_string() << "..." << std::endl;
+                continue;
+            }
+
             try {
                 m_server->loadPlugin(plugin);
                 m_successfulPlugins.push_back(plugin);
-            }
-            catch (std::exception &e) {
+            } catch (std::exception &e) {
                 m_failedPlugins.push_back(std::make_pair(plugin, e.what()));
                 success = false;
             }
-            
         }
 
         return success;
