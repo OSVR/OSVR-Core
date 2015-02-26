@@ -9,8 +9,8 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS
 
 
 foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
-    set(name ${pluginname})
-    add_library(${name} MODULE ${name}.cpp)
+    set(name ${pluginname}.manualload)
+    add_library(${name} MODULE ${pluginname}.cpp)
     target_link_libraries(${name} osvrPluginKitCpp)
     set_target_properties(${name} PROPERTIES
         PREFIX ""
@@ -24,11 +24,11 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 osvr_convert_json(com_osvr_example_AnalogSync_json
     com_osvr_example_AnalogSync.json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-add_library(com_osvr_example_AnalogSync MODULE
+add_library(com_osvr_example_AnalogSync.manualload MODULE
     com_osvr_example_AnalogSync.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-target_link_libraries(com_osvr_example_AnalogSync osvrPluginKitCpp)
-set_target_properties(com_osvr_example_AnalogSync PROPERTIES
+target_link_libraries(com_osvr_example_AnalogSync.manualload osvrPluginKitCpp)
+set_target_properties(com_osvr_example_AnalogSync.manualload PROPERTIES
     PREFIX ""
     FOLDER "OSVR Example Plugins")
 
@@ -36,11 +36,11 @@ set_target_properties(com_osvr_example_AnalogSync PROPERTIES
 osvr_convert_json(com_osvr_example_selfcontainedDetectAndCreate_json
     selfcontained/com_osvr_example_selfcontainedDetectAndCreate.json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-add_library(com_osvr_example_selfcontainedDetectAndCreate MODULE
+add_library(com_osvr_example_selfcontainedDetectAndCreate.manualload MODULE
     selfcontained/com_osvr_example_selfcontainedDetectAndCreate.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate osvrPluginKitCpp)
-set_target_properties(com_osvr_example_selfcontainedDetectAndCreate PROPERTIES
+target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate.manualload osvrPluginKitCpp)
+set_target_properties(com_osvr_example_selfcontainedDetectAndCreate.manualload PROPERTIES
     PREFIX ""
     FOLDER "OSVR Example Plugins")
 
