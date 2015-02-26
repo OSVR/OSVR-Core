@@ -169,7 +169,9 @@ install(DIRECTORY examples/
 ###
 # Install schemas
 ###
-install(DIRECTORY json-schemas/
+install(FILES
+    json-schemas/device_descriptor_schema.json
+    json-schemas/README.md
     DESTINATION "${CMAKE_INSTALL_DOCDIR}/json-schemas"
     COMPONENT Doc)
 
