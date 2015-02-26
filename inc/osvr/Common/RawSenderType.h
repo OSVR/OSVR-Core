@@ -38,7 +38,7 @@ namespace common {
         RawSenderType();
 
         /// @brief Constructor from a registered sender
-        explicit RawSenderType(UnderlyingSenderType sender);
+        OSVR_COMMON_EXPORT explicit RawSenderType(UnderlyingSenderType sender);
 
         /// @brief Gets the registered sender value or default
         UnderlyingSenderType get() const;

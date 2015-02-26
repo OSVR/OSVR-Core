@@ -27,6 +27,7 @@
 #include <osvr/Connection/Export.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ServerInterfaceList.h>
+#include <osvr/Common/DeviceComponentPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -78,6 +79,11 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT void
     addServerInterface(osvr::connection::ServerInterfacePtr const &iface);
 
+    /// @brief Add a device component to our list, which will get added to the
+    /// device when created.
+    OSVR_CONNECTION_EXPORT void
+    addComponent(osvr::common::DeviceComponentPtr const &comp);
+
     /// @brief Returns a tracker interface through the pointer-pointer.
     void
     returnTrackerInterface(osvr::connection::TrackerServerInterface &iface);
@@ -99,6 +105,10 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
         return m_serverInterfaces;
     }
 
+    osvr::common::DeviceComponentList const &getComponents() const {
+        return m_components;
+    }
+
   private:
     osvr::pluginhost::PluginSpecificRegistrationContext *m_context;
     osvr::connection::ConnectionPtr m_conn;
@@ -111,6 +121,7 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     bool m_tracker;
     osvr::connection::TrackerServerInterface **m_trackerIface;
     osvr::connection::ServerInterfaceList m_serverInterfaces;
+    osvr::common::DeviceComponentList m_components;
 };
 
 namespace osvr {

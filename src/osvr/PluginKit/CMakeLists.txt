@@ -45,6 +45,8 @@ target_link_libraries(${LIBNAME_FULL}
     osvrPluginHost
     osvrConnection
     osvrUtilCpp
+    osvrCommon
+    vendored-vrpn
     boost_thread
     opencv_core)
 

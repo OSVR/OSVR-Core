@@ -19,12 +19,54 @@
 #define INCLUDED_ImagingComponent_h_GUID_BA26C922_01FD_43B3_8EB7_A9AB2777CEBC
 
 // Internal Includes
-// - none
+#include <osvr/Common/Export.h>
+#include <osvr/Common/DeviceComponent.h>
+#include <osvr/Common/SerializationTags.h>
+#include <osvr/Util/ChannelCountC.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+namespace osvr {
+namespace common {
+    namespace messages {
+        class ImageRegion : public MessageRegistration<ImageRegion> {
+          public:
+            class MessageSerialization;
+            typedef void (*MessageHandler)(void *userdata,
+                                           std::string const &message);
+
+            static const char *identifier();
+        };
+
+    } // namespace messages
+
+    /// @brief BaseDevice component
+    class ImagingComponent : public DeviceComponent {
+      public:
+        /// @brief Factory method
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        static OSVR_COMMON_EXPORT shared_ptr<ImagingComponent>
+        create(OSVR_ChannelCount numChan);
+
+        /// @brief Message from server to client, containing some image data.
+        messages::ImageRegion imageRegion;
+
+        OSVR_COMMON_EXPORT void sendImageData();
+        OSVR_COMMON_EXPORT void
+        registerImageRegionHandler(vrpn_MESSAGEHANDLER handler, void *userdata);
+
+      private:
+        ImagingComponent(OSVR_ChannelCount numChan);
+        virtual void m_parentSet();
+        OSVR_ChannelCount m_numChan;
+    };
+} // namespace common
+} // namespace osvr
 
 #endif // INCLUDED_ImagingComponent_h_GUID_BA26C922_01FD_43B3_8EB7_A9AB2777CEBC

@@ -48,7 +48,7 @@ namespace common {
         /// @throws std::logic_error if you pass a null pointer.
         template <typename T> T *addComponent(shared_ptr<T> component) {
             T *ret = component.get();
-            m_addComponentPrivate(component);
+            m_addComponent(component);
             return ret;
         }
 
@@ -57,15 +57,11 @@ namespace common {
         void unregisterHandler(vrpn_MESSAGEHANDLER handler, void *userdata,
                                RawMessageType const &msgType);
 
-        /// @brief Call with a string identifying a message type, and get back
-        /// an identifier.
-        RawMessageType registerMessageType(const char *identifier);
-
         /// @brief Call with a MessageRegistration object, and the message type
         /// will be registered and stored in the `type` field.
         template <typename T>
         void registerMessageType(MessageRegistration<T> &messageReg) {
-            messageReg.setMessageType(registerMessageType(T::identifier()));
+            messageReg.setMessageType(m_registerMessageType(T::identifier()));
         }
 
         RawSenderType getSender();
@@ -76,7 +72,7 @@ namespace common {
 
         /// @brief Called from a component to send pending messages instead of
         /// waiting for next time.
-        void sendPending();
+        OSVR_COMMON_EXPORT void sendPending();
 
         template <typename T>
         void packMessage(Buffer<T> const &buf, RawMessageType const &msgType,
@@ -95,11 +91,9 @@ namespace common {
 
       protected:
         /// @brief Constructor
-        BaseDevice();
-        /// @brief The implementation-specific part of addComponent.
-        virtual void m_addComponent(DeviceComponentPtr component);
+        OSVR_COMMON_EXPORT BaseDevice();
         /// @brief Should be called by derived class to set the connection
-        void m_setConnection(vrpn_ConnectionPtr conn);
+        OSVR_COMMON_EXPORT void m_setConnection(vrpn_ConnectionPtr conn);
         /// @brief Accessor for underlying connection
         vrpn_ConnectionPtr m_getConnection() const;
         /// @brief Implementation-specific sender retrieval
@@ -109,8 +103,11 @@ namespace common {
         virtual void m_update() = 0;
 
       private:
-        OSVR_COMMON_EXPORT void
-        m_addComponentPrivate(DeviceComponentPtr component);
+        /// @brief Call with a string identifying a message type, and get back
+        /// an identifier.
+        RawMessageType m_registerMessageType(const char *identifier);
+
+        OSVR_COMMON_EXPORT void m_addComponent(DeviceComponentPtr component);
 
         void m_packMessage(size_t len, const char *buf,
                            RawMessageType const &msgType,

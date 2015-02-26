@@ -20,6 +20,7 @@
 
 // Internal Includes
 #include "DeviceConstructionData.h"
+#include <osvr/Common/BaseDevice.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TimeValue.h>
 
@@ -32,18 +33,24 @@
 namespace osvr {
 namespace connection {
     /// @brief Basic implementation of a vrpn_BaseClass server.
-    class vrpn_BaseFlexServer : public vrpn_BaseClass {
+    class vrpn_BaseFlexServer : public vrpn_BaseClass,
+                                public common::BaseDevice {
       public:
         vrpn_BaseFlexServer(DeviceConstructionData &init)
             : vrpn_BaseClass(init.getQualifiedName().c_str(), init.conn) {
+            m_setConnection(vrpn_ConnectionPtr(init.conn));
             vrpn_BaseClass::init();
             init.flexServer = this;
         }
         virtual ~vrpn_BaseFlexServer() {}
 
         virtual void mainloop() {
-            /// @todo service device here? Device ends up being serviced in this
-            /// object's owner, the VrpnConnectionDevice.
+            /// @todo service device here? Some device parts end up being
+            /// serviced in this object's owner, the VrpnConnectionDevice.
+
+            /// Service device components in the BaseDevice.
+            update();
+
             server_mainloop();
         }
         void sendData(util::time::TimeValue const &timestamp, vrpn_uint32 msgID,
@@ -56,6 +63,12 @@ namespace connection {
 
       protected:
         virtual int register_types() { return 0; }
+        virtual common::RawSenderType m_getSender() {
+            return common::RawSenderType(d_sender_id);
+        }
+        virtual void m_update() {
+            // can be empty since we handle things in mainloop above.
+        }
     };
 } // namespace connection
 } // namespace osvr

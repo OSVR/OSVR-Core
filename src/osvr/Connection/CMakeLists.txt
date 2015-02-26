@@ -74,5 +74,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtil
     PRIVATE
     osvrUtilCpp
+    osvrCommon
     vendored-vrpn
     util-runloopmanager)

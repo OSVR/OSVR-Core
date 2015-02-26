@@ -57,6 +57,11 @@ namespace common {
         return util::messagekeys::systemSender();
     }
 
+    shared_ptr<SystemComponent> SystemComponent::create() {
+        shared_ptr<SystemComponent> ret(new SystemComponent);
+        return ret;
+    }
+
     SystemComponent::SystemComponent() {}
 
     void SystemComponent::sendRoutes(std::string const &routes) {

@@ -57,8 +57,8 @@ namespace server {
         m_systemDevice = common::createServerDevice(
             common::SystemComponent::deviceName(), vrpnConn);
 
-        m_systemComponent = m_systemDevice->addComponent(
-            make_shared<common::SystemComponent>());
+        m_systemComponent =
+            m_systemDevice->addComponent(common::SystemComponent::create());
         registerMainloopMethod([this] { m_systemDevice->update(); });
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));

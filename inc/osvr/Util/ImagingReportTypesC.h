@@ -42,6 +42,9 @@ typedef uint32_t OSVR_ImageDimension;
 typedef uint8_t OSVR_ImageChannels;
 typedef uint8_t OSVR_ImageDepth;
 
+/** @brief Type for raw buffer access to image data */
+typedef unsigned char OSVR_ImageBufferElement;
+
 typedef enum OSVR_ImagingValueType {
     OSVR_IVT_UNSIGNED_INT = 0,
     OSVR_IVT_SIGNED_INT = 1,

@@ -99,7 +99,10 @@ void OSVR_DeviceInitObject::addServerInterface(
     osvr::connection::ServerInterfacePtr const &iface) {
     m_serverInterfaces.push_back(iface);
 }
-
+void OSVR_DeviceInitObject::addComponent(
+    osvr::common::DeviceComponentPtr const &comp) {
+    m_components.push_back(comp);
+}
 void OSVR_DeviceInitObject::returnTrackerInterface(
     osvr::connection::TrackerServerInterface &iface) {
     *m_trackerIface = &iface;

@@ -79,7 +79,7 @@ OSVR_ReturnCode
 osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken dev,
                              OSVR_IN_PTR OSVR_ImagingDeviceInterface iface,
                              OSVR_IN OSVR_ImagingMetadata metadata,
-                             OSVR_IN_PTR void *imageData,
+                             OSVR_IN_PTR OSVR_ImageBufferElement *imageData,
                              OSVR_IN OSVR_ChannelCount sensor,
                              OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 4, 6));

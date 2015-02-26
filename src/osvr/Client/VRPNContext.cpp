@@ -70,8 +70,8 @@ namespace client {
 
         /// Create the system client device.
         m_systemDevice = common::createClientDevice(sysDeviceName, m_conn);
-        m_systemComponent = m_systemDevice->addComponent(
-            make_shared<common::SystemComponent>());
+        m_systemComponent =
+            m_systemDevice->addComponent(common::SystemComponent::create());
         m_systemComponent->registerRoutesHandler(
             &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
 

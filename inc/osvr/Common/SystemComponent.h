@@ -55,8 +55,11 @@ namespace common {
       public:
         /// @brief Get the special device name to be used with this component.
         OSVR_COMMON_EXPORT static const char *deviceName();
-
-        OSVR_COMMON_EXPORT SystemComponent();
+        /// @brief Factory method
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        static OSVR_COMMON_EXPORT shared_ptr<SystemComponent> create();
 
         /// @brief Message from server to client, replacing all routes.
         messages::RoutesFromServer routesOut;
@@ -69,6 +72,7 @@ namespace common {
         messages::AppStartupToServer appStartup;
 
       private:
+        SystemComponent();
         virtual void m_parentSet();
     };
 } // namespace common

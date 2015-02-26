@@ -21,6 +21,7 @@
 //#include <osvr/Connection/ImagingServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/Common/ImagingComponent.h>
 #include "PointerWrapper.h"
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
@@ -31,14 +32,9 @@
 // Standard includes
 // - none
 
-namespace osvr {
-namespace connection {
-    class ImagingServerInterface;
-}
-}
-
-struct OSVR_ImagingDeviceInterfaceObject
-    : public PointerWrapper<osvr::connection::ImagingServerInterface> {};
+struct OSVR_ImagingDeviceInterfaceObject {
+    osvr::common::ImagingComponent *imaging;
+};
 
 OSVR_ReturnCode
 osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
@@ -51,8 +47,9 @@ osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
         opts->getContext()->registerDataWithGenericDelete(
             new OSVR_ImagingDeviceInterfaceObject);
     *iface = ifaceObj;
-    /// @todo update the opts object to add the new interface
-    /// opts->setAnalogs(numChan, ifaceObj->getContainerLocation());
+    auto imaging = osvr::common::ImagingComponent::create(numSensors);
+    ifaceObj->imaging = imaging.get();
+    opts->addComponent(imaging);
     return OSVR_RETURN_SUCCESS;
 }
 
@@ -60,7 +57,7 @@ OSVR_ReturnCode
 osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken dev,
                              OSVR_IN_PTR OSVR_ImagingDeviceInterface iface,
                              OSVR_IN OSVR_ImagingMetadata metadata,
-                             OSVR_IN_PTR void *imageData,
+                             OSVR_IN_PTR OSVR_ImageBufferElement *imageData,
                              OSVR_IN OSVR_ChannelCount sensor,
                              OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     auto guard = dev->getSendGuard();

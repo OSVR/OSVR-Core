@@ -18,6 +18,7 @@
 // Internal Includes
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/DeviceComponent.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -29,15 +30,18 @@ namespace osvr {
 namespace common {
 
     BaseDevice::BaseDevice() {}
-    BaseDevice::~BaseDevice() {}
+    BaseDevice::~BaseDevice() {
+        /// Clear the component list first to make sure handler are
+        /// unregistered.
+        m_components.clear();
+    }
 
-    void BaseDevice::m_addComponentPrivate(DeviceComponentPtr component) {
+    void BaseDevice::m_addComponent(DeviceComponentPtr component) {
         if (!component) {
             throw std::logic_error(
                 "Tried to add a null component pointer to a base device!");
         }
         m_components.push_back(component);
-        m_addComponent(component);
         component->recordParent(*this);
     }
 
@@ -55,7 +59,8 @@ namespace common {
                                               m_getSender().get());
     }
 
-    RawMessageType BaseDevice::registerMessageType(const char *msgString) {
+    RawMessageType BaseDevice::m_registerMessageType(const char *msgString) {
+        OSVR_DEV_VERBOSE("BaseDevice registering message type " << msgString);
         return RawMessageType(
             m_getConnection()->register_message_type(msgString));
     }
@@ -71,10 +76,6 @@ namespace common {
 
     void BaseDevice::sendPending() {
         m_getConnection()->send_pending_reports();
-    }
-
-    void BaseDevice::m_addComponent(DeviceComponentPtr) {
-        // default do-nothing
     }
 
     void BaseDevice::m_packMessage(size_t len, const char *buf,
