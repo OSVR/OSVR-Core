@@ -65,6 +65,11 @@ namespace common {
         serialize(buf, msg);
         m_getParent().packMessage(buf, routesOut.getMessageType());
     }
+
+    void SystemComponent::registerRoutesHandler(vrpn_MESSAGEHANDLER handler,
+                                                void *userdata) {
+        m_registerHandler(handler, userdata, routesOut.getMessageType());
+    }
     void SystemComponent::m_parentSet() {
         m_getParent().registerMessageType(routesOut);
         m_getParent().registerMessageType(appStartup);

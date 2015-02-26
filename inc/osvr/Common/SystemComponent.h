@@ -36,6 +36,9 @@ namespace common {
         class RoutesFromServer : public MessageRegistration<RoutesFromServer> {
           public:
             class MessageSerialization;
+            typedef void (*MessageHandler)(void *userdata,
+                                           std::string const &message);
+
             static const char *identifier();
         };
 
@@ -59,6 +62,8 @@ namespace common {
         MessageRegistration<messages::RoutesFromServer> routesOut;
 
         OSVR_COMMON_EXPORT void sendRoutes(std::string const &routes);
+        OSVR_COMMON_EXPORT void
+        registerRoutesHandler(vrpn_MESSAGEHANDLER handler, void *userdata);
 
         /// @brief Message from client to server, notifying of app ID.
         MessageRegistration<messages::AppStartupToServer> appStartup;
