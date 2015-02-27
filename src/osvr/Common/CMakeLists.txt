@@ -74,3 +74,10 @@ target_link_libraries(${LIBNAME_FULL}
     eigen-headers)
 
 osvr_delayload_opencv(${LIBNAME_FULL} opencv_core)
+
+###
+# Grab DLLs please.
+###
+osvr_copy_dep(${LIBNAME_FULL} opencv_core)
+osvr_copy_dep(${LIBNAME_FULL} opencv_highgui)   # used by plugin
+osvr_copy_dep(${LIBNAME_FULL} opencv_imgproc)   # used by plugin

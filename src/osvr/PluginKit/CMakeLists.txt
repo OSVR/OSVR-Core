@@ -47,8 +47,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     osvrCommon
     vendored-vrpn
-    boost_thread
-    opencv_core)
+    boost_thread)
 
 ###
 # C++ (header-only) interface
@@ -76,8 +75,3 @@ target_link_libraries(${LIBNAME_INTERFACE}
     ${LIBNAME_FULL}Cpp
     $<BUILD_INTERFACE:opencv_core>)
 
-###
-# Grab DLLs please.
-###
-osvr_copy_dep(${LIBNAME_FULL} opencv_core)
-osvr_copy_dep(${LIBNAME_FULL} opencv_highgui)
