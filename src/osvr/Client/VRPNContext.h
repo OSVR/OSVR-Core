@@ -29,6 +29,7 @@
 #include <vrpn_ConnectionPtr.h>
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
+#include <json/value.h>
 
 // Standard includes
 #include <string>
@@ -63,6 +64,11 @@ namespace client {
         m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
         void m_replaceRoutes(std::string const &routes);
         virtual void m_update();
+
+        void m_handleTrackerRouteEntry(std::string const &dest,
+                                       Json::Value src);
+        void m_handleStringRouteEntry(std::string const &dest,
+                                      std::string const &src);
         void m_addAnalogRouter(const char *src, const char *dest, int channel);
         template <typename Predicate>
         void m_addButtonRouter(const char *src, const char *dest,

@@ -91,6 +91,7 @@ namespace client {
     static const char DESTINATION_KEY[] = "destination";
     static const char SENSOR_KEY[] = "sensor";
     static const char TRACKER_KEY[] = "tracker";
+    static const char IMAGING_KEY[] = "imaging";
     void VRPNContext::m_replaceRoutes(std::string const &routes) {
 
         Json::Value root;
@@ -106,19 +107,13 @@ namespace client {
             Json::Value route = root[i];
 
             std::string dest = route[DESTINATION_KEY].asString();
-            boost::optional<int> sensor;
 
-            transform::JSONTransformVisitor xformParse(route[SOURCE_KEY]);
-            Json::Value srcLeaf = xformParse.getLeaf();
-            std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
-            // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
-            srcDevice.erase(begin(srcDevice)); // remove leading slash
-            if (srcLeaf.isMember(SENSOR_KEY)) {
-                sensor = srcLeaf[SENSOR_KEY].asInt();
+            Json::Value src = route[SOURCE_KEY];
+            if (src.isString()) {
+                m_handleStringRouteEntry(dest, src.asString());
+            } else {
+                m_handleTrackerRouteEntry(dest, src);
             }
-
-            m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
-                               xformParse.getTransform());
         }
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
@@ -151,6 +146,25 @@ namespace client {
 
         OSVR_DEV_VERBOSE("Now have " << m_routers.size() << " routes.");
     }
+
+    void VRPNContext::m_handleTrackerRouteEntry(std::string const &dest,
+                                                Json::Value src) {
+
+        boost::optional<int> sensor;
+        transform::JSONTransformVisitor xformParse(src);
+        Json::Value srcLeaf = xformParse.getLeaf();
+        std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
+        // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
+        srcDevice.erase(begin(srcDevice)); // remove leading slash
+        if (srcLeaf.isMember(SENSOR_KEY)) {
+            sensor = srcLeaf[SENSOR_KEY].asInt();
+        }
+
+        m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
+                           xformParse.getTransform());
+    }
+    void VRPNContext::m_handleStringRouteEntry(std::string const &dest,
+                                               std::string const &src) {}
 
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
