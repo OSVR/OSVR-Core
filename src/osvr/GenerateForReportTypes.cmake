@@ -3,7 +3,8 @@ set(REPORT_TYPES
     Orientation
     Pose
     Button
-    Analog)
+    Analog
+    Imaging)
 
 # Generate a file using a template with the placeholder @BODY@, as well as a
 # repeated template with the placeholder @TYPE@ - repeated once for each report type.

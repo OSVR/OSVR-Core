@@ -41,7 +41,7 @@ namespace connection {
             vrpn_BaseClass::init();
             init.flexServer = this;
             m_setup(vrpn_ConnectionPtr(init.conn),
-                common::RawSenderType(d_sender_id));
+                    common::RawSenderType(d_sender_id));
         }
         virtual ~vrpn_BaseFlexServer() {}
 

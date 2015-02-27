@@ -25,7 +25,7 @@
 /* Internal Includes */
 #include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/StdInt.h>
-#include <osvr/Util/BoolC.h>
+#include <osvr/Util/ChannelCountC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -66,6 +66,16 @@ typedef struct OSVR_ImagingMetadata {
     OSVR_ImagingValueType type;
 
 } OSVR_ImagingMetadata;
+
+typedef struct OSVR_ImagingState {
+    OSVR_ImagingMetadata metadata;
+    OSVR_ImageBufferElement *data;
+} OSVR_ImagingState;
+
+typedef struct OSVR_ImagingReport {
+    OSVR_ChannelCount sensor;
+    OSVR_ImagingState state;
+} OSVR_ImagingReport;
 
 /** @} */
 
