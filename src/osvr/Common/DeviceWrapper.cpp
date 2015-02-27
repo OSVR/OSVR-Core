@@ -33,6 +33,11 @@ namespace common {
           m_client(client) {
         vrpn_BaseClass::init();
         m_setup(conn, common::RawSenderType(d_sender_id));
+
+        // Clients: don't print "haven't heard from server" messages.
+        if (client) {
+            shutup = true;
+        }
     }
 
     DeviceWrapper::~DeviceWrapper() {}
