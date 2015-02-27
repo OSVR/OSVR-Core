@@ -83,8 +83,8 @@ namespace pluginkit {
             OSVR_ImagingMetadata metadata;
             metadata.channels = frame.channels();
             metadata.depth = typedata.getSize();
-            metadata.width = frame.size[0];
-            metadata.height = frame.size[1];
+            metadata.width = frame.cols;
+            metadata.height = frame.rows;
             metadata.type = typedata.isFloatingPoint()
                                 ? OSVR_IVT_FLOATING_POINT
                                 : (typedata.isSigned() ? OSVR_IVT_SIGNED_INT
