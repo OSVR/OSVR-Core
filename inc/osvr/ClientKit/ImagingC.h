@@ -41,7 +41,7 @@ OSVR_EXTERN_C_BEGIN
     @param buf Image buffer.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientFreeImage(OSVR_ClientContext ctx, OSVR_ImageBufferElement * buf);
+osvrClientFreeImage(OSVR_ClientContext ctx, OSVR_ImageBufferElement *buf);
 
 OSVR_EXTERN_C_END
 

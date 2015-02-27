@@ -40,7 +40,14 @@ namespace clientkit {
 
     inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
+    inline ClientContext &Interface::getContext() { return *m_ctx; }
+
     inline void Interface::free() { m_ctx->free(*this); }
+
+    inline void
+    Interface::takeOwnership(util::boost_util::DeletablePtr const &obj) {
+        m_deletables.push_back(obj);
+    }
 
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     inline void Interface::registerCallback(OSVR_##TYPE##Callback cb,          \

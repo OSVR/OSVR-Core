@@ -18,6 +18,7 @@
 // Internal Includes
 #include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Interface.h>
+#include <osvr/ClientKit/Imaging.h>
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp>
@@ -26,13 +27,32 @@
 #include <iostream>
 #include <string>
 
+/// @brief OpenCV's simple highgui module refers to windows by their name, so we
+/// make this global for a simpler demo.
 static const std::string windowName("OSVR imaging demo | q or esc to quit");
-cv::Mat frame;
 
+/// @brief We keep a copy of the last report to avoid de-allocating the image
+/// buffer until we have a new report.
+osvr::clientkit::ImagingReportOpenCV lastReport;
+
+void imagingCallback(void *userdata,
+                     osvr::util::time::TimeValue const &timestamp,
+                     osvr::clientkit::ImagingReportOpenCV report) {
+    if (report.frame.empty()) {
+        std::cout << "Error, frame empty!" << std::endl;
+        return;
+    }
+
+    cv::imshow(windowName, report.frame);
+    lastReport = report;
+}
 int main() {
     osvr::clientkit::ClientContext context("com.osvr.exampleclients.Imaging");
 
     osvr::clientkit::Interface camera = context.getInterface("/camera");
+
+    // Register the imaging callback.
+    osvr::clientkit::registerImagingCallback(camera, &imagingCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     // We're using a simple OpenCV "highgui" loop here.

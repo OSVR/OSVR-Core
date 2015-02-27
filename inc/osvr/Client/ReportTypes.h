@@ -35,7 +35,8 @@ namespace client {
         /// @brief A typelist containing all specially-handled report types.
         typedef boost::mpl::vector<OSVR_AnalogReport, OSVR_ButtonReport,
                                    OSVR_PoseReport, OSVR_PositionReport,
-                                   OSVR_OrientationReport> ReportTypes;
+                                   OSVR_OrientationReport,
+                                   OSVR_ImagingReport> ReportTypes;
 
     } // namespace traits
 

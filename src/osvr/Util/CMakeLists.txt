@@ -25,11 +25,13 @@ set(API
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/BoolC.h"
+    "${HEADER_LOCATION}/BoostDeletable.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/ChannelCountC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
+    "${HEADER_LOCATION}/Deletable.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
     "${HEADER_LOCATION}/EigenInterop.h"
@@ -52,6 +54,7 @@ set(API
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
+    "${HEADER_LOCATION}/StdDeletable.h"
     "${HEADER_LOCATION}/StdInt.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
@@ -65,6 +68,7 @@ set(API
 
 set(SOURCE
     AnyMap.cpp
+    Deletable.cpp
     GuardInterface.cpp
     TimeValueC.cpp
     MessageKeys.cpp

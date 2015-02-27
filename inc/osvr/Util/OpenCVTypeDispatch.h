@@ -21,13 +21,14 @@
 // Internal Includes
 #include <osvr/Util/StdInt.h>
 #include <osvr/Util/NumberTypeManipulation.h>
+#include <osvr/Util/ImagingReportTypesC.h>
 
 // Library/third-party includes
 #include <opencv2/core/types_c.h>
 #include <boost/mpl/identity.hpp>
 
 // Standard includes
-// - none
+#include <stdexcept>
 
 namespace osvr {
 namespace util {
@@ -75,6 +76,8 @@ namespace util {
         return ret;
     }
 
+    /// @brief Computes the OpenCV "type" (also known as depth - as in CV_8U)
+    /// for a given combination of signed, float, and byte depth.
     inline int cvTypeFromData(bool isSigned, bool isFloat, size_t depth) {
         switch (depth) {
         case 1:
@@ -100,6 +103,16 @@ namespace util {
             throw std::runtime_error(
                 "No OpenCV type matching the requested parameters!");
         }
+    }
+
+    /// @brief Computes the OpenCV matrix type (as in CV_8UC3) from a metadata
+    /// struct
+    inline int computeOpenCVMatType(OSVR_ImagingMetadata const &metadata) {
+        return CV_MAKETYPE(
+            cvTypeFromData(metadata.type == OSVR_IVT_SIGNED_INT,
+                           metadata.type == OSVR_IVT_FLOATING_POINT,
+                           metadata.depth),
+            metadata.channels);
     }
 } // namespace util
 } // namespace osvr

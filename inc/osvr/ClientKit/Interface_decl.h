@@ -22,6 +22,7 @@
 // Internal Includes
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
+#include <osvr/Util/BoostDeletable.h>
 
 // Library/third-party includes
 
@@ -65,6 +66,9 @@ namespace clientkit {
         /// @brief Get the raw OSVR_ClientInterface from this wrapper.
         OSVR_ClientInterface get();
 
+        /// @brief Get the associated ClientContext
+        ClientContext &getContext();
+
         /// @brief Manually free the interface before the context is closed.
         ///
         /// This is not required, but can be used, for instance, to ensure that
@@ -77,9 +81,13 @@ namespace clientkit {
         /// @throws std::logic_error if the interface is null or already freed.
         void free();
 
+        /// @brief Take (shared) ownership of some Deletable object.
+        void takeOwnership(util::boost_util::DeletablePtr const &obj);
+
       private:
         ClientContext *m_ctx;
         OSVR_ClientInterface m_interface;
+        util::boost_util::DeletableList m_deletables;
     };
 } // end namespace clientkit
 

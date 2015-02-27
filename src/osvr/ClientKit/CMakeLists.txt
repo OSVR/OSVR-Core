@@ -7,6 +7,7 @@ set(API
     "${HEADER_LOCATION}/Context_decl.h"
     "${HEADER_LOCATION}/ContextC.h"
     "${HEADER_LOCATION}/Imaging.h"
+    "${HEADER_LOCATION}/Imaging_decl.h"
     "${HEADER_LOCATION}/ImagingC.h"
     "${HEADER_LOCATION}/Interface.h"
     "${HEADER_LOCATION}/Interface_decl.h"

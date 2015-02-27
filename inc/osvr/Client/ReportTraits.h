@@ -66,6 +66,7 @@ namespace client {
         OSVR_REPORT_TRAITS(Pose)
         OSVR_REPORT_TRAITS(Position)
         OSVR_REPORT_TRAITS(Orientation)
+        OSVR_REPORT_TRAITS(Imaging)
 #undef OSVR_REPORT_TRAITS
     } // namespace traits
 
