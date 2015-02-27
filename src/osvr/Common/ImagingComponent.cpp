@@ -47,7 +47,7 @@ namespace common {
             MessageSerialization() : m_imgBuf(nullptr) {}
 
             template <typename T>
-            void allocateBuffer(T &p, size_t bytes, std::true_type const &) {
+            void allocateBuffer(T &, size_t bytes, std::true_type const &) {
                 m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(
                                    cv::fastMalloc(bytes)),
                                &cv::fastFree);
