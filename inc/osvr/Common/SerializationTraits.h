@@ -173,6 +173,28 @@ namespace common {
                 val = (cVal == OSVR_TRUE);
             }
         };
+        template <typename EnumType, typename IntegerType>
+        struct SerializationTraits<EnumAsIntegerTag<EnumType, IntegerType>,
+                                   void> : BaseSerializationTraits<EnumType> {
+            typedef BaseSerializationTraits<EnumType> Base;
+            typedef EnumAsIntegerTag<EnumType, IntegerType> tag_type;
+
+            template <typename BufferType>
+            static void serialize(BufferType &buf,
+                                  typename Base::param_type val,
+                                  tag_type const &) {
+                serializeRaw(buf, static_cast<IntegerType>(val));
+            }
+
+            template <typename BufferReaderType>
+            static void deserialize(BufferReaderType &reader,
+                                    typename Base::reference_type val,
+                                    tag_type const &) {
+                IntegerType intVal;
+                deserializeRaw(reader, intVal);
+                val = static_cast<EnumType>(intVal);
+            }
+        };
 
         /// @brief String, length-prefixed. (default)
         template <>
@@ -249,23 +271,23 @@ namespace common {
 
         /// @brief Serialization traits for a raw data bytestream with the given
         /// alignment.
-        template <size_t Alignment>
-        struct SerializationTraits<AlignedDataBufferTag<Alignment>, void> {
-            typedef AlignedDataBufferTag<Alignment> tag_type;
+        template <> struct SerializationTraits<AlignedDataBufferTag, void> {
+            typedef AlignedDataBufferTag tag_type;
 
             template <typename BufferType, typename DataType>
-            static void serialize(BufferType &buf, DataType *val,
+            static void serialize(BufferType &buf, DataType const *val,
                                   tag_type const &tag) {
                 auto dataPtr =
-                    static_cast<typename BufferType::ElementType const *>(val);
-                buf.appendAligned(dataPtr, tag.length(), Alignment);
+                    reinterpret_cast<typename BufferType::ElementType const *>(
+                        val);
+                buf.appendAligned(dataPtr, tag.length(), tag.alignment());
             }
 
             template <typename BufferReaderType, typename DataType>
             static void deserialize(BufferReaderType &reader, DataType *val,
                                     tag_type const &tag) {
                 auto len = tag.length();
-                auto iter = reader.readBytesAligned(len, Alignment);
+                auto iter = reader.readBytesAligned(len, tag.alignment());
                 std::copy(iter, iter + len, val);
             }
 

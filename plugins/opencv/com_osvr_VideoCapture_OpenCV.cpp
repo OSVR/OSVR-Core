@@ -81,9 +81,6 @@ class CameraDevice : boost::noncopyable {
         cv::Mat subimage = m_frame(cv::Rect(0, 0, 80, 100));
         m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
 
-        osvr::pluginkit::ImagingMessage(m_frame).dump(std::cout);
-        std::cout << std::endl;
-
         return OSVR_RETURN_SUCCESS;
     }
 

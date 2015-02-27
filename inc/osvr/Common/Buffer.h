@@ -77,6 +77,30 @@ namespace common {
     /// Check ActualBufferAlignment::value to see if it is actually aligned.
     typedef std::vector<BufferElement, BufferAllocator> BufferByteVector;
 
+    /// @brief Class wrapping an externally-owned and controlled buffer with the
+    /// vector-like functionality needed to read from it.
+    template <typename ElementType = BufferElement>
+    class ExternalBufferReadingWrapper {
+      public:
+        typedef ElementType const *const_iterator;
+        typedef ElementType value_type;
+
+        ExternalBufferReadingWrapper(ElementType const *buf, size_t size)
+            : m_buf(buf), m_size(size) {}
+
+        const_iterator begin() const { return m_buf; }
+
+        const_iterator end() const { return m_buf + m_size; }
+
+        size_t size() const { return m_size; }
+
+      private:
+        ElementType const *m_buf;
+        size_t m_size;
+        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
+                                "Container must have byte-sized elements");
+    };
+
     /// @brief Provides for a single reading pass over a buffer. It is
     /// important that the buffer not change while a Reader obtained from it
     /// is still in scope.
@@ -86,6 +110,10 @@ namespace common {
       public:
         typedef typename ContainerType::const_iterator const_iterator;
         typedef typename ContainerType::value_type ElementType;
+
+        BufferReader(ContainerType const &buf)
+            : m_buf(&buf), m_begin(m_buf->begin()), m_readIter(m_buf->begin()),
+              m_end(m_buf->end()) {}
 
         size_t bytesRead() const { return m_readIter - m_begin; }
         size_t bytesRemaining() const { return m_end - m_readIter; }
@@ -109,8 +137,7 @@ namespace common {
         const_iterator readBytes(size_t const n) {
             if (bytesRemaining() < n) {
                 throw std::runtime_error(
-                    std::string("Not enough data in the buffer to read ") + n +
-                    " bytes!");
+                    "Not enough data in the buffer to read that many bytes!");
             }
             auto ret = m_readIter;
             m_readIter += n;
@@ -149,16 +176,12 @@ namespace common {
         }
 
       private:
-        BufferReader(ContainerType const &buf)
-            : m_buf(&buf), m_begin(m_buf->begin()), m_readIter(m_buf->begin()),
-              m_end(m_buf->end()) {}
         ContainerType const *m_buf;
         const_iterator m_begin;
         const_iterator m_readIter;
         const_iterator m_end;
         BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
                                 "Container must have byte-sized elements");
-        friend class Buffer<ContainerType>; ///< permits construction
     };
 
     /// @brief A buffer of bytes, built on a byte-vector-like container.
@@ -261,6 +284,8 @@ namespace common {
       private:
         static const ElementType PADDING_ELEMENT = '\0';
         ContainerType m_buf;
+        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
+                                "Container must have byte-sized elements");
     };
 } // namespace common
 } // namespace osvr

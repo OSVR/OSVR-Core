@@ -74,6 +74,33 @@ namespace util {
         opencvTypeDispatch(openCVType, f);
         return ret;
     }
+
+    inline int cvTypeFromData(bool isSigned, bool isFloat, size_t depth) {
+        switch (depth) {
+        case 1:
+            return isSigned ? CV_8S : CV_8U;
+        case 2:
+            return isSigned ? CV_16S : CV_16U;
+
+        case 4:
+            if (isFloat) {
+                return CV_32F;
+            }
+            if (isSigned) {
+                return CV_32S;
+            }
+            throw std::runtime_error("No OpenCV 32-bit unsigned type!");
+        case 8:
+            if (isFloat) {
+                return CV_64F;
+            }
+            throw std::runtime_error("No OpenCV 64-bit integer types!");
+        default:
+
+            throw std::runtime_error(
+                "No OpenCV type matching the requested parameters!");
+        }
+    }
 } // namespace util
 } // namespace osvr
 

@@ -67,6 +67,10 @@ namespace common {
                 apply<T, Tag>(v, tag);
             }
 
+            std::true_type isSerialize() const { return std::true_type(); }
+
+            std::false_type isDeserialize() const { return std::false_type(); }
+
           private:
             /// @brief Implementation of action, using call_traits for optimized
             /// value handling.
@@ -104,6 +108,17 @@ namespace common {
             void operator()(T &v, Tag const &tag = Tag()) {
                 apply<T, Tag>(v, tag);
             }
+
+            /// @overload
+            ///
+            /// Handles pointers.
+            template <typename Tag, typename T>
+            void operator()(T *v, Tag const &tag = Tag()) {
+                apply<T *, Tag>(v, tag);
+            }
+
+            std::false_type isSerialize() const { return std::false_type(); }
+            std::true_type isDeserialize() const { return std::true_type(); }
 
           private:
             /// @brief Implementation of action, using call_traits for optimized

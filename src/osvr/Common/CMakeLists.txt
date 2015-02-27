@@ -69,5 +69,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     jsoncpp_lib
     PRIVATE
+    opencv_core
     vendored-vrpn
     eigen-headers)

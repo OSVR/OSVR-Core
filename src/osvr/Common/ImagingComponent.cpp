@@ -20,11 +20,12 @@
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
+#include <osvr/Util/OpenCVTypeDispatch.h>
 
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-// - none
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 // - none
@@ -34,15 +35,53 @@ namespace common {
     namespace messages {
         class ImageRegion::MessageSerialization {
           public:
-            MessageSerialization(std::string const &str = std::string())
-                : m_str(str) {}
+            MessageSerialization(OSVR_ImagingMetadata const &meta,
+                                 OSVR_ImageBufferElement *imageData,
+                                 OSVR_ChannelCount sensor)
+                : m_meta(meta),
+                  m_imgBuf(imageData,
+                           [](OSVR_ImageBufferElement *) {
+                           }), // That's a null-deleter right there for you.
+                  m_sensor(sensor) {}
+
+            MessageSerialization() : m_imgBuf(nullptr) {}
+
+            template <typename T>
+            void allocateBuffer(T &p, size_t bytes, std::true_type const &) {
+                m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(
+                                   cv::fastMalloc(bytes)),
+                               &cv::fastFree);
+            }
+
+            template <typename T>
+            void allocateBuffer(T &, size_t, std::false_type const &) {
+                // Does nothing if we're serializing.
+            }
 
             template <typename T> void processMessage(T &p) {
-                p(m_str, serialization::StringOnlyMessageTag());
+                p(m_meta.height);
+                p(m_meta.width);
+                p(m_meta.channels);
+                p(m_meta.depth);
+                p(m_meta.type,
+                  serialization::EnumAsIntegerTag<OSVR_ImagingValueType,
+                                                  uint8_t>());
+
+                auto bytes = m_meta.height * m_meta.width * m_meta.depth *
+                             m_meta.channels;
+
+                /// Allocate the matrix backing data, if we're deserializing
+                /// only.
+                allocateBuffer(p, bytes, p.isDeserialize());
+                p(m_imgBuf.get(),
+                  serialization::AlignedDataBufferTag(bytes, m_meta.depth));
             }
 
           private:
-            std::string m_str;
+            OSVR_ImagingMetadata m_meta;
+            shared_ptr<OSVR_ImageBufferElement> m_imgBuf;
+            OSVR_ChannelCount m_sensor;
+            cv::Mat m_mat;
         };
         const char *ImageRegion::identifier() {
             return "com.osvr.imaging.imageregion";
@@ -55,13 +94,29 @@ namespace common {
         return ret;
     }
     ImagingComponent::ImagingComponent(OSVR_ChannelCount numChan)
-        : m_numChan(numChan) {}
+        : m_numSensor(numChan) {}
 
-    void ImagingComponent::sendImageData() {
+    void ImagingComponent::sendImageData(OSVR_ImagingMetadata metadata,
+                                         OSVR_ImageBufferElement *imageData,
+                                         OSVR_ChannelCount sensor,
+                                         OSVR_TimeValue const &timestamp) {
         Buffer<> buf;
-        messages::ImageRegion::MessageSerialization msg;
+        messages::ImageRegion::MessageSerialization msg(metadata, imageData,
+                                                        sensor);
         serialize(buf, msg);
-        m_getParent().packMessage(buf, imageRegion.getMessageType());
+        m_getParent().packMessage(buf, imageRegion.getMessageType(), timestamp);
+        m_getParent().sendPending();
+    }
+
+    int VRPN_CALLBACK
+    ImagingComponent::handleImageRegion(void *userdata, vrpn_HANDLERPARAM p) {
+        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
+            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
+        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+
+        messages::ImageRegion::MessageSerialization msg;
+        deserialize(bufReader, msg);
+        return 0;
     }
 
     void

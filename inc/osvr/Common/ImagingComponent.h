@@ -23,9 +23,10 @@
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/ImagingReportTypesC.h>
 
 // Library/third-party includes
-// - none
+#include <vrpn_BaseClass.h>
 
 // Standard includes
 // - none
@@ -52,19 +53,25 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<ImagingComponent>
-        create(OSVR_ChannelCount numChan);
+        create(OSVR_ChannelCount numSensor);
 
         /// @brief Message from server to client, containing some image data.
         messages::ImageRegion imageRegion;
 
-        OSVR_COMMON_EXPORT void sendImageData();
+        OSVR_COMMON_EXPORT void sendImageData(
+            OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
+            OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
         OSVR_COMMON_EXPORT void
         registerImageRegionHandler(vrpn_MESSAGEHANDLER handler, void *userdata);
 
       private:
         ImagingComponent(OSVR_ChannelCount numChan);
         virtual void m_parentSet();
-        OSVR_ChannelCount m_numChan;
+
+        static int VRPN_CALLBACK
+        handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
+
+        OSVR_ChannelCount m_numSensor;
     };
 } // namespace common
 } // namespace osvr

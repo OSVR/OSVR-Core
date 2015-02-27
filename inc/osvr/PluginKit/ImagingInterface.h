@@ -42,24 +42,9 @@ namespace pluginkit {
 
     class ImagingMessage {
       public:
-        ImagingMessage(cv::InputArray frame, OSVR_ChannelCount sensor = 0)
+        ImagingMessage(cv::Mat const &frame, OSVR_ChannelCount sensor = 0)
             : m_sensor(sensor) {
-            m_frame.create(frame.size(), frame.type());
-            m_frame = frame.getMat().clone();
-        }
-
-        void dump(std::ostream &os) {
-            os << m_frame.size() << ", ";
-            util::NumberTypeData typedata =
-                util::opencvNumberTypeData(m_frame.type());
-            os << m_frame.channels() << " channels, ";
-            os << typedata.getSize() * 8 << " bit ";
-            if (typedata.isFloatingPoint()) {
-                os << "floating-point";
-            } else {
-                os << (typedata.isSigned() ? "signed integer"
-                                           : "unsigned integer");
-            }
+            m_frame = frame.clone();
         }
 
         cv::Mat const &getFrame() const { return m_frame; }
