@@ -78,6 +78,8 @@ osvr_delayload_opencv(${LIBNAME_FULL} opencv_core)
 ###
 # Grab DLLs please.
 ###
-osvr_copy_dep(${LIBNAME_FULL} opencv_core)
-osvr_copy_dep(${LIBNAME_FULL} opencv_highgui)   # used by plugin
-osvr_copy_dep(${LIBNAME_FULL} opencv_imgproc)   # used by plugin
+if(OSVR_COPY_OPENCV)
+    osvr_copy_dep(${LIBNAME_FULL} opencv_core)
+    osvr_copy_dep(${LIBNAME_FULL} opencv_highgui)   # used by plugin
+    osvr_copy_dep(${LIBNAME_FULL} opencv_imgproc)   # used by plugin
+endif()

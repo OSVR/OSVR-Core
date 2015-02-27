@@ -111,6 +111,11 @@ find_package(libfunctionality REQUIRED)
 find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
 find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
+if(WIN32)
+    set(OSVR_COPY_OPENCV ON)
+else()
+    set(OSVR_COPY_OPENCV OFF)
+endif()
 
 add_library(boost_thread INTERFACE)
 target_link_libraries(boost_thread
