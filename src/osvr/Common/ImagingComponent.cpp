@@ -76,12 +76,18 @@ namespace common {
                 p(m_imgBuf.get(),
                   serialization::AlignedDataBufferTag(bytes, m_meta.depth));
             }
+            ImageData getData() const {
+                ImageData ret;
+                ret.sensor = m_sensor;
+                ret.metadata = m_meta;
+                ret.buffer = m_imgBuf;
+                return ret;
+            }
 
           private:
             OSVR_ImagingMetadata m_meta;
-            shared_ptr<OSVR_ImageBufferElement> m_imgBuf;
+            ImageBufferPtr m_imgBuf;
             OSVR_ChannelCount m_sensor;
-            cv::Mat m_mat;
         };
         const char *ImageRegion::identifier() {
             return "com.osvr.imaging.imageregion";
@@ -110,19 +116,27 @@ namespace common {
 
     int VRPN_CALLBACK
     ImagingComponent::handleImageRegion(void *userdata, vrpn_HANDLERPARAM p) {
+        auto self = static_cast<ImagingComponent *>(userdata);
         auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
             reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
         auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
 
         messages::ImageRegion::MessageSerialization msg;
         deserialize(bufReader, msg);
+        auto data = msg.getData();
+        auto timestamp = util::time::fromStructTimeval(p.msg_time);
+        for (auto const &cb : self->m_cb) {
+            cb(data, timestamp);
+        }
         return 0;
     }
 
-    void
-    ImagingComponent::registerImageRegionHandler(vrpn_MESSAGEHANDLER handler,
-                                                 void *userdata) {
-        m_registerHandler(handler, userdata, imageRegion.getMessageType());
+    void ImagingComponent::registerImageHandler(ImageHandler handler) {
+        if (m_cb.empty()) {
+            m_registerHandler(&ImagingComponent::handleImageRegion, this,
+                              imageRegion.getMessageType());
+        }
+        m_cb.push_back(handler);
     }
     void ImagingComponent::m_parentSet() {
         OSVR_DEV_VERBOSE("Finishing init of imaging component");

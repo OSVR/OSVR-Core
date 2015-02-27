@@ -35,12 +35,21 @@ static const std::string windowName("OSVR imaging demo | q or esc to quit");
 /// buffer until we have a new report.
 osvr::clientkit::ImagingReportOpenCV lastReport;
 
+bool gotSomething = false;
+
 void imagingCallback(void *userdata,
                      osvr::util::time::TimeValue const &timestamp,
                      osvr::clientkit::ImagingReportOpenCV report) {
     if (report.frame.empty()) {
         std::cout << "Error, frame empty!" << std::endl;
         return;
+    }
+
+    /// The first time, let's print some info.
+    if (!gotSomething) {
+        gotSomething = true;
+        std::cout << "Got first report: image is " << report.frame.cols << "x"
+                  << report.frame.rows << std::endl;
     }
 
     cv::imshow(windowName, report.frame);
@@ -56,7 +65,7 @@ int main() {
 
     // Pretend that this is your application's mainloop.
     // We're using a simple OpenCV "highgui" loop here.
-    cv::namedWindow(windowName, CV_WINDOW_KEEPRATIO);
+    cv::namedWindow(windowName);
     while (1) {
         context.update();
         char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key

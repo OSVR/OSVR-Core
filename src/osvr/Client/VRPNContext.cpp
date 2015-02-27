@@ -19,6 +19,7 @@
 #include "VRPNContext.h"
 #include "RouterPredicates.h"
 #include "RouterTransforms.h"
+#include "ImagingRouter.h"
 #include "VRPNAnalogRouter.h"
 #include "VRPNButtonRouter.h"
 #include "VRPNTrackerRouter.h"
@@ -36,6 +37,9 @@
 // Library/third-party includes
 #include <json/value.h>
 #include <json/reader.h>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 // Standard includes
 #include <cstring>
@@ -164,7 +168,41 @@ namespace client {
                            xformParse.getTransform());
     }
     void VRPNContext::m_handleStringRouteEntry(std::string const &dest,
-                                               std::string const &src) {}
+                                               std::string src) {
+        std::vector<std::string> components;
+
+        /// @todo replace literal with getPathSeparator
+        boost::algorithm::split(components, src,
+                                boost::algorithm::is_any_of("/"));
+        if (!components.empty()) {
+            if (components.front().empty()) {
+                components.erase(begin(components));
+            }
+        }
+        if (components.size() < 4) {
+            OSVR_DEV_VERBOSE("Could not parse source for route, skipping: "
+                             << src << " => " << dest);
+            return;
+        }
+
+        std::string deviceName =
+            components[0] + "/" + components[1] + "@" + m_host;
+        std::reverse(begin(components), end(components));
+        components.pop_back();
+        components.pop_back();
+
+        std::string interfaceType = components.back();
+        components.pop_back();
+        if (interfaceType == "imaging") {
+            OSVR_DEV_VERBOSE("Adding imaging route for " << dest);
+            m_routers.emplace_back(
+                new ImagingRouter(this, m_conn, deviceName, components, dest));
+        } else {
+            OSVR_DEV_VERBOSE(
+                "Could not handle route message for interface type "
+                << interfaceType << ", skipping: " << src << " => " << dest);
+        }
+    }
 
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.

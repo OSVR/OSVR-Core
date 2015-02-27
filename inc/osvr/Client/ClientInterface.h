@@ -93,7 +93,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Helper function for "setting state" on reports we don't keep
     /// state from
     template <typename ReportType>
-    void m_setState(const OSVR_TimeValue &timestamp, ReportType const &report,
+    void m_setState(const OSVR_TimeValue &, ReportType const &,
                     std::false_type const &) {}
     ::osvr::client::ClientContext *m_ctx;
     std::string const m_path;

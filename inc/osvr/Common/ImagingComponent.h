@@ -33,12 +33,16 @@
 
 namespace osvr {
 namespace common {
+    typedef shared_ptr<OSVR_ImageBufferElement> ImageBufferPtr;
+    struct ImageData {
+        OSVR_ChannelCount sensor;
+        OSVR_ImagingMetadata metadata;
+        ImageBufferPtr buffer;
+    };
     namespace messages {
         class ImageRegion : public MessageRegistration<ImageRegion> {
           public:
             class MessageSerialization;
-            typedef void (*MessageHandler)(void *userdata,
-                                           std::string const &message);
 
             static const char *identifier();
         };
@@ -53,7 +57,7 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<ImagingComponent>
-        create(OSVR_ChannelCount numSensor);
+        create(OSVR_ChannelCount numSensor = 0);
 
         /// @brief Message from server to client, containing some image data.
         messages::ImageRegion imageRegion;
@@ -61,8 +65,10 @@ namespace common {
         OSVR_COMMON_EXPORT void sendImageData(
             OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
             OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
-        OSVR_COMMON_EXPORT void
-        registerImageRegionHandler(vrpn_MESSAGEHANDLER handler, void *userdata);
+
+        typedef std::function<void(ImageData const &,
+                                   util::time::TimeValue const &)> ImageHandler;
+        OSVR_COMMON_EXPORT void registerImageHandler(ImageHandler cb);
 
       private:
         ImagingComponent(OSVR_ChannelCount numChan);
@@ -72,6 +78,7 @@ namespace common {
         handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
 
         OSVR_ChannelCount m_numSensor;
+        std::vector<ImageHandler> m_cb;
     };
 } // namespace common
 } // namespace osvr

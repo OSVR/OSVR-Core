@@ -67,8 +67,7 @@ namespace client {
 
         void m_handleTrackerRouteEntry(std::string const &dest,
                                        Json::Value src);
-        void m_handleStringRouteEntry(std::string const &dest,
-                                      std::string const &src);
+        void m_handleStringRouteEntry(std::string const &dest, std::string src);
         void m_addAnalogRouter(const char *src, const char *dest, int channel);
         template <typename Predicate>
         void m_addButtonRouter(const char *src, const char *dest,

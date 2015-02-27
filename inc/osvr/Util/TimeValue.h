@@ -46,6 +46,27 @@ namespace util {
                                     TimeValue const &src) {
             osvrTimeValueToStructTimeval(&dest, &src);
         }
+        /// @brief Convert a struct timeval to a TimeValue
+        inline void fromStructTimeval(TimeValue &dest,
+                                      struct timeval const &src) {
+            osvrStructTimevalToTimeValue(&dest, &src);
+        }
+
+        /// @brief Convert a struct timeval to a TimeValue
+        inline TimeValue fromStructTimeval(struct timeval const &src) {
+            TimeValue dest;
+            osvrStructTimevalToTimeValue(&dest, &src);
+            return dest;
+        }
+#ifdef OSVR_STRUCT_TIMEVAL_INCLUDED
+        /// @brief Convert a TimeValue to a struct timeval
+        inline struct timeval toStructTimeval(TimeValue const &src) {
+            struct timeval dest;
+            osvrTimeValueToStructTimeval(&dest, &src);
+            return dest;
+        }
+#endif
+
 #endif
     } // namespace time
 } // namespace util
