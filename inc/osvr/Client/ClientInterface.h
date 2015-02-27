@@ -25,6 +25,7 @@
 #include <osvr/Client/InterfaceState.h>
 #include <osvr/Client/InterfaceCallbacks.h>
 #include <osvr/Client/StateType.h>
+#include <osvr/Client/ReportStateTraits.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 
@@ -73,7 +74,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     template <typename ReportType>
     void triggerCallbacks(const OSVR_TimeValue &timestamp,
                           ReportType const &report) {
-        m_state.setStateFromReport(timestamp, report);
+        m_setState(timestamp, report, osvr::client::traits::KeepStateForReport<ReportType>());
         m_callbacks.triggerCallbacks(timestamp, report);
     }
 
@@ -81,6 +82,18 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     void update();
 
   private:
+    /// @brief Helper function for setting state
+    template <typename ReportType>
+    void m_setState(const OSVR_TimeValue &timestamp, ReportType const &report,
+                    std::true_type const &) {
+        m_state.setStateFromReport(timestamp, report);
+    }
+
+    /// @brief Helper function for "setting state" on reports we don't keep
+    /// state from
+    template <typename ReportType>
+    void m_setState(const OSVR_TimeValue &timestamp, ReportType const &report,
+                    std::false_type const &) {}
     ::osvr::client::ClientContext *m_ctx;
     std::string const m_path;
     osvr::client::InterfaceCallbacks m_callbacks;
