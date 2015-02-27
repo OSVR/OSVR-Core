@@ -25,6 +25,7 @@
 
 // Library/third-party includes
 #include <boost/optional.hpp>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <vector>
