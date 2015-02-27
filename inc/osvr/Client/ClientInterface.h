@@ -74,7 +74,8 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     template <typename ReportType>
     void triggerCallbacks(const OSVR_TimeValue &timestamp,
                           ReportType const &report) {
-        m_setState(timestamp, report, osvr::client::traits::KeepStateForReport<ReportType>());
+        m_setState(timestamp, report,
+                   osvr::client::traits::KeepStateForReport<ReportType>());
         m_callbacks.triggerCallbacks(timestamp, report);
     }
 

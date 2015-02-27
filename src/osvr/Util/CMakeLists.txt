@@ -40,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/GuardInterface.h"
     "${HEADER_LOCATION}/GuardInterfaceDummy.h"
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
+    "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"

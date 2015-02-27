@@ -103,3 +103,7 @@ void OSVR_ClientContextObject::setParameter(std::string const &path,
     OSVR_DEV_VERBOSE("Parameter set for " << path);
     m_params[path] = value;
 }
+
+bool OSVR_ClientContextObject::releaseObject(void *obj) {
+    return m_ownedObjects.release(obj);
+}

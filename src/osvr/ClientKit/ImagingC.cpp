@@ -17,9 +17,16 @@
 
 // Internal Includes
 #include <osvr/ClientKit/ImagingC.h>
+#include <osvr/Client/ClientContext.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
+OSVR_ReturnCode osvrClientFreeImage(OSVR_ClientContext ctx,
+                                    OSVR_ImageBufferElement *buf) {
+    auto ret = ctx->releaseObject(buf);
+    return (ret ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE);
+}
