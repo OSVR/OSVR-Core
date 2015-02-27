@@ -75,10 +75,13 @@ namespace common {
         virtual void m_parentSet();
 
         static int VRPN_CALLBACK
-        handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
+        m_handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
+
+        void m_checkFirst(OSVR_ImagingMetadata const &metadata);
 
         OSVR_ChannelCount m_numSensor;
         std::vector<ImageHandler> m_cb;
+        bool m_gotOne;
     };
 } // namespace common
 } // namespace osvr

@@ -106,6 +106,7 @@ namespace common {
                                          OSVR_ImageBufferElement *imageData,
                                          OSVR_ChannelCount sensor,
                                          OSVR_TimeValue const &timestamp) {
+        m_checkFirst(metadata);
         Buffer<> buf;
         messages::ImageRegion::MessageSerialization msg(metadata, imageData,
                                                         sensor);
@@ -115,7 +116,7 @@ namespace common {
     }
 
     int VRPN_CALLBACK
-    ImagingComponent::handleImageRegion(void *userdata, vrpn_HANDLERPARAM p) {
+    ImagingComponent::m_handleImageRegion(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ImagingComponent *>(userdata);
         auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
             reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
@@ -125,6 +126,8 @@ namespace common {
         deserialize(bufReader, msg);
         auto data = msg.getData();
         auto timestamp = util::time::fromStructTimeval(p.msg_time);
+
+        self->m_checkFirst(data.metadata);
         for (auto const &cb : self->m_cb) {
             cb(data, timestamp);
         }
@@ -133,7 +136,7 @@ namespace common {
 
     void ImagingComponent::registerImageHandler(ImageHandler handler) {
         if (m_cb.empty()) {
-            m_registerHandler(&ImagingComponent::handleImageRegion, this,
+            m_registerHandler(&ImagingComponent::m_handleImageRegion, this,
                               imageRegion.getMessageType());
         }
         m_cb.push_back(handler);
@@ -141,6 +144,16 @@ namespace common {
     void ImagingComponent::m_parentSet() {
         OSVR_DEV_VERBOSE("Finishing init of imaging component");
         m_getParent().registerMessageType(imageRegion);
+    }
+
+    void ImagingComponent::m_checkFirst(OSVR_ImagingMetadata const &metadata) {
+        if (m_gotOne) {
+            return;
+        }
+        m_gotOne = true;
+
+        OSVR_DEV_VERBOSE("First frame sent: width="
+                         << metadata.width << " height=" << metadata.height);
     }
 } // namespace common
 } // namespace osvr
