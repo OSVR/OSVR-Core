@@ -29,7 +29,8 @@
 
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
 /// make this global for a simpler demo.
-static const std::string windowName("OSVR imaging demo | q or esc to quit");
+static const std::string
+    windowNameAndInstructions("OSVR imaging demo | q or esc to quit");
 
 /// @brief We keep a copy of the last report to avoid de-allocating the image
 /// buffer until we have a new report.
@@ -52,7 +53,7 @@ void imagingCallback(void *userdata,
                   << report.frame.rows << std::endl;
     }
 
-    cv::imshow(windowName, report.frame);
+    cv::imshow(windowNameAndInstructions, report.frame);
     lastReport = report;
 }
 int main() {
@@ -63,9 +64,13 @@ int main() {
     // Register the imaging callback.
     osvr::clientkit::registerImagingCallback(camera, &imagingCallback, NULL);
 
+    // Output instructions to the console.
+    std::cout << std::endl
+              << windowNameAndInstructions << std::endl;
+
     // Pretend that this is your application's mainloop.
     // We're using a simple OpenCV "highgui" loop here.
-    cv::namedWindow(windowName);
+    cv::namedWindow(windowNameAndInstructions);
     while (1) {
         context.update();
         char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key
