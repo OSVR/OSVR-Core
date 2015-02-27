@@ -20,9 +20,11 @@
 #include <osvr/PluginKit/ImagingInterface.h>
 
 // Library/third-party includes
-//#include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp> // for basic OpenCV types
+#include <opencv2/core/operations.hpp>
+#include <opencv2/highgui/highgui.hpp> // for image capture
+#include <opencv2/imgproc/imgproc.hpp> // for image scaling
+
 #include <boost/noncopyable.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -77,10 +79,18 @@ class CameraDevice : boost::noncopyable {
         if (!retrieved) {
             return OSVR_RETURN_FAILURE;
         }
-        // Sending an width = 210, height = 100 RoI right now to keep data sizes
-        // small - currently limited to about 64k message size.
-        cv::Mat subimage = m_frame(cv::Rect(0, 0, 210, 100));
-        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
+        // Currently limited to just under 64k message size.
+
+        // cv::Mat subimage = m_frame(cv::Rect(0, 0, 210, 100));
+        // m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
+
+        // Scale down to something under 160x120 while keeping aspect ratio.
+        auto xScale = 160.0 / m_frame.cols;
+        auto yScale = 120.0 / m_frame.rows;
+        auto finalScale = std::min(xScale, yScale);
+        cv::resize(m_frame, m_scaledFrame, cv::Size(), finalScale, finalScale,
+                   CV_INTER_AREA);
+        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_scaledFrame));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -91,6 +101,7 @@ class CameraDevice : boost::noncopyable {
     cv::VideoCapture m_camera;
     int m_channel;
     cv::Mat m_frame;
+    cv::Mat m_scaledFrame;
 };
 
 class CameraDetection {
