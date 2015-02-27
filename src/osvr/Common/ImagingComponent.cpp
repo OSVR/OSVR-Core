@@ -106,13 +106,13 @@ namespace common {
                                          OSVR_ImageBufferElement *imageData,
                                          OSVR_ChannelCount sensor,
                                          OSVR_TimeValue const &timestamp) {
-        m_checkFirst(metadata);
         Buffer<> buf;
         messages::ImageRegion::MessageSerialization msg(metadata, imageData,
                                                         sensor);
         serialize(buf, msg);
         m_getParent().packMessage(buf, imageRegion.getMessageType(), timestamp);
         m_getParent().sendPending();
+        m_checkFirst(metadata);
     }
 
     int VRPN_CALLBACK
@@ -151,7 +151,7 @@ namespace common {
         }
         m_gotOne = true;
 
-        OSVR_DEV_VERBOSE("First frame sent: width="
+        OSVR_DEV_VERBOSE("Sending/receiving first frame: width="
                          << metadata.width << " height=" << metadata.height);
     }
 } // namespace common
