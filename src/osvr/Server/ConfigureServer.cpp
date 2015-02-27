@@ -62,12 +62,14 @@ namespace server {
     static const char INTERFACE_KEY[] = "interface";
     static const char LOCAL_KEY[] = "local";
     static const char PORT_KEY[] = "port"; // not the triwizard cup.
+    static const char SLEEP_KEY[] = "sleep";
 
     ServerPtr ConfigureServer::constructServer() {
         Json::Value &root(m_data->root);
         bool local = true;
         std::string iface;
         boost::optional<int> port;
+        int sleepTime = 0; // microseconds
 
         /// Extract data from the JSON structure.
         if (root.isMember(SERVER_KEY)) {
@@ -92,6 +94,13 @@ namespace server {
                 }
                 port = myPort;
             }
+
+            Json::Value jsonSleepTime = jsonServer[SLEEP_KEY];
+            if (jsonSleepTime.isDouble()) {
+                // Sleep time is in milliseconds in the config file.
+                // Convert to microseconds for internal use.
+                sleepTime = static_cast<int>(jsonSleepTime.asDouble() * 1000.0);
+            }
         }
 
         /// Construct a server, or a connection then a server, based on the
@@ -103,6 +112,10 @@ namespace server {
                 connection::Connection::createSharedConnection(iface, port));
             m_server = Server::create(connPtr);
         }
+
+        if (sleepTime > 0.0)
+            m_server->setSleepTime(sleepTime);
+
         return m_server;
     }
 

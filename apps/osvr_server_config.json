@@ -1,4 +1,7 @@
 {
+   "server": {
+     "sleep": 0
+   },
    "plugins" : [ "org_opengoggles_bundled_Multiserver" ],
    "routes" : [
       {

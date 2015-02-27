@@ -82,6 +82,12 @@ namespace server {
         /// @copydoc Server::getSource()
         std::string getSource(std::string const &destination) const;
 
+        /// @copydoc Server::setSleepTime()
+        void setSleepTime(int microseconds);
+
+        /// @copydoc Server::getSleepTime()
+        int getSleepTime() const;
+
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
                                std::string const &driver,
@@ -132,6 +138,9 @@ namespace server {
         ::util::RunLoopManagerBoost m_run;
         bool m_running;
         /// @}
+
+        /// @brief Number of microseconds to sleep after each loop iteration.
+        int m_sleepTime;
     };
 
     template <typename Callable>
