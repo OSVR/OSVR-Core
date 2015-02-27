@@ -38,10 +38,10 @@ namespace connection {
       public:
         vrpn_BaseFlexServer(DeviceConstructionData &init)
             : vrpn_BaseClass(init.getQualifiedName().c_str(), init.conn) {
-            m_setup(vrpn_ConnectionPtr(init.conn),
-                    common::RawSenderType(d_sender_id));
             vrpn_BaseClass::init();
             init.flexServer = this;
+            m_setup(vrpn_ConnectionPtr(init.conn),
+                common::RawSenderType(d_sender_id));
         }
         virtual ~vrpn_BaseFlexServer() {}
 
