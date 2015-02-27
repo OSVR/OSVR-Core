@@ -110,6 +110,12 @@ namespace common {
         messages::ImageRegion::MessageSerialization msg(metadata, imageData,
                                                         sensor);
         serialize(buf, msg);
+        if (buf.size() > vrpn_CONNECTION_TCP_BUFLEN) {
+            OSVR_DEV_VERBOSE("Skipping imaging message: size is "
+                             << buf.size() << " vs the maximum of "
+                             << vrpn_CONNECTION_TCP_BUFLEN);
+            return;
+        }
         m_getParent().packMessage(buf, imageRegion.getMessageType(), timestamp);
         m_getParent().sendPending();
         m_checkFirst(metadata);
