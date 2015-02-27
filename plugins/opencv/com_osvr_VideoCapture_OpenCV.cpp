@@ -77,9 +77,9 @@ class CameraDevice : boost::noncopyable {
         if (!retrieved) {
             return OSVR_RETURN_FAILURE;
         }
-        // Sending an width = 80, height = 100 RoI right now to keep data sizes
-        // small.
-        cv::Mat subimage = m_frame(cv::Rect(0, 0, 80, 100));
+        // Sending an width = 210, height = 100 RoI right now to keep data sizes
+        // small - currently limited to about 64k message size.
+        cv::Mat subimage = m_frame(cv::Rect(0, 0, 210, 100));
         m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
 
         return OSVR_RETURN_SUCCESS;
