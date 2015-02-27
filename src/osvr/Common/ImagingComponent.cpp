@@ -142,7 +142,6 @@ namespace common {
         m_cb.push_back(handler);
     }
     void ImagingComponent::m_parentSet() {
-        OSVR_DEV_VERBOSE("Finishing init of imaging component");
         m_getParent().registerMessageType(imageRegion);
     }
 

@@ -15,6 +15,8 @@
 // (Final version intended to be licensed under
 // the Apache License, Version 2.0)
 
+#define OSVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/DeviceComponent.h>
