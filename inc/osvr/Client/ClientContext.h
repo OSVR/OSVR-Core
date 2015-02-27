@@ -22,9 +22,11 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Client/ClientContext_fwd.h>
 #include <osvr/Client/ClientInterfacePtr.h>
+#include <osvr/Util/KeyedOwnershipContainer.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <boost/any.hpp>
 
 // Standard includes
 #include <string>
@@ -70,6 +72,18 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @brief Sets a string parameter value.
     void setParameter(std::string const &path, std::string const &value);
 
+    /// @brief Pass (smart-pointer) ownership of some object to the client
+    /// context.
+    template <typename T> void *acquireObject(T obj) {
+        return m_ownedObjects.acquire(obj);
+    }
+
+    /// @brief Frees some object whose lifetime is controlled by the client
+    /// context.
+    ///
+    /// @returns true if the object was found and released.
+    OSVR_CLIENT_EXPORT bool releaseObject(void *obj);
+
   protected:
     /// @brief Constructor for derived class use only.
     OSVR_ClientContextObject(const char appId[]);
@@ -79,6 +93,8 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     std::string const m_appId;
     InterfaceList m_interfaces;
     std::map<std::string, std::string> m_params;
+
+    osvr::util::KeyedOwnershipContainer m_ownedObjects;
 };
 
 #endif // INCLUDED_ContextImpl_h_GUID_9000C62E_3693_4888_83A2_0D26F4591B6A

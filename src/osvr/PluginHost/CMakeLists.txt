@@ -39,16 +39,4 @@ target_link_libraries(${LIBNAME_FULL}
 ###
 # Grab DLLs please.
 ###
-if(WIN32)
-    add_custom_command(TARGET ${LIBNAME_FULL} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:libfunctionality::functionality> $<TARGET_FILE_DIR:${LIBNAME_FULL}>
-        COMMENT "Copying required DLL"
-        VERBATIM)
-endif()
-if(WIN32)
-    install(FILES $<TARGET_FILE:libfunctionality::functionality>
-        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
-else()
-    install(FILES $<TARGET_FILE:libfunctionality::functionality>
-        DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime)
-endif()
+osvr_copy_dep(${LIBNAME_FULL} libfunctionality::functionality)

@@ -24,11 +24,14 @@ set(API
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/AnyMap_fwd.h"
+    "${HEADER_LOCATION}/BoolC.h"
+    "${HEADER_LOCATION}/BoostDeletable.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/ChannelCountC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
+    "${HEADER_LOCATION}/Deletable.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
     "${HEADER_LOCATION}/EigenInterop.h"
@@ -36,9 +39,13 @@ set(API
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/GuardInterface.h"
     "${HEADER_LOCATION}/GuardInterfaceDummy.h"
+    "${HEADER_LOCATION}/ImagingReportTypesC.h"
+    "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
+    "${HEADER_LOCATION}/NumberTypeManipulation.h"
+    "${HEADER_LOCATION}/OpenCVTypeDispatch.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/Pose3C.h"
@@ -48,6 +55,7 @@ set(API
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
+    "${HEADER_LOCATION}/StdDeletable.h"
     "${HEADER_LOCATION}/StdInt.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
@@ -61,6 +69,7 @@ set(API
 
 set(SOURCE
     AnyMap.cpp
+    Deletable.cpp
     GuardInterface.cpp
     TimeValueC.cpp
     MessageKeys.cpp
@@ -103,9 +112,9 @@ target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn)
 osvr_add_cpp_interface_library()
 # In an installed version, we search and add the dependency in the config script
 # since we don't need the same version in the same place.
-target_include_directories(${LIBNAME_FULL_CPP}
+target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 
-target_compile_options(${LIBNAME_FULL_CPP}
+target_compile_options(${LIBNAME_INTERFACE}
     INTERFACE ${OSVR_CXX11_FLAGS})

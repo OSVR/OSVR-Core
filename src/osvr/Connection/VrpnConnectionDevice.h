@@ -42,6 +42,9 @@ namespace connection {
             DeviceConstructionData data(init, vrpnConn.get());
             m_server.reset(generateVrpnDynamicServer(data));
             m_baseobj = data.flexServer;
+            for (auto const &component : init.getComponents()) {
+                m_baseobj->addComponent(component);
+            }
         }
         virtual ~VrpnConnectionDevice() {}
         virtual void m_process() {

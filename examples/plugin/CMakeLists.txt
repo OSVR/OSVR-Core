@@ -9,11 +9,9 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS
 
 
 foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
-    set(name ${pluginname})
-    add_library(${name} MODULE ${name}.cpp)
-    target_link_libraries(${name} osvrPluginKitCpp)
-    set_target_properties(${name} PROPERTIES
-        PREFIX ""
+    osvr_add_plugin_no_install(${pluginname} ${pluginname}.cpp)
+    target_link_libraries(${pluginname} osvrPluginKitCpp)
+    set_target_properties(${pluginname} PROPERTIES
         FOLDER "OSVR Example Plugins")
 endforeach()
 
@@ -24,24 +22,22 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 osvr_convert_json(com_osvr_example_AnalogSync_json
     com_osvr_example_AnalogSync.json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-add_library(com_osvr_example_AnalogSync MODULE
+osvr_add_plugin_no_install(com_osvr_example_AnalogSync
     com_osvr_example_AnalogSync.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
 target_link_libraries(com_osvr_example_AnalogSync osvrPluginKitCpp)
 set_target_properties(com_osvr_example_AnalogSync PROPERTIES
-    PREFIX ""
     FOLDER "OSVR Example Plugins")
 
 ## Build the code from the selfcontained example
 osvr_convert_json(com_osvr_example_selfcontainedDetectAndCreate_json
     selfcontained/com_osvr_example_selfcontainedDetectAndCreate.json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-add_library(com_osvr_example_selfcontainedDetectAndCreate MODULE
+osvr_add_plugin_no_install(com_osvr_example_selfcontainedDetectAndCreate
     selfcontained/com_osvr_example_selfcontainedDetectAndCreate.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
 target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate osvrPluginKitCpp)
 set_target_properties(com_osvr_example_selfcontainedDetectAndCreate PROPERTIES
-    PREFIX ""
     FOLDER "OSVR Example Plugins")
 
 if(BUILD_TESTING)

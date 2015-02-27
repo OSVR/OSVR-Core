@@ -240,6 +240,16 @@ osvrDeviceAsyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx,
 
 /** @} */
 
+/** @brief Request a thread sleep for at least the given number of microseconds.
+    DO NOT use within a Sync plugin!
+
+    This is just a request for a minimum sleep time - operating system
+   scheduling and sleep granularity means that you may end up sleeping for
+   longer.
+*/
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+osvrDeviceMicrosleep(OSVR_IN uint64_t microseconds);
+
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END

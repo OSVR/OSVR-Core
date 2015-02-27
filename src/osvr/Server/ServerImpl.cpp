@@ -22,9 +22,11 @@
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Connection/MessageType.h>
 #include <osvr/Util/Verbosity.h>
+#include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
+#include <osvr/Common/SystemComponent.h>
 
 // Library/third-party includes
-// - none
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
 #include <stdexcept>
@@ -32,23 +34,32 @@
 
 namespace osvr {
 namespace server {
+    static vrpn_ConnectionPtr
+    getVRPNConnection(connection::ConnectionPtr const &conn) {
+        vrpn_ConnectionPtr ret;
+        if (std::string(conn->getConnectionKindID()) ==
+            osvr::connection::getVRPNConnectionKindID()) {
+            ret = vrpn_ConnectionPtr(
+                static_cast<vrpn_Connection *>(conn->getUnderlyingObject()));
+        }
+        return ret;
+    }
     ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
         : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
-          m_running(false) {
+          m_systemComponent(nullptr), m_running(false) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
         }
         osvr::connection::Connection::storeConnection(*m_ctx, m_conn);
 
-        if (!m_sysDevice) {
-            m_sysDevice = connection::DeviceToken::createVirtualDevice(
-                util::messagekeys::systemSender(), m_conn);
-        }
-        if (!m_routingMessageType) {
-            m_routingMessageType =
-                m_conn->registerMessageType(util::messagekeys::routingData());
-        }
+        auto vrpnConn = getVRPNConnection(m_conn);
+        m_systemDevice = common::createServerDevice(
+            common::SystemComponent::deviceName(), vrpnConn);
+
+        m_systemComponent =
+            m_systemDevice->addComponent(common::SystemComponent::create());
+        registerMainloopMethod([this] { m_systemDevice->update(); });
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
         m_conn->registerConnectionHandler(
@@ -161,8 +172,7 @@ namespace server {
         std::string message = m_routes.getRoutes();
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
                                          << " routes to the client.");
-        m_sysDevice->sendData(m_routingMessageType.get(), message.c_str(),
-                              message.size());
+        m_systemComponent->sendRoutes(message);
     }
 
 } // namespace server

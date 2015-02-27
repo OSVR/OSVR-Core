@@ -41,6 +41,8 @@ target_link_libraries(${LIBNAME_FULL}
     osvrPluginHost
     PRIVATE
     osvrUtilCpp
+    osvrCommon
+    vendored-vrpn
     jsoncpp_lib
     util-runloopmanager)
 

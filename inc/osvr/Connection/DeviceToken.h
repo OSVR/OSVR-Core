@@ -28,7 +28,7 @@
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Util/GuardInterface.h>
-#include <osvr/Util/UniquePtr.h>
+#include <osvr/Connection/ServerInterfaceList.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -125,6 +125,7 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     std::string const m_name;
     osvr::connection::ConnectionPtr m_conn;
     osvr::connection::ConnectionDevicePtr m_dev;
+    osvr::connection::ServerInterfaceList m_serverInterfaces;
 };
 
 #endif // INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387

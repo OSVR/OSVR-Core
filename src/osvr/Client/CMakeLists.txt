@@ -11,6 +11,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/ReportFromCallback.h"
     "${HEADER_LOCATION}/ReportState.h"
+    "${HEADER_LOCATION}/ReportStateTraits.h"
     "${HEADER_LOCATION}/ReportTraits.h"
     "${HEADER_LOCATION}/ReportTypes.h"
     "${HEADER_LOCATION}/ReportTypeWrapper.h"
@@ -22,6 +23,7 @@ set(SOURCE
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
+    ImagingRouter.h
     RouterTransforms.h
     RouterPredicates.h
     VRPNContext.cpp
@@ -52,6 +54,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrTransform
     osvrRouting
     osvrUtilCpp
+    osvrCommon
     jsoncpp_lib
     vendored-vrpn
     eigen-headers)

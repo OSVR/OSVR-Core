@@ -2,6 +2,7 @@ osvr_setup_lib_vars(Connection)
 
 set(API
     "${HEADER_LOCATION}/AnalogServerInterface.h"
+    "${HEADER_LOCATION}/BaseServerInterface.h"
     "${HEADER_LOCATION}/ButtonServerInterface.h"
     "${HEADER_LOCATION}/Connection.h"
     "${HEADER_LOCATION}/ConnectionDevicePtr.h"
@@ -10,8 +11,10 @@ set(API
     "${HEADER_LOCATION}/DeviceInitObject.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/DeviceTokenPtr.h"
+    "${HEADER_LOCATION}/ImagingServerInterface.h"
     "${HEADER_LOCATION}/MessageType.h"
     "${HEADER_LOCATION}/MessageTypePtr.h"
+    "${HEADER_LOCATION}/ServerInterfaceList.h"
     "${HEADER_LOCATION}/TrackerServerInterface.h")
 
 set(SOURCE
@@ -19,6 +22,7 @@ set(SOURCE
     AsyncAccessControl.h
     AsyncDeviceToken.cpp
     AsyncDeviceToken.h
+    BaseServerInterface.cpp
     Connection.cpp
     ConnectionDevice.cpp
     DeviceConstructionData.h
@@ -28,6 +32,7 @@ set(SOURCE
     GenerateVrpnDynamicServer.cpp
     GenerateVrpnDynamicServer.h
     GenericConnectionDevice.h
+    ImagingServerInterface.cpp
     MessageType.cpp
     SyncDeviceToken.cpp
     SyncDeviceToken.h
@@ -69,5 +74,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtil
     PRIVATE
     osvrUtilCpp
+    osvrCommon
     vendored-vrpn
     util-runloopmanager)

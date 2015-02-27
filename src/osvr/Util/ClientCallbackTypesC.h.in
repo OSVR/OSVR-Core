@@ -3,6 +3,8 @@
 
     Must be c-safe!
 
+    GENERATED - do not edit by hand!
+
     @date 2014
 
     @author
@@ -24,6 +26,7 @@
 
 /* Internal Includes */
 #include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/ImagingReportTypesC.h>
 #include <osvr/Util/ReturnCodesC.h>
 #include <osvr/Util/TimeValueC.h>
 

@@ -21,6 +21,7 @@
 
 // Internal Includes
 #include <osvr/PluginKit/DeviceInterfaceC.h>
+#include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
 // - none
@@ -151,6 +152,24 @@ namespace pluginkit {
                                          "with an empty name field!");
             }
             initSync(ctx, name.c_str(), options);
+        }
+
+        /// @brief Send a message on a registered interface type, providing the
+        /// timestamp yourself
+        ///
+        /// Templated to call implementation in the InterfaceType class.
+        template <typename InterfaceType, typename MessageType>
+        void send(InterfaceType &iface, MessageType const &msg,
+                  OSVR_TimeValue const &timestamp) {
+            iface.send(*this, msg, timestamp);
+        }
+
+        /// @overload
+        template <typename InterfaceType, typename MessageType>
+        void send(InterfaceType &iface, MessageType const &msg) {
+            OSVR_TimeValue timestamp;
+            util::time::getNow(timestamp);
+            send(iface, msg, timestamp);
         }
 
         /// @brief Send a raw bytestream from your device.

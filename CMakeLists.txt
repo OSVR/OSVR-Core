@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 ###
 set(CPACK_PACKAGE_NAME "osvr-core")
 set(CPACK_PACKAGE_VENDOR "Sensics, Inc")
-set(CPACK_PACKAGE_CONTACT "<support@opengoggles.org>")
+set(CPACK_PACKAGE_CONTACT "<support@osvr.com>")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 1)
 set(OSVR_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
@@ -70,12 +70,18 @@ include(EnableExtraCompilerWarnings)
 include(SetDefaultBuildType)
 set_default_build_type(RelWithDebInfo)
 
+include(CopyImportedTarget)
+
 include(MSVCMultipleProcessCompile)
 
 include(CMakeBoostHelper)
 
 include(InstallRequiredSystemLibraries)
 
+include(InternalAddPlugin)
+
+# Nitpicky TODO: This unnecessarily defaults to project folders off when using
+# an older toolset in a newer IDE...
 if(MSVC_IDE AND MSVC_VERSION LESS 1600)
     # VS 2012 Express and newer has folder support...
     option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE. May only work in non-Express Editions!" OFF)
@@ -85,12 +91,26 @@ endif()
 set_property(GLOBAL PROPERTY
     USE_FOLDERS ${BUILD_WITH_PROJECT_FOLDERS})
 
+# Handle CMake config files from projects that don't provide the whole list of builds
+set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release)
+set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release)
 ###
 # Dependencies
 ###
+
+if(WIN32)
+    # Hints for Windows, given the Chocolatey packages.
+    if(NOT "$ENV{ChocolateyInstall}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{ChocolateyInstall}/lib" CHOCO_LIB)
+        list(APPEND CMAKE_PREFIX_PATH "${CHOCO_LIB}/OpenCV/tools/opencv/build" "${CHOCO_LIB}/OpenCV.2.4.10.20150209/tools/opencv/build")
+    endif()
+    list(APPEND CMAKE_PREFIX_PATH "c:/OpenCV249")
+endif()
+
 find_package(libfunctionality REQUIRED)
 find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
 find_package(Threads REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_library(boost_thread INTERFACE)
 target_link_libraries(boost_thread
@@ -108,7 +128,7 @@ if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
         BOOST_THREAD_USE_LIB)
 endif()
 
-find_package(jsoncpp REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
 
 include(CompilerFeatures)
 
@@ -118,14 +138,16 @@ include(CompilerFeatures)
 # Set up shared destination directories to avoid Windows hassle with DLL search paths.
 if(WIN32)
     set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}")
+    set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_BINDIR}")
 else()
     set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}")
+    set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_LIBDIR}")
 endif()
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_PLUGIN_DIR}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_SHARED_LIBRARY_DIR}")
 endif()
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")

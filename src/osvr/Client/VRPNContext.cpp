@@ -19,6 +19,7 @@
 #include "VRPNContext.h"
 #include "RouterPredicates.h"
 #include "RouterTransforms.h"
+#include "ImagingRouter.h"
 #include "VRPNAnalogRouter.h"
 #include "VRPNButtonRouter.h"
 #include "VRPNTrackerRouter.h"
@@ -28,13 +29,17 @@
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Transform/JSONTransformVisitor.h>
 #include <osvr/Transform/ChangeOfBasis.h>
-#include <osvr/Util/MessageKeys.h>
+#include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/SystemComponent.h>
 
 #include <osvr/Client/display_json.h>
 
 // Library/third-party includes
 #include <json/value.h>
 #include <json/reader.h>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 // Standard includes
 #include <cstring>
@@ -59,18 +64,23 @@ namespace client {
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
 
-        std::string contextDevice =
-            std::string(util::messagekeys::systemSender()) + "@" + m_host;
+        std::string sysDeviceName =
+            std::string(common::SystemComponent::deviceName()) + "@" + m_host;
         /// Get connection, forcing a re-open for improved thread-safety.
         m_conn =
-            vrpn_get_connection_by_name(contextDevice.c_str(), nullptr, nullptr,
+            vrpn_get_connection_by_name(sysDeviceName.c_str(), nullptr, nullptr,
                                         nullptr, nullptr, nullptr, true);
         m_conn->removeReference(); // Remove extra reference.
+
+        /// Create the system client device.
+        m_systemDevice = common::createClientDevice(sysDeviceName, m_conn);
+        m_systemComponent =
+            m_systemDevice->addComponent(common::SystemComponent::create());
+        m_systemComponent->registerRoutesHandler(
+            &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
+
         setParameter("/display",
                      std::string(display_json, sizeof(display_json)));
-        m_conn->register_handler(
-            m_conn->register_message_type(util::messagekeys::routingData()),
-            &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
     }
 
     VRPNContext::~VRPNContext() {}
@@ -85,6 +95,7 @@ namespace client {
     static const char DESTINATION_KEY[] = "destination";
     static const char SENSOR_KEY[] = "sensor";
     static const char TRACKER_KEY[] = "tracker";
+    static const char IMAGING_KEY[] = "imaging";
     void VRPNContext::m_replaceRoutes(std::string const &routes) {
 
         Json::Value root;
@@ -100,19 +111,13 @@ namespace client {
             Json::Value route = root[i];
 
             std::string dest = route[DESTINATION_KEY].asString();
-            boost::optional<int> sensor;
 
-            transform::JSONTransformVisitor xformParse(route[SOURCE_KEY]);
-            Json::Value srcLeaf = xformParse.getLeaf();
-            std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
-            // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
-            srcDevice.erase(begin(srcDevice)); // remove leading slash
-            if (srcLeaf.isMember(SENSOR_KEY)) {
-                sensor = srcLeaf[SENSOR_KEY].asInt();
+            Json::Value src = route[SOURCE_KEY];
+            if (src.isString()) {
+                m_handleStringRouteEntry(dest, src.asString());
+            } else {
+                m_handleTrackerRouteEntry(dest, src);
             }
-
-            m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
-                               xformParse.getTransform());
         }
 
 #define OSVR_HYDRA_BUTTON(SENSOR, NAME)                                        \
@@ -144,6 +149,59 @@ namespace client {
 #undef OSVR_HYDRA_ANALOG
 
         OSVR_DEV_VERBOSE("Now have " << m_routers.size() << " routes.");
+    }
+
+    void VRPNContext::m_handleTrackerRouteEntry(std::string const &dest,
+                                                Json::Value src) {
+
+        boost::optional<int> sensor;
+        transform::JSONTransformVisitor xformParse(src);
+        Json::Value srcLeaf = xformParse.getLeaf();
+        std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
+        // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
+        srcDevice.erase(begin(srcDevice)); // remove leading slash
+        if (srcLeaf.isMember(SENSOR_KEY)) {
+            sensor = srcLeaf[SENSOR_KEY].asInt();
+        }
+
+        m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
+                           xformParse.getTransform());
+    }
+    void VRPNContext::m_handleStringRouteEntry(std::string const &dest,
+                                               std::string src) {
+        std::vector<std::string> components;
+
+        /// @todo replace literal with getPathSeparator
+        boost::algorithm::split(components, src,
+                                boost::algorithm::is_any_of("/"));
+        if (!components.empty()) {
+            if (components.front().empty()) {
+                components.erase(begin(components));
+            }
+        }
+        if (components.size() < 4) {
+            OSVR_DEV_VERBOSE("Could not parse source for route, skipping: "
+                             << src << " => " << dest);
+            return;
+        }
+
+        std::string deviceName =
+            components[0] + "/" + components[1] + "@" + m_host;
+        std::reverse(begin(components), end(components));
+        components.pop_back();
+        components.pop_back();
+
+        std::string interfaceType = components.back();
+        components.pop_back();
+        if (interfaceType == "imaging") {
+            OSVR_DEV_VERBOSE("Adding imaging route for " << dest);
+            m_routers.emplace_back(
+                new ImagingRouter(this, m_conn, deviceName, components, dest));
+        } else {
+            OSVR_DEV_VERBOSE(
+                "Could not handle route message for interface type "
+                << interfaceType << ", skipping: " << src << " => " << dest);
+        }
     }
 
     void VRPNContext::m_update() {

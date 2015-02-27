@@ -6,6 +6,9 @@ set(API
     "${HEADER_LOCATION}/Context.h"
     "${HEADER_LOCATION}/Context_decl.h"
     "${HEADER_LOCATION}/ContextC.h"
+    "${HEADER_LOCATION}/Imaging.h"
+    "${HEADER_LOCATION}/Imaging_decl.h"
+    "${HEADER_LOCATION}/ImagingC.h"
     "${HEADER_LOCATION}/Interface.h"
     "${HEADER_LOCATION}/Interface_decl.h"
     "${HEADER_LOCATION}/InterfaceC.h"
@@ -18,6 +21,7 @@ set(API
 set(SOURCE
     ClientKitC.cpp
     ContextC.cpp
+    ImagingC.cpp
     InterfaceC.cpp
     InterfaceCallbackC.cpp
     InterfaceStateC.cpp
@@ -43,7 +47,8 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtil
     PRIVATE
     osvrClient
-    osvrUtilCpp)
+    osvrUtilCpp
+    osvrCommon)
 
 ###
 # C++ (header-only) interface
@@ -52,6 +57,6 @@ target_link_libraries(${LIBNAME_FULL}
 osvr_add_cpp_interface_library()
 # In an installed version, we search and add the dependency in the config script
 # since we don't need the same version in the same place.
-target_include_directories(${LIBNAME_FULL_CPP}
+target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)

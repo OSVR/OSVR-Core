@@ -51,7 +51,7 @@ namespace clientkit {
         /// @brief Initialize the library.
         /// @param applicationIdentifier A string identifying your application.
         /// Reverse DNS format strongly suggested.
-        /// @param flags initialization options (reserved) - pass 0 for now.
+        /// @param flags initialization options (reserved, optional)
         ClientContext(const char applicationIdentifier[], uint32_t flags = 0u);
 
         /// @brief Initialize the context with an existing context.
@@ -79,6 +79,9 @@ namespace clientkit {
         /// @brief Frees an interface before it would normally be freed (at
         /// context close).
         void free(Interface &iface);
+
+        /// @brief Gets the bare OSVR_ClientContext.
+        OSVR_ClientContext get();
 
       private:
         OSVR_ClientContext m_context;
