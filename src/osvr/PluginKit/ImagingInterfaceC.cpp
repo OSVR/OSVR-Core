@@ -62,11 +62,10 @@ osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken dev,
                              OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     auto guard = dev->getSendGuard();
     if (guard->lock()) {
-        bool sendResult =
-            true; /// @todo (*iface)->setValue(val, chan, *timestamp);
         OSVR_DEV_VERBOSE("Sending image report " << metadata.width << "x"
-                                                 << metadata.height);
-        return sendResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+            << metadata.height);
+        iface->imaging->sendImageData(metadata, imageData, sensor, *timestamp);
+        return OSVR_RETURN_SUCCESS;
     }
 
     return OSVR_RETURN_FAILURE;
