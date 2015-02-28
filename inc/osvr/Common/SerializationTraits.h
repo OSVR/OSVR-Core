@@ -255,7 +255,7 @@ namespace common {
             static void deserialize(BufferReaderType &reader,
                                     Base::reference_type val,
                                     tag_type const &) {
-                length_type len = reader.bytesRemaining();
+                auto len = reader.bytesRemaining();
                 auto iter = reader.readBytes(len);
                 val.assign(iter, iter + len);
             }
