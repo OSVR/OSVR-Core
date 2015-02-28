@@ -80,9 +80,6 @@ namespace client {
     }
     static const char SOURCE_KEY[] = "source";
     static const char DESTINATION_KEY[] = "destination";
-    static const char SENSOR_KEY[] = "sensor";
-    static const char TRACKER_KEY[] = "tracker";
-    static const char IMAGING_KEY[] = "imaging";
     void VRPNContext::m_replaceRoutes(std::string const &routes) {
 
         Json::Value root;
@@ -138,6 +135,8 @@ namespace client {
         OSVR_DEV_VERBOSE("Now have " << m_routers.size() << " routes.");
     }
 
+    static const char SENSOR_KEY[] = "sensor";
+    static const char TRACKER_KEY[] = "tracker";
     void VRPNContext::m_handleTrackerRouteEntry(std::string const &dest,
                                                 Json::Value src) {
 
@@ -154,6 +153,8 @@ namespace client {
         m_addTrackerRouter(srcDevice.c_str(), dest.c_str(), sensor,
                            xformParse.getTransform());
     }
+
+    static const char IMAGING_NAME[] = "imaging";
     void VRPNContext::m_handleStringRouteEntry(std::string const &dest,
                                                std::string src) {
         std::vector<std::string> components;
@@ -180,7 +181,7 @@ namespace client {
 
         std::string interfaceType = components.back();
         components.pop_back();
-        if (interfaceType == "imaging") {
+        if (interfaceType == IMAGING_NAME) {
             OSVR_DEV_VERBOSE("Adding imaging route for " << dest);
             m_routers.emplace_back(
                 new ImagingRouter(this, m_conn, deviceName, components, dest));
