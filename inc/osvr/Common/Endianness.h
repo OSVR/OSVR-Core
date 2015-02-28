@@ -26,7 +26,7 @@
 #include <boost/version.hpp>
 
 #if BOOST_VERSION >= 105500
-#include <boost/predef/other/endian.h>
+#include <boost/predef.h>
 #if BOOST_ENDIAN_LITTLE_BYTE
 #define OSVR_IS_LITTLE_ENDIAN
 #define OSVR_BYTE_ORDER_ABCD
@@ -38,7 +38,7 @@
 #endif
 
 #else
-#include <boost/detail/endian.h>
+#include <boost/detail/endian.hpp>
 
 #if defined(BOOST_LITTLE_ENDIAN)
 #define OSVR_IS_LITTLE_ENDIAN
