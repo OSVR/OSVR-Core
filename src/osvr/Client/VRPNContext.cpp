@@ -48,19 +48,6 @@ namespace osvr {
 namespace client {
     RouterEntry::~RouterEntry() {}
 
-    static inline transform::Transform getTransform(const char *data,
-                                                    size_t len) {
-        std::string json(data, len);
-        Json::Value root;
-        Json::Reader reader;
-        if (!reader.parse(json, root)) {
-            throw std::runtime_error("JSON parse error: " +
-                                     reader.getFormattedErrorMessages());
-        }
-        transform::JSONTransformVisitor xform(root);
-        return xform.getTransform();
-    }
-
     VRPNContext::VRPNContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
 
