@@ -1,5 +1,8 @@
 /* This is for the HDK v1.1 - roughly around GDC 2015 */
 {
+  "server": {
+    "sleep": 1
+  },
   "plugins": [
     "org_opengoggles_bundled_Multiserver"
   ],
