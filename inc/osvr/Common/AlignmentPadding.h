@@ -25,7 +25,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <stddef.h>
 
 namespace osvr {
 namespace common {

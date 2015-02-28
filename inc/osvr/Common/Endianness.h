@@ -59,6 +59,7 @@
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/remove_cv.hpp>
 #include <boost/type_traits/remove_reference.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/integer.hpp>
 #include <boost/mpl/if.hpp>
 
