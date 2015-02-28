@@ -41,12 +41,7 @@ namespace util {
       public:
         /// @brief Get runtime data on a given numeric type, passed as the
         /// template argument.
-        template <typename T> static NumberTypeData get() {
-            NumberTypeData d;
-            detail::NumberTypeDecompositionFunctor f(d);
-            f(boost::mpl::identity<T>());
-            return d;
-        }
+        template <typename T> static NumberTypeData get();
 
         /// @brief Default constructor, for an unsigned 1-byte (8 bit) type.
         NumberTypeData() : m_signed(false), m_sizeof(1), m_float(false) {}
@@ -162,6 +157,13 @@ namespace util {
             NumberTypeData &m_data;
         };
     } // namespace detail
+
+    template <typename T> inline NumberTypeData NumberTypeData::get() {
+        NumberTypeData d;
+        detail::NumberTypeDecompositionFunctor f(d);
+        f(boost::mpl::identity<T>());
+        return d;
+    }
 } // namespace util
 } // namespace osvr
 
