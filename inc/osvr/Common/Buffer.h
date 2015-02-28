@@ -253,7 +253,7 @@ namespace common {
             if (bytes == 0) {
                 return;
             }
-            m_buf.insert(m_buf.end(), bytes, PADDING_ELEMENT);
+            m_buf.insert(m_buf.end(), bytes, '\0');
         }
 
         /// @brief Returns a reader object, for making a single read pass over
@@ -282,7 +282,6 @@ namespace common {
         ElementType const *data() const { return m_buf.data(); }
 
       private:
-        static const ElementType PADDING_ELEMENT = '\0';
         ContainerType m_buf;
         BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
                                 "Container must have byte-sized elements");
