@@ -297,7 +297,7 @@ namespace common {
             template <typename DataType>
             static size_t spaceRequired(size_t existingBytes, DataType *val,
                                         tag_type const &tag) {
-                return computeAlignmentPadding(Alignment, existingBytes) +
+                return computeAlignmentPadding(tag.alignment(), existingBytes) +
                        tag.length();
             }
         };
