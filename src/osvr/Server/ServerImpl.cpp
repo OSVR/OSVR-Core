@@ -23,6 +23,7 @@
 #include <osvr/Connection/MessageType.h>
 #include <osvr/Util/Verbosity.h>
 #include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
+#include <osvr/Util/Microsleep.h>
 #include <osvr/Common/SystemComponent.h>
 
 // Library/third-party includes
@@ -46,7 +47,7 @@ namespace server {
     }
     ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
         : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
-          m_systemComponent(nullptr), m_running(false) {
+          m_systemComponent(nullptr), m_running(false), m_sleepTime(0) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
@@ -140,8 +141,12 @@ namespace server {
             }
             shouldContinue = m_run.shouldContinue();
         }
-        /// @todo configurable waiting?
-        m_thread.yield();
+
+        if (m_sleepTime > 0) {
+            osvr::util::time::microsleep(m_sleepTime);
+        } else {
+            m_thread.yield();
+        }
         return shouldContinue;
     }
 
@@ -173,6 +178,14 @@ namespace server {
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
                                          << " routes to the client.");
         m_systemComponent->sendRoutes(message);
+    }
+
+    void ServerImpl::setSleepTime(int microseconds) {
+        m_sleepTime = microseconds;
+    }
+
+    int ServerImpl::getSleepTime() const {
+        return m_sleepTime;
     }
 
 } // namespace server
