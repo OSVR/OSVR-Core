@@ -190,6 +190,32 @@ namespace common {
             return ret;
         }
 
+        /// @brief Swap the order of bytes of an arbitrary integer type
+        ///
+        /// @internal
+        /// Primarily a thin wrapper to centralize type manipulation before
+        /// calling a detail::integerByteSwapImpl() overload selected by
+        /// enable_if/disable_if.
+        template <typename Type> inline Type integerByteSwap(Type const v) {
+            BOOST_STATIC_ASSERT(boost::is_integral<Type>::value);
+            typedef typename boost::remove_cv<
+                typename boost::remove_reference<Type>::type>::type T;
+
+            typedef typename boost::int_t<sizeof(T) * 8>::exact int_t;
+            typedef typename boost::uint_t<sizeof(T) * 8>::exact uint_t;
+            typedef
+                typename boost::mpl::if_<boost::is_signed<T>, uint_t,
+                                         int_t>::type opposite_signedness_type;
+
+            typedef detail::ByteSwap<T> ByteSwapper;
+            typedef detail::ByteSwap<opposite_signedness_type>
+                OppositeByteSwapper;
+
+            return detail::integerByteSwapImpl<
+                T, opposite_signedness_type, ByteSwapper, OppositeByteSwapper>(
+                v);
+        }
+
         namespace detail {
             /// @brief Stock implementation of a no-op host-network conversion
             template <typename T> struct NoOpHostNetworkConversion {
@@ -222,31 +248,6 @@ namespace common {
 
         } // namespace detail
 
-        /// @brief Swap the order of bytes of an arbitrary integer type
-        ///
-        /// @internal
-        /// Primarily a thin wrapper to centralize type manipulation before
-        /// calling a detail::integerByteSwapImpl() overload selected by
-        /// enable_if/disable_if.
-        template <typename Type> inline Type integerByteSwap(Type const v) {
-            BOOST_STATIC_ASSERT(boost::is_integral<Type>::value);
-            typedef typename boost::remove_cv<
-                typename boost::remove_reference<Type>::type>::type T;
-
-            typedef typename boost::int_t<sizeof(T) * 8>::exact int_t;
-            typedef typename boost::uint_t<sizeof(T) * 8>::exact uint_t;
-            typedef
-                typename boost::mpl::if_<boost::is_signed<T>, uint_t,
-                                         int_t>::type opposite_signedness_type;
-
-            typedef detail::ByteSwap<T> ByteSwapper;
-            typedef detail::ByteSwap<opposite_signedness_type>
-                OppositeByteSwapper;
-
-            return detail::integerByteSwapImpl<
-                T, opposite_signedness_type, ByteSwapper, OppositeByteSwapper>(
-                v);
-        }
 #if defined(OSVR_IS_BIG_ENDIAN)
         template <typename T>
         struct NetworkByteOrderTraits<
