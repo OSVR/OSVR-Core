@@ -1,71 +1,69 @@
+/* This is for the HDK v1.1 - roughly around GDC 2015 */
 {
-   "plugins" : [ "org_opengoggles_bundled_Multiserver" ],
-   "routes" : [
-      {
-         "destination" : "/me/hands/left",
-         "source" : {
-            "changeBasis" : {
-               "x" : "x",
-               "y" : "z",
-               "z" : "-y"
-            },
-            "child" : {
-               "sensor" : 0,
-               "tracker" : "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-            }
-         }
-      },
-      {
-         "destination" : "/me/hands/right",
-         "source" : {
-            "changeBasis" : {
-               "x" : "x",
-               "y" : "z",
-               "z" : "-y"
-            },
-            "child" : {
-               "sensor" : 1,
-               "tracker" : "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-            }
-         }
-      },
-      {
-         "destination" : "/me/hands",
-         "source" : {
-            "changeBasis" : {
-               "x" : "x",
-               "y" : "z",
-               "z" : "-y"
-            },
-            "child" : {
-               "tracker" : "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-            }
-         }
-      },
-      {
-         "destination" : "/me/head",
-         "source" : {
-            "calibration" : true,
-            "child" : {
-               "child" : {
-            "rotate" : {
-               "axis" : "-x",
-               "degrees" : 180
-            },
-                  "child" : {
-                     "changeBasis" : {
-                        "x" : "x",
-                        "y" : "-z",
-                        "z" : "-y"
-                     },
-                     "child" : {
-                        "sensor" : 0,
-                        "tracker" : "/org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0"
-                     }
-                  }
-               }
-            }
-         }
+  "plugins": [
+    "org_opengoggles_bundled_Multiserver"
+  ],
+  "routes": [
+    {
+      "destination": "/me/hands/left",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "sensor": 0,
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
+        }
       }
-   ]
+    },
+    {
+      "destination": "/me/hands/right",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "sensor": 1,
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
+        }
+      }
+    },
+    {
+      "destination": "/me/hands",
+      "source": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": {
+          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
+        }
+      }
+    },
+    {
+      "destination": "/me/head",
+      "source": {
+        "rotate": {
+          "axis": "x",
+          "degrees": 90
+        },
+        "child": {
+          "changeBasis": {
+            "x": "-x",
+            "y": "-z",
+            "z": "y"
+          },
+          "child": {
+            "sensor": 0,
+            "tracker": "/org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0"
+          }
+        }
+      }
+    }
+  ]
 }
