@@ -85,9 +85,9 @@ class CameraDevice : boost::noncopyable {
         // m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
 
         // Scale down to something under 160x120 while keeping aspect ratio.
-        auto xScale = 160.0 / m_frame.cols;
-        auto yScale = 120.0 / m_frame.rows;
-        auto finalScale = std::min(xScale, yScale);
+        double xScale = 160.0 / m_frame.cols;
+        double yScale = 120.0 / m_frame.rows;
+        double finalScale = std::min(xScale, yScale);
         cv::resize(m_frame, m_scaledFrame, cv::Size(), finalScale, finalScale,
                    CV_INTER_AREA);
         m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_scaledFrame));
