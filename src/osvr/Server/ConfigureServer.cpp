@@ -36,6 +36,24 @@
 
 namespace osvr {
 namespace server {
+    namespace detail {
+        class StreamPrefixer {
+          public:
+            StreamPrefixer(const char *prefix, std::ostream &os)
+                : m_prefix(prefix), m_os(&os) {}
+            template <typename T> std::ostream &operator<<(T val) {
+                return (*m_os) << m_prefix << val;
+            }
+
+          private:
+            const char *m_prefix;
+            std::ostream *m_os;
+        };
+
+        static detail::StreamPrefixer out("[OSVR Server] ", std::cout);
+        static detail::StreamPrefixer err("[OSVR Server] ", std::cerr);
+    } // namespace detail
+
     class ConfigureServerData : boost::noncopyable {
       public:
         template <typename T> inline void parse(T &json) {
@@ -125,25 +143,31 @@ namespace server {
     }
 
     bool ConfigureServer::loadPlugins() {
+        using detail::out;
+        using detail::err;
+        using std::endl;
 
         bool success = true;
+
         // find path where all plugins are hiding
         pluginhost::SearchPath pluginPath(pluginhost::getPluginSearchPath());
         pluginhost::FileList filesPaths =
             pluginhost::getAllFilesWithExt(pluginPath, OSVR_PLUGIN_EXTENSION);
 
         for (const auto &plugin : filesPaths) {
-            if (boost::iends_with(boost::filesystem::path(plugin).stem().generic_string(),
-                                  OSVR_PLUGIN_IGNORE_SUFFIX)) {
-                std::cout << "Ignoring plugin marked for manual loading " << boost::filesystem::path(plugin).stem().generic_string() << "..." << std::endl;
+            const std::string pluginPath = boost::filesystem::path(plugin).parent_path().generic_string();
+            const std::string pluginBaseName = boost::filesystem::path(plugin).filename().stem().generic_string();
+            const std::string pluginDirName = pluginPath + boost::filesystem::path::preferred_separator + pluginBaseName;
+            if (boost::iends_with(pluginDirName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
+                out << "Ignoring plugin marked for manual loading " << pluginBaseName << "..." << std::endl;
                 continue;
             }
 
             try {
-                m_server->loadPlugin(plugin);
-                m_successfulPlugins.push_back(plugin);
-            } catch (std::exception &e) {
-                m_failedPlugins.push_back(std::make_pair(plugin, e.what()));
+                m_server->loadPlugin(pluginDirName);
+                m_successfulPlugins.push_back(pluginDirName);
+            } catch (const std::exception &e) {
+                m_failedPlugins.push_back(std::make_pair(pluginDirName, e.what()));
                 success = false;
             }
         }
