@@ -9,3 +9,9 @@ set(jsoncpp_DIR_IMPORTED "@jsoncpp_DIR@")
 if(jsoncpp_DIR_IMPORTED AND NOT JSONCPP_FOUND)
     list(APPEND CMAKE_PREFIX_PATH "${jsoncpp_DIR_IMPORTED}")
 endif()
+
+# Likewise for OpenCV.
+set(OpenCV_DIR_IMPORTED "@OpenCV_DIR@")
+if(OpenCV_DIR_IMPORTED AND NOT OPENCV_FOUND)
+    list(APPEND CMAKE_PREFIX_PATH "${OpenCV_DIR_IMPORTED}")
+endif()
