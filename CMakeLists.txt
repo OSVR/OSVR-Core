@@ -246,24 +246,26 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
 ###
 include(CMakePackageConfigHelpers)
 set(PLUGINDIR ${OSVR_PLUGIN_DIR})
-set(BUILD_CONFIG_BASE "${CMAKE_CURRENT_BINARY_DIR}/osvr/osvr")
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
 write_basic_package_version_file(
-    "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
     VERSION ${OSVR_VERSION}
     COMPATIBILITY AnyNewerVersion)
 
 export(EXPORT osvrTargets
-    FILE "${BUILD_CONFIG_BASE}Targets.cmake"
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osvrTargets.cmake"
     NAMESPACE osvr::)
 
+# Register the current build dir as a package search location
+export(PACKAGE osvr)
+
 configure_file(osvrConfig.cmake
-    "${BUILD_CONFIG_BASE}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     @ONLY)
 
 configure_file(osvrConfigBuildTreePaths.cmake
-    "${BUILD_CONFIG_BASE}ConfigBuildTreePaths.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"
     @ONLY)
 
 install(EXPORT osvrTargets
@@ -277,8 +279,8 @@ install(EXPORT osvrTargets
     Devel)
 
 install(FILES
-    "${BUILD_CONFIG_BASE}Config.cmake"
-    "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledBoost.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledOpenCV.cmake"
     DESTINATION
