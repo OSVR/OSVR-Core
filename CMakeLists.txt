@@ -266,10 +266,6 @@ configure_file(osvrConfigBuildTreePaths.cmake
     "${BUILD_CONFIG_BASE}ConfigBuildTreePaths.cmake"
     @ONLY)
 
-configure_file(osvrConfigInstalledBoost.cmake
-    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
-    @ONLY)
-
 install(EXPORT osvrTargets
     FILE
     osvrTargets.cmake
@@ -283,7 +279,8 @@ install(EXPORT osvrTargets
 install(FILES
     "${BUILD_CONFIG_BASE}Config.cmake"
     "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledBoost.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledOpenCV.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT
