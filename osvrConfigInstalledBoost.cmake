@@ -1,5 +1,9 @@
 # File included only with installed binaries, to re-find Boost on those systems.
 
+if(NOT BOOST_FOUND)
+    # Optionally help Windows machines find Boost easier.
+    include("${CMAKE_CURRENT_LIST_DIR}/CMakeBoostHelper.cmake" OPTIONAL)
+endif()
 find_package(Boost QUIET)
 
 if(BOOST_FOUND)
