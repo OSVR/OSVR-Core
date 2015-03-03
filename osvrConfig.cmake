@@ -1,30 +1,27 @@
 
-# File will only exist in build trees
+# File will only exist in build trees - provides hints to dependencies
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigBuildTreePaths.cmake" OPTIONAL)
 
-find_package(libfunctionality)
+# Dependency of PluginKit
+find_package(libfunctionality QUIET)
 
+# The actual exported targets
 include("${CMAKE_CURRENT_LIST_DIR}/osvrTargets.cmake")
 
-# File will only exist in install trees.
+# Fix up imported targets to add deps: these files will only exist in install trees.
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledBoost.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledOpenCV.cmake" OPTIONAL)
 
-function(osvr_add_plugin NAME)
-    add_library(${NAME} MODULE ${ARGN})
-    target_link_libraries(${NAME} osvr::osvrPluginKit)
-    set_target_properties(${NAME} PROPERTIES
-        PREFIX ""
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/@PLUGINDIR@"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/@PLUGINDIR@")
-    install(TARGETS ${NAME}
-        LIBRARY DESTINATION @PLUGINDIR@ COMPONENT Runtime)
-endfunction()
+# We set this variable so that we can share functions like osvr_add_plugin
+# between builds in the main source tree and external builds using this config file.
+set(OSVR_CACHED_PLUGIN_DIR "@OSVR_PLUGIN_DIR@" CACHE INTERNAL
+    "The OSVR_PLUGIN_DIR variable for OSVR, for use in building and installing plugins" FORCE)
 
-function(osvr_convert_json _symbol _in _out)
-    add_custom_command(OUTPUT "${_out}"
-        COMMAND osvr::osvr_json_to_c --symbol ${_symbol} "${_in}" "${_out}"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${_in}"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMENT "Generating string literal header from ${_in}"
-        VERBATIM)
-endfunction()
+# Since alias targets only work for libraries, we use this method instead to
+# share the osvr_convert_json script between the main tree and external config users.
+set(OSVR_JSON_TO_C_EXECUTABLE "osvr::osvr_json_to_c" CACHE INTERNAL
+    "The target name for the osvr_json_to_c executable" FORCE)
+
+# The shared scripts
+include("${CMAKE_CURRENT_LIST_DIR}/osvrAddPlugin.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/osvrConvertJson.cmake")

@@ -1,5 +1,14 @@
+if(WIN32)
+    set(OSVR_SERVER_RESOURCE osvr_server.rc)
+else()
+    set(OSVR_SERVER_RESOURCE)
+endif()
+
+add_executable(osvr_server osvr_server.cpp ${OSVR_SERVER_RESOURCE})
+add_executable(BasicServer BasicServer.cpp)
+add_executable(osvr_calibrate osvr_calibrate.cpp)
+
 foreach(server BasicServer osvr_server osvr_calibrate)
-    add_executable(${server} ${server}.cpp)
     target_link_libraries(${server} osvrServer)
     set_target_properties(${server} PROPERTIES
         FOLDER "OSVR Stock Applications")

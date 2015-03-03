@@ -49,6 +49,10 @@ target_link_libraries(${LIBNAME_FULL}
     vendored-vrpn
     boost_thread)
 
+# Add library alias to allow use of the same osvr_add_plugin script within this
+# tree and outside of it.
+add_library(osvr::${LIBNAME_FULL} ALIAS ${LIBNAME_FULL})
+
 ###
 # C++ (header-only) interface
 ###
@@ -57,21 +61,31 @@ osvr_add_cpp_interface_library()
 target_link_libraries(${LIBNAME_INTERFACE}
     INTERFACE
     osvrUtil)
-# In an installed version, we search and add the dependency in the config script
-# since we don't need the same version in the same place.
 
+# In an installed version, we search and add the dependency in the
+# osvrConfigInstalledBoost.cmake script since we don't need the same version in
+# the same place. Thus, here we only add it to the interface if using a build tree.
 target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
+
+# Add library alias to allow use of the same osvr_add_plugin script within this
+# tree and outside of it.
+add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
 
 ###
 # Imaging interface library
 ###
 osvr_add_interface_library(Imaging)
-# In an installed version, we search and add the dependency in the config script
-# since we don't need the same version in the same place.
+
+# In an installed version, we search and add the dependency in the
+# osvrConfigInstalledOpenCV.cmake script since we don't need the same version in
+# the same place. Thus, here we only add it to the interface if using a build tree.
 target_link_libraries(${LIBNAME_INTERFACE}
     INTERFACE
     ${LIBNAME_FULL}Cpp
     $<BUILD_INTERFACE:opencv_core>)
 
+# Add library alias to allow use of the same osvr_add_plugin script within this
+# tree and outside of it.
+add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})

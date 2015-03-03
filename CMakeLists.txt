@@ -7,46 +7,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 ###
 # Package Options
 ###
-set(CPACK_PACKAGE_NAME "osvr-core")
-set(CPACK_PACKAGE_VENDOR "Sensics, Inc")
-set(CPACK_PACKAGE_CONTACT "<support@osvr.com>")
-set(CPACK_PACKAGE_VERSION_MAJOR 0)
-set(CPACK_PACKAGE_VERSION_MINOR 1)
-set(OSVR_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION ${OSVR_VERSION})
-
-###
-# Library ABI versions
-###
-set(OSVR_PLUGINKIT_ABI_VERSION 0)
-
-include(GetGitRevisionDescription)
-git_describe(GIT_REVISION_DESCRIPTION --tags --match v*)
-if(GIT_REVISION_DESCRIPTION)
-	string(REPLACE "v" ""
-		GIT_REVISION_DESCRIPTION
-		"${GIT_REVISION_DESCRIPTION}")
-	set(CPACK_PACKAGE_VERSION "${GIT_REVISION_DESCRIPTION}")
-	message(STATUS "Git reports version ${CPACK_PACKAGE_VERSION}")
-else()
-	message(STATUS "Could not get revision information from Git!")
-endif()
-
-include(PlatformDefinitions)
-define_platform_macros(OSVR)
-
-if(WIN32)
-    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_CXX_COMPILER_ID}")
-    if(MSVC)
-		math(EXPR _vs_ver "${MSVC_VERSION} / 100 - 6")
-		set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}${_vs_ver}")
-	endif()
-	if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
-		set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-64bit")
-	else()
-		set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-32bit")
-	endif()
-endif()
+include(Version)
 
 ###
 # Configuration Options
@@ -68,42 +29,35 @@ set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins tha
 ###
 # CMake Modules
 ###
+
+# CMake-stock modules
 include(CTest)
 include(CPack)
+include(InstallRequiredSystemLibraries)
+
 include(GNUInstallDirs)
 if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_BINDIR}/extra-sample-apps)
+
+# Shared modules from rpavlik/cmake-modules
+include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
+include(CopyImportedTarget)
+include(MSVCMultipleProcessCompile)
 
 include(SetDefaultBuildType)
 set_default_build_type(RelWithDebInfo)
 
-include(CopyImportedTarget)
+include(UseFolders)
+use_folders()
 
-include(MSVCMultipleProcessCompile)
-
+# Modules that get shipped with an installed SDK
+include(osvrAddPlugin)
+include(osvrConvertJson)
 include(CMakeBoostHelper)
 
-include(InstallRequiredSystemLibraries)
-
-include(InternalAddPlugin)
-
-# Nitpicky TODO: This unnecessarily defaults to project folders off when using
-# an older toolset in a newer IDE...
-if(MSVC_IDE AND MSVC_VERSION LESS 1600)
-    # VS 2012 Express and newer has folder support...
-    option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE. May only work in non-Express Editions!" OFF)
-else()
-    option(BUILD_WITH_PROJECT_FOLDERS "Enable project folders in the IDE." ON)
-endif()
-set_property(GLOBAL PROPERTY
-    USE_FOLDERS ${BUILD_WITH_PROJECT_FOLDERS})
-
-# Handle CMake config files from projects that don't provide the whole list of builds
-set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release)
-set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release)
 ###
 # Dependencies
 ###
@@ -175,6 +129,17 @@ endif()
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
+
+
+# We set this variable so that we can share functions like osvr_add_plugin
+# between builds in this, the main source tree, and external builds using a config file.
+set(OSVR_CACHED_PLUGIN_DIR "${OSVR_PLUGIN_DIR}" CACHE INTERNAL
+    "The OSVR_PLUGIN_DIR variable for OSVR, for use in building and installing plugins" FORCE)
+
+# Since alias targets only work for libraries, we use this method instead to
+# share the osvr_convert_json script between the main tree and external config users.
+set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
+    "The target name for the osvr_json_to_c executable" FORCE)
 
 ###
 # Building
@@ -264,28 +229,26 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
 ###
 include(CMakePackageConfigHelpers)
 set(PLUGINDIR ${OSVR_PLUGIN_DIR})
-set(BUILD_CONFIG_BASE "${CMAKE_CURRENT_BINARY_DIR}/osvr/osvr")
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
 write_basic_package_version_file(
-    "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
     VERSION ${OSVR_VERSION}
     COMPATIBILITY AnyNewerVersion)
 
 export(EXPORT osvrTargets
-    FILE "${BUILD_CONFIG_BASE}Targets.cmake"
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osvrTargets.cmake"
     NAMESPACE osvr::)
 
+# Register the current build dir as a package search location
+export(PACKAGE osvr)
+
 configure_file(osvrConfig.cmake
-    "${BUILD_CONFIG_BASE}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     @ONLY)
 
 configure_file(osvrConfigBuildTreePaths.cmake
-    "${BUILD_CONFIG_BASE}ConfigBuildTreePaths.cmake"
-    @ONLY)
-
-configure_file(osvrConfigInstalledBoost.cmake
-    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"
     @ONLY)
 
 install(EXPORT osvrTargets
@@ -298,12 +261,23 @@ install(EXPORT osvrTargets
     COMPONENT
     Devel)
 
-install(
-    FILES
-    "${BUILD_CONFIG_BASE}Config.cmake"
-    "${BUILD_CONFIG_BASE}ConfigVersion.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigInstalledBoost.cmake"
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrAddPlugin.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledBoost.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledOpenCV.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConvertJson.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT
     Devel)
+
+if(WIN32)
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/CMakeBoostHelper.cmake"
+        DESTINATION
+        ${CONFIG_INSTALL_DIR}
+        COMPONENT
+        Devel)
+endif()

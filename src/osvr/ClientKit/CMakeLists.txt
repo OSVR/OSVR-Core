@@ -60,3 +60,14 @@ osvr_add_cpp_interface_library()
 target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
+
+###
+# Imaging interface library
+###
+osvr_add_interface_library(Imaging)
+# In an installed version, we search and add the dependency in the config script
+# since we don't need the same version in the same place.
+target_link_libraries(${LIBNAME_INTERFACE}
+    INTERFACE
+    ${LIBNAME_FULL}Cpp
+    $<BUILD_INTERFACE:opencv_core>)
