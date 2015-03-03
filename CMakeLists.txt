@@ -71,14 +71,13 @@ include(SetDefaultBuildType)
 set_default_build_type(RelWithDebInfo)
 
 include(CopyImportedTarget)
-
 include(MSVCMultipleProcessCompile)
-
 include(CMakeBoostHelper)
-
 include(InstallRequiredSystemLibraries)
 
-include(InternalAddPlugin)
+# Modules that get shipped with an installed SDK
+include(osvrAddPlugin)
+include(osvrConvertJson)
 
 # Nitpicky TODO: This unnecessarily defaults to project folders off when using
 # an older toolset in a newer IDE...
@@ -94,6 +93,7 @@ set_property(GLOBAL PROPERTY
 # Handle CMake config files from projects that don't provide the whole list of builds
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release)
 set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release)
+
 ###
 # Dependencies
 ###
@@ -157,6 +157,17 @@ endif()
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
+
+
+# We set this variable so that we can share functions like osvr_add_plugin
+# between builds in this, the main source tree, and external builds using a config file.
+set(OSVR_CACHED_PLUGIN_DIR "${OSVR_PLUGIN_DIR}" CACHE INTERNAL
+    "The OSVR_PLUGIN_DIR variable for OSVR, for use in building and installing plugins" FORCE)
+
+# Since alias targets only work for libraries, we use this method instead to
+# share the osvr_convert_json script between the main tree and external config users.
+set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
+    "The target name for the osvr_json_to_c executable" FORCE)
 
 ###
 # Building
@@ -281,8 +292,10 @@ install(EXPORT osvrTargets
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrAddPlugin.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledBoost.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledOpenCV.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConvertJson.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT
