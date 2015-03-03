@@ -27,29 +27,34 @@ endif()
 ###
 # CMake Modules
 ###
+
+# CMake-stock modules
 include(CTest)
 include(CPack)
+include(InstallRequiredSystemLibraries)
+
 include(GNUInstallDirs)
 if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_BINDIR}/extra-sample-apps)
+
+# Shared modules from rpavlik/cmake-modules
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
+include(CopyImportedTarget)
+include(MSVCMultipleProcessCompile)
 
 include(SetDefaultBuildType)
 set_default_build_type(RelWithDebInfo)
 
 include(UseFolders)
 use_folders()
-include(CopyImportedTarget)
-include(MSVCMultipleProcessCompile)
-include(CMakeBoostHelper)
-include(InstallRequiredSystemLibraries)
 
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)
 include(osvrConvertJson)
+include(CMakeBoostHelper)
 
 ###
 # Dependencies
