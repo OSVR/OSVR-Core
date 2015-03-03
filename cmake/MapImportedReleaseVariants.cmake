@@ -12,10 +12,10 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # RelWithDebInfo falls back to Release, then MinSizeRel
-set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release MinSizeRel)
+set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release MinSizeRel NoConfig)
 
 # MinSizeRel falls back to Release, then RelWithDebInfo
-set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release RelWithDebInfo)
+set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release RelWithDebInfo NoConfig)
 
 # Release falls back to RelWithDebInfo, then MinSizeRel
-set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE Release RelWithDebInfo MinSizeRel)
+set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE Release RelWithDebInfo MinSizeRel NoConfig)
