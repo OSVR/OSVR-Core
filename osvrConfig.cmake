@@ -1,13 +1,16 @@
 
-# File will only exist in build trees
+# File will only exist in build trees - provides hints to dependencies
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigBuildTreePaths.cmake" OPTIONAL)
 
-find_package(libfunctionality)
+# Dependency of PluginKit
+find_package(libfunctionality QUIET)
 
+# The actual exported targets
 include("${CMAKE_CURRENT_LIST_DIR}/osvrTargets.cmake")
 
-# File will only exist in install trees.
+# Fix up imported targets to add deps: these files will only exist in install trees.
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledBoost.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledOpenCV.cmake" OPTIONAL)
 
 function(osvr_add_plugin NAME)
     add_library(${NAME} MODULE ${ARGN})
