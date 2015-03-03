@@ -21,3 +21,7 @@ set(OSVR_CACHED_PLUGIN_DIR "@OSVR_PLUGIN_DIR@" CACHE INTERNAL
 # share the osvr_convert_json script between the main tree and external config users.
 set(OSVR_JSON_TO_C_EXECUTABLE "osvr::osvr_json_to_c" CACHE INTERNAL
     "The target name for the osvr_json_to_c executable" FORCE)
+
+# The shared scripts
+include("${CMAKE_CURRENT_LIST_DIR}/osvrAddPlugin.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/osvrConvertJson.cmake")
