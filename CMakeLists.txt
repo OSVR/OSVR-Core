@@ -34,6 +34,7 @@ if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_BINDIR}/extra-sample-apps)
+include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
 
 include(SetDefaultBuildType)
@@ -49,10 +50,6 @@ include(InstallRequiredSystemLibraries)
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)
 include(osvrConvertJson)
-
-# Handle CMake config files from projects that don't provide the whole list of builds
-set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release)
-set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel Release)
 
 ###
 # Dependencies
