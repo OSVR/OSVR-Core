@@ -22,6 +22,15 @@ endforeach()
 target_link_libraries(osvr_server jsoncpp_lib)
 target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 
+add_executable(osvr_reset_yaw
+    osvr_reset_yaw.cpp
+    ClientMainloop.h
+    JSONTools.h
+    WrapRoute.h)
+target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+set_target_properties(osvr_reset_yaw PROPERTIES
+    FOLDER "OSVR Stock Applications")
+
 install(TARGETS osvr_server osvr_calibrate
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 install(TARGETS BasicServer
