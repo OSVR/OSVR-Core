@@ -60,7 +60,7 @@ namespace pluginhost {
         }
     }
 #else
-    #error "Not yet implemented for this platform!"
+    #error "getBinaryLocation() not yet implemented for this platform!"
     std::string getBinaryLocation() {
         return "";
     }

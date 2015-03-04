@@ -10,6 +10,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 include(Version)
 
 ###
+# Library ABI versions
+###
+set(OSVR_PLUGINKIT_ABI_VERSION 0)
+
+###
 # Configuration Options
 ###
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
@@ -52,6 +57,9 @@ set_default_build_type(RelWithDebInfo)
 
 include(UseFolders)
 use_folders()
+
+include(PlatformDefinitions)
+define_platform_macros(OSVR)
 
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)
