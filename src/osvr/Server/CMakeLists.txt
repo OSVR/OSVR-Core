@@ -7,15 +7,13 @@ set(API
     "${HEADER_LOCATION}/ServerPtr.h"
     "${HEADER_LOCATION}/RegisterShutdownHandler.h"
     "${HEADER_LOCATION}/RegisterShutdownHandlerPOSIXSignal.h"
-    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h"
-    "${HEADER_LOCATION}/RouteContainer.h")
+    "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h")
 
 set(SOURCE
     ConfigureServer.cpp
     Server.cpp
     ServerImpl.cpp
-    ServerImpl.h
-    RouteContainer.cpp)
+    ServerImpl.h)
 
 osvr_add_library()
 

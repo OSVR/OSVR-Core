@@ -20,7 +20,7 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
-#include <osvr/Server/RouteContainer.h>
+#include <osvr/Common/RouteContainer.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
@@ -126,7 +126,7 @@ namespace server {
         common::SystemComponent *m_systemComponent;
 
         /// @brief JSON routing directives
-        RouteContainer m_routes;
+        common::RouteContainer m_routes;
 
         /// @brief Mutex held by anything executing in the main thread.
         mutable boost::mutex m_mainThreadMutex;

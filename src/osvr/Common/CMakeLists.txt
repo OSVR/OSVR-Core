@@ -24,6 +24,8 @@ set(API
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
+    "${HEADER_LOCATION}/RouteContainer.h"
+    "${HEADER_LOCATION}/RoutingKeys.h"
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
@@ -43,6 +45,8 @@ set(SOURCE
     MessageRegistration.cpp
     RawMessageType.cpp
     RawSenderType.cpp
+    RouteContainer.cpp
+    RoutingKeys.cpp
     Serialization.cpp
     SystemComponent.cpp)
 
