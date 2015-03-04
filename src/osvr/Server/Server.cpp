@@ -83,9 +83,7 @@ namespace server {
         m_impl->setSleepTime(microseconds);
     }
 
-    int Server::getSleepTime() const {
-        return m_impl->getSleepTime();
-    }
+    int Server::getSleepTime() const { return m_impl->getSleepTime(); }
 
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)

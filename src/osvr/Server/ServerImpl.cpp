@@ -184,9 +184,7 @@ namespace server {
         m_sleepTime = microseconds;
     }
 
-    int ServerImpl::getSleepTime() const {
-        return m_sleepTime;
-    }
+    int ServerImpl::getSleepTime() const { return m_sleepTime; }
 
 } // namespace server
 } // namespace osvr
