@@ -4,7 +4,12 @@ else()
     set(OSVR_SERVER_RESOURCE)
 endif()
 
-add_executable(osvr_server osvr_server.cpp ${OSVR_SERVER_RESOURCE})
+add_executable(osvr_server
+    osvr_server.cpp
+    ClientMainloop.h
+    JSONTools.h
+    WrapRoute.h
+    ${OSVR_SERVER_RESOURCE})
 add_executable(BasicServer BasicServer.cpp)
 add_executable(osvr_calibrate osvr_calibrate.cpp)
 
