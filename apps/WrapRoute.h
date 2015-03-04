@@ -29,10 +29,11 @@
 // - none
 
 inline Json::Value wrapRoute(Json::Value currentRoute, Json::Value newLevel) {
+    namespace routing_keys = osvr::common::routing_keys;
     Json::Value ret = currentRoute;
-    Json::Value prevSource = currentRoute[osvr::common::routing_keys::source()];
-    ret[osvr::common::routing_keys::source()] = newLevel;
-    ret[osvr::common::routing_keys::source()]["child"] = prevSource;
+    Json::Value prevSource = currentRoute[routing_keys::source()];
+    ret[routing_keys::source()] = newLevel;
+    ret[routing_keys::source()][routing_keys::child()] = prevSource;
     return ret;
 }
 
