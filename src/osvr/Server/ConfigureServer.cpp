@@ -142,6 +142,43 @@ namespace server {
         return m_server;
     }
 
+    static const char PLUGINS_KEY[] = "plugins";
+    bool ConfigureServer::loadPlugins() {
+        Json::Value &root(m_data->root);
+        const Json::Value plugins = root[PLUGINS_KEY];
+        bool success = true;
+        for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
+            if (!plugins[i].isString()) {
+                success = false;
+                m_failedPlugins.push_back(std::make_pair(
+                    "Plugin entry " + boost::lexical_cast<std::string>(i),
+                    "Plugin name not string: " + plugins[i].toStyledString()));
+                // skip it!
+                continue;
+            }
+
+            const std::string plugin = plugins[i].asString();
+            try {
+                m_server->loadPlugin(plugin);
+                m_successfulPlugins.push_back(plugin);
+            } catch (std::exception &e) {
+                m_failedPlugins.push_back(std::make_pair(plugin, e.what()));
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    ConfigureServer::SuccessList const &
+    ConfigureServer::getSuccessfulPlugins() const {
+        return m_successfulPlugins;
+    }
+
+    ConfigureServer::ErrorList const &
+    ConfigureServer::getFailedPlugins() const {
+        return m_failedPlugins;
+    }
+
     static const char DRIVERS_KEY[] = "drivers";
     static const char DRIVER_KEY[] = "driver";
     static const char PLUGIN_KEY[] = "plugin";
@@ -222,8 +259,8 @@ namespace server {
         return success;
     }
 
-    void ConfigureServer::loadPlugins() {
-        m_server->loadPlugins();
+    void ConfigureServer::loadAutoPlugins() {
+        m_server->loadAutoPlugins();
     }
 
 } // namespace server

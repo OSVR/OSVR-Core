@@ -84,8 +84,30 @@ namespace server {
         }
 
         {
+            out << "Loading auto-loadable plugins..." << endl;
+            srvConfig.loadAutoPlugins();
+        }
+
+        {
             out << "Loading plugins..." << endl;
             srvConfig.loadPlugins();
+            if (!srvConfig.getSuccessfulPlugins().empty()) {
+                out << "Successful plugins:" << endl;
+                for (auto const &plugin : srvConfig.getSuccessfulPlugins()) {
+                    out << " - " << plugin << endl;
+                }
+                out << "\n";
+            }
+            if (!srvConfig.getFailedPlugins().empty()) {
+                out << "Failed plugins:" << endl;
+                for (auto const &pluginError : srvConfig.getFailedPlugins()) {
+                    out << " - " << pluginError.first << "\t"
+                        << pluginError.second << endl;
+                }
+                out << "\n";
+            }
+
+            out << "\n";
         }
 
         {

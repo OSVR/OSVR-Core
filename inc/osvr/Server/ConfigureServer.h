@@ -86,6 +86,27 @@ namespace server {
         /// @brief Container for plugin/driver names and error messages
         typedef std::vector<ErrorPair> ErrorList;
 
+        /// @brief Loads the plugins contained in an array with key `plugins` in
+        /// the configuration.
+        ///
+        /// Detailed results of the loading can be retrieved with
+        /// getSuccessfulPlugins() and getFailedPlugins()
+        ///
+        /// @returns true if and only if all specified plugins loaded
+        /// successfully.
+        OSVR_SERVER_EXPORT bool loadPlugins();
+
+        /// @name Results of loadPlugins()
+        /// @{
+        /// @brief Get a reference to the list of plugins successfully loaded by
+        /// loadPlugins()
+        OSVR_SERVER_EXPORT SuccessList const &getSuccessfulPlugins() const;
+
+        /// @brief Get a reference to the list of plugins loadPlugins() tried
+        /// but failed to load, along with any exception text.
+        OSVR_SERVER_EXPORT ErrorList const &getFailedPlugins() const;
+        /// @}
+
         /// @brief Configures and instantiates the drivers as specified.
         ///
         /// Looks for an array with the key of `drivers`, containing an array of
@@ -115,7 +136,7 @@ namespace server {
         OSVR_SERVER_EXPORT bool processRoutes();
 
         /// @brief Loads all plugins not marked for manual load.
-        OSVR_SERVER_EXPORT void loadPlugins();
+        OSVR_SERVER_EXPORT void loadAutoPlugins();
 
       private:
         /// @brief Private implementation data structure.
@@ -124,6 +145,12 @@ namespace server {
         /// @brief Owning pointer for the server under
         /// construction/configuration.
         ServerPtr m_server;
+
+        /// @name Results data of loadPlugins()
+        /// @{
+        SuccessList m_successfulPlugins;
+        ErrorList m_failedPlugins;
+        /// @}
 
         /// @name Results data of instantiateDrivers()
         /// @{

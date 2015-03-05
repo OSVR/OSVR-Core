@@ -111,7 +111,7 @@ namespace server {
                                    m_ctx, pluginName));
     }
 
-    void ServerImpl::loadPlugins() {
+    void ServerImpl::loadAutoPlugins() {
         m_ctx->loadPlugins();
     }
 
