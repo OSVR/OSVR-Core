@@ -78,24 +78,37 @@ namespace server {
         create(connection::ConnectionPtr const &conn);
 
         /// @brief Launch a thread running the server.
+        ///
+        /// @throws std::logic_error if called after the server has stopped.
         OSVR_SERVER_EXPORT void start();
 
         /// @brief Launch a thread running the server, and block until the
         /// server shuts down.
+        ///
+        /// @throws std::logic_error if called after the server has stopped.
         OSVR_SERVER_EXPORT void startAndAwaitShutdown();
 
         /// @brief Block until the server shuts down.
+        ///
+        /// Do not call from within the server thread itself, of course.
         OSVR_SERVER_EXPORT void awaitShutdown();
 
         /// @brief Signal the server to stop (if it is running), and block until
         /// it does so.
+        ///
+        /// Safe to call from any non-server thread, do not call from within the
+        /// server thread itself, of course.
         OSVR_SERVER_EXPORT void stop();
 
         /// @brief Signal the server to stop (if it is running) but return
         /// immediately.
+        ///
+        /// Safe to call from any thread.
         OSVR_SERVER_EXPORT void signalStop();
 
         /// @brief Load plugin by name.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
 
         /// @brief Load all auto-loadable plugins.
@@ -107,15 +120,21 @@ namespace server {
         /// creation in this way.
         /// @param params A string containing parameters. Format is between you
         /// and the plugin, but JSON is recommended.
+        ///
+        /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT void
         instantiateDriver(std::string const &plugin, std::string const &driver,
                           std::string const &params = std::string());
 
         /// @brief Run all hardware detect callbacks.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT void triggerHardwareDetect();
 
         /// @brief Register a method to run during every time through the main
         /// loop.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT void registerMainloopMethod(MainloopMethod f);
 
         /// @brief Register a JSON string as a routing directive.
@@ -125,25 +144,33 @@ namespace server {
         ///
         /// @returns true if the route was new, or false if it replaced an
         /// existing route for that destination.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT bool addRoute(std::string const &routingDirective);
 
         /// @brief Get a JSON array of all routing directives.
         /// @param styled Pass `true` if you want the result pretty-printed.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT std::string getRoutes(bool styled = false) const;
 
         /// @brief Gets the source for a given named destination in the routing
         /// directives.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT std::string
         getSource(std::string const &destination) const;
 
         /// @brief Sets the amount of time (in microseconds) that the server
-        /// loop
-        /// will sleep each loop.
+        /// loop will sleep each loop.
+        ///
+        /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT void setSleepTime(int microseconds);
 
         /// @brief Returns the amount of time (in microseconds) that the server
-        /// loop
-        /// sleeps each loop.
+        /// loop sleeps each loop.
+        ///
+        /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT int getSleepTime() const;
 
       private:

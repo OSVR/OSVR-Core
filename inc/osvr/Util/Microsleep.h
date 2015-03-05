@@ -37,14 +37,13 @@ namespace util {
 
         /**
          * @brief Request a thread sleep for at least the given number of
-         *microseconds.
+         * microseconds.
          *
          * DO NOT use within a Sync plugin!
          *
          * This is just a request for a minimum sleep time -- operating system
          * scheduling and sleep granularity means that you may end up sleeping
-         *for
-         * longer.
+         * for longer.
          *
          */
         inline OSVR_ReturnCode microsleep(OSVR_IN uint64_t microseconds) {

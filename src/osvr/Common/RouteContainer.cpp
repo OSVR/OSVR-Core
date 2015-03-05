@@ -16,7 +16,8 @@
 // the Apache License, Version 2.0)
 
 // Internal Includes
-#include <osvr/Server/RouteContainer.h>
+#include <osvr/Common/RouteContainer.h>
+#include <osvr/Common/RoutingKeys.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -29,7 +30,7 @@
 #include <algorithm>
 
 namespace osvr {
-namespace server {
+namespace common {
 
     static inline Json::Value
     parseRoutingDirective(std::string const &routingDirective) {
@@ -42,11 +43,9 @@ namespace server {
         return val;
     }
 
-    static const char DESTINATION_KEY[] = "destination";
-
     static inline std::string
     getDestination(Json::Value const &routingDirective) {
-        return routingDirective.get(DESTINATION_KEY, "").asString();
+        return routingDirective.get(routing_keys::destination(), "").asString();
     }
     static inline std::string toFastString(Json::Value const &val) {
         Json::FastWriter writer;
@@ -84,9 +83,20 @@ namespace server {
         }
     }
 
-    static const char SOURCE_KEY[] = "source";
     std::string
     RouteContainer::getSource(std::string const &destination) const {
+        auto route = getRouteForDestination(destination);
+        if (!route.empty()) {
+            Json::Value directive = parseRoutingDirective(route);
+            if (directive.isMember(routing_keys::source())) {
+                return directive[routing_keys::source()].toStyledString();
+            }
+        }
+        return std::string();
+    }
+
+    std::string RouteContainer::getRouteForDestination(
+        std::string const &destination) const {
         auto it = std::find_if(
             begin(m_routingDirectives), end(m_routingDirectives),
             [&](std::string const &directive) {
@@ -94,10 +104,7 @@ namespace server {
                         destination);
             });
         if (it != end(m_routingDirectives)) {
-            Json::Value directive = parseRoutingDirective(*it);
-            if (directive.isMember(SOURCE_KEY)) {
-                return directive[SOURCE_KEY].toStyledString();
-            }
+            return *it;
         }
         return std::string();
     }
@@ -124,5 +131,5 @@ namespace server {
         }
         return !replaced;
     }
-} // namespace server
+} // namespace common
 } // namespace osvr
