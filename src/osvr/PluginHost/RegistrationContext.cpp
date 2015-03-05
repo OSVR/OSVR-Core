@@ -46,6 +46,24 @@ namespace pluginhost {
         }
     }
 
+    static inline bool tryLoadingPlugin(libfunc::PluginHandle & plugin, std::string const& name, OSVR_PluginRegContext ctx, bool shouldRethrow = false) {
+        OSVR_DEV_VERBOSE("Trying to load a plugin with the name " << name);
+        try {
+            plugin = libfunc::loadPluginByName(
+                name, ctx);
+            return true;
+        } catch (std::runtime_error const&e) {
+            OSVR_DEV_VERBOSE("Failed: " << e.what());
+            if (shouldRethrow) {
+                throw;
+            }
+            return false;
+        }
+        catch (...) {
+            throw;
+        }
+    }
+
     void RegistrationContext::loadPlugin(std::string const &pluginName) {
         const std::string pluginPathName = pluginhost::findPlugin(pluginName);
         if (pluginPathName.empty()) {
@@ -57,8 +75,16 @@ namespace pluginhost {
         PluginRegPtr pluginReg(
             PluginSpecificRegistrationContext::create(pluginName));
         pluginReg->setParent(*this);
-        libfunc::PluginHandle plugin = libfunc::loadPluginByName(
-            pluginPathNameNoExt, pluginReg->extractOpaquePointer());
+
+        libfunc::PluginHandle plugin;
+        auto ctx = pluginReg->extractOpaquePointer();
+
+        bool success = tryLoadingPlugin(plugin, pluginPathName, ctx) || tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
+        if (!success) {
+            throw std::runtime_error("Unusual error occurred trying to load plugin named " +
+                pluginName);
+        }
+
         pluginReg->takePluginHandle(plugin);
         adoptPluginRegistrationContext(pluginReg);
     }
