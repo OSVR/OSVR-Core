@@ -152,12 +152,7 @@ namespace server {
 
     bool ServerImpl::addRoute(std::string const &routingDirective) {
         bool wasNew;
-        m_callControlled([&] {
-            wasNew = m_routes.addRoute(routingDirective);
-            if (m_running) {
-                m_sendRoutes();
-            }
-        });
+        m_callControlled([&] { wasNew = m_addRoute(routingDirective); });
         return wasNew;
     }
 
@@ -178,6 +173,21 @@ namespace server {
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
                                          << " routes to the client.");
         m_systemComponent->sendRoutes(message);
+    }
+
+    int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
+        auto self = static_cast<ServerImpl *>(userdata);
+        OSVR_DEV_VERBOSE("Got an updated route from a client.");
+        self->addRoute(std::string(p.buffer, p.payload_len));
+        return 0;
+    }
+
+    bool ServerImpl::m_addRoute(std::string const &routingDirective) {
+        bool wasNew = m_routes.addRoute(routingDirective);
+        if (m_running) {
+            m_sendRoutes();
+        }
+        return wasNew;
     }
 
     void ServerImpl::setSleepTime(int microseconds) {

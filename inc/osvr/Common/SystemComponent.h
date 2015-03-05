@@ -47,6 +47,13 @@ namespace common {
           public:
             static const char *identifier();
         };
+
+        class ClientRouteToServer
+            : public MessageRegistration<ClientRouteToServer> {
+          public:
+            class MessageSerialization;
+            static const char *identifier();
+        };
     } // namespace messages
 
     /// @brief BaseDevice component, to be used only with the "OSVR" special
@@ -70,6 +77,15 @@ namespace common {
 
         /// @brief Message from client to server, notifying of app ID.
         messages::AppStartupToServer appStartup;
+
+        /// @brief Message from client, sending a single new/updated JSON
+        /// routing directive in to the server.
+        messages::ClientRouteToServer routeIn;
+
+        OSVR_COMMON_EXPORT void sendClientRouteUpdate(std::string const &route);
+        OSVR_COMMON_EXPORT void
+        registerClientRouteUpdateHandler(vrpn_MESSAGEHANDLER handler,
+                                         void *userdata);
 
       private:
         SystemComponent();

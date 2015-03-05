@@ -33,6 +33,7 @@
 #include <boost/noncopyable.hpp>
 #include <util/RunLoopManagerBoost.h>
 #include <boost/thread.hpp>
+#include <vrpn_Connection.h>
 
 // Standard includes
 // - none
@@ -109,6 +110,14 @@ namespace server {
 
         /// @brief sends route message.
         void m_sendRoutes();
+
+        /// @brief handles updated route message from client
+        static int VRPN_CALLBACK
+        m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p);
+
+        /// @brief adds a route - assumes that you've handled ensuring this is
+        /// the main server thread.
+        bool m_addRoute(std::string const &routingDirective);
 
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;

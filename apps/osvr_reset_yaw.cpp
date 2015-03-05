@@ -135,6 +135,7 @@ int main(int argc, char *argv[]) {
             Json::Reader reader;
             if (!reader.parse(routes.getRouteForDestination(dest), origRoute)) {
                 cerr << "Error parsing existing route!" << endl;
+                cerr << routes.getRouteForDestination(dest) << endl;
                 return -1;
             }
         }

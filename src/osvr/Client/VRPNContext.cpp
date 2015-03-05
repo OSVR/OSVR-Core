@@ -198,13 +198,15 @@ namespace client {
     }
 
     void VRPNContext::m_sendRoute(std::string const &route) {
-        OSVR_DEV_VERBOSE(
-            "This client context can't send routes back upstream now!");
+        m_systemComponent->sendClientRouteUpdate(route);
     }
 
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
         m_conn->mainloop();
+        // Mainloop the system device
+        m_systemDevice->update();
+
         // Process each of the routers.
         for (auto const &p : m_routers) {
             (*p)();
