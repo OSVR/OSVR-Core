@@ -57,14 +57,8 @@ namespace pluginhost {
         PluginRegPtr pluginReg(
             PluginSpecificRegistrationContext::create(pluginName));
         pluginReg->setParent(*this);
-        OSVR_DEV_VERBOSE("RegistrationContext:\t"
-                         "Plugin context created, loading plugin");
         libfunc::PluginHandle plugin = libfunc::loadPluginByName(
             pluginPathNameNoExt, pluginReg->extractOpaquePointer());
-        OSVR_DEV_VERBOSE(
-            "RegistrationContext:\t"
-            "Plugin loaded, assuming ownership of plugin handle and "
-            "storing context");
         pluginReg->takePluginHandle(plugin);
         adoptPluginRegistrationContext(pluginReg);
     }
@@ -73,26 +67,26 @@ namespace pluginhost {
         // Build a list of all the plugins we can find
         auto pluginPaths = pluginhost::getPluginSearchPath();
         for (const auto &pluginPath : pluginPaths) {
-            OSVR_DEV_VERBOSE("Searching for plugins in " + pluginPath + "...");
+            OSVR_DEV_VERBOSE("Searching for plugins in " << pluginPath << "...");
         }
         auto pluginPathNames = pluginhost::getAllFilesWithExt(pluginPaths, OSVR_PLUGIN_EXTENSION);
 
         // Load all of the non-.manualload plugins
         for (const auto &plugin : pluginPathNames) {
-            OSVR_DEV_VERBOSE("Examining plugin " + plugin + "...");
+            OSVR_DEV_VERBOSE("Examining plugin '" << plugin << "'...");
             const std::string pluginBaseName = boost::filesystem::path(plugin).filename().stem().generic_string();
             if (boost::iends_with(pluginBaseName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
-                OSVR_DEV_VERBOSE("Ignoring manual-load plugin: " + pluginBaseName);
+                OSVR_DEV_VERBOSE("Ignoring manual-load plugin: " << pluginBaseName);
                 continue;
             }
 
             try {
                 loadPlugin(pluginBaseName);
-                OSVR_DEV_VERBOSE("Successfully loaded plugin: " + pluginBaseName);
+                OSVR_DEV_VERBOSE("Successfully loaded plugin: " << pluginBaseName);
             } catch (const std::exception &e) {
-                OSVR_DEV_VERBOSE("Failed to load plugin " + pluginBaseName + ": " + e.what());
+                OSVR_DEV_VERBOSE("Failed to load plugin " << pluginBaseName << ": " << e.what());
             } catch (...) {
-                OSVR_DEV_VERBOSE("Failed to load plugin " + pluginBaseName + ": Unknown error.");
+                OSVR_DEV_VERBOSE("Failed to load plugin " << pluginBaseName << ": Unknown error.");
             }
         }
     }
