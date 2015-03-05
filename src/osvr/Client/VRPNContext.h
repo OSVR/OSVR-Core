@@ -81,7 +81,6 @@ namespace client {
 
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;
-        common::RouteContainer m_routingDirectives;
         std::vector<RouterEntryPtr> m_routers;
 
         common::BaseDevicePtr m_systemDevice;
