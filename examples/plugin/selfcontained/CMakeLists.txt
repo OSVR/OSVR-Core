@@ -30,6 +30,3 @@ osvr_add_plugin(NAME com_osvr_example_selfcontainedDetectAndCreate
 
 # If you use other libraries, find them and add a line like:
 # target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate AnyOtherLibraries)
-
-# If you access the C++ API that's not really designed for plugin consumption, you'll need this line:
-# target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate osvr::osvrPluginHost)
