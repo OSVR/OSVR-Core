@@ -108,6 +108,10 @@ namespace server {
         /// @overload
         template <typename Callable> void m_callControlled(Callable f) const;
 
+        /// @brief Destroy the context, connection, and nested device in a safe
+        /// order.
+        void m_orderedDestruction();
+
         /// @brief sends route message.
         void m_sendRoutes();
 

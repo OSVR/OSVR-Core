@@ -76,6 +76,11 @@ namespace server {
 
     void ServerImpl::start() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (!m_ctx || !m_conn) {
+            throw std::logic_error("Cannot start server - context or "
+                                   "connection destroyed (probably attempting "
+                                   "to restart a stopped server)");
+        }
         m_running = true;
 
         // Use a lambda to run the loop.
@@ -85,8 +90,7 @@ namespace server {
             do {
                 keepRunning = this->loop();
             } while (keepRunning);
-            m_ctx.reset();
-            m_conn.reset();
+            m_orderedDestruction();
             m_running = false;
         });
         m_run.signalAndWaitForStart();
@@ -173,6 +177,13 @@ namespace server {
         return ret;
     }
 
+    void ServerImpl::m_orderedDestruction() {
+        m_ctx.reset();
+        m_systemComponent = nullptr; // non-owning pointer
+        m_systemDevice.reset();
+        m_conn.reset();
+    }
+
     void ServerImpl::m_sendRoutes() {
         std::string message = m_routes.getRoutes();
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
@@ -183,7 +194,7 @@ namespace server {
     int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ServerImpl *>(userdata);
         OSVR_DEV_VERBOSE("Got an updated route from a client.");
-        self->addRoute(std::string(p.buffer, p.payload_len));
+        self->m_addRoute(std::string(p.buffer, p.payload_len));
         return 0;
     }
 
