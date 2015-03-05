@@ -111,6 +111,9 @@ namespace server {
         /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
 
+        /// @brief Load all auto-loadable plugins.
+        OSVR_SERVER_EXPORT void loadAutoPlugins();
+
         /// @brief Instantiate the named driver with parameters.
         /// @param plugin The name of a plugin.
         /// @param driver The name of a driver registered by the plugin for

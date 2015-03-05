@@ -1,0 +1,26 @@
+/** @file
+    @brief Auto-generated configuration header - do not edit!
+
+    @date 2015
+
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
+*/
+
+// Copyright 2015 Sensics, Inc.
+//
+// All rights reserved.
+//
+// (Final version intended to be licensed under
+// the Apache License, Version 2.0)
+
+#ifndef INCLUDED_PathConfig_h_GUID_ACBCE484_669E_4BA5_6A87_51519A19EE5A
+#define INCLUDED_PathConfig_h_GUID_ACBCE484_669E_4BA5_6A87_51519A19EE5A
+
+#define OSVR_PLUGIN_DIR "@OSVR_PLUGIN_DIR@"
+#define OSVR_PLUGIN_EXTENSION "@CMAKE_SHARED_MODULE_SUFFIX@"
+#define OSVR_PLUGIN_IGNORE_SUFFIX "@OSVR_PLUGIN_IGNORE_SUFFIX@"
+
+#endif // INCLUDED_PathConfig_h_GUID_ACBCE484_669E_4BA5_6A87_51519A19EE5A
+

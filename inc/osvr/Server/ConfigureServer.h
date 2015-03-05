@@ -121,7 +121,7 @@ namespace server {
         /// completed successfully.
         OSVR_SERVER_EXPORT bool instantiateDrivers();
 
-        /// @name Results of loadPlugins()
+        /// @name Results of instantiateDrivers()
         /// @{
         /// @brief Get a reference to the list of drivers successfully
         /// instantiated by instantiateDrivers()
@@ -134,6 +134,9 @@ namespace server {
         /// @}
 
         OSVR_SERVER_EXPORT bool processRoutes();
+
+        /// @brief Loads all plugins not marked for manual load.
+        OSVR_SERVER_EXPORT void loadAutoPlugins();
 
       private:
         /// @brief Private implementation data structure.

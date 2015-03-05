@@ -2,9 +2,7 @@
   "server": {
     "local": false
   },
-  "plugins": [
-    "org_opengoggles_bundled_Multiserver"
-  ],
+  "plugins": [], /* only need to list manual-load plugins */
   "drivers": [
     {
       "plugin": "org_opengoggles_bundled_Multiserver",

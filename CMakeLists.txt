@@ -10,6 +10,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 include(Version)
 
 ###
+# Library ABI versions
+###
+set(OSVR_PLUGINKIT_ABI_VERSION 0)
+
+###
 # Configuration Options
 ###
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
@@ -23,6 +28,9 @@ endif()
 if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
     message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
 endif()
+
+set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
+mark_as_advanced(OSVR_PLUGIN_IGNORE_SUFFIX)
 
 ###
 # CMake Modules
@@ -51,6 +59,9 @@ set_default_build_type(RelWithDebInfo)
 include(UseFolders)
 use_folders()
 
+include(PlatformDefinitions)
+define_platform_macros(OSVR)
+
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)
 include(osvrConvertJson)
@@ -70,7 +81,7 @@ if(WIN32)
 endif()
 
 find_package(libfunctionality REQUIRED)
-find_package(Boost 1.43 COMPONENTS thread system date_time chrono program_options REQUIRED) # Lower version bound of 1.43 for range adapters
+find_package(Boost 1.44 COMPONENTS thread system date_time chrono program_options filesystem REQUIRED) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
 find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
 if(WIN32)
@@ -95,7 +106,15 @@ if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
         BOOST_THREAD_USE_LIB)
 endif()
 
-find_package(jsoncpp CONFIG REQUIRED)
+add_library(boost_filesystem INTERFACE)
+target_link_libraries(boost_filesystem
+    INTERFACE
+    ${Boost_FILESYSTEM_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARIES})
+target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
+target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
+
+find_package(jsoncpp REQUIRED)
 
 include(CompilerFeatures)
 
@@ -104,17 +123,17 @@ include(CompilerFeatures)
 ###
 # Set up shared destination directories to avoid Windows hassle with DLL search paths.
 if(WIN32)
-    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}")
-    set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_BINDIR}")
+	set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}/osvr-plugins-${OSVR_PLUGINKIT_ABI_VERSION}")
+	set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_BINDIR}")
 else()
-    set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}")
-    set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_LIBDIR}")
+	set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}/osvr-plugins-${OSVR_PLUGINKIT_ABI_VERSION}")
+	set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_LIBDIR}")
 endif()
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_SHARED_LIBRARY_DIR}")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OSVR_SHARED_LIBRARY_DIR}")
 endif()
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
@@ -236,6 +255,11 @@ export(PACKAGE osvr)
 configure_file(osvrConfig.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     @ONLY)
+
+# Copy over the shared CMake modules for use in a build tree.
+foreach(HELPER osvrAddPlugin osvrConvertJson)
+    configure_file(${HELPER}.cmake "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
+endforeach()
 
 configure_file(osvrConfigBuildTreePaths.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"

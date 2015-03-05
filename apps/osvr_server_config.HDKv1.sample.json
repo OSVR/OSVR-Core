@@ -1,6 +1,6 @@
 /* This is for the HDK v1 - roughly around CES 2015 */
 {
-   "plugins" : [ "org_opengoggles_bundled_Multiserver" ],
+"plugins": [], /* only need to list manual-load plugins */
    "routes" : [
       {
          "destination" : "/me/hands/left",

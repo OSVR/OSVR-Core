@@ -70,6 +70,9 @@ namespace server {
         /// @brief Load named plugin
         void loadPlugin(std::string const &pluginName);
 
+        /// @brief Load all auto-loadable plugins.
+        void loadAutoPlugins();
+
         /// @copydoc Server::triggerHardwareDetect()
         void triggerHardwareDetect();
 

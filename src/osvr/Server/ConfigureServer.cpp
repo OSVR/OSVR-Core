@@ -19,18 +19,41 @@
 #include <osvr/Server/ConfigureServer.h>
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/PluginHost/SearchPath.h>
 
 // Library/third-party includes
 #include <json/value.h>
 #include <json/reader.h>
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>                 // for stem()
+#include <boost/algorithm/string/predicate.hpp> // for iends_with()
 
 // Standard includes
 #include <stdexcept>
+#include <iostream>
+#include <vector>
 
 namespace osvr {
 namespace server {
+    namespace detail {
+        class StreamPrefixer {
+          public:
+            StreamPrefixer(const char *prefix, std::ostream &os)
+                : m_prefix(prefix), m_os(&os) {}
+            template <typename T> std::ostream &operator<<(T val) {
+                return (*m_os) << m_prefix << val;
+            }
+
+          private:
+            const char *m_prefix;
+            std::ostream *m_os;
+        };
+
+        static detail::StreamPrefixer out("[OSVR Server] ", std::cout);
+        static detail::StreamPrefixer err("[OSVR Server] ", std::cerr);
+    } // namespace detail
+
     class ConfigureServerData : boost::noncopyable {
       public:
         template <typename T> inline void parse(T &json) {
@@ -235,6 +258,8 @@ namespace server {
         }
         return success;
     }
+
+    void ConfigureServer::loadAutoPlugins() { m_server->loadAutoPlugins(); }
 
 } // namespace server
 } // namespace osvr

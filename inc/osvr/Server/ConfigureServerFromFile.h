@@ -84,6 +84,11 @@ namespace server {
         }
 
         {
+            out << "Loading auto-loadable plugins..." << endl;
+            srvConfig.loadAutoPlugins();
+        }
+
+        {
             out << "Loading plugins..." << endl;
             srvConfig.loadPlugins();
             if (!srvConfig.getSuccessfulPlugins().empty()) {

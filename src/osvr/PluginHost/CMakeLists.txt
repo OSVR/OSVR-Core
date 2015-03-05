@@ -5,13 +5,19 @@ set(API
     "${HEADER_LOCATION}/PluginSpecificRegistrationContext.h"
     "${HEADER_LOCATION}/PluginRegPtr.h"
     "${HEADER_LOCATION}/RegistrationContext_fwd.h"
-    "${HEADER_LOCATION}/RegistrationContext.h")
+    "${HEADER_LOCATION}/RegistrationContext.h"
+    "${HEADER_LOCATION}/SearchPath.h")
 
 set(SOURCE
+    BinaryLocation.cpp
+    BinaryLocation.h
     PluginSpecificRegistrationContext.cpp
     PluginSpecificRegistrationContextImpl.cpp
     PluginSpecificRegistrationContextImpl.h
-    RegistrationContext.cpp)
+    RegistrationContext.cpp
+    SearchPath.cpp)
+
+configure_file(PathConfig.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/PathConfig.h")
 
 osvr_add_library()
 
@@ -34,7 +40,9 @@ target_compile_options(${LIBNAME_FULL}
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     libfunctionality::functionality
-    osvrUtilCpp)
+    osvrUtilCpp
+    PRIVATE
+    boost_filesystem)
 
 ###
 # Grab DLLs please.

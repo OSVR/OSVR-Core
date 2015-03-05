@@ -3,9 +3,7 @@
   "server": {
     "sleep": 1
   },
-  "plugins": [
-    "org_opengoggles_bundled_Multiserver"
-  ],
+  "plugins": [], /* only need to list manual-load plugins */
   "routes": [
     {
       "destination": "/me/hands/left",

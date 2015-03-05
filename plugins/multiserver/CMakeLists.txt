@@ -1,4 +1,6 @@
-osvr_add_plugin(org_opengoggles_bundled_Multiserver
+osvr_add_plugin(NAME org_opengoggles_bundled_Multiserver
+    CPP
+    SOURCES
     org_opengoggles_bundled_Multiserver.cpp
     DevicesWithParameters.cpp
     DevicesWithParameters.h
@@ -7,7 +9,7 @@ osvr_add_plugin(org_opengoggles_bundled_Multiserver
     VRPNMultiserver.cpp
     VRPNMultiserver.h)
 
-target_link_libraries(org_opengoggles_bundled_Multiserver osvrVRPNServer osvrPluginKitCpp osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn)
+target_link_libraries(org_opengoggles_bundled_Multiserver osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn)
 
 target_include_directories(org_opengoggles_bundled_Multiserver PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
 
