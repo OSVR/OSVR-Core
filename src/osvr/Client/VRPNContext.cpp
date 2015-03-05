@@ -84,14 +84,14 @@ namespace client {
 
     void
     VRPNContext::m_replaceRoutes(common::RouteContainer const &newDirectives) {
-        OSVR_DEV_VERBOSE("Replacing routes: had " << m_routingDirectives.size()
-                                                  << ", received "
-                                                  << newDirectives.size());
+        OSVR_DEV_VERBOSE("Replacing routing directives: had "
+                         << m_routingDirectives.size() << ", received "
+                         << newDirectives.size());
 
         m_routers.clear();
         m_routingDirectives = newDirectives;
         Json::Reader reader;
-        for (auto const &routeString : m_routingDirectives.getRouteList()) {
+        for (auto const &routeString : newDirectives.getRouteList()) {
             Json::Value route;
             if (!reader.parse(routeString, route)) {
                 OSVR_DEV_VERBOSE("Got a bad route!");
