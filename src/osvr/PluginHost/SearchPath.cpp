@@ -58,7 +58,7 @@ namespace pluginhost {
         FileList filesPaths;
 
         for (const auto& path : dirPath) {
-            using boost::filesystem::recursive_directory_iterator;
+            using boost::filesystem::directory_iterator;
             using boost::make_iterator_range;
             boost::filesystem::path directoryPath(path);
 
@@ -68,7 +68,7 @@ namespace pluginhost {
             }
 
             // Get a list of files inside the dir that match the extension
-            for (const auto& pathName : make_iterator_range(recursive_directory_iterator(directoryPath), recursive_directory_iterator())) {
+            for (const auto& pathName : make_iterator_range(directory_iterator(directoryPath), directory_iterator())) {
                 if (!boost::filesystem::is_regular_file(pathName) || pathName.path().extension() != ext)
                     continue;
 
