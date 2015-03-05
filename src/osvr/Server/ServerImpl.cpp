@@ -54,6 +54,7 @@ namespace server {
         }
         osvr::connection::Connection::storeConnection(*m_ctx, m_conn);
 
+        // Set up system device/system component
         auto vrpnConn = getVRPNConnection(m_conn);
         m_systemDevice = common::createServerDevice(
             common::SystemComponent::deviceName(), vrpnConn);
@@ -63,6 +64,8 @@ namespace server {
         m_systemComponent->registerClientRouteUpdateHandler(
             &ServerImpl::m_handleUpdatedRoute, this);
         registerMainloopMethod([this] { m_systemDevice->update(); });
+
+        // Things to do when we get a new incoming connection
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
         m_conn->registerConnectionHandler(
