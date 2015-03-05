@@ -28,6 +28,7 @@
 // Standard includes
 // - none
 
+/// @todo replace this with something in <osvr/Common/JSONEigen.h>
 inline Json::Value toJson(Eigen::Vector3d const &vec) {
     Json::Value ret(Json::arrayValue);
     ret.append(vec[0]);
