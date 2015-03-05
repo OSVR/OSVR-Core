@@ -92,9 +92,6 @@ namespace pluginhost {
     void RegistrationContext::loadPlugins() {
         // Build a list of all the plugins we can find
         auto pluginPaths = pluginhost::getPluginSearchPath();
-        for (const auto &pluginPath : pluginPaths) {
-            OSVR_DEV_VERBOSE("Searching for plugins in " << pluginPath << "...");
-        }
         auto pluginPathNames = pluginhost::getAllFilesWithExt(pluginPaths, OSVR_PLUGIN_EXTENSION);
 
         // Load all of the non-.manualload plugins
@@ -123,9 +120,6 @@ namespace pluginhost {
         ctx->setParent(*this);
 
         m_regMap.insert(std::make_pair(ctx->getName(), ctx));
-        OSVR_DEV_VERBOSE("RegistrationContext:\t"
-                         "Adopted registration context for "
-                         << ctx->getName());
     }
 
     void RegistrationContext::triggerHardwareDetect() {
