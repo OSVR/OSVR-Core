@@ -24,6 +24,7 @@
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/RouteContainer.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -62,7 +63,8 @@ namespace client {
       private:
         static int VRPN_CALLBACK
         m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
-        void m_replaceRoutes(std::string const &routes);
+        void m_replaceRoutes(common::RouteContainer const &newDirectives);
+        virtual void m_sendRoute(std::string const &route);
         virtual void m_update();
 
         void m_handleTrackerRouteEntry(std::string const &dest,
@@ -76,6 +78,7 @@ namespace client {
         void m_addTrackerRouter(const char *src, const char *dest,
                                 boost::optional<int> sensor,
                                 transform::Transform const &xform);
+
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;
         std::vector<RouterEntryPtr> m_routers;

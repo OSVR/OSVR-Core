@@ -4,7 +4,12 @@ else()
     set(OSVR_SERVER_RESOURCE)
 endif()
 
-add_executable(osvr_server osvr_server.cpp ${OSVR_SERVER_RESOURCE})
+add_executable(osvr_server
+    osvr_server.cpp
+    ClientMainloop.h
+    JSONTools.h
+    WrapRoute.h
+    ${OSVR_SERVER_RESOURCE})
 add_executable(BasicServer BasicServer.cpp)
 add_executable(osvr_calibrate osvr_calibrate.cpp)
 
@@ -15,22 +20,25 @@ foreach(server BasicServer osvr_server osvr_calibrate)
 endforeach()
 
 target_link_libraries(osvr_server jsoncpp_lib)
-target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 
+add_executable(osvr_reset_yaw
+    osvr_reset_yaw.cpp
+    ClientMainloop.h
+    JSONTools.h
+    WrapRoute.h)
+target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+set_target_properties(osvr_reset_yaw PROPERTIES
+    FOLDER "OSVR Stock Applications")
+
+# TODO install osvr_reset_yaw when complete
 install(TARGETS osvr_server osvr_calibrate
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 install(TARGETS BasicServer
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
 
+# Grab all the config files with a glob, to avoid missing one.
 file(GLOB CONFIG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config*.json")
-#set(CONFIG_FILES
-#    osvr_server_config.json
-#    osvr_server_config.xrightydown.json
-#    osvr_server_config.autodetectonly.sample.json
-#    osvr_server_config.externalvrpn.sample.json
-#    osvr_server_config.HDK.sample.json
-#    osvr_server_config.HDKnoHydra.sample.json
-#    osvr_server_config.shared.sample.json)
 
 foreach(FN ${CONFIG_FILES})
     add_custom_command(TARGET osvr_server POST_BUILD

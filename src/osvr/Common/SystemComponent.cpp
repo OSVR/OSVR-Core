@@ -51,6 +51,21 @@ namespace common {
             return "com.osvr.system.appstartup";
         }
 
+        class ClientRouteToServer::MessageSerialization {
+          public:
+            MessageSerialization(std::string const &str = std::string())
+                : m_str(str) {}
+
+            template <typename T> void processMessage(T &p) {
+                p(m_str, serialization::StringOnlyMessageTag());
+            }
+
+          private:
+            std::string m_str;
+        };
+        const char *ClientRouteToServer::identifier() {
+            return "com.osvr.system.updateroutetoserver";
+        }
     } // namespace messages
 
     const char *SystemComponent::deviceName() {
@@ -75,9 +90,23 @@ namespace common {
                                                 void *userdata) {
         m_registerHandler(handler, userdata, routesOut.getMessageType());
     }
+
+    void SystemComponent::sendClientRouteUpdate(std::string const &route) {
+        Buffer<> buf;
+        messages::ClientRouteToServer::MessageSerialization msg(route);
+        serialize(buf, msg);
+        m_getParent().packMessage(buf, routeIn.getMessageType());
+    }
+
+    void SystemComponent::registerClientRouteUpdateHandler(
+        vrpn_MESSAGEHANDLER handler, void *userdata) {
+        m_registerHandler(handler, userdata, routeIn.getMessageType());
+    }
+
     void SystemComponent::m_parentSet() {
         m_getParent().registerMessageType(routesOut);
         m_getParent().registerMessageType(appStartup);
+        m_getParent().registerMessageType(routeIn);
     }
 } // namespace common
 } // namespace osvr

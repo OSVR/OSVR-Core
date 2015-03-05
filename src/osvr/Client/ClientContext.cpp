@@ -104,6 +104,15 @@ void OSVR_ClientContextObject::setParameter(std::string const &path,
     m_params[path] = value;
 }
 
+osvr::common::RouteContainer const &
+OSVR_ClientContextObject::getRoutes() const {
+    return m_routingDirectives;
+}
+
+void OSVR_ClientContextObject::sendRoute(std::string const &route) {
+    m_sendRoute(route);
+}
+
 bool OSVR_ClientContextObject::releaseObject(void *obj) {
     return m_ownedObjects.release(obj);
 }

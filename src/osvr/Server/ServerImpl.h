@@ -20,7 +20,7 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
-#include <osvr/Server/RouteContainer.h>
+#include <osvr/Common/RouteContainer.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
@@ -33,6 +33,7 @@
 #include <boost/noncopyable.hpp>
 #include <util/RunLoopManagerBoost.h>
 #include <boost/thread.hpp>
+#include <vrpn_Connection.h>
 
 // Standard includes
 // - none
@@ -107,8 +108,20 @@ namespace server {
         /// @overload
         template <typename Callable> void m_callControlled(Callable f) const;
 
+        /// @brief Destroy the context, connection, and nested device in a safe
+        /// order.
+        void m_orderedDestruction();
+
         /// @brief sends route message.
         void m_sendRoutes();
+
+        /// @brief handles updated route message from client
+        static int VRPN_CALLBACK
+        m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p);
+
+        /// @brief adds a route - assumes that you've handled ensuring this is
+        /// the main server thread.
+        bool m_addRoute(std::string const &routingDirective);
 
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
@@ -126,7 +139,7 @@ namespace server {
         common::SystemComponent *m_systemComponent;
 
         /// @brief JSON routing directives
-        RouteContainer m_routes;
+        common::RouteContainer m_routes;
 
         /// @brief Mutex held by anything executing in the main thread.
         mutable boost::mutex m_mainThreadMutex;

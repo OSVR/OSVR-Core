@@ -31,6 +31,7 @@
 #include <osvr/Transform/ChangeOfBasis.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/RoutingKeys.h>
 
 #include <osvr/Client/display_json.h>
 
@@ -75,28 +76,32 @@ namespace client {
     int VRPNContext::m_handleRoutingMessage(void *userdata,
                                             vrpn_HANDLERPARAM p) {
         VRPNContext *self = static_cast<VRPNContext *>(userdata);
-        self->m_replaceRoutes(std::string(p.buffer, p.payload_len));
+        common::RouteContainer newDirectives(
+            std::string(p.buffer, p.payload_len));
+        self->m_replaceRoutes(newDirectives);
         return 0;
     }
-    static const char SOURCE_KEY[] = "source";
-    static const char DESTINATION_KEY[] = "destination";
-    void VRPNContext::m_replaceRoutes(std::string const &routes) {
 
-        Json::Value root;
-        Json::Reader reader;
-        if (!reader.parse(routes, root)) {
-            throw std::runtime_error("JSON parse error: " +
-                                     reader.getFormattedErrorMessages());
-        }
-        OSVR_DEV_VERBOSE("Replacing routes: had "
-                         << m_routers.size() << ", received " << root.size());
+    void
+    VRPNContext::m_replaceRoutes(common::RouteContainer const &newDirectives) {
+        OSVR_DEV_VERBOSE("Replacing routing directives: had "
+                         << m_routingDirectives.size() << ", received "
+                         << newDirectives.size());
+
         m_routers.clear();
-        for (Json::ArrayIndex i = 0, e = root.size(); i < e; ++i) {
-            Json::Value route = root[i];
+        m_routingDirectives = newDirectives;
+        Json::Reader reader;
+        for (auto const &routeString : newDirectives.getRouteList()) {
+            Json::Value route;
+            if (!reader.parse(routeString, route)) {
+                OSVR_DEV_VERBOSE("Got a bad route!");
+                continue;
+            }
 
-            std::string dest = route[DESTINATION_KEY].asString();
+            std::string dest =
+                route[common::routing_keys::destination()].asString();
 
-            Json::Value src = route[SOURCE_KEY];
+            Json::Value src = route[common::routing_keys::source()];
             if (src.isString()) {
                 m_handleStringRouteEntry(dest, src.asString());
             } else {
@@ -192,9 +197,16 @@ namespace client {
         }
     }
 
+    void VRPNContext::m_sendRoute(std::string const &route) {
+        m_systemComponent->sendClientRouteUpdate(route);
+    }
+
     void VRPNContext::m_update() {
         // mainloop the VRPN connection.
         m_conn->mainloop();
+        // Mainloop the system device
+        m_systemDevice->update();
+
         // Process each of the routers.
         for (auto const &p : m_routers) {
             (*p)();

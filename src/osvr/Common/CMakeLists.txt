@@ -19,11 +19,14 @@ set(API
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
+    "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
+    "${HEADER_LOCATION}/RouteContainer.h"
+    "${HEADER_LOCATION}/RoutingKeys.h"
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
@@ -43,6 +46,8 @@ set(SOURCE
     MessageRegistration.cpp
     RawMessageType.cpp
     RawSenderType.cpp
+    RouteContainer.cpp
+    RoutingKeys.cpp
     Serialization.cpp
     SystemComponent.cpp)
 

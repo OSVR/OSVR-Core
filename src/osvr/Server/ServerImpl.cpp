@@ -54,13 +54,17 @@ namespace server {
         }
         osvr::connection::Connection::storeConnection(*m_ctx, m_conn);
 
+        // Set up system device/system component
         auto vrpnConn = getVRPNConnection(m_conn);
         m_systemDevice = common::createServerDevice(
             common::SystemComponent::deviceName(), vrpnConn);
 
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-        registerMainloopMethod([this] { m_systemDevice->update(); });
+        m_systemComponent->registerClientRouteUpdateHandler(
+            &ServerImpl::m_handleUpdatedRoute, this);
+
+        // Things to do when we get a new incoming connection
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
         m_conn->registerConnectionHandler(
@@ -71,6 +75,11 @@ namespace server {
 
     void ServerImpl::start() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (!m_ctx || !m_conn) {
+            throw std::logic_error("Cannot start server - context or "
+                                   "connection destroyed (probably attempting "
+                                   "to restart a stopped server)");
+        }
         m_running = true;
 
         // Use a lambda to run the loop.
@@ -80,8 +89,7 @@ namespace server {
             do {
                 keepRunning = this->loop();
             } while (keepRunning);
-            m_ctx.reset();
-            m_conn.reset();
+            m_orderedDestruction();
             m_running = false;
         });
         m_run.signalAndWaitForStart();
@@ -152,12 +160,7 @@ namespace server {
 
     bool ServerImpl::addRoute(std::string const &routingDirective) {
         bool wasNew;
-        m_callControlled([&] {
-            wasNew = m_routes.addRoute(routingDirective);
-            if (m_running) {
-                m_sendRoutes();
-            }
-        });
+        m_callControlled([&] { wasNew = m_addRoute(routingDirective); });
         return wasNew;
     }
 
@@ -173,6 +176,13 @@ namespace server {
         return ret;
     }
 
+    void ServerImpl::m_orderedDestruction() {
+        m_ctx.reset();
+        m_systemComponent = nullptr; // non-owning pointer
+        m_systemDevice.reset();
+        m_conn.reset();
+    }
+
     void ServerImpl::m_sendRoutes() {
         std::string message = m_routes.getRoutes();
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
@@ -180,13 +190,26 @@ namespace server {
         m_systemComponent->sendRoutes(message);
     }
 
+    int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
+        auto self = static_cast<ServerImpl *>(userdata);
+        OSVR_DEV_VERBOSE("Got an updated route from a client.");
+        self->m_addRoute(std::string(p.buffer, p.payload_len));
+        return 0;
+    }
+
+    bool ServerImpl::m_addRoute(std::string const &routingDirective) {
+        bool wasNew = m_routes.addRoute(routingDirective);
+        if (m_running) {
+            m_sendRoutes();
+        }
+        return wasNew;
+    }
+
     void ServerImpl::setSleepTime(int microseconds) {
         m_sleepTime = microseconds;
     }
 
-    int ServerImpl::getSleepTime() const {
-        return m_sleepTime;
-    }
+    int ServerImpl::getSleepTime() const { return m_sleepTime; }
 
 } // namespace server
 } // namespace osvr

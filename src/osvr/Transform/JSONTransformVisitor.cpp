@@ -3,6 +3,8 @@
 
     @date 2014
 
+    @todo Replace the utility functions in here with osvr/Common/JSONEigen
+
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
