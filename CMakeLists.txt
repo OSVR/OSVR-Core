@@ -256,6 +256,11 @@ configure_file(osvrConfig.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     @ONLY)
 
+# Copy over the shared CMake modules for use in a build tree.
+foreach(HELPER osvrAddPlugin osvrConvertJson)
+    configure_file(${HELPER}.cmake "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
+endforeach()
+
 configure_file(osvrConfigBuildTreePaths.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"
     @ONLY)
