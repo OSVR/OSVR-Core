@@ -1,6 +1,5 @@
 {
-  "plugins": [ /* only need to list manual-load plugins */
-  ],
+  "plugins": [], /* only need to list manual-load plugins */
   "drivers": [
     {
       "plugin": "org_opengoggles_bundled_Multiserver",

@@ -1,6 +1,5 @@
 {
-   "plugins": [ /* only need to list manual-load plugins */
-   ],
+   "plugins": [], /* only need to list manual-load plugins */
    "routes" : [
       {
          "destination" : "/me/head",
