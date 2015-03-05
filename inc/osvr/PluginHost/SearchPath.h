@@ -45,44 +45,6 @@ namespace pluginhost {
     /// Given the name of a plugin, find the full path to the plugin library.
     OSVR_PLUGINHOST_EXPORT std::string findPlugin(const std::string& pluginName);
 
-    /// Helper class that generates an iterable range of directory entries.
-    class recursive_directory_range {
-      public:
-        typedef boost::filesystem::recursive_directory_iterator iterator;
-
-        recursive_directory_range(boost::filesystem::path p) : m_path(p) {}
-
-        iterator begin() {
-            return boost::filesystem::recursive_directory_iterator(m_path);
-        }
-
-        iterator end() {
-            return boost::filesystem::recursive_directory_iterator();
-        }
-
-      private:
-        boost::filesystem::path m_path;
-    };
-
-    /// Helper class that generates an iterable range of directory entries.
-    class directory_range {
-      public:
-        typedef boost::filesystem::directory_iterator iterator;
-
-        directory_range(boost::filesystem::path p) : m_path(p) {}
-
-        iterator begin() {
-            return boost::filesystem::directory_iterator(m_path);
-        }
-
-        iterator end() {
-            return boost::filesystem::directory_iterator();
-        }
-
-      private:
-        boost::filesystem::path m_path;
-    };
-
 } // namespace pluginhost
 } // namespace osvr
 
