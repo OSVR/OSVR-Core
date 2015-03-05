@@ -21,13 +21,12 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 # This is just a helper function wrapping CMake's add_library command that
 # sets up include dirs, libraries, and naming convention (no leading "lib")
 # for an OSVR plugin. It also installs the plugin into the right directory.
-# Pass as many source files as you need.
-osvr_add_plugin(com_osvr_example_selfcontainedDetectAndCreate
+# Pass as many source files as you need. See osvrAddPlugin.cmake for full docs.
+osvr_add_plugin(NAME com_osvr_example_selfcontainedDetectAndCreate
+    CPP # indicates we'd like to use the C++ wrapper
+    SOURCES
     com_osvr_example_selfcontainedDetectAndCreate.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-
-# This example uses the C++ wrapper, as suggested, so you'll need this line.
-target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate osvr::osvrPluginKitCpp)
 
 # If you use other libraries, find them and add a line like:
 # target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate AnyOtherLibraries)

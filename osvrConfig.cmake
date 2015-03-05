@@ -12,10 +12,13 @@ include("${CMAKE_CURRENT_LIST_DIR}/osvrTargets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledBoost.cmake" OPTIONAL)
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigInstalledOpenCV.cmake" OPTIONAL)
 
-# We set this variable so that we can share functions like osvr_add_plugin
+# We set these variables so that we can share functions like osvr_add_plugin
 # between builds in the main source tree and external builds using this config file.
 set(OSVR_CACHED_PLUGIN_DIR "@OSVR_PLUGIN_DIR@" CACHE INTERNAL
     "The OSVR_PLUGIN_DIR variable for OSVR, for use in building and installing plugins" FORCE)
+
+set(OSVR_PLUGIN_IGNORE_SUFFIX "@OSVR_PLUGIN_IGNORE_SUFFIX@" CACHE INTERNAL
+    "The additional suffix for OSVR plugins that are not to be auto-loaded" FORCE)
 
 # Since alias targets only work for libraries, we use this method instead to
 # share the osvr_convert_json script between the main tree and external config users.
