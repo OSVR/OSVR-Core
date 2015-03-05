@@ -35,5 +35,6 @@ macro(define_platform_macros _prefix)
 	_define_macro(${_prefix} "ULTRIX" ULTRIX)
 	_define_macro(${_prefix} "CYGWIN" CYGWIN)
 	_define_macro(${_prefix} "Darwin" MACOSX)
+	_define_macro(${_prefix} "Windows" WINDOWS)
 endmacro()
 

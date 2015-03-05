@@ -73,6 +73,7 @@
 #cmakedefine OSVR_ULTRIX
 #cmakedefine OSVR_CYGWIN
 #cmakedefine OSVR_MACOSX
+#cmakedefine OSVR_WINDOWS
 //@}
 
 #endif
