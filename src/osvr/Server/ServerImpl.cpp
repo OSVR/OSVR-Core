@@ -60,6 +60,8 @@ namespace server {
 
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
+        m_systemComponent->registerClientRouteUpdateHandler(
+            &ServerImpl::m_handleUpdatedRoute, this);
         registerMainloopMethod([this] { m_systemDevice->update(); });
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
