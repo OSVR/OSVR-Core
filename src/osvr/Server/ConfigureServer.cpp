@@ -259,9 +259,7 @@ namespace server {
         return success;
     }
 
-    void ConfigureServer::loadAutoPlugins() {
-        m_server->loadAutoPlugins();
-    }
+    void ConfigureServer::loadAutoPlugins() { m_server->loadAutoPlugins(); }
 
 } // namespace server
 } // namespace osvr

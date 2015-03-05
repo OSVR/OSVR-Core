@@ -54,7 +54,8 @@ namespace pluginhost {
         /// @brief Load a plugin from a dynamic library in this context
         OSVR_PLUGINHOST_EXPORT void loadPlugin(std::string const &pluginName);
 
-        /// @brief Load all detected plugins except those with a .manualload suffix
+        /// @brief Load all detected plugins except those with a .manualload
+        /// suffix
         OSVR_PLUGINHOST_EXPORT void loadPlugins();
 
         /// @brief Assume ownership of a plugin-specific registration context

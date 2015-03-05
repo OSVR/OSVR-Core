@@ -55,9 +55,7 @@ namespace server {
         m_impl->loadPlugin(plugin);
     }
 
-    void Server::loadAutoPlugins() {
-        m_impl->loadAutoPlugins();
-    }
+    void Server::loadAutoPlugins() { m_impl->loadAutoPlugins(); }
 
     void Server::instantiateDriver(std::string const &plugin,
                                    std::string const &driver,
@@ -87,9 +85,7 @@ namespace server {
         m_impl->setSleepTime(microseconds);
     }
 
-    int Server::getSleepTime() const {
-        return m_impl->getSleepTime();
-    }
+    int Server::getSleepTime() const { return m_impl->getSleepTime(); }
 
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)

@@ -111,9 +111,7 @@ namespace server {
                                    m_ctx, pluginName));
     }
 
-    void ServerImpl::loadAutoPlugins() {
-        m_ctx->loadPlugins();
-    }
+    void ServerImpl::loadAutoPlugins() { m_ctx->loadPlugins(); }
 
     void ServerImpl::instantiateDriver(std::string const &plugin,
                                        std::string const &driver,
@@ -188,9 +186,7 @@ namespace server {
         m_sleepTime = microseconds;
     }
 
-    int ServerImpl::getSleepTime() const {
-        return m_sleepTime;
-    }
+    int ServerImpl::getSleepTime() const { return m_sleepTime; }
 
 } // namespace server
 } // namespace osvr

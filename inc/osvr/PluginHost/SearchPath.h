@@ -39,10 +39,11 @@ namespace pluginhost {
 
     /// Get list of files inside the directory with given extension
     OSVR_PLUGINHOST_EXPORT FileList
-        getAllFilesWithExt(SearchPath dirPath, const std::string &ext);
+    getAllFilesWithExt(SearchPath dirPath, const std::string &ext);
 
     /// Given the name of a plugin, find the full path to the plugin library.
-    OSVR_PLUGINHOST_EXPORT std::string findPlugin(const std::string& pluginName);
+    OSVR_PLUGINHOST_EXPORT std::string
+    findPlugin(const std::string &pluginName);
 
 } // namespace pluginhost
 } // namespace osvr

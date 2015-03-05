@@ -49,26 +49,25 @@ namespace pluginhost {
     }
 #elif defined(OSVR_NETBSD)
     std::string getBinaryLocation() {
-        return boost::filesystem::canonical("/proc/curproc/exe").generic_string();
+        return boost::filesystem::canonical("/proc/curproc/exe")
+            .generic_string();
     }
 #elif defined(OSVR_FREEBSD)
     std::string getBinaryLocation() {
         if (boost::filesystem::exists("proc/curproc/file")) {
-            return boost::filesystem::canonical("/proc/curproc/file").generic_string();
+            return boost::filesystem::canonical("/proc/curproc/file")
+                .generic_string();
         } else {
             // sysctl CTL_KERN KERN_PROC KERN_PROC_PATHNAME -1
         }
     }
 #else
-    #error "getBinaryLocation() not yet implemented for this platform!"
-    std::string getBinaryLocation() {
-        return "";
-    }
+#error "getBinaryLocation() not yet implemented for this platform!"
+    std::string getBinaryLocation() { return ""; }
 
-    // TODO Mac OS X: _NSGetExecutablePath() (man 3 dyld)
-    // TODO Solaris: getexecname()
+// TODO Mac OS X: _NSGetExecutablePath() (man 3 dyld)
+// TODO Solaris: getexecname()
 #endif
 
 } // namespace pluginhost
 } // namespace osvr
-

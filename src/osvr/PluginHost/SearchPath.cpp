@@ -58,7 +58,7 @@ namespace pluginhost {
     FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext) {
         FileList filesPaths;
 
-        for (const auto& path : dirPath) {
+        for (const auto &path : dirPath) {
             using boost::filesystem::directory_iterator;
             using boost::make_iterator_range;
             boost::filesystem::path directoryPath(path);
@@ -69,8 +69,10 @@ namespace pluginhost {
             }
 
             // Get a list of files inside the dir that match the extension
-            for (const auto& pathName : make_iterator_range(directory_iterator(directoryPath), directory_iterator())) {
-                if (!boost::filesystem::is_regular_file(pathName) || pathName.path().extension() != ext)
+            for (const auto &pathName : make_iterator_range(
+                     directory_iterator(directoryPath), directory_iterator())) {
+                if (!boost::filesystem::is_regular_file(pathName) ||
+                    pathName.path().extension() != ext)
                     continue;
 
                 filesPaths.push_back(pathName.path().generic_string());
@@ -80,30 +82,37 @@ namespace pluginhost {
         return filesPaths;
     }
 
-    std::string findPlugin(const std::string& pluginName) {
+    std::string findPlugin(const std::string &pluginName) {
         auto searchPaths = getPluginSearchPath();
-        for (const auto& searchPath : searchPaths) {
+        for (const auto &searchPath : searchPaths) {
             if (!boost::filesystem::exists(searchPath))
                 continue;
 
             using boost::filesystem::directory_iterator;
             using boost::make_iterator_range;
 
-            for (const auto& pluginPathName : make_iterator_range(directory_iterator(searchPath), directory_iterator())) {
+            for (const auto &pluginPathName : make_iterator_range(
+                     directory_iterator(searchPath), directory_iterator())) {
                 /// Must be a regular file
                 /// @todo does this mean symlinks get excluded?
                 if (!boost::filesystem::is_regular_file(pluginPathName))
                     continue;
 
-                const auto pluginCandidate = boost::filesystem::path(pluginPathName);
+                const auto pluginCandidate =
+                    boost::filesystem::path(pluginPathName);
 
                 /// Needs right extension
-                if (pluginCandidate.extension().generic_string() != OSVR_PLUGIN_EXTENSION) {
+                if (pluginCandidate.extension().generic_string() !=
+                    OSVR_PLUGIN_EXTENSION) {
                     continue;
                 }
-                const auto pluginBaseName = pluginCandidate.filename().stem().generic_string();
-                /// If the name is right or has the manual load suffix, this is a good one.
-                if ((pluginBaseName == pluginName) || (pluginBaseName == pluginName + OSVR_PLUGIN_IGNORE_SUFFIX)) {
+                const auto pluginBaseName =
+                    pluginCandidate.filename().stem().generic_string();
+                /// If the name is right or has the manual load suffix, this is
+                /// a good one.
+                if ((pluginBaseName == pluginName) ||
+                    (pluginBaseName ==
+                     pluginName + OSVR_PLUGIN_IGNORE_SUFFIX)) {
                     return pluginPathName.path().generic_string();
                 }
             }
@@ -114,4 +123,3 @@ namespace pluginhost {
 
 } // namespace pluginhost
 } // namespace osvr
-

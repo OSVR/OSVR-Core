@@ -136,11 +136,13 @@ namespace server {
         OSVR_SERVER_EXPORT std::string
         getSource(std::string const &destination) const;
 
-        /// @brief Sets the amount of time (in microseconds) that the server loop
+        /// @brief Sets the amount of time (in microseconds) that the server
+        /// loop
         /// will sleep each loop.
         OSVR_SERVER_EXPORT void setSleepTime(int microseconds);
 
-        /// @brief Returns the amount of time (in microseconds) that the server loop
+        /// @brief Returns the amount of time (in microseconds) that the server
+        /// loop
         /// sleeps each loop.
         OSVR_SERVER_EXPORT int getSleepTime() const;
 
