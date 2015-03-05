@@ -42,32 +42,57 @@ namespace pluginhost {
         // binDir now normalized to PREFIX/bin
         auto root = binDir.parent_path();
 
+        SearchPath paths;
 #ifdef _MSC_VER
-        const SearchPath path = (root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string();
-#else
-        const SearchPath path = (root / OSVR_PLUGIN_DIR).string();
+        paths.push_back((root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
 #endif
-        return path;
+        paths.push_back((root / OSVR_PLUGIN_DIR).string());
+
+        // TODO add user's home directory to search path
+
+        return paths;
     }
 
     FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext) {
         FileList filesPaths;
-        boost::filesystem::path directoryPath(dirPath);
 
-        // Make sure that directory exists
-        if (!boost::filesystem::exists(directoryPath)) {
-            return filesPaths;
-        }
+        for (const auto& path : dirPath) {
+            boost::filesystem::path directoryPath(path);
 
-        // Get a list of files inside the dir that match the extension
-        for (const auto& path : recursive_directory_range(directoryPath)) {
-            if (!boost::filesystem::is_regular_file(path) || path.path().extension() != ext)
+            // Make sure that directory exists
+            if (!boost::filesystem::exists(directoryPath)) {
                 continue;
+            }
 
-            filesPaths.push_back(path.path().generic_string());
+            // Get a list of files inside the dir that match the extension
+            for (const auto& pathName : recursive_directory_range(directoryPath)) {
+                if (!boost::filesystem::is_regular_file(pathName) || pathName.path().extension() != ext)
+                    continue;
+
+                filesPaths.push_back(pathName.path().generic_string());
+            }
         }
 
         return filesPaths;
+    }
+
+    std::string findPlugin(const std::string& pluginName) {
+        auto searchPaths = getPluginSearchPath();
+        for (const auto& searchPath : searchPaths) {
+            if (!boost::filesystem::exists(searchPath))
+                continue;
+
+            for (const auto& pluginPathName : directory_range(searchPath)) {
+                if (!boost::filesystem::is_regular_file(pluginPathName))
+                    continue;
+
+                const std::string pluginBaseName = boost::filesystem::path(pluginPathName).filename().stem().generic_string();
+                if (pluginBaseName == pluginName)
+                    return pluginPathName.path().generic_string();
+            }
+        }
+
+        return std::string();
     }
 
 } // namespace pluginhost

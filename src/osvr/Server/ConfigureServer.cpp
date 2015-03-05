@@ -142,49 +142,6 @@ namespace server {
         return m_server;
     }
 
-    bool ConfigureServer::loadPlugins() {
-        using detail::out;
-        using detail::err;
-        using std::endl;
-
-        bool success = true;
-
-        // find path where all plugins are hiding
-        pluginhost::SearchPath pluginPath(pluginhost::getPluginSearchPath());
-        pluginhost::FileList filesPaths =
-            pluginhost::getAllFilesWithExt(pluginPath, OSVR_PLUGIN_EXTENSION);
-
-        for (const auto &plugin : filesPaths) {
-            const std::string pluginPath = boost::filesystem::path(plugin).parent_path().generic_string();
-            const std::string pluginBaseName = boost::filesystem::path(plugin).filename().stem().generic_string();
-            const std::string pluginDirName = pluginPath + boost::filesystem::path::preferred_separator + pluginBaseName;
-            if (boost::iends_with(pluginDirName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
-                out << "Ignoring plugin marked for manual loading " << pluginBaseName << "..." << std::endl;
-                continue;
-            }
-
-            try {
-                m_server->loadPlugin(pluginDirName);
-                m_successfulPlugins.push_back(pluginDirName);
-            } catch (const std::exception &e) {
-                m_failedPlugins.push_back(std::make_pair(pluginDirName, e.what()));
-                success = false;
-            }
-        }
-
-        return success;
-    }
-
-    ConfigureServer::SuccessList const &
-    ConfigureServer::getSuccessfulPlugins() const {
-        return m_successfulPlugins;
-    }
-
-    ConfigureServer::ErrorList const &
-    ConfigureServer::getFailedPlugins() const {
-        return m_failedPlugins;
-    }
-
     static const char DRIVERS_KEY[] = "drivers";
     static const char DRIVER_KEY[] = "driver";
     static const char PLUGIN_KEY[] = "plugin";
@@ -263,6 +220,10 @@ namespace server {
             success = true;
         }
         return success;
+    }
+
+    void ConfigureServer::loadPlugins() {
+        m_server->loadPlugins();
     }
 
 } // namespace server

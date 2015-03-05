@@ -98,6 +98,9 @@ namespace server {
         /// @brief Load plugin by name.
         OSVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
 
+        /// @brief Load all detected plugins.
+        OSVR_SERVER_EXPORT void loadPlugins();
+
         /// @brief Instantiate the named driver with parameters.
         /// @param plugin The name of a plugin.
         /// @param driver The name of a driver registered by the plugin for

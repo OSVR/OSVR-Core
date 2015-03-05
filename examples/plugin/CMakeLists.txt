@@ -9,9 +9,9 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS
 
 
 foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
-    osvr_add_plugin_no_install(${pluginname} ${pluginname}.cpp)
-    target_link_libraries(${pluginname} osvrPluginKitCpp)
-    set_target_properties(${pluginname} PROPERTIES
+    osvr_add_plugin_no_install(${pluginname}.manualload ${pluginname}.cpp)
+    target_link_libraries(${pluginname}.manualload osvrPluginKitCpp)
+    set_target_properties(${pluginname}.manualload PROPERTIES
         FOLDER "OSVR Example Plugins")
 endforeach()
 
@@ -22,22 +22,22 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 osvr_convert_json(com_osvr_example_AnalogSync_json
     com_osvr_example_AnalogSync.json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-osvr_add_plugin_no_install(com_osvr_example_AnalogSync
+osvr_add_plugin_no_install(com_osvr_example_AnalogSync.manualload
     com_osvr_example_AnalogSync.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-target_link_libraries(com_osvr_example_AnalogSync osvrPluginKitCpp)
-set_target_properties(com_osvr_example_AnalogSync PROPERTIES
+target_link_libraries(com_osvr_example_AnalogSync.manualload osvrPluginKitCpp)
+set_target_properties(com_osvr_example_AnalogSync.manualload PROPERTIES
     FOLDER "OSVR Example Plugins")
 
 ## Build the code from the selfcontained example
 osvr_convert_json(com_osvr_example_selfcontainedDetectAndCreate_json
     selfcontained/com_osvr_example_selfcontainedDetectAndCreate.json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-osvr_add_plugin_no_install(com_osvr_example_selfcontainedDetectAndCreate
+osvr_add_plugin_no_install(com_osvr_example_selfcontainedDetectAndCreate.manualload
     selfcontained/com_osvr_example_selfcontainedDetectAndCreate.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate osvrPluginKitCpp)
-set_target_properties(com_osvr_example_selfcontainedDetectAndCreate PROPERTIES
+target_link_libraries(com_osvr_example_selfcontainedDetectAndCreate.manualload osvrPluginKitCpp)
+set_target_properties(com_osvr_example_selfcontainedDetectAndCreate.manualload PROPERTIES
     FOLDER "OSVR Example Plugins")
 
 if(BUILD_TESTING)

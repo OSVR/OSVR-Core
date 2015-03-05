@@ -111,6 +111,10 @@ namespace server {
                                    m_ctx, pluginName));
     }
 
+    void ServerImpl::loadPlugins() {
+        m_ctx->loadPlugins();
+    }
+
     void ServerImpl::instantiateDriver(std::string const &plugin,
                                        std::string const &driver,
                                        std::string const &params) {

@@ -55,6 +55,10 @@ namespace server {
         m_impl->loadPlugin(plugin);
     }
 
+    void Server::loadPlugins() {
+        m_impl->loadPlugins();
+    }
+
     void Server::instantiateDriver(std::string const &plugin,
                                    std::string const &driver,
                                    std::string const &params) {

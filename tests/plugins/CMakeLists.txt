@@ -13,9 +13,9 @@ set(OSVR_TEST_DEVICE_PLUGINS
 
 # Build the test-only plugins
 foreach(pluginname ${OSVR_TEST_PLUGINS} ${OSVR_TEST_DEVICE_PLUGINS})
-    osvr_add_plugin_no_install(${pluginname} ${pluginname}.cpp)
-    target_link_libraries(${pluginname} osvrPluginKitCpp)
-    set_target_properties(${pluginname} PROPERTIES
+    osvr_add_plugin_no_install(${pluginname}.manualload ${pluginname}.cpp)
+    target_link_libraries(${pluginname}.manualload osvrPluginKitCpp)
+    set_target_properties(${pluginname}.manualload PROPERTIES
         FOLDER "OSVR Test Plugins")
 endforeach()
 
