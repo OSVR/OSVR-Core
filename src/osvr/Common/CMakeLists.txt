@@ -19,6 +19,7 @@ set(API
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
+    "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
