@@ -21,11 +21,13 @@
 // Internal Includes
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/PluginHost/SearchPath.h>
+#include <osvr/PluginHost/PathConfig.h>
 #include "PluginSpecificRegistrationContextImpl.h"
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <libfunctionality/LoadPlugin.h>
+#include <boost/filesystem.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/algorithm/string/predicate.hpp>

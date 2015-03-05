@@ -20,10 +20,9 @@
 
 // Internal Includes
 #include <osvr/PluginHost/Export.h>
-#include <osvr/PluginHost/PathConfig.h>
 
 // Library/third-party includes
-#include <boost/filesystem.hpp>
+// - none
 
 // Standard includes
 #include <vector>

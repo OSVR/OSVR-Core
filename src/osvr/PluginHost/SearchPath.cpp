@@ -17,6 +17,7 @@
 
 // Internal Includes
 #include <osvr/PluginHost/SearchPath.h>
+#include <osvr/PluginHost/PathConfig.h>
 #include "BinaryLocation.h"
 
 // Library/third-party includes
