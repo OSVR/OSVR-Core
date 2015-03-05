@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(SampleClient) # Change this line.
 
-# Find boost easier.
-include("${CMAKE_CURRENT_SOURCE_DIR}/CMakeBoostHelper.cmake")
-
 # This looks for an osvrConfig.cmake file - most of the time it can be
 # autodetected but you might need to specify osvr_DIR to be something like
-# C:/Users/Ryan/Desktop/build/OSVR-Core-vc12/osvr in the CMake GUI
+# C:/Users/Ryan/Desktop/build/OSVR-Core-vc12 or
+# C:/Users/Ryan/Downloads/OSVR-Core-Snapshot-v0.1-406-gaa55515-build54-vs12-32bit
+# in the CMake GUI or command line
 find_package(osvr)
 
 # Pass as many source files as you need. You'll want your own since this just uses

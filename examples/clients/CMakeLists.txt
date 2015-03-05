@@ -54,7 +54,6 @@ add_test(NAME DisplayParameter_runs
 
 ###
 # Set up self-contained example test
-set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}/osvr")
 set(BUILD_FLAGS)
 if(MSVC)
 # TODO this is really for multi-config generators
@@ -63,6 +62,7 @@ endif()
 if(CMAKE_GENERATOR_TOOLSET)
     set(CONFIG_FLAGS "${CONFIG_FLAGS} -T \"${CMAKE_GENERATOR_TOOLSET}\"")
 endif()
+    set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}")
 
 configure_file(selfcontained_test.cmake "${CMAKE_CURRENT_BINARY_DIR}/selfcontained_test.cmake" @ONLY)
 add_test(NAME StandaloneClientBuilds

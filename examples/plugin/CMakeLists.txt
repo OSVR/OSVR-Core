@@ -43,7 +43,7 @@ set_target_properties(com_osvr_example_selfcontainedDetectAndCreate.manualload P
 if(BUILD_TESTING)
     ###
     # Set up self-contained example test
-    set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}/osvr")
+    set(CONFIG_FLAGS "-Dosvr_DIR=${PROJECT_BINARY_DIR}")
     set(BUILD_FLAGS)
     if(MSVC)
     # TODO this is really for multi-config generators
