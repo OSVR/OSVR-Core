@@ -30,6 +30,7 @@ if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
 endif()
 
 set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
+mark_as_advanced(OSVR_PLUGIN_IGNORE_SUFFIX)
 
 ###
 # CMake Modules
