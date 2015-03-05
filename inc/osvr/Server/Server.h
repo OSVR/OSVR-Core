@@ -85,17 +85,26 @@ namespace server {
         OSVR_SERVER_EXPORT void startAndAwaitShutdown();
 
         /// @brief Block until the server shuts down.
+        ///
+        /// Do not call from within the server thread itself, of course.
         OSVR_SERVER_EXPORT void awaitShutdown();
 
         /// @brief Signal the server to stop (if it is running), and block until
         /// it does so.
+        ///
+        /// Safe to call from any non-server thread, do not call from within the
+        /// server thread itself, of course.
         OSVR_SERVER_EXPORT void stop();
 
         /// @brief Signal the server to stop (if it is running) but return
         /// immediately.
+        ///
+        /// Safe to call from any thread.
         OSVR_SERVER_EXPORT void signalStop();
 
         /// @brief Load plugin by name.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT void loadPlugin(std::string const &plugin);
 
         /// @brief Instantiate the named driver with parameters.
@@ -122,6 +131,8 @@ namespace server {
         ///
         /// @returns true if the route was new, or false if it replaced an
         /// existing route for that destination.
+        ///
+        /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT bool addRoute(std::string const &routingDirective);
 
         /// @brief Get a JSON array of all routing directives.
@@ -135,10 +146,14 @@ namespace server {
 
         /// @brief Sets the amount of time (in microseconds) that the server
         /// loop will sleep each loop.
+        ///
+        /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT void setSleepTime(int microseconds);
 
         /// @brief Returns the amount of time (in microseconds) that the server
         /// loop sleeps each loop.
+        ///
+        /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT int getSleepTime() const;
 
       private:
