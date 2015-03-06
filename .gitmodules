@@ -7,3 +7,6 @@
 [submodule "json-schemas"]
 	path = json-schemas
 	url = git@github.com:OSVR/OSVR-JSON-Schemas.git
+[submodule "vendor/discount-windows-bins"]
+	path = vendor/discount-windows-bins
+	url = https://github.com/OSVR/discount.git
