@@ -203,16 +203,23 @@ else()
     set(README_DEST "${CMAKE_INSTALL_DOCDIR}")
 endif()
 
+# For generating documentation in HTML
+if(WIN32)
+    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendor/discount-windows-bins")
+endif()
 find_package(Markdown)
+
+set(README_MARKDOWN
+    README.md
+    NEWS.md)
 if(MARKDOWN_FOUND)
     include(UseMarkdown)
-    add_markdown_target(markdown-readme ${CMAKE_CURRENT_BINARY_DIR} README.md)
+    add_markdown_target(markdown-readme ${CMAKE_CURRENT_BINARY_DIR} ${README_MARKDOWN})
     install_markdown_target(markdown-readme DESTINATION "${README_DEST}" COMPONENT Runtime)
 else()
-    install(FILES README.md
+    install(FILES ${README_MARKDOWN}
         DESTINATION "${README_DEST}"
-        COMPONENT Runtime
-        RENAME Readme.txt)
+        COMPONENT Runtime)
 endif()
 
 include(DoxygenTargets)
