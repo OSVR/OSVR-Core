@@ -114,38 +114,41 @@ int main(int argc, char *argv[]) {
             boost::unique_lock<boost::mutex> lock(client.getMutex());
             routes = ctx.get()->getRoutes();
             ret = osvrGetOrientationState(iface.get(), &timestamp, &state);
-        }
-        if (ret != OSVR_RETURN_SUCCESS) {
-            cerr << "Sorry, no orientation state available for this route - "
-                    "are you sure you have a device plugged in and your path "
-                    "correct?" << endl;
-            return -1;
-        }
-        Eigen::Vector3d transformedZ =
-            osvr::util::fromQuat(state) * Eigen::Vector3d::UnitZ();
-        transformedZ[1] = 0; // Zero out the Y to project onto the XZ plane
-        auto angle =
-            std::acos(transformedZ.normalized().dot(Eigen::Vector3d::UnitZ()));
-        Json::Value newLayer(Json::objectValue);
-        newLayer["rotate"]["radians"] = angle;
-        newLayer["rotate"]["axis"] = "y";
-
-        Json::Value origRoute;
-        {
-            Json::Reader reader;
-            if (!reader.parse(routes.getRouteForDestination(dest), origRoute)) {
-                cerr << "Error parsing existing route!" << endl;
-                cerr << routes.getRouteForDestination(dest) << endl;
+            if (ret != OSVR_RETURN_SUCCESS) {
+                cerr
+                    << "Sorry, no orientation state available for this route - "
+                       "are you sure you have a device plugged in and your "
+                       "path "
+                       "correct?" << endl;
                 return -1;
             }
-        }
-        std::string newRoute = wrapRoute(origRoute, newLayer).toStyledString();
-        cout << "New route: " << newRoute << endl;
-        {
-            /// briefly interrupt the client mainloop so we can get stuff done
-            /// with the client state.
-            boost::unique_lock<boost::mutex> lock(client.getMutex());
+            auto quat = osvr::util::fromQuat(state);
+            quat.z() = 0;
+            quat.x() = 0;
+            quat.normalize();
+            auto correction = Eigen::AngleAxisd(quat.inverse());
+            cout << correction.angle() << " about " << correction.axis()
+                 << endl;
+
+            Json::Value newLayer(Json::objectValue);
+            newLayer["rotate"]["radians"] = correction.angle();
+            newLayer["rotate"]["axis"] = "y";
+
+            Json::Value origRoute;
+            {
+                Json::Reader reader;
+                if (!reader.parse(routes.getRouteForDestination(dest),
+                                  origRoute)) {
+                    cerr << "Error parsing existing route!" << endl;
+                    cerr << routes.getRouteForDestination(dest) << endl;
+                    return -1;
+                }
+            }
+            std::string newRoute =
+                wrapRoute(origRoute, newLayer).toStyledString();
+            cout << "New route: " << newRoute << endl;
             ctx.get()->sendRoute(newRoute);
+            boost::this_thread::sleep(SETTLE_TIME / 2);
         }
 
         boost::this_thread::sleep(SETTLE_TIME);
