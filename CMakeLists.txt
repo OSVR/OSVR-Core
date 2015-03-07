@@ -221,6 +221,9 @@ else()
         DESTINATION "${README_DEST}"
         COMPONENT Runtime)
 endif()
+install(FILES LICENSE NOTICE
+    DESTINATION "${README_DEST}"
+    COMPONENT Runtime)
 
 include(DoxygenTargets)
 # Internal Doxygen (includes implementation details) - target "doc"
