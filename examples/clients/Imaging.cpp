@@ -65,7 +65,8 @@ int main() {
     osvr::clientkit::registerImagingCallback(camera, &imagingCallback, NULL);
 
     // Output instructions to the console.
-    std::cout << std::endl << windowNameAndInstructions << std::endl;
+    std::cout << std::endl
+              << windowNameAndInstructions << std::endl;
 
     // Pretend that this is your application's mainloop.
     // We're using a simple OpenCV "highgui" loop here.
