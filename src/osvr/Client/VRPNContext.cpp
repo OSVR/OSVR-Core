@@ -199,6 +199,7 @@ namespace client {
 
     void VRPNContext::m_sendRoute(std::string const &route) {
         m_systemComponent->sendClientRouteUpdate(route);
+        m_update();
     }
 
     void VRPNContext::m_update() {
