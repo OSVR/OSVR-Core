@@ -153,6 +153,7 @@ namespace server {
             /// mutex each time through?
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
             m_conn->process();
+            m_systemDevice->update();
             for (auto &f : m_mainloopMethods) {
                 f();
             }
