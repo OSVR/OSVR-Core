@@ -26,6 +26,7 @@
 // Internal Includes
 #include "ClientMainloop.h"
 #include "JSONTools.h"
+#include "RecomposeTransform.h"
 #include "WrapRoute.h"
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
@@ -75,25 +76,11 @@ inline Json::Value removeCalibration(std::string const &input) {
     if (!reader.parse(input, root)) {
         throw std::runtime_error("Could not parse route");
     }
-    std::vector<Json::Value> levels;
-    Json::Value current = root;
-    while (current.isMember("child") && current["child"].isObject()) {
-        if (current.isMember("calibration") &&
-            current["calibration"].isBool() &&
-            current["calibration"].asBool()) {
-            // calibration level - skip it
-        } else {
-            levels.push_back(current);
-        }
-        current = current["child"];
-    }
-    while (levels.size() > 0) {
-        Json::Value next = levels.back();
-        levels.pop_back();
-        next["child"] = current;
-        current = next;
-    }
-    return current;
+    return remove_levels_if(root, [](Json::Value const &current) {
+        return current.isMember("calibration") &&
+               current["calibration"].isBool() &&
+               current["calibration"].asBool();
+    });
 }
 
 int main(int argc, char *argv[]) {
