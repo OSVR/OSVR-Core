@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include "ClientMainloop.h"
+#include "RecomposeTransform.h"
 #include "WrapRoute.h"
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/Client/ClientContext.h>
@@ -37,6 +38,7 @@
 #include <boost/program_options.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/chrono.hpp>
 #include <json/value.h>
 #include <json/reader.h>
 
@@ -53,15 +55,41 @@ auto SETTLE_TIME = boost::posix_time::seconds(2);
 
 class ClientMainloopThread : boost::noncopyable {
   public:
-    ClientMainloopThread(osvr::clientkit::ClientContext &ctx)
-        : m_run(true), m_mainloop(ctx) {
+    ClientMainloopThread(osvr::clientkit::ClientContext &ctx,
+                         bool startNow = false)
+        : m_run(false), m_started(false), m_mainloop(ctx) {
+        if (startNow) {
+            start();
+        }
+    }
+    void start() {
+        if (m_run || m_started) {
+            throw std::logic_error(
+                "Can't start if it's already started or if this is a re-start");
+        }
+        m_started = true;
+        m_run = true;
         m_thread = boost::thread([&] {
             while (m_run) {
-                m_mainloop.mainloop();
-                boost::this_thread::yield();
+                oneLoop();
             }
         });
     }
+
+    void oneLoop() {
+        m_mainloop.mainloop();
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    }
+
+    template <typename T>
+    void loopForDuration(T duration = boost::chrono::seconds(2)) {
+        typedef boost::chrono::steady_clock clock;
+        auto start = clock::now();
+        do {
+            oneLoop();
+        } while (clock::now() - start < duration);
+    }
+
     ~ClientMainloopThread() {
         m_run = false;
         m_thread.join();
@@ -70,9 +98,14 @@ class ClientMainloopThread : boost::noncopyable {
 
   private:
     volatile bool m_run;
+    bool m_started;
     ClientMainloop m_mainloop;
     boost::thread m_thread;
 };
+
+/// @brief A flag we set in transform levels we create.
+static const char FLAG_KEY[] = "resetYaw";
+
 int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     // clang-format off
@@ -102,9 +135,36 @@ int main(int argc, char *argv[]) {
 
     osvr::clientkit::Interface iface = ctx.getInterface(dest);
     {
-        cout << "Starting client mainloop..." << endl;
+
         ClientMainloopThread client(ctx);
-        cout << "Waiting a few seconds for startup..." << endl;
+
+        cout << "Running client mainloop briefly to get routes..." << endl;
+        client.loopForDuration(boost::chrono::seconds(2));
+        cout << "Removing any previous yaw-reset transforms..." << endl;
+        Json::Value origRoute;
+        {
+            Json::Reader reader;
+            auto routeString =
+                ctx.get()->getRoutes().getRouteForDestination(dest);
+            if (!reader.parse(routeString, origRoute)) {
+                cerr << "Error parsing existing route!" << endl;
+                cerr << routeString << endl;
+                return -1;
+            }
+        }
+        Json::Value origTransforms =
+            origRoute[osvr::common::routing_keys::source()];
+        Json::Value cleanTransforms =
+            remove_levels_if(origTransforms, [](Json::Value const &current) {
+                return current.isMember(FLAG_KEY) &&
+                       current[FLAG_KEY].isBool() && current[FLAG_KEY].asBool();
+            });
+        origRoute[osvr::common::routing_keys::source()] = cleanTransforms;
+        ctx.get()->sendRoute(origRoute.toStyledString());
+
+        cout << "Sent cleaned route, starting again and waiting a few seconds "
+                "for startup..." << endl;
+        client.start();
         boost::this_thread::sleep(SETTLE_TIME);
 
         cout << "\n\nPlease place your device for " << dest
@@ -114,43 +174,32 @@ int main(int argc, char *argv[]) {
         OSVR_OrientationState state;
         OSVR_TimeValue timestamp;
         OSVR_ReturnCode ret;
-        osvr::common::RouteContainer routes;
         {
             /// briefly interrupt the client mainloop so we can get stuff done
             /// with the client state.
             boost::unique_lock<boost::mutex> lock(client.getMutex());
-            routes = ctx.get()->getRoutes();
             ret = osvrGetOrientationState(iface.get(), &timestamp, &state);
             if (ret != OSVR_RETURN_SUCCESS) {
                 cerr
                     << "Sorry, no orientation state available for this route - "
                        "are you sure you have a device plugged in and your "
-                       "path "
-                       "correct?" << endl;
+                       "path correct?" << endl;
+                std::cin.ignore();
                 return -1;
             }
-            auto quat = osvr::util::fromQuat(state);
-            quat.z() = 0;
-            quat.x() = 0;
-            quat.normalize();
-            auto correction = Eigen::AngleAxisd(quat.inverse());
-            cout << correction.angle() << " about " << correction.axis()
-                 << endl;
+            auto q = osvr::util::fromQuat(state);
+
+            // see
+            // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
+            double yaw = std::atan2(2 * (q.y() * q.w() - q.x() * q.z()),
+                                    1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
+            cout << "Correction: " << -yaw << " radians about Y" << endl;
 
             Json::Value newLayer(Json::objectValue);
-            newLayer["rotate"]["radians"] = correction.angle();
+            newLayer["rotate"]["radians"] = -yaw;
             newLayer["rotate"]["axis"] = "y";
+            newLayer[FLAG_KEY] = true;
 
-            Json::Value origRoute;
-            {
-                Json::Reader reader;
-                if (!reader.parse(routes.getRouteForDestination(dest),
-                                  origRoute)) {
-                    cerr << "Error parsing existing route!" << endl;
-                    cerr << routes.getRouteForDestination(dest) << endl;
-                    return -1;
-                }
-            }
             std::string newRoute =
                 wrapRoute(origRoute, newLayer).toStyledString();
             cout << "New route: " << newRoute << endl;
@@ -160,6 +209,7 @@ int main(int argc, char *argv[]) {
 
         boost::this_thread::sleep(SETTLE_TIME);
 
+        cout << "Press enter to exit.";
         std::cin.ignore();
     }
     return 0;
