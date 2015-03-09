@@ -100,7 +100,7 @@ namespace common {
                 auto axisPtr = std::strchr(AXIS_NAMES, c);
                 if (nullptr != axisPtr) {
                     auto index = axisPtr - AXIS_NAMES;
-                    if (index = > VecType::RowsAtCompileTime) {
+                    if (index >= VecType::RowsAtCompileTime) {
                         throw std::runtime_error(
                             "A vector of this size cannot be initialized to " +
                             s);
