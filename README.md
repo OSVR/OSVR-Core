@@ -10,11 +10,8 @@ This is the code and libraries to use when developing with OSVR.
 - For developing plugins, you'll use the @ref PluginKit library.
 - For developing applications using the framework, you'll use the @ref ClientKit library.
 
-
 ## Binary Snapshot Documentation
-This snapshot contains documentation, example code, JSON schemas, and JSON descriptor files in the `share/doc/osvrcore` directory.
-
-That directory may also contain an `api` subdirectory with generated API documentation. If your snapshot does not include this API documentation, visit <http://access.osvr.com> to view it online. If you have access to see this file, you should have access to view the documentation on that site, but if there's any issue, just [contact us](mailto:support@osvr.com?subject=Access%20to%20API%20documentation%20site) and we'll get it taken care of.
+This snapshot contains documentation, example code, JSON schemas, and JSON descriptor files in the `share/doc/osvrcore` directory. More information is available online.
 
 ## Source Documentation
 See [the HACKING file](HACKING.md) for some development guidelines for working on this code base itself.
