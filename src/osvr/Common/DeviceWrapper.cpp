@@ -53,8 +53,8 @@ namespace common {
 
     void DeviceWrapper::m_update() {
         if (m_client) {
-            client_mainloop();
             m_getConnection()->mainloop();
+            client_mainloop();
         } else {
             server_mainloop();
         }
