@@ -227,7 +227,7 @@ namespace client {
 
         m_routers.emplace_back(
             new VRPNAnalogRouter<SensorPredicate, NullTransform>(
-                this, m_conn.get(), (src + ("@" + m_host)).c_str(), dest,
+                this, m_conn, (src + ("@" + m_host)).c_str(), dest,
                 SensorPredicate(channel), NullTransform(), channel));
     }
 
@@ -236,7 +236,7 @@ namespace client {
                                         Predicate pred) {
         OSVR_DEV_VERBOSE("Adding button route for " << dest);
         m_routers.emplace_back(new VRPNButtonRouter<Predicate>(
-            this, m_conn.get(), (src + ("@" + m_host)).c_str(), dest, pred));
+            this, m_conn, (src + ("@" + m_host)).c_str(), dest, pred));
     }
 
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
@@ -246,13 +246,15 @@ namespace client {
         std::string source(src);
         if (std::string::npos != source.find('@')) {
             // We found an @ - so this is a device we need a new connection for.
-            m_routers.emplace_back(
-                new VRPNTrackerRouter(this, nullptr, src, sensor, dest, xform));
+
+            OSVR_DEV_VERBOSE("(External source, need new connection)");
+            m_routers.emplace_back(new VRPNTrackerRouter(
+                this, vrpn_ConnectionPtr(), src, sensor, dest, xform));
         } else {
             // No @: assume to be at the same location as the context.
             m_routers.emplace_back(new VRPNTrackerRouter(
-                this, m_conn.get(), (src + ("@" + m_host)).c_str(), sensor,
-                dest, xform));
+                this, m_conn, (src + ("@" + m_host)).c_str(), sensor, dest,
+                xform));
         }
     }
 

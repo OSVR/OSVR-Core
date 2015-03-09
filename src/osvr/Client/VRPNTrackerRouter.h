@@ -44,11 +44,12 @@ namespace osvr {
 namespace client {
     class VRPNTrackerRouter : public RouterEntry {
       public:
-        VRPNTrackerRouter(ClientContext *ctx, vrpn_Connection *conn,
+        VRPNTrackerRouter(ClientContext *ctx, vrpn_ConnectionPtr conn,
                           const char *src, boost::optional<int> sensor,
                           const char *dest, transform::Transform const &t)
             : RouterEntry(ctx, dest),
-              m_remote(new vrpn_Tracker_Remote(src, conn)), m_transform(t) {
+              m_remote(new vrpn_Tracker_Remote(src, conn.get())),
+              m_transform(t), m_conn(conn) {
             m_remote->register_change_handler(this, &VRPNTrackerRouter::handle,
                                               sensor.get_value_or(-1));
             m_remote->shutup = true;
@@ -106,6 +107,7 @@ namespace client {
       private:
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         transform::Transform m_transform;
+        vrpn_ConnectionPtr m_conn;
     };
 
 } // namespace client

@@ -38,10 +38,11 @@ namespace osvr {
 namespace client {
     template <typename Predicate> class VRPNButtonRouter : public RouterEntry {
       public:
-        VRPNButtonRouter(ClientContext *ctx, vrpn_Connection *conn,
+        VRPNButtonRouter(ClientContext *ctx, vrpn_ConnectionPtr conn,
                          const char *src, const char *dest, Predicate p)
             : RouterEntry(ctx, dest),
-              m_remote(new vrpn_Button_Remote(src, conn)), m_pred(p) {
+              m_remote(new vrpn_Button_Remote(src, conn.get())), m_pred(p),
+              m_conn(conn) {
             m_remote->register_change_handler(this, &VRPNButtonRouter::handle);
             m_remote->shutup = true;
         }
@@ -66,6 +67,7 @@ namespace client {
       private:
         unique_ptr<vrpn_Button_Remote> m_remote;
         Predicate m_pred;
+        vrpn_ConnectionPtr m_conn;
     };
 
 } // namespace client
