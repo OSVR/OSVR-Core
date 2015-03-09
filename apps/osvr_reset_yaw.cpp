@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
         boost::this_thread::sleep(SETTLE_TIME);
 
         cout << "\n\nPlease place your device for " << dest
-             << "in its 'zero' orientation and press enter." << endl;
+             << " in its 'zero' orientation and press enter." << endl;
         std::cin.ignore();
 
         OSVR_OrientationState state;
