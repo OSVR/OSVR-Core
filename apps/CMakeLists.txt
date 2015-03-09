@@ -33,9 +33,9 @@ set_target_properties(osvr_reset_yaw PROPERTIES
     FOLDER "OSVR Stock Applications")
 
 # TODO install osvr_reset_yaw when complete
-install(TARGETS osvr_server osvr_calibrate
+install(TARGETS osvr_server
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
-install(TARGETS BasicServer
+install(TARGETS BasicServer osvr_calibrate
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
 
 # Grab all the config files with a glob, to avoid missing one.
