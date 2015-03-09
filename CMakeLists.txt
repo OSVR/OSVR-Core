@@ -210,6 +210,7 @@ endif()
 find_package(Markdown)
 
 set(README_MARKDOWN
+    CONTRIBUTING.md
     README.md
     NEWS.md)
 if(MARKDOWN_FOUND)
