@@ -6,12 +6,13 @@ endif()
 
 add_executable(osvr_server
     osvr_server.cpp
-    ClientMainloop.h
-    JSONTools.h
-    WrapRoute.h
     ${OSVR_SERVER_RESOURCE})
 add_executable(BasicServer BasicServer.cpp)
-add_executable(osvr_calibrate osvr_calibrate.cpp)
+add_executable(osvr_calibrate
+    osvr_calibrate.cpp
+    ClientMainloop.h
+    JSONTools.h
+    WrapRoute.h)
 
 foreach(server BasicServer osvr_server osvr_calibrate)
     target_link_libraries(${server} osvrServer)
