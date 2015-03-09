@@ -34,6 +34,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/count_if.hpp>
 #include <boost/assert.hpp>
+#include <boost/static_assert.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -42,6 +43,7 @@
 
 namespace osvr {
 namespace common {
+    /// @brief Converts quaternions to JSON objects.
     template <typename Derived>
     inline Json::Value toJson(Eigen::QuaternionBase<Derived> const &quat) {
         Json::Value ret(Json::objectValue);
@@ -49,6 +51,17 @@ namespace common {
         ret["x"] = quat.x();
         ret["y"] = quat.y();
         ret["z"] = quat.z();
+    }
+
+    /// @brief Converts vectors to JSON arrays.
+    template <typename Derived>
+    inline Json::Value toJson(Eigen::MatrixBase<Derived> const &vec) {
+        BOOST_STATIC_ASSERT(Derived::ColsAtCompileTime == 1);
+        Json::Value ret(Json::arrayValue);
+        for (size_t i = 0; i < Derived::RowsAtCompileTime; ++i) {
+            ret.append(vec[i]);
+        }
+        return ret;
     }
 
     namespace detail {

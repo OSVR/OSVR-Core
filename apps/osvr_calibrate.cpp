@@ -25,12 +25,11 @@
 
 // Internal Includes
 #include "ClientMainloop.h"
-#include "JSONTools.h"
 #include "RecomposeTransform.h"
 #include "WrapRoute.h"
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
-
+#include <osvr/Common/JSONEigen.h>
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
 
@@ -207,7 +206,7 @@ int main(int argc, char *argv[]) {
             Json::Value newLayer(Json::objectValue);
             newLayer["calibration"] = true;
             newLayer["rotate"]["radians"] = rotation.angle();
-            newLayer["rotate"]["axis"] = toJson(rotation.axis());
+            newLayer["rotate"]["axis"] = osvr::common::toJson(rotation.axis());
             newRoute = wrapRoute(prunedDirective, newLayer);
             bool isNew = server->addRoute(newRoute.toStyledString());
             BOOST_ASSERT_MSG(

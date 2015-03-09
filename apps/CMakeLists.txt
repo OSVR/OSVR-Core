@@ -11,7 +11,6 @@ add_executable(BasicServer BasicServer.cpp)
 add_executable(osvr_calibrate
     osvr_calibrate.cpp
     ClientMainloop.h
-    JSONTools.h
     RecomposeTransform.h
     WrapRoute.h)
 
@@ -27,7 +26,6 @@ target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp osvrCommon eig
 add_executable(osvr_reset_yaw
     osvr_reset_yaw.cpp
     ClientMainloop.h
-    JSONTools.h
     RecomposeTransform.h
     WrapRoute.h)
 target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrTransform osvrRouting osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
