@@ -32,8 +32,7 @@ target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osv
 set_target_properties(osvr_reset_yaw PROPERTIES
     FOLDER "OSVR Stock Applications")
 
-# TODO install osvr_reset_yaw when complete
-install(TARGETS osvr_server
+install(TARGETS osvr_server osvr_reset_yaw
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 install(TARGETS BasicServer osvr_calibrate
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
