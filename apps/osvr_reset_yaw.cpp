@@ -52,6 +52,7 @@ using std::cerr;
 using std::endl;
 
 auto SETTLE_TIME = boost::posix_time::seconds(2);
+auto SLEEP_TIME = boost::posix_time::milliseconds(1);
 
 class ClientMainloopThread : boost::noncopyable {
   public:
@@ -78,7 +79,7 @@ class ClientMainloopThread : boost::noncopyable {
 
     void oneLoop() {
         m_mainloop.mainloop();
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+        boost::this_thread::sleep(SLEEP_TIME);
     }
 
     template <typename T>
