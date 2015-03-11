@@ -24,7 +24,7 @@
 # The default value is: My Project.
 
 # For config item PROJECT_NAME, default is My Project
-PROJECT_NAME           = "OSVR Framework"
+PROJECT_NAME           = "OSVR-Core"
 
 # For config item OUTPUT_DIRECTORY, default is 
 OUTPUT_DIRECTORY       = doxygen
@@ -146,6 +146,7 @@ EXPAND_ONLY_PREDEF     = YES
 PREDEFINED             = __cplusplus \
                          OSVR_DOXYGEN \
                          OSVR_HAVE_STRUCT_TIMEVAL \
+                         OSVR_COMMON_EXPORT= \
                          OSVR_CLIENT_EXPORT= \
                          OSVR_CLIENTKIT_EXPORT= \
                          OSVR_CONNECTION_EXPORT= \
@@ -153,6 +154,7 @@ PREDEFINED             = __cplusplus \
                          OSVR_PLUGINKIT_EXPORT= \
                          OSVR_ROUTING_EXPORT= \
                          OSVR_UTIL_EXPORT= \
+                         OSVR_VRPNSERVER_EXPORT= \
                          OSVR_INLINE= \
                          OSVR_CPP_ONLY(X)=X \
                          OSVR_IN= \
