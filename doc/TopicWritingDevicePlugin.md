@@ -1,50 +1,92 @@
 # Writing a basic device plugin              {#TopicWritingDevicePlugin}
 
-Writing a device plugin means you'll be building against the @ref PluginKit library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure, so you can more easily integrate it with an existing driver codebase. However, the following steps can help you build a plugin from scratch.
+Writing a device plugin means you'll be building against the [PluginKit](@ref PluginKit) library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure, so you can more easily integrate it with an existing driver codebase. However, the following steps can help you build a plugin from scratch.
 
 1. Make a copy of the directory `/examples/plugin/selfcontained` as the starting point for your new plugin repository.
-  - This assumes that your plugin will be "out-of-tree" - that is, not hosted in the main Core repository.
-2. Do what it says in that `EXAMPLE_PLUGIN_README.md` file to change the plugin name and build system.
-3. Implement a hardware detection callback (to determine if your device is connected):
-  - This can take the form of a class with a function call operator (`operator()`), taking `OSVR_PluginRegContext ctx` and returning `OSVR_ReturnCode`. The sample plugin source includes an example of this.
-4. From within your callback, if the device exists, create a device token (as seen in the sample, or as in the `DummySync` examples). You need to have your device hold on to the device token to send data with it later on.
-5. The guts of implementing a device start at about line 51 of the sample: wait until there is data then call `osvrDeviceSendData()`. (There are two versions of this function: one where you provide a timestamp, and one where the timestamp is automatically created for you.) Your HMD may have different types of sensors (Tracker/Button/Analog) and you will need to use appropriate interfaces for each to send reports from device in your plugin.
-6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample json and modify it according to you needs or use the following webapp to create the JSON - <a href="http://opengoggles.org/tools/osvr-json">Device Descriptor Editor</a>. For each interface (Tracker/Button/Analog), you will need to describe its semantics (basically assign useful names to analog channels, etc). JSON device descriptor's purpose is to tell OSVR server what kind of trackers/sensors your device has (Follow the provided example JSON file). Specifying "Device Vendor" and "Device Product Name" in device descriptor file is for "informational purposes".
 
-Note that these instructions are only for drivers that can fully self-configure. Manually-configured drivers are also possible, but no minimal sample has yet been created. You essentially take the same steps as in an auto-detected plugin, except instead of registering a hardware detection callback, you call osvrRegisterDriverInstantiationCallback() providing a name for your driver and a function pointer that will get called with a JSON string of configuration data if the user configures your plugin in the `osvr_server` config file.
-For auto-configured drivers, you should remove `"driver"` section from the `osvr_server_config.json` file, otherwise it will try to load name of specific driver and you would get an error similar to this <br> `"[OSVR Server] - com_osvr_Vuzix/Vuzix No driver initialization callback was registered for the driver name Vuzix"`
+   This assumes that your plugin will be "out-of-tree"—that is, not hosted in the main OSVR-Core repository.
+
+2. Follow the instructions in the `EXAMPLE_PLUGIN_README.md` file to change the plugin name and set up the build system.
+
+3. Implement a hardware detection callback (to determine if your device is connected):
+
+   This can take the form of a class with a function call operator (`operator()`), taking an @ref OSVR_PluginRegContext parameter named `ctx` and returning an @ref OSVR_ReturnCode value. The sample plugin source includes an example of this.
+
+4. From within your callback, if the device exists, create a device token (as seen in the sample, or as in the `DummySync` examples). You need to have your device hold on to the device token to send data with it later on.
+
+5. The guts of implementing a device start at about line 51 of the sample: wait until there is data then call @ref osvrDeviceSendData. (There are two versions of this function: one where you provide a timestamp, and one where the timestamp is automatically created for you.) Your device may have different types of sensors (e.g., tracker, button, analog) and you will need to use appropriate interfaces for each to send reports from device in your plugin.
+
+6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample JSON descriptor and modify it according to you needs or use the [Device Descriptor Editor](http://opengoggles.org/) to create the JSON descriptor. For each interface (e.g., tracker, button, analog), you will need to describe its semantics—that is, assign useful names to analog channels, etc.). The device descriptor's purpose is to tell the OSVR server what kind of sensors your device has. Specifying the device vendor and the product name in device descriptor file is for informational purposes.
+
+Note that these instructions are only for drivers that can fully self-configure. Manually-configured drivers are also possible, but no minimal sample has yet been created. You essentially take the same steps as in an auto-detected plugin, except instead of registering a hardware detection callback, you call @ref osvrRegisterDriverInstantiationCallback providing a name for your driver and a function pointer. The function you provide will be called by the server and passed a JSON string of configuration data if the user configures your plugin in the `osvr_server` config file.
+
+For auto-configured drivers, you should remove the `"driver"` section from the `osvr_server_config.json` file, otherwise it will try to load name of specific driver and you would get an error similar to:
+
+    [OSVR Server] - com_example_MyDevice/DeviceName No driver initialization callback was registered for the driver name DeviceName
 
 ## Building Your Plugin
+
 These are instructions for Windows and Visual Studio, but they follow similarly for other platforms.
 
-1. *Prep source and deps:* Unzip a build snapshot somewhere convenient, and make sure you have your plugin outside of the directory tree. <br>![Build snapshot and plugin source directory](plugin-snapshot-and-plugindir.png)
+1. *Prepare source and dependencies:* Unzip a build snapshot somewhere convenient, and ensure your plugin resides outside of the snatpshot's directory tree.
 
-2. *CMake source and binary directories:* Open CMake, and set your source directory (top box) and build directory (second box - make up a different directory that is convenient for you). For easiest results, don't click configure and generate yet - you can still follow these steps if you do, just know you'll get some bogus errors. <br>![Initial CMake GUI window with directories set](plugin-cmake-1-initial.png)
+   ![Build snapshot and plugin source directory](plugin-snapshot-and-plugindir.png)
 
-3. *Set `CMAKE_PREFIX_PATH` for deps:* Click the "Add Entry" button. Enter `CMAKE_PREFIX_PATH` as the name and choose `PATH` as the type. Then, click the "..." to open a browse window. <br>![Add entry dialog before browsing for value](plugin-cmake-2-add-prefix-path.png) <br>   Choose the main directory of the snapshot - this is the one that contains `bin`, `lib`, etc. Then click OK to confirm the directory, and OK again to complete adding the entry. <br>![Selecting the correct dependency directory](plugin-cmake-3-choose-prefix.png) <br> You'll end up back at the main screen, which now looks like this. <br>![Main window after adding CMAKE_PREFIX_PATH](plugin-cmake-4-after-prefix.png)
+2. *Set the source and build directories:* Open CMake, and set the source directory and build directory. It is usually best to build in a separate directory from the source directory. This keeps the source directory clean and free of generated files.
 
-4. *Configure and generate:* You can now press the "Configure" button. Since your build directory doesn't exist yet, it will ask you for confirmation. <br>![Confirming it's OK to create the build directory](plugin-cmake-5-create-builddir.png) <br> Then, choose your "generator" - the kind of project you want it to generate. You probably want to choose Visual Studio 2013. Once you're back at the main screen, click Generate. <br>![Choosing generator](plugin-cmake-6-choose-generator.png)
+   ![Initial CMake GUI window with directories set](plugin-cmake-1-initial.png)
 
-5. *Open project:* In the build directory you specified, CMake will have generated a `.sln` solution file for you. Double-click to open it, and code/compile your plugin. Note that your snapshot may only have a limited subset of the build configurations included (typically Debug and RelWithDebInfo), so building your plugin in other configurations may not work.
+3. *Add the dependency locations to the `CMAKE_PREFIX_PATH` variable:* Click the "Add Entry" button. Enter `CMAKE_PREFIX_PATH` as the name and choose `PATH` as the type. Then, click the "..." button to open a folder selection window.
 
-6. *Find your build product:* You'll find your `.dll` file in the equivalent location of the binary tree as it was in the source tree, except inside one further configuration-specific folder (for Visual Studio). You may want to put it in the `bin` directory of a snapshot to more easily use the `BasicServer` to test.<br>![Location of build products](plugin-buildproducts.png)
+   ![Add entry dialog before browsing for value](plugin-cmake-2-add-prefix-path.png)
+
+   Select the root directory of the snapshot—this is the folder that contains `bin`, `lib`, etc. Then click OK to confirm the directory, and OK again to complete adding the entry.
+
+   ![Selecting the correct dependency directory](plugin-cmake-3-choose-prefix.png)
+
+   You'll end up back at the main screen, which now looks like this:
+
+   ![Main window after adding CMAKE_PREFIX_PATH](plugin-cmake-4-after-prefix.png)
+
+4. *Configure and generate the build scripts and project files:* Click the "Configure" button. If the build directory you specified doesn't yet exist, CMake will ask for confirmation before creating it. CMake will now search for any required library dependencies and header files.
+
+   ![Confirming it's OK to create the build directory](plugin-cmake-5-create-builddir.png)
+
+   Next, select the appropriate build system or project version for your system. In Windows, you will likely want to select your version of Visual Studio; under Linux, select Makefile. Click Finish to return to the main window. Finally, click Generate to generate the build script or project solution files.
+
+   ![Choosing generator](plugin-cmake-6-choose-generator.png)
+
+5. *Open the project:* In the build directory you specified, CMake will have generated a `.sln` solution file for you if you are using Visual Studio. Double-click to open the project in Visual Studio, and build your plugin. Note that your snapshot may only have a limited subset of the build configurations included (typically Debug and RelWithDebInfo), so building your plugin in other configurations may not work.
+
+6. *Locate your compiled plugin files:* You will find the compiled plugin `.dll` file in a subdirectory of build directory named according to the build type (e.g., `Debug`, `Release`).
+
+   ![Location of build products](plugin-buildproducts.png)
 
 
 ## Testing your plugin
 
-- In order for OSVR Server to properly load the plugin and find your device, you will need to create a new `osvr_server_config.JSON` file. You can start by modifying an existing config file and changing the configuration appropriately. You will need to add routes to `osvr_server_config.JSON` file for sensors/trackers that you specified in your device descriptor. You can also use a tool to create it for you (pending for now).
-- Once your plugin loads succesfully, you should test communication between the device and osvr server to verify that the server receives all necessary data from device. To test: you can start OSVR Server with updated osvr_server_config JSON file. To see the data between device and osvr_server, there is is utility vrpn_print_devices that will allow you to see  the messages. Run this command through the cmd window:  <br> ```vrpn_print_devices fullDeviceName@localhost``` , where `fullDeviceName` is typically `pluginName/deviceName`. Once you run osvr_server, and it successfully loads and detects the device you will see a message like `Added device org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0`. Copy an entire `org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0` which is the needed `fullDeviceName`. VRPN_Print_Device utility is part of the VRPN project. If succesful, you will be able to see the data from your device whether it is tracker coordinates or button presses. See sample output below (HMD with tracker sensor):
+In order for the OSVR server to properly load the plugin and find your device, you will need to create a new `osvr_server_config.json` file. You can start by modifying an existing config file and changing the configuration appropriately. You will need to add routes to `osvr_server_config.json` file for sensors that you specified in your device descriptor.
 
-```
-vrpn_print_devices com_osvr_Vuzix/Vuzix@localhost
-Opened com_osvr_Vuzix/Vuzix@localhost as: Tracker Button Analog Dial Text
-Press ^C to exit.
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
-        pos ( 0.00,  0.00,  0.00); quat (-0.08,  0.89, -0.05,  0.45)
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
-		pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.78,  0.03,  0.87)
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
-        pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.48,  0.03,  0.87)
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
-        pos ( 0.00,  0.00,  0.00); quat (-0.12, -0.88,  0.03,  0.46)
-```
+Once your plugin loads succesfully, you can view the data that the OSVR server is transmitting from your plugin. The `vrpn_print_devices` utility will display this information:
+
+
+    vrpn_print_devices org_example_MyDevice/DeviceName@localhost
+
+You can find the proper device name when you run the `osvr_server`. After successfully loading your plugin, the server will print a message similar to:
+
+    Added device org_example_MyDevice/DeviceName
+
+Here is some example output from a tracker device:
+
+    vrpn_print_devices com_osvr_Vuzix/Vuzix@localhost
+    Opened com_osvr_Vuzix/Vuzix@localhost as: Tracker Button Analog Dial Text
+    Press ^C to exit.
+    Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+            pos ( 0.00,  0.00,  0.00); quat (-0.08,  0.89, -0.05,  0.45)
+    Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+            pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.78,  0.03,  0.87)
+    Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+            pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.48,  0.03,  0.87)
+    Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+            pos ( 0.00,  0.00,  0.00); quat (-0.12, -0.88,  0.03,  0.46)
+
