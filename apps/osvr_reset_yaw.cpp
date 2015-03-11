@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "ClientMainloop.h"
+#include "ClientMainloopThread.h"
 #include "RecomposeTransform.h"
 #include "WrapRoute.h"
 #include <osvr/ClientKit/ClientKit.h>
@@ -38,7 +38,6 @@
 #include <boost/program_options.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/chrono.hpp>
 #include <json/value.h>
 #include <json/reader.h>
 
@@ -52,57 +51,6 @@ using std::cerr;
 using std::endl;
 
 auto SETTLE_TIME = boost::posix_time::seconds(2);
-auto SLEEP_TIME = boost::posix_time::milliseconds(1);
-
-class ClientMainloopThread : boost::noncopyable {
-  public:
-    ClientMainloopThread(osvr::clientkit::ClientContext &ctx,
-                         bool startNow = false)
-        : m_run(false), m_started(false), m_mainloop(ctx) {
-        if (startNow) {
-            start();
-        }
-    }
-    void start() {
-        if (m_run || m_started) {
-            throw std::logic_error(
-                "Can't start if it's already started or if this is a re-start");
-        }
-        m_started = true;
-        m_run = true;
-        m_thread = boost::thread([&] {
-            while (m_run) {
-                oneLoop();
-            }
-        });
-    }
-
-    void oneLoop() {
-        m_mainloop.mainloop();
-        boost::this_thread::sleep(SLEEP_TIME);
-    }
-
-    template <typename T>
-    void loopForDuration(T duration = boost::chrono::seconds(2)) {
-        typedef boost::chrono::steady_clock clock;
-        auto start = clock::now();
-        do {
-            oneLoop();
-        } while (clock::now() - start < duration);
-    }
-
-    ~ClientMainloopThread() {
-        m_run = false;
-        m_thread.join();
-    }
-    boost::mutex &getMutex() { return m_mainloop.getMutex(); }
-
-  private:
-    volatile bool m_run;
-    bool m_started;
-    ClientMainloop m_mainloop;
-    boost::thread m_thread;
-};
 
 /// @brief A flag we set in transform levels we create.
 static const char FLAG_KEY[] = "resetYaw";
