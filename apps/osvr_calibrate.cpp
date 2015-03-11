@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
         {
             /// briefly interrupt the client mainloop so we can get stuff done
             /// with the client state.
-            boost::unique_lock<boost::mutex> lock(client.getMutex());
+            ClientMainloop::lock_type lock(client.getMutex());
             ret = osvrGetOrientationState(iface.get(), &timestamp, &state);
         }
         if (ret != OSVR_RETURN_SUCCESS) {

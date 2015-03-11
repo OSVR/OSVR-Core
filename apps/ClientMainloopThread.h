@@ -40,6 +40,8 @@ static const auto SLEEP_TIME = boost::posix_time::milliseconds(1);
 
 class ClientMainloopThread : boost::noncopyable {
   public:
+    typedef ClientMainloop::mutex_type mutex_type;
+    typedef ClientMainloop::lock_type lock_type;
     ClientMainloopThread(osvr::clientkit::ClientContext &ctx,
                          bool startNow = false)
         : m_run(false), m_started(false), m_mainloop(ctx) {
@@ -79,7 +81,7 @@ class ClientMainloopThread : boost::noncopyable {
         m_run = false;
         m_thread.join();
     }
-    boost::mutex &getMutex() { return m_mainloop.getMutex(); }
+    mutex_type &getMutex() { return m_mainloop.getMutex(); }
 
   private:
     volatile bool m_run;
