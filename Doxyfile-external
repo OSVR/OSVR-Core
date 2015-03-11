@@ -29,3 +29,13 @@ HIDE_FRIEND_COMPOUNDS  = YES
 GENERATE_TODOLIST      = NO
 
 PREDEFINED += OSVR_DOXYGEN_EXTERNAL
+
+EXCLUDE += inc/osvr/Client \
+           inc/osvr/Common \
+           inc/osvr/Connection \
+           inc/osvr/PluginHost \
+           inc/osvr/Routing \
+           inc/osvr/Server \
+           inc/osvr/Transform \
+           inc/osvr/VRPN \
+           examples/plugin-hosts
