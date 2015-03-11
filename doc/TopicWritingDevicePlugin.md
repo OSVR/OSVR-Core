@@ -9,7 +9,7 @@ Writing a device plugin means you'll be building against the @ref PluginKit libr
   - This can take the form of a class with a function call operator (`operator()`), taking `OSVR_PluginRegContext ctx` and returning `OSVR_ReturnCode`. The sample plugin source includes an example of this.
 4. From within your callback, if the device exists, create a device token (as seen in the sample, or as in the `DummySync` examples). You need to have your device hold on to the device token to send data with it later on.
 5. The guts of implementing a device start at about line 51 of the sample: wait until there is data then call `osvrDeviceSendData()`. (There are two versions of this function: one where you provide a timestamp, and one where the timestamp is automatically created for you.) Your HMD may have different types of sensors (Tracker/Button/Analog) and you will need to use appropriate interfaces for each to send reports from device in your plugin.
-6. Create device descriptor JSON and name it `com_osvr_DeviceName.json`. You can either use the sample json and modify it according to you needs or use the following webapp to create the JSON - <a href="http://opengoggles.org/tools/osvr-json">Device Descriptor Editor</a>. For each interface (Tracker/Button/Analog), you will need to describe its semantics (basically assign useful names to analog channels, etc). JSON device descriptor's purpose is to tell OSVR server what kind of trackers/sensors your device has (Follow the provided example JSON file). Specifying "Device Vendor" and "Device Product Name" in device descriptor file is for "informational purposes".
+6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample json and modify it according to you needs or use the following webapp to create the JSON - <a href="http://opengoggles.org/tools/osvr-json">Device Descriptor Editor</a>. For each interface (Tracker/Button/Analog), you will need to describe its semantics (basically assign useful names to analog channels, etc). JSON device descriptor's purpose is to tell OSVR server what kind of trackers/sensors your device has (Follow the provided example JSON file). Specifying "Device Vendor" and "Device Product Name" in device descriptor file is for "informational purposes".
 
 Note that these instructions are only for drivers that can fully self-configure. Manually-configured drivers are also possible, but no minimal sample has yet been created. You essentially take the same steps as in an auto-detected plugin, except instead of registering a hardware detection callback, you call osvrRegisterDriverInstantiationCallback() providing a name for your driver and a function pointer that will get called with a JSON string of configuration data if the user configures your plugin in the `osvr_server` config file.
 For auto-configured drivers, you should remove `"driver"` section from the `osvr_server_config.json` file, otherwise it will try to load name of specific driver and you would get an error similar to this <br> `"[OSVR Server] - com_osvr_Vuzix/Vuzix No driver initialization callback was registered for the driver name Vuzix"`
@@ -32,19 +32,19 @@ These are instructions for Windows and Visual Studio, but they follow similarly 
 
 ## Testing your plugin
 
-- In order for OSVR Server to properly load the plugin and find your device, you will need to create a new `osvr_server_config.JSON` file. You can start by modifying an existing config file and changing the configuration appropriately. You will need to use values from your device descriptor JSON file to properly fill out `osvr_server_config.JSON` file. You can also use a tool to create it for you (pending for now).
-- Once your plugin loads succesfully, you should test communication between the device and osvr server to verify that the server receives all necessary data from device. To test: there is a bundled application called `BasicServer` which doesn't require config files. You can start it and pass names of plugins on command line `BasicServer.exe com_osvr_SamplePlugin.dll` or alternatively you can start OSVR Server with updated osvr_server_config JSON file. To see the data between device and osvr_server, there is is utility vrpn_print_devices that will allow you to see  the messages. Run this command through the cmd window: `vrpn_print_devices fullDeviceName@localhost`, where `fullDeviceName` is typically `pluginName/deviceName`. Once you run osvr_server, and it successfully loads and detects the device you will see a message like `Added device org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0`. Copy an entire `org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0` which is the needed `fullDeviceName`. VRPN_Print_Device utility is part of the VRPN project. If succesful, you will be able to see the data from your device whether it is tracker coordinates or button presses. See sample output below (HMD with tracker sensor):
+- In order for OSVR Server to properly load the plugin and find your device, you will need to create a new `osvr_server_config.JSON` file. You can start by modifying an existing config file and changing the configuration appropriately. You will need to add routes to `osvr_server_config.JSON` file for sensors/trackers that you specified in your device descriptor. You can also use a tool to create it for you (pending for now).
+- Once your plugin loads succesfully, you should test communication between the device and osvr server to verify that the server receives all necessary data from device. To test: you can start OSVR Server with updated osvr_server_config JSON file. To see the data between device and osvr_server, there is is utility vrpn_print_devices that will allow you to see  the messages. Run this command through the cmd window:  <br> ```vrpn_print_devices fullDeviceName@localhost``` , where `fullDeviceName` is typically `pluginName/deviceName`. Once you run osvr_server, and it successfully loads and detects the device you will see a message like `Added device org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0`. Copy an entire `org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0` which is the needed `fullDeviceName`. VRPN_Print_Device utility is part of the VRPN project. If succesful, you will be able to see the data from your device whether it is tracker coordinates or button presses. See sample output below (HMD with tracker sensor):
 
-<BLOCKQUOTE>
-vrpn_print_devices com_osvr_Vuzix/Vuzix@localhost <br>
-Opened com_osvr_Vuzix/Vuzix@localhost as: Tracker Button Analog Dial Text <br>
-Press ^C to exit. <br>
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0: <br>
-        pos ( 0.00,  0.00,  0.00); quat (-0.08,  0.89, -0.05,  0.45) <br>
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0: <br>
-		pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.78,  0.03,  0.87) <br>
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0: <br>
-        pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.48,  0.03,  0.87) <br>
-Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0: <br>
+```
+vrpn_print_devices com_osvr_Vuzix/Vuzix@localhost
+Opened com_osvr_Vuzix/Vuzix@localhost as: Tracker Button Analog Dial Text
+Press ^C to exit.
+Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+        pos ( 0.00,  0.00,  0.00); quat (-0.08,  0.89, -0.05,  0.45)
+Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+		pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.78,  0.03,  0.87)
+Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
+        pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.48,  0.03,  0.87)
+Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
         pos ( 0.00,  0.00,  0.00); quat (-0.12, -0.88,  0.03,  0.46)
-</BLOCKQUOTE> 
+```
