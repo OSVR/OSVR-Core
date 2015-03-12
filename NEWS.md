@@ -11,6 +11,13 @@ Use git for a full changelog.
 
 Entries are labeled with the `git describe`-derived version of a representative commit and date.
 
+## v0.1-777-g830cc1b (12-March-2015)
+**Affects:** Binding/integration distribution
+
+**Main change:** The contents of the `osvrTransform` and `osvrRouting` shared libraries (`.dll` files) have been folded into `osvrCommon` and thus those files are now no longer produced by the build, nor need to be distributed.
+
+This is internal API only, so no changes to apps expected.
+
 ## v0.1.728-g47b68e (5-March-2015)
 **Affects:** Plugin developers, config files, and install instructions for out of tree plugins
 
