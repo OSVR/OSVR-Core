@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
 // - none
@@ -43,10 +44,17 @@ namespace common {
     /// @param root The root node of a tree. This is not checked at runtime
     /// (just a debug assert) since this should only be called from safe,
     /// internal locations!
+    ///
+    /// If nodes do not exist, they are created as NullElement. NullElement
+    /// final components are created as copies of the optional
+    /// finalComponentDefault parameter.
+    ///
     /// @returns a reference to the leaf node referred to by the path.
     /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
     /// exceptions::EmptyPathComponent
-    PathNode &pathParseAndRetrieve(std::string const &path, PathNode &root);
+    PathNode &pathParseAndRetrieve(
+        std::string path, PathNode &root,
+        PathElement const &finalComponentDefault = elements::NullElement());
 } // namespace common
 } // namespace osvr
 

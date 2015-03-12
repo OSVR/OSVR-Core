@@ -30,6 +30,7 @@
 #include <osvr/Common/RoutingExceptions.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Common/PathElementTools.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -42,12 +43,10 @@
 
 namespace osvr {
 namespace common {
-    PathNode &pathParseAndRetrieve(std::string const &path, PathNode &root) {
+    PathNode &pathParseAndRetrieve(std::string path, PathNode &root,
+                                   PathElement const &finalComponentDefault) {
 
-        using std::string;
-        using boost::split_iterator;
         using boost::algorithm::make_split_iterator;
-        using boost::adaptors::sliced;
         using boost::first_finder;
         using boost::is_equal;
         BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
@@ -61,33 +60,31 @@ namespace common {
         if (path.at(0) != getPathSeparatorCharacter()) {
             throw exceptions::PathNotAbsolute(path);
         }
+
         PathNode *ret = &root;
 
-        // Determine if there's a trailing slash.
-        const size_t len = path.size();
-        const size_t theEnd =
-            (path[len - 1] == getPathSeparatorCharacter()) ? len - 1 : len;
+        // Determine if there's a trailing slash and remove it.
+        if (path.back() == getPathSeparatorCharacter()) {
+            path.pop_back();
+        }
 
-        // Get the boost range that excludes the leading slash, and a trailing
-        // slash, if any.
-        auto range_excluding_leading_slash = path | sliced(1, theEnd);
-        OSVR_DEV_VERBOSE(
-            "Range excluding leading slash: "
-            << boost::copy_range<std::string>(range_excluding_leading_slash));
         // Iterate through the chunks of the path, split by a slash.
         std::string component;
-        typedef split_iterator<string::const_iterator> string_split_iterator;
-        for (string_split_iterator It = make_split_iterator(
-                 range_excluding_leading_slash,
-                 first_finder(getPathSeparator(), is_equal()));
-             It != string_split_iterator(); ++It) {
-            component = boost::copy_range<std::string>(*It);
+        auto begin = make_split_iterator(
+            path, first_finder(getPathSeparator(), is_equal()));
+        auto end =
+            decltype(begin)(); // default construct of the same type as begin
+        for (auto rangeIt : boost::make_iterator_range(begin, end)) {
+            component = boost::copy_range<std::string>(rangeIt);
             OSVR_DEV_VERBOSE(component);
             if (component.empty()) {
                 throw exceptions::EmptyPathComponent(path);
             }
             ret = &(ret->getOrCreateChildByName(component));
         }
+
+        // Handle null elements as final component.
+        elements::ifNullReplaceWith(ret->value(), finalComponentDefault);
         return *ret;
     }
 } // namespace common
