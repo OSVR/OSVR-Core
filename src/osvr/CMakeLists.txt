@@ -9,7 +9,6 @@ add_subdirectory(Common)
 
 if(BUILD_SERVER)
     add_subdirectory(PluginHost)
-    #add_subdirectory(VRPN)
     add_subdirectory(Connection)
     add_subdirectory(PluginKit)
     add_subdirectory(Server)
