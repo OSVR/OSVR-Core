@@ -34,12 +34,31 @@
 namespace osvr {
 namespace common {
     namespace elements {
-        void AliasElement::setTarget(std::string const &targetPath) {
+        AliasElement::AliasElement(std::string const &source)
+            : m_source(source) {}
+        void AliasElement::setSource(std::string const &source) {
             /// @todo validation?
-            m_target = targetPath;
+            m_source = source;
         }
 
-        std::string const &AliasElement::getTarget() const { return m_target; }
+        std::string const &AliasElement::getSource() const { return m_source; }
+
+        DeviceElement
+        DeviceElement::createVRPNDeviceElement(std::string const &deviceName,
+                                               std::string const &server) {
+            DeviceElement ret;
+            ret.m_devName = deviceName;
+            ret.m_server = server;
+            return ret;
+        }
+
+        std::string const &DeviceElement::getDeviceName() const {
+            return m_devName;
+        }
+        std::string const &DeviceElement::getServer() const { return m_server; }
+        std::string DeviceElement::getFullDeviceName() const {
+            return getDeviceName() + "@" + getServer();
+        }
     } // namespace elements
 } // namespace common
 } // namespace osvr

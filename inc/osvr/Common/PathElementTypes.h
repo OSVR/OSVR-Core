@@ -54,27 +54,53 @@ namespace common {
 
         /// @brief The element type created when requesting a path that isn't
         /// yet in the tree.
-        class NullElement : public ElementBase<NullElement> {};
+        class NullElement : public ElementBase<NullElement> {
+          public:
+            NullElement() = default;
+        };
 
         /// @brief The element type corresponding to a plugin
-        class PluginElement : public ElementBase<PluginElement> {};
+        class PluginElement : public ElementBase<PluginElement> {
+          public:
+            PluginElement() = default;
+        };
 
         /// @brief The element type corresponding to a device, which implements
         /// 0 or more interfaces
-        class DeviceElement : public ElementBase<DeviceElement> {};
-            DeviceElement() {}
+        class DeviceElement : public ElementBase<DeviceElement> {
+          public:
+            DeviceElement() = default;
             DeviceElement(std::string const &deviceName,
                           std::string const &server)
                 : m_devName(deviceName), m_server(server) {}
 
+            static DeviceElement
+            createVRPNDeviceElement(std::string const &deviceName,
+                                    std::string const &server);
+
+            std::string const &getDeviceName() const;
+            std::string const &getServer() const;
+            std::string getFullDeviceName() const;
+
+          private:
+            std::string m_devName;
+            std::string m_server;
+        };
 
         /// @brief The element type corresponding to an interface, which often
         /// may have one or more sensors
-        class InterfaceElement : public ElementBase<InterfaceElement> {};
+        class InterfaceElement : public ElementBase<InterfaceElement> {
+          public:
+            InterfaceElement() = default;
+        };
 
         /// @brief The element type corresponding to a particular sensor of an
         /// interface
-        class SensorElement : public ElementBase<SensorElement> {};
+        class SensorElement : public ElementBase<SensorElement> {
+
+          public:
+            SensorElement() = default;
+        };
 
         /// @brief The element type serving as a physical association of other
         /// elements.
