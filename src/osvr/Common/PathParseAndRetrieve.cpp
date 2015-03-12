@@ -68,6 +68,9 @@ namespace common {
             path.pop_back();
         }
 
+        // Remove the leading slash for the iterator's benefit.
+        path.erase(begin(path));
+
         // Iterate through the chunks of the path, split by a slash.
         std::string component;
         auto begin = make_split_iterator(
