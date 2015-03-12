@@ -26,10 +26,20 @@ target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp osvrCommon eig
 add_executable(osvr_reset_yaw
     osvr_reset_yaw.cpp
     ClientMainloop.h
+    ClientMainloopThread.h
     RecomposeTransform.h
     WrapRoute.h)
 target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 set_target_properties(osvr_reset_yaw PROPERTIES
+    FOLDER "OSVR Stock Applications")
+
+add_executable(diagnose-rotation
+    diagnose-rotation.cpp
+    ClientMainloop.h
+    ClientMainloopThread.h
+    RecomposeTransform.h)
+target_link_libraries(diagnose-rotation jsoncpp_lib osvrClientKitCpp osvrClient osvrTransform osvrRouting osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+set_target_properties(diagnose-rotation PROPERTIES
     FOLDER "OSVR Stock Applications")
 
 install(TARGETS osvr_server osvr_reset_yaw

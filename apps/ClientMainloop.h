@@ -31,7 +31,7 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <boost/thread/locks.hpp>
 
 // Standard includes
@@ -41,18 +41,20 @@
 /// but easily pausable.
 class ClientMainloop : boost::noncopyable {
   public:
+    typedef boost::recursive_mutex mutex_type;
+    typedef boost::unique_lock<mutex_type> lock_type;
     ClientMainloop(osvr::clientkit::ClientContext &ctx) : m_ctx(ctx) {}
     void mainloop() {
-        boost::unique_lock<boost::mutex> lock(m_mutex, boost::try_to_lock);
+        lock_type lock(m_mutex, boost::try_to_lock);
         if (lock) {
             m_ctx.update();
         }
     }
-    boost::mutex &getMutex() { return m_mutex; }
+    mutex_type &getMutex() { return m_mutex; }
 
   private:
     osvr::clientkit::ClientContext &m_ctx;
-    boost::mutex m_mutex;
+    mutex_type m_mutex;
 };
 
 #endif // INCLUDED_ClientMainloop_h_GUID_CE5D82DA_5A69_46A0_55BA_BE9DB68B61CE
