@@ -4,7 +4,7 @@ set(API
     "${HEADER_LOCATION}/ChangeOfBasis.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Transform.h"
-    "${HEADER_LOCATION}/Util.h")
+    "${HEADER_LOCATION}/DegreesToRadians.h")
 
 set(SOURCE
     JSONTransformVisitor.cpp)

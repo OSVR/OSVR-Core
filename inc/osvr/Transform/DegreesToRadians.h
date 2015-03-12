@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_Util_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
-#define INCLUDED_Util_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
+#ifndef INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
+#define INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
 
 // Internal Includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -41,4 +41,4 @@ namespace transform {
     }
 } // namespace transform
 } // namespace osvr
-#endif // INCLUDED_Util_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
+#endif // INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A

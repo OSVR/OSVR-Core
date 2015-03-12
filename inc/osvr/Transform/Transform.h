@@ -26,7 +26,7 @@
 #define INCLUDED_Transform_h_GUID_8BF4BBD8_CDC1_48BC_DC27_BFDA42A3212E
 
 // Internal Includes
-#include <osvr/Transform/Util.h>
+#include <osvr/Transform/DegreesToRadians.h>
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
