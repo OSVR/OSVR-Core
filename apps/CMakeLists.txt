@@ -38,7 +38,7 @@ add_executable(diagnose-rotation
     ClientMainloop.h
     ClientMainloopThread.h
     RecomposeTransform.h)
-target_link_libraries(diagnose-rotation jsoncpp_lib osvrClientKitCpp osvrClient osvrTransform osvrRouting osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_link_libraries(diagnose-rotation jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 set_target_properties(diagnose-rotation PROPERTIES
     FOLDER "OSVR Stock Applications")
 
