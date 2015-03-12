@@ -24,6 +24,8 @@ set(SOURCE
     ClientInterface.cpp
     CreateContext.cpp
     ImagingRouter.h
+    PureClientContext.h
+    PureClientContext.cpp
     RouterTransforms.h
     RouterPredicates.h
     VRPNContext.cpp
