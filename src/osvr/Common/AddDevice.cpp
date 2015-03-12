@@ -38,7 +38,8 @@
 
 namespace osvr {
 namespace common {
-    PathNode &addDevice(PathTree &tree, std::string const &deviceName) {
+    PathNode &addDevice(PathTree &tree, std::string const &deviceName,
+                        elements::DeviceElement dev) {
         if (deviceName.size() < 3) { // Minimum size: a/b
             throw exceptions::InvalidDeviceName("Given device name is too "
                                                 "short to be a complete device "
