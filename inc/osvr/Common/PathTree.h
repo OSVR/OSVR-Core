@@ -26,9 +26,9 @@
 #define INCLUDED_PathTree_h_GUID_8C6C691A_AAB1_4586_64DD_BD3F870C9071
 
 // Internal Includes
-#include <osvr/Routing/PathTree_fwd.h>
-#include <osvr/Routing/Export.h>
-#include <osvr/Routing/PathNode_fwd.h>
+#include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathNode_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -37,7 +37,7 @@
 #include <string>
 
 namespace osvr {
-namespace routing {
+namespace common {
     /// @addtogroup Routing
     /// @{
 
@@ -46,7 +46,7 @@ namespace routing {
     class PathTree : boost::noncopyable {
       public:
         /// @brief Constructor
-        OSVR_ROUTING_EXPORT PathTree();
+        OSVR_COMMON_EXPORT PathTree();
 
         /// @brief Visitation
         /// @{
@@ -65,7 +65,7 @@ namespace routing {
         /// with values of NullElement
         /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
         /// exceptions::EmptyPathComponent
-        OSVR_ROUTING_EXPORT PathNode &getNodeByPath(std::string const &path);
+        OSVR_COMMON_EXPORT PathNode &getNodeByPath(std::string const &path);
 
       private:
         /// @brief Root node of the tree.
@@ -73,7 +73,7 @@ namespace routing {
     };
     /// @}
 
-} // namespace routing
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_PathTree_h_GUID_8C6C691A_AAB1_4586_64DD_BD3F870C9071

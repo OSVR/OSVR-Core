@@ -26,8 +26,8 @@
 #define INCLUDED_PathElementTools_h_GUID_9246E2D5_1598_409F_BD30_1817FA2C1FB2
 
 // Internal Includes
-#include <osvr/Routing/Export.h>
-#include <osvr/Routing/PathElementTypes.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
 // - none
@@ -36,7 +36,7 @@
 // - none
 
 namespace osvr {
-namespace routing {
+namespace common {
     namespace elements {
         /// @addtogroup Routing
         /// @{
@@ -46,7 +46,7 @@ namespace routing {
         /// better way! (There probably is a better way with a variant
         /// static_visitor)
         /// @param elt The element to investigate.
-        OSVR_ROUTING_EXPORT const char *getTypeName(PathElement const &elt);
+        OSVR_COMMON_EXPORT const char *getTypeName(PathElement const &elt);
 
         /// @brief Gets the string that represents the templated type
         template <typename ElementType> inline const char *getTypeName() {
@@ -60,6 +60,6 @@ namespace routing {
         void ifNullReplaceWith(PathElement &dest, PathElement const &src);
         /// @}
     } // namespace elements
-} // namespace routing
+} // namespace common
 } // namespace osvr
 #endif // INCLUDED_PathElementTools_h_GUID_9246E2D5_1598_409F_BD30_1817FA2C1FB2

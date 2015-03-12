@@ -26,7 +26,7 @@
 #define INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
 
 // Internal Includes
-#include <osvr/Routing/PathNode.h>
+#include <osvr/Common/PathNode.h>
 
 // Library/third-party includes
 #include <boost/variant/get.hpp>
@@ -35,12 +35,12 @@
 // - none
 
 template <typename ElementType>
-inline bool isElementType(osvr::routing::elements::PathElement const &elt) {
+inline bool isElementType(osvr::common::elements::PathElement const &elt) {
     return (boost::get<ElementType const>(&elt) != nullptr);
 }
 
 template <typename ElementType>
-inline bool isNodeType(osvr::routing::PathNode const &node) {
+inline bool isNodeType(osvr::common::PathNode const &node) {
     return isElementType<ElementType>(node.value());
 }
 

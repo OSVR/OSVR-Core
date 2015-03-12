@@ -23,12 +23,12 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/AddDevice.h>
-#include <osvr/Routing/PathNode.h>
-#include <osvr/Routing/PathTree.h>
-#include <osvr/Routing/PathElementTools.h>
-#include <osvr/Routing/Constants.h>
-#include <osvr/Routing/Exceptions.h>
+#include <osvr/Common/AddDevice.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/RoutingExceptions.h>
 
 // Library/third-party includes
 // - none
@@ -37,7 +37,7 @@
 #include <stdexcept>
 
 namespace osvr {
-namespace routing {
+namespace common {
     PathNode &addDevice(PathTree &tree, std::string const &deviceName) {
         if (deviceName.size() < 3) { // Minimum size: a/b
             throw exceptions::InvalidDeviceName("Given device name is too "
@@ -70,5 +70,5 @@ namespace routing {
         elements::ifNullReplaceWith(plugin->value(), elements::PluginElement());
         return device;
     }
-} // namespace routing
+} // namespace common
 } // namespace osvr

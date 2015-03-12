@@ -36,7 +36,7 @@
 // - none
 
 namespace osvr {
-namespace routing {
+namespace common {
     namespace elements {
         class NullElement;
         class PluginElement;
@@ -65,7 +65,7 @@ namespace routing {
     } // namespace elements
 
     using elements::PathElement;
-} // namespace routing
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_PathElementTypes_fwd_h_GUID_8EAAAC63_0E7E_4C8C_27E2_C5B5A58A6D0A

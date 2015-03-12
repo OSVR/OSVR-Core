@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header including PathTree.h and all additional headers needed to
+   define related types.
 
     @date 2014
 
@@ -22,22 +23,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
-#define INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
+#ifndef INCLUDED_PathTreeFull_h_GUID_7CE95664_6F87_46AB_9AF2_DDD6F12FBC80
+#define INCLUDED_PathTreeFull_h_GUID_7CE95664_6F87_46AB_9AF2_DDD6F12FBC80
 
 // Internal Includes
-// - none
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Util/TreeNode.h>
 
 // Library/third-party includes
-// - none
+#include <boost/variant/variant.hpp>
 
 // Standard includes
 // - none
 
-namespace osvr {
-namespace routing {
-    class PathTree;
-} // namespace routing
-} // namespace osvr
-
-#endif // INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
+#endif // INCLUDED_PathTreeFull_h_GUID_7CE95664_6F87_46AB_9AF2_DDD6F12FBC80

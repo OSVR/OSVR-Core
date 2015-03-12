@@ -22,27 +22,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0
-#define INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0
+#ifndef INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
+#define INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
 
 // Internal Includes
-#include <osvr/Routing/PathNode_fwd.h>
-#include <osvr/Routing/PathElementTypes.h> ///< @todo can we split out this include? I don't think all consumers of this header need it.
-#include <osvr/Util/TreeNode.h>
+// - none
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <string>
+// - none
 
 namespace osvr {
-namespace routing {
-    /// @brief Gets the absolute path for the given node.
-    ///
-    /// @ingroup Routing
-    OSVR_ROUTING_EXPORT std::string getFullPath(PathNode const &node);
-} // namespace routing
+namespace common {
+    class PathTree;
+} // namespace common
 } // namespace osvr
 
-#endif // INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0
+#endif // INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9

@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/PathElementTools.h>
-#include <osvr/Routing/PathElementTypes.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathElementTypes.h>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
@@ -36,7 +36,7 @@
 // - none
 
 namespace osvr {
-namespace routing {
+namespace common {
     namespace elements {
         namespace detail {
             /// Class template, specialized to implement class name retrieval.
@@ -48,7 +48,7 @@ namespace routing {
 /// name as a string literal.
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     template <> struct ElementTypeName<CLASS> {                                \
-        OSVR_ROUTING_EXPORT static const char *get() { return #CLASS; }        \
+        OSVR_COMMON_EXPORT static const char *get() { return #CLASS; }         \
     };
 
             /// All types included in the bounded typelist of PathElement must
@@ -85,5 +85,5 @@ namespace routing {
             }
         }
     } // namespace elements
-} // namespace routing
+} // namespace common
 } // namespace osvr

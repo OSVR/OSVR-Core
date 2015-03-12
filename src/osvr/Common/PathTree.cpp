@@ -23,7 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/Constants.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathNode.h>
+#include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
 // - none
@@ -32,9 +34,10 @@
 // - none
 
 namespace osvr {
-namespace routing {
-    char getPathSeparatorCharacter() { return getPathSeparator()[0]; }
-
-    const char *getPathSeparator() { return "/"; }
-} // namespace routing
+namespace common {
+    PathTree::PathTree() : m_root(PathNode::createRoot()) {}
+    PathNode &PathTree::getNodeByPath(std::string const &path) {
+        return pathParseAndRetrieve(path, *m_root);
+    }
+} // namespace common
 } // namespace osvr

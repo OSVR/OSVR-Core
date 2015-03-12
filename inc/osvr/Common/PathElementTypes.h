@@ -28,7 +28,8 @@
 #define INCLUDED_PathElementTypes_h_GUID_5CC817E5_C7CB_45AE_399D_0B0D39579374
 
 // Internal Includes
-#include <osvr/Routing/PathElementTypes_fwd.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathElementTypes_fwd.h>
 
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
@@ -37,7 +38,7 @@
 #include <string>
 
 namespace osvr {
-namespace routing {
+namespace common {
     /// @brief Namespace for the various element types that may constitute a
     /// node in the path tree.
     ///
@@ -61,6 +62,11 @@ namespace routing {
         /// @brief The element type corresponding to a device, which implements
         /// 0 or more interfaces
         class DeviceElement : public ElementBase<DeviceElement> {};
+            DeviceElement() {}
+            DeviceElement(std::string const &deviceName,
+                          std::string const &server)
+                : m_devName(deviceName), m_server(server) {}
+
 
         /// @brief The element type corresponding to an interface, which often
         /// may have one or more sensors
@@ -82,22 +88,25 @@ namespace routing {
         /// does not alias children.
         class AliasElement : public ElementBase<LogicalElement> {
           public:
-            /// @brief Sets the target of this alias
-            /// @param targetPath absolute path of the target.
+            /// @brief Constructor with source.
+            OSVR_COMMON_EXPORT AliasElement(std::string const &source);
+            /// @brief Sets the source of this alias
+            /// @param source absolute path of the target, possibly wrapped in
+            /// transforms.
             /// @todo support relative paths - either here or at a different
             /// level
-            void setTarget(std::string const &targetPath);
+            void setSource(std::string const &source);
 
-            /// @brief Get the path to the target of this alias.
-            std::string const &getTarget() const;
+            /// @brief Get the source of data for this alias
+            std::string const &getSource() const;
 
           private:
-            std::string m_target;
+            std::string m_source;
         };
 
     } // namespace elements
 
-} // namespace routing
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_PathElementTypes_h_GUID_5CC817E5_C7CB_45AE_399D_0B0D39579374

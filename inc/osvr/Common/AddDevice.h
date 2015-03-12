@@ -26,9 +26,9 @@
 #define INCLUDED_AddDevice_h_GUID_DEA28469_5227_44AD_1972_94548FA58E22
 
 // Internal Includes
-#include <osvr/Routing/Export.h>
-#include <osvr/Routing/PathTree_fwd.h>
-#include <osvr/Routing/PathNode_fwd.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/PathNode_fwd.h>
 
 // Library/third-party includes
 // - none
@@ -37,7 +37,7 @@
 #include <string>
 
 namespace osvr {
-namespace routing {
+namespace common {
     /// @brief Adds/updates nodes for the basic path to a device.
     ///
     /// @ingroup Routing
@@ -52,13 +52,13 @@ namespace routing {
     /// is the device, and org_opengoggles_plugin is the plugin.
     ///
     /// @returns The device node
-    /// @throws osvr::routing::exceptions::InvalidDeviceName if an invalid
+    /// @throws osvr::common::exceptions::InvalidDeviceName if an invalid
     /// device name (less than two components) was passed
-    /// @throws osvr::routing::exceptions::EmptyPathComponent if any component
+    /// @throws osvr::common::exceptions::EmptyPathComponent if any component
     /// in the given path is empty after passing initial checks.
-    OSVR_ROUTING_EXPORT PathNode &addDevice(PathTree &tree,
-                                            std::string const &deviceName);
-} // namespace routing
+    OSVR_COMMON_EXPORT PathNode &addDevice(PathTree &tree,
+                                           std::string const &deviceName);
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_AddDevice_h_GUID_DEA28469_5227_44AD_1972_94548FA58E22

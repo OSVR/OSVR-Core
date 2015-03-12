@@ -26,8 +26,8 @@
 #define INCLUDED_PathNode_fwd_h_GUID_3160EFE4_EC7A_4187_5263_ED3303384F7B
 
 // Internal Includes
-#include <osvr/Routing/Export.h>
-#include <osvr/Routing/PathElementTypes_fwd.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathElementTypes_fwd.h>
 #include <osvr/Util/TreeNode_fwd.h>
 
 // Library/third-party includes
@@ -37,7 +37,7 @@
 // - none
 
 namespace osvr {
-namespace routing {
+namespace common {
     /// @addtogroup Routing
     /// @{
 
@@ -51,9 +51,9 @@ namespace routing {
     typedef PathNode *PathNodeParentPtr;
 
     /// @brief Gets an identifying string for the node value type.
-    OSVR_ROUTING_EXPORT const char *getTypeName(PathNode const &node);
+    OSVR_COMMON_EXPORT const char *getTypeName(PathNode const &node);
     /// @}
-} // namespace routing
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_PathNode_fwd_h_GUID_3160EFE4_EC7A_4187_5263_ED3303384F7B

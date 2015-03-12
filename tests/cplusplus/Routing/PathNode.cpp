@@ -24,8 +24,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/PathTreeFull.h>
-#include <osvr/Routing/PathNode.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathNode.h>
 
 // Library/third-party includes
 #include "gtest/gtest.h"
@@ -33,7 +33,7 @@
 // Standard includes
 // - none
 
-using namespace osvr::routing;
+using namespace osvr::common;
 
 TEST(PathNode, getFullPath) {
     PathTree tree;

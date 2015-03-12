@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_Exceptions_h_GUID_DDBD7E30_8C15_46AE_4221_1EB366EA079D
-#define INCLUDED_Exceptions_h_GUID_DDBD7E30_8C15_46AE_4221_1EB366EA079D
+#ifndef INCLUDED_RoutingExceptions_h_GUID_DDBD7E30_8C15_46AE_4221_1EB366EA079D
+#define INCLUDED_RoutingExceptions_h_GUID_DDBD7E30_8C15_46AE_4221_1EB366EA079D
 
 // Internal Includes
 // - none
@@ -35,7 +35,7 @@
 #include <stdexcept>
 
 namespace osvr {
-namespace routing {
+namespace common {
     /// @brief Exceptions that may be thrown from this module.
     ///
     /// @ingroup Routing
@@ -71,6 +71,6 @@ namespace routing {
                       path) {}
         };
     } // namespace exceptions
-} // namespace routing
+} // namespace common
 } // namespace osvr
-#endif // INCLUDED_Exceptions_h_GUID_DDBD7E30_8C15_46AE_4221_1EB366EA079D
+#endif // INCLUDED_RoutingExceptions_h_GUID_DDBD7E30_8C15_46AE_4221_1EB366EA079D

@@ -26,10 +26,10 @@
 
 // Internal Includes
 #include "PathParseAndRetrieve.h"
-#include <osvr/Routing/Constants.h>
-#include <osvr/Routing/PathNode.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/RoutingExceptions.h>
+#include <osvr/Common/PathNode.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Routing/Exceptions.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -41,7 +41,7 @@
 // - none
 
 namespace osvr {
-namespace routing {
+namespace common {
     PathNode &pathParseAndRetrieve(std::string const &path, PathNode &root) {
 
         using std::string;
@@ -90,5 +90,5 @@ namespace routing {
         }
         return *ret;
     }
-} // namespace routing
+} // namespace common
 } // namespace osvr

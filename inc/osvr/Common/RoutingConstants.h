@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2014
 
@@ -22,10 +22,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef INCLUDED_RoutingConstants_h_GUID_1A7E9AA8_23B3_409B_4589_A15870E9473D
+#define INCLUDED_RoutingConstants_h_GUID_1A7E9AA8_23B3_409B_4589_A15870E9473D
+
 // Internal Includes
-#include <osvr/Routing/PathTree.h>
-#include <osvr/Routing/PathNode.h>
-#include "PathParseAndRetrieve.h"
+#include <osvr/Common/Export.h>
 
 // Library/third-party includes
 // - none
@@ -34,10 +35,17 @@
 // - none
 
 namespace osvr {
-namespace routing {
-    PathTree::PathTree() : m_root(PathNode::createRoot()) {}
-    PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return pathParseAndRetrieve(path, *m_root);
-    }
-} // namespace routing
+namespace common {
+    /// @name Constants
+    /// @ingroup Routing
+    /// @{
+    /// @brief Gets the path separator character - a slash.
+    OSVR_COMMON_EXPORT char getPathSeparatorCharacter();
+
+    /// @brief Gets the path separator - a slash - as a null-terminated
+    /// string.
+    OSVR_COMMON_EXPORT const char *getPathSeparator();
+    /// @}
+} // namespace common
 } // namespace osvr
+#endif // INCLUDED_RoutingConstants_h_GUID_1A7E9AA8_23B3_409B_4589_A15870E9473D

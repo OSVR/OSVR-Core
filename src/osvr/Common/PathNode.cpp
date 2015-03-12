@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/PathNode.h>
-#include <osvr/Routing/Constants.h>
-#include <osvr/Routing/PathElementTools.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/PathElementTools.h>
 
 // Library/third-party includes
 // - none
@@ -34,7 +34,7 @@
 #include <sstream>
 
 namespace osvr {
-namespace routing {
+namespace common {
     const char *getTypeName(PathNode const &node) {
         return elements::getTypeName(node.value());
     }
@@ -57,5 +57,5 @@ namespace routing {
         buildPathRecursively(node, os);
         return os.str();
     }
-} // namespace routing
+} // namespace common
 } // namespace osvr

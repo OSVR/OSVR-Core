@@ -24,8 +24,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/PathElementTools.h>
-#include <osvr/Routing/PathElementTypes.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathElementTypes.h>
 #include "IsType.h"
 
 // Library/third-party includes
@@ -34,7 +34,7 @@
 // Standard includes
 // - none
 
-using namespace osvr::routing;
+using namespace osvr::common;
 
 TEST(PathElement, getTypeName) {
     ASSERT_STREQ(elements::getTypeName<elements::NullElement>(), "NullElement");

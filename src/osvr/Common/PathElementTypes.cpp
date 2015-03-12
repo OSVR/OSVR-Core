@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/PathElementTypes.h>
+#include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
 // - none
@@ -32,7 +32,7 @@
 // - none
 
 namespace osvr {
-namespace routing {
+namespace common {
     namespace elements {
         void AliasElement::setTarget(std::string const &targetPath) {
             /// @todo validation?
@@ -41,5 +41,5 @@ namespace routing {
 
         std::string const &AliasElement::getTarget() const { return m_target; }
     } // namespace elements
-} // namespace routing
+} // namespace common
 } // namespace osvr

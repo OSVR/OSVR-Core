@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Implementation
 
     @date 2014
 
@@ -22,11 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_Routing_h_GUID_130A414C_C548_4E89_29BE_0D31792CDC83
-#define INCLUDED_Routing_h_GUID_130A414C_C548_4E89_29BE_0D31792CDC83
-
 // Internal Includes
-// - none
+#include <osvr/Common/RoutingConstants.h>
 
 // Library/third-party includes
 // - none
@@ -35,9 +32,9 @@
 // - none
 
 namespace osvr {
-/// @brief Facilities supporting the path tree and corresponding routing graph.
-/// @ingroup Routing
-namespace routing {} // namespace routing
-} // namespace osvr
+namespace common {
+    char getPathSeparatorCharacter() { return getPathSeparator()[0]; }
 
-#endif // INCLUDED_Routing_h_GUID_130A414C_C548_4E89_29BE_0D31792CDC83
+    const char *getPathSeparator() { return "/"; }
+} // namespace common
+} // namespace osvr
