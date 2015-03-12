@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/Util/EigenInterop.h>
-#include <osvr/Transform/Transform.h>
+#include <osvr/Common/Transform.h>
 
 // Library/third-party includes
 #include <Eigen/Core>

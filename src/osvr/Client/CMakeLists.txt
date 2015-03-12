@@ -24,6 +24,8 @@ set(SOURCE
     ClientInterface.cpp
     CreateContext.cpp
     ImagingRouter.h
+    PureClientContext.h
+    PureClientContext.cpp
     RouterTransforms.h
     RouterPredicates.h
     VRPNContext.cpp
@@ -51,8 +53,6 @@ target_include_directories(${LIBNAME_FULL}
 
 target_link_libraries(${LIBNAME_FULL}
     PRIVATE
-    osvrTransform
-    osvrRouting
     osvrUtilCpp
     osvrCommon
     jsoncpp_lib

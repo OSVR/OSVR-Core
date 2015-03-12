@@ -26,27 +26,24 @@
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
+#include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <stdlib.h>
-
-#ifdef _MSC_VER
-// Don't warn about getenv
-#define _CRT_SECURE_NO_WARNINGS
-#endif
+// - none
 
 static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
 OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
                                   uint32_t /*flags*/) {
-    char *host = ::getenv(HOST_ENV_VAR);
-    if (nullptr != host) {
-        OSVR_DEV_VERBOSE("Connecting to non-default host " << host);
-        return ::osvr::client::createContext(applicationIdentifier, host);
+    auto host = osvr::common::getEnvironmentVariable(HOST_ENV_VAR);
+    if (host.is_initialized()) {
+        OSVR_DEV_VERBOSE("Connecting to non-default host " << *host);
+        return ::osvr::client::createContext(applicationIdentifier,
+                                             host->c_str());
     } else {
         OSVR_DEV_VERBOSE("Connecting to default (local) host");
         return ::osvr::client::createContext(applicationIdentifier);

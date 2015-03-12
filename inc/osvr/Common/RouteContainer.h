@@ -81,6 +81,6 @@ namespace common {
                         std::string const &directive);
         std::vector<std::string> m_routingDirectives;
     };
-} // namespace routing
+} // namespace common
 } // namespace osvr
 #endif // INCLUDED_RouteContainer_h_GUID_EA5F3FB5_13E4_4299_5B39_1C986BC8E784

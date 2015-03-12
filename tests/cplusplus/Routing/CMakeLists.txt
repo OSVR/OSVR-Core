@@ -4,5 +4,5 @@ add_executable(Routing
     PathElement.cpp
     PathNode.cpp
     PathTree.cpp)
-target_link_libraries(Routing osvrRouting)
+target_link_libraries(Routing osvrCommon)
 setup_gtest(Routing)

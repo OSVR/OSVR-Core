@@ -22,26 +22,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
-#define INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+#ifndef INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
+#define INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9
 
 // Internal Includes
-#include <osvr/Common/PathNode.h>
+// - none
 
 // Library/third-party includes
-#include <boost/variant/get.hpp>
+// - none
 
 // Standard includes
 // - none
 
-template <typename ElementType>
-inline bool isElementType(osvr::common::elements::PathElement const &elt) {
-    return (boost::get<ElementType const>(&elt) != nullptr);
-}
+namespace osvr {
+namespace common {
+    class PathTree;
+} // namespace common
+} // namespace osvr
 
-template <typename ElementType>
-inline bool isNodeType(osvr::common::PathNode const &node) {
-    return isElementType<ElementType>(node.value());
-}
-
-#endif // INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+#endif // INCLUDED_PathTree_fwd_h_GUID_EFD4ABEE_5AA0_4585_C9A7_862B457167B9

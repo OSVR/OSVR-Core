@@ -22,26 +22,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
-#define INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+#ifndef INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
+#define INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
 
 // Internal Includes
-#include <osvr/Common/PathNode.h>
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Library/third-party includes
-#include <boost/variant/get.hpp>
+// - none
 
 // Standard includes
 // - none
 
-template <typename ElementType>
-inline bool isElementType(osvr::common::elements::PathElement const &elt) {
-    return (boost::get<ElementType const>(&elt) != nullptr);
-}
-
-template <typename ElementType>
-inline bool isNodeType(osvr::common::PathNode const &node) {
-    return isElementType<ElementType>(node.value());
-}
-
-#endif // INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+namespace osvr {
+namespace common {
+    inline double degreesToRadians(double degrees) {
+        return degrees * M_PI / 180.0;
+    }
+} // namespace common
+} // namespace osvr
+#endif // INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A

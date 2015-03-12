@@ -22,26 +22,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
-#define INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+#ifndef INCLUDED_RoutingConstants_h_GUID_1A7E9AA8_23B3_409B_4589_A15870E9473D
+#define INCLUDED_RoutingConstants_h_GUID_1A7E9AA8_23B3_409B_4589_A15870E9473D
 
 // Internal Includes
-#include <osvr/Common/PathNode.h>
+#include <osvr/Common/Export.h>
 
 // Library/third-party includes
-#include <boost/variant/get.hpp>
+// - none
 
 // Standard includes
 // - none
 
-template <typename ElementType>
-inline bool isElementType(osvr::common::elements::PathElement const &elt) {
-    return (boost::get<ElementType const>(&elt) != nullptr);
-}
+namespace osvr {
+namespace common {
+    /// @name Constants
+    /// @ingroup Routing
+    /// @{
+    /// @brief Gets the path separator character - a slash.
+    OSVR_COMMON_EXPORT char getPathSeparatorCharacter();
 
-template <typename ElementType>
-inline bool isNodeType(osvr::common::PathNode const &node) {
-    return isElementType<ElementType>(node.value());
-}
-
-#endif // INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+    /// @brief Gets the path separator - a slash - as a null-terminated
+    /// string.
+    OSVR_COMMON_EXPORT const char *getPathSeparator();
+    /// @}
+} // namespace common
+} // namespace osvr
+#endif // INCLUDED_RoutingConstants_h_GUID_1A7E9AA8_23B3_409B_4589_A15870E9473D

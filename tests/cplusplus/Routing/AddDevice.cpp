@@ -25,9 +25,9 @@
 
 // Internal Includes
 #include "IsType.h"
-#include <osvr/Routing/PathTree.h>
-#include <osvr/Routing/AddDevice.h>
-#include <osvr/Routing/Exceptions.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/AddDevice.h>
+#include <osvr/Common/RoutingExceptions.h>
 
 // Library/third-party includes
 #include <boost/variant/get.hpp>
@@ -37,7 +37,7 @@
 // - none
 
 using std::string;
-using namespace osvr::routing;
+using namespace osvr::common;
 
 TEST(addDevice, normalConditions) {
     PathTree tree;

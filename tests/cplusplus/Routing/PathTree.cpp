@@ -24,10 +24,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Routing/PathTreeFull.h>
-#include <osvr/Routing/PathElementTypes.h>
-#include <osvr/Routing/PathNode.h>
-#include <osvr/Routing/Exceptions.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/RoutingExceptions.h>
 #include "IsType.h"
 
 // Library/third-party includes
@@ -37,7 +37,7 @@
 // - none
 
 using std::string;
-using namespace osvr::routing;
+using namespace osvr::common;
 TEST(PathTree, create) { ASSERT_NO_THROW(PathTree()); }
 
 TEST(PathTree, getPathRoot) {

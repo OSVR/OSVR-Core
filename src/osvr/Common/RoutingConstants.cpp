@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Implementation
 
     @date 2014
 
@@ -22,26 +22,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
-#define INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
-
 // Internal Includes
-#include <osvr/Common/PathNode.h>
+#include <osvr/Common/RoutingConstants.h>
 
 // Library/third-party includes
-#include <boost/variant/get.hpp>
+// - none
 
 // Standard includes
 // - none
 
-template <typename ElementType>
-inline bool isElementType(osvr::common::elements::PathElement const &elt) {
-    return (boost::get<ElementType const>(&elt) != nullptr);
-}
+namespace osvr {
+namespace common {
+    char getPathSeparatorCharacter() { return getPathSeparator()[0]; }
 
-template <typename ElementType>
-inline bool isNodeType(osvr::common::PathNode const &node) {
-    return isElementType<ElementType>(node.value());
-}
-
-#endif // INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+    const char *getPathSeparator() { return "/"; }
+} // namespace common
+} // namespace osvr

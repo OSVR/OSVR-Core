@@ -22,26 +22,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
-#define INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+#ifndef INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0
+#define INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0
 
 // Internal Includes
-#include <osvr/Common/PathNode.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathElementTypes.h> ///< @todo can we split out this include? I don't think all consumers of this header need it.
+#include <osvr/Util/TreeNode.h>
 
 // Library/third-party includes
-#include <boost/variant/get.hpp>
-
-// Standard includes
 // - none
 
-template <typename ElementType>
-inline bool isElementType(osvr::common::elements::PathElement const &elt) {
-    return (boost::get<ElementType const>(&elt) != nullptr);
-}
+// Standard includes
+#include <string>
 
-template <typename ElementType>
-inline bool isNodeType(osvr::common::PathNode const &node) {
-    return isElementType<ElementType>(node.value());
-}
+namespace osvr {
+namespace common {
+    /// @brief Gets the absolute path for the given node.
+    ///
+    /// @ingroup Routing
+    OSVR_COMMON_EXPORT std::string getFullPath(PathNode const &node);
+} // namespace common
+} // namespace osvr
 
-#endif // INCLUDED_IsType_h_GUID_F2A39A30_F0D0_4288_0E1B_C5B982CD3BED
+#endif // INCLUDED_PathNode_h_GUID_0A160656_BCAF_4C96_EF3F_5209470644B0

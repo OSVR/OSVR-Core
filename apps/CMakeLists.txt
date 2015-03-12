@@ -28,7 +28,7 @@ add_executable(osvr_reset_yaw
     ClientMainloop.h
     RecomposeTransform.h
     WrapRoute.h)
-target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrTransform osvrRouting osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 set_target_properties(osvr_reset_yaw PROPERTIES
     FOLDER "OSVR Stock Applications")
 

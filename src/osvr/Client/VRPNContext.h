@@ -27,7 +27,7 @@
 
 // Internal Includes
 #include <osvr/Client/ClientContext.h>
-#include <osvr/Transform/Transform.h>
+#include <osvr/Common/Transform.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
@@ -84,7 +84,7 @@ namespace client {
 
         void m_addTrackerRouter(const char *src, const char *dest,
                                 boost::optional<int> sensor,
-                                transform::Transform const &xform);
+                                common::Transform const &xform);
 
         vrpn_ConnectionPtr m_conn;
         std::string const m_host;

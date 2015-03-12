@@ -34,8 +34,8 @@
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Transform/JSONTransformVisitor.h>
-#include <osvr/Transform/ChangeOfBasis.h>
+#include <osvr/Common/JSONTransformVisitor.h>
+#include <osvr/Common/ChangeOfBasis.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/RoutingKeys.h>
@@ -153,7 +153,7 @@ namespace client {
                                                 Json::Value src) {
 
         boost::optional<int> sensor;
-        transform::JSONTransformVisitor xformParse(src);
+        common::JSONTransformVisitor xformParse(src);
         Json::Value srcLeaf = xformParse.getLeaf();
         std::string srcDevice = srcLeaf[TRACKER_KEY].asString();
         // OSVR_DEV_VERBOSE("Source device: " << srcDevice);
@@ -241,7 +241,7 @@ namespace client {
 
     void VRPNContext::m_addTrackerRouter(const char *src, const char *dest,
                                          boost::optional<int> sensor,
-                                         transform::Transform const &xform) {
+                                         common::Transform const &xform) {
         OSVR_DEV_VERBOSE("Adding tracker route for " << dest);
         std::string source(src);
         if (std::string::npos != source.find('@')) {
