@@ -16,7 +16,6 @@ if(BUILD_SERVER)
 endif()
 
 if(BUILD_CLIENT)
-    add_subdirectory(Transform)
     add_subdirectory(Client)
     add_subdirectory(ClientKit)
 endif()

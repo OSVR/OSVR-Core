@@ -31,7 +31,7 @@
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Client/ClientContext.h>
 #include <osvr/Client/ClientInterface.h>
-#include <osvr/Transform/Transform.h>
+#include <osvr/Common/Transform.h>
 
 // Library/third-party includes
 #include <vrpn_Tracker.h>
@@ -46,7 +46,7 @@ namespace client {
       public:
         VRPNTrackerRouter(ClientContext *ctx, vrpn_ConnectionPtr conn,
                           const char *src, boost::optional<int> sensor,
-                          const char *dest, transform::Transform const &t)
+                          const char *dest, common::Transform const &t)
             : RouterEntry(ctx, dest),
               m_remote(new vrpn_Tracker_Remote(src, conn.get())),
               m_transform(t), m_conn(conn) {
@@ -106,7 +106,7 @@ namespace client {
 
       private:
         unique_ptr<vrpn_Tracker_Remote> m_remote;
-        transform::Transform m_transform;
+        common::Transform m_transform;
         vrpn_ConnectionPtr m_conn;
     };
 

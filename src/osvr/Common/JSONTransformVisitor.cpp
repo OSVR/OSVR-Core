@@ -25,10 +25,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Transform/JSONTransformVisitor.h>
-#include <osvr/Transform/Transform.h>
-#include <osvr/Transform/ChangeOfBasis.h>
-#include <osvr/Transform/Util.h>
+#include <osvr/Common/JSONTransformVisitor.h>
+#include <osvr/Common/Transform.h>
+#include <osvr/Common/ChangeOfBasis.h>
+#include <osvr/Common/DegreesToRadians.h>
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
@@ -41,7 +41,7 @@
 #include <string>
 
 namespace osvr {
-namespace transform {
+namespace common {
 
     static const char AXIS_NAMES[] = "XYZ";
     static const char MINUS[] = "-";
@@ -189,5 +189,5 @@ namespace transform {
 
     Json::Value const &JSONTransformVisitor::getLeaf() const { return m_leaf; }
 
-} // namespace transform
+} // namespace common
 } // namespace osvr

@@ -27,7 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/StdInt.h>
-#include <osvr/Transform/Transform.h>
+#include <osvr/Common/Transform.h>
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -36,7 +36,7 @@
 // - none
 
 namespace osvr {
-namespace transform {
+namespace common {
     class ChangeOfBasis {
       public:
         ChangeOfBasis() : m_xform(Eigen::Matrix4d::Zero()) {
@@ -58,7 +58,7 @@ namespace transform {
         }
         Eigen::Matrix4d m_xform;
     };
-} // namespace transform
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ChangeOfBasis_h_GUID_3821B5B4_4DC3_4C94_71A5_3D05E043CC62

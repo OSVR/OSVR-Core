@@ -35,10 +35,10 @@
 // - none
 
 namespace osvr {
-namespace transform {
+namespace common {
     inline double degreesToRadians(double degrees) {
         return degrees * M_PI / 180.0;
     }
-} // namespace transform
+} // namespace common
 } // namespace osvr
 #endif // INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A

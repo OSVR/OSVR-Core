@@ -14,15 +14,18 @@ set(API
     "${HEADER_LOCATION}/Buffer.h"
     "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
+    "${HEADER_LOCATION}/ChangeOfBasis.h"
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
+    "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/JSONEigen.h"
+    "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/PathElementTools.h"
@@ -44,6 +47,7 @@ set(API
     "${HEADER_LOCATION}/SerializationTraits.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
+    "${HEADER_LOCATION}/Transform.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
@@ -56,6 +60,7 @@ set(SOURCE
     DeviceWrapper.h
     GetEnvironmentVariable.cpp
     ImagingComponent.cpp
+    JSONTransformVisitor.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
     PathElementTools.cpp

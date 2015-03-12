@@ -53,7 +53,6 @@ target_include_directories(${LIBNAME_FULL}
 
 target_link_libraries(${LIBNAME_FULL}
     PRIVATE
-    osvrTransform
     osvrUtilCpp
     osvrCommon
     jsoncpp_lib

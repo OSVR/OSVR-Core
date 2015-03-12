@@ -26,9 +26,9 @@
 #define INCLUDED_JSONTransformVisitor_h_GUID_35872365_9953_479F_C548_86F8BDAE030B
 
 // Internal Includes
-#include <osvr/Transform/Export.h>
+#include <osvr/Common/Export.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Transform/Transform.h>
+#include <osvr/Common/Transform.h>
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -38,24 +38,24 @@
 #include <string>
 
 namespace osvr {
-namespace transform {
+namespace common {
     class JSONTransformData;
     class JSONTransformVisitor {
       public:
         /// @brief Parses json describing a transformation to compute the
         /// overall transformation.
-        OSVR_TRANSFORM_EXPORT JSONTransformVisitor(Json::Value const &root);
-        OSVR_TRANSFORM_EXPORT ~JSONTransformVisitor();
+        OSVR_COMMON_EXPORT JSONTransformVisitor(Json::Value const &root);
+        OSVR_COMMON_EXPORT ~JSONTransformVisitor();
 
-        OSVR_TRANSFORM_EXPORT Transform const &getTransform() const;
+        OSVR_COMMON_EXPORT Transform const &getTransform() const;
 
-        OSVR_TRANSFORM_EXPORT Json::Value const &getLeaf() const;
+        OSVR_COMMON_EXPORT Json::Value const &getLeaf() const;
 
       private:
         Transform m_transform;
         Json::Value m_leaf;
     };
-} // namespace transform
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_JSONTransformVisitor_h_GUID_35872365_9953_479F_C548_86F8BDAE030B

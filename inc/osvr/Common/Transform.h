@@ -26,7 +26,7 @@
 #define INCLUDED_Transform_h_GUID_8BF4BBD8_CDC1_48BC_DC27_BFDA42A3212E
 
 // Internal Includes
-#include <osvr/Transform/DegreesToRadians.h>
+#include <osvr/Common/DegreesToRadians.h>
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -36,7 +36,7 @@
 
 namespace osvr {
 /// @brief Handles spatial transformations
-namespace transform {
+namespace common {
 
     /// @brief Spatial transformation, consisting of both pre and post
     /// components.
@@ -85,7 +85,7 @@ namespace transform {
                    Eigen::AngleAxisd(degreesToRadians(degrees), axis)).matrix();
     }
 
-} // namespace transform
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_Transform_h_GUID_8BF4BBD8_CDC1_48BC_DC27_BFDA42A3212E
