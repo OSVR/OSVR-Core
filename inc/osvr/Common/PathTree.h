@@ -67,6 +67,14 @@ namespace common {
         /// exceptions::EmptyPathComponent
         OSVR_COMMON_EXPORT PathNode &getNodeByPath(std::string const &path);
 
+        /// @overload
+        ///
+        /// Same as above but a non-existent final component node will be
+        /// initialized from the provided element rather than NullElement.
+        OSVR_COMMON_EXPORT PathNode &
+        getNodeByPath(std::string const &path,
+                      PathElement const &finalComponentDefault);
+
       private:
         /// @brief Root node of the tree.
         PathNodePtr m_root;

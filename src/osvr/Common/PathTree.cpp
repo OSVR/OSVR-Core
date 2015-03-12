@@ -39,5 +39,10 @@ namespace common {
     PathNode &PathTree::getNodeByPath(std::string const &path) {
         return pathParseAndRetrieve(path, *m_root);
     }
+    PathNode &
+    PathTree::getNodeByPath(std::string const &path,
+                            PathElement const &finalComponentDefault) {
+        return pathParseAndRetrieve(path, *m_root, finalComponentDefault);
+    }
 } // namespace common
 } // namespace osvr
