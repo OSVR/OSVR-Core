@@ -16,6 +16,7 @@ set(API
     "${HEADER_LOCATION}/ReportTypes.h"
     "${HEADER_LOCATION}/ReportTypeWrapper.h"
     "${HEADER_LOCATION}/ReportMap.h"
+    "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/StateType.h")
 
 set(SOURCE
@@ -26,13 +27,17 @@ set(SOURCE
     ImagingRouter.h
     PureClientContext.h
     PureClientContext.cpp
+    ResolveTreeNode.cpp
     RouterTransforms.h
     RouterPredicates.h
     VRPNContext.cpp
     VRPNContext.h
+    VRPNConnectionCollection.cpp
+    VRPNConnectionCollection.h
     VRPNAnalogRouter.h
     VRPNButtonRouter.h
-    VRPNTrackerRouter.h)
+    VRPNTrackerRouter.h
+    WiringTracker.h)
 
 set(DISPLAY_JSON display-HDK.json)
 osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")

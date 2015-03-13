@@ -74,13 +74,13 @@ namespace common {
                           std::string const &server)
                 : m_devName(deviceName), m_server(server) {}
 
-            static DeviceElement
+            OSVR_COMMON_EXPORT static DeviceElement
             createVRPNDeviceElement(std::string const &deviceName,
                                     std::string const &server);
 
-            std::string const &getDeviceName() const;
-            std::string const &getServer() const;
-            std::string getFullDeviceName() const;
+            OSVR_COMMON_EXPORT std::string const &getDeviceName() const;
+            OSVR_COMMON_EXPORT std::string const &getServer() const;
+            OSVR_COMMON_EXPORT std::string getFullDeviceName() const;
 
           private:
             std::string m_devName;
@@ -124,7 +124,7 @@ namespace common {
             void setSource(std::string const &source);
 
             /// @brief Get the source of data for this alias
-            std::string const &getSource() const;
+            OSVR_COMMON_EXPORT std::string const &getSource() const;
 
           private:
             std::string m_source;

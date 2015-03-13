@@ -30,6 +30,8 @@
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Client/ResolveTreeNode.h>
+#include "VRPNConnectionCollection.h"
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -40,6 +42,7 @@
 
 namespace osvr {
 namespace client {
+
     class PureClientContext : public ::OSVR_ClientContextObject {
       public:
         PureClientContext(const char appId[], const char host[] = "localhost");
@@ -49,15 +52,20 @@ namespace client {
         void m_setupDummyTree();
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
+        virtual void m_handleNewInterface(ClientInterfacePtr const &iface);
 
+        void m_connectCallbacksOnInterface(ClientInterfacePtr const &iface);
         std::string m_host;
         vrpn_ConnectionPtr m_mainConn;
         common::PathTree m_pathTree;
         common::BaseDevicePtr m_systemDevice;
         common::SystemComponent *m_systemComponent;
-        typedef std::unordered_map<std::string, vrpn_ConnectionPtr>
-            ConnectionMap;
-        ConnectionMap m_vrpnConns;
+        VRPNConnectionCollection m_vrpnConns;
+        typedef std::unordered_map<std::string, ClientInterfaceWeakPtr>
+            InterfaceMap;
+
+        InterfaceMap m_interfaces;
+        InterfaceWiringFactory m_wiringFactory;
     };
 } // namespace client
 } // namespace osvr

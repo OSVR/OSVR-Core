@@ -66,6 +66,7 @@ ClientInterfacePtr OSVR_ClientContextObject::getInterface(const char path[]) {
     }
     ret = make_shared<ClientInterface>(this, path,
                                        ClientInterface::PrivateConstructor());
+    m_handleNewInterface(ret);
     m_interfaces.push_back(ret);
     return ret;
 }
@@ -122,4 +123,9 @@ void OSVR_ClientContextObject::sendRoute(std::string const &route) {
 
 bool OSVR_ClientContextObject::releaseObject(void *obj) {
     return m_ownedObjects.release(obj);
+}
+
+void OSVR_ClientContextObject::m_handleNewInterface(
+    ::osvr::client::ClientInterfacePtr const &) {
+    // by default do nothing
 }

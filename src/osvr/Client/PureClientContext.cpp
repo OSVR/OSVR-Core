@@ -24,28 +24,30 @@
 
 // Internal Includes
 #include "PureClientContext.h"
-
-// Library/third-party includes
 #include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
+#include <osvr/Client/ClientInterface.h>
+#include "WiringTracker.h"
+#include <osvr/Client/ResolveTreeNode.h>
+#include <osvr/Util/Verbosity.h>
+
+// Library/third-party includes
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace client {
+
     PureClientContext::PureClientContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;
-        m_mainConn =
-            vrpn_get_connection_by_name(sysDeviceName.c_str(), nullptr, nullptr,
-                                        nullptr, nullptr, nullptr, true);
-        m_mainConn->removeReference(); // Remove extra reference.
-        m_vrpnConns[m_host] = m_mainConn;
+        m_mainConn = m_vrpnConns.getConnection(
+            common::SystemComponent::deviceName(), host);
 
         /// Create the system client device.
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
@@ -55,22 +57,60 @@ namespace client {
             m_systemComponent->registerRoutesHandler(
                 &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
 #endif
+
+        auto vrpnConns = m_vrpnConns;
+        WiringTracker::createAndAddFactory(m_vrpnConns, m_wiringFactory);
+        m_setupDummyTree();
     }
+
     PureClientContext::~PureClientContext() {}
+
     void PureClientContext::m_setupDummyTree() {
         m_pathTree.getNodeByPath("/org_opengoggles_bundled_Multiserver",
                                  common::elements::PluginElement());
+        m_pathTree.getNodeByPath(
+            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
+            common::elements::DeviceElement::createVRPNDeviceElement(
+                "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
+                "localhost"));
+        m_pathTree.getNodeByPath(
+            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker",
+            common::elements::InterfaceElement());
+
+        m_pathTree.getNodeByPath("/me/hands/left",
+                                 common::elements::AliasElement(
+                                     "/org_opengoggles_bundled_Multiserver/"
+                                     "YEI_3Space_Sensor0/tracker/1"));
     }
+
     void PureClientContext::m_update() {
         /// Mainloop connections
-        for (auto &connPair : m_vrpnConns) {
-            connPair.second->mainloop();
-        }
+        m_vrpnConns.updateAll();
     }
+
     void PureClientContext::m_sendRoute(std::string const &route) {
         m_systemComponent->sendClientRouteUpdate(route);
         m_update();
     }
 
+    void
+    PureClientContext::m_handleNewInterface(ClientInterfacePtr const &iface) {
+        m_connectCallbacksOnInterface(iface);
+    }
+
+    void PureClientContext::m_connectCallbacksOnInterface(
+        ClientInterfacePtr const &iface) {
+
+        auto &node = m_pathTree.getNodeByPath(iface->getPath());
+        auto handler = traverseRoute(m_pathTree, node, iface, m_wiringFactory);
+        if (handler) {
+            OSVR_DEV_VERBOSE("Successfully resolved handler for "
+                             << iface->getPath());
+        } else {
+            OSVR_DEV_VERBOSE("Could not resolve handler for "
+                             << iface->getPath());
+        }
+        iface->data() = handler;
+    }
 } // namespace client
 } // namespace osvr

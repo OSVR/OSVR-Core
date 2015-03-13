@@ -107,6 +107,8 @@ struct OSVR_ClientContextObject : boost::noncopyable {
   private:
     virtual void m_update() = 0;
     virtual void m_sendRoute(std::string const &route) = 0;
+    virtual void
+    m_handleNewInterface(::osvr::client::ClientInterfacePtr const &iface);
     std::string const m_appId;
     InterfaceList m_interfaces;
     std::map<std::string, std::string> m_params;

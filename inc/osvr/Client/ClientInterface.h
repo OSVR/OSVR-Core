@@ -38,6 +38,7 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <boost/any.hpp>
 
 // Standard includes
 #include <string>
@@ -89,6 +90,9 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Update any state.
     void update();
 
+    /// @brief Access the type-erased data for this interface.
+    boost::any &data() { return m_data; }
+
   private:
     /// @brief Helper function for setting state
     template <typename ReportType>
@@ -106,6 +110,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     std::string const m_path;
     osvr::client::InterfaceCallbacks m_callbacks;
     osvr::client::InterfaceState m_state;
+    boost::any m_data;
     friend struct OSVR_ClientContextObject;
 };
 

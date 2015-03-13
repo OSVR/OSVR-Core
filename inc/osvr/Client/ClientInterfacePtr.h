@@ -41,6 +41,8 @@ namespace client {
     typedef ::OSVR_ClientInterfaceObject ClientInterface;
     /// @brief Pointer for holding ClientInterface objects safely.
     typedef shared_ptr<ClientInterface> ClientInterfacePtr;
+    /// @brief Pointer for observing ClientInterface objects safely and weakly.
+    typedef weak_ptr<ClientInterface> ClientInterfaceWeakPtr;
 } // namespace client
 } // namespace osvr
 
