@@ -171,7 +171,8 @@ int main(int argc, char *argv[]) {
             origRoute[osvr::common::routing_keys::source()] = cleanTransforms;
             ctx.get()->sendRoute(origRoute.toStyledString());
 
-            cout << "Sent cleaned route: " << origRoute.toStyledString() << endl;
+            cout << "Sent cleaned route: " << origRoute.toStyledString()
+                 << endl;
         }
         cout << "Running thread and waiting a few seconds "
                 "for startup..." << endl;
