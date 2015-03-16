@@ -39,8 +39,62 @@
 namespace osvr {
 namespace common {
     namespace {
+        class PathElementToJSONFunctor : boost::noncopyable {
+          public:
+            PathElementToJSONFunctor(Json::Value &val) : m_val(val) {}
 
-        class PathElementToJson : public boost::static_visitor<Json::Value> {
+            template <typename T>
+            void operator()(const char name[], T const &data) {
+                m_val[name] = data;
+            }
+
+          private:
+            Json::Value &m_val;
+        };
+
+        class PathElementFromJSONFunctor : boost::noncopyable {
+          public:
+            PathElementFromJSONFunctor(Json::Value const &val) : m_val(val) {}
+
+            void operator()(const char name[], std::string &dataRef) {
+                dataRef = m_val[name].asString();
+            }
+
+          private:
+            Json::Value const &m_val;
+        };
+
+        template <typename T> class PathElementSerializationHandler {
+          public:
+            template <typename Functor, typename ValType>
+            static void handle(Functor &, ValType &) {}
+        };
+
+        template <>
+        class PathElementSerializationHandler<elements::DeviceElement> {
+          public:
+            template <typename Functor, typename ValType>
+            static void handle(Functor &f, ValType &value) {
+                f("device_name", value.getDeviceName());
+                f("server", value.getServer());
+            }
+        };
+
+        template <typename T>
+        inline void pathElementToJson(Json::Value &json, T const &element) {
+            PathElementToJSONFunctor f(json);
+            PathElementSerializationHandler<T>::handle(f, element);
+        }
+
+        template <typename T>
+        inline T pathElementFromJson(Json::Value const &json) {
+            PathElementFromJSONFunctor f(json);
+            T value;
+            PathElementSerializationHandler<T>::handle(f, value);
+            return value;
+        }
+
+        class PathNodeToJson : public boost::static_visitor<Json::Value> {
           public:
             Json::Value setup(PathNode const &node) {
                 Json::Value val{Json::objectValue};
@@ -50,10 +104,12 @@ namespace common {
             }
 
             template <typename T>
-            Json::Value operator()(PathNode const &node, T const &) {
-                return setup(node);
+            Json::Value operator()(PathNode const &node, T const &elt) {
+                auto ret = setup(node);
+                pathElementToJson(ret, elt);
+                return ret;
             }
-
+#if 0
             Json::Value operator()(PathNode const &node,
                                    elements::DeviceElement const &elt) {
                 auto ret = setup(node);
@@ -61,6 +117,7 @@ namespace common {
                 ret["server"] = elt.getServer();
                 return ret;
             }
+#endif
             Json::Value operator()(PathNode const &node,
                                    elements::AliasElement const &elt) {
                 auto ret = setup(node);
@@ -85,7 +142,7 @@ namespace common {
                     nullptr ==
                         boost::get<elements::NullElement>(&node.value())) {
                     // If we're keeping nulls or this isn't a null...
-                    PathElementToJson visitor;
+                    PathNodeToJson visitor;
                     auto newEntry = applyPathNodeVisitor(visitor, node);
                     m_ret.append(newEntry);
                 }

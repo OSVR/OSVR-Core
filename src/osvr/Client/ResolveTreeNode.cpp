@@ -24,8 +24,9 @@
 
 // Internal Includes
 #include <osvr/Client/ResolveTreeNode.h>
-#include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
 #include <osvr/Util/Verbosity.h>

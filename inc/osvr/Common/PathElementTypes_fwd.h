@@ -47,9 +47,7 @@ namespace common {
         class LogicalElement;
         class AliasElement;
 
-/// @brief The variant type containing a particular kind of path
-/// element.
-/// @ingroup Routing
+/// @brief The variant type containing a particular kind of path element.
 #ifndef OSVR_DOXYGEN_EXTERNAL
 ///
 /// NOTE: if you add an element type here, you must make sure it's:
