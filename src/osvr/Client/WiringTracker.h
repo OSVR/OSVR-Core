@@ -69,10 +69,8 @@ namespace client {
                                               sensor.get_value_or(-1));
             OSVR_DEV_VERBOSE("Constructed a TrackerHandler for "
                              << src << " sensor " << sensor.get_value_or(-1));
-#if 0
-            m_remote->shutup = true;
-#endif
         }
+        virtual ~VRPNTrackerHandler() {}
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -177,12 +175,8 @@ namespace client {
             }
 
             auto const &devElt = decomp.getDeviceElement();
-#if 0
-            ret = make_shared<VRPNTrackerHandler>(
-                m_conns.getConnection(devElt),
-                devElt.getFullDeviceName().c_str(), opts, t,
-                decomp.getSensorNumber(), iface);
-#endif
+
+            /// @todo find out why make_shared causes a crash here
             ret.reset(new VRPNTrackerHandler(m_conns.getConnection(devElt),
                                              devElt.getFullDeviceName().c_str(),
                                              opts, t, decomp.getSensorNumber(),

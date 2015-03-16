@@ -268,17 +268,6 @@ namespace common {
         /// reader!
         Reader startReading() const { return Reader(m_buf); }
 
-#if 0
-        /// @todo Commented out because YAGNI
-
-        typedef typename ContainerType::const_iterator const_iterator;
-
-        /// @brief Gets the "begin" iterator
-        const_iterator begin() const { return m_buf.begin(); }
-
-        /// @brief Gets the "past the end" iterator
-        const_iterator end() const { return m_buf.end(); }
-#endif
         /// @brief Gets the current size, in bytes.
         size_t size() const { return m_buf.size(); }
 
