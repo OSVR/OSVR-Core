@@ -84,6 +84,10 @@ namespace common {
                 dest = src;
             }
         }
+
+        bool isNull(PathElement const &elt) {
+            return (nullptr != boost::get<NullElement>(&elt));
+        }
     } // namespace elements
 } // namespace common
 } // namespace osvr

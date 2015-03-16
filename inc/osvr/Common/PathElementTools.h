@@ -58,6 +58,9 @@ namespace common {
         /// @param dest Item to inquire about, and update if needed.
         /// @param src Replacement for dest if dest is a NullElement.
         void ifNullReplaceWith(PathElement &dest, PathElement const &src);
+
+        /// @brief Returns true if the path element provided is a NullElement.
+        bool isNull(PathElement const &elt);
         /// @}
     } // namespace elements
 } // namespace common
