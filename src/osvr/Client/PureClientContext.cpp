@@ -64,7 +64,11 @@ namespace client {
         m_setupDummyTree();
     }
 
-    PureClientContext::~PureClientContext() {}
+    PureClientContext::~PureClientContext() {
+        for (auto const &iface : getInterfaces()) {
+            m_handleReleasingInterface(iface);
+        }
+    }
 
     void PureClientContext::m_setupDummyTree() {
         m_pathTree.getNodeByPath("/org_opengoggles_bundled_Multiserver",
@@ -97,6 +101,11 @@ namespace client {
     void
     PureClientContext::m_handleNewInterface(ClientInterfacePtr const &iface) {
         m_connectCallbacksOnInterface(iface);
+    }
+
+    void PureClientContext::m_handleReleasingInterface(
+        ClientInterfacePtr const &iface) {
+        /// @todo
     }
 
     void PureClientContext::m_connectCallbacksOnInterface(

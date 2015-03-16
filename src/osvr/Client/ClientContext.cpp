@@ -92,6 +92,8 @@ OSVR_ClientContextObject::releaseInterface(ClientInterface *iface) {
     if (ret) {
         // Erase it from our list
         m_interfaces.erase(it);
+        // Notify the derived class if desired
+        m_handleReleasingInterface(ret);
     }
     return ret;
 }
@@ -126,6 +128,10 @@ bool OSVR_ClientContextObject::releaseObject(void *obj) {
 }
 
 void OSVR_ClientContextObject::m_handleNewInterface(
+    ::osvr::client::ClientInterfacePtr const &) {
+    // by default do nothing
+}
+void OSVR_ClientContextObject::m_handleReleasingInterface(
     ::osvr::client::ClientInterfacePtr const &) {
     // by default do nothing
 }

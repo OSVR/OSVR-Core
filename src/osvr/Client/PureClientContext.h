@@ -53,6 +53,8 @@ namespace client {
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
         virtual void m_handleNewInterface(ClientInterfacePtr const &iface);
+        virtual void
+        m_handleReleasingInterface(ClientInterfacePtr const &iface);
 
         void m_connectCallbacksOnInterface(ClientInterfacePtr const &iface);
         std::string m_host;
