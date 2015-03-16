@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Util/Verbosity.h>
@@ -32,6 +33,7 @@
 // Library/third-party includes
 #include <json/value.h>
 #include <boost/variant.hpp>
+#include <boost/mpl/for_each.hpp>
 
 // Standard includes
 // - none
@@ -39,6 +41,39 @@
 namespace osvr {
 namespace common {
     namespace {
+
+        /// @brief Class template (for specialization) allowing serialization
+        /// and deserialization code to be generated from the same operations
+        /// (ensuring keys stay in sync, etc.)
+        template <typename T> class PathElementSerializationHandler {
+          public:
+            template <typename Functor, typename ValType>
+            static void handle(Functor &, ValType &) {}
+        };
+
+        /// @brief Specialization for DeviceElement
+        template <>
+        class PathElementSerializationHandler<elements::DeviceElement> {
+          public:
+            template <typename Functor, typename ValType>
+            static void handle(Functor &f, ValType &value) {
+                f("device_name", value.getDeviceName());
+                f("server", value.getServer());
+            }
+        };
+
+        /// @brief Specialization for AliasElement
+        template <>
+        class PathElementSerializationHandler<elements::AliasElement> {
+          public:
+            template <typename Functor, typename ValType>
+            static void handle(Functor &f, ValType &value) {
+                f("source", value.getSource());
+            }
+        };
+
+        /// @brief Functor for use with PathElementSerializationHandler, for the
+        /// direction PathElement->JSON
         class PathElementToJSONFunctor : boost::noncopyable {
           public:
             PathElementToJSONFunctor(Json::Value &val) : m_val(val) {}
@@ -52,49 +87,10 @@ namespace common {
             Json::Value &m_val;
         };
 
-        class PathElementFromJSONFunctor : boost::noncopyable {
-          public:
-            PathElementFromJSONFunctor(Json::Value const &val) : m_val(val) {}
-
-            void operator()(const char name[], std::string &dataRef) {
-                dataRef = m_val[name].asString();
-            }
-
-          private:
-            Json::Value const &m_val;
-        };
-
-        template <typename T> class PathElementSerializationHandler {
-          public:
-            template <typename Functor, typename ValType>
-            static void handle(Functor &, ValType &) {}
-        };
-
-        template <>
-        class PathElementSerializationHandler<elements::DeviceElement> {
-          public:
-            template <typename Functor, typename ValType>
-            static void handle(Functor &f, ValType &value) {
-                f("device_name", value.getDeviceName());
-                f("server", value.getServer());
-            }
-        };
-
-        template <typename T>
-        inline void pathElementToJson(Json::Value &json, T const &element) {
-            PathElementToJSONFunctor f(json);
-            PathElementSerializationHandler<T>::handle(f, element);
-        }
-
-        template <typename T>
-        inline T pathElementFromJson(Json::Value const &json) {
-            PathElementFromJSONFunctor f(json);
-            T value;
-            PathElementSerializationHandler<T>::handle(f, value);
-            return value;
-        }
-
-        class PathNodeToJson : public boost::static_visitor<Json::Value> {
+        /// @brief A PathNodeVisitor that returns a JSON object corresponding to
+        /// a single PathNode.
+        class PathNodeToJsonVisitor
+            : public boost::static_visitor<Json::Value> {
           public:
             Json::Value setup(PathNode const &node) {
                 Json::Value val{Json::objectValue};
@@ -106,46 +102,30 @@ namespace common {
             template <typename T>
             Json::Value operator()(PathNode const &node, T const &elt) {
                 auto ret = setup(node);
-                pathElementToJson(ret, elt);
-                return ret;
-            }
-#if 0
-            Json::Value operator()(PathNode const &node,
-                                   elements::DeviceElement const &elt) {
-                auto ret = setup(node);
-                ret["device_name"] = elt.getDeviceName();
-                ret["server"] = elt.getServer();
-                return ret;
-            }
-#endif
-            Json::Value operator()(PathNode const &node,
-                                   elements::AliasElement const &elt) {
-                auto ret = setup(node);
-                ret["source"] = elt.getSource();
+                PathElementToJSONFunctor f(ret);
+                PathElementSerializationHandler<T>::handle(f, elt);
                 return ret;
             }
         };
 
+        /// @brief A PathNode (tree) visitor to recursively convert nodes in a
+        /// PathTree to JSON
         class PathTreeToJsonVisitor {
           public:
             PathTreeToJsonVisitor(bool keepNulls)
                 : m_ret(Json::arrayValue), m_keepNulls(keepNulls) {}
 
-            Json::Value convert(PathTree &tree) {
-                tree.visitConstTree(*this);
-                return m_ret;
-            }
+            Json::Value getResult() { return m_ret; }
 
             void operator()(PathNode const &node) {
                 OSVR_DEV_VERBOSE("Visiting " << getFullPath(node));
-                if (m_keepNulls ||
-                    nullptr ==
-                        boost::get<elements::NullElement>(&node.value())) {
+                if (m_keepNulls || !elements::isNull(node.value())) {
                     // If we're keeping nulls or this isn't a null...
-                    PathNodeToJson visitor;
+                    PathNodeToJsonVisitor visitor;
                     auto newEntry = applyPathNodeVisitor(visitor, node);
                     m_ret.append(newEntry);
                 }
+                // Recurse on children
                 node.visitConstChildren(*this);
             }
 
@@ -153,10 +133,63 @@ namespace common {
             Json::Value m_ret;
             bool m_keepNulls;
         };
+
+        /// @brief Functor for use with PathElementSerializationHandler, for the
+        /// direction JSON->PathElement
+        class PathElementFromJsonFunctor : boost::noncopyable {
+          public:
+            PathElementFromJsonFunctor(Json::Value const &val) : m_val(val) {}
+
+            void operator()(const char name[], std::string &dataRef) {
+                dataRef = m_val[name].asString();
+            }
+            /// @todo add more methods if other data types are stored
+          private:
+            Json::Value const &m_val;
+        };
+
+        /// @brief Functor for use with the PathElement's typelist and
+        /// mpl::for_each, to convert from type name string to actual type and
+        /// load the data.
+        class DeserializeElementFunctor {
+          public:
+            DeserializeElementFunctor(Json::Value const &val,
+                                      elements::PathElement &elt)
+                : m_val(val), m_typename(val["type"].asString()), m_elt(elt) {}
+
+            /// @brief Don't try to generate an assignment operator.
+            DeserializeElementFunctor &
+            operator=(const DeserializeElementFunctor &) = delete;
+
+            template <typename T> void operator()(T const &) {
+                if (elements::getTypeName<T>() == m_typename) {
+                    T value;
+                    PathElementFromJsonFunctor functor(m_val);
+                    PathElementSerializationHandler<T>::handle(functor, value);
+                    m_elt = value;
+                }
+            }
+
+          private:
+            Json::Value const &m_val;
+            std::string const m_typename;
+            elements::PathElement &m_elt;
+        };
     } // namespace
+
     Json::Value pathTreeToJson(PathTree &tree, bool keepNulls) {
         auto visitor = PathTreeToJsonVisitor{keepNulls};
-        return visitor.convert(tree);
+        tree.visitConstTree(visitor);
+        return visitor.getResult();
+    }
+
+    void jsonToPathTree(PathTree &tree, Json::Value nodes) {
+        for (auto const &node : nodes) {
+            elements::PathElement elt;
+            DeserializeElementFunctor functor{node, elt};
+            boost::mpl::for_each<elements::PathElement::types>(functor);
+            tree.getNodeByPath(node["path"].asString()).value() = elt;
+        }
     }
 } // namespace common
 } // namespace osvr

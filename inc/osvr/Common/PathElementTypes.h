@@ -118,6 +118,10 @@ namespace common {
           public:
             /// @brief Constructor with source.
             OSVR_COMMON_EXPORT AliasElement(std::string const &source);
+
+            /// @brief default (empty) constructor
+            AliasElement() = default;
+
             /// @brief Sets the source of this alias
             /// @param source absolute path of the target, possibly wrapped in
             /// transforms.
