@@ -32,6 +32,7 @@
 #include <osvr/Client/ClientInterface.h>
 #include "WiringTracker.h"
 #include <osvr/Client/ResolveTreeNode.h>
+#include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -111,6 +112,9 @@ namespace client {
                              << iface->getPath());
         }
         iface->data() = handler;
+
+        auto serializedTree = common::pathTreeToJson(m_pathTree);
+        OSVR_DEV_VERBOSE(serializedTree.toStyledString());
     }
 } // namespace client
 } // namespace osvr

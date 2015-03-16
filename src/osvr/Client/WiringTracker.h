@@ -62,9 +62,9 @@ namespace client {
         VRPNTrackerHandler(vrpn_ConnectionPtr const &conn, const char *src,
                            Options const &options, common::Transform const &t,
                            boost::optional<int> sensor,
-                           ClientInterfacePtr iface)
+                           ClientInterfacePtr const &iface)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
-              m_transform(t), m_opts(options) {
+              m_transform(t), m_iface(iface), m_opts(options) {
             m_remote->register_change_handler(this, &VRPNTrackerHandler::handle,
                                               sensor.get_value_or(-1));
             OSVR_DEV_VERBOSE("Constructed a TrackerHandler for "
@@ -177,11 +177,16 @@ namespace client {
             }
 
             auto const &devElt = decomp.getDeviceElement();
+#if 0
             ret = make_shared<VRPNTrackerHandler>(
                 m_conns.getConnection(devElt),
                 devElt.getFullDeviceName().c_str(), opts, t,
                 decomp.getSensorNumber(), iface);
-
+#endif
+            ret.reset(new VRPNTrackerHandler(m_conns.getConnection(devElt),
+                                             devElt.getFullDeviceName().c_str(),
+                                             opts, t, decomp.getSensorNumber(),
+                                             iface));
             return ret;
         }
 

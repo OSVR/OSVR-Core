@@ -37,6 +37,7 @@ set(API
     "${HEADER_LOCATION}/PathNode_fwd.h"
     "${HEADER_LOCATION}/PathTree.h"
     "${HEADER_LOCATION}/PathTreeFull.h"
+    "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
@@ -71,6 +72,7 @@ set(SOURCE
     PathParseAndRetrieve.cpp
     PathParseAndRetrieve.h
     PathTree.cpp
+    PathTreeSerialization.cpp
     RawMessageType.cpp
     RawSenderType.cpp
     RouteContainer.cpp

@@ -41,6 +41,7 @@ namespace common {
             m_source = source;
         }
 
+        std::string &AliasElement::getSource() { return m_source; }
         std::string const &AliasElement::getSource() const { return m_source; }
 
         DeviceElement
@@ -52,10 +53,14 @@ namespace common {
             return ret;
         }
 
+        std::string &DeviceElement::getDeviceName() { return m_devName; }
         std::string const &DeviceElement::getDeviceName() const {
             return m_devName;
         }
+
+        std::string &DeviceElement::getServer() { return m_server; }
         std::string const &DeviceElement::getServer() const { return m_server; }
+
         std::string DeviceElement::getFullDeviceName() const {
             return getDeviceName() + "@" + getServer();
         }
