@@ -41,20 +41,24 @@
 namespace osvr {
 namespace common {
     namespace detail {
-        template <typename Visitor,
+        template <typename Visitor, typename NodeType,
                   typename ResultType = typename Visitor::result_type>
         class PathNodeVisitorImpl : public boost::static_visitor<ResultType>,
                                     boost::noncopyable {
           public:
-            PathNodeVisitorImpl(PathNode &node, Visitor &v)
+            PathNodeVisitorImpl(NodeType &node, Visitor &v)
                 : m_node(node), m_v(v) {}
 
             template <typename T> ResultType operator()(T &val) {
                 return m_v(m_node, val);
             }
 
+            template <typename T> ResultType operator()(T const &val) {
+                return m_v(m_node, val);
+            }
+
           private:
-            PathNode &m_node;
+            NodeType &m_node;
             Visitor &m_v;
         };
 
@@ -63,7 +67,16 @@ namespace common {
     template <typename Visitor>
     inline typename Visitor::result_type applyPathNodeVisitor(Visitor &v,
                                                               PathNode &node) {
-        auto visitor = detail::PathNodeVisitorImpl<Visitor>(node, v);
+        auto visitor = detail::PathNodeVisitorImpl<Visitor, PathNode>(node, v);
+        return boost::apply_visitor(visitor, node.value());
+    }
+
+    // const version
+    template <typename Visitor>
+    inline typename Visitor::result_type
+    applyPathNodeVisitor(Visitor &v, PathNode const &node) {
+        auto visitor =
+            detail::PathNodeVisitorImpl<Visitor, PathNode const>(node, v);
         return boost::apply_visitor(visitor, node.value());
     }
     /// @}
