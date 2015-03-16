@@ -69,7 +69,6 @@ set(SOURCE
     PathElementTools.cpp
     PathElementTypes.cpp
     PathNode.cpp
-    PathParseAndRetrieve.cpp
     PathParseAndRetrieve.h
     PathTree.cpp
     PathTreeSerialization.cpp

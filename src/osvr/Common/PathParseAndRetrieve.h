@@ -26,35 +26,84 @@
 #define INCLUDED_PathParseAndRetrieve_h_GUID_C451663C_0711_4B85_2011_61D26E5C237C
 
 // Internal Includes
-#include <osvr/Common/PathNode_fwd.h>
-#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/RoutingExceptions.h>
+#include <osvr/Util/TreeNode.h>
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
+#include <boost/algorithm/string/find_iterator.hpp>
+#include <boost/algorithm/string/finder.hpp>
+#include <boost/range/adaptor/sliced.hpp>
 
 // Standard includes
 #include <string>
 
 namespace osvr {
 namespace common {
-    /// @brief Internal method for parsing a path and getting or creating the
-    /// nodes along it.
-    /// @param path An absolute path (beginning with /) - a trailing slash is
-    /// trimmed silently
-    /// @param root The root node of a tree. This is not checked at runtime
-    /// (just a debug assert) since this should only be called from safe,
-    /// internal locations!
-    ///
-    /// If nodes do not exist, they are created as NullElement. NullElement
-    /// final components are created as copies of the optional
-    /// finalComponentDefault parameter.
-    ///
-    /// @returns a reference to the leaf node referred to by the path.
-    /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
-    /// exceptions::EmptyPathComponent
-    PathNode &pathParseAndRetrieve(
-        std::string path, PathNode &root,
-        PathElement const &finalComponentDefault = elements::NullElement());
+    namespace detail {
+        /// @brief Internal method for parsing a path and getting or creating
+        /// the
+        /// nodes along it.
+        /// @param path An absolute path (beginning with /) - a trailing slash
+        /// is
+        /// trimmed silently
+        /// @param root The root node of a tree. This is not checked at runtime
+        /// (just a debug assert) since this should only be called from safe,
+        /// internal locations!
+        ///
+        /// If nodes do not exist, they are created as default
+        ///
+        /// @returns a reference to the leaf node referred to by the path.
+        /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
+        /// exceptions::EmptyPathComponent
+        template <typename ValueType>
+        inline util::TreeNode<ValueType> &
+        pathParseAndRetrieve(std::string path,
+                             util::TreeNode<ValueType> &root) {
+            typedef util::TreeNode<ValueType> Node;
+            using boost::algorithm::make_split_iterator;
+            using boost::first_finder;
+            using boost::is_equal;
+            BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
+            if (path.empty()) {
+                throw exceptions::EmptyPath();
+            }
+            if (path == getPathSeparator()) {
+                /// @todo is an empty path valid input?
+                return root;
+            }
+            if (path.at(0) != getPathSeparatorCharacter()) {
+                throw exceptions::PathNotAbsolute(path);
+            }
+
+            Node *ret = &root;
+
+            // Determine if there's a trailing slash and remove it.
+            if (path.back() == getPathSeparatorCharacter()) {
+                path.pop_back();
+            }
+
+            // Remove the leading slash for the iterator's benefit.
+            path.erase(begin(path));
+
+            // Iterate through the chunks of the path, split by a slash.
+            std::string component;
+            auto begin = make_split_iterator(
+                path, first_finder(getPathSeparator(), is_equal()));
+            auto end = decltype(
+                begin)(); // default construct of the same type as begin
+            for (auto rangeIt : boost::make_iterator_range(begin, end)) {
+                component = boost::copy_range<std::string>(rangeIt);
+                if (component.empty()) {
+                    throw exceptions::EmptyPathComponent(path);
+                }
+                ret = &(ret->getOrCreateChildByName(component));
+            }
+
+            return *ret;
+        }
+    } // namespace detail
 } // namespace common
 } // namespace osvr
 

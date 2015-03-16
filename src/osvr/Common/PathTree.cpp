@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathElementTools.h>
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
@@ -37,12 +38,16 @@ namespace osvr {
 namespace common {
     PathTree::PathTree() : m_root(PathNode::createRoot()) {}
     PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return pathParseAndRetrieve(path, *m_root);
+        return detail::pathParseAndRetrieve(path, *m_root);
     }
     PathNode &
     PathTree::getNodeByPath(std::string const &path,
                             PathElement const &finalComponentDefault) {
-        return pathParseAndRetrieve(path, *m_root, finalComponentDefault);
+        auto &ret = detail::pathParseAndRetrieve(path, *m_root);
+
+        // Handle null elements as final component.
+        elements::ifNullReplaceWith(ret.value(), finalComponentDefault);
+        return ret;
     }
 } // namespace common
 } // namespace osvr
