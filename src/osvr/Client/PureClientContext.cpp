@@ -112,18 +112,6 @@ namespace client {
                              << iface->getPath());
         }
         iface->data() = handler;
-
-        auto serializedTree = common::pathTreeToJson(m_pathTree);
-        OSVR_DEV_VERBOSE(serializedTree.toStyledString());
-
-        common::PathTree newTree;
-        common::jsonToPathTree(newTree, serializedTree);
-
-        auto newTreeSerialized = common::pathTreeToJson(newTree);
-        OSVR_DEV_VERBOSE(newTreeSerialized.toStyledString());
-
-        OSVR_DEV_VERBOSE(
-            ((newTreeSerialized == serializedTree) ? "same" : "different"));
     }
 } // namespace client
 } // namespace osvr
