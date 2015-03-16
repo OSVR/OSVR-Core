@@ -48,18 +48,13 @@ namespace client {
     ///
     /// Right now can only infer that the children of an interface are sensors.
     inline void ifNullTryInferFromParent(common::PathNode &node) {
-
-        OSVR_DEV_VERBOSE(
-            "In ifNullTryInferFromParent for: " << common::getFullPath(node));
         if (nullptr ==
             boost::get<common::elements::NullElement>(&node.value())) {
-            OSVR_DEV_VERBOSE("skipping, not null");
             /// Not null.
             return;
         }
 
         if (nullptr == node.getParent()) {
-            OSVR_DEV_VERBOSE("skipping, no parent");
             // couldn't help, no parent.
             return;
         }
@@ -67,11 +62,8 @@ namespace client {
 
         if (nullptr ==
             boost::get<common::elements::InterfaceElement>(&(parent.value()))) {
-            OSVR_DEV_VERBOSE("Skipping, parent node isn't an interface");
             return; // parent isn't an interface.
         }
-
-        OSVR_DEV_VERBOSE("OK, replacing with sensor element");
         // So if we get here, parent is present and an interface, which means
         // that we're a sensor.
         node.value() = common::elements::SensorElement();
@@ -155,9 +147,6 @@ namespace client {
 
     inline InterfaceWiringFactory::FactoryProduct
     traverseRoute(TraversalBaggage &baggage, common::PathNode &node) {
-
-        OSVR_DEV_VERBOSE("In traverseRoute(TraversalBaggage &baggage, "
-                         "common::PathNode &node)");
         // First do any inference possible here.
         ifNullTryInferFromParent(node);
         // Now visit.
@@ -169,10 +158,6 @@ namespace client {
     traverseRoute(common::PathTree &tree, common::PathNode &node,
                   ClientInterfacePtr const &iface,
                   InterfaceWiringFactory const &factory) {
-
-        OSVR_DEV_VERBOSE("In traverseRoute(common::PathTree &tree, "
-                         "common::PathNode &node, ClientInterfacePtr const "
-                         "&iface, InterfaceWiringFactory const &factory)");
         auto baggage = TraversalBaggage{tree, iface, factory};
         return traverseRoute(baggage, node);
     }
