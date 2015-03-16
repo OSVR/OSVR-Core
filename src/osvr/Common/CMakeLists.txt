@@ -8,6 +8,7 @@ configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/Config
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
     "${HEADER_LOCATION}/AlignmentPadding.h"
+    "${HEADER_LOCATION}/ApplyPathNodeVisitor.h"
     "${HEADER_LOCATION}/BaseDevice.h"
     "${HEADER_LOCATION}/BaseDevicePtr.h"
     "${HEADER_LOCATION}/BaseMessageTraits.h"
@@ -18,6 +19,7 @@ set(API
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
+    "${HEADER_LOCATION}/DecomposeOriginalSource.h"
     "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"

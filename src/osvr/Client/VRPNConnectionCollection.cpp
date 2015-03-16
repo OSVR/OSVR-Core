@@ -36,6 +36,11 @@ namespace client {
     VRPNConnectionCollection::VRPNConnectionCollection()
         : m_connMap(make_shared<ConnectionMap>()) {}
 
+    vrpn_ConnectionPtr VRPNConnectionCollection::getConnection(
+        common::elements::DeviceElement const &elt) {
+        return getConnection(elt.getDeviceName(), elt.getServer());
+    }
+
     vrpn_ConnectionPtr
     VRPNConnectionCollection::getConnection(std::string const &device,
                                             std::string const &host) {

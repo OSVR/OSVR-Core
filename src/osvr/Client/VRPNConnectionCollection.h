@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/SharedPtr.h>
+#include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -43,6 +44,8 @@ namespace client {
 
         vrpn_ConnectionPtr getConnection(std::string const &device,
                                          std::string const &host);
+        vrpn_ConnectionPtr
+        getConnection(common::elements::DeviceElement const &elt);
         void updateAll();
 
       private:

@@ -70,6 +70,38 @@ namespace common {
                       "Provided path was not absolute (no leading slash): " +
                       path) {}
         };
+
+        /// @brief Contains exceptions thrown when, in the course of operation,
+        /// invariants of the path tree are determined to have been violated.
+        /// All inherit from InvariantError.
+        namespace invariants {
+            struct InvariantError : std::runtime_error {
+                InvariantError(std::string const &msg)
+                    : std::runtime_error("Path tree violated invariant: " +
+                                         msg) {}
+            };
+
+            struct SensorMissingParent : InvariantError {
+                SensorMissingParent(std::string const &path = std::string())
+                    : InvariantError("Sensor element missing a parent! " +
+                                     path) {}
+            };
+            struct SensorMissingInterfaceParent : InvariantError {
+                SensorMissingInterfaceParent(
+                    std::string const &path = std::string())
+                    : InvariantError("Sensor element does not have an "
+                                     "InterfaceElement parent! " +
+                                     path) {}
+            };
+
+            struct InterfaceMissingParent : InvariantError {
+                InterfaceMissingParent(std::string const &path = std::string())
+                    : InvariantError("Interface elements must have a "
+                                     "parent of some device type! " +
+                                     path) {}
+            };
+        } // namespace invariants
+
     } // namespace exceptions
 } // namespace common
 } // namespace osvr

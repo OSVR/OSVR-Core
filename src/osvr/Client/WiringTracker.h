@@ -34,7 +34,9 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/Transform.h>
+#include <osvr/Common/DecomposeOriginalSource.h>
 #include "PureClientContext.h"
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <vrpn_Tracker.h>
@@ -57,7 +59,7 @@ namespace client {
             bool reportPosition;
             bool reportOrientation;
         };
-        VRPNTrackerHandler(vrpn_ConnectionPtr conn, const char *src,
+        VRPNTrackerHandler(vrpn_ConnectionPtr const &conn, const char *src,
                            Options const &options, common::Transform const &t,
                            boost::optional<int> sensor,
                            ClientInterfacePtr iface)
@@ -65,6 +67,8 @@ namespace client {
               m_transform(t), m_opts(options) {
             m_remote->register_change_handler(this, &VRPNTrackerHandler::handle,
                                               sensor.get_value_or(-1));
+            OSVR_DEV_VERBOSE("Constructed a TrackerHandler for "
+                             << src << " sensor " << sensor.get_value_or(-1));
 #if 0
             m_remote->shutup = true;
 #endif
@@ -106,7 +110,6 @@ namespace client {
                 iface->triggerCallbacks(timestamp, positionReport);
             }
 
-            /// @todo check to see if rotation is useful/provided
             if (m_opts.reportOrientation) {
                 OSVR_OrientationReport oriReport;
                 oriReport.sensor = info.sensor;
@@ -128,11 +131,15 @@ namespace client {
         static void createAndAddFactory(VRPNConnectionCollection const &conns,
                                         T &factory) {
             factory.addFactory("tracker", WiringTracker(conns));
+            factory.addFactory("pose", WiringTracker(conns));
+            factory.addFactory("position", WiringTracker(conns));
+            factory.addFactory("orientation", WiringTracker(conns));
         }
 
         shared_ptr<Updatable> operator()(common::PathNode &node,
                                          ClientInterfacePtr const &iface) {
-            return (*this)(node, iface, common::Transform());
+            common::Transform identityXform{};
+            return (*this)(node, iface, identityXform);
         }
 
         shared_ptr<Updatable> operator()(common::PathNode &node,
@@ -140,32 +147,40 @@ namespace client {
                                          common::Transform const &t) {
 
             shared_ptr<Updatable> ret;
-            boost::optional<int> sensor;
-            common::PathNodeParentPtr device = nullptr;
-            if (node.getName() == "tracker") {
-                // all sensors
-                /// @todo
-                device = node.getParent();
-            } else if (node.getParent()->getName() == "tracker") {
-                /// OK, sensor specific.
-                sensor = boost::lexical_cast<OSVR_ChannelCount>(node.getName());
-                device = node.getParent()->getParent();
-            } else {
-                // fail!
+            common::DecomposeOriginalSource decomp{node};
+
+            if (!decomp.gotDeviceAndInterface()) {
+                OSVR_DEV_VERBOSE("Got into a tracker wiring factory without "
+                                 "having a device and interface node - should "
+                                 "not happen!");
+                BOOST_ASSERT_MSG(decomp.gotDeviceAndInterface(),
+                                 "Got into a tracker wiring factory without "
+                                 "having a device and interface node - should "
+                                 "not happen!");
                 return ret;
             }
 
             /// @todo set this struct correctly from the descriptor, or perhaps
             /// the path?
             VRPNTrackerHandler::Options opts;
-            opts.reportOrientation = true;
-            opts.reportPosition = true;
-            opts.reportPose = true;
-            auto dev =
-                boost::get<common::elements::DeviceElement>(device->value());
+
+            auto interfaceType = decomp.getInterfaceName();
+            if ("position" == interfaceType) {
+                opts.reportPosition = true;
+            } else if ("orientation" == interfaceType) {
+                opts.reportOrientation = true;
+            } else {
+                /// pose and tracker both imply full reports (?)
+                opts.reportOrientation = true;
+                opts.reportPosition = true;
+                opts.reportPose = true;
+            }
+
+            auto const &devElt = decomp.getDeviceElement();
             ret = make_shared<VRPNTrackerHandler>(
-                m_conns.getConnection(dev.getDeviceName(), dev.getServer()),
-                dev.getFullDeviceName().c_str(), opts, t, sensor, iface);
+                m_conns.getConnection(devElt),
+                devElt.getFullDeviceName().c_str(), opts, t,
+                decomp.getSensorNumber(), iface);
 
             return ret;
         }
