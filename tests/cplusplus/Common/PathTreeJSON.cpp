@@ -24,8 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/PathElementTypes.h>
+#include "DummyTree.h"
 #include <osvr/Common/PathTreeSerialization.h>
 
 #include <test_path_tree_json.h>
@@ -35,28 +34,10 @@
 #include "json/reader.h"
 
 // Standard includes
-#include <string>
+// - none
 
 namespace common = osvr::common;
 using osvr::common::PathTree;
-
-void setupDummyTree(PathTree &tree) {
-    tree.getNodeByPath("/org_opengoggles_bundled_Multiserver",
-                       common::elements::PluginElement());
-    tree.getNodeByPath(
-        "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-        common::elements::DeviceElement::createVRPNDeviceElement(
-            "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            "localhost"));
-    tree.getNodeByPath(
-        "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker",
-        common::elements::InterfaceElement());
-
-    tree.getNodeByPath(
-        "/me/hands/left",
-        common::elements::AliasElement("/org_opengoggles_bundled_Multiserver/"
-                                       "YEI_3Space_Sensor0/tracker/1"));
-}
 
 std::string getJSON() {
     return std::string(test_path_tree_json, sizeof(test_path_tree_json));
