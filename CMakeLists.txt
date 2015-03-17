@@ -115,6 +115,10 @@ target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
 target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
 
 find_package(jsoncpp REQUIRED)
+if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
+    add_library(jsoncpp_lib INTERFACE)
+    target_link_libraries(jsoncpp_lib INTERFACE jsoncpp_lib_static)
+endif()
 
 include(CompilerFeatures)
 
