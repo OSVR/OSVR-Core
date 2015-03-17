@@ -45,7 +45,7 @@ include(GNUInstallDirs)
 if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
-set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_BINDIR}/extra-sample-apps)
+set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
 
 # Shared modules from rpavlik/cmake-modules
 include(MapImportedReleaseVariants)
@@ -245,7 +245,6 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     INSTALL_DESTINATION "${CMAKE_INSTALL_DOCDIR}/api"
     INSTALL_COMPONENT DevelDocs
     NO_PDF)
-
 
 ###
 # Set Up Package for External Usage
