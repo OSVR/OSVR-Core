@@ -28,6 +28,7 @@
 // Internal Includes
 #include <osvr/Client/ClientInterfacePtr.h>
 #include <osvr/Util/TreeNode.h>
+#include "RemoteHandler.h"
 
 // Library/third-party includes
 // - none
@@ -37,11 +38,17 @@
 
 namespace osvr {
 namespace client {
+
+    typedef std::vector<ClientInterfacePtr> InterfaceList;
+    struct InterfaceTreeValue {
+        RemoteHandlerPtr handler;
+        InterfaceList interfaces;
+    };
     /// @brief Holds on to lists of interfaces organized into the tree
     /// structure.
     class InterfaceTree {
       public:
-        typedef std::vector<ClientInterfacePtr> value_type;
+        typedef InterfaceTreeValue value_type;
         typedef util::TreeNode<value_type> node_type;
         /// @brief Constructor
         InterfaceTree();
@@ -58,7 +65,18 @@ namespace client {
 
         /// @brief Returns a reference to the list of interfaces registered for
         /// a given path.
-        value_type &getInterfacesForPath(std::string const &path);
+        InterfaceList &getInterfacesForPath(std::string const &path);
+
+        /// @brief Returns the handler for a given path.
+        RemoteHandlerPtr getHandlerForPath(std::string const &path);
+
+        /// @brief Clears and returns the handler for a given path.
+        RemoteHandlerPtr eraseHandlerForPath(std::string const &path);
+
+        /// @brief Sets the handler for a given path, returning the old handler
+        /// if any.
+        RemoteHandlerPtr setHandlerForPath(std::string const &path,
+                                           RemoteHandlerPtr const &handler);
 
         /// @brief Returns a reference to a node for a given path.
         node_type &getNodeForPath(std::string const &path);

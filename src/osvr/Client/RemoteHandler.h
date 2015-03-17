@@ -22,25 +22,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
-#define INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
+#ifndef INCLUDED_RemoteHandler_h_GUID_930F698B_0732_40A6_A3E0_B11896DA33D7
+#define INCLUDED_RemoteHandler_h_GUID_930F698B_0732_40A6_A3E0_B11896DA33D7
 
 // Internal Includes
-#include <osvr/Common/PathTree_fwd.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
-#include <boost/optional.hpp>
+// - none
 
 // Standard includes
+// - none
 
 namespace osvr {
 namespace client {
-
-    boost::optional<common::OriginalSource>
-    resolveTreeNode(common::PathTree &pathTree, std::string const &path);
-
+    /// @brief Base class for remote device handler classes
+    class RemoteHandler {
+      public:
+        virtual ~RemoteHandler();
+        virtual void update() = 0;
+    };
+    typedef shared_ptr<RemoteHandler> RemoteHandlerPtr;
 } // namespace client
 } // namespace osvr
 
-#endif // INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
+#endif // INCLUDED_RemoteHandler_h_GUID_930F698B_0732_40A6_A3E0_B11896DA33D7

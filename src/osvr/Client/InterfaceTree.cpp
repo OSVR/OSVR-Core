@@ -53,9 +53,33 @@ namespace client {
         return ifaces.empty();
     }
 
-    InterfaceTree::value_type &
+    InterfaceList &
     InterfaceTree::getInterfacesForPath(std::string const &path) {
-        return getNodeForPath(path).value();
+        return getNodeForPath(path).value().interfaces;
+    }
+
+    RemoteHandlerPtr InterfaceTree::getHandlerForPath(std::string const &path) {
+        return getNodeForPath(path).value().handler;
+    }
+
+    /// @brief Clears and returns the handler for a given path.
+    RemoteHandlerPtr
+    InterfaceTree::eraseHandlerForPath(std::string const &path) {
+        auto &node = getNodeForPath(path);
+        auto ret = node.value().handler;
+        node.value().handler.reset();
+        return ret;
+    }
+
+    /// @brief Sets the handler for a given path, returning the old handler if
+    /// any.
+    RemoteHandlerPtr
+    InterfaceTree::setHandlerForPath(std::string const &path,
+                                     RemoteHandlerPtr const &handler) {
+        auto &node = getNodeForPath(path);
+        auto ret = node.value().handler;
+        node.value().handler = handler;
+        return ret;
     }
 
     InterfaceTree::node_type &

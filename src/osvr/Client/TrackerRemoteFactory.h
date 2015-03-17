@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_WiringTracker_h_GUID_C473E294_CC7C_49A2_C03F_B47458E22EDB
-#define INCLUDED_WiringTracker_h_GUID_C473E294_CC7C_49A2_C03F_B47458E22EDB
+#ifndef INCLUDED_TrackerRemoteFactory_h_GUID_C473E294_CC7C_49A2_C03F_B47458E22EDB
+#define INCLUDED_TrackerRemoteFactory_h_GUID_C473E294_CC7C_49A2_C03F_B47458E22EDB
 
 // Internal Includes
 #include "VRPNConnectionCollection.h"
@@ -50,7 +50,7 @@
 
 namespace osvr {
 namespace client {
-    class VRPNTrackerHandler : public Updatable {
+    class VRPNTrackerHandler : public RemoteHandler {
       public:
         struct Options {
             Options()
@@ -62,8 +62,7 @@ namespace client {
         };
         VRPNTrackerHandler(vrpn_ConnectionPtr const &conn, const char *src,
                            Options const &options, common::Transform const &t,
-                           boost::optional<int> sensor,
-                           InterfaceTree::value_type &ifaces)
+                           boost::optional<int> sensor, InterfaceList &ifaces)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
               m_transform(t), m_interfaces(ifaces), m_opts(options) {
             m_remote->register_change_handler(this, &VRPNTrackerHandler::handle,
@@ -120,27 +119,29 @@ namespace client {
         }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         common::Transform m_transform;
-        InterfaceTree::value_type &m_interfaces;
+        InterfaceList &m_interfaces;
         Options m_opts;
     };
 
-    class WiringTracker {
+    class TrackerRemoteFactory {
       public:
-        WiringTracker(VRPNConnectionCollection const &conns) : m_conns(conns) {}
+        TrackerRemoteFactory(VRPNConnectionCollection const &conns)
+            : m_conns(conns) {}
 
         template <typename T>
         static void createAndAddFactory(VRPNConnectionCollection const &conns,
                                         T &factory) {
-            factory.addFactory("tracker", WiringTracker(conns));
-            factory.addFactory("pose", WiringTracker(conns));
-            factory.addFactory("position", WiringTracker(conns));
-            factory.addFactory("orientation", WiringTracker(conns));
+            factory.addFactory("tracker", TrackerRemoteFactory(conns));
+            factory.addFactory("pose", TrackerRemoteFactory(conns));
+            factory.addFactory("position", TrackerRemoteFactory(conns));
+            factory.addFactory("orientation", TrackerRemoteFactory(conns));
         }
 
-        shared_ptr<Updatable> operator()(common::OriginalSource const &source,
-                                         InterfaceTree::value_type &ifaces) {
+        shared_ptr<RemoteHandler>
+        operator()(common::OriginalSource const &source,
+                   InterfaceList &ifaces) {
 
-            shared_ptr<Updatable> ret;
+            shared_ptr<RemoteHandler> ret;
 
             /// @todo set this struct correctly from the descriptor, or perhaps
             /// the path?
@@ -178,4 +179,4 @@ namespace client {
 } // namespace client
 } // namespace osvr
 
-#endif // INCLUDED_WiringTracker_h_GUID_C473E294_CC7C_49A2_C03F_B47458E22EDB
+#endif // INCLUDED_TrackerRemoteFactory_h_GUID_C473E294_CC7C_49A2_C03F_B47458E22EDB

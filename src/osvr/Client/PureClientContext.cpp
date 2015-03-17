@@ -30,7 +30,7 @@
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Client/ClientInterface.h>
-#include "WiringTracker.h"
+#include "TrackerRemoteFactory.h"
 #include "ResolveTreeNode.h"
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
@@ -60,7 +60,7 @@ namespace client {
 #endif
 
         auto vrpnConns = m_vrpnConns;
-        WiringTracker::createAndAddFactory(m_vrpnConns, m_wiringFactory);
+        TrackerRemoteFactory::createAndAddFactory(m_vrpnConns, m_factory);
         m_setupDummyTree();
     }
 
@@ -120,7 +120,7 @@ namespace client {
             OSVR_DEV_VERBOSE("Could not resolve source for " << path);
             return;
         }
-        auto handler = m_wiringFactory.invokeFactory(
+        auto handler = m_factory.invokeFactory(
             *source, m_interfaces.getInterfacesForPath(path));
         if (handler) {
             OSVR_DEV_VERBOSE("Successfully produced handler for " << path);

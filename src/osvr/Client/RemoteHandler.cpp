@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Implementation
 
     @date 2015
 
@@ -22,25 +22,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
-#define INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
-
 // Internal Includes
-#include <osvr/Common/PathTree_fwd.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include "RemoteHandler.h"
 
 // Library/third-party includes
-#include <boost/optional.hpp>
+// - none
 
 // Standard includes
+// - none
 
 namespace osvr {
 namespace client {
-
-    boost::optional<common::OriginalSource>
-    resolveTreeNode(common::PathTree &pathTree, std::string const &path);
-
+    RemoteHandler::~RemoteHandler() {}
 } // namespace client
 } // namespace osvr
-
-#endif // INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E

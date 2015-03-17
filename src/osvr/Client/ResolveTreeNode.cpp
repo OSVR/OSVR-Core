@@ -42,8 +42,6 @@
 namespace osvr {
 namespace client {
 
-    Updatable::~Updatable() {}
-
     /// @brief Given a node, if it's null, try to infer from the parent what it
     /// should be.
     ///
@@ -94,7 +92,6 @@ namespace client {
         void operator()(common::elements::AliasElement const &elt) {
             // This is an alias.
             /// @todo handle transforms
-            auto &source = m_getPathTree().getNodeByPath(elt.getSource());
             m_recurse(elt.getSource());
         }
 
@@ -130,9 +127,9 @@ namespace client {
         common::OriginalSource &m_source;
     };
 
-    inline static void resolveTreeNodeImpl(common::PathTree &pathTree,
-                                           std::string const &path,
-                                           common::OriginalSource &source) {
+    inline void resolveTreeNodeImpl(common::PathTree &pathTree,
+                                    std::string const &path,
+                                    common::OriginalSource &source) {
         OSVR_DEV_VERBOSE("Traversing " << path);
         auto &node = pathTree.getNodeByPath(path);
 

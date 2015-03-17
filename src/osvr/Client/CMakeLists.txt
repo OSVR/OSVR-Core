@@ -26,21 +26,23 @@ set(SOURCE
     ImagingRouter.h
     InterfaceTree.cpp
     InterfaceTree.h
-    InterfaceWiringFactory.h
     PureClientContext.h
     PureClientContext.cpp
+    RemoteHandler.cpp
+    RemoteHandler.h
+    RemoteHandlerFactory.h
     ResolveTreeNode.cpp
     ResolveTreeNode.h
     RouterTransforms.h
     RouterPredicates.h
+    TrackerRemoteFactory.h
     VRPNContext.cpp
     VRPNContext.h
     VRPNConnectionCollection.cpp
     VRPNConnectionCollection.h
     VRPNAnalogRouter.h
     VRPNButtonRouter.h
-    VRPNTrackerRouter.h
-    WiringTracker.h)
+    VRPNTrackerRouter.h)
 
 set(DISPLAY_JSON display-HDK.json)
 osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")

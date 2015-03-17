@@ -33,7 +33,7 @@
 #include "ResolveTreeNode.h"
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
-#include "InterfaceWiringFactory.h"
+#include "RemoteHandlerFactory.h"
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -67,7 +67,7 @@ namespace client {
         common::SystemComponent *m_systemComponent;
         VRPNConnectionCollection m_vrpnConns;
         InterfaceTree m_interfaces;
-        InterfaceWiringFactory m_wiringFactory;
+        RemoteHandlerFactory m_factory;
     };
 } // namespace client
 } // namespace osvr

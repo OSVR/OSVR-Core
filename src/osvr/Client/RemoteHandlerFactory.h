@@ -22,14 +22,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_InterfaceWiringFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
-#define INCLUDED_InterfaceWiringFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
+#ifndef INCLUDED_RemoteHandlerFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
+#define INCLUDED_RemoteHandlerFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
 
 // Internal Includes
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Common/PathNode_fwd.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
-#include "ResolveTreeNode.h"
+#include "RemoteHandler.h"
 #include "InterfaceTree.h"
 
 // Library/third-party includes
@@ -42,12 +42,11 @@
 namespace osvr {
 namespace client {
 
-    class InterfaceWiringFactory {
+    class RemoteHandlerFactory {
       public:
-        typedef shared_ptr<Updatable> FactoryProduct;
+        typedef shared_ptr<RemoteHandler> FactoryProduct;
         typedef std::function<FactoryProduct(common::OriginalSource const &,
-                                             InterfaceTree::value_type &)>
-            SpecificFactory;
+                                             InterfaceList &)> SpecificFactory;
 
         void addFactory(std::string const &name, SpecificFactory factory) {
             m_factoriesByInterface[name] = factory;
@@ -59,7 +58,7 @@ namespace client {
         }
 
         FactoryProduct invokeFactory(common::OriginalSource const &source,
-                                     InterfaceTree::value_type &ifaces) const {
+                                     InterfaceList &ifaces) const {
             auto factory =
                 m_factoriesByInterface.find(source.getInterfaceName());
 
@@ -77,4 +76,4 @@ namespace client {
 
 } // namespace client
 } // namespace osvr
-#endif // INCLUDED_InterfaceWiringFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
+#endif // INCLUDED_RemoteHandlerFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
