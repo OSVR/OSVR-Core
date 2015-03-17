@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(osvrcore)
 
+if(CMAKE_VERSION VERSION_LESS 3.0.0)
+    message(FATAL_ERROR "You must use CMake 3.0.0 or greater.")
+endif()
+
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
 
