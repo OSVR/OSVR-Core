@@ -22,16 +22,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
-#define INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
+#ifndef INCLUDED_InterfaceWiringFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
+#define INCLUDED_InterfaceWiringFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
 
 // Internal Includes
+#include <osvr/Util/SharedPtr.h>
 #include <osvr/Common/PathNode_fwd.h>
-#include <osvr/Common/PathTree_fwd.h>
-#include <osvr/Client/ClientInterfacePtr.h>
+#include <osvr/Common/DecomposeOriginalSource.h>
+#include "ResolveTreeNode.h"
+#include "InterfaceTree.h"
 
 // Library/third-party includes
-#include <boost/any.hpp>
+// - none
 
 // Standard includes
 #include <functional>
@@ -39,16 +41,12 @@
 
 namespace osvr {
 namespace client {
-    class Updatable {
-      public:
-        virtual ~Updatable();
-        virtual void update() = 0;
-    };
+
     class InterfaceWiringFactory {
       public:
         typedef shared_ptr<Updatable> FactoryProduct;
         typedef std::function<FactoryProduct(
-            common::PathNode &, ClientInterfacePtr const &)> SpecificFactory;
+            common::OriginalSource const &, InterfaceTree::value_type &)> SpecificFactory;
 
         void addFactory(std::string const &name, SpecificFactory factory) {
             m_factoriesByInterface[name] = factory;
@@ -59,29 +57,22 @@ namespace client {
                    end(m_factoriesByInterface);
         }
 
-        FactoryProduct invokeFactory(std::string const &name,
-                                     common::PathNode &node,
-                                     ClientInterfacePtr const &iface) const {
-            auto factory = m_factoriesByInterface.find(name);
+        FactoryProduct invokeFactory(common::OriginalSource const & source,
+                                     InterfaceTree::value_type &ifaces) const {
+            auto factory = m_factoriesByInterface.find(source.getInterfaceName());
 
             if (factory == end(m_factoriesByInterface)) {
                 /// Unknown
                 return FactoryProduct();
             }
 
-            return (factory->second)(node, iface);
+            return (factory->second)(source, ifaces);
         }
 
       private:
         std::unordered_map<std::string, SpecificFactory> m_factoriesByInterface;
     };
 
-    InterfaceWiringFactory::FactoryProduct
-    traverseRoute(common::PathTree &tree, common::PathNode &node,
-                  ClientInterfacePtr const &iface,
-                  InterfaceWiringFactory const &factory);
-
 } // namespace client
 } // namespace osvr
-
-#endif // INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
+#endif // INCLUDED_InterfaceWiringFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91

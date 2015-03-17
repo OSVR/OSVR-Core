@@ -31,7 +31,7 @@
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Client/ClientInterface.h>
 #include "WiringTracker.h"
-#include <osvr/Client/ResolveTreeNode.h>
+#include "ResolveTreeNode.h"
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
 
@@ -100,27 +100,36 @@ namespace client {
 
     void
     PureClientContext::m_handleNewInterface(ClientInterfacePtr const &iface) {
-        m_connectCallbacksOnInterface(iface);
+        bool isNew = m_interfaces.addInterface(iface);
+        if (isNew) {
+            m_connectCallbacksOnPath(iface->getPath());
+        }
     }
 
     void PureClientContext::m_handleReleasingInterface(
         ClientInterfacePtr const &iface) {
-        /// @todo
+        bool isEmpty = m_interfaces.removeInterface(iface);
+        if (isEmpty) {
+            m_removeCallbacksOnPath(iface->getPath());
+        }
     }
 
-    void PureClientContext::m_connectCallbacksOnInterface(
-        ClientInterfacePtr const &iface) {
-
-        auto &node = m_pathTree.getNodeByPath(iface->getPath());
-        auto handler = traverseRoute(m_pathTree, node, iface, m_wiringFactory);
-        if (handler) {
-            OSVR_DEV_VERBOSE("Successfully resolved handler for "
-                             << iface->getPath());
-        } else {
-            OSVR_DEV_VERBOSE("Could not resolve handler for "
-                             << iface->getPath());
+    void PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
+        auto source = resolveTreeNode(m_pathTree, path);
+        if (!source.is_initialized()) {
+            OSVR_DEV_VERBOSE("Could not resolve source for " << path);
+            return;
         }
-        iface->data() = handler;
+        auto handler = m_wiringFactory.invokeFactory(*source, m_interfaces.getInterfacesForPath(path));
+        if (handler) {
+            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
+        } else {
+            OSVR_DEV_VERBOSE("Could not produce handler for " << path);
+        }
+        /// @todo stash the handler somewhere and update it regularly.
+    }
+    void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
+        /// @todo remove the stashed handler.
     }
 } // namespace client
 } // namespace osvr

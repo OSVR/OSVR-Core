@@ -26,16 +26,12 @@
 #define INCLUDED_DecomposeOriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7
 
 // Internal Includes
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
-#include <osvr/Common/RoutingExceptions.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathElementTypes_fwd.h>
 
 // Library/third-party includes
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/get.hpp>
 #include <boost/optional.hpp>
-#include <boost/lexical_cast.hpp>
 
 // Standard includes
 #include <string>
@@ -43,90 +39,46 @@
 namespace osvr {
 namespace common {
 
-    class DecomposeOriginalSource : public boost::static_visitor<> {
+    /// @brief The result of resolving a tree node to a device: either an
+    /// original source to connect to, or nothing. Typically wrapped in
+    /// boost::optional for return from functions.
+    class OriginalSource {
       public:
-        DecomposeOriginalSource(PathNode &node)
-            : m_device(nullptr), m_interface(nullptr), m_sensor(nullptr) {
-            m_applyVisitor(node);
-        }
+        OSVR_COMMON_EXPORT OriginalSource();
 
-        bool gotDeviceAndInterface() const {
-            return nullptr != m_device && nullptr != m_interface;
-        }
+        /// @brief Decompose a path node representing an original source into
+        /// its device, interface, and sensor.
+        OSVR_COMMON_EXPORT void decompose(PathNode &node);
 
-        template <typename T> void operator()(PathNode &, T &) {
-            throw std::runtime_error("Element type encountered that is not "
-                                     "recognized in decomposition!");
-        }
+        OSVR_COMMON_EXPORT bool isResolved() const;
 
-        void operator()(PathNode &node, elements::SensorElement &) {
-            m_sensor = &node;
-            if (nullptr == node.getParent()) {
-                throw exceptions::invariants::SensorMissingParent(
-                    getFullPath(node));
-            }
-            m_applyVisitor(*node.getParent());
-            if (nullptr == m_interface) {
-                // Hmm, finished traversing upward and didn't get an interface.
-                throw exceptions::invariants::SensorMissingInterfaceParent(
-                    getFullPath(node));
-            }
-        }
+        void setDevice(PathNode &device);
 
-        void operator()(PathNode &node, elements::InterfaceElement &) {
-            m_interface = &node;
-            if (nullptr == node.getParent()) {
-                throw exceptions::invariants::InterfaceMissingParent(
-                    getFullPath(node));
-            }
-            m_applyVisitor(*node.getParent());
-        }
+        void setInterface(PathNode &iface);
 
-        void operator()(PathNode &node, elements::DeviceElement &) {
-            m_device = &node;
-            /// stop recursing through parents - the device is as far as we
-            /// need.
-        }
+        void setSensor(PathNode &sensor);
 
-        PathNode *getDevice() const { return m_device; }
+        void setTransform(std::string const &transform);
 
-        elements::DeviceElement const &getDeviceElement() const {
-            return boost::get<elements::DeviceElement>(m_device->value());
-        }
-        PathNode *getInterface() const { return m_interface; }
+        PathNode *getDevice() const;
 
-        std::string getInterfaceName() const {
-            std::string ret;
-            if (nullptr == m_interface) {
-                return ret;
-            }
-            ret = m_interface->getName();
-            return ret;
-        }
+        OSVR_COMMON_EXPORT elements::DeviceElement const &
+        getDeviceElement() const;
 
-        PathNode *getSensor() const { return m_sensor; }
+        PathNode *getInterface() const;
+        OSVR_COMMON_EXPORT std::string getInterfaceName() const;
 
-        boost::optional<int> getSensorNumber() const {
-            boost::optional<int> ret;
-            if (nullptr == m_sensor) {
-                return ret;
-            }
-            try {
-                ret = boost::lexical_cast<int>(m_sensor->getName());
-            } catch (boost::bad_lexical_cast &) {
-                // Just means we can't convert to int, so returning an empty
-                // optional is fine.
-            }
-            return ret;
-        }
+        PathNode *getSensor() const;
+
+        OSVR_COMMON_EXPORT boost::optional<int> getSensorNumber() const;
+
+        OSVR_COMMON_EXPORT std::string getTransform() const;
 
       private:
-        void m_applyVisitor(PathNode &node) {
-            applyPathNodeVisitor(*this, node);
-        }
         PathNode *m_device;
         PathNode *m_interface;
         PathNode *m_sensor;
+        std::string m_transform;
     };
 } // namespace common
 } // namespace osvr

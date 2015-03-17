@@ -36,6 +36,7 @@
 #include <osvr/Common/Transform.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
 #include "PureClientContext.h"
+#include "InterfaceTree.h"
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -62,9 +63,9 @@ namespace client {
         VRPNTrackerHandler(vrpn_ConnectionPtr const &conn, const char *src,
                            Options const &options, common::Transform const &t,
                            boost::optional<int> sensor,
-                           ClientInterfacePtr const &iface)
+                           InterfaceTree::value_type &ifaces)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
-              m_transform(t), m_iface(iface), m_opts(options) {
+              m_transform(t), m_interfaces(ifaces), m_opts(options) {
             m_remote->register_change_handler(this, &VRPNTrackerHandler::handle,
                                               sensor.get_value_or(-1));
             OSVR_DEV_VERBOSE("Constructed a TrackerHandler for "
@@ -75,18 +76,13 @@ namespace client {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         static void VRPN_CALLBACK handle(void *userdata, vrpn_TRACKERCB info) {
-
             auto self = static_cast<VRPNTrackerHandler *>(userdata);
-
-            ClientInterfacePtr iface(self->m_iface.lock());
-            if (iface) {
-                self->m_handle(iface, info);
-            }
+            self->m_handle(info);
         }
         virtual void update() { m_remote->mainloop(); }
 
       private:
-        void m_handle(ClientInterfacePtr iface, vrpn_TRACKERCB const &info) {
+        void m_handle(vrpn_TRACKERCB const &info) {
             OSVR_PoseReport report;
             report.sensor = info.sensor;
             OSVR_TimeValue timestamp;
@@ -98,26 +94,33 @@ namespace client {
             util::toPose(pose, report.pose);
 
             if (m_opts.reportPose) {
-                iface->triggerCallbacks(timestamp, report);
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, report);
+                }
             }
 
             if (m_opts.reportPosition) {
                 OSVR_PositionReport positionReport;
                 positionReport.sensor = info.sensor;
                 positionReport.xyz = report.pose.translation;
-                iface->triggerCallbacks(timestamp, positionReport);
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, positionReport);
+                }
             }
 
             if (m_opts.reportOrientation) {
                 OSVR_OrientationReport oriReport;
                 oriReport.sensor = info.sensor;
                 oriReport.rotation = report.pose.rotation;
-                iface->triggerCallbacks(timestamp, oriReport);
+
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, oriReport);
+                }
             }
         }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         common::Transform m_transform;
-        ClientInterfaceWeakPtr m_iface;
+        InterfaceTree::value_type &m_interfaces;
         Options m_opts;
     };
 
@@ -134,35 +137,16 @@ namespace client {
             factory.addFactory("orientation", WiringTracker(conns));
         }
 
-        shared_ptr<Updatable> operator()(common::PathNode &node,
-                                         ClientInterfacePtr const &iface) {
-            common::Transform identityXform{};
-            return (*this)(node, iface, identityXform);
-        }
-
-        shared_ptr<Updatable> operator()(common::PathNode &node,
-                                         ClientInterfacePtr const &iface,
-                                         common::Transform const &t) {
+        shared_ptr<Updatable> operator()(common::OriginalSource const & source,
+                                         InterfaceTree::value_type &ifaces) {
 
             shared_ptr<Updatable> ret;
-            common::DecomposeOriginalSource decomp{node};
-
-            if (!decomp.gotDeviceAndInterface()) {
-                OSVR_DEV_VERBOSE("Got into a tracker wiring factory without "
-                                 "having a device and interface node - should "
-                                 "not happen!");
-                BOOST_ASSERT_MSG(decomp.gotDeviceAndInterface(),
-                                 "Got into a tracker wiring factory without "
-                                 "having a device and interface node - should "
-                                 "not happen!");
-                return ret;
-            }
 
             /// @todo set this struct correctly from the descriptor, or perhaps
             /// the path?
             VRPNTrackerHandler::Options opts;
 
-            auto interfaceType = decomp.getInterfaceName();
+            auto interfaceType = source.getInterfaceName();
             if ("position" == interfaceType) {
                 opts.reportPosition = true;
             } else if ("orientation" == interfaceType) {
@@ -174,13 +158,16 @@ namespace client {
                 opts.reportPose = true;
             }
 
-            auto const &devElt = decomp.getDeviceElement();
+            auto const &devElt = source.getDeviceElement();
+
+            common::Transform identityXform{};
+            /// @todo handle case !source.getTransform().empty()
 
             /// @todo find out why make_shared causes a crash here
             ret.reset(new VRPNTrackerHandler(m_conns.getConnection(devElt),
                                              devElt.getFullDeviceName().c_str(),
-                                             opts, t, decomp.getSensorNumber(),
-                                             iface));
+                                             opts, identityXform, source.getSensorNumber(),
+                                             ifaces));
             return ret;
         }
 

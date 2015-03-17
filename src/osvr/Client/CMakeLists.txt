@@ -16,7 +16,6 @@ set(API
     "${HEADER_LOCATION}/ReportTypes.h"
     "${HEADER_LOCATION}/ReportTypeWrapper.h"
     "${HEADER_LOCATION}/ReportMap.h"
-    "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/StateType.h")
 
 set(SOURCE
@@ -25,9 +24,13 @@ set(SOURCE
     ClientInterface.cpp
     CreateContext.cpp
     ImagingRouter.h
+    InterfaceTree.cpp
+    InterfaceTree.h
+    InterfaceWiringFactory.h
     PureClientContext.h
     PureClientContext.cpp
     ResolveTreeNode.cpp
+    ResolveTreeNode.h
     RouterTransforms.h
     RouterPredicates.h
     VRPNContext.cpp

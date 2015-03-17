@@ -30,8 +30,10 @@
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
-#include <osvr/Client/ResolveTreeNode.h>
+#include "ResolveTreeNode.h"
 #include "VRPNConnectionCollection.h"
+#include "InterfaceTree.h"
+#include "InterfaceWiringFactory.h"
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -56,17 +58,15 @@ namespace client {
         virtual void
         m_handleReleasingInterface(ClientInterfacePtr const &iface);
 
-        void m_connectCallbacksOnInterface(ClientInterfacePtr const &iface);
+        void m_connectCallbacksOnPath(std::string const &path);
+        void m_removeCallbacksOnPath(std::string const &path);
         std::string m_host;
         vrpn_ConnectionPtr m_mainConn;
         common::PathTree m_pathTree;
         common::BaseDevicePtr m_systemDevice;
         common::SystemComponent *m_systemComponent;
         VRPNConnectionCollection m_vrpnConns;
-        typedef std::unordered_map<std::string, ClientInterfaceWeakPtr>
-            InterfaceMap;
-
-        InterfaceMap m_interfaces;
+        InterfaceTree m_interfaces;
         InterfaceWiringFactory m_wiringFactory;
     };
 } // namespace client

@@ -62,6 +62,27 @@ namespace common {
             Visitor &m_v;
         };
 
+        /// @brief Void return specialization
+        template <typename Visitor, typename NodeType>
+        class PathNodeVisitorImpl<Visitor, NodeType, void> : public boost::static_visitor<void>,
+            boost::noncopyable {
+        public:
+            PathNodeVisitorImpl(NodeType &node, Visitor &v)
+                : m_node(node), m_v(v) {}
+
+            template <typename T> void operator()(T &val) {
+                m_v(m_node, val);
+            }
+
+            template <typename T> void operator()(T const &val) {
+                m_v(m_node, val);
+            }
+
+        private:
+            NodeType &m_node;
+            Visitor &m_v;
+        };
+
     } // namespace detail
 
     template <typename Visitor>
@@ -79,6 +100,8 @@ namespace common {
             detail::PathNodeVisitorImpl<Visitor, PathNode const>(node, v);
         return boost::apply_visitor(visitor, node.value());
     }
+
+
     /// @}
 } // namespace common
 } // namespace osvr

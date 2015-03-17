@@ -58,6 +58,7 @@ set(SOURCE
     BaseDevice.cpp
     Common.cpp
     CreateDevice.cpp
+    DecomposeOriginalSource.cpp
     DeviceComponent.cpp
     DeviceWrapper.cpp
     DeviceWrapper.h
