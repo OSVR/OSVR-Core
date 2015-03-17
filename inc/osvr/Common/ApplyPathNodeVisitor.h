@@ -99,7 +99,7 @@ namespace common {
     template <typename Visitor>
     inline typename Visitor::result_type applyPathNodeVisitor(Visitor &v,
                                                               PathNode &node) {
-        auto visitor = detail::PathNodeVisitorImpl<Visitor, PathNode>(node, v);
+        detail::PathNodeVisitorImpl<Visitor, PathNode> visitor{node, v};
         return boost::apply_visitor(visitor, node.value());
     }
 
@@ -107,8 +107,7 @@ namespace common {
     template <typename Visitor>
     inline typename Visitor::result_type
     applyPathNodeVisitor(Visitor &v, PathNode const &node) {
-        auto visitor =
-            detail::PathNodeVisitorImpl<Visitor, PathNode const>(node, v);
+        detail::PathNodeVisitorImpl<Visitor, PathNode const> visitor{node, v};
         return boost::apply_visitor(visitor, node.value());
     }
 
