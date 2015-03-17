@@ -54,19 +54,24 @@ namespace client {
         void m_setupDummyTree();
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
+
         virtual void m_handleNewInterface(ClientInterfacePtr const &iface);
         virtual void
         m_handleReleasingInterface(ClientInterfacePtr const &iface);
 
         void m_connectCallbacksOnPath(std::string const &path);
         void m_removeCallbacksOnPath(std::string const &path);
+
         std::string m_host;
         vrpn_ConnectionPtr m_mainConn;
-        common::PathTree m_pathTree;
         common::BaseDevicePtr m_systemDevice;
         common::SystemComponent *m_systemComponent;
+
         VRPNConnectionCollection m_vrpnConns;
+
+        common::PathTree m_pathTree;
         InterfaceTree m_interfaces;
+
         RemoteHandlerFactory m_factory;
         HandlerContainer m_handlers;
     };
