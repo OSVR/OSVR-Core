@@ -25,7 +25,6 @@
 #ifndef INCLUDED_HandlerContainer_h_GUID_EAD5E6BA_FEDA_428B_0F12_B30FBE4AD6DB
 #define INCLUDED_HandlerContainer_h_GUID_EAD5E6BA_FEDA_428B_0F12_B30FBE4AD6DB
 
-
 // Internal Includes
 #include "RemoteHandler.h"
 
@@ -36,45 +35,44 @@
 #include <vector>
 
 namespace osvr {
-    namespace client {
-        /// @brief Wrapper for a container of handlers.
-        class HandlerContainer {
-        public:
-            void update() {
-                for (auto const& handler : m_handlers) {
-                    handler->update();
-                }
+namespace client {
+    /// @brief Wrapper for a container of handlers.
+    class HandlerContainer {
+      public:
+        void update() {
+            for (auto const &handler : m_handlers) {
+                handler->update();
             }
+        }
 
-            void add(RemoteHandlerPtr const& handler) {
-                if (!handler) {
-                    // Early out for null pointers.
-                    return;
-                }
-                auto it = std::find(begin(m_handlers), end(m_handlers), handler);
-                if (end(m_handlers) == it) {
-                    // OK, not already in there. Add it.
-                    m_handlers.push_back(handler);
-                }
+        void add(RemoteHandlerPtr const &handler) {
+            if (!handler) {
+                // Early out for null pointers.
+                return;
             }
-
-            void remove(RemoteHandlerPtr const& handler) {
-                if (!handler) {
-                    // Early out for null pointers.
-                    return;
-                }
-                auto it = std::find(begin(m_handlers), end(m_handlers), handler);
-                if (end(m_handlers) != it) {
-                    // Found it - erase it.
-                    m_handlers.erase(it);
-                }
+            auto it = std::find(begin(m_handlers), end(m_handlers), handler);
+            if (end(m_handlers) == it) {
+                // OK, not already in there. Add it.
+                m_handlers.push_back(handler);
             }
+        }
 
-            private:
-            std::vector<RemoteHandlerPtr> m_handlers;
-        };
-    } // namespace client
+        void remove(RemoteHandlerPtr const &handler) {
+            if (!handler) {
+                // Early out for null pointers.
+                return;
+            }
+            auto it = std::find(begin(m_handlers), end(m_handlers), handler);
+            if (end(m_handlers) != it) {
+                // Found it - erase it.
+                m_handlers.erase(it);
+            }
+        }
+
+      private:
+        std::vector<RemoteHandlerPtr> m_handlers;
+    };
+} // namespace client
 } // namespace osvr
 
 #endif // INCLUDED_HandlerContainer_h_GUID_EAD5E6BA_FEDA_428B_0F12_B30FBE4AD6DB
-

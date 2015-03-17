@@ -75,7 +75,7 @@ namespace client {
     /// any.
     RemoteHandlerPtr
     InterfaceTree::replaceHandlerForPath(std::string const &path,
-                                     RemoteHandlerPtr const &handler) {
+                                         RemoteHandlerPtr const &handler) {
         auto &node = getNodeForPath(path);
         auto ret = node.value().handler;
         node.value().handler = handler;
