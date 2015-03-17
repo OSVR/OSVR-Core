@@ -35,6 +35,7 @@
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/Transform.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/JSONTransformVisitor.h>
 #include "PureClientContext.h"
 #include "InterfaceTree.h"
 #include <osvr/Util/Verbosity.h>
@@ -44,6 +45,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/any.hpp>
 #include <boost/variant/get.hpp>
+#include <json/value.h>
+#include <json/reader.h>
 
 // Standard includes
 // - none
@@ -161,13 +164,20 @@ namespace client {
 
             auto const &devElt = source.getDeviceElement();
 
-            common::Transform identityXform{};
-            /// @todo handle case !source.getTransform().empty()
+            common::Transform xform{};
+            if (!source.getTransform().empty()) {
+                Json::Value val;
+                Json::Reader reader;
+                if (reader.parse(source.getTransform(), val)) {
+                    common::JSONTransformVisitor xformParse(val);
+                    xform = xformParse.getTransform();
+                }
+            }
 
             /// @todo find out why make_shared causes a crash here
             ret.reset(new VRPNTrackerHandler(m_conns.getConnection(devElt),
                                              devElt.getFullDeviceName().c_str(),
-                                             opts, identityXform,
+                                             opts, xform,
                                              source.getSensorNumber(), ifaces));
             return ret;
         }
