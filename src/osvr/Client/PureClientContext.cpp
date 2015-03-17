@@ -91,6 +91,8 @@ namespace client {
     void PureClientContext::m_update() {
         /// Mainloop connections
         m_vrpnConns.updateAll();
+        /// Update system device
+        m_systemDevice->update();
         /// Update handlers.
         m_handlers.update();
     }
