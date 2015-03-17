@@ -119,6 +119,11 @@ namespace client {
     }
 
     void PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
+        /// Start by removing handler from interface tree and handler container
+        /// for this path, if found. Ensures that if we early-out (fail to set
+        /// up a handler) we don't have a leftover one still active.
+        m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
+
         auto source = common::resolveTreeNode(m_pathTree, path);
         if (!source.is_initialized()) {
             OSVR_DEV_VERBOSE("Could not resolve source for " << path);
@@ -130,9 +135,11 @@ namespace client {
             OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
             // Add the new handler to our collection
             m_handlers.add(handler);
-            // Replace the old handler if any in the interface tree,
-            // and if we had an old handler remove it from our collection
-            m_handlers.remove(m_interfaces.replaceHandlerForPath(path, handler));
+            // Store the new handler in the interface tree
+            auto oldHandler = m_interfaces.replaceHandlerForPath(path, handler);
+            BOOST_ASSERT_MSG(
+                !oldHandler,
+                "We removed the old handler before so it should be null now");
         } else {
             OSVR_DEV_VERBOSE("Could not produce handler for " << path);
         }
