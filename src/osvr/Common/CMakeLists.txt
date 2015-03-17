@@ -104,8 +104,8 @@ target_compile_options(${LIBNAME_FULL}
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     osvrUtilCpp
-    jsoncpp_lib
     PRIVATE
+    jsoncpp_lib
     opencv_core
     vendored-vrpn
     eigen-headers)

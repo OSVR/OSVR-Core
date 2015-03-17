@@ -11,5 +11,5 @@ add_executable(TestCommon
     Serialization.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/test_path_tree_json.h")
 
-target_link_libraries(TestCommon osvrCommon)
+target_link_libraries(TestCommon osvrCommon jsoncpp_lib)
 setup_gtest(TestCommon)
