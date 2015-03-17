@@ -312,3 +312,14 @@ if(WIN32)
         COMPONENT
         Devel)
 endif()
+
+
+###
+# Install dependencies
+###
+#include(GetSearchDirs)
+#get_search_dirs(libSearchDirs libfunctionality::functionality)
+#set(APPS
+#"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/osvr_server${CMAKE_EXECUTABLE_SUFFIX}")
+#install(CODE "include(BundleUtilities)
+#    fixup_bundle(\"${APPS}\" \"\" \"${libSearchDirs}\")")
