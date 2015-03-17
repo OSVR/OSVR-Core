@@ -34,6 +34,7 @@ set(SOURCE
     RemoteHandlerFactory.h
     RouterTransforms.h
     RouterPredicates.h
+    TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h
     VRPNContext.cpp
     VRPNContext.h

@@ -60,7 +60,7 @@ namespace client {
 #endif
 
         auto vrpnConns = m_vrpnConns;
-        TrackerRemoteFactory::createAndAddFactory(m_vrpnConns, m_factory);
+        TrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
         m_setupDummyTree();
     }
 
