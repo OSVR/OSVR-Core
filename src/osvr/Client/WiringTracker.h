@@ -137,7 +137,7 @@ namespace client {
             factory.addFactory("orientation", WiringTracker(conns));
         }
 
-        shared_ptr<Updatable> operator()(common::OriginalSource const & source,
+        shared_ptr<Updatable> operator()(common::OriginalSource const &source,
                                          InterfaceTree::value_type &ifaces) {
 
             shared_ptr<Updatable> ret;
@@ -166,8 +166,8 @@ namespace client {
             /// @todo find out why make_shared causes a crash here
             ret.reset(new VRPNTrackerHandler(m_conns.getConnection(devElt),
                                              devElt.getFullDeviceName().c_str(),
-                                             opts, identityXform, source.getSensorNumber(),
-                                             ifaces));
+                                             opts, identityXform,
+                                             source.getSensorNumber(), ifaces));
             return ret;
         }
 

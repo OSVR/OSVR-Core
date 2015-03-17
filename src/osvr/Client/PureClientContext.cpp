@@ -120,7 +120,8 @@ namespace client {
             OSVR_DEV_VERBOSE("Could not resolve source for " << path);
             return;
         }
-        auto handler = m_wiringFactory.invokeFactory(*source, m_interfaces.getInterfacesForPath(path));
+        auto handler = m_wiringFactory.invokeFactory(
+            *source, m_interfaces.getInterfacesForPath(path));
         if (handler) {
             OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
         } else {

@@ -69,81 +69,7 @@ namespace client {
         // that we're a sensor.
         node.value() = common::elements::SensorElement();
     }
-
-#if 0
-
-    class TraverseRouteVisitor
-        : public boost::static_visitor<InterfaceWiringFactory::FactoryProduct>,
-          boost::noncopyable {
-      public:
-        typedef WiringData data_type;
-        TraverseRouteVisitor(data_type &data, common::PathNode &node)
-            : boost::static_visitor<InterfaceWiringFactory::FactoryProduct>(),
-              m_data(data), m_node(node) {
-            OSVR_DEV_VERBOSE("Traversing " << common::getFullPath(node));
-        }
-
-        /// @brief Fallback case
-        template <typename T>
-        InterfaceWiringFactory::FactoryProduct operator()(T const &) {
-            // Can't handle it.
-            OSVR_DEV_VERBOSE("Couldn't handle: node value type of "
-                             << common::getTypeName(m_node));
-            return InterfaceWiringFactory::FactoryProduct();
-        }
-        /// @todo handle other types here
-
-        /// @brief Handle an alias element
-        InterfaceWiringFactory::FactoryProduct
-        operator()(common::elements::AliasElement const &elt) {
-            // This is an alias.
-            /// @todo handle transforms
-            auto &source = m_getPathTree().getNodeByPath(elt.getSource());
-            return traverseRoute(m_data, source);
-        }
-
-        /// @brief Handle a sensor element
-        InterfaceWiringFactory::FactoryProduct
-        operator()(common::elements::SensorElement const &) {
-            /// This is the end of the traversal: landed on a sensor.
-            common::DecomposeOriginalSource decomp{m_node};
-            BOOST_ASSERT_MSG(decomp.gotDeviceAndInterface(),
-                             "Landing on a sensor means we should have an "
-                             "interface and device, exceptions would be thrown "
-                             "in Decompose otherwise.");
-            return m_getFactory().invokeFactory(decomp.getInterfaceName(),
-                                                m_node, m_getInterfaces());
-        }
-
-        /// @brief Handle an interface element
-        InterfaceWiringFactory::FactoryProduct
-        operator()(common::elements::InterfaceElement const &) {
-            /// This is the end of the traversal: landed on a interface.
-            common::DecomposeOriginalSource decomp{m_node};
-            BOOST_ASSERT_MSG(decomp.gotDeviceAndInterface(),
-                             "Landing on an interface means we should have an "
-                             "interface and device, exceptions would be thrown "
-                             "in Decompose otherwise.");
-            return m_getFactory().invokeFactory(decomp.getInterfaceName(),
-                                                m_node, m_getInterfaces());
-        }
-
-      private:
-        InterfaceWiringFactory const &m_getFactory() {
-            return m_data.getFactory();
-        }
-
-        InterfaceTree::value_type &m_getInterfaces() {
-            return m_data.getInterfaceTree().getInterfacesForPath(
-                m_data.getOriginalInterfacePath());
-        }
-
-        common::PathTree &m_getPathTree() { return m_data.getPathTree(); }
-
-        data_type &m_data;
-        common::PathNode &m_node;
-    };
-#endif
+    // Forward declaration
     void resolveTreeNodeImpl(common::PathTree &pathTree,
                              std::string const &path,
                              common::OriginalSource &source);
@@ -203,20 +129,6 @@ namespace client {
         common::PathNode &m_node;
         common::OriginalSource &m_source;
     };
-#if 0
-    InterfaceWiringFactory::FactoryProduct
-    traverseRoute(WiringData &data, common::PathNode &node) {
-        // Set the initial path if not already set.
-        data.conditionallySetOriginalInterfacePath(common::getFullPath(node));
-
-        // First do any inference possible here.
-        ifNullTryInferFromParent(node);
-
-        // Now visit.
-        TraverseRouteVisitor visitor(data, node);
-        return boost::apply_visitor(visitor, node.value());
-    }
-#endif
 
     inline static void resolveTreeNodeImpl(common::PathTree &pathTree,
                                            std::string const &path,

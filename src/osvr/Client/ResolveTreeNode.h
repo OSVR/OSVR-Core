@@ -42,35 +42,6 @@ namespace client {
         virtual void update() = 0;
     };
 
-#if 0
-    class WiringData {
-      public:
-        WiringData(common::PathTree &pathTree, InterfaceTree &ifaceTree,
-                   InterfaceWiringFactory const &factory);
-        common::PathTree &getPathTree() { return m_pathTree; }
-        InterfaceTree &getInterfaceTree() { return m_ifaceTree; }
-        InterfaceWiringFactory const &getFactory() { return m_factory; }
-
-        void conditionallySetOriginalInterfacePath(std::string const &path) {
-            if (m_origPath.empty()) {
-                m_origPath = path;
-            }
-        }
-        std::string const &getOriginalInterfacePath() const {
-            return m_origPath;
-        }
-
-      private:
-        common::PathTree &m_pathTree;
-        InterfaceTree &m_ifaceTree;
-        InterfaceWiringFactory const &m_factory;
-        std::string m_origPath;
-    };
-
-
-    InterfaceWiringFactory::FactoryProduct
-    traverseRoute(WiringData &data, common::PathNode &node);
-#endif
     boost::optional<common::OriginalSource>
     resolveTreeNode(common::PathTree &pathTree, std::string const &path);
 

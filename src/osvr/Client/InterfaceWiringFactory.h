@@ -45,8 +45,9 @@ namespace client {
     class InterfaceWiringFactory {
       public:
         typedef shared_ptr<Updatable> FactoryProduct;
-        typedef std::function<FactoryProduct(
-            common::OriginalSource const &, InterfaceTree::value_type &)> SpecificFactory;
+        typedef std::function<FactoryProduct(common::OriginalSource const &,
+                                             InterfaceTree::value_type &)>
+            SpecificFactory;
 
         void addFactory(std::string const &name, SpecificFactory factory) {
             m_factoriesByInterface[name] = factory;
@@ -57,9 +58,10 @@ namespace client {
                    end(m_factoriesByInterface);
         }
 
-        FactoryProduct invokeFactory(common::OriginalSource const & source,
+        FactoryProduct invokeFactory(common::OriginalSource const &source,
                                      InterfaceTree::value_type &ifaces) const {
-            auto factory = m_factoriesByInterface.find(source.getInterfaceName());
+            auto factory =
+                m_factoriesByInterface.find(source.getInterfaceName());
 
             if (factory == end(m_factoriesByInterface)) {
                 /// Unknown
