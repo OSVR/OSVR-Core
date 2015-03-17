@@ -23,32 +23,32 @@
 // limitations under the License.
 
 // Internal Includes
-#include "ResolveTreeNode.h"
+#include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/JSONTransformVisitor.h>
 #include <osvr/Util/Verbosity.h>
-#include "InterfaceTree.h"
 
 // Library/third-party includes
 #include <boost/variant.hpp>
 #include <json/value.h>
+#include <json/reader.h>
 
 // Standard includes
 // - none
 
 namespace osvr {
-namespace client {
+namespace common {
 
     /// @brief Given a node, if it's null, try to infer from the parent what it
     /// should be.
     ///
     /// Right now can only infer that the children of an interface are sensors.
     inline void ifNullTryInferFromParent(common::PathNode &node) {
-        if (nullptr ==
-            boost::get<common::elements::NullElement>(&node.value())) {
+        if (nullptr == boost::get<elements::NullElement>(&node.value())) {
             /// Not null.
             return;
         }
@@ -60,17 +60,16 @@ namespace client {
         auto const &parent = *node.getParent();
 
         if (nullptr ==
-            boost::get<common::elements::InterfaceElement>(&(parent.value()))) {
+            boost::get<elements::InterfaceElement>(&(parent.value()))) {
             return; // parent isn't an interface.
         }
         // So if we get here, parent is present and an interface, which means
         // that we're a sensor.
-        node.value() = common::elements::SensorElement();
+        node.value() = elements::SensorElement();
     }
     // Forward declaration
-    void resolveTreeNodeImpl(common::PathTree &pathTree,
-                             std::string const &path,
-                             common::OriginalSource &source);
+    void resolveTreeNodeImpl(PathTree &pathTree, std::string const &path,
+                             OriginalSource &source);
 
     class TreeResolutionVisitor : public boost::static_visitor<>,
                                   boost::noncopyable {
@@ -86,17 +85,39 @@ namespace client {
             OSVR_DEV_VERBOSE("Couldn't handle: node value type of "
                              << common::getTypeName(m_node));
         }
-        /// @todo handle other types here
 
         /// @brief Handle an alias element
-        void operator()(common::elements::AliasElement const &elt) {
+        void operator()(elements::AliasElement const &elt) {
             // This is an alias.
             /// @todo handle transforms
-            m_recurse(elt.getSource());
+            auto src = elt.getSource();
+            Json::Value val;
+            Json::Reader reader;
+            if (reader.parse(src, val)) {
+                OSVR_DEV_VERBOSE(
+                    "Alias parsed as JSON: " << val.toStyledString());
+                if (val.isString()) {
+                    OSVR_DEV_VERBOSE("Alias parsed as a JSON string");
+                    // Assume a string is just a string.
+                    m_recurse(val.asString());
+                    return;
+                }
+                if (val.isObject()) {
+                    OSVR_DEV_VERBOSE("Alias parsed as a JSON object");
+                    // Assume an object means a transform.
+                    JSONTransformVisitor xformParse(val);
+                    OSVR_DEV_VERBOSE("Transform leaf: "
+                                     << xformParse.getLeaf().toStyledString());
+                    /// @todo finish
+                    return;
+                }
+            }
+            // If we couldn't parse, just recurse directly on the string.
+            m_recurse(src);
         }
 
         /// @brief Handle a sensor element
-        void operator()(common::elements::SensorElement const &) {
+        void operator()(elements::SensorElement const &) {
             /// This is the end of the traversal: landed on a sensor.
             m_decompose();
             BOOST_ASSERT_MSG(m_source.isResolved(),
@@ -106,7 +127,7 @@ namespace client {
         }
 
         /// @brief Handle an interface element
-        void operator()(common::elements::InterfaceElement const &) {
+        void operator()(elements::InterfaceElement const &) {
             /// This is the end of the traversal: landed on a interface.
             m_decompose();
             BOOST_ASSERT_MSG(m_source.isResolved(),
@@ -120,16 +141,15 @@ namespace client {
         void m_recurse(std::string const &path) {
             resolveTreeNodeImpl(m_tree, path, m_source);
         }
-        common::PathTree &m_getPathTree() { return m_tree; }
+        PathTree &m_getPathTree() { return m_tree; }
 
-        common::PathTree &m_tree;
-        common::PathNode &m_node;
-        common::OriginalSource &m_source;
+        PathTree &m_tree;
+        PathNode &m_node;
+        OriginalSource &m_source;
     };
 
-    inline void resolveTreeNodeImpl(common::PathTree &pathTree,
-                                    std::string const &path,
-                                    common::OriginalSource &source) {
+    inline void resolveTreeNodeImpl(PathTree &pathTree, std::string const &path,
+                                    OriginalSource &source) {
         OSVR_DEV_VERBOSE("Traversing " << path);
         auto &node = pathTree.getNodeByPath(path);
 
@@ -141,14 +161,14 @@ namespace client {
         boost::apply_visitor(visitor, node.value());
     }
 
-    boost::optional<common::OriginalSource>
-    resolveTreeNode(common::PathTree &pathTree, std::string const &path) {
-        common::OriginalSource source;
+    boost::optional<OriginalSource> resolveTreeNode(PathTree &pathTree,
+                                                    std::string const &path) {
+        OriginalSource source;
         resolveTreeNodeImpl(pathTree, path, source);
         if (source.isResolved()) {
             return source;
         }
-        return boost::optional<common::OriginalSource>();
+        return boost::optional<OriginalSource>();
     }
-} // namespace client
+} // namespace common
 } // namespace osvr

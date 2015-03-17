@@ -41,6 +41,7 @@ set(API
     "${HEADER_LOCATION}/PathTree_fwd.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
+    "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/RouteContainer.h"
     "${HEADER_LOCATION}/RoutingConstants.h"
     "${HEADER_LOCATION}/RoutingExceptions.h"
@@ -75,6 +76,7 @@ set(SOURCE
     PathTreeSerialization.cpp
     RawMessageType.cpp
     RawSenderType.cpp
+    ResolveTreeNode.cpp
     RouteContainer.cpp
     RoutingConstants.cpp
     RoutingKeys.cpp

@@ -30,7 +30,6 @@
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
-#include "ResolveTreeNode.h"
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
 #include "RemoteHandlerFactory.h"

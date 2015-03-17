@@ -31,7 +31,7 @@
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Client/ClientInterface.h>
 #include "TrackerRemoteFactory.h"
-#include "ResolveTreeNode.h"
+#include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
 
@@ -117,7 +117,7 @@ namespace client {
     }
 
     void PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
-        auto source = resolveTreeNode(m_pathTree, path);
+        auto source = common::resolveTreeNode(m_pathTree, path);
         if (!source.is_initialized()) {
             OSVR_DEV_VERBOSE("Could not resolve source for " << path);
             return;

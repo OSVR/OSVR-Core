@@ -26,6 +26,7 @@
 #define INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E
 
 // Internal Includes
+#include <osvr/Common/Export.h>
 #include <osvr/Common/PathTree_fwd.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
 
@@ -33,14 +34,15 @@
 #include <boost/optional.hpp>
 
 // Standard includes
+#include <string>
 
 namespace osvr {
-namespace client {
+namespace common {
 
-    boost::optional<common::OriginalSource>
-    resolveTreeNode(common::PathTree &pathTree, std::string const &path);
+    OSVR_COMMON_EXPORT boost::optional<OriginalSource>
+    resolveTreeNode(PathTree &pathTree, std::string const &path);
 
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ResolveTreeNode_h_GUID_1EAB4565_C824_4B88_113E_7E898D998E9E

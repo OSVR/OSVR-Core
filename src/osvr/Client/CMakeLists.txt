@@ -32,8 +32,6 @@ set(SOURCE
     RemoteHandler.cpp
     RemoteHandler.h
     RemoteHandlerFactory.h
-    ResolveTreeNode.cpp
-    ResolveTreeNode.h
     RouterTransforms.h
     RouterPredicates.h
     TrackerRemoteFactory.h
