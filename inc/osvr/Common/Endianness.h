@@ -149,6 +149,7 @@ namespace common {
                     reinterpret_cast<char *>(&ret)[i] =
                         reinterpret_cast<char const *>(&v)[sizeof(T) - 1 - i];
                 }
+                return ret;
             }
             /// @brief Implementation of integerByteSwap(): Gets called when we
             /// have an exact match to an explicit specialization
