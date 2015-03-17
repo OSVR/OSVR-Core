@@ -71,8 +71,8 @@ include(CMakeBoostHelper)
 # Dependencies
 ###
 
-if(WIN32)
-    # Hints for Windows, given the Chocolatey packages.
+if(MSVC)
+    # Hints for Windows and MSVC, given the Chocolatey packages.
     if(NOT "$ENV{ChocolateyInstall}" STREQUAL "")
         file(TO_CMAKE_PATH "$ENV{ChocolateyInstall}/lib" CHOCO_LIB)
         list(APPEND CMAKE_PREFIX_PATH "${CHOCO_LIB}/OpenCV/tools/opencv/build" "${CHOCO_LIB}/OpenCV.2.4.10.20150209/tools/opencv/build")
