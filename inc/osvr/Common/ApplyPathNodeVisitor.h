@@ -43,16 +43,22 @@ namespace common {
     namespace detail {
         template <typename Visitor, typename NodeType,
                   typename ResultType = typename Visitor::result_type>
-        class PathNodeVisitorImpl : public boost::static_visitor<ResultType>,
-                                    boost::noncopyable {
+        class PathNodeVisitorImpl : public boost::static_visitor<ResultType> {
           public:
             PathNodeVisitorImpl(NodeType &node, Visitor &v)
                 : m_node(node), m_v(v) {}
 
+            /// @brief Disable assignment operator, since we have reference
+            /// members
+            PathNodeVisitorImpl &
+            operator=(PathNodeVisitorImpl const &) = delete;
+
+            /// @brief Function call method for a non-const visitor
             template <typename T> ResultType operator()(T &val) {
                 return m_v(m_node, val);
             }
 
+            /// @brief Function call method for a const visitor
             template <typename T> ResultType operator()(T const &val) {
                 return m_v(m_node, val);
             }
@@ -70,8 +76,15 @@ namespace common {
             PathNodeVisitorImpl(NodeType &node, Visitor &v)
                 : m_node(node), m_v(v) {}
 
+            /// @brief Disable assignment operator, since we have reference
+            /// members
+            PathNodeVisitorImpl &
+            operator=(PathNodeVisitorImpl const &) = delete;
+
+            /// @brief Function call method for a non-const visitor
             template <typename T> void operator()(T &val) { m_v(m_node, val); }
 
+            /// @brief Function call method for a const visitor
             template <typename T> void operator()(T const &val) {
                 m_v(m_node, val);
             }
