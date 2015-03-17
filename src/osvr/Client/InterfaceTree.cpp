@@ -74,7 +74,7 @@ namespace client {
     /// @brief Sets the handler for a given path, returning the old handler if
     /// any.
     RemoteHandlerPtr
-    InterfaceTree::setHandlerForPath(std::string const &path,
+    InterfaceTree::replaceHandlerForPath(std::string const &path,
                                      RemoteHandlerPtr const &handler) {
         auto &node = getNodeForPath(path);
         auto ret = node.value().handler;

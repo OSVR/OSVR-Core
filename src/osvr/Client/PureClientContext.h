@@ -34,6 +34,7 @@
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
 #include "RemoteHandlerFactory.h"
+#include "HandlerContainer.h"
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -68,6 +69,7 @@ namespace client {
         VRPNConnectionCollection m_vrpnConns;
         InterfaceTree m_interfaces;
         RemoteHandlerFactory m_factory;
+        HandlerContainer m_handlers;
     };
 } // namespace client
 } // namespace osvr

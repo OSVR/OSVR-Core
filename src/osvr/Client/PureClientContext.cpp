@@ -91,6 +91,8 @@ namespace client {
     void PureClientContext::m_update() {
         /// Mainloop connections
         m_vrpnConns.updateAll();
+        /// Update handlers.
+        m_handlers.update();
     }
 
     void PureClientContext::m_sendRoute(std::string const &route) {
@@ -124,13 +126,17 @@ namespace client {
             *source, m_interfaces.getInterfacesForPath(path));
         if (handler) {
             OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
+            // Add the new handler to our collection
+            m_handlers.add(handler);
+            // Replace the old handler if any in the interface tree,
+            // and if we had an old handler remove it from our collection
+            m_handlers.remove(m_interfaces.replaceHandlerForPath(path, handler));
         } else {
             OSVR_DEV_VERBOSE("Could not produce handler for " << path);
         }
-        /// @todo stash the handler somewhere and update it regularly.
     }
     void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
-        /// @todo remove the stashed handler.
+        m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
     }
 } // namespace client
 } // namespace osvr

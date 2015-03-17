@@ -75,7 +75,7 @@ namespace client {
 
         /// @brief Sets the handler for a given path, returning the old handler
         /// if any.
-        RemoteHandlerPtr setHandlerForPath(std::string const &path,
+        RemoteHandlerPtr replaceHandlerForPath(std::string const &path,
                                            RemoteHandlerPtr const &handler);
 
         /// @brief Returns a reference to a node for a given path.

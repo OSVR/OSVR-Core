@@ -23,6 +23,7 @@ set(SOURCE
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
+    HandlerContainer.h
     ImagingRouter.h
     InterfaceTree.cpp
     InterfaceTree.h
