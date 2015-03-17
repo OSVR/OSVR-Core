@@ -34,6 +34,7 @@
 
 // Library/third-party includes
 #include <boost/variant.hpp>
+#include <boost/lexical_cast.hpp>
 #include <json/value.h>
 #include <json/reader.h>
 
@@ -67,6 +68,22 @@ namespace common {
         // that we're a sensor.
         node.value() = elements::SensorElement();
     }
+
+    inline std::string getPathFromOldRouteSource(Json::Value obj) {
+        std::string ret;
+        if (obj.isObject() && obj.isMember("tracker")) {
+            ret = obj["tracker"].asString();
+            if (ret.front() != '/') {
+                ret.insert(begin(ret), '/');
+            }
+            if (obj.isMember("sensor")) {
+                ret += "/tracker/" +
+                       boost::lexical_cast<std::string>(obj["sensor"].asInt());
+            }
+        }
+        return ret;
+    }
+
     // Forward declaration
     void resolveTreeNodeImpl(PathTree &pathTree, std::string const &path,
                              OriginalSource &source);
@@ -105,9 +122,27 @@ namespace common {
                 if (val.isObject()) {
                     OSVR_DEV_VERBOSE("Alias parsed as a JSON object");
                     // Assume an object means a transform.
+                    m_source.setTransform(src);
+
                     JSONTransformVisitor xformParse(val);
-                    OSVR_DEV_VERBOSE("Transform leaf: "
-                                     << xformParse.getLeaf().toStyledString());
+                    auto leaf = xformParse.getLeaf();
+
+                    if (leaf.isString()) {
+                        OSVR_DEV_VERBOSE("Transform leaf is a string.");
+                        m_recurse(leaf.asString());
+                        return;
+                    }
+
+                    auto trackerEquiv = getPathFromOldRouteSource(leaf);
+                    if (!trackerEquiv.empty()) {
+                        OSVR_DEV_VERBOSE("Transform leaf is an old-style "
+                                         "tracker route source.");
+                        m_recurse(trackerEquiv);
+                        return;
+                    }
+
+                    OSVR_DEV_VERBOSE("Couldn't handle transform leaf: "
+                                     << leaf.toStyledString());
                     /// @todo finish
                     return;
                 }
