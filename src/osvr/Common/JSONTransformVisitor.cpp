@@ -115,7 +115,10 @@ namespace common {
     static const char Y_KEY[] = "y";
     static const char Z_KEY[] = "z";
     static inline void handleLevel(Transform &t, Json::Value const &v) {
-
+        if (!v.isObject()) {
+            // This is a non-object leaf node.
+            return;
+        }
         if (v.isMember(CHANGE_BASIS_KEY)) {
             Json::Value changeBasis = v[CHANGE_BASIS_KEY];
             ChangeOfBasis cb;
@@ -170,7 +173,7 @@ namespace common {
         std::vector<Json::Value> levels;
         Json::Value current = root;
         levels.push_back(current);
-        while (current[CHILD_KEY].isObject()) {
+        while (current.isObject() && current.isMember(CHILD_KEY)) {
             current = current[CHILD_KEY];
             levels.push_back(current);
         }
