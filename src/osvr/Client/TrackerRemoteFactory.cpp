@@ -152,7 +152,7 @@ namespace client {
         auto const &devElt = source.getDeviceElement();
 
         common::Transform xform{};
-        if (!source.getTransform().empty()) {
+        if (source.hasTransform()) {
             Json::Value val;
             Json::Reader reader;
             if (reader.parse(source.getTransform(), val)) {

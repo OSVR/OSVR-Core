@@ -116,6 +116,8 @@ namespace common {
 
     std::string OriginalSource::getTransform() const { return m_transform; }
 
+    bool OriginalSource::hasTransform() const { return !m_transform.empty(); }
+
     namespace {
         class DecomposeOriginalSource : public boost::static_visitor<>,
                                         boost::noncopyable {

@@ -73,6 +73,7 @@ namespace common {
         OSVR_COMMON_EXPORT boost::optional<int> getSensorNumber() const;
 
         OSVR_COMMON_EXPORT std::string getTransform() const;
+        OSVR_COMMON_EXPORT bool hasTransform() const;
 
       private:
         PathNode *m_device;
