@@ -73,28 +73,27 @@ namespace client {
     }
 
     void PureClientContext::m_setupDummyTree() {
-        m_pathTree.getNodeByPath("/org_opengoggles_bundled_Multiserver",
-                                 common::elements::PluginElement());
-        m_pathTree.getNodeByPath(
-            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-            common::elements::DeviceElement::createVRPNDeviceElement(
+        using namespace common::elements;
+        m_getElementByPath("/org_opengoggles_bundled_Multiserver") =
+            PluginElement();
+        m_getElementByPath(
+            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0") =
+            DeviceElement::createVRPNDeviceElement(
                 "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-                "localhost"));
-        m_pathTree.getNodeByPath(
-            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker",
-            common::elements::InterfaceElement());
-        m_pathTree.getNodeByPath(
-            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/analog",
-            common::elements::InterfaceElement());
+                "localhost");
+        m_getElementByPath(
+            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker") =
+            InterfaceElement();
+        m_getElementByPath(
+            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/analog") =
+            InterfaceElement();
 
-        m_pathTree.getNodeByPath("/me/hands/left",
-                                 common::elements::AliasElement(
-                                     "/org_opengoggles_bundled_Multiserver/"
-                                     "YEI_3Space_Sensor0/tracker/1"));
+        m_getElementByPath("/me/hands/left") =
+            AliasElement("/org_opengoggles_bundled_Multiserver/"
+                         "YEI_3Space_Sensor0/tracker/1");
         m_pathTree.getNodeByPath("/controller/left/trigger").value() =
-            common::elements::AliasElement(
-                "/org_opengoggles_bundled_Multiserver/"
-                "YEI_3Space_Sensor0/analog/0");
+            AliasElement("/org_opengoggles_bundled_Multiserver/"
+                         "YEI_3Space_Sensor0/analog/0");
     }
 
     void PureClientContext::m_update() {
@@ -155,6 +154,11 @@ namespace client {
     }
     void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
         m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
+    }
+
+    common::PathElement &
+    PureClientContext::m_getElementByPath(std::string const &path) {
+        return m_pathTree.getNodeByPath(path).value();
     }
 } // namespace client
 } // namespace osvr

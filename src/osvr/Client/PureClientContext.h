@@ -62,6 +62,8 @@ namespace client {
         void m_connectCallbacksOnPath(std::string const &path);
         void m_removeCallbacksOnPath(std::string const &path);
 
+        common::PathElement & m_getElementByPath(std::string const& path);
+
         std::string m_host;
         vrpn_ConnectionPtr m_mainConn;
         common::BaseDevicePtr m_systemDevice;
