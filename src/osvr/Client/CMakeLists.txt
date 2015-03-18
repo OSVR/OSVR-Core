@@ -20,6 +20,8 @@ set(API
 
 set(SOURCE
     "${CMAKE_CURRENT_BINARY_DIR}/display_json.h"
+    AnalogRemoteFactory.cpp
+    AnalogRemoteFactory.h
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
