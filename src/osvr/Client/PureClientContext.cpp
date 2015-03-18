@@ -83,11 +83,18 @@ namespace client {
         m_pathTree.getNodeByPath(
             "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker",
             common::elements::InterfaceElement());
+        m_pathTree.getNodeByPath(
+            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/analog",
+            common::elements::InterfaceElement());
 
         m_pathTree.getNodeByPath("/me/hands/left",
                                  common::elements::AliasElement(
                                      "/org_opengoggles_bundled_Multiserver/"
                                      "YEI_3Space_Sensor0/tracker/1"));
+        m_pathTree.getNodeByPath("/controller/left/trigger").value() =
+            common::elements::AliasElement(
+                "/org_opengoggles_bundled_Multiserver/"
+                "YEI_3Space_Sensor0/analog/0");
     }
 
     void PureClientContext::m_update() {
