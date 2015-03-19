@@ -98,20 +98,31 @@ namespace common {
 
     common::PathNode *OriginalSource::getSensor() const { return m_sensor; }
 
-    boost::optional<int> OriginalSource::getSensorNumber() const {
-        BOOST_ASSERT_MSG(isResolved(),
+    template <typename T>
+    inline boost::optional<T>
+    getSensorNumberHelper(OriginalSource const &self) {
+        BOOST_ASSERT_MSG(self.isResolved(),
                          "Only makes sense when called on a resolved source.");
-        boost::optional<int> ret;
-        if (nullptr == m_sensor) {
+        boost::optional<T> ret;
+        if (nullptr == self.getSensor()) {
             return ret;
         }
         try {
-            ret = boost::lexical_cast<int>(m_sensor->getName());
+            ret = boost::lexical_cast<T>(self.getSensor()->getName());
         } catch (boost::bad_lexical_cast &) {
-            // Just means we can't convert to int, so returning an empty
+            // Just means we can't convert to the type, so returning an empty
             // optional is fine.
         }
         return ret;
+    }
+
+    boost::optional<int> OriginalSource::getSensorNumber() const {
+        return getSensorNumberHelper<int>(*this);
+    }
+
+    boost::optional<OSVR_ChannelCount>
+    OriginalSource::getSensorNumberAsChannelCount() const {
+        return getSensorNumberHelper<OSVR_ChannelCount>(*this);
     }
 
     std::string OriginalSource::getTransform() const { return m_transform; }
