@@ -26,15 +26,10 @@
 #include "ButtonRemoteFactory.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Client/ClientInterface.h>
-#include <osvr/Util/QuatlibInteropC.h>
-#include <osvr/Util/EigenInterop.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Common/Transform.h>
 #include <osvr/Common/DecomposeOriginalSource.h>
-#include <osvr/Common/JSONTransformVisitor.h>
-#include "PureClientContext.h"
 #include "InterfaceTree.h"
 #include <osvr/Util/ValueOrRange.h>
 #include <osvr/Util/Verbosity.h>
