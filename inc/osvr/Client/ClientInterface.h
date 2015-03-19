@@ -90,6 +90,8 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Update any state.
     void update();
 
+    osvr::client::ClientContext &getContext() const { return *m_ctx; }
+
     /// @brief Access the type-erased data for this interface.
     boost::any &data() { return m_data; }
 
