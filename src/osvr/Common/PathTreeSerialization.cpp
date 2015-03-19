@@ -92,6 +92,8 @@ namespace common {
         class PathNodeToJsonVisitor
             : public boost::static_visitor<Json::Value> {
           public:
+            PathNodeToJsonVisitor() : boost::static_visitor<Json::Value>() {}
+
             Json::Value setup(PathNode const &node) {
                 Json::Value val{Json::objectValue};
                 val["path"] = getFullPath(node);
