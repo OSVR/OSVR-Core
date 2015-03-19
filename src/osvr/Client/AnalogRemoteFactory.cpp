@@ -55,6 +55,7 @@ namespace client {
 
     class VRPNAnalogHandler : public RemoteHandler {
       public:
+        typedef util::ValueOrRange<int> RangeType;
         VRPNAnalogHandler(vrpn_ConnectionPtr const &conn, const char *src,
                           boost::optional<int> sensor, InterfaceList &ifaces)
             : m_remote(new vrpn_Analog_Remote(src, conn.get())),
@@ -66,7 +67,10 @@ namespace client {
                 m_sensors.setValue(*sensor);
             }
         }
-        virtual ~VRPNAnalogHandler() {}
+        virtual ~VRPNAnalogHandler() {
+            m_remote->unregister_change_handler(this,
+                                                &VRPNAnalogHandler::handle);
+        }
 
         static void VRPN_CALLBACK handle(void *userdata, vrpn_ANALOGCB info) {
             auto self = static_cast<VRPNAnalogHandler *>(userdata);
@@ -85,13 +89,15 @@ namespace client {
             OSVR_TimeValue timestamp;
             osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
 
-            if (!m_sensors.isInitialized()) {
-                m_sensors.setRangeMaxMin(maxChannel);
-            } else if (m_all) {
-                m_sensors.extendRangeToMax(maxChannel);
+            if (m_all) {
+                if (m_sensors.empty()) {
+                    m_sensors.setRangeMaxMin(maxChannel);
+                } else {
+                    m_sensors.extendRangeToMax(maxChannel);
+                }
             }
-            for (auto sensor :
-                 m_sensors.getIntersectionWithRangeMaxMin(maxChannel)) {
+            for (auto sensor : m_sensors.getIntersection(
+                     RangeType::RangeZeroTo(maxChannel))) {
                 OSVR_AnalogReport report;
                 report.sensor = sensor;
                 /// @todo handle transform?
@@ -104,7 +110,7 @@ namespace client {
         unique_ptr<vrpn_Analog_Remote> m_remote;
         InterfaceList &m_interfaces;
         bool m_all;
-        util::ValueOrRange<int> m_sensors;
+        RangeType m_sensors;
     };
 
     AnalogRemoteFactory::AnalogRemoteFactory(
