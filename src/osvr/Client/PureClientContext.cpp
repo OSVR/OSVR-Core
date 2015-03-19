@@ -31,6 +31,7 @@
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Client/ClientInterface.h>
 #include "AnalogRemoteFactory.h"
+#include "ButtonRemoteFactory.h"
 #include "TrackerRemoteFactory.h"
 #include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
@@ -63,6 +64,7 @@ namespace client {
         auto vrpnConns = m_vrpnConns;
         TrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
         AnalogRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        ButtonRemoteFactory(m_vrpnConns).registerWith(m_factory);
         m_setupDummyTree();
     }
 

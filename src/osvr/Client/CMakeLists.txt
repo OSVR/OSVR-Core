@@ -22,6 +22,8 @@ set(SOURCE
     "${CMAKE_CURRENT_BINARY_DIR}/display_json.h"
     AnalogRemoteFactory.cpp
     AnalogRemoteFactory.h
+    ButtonRemoteFactory.cpp
+    ButtonRemoteFactory.h
     ClientContext.cpp
     ClientInterface.cpp
     CreateContext.cpp
