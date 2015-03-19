@@ -34,6 +34,31 @@
 namespace osvr {
 namespace common {
     namespace elements {
+
+        /// This chunk of code checks at compile time that:
+        ///
+        /// - All the types in our PathElement variant are derived from
+        /// ElementBase<T>
+        /// - For every type T in that variant, it is derived from
+        /// ElementBase<T> - stronger than the check we put in the constructor,
+        /// though it doesn't help with types that aren't listed in the variant,
+        /// hence why we keep both checks.
+        namespace detail {
+            struct CRTPChecker {
+                template <typename T> struct apply {
+                    typedef ElementBase<T> base_type;
+                    static_assert(std::is_base_of<base_type, T>::value,
+                                  "A given element type T must inherit from "
+                                  "ElementBase<T> (the CRTP)!");
+                    typedef void type;
+                };
+            };
+
+            // Force instantiation of the types for static asserts.
+            typedef boost::mpl::transform<PathElement::types, CRTPChecker>::type
+                CRTPCheckDummy;
+        } // namespace detail
+
         AliasElement::AliasElement(std::string const &source)
             : m_source(source) {}
         void AliasElement::setSource(std::string const &source) {

@@ -3,7 +3,14 @@
 
     @date 2014
 
-    @todo enforce/check CRTP using boost static asserts.
+    Closely related to:
+
+    - <osvr/Common/PathElementTypes_fwd.h>
+    - <osvr/Common/PathElementTools.h>
+    - <src/osvr/Common/PathElementTools.cpp>
+    - <src/osvr/Common/PathTreeSerialization.cpp>
+
+    Changes in this file may require changes in those other files.
 
     @author
     Sensics, Inc.
@@ -36,20 +43,37 @@
 
 // Standard includes
 #include <string>
+#include <type_traits>
 
 namespace osvr {
 namespace common {
-    /// @brief Namespace for the various element types that may constitute a
-    /// node in the path tree.
-    ///
-    /// @ingroup Routing
+/// @brief Namespace for the various element types that may constitute a
+/// node in the path tree.
+#ifndef OSVR_DOXYGEN_EXTERNAL
+///
+/// Note that any changes that add/remove data members should result in
+/// corresponding serialization changes in
+/// src/osvr/Common/PathTreeSerialization.cpp
+#endif
     namespace elements {
         /// @brief Base, using the CRTP, providing some basic functionality for
         /// path elements.
         template <typename Type> class ElementBase {
           public:
             typedef Type type;
+            typedef ElementBase<Type> base_type;
+
             const char *getTypeName() const;
+
+          protected:
+            /// @brief Protected constructor to force subclassing.
+            ElementBase() {
+                /// Partially enforce the Curiously-Recurring Template Pattern
+                /// Doesn't prevent inheriting from the wrong base - we have a
+                /// static assert in the cpp file for that.
+                static_assert(std::is_base_of<base_type, type>::value,
+                              "ElementBase<T> must be the base of an element "
+                              "type T (the CRTP)!");
         };
 
         /// @brief The element type created when requesting a path that isn't
