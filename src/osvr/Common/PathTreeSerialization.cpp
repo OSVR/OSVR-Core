@@ -79,7 +79,7 @@ namespace common {
             PathElementToJSONFunctor(Json::Value &val) : m_val(val) {}
 
             template <typename T>
-            void operator()(const char name[], T const &data) {
+            void operator()(const char name[], T const &data, ...) {
                 m_val[name] = data;
             }
 
@@ -139,16 +139,33 @@ namespace common {
         class PathElementFromJsonFunctor : boost::noncopyable {
           public:
             PathElementFromJsonFunctor(Json::Value const &val) : m_val(val) {}
-
             void operator()(const char name[], std::string &dataRef) {
+                m_requireName(name);
                 dataRef = m_val[name].asString();
             }
 
             void operator()(const char name[], bool &dataRef) {
+                m_requireName(name);
                 dataRef = m_val[name].asBool();
+            }
+
+            void operator()(const char name[], bool &dataRef, bool defaultVal) {
+                if (m_hasName(name)) {
+                    dataRef = m_val[name].asBool();
+                } else {
+                    dataRef = defaultVal;
+                }
             }
             /// @todo add more methods here if other data types are stored
           private:
+            void m_requireName(const char name[]) {
+                if (!m_hasName(name)) {
+                    throw std::runtime_error(
+                        "Missing JSON object member named " +
+                        std::string(name));
+                }
+            }
+            bool m_hasName(const char name[]) { return m_val.isMember(name); }
             Json::Value const &m_val;
         };
 
