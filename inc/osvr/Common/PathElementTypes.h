@@ -138,7 +138,7 @@ namespace common {
 
         /// @brief The element type corresponding to a "shallow" path alias -
         /// does not alias children.
-        class AliasElement : public ElementBase<LogicalElement> {
+        class AliasElement : public ElementBase<AliasElement> {
           public:
             /// @brief Constructor with source.
             OSVR_COMMON_EXPORT AliasElement(std::string const &source);
