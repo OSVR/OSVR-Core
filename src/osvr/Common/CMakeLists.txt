@@ -19,7 +19,6 @@ set(API
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
-    "${HEADER_LOCATION}/DecomposeOriginalSource.h"
     "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
@@ -30,6 +29,7 @@ set(API
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
+    "${HEADER_LOCATION}/OriginalSource.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
@@ -59,7 +59,6 @@ set(SOURCE
     BaseDevice.cpp
     Common.cpp
     CreateDevice.cpp
-    DecomposeOriginalSource.cpp
     DeviceComponent.cpp
     DeviceWrapper.cpp
     DeviceWrapper.h
@@ -68,6 +67,7 @@ set(SOURCE
     JSONTransformVisitor.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
+    OriginalSource.cpp
     PathElementTools.cpp
     PathElementTypes.cpp
     PathNode.cpp

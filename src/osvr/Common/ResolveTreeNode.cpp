@@ -28,7 +28,7 @@
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/JSONTransformVisitor.h>
 #include <osvr/Util/Verbosity.h>
 

@@ -32,7 +32,7 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/Transform.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/JSONTransformVisitor.h>
 #include "PureClientContext.h"
 #include "InterfaceTree.h"

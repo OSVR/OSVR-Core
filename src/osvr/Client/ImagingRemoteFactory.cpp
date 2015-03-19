@@ -30,7 +30,7 @@
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 #include "InterfaceTree.h"
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/CreateDevice.h>

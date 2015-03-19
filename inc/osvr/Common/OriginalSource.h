@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_DecomposeOriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7
-#define INCLUDED_DecomposeOriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7
+#ifndef INCLUDED_OriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7
+#define INCLUDED_OriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7
 
 // Internal Includes
 #include <osvr/Common/Export.h>
@@ -87,4 +87,4 @@ namespace common {
 } // namespace common
 } // namespace osvr
 
-#endif // INCLUDED_DecomposeOriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7
+#endif // INCLUDED_OriginalSource_h_GUID_B7D02DC3_ACFA_4BAF_85C5_8B70854700A7

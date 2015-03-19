@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathTree_fwd.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 
 // Library/third-party includes
 #include <boost/optional.hpp>

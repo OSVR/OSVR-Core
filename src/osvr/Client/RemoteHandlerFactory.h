@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Common/PathNode_fwd.h>
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 #include "RemoteHandler.h"
 #include "InterfaceTree.h"
 

@@ -28,7 +28,7 @@
 // Internal Includes
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 
 // Library/third-party includes
 // - none

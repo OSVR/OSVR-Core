@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/DecomposeOriginalSource.h>
+#include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/RoutingExceptions.h>
