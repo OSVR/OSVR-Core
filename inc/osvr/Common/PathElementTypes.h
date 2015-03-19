@@ -40,6 +40,7 @@
 
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
+#include <boost/mpl/contains.hpp>
 
 // Standard includes
 #include <string>
@@ -67,13 +68,10 @@ namespace common {
 
           protected:
             /// @brief Protected constructor to force subclassing.
-            ElementBase() {
-                /// Partially enforce the Curiously-Recurring Template Pattern
-                /// Doesn't prevent inheriting from the wrong base - we have a
-                /// static assert in the cpp file for that.
-                static_assert(std::is_base_of<base_type, type>::value,
-                              "ElementBase<T> must be the base of an element "
-                              "type T (the CRTP)!");
+            ///
+            /// Inline implementation at the bottom of the file contains static
+            /// assertions.
+            ElementBase();
         };
 
         /// @brief The element type created when requesting a path that isn't
@@ -123,7 +121,6 @@ namespace common {
         /// @brief The element type corresponding to a particular sensor of an
         /// interface
         class SensorElement : public ElementBase<SensorElement> {
-
           public:
             SensorElement() = default;
         };
@@ -160,6 +157,30 @@ namespace common {
           private:
             std::string m_source;
         };
+
+        /// This inline implementation MUST remain at the bottom of this file,
+        /// after all full declarations of types to be included in PathElement.
+        /// It consists entirely of compile time checks, so it is effectively
+        /// removed from the code once the conditions are verified.
+        template <typename Type> inline ElementBase<Type>::ElementBase() {
+            /// Partially enforce the Curiously-Recurring Template Pattern.
+            /// The assertion here is that for some `ElementBase<X>`, there
+            /// exists a `class X : public ElementBase<X> {};`
+            /// Doesn't prevent inheriting from the wrong base (`class X :
+            /// public ElementBase<Y> {};` where there is already a `class Y :
+            /// public ElementBase<Y> {};` - we have a static assert in the .cpp
+            /// file to handle that for the types in the PathElement type list.
+            static_assert(std::is_base_of<base_type, type>::value,
+                          "ElementBase<T> must be the base of an element "
+                          "type T (the CRTP)!");
+
+            /// Enforce that every element type (that gets instantiated) has to
+            /// be holdable by the PathElement variant
+            static_assert(
+                boost::mpl::contains<PathElement::types, type>::type::value,
+                "Every element type must be a part of the PathElement variant "
+                "type's bounded type list!");
+        }
 
     } // namespace elements
 
