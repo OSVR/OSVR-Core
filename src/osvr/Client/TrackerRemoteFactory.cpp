@@ -65,13 +65,17 @@ namespace client {
                            Options const &options, common::Transform const &t,
                            boost::optional<int> sensor, InterfaceList &ifaces)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
-              m_transform(t), m_interfaces(ifaces), m_opts(options) {
+              m_transform(t), m_interfaces(ifaces), m_opts(options),
+              m_sensor(sensor) {
             m_remote->register_change_handler(this, &VRPNTrackerHandler::handle,
                                               sensor.get_value_or(-1));
             OSVR_DEV_VERBOSE("Constructed a TrackerHandler for "
                              << src << " sensor " << sensor.get_value_or(-1));
         }
-        virtual ~VRPNTrackerHandler() {}
+        virtual ~VRPNTrackerHandler() {
+            m_remote->unregister_change_handler(
+                this, &VRPNTrackerHandler::handle, m_sensor.get_value_or(-1));
+        }
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -122,6 +126,7 @@ namespace client {
         common::Transform m_transform;
         InterfaceList &m_interfaces;
         Options m_opts;
+        boost::optional<int> m_sensor;
     };
 
     TrackerRemoteFactory::TrackerRemoteFactory(
