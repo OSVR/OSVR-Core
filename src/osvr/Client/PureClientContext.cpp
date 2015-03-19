@@ -96,6 +96,15 @@ namespace client {
         m_getElementByPath("/controller/left/trigger") =
             AliasElement("/org_opengoggles_bundled_Multiserver/"
                          "YEI_3Space_Sensor0/analog/0");
+
+        m_getElementByPath("/org_opengoggles_bundled_Multiserver/RazerHydra0") =
+            DeviceElement::createVRPNDeviceElement(
+                "org_opengoggles_bundled_Multiserver/RazerHydra0", "localhost");
+        m_getElementByPath(
+            "/org_opengoggles_bundled_Multiserver/RazerHydra0/button") =
+            InterfaceElement();
+        m_getElementByPath("/controller/left/1") = AliasElement(
+            "/org_opengoggles_bundled_Multiserver/RazerHydra0/button/1");
     }
 
     void PureClientContext::m_update() {
