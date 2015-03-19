@@ -28,6 +28,8 @@ set(SOURCE
     ClientInterface.cpp
     CreateContext.cpp
     HandlerContainer.h
+    ImagingRemoteFactory.cpp
+    ImagingRemoteFactory.h
     ImagingRouter.h
     InterfaceTree.cpp
     InterfaceTree.h
