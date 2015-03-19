@@ -43,7 +43,7 @@ namespace common {
         /// ElementBase<T> - stronger than the check we put in the constructor,
         /// though it doesn't help with types that aren't listed in the variant,
         /// hence why we keep both checks.
-        namespace detail {
+        namespace {
             struct CRTPChecker {
                 template <typename T> struct apply {
                     typedef ElementBase<T> base_type;
@@ -57,7 +57,7 @@ namespace common {
             // Force instantiation of the types for static asserts.
             typedef boost::mpl::transform<PathElement::types, CRTPChecker>::type
                 CRTPCheckDummy;
-        } // namespace detail
+        } // namespace
 
         AliasElement::AliasElement(std::string const &source)
             : m_source(source) {}
