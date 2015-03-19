@@ -143,7 +143,11 @@ namespace common {
             void operator()(const char name[], std::string &dataRef) {
                 dataRef = m_val[name].asString();
             }
-            /// @todo add more methods if other data types are stored
+
+            void operator()(const char name[], bool &dataRef) {
+                dataRef = m_val[name].asBool();
+            }
+            /// @todo add more methods here if other data types are stored
           private:
             Json::Value const &m_val;
         };
