@@ -93,7 +93,7 @@ namespace client {
         m_getElementByPath("/me/hands/left") =
             AliasElement("/org_opengoggles_bundled_Multiserver/"
                          "YEI_3Space_Sensor0/tracker/1");
-        m_pathTree.getNodeByPath("/controller/left/trigger").value() =
+        m_getElementByPath("/controller/left/trigger") =
             AliasElement("/org_opengoggles_bundled_Multiserver/"
                          "YEI_3Space_Sensor0/analog/0");
     }
