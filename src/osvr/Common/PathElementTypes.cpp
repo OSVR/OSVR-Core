@@ -60,7 +60,8 @@ namespace common {
         } // namespace
 
         AliasElement::AliasElement(std::string const &source)
-            : m_source(source) {}
+            : m_source(source), m_automatic(false) {}
+
         void AliasElement::setSource(std::string const &source) {
             /// @todo validation?
             m_source = source;
@@ -68,6 +69,9 @@ namespace common {
 
         std::string &AliasElement::getSource() { return m_source; }
         std::string const &AliasElement::getSource() const { return m_source; }
+
+        bool &AliasElement::getAutomatic() { return m_automatic; }
+        bool AliasElement::getAutomatic() const { return m_automatic; }
 
         DeviceElement
         DeviceElement::createVRPNDeviceElement(std::string const &deviceName,

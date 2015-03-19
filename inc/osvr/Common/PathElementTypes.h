@@ -140,8 +140,8 @@ namespace common {
             /// @brief Constructor with source.
             OSVR_COMMON_EXPORT AliasElement(std::string const &source);
 
-            /// @brief default (empty) constructor
-            AliasElement() = default;
+            /// @brief default constructor
+            AliasElement() : m_automatic(false){};
 
             /// @brief Sets the source of this alias
             /// @param source absolute path of the target, possibly wrapped in
@@ -152,10 +152,18 @@ namespace common {
 
             /// @brief Get the source of data for this alias
             OSVR_COMMON_EXPORT std::string &getSource();
+            /// @overload
             OSVR_COMMON_EXPORT std::string const &getSource() const;
+
+            /// @brief Get/set whether this alias was automatically set (and
+            /// thus subject to being override by explicit routing)
+            OSVR_COMMON_EXPORT bool &getAutomatic();
+            /// @overload
+            OSVR_COMMON_EXPORT bool getAutomatic() const;
 
           private:
             std::string m_source;
+            bool m_automatic;
         };
 
         /// This inline implementation MUST remain at the bottom of this file,

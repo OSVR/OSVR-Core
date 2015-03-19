@@ -20,6 +20,7 @@
    {
       "path" : "/me/hands/left",
       "source" : "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker/1",
-      "type" : "AliasElement"
+      "type" : "AliasElement",
+      "automatic" : false
    }
 ]

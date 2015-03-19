@@ -69,6 +69,7 @@ namespace common {
             template <typename Functor, typename ValType>
             static void handle(Functor &f, ValType &value) {
                 f("source", value.getSource());
+                f("automatic", value.getAutomatic(), false /* default value */);
             }
         };
 
