@@ -29,10 +29,14 @@
 #ifndef INCLUDED_StdInt_h_GUID_C1AAF35C_C704_4DB7_14AC_615730C4619B
 #define INCLUDED_StdInt_h_GUID_C1AAF35C_C704_4DB7_14AC_615730C4619B
 
+/* IWYU pragma: begin_exports */
+
 #if !defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER > 1600)
 #include <stdint.h>
 #else
 #include "MSStdIntC.h"
 #endif
+
+/* IWYU pragma: end_exports */
 
 #endif

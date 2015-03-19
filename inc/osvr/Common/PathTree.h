@@ -26,7 +26,7 @@
 #define INCLUDED_PathTree_h_GUID_8C6C691A_AAB1_4586_64DD_BD3F870C9071
 
 // Internal Includes
-#include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/PathTree_fwd.h> // IWYU pragma: export
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathNode_fwd.h>
 

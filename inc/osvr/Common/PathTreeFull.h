@@ -27,12 +27,12 @@
 #define INCLUDED_PathTreeFull_h_GUID_7CE95664_6F87_46AB_9AF2_DDD6F12FBC80
 
 // Internal Includes
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathElementTypes.h>
-#include <osvr/Util/TreeNode.h>
+#include <osvr/Common/PathTree.h> // IWYU pragma: export
+#include <osvr/Common/PathElementTypes.h> // IWYU pragma: export
+#include <osvr/Util/TreeNode.h> // IWYU pragma: export
 
 // Library/third-party includes
-#include <boost/variant/variant.hpp>
+#include <boost/variant/variant.hpp> // IWYU pragma: export
 
 // Standard includes
 // - none

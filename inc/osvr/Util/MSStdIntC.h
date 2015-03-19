@@ -10,6 +10,9 @@
     While Visual Studio pre-2010 can't compile the core, they might build
     plugins, so thus this header is provided.
 */
+
+/* IWYU pragma: private, include <osvr/Util/StdInt.h> */
+
 /* ISO C9x  7.18  Integer types <stdint.h>
  * Based on ISO/IEC SC22/WG14 9899 Committee draft (SC22 N2794)
  *

@@ -36,7 +36,7 @@
 
 // Internal Includes
 #include <osvr/Common/Export.h>
-#include <osvr/Common/PathElementTypes_fwd.h>
+#include <osvr/Common/PathElementTypes_fwd.h> // IWYU pragma: export
 
 // Library/third-party includes
 #include <boost/variant/variant.hpp>

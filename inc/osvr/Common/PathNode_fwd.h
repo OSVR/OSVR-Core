@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathElementTypes_fwd.h>
-#include <osvr/Util/TreeNode_fwd.h>
+#include <osvr/Util/TreeNode_fwd.h> // IWYU pragma: export
 
 // Library/third-party includes
 // - none
