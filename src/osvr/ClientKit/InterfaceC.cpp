@@ -28,7 +28,7 @@
 #include <osvr/Client/ClientContext.h>
 
 // Library/third-party includes
-#include <boost/assert.hpp>
+// - none
 
 // Standard includes
 // - none
