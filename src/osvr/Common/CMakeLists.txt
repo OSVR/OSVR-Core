@@ -34,6 +34,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceList.h"
     "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/JSONEigen.h"
+    "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
