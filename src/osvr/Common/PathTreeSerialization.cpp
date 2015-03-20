@@ -110,7 +110,10 @@ namespace common {
                 return ret;
             }
         };
-
+        Json::Value pathNodeToJson(PathNode const &node) {
+            PathNodeToJsonVisitor visitor;
+            return applyPathNodeVisitor(visitor, node);
+        }
         /// @brief A PathNode (tree) visitor to recursively convert nodes in a
         /// PathTree to JSON
         class PathTreeToJsonVisitor {
@@ -124,9 +127,7 @@ namespace common {
                 OSVR_DEV_VERBOSE("Visiting " << getFullPath(node));
                 if (m_keepNulls || !elements::isNull(node.value())) {
                     // If we're keeping nulls or this isn't a null...
-                    PathNodeToJsonVisitor visitor;
-                    auto newEntry = applyPathNodeVisitor(visitor, node);
-                    m_ret.append(newEntry);
+                    m_ret.append(pathNodeToJson(node));
                 }
                 // Recurse on children
                 node.visitConstChildren(*this);
