@@ -1,11 +1,12 @@
 /** @file
-@brief Header
+    @brief Header
 
-@date 2015
+    @date 2015
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
+
 */
 
 // Copyright 2015 Sensics, Inc.
@@ -22,19 +23,23 @@ Sensics, Inc.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef INCLUDED_SerialPort_h_GUID_DC91C7DB_E233_4C95_03F7_31415985F7B8
+#define INCLUDED_SerialPort_h_GUID_DC91C7DB_E233_4C95_03F7_31415985F7B8
+
 // Internal Includes
-// - none
+#include "USBSerialDeviceImpl.h"
 
 // Library/third-party includes
-// - none
 
 // Standard includes
-#include <memory>
 #include <string>
 
-namespace osvr{
+namespace osvr {
 namespace usbserial {
-	
+
+    std::string getPortNumber(USBSerialDeviceImpl *serialDevice);
 
 } // namespace usbserial
 } // namespace osvr
+
+#endif // INCLUDED_SerialPort_h_GUID_DC91C7DB_E233_4C95_03F7_31415985F7B8

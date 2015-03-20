@@ -22,12 +22,9 @@ Sensics, Inc.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_USBSerialEnum_h_GUID_B17561E7_ADC2_438C_87B9_D05321AF6BD6
-#define INCLUDED_USBSerialEnum_h_GUID_B17561E7_ADC2_438C_87B9_D05321AF6BD6
-
-
 // Internal Includes
-#include <osvr/USBSerial/Export.h>
+#include <osvr/USBSerial/USBSerial.h>
+#include "USBSerialDeviceImpl.h"
 
 // Library/third-party includes
 // - none
@@ -38,31 +35,19 @@ Sensics, Inc.
 
 namespace osvr {
 namespace usbserial {
-	class Enumerator;
-	class EnumeratedDevice {
-	public:
-		std::string getPlatformSpecificPath();
-		uint16_t getVID();
-		uint16_t getPID();
-	private:
-		class Impl;
-		EnumeratedDevice(std::unique_ptr<Impl> impl);
-	};
-	class EnumeratorIterator {
-		/// stuff
-	};
-	class Enumerator {
-		class Impl;
-	public:
-		OSVR_USBSERIAL_EXPORT Enumerator();
-		OSVR_USBSERIAL_EXPORT ~Enumerator();
 
-		OSVR_USBSERIAL_EXPORT EnumeratorIterator begin();
-		OSVR_USBSERIAL_EXPORT EnumeratorIterator end();
-	private:
-		std::unique_ptr<Impl> m_impl;
-	};
+    // create USB-Serial device with provided vendor and product IDs
+    USBSerialDevice::USBSerialDevice(std::string vendorID,
+                                     std::string productID)
+        : impl(new USBSerialDeviceImpl(vendorID, productID)){};
+
+    USBSerialDevice::~USBSerialDevice() {}
+
+    std::string USBSerialDevice::getVID() { return impl->getVID(); }
+
+    std::string USBSerialDevice::getPID() { return impl->getPID(); }
+
+    std::string USBSerialDevice::getPort() { return impl->getPort(); }
 
 } // namespace usbserial
 } // namespace osvr
-#endif // INCLUDED_USBSerialEnum_h_GUID_B17561E7_ADC2_438C_87B9_D05321AF6BD6

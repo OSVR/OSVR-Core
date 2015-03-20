@@ -26,6 +26,7 @@
 #include "DevicesWithParameters.h"
 #include "GetSerialPortState.h"
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
+#include <osvr/USBSerial/USBSerial.h>
 
 // Library/third-party includes
 #include <json/reader.h>
@@ -83,7 +84,11 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         throw std::runtime_error("Could not parse configuration: " +
                                  reader.getFormattedErrorMessages());
     }
-    std::string port = normalizeAndVerifySerialPort(root["port"].asString());
+
+    osvr::usbserial::USBSerialDevice serialDevice(root["vendorID"].asString(),
+                                                  root["productID"].asString());
+
+    std::string port = normalizeAndVerifySerialPort(serialDevice.getPort());
     bool calibrate_gyros_on_setup =
         root.get("calibrateGyrosOnSetup", false).asBool();
     bool tare_on_setup = root.get("tareOnSetup", false).asBool();

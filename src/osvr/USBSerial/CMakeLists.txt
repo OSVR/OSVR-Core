@@ -1,10 +1,14 @@
 osvr_setup_lib_vars(USBSerial)
 
 set(API
-    "${HEADER_LOCATION}/USBSerialEnum.h")
+    "${HEADER_LOCATION}/USBSerial.h"
+    "${HEADER_LOCATION}/SerialPort.h")
 
 set(SOURCE
-    USBSerialEnum.cpp)
+    USBSerial.cpp
+    USBSerialDeviceImpl.h
+    USBSerialDeviceImpl.cpp
+    SerialPort.cpp)
 
 osvr_add_library()
 
@@ -24,13 +28,22 @@ target_compile_options(${LIBNAME_FULL}
     PUBLIC
     ${OSVR_CXX11_FLAGS})
 
-target_link_libraries(${LIBNAME_FULL}
-    PUBLIC
-    libfunctionality::functionality
-    osvrUtilCpp
-    PRIVATE
-    boost_filesystem)
-    
+if(WIN32)
+    target_link_libraries(${LIBNAME_FULL}
+        PUBLIC
+        libfunctionality::functionality
+        osvrUtilCpp
+        PRIVATE
+        boost_filesystem
+        wbemuuid)
+else()
+    target_link_libraries(${LIBNAME_FULL}
+        PUBLIC
+        libfunctionality::functionality
+        osvrUtilCpp
+        PRIVATE
+        boost_filesystem)
+endif()
 ###
 # Grab DLLs please.
 ###
