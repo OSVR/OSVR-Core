@@ -53,9 +53,9 @@ namespace common {
         /// A traits class must implement:
         ///
         /// - `template <typename BufferType> static void
-        /// buffer(BufferType &buf, typename Base::param_type val, Tag const&)`
+        /// serialize(BufferType &buf, typename Base::param_type val, Tag const&)`
         /// - `template <typename BufferReaderType> static void
-        /// unbuffer(BufferReaderType &buf, typename Base::reference_type val,
+        /// deserialize(BufferReaderType &buf, typename Base::reference_type val,
         /// Tag const&)`
         /// - `static size_t spaceRequired(size_t existingBytes, typename
         /// Base::param_type val, Tag const&)`
