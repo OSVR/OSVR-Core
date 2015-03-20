@@ -62,6 +62,11 @@ namespace client {
             OSVR_DEV_VERBOSE("Constructed an ImagingHandler for "
                              << deviceName);
         }
+
+        /// @brief Deleted assignment operator.
+        NetworkImagingRemoteHandler &
+        operator=(NetworkImagingRemoteHandler const &) = delete;
+
         virtual ~NetworkImagingRemoteHandler() {
             /// @todo do we need to unregister?
         }
