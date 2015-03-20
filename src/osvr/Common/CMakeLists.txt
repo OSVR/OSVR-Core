@@ -15,7 +15,12 @@ set(API
     "${HEADER_LOCATION}/Buffer.h"
     "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
+    "${HEADER_LOCATION}/CallbackType.h"
     "${HEADER_LOCATION}/ChangeOfBasis.h"
+    "${HEADER_LOCATION}/ClientContext.h"
+    "${HEADER_LOCATION}/ClientContext_fwd.h"
+    "${HEADER_LOCATION}/ClientInterface.h"
+    "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
@@ -25,6 +30,9 @@ set(API
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
+    "${HEADER_LOCATION}/InterfaceCallbacks.h"
+    "${HEADER_LOCATION}/InterfaceList.h"
+    "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/MessageHandler.h"
@@ -41,6 +49,12 @@ set(API
     "${HEADER_LOCATION}/PathTree_fwd.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
+    "${HEADER_LOCATION}/ReportFromCallback.h"
+    "${HEADER_LOCATION}/ReportMap.h"
+    "${HEADER_LOCATION}/ReportState.h"
+    "${HEADER_LOCATION}/ReportStateTraits.h"
+    "${HEADER_LOCATION}/ReportTraits.h"
+    "${HEADER_LOCATION}/ReportTypes.h"
     "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/RouteContainer.h"
     "${HEADER_LOCATION}/RoutingConstants.h"
@@ -49,6 +63,7 @@ set(API
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
+    "${HEADER_LOCATION}/StateType.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${HEADER_LOCATION}/Transform.h"
@@ -57,7 +72,10 @@ set(API
 set(SOURCE
     AddDevice.cpp
     BaseDevice.cpp
+    ClientContext.cpp
+    ClientInterface.cpp
     Common.cpp
+    ConfigByteSwapping.h.cmake_in
     CreateDevice.cpp
     DeviceComponent.cpp
     DeviceWrapper.cpp

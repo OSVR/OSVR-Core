@@ -1,22 +1,7 @@
 osvr_setup_lib_vars(Client)
 
 set(API
-    "${HEADER_LOCATION}/CallbackType.h"
-    "${HEADER_LOCATION}/ClientContext.h"
-    "${HEADER_LOCATION}/ClientContext_fwd.h"
-    "${HEADER_LOCATION}/ClientInterface.h"
-    "${HEADER_LOCATION}/ClientInterfacePtr.h"
-    "${HEADER_LOCATION}/CreateContext.h"
-    "${HEADER_LOCATION}/InterfaceCallbacks.h"
-    "${HEADER_LOCATION}/InterfaceState.h"
-    "${HEADER_LOCATION}/ReportFromCallback.h"
-    "${HEADER_LOCATION}/ReportState.h"
-    "${HEADER_LOCATION}/ReportStateTraits.h"
-    "${HEADER_LOCATION}/ReportTraits.h"
-    "${HEADER_LOCATION}/ReportTypes.h"
-    "${HEADER_LOCATION}/ReportTypeWrapper.h"
-    "${HEADER_LOCATION}/ReportMap.h"
-    "${HEADER_LOCATION}/StateType.h")
+    "${HEADER_LOCATION}/CreateContext.h")
 
 set(SOURCE
     "${CMAKE_CURRENT_BINARY_DIR}/display_json.h"
@@ -24,8 +9,6 @@ set(SOURCE
     AnalogRemoteFactory.h
     ButtonRemoteFactory.cpp
     ButtonRemoteFactory.h
-    ClientContext.cpp
-    ClientInterface.cpp
     CreateContext.cpp
     HandlerContainer.h
     ImagingRemoteFactory.cpp
@@ -33,21 +16,21 @@ set(SOURCE
     ImagingRouter.h
     InterfaceTree.cpp
     InterfaceTree.h
-    PureClientContext.h
     PureClientContext.cpp
+    PureClientContext.h
     RemoteHandler.cpp
     RemoteHandler.h
     RemoteHandlerFactory.h
-    RouterTransforms.h
     RouterPredicates.h
+    RouterTransforms.h
     TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h
-    VRPNContext.cpp
-    VRPNContext.h
-    VRPNConnectionCollection.cpp
-    VRPNConnectionCollection.h
     VRPNAnalogRouter.h
     VRPNButtonRouter.h
+    VRPNConnectionCollection.cpp
+    VRPNConnectionCollection.h
+    VRPNContext.cpp
+    VRPNContext.h
     VRPNTrackerRouter.h)
 
 set(DISPLAY_JSON display-HDK.json)
