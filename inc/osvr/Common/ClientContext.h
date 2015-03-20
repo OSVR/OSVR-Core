@@ -45,7 +45,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
   public:
     typedef std::vector<osvr::common::ClientInterfacePtr> InterfaceList;
     /// @brief Destructor
-    virtual ~OSVR_ClientContextObject();
+    OSVR_COMMON_EXPORT virtual ~OSVR_ClientContextObject();
 
     /// @brief System-wide update method.
     OSVR_COMMON_EXPORT void update();
@@ -84,7 +84,8 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     getStringParameter(std::string const &path) const;
 
     /// @brief Sets a string parameter value.
-    void setParameter(std::string const &path, std::string const &value);
+    OSVR_COMMON_EXPORT void setParameter(std::string const &path,
+                                         std::string const &value);
 
     /// @brief Pass (smart-pointer) ownership of some object to the client
     /// context.
@@ -100,7 +101,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
   protected:
     /// @brief Constructor for derived class use only.
-    OSVR_ClientContextObject(const char appId[]);
+    OSVR_COMMON_EXPORT OSVR_ClientContextObject(const char appId[]);
 
     osvr::common::RouteContainer m_routingDirectives;
 
@@ -109,11 +110,11 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     virtual void m_sendRoute(std::string const &route) = 0;
     /// @brief Optional implementation-specific handling of interface retrieval,
     /// before the interface is returned to the client.
-    virtual void
+    OSVR_COMMON_EXPORT virtual void
     m_handleNewInterface(osvr::common::ClientInterfacePtr const &iface);
     /// @brief Optional implementation-specific handling of interface release,
     /// before the interface is actually freed.
-    virtual void
+    OSVR_COMMON_EXPORT virtual void
     m_handleReleasingInterface(osvr::common::ClientInterfacePtr const &iface);
     std::string const m_appId;
     InterfaceList m_interfaces;

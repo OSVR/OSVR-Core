@@ -123,8 +123,8 @@ namespace client {
         m_update();
     }
 
-    void
-    PureClientContext::m_handleNewInterface(ClientInterfacePtr const &iface) {
+    void PureClientContext::m_handleNewInterface(
+        common::ClientInterfacePtr const &iface) {
         bool isNew = m_interfaces.addInterface(iface);
         if (isNew) {
             m_connectCallbacksOnPath(iface->getPath());
@@ -132,7 +132,7 @@ namespace client {
     }
 
     void PureClientContext::m_handleReleasingInterface(
-        ClientInterfacePtr const &iface) {
+        common::ClientInterfacePtr const &iface) {
         bool isEmpty = m_interfaces.removeInterface(iface);
         if (isEmpty) {
             m_removeCallbacksOnPath(iface->getPath());

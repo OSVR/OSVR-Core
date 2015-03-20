@@ -51,12 +51,13 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
   public:
     /// @brief Constructor - only to be called by ClientContext
+    OSVR_COMMON_EXPORT
     OSVR_ClientInterfaceObject(osvr::common::ClientContext *ctx,
                                std::string const &path,
                                PrivateConstructor const &);
 
     /// @brief Get the path as a string.
-    std::string const &getPath() const;
+    OSVR_COMMON_EXPORT std::string const &getPath() const;
 
     /// @brief If state exists for the given ReportType on this interface, it
     /// will be returned in the arguments, and true will be returned.

@@ -40,8 +40,9 @@ static const char PATHTREE_ENV_VAR[] = "OSVR_PATHTREE";
 namespace osvr {
 namespace client {
 
-    ClientContext *createContext(const char appId[], const char host[]) {
-        ClientContext *ret = nullptr;
+    common::ClientContext *createContext(const char appId[],
+                                         const char host[]) {
+        common::ClientContext *ret = nullptr;
         if (!appId || std::strlen(appId) == 0) {
             OSVR_DEV_VERBOSE("Could not create client context - null or empty "
                              "appId provided!");

@@ -44,7 +44,7 @@ namespace osvr {
 namespace client {
     class VRPNTrackerRouter : public RouterEntry {
       public:
-        VRPNTrackerRouter(ClientContext *ctx, vrpn_ConnectionPtr conn,
+        VRPNTrackerRouter(common::ClientContext *ctx, vrpn_ConnectionPtr conn,
                           const char *src, boost::optional<int> sensor,
                           const char *dest, common::Transform const &t)
             : RouterEntry(ctx, dest),

@@ -39,9 +39,10 @@ namespace client {
     template <typename Predicate, typename Transform>
     class VRPNAnalogRouter : public RouterEntry {
       public:
-        VRPNAnalogRouter(ClientContext *ctx, vrpn_ConnectionPtr const &conn,
-                         const char *src, const char *dest, Predicate p,
-                         Transform t, int channel)
+        VRPNAnalogRouter(common::ClientContext *ctx,
+                         vrpn_ConnectionPtr const &conn, const char *src,
+                         const char *dest, Predicate p, Transform t,
+                         int channel)
             : RouterEntry(ctx, dest), m_channel(channel),
               m_remote(new vrpn_Analog_Remote(src, conn.get())), m_pred(p),
               m_transform(t), m_conn(conn) {

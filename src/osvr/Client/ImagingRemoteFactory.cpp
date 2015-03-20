@@ -50,7 +50,7 @@ namespace client {
         NetworkImagingRemoteHandler(vrpn_ConnectionPtr const &conn,
                                     std::string const &deviceName,
                                     boost::optional<OSVR_ChannelCount> sensor,
-                                    InterfaceList &ifaces)
+                                    common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
@@ -80,7 +80,7 @@ namespace client {
             report.sensor = data.sensor;
             report.state.metadata = data.metadata;
             report.state.data = data.buffer.get();
-            ClientInterfacePtr anInterface;
+            common::ClientInterfacePtr anInterface;
             for (auto &iface : m_interfaces) {
                 anInterface = iface;
                 iface->triggerCallbacks(timestamp, report);
@@ -91,7 +91,7 @@ namespace client {
         }
 
         common::BaseDevicePtr m_dev;
-        InterfaceList &m_interfaces;
+        common::InterfaceList &m_interfaces;
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
     };
@@ -101,7 +101,8 @@ namespace client {
         : m_conns(conns) {}
 
     shared_ptr<RemoteHandler> ImagingRemoteFactory::
-    operator()(common::OriginalSource const &source, InterfaceList &ifaces) {
+    operator()(common::OriginalSource const &source,
+               common::InterfaceList &ifaces) {
 
         shared_ptr<RemoteHandler> ret;
 

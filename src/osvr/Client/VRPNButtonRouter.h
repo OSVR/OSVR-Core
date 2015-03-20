@@ -38,7 +38,7 @@ namespace osvr {
 namespace client {
     template <typename Predicate> class VRPNButtonRouter : public RouterEntry {
       public:
-        VRPNButtonRouter(ClientContext *ctx, vrpn_ConnectionPtr conn,
+        VRPNButtonRouter(common::ClientContext *ctx, vrpn_ConnectionPtr conn,
                          const char *src, const char *dest, Predicate p)
             : RouterEntry(ctx, dest),
               m_remote(new vrpn_Button_Remote(src, conn.get())), m_pred(p),

@@ -57,7 +57,8 @@ namespace client {
       public:
         typedef util::ValueOrRange<int> RangeType;
         VRPNAnalogHandler(vrpn_ConnectionPtr const &conn, const char *src,
-                          boost::optional<int> sensor, InterfaceList &ifaces)
+                          boost::optional<int> sensor,
+                          common::InterfaceList &ifaces)
             : m_remote(new vrpn_Analog_Remote(src, conn.get())),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()) {
             m_remote->register_change_handler(this, &VRPNAnalogHandler::handle);
@@ -108,7 +109,7 @@ namespace client {
             }
         }
         unique_ptr<vrpn_Analog_Remote> m_remote;
-        InterfaceList &m_interfaces;
+        common::InterfaceList &m_interfaces;
         bool m_all;
         RangeType m_sensors;
     };
@@ -118,7 +119,8 @@ namespace client {
         : m_conns(conns) {}
 
     shared_ptr<RemoteHandler> AnalogRemoteFactory::
-    operator()(common::OriginalSource const &source, InterfaceList &ifaces) {
+    operator()(common::OriginalSource const &source,
+               common::InterfaceList &ifaces) {
 
         shared_ptr<RemoteHandler> ret;
 

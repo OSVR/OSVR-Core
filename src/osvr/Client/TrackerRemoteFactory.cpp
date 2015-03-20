@@ -63,7 +63,8 @@ namespace client {
         };
         VRPNTrackerHandler(vrpn_ConnectionPtr const &conn, const char *src,
                            Options const &options, common::Transform const &t,
-                           boost::optional<int> sensor, InterfaceList &ifaces)
+                           boost::optional<int> sensor,
+                           common::InterfaceList &ifaces)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
               m_transform(t), m_interfaces(ifaces), m_opts(options),
               m_sensor(sensor) {
@@ -124,7 +125,7 @@ namespace client {
         }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         common::Transform m_transform;
-        InterfaceList &m_interfaces;
+        common::InterfaceList &m_interfaces;
         Options m_opts;
         boost::optional<int> m_sensor;
     };
@@ -134,7 +135,8 @@ namespace client {
         : m_conns(conns) {}
 
     shared_ptr<RemoteHandler> TrackerRemoteFactory::
-    operator()(common::OriginalSource const &source, InterfaceList &ifaces) {
+    operator()(common::OriginalSource const &source,
+               common::InterfaceList &ifaces) {
 
         shared_ptr<RemoteHandler> ret;
 

@@ -28,7 +28,7 @@
 #include "RecomposeTransform.h"
 #include "WrapRoute.h"
 #include <osvr/ClientKit/ClientKit.h>
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/Common/RouteContainer.h>
 #include <osvr/Util/EigenInterop.h>

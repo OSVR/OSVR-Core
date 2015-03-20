@@ -29,8 +29,8 @@
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Common/PathNode_fwd.h>
 #include <osvr/Common/OriginalSource.h>
+#include <osvr/Common/InterfaceList.h>
 #include "RemoteHandler.h"
-#include "InterfaceTree.h"
 
 // Library/third-party includes
 // - none
@@ -46,7 +46,8 @@ namespace client {
       public:
         typedef shared_ptr<RemoteHandler> FactoryProduct;
         typedef std::function<FactoryProduct(common::OriginalSource const &,
-                                             InterfaceList &)> SpecificFactory;
+                                             common::InterfaceList &)>
+            SpecificFactory;
 
         void addFactory(std::string const &name, SpecificFactory factory) {
             m_factoriesByInterface[name] = factory;
@@ -58,7 +59,7 @@ namespace client {
         }
 
         FactoryProduct invokeFactory(common::OriginalSource const &source,
-                                     InterfaceList &ifaces) const {
+                                     common::InterfaceList &ifaces) const {
             auto factory =
                 m_factoriesByInterface.find(source.getInterfaceName());
 

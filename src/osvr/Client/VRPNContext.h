@@ -47,16 +47,16 @@ namespace client {
     class RouterEntry : boost::noncopyable {
       public:
         std::string const &getDest() { return m_dest; }
-        ClientContext *getContext() { return m_ctx; }
+        common::ClientContext *getContext() { return m_ctx; }
         virtual ~RouterEntry();
         virtual void operator()() = 0;
 
       protected:
-        RouterEntry(ClientContext *ctx, std::string const &dest)
+        RouterEntry(common::ClientContext *ctx, std::string const &dest)
             : m_ctx(ctx), m_dest(dest) {}
 
       private:
-        ClientContext *m_ctx;
+        common::ClientContext *m_ctx;
         const std::string m_dest;
     };
 

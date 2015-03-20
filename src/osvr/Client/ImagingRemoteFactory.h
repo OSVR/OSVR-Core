@@ -27,8 +27,10 @@
 
 // Internal Includes
 #include "VRPNConnectionCollection.h"
-#include "InterfaceTree.h"
+#include <osvr/Common/InterfaceList.h>
 #include <osvr/Common/OriginalSource.h>
+#include <osvr/Util/SharedPtr.h>
+#include "RemoteHandler.h"
 
 // Library/third-party includes
 // - none
@@ -48,7 +50,8 @@ namespace client {
         }
 
         shared_ptr<RemoteHandler>
-        operator()(common::OriginalSource const &source, InterfaceList &ifaces);
+        operator()(common::OriginalSource const &source,
+                   common::InterfaceList &ifaces);
 
       private:
         VRPNConnectionCollection m_conns;

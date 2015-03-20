@@ -37,14 +37,15 @@ namespace osvr {
 namespace client {
     InterfaceTree::InterfaceTree() : m_root(node_type::createRoot()) {}
 
-    bool InterfaceTree::addInterface(ClientInterfacePtr const &iface) {
+    bool InterfaceTree::addInterface(common::ClientInterfacePtr const &iface) {
         auto &ifaces = getInterfacesForPath(iface->getPath());
         bool ret = ifaces.empty();
         ifaces.push_back(iface);
         return ret;
     }
 
-    bool InterfaceTree::removeInterface(ClientInterfacePtr const &iface) {
+    bool
+    InterfaceTree::removeInterface(common::ClientInterfacePtr const &iface) {
         auto &ifaces = getInterfacesForPath(iface->getPath());
         auto it = std::find(begin(ifaces), end(ifaces), iface);
         if (it != end(ifaces)) {
@@ -53,7 +54,7 @@ namespace client {
         return ifaces.empty();
     }
 
-    InterfaceList &
+    common::InterfaceList &
     InterfaceTree::getInterfacesForPath(std::string const &path) {
         return getNodeForPath(path).value().interfaces;
     }
