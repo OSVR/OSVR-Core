@@ -173,7 +173,7 @@ namespace common {
             Json::Value const &m_val;
         };
 
-        /// @brief Functor for use with the PathElement's typelist and
+        /// @brief Functor for use with the PathElement's type list and
         /// mpl::for_each, to convert from type name string to actual type and
         /// load the data.
         class DeserializeElementFunctor {
