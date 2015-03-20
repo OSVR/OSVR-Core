@@ -26,13 +26,13 @@
 #define INCLUDED_ClientInterface_h_GUID_A3A55368_DE2F_4980_BAE9_1C398B0D40A1
 
 // Internal Includes
-#include <osvr/Client/Export.h>
-#include <osvr/Client/ClientContext_fwd.h>
-#include <osvr/Client/ClientInterfacePtr.h>
-#include <osvr/Client/InterfaceState.h>
-#include <osvr/Client/InterfaceCallbacks.h>
-#include <osvr/Client/StateType.h>
-#include <osvr/Client/ReportStateTraits.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/ClientContext_fwd.h>
+#include <osvr/Common/ClientInterfacePtr.h>
+#include <osvr/Common/InterfaceState.h>
+#include <osvr/Common/InterfaceCallbacks.h>
+#include <osvr/Common/StateType.h>
+#include <osvr/Common/ReportStateTraits.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 

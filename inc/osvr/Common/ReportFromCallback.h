@@ -22,11 +22,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_CallbackType_h_GUID_5CE2B364_1343_4792_F86D_CF16447F5040
-#define INCLUDED_CallbackType_h_GUID_5CE2B364_1343_4792_F86D_CF16447F5040
+#ifndef INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
+#define INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
 
 // Internal Includes
-#include <osvr/Client/ReportTraits.h>
+#include <osvr/Common/ReportTraits.h>
 
 // Library/third-party includes
 // - none
@@ -34,4 +34,4 @@
 // Standard includes
 // - none
 
-#endif // INCLUDED_CallbackType_h_GUID_5CE2B364_1343_4792_F86D_CF16447F5040
+#endif // INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3

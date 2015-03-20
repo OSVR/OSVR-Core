@@ -44,18 +44,18 @@ namespace client {
     namespace traits {
         /// @brief Metafunction taking a ReportType and returning the associated
         /// CallbackType
-        /// @headerfile CallbackType.h <osvr/Client/CallbackType.h>
+        /// @headerfile CallbackType.h <osvr/Common/CallbackType.h>
         template <typename T> struct CallbackType {};
 
         /** @brief Metafunction taking a CallbackType and returning the
         associated ReportType
-        @headerfile ReportFromCallback.h <osvr/Client/ReportFromCallback.h>
+        @headerfile ReportFromCallback.h <osvr/Common/ReportFromCallback.h>
         */
         template <typename T> struct ReportFromCallback {};
 
         /// @brief Metafunction taking a ReportType and returning the associated
         /// StateType
-        /// @headerfile StateType.h <osvr/Client/StateType.h>
+        /// @headerfile StateType.h <osvr/Common/StateType.h>
         template <typename T> struct StateType {};
 
 #define OSVR_REPORT_TRAITS(TYPE)                                               \

@@ -26,9 +26,9 @@
 #define INCLUDED_InterfaceCallbacks_h_GUID_0CE1EE79_D74A_4EAA_CF16_3AABDA3A1B6A
 
 // Internal Includes
-#include <osvr/Client/ReportMap.h>
-#include <osvr/Client/ReportTypes.h>
-#include <osvr/Client/ReportFromCallback.h>
+#include <osvr/Common/ReportMap.h>
+#include <osvr/Common/ReportTypes.h>
+#include <osvr/Common/ReportFromCallback.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes

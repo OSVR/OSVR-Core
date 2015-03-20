@@ -26,7 +26,7 @@
 #define INCLUDED_ReportMap_h_GUID_E6AD6837_0C7A_4FAF_0639_4F11821AEE65
 
 // Internal Includes
-#include <osvr/Client/ReportTypes.h>
+#include <osvr/Common/ReportTypes.h>
 
 // Library/third-party includes
 #include <boost/fusion/include/mpl.hpp>

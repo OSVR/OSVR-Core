@@ -26,9 +26,9 @@
 #define INCLUDED_ContextImpl_h_GUID_9000C62E_3693_4888_83A2_0D26F4591B6A
 
 // Internal Includes
-#include <osvr/Client/Export.h>
-#include <osvr/Client/ClientContext_fwd.h>
-#include <osvr/Client/ClientInterfacePtr.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/ClientContext_fwd.h>
+#include <osvr/Common/ClientInterfacePtr.h>
 #include <osvr/Common/RouteContainer.h>
 #include <osvr/Util/KeyedOwnershipContainer.h>
 
