@@ -41,7 +41,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace common {
     /// @brief A templated type containing state and a timestamp for known,
     /// specialized report types.
     template <typename ReportType> struct StateMapContents {
@@ -95,7 +95,7 @@ namespace client {
         StateMap m_states;
     };
 
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_InterfaceState_h_GUID_FFF8951B_3677_4EB5_373A_3A1A697AECDE

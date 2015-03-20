@@ -31,8 +31,8 @@
 #include "VRPNButtonRouter.h"
 #include "VRPNTrackerRouter.h"
 #include <osvr/Util/ClientCallbackTypesC.h>
-#include <osvr/Client/ClientContext.h>
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/JSONTransformVisitor.h>
 #include <osvr/Common/ChangeOfBasis.h>

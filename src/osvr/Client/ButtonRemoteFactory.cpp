@@ -25,7 +25,7 @@
 // Internal Includes
 #include "ButtonRemoteFactory.h"
 #include "VRPNConnectionCollection.h"
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>

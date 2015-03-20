@@ -29,8 +29,8 @@
 #include "VRPNContext.h"
 #include <osvr/Util/QuatlibInteropC.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Client/ClientContext.h>
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/Transform.h>
 
 // Library/third-party includes

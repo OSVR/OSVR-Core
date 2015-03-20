@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include "InterfaceTree.h"
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 #include "../Common/PathParseAndRetrieve.h" /// @todo internal header cross-include
 
 // Library/third-party includes

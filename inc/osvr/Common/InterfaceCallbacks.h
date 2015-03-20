@@ -42,7 +42,7 @@
 #include <functional>
 
 namespace osvr {
-namespace client {
+namespace common {
     /// @brief Metafunction computing the storage for callbacks for a report
     /// type.
     template <typename ReportType> struct CallbackStorageType {
@@ -81,7 +81,7 @@ namespace client {
         CallbackMap m_callbacks;
     };
 
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_InterfaceCallbacks_h_GUID_0CE1EE79_D74A_4EAA_CF16_3AABDA3A1B6A

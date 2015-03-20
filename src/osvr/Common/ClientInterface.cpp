@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -33,7 +33,7 @@
 #include <boost/range/algorithm.hpp>
 
 OSVR_ClientInterfaceObject::OSVR_ClientInterfaceObject(
-    ::osvr::client::ClientContext *ctx, std::string const &path,
+    ::osvr::common::ClientContext *ctx, std::string const &path,
     OSVR_ClientInterfaceObject::PrivateConstructor const &)
     : m_ctx(ctx), m_path(path) {
     OSVR_DEV_VERBOSE("Interface initialized for " << m_path);

@@ -35,7 +35,7 @@
 #include <type_traits>
 
 namespace osvr {
-namespace client {
+namespace common {
     namespace traits {
         /// @brief Type predicate: Whether callbacks of a report type should
         /// store state for that type.
@@ -48,6 +48,6 @@ namespace client {
 
     } // namespace traits
 
-} // namespace client
+} // namespace common
 } // namespace osvr
 #endif // INCLUDED_ReportStateTraits_h_GUID_44BA0D27_B1B4_4A8C_5D47_2AFECC2C2BEE

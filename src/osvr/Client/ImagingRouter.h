@@ -27,7 +27,7 @@
 
 // Internal Includes
 #include "VRPNContext.h"
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/ImagingComponent.h>
 #include <osvr/Util/Verbosity.h>
@@ -56,7 +56,8 @@ namespace client {
           private:
             ImagingRouter *m_router;
         };
-        ImagingRouter(ClientContext *ctx, vrpn_ConnectionPtr const &conn,
+        ImagingRouter(common::ClientContext *ctx,
+                      vrpn_ConnectionPtr const &conn,
                       std::string const &deviceName,
                       std::vector<std::string> &components,
                       std::string const &dest)

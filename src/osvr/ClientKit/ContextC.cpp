@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/ContextC.h>
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Util/Verbosity.h>

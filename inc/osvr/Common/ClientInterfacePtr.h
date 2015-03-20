@@ -37,13 +37,13 @@
 
 struct OSVR_ClientInterfaceObject;
 namespace osvr {
-namespace client {
+namespace common {
     typedef ::OSVR_ClientInterfaceObject ClientInterface;
     /// @brief Pointer for holding ClientInterface objects safely.
     typedef shared_ptr<ClientInterface> ClientInterfacePtr;
     /// @brief Pointer for observing ClientInterface objects safely and weakly.
     typedef weak_ptr<ClientInterface> ClientInterfaceWeakPtr;
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ClientInterfacePtr_h_GUID_8B87240D_2BBD_46BC_8D74_BC3436FAAF3A

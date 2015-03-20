@@ -25,7 +25,7 @@
 // Internal Includes
 #include "TrackerRemoteFactory.h"
 #include "VRPNConnectionCollection.h"
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/QuatlibInteropC.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Common/PathTreeFull.h>

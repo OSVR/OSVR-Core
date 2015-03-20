@@ -26,7 +26,7 @@
 #define INCLUDED_PureClientContext_h_GUID_0A40DCCB_0451_4DB0_855B_7ECE66C52D07
 
 // Internal Includes
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>

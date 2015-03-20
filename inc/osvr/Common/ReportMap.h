@@ -38,7 +38,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace common {
     namespace traits {
 
         namespace detail {
@@ -63,6 +63,6 @@ namespace client {
                     type;
         };
     } // namespace traits
-} // namespace client
+} // namespace common
 } // namespace osvr
 #endif // INCLUDED_ReportMap_h_GUID_E6AD6837_0C7A_4FAF_0639_4F11821AEE65

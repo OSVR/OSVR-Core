@@ -35,7 +35,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace common {
     namespace traits {
 
         /// @brief Helper traits struct for reportState(), to access the state
@@ -93,7 +93,7 @@ namespace client {
     typename traits::StateType<ReportType>::type &reportState(ReportType &r) {
         return traits::ReportStateGetter<ReportType>::apply(r);
     }
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ReportState_h_GUID_452FA875_E51C_4A88_5A58_E28CB6F40B86

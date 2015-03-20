@@ -51,7 +51,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
   public:
     /// @brief Constructor - only to be called by ClientContext
-    OSVR_ClientInterfaceObject(::osvr::client::ClientContext *ctx,
+    OSVR_ClientInterfaceObject(osvr::common::ClientContext *ctx,
                                std::string const &path,
                                PrivateConstructor const &);
 
@@ -62,7 +62,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// will be returned in the arguments, and true will be returned.
     template <typename ReportType>
     bool getState(osvr::util::time::TimeValue &timestamp,
-                  typename osvr::client::traits::StateType<ReportType>::type &
+                  typename osvr::common::traits::StateType<ReportType>::type &
                       state) const {
         if (!m_state.hasState<ReportType>()) {
             return false;
@@ -83,14 +83,14 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     void triggerCallbacks(const OSVR_TimeValue &timestamp,
                           ReportType const &report) {
         m_setState(timestamp, report,
-                   osvr::client::traits::KeepStateForReport<ReportType>());
+                   osvr::common::traits::KeepStateForReport<ReportType>());
         m_callbacks.triggerCallbacks(timestamp, report);
     }
 
     /// @brief Update any state.
     void update();
 
-    osvr::client::ClientContext &getContext() const { return *m_ctx; }
+    osvr::common::ClientContext &getContext() const { return *m_ctx; }
 
     /// @brief Access the type-erased data for this interface.
     boost::any &data() { return m_data; }
@@ -108,10 +108,10 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     template <typename ReportType>
     void m_setState(const OSVR_TimeValue &, ReportType const &,
                     std::false_type const &) {}
-    ::osvr::client::ClientContext *m_ctx;
+    osvr::common::ClientContext *m_ctx;
     std::string const m_path;
-    osvr::client::InterfaceCallbacks m_callbacks;
-    osvr::client::InterfaceState m_state;
+    osvr::common::InterfaceCallbacks m_callbacks;
+    osvr::common::InterfaceState m_state;
     boost::any m_data;
     friend struct OSVR_ClientContextObject;
 };

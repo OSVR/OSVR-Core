@@ -40,7 +40,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace common {
     namespace traits {
         /// @brief Metafunction taking a ReportType and returning the associated
         /// CallbackType
@@ -77,7 +77,7 @@ namespace client {
 #undef OSVR_REPORT_TRAITS
     } // namespace traits
 
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ReportTraits_h_GUID_CEDB196C_04E8_4085_EDCF_C5A1BD81A827

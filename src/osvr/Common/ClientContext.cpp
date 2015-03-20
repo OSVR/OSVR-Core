@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Client/ClientContext.h>
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -33,8 +33,8 @@
 // Standard includes
 #include <algorithm>
 
-using ::osvr::client::ClientInterfacePtr;
-using ::osvr::client::ClientInterface;
+using ::osvr::common::ClientInterfacePtr;
+using ::osvr::common::ClientInterface;
 using ::osvr::make_shared;
 
 OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[])
@@ -128,10 +128,10 @@ bool OSVR_ClientContextObject::releaseObject(void *obj) {
 }
 
 void OSVR_ClientContextObject::m_handleNewInterface(
-    ::osvr::client::ClientInterfacePtr const &) {
+    ::osvr::common::ClientInterfacePtr const &) {
     // by default do nothing
 }
 void OSVR_ClientContextObject::m_handleReleasingInterface(
-    ::osvr::client::ClientInterfacePtr const &) {
+    ::osvr::common::ClientInterfacePtr const &) {
     // by default do nothing
 }

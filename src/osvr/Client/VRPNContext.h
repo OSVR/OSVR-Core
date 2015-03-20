@@ -26,7 +26,7 @@
 #define INCLUDED_VRPNContext_h_GUID_CD10DDF9_457C_4884_077E_D0896E4FBFD1
 
 // Internal Includes
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/Common/Transform.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/BaseDevicePtr.h>

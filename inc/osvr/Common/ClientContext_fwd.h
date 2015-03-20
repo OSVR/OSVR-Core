@@ -36,9 +36,9 @@
 
 struct OSVR_ClientContextObject;
 namespace osvr {
-namespace client {
+namespace common {
     typedef ::OSVR_ClientContextObject ClientContext;
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ClientContext_fwd_h_GUID_B0F0AC20_6466_4BB4_789F_AB7ED131CAEC

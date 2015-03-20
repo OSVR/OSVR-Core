@@ -43,12 +43,12 @@
 
 struct OSVR_ClientContextObject : boost::noncopyable {
   public:
-    typedef std::vector<osvr::client::ClientInterfacePtr> InterfaceList;
+    typedef std::vector<osvr::common::ClientInterfacePtr> InterfaceList;
     /// @brief Destructor
     virtual ~OSVR_ClientContextObject();
 
     /// @brief System-wide update method.
-    OSVR_CLIENT_EXPORT void update();
+    OSVR_COMMON_EXPORT void update();
 
     /// @brief Accessor for app ID
     std::string const &getAppId() const;
@@ -57,7 +57,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// retains shared ownership.
     ///
     /// @param path Path to a resource. Should be absolute.
-    OSVR_CLIENT_EXPORT::osvr::client::ClientInterfacePtr
+    OSVR_COMMON_EXPORT osvr::common::ClientInterfacePtr
     getInterface(const char path[]);
 
     /// @brief Searches through this context to determine if the passed
@@ -68,19 +68,19 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     ///
     /// @returns Pointer owning the submitted interface object, or an empty
     /// pointer if NULL passed or not found.
-    OSVR_CLIENT_EXPORT::osvr::client::ClientInterfacePtr
-    releaseInterface(::osvr::client::ClientInterface *iface);
+    OSVR_COMMON_EXPORT osvr::common::ClientInterfacePtr
+    releaseInterface(osvr::common::ClientInterface *iface);
 
     InterfaceList const &getInterfaces() const { return m_interfaces; }
 
     /// @brief Sends a JSON route/transform object to the server.
-    OSVR_CLIENT_EXPORT void sendRoute(std::string const &route);
+    OSVR_COMMON_EXPORT void sendRoute(std::string const &route);
 
     /// @brief Gets routing directives.
-    OSVR_CLIENT_EXPORT osvr::common::RouteContainer const &getRoutes() const;
+    OSVR_COMMON_EXPORT osvr::common::RouteContainer const &getRoutes() const;
 
     /// @brief Gets a string parameter value.
-    OSVR_CLIENT_EXPORT std::string
+    OSVR_COMMON_EXPORT std::string
     getStringParameter(std::string const &path) const;
 
     /// @brief Sets a string parameter value.
@@ -96,7 +96,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// context.
     ///
     /// @returns true if the object was found and released.
-    OSVR_CLIENT_EXPORT bool releaseObject(void *obj);
+    OSVR_COMMON_EXPORT bool releaseObject(void *obj);
 
   protected:
     /// @brief Constructor for derived class use only.
@@ -110,11 +110,11 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @brief Optional implementation-specific handling of interface retrieval,
     /// before the interface is returned to the client.
     virtual void
-    m_handleNewInterface(::osvr::client::ClientInterfacePtr const &iface);
+    m_handleNewInterface(osvr::common::ClientInterfacePtr const &iface);
     /// @brief Optional implementation-specific handling of interface release,
     /// before the interface is actually freed.
     virtual void
-    m_handleReleasingInterface(::osvr::client::ClientInterfacePtr const &iface);
+    m_handleReleasingInterface(osvr::common::ClientInterfacePtr const &iface);
     std::string const m_appId;
     InterfaceList m_interfaces;
     std::map<std::string, std::string> m_params;

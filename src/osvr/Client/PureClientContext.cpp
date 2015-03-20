@@ -29,7 +29,7 @@
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 #include "AnalogRemoteFactory.h"
 #include "ButtonRemoteFactory.h"
 #include "ImagingRemoteFactory.h"

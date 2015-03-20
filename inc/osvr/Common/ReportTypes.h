@@ -35,7 +35,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace common {
     /// @brief Type traits and metaprogramming supports related to
     /// specially-handled reports.
     namespace traits {
@@ -47,7 +47,7 @@ namespace client {
 
     } // namespace traits
 
-} // namespace client
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_ReportTypes_h_GUID_BB8F47AD_5F82_439E_C3F9_7C57D016D3C9
