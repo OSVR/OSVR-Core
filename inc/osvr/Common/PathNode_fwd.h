@@ -38,9 +38,6 @@
 
 namespace osvr {
 namespace common {
-    /// @addtogroup Routing
-    /// @{
-
     /// @brief The specific tree node type that contains a path element.
     typedef ::osvr::util::TreeNode<PathElement> PathNode;
 
@@ -52,7 +49,6 @@ namespace common {
 
     /// @brief Gets an identifying string for the node value type.
     OSVR_COMMON_EXPORT const char *getTypeName(PathNode const &node);
-    /// @}
 } // namespace common
 } // namespace osvr
 

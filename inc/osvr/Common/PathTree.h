@@ -38,9 +38,6 @@
 
 namespace osvr {
 namespace common {
-    /// @addtogroup Routing
-    /// @{
-
     /// @brief A tree representation, with path/url syntax, of the known OSVR
     /// system.
     class PathTree : boost::noncopyable {
@@ -79,7 +76,6 @@ namespace common {
         /// @brief Root node of the tree.
         PathNodePtr m_root;
     };
-    /// @}
 
 } // namespace common
 } // namespace osvr
