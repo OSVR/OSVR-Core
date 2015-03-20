@@ -53,10 +53,11 @@ namespace common {
         /// A traits class must implement:
         ///
         /// - `template <typename BufferType> static void
-        /// serialize(BufferType &buf, typename Base::param_type val, Tag const&)`
+        /// serialize(BufferType &buf, typename Base::param_type val, Tag
+        /// const&)`
         /// - `template <typename BufferReaderType> static void
-        /// deserialize(BufferReaderType &buf, typename Base::reference_type val,
-        /// Tag const&)`
+        /// deserialize(BufferReaderType &buf, typename Base::reference_type
+        /// val, Tag const&)`
         /// - `static size_t spaceRequired(size_t existingBytes, typename
         /// Base::param_type val, Tag const&)`
         ///
@@ -65,6 +66,9 @@ namespace common {
         ///
         /// A traits class should inherit from `BaseSerializationTraits<T>` to
         /// get useful typedefs.
+        ///
+        /// See the serializers below for std::string for useful
+        /// examples/starting points.
         ///
         /// The dummy template parameter exists for usage of `enable_if`.
         template <typename Tag, typename Dummy = void>
