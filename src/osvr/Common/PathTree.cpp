@@ -49,5 +49,7 @@ namespace common {
         elements::ifNullReplaceWith(ret.value(), finalComponentDefault);
         return ret;
     }
+
+    void PathTree::reset() { m_root = PathNode::createRoot(); }
 } // namespace common
 } // namespace osvr

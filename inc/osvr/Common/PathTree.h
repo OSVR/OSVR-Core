@@ -72,6 +72,9 @@ namespace common {
         getNodeByPath(std::string const &path,
                       PathElement const &finalComponentDefault);
 
+        /// @brief Reset the path tree to a new, empty root node.
+        OSVR_COMMON_EXPORT void reset();
+
       private:
         /// @brief Root node of the tree.
         PathNodePtr m_root;
