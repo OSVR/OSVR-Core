@@ -71,7 +71,7 @@ namespace common {
                                         Tag const &) {
                 return getBufferSpaceRequiredRaw(existingBytes,
                                                  Json::FastWriter().write(val),
-                                                 UnderlyingStringTag())
+                                                 UnderlyingStringTag());
             }
         };
 
