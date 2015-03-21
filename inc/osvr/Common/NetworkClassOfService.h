@@ -145,8 +145,9 @@ namespace common {
             : std::is_base_of<detail::ClassOfServiceRoot, T> {};
 
         template <typename ClassOfService>
-        inline size_t getMessageSizeLimit(ClassOfServiceBase<ClassOfService> const &) {
-            return detail::GetMessageSizeLimit<Derived>::get();
+        inline size_t
+        getMessageSizeLimit(ClassOfServiceBase<ClassOfService> const &) {
+            return detail::GetMessageSizeLimit<ClassOfService>::get();
         }
 
         /// This inline implementation MUST remain at the bottom of this
@@ -161,9 +162,9 @@ namespace common {
             /// Doesn't prevent inheriting from the wrong base (`class X :
             /// public ClassOfServiceBase<Y> {};` where there is already a
             /// `class Y : public ClassOfServiceBase<Y> {};`)
-            static_assert(
-                std::is_base_of<base_type, type>::value,
-                "ClassOfServiceBase<T> must be the base of a class of service type T (the CRTP)!");
+            static_assert(std::is_base_of<base_type, type>::value,
+                          "ClassOfServiceBase<T> must be the base of a class "
+                          "of service type T (the CRTP)!");
         }
 
     } // namespace class_of_service
