@@ -59,6 +59,10 @@ namespace common {
         OSVR_COMMON_EXPORT std::string
         getSource(std::string const &destination) const;
 
+        OSVR_COMMON_EXPORT std::string getSourceAt(size_t i) const;
+
+        OSVR_COMMON_EXPORT std::string getDestinationAt(size_t i) const;
+
         /// @brief Get the full routing JSON string for a given destination
         /// path.
         /// @returns an empty string if the destination was not found.
@@ -71,6 +75,15 @@ namespace common {
         std::vector<std::string> const &getRouteList() const {
             return m_routingDirectives;
         }
+
+        /// @brief Gets the destination of a route, given the route in string
+        /// format.
+        OSVR_COMMON_EXPORT static std::string
+        getDestinationFromString(std::string const &route);
+        /// @brief Gets the source of a route, given the route in string
+        /// format.
+        OSVR_COMMON_EXPORT static std::string
+        getSourceFromString(std::string const &route);
 
       private:
         /// @brief Internal add route helper function, for when we've already
