@@ -189,6 +189,16 @@ namespace common {
                                 "Container must have byte-sized elements");
     };
 
+    /// @brief Constructs and returns a buffer reader for an
+    /// externally-allocated
+    /// buffer: it's on you to supply a valid pointer and length.
+    template <typename CharType>
+    inline BufferReader<ExternalBufferReadingWrapper<CharType> >
+    readExternalBuffer(const CharType *buf, size_t len) {
+        return BufferReader<ExternalBufferReadingWrapper<CharType> >(
+            ExternalBufferReadingWrapper<CharType>(buf, len));
+    }
+
     /// @brief A buffer of bytes, built on a byte-vector-like container.
     /// Provides methods for easily appending to the buffer (including alignment
     /// padding), and a nested class for reading from such a buffer.
