@@ -30,9 +30,10 @@
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
+#include <osvr/Common/PathTree_fwd.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
 
 // Standard includes
 // - none
@@ -57,6 +58,12 @@ namespace common {
 
         class ClientRouteToServer
             : public MessageRegistration<ClientRouteToServer> {
+          public:
+            class MessageSerialization;
+            static const char *identifier();
+        };
+
+        class ConfigFromServer : public MessageRegistration<ConfigFromServer> {
           public:
             class MessageSerialization;
             static const char *identifier();
@@ -94,9 +101,27 @@ namespace common {
         registerClientRouteUpdateHandler(vrpn_MESSAGEHANDLER handler,
                                          void *userdata);
 
+        /// @brief Message from server, updating/replacing the client's
+        /// configuration
+        messages::ConfigFromServer configOut;
+
+        typedef std::function<void(Json::Value const &,
+                                   util::time::TimeValue const &)> JsonHandler;
+        typedef std::function<void(util::time::TimeValue const &)> ResetHandler;
+        OSVR_COMMON_EXPORT void registerAddToTreeHandler(JsonHandler cb);
+        OSVR_COMMON_EXPORT void registerResetTreeHandler(ResetHandler cb);
+
+        OSVR_COMMON_EXPORT void sendReplacementTree(PathTree &tree);
+
       private:
         SystemComponent();
         virtual void m_parentSet();
+        void m_registerConfigHandler();
+        static int VRPN_CALLBACK
+        m_handleConfig(void *userdata, vrpn_HANDLERPARAM p);
+
+        std::vector<JsonHandler> m_configAddToTreeHandlers;
+        std::vector<ResetHandler> m_configResetHandlers;
     };
 } // namespace common
 } // namespace osvr
