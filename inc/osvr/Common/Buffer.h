@@ -119,8 +119,7 @@ namespace common {
         typedef typename ContainerType::value_type ElementType;
 
         BufferReader(ContainerType const &buf)
-            : m_buf(&buf), m_begin(m_buf->begin()), m_readIter(m_buf->begin()),
-              m_end(m_buf->end()) {}
+            : m_begin(buf.begin()), m_readIter(buf.begin()), m_end(buf.end()) {}
 
         size_t bytesRead() const { return m_readIter - m_begin; }
         size_t bytesRemaining() const { return m_end - m_readIter; }
@@ -183,7 +182,6 @@ namespace common {
         }
 
       private:
-        ContainerType const *m_buf;
         const_iterator m_begin;
         const_iterator m_readIter;
         const_iterator m_end;
