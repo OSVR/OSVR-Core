@@ -113,16 +113,12 @@ namespace common {
             Json::Value val;
             Json::Reader reader;
             if (reader.parse(src, val)) {
-                OSVR_DEV_VERBOSE(
-                    "Alias parsed as JSON: " << val.toStyledString());
                 if (val.isString()) {
-                    OSVR_DEV_VERBOSE("Alias parsed as a JSON string");
                     // Assume a string is just a string.
                     m_recurse(val.asString());
                     return;
                 }
                 if (val.isObject()) {
-                    OSVR_DEV_VERBOSE("Alias parsed as a JSON object");
                     // Assume an object means a transform.
                     m_source.setTransform(src);
 
@@ -130,15 +126,12 @@ namespace common {
                     auto leaf = xformParse.getLeaf();
 
                     if (leaf.isString()) {
-                        OSVR_DEV_VERBOSE("Transform leaf is a string.");
                         m_recurse(leaf.asString());
                         return;
                     }
 
                     auto trackerEquiv = getPathFromOldRouteSource(leaf);
                     if (!trackerEquiv.empty()) {
-                        OSVR_DEV_VERBOSE("Transform leaf is an old-style "
-                                         "tracker route source.");
                         m_recurse(trackerEquiv);
                         return;
                     }
