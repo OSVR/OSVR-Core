@@ -30,6 +30,7 @@
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Util/TimeValue_fwd.h>
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
 #include "RemoteHandlerFactory.h"
@@ -37,6 +38,7 @@
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
+#include <json/value.h>
 
 // Standard includes
 #include <string>
@@ -63,6 +65,14 @@ namespace client {
         void m_connectCallbacksOnPath(std::string const &path);
         void m_removeCallbacksOnPath(std::string const &path);
 
+        void m_handleConfigReset(util::time::TimeValue const &);
+        void m_handleConfigAddNodes(Json::Value const &nodes,
+                                    util::time::TimeValue const &);
+        static int VRPN_CALLBACK
+        m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
+        void m_populateTreeFromRoutes();
+        void m_connectNeededCallbacks();
+
         common::PathElement &m_getElementByPath(std::string const &path);
 
         std::string m_host;
@@ -77,6 +87,8 @@ namespace client {
 
         RemoteHandlerFactory m_factory;
         HandlerContainer m_handlers;
+
+        std::string m_directivesString;
     };
 } // namespace client
 } // namespace osvr

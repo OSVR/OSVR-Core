@@ -39,6 +39,7 @@
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
+#include <json/reader.h>
 
 // Standard includes
 // - none
@@ -48,6 +49,15 @@ namespace client {
 
     PureClientContext::PureClientContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
+        /// Register all the factories.
+        TrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        AnalogRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        ButtonRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        ImagingRemoteFactory(m_vrpnConns).registerWith(m_factory);
+
+        /// @todo remove this line
+        m_setupDummyTree();
+
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;
         m_mainConn = m_vrpnConns.getConnection(
@@ -57,17 +67,16 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-#if 0
-            m_systemComponent->registerRoutesHandler(
-                &VRPNContext::m_handleRoutingMessage, static_cast<void *>(this));
-#endif
-
-        auto vrpnConns = m_vrpnConns;
-        TrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        AnalogRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        ButtonRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        ImagingRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        m_setupDummyTree();
+        /// Temporarily still using the existing route messages
+        m_systemComponent->registerRoutesHandler(
+            &PureClientContext::m_handleRoutingMessage, this);
+        {
+            using namespace std::placeholders;
+            m_systemComponent->registerResetTreeHandler(
+                std::bind(&PureClientContext::m_handleConfigReset, this, _1));
+            m_systemComponent->registerAddToTreeHandler(std::bind(
+                &PureClientContext::m_handleConfigAddNodes, this, _1, _2));
+        }
     }
 
     PureClientContext::~PureClientContext() {
@@ -92,21 +101,22 @@ namespace client {
             "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/analog") =
             InterfaceElement();
 
-        m_getElementByPath("/me/hands/left") =
-            AliasElement("/org_opengoggles_bundled_Multiserver/"
-                         "YEI_3Space_Sensor0/tracker/1");
-        m_getElementByPath("/controller/left/trigger") =
-            AliasElement("/org_opengoggles_bundled_Multiserver/"
-                         "YEI_3Space_Sensor0/analog/0");
-
         m_getElementByPath("/org_opengoggles_bundled_Multiserver/RazerHydra0") =
             DeviceElement::createVRPNDeviceElement(
                 "org_opengoggles_bundled_Multiserver/RazerHydra0", "localhost");
         m_getElementByPath(
             "/org_opengoggles_bundled_Multiserver/RazerHydra0/button") =
             InterfaceElement();
-        m_getElementByPath("/controller/left/1") = AliasElement(
-            "/org_opengoggles_bundled_Multiserver/RazerHydra0/button/1");
+
+        m_getElementByPath(
+            "/org_opengoggles_bundled_Multiserver/OneEuroFilter0") =
+            DeviceElement::createVRPNDeviceElement(
+                "org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+                "localhost");
+
+        m_getElementByPath(
+            "/org_opengoggles_bundled_Multiserver/OneEuroFilter0/tracker") =
+            InterfaceElement();
     }
 
     void PureClientContext::m_update() {
@@ -153,7 +163,8 @@ namespace client {
         auto handler = m_factory.invokeFactory(
             *source, m_interfaces.getInterfacesForPath(path));
         if (handler) {
-            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
+            std::cout << "Successfully produced handler for " << path << "\n";
+            // OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
             // Add the new handler to our collection
             m_handlers.add(handler);
             // Store the new handler in the interface tree
@@ -162,11 +173,82 @@ namespace client {
                 !oldHandler,
                 "We removed the old handler before so it should be null now");
         } else {
-            OSVR_DEV_VERBOSE("Could not produce handler for " << path);
+            std::cout << "Could not produce handler for " << path << "\n";
+            // OSVR_DEV_VERBOSE("Could not produce handler for " << path);
         }
     }
+
     void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
         m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
+    }
+
+    void PureClientContext::m_handleConfigReset(util::time::TimeValue const &) {
+        m_pathTree.reset();
+        for (auto const &iface : getInterfaces()) {
+            /// @todo slightly overkill, but it works - tree traversal would be
+            /// better.
+            m_removeCallbacksOnPath(iface->getPath());
+        }
+    }
+    int PureClientContext::m_handleRoutingMessage(void *userdata,
+                                                  vrpn_HANDLERPARAM p) {
+        auto self = static_cast<PureClientContext *>(userdata);
+        auto newString = std::string(p.buffer, p.payload_len);
+        if (newString == self->m_directivesString) {
+            return 0;
+        }
+        self->m_directivesString = newString;
+        common::RouteContainer newDirectives{newString};
+
+        OSVR_DEV_VERBOSE("Replacing routing directives: had "
+                         << self->m_routingDirectives.size() << ", received "
+                         << newDirectives.size());
+        for (auto const &route : self->m_routingDirectives.getRouteList()) {
+            self->m_removeCallbacksOnPath(
+                common::RouteContainer::getDestinationFromString(route));
+        }
+        self->m_routingDirectives = newDirectives;
+        self->m_populateTreeFromRoutes();
+        return 0;
+    }
+    void PureClientContext::m_populateTreeFromRoutes() {
+
+        OSVR_DEV_VERBOSE(
+            "Entering PureClientContext::m_populateTreeFromRoutes");
+        Json::Reader reader;
+        Json::Value val;
+        for (auto const &route : m_routingDirectives.getRouteList()) {
+
+            auto path = common::RouteContainer::getDestinationFromString(route);
+            m_getElementByPath(path) = common::elements::AliasElement(
+                common::RouteContainer::getSourceFromString(route));
+            m_connectCallbacksOnPath(path);
+        }
+    }
+    void PureClientContext::m_connectNeededCallbacks() {
+        OSVR_DEV_VERBOSE(
+            "*** Entering PureClientContext::m_connectNeededCallbacks");
+        for (auto const &iface : getInterfaces()) {
+            /// @todo slightly overkill, but it works - tree traversal would be
+            /// better.
+            auto path = iface->getPath();
+            /// For every interface, if there's no handler at that path on the
+            /// interface tree, try to set one up.
+            if (!m_interfaces.getHandlerForPath(path)) {
+                m_connectCallbacksOnPath(path);
+            }
+        }
+
+        OSVR_DEV_VERBOSE(
+            "*** Exiting PureClientContext::m_connectNeededCallbacks");
+    }
+
+    void
+    PureClientContext::m_handleConfigAddNodes(Json::Value const &nodes,
+                                              util::time::TimeValue const &) {
+        common::jsonToPathTree(m_pathTree, nodes);
+        m_populateTreeFromRoutes();
+        m_connectNeededCallbacks();
     }
 
     common::PathElement &
