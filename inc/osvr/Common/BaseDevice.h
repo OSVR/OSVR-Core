@@ -33,6 +33,7 @@
 #include <osvr/Common/RawSenderType.h>
 #include <osvr/Common/MessageRegistration.h>
 #include <osvr/Common/Buffer.h>
+#include <osvr/Common/NetworkClassOfService.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -44,6 +45,7 @@
 
 namespace osvr {
 namespace common {
+
     /// @brief Class used as an interface for underlying devices that can have
     /// device components (corresponding to interface classes)
     class BaseDevice {
@@ -81,20 +83,23 @@ namespace common {
         /// waiting for next time.
         OSVR_COMMON_EXPORT void sendPending();
 
+        template <typename T, typename ClassOfService>
+        void packMessage(
+            Buffer<T> const &buf, RawMessageType const &msgType,
+            util::time::TimeValue const &timestamp,
+            class_of_service::ClassOfServiceBase<ClassOfService> const &);
+
         template <typename T>
         void packMessage(Buffer<T> const &buf, RawMessageType const &msgType,
-                         util::time::TimeValue const &timestamp,
-                         uint32_t classOfService = vrpn_CONNECTION_RELIABLE) {
-            m_packMessage(buf.size(), buf.data(), msgType, timestamp,
-                          classOfService);
-        }
+                         util::time::TimeValue const &timestamp);
+
+        template <typename T, typename ClassOfService>
+        void packMessage(
+            Buffer<T> const &buf, RawMessageType const &msgType,
+            class_of_service::ClassOfServiceBase<ClassOfService> const &);
+
         template <typename T>
-        void packMessage(Buffer<T> const &buf, RawMessageType const &msgType,
-                         uint32_t classOfService = vrpn_CONNECTION_RELIABLE) {
-            util::time::TimeValue t;
-            util::time::getNow(t);
-            m_packMessage(buf.size(), buf.data(), msgType, t, classOfService);
-        }
+        void packMessage(Buffer<T> const &buf, RawMessageType const &msgType);
 
       protected:
         /// @brief Constructor
@@ -123,6 +128,38 @@ namespace common {
         vrpn_ConnectionPtr m_conn;
         RawSenderType m_sender;
     };
+
+    template <typename T, typename ClassOfService>
+    inline void BaseDevice::packMessage(
+        Buffer<T> const &buf, RawMessageType const &msgType,
+        util::time::TimeValue const &timestamp,
+        class_of_service::ClassOfServiceBase<ClassOfService> const &) {
+        m_packMessage(
+            buf.size(), buf.data(), msgType, timestamp,
+            class_of_service::VRPNConnectionValue<ClassOfService>::value);
+    }
+    template <typename T>
+    inline void
+    BaseDevice::packMessage(Buffer<T> const &buf, RawMessageType const &msgType,
+                            util::time::TimeValue const &timestamp) {
+        packMessage(buf, msgType, timestamp, class_of_service::Reliable());
+    }
+
+    template <typename T, typename ClassOfService>
+    inline void BaseDevice::packMessage(
+        Buffer<T> const &buf, RawMessageType const &msgType,
+        class_of_service::ClassOfServiceBase<ClassOfService> const &
+            classOfService) {
+        util::time::TimeValue t;
+        util::time::getNow(t);
+        packMessage(buf, msgType, t, classOfService);
+    }
+
+    template <typename T>
+    inline void BaseDevice::packMessage(Buffer<T> const &buf,
+                                        RawMessageType const &msgType) {
+        packMessage(buf, msgType, class_of_service::Reliable());
+    }
 } // namespace common
 } // namespace osvr
 

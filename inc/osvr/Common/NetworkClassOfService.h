@@ -77,21 +77,21 @@ namespace common {
         /// @brief CRTP base for classes of service, useful for accepting
         /// classes of service for an argument without letting just any old type
         /// through.
-        template <typename Derived> struct ClassOfService;
+        template <typename ClassOfService> struct ClassOfServiceBase;
 
         /// @brief Type trait like std::is_base_of indicating whether the given
         /// type is a recognized class of service.
         template <typename T> struct IsClassOfService;
 
         /// @brief Given a class of service, returns a m
-        template <typename Derived>
-        size_t getMessageSizeLimit(ClassOfService<Derived> const &);
+        template <typename ClassOfService>
+        size_t getMessageSizeLimit(ClassOfServiceBase<ClassOfService> const &);
 
         /// @brief Association of class of service types with integral
         /// constants.
         ///
         /// Values from vrpn_Connection.h
-        template <typename T> struct VRPNConnectionValue;
+        template <typename ClassOfService> struct VRPNConnectionValue;
 
         template <>
         struct VRPNConnectionValue<Reliable>
@@ -124,30 +124,28 @@ namespace common {
             };
         } // namespace detail
 
-        template <typename Derived>
-        struct ClassOfService : detail::ClassOfServiceRoot {
-            typedef Derived type;
-            typedef ClassOfService<Derived> base_type;
-
-          protected:
-            ClassOfService();
+        template <typename ClassOfService>
+        struct ClassOfServiceBase : detail::ClassOfServiceRoot {
+            typedef ClassOfService type;
+            typedef ClassOfServiceBase<ClassOfService> base_type;
+            ClassOfServiceBase();
         };
-        struct Reliable : ClassOfService<Reliable> {};
+        struct Reliable : ClassOfServiceBase<Reliable> {};
 
-        struct FixedLatency : ClassOfService<FixedLatency> {};
+        struct FixedLatency : ClassOfServiceBase<FixedLatency> {};
 
-        struct LowLatency : ClassOfService<LowLatency> {};
+        struct LowLatency : ClassOfServiceBase<LowLatency> {};
 
-        struct FixedThroughput : ClassOfService<FixedThroughput> {};
+        struct FixedThroughput : ClassOfServiceBase<FixedThroughput> {};
 
-        struct HighThroughput : ClassOfService<HighThroughput> {};
+        struct HighThroughput : ClassOfServiceBase<HighThroughput> {};
 
         template <typename T>
         struct IsClassOfService
             : std::is_base_of<detail::ClassOfServiceRoot, T> {};
 
-        template <typename Derived>
-        inline size_t getMessageSizeLimit(ClassOfService<Derived> const &) {
+        template <typename ClassOfService>
+        inline size_t getMessageSizeLimit(ClassOfServiceBase<ClassOfService> const &) {
             return detail::GetMessageSizeLimit<Derived>::get();
         }
 
@@ -155,18 +153,17 @@ namespace common {
         /// file. It consists entirely of compile time checks, so it is
         /// effectively removed from the code once the conditions are
         /// verified.
-        template <typename Derived>
-        inline ClassOfService<Derived>::ClassOfService() {
+        template <typename ClassOfService>
+        inline ClassOfServiceBase<ClassOfService>::ClassOfServiceBase() {
             /// Partially enforce the Curiously-Recurring Template Pattern.
-            /// The assertion here is that for some `ClassOfService<X>`,
-            /// there exists a `class X : public ClassOfService<X> {};`
+            /// The assertion here is that for some `ClassOfServiceBase<X>`,
+            /// there exists a `class X : public ClassOfServiceBase<X> {};`
             /// Doesn't prevent inheriting from the wrong base (`class X :
-            /// public ClassOfService<Y> {};` where there is already a
-            /// `class Y : public ClassOfService<Y> {};`)
+            /// public ClassOfServiceBase<Y> {};` where there is already a
+            /// `class Y : public ClassOfServiceBase<Y> {};`)
             static_assert(
                 std::is_base_of<base_type, type>::value,
-                "ClassOfService<T> must be the base of a class of service "
-                "type T (the CRTP)!");
+                "ClassOfServiceBase<T> must be the base of a class of service type T (the CRTP)!");
         }
 
     } // namespace class_of_service
