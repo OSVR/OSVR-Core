@@ -39,7 +39,7 @@
 #include <json/reader.h>
 
 // Standard includes
-// - none
+#include <sstream>
 
 namespace osvr {
 namespace common {
@@ -70,18 +70,20 @@ namespace common {
     }
 
     inline std::string getPathFromOldRouteSource(Json::Value obj) {
-        std::string ret;
+        std::ostringstream ret;
         if (obj.isObject() && obj.isMember("tracker")) {
-            ret = obj["tracker"].asString();
-            if (ret.front() != '/') {
-                ret.insert(begin(ret), '/');
+            auto tracker = obj["tracker"].asString();
+            if (tracker.front() != '/') {
+                ret << "/";
             }
+            ret << tracker;
+            ret << "/tracker";
             if (obj.isMember("sensor")) {
-                ret += "/tracker/" +
-                       boost::lexical_cast<std::string>(obj["sensor"].asInt());
+                ret << "/";
+                ret << obj["sensor"].asInt();
             }
         }
-        return ret;
+        return ret.str();
     }
 
     // Forward declaration
