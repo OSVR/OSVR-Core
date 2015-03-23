@@ -30,11 +30,13 @@
 // Library/third-party includes
 #ifdef OSVR_WINDOWS
 #define _WIN32_DCOM
-#include <iostream>
+#include <string>
 #include <comdef.h>
 #include <Wbemidl.h>
 #include <tchar.h>
 #include <windows.h>
+#include <locale>
+#include <codecvt>
 #endif // OSVR_WINDOWS
 
 // Standard includes
@@ -44,15 +46,6 @@ namespace osvr {
 namespace usbserial {
 
 #if defined(OSVR_WINDOWS)
-
-    std::string wStringToString(const std::wstring &s) {
-        int len;
-        int slength = (int)s.length() + 1;
-        len = WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
-        std::string r(len, '\0');
-        WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, &r[0], len, 0, 0);
-        return r;
-    }
 
     std::string getPortNumber(USBSerialDeviceImpl *serialDevice) {
 
@@ -136,6 +129,7 @@ namespace usbserial {
 
         IWbemClassObject *wbemClassObj;
         ULONG numObjRet = 0;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> convStr;
         while (devEnum) {
             HRESULT hr =
                 devEnum->Next(WBEM_INFINITE, 1, &wbemClassObj, &numObjRet);
@@ -149,10 +143,10 @@ namespace usbserial {
 
             // Get the value of the Name property
             hr = wbemClassObj->Get(L"DeviceID", 0, &vtPort, 0, 0);
-            std::string sPort = wStringToString(vtPort.bstrVal);
+            std::string sPort = convStr.to_bytes(vtPort.bstrVal);
 
             hr = wbemClassObj->Get(L"PNPDeviceID", 0, &vtHardware, 0, 0);
-            std::string HardwID = wStringToString(vtHardware.bstrVal);
+            std::string HardwID = convStr.to_bytes(vtHardware.bstrVal);
 
             std::string deviceVID = serialDevice->getVID();
             std::string devicePID = serialDevice->getPID();

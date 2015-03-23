@@ -71,7 +71,7 @@ inline SerialPortState getSerialPortStateImpl(std::string const &port) {
 
 SerialPortState getSerialPortState(std::string const &port) {
     if (port.empty()) {
-        return SERIAL_INVALID;
+        return SERIAL_MISSING;
     }
     return getSerialPortStateImpl(port);
 }
