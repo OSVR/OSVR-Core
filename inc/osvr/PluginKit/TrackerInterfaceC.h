@@ -49,7 +49,7 @@ OSVR_EXTERN_C_BEGIN
 */
 
 /** @brief Opaque type used in conjunction with a device token to send data on
-    a button interface.
+    a tracker interface.
 */
 typedef struct OSVR_TrackerDeviceInterfaceObject *OSVR_TrackerDeviceInterface;
 
