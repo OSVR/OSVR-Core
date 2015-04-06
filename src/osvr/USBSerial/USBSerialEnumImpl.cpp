@@ -1,14 +1,13 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2015
 
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
-
 */
-
+ 
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,30 +21,37 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+ 
 // Internal Includes
-#include "USBSerialDeviceImpl.h"
-#include "osvr/USBSerial/SerialPort.h"
+#include <osvr/USBSerial/USBSerialEnum.h>
+#include "USBSerialEnumImpl.h"
+#include "USBSerialDevInfo.h"
 
 // Library/third-party includes
-// - none
 
+ 
 // Standard includes
-// - none
+#include <memory>
+#include <iostream>
 
 namespace osvr {
 namespace usbserial {
+	
+	EnumeratorImpl::EnumeratorImpl():
+		devices(getSerialDeviceList(NO_FILTER, NO_FILTER)) {}
 
-    USBSerialDeviceImpl::USBSerialDeviceImpl(std::string vendorID,
-                                             std::string productID)
-        : vID(vendorID), pID(productID) {}
+	EnumeratorImpl::EnumeratorImpl(uint16_t vendorID, uint16_t productID) :
+		devices(getSerialDeviceList(vendorID, productID)) {}
 
-    std::string USBSerialDeviceImpl::getPort() { return getPortNumber(this); }
+	EnumeratorImpl::~EnumeratorImpl() {}
 
-    USBSerialDeviceImpl::~USBSerialDeviceImpl() {}
-
-    std::string USBSerialDeviceImpl::getVID() { return vID; }
-    std::string USBSerialDeviceImpl::getPID() { return pID; }
-
+	EnumeratorIterator EnumeratorImpl::begin() {
+		return EnumeratorIterator(&devices, 0);
+	}
+	
+	EnumeratorIterator EnumeratorImpl::end() {
+		return EnumeratorIterator(&devices, devices.size());
+	}
+ 
 } // namespace usbserial
 } // namespace osvr

@@ -6,9 +6,8 @@
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
-
 */
-
+ 
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,40 +21,50 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#ifndef INCLUDED_USBSerialDeviceImpl_h_GUID_3B5D2418_A936_4795_C1EF_F3E4BD38D184
-#define INCLUDED_USBSerialDeviceImpl_h_GUID_3B5D2418_A936_4795_C1EF_F3E4BD38D184
-
+ 
 // Internal Includes
-#include <osvr/USBSerial/USBSerial.h>
-
+#include <osvr/USBSerial/USBSerialEnum.h>
+#include "USBSerialEnumImpl.h"
+ 
 // Library/third-party includes
-// - none
 
+ 
 // Standard includes
-// - none
+#include <memory>
+#include <iostream>
 
 namespace osvr {
 namespace usbserial {
+    
 
-    class USBSerialDeviceImpl {
-      public:
-        USBSerialDeviceImpl();
-        USBSerialDeviceImpl(std::string vendorID, std::string productID);
+	EnumeratorIterator::EnumeratorIterator(DeviceList* devices, int posn) :
+		devs(devices), pos(posn) {};
 
-        ~USBSerialDeviceImpl();
+	EnumeratorIterator EnumeratorIterator::operator++(){
+		++pos;
+		return *this;
+	}
+	USBSerialDevice* EnumeratorIterator::operator*(){
+		return &devs->at(pos);
+	}
 
-        std::string getPort();
+	bool EnumeratorIterator::operator!=(const EnumeratorIterator& other){
+		return pos != other.pos;
+	}
 
-        std::string getVID();
-        std::string getPID();
+	EnumeratorIterator::~EnumeratorIterator() {}
 
-      private:
-        std::string vID;
-        std::string pID;
-    };
+	Enumerator::Enumerator(uint16_t vendorID, uint16_t productID)
+		: m_impl(new EnumeratorImpl(vendorID, productID)){};
+	
+	Enumerator::~Enumerator() {}
 
+	EnumeratorIterator Enumerator::begin(){
+		return m_impl->begin();
+	}
+	EnumeratorIterator Enumerator::end(){
+		return (m_impl->end());
+	}
+ 
 } // namespace usbserial
 } // namespace osvr
-
-#endif // INCLUDED_USBSerialDeviceImpl_h_GUID_3B5D2418_A936_4795_C1EF_F3E4BD38D184

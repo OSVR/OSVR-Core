@@ -1,14 +1,16 @@
 osvr_setup_lib_vars(USBSerial)
 
 set(API
-    "${HEADER_LOCATION}/USBSerial.h"
-    "${HEADER_LOCATION}/SerialPort.h")
+    "${HEADER_LOCATION}/USBSerialDevice.h"
+    "${HEADER_LOCATION}/USBSerialEnum.h")
 
 set(SOURCE
-    USBSerial.cpp
-    USBSerialDeviceImpl.h
-    USBSerialDeviceImpl.cpp
-    SerialPort.cpp)
+    USBSerialDevice.cpp
+    USBSerialDevInfo.h
+    USBSerialDevInfo.cpp
+    USBSerialEnum.cpp
+    USBSerialEnumImpl.h
+    USBSerialEnumImpl.cpp)
 
 osvr_add_library()
 

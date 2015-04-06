@@ -27,17 +27,18 @@
 #define INCLUDED_SerialPort_h_GUID_DC91C7DB_E233_4C95_03F7_31415985F7B8
 
 // Internal Includes
-#include "USBSerialDeviceImpl.h"
+#include <osvr/USBSerial/USBSerialDevice.h>
 
 // Library/third-party includes
 
 // Standard includes
 #include <string>
+#include <vector>
 
 namespace osvr {
 namespace usbserial {
 
-    std::string getPortNumber(USBSerialDeviceImpl *serialDevice);
+	std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID, uint16_t productID);
 
 } // namespace usbserial
 } // namespace osvr

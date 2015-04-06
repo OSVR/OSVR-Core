@@ -23,8 +23,7 @@ Sensics, Inc.
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/USBSerial/USBSerial.h>
-#include "USBSerialDeviceImpl.h"
+#include <osvr/USBSerial/USBSerialDevice.h>
 
 // Library/third-party includes
 // - none
@@ -37,17 +36,19 @@ namespace osvr {
 namespace usbserial {
 
     // create USB-Serial device with provided vendor and product IDs
-    USBSerialDevice::USBSerialDevice(std::string vendorID,
-                                     std::string productID)
-        : impl(new USBSerialDeviceImpl(vendorID, productID)){};
+	USBSerialDevice::USBSerialDevice(uint16_t vendorID,
+                                     uint16_t productID,
+									 std::string devPath,
+									 std::string port)
+									 : deviceVID(vendorID), devicePID(productID),
+									 devicePath(devPath), devicePort(port) {};
 
     USBSerialDevice::~USBSerialDevice() {}
 
-    std::string USBSerialDevice::getVID() { return impl->getVID(); }
-
-    std::string USBSerialDevice::getPID() { return impl->getPID(); }
-
-    std::string USBSerialDevice::getPort() { return impl->getPort(); }
+	uint16_t USBSerialDevice::getVID() { return deviceVID; }
+	uint16_t USBSerialDevice::getPID() { return devicePID; }
+	std::string USBSerialDevice::getPlatformSpecificPath() { return devicePath; }
+    std::string USBSerialDevice::getPort() { return devicePort; }
 
 } // namespace usbserial
 } // namespace osvr
