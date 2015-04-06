@@ -4,10 +4,6 @@
     {
       "plugin": "org_opengoggles_bundled_Multiserver",
       "driver": "YEI_3Space_Sensor",
-      "params": {
-        "vendorID": "2476",
-        "productID": "1010"
-      }
     }
   ],
   "routes": [
