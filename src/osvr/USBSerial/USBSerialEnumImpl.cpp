@@ -7,7 +7,7 @@
     Sensics, Inc.
     <http://sensics.com/osvr>
 */
- 
+
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
- 
+
 // Internal Includes
 #include <osvr/USBSerial/USBSerialEnum.h>
 #include "USBSerialEnumImpl.h"
@@ -29,29 +29,28 @@
 
 // Library/third-party includes
 
- 
 // Standard includes
 #include <memory>
 #include <iostream>
 
 namespace osvr {
 namespace usbserial {
-	
-	EnumeratorImpl::EnumeratorImpl():
-		devices(getSerialDeviceList(NO_FILTER, NO_FILTER)) {}
 
-	EnumeratorImpl::EnumeratorImpl(uint16_t vendorID, uint16_t productID) :
-		devices(getSerialDeviceList(vendorID, productID)) {}
+    EnumeratorImpl::EnumeratorImpl()
+        : devices(getSerialDeviceList(NO_FILTER, NO_FILTER)) {}
 
-	EnumeratorImpl::~EnumeratorImpl() {}
+    EnumeratorImpl::EnumeratorImpl(uint16_t vendorID, uint16_t productID)
+        : devices(getSerialDeviceList(vendorID, productID)) {}
 
-	EnumeratorIterator EnumeratorImpl::begin() {
-		return EnumeratorIterator(&devices, 0);
-	}
-	
-	EnumeratorIterator EnumeratorImpl::end() {
-		return EnumeratorIterator(&devices, devices.size());
-	}
- 
+    EnumeratorImpl::~EnumeratorImpl() {}
+
+    EnumeratorIterator EnumeratorImpl::begin() {
+        return EnumeratorIterator(&devices, 0);
+    }
+
+    EnumeratorIterator EnumeratorImpl::end() {
+        return EnumeratorIterator(&devices, devices.size());
+    }
+
 } // namespace usbserial
 } // namespace osvr

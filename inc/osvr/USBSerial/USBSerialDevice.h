@@ -37,27 +37,27 @@ Sensics, Inc.
 
 namespace osvr {
 namespace usbserial {
-    
+
     class USBSerialDevice {
       public:
         // create USB-Serial device with provided vendor and product IDs
-		  OSVR_USBSERIAL_EXPORT USBSerialDevice(uint16_t vendorID,
-												uint16_t productID,
-												std::string devPath,
-												std::string port);
+        OSVR_USBSERIAL_EXPORT USBSerialDevice(uint16_t vendorID,
+                                              uint16_t productID,
+                                              std::string devPath,
+                                              std::string port);
         OSVR_USBSERIAL_EXPORT USBSerialDevice();
         OSVR_USBSERIAL_EXPORT ~USBSerialDevice();
 
-		OSVR_USBSERIAL_EXPORT uint16_t getVID();
-		OSVR_USBSERIAL_EXPORT uint16_t getPID();
-		OSVR_USBSERIAL_EXPORT std::string getPlatformSpecificPath();
+        OSVR_USBSERIAL_EXPORT uint16_t getVID();
+        OSVR_USBSERIAL_EXPORT uint16_t getPID();
+        OSVR_USBSERIAL_EXPORT std::string getPlatformSpecificPath();
         OSVR_USBSERIAL_EXPORT std::string getPort();
 
       private:
-		  uint16_t deviceVID;
-		  uint16_t devicePID;
-		  std::string devicePath;
-		  std::string devicePort;
+        uint16_t deviceVID;
+        uint16_t devicePID;
+        std::string devicePath;
+        std::string devicePort;
     };
 
 } // namespace usbserial

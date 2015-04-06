@@ -7,7 +7,7 @@
     Sensics, Inc.
     <http://sensics.com/osvr>
 */
- 
+
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,50 +21,42 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
- 
+
 // Internal Includes
 #include <osvr/USBSerial/USBSerialEnum.h>
 #include "USBSerialEnumImpl.h"
- 
+
 // Library/third-party includes
 
- 
 // Standard includes
 #include <memory>
 #include <iostream>
 
 namespace osvr {
 namespace usbserial {
-    
 
-	EnumeratorIterator::EnumeratorIterator(DeviceList* devices, int posn) :
-		devs(devices), pos(posn) {};
+    EnumeratorIterator::EnumeratorIterator(DeviceList *devices, int posn)
+        : devs(devices), pos(posn){};
 
-	EnumeratorIterator EnumeratorIterator::operator++(){
-		++pos;
-		return *this;
-	}
-	USBSerialDevice* EnumeratorIterator::operator*(){
-		return &devs->at(pos);
-	}
+    EnumeratorIterator EnumeratorIterator::operator++() {
+        ++pos;
+        return *this;
+    }
+    USBSerialDevice *EnumeratorIterator::operator*() { return &devs->at(pos); }
 
-	bool EnumeratorIterator::operator!=(const EnumeratorIterator& other){
-		return pos != other.pos;
-	}
+    bool EnumeratorIterator::operator!=(const EnumeratorIterator &other) {
+        return pos != other.pos;
+    }
 
-	EnumeratorIterator::~EnumeratorIterator() {}
+    EnumeratorIterator::~EnumeratorIterator() {}
 
-	Enumerator::Enumerator(uint16_t vendorID, uint16_t productID)
-		: m_impl(new EnumeratorImpl(vendorID, productID)){};
-	
-	Enumerator::~Enumerator() {}
+    Enumerator::Enumerator(uint16_t vendorID, uint16_t productID)
+        : m_impl(new EnumeratorImpl(vendorID, productID)){};
 
-	EnumeratorIterator Enumerator::begin(){
-		return m_impl->begin();
-	}
-	EnumeratorIterator Enumerator::end(){
-		return (m_impl->end());
-	}
- 
+    Enumerator::~Enumerator() {}
+
+    EnumeratorIterator Enumerator::begin() { return m_impl->begin(); }
+    EnumeratorIterator Enumerator::end() { return (m_impl->end()); }
+
 } // namespace usbserial
 } // namespace osvr

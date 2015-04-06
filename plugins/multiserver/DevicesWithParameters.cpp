@@ -84,31 +84,30 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         throw std::runtime_error("Could not parse configuration: " +
                                  reader.getFormattedErrorMessages());
     }
-	uint16_t vID = 0x9AC;
-	uint16_t pID = 0x3F2;
-	for (auto dev : osvr::usbserial::Enumerator(vID, pID)){
+    uint16_t vID = 0x9AC;
+    uint16_t pID = 0x3F2;
+    for (auto dev : osvr::usbserial::Enumerator(vID, pID)) {
 
-		std::string port = normalizeAndVerifySerialPort(dev->getPort());
+        std::string port = normalizeAndVerifySerialPort(dev->getPort());
 
-		bool calibrate_gyros_on_setup =
-			root.get("calibrateGyrosOnSetup", false).asBool();
-		bool tare_on_setup = root.get("tareOnSetup", false).asBool();
-		double frames_per_second = root.get("framesPerSecond", 250).asFloat();
+        bool calibrate_gyros_on_setup =
+            root.get("calibrateGyrosOnSetup", false).asBool();
+        bool tare_on_setup = root.get("tareOnSetup", false).asBool();
+        double frames_per_second = root.get("framesPerSecond", 250).asFloat();
 
-		Json::Value commands = root.get("resetCommands", Json::arrayValue);
-		CStringArray reset_commands;
+        Json::Value commands = root.get("resetCommands", Json::arrayValue);
+        CStringArray reset_commands;
 
-		for (Json::ArrayIndex i = 0, e = commands.size(); i < e; ++i) {
-			reset_commands.push_back(commands[i].asString());
-		}
+        for (Json::ArrayIndex i = 0, e = commands.size(); i < e; ++i) {
+            reset_commands.push_back(commands[i].asString());
+        }
 
-		osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+        osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
 
-		reg.registerDevice(new vrpn_YEI_3Space_Sensor(
-			reg.useDecoratedName(data.getName("YEI_3Space_Sensor")).c_str(),
-			reg.getVRPNConnection(), port.c_str(), 115200, calibrate_gyros_on_setup,
-			tare_on_setup, frames_per_second, 0, 0, 1, 0,
-			reset_commands.get_array()));
-	}
-	
+        reg.registerDevice(new vrpn_YEI_3Space_Sensor(
+            reg.useDecoratedName(data.getName("YEI_3Space_Sensor")).c_str(),
+            reg.getVRPNConnection(), port.c_str(), 115200,
+            calibrate_gyros_on_setup, tare_on_setup, frames_per_second, 0, 0, 1,
+            0, reset_commands.get_array()));
+    }
 }

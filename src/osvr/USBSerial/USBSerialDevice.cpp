@@ -36,18 +36,18 @@ namespace osvr {
 namespace usbserial {
 
     // create USB-Serial device with provided vendor and product IDs
-	USBSerialDevice::USBSerialDevice(uint16_t vendorID,
-                                     uint16_t productID,
-									 std::string devPath,
-									 std::string port)
-									 : deviceVID(vendorID), devicePID(productID),
-									 devicePath(devPath), devicePort(port) {};
+    USBSerialDevice::USBSerialDevice(uint16_t vendorID, uint16_t productID,
+                                     std::string devPath, std::string port)
+        : deviceVID(vendorID), devicePID(productID), devicePath(devPath),
+          devicePort(port){};
 
     USBSerialDevice::~USBSerialDevice() {}
 
-	uint16_t USBSerialDevice::getVID() { return deviceVID; }
-	uint16_t USBSerialDevice::getPID() { return devicePID; }
-	std::string USBSerialDevice::getPlatformSpecificPath() { return devicePath; }
+    uint16_t USBSerialDevice::getVID() { return deviceVID; }
+    uint16_t USBSerialDevice::getPID() { return devicePID; }
+    std::string USBSerialDevice::getPlatformSpecificPath() {
+        return devicePath;
+    }
     std::string USBSerialDevice::getPort() { return devicePort; }
 
 } // namespace usbserial

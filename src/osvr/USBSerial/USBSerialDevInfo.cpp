@@ -48,146 +48,143 @@ namespace usbserial {
 
 #if defined(OSVR_WINDOWS)
 
-	std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID, uint16_t productID){
-		
-		HRESULT result;
-		std::vector<USBSerialDevice> devices;
+    std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID,
+                                                     uint16_t productID) {
 
-		// initialize COM to make lib calls, otherwise we can't proceed
-		result = CoInitializeEx(0, COINIT_MULTITHREADED);
+        HRESULT result;
+        std::vector<USBSerialDevice> devices;
 
-		if (FAILED(result)) {
-			return devices;
-		}
+        // initialize COM to make lib calls, otherwise we can't proceed
+        result = CoInitializeEx(0, COINIT_MULTITHREADED);
 
-		// Set COM security should be done here. It's automatically
-		// called by COM when interface is marshaled/unmarshaled with default
-		// settings
+        if (FAILED(result)) {
+            return devices;
+        }
 
-		// Obtain the initial locator to WMI
-		IWbemLocator *locator = NULL;
+        // Set COM security should be done here. It's automatically
+        // called by COM when interface is marshaled/unmarshaled with default
+        // settings
 
-		result = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
-			IID_IWbemLocator, (LPVOID *)&locator);
+        // Obtain the initial locator to WMI
+        IWbemLocator *locator = NULL;
 
-		if (FAILED(result)) {
-			CoUninitialize();
-			return devices;
-		}
+        result = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
+                                  IID_IWbemLocator, (LPVOID *)&locator);
 
-		// Connect to WMI through the IWbemLocator::ConnectServer method
+        if (FAILED(result)) {
+            CoUninitialize();
+            return devices;
+        }
 
-		IWbemServices *wbemServices = NULL;
+        // Connect to WMI through the IWbemLocator::ConnectServer method
 
-		// Connect to the root\cimv2 namespace with
-		// the current user and obtain pointer pSvc
-		// to make IWbemServices calls.
-		result = locator->ConnectServer(
-			_bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
-			NULL,                    // User name. NULL = current user
-			NULL,                    // User password. NULL = current
-			0,                       // Locale. NULL indicates current
-			NULL,                    // Security flags.
-			0,                       // Authority (for example, Kerberos)
-			0,                       // Context object
-			&wbemServices            // pointer to IWbemServices proxy
-			);
+        IWbemServices *wbemServices = NULL;
 
-		if (FAILED(result)) {
-			locator->Release();
-			CoUninitialize();
-		}
+        // Connect to the root\cimv2 namespace with
+        // the current user and obtain pointer pSvc
+        // to make IWbemServices calls.
+        result = locator->ConnectServer(
+            _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+            NULL,                    // User name. NULL = current user
+            NULL,                    // User password. NULL = current
+            0,                       // Locale. NULL indicates current
+            NULL,                    // Security flags.
+            0,                       // Authority (for example, Kerberos)
+            0,                       // Context object
+            &wbemServices            // pointer to IWbemServices proxy
+            );
 
-		// Set security levels on the proxy
+        if (FAILED(result)) {
+            locator->Release();
+            CoUninitialize();
+        }
 
-		result =
-			CoSetProxyBlanket(wbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
-			NULL, RPC_C_AUTHN_LEVEL_CALL,
-			RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+        // Set security levels on the proxy
 
-		if (FAILED(result)) {
-			wbemServices->Release();
-			locator->Release();
-			CoUninitialize();
-			return devices;
-		}
+        result =
+            CoSetProxyBlanket(wbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
+                              NULL, RPC_C_AUTHN_LEVEL_CALL,
+                              RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
 
-		// Use the IWbemServices pointer to make requests of WMI
+        if (FAILED(result)) {
+            wbemServices->Release();
+            locator->Release();
+            CoUninitialize();
+            return devices;
+        }
 
-		// Get a list of serial devices
-		IEnumWbemClassObject *devEnum = NULL;
-		result = wbemServices->ExecQuery(
-			bstr_t("WQL"), bstr_t("SELECT * FROM Win32_SerialPort"),
-			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL,
-			&devEnum);
+        // Use the IWbemServices pointer to make requests of WMI
 
-		if (FAILED(result)) {
-			wbemServices->Release();
-			locator->Release();
-			CoUninitialize();
-			return devices;
-		}
+        // Get a list of serial devices
+        IEnumWbemClassObject *devEnum = NULL;
+        result = wbemServices->ExecQuery(
+            bstr_t("WQL"), bstr_t("SELECT * FROM Win32_SerialPort"),
+            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL,
+            &devEnum);
 
-		IWbemClassObject *wbemClassObj;
-		ULONG numObjRet = 0;
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> convStr;
-		while (devEnum) {
-			HRESULT hr =
-				devEnum->Next(WBEM_INFINITE, 1, &wbemClassObj, &numObjRet);
+        if (FAILED(result)) {
+            wbemServices->Release();
+            locator->Release();
+            CoUninitialize();
+            return devices;
+        }
 
-			if (numObjRet == 0) {
-				break;
-			}
+        IWbemClassObject *wbemClassObj;
+        ULONG numObjRet = 0;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> convStr;
+        while (devEnum) {
+            HRESULT hr =
+                devEnum->Next(WBEM_INFINITE, 1, &wbemClassObj, &numObjRet);
 
-			VARIANT vtPort;
-			VARIANT vtHardware;
-			VARIANT vtPath;
+            if (numObjRet == 0) {
+                break;
+            }
 
-			// Get the value of the Name property
-			hr = wbemClassObj->Get(L"DeviceID", 0, &vtPort, 0, 0);
-			std::string sPort = convStr.to_bytes(vtPort.bstrVal);
-			
-			hr = wbemClassObj->Get(L"PNPDeviceID", 0, &vtHardware, 0, 0);
-			std::string HardwID = convStr.to_bytes(vtHardware.bstrVal);
+            VARIANT vtPort;
+            VARIANT vtHardware;
+            VARIANT vtPath;
 
-			hr = wbemClassObj->Get(L"__PATH", 0, &vtPath, 0, 0);
-			std::string devPath = convStr.to_bytes(vtPath.bstrVal);
+            // Get the value of the Name property
+            hr = wbemClassObj->Get(L"DeviceID", 0, &vtPort, 0, 0);
+            std::string sPort = convStr.to_bytes(vtPort.bstrVal);
 
-			std::string deviceVID = std::to_string(vendorID);
-			std::string devicePID = std::to_string(productID);
+            hr = wbemClassObj->Get(L"PNPDeviceID", 0, &vtHardware, 0, 0);
+            std::string HardwID = convStr.to_bytes(vtHardware.bstrVal);
 
-			std::regex vidPidRegEx("VID[\\s&\\*\\#_]?" + deviceVID +
-				"[\\s&\\*\\#_]?PID[\\s&\\*\\#_]?" +
-				devicePID);
+            hr = wbemClassObj->Get(L"__PATH", 0, &vtPath, 0, 0);
+            std::string devPath = convStr.to_bytes(vtPath.bstrVal);
 
-			
+            std::string deviceVID = std::to_string(vendorID);
+            std::string devicePID = std::to_string(productID);
 
-			// found a match
-			if (std::regex_search(HardwID, vidPidRegEx)) {
+            std::regex vidPidRegEx("VID[\\s&\\*\\#_]?" + deviceVID +
+                                   "[\\s&\\*\\#_]?PID[\\s&\\*\\#_]?" +
+                                   devicePID);
 
-				USBSerialDevice newDevice(vendorID, productID, devPath, sPort);
-				devices.push_back(newDevice);
+            // found a match
+            if (std::regex_search(HardwID, vidPidRegEx)) {
 
-			}
+                USBSerialDevice newDevice(vendorID, productID, devPath, sPort);
+                devices.push_back(newDevice);
+            }
 
-			VariantClear(&vtPort);
-			VariantClear(&vtHardware);
-			VariantClear(&vtPath);
-			wbemClassObj->Release();
-		}
+            VariantClear(&vtPort);
+            VariantClear(&vtHardware);
+            VariantClear(&vtPath);
+            wbemClassObj->Release();
+        }
 
-		// release Resources
+        // release Resources
 
-		wbemServices->Release();
-		locator->Release();
-		devEnum->Release();
-		if (!wbemClassObj)
-			wbemClassObj->Release();
-		CoUninitialize();
+        wbemServices->Release();
+        locator->Release();
+        devEnum->Release();
+        if (!wbemClassObj)
+            wbemClassObj->Release();
+        CoUninitialize();
 
-		return devices;
-	
-	}
+        return devices;
+    }
 
 #else
 #error "getBinaryLocation() not yet implemented for this platform!"

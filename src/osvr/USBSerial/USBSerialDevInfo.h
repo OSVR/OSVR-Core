@@ -38,7 +38,8 @@
 namespace osvr {
 namespace usbserial {
 
-	std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID, uint16_t productID);
+    std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID,
+                                                     uint16_t productID);
 
 } // namespace usbserial
 } // namespace osvr

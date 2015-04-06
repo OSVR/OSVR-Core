@@ -23,8 +23,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 // Internal Includes
 #include <osvr/USBSerial/USBSerialEnum.h>
 
@@ -42,18 +40,17 @@ namespace usbserial {
     class EnumeratorImpl {
 
       public:
+        EnumeratorImpl();
 
-		  EnumeratorImpl();
-        
-		  EnumeratorImpl(uint16_t vendorID, uint16_t productID);
+        EnumeratorImpl(uint16_t vendorID, uint16_t productID);
 
-		  ~EnumeratorImpl();
+        ~EnumeratorImpl();
 
-		  EnumeratorIterator begin();
-		  EnumeratorIterator end();
+        EnumeratorIterator begin();
+        EnumeratorIterator end();
 
       private:
-		  DeviceList devices;
+        DeviceList devices;
     };
 
 } // namespace usbserial
