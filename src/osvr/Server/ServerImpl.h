@@ -36,6 +36,7 @@
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Util/Flag.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -126,6 +127,9 @@ namespace server {
         /// @brief sends route message.
         void m_sendRoutes();
 
+        /// @brief sends full path tree contents
+        void m_sendTree();
+
         /// @brief handles updated route message from client
         static int VRPN_CALLBACK
         m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p);
@@ -157,7 +161,7 @@ namespace server {
 
         /// @brief Path tree
         common::PathTree m_tree;
-        bool m_treeDirty;
+        util::Flag m_treeDirty;
 
         /// @brief Mutex held by anything executing in the main thread.
         mutable boost::mutex m_mainThreadMutex;

@@ -27,6 +27,7 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/RoutingConstants.h>
+#include <osvr/Util/Flag.h>
 
 #include "PathParseAndRetrieve.h"
 
@@ -41,27 +42,27 @@ namespace osvr {
 namespace common {
     static const char INTERFACES_KEY[] = "interfaces";
 
-    static inline bool
+    static inline util::Flag
     processInterfacesFromDescriptor(PathNode &devNode,
                                     Json::Value const &desc) {
-        bool ret = false;
+        util::Flag changed;
         if (!desc.isMember(INTERFACES_KEY)) {
             // No interfaces member
-            return ret;
+            return changed;
         }
         Json::Value const &ifaces = desc[INTERFACES_KEY];
         if (!ifaces.isObject()) {
             // Interfaces member isn't an object
-            return ret;
+            return changed;
         }
         for (auto const &iface : ifaces.getMemberNames()) {
             auto &ifaceNode = detail::treePathRetrieve(iface, devNode);
             if (elements::isNull(ifaceNode.value())) {
                 ifaceNode.value() = elements::InterfaceElement();
-                ret = true;
+                changed.set();
             }
         }
-        return ret;
+        return changed;
     }
 
     bool processDeviceDescriptorForPathTree(PathTree &tree,
@@ -72,7 +73,7 @@ namespace common {
             // Leading slash, which we'll need to drop from the device name
             devName.erase(begin(devName));
         }
-        bool ret = false;
+        util::Flag changed;
 
         /// Set up device node
         auto &devNode = tree.getNodeByPath(getPathSeparator() + devName);
@@ -86,7 +87,7 @@ namespace common {
             }
             devNode.value() =
                 elements::DeviceElement::createVRPNDeviceElement(devName, host);
-            ret = true;
+            changed.set();
         }
 
         /// @todo store descriptor string in the device node
@@ -97,13 +98,13 @@ namespace common {
             Json::Reader reader;
             if (!reader.parse(jsonDescriptor, descriptor)) {
                 /// @todo warn about failed descriptor parse?
-                return ret;
+                return changed.get();
             }
         }
 
-        ret = processInterfacesFromDescriptor(devNode, descriptor) || ret;
+        changed += processInterfacesFromDescriptor(devNode, descriptor);
 
-        return ret;
+        return changed.get();
     }
 
 } // namespace common
