@@ -57,6 +57,19 @@ namespace vrpnserver {
             return ret;
         }
 
+        void registerDevice(OSVR_DeviceUpdateCallback cb,
+            void *dev) {
+            osvr::connection::ConnectionPtr conn =
+                osvr::connection::Connection::retrieveConnection(m_ctx.getParent());
+
+            auto const& names = getNames();
+            if (names.empty()) {
+                throw std::logic_error(
+                    "Your VRPN device has to register at least one name!");
+            }
+            m_connDev = conn->registerAdvancedDevice(names, cb, dev);
+        }
+
         connection::ConnectionDevice::NameList const &getNames() const {
             return m_names;
         }
@@ -64,6 +77,7 @@ namespace vrpnserver {
       private:
         pluginhost::PluginSpecificRegistrationContext &m_ctx;
         connection::ConnectionDevice::NameList m_names;
+        connection::ConnectionDevicePtr m_connDev;
     };
 
     VRPNDeviceRegistration::VRPNDeviceRegistration(OSVR_PluginRegContext ctx)
@@ -87,15 +101,7 @@ namespace vrpnserver {
 
     void VRPNDeviceRegistration::m_registerDevice(OSVR_DeviceUpdateCallback cb,
                                                   void *dev) {
-        osvr::connection::ConnectionPtr conn =
-            osvr::connection::Connection::retrieveConnection(m_ctx.getParent());
-
-        auto names = m_impl->getNames();
-        if (names.empty()) {
-            throw std::logic_error(
-                "Your VRPN device has to register at least one name!");
-        }
-        conn->registerAdvancedDevice(names, cb, dev);
+        m_impl->registerDevice(cb, dev);
     }
 
 } // namespace vrpnserver
