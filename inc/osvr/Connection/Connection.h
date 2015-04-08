@@ -37,6 +37,7 @@
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
+#include <boost/range/iterator_range.hpp>
 
 // Standard includes
 #include <string>
@@ -122,6 +123,13 @@ namespace connection {
         /// @brief Destructor
         OSVR_CONNECTION_EXPORT virtual ~Connection();
 
+        typedef std::vector<ConnectionDevicePtr> DeviceList;
+
+        /// @brief Get the devices, as a range
+        boost::iterator_range<DeviceList::const_iterator> getDevices() const {
+            return boost::make_iterator_range(begin(m_devices), end(m_devices));
+        }
+
         /// @name Advanced Methods - not for general consumption
         /// These can break encapsulation rules and/or encourage bad coding
         /// habits.
@@ -190,7 +198,6 @@ namespace connection {
         Connection();
 
       private:
-        typedef std::vector<ConnectionDevicePtr> DeviceList;
         DeviceList m_devices;
         std::vector<std::function<void()> > m_descriptorHandlers;
     };
