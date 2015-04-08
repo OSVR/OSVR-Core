@@ -25,6 +25,7 @@
 // Internal Includes
 #include "ServerImpl.h"
 #include <osvr/Connection/Connection.h>
+#include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Connection/MessageType.h>
@@ -226,7 +227,16 @@ namespace server {
     int ServerImpl::getSleepTime() const { return m_sleepTime; }
 
     void ServerImpl::m_handleDeviceDescriptors() {
-        OSVR_DEV_VERBOSE("In ServerImpl::m_handleDeviceDescriptors.");
+        for (auto const &dev : m_conn->getDevices()) {
+            auto const &descriptor = dev->getDeviceDescriptor();
+            if (descriptor.empty()) {
+                OSVR_DEV_VERBOSE("Developer Warning: No device descriptor for "
+                                 << dev->getName());
+            } else {
+                OSVR_DEV_VERBOSE("Descriptor for " << dev->getName() << "\n"
+                                                   << descriptor);
+            }
+        }
     }
 
 } // namespace server

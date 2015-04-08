@@ -51,7 +51,7 @@ namespace connection {
         typedef std::vector<std::string> NameList;
 
         /// @brief accessor for (primary) device name
-        std::string const &getName() const;
+        OSVR_CONNECTION_EXPORT std::string const &getName() const;
 
         /// @brief accessor for device names
         NameList const &getNames() const;
@@ -76,7 +76,7 @@ namespace connection {
         setDeviceDescriptor(std::string const &jsonString);
 
         /// @brief Get the most current JSON device descriptor
-        std::string const &getDeviceDescriptor() const;
+        OSVR_CONNECTION_EXPORT std::string const &getDeviceDescriptor() const;
 
       protected:
         /// @brief Does this connection device have a device token? Should be
