@@ -36,14 +36,14 @@
 // Standard includes
 #include <string>
 #include <stddef.h>
-#include <type_traits>
 
 namespace osvr {
 namespace util {
     /// @brief Safely and easily convert a literal array of characters (like
     /// from osvr_json_to_c) into a std::string.
-    template <typename T> inline std::string makeString(T arrayLiteral) {
-        return std::string(arrayLiteral, std::extent<T>());
+    template <size_t N>
+    inline std::string makeString(const char(&arrayLiteral)[N]) {
+        return std::string(arrayLiteral, N);
     }
 } // namespace util
 } // namespace osvr
