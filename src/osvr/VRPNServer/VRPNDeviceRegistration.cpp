@@ -57,17 +57,23 @@ namespace vrpnserver {
             return ret;
         }
 
-        void registerDevice(OSVR_DeviceUpdateCallback cb,
-            void *dev) {
+        void registerDevice(OSVR_DeviceUpdateCallback cb, void *dev) {
             osvr::connection::ConnectionPtr conn =
-                osvr::connection::Connection::retrieveConnection(m_ctx.getParent());
+                osvr::connection::Connection::retrieveConnection(
+                    m_ctx.getParent());
 
-            auto const& names = getNames();
+            auto const &names = getNames();
             if (names.empty()) {
                 throw std::logic_error(
                     "Your VRPN device has to register at least one name!");
             }
             m_connDev = conn->registerAdvancedDevice(names, cb, dev);
+        }
+
+        void setDeviceDescriptor(std::string const &jsonString) {
+            m_connDev->setDeviceDescriptor(jsonString);
+            osvr::connection::Connection::retrieveConnection(m_ctx.getParent())
+                ->triggerDescriptorHandlers();
         }
 
         connection::ConnectionDevice::NameList const &getNames() const {
@@ -97,6 +103,11 @@ namespace vrpnserver {
     }
     vrpn_Connection *VRPNDeviceRegistration::getVRPNConnection() {
         return ::osvr::vrpnserver::getVRPNConnection(m_ctx);
+    }
+
+    void
+    VRPNDeviceRegistration::setDeviceDescriptor(std::string const &jsonString) {
+        m_impl->setDeviceDescriptor(jsonString);
     }
 
     void VRPNDeviceRegistration::m_registerDevice(OSVR_DeviceUpdateCallback cb,

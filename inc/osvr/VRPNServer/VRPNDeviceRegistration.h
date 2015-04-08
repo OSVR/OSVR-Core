@@ -117,6 +117,9 @@ namespace vrpnserver {
             return registerDevice(ret.release());
         }
 
+        OSVR_VRPNSERVER_EXPORT void
+        setDeviceDescriptor(std::string const &jsonString);
+
       private:
         OSVR_VRPNSERVER_EXPORT void
         m_registerDevice(OSVR_DeviceUpdateCallback cb, void *dev);

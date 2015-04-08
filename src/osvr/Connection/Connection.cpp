@@ -142,6 +142,15 @@ namespace connection {
     void Connection::registerConnectionHandler(std::function<void()> handler) {
         m_registerConnectionHandler(handler);
     }
+    void Connection::registerDescriptorHandler(std::function<void()> handler) {
+        m_descriptorHandlers.push_back(handler);
+    }
+
+    void Connection::triggerDescriptorHandlers() {
+        for (auto &handler : m_descriptorHandlers) {
+            handler();
+        }
+    }
 
     Connection::Connection() {}
 

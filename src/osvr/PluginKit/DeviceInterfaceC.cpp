@@ -40,6 +40,7 @@
 
 // Standard includes
 #include <functional>
+#include <string>
 
 OSVR_DeviceInitOptions
 osvrDeviceCreateInitOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx) {
@@ -81,8 +82,7 @@ OSVR_ReturnCode osvrDeviceSendJsonDescriptor(OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor descriptor",
                                     json);
 
-    /// @todo Register this with the context/device
-
+    dev->setDeviceDescriptor(std::string(json, len));
     return OSVR_RETURN_SUCCESS;
 }
 

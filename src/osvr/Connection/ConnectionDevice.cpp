@@ -65,6 +65,15 @@ namespace connection {
         m_token = &token;
     }
 
+    void ConnectionDevice::setDeviceDescriptor(std::string const &jsonString) {
+        /// @todo validate descriptor here
+        m_descriptor = jsonString;
+    }
+
+    std::string const &ConnectionDevice::getDeviceDescriptor() const {
+        return m_descriptor;
+    }
+
     bool ConnectionDevice::m_hasDeviceToken() const {
         return m_token != nullptr;
     }

@@ -111,6 +111,14 @@ namespace connection {
         OSVR_CONNECTION_EXPORT void
         registerConnectionHandler(std::function<void()> handler);
 
+        /// @brief Register a function to be called when a descriptor changes
+        OSVR_CONNECTION_EXPORT void
+        registerDescriptorHandler(std::function<void()> handler);
+
+        /// @brief Signal a descriptor update and call any/all descriptor
+        /// handlers.
+        OSVR_CONNECTION_EXPORT void triggerDescriptorHandlers();
+
         /// @brief Destructor
         OSVR_CONNECTION_EXPORT virtual ~Connection();
 
@@ -158,6 +166,7 @@ namespace connection {
         /// dynamic type of the connection.
         OSVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
         /// @}
+
       protected:
         /// @brief (Subclass implementation) Register (or retrieve registration)
         /// of a message type.
@@ -183,6 +192,7 @@ namespace connection {
       private:
         typedef std::vector<ConnectionDevicePtr> DeviceList;
         DeviceList m_devices;
+        std::vector<std::function<void()> > m_descriptorHandlers;
     };
 } // namespace connection
 } // namespace osvr
