@@ -58,6 +58,7 @@ set(API
     "${HEADER_LOCATION}/SharedPtr.h"
     "${HEADER_LOCATION}/StdDeletable.h"
     "${HEADER_LOCATION}/StdInt.h"
+    "${HEADER_LOCATION}/StringLiteralFileToString.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
     "${HEADER_LOCATION}/TimeValue_fwd.h"
