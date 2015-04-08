@@ -77,7 +77,7 @@ namespace server {
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
         m_conn->registerConnectionHandler(
-            std::bind(&ServerImpl::m_sendRoutes, std::ref(*this)));
+            std::bind(&ServerImpl::m_sendTree, std::ref(*this)));
 
         // Deal with updated device descriptors.
         m_conn->registerDescriptorHandler(
@@ -186,12 +186,14 @@ namespace server {
     }
 
     std::string ServerImpl::getRoutes(bool styled) const {
+        /// @todo needs removal/replacement post path tree
         std::string ret;
         m_callControlled([&] { ret = m_routes.getRoutes(styled); });
         return ret;
     }
 
     std::string ServerImpl::getSource(std::string const &destination) const {
+        /// @todo needs removal/replacement post path tree
         std::string ret;
         m_callControlled([&] { ret = m_routes.getSource(destination); });
         return ret;
@@ -203,13 +205,14 @@ namespace server {
         m_systemDevice.reset();
         m_conn.reset();
     }
-
+#if 0
     void ServerImpl::m_sendRoutes() {
         std::string message = m_routes.getRoutes();
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
                                          << " routes to the client.");
         m_systemComponent->sendRoutes(message);
     }
+#endif
 
     int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ServerImpl *>(userdata);
@@ -219,11 +222,11 @@ namespace server {
     }
 
     bool ServerImpl::m_addRoute(std::string const &routingDirective) {
-        bool wasNew = m_routes.addRoute(routingDirective);
-        if (m_running) {
-            m_sendRoutes();
-        }
-        return wasNew;
+        bool change =
+            common::addAliasFromRoute(m_tree.getRoot(), routingDirective);
+        m_treeDirty += change;
+        return change;
+    }
 
     void ServerImpl::m_sendTree() {
         OSVR_DEV_VERBOSE("Sending path tree to clients.");
@@ -245,9 +248,8 @@ namespace server {
             } else {
                 OSVR_DEV_VERBOSE("Descriptor for " << dev->getName() << "\n"
                                                    << descriptor);
-                m_treeDirty = common::processDeviceDescriptorForPathTree(
-                                  m_tree, dev->getName(), descriptor) ||
-                              m_treeDirty;
+                m_treeDirty += common::processDeviceDescriptorForPathTree(
+                    m_tree, dev->getName(), descriptor);
             }
         }
     }

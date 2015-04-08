@@ -26,10 +26,11 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/RouteContainer.h>
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
-// - none
+#include <boost/variant/get.hpp>
 
 // Standard includes
 // - none
@@ -51,5 +52,53 @@ namespace common {
     }
 
     void PathTree::reset() { m_root = PathNode::createRoot(); }
+
+    /// @brief Determine if the node needs updating given that we want to add an
+    /// alias there pointing to source with the given automatic status.
+    static inline bool aliasNeedsUpdate(PathNode &node,
+                                        std::string const &source,
+                                        bool automatic) {
+        elements::AliasElement *elt =
+            boost::get<elements::AliasElement>(&node.value());
+        if (nullptr == elt) {
+            /// Always replace non-aliases
+            return true;
+        }
+        if (!automatic && elt->getAutomatic()) {
+            /// We're a manual alias, and there is only an automatic, so we
+            /// override
+            return true;
+        }
+        if (automatic == elt->getAutomatic() && source != elt->getSource()) {
+            /// Same automatic status, different source: replace/update
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Make node an alias pointing to source, with the given automatic
+    /// status, if it needs updating.
+    ///
+    /// @return true if the node was changed
+    static inline bool addAlias(PathNode &node, std::string const &source,
+                                bool automatic) {
+        if (!aliasNeedsUpdate(node, source, automatic)) {
+            return false;
+        }
+        elements::AliasElement elt;
+        elt.setSource(source);
+        elt.getAutomatic() = automatic;
+        node.value() = elt;
+        return true;
+    }
+
+    bool addAliasFromRoute(PathNode &node, std::string const &route,
+                           bool automatic) {
+        auto path = common::RouteContainer::getDestinationFromString(route);
+        auto &aliasNode = detail::treePathRetrieve(path, node);
+        return addAlias(aliasNode,
+                        common::RouteContainer::getSourceFromString(route),
+                        automatic);
+    }
 } // namespace common
 } // namespace osvr

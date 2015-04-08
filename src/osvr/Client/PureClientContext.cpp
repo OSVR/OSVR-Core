@@ -67,9 +67,11 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-        /// Temporarily still using the existing route messages
+/// Temporarily still using the existing route messages
+#if 0
         m_systemComponent->registerRoutesHandler(
             &PureClientContext::m_handleRoutingMessage, this);
+#endif
         {
             using namespace std::placeholders;
             m_systemComponent->registerResetTreeHandler(
@@ -86,6 +88,7 @@ namespace client {
     }
 
     void PureClientContext::m_setupDummyTree() {
+#if 0
         using namespace common::elements;
         m_getElementByPath("/org_opengoggles_bundled_Multiserver") =
             PluginElement();
@@ -117,6 +120,7 @@ namespace client {
         m_getElementByPath(
             "/org_opengoggles_bundled_Multiserver/OneEuroFilter0/tracker") =
             InterfaceElement();
+#endif
     }
 
     void PureClientContext::m_update() {
@@ -183,6 +187,8 @@ namespace client {
     }
 
     void PureClientContext::m_handleConfigReset(util::time::TimeValue const &) {
+
+        OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigReset");
         m_pathTree.reset();
         for (auto const &iface : getInterfaces()) {
             /// @todo slightly overkill, but it works - tree traversal would be
@@ -190,6 +196,7 @@ namespace client {
             m_removeCallbacksOnPath(iface->getPath());
         }
     }
+#if 0
     int PureClientContext::m_handleRoutingMessage(void *userdata,
                                                   vrpn_HANDLERPARAM p) {
         auto self = static_cast<PureClientContext *>(userdata);
@@ -225,6 +232,7 @@ namespace client {
             m_connectCallbacksOnPath(path);
         }
     }
+#endif
     void PureClientContext::m_connectNeededCallbacks() {
         OSVR_DEV_VERBOSE(
             "*** Entering PureClientContext::m_connectNeededCallbacks");
@@ -246,8 +254,8 @@ namespace client {
     void
     PureClientContext::m_handleConfigAddNodes(Json::Value const &nodes,
                                               util::time::TimeValue const &) {
+        OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigAddNodes");
         common::jsonToPathTree(m_pathTree, nodes);
-        m_populateTreeFromRoutes();
         m_connectNeededCallbacks();
     }
 
