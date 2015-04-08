@@ -56,6 +56,20 @@ namespace common {
                       "Cannot use a path with an empty component: " + path) {}
         };
 
+        /// @brief Thrown when attempting to go to the parent path from the root
+        struct ImpossibleParentPath : std::runtime_error {
+            ImpossibleParentPath()
+                : std::runtime_error(
+                "Cannot specify .. for parent path when already at the root!") {}
+        };
+
+        /// @brief Thrown when attempting to go to the parent path when forbidden
+        struct ForbiddenParentPath : std::runtime_error {
+            ForbiddenParentPath()
+                : std::runtime_error(
+                "Cannot specify .. in a parent path used in this context!") {}
+        };
+
         /// @brief Thrown when attempting to use an empty path
         struct EmptyPath : std::runtime_error {
             EmptyPath()
