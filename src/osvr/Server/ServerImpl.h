@@ -35,6 +35,7 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/PathTree.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -153,6 +154,10 @@ namespace server {
 
         /// @brief JSON routing directives
         common::RouteContainer m_routes;
+
+        /// @brief Path tree
+        common::PathTree m_tree;
+        bool m_treeDirty;
 
         /// @brief Mutex held by anything executing in the main thread.
         mutable boost::mutex m_mainThreadMutex;

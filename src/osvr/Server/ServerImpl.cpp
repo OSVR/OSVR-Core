@@ -33,6 +33,7 @@
 #include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
 #include <osvr/Util/Microsleep.h>
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/ProcessDeviceDescriptor.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -55,7 +56,8 @@ namespace server {
     }
     ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
         : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
-          m_systemComponent(nullptr), m_running(false), m_sleepTime(0) {
+          m_systemComponent(nullptr), m_running(false), m_treeDirty(false),
+          m_sleepTime(0) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
@@ -158,6 +160,11 @@ namespace server {
             /// mutex each time through?
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
             m_conn->process();
+            if (m_treeDirty) {
+                OSVR_DEV_VERBOSE("Tree dirty");
+                /// @todo send the tree to the client
+                m_treeDirty = false;
+            }
             m_systemDevice->update();
             for (auto &f : m_mainloopMethods) {
                 f();
@@ -235,6 +242,9 @@ namespace server {
             } else {
                 OSVR_DEV_VERBOSE("Descriptor for " << dev->getName() << "\n"
                                                    << descriptor);
+                m_treeDirty = common::processDeviceDescriptorForPathTree(
+                                  m_tree, dev->getName(), descriptor) ||
+                              m_treeDirty;
             }
         }
     }
