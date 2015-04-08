@@ -31,7 +31,10 @@
 #include "DevicesWithParameters.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/Util/UniquePtr.h>
+#include <osvr/Util/StringLiteralFileToString.h>
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
+
+#include "org_opengoggles_bundled_Multiserver_RazerHydra_json.h"
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
@@ -100,6 +103,8 @@ class VRPNHardwareDetect : boost::noncopyable {
                             reg.useDecoratedName(m_data.getName("RazerHydra"));
                         reg.registerDevice(new vrpn_Tracker_RazerHydra(
                             name.c_str(), reg.getVRPNConnection()));
+                        reg.setDeviceDescriptor(osvr::util::makeString(
+                            org_opengoggles_bundled_Multiserver_RazerHydra_json));
                     }
                     std::string localName = "*" + name;
 
