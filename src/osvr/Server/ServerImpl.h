@@ -133,6 +133,9 @@ namespace server {
         /// the main server thread.
         bool m_addRoute(std::string const &routingDirective);
 
+        /// @brief Handle new or updated device descriptors.
+        void m_handleDeviceDescriptors();
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 

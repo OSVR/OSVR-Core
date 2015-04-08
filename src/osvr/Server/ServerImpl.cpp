@@ -76,6 +76,10 @@ namespace server {
             std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
         m_conn->registerConnectionHandler(
             std::bind(&ServerImpl::m_sendRoutes, std::ref(*this)));
+
+        // Deal with updated device descriptors.
+        m_conn->registerDescriptorHandler(
+            std::bind(&ServerImpl::m_handleDeviceDescriptors, std::ref(*this)));
     }
 
     ServerImpl::~ServerImpl() { stop(); }
@@ -220,6 +224,10 @@ namespace server {
     }
 
     int ServerImpl::getSleepTime() const { return m_sleepTime; }
+
+    void ServerImpl::m_handleDeviceDescriptors() {
+        OSVR_DEV_VERBOSE("In ServerImpl::m_handleDeviceDescriptors.");
+    }
 
 } // namespace server
 } // namespace osvr
