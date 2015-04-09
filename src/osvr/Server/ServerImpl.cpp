@@ -74,14 +74,11 @@ namespace server {
             &ServerImpl::m_handleUpdatedRoute, this);
 
         // Things to do when we get a new incoming connection
-        m_conn->registerConnectionHandler(
-            std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
-        m_conn->registerConnectionHandler(
-            std::bind(&ServerImpl::m_sendTree, std::ref(*this)));
+        m_conn->registerConnectionHandler([&] { triggerHardwareDetect(); });
+        m_conn->registerConnectionHandler([&] { m_sendTree(); });
 
         // Deal with updated device descriptors.
-        m_conn->registerDescriptorHandler(
-            std::bind(&ServerImpl::m_handleDeviceDescriptors, std::ref(*this)));
+        m_conn->registerDescriptorHandler([&] { m_handleDeviceDescriptors(); });
     }
 
     ServerImpl::~ServerImpl() { stop(); }
@@ -128,8 +125,7 @@ namespace server {
     }
 
     void ServerImpl::loadPlugin(std::string const &pluginName) {
-        m_callControlled(std::bind(&pluginhost::RegistrationContext::loadPlugin,
-                                   m_ctx, pluginName));
+        m_callControlled([&, pluginName] { m_ctx->loadPlugin(pluginName); });
     }
 
     void ServerImpl::loadAutoPlugins() { m_ctx->loadPlugins(); }

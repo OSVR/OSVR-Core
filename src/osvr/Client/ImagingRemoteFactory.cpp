@@ -40,7 +40,7 @@
 // - none
 
 // Standard includes
-#include <functional>
+// - none
 
 namespace osvr {
 namespace client {
@@ -56,9 +56,11 @@ namespace client {
               m_sensor(sensor) {
             auto imaging = common::ImagingComponent::create();
             m_dev->addComponent(imaging);
-            using namespace std::placeholders;
-            imaging->registerImageHandler(std::bind(
-                &NetworkImagingRemoteHandler::m_handleImage, this, _1, _2));
+            imaging->registerImageHandler(
+                [&](common::ImageData const &data,
+                    util::time::TimeValue const &timestamp) {
+                    m_handleImage(data, timestamp);
+                });
             OSVR_DEV_VERBOSE("Constructed an ImagingHandler for "
                              << deviceName);
         }
