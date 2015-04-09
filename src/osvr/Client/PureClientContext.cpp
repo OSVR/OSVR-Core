@@ -67,11 +67,10 @@ namespace client {
             m_systemDevice->addComponent(common::SystemComponent::create());
         {
             using namespace std::placeholders;
-
-            m_systemComponent->registerReplaceTreeHandler(
-                common::DeduplicatingFunctionWrapper<Json::Value const &>(
-                    std::bind(&PureClientContext::m_handleReplaceTree, this,
-                              _1)));
+            typedef common::DeduplicatingFunctionWrapper<Json::Value const &>
+                DedupJsonFunction;
+            m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
+                [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
         }
     }
 
