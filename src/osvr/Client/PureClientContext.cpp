@@ -43,7 +43,7 @@
 #include <json/reader.h>
 
 // Standard includes
-// - none
+#include <unordered_set>
 
 namespace osvr {
 namespace client {
@@ -118,7 +118,7 @@ namespace client {
         }
     }
 
-    void PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
+    bool PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
         /// Start by removing handler from interface tree and handler container
         /// for this path, if found. Ensures that if we early-out (fail to set
         /// up a handler) we don't have a leftover one still active.
@@ -127,7 +127,7 @@ namespace client {
         auto source = common::resolveTreeNode(m_pathTree, path);
         if (!source.is_initialized()) {
             OSVR_DEV_VERBOSE("Could not resolve source for " << path);
-            return;
+            return false;
         }
         auto handler = m_factory.invokeFactory(
             *source, m_interfaces.getInterfacesForPath(path));
@@ -138,9 +138,11 @@ namespace client {
             BOOST_ASSERT_MSG(
                 !oldHandler,
                 "We removed the old handler before so it should be null now");
-        } else {
-            OSVR_DEV_VERBOSE("Could not produce handler for " << path);
+            return true;
         }
+
+        OSVR_DEV_VERBOSE("Could not produce handler for " << path);
+        return false;
     }
 
     void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
@@ -148,6 +150,8 @@ namespace client {
     }
 
     void PureClientContext::m_connectNeededCallbacks() {
+        std::unordered_set<std::string> failedPaths;
+        size_t successfulPaths{0};
         for (auto const &iface : getInterfaces()) {
             /// @todo slightly overkill, but it works - tree traversal would be
             /// better.
@@ -155,9 +159,17 @@ namespace client {
             /// For every interface, if there's no handler at that path on the
             /// interface tree, try to set one up.
             if (!m_interfaces.getHandlerForPath(path)) {
-                m_connectCallbacksOnPath(path);
+                auto success = m_connectCallbacksOnPath(path);
+                if (success) {
+                    successfulPaths++;
+                } else {
+                    failedPaths.insert(path);
+                }
             }
         }
+        OSVR_DEV_VERBOSE("Connected " << successfulPaths << " of "
+                                      << successfulPaths + failedPaths.size()
+                                      << " unconnected paths successfully");
     }
 
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {

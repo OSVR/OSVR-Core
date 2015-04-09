@@ -69,7 +69,9 @@ namespace client {
         /// @brief Given a path, remove any existing handler for that path, then
         /// attempt to fully resolve the path to its source and construct a
         /// handler for it.
-        void m_connectCallbacksOnPath(std::string const &path);
+        ///
+        /// @return true if we were able to connect the path.
+        bool m_connectCallbacksOnPath(std::string const &path);
 
         /// @brief Given a path, remove any existing handler for that path from
         /// both the handler container and the interface tree.
