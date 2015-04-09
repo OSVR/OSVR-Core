@@ -86,11 +86,7 @@ namespace client {
 #endif
     }
 
-    PureClientContext::~PureClientContext() {
-        for (auto const &iface : getInterfaces()) {
-            m_handleReleasingInterface(iface);
-        }
-    }
+    PureClientContext::~PureClientContext() {}
 
     void PureClientContext::m_update() {
         /// Mainloop connections
