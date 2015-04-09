@@ -40,7 +40,13 @@ namespace client {
     bool InterfaceTree::addInterface(common::ClientInterfacePtr const &iface) {
         auto &ifaces = getInterfacesForPath(iface->getPath());
         bool ret = ifaces.empty();
-        ifaces.push_back(iface);
+
+        // Makes sure we only have one copy of any interface pointer in the
+        // vector
+        auto it = std::find(begin(ifaces), end(ifaces), iface);
+        if (it == end(ifaces)) {
+            ifaces.push_back(iface);
+        }
         return ret;
     }
 
