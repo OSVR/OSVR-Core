@@ -101,8 +101,6 @@ namespace common {
         /// @brief Fallback case
         template <typename T> void operator()(T const &) {
             // Can't handle it.
-            OSVR_DEV_VERBOSE("Couldn't handle: node value type of "
-                             << common::getTypeName(m_node));
         }
 
         /// @brief Handle an alias element
@@ -180,7 +178,6 @@ namespace common {
 
     inline void resolveTreeNodeImpl(PathTree &pathTree, std::string const &path,
                                     OriginalSource &source) {
-        OSVR_DEV_VERBOSE("Traversing " << path);
         auto &node = pathTree.getNodeByPath(path);
 
         // First do any inference possible here.
