@@ -172,12 +172,10 @@ namespace client {
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
         OSVR_DEV_VERBOSE(
             "PureClientContext::m_handleConfigAddNodes - clearing tree");
+        // reset path tree
         m_pathTree.reset();
-        for (auto const &iface : getInterfaces()) {
-            /// @todo slightly overkill, but it works - tree traversal would be
-            /// better.
-            m_removeCallbacksOnPath(iface->getPath());
-        }
+        // wipe out handlers in the interface tree
+        m_interfaces.clearHandlers();
 
         OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigAddNodes - "
                          "repopulating and connecting tree");
