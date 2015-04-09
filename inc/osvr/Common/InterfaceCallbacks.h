@@ -63,7 +63,11 @@ namespace common {
                 ReportType;
             using namespace std::placeholders;
             boost::fusion::at_key<ReportType>(m_callbacks)
-                .push_back(std::bind(cb, userdata, _1, _2));
+                .push_back(
+                    [cb, userdata](util::time::TimeValue const *timestamp,
+                                   ReportType const *report) {
+                        cb(userdata, timestamp, report);
+                    });
         }
 
         template <typename ReportType>

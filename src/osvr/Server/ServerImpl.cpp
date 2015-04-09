@@ -138,8 +138,7 @@ namespace server {
 
     void ServerImpl::triggerHardwareDetect() {
         OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
-        m_callControlled(std::bind(
-            &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));
+        m_callControlled([&] { m_ctx->triggerHardwareDetect(); });
     }
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
