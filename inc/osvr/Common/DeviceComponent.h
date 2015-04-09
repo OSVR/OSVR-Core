@@ -63,7 +63,9 @@ namespace common {
         /// @brief Registers a handler whose lifetime is tied to the lifetime of
         /// the component.
         ///
-        /// Only call if m_hasParent() is true
+        /// Only call if m_hasParent() is true.
+        ///
+        /// Your handler should return 0 unless something is horribly wrong.
         void m_registerHandler(vrpn_MESSAGEHANDLER handler, void *userdata,
                                RawMessageType const &msgType);
 
