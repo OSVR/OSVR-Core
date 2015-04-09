@@ -65,13 +65,20 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-        {
-            using namespace std::placeholders;
-            typedef common::DeduplicatingFunctionWrapper<Json::Value const &>
-                DedupJsonFunction;
-            m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
-                [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
-        }
+#define OSVR_USE_DEDUP
+#ifdef OSVR_USE_DEDUP
+        typedef common::DeduplicatingFunctionWrapper<Json::Value const &>
+            DedupJsonFunction;
+        m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
+            [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
+#else
+        // Just for testing purposes, figuring out why we end up looping too
+        // much.
+        m_systemComponent->registerReplaceTreeHandler(
+            [&](Json::Value const &nodes, util::time::TimeValue const &) {
+                m_handleReplaceTree(nodes);
+            });
+#endif
     }
 
     PureClientContext::~PureClientContext() {
