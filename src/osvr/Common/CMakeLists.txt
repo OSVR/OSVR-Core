@@ -77,6 +77,7 @@ set(API
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${HEADER_LOCATION}/Transform.h"
+    "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
@@ -119,7 +120,8 @@ set(SOURCE
     RoutingConstants.cpp
     RoutingKeys.cpp
     Serialization.cpp
-    SystemComponent.cpp)
+    SystemComponent.cpp
+    EyeTrackerComponent.cpp)
 
 osvr_add_library()
 
