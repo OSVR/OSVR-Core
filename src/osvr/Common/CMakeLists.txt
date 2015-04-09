@@ -24,6 +24,7 @@ set(API
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
+    "${HEADER_LOCATION}/DeduplicatingFunctionWrapper.h"
     "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
