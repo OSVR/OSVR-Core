@@ -26,6 +26,7 @@
 #define INCLUDED_CommonComponent_h_GUID_199AFD54_3489_4295_30F9_00B7CE33FE31
 
 // Internal Includes
+#include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
 

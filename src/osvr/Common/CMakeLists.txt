@@ -23,6 +23,7 @@ set(API
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/Common.h"
     "${HEADER_LOCATION}/CommonComponent.h"
+    "${HEADER_LOCATION}/CommonComponent_fwd.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
     "${HEADER_LOCATION}/DeduplicatingFunctionWrapper.h"

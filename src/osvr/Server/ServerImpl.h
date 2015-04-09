@@ -35,6 +35,7 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Util/Flag.h>
 
@@ -155,6 +156,9 @@ namespace server {
 
         /// @brief System device component
         common::SystemComponent *m_systemComponent;
+
+        /// @brief Common component for system device
+        common::CommonComponent *m_commonComponent;
 
         /// @brief JSON routing directives
         common::RouteContainer m_routes;

@@ -33,6 +33,7 @@
 #include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
 #include <osvr/Util/Microsleep.h>
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/CommonComponent.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
 
 // Library/third-party includes
@@ -74,8 +75,11 @@ namespace server {
             &ServerImpl::m_handleUpdatedRoute, this);
 
         // Things to do when we get a new incoming connection
-        m_conn->registerConnectionHandler([&] { triggerHardwareDetect(); });
-        m_conn->registerConnectionHandler([&] { m_sendTree(); });
+        m_commonComponent =
+            m_systemDevice->addComponent(common::CommonComponent::create());
+        m_commonComponent->registerPingHandler(
+            [&] { triggerHardwareDetect(); });
+        m_commonComponent->registerPingHandler([&] { m_sendTree(); });
 
         // Deal with updated device descriptors.
         m_conn->registerDescriptorHandler([&] { m_handleDeviceDescriptors(); });
