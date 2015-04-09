@@ -35,7 +35,6 @@
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
 #include "RemoteHandlerFactory.h"
-#include "HandlerContainer.h"
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -43,7 +42,6 @@
 
 // Standard includes
 #include <string>
-#include <unordered_map>
 
 namespace osvr {
 namespace client {
@@ -115,9 +113,6 @@ namespace client {
 
         /// @brief Factory for producing remote handlers.
         RemoteHandlerFactory m_factory;
-
-        /// @brief Container for remote handlers allowing easy updating.
-        HandlerContainer m_handlers;
 
         /// @brief RAII holder for networking start/stop
         common::NetworkingSupport m_network;

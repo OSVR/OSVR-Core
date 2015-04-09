@@ -98,7 +98,7 @@ namespace client {
         /// Update system device
         m_systemDevice->update();
         /// Update handlers.
-        m_handlers.update();
+        m_interfaces.updateHandlers();
     }
 
     void PureClientContext::m_sendRoute(std::string const &route) {
@@ -126,7 +126,7 @@ namespace client {
         /// Start by removing handler from interface tree and handler container
         /// for this path, if found. Ensures that if we early-out (fail to set
         /// up a handler) we don't have a leftover one still active.
-        m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
+        m_interfaces.eraseHandlerForPath(path);
 
         auto source = common::resolveTreeNode(m_pathTree, path);
         if (!source.is_initialized()) {
@@ -137,8 +137,6 @@ namespace client {
             *source, m_interfaces.getInterfacesForPath(path));
         if (handler) {
             OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
-            // Add the new handler to our collection
-            m_handlers.add(handler);
             // Store the new handler in the interface tree
             auto oldHandler = m_interfaces.replaceHandlerForPath(path, handler);
             BOOST_ASSERT_MSG(
@@ -150,7 +148,7 @@ namespace client {
     }
 
     void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
-        m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
+        m_interfaces.eraseHandlerForPath(path);
     }
 
     void PureClientContext::m_connectNeededCallbacks() {

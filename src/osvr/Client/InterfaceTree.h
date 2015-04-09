@@ -29,6 +29,7 @@
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Util/TreeNode.h>
 #include "RemoteHandler.h"
+#include "HandlerContainer.h"
 
 // Library/third-party includes
 // - none
@@ -44,7 +45,7 @@ namespace client {
         common::InterfaceList interfaces;
     };
     /// @brief Holds on to lists of interfaces organized into the tree
-    /// structure.
+    /// structure, as well as their associated handlers.
     class InterfaceTree {
       public:
         typedef InterfaceTreeValue value_type;
@@ -77,6 +78,11 @@ namespace client {
         RemoteHandlerPtr replaceHandlerForPath(std::string const &path,
                                                RemoteHandlerPtr const &handler);
 
+        /// @brief Call the update method on all handlers.
+        void updateHandlers();
+
+        /// @brief Removes all handlers
+        void clearHandlers();
 
       private:
         /// @brief Returns a reference to a node for a given path.
@@ -89,6 +95,8 @@ namespace client {
         RemoteHandlerPtr m_setHandler(node_type &node,
                                       RemoteHandlerPtr const &handler);
         node_type::ptr_type m_root;
+        HandlerContainer m_handlers;
+        friend class HandlerClearVisitor;
     };
 
 } // namespace client

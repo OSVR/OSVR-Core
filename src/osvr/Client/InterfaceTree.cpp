@@ -35,6 +35,18 @@
 
 namespace osvr {
 namespace client {
+    class HandlerClearVisitor {
+      public:
+        HandlerClearVisitor(InterfaceTree &tree) : m_tree(&tree) {}
+        void operator()(InterfaceTree::node_type &node) {
+            m_tree->m_removeHandler(node);
+            node.visitChildren(*this);
+        }
+
+      private:
+        InterfaceTree *m_tree;
+    };
+
     InterfaceTree::InterfaceTree() : m_root(node_type::createRoot()) {}
 
     bool InterfaceTree::addInterface(common::ClientInterfacePtr const &iface) {
@@ -79,6 +91,11 @@ namespace client {
                                          RemoteHandlerPtr const &handler) {
         return m_setHandler(m_getNodeForPath(path), handler);
     }
+
+    void InterfaceTree::updateHandlers() { m_handlers.update(); }
+    void InterfaceTree::clearHandlers() {
+        HandlerClearVisitor visitor{*this};
+        visitor(*m_root);
     }
 
     InterfaceTree::node_type &
@@ -89,6 +106,7 @@ namespace client {
     RemoteHandlerPtr InterfaceTree::m_removeHandler(node_type &node) {
         auto ret = node.value().handler;
         node.value().handler.reset();
+        m_handlers.remove(ret);
         return ret;
     }
 
@@ -97,6 +115,7 @@ namespace client {
                                 RemoteHandlerPtr const &handler) {
         auto ret = m_removeHandler(node);
         node.value().handler = handler;
+        m_handlers.add(handler);
         return ret;
     }
 } // namespace client
