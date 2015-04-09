@@ -185,9 +185,5 @@ namespace client {
         m_connectNeededCallbacks();
     }
 
-    common::PathElement &
-    PureClientContext::m_getElementByPath(std::string const &path) {
-        return m_pathTree.getNodeByPath(path).value();
-    }
 } // namespace client
 } // namespace osvr

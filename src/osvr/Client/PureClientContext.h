@@ -86,10 +86,6 @@ namespace client {
         /// or more interface objects but no remote handler.
         void m_connectNeededCallbacks();
 
-        /// @brief Looks up a path in the path tree and returns the value (the
-        /// common::PathElement) there.
-        common::PathElement &m_getElementByPath(std::string const &path);
-
         /// @brief The main OSVR server host: usually localhost
         std::string m_host;
 
