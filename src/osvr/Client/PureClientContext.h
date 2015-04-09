@@ -56,32 +56,67 @@ namespace client {
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
 
+        /// @brief Called with each new interface object before it is returned
+        /// to the client.
         virtual void
         m_handleNewInterface(common::ClientInterfacePtr const &iface);
+
+        /// @brief Called with each interface object to be released/deleted
+        /// after it is removed from the context's list of interfaces but before
+        /// it is deleted.
         virtual void
         m_handleReleasingInterface(common::ClientInterfacePtr const &iface);
 
+        /// @brief Given a path, remove any existing handler for that path, then
+        /// attempt to fully resolve the path to its source and construct a
+        /// handler for it.
         void m_connectCallbacksOnPath(std::string const &path);
+
+        /// @brief Given a path, remove any existing handler for that path from
+        /// both the handler container and the interface tree.
         void m_removeCallbacksOnPath(std::string const &path);
 
+        /// @brief Given a JSON array of nodes representing a path tree, wipe
+        /// out existing path tree and remote handlers, build new path tree, and
+        /// set up new remote handlers for all known interfaces.
         void m_handleReplaceTree(Json::Value const &nodes);
+
+        /// @brief Calls m_connectCallbacksOnPath() for every path that has one
+        /// or more interface objects but no remote handler.
         void m_connectNeededCallbacks();
 
+        /// @brief Looks up a path in the path tree and returns the value (the
+        /// common::PathElement) there.
         common::PathElement &m_getElementByPath(std::string const &path);
 
+        /// @brief The main OSVR server host: usually localhost
         std::string m_host;
+
+        /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;
+
+        /// @brief The "OSVR" system device for control messages
         common::BaseDevicePtr m_systemDevice;
+
+        /// @brief The system component providing access to sending/receiving
+        /// control messages.
         common::SystemComponent *m_systemComponent;
 
+        /// @brief All open VRPN connections, keyed by host
         VRPNConnectionCollection m_vrpnConns;
 
+        /// @brief Path tree
         common::PathTree m_pathTree;
+
+        /// @brief Tree parallel to path tree for holding interface objects and
+        /// remote handlers.
         InterfaceTree m_interfaces;
 
+        /// @brief Factory for producing remote handlers.
         RemoteHandlerFactory m_factory;
-        HandlerContainer m_handlers;
 
+        /// @brief Container for remote handlers allowing easy updating.
+        HandlerContainer m_handlers;
     };
 } // namespace client
 } // namespace osvr
