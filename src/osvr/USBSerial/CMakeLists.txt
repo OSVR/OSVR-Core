@@ -23,6 +23,8 @@ set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING osvrcore_MAJOR_VERSION)
 
 target_include_directories(${LIBNAME_FULL}
+    PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../vendor/com_smart_pointer"
     PUBLIC
     ${Boost_INCLUDE_DIRS})
 
