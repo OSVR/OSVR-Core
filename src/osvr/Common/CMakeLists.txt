@@ -22,6 +22,7 @@ set(API
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/Common.h"
+    "${HEADER_LOCATION}/CommonComponent.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
     "${HEADER_LOCATION}/DeduplicatingFunctionWrapper.h"
@@ -80,6 +81,7 @@ set(SOURCE
     ClientContext.cpp
     ClientInterface.cpp
     Common.cpp
+    CommonComponent.cpp
     ConfigByteSwapping.h.cmake_in
     CreateDevice.cpp
     DeviceComponent.cpp
