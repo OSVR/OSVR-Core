@@ -56,9 +56,6 @@ namespace client {
         ButtonRemoteFactory(m_vrpnConns).registerWith(m_factory);
         ImagingRemoteFactory(m_vrpnConns).registerWith(m_factory);
 
-        /// @todo remove this line
-        m_setupDummyTree();
-
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;
         m_mainConn = m_vrpnConns.getConnection(
@@ -68,17 +65,8 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-/// Temporarily still using the existing route messages
-#if 0
-        m_systemComponent->registerRoutesHandler(
-            &PureClientContext::m_handleRoutingMessage, this);
-#endif
         {
             using namespace std::placeholders;
-#if 0
-            m_systemComponent->registerReplaceTreeHandler(std::bind(
-                &PureClientContext::m_handleReplaceTree, this, _1, _2));
-#endif
 
             m_systemComponent->registerReplaceTreeHandler(
                 common::DeduplicatingFunctionWrapper<Json::Value const &>(
@@ -91,42 +79,6 @@ namespace client {
         for (auto const &iface : getInterfaces()) {
             m_handleReleasingInterface(iface);
         }
-    }
-
-    void PureClientContext::m_setupDummyTree() {
-#if 0
-        using namespace common::elements;
-        m_getElementByPath("/org_opengoggles_bundled_Multiserver") =
-            PluginElement();
-        m_getElementByPath(
-            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0") =
-            DeviceElement::createVRPNDeviceElement(
-                "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-                "localhost");
-        m_getElementByPath(
-            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker") =
-            InterfaceElement();
-        m_getElementByPath(
-            "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/analog") =
-            InterfaceElement();
-
-        m_getElementByPath("/org_opengoggles_bundled_Multiserver/RazerHydra0") =
-            DeviceElement::createVRPNDeviceElement(
-                "org_opengoggles_bundled_Multiserver/RazerHydra0", "localhost");
-        m_getElementByPath(
-            "/org_opengoggles_bundled_Multiserver/RazerHydra0/button") =
-            InterfaceElement();
-
-        m_getElementByPath(
-            "/org_opengoggles_bundled_Multiserver/OneEuroFilter0") =
-            DeviceElement::createVRPNDeviceElement(
-                "org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-                "localhost");
-
-        m_getElementByPath(
-            "/org_opengoggles_bundled_Multiserver/OneEuroFilter0/tracker") =
-            InterfaceElement();
-#endif
     }
 
     void PureClientContext::m_update() {
@@ -173,8 +125,7 @@ namespace client {
         auto handler = m_factory.invokeFactory(
             *source, m_interfaces.getInterfacesForPath(path));
         if (handler) {
-            std::cout << "Successfully produced handler for " << path << "\n";
-            // OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
+            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
             // Add the new handler to our collection
             m_handlers.add(handler);
             // Store the new handler in the interface tree
@@ -183,8 +134,7 @@ namespace client {
                 !oldHandler,
                 "We removed the old handler before so it should be null now");
         } else {
-            std::cout << "Could not produce handler for " << path << "\n";
-            // OSVR_DEV_VERBOSE("Could not produce handler for " << path);
+            OSVR_DEV_VERBOSE("Could not produce handler for " << path);
         }
     }
 
@@ -192,43 +142,6 @@ namespace client {
         m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
     }
 
-#if 0
-    int PureClientContext::m_handleRoutingMessage(void *userdata,
-                                                  vrpn_HANDLERPARAM p) {
-        auto self = static_cast<PureClientContext *>(userdata);
-        auto newString = std::string(p.buffer, p.payload_len);
-        if (newString == self->m_directivesString) {
-            return 0;
-        }
-        self->m_directivesString = newString;
-        common::RouteContainer newDirectives{newString};
-
-        OSVR_DEV_VERBOSE("Replacing routing directives: had "
-                         << self->m_routingDirectives.size() << ", received "
-                         << newDirectives.size());
-        for (auto const &route : self->m_routingDirectives.getRouteList()) {
-            self->m_removeCallbacksOnPath(
-                common::RouteContainer::getDestinationFromString(route));
-        }
-        self->m_routingDirectives = newDirectives;
-        self->m_populateTreeFromRoutes();
-        return 0;
-    }
-    void PureClientContext::m_populateTreeFromRoutes() {
-
-        OSVR_DEV_VERBOSE(
-            "Entering PureClientContext::m_populateTreeFromRoutes");
-        Json::Reader reader;
-        Json::Value val;
-        for (auto const &route : m_routingDirectives.getRouteList()) {
-
-            auto path = common::RouteContainer::getDestinationFromString(route);
-            m_getElementByPath(path) = common::elements::AliasElement(
-                common::RouteContainer::getSourceFromString(route));
-            m_connectCallbacksOnPath(path);
-        }
-    }
-#endif
     void PureClientContext::m_connectNeededCallbacks() {
         OSVR_DEV_VERBOSE(
             "*** Entering PureClientContext::m_connectNeededCallbacks");

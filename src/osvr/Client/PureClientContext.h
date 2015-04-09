@@ -53,7 +53,6 @@ namespace client {
         virtual ~PureClientContext();
 
       private:
-        void m_setupDummyTree();
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
 
@@ -66,9 +65,6 @@ namespace client {
         void m_removeCallbacksOnPath(std::string const &path);
 
         void m_handleReplaceTree(Json::Value const &nodes);
-        static int VRPN_CALLBACK
-        m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
-        void m_populateTreeFromRoutes();
         void m_connectNeededCallbacks();
 
         common::PathElement &m_getElementByPath(std::string const &path);
@@ -86,7 +82,6 @@ namespace client {
         RemoteHandlerFactory m_factory;
         HandlerContainer m_handlers;
 
-        std::string m_directivesString;
     };
 } // namespace client
 } // namespace osvr
