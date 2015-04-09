@@ -63,7 +63,8 @@ namespace common {
             static const char *identifier();
         };
 
-        class ConfigFromServer : public MessageRegistration<ConfigFromServer> {
+        class ReplacementTreeFromServer
+            : public MessageRegistration<ReplacementTreeFromServer> {
           public:
             class MessageSerialization;
             static const char *identifier();
@@ -103,25 +104,21 @@ namespace common {
 
         /// @brief Message from server, updating/replacing the client's
         /// configuration
-        messages::ConfigFromServer configOut;
+        messages::ReplacementTreeFromServer treeOut;
 
         typedef std::function<void(Json::Value const &,
                                    util::time::TimeValue const &)> JsonHandler;
-        typedef std::function<void(util::time::TimeValue const &)> ResetHandler;
-        OSVR_COMMON_EXPORT void registerAddToTreeHandler(JsonHandler cb);
-        OSVR_COMMON_EXPORT void registerResetTreeHandler(ResetHandler cb);
+        OSVR_COMMON_EXPORT void registerReplaceTreeHandler(JsonHandler cb);
 
         OSVR_COMMON_EXPORT void sendReplacementTree(PathTree &tree);
 
       private:
         SystemComponent();
         virtual void m_parentSet();
-        void m_registerConfigHandler();
         static int VRPN_CALLBACK
-        m_handleConfig(void *userdata, vrpn_HANDLERPARAM p);
+        m_handleReplaceTree(void *userdata, vrpn_HANDLERPARAM p);
 
-        std::vector<JsonHandler> m_configAddToTreeHandlers;
-        std::vector<ResetHandler> m_configResetHandlers;
+        std::vector<JsonHandler> m_replaceTreeHandlers;
     };
 } // namespace common
 } // namespace osvr

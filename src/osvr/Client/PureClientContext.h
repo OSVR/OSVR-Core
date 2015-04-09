@@ -65,9 +65,8 @@ namespace client {
         void m_connectCallbacksOnPath(std::string const &path);
         void m_removeCallbacksOnPath(std::string const &path);
 
-        void m_handleConfigReset(util::time::TimeValue const &);
-        void m_handleConfigAddNodes(Json::Value const &nodes,
-                                    util::time::TimeValue const &);
+        void m_handleReplaceTree(Json::Value const &nodes,
+                                 util::time::TimeValue const &);
         static int VRPN_CALLBACK
         m_handleRoutingMessage(void *userdata, vrpn_HANDLERPARAM p);
         void m_populateTreeFromRoutes();

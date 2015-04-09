@@ -74,10 +74,8 @@ namespace client {
 #endif
         {
             using namespace std::placeholders;
-            m_systemComponent->registerResetTreeHandler(
-                std::bind(&PureClientContext::m_handleConfigReset, this, _1));
-            m_systemComponent->registerAddToTreeHandler(std::bind(
-                &PureClientContext::m_handleConfigAddNodes, this, _1, _2));
+            m_systemComponent->registerReplaceTreeHandler(std::bind(
+                &PureClientContext::m_handleReplaceTree, this, _1, _2));
         }
     }
 
@@ -186,16 +184,6 @@ namespace client {
         m_handlers.remove(m_interfaces.eraseHandlerForPath(path));
     }
 
-    void PureClientContext::m_handleConfigReset(util::time::TimeValue const &) {
-
-        OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigReset");
-        m_pathTree.reset();
-        for (auto const &iface : getInterfaces()) {
-            /// @todo slightly overkill, but it works - tree traversal would be
-            /// better.
-            m_removeCallbacksOnPath(iface->getPath());
-        }
-    }
 #if 0
     int PureClientContext::m_handleRoutingMessage(void *userdata,
                                                   vrpn_HANDLERPARAM p) {
@@ -251,10 +239,19 @@ namespace client {
             "*** Exiting PureClientContext::m_connectNeededCallbacks");
     }
 
-    void
-    PureClientContext::m_handleConfigAddNodes(Json::Value const &nodes,
-                                              util::time::TimeValue const &) {
-        OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigAddNodes");
+    void PureClientContext::m_handleReplaceTree(Json::Value const &nodes,
+                                                util::time::TimeValue const &) {
+        OSVR_DEV_VERBOSE(
+            "PureClientContext::m_handleConfigAddNodes - clearing tree");
+        m_pathTree.reset();
+        for (auto const &iface : getInterfaces()) {
+            /// @todo slightly overkill, but it works - tree traversal would be
+            /// better.
+            m_removeCallbacksOnPath(iface->getPath());
+        }
+
+        OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigAddNodes - "
+                         "repopulating and connecting tree");
         common::jsonToPathTree(m_pathTree, nodes);
         m_connectNeededCallbacks();
     }
