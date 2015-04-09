@@ -37,6 +37,7 @@
 #include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 
 // Library/third-party includes
 #include <json/reader.h>
@@ -74,8 +75,15 @@ namespace client {
 #endif
         {
             using namespace std::placeholders;
+#if 0
             m_systemComponent->registerReplaceTreeHandler(std::bind(
                 &PureClientContext::m_handleReplaceTree, this, _1, _2));
+#endif
+
+            m_systemComponent->registerReplaceTreeHandler(
+                common::DeduplicatingFunctionWrapper<Json::Value const &>(
+                    std::bind(&PureClientContext::m_handleReplaceTree, this,
+                              _1)));
         }
     }
 
@@ -239,8 +247,7 @@ namespace client {
             "*** Exiting PureClientContext::m_connectNeededCallbacks");
     }
 
-    void PureClientContext::m_handleReplaceTree(Json::Value const &nodes,
-                                                util::time::TimeValue const &) {
+    void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
         OSVR_DEV_VERBOSE(
             "PureClientContext::m_handleConfigAddNodes - clearing tree");
         m_pathTree.reset();
