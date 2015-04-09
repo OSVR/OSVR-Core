@@ -40,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/NetworkClassOfService.h"
+    "${HEADER_LOCATION}/NetworkingSupport.h"
     "${HEADER_LOCATION}/OriginalSource.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
@@ -90,6 +91,7 @@ set(SOURCE
     MessageHandler.cpp
     MessageRegistration.cpp
     NetworkClassOfService.cpp
+    NetworkingSupport.cpp
     OriginalSource.cpp
     PathElementTools.cpp
     PathElementTypes.cpp

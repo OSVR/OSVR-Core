@@ -50,6 +50,11 @@ namespace client {
 
     PureClientContext::PureClientContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
+
+        if (!m_network.isUp()) {
+            throw std::runtime_error("Network error: " + m_network.getError());
+        }
+
         /// Register all the factories.
         TrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
         AnalogRemoteFactory(m_vrpnConns).registerWith(m_factory);

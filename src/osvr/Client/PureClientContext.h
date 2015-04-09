@@ -30,6 +30,7 @@
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Common/NetworkingSupport.h>
 #include <osvr/Util/TimeValue_fwd.h>
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
@@ -117,6 +118,9 @@ namespace client {
 
         /// @brief Container for remote handlers allowing easy updating.
         HandlerContainer m_handlers;
+
+        /// @brief RAII holder for networking start/stop
+        common::NetworkingSupport m_network;
     };
 } // namespace client
 } // namespace osvr
