@@ -148,8 +148,6 @@ namespace client {
     }
 
     void PureClientContext::m_connectNeededCallbacks() {
-        OSVR_DEV_VERBOSE(
-            "*** Entering PureClientContext::m_connectNeededCallbacks");
         for (auto const &iface : getInterfaces()) {
             /// @todo slightly overkill, but it works - tree traversal would be
             /// better.
@@ -160,22 +158,18 @@ namespace client {
                 m_connectCallbacksOnPath(path);
             }
         }
-
-        OSVR_DEV_VERBOSE(
-            "*** Exiting PureClientContext::m_connectNeededCallbacks");
     }
 
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
-        OSVR_DEV_VERBOSE(
-            "PureClientContext::m_handleConfigAddNodes - clearing tree");
+        OSVR_DEV_VERBOSE("Got updated path tree, processing");
         // reset path tree
         m_pathTree.reset();
         // wipe out handlers in the interface tree
         m_interfaces.clearHandlers();
 
-        OSVR_DEV_VERBOSE("PureClientContext::m_handleConfigAddNodes - "
-                         "repopulating and connecting tree");
+        // populate path tree from message
         common::jsonToPathTree(m_pathTree, nodes);
+        // re-connect handlers.
         m_connectNeededCallbacks();
     }
 
