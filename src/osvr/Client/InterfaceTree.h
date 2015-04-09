@@ -77,10 +77,17 @@ namespace client {
         RemoteHandlerPtr replaceHandlerForPath(std::string const &path,
                                                RemoteHandlerPtr const &handler);
 
-        /// @brief Returns a reference to a node for a given path.
-        node_type &getNodeForPath(std::string const &path);
 
       private:
+        /// @brief Returns a reference to a node for a given path.
+        node_type &m_getNodeForPath(std::string const &path);
+
+        /// @brief Internal helper for removal of a handler
+        RemoteHandlerPtr m_removeHandler(node_type &node);
+
+        /// @brief Internal helper for setting of a handler
+        RemoteHandlerPtr m_setHandler(node_type &node,
+                                      RemoteHandlerPtr const &handler);
         node_type::ptr_type m_root;
     };
 

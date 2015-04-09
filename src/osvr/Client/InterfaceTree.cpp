@@ -62,36 +62,42 @@ namespace client {
 
     common::InterfaceList &
     InterfaceTree::getInterfacesForPath(std::string const &path) {
-        return getNodeForPath(path).value().interfaces;
+        return m_getNodeForPath(path).value().interfaces;
     }
 
     RemoteHandlerPtr InterfaceTree::getHandlerForPath(std::string const &path) {
-        return getNodeForPath(path).value().handler;
+        return m_getNodeForPath(path).value().handler;
     }
 
-    /// @brief Clears and returns the handler for a given path.
     RemoteHandlerPtr
     InterfaceTree::eraseHandlerForPath(std::string const &path) {
-        auto &node = getNodeForPath(path);
+        return m_removeHandler(m_getNodeForPath(path));
+    }
+
+    RemoteHandlerPtr
+    InterfaceTree::replaceHandlerForPath(std::string const &path,
+                                         RemoteHandlerPtr const &handler) {
+        return m_setHandler(m_getNodeForPath(path), handler);
+    }
+    }
+
+    InterfaceTree::node_type &
+    InterfaceTree::m_getNodeForPath(std::string const &path) {
+        return common::detail::pathParseAndRetrieve(path, *m_root);
+    }
+
+    RemoteHandlerPtr InterfaceTree::m_removeHandler(node_type &node) {
         auto ret = node.value().handler;
         node.value().handler.reset();
         return ret;
     }
 
-    /// @brief Sets the handler for a given path, returning the old handler if
-    /// any.
     RemoteHandlerPtr
-    InterfaceTree::replaceHandlerForPath(std::string const &path,
-                                         RemoteHandlerPtr const &handler) {
-        auto &node = getNodeForPath(path);
-        auto ret = node.value().handler;
+    InterfaceTree::m_setHandler(node_type &node,
+                                RemoteHandlerPtr const &handler) {
+        auto ret = m_removeHandler(node);
         node.value().handler = handler;
         return ret;
-    }
-
-    InterfaceTree::node_type &
-    InterfaceTree::getNodeForPath(std::string const &path) {
-        return common::detail::pathParseAndRetrieve(path, *m_root);
     }
 } // namespace client
 } // namespace osvr
