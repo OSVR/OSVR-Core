@@ -63,7 +63,7 @@ namespace common {
         /// exceptions::ForbiddenParentPath, exceptions::ImpossibleParentPath
         template <typename ValueType>
         inline util::TreeNode<ValueType> &
-        treePathRetrieve(std::string path, util::TreeNode<ValueType> &node,
+        treePathRetrieve(util::TreeNode<ValueType> &node, std::string path,
                          bool permitParent = false) {
             typedef util::TreeNode<ValueType> Node;
 
@@ -156,8 +156,8 @@ namespace common {
         /// exceptions::EmptyPathComponent, exceptions::ForbiddenParentPath
         template <typename ValueType>
         inline util::TreeNode<ValueType> &
-        pathParseAndRetrieve(std::string const &path,
-                             util::TreeNode<ValueType> &root) {
+        pathParseAndRetrieve(util::TreeNode<ValueType> &root,
+                             std::string const &path) {
             BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
             if (path.empty()) {
                 throw exceptions::EmptyPath();
@@ -169,7 +169,7 @@ namespace common {
                 throw exceptions::PathNotAbsolute(path);
             }
 
-            return treePathRetrieve(path, root);
+            return treePathRetrieve(root, path);
         }
     } // namespace detail
 } // namespace common

@@ -39,12 +39,12 @@ namespace osvr {
 namespace common {
     PathTree::PathTree() : m_root(PathNode::createRoot()) {}
     PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return detail::pathParseAndRetrieve(path, *m_root);
+        return detail::pathParseAndRetrieve(*m_root, path);
     }
     PathNode &
     PathTree::getNodeByPath(std::string const &path,
                             PathElement const &finalComponentDefault) {
-        auto &ret = detail::pathParseAndRetrieve(path, *m_root);
+        auto &ret = detail::pathParseAndRetrieve(*m_root, path);
 
         // Handle null elements as final component.
         elements::ifNullReplaceWith(ret.value(), finalComponentDefault);
@@ -95,7 +95,7 @@ namespace common {
     bool addAliasFromRoute(PathNode &node, std::string const &route,
                            bool automatic) {
         auto path = common::RouteContainer::getDestinationFromString(route);
-        auto &aliasNode = detail::treePathRetrieve(path, node);
+        auto &aliasNode = detail::treePathRetrieve(node, path);
         return addAlias(aliasNode,
                         common::RouteContainer::getSourceFromString(route),
                         automatic);

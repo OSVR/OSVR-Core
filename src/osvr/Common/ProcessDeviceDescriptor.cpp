@@ -56,7 +56,7 @@ namespace common {
             return changed;
         }
         for (auto const &iface : ifaces.getMemberNames()) {
-            auto &ifaceNode = detail::treePathRetrieve(iface, devNode);
+            auto &ifaceNode = detail::treePathRetrieve(devNode, iface);
             if (elements::isNull(ifaceNode.value())) {
                 ifaceNode.value() = elements::InterfaceElement();
                 changed.set();
