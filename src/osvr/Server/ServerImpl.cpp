@@ -245,8 +245,6 @@ namespace server {
                 OSVR_DEV_VERBOSE("Developer Warning: No device descriptor for "
                                  << dev->getName());
             } else {
-                OSVR_DEV_VERBOSE("Descriptor for " << dev->getName() << "\n"
-                                                   << descriptor);
                 m_treeDirty += common::processDeviceDescriptorForPathTree(
                     m_tree, dev->getName(), descriptor);
             }
