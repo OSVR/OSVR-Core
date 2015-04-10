@@ -22,18 +22,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define OSVR_DEV_VERBOSE_DISABLE
+
 // Internal Includes
 #include <osvr/Common/ProcessDeviceDescriptor.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/RoutingConstants.h>
 #include <osvr/Util/Flag.h>
+#include <osvr/Util/Verbosity.h>
 
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
 #include <json/value.h>
 #include <json/reader.h>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 // - none
@@ -62,6 +66,70 @@ namespace common {
                 changed.set();
             }
         }
+        return changed;
+    }
+
+    static const char TARGET_KEY[] = "$target";
+    static const char SEMANTIC_KEY[] = "semantic";
+    namespace {
+        class SemanticRecursion : boost::noncopyable {
+          public:
+            SemanticRecursion(PathNode &devNode) : m_devNode(devNode) {}
+
+            util::Flag operator()(Json::Value const &semanticObject) {
+                m_recurse(semanticObject, SEMANTIC_KEY);
+                return m_flag;
+            }
+
+          private:
+            bool m_add(Json::Value const &currentLevel,
+                       std::string const &relativeSemanticPath) {
+                OSVR_DEV_VERBOSE("SemanticRecursion::m_add "
+                                 << relativeSemanticPath);
+                return addAliasFromSourceAndRelativeDest(
+                    m_devNode, currentLevel.toStyledString(),
+                    relativeSemanticPath);
+            }
+            void m_recurse(Json::Value const &currentLevel,
+                           std::string const &relativeSemanticPath) {
+                OSVR_DEV_VERBOSE("SemanticRecursion::m_recurse "
+                                 << relativeSemanticPath);
+                if (currentLevel.isString()) {
+                    m_flag += m_add(currentLevel, relativeSemanticPath);
+                    return;
+                }
+                if (currentLevel.isObject()) {
+                    Json::Value target = currentLevel[TARGET_KEY];
+                    if (!target.isNull()) {
+                        m_flag += m_add(target, relativeSemanticPath);
+                    }
+
+                    for (auto const &memberName :
+                         currentLevel.getMemberNames()) {
+                        if (TARGET_KEY == memberName) {
+                            continue;
+                        }
+                        m_recurse(currentLevel[memberName],
+                                  relativeSemanticPath + getPathSeparator() +
+                                      memberName);
+                    }
+                }
+            }
+            PathNode &m_devNode;
+            util::Flag m_flag;
+        };
+    } // namespace
+
+    static inline util::Flag
+    processSemanticFromDescriptor(PathNode &devNode, Json::Value const &desc) {
+        util::Flag changed;
+        Json::Value const &sem = desc[SEMANTIC_KEY];
+        if (!sem.isObject()) {
+            // Semantic member isn't an object or isn't a member
+            return changed;
+        }
+        SemanticRecursion f{devNode};
+        changed += f(sem);
         return changed;
     }
 
@@ -103,6 +171,8 @@ namespace common {
         }
 
         changed += processInterfacesFromDescriptor(devNode, descriptor);
+
+        changed += processSemanticFromDescriptor(devNode, descriptor);
 
         return changed.get();
     }
