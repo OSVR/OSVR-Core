@@ -44,6 +44,7 @@ set(API
     "${HEADER_LOCATION}/NetworkClassOfService.h"
     "${HEADER_LOCATION}/NetworkingSupport.h"
     "${HEADER_LOCATION}/OriginalSource.h"
+    "${HEADER_LOCATION}/ParseAlias.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
@@ -96,6 +97,7 @@ set(SOURCE
     NetworkClassOfService.cpp
     NetworkingSupport.cpp
     OriginalSource.cpp
+    ParseAlias.cpp
     PathElementTools.cpp
     PathElementTypes.cpp
     PathNode.cpp

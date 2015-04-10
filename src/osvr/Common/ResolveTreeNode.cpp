@@ -29,7 +29,7 @@
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/OriginalSource.h>
-#include <osvr/Common/JSONTransformVisitor.h>
+#include <osvr/Common/ParseAlias.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -69,22 +69,6 @@ namespace common {
         node.value() = elements::SensorElement();
     }
 
-    inline std::string getPathFromOldRouteSource(Json::Value obj) {
-        std::ostringstream ret;
-        if (obj.isObject() && obj.isMember("tracker")) {
-            auto tracker = obj["tracker"].asString();
-            if (tracker.front() != '/') {
-                ret << "/";
-            }
-            ret << tracker;
-            ret << "/tracker";
-            if (obj.isMember("sensor")) {
-                ret << "/";
-                ret << obj["sensor"].asInt();
-            }
-        }
-        return ret.str();
-    }
 
     // Forward declaration
     void resolveTreeNodeImpl(PathTree &pathTree, std::string const &path,
@@ -106,42 +90,18 @@ namespace common {
         /// @brief Handle an alias element
         void operator()(elements::AliasElement const &elt) {
             // This is an alias.
-            /// @todo handle transforms
-            auto src = elt.getSource();
-            Json::Value val;
-            Json::Reader reader;
-            if (reader.parse(src, val)) {
-                if (val.isString()) {
-                    // Assume a string is just a string.
-                    m_recurse(val.asString());
-                    return;
-                }
-                if (val.isObject()) {
-                    // Assume an object means a transform.
-                    m_source.setTransform(src);
-
-                    JSONTransformVisitor xformParse(val);
-                    auto leaf = xformParse.getLeaf();
-
-                    if (leaf.isString()) {
-                        m_recurse(leaf.asString());
-                        return;
-                    }
-
-                    auto trackerEquiv = getPathFromOldRouteSource(leaf);
-                    if (!trackerEquiv.empty()) {
-                        m_recurse(trackerEquiv);
-                        return;
-                    }
-
-                    OSVR_DEV_VERBOSE("Couldn't handle transform leaf: "
-                                     << leaf.toStyledString());
-                    /// @todo finish
-                    return;
-                }
+            ParsedAlias parsed(elt.getSource());
+            if (!parsed.isValid()) {
+                OSVR_DEV_VERBOSE("Couldn't parse alias: "
+                    << elt.getSource());
+                return;
             }
-            // If we couldn't parse, just recurse directly on the string.
-            m_recurse(src);
+            /// @todo update the element with the normalized source?
+            if (!parsed.isSimple()) {
+                // Not simple: store the full string as a transform.
+                m_source.setTransform(parsed.getAlias());
+            }
+            m_recurse(parsed.getLeaf());
         }
 
         /// @brief Handle a sensor element
