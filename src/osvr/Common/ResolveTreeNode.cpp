@@ -69,7 +69,6 @@ namespace common {
         node.value() = elements::SensorElement();
     }
 
-
     // Forward declaration
     void resolveTreeNodeImpl(PathTree &pathTree, std::string const &path,
                              OriginalSource &source);
@@ -92,8 +91,7 @@ namespace common {
             // This is an alias.
             ParsedAlias parsed(elt.getSource());
             if (!parsed.isValid()) {
-                OSVR_DEV_VERBOSE("Couldn't parse alias: "
-                    << elt.getSource());
+                OSVR_DEV_VERBOSE("Couldn't parse alias: " << elt.getSource());
                 return;
             }
             /// @todo update the element with the normalized source?
