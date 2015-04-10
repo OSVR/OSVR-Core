@@ -35,6 +35,7 @@
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 
 #include "org_opengoggles_bundled_Multiserver_RazerHydra_json.h"
+#include "org_opengoggles_bundled_Multiserver_OneEuroFilter_json.h"
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
@@ -43,6 +44,9 @@
 #include "vrpn_Tracker_OSVRHackerDevKit.h"
 #include "vrpn_Tracker_Filter.h"
 #include <boost/noncopyable.hpp>
+
+#include <json/value.h>
+#include <json/reader.h>
 
 #ifdef OSVR_MULTISERVER_VERBOSE
 #include <boost/format.hpp>
@@ -94,6 +98,14 @@ class VRPNHardwareDetect : boost::noncopyable {
                 if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
                     gotDevice = true;
                     m_handlePath(dev->path);
+                    auto hydraJsonString = osvr::util::makeString(
+                        org_opengoggles_bundled_Multiserver_RazerHydra_json);
+                    Json::Value hydraJson;
+                    Json::Reader reader;
+                    if (!reader.parse(hydraJsonString, hydraJson)) {
+                        throw std::logic_error("Faulty JSON file for Hydra - "
+                                               "should not be possible!");
+                    }
                     /// Decorated name for Hydra
                     std::string name;
                     {
@@ -103,12 +115,32 @@ class VRPNHardwareDetect : boost::noncopyable {
                             reg.useDecoratedName(m_data.getName("RazerHydra"));
                         reg.registerDevice(new vrpn_Tracker_RazerHydra(
                             name.c_str(), reg.getVRPNConnection()));
-                        reg.setDeviceDescriptor(osvr::util::makeString(
-                            org_opengoggles_bundled_Multiserver_RazerHydra_json));
+                        reg.setDeviceDescriptor(hydraJsonString);
                     }
                     std::string localName = "*" + name;
 
                     {
+                        // Copy semantic paths for corresponding filter: just
+                        // want left/$target and right/$target
+                        Json::Value filterJson;
+                        if (!reader.parse(
+                                osvr::util::makeString(
+                                    org_opengoggles_bundled_Multiserver_OneEuroFilter_json),
+                                filterJson)) {
+                            throw std::logic_error("Faulty JSON file for One "
+                                                   "Euro Filter - should not "
+                                                   "be possible!");
+                        }
+                        auto &filterSem =
+                            (filterJson["semantic"] = Json::objectValue);
+                        auto &hydraSem = hydraJson["semantic"];
+                        for (auto const &element : {"left", "right"}) {
+                            filterSem[element] = Json::objectValue;
+                            filterSem[element]["$target"] =
+                                hydraSem[element]["$target"];
+                        }
+                        std::cout << filterJson.toStyledString() << std::endl;
+
                         // Corresponding filter
                         osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
                         reg.registerDevice(new vrpn_Tracker_FilterOneEuro(
@@ -116,6 +148,8 @@ class VRPNHardwareDetect : boost::noncopyable {
                                     m_data.getName("OneEuroFilter")).c_str(),
                             reg.getVRPNConnection(), localName.c_str(), 2, 1.15,
                             1.0, 1.2, 1.5, 5.0, 1.2));
+
+                        reg.setDeviceDescriptor(filterJson.toStyledString());
                     }
                     continue;
                 }

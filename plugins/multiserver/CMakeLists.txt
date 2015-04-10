@@ -1,4 +1,5 @@
 set(DESCRIPTORS
+    org_opengoggles_bundled_Multiserver_OneEuroFilter
     org_opengoggles_bundled_Multiserver_RazerHydra
     org_opengoggles_bundled_Multiserver_YEI_3Space_Sensor)
 set(JSON_HEADERS)
