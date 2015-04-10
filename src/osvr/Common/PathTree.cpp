@@ -27,6 +27,9 @@
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/RouteContainer.h>
+#include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Util/Verbosity.h>
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
@@ -82,6 +85,7 @@ namespace common {
     /// @return true if the node was changed
     static inline bool addAlias(PathNode &node, std::string const &source,
                                 bool automatic) {
+
         if (!aliasNeedsUpdate(node, source, automatic)) {
             return false;
         }
@@ -96,9 +100,58 @@ namespace common {
                            bool automatic) {
         auto path = common::RouteContainer::getDestinationFromString(route);
         auto &aliasNode = detail::treePathRetrieve(node, path);
-        return addAlias(aliasNode,
-                        common::RouteContainer::getSourceFromString(route),
-                        automatic);
+        ParsedAlias newSource(route);
+        if (!newSource.isValid()) {
+            /// @todo signify invalid route in some other way?
+            OSVR_DEV_VERBOSE("Could not parse route as a source: " << route);
+            return false;
+        }
+        if (!isPathAbsolute(newSource.getLeaf())) {
+            /// @todo signify not to pass relative paths here in some other way?
+            OSVR_DEV_VERBOSE(
+                "Route contains a relative path, not permitted: " << route);
+            return false;
+        }
+        OSVR_DEV_VERBOSE("addAliasFromRoute:\n\tRoute: "
+                         << route
+                         << "\n\tNew source: " << newSource.getAlias());
+        OSVR_DEV_VERBOSE("addAliasFromRoute: " << getFullPath(aliasNode)
+                                               << " -> "
+                                               << newSource.getLeaf());
+        return addAlias(aliasNode, newSource.getAlias(), automatic);
+    }
+
+    static inline std::string getAbsolutePath(PathNode &node,
+                                              std::string const &path) {
+        if (isPathAbsolute(path)) {
+            return path;
+        }
+        return getFullPath(detail::treePathRetrieve(node, path));
+    }
+
+    bool addAliasFromSourceAndRelativeDest(PathNode &node,
+                                           std::string const &source,
+                                           std::string const &dest,
+                                           bool automatic) {
+        auto &aliasNode = detail::treePathRetrieve(node, dest);
+        ParsedAlias newSource(source);
+        if (!newSource.isValid()) {
+            /// @todo signify invalid route in some other way?
+            OSVR_DEV_VERBOSE("Could not parse source: " << source);
+            return false;
+        }
+        auto absSource = getAbsolutePath(node, newSource.getLeaf());
+        newSource.setLeaf(absSource);
+        OSVR_DEV_VERBOSE("addAliasFromSourceAndRelativeDest:\n\tOld source: "
+                         << source
+                         << "\n\tNew source: " << newSource.getAlias());
+        OSVR_DEV_VERBOSE("addAliasFromSourceAndRelativeDest: "
+                         << getFullPath(aliasNode) << " -> " << absSource);
+        return addAlias(aliasNode, newSource.getAlias(), automatic);
+    }
+
+    bool isPathAbsolute(std::string const &source) {
+        return !source.empty() && source.at(0) == getPathSeparatorCharacter();
     }
 } // namespace common
 } // namespace osvr

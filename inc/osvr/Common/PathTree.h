@@ -90,6 +90,8 @@ namespace common {
                                            std::string const &dest,
                                            bool automatic = false);
 
+    bool isPathAbsolute(std::string const &source);
+
 } // namespace common
 } // namespace osvr
 
