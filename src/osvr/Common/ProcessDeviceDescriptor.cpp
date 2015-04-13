@@ -22,7 +22,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define OSVR_DEV_VERBOSE_DISABLE
+#undef OSVR_DEV_VERBOSE_DISABLE
 
 // Internal Includes
 #include <osvr/Common/ProcessDeviceDescriptor.h>
@@ -92,16 +92,12 @@ namespace common {
           private:
             bool m_add(Json::Value const &currentLevel,
                        std::string const &relativeSemanticPath) {
-                OSVR_DEV_VERBOSE("SemanticRecursion::m_add "
-                                 << relativeSemanticPath);
                 return addAliasFromSourceAndRelativeDest(
                     m_devNode, currentLevel.toStyledString(),
                     relativeSemanticPath, ALIASPRIORITY_SEMANTICROUTE);
             }
             void m_recurse(Json::Value const &currentLevel,
                            std::string const &relativeSemanticPath) {
-                OSVR_DEV_VERBOSE("SemanticRecursion::m_recurse "
-                                 << relativeSemanticPath);
                 if (currentLevel.isString()) {
                     m_flag += m_add(currentLevel, relativeSemanticPath);
                     return;
