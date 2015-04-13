@@ -39,6 +39,7 @@
 #include <codecvt>
 #include "intrusive_ptr_COM.h"
 #include <boost/intrusive_ptr.hpp>
+#include <boost/noncopyable.hpp>
 #endif // OSVR_WINDOWS
 
 // Standard includes
@@ -50,6 +51,28 @@ namespace usbserial {
 
 #if defined(OSVR_WINDOWS)
 
+    namespace {
+        /// @brief RAII wrapper for initializing/uninitializing COM.
+        class ComRAII : boost::noncopyable {
+          public:
+            ComRAII() : m_failed(false) {
+                auto result = CoInitializeEx(0, COINIT_MULTITHREADED);
+                if (FAILED(result)) {
+                    m_failed = true;
+                }
+            }
+            ~ComRAII() {
+                if (!m_failed) {
+                    CoUninitialize();
+                }
+            }
+            bool failed() const { return m_failed; }
+
+          private:
+            bool m_failed;
+        };
+    } // namespace
+
     std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID,
                                                      uint16_t productID) {
         using boost::intrusive_ptr;
@@ -58,9 +81,8 @@ namespace usbserial {
         std::vector<USBSerialDevice> devices;
 
         // initialize COM to make lib calls, otherwise we can't proceed
-        result = CoInitializeEx(0, COINIT_MULTITHREADED);
-
-        if (FAILED(result)) {
+        ComRAII comSetup;
+        if (comSetup.failed()) {
             return devices;
         }
 
@@ -75,7 +97,6 @@ namespace usbserial {
                                   IID_IWbemLocator, AttachPtr(locator));
 
         if (FAILED(result)) {
-            CoUninitialize();
             return devices;
         }
 
@@ -98,7 +119,7 @@ namespace usbserial {
             );
 
         if (FAILED(result)) {
-            CoUninitialize();
+            return devices;
         }
 
         // Set security levels on the proxy
@@ -109,7 +130,6 @@ namespace usbserial {
                               RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
 
         if (FAILED(result)) {
-            CoUninitialize();
             return devices;
         }
 
@@ -123,7 +143,6 @@ namespace usbserial {
             AttachPtr(devEnum));
 
         if (FAILED(result)) {
-            CoUninitialize();
             return devices;
         }
 
@@ -170,8 +189,6 @@ namespace usbserial {
             VariantClear(&vtHardware);
             VariantClear(&vtPath);
         }
-
-        CoUninitialize();
 
         return devices;
     }
