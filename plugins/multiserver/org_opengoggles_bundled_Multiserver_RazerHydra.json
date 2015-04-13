@@ -80,5 +80,11 @@
       },
       "trigger": "analog/5"
     }
+  },
+  "automaticAliases": {
+    "/me/hands/left": "semantic/left",
+    "/me/hands/right": "semantic/right",
+    "/controller/left": "semantic/left/*",
+    "/controller/right": "semantic/right/*"
   }
 }
