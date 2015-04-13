@@ -63,27 +63,47 @@ public:
     //      [in] addRef
     //          If true then the ptr's refcount will be incremented on acquisition.
     //
-    IntrusivePtrWrapper(boost::intrusive_ptr<T>& ref, bool addRef);
+    IntrusivePtrWrapper(boost::intrusive_ptr<T>& ref, bool addRef)
+        : m_ref(ref), m_addRef(addRef), m_ptr(nullptr)
+    {
+    }
 
     //
     //  Destructor.
     //
-    ~IntrusivePtrWrapper();
+    ~IntrusivePtrWrapper()
+    {
+        m_ref = boost::intrusive_ptr<T>(m_ptr, m_addRef);
+    }
+
+    //
+    // Assignment operator: deleted
+    //
+    IntrusivePtrWrapper & operator=(IntrusivePtrWrapper const &) = delete;
 
     //
     //  Implicit conversion to T**.
     //
-    operator T**();
+    operator T**()
+    {
+        return &m_ptr;
+    }
 
 	//
 	//  Implicit conversion to T*.
 	//
-	operator T*();
+    operator T*()
+    {
+        return m_ptr;
+    }
 
     //
     //  Implicit conversion to void**.
     //
-    operator void**();
+    operator void**()
+    {
+        return reinterpret_cast<void**>(&m_ptr);
+    }
 
 private:
     //
@@ -93,36 +113,6 @@ private:
     T* m_ptr;
     bool m_addRef;
 };
-
-template <typename T>
-inline IntrusivePtrWrapper<T>::IntrusivePtrWrapper(boost::intrusive_ptr<T>& ref, bool addRef)
-    : m_ref(ref), m_addRef(addRef), m_ptr(nullptr)
-{
-}
-
-template <typename T>
-inline IntrusivePtrWrapper<T>::~IntrusivePtrWrapper()
-{
-    m_ref = boost::intrusive_ptr<T>(m_ptr, m_addRef);
-}
-
-template <typename T>
-inline IntrusivePtrWrapper<T>::operator T**()
-{
-    return &m_ptr;
-}
-
-template <typename T>
-inline &IntrusivePtrWrapper<T>::operator T*()
-{
-	return m_ptr;
-}
-
-template <typename T>
-inline IntrusivePtrWrapper<T>::operator void**()
-{
-    return reinterpret_cast<void**>(&m_ptr);
-}
 
 
 //
