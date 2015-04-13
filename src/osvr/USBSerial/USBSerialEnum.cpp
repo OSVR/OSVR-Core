@@ -53,6 +53,8 @@ namespace usbserial {
     Enumerator::Enumerator(uint16_t vendorID, uint16_t productID)
         : m_impl(new EnumeratorImpl(vendorID, productID)){};
 
+    Enumerator::Enumerator() : m_impl(new EnumeratorImpl()){};
+
     Enumerator::~Enumerator() {}
 
     EnumeratorIterator Enumerator::begin() { return m_impl->begin(); }

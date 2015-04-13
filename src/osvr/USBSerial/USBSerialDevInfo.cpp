@@ -73,8 +73,9 @@ namespace usbserial {
         };
     } // namespace
 
-    std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID,
-                                                     uint16_t productID) {
+    std::vector<USBSerialDevice>
+    getSerialDeviceList(boost::optional<uint16_t> vendorID,
+                        boost::optional<uint16_t> productID) {
         using boost::intrusive_ptr;
 
         HRESULT result;
@@ -171,17 +172,25 @@ namespace usbserial {
             hr = wbemClassObj->Get(L"__PATH", 0, &vtPath, 0, 0);
             std::string devPath = convStr.to_bytes(vtPath.bstrVal);
 
-            std::string deviceVID = std::to_string(vendorID);
-            std::string devicePID = std::to_string(productID);
+            if ((vendorID) && (productID)) {
 
-            std::regex vidPidRegEx("VID[\\s&\\*\\#_]?" + deviceVID +
-                                   "[\\s&\\*\\#_]?PID[\\s&\\*\\#_]?" +
-                                   devicePID);
+                std::string deviceVID = std::to_string(*vendorID);
+                std::string devicePID = std::to_string(*productID);
 
-            // found a match
-            if (std::regex_search(HardwID, vidPidRegEx)) {
+                std::regex vidPidRegEx("VID[\\s&\\*\\#_]?" + deviceVID +
+                                       "[\\s&\\*\\#_]?PID[\\s&\\*\\#_]?" +
+                                       devicePID);
 
-                USBSerialDevice newDevice(vendorID, productID, devPath, sPort);
+                // found a match
+                if (std::regex_search(HardwID, vidPidRegEx)) {
+
+                    USBSerialDevice newDevice(*vendorID, *productID, devPath,
+                                              sPort);
+                    devices.push_back(newDevice);
+                }
+            } else {
+                USBSerialDevice newDevice(*vendorID, *productID, devPath,
+                                          sPort);
                 devices.push_back(newDevice);
             }
 

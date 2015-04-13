@@ -30,6 +30,7 @@
 #include <osvr/USBSerial/USBSerialDevice.h>
 
 // Library/third-party includes
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <string>
@@ -38,8 +39,9 @@
 namespace osvr {
 namespace usbserial {
 
-    std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID,
-                                                     uint16_t productID);
+    std::vector<USBSerialDevice> getSerialDeviceList(
+        boost::optional<uint16_t> vendorID = boost::optional<uint16_t>(),
+        boost::optional<uint16_t> productID = boost::optional<uint16_t>());
 
 } // namespace usbserial
 } // namespace osvr

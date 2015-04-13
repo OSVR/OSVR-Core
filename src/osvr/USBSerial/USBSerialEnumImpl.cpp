@@ -36,8 +36,7 @@
 namespace osvr {
 namespace usbserial {
 
-    EnumeratorImpl::EnumeratorImpl()
-        : devices(getSerialDeviceList(NO_FILTER, NO_FILTER)) {}
+    EnumeratorImpl::EnumeratorImpl() : devices(getSerialDeviceList()) {}
 
     EnumeratorImpl::EnumeratorImpl(uint16_t vendorID, uint16_t productID)
         : devices(getSerialDeviceList(vendorID, productID)) {}

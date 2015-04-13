@@ -32,8 +32,6 @@
 // Standard includes
 // - none
 
-#define NO_FILTER 0x0
-
 namespace osvr {
 namespace usbserial {
 
