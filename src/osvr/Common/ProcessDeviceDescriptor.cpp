@@ -38,6 +38,7 @@
 #include <json/value.h>
 #include <json/reader.h>
 #include <boost/noncopyable.hpp>
+#include <boost/variant/get.hpp>
 
 // Standard includes
 // - none
@@ -145,7 +146,8 @@ namespace common {
 
         /// Set up device node
         auto &devNode = tree.getNodeByPath(getPathSeparator() + devName);
-        if (elements::isNull(devNode.value())) {
+        auto devElt = boost::get<elements::DeviceElement>(&devNode.value());
+        if (nullptr == devElt) {
             std::string host{"localhost"};
             auto atLocation = devName.find('@');
             if (std::string::npos != atLocation) {
@@ -155,10 +157,9 @@ namespace common {
             }
             devNode.value() =
                 elements::DeviceElement::createVRPNDeviceElement(devName, host);
+            devElt = boost::get<elements::DeviceElement>(&devNode.value());
             changed.set();
         }
-
-        /// @todo store descriptor string in the device node
 
         /// Parse JSON
         Json::Value descriptor;
@@ -169,6 +170,11 @@ namespace common {
                 return changed.get();
             }
         }
+        if (descriptor == devElt->getDescriptor() && !changed) {
+            /// @todo no change in descriptor so no processing?
+            return changed.get();
+        }
+        devElt->getDescriptor() = descriptor;
 
         changed += processInterfacesFromDescriptor(devNode, descriptor);
 
