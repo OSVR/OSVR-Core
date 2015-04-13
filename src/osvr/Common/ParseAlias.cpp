@@ -60,6 +60,9 @@ namespace common {
     ParsedAlias::ParsedAlias(std::string const &src) : m_simple(true) {
         m_parse(src);
     }
+
+    ParsedAlias::ParsedAlias(Json::Value src) : m_simple(true) { m_parse(src); }
+
     bool ParsedAlias::isValid() const { return !m_value.isNull(); }
 
     bool ParsedAlias::isSimple() const { return m_simple; }
@@ -70,6 +73,10 @@ namespace common {
         Json::FastWriter writer;
         writer.omitEndingLineFeed();
         return writer.write(m_value);
+    }
+
+    Json::Value ParsedAlias::getAliasValue() const {
+        return m_value;
     }
 
     void ParsedAlias::m_parse(std::string const &src) {

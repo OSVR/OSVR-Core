@@ -41,6 +41,9 @@ namespace common {
         /// @brief Constructor - performs parse and normalization of format.
         ParsedAlias(std::string const &src);
 
+        /// @brief Constructor - performs normalization of format.
+        ParsedAlias(Json::Value src);
+
         /// @brief Did the alias parse in a valid way?
         bool isValid() const;
 
@@ -55,6 +58,10 @@ namespace common {
 
         /// @brief Get the normalized, cleaned, compacted version of the alias.
         std::string getAlias() const;
+
+        /// @brief Gets a copy of the normalized version of the alias as a
+        /// Json::Value
+        Json::Value getAliasValue() const;
 
       private:
         void m_parse(std::string const &src);
