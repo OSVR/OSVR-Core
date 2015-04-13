@@ -37,6 +37,8 @@
 #include <windows.h>
 #include <locale>
 #include <codecvt>
+#include "intrusive_ptr_COM.h"
+#include <boost/intrusive_ptr.hpp>
 #endif // OSVR_WINDOWS
 
 // Standard includes
@@ -50,6 +52,7 @@ namespace usbserial {
 
     std::vector<USBSerialDevice> getSerialDeviceList(uint16_t vendorID,
                                                      uint16_t productID) {
+        using boost::intrusive_ptr;
 
         HRESULT result;
         std::vector<USBSerialDevice> devices;
@@ -66,10 +69,10 @@ namespace usbserial {
         // settings
 
         // Obtain the initial locator to WMI
-        IWbemLocator *locator = NULL;
+        intrusive_ptr<IWbemLocator> locator;
 
         result = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
-                                  IID_IWbemLocator, (LPVOID *)&locator);
+                                  IID_IWbemLocator, AttachPtr(locator));
 
         if (FAILED(result)) {
             CoUninitialize();
@@ -78,7 +81,7 @@ namespace usbserial {
 
         // Connect to WMI through the IWbemLocator::ConnectServer method
 
-        IWbemServices *wbemServices = NULL;
+        intrusive_ptr<IWbemServices> wbemServices;
 
         // Connect to the root\cimv2 namespace with
         // the current user and obtain pointer pSvc
@@ -91,24 +94,21 @@ namespace usbserial {
             NULL,                    // Security flags.
             0,                       // Authority (for example, Kerberos)
             0,                       // Context object
-            &wbemServices            // pointer to IWbemServices proxy
+            AttachPtr(wbemServices)  // pointer to IWbemServices proxy
             );
 
         if (FAILED(result)) {
-            locator->Release();
             CoUninitialize();
         }
 
         // Set security levels on the proxy
 
         result =
-            CoSetProxyBlanket(wbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
-                              NULL, RPC_C_AUTHN_LEVEL_CALL,
+            CoSetProxyBlanket(wbemServices.get(), RPC_C_AUTHN_WINNT,
+                              RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL,
                               RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
 
         if (FAILED(result)) {
-            wbemServices->Release();
-            locator->Release();
             CoUninitialize();
             return devices;
         }
@@ -116,25 +116,23 @@ namespace usbserial {
         // Use the IWbemServices pointer to make requests of WMI
 
         // Get a list of serial devices
-        IEnumWbemClassObject *devEnum = NULL;
+        intrusive_ptr<IEnumWbemClassObject> devEnum;
         result = wbemServices->ExecQuery(
             bstr_t("WQL"), bstr_t("SELECT * FROM Win32_SerialPort"),
             WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL,
-            &devEnum);
+            AttachPtr(devEnum));
 
         if (FAILED(result)) {
-            wbemServices->Release();
-            locator->Release();
             CoUninitialize();
             return devices;
         }
 
-        IWbemClassObject *wbemClassObj;
+        intrusive_ptr<IWbemClassObject> wbemClassObj;
         ULONG numObjRet = 0;
         std::wstring_convert<std::codecvt_utf8<wchar_t>> convStr;
         while (devEnum) {
-            HRESULT hr =
-                devEnum->Next(WBEM_INFINITE, 1, &wbemClassObj, &numObjRet);
+            HRESULT hr = devEnum->Next(WBEM_INFINITE, 1,
+                                       AttachPtr(wbemClassObj), &numObjRet);
 
             if (numObjRet == 0) {
                 break;
@@ -171,16 +169,8 @@ namespace usbserial {
             VariantClear(&vtPort);
             VariantClear(&vtHardware);
             VariantClear(&vtPath);
-            wbemClassObj->Release();
         }
 
-        // release Resources
-
-        wbemServices->Release();
-        locator->Release();
-        devEnum->Release();
-        if (!wbemClassObj)
-            wbemClassObj->Release();
         CoUninitialize();
 
         return devices;
