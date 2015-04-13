@@ -36,6 +36,10 @@
 namespace osvr {
 namespace common {
 
+    /// @brief Helper, converts old-style tracker source into normal. For a
+    /// little backward-compatibility.
+    ///
+    /// @todo remove this method in the future.
     inline std::string getPathFromOldRouteSource(Json::Value obj) {
         std::ostringstream ret;
         if (obj.isObject() && obj.isMember("tracker")) {
@@ -52,6 +56,7 @@ namespace common {
         }
         return ret.str();
     }
+
     ParsedAlias::ParsedAlias(std::string const &src) : m_simple(true) {
         m_parse(src);
     }

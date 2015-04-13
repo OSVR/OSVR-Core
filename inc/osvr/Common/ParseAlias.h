@@ -38,7 +38,7 @@ namespace osvr {
 namespace common {
     class ParsedAlias {
       public:
-        /// @brief Constructor - performs parse.
+        /// @brief Constructor - performs parse and normalization of format.
         ParsedAlias(std::string const &src);
 
         /// @brief Did the alias parse in a valid way?
