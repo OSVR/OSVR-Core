@@ -125,7 +125,6 @@ namespace common {
             Json::Value getResult() { return m_ret; }
 
             void operator()(PathNode const &node) {
-                OSVR_DEV_VERBOSE("Visiting " << getFullPath(node));
                 if (m_keepNulls || !elements::isNull(node.value())) {
                     // If we're keeping nulls or this isn't a null...
                     m_ret.append(pathNodeToJson(node));
