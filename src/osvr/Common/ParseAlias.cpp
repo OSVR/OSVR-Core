@@ -70,6 +70,9 @@ namespace common {
     void ParsedAlias::setLeaf(std::string const &leaf) { m_leaf() = leaf; }
 
     std::string ParsedAlias::getAlias() const {
+        if (m_value.isString()) {
+            return m_value.asString();
+        }
         Json::FastWriter writer;
         writer.omitEndingLineFeed();
         return writer.write(m_value);
