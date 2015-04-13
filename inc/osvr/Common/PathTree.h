@@ -82,13 +82,12 @@ namespace common {
         PathNodePtr m_root;
     };
 
-    OSVR_COMMON_EXPORT bool addAliasFromRoute(PathNode &node,
-                                              std::string const &route,
-                                              bool automatic = false);
-    bool addAliasFromSourceAndRelativeDest(PathNode &node,
-                                           std::string const &source,
-                                           std::string const &dest,
-                                           bool automatic = false);
+    OSVR_COMMON_EXPORT bool
+    addAliasFromRoute(PathNode &node, std::string const &route,
+                      AliasPriority automatic = ALIASPRIORITY_MANUAL);
+    bool addAliasFromSourceAndRelativeDest(
+        PathNode &node, std::string const &source, std::string const &dest,
+        AliasPriority automatic = ALIASPRIORITY_MANUAL);
 
     bool isPathAbsolute(std::string const &source);
 

@@ -88,7 +88,7 @@ namespace common {
                                  << relativeSemanticPath);
                 return addAliasFromSourceAndRelativeDest(
                     m_devNode, currentLevel.toStyledString(),
-                    relativeSemanticPath);
+                    relativeSemanticPath, ALIASPRIORITY_SEMANTICROUTE);
             }
             void m_recurse(Json::Value const &currentLevel,
                            std::string const &relativeSemanticPath) {

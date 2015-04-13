@@ -69,7 +69,8 @@ namespace common {
             template <typename Functor, typename ValType>
             static void handle(Functor &f, ValType &value) {
                 f("source", value.getSource());
-                f("automatic", value.getAutomatic(), false /* default value */);
+                f("priority", value.priority(),
+                  ALIASPRIORITY_MINIMUM /* default value */);
             }
         };
 
@@ -156,6 +157,15 @@ namespace common {
             void operator()(const char name[], bool &dataRef, bool defaultVal) {
                 if (m_hasName(name)) {
                     dataRef = m_val[name].asBool();
+                } else {
+                    dataRef = defaultVal;
+                }
+            }
+
+            void operator()(const char name[], uint8_t &dataRef,
+                            uint8_t defaultVal) {
+                if (m_hasName(name)) {
+                    dataRef = static_cast<uint8_t>(m_val[name].asInt());
                 } else {
                     dataRef = defaultVal;
                 }

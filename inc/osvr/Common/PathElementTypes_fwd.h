@@ -27,7 +27,7 @@
 #define INCLUDED_PathElementTypes_fwd_h_GUID_8EAAAC63_0E7E_4C8C_27E2_C5B5A58A6D0A
 
 // Internal Includes
-// - none
+#include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
 #include <boost/variant/variant_fwd.hpp>
@@ -37,6 +37,11 @@
 
 namespace osvr {
 namespace common {
+    typedef uint8_t AliasPriority;
+    static const AliasPriority ALIASPRIORITY_MINIMUM = 0;
+    static const AliasPriority ALIASPRIORITY_AUTOMATIC = 127;
+    static const AliasPriority ALIASPRIORITY_SEMANTICROUTE = 128;
+    static const AliasPriority ALIASPRIORITY_MANUAL = 255;
     namespace elements {
         class NullElement;
         class PluginElement;

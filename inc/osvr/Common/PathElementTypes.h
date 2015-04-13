@@ -133,15 +133,24 @@ namespace common {
         /// @brief The element type corresponding to a logical grouping.
         class LogicalElement : public ElementBase<LogicalElement> {};
 
-        /// @brief The element type corresponding to a "shallow" path alias -
-        /// does not alias children.
+        /// @brief The element type corresponding to a path alias, with a
+        /// priority level for sorting out whether automatic routes should
+        /// replace or update it.
+        ///
+        /// This is a "shallow" alias - does not link to children.
         class AliasElement : public ElementBase<AliasElement> {
           public:
+
+            /// @brief Constructor with source and priority.
+            OSVR_COMMON_EXPORT
+            AliasElement(std::string const &source, AliasPriority priority);
+
             /// @brief Constructor with source.
-            OSVR_COMMON_EXPORT AliasElement(std::string const &source);
+            OSVR_COMMON_EXPORT
+            AliasElement(std::string const &source);
 
             /// @brief default constructor
-            AliasElement() : m_automatic(false){};
+            AliasElement() : AliasElement("", ALIASPRIORITY_MINIMUM) {}
 
             /// @brief Sets the source of this alias
             /// @param source absolute path of the target, possibly wrapped in
@@ -157,13 +166,13 @@ namespace common {
 
             /// @brief Get/set whether this alias was automatically set (and
             /// thus subject to being override by explicit routing)
-            OSVR_COMMON_EXPORT bool &getAutomatic();
+            OSVR_COMMON_EXPORT AliasPriority &priority();
             /// @overload
-            OSVR_COMMON_EXPORT bool getAutomatic() const;
+            OSVR_COMMON_EXPORT AliasPriority priority() const;
 
           private:
             std::string m_source;
-            bool m_automatic;
+            AliasPriority m_priority;
         };
 
         /// This inline implementation MUST remain at the bottom of this file,

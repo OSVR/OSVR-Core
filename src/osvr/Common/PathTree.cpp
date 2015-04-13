@@ -60,19 +60,18 @@ namespace common {
     /// alias there pointing to source with the given automatic status.
     static inline bool aliasNeedsUpdate(PathNode &node,
                                         std::string const &source,
-                                        bool automatic) {
+                                        AliasPriority priority) {
         elements::AliasElement *elt =
             boost::get<elements::AliasElement>(&node.value());
         if (nullptr == elt) {
             /// Always replace non-aliases
             return true;
         }
-        if (!automatic && elt->getAutomatic()) {
-            /// We're a manual alias, and there is only an automatic, so we
-            /// override
+        if (priority > elt->priority()) {
+            /// We're a higher-priority (manual vs automatic for instance), so override
             return true;
         }
-        if (automatic == elt->getAutomatic() && source != elt->getSource()) {
+        if (priority == elt->priority() && source != elt->getSource()) {
             /// Same automatic status, different source: replace/update
             return true;
         }
@@ -84,20 +83,20 @@ namespace common {
     ///
     /// @return true if the node was changed
     static inline bool addAlias(PathNode &node, std::string const &source,
-                                bool automatic) {
+        AliasPriority priority) {
 
-        if (!aliasNeedsUpdate(node, source, automatic)) {
+        if (!aliasNeedsUpdate(node, source, priority)) {
             return false;
         }
         elements::AliasElement elt;
         elt.setSource(source);
-        elt.getAutomatic() = automatic;
+        elt.priority() = priority;
         node.value() = elt;
         return true;
     }
 
     bool addAliasFromRoute(PathNode &node, std::string const &route,
-                           bool automatic) {
+        AliasPriority priority) {
         auto path = common::RouteContainer::getDestinationFromString(route);
         auto &aliasNode = detail::treePathRetrieve(node, path);
         ParsedAlias newSource(route);
@@ -120,7 +119,7 @@ namespace common {
         OSVR_DEV_VERBOSE("addAliasFromRoute: " << getFullPath(aliasNode)
                                                << " -> "
                                                << newSource.getLeaf());
-        return addAlias(aliasNode, newSource.getAlias(), automatic);
+        return addAlias(aliasNode, newSource.getAlias(), priority);
     }
 
     static inline std::string getAbsolutePath(PathNode &node,
@@ -134,7 +133,7 @@ namespace common {
     bool addAliasFromSourceAndRelativeDest(PathNode &node,
                                            std::string const &source,
                                            std::string const &dest,
-                                           bool automatic) {
+                                           AliasPriority priority) {
         auto &aliasNode = detail::treePathRetrieve(node, dest);
         ParsedAlias newSource(source);
         if (!newSource.isValid()) {
@@ -151,7 +150,7 @@ namespace common {
 #endif
         OSVR_DEV_VERBOSE("addAliasFromSourceAndRelativeDest: "
                          << getFullPath(aliasNode) << " -> " << absSource);
-        return addAlias(aliasNode, newSource.getAlias(), automatic);
+        return addAlias(aliasNode, newSource.getAlias(), priority);
     }
 
     bool isPathAbsolute(std::string const &source) {
