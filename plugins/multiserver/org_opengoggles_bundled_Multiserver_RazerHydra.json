@@ -55,7 +55,14 @@
       "2": "button/2",
       "3": "button/3",
       "4": "button/4",
-      "$target": "tracker/0",
+      "$target": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": "tracker/0"
+       },
       "middle": "button/0",
       "bumper": "button/5",
       "joystick": {
@@ -70,7 +77,14 @@
       "2": "button/10",
       "3": "button/11",
       "4": "button/12",
-      "$target": "tracker/1",
+      "$target": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": "tracker/1"
+       },
       "middle": "button/8",
       "bumper": "button/13",
       "joystick": {
