@@ -41,6 +41,7 @@
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
 #include <boost/mpl/contains.hpp>
+#include <json/value.h>
 
 // Standard includes
 #include <string>
@@ -106,9 +107,13 @@ namespace common {
             OSVR_COMMON_EXPORT std::string const &getServer() const;
             OSVR_COMMON_EXPORT std::string getFullDeviceName() const;
 
+            OSVR_COMMON_EXPORT Json::Value & getDescriptor();
+            OSVR_COMMON_EXPORT Json::Value const & getDescriptor() const;
+
           private:
             std::string m_devName;
             std::string m_server;
+            Json::Value m_descriptor;
         };
 
         /// @brief The element type corresponding to an interface, which often

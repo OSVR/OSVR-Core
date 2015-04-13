@@ -32,6 +32,7 @@
 
 // Library/third-party includes
 #include <json/value.h>
+#include <json/reader.h>
 #include <boost/variant.hpp>
 #include <boost/mpl/for_each.hpp>
 
@@ -59,6 +60,7 @@ namespace common {
             static void handle(Functor &f, ValType &value) {
                 f("device_name", value.getDeviceName());
                 f("server", value.getServer());
+                f("descriptor", value.getDescriptor());
             }
         };
 
@@ -151,6 +153,19 @@ namespace common {
             void operator()(const char name[], bool &dataRef) {
                 m_requireName(name);
                 dataRef = m_val[name].asBool();
+            }
+
+            void operator()(const char name[], Json::Value &dataRef) {
+                m_requireName(name);
+                if (m_val[name].isString()) {
+                    Json::Reader reader;
+                    Json::Value val;
+                    if (reader.parse(m_val[name].asString(), val)) {
+                        dataRef = val;
+                    }
+                } else {
+                    dataRef = m_val[name];
+                }
             }
 
             void operator()(const char name[], bool &dataRef, bool defaultVal) {

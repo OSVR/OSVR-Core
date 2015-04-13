@@ -97,6 +97,10 @@ namespace common {
         std::string DeviceElement::getFullDeviceName() const {
             return getDeviceName() + "@" + getServer();
         }
+        Json::Value &DeviceElement::getDescriptor() { return m_descriptor; }
+        Json::Value const &DeviceElement::getDescriptor() const {
+            return m_descriptor;
+        }
     } // namespace elements
 } // namespace common
 } // namespace osvr
