@@ -122,6 +122,9 @@ typedef struct OSVR_AnalogReport {
 /** @brief Report type for an Imaging callback (forward declaration) */
 struct OSVR_ImagingReport;
 
+/** @brief Report type for an Eye tracking report (forward declaration) */
+struct OSVR_GazeDirectionReport;
+
 /** @} */
 
 /** @} */

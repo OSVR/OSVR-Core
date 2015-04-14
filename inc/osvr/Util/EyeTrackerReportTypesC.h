@@ -1,12 +1,13 @@
 /** @file
-    @brief Header
+@brief Header
 
-    @date 2015
+Must be c-safe!
 
-    @author
-    Sensics, Inc.
-    <http://sensics.com/osvr>
+@date 2015
 
+@author
+Sensics, Inc.
+<http://sensics.com/osvr>
 */
 
 // Copyright 2015 Sensics, Inc.
@@ -28,7 +29,9 @@
 
 
 // Internal Includes
-// - none
+#include <osvr/Util/Vec2C.h>
+#include <osvr/Util/Vec3C.h>
+#include <osvr/Util/ChannelCountC.h>
 
 // Library/third-party includes
 // - none
@@ -36,11 +39,30 @@
 // Standard includes
 // - none
 
-namespace osvr {
-	namespace util {
+OSVR_EXTERN_C_BEGIN
 
-	} // namespace util
-} // namespace osvr
+typedef enum OSVR_Eye_Type {
+	OSVR_EYE_LEFT = 0,
+	OSVR_EYE_RIGHT = 1
+} OSVR_Eye_Type;
+
+typedef enum OSVR_Eye_Tracker_Mode {
+	OSVR_MONOCULAR = 0,
+	OSVR_BINOCULAR = 1
+} OSVR_Eye_Tracker_Mode;
+
+typedef struct OSVR_EyeData{
+	OSVR_Vec2 gazeDirection2D;
+	OSVR_Vec3 gazeDirection3D;
+} OSVR_EyeData;
+
+typedef struct OSVR_EyeTrackerReport {
+	OSVR_ChannelCount sensor;
+	OSVR_EyeData state;
+} OSVR_EyeTrackerReport;
+
+
+OSVR_EXTERN_C_END
 
 #endif // INCLUDED_EyeTrackerReportTypesC_h_GUID_7BD4C450_5D26_4090_BCA4_7305E3DCC6B7
 
