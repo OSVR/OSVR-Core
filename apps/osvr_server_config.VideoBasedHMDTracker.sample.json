@@ -5,8 +5,10 @@
   "routes": [
     {
       "destination": "/me/head",
-      "source": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0",
-      "sensor": 0
+      "source": {
+        "tracker": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0",
+        "sensor": 0
+      }
     }
   ]
 }
