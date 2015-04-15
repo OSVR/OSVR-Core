@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
-#include <osvr/PluginKit/AnalogInterfaceC.h>
+#include <osvr/PluginKit/TrackerInterfaceC.h>
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -52,8 +52,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
-        /// Indicate that we'll want 1 analog channel.
-        osvrDeviceAnalogConfigure(opts, &m_analog, 1);
+        // Configure the tracker interface.
+        osvrDeviceTrackerConfigure(opts, &m_tracker);
 
         /// Come up with a device name
         std::ostringstream os;
@@ -88,14 +88,27 @@ class VideoBasedHMDTracker : boost::noncopyable {
             return OSVR_RETURN_FAILURE;
         }
 
-        /// Report the value of channel 0
-        osvrDeviceAnalogSetValue(m_dev, m_analog, 0.0, 0);
+        // Keep track of when we got the image, since that is our
+        // best estimate for when the tracker was at the specified
+        // pose.
+        OSVR_TimeValue timestamp;
+        osvrTimeValueGetNow(&timestamp);
+
+        // Compute the pose of the HMD w.r.t. the camera frame of reference.
+        OSVR_PoseState pose;
+        osvrPose3SetIdentity(&pose);
+        // XXX Compute pose here.
+
+        /// Report the new pose, time-stamped with the time we
+        // received the image from the camera.
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker,
+            &pose, 0, &timestamp);
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
-    OSVR_AnalogDeviceInterface m_analog;
+    OSVR_TrackerDeviceInterface m_tracker;
     cv::VideoCapture m_camera;
     int m_channel;
     cv::Mat m_frame;
