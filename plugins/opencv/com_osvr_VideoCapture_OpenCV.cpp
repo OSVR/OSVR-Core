@@ -65,7 +65,7 @@ class CameraDevice : boost::noncopyable {
 
         /// Come up with a device name
         std::ostringstream os;
-        os << "Camera" << cameraNum << "_" << m_channel;
+        os << "TrackedCamera" << cameraNum << "_" << m_channel;
 
         /// Create an asynchronous (threaded) device
         m_dev.initAsync(ctx, os.str(), opts);

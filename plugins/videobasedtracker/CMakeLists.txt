@@ -13,6 +13,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 # for an OSVR plugin. It also installs the plugin into the right directory.
 # Pass as many source files as you need. See osvrAddPlugin.cmake for full docs.
 osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
+    MANUAL_LOAD
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
