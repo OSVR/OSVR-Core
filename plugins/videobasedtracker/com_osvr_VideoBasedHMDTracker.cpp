@@ -57,7 +57,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         /// Come up with a device name
         std::ostringstream os;
-        os << "VideoBasedHMDTracker" << cameraNum << "_" << channel;
+        os << "TrackedCamera" << cameraNum << "_" << channel;
 
         /// Create an asynchronous (threaded) device
         m_dev.initAsync(ctx, os.str(), opts);
@@ -68,7 +68,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
-    }
+      }
 
     OSVR_ReturnCode update() {
         if (!m_camera.isOpened()) {
