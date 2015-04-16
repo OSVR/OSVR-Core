@@ -41,6 +41,8 @@
 #include <iostream>
 #include <sstream>
 
+#define VBHMD_DEBUG
+
 // Anonymous namespace to avoid symbol collision
 namespace {
 
@@ -94,6 +96,13 @@ class VideoBasedHMDTracker : boost::noncopyable {
         OSVR_TimeValue timestamp;
         osvrTimeValueGetNow(&timestamp);
 
+#ifdef VBHMD_DEBUG
+        if (m_camera.isOpened()) {
+            cv::imshow("Debug window", m_frame);
+            cv::waitKey(1);
+        }
+#endif
+
         // Compute the pose of the HMD w.r.t. the camera frame of reference.
         OSVR_PoseState pose;
         osvrPose3SetIdentity(&pose);
@@ -125,18 +134,22 @@ class HardwareDetection {
         }
 
         {
-            // Autodetect camera
+            // Autodetect camera.  This needs to have the same
+            // parameter as the constructor for the VideoBasedHMDTracker
+            // class above or else it will not be looking for the
+            // same camera.  This instance of the camera will auto-
+            // delete itself when this block finishes, so should
+            // close the camera -- leaving it to be opened again
+            // in the constructor.
             cv::VideoCapture cap(0);
             if (!cap.isOpened()) {
                 // Failed to find camera
                 return OSVR_RETURN_FAILURE;
             }
         }
-
         m_found = true;
 
-        /// Create our device object, passing the context, and register
-        /// the function to call
+        /// Create our device object, passing the context.
         osvr::pluginkit::registerObjectForDeletion(ctx, new VideoBasedHMDTracker(ctx));
 
         return OSVR_RETURN_SUCCESS;
@@ -144,7 +157,7 @@ class HardwareDetection {
 
   private:
     /// @brief Have we found our device yet? (this limits the plugin to one
-    /// instance)
+    /// instance, so that only one tracker will use this camera.)
     bool m_found;
 };
 } // namespace
