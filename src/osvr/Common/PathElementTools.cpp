@@ -38,7 +38,7 @@
 namespace osvr {
 namespace common {
     namespace elements {
-        namespace detail {
+        namespace {
             /// Class template, specialized to implement class name retrieval.
             template <typename ElementType> struct ElementTypeName {
                 static const char *get();
@@ -48,7 +48,7 @@ namespace common {
 /// name as a string literal.
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     template <> struct ElementTypeName<CLASS> {                                \
-        OSVR_COMMON_EXPORT static const char *get() { return #CLASS; }         \
+        static const char *get() { return #CLASS; }                            \
     };
 
             /// All types included in the bounded typelist of PathElement must
@@ -61,15 +61,13 @@ namespace common {
             OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
             OSVR_ROUTING_TYPENAME_HANDLER(StringElement)
 #undef OSVR_ROUTING_TYPENAME_HANDLER
-        } // namespace detail
 
-        namespace {
             /// @brief Visitor class used to help getTypeName()
             class TypeNameVisitor : public boost::static_visitor<const char *> {
               public:
                 template <typename ElementType>
                 const char *operator()(ElementType const &) const {
-                    return detail::ElementTypeName<ElementType>::get();
+                    return ElementTypeName<ElementType>::get();
                 }
             };
         } // namespace
