@@ -139,10 +139,13 @@ class VRPNHardwareDetect : boost::noncopyable {
                             filterSem[element]["$target"] =
                                 hydraSem[element]["$target"];
                         }
-                        auto & filterAuto = (filterJson["automaticAliases"] = Json::objectValue);
-                        filterAuto["$priority"] = 130; // enough to override a normal automatic route.
+                        auto &filterAuto = (filterJson["automaticAliases"] =
+                                                Json::objectValue);
+                        filterAuto["$priority"] =
+                            130; // enough to override a normal automatic route.
                         auto &hydraAuto = hydraJson["automaticAliases"];
-                        for (auto const &element : { "/me/hands/left", "/me/hands/right" }) {
+                        for (auto const &element :
+                             {"/me/hands/left", "/me/hands/right"}) {
                             filterAuto[element] = hydraAuto[element];
                         }
 

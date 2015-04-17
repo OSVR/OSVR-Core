@@ -107,8 +107,8 @@ namespace common {
             OSVR_COMMON_EXPORT std::string const &getServer() const;
             OSVR_COMMON_EXPORT std::string getFullDeviceName() const;
 
-            OSVR_COMMON_EXPORT Json::Value & getDescriptor();
-            OSVR_COMMON_EXPORT Json::Value const & getDescriptor() const;
+            OSVR_COMMON_EXPORT Json::Value &getDescriptor();
+            OSVR_COMMON_EXPORT Json::Value const &getDescriptor() const;
 
           private:
             std::string m_devName;
@@ -145,7 +145,6 @@ namespace common {
         /// This is a "shallow" alias - does not link to children.
         class AliasElement : public ElementBase<AliasElement> {
           public:
-
             /// @brief Constructor with source and priority.
             OSVR_COMMON_EXPORT
             AliasElement(std::string const &source, AliasPriority priority);

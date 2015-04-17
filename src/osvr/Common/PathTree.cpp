@@ -68,7 +68,8 @@ namespace common {
             return true;
         }
         if (priority > elt->priority()) {
-            /// We're a higher-priority (manual vs automatic for instance), so override
+            /// We're a higher-priority (manual vs automatic for instance), so
+            /// override
             return true;
         }
         if (priority == elt->priority() && source != elt->getSource()) {
@@ -83,7 +84,7 @@ namespace common {
     ///
     /// @return true if the node was changed
     static inline bool addAlias(PathNode &node, std::string const &source,
-        AliasPriority priority) {
+                                AliasPriority priority) {
 
         if (!aliasNeedsUpdate(node, source, priority)) {
             return false;
@@ -96,7 +97,7 @@ namespace common {
     }
 
     bool addAliasFromRoute(PathNode &node, std::string const &route,
-        AliasPriority priority) {
+                           AliasPriority priority) {
         auto path = common::RouteContainer::getDestinationFromString(route);
         auto &aliasNode = detail::treePathRetrieve(node, path);
         ParsedAlias newSource(route);

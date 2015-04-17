@@ -78,9 +78,7 @@ namespace common {
         return writer.write(m_value);
     }
 
-    Json::Value ParsedAlias::getAliasValue() const {
-        return m_value;
-    }
+    Json::Value ParsedAlias::getAliasValue() const { return m_value; }
 
     void ParsedAlias::m_parse(std::string const &src) {
         Json::Value val;
