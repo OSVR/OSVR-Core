@@ -118,6 +118,10 @@ namespace client {
         }
     }
 
+    common::PathTree const &PureClientContext::m_getPathTree() const {
+        return m_pathTree;
+    }
+
     bool PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
         /// Start by removing handler from interface tree and handler container
         /// for this path, if found. Ensures that if we early-out (fail to set

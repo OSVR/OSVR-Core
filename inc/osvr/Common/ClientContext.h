@@ -29,7 +29,7 @@
 #include <osvr/Common/Export.h>
 #include <osvr/Common/ClientContext_fwd.h>
 #include <osvr/Common/ClientInterfacePtr.h>
-#include <osvr/Common/RouteContainer.h>
+#include <osvr/Common/PathTree_fwd.h>
 #include <osvr/Util/KeyedOwnershipContainer.h>
 
 // Library/third-party includes
@@ -76,16 +76,12 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @brief Sends a JSON route/transform object to the server.
     OSVR_COMMON_EXPORT void sendRoute(std::string const &route);
 
-    /// @brief Gets routing directives.
-    OSVR_COMMON_EXPORT osvr::common::RouteContainer const &getRoutes() const;
-
     /// @brief Gets a string parameter value.
     OSVR_COMMON_EXPORT std::string
     getStringParameter(std::string const &path) const;
 
-    /// @brief Sets a string parameter value.
-    OSVR_COMMON_EXPORT void setParameter(std::string const &path,
-                                         std::string const &value);
+    /// @brief Accessor for the path tree.
+    OSVR_COMMON_EXPORT osvr::common::PathTree const &getPathTree() const;
 
     /// @brief Pass (smart-pointer) ownership of some object to the client
     /// context.
@@ -103,8 +99,6 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @brief Constructor for derived class use only.
     OSVR_COMMON_EXPORT OSVR_ClientContextObject(const char appId[]);
 
-    osvr::common::RouteContainer m_routingDirectives;
-
   private:
     virtual void m_update() = 0;
     virtual void m_sendRoute(std::string const &route) = 0;
@@ -116,6 +110,11 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// before the interface is actually freed.
     OSVR_COMMON_EXPORT virtual void
     m_handleReleasingInterface(osvr::common::ClientInterfacePtr const &iface);
+
+    /// @brief Implementation of accessor for the path tree.
+    OSVR_COMMON_EXPORT virtual osvr::common::PathTree const &
+    m_getPathTree() const = 0;
+
     std::string const m_appId;
     InterfaceList m_interfaces;
     std::map<std::string, std::string> m_params;

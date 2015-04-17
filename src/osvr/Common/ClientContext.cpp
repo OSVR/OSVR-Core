@@ -108,15 +108,8 @@ OSVR_ClientContextObject::getStringParameter(std::string const &path) const {
     return ret;
 }
 
-void OSVR_ClientContextObject::setParameter(std::string const &path,
-                                            std::string const &value) {
-    OSVR_DEV_VERBOSE("Parameter set for " << path);
-    m_params[path] = value;
-}
-
-osvr::common::RouteContainer const &
-OSVR_ClientContextObject::getRoutes() const {
-    return m_routingDirectives;
+osvr::common::PathTree const &OSVR_ClientContextObject::getPathTree() const {
+    return m_getPathTree();
 }
 
 void OSVR_ClientContextObject::sendRoute(std::string const &route) {

@@ -66,6 +66,8 @@ namespace client {
         virtual void
         m_handleReleasingInterface(common::ClientInterfacePtr const &iface);
 
+        virtual common::PathTree const &m_getPathTree() const;
+
         /// @brief Given a path, remove any existing handler for that path, then
         /// attempt to fully resolve the path to its source and construct a
         /// handler for it.
