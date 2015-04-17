@@ -37,44 +37,60 @@
 #include <boost/mpl/for_each.hpp>
 
 // Standard includes
-// - none
+#include <type_traits>
 
 namespace osvr {
 namespace common {
     namespace {
 
-        /// @brief Class template (for specialization) allowing serialization
+        /// @brief "using" statement to combine/simplify the enable_if test for
+        /// an element type's serialization.
+        template <typename Input, typename Known>
+        using enable_if_element_type = std::enable_if_t<
+            std::is_same<std::remove_const_t<Input>, Known>::value>;
+
+        /// The serializationHandler function templates allow serialization
         /// and deserialization code to be generated from the same operations
         /// (ensuring keys stay in sync, etc.)
-        template <typename T> class PathElementSerializationHandler {
-          public:
-            template <typename Functor, typename ValType>
-            static void handle(Functor &, ValType &) {}
-        };
 
-        /// @brief Specialization for DeviceElement
-        template <>
-        class PathElementSerializationHandler<elements::DeviceElement> {
-          public:
-            template <typename Functor, typename ValType>
-            static void handle(Functor &f, ValType &value) {
-                f("device_name", value.getDeviceName());
-                f("server", value.getServer());
-                f("descriptor", value.getDescriptor());
-            }
-        };
+        /// @brief Serialization handler for DeviceElement
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::DeviceElement>
+        serializationHandler(Functor &f, ValType &value) {
+            f("device_name", value.getDeviceName());
+            f("server", value.getServer());
+            f("descriptor", value.getDescriptor());
+        }
 
-        /// @brief Specialization for AliasElement
-        template <>
-        class PathElementSerializationHandler<elements::AliasElement> {
-          public:
-            template <typename Functor, typename ValType>
-            static void handle(Functor &f, ValType &value) {
-                f("source", value.getSource());
-                f("priority", value.priority(),
-                  ALIASPRIORITY_MINIMUM /* default value */);
-            }
-        };
+        /// @brief Serialization handler for AliasElement
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::AliasElement>
+        serializationHandler(Functor &f, ValType &value) {
+            f("source", value.getSource());
+            f("priority", value.priority(),
+              ALIASPRIORITY_MINIMUM /* default value */);
+        }
+
+        /// @brief Serialization handler for StringElement
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::StringElement>
+        serializationHandler(Functor &f, ValType &value) {
+            /// @todo implement
+        }
+
+        // Serialization handlers for elements without extra data
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::NullElement>
+        serializationHandler(Functor &, ValType &) {}
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::PluginElement>
+        serializationHandler(Functor &, ValType &) {}
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::InterfaceElement>
+        serializationHandler(Functor &, ValType &) {}
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::SensorElement>
+        serializationHandler(Functor &, ValType &) {}
 
         /// @brief Functor for use with PathElementSerializationHandler, for the
         /// direction PathElement->JSON
@@ -109,7 +125,7 @@ namespace common {
             Json::Value operator()(PathNode const &node, T const &elt) {
                 auto ret = setup(node);
                 PathElementToJSONFunctor f(ret);
-                PathElementSerializationHandler<T>::handle(f, elt);
+                serializationHandler(f, elt);
                 return ret;
             }
         };
@@ -214,7 +230,7 @@ namespace common {
                 if (elements::getTypeName<T>() == m_typename) {
                     T value;
                     PathElementFromJsonFunctor functor(m_val);
-                    PathElementSerializationHandler<T>::handle(functor, value);
+                    serializationHandler(functor, value);
                     m_elt = value;
                 }
             }
