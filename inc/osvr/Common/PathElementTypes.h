@@ -175,7 +175,22 @@ namespace common {
         /// such as a JSON string
         class StringElement : public ElementBase<StringElement> {
           public:
-            StringElement() = default;
+            /// @brief Default constructor
+            OSVR_COMMON_EXPORT
+            StringElement();
+
+            /// @brief Constructor with value.
+            OSVR_COMMON_EXPORT
+            StringElement(std::string const &s);
+
+            /// @brief Get/set (if non const) the stored string
+            OSVR_COMMON_EXPORT std::string &getString();
+
+            /// @overload
+            OSVR_COMMON_EXPORT std::string const &getString() const;
+
+          private:
+            std::string m_val;
         };
 
         /// This inline implementation MUST remain at the bottom of this file,

@@ -77,6 +77,13 @@ namespace common {
         AliasPriority &AliasElement::priority() { return m_priority; }
         AliasPriority AliasElement::priority() const { return m_priority; }
 
+        StringElement::StringElement() {}
+        StringElement::StringElement(std::string const &s) : m_val(s) {}
+
+        std::string &StringElement::getString() { return m_val; }
+
+        std::string const &StringElement::getString() const { return m_val; }
+
         DeviceElement
         DeviceElement::createVRPNDeviceElement(std::string const &deviceName,
                                                std::string const &server) {

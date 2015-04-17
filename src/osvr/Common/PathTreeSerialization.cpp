@@ -75,7 +75,7 @@ namespace common {
         template <typename Functor, typename ValType>
         inline enable_if_element_type<ValType, elements::StringElement>
         serializationHandler(Functor &f, ValType &value) {
-            /// @todo implement
+            f("string", value.getString());
         }
 
         // Serialization handlers for elements without extra data
