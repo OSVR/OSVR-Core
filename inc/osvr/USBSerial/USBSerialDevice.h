@@ -32,7 +32,6 @@ Sensics, Inc.
 // - none
 
 // Standard includes
-#include <memory>
 #include <string>
 
 namespace osvr {
@@ -40,26 +39,48 @@ namespace usbserial {
 
     class USBSerialDevice {
       public:
-        // create USB-Serial device with provided vendor and product IDs
         OSVR_USBSERIAL_EXPORT USBSerialDevice(uint16_t vendorID,
                                               uint16_t productID,
-                                              std::string devPath,
-                                              std::string port);
+                                              const std::string &devPath,
+                                              const std::string &port);
         OSVR_USBSERIAL_EXPORT USBSerialDevice();
-        OSVR_USBSERIAL_EXPORT ~USBSerialDevice();
 
-        OSVR_USBSERIAL_EXPORT uint16_t getVID();
-        OSVR_USBSERIAL_EXPORT uint16_t getPID();
-        OSVR_USBSERIAL_EXPORT std::string getPlatformSpecificPath();
-        OSVR_USBSERIAL_EXPORT std::string getPort();
+        OSVR_USBSERIAL_EXPORT uint16_t getVID() const;
+        OSVR_USBSERIAL_EXPORT uint16_t getPID() const;
+        OSVR_USBSERIAL_EXPORT std::string getPlatformSpecificPath() const;
+        OSVR_USBSERIAL_EXPORT std::string getPort() const;
 
       private:
-        uint16_t deviceVID;
-        uint16_t devicePID;
-        std::string devicePath;
-        std::string devicePort;
+        uint16_t m_vendorID;
+        uint16_t m_productID;
+        std::string m_devicePath;
+        std::string m_devicePort;
     };
+
+    inline USBSerialDevice::USBSerialDevice(uint16_t vendorID,
+                                            uint16_t productID,
+                                            const std::string &devPath,
+                                            const std::string &port)
+        : m_vendorID(vendorID), m_productID(productID), m_devicePath(devPath),
+          m_devicePort(port) {
+        // do nothing
+    }
+
+    inline USBSerialDevice::USBSerialDevice() {
+        // do nothing
+    }
+
+    inline uint16_t USBSerialDevice::getVID() const { return m_vendorID; }
+
+    inline uint16_t USBSerialDevice::getPID() const { return m_productID; }
+
+    inline std::string USBSerialDevice::getPlatformSpecificPath() const {
+        return m_devicePath;
+    }
+
+    inline std::string USBSerialDevice::getPort() const { return m_devicePort; }
 
 } // namespace usbserial
 } // namespace osvr
+
 #endif // INCLUDED_USBSerialEnum_h_GUID_B17561E7_ADC2_438C_87B9_D05321AF6BD6

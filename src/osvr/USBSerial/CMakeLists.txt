@@ -5,7 +5,6 @@ set(API
     "${HEADER_LOCATION}/USBSerialEnum.h")
 
 set(SOURCE
-    USBSerialDevice.cpp
     USBSerialDevInfo.h
     USBSerialDevInfo.cpp
     USBSerialEnum.cpp
