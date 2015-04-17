@@ -24,18 +24,14 @@
 
 // Internal Includes
 #include <osvr/Client/CreateContext.h>
-#include "VRPNContext.h"
 #include "PureClientContext.h"
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/GetEnvironmentVariable.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <cstring>
-
-static const char PATHTREE_ENV_VAR[] = "OSVR_PATHTREE";
 
 namespace osvr {
 namespace client {
@@ -48,15 +44,7 @@ namespace client {
                              "appId provided!");
             return ret;
         }
-
-        if (common::getEnvironmentVariable(PATHTREE_ENV_VAR).is_initialized()) {
-            // that environment variable has something in it - turn on testing.
-            OSVR_DEV_VERBOSE("Caution: creating experimental PureClientContext "
-                             "using PathTree!");
-            ret = new PureClientContext(appId, host);
-        } else {
-            ret = new VRPNContext(appId, host);
-        }
+        ret = new PureClientContext(appId, host);
         return ret;
     }
 

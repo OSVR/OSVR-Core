@@ -13,7 +13,6 @@ set(SOURCE
     HandlerContainer.h
     ImagingRemoteFactory.cpp
     ImagingRemoteFactory.h
-    ImagingRouter.h
     InterfaceTree.cpp
     InterfaceTree.h
     PureClientContext.cpp
@@ -25,16 +24,9 @@ set(SOURCE
     RouterTransforms.h
     TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h
-    VRPNAnalogRouter.h
-    VRPNButtonRouter.h
     VRPNConnectionCollection.cpp
-    VRPNConnectionCollection.h
-    VRPNContext.cpp
-    VRPNContext.h
-    VRPNTrackerRouter.h)
+    VRPNConnectionCollection.h)
 
-set(DISPLAY_JSON display-HDK.json)
-osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
 
