@@ -52,15 +52,14 @@ namespace common {
     };
 
             /// All types included in the bounded typelist of PathElement must
-            /// be in this list.
-            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
+            /// be in this list. It's kept sorted for ease of maintenance.
+            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
             OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
             OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(PhysicalAssociationElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(LogicalElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(StringElement)
 #undef OSVR_ROUTING_TYPENAME_HANDLER
         } // namespace detail
 

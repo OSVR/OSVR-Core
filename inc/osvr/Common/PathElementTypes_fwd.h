@@ -43,14 +43,14 @@ namespace common {
     static const AliasPriority ALIASPRIORITY_SEMANTICROUTE = 128;
     static const AliasPriority ALIASPRIORITY_MANUAL = 255;
     namespace elements {
-        class NullElement;
-        class PluginElement;
+        // list is kept sorted here for convenience
+        class AliasElement;
         class DeviceElement;
         class InterfaceElement;
+        class NullElement;
+        class PluginElement;
         class SensorElement;
-        class PhysicalAssociationElement;
-        class LogicalElement;
-        class AliasElement;
+        class StringElement;
 
 /// @brief The variant type containing a particular kind of path element.
 #ifndef OSVR_DOXYGEN_EXTERNAL
@@ -60,11 +60,14 @@ namespace common {
 /// - forward-declared above
 /// - declared in PathElementTypes.h
 /// - included in the name list in PathElementTools.cpp
+///
+/// Note that while most lists of these types are not order sensitive, and so
+/// have been sorted, order does matter for the types in this typedef. Above
+/// all, NullElement must remain first.
 #endif
-        typedef boost::variant<NullElement, PluginElement, DeviceElement,
-                               InterfaceElement, SensorElement,
-                               PhysicalAssociationElement, LogicalElement,
-                               AliasElement> PathElement;
+        typedef boost::variant<NullElement, AliasElement, SensorElement,
+                               InterfaceElement, DeviceElement, PluginElement,
+                               StringElement> PathElement;
     } // namespace elements
 
     using elements::PathElement;

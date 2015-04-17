@@ -130,14 +130,6 @@ namespace common {
             SensorElement() = default;
         };
 
-        /// @brief The element type serving as a physical association of other
-        /// elements.
-        class PhysicalAssociationElement
-            : public ElementBase<PhysicalAssociationElement> {};
-
-        /// @brief The element type corresponding to a logical grouping.
-        class LogicalElement : public ElementBase<LogicalElement> {};
-
         /// @brief The element type corresponding to a path alias, with a
         /// priority level for sorting out whether automatic routes should
         /// replace or update it.
@@ -177,6 +169,13 @@ namespace common {
           private:
             std::string m_source;
             AliasPriority m_priority;
+        };
+
+        /// @brief The element type corresponding to a string value
+        /// such as a JSON string
+        class StringElement : public ElementBase<StringElement> {
+        public:
+            StringElement() = default;
         };
 
         /// This inline implementation MUST remain at the bottom of this file,
