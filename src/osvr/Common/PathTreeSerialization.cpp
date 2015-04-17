@@ -67,8 +67,7 @@ namespace common {
         inline enable_if_element_type<ValType, elements::AliasElement>
         serializationHandler(Functor &f, ValType &value) {
             f("source", value.getSource());
-            f("priority", value.priority(),
-              ALIASPRIORITY_MINIMUM /* default value */);
+            f("priority", value.priority());
         }
 
         /// @brief Serialization handler for StringElement
@@ -156,21 +155,33 @@ namespace common {
             bool m_keepNulls;
         };
 
-        /// @brief Functor for use with PathElementSerializationHandler, for the
+        /// @brief Functor for use with a serializationHandler overload, for the
         /// direction JSON->PathElement
         class PathElementFromJsonFunctor : boost::noncopyable {
           public:
             PathElementFromJsonFunctor(Json::Value const &val) : m_val(val) {}
+
+            /// @brief Deserialize a string
             void operator()(const char name[], std::string &dataRef) {
                 m_requireName(name);
                 dataRef = m_val[name].asString();
             }
-
+            /// @brief Deserialize a bool
             void operator()(const char name[], bool &dataRef) {
                 m_requireName(name);
                 dataRef = m_val[name].asBool();
             }
+            /// @brief Deserialize a bool with default
+            void operator()(const char name[], bool &dataRef, bool defaultVal) {
+                if (m_hasName(name)) {
+                    dataRef = m_val[name].asBool();
+                } else {
+                    dataRef = defaultVal;
+                }
+            }
 
+            /// @brief Deserialize a Json::Value from either nested JSON or a
+            /// JSON string
             void operator()(const char name[], Json::Value &dataRef) {
                 m_requireName(name);
                 if (m_val[name].isString()) {
@@ -184,14 +195,13 @@ namespace common {
                 }
             }
 
-            void operator()(const char name[], bool &dataRef, bool defaultVal) {
-                if (m_hasName(name)) {
-                    dataRef = m_val[name].asBool();
-                } else {
-                    dataRef = defaultVal;
-                }
+            /// @brief Deserialize a uint8_t (e.g. AliasPriority)
+            void operator()(const char name[], uint8_t &dataRef) {
+                m_requireName(name);
+                dataRef = static_cast<uint8_t>(m_val[name].asInt());
             }
 
+            /// @brief Deserialize a uint8_t (e.g. AliasPriority) with default
             void operator()(const char name[], uint8_t &dataRef,
                             uint8_t defaultVal) {
                 if (m_hasName(name)) {
@@ -200,6 +210,7 @@ namespace common {
                     dataRef = defaultVal;
                 }
             }
+
             /// @todo add more methods here if other data types are stored
           private:
             void m_requireName(const char name[]) {
