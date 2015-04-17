@@ -174,7 +174,7 @@ namespace common {
         /// @brief The element type corresponding to a string value
         /// such as a JSON string
         class StringElement : public ElementBase<StringElement> {
-        public:
+          public:
             StringElement() = default;
         };
 
