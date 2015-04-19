@@ -31,40 +31,45 @@ static const vrpn_uint16 OCULUS_VENDOR = 0x2833;
 static const vrpn_uint16 DK2_PRODUCT = 0x0021;
 
 Oculus_DK2_HID::Oculus_DK2_HID(double keepAliveSeconds)
-    : vrpn_HidInterface(d_filter = new vrpn_HidProductAcceptor(OCULUS_VENDOR, DK2_PRODUCT))
+    : vrpn_HidInterface(m_filter = new vrpn_HidProductAcceptor(OCULUS_VENDOR, DK2_PRODUCT))
 {
     // Store keep-alive interval.
-    d_keepAliveSeconds = keepAliveSeconds;
+    m_keepAliveSeconds = keepAliveSeconds;
 
     // Send a command to turn on the LEDs and record the time at which
     // we did so.
-    // XXX
-    vrpn_gettimeofday(&d_lastKeepAlive, NULL);
+    writeLEDControl();
+    vrpn_gettimeofday(&m_lastKeepAlive, NULL);
 }
 
 Oculus_DK2_HID::~Oculus_DK2_HID()
 {
-    delete d_filter;
+    // Turn off the LEDs
+    writeLEDControl(false);
+
+    // Clean up our memory.
+    delete m_filter;
 }
 
 std::vector<OCULUS_IMU_REPORT> Oculus_DK2_HID::poll()
 {
-    std::vector<OCULUS_IMU_REPORT> ret;
-
     // See if it has been long enough to send another keep-alive to
     // the LEDs.
     struct timeval now;
     vrpn_gettimeofday(&now, NULL);
-    if (vrpn_TimevalDurationSeconds(now, d_lastKeepAlive) >= d_keepAliveSeconds) {
-        // XXX
-        d_lastKeepAlive = now;
+    if (vrpn_TimevalDurationSeconds(now, m_lastKeepAlive) >= m_keepAliveSeconds) {
+        writeLEDControl();
+        m_lastKeepAlive = now;
     }
 
-    // Read and parse any available IMU reports from the DK2, returning
-    // them.
+    // Clear old reports, which will have already been returned.
+    // Read and parse any available IMU reports from the DK2, which will put
+    // them into the report vector.
+    m_reports.clear();
+    update();
     // XXX
 
-    return ret;
+    return m_reports;
 }
 
 // Thank you to Oliver Kreylos for the info needed to write this function.
@@ -108,4 +113,11 @@ void Oculus_DK2_HID::writeLEDControl(
 
     /* Write the LED control feature report: */
     send_feature_report(sizeof(pktBuffer), pktBuffer);
+}
+
+void Oculus_DK2_HID::on_data_received(size_t bytes, vrpn_uint8 *buffer)
+{
+    // Fill new entries into the vector that will be passed back
+    // on the next poll().
+    // XXX
 }
