@@ -90,6 +90,7 @@ set(SOURCE
     DeviceWrapper.cpp
     DeviceWrapper.h
     GetEnvironmentVariable.cpp
+    GetJSONStringFromTree.h
     ImagingComponent.cpp
     JSONTransformVisitor.cpp
     MessageHandler.cpp
