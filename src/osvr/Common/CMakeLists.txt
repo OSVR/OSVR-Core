@@ -98,6 +98,8 @@ set(SOURCE
     NetworkingSupport.cpp
     OriginalSource.cpp
     ParseAlias.cpp
+    PathElementSerialization.h
+    PathElementSerializationDescriptions.h
     PathElementTools.cpp
     PathElementTypes.cpp
     PathNode.cpp

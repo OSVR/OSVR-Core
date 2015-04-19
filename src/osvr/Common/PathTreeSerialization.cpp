@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include <osvr/Common/PathTreeSerialization.h>
+#include "PathElementSerialization.h"
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathNode.h>
@@ -32,99 +33,31 @@
 
 // Library/third-party includes
 #include <json/value.h>
-#include <json/reader.h>
-#include <boost/variant.hpp>
-#include <boost/mpl/for_each.hpp>
 
 // Standard includes
-#include <type_traits>
+// - none
 
 namespace osvr {
 namespace common {
     namespace {
-
-        /// @brief "using" statement to combine/simplify the enable_if test for
-        /// an element type's serialization.
-        template <typename Input, typename Known>
-        using enable_if_element_type = std::enable_if_t<
-            std::is_same<std::remove_const_t<Input>, Known>::value>;
-
-        /// The serializationHandler function templates allow serialization
-        /// and deserialization code to be generated from the same operations
-        /// (ensuring keys stay in sync, etc.)
-
-        /// @brief Serialization handler for DeviceElement
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::DeviceElement>
-        serializationHandler(Functor &f, ValType &value) {
-            f("device_name", value.getDeviceName());
-            f("server", value.getServer());
-            f("descriptor", value.getDescriptor());
-        }
-
-        /// @brief Serialization handler for AliasElement
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::AliasElement>
-        serializationHandler(Functor &f, ValType &value) {
-            f("source", value.getSource());
-            f("priority", value.priority());
-        }
-
-        /// @brief Serialization handler for StringElement
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::StringElement>
-        serializationHandler(Functor &f, ValType &value) {
-            f("string", value.getString());
-        }
-
-        // Serialization handlers for elements without extra data
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::NullElement>
-        serializationHandler(Functor &, ValType &) {}
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::PluginElement>
-        serializationHandler(Functor &, ValType &) {}
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::InterfaceElement>
-        serializationHandler(Functor &, ValType &) {}
-        template <typename Functor, typename ValType>
-        inline enable_if_element_type<ValType, elements::SensorElement>
-        serializationHandler(Functor &, ValType &) {}
-
-        /// @brief Functor for use with PathElementSerializationHandler, for the
-        /// direction PathElement->JSON
-        class PathElementToJSONFunctor : boost::noncopyable {
-          public:
-            PathElementToJSONFunctor(Json::Value &val) : m_val(val) {}
-
-            template <typename T>
-            void operator()(const char name[], T const &data, ...) {
-                m_val[name] = data;
-            }
-
-          private:
-            Json::Value &m_val;
-        };
-
         /// @brief A PathNodeVisitor that returns a JSON object corresponding to
-        /// a single PathNode.
+        /// a single PathNode (including its contained PathElement value)
         class PathNodeToJsonVisitor
             : public boost::static_visitor<Json::Value> {
           public:
             PathNodeToJsonVisitor() : boost::static_visitor<Json::Value>() {}
 
-            Json::Value setup(PathNode const &node) {
-                Json::Value val{Json::objectValue};
+            /// @brief Adds data from the PathNode to an object containing
+            /// PathElement data.
+            void addNodeData(PathNode const &node, Json::Value &val) {
                 val["path"] = getFullPath(node);
                 val["type"] = getTypeName(node);
-                return val;
             }
 
             template <typename T>
             Json::Value operator()(PathNode const &node, T const &elt) {
-                auto ret = setup(node);
-                PathElementToJSONFunctor f(ret);
-                serializationHandler(f, elt);
+                auto ret = pathElementToJson(elt);
+                addNodeData(node, ret);
                 return ret;
             }
         };
@@ -154,103 +87,6 @@ namespace common {
             Json::Value m_ret;
             bool m_keepNulls;
         };
-
-        /// @brief Functor for use with a serializationHandler overload, for the
-        /// direction JSON->PathElement
-        class PathElementFromJsonFunctor : boost::noncopyable {
-          public:
-            PathElementFromJsonFunctor(Json::Value const &val) : m_val(val) {}
-
-            /// @brief Deserialize a string
-            void operator()(const char name[], std::string &dataRef) {
-                m_requireName(name);
-                dataRef = m_val[name].asString();
-            }
-            /// @brief Deserialize a bool
-            void operator()(const char name[], bool &dataRef) {
-                m_requireName(name);
-                dataRef = m_val[name].asBool();
-            }
-            /// @brief Deserialize a bool with default
-            void operator()(const char name[], bool &dataRef, bool defaultVal) {
-                if (m_hasName(name)) {
-                    dataRef = m_val[name].asBool();
-                } else {
-                    dataRef = defaultVal;
-                }
-            }
-
-            /// @brief Deserialize a Json::Value from either nested JSON or a
-            /// JSON string
-            void operator()(const char name[], Json::Value &dataRef) {
-                m_requireName(name);
-                if (m_val[name].isString()) {
-                    Json::Reader reader;
-                    Json::Value val;
-                    if (reader.parse(m_val[name].asString(), val)) {
-                        dataRef = val;
-                    }
-                } else {
-                    dataRef = m_val[name];
-                }
-            }
-
-            /// @brief Deserialize a uint8_t (e.g. AliasPriority)
-            void operator()(const char name[], uint8_t &dataRef) {
-                m_requireName(name);
-                dataRef = static_cast<uint8_t>(m_val[name].asInt());
-            }
-
-            /// @brief Deserialize a uint8_t (e.g. AliasPriority) with default
-            void operator()(const char name[], uint8_t &dataRef,
-                            uint8_t defaultVal) {
-                if (m_hasName(name)) {
-                    dataRef = static_cast<uint8_t>(m_val[name].asInt());
-                } else {
-                    dataRef = defaultVal;
-                }
-            }
-
-            /// @todo add more methods here if other data types are stored
-          private:
-            void m_requireName(const char name[]) {
-                if (!m_hasName(name)) {
-                    throw std::runtime_error(
-                        "Missing JSON object member named " +
-                        std::string(name));
-                }
-            }
-            bool m_hasName(const char name[]) { return m_val.isMember(name); }
-            Json::Value const &m_val;
-        };
-
-        /// @brief Functor for use with the PathElement's type list and
-        /// mpl::for_each, to convert from type name string to actual type and
-        /// load the data.
-        class DeserializeElementFunctor {
-          public:
-            DeserializeElementFunctor(Json::Value const &val,
-                                      elements::PathElement &elt)
-                : m_val(val), m_typename(val["type"].asString()), m_elt(elt) {}
-
-            /// @brief Don't try to generate an assignment operator.
-            DeserializeElementFunctor &
-            operator=(const DeserializeElementFunctor &) = delete;
-
-            template <typename T> void operator()(T const &) {
-                if (elements::getTypeName<T>() == m_typename) {
-                    T value;
-                    PathElementFromJsonFunctor functor(m_val);
-                    serializationHandler(functor, value);
-                    m_elt = value;
-                }
-            }
-
-          private:
-            Json::Value const &m_val;
-            std::string const m_typename;
-            elements::PathElement &m_elt;
-        };
     } // namespace
 
     Json::Value pathTreeToJson(PathTree &tree, bool keepNulls) {
@@ -261,9 +97,7 @@ namespace common {
 
     void jsonToPathTree(PathTree &tree, Json::Value nodes) {
         for (auto const &node : nodes) {
-            elements::PathElement elt;
-            DeserializeElementFunctor functor{node, elt};
-            boost::mpl::for_each<elements::PathElement::types>(functor);
+            elements::PathElement elt = jsonToPathElement(node);
             tree.getNodeByPath(node["path"].asString()).value() = elt;
         }
     }
