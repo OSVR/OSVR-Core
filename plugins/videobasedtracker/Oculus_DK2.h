@@ -1,5 +1,5 @@
 /** @file
-@brief Header file describing interface for an Oculus DK2 HID device.
+@brief Header file describing interface for an Oculus DK2 device.
 
 @date 2015
 
@@ -28,15 +28,21 @@ Sensics, Inc.
 #include <vrpn_HumanInterface.h>
 #include <vrpn_Shared.h>
 
+#include <opencv2/core/core.hpp> // for basic OpenCV types
+
 namespace osvr {
 namespace oculus_dk2 {
 
+// This is the information included with each Inertial Measurement Unit
+// (IMU) report from a DK2.
 typedef struct {
     int accel[3];
     int gyro[3];
     vrpn_uint16 timestamp;
 } OCULUS_IMU_REPORT;
 
+// The HID device on the DK2.  This is used to control the LEDs and
+// also to report values from the IMU.
 class Oculus_DK2_HID : public vrpn_HidInterface
 {
 public:
@@ -78,6 +84,12 @@ private:
     // from the Inertial Measurement Unit (IMU).
     void on_data_received(size_t bytes, vrpn_uint8 *buffer);
 };
+
+// Function to convert a bogus-formatted image from OpenCV from the
+// HDK (which happens because the unit claims to be reporting YUV format
+// when in fact it is reporting grayscale format) into the correct
+// image.
+extern cv::Mat unscramble_image(const cv::Mat &image);
 
 } // namespace oculus_dk2
 } // namespace osvr
