@@ -32,6 +32,7 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/NetworkingSupport.h>
 #include <osvr/Util/TimeValue_fwd.h>
+#include <osvr/Util/DefaultBool.h>
 #include "VRPNConnectionCollection.h"
 #include "InterfaceTree.h"
 #include "RemoteHandlerFactory.h"
@@ -116,6 +117,12 @@ namespace client {
 
         /// @brief RAII holder for networking start/stop
         common::NetworkingSupport m_network;
+
+        /// @brief Have we gotten a connection to the main server?
+        util::DefaultBool<false> m_gotConnection;
+
+        /// @brief Have we gotten a path tree?
+        util::DefaultBool<false> m_gotTree;
     };
 } // namespace client
 } // namespace osvr

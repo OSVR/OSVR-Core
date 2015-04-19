@@ -44,9 +44,12 @@
 
 // Standard includes
 #include <unordered_set>
+#include <thread>
 
 namespace osvr {
 namespace client {
+
+    static const std::chrono::milliseconds CONNECT_WAIT(500);
 
     PureClientContext::PureClientContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
@@ -84,6 +87,21 @@ namespace client {
                 m_handleReplaceTree(nodes);
             });
 #endif
+        typedef std::chrono::system_clock clock;
+        auto begin = clock::now();
+        auto end = begin + CONNECT_WAIT;
+        while (clock::now() < end && !m_gotTree && !m_gotConnection) {
+            m_update();
+            std::this_thread::yield();
+        }
+        auto timeToStartup = (clock::now() - begin);
+        OSVR_DEV_VERBOSE(
+            "Connection process took "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(
+                   timeToStartup).count()
+            << "ms: " << (m_gotConnection ? "have connection to server, "
+                                          : "don't have connection to server, ")
+            << (m_gotTree ? "have path tree" : "don't have path tree"));
     }
 
     PureClientContext::~PureClientContext() {}
@@ -91,6 +109,12 @@ namespace client {
     void PureClientContext::m_update() {
         /// Mainloop connections
         m_vrpnConns.updateAll();
+
+        if (!m_gotConnection && m_mainConn->connected()) {
+            OSVR_DEV_VERBOSE("Got connection to main OSVR server");
+            m_gotConnection = true;
+        }
+
         /// Update system device
         m_systemDevice->update();
         /// Update handlers.
@@ -177,6 +201,7 @@ namespace client {
     }
 
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
+        m_gotTree = true;
         OSVR_DEV_VERBOSE("Got updated path tree, processing");
         // reset path tree
         m_pathTree.reset();
