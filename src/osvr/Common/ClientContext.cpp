@@ -26,6 +26,7 @@
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
+#include "GetJSONStringFromTree.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -100,12 +101,7 @@ OSVR_ClientContextObject::releaseInterface(ClientInterface *iface) {
 
 std::string
 OSVR_ClientContextObject::getStringParameter(std::string const &path) const {
-    auto it = m_params.find(path);
-    std::string ret;
-    if (it != m_params.end()) {
-        ret = it->second;
-    }
-    return ret;
+    return getJSONStringFromTree(getPathTree(), path);
 }
 
 osvr::common::PathTree const &OSVR_ClientContextObject::getPathTree() const {
