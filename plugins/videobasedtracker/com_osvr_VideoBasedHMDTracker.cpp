@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include "Oculus_DK2.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -85,10 +86,16 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 << ", Mode " << m_camera.get(CV_CAP_PROP_MODE) << std::endl;
             if (m_isOculusCamera) {
                 std::cout << "Is Oculus camera, reformatting to mono" << std::endl;
+                m_dk2 = new osvr::oculus_dk2::Oculus_DK2_HID();
             }
 #endif
         }
       }
+
+    ~VideoBasedHMDTracker() {
+        // Delete the DK2 if we have one (okay to delete a NULL pointer)
+        delete m_dk2;
+    }
 
     OSVR_ReturnCode update() {
         if (!m_camera.isOpened()) {
@@ -183,6 +190,10 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // conversion back to YCbCr:
             //  TODO
             // m_frameCopy.TODO;
+
+            // Read any reports and discard them.  We do this to keep the
+            // LED keepAlive going.
+            m_dk2->poll();
         }
 
 #ifdef VBHMD_DEBUG
@@ -214,6 +225,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     cv::Mat m_frame;
     cv::Mat m_frameCopy;
     bool m_isOculusCamera;    //< Is this image from and Oculus camera?
+    osvr::oculus_dk2::Oculus_DK2_HID *m_dk2 = NULL;
 };
 
 class HardwareDetection {

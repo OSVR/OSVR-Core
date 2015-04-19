@@ -50,10 +50,15 @@ public:
     std::vector<OCULUS_IMU_REPORT> poll();
 
 private:
-    vrpn_HidAcceptor *d_filter;
-    double d_keepAliveSeconds;
-    struct timeval d_lastKeepAlive;
+    vrpn_HidAcceptor *m_filter;
+    double m_keepAliveSeconds;
+    struct timeval m_lastKeepAlive;
 
+    // Reports from the IMU.
+    std::vector<OCULUS_IMU_REPORT> m_reports;
+
+    // Send an LED control feature report.  This needs to be sent with
+    // enable = true every keepAliveSeconds to keep the LEDs going.
     void writeLEDControl(
         bool enable = true
         , vrpn_uint16 exposureLength = 350
@@ -68,6 +73,10 @@ private:
         , bool customPattern = false
         , vrpn_uint16 commandId = 0         //< Not sure what this means
         );
+
+    // Handle incoming data reports, which in this case are reports
+    // from the Inertial Measurement Unit (IMU).
+    void on_data_received(size_t bytes, vrpn_uint8 *buffer);
 };
 
 } // namespace oculus_dk2
