@@ -64,7 +64,7 @@ namespace common {
             return changed;
         }
         for (auto const &iface : ifaces.getMemberNames()) {
-            auto &ifaceNode = detail::treePathRetrieve(devNode, iface);
+            auto &ifaceNode = treePathRetrieve(devNode, iface);
             if (elements::isNull(ifaceNode.value())) {
                 ifaceNode.value() = elements::InterfaceElement();
                 changed.set();
@@ -194,9 +194,8 @@ namespace common {
                 /// OK, handle wildcard here
                 auto sourceStem = source;
                 boost::algorithm::erase_tail(sourceStem, WILDCARD_SUFFIX_LEN);
-                auto &sourceNode =
-                    detail::treePathRetrieve(m_devNode, sourceStem);
-                auto &destNode = detail::treePathRetrieve(m_devNode, path);
+                auto &sourceNode = treePathRetrieve(m_devNode, sourceStem);
+                auto &destNode = treePathRetrieve(m_devNode, path);
                 auto absoluteSourceStem = getFullPath(sourceNode);
                 auto absoluteSourcePrefixLen = absoluteSourceStem.length();
                 traverseWith(sourceNode, [&](PathNode &node) {

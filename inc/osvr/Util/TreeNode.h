@@ -45,6 +45,10 @@ namespace util {
     /// argument-dependent lookup with tree-related nonmembers, the class
     /// template TreeNode is imported into the parent namespace.
     namespace tree {
+        struct NoSuchChild : std::runtime_error {
+            NoSuchChild(std::string const &name)
+                : std::runtime_error("No child found with the name " + name) {}
+        };
         /// @brief A node in a generic tree, which can contain an object by
         /// value.
         /// @tparam ValueType The contained value type: must be
@@ -101,6 +105,10 @@ namespace util {
 
             /// @brief Get the named child, creating it if it doesn't exist.
             type &getOrCreateChildByName(std::string const &name);
+
+            /// @brief Get the named child, throwing NoSuchChild if it doesn't
+            /// exist.
+            type const &getChildByName(std::string const &name) const;
 
             /// @brief Gets the name of the current node. This will be empty if
             /// and
@@ -245,6 +253,16 @@ namespace util {
                 return *child;
             }
             return TreeNode::create(*this, name);
+        }
+
+        template <typename ValueType>
+        inline TreeNode<ValueType> const &
+        TreeNode<ValueType>::getChildByName(std::string const &name) const {
+            weak_ptr_type child = m_getChildByName(name);
+            if (child != nullptr) {
+                return *child;
+            }
+            throw NoSuchChild(name);
         }
 
         template <typename ValueType>

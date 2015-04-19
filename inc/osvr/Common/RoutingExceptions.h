@@ -63,6 +63,14 @@ namespace common {
                                      "already at the root!") {}
         };
 
+        /// @brief Thrown when attempting to go use an absolute path when
+        /// forbidden
+        struct ForbiddenAbsolutePath : std::runtime_error {
+            ForbiddenAbsolutePath()
+                : std::runtime_error(
+                      "Cannot specify an absolute path in this context!") {}
+        };
+
         /// @brief Thrown when attempting to go to the parent path when
         /// forbidden
         struct ForbiddenParentPath : std::runtime_error {

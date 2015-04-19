@@ -100,7 +100,7 @@ namespace client {
 
     InterfaceTree::node_type &
     InterfaceTree::m_getNodeForPath(std::string const &path) {
-        return common::detail::pathParseAndRetrieve(*m_root, path);
+        return common::pathParseAndRetrieve(*m_root, path);
     }
 
     RemoteHandlerPtr InterfaceTree::m_removeHandler(node_type &node) {

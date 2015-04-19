@@ -42,12 +42,12 @@ namespace osvr {
 namespace common {
     PathTree::PathTree() : m_root(PathNode::createRoot()) {}
     PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return detail::pathParseAndRetrieve(*m_root, path);
+        return pathParseAndRetrieve(*m_root, path);
     }
     PathNode &
     PathTree::getNodeByPath(std::string const &path,
                             PathElement const &finalComponentDefault) {
-        auto &ret = detail::pathParseAndRetrieve(*m_root, path);
+        auto &ret = pathParseAndRetrieve(*m_root, path);
 
         // Handle null elements as final component.
         elements::ifNullReplaceWith(ret.value(), finalComponentDefault);
@@ -99,7 +99,7 @@ namespace common {
     bool addAliasFromRoute(PathNode &node, std::string const &route,
                            AliasPriority priority) {
         auto path = common::RouteContainer::getDestinationFromString(route);
-        auto &aliasNode = detail::treePathRetrieve(node, path);
+        auto &aliasNode = treePathRetrieve(node, path);
         ParsedAlias newSource(route);
         if (!newSource.isValid()) {
             /// @todo signify invalid route in some other way?
@@ -128,14 +128,14 @@ namespace common {
         if (isPathAbsolute(path)) {
             return path;
         }
-        return getFullPath(detail::treePathRetrieve(node, path));
+        return getFullPath(treePathRetrieve(node, path));
     }
 
     bool addAliasFromSourceAndRelativeDest(PathNode &node,
                                            std::string const &source,
                                            std::string const &dest,
                                            AliasPriority priority) {
-        auto &aliasNode = detail::treePathRetrieve(node, dest);
+        auto &aliasNode = treePathRetrieve(node, dest);
         ParsedAlias newSource(source);
         if (!newSource.isValid()) {
             /// @todo signify invalid route in some other way?

@@ -42,30 +42,28 @@
 namespace osvr {
 namespace common {
     namespace detail {
+        struct GetOrCreateFunctor {
+            template <typename Node>
+            Node *operator()(Node *node, std::string const &component) const {
+                return &(node->getOrCreateChildByName(component));
+            }
+        };
 
-        /// @brief Internal method for parsing a path and getting
-        /// or creating the nodes along it.
-        ///
-        /// @param path An absolute path (beginning with /) or a path relative
-        /// to the node (no leading /) - a trailing slash is trimmed silently
-        /// @param node A node of a tree. If a leading slash is found on the
-        /// path, the node will be used to find the root, otherwise it is
-        /// considered the place to which the given path is relative.
-        /// @param permitParent An optional flag indicating if ".." is permitted
-        /// as a component of the path, moving to the parent level.
-        ///
-        /// If nodes do not exist, they are created as default. An empty path
-        /// results in returning the same node provided. A component of a path
-        /// equal to "." is effectively ignored ("current directory" behavior)
-        ///
-        /// @returns a reference to the node referred to by the path.
-        /// @throws exceptions::EmptyPathComponent,
-        /// exceptions::ForbiddenParentPath, exceptions::ImpossibleParentPath
-        template <typename ValueType>
-        inline util::TreeNode<ValueType> &
-        treePathRetrieve(util::TreeNode<ValueType> &node, std::string path,
-                         bool permitParent = false) {
-            typedef util::TreeNode<ValueType> Node;
+        struct GetChildFunctor {
+            template <typename Node>
+            Node const *operator()(Node const *node,
+                                   std::string const &component) const {
+                return &(node->getChildByName(component));
+            }
+        };
+        enum ParentPolicy { GETPARENT_PERMIT, GETPARENT_DENY };
+        enum AbsolutePolicy { ABSOLUTEPATH_PERMIT, ABSOLUTEPATH_DENY };
+
+        template <typename GetChildFunctor, typename Node>
+        inline Node &treePathRetrieveImplementation(
+            GetChildFunctor f, Node &node, std::string path,
+            ParentPolicy permitParent = GETPARENT_DENY,
+            AbsolutePolicy permitAbsolute = ABSOLUTEPATH_PERMIT) {
 
             if (path.empty()) {
                 return node;
@@ -74,6 +72,9 @@ namespace common {
 
             // Check for leading slash, indicating absolute path
             if (path.at(0) == getPathSeparatorCharacter()) {
+                if (ABSOLUTEPATH_PERMIT != permitAbsolute) {
+                    throw exceptions::ForbiddenAbsolutePath();
+                }
                 // Got it, so move to the root of the tree.
                 while (!ret->isRoot()) {
                     ret = ret->getParent();
@@ -123,7 +124,7 @@ namespace common {
                     } else if (component == "..") {
                         // parent path - must check for permission first, then
                         // possibility (root has no parent)
-                        if (!permitParent) {
+                        if (GETPARENT_PERMIT != permitParent) {
                             throw exceptions::ForbiddenParentPath();
                         }
                         if (ret->isRoot()) {
@@ -132,7 +133,7 @@ namespace common {
                         ret = ret->getParent();
                     } else {
                         // A non-special string: just get the child
-                        ret = &(ret->getOrCreateChildByName(component));
+                        ret = f(ret, component);
                     }
                     // if we make it to here we've updated ret.
                 }
@@ -141,37 +142,77 @@ namespace common {
             return *ret;
         }
 
-        /// @brief Internal method for parsing a path and getting or creating
-        /// the nodes along it.
-        /// @param path An absolute path (beginning with /) - a trailing slash
-        /// is trimmed silently
-        /// @param root The root node of a tree. This is not checked at runtime
-        /// (just a debug assert) since this should only be called from safe,
-        /// internal locations!
-        ///
-        /// If nodes do not exist, they are created as default
-        ///
-        /// @returns a reference to the leaf node referred to by the path.
-        /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
-        /// exceptions::EmptyPathComponent, exceptions::ForbiddenParentPath
-        template <typename ValueType>
-        inline util::TreeNode<ValueType> &
-        pathParseAndRetrieve(util::TreeNode<ValueType> &root,
-                             std::string const &path) {
-            BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
-            if (path.empty()) {
-                throw exceptions::EmptyPath();
-            }
-            if (path == getPathSeparator()) {
-                return root;
-            }
-            if (path.at(0) != getPathSeparatorCharacter()) {
-                throw exceptions::PathNotAbsolute(path);
-            }
-
-            return treePathRetrieve(root, path);
-        }
     } // namespace detail
+    /// @brief Internal method for parsing a path and getting
+    /// or creating the nodes along it.
+    ///
+    /// @param path An absolute path (beginning with /) or a path relative
+    /// to the node (no leading /) - a trailing slash is trimmed silently
+    /// @param node A node of a tree. If a leading slash is found on the
+    /// path, the node will be used to find the root, otherwise it is
+    /// considered the place to which the given path is relative.
+    /// @param permitParent An optional flag indicating if ".." is permitted
+    /// as a component of the path, moving to the parent level.
+    ///
+    /// If nodes do not exist, they are created as default. An empty path
+    /// results in returning the same node provided. A component of a path
+    /// equal to "." is effectively ignored ("current directory" behavior)
+    ///
+    /// @returns a reference to the node referred to by the path.
+    /// @throws exceptions::EmptyPathComponent,
+    /// exceptions::ForbiddenParentPath, exceptions::ImpossibleParentPath
+    template <typename ValueType>
+    inline util::TreeNode<ValueType> &
+    treePathRetrieve(util::TreeNode<ValueType> &node, std::string path,
+                     bool permitParent = false) {
+        return detail::treePathRetrieveImplementation(
+            detail::GetOrCreateFunctor(), node, path,
+            permitParent ? detail::GETPARENT_PERMIT : detail::GETPARENT_DENY);
+    }
+
+    /// @overload
+    ///
+    /// This version works with const trees, and does not create missing
+    /// children: instead it throws util::tree::NoSuchChild.
+    template <typename ValueType>
+    inline util::TreeNode<ValueType> const &
+    treePathRetrieve(util::TreeNode<ValueType> const &node, std::string path,
+                     bool permitParent = false) {
+        return detail::treePathRetrieveImplementation(
+            detail::GetChildFunctor(), node, path,
+            permitParent ? detail::GETPARENT_PERMIT : detail::GETPARENT_DENY);
+    }
+
+    /// @brief Internal method for parsing a path and getting or creating
+    /// the nodes along it.
+    /// @param path An absolute path (beginning with /) - a trailing slash
+    /// is trimmed silently
+    /// @param root The root node of a tree. This is not checked at runtime
+    /// (just a debug assert) since this should only be called from safe,
+    /// internal locations!
+    ///
+    /// If nodes do not exist, they are created as default
+    ///
+    /// @returns a reference to the leaf node referred to by the path.
+    /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
+    /// exceptions::EmptyPathComponent, exceptions::ForbiddenParentPath
+    template <typename ValueType>
+    inline util::TreeNode<ValueType> &
+    pathParseAndRetrieve(util::TreeNode<ValueType> &root,
+                         std::string const &path) {
+        BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
+        if (path.empty()) {
+            throw exceptions::EmptyPath();
+        }
+        if (path == getPathSeparator()) {
+            return root;
+        }
+        if (path.at(0) != getPathSeparatorCharacter()) {
+            throw exceptions::PathNotAbsolute(path);
+        }
+
+        return treePathRetrieve(root, path);
+    }
 } // namespace common
 } // namespace osvr
 
