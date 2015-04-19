@@ -54,6 +54,11 @@ namespace common {
         return ret;
     }
 
+    PathNode const &PathTree::getNodeByPath(std::string const &path) const {
+        return pathParseAndRetrieve(const_cast<PathNode const &>(*m_root),
+                                    path);
+    }
+
     void PathTree::reset() { m_root = PathNode::createRoot(); }
 
     /// @brief Determine if the node needs updating given that we want to add an

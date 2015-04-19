@@ -180,9 +180,8 @@ namespace util {
             explicit TreeNode(value_type const &val);
 
             /// @brief Internal helper to get child by name, or a null pointer
-            /// if no
-            /// such child.
-            weak_ptr_type m_getChildByName(std::string const &name);
+            /// if no such child.
+            weak_ptr_type m_getChildByName(std::string const &name) const;
 
             /// @brief Internal helper to add a named child. Assumes no such
             /// child already exists!
@@ -299,7 +298,7 @@ namespace util {
 
         template <typename ValueType>
         inline typename TreeNode<ValueType>::weak_ptr_type
-        TreeNode<ValueType>::m_getChildByName(std::string const &name) {
+        TreeNode<ValueType>::m_getChildByName(std::string const &name) const {
             /// @todo Don't use a linear search here - use an unordered map or
             /// something.
             auto it = std::find_if(

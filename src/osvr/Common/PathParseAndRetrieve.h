@@ -213,6 +213,25 @@ namespace common {
 
         return treePathRetrieve(root, path);
     }
+
+    /// @overload
+    template <typename ValueType>
+    inline util::TreeNode<ValueType> const &
+    pathParseAndRetrieve(util::TreeNode<ValueType> const &root,
+                         std::string const &path) {
+        BOOST_ASSERT_MSG(root.isRoot(), "Must pass the root node!");
+        if (path.empty()) {
+            throw exceptions::EmptyPath();
+        }
+        if (path == getPathSeparator()) {
+            return root;
+        }
+        if (path.at(0) != getPathSeparatorCharacter()) {
+            throw exceptions::PathNotAbsolute(path);
+        }
+
+        return treePathRetrieve(root, path);
+    }
 } // namespace common
 } // namespace osvr
 

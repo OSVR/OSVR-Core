@@ -64,6 +64,13 @@ namespace common {
         /// exceptions::EmptyPathComponent
         OSVR_COMMON_EXPORT PathNode &getNodeByPath(std::string const &path);
 
+        /// @brief Returns the node indicated by the path, which must be
+        /// absolute (begin with a /).
+        /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
+        /// exceptions::EmptyPathComponent, util::tree::NoSuchChild
+        OSVR_COMMON_EXPORT PathNode const &
+        getNodeByPath(std::string const &path) const;
+
         /// @overload
         ///
         /// Same as above but a non-existent final component node will be
