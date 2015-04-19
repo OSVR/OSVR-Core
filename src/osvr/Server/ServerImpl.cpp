@@ -34,7 +34,12 @@
 #include <osvr/Util/Microsleep.h>
 #include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/CommonComponent.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+
+#include "osvr/Server/display_json.h" /// Fallback display descriptor.
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -81,6 +86,9 @@ namespace server {
             [&] { triggerHardwareDetect(); });
         m_commonComponent->registerPingHandler([&] { m_sendTree(); });
 
+        // Set up the default display descriptor.
+        m_tree.getNodeByPath("/display").value() =
+            common::elements::StringElement(util::makeString(display_json));
         // Deal with updated device descriptors.
         m_conn->registerDescriptorHandler([&] { m_handleDeviceDescriptors(); });
     }
