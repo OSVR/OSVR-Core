@@ -17,10 +17,13 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
+    Oculus_DK2.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
 )
 
-target_link_libraries(com_osvr_VideoBasedHMDTracker opencv_core opencv_highgui opencv_imgproc)
+target_link_libraries(com_osvr_VideoBasedHMDTracker opencv_core opencv_highgui opencv_imgproc vendored-vrpn)
+
+target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins")
