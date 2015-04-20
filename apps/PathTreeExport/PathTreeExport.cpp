@@ -112,9 +112,9 @@ int osvrToStream(std::ostream &os, Options const &opts) {
                     auto &graphNode = graph->getNode(fullPath);
 
                     PathNode &source = pathTree.getNodeByPath(parsed.getLeaf());
-                    graph->addEdge(graph->getNode(getFullPath(source)),
-                                   graphNode, "alias",
-                                   parsed.isSimple() ? std::string() : parsed.getAlias());
+                    graph->addEdge(
+                        graphNode, graph->getNode(getFullPath(source)), "alias",
+                        parsed.isSimple() ? std::string() : parsed.getAlias());
                 });
         }
     }
