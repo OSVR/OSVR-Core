@@ -27,6 +27,7 @@ Sensics, Inc.
 
 // Internal Includes
 #include <osvr/USBSerial/Export.h>
+#include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
 // - none
