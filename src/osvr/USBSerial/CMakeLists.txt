@@ -7,6 +7,8 @@ set(API
 set(SOURCE
     USBSerialDevInfo.h
     USBSerialDevInfo.cpp
+    USBSerialDevInfo_Linux.h
+    USBSerialDevInfo_Windows.h
     USBSerialEnum.cpp
     USBSerialEnumImpl.h
     USBSerialEnumImpl.cpp)

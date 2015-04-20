@@ -28,14 +28,15 @@
 #include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes
+// - none
 
 // Standard includes
 #include <string>
 
 #if defined(OSVR_WINDOWS)
-#include "USBSerialDevInfo_Windows.cpp"
+#include "USBSerialDevInfo_Windows.h"
 #elif defined(OSVR_LINUX)
-#include "USBSerialDevInfo_Linux.cpp"
+#include "USBSerialDevInfo_Linux.h"
 #else
 #error "getPortNumber() not yet implemented for this platform!"
 namespace osvr {
