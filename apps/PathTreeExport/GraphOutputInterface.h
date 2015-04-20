@@ -37,8 +37,7 @@
 
 class NodeInterface : boost::noncopyable {
   public:
-    virtual void addOutEdge(NodeInterface &sink, std::string const &type,
-                            std::string const &data = std::string()) = 0;
+    virtual std::string const &getID() const = 0;
 
   protected:
     NodeInterface() = default;
@@ -51,10 +50,15 @@ class GraphOutputInterface : boost::noncopyable {
 
     virtual ~GraphOutputInterface();
 
-    virtual NodeInterface &
-    addNode(std::string const &name, std::string const &type,
-            std::string const &parent = std::string()) = 0;
-    virtual NodeInterface &getNode(std::string const &name) = 0;
+    virtual NodeInterface &addNode(std::string const &label,
+                                   std::string const &fullPath,
+                                   std::string const &type) = 0;
+    virtual NodeInterface &getNode(std::string const &fullPath) = 0;
+    virtual void addEdge(NodeInterface &tail, NodeInterface &head,
+                         std::string const &type,
+                         std::string const &data = std::string()) = 0;
+    /// @brief Sets a flag indicating that we should try to organize nodes in the path tree structure.
+    virtual void enableTreeOrganization() = 0;
 
   protected:
     GraphOutputInterface() = default;

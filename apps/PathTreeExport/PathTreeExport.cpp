@@ -25,25 +25,105 @@ Sensics, Inc.
 // Internal Includes
 #include <osvr/ClientKit/Context.h>
 #include <osvr/Common/ClientContext.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/ResolveTreeNode.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/ParseAlias.h>
+#include <osvr/Util/Verbosity.h>
 #include "GraphOutputInterface.h"
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
+#include <boost/variant.hpp>
 
 // Standard includes
 #include <iostream>
 #include <fstream>
 
-int osvrToStream(std::ostream &os, std::string const& type) {
+struct Options {
+    std::string graphOutputType;
+    bool fullPaths = false;
+    bool showAliases = false;
+    bool showTree = true;
+};
+int osvrToStream(std::ostream &os, Options const &opts) {
     osvr::clientkit::ClientContext context("com.osvr.osvr2dot");
-    auto const &pathTree = context.get()->getPathTree();
+
+    /// Get a non-const copy of the path tree.
+    osvr::common::PathTree pathTree;
+    osvr::common::clonePathTree(context.get()->getPathTree(), pathTree);
     {
-        auto graph = GraphOutputInterface::createGraphOutputInterface(os, type);
+        auto graph = GraphOutputInterface::createGraphOutputInterface(
+            os, opts.graphOutputType);
+        using namespace osvr::common;
+        /// First traverse to ensure all aliases are resolved
+        osvr::util::traverseWith(
+            pathTree.getRoot(),
+            [&pathTree](osvr::common::PathNode const &node) {
+                resolveTreeNode(pathTree, getFullPath(node));
+            });
+
+        /// Now traverse for tree node output
+        bool fullPaths = opts.fullPaths;
+        osvr::util::traverseWith(
+            pathTree.getRoot(),
+            [&graph, &pathTree, fullPaths](osvr::common::PathNode const &node) {
+                auto parent = node.getParent();
+                if (nullptr == parent) {
+                    return;
+                }
+                auto fullPath = getFullPath(node);
+                auto &graphNode = graph->addNode(
+                    fullPaths ? fullPath : ("/" + node.getName()), fullPath,
+                    getTypeName(node));
+            });
+
+        if (opts.showTree) {
+            /// Now traverse for parent link output
+            graph->enableTreeOrganization();
+            osvr::util::traverseWith(
+                pathTree.getRoot(), [&graph, &pathTree, fullPaths](
+                                        osvr::common::PathNode const &node) {
+                    auto parent = node.getParent();
+                    if (nullptr == parent) {
+                        return;
+                    }
+                    auto fullPath = getFullPath(node);
+                    auto &graphNode = graph->getNode(getFullPath(node));
+                    graph->addEdge(graph->getNode(getFullPath(*parent)),
+                                   graphNode, "child");
+                });
+        }
+        if (opts.showAliases) {
+            /// Now traverse for aliases
+            osvr::util::traverseWith(
+                pathTree.getRoot(),
+                [&graph, &pathTree](osvr::common::PathNode const &node) {
+                    auto alias =
+                        boost::get<elements::AliasElement>(&node.value());
+                    if (nullptr == alias) {
+                        return;
+                    }
+                    auto fullPath = getFullPath(node);
+                    ParsedAlias parsed(alias->getSource());
+                    auto &graphNode = graph->getNode(fullPath);
+
+                    PathNode &source = pathTree.getNodeByPath(parsed.getLeaf());
+                    graph->addEdge(graph->getNode(getFullPath(source)),
+                                   graphNode, "alias",
+                                   parsed.isSimple() ? std::string() : parsed.getAlias());
+                });
+        }
     }
     return 0;
 }
 
 int main(int argc, char *argv[]) {
+    std::ostream *stream = &std::cout;
+    Options opt;
     std::string type;
     {
         namespace po = boost::program_options;
@@ -52,25 +132,31 @@ int main(int argc, char *argv[]) {
         desc.add_options()
             ("help", "produce help message")
             ("output,O", po::value<std::string>(), "output file (defaults to standard out)")
-            ("type,T", po::value<std::string>(&type)->default_value("dot"), "output data format (defaults to graphviz/dot)")
+            ("type,T", po::value<std::string>(&opt.graphOutputType)->default_value("dot"), "output data format (defaults to graphviz/dot)")
+            ("show-tree,t", po::value<bool>(&opt.showTree)->default_value(true), "Whether or not to show the path tree structure")
+            ("show-aliases,a", po::value<bool>(&opt.showAliases)->default_value(false), "Whether or not to show the alias links")
+            ("full-paths,p", po::value<bool>(&opt.fullPaths)->default_value(false), "Whether or not to use a node's full path as its label")
             ;
         // clang-format on
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
         po::notify(vm);
         if (vm.count("help")) {
+            std::cerr << "Traverses the path tree and outputs it as input data "
+                         "for a graph software package\n";
             std::cerr << "Usage: " << argv[0] << " [options]\n";
             std::cerr << desc << "\n";
             return 1;
         }
+        std::ofstream file;
         if (vm.count("output")) {
-            std::ofstream file(vm["output"].as<std::string>().c_str());
+            file.open(vm["output"].as<std::string>().c_str());
             if (!file) {
                 std::cerr << "Error opening output file." << std::endl;
                 return 1;
             }
-            return osvrToStream(file, type);
+            stream = &file;
         }
-        return osvrToStream(std::cout, type);
+        return osvrToStream(*stream, opt);
     }
 }
