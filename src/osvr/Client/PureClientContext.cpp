@@ -90,7 +90,7 @@ namespace client {
         typedef std::chrono::system_clock clock;
         auto begin = clock::now();
         auto end = begin + CONNECT_WAIT;
-        while (clock::now() < end && !m_gotTree && !m_gotConnection) {
+        while (clock::now() < end && (!m_gotTree || !m_gotConnection)) {
             m_update();
             std::this_thread::yield();
         }
