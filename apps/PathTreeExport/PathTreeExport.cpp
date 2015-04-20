@@ -44,7 +44,7 @@ Sensics, Inc.
 #include <fstream>
 
 struct Options {
-    std::string graphOutputType;
+    std::string graphOutputType = "dot";
     bool fullPaths = false;
     bool showAliases = false;
     bool showTree = true;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
         desc.add_options()
             ("help", "produce help message")
             ("output,O", po::value<std::string>(), "output file (defaults to standard out)")
-            ("type,T", po::value<std::string>(&opt.graphOutputType)->default_value("dot"), "output data format (defaults to graphviz/dot)")
+            //("type,T", po::value<std::string>(&opt.graphOutputType)->default_value("dot"), "output data format (defaults to graphviz/dot)")
             ("show-tree,t", po::value<bool>(&opt.showTree)->default_value(true), "Whether or not to show the path tree structure")
             ("show-aliases,a", po::value<bool>(&opt.showAliases)->default_value(false), "Whether or not to show the alias links")
             ("full-paths,p", po::value<bool>(&opt.fullPaths)->default_value(false), "Whether or not to use a node's full path as its label")
