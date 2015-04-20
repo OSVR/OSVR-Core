@@ -3,10 +3,7 @@
   "drivers": [
     {
       "plugin": "org_opengoggles_bundled_Multiserver",
-      "driver": "YEI_3Space_Sensor",
-      "params": {
-        "port": "COM3"
-      }
+      "driver": "YEI_3Space_Sensor"
     }
   ],
   "routes": [
