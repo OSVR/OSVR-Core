@@ -23,6 +23,8 @@ Sensics, Inc.
 // limitations under the License.
 
 #include "Oculus_DK2.h"
+//#include <opencv2/core/operations.hpp>
+#include <opencv2/imgproc/imgproc.hpp> // for image scaling
 
 using namespace osvr;
 using namespace oculus_dk2;
@@ -67,7 +69,6 @@ std::vector<OCULUS_IMU_REPORT> Oculus_DK2_HID::poll()
     // them into the report vector.
     m_reports.clear();
     update();
-    // XXX
 
     return m_reports;
 }
@@ -131,7 +132,6 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     // the frame using cvCloneImage() and then do whatever
     // you want with the copy."  (This comes from the web page:
     // http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html)
-    cv::Mat outImage;
 
     // From http://doc-ok.org/?p=1095
     // "It advertises itself as having a resolution of 376×480
@@ -185,15 +185,28 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     // the color space of the source and destination.  The FFMPEG
     // output on the DK2 does not specify the color space, just the
     // encoding format.
-    // Inverting this set of equations produces the following
-    // conversion back to YCbCr:
     //  TODO
 
-    // For now, we do a brain-dead conversion, where we double the width
-    // of the output image, make it grayscale, and copy the red channel from
-    // the input image into neighboring pixels in the output image.
-    // XXX;
+    // Okay, so here we convert from BGR back into YUV.
+    cv::Mat yuvImage;
+    cv::cvtColor(image, yuvImage, cv::COLOR_BGR2YCrCb);
 
-    outImage = image;
+    // Then we repack the individual components; every Y is used
+    // (second and fourth entry), but Cb is the first entry of
+    // four and Cr the third:  Cb0 Y0 Cr0 Y1 Cb2 Y2 Cr2 Y3.
+    // So the image itself has interplated Cb and Cr values...
+    // For now, we do a brain-dead conversion, where we double the width
+    // of the YUV image, make it grayscale, and copy the Y channels from
+    // the input image into neighboring pixels in the output image; doubling
+    // every one.
+    cv::Mat outImage(yuvImage.rows, yuvImage.cols * 2,
+        CV_8UC1, cv::Scalar(0));
+    for (int r = 0; r < yuvImage.rows; r++) {
+        for (int c = 0; c < yuvImage.cols; c++) {
+            outImage.at<unsigned char>(r, c * 2) = yuvImage.at<cv::Vec3b>(r, c)[0];
+            outImage.at<unsigned char>(r, c * 2 + 1) = yuvImage.at<cv::Vec3b>(r, c)[0];
+        }
+    }
+
     return outImage;
 }
