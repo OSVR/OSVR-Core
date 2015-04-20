@@ -63,8 +63,8 @@ private:
     // Reports from the IMU.
     std::vector<OCULUS_IMU_REPORT> m_reports;
 
-    // Send an LED control feature report.  This needs to be sent with
-    // enable = true every keepAliveSeconds to keep the LEDs going.
+    // Send an LED control feature report. The enable flag tells
+    // whether to turn on the LEDs (true) or not.
     void writeLEDControl(
         bool enable = true
         , vrpn_uint16 exposureLength = 350
@@ -77,7 +77,15 @@ private:
         , bool syncInput = false
         , bool vSyncLock = false
         , bool customPattern = false
-        , vrpn_uint16 commandId = 0         //< Not sure what this means
+        , vrpn_uint16 commandId = 0         //< Should always be zero
+        );
+
+    // Send a KeepAlive feature report to the DK2.  This needs to be sent
+    // every keepAliveSeconds to keep the LEDs going.
+    void writeKeepAlive(
+        bool keepLEDs = true            //< Keep LEDs going, or only IMU?
+        , vrpn_uint16 interval = 10000  //< KeepAlive time in milliseconds
+        , vrpn_uint16 commandId = 0     //< Should always be zero
         );
 
     // Handle incoming data reports, which in this case are reports
