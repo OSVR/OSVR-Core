@@ -90,6 +90,35 @@ class VideoBasedHMDTracker : boost::noncopyable {
             }
 #endif
         }
+
+        // If we have an Oculus camera, set its capture parameters as described
+        // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for
+        // him for sharing this with us, used with permission.
+        if (m_isOculusCamera) {
+            // Trying to find the closest matches to what was being done
+            // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
+            // be able to set everything we need to.  In fact, these don't seem
+            // to be doing anything (gain does not change the brightness, for
+            // example) and all but the gain setting fails (we must not have the
+            // XIMEA interface).
+            if (!m_camera.set(CV_CAP_PROP_AUTO_EXPOSURE, 0)) {
+                std::cerr << "VideoBasedHMDTracker: Can't set auto exposure" << std::endl;
+            }
+            if (!m_camera.set(CV_CAP_PROP_XI_AEAG, 0)) {
+                std::cerr << "VideoBasedHMDTracker: Can't set auto exposure/gain" << std::endl;
+            }
+            if (!m_camera.set(CV_CAP_PROP_GAIN, 16)) {
+                std::cerr << "VideoBasedHMDTracker: Can't set gain" << std::endl;
+            }
+            if (!m_camera.set(CV_CAP_PROP_XI_OFFSET_X, 94)) {
+                std::cerr << "VideoBasedHMDTracker: Can't set horizontal blanking" << std::endl;
+            }
+            if (!m_camera.set(CV_CAP_PROP_XI_OFFSET_Y, 5)) {
+                std::cerr << "VideoBasedHMDTracker: Can't set vertical blanking" << std::endl;
+            }
+            // TODO: Would like to set a number of things, but since these are not working,
+            // giving up.
+        }
       }
 
     ~VideoBasedHMDTracker() {
@@ -105,13 +134,11 @@ class VideoBasedHMDTracker : boost::noncopyable {
         }
 
         // Trigger a camera grab.
-        bool grabbed = m_camera.grab();
-        if (!grabbed) {
+        if (!m_camera.grab()) {
             // No frame available.
             return OSVR_RETURN_SUCCESS;
         }
-        bool retrieved = m_camera.retrieve(m_frame, m_channel);
-        if (!retrieved) {
+        if (!m_camera.retrieve(m_frame, m_channel)) {
             return OSVR_RETURN_FAILURE;
         }
 
@@ -123,7 +150,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         // If we have an Oculus camera, then we need to reformat the
         // image pixels.
-        cv::Mat m_frameCopy = m_frame.clone();
         if (m_isOculusCamera) {
             m_frame = osvr::oculus_dk2::unscramble_image(m_frame);
 
