@@ -26,7 +26,7 @@
 #define INCLUDED_ParseAlias_h_GUID_F34B71BE_C378_4999_CE65_16AC5D1A80F1
 
 // Internal Includes
-// - none
+#include <osvr/Common/Export.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -39,7 +39,7 @@ namespace common {
     class ParsedAlias {
       public:
         /// @brief Constructor - performs parse and normalization of format.
-        ParsedAlias(std::string const &src);
+        OSVR_COMMON_EXPORT ParsedAlias(std::string const &src);
 
         /// @brief Constructor - performs normalization of format.
         ParsedAlias(Json::Value src);
@@ -48,16 +48,16 @@ namespace common {
         bool isValid() const;
 
         /// @brief Is this a simple (string-only, no transform) alias?
-        bool isSimple() const;
+        OSVR_COMMON_EXPORT bool isSimple() const;
 
         /// @brief Get the ultimate source/leaf of the alias
-        std::string getLeaf() const;
+        OSVR_COMMON_EXPORT std::string getLeaf() const;
 
         /// @brief Set the leaf of the alias: should be an absolute path.
         void setLeaf(std::string const &leaf);
 
         /// @brief Get the normalized, cleaned, compacted version of the alias.
-        std::string getAlias() const;
+        OSVR_COMMON_EXPORT std::string getAlias() const;
 
         /// @brief Gets a copy of the normalized version of the alias as a
         /// Json::Value
