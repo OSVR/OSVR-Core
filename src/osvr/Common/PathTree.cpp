@@ -29,6 +29,7 @@
 #include <osvr/Common/RouteContainer.h>
 #include <osvr/Common/ParseAlias.h>
 #include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
 #include "PathParseAndRetrieve.h"
 
@@ -161,6 +162,11 @@ namespace common {
 
     bool isPathAbsolute(std::string const &source) {
         return !source.empty() && source.at(0) == getPathSeparatorCharacter();
+    }
+
+    void clonePathTree(PathTree const &src, PathTree &dest) {
+        auto nodes = pathTreeToJson(src);
+        jsonToPathTree(dest, nodes);
     }
 } // namespace common
 } // namespace osvr

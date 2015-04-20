@@ -100,6 +100,9 @@ namespace common {
 
     bool isPathAbsolute(std::string const &source);
 
+    /// @brief Clones a path tree
+    OSVR_COMMON_EXPORT void clonePathTree(PathTree const &src, PathTree &dest);
+
 } // namespace common
 } // namespace osvr
 
