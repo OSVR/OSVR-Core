@@ -139,11 +139,20 @@ int main(int argc, char *argv[]) {
             ;
         // clang-format on
         po::variables_map vm;
-        po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
-        po::notify(vm);
-        if (vm.count("help")) {
-            std::cerr << "Traverses the path tree and outputs it as input data "
-                         "for a graph software package\n";
+        bool usage = false;
+        try {
+            po::store(po::command_line_parser(argc, argv).options(desc).run(),
+                      vm);
+            po::notify(vm);
+        } catch (std::exception &e) {
+            std::cerr << "\nError parsing command line: " << e.what()
+                      << std::endl;
+            usage = true;
+        }
+        if (usage || vm.count("help")) {
+            std::cerr
+                << "\nTraverses the path tree and outputs it as input data "
+                   "for a graph software package\n";
             std::cerr << "Usage: " << argv[0] << " [options]\n";
             std::cerr << desc << "\n";
             return 1;
