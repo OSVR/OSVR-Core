@@ -32,6 +32,7 @@
 #include <osvr/Common/RoutingConstants.h>
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
 
 #include "PathParseAndRetrieve.h"
 
@@ -123,32 +124,6 @@ namespace common {
             util::Flag m_flag;
         };
 
-        /// @brief A wrapper for pre-order traversal with something like a
-        /// lambda.
-        template <typename F> class TreeTraversalWrapper : boost::noncopyable {
-          public:
-            TreeTraversalWrapper(F functor) : m_functor(functor) {}
-
-            template <typename T> void operator()(util::TreeNode<T> &node) {
-                m_functor(node);
-                node.visitChildren(*this);
-            }
-            template <typename T>
-            void operator()(util::TreeNode<T> const &node) {
-                m_functor(node);
-                node.visitConstChildren(*this);
-            }
-
-          private:
-            F m_functor;
-        };
-
-        template <typename T, typename F>
-        inline void traverseWith(T &node, F functor) {
-            TreeTraversalWrapper<F> funcWrap{functor};
-            funcWrap(node);
-        }
-
         class AutomaticAliases : boost::noncopyable {
           public:
             AutomaticAliases(PathNode &devNode) : m_devNode(devNode) {}
@@ -198,7 +173,7 @@ namespace common {
                 auto &destNode = treePathRetrieve(m_devNode, path);
                 auto absoluteSourceStem = getFullPath(sourceNode);
                 auto absoluteSourcePrefixLen = absoluteSourceStem.length();
-                traverseWith(sourceNode, [&](PathNode &node) {
+                util::traverseWith(sourceNode, [&](PathNode &node) {
                     // Don't duplicate null nodes
                     if (elements::isNull(node.value())) {
                         return;
