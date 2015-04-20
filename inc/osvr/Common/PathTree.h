@@ -84,6 +84,8 @@ namespace common {
 
         PathNode &getRoot() { return *m_root; }
 
+        PathNode const &getRoot() const { return *m_root; }
+
       private:
         /// @brief Root node of the tree.
         PathNodePtr m_root;
