@@ -41,6 +41,7 @@
 // Standard includes
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 #define VBHMD_DEBUG
 
@@ -86,7 +87,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 << ", Mode " << m_camera.get(CV_CAP_PROP_MODE) << std::endl;
             if (m_isOculusCamera) {
                 std::cout << "Is Oculus camera, reformatting to mono" << std::endl;
-                m_dk2 = new osvr::oculus_dk2::Oculus_DK2_HID();
+                m_dk2.reset(new osvr::oculus_dk2::Oculus_DK2_HID());
             }
 #endif
         }
@@ -122,8 +123,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
       }
 
     ~VideoBasedHMDTracker() {
-        // Delete the DK2 if we have one (okay to delete a NULL pointer)
-        delete m_dk2;
     }
 
     OSVR_ReturnCode update() {
@@ -184,7 +183,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     int m_channel;
     cv::Mat m_frame;
     bool m_isOculusCamera;    //< Is this image from and Oculus camera?
-    osvr::oculus_dk2::Oculus_DK2_HID *m_dk2 = NULL;
+    std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;
 };
 
 class HardwareDetection {
