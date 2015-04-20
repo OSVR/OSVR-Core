@@ -118,14 +118,6 @@ namespace common {
                 "Route contains a relative path, not permitted: " << route);
             return false;
         }
-#if 0
-        OSVR_DEV_VERBOSE("addAliasFromRoute:\n\tRoute: "
-                         << route
-                         << "\n\tNew source: " << newSource.getAlias());
-#endif
-        OSVR_DEV_VERBOSE("addAliasFromRoute: " << getFullPath(aliasNode)
-                                               << " -> "
-                                               << newSource.getLeaf());
         return addAlias(aliasNode, newSource.getAlias(), priority);
     }
 
@@ -150,13 +142,6 @@ namespace common {
         }
         auto absSource = getAbsolutePath(node, newSource.getLeaf());
         newSource.setLeaf(absSource);
-#if 0
-        OSVR_DEV_VERBOSE("addAliasFromSourceAndRelativeDest:\n\tOld source: "
-                         << source
-                         << "\n\tNew source: " << newSource.getAlias());
-#endif
-        OSVR_DEV_VERBOSE("addAliasFromSourceAndRelativeDest: "
-                         << getFullPath(aliasNode) << " -> " << absSource);
         return addAlias(aliasNode, newSource.getAlias(), priority);
     }
 
