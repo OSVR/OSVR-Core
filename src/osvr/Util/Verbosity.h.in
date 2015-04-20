@@ -41,7 +41,7 @@
 
 #include <iostream>
 #define OSVR_DEV_VERBOSE(X)                                                    \
-    OSVR_UTIL_MULTILINE_BEGIN std::cout << "[OSVR] " << X << std::endl;        \
+    OSVR_UTIL_MULTILINE_BEGIN std::cerr << "[OSVR] " << X << std::endl;        \
     OSVR_UTIL_MULTILINE_END
 
 #else
