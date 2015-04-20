@@ -60,7 +60,7 @@ std::vector<OCULUS_IMU_REPORT> Oculus_DK2_HID::poll()
     struct timeval now;
     vrpn_gettimeofday(&now, NULL);
     if (vrpn_TimevalDurationSeconds(now, m_lastKeepAlive) >= m_keepAliveSeconds) {
-        writeLEDControl();
+        writeKeepAlive();
         m_lastKeepAlive = now;
     }
 
@@ -111,6 +111,29 @@ void Oculus_DK2_HID::writeLEDControl(
     vrpn_buffer_to_little_endian(&bufptr, &buflen, frameInterval);
     vrpn_buffer_to_little_endian(&bufptr, &buflen, vSyncOffset);
     vrpn_buffer_to_little_endian(&bufptr, &buflen, dutyCycle);
+
+    /* Write the LED control feature report: */
+    send_feature_report(sizeof(pktBuffer), pktBuffer);
+}
+
+// Thank you to Oliver Kreylos for the info needed to write this function.
+// It is based on his OculusRiftHIDReports.cpp, used with permission.
+void Oculus_DK2_HID::writeKeepAlive(
+    bool keepLEDs
+    , vrpn_uint16 interval
+    , vrpn_uint16 commandId)
+{
+    // Buffer to store our report in.
+    vrpn_uint8 pktBuffer[6];
+
+    /* Pack the packet buffer, using little-endian packing: */
+    vrpn_uint8 *bufptr = pktBuffer;
+    vrpn_int32 buflen = sizeof(pktBuffer);
+    vrpn_buffer_to_little_endian(&bufptr, &buflen, vrpn_uint8(0x11U));
+    vrpn_buffer_to_little_endian(&bufptr, &buflen, commandId);
+    vrpn_uint8 flags = keepLEDs ? 0x0bU : 0x01U;
+    vrpn_buffer_to_little_endian(&bufptr, &buflen, flags);
+    vrpn_buffer_to_little_endian(&bufptr, &buflen, interval);
 
     /* Write the LED control feature report: */
     send_feature_report(sizeof(pktBuffer), pktBuffer);
