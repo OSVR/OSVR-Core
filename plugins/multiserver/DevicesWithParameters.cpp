@@ -84,8 +84,8 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         throw std::runtime_error("Could not parse configuration: " +
                                  reader.getFormattedErrorMessages());
     }
-    uint16_t vID = 0x9AC;
-    uint16_t pID = 0x3F2;
+    static const uint16_t vID = 0x9AC;
+    static const uint16_t pID = 0x3F2;
     for (auto dev : osvr::usbserial::Enumerator(vID, pID)) {
 
         std::string port = normalizeAndVerifySerialPort(dev->getPort());
