@@ -1,5 +1,7 @@
 option(BUILD_EXPERIMENTAL_APPS "Should we build the experimental and possibly broken extra apps?" OFF)
 
+add_subdirectory(PathTreeExport)
+
 if(WIN32)
     set(OSVR_SERVER_RESOURCE osvr_server.rc)
 else()
