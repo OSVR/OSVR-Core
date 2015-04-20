@@ -31,23 +31,13 @@ target_compile_options(${LIBNAME_FULL}
     PUBLIC
     ${OSVR_CXX11_FLAGS})
 
+target_link_libraries(${LIBNAME_FULL}
+    PUBLIC
+    osvrUtilCpp
+    PRIVATE
+    boost_filesystem)
 if(WIN32)
     target_link_libraries(${LIBNAME_FULL}
-        PUBLIC
-        libfunctionality::functionality
-        osvrUtilCpp
         PRIVATE
-        boost_filesystem
         wbemuuid)
-else()
-    target_link_libraries(${LIBNAME_FULL}
-        PUBLIC
-        libfunctionality::functionality
-        osvrUtilCpp
-        PRIVATE
-        boost_filesystem)
 endif()
-###
-# Grab DLLs please.
-###
-osvr_copy_dep(${LIBNAME_FULL} libfunctionality::functionality)
