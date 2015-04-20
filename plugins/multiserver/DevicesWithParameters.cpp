@@ -98,6 +98,9 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         Json::Value commands = root.get("resetCommands", Json::arrayValue);
         CStringArray reset_commands;
 
+        // Enable Q-COMP filtering by default
+        reset_commands.push_back("123,2");
+
         for (Json::ArrayIndex i = 0, e = commands.size(); i < e; ++i) {
             reset_commands.push_back(commands[i].asString());
         }
