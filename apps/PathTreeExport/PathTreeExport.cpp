@@ -50,7 +50,7 @@ struct Options {
     bool showTree = true;
 };
 int osvrToStream(std::ostream &os, Options const &opts) {
-    osvr::clientkit::ClientContext context("com.osvr.osvr2dot");
+    osvr::clientkit::ClientContext context("com.osvr.tools.pathtreexport");
 
     /// Get a non-const copy of the path tree.
     osvr::common::PathTree pathTree;
