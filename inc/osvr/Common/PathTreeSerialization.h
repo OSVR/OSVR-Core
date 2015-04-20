@@ -44,7 +44,7 @@ namespace common {
 
     /// @brief Serialize a path tree to a JSON array of objects, one for each
     /// node
-    OSVR_COMMON_EXPORT Json::Value pathTreeToJson(PathTree &tree,
+    OSVR_COMMON_EXPORT Json::Value pathTreeToJson(PathTree const &tree,
                                                   bool keepNulls = false);
 
     /// @brief Deserialize a path tree from a JSON array of objects

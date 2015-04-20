@@ -89,7 +89,7 @@ namespace common {
         };
     } // namespace
 
-    Json::Value pathTreeToJson(PathTree &tree, bool keepNulls) {
+    Json::Value pathTreeToJson(PathTree const &tree, bool keepNulls) {
         auto visitor = PathTreeToJsonVisitor{keepNulls};
         tree.visitConstTree(visitor);
         return visitor.getResult();
