@@ -70,7 +70,7 @@ private:
         , vrpn_uint16 exposureLength = 350
         , vrpn_uint16 frameInterval = 16666
         , vrpn_uint16 vSyncOffset = 0
-        , vrpn_uint8 dutyCycle = 127
+        , vrpn_uint8 dutyCycle = 127        //< 255 = 100% brightness
         , vrpn_uint8 pattern = 1
         , bool autoIncrement = true
         , bool useCarrier = true
