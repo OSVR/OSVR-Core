@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
         // clang-format off
         po::options_description desc("Options");
         desc.add_options()
-            ("help", "produce help message")
+            ("help,h", "produce help message")
             ("output,O", po::value<std::string>(), "output file (defaults to standard out)")
             //("type,T", po::value<std::string>(&opt.graphOutputType)->default_value("dot"), "output data format (defaults to graphviz/dot)")
             ("show-tree,t", po::value<bool>(&opt.showTree)->default_value(true), "Whether or not to show the path tree structure")
