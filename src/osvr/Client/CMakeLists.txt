@@ -4,7 +4,6 @@ set(API
     "${HEADER_LOCATION}/CreateContext.h")
 
 set(SOURCE
-    "${CMAKE_CURRENT_BINARY_DIR}/display_json.h"
     AnalogRemoteFactory.cpp
     AnalogRemoteFactory.h
     ButtonRemoteFactory.cpp
