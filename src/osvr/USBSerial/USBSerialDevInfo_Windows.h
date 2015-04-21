@@ -147,7 +147,7 @@ namespace usbserial {
             HRESULT hr = devEnum->Next(WBEM_INFINITE, 1,
                                        AttachPtr(wbemClassObj), &numObjRet);
 
-            if (numObjRet == 0) {
+            if (FAILED(hr) || numObjRet == 0) {
                 break;
             }
 
