@@ -103,7 +103,7 @@ namespace usbserial {
         // the current user and obtain pointer pSvc
         // to make IWbemServices calls.
         result = locator->ConnectServer(
-            _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+            bstr_t(L"ROOT\\CIMV2"),         // Object path of WMI namespace
             NULL,                    // User name. NULL = current user
             NULL,                    // User password. NULL = current
             0,                       // Locale. NULL indicates current
@@ -133,7 +133,7 @@ namespace usbserial {
         // Get a list of serial devices
         intrusive_ptr<IEnumWbemClassObject> devEnum;
         result = wbemServices->ExecQuery(
-            bstr_t("WQL"), bstr_t("SELECT * FROM Win32_SerialPort"),
+            bstr_t(L"WQL"), bstr_t(L"SELECT * FROM Win32_SerialPort"),
             WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL,
             AttachPtr(devEnum));
 
