@@ -117,5 +117,4 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         reg.setDeviceDescriptor(osvr::util::makeString(
             org_opengoggles_bundled_Multiserver_YEI_3Space_Sensor_json));
     }
-
 }

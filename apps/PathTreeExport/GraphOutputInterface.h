@@ -57,7 +57,8 @@ class GraphOutputInterface : boost::noncopyable {
     virtual void addEdge(NodeInterface &tail, NodeInterface &head,
                          std::string const &type,
                          std::string const &data = std::string()) = 0;
-    /// @brief Sets a flag indicating that we should try to organize nodes in the path tree structure.
+    /// @brief Sets a flag indicating that we should try to organize nodes in
+    /// the path tree structure.
     virtual void enableTreeOrganization() = 0;
 
   protected:

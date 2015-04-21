@@ -62,6 +62,7 @@ class DOTGraphOutput : public GraphOutputInterface {
     void addEdge(DOTNode &tail, DOTNode &head,
                  std::string const &attributes = std::string());
     virtual void enableTreeOrganization();
+
   private:
     void m_outputNode(std::string const &label, std::string const &id,
                       std::string const &type);
