@@ -66,8 +66,9 @@ namespace util {
     }
 #endif // _UNICODE
 
-#endif // _WIN32
 } // namespace util
 } // namespace osvr
+
+#endif // _WIN32
 
 #endif // INCLUDED_WideToUTF8_h_GUID_A2C0AD0B_9DEB_4E84_5A3A_8517ED03AA32
