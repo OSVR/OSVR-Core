@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/InterfaceCallbackC.h>
-#include <osvr/Client/ClientInterface.h>
+#include <osvr/Common/ClientInterface.h>
 
 // Library/third-party includes
 // - none

@@ -51,13 +51,20 @@ namespace common {
     }
 
     static inline std::string
-    getDestination(Json::Value const &routingDirective) {
+    getDestinationFromJson(Json::Value const &routingDirective) {
         return routingDirective.get(routing_keys::destination(), "").asString();
     }
     static inline std::string toFastString(Json::Value const &val) {
         Json::FastWriter writer;
         return writer.write(val);
     }
+
+    static inline std::string
+    getSourceFromJson(Json::Value const &routingDirective) {
+        return routingDirective.get(routing_keys::source(), "")
+            .toStyledString();
+    }
+
     RouteContainer::RouteContainer() {}
 
     RouteContainer::RouteContainer(std::string const &routes) {
@@ -69,13 +76,14 @@ namespace common {
         }
         for (Json::ArrayIndex i = 0, e = routesVal.size(); i < e; ++i) {
             const Json::Value thisRoute = routesVal[i];
-            m_addRoute(getDestination(thisRoute), toFastString(thisRoute));
+            m_addRoute(getDestinationFromJson(thisRoute),
+                       toFastString(thisRoute));
         }
     }
 
     bool RouteContainer::addRoute(std::string const &routingDirective) {
         auto route = parseRoutingDirective(routingDirective);
-        return m_addRoute(getDestination(route), routingDirective);
+        return m_addRoute(getDestinationFromJson(route), routingDirective);
     }
 
     std::string RouteContainer::getRoutes(bool styled) const {
@@ -95,11 +103,19 @@ namespace common {
         auto route = getRouteForDestination(destination);
         if (!route.empty()) {
             Json::Value directive = parseRoutingDirective(route);
-            if (directive.isMember(routing_keys::source())) {
-                return directive[routing_keys::source()].toStyledString();
-            }
+            return getSourceFromJson(directive);
         }
         return std::string();
+    }
+
+    std::string RouteContainer::getSourceAt(size_t i) const {
+        return getSourceFromJson(
+            parseRoutingDirective(m_routingDirectives.at(i)));
+    }
+
+    std::string RouteContainer::getDestinationAt(size_t i) const {
+        return getDestinationFromJson(
+            parseRoutingDirective(m_routingDirectives.at(i)));
     }
 
     std::string RouteContainer::getRouteForDestination(
@@ -107,8 +123,8 @@ namespace common {
         auto it = std::find_if(
             begin(m_routingDirectives), end(m_routingDirectives),
             [&](std::string const &directive) {
-                return (getDestination(parseRoutingDirective(directive)) ==
-                        destination);
+                return (getDestinationFromJson(
+                            parseRoutingDirective(directive)) == destination);
             });
         if (it != end(m_routingDirectives)) {
             return *it;
@@ -116,6 +132,13 @@ namespace common {
         return std::string();
     }
 
+    std::string
+    RouteContainer::getDestinationFromString(std::string const &route) {
+        return getDestinationFromJson(parseRoutingDirective(route));
+    }
+    std::string RouteContainer::getSourceFromString(std::string const &route) {
+        return getSourceFromJson(parseRoutingDirective(route));
+    }
     bool RouteContainer::m_addRoute(std::string const &destination,
                                     std::string const &routingDirective) {
         bool replaced = false;
@@ -125,7 +148,7 @@ namespace common {
             begin(m_routingDirectives),
             end(m_routingDirectives), [&](std::string const &directive) {
                 Json::Value candidate = parseRoutingDirective(directive);
-                bool match = (getDestination(candidate) == destination);
+                bool match = (getDestinationFromJson(candidate) == destination);
                 if (match) {
                     replaced = true;
                 }

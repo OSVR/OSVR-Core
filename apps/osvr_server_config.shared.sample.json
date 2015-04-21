@@ -8,7 +8,10 @@
       "plugin": "org_opengoggles_bundled_Multiserver",
       "driver": "YEI_3Space_Sensor",
       "params": {
-        "port": "COM3"
+        "port": "COM3",
+        "resetCommands": [
+          "123,2"
+        ]
       }
     }
   ]

@@ -28,7 +28,7 @@
 #include "RecomposeTransform.h"
 #include "WrapRoute.h"
 #include <osvr/ClientKit/ClientKit.h>
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/Common/RouteContainer.h>
 #include <osvr/Util/EigenInterop.h>
@@ -171,7 +171,8 @@ int main(int argc, char *argv[]) {
             origRoute[osvr::common::routing_keys::source()] = cleanTransforms;
             ctx.get()->sendRoute(origRoute.toStyledString());
 
-            cout << "Sent cleaned route: " << origRoute.toStyledString() << endl;
+            cout << "Sent cleaned route: " << origRoute.toStyledString()
+                 << endl;
         }
         cout << "Running thread and waiting a few seconds "
                 "for startup..." << endl;

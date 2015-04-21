@@ -8,6 +8,13 @@
   - @subpage PluginExampleReadme
 */
 
+/** @page TopicTools Included tools
+  - @subpage PathTreeExport
+*/
+
+/** @page PathTreeExport Path Tree Export tool for visualizing the OSVR system
+*/
+
 #ifdef OSVR_DOXYGEN_EXTERNAL
 /** @page DevManual Contributing to OSVR-Core
 

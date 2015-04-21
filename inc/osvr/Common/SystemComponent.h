@@ -30,9 +30,10 @@
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
+#include <osvr/Common/PathTree_fwd.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
 
 // Standard includes
 // - none
@@ -57,6 +58,13 @@ namespace common {
 
         class ClientRouteToServer
             : public MessageRegistration<ClientRouteToServer> {
+          public:
+            class MessageSerialization;
+            static const char *identifier();
+        };
+
+        class ReplacementTreeFromServer
+            : public MessageRegistration<ReplacementTreeFromServer> {
           public:
             class MessageSerialization;
             static const char *identifier();
@@ -94,9 +102,23 @@ namespace common {
         registerClientRouteUpdateHandler(vrpn_MESSAGEHANDLER handler,
                                          void *userdata);
 
+        /// @brief Message from server, updating/replacing the client's
+        /// configuration
+        messages::ReplacementTreeFromServer treeOut;
+
+        typedef std::function<void(Json::Value const &,
+                                   util::time::TimeValue const &)> JsonHandler;
+        OSVR_COMMON_EXPORT void registerReplaceTreeHandler(JsonHandler cb);
+
+        OSVR_COMMON_EXPORT void sendReplacementTree(PathTree &tree);
+
       private:
         SystemComponent();
         virtual void m_parentSet();
+        static int VRPN_CALLBACK
+        m_handleReplaceTree(void *userdata, vrpn_HANDLERPARAM p);
+
+        std::vector<JsonHandler> m_replaceTreeHandlers;
     };
 } // namespace common
 } // namespace osvr

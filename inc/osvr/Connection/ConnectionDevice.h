@@ -51,7 +51,7 @@ namespace connection {
         typedef std::vector<std::string> NameList;
 
         /// @brief accessor for (primary) device name
-        std::string const &getName() const;
+        OSVR_CONNECTION_EXPORT std::string const &getName() const;
 
         /// @brief accessor for device names
         NameList const &getNames() const;
@@ -67,6 +67,16 @@ namespace connection {
 
         /// @brief For use only by DeviceToken
         void setDeviceToken(DeviceToken &token);
+
+        /// @brief Send new/updated JSON device descriptor.
+        ///
+        /// Note: does not trigger the descriptor handlers in connection - those
+        /// must be triggered by the caller!
+        OSVR_CONNECTION_EXPORT void
+        setDeviceDescriptor(std::string const &jsonString);
+
+        /// @brief Get the most current JSON device descriptor
+        OSVR_CONNECTION_EXPORT std::string const &getDeviceDescriptor() const;
 
       protected:
         /// @brief Does this connection device have a device token? Should be
@@ -92,6 +102,7 @@ namespace connection {
       private:
         NameList m_names;
         DeviceToken *m_token;
+        std::string m_descriptor;
     };
 } // namespace connection
 } // namespace osvr

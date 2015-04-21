@@ -114,6 +114,10 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     /// @brief Stop any threads spawned and owned by this DeviceToken
     void stopThreads();
 
+    /// @brief Send a new or updated device descriptor for this device.
+    OSVR_CONNECTION_EXPORT void
+    setDeviceDescriptor(std::string const &jsonString);
+
   protected:
     OSVR_DeviceTokenObject(std::string const &name);
     osvr::connection::ConnectionPtr m_getConnection();

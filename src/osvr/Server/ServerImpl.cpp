@@ -25,6 +25,7 @@
 // Internal Includes
 #include "ServerImpl.h"
 #include <osvr/Connection/Connection.h>
+#include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Connection/MessageType.h>
@@ -32,6 +33,13 @@
 #include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
 #include <osvr/Util/Microsleep.h>
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/CommonComponent.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/ProcessDeviceDescriptor.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+
+#include "osvr/Server/display_json.h" /// Fallback display descriptor.
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -72,10 +80,17 @@ namespace server {
             &ServerImpl::m_handleUpdatedRoute, this);
 
         // Things to do when we get a new incoming connection
-        m_conn->registerConnectionHandler(
-            std::bind(&ServerImpl::triggerHardwareDetect, std::ref(*this)));
-        m_conn->registerConnectionHandler(
-            std::bind(&ServerImpl::m_sendRoutes, std::ref(*this)));
+        m_commonComponent =
+            m_systemDevice->addComponent(common::CommonComponent::create());
+        m_commonComponent->registerPingHandler(
+            [&] { triggerHardwareDetect(); });
+        m_commonComponent->registerPingHandler([&] { m_sendTree(); });
+
+        // Set up the default display descriptor.
+        m_tree.getNodeByPath("/display").value() =
+            common::elements::StringElement(util::makeString(display_json));
+        // Deal with updated device descriptors.
+        m_conn->registerDescriptorHandler([&] { m_handleDeviceDescriptors(); });
     }
 
     ServerImpl::~ServerImpl() { stop(); }
@@ -122,8 +137,7 @@ namespace server {
     }
 
     void ServerImpl::loadPlugin(std::string const &pluginName) {
-        m_callControlled(std::bind(&pluginhost::RegistrationContext::loadPlugin,
-                                   m_ctx, pluginName));
+        m_callControlled([&, pluginName] { m_ctx->loadPlugin(pluginName); });
     }
 
     void ServerImpl::loadAutoPlugins() { m_ctx->loadPlugins(); }
@@ -136,8 +150,7 @@ namespace server {
 
     void ServerImpl::triggerHardwareDetect() {
         OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
-        m_callControlled(std::bind(
-            &pluginhost::RegistrationContext::triggerHardwareDetect, m_ctx));
+        m_callControlled([&] { m_ctx->triggerHardwareDetect(); });
     }
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
@@ -153,6 +166,11 @@ namespace server {
             /// mutex each time through?
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
             m_conn->process();
+            if (m_treeDirty) {
+                OSVR_DEV_VERBOSE("Path tree updated");
+                m_sendTree();
+                m_treeDirty.reset();
+            }
             m_systemDevice->update();
             for (auto &f : m_mainloopMethods) {
                 f();
@@ -175,12 +193,14 @@ namespace server {
     }
 
     std::string ServerImpl::getRoutes(bool styled) const {
+        /// @todo needs removal/replacement post path tree
         std::string ret;
         m_callControlled([&] { ret = m_routes.getRoutes(styled); });
         return ret;
     }
 
     std::string ServerImpl::getSource(std::string const &destination) const {
+        /// @todo needs removal/replacement post path tree
         std::string ret;
         m_callControlled([&] { ret = m_routes.getSource(destination); });
         return ret;
@@ -192,13 +212,14 @@ namespace server {
         m_systemDevice.reset();
         m_conn.reset();
     }
-
+#if 0
     void ServerImpl::m_sendRoutes() {
         std::string message = m_routes.getRoutes();
         OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
                                          << " routes to the client.");
         m_systemComponent->sendRoutes(message);
     }
+#endif
 
     int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ServerImpl *>(userdata);
@@ -208,11 +229,15 @@ namespace server {
     }
 
     bool ServerImpl::m_addRoute(std::string const &routingDirective) {
-        bool wasNew = m_routes.addRoute(routingDirective);
-        if (m_running) {
-            m_sendRoutes();
-        }
-        return wasNew;
+        bool change =
+            common::addAliasFromRoute(m_tree.getRoot(), routingDirective);
+        m_treeDirty += change;
+        return change;
+    }
+
+    void ServerImpl::m_sendTree() {
+        OSVR_DEV_VERBOSE("Sending path tree to clients.");
+        m_systemComponent->sendReplacementTree(m_tree);
     }
 
     void ServerImpl::setSleepTime(int microseconds) {
@@ -220,6 +245,19 @@ namespace server {
     }
 
     int ServerImpl::getSleepTime() const { return m_sleepTime; }
+
+    void ServerImpl::m_handleDeviceDescriptors() {
+        for (auto const &dev : m_conn->getDevices()) {
+            auto const &descriptor = dev->getDeviceDescriptor();
+            if (descriptor.empty()) {
+                OSVR_DEV_VERBOSE("Developer Warning: No device descriptor for "
+                                 << dev->getName());
+            } else {
+                m_treeDirty += common::processDeviceDescriptorForPathTree(
+                    m_tree, dev->getName(), descriptor);
+            }
+        }
+    }
 
 } // namespace server
 } // namespace osvr

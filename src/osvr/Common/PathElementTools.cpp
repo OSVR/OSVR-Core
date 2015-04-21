@@ -38,7 +38,7 @@
 namespace osvr {
 namespace common {
     namespace elements {
-        namespace detail {
+        namespace {
             /// Class template, specialized to implement class name retrieval.
             template <typename ElementType> struct ElementTypeName {
                 static const char *get();
@@ -48,29 +48,26 @@ namespace common {
 /// name as a string literal.
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     template <> struct ElementTypeName<CLASS> {                                \
-        OSVR_COMMON_EXPORT static const char *get() { return #CLASS; }         \
+        static const char *get() { return #CLASS; }                            \
     };
 
             /// All types included in the bounded typelist of PathElement must
-            /// be in this list.
-            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
+            /// be in this list. It's kept sorted for ease of maintenance.
+            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
             OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
             OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(PhysicalAssociationElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(LogicalElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(StringElement)
 #undef OSVR_ROUTING_TYPENAME_HANDLER
-        } // namespace detail
 
-        namespace {
             /// @brief Visitor class used to help getTypeName()
             class TypeNameVisitor : public boost::static_visitor<const char *> {
               public:
                 template <typename ElementType>
                 const char *operator()(ElementType const &) const {
-                    return detail::ElementTypeName<ElementType>::get();
+                    return ElementTypeName<ElementType>::get();
                 }
             };
         } // namespace
@@ -83,6 +80,10 @@ namespace common {
             if (boost::get<NullElement>(&dest)) {
                 dest = src;
             }
+        }
+
+        bool isNull(PathElement const &elt) {
+            return (nullptr != boost::get<NullElement>(&elt));
         }
     } // namespace elements
 } // namespace common

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(osvrcore)
 
+if(CMAKE_VERSION VERSION_LESS 3.0.0)
+    message(FATAL_ERROR "You must use CMake 3.0.0 or greater.")
+endif()
+
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -45,7 +49,7 @@ include(GNUInstallDirs)
 if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
-set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_BINDIR}/extra-sample-apps)
+set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
 
 # Shared modules from rpavlik/cmake-modules
 include(MapImportedReleaseVariants)
@@ -71,8 +75,8 @@ include(CMakeBoostHelper)
 # Dependencies
 ###
 
-if(WIN32)
-    # Hints for Windows, given the Chocolatey packages.
+if(MSVC)
+    # Hints for Windows and MSVC, given the Chocolatey packages.
     if(NOT "$ENV{ChocolateyInstall}" STREQUAL "")
         file(TO_CMAKE_PATH "$ENV{ChocolateyInstall}/lib" CHOCO_LIB)
         list(APPEND CMAKE_PREFIX_PATH "${CHOCO_LIB}/OpenCV/tools/opencv/build" "${CHOCO_LIB}/OpenCV.2.4.10.20150209/tools/opencv/build")
@@ -115,6 +119,10 @@ target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
 target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
 
 find_package(jsoncpp REQUIRED)
+if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
+    add_library(jsoncpp_lib INTERFACE)
+    target_link_libraries(jsoncpp_lib INTERFACE jsoncpp_lib_static)
+endif()
 
 include(CompilerFeatures)
 
@@ -123,12 +131,11 @@ include(CompilerFeatures)
 ###
 # Set up shared destination directories to avoid Windows hassle with DLL search paths.
 if(WIN32)
-	set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_BINDIR}/osvr-plugins-${OSVR_PLUGINKIT_ABI_VERSION}")
 	set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_BINDIR}")
 else()
-	set(OSVR_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}/osvr-plugins-${OSVR_PLUGINKIT_ABI_VERSION}")
 	set(OSVR_SHARED_LIBRARY_DIR "${CMAKE_INSTALL_LIBDIR}")
 endif()
+set(OSVR_PLUGIN_DIR "${OSVR_SHARED_LIBRARY_DIR}/osvr-plugins-${OSVR_PLUGINKIT_ABI_VERSION}")
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 endif()
@@ -243,7 +250,6 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     INSTALL_COMPONENT DevelDocs
     NO_PDF)
 
-
 ###
 # Set Up Package for External Usage
 ###
@@ -306,3 +312,14 @@ if(WIN32)
         COMPONENT
         Devel)
 endif()
+
+
+###
+# Install dependencies
+###
+#include(GetSearchDirs)
+#get_search_dirs(libSearchDirs libfunctionality::functionality)
+#set(APPS
+#"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/osvr_server${CMAKE_EXECUTABLE_SUFFIX}")
+#install(CODE "include(BundleUtilities)
+#    fixup_bundle(\"${APPS}\" \"\" \"${libSearchDirs}\")")

@@ -1,0 +1,6 @@
+[
+    { "symbol" : ["shared_ptr", "private", "<osvr/Util/SharedPtr.h>", "public"] },
+    { "symbol" : ["make_shared", "private", "<osvr/Util/SharedPtr.h>", "public"] },
+    { "symbol" : ["unique_ptr", "private", "<osvr/Util/UniquePtr.h>", "public"] }
+    #{"ref": "anglebrackets.imp" }
+]

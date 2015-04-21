@@ -27,6 +27,8 @@
 #include "GetSerialPortState.h"
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 #include <osvr/USBSerial/USBSerialEnum.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+#include "org_opengoggles_bundled_Multiserver_YEI_3Space_Sensor_json.h"
 
 // Library/third-party includes
 #include <json/reader.h>
@@ -112,5 +114,8 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
             reg.getVRPNConnection(), port.c_str(), 115200,
             calibrate_gyros_on_setup, tare_on_setup, frames_per_second, 0, 0, 1,
             0, reset_commands.get_array()));
+        reg.setDeviceDescriptor(osvr::util::makeString(
+            org_opengoggles_bundled_Multiserver_YEI_3Space_Sensor_json));
     }
+
 }

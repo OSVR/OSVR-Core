@@ -66,6 +66,10 @@ namespace connection {
     }
 
     void VrpnBasedConnection::m_initConnection(const char iface[], int port) {
+        if (!m_network.isUp()) {
+            OSVR_DEV_VERBOSE("Network error: " << m_network.getError());
+            throw std::runtime_error(m_network.getError());
+        }
         if (0 == port) {
             port = vrpn_DEFAULT_LISTEN_PORT_NO;
         }

@@ -45,6 +45,10 @@ namespace util {
     /// argument-dependent lookup with tree-related nonmembers, the class
     /// template TreeNode is imported into the parent namespace.
     namespace tree {
+        struct NoSuchChild : std::runtime_error {
+            NoSuchChild(std::string const &name)
+                : std::runtime_error("No child found with the name " + name) {}
+        };
         /// @brief A node in a generic tree, which can contain an object by
         /// value.
         /// @tparam ValueType The contained value type: must be
@@ -101,6 +105,10 @@ namespace util {
 
             /// @brief Get the named child, creating it if it doesn't exist.
             type &getOrCreateChildByName(std::string const &name);
+
+            /// @brief Get the named child, throwing NoSuchChild if it doesn't
+            /// exist.
+            type const &getChildByName(std::string const &name) const;
 
             /// @brief Gets the name of the current node. This will be empty if
             /// and
@@ -172,9 +180,8 @@ namespace util {
             explicit TreeNode(value_type const &val);
 
             /// @brief Internal helper to get child by name, or a null pointer
-            /// if no
-            /// such child.
-            weak_ptr_type m_getChildByName(std::string const &name);
+            /// if no such child.
+            weak_ptr_type m_getChildByName(std::string const &name) const;
 
             /// @brief Internal helper to add a named child. Assumes no such
             /// child already exists!
@@ -248,6 +255,16 @@ namespace util {
         }
 
         template <typename ValueType>
+        inline TreeNode<ValueType> const &
+        TreeNode<ValueType>::getChildByName(std::string const &name) const {
+            weak_ptr_type child = m_getChildByName(name);
+            if (child != nullptr) {
+                return *child;
+            }
+            throw NoSuchChild(name);
+        }
+
+        template <typename ValueType>
         inline std::string const &TreeNode<ValueType>::getName() const {
             return m_name;
         }
@@ -281,7 +298,7 @@ namespace util {
 
         template <typename ValueType>
         inline typename TreeNode<ValueType>::weak_ptr_type
-        TreeNode<ValueType>::m_getChildByName(std::string const &name) {
+        TreeNode<ValueType>::m_getChildByName(std::string const &name) const {
             /// @todo Don't use a linear search here - use an unordered map or
             /// something.
             auto it = std::find_if(

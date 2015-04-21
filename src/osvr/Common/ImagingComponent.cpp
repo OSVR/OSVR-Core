@@ -131,9 +131,7 @@ namespace common {
     int VRPN_CALLBACK
     ImagingComponent::m_handleImageRegion(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ImagingComponent *>(userdata);
-        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
         messages::ImageRegion::MessageSerialization msg;
         deserialize(bufReader, msg);

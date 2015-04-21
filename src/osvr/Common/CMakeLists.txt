@@ -8,26 +8,43 @@ configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/Config
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
     "${HEADER_LOCATION}/AlignmentPadding.h"
+    "${HEADER_LOCATION}/ApplyPathNodeVisitor.h"
     "${HEADER_LOCATION}/BaseDevice.h"
     "${HEADER_LOCATION}/BaseDevicePtr.h"
     "${HEADER_LOCATION}/BaseMessageTraits.h"
     "${HEADER_LOCATION}/Buffer.h"
     "${HEADER_LOCATION}/BufferTraits.h"
     "${HEADER_LOCATION}/Buffer_fwd.h"
+    "${HEADER_LOCATION}/CallbackType.h"
     "${HEADER_LOCATION}/ChangeOfBasis.h"
+    "${HEADER_LOCATION}/ClientContext.h"
+    "${HEADER_LOCATION}/ClientContext_fwd.h"
+    "${HEADER_LOCATION}/ClientInterface.h"
+    "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/Common.h"
+    "${HEADER_LOCATION}/CommonComponent.h"
+    "${HEADER_LOCATION}/CommonComponent_fwd.h"
     "${HEADER_LOCATION}/ConnectionWrapper.h"
     "${HEADER_LOCATION}/CreateDevice.h"
+    "${HEADER_LOCATION}/DeduplicatingFunctionWrapper.h"
     "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
+    "${HEADER_LOCATION}/InterfaceCallbacks.h"
+    "${HEADER_LOCATION}/InterfaceList.h"
+    "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/JSONEigen.h"
+    "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
+    "${HEADER_LOCATION}/NetworkClassOfService.h"
+    "${HEADER_LOCATION}/NetworkingSupport.h"
+    "${HEADER_LOCATION}/OriginalSource.h"
+    "${HEADER_LOCATION}/ParseAlias.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
@@ -35,9 +52,18 @@ set(API
     "${HEADER_LOCATION}/PathNode_fwd.h"
     "${HEADER_LOCATION}/PathTree.h"
     "${HEADER_LOCATION}/PathTreeFull.h"
+    "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
+    "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
+    "${HEADER_LOCATION}/ReportFromCallback.h"
+    "${HEADER_LOCATION}/ReportMap.h"
+    "${HEADER_LOCATION}/ReportState.h"
+    "${HEADER_LOCATION}/ReportStateTraits.h"
+    "${HEADER_LOCATION}/ReportTraits.h"
+    "${HEADER_LOCATION}/ReportTypes.h"
+    "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/RouteContainer.h"
     "${HEADER_LOCATION}/RoutingConstants.h"
     "${HEADER_LOCATION}/RoutingExceptions.h"
@@ -45,6 +71,7 @@ set(API
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
+    "${HEADER_LOCATION}/StateType.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${HEADER_LOCATION}/Transform.h"
@@ -53,24 +80,37 @@ set(API
 set(SOURCE
     AddDevice.cpp
     BaseDevice.cpp
+    ClientContext.cpp
+    ClientInterface.cpp
     Common.cpp
+    CommonComponent.cpp
+    ConfigByteSwapping.h.cmake_in
     CreateDevice.cpp
     DeviceComponent.cpp
     DeviceWrapper.cpp
     DeviceWrapper.h
     GetEnvironmentVariable.cpp
+    GetJSONStringFromTree.h
     ImagingComponent.cpp
     JSONTransformVisitor.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
+    NetworkClassOfService.cpp
+    NetworkingSupport.cpp
+    OriginalSource.cpp
+    ParseAlias.cpp
+    PathElementSerialization.h
+    PathElementSerializationDescriptions.h
     PathElementTools.cpp
     PathElementTypes.cpp
     PathNode.cpp
-    PathParseAndRetrieve.cpp
     PathParseAndRetrieve.h
     PathTree.cpp
+    PathTreeSerialization.cpp
+    ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp
+    ResolveTreeNode.cpp
     RouteContainer.cpp
     RoutingConstants.cpp
     RoutingKeys.cpp
@@ -98,8 +138,8 @@ target_compile_options(${LIBNAME_FULL}
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     osvrUtilCpp
-    jsoncpp_lib
     PRIVATE
+    jsoncpp_lib
     opencv_core
     vendored-vrpn
     eigen-headers)

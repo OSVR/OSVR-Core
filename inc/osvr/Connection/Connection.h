@@ -37,6 +37,7 @@
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
+#include <boost/range/iterator_range.hpp>
 
 // Standard includes
 #include <string>
@@ -111,8 +112,23 @@ namespace connection {
         OSVR_CONNECTION_EXPORT void
         registerConnectionHandler(std::function<void()> handler);
 
+        /// @brief Register a function to be called when a descriptor changes
+        OSVR_CONNECTION_EXPORT void
+        registerDescriptorHandler(std::function<void()> handler);
+
+        /// @brief Signal a descriptor update and call any/all descriptor
+        /// handlers.
+        OSVR_CONNECTION_EXPORT void triggerDescriptorHandlers();
+
         /// @brief Destructor
         OSVR_CONNECTION_EXPORT virtual ~Connection();
+
+        typedef std::vector<ConnectionDevicePtr> DeviceList;
+
+        /// @brief Get the devices, as a range
+        boost::iterator_range<DeviceList::const_iterator> getDevices() const {
+            return boost::make_iterator_range(begin(m_devices), end(m_devices));
+        }
 
         /// @name Advanced Methods - not for general consumption
         /// These can break encapsulation rules and/or encourage bad coding
@@ -158,6 +174,7 @@ namespace connection {
         /// dynamic type of the connection.
         OSVR_CONNECTION_EXPORT virtual const char *getConnectionKindID();
         /// @}
+
       protected:
         /// @brief (Subclass implementation) Register (or retrieve registration)
         /// of a message type.
@@ -181,8 +198,8 @@ namespace connection {
         Connection();
 
       private:
-        typedef std::vector<ConnectionDevicePtr> DeviceList;
         DeviceList m_devices;
+        std::vector<std::function<void()> > m_descriptorHandlers;
     };
 } // namespace connection
 } // namespace osvr

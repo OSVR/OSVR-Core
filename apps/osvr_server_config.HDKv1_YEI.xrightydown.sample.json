@@ -4,50 +4,10 @@
     {
       "plugin": "org_opengoggles_bundled_Multiserver",
       "driver": "YEI_3Space_Sensor"
+
     }
   ],
   "routes": [
-    {
-      "destination": "/me/hands/left",
-      "source": {
-        "changeBasis": {
-          "x": "x",
-          "y": "z",
-          "z": "-y"
-        },
-        "child": {
-          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-          "sensor": 0
-        }
-      }
-    },
-    {
-      "destination": "/me/hands/right",
-      "source": {
-        "changeBasis": {
-          "x": "x",
-          "y": "z",
-          "z": "-y"
-        },
-        "child": {
-          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
-          "sensor": 1
-        }
-      }
-    },
-    {
-      "destination": "/me/hands",
-      "source": {
-        "changeBasis": {
-          "x": "x",
-          "y": "z",
-          "z": "-y"
-        },
-        "child": {
-          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-        }
-      }
-    },
     {
       "destination": "/me/head",
       "source": {

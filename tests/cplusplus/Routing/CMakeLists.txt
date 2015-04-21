@@ -4,5 +4,5 @@ add_executable(Routing
     PathElement.cpp
     PathNode.cpp
     PathTree.cpp)
-target_link_libraries(Routing osvrCommon)
+target_link_libraries(Routing osvrCommon jsoncpp_lib)
 setup_gtest(Routing)

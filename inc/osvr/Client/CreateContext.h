@@ -26,8 +26,8 @@
 #define INCLUDED_CreateContext_h_GUID_F3E78707_5C69_4F80_9084_E6071A9E6128
 
 // Internal Includes
-#include <osvr/Client/ClientContext_fwd.h>
 #include <osvr/Client/Export.h>
+#include <osvr/Common/ClientContext_fwd.h>
 
 // Library/third-party includes
 // - none
@@ -38,7 +38,7 @@
 namespace osvr {
 namespace client {
 
-    OSVR_CLIENT_EXPORT ClientContext *
+    OSVR_CLIENT_EXPORT common::ClientContext *
     createContext(const char appId[], const char host[] = "localhost");
 
 } // namespace client

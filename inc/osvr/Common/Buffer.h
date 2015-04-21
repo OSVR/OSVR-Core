@@ -119,8 +119,7 @@ namespace common {
         typedef typename ContainerType::value_type ElementType;
 
         BufferReader(ContainerType const &buf)
-            : m_buf(&buf), m_begin(m_buf->begin()), m_readIter(m_buf->begin()),
-              m_end(m_buf->end()) {}
+            : m_begin(buf.begin()), m_readIter(buf.begin()), m_end(buf.end()) {}
 
         size_t bytesRead() const { return m_readIter - m_begin; }
         size_t bytesRemaining() const { return m_end - m_readIter; }
@@ -183,13 +182,22 @@ namespace common {
         }
 
       private:
-        ContainerType const *m_buf;
         const_iterator m_begin;
         const_iterator m_readIter;
         const_iterator m_end;
         BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
                                 "Container must have byte-sized elements");
     };
+
+    /// @brief Constructs and returns a buffer reader for an
+    /// externally-allocated
+    /// buffer: it's on you to supply a valid pointer and length.
+    template <typename CharType>
+    inline BufferReader<ExternalBufferReadingWrapper<CharType> >
+    readExternalBuffer(const CharType *buf, size_t len) {
+        return BufferReader<ExternalBufferReadingWrapper<CharType> >(
+            ExternalBufferReadingWrapper<CharType>(buf, len));
+    }
 
     /// @brief A buffer of bytes, built on a byte-vector-like container.
     /// Provides methods for easily appending to the buffer (including alignment
@@ -268,17 +276,6 @@ namespace common {
         /// reader!
         Reader startReading() const { return Reader(m_buf); }
 
-#if 0
-        /// @todo Commented out because YAGNI
-
-        typedef typename ContainerType::const_iterator const_iterator;
-
-        /// @brief Gets the "begin" iterator
-        const_iterator begin() const { return m_buf.begin(); }
-
-        /// @brief Gets the "past the end" iterator
-        const_iterator end() const { return m_buf.end(); }
-#endif
         /// @brief Gets the current size, in bytes.
         size_t size() const { return m_buf.size(); }
 

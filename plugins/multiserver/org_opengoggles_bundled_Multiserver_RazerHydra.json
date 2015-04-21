@@ -2,8 +2,8 @@
   "deviceVendor": "Razer",
   "deviceName": "Hydra",
   "author": "Ryan Pavlik <ryan@sensics.com>",
-  "version": 1,
-  "lastModified": "2014-12-04T21:13:07.585Z",
+  "version": 2,
+  "lastModified": "2015-04-10T17:38:49.659Z",
   "interfaces": {
     "tracker": {
       "count": 2,
@@ -49,13 +49,20 @@
       "count": 15
     }
   },
-  "semantics": {
+  "semantic": {
     "left": {
       "1": "button/1",
       "2": "button/2",
       "3": "button/3",
       "4": "button/4",
-      "$target": "tracker/0",
+      "$target": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": "tracker/0"
+       },
       "middle": "button/0",
       "bumper": "button/5",
       "joystick": {
@@ -70,7 +77,14 @@
       "2": "button/10",
       "3": "button/11",
       "4": "button/12",
-      "$target": "tracker/1",
+      "$target": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": "tracker/1"
+       },
       "middle": "button/8",
       "bumper": "button/13",
       "joystick": {
@@ -80,5 +94,11 @@
       },
       "trigger": "analog/5"
     }
+  },
+  "automaticAliases": {
+    "/me/hands/left": "semantic/left",
+    "/me/hands/right": "semantic/right",
+    "/controller/left": "semantic/left/*",
+    "/controller/right": "semantic/right/*"
   }
 }

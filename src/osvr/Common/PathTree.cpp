@@ -25,10 +25,16 @@
 // Internal Includes
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/RouteContainer.h>
+#include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/PathTreeSerialization.h>
+#include <osvr/Util/Verbosity.h>
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
-// - none
+#include <boost/variant/get.hpp>
 
 // Standard includes
 // - none
@@ -37,12 +43,115 @@ namespace osvr {
 namespace common {
     PathTree::PathTree() : m_root(PathNode::createRoot()) {}
     PathNode &PathTree::getNodeByPath(std::string const &path) {
-        return pathParseAndRetrieve(path, *m_root);
+        return pathParseAndRetrieve(*m_root, path);
     }
     PathNode &
     PathTree::getNodeByPath(std::string const &path,
                             PathElement const &finalComponentDefault) {
-        return pathParseAndRetrieve(path, *m_root, finalComponentDefault);
+        auto &ret = pathParseAndRetrieve(*m_root, path);
+
+        // Handle null elements as final component.
+        elements::ifNullReplaceWith(ret.value(), finalComponentDefault);
+        return ret;
+    }
+
+    PathNode const &PathTree::getNodeByPath(std::string const &path) const {
+        return pathParseAndRetrieve(const_cast<PathNode const &>(*m_root),
+                                    path);
+    }
+
+    void PathTree::reset() { m_root = PathNode::createRoot(); }
+
+    /// @brief Determine if the node needs updating given that we want to add an
+    /// alias there pointing to source with the given automatic status.
+    static inline bool aliasNeedsUpdate(PathNode &node,
+                                        std::string const &source,
+                                        AliasPriority priority) {
+        elements::AliasElement *elt =
+            boost::get<elements::AliasElement>(&node.value());
+        if (nullptr == elt) {
+            /// Always replace non-aliases
+            return true;
+        }
+        if (priority > elt->priority()) {
+            /// We're a higher-priority (manual vs automatic for instance), so
+            /// override
+            return true;
+        }
+        if (priority == elt->priority() && source != elt->getSource()) {
+            /// Same automatic status, different source: replace/update
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Make node an alias pointing to source, with the given automatic
+    /// status, if it needs updating.
+    ///
+    /// @return true if the node was changed
+    static inline bool addAlias(PathNode &node, std::string const &source,
+                                AliasPriority priority) {
+
+        if (!aliasNeedsUpdate(node, source, priority)) {
+            return false;
+        }
+        elements::AliasElement elt;
+        elt.setSource(source);
+        elt.priority() = priority;
+        node.value() = elt;
+        return true;
+    }
+
+    bool addAliasFromRoute(PathNode &node, std::string const &route,
+                           AliasPriority priority) {
+        auto path = common::RouteContainer::getDestinationFromString(route);
+        auto &aliasNode = treePathRetrieve(node, path);
+        ParsedAlias newSource(route);
+        if (!newSource.isValid()) {
+            /// @todo signify invalid route in some other way?
+            OSVR_DEV_VERBOSE("Could not parse route as a source: " << route);
+            return false;
+        }
+        if (!isPathAbsolute(newSource.getLeaf())) {
+            /// @todo signify not to pass relative paths here in some other way?
+            OSVR_DEV_VERBOSE(
+                "Route contains a relative path, not permitted: " << route);
+            return false;
+        }
+        return addAlias(aliasNode, newSource.getAlias(), priority);
+    }
+
+    static inline std::string getAbsolutePath(PathNode &node,
+                                              std::string const &path) {
+        if (isPathAbsolute(path)) {
+            return path;
+        }
+        return getFullPath(treePathRetrieve(node, path));
+    }
+
+    bool addAliasFromSourceAndRelativeDest(PathNode &node,
+                                           std::string const &source,
+                                           std::string const &dest,
+                                           AliasPriority priority) {
+        auto &aliasNode = treePathRetrieve(node, dest);
+        ParsedAlias newSource(source);
+        if (!newSource.isValid()) {
+            /// @todo signify invalid route in some other way?
+            OSVR_DEV_VERBOSE("Could not parse source: " << source);
+            return false;
+        }
+        auto absSource = getAbsolutePath(node, newSource.getLeaf());
+        newSource.setLeaf(absSource);
+        return addAlias(aliasNode, newSource.getAlias(), priority);
+    }
+
+    bool isPathAbsolute(std::string const &source) {
+        return !source.empty() && source.at(0) == getPathSeparatorCharacter();
+    }
+
+    void clonePathTree(PathTree const &src, PathTree &dest) {
+        auto nodes = pathTreeToJson(src);
+        jsonToPathTree(dest, nodes);
     }
 } // namespace common
 } // namespace osvr

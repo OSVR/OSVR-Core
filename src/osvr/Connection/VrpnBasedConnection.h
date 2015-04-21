@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Connection/Connection.h>
+#include <osvr/Common/NetworkingSupport.h>
 
 // Library/third-party includes
 #include <vrpn_Connection.h>
@@ -78,6 +79,7 @@ namespace connection {
 
         vrpn_ConnectionPtr m_vrpnConnection;
         std::vector<std::function<void()> > m_connectionHandlers;
+        common::NetworkingSupport m_network;
     };
 
 } // namespace connection
