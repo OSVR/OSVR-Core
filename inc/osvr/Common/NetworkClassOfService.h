@@ -33,6 +33,7 @@
 
 // Standard includes
 #include <type_traits>
+#include <stddef.h>
 
 namespace osvr {
 namespace common {

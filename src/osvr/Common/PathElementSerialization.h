@@ -36,6 +36,7 @@
 #include <json/reader.h>
 #include <boost/variant.hpp>
 #include <boost/mpl/for_each.hpp>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <type_traits>
