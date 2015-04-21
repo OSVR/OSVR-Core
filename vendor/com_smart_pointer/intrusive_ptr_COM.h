@@ -46,6 +46,7 @@ inline void intrusive_ptr_release(IUnknown* ptr)
     ptr->Release();
 }
 
+namespace detail {
 //
 //  Enable intrusive_ptr objects to be passed as parameters to functions expecting
 //  a pointer-to-pointer which will be initialized by the function.
@@ -130,5 +131,10 @@ inline IntrusivePtrWrapper<T> AttachPtr(boost::intrusive_ptr<T>& ref, bool addRe
 {
     return IntrusivePtrWrapper<T>(ref, addRef);
 }
+
+} // namespace detail
+
+
+using detail::AttachPtr;
 
 #endif // INCLUDED_intrusive_ptr_COM_h_GUID_BB97FC94_B320_4FB9_5379_940B0A631CA6
