@@ -37,7 +37,7 @@
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.DisplayParameter", 0);
+        osvrClientInit("com.osvr.exampleclients.DisplayParameter", 0);
 
     const char *path = "/display";
 

@@ -40,7 +40,7 @@ namespace common = osvr::common;
 using osvr::common::PathTree;
 using namespace osvr::common::elements;
 
-inline std::string getPlugin() { return "org_opengoggles_bundled_Multiserver"; }
+inline std::string getPlugin() { return "com_osvr_bundled_Multiserver"; }
 
 inline std::string getPluginPath() { return "/" + getPlugin(); }
 

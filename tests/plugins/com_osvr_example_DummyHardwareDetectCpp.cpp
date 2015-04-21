@@ -1,6 +1,6 @@
 /** @file
-    @brief Implementation of a dummy Hardware Detect Callback, using the full
-    idiomatic C++ wrapper, beyond even DummyHardwareDetectCpp2
+    @brief Implementation of a dummy Hardware Detect Callback, using a
+    idiomatic C++ approach than DummyHardwareDetect.
 
     @date 2014
 
@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/PluginKit.h>
+#include <osvr/PluginKit/PluginRegistration.h>
 
 // Library/third-party includes
 // - none
@@ -53,19 +53,19 @@ class HardwareDetection {
 };
 } // namespace
 
-OSVR_PLUGIN(org_opengoggles_example_DummyHardwareDetectCpp2) {
-    osvr::pluginkit::PluginContext context(ctx);
+OSVR_PLUGIN(com_osvr_example_DummyHardwareDetectCpp) {
     /// Register a detection callback function object: here passing it result of
     /// "new".
     /// Auto-registers for destruction.
-    context.registerHardwareDetectCallback(new HardwareDetection(0));
+    osvr::pluginkit::registerHardwareDetectCallback(ctx,
+                                                    new HardwareDetection(0));
 
     /// Register a detection callback function object: here passing it a value.
     /// It will make a copy that it auto-registers for destruction.
     HardwareDetection myDetect(10);
-    context.registerHardwareDetectCallback(myDetect);
+    osvr::pluginkit::registerHardwareDetectCallback(ctx, myDetect);
     /// Registering twice to demonstrate that copying occurs.
-    context.registerHardwareDetectCallback(myDetect);
+    osvr::pluginkit::registerHardwareDetectCallback(ctx, myDetect);
 
     return OSVR_RETURN_SUCCESS;
 }

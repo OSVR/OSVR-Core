@@ -42,7 +42,7 @@ void myAnalogCallback(void *userdata, const OSVR_TimeValue *timestamp,
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.AnalogCallback", 0);
+        osvrClientInit("com.osvr.exampleclients.AnalogCallback", 0);
 
     OSVR_ClientInterface analogTrigger = NULL;
     /* This is just one of the paths: specifically, the Hydra's left

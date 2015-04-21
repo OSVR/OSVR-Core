@@ -1,7 +1,7 @@
 set(DESCRIPTORS
-    org_opengoggles_bundled_Multiserver_OneEuroFilter
-    org_opengoggles_bundled_Multiserver_RazerHydra
-    org_opengoggles_bundled_Multiserver_YEI_3Space_Sensor)
+    com_osvr_Multiserver_OneEuroFilter
+    com_osvr_Multiserver_RazerHydra
+    com_osvr_Multiserver_YEI_3Space_Sensor)
 set(JSON_HEADERS)
 set(JSON_DESCRIPTORS)
 
@@ -15,10 +15,10 @@ foreach(filestem ${DESCRIPTORS})
     list(APPEND JSON_DESCRIPTORS "${infile}")
 endforeach()
 
-osvr_add_plugin(NAME org_opengoggles_bundled_Multiserver
+osvr_add_plugin(NAME com_osvr_Multiserver
     CPP
     SOURCES
-    org_opengoggles_bundled_Multiserver.cpp
+    com_osvr_Multiserver.cpp
     DevicesWithParameters.cpp
     DevicesWithParameters.h
     GetSerialPortState.cpp
@@ -27,11 +27,11 @@ osvr_add_plugin(NAME org_opengoggles_bundled_Multiserver
     VRPNMultiserver.h
     ${JSON_HEADERS})
 
-target_link_libraries(org_opengoggles_bundled_Multiserver osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn osvrUSBSerial)
+target_link_libraries(com_osvr_Multiserver osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn osvrUSBSerial)
 
-target_include_directories(org_opengoggles_bundled_Multiserver PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi" "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(com_osvr_Multiserver PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi" "${CMAKE_CURRENT_BINARY_DIR}")
 
-set_target_properties(org_opengoggles_bundled_Multiserver PROPERTIES
+set_target_properties(com_osvr_Multiserver PROPERTIES
     FOLDER "OSVR Plugins")
 
 install(FILES

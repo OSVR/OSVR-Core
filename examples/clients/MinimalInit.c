@@ -35,7 +35,7 @@
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.MinimalInit", 0);
+        osvrClientInit("com.osvr.exampleclients.MinimalInit", 0);
     printf("OK, library initialized.\n");
 
     /* Pretend that this is your application's mainloop. */

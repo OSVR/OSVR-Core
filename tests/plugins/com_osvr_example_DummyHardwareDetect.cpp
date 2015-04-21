@@ -24,7 +24,6 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginRegistrationC.h>
-#include <osvr/Util/GenericDeleter.h>
 
 // Library/third-party includes
 // - none
@@ -32,27 +31,20 @@
 // Standard includes
 #include <iostream>
 
-// Anonymous namespace to avoid symbol collision
-namespace {
+static int sampleHardwareUserdata = 1;
 
-class DummyDevice {
-  public:
-    DummyDevice() { std::cout << "Constructing dummy device" << std::endl; }
+static OSVR_ReturnCode detectHardwareChange(OSVR_PluginRegContext /*ctx*/,
+                                            void *userData) {
+    int &data = *static_cast<int *>(userData);
+    std::cout << "Got a detection request for hardware change, with user data "
+              << data << std::endl;
+    return OSVR_RETURN_SUCCESS;
+}
 
-    ~DummyDevice() { std::cout << "Destroying dummy device" << std::endl; }
-
-  private:
-};
-} // namespace
-
-OSVR_PLUGIN(org_opengoggles_example_NullDevice) {
-
-    /// Create a "device" that actually does nothing.
-    DummyDevice *myDevice = new DummyDevice();
-    /// Must ask the core to tell us to delete it.
-    osvrPluginRegisterDataWithDeleteCallback(
-        ctx, &osvr::util::generic_deleter<DummyDevice>,
-        static_cast<void *>(myDevice));
+OSVR_PLUGIN(com_osvr_example_DummyHardwareDetect) {
+    /// Register a detect callback, with some dummy userdata.
+    osvrPluginRegisterHardwareDetectCallback(ctx, &detectHardwareChange,
+                                             &sampleHardwareUserdata);
 
     return OSVR_RETURN_SUCCESS;
 }

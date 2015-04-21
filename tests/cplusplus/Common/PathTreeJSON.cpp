@@ -65,6 +65,7 @@ TEST(PathTreeJSON, ManualTreeToJsonWithRoundtrip) {
 
     ASSERT_NO_THROW(common::pathTreeToJson(tree));
     auto json = common::pathTreeToJson(tree);
+    std::cout << json.toStyledString() << std::endl;
     ASSERT_NE(json.size(), 0u);
 
     PathTree tree2;

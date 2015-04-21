@@ -10,7 +10,7 @@
           "z": "-y"
         },
         "child": {
-          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+          "tracker": "/com_osvr_Multiserver/OneEuroFilter0",
           "sensor": 0
         }
       }
@@ -24,7 +24,7 @@
           "z": "-y"
         },
         "child": {
-          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0",
+          "tracker": "/com_osvr_Multiserver/OneEuroFilter0",
           "sensor": 1
         }
       }
@@ -38,7 +38,7 @@
           "z": "-y"
         },
         "child": {
-          "tracker": "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
+          "tracker": "/com_osvr_Multiserver/OneEuroFilter0"
         }
       }
     },

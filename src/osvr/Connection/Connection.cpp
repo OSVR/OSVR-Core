@@ -42,7 +42,7 @@
 namespace osvr {
 namespace connection {
     /// @brief Internal constant string used as key into AnyMap
-    static const char CONNECTION_KEY[] = "org.opengoggles.ConnectionPtr";
+    static const char CONNECTION_KEY[] = "com.osvr.ConnectionPtr";
 
     ConnectionPtr Connection::createLocalConnection() {
         ConnectionPtr conn(make_shared<VrpnBasedConnection>(

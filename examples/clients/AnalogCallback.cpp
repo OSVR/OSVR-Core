@@ -39,7 +39,7 @@ void myAnalogCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
 
 int main() {
     osvr::clientkit::ClientContext context(
-        "org.opengoggles.exampleclients.AnalogCallback");
+        "com.osvr.exampleclients.AnalogCallback");
 
     // This is just one of the paths: specifically, the Hydra's left
     // controller's analog trigger. More are in the docs and/or listed on

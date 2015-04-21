@@ -37,7 +37,7 @@
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.TrackerState", 0);
+        osvrClientInit("com.osvr.exampleclients.TrackerState", 0);
 
     OSVR_ClientInterface lefthand = NULL;
     /* This is just one of the paths. You can also use:

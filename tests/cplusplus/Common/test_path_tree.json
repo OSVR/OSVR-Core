@@ -1,26 +1,23 @@
 [
    {
-      "path" : "/org_opengoggles_bundled_Multiserver",
+      "path" : "/com_osvr_Multiserver",
       "type" : "PluginElement"
    },
    {
-      "device_name" : "org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
-      "path" : "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0",
+      "descriptor" : null,
+      "device_name" : "com_osvr_Multiserver/YEI_3Space_Sensor0",
+      "path" : "/com_osvr_Multiserver/YEI_3Space_Sensor0",
       "server" : "localhost",
       "type" : "DeviceElement"
    },
    {
-      "path" : "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker",
+      "path" : "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker",
       "type" : "InterfaceElement"
    },
    {
-      "path" : "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker/1",
-      "type" : "SensorElement"
-   },
-   {
       "path" : "/me/hands/left",
-      "source" : "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker/1",
-      "type" : "AliasElement",
-      "automatic" : false
+      "priority" : 0,
+      "source" : "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker/1",
+      "type" : "AliasElement"
    }
 ]

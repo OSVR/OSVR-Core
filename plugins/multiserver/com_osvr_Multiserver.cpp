@@ -34,8 +34,8 @@
 #include <osvr/Util/StringLiteralFileToString.h>
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 
-#include "org_opengoggles_bundled_Multiserver_RazerHydra_json.h"
-#include "org_opengoggles_bundled_Multiserver_OneEuroFilter_json.h"
+#include "com_osvr_Multiserver_RazerHydra_json.h"
+#include "com_osvr_Multiserver_OneEuroFilter_json.h"
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
@@ -99,7 +99,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                     gotDevice = true;
                     m_handlePath(dev->path);
                     auto hydraJsonString = osvr::util::makeString(
-                        org_opengoggles_bundled_Multiserver_RazerHydra_json);
+                        com_osvr_Multiserver_RazerHydra_json);
                     Json::Value hydraJson;
                     Json::Reader reader;
                     if (!reader.parse(hydraJsonString, hydraJson)) {
@@ -125,7 +125,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                         Json::Value filterJson;
                         if (!reader.parse(
                                 osvr::util::makeString(
-                                    org_opengoggles_bundled_Multiserver_OneEuroFilter_json),
+                                com_osvr_Multiserver_OneEuroFilter_json),
                                 filterJson)) {
                             throw std::logic_error("Faulty JSON file for One "
                                                    "Euro Filter - should not "
@@ -196,7 +196,7 @@ class VRPNHardwareDetect : boost::noncopyable {
     std::vector<std::string> m_handledPaths;
 };
 
-OSVR_PLUGIN(org_opengoggles_bundled_Multiserver) {
+OSVR_PLUGIN(com_osvr_Multiserver) {
     osvr::pluginkit::PluginContext context(ctx);
 
     VRPNMultiserverData &data =

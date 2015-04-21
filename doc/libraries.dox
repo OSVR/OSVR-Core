@@ -6,14 +6,14 @@
     The C++ wrappers do require some version of the Boost headers to be available. For Windows, the [official binaries](http://sourceforge.net/projects/boost/files/boost-binaries/) are recommended.
 
     See examples:
-    - Comprehensive (auto-detects hardware and creates device): org_opengoggles_example_DummyDetectAndCreateAsync.cpp
-    - org_opengoggles_example_NullPlugin.cpp
-    - org_opengoggles_example_NullDevice.cpp
-    - org_opengoggles_example_DummyAsync.cpp
-    - org_opengoggles_example_DummySync.cpp
-    - org_opengoggles_example_DummyHardwareDetect.cpp
-    - org_opengoggles_example_DummyHardwareDetectCpp.cpp
-    - org_opengoggles_example_DummyHardwareDetectCpp2.cpp
+    - Comprehensive (auto-detects hardware and creates device): com_osvr_example_DummyDetectAndCreateAsync.cpp
+    - com_osvr_example_NullPlugin.cpp
+    - com_osvr_example_NullDevice.cpp
+    - com_osvr_example_DummyAsync.cpp
+    - com_osvr_example_DummySync.cpp
+    - com_osvr_example_DummyHardwareDetect.cpp
+    - com_osvr_example_DummyHardwareDetectCpp.cpp
+    - com_osvr_example_DummyHardwareDetectCpp2.cpp
 */
 
 /** @defgroup ClientKit ClientKit

@@ -20,7 +20,7 @@
             },
             "child": {
               "sensor": 0,
-              "tracker": "/org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0"
+              "tracker": "/com_osvr_Multiserver/OSVRHackerDevKit0"
             }
           }
         }

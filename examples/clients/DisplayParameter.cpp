@@ -34,7 +34,7 @@
 
 int main() {
     osvr::clientkit::ClientContext context(
-        "org.opengoggles.exampleclients.DisplayParameter");
+        "com.osvr.exampleclients.DisplayParameter");
 
     std::string displayDescription = context.getStringParameter("/display");
 

@@ -33,6 +33,6 @@
 
 namespace osvr {
 namespace connection {
-    const char *getVRPNConnectionKindID() { return "org.opengoggles.vrpn"; }
+    const char *getVRPNConnectionKindID() { return "com.osvr.vrpn"; }
 } // namespace connection
 } // namespace osvr

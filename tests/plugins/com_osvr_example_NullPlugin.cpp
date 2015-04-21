@@ -31,20 +31,7 @@
 // Standard includes
 #include <iostream>
 
-static int sampleHardwareUserdata = 1;
-
-static OSVR_ReturnCode detectHardwareChange(OSVR_PluginRegContext /*ctx*/,
-                                            void *userData) {
-    int &data = *static_cast<int *>(userData);
-    std::cout << "Got a detection request for hardware change, with user data "
-              << data << std::endl;
-    return OSVR_RETURN_SUCCESS;
-}
-
-OSVR_PLUGIN(org_opengoggles_example_DummyHardwareDetect) {
-    /// Register a detect callback, with some dummy userdata.
-    osvrPluginRegisterHardwareDetectCallback(ctx, &detectHardwareChange,
-                                             &sampleHardwareUserdata);
-
+OSVR_PLUGIN(com_osvr_example_NullPlugin) {
+    std::cout << "In plugin EP!" << std::endl;
     return OSVR_RETURN_SUCCESS;
 }

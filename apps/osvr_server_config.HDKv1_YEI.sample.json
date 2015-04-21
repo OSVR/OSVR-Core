@@ -2,7 +2,7 @@
   "plugins": [], /* only need to list manual-load plugins */
   "drivers": [
     {
-      "plugin": "org_opengoggles_bundled_Multiserver",
+      "plugin": "com_osvr_Multiserver",
       "driver": "YEI_3Space_Sensor"
 
     }
@@ -21,7 +21,7 @@
             "degrees": 90,
             "axis": "x"
           },
-          "child": "/org_opengoggles_bundled_Multiserver/YEI_3Space_Sensor0/tracker/1"
+          "child": "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker/1"
         }
       }
     }

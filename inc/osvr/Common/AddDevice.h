@@ -45,12 +45,12 @@ namespace common {
     ///
     /// @param tree Your path tree.
     /// @param deviceName A namespaced device name coming from a plugin,
-    /// like `/org_opengoggles_plugin/SampleDevice`. If a leading slash is
+    /// like `/com_osvr_plugin/SampleDevice`. If a leading slash is
     /// missing, it will be assumed and added.
     ///
     /// Multiple levels are acceptable: for example,
-    /// `/org_opengoggles_plugin/SampleDriver/Instance1` is valid: Instance1
-    /// is the device, and org_opengoggles_plugin is the plugin.
+    /// `/com_osvr_plugin/SampleDriver/Instance1` is valid: Instance1
+    /// is the device, and com_osvr_plugin is the plugin.
     ///
     /// @returns The device node
     /// @throws osvr::common::exceptions::InvalidDeviceName if an invalid

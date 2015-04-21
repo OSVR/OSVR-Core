@@ -63,7 +63,7 @@ void myPositionCallback(void *userdata, const OSVR_TimeValue *timestamp,
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.TrackerCallback", 0);
+        osvrClientInit("com.osvr.exampleclients.TrackerCallback", 0);
 
     /* This is just one of the paths. You can also use:
      * /me/hands/right
