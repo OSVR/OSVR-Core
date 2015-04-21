@@ -50,7 +50,7 @@ namespace usbserial {
         class ComRAII : boost::noncopyable {
           public:
             ComRAII() : m_failed(false) {
-                auto result = CoInitializeEx(0, COINIT_MULTITHREADED);
+                auto result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
                 if (FAILED(result)) {
                     m_failed = true;
                 }
@@ -88,8 +88,9 @@ namespace usbserial {
         // Obtain the initial locator to WMI
         intrusive_ptr<IWbemLocator> locator;
 
-        result = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
-                                  IID_IWbemLocator, AttachPtr(locator));
+        result =
+            CoCreateInstance(CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER,
+                             IID_IWbemLocator, AttachPtr(locator));
 
         if (FAILED(result)) {
             return devices;
@@ -104,13 +105,13 @@ namespace usbserial {
         // to make IWbemServices calls.
         result = locator->ConnectServer(
             bstr_t(L"ROOT\\CIMV2"),         // Object path of WMI namespace
-            NULL,                           // User name. NULL = current user
-            NULL,                           // User password. NULL = current
-            0,                              // Locale. NULL indicates current
+            nullptr,                        // User name. nullptr = current user
+            nullptr,                        // User password. nullptr = current
+            nullptr,                        // Locale. nullptr indicates current
             WBEM_FLAG_CONNECT_USE_MAX_WAIT, // Security flags - here, requesting
                                             // a timeout.
             0,                              // Authority (for example, Kerberos)
-            0,                              // Context object
+            nullptr,                        // Context object
             AttachPtr(wbemServices)         // pointer to IWbemServices proxy
             );
 
@@ -122,8 +123,8 @@ namespace usbserial {
 
         result =
             CoSetProxyBlanket(wbemServices.get(), RPC_C_AUTHN_WINNT,
-                              RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL,
-                              RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+                              RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL,
+                              RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
 
         if (FAILED(result)) {
             return devices;
@@ -135,7 +136,7 @@ namespace usbserial {
         intrusive_ptr<IEnumWbemClassObject> devEnum;
         result = wbemServices->ExecQuery(
             bstr_t(L"WQL"), bstr_t(L"SELECT * FROM Win32_SerialPort"),
-            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL,
+            WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr,
             AttachPtr(devEnum));
 
         if (FAILED(result)) {
@@ -157,13 +158,14 @@ namespace usbserial {
             VARIANT vtPath;
 
             // Get the value of the Name property
-            hr = wbemClassObj->Get(L"DeviceID", 0, &vtPort, 0, 0);
+            hr = wbemClassObj->Get(L"DeviceID", 0, &vtPort, nullptr, nullptr);
             std::string sPort = util::wideToUTF8String(vtPort.bstrVal);
 
-            hr = wbemClassObj->Get(L"PNPDeviceID", 0, &vtHardware, 0, 0);
+            hr = wbemClassObj->Get(L"PNPDeviceID", 0, &vtHardware, nullptr,
+                                   nullptr);
             std::string HardwID = util::wideToUTF8String(vtHardware.bstrVal);
 
-            hr = wbemClassObj->Get(L"__PATH", 0, &vtPath, 0, 0);
+            hr = wbemClassObj->Get(L"__PATH", 0, &vtPath, nullptr, nullptr);
             std::string devPath = util::wideToUTF8String(vtPath.bstrVal);
 
             if ((vendorID) && (productID)) {

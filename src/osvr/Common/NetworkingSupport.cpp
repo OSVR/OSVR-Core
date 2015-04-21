@@ -48,8 +48,8 @@ namespace common {
         TCHAR buf[256] = {0};
 
         FormatMessage(
-            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
-            err, 0, &(buf[0]), sizeof(buf) / sizeof(buf[0]), NULL);
+            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr,
+            err, 0, &(buf[0]), sizeof(buf) / sizeof(buf[0]), nullptr);
         return util::tcharToUTF8String(buf);
     }
 
