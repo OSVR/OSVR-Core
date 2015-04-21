@@ -104,13 +104,14 @@ namespace usbserial {
         // to make IWbemServices calls.
         result = locator->ConnectServer(
             bstr_t(L"ROOT\\CIMV2"),         // Object path of WMI namespace
-            NULL,                    // User name. NULL = current user
-            NULL,                    // User password. NULL = current
-            0,                       // Locale. NULL indicates current
-            NULL,                    // Security flags.
-            0,                       // Authority (for example, Kerberos)
-            0,                       // Context object
-            AttachPtr(wbemServices)  // pointer to IWbemServices proxy
+            NULL,                           // User name. NULL = current user
+            NULL,                           // User password. NULL = current
+            0,                              // Locale. NULL indicates current
+            WBEM_FLAG_CONNECT_USE_MAX_WAIT, // Security flags - here, requesting
+                                            // a timeout.
+            0,                              // Authority (for example, Kerberos)
+            0,                              // Context object
+            AttachPtr(wbemServices)         // pointer to IWbemServices proxy
             );
 
         if (FAILED(result)) {
