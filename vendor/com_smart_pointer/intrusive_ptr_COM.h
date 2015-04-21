@@ -64,7 +64,7 @@ public:
     //          If true then the ptr's refcount will be incremented on acquisition.
     //
     IntrusivePtrWrapper(boost::intrusive_ptr<T>& ref, bool addRef)
-        : m_ref(ref), m_addRef(addRef), m_ptr(nullptr)
+        : m_ref(ref), m_ptr(nullptr), m_addRef(addRef)
     {
     }
 
