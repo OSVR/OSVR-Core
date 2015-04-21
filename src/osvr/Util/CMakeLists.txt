@@ -6,6 +6,7 @@ if(BUILD_DEV_VERBOSE)
 endif()
 configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
+
 ###
 # Platform Config Header
 ###
@@ -13,6 +14,8 @@ include(CheckStructHasMember)
 check_struct_has_member("struct timeval" tv_sec sys/time.h OSVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H LANGUAGE C)
 check_struct_has_member("struct timeval" tv_sec winsock2.h OSVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H LANGUAGE C)
 configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
+
+configure_file(WideToUTF8.h.in "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h" @ONLY)
 
 ###
 # Library build
@@ -84,8 +87,10 @@ set(SOURCE
     Verbosity.h.in
     ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in
+    WideToUTF8.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h")
 
 osvr_add_library()
 

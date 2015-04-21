@@ -43,4 +43,9 @@ else()
     message(FATAL_ERROR "Sorry, your compiler does not support the C++11 features required to compile the library core.")
 endif()
 
+if(WIN32)
+    include(CheckIncludeFileCXX)
+    check_include_file_cxx(codecvt OSVR_HAVE_CODECVT)
+endif()
+
 set(CMAKE_REQUIRED_FLAGS)

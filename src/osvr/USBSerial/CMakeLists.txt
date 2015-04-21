@@ -1,5 +1,4 @@
 osvr_setup_lib_vars(USBSerial)
-
 set(API
     "${HEADER_LOCATION}/USBSerialDevice.h"
     "${HEADER_LOCATION}/USBSerialEnum.h")
@@ -37,7 +36,8 @@ target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     osvrUtilCpp
     PRIVATE
-    boost_filesystem)
+    boost_filesystem
+    ${OSVR_CODECVT_LIBRARIES})
 if(WIN32)
     target_link_libraries(${LIBNAME_FULL}
         PRIVATE

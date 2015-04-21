@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include "USBSerialDevInfo.h"
+#include <osvr/Util/WideToUTF8.h>
 
 // Library/third-party includes
 #define _WIN32_DCOM
@@ -33,8 +34,6 @@
 #include <Wbemidl.h>
 #include <tchar.h>
 #include <windows.h>
-#include <locale>
-#include <codecvt>
 #include "intrusive_ptr_COM.h"
 #include <boost/intrusive_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -144,7 +143,6 @@ namespace usbserial {
 
         intrusive_ptr<IWbemClassObject> wbemClassObj;
         ULONG numObjRet = 0;
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> convStr;
         while (devEnum) {
             HRESULT hr = devEnum->Next(WBEM_INFINITE, 1,
                                        AttachPtr(wbemClassObj), &numObjRet);
@@ -159,13 +157,13 @@ namespace usbserial {
 
             // Get the value of the Name property
             hr = wbemClassObj->Get(L"DeviceID", 0, &vtPort, 0, 0);
-            std::string sPort = convStr.to_bytes(vtPort.bstrVal);
+            std::string sPort = util::wideToUTF8String(vtPort.bstrVal);
 
             hr = wbemClassObj->Get(L"PNPDeviceID", 0, &vtHardware, 0, 0);
-            std::string HardwID = convStr.to_bytes(vtHardware.bstrVal);
+            std::string HardwID = util::wideToUTF8String(vtHardware.bstrVal);
 
             hr = wbemClassObj->Get(L"__PATH", 0, &vtPath, 0, 0);
-            std::string devPath = convStr.to_bytes(vtPath.bstrVal);
+            std::string devPath = util::wideToUTF8String(vtPath.bstrVal);
 
             if ((vendorID) && (productID)) {
 

@@ -126,6 +126,12 @@ endif()
 
 include(CompilerFeatures)
 
+set(OSVR_CODECVT_LIBRARIES)
+if(WIN32 AND NOT OSVR_HAVE_CODECVT) # Needed for USB Serial Enum and Winsock error processing.
+    find_package(Boost COMPONENTS locale REQUIRED)
+    set(OSVR_CODECVT_LIBRARIES ${Boost_LOCALE_LIBRARY})
+endif()
+
 ###
 # Set up build directories
 ###

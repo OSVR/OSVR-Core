@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include <osvr/Common/NetworkingSupport.h>
+#include <osvr/Util/WideToUTF8.h>
 
 // Library/third-party includes
 // - none
@@ -36,10 +37,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 
-#ifdef UNICODE
-#include <locale>
-#include <codecvt>
-#endif
 #endif
 
 namespace osvr {
@@ -47,23 +44,13 @@ namespace common {
 
 #ifdef _WIN32
 
-#ifdef UNICODE
-    static inline std::string tcharToUTF8String(TCHAR buf[]) {
-        std::wstring_convert<std::codecvt_utf8<TCHAR> > strCvt;
-        return strCvt.to_bytes(buf);
-    }
-#else
-    static inline std::string tcharToUTF8String(TCHAR buf[]) {
-        return std::string(buf);
-    }
-#endif
     static inline std::string wsaErrorCodeToString(int err) {
         TCHAR buf[256] = {0};
 
         FormatMessage(
             FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
             err, 0, &(buf[0]), sizeof(buf) / sizeof(buf[0]), NULL);
-        return tcharToUTF8String(buf);
+        return util::tcharToUTF8String(buf);
     }
 
     inline bool NetworkingSupport::m_start() {

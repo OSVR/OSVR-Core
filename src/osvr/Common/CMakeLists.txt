@@ -142,7 +142,8 @@ target_link_libraries(${LIBNAME_FULL}
     jsoncpp_lib
     opencv_core
     vendored-vrpn
-    eigen-headers)
+    eigen-headers
+    ${OSVR_CODECVT_LIBRARIES})
 
 osvr_delayload_opencv(${LIBNAME_FULL} opencv_core)
 
