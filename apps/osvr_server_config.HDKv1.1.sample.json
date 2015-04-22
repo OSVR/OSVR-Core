@@ -2,25 +2,5 @@
 {
   "server": {
     "sleep": 1
-  },
-  "plugins": [], /* only need to list manual-load plugins */
-  "routes": [
-    {
-      "destination": "/me/head",
-      "source": {
-        "rotate": {
-          "axis": "x",
-          "degrees": 90
-        },
-        "child": {
-          "changeBasis": {
-            "x": "-x",
-            "y": "-z",
-            "z": "y"
-          },
-          "child": "/com_osvr_Multiserver/OSVRHackerDevKit0/tracker/0"
-        }
-      }
-    }
-  ]
+  }
 }
