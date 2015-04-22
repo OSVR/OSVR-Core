@@ -95,7 +95,7 @@ namespace server {
     static const char SLEEP_KEY[] = "sleep";
 
     ServerPtr ConfigureServer::constructServer() {
-        Json::Value &root(m_data->root);
+        Json::Value const &root(m_data->root);
         bool local = true;
         std::string iface;
         boost::optional<int> port;
@@ -151,7 +151,7 @@ namespace server {
 
     static const char PLUGINS_KEY[] = "plugins";
     bool ConfigureServer::loadPlugins() {
-        Json::Value &root(m_data->root);
+        Json::Value const &root(m_data->root);
         const Json::Value plugins = root[PLUGINS_KEY];
         bool success = true;
         for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
@@ -192,10 +192,9 @@ namespace server {
     static const char PARAMS_KEY[] = "params";
     bool ConfigureServer::instantiateDrivers() {
         bool success = true;
-        Json::Value &root(m_data->root);
-        const Json::Value drivers = root[DRIVERS_KEY];
-        for (Json::ArrayIndex i = 0, e = drivers.size(); i < e; ++i) {
-            const Json::Value thisDriver = drivers[i];
+        Json::Value const &root(m_data->root);
+        Json::Value const &drivers = root[DRIVERS_KEY];
+        for (auto const &thisDriver : drivers) {
             const bool hasPlugin = thisDriver[PLUGIN_KEY].isString();
             const bool hasDriver = thisDriver[DRIVER_KEY].isString();
             if (!hasPlugin && !hasDriver) {
@@ -255,9 +254,9 @@ namespace server {
 
     static const char ROUTES_KEY[] = "routes";
     bool ConfigureServer::processRoutes() {
-        Json::Value &root(m_data->root);
+        Json::Value const &root(m_data->root);
         bool success = false;
-        const Json::Value routes = root[ROUTES_KEY];
+        Json::Value const &routes = root[ROUTES_KEY];
         for (Json::ArrayIndex i = 0, e = routes.size(); i < e; ++i) {
             const Json::Value thisRoute = routes[i];
             m_server->addRoute(thisRoute.toStyledString());
