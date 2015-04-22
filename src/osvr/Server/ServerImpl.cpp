@@ -37,6 +37,7 @@
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
+#include <osvr/Common/ProcessAliasesFromJSON.h>
 #include <osvr/Util/StringLiteralFileToString.h>
 
 #include "osvr/Server/display_json.h" /// Fallback display descriptor.
@@ -192,11 +193,21 @@ namespace server {
         return wasNew;
     }
 
-    std::string ServerImpl::getRoutes(bool styled) const {
-        /// @todo needs removal/replacement post path tree
-        std::string ret;
-        m_callControlled([&] { ret = m_routes.getRoutes(styled); });
-        return ret;
+    bool ServerImpl::addAlias(std::string const &path,
+                              std::string const &source,
+                              common::AliasPriority priority) {
+
+        bool wasChanged;
+        m_callControlled(
+            [&] { wasChanged = m_addAlias(path, source, priority); });
+        return wasChanged;
+    }
+
+    bool ServerImpl::addAliases(Json::Value const &aliases,
+                                common::AliasPriority priority) {
+        bool wasChanged;
+        m_callControlled([&] { wasChanged = m_addAliases(aliases, priority); });
+        return wasChanged;
     }
 
     std::string ServerImpl::getSource(std::string const &destination) const {
@@ -212,14 +223,6 @@ namespace server {
         m_systemDevice.reset();
         m_conn.reset();
     }
-#if 0
-    void ServerImpl::m_sendRoutes() {
-        std::string message = m_routes.getRoutes();
-        OSVR_DEV_VERBOSE("Transmitting " << m_routes.size()
-                                         << " routes to the client.");
-        m_systemComponent->sendRoutes(message);
-    }
-#endif
 
     int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ServerImpl *>(userdata);
@@ -231,6 +234,26 @@ namespace server {
     bool ServerImpl::m_addRoute(std::string const &routingDirective) {
         bool change =
             common::addAliasFromRoute(m_tree.getRoot(), routingDirective);
+        m_treeDirty += change;
+        return change;
+    }
+
+    bool ServerImpl::m_addAlias(std::string const &path,
+                                std::string const &source,
+                                common::AliasPriority priority) {
+        auto &node = m_tree.getNodeByPath(path);
+        bool change = common::addAlias(node, source, priority);
+        m_treeDirty += change;
+        return change;
+    }
+
+    bool ServerImpl::m_addAliases(Json::Value const &aliases,
+                                  common::AliasPriority priority) {
+        common::PathProcessOptions opts;
+        opts.defaultPriority = priority;
+
+        bool change =
+            common::processAliasesFromJSON(m_tree.getRoot(), aliases, opts);
         m_treeDirty += change;
         return change;
     }

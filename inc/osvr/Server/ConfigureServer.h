@@ -141,6 +141,7 @@ namespace server {
         /// @}
 
         OSVR_SERVER_EXPORT bool processRoutes();
+        OSVR_SERVER_EXPORT bool processAliases();
 
         /// @brief Loads all plugins not marked for manual load.
         OSVR_SERVER_EXPORT void loadAutoPlugins();

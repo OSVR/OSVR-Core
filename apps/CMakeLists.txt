@@ -18,7 +18,9 @@ install(TARGETS osvr_server
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
 add_executable(BasicServer BasicServer.cpp)
-target_link_libraries(BasicServer osvrServer)
+target_link_libraries(BasicServer
+    osvrServer
+    jsoncpp_lib)
 set_target_properties(BasicServer PROPERTIES
     FOLDER "OSVR Stock Applications")
 

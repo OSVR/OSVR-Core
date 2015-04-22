@@ -139,6 +139,7 @@ namespace server {
         }
 
         srvConfig.processRoutes();
+        srvConfig.processAliases();
 
         out << "Triggering a hardware detection..." << endl;
         ret->triggerHardwareDetect();

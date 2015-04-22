@@ -266,6 +266,19 @@ namespace server {
         return success;
     }
 
+    static const char ALIASES_KEY[] = "aliases";
+    bool ConfigureServer::processAliases() {
+        Json::Value const &root(m_data->root);
+        bool success = false;
+        Json::Value const &aliases = root[ALIASES_KEY];
+        if (aliases.isNull()) {
+            return success;
+        }
+        success = m_server->addAliases(aliases);
+
+        return success;
+    }
+
     void ConfigureServer::loadAutoPlugins() { m_server->loadAutoPlugins(); }
 
 } // namespace server

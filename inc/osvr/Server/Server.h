@@ -29,10 +29,12 @@
 #include <osvr/Server/Export.h>
 #include <osvr/Server/ServerPtr.h>
 #include <osvr/Connection/ConnectionPtr.h>
+#include <osvr/Common/PathElementTypes_fwd.h>
 #include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <json/value.h>
 
 // Standard includes
 #include <string>
@@ -40,7 +42,6 @@
 
 namespace osvr {
 /// @brief Server functionality
-/// @ingroup Server
 namespace server {
     // Forward declaration for pimpl idiom.
     class ServerImpl;
@@ -147,7 +148,7 @@ namespace server {
         /// @brief Register a JSON string as a routing directive.
         ///
         /// If the server is running, this will trigger a re-transmission of
-        /// routing directives to all clients.
+        /// the path tree to all clients.
         ///
         /// @returns true if the route was new, or false if it replaced an
         /// existing route for that destination.
@@ -155,11 +156,25 @@ namespace server {
         /// Safe to call from any thread, even when server is running.
         OSVR_SERVER_EXPORT bool addRoute(std::string const &routingDirective);
 
-        /// @brief Get a JSON array of all routing directives.
-        /// @param styled Pass `true` if you want the result pretty-printed.
+        /// @brief Add an alias entry to the tree
+        ///
+        /// If the server is running, this will trigger a re-transmission of
+        /// the path tree to all clients.
         ///
         /// Safe to call from any thread, even when server is running.
-        OSVR_SERVER_EXPORT std::string getRoutes(bool styled = false) const;
+        OSVR_SERVER_EXPORT bool
+        addAlias(std::string const &path, std::string const &source,
+                 common::AliasPriority priority = common::ALIASPRIORITY_MANUAL);
+
+        /// @brief Add alias entries to the tree from JSON
+        ///
+        /// If the server is running, this will trigger a re-transmission of
+        /// the path tree to all clients.
+        ///
+        /// Safe to call from any thread, even when server is running.
+        OSVR_SERVER_EXPORT bool addAliases(
+            Json::Value const &aliases,
+            common::AliasPriority priority = common::ALIASPRIORITY_MANUAL);
 
         /// @brief Gets the source for a given named destination in the routing
         /// directives.
