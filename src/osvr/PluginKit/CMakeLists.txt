@@ -6,6 +6,8 @@ set(API
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
+    "${HEADER_LOCATION}/EyeTrackerInterface.h"
+    "${HEADER_LOCATION}/EyeTrackerInterfaceC.h"
     "${HEADER_LOCATION}/ImagingInterface.h"
     "${HEADER_LOCATION}/ImagingInterfaceC.h"
     "${HEADER_LOCATION}/PluginKit.h"
@@ -19,6 +21,7 @@ set(SOURCE
     ButtonInterfaceC.cpp
     DeviceInterfaceC.cpp
     HandleNullContext.h
+    EyeTrackerInterfaceC.cpp
     ImagingInterfaceC.cpp
     PluginRegistrationC.cpp
     PointerWrapper.h
