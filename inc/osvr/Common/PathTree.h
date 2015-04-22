@@ -91,12 +91,26 @@ namespace common {
         PathNodePtr m_root;
     };
 
+    /// @brief Make node an alias pointing to source, with the given priority,
+    /// if it needs updating.
+    ///
+    /// @return true if the node was changed
+    OSVR_COMMON_EXPORT bool
+    addAlias(PathNode &node, std::string const &source,
+             AliasPriority priority = ALIASPRIORITY_MANUAL);
+
+    /// @brief Parse an old-style route object (with source and destination),
+    /// and use the given node as a entry point into the tree, and add an
+    /// aliases based on that route.
+    ///
+    /// @return true if the node was changed
     OSVR_COMMON_EXPORT bool
     addAliasFromRoute(PathNode &node, std::string const &route,
-                      AliasPriority automatic = ALIASPRIORITY_MANUAL);
+                      AliasPriority priority = ALIASPRIORITY_MANUAL);
+
     bool addAliasFromSourceAndRelativeDest(
         PathNode &node, std::string const &source, std::string const &dest,
-        AliasPriority automatic = ALIASPRIORITY_MANUAL);
+        AliasPriority priority = ALIASPRIORITY_MANUAL);
 
     bool isPathAbsolute(std::string const &source);
 

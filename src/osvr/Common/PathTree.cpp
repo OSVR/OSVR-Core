@@ -85,12 +85,8 @@ namespace common {
         return false;
     }
 
-    /// @brief Make node an alias pointing to source, with the given automatic
-    /// status, if it needs updating.
-    ///
-    /// @return true if the node was changed
-    static inline bool addAlias(PathNode &node, std::string const &source,
-                                AliasPriority priority) {
+    static inline bool addAliasImpl(PathNode &node, std::string const &source,
+                                    AliasPriority priority) {
 
         if (!aliasNeedsUpdate(node, source, priority)) {
             return false;
@@ -100,6 +96,23 @@ namespace common {
         elt.priority() = priority;
         node.value() = elt;
         return true;
+    }
+
+    bool addAlias(PathNode &node, std::string const &source,
+                  AliasPriority priority) {
+        ParsedAlias newSource(source);
+        if (!newSource.isValid()) {
+            /// @todo signify invalid route in some other way?
+            OSVR_DEV_VERBOSE("Could not parse source: " << source);
+            return false;
+        }
+        if (!isPathAbsolute(newSource.getLeaf())) {
+            /// @todo signify not to pass relative paths here in some other way?
+            OSVR_DEV_VERBOSE(
+                "Source contains a relative path, not permitted: " << source);
+            return false;
+        }
+        return addAliasImpl(node, newSource.getAlias(), priority);
     }
 
     bool addAliasFromRoute(PathNode &node, std::string const &route,
@@ -118,7 +131,7 @@ namespace common {
                 "Route contains a relative path, not permitted: " << route);
             return false;
         }
-        return addAlias(aliasNode, newSource.getAlias(), priority);
+        return addAliasImpl(aliasNode, newSource.getAlias(), priority);
     }
 
     static inline std::string getAbsolutePath(PathNode &node,
@@ -142,7 +155,7 @@ namespace common {
         }
         auto absSource = getAbsolutePath(node, newSource.getLeaf());
         newSource.setLeaf(absSource);
-        return addAlias(aliasNode, newSource.getAlias(), priority);
+        return addAliasImpl(aliasNode, newSource.getAlias(), priority);
     }
 
     bool isPathAbsolute(std::string const &source) {
