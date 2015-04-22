@@ -34,8 +34,9 @@
 #include <osvr/Util/StringLiteralFileToString.h>
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 
-#include "com_osvr_Multiserver_RazerHydra_json.h"
+#include "com_osvr_Multiserver_OSVRHackerDevKit_json.h"
 #include "com_osvr_Multiserver_OneEuroFilter_json.h"
+#include "com_osvr_Multiserver_RazerHydra_json.h"
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
@@ -171,6 +172,8 @@ class VRPNHardwareDetect : boost::noncopyable {
                     reg.constructAndRegisterDevice<
                         vrpn_Tracker_OSVRHackerDevKit>(
                         m_data.getName("OSVRHackerDevKit"));
+                    reg.setDeviceDescriptor(osvr::util::makeString(
+                        com_osvr_Multiserver_OSVRHackerDevKit_json));
                     continue;
                 }
             }

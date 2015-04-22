@@ -1,5 +1,6 @@
 set(DESCRIPTORS
     com_osvr_Multiserver_OneEuroFilter
+    com_osvr_Multiserver_OSVRHackerDevKit
     com_osvr_Multiserver_RazerHydra
     com_osvr_Multiserver_YEI_3Space_Sensor)
 set(JSON_HEADERS)
