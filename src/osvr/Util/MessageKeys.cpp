@@ -35,9 +35,7 @@ namespace osvr {
 namespace util {
     namespace messagekeys {
         const char *systemSender() { return "OSVR"; }
-        const char *routingData() {
-            return "com.osvr.system.routingdata";
-        }
+        const char *routingData() { return "com.osvr.system.routingdata"; }
     } // namespace messagekeys
 } // namespace util
 } // namespace osvr
