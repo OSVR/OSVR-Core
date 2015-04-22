@@ -125,7 +125,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                         Json::Value filterJson;
                         if (!reader.parse(
                                 osvr::util::makeString(
-                                com_osvr_Multiserver_OneEuroFilter_json),
+                                    com_osvr_Multiserver_OneEuroFilter_json),
                                 filterJson)) {
                             throw std::logic_error("Faulty JSON file for One "
                                                    "Euro Filter - should not "
