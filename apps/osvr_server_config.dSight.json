@@ -1,0 +1,29 @@
+{
+  "plugins": [], /* only need to list manual-load plugins */
+  "drivers": [
+    {
+      "plugin": "com_osvr_Multiserver",
+      "driver": "YEI_3Space_Sensor",
+      "params": {
+        "resetCommands": [
+          "123,2"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "destination": "/me/head",
+      "source": {
+        "child": {
+          "changeBasis": {
+            "x": "y",
+            "y": "-z",
+            "z": "x"
+          },
+          "child": "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker/1"
+        }
+      }
+    }
+  ]
+}
