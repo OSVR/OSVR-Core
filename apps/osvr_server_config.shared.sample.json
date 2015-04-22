@@ -6,12 +6,7 @@
   "drivers": [
     {
       "plugin": "com_osvr_Multiserver",
-      "driver": "YEI_3Space_Sensor",
-      "params": {
-        "port": "COM3",
-        "resetCommands": [
-          "123,2"
-        ]
+      "driver": "YEI_3Space_Sensor"
       }
     }
   ]

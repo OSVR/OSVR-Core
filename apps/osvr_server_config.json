@@ -18,10 +18,7 @@
             "y": "-z",
             "z": "y"
           },
-          "child": {
-            "sensor": 0,
-            "tracker": "/com_osvr_Multiserver/OSVRHackerDevKit0"
-          }
+          "child": "/com_osvr_Multiserver/OSVRHackerDevKit0/tracker/0"
         }
       }
     }

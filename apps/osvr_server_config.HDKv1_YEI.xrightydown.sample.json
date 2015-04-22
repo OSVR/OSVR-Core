@@ -4,7 +4,6 @@
     {
       "plugin": "com_osvr_Multiserver",
       "driver": "YEI_3Space_Sensor"
-
     }
   ],
   "routes": [
@@ -22,10 +21,7 @@
               "degrees": 90,
               "axis": "x"
             },
-            "child": {
-              "tracker": "/com_osvr_Multiserver/YEI_3Space_Sensor0",
-              "sensor": 1
-            }
+            "child": "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker/1"
           }
         }
       }
