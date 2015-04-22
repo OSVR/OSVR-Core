@@ -33,6 +33,7 @@
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TreeTraversalVisitor.h>
+#include <osvr/Common/ProcessAliasesFromJSON.h>
 
 #include "PathParseAndRetrieve.h"
 
@@ -77,9 +78,6 @@ namespace common {
     static const char TARGET_KEY[] = "$target";
     static const char SEMANTIC_KEY[] = "semantic";
     static const char AUTOMATIC_KEY[] = "automaticAliases";
-    static const char PRIORITY_KEY[] = "$priority";
-    static const char WILDCARD_SUFFIX[] = "/*";
-    static const size_t WILDCARD_SUFFIX_LEN = sizeof(WILDCARD_SUFFIX) - 1;
     namespace {
         class SemanticRecursion : boost::noncopyable {
           public:
@@ -124,75 +122,6 @@ namespace common {
             util::Flag m_flag;
         };
 
-        class AutomaticAliases : boost::noncopyable {
-          public:
-            AutomaticAliases(PathNode &devNode) : m_devNode(devNode) {}
-            util::Flag operator()(Json::Value const &val) {
-                if (val.isArray()) {
-                    m_processArray(val);
-                } else if (val.isObject()) {
-                    m_processObject(val);
-                }
-                return m_flag;
-            }
-
-          private:
-            void m_processArray(Json::Value const &arr) {
-                for (auto const &elt : arr) {
-                    if (elt.isObject()) {
-                        m_processObject(elt);
-                    }
-                }
-            }
-            void m_processObject(Json::Value const &obj) {
-                AliasPriority priority{ALIASPRIORITY_AUTOMATIC};
-                if (obj.isMember(PRIORITY_KEY)) {
-                    priority =
-                        static_cast<AliasPriority>(obj[PRIORITY_KEY].asInt());
-                }
-                for (auto const &key : obj.getMemberNames()) {
-                    if (PRIORITY_KEY == key) {
-                        continue;
-                    }
-                    m_processEntry(key, obj[key].asString(), priority);
-                }
-            }
-            void m_processEntry(std::string const &path,
-                                std::string const &source,
-                                AliasPriority priority) {
-                if (!boost::algorithm::ends_with(source, WILDCARD_SUFFIX)) {
-                    /// Handle the simple ones first.
-                    m_flag += addAliasFromSourceAndRelativeDest(
-                        m_devNode, source, path, priority);
-                    return;
-                }
-                /// OK, handle wildcard here
-                auto sourceStem = source;
-                boost::algorithm::erase_tail(sourceStem, WILDCARD_SUFFIX_LEN);
-                auto &sourceNode = treePathRetrieve(m_devNode, sourceStem);
-                auto &destNode = treePathRetrieve(m_devNode, path);
-                auto absoluteSourceStem = getFullPath(sourceNode);
-                auto absoluteSourcePrefixLen = absoluteSourceStem.length();
-                util::traverseWith(sourceNode, [&](PathNode &node) {
-                    // Don't duplicate null nodes
-                    if (elements::isNull(node.value())) {
-                        return;
-                    }
-                    auto sourcePath = getFullPath(node);
-                    /// This is relative to the initial source stem: where we
-                    /// started the traversal. Want to apply the same relative
-                    /// path to the destination stem.
-                    auto relPath = sourcePath;
-                    boost::algorithm::erase_head(relPath,
-                                                 absoluteSourcePrefixLen + 1);
-                    m_flag += addAliasFromSourceAndRelativeDest(
-                        destNode, sourcePath, relPath, priority);
-                });
-            }
-
-            PathNode &m_devNode;
-            util::Flag m_flag;
-        };
     } // namespace
 
     static inline util::Flag
@@ -207,12 +136,14 @@ namespace common {
         changed += f(sem);
         return changed;
     }
-    static inline util::Flag
-    processAutomaticFromDescriptor(PathNode &devNode, Json::Value const &desc) {
-        util::Flag changed;
+    static inline bool processAutomaticFromDescriptor(PathNode &devNode,
+                                                      Json::Value const &desc) {
         Json::Value const &automatic = desc[AUTOMATIC_KEY];
-        AutomaticAliases f{devNode};
-        return f(automatic);
+        PathProcessOptions opts;
+        opts.defaultPriority = ALIASPRIORITY_AUTOMATIC;
+        opts.permitRelativePath = true;
+        opts.permitRelativeSource = true;
+        return processAliasesFromJSON(devNode, automatic, opts);
     }
     bool processDeviceDescriptorForPathTree(PathTree &tree,
                                             std::string const &deviceName,

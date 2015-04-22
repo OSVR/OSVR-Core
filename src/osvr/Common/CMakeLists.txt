@@ -54,6 +54,7 @@ set(API
     "${HEADER_LOCATION}/PathTreeFull.h"
     "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
+    "${HEADER_LOCATION}/ProcessAliasesFromJSON.h"
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
@@ -107,6 +108,7 @@ set(SOURCE
     PathParseAndRetrieve.h
     PathTree.cpp
     PathTreeSerialization.cpp
+    ProcessAliasesFromJSON.cpp
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp
