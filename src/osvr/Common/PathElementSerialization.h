@@ -40,6 +40,7 @@
 
 // Standard includes
 #include <type_traits>
+#include <stdexcept>
 
 namespace osvr {
 namespace common {
