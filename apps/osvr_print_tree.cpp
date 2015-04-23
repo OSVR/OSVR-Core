@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     {
         /// We only actually need the client open for long enough to get the
         /// path tree and clone it.
-        osvr::clientkit::ClientContext context("com.osvr.tools.pathtreexport");
+        osvr::clientkit::ClientContext context("com.osvr.tools.printtree");
 
         /// Get a non-const copy of the path tree.
         osvr::common::clonePathTree(context.get()->getPathTree(), pathTree);
