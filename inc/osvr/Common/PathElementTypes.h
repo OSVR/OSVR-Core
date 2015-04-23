@@ -41,6 +41,7 @@
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
 #include <boost/mpl/contains.hpp>
+#include <boost/operators.hpp>
 #include <json/value.h>
 
 // Standard includes
@@ -75,22 +76,41 @@ namespace common {
             ElementBase();
         };
 
+        /// @brief Base, using the CRTP, of "empty" path elements (those that
+        /// don't store additional data but derive their meaning from their
+        /// path)
+        template <typename Type>
+        class EmptyElementBase : public ElementBase<Type>,
+                                 boost::operators<Type> {
+          public:
+            /// @brief Trivial equality comparison operator
+
+            bool operator==(EmptyElementBase<Type> const &) const {
+                return true;
+            }
+
+          protected:
+            /// @brief Protected constructor to force subclassing.
+            EmptyElementBase() {}
+        };
+
         /// @brief The element type created when requesting a path that isn't
         /// yet in the tree.
-        class NullElement : public ElementBase<NullElement> {
+        class NullElement : public EmptyElementBase<NullElement> {
           public:
             NullElement() = default;
         };
 
         /// @brief The element type corresponding to a plugin
-        class PluginElement : public ElementBase<PluginElement> {
+        class PluginElement : public EmptyElementBase<PluginElement> {
           public:
             PluginElement() = default;
         };
 
         /// @brief The element type corresponding to a device, which implements
         /// 0 or more interfaces
-        class DeviceElement : public ElementBase<DeviceElement> {
+        class DeviceElement : public ElementBase<DeviceElement>,
+                              boost::operators<DeviceElement> {
           public:
             DeviceElement() = default;
             DeviceElement(std::string const &deviceName,
@@ -110,6 +130,13 @@ namespace common {
             OSVR_COMMON_EXPORT Json::Value &getDescriptor();
             OSVR_COMMON_EXPORT Json::Value const &getDescriptor() const;
 
+            /// @brief Equality comparison operator
+            bool operator==(DeviceElement const &other) const {
+                return m_devName == other.m_devName &&
+                       m_server == other.m_server &&
+                       m_descriptor == other.m_descriptor;
+            }
+
           private:
             std::string m_devName;
             std::string m_server;
@@ -118,14 +145,14 @@ namespace common {
 
         /// @brief The element type corresponding to an interface, which often
         /// may have one or more sensors
-        class InterfaceElement : public ElementBase<InterfaceElement> {
+        class InterfaceElement : public EmptyElementBase<InterfaceElement> {
           public:
             InterfaceElement() = default;
         };
 
         /// @brief The element type corresponding to a particular sensor of an
         /// interface
-        class SensorElement : public ElementBase<SensorElement> {
+        class SensorElement : public EmptyElementBase<SensorElement> {
           public:
             SensorElement() = default;
         };
@@ -135,7 +162,8 @@ namespace common {
         /// replace or update it.
         ///
         /// This is a "shallow" alias - does not link to children.
-        class AliasElement : public ElementBase<AliasElement> {
+        class AliasElement : public ElementBase<AliasElement>,
+                             boost::operators<DeviceElement> {
           public:
             /// @brief Constructor with source and priority.
             OSVR_COMMON_EXPORT
@@ -166,6 +194,11 @@ namespace common {
             /// @overload
             OSVR_COMMON_EXPORT AliasPriority priority() const;
 
+            /// @brief Equality comparison operator
+            bool operator==(AliasElement const &rhs) const {
+                return m_priority == rhs.m_priority && m_source == rhs.m_source;
+            }
+
           private:
             std::string m_source;
             AliasPriority m_priority;
@@ -188,6 +221,11 @@ namespace common {
 
             /// @overload
             OSVR_COMMON_EXPORT std::string const &getString() const;
+
+            /// @brief Equality comparison operator
+            bool operator==(StringElement const &other) const {
+                return m_val == other.m_val;
+            }
 
           private:
             std::string m_val;
