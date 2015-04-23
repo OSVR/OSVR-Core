@@ -33,6 +33,7 @@
 #include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Util/IndentingStream.h>
+#include <osvr/Util/ProgramOptionsToggleFlags.h>
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
@@ -44,7 +45,8 @@
 #include <iomanip>
 
 struct Options {
-    bool showAliasDetails;
+    bool showAliasSource;
+    bool showAliasPriority;
     bool showDeviceDetails;
     bool showDeviceDescriptor;
     bool showSensors;
@@ -81,10 +83,12 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
     void operator()(osvr::common::PathNode const &node,
                     osvr::common::elements::AliasElement const &elt) {
         m_outputBasics(node, elt) << std::endl;
-        if (m_opts.showAliasDetails) {
-            m_indentStream << "-> " << elt.getSource() << "\nPriority: "
-                           << osvr::common::outputPriority(elt.priority())
-                           << std::endl;
+        if (m_opts.showAliasSource) {
+            m_indentStream << "-> " << elt.getSource() << std::endl;
+        }
+        if (m_opts.showAliasPriority) {
+            m_indentStream << "Priority: " << osvr::common::outputPriority(
+                                                  elt.priority()) << std::endl;
         }
     }
     /// @brief Print Devices
@@ -129,16 +133,21 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("show-alias-details,a", po::value<bool>(&opts.showAliasDetails)->default_value(true), "Whether or not to show the source and priority associated with each alias")
-        ("show-device-details,d", po::value<bool>(&opts.showDeviceDetails)->default_value(true), "Whether or not to show the basic details associated with each device")
-        ("show-device-descriptors,D", po::value<bool>(&opts.showDeviceDescriptor)->default_value(false), "Whether or not to show the JSON descriptors associated with each device")
-        ("show-sensors,s", po::value<bool>(&opts.showSensors)->default_value(true), "Whether or not to show the 'sensor' nodes")
+        ("show-alias-source", po::value<bool>(&opts.showAliasSource)->default_value(true), "Whether or not to show the source associated with each alias")
+        ("show-alias-priority", po::value<bool>(&opts.showAliasPriority)->default_value(false), "Whether or not to show the priority associated with each alias")
+        ("show-device-details", po::value<bool>(&opts.showDeviceDetails)->default_value(true), "Whether or not to show the basic details associated with each device")
+        ("show-device-descriptors", po::value<bool>(&opts.showDeviceDescriptor)->default_value(false), "Whether or not to show the JSON descriptors associated with each device")
+        ("show-sensors", po::value<bool>(&opts.showSensors)->default_value(true), "Whether or not to show the 'sensor' nodes")
         ;
     // clang-format on
     po::variables_map vm;
     bool usage = false;
     try {
-        po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
+        po::store(po::command_line_parser(argc, argv)
+                      .options(desc)
+                      .extra_parser(osvr::util::convertHideIntoFalseShow)
+                      .run(),
+                  vm);
         po::notify(vm);
     } catch (std::exception &e) {
         std::cerr << "\nError parsing command line: " << e.what() << "\n\n";
@@ -150,6 +159,7 @@ int main(int argc, char *argv[]) {
                "human consumption. See\n"
                "PathTreeExport for structured output for graphical display.\n";
         std::cerr << "Usage: " << argv[0] << " [options]\n\n";
+        std::cerr << "All --show options have a matching --hide option.\n\n";
         std::cerr << desc << "\n";
         return 1;
     }

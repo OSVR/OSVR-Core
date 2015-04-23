@@ -56,6 +56,7 @@ set(API
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/Pose3C.h"
+    "${HEADER_LOCATION}/ProgramOptionsToggleFlags.h"
     "${HEADER_LOCATION}/QuaternionC.h"
     "${HEADER_LOCATION}/QuatlibInteropC.h"
     "${HEADER_LOCATION}/ResetPointerList.h"
