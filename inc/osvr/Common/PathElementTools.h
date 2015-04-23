@@ -37,6 +37,44 @@
 
 namespace osvr {
 namespace common {
+
+#ifndef OSVR_DOXYGEN_EXTERNAL
+    namespace detail {
+        struct AliasPriorityWrapper {
+            AliasPriority priority;
+        };
+        template <typename T>
+        T &operator<<(T &os, AliasPriorityWrapper &wrapper) {
+            switch (wrapper.priority) {
+            case ALIASPRIORITY_MINIMUM:
+                os << "Minimum (" << int(ALIASPRIORITY_MINIMUM) << ")";
+                break;
+
+            case ALIASPRIORITY_AUTOMATIC:
+                os << "Automatic (" << int(ALIASPRIORITY_AUTOMATIC) << ")";
+                break;
+            case ALIASPRIORITY_SEMANTICROUTE:
+                os << "Semantic Route (" << int(ALIASPRIORITY_SEMANTICROUTE)
+                   << ")";
+                break;
+            case ALIASPRIORITY_MANUAL:
+                os << "Manual/Max (" << int(ALIASPRIORITY_MANUAL) << ")";
+                break;
+            default:
+                os << int(ALIASPRIORITY_MANUAL);
+                break;
+            }
+            return os;
+        }
+    } // namespace detail
+#endif
+
+    /// @brief Helper method to output a priority in a formatted way to a
+    /// stream.
+    inline detail::AliasPriorityWrapper outputPriority(AliasPriority priority) {
+        return detail::AliasPriorityWrapper{priority};
+    }
+
     namespace elements {
         /// @brief Gets a string that indicates the type of path element. Do not
         /// use this for conditionals/comparisons unless there's really no

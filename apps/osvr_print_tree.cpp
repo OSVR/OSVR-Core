@@ -116,8 +116,8 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
                     osvr::common::elements::AliasElement const &elt) {
         m_outputBasics(node, elt) << std::endl;
         if (m_opts.showAliasDetails) {
-            m_indentStream << "-> " << elt.getSource() << "\n(Priority "
-                           << static_cast<int>(elt.priority()) << ")"
+            m_indentStream << "-> " << elt.getSource() << "\nPriority: "
+                           << osvr::common::outputPriority(elt.priority())
                            << std::endl;
         }
     }
