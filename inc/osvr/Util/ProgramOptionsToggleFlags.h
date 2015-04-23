@@ -49,7 +49,7 @@ namespace util {
         }
         return std::make_pair(std::string(), std::string());
     }
-}
+} // namespace util
 } // namespace osvr
 
 #endif // INCLUDED_ProgramOptionsToggleFlags_h_GUID_9879F3E3_4C35_4389_010C_FD82D5878172

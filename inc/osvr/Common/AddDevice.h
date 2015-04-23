@@ -60,7 +60,7 @@ namespace common {
     OSVR_COMMON_EXPORT PathNode &
     addDevice(PathTree &tree, std::string const &deviceName,
               elements::DeviceElement dev = elements::DeviceElement());
-} // namespace routing
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_AddDevice_h_GUID_DEA28469_5227_44AD_1972_94548FA58E22
