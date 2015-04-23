@@ -72,6 +72,10 @@ namespace server {
             }
         }
 
+        Json::Value const &getMember(const char *memberName) const {
+            return root[memberName];
+        }
+
         Json::Value root;
     };
 
@@ -254,9 +258,11 @@ namespace server {
 
     static const char ROUTES_KEY[] = "routes";
     bool ConfigureServer::processRoutes() {
-        Json::Value const &root(m_data->root);
         bool success = false;
-        Json::Value const &routes = root[ROUTES_KEY];
+        Json::Value const &routes = m_data->getMember(ROUTES_KEY);
+        if (routes.isNull()) {
+            return success;
+        }
         for (Json::ArrayIndex i = 0, e = routes.size(); i < e; ++i) {
             const Json::Value thisRoute = routes[i];
             m_server->addRoute(thisRoute.toStyledString());
@@ -267,9 +273,8 @@ namespace server {
 
     static const char ALIASES_KEY[] = "aliases";
     bool ConfigureServer::processAliases() {
-        Json::Value const &root(m_data->root);
         bool success = false;
-        Json::Value const &aliases = root[ALIASES_KEY];
+        Json::Value const &aliases = m_data->getMember(ALIASES_KEY);
         if (aliases.isNull()) {
             return success;
         }
