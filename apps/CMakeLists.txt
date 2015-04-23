@@ -17,6 +17,18 @@ set_target_properties(osvr_server PROPERTIES
 install(TARGETS osvr_server
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
+add_executable(osvr_print_tree
+    osvr_print_tree.cpp)
+target_link_libraries(osvr_print_tree
+    osvrClientKitCpp
+    osvrCommon
+    jsoncpp_lib
+    boost_program_options)
+set_target_properties(osvr_print_tree PROPERTIES
+    FOLDER "OSVR Stock Applications")
+install(TARGETS osvr_print_tree
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+
 add_executable(BasicServer BasicServer.cpp)
 target_link_libraries(BasicServer
     osvrServer
