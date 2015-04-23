@@ -71,8 +71,14 @@ namespace server {
         }
         osvr::connection::Connection::storeConnection(*m_ctx, m_conn);
 
-        // Set up system device/system component
+        // Get the underlying VRPN connection, and make sure it's OK.
         auto vrpnConn = getVRPNConnection(m_conn);
+
+        if (!(vrpnConn->doing_okay())) {
+            throw ServerCreationFailure();
+        }
+
+        // Set up system device/system component
         m_systemDevice = common::createServerDevice(
             common::SystemComponent::deviceName(), vrpnConn);
 

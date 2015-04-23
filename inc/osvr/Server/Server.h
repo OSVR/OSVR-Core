@@ -38,6 +38,7 @@
 // Standard includes
 #include <string>
 #include <functional>
+#include <stdexcept>
 
 namespace Json {
 class Value;
@@ -52,6 +53,13 @@ namespace server {
     /// @brief A function that can be registered by the server app to run in
     /// each mainloop iteration.
     typedef std::function<void()> MainloopMethod;
+
+    struct ServerCreationFailure : std::runtime_error {
+        ServerCreationFailure()
+            : std::runtime_error("Could not create server - there is probably "
+                                 "another instance of the server or a VRPN "
+                                 "server running already.") {}
+    };
 
     /// @brief Class handling a run-loop with a registration context and
     /// connection
