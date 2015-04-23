@@ -107,11 +107,11 @@ namespace common {
                     if (PRIORITY_KEY == key) {
                         continue;
                     }
-                    m_processEntry(key, obj[key].asString(), priority);
+                    m_processEntry(key, obj[key], priority);
                 }
             }
             void m_processEntry(std::string const &path,
-                                std::string const &source,
+                                Json::Value const &source,
                                 AliasPriority priority) {
                 if (!m_opts.permitRelativePath && !isPathAbsolute(path)) {
                     OSVR_DEV_VERBOSE(
@@ -129,7 +129,7 @@ namespace common {
                 if (!boost::algorithm::ends_with(parsedSource.getLeaf(),
                                                  WILDCARD_SUFFIX)) {
                     /// Handle the simple ones first.
-                    m_processSingleEntry(path, source, priority);
+                    m_processSingleEntry(path, parsedSource.getAlias(), priority);
                     return;
                 }
 
