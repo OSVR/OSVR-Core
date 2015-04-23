@@ -32,49 +32,16 @@
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/PathNode.h>
-#include <osvr/Util/Flag.h>
+#include <osvr/Util/IndentingStream.h>
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 
 // Standard includes
 #include <iostream>
 #include <iomanip>
-
-class IndentFilter : public boost::iostreams::output_filter {
-  public:
-    IndentFilter(size_t spaces) : m_spaces(spaces), m_lastWasNewline(true) {}
-
-    static const char NEWLINE = '\n';
-    static const char CR = '\r';
-    template <typename Sink> bool put(Sink &snk, char c) {
-
-        namespace io = boost::iostreams;
-        osvr::util::Flag failure;
-        if (c == CR) {
-            // silently drop these, they can confuse us
-            return true;
-        }
-        if (c == NEWLINE) {
-            m_lastWasNewline = true;
-        } else if (m_lastWasNewline) {
-            for (size_t i = 0; i < m_spaces; ++i) {
-                failure += !io::put(snk, ' ');
-            }
-            m_lastWasNewline = false;
-        }
-        failure += !io::put(snk, c);
-        return !failure;
-    }
-
-  private:
-    size_t m_spaces;
-    bool m_lastWasNewline;
-};
 
 struct Options {
     bool showAliasDetails;
@@ -87,16 +54,15 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
   public:
     /// @brief Constructor
     TreeNodePrinter(Options opts)
-        : boost::static_visitor<>(), m_opts(opts), m_os(std::cout),
-          m_maxTypeLen(osvr::common::elements::getMaxTypeNameLength()) {
+        : boost::static_visitor<>(), m_opts(opts),
+          m_maxTypeLen(osvr::common::elements::getMaxTypeNameLength()),
+          m_os(std::cout), m_indentStream{m_maxTypeLen + 2 + 1 + 2, m_os} {
         // Some initial space to set the output off.
         m_os << "\n\n";
 
-        // Create the filtering ostream that indents past the type name.
+        // Computation for initializing the indent stream above:
         // Indents type name size, +2 for the brackets, +1 for the space, and +2
         // so it doesn't line up with the path.
-        m_indentStream.push(IndentFilter{m_maxTypeLen + 2 + 1 + 2});
-        m_indentStream.push(m_os);
     }
 
     /// @brief print nothing for a null element.
@@ -151,9 +117,9 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
         return m_os;
     }
     Options m_opts;
-    std::ostream &m_os;
-    boost::iostreams::filtering_ostream m_indentStream;
     size_t m_maxTypeLen;
+    std::ostream &m_os;
+    osvr::util::IndentingStream m_indentStream;
 };
 
 int main(int argc, char *argv[]) {
