@@ -34,11 +34,14 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
-#include <json/value.h>
 
 // Standard includes
 #include <string>
 #include <functional>
+
+namespace Json {
+class Value;
+}
 
 namespace osvr {
 /// @brief Server functionality
