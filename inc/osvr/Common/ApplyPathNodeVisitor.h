@@ -96,6 +96,9 @@ namespace common {
 
     } // namespace detail
 
+    /// @brief Visit a node's element's contained type, similar to
+    /// boost::apply_visitor, but passing both the PathNode and the PathElement
+    /// type.
     template <typename Visitor>
     inline typename Visitor::result_type applyPathNodeVisitor(Visitor &v,
                                                               PathNode &node) {
@@ -103,7 +106,8 @@ namespace common {
         return boost::apply_visitor(visitor, node.value());
     }
 
-    // const version
+    /// @overload
+    /// const version
     template <typename Visitor>
     inline typename Visitor::result_type
     applyPathNodeVisitor(Visitor &v, PathNode const &node) {
