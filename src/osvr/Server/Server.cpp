@@ -80,8 +80,25 @@ namespace server {
         return m_impl->addRoute(routingDirective);
     }
 
-    std::string Server::getRoutes(bool styled) const {
-        return m_impl->getRoutes(styled);
+    bool Server::addAlias(std::string const &path, std::string const &source,
+                          common::AliasPriority priority) {
+        return m_impl->addAlias(path, source, priority);
+    }
+
+    bool Server::addString(std::string const &path, std::string const &value) {
+        return m_impl->addString(path, value);
+    }
+
+    bool Server::addAliases(Json::Value const &aliases,
+                            common::AliasPriority priority) {
+        return m_impl->addAliases(aliases, priority);
+    }
+
+    void Server::addExternalDevice(std::string const &path,
+                                   std::string const &deviceName,
+                                   std::string const &server,
+                                   std::string const &descriptor) {
+        m_impl->addExternalDevice(path, deviceName, server, descriptor);
     }
 
     std::string Server::getSource(std::string const &destination) const {

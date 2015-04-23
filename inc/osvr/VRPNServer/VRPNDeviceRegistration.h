@@ -43,11 +43,11 @@ class vrpn_Connection;
 
 namespace osvr {
 namespace vrpnserver {
-    /// @addtogroup VRPNServer
-    /// @{
     class VRPNDeviceRegistration_impl;
 
     namespace detail {
+        /// @brief This function is the one that will serve as your "update
+        /// callback" for your VRPN-based device.
         template <typename T>
         static OSVR_ReturnCode callMainloop(void *userdata) {
             T *obj = static_cast<T *>(userdata);
@@ -117,13 +117,15 @@ namespace vrpnserver {
             return registerDevice(ret.release());
         }
 
+        OSVR_VRPNSERVER_EXPORT void
+        setDeviceDescriptor(std::string const &jsonString);
+
       private:
         OSVR_VRPNSERVER_EXPORT void
         m_registerDevice(OSVR_DeviceUpdateCallback cb, void *dev);
         pluginhost::PluginSpecificRegistrationContext &m_ctx;
         unique_ptr<VRPNDeviceRegistration_impl> m_impl;
     };
-    /// @}
 } // namespace vrpnserver
 } // namespace osvr
 

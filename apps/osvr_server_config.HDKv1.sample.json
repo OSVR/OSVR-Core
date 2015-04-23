@@ -1,72 +1,19 @@
-/* This is for the HDK v1 - roughly around CES 2015 */
+/* This is for the HDK v1 - roughly around CES 2015 - must manually override the alias to get a different transform */
 {
-"plugins": [], /* only need to list manual-load plugins */
-   "routes" : [
-      {
-         "destination" : "/me/hands/left",
-         "source" : {
-            "changeBasis" : {
-               "x" : "x",
-               "y" : "z",
-               "z" : "-y"
-            },
-            "child" : {
-               "sensor" : 0,
-               "tracker" : "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-            }
-         }
+  "aliases": {
+    "/me/head": {
+      "rotate": {
+        "axis": "-x",
+        "degrees": 180
       },
-      {
-         "destination" : "/me/hands/right",
-         "source" : {
-            "changeBasis" : {
-               "x" : "x",
-               "y" : "z",
-               "z" : "-y"
-            },
-            "child" : {
-               "sensor" : 1,
-               "tracker" : "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-            }
-         }
-      },
-      {
-         "destination" : "/me/hands",
-         "source" : {
-            "changeBasis" : {
-               "x" : "x",
-               "y" : "z",
-               "z" : "-y"
-            },
-            "child" : {
-               "tracker" : "/org_opengoggles_bundled_Multiserver/OneEuroFilter0"
-            }
-         }
-      },
-      {
-         "destination" : "/me/head",
-         "source" : {
-            "calibration" : true,
-            "child" : {
-               "child" : {
-            "rotate" : {
-               "axis" : "-x",
-               "degrees" : 180
-            },
-                  "child" : {
-                     "changeBasis" : {
-                        "x" : "x",
-                        "y" : "-z",
-                        "z" : "-y"
-                     },
-                     "child" : {
-                        "sensor" : 0,
-                        "tracker" : "/org_opengoggles_bundled_Multiserver/OSVRHackerDevKit0"
-                     }
-                  }
-               }
-            }
-         }
+      "child": {
+        "changeBasis": {
+          "x": "x",
+          "y": "-z",
+          "z": "-y"
+        },
+        "child": "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd"
       }
-   ]
+    }
+  }
 }

@@ -37,6 +37,11 @@
 
 namespace osvr {
 namespace common {
+    /// @brief Type-safe wrapper with built-in default for a VRPN "sender type"
+    /// integer.
+    ///
+    /// @todo add test code to ensure that the default value matches
+    /// vrpn_ANY_SENDER as found in vrpn_Connection.h
     class RawSenderType {
       public:
         typedef int32_t UnderlyingSenderType;

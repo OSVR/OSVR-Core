@@ -24,11 +24,11 @@
 
 // Internal Includes
 #include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/Client/ClientInterface.h>
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/ClientContext.h>
 
 // Library/third-party includes
-#include <boost/assert.hpp>
+// - none
 
 // Standard includes
 // - none
@@ -40,7 +40,7 @@ OSVR_ReturnCode osvrClientGetInterface(OSVR_ClientContext ctx,
         /// Return failure if given a null context
         return OSVR_RETURN_FAILURE;
     }
-    ::osvr::client::ClientInterfacePtr ret = ctx->getInterface(path);
+    osvr::common::ClientInterfacePtr ret = ctx->getInterface(path);
     if (ret) {
         *iface = ret.get();
         return OSVR_RETURN_SUCCESS;
@@ -61,7 +61,7 @@ OSVR_ReturnCode osvrClientFreeInterface(OSVR_ClientContext ctx,
 
     /// This call returns a smart pointer - going to let it go out of scope
     /// here to delete.
-    ::osvr::client::ClientInterfacePtr ptr(ctx->releaseInterface(iface));
+    osvr::common::ClientInterfacePtr ptr(ctx->releaseInterface(iface));
     if (!ptr) {
         /// Return failure if the context didn't have a record of this
         /// interface.

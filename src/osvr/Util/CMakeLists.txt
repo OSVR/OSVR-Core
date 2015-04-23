@@ -6,6 +6,7 @@ if(BUILD_DEV_VERBOSE)
 endif()
 configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
+
 ###
 # Platform Config Header
 ###
@@ -13,6 +14,8 @@ include(CheckStructHasMember)
 check_struct_has_member("struct timeval" tv_sec sys/time.h OSVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H LANGUAGE C)
 check_struct_has_member("struct timeval" tv_sec winsock2.h OSVR_HAVE_STRUCT_TIMEVAL_IN_WINSOCK2_H LANGUAGE C)
 configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
+
+configure_file(WideToUTF8.h.in "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h" @ONLY)
 
 ###
 # Library build
@@ -31,15 +34,18 @@ set(API
     "${HEADER_LOCATION}/ChannelCountC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
+    "${HEADER_LOCATION}/DefaultBool.h"
     "${HEADER_LOCATION}/Deletable.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
     "${HEADER_LOCATION}/EigenInterop.h"
+    "${HEADER_LOCATION}/Flag.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/GuardInterface.h"
     "${HEADER_LOCATION}/GuardInterfaceDummy.h"
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
+    "${HEADER_LOCATION}/IndentingStream.h"
     "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
@@ -50,6 +56,7 @@ set(API
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/Pose3C.h"
+    "${HEADER_LOCATION}/ProgramOptionsToggleFlags.h"
     "${HEADER_LOCATION}/QuaternionC.h"
     "${HEADER_LOCATION}/QuatlibInteropC.h"
     "${HEADER_LOCATION}/ResetPointerList.h"
@@ -58,13 +65,16 @@ set(API
     "${HEADER_LOCATION}/SharedPtr.h"
     "${HEADER_LOCATION}/StdDeletable.h"
     "${HEADER_LOCATION}/StdInt.h"
+    "${HEADER_LOCATION}/StringLiteralFileToString.h"
     "${HEADER_LOCATION}/TimeValue.h"
     "${HEADER_LOCATION}/TimeValueC.h"
     "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/TreeNode.h"
     "${HEADER_LOCATION}/TreeNode_fwd.h"
+    "${HEADER_LOCATION}/TreeTraversalVisitor.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/Util.h"
+    "${HEADER_LOCATION}/ValueOrRange.h"
     "${HEADER_LOCATION}/Vec3C.h"
     "${HEADER_LOCATION}/WindowsVariantC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
@@ -79,8 +89,10 @@ set(SOURCE
     Verbosity.h.in
     ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in
+    WideToUTF8.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h")
 
 osvr_add_library()
 

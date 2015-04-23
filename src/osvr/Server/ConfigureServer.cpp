@@ -27,6 +27,8 @@
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/PluginHost/SearchPath.h>
+#include <osvr/Util/Verbosity.h>
+#include "JSONResolvePossibleRef.h"
 
 // Library/third-party includes
 #include <json/value.h>
@@ -72,6 +74,10 @@ namespace server {
             }
         }
 
+        Json::Value const &getMember(const char *memberName) const {
+            return root[memberName];
+        }
+
         Json::Value root;
     };
 
@@ -95,7 +101,7 @@ namespace server {
     static const char SLEEP_KEY[] = "sleep";
 
     ServerPtr ConfigureServer::constructServer() {
-        Json::Value &root(m_data->root);
+        Json::Value const &root(m_data->root);
         bool local = true;
         std::string iface;
         boost::optional<int> port;
@@ -151,7 +157,7 @@ namespace server {
 
     static const char PLUGINS_KEY[] = "plugins";
     bool ConfigureServer::loadPlugins() {
-        Json::Value &root(m_data->root);
+        Json::Value const &root(m_data->root);
         const Json::Value plugins = root[PLUGINS_KEY];
         bool success = true;
         for (Json::ArrayIndex i = 0, e = plugins.size(); i < e; ++i) {
@@ -192,10 +198,9 @@ namespace server {
     static const char PARAMS_KEY[] = "params";
     bool ConfigureServer::instantiateDrivers() {
         bool success = true;
-        Json::Value &root(m_data->root);
-        const Json::Value drivers = root[DRIVERS_KEY];
-        for (Json::ArrayIndex i = 0, e = drivers.size(); i < e; ++i) {
-            const Json::Value thisDriver = drivers[i];
+        Json::Value const &root(m_data->root);
+        Json::Value const &drivers = root[DRIVERS_KEY];
+        for (auto const &thisDriver : drivers) {
             const bool hasPlugin = thisDriver[PLUGIN_KEY].isString();
             const bool hasDriver = thisDriver[DRIVER_KEY].isString();
             if (!hasPlugin && !hasDriver) {
@@ -255,13 +260,84 @@ namespace server {
 
     static const char ROUTES_KEY[] = "routes";
     bool ConfigureServer::processRoutes() {
-        Json::Value &root(m_data->root);
         bool success = false;
-        const Json::Value routes = root[ROUTES_KEY];
+        Json::Value const &routes = m_data->getMember(ROUTES_KEY);
+        if (routes.isNull()) {
+            return success;
+        }
         for (Json::ArrayIndex i = 0, e = routes.size(); i < e; ++i) {
             const Json::Value thisRoute = routes[i];
             m_server->addRoute(thisRoute.toStyledString());
             success = true;
+        }
+        return success;
+    }
+
+    static const char ALIASES_KEY[] = "aliases";
+    bool ConfigureServer::processAliases() {
+        bool success = false;
+        Json::Value const &aliases = m_data->getMember(ALIASES_KEY);
+        if (aliases.isNull()) {
+            return success;
+        }
+        success = m_server->addAliases(aliases);
+
+        return success;
+    }
+    static const char EXTERNALDEVICES_KEY[] = "externalDevices";
+    static const char DEVICENAME_KEY[] = "deviceName";
+    static const char DESCRIPTOR_KEY[] = "descriptor";
+    bool ConfigureServer::processExternalDevices() {
+        bool success = false;
+        Json::Value const &devices = m_data->getMember(EXTERNALDEVICES_KEY);
+        if (devices.isNull()) {
+            return success;
+        }
+        for (auto const &devPath : devices.getMemberNames()) {
+            auto const &dev = devices[devPath];
+            auto const &devName = dev[DEVICENAME_KEY];
+            auto const &server = dev[SERVER_KEY];
+            auto descriptor = resolvePossibleRef(dev[DESCRIPTOR_KEY]);
+            if (devName.isNull()) {
+                OSVR_DEV_VERBOSE(
+                    "Missing 'deviceName' for external device entry of "
+                    << devPath << " : " << dev.toStyledString());
+                continue;
+            }
+            if (server.isNull()) {
+                OSVR_DEV_VERBOSE(
+                    "Missing 'server' for external device entry of "
+                    << devPath << " : " << dev.toStyledString());
+                continue;
+            }
+
+            if (descriptor.isNull()) {
+                OSVR_DEV_VERBOSE("Missing 'descriptor' file or object for "
+                                 "external device entry of "
+                                 << devPath << " : " << dev.toStyledString());
+                continue;
+            }
+
+            m_server->addExternalDevice(devPath, devName.asString(),
+                                        server.asString(),
+                                        descriptor.toStyledString());
+            success = true;
+        }
+        return success;
+    }
+
+    static const char DISPLAY_KEY[] = "display";
+    static const char DISPLAY_PATH[] = "/display";
+    bool ConfigureServer::processDisplay() {
+        bool success = false;
+        Json::Value const &display = m_data->getMember(DISPLAY_KEY);
+        if (display.isNull()) {
+            return success;
+        }
+        auto result = resolvePossibleRef(display);
+        if (!result.isNull()) {
+            success =
+                m_server->addString(DISPLAY_PATH, result.toStyledString());
         }
         return success;
     }

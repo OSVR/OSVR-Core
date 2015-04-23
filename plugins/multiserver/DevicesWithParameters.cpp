@@ -26,6 +26,9 @@
 #include "DevicesWithParameters.h"
 #include "GetSerialPortState.h"
 #include <osvr/VRPNServer/VRPNDeviceRegistration.h>
+#include <osvr/USBSerial/USBSerialEnum.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+#include "com_osvr_Multiserver_YEI_3Space_Sensor_json.h"
 
 // Library/third-party includes
 #include <json/reader.h>
@@ -83,24 +86,37 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
         throw std::runtime_error("Could not parse configuration: " +
                                  reader.getFormattedErrorMessages());
     }
-    std::string port = normalizeAndVerifySerialPort(root["port"].asString());
-    bool calibrate_gyros_on_setup =
-        root.get("calibrateGyrosOnSetup", false).asBool();
-    bool tare_on_setup = root.get("tareOnSetup", false).asBool();
-    double frames_per_second = root.get("framesPerSecond", 250).asFloat();
+    static const uint16_t vID = 0x9AC;
+    static const uint16_t pID = 0x3F2;
+    for (auto dev : osvr::usbserial::Enumerator(vID, pID)) {
 
-    Json::Value commands = root.get("resetCommands", Json::arrayValue);
-    CStringArray reset_commands;
+        std::string port = normalizeAndVerifySerialPort(dev->getPort());
 
-    for (Json::ArrayIndex i = 0, e = commands.size(); i < e; ++i) {
-        reset_commands.push_back(commands[i].asString());
+        bool calibrate_gyros_on_setup =
+            root.get("calibrateGyrosOnSetup", false).asBool();
+        bool tare_on_setup = root.get("tareOnSetup", false).asBool();
+        double frames_per_second = root.get("framesPerSecond", 250).asFloat();
+
+        Json::Value commands = root.get("resetCommands", Json::arrayValue);
+        CStringArray reset_commands;
+
+        if (commands.empty()) {
+            // Enable Q-COMP filtering by default
+            reset_commands.push_back("123,2");
+        } else {
+            for (Json::ArrayIndex i = 0, e = commands.size(); i < e; ++i) {
+                reset_commands.push_back(commands[i].asString());
+            }
+        }
+
+        osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+
+        reg.registerDevice(new vrpn_YEI_3Space_Sensor(
+            reg.useDecoratedName(data.getName("YEI_3Space_Sensor")).c_str(),
+            reg.getVRPNConnection(), port.c_str(), 115200,
+            calibrate_gyros_on_setup, tare_on_setup, frames_per_second, 0, 0, 1,
+            0, reset_commands.get_array()));
+        reg.setDeviceDescriptor(osvr::util::makeString(
+            com_osvr_Multiserver_YEI_3Space_Sensor_json));
     }
-
-    osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
-
-    reg.registerDevice(new vrpn_YEI_3Space_Sensor(
-        reg.useDecoratedName(data.getName("YEI_3Space_Sensor")).c_str(),
-        reg.getVRPNConnection(), port.c_str(), 115200, calibrate_gyros_on_setup,
-        tare_on_setup, frames_per_second, 0, 0, 1, 0,
-        reset_commands.get_array()));
 }

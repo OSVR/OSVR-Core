@@ -35,7 +35,7 @@
 
 int main() {
     osvr::clientkit::ClientContext context(
-        "org.opengoggles.exampleclients.TrackerState");
+        "com.osvr.exampleclients.TrackerState");
 
     // This is just one of the paths. You can also use:
     // /me/hands/right

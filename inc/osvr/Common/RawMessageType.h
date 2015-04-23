@@ -37,6 +37,11 @@
 
 namespace osvr {
 namespace common {
+    /// @brief Type-safe wrapper with built-in default for a VRPN "message type"
+    /// integer.
+    ///
+    /// @todo add test code to ensure that the default value matches
+    /// vrpn_ANY_TYPE as found in vrpn_Connection.h
     class RawMessageType {
       public:
         typedef int32_t UnderlyingMessageType;

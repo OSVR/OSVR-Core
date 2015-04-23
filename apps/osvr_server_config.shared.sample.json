@@ -5,10 +5,8 @@
   "plugins": [], /* only need to list manual-load plugins */
   "drivers": [
     {
-      "plugin": "org_opengoggles_bundled_Multiserver",
-      "driver": "YEI_3Space_Sensor",
-      "params": {
-        "port": "COM3"
+      "plugin": "com_osvr_Multiserver",
+      "driver": "YEI_3Space_Sensor"
       }
     }
   ]

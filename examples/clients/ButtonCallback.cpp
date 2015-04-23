@@ -40,7 +40,7 @@ void myButtonCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
 
 int main() {
     osvr::clientkit::ClientContext context(
-        "org.opengoggles.exampleclients.ButtonCallback");
+        "com.osvr.exampleclients.ButtonCallback");
 
     // This is just one of the paths: specifically, the Hydra's left
     // controller's button labelled "1". More are in the docs and/or listed on

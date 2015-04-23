@@ -56,6 +56,29 @@ namespace common {
                       "Cannot use a path with an empty component: " + path) {}
         };
 
+        /// @brief Thrown when attempting to go to the parent path from the root
+        struct ImpossibleParentPath : std::runtime_error {
+            ImpossibleParentPath()
+                : std::runtime_error("Cannot specify .. for parent path when "
+                                     "already at the root!") {}
+        };
+
+        /// @brief Thrown when attempting to go use an absolute path when
+        /// forbidden
+        struct ForbiddenAbsolutePath : std::runtime_error {
+            ForbiddenAbsolutePath()
+                : std::runtime_error(
+                      "Cannot specify an absolute path in this context!") {}
+        };
+
+        /// @brief Thrown when attempting to go to the parent path when
+        /// forbidden
+        struct ForbiddenParentPath : std::runtime_error {
+            ForbiddenParentPath()
+                : std::runtime_error("Cannot specify .. in a parent path used "
+                                     "in this context!") {}
+        };
+
         /// @brief Thrown when attempting to use an empty path
         struct EmptyPath : std::runtime_error {
             EmptyPath()
@@ -70,6 +93,38 @@ namespace common {
                       "Provided path was not absolute (no leading slash): " +
                       path) {}
         };
+
+        /// @brief Contains exceptions thrown when, in the course of operation,
+        /// invariants of the path tree are determined to have been violated.
+        /// All inherit from InvariantError.
+        namespace invariants {
+            struct InvariantError : std::runtime_error {
+                InvariantError(std::string const &msg)
+                    : std::runtime_error("Path tree violated invariant: " +
+                                         msg) {}
+            };
+
+            struct SensorMissingParent : InvariantError {
+                SensorMissingParent(std::string const &path = std::string())
+                    : InvariantError("Sensor element missing a parent! " +
+                                     path) {}
+            };
+            struct SensorMissingInterfaceParent : InvariantError {
+                SensorMissingInterfaceParent(
+                    std::string const &path = std::string())
+                    : InvariantError("Sensor element does not have an "
+                                     "InterfaceElement parent! " +
+                                     path) {}
+            };
+
+            struct InterfaceMissingParent : InvariantError {
+                InterfaceMissingParent(std::string const &path = std::string())
+                    : InvariantError("Interface elements must have a "
+                                     "parent of some device type! " +
+                                     path) {}
+            };
+        } // namespace invariants
+
     } // namespace exceptions
 } // namespace common
 } // namespace osvr

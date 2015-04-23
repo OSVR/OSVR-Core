@@ -40,9 +40,8 @@ class vrpn_Connection;
 
 namespace osvr {
 
-/// @addtogroup VRPNServer
-/// @{
-/// @brief Contains functions and classes for @ref VRPNServer
+/// @brief Contains functions and classes for plugins directly wrapping a VRPN
+/// server
 namespace vrpnserver {
     /// @brief Retrieves the vrpn_Connection pointer from an
     /// OSVR_PluginRegContext.

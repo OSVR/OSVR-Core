@@ -1,3 +1,7 @@
+option(BUILD_EXPERIMENTAL_APPS "Should we build the experimental and possibly broken extra apps?" OFF)
+
+add_subdirectory(PathTreeExport)
+
 if(WIN32)
     set(OSVR_SERVER_RESOURCE osvr_server.rc)
 else()
@@ -7,45 +11,87 @@ endif()
 add_executable(osvr_server
     osvr_server.cpp
     ${OSVR_SERVER_RESOURCE})
-add_executable(BasicServer BasicServer.cpp)
-add_executable(osvr_calibrate
-    osvr_calibrate.cpp
-    ClientMainloop.h
-    RecomposeTransform.h
-    WrapRoute.h)
-
-foreach(server BasicServer osvr_server osvr_calibrate)
-    target_link_libraries(${server} osvrServer)
-    set_target_properties(${server} PROPERTIES
-        FOLDER "OSVR Stock Applications")
-endforeach()
-
-target_link_libraries(osvr_server jsoncpp_lib)
-target_link_libraries(osvr_calibrate jsoncpp_lib osvrClientKitCpp osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-
-add_executable(osvr_reset_yaw
-    osvr_reset_yaw.cpp
-    ClientMainloop.h
-    ClientMainloopThread.h
-    RecomposeTransform.h
-    WrapRoute.h)
-target_link_libraries(osvr_reset_yaw jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-set_target_properties(osvr_reset_yaw PROPERTIES
+target_link_libraries(osvr_server osvrServer jsoncpp_lib)
+set_target_properties(osvr_server PROPERTIES
     FOLDER "OSVR Stock Applications")
-
-add_executable(diagnose-rotation
-    diagnose-rotation.cpp
-    ClientMainloop.h
-    ClientMainloopThread.h
-    RecomposeTransform.h)
-target_link_libraries(diagnose-rotation jsoncpp_lib osvrClientKitCpp osvrClient osvrCommon eigen-headers boost_thread ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-set_target_properties(diagnose-rotation PROPERTIES
-    FOLDER "OSVR Stock Applications")
-
-install(TARGETS osvr_server osvr_reset_yaw
+install(TARGETS osvr_server
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
-install(TARGETS BasicServer osvr_calibrate
+
+add_executable(osvr_print_tree
+    osvr_print_tree.cpp)
+target_link_libraries(osvr_print_tree
+    osvrClientKitCpp
+    osvrCommon
+    jsoncpp_lib
+    boost_program_options)
+set_target_properties(osvr_print_tree PROPERTIES
+    FOLDER "OSVR Stock Applications")
+install(TARGETS osvr_print_tree
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+
+add_executable(BasicServer BasicServer.cpp)
+target_link_libraries(BasicServer
+    osvrServer
+    jsoncpp_lib)
+set_target_properties(BasicServer PROPERTIES
+    FOLDER "OSVR Stock Applications")
+
+install(TARGETS BasicServer
     RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
+
+if(BUILD_EXPERIMENTAL_APPS)
+    add_executable(osvr_calibrate
+        osvr_calibrate.cpp
+        ClientMainloop.h
+        RecomposeTransform.h
+        WrapRoute.h)
+    target_link_libraries(osvr_calibrate
+        osvrServer
+        jsoncpp_lib
+        osvrClientKitCpp
+        osvrCommon
+        eigen-headers
+        boost_thread
+        boost_program_options)
+    set_target_properties(osvr_calibrate PROPERTIES
+        FOLDER "OSVR Experimental Applications")
+
+    add_executable(osvr_reset_yaw
+        osvr_reset_yaw.cpp
+        ClientMainloop.h
+        ClientMainloopThread.h
+        RecomposeTransform.h
+        WrapRoute.h)
+    target_link_libraries(osvr_reset_yaw
+        jsoncpp_lib
+        osvrClientKitCpp
+        osvrClient
+        osvrCommon
+        eigen-headers
+        boost_thread
+        boost_program_options)
+    set_target_properties(osvr_reset_yaw PROPERTIES
+        FOLDER "OSVR Experimental Applications")
+
+    add_executable(diagnose-rotation
+        diagnose-rotation.cpp
+        ClientMainloop.h
+        ClientMainloopThread.h
+        RecomposeTransform.h)
+    target_link_libraries(diagnose-rotation
+        jsoncpp_lib
+        osvrClientKitCpp
+        osvrClient
+        osvrCommon
+        eigen-headers
+        boost_thread
+        boost_program_options)
+    set_target_properties(diagnose-rotation PROPERTIES
+        FOLDER "OSVR Experimental Applications")
+
+    install(TARGETS osvr_calibrate osvr_reset_yaw diagnose-rotation
+        RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExperimentalApps)
+endif()
 
 # Grab all the config files with a glob, to avoid missing one.
 file(GLOB CONFIG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config*.json")
@@ -57,4 +103,22 @@ foreach(FN ${CONFIG_FILES})
         VERBATIM)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
         DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+endforeach()
+
+set(DISPLAYS_DIR /displays)
+
+add_custom_command(TARGET osvr_server POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:osvr_server>${DISPLAYS_DIR}"
+        COMMENT "Making JSON display descriptor directory"
+        VERBATIM)
+# Grab all the display files with a glob, to avoid missing one.
+file(GLOB DISPLAY_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/${DISPLAYS_DIR}/*.json")
+
+foreach(FN ${DISPLAY_FILES})
+    add_custom_command(TARGET osvr_server POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${DISPLAYS_DIR}"
+        COMMENT "Copying JSON display descriptor ${FN}"
+        VERBATIM)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}/${FN}"
+        DESTINATION ${CMAKE_INSTALL_BINDIR}${DISPLAYS_DIR} COMPONENT Runtime)
 endforeach()

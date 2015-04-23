@@ -40,15 +40,13 @@ TEST(PathNode, getFullPath) {
     ASSERT_EQ(getFullPath(tree.getNodeByPath("/")), "/") << "Root";
     ASSERT_EQ(getFullPath(tree.getNodeByPath("/test")), "/test")
         << "First level";
-    ASSERT_EQ(
-        getFullPath(tree.getNodeByPath("/org_opengoggles_sample/MyDevice")),
-        "/org_opengoggles_sample/MyDevice")
+    ASSERT_EQ(getFullPath(tree.getNodeByPath("/com_osvr_sample/MyDevice")),
+              "/com_osvr_sample/MyDevice")
         << "Second level";
 }
 
 TEST(PathNode, getFullPathNormalizes) {
     PathTree tree;
-    ASSERT_EQ(
-        getFullPath(tree.getNodeByPath("/org_opengoggles_sample/MyDevice/")),
-        "/org_opengoggles_sample/MyDevice");
+    ASSERT_EQ(getFullPath(tree.getNodeByPath("/com_osvr_sample/MyDevice/")),
+              "/com_osvr_sample/MyDevice");
 }

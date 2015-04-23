@@ -26,6 +26,7 @@
 #include <osvr/Common/AddDevice.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/RoutingConstants.h>
 #include <osvr/Common/RoutingExceptions.h>

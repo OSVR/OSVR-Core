@@ -1,0 +1,104 @@
+{
+  "deviceVendor": "Razer",
+  "deviceName": "Hydra",
+  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "version": 2,
+  "lastModified": "2015-04-10T17:38:49.659Z",
+  "interfaces": {
+    "tracker": {
+      "count": 2,
+      "position": true,
+      "orientation": true
+    },
+    "analog": {
+      "count": 6,
+      "traits": [
+        {
+          "min": -1,
+          "max": 1,
+          "rest": 0
+        },
+        {
+          "min": -1,
+          "max": 1,
+          "rest": 0
+        },
+        {
+          "min": 0,
+          "max": 1,
+          "rest": 0
+        },
+        {
+          "min": -1,
+          "max": 1,
+          "rest": 0
+        },
+        {
+          "min": -1,
+          "max": 1,
+          "rest": 0
+        },
+        {
+          "min": 0,
+          "max": 1,
+          "rest": 0
+        }
+      ]
+    },
+    "button": {
+      "count": 15
+    }
+  },
+  "semantic": {
+    "left": {
+      "1": "button/1",
+      "2": "button/2",
+      "3": "button/3",
+      "4": "button/4",
+      "$target": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": "tracker/0"
+       },
+      "middle": "button/0",
+      "bumper": "button/5",
+      "joystick": {
+        "button": "button/6",
+        "x": "analog/0",
+        "y": "analog/1"
+      },
+      "trigger": "analog/2"
+    },
+    "right": {
+      "1": "button/9",
+      "2": "button/10",
+      "3": "button/11",
+      "4": "button/12",
+      "$target": {
+        "changeBasis": {
+          "x": "x",
+          "y": "z",
+          "z": "-y"
+        },
+        "child": "tracker/1"
+       },
+      "middle": "button/8",
+      "bumper": "button/13",
+      "joystick": {
+        "button": "button/14",
+        "x": "analog/3",
+        "y": "analog/4"
+      },
+      "trigger": "analog/5"
+    }
+  },
+  "automaticAliases": {
+    "/me/hands/left": "semantic/left",
+    "/me/hands/right": "semantic/right",
+    "/controller/left": "semantic/left/*",
+    "/controller/right": "semantic/right/*"
+  }
+}

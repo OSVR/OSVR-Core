@@ -26,7 +26,7 @@
 #define INCLUDED_PathTree_h_GUID_8C6C691A_AAB1_4586_64DD_BD3F870C9071
 
 // Internal Includes
-#include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/PathTree_fwd.h> // IWYU pragma: export
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathNode_fwd.h>
 
@@ -38,9 +38,6 @@
 
 namespace osvr {
 namespace common {
-    /// @addtogroup Routing
-    /// @{
-
     /// @brief A tree representation, with path/url syntax, of the known OSVR
     /// system.
     class PathTree : boost::noncopyable {
@@ -67,6 +64,13 @@ namespace common {
         /// exceptions::EmptyPathComponent
         OSVR_COMMON_EXPORT PathNode &getNodeByPath(std::string const &path);
 
+        /// @brief Returns the node indicated by the path, which must be
+        /// absolute (begin with a /).
+        /// @throws exceptions::PathNotAbsolute, exceptions::EmptyPath,
+        /// exceptions::EmptyPathComponent, util::tree::NoSuchChild
+        OSVR_COMMON_EXPORT PathNode const &
+        getNodeByPath(std::string const &path) const;
+
         /// @overload
         ///
         /// Same as above but a non-existent final component node will be
@@ -75,11 +79,43 @@ namespace common {
         getNodeByPath(std::string const &path,
                       PathElement const &finalComponentDefault);
 
+        /// @brief Reset the path tree to a new, empty root node.
+        OSVR_COMMON_EXPORT void reset();
+
+        PathNode &getRoot() { return *m_root; }
+
+        PathNode const &getRoot() const { return *m_root; }
+
       private:
         /// @brief Root node of the tree.
         PathNodePtr m_root;
     };
-    /// @}
+
+    /// @brief Make node an alias pointing to source, with the given priority,
+    /// if it needs updating.
+    ///
+    /// @return true if the node was changed
+    OSVR_COMMON_EXPORT bool
+    addAlias(PathNode &node, std::string const &source,
+             AliasPriority priority = ALIASPRIORITY_MANUAL);
+
+    /// @brief Parse an old-style route object (with source and destination),
+    /// and use the given node as a entry point into the tree, and add an
+    /// aliases based on that route.
+    ///
+    /// @return true if the node was changed
+    OSVR_COMMON_EXPORT bool
+    addAliasFromRoute(PathNode &node, std::string const &route,
+                      AliasPriority priority = ALIASPRIORITY_MANUAL);
+
+    bool addAliasFromSourceAndRelativeDest(
+        PathNode &node, std::string const &source, std::string const &dest,
+        AliasPriority priority = ALIASPRIORITY_MANUAL);
+
+    bool isPathAbsolute(std::string const &source);
+
+    /// @brief Clones a path tree
+    OSVR_COMMON_EXPORT void clonePathTree(PathTree const &src, PathTree &dest);
 
 } // namespace common
 } // namespace osvr

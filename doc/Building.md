@@ -8,7 +8,7 @@ The rest of the page you're currently reading is targeted at those interested in
 
 You'll need:
 
-- CMake, fairly recent (2.8.12 or newer, 3.0.2 most tested, that or the latest preferred.)
+- CMake, fairly recent (3.0 or newer, 3.0.2 most tested, that or the latest preferred.)
 - A relatively recent version of Boost (1.44 or newer, 1.57.0 on Windows the most tested, the latest is usually preferred barring any weird bugs which will be noted here if discovered.)
 - [libfunctionality][] compiled
 - [jsoncpp][] compiled, with the `JSONCPP_WITH_CMAKE_PACKAGE` option turned on, and the `JSONCPP_LIB_BUILD_SHARED` option turned off on Windows and on for other platforms.

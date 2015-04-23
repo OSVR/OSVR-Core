@@ -25,20 +25,21 @@
 // Internal Includes
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
+
+// Library/third-party includes
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
-
-// Library/third-party includes
-// - none
+#include <boost/mpl/for_each.hpp>
 
 // Standard includes
-// - none
+#include <algorithm>
+#include <string.h>
 
 namespace osvr {
 namespace common {
     namespace elements {
-        namespace detail {
+        namespace {
             /// Class template, specialized to implement class name retrieval.
             template <typename ElementType> struct ElementTypeName {
                 static const char *get();
@@ -48,29 +49,26 @@ namespace common {
 /// name as a string literal.
 #define OSVR_ROUTING_TYPENAME_HANDLER(CLASS)                                   \
     template <> struct ElementTypeName<CLASS> {                                \
-        OSVR_COMMON_EXPORT static const char *get() { return #CLASS; }         \
+        static const char *get() { return #CLASS; }                            \
     };
 
             /// All types included in the bounded typelist of PathElement must
-            /// be in this list.
-            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
+            /// be in this list. It's kept sorted for ease of maintenance.
+            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
             OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(NullElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(PluginElement)
             OSVR_ROUTING_TYPENAME_HANDLER(SensorElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(PhysicalAssociationElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(LogicalElement)
-            OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(StringElement)
 #undef OSVR_ROUTING_TYPENAME_HANDLER
-        } // namespace detail
 
-        namespace {
             /// @brief Visitor class used to help getTypeName()
             class TypeNameVisitor : public boost::static_visitor<const char *> {
               public:
                 template <typename ElementType>
                 const char *operator()(ElementType const &) const {
-                    return detail::ElementTypeName<ElementType>::get();
+                    return ElementTypeName<ElementType>::get();
                 }
             };
         } // namespace
@@ -83,6 +81,34 @@ namespace common {
             if (boost::get<NullElement>(&dest)) {
                 dest = src;
             }
+        }
+
+        bool isNull(PathElement const &elt) {
+            return (nullptr != boost::get<NullElement>(&elt));
+        }
+
+        namespace {
+            class MaxTypeNameLength {
+              public:
+                MaxTypeNameLength(size_t &maxLen) : m_maxLen(maxLen) {}
+                /// @brief no assignment operator
+                MaxTypeNameLength &
+                operator=(MaxTypeNameLength const &) = delete;
+                template <typename T> void operator()(T const &) {
+                    m_maxLen =
+                        (std::max)(m_maxLen, strlen(ElementTypeName<T>::get()));
+                }
+
+              private:
+                size_t &m_maxLen;
+            };
+        } // namespace
+
+        size_t getMaxTypeNameLength() {
+            size_t maxLen = 0;
+            boost::mpl::for_each<elements::PathElement::types>(
+                MaxTypeNameLength(maxLen));
+            return maxLen;
         }
     } // namespace elements
 } // namespace common

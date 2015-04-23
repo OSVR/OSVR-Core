@@ -33,7 +33,7 @@
 
 int main() {
     osvr::clientkit::ClientContext context(
-        "org.opengoggles.exampleclients.MinimalInit");
+        "com.osvr.exampleclients.MinimalInit");
     std::cout << "OK, library initialized." << std::endl;
 
     // Pretend that this is your application's mainloop.

@@ -165,8 +165,7 @@ int main(int argc, char *argv[]) {
     osvr::clientkit::Interface iface = ctx.getInterface(dest);
 
     ClientMainloop client(ctx);
-    srv->registerMainloopMethod(
-        std::bind(&ClientMainloop::mainloop, std::ref(client)));
+    srv->registerMainloopMethod([&client] { client.mainloop(); });
     {
         // Take ownership of the server inside this nested scope
         // We want to ensure that the client parts outlive the server.

@@ -155,8 +155,11 @@ namespace pluginhost {
                                    "name for this plugin has already been "
                                    "registered!");
         }
+        auto opaque = extractOpaquePointer();
         m_driverInstantiationCallbacks[name] =
-            std::bind(constructor, extractOpaquePointer(), _1, userData);
+            [constructor, opaque, userData](const char *params) {
+                return constructor(opaque, params, userData);
+            };
     }
 
     util::AnyMap &PluginSpecificRegistrationContextImpl::data() {

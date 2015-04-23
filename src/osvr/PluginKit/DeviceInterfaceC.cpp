@@ -39,7 +39,7 @@
 #include <boost/thread.hpp>
 
 // Standard includes
-#include <functional>
+#include <string>
 
 OSVR_DeviceInitOptions
 osvrDeviceCreateInitOptions(OSVR_IN_PTR OSVR_PluginRegContext ctx) {
@@ -81,8 +81,7 @@ OSVR_ReturnCode osvrDeviceSendJsonDescriptor(OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSendJsonDescriptor descriptor",
                                     json);
 
-    /// @todo Register this with the context/device
-
+    dev->setDeviceDescriptor(std::string(json, len));
     return OSVR_RETURN_SUCCESS;
 }
 
@@ -186,7 +185,8 @@ osvrDeviceRegisterUpdateCallback(OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_DEV_VERBOSE("In osvrDeviceRegisterUpdateCallback");
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(
         "osvrDeviceRegisterUpdateCallback device token", dev);
-    dev->setUpdateCallback(std::bind(updateCallback, userData));
+    dev->setUpdateCallback(
+        [updateCallback, userData] { return updateCallback(userData); });
     return OSVR_RETURN_SUCCESS;
 }
 

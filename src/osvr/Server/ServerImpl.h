@@ -35,12 +35,16 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/CommonComponent_fwd.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Util/Flag.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 #include <util/RunLoopManagerBoost.h>
 #include <boost/thread.hpp>
 #include <vrpn_Connection.h>
+#include <json/value.h>
 
 // Standard includes
 // - none
@@ -89,8 +93,21 @@ namespace server {
         /// @copydoc Server::addRoute()
         bool addRoute(std::string const &routingDirective);
 
-        /// @copydoc Server::getRoutes()
-        std::string getRoutes(bool styled) const;
+        /// @copydoc Server::addAlias()
+        bool addAlias(std::string const &path, std::string const &source,
+                      common::AliasPriority priority);
+
+        /// @copydoc Server::addAliases()
+        bool addAliases(Json::Value const &aliases,
+                        common::AliasPriority priority);
+
+        /// @copydoc Server::addExternalDevice
+        void addExternalDevice(
+            std::string const &path, std::string const &deviceName,
+            std::string const &server, std::string const &descriptor);
+
+        /// @copydoc Server::addString
+        bool addString(std::string const &path, std::string const &value);
 
         /// @copydoc Server::getSource()
         std::string getSource(std::string const &destination) const;
@@ -125,6 +142,9 @@ namespace server {
         /// @brief sends route message.
         void m_sendRoutes();
 
+        /// @brief sends full path tree contents
+        void m_sendTree();
+
         /// @brief handles updated route message from client
         static int VRPN_CALLBACK
         m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p);
@@ -132,6 +152,19 @@ namespace server {
         /// @brief adds a route - assumes that you've handled ensuring this is
         /// the main server thread.
         bool m_addRoute(std::string const &routingDirective);
+
+        /// @brief adds an alias - assumes that you've handled ensuring this is
+        /// the main server thread.
+        bool m_addAlias(std::string const &path, std::string const &source,
+                        common::AliasPriority priority);
+
+        /// @brief adds aliases - assumes that you've handled ensuring this is
+        /// the main server thread.
+        bool m_addAliases(Json::Value const &aliases,
+                          common::AliasPriority priority);
+
+        /// @brief Handle new or updated device descriptors.
+        void m_handleDeviceDescriptors();
 
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
@@ -148,8 +181,15 @@ namespace server {
         /// @brief System device component
         common::SystemComponent *m_systemComponent;
 
+        /// @brief Common component for system device
+        common::CommonComponent *m_commonComponent;
+
         /// @brief JSON routing directives
         common::RouteContainer m_routes;
+
+        /// @brief Path tree
+        common::PathTree m_tree;
+        util::Flag m_treeDirty;
 
         /// @brief Mutex held by anything executing in the main thread.
         mutable boost::mutex m_mainThreadMutex;

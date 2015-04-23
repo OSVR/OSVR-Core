@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/ParametersC.h>
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 
 // Library/third-party includes
 // - none

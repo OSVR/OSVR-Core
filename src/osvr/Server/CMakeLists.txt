@@ -11,9 +11,16 @@ set(API
 
 set(SOURCE
     ConfigureServer.cpp
+    JSONResolvePossibleRef.h
+    JSONResolvePossibleRef.cpp
     Server.cpp
     ServerImpl.cpp
-    ServerImpl.h)
+    ServerImpl.h
+    "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
+
+# Fallback display descriptor
+set(DISPLAY_JSON display-HDK.json)
+osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
 

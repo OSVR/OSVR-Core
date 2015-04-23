@@ -99,6 +99,12 @@ void OSVR_DeviceTokenObject::connectionInteract() { m_connectionInteract(); }
 
 void OSVR_DeviceTokenObject::stopThreads() { m_stopThreads(); }
 
+void OSVR_DeviceTokenObject::setDeviceDescriptor(
+    std::string const &jsonString) {
+    m_getConnectionDevice()->setDeviceDescriptor(jsonString);
+    m_getConnection()->triggerDescriptorHandlers();
+}
+
 ConnectionPtr OSVR_DeviceTokenObject::m_getConnection() { return m_conn; }
 
 ConnectionDevicePtr OSVR_DeviceTokenObject::m_getConnectionDevice() {

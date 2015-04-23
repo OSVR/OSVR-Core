@@ -43,7 +43,7 @@ void myButtonCallback(void *userdata, const OSVR_TimeValue *timestamp,
 
 int main() {
     OSVR_ClientContext ctx =
-        osvrClientInit("org.opengoggles.exampleclients.ButtonCallback", 0);
+        osvrClientInit("com.osvr.exampleclients.ButtonCallback", 0);
 
     OSVR_ClientInterface button1 = NULL;
     /* This is just one of the paths: specifically, the Hydra's left

@@ -42,7 +42,7 @@
 namespace osvr {
 namespace connection {
     /// @brief Internal constant string used as key into AnyMap
-    static const char CONNECTION_KEY[] = "org.opengoggles.ConnectionPtr";
+    static const char CONNECTION_KEY[] = "com.osvr.ConnectionPtr";
 
     ConnectionPtr Connection::createLocalConnection() {
         ConnectionPtr conn(make_shared<VrpnBasedConnection>(
@@ -100,8 +100,10 @@ namespace connection {
     Connection::registerAdvancedDevice(std::string const &deviceName,
                                        OSVR_DeviceUpdateCallback updateFunction,
                                        void *userdata) {
-        ConnectionDevicePtr dev(new GenericConnectionDevice(
-            deviceName, std::bind(updateFunction, userdata)));
+        ConnectionDevicePtr dev(
+            new GenericConnectionDevice(deviceName, [updateFunction, userdata] {
+                return updateFunction(userdata);
+            }));
         addDevice(dev);
         return dev;
     }
@@ -111,7 +113,8 @@ namespace connection {
                                        OSVR_DeviceUpdateCallback updateFunction,
                                        void *userdata) {
         ConnectionDevicePtr dev(new GenericConnectionDevice(
-            deviceNames, std::bind(updateFunction, userdata)));
+            deviceNames,
+            [updateFunction, userdata] { return updateFunction(userdata); }));
         addDevice(dev);
         return dev;
     }
@@ -141,6 +144,15 @@ namespace connection {
 
     void Connection::registerConnectionHandler(std::function<void()> handler) {
         m_registerConnectionHandler(handler);
+    }
+    void Connection::registerDescriptorHandler(std::function<void()> handler) {
+        m_descriptorHandlers.push_back(handler);
+    }
+
+    void Connection::triggerDescriptorHandlers() {
+        for (auto &handler : m_descriptorHandlers) {
+            handler();
+        }
     }
 
     Connection::Connection() {}

@@ -1,15 +1,15 @@
 # These plugins can run on just a bare PluginHost.
 set(OSVR_TEST_PLUGINS
-    org_opengoggles_example_DummyHardwareDetect
-    org_opengoggles_example_DummyHardwareDetectCpp
-    org_opengoggles_example_DummyHardwareDetectCpp2
-    org_opengoggles_example_NullDevice
-    org_opengoggles_example_NullPlugin)
+    com_osvr_example_DummyHardwareDetect
+    com_osvr_example_DummyHardwareDetectCpp
+    com_osvr_example_DummyHardwareDetectCpp2
+    com_osvr_example_NullDevice
+    com_osvr_example_NullPlugin)
 
 # These plugins need a host with a Connection.
 set(OSVR_TEST_DEVICE_PLUGINS
-    org_opengoggles_example_DummyAsync
-    org_opengoggles_example_DummySync)
+    com_osvr_example_DummyAsync
+    com_osvr_example_DummySync)
 
 # Build the test-only plugins
 foreach(pluginname ${OSVR_TEST_PLUGINS} ${OSVR_TEST_DEVICE_PLUGINS})

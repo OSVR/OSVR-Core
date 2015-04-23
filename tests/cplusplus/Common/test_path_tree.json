@@ -1,0 +1,23 @@
+[
+   {
+      "path" : "/com_osvr_Multiserver",
+      "type" : "PluginElement"
+   },
+   {
+      "descriptor" : null,
+      "device_name" : "com_osvr_Multiserver/YEI_3Space_Sensor0",
+      "path" : "/com_osvr_Multiserver/YEI_3Space_Sensor0",
+      "server" : "localhost",
+      "type" : "DeviceElement"
+   },
+   {
+      "path" : "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker",
+      "type" : "InterfaceElement"
+   },
+   {
+      "path" : "/me/hands/left",
+      "priority" : 0,
+      "source" : "/com_osvr_Multiserver/YEI_3Space_Sensor0/tracker/1",
+      "type" : "AliasElement"
+   }
+]

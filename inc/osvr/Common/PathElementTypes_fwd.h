@@ -27,7 +27,7 @@
 #define INCLUDED_PathElementTypes_fwd_h_GUID_8EAAAC63_0E7E_4C8C_27E2_C5B5A58A6D0A
 
 // Internal Includes
-// - none
+#include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
 #include <boost/variant/variant_fwd.hpp>
@@ -37,19 +37,22 @@
 
 namespace osvr {
 namespace common {
+    typedef uint8_t AliasPriority;
+    static const AliasPriority ALIASPRIORITY_MINIMUM = 0;
+    static const AliasPriority ALIASPRIORITY_AUTOMATIC = 127;
+    static const AliasPriority ALIASPRIORITY_SEMANTICROUTE = 128;
+    static const AliasPriority ALIASPRIORITY_MANUAL = 255;
     namespace elements {
-        class NullElement;
-        class PluginElement;
+        // list is kept sorted here for convenience
+        class AliasElement;
         class DeviceElement;
         class InterfaceElement;
+        class NullElement;
+        class PluginElement;
         class SensorElement;
-        class PhysicalAssociationElement;
-        class LogicalElement;
-        class AliasElement;
+        class StringElement;
 
-/// @brief The variant type containing a particular kind of path
-/// element.
-/// @ingroup Routing
+/// @brief The variant type containing a particular kind of path element.
 #ifndef OSVR_DOXYGEN_EXTERNAL
 ///
 /// NOTE: if you add an element type here, you must make sure it's:
@@ -57,11 +60,14 @@ namespace common {
 /// - forward-declared above
 /// - declared in PathElementTypes.h
 /// - included in the name list in PathElementTools.cpp
+///
+/// Note that while most lists of these types are not order sensitive, and so
+/// have been sorted, order does matter for the types in this typedef. Above
+/// all, NullElement must remain first.
 #endif
-        typedef boost::variant<NullElement, PluginElement, DeviceElement,
-                               InterfaceElement, SensorElement,
-                               PhysicalAssociationElement, LogicalElement,
-                               AliasElement> PathElement;
+        typedef boost::variant<NullElement, AliasElement, SensorElement,
+                               InterfaceElement, DeviceElement, PluginElement,
+                               StringElement> PathElement;
     } // namespace elements
 
     using elements::PathElement;
