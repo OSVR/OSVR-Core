@@ -27,6 +27,7 @@
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/PluginHost/SearchPath.h>
+#include "JSONResolvePossibleRef.h"
 
 // Library/third-party includes
 #include <json/value.h>
@@ -280,6 +281,22 @@ namespace server {
         }
         success = m_server->addAliases(aliases);
 
+        return success;
+    }
+
+    static const char DISPLAY_KEY[] = "display";
+    static const char DISPLAY_PATH[] = "/display";
+    bool ConfigureServer::processDisplay() {
+        bool success = false;
+        Json::Value const &display = m_data->getMember(DISPLAY_KEY);
+        if (display.isNull()) {
+            return success;
+        }
+        auto result = resolvePossibleRef(display);
+        if (!result.isNull()) {
+            success =
+                m_server->addString(DISPLAY_PATH, result.toStyledString());
+        }
         return success;
     }
 
