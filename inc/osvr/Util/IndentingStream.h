@@ -82,7 +82,7 @@ namespace util {
     class IndentingStream : public boost::iostreams::filtering_ostream {
       public:
         IndentingStream(size_t spaces, std::ostream &stream)
-            : m_filter{spaces}, m_os{stream} {
+            : m_filter(spaces), m_os(stream) {
             push(boost::ref(m_filter));
             push(m_os);
         }
