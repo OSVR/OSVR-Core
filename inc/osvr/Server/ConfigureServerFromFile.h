@@ -138,6 +138,11 @@ namespace server {
             out << "\n";
         }
 
+        if (srvConfig.processExternalDevices()) {
+            out << "External devices found and parsed from config file."
+                << endl;
+        }
+
         if (srvConfig.processRoutes()) {
             out << "Routes found and parsed from config file." << endl;
         }

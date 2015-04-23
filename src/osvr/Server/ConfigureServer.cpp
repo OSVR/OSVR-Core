@@ -27,6 +27,7 @@
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/PluginHost/SearchPath.h>
+#include <osvr/Util/Verbosity.h>
 #include "JSONResolvePossibleRef.h"
 
 // Library/third-party includes
@@ -281,6 +282,47 @@ namespace server {
         }
         success = m_server->addAliases(aliases);
 
+        return success;
+    }
+    static const char EXTERNALDEVICES_KEY[] = "externalDevices";
+    static const char DEVICENAME_KEY[] = "deviceName";
+    static const char DESCRIPTOR_KEY[] = "descriptor";
+    bool ConfigureServer::processExternalDevices() {
+        bool success = false;
+        Json::Value const &devices = m_data->getMember(EXTERNALDEVICES_KEY);
+        if (devices.isNull()) {
+            return success;
+        }
+        for (auto const &devPath : devices.getMemberNames()) {
+            auto const &dev = devices[devPath];
+            auto const &devName = dev[DEVICENAME_KEY];
+            auto const &server = dev[SERVER_KEY];
+            auto descriptor = resolvePossibleRef(dev[DESCRIPTOR_KEY]);
+            if (devName.isNull()) {
+                OSVR_DEV_VERBOSE(
+                    "Missing 'deviceName' for external device entry of "
+                    << devPath << " : " << dev.toStyledString());
+                continue;
+            }
+            if (server.isNull()) {
+                OSVR_DEV_VERBOSE(
+                    "Missing 'server' for external device entry of "
+                    << devPath << " : " << dev.toStyledString());
+                continue;
+            }
+
+            if (descriptor.isNull()) {
+                OSVR_DEV_VERBOSE("Missing 'descriptor' file or object for "
+                                 "external device entry of "
+                                 << devPath << " : " << dev.toStyledString());
+                continue;
+            }
+
+            m_server->addExternalDevice(devPath, devName.asString(),
+                                        server.asString(),
+                                        descriptor.toStyledString());
+            success = true;
+        }
         return success;
     }
 

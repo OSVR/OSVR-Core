@@ -1,31 +1,47 @@
 {
-  "plugins": [], /* only need to list manual-load plugins */
-  "routes": [
-    {
-      "destination": "/me/head",
-      "source": {
-        "rotate": {
-          "degrees": 90,
-          "axis": "x"
-        },
-        "child": {
-          "changeBasis": {
-            "x": "x",
-            "y": "z",
-            "z": "-y"
-          },
-          "child": {
-            "rotate": {
-              "degrees": -90,
-              "axis": "z"
-            },
-            "child": {
-              "tracker": "/YEI0@localhost:3884",
-              "sensor": 1
-            }
-          }
+  "externalDevices": {
+    "/myExternalDevice": {
+      "deviceName": "Tracker0",
+      "server": "localhost:3664",
+      "descriptor": /* can also provide a file path here, or this is the minimal */ {
+        "interfaces": {
+          "tracker": {},
+          "button": {},
+          "analog": {}
         }
       }
     }
-  ]
+  },
+  "aliases": {
+    "/me/head": {
+      "rotate": {
+        "axis": "-x",
+        "degrees": 180
+      },
+      "child": {
+        "changeBasis": {
+          "x": "x",
+          "y": "-z",
+          "z": "-y"
+        },
+        "child": "/myExternalDevice/tracker/0"
+      }
+    },
+    "/me/hands/right": {
+      "rotate": {
+        "axis": "-x",
+        "degrees": 180
+      },
+      "child": {
+        "changeBasis": {
+          "x": "x",
+          "y": "-z",
+          "z": "-y"
+        },
+        "child": "/myExternalDevice/tracker/1"
+      }
+    },
+    "/controller/trigger": "/myExternalDevice/analog/0",
+    "/controller/a": "/myExternalDevice/button/0"
+  }
 }

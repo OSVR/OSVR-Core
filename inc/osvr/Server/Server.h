@@ -196,6 +196,16 @@ namespace server {
             Json::Value const &aliases,
             common::AliasPriority priority = common::ALIASPRIORITY_MANUAL);
 
+        /// @brief Add an external device entry manually to the tree.
+        ///
+        /// If the server is running, this will trigger a re-transmission of
+        /// the path tree to all clients.
+        ///
+        /// Safe to call from any thread, even when server is running.
+        OSVR_SERVER_EXPORT void addExternalDevice(
+            std::string const &path, std::string const &deviceName,
+            std::string const &server, std::string const &descriptor);
+
         /// @brief Gets the source for a given named destination in the routing
         /// directives.
         ///

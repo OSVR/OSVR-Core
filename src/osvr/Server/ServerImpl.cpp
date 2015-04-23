@@ -217,6 +217,19 @@ namespace server {
         return wasChanged;
     }
 
+
+    void ServerImpl::addExternalDevice(
+        std::string const &path, std::string const &deviceName,
+        std::string const &server, std::string const &descriptor) {
+        m_callControlled([&] {
+            auto &node = m_tree.getNodeByPath(path);
+            auto elt = common::elements::DeviceElement{deviceName, server};
+            elt.getDescriptor() = descriptor;
+            node.value() = elt;
+            m_treeDirty.set();
+        });
+    }
+
     bool ServerImpl::addString(std::string const &path,
                                std::string const &value) {
         bool wasChanged = false;

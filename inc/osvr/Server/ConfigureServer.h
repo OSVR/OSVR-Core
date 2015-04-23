@@ -143,9 +143,14 @@ namespace server {
         OSVR_SERVER_EXPORT bool processRoutes();
         OSVR_SERVER_EXPORT bool processAliases();
 
+        /// @brief Process any external devices in the config.
+        /// @return true if any were found and loaded.
+        OSVR_SERVER_EXPORT bool processExternalDevices();
+
         /// @brief Process a display element in the config.
         /// @return true if one was found and it was successfully loaded.
         OSVR_SERVER_EXPORT bool processDisplay();
+
 
         /// @brief Loads all plugins not marked for manual load.
         OSVR_SERVER_EXPORT void loadAutoPlugins();

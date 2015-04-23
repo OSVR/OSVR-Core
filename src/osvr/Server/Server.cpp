@@ -94,6 +94,13 @@ namespace server {
         return m_impl->addAliases(aliases, priority);
     }
 
+    void Server::addExternalDevice(std::string const &path,
+                                   std::string const &deviceName,
+                                   std::string const &server,
+                                   std::string const &descriptor) {
+        m_impl->addExternalDevice(path, deviceName, server, descriptor);
+    }
+
     std::string Server::getSource(std::string const &destination) const {
         return m_impl->getSource(destination);
     }

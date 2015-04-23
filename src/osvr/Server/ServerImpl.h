@@ -101,6 +101,11 @@ namespace server {
         bool addAliases(Json::Value const &aliases,
                         common::AliasPriority priority);
 
+        /// @copydoc Server::addExternalDevice
+        void addExternalDevice(
+            std::string const &path, std::string const &deviceName,
+            std::string const &server, std::string const &descriptor);
+
         /// @copydoc Server::addString
         bool addString(std::string const &path, std::string const &value);
 
