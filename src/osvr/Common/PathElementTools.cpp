@@ -25,15 +25,16 @@
 // Internal Includes
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
+
+// Library/third-party includes
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
-
-// Library/third-party includes
-// - none
+#include <boost/mpl/for_each.hpp>
 
 // Standard includes
-// - none
+#include <algorithm>
+#include <string.h>
 
 namespace osvr {
 namespace common {
@@ -84,6 +85,30 @@ namespace common {
 
         bool isNull(PathElement const &elt) {
             return (nullptr != boost::get<NullElement>(&elt));
+        }
+
+        namespace {
+            class MaxTypeNameLength {
+              public:
+                MaxTypeNameLength(size_t &maxLen) : m_maxLen(maxLen) {}
+                /// @brief no assignment operator
+                MaxTypeNameLength &
+                operator=(MaxTypeNameLength const &) = delete;
+                template <typename T> void operator()(T const &) {
+                    m_maxLen =
+                        (std::max)(m_maxLen, strlen(ElementTypeName<T>::get()));
+                }
+
+              private:
+                size_t &m_maxLen;
+            };
+        } // namespace
+
+        size_t getMaxTypeNameLength() {
+            size_t maxLen = 0;
+            boost::mpl::for_each<elements::PathElement::types>(
+                MaxTypeNameLength(maxLen));
+            return maxLen;
         }
     } // namespace elements
 } // namespace common

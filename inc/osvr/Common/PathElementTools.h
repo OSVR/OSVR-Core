@@ -33,7 +33,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <stddef.h>
 
 namespace osvr {
 namespace common {
@@ -58,7 +58,11 @@ namespace common {
 
         /// @brief Returns true if the path element provided is a NullElement.
         bool isNull(PathElement const &elt);
+
+        /// @brief Gets the length of the longest type name
+        OSVR_COMMON_EXPORT size_t getMaxTypeNameLength();
     } // namespace elements
+    using elements::getTypeName;
 } // namespace common
 } // namespace osvr
 #endif // INCLUDED_PathElementTools_h_GUID_9246E2D5_1598_409F_BD30_1817FA2C1FB2
