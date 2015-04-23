@@ -11,6 +11,13 @@ Use git for a full changelog.
 
 Entries are labeled with the `git describe`-derived version of a representative commit and date.
 
+## v0.2 (23-April-2015)
+**Affects:** Binding/integration distribution, usage
+
+This is a large update. The main take-aways are that you must update both the client and server due to protocol changes, the number of DLLs has changed, and the config file format has evolved and is much smaller than before.
+
+There are new tools: `osvr_print_tree` displays the contents of the path tree (try `-h` for help with command line arguments), and `PathTreeExport` exports path tree structure to DOT format - see the documentation for usage.
+
 ## v0.1-777-g830cc1b (12-March-2015)
 **Affects:** Binding/integration distribution
 
