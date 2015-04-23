@@ -64,6 +64,7 @@ set(API
     "${HEADER_LOCATION}/ReportStateTraits.h"
     "${HEADER_LOCATION}/ReportTraits.h"
     "${HEADER_LOCATION}/ReportTypes.h"
+    "${HEADER_LOCATION}/ResolveFullTree.h"
     "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/RouteContainer.h"
     "${HEADER_LOCATION}/RoutingConstants.h"
@@ -112,6 +113,7 @@ set(SOURCE
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp
+    ResolveFullTree.cpp
     ResolveTreeNode.cpp
     RouteContainer.cpp
     RoutingConstants.cpp

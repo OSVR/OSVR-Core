@@ -28,6 +28,7 @@ Sensics, Inc.
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/ResolveTreeNode.h>
+#include <osvr/Common/ResolveFullTree.h>
 #include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/PathElementTools.h>
@@ -55,16 +56,13 @@ int osvrToStream(std::ostream &os, Options const &opts) {
     /// Get a non-const copy of the path tree.
     osvr::common::PathTree pathTree;
     osvr::common::clonePathTree(context.get()->getPathTree(), pathTree);
+
+    /// Resolve all aliases
+    osvr::common::resolveFullTree(pathTree);
     {
         auto graph = GraphOutputInterface::createGraphOutputInterface(
             os, opts.graphOutputType);
         using namespace osvr::common;
-        /// First traverse to ensure all aliases are resolved
-        osvr::util::traverseWith(
-            pathTree.getRoot(),
-            [&pathTree](osvr::common::PathNode const &node) {
-                resolveTreeNode(pathTree, getFullPath(node));
-            });
 
         /// Now traverse for tree node output
         bool fullPaths = opts.fullPaths;
