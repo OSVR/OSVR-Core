@@ -40,7 +40,7 @@ if(BUILD_EXPERIMENTAL_APPS)
         osvrCommon
         eigen-headers
         boost_thread
-        ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+        boost_program_options)
     set_target_properties(osvr_calibrate PROPERTIES
         FOLDER "OSVR Experimental Applications")
 
@@ -57,7 +57,7 @@ if(BUILD_EXPERIMENTAL_APPS)
         osvrCommon
         eigen-headers
         boost_thread
-        ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+        boost_program_options)
     set_target_properties(osvr_reset_yaw PROPERTIES
         FOLDER "OSVR Experimental Applications")
 
@@ -73,7 +73,7 @@ if(BUILD_EXPERIMENTAL_APPS)
         osvrCommon
         eigen-headers
         boost_thread
-        ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+        boost_program_options)
     set_target_properties(diagnose-rotation PROPERTIES
         FOLDER "OSVR Experimental Applications")
 

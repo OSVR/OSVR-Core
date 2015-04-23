@@ -118,6 +118,12 @@ target_link_libraries(boost_filesystem
 target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
 target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
 
+add_library(boost_program_options INTERFACE)
+target_link_libraries(boost_program_options
+    INTERFACE
+    ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_include_directories(boost_program_options INTERFACE ${Boost_INCLUDE_DIRS})
+
 find_package(jsoncpp REQUIRED)
 if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
     add_library(jsoncpp_lib INTERFACE)
