@@ -44,7 +44,7 @@ namespace common {
             AliasPriority priority;
         };
         template <typename T>
-        T &operator<<(T &os, AliasPriorityWrapper &wrapper) {
+        T &&operator<<(T &&os, AliasPriorityWrapper const &wrapper) {
             switch (wrapper.priority) {
             case ALIASPRIORITY_MINIMUM:
                 os << "Minimum (" << int(ALIASPRIORITY_MINIMUM) << ")";
