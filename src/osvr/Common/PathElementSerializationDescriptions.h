@@ -43,8 +43,8 @@ namespace common {
         /// @brief "using" statement to combine/simplify the enable_if test for
         /// an element type's serialization.
         template <typename Input, typename Known>
-        using enable_if_element_type = std::enable_if_t<
-            std::is_same<std::remove_const_t<Input>, Known>::value>;
+        using enable_if_element_type = typename std::enable_if<std::is_same<
+            typename std::remove_const<Input>::type, Known>::value>::type;
 
         /// @brief Description for DeviceElement
         template <typename Functor, typename ValType>

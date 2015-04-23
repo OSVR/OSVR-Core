@@ -47,12 +47,12 @@ namespace common {
         using argument_type = ArgumentType;
 
         /// @brief Storage type: if not supplied via template parameter,
-        /// inferred
-        /// by removing const& from the argument type.
-        using storage_type = std::conditional_t<
+        /// inferred by removing const& from the argument type.
+        using storage_type = typename std::conditional<
             std::is_same<StorageType, void>::value,
-            std::remove_const_t<std::remove_reference_t<ArgumentType> >,
-            StorageType>;
+            typename std::remove_const<
+                typename std::remove_reference<ArgumentType>::type>::type,
+            StorageType>::type;
 
         /// @brief Return type - presently fixed.
         typedef void return_type;
