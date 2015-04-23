@@ -11,6 +11,8 @@ set(API
 
 set(SOURCE
     ConfigureServer.cpp
+    JSONResolvePossibleRef.h
+    JSONResolvePossibleRef.cpp
     Server.cpp
     ServerImpl.cpp
     ServerImpl.h
