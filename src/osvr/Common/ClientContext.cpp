@@ -43,7 +43,9 @@ OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[])
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
 }
 
-OSVR_ClientContextObject::~OSVR_ClientContextObject() {}
+OSVR_ClientContextObject::~OSVR_ClientContextObject() {
+    OSVR_DEV_VERBOSE("Client context shut down for " << m_appId);
+}
 
 std::string const &OSVR_ClientContextObject::getAppId() const {
     return m_appId;
