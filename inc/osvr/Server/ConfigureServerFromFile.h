@@ -138,8 +138,13 @@ namespace server {
             out << "\n";
         }
 
-        srvConfig.processRoutes();
-        srvConfig.processAliases();
+        if (srvConfig.processRoutes()) {
+            out << "Routes found and parsed from config file." << endl;
+        }
+
+        if (srvConfig.processAliases()) {
+            out << "Aliases found and parsed from config file." << endl;
+        }
 
         out << "Triggering a hardware detection..." << endl;
         ret->triggerHardwareDetect();
