@@ -107,9 +107,11 @@ namespace osvr {
 		inline void registerImagingCallback(Interface &iface,
 			EyeTrackerCallback cb,
 			void *userdata) {
+			/*
 			util::boost_util::DeletablePtr ptr(
 				new detail::EyeTrackerCallbackRegistration(iface, cb, userdata));
 			iface.takeOwnership(ptr);
+			*/
 		}
 
 	} // end namespace clientkit

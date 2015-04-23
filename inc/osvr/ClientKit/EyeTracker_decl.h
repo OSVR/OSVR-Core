@@ -47,9 +47,7 @@ namespace osvr {
 
 		//typedef boost::shared_ptr<OSVR_EyeBufferElement> EyeBufferPtr;
 
-		/// @brief The user-friendly eye tracker report. Note that passing this around
-		/// by value is OK (doesn't copy the image), and the easiest way to ensure
-		/// that the image buffer doesn't get freed before you're done using it.
+		/// @brief The user-friendly eye tracker report.
 		struct EyeTrackerReport {
 			/// @brief The device sensor number this data came from.
 			OSVR_ChannelCount sensor;
@@ -58,6 +56,8 @@ namespace osvr {
 			/// eye data buffer for the frame.
 
 			//EyeBufferPtr buffer;
+
+			OSVR_EyeGazeDirection gaze;
 		};
 
 		/// @brief The user-friendly eye tracker callback type
