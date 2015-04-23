@@ -101,6 +101,9 @@ namespace server {
         bool addAliases(Json::Value const &aliases,
                         common::AliasPriority priority);
 
+        /// @copydoc Server::addString
+        bool addString(std::string const &path, std::string const &value);
+
         /// @copydoc Server::getSource()
         std::string getSource(std::string const &destination) const;
 

@@ -85,6 +85,10 @@ namespace server {
         return m_impl->addAlias(path, source, priority);
     }
 
+    bool Server::addString(std::string const &path, std::string const &value) {
+        return m_impl->addString(path, value);
+    }
+
     bool Server::addAliases(Json::Value const &aliases,
                             common::AliasPriority priority) {
         return m_impl->addAliases(aliases, priority);

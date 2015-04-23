@@ -169,6 +169,15 @@ namespace server {
         addAlias(std::string const &path, std::string const &source,
                  common::AliasPriority priority = common::ALIASPRIORITY_MANUAL);
 
+        /// @brief Add a string entry to the tree
+        ///
+        /// If the server is running, this will trigger a re-transmission of
+        /// the path tree to all clients.
+        ///
+        /// Safe to call from any thread, even when server is running.
+        OSVR_SERVER_EXPORT bool addString(std::string const &path,
+                                          std::string const &value);
+
         /// @brief Add alias entries to the tree from JSON
         ///
         /// If the server is running, this will trigger a re-transmission of

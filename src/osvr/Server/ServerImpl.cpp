@@ -44,6 +44,7 @@
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
+#include <boost/variant.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -207,6 +208,22 @@ namespace server {
                                 common::AliasPriority priority) {
         bool wasChanged;
         m_callControlled([&] { wasChanged = m_addAliases(aliases, priority); });
+        return wasChanged;
+    }
+
+    bool ServerImpl::addString(std::string const &path,
+                               std::string const &value) {
+        bool wasChanged = false;
+        auto newElement =
+            common::PathElement{common::elements::StringElement{value}};
+        m_callControlled([&] {
+            auto &node = m_tree.getNodeByPath(path);
+            if (!(newElement == node.value())) {
+                m_treeDirty.set();
+                wasChanged = true;
+                node.value() = newElement;
+            }
+        });
         return wasChanged;
     }
 
