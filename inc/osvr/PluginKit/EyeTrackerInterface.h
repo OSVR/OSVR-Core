@@ -40,8 +40,8 @@
 
 namespace osvr {
 	namespace pluginkit {
-		/** @defgroup PluginKitCppImaging Imaging interface (C++)
-		@brief Sending image reports from a device in your plugin.
+		/** @defgroup PluginKitCppEyeTracker EyeTracker interface (C++)
+		@brief Sending eye tracker reports from a device in your plugin.
 		@ingroup PluginKit
 
 		@{
@@ -49,56 +49,54 @@ namespace osvr {
 
 		class EyeTrackerMessage {
 		public:
-			EyeTrackerMessage(cv::Mat const &frame, OSVR_ChannelCount sensor = 0)
-				: m_sensor(sensor) {
-				m_frame = frame.clone();
-			}
+			EyeTrackerMessage(OSVR_EyeGazeDirection gaze, OSVR_ChannelCount sensor = 1)
+				: m_sensor(sensor), m_gaze(gaze) {}
 
-			cv::Mat const &getFrame() const { return m_frame; }
+			OSVR_EyeGazeDirection getGaze() const { return m_gaze; }
 
 			OSVR_ChannelCount getSensor() const { return m_sensor; }
 
 		private:
-			cv::Mat m_frame;
+			OSVR_EyeGazeDirection m_gaze;
 			OSVR_ChannelCount m_sensor;
 		};
 
-		class ImagingInterface {
+		class EyeTrackerInterface {
 		public:
-			ImagingInterface(OSVR_ImagingDeviceInterface iface = NULL)
+			EyeTrackerInterface(OSVR_EyeTrackerDeviceInterface iface = NULL)
 				: m_iface(iface) {}
-			explicit ImagingInterface(OSVR_DeviceInitOptions opts,
+			explicit EyeTrackerInterface(OSVR_DeviceInitOptions opts,
 				OSVR_ChannelCount numSensors = 1) {
 				OSVR_ReturnCode ret =
-					osvrDeviceImagingConfigure(opts, &m_iface, numSensors);
+					osvrDeviceEyeTrackerConfigure(opts, &m_iface, numSensors);
 				if (OSVR_RETURN_SUCCESS != ret) {
-					throw std::logic_error("Could not initialize an Imaging "
+					throw std::logic_error("Could not initialize an Eye Tracker "
 						"Interface with the device options "
 						"given!");
 				}
 			}
 
-			void send(DeviceToken &dev, ImagingMessage const &message,
+			void send(DeviceToken &dev, EyeTrackerMessage const &message,
 				OSVR_TimeValue const &timestamp) {
 				if (!m_iface) {
 					throw std::logic_error(
-						"Must initialize the imaging interface before using it!");
+						"Must initialize the eye tracker interface before using it!");
 				}
-				cv::Mat const &frame(message.getFrame());
-				util::NumberTypeData typedata =
-					util::opencvNumberTypeData(frame.type());
-				OSVR_ImagingMetadata metadata;
-				metadata.channels = frame.channels();
-				metadata.depth = typedata.getSize();
-				metadata.width = frame.cols;
-				metadata.height = frame.rows;
-				metadata.type = typedata.isFloatingPoint()
-					? OSVR_IVT_FLOATING_POINT
-					: (typedata.isSigned() ? OSVR_IVT_SIGNED_INT
-					: OSVR_IVT_UNSIGNED_INT);
+				OSVR_EyeGazeDirection gaze(message.getGaze());
+				//util::NumberTypeData typedata =
+				//	util::opencvNumberTypeData(frame.type());
+				//OSVR_ImagingMetadata metadata;
+				//metadata.channels = frame.channels();
+				//metadata.depth = typedata.getSize();
+				//metadata.width = frame.cols;
+				//metadata.height = frame.rows;
+				//metadata.type = typedata.isFloatingPoint()
+				//	? OSVR_IVT_FLOATING_POINT
+				//	: (typedata.isSigned() ? OSVR_IVT_SIGNED_INT
+				//	: OSVR_IVT_UNSIGNED_INT);
 
 				OSVR_ReturnCode ret =
-					osvrDeviceImagingReportFrame(dev, m_iface, metadata, frame.data,
+					osvrDeviceEyeTrackerReportData(dev, m_iface, &gaze,
 					message.getSensor(), &timestamp);
 				if (OSVR_RETURN_SUCCESS != ret) {
 					throw std::runtime_error("Could not send imaging message!");
@@ -106,7 +104,7 @@ namespace osvr {
 			}
 
 		private:
-			OSVR_ImagingDeviceInterface m_iface;
+			OSVR_EyeTrackerDeviceInterface m_iface;
 		};
 
 		/// @}

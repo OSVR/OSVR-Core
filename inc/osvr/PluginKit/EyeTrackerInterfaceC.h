@@ -37,9 +37,9 @@
 /* Standard includes */
 /* none */
 
-/** @defgroup PluginKitCImaging Imaging interface underlying C API - not
+/** @defgroup PluginKitCEyeTracker EyeTracker interface underlying C API - not
 intended for direct usage
-@brief Used by the C++ header-only wrappers to send image reports from a
+@brief Used by the C++ header-only wrappers to send eye tracker reports from a
 device in your plugin.
 @ingroup PluginKit
 @{
@@ -78,9 +78,9 @@ OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
-osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken dev,
+osvrDeviceEyeTrackerReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeBufferElement *eyeData,
+OSVR_IN_PTR OSVR_EyeGazeDirection *eyeData,
 OSVR_IN OSVR_ChannelCount sensor,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3, 4));
