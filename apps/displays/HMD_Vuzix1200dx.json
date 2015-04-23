@@ -1,0 +1,34 @@
+{
+    "hmd": {
+        "field_of_view": {
+            "monocular_horizontal": 17.6,
+            "monocular_vertical": 30.7,
+            "overlap_percent": 100,
+            "pitch_tilt": 0
+        },
+		"resolutions": [
+			{
+				"width": 852,
+				"height": 480,
+				"video_inputs": 1,
+				"display_mode": "horz_side_by_side"
+			}
+		],
+		"distortion": {
+			"k1_red": 0,
+			"k1_green": 0,
+			"k1_blue": 0
+		},
+		"rendering": {
+			"right_roll": 0,
+			"left_roll": 0
+		},
+		"eyes": [
+			{
+				"center_proj_x": 0.5,
+				"center_proj_y": 0.5,
+				"rotate_180": 0
+			}
+		]
+	}
+}

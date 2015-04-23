@@ -1,0 +1,57 @@
+{
+  "hmd": {
+    "device": {
+      "vendor": "Sensics",
+      "model": "zSight",
+      "Version": "1.1",
+      "Note": ""
+    },
+    "field_of_view": {
+      "monocular_horizontal": 48,
+      "monocular_vertical": 38.4,
+      "overlap_percent": 100,
+      "pitch_tilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 1280,
+        "height": 1024,
+        "video_inputs": 2,
+        "display_mode": "full_screen"
+      },
+      {
+        "width": 1280,
+        "height": 1024,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side"
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "video_inputs": 2,
+        "display_mode": "full_screen"
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side"
+      }
+    ],
+    "distortion": {
+      "k1_red": 0,
+      "k1_green": 0,
+      "k1_blue": 0
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "hmd": {
+    "device": {
+      "vendor": "Sensics",
+      "model": "dSight",
+      "Version": "landscape",
+      "Note": "Suitable when dSight receives 1080x1920 landscape-mode video"
+    },
+    "field_of_view": {
+      "monocular_horizontal": 95,
+      "monocular_vertical": 53.43,
+      "overlap_percent": 73.68,
+      "pitch_tilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 1920,
+        "height": 1080,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side"
+      }
+    ],
+    "distortion": {
+			"k1_red": 0.5,
+			"k1_green": 0.5,
+			"k1_blue": 0.5
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5
+      }
+    ]
+  }
+}

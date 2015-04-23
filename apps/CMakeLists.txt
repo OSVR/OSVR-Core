@@ -104,3 +104,21 @@ foreach(FN ${CONFIG_FILES})
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
         DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endforeach()
+
+set(DISPLAYS_DIR /displays)
+
+add_custom_command(TARGET osvr_server POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:osvr_server>${DISPLAYS_DIR}"
+        COMMENT "Making JSON display descriptor directory"
+        VERBATIM)
+# Grab all the display files with a glob, to avoid missing one.
+file(GLOB DISPLAY_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/${DISPLAYS_DIR}/*.json")
+
+foreach(FN ${DISPLAY_FILES})
+    add_custom_command(TARGET osvr_server POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${DISPLAYS_DIR}"
+        COMMENT "Copying JSON display descriptor ${FN}"
+        VERBATIM)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}/${FN}"
+        DESTINATION ${CMAKE_INSTALL_BINDIR}${DISPLAYS_DIR} COMPONENT Runtime)
+endforeach()

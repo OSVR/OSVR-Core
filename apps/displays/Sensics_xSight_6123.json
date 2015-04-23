@@ -1,0 +1,39 @@
+{
+  "hmd": {
+    "device": {
+      "vendor": "Sensics",
+      "model": "xSight 6123",
+      "Version": "",
+      "Note": "Assumes xSight SVP is set for 1920x1080 full screen"
+    },
+    "field_of_view": {
+      "monocular_horizontal": 85.5,
+      "monocular_vertical": 45,
+      "overlap_percent": 62,
+      "pitch_tilt": 7.5
+    },
+    "resolutions": [
+      {
+        "width": 1920,
+        "height": 1080,
+        "video_inputs": 2,
+        "display_mode": "full_screen"
+      }
+    ],
+    "distortion": {
+      "k1_red": 0,
+      "k1_green": 0,
+      "k1_blue": 0
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5
+      }
+    ]
+  }
+}
