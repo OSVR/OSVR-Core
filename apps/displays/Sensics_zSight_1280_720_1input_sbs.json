@@ -1,30 +1,30 @@
 {
   "hmd": {
     "device": {
-      "vendor": "OSVR",
-      "model": "HDK",
+      "vendor": "Sensics",
+      "model": "zSight",
       "Version": "1.1",
-      "num_displays": 1,
-      "Note": "Settings are also good for HDK 1.0"
+      "num_displays": 2,
+      "Note": "1280x720 resolution mode, 1 video input"
     },
     "field_of_view": {
-      "monocular_horizontal": 90,
-      "monocular_vertical": 101.25,
+      "monocular_horizontal": 48,
+      "monocular_vertical": 38.4,
       "overlap_percent": 100,
       "pitch_tilt": 0
     },
     "resolutions": [
       {
-        "width": 1920,
-        "height": 1080,
+        "width": 1280,
+        "height": 720,
         "video_inputs": 1,
-        "display_mode": "horz_side_by_side"     
+        "display_mode": "horz_side_by_side"
       }
     ],
     "distortion": {
-      "k1_red": 0,
-      "k1_green": 0,
-      "k1_blue": 0
+      "k1_red": 0.041,
+      "k1_green": 0.041,
+      "k1_blue": 0.041
     },
     "rendering": {
       "right_roll": 0,

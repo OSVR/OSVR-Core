@@ -4,7 +4,8 @@
       "vendor": "Sensics",
       "model": "zSight",
       "Version": "1.1",
-      "Note": ""
+      "num_displays": 2,
+      "Note": "1280x1024 resolution mode, 2 video inputs"
     },
     "field_of_view": {
       "monocular_horizontal": 48,
@@ -18,30 +19,12 @@
         "height": 1024,
         "video_inputs": 2,
         "display_mode": "full_screen"
-      },
-      {
-        "width": 1280,
-        "height": 1024,
-        "video_inputs": 1,
-        "display_mode": "horz_side_by_side"
-      },
-      {
-        "width": 1280,
-        "height": 720,
-        "video_inputs": 2,
-        "display_mode": "full_screen"
-      },
-      {
-        "width": 1280,
-        "height": 720,
-        "video_inputs": 1,
-        "display_mode": "horz_side_by_side"
       }
     ],
     "distortion": {
-      "k1_red": 0,
-      "k1_green": 0,
-      "k1_blue": 0
+      "k1_red": 0.041,
+      "k1_green": 0.041,
+      "k1_blue": 0.041
     },
     "rendering": {
       "right_roll": 0,
