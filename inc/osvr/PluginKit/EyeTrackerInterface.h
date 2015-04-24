@@ -99,7 +99,7 @@ namespace osvr {
 					osvrDeviceEyeTrackerReportData(dev, m_iface, &gaze,
 					message.getSensor(), &timestamp);
 				if (OSVR_RETURN_SUCCESS != ret) {
-					throw std::runtime_error("Could not send imaging message!");
+					throw std::runtime_error("Could not send eye tracker message!");
 				}
 			}
 

@@ -26,7 +26,6 @@
 // Internal Includes
 #include <osvr/PluginKit/EyeTrackerInterfaceC.h>
 #include <osvr/Connection/DeviceInitObject.h>
-//#include <osvr/Connection/ImagingServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Common/EyeTrackerComponent.h>
