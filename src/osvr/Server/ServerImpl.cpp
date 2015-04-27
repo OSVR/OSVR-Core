@@ -239,6 +239,9 @@ namespace server {
             elt.getDescriptor() = descriptorVal;
             node.value() = elt;
             m_treeDirty.set();
+
+            /// Process device descriptor
+            common::processDeviceDescriptorFromExistingDevice(node, elt);
         });
     }
 
