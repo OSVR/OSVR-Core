@@ -45,6 +45,7 @@
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
 #include <boost/variant.hpp>
+#include <json/reader.h>
 
 // Standard includes
 #include <stdexcept>
@@ -217,14 +218,25 @@ namespace server {
         return wasChanged;
     }
 
-
-    void ServerImpl::addExternalDevice(
-        std::string const &path, std::string const &deviceName,
-        std::string const &server, std::string const &descriptor) {
+    void ServerImpl::addExternalDevice(std::string const &path,
+                                       std::string const &deviceName,
+                                       std::string const &server,
+                                       std::string const &descriptor) {
+        Json::Value descriptorVal;
+        Json::Reader reader;
+        if (!reader.parse(descriptor, descriptorVal)) {
+            BOOST_ASSERT_MSG(0, "Should never get here - string descriptor "
+                                "handed to us should have been generated from "
+                                "a JSON value.");
+            return;
+        }
         m_callControlled([&] {
+            /// Get the node
             auto &node = m_tree.getNodeByPath(path);
+
+            /// Create the DeviceElement and set it as the node value
             auto elt = common::elements::DeviceElement{deviceName, server};
-            elt.getDescriptor() = descriptor;
+            elt.getDescriptor() = descriptorVal;
             node.value() = elt;
             m_treeDirty.set();
         });
