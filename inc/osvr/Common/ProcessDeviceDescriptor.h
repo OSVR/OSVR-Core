@@ -28,6 +28,8 @@
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathElementTypes_fwd.h>
 
 // Library/third-party includes
 // - none
@@ -44,6 +46,13 @@ namespace common {
     processDeviceDescriptorForPathTree(PathTree &tree,
                                        std::string const &deviceName,
                                        std::string const &jsonDescriptor);
+
+    /// @brief Set up a path tree based on a device descriptor from an existing
+    /// DeviceElement node
+    ///
+    /// @return true if changes were made
+    OSVR_COMMON_EXPORT bool processDeviceDescriptorFromExistingDevice(
+        PathNode &devNode, elements::DeviceElement const &devElt);
 
 } // namespace common
 } // namespace osvr
