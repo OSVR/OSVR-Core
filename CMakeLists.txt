@@ -110,9 +110,9 @@ if(MSVC)
     list(APPEND CMAKE_PREFIX_PATH "c:/OpenCV249")
 endif()
 
-find_package(libfunctionality REQUIRED)
-find_package(Boost 1.44 COMPONENTS thread system date_time chrono program_options filesystem REQUIRED) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
-find_package(Threads REQUIRED)
+if(BUILD_SERVER)
+    find_package(libfunctionality REQUIRED)
+endif()
 find_package(OpenCV REQUIRED)
 if(WIN32)
     set(OSVR_COPY_OPENCV ON)
@@ -120,35 +120,8 @@ else()
     set(OSVR_COPY_OPENCV OFF)
 endif()
 
-add_library(boost_thread INTERFACE)
-target_link_libraries(boost_thread
-    INTERFACE
-    ${Boost_THREAD_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES}
-    ${Boost_DATE_TIME_LIBRARIES}
-    ${Boost_CHRONO_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT})
-target_include_directories(boost_thread INTERFACE ${Boost_INCLUDE_DIRS})
-if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
-    # Work around a foolish insistence to use DLLs on MXE that don't exist.
-    target_compile_definitions(boost_thread
-        INTERFACE
-        BOOST_THREAD_USE_LIB)
-endif()
+find_package(Threads REQUIRED)
 
-add_library(boost_filesystem INTERFACE)
-target_link_libraries(boost_filesystem
-    INTERFACE
-    ${Boost_FILESYSTEM_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES})
-target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
-target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
-
-add_library(boost_program_options INTERFACE)
-target_link_libraries(boost_program_options
-    INTERFACE
-    ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-target_include_directories(boost_program_options INTERFACE ${Boost_INCLUDE_DIRS})
 
 find_package(jsoncpp REQUIRED)
 if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
@@ -158,11 +131,34 @@ endif()
 
 include(CompilerFeatures)
 
-set(OSVR_CODECVT_LIBRARIES)
-if(WIN32 AND NOT OSVR_HAVE_CODECVT) # Needed for USB Serial Enum and Winsock error processing.
-    find_package(Boost COMPONENTS locale REQUIRED)
-    set(OSVR_CODECVT_LIBRARIES ${Boost_LOCALE_LIBRARY})
+###
+# Figure out what Boost compiled libraries we need.
+###
+set(NEED_BOOST_PROGRAM_OPTIONS OFF)
+set(NEED_BOOST_FILESYSTEM OFF)
+set(NEED_BOOST_LOCALE OFF)
+
+# Assume for now we always need this
+set(NEED_BOOST_THREAD ON)
+
+if(BUILD_SERVER_APP OR BUILD_CLIENT_APPS)
+    set(NEED_BOOST_PROGRAM_OPTIONS ON)
 endif()
+
+if(BUILD_SERVER)
+    set(NEED_BOOST_FILESYSTEM ON)
+endif()
+
+if(WIN32 AND NOT OSVR_HAVE_CODECVT)
+    # Needed for USB Serial Enum and Winsock error processing.
+    # either native or Boost Locale - set up in BoostTargets.cmake
+    set(NEED_BOOST_LOCALE ON)
+    set(OSVR_CODECVT_LIBRARIES boost_locale)
+endif()
+
+# This script runs find_package(Boost) for the right components and creates
+# interface targets for the requested libraries
+include(BoostTargets)
 
 ###
 # Set up build directories
@@ -198,6 +194,7 @@ set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
 ###
 # Building
 ###
+# vendored dependencies
 add_subdirectory(vendor)
 
 # Set RPATH for dynamic library search.
@@ -210,12 +207,18 @@ set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "d")
 endif()
+
+# Development tools
 add_subdirectory(devtools)
+
+# Core libraries
 add_subdirectory(src/osvr)
+
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "")
 endif()
 
+# Apps
 add_subdirectory(apps)
 add_subdirectory(plugins)
 if(BUILD_TESTING)
