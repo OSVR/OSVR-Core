@@ -7,7 +7,7 @@
       "numDisplays": 2,
       "Note": "Assumes xSight SVP is set for 1920x1080 full screen"
     },
-    "field_of_view": {
+    "fieldOfView": {
       "monocularHorizontal": 85.5,
       "monocularVertical": 45,
       "overlapPercent": 62,

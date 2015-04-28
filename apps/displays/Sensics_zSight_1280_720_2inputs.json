@@ -7,7 +7,7 @@
       "numDisplays": 2,
       "Note": "1280x720 resolution mode, 2 video inputs"
     },
-    "field_of_view": {
+    "fieldOfView": {
       "monocularHorizontal": 48,
       "monocularVertical": 38.4,
       "overlapPercent": 100,

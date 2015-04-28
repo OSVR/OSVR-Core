@@ -7,7 +7,7 @@
       "numDisplays": 1,
       "Note": "Settings are also good for HDK 1.0"
     },
-    "field_of_view": {
+    "fieldOfView": {
       "monocularHorizontal": 90,
       "monocularVertical": 101.25,
       "overlapPercent": 100,

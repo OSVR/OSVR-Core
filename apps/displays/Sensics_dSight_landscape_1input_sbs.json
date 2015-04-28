@@ -7,7 +7,7 @@
       "numDisplays": 2,
       "Note": "Suitable when dSight receives 1080x1920 landscape-mode video, 1 video input"
     },
-    "field_of_view": {
+    "fieldOfView": {
       "monocularHorizontal": 95,
       "monocularVertical": 53.43,
       "overlapPercent": 73.68,

@@ -7,7 +7,7 @@
       "numDisplays": 2,
       "Note": "1920x1080, 2 video inputs"
     },
-    "field_of_view": {
+    "fieldOfView": {
       "monocularHorizontal": 60,
       "monocularVertical": 33.75,
       "overlapPercent": 100,

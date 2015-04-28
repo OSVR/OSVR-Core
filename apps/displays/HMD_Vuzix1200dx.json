@@ -7,7 +7,7 @@
       "numDisplays": 2,
       "Note": ""
     },
-    "field_of_view": {
+    "fieldOfView": {
       "monocularHorizontal": 17.6,
       "monocularVertical": 30.7,
       "overlapPercent": 100,
