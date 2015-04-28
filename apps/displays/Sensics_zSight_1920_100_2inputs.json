@@ -4,36 +4,36 @@
       "vendor": "Sensics",
       "model": "zSight 1920-100",
       "Version": "",
-      "num_displays": 2,
+      "numDisplays": 2,
       "Note": "1920x1080, 2 video inputs"
     },
     "field_of_view": {
-      "monocular_horizontal": 60,
-      "monocular_vertical": 33.75,
-      "overlap_percent": 50,
-      "pitch_tilt": 0
+      "monocularHorizontal": 60,
+      "monocularVertical": 33.75,
+      "overlapPercent": 50,
+      "pitchTilt": 0
     },
     "resolutions": [
       {
         "width": 1920,
         "height": 1080,
-        "video_inputs": 2,
-        "display_mode": "full_screen"
+        "videoInputs": 2,
+        "displayMode": "fullScreen"
       }
     ],
     "distortion": {
-      "k1_red": 0.041,
-      "k1_green": 0.041,
-      "k1_blue": 0.041
+      "k1Red": 0.041,
+      "k1Green": 0.041,
+      "k1Blue": 0.041
     },
     "rendering": {
-      "right_roll": 0,
-      "left_roll": 0
+      "rightRoll": 0,
+      "leftRoll": 0
     },
     "eyes": [
       {
-        "center_proj_x": 0.5,
-        "center_proj_y": 0.5
+        "centerProjX": 0.5,
+        "centerProjY": 0.5
       }
     ]
   }
