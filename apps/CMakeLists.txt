@@ -93,32 +93,48 @@ if(BUILD_EXPERIMENTAL_APPS)
         RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExperimentalApps)
 endif()
 
+set(FILE_OUTPUTS)
+
 # Grab all the config files with a glob, to avoid missing one.
 file(GLOB CONFIG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config*.json")
 
 foreach(FN ${CONFIG_FILES})
-    add_custom_command(TARGET osvr_server POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FN}" $<TARGET_FILE_DIR:osvr_server>
-        COMMENT "Copying JSON config file sample ${FN}"
+    list(APPEND FILE_OUTPUTS "${FN}")
+    add_custom_command(OUTPUT "${FN}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FN}" "$<TARGET_FILE_DIR:osvr_server>"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
+        COMMENT "Copying JSON config file ${FN}"
         VERBATIM)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
-        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Server)
 endforeach()
 
-set(DISPLAYS_DIR /displays)
-
-add_custom_command(TARGET osvr_server POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:osvr_server>${DISPLAYS_DIR}"
-        COMMENT "Making JSON display descriptor directory"
+# Copy contents of dir for both build and install trees.
+macro(osvr_copy_dir _dirname _glob _comment)
+    add_custom_command(OUTPUT "${_dirname}"
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:osvr_server>${_dirname}"
+        COMMENT "Making ${_comment} directory"
         VERBATIM)
-# Grab all the display files with a glob, to avoid missing one.
-file(GLOB DISPLAY_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/${DISPLAYS_DIR}/*.json")
 
-foreach(FN ${DISPLAY_FILES})
-    add_custom_command(TARGET osvr_server POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${DISPLAYS_DIR}"
-        COMMENT "Copying JSON display descriptor ${FN}"
-        VERBATIM)
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}${DISPLAYS_DIR}/${FN}"
-        DESTINATION ${CMAKE_INSTALL_BINDIR}${DISPLAYS_DIR} COMPONENT Runtime)
-endforeach()
+    # Grab all the files with a glob, to avoid missing one.
+    file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}" "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${_glob}")
+
+    foreach(FN ${_files})
+        list(APPEND FILE_OUTPUTS "${_dirname}/${FN}")
+        add_custom_command(OUTPUT "${_dirname}/${FN}"
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${_dirname}"
+            MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}"
+            DEPENDS "${_dirname}"
+            COMMENT "Copying ${_comment} ${FN}"
+            VERBATIM)
+        install(FILES "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}"
+            DESTINATION ${CMAKE_INSTALL_BINDIR}${_dirname} COMPONENT Server)
+    endforeach()
+endmacro()
+
+osvr_copy_dir(/displays *.json "JSON display descriptor")
+
+# Have to set them as symbolic because we can't use a generator expression in add_custom_command(OUTPUT
+set_source_files_properties(${FILE_OUTPUTS} PROPERTIES SYMBOLIC TRUE)
+add_custom_target(copy_osvr_server_config_files ALL
+    DEPENDS ${FILE_OUTPUTS})
