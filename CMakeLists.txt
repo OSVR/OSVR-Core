@@ -24,7 +24,7 @@ set(OSVR_PLUGINKIT_ABI_VERSION 0)
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
 option(BUILD_DEV_VERBOSE "Build with verbose development messages?" ON)
 
-option(BUILD_SERVER "Should we build the server libraries?" ON)
+option(BUILD_SERVER "Should we build the server libraries and required dev tools?" ON)
 option(BUILD_SERVER_EXAMPLES "Should we build the server-related example apps and plugins?" ON)
 option(BUILD_SERVER_APP "Should we build the server app?" ON)
 option(BUILD_SERVER_PLUGINS "Should we build the standard plugins?" ON)
@@ -40,6 +40,11 @@ endif()
 if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
     message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
 endif()
+
+# Right now, always build if we build the server
+# TODO change for cross compiling like the Android port.
+set(BUILD_OSVR_JSON_TO_C ${BUILD_SERVER})
+set(HAVE_OSVR_JSON_TO_C ${BUILD_SERVER})
 
 # Consistency: can't build the examples, apps, etc if you don't have the library
 set(dependent_options
@@ -220,7 +225,9 @@ endif()
 
 # Apps
 add_subdirectory(apps)
-add_subdirectory(plugins)
+if(BUILD_SERVER_PLUGINS)
+    add_subdirectory(plugins)
+endif()
 if(BUILD_TESTING)
     add_subdirectory(examples)
     add_subdirectory(tests)

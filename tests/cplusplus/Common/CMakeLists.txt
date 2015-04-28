@@ -1,15 +1,21 @@
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-osvr_convert_json(test_path_tree_json
-    test_path_tree.json
-    "${CMAKE_CURRENT_BINARY_DIR}/test_path_tree_json.h")
+set(PATHTREEJSON_SOURCES)
+if(HAVE_OSVR_JSON_TO_C)
+    osvr_convert_json(test_path_tree_json
+        test_path_tree.json
+        "${CMAKE_CURRENT_BINARY_DIR}/test_path_tree_json.h")
+    set(PATHTREEJSON_SOURCES
+        test_path_tree.json
+        PathTreeJSON.cpp
+        "${CMAKE_CURRENT_BINARY_DIR}/test_path_tree_json.h")
+endif()
 
 add_executable(TestCommon
     DummyTree.h
-    PathTreeJSON.cpp
     PathTreeResolution.cpp
     Serialization.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/test_path_tree_json.h")
+    ${PATHTREEJSON_SOURCES})
 
 target_link_libraries(TestCommon osvrCommon jsoncpp_lib)
 setup_gtest(TestCommon)

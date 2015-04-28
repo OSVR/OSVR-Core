@@ -1,2 +1,4 @@
 add_subdirectory(cplusplus)
-add_subdirectory(plugins)
+if(BUILD_SERVER_EXAMPLES)
+    add_subdirectory(plugins)
+endif()
