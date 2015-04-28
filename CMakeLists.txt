@@ -23,8 +23,16 @@ set(OSVR_PLUGINKIT_ABI_VERSION 0)
 ###
 option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
 option(BUILD_DEV_VERBOSE "Build with verbose development messages?" ON)
-option(BUILD_SERVER "Should we build the server libraries and applications?" ON)
-option(BUILD_CLIENT "Should we build the client libraries and applications?" ON)
+
+option(BUILD_SERVER "Should we build the server libraries?" ON)
+option(BUILD_SERVER_EXAMPLES "Should we build the server-related example apps and plugins?" ON)
+option(BUILD_SERVER_APP "Should we build the server app?" ON)
+option(BUILD_SERVER_PLUGINS "Should we build the standard plugins?" ON)
+
+option(BUILD_CLIENT "Should we build the client libraries?" ON)
+option(BUILD_CLIENT_EXAMPLES "Should we build the client example apps?" ON)
+option(BUILD_CLIENT_APPS "Should we build the client apps?" ON)
+
 if(WIN32)
     option(Boost_USE_STATIC_LIBS "Build with Boost's static libraries?" ON)
 endif()
@@ -32,6 +40,24 @@ endif()
 if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
     message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
 endif()
+
+# Consistency: can't build the examples, apps, etc if you don't have the library
+set(dependent_options
+    BUILD_SERVER_EXAMPLES
+    BUILD_SERVER_APP
+    BUILD_SERVER_PLUGINS
+    BUILD_CLIENT_EXAMPLES
+    BUILD_CLIENT_APPS)
+foreach(dependent_option ${dependent_options})
+    string(REGEX REPLACE "_[^_]+$" "" dependency "${dependent_option}")
+    if("${${dependent_option}}" AND NOT "${${dependency}}")
+        # Commented-out code updates the cache variable.
+        #get_property(_help CACHE ${dependent_option} PROPERTY HELPSTRING)
+        #set(${dependent_option} OFF CACHE BOOL "${_help}" FORCE)
+        set(${dependent_option} OFF)
+        message(STATUS "Disabling ${dependent_option}: depends on ${dependency}, which is disabled")
+    endif()
+endforeach()
 
 set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
 mark_as_advanced(OSVR_PLUGIN_IGNORE_SUFFIX)
