@@ -82,14 +82,18 @@ int main(int argc, char *argv[]) {
     osvr::clientkit::ClientContext ctx("com.osvr.bundled.resetyaw");
     std::string const dest = vm["route"].as<std::string>();
 
+    // Get the interface associated with the destination route we
+    // are looking for.
     osvr::clientkit::Interface iface = ctx.getInterface(dest);
     {
-
         ClientMainloopThread client(ctx);
 
         cout << "Running client mainloop briefly to get routes..." << endl;
         client.loopForDuration(boost::chrono::seconds(2));
         cout << "Removing any previous yaw-reset transforms..." << endl;
+
+        // Get a reference for the portion of the tree that is associated
+        // with this destination.
         Json::Value origRoute;
         {
             Json::Reader reader;
@@ -101,6 +105,13 @@ int main(int argc, char *argv[]) {
                 return -1;
             }
         }
+
+        // Get a reference to the source associated with the portion
+        // of the tree that has this destination.  Then clean out
+        // any prior instance of our meddling by checking for an
+        // entry that has our flag key in it.  Then replace the
+        // original source tree with the cleaned tree.  Send this
+        // cleaned route back to the server.
         Json::Value origTransforms =
             origRoute[osvr::common::routing_keys::source()];
         Json::Value cleanTransforms =
@@ -145,8 +156,8 @@ int main(int argc, char *argv[]) {
             cout << "Correction: " << -yaw << " radians about Y" << endl;
 
             Json::Value newLayer(Json::objectValue);
-            newLayer["rotate"]["radians"] = -yaw;
-            newLayer["rotate"]["axis"] = "y";
+            newLayer["postrotate"]["radians"] = -yaw;
+            newLayer["postrotate"]["axis"] = "y";
             newLayer[FLAG_KEY] = true;
 
             std::string newRoute =
