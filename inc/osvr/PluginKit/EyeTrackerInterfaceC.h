@@ -59,7 +59,7 @@ typedef struct OSVR_EyeTrackerDeviceInterfaceObject *OSVR_EyeTrackerDeviceInterf
 lifetime as the device token in order to send messages conforming to an
 imaging interface.
 @param numSensors The number of eye tracker sensors you will be reporting:
-You can have repot 1 - 3 sensors (with multiple channels per sensor). This 
+You can have repot 1 - 3 sensors. This 
 parameter may be subject to external limitations
 */
 OSVR_PLUGINKIT_EXPORT
@@ -83,8 +83,9 @@ OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
 OSVR_IN_PTR OSVR_EyeGazeDirection *eyeData,
 OSVR_IN OSVR_ChannelCount sensor,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-OSVR_FUNC_NONNULL((1, 2, 3, 4));
+OSVR_FUNC_NONNULL((1, 2, 3, 5));
 /** @} */ /* end of group */
+
 
 OSVR_EXTERN_C_END
 

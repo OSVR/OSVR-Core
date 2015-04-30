@@ -39,55 +39,26 @@ namespace osvr {
 		namespace messages {
 			class EyeRegion::MessageSerialization {
 			public:
-				MessageSerialization(OSVR_EyeGazeDirection gaze,
-					//OSVR_EyeBufferElement *eyeBuff,
+				MessageSerialization(OSVR_EyeGazeDirection const &gaze,
 					OSVR_ChannelCount sensor)
 					: m_data(gaze),
-					//m_eyeBuf(eyeBuff,
-					//[](OSVR_EyeBufferElement *) {}),
 					m_sensor(sensor) {}
 
-				//MessageSerialization() : m_eyeBuf(nullptr) {}
 				MessageSerialization() {}
 
-				/*
-				template <typename T>
-				void allocateBuffer(T &, size_t bytes, std::true_type const &) {
-					m_imgBuf.reset(reinterpret_cast<OSVR_EyeBufferElement *>(
-						malloc(bytes)),
-						&free);
-				}
-				*/
-				template <typename T>
-				void allocateBuffer(T &, size_t, std::false_type const &) {
-					// Does nothing if we're serializing.
-				}
-				
 				template <typename T> void processMessage(T &p) {
 					p(m_data.gazeDirection2D);
 					p(m_data.gazeDirection3D);
-
-					//auto bytes = sizeof(m_data.gazeDirection2D) * 
-					//			sizeof(m_data.gazeDirection3D);
-
-					/// Allocate the matrix backing data, if we're deserializing
-					/// only.
-					//allocateBuffer(p, bytes, p.isDeserialize());
-					
-					//p(m_eyeBuf.get(),
-					//	serialization::AlignedDataBufferTag(bytes, sizeof(m_data.gazeDirection2D)));
 				}
 				EyeData getData() const {
 					EyeData ret;
 					ret.sensor = m_sensor;
 					ret.gaze = m_data;
-					//ret.buffer = m_eyeBuf;
 					return ret;
 				}
 
 			private:
 				OSVR_EyeGazeDirection m_data;
-				//EyeBufferPtr m_eyeBuf;
 				OSVR_ChannelCount m_sensor;
 			};
 			const char *EyeRegion::identifier() {
@@ -105,7 +76,6 @@ namespace osvr {
 			: m_numSensor(numChan) {}
 
 		void EyeTrackerComponent::sendEyeData(OSVR_EyeGazeDirection data,
-												//OSVR_EyeBufferElement *eyeBuf,
 												OSVR_ChannelCount sensor,
 												OSVR_TimeValue const &timestamp){
 			
@@ -114,7 +84,6 @@ namespace osvr {
 			serialize(buf, msg);
 
 			m_getParent().packMessage(buf, eyeRegion.getMessageType(), timestamp);
-			m_getParent().sendPending();
 		}
 
 		int VRPN_CALLBACK

@@ -41,9 +41,7 @@ Sensics, Inc.
 
 OSVR_EXTERN_C_BEGIN
 
-/** @brief Type for buffer access to eye data */
-typedef unsigned char OSVR_EyeBufferElement;
-
+/*
 typedef enum OSVR_Eye_Type {
 	OSVR_EYE_LEFT = 0,
 	OSVR_EYE_RIGHT = 1
@@ -53,6 +51,7 @@ typedef enum OSVR_Eye_Tracker_Mode {
 	OSVR_MONOCULAR = 0,
 	OSVR_BINOCULAR = 1
 } OSVR_Eye_Tracker_Mode;
+*/
 
 typedef struct OSVR_EyeGazeDirection{
 	OSVR_Vec2 gazeDirection2D;

@@ -25,7 +25,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/EyeTrackerC.h>
-#include <osvr/Client/ClientContext.h>
+#include <osvr/Common/ClientContext.h>
 
 // Library/third-party includes
 // - none

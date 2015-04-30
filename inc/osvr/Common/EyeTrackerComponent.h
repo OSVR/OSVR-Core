@@ -42,7 +42,7 @@
 
 namespace osvr {
 	namespace common {
-		typedef shared_ptr<OSVR_EyeBufferElement> EyeBufferPtr;
+		
 		struct EyeData {
 			OSVR_ChannelCount sensor;
 			OSVR_EyeGazeDirection gaze;
@@ -74,7 +74,6 @@ namespace osvr {
 
 			OSVR_COMMON_EXPORT void sendEyeData(
 				OSVR_EyeGazeDirection gaze, 
-				//OSVR_EyeBufferElement *eyeBuf,
 				OSVR_ChannelCount sensor, 
 				OSVR_TimeValue const &timestamp);
 
