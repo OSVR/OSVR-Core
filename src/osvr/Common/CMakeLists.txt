@@ -120,6 +120,7 @@ set(SOURCE
     RoutingConstants.cpp
     RoutingKeys.cpp
     Serialization.cpp
+    SerializationTraitExample.h
     SystemComponent.cpp
     EyeTrackerComponent.cpp)
 

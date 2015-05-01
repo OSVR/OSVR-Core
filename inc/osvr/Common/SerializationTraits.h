@@ -73,8 +73,8 @@ namespace common {
         /// A traits class should inherit from `BaseSerializationTraits<T>` to
         /// get useful typedefs.
         ///
-        /// See the serializers below for std::string for useful
-        /// examples/starting points.
+        /// See the file src/osvr/common/SerializationTraitExample.h for a
+        /// starting point.
         ///
         /// The dummy template parameter exists for usage of `enable_if`.
         template <typename Tag, typename Dummy = void>
@@ -84,7 +84,9 @@ namespace common {
             /// cases, you can just add a SerializationTraits specialization for
             /// the DefaultSerializationTag<T> (see docs above) and if it's a
             /// struct, it can probably contain primarily calls to serializeRaw
-            /// and deserializeRaw.
+            /// and deserializeRaw. See also the file
+            /// src/osvr/common/SerializationTraitExample.h for a starting
+            /// point.
             ///
             /// The weird thing we assert here is because we have to make the
             /// assertion dependent on a template type or it will get tripped at
