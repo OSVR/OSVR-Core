@@ -47,7 +47,7 @@ namespace common {
 
     namespace serialization {
 
-        /// Dummy template for better error messages - inspired by
+        /// @brief Dummy template for better error messages - inspired by
         /// http://stackoverflow.com/a/17917624/265522
         template <typename Tag>
         using MissingSerializationTraitsForTagOrType =
