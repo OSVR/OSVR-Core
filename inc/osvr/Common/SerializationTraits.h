@@ -73,8 +73,8 @@ namespace common {
         /// A traits class should inherit from `BaseSerializationTraits<T>` to
         /// get useful typedefs.
         ///
-        /// See the file src/osvr/common/SerializationTraitExample.h for a
-        /// starting point.
+        /// See the internals example SerializationTraitExample_Complicated.h
+        /// for a starting point.
         ///
         /// The dummy template parameter exists for usage of `enable_if`.
         template <typename Tag, typename Dummy = void>
@@ -143,6 +143,8 @@ namespace common {
         ///
         /// Explicitly specializing this template as instructed produces the
         /// more complex serialization code automatically.
+        ///
+        /// See the internals example SerializationTraitExample_Simple.h
         template <typename T> struct SimpleStructSerialization;
 
         /// @brief Mandatory base class for SimpleStructSerialization
