@@ -90,6 +90,8 @@ private:
 
     // Handle incoming data reports, which in this case are reports
     // from the Inertial Measurement Unit (IMU).
+    //   TODO: Implement the actual parsing and storing of this
+    // information.
     void on_data_received(size_t bytes, vrpn_uint8 *buffer);
 };
 
@@ -97,6 +99,9 @@ private:
 // HDK (which happens because the unit claims to be reporting YUV format
 // when in fact it is reporting grayscale format) into the correct
 // image.
+//   TODO: The implementation of this function currently only uses half
+// of the values that are available, doubling them horizontally to fill
+// in all of the pixels.
 extern cv::Mat unscramble_image(const cv::Mat &image);
 
 } // namespace oculus_dk2

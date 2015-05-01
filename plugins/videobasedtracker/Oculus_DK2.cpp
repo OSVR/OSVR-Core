@@ -143,6 +143,8 @@ void Oculus_DK2_HID::on_data_received(size_t bytes, vrpn_uint8 *buffer)
 {
     // Fill new entries into the vector that will be passed back
     // on the next poll().
+    //   TODO: Read the values from the IMU and store them into the
+    // vector that we'll return on the next call to poll().
     // XXX
 }
 
@@ -208,7 +210,6 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     // the color space of the source and destination.  The FFMPEG
     // output on the DK2 does not specify the color space, just the
     // encoding format.
-    //  TODO
 
     // Okay, so here we convert from BGR back into YUV.
     cv::Mat yuvImage;
@@ -222,6 +223,8 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     // of the YUV image, make it grayscale, and copy the Y channels from
     // the input image into neighboring pixels in the output image; doubling
     // every one.
+    //  TODO: Invert the transformation used to get from YUV to BGR and
+    // determine the actual components.
     cv::Mat outImage(yuvImage.rows, yuvImage.cols * 2,
         CV_8UC1, cv::Scalar(0));
     for (int r = 0; r < yuvImage.rows; r++) {
