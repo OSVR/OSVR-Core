@@ -56,6 +56,10 @@ namespace common {
         /// @brief Traits class indicating how to serialize a type with a given
         /// tag. The default tag for a type `T` is `DefaultSerializationTag<T>`
         ///
+        /// Note that if you're serializing a simple struct-like type, you have
+        /// an easier route than specializing this traits template: see
+        /// SimpleStructSerialization
+        ///
         /// A traits class must implement:
         ///
         /// - `template <typename BufferType> static void
@@ -205,13 +209,14 @@ namespace common {
           private:
             /// @brief Helper functor class to pass to a
             /// SimpleStructSerialization method for serialization.
-              template <typename BufferType> class StructSerializeFunctor : boost::noncopyable {
+            template <typename BufferType>
+            class StructSerializeFunctor : boost::noncopyable {
               public:
-                  /// @brief Constructor
-                  StructSerializeFunctor(BufferType &buf) : m_buf(buf) {}
+                /// @brief Constructor
+                StructSerializeFunctor(BufferType &buf) : m_buf(buf) {}
 
-                  /// @brief Functor method called by the
-                  /// SimpleStructSerialization
+                /// @brief Functor method called by the
+                /// SimpleStructSerialization
                 template <typename T> void operator()(T const &val) {
                     serializeRaw(m_buf, val);
                 }
@@ -256,7 +261,7 @@ namespace common {
             /// SimpleStructSerialization method for space requirement
             /// computation.
             class StructSpaceRequirementFunctor : boost::noncopyable {
-            public:
+              public:
                 /// @brief Constructor
                 StructSpaceRequirementFunctor(size_t existingBytes)
                     : m_initialBytes(existingBytes), m_bytes(existingBytes) {}
@@ -277,7 +282,7 @@ namespace common {
                 /// @brief Accessor to the accumulated state
                 size_t get() const { return m_bytes - m_initialBytes; }
 
-            private:
+              private:
                 size_t m_initialBytes;
                 size_t m_bytes;
             };
