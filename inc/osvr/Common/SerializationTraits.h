@@ -47,6 +47,12 @@ namespace common {
 
     namespace serialization {
 
+        /// Dummy template for better error messages - inspired by
+        /// http://stackoverflow.com/a/17917624/265522
+        template <typename Tag>
+        using MissingSerializationTraitsForTagOrType =
+            std::integral_constant<bool, std::is_same<Tag, Tag>::value>;
+
         /// @brief Traits class indicating how to serialize a type with a given
         /// tag. The default tag for a type `T` is `DefaultSerializationTag<T>`
         ///
@@ -72,7 +78,21 @@ namespace common {
         ///
         /// The dummy template parameter exists for usage of `enable_if`.
         template <typename Tag, typename Dummy = void>
-        struct SerializationTraits;
+        struct SerializationTraits {
+            /// If you get this error, you probably are trying to
+            /// serialize/deserialize a type we haven't handled before. In most
+            /// cases, you can just add a SerializationTraits specialization for
+            /// the DefaultSerializationTag<T> (see docs above) and if it's a
+            /// struct, it can probably contain primarily calls to serializeRaw
+            /// and deserializeRaw.
+            ///
+            /// The weird thing we assert here is because we have to make the
+            /// assertion dependent on a template type or it will get tripped at
+            /// point of declaration, rather than instantiation.
+            static_assert(!MissingSerializationTraitsForTagOrType<Tag>::value,
+                          "You must implement a SerializationTraits "
+                          "specialization for this type/tag!");
+        };
 
         /// @brief Serialize a value to a buffer, with optional tag to specify
         /// non-default traits.
