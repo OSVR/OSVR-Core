@@ -119,7 +119,6 @@ set(SOURCE
     RouteContainer.cpp
     RoutingConstants.cpp
     RoutingKeys.cpp
-    Serialization.cpp
     SystemComponent.cpp
     EyeTrackerComponent.cpp)
 
