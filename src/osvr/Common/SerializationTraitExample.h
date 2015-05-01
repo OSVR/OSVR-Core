@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header containing examples of how to implement serialization for new
+   types.
 
     @date 2015
 
@@ -44,15 +45,48 @@ namespace common {
         int16_t C;
     };
 
-    namespace serialization {
-        /// @brief Default serialization traits for YourType - imagine it's got
-        /// 3 members, A, B, and C.
-        template <>
-        struct SerializationTraits<DefaultSerializationTag<YourType>, void>
-            : BaseSerializationTraits<YourType> {
+    // Dummy example for your type.
+    struct YourType2 {
+        double A;
+        uint32_t B;
+        int16_t C;
+    };
 
-            typedef BaseSerializationTraits<YourType> Base;
-            typedef DefaultSerializationTag<YourType> tag_type;
+    namespace serialization {
+        /// @brief Example of serialization for a simple struct: no special
+        /// treatment for any of the variables, just recursively
+        /// serialize/deserialize/compute size for each of the members.
+        ///
+        /// If you specialize SimpleStructSerialization (and inherit from
+        /// SimpleStructSerializationBase), the more complex version of the
+        /// traits for the "default tag" will automatically be generated for
+        /// you.
+        ///
+        /// If you need more control over the serialization process, you'll need
+        /// to start with something like the example below of a
+        /// SerializationTraits explicit specialization.
+        template <>
+        struct SimpleStructSerialization<YourType>
+            : SimpleStructSerializationBase {
+            template <typename F, typename T> static void apply(F &f, T &val) {
+                f(val.A);
+                f(val.B);
+                f(val.C);
+            }
+        };
+
+        /// @brief Default serialization traits for YourType2
+        ///
+        /// This is the "complex" way of doing things - in case you have some
+        /// members you have to treat specially, etc. If your type is literally
+        /// just a composition of other known types, like this one is, you're
+        /// better off using the SimpleStructSerializer method - see above.
+        template <>
+        struct SerializationTraits<DefaultSerializationTag<YourType2>, void>
+            : BaseSerializationTraits<YourType2> {
+
+            typedef BaseSerializationTraits<YourType2> Base;
+            typedef DefaultSerializationTag<YourType2> tag_type;
 
             template <typename BufferType>
             static void serialize(BufferType &buf,
@@ -73,15 +107,15 @@ namespace common {
             }
 
             static size_t spaceRequired(size_t existingBytes,
-                                        typename Base::param_type val,
+                                        Base::param_type val,
                                         tag_type const &) {
                 auto requiredA =
                     getBufferSpaceRequiredRaw(existingBytes, val.A);
                 auto requiredB =
                     getBufferSpaceRequiredRaw(existingBytes + requiredA, val.B);
-                auto requiredC =
-                    getBufferSpaceRequiredRaw(existingBytes + requiredB, val.B);
-                return requiredC;
+                return getBufferSpaceRequiredRaw(existingBytes + requiredB,
+                                                 val.C);
+                ;
             }
         };
 
