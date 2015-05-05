@@ -102,6 +102,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // to be doing anything (gain does not change the brightness, for
             // example) and all but the gain setting fails (we must not have the
             // XIMEA interface).
+            //  TODO: There is no OS-independent way to set these parameters on
+            // the camera, so we're not going to be able to use it.
             if (!m_camera.set(CV_CAP_PROP_AUTO_EXPOSURE, 0)) {
                 std::cerr << "VideoBasedHMDTracker: Can't set auto exposure" << std::endl;
             }

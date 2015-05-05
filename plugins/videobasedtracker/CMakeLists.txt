@@ -19,6 +19,8 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     com_osvr_VideoBasedHMDTracker.cpp
     Oculus_DK2.cpp
 	Oculus_DK2.h
+	LedIdentifier.cpp
+	LedIdentifier.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
 )
 
