@@ -41,11 +41,6 @@ if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
     message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
 endif()
 
-# Right now, always build if we build the server
-# TODO change for cross compiling like the Android port.
-set(BUILD_OSVR_JSON_TO_C ${BUILD_SERVER})
-set(HAVE_OSVR_JSON_TO_C ${BUILD_SERVER})
-
 # Consistency: can't build the examples, apps, etc if you don't have the library
 set(dependent_options
     BUILD_SERVER_EXAMPLES
@@ -66,6 +61,23 @@ endforeach()
 
 set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
 mark_as_advanced(OSVR_PLUGIN_IGNORE_SUFFIX)
+
+# Figure out what to do with osvr_json_to_c
+if(CMAKE_CROSSCOMPILING OR ANDROID)
+    # If you are cross-compiling, please pass in OSVR_JSON_TO_C_COMMAND to CMake
+    set(OSVR_CROSSCOMPILING ON)
+    set(BUILD_OSVR_JSON_TO_C OFF)
+    if(OSVR_JSON_TO_C_COMMAND)
+        set(HAVE_OSVR_JSON_TO_C ON)
+        set(OSVR_JSON_TO_C_EXECUTABLE ${HAVE_OSVR_JSON_TO_C})
+    else()
+        set(HAVE_OSVR_JSON_TO_C OFF)
+    endif()
+else()
+    # Right now, always build if we build the server
+    set(BUILD_OSVR_JSON_TO_C ${BUILD_SERVER})
+    set(HAVE_OSVR_JSON_TO_C ${BUILD_SERVER})
+endif()
 
 ###
 # CMake Modules
@@ -193,8 +205,10 @@ set(OSVR_CACHED_PLUGIN_DIR "${OSVR_PLUGIN_DIR}" CACHE INTERNAL
 
 # Since alias targets only work for libraries, we use this method instead to
 # share the osvr_convert_json script between the main tree and external config users.
-set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
-    "The target name for the osvr_json_to_c executable" FORCE)
+if(NOT OSVR_CROSSCOMPILING)
+    set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
+        "The target name for the osvr_json_to_c executable" FORCE)
+endif()
 
 ###
 # Building
