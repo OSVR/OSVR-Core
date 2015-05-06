@@ -23,8 +23,8 @@ Sensics, Inc.
 // limitations under the License.
 
 #pragma once
-#include "LedIdentifier.h"
 
+#include "LedIdentifier.h"
 #include <opencv2/opencv.hpp>
 #include <vector>
 
