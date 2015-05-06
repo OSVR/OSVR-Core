@@ -23,6 +23,8 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
 	LedIdentifier.h
 	LED.cpp
 	LED.h
+	BeaconBasedPoseEstimator.cpp
+	BeaconBasedPoseEstimator.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
 )
 

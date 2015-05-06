@@ -26,6 +26,8 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include "Oculus_DK2.h"
+#include "LED.h"
+#include "BeaconBasedPoseEstimator.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -50,8 +52,15 @@ namespace {
 
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
-      VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0, int channel = 0)
-          : m_camera(cameraNum), m_channel(channel) {
+    VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0, int channel = 0)
+    {
+        // Initialize things from parameters and from defaults.  Do it here rather than
+        // in an initialization list so that we're independent of member order declaration.
+        m_camera = cameraNum;
+        m_channel = channel;
+        m_type = Unknown;
+        m_dk2 = nullptr;
+        m_estimator = nullptr;
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -73,56 +82,88 @@ class VideoBasedHMDTracker : boost::noncopyable {
         /// Register update callback
         m_dev.registerUpdateCallback(this);
 
+        //===============================================
+        // Figure out what type of HMD we're using.
+        int height = 0;
+        int width = 0;
         if (m_camera.isOpened()) {
-            int height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
-            int width = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_WIDTH));
+            height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
+            width = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_WIDTH));
 
             // See if this is an Oculus camera by checking the dimensions of
             // the image.  This camera type improperly describes its format
             // as being a color format when it is in fact a mono format.
-            m_isOculusCamera = (width == 376) && (height == 480);
-#ifdef VBHMD_DEBUG
+            bool isOculusCamera = (width == 376) && (height == 480);
+            if (isOculusCamera) {
+                m_type = OculusDK2;
+            }
+
+            // TODO: Check to see if the resolution/name matches the OSVR HDK camera
+            else {
+                m_type = OSVRHDK;
+            }
+    #ifdef VBHMD_DEBUG
             std::cout << "Got image of size " << width << "x" << height
                 << ", Format " << m_camera.get(CV_CAP_PROP_FORMAT)
                 << ", Mode " << m_camera.get(CV_CAP_PROP_MODE) << std::endl;
-            if (m_isOculusCamera) {
+            if (m_type == OculusDK2) {
                 std::cout << "Is Oculus camera, reformatting to mono" << std::endl;
                 m_dk2.reset(new osvr::oculus_dk2::Oculus_DK2_HID());
             }
-#endif
+    #endif
         }
 
-        // If we have an Oculus camera, set its capture parameters as described
-        // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for
-        // him for sharing this with us, used with permission.
-        if (m_isOculusCamera) {
-            // Trying to find the closest matches to what was being done
-            // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
-            // be able to set everything we need to.  In fact, these don't seem
-            // to be doing anything (gain does not change the brightness, for
-            // example) and all but the gain setting fails (we must not have the
-            // XIMEA interface).
-            //  TODO: There is no OS-independent way to set these parameters on
-            // the camera, so we're not going to be able to use it.
-            if (!m_camera.set(CV_CAP_PROP_AUTO_EXPOSURE, 0)) {
-                std::cerr << "VideoBasedHMDTracker: Can't set auto exposure" << std::endl;
+        //===============================================
+        // Configure objects and set up data structures and devices based on the
+        // type of device we have.
+
+        switch (m_type) {
+        case OculusDK2:
+            // TODO: Fill these in when they are known
+            m_identifier = nullptr;
+            m_estimator = nullptr;
+
+            // Set Oculus' camera capture parameters as described
+            // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for
+            // him for sharing this with us, used with permission.
+            if (m_type == OculusDK2) {
+                // Trying to find the closest matches to what was being done
+                // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
+                // be able to set everything we need to.  In fact, these don't seem
+                // to be doing anything (gain does not change the brightness, for
+                // example) and all but the gain setting fails (we must not have the
+                // XIMEA interface).
+                //  TODO: There is no OS-independent way to set these parameters on
+                // the camera, so we're not going to be able to use it.
+                //  TODO: Would like to set a number of things, but since these are not working,
+                // giving up.
             }
-            if (!m_camera.set(CV_CAP_PROP_XI_AEAG, 0)) {
-                std::cerr << "VideoBasedHMDTracker: Can't set auto exposure/gain" << std::endl;
+            break;
+
+        case OSVRHDK:
+            {
+                // TODO: Come up with actual estimates for camera and distortion
+                // parameters by calibrating them in OpenCV.
+                double cx = width / 2.0;
+                double cy = height / 2.0;
+                double fx = 300.0;
+                double fy = fx;
+                std::vector< std::vector<double> > m;
+                m.push_back({  fx, 0.0,  cx });
+                m.push_back({ 0.0,  fy,  cy });
+                m.push_back({ 0.0, 0.0, 1.0 });
+                std::vector<double> d;
+                d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
+                m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
+                m_estimator = new osvr::vbtracker::BeaconBasedPoseEstimator(m, d);
             }
-            if (!m_camera.set(CV_CAP_PROP_GAIN, 16)) {
-                std::cerr << "VideoBasedHMDTracker: Can't set gain" << std::endl;
-            }
-            if (!m_camera.set(CV_CAP_PROP_XI_OFFSET_X, 94)) {
-                std::cerr << "VideoBasedHMDTracker: Can't set horizontal blanking" << std::endl;
-            }
-            if (!m_camera.set(CV_CAP_PROP_XI_OFFSET_Y, 5)) {
-                std::cerr << "VideoBasedHMDTracker: Can't set vertical blanking" << std::endl;
-            }
-            // TODO: Would like to set a number of things, but since these are not working,
-            // giving up.
+            break;
+
+        default:    // Also handles the "Unknown" case.
+            // We've already got a NULL identifier and estimator, so nothing to do.
+            break;
         }
-      }
+    }
 
     ~VideoBasedHMDTracker() {
     }
@@ -146,12 +187,15 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // Keep track of when we got the image, since that is our
         // best estimate for when the tracker was at the specified
         // pose.
+        // TODO: Back-date the aquisition time by the expected image
+        // transfer time and perhaps by half the exposure time to say
+        // when the photons actually arrived.
         OSVR_TimeValue timestamp;
         osvrTimeValueGetNow(&timestamp);
 
         // If we have an Oculus camera, then we need to reformat the
         // image pixels.
-        if (m_isOculusCamera) {
+        if (m_type == OculusDK2) {
             m_frame = osvr::oculus_dk2::unscramble_image(m_frame);
 
             // Read any reports and discard them.  We do this to keep the
@@ -184,7 +228,16 @@ class VideoBasedHMDTracker : boost::noncopyable {
     cv::VideoCapture m_camera;
     int m_channel;
     cv::Mat m_frame;
-    bool m_isOculusCamera;    //< Is this image from and Oculus camera?
+
+    // What type of HMD are we tracking?
+    enum { Unknown, OSVRHDK, OculusDK2 } m_type;
+
+    // Structures needed to do the tracking.
+    osvr::vbtracker::LedIdentifier *m_identifier;
+    std::list<osvr::vbtracker::Led> m_leds;
+    osvr::vbtracker::BeaconBasedPoseEstimator *m_estimator;
+
+    // In case we are using a DK2, we need a pointer to one.
     std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;
 };
 
