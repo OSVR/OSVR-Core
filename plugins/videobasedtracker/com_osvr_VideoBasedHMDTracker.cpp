@@ -166,15 +166,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
     }
 
     ~VideoBasedHMDTracker() {
+        // It is okay to delete NULL pointers, so we don't check here.
+        delete m_estimator;
+        delete m_identifier;
     }
 
-    OSVR_ReturnCode update() {
+    OSVR_ReturnCode update()
+    {
         if (!m_camera.isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
             // camera will be plugged back in later.
             return OSVR_RETURN_SUCCESS;
         }
 
+        //==================================================================
         // Trigger a camera grab.
         if (!m_camera.grab()) {
             // No frame available.
@@ -184,6 +189,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             return OSVR_RETURN_FAILURE;
         }
 
+        //==================================================================
         // Keep track of when we got the image, since that is our
         // best estimate for when the tracker was at the specified
         // pose.
@@ -193,6 +199,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         OSVR_TimeValue timestamp;
         osvrTimeValueGetNow(&timestamp);
 
+        //==================================================================
         // If we have an Oculus camera, then we need to reformat the
         // image pixels.
         if (m_type == OculusDK2) {
@@ -203,18 +210,127 @@ class VideoBasedHMDTracker : boost::noncopyable {
             m_dk2->poll();
         }
 
-#ifdef VBHMD_DEBUG
-        if (m_camera.isOpened()) {
-            cv::imshow("Debug window", m_frame);
-            cv::waitKey(1);
-        }
-#endif
+        //==================================================================
+        // Convert the image into a format we can use.
+        cv::cvtColor(m_frame, m_imageGray, CV_RGB2GRAY);
 
+        //================================================================
+        // Tracking the points
+
+        // Threshold the image based on the brightness value that is halfway between
+        // the darkest and brightest pixel in the image.
+        double minVal, maxVal;
+        cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
+        double thresholdValue = minVal + (maxVal - minVal) * 0.8;
+        cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255, CV_THRESH_BINARY);
+
+        // Construct a blob detector and find the blobs in the image.
+        // TODO: Determine the maximum size of a trackable blob by seeing
+        // when we're so close that we can't view at least four in the
+        // camera.
+        cv::SimpleBlobDetector::Params params;
+        params.filterByColor = true;    // Look for bright blobs
+        params.blobColor = static_cast<uchar>(maxVal);
+        params.filterByInertia = true;  // Look for non-elongated blobs
+        params.minInertiaRatio = 0.5;
+        params.maxInertiaRatio = 1.0;
+        cv::SimpleBlobDetector detector(params);
+        std::vector<cv::KeyPoint> keyPoints;
+        detector.detect(m_imageGray, keyPoints);
+
+        // Draw detected blobs as red circles.
+        cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
+            cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+        //if (keyPoints.size() > 0) { std::cout << "First keypoint location: " << keyPoints[0].pt.x << ", " << keyPoints[0].pt.y << std::endl; }
+
+        // TODO: Consider computing the center of mass of a dilated bounding
+        // rectangle around each keypoint to produce a more precise subpixel
+        // localization of each LED.  The moments() function may be helpful
+        // with this.
+
+        // TODO: Estimate the summed brightness of each blob so that we can
+        // detect when they are getting brighter and dimmer.  Pass this as
+        // the brightness parameter to the 
+
+        // Locate the closest blob from this frame to each LED found
+        // in the previous frame.  If it is close enough to the nearest neighbor from last
+        // time, we assume that it is the same LED and update it.  If not, we
+        // delete the LED from the list.  Once we have matched a blob to an
+        // LED, we remove it from the list.  If there are any blobs leftover,
+        // we create new LEDs from them.
+        // TODO: Include motion estimate based on Kalman filter along with
+        // model of the projection once we have one built.  Note that this will
+        // require handling the lens distortion appropriately.
+        std::list<osvr::vbtracker::Led>::iterator led = m_leds.begin();
+        while (led != m_leds.end()) {
+            double TODO_BLOB_MOVE_THRESHOLD = 10;
+            std::vector<cv::KeyPoint>::iterator nearest;
+            nearest = led->nearest(keyPoints, TODO_BLOB_MOVE_THRESHOLD);
+            if (nearest == keyPoints.end()) {
+                // We have no blob corresponding to this LED, so we need
+                // to delete this LED.
+                led = m_leds.erase(led);
+            }
+            else {
+                // Update the values in this LED and then go on to the
+                // next one.  Remove this blob from the list of potential
+                // matches.
+                led->addMeasurement(nearest->pt, nearest->size);
+                keyPoints.erase(nearest);
+                led++;
+            }
+        }
+        // If we have any blobs that have not been associated with an
+        // LED, then we add a new LED for each of them.
+        //std::cout << "Had " << Leds.size() << " LEDs, " << keyPoints.size() << " new ones available" << std::endl;
+        while (keyPoints.size() > 0) {
+            osvr::vbtracker::Led newLed(m_identifier,
+                keyPoints.begin()->pt, keyPoints.begin()->size);
+            m_leds.push_back(newLed);
+            keyPoints.erase(keyPoints.begin());
+        }
+
+        // Label the keypoints with their IDs.
+        for (led = m_leds.begin(); led != m_leds.end(); led++) {
+            std::ostringstream label;
+            label << led->getID();
+            cv::Point where = led->getLocation();
+            where.x += 1;
+            where.y += 1;
+            cv::putText(m_imageWithBlobs, label.str(), where,
+                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255));
+        }
+
+        //==================================================================
         // Compute the pose of the HMD w.r.t. the camera frame of reference.
         OSVR_PoseState pose;
         osvrPose3SetIdentity(&pose);
         // XXX Compute pose here.
 
+#ifdef VBHMD_DEBUG
+        if (m_camera.isOpened()) {
+            cv::imshow("Debug window", m_frame);
+            int key = cv::waitKey(1);
+            switch (key) {
+            case 'i':
+                // Show the input image.
+                m_shownImage = &m_frame;
+                break;
+
+            case 't':
+                // Show the thresholded image.
+                m_shownImage = &m_thresholdImage;
+                break;
+
+            case 'b':
+                // Show the blob image.
+                m_shownImage = &m_imageWithBlobs;
+                break;
+            }
+        }
+#endif
+
+        //==================================================================
         /// Report the new pose, time-stamped with the time we
         // received the image from the camera.
         osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker,
@@ -228,6 +344,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
     cv::VideoCapture m_camera;
     int m_channel;
     cv::Mat m_frame;
+    cv::Mat m_imageGray;
+    cv::Mat m_thresholdImage;
+    cv::Mat m_imageWithBlobs;
+#ifdef VBHMD_DEBUG
+    cv::Mat *m_shownImage = &m_frame;
+#endif
 
     // What type of HMD are we tracking?
     enum { Unknown, OSVRHDK, OculusDK2 } m_type;
