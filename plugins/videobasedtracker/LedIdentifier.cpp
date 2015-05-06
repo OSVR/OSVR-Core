@@ -1,5 +1,5 @@
 /** @file
-@brief Header file for class that identifies LEDs based on blink codes.
+@brief Implementation for class that identifies LEDs based on blink codes.
 
 @date 2015
 
@@ -21,8 +21,6 @@ Sensics, Inc.
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#pragma once
 
 #include "LedIdentifier.h"
 
