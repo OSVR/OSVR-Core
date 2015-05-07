@@ -9,12 +9,14 @@ set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_system)
 add_custom_target(header_dependencies)
 
 file(GLOB_RECURSE headers RELATIVE "${HEADER_BASE}" ${HEADER_BASE}/*.h)
+set(test_index 0)
 foreach(HEADER ${headers})
     list (FIND IGNORED_HEADERS "${HEADER}" _index)
     if (${_index} EQUAL -1)
         string(REPLACE ".h" "" basename "${HEADER}")
         string(MAKE_C_IDENTIFIER "${basename}" basename)
-        set(test_name "test_header_prereqs_${basename}")
+        #set(test_name "test_header_prereqs_${basename}")
+        set(test_name "test_${test_index}")
 
         set(extension cpp)
         if (${HEADER} MATCHES "C.h$")
@@ -45,6 +47,8 @@ foreach(HEADER ${headers})
 
         add_test(NAME ${test_name}_builds COMMAND ${test_name})
         add_dependencies(header_dependencies ${test_name})
+
+        math(EXPR test_index "${test_index} + 1")
     endif()
 endforeach()
 
