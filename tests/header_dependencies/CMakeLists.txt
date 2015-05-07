@@ -4,7 +4,7 @@
 
 set(IGNORED_HEADERS osvr/Util/MSStdIntC.h)
 
-set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_system)
+set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_thread boost_filesystem boost_locale)
 
 add_custom_target(header_dependencies)
 
