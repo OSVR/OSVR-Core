@@ -16,7 +16,7 @@ foreach(HEADER ${headers})
     endif()
 
     string(REPLACE ".h" "" basename "${HEADER}")
-    string(REGEX REPLACE "[\\./]" "_" basename "${basename}")
+    string(MAKE_C_IDENTIFIER "${basename}" basename)
     set(test_name "test_header_prereqs_${basename}")
 
     set(extension cpp)
