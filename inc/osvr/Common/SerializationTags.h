@@ -32,7 +32,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <cstddef>
 
 namespace osvr {
 namespace common {

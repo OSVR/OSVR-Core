@@ -32,6 +32,8 @@
 
 // Library/third-party includes
 #include <boost/version.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/type_traits.hpp>
 
 #if BOOST_VERSION >= 105600
 #include <boost/align/aligned_allocator.hpp>

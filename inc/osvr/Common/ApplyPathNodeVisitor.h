@@ -29,11 +29,12 @@
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathElementTypes_fwd.h>
 #include <osvr/Util/TreeNode_fwd.h>
-#include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathNode.h>
 
 // Library/third-party includes
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 // - none
