@@ -34,6 +34,9 @@ foreach(HEADER ${headers})
         $<BUILD_INTERFACE:${HEADER_BASE}>
         $<INSTALL_INTERFACE:include>)
 
+    set_target_properties(${test_name} PROPERTIES
+        FOLDER "OSVR Header dependency tests")
+
     if (${extension} STREQUAL cpp)
         target_compile_options(${test_name} PUBLIC ${OSVR_CXX11_FLAGS})
     endif()
