@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/TimeValueC.h>
+#include <osvr/Util/TimeValue_fwd.h>
 
 // Library/third-party includes
 // - none

@@ -15,7 +15,6 @@ foreach(HEADER ${headers})
     if (${_index} EQUAL -1)
         string(REPLACE ".h" "" basename "${HEADER}")
         string(MAKE_C_IDENTIFIER "${basename}" basename)
-        #set(test_name "test_header_prereqs_${basename}")
         set(test_name "test_${test_index}")
 
         set(extension cpp)
@@ -51,4 +50,17 @@ foreach(HEADER ${headers})
         math(EXPR test_index "${test_index} + 1")
     endif()
 endforeach()
+
+#
+# Ensure forward-declaration headers are included in the full-declaration headers.
+# That is, ensure that Blah_fwd.h is included in Blah.h.
+#
+
+add_test(NAME test_fwd_headers
+    COMMAND ${CMAKE_COMMAND}
+        -DHEADER_BASE=${HEADER_BASE}
+        -P "${CMAKE_CURRENT_LIST_DIR}/CheckForwardDeclarationHeaders.cmake"
+)
+
+
 
