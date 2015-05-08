@@ -1,0 +1,36 @@
+{
+  "externalDevices": {
+    "/Xbox_360Device": {
+      "deviceName": "Xbox_360",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "analog": {},
+          "button": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/controller/trigger/lftX": "/Xbox_360Device/analog/0",
+    "/controller/trigger/lftY": "/Xbox_360Device/analog/1",
+    "/controller/trigger/rgtX": "/Xbox_360Device/analog/2",
+    "/controller/trigger/rgtY": "/Xbox_360Device/analog/3",
+    "/controller/trigger/trigs": "/Xbox_360Device/analog/4",
+    "/controller/trigger/pov": "/Xbox_360Device/analog/5",
+    "/controller/A": "/Xbox_360Device/button/0",
+    "/controller/B": "/Xbox_360Device/button/1",
+    "/controller/X": "/Xbox_360Device/button/2",
+    "/controller/Y": "/Xbox_360Device/button/3",
+    "/controller/leftBmp": "/Xbox_360Device/button/4",
+    "/controller/rightBmp": "/Xbox_360Device/button/5",
+    "/controller/back": "/Xbox_360Device/button/6",
+    "/controller/start": "/Xbox_360Device/button/7",
+    "/controller/leftJstk": "/Xbox_360Device/button/8",
+    "/controller/rightJstk": "/Xbox_360Device/button/9",
+    "/controller/up": "/Xbox_360Device/button/10",
+    "/controller/right": "/Xbox_360Device/button/11",
+    "/controller/down": "/Xbox_360Device/button/12",
+    "/controller/left": "/Xbox_360Device/button/13"
+  }
+}
