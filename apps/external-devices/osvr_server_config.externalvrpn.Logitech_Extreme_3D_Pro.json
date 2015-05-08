@@ -1,0 +1,37 @@
+{
+  "externalDevices": {
+    "/Logitech_Extreme_3D_ProDevice": {
+      "deviceName": "logitech0",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "analog": {},
+          "button": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/controller/trigger/X": "/Logitech_Extreme_3D_ProDevice/analog/0",
+    "/controller/trigger/Y": "/Logitech_Extreme_3D_ProDevice/analog/1",
+    "/controller/trigger/rotate": "/Logitech_Extreme_3D_ProDevice/analog/2",
+    "/controller/trigger/slider": "/Logitech_Extreme_3D_ProDevice/analog/3",
+    "/controller/trigger/pov": "/Logitech_Extreme_3D_ProDevice/analog/4",
+    "/controller/1": "/Logitech_Extreme_3D_ProDevice/button/0",
+    "/controller/2": "/Logitech_Extreme_3D_ProDevice/button/1",
+    "/controller/3": "/Logitech_Extreme_3D_ProDevice/button/2",
+    "/controller/4": "/Logitech_Extreme_3D_ProDevice/button/3",
+    "/controller/5": "/Logitech_Extreme_3D_ProDevice/button/4",
+    "/controller/6": "/Logitech_Extreme_3D_ProDevice/button/5",
+    "/controller/7": "/Logitech_Extreme_3D_ProDevice/button/6",
+    "/controller/8": "/Logitech_Extreme_3D_ProDevice/button/7",
+    "/controller/9": "/Logitech_Extreme_3D_ProDevice/button/8",
+    "/controller/10": "/Logitech_Extreme_3D_ProDevice/button/9",
+    "/controller/11": "/Logitech_Extreme_3D_ProDevice/button/10",
+    "/controller/12": "/Logitech_Extreme_3D_ProDevice/button/11",
+    "/controller/up": "/Logitech_Extreme_3D_ProDevice/button/12",
+    "/controller/down": "/Logitech_Extreme_3D_ProDevice/button/13",
+    "/controller/left": "/Logitech_Extreme_3D_ProDevice/button/14",
+    "/controller/right": "/Logitech_Extreme_3D_ProDevice/button/15"
+  }
+}
