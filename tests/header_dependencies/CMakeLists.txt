@@ -15,7 +15,6 @@ foreach(HEADER ${headers})
     if (${_index} EQUAL -1)
         string(REPLACE ".h" "" basename "${HEADER}")
         string(MAKE_C_IDENTIFIER "${basename}" basename)
-        #set(test_name "test_header_prereqs_${basename}")
         set(test_name "test_${test_index}")
 
         set(extension cpp)
@@ -51,4 +50,27 @@ foreach(HEADER ${headers})
         math(EXPR test_index "${test_index} + 1")
     endif()
 endforeach()
+
+#
+# Ensure forward-declaration headers are included in the full-declaration headers.
+# That is, ensure that Blah_fwd.h is included in Blah.h.
+#
+
+file(GLOB_RECURSE fwd_headers RELATIVE "${HEADER_BASE}" ${HEADER_BASE}/*_fwd.h)
+foreach(fwd_header ${fwd_headers})
+    string(REPLACE "_fwd.h" ".h" full_header "${fwd_header}")
+    file(STRINGS "${HEADER_BASE}/${full_header}" header_contents)
+    set(_found OFF)
+    foreach(line ${header_contents})
+        if ("${line}" MATCHES "#include [<\"]${fwd_header}[>\"]")
+            set(_found ON)
+            break()
+        endif()
+    endforeach()
+    if (NOT _found)
+        message(FATAL_ERROR "The header file <${full_header}> does not include <${fwd_header}>.")
+    endif()
+endforeach()
+
+
 

@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/Export.h>
+#include <osvr/Util/AnyMap_fwd.h>
 
 // Library/third-party includes
 #include <boost/any.hpp>
