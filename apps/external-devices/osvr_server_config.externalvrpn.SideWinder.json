@@ -1,0 +1,27 @@
+{
+  "externalDevices": {
+    "/SidewinderDevice": {
+      "deviceName": "Sidewinder",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "analog": {},
+          "button": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/controller/trigger/X": "/SidewinderDevice/analog/0",
+    "/controller/trigger/Y": "/SidewinderDevice/analog/1",
+    "/controller/trigger/slider": "/SidewinderDevice/analog/2",
+    "/controller/1": "/SidewinderDevice/button/0",
+    "/controller/2": "/SidewinderDevice/button/1",
+    "/controller/3": "/SidewinderDevice/button/2",
+    "/controller/4": "/SidewinderDevice/button/3",
+    "/controller/5": "/SidewinderDevice/button/4",
+    "/controller/6": "/SidewinderDevice/button/5",
+    "/controller/7": "/SidewinderDevice/button/6",
+    "/controller/8": "/SidewinderDevice/button/7"
+  }
+}
