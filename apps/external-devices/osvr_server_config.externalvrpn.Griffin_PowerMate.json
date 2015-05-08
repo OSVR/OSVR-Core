@@ -5,12 +5,14 @@
       "server": "localhost:3884",
       "descriptor": {
         "interfaces": {
-          "button": {}
+          "button": {},
+          "analog": {}
         }
       }
     }
   },
   "aliases": {
-    "/controller/1": "/GriffinPowerMateDevice/button/0",
+    "/controller/trigger/turn": "/GriffinPowerMateDevice/analog/0",
+    "/controller/1": "/GriffinPowerMateDevice/button/0"
   }
 }
