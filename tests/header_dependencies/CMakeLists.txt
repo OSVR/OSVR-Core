@@ -56,21 +56,11 @@ endforeach()
 # That is, ensure that Blah_fwd.h is included in Blah.h.
 #
 
-file(GLOB_RECURSE fwd_headers RELATIVE "${HEADER_BASE}" ${HEADER_BASE}/*_fwd.h)
-foreach(fwd_header ${fwd_headers})
-    string(REPLACE "_fwd.h" ".h" full_header "${fwd_header}")
-    file(STRINGS "${HEADER_BASE}/${full_header}" header_contents)
-    set(_found OFF)
-    foreach(line ${header_contents})
-        if ("${line}" MATCHES "#include [<\"]${fwd_header}[>\"]")
-            set(_found ON)
-            break()
-        endif()
-    endforeach()
-    if (NOT _found)
-        message(FATAL_ERROR "The header file <${full_header}> does not include <${fwd_header}>.")
-    endif()
-endforeach()
+add_test(NAME test_fwd_headers
+    COMMAND ${CMAKE_COMMAND}
+        -DHEADER_BASE=${HEADER_BASE}
+        -P "${CMAKE_CURRENT_LIST_DIR}/CheckForwardDeclarationHeaders.cmake"
+)
 
 
 
