@@ -250,7 +250,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         // TODO: Estimate the summed brightness of each blob so that we can
         // detect when they are getting brighter and dimmer.  Pass this as
-        // the brightness parameter to the 
+        // the brightness parameter to the Led class when adding a new one
+        // or augmenting with a new frame.
 
         // Locate the closest blob from this frame to each LED found
         // in the previous frame.  If it is close enough to the nearest neighbor from last
