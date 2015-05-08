@@ -14,7 +14,7 @@
   "aliases": {
     "/controller/trigger/rudder": "/FutabaInterLinkDevice/analog/0",
     "/controller/trigger/throttle": "/FutabaInterLinkDevice/analog/1",
-    "/controller/trigger/alieron": "/FutabaInterLinkDevice/analog/2",
+    "/controller/trigger/aileron": "/FutabaInterLinkDevice/analog/2",
     "/controller/trigger/elevtr": "/FutabaInterLinkDevice/analog/3",
     "/controller/trigger/ch6flaps": "/FutabaInterLinkDevice/analog/4",
     "/controller/ch5fwd": "/FutabaInterLinkDevice/button/0",
@@ -34,6 +34,5 @@
     "/controller/throttlDwn": "/FutabaInterLinkDevice/button/15",
     "/controller/up": "/FutabaInterLinkDevice/button/16",
     "/controller/down": "/FutabaInterLinkDevice/button/17"
-    
   }
 }
