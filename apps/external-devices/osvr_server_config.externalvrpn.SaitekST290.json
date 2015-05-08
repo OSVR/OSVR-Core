@@ -1,0 +1,32 @@
+{
+  "externalDevices": {
+    "/SaitekST290Device": {
+      "deviceName": "SaitekST290",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "analog": {},
+          "button": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/controller/trigger/X": "/SaitekST290Device/analog/0",
+    "/controller/trigger/Y": "/SaitekST290Device/analog/1",
+    "/controller/trigger/Z": "/SaitekST290Device/analog/2",
+    "/controller/trigger/slider": "/SaitekST290Device/analog/3",
+    "/controller/trigger/pov": "/SaitekST290Device/analog/4",
+    "/controller/1": "/SaitekST290Device/button/0",
+    "/controller/2": "/SaitekST290Device/button/1",
+    "/controller/3": "/SaitekST290Device/button/2",
+    "/controller/4": "/SaitekST290Device/button/3",
+    "/controller/5": "/SaitekST290Device/button/4",
+    "/controller/6": "/SaitekST290Device/button/5",
+    "/controller/7": "/SaitekST290Device/button/6",
+    "/controller/up": "/SaitekST290Device/button/7",
+    "/controller/right": "/SaitekST290Device/button/8",
+    "/controller/down": "/SaitekST290Device/button/9",
+    "/controller/left": "/SaitekST290Device/button/10"
+  }
+}
