@@ -1,0 +1,44 @@
+/* Note, that you will need to add a tracker alias for every body/flystick that you add through VRPN */
+/* Powerwall` coordinate system is what the system expects and if you use a different system, then you will need to apply */
+/* transforms (see example below which you'd modify as needed)  */
+{
+  "externalDevices": {
+    "/DTrackDevice": {
+      "deviceName": "DTrack",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "tracker": {},
+          "button": {},
+          "analog": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/me/head": {
+      "rotate": {
+        "axis": "x",
+        "degrees": 0
+      },
+      "child": {
+        "changeBasis": {
+          "x": "x",
+          "y": "y",
+          "z": "z"
+        },
+        "child": "/DTrackDevice/tracker/0"
+      }
+    },
+    "/controller/trigger/1": "/DTrackDevice/analog/0",
+    "/controller/trigger/2": "/DTrackDevice/analog/1",
+    "/controller/1": "/DTrackDevice/button/0",
+    "/controller/2": "/DTrackDevice/button/1",
+    "/controller/3": "/DTrackDevice/button/2",
+    "/controller/4": "/DTrackDevice/button/3",
+    "/controller/5": "/DTrackDevice/button/4",
+    "/controller/6": "/DTrackDevice/button/5",
+    "/controller/7": "/DTrackDevice/button/6",
+    "/controller/8": "/DTrackDevice/button/7"
+  }
+}
