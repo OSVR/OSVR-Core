@@ -367,9 +367,10 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // Compute the pose of the HMD w.r.t. the camera frame of reference.
         // TODO: Keep track of whether we already have a good pose and, if so,
         // have the algorithm initialize using it so we do less work on average.
+        cv::Mat rvec, tvec; // Rotation and translation vectors from within OpenCV
         if (m_estimator) {
             OSVR_PoseState pose;
-            if (m_estimator->EstimatePoseFromLeds(m_leds, pose)) {
+            if (m_estimator->EstimatePoseFromLeds(m_leds, pose, rvec, tvec)) {
                 m_pose = pose;
             }
         }
@@ -432,7 +433,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     cv::Mat m_thresholdImage;
     cv::Mat m_imageWithBlobs;
 #ifdef VBHMD_DEBUG
-    cv::Mat *m_shownImage = &m_frame;
+    cv::Mat *m_shownImage = &m_imageWithBlobs;
 #endif
 
     // What type of HMD are we tracking?

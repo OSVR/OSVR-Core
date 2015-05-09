@@ -142,6 +142,8 @@ void BeaconBasedPoseEstimator::setDistCoeffs(const std::vector<double> &distCoef
 bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     const std::list<osvr::vbtracker::Led> &leds
     , OSVR_PoseState &out
+    , cv::Mat &rvec
+    , cv::Mat &tvec
     )
 {
     // We need to get a pair of matched vectors of points: 2D locations
@@ -153,7 +155,7 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
 
     std::vector<cv::Point3f> objectPoints;
     std::vector<cv::Point2f> imagePoints;
-
+    std::cout << "XXX before pushing" << std::endl;
     std::list<osvr::vbtracker::Led>::const_iterator i;
     for (i = leds.begin(); i != leds.end(); i++) {
         int id = i->getID();
@@ -169,29 +171,65 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
 
     // Make sure we have enough points to do our estimation.  We want at least
     // five corresponding points (this is somewhat arbitary).
+    std::cout << "XXX pushed " << objectPoints.size() << " object and " << imagePoints.size() << " image points" << std::endl;
     if (objectPoints.size() < 5) {
         return false;
     }
 
+    // Construct the camera matrix from the vectors we received.
+    if (m_cameraMatrix.size() != 3) {
+        return false;
+    }
+    for (size_t i = 0; i < m_cameraMatrix.size(); i++) {
+        if (m_cameraMatrix[i].size() != 3) {
+            return false;
+        }
+    }
+    cv::Mat cameraMatrix(static_cast<int>(m_cameraMatrix.size()), 
+        static_cast<int>(m_cameraMatrix[0].size()), CV_64F);
+    for (int i = 0; i < m_cameraMatrix.size(); i++) {
+        for (int j = 0; j < m_cameraMatrix[i].size(); j++) {
+            cameraMatrix.at<double>(i, j) = m_cameraMatrix[i][j];
+        }
+    }
+    //std::cout << "XXX cameraMatrix =" << std::endl << cameraMatrix << std::endl;
+
+    // Construct the distortion matrix from the vectors we received.
+    if (m_distCoeffs.size() < 5) {
+        return false;
+    }
+    cv::Mat distCoeffs(static_cast<int>(m_distCoeffs.size()), 1, CV_64F);
+    for (int i = 0; i < m_distCoeffs.size(); i++) {
+        distCoeffs.at<double>(i, 0) = m_distCoeffs[i];
+    }
+
     // Produce an estimate of the translation and rotation needed to take points from
     // model space into camera space.
+    // TODO: Consider adjusting the number of iterations to improve speed.
+    // TODO: Consider switching away from Ransac solution because we should not have
+    // outliers, this may speed up the solver.
     // TODO: Keep track of whether we have a good estimate already and, if so,
     // use it to initialize the estimate to speed things up on average.
-    cv::Mat rvec, tvec, inliers;
-    cv::solvePnPRansac(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
+    cv::Mat inliers;
+    cv::solvePnPRansac(objectPoints, imagePoints, cameraMatrix, m_distCoeffs,
         rvec, tvec, false, 100, 8.0f, 4, inliers);
-    // XXX
 
-    // Make sure we had most one outlier to produce the calculation.  This
+    // Make sure we had at most one outlier to produce the calculation.  This
     // lets us avoid the case where a single bad report confuses the result,
     // but since we have identified the correspondences, we should not be
     // getting too many false reports.  This number is somewhat arbitary.
-    // XXX
+    std::cout << "XXX found " << inliers.rows * inliers.cols << " inliers" << std::endl;
+    if (inliers.rows * inliers.cols < objectPoints.size() - 1) {
+        return false;
+    }
 
     // Convert this into an OSVR representation of the transformation that gives
     // the pose of the HDK origin in the camera coordinate system, switching units
     // to meters and encoding the angle in a unit quaternion.
     // XXX
+
+    std::cout << "XXX after solving" << std::endl;
+    // XXX return true;
 }
 
 } // End namespace vbtracker
