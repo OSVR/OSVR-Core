@@ -67,6 +67,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_type = Unknown;
         m_dk2 = nullptr;
         m_estimator = nullptr;
+        osvrPose3SetIdentity(&m_pose);
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -313,7 +314,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // Draw detected blobs as red circles.
         cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
             cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-        //if (keyPoints.size() > 0) { std::cout << "First keypoint location: " << keyPoints[0].pt.x << ", " << keyPoints[0].pt.y << std::endl; }
 
         // TODO: Consider computing the center of mass of a dilated bounding
         // rectangle around each keypoint to produce a more precise subpixel
@@ -363,6 +363,18 @@ class VideoBasedHMDTracker : boost::noncopyable {
             keyPoints.erase(keyPoints.begin());
         }
 
+        //==================================================================
+        // Compute the pose of the HMD w.r.t. the camera frame of reference.
+        // TODO: Keep track of whether we already have a good pose and, if so,
+        // have the algorithm initialize using it so we do less work on average.
+        if (m_estimator) {
+            OSVR_PoseState pose;
+            if (m_estimator->EstimatePoseFromLeds(m_leds, pose)) {
+                m_pose = pose;
+            }
+        }
+
+#ifdef VBHMD_DEBUG
         // Label the keypoints with their IDs.
         for (led = m_leds.begin(); led != m_leds.end(); led++) {
             std::ostringstream label;
@@ -374,13 +386,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255));
         }
 
-        //==================================================================
-        // Compute the pose of the HMD w.r.t. the camera frame of reference.
-        OSVR_PoseState pose;
-        osvrPose3SetIdentity(&pose);
-        // XXX Compute pose here.
-
-#ifdef VBHMD_DEBUG
+        // Pick which image to show and show it.
         if (m_frame.data) {
             cv::imshow("Debug window", *m_shownImage);
             int key = cv::waitKey(1);
@@ -407,7 +413,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         /// Report the new pose, time-stamped with the time we
         // received the image from the camera.
         osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker,
-            &pose, 0, &timestamp);
+            &m_pose, 0, &timestamp);
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -439,6 +445,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
     // In case we are using a DK2, we need a pointer to one.
     std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;
+
+    // The pose that we report
+    OSVR_PoseState m_pose;
 };
 
 class HardwareDetection {

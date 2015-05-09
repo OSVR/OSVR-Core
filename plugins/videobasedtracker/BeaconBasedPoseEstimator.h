@@ -24,7 +24,10 @@ Sensics, Inc.
 
 #pragma once
 
+#include "LED.h"
+#include <osvr/Util/ClientReportTypesC.h>
 #include <vector>
+#include <list>
 
 namespace osvr {
 namespace vbtracker {
@@ -54,9 +57,15 @@ public:
         , const std::vector< std::vector<double> > &beacons = OsvrHdkLedLocations_DEFAULT   //< 3D beacon locations
         );
 
-    // Produce an estimate of the translation and rotation needed to take points from
-    // model space into camera space.
-    // XXX We want this to be in OSVR, so go ahead and move the code over there first.
+    // Produce an estimate of the pose of the model-space origin in camera space, where the
+    // origin is at the center of the image as described by the camera matrix.
+    // This pose will be expressed in meters even though the beacon locations
+    // and camera focal depth are in millimeters.
+    // Returns true on success, false on failure to make a pose.
+    bool EstimatePoseFromLeds(
+        const std::list<osvr::vbtracker::Led> &leds
+        , OSVR_PoseState &out
+        );
 
     // Replace one of the data sets we're using with a new one.
     void setBeacons(const std::vector< std::vector<double> > &beacons);
