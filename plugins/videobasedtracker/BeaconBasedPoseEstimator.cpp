@@ -139,6 +139,60 @@ void BeaconBasedPoseEstimator::setDistCoeffs(const std::vector<double> &distCoef
     m_distCoeffs = distCoeffs;
 }
 
+bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
+    const std::list<osvr::vbtracker::Led> &leds
+    , OSVR_PoseState &out
+    )
+{
+    // We need to get a pair of matched vectors of points: 2D locations
+    // with in the image and 3D locations in model space.  There needs to
+    // be a correspondence between the points in these vectors, such that
+    // the ith element in one matches the ith element in the other.  We
+    // make these by looking up the locations of LEDs with known identifiers
+    // and pushing both onto the vectors at the same time.
+
+    std::vector<cv::Point3f> objectPoints;
+    std::vector<cv::Point2f> imagePoints;
+
+    std::list<osvr::vbtracker::Led>::const_iterator i;
+    for (i = leds.begin(); i != leds.end(); i++) {
+        int id = i->getID();
+        if ((id >= 0) && (id < m_beacons.size())) {
+            imagePoints.push_back(i->getLocation());
+            cv::Point3f p(
+                static_cast<float>(m_beacons[id][0]),
+                static_cast<float>(m_beacons[id][1]) ,
+                static_cast<float>(m_beacons[id][2]) );
+            objectPoints.push_back(p);
+        }
+    }
+
+    // Make sure we have enough points to do our estimation.  We want at least
+    // five corresponding points (this is somewhat arbitary).
+    if (objectPoints.size() < 5) {
+        return false;
+    }
+
+    // Produce an estimate of the translation and rotation needed to take points from
+    // model space into camera space.
+    // TODO: Keep track of whether we have a good estimate already and, if so,
+    // use it to initialize the estimate to speed things up on average.
+    cv::Mat rvec, tvec, inliers;
+    cv::solvePnPRansac(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
+        rvec, tvec, false, 100, 8.0f, 4, inliers);
+    // XXX
+
+    // Make sure we had most one outlier to produce the calculation.  This
+    // lets us avoid the case where a single bad report confuses the result,
+    // but since we have identified the correspondences, we should not be
+    // getting too many false reports.  This number is somewhat arbitary.
+    // XXX
+
+    // Convert this into an OSVR representation of the transformation that gives
+    // the pose of the HDK origin in the camera coordinate system, switching units
+    // to meters and encoding the angle in a unit quaternion.
+    // XXX
+}
 
 } // End namespace vbtracker
 } // End namespace osvr
