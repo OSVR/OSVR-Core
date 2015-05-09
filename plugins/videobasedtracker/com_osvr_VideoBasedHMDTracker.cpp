@@ -311,10 +311,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
         std::vector<cv::KeyPoint> keyPoints;
         detector.detect(m_imageGray, keyPoints);
 
-        // Draw detected blobs as red circles.
-        cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
-            cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
         // TODO: Consider computing the center of mass of a dilated bounding
         // rectangle around each keypoint to produce a more precise subpixel
         // localization of each LED.  The moments() function may be helpful
@@ -367,15 +363,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // Compute the pose of the HMD w.r.t. the camera frame of reference.
         // TODO: Keep track of whether we already have a good pose and, if so,
         // have the algorithm initialize using it so we do less work on average.
-        cv::Mat rvec, tvec; // Rotation and translation vectors from within OpenCV
+        bool gotPose = false;
         if (m_estimator) {
             OSVR_PoseState pose;
-            if (m_estimator->EstimatePoseFromLeds(m_leds, pose, rvec, tvec)) {
+            if (m_estimator->EstimatePoseFromLeds(m_leds, pose)) {
                 m_pose = pose;
+                gotPose = true;
             }
         }
 
 #ifdef VBHMD_DEBUG
+        // Draw detected blobs as red circles.
+        cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
+            cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
         // Label the keypoints with their IDs.
         for (led = m_leds.begin(); led != m_leds.end(); led++) {
             std::ostringstream label;
@@ -385,6 +386,24 @@ class VideoBasedHMDTracker : boost::noncopyable {
             where.y += 1;
             cv::putText(m_imageWithBlobs, label.str(), where,
                 cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255));
+        }
+
+        // If we have a transform, reproject all of the points from the
+        // model space (the LED locations) back into the image and
+        // display them on the blob image in green.
+        if (gotPose && m_estimator) {
+            std::vector<cv::Point2f> imagePoints;
+            m_estimator->ProjectBeaconsToImage(imagePoints);
+            // XXX
+            for (int i = 0; i < imagePoints.size(); i++) {
+                std::ostringstream label;
+                label << i;
+                cv::Point where = imagePoints[i];
+                where.x += 1;
+                where.y += 1;
+                cv::putText(m_imageWithBlobs, label.str(), where,
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
+            }
         }
 
         // Pick which image to show and show it.
