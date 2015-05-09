@@ -125,9 +125,23 @@ class VideoBasedHMDTracker : boost::noncopyable {
         height = m_images[0].rows;
         m_type = Fake;
 
+        // Here's where we get 700 for the focal length:
+        // The aspect ratio of the camera in Blender is determined by two parameters:
+        // the focal length(which defaults to 35mm) and the sensor size (which is set
+        // on the camera control panel, and defaults to 32 in my version). This is the
+        // horizontal size of the image sensor in mm, according to the pop - up info
+        // box. The model in OpenCV only has the focal length as a parameter. So the
+        // question becomes how to set the sensor size in Blender to match what OpenCV
+        // is expecting.
+        // The basic issue is that the camera matrix in OpenCV stores the focal length
+        // in pixel units, not millimeters.  For the default image sensor width of 32mm,
+        // and an image resolution of 640x480, we compute the OpenCV focal length as
+        // follows: 35mm * (640 pixels / 32 mm) = 700 pixels. The resulting camera
+        // matrix would be: { {700, 0, 320}, {0, 700, 240}, {0, 0, 1} }
+
         double cx = width / 2.0;
         double cy = height / 2.0;
-        double fx = 35.0;
+        double fx = 700;
         double fy = fx;
         std::vector< std::vector<double> > m;
         m.push_back({  fx, 0.0,  cx });
@@ -199,7 +213,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 // parameters by calibrating them in OpenCV.
                 double cx = width / 2.0;
                 double cy = height / 2.0;
-                double fx = 30.0;
+                double fx = 700.0;   // XXX This needs to be in pixels, not mm
                 double fy = fx;
                 std::vector< std::vector<double> > m;
                 m.push_back({  fx, 0.0,  cx });
