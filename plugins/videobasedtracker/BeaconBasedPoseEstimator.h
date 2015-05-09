@@ -65,6 +65,8 @@ public:
     bool EstimatePoseFromLeds(
         const std::list<osvr::vbtracker::Led> &leds
         , OSVR_PoseState &out
+        , cv::Mat &rvec             //< Also returns the OpenCV results for debugging
+        , cv::Mat &tvec             //< Also returns the OpenCV results for debugging
         );
 
     // Replace one of the data sets we're using with a new one.
