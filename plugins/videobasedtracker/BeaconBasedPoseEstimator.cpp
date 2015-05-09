@@ -121,29 +121,69 @@ BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
     , const std::vector<double> &distCoeffs
     , const std::vector< std::vector<double> > &beacons)
 {
-    m_beacons = beacons;
-    m_cameraMatrix = cameraMatrix;
-    m_distCoeffs = distCoeffs;
+    SetBeacons(beacons);
+    SetCameraMatrix(cameraMatrix);
+    SetDistCoeffs(distCoeffs);
+    m_gotPose = false;
 }
 
-void BeaconBasedPoseEstimator::setBeacons(const std::vector< std::vector<double> > &beacons)
+bool BeaconBasedPoseEstimator::SetBeacons(const std::vector< std::vector<double> > &beacons)
 {
-    m_beacons = beacons;
+    for (int i = 0; i < beacons.size(); i++) {
+        if (beacons[i].size() != 3) { m_beacons.clear(); return false; }
+        cv::Point3f p(
+            static_cast<float>(beacons[i][0]),
+            static_cast<float>(beacons[i][1]),
+            static_cast<float>(beacons[i][2]));
+        m_beacons.push_back(p);
+    }
+
+    return true;
 }
-void BeaconBasedPoseEstimator::setCameraMatrix(const std::vector< std::vector<double> > &cameraMatrix)
+
+bool BeaconBasedPoseEstimator::SetCameraMatrix(const std::vector< std::vector<double> > &cameraMatrix)
 {
-    m_cameraMatrix = cameraMatrix;
+    // Construct the camera matrix from the vectors we received.
+    if (cameraMatrix.size() != 3) {
+        return false;
+    }
+    for (size_t i = 0; i < cameraMatrix.size(); i++) {
+        if (cameraMatrix[i].size() != 3) {
+            return false;
+        }
+    }
+    cv::Mat newCameraMatrix(static_cast<int>(cameraMatrix.size()),
+        static_cast<int>(cameraMatrix[0].size()), CV_64F);
+    for (int i = 0; i < cameraMatrix.size(); i++) {
+        for (int j = 0; j < cameraMatrix[i].size(); j++) {
+            newCameraMatrix.at<double>(i, j) = cameraMatrix[i][j];
+        }
+    }
+
+    m_cameraMatrix = newCameraMatrix;
+//    std::cout << "XXX cameraMatrix =" << std::endl << m_cameraMatrix << std::endl;
+    return true;
 }
-void BeaconBasedPoseEstimator::setDistCoeffs(const std::vector<double> &distCoeffs)
+
+bool BeaconBasedPoseEstimator::SetDistCoeffs(const std::vector<double> &distCoeffs)
 {
-    m_distCoeffs = distCoeffs;
+    // Construct the distortion matrix from the vectors we received.
+    if (distCoeffs.size() < 5) {
+        return false;
+    }
+    cv::Mat newDistCoeffs(static_cast<int>(distCoeffs.size()), 1, CV_64F);
+    for (int i = 0; i < distCoeffs.size(); i++) {
+        newDistCoeffs.at<double>(i, 0) = distCoeffs[i];
+    }
+
+    m_distCoeffs = newDistCoeffs;
+//    std::cout << "XXX distCoeffs =" << std::endl << m_distCoeffs << std::endl;
+    return true;
 }
 
 bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     const std::list<osvr::vbtracker::Led> &leds
     , OSVR_PoseState &out
-    , cv::Mat &rvec
-    , cv::Mat &tvec
     )
 {
     // We need to get a pair of matched vectors of points: 2D locations
@@ -161,11 +201,7 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
         int id = i->getID();
         if ((id >= 0) && (id < m_beacons.size())) {
             imagePoints.push_back(i->getLocation());
-            cv::Point3f p(
-                static_cast<float>(m_beacons[id][0]),
-                static_cast<float>(m_beacons[id][1]) ,
-                static_cast<float>(m_beacons[id][2]) );
-            objectPoints.push_back(p);
+            objectPoints.push_back(m_beacons[id]);
         }
     }
 
@@ -175,33 +211,10 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     if (objectPoints.size() < 5) {
         return false;
     }
-
-    // Construct the camera matrix from the vectors we received.
-    if (m_cameraMatrix.size() != 3) {
-        return false;
-    }
-    for (size_t i = 0; i < m_cameraMatrix.size(); i++) {
-        if (m_cameraMatrix[i].size() != 3) {
-            return false;
-        }
-    }
-    cv::Mat cameraMatrix(static_cast<int>(m_cameraMatrix.size()), 
-        static_cast<int>(m_cameraMatrix[0].size()), CV_64F);
-    for (int i = 0; i < m_cameraMatrix.size(); i++) {
-        for (int j = 0; j < m_cameraMatrix[i].size(); j++) {
-            cameraMatrix.at<double>(i, j) = m_cameraMatrix[i][j];
-        }
-    }
-    //std::cout << "XXX cameraMatrix =" << std::endl << cameraMatrix << std::endl;
-
-    // Construct the distortion matrix from the vectors we received.
-    if (m_distCoeffs.size() < 5) {
-        return false;
-    }
-    cv::Mat distCoeffs(static_cast<int>(m_distCoeffs.size()), 1, CV_64F);
-    for (int i = 0; i < m_distCoeffs.size(); i++) {
-        distCoeffs.at<double>(i, 0) = m_distCoeffs[i];
-    }
+    //std::cout << "XXX First object point = " << objectPoints[0] << std::endl;
+    //std::cout << "XXX First image point = " << imagePoints[0] << std::endl;
+    //std::cout << "XXX Last object point = " << objectPoints[objectPoints.size() - 1] << std::endl;
+    //std::cout << "XXX Last image point = " << imagePoints[imagePoints.size() - 1] << std::endl;
 
     // Produce an estimate of the translation and rotation needed to take points from
     // model space into camera space.
@@ -211,17 +224,18 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     // TODO: Keep track of whether we have a good estimate already and, if so,
     // use it to initialize the estimate to speed things up on average.
     cv::Mat inliers;
-    cv::solvePnPRansac(objectPoints, imagePoints, cameraMatrix, m_distCoeffs,
-        rvec, tvec, false, 100, 8.0f, 4, inliers);
+    cv::solvePnPRansac(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
+        m_rvec, m_tvec, false, 100, 8.0f, 4, inliers);
 
     // Make sure we had at most one outlier to produce the calculation.  This
     // lets us avoid the case where a single bad report confuses the result,
     // but since we have identified the correspondences, we should not be
     // getting too many false reports.  This number is somewhat arbitary.
     std::cout << "XXX found " << inliers.rows * inliers.cols << " inliers" << std::endl;
-    if (inliers.rows * inliers.cols < objectPoints.size() - 1) {
-        return false;
-    }
+// XXX Re-insert once this works.
+//    if (inliers.rows * inliers.cols < objectPoints.size() - 1) {
+//        return false;
+//    }
 
     // Convert this into an OSVR representation of the transformation that gives
     // the pose of the HDK origin in the camera coordinate system, switching units
@@ -229,8 +243,22 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     // XXX
 
     std::cout << "XXX after solving" << std::endl;
-    // XXX return true;
+
+    m_gotPose = true;
+    return true;
 }
+
+bool BeaconBasedPoseEstimator::ProjectBeaconsToImage(std::vector<cv::Point2f> &out)
+{
+    // Make sure we have a pose.  Otherwise, we can't do anything.
+    if (!m_gotPose) {
+        return false;
+    }
+
+    cv::projectPoints(m_beacons, m_rvec, m_tvec, m_cameraMatrix, m_distCoeffs, out);
+    return true;
+}
+
 
 } // End namespace vbtracker
 } // End namespace osvr

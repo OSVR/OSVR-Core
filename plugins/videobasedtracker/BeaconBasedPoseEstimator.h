@@ -65,19 +65,28 @@ public:
     bool EstimatePoseFromLeds(
         const std::list<osvr::vbtracker::Led> &leds
         , OSVR_PoseState &out
-        , cv::Mat &rvec             //< Also returns the OpenCV results for debugging
-        , cv::Mat &tvec             //< Also returns the OpenCV results for debugging
         );
 
+    // Project the beacons into image space given the most-recent estimation of
+    // pose.
+    // Returns true on success, false on failure.
+    bool ProjectBeaconsToImage(std::vector<cv::Point2f> &out);
+
     // Replace one of the data sets we're using with a new one.
-    void setBeacons(const std::vector< std::vector<double> > &beacons);
-    void setCameraMatrix(const std::vector< std::vector<double> > &cameraMatrix);
-    void setDistCoeffs(const std::vector<double> &distCoeffs);
+    bool SetBeacons(const std::vector< std::vector<double> > &beacons);
+    bool SetCameraMatrix(const std::vector< std::vector<double> > &cameraMatrix);
+    bool SetDistCoeffs(const std::vector<double> &distCoeffs);
 
 protected:
-    std::vector< std::vector<double> >   m_beacons;      //< 3D location of LED beacons
-    std::vector< std::vector<double> >   m_cameraMatrix; //< 3x3 camera matrix
-    std::vector<double>                  m_distCoeffs;   //< Distortion coefficients
+    std::vector<cv::Point3f>   m_beacons;      //< 3D location of LED beacons
+    cv::Mat   m_cameraMatrix;   //< 3x3 camera matrix
+    cv::Mat   m_distCoeffs;     //< Distortion coefficients
+
+    // Stores the most-recent solution, in case we need it again (for example, to
+    // project our beacons into the image).
+    bool    m_gotPose;          //< Have we produced a pose estimate yet?
+    cv::Mat m_rvec;             //< Rotation vector associated with the most-recent pose
+    cv::Mat m_tvec;             //< Translation vector associated with the most-recent pose.
 };
 
 } // End namespace vbtracker
