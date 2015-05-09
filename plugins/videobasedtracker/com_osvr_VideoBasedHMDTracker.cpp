@@ -42,10 +42,17 @@
 
 // Standard includes
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <memory>
 
+// Define the constant below to provide debugging (window showing video and
+// behavior)
 #define VBHMD_DEBUG
+
+// Define the constant below to read from a set of files with names
+// 0001.tif and above; specify the directory name to read from
+#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -56,7 +63,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
     {
         // Initialize things from parameters and from defaults.  Do it here rather than
         // in an initialization list so that we're independent of member order declaration.
-        m_camera = cameraNum;
         m_channel = channel;
         m_type = Unknown;
         m_dk2 = nullptr;
@@ -86,6 +92,52 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // Figure out what type of HMD we're using.
         int height = 0;
         int width = 0;
+#ifdef VBHMD_FAKE_IMAGES
+        // Read a vector of images, which we'll loop through.
+        int imageNum = 1;
+        do {
+            std::ostringstream fileName;
+            fileName << VBHMD_FAKE_IMAGES << "/";
+            fileName << std::setfill('0') << std::setw(4) << imageNum++;
+            fileName << ".tif";
+            cv::Mat image;
+#ifdef VBHMD_DEBUG
+            std::cout << "Trying to read image from " << fileName.str() << std::endl;
+#endif
+            image = cv::imread(fileName.str().c_str(), CV_LOAD_IMAGE_COLOR);
+            if (!image.data) {
+                break;
+            }
+            m_images.push_back(image);
+        } while (true);
+        m_currentImage = 0;
+
+        if (m_images.size() == 0) {
+            std::cerr << "Could not read any images from " << VBHMD_FAKE_IMAGES
+                << std::endl;
+            return;
+        }
+
+        // The fake tracker uses fake LED positions and a
+        // simulated camera, whose parameters we describe here.
+        width = m_images[0].cols;
+        height = m_images[0].rows;
+        m_type = Fake;
+
+        double cx = width / 2.0;
+        double cy = height / 2.0;
+        double fx = 35.0;
+        double fy = fx;
+        std::vector< std::vector<double> > m;
+        m.push_back({  fx, 0.0,  cx });
+        m.push_back({ 0.0,  fy,  cy });
+        m.push_back({ 0.0, 0.0, 1.0 });
+        std::vector<double> d;
+        d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
+        m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
+        m_estimator = new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
+            osvr::vbtracker::OsvrHdkLedLocations_FAKE);
+#else
         if (m_camera.isOpened()) {
             height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
             width = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_WIDTH));
@@ -146,7 +198,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 // parameters by calibrating them in OpenCV.
                 double cx = width / 2.0;
                 double cy = height / 2.0;
-                double fx = 300.0;
+                double fx = 30.0;
                 double fy = fx;
                 std::vector< std::vector<double> > m;
                 m.push_back({  fx, 0.0,  cx });
@@ -163,6 +215,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // We've already got a NULL identifier and estimator, so nothing to do.
             break;
         }
+#endif
     }
 
     ~VideoBasedHMDTracker() {
@@ -173,6 +226,24 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
     OSVR_ReturnCode update()
     {
+#ifdef VBHMD_FAKE_IMAGES
+        // Wrap the image count back around if it has gone too
+        // high.
+        if (m_currentImage >= m_images.size()) {
+            m_currentImage = 0;
+        }
+        // Read an image if there is one to be had, and
+        // increment the frame count.  Otherwise, fail.
+        if (m_currentImage >= m_images.size()) {
+            return OSVR_RETURN_FAILURE;
+        } else {
+            m_frame = m_images[m_currentImage++];
+        }
+
+        // Sleep 1/60th of a second, to simulate a reasonable
+        // frame rate.
+        vrpn_SleepMsecs(16);
+#else
         if (!m_camera.isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
             // camera will be plugged back in later.
@@ -188,6 +259,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         if (!m_camera.retrieve(m_frame, m_channel)) {
             return OSVR_RETURN_FAILURE;
         }
+#endif
 
         //==================================================================
         // Keep track of when we got the image, since that is our
@@ -309,8 +381,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // XXX Compute pose here.
 
 #ifdef VBHMD_DEBUG
-        if (m_camera.isOpened()) {
-            cv::imshow("Debug window", m_frame);
+        if (m_frame.data) {
+            cv::imshow("Debug window", *m_shownImage);
             int key = cv::waitKey(1);
             switch (key) {
             case 'i':
@@ -342,7 +414,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
   private:
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_TrackerDeviceInterface m_tracker;
+#ifdef VBHMD_FAKE_IMAGES
+    std::vector<cv::Mat> m_images;
+    size_t m_currentImage;
+#else
     cv::VideoCapture m_camera;
+#endif
     int m_channel;
     cv::Mat m_frame;
     cv::Mat m_imageGray;
@@ -353,7 +430,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 #endif
 
     // What type of HMD are we tracking?
-    enum { Unknown, OSVRHDK, OculusDK2 } m_type;
+    enum { Unknown, OSVRHDK, OculusDK2, Fake } m_type;
 
     // Structures needed to do the tracking.
     osvr::vbtracker::LedIdentifier *m_identifier;
@@ -373,6 +450,7 @@ class HardwareDetection {
             return OSVR_RETURN_SUCCESS;
         }
 
+#ifndef VBHMD_FAKE_IMAGES
         {
             // Autodetect camera.  This needs to have the same
             // parameter as the constructor for the VideoBasedHMDTracker
@@ -387,6 +465,7 @@ class HardwareDetection {
                 return OSVR_RETURN_FAILURE;
             }
         }
+#endif
         m_found = true;
 
         /// Create our device object, passing the context.

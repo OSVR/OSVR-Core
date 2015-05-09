@@ -71,6 +71,51 @@ const std::vector< std::vector<double> > OsvrHdkLedLocations_DEFAULT =
     , { 59.59, 10.25, 48.1 }
 };
 
+// Fake 3D locations for the beacons on an OSVR HDK, in millimeters.
+// These are the ones used to construct the simulated video for debugging.
+const std::vector< std::vector<double> > OsvrHdkLedLocations_FAKE =
+{     { 0, 3, -10000 }
+    , { 0, 15, -10000 }
+    , { 0, 25, -10000 }
+    , { 0, 45, -10000 }
+    , { 10, 3, -10000 }
+    , { 10, 15, -10000 }
+    , { 10, 25, 47.8 }
+    , { 10, 45, 45.1 }
+    , { 20, 3, 49 }
+    , { 20, 15, 50.5 }
+    , { 20, 25, 49 }
+    , { 20, 45, 42.9 }
+    , { 30, 3, 44.6 }
+    , { 30, 15, 47 }
+    , { 30, 25, 50.5 }
+    , { 30, 45, 51.3 }
+    , { 40, 3, 48.1 }
+    , { 40, 15, 48.1 }
+    , { 40, 25, 42.4 }
+    , { 40, 45, 42.9 }
+    , { 50, 3, 48.1 }
+    , { 50, 15, 48.1 }
+    , { 50, 25, 50.5 }
+    , { 50, 45, 47 }
+    , { 60, 3, 51.3 }
+    , { 60, 15, 50.5 }
+    , { 60, 25, 49 }
+    , { 60, 45, 47.8 }
+    , { 70, 3, 47.8 }
+    , { 70, 15, 45.1 }
+    , { 70, 25, 42.9 }
+    , { 70, 45, 50.5 }
+    , { 80, 3, 48 }
+    , { 80, 15, 48 }
+    , { 80, 25, 44.6 }
+    , { 80, 45, 47 }
+    , { 12, 7, 50.5 }
+    , { 45, 20, 51.3 }
+    , { 61, 30, 48.1 }
+    , { 72, 33, 48.1 }
+};
+
 BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
     const std::vector < std::vector<double> > &cameraMatrix
     , const std::vector<double> &distCoeffs

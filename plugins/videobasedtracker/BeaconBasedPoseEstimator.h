@@ -32,6 +32,10 @@ namespace vbtracker {
 // Default 3D locations for the beacons on an OSVR HDK, in millimeters
 extern const std::vector< std::vector<double> > OsvrHdkLedLocations_DEFAULT;
 
+// Fake 3D locations for the beacons on an OSVR HDK, in millimeters.
+// These are the ones used to construct the simulated video for debugging.
+extern const std::vector< std::vector<double> > OsvrHdkLedLocations_FAKE;
+
 // Class to track an object that has identified LED beacons on it as seen in
 // a camera, where the absolute location of the LEDs with respect to a common
 // frame of reference is known.  Returns the transformation that takes points
