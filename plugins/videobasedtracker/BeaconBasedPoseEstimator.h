@@ -70,7 +70,7 @@ public:
     // Project the beacons into image space given the most-recent estimation of
     // pose.
     // Returns true on success, false on failure.
-    bool ProjectBeaconsToImage(std::vector<cv::Point2f> &out);
+    bool ProjectBeaconsToImage(std::vector<cv::Point2f> &outPose);
 
     // Replace one of the data sets we're using with a new one.
     bool SetBeacons(const std::vector< std::vector<double> > &beacons);

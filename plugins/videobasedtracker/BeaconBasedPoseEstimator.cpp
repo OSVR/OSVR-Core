@@ -23,6 +23,7 @@ Sensics, Inc.
 // limitations under the License.
 
 #include "BeaconBasedPoseEstimator.h"
+#include <osvr/Util/QuatlibInteropC.h>
 
 namespace osvr {
 namespace vbtracker {
@@ -116,6 +117,7 @@ const std::vector< std::vector<double> > OsvrHdkLedLocations_FAKE =
     , { 72, 33, 48.1 }
 };
 
+
 BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
     const std::vector < std::vector<double> > &cameraMatrix
     , const std::vector<double> &distCoeffs
@@ -183,7 +185,7 @@ bool BeaconBasedPoseEstimator::SetDistCoeffs(const std::vector<double> &distCoef
 
 bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     const std::list<osvr::vbtracker::Led> &leds
-    , OSVR_PoseState &out
+    , OSVR_PoseState &outPose
     )
 {
     // We need to get a pair of matched vectors of points: 2D locations
@@ -195,7 +197,6 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
 
     std::vector<cv::Point3f> objectPoints;
     std::vector<cv::Point2f> imagePoints;
-    std::cout << "XXX before pushing" << std::endl;
     std::list<osvr::vbtracker::Led>::const_iterator i;
     for (i = leds.begin(); i != leds.end(); i++) {
         int id = i->getID();
@@ -207,42 +208,89 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
 
     // Make sure we have enough points to do our estimation.  We want at least
     // five corresponding points (this is somewhat arbitary).
-    std::cout << "XXX pushed " << objectPoints.size() << " object and " << imagePoints.size() << " image points" << std::endl;
     if (objectPoints.size() < 5) {
+        m_gotPose = false;
         return false;
     }
-    //std::cout << "XXX First object point = " << objectPoints[0] << std::endl;
-    //std::cout << "XXX First image point = " << imagePoints[0] << std::endl;
-    //std::cout << "XXX Last object point = " << objectPoints[objectPoints.size() - 1] << std::endl;
-    //std::cout << "XXX Last image point = " << imagePoints[imagePoints.size() - 1] << std::endl;
 
     // Produce an estimate of the translation and rotation needed to take points from
-    // model space into camera space.
-    // TODO: Consider adjusting the number of iterations to improve speed.
-    // TODO: Consider switching away from Ransac solution because we should not have
-    // outliers, this may speed up the solver.
-    // TODO: Keep track of whether we have a good estimate already and, if so,
-    // use it to initialize the estimate to speed things up on average.
-    cv::Mat inliers;
-    cv::solvePnPRansac(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
-        m_rvec, m_tvec, false, 100, 8.0f, 4, inliers);
+    // model space into camera space.  We should not have any outliers, so
+    // using PnP rather than PnPRansac solver.
+    cv::solvePnP(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
+        m_rvec, m_tvec, false);
 
-    // Make sure we had at most one outlier to produce the calculation.  This
-    // lets us avoid the case where a single bad report confuses the result,
-    // but since we have identified the correspondences, we should not be
-    // getting too many false reports.  This number is somewhat arbitary.
-    std::cout << "XXX found " << inliers.rows * inliers.cols << " inliers" << std::endl;
-// XXX Re-insert once this works.
-//    if (inliers.rows * inliers.cols < objectPoints.size() - 1) {
-//        return false;
-//    }
+//    std::cout << "XXX tvec = " << m_tvec << std::endl;
+//    std::cout << "XXX rvec = " << m_rvec << std::endl;
 
+    //==========================================================================
     // Convert this into an OSVR representation of the transformation that gives
     // the pose of the HDK origin in the camera coordinate system, switching units
     // to meters and encoding the angle in a unit quaternion.
-    // XXX
+    // The matrix described by rvec and tvec takes points in model space (the
+    // space where the LEDs are defined, which is in mm away from an implied
+    // origin) into a coordinate system where the center is at the camera's
+    // origin, with X to the right, Y down, and Z in the direction that the
+    // camera is facing (but still in the original units of mm):
+    //  |Xc|   |r11 r12 r13 t1| |Xm|
+    //  |Yc| = |r21 r22 r23 t2|*|Ym|
+    //  |Zc|   |r31 r32 r33 t3| |Zm|
+    //                          |1 |
+    //  That is, it rotates into the camera coordinate system and then adds
+    // the translation, which is in the camera coordinate system.
+    //  We want the tranformation that takes points in the coordinate system
+    // of the tracker's "source" (the camera) and moves them into the coordinate
+    // system of the tracker's "sensor" (the HDK), which is the inverse of
+    // the transformation described above scaled to move from mm to meters.
 
-    std::cout << "XXX after solving" << std::endl;
+    // Compose the transform that we will invert, in original units.
+    // We start by making a 3x3 rotation matrix out of the rvec, which
+    // is done by a function that for some reason is named Rodrigues.
+    cv::Mat rot;
+    cv::Rodrigues(m_rvec, rot);
+
+    // TODO: Replace this code with Eigen code.
+
+    if (rot.type() != CV_64F) {
+        m_gotPose = false;
+        return false;
+    }
+
+    // Get the forward transform
+    q_xyz_quat_type forward;
+    forward.xyz[Q_X] = m_tvec.at<double>(0);
+    forward.xyz[Q_Y] = m_tvec.at<double>(1);
+    forward.xyz[Q_Z] = m_tvec.at<double>(2);
+
+    // Fill in a 4x4 matrix that starts as the identity
+    // matrix with the 3x3 part from the rotation matrix.
+    q_matrix_type rot4x4;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if ((i < 3) && (j < 3)) {
+                rot4x4[i][j] = rot.at<double>(i, j);
+            }
+            else {
+                if (i == j) {
+                    rot4x4[i][j] = 1;
+                }
+                else {
+                    rot4x4[i][j] = 0;
+                }
+            }
+        }
+    }
+    q_from_row_matrix(forward.quat, rot4x4);
+
+    // Invert it.
+    q_xyz_quat_type inverse;
+    q_xyz_quat_invert(&inverse, &forward);
+
+    // Scale to meters
+    q_vec_scale(inverse.xyz, 1e-3, inverse.xyz);
+
+    //==============================================================
+    // Put into OSVR format.
+    osvrPose3FromQuatlib(&outPose, &inverse);
 
     m_gotPose = true;
     return true;

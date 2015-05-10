@@ -48,11 +48,11 @@
 
 // Define the constant below to provide debugging (window showing video and
 // behavior)
-#define VBHMD_DEBUG
+//#define VBHMD_DEBUG
 
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
-#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -255,9 +255,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
             m_frame = m_images[m_currentImage++];
         }
 
-        // Sleep 1/60th of a second, to simulate a reasonable
+        // Sleep 1/120th of a second, to simulate a reasonable
         // frame rate.
-        vrpn_SleepMsecs(16);
+        vrpn_SleepMsecs(1000/120);
 #else
         if (!m_camera.isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
@@ -440,6 +440,13 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 m_shownImage = &m_imageWithBlobs;
                 break;
             }
+        }
+
+        // Report the pose, if we got one
+        if (gotPose) {
+            std::cout << "Pos: " << m_pose.translation.data[0] << ", "
+                << m_pose.translation.data[1] << ", "
+                << m_pose.translation.data[2] << std::endl;
         }
 #endif
 
