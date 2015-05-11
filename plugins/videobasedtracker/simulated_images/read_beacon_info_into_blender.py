@@ -1,13 +1,24 @@
 import bpy
 
+#============================================================================
 # Edit the two file names here to change them to match the files you want to
 # open.
-locationFile = open('HDK_LED_locations.csv')
+
+locationFile = open('HDK_LED_locations_2rmt.csv')
 patternFile = open('HDK_LED_patterns.txt')
-locations = locationFile.readlines()
-patterns = patternFile.readlines()
+
+# Edit the number of repetitions of flashings done here.
+# This will not change the camera behavior, which is set to
+# move to the right over one set of flashes and then to the
+# left over a second set.
+
+numRepeats = 2
 
 #============================================================================
+# Probably don't edit below here.
+
+locations = locationFile.readlines()
+patterns = patternFile.readlines()
 
 def setMaterial(ob, mat):
     me = ob.data
@@ -88,28 +99,36 @@ for location in locations:
 # file should have the same number of frames.
 
 frameNum = 1
-for letter in patterns[0]:
-    
-    bpy.context.scene.frame_set(frameNum)
-    print("Handling time = ", frameNum)
+rep = 0
+while rep < numRepeats:
 
-    # Set each beacon's size based on the frame we're in
-    # and its entry in the string.  It gets smaller for a
-    # dim beacon and larger for a bright one.
-    # TODO: we'd like to maybe adjust its diffuse color as
-    # well, to make it dimmer, but we're probably going to
-    # be overblowing the sensor so size is the main effect.
-    beaconId = 0;
-    for sphere in sphereList:
-        selectObject(sphereList[beaconId])
-        if patterns[beaconId][frameNum-1] == '*':
-            bpy.context.object.scale = [1.00, 1.00, 1.00]
-            bpy.ops.anim.keyframe_insert_menu(type='Scaling')
-        else:
-            if patterns[beaconId][frameNum-1] == '.':
+    count = 0;
+    while count < len(patterns[0])-1:
+                
+        bpy.context.scene.frame_set(frameNum)
+        print("Handling time = ", frameNum)
+
+        # Set each beacon's size based on the frame we're in
+        # and its entry in the string.  It gets smaller for a
+        # dim beacon and larger for a bright one.
+        # TODO: we'd like to maybe adjust its diffuse color as
+        # well, to make it dimmer, but we're probably going to
+        # be overblowing the sensor so size is the main effect.
+        beaconId = 0;
+        for sphere in sphereList:
+            selectObject(sphereList[beaconId])
+            if patterns[beaconId][count] == '*':
+                bpy.context.object.scale = [1.00, 1.00, 1.00]
+            else:
                 bpy.context.object.scale = [0.75, 0.75, 0.75]
-                bpy.ops.anim.keyframe_insert_menu(type='Scaling')
-        beaconId += 1
+            bpy.ops.anim.keyframe_insert_menu(type='Scaling')
+            beaconId += 1
 
-    # Next frame we will set.
-    frameNum += 1
+        count += 1
+
+        # Next frame we will set.
+        bpy.data.scenes["Scene"].frame_end = frameNum
+        frameNum += 1
+        
+    rep += 1
+
