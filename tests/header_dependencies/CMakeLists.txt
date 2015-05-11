@@ -4,6 +4,9 @@
 
 set(IGNORED_HEADERS osvr/Util/MSStdIntC.h)
 
+set(LIBRARIES_PluginKit libfunctionality::functionality)
+set(LIBRARIES_VRPNServer libfunctionality::functionality)
+
 set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_thread boost_filesystem)
 
 add_custom_target(header_dependencies)
@@ -11,14 +14,29 @@ add_custom_target(header_dependencies)
 file(GLOB_RECURSE headers RELATIVE "${HEADER_BASE}" ${HEADER_BASE}/*.h)
 set(test_index 0)
 foreach(HEADER ${headers})
-    list (FIND IGNORED_HEADERS "${HEADER}" _index)
-    if (${_index} EQUAL -1)
-        string(REPLACE ".h" "" basename "${HEADER}")
-        string(MAKE_C_IDENTIFIER "${basename}" basename)
+    list(FIND IGNORED_HEADERS "${HEADER}" _index)
+    if(${_index} EQUAL -1)
+        # Sample of relevant variables computed here
+        # HEADER: osvr/Util/TimeValue.h
+        # symbolname: osvr_Util_TimeValue
+        # libname: Util
+
+        # Compute symbolname
+        string(REPLACE ".h" "" symbolname "${HEADER}")
+        string(MAKE_C_IDENTIFIER "${symbolname}" symbolname)
+
+        # Compute libname
+        string(REGEX REPLACE "osvr/" "" libname "${HEADER}")
+        string(REGEX REPLACE "/[^/]+$" "" libname "${libname}")
+
+        #message(STATUS "${HEADER}: '${symbolname}' - '${libname}'")
+
+        # Name the test and output file with a number, to dodge Windows path length limits.
         set(test_name "test_${test_index}")
 
         set(extension cpp)
         if (${HEADER} MATCHES "C.h$")
+            # Header required to be C-safe, enforce it!
             set(extension c)
         endif()
 
@@ -35,14 +53,14 @@ foreach(HEADER ${headers})
         set_target_properties(${test_name} PROPERTIES
             FOLDER "OSVR Header dependency tests")
 
-        if (${extension} STREQUAL cpp)
+        if(${extension} STREQUAL cpp)
             target_compile_options(${test_name} PUBLIC ${OSVR_CXX11_FLAGS})
         endif()
 
-        target_link_libraries(${test_name} ${COMMON_TEST_LIBRARIES})
-        if (LIBRARIES_${basename})
-            target_link_libraries(${test_name} ${LIBRARIES_${basename}})
-        endif()
+        target_link_libraries(${test_name}
+            ${COMMON_TEST_LIBRARIES}
+            ${LIBRARIES_${symbolname}}
+            ${LIBRARIES_${libname}})
 
         add_test(NAME ${test_name}_builds COMMAND ${test_name})
         add_dependencies(header_dependencies ${test_name})
