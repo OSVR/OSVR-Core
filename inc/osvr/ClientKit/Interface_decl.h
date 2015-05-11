@@ -56,6 +56,9 @@ namespace clientkit {
         /// object.
         Interface(ClientContext &ctx, OSVR_ClientInterface iface);
 
+        /// @brief Empty constructor.
+        Interface();
+
 #define OSVR_CALLBACK_METHODS(TYPE)                                            \
     void registerCallback(OSVR_##TYPE##Callback cb, void *userdata);
 
@@ -69,6 +72,11 @@ namespace clientkit {
 /// @}
 
 #undef OSVR_CALLBACK_METHODS
+
+        /// @brief Determine if this interface object is empty (that is, was
+        /// it once initialized). Does not determine if it has already been
+        /// freed (see free())
+        bool notEmpty() const;
 
         /// @brief Get the raw OSVR_ClientInterface from this wrapper.
         OSVR_ClientInterface get();

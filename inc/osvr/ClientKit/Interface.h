@@ -45,6 +45,12 @@ namespace clientkit {
     inline Interface::Interface(ClientContext &ctx, OSVR_ClientInterface iface)
         : m_ctx(&ctx), m_interface(iface) {}
 
+    inline Interface::Interface() : m_ctx(NULL), m_interface(NULL) {}
+
+    inline bool Interface::notEmpty() const {
+        return m_ctx != NULL && m_interface != NULL;
+    }
+
     inline OSVR_ClientInterface Interface::get() { return m_interface; }
 
     inline ClientContext &Interface::getContext() { return *m_ctx; }
