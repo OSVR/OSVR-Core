@@ -15,3 +15,8 @@ set(OpenCV_DIR_IMPORTED "@OpenCV_DIR@")
 if(OpenCV_DIR_IMPORTED AND NOT OPENCV_FOUND)
     list(APPEND CMAKE_PREFIX_PATH "${OpenCV_DIR_IMPORTED}")
 endif()
+
+# Help out with boost.
+if(NOT BOOST_FOUND)
+    include("@CMAKE_CURRENT_SOURCE_DIR@/CMakeBoostHelper.cmake")
+endif()
