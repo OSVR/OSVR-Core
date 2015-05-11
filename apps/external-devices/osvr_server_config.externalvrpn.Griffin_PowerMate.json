@@ -1,0 +1,18 @@
+{
+  "externalDevices": {
+    "/GriffinPowerMateDevice": {
+      "deviceName": "griffin0",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "button": {},
+          "analog": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/controller/trigger/turn": "/GriffinPowerMateDevice/analog/0",
+    "/controller/1": "/GriffinPowerMateDevice/button/0"
+  }
+}

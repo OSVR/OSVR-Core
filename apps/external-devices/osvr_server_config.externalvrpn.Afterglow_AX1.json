@@ -1,0 +1,36 @@
+{
+  "externalDevices": {
+    "/AfterglowAx1Device": {
+      "deviceName": "AfterglowAx1",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "analog": {},
+          "button": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/controller/trigger/leftX": "/AfterglowAx1Device/analog/0",
+    "/controller/trigger/leftY": "/AfterglowAx1Device/analog/1",
+    "/controller/trigger/rightX": "/AfterglowAx1Device/analog/2",
+    "/controller/trigger/rightY": "/AfterglowAx1Device/analog/3",
+    "/controller/trigger/trigs": "/AfterglowAx1Device/analog/4",
+    "/controller/trigger/pov": "/AfterglowAx1Device/analog/5",
+    "/controller/A": "/AfterglowAx1Device/button/0",
+    "/controller/B": "/AfterglowAx1Device/button/1",
+    "/controller/X": "/AfterglowAx1Device/button/2",
+    "/controller/Y": "/AfterglowAx1Device/button/3",
+    "/controller/leftBmp": "/AfterglowAx1Device/button/4",
+    "/controller/rightBmp": "/AfterglowAx1Device/button/5",
+    "/controller/back": "/AfterglowAx1Device/button/6",
+    "/controller/start": "/AfterglowAx1Device/button/7",
+    "/controller/leftJstk": "/AfterglowAx1Device/button/8",
+    "/controller/rightJstk": "/AfterglowAx1Device/button/9",
+    "/controller/up": "/AfterglowAx1Device/button/10",
+    "/controller/right": "/AfterglowAx1Device/button/11",
+    "/controller/down": "/AfterglowAx1Device/button/12",
+    "/controller/left": "/AfterglowAx1Device/button/13"
+  }
+}
