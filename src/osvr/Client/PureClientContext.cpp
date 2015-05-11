@@ -49,7 +49,9 @@
 namespace osvr {
 namespace client {
 
-    static const std::chrono::milliseconds CONNECT_WAIT(500);
+    static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
+    static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
+    static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
     PureClientContext::PureClientContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
@@ -89,10 +91,27 @@ namespace client {
 #endif
         typedef std::chrono::system_clock clock;
         auto begin = clock::now();
-        auto end = begin + CONNECT_WAIT;
-        while (clock::now() < end && (!m_gotTree || !m_gotConnection)) {
+
+        // Spin the update to get a connection
+        auto connEnd = begin + STARTUP_CONNECT_TIMEOUT;
+        while (clock::now() < connEnd && !m_gotConnection) {
             m_update();
-            std::this_thread::yield();
+            std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
+        }
+        if (!m_gotConnection) {
+            OSVR_DEV_VERBOSE(
+                "Could not connect to OSVR server in the timeout period "
+                "allotted of "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(
+                       STARTUP_CONNECT_TIMEOUT).count() << "ms");
+            return; // Bail early if we don't even have a connection
+        }
+
+        // Spin the update to get a path tree
+        auto treeEnd = begin + STARTUP_TREE_TIMEOUT;
+        while (clock::now() < treeEnd && !m_gotTree) {
+            m_update();
+            std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
         }
         auto timeToStartup = (clock::now() - begin);
         OSVR_DEV_VERBOSE(
