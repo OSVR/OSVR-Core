@@ -1,8 +1,12 @@
 osvr_setup_lib_vars(Common)
 
 include(CheckIncludeFile)
+include(CheckCSourceCompiles)
 
 check_include_file(byteswap.h OSVR_HAVE_BYTESWAP_H)
+check_c_source_compiles("#include <byteswap.h>\nint main() {return bswap16(0x1234);}" OSVR_HAVE_WORKING_BSWAP)
+check_c_source_compiles("#include <byteswap.h>\nint main() {return bswap_16(0x1234);}" OSVR_HAVE_WORKING_BSWAP_UNDERSCORE)
+check_c_source_compiles("#include <byteswap.h>\nint main() {return __bswap_16(0x1234);}" OSVR_HAVE_WORKING_UNDERSCORES_BSWAP)
 configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(API

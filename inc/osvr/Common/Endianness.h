@@ -131,7 +131,30 @@ namespace common {
                     return _byteswap_uint64(v);
                 }
             };
-#elif defined(OSVR_HAVE_BYTESWAP_H)
+#elif defined(OSVR_HAVE_BYTESWAP_H) && defined(OSVR_HAVE_WORKING_BSWAP)
+            template <> struct ByteSwap<uint16_t> : boost::true_type {
+                static uint16_t apply(uint16_t v) { return bswap16(v); }
+            };
+            template <> struct ByteSwap<uint32_t> : boost::true_type {
+                static uint32_t apply(uint32_t v) { return bswap32(v); }
+            };
+            template <> struct ByteSwap<uint64_t> : boost::true_type {
+                static uint64_t apply(uint64_t v) { return bswap64(v); }
+            };
+#elif defined(OSVR_HAVE_BYTESWAP_H) &&                                         \
+    defined(OSVR_HAVE_WORKING_BSWAP_UNDERSCORE)
+            template <> struct ByteSwap<uint16_t> : boost::true_type {
+                static uint16_t apply(uint16_t v) { return bswap_16(v); }
+            };
+
+            template <> struct ByteSwap<uint32_t> : boost::true_type {
+                static uint32_t apply(uint32_t v) { return bswap_32(v); }
+            };
+            template <> struct ByteSwap<uint64_t> : boost::true_type {
+                static uint64_t apply(uint64_t v) { return bswap_64(v); }
+            };
+#elif defined(OSVR_HAVE_BYTESWAP_H) &&                                         \
+    defined(OSVR_HAVE_WORKING_UNDERSCORES_BSWAP)
             template <> struct ByteSwap<uint16_t> : boost::true_type {
                 static uint16_t apply(uint16_t v) { return __bswap_16(v); }
             };
