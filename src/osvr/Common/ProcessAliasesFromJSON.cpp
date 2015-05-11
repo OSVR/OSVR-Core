@@ -129,7 +129,8 @@ namespace common {
                 if (!boost::algorithm::ends_with(parsedSource.getLeaf(),
                                                  WILDCARD_SUFFIX)) {
                     /// Handle the simple ones first.
-                    m_processSingleEntry(path, parsedSource.getAlias(), priority);
+                    m_processSingleEntry(path, parsedSource.getAlias(),
+                                         priority);
                     return;
                 }
 
