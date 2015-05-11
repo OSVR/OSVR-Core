@@ -48,11 +48,11 @@
 
 // Define the constant below to provide debugging (window showing video and
 // behavior)
-//#define VBHMD_DEBUG
+#define VBHMD_DEBUG
 
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
-//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -119,7 +119,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             return;
         }
 
-        // The fake tracker uses fake LED positions and a
+        // The fake tracker uses real LED positions and a
         // simulated camera, whose parameters we describe here.
         width = m_images[0].cols;
         height = m_images[0].rows;
@@ -151,7 +151,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
         m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
         m_estimator = new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
-            osvr::vbtracker::OsvrHdkLedLocations_FAKE);
+            osvr::vbtracker::OsvrHdkLedLocations_DEFAULT);
 #else
         if (m_camera.isOpened()) {
             height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
@@ -304,7 +304,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         //================================================================
         // Tracking the points
 
-        // Threshold the image based on the brightness value that is halfway between
+        // Threshold the image based on the brightness value that is between
         // the darkest and brightest pixel in the image.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
@@ -312,6 +312,10 @@ class VideoBasedHMDTracker : boost::noncopyable {
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255, CV_THRESH_BINARY);
 
         // Construct a blob detector and find the blobs in the image.
+        // XXX Make it so we don't have to have a blown-out image to track.
+        // If the light is dimmer in the simulated image, so the brightest
+        // pixel is not 255 saturated across the blobs, we don't find any
+        // blobs.
         // TODO: Determine the maximum size of a trackable blob by seeing
         // when we're so close that we can't view at least four in the
         // camera.
@@ -394,7 +398,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // Label the keypoints with their IDs.
         for (led = m_leds.begin(); led != m_leds.end(); led++) {
             std::ostringstream label;
-            label << led->getID();
+            int id = led->getID();
+            if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
+            label << id;
             cv::Point where = led->getLocation();
             where.x += 1;
             where.y += 1;
@@ -408,10 +414,11 @@ class VideoBasedHMDTracker : boost::noncopyable {
         if (gotPose && m_estimator) {
             std::vector<cv::Point2f> imagePoints;
             m_estimator->ProjectBeaconsToImage(imagePoints);
-            // XXX
             for (int i = 0; i < imagePoints.size(); i++) {
                 std::ostringstream label;
-                label << i;
+                int id = i;
+                if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
+                label << id;   // Print 1-based LED ID
                 cv::Point where = imagePoints[i];
                 where.x += 1;
                 where.y += 1;
