@@ -48,11 +48,11 @@
 
 // Define the constant below to provide debugging (window showing video and
 // behavior)
-#define VBHMD_DEBUG
+//#define VBHMD_DEBUG
 
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
-#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 
 // Anonymous namespace to avoid symbol collision
 namespace {

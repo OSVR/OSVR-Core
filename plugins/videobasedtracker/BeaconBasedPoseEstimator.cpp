@@ -86,6 +86,9 @@ BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
 
 bool BeaconBasedPoseEstimator::SetBeacons(const std::vector< std::vector<double> > &beacons)
 {
+    // Our existing pose won't match anymore.
+    m_gotPose = false;
+
     for (int i = 0; i < beacons.size(); i++) {
         if (beacons[i].size() != 3) { m_beacons.clear(); return false; }
         cv::Point3f p(
@@ -100,6 +103,9 @@ bool BeaconBasedPoseEstimator::SetBeacons(const std::vector< std::vector<double>
 
 bool BeaconBasedPoseEstimator::SetCameraMatrix(const std::vector< std::vector<double> > &cameraMatrix)
 {
+    // Our existing pose won't match anymore.
+    m_gotPose = false;
+
     // Construct the camera matrix from the vectors we received.
     if (cameraMatrix.size() != 3) {
         return false;
@@ -124,6 +130,9 @@ bool BeaconBasedPoseEstimator::SetCameraMatrix(const std::vector< std::vector<do
 
 bool BeaconBasedPoseEstimator::SetDistCoeffs(const std::vector<double> &distCoeffs)
 {
+    // Our existing pose won't match anymore.
+    m_gotPose = false;
+
     // Construct the distortion matrix from the vectors we received.
     if (distCoeffs.size() < 5) {
         return false;
@@ -154,6 +163,9 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     std::vector<cv::Point2f> imagePoints;
     std::list<osvr::vbtracker::Led>::const_iterator i;
     for (i = leds.begin(); i != leds.end(); i++) {
+
+        // Skip IDs less than zero; they indicate bad
+        // LEDs.
         int id = i->getID();
         if ((id >= 0) && (id < m_beacons.size())) {
             imagePoints.push_back(i->getLocation());
@@ -162,17 +174,20 @@ bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
     }
 
     // Make sure we have enough points to do our estimation.  We want at least
-    // five corresponding points (this is somewhat arbitary).
+    // five corresponding points (this is somewhat arbitrary, but must be at
+    // least 5 to allow for 2 outliers below).
     if (objectPoints.size() < 5) {
         m_gotPose = false;
         return false;
     }
 
     // Produce an estimate of the translation and rotation needed to take points from
-    // model space into camera space.  We should not have any outliers, so
-    // using PnP rather than PnPRansac solver.
-    cv::solvePnP(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
-        m_rvec, m_tvec, false);
+    // model space into camera space.  We allow for at most two outliers.  Even in
+    // simulation data, we sometimes find duplicate IDs for LEDs, indicating that we
+    // are getting mis-identified ones sometimes.
+    cv::solvePnPRansac(objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs,
+        m_rvec, m_tvec, false, 100, 8.0f,
+        static_cast<int>(objectPoints.size()-2));
 
 //    std::cout << "XXX tvec = " << m_tvec << std::endl;
 //    std::cout << "XXX rvec = " << m_rvec << std::endl;
