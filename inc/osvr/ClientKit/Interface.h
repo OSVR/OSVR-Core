@@ -55,7 +55,12 @@ namespace clientkit {
 
     inline ClientContext &Interface::getContext() { return *m_ctx; }
 
-    inline void Interface::free() { m_ctx->free(*this); }
+    inline void Interface::free() {
+        m_deletables.clear();
+        m_ctx->free(*this);
+        m_ctx = NULL;
+        m_interface = NULL;
+    }
 
     inline void
     Interface::takeOwnership(util::boost_util::DeletablePtr const &obj) {
