@@ -33,7 +33,6 @@
 #endif // OSVR_WINDOWS
 
 #include <boost/filesystem.hpp>
-#include <cstring>
 
 // Standard includes
 // - none
