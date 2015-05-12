@@ -33,6 +33,7 @@
 #endif // OSVR_WINDOWS
 
 #include <boost/filesystem.hpp>
+#include <cstring>
 
 // Standard includes
 // - none
@@ -67,6 +68,10 @@ namespace pluginhost {
         } else {
             // sysctl CTL_KERN KERN_PROC KERN_PROC_PATHNAME -1
         }
+    }
+#elif defined(OSVR_ANDROID)
+    std::string getBinaryLocation() {
+        return boost::filesystem::canonical("/proc/self/exe").generic_string();
     }
 #else
 #error "getBinaryLocation() not yet implemented for this platform!"
