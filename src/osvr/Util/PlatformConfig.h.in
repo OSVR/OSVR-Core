@@ -63,6 +63,7 @@
  */
 //@{
 #cmakedefine OSVR_AIX
+#cmakedefine OSVR_ANDROID
 #cmakedefine OSVR_BSDOS
 #cmakedefine OSVR_FREEBSD
 #cmakedefine OSVR_HPUX
