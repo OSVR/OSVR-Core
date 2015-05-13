@@ -48,11 +48,11 @@
 
 // Define the constant below to provide debugging (window showing video and
 // behavior)
-//#define VBHMD_DEBUG
+#define VBHMD_DEBUG
 
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
-//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -60,6 +60,9 @@ namespace {
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0, int channel = 0)
+#ifndef VBHMD_FAKE_IMAGES
+        : m_camera(cameraNum)
+#endif
     {
         // Initialize things from parameters and from defaults.  Do it here rather than
         // in an initialization list so that we're independent of member order declaration.
@@ -149,7 +152,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m.push_back({ 0.0, 0.0, 1.0 });
         std::vector<double> d;
         d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
-        m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
+//        m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
+        m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS);
         m_estimator = new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
             osvr::vbtracker::OsvrHdkLedLocations_DEFAULT);
 #else

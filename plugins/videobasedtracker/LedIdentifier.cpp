@@ -79,7 +79,7 @@ std::list<bool> LedIdentifier::getBitsUsingThreshold(
 }
 
 // Determines the LED IDs for the OSVR HDK
-std::vector<std::string> OsvrHdkLedIdentifier_DEFAULT_PATTERNS = {
+const std::vector<std::string> OsvrHdkLedIdentifier_DEFAULT_PATTERNS = {
       "***...*........*"
     , "...****..*......"
     , "*.*..........***"
@@ -120,6 +120,51 @@ std::vector<std::string> OsvrHdkLedIdentifier_DEFAULT_PATTERNS = {
     , "......**.*......"
     , ".............***"
     , "..........*....."
+};
+
+// Patterns found in the "HDK_random_images" folder, which has only 8
+// images for each and they are a random subset of the actual images.
+const std::vector<std::string> OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS = {
+      "***...*."
+    , "...****."
+    , "*.*....."
+    , "**......"
+    , "*....*.."
+    , "...*...."
+    , "..*....."
+    , "...*...."
+    , ".......*"
+    , "......*."
+    , ".......*"
+    , "..*....."
+    , "....*..."
+    , "....*..*"
+    , "..*...*."
+    , "........"
+    , "..*..*.*"
+    , "....*..."
+    , "...*.*.."
+    , "...*...."
+    , "....*.*."
+    , "*......."
+    , ".*......"
+    , ".*......"
+    , "....*.*."
+    , ".*.*.*.."
+    , "........"
+    , "**......"
+    , ".*...**."
+    , "........"
+    , "..*....."
+    , "*......*"
+    , "...*...."
+    , "...**..."
+    , ".**....*"
+    , "....**.."
+    , "*......."
+    , "......**"
+    , "........"
+    , "........"
 };
 
 // Convert from string encoding representations into lists

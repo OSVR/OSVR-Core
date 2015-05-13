@@ -70,7 +70,8 @@ protected:
 };
 
 // Determines the LED IDs for the OSVR HDK
-extern std::vector<std::string> OsvrHdkLedIdentifier_DEFAULT_PATTERNS;
+extern const std::vector<std::string> OsvrHdkLedIdentifier_DEFAULT_PATTERNS;
+extern const std::vector<std::string> OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS;
 
 class OsvrHdkLedIdentifier : public LedIdentifier {
 public:
