@@ -137,6 +137,9 @@ if(WIN32)
 else()
     set(OSVR_COPY_OPENCV OFF)
 endif()
+if(ANDROID)
+    include(OpenCVAndroid)
+endif()
 
 find_package(Threads REQUIRED)
 
