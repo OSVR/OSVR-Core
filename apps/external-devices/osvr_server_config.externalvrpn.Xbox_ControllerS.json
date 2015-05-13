@@ -1,37 +1,9 @@
 {
-  "externalDevices": {
-    "/Xbox_SDevice": {
-      "deviceName": "Xbox_S",
-      "server": "localhost:3884",
-      "descriptor": {
-        "interfaces": {
-          "analog": {},
-          "button": {}
+    "externalDevices": {
+        "/Xbox_SDevice": {
+            "deviceName": "Xbox_S",
+            "server": "localhost:3884",
+            "descriptor": "device-descriptors/Xbox_ControllerS.json"
         }
-      }
     }
-  },
-  "aliases": {
-    "/controller/trigger/leftX": "/Xbox_SDevice/analog/0",
-    "/controller/trigger/leftY": "/Xbox_SDevice/analog/1",
-    "/controller/trigger/rightX": "/Xbox_SDevice/analog/2",
-    "/controller/trigger/rightY": "/Xbox_SDevice/analog/3",
-    "/controller/trigger/pov": "/Xbox_SDevice/analog/4",
-    "/controller/A": "/Xbox_SDevice/button/0",
-    "/controller/B": "/Xbox_SDevice/button/1",
-    "/controller/X": "/Xbox_SDevice/button/2",
-    "/controller/Y": "/Xbox_SDevice/button/3",
-    "/controller/black": "/Xbox_SDevice/button/4",
-    "/controller/white": "/Xbox_SDevice/button/5",
-    "/controller/start": "/Xbox_SDevice/button/6",
-    "/controller/back": "/Xbox_SDevice/button/7",
-    "/controller/leftJstk": "/Xbox_SDevice/button/8",
-    "/controller/rightJstk": "/Xbox_SDevice/button/9",
-    "/controller/leftTrg": "/Xbox_SDevice/button/10",
-    "/controller/rightTrg": "/Xbox_SDevice/button/11",
-    "/controller/up": "/Xbox_SDevice/button/12",
-    "/controller/right": "/Xbox_SDevice/button/13",
-    "/controller/down": "/Xbox_SDevice/button/14",
-    "/controller/left": "/Xbox_SDevice/button/15"
-  }
 }
