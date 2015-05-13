@@ -142,7 +142,8 @@ if(BUILD_SERVER_APP)
 
     osvr_copy_dir(/displays *.json "JSON display descriptor")
     osvr_copy_dir(/sample-configs *.json "sample OSVR Server config")
-    osvr_copy_dir(/external-devices *.json "Device Descriptors for External VRPN devices")
+    osvr_copy_dir(/external-devices *.json "OSVR Server Configs for External VRPN devices")
+    osvr_copy_dir(/external-devices/device-descriptors *.json "Device Descriptors for External VRPN devices")
 
     # Have to set them as symbolic because we can't use a generator expression in add_custom_command(OUTPUT
     set_source_files_properties(${FILE_OUTPUTS} PROPERTIES SYMBOLIC TRUE)
