@@ -1,6 +1,6 @@
 # Set up package options
 set(CPACK_PACKAGE_NAME "osvr-core")
-set(CPACK_PACKAGE_VENDOR "Sensics, Inc")
+set(CPACK_PACKAGE_VENDOR "Sensics, Inc.")
 set(CPACK_PACKAGE_CONTACT "<support@osvr.com>")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 1)
