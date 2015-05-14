@@ -47,12 +47,13 @@
 #include <memory>
 
 // Define the constant below to provide debugging (window showing video and
-// behavior)
+// behavior, printing tracked positions)
 #define VBHMD_DEBUG
 
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
-#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
+//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -69,8 +70,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_channel = channel;
         m_type = Unknown;
         m_dk2 = nullptr;
-        m_estimator = nullptr;
-        osvrPose3SetIdentity(&m_pose);
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -152,10 +151,16 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m.push_back({ 0.0, 0.0, 1.0 });
         std::vector<double> d;
         d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
-//        m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
-        m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS);
-        m_estimator = new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
-            osvr::vbtracker::OsvrHdkLedLocations_DEFAULT);
+//        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
+        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
+        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
+            osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
+        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
+            osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
+        std::list<osvr::vbtracker::Led> empty_led_group;
+        m_led_groups.push_back(empty_led_group);
+        m_led_groups.push_back(empty_led_group);
 #else
         if (m_camera.isOpened()) {
             height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
@@ -190,14 +195,17 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         switch (m_type) {
         case OculusDK2:
-            // TODO: Fill these in when they are known
-            m_identifier = nullptr;
-            m_estimator = nullptr;
+            {
+                // TODO: Fill these in when they are known
+                //m_identifiers.push_back(XXX);
+                //m_estimator.push_back(XXX);
+                std::list<osvr::vbtracker::Led> empty_led_group;
+                m_led_groups.push_back(empty_led_group);
 
-            // Set Oculus' camera capture parameters as described
-            // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for
-            // him for sharing this with us, used with permission.
-            if (m_type == OculusDK2) {
+                // Set Oculus' camera capture parameters as described
+                // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for
+                // him for sharing this with us, used with permission.
+
                 // Trying to find the closest matches to what was being done
                 // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
                 // be able to set everything we need to.  In fact, these don't seem
@@ -225,8 +233,13 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 m.push_back({ 0.0, 0.0, 1.0 });
                 std::vector<double> d;
                 d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
-                m_identifier = new osvr::vbtracker::OsvrHdkLedIdentifier();
-                m_estimator = new osvr::vbtracker::BeaconBasedPoseEstimator(m, d);
+                m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
+                m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+                m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
+                m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
+                std::list<osvr::vbtracker::Led> empty_led_group;
+                m_led_groups.push_back(empty_led_group);
+                m_led_groups.push_back(empty_led_group);
             }
             break;
 
@@ -239,8 +252,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
     ~VideoBasedHMDTracker() {
         // It is okay to delete NULL pointers, so we don't check here.
-        delete m_estimator;
-        delete m_identifier;
+        for (size_t i = 0; i < m_estimators.size(); i++) {
+            delete m_estimators[i];
+        }
+        for (size_t i = 0; i < m_identifiers.size(); i++) {
+            delete m_identifiers[i];
+        }
     }
 
     OSVR_ReturnCode update()
@@ -303,6 +320,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         //==================================================================
         // Convert the image into a format we can use.
+        // TODO: Consider reading in the image in gray scale to begin with
         cv::cvtColor(m_frame, m_imageGray, CV_RGB2GRAY);
 
         //================================================================
@@ -330,8 +348,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         params.minInertiaRatio = 0.5;
         params.maxInertiaRatio = 1.0;
         cv::SimpleBlobDetector detector(params);
-        std::vector<cv::KeyPoint> keyPoints;
-        detector.detect(m_imageGray, keyPoints);
+        std::vector<cv::KeyPoint> foundKeyPoints;
+        detector.detect(m_imageGray, foundKeyPoints);
 
         // TODO: Consider computing the center of mass of a dilated bounding
         // rectangle around each keypoint to produce a more precise subpixel
@@ -343,129 +361,141 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // the brightness parameter to the Led class when adding a new one
         // or augmenting with a new frame.
 
-        // Locate the closest blob from this frame to each LED found
-        // in the previous frame.  If it is close enough to the nearest neighbor from last
-        // time, we assume that it is the same LED and update it.  If not, we
-        // delete the LED from the list.  Once we have matched a blob to an
-        // LED, we remove it from the list.  If there are any blobs leftover,
-        // we create new LEDs from them.
-        // TODO: Include motion estimate based on Kalman filter along with
-        // model of the projection once we have one built.  Note that this will
-        // require handling the lens distortion appropriately.
-        std::list<osvr::vbtracker::Led>::iterator led = m_leds.begin();
-        while (led != m_leds.end()) {
-            double TODO_BLOB_MOVE_THRESHOLD = 10;
-            std::vector<cv::KeyPoint>::iterator nearest;
-            nearest = led->nearest(keyPoints, TODO_BLOB_MOVE_THRESHOLD);
-            if (nearest == keyPoints.end()) {
-                // We have no blob corresponding to this LED, so we need
-                // to delete this LED.
-                led = m_leds.erase(led);
-            }
-            else {
-                // Update the values in this LED and then go on to the
-                // next one.  Remove this blob from the list of potential
-                // matches.
-                led->addMeasurement(nearest->pt, nearest->size);
-                keyPoints.erase(nearest);
-                led++;
-            }
-        }
-        // If we have any blobs that have not been associated with an
-        // LED, then we add a new LED for each of them.
-        //std::cout << "Had " << Leds.size() << " LEDs, " << keyPoints.size() << " new ones available" << std::endl;
-        while (keyPoints.size() > 0) {
-            osvr::vbtracker::Led newLed(m_identifier,
-                keyPoints.begin()->pt, keyPoints.begin()->size);
-            m_leds.push_back(newLed);
-            keyPoints.erase(keyPoints.begin());
-        }
+        // We allow multiple sets of LEDs, each corresponding to a different
+        // sensor, to be located in the same image.  We construct a new set
+        // of LEDs for each and try to find them.  It is assumed that they all
+        // have unique ID patterns across all sensors.
+        for (size_t sensor = 0; sensor < m_identifiers.size(); sensor++) {
+            osvrPose3SetIdentity(&m_pose);
+            std::vector<cv::KeyPoint> keyPoints = foundKeyPoints;
 
-        //==================================================================
-        // Compute the pose of the HMD w.r.t. the camera frame of reference.
-        // TODO: Keep track of whether we already have a good pose and, if so,
-        // have the algorithm initialize using it so we do less work on average.
-        bool gotPose = false;
-        if (m_estimator) {
-            OSVR_PoseState pose;
-            if (m_estimator->EstimatePoseFromLeds(m_leds, pose)) {
-                m_pose = pose;
-                gotPose = true;
+            // Locate the closest blob from this frame to each LED found
+            // in the previous frame.  If it is close enough to the nearest neighbor from last
+            // time, we assume that it is the same LED and update it.  If not, we
+            // delete the LED from the list.  Once we have matched a blob to an
+            // LED, we remove it from the list.  If there are any blobs leftover,
+            // we create new LEDs from them.
+            // TODO: Include motion estimate based on Kalman filter along with
+            // model of the projection once we have one built.  Note that this will
+            // require handling the lens distortion appropriately.
+            std::list<osvr::vbtracker::Led>::iterator led = m_led_groups[sensor].begin();
+            while (led != m_led_groups[sensor].end()) {
+                double TODO_BLOB_MOVE_THRESHOLD = 10;
+                std::vector<cv::KeyPoint>::iterator nearest;
+                nearest = led->nearest(keyPoints, TODO_BLOB_MOVE_THRESHOLD);
+                if (nearest == keyPoints.end()) {
+                    // We have no blob corresponding to this LED, so we need
+                    // to delete this LED.
+                    led = m_led_groups[sensor].erase(led);
+                }
+                else {
+                    // Update the values in this LED and then go on to the
+                    // next one.  Remove this blob from the list of potential
+                    // matches.
+                    led->addMeasurement(nearest->pt, nearest->size);
+                    keyPoints.erase(nearest);
+                    led++;
+                }
             }
-        }
+            // If we have any blobs that have not been associated with an
+            // LED, then we add a new LED for each of them.
+            //std::cout << "Had " << Leds.size() << " LEDs, " << keyPoints.size() << " new ones available" << std::endl;
+            while (keyPoints.size() > 0) {
+                osvr::vbtracker::Led newLed(m_identifiers[sensor],
+                    keyPoints.begin()->pt, keyPoints.begin()->size);
+                m_led_groups[sensor].push_back(newLed);
+                keyPoints.erase(keyPoints.begin());
+            }
+
+            //==================================================================
+            // Compute the pose of the HMD w.r.t. the camera frame of reference.
+            // TODO: Keep track of whether we already have a good pose and, if so,
+            // have the algorithm initialize using it so we do less work on average.
+            bool gotPose = false;
+            if (m_estimators[sensor]) {
+                OSVR_PoseState pose;
+                if (m_estimators[sensor]->EstimatePoseFromLeds(m_led_groups[sensor], pose)) {
+                    m_pose = pose;
+                    gotPose = true;
+                }
+            }
 
 #ifdef VBHMD_DEBUG
-        // Draw detected blobs as red circles.
-        cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
-            cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+            // Draw detected blobs as red circles.
+            cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
+                cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
-        // Label the keypoints with their IDs.
-        for (led = m_leds.begin(); led != m_leds.end(); led++) {
-            std::ostringstream label;
-            int id = led->getID();
-            if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
-            label << id;
-            cv::Point where = led->getLocation();
-            where.x += 1;
-            where.y += 1;
-            cv::putText(m_imageWithBlobs, label.str(), where,
-                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255));
-        }
-
-        // If we have a transform, reproject all of the points from the
-        // model space (the LED locations) back into the image and
-        // display them on the blob image in green.
-        if (gotPose && m_estimator) {
-            std::vector<cv::Point2f> imagePoints;
-            m_estimator->ProjectBeaconsToImage(imagePoints);
-            for (int i = 0; i < imagePoints.size(); i++) {
+            // Label the keypoints with their IDs.
+            for (led = m_led_groups[sensor].begin(); led != m_led_groups[sensor].end(); led++) {
                 std::ostringstream label;
-                int id = i;
+                int id = led->getID();
                 if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
-                label << id;   // Print 1-based LED ID
-                cv::Point where = imagePoints[i];
+                label << id;
+                cv::Point where = led->getLocation();
                 where.x += 1;
                 where.y += 1;
                 cv::putText(m_imageWithBlobs, label.str(), where,
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255));
             }
-        }
 
-        // Pick which image to show and show it.
-        if (m_frame.data) {
-            cv::imshow("Debug window", *m_shownImage);
-            int key = cv::waitKey(1);
-            switch (key) {
-            case 'i':
-                // Show the input image.
-                m_shownImage = &m_frame;
-                break;
-
-            case 't':
-                // Show the thresholded image.
-                m_shownImage = &m_thresholdImage;
-                break;
-
-            case 'b':
-                // Show the blob image.
-                m_shownImage = &m_imageWithBlobs;
-                break;
+            // If we have a transform, reproject all of the points from the
+            // model space (the LED locations) back into the image and
+            // display them on the blob image in green.
+            if (gotPose) {
+                std::vector<cv::Point2f> imagePoints;
+                m_estimators[sensor]->ProjectBeaconsToImage(imagePoints);
+                for (int i = 0; i < imagePoints.size(); i++) {
+                    std::ostringstream label;
+                    int id = i;
+                    if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
+                    label << id;   // Print 1-based LED ID
+                    cv::Point where = imagePoints[i];
+                    where.x += 1;
+                    where.y += 1;
+                    cv::putText(m_imageWithBlobs, label.str(), where,
+                        cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
+                }
             }
-        }
 
-        // Report the pose, if we got one
-        if (gotPose) {
-            std::cout << "Pos: " << m_pose.translation.data[0] << ", "
-                << m_pose.translation.data[1] << ", "
-                << m_pose.translation.data[2] << std::endl;
-        }
+            // Pick which image to show and show it.
+            if (m_frame.data) {
+                std::ostringstream windowName;
+                windowName << "Sensor" << sensor;
+                cv::imshow(windowName.str().c_str(), *m_shownImage);
+                int key = cv::waitKey(1);
+                switch (key) {
+                case 'i':
+                    // Show the input image.
+                    m_shownImage = &m_frame;
+                    break;
+
+                case 't':
+                    // Show the thresholded image.
+                    m_shownImage = &m_thresholdImage;
+                    break;
+
+                case 'b':
+                    // Show the blob image.
+                    m_shownImage = &m_imageWithBlobs;
+                    break;
+                }
+            }
+
+            // Report the pose, if we got one
+            if (gotPose) {
+                std::cout << "Pos (sensor " << sensor << "): "
+                    << m_pose.translation.data[0] << ", "
+                    << m_pose.translation.data[1] << ", "
+                    << m_pose.translation.data[2] << std::endl;
+            }
 #endif
 
-        //==================================================================
-        /// Report the new pose, time-stamped with the time we
-        // received the image from the camera.
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker,
-            &m_pose, 0, &timestamp);
+            //==================================================================
+            /// Report the new pose, time-stamped with the time we
+            // received the image from the camera.
+            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker,
+                &m_pose, static_cast<OSVR_ChannelCount>(sensor), &timestamp);
+        }
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -491,9 +521,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
     enum { Unknown, OSVRHDK, OculusDK2, Fake } m_type;
 
     // Structures needed to do the tracking.
-    osvr::vbtracker::LedIdentifier *m_identifier;
-    std::list<osvr::vbtracker::Led> m_leds;
-    osvr::vbtracker::BeaconBasedPoseEstimator *m_estimator;
+    std::vector<osvr::vbtracker::LedIdentifier *> m_identifiers;
+    std::vector<std::list<osvr::vbtracker::Led> > m_led_groups;
+    std::vector<osvr::vbtracker::BeaconBasedPoseEstimator *> m_estimators;
 
     // In case we are using a DK2, we need a pointer to one.
     std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;

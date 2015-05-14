@@ -33,7 +33,8 @@ namespace osvr {
 namespace vbtracker {
 
 // Default 3D locations for the beacons on an OSVR HDK, in millimeters
-extern const std::vector< std::vector<double> > OsvrHdkLedLocations_DEFAULT;
+extern const std::vector< std::vector<double> > OsvrHdkLedLocations_SENSOR0;
+extern const std::vector< std::vector<double> > OsvrHdkLedLocations_SENSOR1;
 
 // Class to track an object that has identified LED beacons on it as seen in
 // a camera, where the absolute location of the LEDs with respect to a common
@@ -50,7 +51,7 @@ public:
     BeaconBasedPoseEstimator(
         const std::vector < std::vector<double> > &cameraMatrix  //< 3x3 camera matrix for OpenCV
         , const std::vector<double> &distCoeffs             //< Distortion coefficients for OpenCV
-        , const std::vector< std::vector<double> > &beacons = OsvrHdkLedLocations_DEFAULT   //< 3D beacon locations
+        , const std::vector< std::vector<double> > &beacons   //< 3D beacon locations
         );
 
     // Produce an estimate of the pose of the model-space origin in camera space, where the

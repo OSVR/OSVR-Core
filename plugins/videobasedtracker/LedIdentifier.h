@@ -70,7 +70,8 @@ protected:
 };
 
 // Determines the LED IDs for the OSVR HDK
-extern const std::vector<std::string> OsvrHdkLedIdentifier_DEFAULT_PATTERNS;
+extern const std::vector<std::string> OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
+extern const std::vector<std::string> OsvrHdkLedIdentifier_SENSOR1_PATTERNS;
 extern const std::vector<std::string> OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS;
 
 class OsvrHdkLedIdentifier : public LedIdentifier {
@@ -79,8 +80,7 @@ public:
     // each LED, and each is encoded with '*' meaning that the
     // LED is bright and '.' that it is dim at this point in time.
     // All patterns must have the same length.
-    OsvrHdkLedIdentifier(const std::vector<std::string> &PATTERNS =
-        OsvrHdkLedIdentifier_DEFAULT_PATTERNS);
+    OsvrHdkLedIdentifier(const std::vector<std::string> &PATTERNS);
     virtual int getId(std::list<float> brightnesses) const;
 protected:
     size_t                         d_length;   //< Length of all patterns
