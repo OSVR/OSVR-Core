@@ -1,0 +1,33 @@
+{
+    "deviceVendor": "Microsoft",
+    "deviceName": "SideWinder Precision",
+    "author": "Georgiy Frolov <georgiy@sensics.com>",
+    "version": 1,
+    "lastModified": "2015-05-12T17:38:49.659Z",
+    "interfaces": {
+        "analog": {
+            "count": 3
+        },
+        "button": {
+            "count": 8
+        }
+    },
+    "semantic": {
+        "1": "button/0",
+        "2": "button/1",
+        "3": "button/2",
+        "4": "button/3",
+        "5": "button/4",
+        "6": "button/5",
+        "7": "button/6",
+        "8": "button/7",
+        "joystick": {
+            "x": "analog/0",
+            "y": "analog/1"
+        },
+        "slider": "analog/2"
+    },
+    "automaticAliases": {
+        "/controller": "semantic/*"
+    }
+}
