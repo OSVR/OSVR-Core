@@ -6,7 +6,7 @@
 # 2015 Ryan Pavlik <ryan@sensics.com> <abiryan@ryand.net>
 # http://academic.cleardefinition.com
 #
-# Copyright Sensics 2015.
+# Copyright Sensics, Inc. 2015.
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
