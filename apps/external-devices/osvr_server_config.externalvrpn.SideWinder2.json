@@ -1,33 +1,9 @@
 {
-  "externalDevices": {
-    "/Sidewinder2Device": {
-      "deviceName": "Sidewinder2",
-      "server": "localhost:3884",
-      "descriptor": {
-        "interfaces": {
-          "analog": {},
-          "button": {}
+    "externalDevices": {
+        "/Sidewinder2Device": {
+            "deviceName": "Sidewinder2",
+            "server": "localhost:3884",
+            "descriptor": "device-descriptors/Sidewinder2.json"
         }
-      }
     }
-  },
-  "aliases": {
-    "/controller/trigger/X": "/Sidewinder2Device/analog/0",
-    "/controller/trigger/Y": "/Sidewinder2Device/analog/1",
-    "/controller/trigger/Z": "/Sidewinder2Device/analog/2",
-    "/controller/trigger/slider": "/Sidewinder2Device/analog/3",
-    "/controller/trigger/pov": "/Sidewinder2Device/analog/4",
-    "/controller/1": "/Sidewinder2Device/button/0",
-    "/controller/2": "/Sidewinder2Device/button/1",
-    "/controller/3": "/Sidewinder2Device/button/2",
-    "/controller/4": "/Sidewinder2Device/button/3",
-    "/controller/5": "/Sidewinder2Device/button/4",
-    "/controller/6": "/Sidewinder2Device/button/5",
-    "/controller/7": "/Sidewinder2Device/button/6",
-    "/controller/8": "/Sidewinder2Device/button/7",
-    "/controller/up": "/Sidewinder2Device/button/8",
-    "/controller/right": "/Sidewinder2Device/button/9",
-    "/controller/down": "/Sidewinder2Device/button/10",
-    "/controller/left": "/Sidewinder2Device/button/11"
-  }
 }
