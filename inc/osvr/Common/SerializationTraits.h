@@ -30,6 +30,8 @@
 #include <osvr/Common/Endianness.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/BoolC.h>
+#include <osvr/Util/Vec2C.h>
+#include <osvr/Util/Vec3C.h>
 
 // Library/third-party includes
 #include <boost/call_traits.hpp>
@@ -490,6 +492,25 @@ namespace common {
                        tag.length();
             }
         };
+
+		template <>
+		struct SimpleStructSerialization<OSVR_Vec2>
+			: SimpleStructSerializationBase{
+			template <typename F, typename T> static void apply(F &f, T &val) {
+				f(val.data[0]);
+				f(val.data[1]);
+			}
+		};
+
+		template <>
+		struct SimpleStructSerialization<OSVR_Vec3>
+			: SimpleStructSerializationBase{
+			template <typename F, typename T> static void apply(F &f, T &val) {
+				f(val.data[0]);
+				f(val.data[1]);
+				f(val.data[2]);
+			}
+		};
     } // namespace serialization
 
 } // namespace common
