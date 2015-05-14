@@ -1,7 +1,7 @@
 /** @file
-		@brief Header
+    @brief Header
 
-		This header is maintained as a part of 'util-headers' - you can always
+    This header is maintained as a part of 'util-headers' - you can always
     find the latest version online at https://github.com/rpavlik/util-headers
 
     This GUID can help identify the project: d1dbc94e-e863-49cf-bc08-ab4d9f486613
@@ -10,40 +10,39 @@
     5574e8f134c953c687a741043067a9082120b497
 
     Commit date: "2015-05-14 14:47:19 -0500"
+    @date 2015
 
-		@date 2013
-
-		@author
-		Ryan Pavlik
-		<rpavlik@iastate.edu> and <abiryan@ryand.net>
-		http://academic.cleardefinition.com/
-		Iowa State University Virtual Reality Applications Center
-		Human-Computer Interaction Graduate Program
-
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
-//           Copyright Iowa State University 2013.
+
+//               Copyright Sensics, Inc. 2015.
 //  Distributed under the Boost Software License, Version 1.0.
 //     (See accompanying file LICENSE_1_0.txt or copy at
 //           http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef INCLUDED_RunLoopManagerBoost_h_GUID_50f7b2f1_493e_4395_25ca_df2f010a34bd
-#define INCLUDED_RunLoopManagerBoost_h_GUID_50f7b2f1_493e_4395_25ca_df2f010a34bd
+#ifndef INCLUDED_RunLoopManagerStd_h_GUID_34945132_5355_45A8_A7D6_073C7C8C235A
+#define INCLUDED_RunLoopManagerStd_h_GUID_34945132_5355_45A8_A7D6_073C7C8C235A
+
 
 // Internal Includes
 #include "RunLoopManager.h"
 
 // Library/third-party includes
-#include <boost/thread.hpp>
+// - none
 
 // Standard includes
-// - none
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace util {
 
-	class RunLoopManagerBoost : public RunLoopManagerBase {
+	class RunLoopManagerStd : public RunLoopManagerBase {
 		public:
-			RunLoopManagerBoost() : currentState_(STATE_STOPPED) {}
+			RunLoopManagerStd() : currentState_(STATE_STOPPED) {}
 
 			/// @name StartingInterface
 			/// @{
@@ -59,21 +58,21 @@ namespace util {
 
 		private:
 			void reportStateChange_(RunningState s);
-			boost::mutex mut_;
-			boost::condition_variable stateCond_;
+			std::mutex mut_;
+			std::condition_variable stateCond_;
 
-			typedef boost::unique_lock<boost::mutex> Lock;
+			typedef std::unique_lock<std::mutex> Lock;
 
 			/// protected by condition variable
 			volatile RunningState currentState_;
 	};
 
-	inline void RunLoopManagerBoost::signalStart() {
+	inline void RunLoopManagerStd::signalStart() {
 		Lock condGuard(mut_);
 		setShouldStop_(false);
 	}
 
-	inline void RunLoopManagerBoost::signalAndWaitForStart() {
+	inline void RunLoopManagerStd::signalAndWaitForStart() {
 		signalStart();
 		{
 			Lock condGuard(mut_);
@@ -83,12 +82,12 @@ namespace util {
 		}
 	}
 
-	inline void RunLoopManagerBoost::signalShutdown() {
+	inline void RunLoopManagerStd::signalShutdown() {
 		Lock condGuard(mut_);
 		setShouldStop_(true);
 	}
 
-	inline void RunLoopManagerBoost::signalAndWaitForShutdown() {
+	inline void RunLoopManagerStd::signalAndWaitForShutdown() {
 		Lock condGuard(mut_);
 		setShouldStop_(true);
 
@@ -98,7 +97,7 @@ namespace util {
 	}
 
 	inline void
-	RunLoopManagerBoost::reportStateChange_(RunLoopManagerBase::RunningState s) {
+	RunLoopManagerStd::reportStateChange_(RunLoopManagerBase::RunningState s) {
 		{
 			Lock condGuard(mut_);
 			currentState_ = s;
@@ -108,4 +107,5 @@ namespace util {
 
 } // end of namespace util
 
-#endif // INCLUDED_RunLoopManagerBoost_h_GUID_50f7b2f1_493e_4395_25ca_df2f010a34bd
+#endif // INCLUDED_RunLoopManagerStd_h_GUID_34945132_5355_45A8_A7D6_073C7C8C235A
+
