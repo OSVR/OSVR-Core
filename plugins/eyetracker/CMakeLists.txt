@@ -14,12 +14,11 @@ foreach(filestem ${DESCRIPTORS})
 endforeach()
 
 osvr_add_plugin(NAME com_osvr_EyeTracker
-    CPP
     SOURCES
     com_osvr_EyeTracker.cpp
     ${JSON_HEADERS})
 
-target_link_libraries(com_osvr_EyeTracker osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn osvrUSBSerial)
+target_link_libraries(com_osvr_EyeTracker osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn osvrPluginKit)
 
 target_include_directories(com_osvr_EyeTracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi" "${CMAKE_CURRENT_BINARY_DIR}")
 

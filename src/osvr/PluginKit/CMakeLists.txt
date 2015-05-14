@@ -79,7 +79,9 @@ add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
 ###
 # Imaging interface library
 ###
-osvr_add_interface_library(Imaging)
+osvr_add_interface_library(Imaging
+                            EyeTracker)
+
 
 # In an installed version, we search and add the dependency in the
 # osvrConfigInstalledOpenCV.cmake script since we don't need the same version in
