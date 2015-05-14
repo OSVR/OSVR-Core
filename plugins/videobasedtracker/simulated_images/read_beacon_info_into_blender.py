@@ -1,11 +1,19 @@
 import bpy
 
 #============================================================================
+# Edit below here
+
 # Edit the two file names here to change them to match the files you want to
 # open.
 
-locationFile = open('HDK_LED_locations_2rmt.csv')
+locationFile = open('HDK_LED_locations_3rmt.csv')
 patternFile = open('HDK_LED_patterns.txt')
+
+# Edit the Y offset to by applied to move the group of beacons
+# associated with different sensors to avoid overlap.  This is
+# in cm.
+
+sensorYOffset = 8.5
 
 # Edit the number of repetitions of flashings done here.
 # This will not change the camera behavior, which is set to
@@ -14,8 +22,8 @@ patternFile = open('HDK_LED_patterns.txt')
 
 numRepeats = 2
 
-#============================================================================
 # Probably don't edit below here.
+#============================================================================
 
 locations = locationFile.readlines()
 patterns = patternFile.readlines()
@@ -68,8 +76,8 @@ sphereList = list()
 for location in locations:
 
     # Skip the first line of the locations file because it is a header.
-    # Also skip the first six entries, since they are "back-facing" LEDs
-    # and should not be visible.
+    # If this beacon is from a sensor number larger than 0, shift it up
+    # in Y by the offset amount so that it will not overlap other sensors.
     if sphereNum > 0:
         # Pull the X, Y, Z coordinates out as the last three entries
         # in the line, skipping
@@ -88,7 +96,7 @@ for location in locations:
         selectObject(sphereList[listIndex])
         myname = 'OSVR_beacon'+str(sphereNum-1).zfill(3)
         bpy.context.active_object.name = myname
-        bpy.context.active_object.location = (float(currentLocation[2])/10, float(currentLocation[3])/10, float(currentLocation[4])/10)
+        bpy.context.active_object.location = (float(currentLocation[2])/10, float(currentLocation[3])/10 + sensorYOffset * float(currentLocation[5]), float(currentLocation[4])/10)
         listIndex += 1
     
     # Always increment the sphere number even if we're skipping this sphere

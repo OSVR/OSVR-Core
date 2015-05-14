@@ -28,15 +28,9 @@ Sensics, Inc.
 namespace osvr {
 namespace vbtracker {
 
-// Default 3D locations for the beacons on an OSVR HDK, in millimeters
-const std::vector< std::vector<double> > OsvrHdkLedLocations_DEFAULT =
-{     { 1, 23.8, -10000 }
-    , { 11, 5.8, -10000 }
-    , { 9, -23.8, -10000 }
-    , { 0, -8.8, -10000 }
-    , { -9, -23.8, -10000 }
-    , { -12, 5.8, -10000 }
-    , { -85, 3, 24.09 }
+// Default 3D locations for the beacons on an OSVR HDK face plate, in millimeters
+const std::vector< std::vector<double> > OsvrHdkLedLocations_SENSOR0 =
+{     { -85, 3, 24.09 }
     , { -83.2, -14.01, 13.89 }
     , { -47, 51, 24.09 }
     , { 47, 51, 24.09 }
@@ -70,6 +64,16 @@ const std::vector< std::vector<double> > OsvrHdkLedLocations_DEFAULT =
     , { -0.41, 20.75, 51.3 }
     , { 59.59, 15.75, 48.1 }
     , { 59.59, -10.25, 48.1 }
+};
+
+// Default 3D locations for the beacons on an OSVR HDK back plate, in millimeters
+const std::vector< std::vector<double> > OsvrHdkLedLocations_SENSOR1 =
+{     { 1, 23.8, 0 }
+    , { 11, 5.8, 0 }
+    , { 9, -23.8, 0 }
+    , { 0, -8.8, 0 }
+    , { -9, -23.8, 0 }
+    , { -12, 5.8, 0 }
 };
 
 
