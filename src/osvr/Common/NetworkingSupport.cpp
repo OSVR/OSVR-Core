@@ -74,7 +74,10 @@ namespace common {
     }
 #else
     // Don't think any other platforms need this.
-    inline bool NetworkingSupport::m_start() { m_up = true; return true; }
+    inline bool NetworkingSupport::m_start() {
+        m_up = true;
+        return true;
+    }
     inline bool NetworkingSupport::m_stop() { return true; }
 #endif
 
