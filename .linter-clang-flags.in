@@ -1,0 +1,4 @@
+-std=c++11
+-Wall
+-Wextra
+@OSVR_LINTER_CLANG_FLAGS_EXTRA@

@@ -1,0 +1,6 @@
+-std=c++11
+-Iinclude
+-I@CMAKE_CURRENT_BINARY_DIR@/src
+-I@Boost_INCLUDE_DIR@
+
+@OSVR_CLANG_COMPLETE_EXTRA@
