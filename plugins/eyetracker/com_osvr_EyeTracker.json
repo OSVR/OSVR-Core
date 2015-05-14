@@ -1,0 +1,20 @@
+{
+    "deviceVendor": "Sensics",
+    "deviceName": "Eye Tracker",
+    "author": "Georgiy Frolov georgiy@sensics.com",
+    "version": 1,
+    "lastModified": "",
+    "interfaces": {
+        "eyetracker": {
+            "count": 1
+        }
+    },
+    "semantic": {
+        "value": {
+            "$target": "eyetracker/0"
+        }
+    },
+    "automaticAliases": {
+        "/me/eye/left": "semantic/"
+    }
+}

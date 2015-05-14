@@ -1,0 +1,17 @@
+{
+  "plugins": [
+    "com_osvr_EyeTracker"
+  ],
+  "routes": [
+    {
+      "destination": "/me/eyes",
+      "source": {
+        "child": {
+          "tracker": "/com_osvr_EyeTracker/EyeTracker",
+          "sensor": 0
+        }
+      }
+    }
+  ],
+  "display": "displays/HMD.json"
+}
