@@ -140,7 +140,6 @@ endif()
 
 find_package(Threads REQUIRED)
 
-
 find_package(jsoncpp REQUIRED)
 if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
     add_library(jsoncpp_lib INTERFACE)
@@ -247,6 +246,23 @@ if(BUILD_TESTING)
     add_subdirectory(examples)
     add_subdirectory(tests)
 endif()
+
+###
+# Setup some basic files to support editors
+###
+# still could use additional include paths (and defines?) added.
+
+# CMake convention note:
+# Yes, this is generating in the source tree (bad),
+# but the output files are not version controlled (good) and are in fact
+# in gitignore (good)
+
+# .clang_complete - for vim and the completion package in Atom
+configure_file(.clang_complete.in "${CMAKE_CURRENT_SOURCE_DIR}/.clang_complete" @ONLY)
+
+# For the linter-clang package in Atom
+configure_file(.linter-clang-flags.in "${CMAKE_CURRENT_SOURCE_DIR}/.linter-clang-flags" @ONLY)
+configure_file(.linter-clang-includes.in "${CMAKE_CURRENT_SOURCE_DIR}/.linter-clang-includes" @ONLY)
 
 ###
 # Install examples

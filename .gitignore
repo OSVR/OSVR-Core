@@ -1,3 +1,8 @@
+# Generated config files for editors
+/.clang_complete
+/.linter-clang-flags
+/.linter-clang-includes
+
 # Doxygen output
 /doxygen/
 
@@ -93,4 +98,3 @@ $RECYCLE.BIN/
 Session.vim
 .netrwhist
 *~
-
