@@ -159,7 +159,8 @@ osvr_delayload_opencv(${LIBNAME_FULL} opencv_core)
 # Grab DLLs please.
 ###
 if(OSVR_COPY_OPENCV)
-    osvr_copy_dep(${LIBNAME_FULL} opencv_core)
-    osvr_copy_dep(${LIBNAME_FULL} opencv_highgui)   # used by plugin
-    osvr_copy_dep(${LIBNAME_FULL} opencv_imgproc)   # used by plugin
+    # This copies the DLLs used by the core, as well as by any enabled in-tree plugins.
+    foreach(opencvlib ${OPENCV_MODULES_USED})
+        osvr_copy_dep(${LIBNAME_FULL} ${opencvlib})
+    endforeach()
 endif()
