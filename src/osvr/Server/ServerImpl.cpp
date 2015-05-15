@@ -117,6 +117,7 @@ namespace server {
         // Use a lambda to run the loop.
         m_thread = boost::thread([&] {
             bool keepRunning = true;
+            m_mainThreadId = m_thread.get_id();
             ::util::LoopGuard guard(m_run);
             do {
                 keepRunning = this->m_loop();
@@ -164,6 +165,8 @@ namespace server {
     void ServerImpl::instantiateDriver(std::string const &plugin,
                                        std::string const &driver,
                                        std::string const &params) {
+        BOOST_ASSERT_MSG(m_inServerThread(),
+                         "This method is only available in the server thread!");
         m_ctx->instantiateDriver(plugin, driver, params);
     }
 
@@ -303,6 +306,9 @@ namespace server {
 
     int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ServerImpl *>(userdata);
+        BOOST_ASSERT_MSG(
+            self->m_inServerThread(),
+            "This callback should never happen outside the server thread!");
         OSVR_DEV_VERBOSE("Got an updated route from a client.");
         self->m_addRoute(std::string(p.buffer, p.payload_len));
         return 0;
