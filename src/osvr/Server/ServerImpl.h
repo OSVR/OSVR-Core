@@ -191,6 +191,10 @@ namespace server {
         /// @brief Common component for system device
         common::CommonComponent *m_commonComponent;
 
+        /// @brief Queue of actions to take next mainloop (potentially
+        /// time-consuming so we move them out of message handlers)
+        std::vector<std::function<void()> > m_queuedActions;
+
         /// @brief JSON routing directives
         common::RouteContainer m_routes;
 
