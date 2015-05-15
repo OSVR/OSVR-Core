@@ -26,6 +26,3 @@ simulate_HDK_video.blend:
 animation_from_fake:
 	Directory containing the output rendering of simulate_HDK_video.blend.
 
-HDK_random_images:
-	Debugging images using the OSVR HDK views from an unsynchronized camera.  They were used to make sure that the blob-finding an size-detection code worked with the flash pattern in use during development in early May 2015.
-
