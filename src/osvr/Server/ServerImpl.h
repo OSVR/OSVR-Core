@@ -149,8 +149,6 @@ namespace server {
         /// order.
         void m_orderedDestruction();
 
-        /// @brief sends route message.
-        void m_sendRoutes();
 
         /// @brief sends full path tree contents
         void m_sendTree();
