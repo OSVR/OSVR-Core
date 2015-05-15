@@ -167,6 +167,12 @@ namespace server {
         /// @brief Handle new or updated device descriptors.
         void m_handleDeviceDescriptors();
 
+        /// @brief Some things are only safe in the server thread. This is how
+        /// to check if we're in the server thread. (Use m_callControlled with a
+        /// lambda to perform operations guaranteed to be in the server thread
+        /// or effectively so)
+        bool m_inServerThread() const;
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -205,15 +211,39 @@ namespace server {
         bool m_running;
         /// @}
 
+        /// @brief The effective "main thread" - usually equivalent to
+        /// m_thread.get_id() but a callControlled might change it.
+        mutable boost::thread::id m_mainThreadId;
+
         /// @brief Number of microseconds to sleep after each loop iteration.
         int m_sleepTime;
     };
+
+    /// @brief Class to temporarily (in RAII style) change a thread ID variable
+    /// to the current thread, then back again when we leave scope.
+    class TemporaryThreadIDChanger : boost::noncopyable {
+      public:
+        TemporaryThreadIDChanger(boost::thread::id &id)
+            : m_id(id), m_origID(id) {
+            m_id = boost::this_thread::get_id();
+        }
+        ~TemporaryThreadIDChanger() { m_id = m_origID; }
+
+      private:
+        boost::thread::id &m_id;
+        boost::thread::id m_origID;
+    };
+
+    inline bool ServerImpl::m_inServerThread() const {
+        return boost::this_thread::get_id() == m_mainThreadId;
+    }
 
     template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
             f();
@@ -225,6 +255,7 @@ namespace server {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
             f();
