@@ -19,3 +19,8 @@ add_executable(TestCommon
 
 target_link_libraries(TestCommon osvrCommon jsoncpp_lib)
 setup_gtest(TestCommon)
+
+add_executable(SharedMemoryServer SharedMemoryServer.cpp)
+target_link_libraries(SharedMemoryServer osvrCommon)
+add_executable(SharedMemoryClient SharedMemoryClient.cpp)
+target_link_libraries(SharedMemoryClient osvrCommon)
