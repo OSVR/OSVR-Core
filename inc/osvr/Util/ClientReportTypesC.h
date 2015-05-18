@@ -34,6 +34,10 @@
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/StdInt.h>
 
+#include <osvr/Util/Vec2C.h>
+#include <osvr/Util/Vec3C.h>
+#include <osvr/Util/ChannelCountC.h>
+
 /* Library/third-party includes */
 /* none */
 
@@ -122,8 +126,19 @@ typedef struct OSVR_AnalogReport {
 /** @brief Report type for an Imaging callback (forward declaration) */
 struct OSVR_ImagingReport;
 
-/** @brief Report type for an Eye Tracker callback (forward declaration) */
-struct OSVR_GazeDirectionReport;
+typedef struct OSVR_EyeGazeDirection{
+	OSVR_Vec2 gazeDirection2D;
+	OSVR_Vec3 gazeDirection3D;
+} OSVR_EyeGazeDirection;
+
+typedef struct OSVR_EyeTrackerState{
+	OSVR_EyeGazeDirection gaze;
+} OSVR_EyeTrackerState;
+
+typedef struct OSVR_EyeTrackerReport {
+	OSVR_ChannelCount sensor;
+	OSVR_EyeTrackerState state;
+} OSVR_EyeTrackerReport;
 
 /** @} */
 
