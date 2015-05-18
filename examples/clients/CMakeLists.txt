@@ -6,7 +6,7 @@ set(MAINCLIENTS
     ButtonCallback
     TrackerCallback
     DisplayParameter
-    Imaging)
+    Imaging
     EyeTracker)
 # These are "extra"
 set(CLIENTS
