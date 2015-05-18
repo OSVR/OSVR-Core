@@ -7,6 +7,7 @@ set(MAINCLIENTS
     TrackerCallback
     DisplayParameter
     Imaging)
+    EyeTracker)
 # These are "extra"
 set(CLIENTS
     MinimalInit
