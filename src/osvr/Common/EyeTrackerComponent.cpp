@@ -82,7 +82,7 @@ namespace osvr {
 			Buffer<> buf;
 			messages::EyeRegion::MessageSerialization msg(data, sensor);
 			serialize(buf, msg);
-
+			
 			m_getParent().packMessage(buf, eyeRegion.getMessageType(), timestamp);
 		}
 
@@ -94,7 +94,7 @@ namespace osvr {
 			auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
 
 			messages::EyeRegion::MessageSerialization msg;
-			//deserialize(bufReader, msg);
+			deserialize(bufReader, msg);
 			auto data = msg.getData();
 			auto timestamp = util::time::fromStructTimeval(p.msg_time);
 

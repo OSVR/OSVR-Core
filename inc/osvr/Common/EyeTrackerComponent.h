@@ -32,7 +32,7 @@
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
-#include <osvr/Util/EyeTrackerReportTypesC.h>
+#include <osvr/Util/ClientReportTypesC.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
