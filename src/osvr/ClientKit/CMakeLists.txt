@@ -6,9 +6,6 @@ set(API
     "${HEADER_LOCATION}/Context.h"
     "${HEADER_LOCATION}/Context_decl.h"
     "${HEADER_LOCATION}/ContextC.h"
-    # "${HEADER_LOCATION}/EyeTracker.h"
-    "${HEADER_LOCATION}/EyeTracker_decl.h"
-    # "${HEADER_LOCATION}/EyeTrackerC.h"
     "${HEADER_LOCATION}/Imaging.h"
     "${HEADER_LOCATION}/Imaging_decl.h"
     "${HEADER_LOCATION}/ImagingC.h"
@@ -24,7 +21,6 @@ set(API
 set(SOURCE
     ClientKitC.cpp
     ContextC.cpp
-    # EyeTrackerC.cpp
     ImagingC.cpp
     InterfaceC.cpp
     InterfaceCallbackC.cpp
@@ -68,8 +64,7 @@ target_include_directories(${LIBNAME_INTERFACE}
 ###
 # Imaging interface library
 ###
-osvr_add_interface_library(Imaging
-                            EyeTracker)
+osvr_add_interface_library(Imaging)
 # In an installed version, we search and add the dependency in the config script
 # since we don't need the same version in the same place.
 target_link_libraries(${LIBNAME_INTERFACE}
