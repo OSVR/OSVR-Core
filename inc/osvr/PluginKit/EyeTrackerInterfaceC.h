@@ -29,7 +29,7 @@
 /* Internal Includes */
 #include <osvr/PluginKit/DeviceInterfaceC.h>
 #include <osvr/Util/ChannelCountC.h>
-#include <osvr/Util/EyeTrackerReportTypesC.h>
+#include <osvr/Util/ClientReportTypesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -80,7 +80,7 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirection *eyeData,
+OSVR_IN_PTR OSVR_EyeGazeDirection eyeData,
 OSVR_IN OSVR_ChannelCount sensor,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3, 5));
