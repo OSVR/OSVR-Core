@@ -5,7 +5,7 @@
     <http://sensics.com/osvr>
 */
 
-// Copyright 2015 Vuzix Corporation.
+// Copyright 2015 Sensics Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,18 +20,14 @@
 // limitations under the License.
 
 
-/// Needed to get M_PI from math.h on Windows.
-#define _USE_MATH_DEFINES
-
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
-#include <osvr/PluginKit/EyeTrackerInterface.h>
+#include <osvr/PluginKit/EyeTrackerInterfaceC.h>
 
 // Generated JSON header file
 #include "com_osvr_EyeTracker_json.h"
 
 // Library/third-party includes
-#include <math.h>
 
 // Standard includes
 #include <iostream>
@@ -51,7 +47,7 @@ class EyeTrackerDevice {
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
         //tracker = trackerInst;
-		m_eyetracker = osvr::pluginkit::EyeTrackerInterface(opts);
+		osvrDeviceEyeTrackerConfigure(opts, &m_eyetracker, 1);
 
         /// Create the sync device token with the options
         m_dev.initSync(ctx, "EyeTracker", opts);
@@ -83,14 +79,15 @@ class EyeTrackerDevice {
 		gaze.gazeDirection3D = gaze3D;
 
 
-		m_dev.send(m_eyetracker, osvr::pluginkit::EyeTrackerMessage(gaze));
+		//m_dev.send(m_eyetracker, osvr::pluginkit::EyeTrackerMessage(gaze));
+		osvrDeviceEyeTrackerReportData(m_dev, m_eyetracker, gaze, 1, &times);
         
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
-	osvr::pluginkit::EyeTrackerInterface m_eyetracker;
+	OSVR_EyeTrackerDeviceInterface m_eyetracker;
 };
 
 class HardwareDetection {
