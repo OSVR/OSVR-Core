@@ -6,7 +6,6 @@ set(API
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
-    "${HEADER_LOCATION}/EyeTrackerInterface.h"
     "${HEADER_LOCATION}/EyeTrackerInterfaceC.h"
     "${HEADER_LOCATION}/ImagingInterface.h"
     "${HEADER_LOCATION}/ImagingInterfaceC.h"
@@ -79,8 +78,7 @@ add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
 ###
 # Imaging interface library
 ###
-osvr_add_interface_library(Imaging
-                            EyeTracker)
+osvr_add_interface_library(Imaging)
 
 
 # In an installed version, we search and add the dependency in the
