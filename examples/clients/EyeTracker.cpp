@@ -38,13 +38,13 @@ void printEyeTrackerReport(const OSVR_EyeTrackerReport *report){
 
 
 	std::cout << "2D Data:" <<
-		report->gaze.gazeDirection2D.data[0] << "; " <<
-		report->gaze.gazeDirection2D.data[1] << std::endl;
+		report->state.gaze.gazeDirection2D.data[0] << "; " <<
+		report->state.gaze.gazeDirection2D.data[1] << std::endl;
 
 	std::cout << "3D Data:" <<
-		report->gaze.gazeDirection3D.data[0] << "; " <<
-		report->gaze.gazeDirection3D.data[1] << "; " <<
-		report->gaze.gazeDirection3D.data[2] << std::endl;
+		report->state.gaze.gazeDirection3D.data[0] << "; " <<
+		report->state.gaze.gazeDirection3D.data[1] << "; " <<
+		report->state.gaze.gazeDirection3D.data[2] << std::endl;
 
 }
 
@@ -67,7 +67,7 @@ int main() {
     while (1) {
         context.update();
     }
-
+	
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }
