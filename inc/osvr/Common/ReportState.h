@@ -79,6 +79,14 @@ namespace common {
                 return r.rotation;
             }
         };
+
+		// Template specialization to handle OSVR_EyeTrackerReport
+		template <> struct ReportStateGetter<OSVR_EyeTrackerReport> {
+			static OSVR_EyeTrackerState const &apply(OSVR_EyeTrackerReport const &r) {
+				return r.state;
+			}
+			static OSVR_EyeTrackerState apply(OSVR_EyeTrackerReport &r) { return r.state; }
+		};
     } // namespace traits
 
     /// @brief Generic const accessor for the "state" member of a report.

@@ -123,9 +123,6 @@ typedef struct OSVR_AnalogReport {
     OSVR_AnalogState state;
 } OSVR_AnalogReport;
 
-/** @brief Report type for an Imaging callback (forward declaration) */
-struct OSVR_ImagingReport;
-
 typedef struct OSVR_EyeGazeDirection{
 	OSVR_Vec2 gazeDirection2D;
 	OSVR_Vec3 gazeDirection3D;
@@ -139,6 +136,9 @@ typedef struct OSVR_EyeTrackerReport {
 	OSVR_ChannelCount sensor;
 	OSVR_EyeTrackerState state;
 } OSVR_EyeTrackerReport;
+
+/** @brief Report type for an Imaging callback (forward declaration) */
+struct OSVR_ImagingReport;
 
 /** @} */
 

@@ -43,7 +43,7 @@ namespace common {
         typedef boost::mpl::vector<OSVR_AnalogReport, OSVR_ButtonReport,
                                    OSVR_PoseReport, OSVR_PositionReport,
                                    OSVR_OrientationReport,
-                                   OSVR_ImagingReport> ReportTypes;
+                                   OSVR_ImagingReport, OSVR_EyeTrackerReport> ReportTypes;
 
     } // namespace traits
 
