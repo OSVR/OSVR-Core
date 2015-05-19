@@ -28,18 +28,33 @@
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
 #include <osvr/Util/OpenCVTypeDispatch.h>
-
+#include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
 
 // Standard includes
-// - none
+#include <sstream>
 
 namespace osvr {
 namespace common {
+    static inline uint32_t getBufferSize(OSVR_ImagingMetadata const &meta) {
+        return meta.height * meta.width * meta.depth * meta.channels;
+    }
     namespace messages {
+        namespace {
+            template <typename T>
+            void process(OSVR_ImagingMetadata &meta, T &p) {
+                p(meta.height);
+                p(meta.width);
+                p(meta.channels);
+                p(meta.depth);
+                p(meta.type,
+                  serialization::EnumAsIntegerTag<OSVR_ImagingValueType,
+                                                  uint8_t>());
+            }
+        } // namespace
         class ImageRegion::MessageSerialization {
           public:
             MessageSerialization(OSVR_ImagingMetadata const &meta,
@@ -66,16 +81,8 @@ namespace common {
             }
 
             template <typename T> void processMessage(T &p) {
-                p(m_meta.height);
-                p(m_meta.width);
-                p(m_meta.channels);
-                p(m_meta.depth);
-                p(m_meta.type,
-                  serialization::EnumAsIntegerTag<OSVR_ImagingValueType,
-                                                  uint8_t>());
-
-                auto bytes = m_meta.height * m_meta.width * m_meta.depth *
-                             m_meta.channels;
+                process(m_meta, p);
+                auto bytes = getBufferSize(m_meta);
 
                 /// Allocate the matrix backing data, if we're deserializing
                 /// only.
@@ -99,6 +106,45 @@ namespace common {
         const char *ImageRegion::identifier() {
             return "com.osvr.imaging.imageregion";
         }
+
+        namespace {
+            struct SharedMemoryMessage {
+                OSVR_ImagingMetadata metadata;
+                SharedMemoryRingBuffer::sequence_type seqNum;
+                OSVR_ChannelCount sensor;
+                SharedMemoryRingBuffer::abi_level_type abiLevel;
+                SharedMemoryRingBuffer::BackendType backend;
+                std::string shmName;
+            };
+            template <typename T>
+            void process(SharedMemoryMessage &shmMsg, T &p) {
+                process(shmMsg.metadata, p);
+                p(shmMsg.seqNum);
+                p(shmMsg.sensor);
+                p(shmMsg.abiLevel);
+                p(shmMsg.backend);
+                p(shmMsg.shmName);
+            }
+
+        } // namespace
+        class ImagePlacedInSharedMemory::MessageSerialization {
+          public:
+            MessageSerialization() {}
+            explicit MessageSerialization(SharedMemoryMessage &&msg)
+                : m_msgData(std::move(msg)) {}
+            template <typename T> void processMessage(T &p) {
+                process(m_msgData, p);
+            }
+
+            SharedMemoryMessage const &getMessage() { return m_msgData; }
+
+          private:
+            SharedMemoryMessage m_msgData;
+        };
+
+        const char *ImagePlacedInSharedMemory::identifier() {
+            return "com.osvr.imaging.imageplacedinsharedmemory";
+        }
     } // namespace messages
 
     shared_ptr<ImagingComponent>
@@ -113,19 +159,75 @@ namespace common {
                                          OSVR_ImageBufferElement *imageData,
                                          OSVR_ChannelCount sensor,
                                          OSVR_TimeValue const &timestamp) {
+
+        util::Flag dataSent;
+        dataSent += m_sendImageDataViaSharedMemory(metadata, imageData, sensor,
+                                                   timestamp);
+        dataSent +=
+            m_sendImageDataOnTheWire(metadata, imageData, sensor, timestamp);
+        if (dataSent) {
+            m_checkFirst(metadata);
+        }
+    }
+
+    bool ImagingComponent::m_sendImageDataViaSharedMemory(
+        OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
+        OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
+
+        m_growShmVecIfRequired(sensor);
+        uint32_t imageBufferSize = getBufferSize(metadata);
+        if (!m_shmBuf[sensor] ||
+            m_shmBuf[sensor]->getEntrySize() != imageBufferSize) {
+            // create or replace the shared memory ring buffer.
+            /// @todo make the name better - should include device name
+            auto makeName = [](OSVR_ChannelCount sensor) {
+                std::ostringstream os;
+                os << "com.osvr.imaging/" << int(sensor);
+                return os.str();
+            };
+            m_shmBuf[sensor] = SharedMemoryRingBuffer::create(
+                SharedMemoryRingBuffer::Options(makeName(sensor))
+                    .setEntrySize(imageBufferSize));
+        }
+        if (!m_shmBuf[sensor]) {
+            OSVR_DEV_VERBOSE(
+                "Some issue creating shared memory for imaging, skipping out.");
+            return false;
+        }
+        auto &shm = *(m_shmBuf[sensor]);
+        auto seq = shm.put(imageData, imageBufferSize);
+
+        Buffer<> buf;
+        messages::ImagePlacedInSharedMemory::MessageSerialization serialization(
+            messages::SharedMemoryMessage{metadata, seq, sensor,
+                                          SharedMemoryRingBuffer::getABILevel(),
+                                          shm.getBackend(), shm.getName()});
+        serialize(buf, serialization);
+        m_getParent().packMessage(
+            buf, imagePlacedInSharedMemory.getMessageType(), timestamp);
+
+        return true;
+    }
+
+    bool ImagingComponent::m_sendImageDataOnTheWire(
+        OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
+        OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
+
         Buffer<> buf;
         messages::ImageRegion::MessageSerialization msg(metadata, imageData,
                                                         sensor);
         serialize(buf, msg);
         if (buf.size() > vrpn_CONNECTION_TCP_BUFLEN) {
+#if 0
             OSVR_DEV_VERBOSE("Skipping imaging message: size is "
                              << buf.size() << " vs the maximum of "
                              << vrpn_CONNECTION_TCP_BUFLEN);
-            return;
+#endif
+            return false;
         }
         m_getParent().packMessage(buf, imageRegion.getMessageType(), timestamp);
         m_getParent().sendPending();
-        m_checkFirst(metadata);
+        return true;
     }
 
     int VRPN_CALLBACK
@@ -145,15 +247,70 @@ namespace common {
         return 0;
     }
 
+    int VRPN_CALLBACK
+    ImagingComponent::m_handleImagePlacedInSharedMemory(void *userdata,
+                                                        vrpn_HANDLERPARAM p) {
+        auto self = static_cast<ImagingComponent *>(userdata);
+        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
+
+        messages::ImagePlacedInSharedMemory::MessageSerialization msgSerialize;
+        deserialize(bufReader, msgSerialize);
+        auto &msg = msgSerialize.getMessage();
+        auto timestamp = util::time::fromStructTimeval(p.msg_time);
+
+        if (SharedMemoryRingBuffer::getABILevel() != msg.abiLevel) {
+            /// Can't interoperate with this server over shared memory
+            OSVR_DEV_VERBOSE("Can't handle SHM ABI level " << msg.abiLevel);
+            return 0;
+        }
+        self->m_growShmVecIfRequired(msg.sensor);
+        auto checkSameRingBuf = [](messages::SharedMemoryMessage const &msg,
+                                   SharedMemoryRingBufferPtr &ringbuf) {
+            return (msg.backend == ringbuf->getBackend()) &&
+                   (ringbuf->getEntrySize() == getBufferSize(msg.metadata)) &&
+                   (ringbuf->getName() == msg.shmName);
+        };
+        if (!self->m_shmBuf[msg.sensor] ||
+            !checkSameRingBuf(msg, self->m_shmBuf[msg.sensor])) {
+            self->m_shmBuf[msg.sensor] = SharedMemoryRingBuffer::find(
+                SharedMemoryRingBuffer::Options(msg.shmName, msg.backend));
+        }
+        if (!self->m_shmBuf[msg.sensor]) {
+            /// Can't find the shared memory referred to - possibly not a local
+            /// client
+            OSVR_DEV_VERBOSE("Can't find desired IPC ring buffer "
+                             << msg.shmName);
+            return 0;
+        }
+
+        auto &shm = self->m_shmBuf[msg.sensor];
+        auto getResult = shm->get(msg.seqNum);
+        if (getResult) {
+            auto bufptr = getResult.getBufferSmartPointer();
+            self->m_checkFirst(msg.metadata);
+            auto data = ImageData{msg.sensor, msg.metadata, bufptr};
+
+            for (auto const &cb : self->m_cb) {
+                cb(data, timestamp);
+            }
+        }
+        return 0;
+    }
+
     void ImagingComponent::registerImageHandler(ImageHandler handler) {
         if (m_cb.empty()) {
             m_registerHandler(&ImagingComponent::m_handleImageRegion, this,
                               imageRegion.getMessageType());
+
+            m_registerHandler(
+                &ImagingComponent::m_handleImagePlacedInSharedMemory, this,
+                imagePlacedInSharedMemory.getMessageType());
         }
         m_cb.push_back(handler);
     }
     void ImagingComponent::m_parentSet() {
         m_getParent().registerMessageType(imageRegion);
+        m_getParent().registerMessageType(imagePlacedInSharedMemory);
     }
 
     void ImagingComponent::m_checkFirst(OSVR_ImagingMetadata const &metadata) {
@@ -164,6 +321,11 @@ namespace common {
 
         OSVR_DEV_VERBOSE("Sending/receiving first frame: width="
                          << metadata.width << " height=" << metadata.height);
+    }
+    void ImagingComponent::m_growShmVecIfRequired(OSVR_ChannelCount sensor) {
+        if (m_shmBuf.size() <= sensor) {
+            m_shmBuf.resize(sensor + 1);
+        }
     }
 } // namespace common
 } // namespace osvr

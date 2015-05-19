@@ -68,6 +68,7 @@ namespace common {
         typedef uint16_t alignment_type;
         typedef uint16_t entry_count_type;
         typedef uint32_t entry_size_type;
+        typedef uint32_t abi_level_type;
         class Options {
           public:
             OSVR_COMMON_EXPORT Options();
@@ -111,7 +112,7 @@ namespace common {
         /// internal shared memory layout, such that if two processes try to
         /// communicate with different ABI levels, they will (likely) not
         /// succeed and thus should not try.
-        OSVR_COMMON_EXPORT static uint32_t getABILevel();
+        OSVR_COMMON_EXPORT static abi_level_type getABILevel();
 
         /// @brief Named constructor, for use by server processes: creates a
         /// shared memory ring buffer given the options structure.
@@ -150,8 +151,11 @@ namespace common {
         /// have (and uses) well-defined overflow semantics.
         typedef uint32_t sequence_type;
 
-        typedef uint8_t *pointer_type;
-        typedef uint8_t const *pointer_to_const_type;
+        typedef uint8_t value_type;
+        typedef value_type *pointer_type;
+        typedef value_type const *pointer_to_const_type;
+
+        typedef shared_ptr<value_type> smart_pointer_type;
 
         /// @brief A class providing write access to the next available element
         /// in the ring buffer, owning the appropriate mutex locks and providing
@@ -209,6 +213,10 @@ namespace common {
             /// @brief Gets the raw pointer
             pointer_to_const_type get() const { return m_buf; }
 
+            /// @brief Gets a smart pointer to the buffer that shares ownership
+            /// of the underlying resources of this object.
+            smart_pointer_type getBufferSmartPointer() const;
+
             /// @brief Gets the sequence number associated with this entry.
             sequence_type getSequenceNumber() const { return m_seq; }
 
@@ -219,11 +227,9 @@ namespace common {
             BufferReadProxy(detail::IPCGetResultPtr &&data,
                             SharedMemoryRingBufferPtr &&shm);
             friend class SharedMemoryRingBuffer;
-            pointer_to_const_type m_buf;
+            pointer_type m_buf;
             sequence_type m_seq;
             detail::IPCGetResultPtr m_data;
-            /// @brief for lifetime management only.
-            SharedMemoryRingBufferPtr m_shm;
         };
 
         /// @brief Puts the data in the next element in the buffer (using

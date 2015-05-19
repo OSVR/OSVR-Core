@@ -31,6 +31,7 @@
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ImagingReportTypesC.h>
+#include <osvr/Common/SharedMemoryRingBuffer.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -53,7 +54,12 @@ namespace common {
 
             static const char *identifier();
         };
-
+        class ImagePlacedInSharedMemory
+            : public MessageRegistration<ImagePlacedInSharedMemory> {
+          public:
+            class MessageSerialization;
+            static const char *identifier();
+        };
     } // namespace messages
 
     /// @brief BaseDevice component
@@ -69,6 +75,10 @@ namespace common {
         /// @brief Message from server to client, containing some image data.
         messages::ImageRegion imageRegion;
 
+        /// @brief Message from server to client, notifying of image data in the
+        /// shared memory ring buffer.
+        messages::ImagePlacedInSharedMemory imagePlacedInSharedMemory;
+
         OSVR_COMMON_EXPORT void sendImageData(
             OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
             OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
@@ -81,14 +91,32 @@ namespace common {
         ImagingComponent(OSVR_ChannelCount numChan);
         virtual void m_parentSet();
 
+        /// @return true if we could send it.
+        bool m_sendImageDataViaSharedMemory(OSVR_ImagingMetadata metadata,
+                                            OSVR_ImageBufferElement *imageData,
+                                            OSVR_ChannelCount sensor,
+                                            OSVR_TimeValue const &timestamp);
+
+        /// @return true if we could send it.
+        bool m_sendImageDataOnTheWire(OSVR_ImagingMetadata metadata,
+                                      OSVR_ImageBufferElement *imageData,
+                                      OSVR_ChannelCount sensor,
+                                      OSVR_TimeValue const &timestamp);
+
         static int VRPN_CALLBACK
         m_handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
 
+        static int VRPN_CALLBACK
+        m_handleImagePlacedInSharedMemory(void *userdata, vrpn_HANDLERPARAM p);
+
         void m_checkFirst(OSVR_ImagingMetadata const &metadata);
+        void m_growShmVecIfRequired(OSVR_ChannelCount sensor);
 
         OSVR_ChannelCount m_numSensor;
         std::vector<ImageHandler> m_cb;
         bool m_gotOne;
+        /// @brief One for each sensor
+        std::vector<SharedMemoryRingBufferPtr> m_shmBuf;
     };
 } // namespace common
 } // namespace osvr

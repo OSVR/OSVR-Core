@@ -37,20 +37,18 @@
 #include <utility>
 #include <type_traits>
 
-#undef OSVR_SHM_LOCK_DEBUGGING
-
 namespace osvr {
 namespace common {
 #define OSVR_SHM_VERBOSE(X) OSVR_DEV_VERBOSE("SharedMemoryRingBuffer: " << X)
 
-    /// @brief the ABI level: this must be bumped if the layout of any
-    /// shared-memory objects (Bookkeeping, ElementData) changes, if Boost
-    /// Interprocess changes affect the utilized ABI, or if other changes occur
-    /// that would interfere with  communication.
+    /// @brief the ABI level: this must be bumped if the layout of any shared-memory
+    /// objects (Bookkeeping, ElementData) changes, if Boost Interprocess changes
+    /// affect the utilized ABI, or if other changes occur that would interfere with
+    /// communication.
     static SharedMemoryRingBuffer::abi_level_type SHM_SOURCE_ABI_LEVEL = 0;
 
-/// Some tests that can be automated for ensuring validity of the ABI level
-/// number.
+    /// Some tests that can be automated for ensuring validity of the ABI level
+    /// number.
 #if (BOOST_VERSION > 105800)
 #error                                                                         \
     "Using an untested Boost version - inspect the Boost Interprocess release notes/changelog to see if any ABI breaks affect us."
@@ -62,8 +60,8 @@ namespace common {
     "Boost Interprocess pre-1.54 on Win32 is ABI-incompatible with newer Boost due to changed bootstamp function."
 #endif
 #else // !_WIN32
-// No obvious ABI breaks through 1.58 seem to apply to us on non-Windows
-// platforms
+    // No obvious ABI breaks through 1.58 seem to apply to us on non-Windows
+    // platforms
 #endif
 
     static_assert(std::is_same<SharedMemoryRingBuffer::BackendType,
@@ -118,6 +116,7 @@ namespace common {
             BufferType *buffer;
             ipc::sharable_lock_type elementLock;
             sequence_type seq;
+            SharedMemoryRingBufferPtr shm;
         };
     } // namespace detail
 
@@ -412,18 +411,18 @@ namespace common {
 
     SharedMemoryRingBuffer::BufferReadProxy::BufferReadProxy(
         detail::IPCGetResultPtr &&data, SharedMemoryRingBufferPtr &&shm)
-        : m_buf(nullptr), m_seq(0), m_data(std::move(data)),
-          m_shm(std::move(shm)) {
+        : m_buf(nullptr), m_seq(0), m_data(std::move(data)) {
         if (nullptr != m_data) {
             m_buf = m_data->buffer;
             m_seq = m_data->seq;
+            m_data->shm = std::move(shm);
         }
     }
 
-    SharedMemoryRingBuffer::smart_pointer_type
-    SharedMemoryRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
+    SharedMemoryRingBuffer::smart_pointer_type SharedMemoryRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
         return smart_pointer_type(m_data, m_buf);
     }
+
 
     SharedMemoryRingBuffer::Options::Options()
         : m_shmBackend(ipc::DEFAULT_MANAGED_SHM_ID) {}
