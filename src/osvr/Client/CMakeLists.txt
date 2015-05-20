@@ -9,6 +9,8 @@ set(SOURCE
     ButtonRemoteFactory.cpp
     ButtonRemoteFactory.h
     CreateContext.cpp
+    EyeTrackerRemoteFactory.cpp
+    EyeTrackerRemoteFactory.h
     HandlerContainer.h
     ImagingRemoteFactory.cpp
     ImagingRemoteFactory.h
