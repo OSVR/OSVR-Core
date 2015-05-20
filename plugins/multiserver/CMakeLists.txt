@@ -16,6 +16,10 @@ foreach(filestem ${DESCRIPTORS})
     list(APPEND JSON_DESCRIPTORS "${infile}")
 endforeach()
 
+if(BUILD_USBSERIALENUM)
+    add_definitions(-DOSVR_HAVE_USBSERIALENUM)
+endif()
+
 osvr_add_plugin(NAME com_osvr_Multiserver
     CPP
     SOURCES
@@ -28,9 +32,13 @@ osvr_add_plugin(NAME com_osvr_Multiserver
     VRPNMultiserver.h
     ${JSON_HEADERS})
 
-target_link_libraries(com_osvr_Multiserver osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn osvrUSBSerial)
+target_link_libraries(com_osvr_Multiserver osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn vendored-hidapi)
 
-target_include_directories(com_osvr_Multiserver PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi" "${CMAKE_CURRENT_BINARY_DIR}")
+if(BUILD_USBSERIALENUM)
+    target_link_libraries(com_osvr_Multiserver osvrUSBSerial)
+endif()
+
+target_include_directories(com_osvr_Multiserver PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 set_target_properties(com_osvr_Multiserver PROPERTIES
     FOLDER "OSVR Plugins")

@@ -3,6 +3,11 @@
 #
 
 set(IGNORED_HEADERS osvr/Util/MSStdIntC.h)
+if(NOT BUILD_USBSERIALENUM)
+    list(APPEND IGNORED_HEADERS
+        osvr/USBSerial/USBSerialDevice.h
+        osvr/USBSerial/USBSerialEnum.h)
+endif()
 
 set(LIBRARIES_PluginKit libfunctionality::functionality)
 set(LIBRARIES_VRPNServer libfunctionality::functionality)
@@ -79,6 +84,3 @@ add_test(NAME test_fwd_headers
         -DHEADER_BASE=${HEADER_BASE}
         -P "${CMAKE_CURRENT_LIST_DIR}/CheckForwardDeclarationHeaders.cmake"
 )
-
-
-

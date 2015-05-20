@@ -34,7 +34,7 @@ option(BUILD_CLIENT_EXAMPLES "Should we build the client example apps?" ON)
 option(BUILD_CLIENT_APPS "Should we build the client apps?" ON)
 
 option(BUILD_HEADER_DEPENDENCY_TESTS "Should we add targets to ensure that every public header compiles cleanly on its own? Increases number of targets greatly..." ON)
-if(WIN32)
+if(WIN32 OR ANDROID)
     option(Boost_USE_STATIC_LIBS "Build with Boost's static libraries?" ON)
 endif()
 
@@ -80,8 +80,10 @@ else()
     set(HAVE_OSVR_JSON_TO_C ${BUILD_SERVER})
 endif()
 
+set(BUILD_USBSERIALENUM ${BUILD_SERVER_PLUGINS})
 set(BUILD_OPENCV_CAMERA_PLUGIN ${BUILD_SERVER_PLUGINS})
 if(ANDROID)
+    set(BUILD_USBSERIALENUM OFF)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
 endif()
 
