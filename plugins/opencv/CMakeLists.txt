@@ -3,7 +3,7 @@ osvr_add_plugin(NAME com_osvr_VideoCapture_OpenCV
     MANUAL_LOAD
     SOURCES com_osvr_VideoCapture_OpenCV.cpp)
 
-target_link_libraries(com_osvr_VideoCapture_OpenCV osvrPluginKitImaging opencv_core opencv_highgui opencv_imgproc)
+target_link_libraries(com_osvr_VideoCapture_OpenCV osvrPluginKitImaging opencv_core ${OPENCV_CAMERA_EXTRA_LIBS})
 
 set_target_properties(com_osvr_VideoCapture_OpenCV PROPERTIES
     FOLDER "OSVR Plugins")
