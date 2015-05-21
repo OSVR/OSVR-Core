@@ -36,22 +36,23 @@
 
 void printEyeTrackerReport(const OSVR_EyeTrackerReport *report){
 
-
 	std::cout << "2D Data:" <<
 		report->state.gaze.gazeDirection2D.data[0] << "; " <<
-		report->state.gaze.gazeDirection2D.data[1] << std::endl;
+		report->state.gaze.gazeDirection2D.data[1] << "\t" <<
 
-	std::cout << "3D Data:" <<
+				"3D Data:" <<
 		report->state.gaze.gazeDirection3D.data[0] << "; " <<
 		report->state.gaze.gazeDirection3D.data[1] << "; " <<
 		report->state.gaze.gazeDirection3D.data[2] << std::endl;
+
+	
 
 }
 
 void eyeTrackerCallback(void * /*userdata*/,
 						const OSVR_TimeValue * /*timestamp*/ ,
 					 const OSVR_EyeTrackerReport *report) {
-	std::cout << "Got Eye Tracker Report: " << std::endl;
+	std::cout << "Got Eye Tracker Report: for sensor #" << report->sensor << std::endl;
 		printEyeTrackerReport(report);
 }
 
@@ -59,9 +60,9 @@ void eyeTrackerCallback(void * /*userdata*/,
 int main() {
     osvr::clientkit::ClientContext context("com.osvr.exampleclients.EyeTrackerCallback");
 
-    osvr::clientkit::Interface eyetracker = context.getInterface("/eyetracker");
+    osvr::clientkit::Interface eyetracker = context.getInterface("/com_osvr_EyeTracker/EyeTracker/eyetracker");
 
-	//eyetracker.registerCallback(&eyeTrackerCallback, NULL);
+	eyetracker.registerCallback(&eyeTrackerCallback, NULL);
 
 	// Pretend that this is your application's mainloop.
     while (1) {
