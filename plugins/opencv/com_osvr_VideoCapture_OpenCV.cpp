@@ -25,6 +25,9 @@
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/ImagingInterface.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+
+#include "com_osvr_VideoCapture_OpenCV_json.h"
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp> // for basic OpenCV types
@@ -64,6 +67,9 @@ class CameraDevice : boost::noncopyable {
         // Puts an object in m_dev that knows it's a
         // threaded device so osvrDeviceSendData knows
         // that it needs to get a connection lock first.
+
+        /// Send the JSON.
+        m_dev.sendJsonDescriptor(osvr::util::makeString(com_osvr_VideoCapture_OpenCV_json));
 
         /// Sets the update callback
         m_dev.registerUpdateCallback(this);
