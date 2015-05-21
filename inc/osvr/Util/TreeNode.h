@@ -147,7 +147,7 @@ namespace util {
             /// @brief Generic constant visitation method that calls a functor
             /// on each of the children (as const) in an undefined order.
             template <typename F> void visitConstChildren(F &visitor) const {
-                for (ptr_type const &node : m_children) {
+                for (auto const &node : m_children) {
                     visitor(const_cast<type const &>(*node));
                 }
             }
