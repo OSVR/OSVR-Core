@@ -6,15 +6,15 @@
     "lastModified": "",
     "interfaces": {
         "eyetracker": {
-            "count": 1
+            "count": 2
         }
     },
     "semantic": {
-        "value": {
-            "$target": "eyetracker/0"
-        }
+        "left": "eyetracker/0",
+        "right": "eyetracker/1"
     },
     "automaticAliases": {
-        "/me/eye/left": "semantic/"
+        "/me/eyes/left": "semantic/left",
+        "/me/eyes/right": "semantic/right"
     }
 }
