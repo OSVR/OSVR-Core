@@ -12,27 +12,32 @@ endif()
 set(LIBRARIES_PluginKit libfunctionality::functionality)
 set(LIBRARIES_VRPNServer libfunctionality::functionality)
 
-set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_thread boost_filesystem)
+set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_thread)
+if(TARGET boost_filesystem)
+    list(APPEND COMMON_TEST_LIBRARIES boost_filesystem)
+endif()
 
 add_custom_target(header_dependencies)
 
 file(GLOB_RECURSE headers RELATIVE "${HEADER_BASE}" ${HEADER_BASE}/*.h)
 set(test_index 0)
 foreach(HEADER ${headers})
+    # Sample of relevant variables computed here
+    # HEADER: osvr/Util/TimeValue.h
+    # symbolname: osvr_Util_TimeValue
+    # libname: Util
+
+    # Compute symbolname
+    string(REPLACE ".h" "" symbolname "${HEADER}")
+    string(MAKE_C_IDENTIFIER "${symbolname}" symbolname)
+
+    # Compute libname
+    string(REGEX REPLACE "osvr/" "" libname "${HEADER}")
+    string(REGEX REPLACE "/[^/]+$" "" libname "${libname}")
+
     list(FIND IGNORED_HEADERS "${HEADER}" _index)
-    if(${_index} EQUAL -1)
-        # Sample of relevant variables computed here
-        # HEADER: osvr/Util/TimeValue.h
-        # symbolname: osvr_Util_TimeValue
-        # libname: Util
-
-        # Compute symbolname
-        string(REPLACE ".h" "" symbolname "${HEADER}")
-        string(MAKE_C_IDENTIFIER "${symbolname}" symbolname)
-
-        # Compute libname
-        string(REGEX REPLACE "osvr/" "" libname "${HEADER}")
-        string(REGEX REPLACE "/[^/]+$" "" libname "${libname}")
+    # If we didn't explicitly ignore this and if we built this target
+    if(${_index} EQUAL -1 AND TARGET "osvr${libname}")
 
         #message(STATUS "${HEADER}: '${symbolname}' - '${libname}'")
 
