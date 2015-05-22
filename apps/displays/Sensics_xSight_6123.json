@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "Sensics",
       "model": "xSight 6123",
-      "Version": "",
+      "version": "",
       "numDisplays": 2,
-      "Note": "Assumes xSight SVP is set for 1920x1080 full screen"
+      "note": "Assumes xSight SVP is set for 1920x1080 full screen"
     },
     "fieldOfView": {
       "monocularHorizontal": 85.5,
@@ -18,7 +21,8 @@
         "width": 1920,
         "height": 1080,
         "videoInputs": 2,
-        "displayMode": "fullScreen"
+        "displayMode": "fullScreen",
+        "swapEyes": 0
       }
     ],
     "distortion": {

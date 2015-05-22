@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "Oculus",
       "model": "Rift",
-      "Version": "DK1",
+      "version": "DK1",
       "numDisplays": 1,
-      "Note": ""
+      "note": ""
     },
     "fieldOfView": {
       "monocularHorizontal": 99,
@@ -18,7 +21,8 @@
         "width": 1280,
         "height": 800,
         "videoInputs": 1,
-        "displayMode": "horzSideBySide"
+        "displayMode": "horzSideBySide",
+        "swapEyes": 0
       }
     ],
     "distortion": {

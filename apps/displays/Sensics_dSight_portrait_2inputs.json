@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "Sensics",
       "model": "dSight",
-      "Version": "portrait",
+      "version": "portrait",
       "numDisplays": 2,
-      "Note": "Suitable when dSight receives 1080x1920 portrait-mode video, 2 video inputs"
+      "note": "Suitable when dSight receives 1080x1920 portrait-mode video, 2 video inputs"
     },
     "fieldOfView": {
       "monocularHorizontal": 95,
@@ -18,7 +21,8 @@
         "width": 1920,
         "height": 1080,
         "videoInputs": 2,
-        "displayMode": "fullScreen"
+        "displayMode": "fullScreen",
+        "swapEyes": 0
       }
     ],
     "distortion": {

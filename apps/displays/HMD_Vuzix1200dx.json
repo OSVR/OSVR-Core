@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "Vuzix",
       "model": "Wrap 1200dx",
-      "Version": "1.0",
+      "version": "1.0",
       "numDisplays": 2,
-      "Note": ""
+      "note": ""
     },
     "fieldOfView": {
       "monocularHorizontal": 17.6,
@@ -18,7 +21,8 @@
         "width": 852,
         "height": 480,
         "videoInputs": 1,
-        "displayMode": "horzSideBySide"
+        "displayMode": "horzSideBySide",
+        "swapEyes": 0
       }
     ],
     "distortion": {

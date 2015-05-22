@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "OSVR",
       "model": "HDK",
-      "Version": "1.1",
+      "version": "1.1",
       "numDisplays": 1,
-      "Note": "Settings are also good for HDK 1.0"
+      "note": "Settings are also good for HDK 1.0"
     },
     "fieldOfView": {
       "monocularHorizontal": 90,
@@ -18,7 +21,8 @@
         "width": 1920,
         "height": 1080,
         "videoInputs": 1,
-        "displayMode": "horzSideBySide"
+        "displayMode": "horzSideBySide",
+        "swapEyes": 0
       }
     ],
     "distortion": {

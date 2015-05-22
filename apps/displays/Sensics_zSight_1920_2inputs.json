@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "Sensics",
       "model": "zSight 1920",
-      "Version": "",
+      "version": "",
       "numDisplays": 2,
-      "Note": "1920x1080, 2 video inputs"
+      "note": "1920x1080, 2 video inputs"
     },
     "fieldOfView": {
       "monocularHorizontal": 60,
@@ -18,7 +21,8 @@
         "width": 1920,
         "height": 1080,
         "videoInputs": 2,
-        "displayMode": "fullScreen"
+        "displayMode": "fullScreen",
+        "swapEyes": 0
       }
     ],
     "distortion": {

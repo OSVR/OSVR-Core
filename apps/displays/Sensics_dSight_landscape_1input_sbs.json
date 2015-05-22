@@ -1,11 +1,14 @@
 {
+  "meta": {
+    "schemaVersion":"1.1"
+  },
   "hmd": {
     "device": {
       "vendor": "Sensics",
       "model": "dSight",
-      "Version": "landscape",
+      "version": "landscape",
       "numDisplays": 2,
-      "Note": "Suitable when dSight receives 1080x1920 landscape-mode video, 1 video input"
+      "note": "Suitable when dSight receives 1080x1920 landscape-mode video, 1 video input"
     },
     "fieldOfView": {
       "monocularHorizontal": 95,
@@ -18,7 +21,8 @@
         "width": 1920,
         "height": 1080,
         "videoInputs": 1,
-        "displayMode": "horzSideBySide"
+        "displayMode": "horzSideBySide",
+        "swapEyes": 0
       }
     ],
     "distortion": {
