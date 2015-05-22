@@ -78,7 +78,11 @@ include(CopyImportedTarget)
 include(MSVCMultipleProcessCompile)
 
 include(SetDefaultBuildType)
-set_default_build_type(RelWithDebInfo)
+if(ANDROID)
+    set_default_build_type(Release)
+else()
+    set_default_build_type(RelWithDebInfo)
+endif()
 
 include(UseFolders)
 use_folders()
