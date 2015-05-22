@@ -4,31 +4,31 @@
   },
   "hmd": {
     "device": {
-      "vendor": "Vuzix",
-      "model": "Wrap 1200dx",
-      "version": "1.0",
-      "numDisplays": 2,
+      "vendor": "Oculus",
+      "model": "Rift",
+      "version": "DK2",
+      "numDisplays": 1,
       "note": ""
     },
     "fieldOfView": {
-      "monocularHorizontal": 17.6,
-      "monocularVertical": 30.7,
+      "monocularHorizontal": 93.2798,
+      "monocularVertical": 106.092,
       "overlapPercent": 100,
       "pitchTilt": 0
     },
     "resolutions": [
       {
-        "width": 852,
-        "height": 480,
+        "width": 1920,
+        "height": 1080,
         "videoInputs": 1,
         "displayMode": "horzSideBySide",
         "swapEyes": 0
       }
     ],
     "distortion": {
-      "k1Red": 0,
-      "k1Green": 0,
-      "k1Blue": 0
+      "k1Red": 1.01999,
+      "k1Green": 1.248,
+      "k1Blue": 1.48601
     },
     "rendering": {
       "rightRoll": 0,
@@ -37,8 +37,7 @@
     "eyes": [
       {
         "centerProjX": 0.5,
-        "centerProjY": 0.5,
-        "rotate180": 0
+        "centerProjY": 0.5
       }
     ]
   }

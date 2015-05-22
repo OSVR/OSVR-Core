@@ -4,31 +4,31 @@
   },
   "hmd": {
     "device": {
-      "vendor": "Vuzix",
-      "model": "Wrap 1200dx",
-      "version": "1.0",
+      "vendor": "Sensics",
+      "model": "dSight",
+      "version": "landscape",
       "numDisplays": 2,
-      "note": ""
+      "note": "Suitable when dSight receives 1080x1920 landscape-mode video, 1 video input"
     },
     "fieldOfView": {
-      "monocularHorizontal": 17.6,
-      "monocularVertical": 30.7,
-      "overlapPercent": 100,
+      "monocularHorizontal": 95,
+      "monocularVertical": 53.43,
+      "overlapPercent": 73.68,
       "pitchTilt": 0
     },
     "resolutions": [
       {
-        "width": 852,
-        "height": 480,
+        "width": 1920,
+        "height": 1080,
         "videoInputs": 1,
         "displayMode": "horzSideBySide",
         "swapEyes": 0
       }
     ],
     "distortion": {
-      "k1Red": 0,
-      "k1Green": 0,
-      "k1Blue": 0
+      "k1Red": 0.5,
+      "k1Green": 0.5,
+      "k1Blue": 0.5
     },
     "rendering": {
       "rightRoll": 0,
@@ -37,8 +37,7 @@
     "eyes": [
       {
         "centerProjX": 0.5,
-        "centerProjY": 0.5,
-        "rotate180": 0
+        "centerProjY": 0.5
       }
     ]
   }

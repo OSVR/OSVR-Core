@@ -5,16 +5,16 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "xSight 6123",
+      "model": "zSight 1920-100",
       "version": "",
       "numDisplays": 2,
-      "note": "Assumes xSight SVP is set for 1920x1080 full screen"
+      "note": "1920x1080, 2 video inputs"
     },
     "fieldOfView": {
-      "monocularHorizontal": 85.5,
-      "monocularVertical": 45,
-      "overlapPercent": 62,
-      "pitchTilt": 7.5
+      "monocularHorizontal": 60,
+      "monocularVertical": 33.75,
+      "overlapPercent": 50,
+      "pitchTilt": 0
     },
     "resolutions": [
       {
@@ -26,9 +26,9 @@
       }
     ],
     "distortion": {
-      "k1Red": 0,
-      "k1Green": 0,
-      "k1Blue": 0
+      "k1Red": 0.041,
+      "k1Green": 0.041,
+      "k1Blue": 0.041
     },
     "rendering": {
       "rightRoll": 0,

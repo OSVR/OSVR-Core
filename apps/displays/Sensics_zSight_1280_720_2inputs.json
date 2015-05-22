@@ -4,31 +4,31 @@
   },
   "hmd": {
     "device": {
-      "vendor": "Vuzix",
-      "model": "Wrap 1200dx",
-      "version": "1.0",
+      "vendor": "Sensics",
+      "model": "zSight",
+      "version": "1.1",
       "numDisplays": 2,
-      "note": ""
+      "note": "1280x720 resolution mode, 2 video inputs"
     },
     "fieldOfView": {
-      "monocularHorizontal": 17.6,
-      "monocularVertical": 30.7,
+      "monocularHorizontal": 48,
+      "monocularVertical": 38.4,
       "overlapPercent": 100,
       "pitchTilt": 0
     },
     "resolutions": [
       {
-        "width": 852,
-        "height": 480,
-        "videoInputs": 1,
-        "displayMode": "horzSideBySide",
+        "width": 1280,
+        "height": 720,
+        "videoInputs": 2,
+        "displayMode": "fullScreen",
         "swapEyes": 0
       }
     ],
     "distortion": {
-      "k1Red": 0,
-      "k1Green": 0,
-      "k1Blue": 0
+      "k1Red": 0.041,
+      "k1Green": 0.041,
+      "k1Blue": 0.041
     },
     "rendering": {
       "rightRoll": 0,
@@ -37,8 +37,7 @@
     "eyes": [
       {
         "centerProjX": 0.5,
-        "centerProjY": 0.5,
-        "rotate180": 0
+        "centerProjY": 0.5
       }
     ]
   }

@@ -1,34 +1,45 @@
 {
-    "hmd": {
-        "field_of_view": {
-            "monocular_horizontal": 51,
-            "monocular_vertical": 30,
-            "overlap_percent": 100,
-            "pitch_tilt": 0
-        },
-		"resolutions": [
-			{
-				"width": 1280,
-				"height": 720,
-				"video_inputs": 1,
-				"display_mode": "horz_side_by_side"
-			}
-		],
-		"distortion": {
-			"k1_red": 0,
-			"k1_green": 0,
-			"k1_blue": 0
-		},
-		"rendering": {
-			"right_roll": 0,
-			"left_roll": 0
-		},
-		"eyes": [
-			{
-				"center_proj_x": 0.5,
-				"center_proj_y": 0.5,
-				"rotate_180": 0
-			}
-		]
-	}
+  "meta": {
+    "schemaVersion":"1.1"
+  },
+  "hmd": {
+    "device": {
+      "vendor": "Vuzix",
+      "model": "IWear 720",
+      "version": "1.0",
+      "numDisplays": 2,
+      "note": ""
+    },
+    "fieldOfView": {
+      "monocularHorizontal": 51,
+      "monocularVertical": 30,
+      "overlapPercent": 100,
+      "pitchTilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 1280,
+        "height": 720,
+        "videoInputs": 1,
+        "displayMode": "horzSideBySide",
+        "swapEyes": 0
+      }
+    ],
+    "distortion": {
+      "k1Red": 0,
+      "k1Green": 0,
+      "k1Blue": 0
+    },
+    "rendering": {
+      "rightRoll": 0,
+      "leftRoll": 0
+    },
+    "eyes": [
+      {
+        "centerProjX": 0.5,
+        "centerProjY": 0.5,
+        "rotate180": 0
+      }
+    ]
+  }
 }

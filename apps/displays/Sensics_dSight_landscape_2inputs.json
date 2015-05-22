@@ -5,16 +5,16 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "xSight 6123",
-      "version": "",
+      "model": "dSight",
+      "version": "landscape",
       "numDisplays": 2,
-      "note": "Assumes xSight SVP is set for 1920x1080 full screen"
+      "note": "Suitable when dSight receives 1080x1920 landscape-mode video, 2 video inputs"
     },
     "fieldOfView": {
-      "monocularHorizontal": 85.5,
-      "monocularVertical": 45,
-      "overlapPercent": 62,
-      "pitchTilt": 7.5
+      "monocularHorizontal": 95,
+      "monocularVertical": 53.43,
+      "overlapPercent": 73.68,
+      "pitchTilt": 0
     },
     "resolutions": [
       {
@@ -26,9 +26,9 @@
       }
     ],
     "distortion": {
-      "k1Red": 0,
-      "k1Green": 0,
-      "k1Blue": 0
+      "k1Red": 0.5,
+      "k1Green": 0.5,
+      "k1Blue": 0.5
     },
     "rendering": {
       "rightRoll": 0,

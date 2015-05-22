@@ -5,33 +5,33 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "xSight 6123",
-      "version": "",
+      "model": "dSight",
+      "version": "portrait",
       "numDisplays": 2,
-      "note": "Assumes xSight SVP is set for 1920x1080 full screen"
+      "note": "Suitable when dSight receives 1080x1920 portrait-mode video, 1 video input"
     },
     "fieldOfView": {
-      "monocularHorizontal": 85.5,
-      "monocularVertical": 45,
-      "overlapPercent": 62,
-      "pitchTilt": 7.5
+      "monocularHorizontal": 95,
+      "monocularVertical": 53.43,
+      "overlapPercent": 73.68,
+      "pitchTilt": 0
     },
     "resolutions": [
       {
         "width": 1920,
         "height": 1080,
-        "videoInputs": 2,
-        "displayMode": "fullScreen",
+        "videoInputs": 1,
+        "displayMode": "vertSideBySide",
         "swapEyes": 0
       }
     ],
     "distortion": {
-      "k1Red": 0,
-      "k1Green": 0,
-      "k1Blue": 0
+      "k1Red": 0.5,
+      "k1Green": 0.5,
+      "k1Blue": 0.5
     },
     "rendering": {
-      "rightRoll": 0,
+      "rightRoll": 180,
       "leftRoll": 0
     },
     "eyes": [
