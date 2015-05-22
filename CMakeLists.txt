@@ -5,8 +5,9 @@ if(CMAKE_VERSION VERSION_LESS 3.0.0)
     message(FATAL_ERROR "You must use CMake 3.0.0 or greater.")
 endif()
 
+set(LOCAL_CMAKE_MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-local")
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${LOCAL_CMAKE_MODULE_DIR}")
 
 ###
 # Package Options
@@ -370,16 +371,16 @@ export(EXPORT osvrTargets
 # Register the current build dir as a package search location
 export(PACKAGE osvr)
 
-configure_file(osvrConfig.cmake
+configure_file("${LOCAL_CMAKE_MODULE_DIR}/osvrConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     @ONLY)
 
 # Copy over the shared CMake modules for use in a build tree.
 foreach(HELPER osvrAddPlugin osvrConvertJson)
-    configure_file(${HELPER}.cmake "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
+    configure_file("${LOCAL_CMAKE_MODULE_DIR}/${HELPER}.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
 endforeach()
 
-configure_file(osvrConfigBuildTreePaths.cmake
+configure_file("${LOCAL_CMAKE_MODULE_DIR}/osvrConfigBuildTreePaths.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"
     @ONLY)
 
@@ -396,10 +397,10 @@ install(EXPORT osvrTargets
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrAddPlugin.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledBoost.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledOpenCV.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConvertJson.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrAddPlugin.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrConfigInstalledBoost.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrConfigInstalledOpenCV.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrConvertJson.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT
@@ -407,7 +408,7 @@ install(FILES
 
 if(WIN32)
     install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/CMakeBoostHelper.cmake"
+        "${LOCAL_CMAKE_MODULE_DIR}/CMakeBoostHelper.cmake"
         DESTINATION
         ${CONFIG_INSTALL_DIR}
         COMPONENT
