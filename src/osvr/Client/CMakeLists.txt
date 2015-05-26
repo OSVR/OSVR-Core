@@ -16,6 +16,8 @@ set(SOURCE
     ImagingRemoteFactory.h
     InterfaceTree.cpp
     InterfaceTree.h
+    Location2DRemoteFactory.cpp
+    Location2DRemoteFactory.h    
     PureClientContext.cpp
     PureClientContext.h
     RemoteHandler.cpp

@@ -34,6 +34,7 @@
 #include "ButtonRemoteFactory.h"
 #include "EyeTrackerRemoteFactory.h"
 #include "ImagingRemoteFactory.h"
+#include "Location2DRemoteFactory.h"
 #include "TrackerRemoteFactory.h"
 #include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
@@ -65,6 +66,7 @@ namespace client {
         ButtonRemoteFactory(m_vrpnConns).registerWith(m_factory);
         ImagingRemoteFactory(m_vrpnConns).registerWith(m_factory);
         EyeTrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        Location2DRemoteFactory(m_vrpnConns).registerWith(m_factory);
         
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;
