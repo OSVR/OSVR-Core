@@ -39,10 +39,6 @@
 static const std::string
     windowNameAndInstructions("OSVR imaging demo | q or esc to quit");
 
-/// @brief We keep a copy of the last report to avoid de-allocating the image
-/// buffer until we have a new report.
-osvr::clientkit::ImagingReportOpenCV lastReport;
-
 bool gotSomething = false;
 
 void imagingCallback(void *userdata,
@@ -61,6 +57,8 @@ void imagingCallback(void *userdata,
     }
 
     cv::imshow(windowNameAndInstructions, report.frame);
+    auto &lastReport =
+        *static_cast<osvr::clientkit::ImagingReportOpenCV *>(userdata);
     lastReport = report;
 }
 int main() {
@@ -68,8 +66,13 @@ int main() {
 
     osvr::clientkit::Interface camera = context.getInterface("/camera");
 
+    /// We keep a copy of the last report to avoid de-allocating the image
+    /// buffer until we have a new report.
+    osvr::clientkit::ImagingReportOpenCV lastReport;
+
     // Register the imaging callback.
-    osvr::clientkit::registerImagingCallback(camera, &imagingCallback, NULL);
+    osvr::clientkit::registerImagingCallback(camera, &imagingCallback,
+                                             &lastReport);
 
     // Output instructions to the console.
     std::cout << std::endl << windowNameAndInstructions << std::endl;
