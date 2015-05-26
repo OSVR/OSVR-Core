@@ -67,6 +67,7 @@ namespace clientkit {
         OSVR_CALLBACK_METHODS(Button)
         OSVR_CALLBACK_METHODS(Analog)
 		OSVR_CALLBACK_METHODS(EyeTracker)
+		OSVR_CALLBACK_METHODS(Location2D)
 /// @}
 
 #undef OSVR_CALLBACK_METHODS
