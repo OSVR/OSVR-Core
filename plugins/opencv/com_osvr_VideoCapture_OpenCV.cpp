@@ -33,7 +33,6 @@
 #include <opencv2/core/core.hpp> // for basic OpenCV types
 #include <opencv2/core/operations.hpp>
 #include <opencv2/highgui/highgui.hpp> // for image capture
-#include <opencv2/imgproc/imgproc.hpp> // for image scaling
 
 #include <boost/noncopyable.hpp>
 #include <boost/lexical_cast.hpp>
@@ -69,7 +68,8 @@ class CameraDevice : boost::noncopyable {
         // that it needs to get a connection lock first.
 
         /// Send the JSON.
-        m_dev.sendJsonDescriptor(osvr::util::makeString(com_osvr_VideoCapture_OpenCV_json));
+        m_dev.sendJsonDescriptor(
+            osvr::util::makeString(com_osvr_VideoCapture_OpenCV_json));
 
         /// Sets the update callback
         m_dev.registerUpdateCallback(this);
@@ -92,18 +92,9 @@ class CameraDevice : boost::noncopyable {
         if (!retrieved) {
             return OSVR_RETURN_FAILURE;
         }
-        // Currently limited to just under 64k message size.
 
-        // cv::Mat subimage = m_frame(cv::Rect(0, 0, 210, 100));
-        // m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(subimage));
-
-        // Scale down to something under 160x120 while keeping aspect ratio.
-        double xScale = 160.0 / m_frame.cols;
-        double yScale = 120.0 / m_frame.rows;
-        double finalScale = std::min(xScale, yScale);
-        cv::resize(m_frame, m_scaledFrame, cv::Size(), finalScale, finalScale,
-                   CV_INTER_AREA);
-        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_scaledFrame));
+        // If larger than 160x120, will used shared memory backend only.
+        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_frame));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -151,8 +142,6 @@ class CameraDetection {
 } // end anonymous namespace
 
 OSVR_PLUGIN(com_osvr_VideoCapture_OpenCV) {
-    osvrDeviceRegisterMessageType(ctx, "CameraMessage", &cameraMessage);
-
     osvr::pluginkit::PluginContext context(ctx);
 
     context.registerHardwareDetectCallback(new CameraDetection());
