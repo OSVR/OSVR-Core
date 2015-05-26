@@ -87,13 +87,9 @@ namespace client {
             report.sensor = data.sensor;
             report.state.metadata = data.metadata;
             report.state.data = data.buffer.get();
-            common::ClientInterfacePtr anInterface;
             for (auto &iface : m_interfaces) {
-                anInterface = iface;
                 iface->triggerCallbacks(timestamp, report);
-            }
-            if (anInterface) {
-                anInterface->getContext().acquireObject(data.buffer);
+                iface->getContext().acquireObject(data.buffer);
             }
         }
 

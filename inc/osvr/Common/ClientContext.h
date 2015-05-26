@@ -118,7 +118,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     std::string const m_appId;
     InterfaceList m_interfaces;
 
-    osvr::util::KeyedOwnershipContainer m_ownedObjects;
+    osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
 };
 
 #endif // INCLUDED_ContextImpl_h_GUID_9000C62E_3693_4888_83A2_0D26F4591B6A
