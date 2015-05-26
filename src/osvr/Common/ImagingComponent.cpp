@@ -213,7 +213,10 @@ namespace common {
     bool ImagingComponent::m_sendImageDataOnTheWire(
         OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
         OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
-
+        /// @todo currently only handle 8bit data over network
+        if (metadata.depth != 1) {
+            return false;
+        }
         Buffer<> buf;
         messages::ImageRegion::MessageSerialization msg(metadata, imageData,
                                                         sensor);
