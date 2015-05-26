@@ -31,6 +31,7 @@ set(API
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
+    "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/InterfaceCallbacks.h"
@@ -39,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
+    "${HEADER_LOCATION}/Location2DComponent.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/NetworkClassOfService.h"
@@ -77,7 +79,6 @@ set(API
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${HEADER_LOCATION}/Transform.h"
-    "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
 set(SOURCE
@@ -92,10 +93,12 @@ set(SOURCE
     DeviceComponent.cpp
     DeviceWrapper.cpp
     DeviceWrapper.h
+    EyeTrackerComponent.cpp    
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
     JSONTransformVisitor.cpp
+    Location2DComponent.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
     NetworkClassOfService.cpp
@@ -119,8 +122,7 @@ set(SOURCE
     RouteContainer.cpp
     RoutingConstants.cpp
     RoutingKeys.cpp
-    SystemComponent.cpp
-    EyeTrackerComponent.cpp)
+    SystemComponent.cpp)
 
 osvr_add_library()
 
