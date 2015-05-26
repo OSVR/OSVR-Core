@@ -143,8 +143,22 @@ typedef struct OSVR_EyeTrackerReport {
 	OSVR_EyeTrackerState state;
 } OSVR_EyeTrackerReport;
 
-/** @brief C function type for a callback on an analog interface */
+/** @brief C function type for a callback on an eye tracker interface */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(EyeTracker);
+
+/** @brief Type of 2D location state */
+typedef OSVR_Vec2 OSVR_Location2DState;
+
+/** @brief Report type for a callback on a  2D location interface */
+typedef struct OSVR_Location2DReport{
+    /** @brief Identifies the sensor/channel that the report comes from */
+    OSVR_ChannelCount sensor;
+    /** @brief The 2D location state. */
+    OSVR_Location2DState location;
+} OSVR_Location2DReport;
+
+/** @brief C function type for a callback on an location2D interface */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Location2D);
 
 #undef OSVR_DEFINE_CALLBACK
 /** @} */
