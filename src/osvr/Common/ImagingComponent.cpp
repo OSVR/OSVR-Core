@@ -179,14 +179,15 @@ namespace common {
         if (!m_shmBuf[sensor] ||
             m_shmBuf[sensor]->getEntrySize() != imageBufferSize) {
             // create or replace the shared memory ring buffer.
-            /// @todo make the name better - should include device name
-            auto makeName = [](OSVR_ChannelCount sensor) {
-                std::ostringstream os;
-                os << "com.osvr.imaging/" << int(sensor);
-                return os.str();
-            };
+            auto makeName =
+                [](OSVR_ChannelCount sensor, std::string const &devName) {
+                    std::ostringstream os;
+                    os << "com.osvr.imaging/" << devName << "/" << int(sensor);
+                    return os.str();
+                };
             m_shmBuf[sensor] = SharedMemoryRingBuffer::create(
-                SharedMemoryRingBuffer::Options(makeName(sensor))
+                SharedMemoryRingBuffer::Options(
+                    makeName(sensor, m_getParent().getDeviceName()))
                     .setEntrySize(imageBufferSize));
         }
         if (!m_shmBuf[sensor]) {
