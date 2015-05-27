@@ -70,7 +70,7 @@
 #include <boost/integer.hpp>
 #include <boost/mpl/if.hpp>
 
-#if !defined(OSVR_HAVE_BYTESWAP_H) && defined(_MSC_VER)
+#if defined(OSVR_HAVE_INTRIN_H) && defined(OSVR_HAVE_WORKING_MS_BYTESWAPS)
 #define OSVR_HAVE_MSC_BYTESWAPS
 #include <intrin.h>
 #endif
