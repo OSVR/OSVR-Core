@@ -103,6 +103,7 @@ namespace common {
             sequence_type seq;
             ipc::exclusive_lock_type elementLock;
             ipc::exclusive_lock_type boundsLock;
+            SharedMemoryRingBufferPtr shm;
         };
 
         struct IPCGetResult {
@@ -247,9 +248,10 @@ namespace common {
                     << sequenceNumber << " aka index " << back(lock));
 #endif
                 auto elementLock = back(lock)->getExclusiveLock();
+                /// shared memory nullptr filled in by outer class
                 detail::IPCPutResultPtr ret(new detail::IPCPutResult{
                     back(lock)->getBuf(elementLock), sequenceNumber,
-                    std::move(elementLock), std::move(lock)});
+                    std::move(elementLock), std::move(lock), nullptr});
                 return ret;
             }
 
@@ -399,11 +401,11 @@ namespace common {
 
     SharedMemoryRingBuffer::BufferWriteProxy::BufferWriteProxy(
         detail::IPCPutResultPtr &&data, SharedMemoryRingBufferPtr &&shm)
-        : m_buf(nullptr), m_seq(0), m_data(std::move(data)),
-          m_shm(std::move(shm)) {
+        : m_buf(nullptr), m_seq(0), m_data(std::move(data)) {
         if (m_data) {
             m_buf = m_data->buffer;
             m_seq = m_data->seq;
+            m_data->shm = std::move(shm);
         }
     }
 
@@ -420,7 +422,6 @@ namespace common {
     SharedMemoryRingBuffer::smart_pointer_type SharedMemoryRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
         return smart_pointer_type(m_data, m_buf);
     }
-
 
     SharedMemoryRingBuffer::Options::Options()
         : m_shmBackend(ipc::DEFAULT_MANAGED_SHM_ID) {}
@@ -478,8 +479,9 @@ namespace common {
             if (nullptr != elt) {
                 auto readerLock = elt->getSharableLock();
                 auto buf = elt->getBuf(readerLock);
-                ret.reset(
-                    new detail::IPCGetResult{buf, std::move(readerLock), num});
+                /// The nullptr will be filled in by the main object.
+                ret.reset(new detail::IPCGetResult{buf, std::move(readerLock),
+                                                   num, nullptr});
             }
             return ret;
         }
@@ -491,9 +493,10 @@ namespace common {
             if (nullptr != elt) {
                 auto readerLock = elt->getSharableLock();
                 auto buf = elt->getBuf(readerLock);
+                /// The nullptr will be filled in by the main object.
                 ret.reset(new detail::IPCGetResult{
                     buf, std::move(readerLock),
-                    m_bookkeeping->backSequenceNumber(boundsLock)});
+                    m_bookkeeping->backSequenceNumber(boundsLock), nullptr});
             }
             return ret;
         }

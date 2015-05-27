@@ -192,8 +192,6 @@ namespace common {
             pointer_type m_buf;
             sequence_type m_seq;
             detail::IPCPutResultPtr m_data;
-            /// @brief for lifetime management only.
-            SharedMemoryRingBufferPtr m_shm;
         };
 
         /// @brief A class providing access to an entry in the ring buffer,
