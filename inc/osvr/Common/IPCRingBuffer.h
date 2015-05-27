@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_SharedMemoryRingBuffer_h_GUID_4F33BDA7_1BEB_4E81_B96C_1ADA1CBD1997
-#define INCLUDED_SharedMemoryRingBuffer_h_GUID_4F33BDA7_1BEB_4E81_B96C_1ADA1CBD1997
+#ifndef INCLUDED_IPCRingBuffer_h_GUID_4F33BDA7_1BEB_4E81_B96C_1ADA1CBD1997
+#define INCLUDED_IPCRingBuffer_h_GUID_4F33BDA7_1BEB_4E81_B96C_1ADA1CBD1997
 
 // Internal Includes
 #include <osvr/Common/Export.h>
@@ -46,12 +46,13 @@ namespace common {
         typedef shared_ptr<IPCGetResult> IPCGetResultPtr;
     }
     // forward declaration
-    class SharedMemoryRingBuffer;
+    class IPCRingBuffer;
 
     /// @brief Pointer type for holding a shared memory ring buffer.
-    typedef shared_ptr<SharedMemoryRingBuffer> SharedMemoryRingBufferPtr;
+    typedef shared_ptr<IPCRingBuffer> IPCRingBufferPtr;
 
-    /// @brief A ring buffer stored in shared memory, with managed occupancy.
+    /// @brief A ring buffer for interprocess communication, with managed
+    /// occupancy.
     ///
     /// Each element in the ring buffer (that is, the contained buffers) is
     /// aligned to the given power of 2 alignment.
@@ -61,8 +62,8 @@ namespace common {
     /// segment name and signalling new data, and no guarantee that the data you
     /// were notified about won't be overwritten - just that if you're currently
     /// accessing data, we won't overwrite that.
-    class SharedMemoryRingBuffer
-        : public enable_shared_from_this<SharedMemoryRingBuffer> {
+    class IPCRingBuffer
+        : public enable_shared_from_this<IPCRingBuffer> {
       public:
         typedef uint8_t BackendType;
         typedef uint16_t alignment_type;
@@ -119,24 +120,23 @@ namespace common {
         ///
         /// If the returned pointer is not valid, the named segment could not be
         /// created for some reason.
-        OSVR_COMMON_EXPORT static SharedMemoryRingBufferPtr
+        OSVR_COMMON_EXPORT static IPCRingBufferPtr
         create(Options const &opts);
 
-        /// @brief Named constructor, for use by client processes: accesses a
-        /// shared memory ring buffer using the options structure. Only the name
-        /// field is used from the options.
+        /// @brief Named constructor, for use by client processes: accesses an
+        /// IPC ring buffer using the options structure. Only the name field is
+        /// used from the options.
         ///
-        /// If the returned pointer is not valid, the named segment could not be
+        /// If the returned pointer is not valid, the named buffer could not be
         /// found.
-        OSVR_COMMON_EXPORT static SharedMemoryRingBufferPtr
+        OSVR_COMMON_EXPORT static IPCRingBufferPtr
         find(Options const &opts);
 
-        /// @brief Returns an integer identifying the shared memory backend
-        /// used.
+        /// @brief Returns an integer identifying the IPC backend used.
         OSVR_COMMON_EXPORT BackendType getBackend() const;
 
-        /// @brief Returns the name string used to create or find this shared
-        /// memory.
+        /// @brief Returns the name string used to create or find this ring
+        /// buffer
         OSVR_COMMON_EXPORT std::string const &getName() const;
 
         /// @brief Returns the size of each individual buffer entry, in bytes.
@@ -187,8 +187,8 @@ namespace common {
 
           private:
             BufferWriteProxy(detail::IPCPutResultPtr &&data,
-                             SharedMemoryRingBufferPtr &&shm);
-            friend class SharedMemoryRingBuffer;
+                             IPCRingBufferPtr &&shm);
+            friend class IPCRingBuffer;
             pointer_type m_buf;
             sequence_type m_seq;
             detail::IPCPutResultPtr m_data;
@@ -224,8 +224,8 @@ namespace common {
 
           private:
             BufferReadProxy(detail::IPCGetResultPtr &&data,
-                            SharedMemoryRingBufferPtr &&shm);
-            friend class SharedMemoryRingBuffer;
+                            IPCRingBufferPtr &&shm);
+            friend class IPCRingBuffer;
             pointer_type m_buf;
             sequence_type m_seq;
             detail::IPCGetResultPtr m_data;
@@ -254,17 +254,17 @@ namespace common {
         OSVR_COMMON_EXPORT BufferReadProxy getLatest();
 
         /// @brief Destructor.
-        OSVR_COMMON_EXPORT ~SharedMemoryRingBuffer();
+        OSVR_COMMON_EXPORT ~IPCRingBuffer();
 
       private:
-        static SharedMemoryRingBufferPtr
+        static IPCRingBufferPtr
         m_constructorHelper(Options const &opts, bool doCreate);
         class Impl;
-        SharedMemoryRingBuffer(unique_ptr<Impl> &&impl);
+        IPCRingBuffer(unique_ptr<Impl> &&impl);
         unique_ptr<Impl> m_impl;
     };
 
 } // namespace common
 } // namespace osvr
 
-#endif // INCLUDED_SharedMemoryRingBuffer_h_GUID_4F33BDA7_1BEB_4E81_B96C_1ADA1CBD1997
+#endif // INCLUDED_IPCRingBuffer_h_GUID_4F33BDA7_1BEB_4E81_B96C_1ADA1CBD1997

@@ -110,10 +110,10 @@ namespace common {
         namespace {
             struct SharedMemoryMessage {
                 OSVR_ImagingMetadata metadata;
-                SharedMemoryRingBuffer::sequence_type seqNum;
+                IPCRingBuffer::sequence_type seqNum;
                 OSVR_ChannelCount sensor;
-                SharedMemoryRingBuffer::abi_level_type abiLevel;
-                SharedMemoryRingBuffer::BackendType backend;
+                IPCRingBuffer::abi_level_type abiLevel;
+                IPCRingBuffer::BackendType backend;
                 std::string shmName;
             };
             template <typename T>
@@ -185,8 +185,8 @@ namespace common {
                     os << "com.osvr.imaging/" << devName << "/" << int(sensor);
                     return os.str();
                 };
-            m_shmBuf[sensor] = SharedMemoryRingBuffer::create(
-                SharedMemoryRingBuffer::Options(
+            m_shmBuf[sensor] = IPCRingBuffer::create(
+                IPCRingBuffer::Options(
                     makeName(sensor, m_getParent().getDeviceName()))
                     .setEntrySize(imageBufferSize));
         }
@@ -201,7 +201,7 @@ namespace common {
         Buffer<> buf;
         messages::ImagePlacedInSharedMemory::MessageSerialization serialization(
             messages::SharedMemoryMessage{metadata, seq, sensor,
-                                          SharedMemoryRingBuffer::getABILevel(),
+                                          IPCRingBuffer::getABILevel(),
                                           shm.getBackend(), shm.getName()});
         serialize(buf, serialization);
         m_getParent().packMessage(
@@ -262,22 +262,22 @@ namespace common {
         auto &msg = msgSerialize.getMessage();
         auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
-        if (SharedMemoryRingBuffer::getABILevel() != msg.abiLevel) {
+        if (IPCRingBuffer::getABILevel() != msg.abiLevel) {
             /// Can't interoperate with this server over shared memory
             OSVR_DEV_VERBOSE("Can't handle SHM ABI level " << msg.abiLevel);
             return 0;
         }
         self->m_growShmVecIfRequired(msg.sensor);
         auto checkSameRingBuf = [](messages::SharedMemoryMessage const &msg,
-                                   SharedMemoryRingBufferPtr &ringbuf) {
+                                   IPCRingBufferPtr &ringbuf) {
             return (msg.backend == ringbuf->getBackend()) &&
                    (ringbuf->getEntrySize() == getBufferSize(msg.metadata)) &&
                    (ringbuf->getName() == msg.shmName);
         };
         if (!self->m_shmBuf[msg.sensor] ||
             !checkSameRingBuf(msg, self->m_shmBuf[msg.sensor])) {
-            self->m_shmBuf[msg.sensor] = SharedMemoryRingBuffer::find(
-                SharedMemoryRingBuffer::Options(msg.shmName, msg.backend));
+            self->m_shmBuf[msg.sensor] = IPCRingBuffer::find(
+                IPCRingBuffer::Options(msg.shmName, msg.backend));
         }
         if (!self->m_shmBuf[msg.sensor]) {
             /// Can't find the shared memory referred to - possibly not a local

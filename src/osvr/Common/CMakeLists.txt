@@ -43,6 +43,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceCallbacks.h"
     "${HEADER_LOCATION}/InterfaceList.h"
     "${HEADER_LOCATION}/InterfaceState.h"
+    "${HEADER_LOCATION}/IPCRingBuffer.h"
     "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
@@ -80,7 +81,6 @@ set(API
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
-    "${HEADER_LOCATION}/SharedMemoryRingBuffer.h"
     "${HEADER_LOCATION}/StateType.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
@@ -102,6 +102,7 @@ set(SOURCE
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
+    IPCRingBuffer.cpp
     JSONTransformVisitor.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
@@ -129,7 +130,6 @@ set(SOURCE
     Serialization.cpp
     SharedMemory.h
     SharedMemoryObjectWithMutex.h
-    SharedMemoryRingBuffer.cpp
     SystemComponent.cpp)
 
 osvr_add_library()

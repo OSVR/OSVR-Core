@@ -31,7 +31,7 @@
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ImagingReportTypesC.h>
-#include <osvr/Common/SharedMemoryRingBuffer.h>
+#include <osvr/Common/IPCRingBuffer.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -116,7 +116,7 @@ namespace common {
         std::vector<ImageHandler> m_cb;
         bool m_gotOne;
         /// @brief One for each sensor
-        std::vector<SharedMemoryRingBufferPtr> m_shmBuf;
+        std::vector<IPCRingBufferPtr> m_shmBuf;
     };
 } // namespace common
 } // namespace osvr

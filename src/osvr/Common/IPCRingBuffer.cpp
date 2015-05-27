@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/SharedMemoryRingBuffer.h>
+#include <osvr/Common/IPCRingBuffer.h>
 #include "SharedMemory.h"
 #include "SharedMemoryObjectWithMutex.h"
 #include <osvr/Util/ImagingReportTypesC.h>
@@ -39,13 +39,13 @@
 
 namespace osvr {
 namespace common {
-#define OSVR_SHM_VERBOSE(X) OSVR_DEV_VERBOSE("SharedMemoryRingBuffer: " << X)
+#define OSVR_SHM_VERBOSE(X) OSVR_DEV_VERBOSE("IPCRingBuffer: " << X)
 
     /// @brief the ABI level: this must be bumped if the layout of any
     /// shared-memory objects (Bookkeeping, ElementData) changes, if Boost
     /// Interprocess changes affect the utilized ABI, or if other changes occur
     /// that would interfere with communication.
-    static SharedMemoryRingBuffer::abi_level_type SHM_SOURCE_ABI_LEVEL = 0;
+    static IPCRingBuffer::abi_level_type SHM_SOURCE_ABI_LEVEL = 0;
 
 /// Some tests that can be automated for ensuring validity of the ABI level
 /// number.
@@ -64,9 +64,9 @@ namespace common {
 // platforms
 #endif
 
-    static_assert(std::is_same<SharedMemoryRingBuffer::BackendType,
+    static_assert(std::is_same<IPCRingBuffer::BackendType,
                                ipc::SharedMemoryBackendType>::value,
-                  "The typedefs SharedMemoryRingBuffer::BackendType and "
+                  "The typedefs IPCRingBuffer::BackendType and "
                   "ipc::SharedMemoryBackendType must remain in sync!");
 
     namespace bip = boost::interprocess;
@@ -77,7 +77,7 @@ namespace common {
         using ipc_deleter_type =
             typename ManagedMemory::template deleter<T>::type;
 
-        typedef SharedMemoryRingBuffer::sequence_type sequence_type;
+        typedef IPCRingBuffer::sequence_type sequence_type;
 
         /// @brief Destroys the "unique_instance" of a given type in a managed
         /// memory segment. If there isn't an instance, this is a no-op.
@@ -103,7 +103,7 @@ namespace common {
             sequence_type seq;
             ipc::exclusive_lock_type elementLock;
             ipc::exclusive_lock_type boundsLock;
-            SharedMemoryRingBufferPtr shm;
+            IPCRingBufferPtr shm;
         };
 
         struct IPCGetResult {
@@ -117,7 +117,7 @@ namespace common {
             BufferType *buffer;
             ipc::sharable_lock_type elementLock;
             sequence_type seq;
-            SharedMemoryRingBufferPtr shm;
+            IPCRingBufferPtr shm;
         };
     } // namespace detail
 
@@ -134,7 +134,7 @@ namespace common {
 
             template <typename ManagedMemory>
             void allocateBuf(ManagedMemory &shm,
-                             SharedMemoryRingBuffer::Options const &opts) {
+                             IPCRingBuffer::Options const &opts) {
                 freeBuf(shm);
                 m_buf = static_cast<BufferType *>(shm.allocate_aligned(
                     opts.getEntrySize(), opts.getAlignment()));
@@ -156,7 +156,7 @@ namespace common {
             typedef uint16_t raw_index_type;
             template <typename ManagedMemory>
             Bookkeeping(ManagedMemory &shm,
-                        SharedMemoryRingBuffer::Options const &opts)
+                        IPCRingBuffer::Options const &opts)
                 : m_capacity(opts.getEntries()),
                   elementArray(shm.template construct<ElementData>(
                       bip::unique_instance)[m_capacity]()),
@@ -266,7 +266,7 @@ namespace common {
         };
 
         static size_t
-        computeRequiredSpace(SharedMemoryRingBuffer::Options const &opts) {
+        computeRequiredSpace(IPCRingBuffer::Options const &opts) {
             size_t alignedEntrySize = opts.getEntrySize() + opts.getAlignment();
             size_t dataSize = alignedEntrySize * (opts.getEntries() + 1);
             // Give 33% overhead on the raw bookkeeping data
@@ -310,7 +310,7 @@ namespace common {
           public:
             typedef SegmentHolderBase<ManagedMemory> Base;
             ServerSharedMemorySegmentHolder(
-                SharedMemoryRingBuffer::Options const &opts)
+                IPCRingBuffer::Options const &opts)
                 : m_name(opts.getName()) {
                 OSVR_SHM_VERBOSE("Creating segment, name "
                                  << opts.getName() << ", size "
@@ -355,7 +355,7 @@ namespace common {
           public:
             typedef SegmentHolderBase<ManagedMemory> Base;
             ClientSharedMemorySegmentHolder(
-                SharedMemoryRingBuffer::Options const &opts) {
+                IPCRingBuffer::Options const &opts) {
                 OSVR_SHM_VERBOSE("Finding segment, name " << opts.getName());
                 try {
                     Base::m_shm.reset(new ManagedMemory(
@@ -379,7 +379,7 @@ namespace common {
         /// @brief Factory function for constructing a memory segment holder.
         template <typename ManagedMemory>
         inline unique_ptr<SharedMemorySegmentHolder>
-        constructMemorySegment(SharedMemoryRingBuffer::Options const &opts,
+        constructMemorySegment(IPCRingBuffer::Options const &opts,
                                bool doCreate) {
             unique_ptr<SharedMemorySegmentHolder> ret;
             if (doCreate) {
@@ -399,8 +399,8 @@ namespace common {
         }
     } // namespace
 
-    SharedMemoryRingBuffer::BufferWriteProxy::BufferWriteProxy(
-        detail::IPCPutResultPtr &&data, SharedMemoryRingBufferPtr &&shm)
+    IPCRingBuffer::BufferWriteProxy::BufferWriteProxy(
+        detail::IPCPutResultPtr &&data, IPCRingBufferPtr &&shm)
         : m_buf(nullptr), m_seq(0), m_data(std::move(data)) {
         if (m_data) {
             m_buf = m_data->buffer;
@@ -409,8 +409,8 @@ namespace common {
         }
     }
 
-    SharedMemoryRingBuffer::BufferReadProxy::BufferReadProxy(
-        detail::IPCGetResultPtr &&data, SharedMemoryRingBufferPtr &&shm)
+    IPCRingBuffer::BufferReadProxy::BufferReadProxy(
+        detail::IPCGetResultPtr &&data, IPCRingBufferPtr &&shm)
         : m_buf(nullptr), m_seq(0), m_data(std::move(data)) {
         if (nullptr != m_data) {
             m_buf = m_data->buffer;
@@ -419,47 +419,47 @@ namespace common {
         }
     }
 
-    SharedMemoryRingBuffer::smart_pointer_type
-    SharedMemoryRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
+    IPCRingBuffer::smart_pointer_type
+    IPCRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
         return smart_pointer_type(m_data, m_buf);
     }
 
-    SharedMemoryRingBuffer::Options::Options()
+    IPCRingBuffer::Options::Options()
         : m_shmBackend(ipc::DEFAULT_MANAGED_SHM_ID) {}
 
-    SharedMemoryRingBuffer::Options::Options(std::string const &name)
+    IPCRingBuffer::Options::Options(std::string const &name)
         : m_name(ipc::make_name_safe(name)),
           m_shmBackend(ipc::DEFAULT_MANAGED_SHM_ID) {}
 
-    SharedMemoryRingBuffer::Options::Options(std::string const &name,
+    IPCRingBuffer::Options::Options(std::string const &name,
                                              BackendType backend)
         : m_name(ipc::make_name_safe(name)), m_shmBackend(backend) {}
 
-    SharedMemoryRingBuffer::Options &
-    SharedMemoryRingBuffer::Options::setName(std::string const &name) {
+    IPCRingBuffer::Options &
+    IPCRingBuffer::Options::setName(std::string const &name) {
         m_name = ipc::make_name_safe(name);
         return *this;
     }
 
-    SharedMemoryRingBuffer::Options &
-    SharedMemoryRingBuffer::Options::setAlignment(alignment_type alignment) {
+    IPCRingBuffer::Options &
+    IPCRingBuffer::Options::setAlignment(alignment_type alignment) {
         /// @todo ensure power of 2
         m_alignment = alignment;
         return *this;
     }
 
-    SharedMemoryRingBuffer::Options &
-    SharedMemoryRingBuffer::Options::setEntries(entry_count_type entries) {
+    IPCRingBuffer::Options &
+    IPCRingBuffer::Options::setEntries(entry_count_type entries) {
         m_entries = entries;
         return *this;
     }
 
-    SharedMemoryRingBuffer::Options &
-    SharedMemoryRingBuffer::Options::setEntrySize(entry_size_type entrySize) {
+    IPCRingBuffer::Options &
+    IPCRingBuffer::Options::setEntrySize(entry_size_type entrySize) {
         m_entrySize = entrySize;
         return *this;
     }
-    class SharedMemoryRingBuffer::Impl {
+    class IPCRingBuffer::Impl {
       public:
         Impl(unique_ptr<SharedMemorySegmentHolder> &&segment,
              Options const &opts)
@@ -511,11 +511,11 @@ namespace common {
         Options m_opts;
     };
 
-    SharedMemoryRingBufferPtr
-    SharedMemoryRingBuffer::m_constructorHelper(Options const &opts,
+    IPCRingBufferPtr
+    IPCRingBuffer::m_constructorHelper(Options const &opts,
                                                 bool doCreate) {
 
-        SharedMemoryRingBufferPtr ret;
+        IPCRingBufferPtr ret;
         unique_ptr<SharedMemorySegmentHolder> segment;
 
         switch (opts.getBackend()) {
@@ -549,64 +549,64 @@ namespace common {
             return ret;
         }
         unique_ptr<Impl> impl(new Impl(std::move(segment), opts));
-        ret.reset(new SharedMemoryRingBuffer(std::move(impl)));
+        ret.reset(new IPCRingBuffer(std::move(impl)));
         return ret;
     }
 
-    SharedMemoryRingBuffer::abi_level_type
-    SharedMemoryRingBuffer::getABILevel() {
+    IPCRingBuffer::abi_level_type
+    IPCRingBuffer::getABILevel() {
         return SHM_SOURCE_ABI_LEVEL;
     }
 
-    SharedMemoryRingBufferPtr
-    SharedMemoryRingBuffer::create(Options const &opts) {
+    IPCRingBufferPtr
+    IPCRingBuffer::create(Options const &opts) {
         return m_constructorHelper(opts, true);
     }
-    SharedMemoryRingBufferPtr
-    SharedMemoryRingBuffer::find(Options const &opts) {
+    IPCRingBufferPtr
+    IPCRingBuffer::find(Options const &opts) {
         return m_constructorHelper(opts, false);
     }
 
-    SharedMemoryRingBuffer::SharedMemoryRingBuffer(unique_ptr<Impl> &&impl)
+    IPCRingBuffer::IPCRingBuffer(unique_ptr<Impl> &&impl)
         : m_impl(std::move(impl)) {}
 
-    SharedMemoryRingBuffer::~SharedMemoryRingBuffer() {}
+    IPCRingBuffer::~IPCRingBuffer() {}
 
-    SharedMemoryRingBuffer::BackendType
-    SharedMemoryRingBuffer::getBackend() const {
+    IPCRingBuffer::BackendType
+    IPCRingBuffer::getBackend() const {
         return m_impl->getOpts().getBackend();
     }
 
-    std::string const &SharedMemoryRingBuffer::getName() const {
+    std::string const &IPCRingBuffer::getName() const {
         return m_impl->getOpts().getName();
     }
 
-    uint32_t SharedMemoryRingBuffer::getEntrySize() const {
+    uint32_t IPCRingBuffer::getEntrySize() const {
         return m_impl->getOpts().getEntrySize();
     }
 
-    uint16_t SharedMemoryRingBuffer::getEntries() const {
+    uint16_t IPCRingBuffer::getEntries() const {
         return m_impl->getOpts().getEntries();
     }
 
-    SharedMemoryRingBuffer::BufferWriteProxy SharedMemoryRingBuffer::put() {
+    IPCRingBuffer::BufferWriteProxy IPCRingBuffer::put() {
         return BufferWriteProxy(m_impl->put(), shared_from_this());
     }
 
-    sequence_type SharedMemoryRingBuffer::put(pointer_to_const_type data,
+    sequence_type IPCRingBuffer::put(pointer_to_const_type data,
                                               size_t len) {
         auto proxy = put();
         std::memcpy(proxy.get(), data, len);
         return proxy.getSequenceNumber();
     }
 
-    SharedMemoryRingBuffer::BufferReadProxy
-    SharedMemoryRingBuffer::get(sequence_type num) {
+    IPCRingBuffer::BufferReadProxy
+    IPCRingBuffer::get(sequence_type num) {
         return BufferReadProxy(m_impl->get(num), shared_from_this());
     }
 
-    SharedMemoryRingBuffer::BufferReadProxy
-    SharedMemoryRingBuffer::getLatest() {
+    IPCRingBuffer::BufferReadProxy
+    IPCRingBuffer::getLatest() {
         return BufferReadProxy(m_impl->getLatest(), shared_from_this());
     }
 
