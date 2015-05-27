@@ -39,6 +39,7 @@ set(API
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
+    "${HEADER_LOCATION}/IntegerByteSwap.h"
     "${HEADER_LOCATION}/InterfaceCallbacks.h"
     "${HEADER_LOCATION}/InterfaceList.h"
     "${HEADER_LOCATION}/InterfaceState.h"
