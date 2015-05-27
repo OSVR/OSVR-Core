@@ -32,6 +32,7 @@
 #include <osvr/Common/ClientInterface.h>
 #include "AnalogRemoteFactory.h"
 #include "ButtonRemoteFactory.h"
+#include "DirectionRemoteFactory.h"
 #include "EyeTrackerRemoteFactory.h"
 #include "ImagingRemoteFactory.h"
 #include "Location2DRemoteFactory.h"
@@ -67,6 +68,7 @@ namespace client {
         ImagingRemoteFactory(m_vrpnConns).registerWith(m_factory);
         EyeTrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
         Location2DRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        DirectionRemoteFactory(m_vrpnConns).registerWith(m_factory);
         
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;
