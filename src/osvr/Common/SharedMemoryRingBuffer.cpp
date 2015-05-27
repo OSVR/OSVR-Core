@@ -41,14 +41,14 @@ namespace osvr {
 namespace common {
 #define OSVR_SHM_VERBOSE(X) OSVR_DEV_VERBOSE("SharedMemoryRingBuffer: " << X)
 
-    /// @brief the ABI level: this must be bumped if the layout of any shared-memory
-    /// objects (Bookkeeping, ElementData) changes, if Boost Interprocess changes
-    /// affect the utilized ABI, or if other changes occur that would interfere with
-    /// communication.
+    /// @brief the ABI level: this must be bumped if the layout of any
+    /// shared-memory objects (Bookkeeping, ElementData) changes, if Boost
+    /// Interprocess changes affect the utilized ABI, or if other changes occur
+    /// that would interfere with communication.
     static SharedMemoryRingBuffer::abi_level_type SHM_SOURCE_ABI_LEVEL = 0;
 
-    /// Some tests that can be automated for ensuring validity of the ABI level
-    /// number.
+/// Some tests that can be automated for ensuring validity of the ABI level
+/// number.
 #if (BOOST_VERSION > 105800)
 #error                                                                         \
     "Using an untested Boost version - inspect the Boost Interprocess release notes/changelog to see if any ABI breaks affect us."
@@ -60,8 +60,8 @@ namespace common {
     "Boost Interprocess pre-1.54 on Win32 is ABI-incompatible with newer Boost due to changed bootstamp function."
 #endif
 #else // !_WIN32
-    // No obvious ABI breaks through 1.58 seem to apply to us on non-Windows
-    // platforms
+// No obvious ABI breaks through 1.58 seem to apply to us on non-Windows
+// platforms
 #endif
 
     static_assert(std::is_same<SharedMemoryRingBuffer::BackendType,
@@ -419,7 +419,8 @@ namespace common {
         }
     }
 
-    SharedMemoryRingBuffer::smart_pointer_type SharedMemoryRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
+    SharedMemoryRingBuffer::smart_pointer_type
+    SharedMemoryRingBuffer::BufferReadProxy::getBufferSmartPointer() const {
         return smart_pointer_type(m_data, m_buf);
     }
 
