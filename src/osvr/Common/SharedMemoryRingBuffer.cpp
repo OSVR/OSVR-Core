@@ -83,9 +83,9 @@ namespace common {
         /// memory segment. If there isn't an instance, this is a no-op.
         template <typename T, typename ManagedMemory>
         inline void destroy_unique_instance(ManagedMemory &shm) {
-            auto result = shm.find<T>(bip::unique_instance);
+            auto result = shm.template find<T>(bip::unique_instance);
             if (result.first) {
-                shm.destroy<T>(bip::unique_instance);
+                shm.template destroy<T>(bip::unique_instance);
             }
         }
     } // namespace
@@ -157,7 +157,7 @@ namespace common {
             Bookkeeping(ManagedMemory &shm,
                         SharedMemoryRingBuffer::Options const &opts)
                 : m_capacity(opts.getEntries()),
-                  elementArray(shm.construct<ElementData>(
+                  elementArray(shm.template construct<ElementData>(
                       bip::unique_instance)[m_capacity]()),
                   m_beginSequenceNumber(0), m_nextSequenceNumber(0), m_begin(0),
                   m_size(0), m_bufLen(opts.getEntrySize()) {
@@ -185,7 +185,7 @@ namespace common {
                     for (raw_index_type i = 0; i < m_capacity; ++i) {
                         getByRawIndex(i, lock).freeBuf(shm);
                     }
-                    shm.destroy<ElementData>(bip::unique_instance);
+                    shm.template destroy<ElementData>(bip::unique_instance);
                 }
             }
 
@@ -311,6 +311,7 @@ namespace common {
         class ServerSharedMemorySegmentHolder
             : public SegmentHolderBase<ManagedMemory> {
           public:
+            typedef SegmentHolderBase<ManagedMemory> Base;
             ServerSharedMemorySegmentHolder(
                 SharedMemoryRingBuffer::Options const &opts)
                 : m_name(opts.getName()) {
@@ -321,9 +322,9 @@ namespace common {
                     removeSharedMemory();
                     /// @todo Some shared memory types (specifically, Windows),
                     /// don't have a remove, so we should re-open.
-                    m_shm.reset(new ManagedMemory(bip::create_only,
-                                                  opts.getName().c_str(),
-                                                  computeRequiredSpace(opts)));
+                    Base::m_shm.reset(new ManagedMemory(
+                        bip::create_only, opts.getName().c_str(),
+                        computeRequiredSpace(opts)));
                 } catch (bip::interprocess_exception &e) {
                     OSVR_SHM_VERBOSE("Failed to create shared memory segment "
                                      << opts.getName()
@@ -331,13 +332,14 @@ namespace common {
                     return;
                 }
                 // destroy_unique_instance<Bookkeeping>(*m_shm);
-                m_bookkeeping = m_shm->construct<Bookkeeping>(
-                    bip::unique_instance)(*m_shm, opts);
+                Base::m_bookkeeping =
+                    Base::m_shm->template construct<Bookkeeping>(
+                        bip::unique_instance)(*Base::m_shm, opts);
             }
 
             virtual ~ServerSharedMemorySegmentHolder() {
-                if (m_bookkeeping) {
-                    m_bookkeeping->freeBufs(*m_shm);
+                if (Base::m_bookkeeping) {
+                    Base::m_bookkeeping->freeBufs(*Base::m_shm);
                 }
                 removeSharedMemory();
             }
@@ -354,21 +356,22 @@ namespace common {
         class ClientSharedMemorySegmentHolder
             : public SegmentHolderBase<ManagedMemory> {
           public:
+            typedef SegmentHolderBase<ManagedMemory> Base;
             ClientSharedMemorySegmentHolder(
                 SharedMemoryRingBuffer::Options const &opts) {
                 OSVR_SHM_VERBOSE("Finding segment, name " << opts.getName());
                 try {
-                    m_shm.reset(new ManagedMemory(bip::open_only,
-                                                  opts.getName().c_str()));
+                    Base::m_shm.reset(new ManagedMemory(
+                        bip::open_only, opts.getName().c_str()));
                 } catch (bip::interprocess_exception &e) {
                     OSVR_SHM_VERBOSE("Failed to open shared memory segment "
                                      << opts.getName()
                                      << " with exception: " << e.what());
                     return;
                 }
-                auto bookkeeping =
-                    m_shm->find<Bookkeeping>(bip::unique_instance);
-                m_bookkeeping = bookkeeping.first;
+                auto bookkeeping = Base::m_shm->template find<Bookkeeping>(
+                    bip::unique_instance);
+                Base::m_bookkeeping = bookkeeping.first;
             }
 
             virtual ~ClientSharedMemorySegmentHolder() {}
