@@ -179,11 +179,6 @@ namespace common {
         }
     } // namespace ipc
     using ipc::ipc_offset_ptr;
-
-    template <typename T, typename SharedMemoryType = ipc::managed_shm>
-    using ipc_allocator = boost::interprocess::allocator<
-        T, typename SharedMemoryType::segment_manager>;
-
 } // namespace common
 } // namespace osvr
 
