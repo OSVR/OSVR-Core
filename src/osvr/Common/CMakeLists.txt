@@ -30,6 +30,7 @@ set(API
     "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
+    "${HEADER_LOCATION}/DirectionComponent.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
@@ -93,6 +94,7 @@ set(SOURCE
     DeviceComponent.cpp
     DeviceWrapper.cpp
     DeviceWrapper.h
+    DirectionComponent.cpp
     EyeTrackerComponent.cpp    
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h

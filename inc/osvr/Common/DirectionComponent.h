@@ -23,8 +23,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_EyeTrackerComponent_h_GUID_68C4C9C6_84AF_43AC_1392_008C04EFAF0D
-#define INCLUDED_EyeTrackerComponent_h_GUID_68C4C9C6_84AF_43AC_1392_008C04EFAF0D
+#ifndef INCLUDED_DirectionComponent_h_GUID_DBB6E776_4381_4FB7_C855_B77A87F811BE
+#define INCLUDED_DirectionComponent_h_GUID_DBB6E776_4381_4FB7_C855_B77A87F811BE
 
 
 // Internal Includes
@@ -43,13 +43,13 @@
 namespace osvr {
 	namespace common {
 		
-		struct EyeData {
+		struct DirectionData {
 			OSVR_ChannelCount sensor;
-			OSVR_EyeGazeDirection gaze;
+			OSVR_DirectionState direction;
 		};
 
 		namespace messages {
-			class EyeRegion : public MessageRegistration<EyeRegion> {
+			class DirectionRecord : public MessageRegistration<DirectionRecord> {
 			public:
 				class MessageSerialization;
 
@@ -59,43 +59,43 @@ namespace osvr {
 		} // namespace messages
 
 		/// @brief BaseDevice component
-		class EyeTrackerComponent : public DeviceComponent {
+		class DirectionComponent : public DeviceComponent {
 		public:
 			/// @brief Factory method
 			///
 			/// Required to ensure that allocation and deallocation stay on the same
 			/// side of a DLL line.
-			static OSVR_COMMON_EXPORT shared_ptr<EyeTrackerComponent>
-				create(OSVR_ChannelCount numSensor = 2);
+			static OSVR_COMMON_EXPORT shared_ptr<DirectionComponent>
+				create(OSVR_ChannelCount numSensor = 1);
 
-			/// @brief Message from server to client, containing eye data.
-			messages::EyeRegion eyeRegion;
+			/// @brief Message from server to client, containing 3D direction data.
+			messages::DirectionRecord directionRecord;
 
-			OSVR_COMMON_EXPORT void sendEyeData(
-				OSVR_EyeGazeDirection gaze, 
+			OSVR_COMMON_EXPORT void sendDirectionData(
+				OSVR_DirectionState direction,
 				OSVR_ChannelCount sensor, 
 				OSVR_TimeValue const &timestamp);
 
-			typedef std::function<void(EyeData const &,
-				util::time::TimeValue const &)> EyeHandler;
-			OSVR_COMMON_EXPORT void registerEyeHandler(EyeHandler cb);
+			typedef std::function<void(DirectionData const &,
+				util::time::TimeValue const &)> DirectionHandler;
+			OSVR_COMMON_EXPORT void registerDirectionHandler(DirectionHandler cb);
 
 		private:
-			EyeTrackerComponent(OSVR_ChannelCount numChan);
+			DirectionComponent(OSVR_ChannelCount numChan);
 			virtual void m_parentSet();
 
 			static int VRPN_CALLBACK
-				m_handleEyeRegion(void *userdata, vrpn_HANDLERPARAM p);
+				m_handleDirectionRecord(void *userdata, vrpn_HANDLERPARAM p);
 
-			void m_checkFirst(OSVR_EyeGazeDirection const &gaze);
+			void m_checkFirst(OSVR_DirectionState const &direction);
 
 			OSVR_ChannelCount m_numSensor;
-			std::vector<EyeHandler> m_cb;
+			std::vector<DirectionHandler> m_cb;
 			bool m_gotOne;
 		};
 
 	} // namespace common
 } // namespace osvr
 
-#endif // INCLUDED_EyeTrackerComponent_h_GUID_68C4C9C6_84AF_43AC_1392_008C04EFAF0D
+#endif // INCLUDED_DirectionComponent_h_GUID_DBB6E776_4381_4FB7_C855_B77A87F811BE
 

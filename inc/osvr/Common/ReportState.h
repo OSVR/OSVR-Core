@@ -95,6 +95,14 @@ namespace common {
 			}
 			static OSVR_Location2DState apply(OSVR_Location2DReport &r) { return r.location; }
 		};
+        
+        // Template specialization to handle OSVR_DirectionReport
+		template <> struct ReportStateGetter<OSVR_DirectionReport> {
+			static OSVR_DirectionState const &apply(OSVR_DirectionReport const &r) {
+				return r.direction;
+			}
+			static OSVR_DirectionState apply(OSVR_DirectionReport &r) { return r.direction; }
+		};
     } // namespace traits
 
     /// @brief Generic const accessor for the "state" member of a report.
