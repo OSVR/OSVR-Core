@@ -160,6 +160,20 @@ typedef struct OSVR_Location2DReport{
 /** @brief C function type for a callback on an location2D interface */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Location2D);
 
+/** @brief Type of unit directional vector in 3D with no particular origin*/
+typedef OSVR_Vec3 OSVR_DirectionState;
+
+/** @brief Report type for 3D Direction vector */
+typedef struct OSVR_DirectionReport{
+    /** @brief Identifies the sensor/channel that the report comes from */
+    OSVR_ChannelCount sensor;
+    /** @brief The 3D Direction state. */
+    OSVR_DirectionState direction;
+} OSVR_DirectionReport;
+
+/** @brief C function type for a callback on an location2D interface */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Direction);
+
 #undef OSVR_DEFINE_CALLBACK
 /** @} */
 OSVR_EXTERN_C_END
