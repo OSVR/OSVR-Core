@@ -525,14 +525,14 @@ namespace common {
                 constructMemorySegment<ipc::basic_managed_shm>(opts, doCreate);
             break;
 
-#ifdef BOOST_INTERPROCESS_WINDOWS
+#ifdef OSVR_HAVE_WINDOWS_SHM
         case ipc::WINDOWS_MANAGED_SHM_ID:
             segment = constructMemorySegment<ipc::windows_managed_shm>(
                 opts, doCreate);
             break;
 #endif
 
-#ifdef BOOST_INTERPROCESS_XSI_SHARED_MEMORY_OBJECTS
+#ifdef OSVR_HAVE_XSI_SHM
         case ipc::SYSV_MANAGED_SHM_ID:
             segment =
                 constructMemorySegment<ipc::sysv_managed_shm>(opts, doCreate);

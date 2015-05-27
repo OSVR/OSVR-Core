@@ -49,8 +49,14 @@
 #if defined(BOOST_INTERPROCESS_WINDOWS)
 // Currently only supporting mixing 32/64 on Windows
 #define OSVR_SHM_3264
+#define OSVR_HAVE_WINDOWS_SHM
 #include <boost/interprocess/managed_windows_shared_memory.hpp>
 #elif defined(BOOST_INTERPROCESS_XSI_SHARED_MEMORY_OBJECTS)
+// Disabled - can't compute a correct key at this time.
+#undef OSVR_HAVE_XSI_SHM
+#ifdef OSVR_USE_PLATFORM_SPECIALIZED_SHM
+#undef OSVR_USE_PLATFORM_SPECIALIZED_SHM
+#endif
 #include <boost/interprocess/managed_xsi_shared_memory.hpp>
 #else
 #ifdef OSVR_USE_PLATFORM_SPECIALIZED_SHM
@@ -122,7 +128,7 @@ namespace common {
                 char, my_mem_alloc_algo<boost::interprocess::mutex_family>,
                 index_type>;
 
-#if defined(BOOST_INTERPROCESS_WINDOWS)
+#if defined(OSVR_HAVE_WINDOWS_SHM)
         using windows_managed_shm =
             boost::interprocess::basic_managed_windows_shared_memory<
                 char, my_mem_alloc_algo<boost::interprocess::mutex_family>,
@@ -132,7 +138,7 @@ namespace common {
         };
 #endif
 
-#if defined(BOOST_INTERPROCESS_XSI_SHARED_MEMORY_OBJECTS)
+#if defined(OSVR_HAVE_XSI_SHM)
 
         using sysv_managed_shm =
             boost::interprocess::basic_managed_xsi_shared_memory<
@@ -141,11 +147,11 @@ namespace common {
 #endif
 
 #ifdef OSVR_USE_PLATFORM_SPECIALIZED_SHM
-#if defined(BOOST_INTERPROCESS_WINDOWS)
+#if defined(OSVR_HAVE_WINDOWS_SHM)
         using default_managed_shm = windows_managed_shm;
         static const SharedMemoryBackendType DEFAULT_MANAGED_SHM_ID =
             WINDOWS_MANAGED_SHM_ID;
-#elif defined(BOOST_INTERPROCESS_XSI_SHARED_MEMORY_OBJECTS)
+#elif defined(OSVR_HAVE_XSI_SHM)
         using default_managed_shm = sysv_managed_shm;
         static const SharedMemoryBackendType DEFAULT_MANAGED_SHM_ID =
             SYSV_MANAGED_SHM_ID;
