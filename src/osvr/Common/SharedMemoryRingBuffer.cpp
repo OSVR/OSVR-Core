@@ -213,11 +213,6 @@ namespace common {
                 return nullptr; // out of bounds request -> nullptr return.
             }
 
-            template <typename LockType>
-            raw_index_type &getNextIndex(LockType &lock) {
-                verifyReaderLock(lock);
-                return (m_begin + size()) % m_capacity;
-            }
             template <typename LockType> bool empty(LockType &lock) const {
                 verifyReaderLock(lock);
                 return m_size == 0;
