@@ -10,8 +10,8 @@
         }
     },
     "semantic": {
-        "left": "eyetracker/0",
-        "right": "eyetracker/1"
+        "left": "eyetracker/1",
+        "right": "eyetracker/2"
     },
     "automaticAliases": {
         "/me/eyes/left": "semantic/left",

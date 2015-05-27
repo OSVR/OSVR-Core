@@ -47,8 +47,8 @@ device in your plugin.
 
 OSVR_EXTERN_C_BEGIN
 
-/** @brief Opaque type used in conjunction with a device token to send data on
-an eye tracker interface.
+/** @brief Opaque type used in conjunction with a device token to send data on eye
+tracker interface (which factors into more interfaces, see implementation).
 */
 typedef struct OSVR_EyeTrackerDeviceInterfaceObject *OSVR_EyeTrackerDeviceInterface;
 
@@ -65,25 +65,58 @@ parameter may be subject to external limitations
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
-OSVR_IN OSVR_ChannelCount numSensors
-OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
+OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface OSVR_FUNC_NONNULL((1, 2)));
 
-/** @brief Report data for a sensor(one eye or binocular data).
+/** @brief Report gaze position 2D for a sensor (eye)
 @param dev Device token
 @param iface Eye Tracker interface
-@param eyeData A pointer to a copy of the eye data
+@param gazePosition A copy of the eye gaze Position
 @param sensor Sensor number
 @param timestamp Timestamp correlating to eye data.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
-osvrDeviceEyeTrackerReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
+osvrDeviceEyeTrackerReportGazePosition(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirection eyeData,
+OSVR_IN_PTR OSVR_EyeGazePosition2DState gazePosition,
 OSVR_IN OSVR_ChannelCount sensor,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-OSVR_FUNC_NONNULL((1, 2, 3, 5));
+OSVR_FUNC_NONNULL((1, 2, 3, 4));
+/** @} */ /* end of group */
+
+/** @brief Report gaze direction 3D for a sensor (eye)
+@param dev Device token
+@param iface Eye Tracker interface
+@param gazeDirection A copy of the eye gaze Direction
+@param sensor Sensor number
+@param timestamp Timestamp correlating to eye data.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportGazeDirection(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeGazeDirectionState gazeDirection,
+OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+OSVR_FUNC_NONNULL((1, 2, 3, 4));
+/** @} */ /* end of group */
+
+
+/** @brief Report gaze base point for a sensor (eye)
+@param dev Device token
+@param iface Eye Tracker interface
+@param gazeBasePoint A copy of the eye gaze Direction
+@param sensor Sensor number
+@param timestamp Timestamp correlating to eye data.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportGazeBasePoint(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState gazeBasePoint,
+OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+OSVR_FUNC_NONNULL((1, 2, 3, 4));
 /** @} */ /* end of group */
 
 

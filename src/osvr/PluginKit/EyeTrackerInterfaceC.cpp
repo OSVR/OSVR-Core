@@ -28,10 +28,12 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Common/EyeTrackerComponent.h>
 #include "PointerWrapper.h"
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
+
+#include <osvr/Common/Location2DComponent.h>
+#include <osvr/Common/DirectionComponent.h>
 
 // Library/third-party includes
 // - none
@@ -40,13 +42,14 @@
 // - none
 
 struct OSVR_EyeTrackerDeviceInterfaceObject {
-	osvr::common::EyeTrackerComponent *eyetracker;
+	osvr::common::Location2DComponent *location;
+	osvr::common::DirectionComponent *direction;
+	//button
 };
 
 OSVR_ReturnCode
 osvrDeviceEyeTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
-OSVR_IN OSVR_ChannelCount numSensors) {
+OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface) {
 
 	OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", opts);
 	OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", iface);
@@ -54,21 +57,59 @@ OSVR_IN OSVR_ChannelCount numSensors) {
 		opts->getContext()->registerDataWithGenericDelete(
 		new OSVR_EyeTrackerDeviceInterfaceObject);
 	*iface = ifaceObj;
-	auto eyeTracker = osvr::common::EyeTrackerComponent::create(numSensors);
-	ifaceObj->eyetracker = eyeTracker.get();
-	opts->addComponent(eyeTracker);
+
+	auto location = osvr::common::Location2DComponent::create();
+	ifaceObj->location = location.get();
+	opts->addComponent(location);
+
+	auto direction = osvr::common::DirectionComponent::create();
+	ifaceObj->direction = direction.get();
+	opts->addComponent(direction);
+
 	return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode
-osvrDeviceEyeTrackerReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
+osvrDeviceEyeTrackerReportGazePosition(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirection eyeData,
+OSVR_IN_PTR OSVR_EyeGazePosition2DState gazePosition,
+OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+
+	
+	auto guard = dev->getSendGuard();
+	if (guard->lock()) {
+		iface->location->sendLocationData(gazePosition, sensor, *timestamp);
+		return OSVR_RETURN_SUCCESS;
+	}
+
+	return OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportGazeDirection(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeGazeDirectionState gazeDirection,
 OSVR_IN OSVR_ChannelCount sensor,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
-		iface->eyetracker->sendEyeData(eyeData, sensor, *timestamp);
+		iface->direction->sendDirectionData(gazeDirection, sensor, *timestamp);
+		return OSVR_RETURN_SUCCESS;
+	}
+
+	return OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportGazeBasePoint(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState gazeBasePoint,
+OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+	auto guard = dev->getSendGuard();
+	if (guard->lock()) {
+		iface->direction->sendDirectionData(gazeBasePoint, sensor, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 

@@ -38,8 +38,6 @@
 // Anonymous namespace to avoid symbol collision
 namespace {
 
-	//typedef std::shared_ptr<EyeTrackerInstance> TrackerPtr;
-
 	OSVR_MessageType eyeTrackerMessage;
 
 class EyeTrackerDevice {
@@ -49,7 +47,7 @@ class EyeTrackerDevice {
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
         //tracker = trackerInst;
-		osvrDeviceEyeTrackerConfigure(opts, &m_eyetracker, 2);
+		osvrDeviceEyeTrackerConfigure(opts, &m_eyetracker);
 
         /// Create the sync device token with the options
         m_dev.initSync(ctx, "EyeTracker", opts);
@@ -86,7 +84,10 @@ class EyeTrackerDevice {
 		leftGaze.gazeDirection2D = gaze2D;
 		leftGaze.gazeDirection3D = gaze3D;
 		//printReport(&leftGaze, 1);
-		osvrDeviceEyeTrackerReportData(m_dev, m_eyetracker, leftGaze, 1, &times);
+
+
+		//osvrDeviceEyeTrackerReportData(m_dev, m_eyetracker, leftGaze, 1, &times);
+		osvrDeviceEyeTrackerReportGazePosition(m_dev, m_eyetracker, leftGaze.gazeDirection2D, 1, &times);
 
 		gaze2D.data[0] = -99;
 		gaze2D.data[1] = -99;
@@ -98,7 +99,8 @@ class EyeTrackerDevice {
 		rightGaze.gazeDirection2D = gaze2D;
 		rightGaze.gazeDirection3D = gaze3D;
 		//printReport(&rightGaze, 2);
-		osvrDeviceEyeTrackerReportData(m_dev, m_eyetracker, rightGaze, 2, &times);
+
+		//osvrDeviceEyeTrackerReportData(m_dev, m_eyetracker, rightGaze, 2, &times);
 		        
         return OSVR_RETURN_SUCCESS;
     }
