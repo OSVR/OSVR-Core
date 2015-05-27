@@ -24,6 +24,8 @@
 
 // Internal Includes
 #include <osvr/Common/IPCRingBuffer.h>
+#include "IPCRingBufferResults.h"
+#include "IPCRingBufferSharedObjects.h"
 #include "SharedMemory.h"
 #include "SharedMemoryObjectWithMutex.h"
 #include <osvr/Util/ImagingReportTypesC.h>
@@ -68,6 +70,10 @@ namespace common {
                                ipc::SharedMemoryBackendType>::value,
                   "The typedefs IPCRingBuffer::BackendType and "
                   "ipc::SharedMemoryBackendType must remain in sync!");
+    static_assert(
+        std::is_same<IPCRingBuffer::value_type, OSVR_ImageBufferElement>::value,
+        "The ring buffer's individual byte type must match the image buffer "
+        "element type.");
 
     namespace bip = boost::interprocess;
     namespace {
@@ -89,190 +95,16 @@ namespace common {
             }
         }
     } // namespace
-    namespace detail {
-        struct IPCPutResult {
-            ~IPCPutResult() {
-#ifdef OSVR_SHM_LOCK_DEBUGGING
-                OSVR_SHM_VERBOSE("Releasing exclusive lock on sequence "
-                                 << seq);
-#endif
-                elementLock.unlock();
-                boundsLock.unlock();
-            }
-            BufferType *buffer;
-            sequence_type seq;
-            ipc::exclusive_lock_type elementLock;
-            ipc::exclusive_lock_type boundsLock;
-            IPCRingBufferPtr shm;
-        };
-
-        struct IPCGetResult {
-
-            ~IPCGetResult() {
-#ifdef OSVR_SHM_LOCK_DEBUGGING
-                OSVR_SHM_VERBOSE("Releasing shared lock on sequence " << seq);
-#endif
-                elementLock.unlock();
-            }
-            BufferType *buffer;
-            ipc::sharable_lock_type elementLock;
-            sequence_type seq;
-            IPCRingBufferPtr shm;
-        };
-    } // namespace detail
 
     namespace {
-        class ElementData : public ipc::ObjectWithMutex, boost::noncopyable {
-          public:
-            ElementData() : m_buf(nullptr) {}
 
-            template <typename LockType>
-            BufferType *getBuf(LockType &lock) const {
-                verifyReaderLock(lock);
-                return m_buf.get();
-            }
-
-            template <typename ManagedMemory>
-            void allocateBuf(ManagedMemory &shm,
-                             IPCRingBuffer::Options const &opts) {
-                freeBuf(shm);
-                m_buf = static_cast<BufferType *>(shm.allocate_aligned(
-                    opts.getEntrySize(), opts.getAlignment()));
-            }
-
-            template <typename ManagedMemory> void freeBuf(ManagedMemory &shm) {
-                if (nullptr != m_buf) {
-                    shm.deallocate(m_buf.get());
-                }
-                m_buf = nullptr;
-            }
-
-          private:
-            ipc_offset_ptr<BufferType> m_buf;
-        };
-
-        class Bookkeeping : public ipc::ObjectWithMutex, boost::noncopyable {
-          public:
-            typedef uint16_t raw_index_type;
-            template <typename ManagedMemory>
-            Bookkeeping(ManagedMemory &shm,
-                        IPCRingBuffer::Options const &opts)
-                : m_capacity(opts.getEntries()),
-                  elementArray(shm.template construct<ElementData>(
-                      bip::unique_instance)[m_capacity]()),
-                  m_beginSequenceNumber(0), m_nextSequenceNumber(0), m_begin(0),
-                  m_size(0), m_bufLen(opts.getEntrySize()) {
-
-                auto lock = getExclusiveLock();
-                {
-                    for (raw_index_type i = 0; i < m_capacity; ++i) {
-                        try {
-                            getByRawIndex(i, lock).allocateBuf(shm, opts);
-                        } catch (std::bad_alloc &) {
-                            OSVR_SHM_VERBOSE("Couldn't allocate buffer #"
-                                             << i
-                                             << ", truncating the ring buffer");
-                            m_capacity = i;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            template <typename ManagedMemory>
-            void freeBufs(ManagedMemory &shm) {
-                auto lock = getExclusiveLock();
-                {
-                    for (raw_index_type i = 0; i < m_capacity; ++i) {
-                        getByRawIndex(i, lock).freeBuf(shm);
-                    }
-                    shm.template destroy<ElementData>(bip::unique_instance);
-                }
-            }
-
-            /// @brief Get number of elements.
-            raw_index_type getCapacity() const { return m_capacity; }
-
-            /// @brief Get capacity of elements.
-            uint32_t getBufferLength() const { return m_bufLen; }
-
-            template <typename LockType>
-            ElementData &getByRawIndex(raw_index_type index, LockType &lock) {
-                verifyReaderLock(lock);
-                return *(elementArray + (index % m_capacity));
-            }
-            template <typename LockType>
-            ElementData *getBySequenceNumber(sequence_type num,
-                                             LockType &lock) {
-                verifyReaderLock(lock);
-                auto sequenceRelativeToBegin = num - m_beginSequenceNumber;
-                if (sequenceRelativeToBegin < m_size) {
-                    raw_index_type idx((m_begin + sequenceRelativeToBegin) %
-                                       m_capacity);
-                    return &getByRawIndex(idx, lock);
-                }
-                return nullptr; // out of bounds request -> nullptr return.
-            }
-
-            template <typename LockType> bool empty(LockType &lock) const {
-                verifyReaderLock(lock);
-                return m_size == 0;
-            }
-            template <typename LockType>
-            sequence_type backSequenceNumber(LockType &lock) {
-                verifyReaderLock(lock);
-                return m_nextSequenceNumber - 1;
-            }
-
-            template <typename LockType> ElementData *back(LockType &lock) {
-                verifyReaderLock(lock);
-                if (empty(lock)) {
-                    return nullptr;
-                }
-                return &getByRawIndex(m_begin + m_size - 1, lock);
-            }
-
-            detail::IPCPutResultPtr produceElement() {
-                auto lock = getExclusiveLock();
-                auto sequenceNumber = m_nextSequenceNumber;
-                m_nextSequenceNumber++;
-                if (m_size == m_capacity) {
-                    m_begin++;
-                    m_beginSequenceNumber++;
-                } else {
-                    m_size++;
-                }
-#ifdef OSVR_SHM_LOCK_DEBUGGING
-                OSVR_SHM_VERBOSE(
-                    "Attempting to get an exclusive lock on sequence "
-                    << sequenceNumber << " aka index " << back(lock));
-#endif
-                auto elementLock = back(lock)->getExclusiveLock();
-                /// shared memory nullptr filled in by outer class
-                detail::IPCPutResultPtr ret(new detail::IPCPutResult{
-                    back(lock)->getBuf(elementLock), sequenceNumber,
-                    std::move(elementLock), std::move(lock), nullptr});
-                return ret;
-            }
-
-          private:
-            raw_index_type m_capacity;
-            ipc_offset_ptr<ElementData> elementArray;
-            sequence_type m_beginSequenceNumber;
-            sequence_type m_nextSequenceNumber;
-            raw_index_type m_begin;
-            raw_index_type m_size;
-            uint32_t m_bufLen;
-        };
-
-        static size_t
-        computeRequiredSpace(IPCRingBuffer::Options const &opts) {
+        static size_t computeRequiredSpace(IPCRingBuffer::Options const &opts) {
             size_t alignedEntrySize = opts.getEntrySize() + opts.getAlignment();
             size_t dataSize = alignedEntrySize * (opts.getEntries() + 1);
             // Give 33% overhead on the raw bookkeeping data
             static const size_t BOOKKEEPING_SIZE =
-                (sizeof(Bookkeeping) +
-                 (sizeof(ElementData) * opts.getEntries())) *
+                (sizeof(detail::Bookkeeping) +
+                 (sizeof(detail::ElementData) * opts.getEntries())) *
                 4 / 3;
             return dataSize + BOOKKEEPING_SIZE;
         }
@@ -282,13 +114,13 @@ namespace common {
             SharedMemorySegmentHolder() : m_bookkeeping(nullptr) {}
             virtual ~SharedMemorySegmentHolder(){};
 
-            Bookkeeping *getBookkeeping() { return m_bookkeeping; }
+            detail::Bookkeeping *getBookkeeping() { return m_bookkeeping; }
 
             virtual uint64_t getSize() const = 0;
             virtual uint64_t getFreeMemory() const = 0;
 
           protected:
-            Bookkeeping *m_bookkeeping;
+            detail::Bookkeeping *m_bookkeeping;
         };
 
         template <typename ManagedMemory>
@@ -309,8 +141,7 @@ namespace common {
             : public SegmentHolderBase<ManagedMemory> {
           public:
             typedef SegmentHolderBase<ManagedMemory> Base;
-            ServerSharedMemorySegmentHolder(
-                IPCRingBuffer::Options const &opts)
+            ServerSharedMemorySegmentHolder(IPCRingBuffer::Options const &opts)
                 : m_name(opts.getName()) {
                 OSVR_SHM_VERBOSE("Creating segment, name "
                                  << opts.getName() << ", size "
@@ -328,16 +159,13 @@ namespace common {
                                      << " with exception: " << e.what());
                     return;
                 }
-                // destroy_unique_instance<Bookkeeping>(*m_shm);
+                // detail::Bookkeeping::destroy(*Base::m_shm);
                 Base::m_bookkeeping =
-                    Base::m_shm->template construct<Bookkeeping>(
-                        bip::unique_instance)(*Base::m_shm, opts);
+                    detail::Bookkeeping::construct(*Base::m_shm, opts);
             }
 
             virtual ~ServerSharedMemorySegmentHolder() {
-                if (Base::m_bookkeeping) {
-                    Base::m_bookkeeping->freeBufs(*Base::m_shm);
-                }
+                detail::Bookkeeping::destroy(*Base::m_shm);
                 removeSharedMemory();
             }
 
@@ -366,9 +194,7 @@ namespace common {
                                      << " with exception: " << e.what());
                     return;
                 }
-                auto bookkeeping = Base::m_shm->template find<Bookkeeping>(
-                    bip::unique_instance);
-                Base::m_bookkeeping = bookkeeping.first;
+                Base::m_bookkeeping = detail::Bookkeeping::find(*Base::m_shm);
             }
 
             virtual ~ClientSharedMemorySegmentHolder() {}
@@ -432,7 +258,7 @@ namespace common {
           m_shmBackend(ipc::DEFAULT_MANAGED_SHM_ID) {}
 
     IPCRingBuffer::Options::Options(std::string const &name,
-                                             BackendType backend)
+                                    BackendType backend)
         : m_name(ipc::make_name_safe(name)), m_shmBackend(backend) {}
 
     IPCRingBuffer::Options &
@@ -506,14 +332,13 @@ namespace common {
 
       private:
         unique_ptr<SharedMemorySegmentHolder> m_seg;
-        Bookkeeping *m_bookkeeping;
+        detail::Bookkeeping *m_bookkeeping;
 
         Options m_opts;
     };
 
-    IPCRingBufferPtr
-    IPCRingBuffer::m_constructorHelper(Options const &opts,
-                                                bool doCreate) {
+    IPCRingBufferPtr IPCRingBuffer::m_constructorHelper(Options const &opts,
+                                                        bool doCreate) {
 
         IPCRingBufferPtr ret;
         unique_ptr<SharedMemorySegmentHolder> segment;
@@ -553,17 +378,14 @@ namespace common {
         return ret;
     }
 
-    IPCRingBuffer::abi_level_type
-    IPCRingBuffer::getABILevel() {
+    IPCRingBuffer::abi_level_type IPCRingBuffer::getABILevel() {
         return SHM_SOURCE_ABI_LEVEL;
     }
 
-    IPCRingBufferPtr
-    IPCRingBuffer::create(Options const &opts) {
+    IPCRingBufferPtr IPCRingBuffer::create(Options const &opts) {
         return m_constructorHelper(opts, true);
     }
-    IPCRingBufferPtr
-    IPCRingBuffer::find(Options const &opts) {
+    IPCRingBufferPtr IPCRingBuffer::find(Options const &opts) {
         return m_constructorHelper(opts, false);
     }
 
@@ -572,8 +394,7 @@ namespace common {
 
     IPCRingBuffer::~IPCRingBuffer() {}
 
-    IPCRingBuffer::BackendType
-    IPCRingBuffer::getBackend() const {
+    IPCRingBuffer::BackendType IPCRingBuffer::getBackend() const {
         return m_impl->getOpts().getBackend();
     }
 
@@ -593,20 +414,18 @@ namespace common {
         return BufferWriteProxy(m_impl->put(), shared_from_this());
     }
 
-    sequence_type IPCRingBuffer::put(pointer_to_const_type data,
-                                              size_t len) {
+    IPCRingBuffer::sequence_type IPCRingBuffer::put(pointer_to_const_type data,
+                                                    size_t len) {
         auto proxy = put();
         std::memcpy(proxy.get(), data, len);
         return proxy.getSequenceNumber();
     }
 
-    IPCRingBuffer::BufferReadProxy
-    IPCRingBuffer::get(sequence_type num) {
+    IPCRingBuffer::BufferReadProxy IPCRingBuffer::get(sequence_type num) {
         return BufferReadProxy(m_impl->get(num), shared_from_this());
     }
 
-    IPCRingBuffer::BufferReadProxy
-    IPCRingBuffer::getLatest() {
+    IPCRingBuffer::BufferReadProxy IPCRingBuffer::getLatest() {
         return BufferReadProxy(m_impl->getLatest(), shared_from_this());
     }
 

@@ -103,6 +103,8 @@ set(SOURCE
     GetJSONStringFromTree.h
     ImagingComponent.cpp
     IPCRingBuffer.cpp
+    IPCRingBufferResults.h
+    IPCRingBufferSharedObjects.h
     JSONTransformVisitor.cpp
     MessageHandler.cpp
     MessageRegistration.cpp

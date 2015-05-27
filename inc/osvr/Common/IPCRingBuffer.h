@@ -62,8 +62,7 @@ namespace common {
     /// segment name and signalling new data, and no guarantee that the data you
     /// were notified about won't be overwritten - just that if you're currently
     /// accessing data, we won't overwrite that.
-    class IPCRingBuffer
-        : public enable_shared_from_this<IPCRingBuffer> {
+    class IPCRingBuffer : public enable_shared_from_this<IPCRingBuffer> {
       public:
         typedef uint8_t BackendType;
         typedef uint16_t alignment_type;
@@ -120,8 +119,7 @@ namespace common {
         ///
         /// If the returned pointer is not valid, the named segment could not be
         /// created for some reason.
-        OSVR_COMMON_EXPORT static IPCRingBufferPtr
-        create(Options const &opts);
+        OSVR_COMMON_EXPORT static IPCRingBufferPtr create(Options const &opts);
 
         /// @brief Named constructor, for use by client processes: accesses an
         /// IPC ring buffer using the options structure. Only the name field is
@@ -129,8 +127,7 @@ namespace common {
         ///
         /// If the returned pointer is not valid, the named buffer could not be
         /// found.
-        OSVR_COMMON_EXPORT static IPCRingBufferPtr
-        find(Options const &opts);
+        OSVR_COMMON_EXPORT static IPCRingBufferPtr find(Options const &opts);
 
         /// @brief Returns an integer identifying the IPC backend used.
         OSVR_COMMON_EXPORT BackendType getBackend() const;
@@ -257,8 +254,8 @@ namespace common {
         OSVR_COMMON_EXPORT ~IPCRingBuffer();
 
       private:
-        static IPCRingBufferPtr
-        m_constructorHelper(Options const &opts, bool doCreate);
+        static IPCRingBufferPtr m_constructorHelper(Options const &opts,
+                                                    bool doCreate);
         class Impl;
         IPCRingBuffer(unique_ptr<Impl> &&impl);
         unique_ptr<Impl> m_impl;
