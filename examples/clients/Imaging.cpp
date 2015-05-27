@@ -57,7 +57,7 @@ void imagingCallback(void *userdata,
     }
 
     cv::imshow(windowNameAndInstructions, report.frame);
-    auto &lastReport =
+    osvr::clientkit::ImagingReportOpenCV &lastReport =
         *static_cast<osvr::clientkit::ImagingReportOpenCV *>(userdata);
     lastReport = report;
 }
