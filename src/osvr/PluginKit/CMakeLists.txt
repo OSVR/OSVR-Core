@@ -6,6 +6,7 @@ set(API
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
+    "${HEADER_LOCATION}/DirectionInterfaceC.h"
     "${HEADER_LOCATION}/EyeTrackerInterfaceC.h"
     "${HEADER_LOCATION}/ImagingInterface.h"
     "${HEADER_LOCATION}/ImagingInterfaceC.h"
@@ -20,6 +21,7 @@ set(SOURCE
     AnalogInterfaceC.cpp
     ButtonInterfaceC.cpp
     DeviceInterfaceC.cpp
+    DirectionInterfaceC.cpp
     HandleNullContext.h
     EyeTrackerInterfaceC.cpp
     ImagingInterfaceC.cpp
