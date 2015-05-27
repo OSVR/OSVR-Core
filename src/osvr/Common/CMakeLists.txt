@@ -3,7 +3,9 @@ osvr_setup_lib_vars(Common)
 include(CheckIncludeFile)
 include(CheckCSourceCompiles)
 
+check_include_file(intrin.h OSVR_HAVE_INTRIN_H)
 check_include_file(byteswap.h OSVR_HAVE_BYTESWAP_H)
+check_c_source_compiles("#include <intrin.h>\nint main() {return _byteswap_ushort(0x1234) + _byteswap_ulong(0x12345678) + (int)_byteswap_uint64(0x0123456789abcdef);}" OSVR_HAVE_WORKING_MS_BYTESWAPS)
 check_c_source_compiles("#include <byteswap.h>\nint main() {return bswap16(0x1234);}" OSVR_HAVE_WORKING_BSWAP)
 check_c_source_compiles("#include <byteswap.h>\nint main() {return bswap_16(0x1234);}" OSVR_HAVE_WORKING_BSWAP_UNDERSCORE)
 check_c_source_compiles("#include <byteswap.h>\nint main() {return __bswap_16(0x1234);}" OSVR_HAVE_WORKING_UNDERSCORES_BSWAP)
@@ -37,9 +39,11 @@ set(API
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
+    "${HEADER_LOCATION}/IntegerByteSwap.h"
     "${HEADER_LOCATION}/InterfaceCallbacks.h"
     "${HEADER_LOCATION}/InterfaceList.h"
     "${HEADER_LOCATION}/InterfaceState.h"
+    "${HEADER_LOCATION}/IPCRingBuffer.h"
     "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
@@ -98,6 +102,9 @@ set(SOURCE
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
+    IPCRingBuffer.cpp
+    IPCRingBufferResults.h
+    IPCRingBufferSharedObjects.h
     JSONTransformVisitor.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
@@ -123,6 +130,8 @@ set(SOURCE
     RoutingConstants.cpp
     RoutingKeys.cpp
     Serialization.cpp
+    SharedMemory.h
+    SharedMemoryObjectWithMutex.h
     SystemComponent.cpp)
 
 osvr_add_library()

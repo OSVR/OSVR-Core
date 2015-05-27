@@ -139,15 +139,18 @@ namespace util {
             /// @brief Generic visitation method that calls a functor on each of
             /// the children in an undefined order.
             template <typename F> void visitChildren(F &visitor) {
-                for (ptr_type &node : m_children) {
-                    visitor(*node);
+                typedef typename ChildList::size_type size_type;
+                for (size_type i = 0; i < m_children.size(); ++i) {
+                    /// Using indices and re-evaluating size each time to safely
+                    /// handle visitors that add things.
+                    visitor(*(m_children[i]));
                 }
             }
 
             /// @brief Generic constant visitation method that calls a functor
             /// on each of the children (as const) in an undefined order.
             template <typename F> void visitConstChildren(F &visitor) const {
-                for (ptr_type const &node : m_children) {
+                for (auto const &node : m_children) {
                     visitor(const_cast<type const &>(*node));
                 }
             }

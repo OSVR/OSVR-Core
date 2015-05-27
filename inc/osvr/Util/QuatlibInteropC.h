@@ -66,12 +66,14 @@ OSVR_INLINE void osvrVec3FromQuatlib(OSVR_Vec3 *dest, q_vec_type const src) {
     memcpy((void *)(dest->data), (void const *)(src), sizeof(double) * 3);
 }
 
-OSVR_INLINE void osvrPose3ToQuatlib(q_xyz_quat_type *dest, OSVR_Pose3 const *src) {
+OSVR_INLINE void osvrPose3ToQuatlib(q_xyz_quat_type *dest,
+                                    OSVR_Pose3 const *src) {
     osvrVec3ToQuatlib(dest->xyz, &(src->translation));
     osvrQuatToQuatlib(dest->quat, &(src->rotation));
 }
 
-OSVR_INLINE void osvrPose3FromQuatlib(OSVR_Pose3 *dest, q_xyz_quat_type const *src) {
+OSVR_INLINE void osvrPose3FromQuatlib(OSVR_Pose3 *dest,
+                                      q_xyz_quat_type const *src) {
     osvrVec3FromQuatlib(&(dest->translation), src->xyz);
     osvrQuatFromQuatlib(&(dest->rotation), src->quat);
 }

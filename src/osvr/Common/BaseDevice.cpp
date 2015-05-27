@@ -87,6 +87,8 @@ namespace common {
         m_getConnection()->send_pending_reports();
     }
 
+    std::string const &BaseDevice::getDeviceName() const { return m_name; }
+
     void BaseDevice::m_packMessage(size_t len, const char *buf,
                                    RawMessageType const &msgType,
                                    util::time::TimeValue const &timestamp,
@@ -101,9 +103,11 @@ namespace common {
         }
     }
 
-    void BaseDevice::m_setup(vrpn_ConnectionPtr conn, RawSenderType sender) {
+    void BaseDevice::m_setup(vrpn_ConnectionPtr conn, RawSenderType sender,
+                             std::string const &name) {
         m_conn = conn;
         m_sender = sender;
+        m_name = name;
     }
 
     vrpn_ConnectionPtr BaseDevice::m_getConnection() const { return m_conn; }

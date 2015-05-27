@@ -1,7 +1,10 @@
-#osvr_convert_json(com_osvr_VideoCapture_OpenCV_json com_osvr_VideoCapture_OpenCV.json "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoCapture_OpenCV_json.h")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+osvr_convert_json(com_osvr_VideoCapture_OpenCV_json com_osvr_VideoCapture_OpenCV.json "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoCapture_OpenCV_json.h")
 osvr_add_plugin(NAME com_osvr_VideoCapture_OpenCV
     MANUAL_LOAD
-    SOURCES com_osvr_VideoCapture_OpenCV.cpp)
+    SOURCES
+    com_osvr_VideoCapture_OpenCV.cpp
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoCapture_OpenCV_json.h")
 
 target_link_libraries(com_osvr_VideoCapture_OpenCV osvrPluginKitImaging opencv_core ${OPENCV_CAMERA_EXTRA_LIBS})
 

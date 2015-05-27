@@ -27,7 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/StdInt.h>
-#include <osvr/Common/ConfigByteSwapping.h>
+#include <osvr/Common/IntegerByteSwap.h>
 
 // Library/third-party includes
 #include <boost/version.hpp>
@@ -59,25 +59,10 @@
 
 #endif
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_integral.hpp>
-#include <boost/type_traits/is_signed.hpp>
-#include <boost/type_traits/is_unsigned.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/remove_cv.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/integer.hpp>
-#include <boost/mpl/if.hpp>
 
-#if !defined(OSVR_HAVE_BYTESWAP_H) && defined(_MSC_VER)
-#define OSVR_HAVE_MSC_BYTESWAPS
-#include <intrin.h>
-#endif
-
-#ifdef OSVR_HAVE_BYTESWAP_H
-#include <byteswap.h>
-#endif
+// Standard/system includes
+#include <type_traits>
 
 #if defined(__FLOAT_WORD_ORDER) && defined(__BYTE_ORDER)
 #if (__FLOAT_WORD_ORDER != __BYTE_ORDER)
@@ -95,157 +80,16 @@ namespace common {
         template <typename T, typename Dummy = void>
         struct NetworkByteOrderTraits;
 
-        namespace detail {
-            /// @brief Stock implementation of a no-op host-network conversion
-            template <typename T> struct ByteOrderNoOp {
-                static T apply(T v) { return v; }
-            };
-
-            template <typename T> struct ByteSwap : boost::false_type {
-                typedef void not_specialized;
-            };
-
-            struct NoOpFunction {
-                template <typename ArgType> static ArgType apply(ArgType v) {
-                    return v;
-                }
-            };
-            /// @brief no-op swap for 1 byte.
-            template <>
-            struct ByteSwap<uint8_t> : NoOpFunction, boost::true_type {};
-
-            template <>
-            struct ByteSwap<int8_t> : NoOpFunction, boost::true_type {};
-#if defined(OSVR_HAVE_MSC_BYTESWAPS)
-            template <> struct ByteSwap<uint16_t> : boost::true_type {
-                static uint16_t apply(uint16_t v) {
-                    return _byteswap_ushort(v);
-                }
-            };
-
-            template <> struct ByteSwap<uint32_t> : boost::true_type {
-                static uint32_t apply(uint32_t v) { return _byteswap_ulong(v); }
-            };
-            template <> struct ByteSwap<uint64_t> : boost::true_type {
-                static uint64_t apply(uint64_t v) {
-                    return _byteswap_uint64(v);
-                }
-            };
-#elif defined(OSVR_HAVE_BYTESWAP_H) && defined(OSVR_HAVE_WORKING_BSWAP)
-            template <> struct ByteSwap<uint16_t> : boost::true_type {
-                static uint16_t apply(uint16_t v) { return bswap16(v); }
-            };
-            template <> struct ByteSwap<uint32_t> : boost::true_type {
-                static uint32_t apply(uint32_t v) { return bswap32(v); }
-            };
-            template <> struct ByteSwap<uint64_t> : boost::true_type {
-                static uint64_t apply(uint64_t v) { return bswap64(v); }
-            };
-#elif defined(OSVR_HAVE_BYTESWAP_H) &&                                         \
-    defined(OSVR_HAVE_WORKING_BSWAP_UNDERSCORE)
-            template <> struct ByteSwap<uint16_t> : boost::true_type {
-                static uint16_t apply(uint16_t v) { return bswap_16(v); }
-            };
-
-            template <> struct ByteSwap<uint32_t> : boost::true_type {
-                static uint32_t apply(uint32_t v) { return bswap_32(v); }
-            };
-            template <> struct ByteSwap<uint64_t> : boost::true_type {
-                static uint64_t apply(uint64_t v) { return bswap_64(v); }
-            };
-#elif defined(OSVR_HAVE_BYTESWAP_H) &&                                         \
-    defined(OSVR_HAVE_WORKING_UNDERSCORES_BSWAP)
-            template <> struct ByteSwap<uint16_t> : boost::true_type {
-                static uint16_t apply(uint16_t v) { return __bswap_16(v); }
-            };
-
-            template <> struct ByteSwap<uint32_t> : boost::true_type {
-                static uint32_t apply(uint32_t v) { return __bswap_32(v); }
-            };
-            template <> struct ByteSwap<uint64_t> : boost::true_type {
-                static uint64_t apply(uint64_t v) { return __bswap_64(v); }
-            };
-#endif
-            template <typename T> inline T genericByteSwap(T const v) {
-                T ret;
-                for (size_t i = 0; i < sizeof(T); ++i) {
-                    reinterpret_cast<char *>(&ret)[i] =
-                        reinterpret_cast<char const *>(&v)[sizeof(T) - 1 - i];
-                }
-                return ret;
-            }
-            /// @brief Implementation of integerByteSwap(): Gets called when we
-            /// have an exact match to an explicit specialization
-            template <typename T, typename OppositeSignType,
-                      typename ByteSwapper, typename OppositeByteSwapper>
-            inline T integerByteSwapImpl(
-                T const v,
-                typename boost::enable_if<ByteSwapper>::type * = nullptr) {
-                return ByteSwapper::apply(v);
-            }
-
-            /// @brief Implementation of integerByteSwap(): Gets called when we
-            /// DO NOT have an exact match to an explicit specialization, but we
-            /// do have a match if we switch the signedness.
-            template <typename T, typename OppositeSignType,
-                      typename ByteSwapper, typename OppositeByteSwapper>
-            inline T integerByteSwapImpl(
-                T const v,
-                typename boost::disable_if<ByteSwapper>::type * = nullptr,
-                typename boost::enable_if<OppositeByteSwapper>::type * =
-                    nullptr) {
-                return static_cast<T>(OppositeByteSwapper::apply(
-                    static_cast<OppositeSignType>(v)));
-            }
-
-            /// @brief Implementation of integerByteSwap(): Gets called if no
-            /// explicit specialization exists (for the type or its
-            /// opposite-signedness relative)
-            template <typename T, typename OppositeSignType,
-                      typename ByteSwapper, typename OppositeByteSwapper>
-            inline T integerByteSwapImpl(
-                T v, typename boost::disable_if<ByteSwapper>::type * = nullptr,
-                typename boost::disable_if<OppositeByteSwapper>::type * =
-                    nullptr) {
-                return genericByteSwap(v);
-            }
-        } // namespace detail
-
         /// @brief Take the binary representation of a value with one type,
         /// and return it as another type, without breaking strict aliasing.
         template <typename Dest, typename Src>
         inline Dest safe_pun(Src const src) {
-            BOOST_STATIC_ASSERT(sizeof(Src) == sizeof(Dest));
+            static_assert(sizeof(Src) == sizeof(Dest),
+                          "Can only use safe_pun for types of the same size");
             Dest ret;
             memcpy(reinterpret_cast<char *>(&ret),
                    reinterpret_cast<char const *>(&src), sizeof(src));
             return ret;
-        }
-
-        /// @brief Swap the order of bytes of an arbitrary integer type
-        ///
-        /// @internal
-        /// Primarily a thin wrapper to centralize type manipulation before
-        /// calling a detail::integerByteSwapImpl() overload selected by
-        /// enable_if/disable_if.
-        template <typename Type> inline Type integerByteSwap(Type const v) {
-            BOOST_STATIC_ASSERT(boost::is_integral<Type>::value);
-            typedef typename boost::remove_cv<
-                typename boost::remove_reference<Type>::type>::type T;
-
-            typedef typename boost::int_t<sizeof(T) * 8>::exact int_t;
-            typedef typename boost::uint_t<sizeof(T) * 8>::exact uint_t;
-            typedef
-                typename boost::mpl::if_<boost::is_signed<T>, uint_t,
-                                         int_t>::type opposite_signedness_type;
-
-            typedef detail::ByteSwap<T> ByteSwapper;
-            typedef detail::ByteSwap<opposite_signedness_type>
-                OppositeByteSwapper;
-
-            return detail::integerByteSwapImpl<
-                T, opposite_signedness_type, ByteSwapper, OppositeByteSwapper>(
-                v);
         }
 
         namespace detail {
@@ -268,8 +112,12 @@ namespace common {
                 typedef T type;
                 typedef UnsignedIntType uint_t;
 
-                BOOST_STATIC_ASSERT(sizeof(T) == sizeof(UnsignedIntType));
-                BOOST_STATIC_ASSERT(boost::is_unsigned<UnsignedIntType>::value);
+                static_assert(sizeof(T) == sizeof(UnsignedIntType),
+                              "Type-punning host-network conversion only works "
+                              "when the types are the same size");
+                static_assert(
+                    std::is_unsigned<UnsignedIntType>::value,
+                    "Template parameter UnsignedIntType should be unsigned!");
 
                 typedef NetworkByteOrderTraits<uint_t> IntTraits;
                 static type hton(type const v) {
@@ -283,13 +131,13 @@ namespace common {
 #if defined(OSVR_IS_BIG_ENDIAN)
         template <typename T>
         struct NetworkByteOrderTraits<
-            T, typename boost::enable_if<boost::is_integral<T> >::type>
+            T, typename std::enable_if<std::is_integral<T>::value>::type>
             : detail::NoOpHostNetworkConversion<T> {};
 
 #elif defined(OSVR_IS_LITTLE_ENDIAN)
         template <typename T>
         struct NetworkByteOrderTraits<
-            T, typename boost::enable_if<boost::is_integral<T> >::type>
+            T, typename std::enable_if<std::is_integral<T>::value>::type>
             : detail::IntegerByteOrderSwap<T> {};
 #endif
 

@@ -137,7 +137,7 @@ set(OPENCV_MODULES_USED opencv_core)
 # We set this up here so that if we need to copy DLLs, we can do it in the main
 # library builds where it's easier to get the right directory on Windows in a build tree.
 if(BUILD_OPENCV_CAMERA_PLUGIN)
-    set(OPENCV_CAMERA_EXTRA_LIBS opencv_highgui opencv_imgproc)
+    set(OPENCV_CAMERA_EXTRA_LIBS opencv_highgui)
     list(APPEND OPENCV_MODULES_USED ${OPENCV_CAMERA_EXTRA_LIBS})
 endif()
 
