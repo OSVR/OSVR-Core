@@ -176,6 +176,7 @@ namespace common {
             /// @brief move-assignable
             BufferWriteProxy &operator=(BufferWriteProxy &&other) {
                 std::swap(m_data, other.m_data);
+                return *this;
             }
 
             operator pointer_type() const { return get(); }
