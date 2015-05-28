@@ -132,6 +132,13 @@ namespace common {
             MessageSerialization() {}
             explicit MessageSerialization(SharedMemoryMessage &&msg)
                 : m_msgData(std::move(msg)) {}
+
+#if defined(_MSC_VER) && defined(_PREFAST_)
+            /// @todo workaround for apparent bug in VS2013 /analyze
+            explicit MessageSerialization(SharedMemoryMessage const &msg)
+                : m_msgData(msg) {}
+#endif
+
             template <typename T> void processMessage(T &p) {
                 process(m_msgData, p);
             }
