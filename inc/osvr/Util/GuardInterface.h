@@ -40,9 +40,9 @@ namespace util {
     /// @brief An interface to a (deferred) guard class: after instantiation and
     /// lock returning true, some resource is locked and available until
     /// destruction.
-    class GuardInterface {
+    class OSVR_UTIL_EXPORT GuardInterface {
       public:
-        OSVR_UTIL_EXPORT virtual ~GuardInterface();
+        virtual ~GuardInterface();
         /// @brief Attempts to lock/request the resource, and returns true if
         /// successful.
         ///
