@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "schemaVersion": 1
+  },
+  "hmd": {
+    "device": {
+      "vendor": "Oculus",
+      "model": "Rift",
+      "num_displays": 1,
+      "Version": "DK2",
+      "Note": ""
+    },
+    "field_of_view": {
+      "monocular_horizontal": 93.2798,
+      "monocular_vertical": 106.092,
+      "overlap_percent": 100,
+      "pitch_tilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 1920,
+        "height": 1080,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side",
+        "swap_eyes": 0
+      }
+    ],
+    "distortion": {
+      "k1_red": 1.01999,
+      "k1_green": 1.248,
+      "k1_blue": 1.48601
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5,
+        "rotate_180": false
+      }
+    ]
+  }
+}
