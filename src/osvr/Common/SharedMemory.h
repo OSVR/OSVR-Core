@@ -32,13 +32,28 @@
 /// Allows header-only usage of Interprocess
 #define BOOST_DATE_TIME_NO_LIB
 
+/// @todo This is a workaround for Clang and Boost pre-1.50, to fix a build
+/// error caused by a syntax error in Boost.Containers allocator traits.
+#include <boost/version.hpp>
+#if defined(__clang__) && (BOOST_VERSION < 105000) &&                          \
+    !defined(BOOST_NO_TEMPLATE_ALIASES)
+#define OSVR_NEEDS_BOOST_CLANG_WORKAROUND
+#endif
+
 // Internal Includes
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
+#ifdef OSVR_NEEDS_BOOST_CLANG_WORKAROUND
+#define BOOST_NO_TEMPLATE_ALIASES
+#endif
+#include <boost/interprocess/mem_algo/rbtree_best_fit.hpp>
+#ifdef OSVR_NEEDS_BOOST_CLANG_WORKAROUND
+#undef BOOST_NO_TEMPLATE_ALIASES
+#endif
+
 #include <boost/interprocess/interprocess_fwd.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
-#include <boost/interprocess/mem_algo/rbtree_best_fit.hpp>
 
 // Standard includes
 #include <cctype>
