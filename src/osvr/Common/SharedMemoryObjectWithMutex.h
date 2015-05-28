@@ -30,10 +30,9 @@
 
 // Library/third-party includes
 #include <boost/interprocess/interprocess_fwd.hpp>
-#include <boost/interprocess/sync/interprocess_sharable_mutex.hpp>
+#include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
-#include <boost/interprocess/sync/upgradable_lock.hpp>
 
 // Standard includes
 // - none
@@ -44,7 +43,8 @@ namespace common {
 
         namespace bip = boost::interprocess;
 
-        typedef bip::interprocess_sharable_mutex mutex_type;
+        /// Using it as a shared mutex - but that wasn't added until boost 1.52
+        typedef bip::interprocess_upgradable_mutex mutex_type;
         typedef bip::scoped_lock<mutex_type> exclusive_lock_type;
         typedef bip::sharable_lock<mutex_type> sharable_lock_type;
 
