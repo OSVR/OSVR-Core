@@ -150,7 +150,8 @@ namespace common {
     /// needs to perform computation.
     template <typename BufferType, typename MessageClass>
     void serialize(BufferType &buf, MessageClass &msg) {
-        BOOST_STATIC_ASSERT(is_buffer<BufferType>::value);
+        static_assert(is_buffer<BufferType>::value,
+                      "First argument must be a buffer object");
         /// @todo add another functor to first compute message length and
         /// reserve buffer space?
         serialization::SerializeFunctor<BufferType> functor(buf);
@@ -166,7 +167,8 @@ namespace common {
     /// method needs to perform computation.
     template <typename BufferReaderType, typename MessageClass>
     void deserialize(BufferReaderType &reader, MessageClass &msg) {
-        BOOST_STATIC_ASSERT(is_buffer_reader<BufferReaderType>::value);
+        static_assert(is_buffer_reader<BufferReaderType>::value,
+                      "First argument must be a buffer reader object");
         serialization::DeserializeFunctor<BufferReaderType> functor(reader);
         msg.processMessage(functor);
     }
