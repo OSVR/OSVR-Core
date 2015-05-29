@@ -31,7 +31,7 @@
 #include "PointerWrapper.h"
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
-
+#include <osvr/Common/EyeTrackerComponent.h>
 #include <osvr/Common/Location2DComponent.h>
 #include <osvr/Common/DirectionComponent.h>
 
@@ -42,10 +42,12 @@
 // - none
 
 struct OSVR_EyeTrackerDeviceInterfaceObject {
+	osvr::common::EyeTrackerComponent *eyetracker;
 	osvr::common::Location2DComponent *location;
 	osvr::common::DirectionComponent *direction;
 	//button
 };
+
 
 OSVR_ReturnCode
 osvrDeviceEyeTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
@@ -70,16 +72,17 @@ OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface) {
 }
 
 OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGazePosition(OSVR_IN_PTR OSVR_DeviceToken dev,
+osvrDeviceEyeTrackerReport2DGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazePosition2DState gazePosition,
-OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_EyeGazePosition2DReport *gazePosition,
+//OSVR_IN OSVR_EyeBlinkState blink,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-	
+
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
-		iface->location->sendLocationData(gazePosition, sensor, *timestamp);
+		iface->location->sendLocationData(gazePosition->location, gazePosition->sensor, *timestamp);
+		//iface->eyetracker->sendEyeData()
 		return OSVR_RETURN_SUCCESS;
 	}
 
@@ -87,14 +90,16 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 }
 
 OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGazeDirection(OSVR_IN_PTR OSVR_DeviceToken dev,
+osvrDeviceEyeTrackerReport3DGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirectionState gazeDirection,
-OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeDirection,
+OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeBasePoint,
+//OSVR_IN OSVR_EyeBlinkState blink,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
-		iface->direction->sendDirectionData(gazeDirection, sensor, *timestamp);
+		iface->direction->sendDirectionData(gazeDirection->direction, gazeDirection->sensor, *timestamp);
+		iface->direction->sendDirectionData(gazeBasePoint->direction, gazeBasePoint->sensor, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
@@ -104,14 +109,52 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReportGazeBasePoint(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState gazeBasePoint,
-OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeBasePoint,
+//OSVR_IN OSVR_EyeBlinkState blink,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
-		iface->direction->sendDirectionData(gazeBasePoint, sensor, *timestamp);
+		iface->direction->sendDirectionData(gazeBasePoint->direction, gazeBasePoint->sensor, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
 	return OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportGazeDirection(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeDirection,
+//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp){
+
+	auto guard = dev->getSendGuard();
+	if (guard->lock()) {
+		iface->direction->sendDirectionData(gazeDirection->direction, gazeDirection->sensor, *timestamp);
+		return OSVR_RETURN_SUCCESS;
+	}
+
+	return OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeGazePosition2DReport *gazePosition,
+OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeDirection,
+OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeBasePoint,
+//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp){
+
+	auto guard = dev->getSendGuard();
+	if (guard->lock()) {
+		iface->location->sendLocationData(gazePosition->location, gazePosition->sensor, *timestamp);
+		iface->direction->sendDirectionData(gazeBasePoint->direction, gazeBasePoint->sensor, *timestamp);
+		iface->direction->sendDirectionData(gazeDirection->direction, gazeDirection->sensor, *timestamp);
+		return OSVR_RETURN_SUCCESS;
+	}
+
+	return OSVR_RETURN_FAILURE;
+
+
 }
