@@ -1,5 +1,11 @@
 # Help CMake find recent Boost MSVC binaries without manual configuration.
+if(MSVC)
+    if(NOT DEFINED Boost_USE_MULTITHREADED)
+        set(Boost_USE_MULTITHREADED ON) # Most common ABI
+    endif()
+endif()
 if(MSVC AND (NOT Boost_INCLUDE_DIR OR NOT Boost_LIBRARY_DIR))
+
     math(EXPR _vs_ver "${MSVC_VERSION} / 100 - 6")
     if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
         set(_libdir "lib64-msvc-${_vs_ver}.0")
