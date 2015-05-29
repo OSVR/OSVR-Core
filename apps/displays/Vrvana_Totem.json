@@ -1,4 +1,7 @@
 {
+    "meta": {
+        "schemaVersion": 1
+    },
     "hmd": {
         "device": {
             "vendor": "Vrvana",
