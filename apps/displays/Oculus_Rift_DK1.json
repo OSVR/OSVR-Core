@@ -4,31 +4,31 @@
   },
   "hmd": {
     "device": {
-      "vendor": "Vuzix",
-      "model": "IWear 720",
-      "num_displays": 2,
-      "Version": "1.0",
+      "vendor": "Oculus",
+      "model": "Rift",
+      "num_displays": 1,
+      "Version": "DK1",
       "Note": ""
     },
     "field_of_view": {
-      "monocular_horizontal": 51,
-      "monocular_vertical": 30,
-      "overlap_percent": 100,
+      "monocular_horizontal": 99,
+      "monocular_vertical": 100,
+      "overlap_percent": 93,
       "pitch_tilt": 0
     },
     "resolutions": [
       {
         "width": 1280,
-        "height": 720,
+        "height": 800,
         "video_inputs": 1,
         "display_mode": "horz_side_by_side",
         "swap_eyes": 0
       }
     ],
     "distortion": {
-      "k1_red": 0,
-      "k1_green": 0,
-      "k1_blue": 0
+      "k1_red": 0.696995,
+      "k1_green": 0.696995,
+      "k1_blue": 0.712994
     },
     "rendering": {
       "right_roll": 0,

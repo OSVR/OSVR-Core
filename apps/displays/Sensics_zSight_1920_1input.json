@@ -4,31 +4,31 @@
   },
   "hmd": {
     "device": {
-      "vendor": "Vuzix",
-      "model": "IWear 720",
+      "vendor": "Sensics",
+      "model": "z_sight 1920",
       "num_displays": 2,
-      "Version": "1.0",
-      "Note": ""
+      "Version": "",
+      "Note": "1920x1080, 1 video input"
     },
     "field_of_view": {
-      "monocular_horizontal": 51,
-      "monocular_vertical": 30,
+      "monocular_horizontal": 60,
+      "monocular_vertical": 33.75,
       "overlap_percent": 100,
       "pitch_tilt": 0
     },
     "resolutions": [
       {
-        "width": 1280,
-        "height": 720,
+        "width": 1920,
+        "height": 1080,
         "video_inputs": 1,
-        "display_mode": "horz_side_by_side",
+        "display_mode": "full_screen",
         "swap_eyes": 0
       }
     ],
     "distortion": {
-      "k1_red": 0,
-      "k1_green": 0,
-      "k1_blue": 0
+      "k1_red": 0.041,
+      "k1_green": 0.041,
+      "k1_blue": 0.041
     },
     "rendering": {
       "right_roll": 0,
