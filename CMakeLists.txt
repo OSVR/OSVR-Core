@@ -348,13 +348,18 @@ configure_file("${LOCAL_CMAKE_MODULE_DIR}/osvrConfig.cmake"
     @ONLY)
 
 # Copy over the shared CMake modules for use in a build tree.
-foreach(HELPER osvrAddPlugin osvrConvertJson)
+foreach(HELPER osvrAddPlugin osvrConvertJson CMakeBoostHelper)
     configure_file("${LOCAL_CMAKE_MODULE_DIR}/${HELPER}.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
 endforeach()
 
 configure_file("${LOCAL_CMAKE_MODULE_DIR}/osvrConfigBuildTreePaths.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"
     @ONLY)
+
+if(WIN32)
+    # Needed by CMakeBoostHelper
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetMSVCVersion.cmake" "${CMAKE_CURRENT_BINARY_DIR}/GetMSVCVersion.cmake" COPYONLY)
+endif()
 
 install(EXPORT osvrTargets
     FILE
@@ -380,6 +385,7 @@ install(FILES
 
 if(WIN32)
     install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetMSVCVersion.cmake"
         "${LOCAL_CMAKE_MODULE_DIR}/CMakeBoostHelper.cmake"
         DESTINATION
         ${CONFIG_INSTALL_DIR}

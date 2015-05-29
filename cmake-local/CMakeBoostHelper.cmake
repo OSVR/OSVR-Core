@@ -4,17 +4,25 @@ if(MSVC)
         set(Boost_USE_MULTITHREADED ON) # Most common ABI
     endif()
 endif()
-if(MSVC AND (NOT Boost_INCLUDE_DIR OR NOT Boost_LIBRARY_DIR))
 
-    math(EXPR _vs_ver "${MSVC_VERSION} / 100 - 6")
+# Function exists solely to introduce a new scope for CMAKE_MODULE_PATH
+function(_boosthelper_includehelper)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+    include(GetMSVCVersion)
+endfunction()
+
+if(MSVC AND (NOT Boost_INCLUDE_DIR OR NOT Boost_LIBRARY_DIR))
+    _boosthelper_includehelper()
+    get_msvc_major_minor_version(_vs_major _vs_minor)
     if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
-        set(_libdir "lib64-msvc-${_vs_ver}.0")
+        set(_libdir "lib64-msvc-${_vs_major}.${_vs_minor}")
     else()
-        set(_libdir "lib32-msvc-${_vs_ver}.0")
+        set(_libdir "lib32-msvc-${_vs_major}.${_vs_minor}")
     endif()
 
     set(_haslibs)
     if(EXISTS "c:/local")
+        # Get all versions, newest first.
         file(GLOB _possibilities "c:/local/boost*")
         list(REVERSE _possibilities)
         foreach(DIR ${_possibilities})

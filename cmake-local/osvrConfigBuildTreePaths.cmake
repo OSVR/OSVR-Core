@@ -18,5 +18,5 @@ endif()
 
 # Help out with boost.
 if(NOT BOOST_FOUND)
-    include("@CMAKE_CURRENT_SOURCE_DIR@/CMakeBoostHelper.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/CMakeBoostHelper.cmake" OPTIONAL)
 endif()
