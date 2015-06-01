@@ -80,7 +80,7 @@ namespace osvr {
 			serialize(buf, msg);
 			
 			m_getParent().packMessage(buf, eyeRegion.getMessageType(), timestamp);
-			std::cout << "DIS HERE " << std::endl;
+			
 		}
 
 		int VRPN_CALLBACK
@@ -89,7 +89,7 @@ namespace osvr {
 			auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
 				reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
 			auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
-
+			
 			messages::EyeRegion::MessageSerialization msg;
 			deserialize(bufReader, msg);
 			auto data = msg.getNotification();

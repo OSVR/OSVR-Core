@@ -68,6 +68,10 @@ OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface) {
 	ifaceObj->direction = direction.get();
 	opts->addComponent(direction);
 
+	auto eyetracker = osvr::common::EyeTrackerComponent::create();
+	ifaceObj->eyetracker = eyetracker.get();
+	opts->addComponent(eyetracker);
+
 	return OSVR_RETURN_SUCCESS;
 }
 
@@ -82,7 +86,7 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
 		iface->location->sendLocationData(gazePosition->location, gazePosition->sensor, *timestamp);
-		//iface->eyetracker->sendEyeData()
+		iface->eyetracker->sendNotification(EYE_DATA_READY, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
@@ -100,6 +104,7 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 	if (guard->lock()) {
 		iface->direction->sendDirectionData(gazeDirection->direction, gazeDirection->sensor, *timestamp);
 		iface->direction->sendDirectionData(gazeBasePoint->direction, gazeBasePoint->sensor, *timestamp);
+		iface->eyetracker->sendNotification(EYE_DATA_READY, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
@@ -115,6 +120,7 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
 		iface->direction->sendDirectionData(gazeBasePoint->direction, gazeBasePoint->sensor, *timestamp);
+		iface->eyetracker->sendNotification(EYE_DATA_READY, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
@@ -131,6 +137,7 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp){
 	auto guard = dev->getSendGuard();
 	if (guard->lock()) {
 		iface->direction->sendDirectionData(gazeDirection->direction, gazeDirection->sensor, *timestamp);
+		iface->eyetracker->sendNotification(EYE_DATA_READY, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
@@ -151,6 +158,7 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp){
 		iface->location->sendLocationData(gazePosition->location, gazePosition->sensor, *timestamp);
 		iface->direction->sendDirectionData(gazeBasePoint->direction, gazeBasePoint->sensor, *timestamp);
 		iface->direction->sendDirectionData(gazeDirection->direction, gazeDirection->sensor, *timestamp);
+		iface->eyetracker->sendNotification(EYE_DATA_READY, *timestamp);
 		return OSVR_RETURN_SUCCESS;
 	}
 
