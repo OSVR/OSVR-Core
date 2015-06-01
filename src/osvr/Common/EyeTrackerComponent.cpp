@@ -39,27 +39,22 @@ namespace osvr {
 		namespace messages {
 			class EyeRegion::MessageSerialization {
 			public:
-				MessageSerialization(OSVR_EyeGazeDirection const &gaze,
-					OSVR_ChannelCount sensor)
-					: m_data(gaze),
-					m_sensor(sensor) {}
+				MessageSerialization(OSVR_Eye_Notification notification)
+					: m_notification(notification) {}
 
 				MessageSerialization() {}
 
 				template <typename T> void processMessage(T &p) {
-					p(m_data.gazeDirection2D);
-					p(m_data.gazeDirection3D);
+					p(m_notification);
 				}
-				EyeData getData() const {
-					EyeData ret;
-					ret.sensor = m_sensor;
-					ret.gaze = m_data;
+				OSVR_Eye_Notification getNotification() const {
+					OSVR_Eye_Notification ret;
+					ret = m_notification;
 					return ret;
 				}
 
 			private:
-				OSVR_EyeGazeDirection m_data;
-				OSVR_ChannelCount m_sensor;
+				OSVR_Eye_Notification m_notification;
 			};
 			const char *EyeRegion::identifier() {
 				return "com.osvr.eyetracker.eyeregion";
@@ -75,15 +70,17 @@ namespace osvr {
 		EyeTrackerComponent::EyeTrackerComponent(OSVR_ChannelCount numChan)
 			: m_numSensor(numChan) {}
 
-		void EyeTrackerComponent::sendEyeData(OSVR_EyeGazeDirection data,
-												OSVR_ChannelCount sensor,
+		void EyeTrackerComponent::sendNotification(OSVR_Eye_Notification notification,
 												OSVR_TimeValue const &timestamp){
 			
 			Buffer<> buf;
-			messages::EyeRegion::MessageSerialization msg(data, sensor);
+			
+			messages::EyeRegion::MessageSerialization msg(notification);
+			
 			serialize(buf, msg);
 			
 			m_getParent().packMessage(buf, eyeRegion.getMessageType(), timestamp);
+			std::cout << "DIS HERE " << std::endl;
 		}
 
 		int VRPN_CALLBACK
@@ -95,7 +92,7 @@ namespace osvr {
 
 			messages::EyeRegion::MessageSerialization msg;
 			deserialize(bufReader, msg);
-			auto data = msg.getData();
+			auto data = msg.getNotification();
 			auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
 			for (auto const &cb : self->m_cb) {
