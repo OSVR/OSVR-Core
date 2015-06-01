@@ -48,6 +48,8 @@ namespace client {
 
         template <typename T> void registerWith(T &factory) const {
             factory.addFactory("eyetracker", *this);
+			factory.addFactory("location2D", *this);
+			factory.addFactory("direction", *this);
         }
 
         shared_ptr<RemoteHandler>
