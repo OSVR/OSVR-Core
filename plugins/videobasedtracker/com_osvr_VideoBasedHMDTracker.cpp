@@ -50,13 +50,18 @@
 // behavior, printing tracked positions)
 #define VBHMD_DEBUG
 
+// Define the constant below to set a directory to save the video frames that are aquired
+// with files in a format that can later be read by VBHMD_FAKE_IMAGES
+//#define VBHMD_SAVE_IMAGES "./Frames"
+
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
+//#define VBHMD_FAKE_IMAGES "./Frames"
+//#define VBHMD_FAKE_IMAGES "C:/tmp/HDK_far"
 //#define VBHMD_FAKE_IMAGES
 //"F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 //#define VBHMD_FAKE_IMAGES
 //"F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
-//#define VBHMD_FAKE_IMAGES "C:/tmp/HDK_far"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -329,6 +334,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
         if (!m_camera.retrieve(m_frame, m_channel)) {
             return OSVR_RETURN_FAILURE;
         }
+
+    #ifdef VBHMD_SAVE_IMAGES
+        // If we're supposed to save images, make file names that match the
+        // format we need to read them back in again and save the images.
+        std::ostringstream fileName;
+        fileName << VBHMD_SAVE_IMAGES << "/";
+        fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
+        fileName << ".tif";
+        if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
+            std::cerr << "Could not write image to " << fileName.str() << std::endl;
+        }
+
+    #endif
+
 #endif
 
         //==================================================================
@@ -560,6 +579,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
     size_t m_currentImage;
 #else
     cv::VideoCapture m_camera;
+#endif
+#ifdef VBHMD_SAVE_IMAGES
+    int m_imageNum = 1;
 #endif
     int m_channel;
     cv::Mat m_frame;
