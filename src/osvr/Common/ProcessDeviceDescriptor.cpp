@@ -34,6 +34,7 @@
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/ProcessAliasesFromJSON.h>
+#include <osvr/Common/NormalizeDeviceDescriptor.h>
 
 #include "PathParseAndRetrieve.h"
 
@@ -60,12 +61,14 @@ namespace common {
             // No interfaces member
             return changed;
         }
+		
         Json::Value const &ifaces = desc[INTERFACES_KEY];
-        if (!ifaces.isObject()) {
+		if (!ifaces.isObject()) {
             // Interfaces member isn't an object
             return changed;
         }
         for (auto const &iface : ifaces.getMemberNames()) {
+			
             auto &ifaceNode = treePathRetrieve(devNode, iface);
             if (elements::isNull(ifaceNode.value())) {
                 ifaceNode.value() = elements::InterfaceElement();
@@ -171,6 +174,9 @@ namespace common {
             devElt = boost::get<elements::DeviceElement>(&devNode.value());
             changed.set();
         }
+
+		/// normalize device descriptor
+		normalizeDeviceDescriptor(jsonDescriptor);
 
         /// Parse JSON
         Json::Value descriptor;
