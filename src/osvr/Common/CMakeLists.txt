@@ -46,6 +46,7 @@ set(API
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/NetworkClassOfService.h"
     "${HEADER_LOCATION}/NetworkingSupport.h"
+    "${HEADER_LOCATION}/NormalizeDeviceDescriptor.h"
     "${HEADER_LOCATION}/OriginalSource.h"
     "${HEADER_LOCATION}/ParseAlias.h"
     "${HEADER_LOCATION}/PathElementTools.h"
@@ -105,6 +106,7 @@ set(SOURCE
     MessageRegistration.cpp
     NetworkClassOfService.cpp
     NetworkingSupport.cpp
+    NormalizeDeviceDescriptor.cpp
     OriginalSource.cpp
     ParseAlias.cpp
     PathElementSerialization.h
