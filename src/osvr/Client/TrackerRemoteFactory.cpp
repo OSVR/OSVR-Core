@@ -136,7 +136,8 @@ namespace client {
 
     shared_ptr<RemoteHandler> TrackerRemoteFactory::
     operator()(common::OriginalSource const &source,
-               common::InterfaceList &ifaces) {
+               common::InterfaceList &ifaces,
+				   common::ClientContext &ctx) {
 
         shared_ptr<RemoteHandler> ret;
 
