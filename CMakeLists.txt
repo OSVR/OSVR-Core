@@ -25,8 +25,13 @@ set(OSVR_PLUGINKIT_ABI_VERSION 0)
 
 # This included script is shared with (e.g. Android) super-builds.
 include(osvrBuildOptions)
+
+# Build options that aren't shared with super-builds
 if(WIN32 OR ANDROID)
     option(Boost_USE_STATIC_LIBS "Build with Boost's static libraries?" ON)
+endif()
+if(MSVC)
+    option(BUILD_IN_PARALLEL "Should we use the MSVC /mp option to compile in parallel? Usually faster, but sometimes makes build errors harder to fix." ON)
 endif()
 
 set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
@@ -75,7 +80,9 @@ set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
 include(CopyImportedTarget)
-include(MSVCMultipleProcessCompile)
+if(BUILD_IN_PARALLEL)
+    include(MSVCMultipleProcessCompile)
+endif()
 
 include(SetDefaultBuildType)
 if(ANDROID)
