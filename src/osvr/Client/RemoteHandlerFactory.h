@@ -46,7 +46,8 @@ namespace client {
       public:
         typedef shared_ptr<RemoteHandler> FactoryProduct;
         typedef std::function<FactoryProduct(common::OriginalSource const &,
-                                             common::InterfaceList &)>
+                                             common::InterfaceList &,
+											 common::ClientContext &)>
             SpecificFactory;
 
         void addFactory(std::string const &name, SpecificFactory factory) {
@@ -59,7 +60,8 @@ namespace client {
         }
 
         FactoryProduct invokeFactory(common::OriginalSource const &source,
-                                     common::InterfaceList &ifaces) const {
+                                     common::InterfaceList &ifaces,
+									 common::ClientContext &ctx) const {
             auto factory =
                 m_factoriesByInterface.find(source.getInterfaceName());
 
@@ -67,8 +69,8 @@ namespace client {
                 /// Unknown
                 return FactoryProduct();
             }
-
-            return (factory->second)(source, ifaces);
+			
+			return (factory->second)(source, ifaces, ctx);
         }
 
       private:

@@ -164,7 +164,7 @@ namespace client {
             return false;
         }
         auto handler = m_factory.invokeFactory(
-            *source, m_interfaces.getInterfacesForPath(path));
+            *source, m_interfaces.getInterfacesForPath(path), *this);
         if (handler) {
             OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
             // Store the new handler in the interface tree
