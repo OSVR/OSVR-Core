@@ -43,9 +43,8 @@
 namespace osvr {
 	namespace common {
 
-		struct EyeData {
+		struct OSVR_EyeNotification {
 			OSVR_ChannelCount sensor;
-			OSVR_EyeGazeDirection gaze;
 		};
 
 		namespace messages {
@@ -72,10 +71,10 @@ namespace osvr {
 			messages::EyeRegion eyeRegion;
 
 			OSVR_COMMON_EXPORT void sendNotification(
-				OSVR_Eye_Notification notification,
+				OSVR_ChannelCount sensor,
 				OSVR_TimeValue const &timestamp);
 
-			typedef std::function<void(OSVR_Eye_Notification const &,
+			typedef std::function<void(OSVR_EyeNotification const &,
 				util::time::TimeValue const &)> EyeHandler;
 			OSVR_COMMON_EXPORT void registerEyeHandler(EyeHandler cb);
 

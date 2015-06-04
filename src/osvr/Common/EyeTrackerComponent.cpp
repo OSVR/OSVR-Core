@@ -39,22 +39,22 @@ namespace osvr {
 		namespace messages {
 			class EyeRegion::MessageSerialization {
 			public:
-				MessageSerialization(OSVR_Eye_Notification notification)
+				MessageSerialization(OSVR_EyeNotification notification)
 					: m_notification(notification) {}
 
 				MessageSerialization() {}
 
 				template <typename T> void processMessage(T &p) {
-					p(m_notification);
+					p(m_notification.sensor);
 				}
-				OSVR_Eye_Notification getNotification() const {
-					OSVR_Eye_Notification ret;
-					ret = m_notification;
+				OSVR_EyeNotification getNotification() const {
+					OSVR_EyeNotification ret;
+					ret.sensor = m_notification.sensor;
 					return ret;
 				}
 
 			private:
-				OSVR_Eye_Notification m_notification;
+				OSVR_EyeNotification m_notification;
 			};
 			const char *EyeRegion::identifier() {
 				return "com.osvr.eyetracker.eyeregion";
@@ -70,11 +70,12 @@ namespace osvr {
 		EyeTrackerComponent::EyeTrackerComponent(OSVR_ChannelCount numChan)
 			: m_numSensor(numChan) {}
 
-		void EyeTrackerComponent::sendNotification(OSVR_Eye_Notification notification,
+		void EyeTrackerComponent::sendNotification(OSVR_ChannelCount sensor,
 												OSVR_TimeValue const &timestamp){
 			
 			Buffer<> buf;
-			
+			OSVR_EyeNotification notification;
+			notification.sensor = sensor;
 			messages::EyeRegion::MessageSerialization msg(notification);
 			
 			serialize(buf, msg);
