@@ -34,9 +34,11 @@
 #include "ButtonRemoteFactory.h"
 #include "ImagingRemoteFactory.h"
 #include "TrackerRemoteFactory.h"
+#include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
 
 // Library/third-party includes
@@ -48,6 +50,40 @@
 
 namespace osvr {
 namespace client {
+
+    class LocalhostReplacer : public boost::static_visitor<>, boost::noncopyable
+    {
+    public:
+        LocalhostReplacer(const std::string &host) : boost::static_visitor<>(), m_host(host) {};
+
+        /// @brief Replace localhost with proper hostname:port for Device elements
+        void operator()(osvr::common::PathNode &,
+            osvr::common::elements::DeviceElement &elt)
+        {
+            std::string &server = elt.getServer();
+
+            auto it = server.find("localhost");
+
+            if (it != server.npos)
+            {
+                // do a bit of surgery, only the "localhost" must be replaced, keeping
+                // the ":xxxx" part with the port number - the host could be running a local 
+                // VRPN/OSVR service on another port!
+                auto end = server.find(":");
+                server = server.replace(it, end, m_host);
+            }
+        }
+
+        /// @brief Catch-all for other element types.
+        template <typename T>
+        void operator()(osvr::common::PathNode &, T &) 
+        {
+        }        
+
+
+    protected:
+        const std::string m_host;
+    };
 
     static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
     static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
@@ -229,6 +265,17 @@ namespace client {
 
         // populate path tree from message
         common::jsonToPathTree(m_pathTree, nodes);
+
+        // replace the @localhost with the correct host name 
+        // in case we are a remote client, otherwise the connection
+        // would fail
+
+        LocalhostReplacer replacer(m_host);        
+        util::traverseWith(
+            m_pathTree.getRoot(), [&replacer](osvr::common::PathNode &node) {
+            common::applyPathNodeVisitor(replacer, node);
+        });
+
         // re-connect handlers.
         m_connectNeededCallbacks();
     }
