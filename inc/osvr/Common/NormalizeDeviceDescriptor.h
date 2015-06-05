@@ -46,7 +46,7 @@ namespace osvr {
 		/// osvr_button)
 		///
 		/// @return silently modifies it or leaves unchanged.
-		OSVR_COMMON_EXPORT void
+		OSVR_COMMON_EXPORT std::string const
 			normalizeDeviceDescriptor(std::string const &jsonDescriptor);
 
 	} // namespace common

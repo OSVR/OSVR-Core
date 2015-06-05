@@ -61,14 +61,14 @@ namespace common {
             // No interfaces member
             return changed;
         }
-		
+
         Json::Value const &ifaces = desc[INTERFACES_KEY];
 		if (!ifaces.isObject()) {
             // Interfaces member isn't an object
             return changed;
         }
         for (auto const &iface : ifaces.getMemberNames()) {
-			
+
             auto &ifaceNode = treePathRetrieve(devNode, iface);
             if (elements::isNull(ifaceNode.value())) {
                 ifaceNode.value() = elements::InterfaceElement();
@@ -176,13 +176,13 @@ namespace common {
         }
 
 		/// normalize device descriptor
-		normalizeDeviceDescriptor(jsonDescriptor);
+		const std::string normalizedDescriptor = normalizeDeviceDescriptor(jsonDescriptor);
 
         /// Parse JSON
         Json::Value descriptor;
         {
             Json::Reader reader;
-            if (!reader.parse(jsonDescriptor, descriptor)) {
+			if (!reader.parse(normalizedDescriptor, descriptor)) {
                 /// @todo warn about failed descriptor parse?
                 return changed.get();
             }

@@ -142,26 +142,26 @@ namespace osvr {
 
 		/// @todo process for tracker interface
 
-		void normalizeDeviceDescriptor(std::string const &jsonDescriptor){
+		std::string const normalizeDeviceDescriptor(std::string const &jsonDescriptor){
 
 			Json::Value descriptor;
 			{
 				Json::Reader reader;
 				if (!reader.parse(jsonDescriptor, descriptor)){
 					/// if can't parse as json then leave unchanged, err will be handler later
-					return;
+					return jsonDescriptor;
 				}
 			}
 			/// no interfaces member so don't chanage anything
 			if (!descriptor.isMember(INTERFACES_KEY)){
-				return;
+				return jsonDescriptor;
 			}
 
 			Json::Value const &ifaceNames = descriptor[INTERFACES_KEY];
 
 			// interfaces member isn't an object
 			if (!ifaceNames.isObject()){
-				return;
+				return jsonDescriptor;
 			}
 
 			for (auto const &ifaceName : ifaceNames.getMemberNames()){
@@ -176,7 +176,9 @@ namespace osvr {
 					/// @todo for future interfaces
 				}
 			}
-			return;
+
+			const std::string normalizedDescriptor = descriptor.toStyledString();
+			return normalizedDescriptor;
 		}
 
 
