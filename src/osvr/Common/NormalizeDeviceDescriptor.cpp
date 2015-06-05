@@ -66,13 +66,13 @@ namespace osvr {
 		/// so to avoid replacing tracker data, we need to safely merge them
 		void mergeIdenticalInterfaces(Json::Value &existingIface, Json::Value &newIface,
 										std::string const &detail){
-				
+
 		}
 
 
 		/// @brief appends json value for a given string
 		void appendCurrentIface(Json::Value &augInterface, Json::Value &currInterface){
-			
+
 			for (auto &detail : currInterface.getMemberNames()){
 				Json::Value const &obj = augInterface[detail];
 				if (obj.isObject()){
@@ -88,11 +88,11 @@ namespace osvr {
 		/// provided that they are set to true :
 		/// OSVR_Direction, OSVR_Location2D, OSVR_Tracker, OSVR_Button
 		void  normalizeForEyeTracker(Json::Value &descriptor, std::string const &ifaceName){
-			
+
 			// step into the interfaces object
 			Json::Value const &iface = descriptor[INTERFACES_KEY][ifaceName];
 
-			//hold the count for eyetracker sensors to initialize 
+			//hold the count for eyetracker sensors to initialize
 			int count = descriptor[INTERFACES_KEY][ifaceName][COUNT_KEY].asInt();
 
 			//if we couldn't find count then return
@@ -101,13 +101,13 @@ namespace osvr {
 			}
 
 			Json::Value augInterfaces;
- 			// go thru details of interface and 
+ 			// go thru details of interface and
 			for (auto &subIface : iface.getMemberNames()){
 				//check if subinterface is set to true
 				bool enabled = descriptor[INTERFACES_KEY][ifaceName][subIface].asBool();
-				
+
 				if (enabled){
-					
+
 
 
 					if (boost::iequals(subIface, LOCATION2D_KEY)){
@@ -131,25 +131,17 @@ namespace osvr {
 					}
 				}
 			}
-			//std::cout << "AUGEMENTED " << std::endl;
-			//st::cout << augInterfaces.toStyledString() << std::endl;
-
-			std::cout << "OLD DESCRIPTOR " << std::endl;
-			std::cout << descriptor.toStyledString() << std::endl;
 
 			if (augInterfaces != NULL){
 				Json::Value &currInterfaces = descriptor[INTERFACES_KEY];
-				
+
 				appendCurrentIface(augInterfaces, currInterfaces);
-				//std::cout << currInterfaces.toStyledString() << std::endl;
 				descriptor[INTERFACES_KEY] = augInterfaces;
 			}
-			std::cout << "NEW DESCRIPTOR " << std::endl;
-			std::cout << descriptor.toStyledString() << std::endl;
 		}
 
 		/// @todo process for tracker interface
-		
+
 		void normalizeDeviceDescriptor(std::string const &jsonDescriptor){
 
 			Json::Value descriptor;
@@ -166,21 +158,19 @@ namespace osvr {
 			}
 
 			Json::Value const &ifaceNames = descriptor[INTERFACES_KEY];
-			
+
 			// interfaces member isn't an object
 			if (!ifaceNames.isObject()){
 				return;
 			}
-			
-			for (auto const &ifaceName : ifaceNames.getMemberNames()){
 
-				std::cout << "Interface name: " << ifaceName.c_str() << std::endl;
+			for (auto const &ifaceName : ifaceNames.getMemberNames()){
 
 				if (boost::iequals(ifaceName, EYETRACKER_KEY)){
 					normalizeForEyeTracker(descriptor, ifaceName);
 				}
 				else if (boost::iequals(ifaceName, TRACKER_KEY)){
-					/// @todo for tracker 
+					/// @todo for tracker
 				}
 				else{
 					/// @todo for future interfaces
@@ -190,7 +180,7 @@ namespace osvr {
 		}
 
 
-		
+
 
 	} // namespace common
 } // namespace osvr
