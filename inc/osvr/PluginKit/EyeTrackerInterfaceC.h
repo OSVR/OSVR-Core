@@ -65,7 +65,9 @@ parameter may be subject to external limitations
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface OSVR_FUNC_NONNULL((1, 2)));
+OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
+OSVR_IN OSVR_ChannelCount numChan
+OSVR_FUNC_NONNULL((1, 2)));
 
 /** @brief Report gaze position 2D for a sensor (eye)
 @param dev Device token
@@ -78,8 +80,8 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReport2DGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazePosition2DReport *gazePosition,
-//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_EyeGazePosition2DState *gazePosition,
+OSVR_IN OSVR_ChannelCount chan,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3));
 /** @} */ /* end of group */
@@ -95,9 +97,9 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReport3DGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeDirection,
-OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeBasePoint,
-//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
+OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
+OSVR_IN OSVR_ChannelCount chan,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3, 4));
 /** @} */ /* end of group */
@@ -114,8 +116,8 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReportGazeBasePoint(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeBasePoint,
-//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
+OSVR_IN OSVR_ChannelCount chan,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3));
 /** @} */ /* end of group */
@@ -131,10 +133,27 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReportGazeDirection(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeDirection,
-//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
+OSVR_IN OSVR_ChannelCount chan,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3));
+/** @} */ /* end of group */
+
+/** @brief Report the blink state
+@param dev Device token
+@param iface Eye Tracker interface
+@param gazeBasePoint A copy of the eye tracker report
+@param sensor Sensor number
+@param timestamp Timestamp correlating to eye data.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode
+osvrDeviceEyeTrackerReportBlink(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+OSVR_IN_PTR OSVR_EyeBlinkState blink,
+OSVR_IN OSVR_ChannelCount chan,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+OSVR_FUNC_NONNULL((1, 2, 3, 4));
 /** @} */ /* end of group */
 
 
@@ -149,10 +168,10 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazePosition2DReport *gazePosition,
-OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeDirection,
-OSVR_IN_PTR OSVR_EyeGazeDirectionReport *gazeBasePoint,
-//OSVR_IN OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_EyeGazePosition2DState *gazePosition,
+OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
+OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
+OSVR_IN OSVR_ChannelCount chan,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp)
 OSVR_FUNC_NONNULL((1, 2, 3, 4));
 /** @} */ /* end of group */
