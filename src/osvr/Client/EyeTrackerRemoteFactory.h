@@ -32,6 +32,7 @@
 #include <osvr/Common/OriginalSource.h>
 #include <osvr/Util/SharedPtr.h>
 #include "RemoteHandler.h"
+#include <osvr/Common/ClientContext.h>
 
 // Library/third-party includes
 // - none
@@ -50,11 +51,14 @@ namespace client {
             factory.addFactory("eyetracker", *this);
 			factory.addFactory("location2D", *this);
 			factory.addFactory("direction", *this);
+			factory.addFactory("tracker", *this);
+			factory.addFactory("button", *this);
         }
 
         shared_ptr<RemoteHandler>
         operator()(common::OriginalSource const &source,
-                   common::InterfaceList &ifaces);
+                   common::InterfaceList &ifaces,
+				   common::ClientContext &ctx);
 
       private:
         VRPNConnectionCollection m_conns;
