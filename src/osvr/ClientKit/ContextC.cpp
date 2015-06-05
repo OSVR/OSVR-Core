@@ -49,6 +49,15 @@ OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
         return ::osvr::client::createContext(applicationIdentifier);
     }
 }
+
+OSVR_ClientContext osvrClientInitHost(const char applicationIdentifier[],
+                                      const char host[],
+                                      uint32_t /*flags*/) {
+
+    OSVR_DEV_VERBOSE("Connecting to non-default host " << host);
+    return ::osvr::client::createContext(applicationIdentifier, host);
+}
+
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
     ctx->update();
     return OSVR_RETURN_SUCCESS;
