@@ -42,11 +42,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/any.hpp>
 #include <boost/variant/get.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 #include <json/value.h>
 #include <json/reader.h>
 
 // Standard includes
-// - none
+#include <iostream>
+#include <string>
 
 namespace osvr {
 namespace client {
@@ -110,10 +113,10 @@ namespace client {
 			  report.directionValid = false;
 			  report.basePointValid = false;
 			  if (m_opts.reportDirection) {
-				  //report.directionValid = m_opts.dirIface->getState<OSVR_DirectionState>(timestamp, report.direction);
+				//  report.directionValid = m_opts.dirIface->getState<OSVR_DirectionState>(timestamp, report.direction);
 			  }
 			  if (m_opts.reportBasePoint) {
-				  //report.basePointValid = m_opts.trackerIface->getState<OSVR_PositionReport>(timestamp, report.basePoint);
+				//  report.basePointValid = m_opts.trackerIface->getState<OSVR_PositionReport>(timestamp, report.basePoint);
 			  }
 			  if (!(report.basePointValid || report.directionValid)) {
 				  return; // don't send an empty report.
@@ -122,15 +125,16 @@ namespace client {
 				  iface->triggerCallbacks(timestamp, report);
 			  }
 		  }
-
+		  
 		  void m_handleEyeTracking2d(common::OSVR_EyeNotification const &data,
 			  util::time::TimeValue const &timestamp) {
 
 			  OSVR_EyeTracker2DReport report;
 			  report.sensor = data.sensor;
 			  report.locationValid = false;
+			  OSVR_OrientationReport rep;
 			  if (m_opts.reportLocation2D) {
-				  //report.locationValid = m_opts.locationIface->getState<OSVR_Location2DReport>(timestamp, report.location);
+				 // report.locationValid = m_opts.locationIface->getState<OSVR_OrientationReport>(timestamp, rep.rotation);
 			  }
 			  if (!(report.locationValid)) {
 				  return; // don't send an empty report.
@@ -183,42 +187,35 @@ namespace client {
         shared_ptr<RemoteHandler> ret;
 
 		NetworkEyeTrackerRemoteHandler::Options opts;
-		std::string const val = ctx.getStringParameter("/com_osvr_EyeTracker/EyeTracker/eyetracker");
-		std::cout << "Val is " << source.getInterfaceName() << std::endl;
-		osvr::common::PathTree pathTree;
-		osvr::common::clonePathTree(ctx.getPathTree(), pathTree);
-		
-		//auto myDescriptor = ctx.getStringParameter(path);
 
-		/*
-		Json::Value desc;
-		Json::Reader reader;
-		if (reader.parse(myDescriptor, desc)){
-			std::cout << desc.toStyledString() << std::endl;
-		}
-		else{
-		}
-		*/
-
-		/*
-		if (myDescriptor["interfaces"]["eyetracker"].get("direction", false)) {
+		auto myDescriptor = source.getDeviceElement().getDescriptor();		
+	
+		if (myDescriptor["interfaces"]["eyetracker"].isMember("direction")) {
 			opts.reportDirection = true;
-			opts.dirIface = ctx.getInterface(source.getDevice + "/direction/" + source.getSensor());
+			const std::string iface = source.getDeviceElement().getDeviceName() +
+				"/direction" ;
+			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
+			opts.dirIface = ctx.getInterface(iface.c_str());
 		}
-		if (myDescriptor["interfaces"]["eyetracker"].get("tracker", false)) {
+		if (myDescriptor["interfaces"]["eyetracker"].isMember("tracker")) {
 			opts.reportBasePoint = true;
-			opts.trackerIface = ctx.getInterface(source.getDevice + "/tracker/" + source.getSensor());
+			const std::string iface = (source.getDeviceElement().getDeviceName() + "/tracker/");
+			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
+			opts.trackerIface = ctx.getInterface(iface.c_str());
 		}
-		if (myDescriptor["interfaces"]["eyetracker"].get("location2D", false)) {
+		
+		if (myDescriptor["interfaces"]["eyetracker"].isMember("location2D")) {
 			opts.reportLocation2D = true;
-			opts.locationIface = ctx.getInterface(source.getDevice + "/location2D/" + source.getSensor());
+			const std::string iface = (source.getDeviceElement().getDeviceName() + "/location2D/");
+			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
+			opts.locationIface = ctx.getInterface(iface.c_str());
 		}
-		if (myDescriptor["interfaces"]["eyetracker"].get("button", false)) {
+		if (myDescriptor["interfaces"]["eyetracker"].isMember("button")) {
 			opts.reportBlink = true;
-			opts.buttonIface = ctx.getInterface(source.getDevice + "/location2D/" + source.getSensor());
+			const std::string iface = (source.getDeviceElement().getDeviceName() + "/button/");
+			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
+			opts.buttonIface = ctx.getInterface(iface.c_str());
 		}
-
-		*/
 
         if (source.hasTransform()) {
             OSVR_DEV_VERBOSE(
