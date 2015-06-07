@@ -224,7 +224,8 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image) {
     // the input image into neighboring pixels in the output image; doubling
     // every one.
     //  TODO: Invert the transformation used to get from YUV to BGR and
-    // determine the actual components.
+    // determine the actual components, which are in fact a set of greyscale
+    // values.
     cv::Mat outImage(yuvImage.rows, yuvImage.cols * 2, CV_8UC1, cv::Scalar(0));
     for (int r = 0; r < yuvImage.rows; r++) {
         for (int c = 0; c < yuvImage.cols; c++) {

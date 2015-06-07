@@ -364,17 +364,18 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // If we have an Oculus camera, then we need to reformat the
         // image pixels.
         if (m_type == OculusDK2) {
-            m_frame = osvr::oculus_dk2::unscramble_image(m_frame);
+            m_imageGray = osvr::oculus_dk2::unscramble_image(m_frame);
 
             // Read any reports and discard them.  We do this to keep the
             // LED keepAlive going.
             m_dk2->poll();
         }
-
-        //==================================================================
-        // Convert the image into a format we can use.
-        // TODO: Consider reading in the image in gray scale to begin with
-        cv::cvtColor(m_frame, m_imageGray, CV_RGB2GRAY);
+        else {
+            //==================================================================
+            // Convert the image into a format we can use.
+            // TODO: Consider reading in the image in gray scale to begin with
+            cv::cvtColor(m_frame, m_imageGray, CV_RGB2GRAY);
+        }
 
         //================================================================
         // Tracking the points
