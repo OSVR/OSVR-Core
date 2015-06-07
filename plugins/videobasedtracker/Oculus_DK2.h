@@ -97,7 +97,8 @@ namespace oculus_dk2 {
     // Function to convert a bogus-formatted image from OpenCV from the
     // HDK (which happens because the unit claims to be reporting YUV format
     // when in fact it is reporting grayscale format) into the correct
-    // image.
+    // image.  This function returns a grayscale-format image at double
+    // the resolution of the input image.
     //   TODO: The implementation of this function currently only uses half
     // of the values that are available, doubling them horizontally to fill
     // in all of the pixels.
