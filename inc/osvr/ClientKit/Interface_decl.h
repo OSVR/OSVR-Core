@@ -69,6 +69,8 @@ namespace clientkit {
 		OSVR_CALLBACK_METHODS(EyeTracker)
 		OSVR_CALLBACK_METHODS(Location2D)
 		OSVR_CALLBACK_METHODS(Direction)
+		OSVR_CALLBACK_METHODS(EyeTracker2D)
+		OSVR_CALLBACK_METHODS(EyeTracker3D)
 /// @}
 
 #undef OSVR_CALLBACK_METHODS

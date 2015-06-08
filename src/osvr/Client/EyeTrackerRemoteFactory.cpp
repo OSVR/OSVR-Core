@@ -37,6 +37,8 @@
 #include <osvr/Common/EyeTrackerComponent.h>
 #include <osvr/Common/Location2DComponent.h>
 #include <osvr/Common/DirectionComponent.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/InterfaceState.h>
 
 // Library/third-party includes
 #include <boost/lexical_cast.hpp>
@@ -75,9 +77,11 @@ namespace client {
 
         NetworkEyeTrackerRemoteHandler(vrpn_ConnectionPtr const &conn,
                                     std::string const &deviceName,
+									Options const &options,
                                     boost::optional<OSVR_ChannelCount> sensor,
                                     common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
+			m_opts(options),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
             auto eyetracker = common::EyeTrackerComponent::create();
@@ -104,7 +108,7 @@ namespace client {
 
       private:
 
-		  /*
+		  
 		  void m_handleEyeTracking3d(common::OSVR_EyeNotification const &data,
 			  util::time::TimeValue const &timestamp) {
 
@@ -112,11 +116,12 @@ namespace client {
 			  report.sensor = data.sensor;
 			  report.directionValid = false;
 			  report.basePointValid = false;
+			  util::time::TimeValue timest = timestamp;
 			  if (m_opts.reportDirection) {
-				//  report.directionValid = m_opts.dirIface->getState<OSVR_DirectionState>(timestamp, report.direction);
+				  report.directionValid = m_opts.dirIface->getState<OSVR_DirectionReport>(timest, report.state.direction);
 			  }
 			  if (m_opts.reportBasePoint) {
-				//  report.basePointValid = m_opts.trackerIface->getState<OSVR_PositionReport>(timestamp, report.basePoint);
+				  report.basePointValid = m_opts.trackerIface->getState<OSVR_PositionReport>(timest, report.state.basePoint);
 			  }
 			  if (!(report.basePointValid || report.directionValid)) {
 				  return; // don't send an empty report.
@@ -126,46 +131,38 @@ namespace client {
 			  }
 		  }
 		  
+
 		  void m_handleEyeTracking2d(common::OSVR_EyeNotification const &data,
 			  util::time::TimeValue const &timestamp) {
 
 			  OSVR_EyeTracker2DReport report;
 			  report.sensor = data.sensor;
 			  report.locationValid = false;
-			  OSVR_OrientationReport rep;
+			  util::time::TimeValue timest = timestamp;
+			  
 			  if (m_opts.reportLocation2D) {
-				 // report.locationValid = m_opts.locationIface->getState<OSVR_OrientationReport>(timestamp, rep.rotation);
+				  report.locationValid = m_opts.locationIface->getState<OSVR_Location2DReport>(timest, report.state);
 			  }
 			  if (!(report.locationValid)) {
 				  return; // don't send an empty report.
 			  }
+			  
 			  for (auto &iface : m_interfaces) {
 				  iface->triggerCallbacks(timestamp, report);
 			  }
+			  
 		  }
-		  */
+		  
 		  void m_handleEyeTracking(common::OSVR_EyeNotification const &data,
                            util::time::TimeValue const &timestamp) {
 			if (!m_all && *m_sensor != data.sensor) {
                 /// doesn't match our filter.
                 return;
             }
-
-			/*
-            OSVR_EyeTrackerReport report;
-			report.sensor = 99;
-
-            common::ClientInterfacePtr anInterface;
-            for (auto &iface : m_interfaces) {
-                anInterface = iface;
-                iface->triggerCallbacks(timestamp, report);
-            }
-			*/
-
-/*
+			
 			m_handleEyeTracking3d(data, timestamp);
 			m_handleEyeTracking2d(data, timestamp);
-*/
+
         }
 
         common::BaseDevicePtr m_dev;
@@ -192,27 +189,27 @@ namespace client {
 	
 		if (myDescriptor["interfaces"]["eyetracker"].isMember("direction")) {
 			opts.reportDirection = true;
-			const std::string iface = source.getDeviceElement().getDeviceName() +
+			const std::string iface = common::getPathSeparator() + source.getDeviceElement().getDeviceName() +
 				"/direction" ;
 			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
 			opts.dirIface = ctx.getInterface(iface.c_str());
 		}
 		if (myDescriptor["interfaces"]["eyetracker"].isMember("tracker")) {
 			opts.reportBasePoint = true;
-			const std::string iface = (source.getDeviceElement().getDeviceName() + "/tracker/");
+			const std::string iface = common::getPathSeparator() + source.getDeviceElement().getDeviceName() + "/tracker/";
 			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
 			opts.trackerIface = ctx.getInterface(iface.c_str());
 		}
 		
 		if (myDescriptor["interfaces"]["eyetracker"].isMember("location2D")) {
 			opts.reportLocation2D = true;
-			const std::string iface = (source.getDeviceElement().getDeviceName() + "/location2D/");
+			const std::string iface = common::getPathSeparator() + source.getDeviceElement().getDeviceName() + "/location2D/";
 			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
 			opts.locationIface = ctx.getInterface(iface.c_str());
 		}
 		if (myDescriptor["interfaces"]["eyetracker"].isMember("button")) {
 			opts.reportBlink = true;
-			const std::string iface = (source.getDeviceElement().getDeviceName() + "/button/");
+			const std::string iface = common::getPathSeparator() + source.getDeviceElement().getDeviceName() + "/button/";
 			// + boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
 			opts.buttonIface = ctx.getInterface(iface.c_str());
 		}
@@ -227,7 +224,7 @@ namespace client {
 
         /// @todo find out why make_shared causes a crash here
         ret.reset(new NetworkEyeTrackerRemoteHandler(
-            m_conns.getConnection(devElt), devElt.getFullDeviceName(),
+            m_conns.getConnection(devElt), devElt.getFullDeviceName(), opts,
             source.getSensorNumberAsChannelCount(), ifaces));
         return ret;
     }

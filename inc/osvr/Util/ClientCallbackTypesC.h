@@ -174,23 +174,31 @@ typedef struct OSVR_DirectionReport{
 /** @brief C function type for a callback on an location2D interface */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Direction);
 
+/** @brief State for 2D location report */
+typedef OSVR_Location2DState OSVR_EyeTracker2DState;
+
 /** @brief Report type for 2D location report */
 typedef struct OSVR_EyeTracker2DReport {
-	OSVR_ChannelCount sensor;
 	bool locationValid;
-	OSVR_Location2DState location;
+	OSVR_ChannelCount sensor;
+	OSVR_EyeTracker2DState state;
 } OSVR_EyeTracker2DReport;
 
 /** @brief C function type for a callback for EyeTracker2D */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(EyeTracker2D);
 
-/** @brief Report type for 3D gaze report */
-typedef struct OSVR_EyeTracker3DReport {
-	OSVR_ChannelCount sensor;
-	bool directionValid;
-	bool basePointValid;
+/** @brief State for 3D gaze report */
+typedef struct OSVR_EyeTracker3DState{
 	OSVR_DirectionState direction;
 	OSVR_PositionState basePoint;
+} OSVR_EyeTracker3DState;
+
+/** @brief Report type for 3D gaze report */
+typedef struct OSVR_EyeTracker3DReport {
+	bool directionValid;
+	bool basePointValid;
+	OSVR_ChannelCount sensor;
+	OSVR_EyeTracker3DState state;
 } OSVR_EyeTracker3DReport;
 
 /** @brief C function type for a callback for EyeTracker3D */
