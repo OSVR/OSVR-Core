@@ -85,9 +85,14 @@ target_link_libraries(${LIBNAME_INTERFACE}
     INTERFACE
     ${LIBNAME_FULL}Cpp
     $<BUILD_INTERFACE:opencv_core>)
-target_include_directories(${LIBNAME_INTERFACE}
-    INTERFACE
-    $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>)
+
+# Include dir specifically required by 3.0 and up. Not sure why we get an error with 2.4.10
+if(NOT OpenCV_VERSION VERSION_LESS 3.0.0)
+    list(REMOVE_DUPLICATES OpenCV_INCLUDE_DIRS)
+    target_include_directories(${LIBNAME_INTERFACE}
+        INTERFACE
+        $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>)
+endif()
 
 # Add library alias to allow use of the same osvr_add_plugin script within this
 # tree and outside of it.
