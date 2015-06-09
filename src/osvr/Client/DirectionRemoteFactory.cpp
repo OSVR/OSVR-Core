@@ -91,11 +91,6 @@ namespace client {
                 anInterface = iface;
                 iface->triggerCallbacks(timestamp, report);
             }
-            /*
-            if (anInterface) {
-                anInterface->getContext().acquireObject(data.buffer);
-            }
-            */
         }
 
         common::BaseDevicePtr m_dev;

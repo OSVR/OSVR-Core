@@ -37,14 +37,6 @@
 /* Standard includes */
 /* none */
 
-/** @defgroup PluginKitCEyeTracker EyeTracker interface underlying C API - not
-intended for direct usage
-@brief Used by the C++ header-only wrappers to send eye tracker reports from a
-device in your plugin.
-@ingroup PluginKit
-@{
-*/
-
 OSVR_EXTERN_C_BEGIN
 
 /** @brief Opaque type used in conjunction with a device token to send data on eye

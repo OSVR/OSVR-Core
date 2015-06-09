@@ -37,14 +37,6 @@
 /* Standard includes */
 /* none */
 
-/** @defgroup PluginKitCDirection Direction interface underlying C API - not
-intended for direct usage
-@brief Used by the C++ header-only wrappers to send Direction(3D) reports from a
-device in your plugin.
-@ingroup PluginKit
-@{
-*/
-
 OSVR_EXTERN_C_BEGIN
 
 /** @brief Opaque type used in conjunction with a device token to send data on 3D Direction
