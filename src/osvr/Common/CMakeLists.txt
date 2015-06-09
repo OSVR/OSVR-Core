@@ -146,7 +146,9 @@ set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
 
 target_include_directories(${LIBNAME_FULL}
     PUBLIC
-    ${Boost_INCLUDE_DIRS})
+    ${Boost_INCLUDE_DIRS}
+    PRIVATE
+    ${OpenCV_INCLUDE_DIRS})
 
 target_compile_options(${LIBNAME_FULL}
     PUBLIC

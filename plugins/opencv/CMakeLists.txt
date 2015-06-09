@@ -7,6 +7,7 @@ osvr_add_plugin(NAME com_osvr_VideoCapture_OpenCV
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoCapture_OpenCV_json.h")
 
 target_link_libraries(com_osvr_VideoCapture_OpenCV osvrPluginKitImaging opencv_core ${OPENCV_CAMERA_EXTRA_LIBS})
+target_include_directories(com_osvr_VideoCapture_OpenCV PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 set_target_properties(com_osvr_VideoCapture_OpenCV PROPERTIES
     FOLDER "OSVR Plugins")

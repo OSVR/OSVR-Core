@@ -85,6 +85,9 @@ target_link_libraries(${LIBNAME_INTERFACE}
     INTERFACE
     ${LIBNAME_FULL}Cpp
     $<BUILD_INTERFACE:opencv_core>)
+target_include_directories(${LIBNAME_INTERFACE}
+    INTERFACE
+    $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>)
 
 # Add library alias to allow use of the same osvr_add_plugin script within this
 # tree and outside of it.
