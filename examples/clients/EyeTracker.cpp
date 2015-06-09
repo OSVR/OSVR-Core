@@ -34,41 +34,52 @@
 #include <string>
 
 
-void printEyeTrackerReport(const OSVR_EyeTrackerReport *report){
+void printEyeTracker2DReport(const OSVR_EyeTracker2DReport *report){
 
 	std::cout << "2D Data:" <<
-		report->state.gaze.gazeDirection2D.data[0] << "; " <<
-		report->state.gaze.gazeDirection2D.data[1] << "\t" <<
-
-				"3D Data:" <<
-		report->state.gaze.gazeDirection3D.data[0] << "; " <<
-		report->state.gaze.gazeDirection3D.data[1] << "; " <<
-		report->state.gaze.gazeDirection3D.data[2] << std::endl;
-
-	
-
+		report->state.data[0] << "; " <<
+		report->state.data[1] << std::endl;
 }
 
-void eyeTrackerCallback(void * /*userdata*/,
-						const OSVR_TimeValue * /*timestamp*/ ,
-					 const OSVR_EyeTrackerReport *report) {
-	std::cout << "Got Eye Tracker Report: for sensor #" << report->sensor << std::endl;
-		printEyeTrackerReport(report);
+void printEyeTracker3DReport(const OSVR_EyeTracker3DReport *report){
+
+	std::cout << "3D Data Base Point:" <<
+		report->state.basePoint.data[0] << "; " <<
+		report->state.basePoint.data[1] << "; " <<
+		report->state.basePoint.data[2] << std::endl;
+	std::cout << "3D Data Direction:" <<
+		report->state.direction.data[0] << "; " <<
+		report->state.direction.data[1] << "; " <<
+		report->state.direction.data[2] << std::endl;
 }
 
+void eyeTracker2DCallback(void * /*userdata*/,
+						const OSVR_TimeValue * /*timestamp*/,
+					const OSVR_EyeTracker2DReport *report) {
+	std::cout << "Got 2D Eye Tracker Report: for sensor #" << report->sensor << std::endl;
+	printEyeTracker2DReport(report);
+}
+
+void eyeTracker3DCallback(void * /*userdata*/,
+	const OSVR_TimeValue * /*timestamp*/,
+	const OSVR_EyeTracker3DReport *report) {
+	std::cout << "Got 3D Eye Tracker Report: for sensor #" << report->sensor << std::endl;
+	printEyeTracker3DReport(report);
+}
 
 int main() {
     osvr::clientkit::ClientContext context("com.osvr.exampleclients.EyeTrackerCallback");
 
     osvr::clientkit::Interface eyetracker = context.getInterface("/com_osvr_EyeTracker/EyeTracker/eyetracker");
 
-	eyetracker.registerCallback(&eyeTrackerCallback, NULL);
+	eyetracker.registerCallback(&eyeTracker2DCallback, NULL);
+	eyetracker.registerCallback(&eyeTracker3DCallback, NULL);
 
 	// Pretend that this is your application's mainloop.
     while (1) {
         context.update();
     }
-	
+
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }

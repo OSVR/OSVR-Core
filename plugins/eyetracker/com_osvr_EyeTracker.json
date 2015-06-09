@@ -6,15 +6,43 @@
     "lastModified": "",
     "interfaces": {
         "eyetracker": {
+            "count": 2,
+            "location2D": true,
+            "direction": true,
+            "tracker": true
+        },
+        "direction": {
+            "count": 2
+        },
+        "tracker": {
+            "position": true,
+            "orientation": false,
+            "bounded": true,
+            "count": 2
+        },
+        "location2D": {
             "count": 2
         }
     },
     "semantic": {
-        "left": "eyetracker/1",
-        "right": "eyetracker/2"
+        "left": "eyetracker/0",
+        "right": "eyetracker/1"
+    },
+    "semantic alternate/generated": {
+        "left": {
+            "$target": "eyetracker/0",
+            "gazeDirection": "direction/0",
+            "gazeOrigin": "tracker/0",
+            "gazeLocation": "location2D/0"
+        },
+        "right": {
+            "$target": "eyetracker/1",
+            "gazeDirection": "direction/1",
+            "gazeOrigin": "tracker/1",
+            "gazeLocation": "location2D/1"
+        }
     },
     "automaticAliases": {
-        "/me/eyes/left": "semantic/left",
-        "/me/eyes/right": "semantic/right"
+        "/me/eyes": "semantic/*"
     }
 }
