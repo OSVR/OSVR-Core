@@ -134,7 +134,7 @@ namespace client {
 
 		  void m_handleEyeTracking2d(common::OSVR_EyeNotification const &data,
 			  util::time::TimeValue const &timestamp) {
-
+			  
 			  OSVR_EyeTracker2DReport report;
 			  report.sensor = data.sensor;
 			  report.locationValid = false;
@@ -153,6 +153,27 @@ namespace client {
 			  
 		  }
 		  
+		  void m_handleEyeBlink(common::OSVR_EyeNotification const &data,
+			  util::time::TimeValue const &timestamp) {
+
+			  OSVR_EyeTrackerBlinkReport report;
+			  report.sensor = data.sensor;
+			  report.blinkValid = false;
+			  util::time::TimeValue timest = timestamp;
+
+			  if (m_opts.reportLocation2D) {
+				  report.blinkValid = m_opts.locationIface->getState<OSVR_ButtonReport>(timest, report.state);
+			  }
+			  if (!(report.blinkValid)) {
+				  return; // don't send an empty report.
+			  }
+
+			  for (auto &iface : m_interfaces) {
+				  iface->triggerCallbacks(timestamp, report);
+			  }
+
+		  }
+		  
 		  void m_handleEyeTracking(common::OSVR_EyeNotification const &data,
                            util::time::TimeValue const &timestamp) {
 			if (!m_all && *m_sensor != data.sensor) {
@@ -162,7 +183,7 @@ namespace client {
 			
 			m_handleEyeTracking3d(data, timestamp);
 			m_handleEyeTracking2d(data, timestamp);
-
+			m_handleEyeBlink(data, timestamp);
         }
 
         common::BaseDevicePtr m_dev;

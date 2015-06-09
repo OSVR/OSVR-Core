@@ -155,7 +155,7 @@ typedef OSVR_Location2DReport OSVR_EyeGazePosition2DReport;
 /** @brief Report type for a gaze direction (3D) */
 typedef OSVR_DirectionReport OSVR_EyeGazeDirectionReport;
 
-typedef OSVR_ButtonState OSVR_EyeBlinkState;
+
 
 /** @brief Type of eye gaze direction in 3D which contains 3D vector (position) containing gaze
 base point of the user's respective eye in 3D device coordinates. */
@@ -174,11 +174,6 @@ typedef OSVR_DirectionState OSVR_EyeGazeDirectionState;
 
 //end ET types
 
-/** @brief Report type for a blink event */
-typedef struct OSVR_EyeBlinkReport{
-	OSVR_ChannelCount sensor;
-} OSVR_EyeBlinkReport;
-
 
 typedef struct OSVR_EyeGazeDirection{
 	OSVR_Vec2 gazeDirection2D;
@@ -196,7 +191,6 @@ typedef struct OSVR_EyeTrackerReport {
 	OSVR_EyeGazeDirectionState dir;
 	OSVR_EyeGazePosition2DState pos;
 } OSVR_EyeTrackerReport;
-
 
 /** @brief State for 3D gaze report */
 typedef struct OSVR_EyeTracker3DState{
@@ -221,6 +215,16 @@ typedef struct OSVR_EyeTracker2DReport {
 	OSVR_ChannelCount sensor;
 	OSVR_EyeTracker2DState state;
 } OSVR_EyeTracker2DReport;
+
+/** @brief State for a blink event */
+typedef OSVR_ButtonState OSVR_EyeTrackerBlinkState;
+
+/** @brief Report type for a blink event */
+typedef struct OSVR_EyeTrackerBlinkReport{
+	bool blinkValid;
+	OSVR_ChannelCount sensor;
+	OSVR_EyeTrackerBlinkState state;
+} OSVR_EyeTrackerBlinkReport;
 
 /** @brief Report type for an Imaging callback (forward declaration) */
 struct OSVR_ImagingReport;

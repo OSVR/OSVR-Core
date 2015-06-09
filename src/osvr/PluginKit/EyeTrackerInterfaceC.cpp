@@ -75,7 +75,7 @@ OSVR_IN OSVR_ChannelCount numChan) {
 	auto eyetracker = osvr::common::EyeTrackerComponent::create();
 	ifaceObj->eyetracker = eyetracker.get();
 	opts->addComponent(eyetracker);
-	
+
 	opts->setButtons(numChan, ifaceObj->button.getContainerLocation());
 	opts->setTracker(ifaceObj->tracker.getContainerLocation());
 
@@ -154,10 +154,10 @@ OSVR_IN_PTR OSVR_TimeValue const *timestamp){
 OSVR_ReturnCode
 osvrDeviceEyeTrackerReportBlink(OSVR_IN_PTR OSVR_DeviceToken dev,
 OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeBlinkState blink,
+OSVR_IN_PTR OSVR_EyeTrackerBlinkState blink,
 OSVR_IN OSVR_ChannelCount chan,
 OSVR_IN_PTR OSVR_TimeValue const *timestamp){
-	
+
 	iface->button->setValue(blink, chan, *timestamp);
 	iface->eyetracker->sendNotification(chan, *timestamp);
 	return OSVR_RETURN_SUCCESS;

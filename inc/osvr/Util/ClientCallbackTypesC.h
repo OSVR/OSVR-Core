@@ -204,6 +204,19 @@ typedef struct OSVR_EyeTracker3DReport {
 /** @brief C function type for a callback for EyeTracker3D */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(EyeTracker3D);
 
+/** @brief State for a blink event */
+typedef OSVR_ButtonState OSVR_EyeTrackerBlinkState;
+
+/** @brief Report type for a blink event */
+typedef struct OSVR_EyeTrackerBlinkReport{
+	bool blinkValid;
+	OSVR_ChannelCount sensor;
+	OSVR_EyeTrackerBlinkState state;
+} OSVR_EyeTrackerBlinkReport;
+
+/** @brief C function type for a callback for EyeTrackerBlink */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(EyeTrackerBlink);
+
 #undef OSVR_DEFINE_CALLBACK
 /** @} */
 OSVR_EXTERN_C_END
