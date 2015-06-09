@@ -129,23 +129,6 @@ typedef struct OSVR_AnalogReport {
 /** @brief C function type for a callback on an analog interface */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Analog);
 
-typedef struct OSVR_EyeGazeDirection{
-	OSVR_Vec2 gazeDirection2D;
-	OSVR_Vec3 gazeDirection3D;
-} OSVR_EyeGazeDirection;
-
-typedef struct OSVR_EyeTrackerState{
-	OSVR_EyeGazeDirection gaze;
-} OSVR_EyeTrackerState;
-
-typedef struct OSVR_EyeTrackerReport {
-	OSVR_ChannelCount sensor;
-	OSVR_EyeTrackerState state;
-} OSVR_EyeTrackerReport;
-
-/** @brief C function type for a callback on an eye tracker interface */
-OSVR_DEFINE_CLIENT_CALLBACK_TYPE(EyeTracker);
-
 /** @brief Type of 2D location state */
 typedef OSVR_Vec2 OSVR_Location2DState;
 

@@ -5,7 +5,6 @@ set(REPORT_TYPES
     Button
     Analog
     Imaging
-    EyeTracker
     Location2D
     Direction
     EyeTracker2D

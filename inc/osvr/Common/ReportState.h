@@ -80,14 +80,6 @@ namespace common {
             }
         };
 
-		// Template specialization to handle OSVR_EyeTrackerReport
-		template <> struct ReportStateGetter<OSVR_EyeTrackerReport> {
-			static OSVR_EyeTrackerState const &apply(OSVR_EyeTrackerReport const &r) {
-				return r.state;
-			}
-			static OSVR_EyeTrackerState apply(OSVR_EyeTrackerReport &r) { return r.state; }
-		};
-
 		// Template specialization to handle OSVR_Location2DReport
 		template <> struct ReportStateGetter<OSVR_Location2DReport> {
 			static OSVR_Location2DState const &apply(OSVR_Location2DReport const &r) {
