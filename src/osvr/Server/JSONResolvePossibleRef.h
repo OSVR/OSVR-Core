@@ -42,9 +42,17 @@ namespace server {
     /// Pointer-style $ref object, and might just directly be an object, return
     /// the object desired.
     ///
+    /// If just a string (suggesting it was intended to be a reference), returns
+    /// null.
+    ///
+    /// @param stringAcceptableResult Determines whether a string that we can't
+    /// resolve to a loadable JSON reference should be returned as itself
+    /// (valid, true), or should be signaled as an error by returning null
+    /// (false, default)
     /// @param searchPath Optional list of directories to look for any mentioned
     /// files.
     Json::Value resolvePossibleRef(Json::Value const &input,
+                                   bool stringAcceptableResult = false,
                                    std::vector<std::string> const &searchPath =
                                        std::vector<std::string>());
 

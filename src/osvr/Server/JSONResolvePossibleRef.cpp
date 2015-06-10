@@ -34,6 +34,8 @@
 
 namespace osvr {
 namespace server {
+    /// @brief Helper function to load a JSON file given a full path to the
+    /// file.
     /// @returns a null json value if load failed.
     static inline Json::Value attemptLoad(std::string fullFn) {
         Json::Value ret{Json::nullValue};
@@ -48,9 +50,12 @@ namespace server {
         }
         return ret;
     }
+    /// @brief Helper function to load a JSON file by name in a search path.
+    /// @return Json::nullValue if could not load, otherwise parsed contents of
+    /// file.
     static inline Json::Value
     loadFromFile(std::string fn, std::vector<std::string> const &searchPath) {
-        Json::Value ret;
+        Json::Value ret{Json::nullValue};
         for (auto const &path : searchPath) {
             auto fullFn = boost::filesystem::path(path) / fn;
             ret = attemptLoad(fullFn.string());
@@ -59,17 +64,21 @@ namespace server {
             }
         }
         // Last ditch effort, or only attempt if no search path provided
+        // This effectively uses the current working directory.
         ret = attemptLoad(fn);
         return ret;
     }
+
     Json::Value resolvePossibleRef(Json::Value const &input,
+                                   bool stringAcceptableResult,
                                    std::vector<std::string> const &searchPath) {
-        Json::Value ret;
+        Json::Value ret{Json::nullValue};
         if (input.isString()) {
             ret = loadFromFile(input.asString(), searchPath);
-            if (!ret.isNull()) {
-                return ret;
+            if (ret.isNull() && stringAcceptableResult) {
+                ret = input;
             }
+            return ret;
         }
         if (input.isObject() && input.isMember("$ref")) {
             /// @todo remove things after the filename in the ref.

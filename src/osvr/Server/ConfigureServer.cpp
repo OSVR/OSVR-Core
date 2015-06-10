@@ -334,11 +334,18 @@ namespace server {
         if (display.isNull()) {
             return success;
         }
+
         auto result = resolvePossibleRef(display);
-        if (!result.isNull()) {
-            success =
-                m_server->addString(DISPLAY_PATH, result.toStyledString());
+        if (result.isNull()) {
+            OSVR_DEV_VERBOSE(
+                "ERROR: Could not load an object or display descriptor "
+                "file specified by: "
+                << display.toStyledString());
+            return success;
         }
+
+        // OK, got it.
+        success = m_server->addString(DISPLAY_PATH, result.toStyledString());
         return success;
     }
 
