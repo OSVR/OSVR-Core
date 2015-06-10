@@ -7,7 +7,6 @@
     {
       "plugin": "com_osvr_Multiserver",
       "driver": "YEI_3Space_Sensor"
-      }
     }
   ]
 }
