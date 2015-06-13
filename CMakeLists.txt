@@ -400,6 +400,16 @@ if(WIN32)
         Devel)
 endif()
 
+if(ANDROID AND "${ANDROID_STL}" STREQUAL "gnustl_shared")
+    if(__libstl) # TODO this is an internal variable in android-cmake!
+        install(FILES
+            "${__libstl}"
+            DESTINATION
+            ${OSVR_SHARED_LIBRARY_DIR}
+            COMPONENT
+            Runtime)
+    endif()
+endif()
 
 ###
 # Install dependencies
