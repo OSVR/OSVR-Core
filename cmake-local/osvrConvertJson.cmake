@@ -5,6 +5,9 @@
 # literal (appropriately escaped) of your JSON file in compact format
 # (whitespace and comments removed), not null terminated.
 function(osvr_convert_json _symbol _in _out)
+    if(NOT OSVR_JSON_TO_C_EXECUTABLE)
+        message(FATAL_ERROR "Cannot convert a JSON file to C without osvr_json_to_c - set OSVR_JSON_TO_C_EXECUTABLE to a valid host system executable!")
+    endif()
     add_custom_command(OUTPUT "${_out}"
         COMMAND ${OSVR_JSON_TO_C_EXECUTABLE} --symbol ${_symbol} "${_in}" "${_out}"
         MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${_in}"

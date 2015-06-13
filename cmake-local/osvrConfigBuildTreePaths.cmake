@@ -20,3 +20,8 @@ endif()
 if(NOT BOOST_FOUND)
     include("${CMAKE_CURRENT_LIST_DIR}/CMakeBoostHelper.cmake" OPTIONAL)
 endif()
+
+# For build trees, we might already know where an OSVR JSON to C is
+if(NOT OSVR_JSON_TO_C_COMMAND)
+    set(OSVR_JSON_TO_C_COMMAND "@OSVR_JSON_TO_C_COMMAND@")
+endif()

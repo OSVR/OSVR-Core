@@ -22,9 +22,24 @@ set(OSVR_PLUGIN_IGNORE_SUFFIX "@OSVR_PLUGIN_IGNORE_SUFFIX@" CACHE INTERNAL
 
 # Since alias targets only work for libraries, we use this method instead to
 # share the osvr_convert_json script between the main tree and external config users.
-set(OSVR_JSON_TO_C_EXECUTABLE "osvr::osvr_json_to_c" CACHE INTERNAL
-    "The target name for the osvr_json_to_c executable" FORCE)
-
+if(TARGET osvr::osvr_json_to_c)
+    set(OSVR_JSON_TO_C_EXECUTABLE "osvr::osvr_json_to_c" CACHE INTERNAL
+        "The target name for the osvr_json_to_c executable" FORCE)
+else()
+    # This stuff to handle primarily cross-compiling, like for Android.
+    if(NOT DEFINED OSVR_JSON_TO_C_EXECUTABLE)
+        # The latter variable might be set by a script in the build tree config,
+        # or by a command line.
+        set(OSVR_JSON_TO_C_EXECUTABLE "${OSVR_JSON_TO_C_COMMAND}")
+    endif()
+    if(COMMAND find_host_program)
+        # If we are in an environment like android-cmake, use find_host_program
+        # to find the program
+        find_host_program(OSVR_JSON_TO_C_EXECUTABLE osvr_json_to_c)
+    else()
+        find_program(OSVR_JSON_TO_C_EXECUTABLE osvr_json_to_c)
+    endif()
+endif()
 # The shared scripts
 include("${CMAKE_CURRENT_LIST_DIR}/osvrAddPlugin.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConvertJson.cmake")
