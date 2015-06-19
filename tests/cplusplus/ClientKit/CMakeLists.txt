@@ -1,9 +1,7 @@
-add_executable(TestSimultaneousContexts
-    SimultaneousContexts.cpp)
-target_link_libraries(TestSimultaneousContexts osvrClientKitCpp)
-setup_gtest(TestSimultaneousContexts)
 
-add_executable(TestSequentialContexts
-    SequentialContexts.cpp)
-target_link_libraries(TestSequentialContexts osvrClientKitCpp)
-setup_gtest(TestSequentialContexts)
+foreach(test SimultaneousContexts SequentialContexts OverlappedContexts)
+    add_executable(Test${test}
+        ${test}.cpp)
+    target_link_libraries(Test${test} osvrClientKitCpp)
+    setup_gtest(Test${test})
+endforeach()
