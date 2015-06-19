@@ -42,7 +42,8 @@ foreach(HEADER ${headers})
         #message(STATUS "${HEADER}: '${symbolname}' - '${libname}'")
 
         # Name the test and output file with a number, to dodge Windows path length limits.
-        set(test_name "test_${test_index}")
+        # Call it header, instead of test, to avoid polluting the 'executable'
+        set(test_name "header_${test_index}")
 
         set(extension cpp)
         if (${HEADER} MATCHES "C.h$")

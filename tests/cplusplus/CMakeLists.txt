@@ -13,3 +13,7 @@ add_subdirectory(Common)
 if(BUILD_SERVER)
     add_subdirectory(Connection)
 endif()
+
+if(BUILD_CLIENT)
+    add_subdirectory(ClientKit)
+endif()
