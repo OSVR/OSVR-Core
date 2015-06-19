@@ -1,0 +1,9 @@
+add_executable(TestSimultaneousContexts
+    SimultaneousContexts.cpp)
+target_link_libraries(TestSimultaneousContexts osvrClientKitCpp)
+setup_gtest(TestSimultaneousContexts)
+
+add_executable(TestSequentialContexts
+    SequentialContexts.cpp)
+target_link_libraries(TestSequentialContexts osvrClientKitCpp)
+setup_gtest(TestSequentialContexts)
