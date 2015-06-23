@@ -41,6 +41,8 @@
 #include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
 
+#include <boost/algorithm/string.hpp>
+
 // Library/third-party includes
 #include <json/reader.h>
 
@@ -54,7 +56,12 @@ namespace client {
     class LocalhostReplacer : public boost::static_visitor<>, boost::noncopyable
     {
     public:
-        LocalhostReplacer(const std::string &host) : boost::static_visitor<>(), m_host(host) {};
+        LocalhostReplacer(const std::string &host) : boost::static_visitor<>(), m_host(host)
+        {
+            BOOST_ASSERT_MSG(
+                m_host.length() > 0,
+                "Cannot replace localhost with an empty host name!");
+        }
 
         /// @brief Replace localhost with proper hostname:port for Device elements
         void operator()(osvr::common::PathNode &,
@@ -66,11 +73,16 @@ namespace client {
 
             if (it != server.npos)
             {
-                // do a bit of surgery, only the "localhost" must be replaced, keeping
+                // Do a bit of surgery, only the "localhost" must be replaced, keeping
                 // the ":xxxx" part with the port number - the host could be running a local 
                 // VRPN/OSVR service on another port!
-                auto end = server.find(":");
-                server = server.replace(it, end, m_host);
+
+                // We have to do it like this, because std::string::replace() has a silly undefined corner 
+                // case when the string we are replacing localhost with is shorter than the length of 
+                // string being replaced (see http://www.cplusplus.com/reference/string/string/replace/ )
+                // Better be safe than sorry :(
+
+                server = boost::algorithm::ireplace_first_copy(server, "localhost", m_host);  // Go through a copy, just to be extra safe
             }
         }
 
