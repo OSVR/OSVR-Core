@@ -2,8 +2,8 @@
 # named com_osvr_VideoBasedHMDTracker_json (not null terminated)
 # The file must be added as a source file to some target (as below) to be generated.
 osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
-    com_osvr_VideoBasedHMDTracker.json
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h")
+	com_osvr_VideoBasedHMDTracker.json
+	"${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h")
 
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
@@ -18,17 +18,20 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
     Oculus_DK2.cpp
-	Oculus_DK2.h
-	LedIdentifier.cpp
-	LedIdentifier.h
-	LED.cpp
-	LED.h
-	BeaconBasedPoseEstimator.cpp
-	BeaconBasedPoseEstimator.h
+    Oculus_DK2.h
+    LedIdentifier.cpp
+    LedIdentifier.h
+    LED.cpp
+    LED.h
+    BeaconBasedPoseEstimator.cpp
+    BeaconBasedPoseEstimator.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
 )
 
-target_link_libraries(com_osvr_VideoBasedHMDTracker opencv_features2d opencv_calib3d opencv_core opencv_highgui opencv_imgproc vendored-vrpn)
+target_link_libraries(com_osvr_VideoBasedHMDTracker
+    ${VIDEOTRACKER_EXTRA_LIBS}
+    opencv_core
+    vendored-vrpn)
 
 target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
 
