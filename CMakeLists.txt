@@ -99,6 +99,8 @@ use_folders()
 include(PlatformDefinitions)
 define_platform_macros(OSVR)
 
+include(osvrGtest)
+
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)
 include(osvrConvertJson)

@@ -1,3 +1,3 @@
 add_executable(TreeNode TreeNode.cpp)
 target_link_libraries(TreeNode osvrUtilCpp)
-setup_gtest(TreeNode)
+osvr_setup_gtest(TreeNode)

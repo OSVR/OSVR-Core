@@ -18,7 +18,7 @@ add_executable(TestCommon
     ${PATHTREEJSON_SOURCES})
 
 target_link_libraries(TestCommon osvrCommon jsoncpp_lib)
-setup_gtest(TestCommon)
+osvr_setup_gtest(TestCommon)
 
 # shared memory test executables - not automated.
 #add_executable(SharedMemoryServer SharedMemoryServer.cpp)
