@@ -35,6 +35,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <memory>
 
 namespace osvr {
 namespace vbtracker {
@@ -77,6 +78,7 @@ namespace vbtracker {
         getBitsUsingThreshold(const std::list<float> &brightnesses,
                               float threshold) const;
     };
+    typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
 
     // Determines the LED IDs for the OSVR HDK
     extern const std::vector<std::string> OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
