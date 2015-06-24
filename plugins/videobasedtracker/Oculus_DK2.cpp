@@ -33,8 +33,8 @@ static const vrpn_uint16 OCULUS_VENDOR = 0x2833;
 static const vrpn_uint16 DK2_PRODUCT = 0x0021;
 
 Oculus_DK2_HID::Oculus_DK2_HID(double keepAliveSeconds)
-    : vrpn_HidInterface(m_filter = new vrpn_HidProductAcceptor(OCULUS_VENDOR, DK2_PRODUCT))
-{
+    : vrpn_HidInterface(
+          m_filter = new vrpn_HidProductAcceptor(OCULUS_VENDOR, DK2_PRODUCT)) {
     // Store keep-alive interval.
     m_keepAliveSeconds = keepAliveSeconds;
 
@@ -44,8 +44,7 @@ Oculus_DK2_HID::Oculus_DK2_HID(double keepAliveSeconds)
     vrpn_gettimeofday(&m_lastKeepAlive, NULL);
 }
 
-Oculus_DK2_HID::~Oculus_DK2_HID()
-{
+Oculus_DK2_HID::~Oculus_DK2_HID() {
     // Turn off the LEDs
     writeLEDControl(false);
 
@@ -53,13 +52,13 @@ Oculus_DK2_HID::~Oculus_DK2_HID()
     delete m_filter;
 }
 
-std::vector<OCULUS_IMU_REPORT> Oculus_DK2_HID::poll()
-{
+std::vector<OCULUS_IMU_REPORT> Oculus_DK2_HID::poll() {
     // See if it has been long enough to send another keep-alive to
     // the LEDs.
     struct timeval now;
     vrpn_gettimeofday(&now, NULL);
-    if (vrpn_TimevalDurationSeconds(now, m_lastKeepAlive) >= m_keepAliveSeconds) {
+    if (vrpn_TimevalDurationSeconds(now, m_lastKeepAlive) >=
+        m_keepAliveSeconds) {
         writeKeepAlive();
         m_lastKeepAlive = now;
     }
@@ -76,19 +75,10 @@ std::vector<OCULUS_IMU_REPORT> Oculus_DK2_HID::poll()
 // Thank you to Oliver Kreylos for the info needed to write this function.
 // It is based on his OculusRiftHIDReports.cpp, used with permission.
 void Oculus_DK2_HID::writeLEDControl(
-    bool enable
-    , vrpn_uint16 exposureLength
-    , vrpn_uint16 frameInterval
-    , vrpn_uint16 vSyncOffset
-    , vrpn_uint8 dutyCycle
-    , vrpn_uint8 pattern
-    , bool autoIncrement
-    , bool useCarrier
-    , bool syncInput
-    , bool vSyncLock
-    , bool customPattern
-    , vrpn_uint16 commandId)
-{
+    bool enable, vrpn_uint16 exposureLength, vrpn_uint16 frameInterval,
+    vrpn_uint16 vSyncOffset, vrpn_uint8 dutyCycle, vrpn_uint8 pattern,
+    bool autoIncrement, bool useCarrier, bool syncInput, bool vSyncLock,
+    bool customPattern, vrpn_uint16 commandId) {
     // Buffer to store our report in.
     vrpn_uint8 pktBuffer[13];
 
@@ -99,14 +89,27 @@ void Oculus_DK2_HID::writeLEDControl(
     vrpn_buffer_to_little_endian(&bufptr, &buflen, commandId);
     vrpn_buffer_to_little_endian(&bufptr, &buflen, pattern);
     vrpn_uint8 flags = 0x00U;
-    if (enable) { flags |= 0x01U; }
-    if (autoIncrement) { flags |= 0x02U; }
-    if (useCarrier) { flags |= 0x04U; }
-    if (syncInput) { flags |= 0x08U; }
-    if (vSyncLock) { flags |= 0x10U; }
-    if (customPattern) { flags |= 0x20U; }
+    if (enable) {
+        flags |= 0x01U;
+    }
+    if (autoIncrement) {
+        flags |= 0x02U;
+    }
+    if (useCarrier) {
+        flags |= 0x04U;
+    }
+    if (syncInput) {
+        flags |= 0x08U;
+    }
+    if (vSyncLock) {
+        flags |= 0x10U;
+    }
+    if (customPattern) {
+        flags |= 0x20U;
+    }
     vrpn_buffer_to_little_endian(&bufptr, &buflen, flags);
-    vrpn_buffer_to_little_endian(&bufptr, &buflen, vrpn_uint8(0x0cU)); // Reserved byte
+    vrpn_buffer_to_little_endian(&bufptr, &buflen,
+                                 vrpn_uint8(0x0cU)); // Reserved byte
     vrpn_buffer_to_little_endian(&bufptr, &buflen, exposureLength);
     vrpn_buffer_to_little_endian(&bufptr, &buflen, frameInterval);
     vrpn_buffer_to_little_endian(&bufptr, &buflen, vSyncOffset);
@@ -118,11 +121,8 @@ void Oculus_DK2_HID::writeLEDControl(
 
 // Thank you to Oliver Kreylos for the info needed to write this function.
 // It is based on his OculusRiftHIDReports.cpp, used with permission.
-void Oculus_DK2_HID::writeKeepAlive(
-    bool keepLEDs
-    , vrpn_uint16 interval
-    , vrpn_uint16 commandId)
-{
+void Oculus_DK2_HID::writeKeepAlive(bool keepLEDs, vrpn_uint16 interval,
+                                    vrpn_uint16 commandId) {
     // Buffer to store our report in.
     vrpn_uint8 pktBuffer[6];
 
@@ -139,8 +139,7 @@ void Oculus_DK2_HID::writeKeepAlive(
     send_feature_report(sizeof(pktBuffer), pktBuffer);
 }
 
-void Oculus_DK2_HID::on_data_received(size_t bytes, vrpn_uint8 *buffer)
-{
+void Oculus_DK2_HID::on_data_received(size_t bytes, vrpn_uint8 *buffer) {
     // Fill new entries into the vector that will be passed back
     // on the next poll().
     //   TODO: Read the values from the IMU and store them into the
@@ -148,8 +147,7 @@ void Oculus_DK2_HID::on_data_received(size_t bytes, vrpn_uint8 *buffer)
     // XXX
 }
 
-cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
-{
+cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image) {
     //   From the documentation: "Note OpenCV 1.x
     // functions cvRetrieveFrame and cv.RetrieveFrame return image
     // stored inside the video capturing structure. It is not
@@ -168,7 +166,8 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     // "...most popular of the various YUV 4:2:2 formats.
     // Horizontal sample period for Y = 1, V = 2, U = 2.
     // Macropixel = 2 image pixels.  U0Y0V0Y1"
-    // This seems inconsistent.  From http://www.digitalpreservation.gov/formats/fdd/fdd000365.shtml
+    // This seems inconsistent.  From
+    // http://www.digitalpreservation.gov/formats/fdd/fdd000365.shtml
     // "Byte 0=8-bit Cb; Byte 1=8-bit Y'0", which seems to
     // say that the first byte is used to determine color
     // and the second to determine luminance, so we should
@@ -202,7 +201,8 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     //  |B| |1.000  1.765  0.000| |Cr - 128|
     // but the code uses coefficients with more resolution (and
     // stored in a different order):
-    //  { { +0.5870, +0.1140, +0.2990 }, // Rec.601 (ITU-R BT.470-2/SMPTE 170M) (2)
+    //  { { +0.5870, +0.1140, +0.2990 }, // Rec.601 (ITU-R BT.470-2/SMPTE 170M)
+    //  (2)
     //  { -0.3313, +0.5000, -0.1687 },
     //  { -0.4187, -0.0813, +0.5000 } }
     // (but this is only one of four choices, choice 2 of 0-3).
@@ -225,12 +225,13 @@ cv::Mat osvr::oculus_dk2::unscramble_image(const cv::Mat &image)
     // every one.
     //  TODO: Invert the transformation used to get from YUV to BGR and
     // determine the actual components.
-    cv::Mat outImage(yuvImage.rows, yuvImage.cols * 2,
-        CV_8UC1, cv::Scalar(0));
+    cv::Mat outImage(yuvImage.rows, yuvImage.cols * 2, CV_8UC1, cv::Scalar(0));
     for (int r = 0; r < yuvImage.rows; r++) {
         for (int c = 0; c < yuvImage.cols; c++) {
-            outImage.at<unsigned char>(r, c * 2) = yuvImage.at<cv::Vec3b>(r, c)[0];
-            outImage.at<unsigned char>(r, c * 2 + 1) = yuvImage.at<cv::Vec3b>(r, c)[0];
+            outImage.at<unsigned char>(r, c * 2) =
+                yuvImage.at<cv::Vec3b>(r, c)[0];
+            outImage.at<unsigned char>(r, c * 2 + 1) =
+                yuvImage.at<cv::Vec3b>(r, c)[0];
         }
     }
 

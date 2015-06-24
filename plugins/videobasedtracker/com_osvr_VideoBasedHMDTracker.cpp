@@ -52,8 +52,10 @@
 
 // Define the constant below to read from a set of files with names
 // 0001.tif and above; specify the directory name to read from
-//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
-//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
+//#define VBHMD_FAKE_IMAGES
+//"F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+//#define VBHMD_FAKE_IMAGES
+//"F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
 //#define VBHMD_FAKE_IMAGES "C:/tmp/HDK_far"
 
 // Anonymous namespace to avoid symbol collision
@@ -61,13 +63,16 @@ namespace {
 
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
-    VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0, int channel = 0)
+    VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0,
+                         int channel = 0)
 #ifndef VBHMD_FAKE_IMAGES
         : m_camera(cameraNum)
 #endif
     {
-        // Initialize things from parameters and from defaults.  Do it here rather than
-        // in an initialization list so that we're independent of member order declaration.
+        // Initialize things from parameters and from defaults.  Do it here
+        // rather than
+        // in an initialization list so that we're independent of member order
+        // declaration.
         m_channel = channel;
         m_type = Unknown;
         m_dk2 = nullptr;
@@ -86,8 +91,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_dev.initAsync(ctx, os.str(), opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(
-            com_osvr_VideoBasedHMDTracker_json);
+        m_dev.sendJsonDescriptor(com_osvr_VideoBasedHMDTracker_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
@@ -106,7 +110,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
             fileName << ".tif";
             cv::Mat image;
 #ifdef VBHMD_DEBUG
-            std::cout << "Trying to read image from " << fileName.str() << std::endl;
+            std::cout << "Trying to read image from " << fileName.str()
+                      << std::endl;
 #endif
             image = cv::imread(fileName.str().c_str(), CV_LOAD_IMAGE_COLOR);
             if (!image.data) {
@@ -118,7 +123,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         if (m_images.size() == 0) {
             std::cerr << "Could not read any images from " << VBHMD_FAKE_IMAGES
-                << std::endl;
+                      << std::endl;
             return;
         }
 
@@ -129,36 +134,53 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_type = Fake;
 
         // Here's where we get 700 for the focal length:
-        // The aspect ratio of the camera in Blender is determined by two parameters:
-        // the focal length(which defaults to 35mm) and the sensor size (which is set
-        // on the camera control panel, and defaults to 32 in my version). This is the
-        // horizontal size of the image sensor in mm, according to the pop - up info
-        // box. The model in OpenCV only has the focal length as a parameter. So the
-        // question becomes how to set the sensor size in Blender to match what OpenCV
+        // The aspect ratio of the camera in Blender is determined by two
+        // parameters:
+        // the focal length(which defaults to 35mm) and the sensor size (which
+        // is set
+        // on the camera control panel, and defaults to 32 in my version). This
+        // is the
+        // horizontal size of the image sensor in mm, according to the pop - up
+        // info
+        // box. The model in OpenCV only has the focal length as a parameter. So
+        // the
+        // question becomes how to set the sensor size in Blender to match what
+        // OpenCV
         // is expecting.
-        // The basic issue is that the camera matrix in OpenCV stores the focal length
-        // in pixel units, not millimeters.  For the default image sensor width of 32mm,
-        // and an image resolution of 640x480, we compute the OpenCV focal length as
-        // follows: 35mm * (640 pixels / 32 mm) = 700 pixels. The resulting camera
+        // The basic issue is that the camera matrix in OpenCV stores the focal
+        // length
+        // in pixel units, not millimeters.  For the default image sensor width
+        // of 32mm,
+        // and an image resolution of 640x480, we compute the OpenCV focal
+        // length as
+        // follows: 35mm * (640 pixels / 32 mm) = 700 pixels. The resulting
+        // camera
         // matrix would be: { {700, 0, 320}, {0, 700, 240}, {0, 0, 1} }
 
         double cx = width / 2.0;
         double cy = height / 2.0;
         double fx = 700;
         double fy = fx;
-        std::vector< std::vector<double> > m;
-        m.push_back({  fx, 0.0,  cx });
-        m.push_back({ 0.0,  fy,  cy });
-        m.push_back({ 0.0, 0.0, 1.0 });
+        std::vector<std::vector<double> > m;
+        m.push_back({fx, 0.0, cx});
+        m.push_back({0.0, fy, cy});
+        m.push_back({0.0, 0.0, 1.0});
         std::vector<double> d;
-        d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
-//        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
-        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
-        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
-        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
-            osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
-        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d,
-            osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
+        d.push_back(0);
+        d.push_back(0);
+        d.push_back(0);
+        d.push_back(0);
+        d.push_back(0);
+        //        m_identifiers.push_back(new
+        //        osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
+        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
+            osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
+        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
+            osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(
+            m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
+        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(
+            m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
         std::list<osvr::vbtracker::Led> empty_led_group;
         m_led_groups.push_back(empty_led_group);
         m_led_groups.push_back(empty_led_group);
@@ -175,19 +197,22 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 m_type = OculusDK2;
             }
 
-            // TODO: Check to see if the resolution/name matches the OSVR HDK camera
+            // TODO: Check to see if the resolution/name matches the OSVR HDK
+            // camera
             else {
                 m_type = OSVRHDK;
             }
-    #ifdef VBHMD_DEBUG
+#ifdef VBHMD_DEBUG
             std::cout << "Got image of size " << width << "x" << height
-                << ", Format " << m_camera.get(CV_CAP_PROP_FORMAT)
-                << ", Mode " << m_camera.get(CV_CAP_PROP_MODE) << std::endl;
+                      << ", Format " << m_camera.get(CV_CAP_PROP_FORMAT)
+                      << ", Mode " << m_camera.get(CV_CAP_PROP_MODE)
+                      << std::endl;
             if (m_type == OculusDK2) {
-                std::cout << "Is Oculus camera, reformatting to mono" << std::endl;
+                std::cout << "Is Oculus camera, reformatting to mono"
+                          << std::endl;
                 m_dk2.reset(new osvr::oculus_dk2::Oculus_DK2_HID());
             }
-    #endif
+#endif
         }
 
         //===============================================
@@ -195,57 +220,66 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // type of device we have.
 
         switch (m_type) {
-        case OculusDK2:
-            {
-                // TODO: Fill these in when they are known
-                //m_identifiers.push_back(XXX);
-                //m_estimator.push_back(XXX);
-                std::list<osvr::vbtracker::Led> empty_led_group;
-                m_led_groups.push_back(empty_led_group);
+        case OculusDK2: {
+            // TODO: Fill these in when they are known
+            // m_identifiers.push_back(XXX);
+            // m_estimator.push_back(XXX);
+            std::list<osvr::vbtracker::Led> empty_led_group;
+            m_led_groups.push_back(empty_led_group);
 
-                // Set Oculus' camera capture parameters as described
-                // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for
-                // him for sharing this with us, used with permission.
+            // Set Oculus' camera capture parameters as described
+            // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank
+            // you for
+            // him for sharing this with us, used with permission.
 
-                // Trying to find the closest matches to what was being done
-                // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
-                // be able to set everything we need to.  In fact, these don't seem
-                // to be doing anything (gain does not change the brightness, for
-                // example) and all but the gain setting fails (we must not have the
-                // XIMEA interface).
-                //  TODO: There is no OS-independent way to set these parameters on
-                // the camera, so we're not going to be able to use it.
-                //  TODO: Would like to set a number of things, but since these are not working,
-                // giving up.
-            }
-            break;
+            // Trying to find the closest matches to what was being done
+            // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
+            // be able to set everything we need to.  In fact, these don't seem
+            // to be doing anything (gain does not change the brightness, for
+            // example) and all but the gain setting fails (we must not have the
+            // XIMEA interface).
+            //  TODO: There is no OS-independent way to set these parameters on
+            // the camera, so we're not going to be able to use it.
+            //  TODO: Would like to set a number of things, but since these are
+            //  not working,
+            // giving up.
+        } break;
 
-        case OSVRHDK:
-            {
-                // TODO: Come up with actual estimates for camera and distortion
-                // parameters by calibrating them in OpenCV.
-                double cx = width / 2.0;
-                double cy = height / 2.0;
-                double fx = 700.0;   // XXX This needs to be in pixels, not mm
-                double fy = fx;
-                std::vector< std::vector<double> > m;
-                m.push_back({  fx, 0.0,  cx });
-                m.push_back({ 0.0,  fy,  cy });
-                m.push_back({ 0.0, 0.0, 1.0 });
-                std::vector<double> d;
-                d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0); d.push_back(0);
-                m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
-                m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
-                m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
-                m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
-                std::list<osvr::vbtracker::Led> empty_led_group;
-                m_led_groups.push_back(empty_led_group);
-                m_led_groups.push_back(empty_led_group);
-            }
-            break;
+        case OSVRHDK: {
+            // TODO: Come up with actual estimates for camera and distortion
+            // parameters by calibrating them in OpenCV.
+            double cx = width / 2.0;
+            double cy = height / 2.0;
+            double fx = 700.0; // XXX This needs to be in pixels, not mm
+            double fy = fx;
+            std::vector<std::vector<double> > m;
+            m.push_back({fx, 0.0, cx});
+            m.push_back({0.0, fy, cy});
+            m.push_back({0.0, 0.0, 1.0});
+            std::vector<double> d;
+            d.push_back(0);
+            d.push_back(0);
+            d.push_back(0);
+            d.push_back(0);
+            d.push_back(0);
+            m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
+                osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
+            m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
+                osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+            m_estimators.push_back(
+                new osvr::vbtracker::BeaconBasedPoseEstimator(
+                    m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
+            m_estimators.push_back(
+                new osvr::vbtracker::BeaconBasedPoseEstimator(
+                    m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
+            std::list<osvr::vbtracker::Led> empty_led_group;
+            m_led_groups.push_back(empty_led_group);
+            m_led_groups.push_back(empty_led_group);
+        } break;
 
-        default:    // Also handles the "Unknown" case.
-            // We've already got a NULL identifier and estimator, so nothing to do.
+        default: // Also handles the "Unknown" case.
+            // We've already got a NULL identifier and estimator, so nothing to
+            // do.
             break;
         }
 #endif
@@ -261,8 +295,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         }
     }
 
-    OSVR_ReturnCode update()
-    {
+    OSVR_ReturnCode update() {
 #ifdef VBHMD_FAKE_IMAGES
         // Wrap the image count back around if it has gone too
         // high.
@@ -279,7 +312,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         // Sleep 1/120th of a second, to simulate a reasonable
         // frame rate.
-        vrpn_SleepMsecs(1000/120);
+        vrpn_SleepMsecs(1000 / 120);
 #else
         if (!m_camera.isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
@@ -332,7 +365,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
         double thresholdValue = minVal + (maxVal - minVal) * 0.8;
-        cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255, CV_THRESH_BINARY);
+        cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
+                      CV_THRESH_BINARY);
 
         // Construct a blob detector and find the blobs in the image.
         // XXX Make it so we don't have to have a blown-out image to track.
@@ -343,9 +377,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // when we're so close that we can't view at least four in the
         // camera.
         cv::SimpleBlobDetector::Params params;
-        params.filterByColor = true;    // Look for bright blobs
+        params.filterByColor = true; // Look for bright blobs
         params.blobColor = static_cast<uchar>(maxVal);
-        params.filterByInertia = true;  // Look for non-elongated blobs
+        params.filterByInertia = true; // Look for non-elongated blobs
         params.minInertiaRatio = 0.5;
         params.maxInertiaRatio = 1.0;
         cv::SimpleBlobDetector detector(params);
@@ -371,15 +405,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
             std::vector<cv::KeyPoint> keyPoints = foundKeyPoints;
 
             // Locate the closest blob from this frame to each LED found
-            // in the previous frame.  If it is close enough to the nearest neighbor from last
-            // time, we assume that it is the same LED and update it.  If not, we
+            // in the previous frame.  If it is close enough to the nearest
+            // neighbor from last
+            // time, we assume that it is the same LED and update it.  If not,
+            // we
             // delete the LED from the list.  Once we have matched a blob to an
-            // LED, we remove it from the list.  If there are any blobs leftover,
+            // LED, we remove it from the list.  If there are any blobs
+            // leftover,
             // we create new LEDs from them.
             // TODO: Include motion estimate based on Kalman filter along with
-            // model of the projection once we have one built.  Note that this will
+            // model of the projection once we have one built.  Note that this
+            // will
             // require handling the lens distortion appropriately.
-            std::list<osvr::vbtracker::Led>::iterator led = m_led_groups[sensor].begin();
+            std::list<osvr::vbtracker::Led>::iterator led =
+                m_led_groups[sensor].begin();
             while (led != m_led_groups[sensor].end()) {
                 double TODO_BLOB_MOVE_THRESHOLD = 10;
                 std::vector<cv::KeyPoint>::iterator nearest;
@@ -388,8 +427,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                     // We have no blob corresponding to this LED, so we need
                     // to delete this LED.
                     led = m_led_groups[sensor].erase(led);
-                }
-                else {
+                } else {
                     // Update the values in this LED and then go on to the
                     // next one.  Remove this blob from the list of potential
                     // matches.
@@ -400,22 +438,27 @@ class VideoBasedHMDTracker : boost::noncopyable {
             }
             // If we have any blobs that have not been associated with an
             // LED, then we add a new LED for each of them.
-            //std::cout << "Had " << Leds.size() << " LEDs, " << keyPoints.size() << " new ones available" << std::endl;
+            // std::cout << "Had " << Leds.size() << " LEDs, " <<
+            // keyPoints.size() << " new ones available" << std::endl;
             while (keyPoints.size() > 0) {
                 osvr::vbtracker::Led newLed(m_identifiers[sensor],
-                    keyPoints.begin()->pt, keyPoints.begin()->size);
+                                            keyPoints.begin()->pt,
+                                            keyPoints.begin()->size);
                 m_led_groups[sensor].push_back(newLed);
                 keyPoints.erase(keyPoints.begin());
             }
 
             //==================================================================
             // Compute the pose of the HMD w.r.t. the camera frame of reference.
-            // TODO: Keep track of whether we already have a good pose and, if so,
-            // have the algorithm initialize using it so we do less work on average.
+            // TODO: Keep track of whether we already have a good pose and, if
+            // so,
+            // have the algorithm initialize using it so we do less work on
+            // average.
             bool gotPose = false;
             if (m_estimators[sensor]) {
                 OSVR_PoseState pose;
-                if (m_estimators[sensor]->EstimatePoseFromLeds(m_led_groups[sensor], pose)) {
+                if (m_estimators[sensor]->EstimatePoseFromLeds(
+                        m_led_groups[sensor], pose)) {
                     m_pose = pose;
                     gotPose = true;
                 }
@@ -424,19 +467,24 @@ class VideoBasedHMDTracker : boost::noncopyable {
 #ifdef VBHMD_DEBUG
             // Draw detected blobs as red circles.
             cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
-                cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+                              cv::Scalar(0, 0, 255),
+                              cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
             // Label the keypoints with their IDs.
-            for (led = m_led_groups[sensor].begin(); led != m_led_groups[sensor].end(); led++) {
+            for (led = m_led_groups[sensor].begin();
+                 led != m_led_groups[sensor].end(); led++) {
                 std::ostringstream label;
                 int id = led->getID();
-                if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
+                if (id >= 0) {
+                    id++;
+                } // Print 1-based LED ID for actual LEDs
                 label << id;
                 cv::Point where = led->getLocation();
                 where.x += 1;
                 where.y += 1;
                 cv::putText(m_imageWithBlobs, label.str(), where,
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255));
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                            cv::Scalar(0, 0, 255));
             }
 
             // If we have a transform, reproject all of the points from the
@@ -448,13 +496,16 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 for (int i = 0; i < imagePoints.size(); i++) {
                     std::ostringstream label;
                     int id = i;
-                    if (id >= 0) { id++; } //Print 1-based LED ID for actual LEDs
-                    label << id;   // Print 1-based LED ID
+                    if (id >= 0) {
+                        id++;
+                    } // Print 1-based LED ID for actual LEDs
+                    label << id; // Print 1-based LED ID
                     cv::Point where = imagePoints[i];
                     where.x += 1;
                     where.y += 1;
                     cv::putText(m_imageWithBlobs, label.str(), where,
-                        cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
+                                cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                                cv::Scalar(0, 255, 0));
                 }
             }
 
@@ -484,18 +535,19 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
             // Report the pose, if we got one
             if (gotPose) {
-                std::cout << "Pos (sensor " << sensor << "): "
-                    << m_pose.translation.data[0] << ", "
-                    << m_pose.translation.data[1] << ", "
-                    << m_pose.translation.data[2] << std::endl;
+                std::cout << "Pos (sensor " << sensor
+                          << "): " << m_pose.translation.data[0] << ", "
+                          << m_pose.translation.data[1] << ", "
+                          << m_pose.translation.data[2] << std::endl;
             }
 #endif
 
             //==================================================================
             /// Report the new pose, time-stamped with the time we
             // received the image from the camera.
-            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker,
-                &m_pose, static_cast<OSVR_ChannelCount>(sensor), &timestamp);
+            osvrDeviceTrackerSendPoseTimestamped(
+                m_dev, m_tracker, &m_pose,
+                static_cast<OSVR_ChannelCount>(sensor), &timestamp);
         }
         return OSVR_RETURN_SUCCESS;
     }
@@ -561,7 +613,8 @@ class HardwareDetection {
         m_found = true;
 
         /// Create our device object, passing the context.
-        osvr::pluginkit::registerObjectForDeletion(ctx, new VideoBasedHMDTracker(ctx));
+        osvr::pluginkit::registerObjectForDeletion(
+            ctx, new VideoBasedHMDTracker(ctx));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -581,4 +634,3 @@ OSVR_PLUGIN(com_osvr_VideoBasedHMDTracker) {
 
     return OSVR_RETURN_SUCCESS;
 }
-
