@@ -98,13 +98,17 @@ namespace vbtracker {
         cv::Mat m_cameraMatrix;             //< 3x3 camera matrix
         cv::Mat m_distCoeffs;               //< Distortion coefficients
 
-        // Stores the most-recent solution, in case we need it again (for
-        // example, to
-        // project our beacons into the image).
-        bool m_gotPose; //< Have we produced a pose estimate yet?
-        cv::Mat m_rvec; //< Rotation vector associated with the most-recent pose
-        cv::Mat
-            m_tvec; //< Translation vector associated with the most-recent pose.
+        /// @name Pose cache
+        /// @brief Stores the most-recent solution, in case we need it again
+        /// (for example, to project our beacons into the image).
+        /// @{
+        /// @brief Have we produced a pose estimate yet?
+        bool m_gotPose;
+        /// @brief Rotation vector associated with the most-recent pose
+        cv::Mat m_rvec;
+        /// @brief Translation vector associated with the most-recent pose.
+        cv::Mat m_tvec;
+        /// @}
     };
 
     typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
