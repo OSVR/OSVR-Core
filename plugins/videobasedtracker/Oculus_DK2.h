@@ -1,11 +1,11 @@
 /** @file
-@brief Header file describing interface for an Oculus DK2 device.
+    @brief Header file describing interface for an Oculus DK2 device.
 
-@date 2015
+    @date 2015
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2015 Sensics, Inc.
@@ -14,7 +14,7 @@ Sensics, Inc.
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// 	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,19 @@ Sensics, Inc.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#ifndef INCLUDED_Oculus_DK2_h_GUID_EA07F823_BC38_47B0_F60A_E525110E2C1C
+#define INCLUDED_Oculus_DK2_h_GUID_EA07F823_BC38_47B0_F60A_E525110E2C1C
 
-#include <vector>
+// Internal Includes
+// - none
+
+// Library/third-party includes
 #include <vrpn_HumanInterface.h>
 #include <vrpn_Shared.h>
-
 #include <opencv2/core/core.hpp> // for basic OpenCV types
+
+// Standard includes
+#include <vector>
 
 namespace osvr {
 namespace oculus_dk2 {
@@ -106,3 +112,5 @@ namespace oculus_dk2 {
 
 } // namespace oculus_dk2
 } // namespace osvr
+
+#endif // INCLUDED_Oculus_DK2_h_GUID_EA07F823_BC38_47B0_F60A_E525110E2C1C

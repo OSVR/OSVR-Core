@@ -1,11 +1,11 @@
 /** @file
-@brief Header file for class that tracks and identifies LEDs.
+    @brief Header file for class that tracks and identifies LEDs.
 
-@date 2015
+    @date 2015
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2015 Sensics, Inc.
@@ -14,7 +14,7 @@ Sensics, Inc.
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// 	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,16 @@ Sensics, Inc.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#ifndef INCLUDED_BeaconBasedPoseEstimator_h_GUID_7B983CED_F2C5_4B86_109A_948863B665B1
+#define INCLUDED_BeaconBasedPoseEstimator_h_GUID_7B983CED_F2C5_4B86_109A_948863B665B1
 
+// Internal Includes
 #include "LED.h"
+
+// Library/third-party includes
 #include <osvr/Util/ClientReportTypesC.h>
+
+// Standard includes
 #include <vector>
 #include <list>
 
@@ -100,5 +106,7 @@ namespace vbtracker {
             m_tvec; //< Translation vector associated with the most-recent pose.
     };
 
-} // End namespace vbtracker
-} // End namespace osvr
+} // namespace vbtracker
+} // namespace osvr
+
+#endif // INCLUDED_BeaconBasedPoseEstimator_h_GUID_7B983CED_F2C5_4B86_109A_948863B665B1

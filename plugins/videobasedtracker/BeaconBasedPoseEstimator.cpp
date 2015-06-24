@@ -1,11 +1,11 @@
 /** @file
-@brief Implementation for class that tracks and identifies LEDs.
+    @brief Implementation for class that tracks and identifies LEDs.
 
-@date 2015
+    @date 2015
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2015 Sensics, Inc.
