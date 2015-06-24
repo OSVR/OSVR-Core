@@ -1,5 +1,5 @@
 /** @file
-    @brief Wrapper for a vrpn_Tracker_VideoBasedHMDTracker
+    @brief Main file for a video-based HMD tracker.
 
     @date 2015
 
@@ -50,7 +50,8 @@
 // behavior, printing tracked positions)
 #define VBHMD_DEBUG
 
-// Define the constant below to set a directory to save the video frames that are aquired
+// Define the constant below to set a directory to save the video frames that
+// are aquired
 // with files in a format that can later be read by VBHMD_FAKE_IMAGES
 //#define VBHMD_SAVE_IMAGES "./Frames"
 
@@ -142,25 +143,17 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // The aspect ratio of the camera in Blender is determined by two
         // parameters:
         // the focal length(which defaults to 35mm) and the sensor size (which
-        // is set
-        // on the camera control panel, and defaults to 32 in my version). This
-        // is the
-        // horizontal size of the image sensor in mm, according to the pop - up
-        // info
-        // box. The model in OpenCV only has the focal length as a parameter. So
-        // the
-        // question becomes how to set the sensor size in Blender to match what
-        // OpenCV
-        // is expecting.
-        // The basic issue is that the camera matrix in OpenCV stores the focal
-        // length
+        // is set on the camera control panel, and defaults to 32 in my
+        // version). This is the horizontal size of the image sensor in mm,
+        // according to the pop-up info box. The model in OpenCV only has the
+        // focal length as a parameter. So the question becomes how to set the
+        // sensor size in Blender to match what OpenCV is expecting. The basic
+        // issue is that the camera matrix in OpenCV stores the focal length
         // in pixel units, not millimeters.  For the default image sensor width
-        // of 32mm,
-        // and an image resolution of 640x480, we compute the OpenCV focal
-        // length as
-        // follows: 35mm * (640 pixels / 32 mm) = 700 pixels. The resulting
-        // camera
-        // matrix would be: { {700, 0, 320}, {0, 700, 240}, {0, 0, 1} }
+        // of 32mm, and an image resolution of 640x480, we compute the OpenCV
+        // focal length as follows: 35mm * (640 pixels / 32 mm) = 700 pixels.
+        // The resulting camera matrix would be: { {700, 0, 320}, {0, 700, 240},
+        // {0, 0, 1} }
 
         double cx = width / 2.0;
         double cy = height / 2.0;
@@ -202,9 +195,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 m_type = OculusDK2;
             }
 
-            // TODO: Check to see if the resolution/name matches the OSVR HDK
-            // camera
             else {
+                /// @todo Check to see if the resolution/name matches the OSVR
+                /// HDK camera
                 m_type = OSVRHDK;
             }
 #ifdef VBHMD_DEBUG
@@ -232,10 +225,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
             std::list<osvr::vbtracker::Led> empty_led_group;
             m_led_groups.push_back(empty_led_group);
 
-            // Set Oculus' camera capture parameters as described
-            // in Oliver Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank
-            // you for
-            // him for sharing this with us, used with permission.
+            // Set Oculus' camera capture parameters as described in Oliver
+            // Kreylos' OculusRiftDK2VideoDevice.cpp program.  Thank you for him
+            // for sharing this with us, used with permission.
 
             // Trying to find the closest matches to what was being done
             // in OculusRiftDK2VideoDevice.cpp, but I don't think we're going to
@@ -243,16 +235,15 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // to be doing anything (gain does not change the brightness, for
             // example) and all but the gain setting fails (we must not have the
             // XIMEA interface).
-            //  TODO: There is no OS-independent way to set these parameters on
-            // the camera, so we're not going to be able to use it.
-            //  TODO: Would like to set a number of things, but since these are
-            //  not working,
-            // giving up.
+            /// @todo There is no OS-independent way to set these parameters on
+            /// the camera, so we're not going to be able to use it.
+            /// @todo Would like to set a number of things, but since these are
+            ///  not working, giving up.
         } break;
 
         case OSVRHDK: {
-            // TODO: Come up with actual estimates for camera and distortion
-            // parameters by calibrating them in OpenCV.
+            /// @todo Come up with actual estimates for camera and distortion
+            /// parameters by calibrating them in OpenCV.
             double cx = width / 2.0;
             double cy = height / 2.0;
             double fx = 700.0; // XXX This needs to be in pixels, not mm
@@ -335,7 +326,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             return OSVR_RETURN_FAILURE;
         }
 
-    #ifdef VBHMD_SAVE_IMAGES
+#ifdef VBHMD_SAVE_IMAGES
         // If we're supposed to save images, make file names that match the
         // format we need to read them back in again and save the images.
         std::ostringstream fileName;
@@ -343,10 +334,11 @@ class VideoBasedHMDTracker : boost::noncopyable {
         fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
         fileName << ".tif";
         if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
-            std::cerr << "Could not write image to " << fileName.str() << std::endl;
+            std::cerr << "Could not write image to " << fileName.str()
+                      << std::endl;
         }
 
-    #endif
+#endif
 
 #endif
 
@@ -369,8 +361,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // Read any reports and discard them.  We do this to keep the
             // LED keepAlive going.
             m_dk2->poll();
-        }
-        else {
+        } else {
             //==================================================================
             // Convert the image into a format we can use.
             // TODO: Consider reading in the image in gray scale to begin with
@@ -426,17 +417,13 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
             // Locate the closest blob from this frame to each LED found
             // in the previous frame.  If it is close enough to the nearest
-            // neighbor from last
-            // time, we assume that it is the same LED and update it.  If not,
-            // we
-            // delete the LED from the list.  Once we have matched a blob to an
-            // LED, we remove it from the list.  If there are any blobs
-            // leftover,
-            // we create new LEDs from them.
+            // neighbor from last time, we assume that it is the same LED and
+            // update it.  If not, we delete the LED from the list.  Once we
+            // have matched a blob to an LED, we remove it from the list.  If
+            // there are any blobs leftover, we create new LEDs from them.
             // TODO: Include motion estimate based on Kalman filter along with
             // model of the projection once we have one built.  Note that this
-            // will
-            // require handling the lens distortion appropriately.
+            // will require handling the lens distortion appropriately.
             std::list<osvr::vbtracker::Led>::iterator led =
                 m_led_groups[sensor].begin();
             while (led != m_led_groups[sensor].end()) {
@@ -471,8 +458,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             //==================================================================
             // Compute the pose of the HMD w.r.t. the camera frame of reference.
             // TODO: Keep track of whether we already have a good pose and, if
-            // so,
-            // have the algorithm initialize using it so we do less work on
+            // so, have the algorithm initialize using it so we do less work on
             // average.
             bool gotPose = false;
             if (m_estimators[sensor]) {
@@ -518,7 +504,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                     int id = i;
                     if (id >= 0) {
                         id++;
-                    } // Print 1-based LED ID for actual LEDs
+                    }            // Print 1-based LED ID for actual LEDs
                     label << id; // Print 1-based LED ID
                     cv::Point where = imagePoints[i];
                     where.x += 1;

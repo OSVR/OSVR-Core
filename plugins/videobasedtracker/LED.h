@@ -1,11 +1,11 @@
 /** @file
-@brief Header file for class that tracks and identifies LEDs.
+    @brief Header file for class that tracks and identifies LEDs.
 
-@date 2015
+    @date 2015
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2015 Sensics, Inc.
@@ -14,7 +14,7 @@ Sensics, Inc.
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// 	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,16 @@ Sensics, Inc.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#ifndef INCLUDED_LED_h_GUID_C53E1134_AD6B_46B0_4808_19C7EAA7D0EC
+#define INCLUDED_LED_h_GUID_C53E1134_AD6B_46B0_4808_19C7EAA7D0EC
 
+// Internal Includes
 #include "LedIdentifier.h"
+
+// Library/third-party includes
 #include <opencv2/opencv.hpp>
+
+// Standard includes
 #include <vector>
 
 namespace osvr {
@@ -81,3 +87,5 @@ namespace vbtracker {
 
 } // End namespace vbtracker
 } // End namespace osvr
+
+#endif // INCLUDED_LED_h_GUID_C53E1134_AD6B_46B0_4808_19C7EAA7D0EC
