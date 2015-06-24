@@ -18,6 +18,7 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     NO_INSTALL # while in development, don't install
     SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
+    GetCameraMatrix.h
     Oculus_DK2.cpp
     Oculus_DK2.h
     LedIdentifier.cpp
@@ -32,7 +33,8 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
 target_link_libraries(com_osvr_VideoBasedHMDTracker
     ${VIDEOTRACKER_EXTRA_LIBS}
     opencv_core
-    vendored-vrpn)
+    vendored-vrpn
+    eigen-headers)
 
 target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
 
