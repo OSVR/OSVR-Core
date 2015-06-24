@@ -27,64 +27,65 @@ Sensics, Inc.
 namespace osvr {
 namespace vbtracker {
 
-Led::Led(LedIdentifier *identifier, float x, float y, float brightness)
-{
-    m_identifier = identifier; m_location.x = x; m_location.y = y; m_id = -1;
-    m_brightnessHistory.push_back(brightness);
-}
-
-Led::Led(LedIdentifier *identifier, cv::Point2f loc, float brightness)
-{
-    m_identifier = identifier; m_location = loc; m_id = -1;
-    m_brightnessHistory.push_back(brightness);
-}
-
-void Led::addMeasurement(cv::Point2f loc, float brightness)
-{
-    m_location = loc;
-    m_brightnessHistory.push_back(brightness);
-
-    // If we don't have an identifier, then our ID is unknown.
-    // Otherwise, try and find it.
-    if (!m_identifier) {
+    Led::Led(LedIdentifier *identifier, float x, float y, float brightness) {
+        m_identifier = identifier;
+        m_location.x = x;
+        m_location.y = y;
         m_id = -1;
+        m_brightnessHistory.push_back(brightness);
     }
-    else {
-        m_id = m_identifier->getId(m_brightnessHistory);
+
+    Led::Led(LedIdentifier *identifier, cv::Point2f loc, float brightness) {
+        m_identifier = identifier;
+        m_location = loc;
+        m_id = -1;
+        m_brightnessHistory.push_back(brightness);
     }
-}
 
-std::vector<cv::KeyPoint>::iterator Led::nearest(std::vector<cv::KeyPoint> &vec
-    , double threshold) const
-{
-    // If we have no elements in the vector, return the end().
-    if (vec.size() == 0) { return vec.end(); }
+    void Led::addMeasurement(cv::Point2f loc, float brightness) {
+        m_location = loc;
+        m_brightnessHistory.push_back(brightness);
 
-    // Find the distance to the first point and record it as the
-    // current minimum distance;
-    std::vector<cv::KeyPoint>::iterator ret = vec.begin();
-    double minDist = sqrt(norm(m_location - ret->pt));
-
-    // Search the rest of the elements to see if we can find a
-    // better one.
-    std::vector<cv::KeyPoint>::iterator i = vec.begin();
-    while (++i != vec.end()) {
-        double dist = sqrt(norm(m_location - i->pt));
-        if (dist < minDist) {
-            minDist = dist;
-            ret = i;
+        // If we don't have an identifier, then our ID is unknown.
+        // Otherwise, try and find it.
+        if (!m_identifier) {
+            m_id = -1;
+        } else {
+            m_id = m_identifier->getId(m_brightnessHistory);
         }
     }
 
-    // If the closest is within the threshold, return it.  Otherwise,
-    // return the end.
-    if (minDist <= threshold) {
-        return ret;
+    std::vector<cv::KeyPoint>::iterator
+    Led::nearest(std::vector<cv::KeyPoint> &vec, double threshold) const {
+        // If we have no elements in the vector, return the end().
+        if (vec.size() == 0) {
+            return vec.end();
+        }
+
+        // Find the distance to the first point and record it as the
+        // current minimum distance;
+        std::vector<cv::KeyPoint>::iterator ret = vec.begin();
+        double minDist = sqrt(norm(m_location - ret->pt));
+
+        // Search the rest of the elements to see if we can find a
+        // better one.
+        std::vector<cv::KeyPoint>::iterator i = vec.begin();
+        while (++i != vec.end()) {
+            double dist = sqrt(norm(m_location - i->pt));
+            if (dist < minDist) {
+                minDist = dist;
+                ret = i;
+            }
+        }
+
+        // If the closest is within the threshold, return it.  Otherwise,
+        // return the end.
+        if (minDist <= threshold) {
+            return ret;
+        } else {
+            return vec.end();
+        }
     }
-    else {
-        return vec.end();
-    }
-}
 
 } // End namespace vbtracker
 } // End namespace osvr
