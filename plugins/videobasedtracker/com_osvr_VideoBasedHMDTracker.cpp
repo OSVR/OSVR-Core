@@ -82,7 +82,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
         // declaration.
         m_channel = channel;
         m_type = Unknown;
-        m_dk2 = nullptr;
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -360,7 +359,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 //==================================================================
                 // Report the new pose, time-stamped with the time we
                 // received the image from the camera.
-                osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &m_pose,
+                osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &pose,
                                                      sensor, &timestamp);
             });
 
@@ -382,11 +381,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
     int m_channel;
     cv::Mat m_frame;
     cv::Mat m_imageGray;
-    cv::Mat m_thresholdImage;
-    cv::Mat m_imageWithBlobs;
-#ifdef VBHMD_DEBUG
-    cv::Mat *m_shownImage = &m_imageWithBlobs;
-#endif
 
     osvr::vbtracker::VideoBasedTracker m_vbtracker;
 
@@ -395,9 +389,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
     // In case we are using a DK2, we need a pointer to one.
     std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;
-
-    // The pose that we report
-    OSVR_PoseState m_pose;
 };
 
 class HardwareDetection {

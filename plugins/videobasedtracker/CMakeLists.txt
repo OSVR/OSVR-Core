@@ -8,6 +8,17 @@ osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+set(CORE_VBTRACKER_FILES
+	BeaconBasedPoseEstimator.cpp
+	BeaconBasedPoseEstimator.h
+	GetCameraMatrix.h
+	LedIdentifier.cpp
+	LedIdentifier.h
+	LED.cpp
+	LED.h
+	VideoBasedTracker.cpp
+	VideoBasedTracker.h)
+
 # This is just a helper function wrapping CMake's add_library command that
 # sets up include dirs, libraries, and naming convention (no leading "lib")
 # for an OSVR plugin. It also installs the plugin into the right directory.
@@ -17,18 +28,10 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     CPP # indicates we'd like to use the C++ wrapper
     NO_INSTALL # while in development, don't install
     SOURCES
-    BeaconBasedPoseEstimator.cpp
-    BeaconBasedPoseEstimator.h
+    ${CORE_VBTRACKER_FILES}
     com_osvr_VideoBasedHMDTracker.cpp
-    GetCameraMatrix.h
     Oculus_DK2.cpp
     Oculus_DK2.h
-    LedIdentifier.cpp
-    LedIdentifier.h
-    LED.cpp
-    LED.h
-    VideoBasedTracker.cpp
-    VideoBasedTracker.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
 )
 
@@ -43,3 +46,16 @@ target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE "${CMAKE_CURREN
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins")
 
+if(BUILD_TESTING)
+    add_executable(vbtracker-cam
+        ${CORE_VBTRACKER_FILES}
+        TestStandalone.cpp)
+    target_link_libraries(vbtracker-cam
+        PRIVATE
+        osvrPluginKitCpp
+        ${VIDEOTRACKER_EXTRA_LIBS}
+        opencv_core
+        vendored-vrpn
+        eigen-headers)
+    #osvr_setup_gtest(vbtracker-cam)
+endif()

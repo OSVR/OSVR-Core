@@ -45,8 +45,9 @@ namespace vbtracker {
             new BeaconBasedPoseEstimator(m, d, locations));
         m_led_groups.emplace_back();
     }
-    void VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
+    bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          PoseHandler handler) {
+        bool done = false;
         m_frame = frame;
         m_imageGray = grayImage;
 
@@ -148,6 +149,7 @@ namespace vbtracker {
                 OSVR_PoseState pose;
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
                         m_led_groups[sensor], pose)) {
+                    m_pose = pose;
                     handler(sensor, pose);
                     gotPose = true;
                 }
@@ -219,6 +221,10 @@ namespace vbtracker {
                     // Show the blob image.
                     m_shownImage = &m_imageWithBlobs;
                     break;
+                case 'q':
+                    // Indicate we want to quit.
+                    done = true;
+                    break;
                 }
             }
 
@@ -230,6 +236,7 @@ namespace vbtracker {
                           << m_pose.translation.data[2] << std::endl;
             }
 #endif
+            return done;
         }
     }
 } // namespace vbtracker
