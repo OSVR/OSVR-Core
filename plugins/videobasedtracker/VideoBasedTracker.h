@@ -58,7 +58,8 @@ namespace vbtracker {
         void addSensor(LedIdentifier * identifier, DoubleVecVec const& m, std::vector<double> const& d, DoubleVecVec const& locations);
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const&)> PoseHandler;
-        void processImage(cv::Mat frame, cv::Mat grayImage,
+        /// @return true if user hit q to quit.
+        bool processImage(cv::Mat frame, cv::Mat grayImage,
                           PoseHandler handler);
 
       private:
