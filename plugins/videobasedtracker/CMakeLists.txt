@@ -17,6 +17,8 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     CPP # indicates we'd like to use the C++ wrapper
     NO_INSTALL # while in development, don't install
     SOURCES
+    BeaconBasedPoseEstimator.cpp
+    BeaconBasedPoseEstimator.h
     com_osvr_VideoBasedHMDTracker.cpp
     GetCameraMatrix.h
     Oculus_DK2.cpp
@@ -25,8 +27,8 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     LedIdentifier.h
     LED.cpp
     LED.h
-    BeaconBasedPoseEstimator.cpp
-    BeaconBasedPoseEstimator.h
+    VideoBasedTracker.cpp
+    VideoBasedTracker.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
 )
 
