@@ -56,8 +56,7 @@ namespace vbtracker {
         // of brightness and darkness can be used to identify it.
         // "brightness" is an abstract quantity that is fed into the identity
         // detector; it may be area or summed brightness or another useful
-        // estimate
-        // of the LED state.
+        // estimate of the LED state.
         void addMeasurement(cv::Point2f loc, float brightness);
 
         // Tells which LED I am.  An index of -1 means not yet determined.
