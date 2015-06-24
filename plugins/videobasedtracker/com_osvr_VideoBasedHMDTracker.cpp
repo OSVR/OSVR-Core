@@ -171,13 +171,13 @@ class VideoBasedHMDTracker : boost::noncopyable {
         d.push_back(0);
         //        m_identifiers.push_back(new
         //        osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
-        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
+        m_identifiers.emplace_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
             osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
-        m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
+        m_identifiers.emplace_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
             osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
-        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(
+        m_estimators.emplace_back(new osvr::vbtracker::BeaconBasedPoseEstimator(
             m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
-        m_estimators.push_back(new osvr::vbtracker::BeaconBasedPoseEstimator(
+        m_estimators.emplace_back(new osvr::vbtracker::BeaconBasedPoseEstimator(
             m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
         std::list<osvr::vbtracker::Led> empty_led_group;
         m_led_groups.push_back(empty_led_group);
@@ -258,14 +258,16 @@ class VideoBasedHMDTracker : boost::noncopyable {
             d.push_back(0);
             d.push_back(0);
             d.push_back(0);
-            m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
-                osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
-            m_identifiers.push_back(new osvr::vbtracker::OsvrHdkLedIdentifier(
-                osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
-            m_estimators.push_back(
+            m_identifiers.emplace_back(
+                new osvr::vbtracker::OsvrHdkLedIdentifier(
+                    osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS));
+            m_identifiers.emplace_back(
+                new osvr::vbtracker::OsvrHdkLedIdentifier(
+                    osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+            m_estimators.emplace_back(
                 new osvr::vbtracker::BeaconBasedPoseEstimator(
                     m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0));
-            m_estimators.push_back(
+            m_estimators.emplace_back(
                 new osvr::vbtracker::BeaconBasedPoseEstimator(
                     m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1));
             std::list<osvr::vbtracker::Led> empty_led_group;
@@ -279,16 +281,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
             break;
         }
 #endif
-    }
-
-    ~VideoBasedHMDTracker() {
-        // It is okay to delete NULL pointers, so we don't check here.
-        for (size_t i = 0; i < m_estimators.size(); i++) {
-            delete m_estimators[i];
-        }
-        for (size_t i = 0; i < m_identifiers.size(); i++) {
-            delete m_identifiers[i];
-        }
     }
 
     OSVR_ReturnCode update() {
@@ -448,7 +440,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // std::cout << "Had " << Leds.size() << " LEDs, " <<
             // keyPoints.size() << " new ones available" << std::endl;
             while (keyPoints.size() > 0) {
-                osvr::vbtracker::Led newLed(m_identifiers[sensor],
+                osvr::vbtracker::Led newLed(m_identifiers[sensor].get(),
                                             keyPoints.begin()->pt,
                                             keyPoints.begin()->size);
                 m_led_groups[sensor].push_back(newLed);
@@ -583,9 +575,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
     enum { Unknown, OSVRHDK, OculusDK2, Fake } m_type;
 
     // Structures needed to do the tracking.
-    std::vector<osvr::vbtracker::LedIdentifier *> m_identifiers;
+    std::vector<osvr::vbtracker::LedIdentifierPtr> m_identifiers;
     std::vector<std::list<osvr::vbtracker::Led> > m_led_groups;
-    std::vector<osvr::vbtracker::BeaconBasedPoseEstimator *> m_estimators;
+    std::vector<osvr::vbtracker::EstimatorPtr> m_estimators;
 
     // In case we are using a DK2, we need a pointer to one.
     std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;

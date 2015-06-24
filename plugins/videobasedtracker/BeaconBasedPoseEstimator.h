@@ -34,6 +34,7 @@
 // Standard includes
 #include <vector>
 #include <list>
+#include <memory>
 
 namespace osvr {
 namespace vbtracker {
@@ -105,6 +106,8 @@ namespace vbtracker {
         cv::Mat
             m_tvec; //< Translation vector associated with the most-recent pose.
     };
+
+    typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
 
 } // namespace vbtracker
 } // namespace osvr
