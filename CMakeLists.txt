@@ -56,9 +56,11 @@ endif()
 
 set(BUILD_USBSERIALENUM ${BUILD_SERVER_PLUGINS})
 set(BUILD_OPENCV_CAMERA_PLUGIN ${BUILD_SERVER_PLUGINS})
+set(BUILD_VIDEOTRACKER_PLUGIN ${BUILD_SERVER_PLUGINS})
 if(ANDROID)
     set(BUILD_USBSERIALENUM OFF)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
+    set(BUILD_VIDEOTRACKER_PLUGIN OFF)
 endif()
 
 ###
@@ -146,6 +148,17 @@ set(OPENCV_MODULES_USED opencv_core)
 if(BUILD_OPENCV_CAMERA_PLUGIN)
     set(OPENCV_CAMERA_EXTRA_LIBS opencv_highgui)
     list(APPEND OPENCV_MODULES_USED ${OPENCV_CAMERA_EXTRA_LIBS})
+endif()
+
+if(BUILD_VIDEOTRACKER_PLUGIN)
+    set(VIDEOTRACKER_EXTRA_LIBS
+        opencv_imgproc
+        opencv_features2d
+        opencv_calib3d
+        opencv_highgui
+        opencv_imgproc
+        opencv_flann)
+    list(APPEND OPENCV_MODULES_USED ${VIDEOTRACKER_EXTRA_LIBS})
 endif()
 
 list(REMOVE_DUPLICATES OPENCV_MODULES_USED)
