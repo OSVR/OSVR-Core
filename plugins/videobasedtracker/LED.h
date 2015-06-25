@@ -48,8 +48,8 @@ namespace vbtracker {
         // and a pointer to an object that will be used to identify the LEDs
         // based on their brightness over time.
         Led(LedIdentifier *identifier, float x = 0, float y = 0,
-            float brightness = 0);
-        Led(LedIdentifier *identifier, cv::Point2f loc, float brightness = 0);
+            Brightness brightness = 0);
+        Led(LedIdentifier *identifier, cv::Point2f loc, Brightness brightness = 0);
 
         // Add a new measurement for this LED, which must be for a frame that
         // is just following the previous measurement, so that the encoding
@@ -57,7 +57,7 @@ namespace vbtracker {
         // "brightness" is an abstract quantity that is fed into the identity
         // detector; it may be area or summed brightness or another useful
         // estimate of the LED state.
-        void addMeasurement(cv::Point2f loc, float brightness);
+        void addMeasurement(cv::Point2f loc, Brightness brightness);
 
         // Tells which LED I am.  An index of -1 means not yet determined.
         // An index below -1 means known not to be an LED (different identifiers
@@ -72,11 +72,11 @@ namespace vbtracker {
         // one within the specified threshold.
         // Returns end() if there is not a nearest within threshold (or an empty
         // vector).
-        std::vector<cv::KeyPoint>::iterator
-        nearest(std::vector<cv::KeyPoint> &vec, double threshold) const;
+        KeyPointIterator
+            nearest(KeyPointList &keypoints, double threshold) const;
 
       private:
-        std::list<float>
+        BrightnessList
             m_brightnessHistory; //< Starting from current frame going backwards
         int m_id;                //< Which LED am I?
         cv::Point2f m_location;  //< Most recent recorded location
