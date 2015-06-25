@@ -164,16 +164,12 @@ namespace vbtracker {
             // Label the keypoints with their IDs.
             for (led = m_led_groups[sensor].begin();
                  led != m_led_groups[sensor].end(); led++) {
-                std::ostringstream label;
-                int id = led->getID();
-                if (id >= 0) {
-                    id++;
-                } // Print 1-based LED ID for actual LEDs
-                label << id;
+                // Print 1-based LED ID for actual LEDs
+                auto label = std::to_string(led->getOneBasedID());
                 cv::Point where = led->getLocation();
                 where.x += 1;
                 where.y += 1;
-                cv::putText(m_imageWithBlobs, label.str(), where,
+                cv::putText(m_imageWithBlobs, label, where,
                             cv::FONT_HERSHEY_SIMPLEX, 0.5,
                             cv::Scalar(0, 0, 255));
             }
@@ -186,12 +182,13 @@ namespace vbtracker {
                 m_estimators[sensor]->ProjectBeaconsToImage(imagePoints);
                 size_t n = imagePoints.size();
                 for (size_t i = 0; i < n; ++i) {
+                    // Print 1-based LED IDs
+                    auto label = std::to_string(i + 1);
                     auto where = imagePoints[i];
                     where.x += 1;
                     where.y += 1;
-                    cv::putText(m_imageWithBlobs,
-                                std::to_string(i + 1) /* 1-based LED ID */,
-                                where, cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::putText(m_imageWithBlobs, label, where,
+                                cv::FONT_HERSHEY_SIMPLEX, 0.5,
                                 cv::Scalar(0, 255, 0));
                 }
             }

@@ -65,8 +65,12 @@ namespace vbtracker {
         // An index of 0 or higher is determined based on the flash pattern.
         int getID() const { return m_id; }
 
+        /// @brief Gets either the raw negative sentinel ID or a 1-based ID (for
+        /// display purposes)
+        int getOneBasedID() const { return (m_id < 0) ? m_id : m_id + 1; }
+
         /// @brief Do we have a positive identification as a known LED?
-        bool identified() const { return m_id > -1; }
+        bool identified() const { return !(m_id < 0); }
 
         // Reports the most-recently-added position.
         cv::Point2f getLocation() const { return m_location; }
