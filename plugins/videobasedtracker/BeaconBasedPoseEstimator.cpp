@@ -168,14 +168,14 @@ namespace vbtracker {
 
         std::vector<cv::Point3f> objectPoints;
         std::vector<cv::Point2f> imagePoints;
-        std::list<osvr::vbtracker::Led>::const_iterator i;
-        for (i = leds.begin(); i != leds.end(); i++) {
-
-            // Skip IDs less than zero; they indicate bad
-            // LEDs.
-            int id = i->getID();
-            if ((id >= 0) && (id < m_beacons.size())) {
-                imagePoints.push_back(i->getLocation());
+        auto const beaconsSize = m_beacons.size();
+        for (auto const &led : leds) {
+            if (!led.identified()) {
+                continue;
+            }
+            auto id = led.getID();
+            if (id < beaconsSize) {
+                imagePoints.push_back(led.getLocation());
                 objectPoints.push_back(m_beacons[id]);
             }
         }
