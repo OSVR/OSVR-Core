@@ -8,7 +8,10 @@ osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-set(CORE_VBTRACKER_FILES
+###
+# Build a separate static library with the core of the video-based tracker
+###
+add_library(vbtracker-core STATIC
 	BeaconBasedPoseEstimator.cpp
 	BeaconBasedPoseEstimator.h
 	GetCameraMatrix.h
@@ -20,16 +23,28 @@ set(CORE_VBTRACKER_FILES
 	VideoBasedTracker.cpp
 	VideoBasedTracker.h)
 
-# This is just a helper function wrapping CMake's add_library command that
-# sets up include dirs, libraries, and naming convention (no leading "lib")
-# for an OSVR plugin. It also installs the plugin into the right directory.
-# Pass as many source files as you need. See osvrAddPlugin.cmake for full docs.
+target_link_libraries(vbtracker-core
+    PUBLIC
+    ${VIDEOTRACKER_EXTRA_LIBS}
+    opencv_core
+    osvrUtilCpp # for typedefs and boost headers
+    vendored-vrpn # for quatlib
+    eigen-headers)
+target_compile_options(vbtracker-core
+	PUBLIC
+	${OSVR_CXX11_FLAGS})
+
+set_target_properties(vbtracker-core PROPERTIES
+    FOLDER "OSVR Plugins")
+
+###
+# Build the plugin
+###
 osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     MANUAL_LOAD
     CPP # indicates we'd like to use the C++ wrapper
     NO_INSTALL # while in development, don't install
     SOURCES
-    ${CORE_VBTRACKER_FILES}
     com_osvr_VideoBasedHMDTracker.cpp
     Oculus_DK2.cpp
     Oculus_DK2.h
@@ -37,31 +52,20 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
 )
 
 target_link_libraries(com_osvr_VideoBasedHMDTracker
-    ${VIDEOTRACKER_EXTRA_LIBS}
-    opencv_core
-    vendored-vrpn
-    eigen-headers)
+    vbtracker-core
+    vendored-vrpn # for hidapi
+)
 
 target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
-target_compile_options(com_osvr_VideoBasedHMDTracker
-	PRIVATE
-	${OSVR_CXX11_FLAGS})
+
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins")
 
 if(BUILD_TESTING)
     add_executable(vbtracker-cam
-        ${CORE_VBTRACKER_FILES}
         TestStandalone.cpp)
     target_link_libraries(vbtracker-cam
         PRIVATE
-        osvrPluginKitCpp
-        ${VIDEOTRACKER_EXTRA_LIBS}
-        opencv_core
-        vendored-vrpn
-        eigen-headers)
-	target_compile_options(vbtracker-cam
-		PRIVATE
-		${OSVR_CXX11_FLAGS})
+        vbtracker-core)
     #osvr_setup_gtest(vbtracker-cam)
 endif()
