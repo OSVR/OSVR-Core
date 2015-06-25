@@ -47,6 +47,10 @@ namespace vbtracker {
     typedef std::vector<std::vector<double> > DoubleVecVec;
 
     typedef std::vector<std::string> PatternStringList;
+
+    /// @todo std::list used here for ease of rotate, but has terrible data
+    /// locality - consider changing when a more efficient rotation-invariant
+    /// string match algorithm is used.
     typedef std::list<bool> LedPattern;
     typedef std::vector<LedPattern> PatternList;
 
@@ -60,10 +64,18 @@ namespace vbtracker {
     typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
     typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
 
-    typedef std::vector<LedIdentifierPtr> LedIdentifierList;
     typedef std::list<Led> LedGroup;
+
+    /// @name Containers of "per-sensor" objects
+    /// @brief It seems like in a "well-formed" video-based tracker, there is
+    /// one element in each of these containers for each "sensor" (known rigid
+    /// organization of markers), and these are parallel (indices between them
+    /// correlate)
+    /// @{
+    typedef std::vector<LedIdentifierPtr> LedIdentifierList;
     typedef std::vector<LedGroup> LedGroupList;
     typedef std::vector<EstimatorPtr> EstimatorList;
+    /// @}
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08

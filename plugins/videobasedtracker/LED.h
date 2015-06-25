@@ -37,33 +37,39 @@
 namespace osvr {
 namespace vbtracker {
 
-    //----------------------------------------------------------------------
-    // Helper class to keep track of the state of a blob over time.  This
-    // is used to help determine the identity of each LED in the scene.
-    // The LEDs are identified by their blink codes.  A steady one is
-    // presumed to be a light source.
+    /// @brief Helper class to keep track of the state of a blob over time. This
+    /// is used to help determine the identity of each LED in the scene. The
+    /// LEDs are identified by their blink codes.  A steady one is presumed to
+    /// be a light source.
     class Led {
       public:
-        // Constructor takes initial values for the location and brightness,
-        // and a pointer to an object that will be used to identify the LEDs
-        // based on their brightness over time.
+        /// @name Constructors
+        /// @brief Constructor takes initial values for the location and
+        /// brightness, and a pointer to an object that will be used to identify
+        /// the LEDs based on their brightness over time.
+        /// @todo Would it ever be valid to pass in nullptr? if not, let's take
+        /// in a reference instead to better convey the semantics.
+        /// @{
         Led(LedIdentifier *identifier, float x = 0, float y = 0,
             Brightness brightness = 0);
         Led(LedIdentifier *identifier, cv::Point2f loc,
             Brightness brightness = 0);
+        /// @}
 
-        // Add a new measurement for this LED, which must be for a frame that
-        // is just following the previous measurement, so that the encoding
-        // of brightness and darkness can be used to identify it.
-        // "brightness" is an abstract quantity that is fed into the identity
-        // detector; it may be area or summed brightness or another useful
-        // estimate of the LED state.
+        /// @brief Add a new measurement for this LED, which must be for a frame
+        /// that is just following the previous measurement, so that the
+        /// encoding of brightness and darkness can be used to identify it.
+        /// @param brightness is an abstract quantity that is fed into the
+        /// identity detector; it may be area or summed brightness or another
+        /// useful estimate of the LED state.
         void addMeasurement(cv::Point2f loc, Brightness brightness);
 
-        // Tells which LED I am.  An index of -1 means not yet determined.
-        // An index below -1 means known not to be an LED (different identifiers
-        // use different codes to differentiate between cases).
-        // An index of 0 or higher is determined based on the flash pattern.
+        /// @brief Tells which LED I am.
+        ///
+        /// - An index of -1 means not yet determined.
+        /// - An index below -1 means known not to be an LED (different
+        ///   identifiers use different codes to differentiate between cases).
+        /// - An index of 0 or higher is determined based on the flash pattern.
         int getID() const { return m_id; }
 
         /// @brief Gets either the raw negative sentinel ID or a 1-based ID (for
@@ -73,23 +79,29 @@ namespace vbtracker {
         /// @brief Do we have a positive identification as a known LED?
         bool identified() const { return !(m_id < 0); }
 
-        // Reports the most-recently-added position.
+        /// @brief Reports the most-recently-added position.
         cv::Point2f getLocation() const { return m_location; }
 
-        // Find the nearest KeyPoint from a vector of points to me, if there is
-        // one within the specified threshold.
-        // Returns end() if there is not a nearest within threshold (or an empty
-        // vector).
+        /// @brief Find the nearest KeyPoint from a container of points to me,
+        /// if there is one within the specified threshold.
+        /// @return end() if there is not a nearest within threshold (or an
+        /// empty container).
         KeyPointIterator nearest(KeyPointList &keypoints,
                                  double threshold) const;
 
       private:
-        BrightnessList
-            m_brightnessHistory; //< Starting from current frame going backwards
-        int m_id;                //< Which LED am I?
-        cv::Point2f m_location;  //< Most recent recorded location
-        LedIdentifier *
-            m_identifier; //< Class used to determine the identity of an LED
+        /// Starting from current frame going backwards
+        BrightnessList m_brightnessHistory;
+
+        /// @brief Which LED am I? Non-negative are indices, negative are
+        /// sentinels
+        int m_id;
+
+        /// @brief Most recent recorded location
+        cv::Point2f m_location;
+
+        /// @brief Object used to determine the identity of an LED
+        LedIdentifier *m_identifier;
     };
 
 } // End namespace vbtracker
