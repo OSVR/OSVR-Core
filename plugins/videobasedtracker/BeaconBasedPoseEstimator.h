@@ -40,16 +40,17 @@
 namespace osvr {
 namespace vbtracker {
 
-    // Default 3D locations for the beacons on an OSVR HDK, in millimeters
+    /// @name Default 3D locations for the beacons on an OSVR HDK, in millimeters
+    /// @{
     extern const DoubleVecVec OsvrHdkLedLocations_SENSOR0;
     extern const DoubleVecVec OsvrHdkLedLocations_SENSOR1;
+    /// @}
 
-    // Class to track an object that has identified LED beacons on it as seen in
-    // a camera, where the absolute location of the LEDs with respect to a
-    // common
-    // frame of reference is known.  Returns the transformation that takes
-    // points
-    // from the model coordinate system to the camera coordinate system.
+    /// @brief Class to track an object that has identified LED beacons
+    /// on it as seen in a camera, where the absolute location of the
+    /// LEDs with respect to a common frame of reference is known.
+    /// Returns the transformation that takes points from the model
+    /// coordinate system to the camera coordinate system.
     class BeaconBasedPoseEstimator {
       public:
         /// @brief Constructor needs to be told the 3D locations of the beacons
@@ -68,11 +69,13 @@ namespace vbtracker {
             const DoubleVecVec &beacons //< 3D beacon locations
             );
 
-        /// Produce an estimate of the pose of the model-space origin in camera
-        /// space, where the origin is at the center of the image as described
-        /// by the camera matrix. This pose will be expressed in meters even
-        /// though the beacon locations and camera focal depth are in
-        /// millimeters.
+        /// @brief Produce an estimate of the pose of the model-space origin in
+        /// camera space, where the origin is at the center of the image as
+        /// described by the camera matrix.
+        ///
+        /// This pose will be expressed in meters even though the beacon
+        /// locations and camera focal depth are in millimeters.
+        ///
         /// @return Returns true on success, false on failure to make a pose.
         bool EstimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
 
