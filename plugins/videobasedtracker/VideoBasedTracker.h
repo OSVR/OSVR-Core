@@ -50,9 +50,24 @@ namespace vbtracker {
     class VideoBasedTracker {
       public:
         void addOculusSensor();
+        /// @name Sensor addition methods
+        /// @{
+        /// @brief Adds a sensor, given an LedIdentifier and parameters to
+        /// create a pose estimator.
+        /// @param identifier Takes unique ownership of the passed LedIdentifier
+        /// object
+        /// @param m A 3x3 camera matrix
+        /// @param d A 5-dimensional distortion parameter vector
+        /// @param locations A list of the 3d locations (in mm) of each marker
+        /// @todo Remove this raw pointer version.
         void addSensor(LedIdentifier *identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
                        DoubleVecVec const &locations);
+        /// @overload
+        void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d,
+                       DoubleVecVec const &locations);
+        /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
             PoseHandler;
