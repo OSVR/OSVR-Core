@@ -43,7 +43,9 @@ target_link_libraries(com_osvr_VideoBasedHMDTracker
     eigen-headers)
 
 target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/vrpn/submodules/hidapi")
-
+target_compile_options(com_osvr_VideoBasedHMDTracker
+	PRIVATE
+	${OSVR_CXX11_FLAGS})
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins")
 
@@ -58,5 +60,8 @@ if(BUILD_TESTING)
         opencv_core
         vendored-vrpn
         eigen-headers)
+	target_compile_options(vbtracker-cam
+		PRIVATE
+		${OSVR_CXX11_FLAGS})
     #osvr_setup_gtest(vbtracker-cam)
 endif()
