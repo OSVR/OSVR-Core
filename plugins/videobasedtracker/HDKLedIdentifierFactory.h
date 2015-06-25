@@ -22,39 +22,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_HDKLedIdentifier_h_GUID_A1204292_1F90_459E_44AD_18BA932C0E93
-#define INCLUDED_HDKLedIdentifier_h_GUID_A1204292_1F90_459E_44AD_18BA932C0E93
+#ifndef INCLUDED_HDKLedIdentifierFactory_h_GUID_7CB9381C_A55F_49B4_7322_DB88F3B8AD65
+#define INCLUDED_HDKLedIdentifierFactory_h_GUID_7CB9381C_A55F_49B4_7322_DB88F3B8AD65
 
 // Internal Includes
+#include "Types.h"
 #include "LedIdentifier.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <stdint.h>
 
 namespace osvr {
 namespace vbtracker {
 
-    class OsvrHdkLedIdentifier : public LedIdentifier {
-      public:
-        /// @brief Give it a list of patterns to use.  There is a string for
-        /// each LED, and each is encoded with '*' meaning that the LED is
-        /// bright and '.' that it is dim at this point in time. All patterns
-        /// must have the same length.
-        OsvrHdkLedIdentifier(const PatternStringList &PATTERNS);
+    /// @brief Factory function to create an HDK Led Identifier object
+    /// @param sensor either 0 (front plate) or 1 (back plate)
+    LedIdentifierPtr createHDKLedIdentifier(uint8_t sensor);
 
-        ~OsvrHdkLedIdentifier() override;
-
-        int getId(BrightnessList brightnesses) const override;
-
-      private:
-        size_t d_length;        //< Length of all patterns
-        PatternList d_patterns; //< Patterns by index
-    };
-
+    /// @brief Factory function to create an HDK Led Identifier object using the
+    /// random images patterns.
+    LedIdentifierPtr createRandomHDKLedIdentifier();
 } // End namespace vbtracker
 } // End namespace osvr
 
-#endif // INCLUDED_HDKLedIdentifier_h_GUID_A1204292_1F90_459E_44AD_18BA932C0E93
+#endif // INCLUDED_HDKLedIdentifierFactory_h_GUID_7CB9381C_A55F_49B4_7322_DB88F3B8AD65

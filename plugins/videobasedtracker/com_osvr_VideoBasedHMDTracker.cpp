@@ -23,12 +23,11 @@
 // limitations under the License.
 
 // Internal Includes
+#include "Oculus_DK2.h"
+#include "VideoBasedTracker.h"
+#include "HDKLedIdentifierFactory.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
-#include "Oculus_DK2.h"
-#include "LED.h"
-#include "BeaconBasedPoseEstimator.h"
-#include "VideoBasedTracker.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -256,14 +255,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
             d.push_back(0);
             d.push_back(0);
             d.push_back(0);
-            m_vbtracker.addSensor(
-                new osvr::vbtracker::OsvrHdkLedIdentifier(
-                    osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS),
-                m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0);
-            m_vbtracker.addSensor(
-                new osvr::vbtracker::OsvrHdkLedIdentifier(
-                    osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS),
-                m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1);
+            m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifier(0), m,
+                                  d,
+                                  osvr::vbtracker::OsvrHdkLedLocations_SENSOR0);
+            m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifier(1), m,
+                                  d,
+                                  osvr::vbtracker::OsvrHdkLedLocations_SENSOR1);
 
         } break;
 

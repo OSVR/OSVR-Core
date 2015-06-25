@@ -17,6 +17,8 @@ add_library(vbtracker-core STATIC
     GetCameraMatrix.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
+    HDKLedIdentifierFactory.cpp
+    HDKLedIdentifierFactory.h
     IdentifierHelpers.h
     LedIdentifier.cpp
     LedIdentifier.h

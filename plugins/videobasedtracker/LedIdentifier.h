@@ -62,46 +62,6 @@ namespace vbtracker {
         virtual int getId(BrightnessList brightnesses) const = 0;
 
       protected:
-        /// @brief Helper method for all derived classes to use to truncate the
-        /// passed-in brightness list to the maximum useful length.
-        /// @todo static method?
-        void truncateBrightnessListTo(BrightnessList &brightnesses,
-                                      size_t n) const;
-
-        /// @brief Helper function to find the minimum and maximum values in a
-        /// non-empty list of brightnesses.
-        /// @todo static method?
-        BrightnessMinMax
-        findMinMaxBrightness(const BrightnessList &brightnesses) const;
-
-        /// @brief Helper method for all derived classes to use to turn a
-        /// brightness list into a boolean list based on thresholding on the
-        /// halfway point between minimum and maximum brightness.
-        /// @todo static method?
-        LedPattern getBitsUsingThreshold(const std::list<float> &brightnesses,
-                                         float threshold) const;
-    };
-
-    // Determines the LED IDs for the OSVR HDK
-    extern const PatternStringList OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
-    extern const PatternStringList OsvrHdkLedIdentifier_SENSOR1_PATTERNS;
-    extern const PatternStringList OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS;
-
-    class OsvrHdkLedIdentifier : public LedIdentifier {
-      public:
-        /// @brief Give it a list of patterns to use.  There is a string for
-        /// each LED, and each is encoded with '*' meaning that the LED is
-        /// bright and '.' that it is dim at this point in time. All patterns
-        /// must have the same length.
-        OsvrHdkLedIdentifier(const PatternStringList &PATTERNS);
-
-        ~OsvrHdkLedIdentifier() override;
-
-        int getId(BrightnessList brightnesses) const override;
-
-      private:
-        size_t d_length;        //< Length of all patterns
-        PatternList d_patterns; //< Patterns by index
     };
 
 } // End namespace vbtracker

@@ -45,7 +45,14 @@ namespace vbtracker {
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
                                       DoubleVecVec const &locations) {
-        m_identifiers.emplace_back(identifier);
+        addSensor(LedIdentifierPtr(identifier), m, d, locations);
+    }
+
+    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
+                                      DoubleVecVec const &m,
+                                      std::vector<double> const &d,
+                                      DoubleVecVec const &locations) {
+        m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(
             new BeaconBasedPoseEstimator(m, d, locations));
         m_led_groups.emplace_back();
