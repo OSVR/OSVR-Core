@@ -49,9 +49,12 @@ namespace vbtracker {
         m_estimators.emplace_back(
             new BeaconBasedPoseEstimator(m, d, locations));
         m_led_groups.emplace_back();
+        m_assertInvariants();
     }
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          PoseHandler handler) {
+
+        m_assertInvariants();
         bool done = false;
         m_frame = frame;
         m_imageGray = grayImage;
@@ -235,6 +238,8 @@ namespace vbtracker {
             }
 #endif
         }
+
+        m_assertInvariants();
         return done;
     }
 } // namespace vbtracker

@@ -34,6 +34,7 @@
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <vector>
@@ -76,6 +77,12 @@ namespace vbtracker {
 #endif
         /// @}
 
+        /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
+        /// inline right out of existence in non-debug builds.
+        void m_assertInvariants() const {
+            BOOST_ASSERT_MSG(m_identifiers.size() == m_led_groups.size(), "Expected to have as many identifier objects as LED groups");
+            BOOST_ASSERT_MSG(m_identifiers.size() == m_estimators.size(), "Expected to have as many identifier objects as estimator objects");
+        }
         /// @name Structures needed to do the tracking.
         /// @{
         LedIdentifierList m_identifiers;
