@@ -35,7 +35,7 @@ target_compile_options(vbtracker-core
 	${OSVR_CXX11_FLAGS})
 
 set_target_properties(vbtracker-core PROPERTIES
-    FOLDER "OSVR Plugins")
+    FOLDER "OSVR Plugins/Video-Based Tracker")
 
 ###
 # Build the plugin
@@ -57,7 +57,7 @@ target_link_libraries(com_osvr_VideoBasedHMDTracker
 )
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
-    FOLDER "OSVR Plugins")
+    FOLDER "OSVR Plugins/Video-Based Tracker")
 
 if(BUILD_TESTING)
     add_executable(vbtracker-cam
@@ -66,6 +66,6 @@ if(BUILD_TESTING)
         PRIVATE
         vbtracker-core)
     set_target_properties(vbtracker-cam PROPERTIES
-        FOLDER "OSVR Plugins")
+        FOLDER "OSVR Plugins/Video-Based Tracker")
     #osvr_setup_gtest(vbtracker-cam)
 endif()
