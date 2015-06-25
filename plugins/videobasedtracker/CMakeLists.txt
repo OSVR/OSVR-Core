@@ -15,6 +15,9 @@ add_library(vbtracker-core STATIC
     BeaconBasedPoseEstimator.cpp
     BeaconBasedPoseEstimator.h
     GetCameraMatrix.h
+    HDKLedIdentifier.cpp
+    HDKLedIdentifier.h
+    IdentifierHelpers.h
     LedIdentifier.cpp
     LedIdentifier.h
     LED.cpp
