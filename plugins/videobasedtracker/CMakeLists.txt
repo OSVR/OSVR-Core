@@ -2,8 +2,8 @@
 # named com_osvr_VideoBasedHMDTracker_json (not null terminated)
 # The file must be added as a source file to some target (as below) to be generated.
 osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
-	com_osvr_VideoBasedHMDTracker.json
-	"${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h")
+    com_osvr_VideoBasedHMDTracker.json
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h")
 
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
@@ -12,16 +12,16 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 # Build a separate static library with the core of the video-based tracker
 ###
 add_library(vbtracker-core STATIC
-	BeaconBasedPoseEstimator.cpp
-	BeaconBasedPoseEstimator.h
-	GetCameraMatrix.h
-	LedIdentifier.cpp
-	LedIdentifier.h
-	LED.cpp
-	LED.h
-	Types.h
-	VideoBasedTracker.cpp
-	VideoBasedTracker.h)
+    BeaconBasedPoseEstimator.cpp
+    BeaconBasedPoseEstimator.h
+    GetCameraMatrix.h
+    LedIdentifier.cpp
+    LedIdentifier.h
+    LED.cpp
+    LED.h
+    Types.h
+    VideoBasedTracker.cpp
+    VideoBasedTracker.h)
 
 target_link_libraries(vbtracker-core
     PUBLIC
@@ -31,8 +31,8 @@ target_link_libraries(vbtracker-core
     vendored-vrpn # for quatlib
     eigen-headers)
 target_compile_options(vbtracker-core
-	PUBLIC
-	${OSVR_CXX11_FLAGS})
+    PUBLIC
+    ${OSVR_CXX11_FLAGS})
 
 set_target_properties(vbtracker-core PROPERTIES
     FOLDER "OSVR Plugins/Video-Based Tracker")
