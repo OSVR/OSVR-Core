@@ -1,0 +1,67 @@
+/** @file
+    @brief Header
+
+    @date 2015
+
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
+*/
+
+// Copyright 2015 Sensics, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
+#define INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
+
+
+// Internal Includes
+// - none
+
+// Library/third-party includes
+#include <opencv2/core/core.hpp>
+
+// Standard includes
+#include <vector>
+#include <list>
+#include <string>
+#include <memory>
+
+namespace osvr {
+    namespace vbtracker {
+    class Led;
+    class LedIdentifier;
+    class BeaconBasedPoseEstimator;
+
+    /// @todo Replace usages of this with Eigen or cv matrices.
+    typedef std::vector<std::vector<double> > DoubleVecVec;
+
+    typedef std::vector<std::string> PatternStringList;
+    typedef std::list<bool> LedPattern;
+    typedef std::vector<LedPattern > PatternList;
+
+    typedef float Brightness;
+    typedef std::list<Brightness> BrightnessList;
+
+    typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
+    typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
+
+    typedef std::vector<LedIdentifierPtr> LedIdentifierList;
+    typedef std::list<Led> LedGroup;
+    typedef std::vector<LedGroup> LedGroupList;
+    typedef std::vector<EstimatorPtr> EstimatorList;
+} // namespace vbtracker
+} // namespace osvr
+#endif // INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
+

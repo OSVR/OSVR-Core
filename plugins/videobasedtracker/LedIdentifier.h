@@ -26,78 +26,83 @@
 #define INCLUDED_LedIdentifier_h_GUID_674F7CDB_87AD_41AA_2475_134F2B4A3FF9
 
 // Internal Includes
-// - none
+#include "Types.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <vector>
-#include <list>
-#include <string>
-#include <memory>
+// - none
 
 namespace osvr {
 namespace vbtracker {
 
-    //----------------------------------------------------------------------
-    // Helper class to identify an LED based on its pattern of brightness
-    // over time.  The base class defines the interface.  The derived classes
-    // encode the pattern-detection algorithm for specific devices.
-    // NOTE: This class may modify the passed-in list, truncating it
-    // so that old data points are removed once there are enough measurements
-    // to make an estimate.
-    // TODO: Consider adding a distance estimator as a parameter throughout,
-    // which can be left alone for unknown or estimated based on a Kalman
-    // filter; it would be used to scale the expected brightness.
+    /// @brief Helper class to identify an LED based on its pattern of
+    /// brightness over time.  The base class defines the interface.  The
+    /// derived classes encode the pattern-detection algorithm for specific
+    /// devices.
+    ///
+    /// NOTE: This class may modify the passed-in list, truncating it so that
+    /// old data points are removed once there are enough measurements to make
+    /// an estimate.
+    ///
+    /// @todo Consider adding a distance estimator as a parameter throughout,
+    /// which can be left alone for unknown or estimated based on a Kalman
+    /// filter; it would be used to scale the expected brightness.
     class LedIdentifier {
       public:
-        /// Determine the identity of the LED whose brightness pattern is
-        // passed in.  Return -1 for unknown (not enough information) and
-        // less than -1 for definitely not an LED (light sources will be
-        // constant, mis-tracked LEDs may produce spurious changes in the
-        // pattern for example).
-        virtual int getId(std::list<float> brightnesses) const = 0;
+        /// @brief Virtual destructor;
+        virtual ~LedIdentifier();
+        /// @brief Determine the identity of the LED whose brightness pattern is
+        /// passed in.
+        /// @return -1 for unknown (not enough information) and
+        /// less than -1 for definitely not an LED (light sources will be
+        /// constant, mis-tracked LEDs may produce spurious changes in the
+        /// pattern for example).
+        virtual int getId(BrightnessList brightnesses) const = 0;
 
       protected:
-        // Helper method for all derived classes to use to truncate the
-        // passed-in brightness list to the maximum useful length.
-        void truncateBrightnessListTo(std::list<float> &brightnesses,
+        /// @brief Helper method for all derived classes to use to truncate the
+        /// passed-in brightness list to the maximum useful length.
+        /// @todo static method?
+        void truncateBrightnessListTo(BrightnessList &brightnesses,
                                       size_t n) const;
 
-        // Helper function to find the minimum and maximum values in a
-        // list of brightnesses.  Returns false if there is an empty
-        // list passed in.
-        bool findMinMaxBrightness(const std::list<float> &brightnesses,
-                                  float &minVal, float &maxVal) const;
+        /// @brief Helper function to find the minimum and maximum values in a
+        /// list of brightnesses.
+        /// @return false if there is an empty list passed in.
+        /// @todo static method?
+        bool findMinMaxBrightness(const BrightnessList &brightnesses,
+                                  Brightness &minVal, Brightness &maxVal) const;
 
-        // Helper method for all derived classes to use to turn a brightness
-        // list into a boolean list based on thresholding on the halfway
-        // point between minumum and maximum brightness.
-        std::list<bool>
-        getBitsUsingThreshold(const std::list<float> &brightnesses,
-                              float threshold) const;
+        /// @brief Helper method for all derived classes to use to turn a
+        /// brightness list into a boolean list based on thresholding on the
+        /// halfway point between minimum and maximum brightness.
+        /// @todo static method?
+        LedPattern getBitsUsingThreshold(const std::list<float> &brightnesses,
+                                         float threshold) const;
     };
-    typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
 
     // Determines the LED IDs for the OSVR HDK
-    extern const std::vector<std::string> OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
-    extern const std::vector<std::string> OsvrHdkLedIdentifier_SENSOR1_PATTERNS;
-    extern const std::vector<std::string>
-        OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS;
+    extern const PatternStringList OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
+    extern const PatternStringList OsvrHdkLedIdentifier_SENSOR1_PATTERNS;
+    extern const PatternStringList OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS;
 
     class OsvrHdkLedIdentifier : public LedIdentifier {
       public:
-        // Give it a list of patterns to use.  There is a string for
-        // each LED, and each is encoded with '*' meaning that the
-        // LED is bright and '.' that it is dim at this point in time.
-        // All patterns must have the same length.
-        OsvrHdkLedIdentifier(const std::vector<std::string> &PATTERNS);
-        virtual int getId(std::list<float> brightnesses) const;
+        /// @brief Give it a list of patterns to use.  There is a string for
+        /// each LED, and each is encoded with '*' meaning that the LED is
+        /// bright and '.' that it is dim at this point in time. All patterns
+        /// must have the same length.
+        OsvrHdkLedIdentifier(const PatternStringList &PATTERNS);
 
-      protected:
-        size_t d_length;                          //< Length of all patterns
-        std::vector<std::list<bool> > d_patterns; //< Patterns by index
+        ~OsvrHdkLedIdentifier() override;
+
+        int getId(BrightnessList brightnesses) const override;
+
+      private:
+        size_t d_length;        //< Length of all patterns
+        PatternList d_patterns; //< Patterns by index
     };
 
 } // End namespace vbtracker
