@@ -25,7 +25,6 @@
 #ifndef INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
 #define INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
 
-
 // Internal Includes
 // - none
 
@@ -39,7 +38,7 @@
 #include <memory>
 
 namespace osvr {
-    namespace vbtracker {
+namespace vbtracker {
     class Led;
     class LedIdentifier;
     class BeaconBasedPoseEstimator;
@@ -68,4 +67,3 @@ namespace osvr {
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
-

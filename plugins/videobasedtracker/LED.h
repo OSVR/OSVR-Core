@@ -49,7 +49,8 @@ namespace vbtracker {
         // based on their brightness over time.
         Led(LedIdentifier *identifier, float x = 0, float y = 0,
             Brightness brightness = 0);
-        Led(LedIdentifier *identifier, cv::Point2f loc, Brightness brightness = 0);
+        Led(LedIdentifier *identifier, cv::Point2f loc,
+            Brightness brightness = 0);
 
         // Add a new measurement for this LED, which must be for a frame that
         // is just following the previous measurement, so that the encoding
@@ -79,8 +80,8 @@ namespace vbtracker {
         // one within the specified threshold.
         // Returns end() if there is not a nearest within threshold (or an empty
         // vector).
-        KeyPointIterator
-            nearest(KeyPointList &keypoints, double threshold) const;
+        KeyPointIterator nearest(KeyPointList &keypoints,
+                                 double threshold) const;
 
       private:
         BrightnessList

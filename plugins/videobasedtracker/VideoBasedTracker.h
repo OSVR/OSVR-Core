@@ -40,7 +40,6 @@
 #include <list>
 #include <functional>
 
-
 // Define the constant below to provide debugging (window showing video and
 // behavior, printing tracked positions)
 #define VBHMD_DEBUG
@@ -49,11 +48,13 @@ namespace osvr {
 namespace vbtracker {
     class VideoBasedTracker {
       public:
-
         void addOculusSensor();
-        void addSensor(LedIdentifier * identifier, DoubleVecVec const& m, std::vector<double> const& d, DoubleVecVec const& locations);
+        void addSensor(LedIdentifier *identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d,
+                       DoubleVecVec const &locations);
 
-        typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const&)> PoseHandler;
+        typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
+            PoseHandler;
         /// @return true if user hit q to quit.
         bool processImage(cv::Mat frame, cv::Mat grayImage,
                           PoseHandler handler);

@@ -71,7 +71,8 @@ namespace vbtracker {
         /// @brief Helper function to find the minimum and maximum values in a
         /// non-empty list of brightnesses.
         /// @todo static method?
-        BrightnessMinMax findMinMaxBrightness(const BrightnessList &brightnesses) const;
+        BrightnessMinMax
+        findMinMaxBrightness(const BrightnessList &brightnesses) const;
 
         /// @brief Helper method for all derived classes to use to turn a
         /// brightness list into a boolean list based on thresholding on the
