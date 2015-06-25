@@ -184,18 +184,14 @@ namespace vbtracker {
             if (gotPose) {
                 std::vector<cv::Point2f> imagePoints;
                 m_estimators[sensor]->ProjectBeaconsToImage(imagePoints);
-                for (int i = 0; i < imagePoints.size(); i++) {
-                    std::ostringstream label;
-                    int id = i;
-                    if (id >= 0) {
-                        id++;
-                    }            // Print 1-based LED ID for actual LEDs
-                    label << id; // Print 1-based LED ID
-                    cv::Point where = imagePoints[i];
+                size_t n = imagePoints.size();
+                for (size_t i = 0; i < n; ++i) {
+                    auto where = imagePoints[i];
                     where.x += 1;
                     where.y += 1;
-                    cv::putText(m_imageWithBlobs, label.str(), where,
-                                cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::putText(m_imageWithBlobs,
+                                std::to_string(i + 1) /* 1-based LED ID */,
+                                where, cv::FONT_HERSHEY_SIMPLEX, 0.5,
                                 cv::Scalar(0, 255, 0));
                 }
             }
