@@ -60,23 +60,21 @@ namespace vbtracker {
         /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
         /// for details on these formats.
         BeaconBasedPoseEstimator(
-            const DoubleVecVec &
-                cameraMatrix //< 3x3 camera matrix for OpenCV
+            const DoubleVecVec &cameraMatrix //< 3x3 camera matrix for OpenCV
             ,
             const std::vector<double> &
                 distCoeffs //< Distortion coefficients for OpenCV
             ,
-            const DoubleVecVec &
-                beacons //< 3D beacon locations
+            const DoubleVecVec &beacons //< 3D beacon locations
             );
 
         /// Produce an estimate of the pose of the model-space origin in camera
-        /// space, where the origin is at the center of the image as described by
-        /// the camera matrix. This pose will be expressed in meters even though
-        /// the beacon locations and camera focal depth are in millimeters.
+        /// space, where the origin is at the center of the image as described
+        /// by the camera matrix. This pose will be expressed in meters even
+        /// though the beacon locations and camera focal depth are in
+        /// millimeters.
         /// @return Returns true on success, false on failure to make a pose.
-        bool EstimatePoseFromLeds(const LedGroup &leds,
-                                  OSVR_PoseState &out);
+        bool EstimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
 
         /// @brief Project the beacons into image space given the most-recent
         /// estimation of pose.
@@ -90,7 +88,10 @@ namespace vbtracker {
         bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
-      protected:
+      private:
+        /// @brief Implementation - doesn't set m_gotPose;
+        bool m_estimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
+
         std::vector<cv::Point3f> m_beacons; //< 3D location of LED beacons
         cv::Mat m_cameraMatrix;             //< 3x3 camera matrix
         cv::Mat m_distCoeffs;               //< Distortion coefficients

@@ -156,9 +156,22 @@ namespace vbtracker {
         return true;
     }
 
+    static const int OUTLIERS_PERMITTED = 2;
+    /// We want at least five corresponding points (this is somewhat arbitrary,
+    /// but must be at least 5 to allow for 2 outliers below).
+    static const int MIN_OBJECT_POINTS = OUTLIERS_PERMITTED + 3;
+
     bool
     BeaconBasedPoseEstimator::EstimatePoseFromLeds(const LedGroup &leds,
                                                    OSVR_PoseState &outPose) {
+        auto ret = m_estimatePoseFromLeds(leds, outPose);
+        m_gotPose = ret;
+        return ret;
+    }
+
+    bool
+    BeaconBasedPoseEstimator::m_estimatePoseFromLeds(const LedGroup &leds,
+                                                     OSVR_PoseState &outPose) {
         // We need to get a pair of matched vectors of points: 2D locations
         // with in the image and 3D locations in model space.  There needs to
         // be a correspondence between the points in these vectors, such that
@@ -180,22 +193,20 @@ namespace vbtracker {
             }
         }
 
-        // Make sure we have enough points to do our estimation.  We want at
-        // least five corresponding points (this is somewhat arbitrary, but must
-        // be at least 5 to allow for 2 outliers below).
-        if (objectPoints.size() < 5) {
-            m_gotPose = false;
+        // Make sure we have enough points to do our estimation.
+        if (objectPoints.size() < MIN_OBJECT_POINTS) {
             return false;
         }
 
         // Produce an estimate of the translation and rotation needed to take
-        // points from model space into camera space.  We allow for at most two
-        // outliers. Even in simulation data, we sometimes find duplicate IDs
-        // for LEDs, indicating that we are getting mis-identified ones
-        // sometimes.
-        cv::solvePnPRansac(objectPoints, imagePoints, m_cameraMatrix,
-                           m_distCoeffs, m_rvec, m_tvec, false, 100, 8.0f,
-                           static_cast<int>(objectPoints.size() - 2));
+        // points from model space into camera space.  We allow for at most
+        // OUTLIERS_PERMITTED outliers. Even in simulation data, we sometimes
+        // find duplicate IDs for LEDs, indicating that we are getting
+        // mis-identified ones sometimes.
+        cv::solvePnPRansac(
+            objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
+            m_tvec, false, 100, 8.0f,
+            static_cast<int>(objectPoints.size() - OUTLIERS_PERMITTED));
 
         //    std::cout << "XXX tvec = " << m_tvec << std::endl;
         //    std::cout << "XXX rvec = " << m_rvec << std::endl;
@@ -231,7 +242,6 @@ namespace vbtracker {
         // TODO: Replace this code with Eigen code.
 
         if (rot.type() != CV_64F) {
-            m_gotPose = false;
             return false;
         }
 
@@ -269,8 +279,6 @@ namespace vbtracker {
         //==============================================================
         // Put into OSVR format.
         osvrPose3FromQuatlib(&outPose, &inverse);
-
-        m_gotPose = true;
         return true;
     }
 
