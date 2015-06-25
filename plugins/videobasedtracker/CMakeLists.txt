@@ -65,5 +65,7 @@ if(BUILD_TESTING)
     target_link_libraries(vbtracker-cam
         PRIVATE
         vbtracker-core)
+    set_target_properties(vbtracker-cam PROPERTIES
+        FOLDER "OSVR Plugins")
     #osvr_setup_gtest(vbtracker-cam)
 endif()
