@@ -22,24 +22,27 @@ Sensics, Inc.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Internal Includes
 #include "LedIdentifier.h"
+
+// Library/third-party includes
+// - none
+
+// Standard includes
 
 namespace osvr {
 namespace vbtracker {
-
-    void LedIdentifier::truncateBrightnessListTo(std::list<float> &brightnesses,
+    LedIdentifier::~LedIdentifier() {}
+    void LedIdentifier::truncateBrightnessListTo(BrightnessList &brightnesses,
                                                  size_t n) const {
         while (brightnesses.size() > n) {
             brightnesses.pop_front();
         }
     }
 
-    // Helper function to find the minimum and maximum values in a
-    // list of brightnesses.  Returns false if there is an empty
-    // list passed in.
-    bool
-    LedIdentifier::findMinMaxBrightness(const std::list<float> &brightnesses,
-                                        float &minVal, float &maxVal) const {
+    bool LedIdentifier::findMinMaxBrightness(const BrightnessList &brightnesses,
+                                             Brightness &minVal,
+                                             Brightness &maxVal) const {
         if (brightnesses.size() == 0) {
             minVal = maxVal = 0;
             return false;
@@ -47,7 +50,7 @@ namespace vbtracker {
 
         // Find the largest and smallest values, and then
         // the threshold.
-        std::list<float>::const_iterator i = brightnesses.begin();
+        auto i = brightnesses.begin();
         minVal = *i;
         maxVal = minVal;
         while (++i != brightnesses.end()) {
@@ -61,13 +64,10 @@ namespace vbtracker {
         return true;
     }
 
-    // Helper method for all derived classes to use to turn a brightness
-    // list into a boolean list based on thresholding on the halfway
-    // point between minumum and maximum brightness.
-    std::list<bool>
-    LedIdentifier::getBitsUsingThreshold(const std::list<float> &brightnesses,
-                                         float threshold) const {
-        std::list<bool> ret;
+    LedPattern
+    LedIdentifier::getBitsUsingThreshold(const BrightnessList &brightnesses,
+                                         Brightness threshold) const {
+        LedPattern ret;
 
         // Categorize each element according to above or below threshold.
         std::list<float>::const_iterator i;
@@ -173,11 +173,11 @@ namespace vbtracker {
             ,
             "........" // 40
     };
-
+    OsvrHdkLedIdentifier::~OsvrHdkLedIdentifier() {}
     // Convert from string encoding representations into lists
     // of boolean values for use in comparison.
     OsvrHdkLedIdentifier::OsvrHdkLedIdentifier(
-        const std::vector<std::string> &PATTERNS) {
+        const PatternStringList &PATTERNS) {
         // Ensure that we have at least one entry in our list and
         // find the length of the first entry.
         if (PATTERNS.size() == 0) {

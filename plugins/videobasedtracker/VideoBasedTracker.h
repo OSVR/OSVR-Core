@@ -26,6 +26,7 @@
 #define INCLUDED_VideoBasedTracker_h_GUID_831CC0DD_16A5_43AB_12D3_AE86E1998ED4
 
 // Internal Includes
+#include "Types.h"
 #include "LED.h"
 #include "LedIdentifier.h"
 #include "BeaconBasedPoseEstimator.h"
@@ -48,12 +49,7 @@ namespace osvr {
 namespace vbtracker {
     class VideoBasedTracker {
       public:
-        typedef std::vector<LedIdentifierPtr> LedIdentifierList;
-        typedef std::list<Led> LedGroup;
-        typedef std::vector<LedGroup> LedGroupList;
-        typedef std::vector<EstimatorPtr> EstimatorList;
 
-        typedef std::vector<std::vector<double> > DoubleVecVec;
         void addOculusSensor();
         void addSensor(LedIdentifier * identifier, DoubleVecVec const& m, std::vector<double> const& d, DoubleVecVec const& locations);
 

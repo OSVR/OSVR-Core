@@ -16,6 +16,7 @@ set(CORE_VBTRACKER_FILES
 	LedIdentifier.h
 	LED.cpp
 	LED.h
+	Types.h
 	VideoBasedTracker.cpp
 	VideoBasedTracker.h)
 
