@@ -53,6 +53,7 @@ namespace osvr {
 
     typedef float Brightness;
     typedef std::list<Brightness> BrightnessList;
+    typedef std::pair<Brightness, Brightness> BrightnessMinMax;
 
     typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
     typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;

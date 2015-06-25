@@ -26,9 +26,10 @@ Sensics, Inc.
 #include "LedIdentifier.h"
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
+#include <algorithm>
 
 namespace osvr {
 namespace vbtracker {
@@ -40,44 +41,26 @@ namespace vbtracker {
         }
     }
 
-    bool LedIdentifier::findMinMaxBrightness(const BrightnessList &brightnesses,
-                                             Brightness &minVal,
-                                             Brightness &maxVal) const {
-        if (brightnesses.size() == 0) {
-            minVal = maxVal = 0;
-            return false;
-        }
-
-        // Find the largest and smallest values, and then
-        // the threshold.
-        auto i = brightnesses.begin();
-        minVal = *i;
-        maxVal = minVal;
-        while (++i != brightnesses.end()) {
-            if (*i < minVal) {
-                minVal = *i;
-            }
-            if (*i > maxVal) {
-                maxVal = *i;
-            }
-        }
-        return true;
+    BrightnessMinMax LedIdentifier::findMinMaxBrightness(
+        const BrightnessList &brightnesses) const {
+        BOOST_ASSERT_MSG(!brightnesses.empty(), "Must be a non-empty list!");
+        auto extremaIterators =
+            std::minmax_element(begin(brightnesses), end(brightnesses));
+        return std::make_pair(*extremaIterators.first,
+                              *extremaIterators.second);
     }
 
     LedPattern
     LedIdentifier::getBitsUsingThreshold(const BrightnessList &brightnesses,
                                          Brightness threshold) const {
         LedPattern ret;
+        // Allocate output space for our transform.
+        ret.resize(brightnesses.size());
 
-        // Categorize each element according to above or below threshold.
-        std::list<float>::const_iterator i;
-        for (i = brightnesses.begin(); i != brightnesses.end(); i++) {
-            if (*i >= threshold) {
-                ret.push_back(true);
-            } else {
-                ret.push_back(false);
-            }
-        }
+        std::transform(
+            begin(brightnesses), end(brightnesses), begin(ret),
+            [threshold](Brightness val) { return val >= threshold; });
+
         return ret;
     }
 
@@ -217,8 +200,7 @@ namespace vbtracker {
 
     int OsvrHdkLedIdentifier::getId(std::list<float> brightnesses) const {
         // If we don't have at least the required number of frames of data, we
-        // don't
-        // know anything.
+        // don't know anything.
         if (brightnesses.size() < d_length) {
             return -1;
         }
@@ -230,10 +212,9 @@ namespace vbtracker {
         // they are too close to each other, we have a light rather
         // than an LED.  If not, compute a threshold to separate the
         // 0's and 1's.
-        float minVal, maxVal;
-        if (!findMinMaxBrightness(brightnesses, minVal, maxVal)) {
-            return -2;
-        }
+        auto extrema = findMinMaxBrightness(brightnesses);
+        Brightness minVal = extrema.first;
+        Brightness maxVal = extrema.second;
         static const double TODO_MIN_BRIGHTNESS_DIFF = 0.5;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
             return -2;
