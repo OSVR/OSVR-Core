@@ -42,7 +42,7 @@ target_link_libraries(vendored-hidapi INTERFACE vendored-vrpn)
 if(VRPN_HIDAPI_SOURCE_ROOT)
     target_include_directories(vendored-hidapi INTERFACE "${VRPN_HIDAPI_SOURCE_ROOT}")
 else()
-    target_include_directories(vendored-hidapi INTERFACE vrpn/submodules/hidapi)
+    target_include_directories(vendored-hidapi INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/submodules/hidapi")
 endif()
 
 # Interface target for util headers
