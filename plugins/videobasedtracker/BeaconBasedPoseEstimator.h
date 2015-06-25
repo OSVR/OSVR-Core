@@ -40,7 +40,8 @@
 namespace osvr {
 namespace vbtracker {
 
-    /// @name Default 3D locations for the beacons on an OSVR HDK, in millimeters
+    /// @name Default 3D locations for the beacons on an OSVR HDK, in
+    /// millimeters
     /// @{
     extern const DoubleVecVec OsvrHdkLedLocations_SENSOR0;
     extern const DoubleVecVec OsvrHdkLedLocations_SENSOR1;
