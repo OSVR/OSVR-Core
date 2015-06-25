@@ -27,21 +27,14 @@ Sensics, Inc.
 namespace osvr {
 namespace vbtracker {
 
-    Led::Led(LedIdentifier *identifier, float x, float y,
-             Brightness brightness) {
-        m_identifier = identifier;
-        m_location.x = x;
-        m_location.y = y;
-        m_id = -1;
-        m_brightnessHistory.push_back(brightness);
+    Led::Led(LedIdentifier *identifier, float x, float y, Brightness brightness)
+        : m_id(-1), m_identifier(identifier) {
+        addMeasurement(cv::Point2f(x, y), brightness);
     }
 
-    Led::Led(LedIdentifier *identifier, cv::Point2f loc,
-             Brightness brightness) {
-        m_identifier = identifier;
-        m_location = loc;
-        m_id = -1;
-        m_brightnessHistory.push_back(brightness);
+    Led::Led(LedIdentifier *identifier, cv::Point2f loc, Brightness brightness)
+        : m_id(-1), m_identifier(identifier) {
+        addMeasurement(loc, brightness);
     }
 
     void Led::addMeasurement(cv::Point2f loc, Brightness brightness) {

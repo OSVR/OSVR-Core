@@ -65,6 +65,9 @@ namespace vbtracker {
         // An index of 0 or higher is determined based on the flash pattern.
         int getID() const { return m_id; }
 
+        /// @brief Do we have a positive identification as a known LED?
+        bool identified() const { return m_id > -1; }
+
         // Reports the most-recently-added position.
         cv::Point2f getLocation() const { return m_location; }
 

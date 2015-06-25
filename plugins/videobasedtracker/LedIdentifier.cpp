@@ -213,23 +213,27 @@ namespace vbtracker {
         // than an LED.  If not, compute a threshold to separate the
         // 0's and 1's.
         auto extrema = findMinMaxBrightness(brightnesses);
-        Brightness minVal = extrema.first;
-        Brightness maxVal = extrema.second;
+        const auto minVal = extrema.first;
+        const auto maxVal = extrema.second;
         static const double TODO_MIN_BRIGHTNESS_DIFF = 0.5;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
             return -2;
         }
-        float threshold = (minVal + maxVal) / 2;
+        const auto threshold = (minVal + maxVal) / 2;
 
         // Get a list of boolean values for 0's and 1's using
         // the threshold computed above.
-        std::list<bool> bits = getBitsUsingThreshold(brightnesses, threshold);
+        auto bits = getBitsUsingThreshold(brightnesses, threshold);
 
         // Search through the available patterns to see if the passed-in
         // pattern matches any of them.  If so, return that pattern.  We
         // need to check all potential rotations of the pattern, since we
         // don't know when the code started.  For the HDK, the codes are
         // rotationally invariant.
+
+        /// @todo feels like there should be a good algorithm for
+        /// rotation-invariant string matching besides brute-forcing it here.
+        ///  -- rpavlik
         for (size_t i = 0; i < d_patterns.size(); i++) {
             for (size_t j = 0; j < bits.size(); j++) {
                 if (bits == d_patterns[i]) {
