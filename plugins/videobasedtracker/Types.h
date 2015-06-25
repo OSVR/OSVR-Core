@@ -30,7 +30,7 @@
 // - none
 
 // Library/third-party includes
-#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
 
 // Standard includes
 #include <vector>
@@ -49,7 +49,10 @@ namespace osvr {
 
     typedef std::vector<std::string> PatternStringList;
     typedef std::list<bool> LedPattern;
-    typedef std::vector<LedPattern > PatternList;
+    typedef std::vector<LedPattern> PatternList;
+
+    typedef std::vector<cv::KeyPoint> KeyPointList;
+    typedef KeyPointList::iterator KeyPointIterator;
 
     typedef float Brightness;
     typedef std::list<Brightness> BrightnessList;

@@ -27,7 +27,8 @@ Sensics, Inc.
 namespace osvr {
 namespace vbtracker {
 
-    Led::Led(LedIdentifier *identifier, float x, float y, float brightness) {
+    Led::Led(LedIdentifier *identifier, float x, float y,
+             Brightness brightness) {
         m_identifier = identifier;
         m_location.x = x;
         m_location.y = y;
@@ -35,14 +36,15 @@ namespace vbtracker {
         m_brightnessHistory.push_back(brightness);
     }
 
-    Led::Led(LedIdentifier *identifier, cv::Point2f loc, float brightness) {
+    Led::Led(LedIdentifier *identifier, cv::Point2f loc,
+             Brightness brightness) {
         m_identifier = identifier;
         m_location = loc;
         m_id = -1;
         m_brightnessHistory.push_back(brightness);
     }
 
-    void Led::addMeasurement(cv::Point2f loc, float brightness) {
+    void Led::addMeasurement(cv::Point2f loc, Brightness brightness) {
         m_location = loc;
         m_brightnessHistory.push_back(brightness);
 
@@ -55,26 +57,26 @@ namespace vbtracker {
         }
     }
 
-    std::vector<cv::KeyPoint>::iterator
-    Led::nearest(std::vector<cv::KeyPoint> &vec, double threshold) const {
+    KeyPointIterator Led::nearest(KeyPointList &keypoints,
+                                  double threshold) const {
         // If we have no elements in the vector, return the end().
-        if (vec.size() == 0) {
-            return vec.end();
+        if (keypoints.empty()) {
+            return end(keypoints);
         }
 
         // Find the distance to the first point and record it as the
         // current minimum distance;
-        std::vector<cv::KeyPoint>::iterator ret = vec.begin();
+        auto ret = begin(keypoints);
         double minDist = sqrt(norm(m_location - ret->pt));
 
         // Search the rest of the elements to see if we can find a
         // better one.
-        std::vector<cv::KeyPoint>::iterator i = vec.begin();
-        while (++i != vec.end()) {
-            double dist = sqrt(norm(m_location - i->pt));
+        auto it = keypoints.begin();
+        while (++it != keypoints.end()) {
+            double dist = sqrt(norm(m_location - it->pt));
             if (dist < minDist) {
                 minDist = dist;
-                ret = i;
+                ret = it;
             }
         }
 
@@ -83,7 +85,7 @@ namespace vbtracker {
         if (minDist <= threshold) {
             return ret;
         } else {
-            return vec.end();
+            return end(keypoints);
         }
     }
 
