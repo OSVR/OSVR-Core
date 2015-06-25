@@ -236,8 +236,8 @@ namespace vbtracker {
                           << m_pose.translation.data[2] << std::endl;
             }
 #endif
-            return done;
         }
+        return done;
     }
 } // namespace vbtracker
 } // namespace osvr
