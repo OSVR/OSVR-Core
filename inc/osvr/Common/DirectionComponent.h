@@ -26,7 +26,6 @@
 #ifndef INCLUDED_DirectionComponent_h_GUID_DBB6E776_4381_4FB7_C855_B77A87F811BE
 #define INCLUDED_DirectionComponent_h_GUID_DBB6E776_4381_4FB7_C855_B77A87F811BE
 
-
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
@@ -41,61 +40,61 @@
 // - none
 
 namespace osvr {
-	namespace common {
-		
-		struct DirectionData {
-			OSVR_ChannelCount sensor;
-			OSVR_DirectionState direction;
-		};
+namespace common {
 
-		namespace messages {
-			class DirectionRecord : public MessageRegistration<DirectionRecord> {
-			public:
-				class MessageSerialization;
+    struct DirectionData {
+        OSVR_ChannelCount sensor;
+        OSVR_DirectionState direction;
+    };
 
-				static const char *identifier();
-			};
+    namespace messages {
+        class DirectionRecord : public MessageRegistration<DirectionRecord> {
+          public:
+            class MessageSerialization;
 
-		} // namespace messages
+            static const char *identifier();
+        };
 
-		/// @brief BaseDevice component
-		class DirectionComponent : public DeviceComponent {
-		public:
-			/// @brief Factory method
-			///
-			/// Required to ensure that allocation and deallocation stay on the same
-			/// side of a DLL line.
-			static OSVR_COMMON_EXPORT shared_ptr<DirectionComponent>
-				create(OSVR_ChannelCount numSensor = 1);
+    } // namespace messages
 
-			/// @brief Message from server to client, containing 3D direction data.
-			messages::DirectionRecord directionRecord;
+    /// @brief BaseDevice component
+    class DirectionComponent : public DeviceComponent {
+      public:
+        /// @brief Factory method
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        static OSVR_COMMON_EXPORT shared_ptr<DirectionComponent>
+        create(OSVR_ChannelCount numSensor = 1);
 
-			OSVR_COMMON_EXPORT void sendDirectionData(
-				OSVR_DirectionState direction,
-				OSVR_ChannelCount sensor, 
-				OSVR_TimeValue const &timestamp);
+        /// @brief Message from server to client, containing 3D direction data.
+        messages::DirectionRecord directionRecord;
 
-			typedef std::function<void(DirectionData const &,
-				util::time::TimeValue const &)> DirectionHandler;
-			OSVR_COMMON_EXPORT void registerDirectionHandler(DirectionHandler cb);
+        OSVR_COMMON_EXPORT void
+        sendDirectionData(OSVR_DirectionState direction,
+                          OSVR_ChannelCount sensor,
+                          OSVR_TimeValue const &timestamp);
 
-		private:
-			DirectionComponent(OSVR_ChannelCount numChan);
-			virtual void m_parentSet();
+        typedef std::function<void(DirectionData const &,
+                                   util::time::TimeValue const &)>
+            DirectionHandler;
+        OSVR_COMMON_EXPORT void registerDirectionHandler(DirectionHandler cb);
 
-			static int VRPN_CALLBACK
-				m_handleDirectionRecord(void *userdata, vrpn_HANDLERPARAM p);
+      private:
+        DirectionComponent(OSVR_ChannelCount numChan);
+        virtual void m_parentSet();
 
-			void m_checkFirst(OSVR_DirectionState const &direction);
+        static int VRPN_CALLBACK
+        m_handleDirectionRecord(void *userdata, vrpn_HANDLERPARAM p);
 
-			OSVR_ChannelCount m_numSensor;
-			std::vector<DirectionHandler> m_cb;
-			bool m_gotOne;
-		};
+        void m_checkFirst(OSVR_DirectionState const &direction);
 
-	} // namespace common
+        OSVR_ChannelCount m_numSensor;
+        std::vector<DirectionHandler> m_cb;
+        bool m_gotOne;
+    };
+
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_DirectionComponent_h_GUID_DBB6E776_4381_4FB7_C855_B77A87F811BE
-

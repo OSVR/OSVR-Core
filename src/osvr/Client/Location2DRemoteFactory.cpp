@@ -47,21 +47,21 @@ namespace client {
 
     class NetworkLocation2DRemoteHandler : public RemoteHandler {
       public:
-        NetworkLocation2DRemoteHandler(vrpn_ConnectionPtr const &conn,
-                                    std::string const &deviceName,
-                                    boost::optional<OSVR_ChannelCount> sensor,
-                                    common::InterfaceList &ifaces)
+        NetworkLocation2DRemoteHandler(
+            vrpn_ConnectionPtr const &conn, std::string const &deviceName,
+            boost::optional<OSVR_ChannelCount> sensor,
+            common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
             auto location = common::Location2DComponent::create();
-			m_dev->addComponent(location);
+            m_dev->addComponent(location);
             location->registerLocationHandler(
                 [&](common::LocationData const &data,
                     util::time::TimeValue const &timestamp) {
                     m_handleLocation(data, timestamp);
                 });
-			OSVR_DEV_VERBOSE("Constructed an 2D-Location Handler for "
+            OSVR_DEV_VERBOSE("Constructed an 2D-Location Handler for "
                              << deviceName);
         }
 
@@ -77,8 +77,8 @@ namespace client {
 
       private:
         void m_handleLocation(common::LocationData const &data,
-                           util::time::TimeValue const &timestamp) {
-			if (!m_all && *m_sensor != data.sensor) {
+                              util::time::TimeValue const &timestamp) {
+            if (!m_all && *m_sensor != data.sensor) {
                 /// doesn't match our filter.
                 return;
             }
@@ -105,8 +105,7 @@ namespace client {
 
     shared_ptr<RemoteHandler> Location2DRemoteFactory::
     operator()(common::OriginalSource const &source,
-               common::InterfaceList &ifaces,
-				   common::ClientContext &ctx) {
+               common::InterfaceList &ifaces, common::ClientContext &ctx) {
 
         shared_ptr<RemoteHandler> ret;
 

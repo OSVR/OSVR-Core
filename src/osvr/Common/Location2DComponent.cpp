@@ -32,88 +32,89 @@
 
 // Library/third-party includes
 
-
 namespace osvr {
-	namespace common {
+namespace common {
 
-		namespace messages {
-			class LocationRecord::MessageSerialization {
-			public:
-				MessageSerialization(OSVR_Location2DState const &location,
-					OSVR_ChannelCount sensor)
-					: m_location(location),
-					m_sensor(sensor) {}
+    namespace messages {
+        class LocationRecord::MessageSerialization {
+          public:
+            MessageSerialization(OSVR_Location2DState const &location,
+                                 OSVR_ChannelCount sensor)
+                : m_location(location), m_sensor(sensor) {}
 
-				MessageSerialization() {}
+            MessageSerialization() {}
 
-				template <typename T> void processMessage(T &p) {
-					p(m_location);
-					p(m_sensor);
-				}
-				LocationData getData() const {
-					LocationData ret;
-					ret.sensor = m_sensor;
-					ret.location = m_location;
-					return ret;
-				}
+            template <typename T> void processMessage(T &p) {
+                p(m_location);
+                p(m_sensor);
+            }
+            LocationData getData() const {
+                LocationData ret;
+                ret.sensor = m_sensor;
+                ret.location = m_location;
+                return ret;
+            }
 
-			private:
-				OSVR_Location2DState m_location;
-				OSVR_ChannelCount m_sensor;
-			};
-			const char *LocationRecord::identifier() {
-				return "com.osvr.location2D.locationrecord";
-			}
-		} // namespace messages
+          private:
+            OSVR_Location2DState m_location;
+            OSVR_ChannelCount m_sensor;
+        };
+        const char *LocationRecord::identifier() {
+            return "com.osvr.location2D.locationrecord";
+        }
+    } // namespace messages
 
-		shared_ptr<Location2DComponent>
-			Location2DComponent::create(OSVR_ChannelCount numChan){
-			shared_ptr<Location2DComponent> ret(new Location2DComponent(numChan));
-			return ret;
-		}
+    shared_ptr<Location2DComponent>
+    Location2DComponent::create(OSVR_ChannelCount numChan) {
+        shared_ptr<Location2DComponent> ret(new Location2DComponent(numChan));
+        return ret;
+    }
 
-		Location2DComponent::Location2DComponent(OSVR_ChannelCount numChan)
-			: m_numSensor(numChan) {}
+    Location2DComponent::Location2DComponent(OSVR_ChannelCount numChan)
+        : m_numSensor(numChan) {}
 
-		void Location2DComponent::sendLocationData(OSVR_Location2DState location,
-												OSVR_ChannelCount sensor,
-												OSVR_TimeValue const &timestamp){
+    void
+    Location2DComponent::sendLocationData(OSVR_Location2DState location,
+                                          OSVR_ChannelCount sensor,
+                                          OSVR_TimeValue const &timestamp) {
 
-			Buffer<> buf;
-			messages::LocationRecord::MessageSerialization msg(location, sensor);
-			serialize(buf, msg);
+        Buffer<> buf;
+        messages::LocationRecord::MessageSerialization msg(location, sensor);
+        serialize(buf, msg);
 
-			m_getParent().packMessage(buf, locationRecord.getMessageType(), timestamp);
-		}
+        m_getParent().packMessage(buf, locationRecord.getMessageType(),
+                                  timestamp);
+    }
 
-		int VRPN_CALLBACK
-			Location2DComponent::m_handleLocationRecord(void *userdata, vrpn_HANDLERPARAM p) {
-			auto self = static_cast<Location2DComponent *>(userdata);
-			auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-				reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-			auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+    int VRPN_CALLBACK
+    Location2DComponent::m_handleLocationRecord(void *userdata,
+                                                vrpn_HANDLERPARAM p) {
+        auto self = static_cast<Location2DComponent *>(userdata);
+        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
+            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
+        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
 
-			messages::LocationRecord::MessageSerialization msg;
-			deserialize(bufReader, msg);
-			auto data = msg.getData();
-			auto timestamp = util::time::fromStructTimeval(p.msg_time);
+        messages::LocationRecord::MessageSerialization msg;
+        deserialize(bufReader, msg);
+        auto data = msg.getData();
+        auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
-			for (auto const &cb : self->m_cb) {
-				cb(data, timestamp);
-			}
-			return 0;
-		}
+        for (auto const &cb : self->m_cb) {
+            cb(data, timestamp);
+        }
+        return 0;
+    }
 
-		void Location2DComponent::registerLocationHandler(LocationHandler handler) {
-			if (m_cb.empty()) {
-				m_registerHandler(&Location2DComponent::m_handleLocationRecord, this,
-					locationRecord.getMessageType());
-			}
-			m_cb.push_back(handler);
-		}
-		void Location2DComponent::m_parentSet() {
-			m_getParent().registerMessageType(locationRecord);
-		}
+    void Location2DComponent::registerLocationHandler(LocationHandler handler) {
+        if (m_cb.empty()) {
+            m_registerHandler(&Location2DComponent::m_handleLocationRecord,
+                              this, locationRecord.getMessageType());
+        }
+        m_cb.push_back(handler);
+    }
+    void Location2DComponent::m_parentSet() {
+        m_getParent().registerMessageType(locationRecord);
+    }
 
-	} // namespace common
+} // namespace common
 } // namespace osvr

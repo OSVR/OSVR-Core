@@ -23,8 +23,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 // Internal Includes
 #include <osvr/Common/NormalizeDeviceDescriptor.h>
 
@@ -43,146 +41,138 @@
 #include <iostream>
 
 namespace osvr {
-	namespace common {
+namespace common {
 
-		static const char INTERFACES_KEY[] = "interfaces";
-		static const char EYETRACKER_KEY[] = "eyetracker";
-		static const char LOCATION2D_KEY[] = "location2D";
-		static const char DIRECTION_KEY[] = "direction";
-		static const char TRACKER_KEY[] = "tracker";
-		static const char BUTTON_KEY[] = "button";
-		static const char COUNT_KEY[] = "count";
-		static const char POSITION_KEY[] = "position";
-		static const char ORIENTATION_KEY[] = "orientation";
-		static const char BOUNDED_KEY[] = "bounded";
-		static const char TRUE[] = "true";
-		static const char FALSE[] = "false";
+    static const char INTERFACES_KEY[] = "interfaces";
+    static const char EYETRACKER_KEY[] = "eyetracker";
+    static const char LOCATION2D_KEY[] = "location2D";
+    static const char DIRECTION_KEY[] = "direction";
+    static const char TRACKER_KEY[] = "tracker";
+    static const char BUTTON_KEY[] = "button";
+    static const char COUNT_KEY[] = "count";
+    static const char POSITION_KEY[] = "position";
+    static const char ORIENTATION_KEY[] = "orientation";
+    static const char BOUNDED_KEY[] = "bounded";
+    static const char TRUE[] = "true";
+    static const char FALSE[] = "false";
 
+    /// @todo when appending interfaces you might encounter that there are
+    /// independent interfaces that are same as subinterfaces
+    /// for example, eyetracker device and tracker device plugin
+    /// eyetracker breaks down into 4 interfaces including tracker
+    /// so to avoid replacing tracker data, we need to safely merge them
+    void mergeIdenticalInterfaces(Json::Value &existingIface,
+                                  Json::Value &newIface,
+                                  std::string const &detail) {}
 
-		/// @todo when appending interfaces you might encounter that there are
-		/// independent interfaces that are same as subinterfaces
-		/// for example, eyetracker device and tracker device plugin
-		/// eyetracker breaks down into 4 interfaces including tracker
-		/// so to avoid replacing tracker data, we need to safely merge them
-		void mergeIdenticalInterfaces(Json::Value &existingIface, Json::Value &newIface,
-										std::string const &detail){
+    /// @brief appends json value for a given string
+    void appendCurrentIface(Json::Value &augInterface,
+                            Json::Value &currInterface) {
 
-		}
+        for (auto &detail : currInterface.getMemberNames()) {
+            Json::Value const &obj = augInterface[detail];
+            if (obj.isObject()) {
+                /// @todo mergeIdenticalInterfaces(currInterface, augInterface,
+                /// detail)
+            } else {
+                augInterface[detail] = currInterface[detail];
+            }
+        }
+    }
 
+    /// @brief For eyetracker, it will add the following interfaces to the
+    /// descriptor
+    /// provided that they are set to true :
+    /// OSVR_Direction, OSVR_Location2D, OSVR_Tracker, OSVR_Button
+    void normalizeForEyeTracker(Json::Value &descriptor,
+                                std::string const &ifaceName) {
 
-		/// @brief appends json value for a given string
-		void appendCurrentIface(Json::Value &augInterface, Json::Value &currInterface){
+        // step into the interfaces object
+        Json::Value const &iface = descriptor[INTERFACES_KEY][ifaceName];
 
-			for (auto &detail : currInterface.getMemberNames()){
-				Json::Value const &obj = augInterface[detail];
-				if (obj.isObject()){
-					/// @todo mergeIdenticalInterfaces(currInterface, augInterface, detail)
-				}
-				else{
-					augInterface[detail] = currInterface[detail];
-				}
-			}
-		}
+        // hold the count for eyetracker sensors to initialize
+        int count = descriptor[INTERFACES_KEY][ifaceName][COUNT_KEY].asInt();
 
-		/// @brief For eyetracker, it will add the following interfaces to the descriptor
-		/// provided that they are set to true :
-		/// OSVR_Direction, OSVR_Location2D, OSVR_Tracker, OSVR_Button
-		void  normalizeForEyeTracker(Json::Value &descriptor, std::string const &ifaceName){
+        // if we couldn't find count then return
+        if (!count) {
+            return;
+        }
 
-			// step into the interfaces object
-			Json::Value const &iface = descriptor[INTERFACES_KEY][ifaceName];
+        Json::Value augInterfaces;
+        // go thru details of interface and
+        for (auto &subIface : iface.getMemberNames()) {
+            // check if subinterface is set to true
+            bool enabled =
+                descriptor[INTERFACES_KEY][ifaceName][subIface].asBool();
 
-			//hold the count for eyetracker sensors to initialize
-			int count = descriptor[INTERFACES_KEY][ifaceName][COUNT_KEY].asInt();
+            if (enabled) {
 
-			//if we couldn't find count then return
-			if (!count){
-				return;
-			}
+                if (boost::iequals(subIface, LOCATION2D_KEY)) {
+                    augInterfaces[LOCATION2D_KEY][COUNT_KEY] = count;
+                } else if (boost::iequals(subIface, DIRECTION_KEY)) {
+                    augInterfaces[DIRECTION_KEY][COUNT_KEY] = count;
+                } else if (boost::iequals(subIface, TRACKER_KEY)) {
 
-			Json::Value augInterfaces;
- 			// go thru details of interface and
-			for (auto &subIface : iface.getMemberNames()){
-				//check if subinterface is set to true
-				bool enabled = descriptor[INTERFACES_KEY][ifaceName][subIface].asBool();
+                    augInterfaces[TRACKER_KEY][POSITION_KEY] = TRUE;
+                    augInterfaces[TRACKER_KEY][ORIENTATION_KEY] = FALSE;
+                    augInterfaces[TRACKER_KEY][BOUNDED_KEY] = TRUE;
+                    augInterfaces[TRACKER_KEY][COUNT_KEY] = count;
+                } else if (boost::iequals(subIface, BUTTON_KEY)) {
+                    augInterfaces[BUTTON_KEY][COUNT_KEY] = count;
+                } else {
+                    continue;
+                }
+            }
+        }
 
-				if (enabled){
+        if (augInterfaces != NULL) {
+            Json::Value &currInterfaces = descriptor[INTERFACES_KEY];
 
+            appendCurrentIface(augInterfaces, currInterfaces);
+            descriptor[INTERFACES_KEY] = augInterfaces;
+        }
+    }
 
+    /// @todo process for tracker interface
 
-					if (boost::iequals(subIface, LOCATION2D_KEY)){
-						augInterfaces[LOCATION2D_KEY][COUNT_KEY] = count;
-					}
-					else if (boost::iequals(subIface, DIRECTION_KEY)){
-						augInterfaces[DIRECTION_KEY][COUNT_KEY] = count;
-					}
-					else if (boost::iequals(subIface, TRACKER_KEY)){
+    std::string const
+    normalizeDeviceDescriptor(std::string const &jsonDescriptor) {
 
-						augInterfaces[TRACKER_KEY][POSITION_KEY] = TRUE;
-						augInterfaces[TRACKER_KEY][ORIENTATION_KEY] = FALSE;
-						augInterfaces[TRACKER_KEY][BOUNDED_KEY] = TRUE;
-						augInterfaces[TRACKER_KEY][COUNT_KEY] = count;
-					}
-					else if (boost::iequals(subIface, BUTTON_KEY)){
-						augInterfaces[BUTTON_KEY][COUNT_KEY] = count;
-					}
-					else{
-						continue;
-					}
-				}
-			}
+        Json::Value descriptor;
+        {
+            Json::Reader reader;
+            if (!reader.parse(jsonDescriptor, descriptor)) {
+                /// if can't parse as json then leave unchanged, err will be
+                /// handler later
+                return jsonDescriptor;
+            }
+        }
+        /// no interfaces member so don't chanage anything
+        if (!descriptor.isMember(INTERFACES_KEY)) {
+            return jsonDescriptor;
+        }
 
-			if (augInterfaces != NULL){
-				Json::Value &currInterfaces = descriptor[INTERFACES_KEY];
+        Json::Value const &ifaceNames = descriptor[INTERFACES_KEY];
 
-				appendCurrentIface(augInterfaces, currInterfaces);
-				descriptor[INTERFACES_KEY] = augInterfaces;
-			}
-		}
+        // interfaces member isn't an object
+        if (!ifaceNames.isObject()) {
+            return jsonDescriptor;
+        }
 
-		/// @todo process for tracker interface
+        for (auto const &ifaceName : ifaceNames.getMemberNames()) {
 
-		std::string const normalizeDeviceDescriptor(std::string const &jsonDescriptor){
+            if (boost::iequals(ifaceName, EYETRACKER_KEY)) {
+                normalizeForEyeTracker(descriptor, ifaceName);
+            } else if (boost::iequals(ifaceName, TRACKER_KEY)) {
+                /// @todo for tracker
+            } else {
+                /// @todo for future interfaces
+            }
+        }
 
-			Json::Value descriptor;
-			{
-				Json::Reader reader;
-				if (!reader.parse(jsonDescriptor, descriptor)){
-					/// if can't parse as json then leave unchanged, err will be handler later
-					return jsonDescriptor;
-				}
-			}
-			/// no interfaces member so don't chanage anything
-			if (!descriptor.isMember(INTERFACES_KEY)){
-				return jsonDescriptor;
-			}
+        const std::string normalizedDescriptor = descriptor.toStyledString();
+        return normalizedDescriptor;
+    }
 
-			Json::Value const &ifaceNames = descriptor[INTERFACES_KEY];
-
-			// interfaces member isn't an object
-			if (!ifaceNames.isObject()){
-				return jsonDescriptor;
-			}
-
-			for (auto const &ifaceName : ifaceNames.getMemberNames()){
-
-				if (boost::iequals(ifaceName, EYETRACKER_KEY)){
-					normalizeForEyeTracker(descriptor, ifaceName);
-				}
-				else if (boost::iequals(ifaceName, TRACKER_KEY)){
-					/// @todo for tracker
-				}
-				else{
-					/// @todo for future interfaces
-				}
-			}
-
-			const std::string normalizedDescriptor = descriptor.toStyledString();
-			return normalizedDescriptor;
-		}
-
-
-
-
-	} // namespace common
+} // namespace common
 } // namespace osvr

@@ -48,20 +48,20 @@ namespace client {
     class NetworkDirectionRemoteHandler : public RemoteHandler {
       public:
         NetworkDirectionRemoteHandler(vrpn_ConnectionPtr const &conn,
-                                    std::string const &deviceName,
-                                    boost::optional<OSVR_ChannelCount> sensor,
-                                    common::InterfaceList &ifaces)
+                                      std::string const &deviceName,
+                                      boost::optional<OSVR_ChannelCount> sensor,
+                                      common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
             auto direction = common::DirectionComponent::create();
-			m_dev->addComponent(direction);
+            m_dev->addComponent(direction);
             direction->registerDirectionHandler(
                 [&](common::DirectionData const &data,
                     util::time::TimeValue const &timestamp) {
                     m_handleDirection(data, timestamp);
                 });
-			OSVR_DEV_VERBOSE("Constructed an Direction Handler for "
+            OSVR_DEV_VERBOSE("Constructed an Direction Handler for "
                              << deviceName);
         }
 
@@ -77,8 +77,8 @@ namespace client {
 
       private:
         void m_handleDirection(common::DirectionData const &data,
-                           util::time::TimeValue const &timestamp) {
-			if (!m_all && *m_sensor != data.sensor) {
+                               util::time::TimeValue const &timestamp) {
+            if (!m_all && *m_sensor != data.sensor) {
                 /// doesn't match our filter.
                 return;
             }
@@ -105,8 +105,7 @@ namespace client {
 
     shared_ptr<RemoteHandler> DirectionRemoteFactory::
     operator()(common::OriginalSource const &source,
-               common::InterfaceList &ifaces,
-				   common::ClientContext &ctx) {
+               common::InterfaceList &ifaces, common::ClientContext &ctx) {
 
         shared_ptr<RemoteHandler> ret;
 

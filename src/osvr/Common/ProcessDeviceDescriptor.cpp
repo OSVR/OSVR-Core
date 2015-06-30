@@ -63,7 +63,7 @@ namespace common {
         }
 
         Json::Value const &ifaces = desc[INTERFACES_KEY];
-		if (!ifaces.isObject()) {
+        if (!ifaces.isObject()) {
             // Interfaces member isn't an object
             return changed;
         }
@@ -175,14 +175,15 @@ namespace common {
             changed.set();
         }
 
-		/// normalize device descriptor
-		const std::string normalizedDescriptor = normalizeDeviceDescriptor(jsonDescriptor);
+        /// normalize device descriptor
+        const std::string normalizedDescriptor =
+            normalizeDeviceDescriptor(jsonDescriptor);
 
         /// Parse JSON
         Json::Value descriptor;
         {
             Json::Reader reader;
-			if (!reader.parse(normalizedDescriptor, descriptor)) {
+            if (!reader.parse(normalizedDescriptor, descriptor)) {
                 /// @todo warn about failed descriptor parse?
                 return changed.get();
             }

@@ -493,24 +493,24 @@ namespace common {
             }
         };
 
-		template <>
-		struct SimpleStructSerialization<OSVR_Vec2>
-			: SimpleStructSerializationBase{
-			template <typename F, typename T> static void apply(F &f, T &val) {
-				f(val.data[0]);
-				f(val.data[1]);
-			}
-		};
+        template <>
+        struct SimpleStructSerialization<OSVR_Vec2>
+            : SimpleStructSerializationBase {
+            template <typename F, typename T> static void apply(F &f, T &val) {
+                f(val.data[0]);
+                f(val.data[1]);
+            }
+        };
 
-		template <>
-		struct SimpleStructSerialization<OSVR_Vec3>
-			: SimpleStructSerializationBase{
-			template <typename F, typename T> static void apply(F &f, T &val) {
-				f(val.data[0]);
-				f(val.data[1]);
-				f(val.data[2]);
-			}
-		};
+        template <>
+        struct SimpleStructSerialization<OSVR_Vec3>
+            : SimpleStructSerializationBase {
+            template <typename F, typename T> static void apply(F &f, T &val) {
+                f(val.data[0]);
+                f(val.data[1]);
+                f(val.data[2]);
+            }
+        };
     } // namespace serialization
 
 } // namespace common

@@ -33,36 +33,34 @@
 #include <iostream>
 #include <string>
 
+void printLocation2DReport(const OSVR_Location2DReport *report) {
 
-void printLocation2DReport(const OSVR_Location2DReport *report){
-
-    
-	std::cout << 
-		report->location.data[0] << "; " <<
-		report->location.data[1] << "\t" << std::endl;	
-
+    std::cout << report->location.data[0] << "; " << report->location.data[1]
+              << "\t" << std::endl;
 }
 
 void location2DCallback(void * /*userdata*/,
-						const OSVR_TimeValue * /*timestamp*/ ,
-					 const OSVR_Location2DReport *report) {
-	std::cout << "Got 2D Location Report, for sensor #" << report->sensor << std::endl;
-		printLocation2DReport(report);
+                        const OSVR_TimeValue * /*timestamp*/,
+                        const OSVR_Location2DReport *report) {
+    std::cout << "Got 2D Location Report, for sensor #" << report->sensor
+              << std::endl;
+    printLocation2DReport(report);
 }
 
-
 int main() {
-    osvr::clientkit::ClientContext context("com.osvr.exampleclients.Location2DCallback");
+    osvr::clientkit::ClientContext context(
+        "com.osvr.exampleclients.Location2DCallback");
 
-    osvr::clientkit::Interface location = context.getInterface("/com_osvr_EyeTracker/EyeTracker/eyetracker");
+    osvr::clientkit::Interface location =
+        context.getInterface("/com_osvr_Multi/Location2D/location2D");
 
-	location.registerCallback(&location2DCallback, NULL);
+    location.registerCallback(&location2DCallback, NULL);
 
-	// Pretend that this is your application's mainloop.
+    // Pretend that this is your application's mainloop.
     while (1) {
         context.update();
     }
-	
+
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }

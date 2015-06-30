@@ -44,144 +44,139 @@
 // - none
 
 struct OSVR_EyeTrackerDeviceInterfaceObject {
-	osvr::common::EyeTrackerComponent *eyetracker;
-	osvr::common::Location2DComponent *location;
-	osvr::common::DirectionComponent *direction;
-	PointerWrapper<osvr::connection::ButtonServerInterface> button;
-	PointerWrapper<osvr::connection::TrackerServerInterface> tracker;
+    osvr::common::EyeTrackerComponent *eyetracker;
+    osvr::common::Location2DComponent *location;
+    osvr::common::DirectionComponent *direction;
+    PointerWrapper<osvr::connection::ButtonServerInterface> button;
+    PointerWrapper<osvr::connection::TrackerServerInterface> tracker;
 };
 
+OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
+    OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+    OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
+    OSVR_IN OSVR_ChannelCount numChan) {
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
-OSVR_IN OSVR_ChannelCount numChan) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", opts);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", iface);
+    OSVR_EyeTrackerDeviceInterface ifaceObj =
+        opts->getContext()->registerDataWithGenericDelete(
+            new OSVR_EyeTrackerDeviceInterfaceObject);
+    *iface = ifaceObj;
 
-	OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", opts);
-	OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", iface);
-	OSVR_EyeTrackerDeviceInterface ifaceObj =
-		opts->getContext()->registerDataWithGenericDelete(
-		new OSVR_EyeTrackerDeviceInterfaceObject);
-	*iface = ifaceObj;
+    auto location = osvr::common::Location2DComponent::create();
+    ifaceObj->location = location.get();
+    opts->addComponent(location);
 
-	auto location = osvr::common::Location2DComponent::create();
-	ifaceObj->location = location.get();
-	opts->addComponent(location);
+    auto direction = osvr::common::DirectionComponent::create();
+    ifaceObj->direction = direction.get();
+    opts->addComponent(direction);
 
-	auto direction = osvr::common::DirectionComponent::create();
-	ifaceObj->direction = direction.get();
-	opts->addComponent(direction);
+    auto eyetracker = osvr::common::EyeTrackerComponent::create();
+    ifaceObj->eyetracker = eyetracker.get();
+    opts->addComponent(eyetracker);
 
-	auto eyetracker = osvr::common::EyeTrackerComponent::create();
-	ifaceObj->eyetracker = eyetracker.get();
-	opts->addComponent(eyetracker);
+    opts->setButtons(numChan, ifaceObj->button.getContainerLocation());
+    opts->setTracker(ifaceObj->tracker.getContainerLocation());
 
-	opts->setButtons(numChan, ifaceObj->button.getContainerLocation());
-	opts->setTracker(ifaceObj->tracker.getContainerLocation());
-
-	return OSVR_RETURN_SUCCESS;
+    return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReport2DGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazePosition2DState *gazePosition,
-OSVR_IN OSVR_ChannelCount chan,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_EyeGazePosition2DState *gazePosition,
+    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
+    auto guard = dev->getSendGuard();
+    if (guard->lock()) {
+        iface->location->sendLocationData(*gazePosition, chan, *timestamp);
+        iface->eyetracker->sendNotification(chan, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
 
-	auto guard = dev->getSendGuard();
-	if (guard->lock()) {
-		iface->location->sendLocationData(*gazePosition, chan, *timestamp);
-		iface->eyetracker->sendNotification(chan, *timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
-
-	return OSVR_RETURN_FAILURE;
+    return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReport3DGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
-OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
-OSVR_IN OSVR_ChannelCount chan,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-	auto guard = dev->getSendGuard();
-	if (guard->lock()) {
-		iface->direction->sendDirectionData(*gazeDirection, chan, *timestamp);
-		iface->tracker->sendReport(*gazeBasePoint, chan, *timestamp);
-		iface->eyetracker->sendNotification(chan, *timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
+OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
+    OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
+    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    auto guard = dev->getSendGuard();
+    if (guard->lock()) {
+        iface->direction->sendDirectionData(*gazeDirection, chan, *timestamp);
+        iface->tracker->sendReport(*gazeBasePoint, chan, *timestamp);
+        iface->eyetracker->sendNotification(chan, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
 
-	return OSVR_RETURN_FAILURE;
+    return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGazeBasePoint(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
-OSVR_IN OSVR_ChannelCount chan,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-	auto guard = dev->getSendGuard();
-	if (guard->lock()) {
-		iface->tracker->sendReport(*gazeBasePoint, chan, *timestamp);
-		iface->eyetracker->sendNotification(chan, *timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
+OSVR_ReturnCode osvrDeviceEyeTrackerReportGazeBasePoint(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
+    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    auto guard = dev->getSendGuard();
+    if (guard->lock()) {
+        iface->tracker->sendReport(*gazeBasePoint, chan, *timestamp);
+        iface->eyetracker->sendNotification(chan, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
 
-	return OSVR_RETURN_FAILURE;
+    return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGazeDirection(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
-OSVR_IN OSVR_ChannelCount chan,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp){
+OSVR_ReturnCode osvrDeviceEyeTrackerReportGazeDirection(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
+    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-	auto guard = dev->getSendGuard();
-	if (guard->lock()) {
-		iface->direction->sendDirectionData(*gazeDirection, chan, *timestamp);
-		iface->eyetracker->sendNotification(chan, *timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
+    auto guard = dev->getSendGuard();
+    if (guard->lock()) {
+        iface->direction->sendDirectionData(*gazeDirection, chan, *timestamp);
+        iface->eyetracker->sendNotification(chan, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
 
-	return OSVR_RETURN_FAILURE;
+    return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReportBlink(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeTrackerBlinkState blink,
-OSVR_IN OSVR_ChannelCount chan,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp){
+OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-	iface->button->setValue(blink, chan, *timestamp);
-	iface->eyetracker->sendNotification(chan, *timestamp);
-	return OSVR_RETURN_SUCCESS;
+    iface->button->setValue(blink, chan, *timestamp);
+    iface->eyetracker->sendNotification(chan, *timestamp);
+    return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-OSVR_IN_PTR OSVR_EyeGazePosition2DState *gazePosition,
-OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
-OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
-OSVR_IN OSVR_ChannelCount chan,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp){
+OSVR_ReturnCode osvrDeviceEyeTrackerReportGaze(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_EyeGazePosition2DState *gazePosition,
+    OSVR_IN_PTR OSVR_EyeGazeDirectionState *gazeDirection,
+    OSVR_IN_PTR OSVR_EyeGazeBasePoint3DState *gazeBasePoint,
+    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-	auto guard = dev->getSendGuard();
-	if (guard->lock()) {
-		iface->location->sendLocationData(*gazePosition, chan, *timestamp);
-		iface->tracker->sendReport(*gazeBasePoint, chan, *timestamp);
-		iface->direction->sendDirectionData(*gazeDirection, chan, *timestamp);
-		iface->eyetracker->sendNotification(chan, *timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
+    auto guard = dev->getSendGuard();
+    if (guard->lock()) {
+        iface->location->sendLocationData(*gazePosition, chan, *timestamp);
+        iface->tracker->sendReport(*gazeBasePoint, chan, *timestamp);
+        iface->direction->sendDirectionData(*gazeDirection, chan, *timestamp);
+        iface->eyetracker->sendNotification(chan, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
 
-	return OSVR_RETURN_FAILURE;
-
-
+    return OSVR_RETURN_FAILURE;
 }

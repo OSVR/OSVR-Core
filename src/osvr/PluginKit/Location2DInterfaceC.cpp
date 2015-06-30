@@ -40,37 +40,38 @@
 // - none
 
 struct OSVR_Location2D_DeviceInterfaceObject {
-	osvr::common::Location2DComponent *location;
+    osvr::common::Location2DComponent *location;
 };
 
-OSVR_ReturnCode
-osvrDeviceLocation2DConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-OSVR_OUT_PTR OSVR_Location2D_DeviceInterface *iface,
-OSVR_IN OSVR_ChannelCount numSensors) {
+OSVR_ReturnCode osvrDeviceLocation2DConfigure(
+    OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+    OSVR_OUT_PTR OSVR_Location2D_DeviceInterface *iface,
+    OSVR_IN OSVR_ChannelCount numSensors) {
 
-	OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceLocation2DConfigure", opts);
-	OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceLocation2DConfigure", iface);
-	OSVR_Location2D_DeviceInterface ifaceObj =
-		opts->getContext()->registerDataWithGenericDelete(
-		new OSVR_Location2D_DeviceInterfaceObject);
-	*iface = ifaceObj;
-	auto location = osvr::common::Location2DComponent::create(numSensors);
-	ifaceObj->location = location.get();
-	opts->addComponent(location);
-	return OSVR_RETURN_SUCCESS;
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceLocation2DConfigure", opts);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceLocation2DConfigure", iface);
+    OSVR_Location2D_DeviceInterface ifaceObj =
+        opts->getContext()->registerDataWithGenericDelete(
+            new OSVR_Location2D_DeviceInterfaceObject);
+    *iface = ifaceObj;
+    auto location = osvr::common::Location2DComponent::create(numSensors);
+    ifaceObj->location = location.get();
+    opts->addComponent(location);
+    return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode
 osvrDeviceLocation2DReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
-OSVR_IN_PTR OSVR_Location2D_DeviceInterface iface,
-OSVR_IN_PTR OSVR_Location2DState locationData,
-OSVR_IN OSVR_ChannelCount sensor,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-	auto guard = dev->getSendGuard();
-	if (guard->lock()) {
-		iface->location->sendLocationData(locationData, sensor, *timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
+                               OSVR_IN_PTR OSVR_Location2D_DeviceInterface
+                                   iface,
+                               OSVR_IN_PTR OSVR_Location2DState locationData,
+                               OSVR_IN OSVR_ChannelCount sensor,
+                               OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    auto guard = dev->getSendGuard();
+    if (guard->lock()) {
+        iface->location->sendLocationData(locationData, sensor, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
 
-	return OSVR_RETURN_FAILURE;
+    return OSVR_RETURN_FAILURE;
 }

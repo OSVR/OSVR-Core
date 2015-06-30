@@ -26,7 +26,6 @@
 #ifndef INCLUDED_EyeTrackerComponent_h_GUID_68C4C9C6_84AF_43AC_1392_008C04EFAF0D
 #define INCLUDED_EyeTrackerComponent_h_GUID_68C4C9C6_84AF_43AC_1392_008C04EFAF0D
 
-
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
@@ -41,57 +40,56 @@
 // - none
 
 namespace osvr {
-	namespace common {
+namespace common {
 
-		struct OSVR_EyeNotification {
-			OSVR_ChannelCount sensor;
-		};
+    struct OSVR_EyeNotification {
+        OSVR_ChannelCount sensor;
+    };
 
-		namespace messages {
-			class EyeRegion : public MessageRegistration<EyeRegion> {
-			public:
-				class MessageSerialization;
+    namespace messages {
+        class EyeRegion : public MessageRegistration<EyeRegion> {
+          public:
+            class MessageSerialization;
 
-				static const char *identifier();
-			};
+            static const char *identifier();
+        };
 
-		} // namespace messages
+    } // namespace messages
 
-		/// @brief BaseDevice component
-		class EyeTrackerComponent : public DeviceComponent {
-		public:
-			/// @brief Factory method
-			///
-			/// Required to ensure that allocation and deallocation stay on the same
-			/// side of a DLL line.
-			static OSVR_COMMON_EXPORT shared_ptr<EyeTrackerComponent>
-				create(OSVR_ChannelCount numSensor = 2);
+    /// @brief BaseDevice component
+    class EyeTrackerComponent : public DeviceComponent {
+      public:
+        /// @brief Factory method
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        static OSVR_COMMON_EXPORT shared_ptr<EyeTrackerComponent>
+        create(OSVR_ChannelCount numSensor = 2);
 
-			/// @brief Message from server to client, containing eye data.
-			messages::EyeRegion eyeRegion;
+        /// @brief Message from server to client, containing eye data.
+        messages::EyeRegion eyeRegion;
 
-			OSVR_COMMON_EXPORT void sendNotification(
-				OSVR_ChannelCount sensor,
-				OSVR_TimeValue const &timestamp);
+        OSVR_COMMON_EXPORT void
+        sendNotification(OSVR_ChannelCount sensor,
+                         OSVR_TimeValue const &timestamp);
 
-			typedef std::function<void(OSVR_EyeNotification const &,
-				util::time::TimeValue const &)> EyeHandler;
-			OSVR_COMMON_EXPORT void registerEyeHandler(EyeHandler cb);
+        typedef std::function<void(OSVR_EyeNotification const &,
+                                   util::time::TimeValue const &)> EyeHandler;
+        OSVR_COMMON_EXPORT void registerEyeHandler(EyeHandler cb);
 
-		private:
-			EyeTrackerComponent(OSVR_ChannelCount numChan);
-			virtual void m_parentSet();
+      private:
+        EyeTrackerComponent(OSVR_ChannelCount numChan);
+        virtual void m_parentSet();
 
-			static int VRPN_CALLBACK
-				m_handleEyeRegion(void *userdata, vrpn_HANDLERPARAM p);
+        static int VRPN_CALLBACK
+        m_handleEyeRegion(void *userdata, vrpn_HANDLERPARAM p);
 
-			OSVR_ChannelCount m_numSensor;
-			std::vector<EyeHandler> m_cb;
-			bool m_gotOne;
-		};
+        OSVR_ChannelCount m_numSensor;
+        std::vector<EyeHandler> m_cb;
+        bool m_gotOne;
+    };
 
-	} // namespace common
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_EyeTrackerComponent_h_GUID_68C4C9C6_84AF_43AC_1392_008C04EFAF0D
-

@@ -32,88 +32,90 @@
 
 // Library/third-party includes
 
-
 namespace osvr {
-	namespace common {
+namespace common {
 
-		namespace messages {
-			class DirectionRecord::MessageSerialization {
-			public:
-				MessageSerialization(OSVR_DirectionState const &direction,
-					OSVR_ChannelCount sensor)
-					: m_direction(direction),
-					m_sensor(sensor) {}
+    namespace messages {
+        class DirectionRecord::MessageSerialization {
+          public:
+            MessageSerialization(OSVR_DirectionState const &direction,
+                                 OSVR_ChannelCount sensor)
+                : m_direction(direction), m_sensor(sensor) {}
 
-				MessageSerialization() {}
+            MessageSerialization() {}
 
-				template <typename T> void processMessage(T &p) {
-					p(m_direction);
-					p(m_sensor);
-				}
-				DirectionData getData() const {
-					DirectionData ret;
-					ret.sensor = m_sensor;
-					ret.direction = m_direction;
-					return ret;
-				}
+            template <typename T> void processMessage(T &p) {
+                p(m_direction);
+                p(m_sensor);
+            }
+            DirectionData getData() const {
+                DirectionData ret;
+                ret.sensor = m_sensor;
+                ret.direction = m_direction;
+                return ret;
+            }
 
-			private:
-				OSVR_DirectionState m_direction;
-				OSVR_ChannelCount m_sensor;
-			};
-			const char *DirectionRecord::identifier() {
-				return "com.osvr.direction.directionrecord";
-			}
-		} // namespace messages
+          private:
+            OSVR_DirectionState m_direction;
+            OSVR_ChannelCount m_sensor;
+        };
+        const char *DirectionRecord::identifier() {
+            return "com.osvr.direction.directionrecord";
+        }
+    } // namespace messages
 
-		shared_ptr<DirectionComponent>
-			DirectionComponent::create(OSVR_ChannelCount numChan){
-			shared_ptr<DirectionComponent> ret(new DirectionComponent(numChan));
-			return ret;
-		}
+    shared_ptr<DirectionComponent>
+    DirectionComponent::create(OSVR_ChannelCount numChan) {
+        shared_ptr<DirectionComponent> ret(new DirectionComponent(numChan));
+        return ret;
+    }
 
-		DirectionComponent::DirectionComponent(OSVR_ChannelCount numChan)
-			: m_numSensor(numChan) {}
+    DirectionComponent::DirectionComponent(OSVR_ChannelCount numChan)
+        : m_numSensor(numChan) {}
 
-		void DirectionComponent::sendDirectionData(OSVR_DirectionState direction,
-												OSVR_ChannelCount sensor,
-												OSVR_TimeValue const &timestamp){
+    void
+    DirectionComponent::sendDirectionData(OSVR_DirectionState direction,
+                                          OSVR_ChannelCount sensor,
+                                          OSVR_TimeValue const &timestamp) {
 
-			Buffer<> buf;
-			messages::DirectionRecord::MessageSerialization msg(direction, sensor);
-			serialize(buf, msg);
+        Buffer<> buf;
+        messages::DirectionRecord::MessageSerialization msg(direction, sensor);
+        serialize(buf, msg);
 
-			m_getParent().packMessage(buf, directionRecord.getMessageType(), timestamp);
-		}
+        m_getParent().packMessage(buf, directionRecord.getMessageType(),
+                                  timestamp);
+    }
 
-		int VRPN_CALLBACK
-			DirectionComponent::m_handleDirectionRecord(void *userdata, vrpn_HANDLERPARAM p) {
-			auto self = static_cast<DirectionComponent *>(userdata);
-			auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-				reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-			auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+    int VRPN_CALLBACK
+    DirectionComponent::m_handleDirectionRecord(void *userdata,
+                                                vrpn_HANDLERPARAM p) {
+        auto self = static_cast<DirectionComponent *>(userdata);
+        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
+            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
+        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
 
-			messages::DirectionRecord::MessageSerialization msg;
-			deserialize(bufReader, msg);
-			auto data = msg.getData();
-			auto timestamp = util::time::fromStructTimeval(p.msg_time);
+        messages::DirectionRecord::MessageSerialization msg;
+        deserialize(bufReader, msg);
+        auto data = msg.getData();
+        auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
-			for (auto const &cb : self->m_cb) {
-				cb(data, timestamp);
-			}
-			return 0;
-		}
+        for (auto const &cb : self->m_cb) {
+            cb(data, timestamp);
+        }
+        return 0;
+    }
 
-		void DirectionComponent::registerDirectionHandler(DirectionHandler handler) {
-			if (m_cb.empty()) {
-				m_registerHandler(&DirectionComponent::m_handleDirectionRecord, this,
-					directionRecord.getMessageType());
-			}
-			m_cb.push_back(handler);
-		}
-		void DirectionComponent::m_parentSet() {
-			m_getParent().registerMessageType(directionRecord);
-		}
+    void
+    DirectionComponent::registerDirectionHandler(DirectionHandler handler) {
+        if (m_cb.empty()) {
+            m_registerHandler(&DirectionComponent::m_handleDirectionRecord,
+                              this, directionRecord.getMessageType());
+        }
+        m_cb.push_back(handler);
+    }
+    void DirectionComponent::m_parentSet() {
+        m_getParent().registerMessageType(directionRecord);
+    }
 
-	} // namespace common
+} // namespace common
 } // namespace osvr

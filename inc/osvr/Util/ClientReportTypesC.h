@@ -123,55 +123,57 @@ typedef struct OSVR_AnalogReport {
     OSVR_AnalogState state;
 } OSVR_AnalogReport;
 
-/** @brief Type of location within a 2D region, in normalized display coordinates
-	(in range [0, 1] in standard OSVR coordinate system)*/
+/** @brief Type of location within a 2D region, in normalized display
+   coordinates
+    (in range [0, 1] in standard OSVR coordinate system)*/
 typedef OSVR_Vec2 OSVR_Location2DState;
 
 /** @brief Report type for 2D location */
-typedef struct OSVR_Location2DReport{
-OSVR_ChannelCount sensor;
-OSVR_Location2DState location;
+typedef struct OSVR_Location2DReport {
+    OSVR_ChannelCount sensor;
+    OSVR_Location2DState location;
 } OSVR_Location2DReport;
 
 /** @brief Type of unit directional vector in 3D with no particular origin*/
 typedef OSVR_Vec3 OSVR_DirectionState;
 
 /** @brief Report type for 3D Direction vector */
-typedef struct OSVR_DirectionReport{
-OSVR_ChannelCount sensor;
-OSVR_DirectionState direction;
+typedef struct OSVR_DirectionReport {
+    OSVR_ChannelCount sensor;
+    OSVR_DirectionState direction;
 } OSVR_DirectionReport;
 
+// types for eye tracker reports
 
-
-//types for eye tracker reports
-
-/** @brief Type of eye gaze direction in 3D which contains 3D vector (position) containing gaze
+/** @brief Type of eye gaze direction in 3D which contains 3D vector (position)
+containing gaze
 base point of the user's respective eye in 3D device coordinates. */
 typedef OSVR_PositionState OSVR_EyeGazeBasePoint3DState;
 
-/** @brief Type of eye gaze position in 2D which contains users's gaze/point of regard
-in normalized display coordinates (in range [0, 1] in standard OSVR coordinate system)*/
+/** @brief Type of eye gaze position in 2D which contains users's gaze/point of
+regard
+in normalized display coordinates (in range [0, 1] in standard OSVR coordinate
+system)*/
 typedef OSVR_Location2DState OSVR_EyeGazePosition2DState;
 
-//typedef OSVR_DirectionState OSVR_EyeGazeBasePoint3DState;
+// typedef OSVR_DirectionState OSVR_EyeGazeBasePoint3DState;
 
-/** @brief Type of 3D vector (direction vector) containing the normalized gaze direction of user's respective eye */
+/** @brief Type of 3D vector (direction vector) containing the normalized gaze
+ * direction of user's respective eye */
 typedef OSVR_DirectionState OSVR_EyeGazeDirectionState;
 
-
 /** @brief State for 3D gaze report */
-typedef struct OSVR_EyeTracker3DState{
-	OSVR_DirectionState direction;
-	OSVR_PositionState basePoint;
+typedef struct OSVR_EyeTracker3DState {
+    OSVR_DirectionState direction;
+    OSVR_PositionState basePoint;
 } OSVR_EyeTracker3DState;
 
 /** @brief Report type for 3D gaze report */
 typedef struct OSVR_EyeTracker3DReport {
-	bool directionValid;
-	bool basePointValid;
-	OSVR_ChannelCount sensor;
-	OSVR_EyeTracker3DState state;
+    bool directionValid;
+    bool basePointValid;
+    OSVR_ChannelCount sensor;
+    OSVR_EyeTracker3DState state;
 } OSVR_EyeTracker3DReport;
 
 /** @brief State for 2D location report */
@@ -179,22 +181,22 @@ typedef OSVR_Location2DState OSVR_EyeTracker2DState;
 
 /** @brief Report type for 2D location report */
 typedef struct OSVR_EyeTracker2DReport {
-	bool locationValid;
-	OSVR_ChannelCount sensor;
-	OSVR_EyeTracker2DState state;
+    bool locationValid;
+    OSVR_ChannelCount sensor;
+    OSVR_EyeTracker2DState state;
 } OSVR_EyeTracker2DReport;
 
 /** @brief State for a blink event */
 typedef OSVR_ButtonState OSVR_EyeTrackerBlinkState;
 
 /** @brief Report type for a blink event */
-typedef struct OSVR_EyeTrackerBlinkReport{
-	bool blinkValid;
-	OSVR_ChannelCount sensor;
-	OSVR_EyeTrackerBlinkState state;
+typedef struct OSVR_EyeTrackerBlinkReport {
+    bool blinkValid;
+    OSVR_ChannelCount sensor;
+    OSVR_EyeTrackerBlinkState state;
 } OSVR_EyeTrackerBlinkReport;
 
-//end Eye Tracker types
+// end Eye Tracker types
 
 /** @brief Report type for an Imaging callback (forward declaration) */
 struct OSVR_ImagingReport;

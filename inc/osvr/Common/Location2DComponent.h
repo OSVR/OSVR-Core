@@ -26,7 +26,6 @@
 #ifndef INCLUDED_Location2DComponent_h_GUID_A831481F_0257_449A_6404_3B789BD89CEF
 #define INCLUDED_Location2DComponent_h_GUID_A831481F_0257_449A_6404_3B789BD89CEF
 
-
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
@@ -41,61 +40,61 @@
 // - none
 
 namespace osvr {
-	namespace common {
-		
-		struct LocationData {
-			OSVR_ChannelCount sensor;
-			OSVR_Location2DState location;
-		};
+namespace common {
 
-		namespace messages {
-			class LocationRecord : public MessageRegistration<LocationRecord> {
-			public:
-				class MessageSerialization;
+    struct LocationData {
+        OSVR_ChannelCount sensor;
+        OSVR_Location2DState location;
+    };
 
-				static const char *identifier();
-			};
+    namespace messages {
+        class LocationRecord : public MessageRegistration<LocationRecord> {
+          public:
+            class MessageSerialization;
 
-		} // namespace messages
+            static const char *identifier();
+        };
 
-		/// @brief BaseDevice component
-		class Location2DComponent : public DeviceComponent {
-		public:
-			/// @brief Factory method
-			///
-			/// Required to ensure that allocation and deallocation stay on the same
-			/// side of a DLL line.
-			static OSVR_COMMON_EXPORT shared_ptr<Location2DComponent>
-				create(OSVR_ChannelCount numSensor = 1);
+    } // namespace messages
 
-			/// @brief Message from server to client, containing 2D location data.
-			messages::LocationRecord locationRecord;
+    /// @brief BaseDevice component
+    class Location2DComponent : public DeviceComponent {
+      public:
+        /// @brief Factory method
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        static OSVR_COMMON_EXPORT shared_ptr<Location2DComponent>
+        create(OSVR_ChannelCount numSensor = 1);
 
-			OSVR_COMMON_EXPORT void sendLocationData(
-				OSVR_Location2DState location,
-				OSVR_ChannelCount sensor, 
-				OSVR_TimeValue const &timestamp);
+        /// @brief Message from server to client, containing 2D location data.
+        messages::LocationRecord locationRecord;
 
-			typedef std::function<void(LocationData const &,
-				util::time::TimeValue const &)> LocationHandler;
-			OSVR_COMMON_EXPORT void registerLocationHandler(LocationHandler cb);
+        OSVR_COMMON_EXPORT void
+        sendLocationData(OSVR_Location2DState location,
+                         OSVR_ChannelCount sensor,
+                         OSVR_TimeValue const &timestamp);
 
-		private:
-			Location2DComponent(OSVR_ChannelCount numChan);
-			virtual void m_parentSet();
+        typedef std::function<void(LocationData const &,
+                                   util::time::TimeValue const &)>
+            LocationHandler;
+        OSVR_COMMON_EXPORT void registerLocationHandler(LocationHandler cb);
 
-			static int VRPN_CALLBACK
-				m_handleLocationRecord(void *userdata, vrpn_HANDLERPARAM p);
+      private:
+        Location2DComponent(OSVR_ChannelCount numChan);
+        virtual void m_parentSet();
 
-			void m_checkFirst(OSVR_Location2DState const &location);
+        static int VRPN_CALLBACK
+        m_handleLocationRecord(void *userdata, vrpn_HANDLERPARAM p);
 
-			OSVR_ChannelCount m_numSensor;
-			std::vector<LocationHandler> m_cb;
-			bool m_gotOne;
-		};
+        void m_checkFirst(OSVR_Location2DState const &location);
 
-	} // namespace common
+        OSVR_ChannelCount m_numSensor;
+        std::vector<LocationHandler> m_cb;
+        bool m_gotOne;
+    };
+
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_Location2DComponent_h_GUID_A831481F_0257_449A_6404_3B789BD89CEF
-

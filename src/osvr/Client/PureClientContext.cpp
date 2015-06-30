@@ -69,7 +69,7 @@ namespace client {
         EyeTrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
         Location2DRemoteFactory(m_vrpnConns).registerWith(m_factory);
         DirectionRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        
+
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;
         m_mainConn = m_vrpnConns.getConnection(

@@ -32,86 +32,86 @@
 
 // Library/third-party includes
 
-
 namespace osvr {
-	namespace common {
+namespace common {
 
-		namespace messages {
-			class EyeRegion::MessageSerialization {
-			public:
-				MessageSerialization(OSVR_EyeNotification notification)
-					: m_notification(notification) {}
+    namespace messages {
+        class EyeRegion::MessageSerialization {
+          public:
+            MessageSerialization(OSVR_EyeNotification notification)
+                : m_notification(notification) {}
 
-				MessageSerialization() {}
+            MessageSerialization() {}
 
-				template <typename T> void processMessage(T &p) {
-					p(m_notification.sensor);
-				}
-				OSVR_EyeNotification getNotification() const {
-					OSVR_EyeNotification ret;
-					ret.sensor = m_notification.sensor;
-					return ret;
-				}
+            template <typename T> void processMessage(T &p) {
+                p(m_notification.sensor);
+            }
+            OSVR_EyeNotification getNotification() const {
+                OSVR_EyeNotification ret;
+                ret.sensor = m_notification.sensor;
+                return ret;
+            }
 
-			private:
-				OSVR_EyeNotification m_notification;
-			};
-			const char *EyeRegion::identifier() {
-				return "com.osvr.eyetracker.eyeregion";
-			}
-		} // namespace messages
+          private:
+            OSVR_EyeNotification m_notification;
+        };
+        const char *EyeRegion::identifier() {
+            return "com.osvr.eyetracker.eyeregion";
+        }
+    } // namespace messages
 
-		shared_ptr<EyeTrackerComponent>
-			EyeTrackerComponent::create(OSVR_ChannelCount numChan){
-			shared_ptr<EyeTrackerComponent> ret(new EyeTrackerComponent(numChan));
-			return ret;
-		}
+    shared_ptr<EyeTrackerComponent>
+    EyeTrackerComponent::create(OSVR_ChannelCount numChan) {
+        shared_ptr<EyeTrackerComponent> ret(new EyeTrackerComponent(numChan));
+        return ret;
+    }
 
-		EyeTrackerComponent::EyeTrackerComponent(OSVR_ChannelCount numChan)
-			: m_numSensor(numChan) {}
+    EyeTrackerComponent::EyeTrackerComponent(OSVR_ChannelCount numChan)
+        : m_numSensor(numChan) {}
 
-		void EyeTrackerComponent::sendNotification(OSVR_ChannelCount sensor,
-												OSVR_TimeValue const &timestamp){
-			
-			Buffer<> buf;
-			OSVR_EyeNotification notification;
-			notification.sensor = sensor;
-			messages::EyeRegion::MessageSerialization msg(notification);
-			
-			serialize(buf, msg);
-			
-			m_getParent().packMessage(buf, eyeRegion.getMessageType(), timestamp);
-			
-		}
+    void
+    EyeTrackerComponent::sendNotification(OSVR_ChannelCount sensor,
+                                          OSVR_TimeValue const &timestamp) {
 
-		int VRPN_CALLBACK
-			EyeTrackerComponent::m_handleEyeRegion(void *userdata, vrpn_HANDLERPARAM p) {
-			auto self = static_cast<EyeTrackerComponent *>(userdata);
-			auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-				reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-			auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
-			
-			messages::EyeRegion::MessageSerialization msg;
-			deserialize(bufReader, msg);
-			auto data = msg.getNotification();
-			auto timestamp = util::time::fromStructTimeval(p.msg_time);
+        Buffer<> buf;
+        OSVR_EyeNotification notification;
+        notification.sensor = sensor;
+        messages::EyeRegion::MessageSerialization msg(notification);
 
-			for (auto const &cb : self->m_cb) {
-				cb(data, timestamp);
-			}
-			return 0;
-		}
+        serialize(buf, msg);
 
-		void EyeTrackerComponent::registerEyeHandler(EyeHandler handler) {
-			if (m_cb.empty()) {
-				m_registerHandler(&EyeTrackerComponent::m_handleEyeRegion, this,
-					eyeRegion.getMessageType());
-			}
-			m_cb.push_back(handler);
-		}
-		void EyeTrackerComponent::m_parentSet() {
-			m_getParent().registerMessageType(eyeRegion);
-		}
+        m_getParent().packMessage(buf, eyeRegion.getMessageType(), timestamp);
+    }
 
-	} // namespace common
+    int VRPN_CALLBACK
+    EyeTrackerComponent::m_handleEyeRegion(void *userdata,
+                                           vrpn_HANDLERPARAM p) {
+        auto self = static_cast<EyeTrackerComponent *>(userdata);
+        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
+            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
+        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+
+        messages::EyeRegion::MessageSerialization msg;
+        deserialize(bufReader, msg);
+        auto data = msg.getNotification();
+        auto timestamp = util::time::fromStructTimeval(p.msg_time);
+
+        for (auto const &cb : self->m_cb) {
+            cb(data, timestamp);
+        }
+        return 0;
+    }
+
+    void EyeTrackerComponent::registerEyeHandler(EyeHandler handler) {
+        if (m_cb.empty()) {
+            m_registerHandler(&EyeTrackerComponent::m_handleEyeRegion, this,
+                              eyeRegion.getMessageType());
+        }
+        m_cb.push_back(handler);
+    }
+    void EyeTrackerComponent::m_parentSet() {
+        m_getParent().registerMessageType(eyeRegion);
+    }
+
+} // namespace common
 } // namespace osvr

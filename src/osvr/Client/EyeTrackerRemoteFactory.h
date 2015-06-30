@@ -49,16 +49,15 @@ namespace client {
 
         template <typename T> void registerWith(T &factory) const {
             factory.addFactory("eyetracker", *this);
-			factory.addFactory("location2D", *this);
-			factory.addFactory("direction", *this);
-			factory.addFactory("tracker", *this);
-			factory.addFactory("button", *this);
+            factory.addFactory("location2D", *this);
+            factory.addFactory("direction", *this);
+            factory.addFactory("tracker", *this);
+            factory.addFactory("button", *this);
         }
 
         shared_ptr<RemoteHandler>
         operator()(common::OriginalSource const &source,
-                   common::InterfaceList &ifaces,
-				   common::ClientContext &ctx);
+                   common::InterfaceList &ifaces, common::ClientContext &ctx);
 
       private:
         VRPNConnectionCollection m_conns;

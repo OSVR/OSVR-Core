@@ -80,44 +80,60 @@ namespace common {
             }
         };
 
-		// Template specialization to handle OSVR_Location2DReport
-		template <> struct ReportStateGetter<OSVR_Location2DReport> {
-			static OSVR_Location2DState const &apply(OSVR_Location2DReport const &r) {
-				return r.location;
-			}
-			static OSVR_Location2DState apply(OSVR_Location2DReport &r) { return r.location; }
-		};
+        // Template specialization to handle OSVR_Location2DReport
+        template <> struct ReportStateGetter<OSVR_Location2DReport> {
+            static OSVR_Location2DState const &
+            apply(OSVR_Location2DReport const &r) {
+                return r.location;
+            }
+            static OSVR_Location2DState apply(OSVR_Location2DReport &r) {
+                return r.location;
+            }
+        };
 
         // Template specialization to handle OSVR_DirectionReport
-		template <> struct ReportStateGetter<OSVR_DirectionReport> {
-			static OSVR_DirectionState const &apply(OSVR_DirectionReport const &r) {
-				return r.direction;
-			}
-			static OSVR_DirectionState apply(OSVR_DirectionReport &r) { return r.direction; }
-		};
+        template <> struct ReportStateGetter<OSVR_DirectionReport> {
+            static OSVR_DirectionState const &
+            apply(OSVR_DirectionReport const &r) {
+                return r.direction;
+            }
+            static OSVR_DirectionState apply(OSVR_DirectionReport &r) {
+                return r.direction;
+            }
+        };
 
-		 // Template specialization to handle OSVR_EyeTracker2DReport
-		template <> struct ReportStateGetter<OSVR_EyeTracker2DReport> {
-			static OSVR_EyeTracker2DState const &apply(OSVR_EyeTracker2DReport const &r) {
-				return r.state;
-			}
-			static OSVR_EyeTracker2DState apply(OSVR_EyeTracker2DReport &r) { return r.state; }
-		};
+        // Template specialization to handle OSVR_EyeTracker2DReport
+        template <> struct ReportStateGetter<OSVR_EyeTracker2DReport> {
+            static OSVR_EyeTracker2DState const &
+            apply(OSVR_EyeTracker2DReport const &r) {
+                return r.state;
+            }
+            static OSVR_EyeTracker2DState apply(OSVR_EyeTracker2DReport &r) {
+                return r.state;
+            }
+        };
 
-		 // Template specialization to handle OSVR_EyeTracker3DReport
-		template <> struct ReportStateGetter<OSVR_EyeTracker3DReport> {
-			static OSVR_EyeTracker3DState const &apply(OSVR_EyeTracker3DReport const &r) {
-				return r.state;
-			}
-			static OSVR_EyeTracker3DState apply(OSVR_EyeTracker3DReport &r) { return r.state; }
-		};
-		 // Template specialization to handle OSVR_EyeTrackerBlinkReport
-		template <> struct ReportStateGetter<OSVR_EyeTrackerBlinkReport> {
-			static OSVR_EyeTrackerBlinkState const &apply(OSVR_EyeTrackerBlinkReport const &r) {
-				return r.state;
-			}
-			static OSVR_EyeTrackerBlinkState apply(OSVR_EyeTrackerBlinkReport &r) { return r.state; }
-		};
+        // Template specialization to handle OSVR_EyeTracker3DReport
+        template <> struct ReportStateGetter<OSVR_EyeTracker3DReport> {
+            static OSVR_EyeTracker3DState const &
+            apply(OSVR_EyeTracker3DReport const &r) {
+                return r.state;
+            }
+            static OSVR_EyeTracker3DState apply(OSVR_EyeTracker3DReport &r) {
+                return r.state;
+            }
+        };
+        // Template specialization to handle OSVR_EyeTrackerBlinkReport
+        template <> struct ReportStateGetter<OSVR_EyeTrackerBlinkReport> {
+            static OSVR_EyeTrackerBlinkState const &
+            apply(OSVR_EyeTrackerBlinkReport const &r) {
+                return r.state;
+            }
+            static OSVR_EyeTrackerBlinkState
+            apply(OSVR_EyeTrackerBlinkReport &r) {
+                return r.state;
+            }
+        };
     } // namespace traits
 
     /// @brief Generic const accessor for the "state" member of a report.

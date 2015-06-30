@@ -33,37 +33,34 @@
 #include <iostream>
 #include <string>
 
+void printDirectionReport(const OSVR_DirectionReport *report) {
 
-void printDirectionReport(const OSVR_DirectionReport *report){
-
-    
-	std::cout << 
-		report->direction.data[0] << "; " <<
-		report->direction.data[1] << "; " <<
-		report->direction.data[2] << "\t" << std::endl;	
-
+    std::cout << report->direction.data[0] << "; " << report->direction.data[1]
+              << "; " << report->direction.data[2] << "\t" << std::endl;
 }
 
 void directionCallback(void * /*userdata*/,
-						const OSVR_TimeValue * /*timestamp*/ ,
-					 const OSVR_DirectionReport *report) {
-	std::cout << "Got 3D direction Report, for sensor #" << report->sensor << std::endl;
-		printDirectionReport(report);
+                       const OSVR_TimeValue * /*timestamp*/,
+                       const OSVR_DirectionReport *report) {
+    std::cout << "Got 3D direction Report, for sensor #" << report->sensor
+              << std::endl;
+    printDirectionReport(report);
 }
 
-
 int main() {
-    osvr::clientkit::ClientContext context("com.osvr.exampleclients.DirectionCallback");
+    osvr::clientkit::ClientContext context(
+        "com.osvr.exampleclients.DirectionCallback");
 
-    osvr::clientkit::Interface direction = context.getInterface("/com_osvr_EyeTracker/EyeTracker/eyetracker");
+    osvr::clientkit::Interface direction =
+        context.getInterface("/com_osvr_Multi/Location2D/direction");
 
-	direction.registerCallback(&directionCallback, NULL);
+    direction.registerCallback(&directionCallback, NULL);
 
-	// Pretend that this is your application's mainloop.
+    // Pretend that this is your application's mainloop.
     while (1) {
         context.update();
     }
-	
+
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
 }

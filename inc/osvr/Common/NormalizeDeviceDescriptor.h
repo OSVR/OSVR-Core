@@ -26,7 +26,6 @@
 #ifndef INCLUDED_NormalizeDeviceDescriptor_h_GUID_1DF9C796_7C76_47A2_74DA_5DDCF1F407C9
 #define INCLUDED_NormalizeDeviceDescriptor_h_GUID_1DF9C796_7C76_47A2_74DA_5DDCF1F407C9
 
-
 // Internal Includes
 #include <osvr/Common/Export.h>
 
@@ -36,21 +35,20 @@
 // Standard includes
 #include <string>
 
-
 namespace osvr {
-	namespace common {
-		/// @brief It will normalize device descriptor by adding implied interfaces
-		/// to the existing device descriptor
-		/// This should be expanded for every interface that combines multiple other
-		/// interfaces, such as eyetracker(osvr_direction, osvr_location2d, osvr_tracker,
-		/// osvr_button)
-		///
-		/// @return silently modifies it or leaves unchanged.
-		OSVR_COMMON_EXPORT std::string const
-			normalizeDeviceDescriptor(std::string const &jsonDescriptor);
+namespace common {
+    /// @brief It will normalize device descriptor by adding implied interfaces
+    /// to the existing device descriptor
+    /// This should be expanded for every interface that combines multiple other
+    /// interfaces, such as eyetracker(osvr_direction, osvr_location2d,
+    /// osvr_tracker,
+    /// osvr_button)
+    ///
+    /// @return silently modifies it or leaves unchanged.
+    OSVR_COMMON_EXPORT std::string const
+    normalizeDeviceDescriptor(std::string const &jsonDescriptor);
 
-	} // namespace common
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_NormalizeDeviceDescriptor_h_GUID_1DF9C796_7C76_47A2_74DA_5DDCF1F407C9
-

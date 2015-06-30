@@ -56,8 +56,7 @@ namespace client {
 
         shared_ptr<RemoteHandler>
         operator()(common::OriginalSource const &source,
-                   common::InterfaceList &ifaces,
-				   common::ClientContext &ctx);
+                   common::InterfaceList &ifaces, common::ClientContext &ctx);
 
       private:
         VRPNConnectionCollection m_conns;
