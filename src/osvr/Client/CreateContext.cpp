@@ -26,6 +26,7 @@
 #include <osvr/Client/CreateContext.h>
 #include "PureClientContext.h"
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Client/GetRuntimeVersion.h>
 
 // Library/third-party includes
 // - none
@@ -38,6 +39,8 @@ namespace client {
 
     common::ClientContext *createContext(const char appId[],
                                          const char host[]) {
+        OSVR_DEV_VERBOSE("Creating client context - OSVR "
+                         << getModuleName() << " " << getVersionString());
         common::ClientContext *ret = nullptr;
         if (!appId || std::strlen(appId) == 0) {
             OSVR_DEV_VERBOSE("Could not create client context - null or empty "
