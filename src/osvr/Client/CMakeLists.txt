@@ -1,7 +1,8 @@
 osvr_setup_lib_vars(Client)
 
 set(API
-    "${HEADER_LOCATION}/CreateContext.h")
+    "${HEADER_LOCATION}/CreateContext.h"
+    "${HEADER_LOCATION}/GetRuntimeVersion.h")
 
 set(SOURCE
     AnalogRemoteFactory.cpp
@@ -9,6 +10,7 @@ set(SOURCE
     ButtonRemoteFactory.cpp
     ButtonRemoteFactory.h
     CreateContext.cpp
+    GetRuntimeVersion.cpp
     HandlerContainer.h
     ImagingRemoteFactory.cpp
     ImagingRemoteFactory.h
@@ -25,7 +27,6 @@ set(SOURCE
     TrackerRemoteFactory.h
     VRPNConnectionCollection.cpp
     VRPNConnectionCollection.h)
-
 
 osvr_add_library()
 
