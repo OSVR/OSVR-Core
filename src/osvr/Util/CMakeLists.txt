@@ -6,6 +6,10 @@ if(BUILD_DEV_VERBOSE)
 endif()
 configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
+###
+# Version header
+###
+configure_file(Version.h.in "${CMAKE_CURRENT_BINARY_DIR}/Version.h")
 
 ###
 # Platform Config Header
@@ -77,7 +81,8 @@ set(API
     "${HEADER_LOCATION}/ValueOrRange.h"
     "${HEADER_LOCATION}/Vec3C.h"
     "${HEADER_LOCATION}/WindowsVariantC.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/Version.h")
 
 set(SOURCE
     AnyMap.cpp
@@ -86,6 +91,7 @@ set(SOURCE
     TimeValueC.cpp
     MessageKeys.cpp
     PlatformConfig.h.in
+    Version.h.in
     Verbosity.h.in
     ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in
