@@ -44,7 +44,7 @@ namespace common {
     /// tracker, button)
     ///
     /// @return a serialized JSON string (may be unmodified)
-    OSVR_COMMON_EXPORT std::string const
+    OSVR_COMMON_EXPORT std::string
     normalizeDeviceDescriptor(std::string const &jsonDescriptor);
 
 } // namespace common
