@@ -40,20 +40,20 @@
 OSVR_EXTERN_C_BEGIN
 
 /** @brief Opaque type used in conjunction with a device token to send data on
- 3D Direction
- interface
+    3D Direction interface.
 */
 typedef struct OSVR_DirectionDeviceInterfaceObject *
     OSVR_DirectionDeviceInterface;
 
 /** @brief Specify that your device will implement the Direction interface.
 
-@param opts The device init options object.
-@param [out] iface An interface object you should retain with the same
-lifetime as the device token in order to send messages conforming to an
-Direction interface.
-@param numSensors The number of sensors you will be reporting Direction data :
-You can report 1+ sensors. This parameter may be subject to external limitations
+    @param opts The device init options object.
+    @param [out] iface An interface object you should retain with the same
+    lifetime as the device token in order to send messages conforming to an
+    Direction interface.
+    @param numSensors The number of sensors you will be reporting Direction data
+    for. You can report 1+ sensors. This parameter may be subject to external
+    limitations.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
@@ -63,20 +63,20 @@ osvrDeviceDirectionConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                                  OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report data for a specific sensor.
-@param dev Device token
-@param iface Direction interface
-@param directionData Copy of 3D Direction data
-@param sensor Sensor number
-@param timestamp Timestamp correlating to 3D direction data.
+    @param dev Device token
+    @param iface Direction interface
+    @param directionData Copy of 3D Direction data
+    @param sensor Sensor number
+    @param timestamp Timestamp correlating to 3D direction data.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceDirectionReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
                               OSVR_IN_PTR OSVR_DirectionDeviceInterface iface,
-                              OSVR_IN_PTR OSVR_DirectionState directionData,
+                              OSVR_IN OSVR_DirectionState directionData,
                               OSVR_IN OSVR_ChannelCount sensor,
                               OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+    OSVR_FUNC_NONNULL((1, 2, 5));
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
