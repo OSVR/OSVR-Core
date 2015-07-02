@@ -53,8 +53,6 @@ namespace common {
     static const char POSITION_KEY[] = "position";
     static const char ORIENTATION_KEY[] = "orientation";
     static const char BOUNDED_KEY[] = "bounded";
-    static const char TRUE[] = "true";
-    static const char FALSE[] = "false";
 
     /// @todo when appending interfaces you might encounter that there are
     /// independent interfaces that are same as subinterfaces
@@ -81,8 +79,7 @@ namespace common {
     }
 
     /// @brief For eyetracker, it will add the following interfaces to the
-    /// descriptor
-    /// provided that they are set to true :
+    /// descriptor provided that they are set to true:
     /// OSVR_Direction, OSVR_Location2D, OSVR_Tracker, OSVR_Button
     void normalizeForEyeTracker(Json::Value &descriptor,
                                 std::string const &ifaceName) {
@@ -113,9 +110,9 @@ namespace common {
                     augInterfaces[DIRECTION_KEY][COUNT_KEY] = count;
                 } else if (boost::iequals(subIface, TRACKER_KEY)) {
 
-                    augInterfaces[TRACKER_KEY][POSITION_KEY] = TRUE;
-                    augInterfaces[TRACKER_KEY][ORIENTATION_KEY] = FALSE;
-                    augInterfaces[TRACKER_KEY][BOUNDED_KEY] = TRUE;
+                    augInterfaces[TRACKER_KEY][POSITION_KEY] = true;
+                    augInterfaces[TRACKER_KEY][ORIENTATION_KEY] = false;
+                    augInterfaces[TRACKER_KEY][BOUNDED_KEY] = true;
                     augInterfaces[TRACKER_KEY][COUNT_KEY] = count;
                 } else if (boost::iequals(subIface, BUTTON_KEY)) {
                     augInterfaces[BUTTON_KEY][COUNT_KEY] = count;
