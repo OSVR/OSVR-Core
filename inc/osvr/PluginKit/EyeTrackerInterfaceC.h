@@ -60,7 +60,7 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
     OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
-    OSVR_IN OSVR_ChannelCount numChan OSVR_FUNC_NONNULL((1, 2)));
+    OSVR_IN OSVR_ChannelCount numChan) OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report gaze position 2D for a sensor (eye)
 @param dev Device token
