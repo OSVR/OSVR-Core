@@ -2,7 +2,10 @@
 # Ensure all headers include all dependencies
 #
 
-set(IGNORED_HEADERS osvr/Util/MSStdIntC.h)
+set(IGNORED_HEADERS
+    osvr/Util/MSStdIntC.h
+    osvr/Private/GetRuntimeVersion_InnerImpl.h)
+
 if(NOT BUILD_USBSERIALENUM)
     list(APPEND IGNORED_HEADERS
         osvr/USBSerial/USBSerialDevice.h

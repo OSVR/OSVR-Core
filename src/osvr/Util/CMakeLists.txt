@@ -6,6 +6,41 @@ if(BUILD_DEV_VERBOSE)
 endif()
 configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
+###
+# Version header
+###
+configure_file(Version.h.in "${CMAKE_CURRENT_BINARY_DIR}/Version.h")
+
+###
+# Version resource helper
+###
+set(OSVR_RC_COMMONCOMMENTS_STR "")
+if(OSVR_BIT_VARIANT)
+    set(OSVR_RC_COMMONCOMMENTS_STR "${OSVR_BIT_VARIANT}")
+endif()
+# TODO make this actually update automatically
+set(OSVR_RC_CURRENTYEAR_STR 2015)
+
+if(WIN32)
+    if(MSVC)
+        set(OSVR_RC_COMPILER_STR "MSVC ${MSVC_VERSION}")
+    elseif("${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}" MATCHES "/gcc/")
+        foreach(linkdir ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
+            if("${linkdir}" MATCHES "gcc/([^/]+/[.0-9]+)")
+                set(OSVR_RC_COMPILER_STR "GCC ${CMAKE_MATCH_1}")
+                break()
+            endif()
+        endforeach()
+    else()
+        set(OSVR_RC_COMPILER_STR "${CMAKE_CXX_COMPILER_ID}")
+    endif()
+endif()
+set(OSVR_RC_PRIVATEBUILDINFO "")
+if(NOT OSVR_RC_RELEASEBUILD)
+    # TODO make this string descriptive
+    set(OSVR_RC_PRIVATEBUILDINFO "TODO")
+endif()
+configure_file(VersionResourceHelper.h.in "${CMAKE_CURRENT_BINARY_DIR}/VersionResourceHelper.h")
 
 ###
 # Platform Config Header
@@ -42,6 +77,7 @@ set(API
     "${HEADER_LOCATION}/Flag.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
+    "${HEADER_LOCATION}/GetRuntimeVersion.h"
     "${HEADER_LOCATION}/GuardInterface.h"
     "${HEADER_LOCATION}/GuardInterfaceDummy.h"
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
@@ -77,15 +113,25 @@ set(API
     "${HEADER_LOCATION}/ValueOrRange.h"
     "${HEADER_LOCATION}/Vec3C.h"
     "${HEADER_LOCATION}/WindowsVariantC.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/VersionResourceHelper.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/Version.h")
+
+if(WIN32 AND FALSE)
+    list(APPEND API
+        "${HEADER_LOCATION}/SharedVersion.rc")
+endif()
 
 set(SOURCE
     AnyMap.cpp
     Deletable.cpp
+    GetRuntimeVersion.cpp
     GuardInterface.cpp
     TimeValueC.cpp
     MessageKeys.cpp
     PlatformConfig.h.in
+    VersionResourceHelper.h.in
+    Version.h.in
     Verbosity.h.in
     ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in

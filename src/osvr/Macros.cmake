@@ -37,6 +37,9 @@ macro(osvr_add_library)
         target_compile_definitions(${LIBNAME_FULL} PUBLIC ${EXPORT_BASENAME}_STATIC_DEFINE)
     endif()
 
+    # Module name
+    target_compile_definitions(${LIBNAME_FULL} PRIVATE OSVR_MODULE_NAME="${LIBNAME}")
+
     target_include_directories(${LIBNAME_FULL}
         PUBLIC
         $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>

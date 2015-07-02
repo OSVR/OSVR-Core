@@ -1,9 +1,11 @@
 osvr_setup_lib_vars(USBSerial)
 set(API
+    "${HEADER_LOCATION}/GetRuntimeVersion.h"
     "${HEADER_LOCATION}/USBSerialDevice.h"
     "${HEADER_LOCATION}/USBSerialEnum.h")
 
 set(SOURCE
+    GetRuntimeVersion.cpp
     USBSerialDevInfo.h
     USBSerialDevInfo.cpp
     USBSerialDevInfo_Linux.h

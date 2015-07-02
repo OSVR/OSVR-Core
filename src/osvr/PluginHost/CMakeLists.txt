@@ -1,6 +1,7 @@
 osvr_setup_lib_vars(PluginHost)
 
 set(API
+    "${HEADER_LOCATION}/GetRuntimeVersion.h"
     "${HEADER_LOCATION}/PluginSpecificRegistrationContext_fwd.h"
     "${HEADER_LOCATION}/PluginSpecificRegistrationContext.h"
     "${HEADER_LOCATION}/PluginRegPtr.h"
@@ -11,6 +12,7 @@ set(API
 set(SOURCE
     BinaryLocation.cpp
     BinaryLocation.h
+    GetRuntimeVersion.cpp
     PluginSpecificRegistrationContext.cpp
     PluginSpecificRegistrationContextImpl.cpp
     PluginSpecificRegistrationContextImpl.h
