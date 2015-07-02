@@ -37,14 +37,13 @@
 
 namespace osvr {
 namespace common {
-    /// @brief It will normalize device descriptor by adding implied interfaces
-    /// to the existing device descriptor
-    /// This should be expanded for every interface that combines multiple other
-    /// interfaces, such as eyetracker(osvr_direction, osvr_location2d,
-    /// osvr_tracker,
-    /// osvr_button)
+    /// @brief "Normalizes" a device descriptor by parsing it and adding implied
+    /// interfaces to the existing device descriptor before serializing it back
+    /// out to a string. Contains logic for every interface that combines
+    /// multiple other interfaces, such as eyetracker (direction, location2d,
+    /// tracker, button)
     ///
-    /// @return silently modifies it or leaves unchanged.
+    /// @return a serialized JSON string (may be unmodified)
     OSVR_COMMON_EXPORT std::string const
     normalizeDeviceDescriptor(std::string const &jsonDescriptor);
 
