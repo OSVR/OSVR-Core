@@ -38,6 +38,7 @@ set(API
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
+    "${HEADER_LOCATION}/GetRuntimeVersion.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/IntegerByteSwap.h"
     "${HEADER_LOCATION}/InterfaceCallbacks.h"
@@ -101,6 +102,7 @@ set(SOURCE
     DeviceWrapper.h
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
+    GetRuntimeVersion.cpp
     ImagingComponent.cpp
     IPCRingBuffer.cpp
     IPCRingBufferResults.h

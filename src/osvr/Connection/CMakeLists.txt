@@ -11,6 +11,7 @@ set(API
     "${HEADER_LOCATION}/DeviceInitObject.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/DeviceTokenPtr.h"
+    "${HEADER_LOCATION}/GetRuntimeVersion.h"
     "${HEADER_LOCATION}/ImagingServerInterface.h"
     "${HEADER_LOCATION}/MessageType.h"
     "${HEADER_LOCATION}/MessageTypePtr.h"
@@ -32,6 +33,7 @@ set(SOURCE
     GenerateVrpnDynamicServer.cpp
     GenerateVrpnDynamicServer.h
     GenericConnectionDevice.h
+    GetRuntimeVersion.cpp
     ImagingServerInterface.cpp
     MessageType.cpp
     SyncDeviceToken.cpp

@@ -1,10 +1,12 @@
 osvr_setup_lib_vars(VRPNServer)
 
 set(API
+    "${HEADER_LOCATION}/GetRuntimeVersion.h"
     "${HEADER_LOCATION}/GetVRPNConnection.h"
     "${HEADER_LOCATION}/VRPNDeviceRegistration.h")
 
 set(SOURCE
+    GetRuntimeVersion.cpp
     GetVRPNConnection.cpp
     VRPNDeviceRegistration.cpp)
 

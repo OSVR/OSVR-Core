@@ -27,7 +27,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Client/GetRuntimeVersion.h>
+#include <osvr/@Modname@/GetRuntimeVersion.h>
 #include <osvr/Util/RuntimeNumericVersion.h>
 #include <osvr/Util/Version.h>
 
@@ -38,7 +38,7 @@
 // - none
 
 namespace osvr {
-namespace client {
+namespace @modname@ {
 #include <osvr/Private/GetRuntimeVersion_InnerImpl.h>
-} // namespace client
+} // namespace @modname@
 } // namespace osvr
