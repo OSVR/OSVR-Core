@@ -63,6 +63,9 @@ namespace common {
 
         PathNode *getDevice() const;
 
+        /// @brief Gets the full path of the device node
+        OSVR_COMMON_EXPORT std::string getDevicePath() const;
+
         OSVR_COMMON_EXPORT elements::DeviceElement const &
         getDeviceElement() const;
 
