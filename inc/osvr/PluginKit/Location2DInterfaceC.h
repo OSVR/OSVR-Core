@@ -70,14 +70,11 @@ OSVR_ReturnCode osvrDeviceLocation2DConfigure(
     @param timestamp Timestamp correlating to 2D location data.
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode
-osvrDeviceLocation2DReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
-                               OSVR_IN_PTR OSVR_Location2D_DeviceInterface
-                                   iface,
-                               OSVR_IN_PTR OSVR_Location2DState locationData,
-                               OSVR_IN OSVR_ChannelCount sensor,
-                               OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+OSVR_ReturnCode osvrDeviceLocation2DReportData(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_Location2D_DeviceInterface iface,
+    OSVR_IN OSVR_Location2DState locationData, OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END

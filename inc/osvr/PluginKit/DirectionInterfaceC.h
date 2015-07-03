@@ -72,13 +72,11 @@ osvrDeviceDirectionConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     @todo Remove the dev parameter
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode
-osvrDeviceDirectionReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
-                              OSVR_IN_PTR OSVR_DirectionDeviceInterface iface,
-                              OSVR_IN OSVR_DirectionState directionData,
-                              OSVR_IN OSVR_ChannelCount sensor,
-                              OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-    OSVR_FUNC_NONNULL((1, 2, 5));
+OSVR_ReturnCode osvrDeviceDirectionReportData(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_DirectionDeviceInterface iface,
+    OSVR_IN OSVR_DirectionState directionData, OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END

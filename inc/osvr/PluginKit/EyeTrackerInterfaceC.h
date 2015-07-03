@@ -141,9 +141,8 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
     OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-    OSVR_IN_PTR OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount chan,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-    OSVR_FUNC_NONNULL((1, 2, 3, 4));
+    OSVR_IN OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
 /** @} */ /* end of group */
 
 /** @brief Report both 2D and 3D gaze directions for an eye
