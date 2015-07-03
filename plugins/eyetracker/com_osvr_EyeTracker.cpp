@@ -83,8 +83,8 @@ class EyeTrackerDevice {
         dir.direction = gaze3D;
         dir.basePoint = gaze3D;
 
-        osvrDeviceEyeTrackerReportGaze(m_dev, m_eyetracker, &location,
-                                       &dir.direction, &dir.basePoint, 0,
+        osvrDeviceEyeTrackerReportGaze(m_dev, m_eyetracker, location,
+                                       dir.direction, dir.basePoint, 0,
                                        &times);
 
         return OSVR_RETURN_SUCCESS;
