@@ -163,7 +163,7 @@ namespace client {
             bool haveBlink = false;
             util::time::TimeValue blinkTimestamp;
 
-            if (m_opts.reportLocation2D) {
+            if (m_opts.reportBlink) {
                 haveBlink = m_opts.locationIface->getState<OSVR_ButtonReport>(
                     blinkTimestamp, report.state);
             }
