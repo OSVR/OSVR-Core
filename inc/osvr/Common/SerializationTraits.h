@@ -219,14 +219,14 @@ namespace common {
 
                 /// @brief Functor method called by the
                 /// SimpleStructSerialization
-                template <typename T> void operator()(T const &val) {
+                template <typename U> void operator()(U const &val) {
                     serializeRaw(m_buf, val);
                 }
 
                 /// @brief Functor method called by the
                 /// SimpleStructSerialization with a tag
-                template <typename T, typename Tag>
-                void operator()(T const &val, Tag &t) {
+                template <typename U, typename Tag>
+                void operator()(U const &val, Tag &t) {
                     serializeRaw(m_buf, val, t);
                 }
 
@@ -244,14 +244,14 @@ namespace common {
 
                 /// @brief Functor method called by the
                 /// SimpleStructSerialization
-                template <typename T> void operator()(T &val) {
+                template <typename U> void operator()(U &val) {
                     deserializeRaw(m_buf, val);
                 }
 
                 /// @brief Functor method called by the
                 /// SimpleStructSerialization with a tag
-                template <typename T, typename Tag>
-                void operator()(T &val, Tag &t) {
+                template <typename U, typename Tag>
+                void operator()(U &val, Tag &t) {
                     deserializeRaw(m_buf, val, t);
                 }
 
@@ -270,14 +270,14 @@ namespace common {
 
                 /// @brief Functor method called by the
                 /// SimpleStructSerialization
-                template <typename T> void operator()(T const &val) {
+                template <typename U> void operator()(U const &val) {
                     m_bytes += getBufferSpaceRequiredRaw(m_bytes, val);
                 }
 
                 /// @brief Functor method called by the
                 /// SimpleStructSerialization with a tag
-                template <typename T, typename Tag>
-                void operator()(T const &val, Tag &t) {
+                template <typename U, typename Tag>
+                void operator()(U const &val, Tag &t) {
                     m_bytes += getBufferSpaceRequiredRaw(m_bytes, val, t);
                 }
 
