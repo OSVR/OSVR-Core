@@ -56,7 +56,7 @@
 namespace osvr {
 namespace client {
 
-    class NetworkEyeTrackerRemoteHandler : public RemoteHandler {
+    class EyeTrackerRemoteHandler : public RemoteHandler {
       public:
         struct Options {
             Options()
@@ -72,10 +72,11 @@ namespace client {
             osvr::common::ClientInterfacePtr buttonIface;
         };
 
-        NetworkEyeTrackerRemoteHandler(
-            vrpn_ConnectionPtr const &conn, std::string const &deviceName,
-            Options const &options, boost::optional<OSVR_ChannelCount> sensor,
-            common::InterfaceList &ifaces)
+        EyeTrackerRemoteHandler(vrpn_ConnectionPtr const &conn,
+                                std::string const &deviceName,
+                                Options const &options,
+                                boost::optional<OSVR_ChannelCount> sensor,
+                                common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
               m_opts(options), m_sensor(sensor) {
@@ -90,10 +91,10 @@ namespace client {
         }
 
         /// @brief Deleted assignment operator.
-        NetworkEyeTrackerRemoteHandler &
-        operator=(NetworkEyeTrackerRemoteHandler const &) = delete;
+        EyeTrackerRemoteHandler &
+        operator=(EyeTrackerRemoteHandler const &) = delete;
 
-        virtual ~NetworkEyeTrackerRemoteHandler() {
+        virtual ~EyeTrackerRemoteHandler() {
             /// @todo do we need to unregister?
         }
 
@@ -209,7 +210,7 @@ namespace client {
 
         shared_ptr<RemoteHandler> ret;
 
-        NetworkEyeTrackerRemoteHandler::Options opts;
+        EyeTrackerRemoteHandler::Options opts;
 
         auto myDescriptor = source.getDeviceElement().getDescriptor();
 
@@ -258,7 +259,7 @@ namespace client {
 
         auto const &devElt = source.getDeviceElement();
 
-        ret.reset(new NetworkEyeTrackerRemoteHandler(
+        ret.reset(new EyeTrackerRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(), opts,
             source.getSensorNumberAsChannelCount(), ifaces));
         return ret;
