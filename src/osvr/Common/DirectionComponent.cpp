@@ -90,9 +90,7 @@ namespace common {
     DirectionComponent::m_handleDirectionRecord(void *userdata,
                                                 vrpn_HANDLERPARAM p) {
         auto self = static_cast<DirectionComponent *>(userdata);
-        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
         messages::DirectionRecord::MessageSerialization msg;
         deserialize(bufReader, msg);

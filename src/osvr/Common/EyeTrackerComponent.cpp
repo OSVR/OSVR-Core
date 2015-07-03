@@ -87,9 +87,7 @@ namespace common {
     EyeTrackerComponent::m_handleEyeRegion(void *userdata,
                                            vrpn_HANDLERPARAM p) {
         auto self = static_cast<EyeTrackerComponent *>(userdata);
-        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
         messages::EyeRegion::MessageSerialization msg;
         deserialize(bufReader, msg);
