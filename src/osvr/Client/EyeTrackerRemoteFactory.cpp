@@ -213,21 +213,18 @@ namespace client {
         EyeTrackerRemoteHandler::Options opts;
 
         auto myDescriptor = source.getDeviceElement().getDescriptor();
+        auto devicePath = source.getDevicePath();
 
         if (myDescriptor["interfaces"]["eyetracker"].isMember("direction")) {
             opts.reportDirection = true;
-            const std::string iface =
-                common::getPathSeparator() +
-                source.getDeviceElement().getDeviceName() + "/direction";
+            const std::string iface = devicePath + "/direction";
             /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.dirIface = ctx.getInterface(iface.c_str());
         }
         if (myDescriptor["interfaces"]["eyetracker"].isMember("tracker")) {
             opts.reportBasePoint = true;
-            const std::string iface =
-                common::getPathSeparator() +
-                source.getDeviceElement().getDeviceName() + "/tracker/";
+            const std::string iface = devicePath + "/tracker/";
             /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.trackerIface = ctx.getInterface(iface.c_str());
@@ -235,18 +232,14 @@ namespace client {
 
         if (myDescriptor["interfaces"]["eyetracker"].isMember("location2D")) {
             opts.reportLocation2D = true;
-            const std::string iface =
-                common::getPathSeparator() +
-                source.getDeviceElement().getDeviceName() + "/location2D/";
+            const std::string iface = devicePath + "/location2D/";
             /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.locationIface = ctx.getInterface(iface.c_str());
         }
         if (myDescriptor["interfaces"]["eyetracker"].isMember("button")) {
             opts.reportBlink = true;
-            const std::string iface =
-                common::getPathSeparator() +
-                source.getDeviceElement().getDeviceName() + "/button/";
+            const std::string iface = devicePath + "/button/";
             /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.buttonIface = ctx.getInterface(iface.c_str());
