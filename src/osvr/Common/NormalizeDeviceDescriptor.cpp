@@ -95,7 +95,7 @@ namespace common {
             return;
         }
 
-        Json::Value augInterfaces;
+        Json::Value augInterfaces(Json::objectValue);
         // go thru details of interface and
         for (auto &subIface : iface.getMemberNames()) {
             // check if subinterface is set to true
@@ -122,7 +122,7 @@ namespace common {
             }
         }
 
-        if (augInterfaces != NULL) {
+        if (augInterfaces.size() > 0) {
             Json::Value &currInterfaces = descriptor[INTERFACES_KEY];
 
             appendCurrentIface(augInterfaces, currInterfaces);
