@@ -246,6 +246,7 @@ namespace client {
         }
 
         if (source.hasTransform()) {
+            /// @todo we actually should be using it on direction and origin
             OSVR_DEV_VERBOSE(
                 "Ignoring transform found on route for Eye Tracker data!");
         }
