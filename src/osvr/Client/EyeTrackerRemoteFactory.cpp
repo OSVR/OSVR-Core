@@ -208,7 +208,7 @@ namespace client {
             const std::string iface =
                 common::getPathSeparator() +
                 source.getDeviceElement().getDeviceName() + "/direction";
-            // +
+            /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.dirIface = ctx.getInterface(iface.c_str());
         }
@@ -217,7 +217,7 @@ namespace client {
             const std::string iface =
                 common::getPathSeparator() +
                 source.getDeviceElement().getDeviceName() + "/tracker/";
-            // +
+            /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.trackerIface = ctx.getInterface(iface.c_str());
         }
@@ -227,7 +227,7 @@ namespace client {
             const std::string iface =
                 common::getPathSeparator() +
                 source.getDeviceElement().getDeviceName() + "/location2D/";
-            // +
+            /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.locationIface = ctx.getInterface(iface.c_str());
         }
@@ -236,7 +236,7 @@ namespace client {
             const std::string iface =
                 common::getPathSeparator() +
                 source.getDeviceElement().getDeviceName() + "/button/";
-            // +
+            /// @todo need to append sensor number here!
             // boost::lexical_cast<std::string>(source.getSensorNumberAsChannelCount())
             opts.buttonIface = ctx.getInterface(iface.c_str());
         }
@@ -246,10 +246,8 @@ namespace client {
                 "Ignoring transform found on route for Eye Tracker data!");
         }
 
-        /// @todo This is where we'd take a different path for IPC imaging data.
         auto const &devElt = source.getDeviceElement();
 
-        /// @todo find out why make_shared causes a crash here
         ret.reset(new NetworkEyeTrackerRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(), opts,
             source.getSensorNumberAsChannelCount(), ifaces));
