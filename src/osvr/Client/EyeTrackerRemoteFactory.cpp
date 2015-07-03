@@ -212,7 +212,7 @@ namespace client {
 
         EyeTrackerRemoteHandler::Options opts;
 
-        auto myDescriptor = source.getDeviceElement().getDescriptor();
+        auto const &myDescriptor = source.getDeviceElement().getDescriptor();
         auto devicePath = source.getDevicePath();
 
         if (myDescriptor["interfaces"]["eyetracker"].isMember("direction")) {
