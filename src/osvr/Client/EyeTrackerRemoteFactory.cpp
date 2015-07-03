@@ -77,8 +77,8 @@ namespace client {
             Options const &options, boost::optional<OSVR_ChannelCount> sensor,
             common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_opts(options), m_interfaces(ifaces),
-              m_all(!sensor.is_initialized()), m_sensor(sensor) {
+              m_interfaces(ifaces), m_all(!sensor.is_initialized()),
+              m_opts(options), m_sensor(sensor) {
             auto eyetracker = common::EyeTrackerComponent::create();
             m_dev->addComponent(eyetracker);
             eyetracker->registerEyeHandler(
