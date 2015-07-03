@@ -132,8 +132,7 @@ namespace common {
 
     /// @todo process for tracker interface
 
-    std::string
-    normalizeDeviceDescriptor(std::string const &jsonDescriptor) {
+    std::string normalizeDeviceDescriptor(std::string const &jsonDescriptor) {
 
         Json::Value descriptor;
         {
