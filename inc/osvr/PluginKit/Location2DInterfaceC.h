@@ -40,20 +40,20 @@
 OSVR_EXTERN_C_BEGIN
 
 /** @brief Opaque type used in conjunction with a device token to send data on
- 2D Location
- interface
+    2D Location interface
 */
 typedef struct OSVR_Location2D_DeviceInterfaceObject *
     OSVR_Location2D_DeviceInterface;
 
 /** @brief Specify that your device will implement the Location2D interface.
 
-@param opts The device init options object.
-@param [out] iface An interface object you should retain with the same
-lifetime as the device token in order to send messages conforming to an
-Location2D interface.
-@param numSensors The number of sensors you will be reporting 2D Location data :
-You can report 1+ sensors. This parameter may be subject to external limitations
+    @param opts The device init options object.
+    @param [out] iface An interface object you should retain with the same
+    lifetime as the device token in order to send messages conforming to an
+    Location2D interface.
+    @param numSensors The number of sensors you will be reporting 2D Location
+    data: You can report 1+ sensors. This parameter may be subject to external
+    limitations
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceLocation2DConfigure(
@@ -63,11 +63,11 @@ OSVR_ReturnCode osvrDeviceLocation2DConfigure(
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report data for a specific sensor.
-@param dev Device token
-@param iface Location2D interface
-@param locationData Copy of 2D Location data
-@param sensor Sensor number
-@param timestamp Timestamp correlating to 2D location data.
+    @param dev Device token
+    @param iface Location2D interface
+    @param locationData Copy of 2D Location data
+    @param sensor Sensor number
+    @param timestamp Timestamp correlating to 2D location data.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode

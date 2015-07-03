@@ -68,6 +68,8 @@ osvrDeviceDirectionConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     @param directionData Copy of 3D Direction data
     @param sensor Sensor number
     @param timestamp Timestamp correlating to 3D direction data.
+
+    @todo Remove the dev parameter
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode

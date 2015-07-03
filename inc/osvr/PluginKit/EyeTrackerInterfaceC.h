@@ -40,21 +40,19 @@
 OSVR_EXTERN_C_BEGIN
 
 /** @brief Opaque type used in conjunction with a device token to send data on
-eye
-tracker interface (which factors into more interfaces, see implementation).
+    eye tracker interface (which internally is carried over several interfaces).
 */
 typedef struct OSVR_EyeTrackerDeviceInterfaceObject *
     OSVR_EyeTrackerDeviceInterface;
 
 /** @brief Specify that your device will implement the Eye Tracker interface.
 
-@param opts The device init options object.
-@param [out] iface An interface object you should retain with the same
-lifetime as the device token in order to send messages conforming to an
-imaging interface.
-@param numSensors The number of eye tracker sensors you will be reporting:
-You can have repot 1 - 3 sensors. This
-parameter may be subject to external limitations
+    @param opts The device init options object.
+    @param [out] iface An interface object you should retain with the same
+    lifetime as the device token in order to send messages conforming to an
+    imaging interface.
+    @param numSensors The number of eye tracker sensors you will be reporting:
+    You can report 1 - 3 sensors.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
@@ -62,12 +60,17 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
     OSVR_OUT_PTR OSVR_EyeTrackerDeviceInterface *iface,
     OSVR_IN OSVR_ChannelCount numChan) OSVR_FUNC_NONNULL((1, 2));
 
-/** @brief Report gaze position 2D for a sensor (eye)
-@param dev Device token
-@param iface Eye Tracker interface
-@param gazePosition A copy of the eye gaze Position
-@param sensor Sensor number
-@param timestamp Timestamp correlating to eye data.
+/** @brief Report gaze position 2D for a sensor (eye) - each component
+    normalized from 0 to 1, lower-left corner of the screen is (0, 0) with the
+    screen extending along the positive axes.
+
+    @todo remove dev parameter
+
+    @param dev Device token
+    @param iface Eye Tracker interface
+    @param gazePosition A copy of the eye gaze Position
+    @param sensor Sensor number
+    @param timestamp Timestamp correlating to eye data.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
