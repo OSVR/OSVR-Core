@@ -133,16 +133,17 @@ namespace client {
         void m_handleEyeTracking2d(common::OSVR_EyeNotification const &data,
                                    util::time::TimeValue const &timestamp) {
 
+            if (!m_opts.reportLocation2D) {
+                return;
+            }
             OSVR_EyeTracker2DReport report;
             report.sensor = data.sensor;
             bool locationValid = false;
             util::time::TimeValue reportTime;
 
-            if (m_opts.reportLocation2D) {
-                locationValid =
-                    m_opts.locationIface->getState<OSVR_Location2DReport>(
-                        reportTime, report.state);
-            }
+            locationValid =
+                m_opts.locationIface->getState<OSVR_Location2DReport>(
+                    reportTime, report.state);
             if (!locationValid) {
                 return; // don't send an empty report.
             }
@@ -158,15 +159,16 @@ namespace client {
         void m_handleEyeBlink(common::OSVR_EyeNotification const &data,
                               util::time::TimeValue const &timestamp) {
 
+            if (!m_opts.reportBlink) {
+                return;
+            }
             OSVR_EyeTrackerBlinkReport report;
             report.sensor = data.sensor;
             bool haveBlink = false;
             util::time::TimeValue blinkTimestamp;
 
-            if (m_opts.reportBlink) {
-                haveBlink = m_opts.locationIface->getState<OSVR_ButtonReport>(
-                    blinkTimestamp, report.state);
-            }
+            haveBlink = m_opts.locationIface->getState<OSVR_ButtonReport>(
+                blinkTimestamp, report.state);
             if (!haveBlink) {
                 return; // don't send an empty report.
             }
