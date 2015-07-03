@@ -37,6 +37,7 @@
 #include <osvr/Util/Vec2C.h>
 #include <osvr/Util/Vec3C.h>
 #include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/BoolC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -163,14 +164,14 @@ typedef OSVR_DirectionState OSVR_EyeGazeDirectionState;
 
 /** @brief State for 3D gaze report */
 typedef struct OSVR_EyeTracker3DState {
+    OSVR_CBool directionValid;
     OSVR_DirectionState direction;
+    OSVR_CBool basePointValid;
     OSVR_PositionState basePoint;
 } OSVR_EyeTracker3DState;
 
 /** @brief Report type for 3D gaze report */
 typedef struct OSVR_EyeTracker3DReport {
-    bool directionValid;
-    bool basePointValid;
     OSVR_ChannelCount sensor;
     OSVR_EyeTracker3DState state;
 } OSVR_EyeTracker3DReport;
@@ -180,7 +181,6 @@ typedef OSVR_Location2DState OSVR_EyeTracker2DState;
 
 /** @brief Report type for 2D location report */
 typedef struct OSVR_EyeTracker2DReport {
-    bool locationValid;
     OSVR_ChannelCount sensor;
     OSVR_EyeTracker2DState state;
 } OSVR_EyeTracker2DReport;
@@ -190,7 +190,6 @@ typedef OSVR_ButtonState OSVR_EyeTrackerBlinkState;
 
 /** @brief Report type for a blink event */
 typedef struct OSVR_EyeTrackerBlinkReport {
-    bool blinkValid;
     OSVR_ChannelCount sensor;
     OSVR_EyeTrackerBlinkState state;
 } OSVR_EyeTrackerBlinkReport;

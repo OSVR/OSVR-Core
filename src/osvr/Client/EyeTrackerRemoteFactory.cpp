@@ -105,22 +105,26 @@ namespace client {
 
             OSVR_EyeTracker3DReport report;
             report.sensor = data.sensor;
-            report.directionValid = false;
-            report.basePointValid = false;
+            report.state.directionValid = false;
+            report.state.basePointValid = false;
             util::time::TimeValue timest = timestamp;
             if (m_opts.reportDirection) {
-                report.directionValid =
+                report.state.directionValid =
                     m_opts.dirIface->getState<OSVR_DirectionReport>(
                         timest, report.state.direction);
             }
             if (m_opts.reportBasePoint) {
-                report.basePointValid =
+                report.state.basePointValid =
                     m_opts.trackerIface->getState<OSVR_PositionReport>(
                         timest, report.state.basePoint);
             }
-            if (!(report.basePointValid || report.directionValid)) {
+            if (!(report.state.basePointValid || report.state.directionValid)) {
                 return; // don't send an empty report.
             }
+
+            /// @todo what timestamp do we use - the one from the notification
+            /// or the ones from the original reports? At least right now
+            /// they're theoretically the same, but...
             for (auto &iface : m_interfaces) {
                 iface->triggerCallbacks(timestamp, report);
             }
@@ -131,18 +135,21 @@ namespace client {
 
             OSVR_EyeTracker2DReport report;
             report.sensor = data.sensor;
-            report.locationValid = false;
-            util::time::TimeValue timest = timestamp;
+            bool locationValid = false;
+            util::time::TimeValue reportTime;
 
             if (m_opts.reportLocation2D) {
-                report.locationValid =
+                locationValid =
                     m_opts.locationIface->getState<OSVR_Location2DReport>(
-                        timest, report.state);
+                        reportTime, report.state);
             }
-            if (!(report.locationValid)) {
+            if (!locationValid) {
                 return; // don't send an empty report.
             }
 
+            /// @todo what timestamp do we use - the one from the notification
+            /// or the one from the original report? At least right now they're
+            /// the same, but...
             for (auto &iface : m_interfaces) {
                 iface->triggerCallbacks(timestamp, report);
             }
@@ -153,18 +160,19 @@ namespace client {
 
             OSVR_EyeTrackerBlinkReport report;
             report.sensor = data.sensor;
-            report.blinkValid = false;
-            util::time::TimeValue timest = timestamp;
+            bool haveBlink = false;
+            util::time::TimeValue blinkTimestamp;
 
             if (m_opts.reportLocation2D) {
-                report.blinkValid =
-                    m_opts.locationIface->getState<OSVR_ButtonReport>(
-                        timest, report.state);
+                haveBlink = m_opts.locationIface->getState<OSVR_ButtonReport>(
+                    blinkTimestamp, report.state);
             }
-            if (!(report.blinkValid)) {
+            if (!haveBlink) {
                 return; // don't send an empty report.
             }
-
+            /// @todo what timestamp do we use - the one from the notification
+            /// or the one from the original report? At least right now they're
+            /// the same, but...
             for (auto &iface : m_interfaces) {
                 iface->triggerCallbacks(timestamp, report);
             }
