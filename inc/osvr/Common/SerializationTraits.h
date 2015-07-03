@@ -188,7 +188,7 @@ namespace common {
             static void serialize(BufferType &buf,
                                   typename Base::param_type val,
                                   tag_type const &) {
-                auto f = StructSerializeFunctor<BufferType>(buf);
+                StructSerializeFunctor<BufferType> f(buf);
                 SimpleSerialization::apply(f, val);
             }
 
@@ -196,14 +196,14 @@ namespace common {
             static void deserialize(BufferReaderType &buf,
                                     typename Base::reference_type val,
                                     tag_type const &) {
-                auto f = StructDeserializeFunctor<BufferReaderType>(buf);
+                StructDeserializeFunctor<BufferReaderType> f(buf);
                 SimpleSerialization::apply(f, val);
             }
 
             static size_t spaceRequired(size_t existingBytes,
                                         typename Base::param_type val,
                                         tag_type const &) {
-                auto f = StructSpaceRequirementFunctor(existingBytes);
+                StructSpaceRequirementFunctor f(existingBytes);
                 SimpleSerialization::apply(f, val);
                 return f.get();
             }
