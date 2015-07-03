@@ -32,6 +32,7 @@
 #include <iostream>
 #include <memory>
 #include <ctime>
+#include <cmath>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
