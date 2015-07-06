@@ -43,7 +43,7 @@ OSVR_MessageType eyeTrackerMessage;
 
 class EyeTrackerDevice {
   public:
-    EyeTrackerDevice(OSVR_PluginRegContext ctx) {
+    EyeTrackerDevice(OSVR_PluginRegContext ctx) : m_Blink(false) {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
@@ -60,12 +60,12 @@ class EyeTrackerDevice {
 
         /// Seed the bad random generator.
         std::srand(std::time(0));
-
     }
 
     OSVR_ReturnCode update() {
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(250)); // Simulate waiting a quarter second for data.
+        std::this_thread::sleep_for(std::chrono::milliseconds(
+            250)); // Simulate waiting a quarter second for data.
 
         OSVR_TimeValue times;
 
@@ -91,11 +91,15 @@ class EyeTrackerDevice {
 
         osvrDeviceEyeTrackerReportGaze(m_dev, m_eyetracker, location,
                                        dir.direction, dir.basePoint, 0, &times);
+        m_Blink = !m_Blink;
+        osvrDeviceEyeTrackerReportBlink(m_dev, m_eyetracker, m_Blink, 0,
+                                        &times);
 
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
+    bool m_Blink;
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_EyeTrackerDeviceInterface m_eyetracker;
 };

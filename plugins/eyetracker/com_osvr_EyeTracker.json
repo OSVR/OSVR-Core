@@ -9,7 +9,8 @@
             "count": 2,
             "location2D": true,
             "direction": true,
-            "tracker": true
+            "tracker": true,
+			"button": true
         },
         "direction": {
             "count": 2

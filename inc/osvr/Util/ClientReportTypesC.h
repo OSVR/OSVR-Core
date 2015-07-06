@@ -188,6 +188,13 @@ typedef struct OSVR_EyeTracker2DReport {
 /** @brief State for a blink event */
 typedef OSVR_ButtonState OSVR_EyeTrackerBlinkState;
 
+/** @brief OSVR_EyeTrackerBlinkState value indicating an eyes blink had occurred
+ */
+#define OSVR_EYE_BLINK (1)
+
+/** @brief OSVR_EyeTrackerBlinkState value indicating eyes are not blinking */
+#define OSVR_EYE_NO_BLINK (0)
+
 /** @brief Report type for a blink event */
 typedef struct OSVR_EyeTrackerBlinkReport {
     OSVR_ChannelCount sensor;

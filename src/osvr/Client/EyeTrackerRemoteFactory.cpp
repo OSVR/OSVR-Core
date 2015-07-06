@@ -159,7 +159,7 @@ namespace client {
 
         void m_handleEyeBlink(common::OSVR_EyeNotification const &data,
                               util::time::TimeValue const &timestamp) {
-			
+
             if (!m_opts.reportBlink) {
                 return;
             }
@@ -167,7 +167,7 @@ namespace client {
             report.sensor = data.sensor;
             bool haveBlink = false;
             util::time::TimeValue blinkTimestamp;
-			
+
             haveBlink = m_opts.buttonIface->getState<OSVR_ButtonReport>(
                 blinkTimestamp, report.state);
             if (!haveBlink) {

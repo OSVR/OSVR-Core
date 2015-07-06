@@ -49,6 +49,15 @@ void printEyeTracker3DReport(const OSVR_EyeTracker3DReport *report) {
               << report->state.direction.data[2] << std::endl;
 }
 
+void printEyeTrackerBlinkReport(const OSVR_EyeTrackerBlinkReport *report) {
+
+    if (report->state == OSVR_EYE_BLINK) {
+        std::cout << "Blink occured" << std::endl;
+    } else {
+        std::cout << "No blink" << std::endl;
+    }
+}
+
 void eyeTracker2DCallback(void * /*userdata*/,
                           const OSVR_TimeValue * /*timestamp*/,
                           const OSVR_EyeTracker2DReport *report) {
@@ -65,6 +74,14 @@ void eyeTracker3DCallback(void * /*userdata*/,
     printEyeTracker3DReport(report);
 }
 
+void eyeTrackerBlinkCallback(void * /*userdata*/,
+                             const OSVR_TimeValue * /*timestamp*/,
+                             const OSVR_EyeTrackerBlinkReport *report) {
+    std::cout << "Got Eye Tracker Blink Report: for sensor #" << report->sensor
+              << std::endl;
+    printEyeTrackerBlinkReport(report);
+}
+
 int main() {
     osvr::clientkit::ClientContext context(
         "com.osvr.exampleclients.EyeTrackerCallback");
@@ -74,6 +91,7 @@ int main() {
 
     eyetracker.registerCallback(&eyeTracker2DCallback, NULL);
     eyetracker.registerCallback(&eyeTracker3DCallback, NULL);
+    eyetracker.registerCallback(&eyeTrackerBlinkCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     while (1) {
