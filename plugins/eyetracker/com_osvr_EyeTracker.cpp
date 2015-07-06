@@ -55,6 +55,10 @@ class EyeTrackerDevice {
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
+
+        /// Seed the bad random generator.
+        std::srand(std::time(0));
+
     }
 
     OSVR_ReturnCode update() {
@@ -62,8 +66,6 @@ class EyeTrackerDevice {
         OSVR_TimeValue times;
 
         osvrTimeValueGetNow(&times);
-
-        std::srand(std::time(0));
         int randVal = std::rand();
 
         // Left eye Data
