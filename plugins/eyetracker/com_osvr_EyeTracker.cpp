@@ -33,6 +33,8 @@
 #include <memory>
 #include <ctime>
 #include <cmath>
+#include <chrono>
+#include <thread>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -48,7 +50,7 @@ class EyeTrackerDevice {
         osvrDeviceEyeTrackerConfigure(opts, &m_eyetracker, 2);
 
         /// Create the sync device token with the options
-        m_dev.initSync(ctx, "EyeTracker", opts);
+        m_dev.initAsync(ctx, "EyeTracker", opts);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(com_osvr_EyeTracker_json);
@@ -62,6 +64,8 @@ class EyeTrackerDevice {
     }
 
     OSVR_ReturnCode update() {
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(250)); // Simulate waiting a quarter second for data.
 
         OSVR_TimeValue times;
 
@@ -86,8 +90,7 @@ class EyeTrackerDevice {
         dir.basePoint = gaze3D;
 
         osvrDeviceEyeTrackerReportGaze(m_dev, m_eyetracker, location,
-                                       dir.direction, dir.basePoint, 0,
-                                       &times);
+                                       dir.direction, dir.basePoint, 0, &times);
 
         return OSVR_RETURN_SUCCESS;
     }
