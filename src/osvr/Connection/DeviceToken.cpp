@@ -72,7 +72,7 @@ OSVR_DeviceTokenObject::createVirtualDevice(std::string const &name,
 OSVR_DeviceTokenObject::OSVR_DeviceTokenObject(std::string const &name)
     : m_name(name) {}
 
-OSVR_DeviceTokenObject::~OSVR_DeviceTokenObject() {}
+OSVR_DeviceTokenObject::~OSVR_DeviceTokenObject() { stopThreads(); }
 
 std::string const &OSVR_DeviceTokenObject::getName() const { return m_name; }
 
