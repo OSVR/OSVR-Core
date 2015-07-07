@@ -4,6 +4,7 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
 
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
     com_osvr_example_AnalogSync
+    com_osvr_example_EyeTracker
     com_osvr_example_selfcontainedDetectAndCreate
     ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE}
     CACHE INTERNAL "" FORCE)
@@ -27,6 +28,18 @@ osvr_add_plugin(NAME com_osvr_example_AnalogSync
     com_osvr_example_AnalogSync.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
 set_target_properties(com_osvr_example_AnalogSync PROPERTIES
+    FOLDER "OSVR Example Plugins")
+
+## Build the eyetracker example
+osvr_convert_json(com_osvr_example_EyeTracker_json
+    com_osvr_example_EyeTracker.json
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_EyeTracker_json.h")
+osvr_add_plugin(NAME com_osvr_example_EyeTracker
+    NO_INSTALL MANUAL_LOAD CPP
+    SOURCES
+    com_osvr_example_EyeTracker.cpp
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_EyeTracker_json.h")
+set_target_properties(com_osvr_example_EyeTracker PROPERTIES
     FOLDER "OSVR Example Plugins")
 
 ## Build the code from the selfcontained example

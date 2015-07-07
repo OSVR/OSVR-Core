@@ -24,7 +24,7 @@
 #include <osvr/PluginKit/EyeTrackerInterfaceC.h>
 
 // Generated JSON header file
-#include "com_osvr_EyeTracker_json.h"
+#include "com_osvr_example_EyeTracker_json.h"
 
 // Library/third-party includes
 
@@ -53,7 +53,7 @@ class EyeTrackerDevice {
         m_dev.initAsync(ctx, "EyeTracker", opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(com_osvr_EyeTracker_json);
+        m_dev.sendJsonDescriptor(com_osvr_example_EyeTracker_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
@@ -138,9 +138,7 @@ class HardwareDetection {
 };
 } // namespace
 
-OSVR_PLUGIN(com_osvr_EyeTracker) {
-
-    osvrDeviceRegisterMessageType(ctx, "EyeTrackerMessage", &eyeTrackerMessage);
+OSVR_PLUGIN(com_osvr_example_EyeTracker) {
 
     osvr::pluginkit::PluginContext context(ctx);
 
