@@ -134,7 +134,8 @@ namespace connection {
     };
 
     util::GuardPtr AsyncDeviceToken::m_getSendGuard() {
-        return util::GuardPtr(new AsyncSendGuard(m_accessControl));
+        util::GuardPtr ret(new AsyncSendGuard(m_accessControl));
+        return ret;
     }
 
     void AsyncDeviceToken::m_connectionInteract() {
