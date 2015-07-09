@@ -78,8 +78,8 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
     ifaceObj->eyetracker = eyetracker.get();
     opts->addComponent(eyetracker);
 
-    opts->setButtons(numChan, ifaceObj->button.getContainerLocation());
-    opts->setTracker(ifaceObj->tracker.getContainerLocation());
+    opts->setButtons(numChan, ifaceObj->button);
+    opts->setTracker(ifaceObj->tracker);
 
     return OSVR_RETURN_SUCCESS;
 }
