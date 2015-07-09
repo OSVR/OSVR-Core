@@ -40,6 +40,8 @@ template <typename Contained> class PointerWrapper {
   public:
     PointerWrapper(Contained *ptr = nullptr) : m_ptr(ptr) {}
 
+    operator Contained **() { return getContainerLocation(); }
+
     Contained **getContainerLocation() { return &m_ptr; }
     Contained *operator->() { return m_ptr; }
     Contained &operator*() { return *m_ptr; }
