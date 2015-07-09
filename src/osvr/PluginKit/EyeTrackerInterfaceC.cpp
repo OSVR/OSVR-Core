@@ -49,6 +49,7 @@ struct OSVR_EyeTrackerDeviceInterfaceObject {
     osvr::common::DirectionComponent *direction;
     PointerWrapper<osvr::connection::ButtonServerInterface> button;
     PointerWrapper<osvr::connection::TrackerServerInterface> tracker;
+    PointerWrapper<OSVR_DeviceTokenObject> token;
 };
 
 OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
@@ -77,6 +78,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
 
     opts->setButtons(numChan, ifaceObj->button.getContainerLocation());
     opts->setTracker(ifaceObj->tracker.getContainerLocation());
+    opts->addTokenInterest(ifaceObj->token);
 
     return OSVR_RETURN_SUCCESS;
 }
@@ -88,7 +90,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->token->getSendGuard();
     if (guard->lock()) {
         iface->location->sendLocationData(gazePosition, sensor, *timestamp);
         iface->eyetracker->sendNotification(sensor, *timestamp);
@@ -105,7 +107,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
     OSVR_IN OSVR_EyeGazeBasePoint3DState gazeBasePoint,
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    auto guard = dev->getSendGuard();
+    auto guard = iface->token->getSendGuard();
     if (guard->lock()) {
         iface->direction->sendDirectionData(gazeDirection, sensor, *timestamp);
         iface->tracker->sendReport(gazeBasePoint, sensor, *timestamp);
@@ -123,7 +125,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->token->getSendGuard();
     if (guard->lock()) {
         iface->direction->sendDirectionData(gazeDirection, sensor, *timestamp);
         iface->eyetracker->sendNotification(sensor, *timestamp);
@@ -143,7 +145,7 @@ osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
                                OSVR_IN OSVR_ChannelCount sensor,
                                OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->token->getSendGuard();
     if (guard->lock()) {
         iface->location->sendLocationData(gazePosition, sensor, *timestamp);
         iface->tracker->sendReport(gazeBasePoint, sensor, *timestamp);
@@ -161,7 +163,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
     OSVR_IN OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->token->getSendGuard();
     if (guard->lock()) {
         iface->button->setValue(blink, sensor, *timestamp);
         iface->eyetracker->sendNotification(sensor, *timestamp);
