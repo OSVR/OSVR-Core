@@ -27,7 +27,6 @@ set(SOURCE
     ImagingInterfaceC.cpp
     Location2DInterfaceC.cpp
     PluginRegistrationC.cpp
-    PointerWrapper.h
     TrackerInterfaceC.cpp)
 
 osvr_add_library()

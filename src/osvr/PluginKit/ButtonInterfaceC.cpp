@@ -29,7 +29,7 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
-#include "PointerWrapper.h"
+#include <osvr/Util/PointerWrapper.h>
 
 // Library/third-party includes
 // - none
@@ -38,7 +38,8 @@
 // - none
 
 struct OSVR_ButtonDeviceInterfaceObject
-    : public PointerWrapper<osvr::connection::ButtonServerInterface> {};
+    : public osvr::util::PointerWrapper<
+          osvr::connection::ButtonServerInterface> {};
 
 OSVR_ReturnCode
 osvrDeviceButtonConfigure(OSVR_IN_PTR OSVR_DeviceInitOptions opts,

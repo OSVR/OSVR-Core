@@ -28,7 +28,7 @@
 #include <osvr/Connection/AnalogServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include "PointerWrapper.h"
+#include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
 
 // Library/third-party includes
@@ -38,7 +38,8 @@
 // - none
 
 struct OSVR_AnalogDeviceInterfaceObject
-    : public PointerWrapper<osvr::connection::AnalogServerInterface> {};
+    : public osvr::util::PointerWrapper<
+          osvr::connection::AnalogServerInterface> {};
 
 OSVR_ReturnCode
 osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,

@@ -28,7 +28,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include "PointerWrapper.h"
+#include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/EyeTrackerComponent.h>
@@ -42,6 +42,8 @@
 
 // Standard includes
 // - none
+
+using osvr::util::PointerWrapper;
 
 struct OSVR_EyeTrackerDeviceInterfaceObject {
     osvr::common::EyeTrackerComponent *eyetracker;

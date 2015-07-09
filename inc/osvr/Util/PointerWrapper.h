@@ -34,20 +34,24 @@
 // Standard includes
 // - none
 
-/// @brief A wrapper to easily define structures that exist just to hold a
-/// pointer.
-template <typename Contained> class PointerWrapper {
-  public:
-    PointerWrapper(Contained *ptr = nullptr) : m_ptr(ptr) {}
+namespace osvr {
+namespace util {
+    /// @brief A wrapper to easily define structures that exist just to hold a
+    /// pointer.
+    template <typename Contained> class PointerWrapper {
+      public:
+        PointerWrapper(Contained *ptr = nullptr) : m_ptr(ptr) {}
 
-    operator Contained **() { return getContainerLocation(); }
+        operator Contained **() { return getContainerLocation(); }
 
-    Contained **getContainerLocation() { return &m_ptr; }
-    Contained *operator->() { return m_ptr; }
-    Contained &operator*() { return *m_ptr; }
+        Contained **getContainerLocation() { return &m_ptr; }
+        Contained *operator->() { return m_ptr; }
+        Contained &operator*() { return *m_ptr; }
 
-  private:
-    Contained *m_ptr;
-};
+      private:
+        Contained *m_ptr;
+    };
+} // namespace util
+} // namespace osvr
 
 #endif // INCLUDED_PointerWrapper_h_GUID_0C8888FE_163F_46A3_A9F2_1EFCF610C64D

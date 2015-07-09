@@ -55,6 +55,7 @@ set(API
     "${HEADER_LOCATION}/OpenCVTypeDispatch.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
+    "${HEADER_LOCATION}/PointerWrapper.h"
     "${HEADER_LOCATION}/Pose3C.h"
     "${HEADER_LOCATION}/ProgramOptionsToggleFlags.h"
     "${HEADER_LOCATION}/QuaternionC.h"

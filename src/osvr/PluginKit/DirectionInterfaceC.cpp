@@ -29,7 +29,7 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Common/DirectionComponent.h>
-#include "PointerWrapper.h"
+#include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
 

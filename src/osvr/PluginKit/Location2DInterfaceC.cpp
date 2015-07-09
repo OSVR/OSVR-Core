@@ -29,7 +29,6 @@
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Common/Location2DComponent.h>
-#include "PointerWrapper.h"
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
 
