@@ -43,8 +43,9 @@ using osvr::connection::SyncDeviceToken;
 using osvr::connection::VirtualDeviceToken;
 using osvr::connection::ConnectionPtr;
 using osvr::connection::MessageType;
-using osvr::connection::GuardPtr;
 using osvr::connection::ConnectionDevicePtr;
+using osvr::util::GuardPtr;
+
 DeviceTokenPtr
 OSVR_DeviceTokenObject::createAsyncDevice(DeviceInitObject &init) {
     DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));

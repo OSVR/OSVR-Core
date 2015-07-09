@@ -57,7 +57,7 @@ namespace connection {
         void m_sendData(util::time::TimeValue const &timestamp,
                                 MessageType *type, const char *bytestream,
                                 size_t len) override;
-        GuardPtr m_getSendGuard() override;
+        util::GuardPtr m_getSendGuard() override;
 
         /// Called from the main thread - services requests to send from
         /// the async thread.

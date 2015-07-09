@@ -133,8 +133,8 @@ namespace connection {
         RequestToSend m_rts;
     };
 
-    GuardPtr AsyncDeviceToken::m_getSendGuard() {
-        return GuardPtr(new AsyncSendGuard(m_accessControl));
+    util::GuardPtr AsyncDeviceToken::m_getSendGuard() {
+        return util::GuardPtr(new AsyncSendGuard(m_accessControl));
     }
 
     void AsyncDeviceToken::m_connectionInteract() {

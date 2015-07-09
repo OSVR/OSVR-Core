@@ -53,8 +53,8 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
-    GuardPtr VirtualDeviceToken::m_getSendGuard() {
-        return GuardPtr(new util::DummyGuard);
+    util::GuardPtr VirtualDeviceToken::m_getSendGuard() {
+        return util::GuardPtr(new util::DummyGuard);
     }
 
     void VirtualDeviceToken::m_connectionInteract() {}
