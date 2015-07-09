@@ -27,6 +27,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/AnalogServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
@@ -38,8 +39,9 @@
 // - none
 
 struct OSVR_AnalogDeviceInterfaceObject
-    : public osvr::util::PointerWrapper<
-          osvr::connection::AnalogServerInterface> {};
+    : public osvr::connection::DeviceInterfaceBase {
+    osvr::util::PointerWrapper<osvr::connection::AnalogServerInterface> analog;
+};
 
 OSVR_ReturnCode
 osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
@@ -48,68 +50,62 @@ osvrDeviceAnalogConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogConfigure", iface);
     OSVR_AnalogDeviceInterface ifaceObj =
-        opts->getContext()->registerDataWithGenericDelete(
-            new OSVR_AnalogDeviceInterfaceObject);
+        opts->makeInterfaceObject<OSVR_AnalogDeviceInterfaceObject>();
     *iface = ifaceObj;
-    opts->setAnalogs(numChan, ifaceObj->getContainerLocation());
+    opts->setAnalogs(numChan, ifaceObj->analog);
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceAnalogSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
-                                         OSVR_IN_PTR OSVR_AnalogDeviceInterface
-                                             iface,
-                                         OSVR_IN OSVR_AnalogState val,
-                                         OSVR_IN OSVR_ChannelCount chan) {
+OSVR_ReturnCode
+osvrDeviceAnalogSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
+                         OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
+                         OSVR_IN OSVR_AnalogState val,
+                         OSVR_IN OSVR_ChannelCount chan) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
     return osvrDeviceAnalogSetValueTimestamped(dev, iface, val, chan, &now);
 }
 
 OSVR_ReturnCode osvrDeviceAnalogSetValueTimestamped(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
-    OSVR_IN_PTR OSVR_AnalogDeviceInterface iface, OSVR_IN OSVR_AnalogState val,
-    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_DeviceToken, OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
+    OSVR_IN OSVR_AnalogState val, OSVR_IN OSVR_ChannelCount chan,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped",
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValueTimestamped",
                                     timestamp);
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        bool sendResult = (*iface)->setValue(val, chan, *timestamp);
+        bool sendResult = iface->analog->setValue(val, chan, *timestamp);
         return sendResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
     }
 
     return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode osvrDeviceAnalogSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                                          OSVR_IN_PTR OSVR_AnalogDeviceInterface
-                                              iface,
-                                          OSVR_IN_PTR OSVR_AnalogState val[],
-                                          OSVR_IN OSVR_ChannelCount chans) {
+OSVR_ReturnCode
+osvrDeviceAnalogSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                          OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
+                          OSVR_IN_PTR OSVR_AnalogState val[],
+                          OSVR_IN OSVR_ChannelCount chans) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
     return osvrDeviceAnalogSetValuesTimestamped(dev, iface, val, chans, &now);
 }
 
 OSVR_ReturnCode osvrDeviceAnalogSetValuesTimestamped(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
-    OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
+    OSVR_IN_PTR OSVR_DeviceToken, OSVR_IN_PTR OSVR_AnalogDeviceInterface iface,
     OSVR_IN_PTR OSVR_AnalogState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
-                                    dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceAnalogSetValuesTimestamped",
                                     timestamp);
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        (*iface)->setValues(val, chans, *timestamp);
+        iface->analog->setValues(val, chans, *timestamp);
         return OSVR_RETURN_SUCCESS;
     }
     return OSVR_RETURN_FAILURE;
