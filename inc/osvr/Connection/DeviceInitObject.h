@@ -44,6 +44,8 @@
 
 // Standard includes
 #include <string>
+#include <type_traits>
+#include <memory>
 
 namespace osvr {
 namespace connection {
@@ -93,6 +95,18 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     /// device when created.
     OSVR_CONNECTION_EXPORT void
     addComponent(osvr::common::DeviceComponentPtr const &comp);
+
+    /// @brief A helper method to make a "device interface object" of
+    /// user-designated type and apppropriate lifetime.
+    template <typename T> T *makeInterfaceObject() {
+        static_assert(
+            std::is_base_of<osvr::connection::DeviceInterfaceBase, T>::value,
+            "Your interface object must derive from "
+            "DeviceInterfaceBase to use this handy wrapper!");
+        auto ifaceObj = getContext()->registerDataWithGenericDelete(new T);
+        addTokenInterest(ifaceObj);
+        return ifaceObj;
+    }
 
     /// @brief Add an observer that we'll eventually inform about the device
     /// token.
