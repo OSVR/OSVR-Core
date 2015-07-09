@@ -119,20 +119,20 @@ if(BUILD_SERVER_APP)
 
     # Copy contents of dir for both build and install trees.
     macro(osvr_copy_dir _dirname _glob _comment)
-        add_custom_command(OUTPUT "${_dirname}"
+        add_custom_command(OUTPUT "${_dirname}-stamp"
             COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:osvr_server>${_dirname}"
             COMMENT "Making ${_comment} directory"
             VERBATIM)
-
+        set_source_files_properties("${_dirname}-stamp" PROPERTIES SYMBOLIC TRUE)
         # Grab all the files with a glob, to avoid missing one.
         file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}" "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${_glob}")
 
         foreach(FN ${_files})
             list(APPEND FILE_OUTPUTS "${_dirname}/${FN}")
             add_custom_command(OUTPUT "${_dirname}/${FN}"
-                COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${_dirname}"
+                COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${_dirname}/"
                 MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}"
-                DEPENDS "${_dirname}"
+                DEPENDS "${_dirname}-stamp"
                 COMMENT "Copying ${_comment} ${FN}"
                 VERBATIM)
             install(FILES "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}"
