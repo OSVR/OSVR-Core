@@ -155,8 +155,8 @@ namespace server {
             out << "Display descriptor found and parsed from config file"
                 << endl;
         } else {
-            out << "No 'display' object found in config file - server may use "
-                   "the OSVR HDK as a default." << endl;
+            out << "No valid 'display' object found in config file - server "
+                   "may use the OSVR HDK as a default." << endl;
         }
 
         out << "Triggering a hardware detection..." << endl;

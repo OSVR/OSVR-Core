@@ -26,6 +26,7 @@
 #define INCLUDED_GuardInterfaceDummy_h_GUID_3882E1F8_E44A_4D95_E4D3_6C60A9C94F05
 
 // Internal Includes
+#include <osvr/Util/Export.h>
 #include <osvr/Util/GuardInterface.h>
 
 // Library/third-party includes
@@ -36,10 +37,10 @@
 
 namespace osvr {
 namespace util {
-    class DummyGuard : public GuardInterface {
+    class OSVR_UTIL_EXPORT DummyGuard : public GuardInterface {
       public:
-        virtual bool lock() { return true; }
-        virtual ~DummyGuard() {}
+        virtual bool lock() override { return true; }
+        virtual ~DummyGuard();
     };
 
 } // namespace util

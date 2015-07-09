@@ -5,8 +5,9 @@ if(CMAKE_VERSION VERSION_LESS 3.0.0)
     message(FATAL_ERROR "You must use CMake 3.0.0 or greater.")
 endif()
 
+set(LOCAL_CMAKE_MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-local")
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${LOCAL_CMAKE_MODULE_DIR}")
 
 ###
 # Package Options
@@ -21,20 +22,44 @@ set(OSVR_PLUGINKIT_ABI_VERSION 0)
 ###
 # Configuration Options
 ###
-option(BUILD_SHARED_LIBS "Should we build as a shared library?" ON)
-option(BUILD_DEV_VERBOSE "Build with verbose development messages?" ON)
-option(BUILD_SERVER "Should we build the server libraries and applications?" ON)
-option(BUILD_CLIENT "Should we build the client libraries and applications?" ON)
-if(WIN32)
+
+# This included script is shared with (e.g. Android) super-builds.
+include(osvrBuildOptions)
+
+# Build options that aren't shared with super-builds
+if(WIN32 OR ANDROID)
     option(Boost_USE_STATIC_LIBS "Build with Boost's static libraries?" ON)
 endif()
-
-if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
-    message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
+if(MSVC)
+    option(BUILD_IN_PARALLEL "Should we use the MSVC /mp option to compile in parallel? Usually faster, but sometimes makes build errors harder to fix." ON)
 endif()
 
 set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
 mark_as_advanced(OSVR_PLUGIN_IGNORE_SUFFIX)
+
+# Figure out what to do with osvr_json_to_c
+if(CMAKE_CROSSCOMPILING OR ANDROID)
+    # If you are cross-compiling, please pass in OSVR_JSON_TO_C_COMMAND to CMake
+    set(OSVR_CROSSCOMPILING ON)
+    set(BUILD_OSVR_JSON_TO_C OFF)
+    if(OSVR_JSON_TO_C_COMMAND)
+        set(HAVE_OSVR_JSON_TO_C ON)
+        set(OSVR_JSON_TO_C_EXECUTABLE ${OSVR_JSON_TO_C_COMMAND})
+    else()
+        set(HAVE_OSVR_JSON_TO_C OFF)
+    endif()
+else()
+    # Right now, always build if we build the server
+    set(BUILD_OSVR_JSON_TO_C ${BUILD_SERVER})
+    set(HAVE_OSVR_JSON_TO_C ${BUILD_SERVER})
+endif()
+
+set(BUILD_USBSERIALENUM ${BUILD_SERVER_PLUGINS})
+set(BUILD_OPENCV_CAMERA_PLUGIN ${BUILD_SERVER_PLUGINS})
+if(ANDROID)
+    set(BUILD_USBSERIALENUM OFF)
+    set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
+endif()
 
 ###
 # CMake Modules
@@ -55,10 +80,16 @@ set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
 include(CopyImportedTarget)
-include(MSVCMultipleProcessCompile)
+if(BUILD_IN_PARALLEL)
+    include(MSVCMultipleProcessCompile)
+endif()
 
 include(SetDefaultBuildType)
-set_default_build_type(RelWithDebInfo)
+if(ANDROID)
+    set_default_build_type(Release)
+else()
+    set_default_build_type(RelWithDebInfo)
+endif()
 
 include(UseFolders)
 use_folders()
@@ -84,45 +115,20 @@ if(MSVC)
     list(APPEND CMAKE_PREFIX_PATH "c:/OpenCV249")
 endif()
 
-find_package(libfunctionality REQUIRED)
-find_package(Boost 1.44 COMPONENTS thread system date_time chrono program_options filesystem REQUIRED) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
-find_package(Threads REQUIRED)
+if(BUILD_SERVER)
+    find_package(libfunctionality REQUIRED)
+endif()
 find_package(OpenCV REQUIRED)
 if(WIN32)
     set(OSVR_COPY_OPENCV ON)
 else()
     set(OSVR_COPY_OPENCV OFF)
 endif()
-
-add_library(boost_thread INTERFACE)
-target_link_libraries(boost_thread
-    INTERFACE
-    ${Boost_THREAD_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES}
-    ${Boost_DATE_TIME_LIBRARIES}
-    ${Boost_CHRONO_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT})
-target_include_directories(boost_thread INTERFACE ${Boost_INCLUDE_DIRS})
-if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
-    # Work around a foolish insistence to use DLLs on MXE that don't exist.
-    target_compile_definitions(boost_thread
-        INTERFACE
-        BOOST_THREAD_USE_LIB)
+if(ANDROID)
+    include(OpenCVAndroid)
 endif()
 
-add_library(boost_filesystem INTERFACE)
-target_link_libraries(boost_filesystem
-    INTERFACE
-    ${Boost_FILESYSTEM_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES})
-target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
-target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
-
-add_library(boost_program_options INTERFACE)
-target_link_libraries(boost_program_options
-    INTERFACE
-    ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-target_include_directories(boost_program_options INTERFACE ${Boost_INCLUDE_DIRS})
+find_package(Threads REQUIRED)
 
 find_package(jsoncpp REQUIRED)
 if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
@@ -132,11 +138,46 @@ endif()
 
 include(CompilerFeatures)
 
-set(OSVR_CODECVT_LIBRARIES)
-if(WIN32 AND NOT OSVR_HAVE_CODECVT) # Needed for USB Serial Enum and Winsock error processing.
-    find_package(Boost COMPONENTS locale REQUIRED)
-    set(OSVR_CODECVT_LIBRARIES ${Boost_LOCALE_LIBRARY})
+set(OPENCV_MODULES_USED opencv_core)
+
+# Extra OpenCV components.
+# We set this up here so that if we need to copy DLLs, we can do it in the main
+# library builds where it's easier to get the right directory on Windows in a build tree.
+if(BUILD_OPENCV_CAMERA_PLUGIN)
+    set(OPENCV_CAMERA_EXTRA_LIBS opencv_highgui)
+    list(APPEND OPENCV_MODULES_USED ${OPENCV_CAMERA_EXTRA_LIBS})
 endif()
+
+list(REMOVE_DUPLICATES OPENCV_MODULES_USED)
+
+###
+# Figure out what Boost compiled libraries we need.
+###
+set(NEED_BOOST_PROGRAM_OPTIONS OFF)
+set(NEED_BOOST_FILESYSTEM OFF)
+set(NEED_BOOST_LOCALE OFF)
+
+# Assume for now we always need this
+set(NEED_BOOST_THREAD ON)
+
+if(BUILD_SERVER_APP OR BUILD_CLIENT_APPS)
+    set(NEED_BOOST_PROGRAM_OPTIONS ON)
+endif()
+
+if(BUILD_SERVER)
+    set(NEED_BOOST_FILESYSTEM ON)
+endif()
+
+if(WIN32 AND NOT OSVR_HAVE_CODECVT)
+    # Needed for USB Serial Enum and Winsock error processing.
+    # either native or Boost Locale - set up in BoostTargets.cmake
+    set(NEED_BOOST_LOCALE ON)
+    set(OSVR_CODECVT_LIBRARIES boost_locale)
+endif()
+
+# This script runs find_package(Boost) for the right components and creates
+# interface targets for the requested libraries
+include(BoostTargets)
 
 ###
 # Set up build directories
@@ -166,12 +207,15 @@ set(OSVR_CACHED_PLUGIN_DIR "${OSVR_PLUGIN_DIR}" CACHE INTERNAL
 
 # Since alias targets only work for libraries, we use this method instead to
 # share the osvr_convert_json script between the main tree and external config users.
-set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
-    "The target name for the osvr_json_to_c executable" FORCE)
+if(NOT OSVR_CROSSCOMPILING)
+    set(OSVR_JSON_TO_C_EXECUTABLE "osvr_json_to_c" CACHE INTERNAL
+        "The target name for the osvr_json_to_c executable" FORCE)
+endif()
 
 ###
 # Building
 ###
+# vendored dependencies
 add_subdirectory(vendor)
 
 # Set RPATH for dynamic library search.
@@ -184,18 +228,43 @@ set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "d")
 endif()
+
+# Development tools
 add_subdirectory(devtools)
+
+# Core libraries
 add_subdirectory(src/osvr)
+
 if(WIN32)
     set(CMAKE_DEBUG_POSTFIX "")
 endif()
 
+# Apps
 add_subdirectory(apps)
-add_subdirectory(plugins)
+if(BUILD_SERVER_PLUGINS)
+    add_subdirectory(plugins)
+endif()
 if(BUILD_TESTING)
     add_subdirectory(examples)
     add_subdirectory(tests)
 endif()
+
+###
+# Setup some basic files to support editors
+###
+# still could use additional include paths (and defines?) added.
+
+# CMake convention note:
+# Yes, this is generating in the source tree (bad),
+# but the output files are not version controlled (good) and are in fact
+# in gitignore (good)
+
+# .clang_complete - for vim and the completion package in Atom
+configure_file(.clang_complete.in "${CMAKE_CURRENT_SOURCE_DIR}/.clang_complete" @ONLY)
+
+# For the linter-clang package in Atom
+configure_file(.linter-clang-flags.in "${CMAKE_CURRENT_SOURCE_DIR}/.linter-clang-flags" @ONLY)
+configure_file(.linter-clang-includes.in "${CMAKE_CURRENT_SOURCE_DIR}/.linter-clang-includes" @ONLY)
 
 ###
 # Install examples
@@ -281,18 +350,23 @@ export(EXPORT osvrTargets
 # Register the current build dir as a package search location
 export(PACKAGE osvr)
 
-configure_file(osvrConfig.cmake
+configure_file("${LOCAL_CMAKE_MODULE_DIR}/osvrConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     @ONLY)
 
 # Copy over the shared CMake modules for use in a build tree.
-foreach(HELPER osvrAddPlugin osvrConvertJson)
-    configure_file(${HELPER}.cmake "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
+foreach(HELPER osvrAddPlugin osvrConvertJson CMakeBoostHelper)
+    configure_file("${LOCAL_CMAKE_MODULE_DIR}/${HELPER}.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${HELPER}.cmake" COPYONLY)
 endforeach()
 
-configure_file(osvrConfigBuildTreePaths.cmake
+configure_file("${LOCAL_CMAKE_MODULE_DIR}/osvrConfigBuildTreePaths.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigBuildTreePaths.cmake"
     @ONLY)
+
+if(WIN32)
+    # Needed by CMakeBoostHelper
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetMSVCVersion.cmake" "${CMAKE_CURRENT_BINARY_DIR}/GetMSVCVersion.cmake" COPYONLY)
+endif()
 
 install(EXPORT osvrTargets
     FILE
@@ -307,10 +381,10 @@ install(EXPORT osvrTargets
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrAddPlugin.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledBoost.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConfigInstalledOpenCV.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/osvrConvertJson.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrAddPlugin.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrConfigInstalledBoost.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrConfigInstalledOpenCV.cmake"
+    "${LOCAL_CMAKE_MODULE_DIR}/osvrConvertJson.cmake"
     DESTINATION
     ${CONFIG_INSTALL_DIR}
     COMPONENT
@@ -318,13 +392,24 @@ install(FILES
 
 if(WIN32)
     install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/CMakeBoostHelper.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetMSVCVersion.cmake"
+        "${LOCAL_CMAKE_MODULE_DIR}/CMakeBoostHelper.cmake"
         DESTINATION
         ${CONFIG_INSTALL_DIR}
         COMPONENT
         Devel)
 endif()
 
+if(ANDROID AND "${ANDROID_STL}" STREQUAL "gnustl_shared")
+    if(__libstl) # TODO this is an internal variable in android-cmake!
+        install(FILES
+            "${__libstl}"
+            DESTINATION
+            ${OSVR_SHARED_LIBRARY_DIR}
+            COMPONENT
+            Runtime)
+    endif()
+endif()
 
 ###
 # Install dependencies

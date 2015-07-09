@@ -32,6 +32,7 @@
 
 // Library/third-party includes
 #include <boost/version.hpp>
+#include <boost/type_traits.hpp>
 
 #if BOOST_VERSION >= 105600
 #include <boost/align/aligned_allocator.hpp>
@@ -104,8 +105,8 @@ namespace common {
       private:
         ElementType const *m_buf;
         size_t m_size;
-        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
-                                "Container must have byte-sized elements");
+        static_assert(sizeof(ElementType) == 1,
+                      "Container must have byte-sized elements");
     };
 
     /// @brief Provides for a single reading pass over a buffer. It is
@@ -185,8 +186,8 @@ namespace common {
         const_iterator m_begin;
         const_iterator m_readIter;
         const_iterator m_end;
-        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
-                                "Container must have byte-sized elements");
+        static_assert(sizeof(ElementType) == 1,
+                      "Container must have byte-sized elements");
     };
 
     /// @brief Constructs and returns a buffer reader for an
@@ -231,7 +232,8 @@ namespace common {
         ///
         /// The value cannot be a pointer here.
         template <typename T> void append(T const v) {
-            BOOST_STATIC_ASSERT(!boost::is_pointer<T>::value);
+            static_assert(!boost::is_pointer<T>::value,
+                          "Cannot append the value of a pointer!");
             /// Safe to do without violating strict aliasing because ElementType
             /// is a character type.
             ElementType const *src = reinterpret_cast<ElementType const *>(&v);
@@ -287,8 +289,8 @@ namespace common {
 
       private:
         ContainerType m_buf;
-        BOOST_STATIC_ASSERT_MSG(sizeof(ElementType) == 1,
-                                "Container must have byte-sized elements");
+        static_assert(sizeof(ElementType) == 1,
+                      "Container must have byte-sized elements");
     };
 } // namespace common
 } // namespace osvr

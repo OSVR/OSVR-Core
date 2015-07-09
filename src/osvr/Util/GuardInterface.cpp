@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include <osvr/Util/GuardInterface.h>
+#include <osvr/Util/GuardInterfaceDummy.h>
 
 // Library/third-party includes
 // - none
@@ -34,5 +35,6 @@
 namespace osvr {
 namespace util {
     GuardInterface::~GuardInterface() {}
+    DummyGuard::~DummyGuard() {}
 } // namespace util
 } // namespace osvr

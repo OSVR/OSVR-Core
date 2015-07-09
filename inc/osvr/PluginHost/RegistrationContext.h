@@ -27,6 +27,7 @@
 #define INCLUDED_RegistrationContext_h_GUID_9FF83E64_B2E1_40B7_E072_929AC0F94A10
 
 // Internal Includes
+#include <osvr/PluginHost/RegistrationContext_fwd.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Util/AnyMap.h>
 #include <osvr/PluginHost/Export.h>

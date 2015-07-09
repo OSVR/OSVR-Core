@@ -34,7 +34,7 @@
 #include <osvr/Util/PluginRegContextC.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
+// - none
 
 // Standard includes
 // - none
@@ -56,8 +56,13 @@ namespace vrpnserver {
         }
     } // namespace detail
 
-    class VRPNDeviceRegistration : boost::noncopyable {
+    class VRPNDeviceRegistration {
       public:
+        /// @brief noncopyable
+        VRPNDeviceRegistration(VRPNDeviceRegistration const &) = delete;
+        /// @brief nonassignable
+        VRPNDeviceRegistration &
+        operator=(VRPNDeviceRegistration const &) = delete;
         /// @brief Start the process of registering a manually-created VRPN
         /// device into the OSVR server core.
         OSVR_VRPNSERVER_EXPORT

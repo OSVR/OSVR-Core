@@ -44,7 +44,7 @@ namespace util {
         typedef typename RangeType::type IteratorType;
         typedef typename IteratorType::value_type PointerType;
         for (auto &ptr : range) {
-            ptr.reset()
+            ptr.reset();
         }
     }
 } // namespace util

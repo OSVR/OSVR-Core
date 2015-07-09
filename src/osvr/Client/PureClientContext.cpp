@@ -37,10 +37,14 @@
 #include "ImagingRemoteFactory.h"
 #include "Location2DRemoteFactory.h"
 #include "TrackerRemoteFactory.h"
+#include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
+
+#include <boost/algorithm/string.hpp>
 
 // Library/third-party includes
 #include <json/reader.h>
@@ -52,7 +56,53 @@
 namespace osvr {
 namespace client {
 
-    static const std::chrono::milliseconds CONNECT_WAIT(500);
+    class LocalhostReplacer : public boost::static_visitor<>, boost::noncopyable
+    {
+    public:
+        LocalhostReplacer(const std::string &host) : boost::static_visitor<>(), m_host(host)
+        {
+            BOOST_ASSERT_MSG(
+                m_host.length() > 0,
+                "Cannot replace localhost with an empty host name!");
+        }
+
+        /// @brief Replace localhost with proper hostname:port for Device elements
+        void operator()(osvr::common::PathNode &,
+            osvr::common::elements::DeviceElement &elt)
+        {
+            std::string &server = elt.getServer();
+
+            auto it = server.find("localhost");
+
+            if (it != server.npos)
+            {
+                // Do a bit of surgery, only the "localhost" must be replaced, keeping
+                // the ":xxxx" part with the port number - the host could be running a local 
+                // VRPN/OSVR service on another port!
+
+                // We have to do it like this, because std::string::replace() has a silly undefined corner 
+                // case when the string we are replacing localhost with is shorter than the length of 
+                // string being replaced (see http://www.cplusplus.com/reference/string/string/replace/ )
+                // Better be safe than sorry :(
+
+                server = boost::algorithm::ireplace_first_copy(server, "localhost", m_host);  // Go through a copy, just to be extra safe
+            }
+        }
+
+        /// @brief Catch-all for other element types.
+        template <typename T>
+        void operator()(osvr::common::PathNode &, T &) 
+        {
+        }        
+
+
+    protected:
+        const std::string m_host;
+    };
+
+    static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
+    static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
+    static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
     PureClientContext::PureClientContext(const char appId[], const char host[])
         : ::OSVR_ClientContextObject(appId), m_host(host) {
@@ -95,10 +145,27 @@ namespace client {
 #endif
         typedef std::chrono::system_clock clock;
         auto begin = clock::now();
-        auto end = begin + CONNECT_WAIT;
-        while (clock::now() < end && (!m_gotTree || !m_gotConnection)) {
+
+        // Spin the update to get a connection
+        auto connEnd = begin + STARTUP_CONNECT_TIMEOUT;
+        while (clock::now() < connEnd && !m_gotConnection) {
             m_update();
-            std::this_thread::yield();
+            std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
+        }
+        if (!m_gotConnection) {
+            OSVR_DEV_VERBOSE(
+                "Could not connect to OSVR server in the timeout period "
+                "allotted of "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(
+                       STARTUP_CONNECT_TIMEOUT).count() << "ms");
+            return; // Bail early if we don't even have a connection
+        }
+
+        // Spin the update to get a path tree
+        auto treeEnd = begin + STARTUP_TREE_TIMEOUT;
+        while (clock::now() < treeEnd && !m_gotTree) {
+            m_update();
+            std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
         }
         auto timeToStartup = (clock::now() - begin);
         OSVR_DEV_VERBOSE(
@@ -216,6 +283,17 @@ namespace client {
 
         // populate path tree from message
         common::jsonToPathTree(m_pathTree, nodes);
+
+        // replace the @localhost with the correct host name 
+        // in case we are a remote client, otherwise the connection
+        // would fail
+
+        LocalhostReplacer replacer(m_host);        
+        util::traverseWith(
+            m_pathTree.getRoot(), [&replacer](osvr::common::PathNode &node) {
+            common::applyPathNodeVisitor(replacer, node);
+        });
+
         // re-connect handlers.
         m_connectNeededCallbacks();
     }

@@ -179,7 +179,7 @@ namespace common {
         const std::string normalizedDescriptor =
             normalizeDeviceDescriptor(jsonDescriptor);
 
-        /// Parse JSON
+        /// Parse JSON to stuff into device node.
         Json::Value descriptor;
         {
             Json::Reader reader;
@@ -194,11 +194,23 @@ namespace common {
         }
         devElt->getDescriptor() = descriptor;
 
-        changed += processInterfacesFromDescriptor(devNode, descriptor);
+        changed += processDeviceDescriptorFromExistingDevice(devNode, *devElt);
 
-        changed += processSemanticFromDescriptor(devNode, descriptor);
+        return changed.get();
+    }
 
-        changed += processAutomaticFromDescriptor(devNode, descriptor);
+    bool processDeviceDescriptorFromExistingDevice(
+        PathNode &devNode, elements::DeviceElement const &devElt) {
+        util::Flag changed;
+
+        changed +=
+            processInterfacesFromDescriptor(devNode, devElt.getDescriptor());
+
+        changed +=
+            processSemanticFromDescriptor(devNode, devElt.getDescriptor());
+
+        changed +=
+            processAutomaticFromDescriptor(devNode, devElt.getDescriptor());
 
         return changed.get();
     }

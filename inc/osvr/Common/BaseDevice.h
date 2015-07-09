@@ -101,12 +101,15 @@ namespace common {
         template <typename T>
         void packMessage(Buffer<T> const &buf, RawMessageType const &msgType);
 
+        std::string const &getDeviceName() const;
+
       protected:
         /// @brief Constructor
         OSVR_COMMON_EXPORT BaseDevice();
         /// @brief Should be called by derived class to set the connection, etc.
         OSVR_COMMON_EXPORT void m_setup(vrpn_ConnectionPtr conn,
-                                        RawSenderType sender);
+                                        RawSenderType sender,
+                                        std::string const &name);
         /// @brief Accessor for underlying connection
         vrpn_ConnectionPtr m_getConnection() const;
         /// @brief Implementation-specific update (call client_mainloop() or
@@ -127,6 +130,7 @@ namespace common {
         DeviceComponentList m_components;
         vrpn_ConnectionPtr m_conn;
         RawSenderType m_sender;
+        std::string m_name;
     };
 
     template <typename T, typename ClassOfService>

@@ -19,7 +19,7 @@ set(SOURCE
     "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 # Fallback display descriptor
-set(DISPLAY_JSON display-HDK.json)
+set(DISPLAY_JSON ../../../apps/displays/OSVR_HDK_1_1.json)
 osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
@@ -34,7 +34,7 @@ set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
 
 target_include_directories(${LIBNAME_FULL}
     PUBLIC
-    ${Boost_INCLUDE_DIRS})
+    $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 
 target_compile_options(${LIBNAME_FULL}
     PUBLIC
@@ -51,4 +51,3 @@ target_link_libraries(${LIBNAME_FULL}
     vendored-vrpn
     jsoncpp_lib
     util-runloopmanager)
-

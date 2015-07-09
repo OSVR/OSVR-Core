@@ -1,0 +1,49 @@
+/* Configuration file for Polhemus G4 system with two trackers and PowerTrak 360 buttons through an external VRPN server. */
+{
+	"externalDevices": {
+		"/myG4Device": {
+			"deviceName": "G4",
+			"server": "localhost:3884",
+			"descriptor": {
+				"interfaces": {
+					"tracker": {}
+				}
+			}
+		},
+		"/myPowerTrakDevice": {
+			"deviceName": "PowerTrak",
+			"server": "localhost:3884",
+			"descriptor": {
+				"interfaces": {
+					"button": {}
+				}
+			}
+		}
+	},
+	"aliases": {
+		"/me/hands/right": {
+			"child": {
+				"changeBasis": {
+					"x": "-y",
+					"y": "-z",
+					"z": "x"
+				},
+				"child": "/myG4Device/tracker/0"
+			}
+		},
+		"/me/hands/left": {
+			"child": {
+				"changeBasis": {
+					"x": "-y",
+					"y": "-z",
+					"z": "x"
+				},
+				"child": "/myG4Device/tracker/1"
+			}
+		},
+		"/controller/left/fwd": "/myPowerTrakDevice/button/0",
+		"/controller/left/rgt": "/myPowerTrakDevice/button/1",
+		"/controller/left/lft": "/myPowerTrakDevice/button/2",
+		"/controller/left/bck": "/myPowerTrakDevice/button/3"
+		}
+}

@@ -22,6 +22,7 @@ endfunction()
 
 macro(define_platform_macros _prefix)
 	_define_platform_macros_impl(${_prefix} "AIX" AIX)
+	_define_platform_macros_impl(${_prefix} "Android" ANDROID)
 	_define_platform_macros_impl(${_prefix} "BS/DOS" BSDOS)
 	_define_platform_macros_impl(${_prefix} "FreeBSD" FREEBSD)
 	_define_platform_macros_impl(${_prefix} "HP-UX" HPUX)

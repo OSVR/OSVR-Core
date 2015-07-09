@@ -23,7 +23,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef __ANDROID__
 #define OSVR_DEV_VERBOSE_DISABLE
+#endif
 
 // Internal Includes
 #include <osvr/PluginHost/RegistrationContext.h>

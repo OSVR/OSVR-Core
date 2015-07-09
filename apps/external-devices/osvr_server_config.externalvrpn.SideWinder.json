@@ -1,0 +1,9 @@
+{
+    "externalDevices": {
+        "/SidewinderDevice": {
+            "deviceName": "Sidewinder",
+            "server": "localhost:3884",
+            "descriptor": "device-descriptors/Sidewinder.json"
+        }
+    }
+}

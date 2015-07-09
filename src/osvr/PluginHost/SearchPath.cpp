@@ -26,6 +26,7 @@
 #include <osvr/PluginHost/SearchPath.h>
 #include <osvr/PluginHost/PathConfig.h>
 #include "BinaryLocation.h"
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <boost/filesystem.hpp>
@@ -38,7 +39,9 @@ namespace osvr {
 namespace pluginhost {
     SearchPath getPluginSearchPath() {
         boost::filesystem::path exeLocation(getBinaryLocation());
-
+#ifdef __ANDROID__
+        OSVR_DEV_VERBOSE("Binary location: " << exeLocation);
+#endif
         // Should be something like PREFIX/bin or PREFIX/bin/Release (depending
         // on if we're installed or in a build tree)
         auto binDir = exeLocation.parent_path();

@@ -25,7 +25,22 @@
 #ifndef INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369
 #define INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369
 
+// Header containing byteswap intrinsics in MSVC
+#cmakedefine OSVR_HAVE_INTRIN_H
+
+// MSVC-style: _byteswap_ushort, _byteswap_ulong, _byteswap_uint64
+#cmakedefine OSVR_HAVE_MSVC_BYTESWAPS
+
+// *nix-style byteswap header
 #cmakedefine OSVR_HAVE_BYTESWAP_H
 
-#endif // INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369
+// bswap16, bswap32, bswap64
+#cmakedefine OSVR_HAVE_WORKING_BSWAP
 
+// bswap_16, bswap_32, bswap_64
+#cmakedefine OSVR_HAVE_WORKING_BSWAP_UNDERSCORE
+
+// __bswap_16, __bswap_32, __bswap_64
+#cmakedefine OSVR_HAVE_WORKING_UNDERSCORES_BSWAP
+
+#endif // INCLUDED_ConfigByteSwapping_h_GUID_A0C3729C_7D63_43A8_2D4E_6DADB6400369

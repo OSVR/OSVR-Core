@@ -34,7 +34,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/count_if.hpp>
 #include <boost/assert.hpp>
-#include <boost/static_assert.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -56,7 +55,8 @@ namespace common {
     /// @brief Converts vectors to JSON arrays.
     template <typename Derived>
     inline Json::Value toJson(Eigen::MatrixBase<Derived> const &vec) {
-        BOOST_STATIC_ASSERT(Derived::ColsAtCompileTime == 1);
+        static_assert(Derived::ColsAtCompileTime == 1,
+                      "This function is only for converting vectors to JSON");
         Json::Value ret(Json::arrayValue);
         for (size_t i = 0; i < Derived::RowsAtCompileTime; ++i) {
             ret.append(vec[i]);

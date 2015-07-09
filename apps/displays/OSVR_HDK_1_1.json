@@ -1,8 +1,12 @@
 {
+  "meta": {
+    "schemaVersion": 1
+  },
   "hmd": {
     "device": {
       "vendor": "OSVR",
       "model": "HDK",
+      "num_displays": 1,
       "Version": "1.1",
       "Note": "Settings are also good for HDK 1.0"
     },
@@ -17,7 +21,8 @@
         "width": 1920,
         "height": 1080,
         "video_inputs": 1,
-        "display_mode": "horz_side_by_side"
+        "display_mode": "horz_side_by_side",
+        "swap_eyes": 0
       }
     ],
     "distortion": {
@@ -32,7 +37,8 @@
     "eyes": [
       {
         "center_proj_x": 0.5,
-        "center_proj_y": 0.5
+        "center_proj_y": 0.5,
+        "rotate_180": 0
       }
     ]
   }

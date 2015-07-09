@@ -36,15 +36,57 @@
 
 namespace osvr {
 namespace util {
+    class SingleOwnershipPolicy {
+      protected:
+        SingleOwnershipPolicy() {}
+        void *doInsert(void *rawPtr, boost::any smartPtr) {
+            m_container[rawPtr] = smartPtr;
+            return rawPtr;
+        }
+
+        bool doReleaseOne(void *rawPtr) {
+
+            size_t found = m_container.erase(rawPtr);
+            return (0 != found);
+        }
+
+      private:
+        typedef std::map<void *, boost::any> Container;
+        Container m_container;
+    };
+
+    class MultipleReferenceOwnershipPolicy {
+      protected:
+        MultipleReferenceOwnershipPolicy() {}
+
+        void *doInsert(void *rawPtr, boost::any smartPtr) {
+            m_container.insert(std::make_pair(rawPtr, smartPtr));
+            return rawPtr;
+        }
+
+        bool doReleaseOne(void *rawPtr) {
+            auto it = m_container.find(rawPtr);
+            if (m_container.end() != it) {
+                m_container.erase(it);
+                return true;
+            }
+            return false;
+        }
+
+      private:
+        typedef std::multimap<void *, boost::any> Container;
+        Container m_container;
+    };
     /// @brief Holds on to smart pointers by value, and lets you free them by
     /// providing the corresponding void *.
-    class KeyedOwnershipContainer {
+    template <typename Policy = SingleOwnershipPolicy>
+    class BasicKeyedOwnershipContainer : private Policy {
       public:
         /// @brief Adds an object held by a smart pointer to our ownership,
         /// returning its void * usable to release it before the destruction of
         /// this object.
         template <typename T> void *acquire(T ptr) {
-            return m_insert(ptr.get(), ptr);
+            return Policy::doInsert(ptr.get(), ptr);
         }
 
         /// @brief Releases the indicated smart pointer in our ownership, if we
@@ -55,20 +97,13 @@ namespace util {
         /// still referenced elsewhere, for instance.
         ///
         /// @returns true if we found it and released it
-        bool release(void *ptr) {
-            size_t found = m_container.erase(ptr);
-            return (0 != found);
-        }
-
-      private:
-        void *m_insert(void *key, boost::any ptr) {
-            m_container[key] = ptr;
-            return key;
-        }
-
-        typedef std::map<void *, boost::any> Container;
-        Container m_container;
+        bool release(void *ptr) { return Policy::doReleaseOne(ptr); }
     };
+    typedef BasicKeyedOwnershipContainer<SingleOwnershipPolicy>
+        KeyedOwnershipContainer;
+
+    typedef BasicKeyedOwnershipContainer<MultipleReferenceOwnershipPolicy>
+        MultipleKeyedOwnershipContainer;
 } // namespace util
 } // namespace osvr
 

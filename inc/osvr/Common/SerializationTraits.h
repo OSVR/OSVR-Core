@@ -35,14 +35,11 @@
 
 // Library/third-party includes
 #include <boost/call_traits.hpp>
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_integral.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/alignment_of.hpp>
 #include <boost/noncopyable.hpp>
 
 // Standard includes
 #include <string>
+#include <type_traits>
 
 namespace osvr {
 namespace common {
@@ -334,7 +331,9 @@ namespace common {
                                     !std::is_same<bool, T>::value>::type>
             : ArithmeticSerializationTraits<T, sizeof(T)> {
 
-            BOOST_STATIC_ASSERT(boost::alignment_of<T>::value == sizeof(T));
+            static_assert(std::alignment_of<T>::value == sizeof(T),
+                          "Arithmetic types are assumed to have an alignment "
+                          "equal to their size");
         };
 
         /// @brief Set up the default serialization traits for bool,

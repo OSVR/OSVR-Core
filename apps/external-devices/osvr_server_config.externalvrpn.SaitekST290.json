@@ -1,0 +1,9 @@
+{
+    "externalDevices": {
+        "/SaitekST290Device": {
+            "deviceName": "SaitekST290",
+            "server": "localhost:3884",
+            "descriptor": "device-descriptors/Saitek_ST290.json"
+        }
+    }
+}

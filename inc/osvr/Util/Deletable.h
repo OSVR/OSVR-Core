@@ -39,9 +39,9 @@ namespace osvr {
 namespace util {
     /// @brief Base class for objects that just need to be generically
     /// deletable.
-    class Deletable {
+    class OSVR_UTIL_EXPORT Deletable {
       public:
-        OSVR_UTIL_EXPORT virtual ~Deletable();
+        virtual ~Deletable();
     };
 } // namespace util
 } // namespace osvr

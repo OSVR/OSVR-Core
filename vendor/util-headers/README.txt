@@ -1,1 +1,1 @@
-Extracted from https://github.com/rpavlik/util-headers  at commit a1072ffcb5b18913c2a154020e16305ffc11842c
+Extracted from https://github.com/rpavlik/util-headers at commit 5574e8f134c953c687a741043067a9082120b497
