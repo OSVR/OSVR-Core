@@ -62,8 +62,8 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
 
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceEyeTrackerConfigure", iface);
-    auto ifaceObj = opts->getContext()->registerDataWithGenericDelete(
-        new OSVR_EyeTrackerDeviceInterfaceObject);
+    auto ifaceObj =
+        opts->makeInterfaceObject<OSVR_EyeTrackerDeviceInterfaceObject>();
     *iface = ifaceObj;
 
     auto location = osvr::common::Location2DComponent::create();
@@ -80,7 +80,6 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
 
     opts->setButtons(numChan, ifaceObj->button.getContainerLocation());
     opts->setTracker(ifaceObj->tracker.getContainerLocation());
-    opts->addTokenInterest(ifaceObj);
 
     return OSVR_RETURN_SUCCESS;
 }
