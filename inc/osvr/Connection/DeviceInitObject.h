@@ -36,6 +36,7 @@
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ServerInterfaceList.h>
 #include <osvr/Common/DeviceComponentPtr.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -51,6 +52,7 @@ namespace connection {
     class TrackerServerInterface;
 } // namespace connection
 } // namespace osvr
+
 /// @brief Structure used internally to construct the desired type of device.
 struct OSVR_DeviceInitObject : boost::noncopyable {
   public:
@@ -99,11 +101,19 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
             m_tokenInterest.push_back(devPtr);
         }
     }
+    void addTokenInterest(osvr::connection::DeviceInterfaceBase *ifaceObj) {
+        if (nullptr != ifaceObj) {
+            m_deviceInterfaces.push_back(ifaceObj);
+        }
+    }
 
     /// @brief Notify all those interested what the device token is.
     void notifyToken(OSVR_DeviceTokenObject *dev) {
         for (auto interest : m_tokenInterest) {
             *interest = dev;
+        }
+        for (auto ifaceObj : m_deviceInterfaces) {
+            ifaceObj->setDeviceToken(*dev);
         }
     }
 
@@ -145,8 +155,9 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     osvr::connection::TrackerServerInterface **m_trackerIface;
     osvr::connection::ServerInterfaceList m_serverInterfaces;
     osvr::common::DeviceComponentList m_components;
-    std::vector<OSVR_DeviceTokenObject**> m_tokenInterest;
-};
+    std::vector<OSVR_DeviceTokenObject **> m_tokenInterest;
 
+    std::vector<osvr::connection::DeviceInterfaceBase *> m_deviceInterfaces;
+};
 
 #endif // INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064
