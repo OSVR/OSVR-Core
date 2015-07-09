@@ -91,15 +91,16 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT void
     addComponent(osvr::common::DeviceComponentPtr const &comp);
 
-    /// @brief Add an observer that we'll eventually inform about the device token.
-    void addTokenInterest(OSVR_DeviceTokenObject** devPtr) {
+    /// @brief Add an observer that we'll eventually inform about the device
+    /// token.
+    void addTokenInterest(OSVR_DeviceTokenObject **devPtr) {
         if (nullptr != devPtr) {
             m_tokenInterest.push_back(devPtr);
         }
     }
 
     /// @brief Notify all those interested what the device token is.
-    void notifyToken(OSVR_DeviceTokenObject* dev) {
+    void notifyToken(OSVR_DeviceTokenObject *dev) {
         for (auto interest : m_tokenInterest) {
             *interest = dev;
         }

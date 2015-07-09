@@ -55,8 +55,8 @@ namespace connection {
         /// Called from the async thread - only permitted to actually
         /// send data when m_connectionInteract says so.
         void m_sendData(util::time::TimeValue const &timestamp,
-                                MessageType *type, const char *bytestream,
-                                size_t len) override;
+                        MessageType *type, const char *bytestream,
+                        size_t len) override;
         util::GuardPtr m_getSendGuard() override;
 
         /// Called from the main thread - services requests to send from

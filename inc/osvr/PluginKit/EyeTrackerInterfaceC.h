@@ -42,8 +42,8 @@ OSVR_EXTERN_C_BEGIN
 /** @brief Opaque type used in conjunction with a device token to send data on
     eye tracker interface (which internally is carried over several interfaces).
 */
-typedef struct OSVR_EyeTrackerDeviceInterfaceObject
-    *OSVR_EyeTrackerDeviceInterface;
+typedef struct OSVR_EyeTrackerDeviceInterfaceObject *
+    OSVR_EyeTrackerDeviceInterface;
 
 /** @brief Specify that your device will implement the Eye Tracker interface.
 

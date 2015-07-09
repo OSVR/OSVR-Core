@@ -44,7 +44,8 @@ namespace connection {
       protected:
         void m_setUpdateCallback(DeviceUpdateCallback const &cb) override;
         void m_sendData(util::time::TimeValue const &timestamp,
-                        MessageType *type, const char *bytestream, size_t len) override;
+                        MessageType *type, const char *bytestream,
+                        size_t len) override;
         util::GuardPtr m_getSendGuard() override;
         void m_connectionInteract() override;
 
