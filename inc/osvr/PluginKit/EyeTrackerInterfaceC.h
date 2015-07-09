@@ -42,8 +42,8 @@ OSVR_EXTERN_C_BEGIN
 /** @brief Opaque type used in conjunction with a device token to send data on
     eye tracker interface (which internally is carried over several interfaces).
 */
-typedef struct OSVR_EyeTrackerDeviceInterfaceObject *
-    OSVR_EyeTrackerDeviceInterface;
+typedef struct OSVR_EyeTrackerDeviceInterfaceObject
+    *OSVR_EyeTrackerDeviceInterface;
 
 /** @brief Specify that your device will implement the Eye Tracker interface.
 
@@ -74,11 +74,10 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
     OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
 
 /** @brief Report 3D gaze ray for an eye
     @param dev Device token
@@ -90,12 +89,11 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
     OSVR_IN OSVR_EyeGazeBasePoint3DState gazeBasePoint,
     OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 6));
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 5));
 
 /** @brief 3D gaze direction for an eye
     @param dev Device token
@@ -106,11 +104,10 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
     OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
 
 /** @brief Report both 2D and 3D gaze for an eye
     @param dev Device token
@@ -123,13 +120,12 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReportGaze(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
     OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
     OSVR_IN OSVR_EyeGazeBasePoint3DState gazeBasePoint,
     OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 7));
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 6));
 
 /** @brief Report the blink state
     @param dev Device token
@@ -140,10 +136,9 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReportGaze(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
 
 OSVR_EXTERN_C_END
 

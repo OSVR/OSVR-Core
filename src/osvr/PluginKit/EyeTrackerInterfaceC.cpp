@@ -84,7 +84,6 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
 }
 
 OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
     OSVR_IN OSVR_ChannelCount sensor,
@@ -101,7 +100,6 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
 }
 
 OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
     OSVR_IN OSVR_EyeGazeBasePoint3DState gazeBasePoint,
@@ -119,7 +117,6 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
 }
 
 OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
     OSVR_IN OSVR_ChannelCount sensor,
@@ -135,15 +132,13 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
     return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
-                               OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-                               OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
-                               OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
-                               OSVR_IN OSVR_EyeGazeBasePoint3DState
-                                   gazeBasePoint,
-                               OSVR_IN OSVR_ChannelCount sensor,
-                               OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+OSVR_ReturnCode osvrDeviceEyeTrackerReportGaze(
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
+    OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
+    OSVR_IN OSVR_EyeGazeBasePoint3DState gazeBasePoint,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
     auto guard = iface->token->getSendGuard();
     if (guard->lock()) {
@@ -158,7 +153,6 @@ osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
