@@ -9,6 +9,7 @@ set(API
     "${HEADER_LOCATION}/ConnectionDevice.h"
     "${HEADER_LOCATION}/ConnectionPtr.h"
     "${HEADER_LOCATION}/DeviceInitObject.h"
+    "${HEADER_LOCATION}/DeviceInitObject_fwd.h"
     "${HEADER_LOCATION}/DeviceToken.h"
     "${HEADER_LOCATION}/DeviceTokenPtr.h"
     "${HEADER_LOCATION}/ImagingServerInterface.h"

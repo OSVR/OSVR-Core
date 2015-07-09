@@ -26,6 +26,7 @@
 #define INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064
 
 // Internal Includes
+#include <osvr/Connection/DeviceInitObject_fwd.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/PluginRegContextC.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
@@ -147,10 +148,5 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     std::vector<OSVR_DeviceTokenObject**> m_tokenInterest;
 };
 
-namespace osvr {
-namespace connection {
-    typedef ::OSVR_DeviceInitObject DeviceInitObject;
-} // namespace connection
-} // namespace osvr
 
 #endif // INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064
