@@ -27,6 +27,7 @@
 #include "AsyncDeviceToken.h"
 #include "SyncDeviceToken.h"
 #include "VirtualDeviceToken.h"
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/ConnectionDevice.h>
 

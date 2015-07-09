@@ -29,9 +29,9 @@
 #include <osvr/Connection/DeviceTokenPtr.h>
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/Export.h>
+#include <osvr/Connection/DeviceInitObject_fwd.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
-#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Util/GuardPtr.h>
