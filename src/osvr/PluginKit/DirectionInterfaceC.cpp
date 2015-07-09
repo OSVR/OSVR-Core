@@ -26,10 +26,10 @@
 // Internal Includes
 #include <osvr/PluginKit/DirectionInterfaceC.h>
 #include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Common/DirectionComponent.h>
-#include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
 
@@ -39,7 +39,8 @@
 // Standard includes
 // - none
 
-struct OSVR_DirectionDeviceInterfaceObject {
+struct OSVR_DirectionDeviceInterfaceObject
+    : public osvr::connection::DeviceInterfaceBase {
     osvr::common::DirectionComponent *direction;
 };
 
@@ -51,9 +52,9 @@ osvrDeviceDirectionConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceDirectionConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceDirectionConfigure", iface);
     OSVR_DirectionDeviceInterface ifaceObj =
-        opts->getContext()->registerDataWithGenericDelete(
-            new OSVR_DirectionDeviceInterfaceObject);
+        opts->makeInterfaceObject<OSVR_DirectionDeviceInterfaceObject>();
     *iface = ifaceObj;
+
     auto direction = osvr::common::DirectionComponent::create(numSensors);
     ifaceObj->direction = direction.get();
     opts->addComponent(direction);
@@ -61,12 +62,11 @@ osvrDeviceDirectionConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
 }
 
 OSVR_ReturnCode
-osvrDeviceDirectionReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
-                              OSVR_IN_PTR OSVR_DirectionDeviceInterface iface,
+osvrDeviceDirectionReportData(OSVR_IN_PTR OSVR_DirectionDeviceInterface iface,
                               OSVR_IN_PTR OSVR_DirectionState directionData,
                               OSVR_IN OSVR_ChannelCount sensor,
                               OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    auto guard = dev->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
         iface->direction->sendDirectionData(directionData, sensor, *timestamp);
         return OSVR_RETURN_SUCCESS;
