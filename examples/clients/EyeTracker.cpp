@@ -86,8 +86,8 @@ int main() {
     osvr::clientkit::ClientContext context(
         "com.osvr.exampleclients.EyeTrackerCallback");
 
-    osvr::clientkit::Interface eyetracker =
-        context.getInterface("/com_osvr_EyeTracker/EyeTracker/eyetracker");
+    osvr::clientkit::Interface eyetracker = context.getInterface(
+        "/com_osvr_example_EyeTracker/EyeTracker/eyetracker");
 
     eyetracker.registerCallback(&eyeTracker2DCallback, NULL);
     eyetracker.registerCallback(&eyeTracker3DCallback, NULL);
