@@ -115,12 +115,6 @@ class HardwareDetection {
         std::cout << "PLUGIN: Got a hardware detection request" << std::endl;
 
         // we always detect an eye tracker in sample plugin
-        if (0 == 1) {
-            std::cout << "PLUGIN: We have NOT detected Eye Tracker "
-                      << std::endl;
-            return OSVR_RETURN_FAILURE;
-        }
-
         m_found = true;
 
         std::cout << "PLUGIN: We have detected Eye Tracker device! "
