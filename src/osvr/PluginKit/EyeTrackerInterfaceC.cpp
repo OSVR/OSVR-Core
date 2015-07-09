@@ -163,6 +163,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
     if (guard->lock()) {
         iface->button->setValue(blink, sensor, *timestamp);
         iface->eyetracker->sendNotification(sensor, *timestamp);
+        return OSVR_RETURN_SUCCESS;
     }
-    return OSVR_RETURN_SUCCESS;
+    return OSVR_RETURN_FAILURE;
 }
