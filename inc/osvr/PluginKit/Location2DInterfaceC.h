@@ -71,10 +71,9 @@ OSVR_ReturnCode osvrDeviceLocation2DConfigure(
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceLocation2DReportData(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_Location2D_DeviceInterface iface,
     OSVR_IN OSVR_Location2DState locationData, OSVR_IN OSVR_ChannelCount sensor,
-    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 2, 5));
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END

@@ -31,6 +31,7 @@
 #include <osvr/Common/Location2DComponent.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 
 // Library/third-party includes
 // - none
@@ -38,7 +39,8 @@
 // Standard includes
 // - none
 
-struct OSVR_Location2D_DeviceInterfaceObject {
+struct OSVR_Location2D_DeviceInterfaceObject
+    : public osvr::connection::DeviceInterfaceBase {
     osvr::common::Location2DComponent *location;
 };
 
@@ -50,8 +52,7 @@ OSVR_ReturnCode osvrDeviceLocation2DConfigure(
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceLocation2DConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceLocation2DConfigure", iface);
     OSVR_Location2D_DeviceInterface ifaceObj =
-        opts->getContext()->registerDataWithGenericDelete(
-            new OSVR_Location2D_DeviceInterfaceObject);
+        opts->makeInterfaceObject<OSVR_Location2D_DeviceInterfaceObject>();
     *iface = ifaceObj;
     auto location = osvr::common::Location2DComponent::create(numSensors);
     ifaceObj->location = location.get();
@@ -59,14 +60,12 @@ OSVR_ReturnCode osvrDeviceLocation2DConfigure(
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrDeviceLocation2DReportData(OSVR_IN_PTR OSVR_DeviceToken dev,
-                               OSVR_IN_PTR OSVR_Location2D_DeviceInterface
-                                   iface,
-                               OSVR_IN_PTR OSVR_Location2DState locationData,
-                               OSVR_IN OSVR_ChannelCount sensor,
-                               OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    auto guard = dev->getSendGuard();
+OSVR_ReturnCode osvrDeviceLocation2DReportData(
+    OSVR_IN_PTR OSVR_Location2D_DeviceInterface iface,
+    OSVR_IN_PTR OSVR_Location2DState locationData,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
         iface->location->sendLocationData(locationData, sensor, *timestamp);
         return OSVR_RETURN_SUCCESS;
