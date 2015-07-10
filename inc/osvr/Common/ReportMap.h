@@ -32,6 +32,8 @@
 #include <boost/fusion/include/mpl.hpp>
 #include <boost/fusion/include/map.hpp>
 #include <boost/fusion/include/pair.hpp>
+#include <boost/fusion/container/map/convert.hpp>
+#include <boost/fusion/include/as_map.hpp>
 #include <boost/mpl/transform.hpp>
 
 // Standard includes
