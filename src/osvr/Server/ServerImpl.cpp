@@ -300,11 +300,11 @@ namespace server {
 
     bool ServerImpl::m_addAliases(Json::Value const &aliases,
                                   common::AliasPriority priority) {
-        common::PathProcessOptions opts;
-        opts.defaultPriority = priority;
-
-        bool change =
-            common::processAliasesFromJSON(m_tree.getRoot(), aliases, opts);
+        auto opts = common::PathProcessOptions{}
+                        .setDefaultPriority(priority)
+                        .enableWildcard();
+        bool change = common::processAliasesFromJSON(
+            m_tree.getRoot(), aliases, opts);
         m_treeDirty += change;
         return change;
     }

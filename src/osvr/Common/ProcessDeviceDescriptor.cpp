@@ -142,10 +142,11 @@ namespace common {
     static inline bool processAutomaticFromDescriptor(PathNode &devNode,
                                                       Json::Value const &desc) {
         Json::Value const &automatic = desc[AUTOMATIC_KEY];
-        PathProcessOptions opts;
-        opts.defaultPriority = ALIASPRIORITY_AUTOMATIC;
-        opts.permitRelativePath = true;
-        opts.permitRelativeSource = true;
+        auto opts = PathProcessOptions{}
+                        .setDefaultPriority(ALIASPRIORITY_AUTOMATIC)
+                        .enableRelativePath()
+                        .enableRelativeSource()
+                        .enableWildcard();
         return processAliasesFromJSON(devNode, automatic, opts);
     }
     bool processDeviceDescriptorForPathTree(PathTree &tree,

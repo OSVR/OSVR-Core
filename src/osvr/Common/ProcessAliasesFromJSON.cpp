@@ -135,6 +135,11 @@ namespace common {
                 }
 
                 /// OK, handle wildcard here
+                if (!m_opts.permitWildcard) {
+                    OSVR_DEV_VERBOSE(
+                        "Got a non-permitted wildcard in the source leaf: "
+                        << parsedSource.getLeaf());
+                }
                 if (parsedSource.isSimple()) {
                     applyWildcard(
                         m_devNode, parsedSource.getLeaf(),

@@ -44,6 +44,7 @@ namespace common {
     struct PathProcessOptions {
         bool permitRelativePath = false;
         bool permitRelativeSource = false;
+        bool permitWildcard = false;
         AliasPriority defaultPriority = ALIASPRIORITY_AUTOMATIC;
 
         /// @brief Turn on permitRelativePath in a chained method.
@@ -55,6 +56,12 @@ namespace common {
         /// @brief Turn on permitRelativeSource in a chained method.
         PathProcessOptions &enableRelativeSource() {
             permitRelativeSource = true;
+            return *this;
+        }
+
+        /// @brief Turn on permitWildcard in a chained method.
+        PathProcessOptions &enableWildcard() {
+            permitWildcard = true;
             return *this;
         }
 
