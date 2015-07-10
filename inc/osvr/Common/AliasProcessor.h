@@ -48,6 +48,20 @@ namespace common {
         };
     } // namespace detail
 
+    /// @brief Given a single JSON object, if it's an old-fashioned "routing
+    /// directive", convert it to a normal "alias"
+    ///
+    /// @return Converted aliases, value unchanged if not a routing directive
+    OSVR_COMMON_EXPORT Json::Value convertRouteToAlias(Json::Value const &val);
+
+    /// @brief Given a path and a destination, combine them into a JSON alias
+    /// description.
+    ///
+    /// @return A JSON object for your alias, or a null value if either input is
+    /// invalid.
+    OSVR_COMMON_EXPORT Json::Value
+    createJSONAlias(std::string const &path, Json::Value const &destination);
+
     /// @brief A short-lived class for setting up options then processing alias
     /// directives to apply to a path tree.
     ///

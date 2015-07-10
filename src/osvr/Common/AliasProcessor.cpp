@@ -31,6 +31,7 @@
 #include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/RoutingKeys.h>
 
 #include "PathParseAndRetrieve.h"
 
@@ -178,6 +179,35 @@ namespace common {
     bool AliasProcessor::process(PathNode &node, Json::Value const &val) {
         AutomaticAliases processor{node, m_opts};
         return processor(val).get();
+    }
+
+    Json::Value createJSONAlias(std::string const &path,
+                                Json::Value const &destination) {
+        Json::Value ret{Json::nullValue};
+        if (path.empty()) {
+            return ret;
+        }
+        if (destination.isNull()) {
+            return ret;
+        }
+        ret = Json::objectValue;
+        ret[path] = destination;
+        return ret;
+    }
+
+    Json::Value convertRouteToAlias(Json::Value const &val) {
+        Json::Value ret = val;
+        if (!val.isObject()) {
+            // Can't be a route if it's not an object.
+            return ret;
+        }
+        if (val.isMember(routing_keys::destination()) &&
+            val.isMember(routing_keys::source())) {
+            // By golly this is an old-fashioned route.
+            ret = createJSONAlias(val[routing_keys::destination()].asString(),
+                                  val[routing_keys::source()]);
+        }
+        return ret;
     }
 } // namespace common
 } // namespace osvr
