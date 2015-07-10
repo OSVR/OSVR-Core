@@ -62,6 +62,12 @@ namespace common {
     OSVR_COMMON_EXPORT Json::Value
     createJSONAlias(std::string const &path, Json::Value const &destination);
 
+    /// @brief Given a JSON object describing one or more aliases, set the
+    /// priority of the alias(es).
+    /// @return Updated description, or input if unchanged/not applicable.
+    OSVR_COMMON_EXPORT Json::Value
+        applyPriorityToAlias(Json::Value const &alias, AliasPriority priority);
+
     /// @brief A short-lived class for setting up options then processing alias
     /// directives to apply to a path tree.
     ///
