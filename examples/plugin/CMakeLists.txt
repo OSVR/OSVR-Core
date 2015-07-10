@@ -41,6 +41,9 @@ osvr_add_plugin(NAME com_osvr_example_EyeTracker
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_EyeTracker_json.h")
 set_target_properties(com_osvr_example_EyeTracker PROPERTIES
     FOLDER "OSVR Example Plugins")
+target_compile_options(com_osvr_example_EyeTracker
+    PRIVATE
+    ${OSVR_CXX11_FLAGS})
 
 ## Build the code from the selfcontained example
 osvr_convert_json(com_osvr_example_selfcontainedDetectAndCreate_json
