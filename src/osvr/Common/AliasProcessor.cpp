@@ -218,7 +218,7 @@ namespace common {
     }
 
     Json::Value convertRouteToAlias(Json::Value const &val) {
-        Json::Value ret = val;
+        Json::Value ret{val};
         if (!val.isObject()) {
             // Can't be a route if it's not an object.
             return ret;
