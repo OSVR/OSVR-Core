@@ -38,10 +38,31 @@
 
 namespace osvr {
 namespace common {
+
+    /// @brief Options struct for processAliasesFromJSON() that can be used with
+    /// the "chained methods" idiom.
     struct PathProcessOptions {
         bool permitRelativePath = false;
         bool permitRelativeSource = false;
         AliasPriority defaultPriority = ALIASPRIORITY_AUTOMATIC;
+
+        /// @brief Turn on permitRelativePath in a chained method.
+        PathProcessOptions &enableRelativePath() {
+            permitRelativePath = true;
+            return *this;
+        }
+
+        /// @brief Turn on permitRelativeSource in a chained method.
+        PathProcessOptions &enableRelativeSource() {
+            permitRelativeSource = true;
+            return *this;
+        }
+
+        /// @brief Set defaultPriority in a chained method.
+        PathProcessOptions &setDefaultPriority(AliasPriority prio) {
+            defaultPriority = prio;
+            return *this;
+        }
     };
 
     /// @brief Adds the given aliases to the tree.
