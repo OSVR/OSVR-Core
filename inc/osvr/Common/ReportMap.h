@@ -31,12 +31,12 @@
 // Library/third-party includes
 #include <boost/version.hpp>
 #include <boost/fusion/include/mpl.hpp>
-#include <boost/fusion/include/map.hpp>
 #include <boost/fusion/include/pair.hpp>
 #if BOOST_VERSION <= 104900
 // Workaround for build on Wheezy
 #include <boost/fusion/container/map/detail/as_map.hpp>
 #endif
+#include <boost/fusion/include/map.hpp>
 #include <boost/fusion/include/as_map.hpp>
 #include <boost/fusion/container/map/convert.hpp>
 #include <boost/mpl/transform.hpp>
