@@ -36,7 +36,9 @@ set(API
     "${HEADER_LOCATION}/DegreesToRadians.h"
     "${HEADER_LOCATION}/DeviceComponent.h"
     "${HEADER_LOCATION}/DeviceComponentPtr.h"
+    "${HEADER_LOCATION}/DirectionComponent.h"
     "${HEADER_LOCATION}/Endianness.h"
+    "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/IntegerByteSwap.h"
@@ -47,10 +49,12 @@ set(API
     "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
+    "${HEADER_LOCATION}/Location2DComponent.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/NetworkClassOfService.h"
     "${HEADER_LOCATION}/NetworkingSupport.h"
+    "${HEADER_LOCATION}/NormalizeDeviceDescriptor.h"
     "${HEADER_LOCATION}/OriginalSource.h"
     "${HEADER_LOCATION}/ParseAlias.h"
     "${HEADER_LOCATION}/PathElementTools.h"
@@ -99,6 +103,8 @@ set(SOURCE
     DeviceComponent.cpp
     DeviceWrapper.cpp
     DeviceWrapper.h
+    DirectionComponent.cpp
+    EyeTrackerComponent.cpp    
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
@@ -106,10 +112,12 @@ set(SOURCE
     IPCRingBufferResults.h
     IPCRingBufferSharedObjects.h
     JSONTransformVisitor.cpp
+    Location2DComponent.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
     NetworkClassOfService.cpp
     NetworkingSupport.cpp
+    NormalizeDeviceDescriptor.cpp
     OriginalSource.cpp
     ParseAlias.cpp
     PathElementSerialization.h
@@ -129,7 +137,6 @@ set(SOURCE
     RouteContainer.cpp
     RoutingConstants.cpp
     RoutingKeys.cpp
-    Serialization.cpp
     SharedMemory.h
     SharedMemoryObjectWithMutex.h
     SystemComponent.cpp)

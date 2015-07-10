@@ -6,8 +6,11 @@ set(API
     "${HEADER_LOCATION}/CommonC.h"
     "${HEADER_LOCATION}/DeviceInterface.h"
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
+    "${HEADER_LOCATION}/DirectionInterfaceC.h"
+    "${HEADER_LOCATION}/EyeTrackerInterfaceC.h"
     "${HEADER_LOCATION}/ImagingInterface.h"
     "${HEADER_LOCATION}/ImagingInterfaceC.h"
+    "${HEADER_LOCATION}/Location2DInterfaceC.h"
     "${HEADER_LOCATION}/PluginKit.h"
     "${HEADER_LOCATION}/PluginKitC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
@@ -18,10 +21,12 @@ set(SOURCE
     AnalogInterfaceC.cpp
     ButtonInterfaceC.cpp
     DeviceInterfaceC.cpp
+    DirectionInterfaceC.cpp
     HandleNullContext.h
+    EyeTrackerInterfaceC.cpp
     ImagingInterfaceC.cpp
+    Location2DInterfaceC.cpp
     PluginRegistrationC.cpp
-    PointerWrapper.h
     TrackerInterfaceC.cpp)
 
 osvr_add_library()
@@ -77,6 +82,7 @@ add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
 # Imaging interface library
 ###
 osvr_add_interface_library(Imaging)
+
 
 # In an installed version, we search and add the dependency in the
 # osvrConfigInstalledOpenCV.cmake script since we don't need the same version in

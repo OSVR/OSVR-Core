@@ -29,7 +29,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
-#include "PointerWrapper.h"
+#include <osvr/Util/PointerWrapper.h>
 
 // Library/third-party includes
 // - none
@@ -38,7 +38,8 @@
 // - none
 
 struct OSVR_TrackerDeviceInterfaceObject
-    : public PointerWrapper<osvr::connection::TrackerServerInterface> {};
+    : public osvr::util::PointerWrapper<
+          osvr::connection::TrackerServerInterface> {};
 
 OSVR_ReturnCode
 osvrDeviceTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,

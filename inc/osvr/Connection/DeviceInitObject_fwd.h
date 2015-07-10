@@ -14,7 +14,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//        http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_PointerWrapper_h_GUID_0C8888FE_163F_46A3_A9F2_1EFCF610C64D
-#define INCLUDED_PointerWrapper_h_GUID_0C8888FE_163F_46A3_A9F2_1EFCF610C64D
+#ifndef INCLUDED_DeviceInitObject_fwd_h_GUID_AF965F38_BEE5_4AA4_6C92_C66A1102ED7C
+#define INCLUDED_DeviceInitObject_fwd_h_GUID_AF965F38_BEE5_4AA4_6C92_C66A1102ED7C
 
 // Internal Includes
 // - none
@@ -34,18 +34,12 @@
 // Standard includes
 // - none
 
-/// @brief A wrapper to easily define structures that exist just to hold a
-/// pointer.
-template <typename Contained> class PointerWrapper {
-  public:
-    PointerWrapper(Contained *ptr = nullptr) : m_ptr(ptr) {}
+struct OSVR_DeviceInitObject;
 
-    Contained **getContainerLocation() { return &m_ptr; }
-    Contained *operator->() { return m_ptr; }
-    Contained &operator*() { return *m_ptr; }
+namespace osvr {
+namespace connection {
+    typedef ::OSVR_DeviceInitObject DeviceInitObject;
+} // namespace connection
+} // namespace osvr
 
-  private:
-    Contained *m_ptr;
-};
-
-#endif // INCLUDED_PointerWrapper_h_GUID_0C8888FE_163F_46A3_A9F2_1EFCF610C64D
+#endif // INCLUDED_DeviceInitObject_fwd_h_GUID_AF965F38_BEE5_4AA4_6C92_C66A1102ED7C

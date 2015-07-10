@@ -29,12 +29,12 @@
 #include <osvr/Connection/DeviceTokenPtr.h>
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/Export.h>
+#include <osvr/Connection/DeviceInitObject_fwd.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ConnectionDevicePtr.h>
-#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/Util/TimeValue.h>
-#include <osvr/Util/GuardInterface.h>
+#include <osvr/Util/GuardPtr.h>
 #include <osvr/Connection/ServerInterfaceList.h>
 
 // Library/third-party includes
@@ -46,7 +46,6 @@
 
 namespace osvr {
 namespace connection {
-    typedef unique_ptr<util::GuardInterface> GuardPtr;
     typedef std::function<OSVR_ReturnCode()> DeviceUpdateCallback;
 } // namespace connection
 } // namespace osvr
@@ -105,7 +104,7 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
              osvr::connection::MessageType *type, const char *bytestream,
              size_t len);
 
-    OSVR_CONNECTION_EXPORT osvr::connection::GuardPtr getSendGuard();
+    OSVR_CONNECTION_EXPORT osvr::util::GuardPtr getSendGuard();
 
     /// @brief Interact with connection. Only legal to end up in
     /// ConnectionDevice::sendData from within here somehow.
@@ -127,7 +126,7 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     virtual void m_sendData(osvr::util::time::TimeValue const &timestamp,
                             osvr::connection::MessageType *type,
                             const char *bytestream, size_t len) = 0;
-    virtual osvr::connection::GuardPtr m_getSendGuard() = 0;
+    virtual osvr::util::GuardPtr m_getSendGuard() = 0;
     virtual void m_connectionInteract() = 0;
     virtual void m_stopThreads();
 

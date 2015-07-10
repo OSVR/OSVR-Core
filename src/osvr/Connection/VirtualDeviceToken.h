@@ -45,12 +45,12 @@ namespace connection {
 
       protected:
         /// @brief Should never be called.
-        virtual void
-        m_setUpdateCallback(osvr::connection::DeviceUpdateCallback const &);
+        void m_setUpdateCallback(
+            osvr::connection::DeviceUpdateCallback const &) override;
         void m_sendData(util::time::TimeValue const &timestamp,
                         MessageType *type, const char *bytestream, size_t len);
-        virtual GuardPtr m_getSendGuard();
-        virtual void m_connectionInteract();
+        util::GuardPtr m_getSendGuard() override;
+        void m_connectionInteract() override;
     };
 } // namespace connection
 } // namespace osvr

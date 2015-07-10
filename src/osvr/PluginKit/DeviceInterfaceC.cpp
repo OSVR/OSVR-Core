@@ -131,6 +131,7 @@ osvrDeviceGenericInit(OSVR_DeviceInitOptions options, OSVR_DeviceToken *device,
             options->getContext()->registerDataWithGenericDelete(dev.release());
         /// @todo Is this too late to delete? Can we delete it earlier?
         options->getContext()->registerDataWithGenericDelete(options);
+        options->notifyToken(*device);
     } catch (std::exception &e) {
         std::cerr << "Error in osvrDeviceGenericInit: " << e.what()
                   << std::endl;

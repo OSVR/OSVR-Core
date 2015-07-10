@@ -26,6 +26,7 @@
 #define INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064
 
 // Internal Includes
+#include <osvr/Connection/DeviceInitObject_fwd.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/PluginRegContextC.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
@@ -35,6 +36,7 @@
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Connection/ServerInterfaceList.h>
 #include <osvr/Common/DeviceComponentPtr.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -42,6 +44,8 @@
 
 // Standard includes
 #include <string>
+#include <type_traits>
+#include <memory>
 
 namespace osvr {
 namespace connection {
@@ -50,6 +54,7 @@ namespace connection {
     class TrackerServerInterface;
 } // namespace connection
 } // namespace osvr
+
 /// @brief Structure used internally to construct the desired type of device.
 struct OSVR_DeviceInitObject : boost::noncopyable {
   public:
@@ -91,6 +96,41 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT void
     addComponent(osvr::common::DeviceComponentPtr const &comp);
 
+    /// @brief A helper method to make a "device interface object" of
+    /// user-designated type and apppropriate lifetime.
+    template <typename T> T *makeInterfaceObject() {
+        static_assert(
+            std::is_base_of<osvr::connection::DeviceInterfaceBase, T>::value,
+            "Your interface object must derive from "
+            "DeviceInterfaceBase to use this handy wrapper!");
+        auto ifaceObj = getContext()->registerDataWithGenericDelete(new T);
+        addTokenInterest(ifaceObj);
+        return ifaceObj;
+    }
+
+    /// @brief Add an observer that we'll eventually inform about the device
+    /// token.
+    void addTokenInterest(OSVR_DeviceTokenObject **devPtr) {
+        if (nullptr != devPtr) {
+            m_tokenInterest.push_back(devPtr);
+        }
+    }
+    void addTokenInterest(osvr::connection::DeviceInterfaceBase *ifaceObj) {
+        if (nullptr != ifaceObj) {
+            m_deviceInterfaces.push_back(ifaceObj);
+        }
+    }
+
+    /// @brief Notify all those interested what the device token is.
+    void notifyToken(OSVR_DeviceTokenObject *dev) {
+        for (auto interest : m_tokenInterest) {
+            *interest = dev;
+        }
+        for (auto ifaceObj : m_deviceInterfaces) {
+            ifaceObj->setDeviceToken(*dev);
+        }
+    }
+
     /// @brief Returns a tracker interface through the pointer-pointer.
     void
     returnTrackerInterface(osvr::connection::TrackerServerInterface &iface);
@@ -129,12 +169,9 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     osvr::connection::TrackerServerInterface **m_trackerIface;
     osvr::connection::ServerInterfaceList m_serverInterfaces;
     osvr::common::DeviceComponentList m_components;
-};
+    std::vector<OSVR_DeviceTokenObject **> m_tokenInterest;
 
-namespace osvr {
-namespace connection {
-    typedef ::OSVR_DeviceInitObject DeviceInitObject;
-} // namespace connection
-} // namespace osvr
+    std::vector<osvr::connection::DeviceInterfaceBase *> m_deviceInterfaces;
+};
 
 #endif // INCLUDED_DeviceInitObject_h_GUID_6B7D1689_CE30_4A9F_4B59_36773D1F0064

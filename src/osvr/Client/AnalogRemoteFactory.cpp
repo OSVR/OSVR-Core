@@ -120,7 +120,7 @@ namespace client {
 
     shared_ptr<RemoteHandler> AnalogRemoteFactory::
     operator()(common::OriginalSource const &source,
-               common::InterfaceList &ifaces) {
+               common::InterfaceList &ifaces, common::ClientContext &) {
 
         shared_ptr<RemoteHandler> ret;
 

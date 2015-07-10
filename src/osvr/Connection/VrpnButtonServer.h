@@ -44,7 +44,7 @@ namespace connection {
         VrpnButtonServer(DeviceConstructionData &init)
             : vrpn_Button_Filter(init.getQualifiedName().c_str(), init.conn) {
             m_setNumChannels(
-                std::min(*init.obj.getAnalogs(),
+                std::min(*init.obj.getButtons(),
                          OSVR_ChannelCount(vrpn_BUTTON_MAX_BUTTONS)));
             // Initialize data
             memset(Base::buttons, 0, sizeof(Base::buttons));

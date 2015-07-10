@@ -44,6 +44,7 @@ set(API
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/GuardInterface.h"
     "${HEADER_LOCATION}/GuardInterfaceDummy.h"
+    "${HEADER_LOCATION}/GuardPtr.h"
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
     "${HEADER_LOCATION}/IndentingStream.h"
     "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
@@ -55,6 +56,7 @@ set(API
     "${HEADER_LOCATION}/OpenCVTypeDispatch.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
+    "${HEADER_LOCATION}/PointerWrapper.h"
     "${HEADER_LOCATION}/Pose3C.h"
     "${HEADER_LOCATION}/ProgramOptionsToggleFlags.h"
     "${HEADER_LOCATION}/QuaternionC.h"
@@ -75,6 +77,7 @@ set(API
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/Util.h"
     "${HEADER_LOCATION}/ValueOrRange.h"
+    "${HEADER_LOCATION}/Vec2C.h"
     "${HEADER_LOCATION}/Vec3C.h"
     "${HEADER_LOCATION}/WindowsVariantC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")

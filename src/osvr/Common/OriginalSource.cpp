@@ -72,6 +72,12 @@ namespace common {
         m_transform = transform;
     }
 
+    std::string OriginalSource::getDevicePath() const {
+        BOOST_ASSERT_MSG(isResolved(),
+                         "Only makes sense when called on a resolved source.");
+        return getFullPath(*getDevice());
+    }
+
     common::PathNode *OriginalSource::getDevice() const { return m_device; }
 
     common::elements::DeviceElement const &

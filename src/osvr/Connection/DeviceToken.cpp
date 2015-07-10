@@ -27,6 +27,7 @@
 #include "AsyncDeviceToken.h"
 #include "SyncDeviceToken.h"
 #include "VirtualDeviceToken.h"
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/ConnectionDevice.h>
 
@@ -43,8 +44,9 @@ using osvr::connection::SyncDeviceToken;
 using osvr::connection::VirtualDeviceToken;
 using osvr::connection::ConnectionPtr;
 using osvr::connection::MessageType;
-using osvr::connection::GuardPtr;
 using osvr::connection::ConnectionDevicePtr;
+using osvr::util::GuardPtr;
+
 DeviceTokenPtr
 OSVR_DeviceTokenObject::createAsyncDevice(DeviceInitObject &init) {
     DeviceTokenPtr ret(new AsyncDeviceToken(init.getQualifiedName()));
@@ -72,7 +74,7 @@ OSVR_DeviceTokenObject::createVirtualDevice(std::string const &name,
 OSVR_DeviceTokenObject::OSVR_DeviceTokenObject(std::string const &name)
     : m_name(name) {}
 
-OSVR_DeviceTokenObject::~OSVR_DeviceTokenObject() {}
+OSVR_DeviceTokenObject::~OSVR_DeviceTokenObject() { stopThreads(); }
 
 std::string const &OSVR_DeviceTokenObject::getName() const { return m_name; }
 

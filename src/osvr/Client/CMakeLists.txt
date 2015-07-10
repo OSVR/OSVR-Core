@@ -9,11 +9,17 @@ set(SOURCE
     ButtonRemoteFactory.cpp
     ButtonRemoteFactory.h
     CreateContext.cpp
+    DirectionRemoteFactory.cpp
+    DirectionRemoteFactory.h
+    EyeTrackerRemoteFactory.cpp
+    EyeTrackerRemoteFactory.h
     HandlerContainer.h
     ImagingRemoteFactory.cpp
     ImagingRemoteFactory.h
     InterfaceTree.cpp
     InterfaceTree.h
+    Location2DRemoteFactory.cpp
+    Location2DRemoteFactory.h    
     PureClientContext.cpp
     PureClientContext.h
     RemoteHandler.cpp

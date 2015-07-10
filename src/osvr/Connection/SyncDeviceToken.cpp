@@ -55,8 +55,8 @@ namespace connection {
         m_getConnectionDevice()->sendData(timestamp, type, bytestream, len);
     }
 
-    GuardPtr SyncDeviceToken::m_getSendGuard() {
-        return GuardPtr(new util::DummyGuard);
+    util::GuardPtr SyncDeviceToken::m_getSendGuard() {
+        return util::GuardPtr(new util::DummyGuard);
     }
 
     void SyncDeviceToken::m_connectionInteract() {

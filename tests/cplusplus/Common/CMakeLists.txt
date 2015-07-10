@@ -1,4 +1,5 @@
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/examples/internals")
 
 set(PATHTREEJSON_SOURCES)
 if(HAVE_OSVR_JSON_TO_C)
@@ -15,6 +16,9 @@ add_executable(TestCommon
     DummyTree.h
     PathTreeResolution.cpp
     Serialization.cpp
+    SerializationExamples.cpp
+    "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Simple.h"
+    "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Complicated.h"
     ${PATHTREEJSON_SOURCES})
 
 target_link_libraries(TestCommon osvrCommon jsoncpp_lib)
