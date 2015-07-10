@@ -31,6 +31,8 @@
 #include <osvr/Common/RoutingConstants.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Common/JSONHelpers.h>
+#include <osvr/Common/AliasProcessor.h>
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
@@ -117,21 +119,9 @@ namespace common {
 
     bool addAliasFromRoute(PathNode &node, std::string const &route,
                            AliasPriority priority) {
-        auto path = common::RouteContainer::getDestinationFromString(route);
-        auto &aliasNode = treePathRetrieve(node, path);
-        ParsedAlias newSource(route);
-        if (!newSource.isValid()) {
-            /// @todo signify invalid route in some other way?
-            OSVR_DEV_VERBOSE("Could not parse route as a source: " << route);
-            return false;
-        }
-        if (!isPathAbsolute(newSource.getLeaf())) {
-            /// @todo signify not to pass relative paths here in some other way?
-            OSVR_DEV_VERBOSE(
-                "Route contains a relative path, not permitted: " << route);
-            return false;
-        }
-        return addAliasImpl(aliasNode, newSource.getAlias(), priority);
+        auto val = jsonParse(route);
+        auto alias = applyPriorityToAlias(convertRouteToAlias(val), priority);
+        return AliasProcessor().process(node, alias);
     }
 
     static inline std::string getAbsolutePath(PathNode &node,
