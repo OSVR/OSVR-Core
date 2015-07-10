@@ -48,6 +48,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/IPCRingBuffer.h"
     "${HEADER_LOCATION}/JSONEigen.h"
+    "${HEADER_LOCATION}/JSONHelpers.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Location2DComponent.h"
@@ -105,7 +106,7 @@ set(SOURCE
     DeviceWrapper.cpp
     DeviceWrapper.h
     DirectionComponent.cpp
-    EyeTrackerComponent.cpp    
+    EyeTrackerComponent.cpp
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
