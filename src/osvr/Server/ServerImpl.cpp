@@ -37,7 +37,7 @@
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
-#include <osvr/Common/ProcessAliasesFromJSON.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Util/StringLiteralFileToString.h>
 
 #include "osvr/Server/display_json.h" /// Fallback display descriptor.
@@ -292,6 +292,7 @@ namespace server {
     bool ServerImpl::m_addAlias(std::string const &path,
                                 std::string const &source,
                                 common::AliasPriority priority) {
+        /// @todo Handle this one with AliasProcessor.
         auto &node = m_tree.getNodeByPath(path);
         bool change = common::addAlias(node, source, priority);
         m_treeDirty += change;
@@ -300,11 +301,10 @@ namespace server {
 
     bool ServerImpl::m_addAliases(Json::Value const &aliases,
                                   common::AliasPriority priority) {
-        auto opts = common::PathProcessOptions{}
-                        .setDefaultPriority(priority)
-                        .enableWildcard();
-        bool change = common::processAliasesFromJSON(
-            m_tree.getRoot(), aliases, opts);
+        bool change = common::AliasProcessor()
+                          .setDefaultPriority(priority)
+                          .enableWildcard()
+                          .process(m_tree.getRoot(), aliases);
         m_treeDirty += change;
         return change;
     }

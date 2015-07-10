@@ -13,6 +13,7 @@ configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/Config
 
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
+    "${HEADER_LOCATION}/AliasProcessor.h"
     "${HEADER_LOCATION}/AlignmentPadding.h"
     "${HEADER_LOCATION}/ApplyPathNodeVisitor.h"
     "${HEADER_LOCATION}/BaseDevice.h"
@@ -66,7 +67,6 @@ set(API
     "${HEADER_LOCATION}/PathTreeFull.h"
     "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
-    "${HEADER_LOCATION}/ProcessAliasesFromJSON.h"
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
@@ -93,6 +93,7 @@ set(API
 
 set(SOURCE
     AddDevice.cpp
+    AliasProcessor.cpp
     BaseDevice.cpp
     ClientContext.cpp
     ClientInterface.cpp
@@ -128,7 +129,6 @@ set(SOURCE
     PathParseAndRetrieve.h
     PathTree.cpp
     PathTreeSerialization.cpp
-    ProcessAliasesFromJSON.cpp
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp

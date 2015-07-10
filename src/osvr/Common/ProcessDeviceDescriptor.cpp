@@ -33,7 +33,7 @@
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TreeTraversalVisitor.h>
-#include <osvr/Common/ProcessAliasesFromJSON.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Common/NormalizeDeviceDescriptor.h>
 
 #include "PathParseAndRetrieve.h"
@@ -142,12 +142,12 @@ namespace common {
     static inline bool processAutomaticFromDescriptor(PathNode &devNode,
                                                       Json::Value const &desc) {
         Json::Value const &automatic = desc[AUTOMATIC_KEY];
-        auto opts = PathProcessOptions{}
-                        .setDefaultPriority(ALIASPRIORITY_AUTOMATIC)
-                        .enableRelativePath()
-                        .enableRelativeSource()
-                        .enableWildcard();
-        return processAliasesFromJSON(devNode, automatic, opts);
+        return AliasProcessor{}
+            .setDefaultPriority(ALIASPRIORITY_AUTOMATIC)
+            .enableRelativePath()
+            .enableRelativeSource()
+            .enableWildcard()
+            .process(devNode, automatic);
     }
     bool processDeviceDescriptorForPathTree(PathTree &tree,
                                             std::string const &deviceName,

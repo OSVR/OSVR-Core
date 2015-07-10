@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ProcessAliasesFromJSON.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathElementTools.h>
@@ -77,7 +77,8 @@ namespace common {
         }
         class AutomaticAliases : boost::noncopyable {
           public:
-            AutomaticAliases(PathNode &devNode, PathProcessOptions opts)
+            AutomaticAliases(PathNode &devNode,
+                             detail::AliasProcessorOptions opts)
                 : m_devNode(devNode), m_opts(opts) {}
 
             util::Flag operator()(Json::Value const &val) {
@@ -168,15 +169,14 @@ namespace common {
             }
 
             PathNode &m_devNode;
-            PathProcessOptions m_opts;
+            detail::AliasProcessorOptions m_opts;
             util::Flag m_flag;
         };
 
     } // namespace
 
-    bool processAliasesFromJSON(PathNode &node, Json::Value const &val,
-                                PathProcessOptions opts) {
-        AutomaticAliases processor{node, opts};
+    bool AliasProcessor::process(PathNode &node, Json::Value const &val) {
+        AutomaticAliases processor{node, m_opts};
         return processor(val).get();
     }
 } // namespace common
