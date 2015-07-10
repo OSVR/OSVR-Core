@@ -66,10 +66,21 @@ namespace common {
     };
 
     /// @brief Adds the given aliases to the tree.
+    ///
+    /// Can handle wildcards (*) in the destination, relative sources and paths,
+    /// and internally-specified alias priorities. Some of these capabilities
+    /// are off by default and should be enabled by passing a parameter in @p
+    /// opts
+    ///
+    /// @param node The parent node for relative path resolution, often the
+    /// root.
+    /// @param val The parsed Json::Value containing aliases.
+    /// @param opts The options struct if other than the default options are
+    /// desired.
     /// @return true if changes were made
-    OSVR_COMMON_EXPORT bool processAliasesFromJSON(PathNode &node,
-                                                   Json::Value const &val,
-                                                   PathProcessOptions opts);
+    OSVR_COMMON_EXPORT bool
+    processAliasesFromJSON(PathNode &node, Json::Value const &val,
+                           PathProcessOptions opts = PathProcessOptions{});
 
 } // namespace common
 } // namespace osvr
