@@ -27,6 +27,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 //#include <osvr/Connection/ImagingServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Common/ImagingComponent.h>
 #include "HandleNullContext.h"
@@ -38,7 +39,8 @@
 // Standard includes
 // - none
 
-struct OSVR_ImagingDeviceInterfaceObject {
+struct OSVR_ImagingDeviceInterfaceObject
+    : public osvr::connection::DeviceInterfaceBase {
     osvr::common::ImagingComponent *imaging;
 };
 
@@ -50,9 +52,9 @@ osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceImagingConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceImagingConfigure", iface);
     OSVR_ImagingDeviceInterface ifaceObj =
-        opts->getContext()->registerDataWithGenericDelete(
-            new OSVR_ImagingDeviceInterfaceObject);
+        opts->makeInterfaceObject<OSVR_ImagingDeviceInterfaceObject>();
     *iface = ifaceObj;
+
     auto imaging = osvr::common::ImagingComponent::create(numSensors);
     ifaceObj->imaging = imaging.get();
     opts->addComponent(imaging);
@@ -60,13 +62,13 @@ osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
 }
 
 OSVR_ReturnCode
-osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken dev,
+osvrDeviceImagingReportFrame(OSVR_IN_PTR OSVR_DeviceToken,
                              OSVR_IN_PTR OSVR_ImagingDeviceInterface iface,
                              OSVR_IN OSVR_ImagingMetadata metadata,
                              OSVR_IN_PTR OSVR_ImageBufferElement *imageData,
                              OSVR_IN OSVR_ChannelCount sensor,
                              OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    auto guard = dev->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
         iface->imaging->sendImageData(metadata, imageData, sensor, *timestamp);
         return OSVR_RETURN_SUCCESS;
