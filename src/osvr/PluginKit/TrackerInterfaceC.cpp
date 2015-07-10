@@ -27,6 +27,7 @@
 #include <osvr/Connection/TrackerServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/PointerWrapper.h>
@@ -38,36 +39,33 @@
 // - none
 
 struct OSVR_TrackerDeviceInterfaceObject
-    : public osvr::util::PointerWrapper<
-          osvr::connection::TrackerServerInterface> {};
+    : public osvr::connection::DeviceInterfaceBase {
+    osvr::util::PointerWrapper<osvr::connection::TrackerServerInterface> tracker;
+};
 
 OSVR_ReturnCode
 osvrDeviceTrackerConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                            OSVR_OUT_PTR OSVR_TrackerDeviceInterface *iface) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceTrackerConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceTrackerConfigure", iface);
-    OSVR_TrackerDeviceInterface ifaceObj = *iface =
-        opts->getContext()->registerDataWithGenericDelete(
-            new OSVR_TrackerDeviceInterfaceObject);
-    opts->setTracker(ifaceObj->getContainerLocation());
+    OSVR_TrackerDeviceInterface ifaceObj =
+        opts->makeInterfaceObject<OSVR_TrackerDeviceInterfaceObject>();
+    *iface = ifaceObj;
+    opts->setTracker(ifaceObj->tracker);
     return OSVR_RETURN_SUCCESS;
 }
 
 template <typename StateType>
 static inline OSVR_ReturnCode
-osvrTrackerSend(const char method[], OSVR_DeviceToken dev,
+osvrTrackerSend(const char method[], OSVR_DeviceToken,
                 OSVR_TrackerDeviceInterface iface, StateType const *val,
                 OSVR_ChannelCount chan, OSVR_TimeValue const *timestamp) {
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
 
-    osvr::connection::DeviceToken *device =
-        static_cast<osvr::connection::DeviceToken *>(dev);
-
-    auto guard = device->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        (*iface)->sendReport(*val, chan, *timestamp);
+        iface->tracker->sendReport(*val, chan, *timestamp);
         return OSVR_RETURN_SUCCESS;
     }
 
