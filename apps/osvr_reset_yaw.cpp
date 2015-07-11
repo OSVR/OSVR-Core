@@ -30,7 +30,11 @@
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
-#include <osvr/Common/RouteContainer.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/JSONHelpers.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/UniquePtr.h>
 
@@ -38,6 +42,8 @@
 #include <boost/program_options.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/variant/get.hpp>
+#include <boost/optional.hpp>
 #include <json/value.h>
 #include <json/reader.h>
 
@@ -50,6 +56,32 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+inline std::string
+createJSONAlias(std::string const &path,
+                osvr::common::elements::AliasElement const &elt) {
+    return osvr::common::applyPriorityToAlias(
+               osvr::common::createJSONAlias(
+                   path, osvr::common::jsonParse(elt.getSource())),
+               elt.priority())
+        .toStyledString();
+}
+boost::optional<osvr::common::elements::AliasElement>
+getAliasElement(osvr::clientkit::ClientContext &ctx, std::string const &path) {
+    osvr::common::PathNode const *node = nullptr;
+    try {
+        node = &(ctx.get()->getPathTree().getNodeByPath(path));
+    } catch (std::exception &e) {
+        cerr << "Could not get node at path '" << path
+             << "' - exception: " << e.what() << endl;
+        return boost::none;
+    }
+    auto elt = boost::get<osvr::common::elements::AliasElement>(&node->value());
+    if (!elt) {
+        return boost::none;
+    }
+    return *elt;
+}
+
 auto SETTLE_TIME = boost::posix_time::seconds(2);
 
 /// @brief A flag we set in transform levels we create.
@@ -61,7 +93,7 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Options");
     desc.add_options()
         ("help", "produce help message")
-        ("route", po::value<std::string>()->default_value("/me/head"), "route to calibrate")
+        ("path", po::value<std::string>()->default_value("/me/head"), "path to calibrate")
         ;
     // clang-format on
 
@@ -80,30 +112,23 @@ int main(int argc, char *argv[]) {
         }
     }
     osvr::clientkit::ClientContext ctx("com.osvr.bundled.resetyaw");
-    std::string const dest = vm["route"].as<std::string>();
+    std::string const path = vm["path"].as<std::string>();
 
     // Get the interface associated with the destination route we
     // are looking for.
-    osvr::clientkit::Interface iface = ctx.getInterface(dest);
+    osvr::clientkit::Interface iface = ctx.getInterface(path);
     {
         ClientMainloopThread client(ctx);
 
-        cout << "Running client mainloop briefly to get routes..." << endl;
+        cout << "Running client mainloop briefly to start up..." << endl;
         client.loopForDuration(boost::chrono::seconds(2));
         cout << "Removing any previous yaw-reset transforms..." << endl;
 
-        // Get a reference for the portion of the tree that is associated
-        // with this destination.
-        Json::Value origRoute;
-        {
-            Json::Reader reader;
-            auto routeString =
-                ctx.get()->getRoutes().getRouteForDestination(dest);
-            if (!reader.parse(routeString, origRoute)) {
-                cerr << "Error parsing existing route!" << endl;
-                cerr << routeString << endl;
-                return -1;
-            }
+        // Get the alias element corresponding to the desired path, if possible.
+        auto elt = getAliasElement(ctx, path);
+        if (!elt) {
+            // No luck, sorry.
+            return -1;
         }
 
         // Get a reference to the source associated with the portion
@@ -111,23 +136,28 @@ int main(int argc, char *argv[]) {
         // any prior instance of our meddling by checking for an
         // entry that has our flag key in it.  Then replace the
         // original source tree with the cleaned tree.  Send this
-        // cleaned route back to the server.
-        Json::Value origTransforms =
-            origRoute[osvr::common::routing_keys::source()];
+        // cleaned alias back to the server.
+        Json::Value origTransforms = osvr::common::jsonParse(elt->getSource());
+        if (origTransforms.isNull()) {
+            cerr << "Couldn't parse the source!" << endl;
+            return -1;
+        }
         Json::Value cleanTransforms =
             remove_levels_if(origTransforms, [](Json::Value const &current) {
                 return current.isMember(FLAG_KEY) &&
                        current[FLAG_KEY].isBool() && current[FLAG_KEY].asBool();
             });
-        origRoute[osvr::common::routing_keys::source()] = cleanTransforms;
-        ctx.get()->sendRoute(origRoute.toStyledString());
+        elt->setSource(osvr::common::jsonToCompactString(cleanTransforms));
+        ctx.get()->sendRoute(createJSONAlias(path, *elt));
 
-        cout << "Sent cleaned route, starting again and waiting a few seconds "
-                "for startup..." << endl;
+        cout << "Sent cleaned transform, starting again and waiting a few "
+                "seconds "
+                "for startup..."
+             << endl;
         client.start();
         boost::this_thread::sleep(SETTLE_TIME);
 
-        cout << "\n\nPlease place your device for " << dest
+        cout << "\n\nPlease place your device for " << path
              << " in its 'zero' orientation and press enter." << endl;
         std::cin.ignore();
 
@@ -140,10 +170,10 @@ int main(int argc, char *argv[]) {
             ClientMainloopThread::lock_type lock(client.getMutex());
             ret = osvrGetOrientationState(iface.get(), &timestamp, &state);
             if (ret != OSVR_RETURN_SUCCESS) {
-                cerr
-                    << "Sorry, no orientation state available for this route - "
-                       "are you sure you have a device plugged in and your "
-                       "path correct?" << endl;
+                cerr << "Sorry, no orientation state available for this path - "
+                        "are you sure you have a device plugged in and your "
+                        "path correct?"
+                     << endl;
                 std::cin.ignore();
                 return -1;
             }
@@ -159,11 +189,11 @@ int main(int argc, char *argv[]) {
             newLayer["postrotate"]["radians"] = -yaw;
             newLayer["postrotate"]["axis"] = "y";
             newLayer[FLAG_KEY] = true;
+            newLayer[osvr::common::routing_keys::child()] = cleanTransforms;
+            cout << "New source: " << newLayer.toStyledString() << endl;
 
-            std::string newRoute =
-                wrapRoute(origRoute, newLayer).toStyledString();
-            cout << "New route: " << newRoute << endl;
-            ctx.get()->sendRoute(newRoute);
+            elt->setSource(osvr::common::jsonToCompactString(newLayer));
+            ctx.get()->sendRoute(createJSONAlias(path, *elt));
             boost::this_thread::sleep(SETTLE_TIME / 2);
         }
 
