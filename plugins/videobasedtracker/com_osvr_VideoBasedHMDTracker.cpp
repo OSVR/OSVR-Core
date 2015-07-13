@@ -59,10 +59,8 @@
 // 0001.tif and above; specify the directory name to read from
 //#define VBHMD_FAKE_IMAGES "./Frames"
 //#define VBHMD_FAKE_IMAGES "C:/tmp/HDK_far"
-//#define VBHMD_FAKE_IMAGES
-//"F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
-//#define VBHMD_FAKE_IMAGES
-//"F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
+//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
+//#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -172,12 +170,10 @@ class VideoBasedHMDTracker : boost::noncopyable {
         //        osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
 
         m_vbtracker.addSensor(
-            new osvr::vbtracker::OsvrHdkLedIdentifier(
-                osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR0_PATTERNS),
+            osvr::vbtracker::createHDKLedIdentifier(0),
             m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0);
         m_vbtracker.addSensor(
-            new osvr::vbtracker::OsvrHdkLedIdentifier(
-                osvr::vbtracker::OsvrHdkLedIdentifier_SENSOR1_PATTERNS),
+            osvr::vbtracker::createHDKLedIdentifier(1),
             m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1);
 
 #else
