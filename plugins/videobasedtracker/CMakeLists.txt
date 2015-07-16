@@ -6,7 +6,7 @@ osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h")
 
 # Be able to find our generated header file.
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/DirectShowCameraLib")
 
 ###
 # Build a separate static library with the core of the video-based tracker
@@ -43,6 +43,29 @@ set_target_properties(vbtracker-core PROPERTIES
     FOLDER "OSVR Plugins/Video-Based Tracker")
 
 ###
+# Build a static library to read from an DirectShow camera.
+# @toto This will be removed when OpenCV knows how to read from the
+# HDK camera.
+###
+add_library(directshow-camera STATIC
+    DirectShowCameraLib/base_camera_server.h
+    DirectShowCameraLib/base_camera_server.cpp
+    DirectShowCameraLib/directx_camera_server.h
+    DirectShowCameraLib/directx_camera_server.cpp
+    )
+
+target_link_libraries(directshow-camera
+    PUBLIC
+    vendored-vrpn 
+    )
+target_compile_options(directshow-camera
+    PUBLIC
+    ${OSVR_CXX11_FLAGS})
+
+set_target_properties(directshow-camera PROPERTIES
+    FOLDER "OSVR Plugins/Video-Based Tracker")
+
+###
 # Build the plugin
 ###
 osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
@@ -58,6 +81,7 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
 
 target_link_libraries(com_osvr_VideoBasedHMDTracker
     vbtracker-core
+    directshow-camera
     vendored-hidapi
 )
 
@@ -69,7 +93,8 @@ if(BUILD_TESTING)
         TestStandalone.cpp)
     target_link_libraries(vbtracker-cam
         PRIVATE
-        vbtracker-core)
+        vbtracker-core
+        directshow-camera)
     set_target_properties(vbtracker-cam PROPERTIES
         FOLDER "OSVR Plugins/Video-Based Tracker")
     #osvr_setup_gtest(vbtracker-cam)
