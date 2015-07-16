@@ -50,6 +50,14 @@
 // behavior, printing tracked positions)
 // -> now located in VideoBasedTracker.h
 
+// Define the constant below to use a DirectShow-based workaround to not
+// being able to open the OSVR HDK camera using OpenCV.
+/// @todo Remove this code and the DirectShow stuff once the camera can be read by OpenCV
+#define VBHMD_USE_DIRECTSHOW
+#ifdef VBHMD_USE_DIRECTSHOW
+    #include "directx_camera_server.h"
+#endif
+
 // Define the constant below to set a directory to save the video frames that
 // are acquired
 // with files in a format that can later be read by VBHMD_FAKE_IMAGES
@@ -70,9 +78,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0,
                          int channel = 0)
 #ifndef VBHMD_FAKE_IMAGES
-        : m_camera(cameraNum)
+#ifdef VBHMD_USE_DIRECTSHOW
+    : m_camera(cameraNum + 1)   // DirectShow uses 1-based first camera
+#else
+    : m_camera(cameraNum)
+#endif
 #endif
     {
+#ifdef VBHMD_USE_DIRECTSHOW
+        // Read a frame from the camera, so that we get all of the info we
+        // need and start the filter graph running
+        /// @Todo Move this into the device itself, so it is ready to go
+        // as soon as it is opened.
+        m_camera.read_image_to_memory();
+#endif
         // Initialize things from parameters and from defaults.  Do it here
         // rather than
         // in an initialization list so that we're independent of member order
@@ -178,8 +197,15 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
 #else
         if (m_camera.isOpened()) {
+#ifdef VBHMD_USE_DIRECTSHOW
+            int minx, miny, maxx, maxy;
+            m_camera.read_range(minx, maxx, miny,maxy);
+            height = maxy - miny+1;
+            width = maxx - minx+1;
+#else
             height = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_HEIGHT));
             width = static_cast<int>(m_camera.get(CV_CAP_PROP_FRAME_WIDTH));
+#endif
 
             // See if this is an Oculus camera by checking the dimensions of
             // the image.  This camera type improperly describes its format
@@ -195,9 +221,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 m_type = OSVRHDK;
             }
 #ifdef VBHMD_DEBUG
-            std::cout << "Got image of size " << width << "x" << height
-                      << ", Format " << m_camera.get(CV_CAP_PROP_FORMAT)
-                      << ", Mode " << m_camera.get(CV_CAP_PROP_MODE)
+            std::cout << "Got image from camera of size " << width << "x" << height
                       << std::endl;
             if (m_type == OculusDK2) {
                 std::cout << "Is Oculus camera, reformatting to mono"
@@ -294,7 +318,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
         }
 
         //==================================================================
-        // Trigger a camera grab.
+        // Trigger a camera grab.  Pull it into an OpenCV matrix named
+        // m_frame.
+#ifdef VBHMD_USE_DIRECTSHOW
+        if (!m_camera.read_image_to_memory()) {
+            // Couldn't open the camera.  Failing silently for now. Maybe the
+            // camera will be plugged back in later.
+            return OSVR_RETURN_SUCCESS;
+        }
+        int minx, miny, maxx, maxy;
+        m_camera.read_range(minx, maxx, miny,maxy);
+        int height = maxy - miny+1;
+        int width = maxx - minx+1;
+        m_frame = cv::Mat(height, width, CV_8UC3, (BYTE*)(m_camera.get_pixel_buffer_pointer()));
+#else
         if (!m_camera.grab()) {
             // No frame available.
             return OSVR_RETURN_SUCCESS;
@@ -302,6 +339,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         if (!m_camera.retrieve(m_frame, m_channel)) {
             return OSVR_RETURN_FAILURE;
         }
+#endif
 
 #ifdef VBHMD_SAVE_IMAGES
         // If we're supposed to save images, make file names that match the
@@ -366,7 +404,11 @@ class VideoBasedHMDTracker : boost::noncopyable {
     std::vector<cv::Mat> m_images;
     size_t m_currentImage;
 #else
+#ifdef VBHMD_USE_DIRECTSHOW
+    directx_camera_server m_camera;
+#else
     cv::VideoCapture m_camera;
+#endif
 #endif
 #ifdef VBHMD_SAVE_IMAGES
     int m_imageNum = 1;
@@ -394,6 +436,21 @@ class HardwareDetection {
         }
 
 #ifndef VBHMD_FAKE_IMAGES
+#ifdef VBHMD_USE_DIRECTSHOW
+        {
+            // Open a DirectShow camera and make sure we can read an
+            // image from it.  This needs to have the same parameter
+            // as the constructor for the VideoBasedHMDTracker class
+            // above or else it will not be looking for the same camera.
+            // We need the camera object to be destroyed before we try
+            // and open it again when we create the VideoBasedHMDTracker
+            // object below, so that object can open the camera.
+            directx_camera_server svr(1);
+            if (!svr.read_image_to_memory()) {
+                return OSVR_RETURN_FAILURE;
+            }
+        }
+#else
         {
             // Autodetect camera.  This needs to have the same
             // parameter as the constructor for the VideoBasedHMDTracker
@@ -408,6 +465,7 @@ class HardwareDetection {
                 return OSVR_RETURN_FAILURE;
             }
         }
+#endif
 #endif
         m_found = true;
 
