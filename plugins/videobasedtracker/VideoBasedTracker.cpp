@@ -31,8 +31,6 @@
 // Standard includes
 // - none
 
-#define VBHMD_DEBUG
-
 namespace osvr {
 namespace vbtracker {
     void VideoBasedTracker::addOculusSensor() {
@@ -60,7 +58,6 @@ namespace vbtracker {
     }
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          PoseHandler handler) {
-
         m_assertInvariants();
         bool done = false;
         m_frame = frame;
@@ -73,24 +70,27 @@ namespace vbtracker {
         // the darkest and brightest pixel in the image.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = minVal + (maxVal - minVal) * 0.8;
+        double thresholdValue = minVal + (maxVal - minVal) * 0.3;
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
         // Construct a blob detector and find the blobs in the image.
-        // XXX Make it so we don't have to have a blown-out image to track.
+        // @todo Make it so we don't have to have a blown-out image to track.
         // If the light is dimmer in the simulated image, so the brightest
         // pixel is not 255 saturated across the blobs, we don't find any
         // blobs.
-        // TODO: Determine the maximum size of a trackable blob by seeing
+        // @todo: Determine the maximum size of a trackable blob by seeing
         // when we're so close that we can't view at least four in the
         // camera.
         cv::SimpleBlobDetector::Params params;
         params.filterByColor = true; // Look for bright blobs
-        params.blobColor = static_cast<uchar>(maxVal);
+        params.blobColor = static_cast<uchar>(255);
         params.filterByInertia = true; // Look for non-elongated blobs
         params.minInertiaRatio = 0.5;
         params.maxInertiaRatio = 1.0;
+        params.minThreshold = static_cast<float>(minVal + (maxVal - minVal) * 0.1);
+        params.maxThreshold = static_cast<float>(thresholdValue);
+        params.thresholdStep = static_cast<float>(0.05 * maxVal-minVal);
         cv::SimpleBlobDetector detector(params);
         /// @todo this variable is a candidate for hoisting to member
         std::vector<cv::KeyPoint> foundKeyPoints;
@@ -165,7 +165,7 @@ namespace vbtracker {
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
                         m_led_groups[sensor], pose)) {
                     m_pose = pose;
-                    handler(sensor, pose);
+                    handler(static_cast<unsigned>(sensor), pose);
                     gotPose = true;
                 }
             }

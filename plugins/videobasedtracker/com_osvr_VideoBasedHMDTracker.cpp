@@ -46,17 +46,21 @@
 #include <sstream>
 #include <memory>
 
-// Define the constant below to provide debugging (window showing video and
-// behavior, printing tracked positions)
-// -> now located in VideoBasedTracker.h
-
 // Define the constant below to use a DirectShow-based workaround to not
 // being able to open the OSVR HDK camera using OpenCV.
 /// @todo Remove this code and the DirectShow stuff once the camera can be read by OpenCV
 #define VBHMD_USE_DIRECTSHOW
 #ifdef VBHMD_USE_DIRECTSHOW
-    #include "directx_camera_server.h"
+#include "directx_camera_server.h"
 #endif
+
+// Define the constant below to provide debugging (window showing video and
+// behavior, printing tracked positions)
+// -> now located in VideoBasedTracker.h
+
+// Define the constant below to print timing information (how many updates
+// per second we are getting).
+#define VBHMD_TIMING
 
 // Define the constant below to set a directory to save the video frames that
 // are acquired
@@ -339,6 +343,25 @@ class VideoBasedHMDTracker : boost::noncopyable {
         if (!m_camera.retrieve(m_frame, m_channel)) {
             return OSVR_RETURN_FAILURE;
         }
+#endif
+
+#ifdef VBHMD_TIMING
+        //==================================================================
+        // Time our performance
+        static struct timeval last = { 0, 0 };
+        if (last.tv_sec == 0) {
+            vrpn_gettimeofday(&last, NULL);
+        }
+        static unsigned count = 0;
+        if (++count == 100) {
+            struct timeval now;
+            vrpn_gettimeofday(&now, NULL);
+            double duration = vrpn_TimevalDurationSeconds(now, last);
+            std::cout << "Video-based tracker: update rate "
+                << count/duration << " hz" << std::endl;
+            count = 0;
+            last = now;
+    }
 #endif
 
 #ifdef VBHMD_SAVE_IMAGES
