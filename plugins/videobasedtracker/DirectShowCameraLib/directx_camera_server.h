@@ -91,6 +91,10 @@ public:
   /// @todo Construct a safer way to access this.
   const unsigned char *get_pixel_buffer_pointer(void) const { return _buffer; }
 
+  /// Matches a method on the OpenCV camera, to let us easily integrate into
+  /// existing code.
+  bool isOpened(void) const { return _started_graph; }
+
 protected:
   virtual void close_device(void);
 
