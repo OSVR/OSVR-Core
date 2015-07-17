@@ -65,6 +65,7 @@ createJSONAlias(std::string const &path,
                elt.priority())
         .toStyledString();
 }
+
 boost::optional<osvr::common::elements::AliasElement>
 getAliasElement(osvr::clientkit::ClientContext &ctx, std::string const &path) {
     osvr::common::PathNode const *node = nullptr;
@@ -157,8 +158,7 @@ int main(int argc, char *argv[]) {
         ctx.get()->sendRoute(createJSONAlias(path, *elt));
 
         cout << "Sent cleaned transform, starting again and waiting a few "
-                "seconds "
-                "for startup..."
+                "seconds for startup..."
              << endl;
         client.start();
         boost::this_thread::sleep(SETTLE_TIME);
