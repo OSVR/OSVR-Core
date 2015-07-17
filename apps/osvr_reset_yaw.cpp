@@ -143,11 +143,16 @@ int main(int argc, char *argv[]) {
             cerr << "Couldn't parse the source!" << endl;
             return -1;
         }
+        cout << "Original transform: " << origTransforms.toStyledString() << "\n"
+             << endl;
+
         Json::Value cleanTransforms =
             remove_levels_if(origTransforms, [](Json::Value const &current) {
                 return current.isMember(FLAG_KEY) &&
                        current[FLAG_KEY].isBool() && current[FLAG_KEY].asBool();
             });
+        cout << "Cleaned transform: " << cleanTransforms.toStyledString() << "\n"
+             << endl;
         elt->setSource(osvr::common::jsonToCompactString(cleanTransforms));
         ctx.get()->sendRoute(createJSONAlias(path, *elt));
 
