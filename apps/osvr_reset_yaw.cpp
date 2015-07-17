@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Options");
     desc.add_options()
         ("help", "produce help message")
-        ("path", po::value<std::string>()->default_value("/me/head"), "path to calibrate")
+        ("path", po::value<std::string>()->default_value("/me/head"), "path to reset-yaw on")
         ;
     // clang-format on
 
@@ -128,6 +128,7 @@ int main(int argc, char *argv[]) {
         auto elt = getAliasElement(ctx, path);
         if (!elt) {
             // No luck, sorry.
+            cerr << "Couldn't get the alias at " << path << endl;
             return -1;
         }
 
