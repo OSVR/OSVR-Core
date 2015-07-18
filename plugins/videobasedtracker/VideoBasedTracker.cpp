@@ -70,7 +70,7 @@ namespace vbtracker {
         // the darkest and brightest pixel in the image.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = minVal + (maxVal - minVal) * 0.3;
+        double thresholdValue = 35;
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
@@ -88,9 +88,9 @@ namespace vbtracker {
         params.filterByInertia = true; // Look for non-elongated blobs
         params.minInertiaRatio = 0.5;
         params.maxInertiaRatio = 1.0;
-        params.minThreshold = static_cast<float>(minVal + (maxVal - minVal) * 0.1);
-        params.maxThreshold = static_cast<float>(thresholdValue);
-        params.thresholdStep = static_cast<float>(0.05 * maxVal-minVal);
+        params.minThreshold = static_cast<float>(thresholdValue);
+        params.maxThreshold = static_cast<float>(thresholdValue + (maxVal - thresholdValue) * 0.3);
+        params.thresholdStep = (params.maxThreshold - params.minThreshold) / 10;
         cv::SimpleBlobDetector detector(params);
         /// @todo this variable is a candidate for hoisting to member
         std::vector<cv::KeyPoint> foundKeyPoints;
