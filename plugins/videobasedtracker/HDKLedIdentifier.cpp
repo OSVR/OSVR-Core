@@ -77,7 +77,7 @@ namespace vbtracker {
         // d_patterns.size() << std::endl;
     }
 
-    int OsvrHdkLedIdentifier::getId(std::list<float> brightnesses) const {
+    int OsvrHdkLedIdentifier::getId(std::list<float> &brightnesses) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {

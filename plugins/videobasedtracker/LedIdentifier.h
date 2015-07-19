@@ -55,11 +55,14 @@ namespace vbtracker {
         virtual ~LedIdentifier();
         /// @brief Determine the identity of the LED whose brightness pattern is
         /// passed in.
+        /// Truncates the passed-in list to the length needed to look for a
+        /// pattern, so it does not grow too long and waste space and time,
+        /// and perhaps produce spurious Ids.
         /// @return -1 for unknown (not enough information) and
         /// less than -1 for definitely not an LED (light sources will be
         /// constant, mis-tracked LEDs may produce spurious changes in the
         /// pattern for example).
-        virtual int getId(BrightnessList brightnesses) const = 0;
+        virtual int getId(BrightnessList &brightnesses) const = 0;
 
       protected:
     };

@@ -47,7 +47,11 @@ namespace vbtracker {
 
         ~OsvrHdkLedIdentifier() override;
 
-        int getId(BrightnessList brightnesses) const override;
+        /// @brief Determine an ID based on a list of brightnesses
+        /// This truncates the passed-in list to only as many elements
+        /// as are in the pattern list, to keep it from growing too
+        /// large and wasting time and space.
+        int getId(BrightnessList &brightnesses) const override;
 
       private:
         size_t d_length;        //< Length of all patterns
