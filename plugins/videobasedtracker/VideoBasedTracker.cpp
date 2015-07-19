@@ -83,14 +83,18 @@ namespace vbtracker {
         // when we're so close that we can't view at least four in the
         // camera.
         cv::SimpleBlobDetector::Params params;
-        params.filterByColor = true; // Look for bright blobs
-        params.blobColor = static_cast<uchar>(255);
-        params.filterByInertia = true; // Look for non-elongated blobs
-        params.minInertiaRatio = 0.5;
-        params.maxInertiaRatio = 1.0;
         params.minThreshold = static_cast<float>(thresholdValue);
         params.maxThreshold = static_cast<float>(thresholdValue + (maxVal - thresholdValue) * 0.3);
         params.thresholdStep = (params.maxThreshold - params.minThreshold) / 10;
+        params.blobColor = static_cast<uchar>(255);
+        params.filterByColor = false; // Look for bright blobs: there is a bug in this code
+        params.minInertiaRatio = 0.5;
+        params.maxInertiaRatio = 1.0;
+        params.filterByInertia = false; // Do we test for non-elongated blobs?
+        params.minArea = 1;
+        params.filterByConvexity = false;
+        params.filterByCircularity = false;
+        params.minDistBetweenBlobs = 3;
         cv::SimpleBlobDetector detector(params);
         /// @todo this variable is a candidate for hoisting to member
         std::vector<cv::KeyPoint> foundKeyPoints;
