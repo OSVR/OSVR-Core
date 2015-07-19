@@ -75,25 +75,25 @@ namespace vbtracker {
                       CV_THRESH_BINARY);
 
         // Construct a blob detector and find the blobs in the image.
-        // @todo Make it so we don't have to have a blown-out image to track.
-        // If the light is dimmer in the simulated image, so the brightest
-        // pixel is not 255 saturated across the blobs, we don't find any
-        // blobs.
-        // @todo: Determine the maximum size of a trackable blob by seeing
-        // when we're so close that we can't view at least four in the
-        // camera.
+        // This set of parameters is optimized for the OSVR HDK prototype
+        // that has exposed LEDs.
+        /// @todo: Make a different set of parameters optimized for the
+        /// Oculus Dk2.
+        /// @todo: Determine the maximum size of a trackable blob by seeing
+        /// when we're so close that we can't view at least four in the
+        /// camera.
         cv::SimpleBlobDetector::Params params;
         params.minThreshold = static_cast<float>(thresholdValue);
         params.maxThreshold = static_cast<float>(thresholdValue + (maxVal - thresholdValue) * 0.3);
         params.thresholdStep = (params.maxThreshold - params.minThreshold) / 10;
         params.blobColor = static_cast<uchar>(255);
-        params.filterByColor = false; // Look for bright blobs: there is a bug in this code
+        params.filterByColor = false;       // Look for bright blobs: there is a bug in this code
         params.minInertiaRatio = 0.5;
         params.maxInertiaRatio = 1.0;
-        params.filterByInertia = false; // Do we test for non-elongated blobs?
-        params.minArea = 1;
-        params.filterByConvexity = false;
-        params.filterByCircularity = false;
+        params.filterByInertia = false;     // Do we test for non-elongated blobs?
+        params.minArea = 1;                 // How small can the blobs be?
+        params.filterByConvexity = false;   // Test for convexity?
+        params.filterByCircularity = false; // Test for circularity?
         params.minDistBetweenBlobs = 3;
         cv::SimpleBlobDetector detector(params);
         /// @todo this variable is a candidate for hoisting to member
