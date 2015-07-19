@@ -337,9 +337,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_frame = cv::Mat(height, width, CV_8UC3, (BYTE*)(m_camera.get_pixel_buffer_pointer()));
 
         //==================================================================
-        // On the camera we use for the OSVR HDK, the image is flipped.  Here
-        // we flip it around Y to get into a consistent coordinate system.
-        /// @todo Does this need to happen for all cameras?
+        // Flip the image in Y to take it from DirectShow space into
+        // OpenCV space.
         cv::flip(m_frame, m_frame, 0);
 #else
         if (!m_camera.grab()) {
