@@ -16,6 +16,7 @@ set(CLIENTS
     Location2D
     Direction
     Locomotion
+    Gesture
     MinimalInit
     TrackerState
     ViewerEyeSurfaces)
