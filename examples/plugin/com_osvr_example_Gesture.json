@@ -1,0 +1,20 @@
+{
+    "deviceVendor": "Sensics",
+    "deviceName": "Gesture",
+    "author": "Georgiy Frolov georgiy@sensics.com",
+    "version": 1,
+    "lastModified": "",
+    "interfaces": {
+        "gesture": {
+            "count": 2
+        }
+    },
+    "semantic": {
+        "left": "gesture/0",
+        "right": "gesture/1"
+    },
+    "automaticAliases": {
+        "/me/hands/left": "semantic/left",
+        "/me/hands/right": "semantic/right"
+    }
+}
