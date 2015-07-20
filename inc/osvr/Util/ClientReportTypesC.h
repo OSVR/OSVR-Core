@@ -340,6 +340,45 @@ typedef struct OSVR_NaviPositionReport {
     OSVR_NaviPositionState state;
 } OSVR_NaviPositionReport;
 
+/** @brief Type of int to identify gestures */
+typedef uint32_t OSVR_GestureID;
+
+/** @brief Type of string to identify gesture name */
+typedef char const *OSVR_GestureName;
+
+/** @brief Type of Gesture state */
+typedef uint8_t OSVR_GestureState;
+
+/** @brief OSVR_GestureState value indicating "gesture started/currently in
+   process(ocurring)"
+    (should be used for continuous gestures, since discrete start and complete
+   at the same time) */
+#define OSVR_GESTURE_IN_PROCESS (1)
+
+/** @brief OSVR_GestureState value indicating "gesture is finished" */
+#define OSVR_GESTURE_COMPLETE (0)
+
+/** @brief a list of pre-set gestures available (can be expanded) */
+#define OSVR_GESTURE_SWIP_LEFT "SwipeLeft"
+#define OSVR_GESTURE_SWIP_RIGHT "SwipeRight"
+#define OSVR_GESTURE_SCROLL_UP "ScrollUp"
+#define OSVR_GESTURE_SCROLL_DOWN "ScrollDown"
+#define OSVR_GESTURE_SINGLE_TAP "SingleTap"
+#define OSVR_GESTURE_DOUBLE_TAP "DoubleTap"
+#define OSVR_GESTURE_PINCH "Pinch"
+#define OSVR_GESTURE_FINGER_SPREAD "FingerSpread"
+#define OSVR_GESTURE_CIRCLE "Circle"
+#define OSVR_GESTURE_LONG_PRESS "LongPress"
+#define OSVR_GESTURE_OPEN_HAND "OpenHand"
+#define OSVR_GESTURE_CLOSED_HAND "ClosedHand"
+
+/** @brief Report type for a gesture event */
+typedef struct OSVR_GestureReport {
+    OSVR_GestureName gestureName;
+    OSVR_GestureState state;
+    OSVR_ChannelCount sensor;
+} OSVR_GestureReport;
+
 /** @} */
 
 /** @} */
