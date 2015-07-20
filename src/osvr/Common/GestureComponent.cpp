@@ -196,9 +196,7 @@ namespace common {
     GestureComponent::m_handleGestureMapRecord(void *userdata,
                                                vrpn_HANDLERPARAM p) {
         auto self = static_cast<GestureComponent *>(userdata);
-        auto bufwrap = ExternalBufferReadingWrapper<unsigned char>(
-            reinterpret_cast<unsigned char const *>(p.buffer), p.payload_len);
-        auto bufReader = BufferReader<decltype(bufwrap)>(bufwrap);
+		auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
         messages::GestureMapRecord::MessageSerialization msg;
         deserialize(bufReader, msg);
