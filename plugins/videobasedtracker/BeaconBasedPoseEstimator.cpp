@@ -236,6 +236,9 @@ namespace vbtracker {
         //  This is the transformation we want, since it reports the sensor's
         // position and orientation in camera space, except that we want to convert
         // the units into meters and the orientation into a Quaternion.
+        //  NOTE: This is a right-handed coordinate system with X pointing
+        // towards the right from the camera center of projection, Y pointing
+        // down, and Z pointing along the camera viewing direction.
 
         // Compose the transform in original units.
         // We start by making a 3x3 rotation matrix out of the rvec, which
