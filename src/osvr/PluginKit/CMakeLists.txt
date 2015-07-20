@@ -8,6 +8,7 @@ set(API
     "${HEADER_LOCATION}/DeviceInterfaceC.h"
     "${HEADER_LOCATION}/DirectionInterfaceC.h"
     "${HEADER_LOCATION}/EyeTrackerInterfaceC.h"
+    "${HEADER_LOCATION}/GestureInterfaceC.h"
     "${HEADER_LOCATION}/ImagingInterface.h"
     "${HEADER_LOCATION}/ImagingInterfaceC.h"
     "${HEADER_LOCATION}/Location2DInterfaceC.h"
@@ -25,6 +26,7 @@ set(SOURCE
     DirectionInterfaceC.cpp
     HandleNullContext.h
     EyeTrackerInterfaceC.cpp
+    GestureInterfaceC.cpp
     ImagingInterfaceC.cpp
     Location2DInterfaceC.cpp
     LocomotionInterfaceC.cpp
@@ -54,6 +56,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrConnection
     osvrUtilCpp
     osvrCommon
+    jsoncpp_lib
     vendored-vrpn
     boost_thread)
 
