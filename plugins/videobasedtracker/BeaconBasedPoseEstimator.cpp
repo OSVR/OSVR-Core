@@ -233,13 +233,11 @@ namespace vbtracker {
         //                          |1 |
         //  That is, it rotates into the camera coordinate system and then adds
         // the translation, which is in the camera coordinate system.
-        //  We want the tranformation that takes points in the coordinate system
-        // of the tracker's "source" (the camera) and moves them into the
-        // coordinate system of the tracker's "sensor" (the HDK), which is the
-        // inverse of the transformation described above scaled to move from mm
-        // to meters.
+        //  This is the transformation we want, since it reports the sensor's
+        // position and orientation in camera space, except that we want to convert
+        // the units into meters and the orientation into a Quaternion.
 
-        // Compose the transform that we will invert, in original units.
+        // Compose the transform in original units.
         // We start by making a 3x3 rotation matrix out of the rvec, which
         // is done by a function that for some reason is named Rodrigues.
         cv::Mat rot;
@@ -275,16 +273,12 @@ namespace vbtracker {
         }
         q_from_row_matrix(forward.quat, rot4x4);
 
-        // Invert it.
-        q_xyz_quat_type inverse;
-        q_xyz_quat_invert(&inverse, &forward);
-
         // Scale to meters
-        q_vec_scale(inverse.xyz, 1e-3, inverse.xyz);
+        q_vec_scale(forward.xyz, 1e-3, forward.xyz);
 
         //==============================================================
         // Put into OSVR format.
-        osvrPose3FromQuatlib(&outPose, &inverse);
+        osvrPose3FromQuatlib(&outPose, &forward);
         return true;
     }
 
