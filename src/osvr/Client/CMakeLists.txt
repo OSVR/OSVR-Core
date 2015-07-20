@@ -33,6 +33,8 @@ set(SOURCE
     DisplayInput.cpp
     EyeTrackerRemoteFactory.cpp
     EyeTrackerRemoteFactory.h
+    GestureRemoteFactory.cpp
+    GestureRemoteFactory.h
     ImagingRemoteFactory.cpp
     ImagingRemoteFactory.h
     InterfaceTree.cpp
