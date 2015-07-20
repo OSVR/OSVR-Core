@@ -359,8 +359,8 @@ typedef uint8_t OSVR_GestureState;
 #define OSVR_GESTURE_COMPLETE (0)
 
 /** @brief a list of pre-set gestures available (can be expanded) */
-#define OSVR_GESTURE_SWIP_LEFT "SwipeLeft"
-#define OSVR_GESTURE_SWIP_RIGHT "SwipeRight"
+#define OSVR_GESTURE_SWIPE_LEFT "SwipeLeft"
+#define OSVR_GESTURE_SWIPE_RIGHT "SwipeRight"
 #define OSVR_GESTURE_SCROLL_UP "ScrollUp"
 #define OSVR_GESTURE_SCROLL_DOWN "ScrollDown"
 #define OSVR_GESTURE_SINGLE_TAP "SingleTap"
