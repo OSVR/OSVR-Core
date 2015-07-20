@@ -45,7 +45,7 @@ namespace common {
 
         /// @brief Called (only) by BaseDevice when being added: effectively
         /// records a "parent pointer" that does not convey ownership.
-        void recordParent(Parent &dev);
+        virtual void recordParent(Parent &dev);
 
         /// @brief Called during mainloop
         void update();
@@ -75,9 +75,9 @@ namespace common {
         /// @brief Implementation-specific (optional) stuff to do during
         /// mainloop
         virtual void m_update();
+        Parent *m_parent;
 
       private:
-        Parent *m_parent;
         MessageHandlerList<BaseDeviceMessageHandleTraits> m_messageHandlers;
     };
 } // namespace common
