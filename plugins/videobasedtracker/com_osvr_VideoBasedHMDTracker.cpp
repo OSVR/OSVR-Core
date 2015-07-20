@@ -263,11 +263,33 @@ class VideoBasedHMDTracker : boost::noncopyable {
         } break;
 
         case OSVRHDK: {
-            /// @todo Come up with actual estimates for camera and distortion
+            // See http://paulbourke.net/miscellaneous/lens/ for diagram.
+            // The focal length of a lens is the distance from the center of
+            // the lens to the point at which objects and infinity focus.  The
+            // horizontal field of view = 2 * atan (0.5 * width / focal length).
+            //  hFOV / 2 = atan( 0.5 * W / FL )
+            //  tan (hFOV / 2) = 0.5 * W / FL
+            //  2 * tan (hFOV/2) = W / FL
+            //  FL = W / ( 2 * tan(hFOV/2) )
+            // We want the focal length in units of pixels.  The manufacturer tells
+            // us that the optical FOV is 82.9 degrees; we assume that this is a
+            // diagonal measurement.  Since the camera resolution is 640x480 pixels,
+            // the diagonal is sqrt( 640*640 + 480*480 ) = 800.
+            // If we use the equation above, but compute the diagonal focal length
+            // (they are linearly related), we get
+            //  FL = 800 / ( 2 * tan(82.9/2) )
+            //  FL = 452.9
+            // Testing with the tracked position when the unit was about 10 inches
+            // from the camera and nearly centered produced a Z estimate of 0.255,
+            // where 0.254 is expected.  This is well within the ruler-based method
+            // of estimating 10 inches, so seems to be correct.
+            // The manufacturer specs distortion < 3% on the module and 1.5% on the
+            // lens, so we ignore the distortion and put in 0 coefficients.
+            /// @todo Come up with actual estimates for distortion
             /// parameters by calibrating them in OpenCV.
             double cx = width / 2.0;
             double cy = height / 2.0;
-            double fx = 700.0; // XXX This needs to be in pixels, not mm
+            double fx = 452.9; // 700.0; // XXX This needs to be in pixels, not mm
             double fy = fx;
             std::vector<std::vector<double> > m;
             m.push_back({fx, 0.0, cx});
