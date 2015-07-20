@@ -84,8 +84,6 @@ namespace common {
         static OSVR_COMMON_EXPORT shared_ptr<GestureComponent>
         create(OSVR_ChannelCount numSensor = 1);
 
-        void recordParent(Parent &dev);
-
         /// @brief Message from server to client, containing Gesture data.
         messages::GestureRecord gestureRecord;
 

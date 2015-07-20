@@ -125,21 +125,6 @@ namespace common {
         m_gestureNameMap.registerStringID(OSVR_GESTURE_CLOSED_HAND);
     }
 
-    void GestureComponent::recordParent(Parent &dev) {
-        BOOST_ASSERT_MSG(nullptr == m_parent,
-                         "recordParent should only be called once!");
-        m_parent = &dev;
-        m_parentSet();
-
-        // add a ping handler to re-send gesture map everytime the new
-        // connection(ping) occurs
-        m_commonComponent =
-            m_getParent().addComponent(osvr::common::CommonComponent::create());
-        OSVR_TimeValue now;
-        osvrTimeValueGetNow(&now);
-        m_commonComponent->registerPingHandler([&] { m_sendGestureMap(now); });
-    }
-
     void GestureComponent::sendGestureData(OSVR_GestureState gestureState,
                                            std::string const &gestureName,
                                            OSVR_ChannelCount sensor,
@@ -196,7 +181,7 @@ namespace common {
     GestureComponent::m_handleGestureMapRecord(void *userdata,
                                                vrpn_HANDLERPARAM p) {
         auto self = static_cast<GestureComponent *>(userdata);
-		auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
+        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
         messages::GestureMapRecord::MessageSerialization msg;
         deserialize(bufReader, msg);
@@ -226,6 +211,15 @@ namespace common {
     }
 
     void GestureComponent::m_parentSet() {
+
+        // add a ping handler to re-send gesture map everytime the new
+        // connection(ping) occurs
+        m_commonComponent =
+            m_getParent().addComponent(osvr::common::CommonComponent::create());
+        OSVR_TimeValue now;
+        osvrTimeValueGetNow(&now);
+        m_commonComponent->registerPingHandler([&] { m_sendGestureMap(now); });
+
         m_getParent().registerMessageType(gestureRecord);
         m_getParent().registerMessageType(gestureMapRecord);
     }
