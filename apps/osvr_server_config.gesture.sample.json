@@ -1,0 +1,26 @@
+{
+    "plugins": [
+        "com_osvr_example_Gesture"
+    ],
+    "routes": [
+        {
+            "destination": "/me/hands/left",
+            "source": {
+                "child": {
+                    "tracker": "/com_osvr_example_Gesture/Gesture",
+                    "sensor": 0
+                }
+            }
+        },
+        {
+            "destination": "/me/hands/right",
+            "source": {
+                "child": {
+                    "tracker": "/com_osvr_example_Gesture/Gesture",
+                    "sensor": 1
+                }
+            }
+        }
+    ],
+    "display": "displays/HMD.json"
+}
