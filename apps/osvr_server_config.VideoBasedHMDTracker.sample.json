@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
+  ],
+  "routes": [
+    {
+      "destination": "/me/head",
+      "source": {
+        "tracker": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0",
+        "sensor": 0
+      }
+    }
+  ]
+}

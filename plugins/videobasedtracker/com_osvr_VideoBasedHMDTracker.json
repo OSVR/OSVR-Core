@@ -1,0 +1,19 @@
+{
+  "deviceVendor": "OSVR",
+  "deviceName": "Video-Based Head-Mounted Display Tracker",
+  "author": "Russ Taylor <russ@reliasolve.com>",
+  "version": 1,
+  "lastModified": "2015-04-15T14:27:0.000Z",
+  "interfaces": {
+    "tracker": {
+      "count": 1,
+      "position": true,
+      "orientation": true
+    }
+  },
+  "semantics": {
+    "value": {
+      "$target": "tracker/0"
+    }
+  }
+}
