@@ -29,7 +29,7 @@
 #include <osvr/Connection/DeviceInitObject_fwd.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/PluginRegContextC.h>
-#include <osvr/PluginHost/PluginSpecificRegistrationContext_fwd.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Util/StdInt.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Connection/Export.h>
