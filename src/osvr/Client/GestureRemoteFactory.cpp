@@ -47,12 +47,12 @@
 namespace osvr {
 namespace client {
 
-    class NetworkGestureRemoteHandler : public RemoteHandler {
+    class GestureRemoteHandler : public RemoteHandler {
       public:
-        NetworkGestureRemoteHandler(vrpn_ConnectionPtr const &conn,
-                                    std::string const &deviceName,
-                                    boost::optional<OSVR_ChannelCount> sensor,
-                                    common::InterfaceList &ifaces)
+        GestureRemoteHandler(vrpn_ConnectionPtr const &conn,
+                             std::string const &deviceName,
+                             boost::optional<OSVR_ChannelCount> sensor,
+                             common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
@@ -77,10 +77,9 @@ namespace client {
         }
 
         /// @brief Deleted assignment operator.
-        NetworkGestureRemoteHandler &
-        operator=(NetworkGestureRemoteHandler const &) = delete;
+        GestureRemoteHandler &operator=(GestureRemoteHandler const &) = delete;
 
-        virtual ~NetworkGestureRemoteHandler() {
+        virtual ~GestureRemoteHandler() {
             /// @todo do we need to unregister?
         }
 
@@ -151,7 +150,7 @@ namespace client {
         auto const &devElt = source.getDeviceElement();
 
         /// @todo find out why make_shared causes a crash here
-        ret.reset(new NetworkGestureRemoteHandler(
+        ret.reset(new GestureRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(),
             source.getSensorNumberAsChannelCount(), ifaces));
         return ret;

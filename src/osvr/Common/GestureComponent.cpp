@@ -111,8 +111,8 @@ namespace common {
         : m_numSensor(numChan) {
 
         // populate the gesture map
-        m_gestureNameMap.registerStringID(OSVR_GESTURE_SWIP_LEFT);
-        m_gestureNameMap.registerStringID(OSVR_GESTURE_SWIP_RIGHT);
+        m_gestureNameMap.registerStringID(OSVR_GESTURE_SWIPE_LEFT);
+        m_gestureNameMap.registerStringID(OSVR_GESTURE_SWIPE_RIGHT);
         m_gestureNameMap.registerStringID(OSVR_GESTURE_SCROLL_UP);
         m_gestureNameMap.registerStringID(OSVR_GESTURE_SCROLL_DOWN);
         m_gestureNameMap.registerStringID(OSVR_GESTURE_SINGLE_TAP);
