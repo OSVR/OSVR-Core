@@ -33,6 +33,8 @@ if(BUILD_CLIENT_APPS)
         boost_program_options)
     set_target_properties(osvr_reset_yaw PROPERTIES
         FOLDER "OSVR Stock Applications")
+    install(TARGETS osvr_reset_yaw
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endif()
 
 if(BUILD_SERVER_EXAMPLES)
