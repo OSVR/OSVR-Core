@@ -25,8 +25,6 @@
 
 // Internal Includes
 #include "ClientMainloopThread.h"
-#include "RecomposeTransform.h"
-#include "WrapRoute.h"
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
@@ -35,6 +33,8 @@
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/JSONHelpers.h>
 #include <osvr/Common/AliasProcessor.h>
+#include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/GeneralizedTransform.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/UniquePtr.h>
 
@@ -139,22 +139,23 @@ int main(int argc, char *argv[]) {
         // entry that has our flag key in it.  Then replace the
         // original source tree with the cleaned tree.  Send this
         // cleaned alias back to the server.
-        Json::Value origTransforms = osvr::common::jsonParse(elt->getSource());
-        if (origTransforms.isNull()) {
-            cerr << "Couldn't parse the source!" << endl;
+        osvr::common::ParsedAlias origAlias{elt->getSource()};
+        if (!origAlias.isValid()) {
+            cerr << "Couldn't parse the alias!" << endl;
             return -1;
         }
-        cout << "Original transform: " << origTransforms.toStyledString() << "\n"
+        cout << "Original transform: "
+             << origAlias.getAliasValue().toStyledString() << "\n" << endl;
+        osvr::common::GeneralizedTransform xforms{origAlias.getAliasValue()};
+        osvr::common::remove_if(xforms, [](Json::Value const &current) {
+            return current.isMember(FLAG_KEY) && current[FLAG_KEY].isBool() &&
+                   current[FLAG_KEY].asBool();
+        });
+        cout << "Cleaned transform: "
+             << xforms.get(origAlias.getLeaf()).toStyledString() << "\n"
              << endl;
-
-        Json::Value cleanTransforms =
-            remove_levels_if(origTransforms, [](Json::Value const &current) {
-                return current.isMember(FLAG_KEY) &&
-                       current[FLAG_KEY].isBool() && current[FLAG_KEY].asBool();
-            });
-        cout << "Cleaned transform: " << cleanTransforms.toStyledString() << "\n"
-             << endl;
-        elt->setSource(osvr::common::jsonToCompactString(cleanTransforms));
+        elt->setSource(
+            osvr::common::jsonToCompactString(xforms.get(origAlias.getLeaf())));
         ctx.get()->sendRoute(createJSONAlias(path, *elt));
 
         cout << "Sent cleaned transform, starting again and waiting a few "
@@ -195,10 +196,12 @@ int main(int argc, char *argv[]) {
             newLayer["postrotate"]["radians"] = -yaw;
             newLayer["postrotate"]["axis"] = "y";
             newLayer[FLAG_KEY] = true;
-            newLayer[osvr::common::routing_keys::child()] = cleanTransforms;
-            cout << "New source: " << newLayer.toStyledString() << endl;
+            xforms.wrap(newLayer);
+            cout << "New source: "
+                 << xforms.get(origAlias.getLeaf()).toStyledString() << endl;
 
-            elt->setSource(osvr::common::jsonToCompactString(newLayer));
+            elt->setSource(osvr::common::jsonToCompactString(
+                xforms.get(origAlias.getLeaf())));
             ctx.get()->sendRoute(createJSONAlias(path, *elt));
             boost::this_thread::sleep(SETTLE_TIME / 2);
         }
