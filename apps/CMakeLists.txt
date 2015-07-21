@@ -22,8 +22,7 @@ if(BUILD_CLIENT_APPS)
     add_executable(osvr_reset_yaw
         osvr_reset_yaw.cpp
         ClientMainloop.h
-        ClientMainloopThread.h
-        RecomposeTransform.h)
+        ClientMainloopThread.h)
     target_link_libraries(osvr_reset_yaw
         jsoncpp_lib
         osvrClientKitCpp
