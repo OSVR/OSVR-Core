@@ -13,6 +13,7 @@ configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/Config
 
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
+    "${HEADER_LOCATION}/AliasProcessor.h"
     "${HEADER_LOCATION}/AlignmentPadding.h"
     "${HEADER_LOCATION}/ApplyPathNodeVisitor.h"
     "${HEADER_LOCATION}/BaseDevice.h"
@@ -39,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/DirectionComponent.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/EyeTrackerComponent.h"
+    "${HEADER_LOCATION}/GeneralizedTransform.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/IntegerByteSwap.h"
@@ -47,6 +49,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceState.h"
     "${HEADER_LOCATION}/IPCRingBuffer.h"
     "${HEADER_LOCATION}/JSONEigen.h"
+    "${HEADER_LOCATION}/JSONHelpers.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Location2DComponent.h"
@@ -66,7 +69,6 @@ set(API
     "${HEADER_LOCATION}/PathTreeFull.h"
     "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
-    "${HEADER_LOCATION}/ProcessAliasesFromJSON.h"
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
@@ -93,6 +95,7 @@ set(API
 
 set(SOURCE
     AddDevice.cpp
+    AliasProcessor.cpp
     BaseDevice.cpp
     ClientContext.cpp
     ClientInterface.cpp
@@ -104,7 +107,8 @@ set(SOURCE
     DeviceWrapper.cpp
     DeviceWrapper.h
     DirectionComponent.cpp
-    EyeTrackerComponent.cpp    
+    EyeTrackerComponent.cpp
+    GeneralizedTransform.cpp
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
@@ -128,7 +132,6 @@ set(SOURCE
     PathParseAndRetrieve.h
     PathTree.cpp
     PathTreeSerialization.cpp
-    ProcessAliasesFromJSON.cpp
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp

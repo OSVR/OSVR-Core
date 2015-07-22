@@ -45,7 +45,7 @@ namespace common {
         ParsedAlias(Json::Value src);
 
         /// @brief Did the alias parse in a valid way?
-        bool isValid() const;
+        OSVR_COMMON_EXPORT bool isValid() const;
 
         /// @brief Is this a simple (string-only, no transform) alias?
         OSVR_COMMON_EXPORT bool isSimple() const;
@@ -61,7 +61,7 @@ namespace common {
 
         /// @brief Gets a copy of the normalized version of the alias as a
         /// Json::Value
-        Json::Value getAliasValue() const;
+        OSVR_COMMON_EXPORT Json::Value getAliasValue() const;
 
       private:
         void m_parse(std::string const &src);

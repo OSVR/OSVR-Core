@@ -29,6 +29,7 @@
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathNode_fwd.h>
 #include <osvr/Common/PathElementTypes_fwd.h>
+#include <osvr/Common/GeneralizedTransform.h>
 #include <osvr/Util/ChannelCountC.h>
 
 // Library/third-party includes
@@ -59,7 +60,7 @@ namespace common {
 
         void setSensor(PathNode &sensor);
 
-        void setTransform(std::string const &transform);
+        void nestTransform(Json::Value const &transform);
 
         PathNode *getDevice() const;
 
@@ -78,14 +79,15 @@ namespace common {
         OSVR_COMMON_EXPORT boost::optional<OSVR_ChannelCount>
         getSensorNumberAsChannelCount() const;
 
-        OSVR_COMMON_EXPORT std::string getTransform() const;
+        OSVR_COMMON_EXPORT Json::Value getTransformJson() const;
         OSVR_COMMON_EXPORT bool hasTransform() const;
 
       private:
+        std::string m_getPath() const;
         PathNode *m_device;
         PathNode *m_interface;
         PathNode *m_sensor;
-        std::string m_transform;
+        GeneralizedTransform m_transform;
     };
 } // namespace common
 } // namespace osvr

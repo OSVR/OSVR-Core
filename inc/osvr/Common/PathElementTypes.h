@@ -181,7 +181,7 @@ namespace common {
             /// transforms.
             /// @todo support relative paths - either here or at a different
             /// level
-            void setSource(std::string const &source);
+            OSVR_COMMON_EXPORT void setSource(std::string const &source);
 
             /// @brief Get the source of data for this alias
             OSVR_COMMON_EXPORT std::string &getSource();

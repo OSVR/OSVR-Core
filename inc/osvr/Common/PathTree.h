@@ -103,6 +103,8 @@ namespace common {
     /// and use the given node as a entry point into the tree, and add an
     /// aliases based on that route.
     ///
+    /// Can also handle normal alias descriptions without complaint.
+    ///
     /// @return true if the node was changed
     OSVR_COMMON_EXPORT bool
     addAliasFromRoute(PathNode &node, std::string const &route,

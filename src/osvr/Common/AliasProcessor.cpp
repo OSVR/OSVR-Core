@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ProcessAliasesFromJSON.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathElementTools.h>
@@ -31,6 +31,7 @@
 #include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/RoutingKeys.h>
 
 #include "PathParseAndRetrieve.h"
 
@@ -75,11 +76,23 @@ namespace common {
                 functor(node, relPath);
             });
         }
+
+        /// @brief Predicate that checks if this path contains a wildcard.
+        inline bool doesPathContainWildcard(std::string const &path) {
+            return boost::algorithm::ends_with(path, WILDCARD_SUFFIX);
+        }
+
+        /// @brief Implementation functor for AliasProcessor.
         class AutomaticAliases : boost::noncopyable {
           public:
-            AutomaticAliases(PathNode &devNode, PathProcessOptions opts)
+            AutomaticAliases(PathNode &devNode,
+                             detail::AliasProcessorOptions opts)
                 : m_devNode(devNode), m_opts(opts) {}
 
+            /// @brief Function call operator: pass any Json::Value. If it is an
+            /// object with aliases, or an array of objects with aliases, it
+            /// will handle them.
+            /// @return whether any changes were made to the tree
             util::Flag operator()(Json::Value const &val) {
                 if (val.isArray()) {
                     m_processArray(val);
@@ -90,6 +103,8 @@ namespace common {
             }
 
           private:
+            /// @brief Takes in an array of objects, and passes them each, in
+            /// order, to m_processObject()
             void m_processArray(Json::Value const &arr) {
                 for (auto const &elt : arr) {
                     if (elt.isObject()) {
@@ -97,6 +112,11 @@ namespace common {
                     }
                 }
             }
+
+            /// @brief Takes in an object, retrieves the priority specified by
+            /// the PRIORITY_KEY, if any, then passes all other entries in
+            /// the object to m_processEntry() along with the default or
+            /// retrieved priority.
             void m_processObject(Json::Value const &obj) {
                 AliasPriority priority{m_opts.defaultPriority};
                 if (obj.isMember(PRIORITY_KEY)) {
@@ -110,6 +130,10 @@ namespace common {
                     m_processEntry(key, obj[key], priority);
                 }
             }
+
+            /// @brief Process a name:value entry in an alias description
+            /// object, with the given priority. Calls m_processSingleEntry() to
+            /// actually complete its work.
             void m_processEntry(std::string const &path,
                                 Json::Value const &source,
                                 AliasPriority priority) {
@@ -119,15 +143,13 @@ namespace common {
                     return;
                 }
                 ParsedAlias parsedSource(source);
-                if (!m_opts.permitRelativeSource &&
-                    !isPathAbsolute(parsedSource.getLeaf())) {
+                auto leaf = parsedSource.getLeaf();
+                if (!m_opts.permitRelativeSource && !isPathAbsolute(leaf)) {
                     OSVR_DEV_VERBOSE(
-                        "Got a non-permitted relative source leaf: "
-                        << parsedSource.getLeaf());
+                        "Got a non-permitted relative source leaf: " << leaf);
                     return;
                 }
-                if (!boost::algorithm::ends_with(parsedSource.getLeaf(),
-                                                 WILDCARD_SUFFIX)) {
+                if (!doesPathContainWildcard(leaf)) {
                     /// Handle the simple ones first.
                     m_processSingleEntry(path, parsedSource.getAlias(),
                                          priority);
@@ -135,9 +157,15 @@ namespace common {
                 }
 
                 /// OK, handle wildcard here
+                if (!m_opts.permitWildcard) {
+                    OSVR_DEV_VERBOSE(
+                        "Got a non-permitted wildcard in the source leaf of: "
+                        << parsedSource.getAlias());
+                }
+
                 if (parsedSource.isSimple()) {
                     applyWildcard(
-                        m_devNode, parsedSource.getLeaf(),
+                        m_devNode, leaf,
                         [&](PathNode &node, std::string const &relPath) {
                             m_processSingleEntry(path + getPathSeparator() +
                                                      relPath,
@@ -146,15 +174,16 @@ namespace common {
                     return;
                 }
 
-                applyWildcard(m_devNode, parsedSource.getLeaf(),
-                              [&](PathNode &node, std::string const &relPath) {
-                                  parsedSource.setLeaf(getFullPath(node));
-                                  m_processSingleEntry(
-                                      path + getPathSeparator() + relPath,
-                                      parsedSource.getAlias(), priority);
-                              });
+                applyWildcard(m_devNode, leaf, [&](PathNode &node,
+                                                   std::string const &relPath) {
+                    parsedSource.setLeaf(getFullPath(node));
+                    m_processSingleEntry(path + getPathSeparator() + relPath,
+                                         parsedSource.getAlias(), priority);
+                });
             }
 
+            /// @brief Called for each individual alias path to be processed for
+            /// (and potentially added to/updated in) the path tree.
             void m_processSingleEntry(std::string const &path,
                                       std::string const &source,
                                       AliasPriority priority) {
@@ -163,16 +192,53 @@ namespace common {
             }
 
             PathNode &m_devNode;
-            PathProcessOptions m_opts;
+            detail::AliasProcessorOptions m_opts;
             util::Flag m_flag;
         };
 
     } // namespace
 
-    bool processAliasesFromJSON(PathNode &node, Json::Value const &val,
-                                PathProcessOptions opts) {
-        AutomaticAliases processor{node, opts};
+    bool AliasProcessor::process(PathNode &node, Json::Value const &val) {
+        AutomaticAliases processor{node, m_opts};
         return processor(val).get();
+    }
+
+    Json::Value createJSONAlias(std::string const &path,
+                                Json::Value const &destination) {
+        Json::Value ret{Json::nullValue};
+        if (path.empty()) {
+            return ret;
+        }
+        if (destination.isNull()) {
+            return ret;
+        }
+        ret = Json::objectValue;
+        ret[path] = destination;
+        return ret;
+    }
+
+    Json::Value convertRouteToAlias(Json::Value const &val) {
+        Json::Value ret{val};
+        if (!val.isObject()) {
+            // Can't be a route if it's not an object.
+            return ret;
+        }
+        if (val.isMember(routing_keys::destination()) &&
+            val.isMember(routing_keys::source())) {
+            // By golly this is an old-fashioned route.
+            ret = createJSONAlias(val[routing_keys::destination()].asString(),
+                                  val[routing_keys::source()]);
+        }
+        return ret;
+    }
+
+    Json::Value applyPriorityToAlias(Json::Value const &alias,
+                                     AliasPriority priority) {
+        Json::Value ret{alias};
+        if (ret.isObject()) {
+            ret[PRIORITY_KEY] = priority;
+        }
+        return ret;
     }
 } // namespace common
 } // namespace osvr

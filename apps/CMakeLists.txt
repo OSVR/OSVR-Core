@@ -18,6 +18,23 @@ if(BUILD_CLIENT_APPS)
         FOLDER "OSVR Stock Applications")
     install(TARGETS osvr_print_tree
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+
+    add_executable(osvr_reset_yaw
+        osvr_reset_yaw.cpp
+        ClientMainloop.h
+        ClientMainloopThread.h)
+    target_link_libraries(osvr_reset_yaw
+        jsoncpp_lib
+        osvrClientKitCpp
+        osvrClient
+        osvrCommon
+        eigen-headers
+        boost_thread
+        boost_program_options)
+    set_target_properties(osvr_reset_yaw PROPERTIES
+        FOLDER "OSVR Stock Applications")
+    install(TARGETS osvr_reset_yaw
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endif()
 
 if(BUILD_SERVER_EXAMPLES)
@@ -47,23 +64,6 @@ if(BUILD_EXPERIMENTAL_APPS)
         boost_thread
         boost_program_options)
     set_target_properties(osvr_calibrate PROPERTIES
-        FOLDER "OSVR Experimental Applications")
-
-    add_executable(osvr_reset_yaw
-        osvr_reset_yaw.cpp
-        ClientMainloop.h
-        ClientMainloopThread.h
-        RecomposeTransform.h
-        WrapRoute.h)
-    target_link_libraries(osvr_reset_yaw
-        jsoncpp_lib
-        osvrClientKitCpp
-        osvrClient
-        osvrCommon
-        eigen-headers
-        boost_thread
-        boost_program_options)
-    set_target_properties(osvr_reset_yaw PROPERTIES
         FOLDER "OSVR Experimental Applications")
 
     add_executable(diagnose-rotation
