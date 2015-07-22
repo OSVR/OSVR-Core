@@ -97,7 +97,7 @@ namespace common {
             /// @todo update the element with the normalized source?
             if (!parsed.isSimple()) {
                 // Not simple: store the full string as a transform.
-                m_source.setTransform(parsed.getAlias());
+                m_source.nestTransform(parsed.getAliasValue());
             }
             m_recurse(parsed.getLeaf());
         }

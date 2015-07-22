@@ -160,12 +160,8 @@ namespace client {
 
         common::Transform xform{};
         if (source.hasTransform()) {
-            Json::Value val;
-            Json::Reader reader;
-            if (reader.parse(source.getTransform(), val)) {
-                common::JSONTransformVisitor xformParse(val);
-                xform = xformParse.getTransform();
-            }
+            common::JSONTransformVisitor xformParse(source.getTransformJson());
+            xform = xformParse.getTransform();
         }
 
         /// @todo find out why make_shared causes a crash here

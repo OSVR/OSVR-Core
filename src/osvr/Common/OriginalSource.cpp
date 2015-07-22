@@ -66,10 +66,8 @@ namespace common {
         m_sensor = &sensor;
     }
 
-    void OriginalSource::setTransform(std::string const &transform) {
-        BOOST_ASSERT_MSG(m_transform.empty(),
-                         "Transform should only be set once.");
-        m_transform = transform;
+    void OriginalSource::nestTransform(Json::Value const &transform) {
+        m_transform.nest(transform);
     }
 
     std::string OriginalSource::getDevicePath() const {
@@ -131,10 +129,33 @@ namespace common {
         return getSensorNumberHelper<OSVR_ChannelCount>(*this);
     }
 
-    std::string OriginalSource::getTransform() const { return m_transform; }
+    Json::Value OriginalSource::getTransformJson() const {
+        BOOST_ASSERT_MSG(isResolved(),
+                         "Only makes sense when called on a resolved source.");
+        return m_transform.get(m_getPath());
+    }
 
-    bool OriginalSource::hasTransform() const { return !m_transform.empty(); }
+    bool OriginalSource::hasTransform() const {
+        BOOST_ASSERT_MSG(isResolved(),
+                         "Only makes sense when called on a resolved source.");
+        return !m_transform.empty();
+    }
 
+    std::string OriginalSource::m_getPath() const {
+        BOOST_ASSERT_MSG(isResolved(),
+                         "Only makes sense when called on a resolved source.");
+        PathNode *node = getSensor();
+        if (!node) {
+            node = getInterface();
+        }
+        if (!node) {
+            node = getDevice();
+        }
+        if (node) {
+            return getFullPath(*node);
+        }
+        return std::string{};
+    }
     namespace {
         class DecomposeOriginalSource : public boost::static_visitor<>,
                                         boost::noncopyable {
