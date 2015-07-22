@@ -74,6 +74,7 @@ set(API
     "${HEADER_LOCATION}/TreeNode.h"
     "${HEADER_LOCATION}/TreeNode_fwd.h"
     "${HEADER_LOCATION}/TreeTraversalVisitor.h"
+    "${HEADER_LOCATION}/TypePack.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/Util.h"
     "${HEADER_LOCATION}/ValueOrRange.h"

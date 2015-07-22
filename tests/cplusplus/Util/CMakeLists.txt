@@ -1,3 +1,5 @@
-add_executable(TreeNode TreeNode.cpp)
-target_link_libraries(TreeNode osvrUtilCpp)
-setup_gtest(TreeNode)
+foreach(testname TreeNode TypePack)
+    add_executable(${testname} ${testname}.cpp)
+    target_link_libraries(${testname} osvrUtilCpp)
+    setup_gtest(${testname})
+endforeach()
