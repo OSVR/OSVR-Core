@@ -31,6 +31,7 @@ set(API
     "${HEADER_LOCATION}/BoostDeletable.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
+    "${HEADER_LOCATION}/ContainerWrapper.h"
     "${HEADER_LOCATION}/ChannelCountC.h"
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
