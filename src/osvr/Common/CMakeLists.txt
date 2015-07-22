@@ -40,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/DirectionComponent.h"
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/EyeTrackerComponent.h"
+    "${HEADER_LOCATION}/GeneralizedTransform.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${HEADER_LOCATION}/IntegerByteSwap.h"
@@ -107,6 +108,7 @@ set(SOURCE
     DeviceWrapper.h
     DirectionComponent.cpp
     EyeTrackerComponent.cpp
+    GeneralizedTransform.cpp
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
