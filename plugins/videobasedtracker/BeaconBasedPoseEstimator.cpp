@@ -45,8 +45,8 @@ namespace vbtracker {
         { 86.6, 2.65, 24.09 },
         { 85.5, -14.31, 13.89 },
         { 85.2, 19.68, 13.89 },
-        { 21, 51, 13.09 },
-        { -21, 51, 13.09 },
+        { 21, 51, 24.09 },  // Original spec was 13.09, new position works better
+        { -21, 51, 24.09 }, // Original spec was 13.09, new position works better
         { -84.2, 19.99, 13.89 },
         { -60.41, 47.55, 44.6 },
         { -80.42, 20.48, 42.9 },
@@ -165,7 +165,7 @@ namespace vbtracker {
     static const int OUTLIERS_PERMITTED = 2;
     /// We want at least five corresponding points (this is somewhat arbitrary,
     /// but must be at least 5 to allow for 2 outliers below).
-    static const int MIN_OBJECT_POINTS = OUTLIERS_PERMITTED + 3;
+    static const int MIN_OBJECT_POINTS = OUTLIERS_PERMITTED + 4;
 
     bool
     BeaconBasedPoseEstimator::EstimatePoseFromLeds(const LedGroup &leds,
@@ -211,11 +211,8 @@ namespace vbtracker {
         // mis-identified ones sometimes.
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, false, 100, 8.0f,
+            m_tvec, true, 5, 8.0f,
             static_cast<int>(objectPoints.size() - OUTLIERS_PERMITTED));
-
-        //    std::cout << "XXX tvec = " << m_tvec << std::endl;
-        //    std::cout << "XXX rvec = " << m_rvec << std::endl;
 
         //==========================================================================
         // Convert this into an OSVR representation of the transformation that
