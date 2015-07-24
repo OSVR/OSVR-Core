@@ -70,7 +70,7 @@ namespace vbtracker {
         // the darkest and brightest pixel in the image.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = 35;
+        double thresholdValue = 30;
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
@@ -236,6 +236,7 @@ namespace vbtracker {
                         // Show the blob image.
                         m_shownImage = &m_imageWithBlobs;
                         break;
+
                     case 'q':
                         // Indicate we want to quit.
                         done = true;
@@ -250,6 +251,7 @@ namespace vbtracker {
                         << m_pose.translation.data[1] << ", "
                         << m_pose.translation.data[2] << std::endl;
                 }
+
                 count = 0;
             }
 #endif
