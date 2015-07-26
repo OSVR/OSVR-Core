@@ -57,8 +57,12 @@ namespace util {
         namespace detail {
             template <typename... Ts> using size_impl = size_t_<sizeof...(Ts)>;
             template <typename... Ts> struct size;
+            // The following fails with clang due to a bug.
+            // <https://llvm.org/bugs/show_bug.cgi?id=14858>
+            //template <typename... Ts>
+            //struct size<list<Ts...>> : size_impl<Ts...> {};
             template <typename... Ts>
-            struct size<list<Ts...>> : size_impl<Ts...> {};
+            struct size<list<Ts...>> : size_t_<sizeof...(Ts)> {};
         } // namespace detail
 
         template <typename... Ts> using size = detail::size<coerce_list<Ts...>>;
