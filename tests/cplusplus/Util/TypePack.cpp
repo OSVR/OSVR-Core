@@ -31,6 +31,7 @@
 
 // Standard includes
 #include <type_traits>
+#include <string>
 #include <stdint.h>
 
 using std::is_same;
@@ -57,12 +58,15 @@ static_assert(is_same<mylist, tp::coerce_list<myelt1, myelt2, myelt3>>::value,
 TEST(TypePack, basicListStructure) {
     static_assert(is_same<tp::t_<mylist>, tp::t_<tp::list<mylist>>>::value,
                   "Unwrapping list of single list");
+    static_assert(
+        is_same<tp::t_<mylist>, tp::t_<tp::list<tp::list<mylist>>>>::value,
+        "Three-level unwrapping list of single list");
     static_assert(tp::size<mylist>::value == mylist_len, "correct length");
     static_assert(is_same<mylist, tp::t_<mylist>>::value,
                   "Result of list is list");
     static_assert(is_same<mylist, tp::coerce_list<mylist>>::value,
                   "Coerce list from list");
-    static_assert(is_same<mylist, tp::coerce_list<tp::list<mylist>>>::value,
+    static_assert(is_same<mylist, tp::coerce_list<tp::list<tp::list<mylist>>>>::value,
                   "Coerce list from double-wrapped list");
 }
 
@@ -201,16 +205,6 @@ TEST(TypePack, apply) {
     static_assert(
         tp::t_<tp::apply<tp::always<true_type>, int, char, float>>::value,
         "Applying always-true-type with 3 args");
-#if 0
-    static_assert(tp::apply_t<tp::always<true_type>>::value,
-                  "Applying always-true-type with no args");
-    static_assert(tp::apply_t<tp::always<true_type>, int>::value,
-                  "Applying always-true-type with 1 arg");
-    static_assert(tp::apply_t<tp::always<true_type>, int, char>::value,
-                  "Applying always-true-type with 2 args");
-    static_assert(tp::apply_t<tp::always<true_type>, int, char, float>::value,
-                  "Applying always-true-type with 3 args");
-#endif
 }
 
 TEST(TypePack, fold) {
