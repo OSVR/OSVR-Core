@@ -48,7 +48,11 @@ namespace util {
 
         template <typename T> using t_ = typename T::type;
 
-        template <typename... Ts> struct list { using type = list; };
+        namespace detail {
+            struct list_base_ {};
+        } // namespace detail
+
+        template <typename... Ts> struct list : detail::list_base_ { using type = list; };
         template <typename... Ts> struct list<list<Ts...>> : list<Ts...> {};
 
         /// @brief Will turn whatever is passed into it into the simplest list.
