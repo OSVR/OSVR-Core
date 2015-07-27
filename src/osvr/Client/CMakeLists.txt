@@ -31,6 +31,8 @@ set(SOURCE
     InterfaceTree.cpp
     Location2DRemoteFactory.cpp
     Location2DRemoteFactory.h
+    LocomotionRemoteFactory.cpp
+    LocomotionRemoteFactory.h
     PureClientContext.cpp
     PureClientContext.h
     RemoteHandler.cpp
