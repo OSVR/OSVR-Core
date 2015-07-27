@@ -52,8 +52,11 @@ namespace util {
             struct list_base_ {};
         } // namespace detail
 
-        template <typename... Ts> struct list : detail::list_base_ { using type = list; };
-        template <typename... Ts> struct list<list<Ts...>> : list<Ts...>::type {};
+        template <typename... Ts> struct list : detail::list_base_ {
+            using type = list;
+        };
+        template <typename... Ts>
+        struct list<list<Ts...>> : list<Ts...>::type {};
 
         /// @brief Will turn whatever is passed into it into the simplest list.
         template <typename... Ts> using coerce_list = t_<list<Ts...>>;
