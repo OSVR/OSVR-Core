@@ -59,12 +59,14 @@ namespace util {
         template <typename... Ts> using coerce_list = t_<list<Ts...>>;
 
         namespace detail {
-            template <typename... Ts> using size_impl = size_t_<sizeof...(Ts)>;
             template <typename... Ts> struct size;
+
             // The following fails with clang due to a bug.
             // <https://llvm.org/bugs/show_bug.cgi?id=14858>
-            //template <typename... Ts>
-            //struct size<list<Ts...>> : size_impl<Ts...> {};
+            // template <typename... Ts> using size_impl =
+            // size_t_<sizeof...(Ts)>;
+            // template <typename... Ts>
+            // struct size<list<Ts...>> : size_impl<Ts...> {};
             template <typename... Ts>
             struct size<list<Ts...>> : size_t_<sizeof...(Ts)> {};
         } // namespace detail
