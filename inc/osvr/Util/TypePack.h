@@ -337,10 +337,10 @@ namespace util {
             struct transform_<list<Ts...>, Fun> {
                 /// required for MSVC2013 to avoid "there are no parameter packs
                 /// available to expand"
-                template <typename T> struct apply_workaround {
-                    using type = typename apply<Fun, T>::type;
-                };
-                typedef list<typename apply_workaround<Ts>::type...> type;
+                template <typename T>
+                struct apply_workaround : apply<Fun, T>::type {};
+                typedef coerce_list<typename apply_workaround<Ts>::type...>
+                    type;
             };
         } // namespace detail
         template <typename List, typename Fun>
