@@ -1,0 +1,18 @@
+{
+    "deviceVendor": "Sensics",
+    "deviceName": "Gesture",
+    "author": "Georgiy Frolov georgiy@sensics.com",
+    "version": 1,
+    "lastModified": "",
+    "interfaces": {
+        "locomotion": {
+            "count": 1
+        }
+    },
+    "semantic": {
+        "$target": "locomotion/0"
+    },
+    "automaticAliases": {
+        "/me/feet/both": "semantic/"
+    }
+}

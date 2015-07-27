@@ -1,0 +1,17 @@
+{
+    "plugins": [
+        "com_osvr_example_Locomotion"
+    ],
+    "routes": [
+        {
+            "destination": "/me/feet/",
+            "source": {
+                "child": {
+                    "tracker": "/com_osvr_example_Locomotion/Locomotion",
+                    "sensor": 0
+                }
+            }
+        }
+    ],
+    "display": "displays/HMD.json"
+}
