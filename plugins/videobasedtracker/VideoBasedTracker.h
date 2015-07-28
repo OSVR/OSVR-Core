@@ -43,7 +43,7 @@
 
 // Define the constant below to provide debugging (window showing video and
 // behavior, printing tracked positions)
-#define VBHMD_DEBUG
+//#define VBHMD_DEBUG
 
 namespace osvr {
 namespace vbtracker {
