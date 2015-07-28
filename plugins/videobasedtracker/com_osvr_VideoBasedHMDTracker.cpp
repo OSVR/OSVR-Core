@@ -60,7 +60,7 @@
 
 // Define the constant below to print timing information (how many updates
 // per second we are getting).
-#define VBHMD_TIMING
+//#define VBHMD_TIMING
 
 // Define the constant below to set a directory to save the video frames that
 // are acquired
@@ -217,9 +217,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
             bool isOculusCamera = (width == 376) && (height == 480);
             if (isOculusCamera) {
                 m_type = OculusDK2;
-            }
-
-            else {
+            } else {
                 /// @todo Check to see if the resolution/name matches the OSVR
                 /// HDK camera
                 m_type = OSVRHDK;
@@ -227,12 +225,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
 #ifdef VBHMD_DEBUG
             std::cout << "Got image from camera of size " << width << "x" << height
                       << std::endl;
+#endif
             if (m_type == OculusDK2) {
                 std::cout << "Is Oculus camera, reformatting to mono"
                           << std::endl;
                 m_dk2.reset(new osvr::oculus_dk2::Oculus_DK2_HID());
             }
-#endif
         }
 
         //===============================================
@@ -473,7 +471,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     enum { Unknown, OSVRHDK, OculusDK2, Fake } m_type;
 
     // In case we are using a DK2, we need a pointer to one.
-    std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2;
+    std::unique_ptr<osvr::oculus_dk2::Oculus_DK2_HID> m_dk2 = nullptr;
 };
 
 class HardwareDetection {
