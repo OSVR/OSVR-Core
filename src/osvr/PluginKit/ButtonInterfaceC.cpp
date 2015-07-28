@@ -27,6 +27,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/ButtonServerInterface.h>
 #include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/PointerWrapper.h>
@@ -37,27 +38,26 @@
 // Standard includes
 // - none
 
-struct OSVR_ButtonDeviceInterfaceObject
-    : public osvr::util::PointerWrapper<
-          osvr::connection::ButtonServerInterface> {};
+struct OSVR_ButtonDeviceInterfaceObject : public osvr::connection::DeviceInterfaceBase {
+    osvr::util::PointerWrapper<osvr::connection::ButtonServerInterface> button;
+};
 
 OSVR_ReturnCode
-osvrDeviceButtonConfigure(OSVR_IN_PTR OSVR_DeviceInitOptions opts,
+osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                           OSVR_OUT_PTR OSVR_ButtonDeviceInterface *iface,
                           OSVR_IN OSVR_ChannelCount numChan) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonConfigure", iface);
-    OSVR_ButtonDeviceInterface ifaceObj = *iface =
-        opts->getContext()->registerDataWithGenericDelete(
-            new OSVR_ButtonDeviceInterfaceObject);
-    opts->setButtons(numChan, ifaceObj->getContainerLocation());
-
+    OSVR_ButtonDeviceInterface ifaceObj =
+        opts->makeInterfaceObject<OSVR_ButtonDeviceInterfaceObject>();
+    *iface = ifaceObj;
+    opts->setButtons(numChan, ifaceObj->button);
     return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode osvrDeviceButtonSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
                                          OSVR_IN_PTR OSVR_ButtonDeviceInterface
-                                             iface,
+                                         iface,
                                          OSVR_IN OSVR_ButtonState val,
                                          OSVR_IN OSVR_ChannelCount chan) {
     OSVR_TimeValue now;
@@ -66,26 +66,24 @@ OSVR_ReturnCode osvrDeviceButtonSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode osvrDeviceButtonSetValueTimestamped(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
-    OSVR_IN_PTR OSVR_ButtonDeviceInterface iface, OSVR_IN OSVR_ButtonState val,
-    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_DeviceToken, OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
+    OSVR_IN OSVR_ButtonState val, OSVR_IN OSVR_ChannelCount chan,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValueTimestamped", dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValueTimestamped",
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValueTimestamped",
                                     timestamp);
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        bool sendResult = (*iface)->setValue(val, chan, *timestamp);
+        bool sendResult = iface->button->setValue(val, chan, *timestamp);
         return sendResult ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
     }
 
     return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode osvrDeviceButtonSetValues(OSVR_IN_PTR OSVR_DeviceToken dev,
+OSVR_ReturnCode osvrDeviceButtonSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
                                           OSVR_IN_PTR OSVR_ButtonDeviceInterface
                                               iface,
                                           OSVR_IN_PTR OSVR_ButtonState val[],
@@ -96,20 +94,17 @@ OSVR_ReturnCode osvrDeviceButtonSetValues(OSVR_IN_PTR OSVR_DeviceToken dev,
 }
 
 OSVR_ReturnCode osvrDeviceButtonSetValuesTimestamped(
-    OSVR_IN_PTR OSVR_DeviceToken dev,
-    OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
+    OSVR_IN_PTR OSVR_DeviceToken, OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
     OSVR_IN_PTR OSVR_ButtonState val[], OSVR_IN OSVR_ChannelCount chans,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
-    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValuesTimestamped",
-                                    dev);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValuesTimestamped",
                                     iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceButtonSetValuesTimestamped",
                                     timestamp);
 
-    auto guard = dev->getSendGuard();
+    auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        (*iface)->setValues(val, chans, *timestamp);
+        iface->button->setValues(val, chans, *timestamp);
         return OSVR_RETURN_SUCCESS;
     }
     return OSVR_RETURN_FAILURE;
