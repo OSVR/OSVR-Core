@@ -1,0 +1,29 @@
+{
+  "externalDevices": {
+    "/AnalogFlyDevice": {
+      "deviceName": "Tracker0",
+      "server": "localhost:3884",
+      "descriptor": {
+        "interfaces": {
+          "tracker": {}
+        }
+      }
+    }
+  },
+  "aliases": {
+    "/me/head": {
+      "rotate": {
+        "axis": "x",
+        "degrees": 0
+      },
+      "child": {
+        "changeBasis": {
+          "x": "x",
+          "y": "y",
+          "z": "z"
+        },
+        "child": "/AnalogFlyDevice/tracker/0"
+      }
+    }
+  }
+}
