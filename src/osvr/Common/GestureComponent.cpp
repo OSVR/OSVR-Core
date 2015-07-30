@@ -147,6 +147,21 @@ namespace common {
                                   timestamp);
     }
 
+	void GestureComponent::sendGestureData(
+		OSVR_GestureState gestureState, OSVR_GestureID gestureID,
+		OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp){
+
+		Buffer<> buf;
+
+		messages::GestureRecord::MessageSerialization msg(gestureState,
+			gestureID, sensor);
+		serialize(buf, msg);
+
+		m_getParent().packMessage(buf, gestureRecord.getMessageType(),
+			timestamp);
+
+	}
+
     void GestureComponent::m_sendGestureMap(OSVR_TimeValue const &timestamp) {
 
         Buffer<> buf;
@@ -223,6 +238,22 @@ namespace common {
         m_getParent().registerMessageType(gestureRecord);
         m_getParent().registerMessageType(gestureMapRecord);
     }
+
+	OSVR_GestureID GestureComponent::getGestureID(const char *gestureName){
+
+		OSVR_GestureID gestureID = m_gestureNameMap.getStringID(gestureName);
+		
+		OSVR_TimeValue now;
+		osvrTimeValueGetNow(&now);
+
+		// if we just inserted new gesture ID then send gesture map
+		if (m_gestureNameMap.isUpdateAvailable()) {
+			m_sendGestureMap(now);
+		}
+
+		return gestureID;
+	}
+
 
 } // namespace common
 } // namespace osvr

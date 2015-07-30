@@ -94,6 +94,10 @@ namespace common {
             OSVR_GestureState gestureState, std::string const &gestureName,
             OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
 
+		OSVR_COMMON_EXPORT void sendGestureData(
+			OSVR_GestureState gestureState, OSVR_GestureID gestureID,
+			OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
+
         void m_sendGestureMap(OSVR_TimeValue const &timestamp);
 
         typedef std::function<void(
@@ -105,6 +109,8 @@ namespace common {
 
         OSVR_COMMON_EXPORT void registerGestureHandler(GestureHandler cb);
         OSVR_COMMON_EXPORT void registerGestureMapHandler(GestureMapHandler cb);
+
+		OSVR_COMMON_EXPORT OSVR_GestureID getGestureID(const char *gestureName);
 
       private:
         GestureComponent(OSVR_ChannelCount numChan);
