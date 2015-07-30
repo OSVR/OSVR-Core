@@ -73,6 +73,7 @@
 //#define VBHMD_FAKE_IMAGES "C:/tmp/HDK_far"
 //#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 //#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
+//#define VBHMD_FAKE_IMAGES "C:/tmp/0727_1m"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -89,13 +90,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
 #endif
 #endif
     {
-#ifdef VBHMD_USE_DIRECTSHOW
-        // Read a frame from the camera, so that we get all of the info we
-        // need and start the filter graph running
-        /// @Todo Move this into the device itself, so it is ready to go
-        // as soon as it is opened.
-        m_camera.read_image_to_memory();
-#endif
         // Initialize things from parameters and from defaults.  Do it here
         // rather than
         // in an initialization list so that we're independent of member order
@@ -194,12 +188,24 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         m_vbtracker.addSensor(
             osvr::vbtracker::createHDKLedIdentifier(0),
-            m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0);
+            m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+            4, 2);
+        // There are sometimes only four beacons on the back unit (two of
+        // the LEDs are disabled), so we let things work with just those.
         m_vbtracker.addSensor(
             osvr::vbtracker::createHDKLedIdentifier(1),
-            m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1);
+            m, d, osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+            4, 0);
 
 #else
+#ifdef VBHMD_USE_DIRECTSHOW
+        // Read a frame from the camera, so that we get all of the info we
+        // need and start the filter graph running
+        /// @Todo Move this into the device itself, so it is ready to go
+        // as soon as it is opened.
+        m_camera.read_image_to_memory();
+#endif
+
         if (m_camera.isOpened()) {
 #ifdef VBHMD_USE_DIRECTSHOW
             int minx, miny, maxx, maxy;
@@ -333,7 +339,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         // Sleep 1/120th of a second, to simulate a reasonable
         // frame rate.
-        vrpn_SleepMsecs(1000 / 120);
+//        vrpn_SleepMsecs(1000 / 120);
 #else
         if (!m_camera.isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
@@ -370,6 +376,22 @@ class VideoBasedHMDTracker : boost::noncopyable {
         }
 #endif
 
+#ifdef VBHMD_SAVE_IMAGES
+        // If we're supposed to save images, make file names that match the
+        // format we need to read them back in again and save the images.
+        std::ostringstream fileName;
+        fileName << VBHMD_SAVE_IMAGES << "/";
+        fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
+        fileName << ".tif";
+        if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
+            std::cerr << "Could not write image to " << fileName.str()
+                      << std::endl;
+        }
+
+#endif
+
+#endif
+
 #ifdef VBHMD_TIMING
         //==================================================================
         // Time our performance
@@ -386,23 +408,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 << count/duration << " hz" << std::endl;
             count = 0;
             last = now;
-    }
-#endif
-
-#ifdef VBHMD_SAVE_IMAGES
-        // If we're supposed to save images, make file names that match the
-        // format we need to read them back in again and save the images.
-        std::ostringstream fileName;
-        fileName << VBHMD_SAVE_IMAGES << "/";
-        fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
-        fileName << ".tif";
-        if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
-            std::cerr << "Could not write image to " << fileName.str()
-                      << std::endl;
         }
-
-#endif
-
 #endif
 
         //==================================================================
