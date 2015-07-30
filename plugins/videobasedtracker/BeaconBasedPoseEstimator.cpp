@@ -88,11 +88,14 @@ namespace vbtracker {
 
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
-        const DoubleVecVec &beacons) {
+        const DoubleVecVec &beacons, size_t requiredInliers,
+        size_t permittedOutliers) {
         SetBeacons(beacons);
         SetCameraMatrix(cameraMatrix);
         SetDistCoeffs(distCoeffs);
         m_gotPose = false;
+        m_requiredInliers = requiredInliers;
+        m_permittedOutliers = permittedOutliers;
     }
 
     bool BeaconBasedPoseEstimator::SetBeacons(const DoubleVecVec &beacons) {
@@ -162,11 +165,6 @@ namespace vbtracker {
         return true;
     }
 
-    static const int OUTLIERS_PERMITTED = 2;
-    /// We want at least five corresponding points (this is somewhat arbitrary,
-    /// but must be at least 5 to allow for 2 outliers below).
-    static const int MIN_OBJECT_POINTS = OUTLIERS_PERMITTED + 4;
-
     bool
     BeaconBasedPoseEstimator::EstimatePoseFromLeds(const LedGroup &leds,
                                                    OSVR_PoseState &outPose) {
@@ -200,19 +198,19 @@ namespace vbtracker {
         }
 
         // Make sure we have enough points to do our estimation.
-        if (objectPoints.size() < MIN_OBJECT_POINTS) {
+        if (objectPoints.size() < m_permittedOutliers + m_requiredInliers) {
             return false;
         }
 
         // Produce an estimate of the translation and rotation needed to take
         // points from model space into camera space.  We allow for at most
-        // OUTLIERS_PERMITTED outliers. Even in simulation data, we sometimes
+        // m_permittedOutliers outliers. Even in simulation data, we sometimes
         // find duplicate IDs for LEDs, indicating that we are getting
         // mis-identified ones sometimes.
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
             m_tvec, true, 5, 8.0f,
-            static_cast<int>(objectPoints.size() - OUTLIERS_PERMITTED));
+            static_cast<int>(objectPoints.size() - m_permittedOutliers));
 
         //==========================================================================
         // Convert this into an OSVR representation of the transformation that

@@ -61,13 +61,17 @@ namespace vbtracker {
         /// format suitable to send to OpenCV. See
         /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
         /// for details on these formats.
+        /// @param cameraMatrix 3x3 camera matrix for OpenCV
+        /// @param distCoeffs Distortion coefficients for OpenCV
+        /// @param beacons 3D beacon locations
+        /// @param requiredInliers How many "good" points must be available
+        /// @param permittedOutliers How many additional "bad" points we can have
         BeaconBasedPoseEstimator(
-            const DoubleVecVec &cameraMatrix //< 3x3 camera matrix for OpenCV
-            ,
-            const std::vector<double> &
-                distCoeffs //< Distortion coefficients for OpenCV
-            ,
-            const DoubleVecVec &beacons //< 3D beacon locations
+            const DoubleVecVec &cameraMatrix
+            , const std::vector<double> &distCoeffs
+            , const DoubleVecVec &beacons
+            , size_t requiredInliers = 4
+            , size_t permittedOutliers = 2
             );
 
         /// @brief Produce an estimate of the pose of the model-space origin in
@@ -99,6 +103,8 @@ namespace vbtracker {
         std::vector<cv::Point3f> m_beacons; //< 3D location of LED beacons
         cv::Mat m_cameraMatrix;             //< 3x3 camera matrix
         cv::Mat m_distCoeffs;               //< Distortion coefficients
+        size_t m_requiredInliers;           //< How many inliers do we require?
+        size_t m_permittedOutliers;         //< How many outliers do we allow?
 
         /// @name Pose cache
         /// @brief Stores the most-recent solution, in case we need it again
