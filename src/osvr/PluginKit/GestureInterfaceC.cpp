@@ -60,8 +60,35 @@ osvrDeviceGestureConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     return OSVR_RETURN_SUCCESS;
 }
 
+void
+osvrDeviceGestureGetID(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+OSVR_IN_PTR const char *gestureName,
+OSVR_IN_PTR OSVR_GestureID *gestureID){
+
+	*gestureID = iface->gesture->getGestureID(gestureName);
+
+}
+
 OSVR_ReturnCode
 osvrDeviceGestureReportData(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+OSVR_IN OSVR_GestureID gestureID,
+OSVR_IN_PTR OSVR_GestureState gestureState,
+OSVR_IN OSVR_ChannelCount sensor,
+OSVR_IN_PTR OSVR_TimeValue const *timestamp){
+
+	auto guard = iface->getSendGuard();
+	if (guard->lock()) {
+		iface->gesture->sendGestureData(gestureState, gestureID, sensor,
+			*timestamp);
+		return OSVR_RETURN_SUCCESS;
+	}
+
+	return OSVR_RETURN_FAILURE;
+
+}
+
+OSVR_ReturnCode
+osvrDeviceGestureReportDataWithName(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
                             OSVR_IN_PTR const char *gestureName,
                             OSVR_IN_PTR OSVR_GestureState gestureState,
                             OSVR_IN OSVR_ChannelCount sensor,

@@ -59,8 +59,36 @@ osvrDeviceGestureConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                            OSVR_IN OSVR_ChannelCount numSensors
                                OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
 
+/** @brief Obtain an ID for a given gesture name
+@param iface GestureInterface
+@param gestureName String name of gesture
+@param gestureID pointer to an id variable
+*/
+OSVR_PLUGINKIT_EXPORT
+void
+osvrDeviceGestureGetID(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+                              OSVR_IN_PTR const char *gestureName,
+                              OSVR_IN_PTR OSVR_GestureID *gestureID)
+    OSVR_FUNC_NONNULL((1, 2));
+
 /** @brief Report data for a specific sensor.
-@param dev Device token
+@param iface Gesture interface
+@param gestureID ID of the gesture corresponding to specific name
+@param gestureState Current state of gesture (In process vs Completed)
+@param sensor Sensor number
+@param timestamp Timestamp correlating to Gesture data.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode
+osvrDeviceGestureReportData(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+                            OSVR_IN OSVR_GestureID gestureID,
+                            OSVR_IN_PTR OSVR_GestureState gestureState,
+                            OSVR_IN OSVR_ChannelCount sensor,
+                            OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 5));
+
+
+/** @brief Report data for a specific sensor.
 @param iface Gesture interface
 @param gestureName String name of gesture
 @param gestureState Current state of gesture (In process vs Completed)
@@ -69,12 +97,16 @@ osvrDeviceGestureConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
-osvrDeviceGestureReportData(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+osvrDeviceGestureReportDataWithName(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
                             OSVR_IN_PTR const char *gestureName,
                             OSVR_IN_PTR OSVR_GestureState gestureState,
                             OSVR_IN OSVR_ChannelCount sensor,
                             OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 5));
+
+
+
+
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
