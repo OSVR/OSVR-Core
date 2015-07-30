@@ -135,6 +135,28 @@ namespace common {
                 return r.state;
             }
         };
+
+        // Template specialization to handle OSVR_NaviVelocityReport
+        template <> struct ReportStateGetter<OSVR_NaviVelocityReport> {
+            static OSVR_NaviVelocityState const &
+            apply(OSVR_NaviVelocityReport const &r) {
+                return r.state;
+            }
+            static OSVR_NaviVelocityState apply(OSVR_NaviVelocityReport &r) {
+                return r.state;
+            }
+        };
+
+        // Template specialization to handle OSVR_NaviPositionReport
+        template <> struct ReportStateGetter<OSVR_NaviPositionReport> {
+            static OSVR_NaviPositionState const &
+            apply(OSVR_NaviPositionReport const &r) {
+                return r.state;
+            }
+            static OSVR_NaviPositionState apply(OSVR_NaviPositionReport &r) {
+                return r.state;
+            }
+        };
     } // namespace traits
 
     /// @brief Generic const accessor for the "state" member of a report.

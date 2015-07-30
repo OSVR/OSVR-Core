@@ -68,6 +68,7 @@ set(API
     "${HEADER_LOCATION}/JSONSerializationTags.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Location2DComponent.h"
+    "${HEADER_LOCATION}/LocomotionComponent.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/NetworkClassOfService.h"
@@ -134,6 +135,7 @@ set(SOURCE
     IPCRingBufferSharedObjects.h
     JSONTransformVisitor.cpp
     Location2DComponent.cpp
+    LocomotionComponent.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
     NetworkClassOfService.cpp
