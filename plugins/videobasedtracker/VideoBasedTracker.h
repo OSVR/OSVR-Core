@@ -59,14 +59,22 @@ namespace vbtracker {
         /// @param m A 3x3 camera matrix
         /// @param d A 5-dimensional distortion parameter vector
         /// @param locations A list of the 3d locations (in mm) of each marker
+        /// @param requiredInliers How many "good" points must be available
+        /// @param permittedOutliers How many additional "bad" points we can have
         /// @todo Remove this raw pointer version.
         void addSensor(LedIdentifier *identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
-                       DoubleVecVec const &locations);
+                       DoubleVecVec const &locations
+                       , size_t requiredInliers = 4
+                       , size_t permittedOutliers = 2
+                       );
         /// @overload
         void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
-                       DoubleVecVec const &locations);
+                       DoubleVecVec const &locations
+                       , size_t requiredInliers = 4
+                       , size_t permittedOutliers = 2
+                       );
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>

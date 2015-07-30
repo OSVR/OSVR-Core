@@ -42,17 +42,23 @@ namespace vbtracker {
     void VideoBasedTracker::addSensor(LedIdentifier *identifier,
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
-                                      DoubleVecVec const &locations) {
-        addSensor(LedIdentifierPtr(identifier), m, d, locations);
+                                      DoubleVecVec const &locations,
+                                      size_t requiredInliers,
+                                      size_t permittedOutliers) {
+        addSensor(LedIdentifierPtr(identifier), m, d, locations,
+            requiredInliers, permittedOutliers);
     }
 
     void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
-                                      DoubleVecVec const &locations) {
+                                      DoubleVecVec const &locations,
+                                      size_t requiredInliers,
+                                      size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(
-            new BeaconBasedPoseEstimator(m, d, locations));
+            new BeaconBasedPoseEstimator(m, d, locations,
+            requiredInliers, permittedOutliers));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
@@ -70,7 +76,7 @@ namespace vbtracker {
         // the darkest and brightest pixel in the image.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = 30;
+        double thresholdValue = 150;
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
