@@ -109,7 +109,7 @@ namespace client {
             }
             report.sensor = data.sensor;
             report.state = data.gestureState;
-            report.gestureName = gestureName.c_str();
+			report.gestureID = data.gestureID;
             common::ClientInterfacePtr anInterface;
             for (auto &iface : m_interfaces) {
                 anInterface = iface;
