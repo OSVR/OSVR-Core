@@ -32,6 +32,8 @@
 #include <iostream>
 #include <memory>
 #include <ctime>
+#include <chrono>
+#include <thread>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -45,9 +47,13 @@ class GestureDevice {
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
         osvrDeviceGestureConfigure(opts, &m_gesture, 2);
-
+		
         /// Create the sync device token with the options
         m_dev.initSync(ctx, "Gesture", opts);
+
+		//get an ID for gesture names to be used in plugin
+		osvrDeviceGestureGetID(m_gesture, OSVR_GESTURE_DOUBLE_TAP, &m_double_tap_gesture);
+		osvrDeviceGestureGetID(m_gesture, "FIST", &m_fist_gesture);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(com_osvr_example_Gesture_json);
@@ -58,21 +64,17 @@ class GestureDevice {
 
     OSVR_ReturnCode update() {
 
+		std::this_thread::sleep_for(std::chrono::milliseconds(
+			1000)); // Simulate waiting a quarter second for data.
+
         OSVR_TimeValue times;
 
         osvrTimeValueGetNow(&times);
-
-        std::string gestureName0 = "fist";
-        std::string gestureName1 = "swipe";
-        std::string gestureName2 = "lasso";
-        OSVR_GestureState state = OSVR_GESTURE_COMPLETE;
-
-        osvrDeviceGestureReportData(m_gesture, OSVR_GESTURE_CIRCLE,
-                                    state, 0, &times);
-        osvrDeviceGestureReportData(m_gesture, OSVR_GESTURE_CLOSED_HAND,
-                                    state, 1, &times);
-        osvrDeviceGestureReportData(m_gesture, OSVR_GESTURE_DOUBLE_TAP,
-                                    state, 2, &times);
+		
+		osvrDeviceGestureReportData(m_gesture, m_double_tap_gesture,
+                                    OSVR_GESTURE_COMPLETE, 0, &times);
+		osvrDeviceGestureReportData(m_gesture, m_fist_gesture,
+                                    OSVR_GESTURE_COMPLETE, 1, &times);
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -80,6 +82,9 @@ class GestureDevice {
   private:
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_GestureDeviceInterface m_gesture;
+	OSVR_GestureID m_fist_gesture;
+	OSVR_GestureID m_double_tap_gesture;
+
 };
 
 class HardwareDetection {
