@@ -24,6 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
+#include <boost/type_traits/remove_cv.hpp>
 #include <osvr/Common/NormalizeDeviceDescriptor.h>
 
 // Library/third-party includes
