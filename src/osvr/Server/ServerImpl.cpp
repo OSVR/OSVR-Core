@@ -39,6 +39,7 @@
 #include <osvr/Common/ProcessDeviceDescriptor.h>
 #include <osvr/Common/AliasProcessor.h>
 #include <osvr/Util/StringLiteralFileToString.h>
+#include <osvr/Common/Tracing.h>
 
 #include "osvr/Server/display_json.h" /// Fallback display descriptor.
 
@@ -159,7 +160,10 @@ namespace server {
 
     void ServerImpl::triggerHardwareDetect() {
         OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
-        m_callControlled([&] { m_ctx->triggerHardwareDetect(); });
+        m_callControlled([&] {
+            common::tracing::markHardwareDetect();
+            m_ctx->triggerHardwareDetect();
+        });
     }
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
@@ -174,6 +178,7 @@ namespace server {
             /// @todo More elegant way of running queued things than grabbing a
             /// mutex each time through?
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            osvr::common::tracing::ServerUpdate trace;
             m_conn->process();
             if (m_treeDirty) {
                 OSVR_DEV_VERBOSE("Path tree updated");
@@ -311,6 +316,7 @@ namespace server {
 
     void ServerImpl::m_sendTree() {
         OSVR_DEV_VERBOSE("Sending path tree to clients.");
+        common::tracing::markPathTreeBroadcast();
         m_systemComponent->sendReplacementTree(m_tree);
     }
 

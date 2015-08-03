@@ -26,6 +26,7 @@
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/ClientContext.h>
+#include <osvr/Common/Tracing.h>
 
 // Library/third-party includes
 // - none
@@ -40,6 +41,7 @@ OSVR_ReturnCode osvrClientGetInterface(OSVR_ClientContext ctx,
         /// Return failure if given a null context
         return OSVR_RETURN_FAILURE;
     }
+    osvr::common::tracing::markGetInterface(path);
     osvr::common::ClientInterfacePtr ret = ctx->getInterface(path);
     if (ret) {
         *iface = ret.get();

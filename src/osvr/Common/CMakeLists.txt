@@ -11,6 +11,21 @@ check_c_source_compiles("#include <byteswap.h>\nint main() {return bswap_16(0x12
 check_c_source_compiles("#include <byteswap.h>\nint main() {return __bswap_16(0x1234);}" OSVR_HAVE_WORKING_UNDERSCORES_BSWAP)
 configure_file(ConfigByteSwapping.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
 
+if(ETWPROVIDERS_FOUND)
+    option(BUILD_WITH_TRACING "Build with high-performance tracing support built-in?" OFF)
+else()
+    set(BUILD_WITH_TRACING OFF)
+endif()
+if(BUILD_WITH_TRACING)
+    if(ETWPROVIDERS_FOUND)
+        set(OSVR_COMMON_TRACING_ENABLED ON)
+        set(OSVR_COMMON_TRACING_ETW ON)
+    endif()
+endif()
+
+configure_file(TracingConfig.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
+
+
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
     "${HEADER_LOCATION}/AliasProcessor.h"
@@ -90,8 +105,10 @@ set(API
     "${HEADER_LOCATION}/StateType.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
+    "${HEADER_LOCATION}/Tracing.h"
     "${HEADER_LOCATION}/Transform.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
 
 set(SOURCE
     AddDevice.cpp
@@ -142,7 +159,8 @@ set(SOURCE
     RoutingKeys.cpp
     SharedMemory.h
     SharedMemoryObjectWithMutex.h
-    SystemComponent.cpp)
+    SystemComponent.cpp
+    Tracing.cpp)
 
 osvr_add_library()
 
@@ -170,6 +188,19 @@ target_link_libraries(${LIBNAME_FULL}
     eigen-headers
     osvr_cxx11_flags
     ${OSVR_CODECVT_LIBRARIES})
+
+if(OSVR_COMMON_TRACING_ETW)
+    target_link_libraries(${LIBNAME_FULL} PRIVATE ETWProviders)
+    add_custom_command(TARGET ${LIBNAME_FULL} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${ETWPROVIDERS_RUNTIME_LIBRARY}" $<TARGET_FILE_DIR:${LIBNAME_FULL}>
+        COMMENT "Copying required DLL for ETWProviders"
+        VERBATIM)
+
+    install(FILES
+        "${ETWPROVIDERS_RUNTIME_LIBRARY}"
+        "${ETWPROVIDERS_MANIFEST}"
+        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+endif()
 
 osvr_delayload_opencv(${LIBNAME_FULL} ${OPENCV_CORE_MODULES})
 

@@ -27,6 +27,7 @@
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
+#include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -50,6 +51,7 @@ OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
     }
 }
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
+    osvr::common::tracing::ClientUpdate region;
     ctx->update();
     return OSVR_RETURN_SUCCESS;
 }
