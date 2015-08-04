@@ -11,6 +11,8 @@ set(SOURCE
     CreateContext.cpp
     DirectionRemoteFactory.cpp
     DirectionRemoteFactory.h
+    DisplayConfiguration.cpp
+    DisplayConfiguration.h
     EyeTrackerRemoteFactory.cpp
     EyeTrackerRemoteFactory.h
     HandlerContainer.h
