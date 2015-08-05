@@ -26,10 +26,10 @@
 #define INCLUDED_DisplayConfiguration_h_GUID_E976C3C5_C76D_4781_6930_A133E598D5B1
 
 // Internal Includes
-// - none
+#include <osvr/Util/Angles.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
 
 // Standard includes
 #include <string>
@@ -80,16 +80,30 @@ namespace client {
         int getDisplayHeight() const;
         DisplayMode getDisplayMode() const;
 
+        util::Angle getVerticalFOV() const;
+        util::Angle getHorizontalFOV() const;
+#if 0
         double getVerticalFOV() const;
         double getVerticalFOVRadians() const;
         double getHorizontalFOV() const;
         double getHorizontalFOVRadians() const;
+#endif
         double getFOVAspectRatio() const;
         double getOverlapPercent() const;
-
+#if 0
         double getPitchTilt() const;
+#endif
+        util::Angle getPitchTilt() const;
 
         double getIPDMeters() const;
+
+        struct DistortionParams {
+            double k1_red = 0.;
+            double k1_green = 0.;
+            double k1_blue = 0.;
+        };
+
+        DistortionParams getDistortion() const { return m_distort; }
 
         /// Structure holding the information for one eye.
         class EyeInfo {
@@ -111,25 +125,23 @@ namespace client {
             DisplayMode display_mode;
         };
 
+        void m_processResolution(Json::Value const &resolution);
+
         std::string m_vendor;
         std::string m_model;
         std::string m_version;
         std::string m_note;
         int m_NumDisplays;
 
-        double m_MonocularHorizontalFOV;
-        double m_MonocularVerticalFOV;
+        util::Angle m_monocularHorizontalFOV;
+        util::Angle m_monocularVerticalFOV;
         double m_OverlapPercent;
-        double m_PitchTilt;
+        util::Angle m_pitchTilt;
 
-        std::vector<Resolution> m_Resolutions;
+        std::vector<Resolution> m_resolutions;
 
-        /// @name Distortion coefficients
-        /// @{
-        double k1_red;
-        double k1_green;
-        double k1_blue;
-        /// @}
+        /// @brief Distortion coefficients
+        DistortionParams m_distort;
 
         // Rendering
         double m_RightRoll;

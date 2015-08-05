@@ -25,8 +25,8 @@
 // Internal Includes
 #include "DisplayConfiguration.h"
 #include <osvr/Common/JSONHelpers.h>
-#include <osvr/Common/DegreesToRadians.h>
 #include <osvr/Util/Verbosity.h>
+#include <boost/units/io.hpp>
 
 // Library/third-party includes
 // - none
@@ -54,10 +54,14 @@ namespace client {
         {
             auto const &fov = hmd["field_of_view"];
             // Field of view
-            m_MonocularHorizontalFOV = fov["monocular_horizontal"].asDouble();
-            m_MonocularVerticalFOV = fov["monocular_vertical"].asDouble();
-            m_OverlapPercent = fov["overlap_percent"].asDouble() / 100.0;
-            m_PitchTilt = fov["pitch_tilt"].asDouble();
+            m_monocularHorizontalFOV = util::Angle(
+                fov["monocular_horizontal"].asDouble() * util::degrees);
+            m_monocularVerticalFOV = util::Angle(
+                fov["monocular_vertical"].asDouble() * util::degrees);
+            m_OverlapPercent =
+                fov.get("overlap_percent", 100).asDouble() / 100.0;
+            m_pitchTilt = util::Angle(fov.get("pitch_tilt", 0).asDouble() *
+                                      util::degrees);
         }
         {
             auto const &devprops = hmd["device"]["properties"];
@@ -69,12 +73,6 @@ namespace client {
             m_NumDisplays = devprops["num_displays"].asInt();
         }
         {
-            /// @todo unnecessary limitation
-            // Since SteamVR only supports outputting to a single window, we
-            // will
-            // traverse the resolutions array to find the first entry that
-            // supports
-            // a single video input.
             auto const &resolutions = hmd["resolutions"];
             if (resolutions.isNull()) {
                 OSVR_DEV_VERBOSE(
@@ -84,61 +82,30 @@ namespace client {
                     "Couldn't find resolutions array.");
             }
 
-            Resolution res;
-            Json::Value resolution;
-            for (auto const &candidateRes : resolutions) {
-                auto const &video_inputs = candidateRes["video_inputs"];
-                if (video_inputs.isNull() || !video_inputs.isInt() ||
-                    1 != video_inputs.asInt()) {
-                    // Missing video_inputs entry, non-integral data type, or
-                    // wrong
-                    // number of video inputs. Skipping entry.
-                    continue;
-                }
-
-                res.video_inputs = video_inputs.asInt();
-                resolution = candidateRes;
-                break;
+            for (auto const &resolution : resolutions) {
+                m_processResolution(resolution);
             }
 
-            if (resolution.isNull()) {
+            if (m_resolutions.empty()) {
                 // We couldn't find any appropriate resolution entries
                 OSVR_DEV_VERBOSE(
                     "DisplayConfiguration::parse(): ERROR: Couldn't "
                     "find any appropriate resolutions.");
                 return;
             }
-
-            // Window bounds
-            res.width = resolution["width"].asInt();
-            res.height = resolution["height"].asInt();
-
-            // Display mode
-            const std::string display_mode_str =
-                resolution["display_mode"].asString();
-            res.display_mode = HORIZONTAL_SIDE_BY_SIDE;
-            if ("horz_side_by_side" == display_mode_str) {
-                res.display_mode = HORIZONTAL_SIDE_BY_SIDE;
-            } else if ("vert_side_by_size" == display_mode_str) {
-                res.display_mode = VERTICAL_SIDE_BY_SIDE;
-            } else if ("full_screen" == display_mode_str) {
-                res.display_mode = FULL_SCREEN;
-            } else {
-                res.display_mode = HORIZONTAL_SIDE_BY_SIDE;
-                OSVR_DEV_VERBOSE("DisplayConfiguration::parse(): WARNING: "
-                                 "Unknown display mode: "
-                                 << display_mode_str);
-            }
-
-            m_Resolutions.push_back(res);
         }
 
         {
             auto const &rendering = hmd["rendering"];
-            m_RightRoll = rendering["right_roll"].asDouble();
-            m_LeftRoll = rendering["left_roll"].asDouble();
+            m_RightRoll = rendering.get("right_roll", 0).asDouble();
+            m_LeftRoll = rendering.get("left_roll", 0).asDouble();
         }
-
+        {
+            auto const &distortion = hmd["distortion"];
+            m_distort.k1_red = distortion.get("k1_red", 0).asDouble();
+            m_distort.k1_green = distortion.get("k1_green", 0).asDouble();
+            m_distort.k1_blue = distortion.get("k1_blue", 0).asDouble();
+        }
         {
             auto const &eyes = hmd["eyes"];
             if (eyes.isNull()) {
@@ -149,8 +116,8 @@ namespace client {
             }
             for (auto const &eye : eyes) {
                 EyeInfo e;
-                e.m_CenterProjX = eye["center_proj_x"].asDouble();
-                e.m_CenterProjY = eye["center_proj_y"].asDouble();
+                e.m_CenterProjX = eye.get("center_proj_x", 0.5).asDouble();
+                e.m_CenterProjY = eye.get("center_proj_y", 0.5).asDouble();
                 if (eye.isMember("rotate_180")) {
                     e.m_rotate180 = (eye["rotate_180"].asInt() != 0);
                 }
@@ -159,19 +126,53 @@ namespace client {
         }
     }
 
+    void
+    DisplayConfiguration::m_processResolution(Json::Value const &resolution) {
+        Resolution res;
+        res.video_inputs = resolution.get("video_inputs", 1).asInt();
+
+        // Window bounds
+        res.width = resolution["width"].asInt();
+        res.height = resolution["height"].asInt();
+
+        // Display mode - Default to horiz side by side unless we have multiple
+        // video inputs, then do full screen (? seems logical but not strictly
+        // what the json schema specifies)
+        res.display_mode =
+            (res.video_inputs > 1 ? FULL_SCREEN : HORIZONTAL_SIDE_BY_SIDE);
+
+        auto const &display_mode = resolution["display_mode"];
+        if (display_mode.isString()) {
+            const std::string display_mode_str = display_mode.asString();
+            if ("horz_side_by_side" == display_mode_str) {
+                res.display_mode = HORIZONTAL_SIDE_BY_SIDE;
+            } else if ("vert_side_by_size" == display_mode_str) {
+                res.display_mode = VERTICAL_SIDE_BY_SIDE;
+            } else if ("full_screen" == display_mode_str) {
+                res.display_mode = FULL_SCREEN;
+            } else {
+                OSVR_DEV_VERBOSE("DisplayConfiguration::parse(): WARNING: "
+                                 "Unknown display mode string: "
+                                 << display_mode_str << " (using default)");
+            }
+        }
+
+        m_resolutions.push_back(res);
+    }
+
     void DisplayConfiguration::print() const {
-        std::cout << "Monocular horizontal FOV: " << m_MonocularHorizontalFOV
+        std::cout << "Monocular horizontal FOV: " << m_monocularHorizontalFOV
                   << std::endl;
-        std::cout << "Monocular vertical FOV: " << m_MonocularVerticalFOV
+        std::cout << "Monocular vertical FOV: " << m_monocularVerticalFOV
                   << std::endl;
         std::cout << "Overlap percent: " << m_OverlapPercent << "%"
                   << std::endl;
-        std::cout << "Pitch tilt: " << m_PitchTilt << std::endl;
-        std::cout << "Resolution: " << m_Resolutions.at(0).width << " x "
-                  << m_Resolutions.at(0).height << std::endl;
-        std::cout << "Video inputs: " << m_Resolutions.at(0).video_inputs
+        std::cout << "Pitch tilt: " << m_pitchTilt << std::endl;
+        std::cout << "Resolution: " << m_resolutions.at(0).width << " x "
+                  << m_resolutions.at(0).height << std::endl;
+        std::cout << "Video inputs: " << m_resolutions.at(0).video_inputs
                   << std::endl;
-        std::cout << "Display mode: " << m_Resolutions.at(0).display_mode
+        std::cout << "Display mode: " << m_resolutions.at(0).display_mode
                   << std::endl;
         std::cout << "Right roll: " << m_RightRoll << std::endl;
         std::cout << "Left roll: " << m_LeftRoll << std::endl;
@@ -197,43 +198,37 @@ namespace client {
     int DisplayConfiguration::getDisplayLeft() const { return 0; }
 
     int DisplayConfiguration::getDisplayWidth() const {
-        return m_Resolutions.at(0).width;
+        return m_resolutions.at(0).width;
     }
 
     int DisplayConfiguration::getDisplayHeight() const {
-        return m_Resolutions.at(0).height;
+        return m_resolutions.at(0).height;
     }
 
     DisplayConfiguration::DisplayMode
     DisplayConfiguration::getDisplayMode() const {
-        return m_Resolutions.at(0).display_mode;
+        return m_resolutions.at(0).display_mode;
     }
 
-    double DisplayConfiguration::getVerticalFOV() const {
-        return m_MonocularVerticalFOV;
+    util::Angle DisplayConfiguration::getVerticalFOV() const {
+        return m_monocularVerticalFOV;
     }
 
-    double DisplayConfiguration::getVerticalFOVRadians() const {
-        return common::degreesToRadians(m_MonocularVerticalFOV);
-    }
-
-    double DisplayConfiguration::getHorizontalFOV() const {
-        return m_MonocularHorizontalFOV;
-    }
-
-    double DisplayConfiguration::getHorizontalFOVRadians() const {
-        return common::degreesToRadians(m_MonocularHorizontalFOV);
+    util::Angle DisplayConfiguration::getHorizontalFOV() const {
+        return m_monocularHorizontalFOV;
     }
 
     double DisplayConfiguration::getFOVAspectRatio() const {
-        return m_MonocularVerticalFOV / m_MonocularHorizontalFOV;
+        return (m_monocularVerticalFOV / m_monocularHorizontalFOV).value();
     }
 
     double DisplayConfiguration::getOverlapPercent() const {
         return m_OverlapPercent;
     }
 
-    double DisplayConfiguration::getPitchTilt() const { return m_PitchTilt; }
+    util::Angle DisplayConfiguration::getPitchTilt() const {
+        return m_pitchTilt;
+    }
 
     double DisplayConfiguration::getIPDMeters() const {
         return DEFAULT_IPD_METERS;
@@ -247,7 +242,8 @@ namespace client {
     void DisplayConfiguration::EyeInfo::print() const {
         std::cout << "Center of projection (X): " << m_CenterProjX << std::endl;
         std::cout << "Center of projection (Y): " << m_CenterProjY << std::endl;
-        std::cout << "Rotate by 180: " << std::boolalpha << m_rotate180 << std::endl;
+        std::cout << "Rotate by 180: " << std::boolalpha << m_rotate180
+                  << std::endl;
     }
 } // namespace client
 } // namespace osvr
