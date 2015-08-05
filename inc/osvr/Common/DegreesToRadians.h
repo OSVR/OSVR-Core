@@ -26,10 +26,10 @@
 #define INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
 
 // Internal Includes
-#include <osvr/Util/EigenCoreGeometry.h>
+// - none
 
 // Library/third-party includes
-// - none
+#include <boost/math/constants/constants.hpp>
 
 // Standard includes
 // - none
@@ -37,7 +37,8 @@
 namespace osvr {
 namespace common {
     inline double degreesToRadians(double degrees) {
-        return degrees * M_PI / 180.0;
+        using namespace boost::math::double_constants;
+        return degrees * pi / 180.0;
     }
 } // namespace common
 } // namespace osvr
