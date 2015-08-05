@@ -36,6 +36,8 @@
 
 namespace osvr {
 namespace client {
+    /// @todo this should come from the tree and user-specific config
+    static const double DEFAULT_IPD_METERS = 0.063; // 63mm
 
     DisplayConfiguration::DisplayConfiguration() {
         // do nothing
@@ -234,7 +236,7 @@ namespace client {
     double DisplayConfiguration::getPitchTilt() const { return m_PitchTilt; }
 
     double DisplayConfiguration::getIPDMeters() const {
-        return 0.065; // 65 mm
+        return DEFAULT_IPD_METERS;
     }
 
     std::vector<DisplayConfiguration::EyeInfo>
