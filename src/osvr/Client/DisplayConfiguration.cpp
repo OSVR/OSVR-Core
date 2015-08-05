@@ -22,18 +22,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define _NEED_MATH_DEFINES
-
 // Internal Includes
 #include "DisplayConfiguration.h"
 #include <osvr/Common/JSONHelpers.h>
+#include <osvr/Common/DegreesToRadians.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <math.h>
+// - none
 
 namespace osvr {
 namespace client {
@@ -213,7 +212,7 @@ namespace client {
     }
 
     double DisplayConfiguration::getVerticalFOVRadians() const {
-        return m_MonocularVerticalFOV * M_PI / 180.0;
+        return common::degreesToRadians(m_MonocularVerticalFOV);
     }
 
     double DisplayConfiguration::getHorizontalFOV() const {
@@ -221,7 +220,7 @@ namespace client {
     }
 
     double DisplayConfiguration::getHorizontalFOVRadians() const {
-        return m_MonocularHorizontalFOV * M_PI / 180.0;
+        return common::degreesToRadians(m_MonocularHorizontalFOV);
     }
 
     double DisplayConfiguration::getFOVAspectRatio() const {
