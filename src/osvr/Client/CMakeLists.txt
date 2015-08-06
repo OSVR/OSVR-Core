@@ -21,7 +21,9 @@ set(SOURCE
     InterfaceTree.cpp
     InterfaceTree.h
     Location2DRemoteFactory.cpp
-    Location2DRemoteFactory.h    
+    Location2DRemoteFactory.h
+    Projection.cpp
+    Projection.h
     PureClientContext.cpp
     PureClientContext.h
     RemoteHandler.cpp
