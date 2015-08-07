@@ -40,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/Deletable.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
+    "${HEADER_LOCATION}/EigenExtras.h"
     "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/Flag.h"
     "${HEADER_LOCATION}/GenericCaller.h"
