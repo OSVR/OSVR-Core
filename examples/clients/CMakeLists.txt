@@ -55,6 +55,8 @@ endforeach()
 add_test(NAME DisplayParameter_runs
     COMMAND DisplayParameter_cpp)
 
+add_subdirectory(opengl-sdl)
+
 if(BUILD_TESTING)
     ###
     # Set up self-contained example test
