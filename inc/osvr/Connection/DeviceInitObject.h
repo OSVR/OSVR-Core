@@ -37,6 +37,7 @@
 #include <osvr/Connection/ServerInterfaceList.h>
 #include <osvr/Common/DeviceComponentPtr.h>
 #include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/PluginHost/RegistrationContext.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -155,6 +156,8 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
     osvr::common::DeviceComponentList const &getComponents() const {
         return m_components;
     }
+
+    OSVR_CONNECTION_EXPORT osvr::pluginhost::RegistrationContext* getParentContext();
 
   private:
     osvr::pluginhost::PluginSpecificRegistrationContext *m_context;
