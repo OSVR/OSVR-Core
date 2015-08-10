@@ -40,7 +40,7 @@
 /* none */
 
 /* Standard includes */
-/* none */
+#include <stdint.h>
 
 OSVR_EXTERN_C_BEGIN
 /** @addtogroup ClientKit
@@ -68,6 +68,33 @@ osvrClientGetInterface(OSVR_ClientContext ctx, const char path[],
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeInterface(OSVR_ClientContext ctx, OSVR_ClientInterface iface);
+
+/** @brief Get the length of a string parameter associated with the given path.
+@param ctx Client context
+@param path A resource path (null-terminated string)
+@param[out] len The length of the string value, including null terminator. 0
+if the parameter does not exist or is not a string.
+
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetNameLength(OSVR_ClientContext ctx, uint32_t id, size_t *len);
+
+/** @brief Convert the ID to string name representation
+
+@param ctx Client context
+@param id  An id that corresponds to an entry in string to ID map
+@param [in, out] buf A buffer that you allocate of appropriate size.
+Must be at least the length returned by osvrClientGetStringParameterLength.
+Will contain the null-terminated string parameter value.
+@param len The length of the buffer you're providing. If the buffer is too
+short, an error is returned and the buffer is unchanged.
+
+@returns It will copy the name of entry name that corresponds to the
+provided id
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetNameFromID(OSVR_ClientContext ctx, uint32_t id,
+                        char *buf, size_t len);
 
 /** @} */
 OSVR_EXTERN_C_END

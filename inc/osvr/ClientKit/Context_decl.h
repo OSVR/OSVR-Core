@@ -26,16 +26,8 @@
 #define INCLUDED_ClientContext_decl_h_GUID_1EFFF79A_3D9F_4794_9F98_37010949F386
 
 // Internal Includes
-// - none
-
-// Library/third-party includes
-// - none
-
-// Standard includes
-// - none
-
-// Internal Includes
 #include <osvr/ClientKit/ContextC.h>
+#include <osvr/Util/ID.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -97,6 +89,9 @@ namespace clientkit {
 
         /// @brief Gets the bare OSVR_ClientContext.
         OSVR_ClientContext get();
+
+        /// @brief converts ID to string name
+        std::string getNamefromID(StringID id);
 
       private:
         OSVR_ClientContext m_context;
