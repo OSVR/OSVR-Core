@@ -27,15 +27,16 @@
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Common/Serialization.h>
-#include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/Buffer.h>
 #include <osvr/Common/PathTreeSerialization.h>
+#include <osvr/Common/CommonComponent.h>
 
 // Library/third-party includes
 #include <json/value.h>
 
 // Standard includes
 // - none
+#include <iostream>
 
 namespace osvr {
 namespace common {
@@ -93,6 +94,29 @@ namespace common {
         const char *ReplacementTreeFromServer::identifier() {
             return "com.osvr.system.ReplacementTreeFromServer";
         }
+
+		class RegisteredStringMapRecord::MessageSerialization {
+		public:
+			MessageSerialization(SerializedStringMap serializedMap)
+				: m_serializedMap(serializedMap) {}
+
+			MessageSerialization() {}
+
+			template <typename T> void processMessage(T &p) {
+				p(m_serializedMap);
+			}
+			MapData getData() const {
+				MapData ret;
+				ret.serializedMap = m_serializedMap;
+				return ret;
+			}
+
+		private:
+			SerializedStringMap m_serializedMap;
+		};
+		const char *RegisteredStringMapRecord::identifier() {
+			return "com.osvr.system.regstringmaprecord";
+		}
     } // namespace messages
 
     const char *SystemComponent::deviceName() {
@@ -104,7 +128,7 @@ namespace common {
         return ret;
     }
 
-    SystemComponent::SystemComponent() {}
+    SystemComponent::SystemComponent() : m_nameToIDMap(new RegStringMapData) {}
 
     void SystemComponent::sendRoutes(std::string const &routes) {
         Buffer<> buf;
@@ -148,11 +172,46 @@ namespace common {
         m_replaceTreeHandlers.push_back(cb);
     }
 
+	MapPtr SystemComponent::getRegStringMap(){
+        return m_nameToIDMap;	
+	}
+
+	void SystemComponent::sendRegisteredStringMap() {
+
+		Buffer<> buf;
+		// serialize the map before sending it
+		SerializedStringMap serializedMap = m_nameToIDMap->map.getMap();
+
+        messages::RegisteredStringMapRecord::MessageSerialization msg(serializedMap);
+		serialize(buf, msg);
+		m_getParent().packMessage(buf, regStringMap.getMessageType());
+	}
+
+	void
+		SystemComponent::registerStringMapHandler(RegisteredStringMapHandler handler) {
+		if (m_cb_map.empty()) {
+			m_registerHandler(&SystemComponent::m_handleRegStringMap, this,
+				regStringMap.getMessageType());
+		}
+		m_cb_map.push_back(handler);
+	}
+
     void SystemComponent::m_parentSet() {
+
+        // add a ping handler to re-send string to ID map everytime the new
+        // connection(ping) occurs
+        m_commonComponent =
+            m_getParent().addComponent(osvr::common::CommonComponent::create());
+        OSVR_TimeValue now;
+        osvrTimeValueGetNow(&now);
+        m_commonComponent->registerPingHandler([&] {
+            sendRegisteredStringMap(); });
+
         m_getParent().registerMessageType(routesOut);
         m_getParent().registerMessageType(appStartup);
         m_getParent().registerMessageType(routeIn);
         m_getParent().registerMessageType(treeOut);
+		m_getParent().registerMessageType(regStringMap);
     }
 
     int SystemComponent::m_handleReplaceTree(void *userdata,
@@ -169,5 +228,23 @@ namespace common {
         }
         return 0;
     }
+
+	int VRPN_CALLBACK
+		SystemComponent::m_handleRegStringMap(void *userdata,
+		vrpn_HANDLERPARAM p) {
+		auto self = static_cast<SystemComponent *>(userdata);
+		auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
+		messages::RegisteredStringMapRecord::MessageSerialization msg;
+		deserialize(bufReader, msg);
+		auto data = msg.getData();
+		auto timestamp = util::time::fromStructTimeval(p.msg_time);
+
+		for (auto const &cb : self->m_cb_map) {
+			cb(data, timestamp);
+		}
+		return 0;
+	}
+
+
 } // namespace common
 } // namespace osvr
