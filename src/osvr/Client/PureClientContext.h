@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/BaseDevicePtr.h>
-#include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/Transform.h>
 #include <osvr/Common/NetworkingSupport.h>
@@ -38,6 +38,8 @@
 #include <osvr/Client/RemoteHandlerFactory.h>
 #include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Common/PathTreeOwner.h>
+#include "RemoteHandlerFactory.h"
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -74,6 +76,8 @@ namespace client {
 
         common::PathTree const &m_getPathTree() const override;
 
+        virtual shared_ptr<common::SystemComponent> m_getSystemComponent();
+
         common::Transform const &m_getRoomToWorldTransform() const override;
 
         void m_setRoomToWorldTransform(common::Transform const &xform) override;
@@ -91,7 +95,7 @@ namespace client {
 
         /// @brief The system component providing access to sending/receiving
         /// control messages.
-        common::SystemComponent *m_systemComponent;
+        shared_ptr<common::SystemComponent> m_systemComponent;
 
         /// @brief All open VRPN connections, keyed by host
         VRPNConnectionCollection m_vrpnConns;
@@ -114,6 +118,10 @@ namespace client {
         /// @brief Manager of client interface objects and their interaction
         /// with the path tree.
         ClientInterfaceObjectManager m_ifaceMgr;
+
+        /// @brief Called whenever an updated string to ID map is available
+        void m_handleRegStringMap(common::MapData const &data,
+            util::time::TimeValue const &timestamp);
     };
 } // namespace client
 } // namespace osvr
