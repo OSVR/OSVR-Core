@@ -34,6 +34,7 @@
 #include <osvr/Common/ClientInterfaceFactory.h>
 #include <osvr/Util/KeyedOwnershipContainer.h>
 #include <osvr/Util/UniquePtr.h>
+#include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
@@ -86,6 +87,9 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     /// @brief Accessor for the path tree.
     OSVR_COMMON_EXPORT osvr::common::PathTree const &getPathTree() const;
+
+    /// @brief Accessor for the system component
+    OSVR_COMMON_EXPORT std::shared_ptr<osvr::common::SystemComponent> getSystemComponent();
 
     /// @brief Pass (smart-pointer) ownership of some object to the client
     /// context.
@@ -152,6 +156,10 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// world space.
     virtual void
     m_setRoomToWorldTransform(osvr::common::Transform const &xform) = 0;
+
+    /// @brief Implementation of accessor for the path tree.
+    OSVR_COMMON_EXPORT virtual std::shared_ptr<osvr::common::SystemComponent>
+        m_getSystemComponent() = 0;
 
     std::string const m_appId;
     InterfaceList m_interfaces;
