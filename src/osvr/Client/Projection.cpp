@@ -100,8 +100,8 @@ namespace client {
 
     DisplayModelList
     generateComputationalDisplayModel(std::string const &displayDescriptor) {
-    DisplayModelList ret;
-    return ret;
+        DisplayModelList ret;
+        return ret;
     }
     ComputationalDisplayModel::~ComputationalDisplayModel() {}
 

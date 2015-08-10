@@ -1,7 +1,5 @@
 /** @file
-    @brief Header
-
-    Must be c-safe!
+    @brief Implementation
 
     @date 2015
 
@@ -10,7 +8,6 @@
     <http://sensics.com/osvr>
 */
 
-/*
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,18 +21,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-*/
 
-#ifndef INCLUDED_RenderingTypesC_h_GUID_6689A6CA_76AC_48AC_A0D0_2902BC95AC35
-#define INCLUDED_RenderingTypesC_h_GUID_6689A6CA_76AC_48AC_A0D0_2902BC95AC35
+// Internal Includes
+#include <osvr/Client/ViewerEye.h>
 
-/* Internal Includes */
-/* none */
+// Library/third-party includes
+// - none
 
-/* Library/third-party includes */
-/* none */
+// Standard includes
+// - none
 
-/* Standard includes */
-/* none */
+namespace osvr {
+namespace client {
+    ViewerEye::ViewerEye(Viewer *viewer, OSVR_ClientContext ctx,
+                         Eigen::Vector3d const &offset, const char path[])
+        : m_pose(ctx, path), m_offset(offset), m_parent(viewer) {}
 
-#endif
+} // namespace client
+} // namespace osvr

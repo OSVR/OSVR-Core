@@ -34,7 +34,9 @@
 #include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/ReturnCodesC.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
+#include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/Matrix44C.h>
+#include <osvr/Util/Pose3C.h>
 
 /* Library/third-party includes */
 /* none */
@@ -47,10 +49,6 @@ OSVR_EXTERN_C_BEGIN
 /** @brief Opaque type of a display configuration. */
 typedef struct OSVR_DisplayConfigObject *OSVR_DisplayConfig;
 
-typedef uint32_t OSVR_ViewerCount;
-typedef uint8_t OSVR_EyeCount;
-typedef uint32_t OSVR_SurfaceCount;
-
 /** @brief Allocates a display configuration object. */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetDisplay(OSVR_ClientContext ctx, OSVR_DisplayConfig *disp);
@@ -61,15 +59,28 @@ osvrClientGetDisplay(OSVR_ClientContext ctx, OSVR_DisplayConfig *disp);
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 
+/** @brief A display config can have one (or theoretically more) viewers */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetNumViewers(OSVR_DisplayConfig disp, OSVR_ViewerCount *viewers);
 
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumEyesForViewer(
-    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount *eyes);
+/** @brief Each viewer in a display config can have one or more "eyes" which
+ * have a substantially similar pose */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetNumEyesForViewer(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
+                              OSVR_EyeCount *eyes);
 
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumSurfacesForViewerEye(
-    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_SurfaceCount *surfaces);
+/** @brief Get the center of projection/"eye point" for the given eye of a
+ * viewer in a display config */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
+                           OSVR_EyeCount eye, OSVR_Pose3 *pose);
+
+/** @brief Each eye of each viewer in a display config has one or more surfaces
+ * (aka "screens") on which content should be rendered. */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetNumSurfacesForViewerEye(OSVR_DisplayConfig disp,
+                                     OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+                                     OSVR_SurfaceCount *surfaces);
 
 OSVR_EXTERN_C_END
 

@@ -155,6 +155,12 @@ OSVR_ReturnCode osvrClientGetNumEyesForViewer(OSVR_DisplayConfig disp,
 }
 
 OSVR_ReturnCode
+osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
+OSVR_EyeCount eye, OSVR_Pose3 *pose) {
+    return OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
 osvrClientGetNumSurfacesForViewerEye(OSVR_DisplayConfig disp,
                                      OSVR_ViewerCount viewer, OSVR_EyeCount eye,
                                      OSVR_SurfaceCount *surfaces) {

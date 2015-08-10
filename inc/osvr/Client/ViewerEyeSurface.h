@@ -1,8 +1,6 @@
 /** @file
     @brief Header
 
-    Must be c-safe!
-
     @date 2015
 
     @author
@@ -10,7 +8,6 @@
     <http://sensics.com/osvr>
 */
 
-/*
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,18 +21,33 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-*/
 
-#ifndef INCLUDED_RenderingTypesC_h_GUID_6689A6CA_76AC_48AC_A0D0_2902BC95AC35
-#define INCLUDED_RenderingTypesC_h_GUID_6689A6CA_76AC_48AC_A0D0_2902BC95AC35
+#ifndef INCLUDED_ViewerEyeSurface_h_GUID_9255AE63_FF1B_4BAE_A569_9C2B207A30A5
+#define INCLUDED_ViewerEyeSurface_h_GUID_9255AE63_FF1B_4BAE_A569_9C2B207A30A5
 
-/* Internal Includes */
-/* none */
+// Internal Includes
+// - none
 
-/* Library/third-party includes */
-/* none */
+// Library/third-party includes
+// - none
 
-/* Standard includes */
-/* none */
+// Standard includes
+// - none
 
-#endif
+namespace osvr {
+namespace client {
+    class DisplayConfigFactory;
+    class ViewerEye;
+    class ViewerEyeSurface {
+      public:
+        explicit ViewerEyeSurface(ViewerEye *parent) : m_parent(parent) {}
+        ViewerEye &eye() { return *m_parent; }
+
+      private:
+        ViewerEye *m_parent;
+    };
+
+} // namespace client
+} // namespace osvr
+
+#endif // INCLUDED_ViewerEyeSurface_h_GUID_9255AE63_FF1B_4BAE_A569_9C2B207A30A5

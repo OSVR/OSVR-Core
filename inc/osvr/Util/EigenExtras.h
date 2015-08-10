@@ -32,10 +32,59 @@
 // - none
 
 // Standard includes
-// - none
+#include <type_traits>
 
 namespace osvr {
-namespace util {} // namespace util
+namespace util {
+    typedef Eigen::Matrix4d ColMatrix44d;
+    typedef Eigen::Vector3d ColVector3d;
+    typedef Eigen::Vector4d ColVector4d;
+    namespace detail {
+        /// @brief Type to use to wrap the Eigen::RowMajor constant.
+        struct RowMajor : std::integral_constant<int, Eigen::RowMajor> {};
+        /// @brief Type to use to wrap the Eigen::ColMajor constant.
+        struct ColMajor : std::integral_constant<int, Eigen::ColMajor> {};
+        /// @brief Creates a vector given the Eigen::ColMajor or Eigen::RowMajor
+        /// integer arguments.
+        template <int Size, int _Options = Eigen::ColMajor,
+                  typename Scalar = double>
+        using VectorImpl = Eigen::Matrix < Scalar,
+              (Options & Eigen::RowMajorBit) ? Size : 1,
+              (!(Options & Eigen::RowMajorBit)) ? Size : 1 > ;
+        /// @brief Creates a vector given the RowMajor or ColMajor type
+        /// arguments.
+        template <int Size, typename Ordering, typename Scalar = double>
+        using Vector = VectorImpl<Size, Ordering::value, Scalar>;
+    } // namespace detail
+
+    /// @name Ordering keywords
+    /// @brief Dummy names to use as a keyword argument to
+    /// makeHomogeneousPoint() and makeHomogeneousVector()
+    /// @{
+    extern detail::RowMajor const *row_major;
+    extern detail::ColMajor const *col_major;
+    /// @}
+
+    template <typename Derived, typename Ordering>
+    inline detail::Vector<4, Ordering>
+    makeHomogeneousPoint(Eigen::MatrixBase<Derived> const &vec,
+                         Ordering * = col_major) {
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+        return (Vector<4, Ordering>() << vec, 1).finished();
+    }
+    template <typename Derived, typename Ordering>
+    inline detail::Vector<4, Ordering>
+    makeHomogeneousVector(Eigen::MatrixBase<Derived> const &vec,
+                          Ordering const * = col_major) {
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+        return (Vector<4, Ordering>() << vec, 0).finished();
+    }
+
+    typedef Eigen::Matrix<double, 4, 4, Eigen::RowMajor> RowMatrix44d;
+    using Eigen::RowVector3d;
+    using Eigen::RowVector4d;
+
+} // namespace util
 } // namespace osvr
 
 #endif // INCLUDED_EigenExtras_h_GUID_7AE6CABA_333B_408A_C898_A2CBBE5BCE5D
