@@ -35,7 +35,8 @@
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Common/JSONSerializationTags.h>
 
-#include <osvr/Common/CommonComponent_fwd.h>
+#include <osvr/Common/SystemComponent.h>
+#include <osvr/Connection/Connection.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -52,20 +53,8 @@ namespace common {
         StringID gestureID;
     };
 
-    struct GestureMap {
-        GestureData data;
-        SerializedStringMap serializedMap;
-    };
-
     namespace messages {
         class GestureRecord : public MessageRegistration<GestureRecord> {
-          public:
-            class MessageSerialization;
-
-            static const char *identifier();
-        };
-
-        class GestureMapRecord : public MessageRegistration<GestureMapRecord> {
           public:
             class MessageSerialization;
 
@@ -82,17 +71,12 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<GestureComponent>
-        create(OSVR_ChannelCount numSensor = 1);
+            create(SystemComponentPtr sysComp);
+
+        //OSVR_COMMON_EXPORT ~GestureComponent();
 
         /// @brief Message from server to client, containing Gesture data.
         messages::GestureRecord gestureRecord;
-
-        /// @brief Message from server to client, containing gesture map
-        messages::GestureMapRecord gestureMapRecord;
-
-        OSVR_COMMON_EXPORT void sendGestureData(
-            OSVR_GestureState gestureState, std::string const &gestureName,
-            OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
 
 		OSVR_COMMON_EXPORT void sendGestureData(
 			OSVR_GestureState gestureState, OSVR_GestureID gestureID,
@@ -103,36 +87,30 @@ namespace common {
         typedef std::function<void(
             GestureData const &, util::time::TimeValue const &)> GestureHandler;
 
-        typedef std::function<void(GestureMap const &,
-                                   util::time::TimeValue const &)>
-            GestureMapHandler;
-
         OSVR_COMMON_EXPORT void registerGestureHandler(GestureHandler cb);
-        OSVR_COMMON_EXPORT void registerGestureMapHandler(GestureMapHandler cb);
 
 		OSVR_COMMON_EXPORT OSVR_GestureID getGestureID(const char *gestureName);
 
       private:
-        GestureComponent(OSVR_ChannelCount numChan);
+        GestureComponent(SystemComponentPtr sysComp);
+
         virtual void m_parentSet();
 
         static int VRPN_CALLBACK
         m_handleGestureRecord(void *userdata, vrpn_HANDLERPARAM p);
-        static int VRPN_CALLBACK
-        m_handleGestureMapRecord(void *userdata, vrpn_HANDLERPARAM p);
 
         void m_checkFirst(OSVR_GestureState const &gesture);
 
         OSVR_ChannelCount m_numSensor;
         std::vector<GestureHandler> m_cb;
-        std::vector<GestureMapHandler> m_cb_map;
 
-        bool m_gotOne;
         // name to ID map used by the server
-        RegisteredStringMap m_gestureNameMap;
+        //RegisteredStringMap m_gestureNameMap;
+		MapPtr m_gestureNameMap;
 
-        /// @brief Common component for system device
-        common::CommonComponent *m_commonComponent;
+		/// @brief System device component
+		shared_ptr<SystemComponent> m_sysComponent;
+		
     };
 
 } // namespace common
