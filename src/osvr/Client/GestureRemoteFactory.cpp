@@ -52,23 +52,21 @@ namespace client {
         GestureRemoteHandler(vrpn_ConnectionPtr const &conn,
                              std::string const &deviceName,
                              boost::optional<OSVR_ChannelCount> sensor,
-                             common::InterfaceList &ifaces)
+                             common::InterfaceList &ifaces,
+                             common::ClientContext* ctx)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
-              m_sensor(sensor) {
+              m_sensor(sensor), m_ctx(ctx){
 
-            auto gesture = common::GestureComponent::create();
+            m_sysComponent = m_ctx->getSystemComponent();
+            m_gestureNameMap = m_sysComponent->getRegStringMap();
+            auto gesture = common::GestureComponent::create(m_sysComponent);
             m_dev->addComponent(gesture);
 
             gesture->registerGestureHandler(
                 [&](common::GestureData const &data,
                     util::time::TimeValue const &timestamp) {
                     m_handleGesture(data, timestamp);
-                });
-            gesture->registerGestureMapHandler(
-                [&](common::GestureMap const &dataMap,
-                    util::time::TimeValue const &timestamp) {
-                    m_handleGestureMap(dataMap, timestamp);
                 });
 
             /**/
@@ -94,22 +92,16 @@ namespace client {
             }
 
             OSVR_GestureReport report;
-
-            osvr::common::StringID id =
-                localGestureMap.convertPeerToLocalID(data.gestureID);
+            StringID id =
+                m_gestureNameMap->corrMap.convertPeerToLocalID(data.gestureID);
             if (id.empty()) {
                 // could not find a peer to local mapping, discarding report
                 return;
             }
-            std::string gestureName = localGestureMap.getNameFromID(id);
 
-            if (gestureName.empty()) {
-                // could not find gesture name for this id, discarding report
-                return;
-            }
             report.sensor = data.sensor;
             report.state = data.gestureState;
-			report.gestureID = data.gestureID;
+			report.gestureID = id;
             common::ClientInterfacePtr anInterface;
             for (auto &iface : m_interfaces) {
                 anInterface = iface;
@@ -117,19 +109,14 @@ namespace client {
             }
         }
 
-        void m_handleGestureMap(common::GestureMap const &data,
-                                util::time::TimeValue const &timestamp) {
-
-            // got the gesture map, will need to sync with ours
-            localGestureMap.setupPeerMappings(data.serializedMap);
-        }
-
         common::BaseDevicePtr m_dev;
         common::InterfaceList &m_interfaces;
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
         // map to keep track of gesture map and server to local ID map
-        common::CorrelatedStringMap localGestureMap;
+        common::MapPtr m_gestureNameMap;
+        common::ClientContext* m_ctx;
+        shared_ptr<common::SystemComponent> m_sysComponent;
     };
 
     GestureRemoteFactory::GestureRemoteFactory(
@@ -138,7 +125,7 @@ namespace client {
 
     shared_ptr<RemoteHandler> GestureRemoteFactory::
     operator()(common::OriginalSource const &source,
-               common::InterfaceList &ifaces, common::ClientContext &) {
+               common::InterfaceList &ifaces, common::ClientContext &ctx) {
 
         shared_ptr<RemoteHandler> ret;
 
@@ -152,7 +139,7 @@ namespace client {
         /// @todo find out why make_shared causes a crash here
         ret.reset(new GestureRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(),
-            source.getSensorNumberAsChannelCount(), ifaces));
+            source.getSensorNumberAsChannelCount(), ifaces, &ctx));
         return ret;
     }
 
