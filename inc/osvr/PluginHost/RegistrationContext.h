@@ -33,6 +33,7 @@
 #include <osvr/Util/AnyMap.h>
 #include <osvr/PluginHost/Export.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/Common/SystemComponent_fwd.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -90,8 +91,15 @@ namespace pluginhost {
 
         /// @brief Const access the data storage map.
         OSVR_PLUGINHOST_EXPORT util::AnyMap const &data() const;
-        /// @}
 
+        /// @brief Store a copy of system component
+        OSVR_PLUGINHOST_EXPORT void
+        setSystemComponent(common::SystemComponent *systemComponent);
+
+        /// @brief Return a copy of system component
+        OSVR_PLUGINHOST_EXPORT common::SystemComponent *getSystemComponent();
+
+        /// @}
       private:
         /// @brief Map of plugin names to owning pointers for plugin
         /// registration.
@@ -102,6 +110,8 @@ namespace pluginhost {
         struct Impl;
         /// Private impl.
         unique_ptr<Impl> m_impl;
+
+        common::SystemComponent *m_systemComponent;
     };
 } // namespace pluginhost
 } // namespace osvr

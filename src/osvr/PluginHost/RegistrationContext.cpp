@@ -187,5 +187,15 @@ namespace pluginhost {
     util::AnyMap &RegistrationContext::data() { return m_data; }
 
     util::AnyMap const &RegistrationContext::data() const { return m_data; }
+
+    void RegistrationContext::setSystemComponent(
+        common::SystemComponent *systemComponent) {
+        m_systemComponent = systemComponent;
+    }
+
+    common::SystemComponent *RegistrationContext::getSystemComponent() {
+        return m_systemComponent;
+    }
+
 } // namespace pluginhost
 } // namespace osvr
