@@ -45,15 +45,15 @@ class GestureDevice {
     GestureDevice(OSVR_PluginRegContext ctx) {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
+        osvrDeviceGestureConfigure(opts, &m_gesture);
 
-        osvrDeviceGestureConfigure(opts, &m_gesture, 2);
-		
         /// Create the sync device token with the options
         m_dev.initSync(ctx, "Gesture", opts);
 
-		//get an ID for gesture names to be used in plugin
-		osvrDeviceGestureGetID(m_gesture, OSVR_GESTURE_DOUBLE_TAP, &m_double_tap_gesture);
-		osvrDeviceGestureGetID(m_gesture, "FIST", &m_fist_gesture);
+        // get an ID for gesture names to be used in plugin
+        osvrDeviceGestureGetID(m_gesture, OSVR_GESTURE_DOUBLE_TAP,
+                               &m_double_tap_gesture);
+        osvrDeviceGestureGetID(m_gesture, "FIST", &m_fist_gesture);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(com_osvr_example_Gesture_json);
@@ -70,10 +70,10 @@ class GestureDevice {
         OSVR_TimeValue times;
 
         osvrTimeValueGetNow(&times);
-		
-		osvrDeviceGestureReportData(m_gesture, m_double_tap_gesture,
+
+        osvrDeviceGestureReportData(m_gesture, m_double_tap_gesture,
                                     OSVR_GESTURE_COMPLETE, 0, &times);
-		osvrDeviceGestureReportData(m_gesture, m_fist_gesture,
+        osvrDeviceGestureReportData(m_gesture, m_fist_gesture,
                                     OSVR_GESTURE_COMPLETE, 1, &times);
 
         return OSVR_RETURN_SUCCESS;
@@ -82,9 +82,8 @@ class GestureDevice {
   private:
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_GestureDeviceInterface m_gesture;
-	OSVR_GestureID m_fist_gesture;
-	OSVR_GestureID m_double_tap_gesture;
-
+    OSVR_GestureID m_fist_gesture;
+    OSVR_GestureID m_double_tap_gesture;
 };
 
 class HardwareDetection {
@@ -98,7 +97,7 @@ class HardwareDetection {
 
         std::cout << "PLUGIN: Got a hardware detection request" << std::endl;
 
-		/// we always detect device in sample plugin
+        /// we always detect device in sample plugin
         m_found = true;
 
         std::cout << "PLUGIN: We have detected Gesture device! " << std::endl;
