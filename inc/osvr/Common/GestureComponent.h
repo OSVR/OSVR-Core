@@ -34,9 +34,7 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Common/JSONSerializationTags.h>
-
 #include <osvr/Common/SystemComponent.h>
-#include <osvr/Connection/Connection.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>

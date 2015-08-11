@@ -35,7 +35,6 @@
 #include <osvr/Util/KeyedOwnershipContainer.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
-#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>

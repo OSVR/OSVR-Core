@@ -27,6 +27,7 @@
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Util/MessageKeys.h>
 #include <osvr/Common/Serialization.h>
+#include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/Buffer.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Common/CommonComponent.h>
@@ -36,7 +37,6 @@
 
 // Standard includes
 // - none
-#include <iostream>
 
 namespace osvr {
 namespace common {

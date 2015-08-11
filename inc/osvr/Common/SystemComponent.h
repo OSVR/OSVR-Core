@@ -31,9 +31,7 @@
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Common/PathTree_fwd.h>
-
 #include <osvr/Util/ClientReportTypesC.h>
-#include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/RegisteredStringMap.h>
 #include <osvr/Common/CommonComponent_fwd.h>
 
