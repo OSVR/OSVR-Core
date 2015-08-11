@@ -53,10 +53,10 @@ namespace client {
                              std::string const &deviceName,
                              boost::optional<OSVR_ChannelCount> sensor,
                              common::InterfaceList &ifaces,
-                             common::ClientContext* ctx)
+                             common::ClientContext *ctx)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_interfaces(ifaces), m_all(!sensor.is_initialized()),
-              m_sensor(sensor), m_ctx(ctx){
+              m_sensor(sensor), m_ctx(ctx) {
 
             m_sysComponent = m_ctx->getSystemComponent();
             m_gestureNameMap = m_sysComponent->getRegStringMap();
@@ -101,7 +101,7 @@ namespace client {
 
             report.sensor = data.sensor;
             report.state = data.gestureState;
-			report.gestureID = id;
+            report.gestureID = id;
             common::ClientInterfacePtr anInterface;
             for (auto &iface : m_interfaces) {
                 anInterface = iface;
@@ -115,8 +115,8 @@ namespace client {
         boost::optional<OSVR_ChannelCount> m_sensor;
         // map to keep track of gesture map and server to local ID map
         common::MapPtr m_gestureNameMap;
-        common::ClientContext* m_ctx;
-        shared_ptr<common::SystemComponent> m_sysComponent;
+        common::ClientContext *m_ctx;
+        common::SystemComponent *m_sysComponent;
     };
 
     GestureRemoteFactory::GestureRemoteFactory(
