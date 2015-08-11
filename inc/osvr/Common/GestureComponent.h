@@ -71,16 +71,15 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<GestureComponent>
-            create(SystemComponentPtr sysComp);
-
-        //OSVR_COMMON_EXPORT ~GestureComponent();
+        create(common::SystemComponent *systemComponent);
 
         /// @brief Message from server to client, containing Gesture data.
         messages::GestureRecord gestureRecord;
 
-		OSVR_COMMON_EXPORT void sendGestureData(
-			OSVR_GestureState gestureState, OSVR_GestureID gestureID,
-			OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
+        OSVR_COMMON_EXPORT void
+        sendGestureData(OSVR_GestureState gestureState,
+                        OSVR_GestureID gestureID, OSVR_ChannelCount sensor,
+                        OSVR_TimeValue const &timestamp);
 
         void m_sendGestureMap(OSVR_TimeValue const &timestamp);
 
@@ -89,10 +88,10 @@ namespace common {
 
         OSVR_COMMON_EXPORT void registerGestureHandler(GestureHandler cb);
 
-		OSVR_COMMON_EXPORT OSVR_GestureID getGestureID(const char *gestureName);
+        OSVR_COMMON_EXPORT OSVR_GestureID getGestureID(const char *gestureName);
 
       private:
-        GestureComponent(SystemComponentPtr sysComp);
+        GestureComponent(common::SystemComponent *systemComponent);
 
         virtual void m_parentSet();
 
@@ -105,12 +104,11 @@ namespace common {
         std::vector<GestureHandler> m_cb;
 
         // name to ID map used by the server
-        //RegisteredStringMap m_gestureNameMap;
-		MapPtr m_gestureNameMap;
+        // RegisteredStringMap m_gestureNameMap;
+        MapPtr m_gestureNameMap;
 
-		/// @brief System device component
-		shared_ptr<SystemComponent> m_sysComponent;
-		
+        /// @brief System device component
+        common::SystemComponent *m_systemComponent;
     };
 
 } // namespace common
