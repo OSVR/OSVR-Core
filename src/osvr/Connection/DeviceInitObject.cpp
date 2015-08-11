@@ -128,7 +128,8 @@ OSVR_DeviceInitObject::getContext() {
     return m_context;
 }
 
-osvr::pluginhost::RegistrationContext* OSVR_DeviceInitObject::getParentContext(){
+osvr::pluginhost::RegistrationContext *
+OSVR_DeviceInitObject::getParentContext() {
 
     return &m_context->getParent();
 }

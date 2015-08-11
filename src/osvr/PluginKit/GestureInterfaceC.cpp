@@ -32,6 +32,7 @@
 #include "HandleNullContext.h"
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/Common/SystemComponent_fwd.h>
 
 // Library/third-party includes
 // - none
@@ -46,56 +47,38 @@ struct OSVR_GestureDeviceInterfaceObject
 
 OSVR_ReturnCode
 osvrDeviceGestureConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-                           OSVR_OUT_PTR OSVR_GestureDeviceInterface *iface,
-                           OSVR_IN OSVR_ChannelCount numSensors) {
+                           OSVR_OUT_PTR OSVR_GestureDeviceInterface *iface) {
 
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceGestureConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceGestureConfigure", iface);
     OSVR_GestureDeviceInterface ifaceObj =
         opts->makeInterfaceObject<OSVR_GestureDeviceInterfaceObject>();
     *iface = ifaceObj;
-    auto gesture = osvr::common::GestureComponent::create(numSensors);
+
+    auto systemComponent = opts->getParentContext()->getSystemComponent();
+    auto gesture = osvr::common::GestureComponent::create(systemComponent);
     ifaceObj->gesture = gesture.get();
     opts->addComponent(gesture);
     return OSVR_RETURN_SUCCESS;
 }
 
-void
-osvrDeviceGestureGetID(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
-OSVR_IN_PTR const char *gestureName,
-OSVR_IN_PTR OSVR_GestureID *gestureID){
+void osvrDeviceGestureGetID(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+                            OSVR_IN_PTR const char *gestureName,
+                            OSVR_IN_PTR OSVR_GestureID *gestureID) {
 
-	*gestureID = iface->gesture->getGestureID(gestureName);
-
+    *gestureID = iface->gesture->getGestureID(gestureName);
 }
 
 OSVR_ReturnCode
 osvrDeviceGestureReportData(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
-OSVR_IN OSVR_GestureID gestureID,
-OSVR_IN_PTR OSVR_GestureState gestureState,
-OSVR_IN OSVR_ChannelCount sensor,
-OSVR_IN_PTR OSVR_TimeValue const *timestamp){
-
-	auto guard = iface->getSendGuard();
-	if (guard->lock()) {
-		iface->gesture->sendGestureData(gestureState, gestureID, sensor,
-			*timestamp);
-		return OSVR_RETURN_SUCCESS;
-	}
-
-	return OSVR_RETURN_FAILURE;
-
-}
-
-OSVR_ReturnCode
-osvrDeviceGestureReportDataWithName(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
-                            OSVR_IN_PTR const char *gestureName,
+                            OSVR_IN OSVR_GestureID gestureID,
                             OSVR_IN_PTR OSVR_GestureState gestureState,
                             OSVR_IN OSVR_ChannelCount sensor,
                             OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+
     auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        iface->gesture->sendGestureData(gestureState, gestureName, sensor,
+        iface->gesture->sendGestureData(gestureState, gestureID, sensor,
                                         *timestamp);
         return OSVR_RETURN_SUCCESS;
     }

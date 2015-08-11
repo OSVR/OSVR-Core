@@ -157,7 +157,8 @@ struct OSVR_DeviceInitObject : boost::noncopyable {
         return m_components;
     }
 
-    OSVR_CONNECTION_EXPORT osvr::pluginhost::RegistrationContext* getParentContext();
+    OSVR_CONNECTION_EXPORT osvr::pluginhost::RegistrationContext *
+    getParentContext();
 
   private:
     osvr::pluginhost::PluginSpecificRegistrationContext *m_context;
