@@ -34,7 +34,11 @@
 #include <iostream>
 #include <string>
 
-void printGestureReport(const OSVR_GestureReport *report) {
+typedef struct ContextData {
+    osvr::clientkit::ClientContext *context;
+} ContextData;
+
+void printGestureReport(const OSVR_GestureReport *report, std::string name) {
 
     std::string state;
     if (report->state == OSVR_GESTURE_COMPLETE) {
@@ -42,28 +46,33 @@ void printGestureReport(const OSVR_GestureReport *report) {
     } else {
         state = "IN PROCESS";
     }
-    std::cout << report->gestureName << "; " << state << "\t" << std::endl;
+    std::cout << name << "; " << report->gestureID << "; " << state << "\t"
+              << std::endl;
 }
 
-void gestureCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
+void gestureCallback(void *userdata, const OSVR_TimeValue * /*timestamp*/,
                      const OSVR_GestureReport *report) {
+    auto ctx = static_cast<ContextData *>(userdata);
+    std::string name = ctx->context->getNamefromID(StringID(report->gestureID));
     std::cout << "Got Gesture Report, for sensor #" << report->sensor
               << std::endl;
-    printGestureReport(report);
+    printGestureReport(report, name);
 }
 
 int main() {
-    osvr::clientkit::ClientContext context(
+
+    ContextData ctx;
+    ctx.context = new osvr::clientkit::ClientContext(
         "com.osvr.exampleclients.GestureCallback");
 
-    osvr::clientkit::Interface location =
-        context.getInterface("/com_osvr_example_Gesture/Gesture/gesture");
+    osvr::clientkit::Interface gesture =
+        ctx.context->getInterface("/com_osvr_example_Gesture/Gesture/gesture");
 
-    location.registerCallback(&gestureCallback, NULL);
+    gesture.registerCallback(&gestureCallback, static_cast<void *>(&ctx));
 
     // Pretend that this is your application's mainloop.
     while (1) {
-        context.update();
+        ctx.context->update();
     }
 
     std::cout << "Library shut down, exiting." << std::endl;
