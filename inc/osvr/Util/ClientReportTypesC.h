@@ -381,9 +381,9 @@ typedef struct OSVR_GestureReportWithName {
 
 /** @brief Report type for a gesture event */
 typedef struct OSVR_GestureReport {
-	OSVR_GestureID gestureID;
-	OSVR_GestureState state;
-	OSVR_ChannelCount sensor;
+    OSVR_GestureID gestureID;
+    OSVR_GestureState state;
+    OSVR_ChannelCount sensor;
 } OSVR_GestureReport;
 
 /** @} */

@@ -47,9 +47,9 @@
 namespace osvr {
 namespace common {
 
-	struct MapData{
-		SerializedStringMap serializedMap;
-	};
+    struct MapData {
+        SerializedStringMap serializedMap;
+    };
 
     namespace messages {
         class RoutesFromServer : public MessageRegistration<RoutesFromServer> {
@@ -81,23 +81,24 @@ namespace common {
             static const char *identifier();
         };
 
-		/// message to send serialized name to ID map
-		class RegisteredStringMapRecord : public MessageRegistration<RegisteredStringMapRecord> {
-		public:
-			class MessageSerialization;
+        /// message to send serialized name to ID map
+        class RegisteredStringMapRecord
+            : public MessageRegistration<RegisteredStringMapRecord> {
+          public:
+            class MessageSerialization;
 
-			static const char *identifier();
-		};
+            static const char *identifier();
+        };
 
     } // namespace messages
 
-	struct RegStringMapData{
-		RegisteredStringMap map;
-		CorrelatedStringMap corrMap;
-	};
+    struct RegStringMapData {
+        RegisteredStringMap map;
+        CorrelatedStringMap corrMap;
+    };
 
-	typedef shared_ptr<RegStringMapData> MapPtr;
-    
+    typedef shared_ptr<RegStringMapData> MapPtr;
+
     typedef shared_ptr<SystemComponent> SystemComponentPtr;
 
     /// @brief BaseDevice component, to be used only with the "OSVR" special
@@ -141,21 +142,19 @@ namespace common {
 
         OSVR_COMMON_EXPORT void sendReplacementTree(PathTree &tree);
 
-		/// @brief Request a copy of MapPtr to the name to ID map
+        /// @brief Request a copy of MapPtr to the name to ID map
         OSVR_COMMON_EXPORT MapPtr getRegStringMap();
 
-		/// @brief Message from server to client, containing registeredStringMap
-		messages::RegisteredStringMapRecord regStringMap;
+        /// @brief Message from server to client, containing registeredStringMap
+        messages::RegisteredStringMapRecord regStringMap;
 
-		OSVR_COMMON_EXPORT void sendRegisteredStringMap();
+        OSVR_COMMON_EXPORT void sendRegisteredStringMap();
 
-		typedef std::function<void(MapData const &,
-			util::time::TimeValue const &)>
-			RegisteredStringMapHandler;
-		OSVR_COMMON_EXPORT void registerStringMapHandler(
-			RegisteredStringMapHandler cb);
-
-
+        typedef std::function<void(MapData const &,
+                                   util::time::TimeValue const &)>
+            RegisteredStringMapHandler;
+        OSVR_COMMON_EXPORT void
+        registerStringMapHandler(RegisteredStringMapHandler cb);
 
       private:
         SystemComponent();
@@ -165,12 +164,12 @@ namespace common {
         m_handleReplaceTree(void *userdata, vrpn_HANDLERPARAM p);
         std::vector<JsonHandler> m_replaceTreeHandlers;
 
-		static int VRPN_CALLBACK
-			m_handleRegStringMap(void *userdata, vrpn_HANDLERPARAM p);
-		std::vector<RegisteredStringMapHandler> m_cb_map;
+        static int VRPN_CALLBACK
+        m_handleRegStringMap(void *userdata, vrpn_HANDLERPARAM p);
+        std::vector<RegisteredStringMapHandler> m_cb_map;
 
-		// name to ID map used by the server
-		MapPtr m_nameToIDMap;
+        // name to ID map used by the server
+        MapPtr m_nameToIDMap;
 
         /// @brief Common component for system device
         common::CommonComponent *m_commonComponent;

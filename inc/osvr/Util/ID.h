@@ -25,7 +25,6 @@
 #ifndef INCLUDED_ID_h_GUID_137CA336_382A_4796_7735_4521F02D5AC2
 #define INCLUDED_ID_h_GUID_137CA336_382A_4796_7735_4521F02D5AC2
 
-
 // Internal Includes
 // - none
 
@@ -36,39 +35,38 @@
 #include <string>
 #include <stdint.h>
 
-    /// idea from the
-    /// http://www.ilikebigbits.com/blog/2014/5/6/type-safe-identifiers-in-c
-    template <class Tag, class impl> class ID {
-      public:
-        static ID invalid() { return ID(); }
+/// idea from the
+/// http://www.ilikebigbits.com/blog/2014/5/6/type-safe-identifiers-in-c
+template <class Tag, class impl> class ID {
+  public:
+    static ID invalid() { return ID(); }
 
-        // Default constructor which will set m_val to a 0xffffffff (UINT32 max)
-        // and signify empty.
-        ID() : m_val(0xffffffff) {}
+    // Default constructor which will set m_val to a 0xffffffff (UINT32 max)
+    // and signify empty.
+    ID() : m_val(0xffffffff) {}
 
-        // Explicit constructor:
-        explicit ID(impl val) : m_val(val) {}
+    // Explicit constructor:
+    explicit ID(impl val) : m_val(val) {}
 
-        // Explicit conversion to get back the impl:
-        // explicit operator impl() const { return m_val; }
+    // Explicit conversion to get back the impl:
+    // explicit operator impl() const { return m_val; }
 
-        // Implicit conversion to get back the impl
-        operator impl() const { return m_val; }
+    // Implicit conversion to get back the impl
+    operator impl() const { return m_val; }
 
-        bool empty() const { return m_val == 0xffffffff ? true : false; }
+    bool empty() const { return m_val == 0xffffffff ? true : false; }
 
-        // this messes with implicit conversion (type casting)
-        /*
-        friend bool operator>(ID a, impl b) { return a.m_val > b; }
-        friend bool operator<(ID a, impl b) { return a.m_val < b; }
-        friend bool operator==(ID a, ID b) { return a.m_val == b.m_val; }
-        friend bool operator!=(ID a, ID b) { return a.m_val != b.m_val; }
-        */
-        impl m_val;
-    };
+    // this messes with implicit conversion (type casting)
+    /*
+    friend bool operator>(ID a, impl b) { return a.m_val > b; }
+    friend bool operator<(ID a, impl b) { return a.m_val < b; }
+    friend bool operator==(ID a, ID b) { return a.m_val == b.m_val; }
+    friend bool operator!=(ID a, ID b) { return a.m_val != b.m_val; }
+    */
+    impl m_val;
+};
 
-    typedef ID<struct StringTag, uint32_t> StringID;
-    typedef ID<struct StringTag, uint32_t> PeerStringID;
+typedef ID<struct StringTag, uint32_t> StringID;
+typedef ID<struct StringTag, uint32_t> PeerStringID;
 
 #endif // INCLUDED_ID_h_GUID_137CA336_382A_4796_7735_4521F02D5AC2
-
