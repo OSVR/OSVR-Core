@@ -48,9 +48,9 @@ namespace util {
         /// integer arguments.
         template <int Size, int _Options = Eigen::ColMajor,
                   typename Scalar = double>
-        using VectorImpl = Eigen::Matrix < Scalar,
-              (Options & Eigen::RowMajorBit) ? Size : 1,
-              (!(Options & Eigen::RowMajorBit)) ? Size : 1 > ;
+        using VectorImpl =
+            Eigen::Matrix<Scalar, (_Options & Eigen::RowMajorBit) ? Size : 1,
+                          (!(_Options & Eigen::RowMajorBit)) ? Size : 1>;
         /// @brief Creates a vector given the RowMajor or ColMajor type
         /// arguments.
         template <int Size, typename Ordering, typename Scalar = double>
@@ -78,6 +78,13 @@ namespace util {
                           Ordering const * = col_major) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
         return (Vector<4, Ordering>() << vec, 0).finished();
+    }
+
+    /// @brief Pulls the 3-dimensional point or vector from a 4-d vec,
+    /// performing division by w if nonzero.
+    inline Eigen::Vector3d extractPoint(Eigen::Vector4d const &homogenous) {
+        return homogenous[3] == 0 ? homogenous.head(3).eval()
+                                  : (homogenous.head(3) / homogenous[3]).eval();
     }
 
     typedef Eigen::Matrix<double, 4, 4, Eigen::RowMajor> RowMatrix44d;

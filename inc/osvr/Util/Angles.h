@@ -42,7 +42,7 @@ namespace util {
 
     /// @brief Convenience template alias for a plane_angle quantity in an
     /// arbitrary system with arbitrary scalar
-    template <typename System, typename Y>
+    template <typename System, typename Y = double>
     using AngleGeneric = boost::units::quantity<
         boost::units::unit<boost::units::plane_angle_dimension, System>, Y>;
 

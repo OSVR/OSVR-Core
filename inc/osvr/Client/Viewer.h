@@ -46,6 +46,10 @@ namespace client {
     class ViewerEyeSurface;
     class Viewer {
       public:
+        Viewer(Viewer const &) = delete;
+        Viewer(Viewer &&other)
+            : m_head(std::move(other.m_head)), m_eyes(std::move(other.m_eyes)) {
+        }
         inline OSVR_EyeCount size() const {
             return static_cast<OSVR_EyeCount>(m_eyes.size());
         }

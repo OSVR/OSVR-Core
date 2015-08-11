@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "ViewerEyeSurface.h"
+#include <osvr/Client/ViewerEyeSurface.h>
 
 // Library/third-party includes
 // - none

@@ -38,17 +38,14 @@ namespace client {
         DisplayConfigPtr cfg(new DisplayConfig(ctx));
         auto const descriptorString = ctx->getStringParameter("/display");
         auto desc = display_schema_1::DisplayDescriptor(descriptorString);
-        cfg->m_viewers.push_back(Viewer(ctx, "/me/head"));
+        cfg->m_viewers.emplace_back(Viewer(ctx, "/me/head"));
         auto &viewer = cfg->m_viewers.front();
         auto eyesDesc = desc.getEyes();
-        auto makeEye = [&](Eigen::Vector3d const &offset) {
-            viewer.ViewerEye(&viewer, ctx, );
-        } if (eyesDesc.size() == 2) {
+        if (eyesDesc.size() == 2) {
             // stereo
             Eigen::Vector3d offset =
                 desc.getIPDMeters() / 2. * Eigen::Vector3d::UnitX();
-        }
-        else {
+        } else {
             // if (eyesDesc.size() == 1)
             // mono
         }

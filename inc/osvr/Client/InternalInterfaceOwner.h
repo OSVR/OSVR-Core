@@ -76,9 +76,9 @@ namespace client {
 
         /// @brief move constructible
         InternalInterfaceOwner(InternalInterfaceOwner &&other)
-            : m_ctx(std::move(other.m_ctx)) {
+            : m_ctx(std::move(other.m_ctx)),
+              m_owningIface(std::move(other.m_owningIface)) {
             std::swap(m_iface, other.m_iface);
-            std::swap(m_owningIface, std::move(other.m_owningIface));
             m_checkInvariants();
         }
 
@@ -90,7 +90,7 @@ namespace client {
             m_reset();
             std::swap(m_ctx, other.m_ctx);
             std::swap(m_iface, other.m_iface);
-            std::swap(m_owningIface, std::move(other.m_owningIface));
+            m_owningIface = std::move(other.m_owningIface);
             m_checkInvariants();
             return *this;
         }
