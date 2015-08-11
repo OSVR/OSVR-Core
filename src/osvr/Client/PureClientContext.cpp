@@ -104,8 +104,8 @@ namespace client {
 
         /// Create the system client device.
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
-        m_systemComponent = common::SystemComponent::create();
-        m_systemDevice->addComponent(m_systemComponent);
+        m_systemComponent =
+            m_systemDevice->addComponent(common::SystemComponent::create());
 
         /// Receive string map data whenever it comes
         m_systemComponent->registerStringMapHandler(
@@ -210,6 +210,9 @@ namespace client {
     common::Transform const &
     PureClientContext::m_getRoomToWorldTransform() const {
         return m_roomToWorld;
+
+    common::SystemComponent *PureClientContext::m_getSystemComponent() {
+        return m_systemComponent;
     }
 
     shared_ptr<common::SystemComponent> PureClientContext::m_getSystemComponent() {
@@ -221,8 +224,8 @@ namespace client {
         m_roomToWorld = xform;
     }
 
-    void PureClientContext::m_handleRegStringMap(common::MapData const &data,
-        util::time::TimeValue const &timestamp){
+    void PureClientContext::m_handleRegStringMap(
+        common::MapData const &data, util::time::TimeValue const &timestamp) {
         auto map = m_systemComponent->getRegStringMap();
         map->corrMap.setupPeerMappings(data.serializedMap);
     }

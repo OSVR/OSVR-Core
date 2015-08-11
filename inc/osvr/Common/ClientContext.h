@@ -89,7 +89,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     OSVR_COMMON_EXPORT osvr::common::PathTree const &getPathTree() const;
 
     /// @brief Accessor for the system component
-    OSVR_COMMON_EXPORT std::shared_ptr<osvr::common::SystemComponent> getSystemComponent();
+    OSVR_COMMON_EXPORT osvr::common::SystemComponent *getSystemComponent();
 
     /// @brief Pass (smart-pointer) ownership of some object to the client
     /// context.
@@ -158,8 +158,8 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     m_setRoomToWorldTransform(osvr::common::Transform const &xform) = 0;
 
     /// @brief Implementation of accessor for the path tree.
-    OSVR_COMMON_EXPORT virtual std::shared_ptr<osvr::common::SystemComponent>
-        m_getSystemComponent() = 0;
+    OSVR_COMMON_EXPORT virtual osvr::common::SystemComponent *
+    m_getSystemComponent() = 0;
 
     std::string const m_appId;
     InterfaceList m_interfaces;

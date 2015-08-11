@@ -122,7 +122,7 @@ osvr::common::PathTree const &OSVR_ClientContextObject::getPathTree() const {
     return m_getPathTree();
 }
 
-std::shared_ptr<osvr::common::SystemComponent> OSVR_ClientContextObject::getSystemComponent(){
+osvr::common::SystemComponent *OSVR_ClientContextObject::getSystemComponent() {
     return m_getSystemComponent();
 }
 
