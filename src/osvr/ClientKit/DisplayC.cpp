@@ -29,6 +29,8 @@
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Client/DisplayConfig.h>
 #include <osvr/Util/MacroToolsC.h>
+#include <osvr/Util/EigenExtras.h>
+#include <osvr/Util/EigenInterop.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -130,7 +132,7 @@ OSVR_ReturnCode osvrClientGetNumViewers(OSVR_DisplayConfig disp,
                                         OSVR_ViewerCount *viewers) {
     OSVR_VALIDATE_DISPLAY_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(viewers, "viewer count");
-    *viewers = disp->cfg->size();
+    *viewers = disp->cfg->getNumViewers();
     return OSVR_RETURN_SUCCESS;
 }
 OSVR_ReturnCode osvrClientGetViewerPose(OSVR_DisplayConfig disp,
@@ -139,8 +141,17 @@ OSVR_ReturnCode osvrClientGetViewerPose(OSVR_DisplayConfig disp,
     OSVR_VALIDATE_DISPLAY_CONFIG;
     OSVR_VALIDATE_VIEWER_ID;
     OSVR_VALIDATE_OUTPUT_PTR(pose, "viewer pose");
+    try {
+        *pose = disp->cfg->getViewer(viewer).getPose();
+        return OSVR_RETURN_SUCCESS;
+    } catch (osvr::client::NoPoseYet &) {
+        OSVR_DEV_VERBOSE("Error getting viewer pose: no pose yet available");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
 
-    /// @todo implement
+        OSVR_DEV_VERBOSE("Error getting viewer pose - exception: " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
     return OSVR_RETURN_FAILURE;
 }
 OSVR_ReturnCode osvrClientGetNumEyesForViewer(OSVR_DisplayConfig disp,
@@ -149,7 +160,7 @@ OSVR_ReturnCode osvrClientGetNumEyesForViewer(OSVR_DisplayConfig disp,
     OSVR_VALIDATE_DISPLAY_CONFIG;
     OSVR_VALIDATE_VIEWER_ID;
     OSVR_VALIDATE_OUTPUT_PTR(eyes, "eye count");
-    *eyes = disp->cfg->getViewer(viewer).size();
+    *eyes = disp->cfg->getNumViewerEyes(viewer);
     return OSVR_RETURN_SUCCESS;
 }
 
@@ -185,7 +196,7 @@ osvrClientGetNumSurfacesForViewerEye(OSVR_DisplayConfig disp,
     OSVR_VALIDATE_VIEWER_ID;
     OSVR_VALIDATE_EYE_ID;
     OSVR_VALIDATE_OUTPUT_PTR(surfaces, "surface count");
-    /// @todo implement
+    *surfaces = disp->cfg->getNumViewerEyeSurfaces(viewer, eye);
     return OSVR_RETURN_FAILURE;
 }
 
@@ -203,9 +214,15 @@ OSVR_ReturnCode osvrClientGetRelativeViewportForViewerEyeSurface(
     OSVR_VALIDATE_OUTPUT_PTR(bottom, "viewport bottom bound");
     OSVR_VALIDATE_OUTPUT_PTR(width, "viewport width");
     OSVR_VALIDATE_OUTPUT_PTR(height, "viewport height");
-    /// @todo implement
-    return OSVR_RETURN_FAILURE;
+    auto viewport = disp->cfg->getViewerEyeSurface(viewer, eye, surface)
+                        .getDisplayRelativeViewport();
+    *left = viewport.left;
+    *bottom = viewport.bottom;
+    *width = viewport.width;
+    *height = viewport.height;
+    return OSVR_RETURN_SUCCESS;
 }
+
 OSVR_ReturnCode osvrClientGetProjectionForViewerEyeSurface(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, double near, double far, OSVR_Matrix44 *matrix) {
@@ -222,6 +239,14 @@ OSVR_ReturnCode osvrClientGetProjectionForViewerEyeSurface(
         OSVR_DEV_VERBOSE("Can't specify a negative near or far distance!");
         return OSVR_RETURN_FAILURE;
     }
-    /// @todo connect to implementation
-    return OSVR_RETURN_FAILURE;
+    if (near == far) {
+        OSVR_DEV_VERBOSE("Can't specify equal near and far distances!");
+        return OSVR_RETURN_FAILURE;
+    }
+    // Transpose to get a matrix that works on column vectors.
+    osvr::util::matMap(*matrix) =
+        disp->cfg->getViewerEyeSurface(viewer, eye, surface)
+            .getProjection(near, far)
+            .transpose();
+    return OSVR_RETURN_SUCCESS;
 }

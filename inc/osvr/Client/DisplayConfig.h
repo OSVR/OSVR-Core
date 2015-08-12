@@ -45,41 +45,29 @@ namespace client {
     typedef unique_ptr<DisplayConfig> DisplayConfigPtr;
     class DisplayConfigFactory {
       public:
-        OSVR_CLIENT_EXPORT static DisplayConfigPtr create(OSVR_ClientContext ctx);
+        OSVR_CLIENT_EXPORT static DisplayConfigPtr
+        create(OSVR_ClientContext ctx);
     };
 
     class DisplayConfig {
       public:
-        inline OSVR_ViewerCount size() const {
-            return static_cast<OSVR_ViewerCount>(m_viewers.size());
-        }
-        inline Viewer &operator[](OSVR_ViewerCount index) {
-            return m_viewers[index];
-        }
-        inline Viewer const &operator[](OSVR_ViewerCount index) const {
-            return m_viewers[index];
-        }
-        inline OSVR_ViewerCount getNumViewers() const {
-            return size();
-        }
-        inline Viewer &getViewer(OSVR_ViewerCount viewer) {
-            return (*this)[viewer];
-        }
+        OSVR_ViewerCount getNumViewers() const;
+        Viewer &getViewer(OSVR_ViewerCount viewer);
+        Viewer const &getViewer(OSVR_ViewerCount viewer) const;
 
-        inline OSVR_EyeCount getNumViewerEyes(OSVR_ViewerCount viewer) const {
-            return (*this)[viewer].size();
-        }
+        OSVR_EyeCount getNumViewerEyes(OSVR_ViewerCount viewer) const;
+        ViewerEye &getViewerEye(OSVR_ViewerCount viewer, OSVR_EyeCount eye);
+        ViewerEye const &getViewerEye(OSVR_ViewerCount viewer,
+                                      OSVR_EyeCount eye) const;
 
-        inline ViewerEye &getViewerEye(OSVR_ViewerCount viewer,
-                                       OSVR_EyeCount eye) {
-            return (*this)[viewer][eye];
-        }
-        inline ViewerEye &getViewerEyeSurface(OSVR_ViewerCount viewer,
-                                              OSVR_EyeCount eye,
-                                              OSVR_SurfaceCount) {
-            /// @todo right now only a single surface per viewer eye
-            return getViewerEye(viewer, eye);
-        }
+        OSVR_SurfaceCount getNumViewerEyeSurfaces(OSVR_ViewerCount viewer,
+                                                  OSVR_EyeCount eye) const;
+        ViewerEye &getViewerEyeSurface(OSVR_ViewerCount viewer,
+                                       OSVR_EyeCount eye,
+                                       OSVR_SurfaceCount surface);
+        ViewerEye const &getViewerEyeSurface(OSVR_ViewerCount viewer,
+                                             OSVR_EyeCount eye,
+                                             OSVR_SurfaceCount surface) const;
 
       private:
         friend class DisplayConfigFactory;
@@ -87,6 +75,49 @@ namespace client {
         std::vector<Viewer> m_viewers;
     };
 
+    //-- inline implementations --//
+    inline OSVR_ViewerCount DisplayConfig::getNumViewers() const {
+        return static_cast<OSVR_ViewerCount>(m_viewers.size());
+    }
+
+    inline Viewer &DisplayConfig::getViewer(OSVR_ViewerCount viewer) {
+        return m_viewers[viewer];
+    }
+    inline Viewer const &
+    DisplayConfig::getViewer(OSVR_ViewerCount viewer) const {
+        return m_viewers[viewer];
+    }
+
+    inline OSVR_EyeCount
+    DisplayConfig::getNumViewerEyes(OSVR_ViewerCount viewer) const {
+        return getViewer(viewer).size();
+    }
+
+    inline ViewerEye &DisplayConfig::getViewerEye(OSVR_ViewerCount viewer,
+                                                  OSVR_EyeCount eye) {
+        return getViewer(viewer)[eye];
+    }
+    inline ViewerEye const &
+    DisplayConfig::getViewerEye(OSVR_ViewerCount viewer,
+                                OSVR_EyeCount eye) const {
+        return getViewer(viewer)[eye];
+    }
+    inline OSVR_SurfaceCount
+    DisplayConfig::getNumViewerEyeSurfaces(OSVR_ViewerCount viewer,
+                                           OSVR_EyeCount eye) const {
+        return getViewerEye(viewer, eye).size();
+    }
+    inline ViewerEye &
+    DisplayConfig::getViewerEyeSurface(OSVR_ViewerCount viewer,
+                                       OSVR_EyeCount eye, OSVR_SurfaceCount) {
+        /// @todo right now only a single surface per viewer eye
+        return getViewerEye(viewer, eye);
+    }
+    inline ViewerEye const &DisplayConfig::getViewerEyeSurface(
+        OSVR_ViewerCount viewer, OSVR_EyeCount eye, OSVR_SurfaceCount) const {
+        /// @todo right now only a single surface per viewer eye
+        return getViewerEye(viewer, eye);
+    }
 } // namespace client
 } // namespace osvr
 

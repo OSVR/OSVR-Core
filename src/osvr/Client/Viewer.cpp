@@ -24,6 +24,8 @@
 
 // Internal Includes
 #include <osvr/Client/Viewer.h>
+#include <osvr/Common/ReportTypes.h>
+#include <osvr/Common/ClientInterface.h>
 
 // Library/third-party includes
 // - none
@@ -35,6 +37,16 @@ namespace osvr {
 namespace client {
     Viewer::Viewer(OSVR_ClientContext ctx, const char path[]) {
         m_head = InternalInterfaceOwner(ctx, path);
+    }
+
+    OSVR_Pose3 Viewer::getPose() const {
+        OSVR_TimeValue timestamp;
+        OSVR_Pose3 pose;
+        bool hasState = m_head->getState<OSVR_PoseReport>(timestamp, pose);
+        if (!hasState) {
+            throw NoPoseYet();
+        }
+        return pose;
     }
 
 } // namespace client

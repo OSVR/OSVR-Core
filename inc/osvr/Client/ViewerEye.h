@@ -28,6 +28,7 @@
 // Internal Includes
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ChannelCountC.h>
+#include <osvr/Client/Export.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -77,11 +78,14 @@ namespace client {
             return m_surfaces[index];
         }
 #endif
-        OSVR_Pose3 getPose() const;
+        OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
         /// @brief Gets a matrix that takes in row vectors in a right-handed
         /// system and outputs signed Z.
-        Eigen::Matrix4d getProjection(double near, double far) const;
+        OSVR_CLIENT_EXPORT Eigen::Matrix4d getProjection(double near, double far) const;
 
+        Viewport getDisplayRelativeViewport() const {
+            return m_viewport;
+        }
       private:
         friend class DisplayConfigFactory;
         ViewerEye(Viewer &viewer, OSVR_ClientContext ctx,

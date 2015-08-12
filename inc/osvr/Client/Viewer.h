@@ -60,6 +60,8 @@ namespace client {
             return m_eyes[index];
         }
 
+        OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
+
       private:
         friend class DisplayConfigFactory;
         Viewer(OSVR_ClientContext ctx, const char path[]);
