@@ -51,7 +51,8 @@ target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     osvrClient
     osvrUtilCpp
-    osvrCommon)
+    osvrCommon
+    eigen-headers)
 
 ###
 # C++ (header-only) interface

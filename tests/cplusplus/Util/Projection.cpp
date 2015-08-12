@@ -35,7 +35,7 @@
 // - none
 
 using osvr::util::degrees;
-using osvr::util::detail::computeRect;
+using osvr::util::computeSymmetricFOVRect;
 
 typedef std::vector<double> BoundsList;
 namespace opts = osvr::util::projection_options;
@@ -50,15 +50,17 @@ template <typename OptionType>
 class ParameterizedProjectionTest : public ::testing::Test {
   public:
     static const opts::OptionType Options = OptionType::value;
-    //using Vec3 = typename std::conditional<opts::IsColumnVector<Options>::value, osvr::util::ColVector3d, osvr::util::RowVector3d>::type;
-    //using Vec4 = typename std::conditional<opts::IsColumnVector<Options>::value, osvr::util::ColVector4d, osvr::util::RowVector4d>::type;
+#if 0
+    using Vec3 = typename std::conditional<opts::IsColumnVector<Options>::value, osvr::util::ColVector3d, osvr::util::RowVector3d>::type;
+    using Vec4 = typename std::conditional<opts::IsColumnVector<Options>::value, osvr::util::ColVector4d, osvr::util::RowVector4d>::type;
+#endif
     using Vec3 = Eigen::Vector3d;
     using Vec4 = Eigen::Vector4d;
     static double getMinZ() {
         return opts::IsZOutputUnsigned<Options>::value ? 0 : -1;
     }
     ParameterizedProjectionTest()
-        : xBounds({ -1, 1 }), yBounds({ -1, 1 }), zBounds({ getMinZ(), 1 }) {
+        : xBounds({-1, 1}), yBounds({-1, 1}), zBounds({getMinZ(), 1}) {
         std::cout
             << "\n Left handed input: " << std::boolalpha
             << osvr::util::projection_options::IsLeftHandedInput<Options>::value
@@ -75,7 +77,7 @@ class ParameterizedProjectionTest : public ::testing::Test {
         std::cout << "Near: " << near << "\tFar: " << far << "\n";
     }
     osvr::util::Rectd computeSymmetricRect() const {
-        return computeRect(50. * degrees, 40. * degrees, near);
+        return computeSymmetricFOVRect(50. * degrees, 40. * degrees, near);
     }
 
     inline void tryProjection(osvr::util::Rectd const &rect) {
@@ -97,7 +99,8 @@ class ParameterizedProjectionTest : public ::testing::Test {
             for (auto y : yBounds) {
                 for (auto x : xBounds) {
                     Vec4 bound(x, y, z, 1);
-                    auto result = osvr::util::extractPoint((inv * bound).eval());
+                    auto result =
+                        osvr::util::extractPoint((inv * bound).eval());
                     std::cout << bound.transpose() << "\t<-\t"
                               << result.transpose() << "\n";
                     if (z == getMinZ()) {

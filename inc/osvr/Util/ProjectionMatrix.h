@@ -28,7 +28,6 @@
 // Internal Includes
 #include <osvr/Util/Rect.h>
 #include <osvr/Util/EigenCoreGeometry.h>
-#include <osvr/Util/TypePack.h>
 
 // Library/third-party includes
 // - none
@@ -44,6 +43,8 @@ namespace util {
     ///
     /// Resulting matrix operates on Eigen::Vector4d, which are row-matrices -
     /// transpose if you want it to work on column matrices.
+    ///
+    /// @todo Look into using Eigen::Projective3d?
     inline Eigen::Matrix4d createProjectionMatrix(Rectd const &bounds,
                                                   double near, double far) {
         // Convert from "left, right, bottom top, near, far" to the 4x4
@@ -58,10 +59,10 @@ namespace util {
         // Microsoft page describing this function.  These are elements
         // [2][3] and [3][2], which are swapped.
         // END APPARENTLY OUTDATED NOTE
-        auto right = bounds[Rectd::RIGHT];
-        auto left = bounds[Rectd::LEFT];
-        auto top = bounds[Rectd::TOP];
-        auto bottom = bounds[Rectd::BOTTOM];
+        auto const right = bounds[Rectd::RIGHT];
+        auto const left = bounds[Rectd::LEFT];
+        auto const top = bounds[Rectd::TOP];
+        auto const bottom = bounds[Rectd::BOTTOM];
 
         Eigen::Matrix4d mat;
         // clang-format off

@@ -49,6 +49,8 @@ OSVR_EXTERN_C_BEGIN
 /** @brief Opaque type of a display configuration. */
 typedef struct OSVR_DisplayConfigObject *OSVR_DisplayConfig;
 
+typedef int32_t OSVR_ViewportDimension;
+
 /** @brief Allocates a display configuration object. */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetDisplay(OSVR_ClientContext ctx, OSVR_DisplayConfig *disp);
@@ -63,24 +65,89 @@ osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetNumViewers(OSVR_DisplayConfig disp, OSVR_ViewerCount *viewers);
 
+/** @brief Get the center of projection/"eye point" for a viewer in a display
+    config.
+
+    Note that there may not necessarily be any surfaces rendered from this pose
+    (it's the unused "center" eye in a stereo configuration) so only use this if
+    it makes integration into your engine or existing applications (not
+    originally designed for stereo) easier.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
+    yet available, in which case the pose argument is unmodified.
+  */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerPose(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_Pose3 *pose);
+
 /** @brief Each viewer in a display config can have one or more "eyes" which
- * have a substantially similar pose */
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientGetNumEyesForViewer(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
-                              OSVR_EyeCount *eyes);
+    have a substantially similar pose
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumEyesForViewer(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount *eyes);
 
 /** @brief Get the center of projection/"eye point" for the given eye of a
- * viewer in a display config */
+    viewer in a display config
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
+    yet available, in which case the pose argument is unmodified.
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
                            OSVR_EyeCount eye, OSVR_Pose3 *pose);
 
 /** @brief Each eye of each viewer in a display config has one or more surfaces
  * (aka "screens") on which content should be rendered. */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumSurfacesForViewerEye(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount *surfaces);
+
+/** @brief Get the dimensions/location of the viewport **within the display
+    input** for a surface seen by an eye of a viewer
+    in a display config. (This does not include other video inputs that may be
+    on a single virtual desktop, etc. and does not necessarily indicate that a
+   viewport in the sense of glViewport must be created with these parameters,
+   though the output order matches for convenience.)
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param left Output: Distance in pixels from the left of the video input to
+    the left of the viewport.
+    @param bottom Output: Distance in pixels from the bottom of the video input
+    to the bottom of the viewport.
+    @param width Output: Width of viewport in pixels.
+    @param height Output: Height of viewport in pixels.
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientGetNumSurfacesForViewerEye(OSVR_DisplayConfig disp,
-                                     OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-                                     OSVR_SurfaceCount *surfaces);
+osvrClientGetRelativeViewportForViewerEyeSurface(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_ViewportDimension *left,
+    OSVR_ViewportDimension *bottom, OSVR_ViewportDimension *width,
+    OSVR_ViewportDimension *height);
+
+/** @brief Get the projection matrix for a surface seen by an eye of a viewer
+   in a display config.  Currently returns a matrix that transforms column
+   vectors from a right-handed coordinate system to a volume with signed Z (that
+   is, near plane mapped to -1 and far to 1) - that is, the convention used by
+   the OpenGL fixed-function pipeline. A parameterization is forthcoming.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param near Distance to near clipping plane - must be nonzero, typically
+    positive.
+    @param far Distance to far clipping plane - must be nonzero, typically
+    positive and greater than near.
+    @param matrix Output projection matrix, row-major storage order.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetProjectionForViewerEyeSurface(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, double near, double far, OSVR_Matrix44 *matrix);
 
 OSVR_EXTERN_C_END
 

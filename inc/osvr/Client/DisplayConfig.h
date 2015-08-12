@@ -45,7 +45,7 @@ namespace client {
     typedef unique_ptr<DisplayConfig> DisplayConfigPtr;
     class DisplayConfigFactory {
       public:
-        OSVR_CLIENT_EXPORT DisplayConfigPtr create(OSVR_ClientContext ctx);
+        OSVR_CLIENT_EXPORT static DisplayConfigPtr create(OSVR_ClientContext ctx);
     };
 
     class DisplayConfig {
@@ -59,11 +59,31 @@ namespace client {
         inline Viewer const &operator[](OSVR_ViewerCount index) const {
             return m_viewers[index];
         }
+        inline OSVR_ViewerCount getNumViewers() const {
+            return size();
+        }
+        inline Viewer &getViewer(OSVR_ViewerCount viewer) {
+            return (*this)[viewer];
+        }
+
+        inline OSVR_EyeCount getNumViewerEyes(OSVR_ViewerCount viewer) const {
+            return (*this)[viewer].size();
+        }
+
+        inline ViewerEye &getViewerEye(OSVR_ViewerCount viewer,
+                                       OSVR_EyeCount eye) {
+            return (*this)[viewer][eye];
+        }
+        inline ViewerEye &getViewerEyeSurface(OSVR_ViewerCount viewer,
+                                              OSVR_EyeCount eye,
+                                              OSVR_SurfaceCount) {
+            /// @todo right now only a single surface per viewer eye
+            return getViewerEye(viewer, eye);
+        }
 
       private:
         friend class DisplayConfigFactory;
-        DisplayConfig(OSVR_ClientContext ctx);
-        InternalInterfaceOwner m_head;
+        DisplayConfig();
         std::vector<Viewer> m_viewers;
     };
 

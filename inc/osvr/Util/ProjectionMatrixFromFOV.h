@@ -37,35 +37,44 @@
 
 namespace osvr {
 namespace util {
-    namespace detail {
-        /// @brief Compute a rectangle at the near clipping plane for the given
-        /// fov values.
-        template <typename System>
-        inline Rectd computeRect(AngleGeneric<System> hFov,
-                                 AngleGeneric<System> vFov, double near) {
-            // Scale the unit X and Y parameters based on the near
-            // plane to make the field of view match what we expect.
-            // The tangent of the view angle in either axis is the
-            // in-plane distance (left, right, top, or bottom) divided
-            // by the distance to the near clipping plane.  We have
-            // the angle specified and for now we assume a unit distance
-            // to the window (we will adjust that later).  Given
-            // this, we solve for the tangent of half the angle
-            // (each of left and right provide half, as do top and
-            // bottom).
-            Rectd ret;
-            ret[Rectd::RIGHT] = std::tan(getRadians(hFov / 2.));
-            ret[Rectd::LEFT] = -ret[Rectd::RIGHT];
-            ret[Rectd::TOP] = std::tan(getRadians(vFov / 2.));
-            ret[Rectd::BOTTOM] = -ret[Rectd::TOP];
+    /// @brief Compute a rectangle at unit distance for the given fov values.
+    template <typename System>
+    inline Rectd computeSymmetricFOVRect(AngleGeneric<System> hFov,
+                                         AngleGeneric<System> vFov) {
+        // Scale the unit X and Y parameters based on the near
+        // plane to make the field of view match what we expect.
+        // The tangent of the view angle in either axis is the
+        // in-plane distance (left, right, top, or bottom) divided
+        // by the distance to the near clipping plane.  We have
+        // the angle specified and for now we assume a unit distance
+        // to the window (corrected later either in the alternate
+        // computeSymmetricFOVRect signature or after caching but before
+        // passing to computeProjectionMatrix).  Given this, we solve for
+        // the tangent of half the angle (each of left and right provide
+        // half, as do top and bottom).
+        Rectd ret;
+        ret[Rectd::RIGHT] = std::tan(getRadians(hFov / 2.));
+        ret[Rectd::LEFT] = -ret[Rectd::RIGHT];
+        ret[Rectd::TOP] = std::tan(getRadians(vFov / 2.));
+        ret[Rectd::BOTTOM] = -ret[Rectd::TOP];
 
-            // Scale the in-plane positions based on the near plane to put
-            // the virtual viewing window on the near plane with the eye at the
-            // origin.
-            ret.data() *= near;
-            return ret;
-        }
-    } // namespace detail
+        return ret;
+    }
+    /// @brief Compute a rectangle at the near clipping plane for the given
+    /// fov values.
+    template <typename System>
+    inline Rectd computeSymmetricFOVRect(AngleGeneric<System> hFov,
+                                         AngleGeneric<System> vFov,
+                                         double near) {
+        // Get the rectangle at the unit distance
+        Rectd ret = computeSymmetricFOVRect(hFov, vFov);
+
+        // Scale the in-plane positions based on the near plane to put
+        // the virtual viewing window on the near plane with the eye at the
+        // origin.
+        ret.data() *= near;
+        return ret;
+    }
 
     template <typename System>
     inline Eigen::Matrix4d
@@ -77,7 +86,7 @@ namespace util {
         /// will always be zero (and other computations may include an
         /// unnecessary addition/subtraction). But, only one place to introduce
         /// bugs.
-        return createProjectionMatrix(detail::computeRect(hFov, vfov, near),
+        return createProjectionMatrix(computeSymmetricFOVRect(hFov, vfov, near),
                                       near, far);
     }
 } // namespace util

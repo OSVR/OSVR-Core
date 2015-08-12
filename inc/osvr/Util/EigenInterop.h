@@ -28,9 +28,11 @@
 
 // Internal Includes
 #include <osvr/Util/Pose3C.h>
+#include <osvr/Util/Matrix44C.h>
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/EigenExtras.h>
 
 // Standard includes
 // - none
@@ -49,13 +51,31 @@ namespace util {
     /// @returns an Eigen::Map allowing use of the OSVR_Vec3 as an
     /// Eigen::Vector3d.
     inline Eigen::Map<Eigen::Vector3d> vecMap(OSVR_Vec3 &vec) {
-        return Eigen::Map<Eigen::Vector3d>(vec.data);
+        return Eigen::Map<Eigen::Vector3d>(&(vec.data[0]));
     }
 
     /// @overload
     /// For constant vectors.
     inline Eigen::Map<const Eigen::Vector3d> vecMap(OSVR_Vec3 const &vec) {
-        return Eigen::Map<const Eigen::Vector3d>(vec.data);
+        return Eigen::Map<const Eigen::Vector3d>(&(vec.data[0]));
+    }
+
+    /// @brief Wrap an OSVR_Matrix44 in an Eigen object that allows it to
+    /// interoperate with Eigen as though it were an Eigen::Matrix (4x4,
+    /// row-major)
+    ///
+    /// @param mat A matrix to wrap
+    /// @returns an Eigen::Map allowing use of the OSVR_Matrix44 as an
+    /// Eigen::Matrix.
+    inline Eigen::Map<util::RowMatrix44d> matMap(OSVR_Matrix44 &mat) {
+        return Eigen::Map<util::RowMatrix44d>(&(mat.data[0][0]));
+    }
+
+    /// @overload
+    /// For constant matrices.
+    inline Eigen::Map<const util::RowMatrix44d>
+    matMap(OSVR_Matrix44 const &mat) {
+        return Eigen::Map<const util::RowMatrix44d>(&(mat.data[0][0]));
     }
 
     /// @brief Convert an OSVR_Quaternion to an Eigen::Quaterniond

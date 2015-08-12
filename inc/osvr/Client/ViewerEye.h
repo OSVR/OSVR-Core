@@ -29,22 +29,43 @@
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
-#include <osvr/Client/ViewerEyeSurface.h>
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/Rect.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <vector>
+#include <stdexcept>
 
 namespace osvr {
 namespace client {
     class DisplayConfigFactory;
     class Viewer;
+    struct Viewport {
+        int32_t left;
+        int32_t bottom;
+        int32_t width;
+        int32_t height;
+    };
+    struct NoPoseYet : std::runtime_error {
+        NoPoseYet()
+            : std::runtime_error("No pose data yet for the interface!") {}
+    };
     class ViewerEye {
       public:
+        ViewerEye(ViewerEye const &) = delete;
+        ViewerEye(ViewerEye &&other)
+            : m_pose(std::move(other.m_pose)),
+              m_offset(std::move(other.m_offset)), m_parent(other.m_parent),
+              m_viewport(other.m_viewport),
+              m_unitBounds(std::move(other.m_unitBounds)),
+              m_rot180(other.m_rot180), m_pitchTilt(other.m_pitchTilt) {}
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        inline OSVR_SurfaceCount size() const { return 1; }
+#if 0
         inline OSVR_SurfaceCount size() const {
             return static_cast<OSVR_SurfaceCount>(m_surfaces.size());
         }
@@ -55,17 +76,28 @@ namespace client {
         operator[](OSVR_SurfaceCount index) const {
             return m_surfaces[index];
         }
-
+#endif
         OSVR_Pose3 getPose() const;
+        /// @brief Gets a matrix that takes in row vectors in a right-handed
+        /// system and outputs signed Z.
+        Eigen::Matrix4d getProjection(double near, double far) const;
 
       private:
         friend class DisplayConfigFactory;
-        ViewerEye(Viewer *viewer, OSVR_ClientContext ctx,
-                  Eigen::Vector3d const &offset, const char path[]);
+        ViewerEye(Viewer &viewer, OSVR_ClientContext ctx,
+                  Eigen::Vector3d const &offset, const char path[],
+                  Viewport &&viewport, util::Rectd &&unitBounds, bool rot180,
+                  double pitchTilt);
         InternalInterfaceOwner m_pose;
         Eigen::Vector3d m_offset;
+#if 0
         std::vector<ViewerEyeSurface> m_surfaces;
-        Viewer *m_parent;
+#endif
+        Viewer &m_parent;
+        Viewport m_viewport;
+        util::Rectd m_unitBounds;
+        bool m_rot180;
+        double m_pitchTilt;
     };
 
 } // namespace client

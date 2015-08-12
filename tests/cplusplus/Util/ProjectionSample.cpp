@@ -37,7 +37,7 @@
 #include <cmath>
 
 using osvr::util::degrees;
-using osvr::util::detail::computeRect;
+using osvr::util::computeSymmetricFOVRect;
 
 typedef std::vector<double> BoundsList;
 namespace opts = osvr::util::projection_options;
@@ -45,8 +45,9 @@ namespace opts = osvr::util::projection_options;
 class ProjectionDemo {
   public:
     ProjectionDemo(double zNear, double zFar)
-        : ProjectionDemo(zNear, zFar,
-                         computeRect(50. * degrees, 40. * degrees, zNear)) {}
+        : ProjectionDemo(
+              zNear, zFar,
+              computeSymmetricFOVRect(50. * degrees, 40. * degrees, zNear)) {}
     ProjectionDemo(double zNear, double zFar, osvr::util::Rectd &&inputRect)
         : near(zNear), far(zFar), rect(std::move(inputRect)) {
         xBounds.assign({-1, 1});
@@ -112,7 +113,7 @@ int main(int argc, char *argv[]) {
     double near = 0.1;
     double far = 1000;
     auto rect =
-        osvr::util::detail::computeRect(50. * degrees, 40. * degrees, near);
+        osvr::util::computeSymmetricFOVRect(50. * degrees, 40. * degrees, near);
     std::cout << "Near: " << near << "\tFar: " << far << "\n";
     std::cout << rect << std::endl;
     auto projection = osvr::util::createProjectionMatrix(rect, near, far);
@@ -131,7 +132,6 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
 
     {
         ProjectionDemo demo(0.1, 1000);

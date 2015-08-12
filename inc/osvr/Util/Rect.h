@@ -43,7 +43,7 @@ namespace util {
         typedef Rect type;
         typedef Scalar value_type;
         typedef Eigen::Matrix<Scalar, 4, 1> storage_type;
-        enum Side { LEFT = 0, TOP = 1, RIGHT = 2, BOTTOM = 3 };
+        enum Side { LEFT = 0, RIGHT = 1, TOP = 2, BOTTOM = 3 };
 
         /// @brief Access by side
         value_type &operator[](Side s) {
@@ -71,8 +71,8 @@ namespace util {
     StreamType &operator<<(StreamType &os, Rect<Scalar> const &rect) {
         typedef Rect<Scalar> R;
         os << "L: " << rect[R::LEFT];
-        os << " T: " << rect[R::TOP];
         os << " R: " << rect[R::RIGHT];
+        os << " T: " << rect[R::TOP];
         os << " B: " << rect[R::BOTTOM];
         return os;
     }
