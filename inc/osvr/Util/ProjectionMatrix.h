@@ -158,8 +158,7 @@ namespace util {
         // Convert from "left, right, bottom top, near, far" to the 4x4
         // transform.
         // See https://www.opengl.org/sdk/docs/man2/xhtml/glFrustum.xml
-        // BEGIN APPARENTLY OUTDATED NOTE - works more accurately if you ignore
-        // that.
+        // BEGIN APPARENTLY OUTDATED NOTE - works accurately if you ignore it
         // NOTE: There is actually a bug in the documentation.  If you
         // call glFrustum() and print out the results and compare them,
         // the value D from that page holds -1 and the value where there
