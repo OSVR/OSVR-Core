@@ -83,8 +83,9 @@ namespace util {
     /// @brief Pulls the 3-dimensional point or vector from a 4-d vec,
     /// performing division by w if nonzero.
     inline Eigen::Vector3d extractPoint(Eigen::Vector4d const &homogenous) {
-        return homogenous[3] == 0 ? homogenous.head(3).eval()
-                                  : (homogenous.head(3) / homogenous[3]).eval();
+        return homogenous[3] == 0
+                   ? homogenous.head<3>().eval()
+                   : (homogenous.head<3>() / homogenous[3]).eval();
     }
 
     typedef Eigen::Matrix<double, 4, 4, Eigen::RowMajor> RowMatrix44d;
