@@ -51,13 +51,22 @@ typedef struct OSVR_DisplayConfigObject *OSVR_DisplayConfig;
 
 typedef int32_t OSVR_ViewportDimension;
 
-/** @brief Allocates a display configuration object. */
+/** @brief Allocates a display configuration object.
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed or some other
+    error occured, in which case the output argument is unmodified.
+  */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetDisplay(OSVR_ClientContext ctx, OSVR_DisplayConfig *disp);
 
 /** @brief Frees a display configuration object. The corresponding context must
- * still be open. If you fail to call this, it will be automatically cleaned up
- * when the corresponding context is closed.*/
+    still be open.
+
+    If you fail to call this, it will be automatically called as part of
+    clean-up when the corresponding context is closed.
+
+    @return OSVR_RETURN_FAILURE if a null config was passed, or if the given
+    display object was already freed.
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 
@@ -148,6 +157,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetProjectionForViewerEyeSurface(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, double near, double far, OSVR_Matrix44 *matrix);
+
+/** @todo for a surface: get needs distortion, get distortion shader, get distortion shader parameters */
 
 OSVR_EXTERN_C_END
 
