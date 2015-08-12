@@ -37,19 +37,82 @@
 #include <cmath>
 
 using osvr::util::degrees;
+using osvr::util::detail::computeRect;
+
+typedef std::vector<double> BoundsList;
+namespace opts = osvr::util::projection_options;
+
+class ProjectionDemo {
+  public:
+    ProjectionDemo(double zNear, double zFar)
+        : ProjectionDemo(zNear, zFar,
+                         computeRect(50. * degrees, 40. * degrees, zNear)) {}
+    ProjectionDemo(double zNear, double zFar, osvr::util::Rectd &&inputRect)
+        : near(zNear), far(zFar), rect(std::move(inputRect)) {
+        xBounds.assign({-1, 1});
+        yBounds.assign({-1, 1});
+        std::cout << "Near: " << near << "\tFar: " << far << "\n";
+        std::cout << rect << std::endl;
+    }
+    template <opts::OptionType Options = 0> inline void tryProjection() {
+        BoundsList zBounds{
+            {(osvr::util::projection_options::IsZOutputUnsigned<Options>::value
+                  ? 0.
+                  : -1.),
+             1}};
+        std::cout
+            << "\n Left handed input: " << std::boolalpha
+            << osvr::util::projection_options::IsLeftHandedInput<Options>::value
+            << "\n";
+        std::cout
+            << "Unsigned Z output: " << std::boolalpha
+            << osvr::util::projection_options::IsZOutputUnsigned<Options>::value
+            << "\n";
+        auto projection =
+            osvr::util::parameterizedCreateProjectionMatrix<Options>(rect, near,
+                                                                     far);
+        std::cout << "Projection matrix:\n";
+        std::cout << projection << std::endl;
+
+        std::cout << "Frustum corners:\n";
+        Eigen::Matrix4d inv = projection.inverse();
+        for (auto z : zBounds) {
+            for (auto y : yBounds) {
+                for (auto x : xBounds) {
+                    Eigen::Vector4d bound(x, y, z, 1);
+                    std::cout
+                        << bound.transpose() << "\t<-\t"
+                        << osvr::util::extractPoint(inv * bound).transpose()
+                        << "\n";
+                }
+            }
+        }
+    }
+
+  private:
+    double near;
+    double far;
+    osvr::util::Rectd rect;
+    BoundsList xBounds;
+    BoundsList yBounds;
+};
 
 int main(int argc, char *argv[]) {
-    typedef std::vector<double> BoundsList;
     BoundsList xBounds;
     xBounds.push_back(-1);
     xBounds.push_back(1);
 
     BoundsList yBounds(xBounds);
+#if 1
     BoundsList zBounds(xBounds);
+#else
+    BoundsList zBounds{{0., 1.}};
+#endif
 
     double near = 0.1;
     double far = 1000;
-    auto rect = osvr::util::detail::computeRect(50. * degrees, 40. * degrees, near);
+    auto rect =
+        osvr::util::detail::computeRect(50. * degrees, 40. * degrees, near);
     std::cout << "Near: " << near << "\tFar: " << far << "\n";
     std::cout << rect << std::endl;
     auto projection = osvr::util::createProjectionMatrix(rect, near, far);
@@ -63,9 +126,20 @@ int main(int argc, char *argv[]) {
             for (auto x : xBounds) {
                 Eigen::Vector4d bound(x, y, z, 1);
                 std::cout << bound.transpose() << "\t<-\t"
-                          << osvr::util::extractPoint(inv * bound).transpose() << "\n";
+                          << osvr::util::extractPoint(inv * bound).transpose()
+                          << "\n";
             }
         }
+    }
+
+
+    {
+        ProjectionDemo demo(0.1, 1000);
+        demo.tryProjection<0>();
+        demo.tryProjection<opts::LeftHandedInput>();
+        demo.tryProjection<opts::ZOutputUnsigned>();
+        demo.tryProjection<opts::LeftHandedInput | opts::ZOutputUnsigned>();
+        return 0;
     }
     return 0;
 }

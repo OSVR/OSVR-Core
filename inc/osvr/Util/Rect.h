@@ -68,7 +68,7 @@ namespace util {
     typedef Rect<> Rectd;
 
     template <typename StreamType, typename Scalar>
-    StreamType &operator<<(StreamType &os, Rect<Scalar> &rect) {
+    StreamType &operator<<(StreamType &os, Rect<Scalar> const &rect) {
         typedef Rect<Scalar> R;
         os << "L: " << rect[R::LEFT];
         os << " T: " << rect[R::TOP];

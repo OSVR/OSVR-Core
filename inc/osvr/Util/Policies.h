@@ -98,7 +98,7 @@ namespace util {
 #endif
         };
         namespace detail {
-            template <typename T> struct GetPolicyListImpl;
+            template <typename Derived> struct GetPolicyListImpl;
             template <typename Derived, typename PolicyClass>
             struct GetPolicyListImpl<SinglePolicyBase<Derived, PolicyClass>> {
                 using arg = SinglePolicyBase<Derived, PolicyClass>;
@@ -111,14 +111,21 @@ namespace util {
                 using arg = PolicyCompositeBase<PolicyClass, Policies>;
                 using type = typename arg::policy_list;
             };
+            template <typename PolicyClass, typename Derived>
+            struct GetPolicyListImpl<PolicyBase<Derived, PolicyClass>>
+                : GetPolicyListImpl<Derived> {};
         } // namespace detail
-        template <typename T>
-        using GetPolicyList = typepack::t_<detail::GetPolicyListImpl<T>>;
+
+        /// @brief Given the Derived parameter of a PolicyBase type, retrieves
+        /// the typepack list<> of policies.
+        template <typename Derived>
+        using GetPolicyList = typepack::t_<detail::GetPolicyListImpl<Derived>>;
+
+        /// @brief Gets a type containing
         template <typename PolicyClass, typename Derived, typename OtherDerived>
-        using PolicyConcat =
-            detail::PolicyCompositeBase<PolicyClass,
-                                typepack::concat<GetPolicyList<Derived>,
-                                                 GetPolicyList<OtherDerived>>>;
+        using PolicyConcat = detail::PolicyCompositeBase<
+            PolicyClass, typepack::concat<GetPolicyList<Derived>,
+                                          GetPolicyList<OtherDerived>>>;
 
         template <typename PolicyClass, typename Derived, typename OtherDerived>
         inline PolicyConcat<PolicyClass, Derived, OtherDerived>
@@ -126,7 +133,12 @@ namespace util {
                   PolicyBase<OtherDerived, PolicyClass> const &) {
             return PolicyConcat<PolicyClass, Derived, OtherDerived>{};
         }
-    }
+
+        namespace detail {
+            template <typename Derived, typename DesiredPolicy>
+            struct HasPolicyImpl {};
+        } // namespace detail
+    }     // namespace policies
 } // namespace util
 } // namespace osvr
 #endif // INCLUDED_Policies_h_GUID_84C007F4_C919_479B_5766_E7AEB55FFB8F
