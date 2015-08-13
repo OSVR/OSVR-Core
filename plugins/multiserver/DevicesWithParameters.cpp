@@ -43,6 +43,7 @@
 #include <memory>
 #include <string>
 #include <string.h>
+#include <utility>
 
 namespace {
 /// @brief Manage an array of dynamically allocated c-strings, terminated with a

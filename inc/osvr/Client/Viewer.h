@@ -36,7 +36,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <utility>
 
 namespace osvr {
 namespace client {

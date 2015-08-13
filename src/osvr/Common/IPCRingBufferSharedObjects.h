@@ -37,7 +37,7 @@
 #include <boost/noncopyable.hpp>
 
 // Standard includes
-// - none
+#include <utility>
 
 namespace osvr {
 namespace common {

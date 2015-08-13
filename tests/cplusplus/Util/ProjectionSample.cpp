@@ -35,6 +35,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <utility>
 
 using osvr::util::degrees;
 using osvr::util::computeSymmetricFOVRect;

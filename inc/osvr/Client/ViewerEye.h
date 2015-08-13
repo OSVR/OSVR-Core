@@ -40,6 +40,7 @@
 // Standard includes
 #include <vector>
 #include <stdexcept>
+#include <utility>
 
 namespace osvr {
 namespace client {
