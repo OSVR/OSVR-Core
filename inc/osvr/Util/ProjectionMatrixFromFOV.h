@@ -72,7 +72,7 @@ namespace util {
         // Scale the in-plane positions based on the near plane to put
         // the virtual viewing window on the near plane with the eye at the
         // origin.
-        ret.data() *= near;
+        ret *= near;
         return ret;
     }
 

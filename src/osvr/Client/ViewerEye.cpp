@@ -55,7 +55,7 @@ namespace client {
         // Scale the in-plane positions based on the near plane to put
         // the virtual viewing window on the near plane with the eye at the
         // origin.
-        rect.data() *= near;
+        rect *= near;
 
         /// @todo Incorporate any rotation of the lenses around the eye Y axis
         // (such as the Oculus DK2) by shifting the boundaries.
