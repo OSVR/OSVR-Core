@@ -46,6 +46,8 @@ OSVR_EXTERN_C_BEGIN
 
 /** @brief A structure defining a 4x4 matrix. Not to be used for general pose
     data, that can be more descriptively described with OSVR_Pose3.
+
+    Row-major memory layout (C convention) of 16 `double` values.
 */
 typedef struct OSVR_Matrix44 {
     /** @brief Data */
@@ -54,8 +56,10 @@ typedef struct OSVR_Matrix44 {
 
 /** @brief Set a matrix to identity */
 OSVR_INLINE void osvrMatrix44SetIdentity(OSVR_Matrix44 *mat) {
-    for (unsigned int i = 0; i < 4; ++i) {
-        for (unsigned int j = 0; j < 4; ++j) {
+    unsigned int i;
+    for (i = 0; i < 4; ++i) {
+        unsigned int j;
+        for (j = 0; j < 4; ++j) {
             mat->data[i][j] = (i == j ? 1. : 0.);
         }
     }

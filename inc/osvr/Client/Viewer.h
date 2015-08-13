@@ -41,21 +41,22 @@
 namespace osvr {
 namespace client {
     class DisplayConfigFactory;
-    class Viewer;
-    class ViewerEye;
-    class ViewerEyeSurface;
     class Viewer {
       public:
         Viewer(Viewer const &) = delete;
+        Viewer &operator=(Viewer const &) = delete;
         Viewer(Viewer &&other)
             : m_head(std::move(other.m_head)), m_eyes(std::move(other.m_eyes)) {
         }
+
         inline OSVR_EyeCount size() const {
             return static_cast<OSVR_EyeCount>(m_eyes.size());
         }
+
         inline ViewerEye &operator[](OSVR_EyeCount index) {
             return m_eyes[index];
         }
+
         inline ViewerEye const &operator[](OSVR_EyeCount index) const {
             return m_eyes[index];
         }

@@ -95,21 +95,17 @@ namespace client {
             return *this;
         }
 
+        typedef osvr::common::ClientInterface contained_type;
+        typedef contained_type &reference;
+        typedef contained_type *pointer;
+
         /// @brief Check to see if valid
         explicit operator bool() const { return nullptr != m_iface; }
 
         /// @name Act like a pointer
         /// @{
-        osvr::common::ClientInterface &operator*() { return *m_iface; }
-
-        osvr::common::ClientInterface const &operator*() const {
-            return *m_iface;
-        }
-
-        osvr::common::ClientInterface *operator->() { return m_iface; }
-        osvr::common::ClientInterface const *operator->() const {
-            return m_iface;
-        }
+        reference operator*() const { return *m_iface; }
+        pointer operator->() const { return m_iface; }
         ///@}
 
         /// @brief Destructor - frees interface.

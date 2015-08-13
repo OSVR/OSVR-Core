@@ -103,13 +103,12 @@ namespace client {
         return util::createProjectionMatrix(rect, near, far);
     }
 
-    ViewerEye::ViewerEye(Viewer &viewer, OSVR_ClientContext ctx,
-                         Eigen::Vector3d const &offset, const char path[],
-                         Viewport &&viewport, util::Rectd &&unitBounds,
-                         bool rot180, double pitchTilt)
-        : m_pose(ctx, path), m_offset(offset), m_parent(viewer),
-          m_viewport(viewport), m_unitBounds(unitBounds), m_rot180(rot180),
-          m_pitchTilt(pitchTilt) {}
+    ViewerEye::ViewerEye(OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
+                         const char path[], Viewport &&viewport,
+                         util::Rectd &&unitBounds, bool rot180,
+                         double pitchTilt)
+        : m_pose(ctx, path), m_offset(offset), m_viewport(viewport),
+          m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt) {}
 
 } // namespace client
 } // namespace osvr

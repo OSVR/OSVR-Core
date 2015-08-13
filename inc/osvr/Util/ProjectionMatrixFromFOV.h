@@ -86,7 +86,7 @@ namespace util {
         /// will always be zero (and other computations may include an
         /// unnecessary addition/subtraction). But, only one place to introduce
         /// bugs.
-        return createProjectionMatrix(computeSymmetricFOVRect(hFov, vfov, near),
+        return createProjectionMatrix(computeSymmetricFOVRect(hFov, vFov, near),
                                       near, far);
     }
 } // namespace util

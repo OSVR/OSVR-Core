@@ -37,14 +37,10 @@
 namespace osvr {
 namespace client {
     class DisplayConfigFactory;
-    class ViewerEye;
     class ViewerEyeSurface {
       public:
-        explicit ViewerEyeSurface(ViewerEye *parent) : m_parent(parent) {}
-        ViewerEye &eye() { return *m_parent; }
-
       private:
-        ViewerEye *m_parent;
+        friend class DisplayConfigFactory;
     };
 
 } // namespace client

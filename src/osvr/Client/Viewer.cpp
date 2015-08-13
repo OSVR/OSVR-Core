@@ -35,9 +35,8 @@
 
 namespace osvr {
 namespace client {
-    Viewer::Viewer(OSVR_ClientContext ctx, const char path[]) {
-        m_head = InternalInterfaceOwner(ctx, path);
-    }
+    Viewer::Viewer(OSVR_ClientContext ctx, const char path[])
+        : m_head(ctx, path) {}
 
     OSVR_Pose3 Viewer::getPose() const {
         OSVR_TimeValue timestamp;

@@ -48,9 +48,9 @@ namespace util {
         /// integer arguments.
         template <int Size, int _Options = Eigen::ColMajor,
                   typename Scalar = double>
-        using VectorImpl =
-            Eigen::Matrix<Scalar, (_Options & Eigen::RowMajorBit) ? Size : 1,
-                          (!(_Options & Eigen::RowMajorBit)) ? Size : 1>;
+        using VectorImpl = Eigen::Matrix < Scalar,
+              (_Options & Eigen::RowMajorBit) ? Size : 1,
+              (!(_Options & Eigen::RowMajorBit)) ? Size : 1 > ;
         /// @brief Creates a vector given the RowMajor or ColMajor type
         /// arguments.
         template <int Size, typename Ordering, typename Scalar = double>
@@ -70,14 +70,14 @@ namespace util {
     makeHomogeneousPoint(Eigen::MatrixBase<Derived> const &vec,
                          Ordering * = col_major) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-        return (Vector<4, Ordering>() << vec, 1).finished();
+        return (detail::Vector<4, Ordering>() << vec, 1).finished();
     }
     template <typename Derived, typename Ordering>
     inline detail::Vector<4, Ordering>
     makeHomogeneousVector(Eigen::MatrixBase<Derived> const &vec,
                           Ordering const * = col_major) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-        return (Vector<4, Ordering>() << vec, 0).finished();
+        return (detail::Vector<4, Ordering>() << vec, 0).finished();
     }
 
 #if 0

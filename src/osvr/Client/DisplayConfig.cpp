@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/Client/DisplayConfig.h>
 #include <osvr/Util/ProjectionMatrixFromFOV.h>
+#include <osvr/Util/Verbosity.h>
 #include "DisplayDescriptorSchema1.h"
 
 // Library/third-party includes
@@ -36,10 +37,11 @@
 namespace osvr {
 namespace client {
     /// @param eye 0 for left, 1 for right
+    /// @todo handle swapeyes? - just for calls to this function
     inline static Viewport
     computeViewport(uint8_t eye,
                     display_schema_1::DisplayDescriptor &descriptor) {
-        Viewport viewport = {0};
+        Viewport viewport;
         // Set up the viewport based on the display resolution and the
         // display configuration.
         switch (descriptor.getDisplayMode()) {
@@ -52,14 +54,14 @@ namespace client {
             viewport.bottom = 0;
             viewport.height = descriptor.getDisplayHeight();
             viewport.width = descriptor.getDisplayWidth() / 2;
-            // Zeroeth eye at left, first eye starts in the middle.
+            // Eye 0 starts at the left, eye 1 starts in the middle.
             viewport.left = eye * viewport.width;
             break;
         case display_schema_1::DisplayDescriptor::VERTICAL_SIDE_BY_SIDE:
             viewport.left = 0;
             viewport.width = descriptor.getDisplayWidth();
             viewport.height = descriptor.getDisplayHeight() / 2;
-            // Zeroeth eye in the top half, first eye at the bottom.
+            // Eye 0 in the top half, eye 1 at the bottom.
             if (eye == 0) {
                 viewport.bottom = viewport.height;
             } else {
@@ -81,34 +83,51 @@ namespace client {
     static const char HEAD_PATH[] = "/me/head";
     DisplayConfigPtr DisplayConfigFactory::create(OSVR_ClientContext ctx) {
         DisplayConfigPtr cfg(new DisplayConfig);
-        auto const descriptorString = ctx->getStringParameter("/display");
-        auto desc = display_schema_1::DisplayDescriptor(descriptorString);
-        cfg->m_viewers.emplace_back(Viewer(ctx, HEAD_PATH));
-        auto &viewer = cfg->m_viewers.front();
-        auto eyesDesc = desc.getEyes();
-        std::vector<uint8_t> eyeIndices;
-        Eigen::Vector3d offset;
-        if (eyesDesc.size() == 2) {
-            // stereo
-            offset = desc.getIPDMeters() / 2. * Eigen::Vector3d::UnitX();
-            eyeIndices = {0, 1};
-        } else {
-            // if (eyesDesc.size() == 1)
-            // mono
-            offset = Eigen::Vector3d::Zero();
-            eyeIndices = {0};
-        }
-        for (auto eye : eyeIndices) {
-            double offsetFactor =
-                (2. * eye) - 1; // turns 0 into -1 and 1 into 1. Doesn't affect
-                                // mono, which has a zero offset vector.
+        try {
+            auto const descriptorString = ctx->getStringParameter("/display");
 
-            viewer.m_eyes.emplace_back(ViewerEye(
-                viewer, ctx, (offsetFactor * offset).eval(), HEAD_PATH,
-                computeViewport(eye, desc), computeRect(desc),
-                eyesDesc[eye].m_rotate180, desc.getPitchTilt().value()));
+            auto desc = display_schema_1::DisplayDescriptor(descriptorString);
+            cfg->m_viewers.emplace_back(Viewer(ctx, HEAD_PATH));
+            auto &viewer = cfg->m_viewers.front();
+            auto eyesDesc = desc.getEyes();
+            std::vector<uint8_t> eyeIndices;
+            Eigen::Vector3d offset;
+            if (eyesDesc.size() == 2) {
+                // stereo
+                offset = desc.getIPDMeters() / 2. * Eigen::Vector3d::UnitX();
+                eyeIndices = {0, 1};
+            } else {
+                // if (eyesDesc.size() == 1)
+                // mono
+                offset = Eigen::Vector3d::Zero();
+                eyeIndices = {0};
+            }
+            for (auto eye : eyeIndices) {
+                double offsetFactor =
+                    (2. * eye) -
+                    1; // turns 0 into -1 and 1 into 1. Doesn't affect
+                       // mono, which has a zero offset vector.
+
+                viewer.m_eyes.emplace_back(ViewerEye(
+                    ctx, (offsetFactor * offset).eval(), HEAD_PATH,
+                    computeViewport(eye, desc), computeRect(desc),
+                    eyesDesc[eye].m_rotate180, desc.getPitchTilt().value()));
+            }
+
+            OSVR_DEV_VERBOSE(
+                "Display: "
+                << desc.getHumanReadableDescription());
+            return cfg;
+        } catch (std::exception const &e) {
+            OSVR_DEV_VERBOSE(
+                "Couldn't create a display config internally! Exception: "
+                << e.what());
+            return DisplayConfigPtr{};
+        } catch (...) {
+            OSVR_DEV_VERBOSE("Couldn't create a display config internally! "
+                             "Unknown exception!");
+            return DisplayConfigPtr{};
         }
-        return cfg;
     }
     DisplayConfig::DisplayConfig() {}
 } // namespace client

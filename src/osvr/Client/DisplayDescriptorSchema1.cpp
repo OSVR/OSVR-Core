@@ -32,7 +32,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <sstream>
 
 namespace osvr {
 namespace client {
@@ -65,7 +65,7 @@ namespace client {
                                           util::degrees);
             }
             {
-                auto const &devprops = hmd["device"]["properties"];
+                auto const &devprops = hmd["device"];
                 // Device properties
                 m_vendor = devprops["vendor"].asString();
                 m_model = devprops["model"].asString();

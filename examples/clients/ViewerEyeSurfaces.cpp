@@ -41,6 +41,7 @@ int main() {
     OSVR_ReturnCode ret = OSVR_RETURN_FAILURE;
     do {
         std::cout << "Trying to get the display config" << std::endl;
+        ctx.update();
         ret = osvrClientGetDisplay(ctx.get(), &display);
     } while (ret == OSVR_RETURN_FAILURE);
 

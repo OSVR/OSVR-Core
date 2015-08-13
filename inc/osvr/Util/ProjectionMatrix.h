@@ -117,7 +117,8 @@ namespace util {
 
     namespace projection_detail {
         // 33 and 34 for signed Z output (range of [-1, 1])
-        template <projection_options::OptionType options, bool = projection_options::IsZOutputUnsigned<options>::value>
+        template <projection_options::OptionType options,
+                  bool = projection_options::IsZOutputUnsigned<options>::value>
         struct ThirdRow {
             static inline double get3(double near, double far) {
                 return (-(far + near) / (far - near));
@@ -128,8 +129,7 @@ namespace util {
         };
         // 33 and 34 for unsigned Z output (range of [0, 1])
         template <projection_options::OptionType options>
-        struct ThirdRow<
-            options, true> {
+        struct ThirdRow<options, true> {
             static inline double get3(double near, double far) {
                 return (-far / (far - near));
             }

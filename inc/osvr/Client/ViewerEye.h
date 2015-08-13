@@ -45,7 +45,6 @@
 namespace osvr {
 namespace client {
     class DisplayConfigFactory;
-    class Viewer;
     struct Viewport {
         int32_t left;
         int32_t bottom;
@@ -59,13 +58,13 @@ namespace client {
     class ViewerEye {
       public:
         ViewerEye(ViewerEye const &) = delete;
+        ViewerEye &operator=(ViewerEye const &) = delete;
         ViewerEye(ViewerEye &&other)
             : m_pose(std::move(other.m_pose)),
-              m_offset(std::move(other.m_offset)), m_parent(other.m_parent),
-              m_viewport(other.m_viewport),
+              m_offset(std::move(other.m_offset)), m_viewport(other.m_viewport),
               m_unitBounds(std::move(other.m_unitBounds)),
               m_rot180(other.m_rot180), m_pitchTilt(other.m_pitchTilt) {}
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
         inline OSVR_SurfaceCount size() const { return 1; }
 #if 0
         inline OSVR_SurfaceCount size() const {
@@ -82,25 +81,24 @@ namespace client {
         OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
         /// @brief Gets a matrix that takes in row vectors in a right-handed
         /// system and outputs signed Z.
-        OSVR_CLIENT_EXPORT Eigen::Matrix4d getProjection(double near, double far) const;
+        OSVR_CLIENT_EXPORT Eigen::Matrix4d getProjection(double near,
+                                                         double far) const;
 
-        Viewport getDisplayRelativeViewport() const {
-            return m_viewport;
-        }
+        Viewport getDisplayRelativeViewport() const { return m_viewport; }
+
       private:
         friend class DisplayConfigFactory;
-        ViewerEye(Viewer &viewer, OSVR_ClientContext ctx,
-                  Eigen::Vector3d const &offset, const char path[],
-                  Viewport &&viewport, util::Rectd &&unitBounds, bool rot180,
-                  double pitchTilt);
+        ViewerEye(OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
+                  const char path[], Viewport &&viewport,
+                  util::Rectd &&unitBounds, bool rot180, double pitchTilt);
         InternalInterfaceOwner m_pose;
         Eigen::Vector3d m_offset;
 #if 0
         std::vector<ViewerEyeSurface> m_surfaces;
 #endif
-        Viewer &m_parent;
         Viewport m_viewport;
         util::Rectd m_unitBounds;
+
         bool m_rot180;
         double m_pitchTilt;
     };

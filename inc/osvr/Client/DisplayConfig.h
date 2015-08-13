@@ -51,6 +51,8 @@ namespace client {
 
     class DisplayConfig {
       public:
+        DisplayConfig(DisplayConfig const &) = delete;
+        DisplayConfig &operator=(DisplayConfig const &) = delete;
         OSVR_ViewerCount getNumViewers() const;
         Viewer &getViewer(OSVR_ViewerCount viewer);
         Viewer const &getViewer(OSVR_ViewerCount viewer) const;
