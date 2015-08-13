@@ -71,7 +71,8 @@ namespace client {
                 m_model = devprops["model"].asString();
                 m_version = devprops["Version"].asString();
                 m_note = devprops["Note"].asString();
-                m_NumDisplays = devprops["num_displays"].asInt();
+                // Note that this parameter is redundant and not used.
+                m_NumDisplays = devprops.get("num_displays", 1).asInt();
             }
             {
                 auto const &resolutions = hmd["resolutions"];
