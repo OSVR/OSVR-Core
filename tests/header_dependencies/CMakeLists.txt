@@ -41,41 +41,43 @@ foreach(HEADER ${headers})
 
         #message(STATUS "${HEADER}: '${symbolname}' - '${libname}'")
 
-        # Name the test and output file with a number, to dodge Windows path length limits.
-        # Call it header, instead of test, to avoid polluting the 'executable'
-        set(test_name "header_${test_index}")
 
-        set(extension cpp)
+        set(extensions cpp)
         if (${HEADER} MATCHES "C.h$")
             # Header required to be C-safe, enforce it!
-            set(extension c)
+            list(APPEND extensions c)
         endif()
 
-        set(source_file "${CMAKE_CURRENT_BINARY_DIR}/${test_name}.${extension}")
-        configure_file(test_header_prereqs.${extension}.in "${source_file}" @ONLY)
+        foreach(extension ${extensions})
+            # Name the test and output file with a number, to dodge Windows path length limits.
+            # Call it header, instead of test, to avoid polluting the 'executable'
+            set(test_name "header_${extension}_${test_index}")
 
-        add_executable(${test_name} "${source_file}")
-        target_include_directories(${test_name}
-            PUBLIC
-            $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
-            $<BUILD_INTERFACE:${HEADER_BASE}>
-            $<INSTALL_INTERFACE:include>)
+            set(source_file "${CMAKE_CURRENT_BINARY_DIR}/main${test_index}.${extension}")
+            configure_file(test_header_prereqs.${extension}.in "${source_file}" @ONLY)
 
-        set_target_properties(${test_name} PROPERTIES
-            FOLDER "OSVR Header dependency tests")
+            add_executable(${test_name} "${source_file}")
+            target_include_directories(${test_name}
+                PUBLIC
+                $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
+                $<BUILD_INTERFACE:${HEADER_BASE}>
+                $<INSTALL_INTERFACE:include>)
 
-        if(${extension} STREQUAL cpp)
-            target_compile_options(${test_name} PUBLIC ${OSVR_CXX11_FLAGS})
-        endif()
+            set_target_properties(${test_name} PROPERTIES
+                FOLDER "OSVR Header dependency tests")
 
-        target_link_libraries(${test_name}
-            ${COMMON_TEST_LIBRARIES}
-            ${LIBRARIES_${symbolname}}
-            ${LIBRARIES_${libname}})
+            if(${extension} STREQUAL cpp)
+                target_compile_options(${test_name} PUBLIC ${OSVR_CXX11_FLAGS})
+            endif()
 
-        add_test(NAME ${test_name}_builds COMMAND ${test_name})
-        add_dependencies(header_dependencies ${test_name})
+            target_link_libraries(${test_name}
+                ${COMMON_TEST_LIBRARIES}
+                ${LIBRARIES_${symbolname}}
+                ${LIBRARIES_${libname}})
 
+            add_test(NAME ${test_name}_builds COMMAND ${test_name})
+            add_dependencies(header_dependencies ${test_name})
+        endforeach()
         math(EXPR test_index "${test_index} + 1")
     endif()
 endforeach()
