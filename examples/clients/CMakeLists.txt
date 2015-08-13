@@ -13,7 +13,8 @@ set(MAINCLIENTS
 # These are "extra"
 set(CLIENTS
     MinimalInit
-    TrackerState)
+    TrackerState
+    ViewerEyeSurfaces)
 
 foreach(name ${MAINCLIENTS} ${CLIENTS})
     foreach(suffix c cpp)
