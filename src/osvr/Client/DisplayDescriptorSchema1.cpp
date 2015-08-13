@@ -171,10 +171,8 @@ namespace client {
             res.height = resolution["height"].asInt();
 
             // Display mode - Default to horiz side by side unless we have
-            // multiple
-            // video inputs, then do full screen (? seems logical but not
-            // strictly
-            // what the json schema specifies)
+            // multiple video inputs, then default to full screen (? seems
+            // logical but not strictly what the json schema specifies)
             res.display_mode =
                 (res.video_inputs > 1 ? FULL_SCREEN : HORIZONTAL_SIDE_BY_SIDE);
 
