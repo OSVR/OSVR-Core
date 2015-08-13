@@ -108,7 +108,7 @@ namespace client {
                 void print() const;
             };
 
-            std::vector<EyeInfo> getEyes() const;
+            std::vector<EyeInfo> const &getEyes() const;
 
           private:
             struct Resolution {

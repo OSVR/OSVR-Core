@@ -239,7 +239,7 @@ namespace client {
             return DEFAULT_IPD_METERS;
         }
 
-        std::vector<DisplayDescriptor::EyeInfo>
+        std::vector<DisplayDescriptor::EyeInfo> const &
         DisplayDescriptor::getEyes() const {
             return m_eyes;
         }
