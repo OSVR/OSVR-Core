@@ -60,6 +60,10 @@ namespace client {
 
             void print() const;
 
+            /// @brief Returns a human-readable description of the device being
+            /// used, assembled from properties.
+            std::string getHumanReadableDescription() const;
+
             /// Read the property information.
             std::string getVendor() const;
             std::string getModel() const;

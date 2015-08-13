@@ -128,6 +128,39 @@ namespace client {
             }
         }
 
+        std::string DisplayDescriptor::getHumanReadableDescription() const {
+            std::ostringstream os;
+            bool needSpace = false;
+            if (!m_vendor.empty()) {
+                os << m_vendor;
+                needSpace = true;
+            }
+
+            if (!m_model.empty()) {
+                if (needSpace) {
+                    os << " ";
+                }
+                os << m_model;
+                needSpace = true;
+            }
+
+            if (!m_version.empty()) {
+                if (needSpace) {
+                    os << " ";
+                }
+                os << "(Version " << m_version << ")";
+                needSpace = true;
+            }
+
+            if (!m_note.empty()) {
+                if (needSpace) {
+                    os << " ";
+                }
+                os << "[Display descriptor note: " << m_note << "]";
+            }
+            return os.str();
+        }
+
         void
         DisplayDescriptor::m_processResolution(Json::Value const &resolution) {
             Resolution res;
