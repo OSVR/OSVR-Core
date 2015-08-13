@@ -118,6 +118,12 @@ namespace client {
                 DisplayMode display_mode;
             };
 
+            Resolution &activeResolution() {
+                return m_resolutions.at(m_activeResolution);
+            }
+            Resolution const &activeResolution() const {
+                return m_resolutions.at(m_activeResolution);
+            }
             void m_processResolution(Json::Value const &resolution);
 
             std::string m_vendor;
@@ -142,6 +148,9 @@ namespace client {
 
             // Eyes
             std::vector<EyeInfo> m_eyes;
+
+            // Active resolution
+            size_t m_activeResolution = 0;
         };
     } // namespace display_schema_1
 

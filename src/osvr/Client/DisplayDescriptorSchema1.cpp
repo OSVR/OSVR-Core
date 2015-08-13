@@ -172,11 +172,11 @@ namespace client {
             std::cout << "Overlap percent: " << m_OverlapPercent << "%"
                       << std::endl;
             std::cout << "Pitch tilt: " << m_pitchTilt << std::endl;
-            std::cout << "Resolution: " << m_resolutions.at(0).width << " x "
-                      << m_resolutions.at(0).height << std::endl;
-            std::cout << "Video inputs: " << m_resolutions.at(0).video_inputs
+            std::cout << "Resolution: " << activeResolution().width << " x "
+                      << activeResolution().height << std::endl;
+            std::cout << "Video inputs: " << activeResolution().video_inputs
                       << std::endl;
-            std::cout << "Display mode: " << m_resolutions.at(0).display_mode
+            std::cout << "Display mode: " << activeResolution().display_mode
                       << std::endl;
             std::cout << "Right roll: " << m_RightRoll << std::endl;
             std::cout << "Left roll: " << m_LeftRoll << std::endl;
@@ -203,16 +203,16 @@ namespace client {
         int DisplayDescriptor::getDisplayLeft() const { return 0; }
 
         int DisplayDescriptor::getDisplayWidth() const {
-            return m_resolutions.at(0).width;
+            return activeResolution().width;
         }
 
         int DisplayDescriptor::getDisplayHeight() const {
-            return m_resolutions.at(0).height;
+            return activeResolution().height;
         }
 
         DisplayDescriptor::DisplayMode
         DisplayDescriptor::getDisplayMode() const {
-            return m_resolutions.at(0).display_mode;
+            return activeResolution().display_mode;
         }
 
         util::Angle DisplayDescriptor::getVerticalFOV() const {
