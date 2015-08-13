@@ -39,6 +39,11 @@
         "center_proj_x": 0.5,
         "center_proj_y": 0.5,
         "rotate_180": 0
+      },
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
       }
     ]
   }
