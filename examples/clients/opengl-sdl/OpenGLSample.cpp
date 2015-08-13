@@ -45,31 +45,154 @@ class Lib {
     Lib() {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             cerr << "Could not initialize SDL" << endl;
-            throw std::runtime_error("Could not initialize SDL");
+            throw std::runtime_error(std::string("Could not initialize SDL") +
+                                     SDL_GetError());
         }
     }
     ~Lib() { SDL_Quit(); }
 };
 
+/// @brief RAII wrapper for SDL text input start/stop.
+class TextInput {
+  public:
+    TextInput() { SDL_StartTextInput(); }
+    ~TextInput() { SDL_StopTextInput(); }
+};
 typedef std::shared_ptr<SDL_Window> WindowPtr;
 template <typename... Args> inline WindowPtr createWindow(Args &&... args) {
     WindowPtr ret(SDL_CreateWindow(std::forward<Args>(args)...),
                   &SDL_DestroyWindow);
     return ret;
 }
-} // namespace
+
+/// @brief RAII wrapper for SDL OpenGL context.
+class GLContext {
+  public:
+    template <typename... Args> GLContext(Args &&... args) {
+        m_context = SDL_GL_CreateContext(std::forward<Args>(args)...);
+    }
+
+    SDL_GLContext &operator*() { return m_context; }
+    SDL_GLContext const &operator*() const { return m_context; }
+
+    ~GLContext() { SDL_GL_DeleteContext(m_context); }
+
+  private:
+    SDL_GLContext m_context;
+};
+} // namespace SDL
+
+static auto const WIDTH = 1920;
+static auto const HEIGHT = 1080;
+
+// Annoyingly a preprocessor macro is the only "good" way to do this quickly and
+// easily
+#define CHECK_SDL_POINTER_RESULT(ptr, action)                                  \
+    do {                                                                       \
+        if (!ptr) {                                                            \
+            cerr << "Could not " action ": " << SDL_GetError() << endl;        \
+            std::exit(-1);                                                     \
+        }                                                                      \
+    } while (0)
+#define CHECK_SDL_NEGATIVE_RESULT(op, action)                                  \
+    do {                                                                       \
+        if ((op) < 0) {                                                        \
+            cerr << "Could not " action ": " << SDL_GetError() << endl;        \
+            std::exit(-1);                                                     \
+        }                                                                      \
+    } while (0)
+
+void renderScene() {
+    /// @todo draw a cube in the world here.
+}
+void render(OSVR_DisplayConfig disp) {
+    OSVR_ViewerCount viewers;
+    osvrClientGetNumViewers(disp, &viewers);
+
+    for (OSVR_ViewerCount viewer = 0; viewer < viewers; ++viewer) {
+        OSVR_EyeCount eyes;
+        osvrClientGetNumEyesForViewer(disp, viewer, &eyes);
+
+        for (OSVR_EyeCount eye = 0; eye < eyes; ++eye) {
+            OSVR_SurfaceCount surfaces;
+            osvrClientGetNumSurfacesForViewerEye(disp, viewer, eye, &surfaces);
+#if 0
+            /// Fill in the ModelView transform based on the eye pose
+            /// @todo
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glMultMatrixd(modelView);
+#endif
+            for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
+                cout << "Viewer " << viewer << ", Eye " << int(eye)
+                     << ", Surface " << surface << endl;
+
+#if 0
+                // Set the OpenGL viewport based on the one we computed.
+                glViewport(static_cast<GLint>(m_viewport.left),
+                    static_cast<GLint>(m_viewport.lower),
+                    static_cast<GLsizei>(m_viewport.width),
+                    static_cast<GLsizei>(m_viewport.height));
+                // Set the OpenGL projection matrix based on the one we
+                // computed.
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                glMultMatrixd(projection);
+                // Set the matrix mode to ModelView, so render code doesn't mess with
+                // the projection matrix on accident.
+                glMatrixMode(GL_MODELVIEW);
+
+#endif
+                renderScene();
+            }
+        }
+    }
+}
 int main(int argc, char *argv[]) {
+    // Open SDL
     SDL::Lib lib;
 
     // Use OpenGL 2.1
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+    // Create a window
     auto window = SDL::createWindow("OSVR", SDL_WINDOWPOS_UNDEFINED,
-                                    SDL_WINDOWPOS_UNDEFINED, 1920, 1080,
+                                    SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT,
                                     SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-    if (!window) {
-        cerr << "Could not create window" << endl;
-        return -1;
+    CHECK_SDL_POINTER_RESULT(window, "create window");
+
+    // Create an OpenGL context and make it current.
+    SDL::GLContext glctx(window.get());
+
+    // Turn on V-SYNC
+    SDL_GL_SetSwapInterval(1);
+
+    // Start OSVR and get OSVR display config
+    osvr::clientkit::ClientContext ctx("com.osvr.example.sdlopengl");
+    OSVR_DisplayConfig display;
+    osvrClientGetDisplay(ctx.get(), &display);
+
+    // Event handler
+    SDL_Event e;
+    SDL::TextInput textinput;
+    bool quit = false;
+    while (!quit) {
+        // Handle all queued events
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                quit = true;
+            }
+        }
+
+        // Update OSVR
+        ctx.update();
+
+        // Render
+        render(display);
+
+        // Swap buffers
+        SDL_GL_SwapWindow(window.get());
     }
 
     return 0;
