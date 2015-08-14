@@ -68,7 +68,7 @@ namespace util {
         const bool needsTranspose = (T::IsRowMajor) ? !needsTransposeFromColMaj
                                                     : needsTransposeFromColMaj;
         Eigen::Map<TargetType> destMat(dest);
-        if (needsTransposeFromColMaj) {
+        if (needsTranspose) {
             destMat = src.template cast<Scalar>().transpose();
         } else {
             destMat = src.template cast<Scalar>();
