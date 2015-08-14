@@ -35,17 +35,13 @@
 #include <stdexcept>
 #include <memory>
 
-using std::cout;
-using std::cerr;
-using std::endl;
-
 namespace SDL {
 /// @brief RAII wrapper for SDL startup/shutdown
 class Lib {
   public:
     Lib() {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            cerr << "Could not initialize SDL" << endl;
+            std::cerr << "Could not initialize SDL" << std::endl;
             throw std::runtime_error(std::string("Could not initialize SDL") +
                                      SDL_GetError());
         }
@@ -107,14 +103,16 @@ static auto const HEIGHT = 1080;
 #define CHECK_SDL_POINTER_RESULT(ptr, action)                                  \
     do {                                                                       \
         if (!ptr) {                                                            \
-            cerr << "Could not " action ": " << SDL_GetError() << endl;        \
+            std::cerr << "Could not " action ": " << SDL_GetError()            \
+                      << std::endl;                                            \
             std::exit(-1);                                                     \
         }                                                                      \
     } while (0)
 #define CHECK_SDL_NEGATIVE_RESULT(op, action)                                  \
     do {                                                                       \
         if ((op) < 0) {                                                        \
-            cerr << "Could not " action ": " << SDL_GetError() << endl;        \
+            std::cerr << "Could not " action ": " << SDL_GetError()            \
+                      << std::endl;                                            \
             std::exit(-1);                                                     \
         }                                                                      \
     } while (0)
@@ -150,7 +148,8 @@ int main(int argc, char *argv[]) {
     auto ret = osvrClientGetDisplay(ctx.get(), &display);
     if (ret != OSVR_RETURN_SUCCESS) {
         std::cerr << "\nCould not get display config (server probably not "
-                     "running or not behaving), exiting." << std::endl;
+                     "running or not behaving), exiting."
+                  << std::endl;
         return -1;
     }
 
@@ -225,9 +224,16 @@ bool render(OSVR_DisplayConfig disp) {
             auto gotView = osvrClientGetViewerEyeViewMatrixd(
                 disp, viewer, eye, viewMat,
                 OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS);
+
             if (gotView != OSVR_RETURN_SUCCESS) {
-                cout << "Waiting for view pose..." << endl;
+                std::cout << "Waiting for view pose..." << std::endl;
                 return false;
+            }
+            static bool announcedPose = false;
+            if (!announcedPose) {
+                std::cout << "Got view pose, rendering will commence!"
+                          << std::endl;
+                announcedPose = true;
             }
 
             /// Initialize the ModelView transform with the view matrix we
