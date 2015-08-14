@@ -33,6 +33,7 @@
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/Rect.h>
+#include <osvr/Util/MatrixConventionsC.h>
 
 // Library/third-party includes
 // - none
@@ -79,10 +80,16 @@ namespace client {
         }
 #endif
         OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
+
+        OSVR_CLIENT_EXPORT Eigen::Matrix4d getView() const;
+
         /// @brief Gets a matrix that takes in row vectors in a right-handed
         /// system and outputs signed Z.
         OSVR_CLIENT_EXPORT Eigen::Matrix4d getProjection(double near,
                                                          double far) const;
+        OSVR_CLIENT_EXPORT Eigen::Matrix4d
+        getProjection(double near, double far,
+                      OSVR_MatrixConventions flags) const;
 
         Viewport getDisplayRelativeViewport() const { return m_viewport; }
 
@@ -91,6 +98,8 @@ namespace client {
         ViewerEye(OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
                   const char path[], Viewport &&viewport,
                   util::Rectd &&unitBounds, bool rot180, double pitchTilt);
+        util::Rectd m_getRect(double near, double far) const;
+        Eigen::Isometry3d getPoseIsometry() const;
         InternalInterfaceOwner m_pose;
         Eigen::Vector3d m_offset;
 #if 0

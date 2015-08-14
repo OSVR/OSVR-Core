@@ -31,6 +31,7 @@
 #include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/EigenExtras.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/MatrixConventions.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -154,6 +155,20 @@ OSVR_ReturnCode osvrClientGetViewerPose(OSVR_DisplayConfig disp,
     }
     return OSVR_RETURN_FAILURE;
 }
+
+/// @brief Helper function to assign/convert matrices as required.
+template <typename Scalar, typename T>
+inline void assignMatrixWithOptions(T const &input, Scalar *output,
+                                    OSVR_MatrixConventions flags) {
+
+    Eigen::Map<Eigen::Matrix<Scalar, 4, 4>> outMatrix(output);
+    if (osvr::util::detail::matrixNeedsTranspose(flags)) {
+        outMatrix = input.template cast<Scalar>().transpose();
+    } else {
+        outMatrix = input.template cast<Scalar>();
+    }
+}
+
 OSVR_ReturnCode osvrClientGetNumEyesForViewer(OSVR_DisplayConfig disp,
                                               OSVR_ViewerCount viewer,
                                               OSVR_EyeCount *eyes) {
@@ -186,6 +201,46 @@ OSVR_ReturnCode osvrClientGetViewerEyePose(OSVR_DisplayConfig disp,
         return OSVR_RETURN_FAILURE;
     }
     return OSVR_RETURN_FAILURE;
+}
+
+template <typename Scalar>
+static inline OSVR_ReturnCode getViewMatrixImpl(OSVR_DisplayConfig disp,
+                                                OSVR_ViewerCount viewer,
+                                                OSVR_EyeCount eye, Scalar *mat,
+                                                OSVR_MatrixConventions flags) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(mat, "view matrix");
+    try {
+        Eigen::Map<Eigen::Matrix<Scalar, 4, 4>> matrix(mat);
+        assignMatrixWithOptions(disp->cfg->getViewerEye(viewer, eye).getView(),
+                                mat, flags);
+        return OSVR_RETURN_SUCCESS;
+    } catch (osvr::client::NoPoseYet &) {
+        OSVR_DEV_VERBOSE(
+            "Error getting viewer eye view matrix: no pose yet available");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+
+        OSVR_DEV_VERBOSE(
+            "Error getting viewer eye view matrix - exception: " << e.what());
+        return OSVR_RETURN_FAILURE;
+    } catch (...) {
+        OSVR_DEV_VERBOSE("Error getting viewer eye view matrix");
+        return OSVR_RETURN_FAILURE;
+    }
+}
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    double *mat, OSVR_MatrixConventions flags) {
+    return getViewMatrixImpl(disp, viewer, eye, mat, flags);
+}
+
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    float *mat, OSVR_MatrixConventions flags) {
+    return getViewMatrixImpl(disp, viewer, eye, mat, flags);
 }
 
 OSVR_ReturnCode
@@ -243,10 +298,55 @@ OSVR_ReturnCode osvrClientGetProjectionForViewerEyeSurface(
         OSVR_DEV_VERBOSE("Can't specify equal near and far distances!");
         return OSVR_RETURN_FAILURE;
     }
-    // Transpose to get a matrix that works on column vectors.
+
     osvr::util::matMap(*matrix) =
         disp->cfg->getViewerEyeSurface(viewer, eye, surface)
-            .getProjection(near, far)
-            .transpose();
+            .getProjection(near, far);
     return OSVR_RETURN_SUCCESS;
+}
+
+template <typename Scalar>
+static inline OSVR_ReturnCode
+getProjectionMatrixImpl(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
+                        OSVR_EyeCount eye, OSVR_SurfaceCount surface,
+                        Scalar near, Scalar far, Scalar *mat,
+                        OSVR_MatrixConventions flags) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_SURFACE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(mat, "projection matrix");
+    if (near == 0 || far == 0) {
+        OSVR_DEV_VERBOSE("Can't specify a near or far distance as 0!");
+        return OSVR_RETURN_FAILURE;
+    }
+    if (near < 0 || far < 0) {
+        OSVR_DEV_VERBOSE("Can't specify a negative near or far distance!");
+        return OSVR_RETURN_FAILURE;
+    }
+    if (near == far) {
+        OSVR_DEV_VERBOSE("Can't specify equal near and far distances!");
+        return OSVR_RETURN_FAILURE;
+    }
+    assignMatrixWithOptions(disp->cfg->getViewerEyeSurface(viewer, eye, surface)
+                                .getProjection(near, far, flags),
+                            mat, flags);
+
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetProjectionMatrixdForViewerEyeSurface(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, double near, double far, double *matrix,
+    OSVR_MatrixConventions flags) {
+    return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far,
+                                   matrix, flags);
+}
+
+OSVR_ReturnCode osvrClientGetProjectionMatrixfForViewerEyeSurface(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, float near, float far, float *matrix,
+    OSVR_MatrixConventions flags) {
+    return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far,
+                                   matrix, flags);
 }

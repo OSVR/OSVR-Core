@@ -52,6 +52,8 @@ set(API
     "${HEADER_LOCATION}/IndentingStream.h"
     "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
     "${HEADER_LOCATION}/Matrix44C.h"
+    "${HEADER_LOCATION}/MatrixConventionsC.h"
+    "${HEADER_LOCATION}/MatrixConventions.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
@@ -97,6 +99,7 @@ set(SOURCE
     Deletable.cpp
     GuardInterface.cpp
     TimeValueC.cpp
+    MatrixConventionsC.cpp
     MessageKeys.cpp
     PlatformConfig.h.in
     Verbosity.h.in
@@ -131,7 +134,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
     COMPONENT Devel)
 
 # TODO VRPN used in this lib only for gettimeofday wrapper: do we need it?
-target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn)
+target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn eigen-headers)
 
 ###
 # C++ util library/headers

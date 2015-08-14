@@ -78,11 +78,7 @@ namespace util {
 
         /// @brief The bit masks for testing conditions - do not depend on these
         /// being equal to a given enum value of OptBits!
-        enum OptMasks {
-            ZOutputUnsignedBit = 0x1,
-            LeftHandedInputBit = 0x2,
-            ColumnVectorBit = 0x4
-        };
+        enum OptMasks { ZOutputUnsignedBit = 0x1, LeftHandedInputBit = 0x2 };
 
         /// @brief The flags (combine with bitwise-or `|`) for specifying
         /// configuration - do not depend on these being equal to a given enum
@@ -92,10 +88,7 @@ namespace util {
             ZOutputUnsigned = ZOutputUnsignedBit,
 
             RightHandedInput = 0,
-            LeftHandedInput = LeftHandedInputBit,
-
-            RowVector = 0,
-            ColumnVector = ColumnVectorBit
+            LeftHandedInput = LeftHandedInputBit
         };
 
         typedef unsigned char OptionType;
@@ -110,8 +103,6 @@ namespace util {
         using IsZOutputUnsigned = CheckOptionBit<Options, ZOutputUnsignedBit>;
         template <OptionType Options>
         using IsLeftHandedInput = CheckOptionBit<Options, LeftHandedInputBit>;
-        template <OptionType Options>
-        using IsColumnVector = CheckOptionBit<Options, ColumnVectorBit>;
 
     } // namespace projection_options
 
@@ -151,8 +142,7 @@ namespace util {
     /// [b, t] to [-1, 1], and [n, f] to [-1, 1] (should be configurable)
     template <projection_options::OptionType options =
                   projection_options::ZOutputSigned |
-                  projection_options::RightHandedInput |
-                  projection_options::RowVector>
+                  projection_options::RightHandedInput>
     inline Eigen::Matrix4d
     parameterizedCreateProjectionMatrix(Rectd const &bounds, double near,
                                         double far) {
@@ -184,9 +174,6 @@ namespace util {
 
         if (projection_options::IsLeftHandedInput<options>::value) {
             mat.col(2) *= -1.;
-        }
-        if (projection_options::IsColumnVector<options>::value) {
-            mat.transposeInPlace();
         }
         return mat;
     }

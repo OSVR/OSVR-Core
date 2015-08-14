@@ -36,6 +36,7 @@
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/Matrix44C.h>
+#include <osvr/Util/MatrixConventionsC.h>
 #include <osvr/Util/Pose3C.h>
 
 /* Library/third-party includes */
@@ -106,6 +107,26 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
                            OSVR_EyeCount eye, OSVR_Pose3 *pose);
 
+/** @brief Get the view matrix (inverse of pose) for the given eye of a
+    viewer in a display config - matrix of doubles.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
+    yet available, in which case the output argument is unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    double *mat, OSVR_MatrixConventions flags);
+
+/** @brief Get the view matrix (inverse of pose) for the given eye of a
+    viewer in a display config - matrix of doubles.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
+    yet available, in which case the output argument is unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    float *mat, OSVR_MatrixConventions flags);
+
 /** @brief Each eye of each viewer in a display config has one or more surfaces
  * (aka "screens") on which content should be rendered. */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumSurfacesForViewerEye(
@@ -158,7 +179,50 @@ osvrClientGetProjectionForViewerEyeSurface(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, double near, double far, OSVR_Matrix44 *matrix);
 
-/** @todo for a surface: get needs distortion, get distortion shader, get distortion shader parameters */
+/** @brief Get the projection matrix for a surface seen by an eye of a viewer
+    in a display config. (double version)
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param near Distance to near clipping plane - must be nonzero, typically
+    positive.
+    @param far Distance to far clipping plane - must be nonzero, typically
+    positive and greater than near.
+    @param matrix Output projection matrix: supply an array of 16
+   (OSVR_MATRIX_SIZE) doubles.
+    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetProjectionMatrixdForViewerEyeSurface(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, double near, double far, double *matrix,
+    OSVR_MatrixConventions flags);
+
+/** @brief Get the projection matrix for a surface seen by an eye of a viewer
+    in a display config. (float version)
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param near Distance to near clipping plane - must be nonzero, typically
+    positive.
+    @param far Distance to far clipping plane - must be nonzero, typically
+    positive and greater than near.
+    @param matrix Output projection matrix: supply an array of 16
+    (OSVR_MATRIX_SIZE) floats.
+    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetProjectionMatrixfForViewerEyeSurface(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, double near, double far, float *matrix,
+    OSVR_MatrixConventions flags);
+
+/** @todo for a surface: get needs distortion, get distortion shader, get
+ * distortion shader parameters */
 
 OSVR_EXTERN_C_END
 

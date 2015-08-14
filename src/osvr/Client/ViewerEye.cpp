@@ -28,6 +28,7 @@
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/ProjectionMatrix.h>
+#include <osvr/Util/MatrixConventions.h>
 
 // Library/third-party includes
 // - none
@@ -37,7 +38,7 @@
 
 namespace osvr {
 namespace client {
-    OSVR_Pose3 ViewerEye::getPose() const {
+    Eigen::Isometry3d ViewerEye::getPoseIsometry() const {
         OSVR_TimeValue timestamp;
         OSVR_Pose3 pose;
         bool hasState = m_pose->getState<OSVR_PoseReport>(timestamp, pose);
@@ -46,11 +47,21 @@ namespace client {
         }
         Eigen::Isometry3d translatedPose =
             util::fromPose(pose) * Eigen::Translation3d(m_offset);
+        return translatedPose;
+    }
+    OSVR_Pose3 ViewerEye::getPose() const {
+        Eigen::Isometry3d translatedPose = getPoseIsometry();
+        OSVR_Pose3 pose;
         util::toPose(translatedPose, pose);
         return pose;
     }
 
-    Eigen::Matrix4d ViewerEye::getProjection(double near, double far) const {
+    Eigen::Matrix4d ViewerEye::getView() const {
+        Eigen::Isometry3d translatedPose = getPoseIsometry();
+        return translatedPose.inverse().matrix();
+    }
+
+    util::Rectd ViewerEye::m_getRect(double near, double far) const {
         util::Rectd rect(m_unitBounds);
         // Scale the in-plane positions based on the near plane to put
         // the virtual viewing window on the near plane with the eye at the
@@ -100,7 +111,69 @@ namespace client {
         /// @todo Figure out interactions between the above shifts and
         /// distortions and make sure to do them in the right order, or to
         /// adjust as needed to make them consistent when they are composed.
-        return util::createProjectionMatrix(rect, near, far);
+
+        return rect;
+    }
+
+    Eigen::Matrix4d ViewerEye::getProjection(double near, double far) const {
+
+        return util::createProjectionMatrix(m_getRect(near, far), near, far);
+    }
+
+    Eigen::Matrix4d
+    ViewerEye::getProjection(double near, double far,
+                             OSVR_MatrixConventions flags) const {
+        using C = osvr::util::detail::CompactMatrixConventions;
+        using F = osvr::util::detail::CompactMatrixFlags;
+        namespace opts = osvr::util::projection_options;
+
+        auto rect = m_getRect(near, far);
+
+        C compactFlags(flags);
+        Eigen::Matrix4d ret;
+        switch (compactFlags.getValue()) {
+        case C::ComputeBits<>::value:
+            ret = util::parameterizedCreateProjectionMatrix<>(rect, near, far);
+            break;
+        case C::ComputeBits<F::NeedsTranspose>::value:
+            ret = util::parameterizedCreateProjectionMatrix<>(rect, near, far)
+                      .transpose();
+            break;
+
+        case C::ComputeBits<F::LeftHandInput>::value:
+            ret = util::parameterizedCreateProjectionMatrix<
+                opts::LeftHandedInput>(rect, near, far);
+            break;
+        case C::ComputeBits<F::LeftHandInput, F::NeedsTranspose>::value:
+            ret = util::parameterizedCreateProjectionMatrix<
+                      opts::LeftHandedInput>(rect, near, far)
+                      .transpose();
+            break;
+
+        case C::ComputeBits<F::UnsignedZ>::value:
+            ret = util::parameterizedCreateProjectionMatrix<
+                opts::ZOutputUnsigned>(rect, near, far);
+            break;
+        case C::ComputeBits<F::UnsignedZ, F::NeedsTranspose>::value:
+            ret = util::parameterizedCreateProjectionMatrix<
+                      opts::ZOutputUnsigned>(rect, near, far)
+                      .transpose();
+            break;
+
+        case C::ComputeBits<F::LeftHandInput, F::UnsignedZ>::value:
+            ret = util::parameterizedCreateProjectionMatrix<
+                opts::LeftHandedInput | opts::ZOutputUnsigned>(rect, near, far);
+            break;
+        case C::ComputeBits<F::LeftHandInput, F::UnsignedZ,
+                            F::NeedsTranspose>::value:
+            ret = util::parameterizedCreateProjectionMatrix<
+                      opts::LeftHandedInput | opts::ZOutputUnsigned>(rect, near,
+                                                                     far)
+                      .transpose();
+            break;
+        }
+
+        return ret;
     }
 
     ViewerEye::ViewerEye(OSVR_ClientContext ctx, Eigen::Vector3d const &offset,

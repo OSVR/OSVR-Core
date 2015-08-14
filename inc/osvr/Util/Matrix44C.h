@@ -31,7 +31,6 @@
 
 /* Internal Includes */
 #include <osvr/Util/APIBaseC.h>
-#include <osvr/Util/StdInt.h>
 
 /* Library/third-party includes */
 /* none */
