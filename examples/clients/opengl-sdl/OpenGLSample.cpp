@@ -116,13 +116,17 @@ void render(OSVR_DisplayConfig disp) {
         for (OSVR_EyeCount eye = 0; eye < eyes; ++eye) {
             OSVR_SurfaceCount surfaces;
             osvrClientGetNumSurfacesForViewerEye(disp, viewer, eye, &surfaces);
-#if 0
+
             /// Fill in the ModelView transform based on the eye pose
             /// @todo
+            double viewMat[16];
+            osvrClientGetViewerEyeViewMatrixd(disp, viewer, eye, viewMat,
+                                              OSVR_MATRIX_COLMAJOR |
+                                                  OSVR_MATRIX_COLVECTORS);
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
-            glMultMatrixd(modelView);
-#endif
+            glMultMatrixd(viewMat);
+
             for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
                 cout << "Viewer " << viewer << ", Eye " << int(eye)
                      << ", Surface " << surface << endl;
@@ -133,21 +137,30 @@ void render(OSVR_DisplayConfig disp) {
                     static_cast<GLint>(m_viewport.lower),
                     static_cast<GLsizei>(m_viewport.width),
                     static_cast<GLsizei>(m_viewport.height));
+#endif
                 // Set the OpenGL projection matrix based on the one we
                 // computed.
+                double zNear = 0.1;
+                double zFar = 100;
+                double projMat[16];
+                osvrClientGetProjectionMatrixdForViewerEyeSurface(
+                    disp, viewer, eye, surface, zNear, zFar, projMat,
+                    OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
+                        OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT);
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
-                glMultMatrixd(projection);
-                // Set the matrix mode to ModelView, so render code doesn't mess with
+                glMultMatrixd(projMat);
+                // Set the matrix mode to ModelView, so render code doesn't mess
+                // with
                 // the projection matrix on accident.
                 glMatrixMode(GL_MODELVIEW);
 
-#endif
                 renderScene();
             }
         }
     }
 }
+
 int main(int argc, char *argv[]) {
     // Open SDL
     SDL::Lib lib;
