@@ -42,7 +42,7 @@ namespace util {
     /// Handles memory ordering (transpose) and scalar type conversion
     /// automatically/based on the flags passed in.
     ///
-    /// @param src An Eigen 4x4 matrix (source)
+    /// @param src An Eigen 4x4 fixed-size matrix or matrix expression (source)
     /// @param dest A pointer to a contiguous 16-element array (destination for
     /// the copy)
     /// @param flags Some matrix convention flags - only the first two (the ones
@@ -50,12 +50,24 @@ namespace util {
     template <typename Scalar, typename T>
     inline void matrixEigenAssign(T const &src, Scalar *dest,
                                   OSVR_MatrixConventions flags) {
-        bool needsTransposeFromColMaj = detail::matrixNeedsTranspose(flags);
+        typedef Eigen::Matrix<Scalar, 4, 4> TargetType;
+        static_assert(!TargetType::IsRowMajor, "This and other code depends on "
+                                               "Eigen matrices being column "
+                                               "major by default");
+
+        // These should all be fixed-size for speed, they're small.
+        EIGEN_STATIC_ASSERT_FIXED_SIZE(T);
+        // Make sure we have a 4x4 matrix
+        EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(T, TargetType);
+
+        const bool needsTransposeFromColMaj =
+            detail::matrixNeedsTranspose(flags);
         // If the source is a row-major matrix, then Eigen will automatically
-        // transpose to col-major, so our transpose logic is flipped.
+        // transpose to col-major (because that's what our "target type" is at
+        // compile time), so our transpose logic is flipped.
         const bool needsTranspose = (T::IsRowMajor) ? !needsTransposeFromColMaj
                                                     : needsTransposeFromColMaj;
-        Eigen::Map<Eigen::Matrix<Scalar, 4, 4>> destMat(dest);
+        Eigen::Map<TargetType> destMat(dest);
         if (needsTransposeFromColMaj) {
             destMat = src.template cast<Scalar>().transpose();
         } else {
