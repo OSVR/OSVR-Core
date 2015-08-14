@@ -67,10 +67,11 @@ foreach(HEADER ${headers})
                 FOLDER "OSVR Header dependency tests")
 
             if(${extension} STREQUAL cpp)
-                target_compile_options(${test_name} PUBLIC ${OSVR_CXX11_FLAGS})
+                target_link_libraries(${test_name} PRIVATE osvr_cxx11_flags)
             endif()
 
             target_link_libraries(${test_name}
+                PRIVATE
                 ${COMMON_TEST_LIBRARIES}
                 ${LIBRARIES_${symbolname}}
                 ${LIBRARIES_${libname}})

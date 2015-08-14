@@ -120,10 +120,6 @@ target_include_directories(${LIBNAME_FULL}
     PRIVATE
     ${Boost_INCLUDE_DIRS})
 
-target_compile_options(${LIBNAME_FULL}
-    PRIVATE
-    ${OSVR_CXX11_FLAGS})
-
 osvr_generate_for_report_types(ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h")
