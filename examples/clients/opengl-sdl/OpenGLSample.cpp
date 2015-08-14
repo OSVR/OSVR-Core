@@ -147,8 +147,8 @@ bool render(OSVR_DisplayConfig disp) {
             /// Try retrieving the view matrix (based on eye pose) from OSVR
             double viewMat[OSVR_MATRIX_SIZE];
             auto gotView = osvrClientGetViewerEyeViewMatrixd(
-                disp, viewer, eye, viewMat,
-                OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS);
+                disp, viewer, eye,
+                OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS, viewMat);
 
             if (gotView != OSVR_RETURN_SUCCESS) {
                 std::cout << "Waiting for view pose..." << std::endl;

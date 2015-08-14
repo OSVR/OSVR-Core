@@ -115,7 +115,7 @@ osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    double *mat, OSVR_MatrixConventions flags);
+    OSVR_MatrixConventions flags, double *mat);
 
 /** @brief Get the view matrix (inverse of pose) for the given eye of a
     viewer in a display config - matrix of doubles.
@@ -125,7 +125,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    float *mat, OSVR_MatrixConventions flags);
+    OSVR_MatrixConventions flags, float *mat);
 
 /** @brief Each eye of each viewer in a display config has one or more surfaces
  * (aka "screens") on which content should be rendered. */
