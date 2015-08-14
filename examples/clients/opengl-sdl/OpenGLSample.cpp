@@ -102,9 +102,11 @@ static auto const HEIGHT = 1080;
         }                                                                      \
     } while (0)
 
-void renderScene() {
-    /// @todo draw a cube in the world here.
-}
+// Forward declarations of rendering functions defined below.
+void draw_cube(double radius);
+
+void renderScene() { draw_cube(1.0); }
+
 void render(OSVR_DisplayConfig disp) {
     OSVR_ViewerCount viewers;
     osvrClientGetNumViewers(disp, &viewers);
@@ -118,7 +120,6 @@ void render(OSVR_DisplayConfig disp) {
             osvrClientGetNumSurfacesForViewerEye(disp, viewer, eye, &surfaces);
 
             /// Fill in the ModelView transform based on the eye pose
-            /// @todo
             double viewMat[16];
             osvrClientGetViewerEyeViewMatrixd(disp, viewer, eye, viewMat,
                                               OSVR_MATRIX_COLMAJOR |
@@ -128,16 +129,23 @@ void render(OSVR_DisplayConfig disp) {
             glMultMatrixd(viewMat);
 
             for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
+#if 0
                 cout << "Viewer " << viewer << ", Eye " << int(eye)
                      << ", Surface " << surface << endl;
-
-#if 0
-                // Set the OpenGL viewport based on the one we computed.
-                glViewport(static_cast<GLint>(m_viewport.left),
-                    static_cast<GLint>(m_viewport.lower),
-                    static_cast<GLsizei>(m_viewport.width),
-                    static_cast<GLsizei>(m_viewport.height));
 #endif
+                // Set the OpenGL viewport based on the one we computed.
+                OSVR_ViewportDimension left;
+                OSVR_ViewportDimension bottom;
+                OSVR_ViewportDimension width;
+                OSVR_ViewportDimension height;
+                osvrClientGetRelativeViewportForViewerEyeSurface(
+                    disp, viewer, eye, surface, &left, &bottom, &width,
+                    &height);
+
+                glViewport(static_cast<GLint>(left), static_cast<GLint>(bottom),
+                           static_cast<GLsizei>(width),
+                           static_cast<GLsizei>(height));
+
                 // Set the OpenGL projection matrix based on the one we
                 // computed.
                 double zNear = 0.1;
@@ -184,7 +192,11 @@ int main(int argc, char *argv[]) {
     // Start OSVR and get OSVR display config
     osvr::clientkit::ClientContext ctx("com.osvr.example.sdlopengl");
     OSVR_DisplayConfig display;
-    osvrClientGetDisplay(ctx.get(), &display);
+    auto ret = osvrClientGetDisplay(ctx.get(), &display);
+    if (ret != OSVR_RETURN_SUCCESS) {
+        std::cerr << "Could not get display config, exiting." << std::endl;
+        return -1;
+    }
 
     // Event handler
     SDL_Event e;
@@ -209,4 +221,81 @@ int main(int argc, char *argv[]) {
     }
 
     return 0;
+}
+
+static GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
+static float red_col[] = {1.0, 0.0, 0.0};
+static float grn_col[] = {0.0, 1.0, 0.0};
+static float blu_col[] = {0.0, 0.0, 1.0};
+static float yel_col[] = {1.0, 1.0, 0.0};
+static float lightblu_col[] = {0.0, 1.0, 1.0};
+static float pur_col[] = {1.0, 0.0, 1.0};
+
+void draw_cube(double radius) {
+    GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
+    glPushMatrix();
+    glScaled(radius, radius, radius);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, matspec);
+    glMaterialf(GL_FRONT, GL_SHININESS, 64.0);
+    glBegin(GL_POLYGON);
+    glColor3fv(lightblu_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lightblu_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lightblu_col);
+    glNormal3f(0.0, 0.0, -1.0);
+    glVertex3f(1.0, 1.0, -1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3fv(blu_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, blu_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, blu_col);
+    glNormal3f(0.0, 0.0, 1.0);
+    glVertex3f(-1.0, 1.0, 1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(1.0, 1.0, 1.0);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3fv(yel_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, yel_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, yel_col);
+    glNormal3f(0.0, -1.0, 0.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3fv(grn_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, grn_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grn_col);
+    glNormal3f(0.0, 1.0, 0.0);
+    glVertex3f(1.0, 1.0, 1.0);
+    glVertex3f(1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0, 1.0);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3fv(pur_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pur_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pur_col);
+    glNormal3f(-1.0, 0.0, 0.0);
+    glVertex3f(-1.0, 1.0, 1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3fv(red_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, red_col);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red_col);
+    glNormal3f(1.0, 0.0, 0.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glVertex3f(1.0, 1.0, -1.0);
+    glVertex3f(1.0, 1.0, 1.0);
+    glEnd();
+    glPopMatrix();
 }
