@@ -34,9 +34,10 @@
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/Rect.h>
 #include <osvr/Util/MatrixConventionsC.h>
+#include <osvr/Util/RadialDistortionParametersC.h>
 
 // Library/third-party includes
-// - none
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <vector>
@@ -64,7 +65,8 @@ namespace client {
             : m_pose(std::move(other.m_pose)),
               m_offset(std::move(other.m_offset)), m_viewport(other.m_viewport),
               m_unitBounds(std::move(other.m_unitBounds)),
-              m_rot180(other.m_rot180), m_pitchTilt(other.m_pitchTilt) {}
+              m_rot180(other.m_rot180), m_pitchTilt(other.m_pitchTilt),
+              m_radDistortParams(std::move(other.m_radDistortParams)) {}
 
         inline OSVR_SurfaceCount size() const { return 1; }
 #if 0
@@ -83,6 +85,15 @@ namespace client {
 
         OSVR_CLIENT_EXPORT Eigen::Matrix4d getView() const;
 
+        bool wantDistortion() const {
+            return m_radDistortParams.is_initialized();
+        }
+
+        boost::optional<OSVR_RadialDistortionParameters>
+        getRadialDistortionParams() const {
+            return m_radDistortParams;
+        }
+
         /// @brief Gets a matrix that takes in row vectors in a right-handed
         /// system and outputs signed Z.
         OSVR_CLIENT_EXPORT Eigen::Matrix4d getProjection(double near,
@@ -95,9 +106,11 @@ namespace client {
 
       private:
         friend class DisplayConfigFactory;
-        ViewerEye(OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
-                  const char path[], Viewport &&viewport,
-                  util::Rectd &&unitBounds, bool rot180, double pitchTilt);
+        ViewerEye(
+            OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
+            const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
+            bool rot180, double pitchTilt,
+            boost::optional<OSVR_RadialDistortionParameters> radDistortParams);
         util::Rectd m_getRect(double near, double far) const;
         Eigen::Isometry3d getPoseIsometry() const;
         InternalInterfaceOwner m_pose;
@@ -110,6 +123,7 @@ namespace client {
 
         bool m_rot180;
         double m_pitchTilt;
+        boost::optional<OSVR_RadialDistortionParameters> m_radDistortParams;
     };
 
 } // namespace client

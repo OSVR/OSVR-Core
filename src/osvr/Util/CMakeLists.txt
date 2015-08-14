@@ -71,6 +71,7 @@ set(API
     "${HEADER_LOCATION}/ProjectionMatrixFromFOV.h"
     "${HEADER_LOCATION}/QuaternionC.h"
     "${HEADER_LOCATION}/QuatlibInteropC.h"
+    "${HEADER_LOCATION}/RadialDistortionParametersC.h"
     "${HEADER_LOCATION}/Rect.h"
     "${HEADER_LOCATION}/RenderingTypesC.h"
     "${HEADER_LOCATION}/ResetPointerList.h"

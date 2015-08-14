@@ -38,6 +38,8 @@
 #include <osvr/Util/Matrix44C.h>
 #include <osvr/Util/MatrixConventionsC.h>
 #include <osvr/Util/Pose3C.h>
+#include <osvr/Util/BoolC.h>
+#include <osvr/Util/RadialDistortionParametersC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -200,8 +202,46 @@ osvrClientGetViewerEyeSurfaceProjectionMatrixf(
     OSVR_SurfaceCount surface, double near, double far,
     OSVR_MatrixConventions flags, float *matrix);
 
-/** @todo for a surface: get needs distortion, get distortion shader, get
- * distortion shader parameters */
+/** @brief Determines if a surface seen by an eye of a viewer in a display
+    config requests some distortion to be performed.
+
+    This simply reports true or false, and does not specify which kind of
+    distortion implementations have been parameterized for this display. For
+    each distortion implementation your application supports, you'll want to
+    call the function to retrieve the parameters to find out if it is available.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param distortionRequested Output parameter: whether distortion is
+    requested.
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientDoesViewerEyeSurfaceWantDistortion(OSVR_DisplayConfig disp,
+                                             OSVR_ViewerCount viewer,
+                                             OSVR_EyeCount eye,
+                                             OSVR_SurfaceCount surface,
+                                             OSVR_CBool *distortionRequested);
+
+/** @brief Returns the radial distortion parameters, if known/requested, for a
+    surface seen by an eye of a viewer in a display config.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param params Output: the parameters for radial distortion
+    @return OSVR_RETURN_FAILURE if this surface does not have these parameters
+    described, or if invalid parameters were passed, in which case the output
+    argument is unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetViewerEyeSurfaceRadialDistortion(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_RadialDistortionParameters *params);
 
 OSVR_EXTERN_C_END
 

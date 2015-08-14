@@ -176,12 +176,14 @@ namespace client {
         return ret;
     }
 
-    ViewerEye::ViewerEye(OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
-                         const char path[], Viewport &&viewport,
-                         util::Rectd &&unitBounds, bool rot180,
-                         double pitchTilt)
+    ViewerEye::ViewerEye(
+        OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
+        const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
+        bool rot180, double pitchTilt,
+        boost::optional<OSVR_RadialDistortionParameters> radDistortParams)
         : m_pose(ctx, path), m_offset(offset), m_viewport(viewport),
-          m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt) {}
+          m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt),
+          m_radDistortParams(radDistortParams) {}
 
 } // namespace client
 } // namespace osvr

@@ -102,16 +102,31 @@ namespace client {
                 offset = Eigen::Vector3d::Zero();
                 eyeIndices = {0};
             }
+
+            boost::optional<OSVR_RadialDistortionParameters> distort;
+            auto k1 = desc.getDistortion();
+            if (k1.k1_red != 0 || k1.k1_green != 0 || k1.k1_blue != 0) {
+                OSVR_RadialDistortionParameters params;
+                params.k1.data[0] = k1.k1_red;
+                params.k1.data[1] = k1.k1_green;
+                params.k1.data[2] = k1.k1_blue;
+                distort = params;
+            }
             for (auto eye : eyeIndices) {
                 double offsetFactor =
                     (2. * eye) -
                     1; // turns 0 into -1 and 1 into 1. Doesn't affect
                        // mono, which has a zero offset vector.
-
-                viewer.m_eyes.emplace_back(ViewerEye(
-                    ctx, (offsetFactor * offset).eval(), HEAD_PATH,
-                    computeViewport(eye, desc), computeRect(desc),
-                    eyesDesc[eye].m_rotate180, desc.getPitchTilt().value()));
+                boost::optional<OSVR_RadialDistortionParameters> distortEye(distort);
+                if (distortEye.is_initialized()) {
+                    distortEye->centerOfProjection.data[0] = eyesDesc[eye].m_CenterProjX;
+                    distortEye->centerOfProjection.data[1] = eyesDesc[eye].m_CenterProjY;
+                }
+                viewer.m_eyes.emplace_back(
+                    ViewerEye(ctx, (offsetFactor * offset).eval(), HEAD_PATH,
+                              computeViewport(eye, desc), computeRect(desc),
+                              eyesDesc[eye].m_rotate180,
+                              desc.getPitchTilt().value(), distortEye));
             }
 
             OSVR_DEV_VERBOSE(

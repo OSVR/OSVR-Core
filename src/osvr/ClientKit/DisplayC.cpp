@@ -311,3 +311,35 @@ OSVR_ReturnCode osvrClientGetViewerEyeSurfaceProjectionMatrixf(
     return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far, flags,
                                    matrix);
 }
+
+OSVR_ReturnCode osvrClientDoesViewerEyeSurfaceWantDistortion(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_CBool *distortionRequested) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_SURFACE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(distortionRequested, "distortion request");
+    *distortionRequested =
+        disp->cfg->getViewerEyeSurface(viewer, eye, surface).wantDistortion()
+            ? OSVR_TRUE
+            : OSVR_FALSE;
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetViewerEyeSurfaceRadialDistortion(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_RadialDistortionParameters *params) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_SURFACE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(params, "radial distortion parameter structure");
+    auto optParams = disp->cfg->getViewerEyeSurface(viewer, eye, surface)
+                         .getRadialDistortionParams();
+    if (optParams.is_initialized()) {
+        *params = *optParams;
+        return OSVR_RETURN_SUCCESS;
+    }
+    return OSVR_RETURN_FAILURE;
+}
