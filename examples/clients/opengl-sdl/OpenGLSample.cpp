@@ -149,7 +149,8 @@ int main(int argc, char *argv[]) {
     OSVR_DisplayConfig display;
     auto ret = osvrClientGetDisplay(ctx.get(), &display);
     if (ret != OSVR_RETURN_SUCCESS) {
-        std::cerr << "Could not get display config, exiting." << std::endl;
+        std::cerr << "\nCould not get display config (server probably not "
+                     "running or not behaving), exiting." << std::endl;
         return -1;
     }
 
