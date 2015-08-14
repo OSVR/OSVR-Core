@@ -3,7 +3,7 @@ if(NOT OPENGL_FOUND OR NOT SDL2_FOUND)
     return()
 endif()
 
-add_executable(OpenGLSample OpenGLSample.cpp)
+add_executable(OpenGLSample SDL2Helpers.h OpenGLSample.cpp)
 target_link_libraries(OpenGLSample
     PRIVATE
     osvrClientKitCpp

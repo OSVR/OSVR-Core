@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/ClientKit/DisplayC.h>
+#include "SDL2Helpers.h"
 
 // Library/third-party includes
 #include <SDL.h>
@@ -32,90 +33,9 @@
 
 // Standard includes
 #include <iostream>
-#include <stdexcept>
-#include <memory>
-
-namespace SDL {
-/// @brief RAII wrapper for SDL startup/shutdown
-class Lib {
-  public:
-    Lib() {
-        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            std::cerr << "Could not initialize SDL" << std::endl;
-            throw std::runtime_error(std::string("Could not initialize SDL") +
-                                     SDL_GetError());
-        }
-    }
-    ~Lib() { SDL_Quit(); }
-
-    Lib(Lib const &) = delete;            //< non-copyable
-    Lib &operator=(Lib const &) = delete; //< non-assignable
-};
-
-/// @brief Smart pointer for SDL_Window
-typedef std::shared_ptr<SDL_Window> WindowPtr;
-
-/// @brief Smart pointer constructor for SDL_Window (forwarding)
-template <typename... Args> inline WindowPtr createWindow(Args &&... args) {
-    WindowPtr ret(SDL_CreateWindow(std::forward<Args>(args)...),
-                  &SDL_DestroyWindow);
-    return ret;
-}
-
-/// @brief RAII wrapper for SDL text input start/stop.
-class TextInput {
-  public:
-    TextInput() { SDL_StartTextInput(); }
-    ~TextInput() { SDL_StopTextInput(); }
-
-    TextInput(TextInput const &) = delete;            //< non-copyable
-    TextInput &operator=(TextInput const &) = delete; //< non-assignable
-};
-
-/// @brief RAII wrapper for SDL OpenGL context.
-class GLContext {
-  public:
-    /// @brief Forwarding constructor
-    template <typename... Args> GLContext(Args &&... args) {
-        m_context = SDL_GL_CreateContext(std::forward<Args>(args)...);
-    }
-
-    /// @brief Destructor for cleanup
-    ~GLContext() { SDL_GL_DeleteContext(m_context); }
-
-    /// @brief Implicit conversion
-    operator SDL_GLContext() const { return m_context; }
-
-    GLContext(GLContext const &) = delete;            //< non-copyable
-    GLContext &operator=(GLContext const &) = delete; //< non-assignable
-
-  private:
-    SDL_GLContext m_context;
-};
-
-} // namespace SDL
 
 static auto const WIDTH = 1920;
 static auto const HEIGHT = 1080;
-
-// Annoyingly a preprocessor macro is the only "good" way to do this quickly and
-// easily
-#define CHECK_SDL_POINTER_RESULT(ptr, action)                                  \
-    do {                                                                       \
-        if (!ptr) {                                                            \
-            std::cerr << "Could not " action ": " << SDL_GetError()            \
-                      << std::endl;                                            \
-            std::exit(-1);                                                     \
-        }                                                                      \
-    } while (0)
-#define CHECK_SDL_NEGATIVE_RESULT(op, action)                                  \
-    do {                                                                       \
-        if ((op) < 0) {                                                        \
-            std::cerr << "Could not " action ": " << SDL_GetError()            \
-                      << std::endl;                                            \
-            std::exit(-1);                                                     \
-        }                                                                      \
-    } while (0)
 
 // Forward declarations of rendering functions defined below.
 void draw_cube(double radius);
@@ -123,6 +43,8 @@ bool render(OSVR_DisplayConfig disp);
 void renderScene();
 
 int main(int argc, char *argv[]) {
+    namespace SDL = osvr::SDL2;
+
     // Open SDL
     SDL::Lib lib;
 
@@ -134,7 +56,10 @@ int main(int argc, char *argv[]) {
     auto window = SDL::createWindow("OSVR", SDL_WINDOWPOS_UNDEFINED,
                                     SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT,
                                     SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-    CHECK_SDL_POINTER_RESULT(window, "create window");
+    if (!window) {
+        std::cerr << "Could not create window: " << SDL_GetError() << std::endl;
+        return -1;
+    }
 
     // Create an OpenGL context and make it current.
     SDL::GLContext glctx(window.get());
@@ -143,7 +68,7 @@ int main(int argc, char *argv[]) {
     SDL_GL_SetSwapInterval(1);
 
     // Start OSVR and get OSVR display config
-    osvr::clientkit::ClientContext ctx("com.osvr.example.sdlopengl");
+    osvr::clientkit::ClientContext ctx("com.osvr.example.SDLOpenGL");
     OSVR_DisplayConfig display;
     auto ret = osvrClientGetDisplay(ctx.get(), &display);
     if (ret != OSVR_RETURN_SUCCESS) {
@@ -265,7 +190,7 @@ bool render(OSVR_DisplayConfig disp) {
                 /// computed.
                 double zNear = 0.1;
                 double zFar = 100;
-                double projMat[16];
+                double projMat[OSVR_MATRIX_SIZE];
                 osvrClientGetViewerEyeSurfaceProjectionMatrixd(
                     disp, viewer, eye, surface, zNear, zFar,
                     OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
