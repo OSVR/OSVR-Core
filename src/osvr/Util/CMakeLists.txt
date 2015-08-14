@@ -54,6 +54,7 @@ set(API
     "${HEADER_LOCATION}/Matrix44C.h"
     "${HEADER_LOCATION}/MatrixConventionsC.h"
     "${HEADER_LOCATION}/MatrixConventions.h"
+    "${HEADER_LOCATION}/MatrixEigenAssign.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
