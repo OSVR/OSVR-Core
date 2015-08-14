@@ -4,7 +4,12 @@ if(NOT OPENGL_FOUND OR NOT SDL2_FOUND)
 endif()
 
 add_executable(OpenGLSample OpenGLSample.cpp)
-target_link_libraries(OpenGLSample PRIVATE osvrClientKitCpp ${OPENGL_LIBRARY} SDL2::SDL2main)
+target_link_libraries(OpenGLSample
+    PRIVATE
+    osvrClientKitCpp
+    ${OPENGL_LIBRARY}
+    SDL2::SDL2main
+    osvr_cxx11_flags)
 set_target_properties(OpenGLSample PROPERTIES
     FOLDER "OSVR Example Clients")
 
