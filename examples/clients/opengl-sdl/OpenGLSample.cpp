@@ -200,11 +200,25 @@ int main(int argc, char *argv[]) {
 
     // Event handler
     SDL_Event e;
+#ifndef __ANDROID__ // Don't want to pop up the on-screen keyboard
     SDL::TextInput textinput;
+#endif
     bool quit = false;
     while (!quit) {
         // Handle all queued events
-        while (SDL_PollEvent(&e) != 0) {
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+            case SDL_QUIT:
+                // Handle some system-wide quit event
+                quit = true;
+                break;
+            case SDL_KEYDOWN:
+                if (SDL_SCANCODE_ESCAPE == e.key.keysym.scancode) {
+                    // Handle pressing ESC
+                    quit = true;
+                }
+                break;
+            }
             if (e.type == SDL_QUIT) {
                 quit = true;
             }
