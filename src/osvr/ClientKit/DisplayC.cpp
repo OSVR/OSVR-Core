@@ -267,39 +267,12 @@ OSVR_ReturnCode osvrClientGetRelativeViewportForViewerEyeSurface(
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetProjectionForViewerEyeSurface(
-    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_SurfaceCount surface, double near, double far, OSVR_Matrix44 *matrix) {
-    OSVR_VALIDATE_DISPLAY_CONFIG;
-    OSVR_VALIDATE_VIEWER_ID;
-    OSVR_VALIDATE_EYE_ID;
-    OSVR_VALIDATE_SURFACE_ID;
-    OSVR_VALIDATE_OUTPUT_PTR(matrix, "projection matrix");
-    if (near == 0 || far == 0) {
-        OSVR_DEV_VERBOSE("Can't specify a near or far distance as 0!");
-        return OSVR_RETURN_FAILURE;
-    }
-    if (near < 0 || far < 0) {
-        OSVR_DEV_VERBOSE("Can't specify a negative near or far distance!");
-        return OSVR_RETURN_FAILURE;
-    }
-    if (near == far) {
-        OSVR_DEV_VERBOSE("Can't specify equal near and far distances!");
-        return OSVR_RETURN_FAILURE;
-    }
-
-    osvr::util::matMap(*matrix) =
-        disp->cfg->getViewerEyeSurface(viewer, eye, surface)
-            .getProjection(near, far);
-    return OSVR_RETURN_SUCCESS;
-}
-
 template <typename Scalar>
 static inline OSVR_ReturnCode
 getProjectionMatrixImpl(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
                         OSVR_EyeCount eye, OSVR_SurfaceCount surface,
-                        Scalar near, Scalar far, Scalar *mat,
-                        OSVR_MatrixConventions flags) {
+                        Scalar near, Scalar far, OSVR_MatrixConventions flags,
+                        Scalar *mat) {
     OSVR_VALIDATE_DISPLAY_CONFIG;
     OSVR_VALIDATE_VIEWER_ID;
     OSVR_VALIDATE_EYE_ID;
@@ -325,18 +298,18 @@ getProjectionMatrixImpl(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetProjectionMatrixdForViewerEyeSurface(
+OSVR_ReturnCode osvrClientGetViewerEyeSurfaceProjectionMatrixd(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_SurfaceCount surface, double near, double far, double *matrix,
-    OSVR_MatrixConventions flags) {
-    return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far,
-                                   matrix, flags);
+    OSVR_SurfaceCount surface, double near, double far,
+    OSVR_MatrixConventions flags, double *matrix) {
+    return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far, flags,
+                                   matrix);
 }
 
-OSVR_ReturnCode osvrClientGetProjectionMatrixfForViewerEyeSurface(
+OSVR_ReturnCode osvrClientGetViewerEyeSurfaceProjectionMatrixf(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_SurfaceCount surface, float near, float far, float *matrix,
-    OSVR_MatrixConventions flags) {
-    return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far,
-                                   matrix, flags);
+    OSVR_SurfaceCount surface, float near, float far,
+    OSVR_MatrixConventions flags, float *matrix) {
+    return getProjectionMatrixImpl(disp, viewer, eye, surface, near, far, flags,
+                                   matrix);
 }

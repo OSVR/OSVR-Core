@@ -65,12 +65,6 @@ inline OSVR_ReturnCode osvrClientGetRelativeViewportForViewerEyeSurface(
         disp, viewer, eye, surface, &left, &bottom, &width, &height);
 }
 
-inline OSVR_ReturnCode osvrClientGetProjectionForViewerEyeSurface(
-    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_SurfaceCount surface, double near, double far, OSVR_Matrix44 &matrix) {
-    return osvrClientGetProjectionForViewerEyeSurface(
-        disp, viewer, eye, surface, near, far, &matrix);
-}
 /// @todo ensure we have wrappers for all the functions.
 /// @}
 

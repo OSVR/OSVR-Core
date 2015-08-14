@@ -266,10 +266,11 @@ bool render(OSVR_DisplayConfig disp) {
                 double zNear = 0.1;
                 double zFar = 100;
                 double projMat[16];
-                osvrClientGetProjectionMatrixdForViewerEyeSurface(
-                    disp, viewer, eye, surface, zNear, zFar, projMat,
+                osvrClientGetViewerEyeSurfaceProjectionMatrixd(
+                    disp, viewer, eye, surface, zNear, zFar,
                     OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
-                        OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT);
+                        OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT,
+                    projMat);
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 glMultMatrixd(projMat);
