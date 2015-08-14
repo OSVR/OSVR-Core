@@ -121,70 +121,8 @@ static auto const HEIGHT = 1080;
 
 // Forward declarations of rendering functions defined below.
 void draw_cube(double radius);
-
-void renderScene() { draw_cube(1.0); }
-
-void render(OSVR_DisplayConfig disp) {
-    OSVR_ViewerCount viewers;
-    osvrClientGetNumViewers(disp, &viewers);
-
-    for (OSVR_ViewerCount viewer = 0; viewer < viewers; ++viewer) {
-        OSVR_EyeCount eyes;
-        osvrClientGetNumEyesForViewer(disp, viewer, &eyes);
-
-        for (OSVR_EyeCount eye = 0; eye < eyes; ++eye) {
-            OSVR_SurfaceCount surfaces;
-            osvrClientGetNumSurfacesForViewerEye(disp, viewer, eye, &surfaces);
-
-            /// Fill in the ModelView transform based on the eye pose
-            double viewMat[16];
-            osvrClientGetViewerEyeViewMatrixd(disp, viewer, eye, viewMat,
-                                              OSVR_MATRIX_COLMAJOR |
-                                                  OSVR_MATRIX_COLVECTORS);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glMultMatrixd(viewMat);
-
-            for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
-#if 0
-                cout << "Viewer " << viewer << ", Eye " << int(eye)
-                     << ", Surface " << surface << endl;
-#endif
-                // Set the OpenGL viewport based on the one we computed.
-                OSVR_ViewportDimension left;
-                OSVR_ViewportDimension bottom;
-                OSVR_ViewportDimension width;
-                OSVR_ViewportDimension height;
-                osvrClientGetRelativeViewportForViewerEyeSurface(
-                    disp, viewer, eye, surface, &left, &bottom, &width,
-                    &height);
-
-                glViewport(static_cast<GLint>(left), static_cast<GLint>(bottom),
-                           static_cast<GLsizei>(width),
-                           static_cast<GLsizei>(height));
-
-                // Set the OpenGL projection matrix based on the one we
-                // computed.
-                double zNear = 0.1;
-                double zFar = 100;
-                double projMat[16];
-                osvrClientGetProjectionMatrixdForViewerEyeSurface(
-                    disp, viewer, eye, surface, zNear, zFar, projMat,
-                    OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
-                        OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT);
-                glMatrixMode(GL_PROJECTION);
-                glLoadIdentity();
-                glMultMatrixd(projMat);
-                // Set the matrix mode to ModelView, so render code doesn't mess
-                // with
-                // the projection matrix on accident.
-                glMatrixMode(GL_MODELVIEW);
-
-                renderScene();
-            }
-        }
-    }
-}
+bool render(OSVR_DisplayConfig disp);
+void renderScene();
 
 int main(int argc, char *argv[]) {
     // Open SDL
@@ -245,25 +183,112 @@ int main(int argc, char *argv[]) {
         ctx.update();
 
         // Render
-        render(display);
+        bool valid = render(display);
 
-        // Swap buffers
-        SDL_GL_SwapWindow(window.get());
+        // Swap buffers if we had all the data to render.
+        if (valid) {
+            SDL_GL_SwapWindow(window.get());
+        }
     }
 
     return 0;
 }
 
-static GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
-static float red_col[] = {1.0, 0.0, 0.0};
-static float grn_col[] = {0.0, 1.0, 0.0};
-static float blu_col[] = {0.0, 0.0, 1.0};
-static float yel_col[] = {1.0, 1.0, 0.0};
-static float lightblu_col[] = {0.0, 1.0, 1.0};
-static float pur_col[] = {1.0, 0.0, 1.0};
+/// @brief A simple dummy "draw" function - note that drawing occurs in "room
+/// space" by default. (that is, in this example, the modelview matrix when this
+/// function is called is initialized such that it transforms from world space
+/// to view space)
+void renderScene() { draw_cube(1.0); }
 
+/// @brief The "wrapper" for rendering to a device described by OSVR.
+///
+/// This function will set up viewport, initialize view and projection matrices
+/// to current values, then call `renderScene()` as needed (e.g. once for each
+/// eye, for a simple HMD.)
+///
+/// @return false if we didn't render (typically because we just started up and
+/// don't have pose data for head/eyes yet)
+bool render(OSVR_DisplayConfig disp) {
+    /// For each viewer...
+    OSVR_ViewerCount viewers;
+    osvrClientGetNumViewers(disp, &viewers);
+    for (OSVR_ViewerCount viewer = 0; viewer < viewers; ++viewer) {
+
+        /// For each eye of the given viewer...
+        OSVR_EyeCount eyes;
+        osvrClientGetNumEyesForViewer(disp, viewer, &eyes);
+        for (OSVR_EyeCount eye = 0; eye < eyes; ++eye) {
+
+            /// Try retrieving the view matrix (based on eye pose) from OSVR
+            double viewMat[OSVR_MATRIX_SIZE];
+            auto gotView = osvrClientGetViewerEyeViewMatrixd(
+                disp, viewer, eye, viewMat,
+                OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS);
+            if (gotView != OSVR_RETURN_SUCCESS) {
+                cout << "Waiting for view pose..." << endl;
+                return false;
+            }
+
+            /// Initialize the ModelView transform with the view matrix we
+            /// received
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glMultMatrixd(viewMat);
+
+            /// For each display surface seen by the given eye of the given
+            /// viewer...
+            OSVR_SurfaceCount surfaces;
+            osvrClientGetNumSurfacesForViewerEye(disp, viewer, eye, &surfaces);
+            for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
+
+                /// Set the OpenGL viewport based on the one we computed.
+                OSVR_ViewportDimension left;
+                OSVR_ViewportDimension bottom;
+                OSVR_ViewportDimension width;
+                OSVR_ViewportDimension height;
+                osvrClientGetRelativeViewportForViewerEyeSurface(
+                    disp, viewer, eye, surface, &left, &bottom, &width,
+                    &height);
+
+                glViewport(static_cast<GLint>(left), static_cast<GLint>(bottom),
+                           static_cast<GLsizei>(width),
+                           static_cast<GLsizei>(height));
+
+                /// Set the OpenGL projection matrix based on the one we
+                /// computed.
+                double zNear = 0.1;
+                double zFar = 100;
+                double projMat[16];
+                osvrClientGetProjectionMatrixdForViewerEyeSurface(
+                    disp, viewer, eye, surface, zNear, zFar, projMat,
+                    OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
+                        OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT);
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                glMultMatrixd(projMat);
+
+                /// Set the matrix mode to ModelView, so render code doesn't
+                /// mess with the projection matrix on accident.
+                glMatrixMode(GL_MODELVIEW);
+
+                /// Call out to render our scene.
+                renderScene();
+            }
+        }
+    }
+    /// Successfully completed a frame render.
+    return true;
+}
+
+/// @brief Fixed-function pipeline OpenGL code to draw a cube
 void draw_cube(double radius) {
-    GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
+    static const GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
+    static const float red_col[] = {1.0, 0.0, 0.0};
+    static const float grn_col[] = {0.0, 1.0, 0.0};
+    static const float blu_col[] = {0.0, 0.0, 1.0};
+    static const float yel_col[] = {1.0, 1.0, 0.0};
+    static const float lightblu_col[] = {0.0, 1.0, 1.0};
+    static const float pur_col[] = {1.0, 0.0, 1.0};
     glPushMatrix();
     glScaled(radius, radius, radius);
     glMaterialfv(GL_FRONT, GL_SPECULAR, matspec);
