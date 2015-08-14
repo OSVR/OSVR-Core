@@ -4,6 +4,7 @@
 #  SDL2::SDL2 - Imported target to use for building a library
 #  SDL2::SDL2main - Imported target to use if you want SDL and SDLmain.
 #  SDL2_FOUND - True if SDL2 was found.
+#  SDL2_DYNAMIC - If we found a DLL version of SDL (meaning you might want to copy a DLL)
 #
 # Original Author:
 # 2015 Ryan Pavlik <ryan.pavlik@gmail.com> <abiryan@ryand.net>
@@ -113,6 +114,7 @@ find_package_handle_standard_args(SDL2
 
 if(SDL2_FOUND)
 	if(WIN32 AND SDL2_RUNTIME_LIBRARY)
+		set(SDL2_DYNAMIC TRUE)
 		add_library(SDL2::SDL2 SHARED IMPORTED)
 		set_target_properties(SDL2::SDL2
 			PROPERTIES
