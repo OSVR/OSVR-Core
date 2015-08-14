@@ -50,8 +50,8 @@ namespace util {
         };
 
         inline bool matrixNeedsTranspose(OSVR_MatrixConventions flags) {
-            bool rowmaj(flags & OSVR_MATRIX_MASK_ROWMAJOR);
-            bool rowvec(flags & OSVR_MATRIX_MASK_ROWVECTORS);
+            const bool rowmaj(0 != (flags & OSVR_MATRIX_MASK_ROWMAJOR));
+            const bool rowvec(0 != (flags & OSVR_MATRIX_MASK_ROWVECTORS));
             // xor since one alone implies transpose, but both together
             // imply no transpose.
             return (rowmaj ^ rowvec);
@@ -65,11 +65,11 @@ namespace util {
                     set(CompactMatrixFlags::NeedsTranspose);
                 }
 
-                if (flags & OSVR_MATRIX_MASK_LHINPUT) {
+                if (0 != (flags & OSVR_MATRIX_MASK_LHINPUT)) {
                     set(CompactMatrixFlags::LeftHandInput);
                 }
 
-                if (flags & OSVR_MATRIX_MASK_UNSIGNEDZ) {
+                if (0 != (flags & OSVR_MATRIX_MASK_UNSIGNEDZ)) {
                     set(CompactMatrixFlags::UnsignedZ);
                 }
             }

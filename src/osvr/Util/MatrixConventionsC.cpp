@@ -39,19 +39,19 @@ static_assert(Eigen::Matrix4d::IsRowMajor == false,
               "still column-major by default.");
 
 inline static bool isRowMajor(OSVR_MatrixConventions flags) {
-    return flags & OSVR_MATRIX_MASK_ROWMAJOR;
+    return 0 != (flags & OSVR_MATRIX_MASK_ROWMAJOR);
 }
 inline static bool isRowVectors(OSVR_MatrixConventions flags) {
-    return flags & OSVR_MATRIX_MASK_ROWVECTORS;
+    return 0 != (flags & OSVR_MATRIX_MASK_ROWVECTORS);
 }
 inline static bool needsTranspose(OSVR_MatrixConventions flags) {
     return isRowMajor(flags) ^ isRowVectors(flags);
 }
 inline static bool isLHInput(OSVR_MatrixConventions flags) {
-    return flags & OSVR_MATRIX_MASK_LHINPUT;
+    return 0 != (flags & OSVR_MATRIX_MASK_LHINPUT);
 }
 inline static bool isUnsignedZ(OSVR_MatrixConventions flags) {
-    return flags & OSVR_MATRIX_MASK_UNSIGNEDZ;
+    return 0 != (flags & OSVR_MATRIX_MASK_UNSIGNEDZ);
 }
 static_assert((OSVR_MATRIX_MASK_ROWMAJOR | OSVR_MATRIX_MASK_ROWVECTORS |
                OSVR_MATRIX_MASK_LHINPUT | OSVR_MATRIX_MASK_UNSIGNEDZ) ==
