@@ -38,6 +38,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+
 namespace SDL {
 /// @brief RAII wrapper for SDL startup/shutdown
 class Lib {
@@ -50,36 +51,52 @@ class Lib {
         }
     }
     ~Lib() { SDL_Quit(); }
+
+    Lib(Lib const &) = delete;            //< non-copyable
+    Lib &operator=(Lib const &) = delete; //< non-assignable
 };
 
-/// @brief RAII wrapper for SDL text input start/stop.
-class TextInput {
-  public:
-    TextInput() { SDL_StartTextInput(); }
-    ~TextInput() { SDL_StopTextInput(); }
-};
+/// @brief Smart pointer for SDL_Window
 typedef std::shared_ptr<SDL_Window> WindowPtr;
+
+/// @brief Smart pointer constructor for SDL_Window (forwarding)
 template <typename... Args> inline WindowPtr createWindow(Args &&... args) {
     WindowPtr ret(SDL_CreateWindow(std::forward<Args>(args)...),
                   &SDL_DestroyWindow);
     return ret;
 }
 
+/// @brief RAII wrapper for SDL text input start/stop.
+class TextInput {
+  public:
+    TextInput() { SDL_StartTextInput(); }
+    ~TextInput() { SDL_StopTextInput(); }
+
+    TextInput(TextInput const &) = delete;            //< non-copyable
+    TextInput &operator=(TextInput const &) = delete; //< non-assignable
+};
+
 /// @brief RAII wrapper for SDL OpenGL context.
 class GLContext {
   public:
+    /// @brief Forwarding constructor
     template <typename... Args> GLContext(Args &&... args) {
         m_context = SDL_GL_CreateContext(std::forward<Args>(args)...);
     }
 
-    SDL_GLContext &operator*() { return m_context; }
-    SDL_GLContext const &operator*() const { return m_context; }
-
+    /// @brief Destructor for cleanup
     ~GLContext() { SDL_GL_DeleteContext(m_context); }
+
+    /// @brief Implicit conversion
+    operator SDL_GLContext() const { return m_context; }
+
+    GLContext(GLContext const &) = delete;            //< non-copyable
+    GLContext &operator=(GLContext const &) = delete; //< non-assignable
 
   private:
     SDL_GLContext m_context;
 };
+
 } // namespace SDL
 
 static auto const WIDTH = 1920;
