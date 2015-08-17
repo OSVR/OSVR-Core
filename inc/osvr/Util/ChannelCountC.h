@@ -50,10 +50,6 @@ channel/sensor index.
 */
 typedef uint32_t OSVR_ChannelCount;
 
-typedef uint32_t OSVR_ViewerCount;
-typedef uint8_t OSVR_EyeCount;
-typedef uint32_t OSVR_SurfaceCount;
-
 /** @} */
 
 OSVR_EXTERN_C_END

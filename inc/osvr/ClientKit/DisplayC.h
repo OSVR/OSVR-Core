@@ -34,7 +34,7 @@
 #include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/ReturnCodesC.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
-#include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/RenderingTypesC.h>
 #include <osvr/Util/MatrixConventionsC.h>
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/BoolC.h>
@@ -51,7 +51,6 @@ OSVR_EXTERN_C_BEGIN
 /** @brief Opaque type of a display configuration. */
 typedef struct OSVR_DisplayConfigObject *OSVR_DisplayConfig;
 
-typedef int32_t OSVR_ViewportDimension;
 
 /** @brief Allocates a display configuration object.
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or some other

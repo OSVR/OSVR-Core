@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header with integer types for Viewer, Eye, and Surface
+   counts/indices, as well as viewport information.
 
     Must be c-safe!
 
@@ -30,12 +31,37 @@
 #define INCLUDED_RenderingTypesC_h_GUID_6689A6CA_76AC_48AC_A0D0_2902BC95AC35
 
 /* Internal Includes */
-/* none */
+#include <osvr/Util/StdInt.h>
+#include <osvr/Util/APIBaseC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
 /* none */
+
+OSVR_EXTERN_C_BEGIN
+
+/** @addtogroup PluginKit
+@{
+*/
+
+/** @brief The integer type specifying a number of viewers in a system. */
+typedef uint32_t OSVR_ViewerCount;
+
+/** @brief The integer type specifying the number of eyes of a viewer. */
+typedef uint8_t OSVR_EyeCount;
+
+/** @brief The integer type specifying the number of surfaces seen by a viewer's
+    eye. */
+typedef uint32_t OSVR_SurfaceCount;
+
+/** @brief The integer type used in specification of size or location of a
+    viewport.  */
+typedef int32_t OSVR_ViewportDimension;
+
+/** @} */
+
+OSVR_EXTERN_C_END
 
 #endif

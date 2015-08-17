@@ -27,7 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/ClientOpaqueTypesC.h>
-#include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/RenderingTypesC.h>
 #include <osvr/Client/Export.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
 #include <osvr/Util/Pose3C.h>
