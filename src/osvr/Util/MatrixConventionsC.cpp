@@ -48,13 +48,13 @@ static inline OSVR_ReturnCode pose3toMatrix(OSVR_Pose3 const *pose,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrPose3ToMatrixd(double *mat, OSVR_Pose3 const *pose,
-                                   OSVR_MatrixConventions flags) {
+OSVR_ReturnCode osvrPose3ToMatrixd(OSVR_Pose3 const *pose,
+                                   OSVR_MatrixConventions flags, double *mat) {
     return pose3toMatrix(pose, flags, mat);
 }
 
-OSVR_ReturnCode osvrPose3ToMatrixf(float *mat, OSVR_Pose3 const *pose,
-                                   OSVR_MatrixConventions flags) {
+OSVR_ReturnCode osvrPose3ToMatrixf(OSVR_Pose3 const *pose,
+                                   OSVR_MatrixConventions flags, float *mat) {
     return pose3toMatrix(pose, flags, mat);
 }
 
