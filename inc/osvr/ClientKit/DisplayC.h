@@ -35,7 +35,6 @@
 #include <osvr/Util/ReturnCodesC.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ChannelCountC.h>
-#include <osvr/Util/Matrix44C.h>
 #include <osvr/Util/MatrixConventionsC.h>
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/BoolC.h>

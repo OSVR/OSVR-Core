@@ -51,7 +51,6 @@ set(API
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
     "${HEADER_LOCATION}/IndentingStream.h"
     "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
-    "${HEADER_LOCATION}/Matrix44C.h"
     "${HEADER_LOCATION}/MatrixConventionsC.h"
     "${HEADER_LOCATION}/MatrixConventions.h"
     "${HEADER_LOCATION}/MatrixEigenAssign.h"
