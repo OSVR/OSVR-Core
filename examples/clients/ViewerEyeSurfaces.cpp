@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/Context.h>
-#include <osvr/ClientKit/DisplayC.h>
+#include <osvr/ClientKit/Display.h>
 
 // Library/third-party includes
 // - none
@@ -35,33 +35,25 @@
 int main() {
     // Start OSVR and get OSVR display config
     osvr::clientkit::ClientContext ctx("com.osvr.example.ViewerEyeSurfaces");
-    OSVR_DisplayConfig display;
+    osvr::clientkit::DisplayConfig display;
 
     // This is in a loop in case we don't have a display config right away.
-    OSVR_ReturnCode ret = OSVR_RETURN_FAILURE;
     do {
         std::cout << "Trying to get the display config" << std::endl;
         ctx.update();
-        ret = osvrClientGetDisplay(ctx.get(), &display);
-    } while (ret == OSVR_RETURN_FAILURE);
+        display = osvr::clientkit::DisplayConfig(ctx);
+    } while (!display.valid());
 
-    OSVR_ViewerCount viewers;
-    osvrClientGetNumViewers(display, &viewers);
-    for (OSVR_ViewerCount viewer = 0; viewer < viewers; ++viewer) {
-        std::cout << "Viewer " << viewer << "\n";
-        OSVR_EyeCount eyes;
-        osvrClientGetNumEyesForViewer(display, viewer, &eyes);
-
-        for (OSVR_EyeCount eye = 0; eye < eyes; ++eye) {
-            std::cout << "\tEye " << int(eye) << "\n";
-            OSVR_SurfaceCount surfaces;
-            osvrClientGetNumSurfacesForViewerEye(display, viewer, eye,
-                                                 &surfaces);
-            for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
-                std::cout << "\t\tSurface " << surface << "\n";
-            }
-        }
-    }
+    // Once we have a valid display config, go through each level with a lambda.
+    display.forEachViewer([](osvr::clientkit::Viewer viewer){
+        std::cout << "Viewer " << viewer.getViewerID() << "\n";
+        viewer.forEachEye([](osvr::clientkit::Eye eye) {
+            std::cout << "\tEye " << int(eye.getEyeID()) << "\n";
+            eye.forEachSurface([](osvr::clientkit::Surface surface) {
+                std::cout << "\t\tSurface " << surface.getSurfaceID() << "\n";
+            });
+        });
+    });
 
     std::cout << "Library shut down, exiting." << std::endl;
     return 0;
