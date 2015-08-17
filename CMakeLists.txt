@@ -81,6 +81,11 @@ endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
 
 # Shared modules from rpavlik/cmake-modules
+
+# Must be before MapImportedReleaseVariants
+find_package(OpenGL)
+find_package(SDL2)
+
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
 include(CopyImportedTarget)

@@ -1,6 +1,4 @@
-/* This is for the HDK v1.1 - roughly around GDC 2015 */
+/* The default config file, as used with the HDK, is fully auto-detected, so no configuration required. */
+/* See the JSON-Schema for server config or other samples to see possible options. */
 {
-  "server": {
-    "sleep": 1
-  }
 }

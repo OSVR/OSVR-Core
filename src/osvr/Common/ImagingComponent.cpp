@@ -36,6 +36,7 @@
 
 // Standard includes
 #include <sstream>
+#include <utility>
 
 namespace osvr {
 namespace common {

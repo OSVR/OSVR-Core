@@ -1,7 +1,12 @@
 osvr_setup_lib_vars(Client)
 
 set(API
-    "${HEADER_LOCATION}/CreateContext.h")
+    "${HEADER_LOCATION}/CreateContext.h"
+    "${HEADER_LOCATION}/DisplayConfig.h"
+    "${HEADER_LOCATION}/InternalInterfaceOwner.h"
+    "${HEADER_LOCATION}/Viewer.h"
+    "${HEADER_LOCATION}/ViewerEye.h"
+    "${HEADER_LOCATION}/ViewerEyeSurface.h")
 
 set(SOURCE
     AnalogRemoteFactory.cpp
@@ -11,6 +16,9 @@ set(SOURCE
     CreateContext.cpp
     DirectionRemoteFactory.cpp
     DirectionRemoteFactory.h
+    DisplayConfig.cpp
+    DisplayDescriptorSchema1.cpp
+    DisplayDescriptorSchema1.h
     EyeTrackerRemoteFactory.cpp
     EyeTrackerRemoteFactory.h
     HandlerContainer.h
@@ -19,7 +27,7 @@ set(SOURCE
     InterfaceTree.cpp
     InterfaceTree.h
     Location2DRemoteFactory.cpp
-    Location2DRemoteFactory.h    
+    Location2DRemoteFactory.h
     PureClientContext.cpp
     PureClientContext.h
     RemoteHandler.cpp
@@ -29,6 +37,9 @@ set(SOURCE
     RouterTransforms.h
     TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h
+    Viewer.cpp
+    ViewerEye.cpp
+    ViewerEyeSurface.cpp
     VRPNConnectionCollection.cpp
     VRPNConnectionCollection.h)
 

@@ -13,7 +13,8 @@ set(MAINCLIENTS
 # These are "extra"
 set(CLIENTS
     MinimalInit
-    TrackerState)
+    TrackerState
+    ViewerEyeSurfaces)
 
 foreach(name ${MAINCLIENTS} ${CLIENTS})
     foreach(suffix c cpp)
@@ -54,6 +55,8 @@ endforeach()
 # Some examples should be run as tests
 add_test(NAME DisplayParameter_runs
     COMMAND DisplayParameter_cpp)
+
+add_subdirectory(opengl-sdl)
 
 if(BUILD_TESTING)
     ###

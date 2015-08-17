@@ -29,10 +29,17 @@
             "right_roll": 0,
             "left_roll": 0
         },
-        "eyes": [{
+        "eyes": [
+          {
             "center_proj_x": 0.5,
             "center_proj_y": 0.5,
             "rotate_180": 0
-        }]
+          },
+          {
+            "center_proj_x": 0.5,
+            "center_proj_y": 0.5,
+            "rotate_180": 0
+          }
+        ]
     }
 }

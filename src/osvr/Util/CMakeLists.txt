@@ -24,6 +24,7 @@ osvr_setup_lib_vars(Util)
 
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
+    "${HEADER_LOCATION}/Angles.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/AnyMap_fwd.h"
@@ -39,6 +40,7 @@ set(API
     "${HEADER_LOCATION}/Deletable.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
+    "${HEADER_LOCATION}/EigenExtras.h"
     "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/Flag.h"
     "${HEADER_LOCATION}/GenericCaller.h"
@@ -49,6 +51,9 @@ set(API
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
     "${HEADER_LOCATION}/IndentingStream.h"
     "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
+    "${HEADER_LOCATION}/MatrixConventionsC.h"
+    "${HEADER_LOCATION}/MatrixConventions.h"
+    "${HEADER_LOCATION}/MatrixEigenAssign.h"
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
@@ -60,8 +65,13 @@ set(API
     "${HEADER_LOCATION}/PointerWrapper.h"
     "${HEADER_LOCATION}/Pose3C.h"
     "${HEADER_LOCATION}/ProgramOptionsToggleFlags.h"
+    "${HEADER_LOCATION}/ProjectionMatrix.h"
+    "${HEADER_LOCATION}/ProjectionMatrixFromFOV.h"
     "${HEADER_LOCATION}/QuaternionC.h"
     "${HEADER_LOCATION}/QuatlibInteropC.h"
+    "${HEADER_LOCATION}/RadialDistortionParametersC.h"
+    "${HEADER_LOCATION}/Rect.h"
+    "${HEADER_LOCATION}/RenderingTypesC.h"
     "${HEADER_LOCATION}/ResetPointerList.h"
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
@@ -89,6 +99,7 @@ set(SOURCE
     Deletable.cpp
     GuardInterface.cpp
     TimeValueC.cpp
+    MatrixConventionsC.cpp
     MessageKeys.cpp
     PlatformConfig.h.in
     Verbosity.h.in
@@ -109,10 +120,6 @@ target_include_directories(${LIBNAME_FULL}
     PRIVATE
     ${Boost_INCLUDE_DIRS})
 
-target_compile_options(${LIBNAME_FULL}
-    PRIVATE
-    ${OSVR_CXX11_FLAGS})
-
 osvr_generate_for_report_types(ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h")
@@ -123,7 +130,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
     COMPONENT Devel)
 
 # TODO VRPN used in this lib only for gettimeofday wrapper: do we need it?
-target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn)
+target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn eigen-headers)
 
 ###
 # C++ util library/headers

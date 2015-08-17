@@ -33,6 +33,8 @@ check_cxx_type_exists("std::unique_ptr<int>" "memory" OSVR_HAVE_STD_UNIQUE_PTR)
 
 if(OSVR_HAVE_STD_SHARED_PTR AND OSVR_HAVE_STD_UNIQUE_PTR)
     set(OSVR_CXX11_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    add_library(osvr_cxx11_flags INTERFACE)
+    target_compile_options(osvr_cxx11_flags INTERFACE ${CMAKE_REQUIRED_FLAGS})
 else()
     message(FATAL_ERROR "Sorry, your compiler does not support the C++11 features required to compile the library core.")
 endif()

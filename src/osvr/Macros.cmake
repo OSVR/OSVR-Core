@@ -43,10 +43,7 @@ macro(osvr_add_library)
         $<BUILD_INTERFACE:${HEADER_BASE}>
         $<INSTALL_INTERFACE:include>)
 
-    target_compile_options(${LIBNAME_FULL}
-        PRIVATE
-        ${OSVR_CXX11_FLAGS})
-
+    target_link_libraries(${LIBNAME_FULL} PRIVATE osvr_cxx11_flags)
     enable_extra_compiler_warnings(${LIBNAME_FULL})
 
     ###

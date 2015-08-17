@@ -1,0 +1,11 @@
+{
+    "plugins": [
+        "com_osvr_EyeTracker"
+    ],
+    "aliases": [
+        {
+            "/me/eyes/left": "/com_osvr_EyeTracker/EyeTracker/tracker/0",
+            "/me/eyes/right": "/com_osvr_EyeTracker/EyeTracker/tracker/1"
+        }
+    ]
+}

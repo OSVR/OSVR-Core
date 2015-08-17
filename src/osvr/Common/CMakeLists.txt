@@ -160,10 +160,6 @@ target_include_directories(${LIBNAME_FULL}
     PRIVATE
     ${OpenCV_INCLUDE_DIRS})
 
-target_compile_options(${LIBNAME_FULL}
-    PUBLIC
-    ${OSVR_CXX11_FLAGS})
-
 target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     osvrUtilCpp
@@ -172,6 +168,7 @@ target_link_libraries(${LIBNAME_FULL}
     opencv_core
     vendored-vrpn
     eigen-headers
+    osvr_cxx11_flags
     ${OSVR_CODECVT_LIBRARIES})
 
 osvr_delayload_opencv(${LIBNAME_FULL} opencv_core)

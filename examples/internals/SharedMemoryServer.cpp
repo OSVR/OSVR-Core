@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/SharedMemoryRingBuffer.h>
+#include <osvr/Common/IPCRingBuffer.h>
 
 // Library/third-party includes
 // - none
@@ -34,29 +34,28 @@
 #include <iostream>
 
 int main() {
-    auto opts = osvr::common::SharedMemoryRingBuffer::Options("Test");
-    auto buf = osvr::common::SharedMemoryRingBuffer::find(opts);
+
+    auto opts = osvr::common::IPCRingBuffer::Options("Test");
+    auto buf = osvr::common::IPCRingBuffer::create(opts);
     if (!buf) {
-        std::cout << "Couldn't find it." << std::endl;
+        std::cout << "Couldn't create it." << std::endl;
         return 1;
     }
+    std::cout << "Using backend: " << int(buf->getBackend()) << std::endl;
 
     std::cout << "Capacity: " << buf->getEntries() << " entries.\n";
     std::cout << "Entry size: " << buf->getEntrySize() << " bytes per entry."
               << std::endl;
 
-    osvr::common::SharedMemoryRingBuffer::sequence_type seq(0);
     while (true) {
-        std::cin.ignore();
-        std::cout << "Sequence number " << seq << ": ";
-        auto res = buf->get(seq);
-        if (res) {
-            std::cout << (res.get())[0] << (res.get())[1] << (res.get())[2];
-        } else {
-            std::cout << "Not available";
-        }
-        std::cout << std::endl;
-        seq++;
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::string data;
+        std::getline(std::cin, data);
+        auto seq =
+            buf->put(reinterpret_cast<const unsigned char *>(data.data()),
+                     data.length());
+        std::cout << "Sequence number " << seq << std::endl;
+        // auto proxy = buf->put();
     }
 
     return 0;
