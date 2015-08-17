@@ -137,7 +137,9 @@ namespace util {
     } // namespace projection_detail
     /// @brief Takes in points at the near clipping plane, as well as
     /// the near and far clipping planes. Result matrix maps [l, r] and
-    /// [b, t] to [-1, 1], and [n, f] to [-1, 1] (should be configurable)
+    /// [b, t] to [-1, 1], and [n, f] to [-1, 1] or [0, 1] depending on
+    /// presence/absence of ZOutputUnsigned flag bit, taking in right- or
+    /// left-handed input also as configured.
     template <projection_options::OptionType options =
                   projection_options::ZOutputSigned |
                   projection_options::RightHandedInput>
@@ -160,14 +162,16 @@ namespace util {
         auto top = bounds[Rectd::TOP];
         auto bottom = bounds[Rectd::BOTTOM];
 
+        // These two methods encapsulate the difference between signed-Z and
+        // unsigned-Z.
         using projection_detail::get33;
         using projection_detail::get34;
         Eigen::Matrix4d mat;
         // clang-format off
         mat << (2 * near / (right - left)), 0, ((right + left) / (right - left)), 0,
-            0, (2 * near / (top - bottom)), ((top + bottom) / (top - bottom)), 0,
-            0, 0, get33<options>(near, far), get34<options>(near, far),
-            0, 0, -1, 0;
+               0, (2 * near / (top - bottom)), ((top + bottom) / (top - bottom)), 0,
+               0, 0,                           get33<options>(near, far), get34<options>(near, far),
+               0, 0,                           -1, 0;
         // clang-format on
 
         if (projection_options::IsLeftHandedInput<options>::value) {
