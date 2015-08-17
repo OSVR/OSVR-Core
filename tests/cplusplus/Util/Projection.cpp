@@ -39,21 +39,11 @@ using osvr::util::computeSymmetricFOVRect;
 
 typedef std::vector<double> BoundsList;
 namespace opts = osvr::util::projection_options;
-#if 0
-template <typename OptionType, bool = opts::IsColumnVector<OptionType::value>::value>
-struct TransformVector {
-    template<typename Mat, typename Vec>
-    static Vec apply(Mat const& m, Vec const& v)
-};
-#endif
+
 template <typename OptionType>
 class ParameterizedProjectionTest : public ::testing::Test {
   public:
     static const opts::OptionType Options = OptionType::value;
-#if 0
-    using Vec3 = typename std::conditional<opts::IsColumnVector<Options>::value, osvr::util::ColVector3d, osvr::util::RowVector3d>::type;
-    using Vec4 = typename std::conditional<opts::IsColumnVector<Options>::value, osvr::util::ColVector4d, osvr::util::RowVector4d>::type;
-#endif
     using Vec3 = Eigen::Vector3d;
     using Vec4 = Eigen::Vector4d;
     static double getMinZ() {
@@ -138,5 +128,22 @@ TYPED_TEST(ParameterizedProjectionTest, BasicSmoketest) {
     this->setParams(0.1, 1000);
     auto rect = this->computeSymmetricRect();
     this->tryProjection(rect);
-    //[&](Eigen::Vector3d const &bound, Eigen::Vector3d const &result) {});
+}
+
+TEST(ParameterizedProjectionTest, MatchesUnparameterized) {
+    using namespace osvr::util;
+    namespace opts = osvr::util::projection_options;
+    double near = 0.1;
+    double far = 100;
+    auto rect = computeSymmetricFOVRect(50. * degrees, 40. * degrees, near);
+    auto paramMat = parameterizedCreateProjectionMatrix<opts::RightHandedInput |
+                                                        opts::ZOutputSigned>(
+        rect, near, far);
+    auto unparamMat = createProjectionMatrix(rect, near, far);
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            ASSERT_EQ(paramMat(i, j), unparamMat(i, j));
+        }
+    }
 }
