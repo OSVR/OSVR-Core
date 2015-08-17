@@ -134,6 +134,20 @@ namespace util {
         inline double get34(double near, double far) {
             return ThirdRow<options>::get4(near, far);
         }
+        /// @brief Adjustment needed for left-handed input: dummy case of not
+        /// requesting left-hand input.
+        template <projection_options::OptionType options, typename = void>
+        struct LeftHandedCorrection {
+            static void apply(Eigen::Matrix4d &) {}
+        };
+        /// @brief Adjustment needed for left-handed input
+        template <projection_options::OptionType options>
+        struct LeftHandedCorrection<
+            options,
+            typename std::enable_if<
+                projection_options::IsLeftHandedInput<options>::value>::type> {
+            static void apply(Eigen::Matrix4d &mat) { mat.col(2) *= -1.; }
+        };
     } // namespace projection_detail
     /// @brief Takes in points at the near clipping plane, as well as
     /// the near and far clipping planes. Result matrix maps [l, r] and
@@ -174,9 +188,11 @@ namespace util {
                0, 0,                           -1, 0;
         // clang-format on
 
-        if (projection_options::IsLeftHandedInput<options>::value) {
-            mat.col(2) *= -1.;
-        }
+        // If the options specify a left-handed input, this function call will
+        // modify the matrix. If not, it turns into an empty call to be
+        // optimized out.
+        using projection_detail::LeftHandedCorrection;
+        LeftHandedCorrection<options>::apply(mat);
         return mat;
     }
 } // namespace util
