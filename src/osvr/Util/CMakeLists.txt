@@ -64,7 +64,6 @@ set(API
     "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/PointerWrapper.h"
     "${HEADER_LOCATION}/Pose3C.h"
-    "${HEADER_LOCATION}/Policies.h"
     "${HEADER_LOCATION}/ProgramOptionsToggleFlags.h"
     "${HEADER_LOCATION}/ProjectionMatrix.h"
     "${HEADER_LOCATION}/ProjectionMatrixFromFOV.h"
