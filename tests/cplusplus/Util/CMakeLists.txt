@@ -6,6 +6,6 @@ endforeach()
 
 target_link_libraries(Projection eigen-headers)
 
-
-add_executable(ProjectionSample ProjectionSample.cpp)
-target_link_libraries(ProjectionSample osvrUtilCpp eigen-headers)
+# Not an automated test
+# add_executable(ProjectionSample ProjectionSample.cpp)
+# target_link_libraries(ProjectionSample osvrUtilCpp eigen-headers)
