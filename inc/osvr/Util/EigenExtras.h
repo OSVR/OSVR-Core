@@ -44,17 +44,28 @@ namespace util {
         struct RowMajor : std::integral_constant<int, Eigen::RowMajor> {};
         /// @brief Type to use to wrap the Eigen::ColMajor constant.
         struct ColMajor : std::integral_constant<int, Eigen::ColMajor> {};
+        template <int _Options>
+        using IsEigenOptionsRowMajor =
+            std::integral_constant<bool,
+                                   ((_Options & Eigen::RowMajorBit) != 0)>;
         /// @brief Creates a vector given the Eigen::ColMajor or Eigen::RowMajor
         /// integer arguments.
         template <int Size, int _Options = Eigen::ColMajor,
                   typename Scalar = double>
-        using VectorImpl = Eigen::Matrix < Scalar,
-              (_Options & Eigen::RowMajorBit) ? Size : 1,
-              (!(_Options & Eigen::RowMajorBit)) ? Size : 1 > ;
+        using VectorImpl =
+            Eigen::Matrix<Scalar,
+                          IsEigenOptionsRowMajor<_Options>::value ? Size : 1,
+                          IsEigenOptionsRowMajor<_Options>::value ? 1 : Size>;
         /// @brief Creates a vector given the RowMajor or ColMajor type
         /// arguments.
         template <int Size, typename Ordering, typename Scalar = double>
         using Vector = VectorImpl<Size, Ordering::value, Scalar>;
+
+        template <int Size, typename PrototypeVector>
+        using SameLayoutVector =
+            Eigen::Matrix<typename PrototypeVector::Scalar,
+                          PrototypeVector::IsRowMajor ? Size : 1,
+                          PrototypeVector::IsRowMajor ? 1 : Size>;
     } // namespace detail
 
     /// @name Ordering keywords
@@ -65,42 +76,45 @@ namespace util {
     extern detail::ColMajor const *col_major;
     /// @}
 
-    template <typename Derived, typename Ordering>
-    inline detail::Vector<4, Ordering>
-    makeHomogeneousPoint(Eigen::MatrixBase<Derived> const &vec,
-                         Ordering * = col_major) {
+    /// @brief Makes a 3D vector into a 4D homogeneous point, with the same
+    /// options (scalar, row vs col vector) as the input.
+    template <typename Derived>
+    inline detail::SameLayoutVector<4, Derived>
+    makeHomogeneousPoint(Eigen::MatrixBase<Derived> const &vec) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-        return (detail::Vector<4, Ordering>() << vec, 1).finished();
-    }
-    template <typename Derived, typename Ordering>
-    inline detail::Vector<4, Ordering>
-    makeHomogeneousVector(Eigen::MatrixBase<Derived> const &vec,
-                          Ordering const * = col_major) {
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-        return (detail::Vector<4, Ordering>() << vec, 0).finished();
+        return (detail::SameLayoutVector<4, Derived>() << vec, 1).finished();
     }
 
-#if 0
-    template <int Size, typename Derived>
-    using SameLayoutVector =
-        detail::VectorImpl<Size, Derived::Options, typename Derived::Scalar>;
-    /// @brief Pulls the 3-dimensional point or vector from a 4-d vec,
-    /// performing division by w if nonzero.
-    template <typename Derived>
-    inline SameLayoutVector<3, Derived>
-    extractPoint(Eigen::MatrixBase<Derived> const &homogenous) {
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 4);
-        return homogenous[3] == 0
-                   ? homogenous.head<3>().eval()
-                   : (homogenous.head<3>() / homogenous[3]).eval();
+    template <typename Scalar, typename Ordering>
+    inline detail::Vector<4, Ordering, Scalar>
+    makeHomogeneousPoint(Scalar x, Scalar y, Scalar z, Ordering * = col_major) {
+        return detail::Vector<4, Ordering>(x, y, z, 1);
     }
-#endif
+
+    /// @brief Makes a 3D vector into a 4D homogeneous vector, with the same
+    /// options (scalar, row vs col vector) as the input.
+    template <typename Derived>
+    inline detail::SameLayoutVector<4, Derived>
+    makeHomogeneousVector(Eigen::MatrixBase<Derived> const &vec) {
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+        return (detail::SameLayoutVector<4, Derived>() << vec, 0).finished();
+    }
+
+    template <typename Scalar, typename Ordering>
+    inline detail::Vector<4, Ordering, Scalar>
+    makeHomogeneousVector(Scalar x, Scalar y, Scalar z,
+                          Ordering * = col_major) {
+        return detail::Vector<4, Ordering>(x, y, z, 0);
+    }
+
     /// @brief Pulls the 3-dimensional point or vector from a 4-d vec,
-    /// performing division by w if nonzero.
-    inline Eigen::Vector3d extractPoint(Eigen::Vector4d const &homogenous) {
+    /// performing division by w if nonzero.template <typename Derived>
+    template <typename Derived>
+    inline detail::SameLayoutVector<3, Derived>
+    extractPoint(Eigen::MatrixBase<Derived> const &homogenous) {
         return homogenous[3] == 0
-                   ? homogenous.head<3>().eval()
-                   : (homogenous.head<3>() / homogenous[3]).eval();
+                   ? homogenous.template head<3>().eval()
+                   : (homogenous.template head<3>() / homogenous[3]).eval();
     }
     typedef Eigen::Matrix<double, 4, 4, Eigen::RowMajor> RowMatrix44d;
     using Eigen::RowVector3d;
