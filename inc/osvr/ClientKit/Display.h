@@ -344,6 +344,10 @@ namespace clientkit {
     /// shared ownership.
     class DisplayConfig {
       public:
+        /// @brief Empty constructor - constructs a config where valid() is
+        /// false
+        DisplayConfig() : m_disp(NULL) {}
+
         /// @brief Retrieve a display config, owning it and managing its
         /// lifetime
         explicit DisplayConfig(ClientContext &ctx)
@@ -366,7 +370,7 @@ namespace clientkit {
         /// config, not affecting lifetime..
         explicit DisplayConfig(OSVR_DisplayConfig disp) : m_disp(disp) {}
 
-        bool valid() const { return m_disp; }
+        bool valid() const { return m_disp != NULL; }
 
         DisplayConfig &ensureValid() {
             if (!valid()) {
