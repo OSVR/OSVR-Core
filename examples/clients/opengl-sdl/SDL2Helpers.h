@@ -96,6 +96,6 @@ namespace SDL2 {
         SDL_GLContext m_context;
     };
 } // namespace SDL2
-} // namespace SDL2
+} // namespace osvr
 
 #endif // INCLUDED_SDL2Helpers_h_GUID_D901E282_40A2_4CB1_DA01_A88E21A45C94
