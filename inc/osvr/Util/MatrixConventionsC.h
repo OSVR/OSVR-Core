@@ -104,53 +104,55 @@ typedef enum OSVR_MatrixFlags {
 enum { OSVR_MATRIX_SIZE = 16 };
 
 /** @brief Set a matrix of doubles based on a Pose3.
-    @param mat Output: an array of 16 doubles
     @param pose The Pose3 to convert
     @param flags Memory ordering flag
+    @param mat Output: an array of 16 doubles
 */
 OSVR_UTIL_EXPORT OSVR_ReturnCode osvrPose3ToMatrixd(
-    double *mat, OSVR_Pose3 const *pose,
-    OSVR_MatrixConventions flags OSVR_CPP_ONLY(= OSVR_MATRIX_ROWMAJOR));
+    OSVR_Pose3 const *pose, OSVR_MatrixConventions flags, double *mat);
 
 /** @brief Set a matrix of floats based on a Pose3.
-    @param mat Output: an array of 16 floats
     @param pose The Pose3 to convert
     @param flags Memory ordering flag
+    @param mat Output: an array of 16 floats
 */
 OSVR_UTIL_EXPORT OSVR_ReturnCode osvrPose3ToMatrixf(
-    float *mat, OSVR_Pose3 const *pose,
-    OSVR_MatrixConventions flags OSVR_CPP_ONLY(= OSVR_MATRIX_ROWMAJOR));
+    OSVR_Pose3 const *pose, OSVR_MatrixConventions flags, float *mat);
 
 OSVR_EXTERN_C_END
 
 #ifdef __cplusplus
-/** @brief Set a matrix based on a Pose3. (C++-only overload) */
-inline OSVR_ReturnCode
-osvrPose3ToMatrix(double *mat, OSVR_Pose3 const *pose,
-                  OSVR_MatrixConventions flags = OSVR_MATRIX_ROWMAJOR) {
-    return osvrPose3ToMatrixd(mat, pose, flags);
+/** @brief Set a matrix based on a Pose3. (C++-only overload - detecting scalar
+ * type) */
+inline OSVR_ReturnCode osvrPose3ToMatrix(OSVR_Pose3 const *pose,
+                                         OSVR_MatrixConventions flags,
+                                         double *mat) {
+    return osvrPose3ToMatrixd(pose, flags, mat);
 }
 
-/** @brief Set a matrix based on a Pose3. (C++-only overload) */
-inline OSVR_ReturnCode
-osvrPose3ToMatrix(float *mat, OSVR_Pose3 const *pose,
-                  OSVR_MatrixConventions flags = OSVR_MATRIX_ROWMAJOR) {
-    return osvrPose3ToMatrixf(mat, pose, flags);
+/** @brief Set a matrix based on a Pose3. (C++-only overload - detecting scalar
+ * type) */
+inline OSVR_ReturnCode osvrPose3ToMatrix(OSVR_Pose3 const *pose,
+                                         OSVR_MatrixConventions flags,
+                                         float *mat) {
+    return osvrPose3ToMatrixf(pose, flags, mat);
 }
 
-/** @brief Set a matrix based on a Pose3. (C++-only overload) */
+/** @brief Set a matrix based on a Pose3. (C++-only overload - detects scalar
+ * and takes array rather than pointer) */
 template <typename Scalar>
-inline OSVR_ReturnCode
-osvrPose3ToMatrix(Scalar mat[OSVR_MATRIX_SIZE], OSVR_Pose3 const *pose,
-                  OSVR_MatrixConventions flags = OSVR_MATRIX_ROWMAJOR) {
-    return osvrPose3ToMatrix(mat, pose, flags);
+inline OSVR_ReturnCode osvrPose3ToMatrix(OSVR_Pose3 const *pose,
+                                         OSVR_MatrixConventions flags,
+                                         Scalar mat[OSVR_MATRIX_SIZE]) {
+    return osvrPose3ToMatrix(pose, flags, &(mat[0]));
 }
-/** @brief Set a matrix based on a Pose3. (C++-only overload) */
+/** @brief Set a matrix based on a Pose3. (C++-only overload - detects scalar,
+ * takes array, takes pose by reference) */
 template <typename Scalar>
-inline OSVR_ReturnCode
-osvrPose3ToMatrix(Scalar mat[OSVR_MATRIX_SIZE], OSVR_Pose3 const &pose,
-                  OSVR_MatrixConventions flags = OSVR_MATRIX_ROWMAJOR) {
-    return osvrPose3ToMatrix(mat, &pose, flags);
+inline OSVR_ReturnCode osvrPose3ToMatrix(OSVR_Pose3 const &pose,
+                                         OSVR_MatrixConventions flags,
+                                         Scalar mat[OSVR_MATRIX_SIZE]) {
+    return osvrPose3ToMatrix(&pose, flags, &(mat[0]));
 }
 
 #endif
