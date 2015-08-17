@@ -47,7 +47,8 @@
 #else
 // Couldn't guess if we have std::shared_ptr, so assume not.
 #define OSVR_SHAREDPTR_USE_BOOST
-#endif
+#endif // guessing
+#endif // !defined(OSVR_SHAREDPTR_USE_BOOST) && !defined(OSVR_SHAREDPTR_USE_STD)
 
 #ifdef OSVR_SHAREDPTR_USE_BOOST
 #include <boost/shared_ptr.hpp>
