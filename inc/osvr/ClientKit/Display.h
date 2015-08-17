@@ -77,13 +77,13 @@ namespace clientkit {
     }
 #endif
 
-    typedef shared_ptr<::OSVR_DisplayConfigObject> UnderlyingDisplayConfigPtr;
+    typedef shared_ptr<OSVR_DisplayConfigObject> UnderlyingDisplayConfigPtr;
     static inline void nullDeleter(OSVR_DisplayConfig) {}
 
     /// @brief Get a shared_ptr to a DisplayConfig (with appropriate deleter
     /// pre-loaded)
     inline UnderlyingDisplayConfigPtr getDisplay(ClientContext &ctx) {
-        ::OSVR_DisplayConfig cfg;
+        OSVR_DisplayConfig cfg;
         osvrClientGetDisplay(ctx.get(), &cfg);
         UnderlyingDisplayConfigPtr ret(cfg, &::osvrClientFreeDisplay);
         return ret;
