@@ -96,9 +96,6 @@ namespace util {
         using CheckOptionBit =
             std::integral_constant<bool,
                                    static_cast<bool>(0 != (Options & Bit))>;
-        template <OptionType Options, OptionType Bit>
-        using ClearOptionBit =
-            std::integral_constant<OptionType, Options &(~Bit)>;
 
         template <OptionType Options>
         using IsZOutputUnsigned = CheckOptionBit<Options, ZOutputUnsignedBit>;
