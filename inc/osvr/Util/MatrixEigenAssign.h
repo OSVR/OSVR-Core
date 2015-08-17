@@ -58,7 +58,7 @@ namespace util {
         // These should all be fixed-size for speed, they're small.
         EIGEN_STATIC_ASSERT_FIXED_SIZE(T);
         // Make sure we have a 4x4 matrix
-        EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(T, TargetType);
+        EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(T, 4, 4);
 
         const bool needsTransposeFromColMaj =
             detail::matrixNeedsTranspose(flags);
