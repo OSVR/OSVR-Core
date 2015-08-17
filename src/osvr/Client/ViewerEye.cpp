@@ -61,7 +61,7 @@ namespace client {
         return translatedPose.inverse().matrix();
     }
 
-    util::Rectd ViewerEye::m_getRect(double near, double far) const {
+    util::Rectd ViewerEye::m_getRect(double near, double /*far*/) const {
         util::Rectd rect(m_unitBounds);
         // Scale the in-plane positions based on the near plane to put
         // the virtual viewing window on the near plane with the eye at the
