@@ -202,7 +202,7 @@ static inline OSVR_ReturnCode getViewMatrixImpl(OSVR_DisplayConfig disp,
     OSVR_VALIDATE_OUTPUT_PTR(mat, "view matrix");
     try {
         osvr::util::matrixEigenAssign(
-            disp->cfg->getViewerEye(viewer, eye).getView(), mat, flags);
+            disp->cfg->getViewerEye(viewer, eye).getView(), flags, mat);
         return OSVR_RETURN_SUCCESS;
     } catch (osvr::client::NoPoseYet &) {
         OSVR_DEV_VERBOSE(
@@ -291,7 +291,7 @@ getProjectionMatrixImpl(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
     osvr::util::matrixEigenAssign(
         disp->cfg->getViewerEyeSurface(viewer, eye, surface)
             .getProjection(near, far, flags),
-        mat, flags);
+        flags, mat);
 
     return OSVR_RETURN_SUCCESS;
 }

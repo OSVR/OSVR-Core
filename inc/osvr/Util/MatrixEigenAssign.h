@@ -43,13 +43,13 @@ namespace util {
     /// automatically/based on the flags passed in.
     ///
     /// @param src An Eigen 4x4 fixed-size matrix or matrix expression (source)
-    /// @param dest A pointer to a contiguous 16-element array (destination for
-    /// the copy)
     /// @param flags Some matrix convention flags - only the first two (the ones
     /// that affect if a transpose is needed) are observed.
+    /// @param dest A pointer to a contiguous 16-element array (destination for
+    /// the copy)
     template <typename Scalar, typename T>
-    inline void matrixEigenAssign(T const &src, Scalar *dest,
-                                  OSVR_MatrixConventions flags) {
+    inline void matrixEigenAssign(T const &src, OSVR_MatrixConventions flags,
+                                  Scalar *dest) {
         typedef Eigen::Matrix<Scalar, 4, 4> TargetType;
         static_assert(!TargetType::IsRowMajor, "This and other code depends on "
                                                "Eigen matrices being column "
