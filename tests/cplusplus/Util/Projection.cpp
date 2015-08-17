@@ -95,12 +95,12 @@ class ParameterizedProjectionTest : public ::testing::Test {
                               << result.transpose() << "\n";
                     if (z == getMinZ()) {
                         // near plane
-                        ASSERT_DOUBLE_EQ(near * handednessCorrection,
-                                         result.z());
+                        ASSERT_NEAR(near * handednessCorrection, result.z(),
+                                    0.0000001);
                     } else {
                         // far plane
-                        ASSERT_DOUBLE_EQ(far * handednessCorrection,
-                                         result.z());
+                        ASSERT_NEAR(far * handednessCorrection, result.z(),
+                                    0.0000001);
                     }
                     // F(osvr::util::extractPoint(bound), result);
                 }
