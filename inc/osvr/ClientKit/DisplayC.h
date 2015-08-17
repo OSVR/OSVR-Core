@@ -51,7 +51,6 @@ OSVR_EXTERN_C_BEGIN
 /** @brief Opaque type of a display configuration. */
 typedef struct OSVR_DisplayConfigObject *OSVR_DisplayConfig;
 
-
 /** @brief Allocates a display configuration object.
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or some other
     error occured, in which case the output argument is unmodified.

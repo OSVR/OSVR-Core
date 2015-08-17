@@ -117,10 +117,13 @@ namespace client {
                     (2. * eye) -
                     1; // turns 0 into -1 and 1 into 1. Doesn't affect
                        // mono, which has a zero offset vector.
-                boost::optional<OSVR_RadialDistortionParameters> distortEye(distort);
+                boost::optional<OSVR_RadialDistortionParameters> distortEye(
+                    distort);
                 if (distortEye.is_initialized()) {
-                    distortEye->centerOfProjection.data[0] = eyesDesc[eye].m_CenterProjX;
-                    distortEye->centerOfProjection.data[1] = eyesDesc[eye].m_CenterProjY;
+                    distortEye->centerOfProjection.data[0] =
+                        eyesDesc[eye].m_CenterProjX;
+                    distortEye->centerOfProjection.data[1] =
+                        eyesDesc[eye].m_CenterProjY;
                 }
                 viewer.m_eyes.emplace_back(
                     ViewerEye(ctx, (offsetFactor * offset).eval(), HEAD_PATH,
@@ -129,9 +132,7 @@ namespace client {
                               desc.getPitchTilt().value(), distortEye));
             }
 
-            OSVR_DEV_VERBOSE(
-                "Display: "
-                << desc.getHumanReadableDescription());
+            OSVR_DEV_VERBOSE("Display: " << desc.getHumanReadableDescription());
             return cfg;
         } catch (std::exception const &e) {
             OSVR_DEV_VERBOSE(
