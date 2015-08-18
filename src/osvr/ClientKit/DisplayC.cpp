@@ -239,7 +239,7 @@ osvrClientGetNumSurfacesForViewerEye(OSVR_DisplayConfig disp,
     OSVR_VALIDATE_EYE_ID;
     OSVR_VALIDATE_OUTPUT_PTR(surfaces, "surface count");
     *surfaces = disp->cfg->getNumViewerEyeSurfaces(viewer, eye);
-    return OSVR_RETURN_FAILURE;
+    return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode osvrClientGetRelativeViewportForViewerEyeSurface(
