@@ -218,13 +218,14 @@ static inline OSVR_ReturnCode getViewMatrixImpl(OSVR_DisplayConfig disp,
         return OSVR_RETURN_FAILURE;
     }
 }
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
+
+OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_MatrixConventions flags, double *mat) {
     return getViewMatrixImpl(disp, viewer, eye, mat, flags);
 }
 
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
+OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_MatrixConventions flags, float *mat) {
     return getViewMatrixImpl(disp, viewer, eye, mat, flags);
