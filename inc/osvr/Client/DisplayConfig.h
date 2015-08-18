@@ -32,6 +32,7 @@
 #include <osvr/Client/Viewer.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
+#include <osvr/Util/ContainerWrapper.h>
 
 // Library/third-party includes
 // - none
@@ -41,6 +42,13 @@
 
 namespace osvr {
 namespace client {
+
+    namespace detail {
+        typedef util::ContainerWrapper<
+            std::vector<Viewer>, util::container_policies::const_iterators,
+            util::container_policies::subscript> ViewerContainerBase;
+    } // namespace detail
+
     class DisplayConfig;
     typedef unique_ptr<DisplayConfig> DisplayConfigPtr;
     class DisplayConfigFactory {
@@ -49,7 +57,7 @@ namespace client {
         create(OSVR_ClientContext ctx);
     };
 
-    class DisplayConfig {
+    class DisplayConfig : public detail::ViewerContainerBase {
       public:
         DisplayConfig(DisplayConfig const &) = delete;
         DisplayConfig &operator=(DisplayConfig const &) = delete;
@@ -74,20 +82,19 @@ namespace client {
       private:
         friend class DisplayConfigFactory;
         DisplayConfig();
-        std::vector<Viewer> m_viewers;
     };
 
     //-- inline implementations --//
     inline OSVR_ViewerCount DisplayConfig::getNumViewers() const {
-        return static_cast<OSVR_ViewerCount>(m_viewers.size());
+        return static_cast<OSVR_ViewerCount>(container().size());
     }
 
     inline Viewer &DisplayConfig::getViewer(OSVR_ViewerCount viewer) {
-        return m_viewers[viewer];
+        return container()[viewer];
     }
     inline Viewer const &
     DisplayConfig::getViewer(OSVR_ViewerCount viewer) const {
-        return m_viewers[viewer];
+        return container()[viewer];
     }
 
     inline OSVR_EyeCount
