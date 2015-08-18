@@ -48,5 +48,9 @@ namespace client {
         return pose;
     }
 
+    bool Viewer::hasPose() const {
+        return m_head->hasStateForReportType<OSVR_PoseReport>();
+    }
+
 } // namespace client
 } // namespace osvr

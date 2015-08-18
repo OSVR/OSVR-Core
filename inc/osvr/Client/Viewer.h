@@ -58,6 +58,7 @@ namespace client {
         }
 
         OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
+        OSVR_CLIENT_EXPORT bool hasPose() const;
 
       private:
         friend class DisplayConfigFactory;
