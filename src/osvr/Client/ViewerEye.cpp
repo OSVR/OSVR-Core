@@ -56,6 +56,10 @@ namespace client {
         return pose;
     }
 
+    bool ViewerEye::hasPose() const {
+        return m_pose->hasStateForReportType<OSVR_PoseReport>();
+    }
+
     Eigen::Matrix4d ViewerEye::getView() const {
         Eigen::Isometry3d translatedPose = getPoseIsometry();
         return translatedPose.inverse().matrix();
