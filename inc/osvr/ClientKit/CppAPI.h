@@ -36,7 +36,7 @@
 // - none
 
 #ifndef OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
-#if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined()
+#if defined(_MSC_VER) && (_MSC_VER >= 1800)
 #define OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
 #elif defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
 #define OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
