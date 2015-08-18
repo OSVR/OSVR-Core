@@ -82,6 +82,7 @@ namespace client {
         }
 #endif
         OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
+        OSVR_CLIENT_EXPORT bool hasPose() const;
 
         OSVR_CLIENT_EXPORT Eigen::Matrix4d getView() const;
 

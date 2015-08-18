@@ -72,11 +72,15 @@ namespace common {
             c.state = reportState(report);
             c.timestamp = timestamp;
             boost::fusion::at_key<ReportType>(m_states) = c;
+            m_hasState = true;
         }
 
         template <typename ReportType> bool hasState() const {
-            return bool(boost::fusion::at_key<ReportType>(m_states));
+            return m_hasState &&
+                   bool(boost::fusion::at_key<ReportType>(m_states));
         }
+
+        bool hasAnyState() const { return m_hasState; }
 
         template <typename ReportType>
         void
@@ -93,6 +97,7 @@ namespace common {
 
       private:
         StateMap m_states;
+        bool m_hasState = false;
     };
 
 } // namespace common

@@ -52,6 +52,12 @@ namespace util {
         /// @brief Request size() to be publicly accessible and forwarded to the
         /// container.
         struct size;
+        /// @brief Request operator[] to be publicly accessible and forwarded to
+        /// the container. (implies const_subscript)
+        struct subscript;
+        /// @brief Request the const overload only of operator[] to be publicly
+        /// accessible and forwarded to the container.
+        struct const_subscript;
     } // namespace container_policies
 
     namespace detail {
@@ -68,6 +74,7 @@ namespace util {
           protected:
             Container &container() { return m_container; }
             Container const &container() const { return m_container; }
+            Container const &ccontainer() const { return m_container; }
 
           private:
             Container m_container;
@@ -75,12 +82,8 @@ namespace util {
 
         /// @brief Container wrapper for consumers that want const iterator
         /// methods.
-        template <typename Container>
-        class ContainerWrapperConstIterators
-            : public ContainerWrapperBase<Container> {
-          private:
-            typedef ContainerWrapperBase<Container> Base;
-
+        template <typename Container, typename Base>
+        class ContainerWrapperConstIterators : public Base {
           public:
             typedef typename Container::const_iterator const_iterator;
             const_iterator begin() const { return Base::container().begin(); }
@@ -90,13 +93,10 @@ namespace util {
         };
 
         /// @brief Container wrapper for consumers that want iterator methods,
-        /// implies also const-iterator methods.
-        template <typename Container>
+        /// including also const-iterator methods.
+        template <typename Container, typename Base>
         class ContainerWrapperIterators
-            : public ContainerWrapperConstIterators<Container> {
-          private:
-            typedef ContainerWrapperConstIterators<Container> Base;
-
+            : public ContainerWrapperConstIterators<Container, Base> {
           public:
             typedef typename Container::iterator iterator;
             iterator begin() { return Base::container().begin(); }
@@ -111,35 +111,90 @@ namespace util {
             size_type size() const { return Base::container().size(); }
         };
 
-        /// @brief Helper metafunction for computing which class the container
-        /// wrapper should derive from to get the desired features.
+        /// @brief Container wrapper mixin for consumers that want const array
+        /// subscript operator methods.
+        template <typename Container, typename Base>
+        class ContainerWrapperConstSubscript : public Base {
+          public:
+            typedef typename Container::size_type size_type;
+            typedef typename Container::const_reference const_reference;
+            const_reference operator[](size_type index) const {
+                return Base::container()[index];
+            }
+        };
+
+        /// @brief Container wrapper mixin for consumers that want the array
+        /// subscript operator, including also const-array subscript methods.
+        template <typename Container, typename Base>
+        class ContainerWrapperSubscript : public Base {
+          public:
+            typedef typename Container::size_type size_type;
+            typedef typename Container::reference reference;
+            typedef typename Container::const_reference const_reference;
+            reference operator[](size_type index) {
+                return Base::container()[index];
+            }
+            const_reference operator[](size_type index) const {
+                return Base::container()[index];
+            }
+        };
+
+        /// @brief Holds the result of evaluating a condition along with the
+        /// mixin template to use (as an alias class) if that condition is true.
+        template <typename Condition,
+                  template <class, class> class ContainerMixin>
+        struct Option {
+            using condition = Condition;
+            template <typename Container, typename Base> struct apply {
+                using type = ContainerMixin<Container, Base>;
+            };
+        };
+
+        /// @brief Alias class to use in fold when computing a container wrapper
+        template <typename Container> struct ContainerWrapperFold {
+            template <typename Base, typename Option> struct apply {
+                using condition = typename Option::condition;
+                using type = typepack::if_<
+                    condition,
+                    typepack::t_<typepack::apply<Option, Container, Base>>,
+                    Base>;
+            };
+        };
+
+        /// @brief Main metafunction used to compute the full type of a
+        /// container wrapper.
         template <typename Container, typename ArgList>
         struct ComputeContainerWrapper {
-            // Determine if we want iterators or const iterators, or neither, as
-            // the base class
+            // Determine if we want iterators or const iterators
             using wants_iterators =
                 typepack::contains<ArgList, container_policies::iterators>;
-            using wants_const_iterators =
+            using wants_const_iterators = typepack::and_<
+                typepack::not_<wants_iterators>,
                 typepack::contains<ArgList,
-                                   container_policies::const_iterators>;
+                                   container_policies::const_iterators>>;
 
-            // Evaluates to one of ContainerWrapperIterators,
-            // ContainerWrapperConstIterators, or ContainerWrapperBase, which
-            // act as a base for any further functionality.
-            using iterator_base_type = typepack::if_<
-                wants_iterators, ContainerWrapperIterators<Container>,
-                typepack::if_<wants_const_iterators,
-                              ContainerWrapperConstIterators<Container>,
-                              ContainerWrapperBase<Container>>>;
+            // Check for subscript operator requests
+            using wants_subscript =
+                typepack::contains<ArgList, container_policies::subscript>;
+            using wants_const_subscript = typepack::and_<
+                typepack::not_<wants_subscript>,
+                typepack::contains<ArgList,
+                                   container_policies::const_subscript>>;
 
-            // Determine if we stick size on the inheritance list as well.
+            // Check for size requests
             using wants_size =
                 typepack::contains<ArgList, container_policies::size>;
-            // Either evaluates to a ContainerWrapperSize inheriting from
-            // iterator_base_type, or iterator_base_type itself.
-            using type = typepack::if_<
-                wants_size, ContainerWrapperSize<Container, iterator_base_type>,
-                iterator_base_type>;
+
+            // List of conditions and their associated mixin class templates
+            using option_list = typepack::list<
+                Option<wants_const_iterators, ContainerWrapperConstIterators>,
+                Option<wants_iterators, ContainerWrapperIterators>,
+                Option<wants_const_subscript, ContainerWrapperConstSubscript>,
+                Option<wants_subscript, ContainerWrapperSubscript>,
+                Option<wants_size, ContainerWrapperSize>>;
+            using type =
+                typepack::fold<option_list, ContainerWrapperBase<Container>,
+                               ContainerWrapperFold<Container>>;
         };
 
         template <typename Container, typename... Args>

@@ -87,8 +87,8 @@ namespace client {
             auto const descriptorString = ctx->getStringParameter("/display");
 
             auto desc = display_schema_1::DisplayDescriptor(descriptorString);
-            cfg->m_viewers.emplace_back(Viewer(ctx, HEAD_PATH));
-            auto &viewer = cfg->m_viewers.front();
+            cfg->container().emplace_back(Viewer(ctx, HEAD_PATH));
+            auto &viewer = cfg->container().front();
             auto eyesDesc = desc.getEyes();
             std::vector<uint8_t> eyeIndices;
             Eigen::Vector3d offset;
@@ -125,7 +125,7 @@ namespace client {
                     distortEye->centerOfProjection.data[1] =
                         eyesDesc[eye].m_CenterProjY;
                 }
-                viewer.m_eyes.emplace_back(
+                viewer.container().emplace_back(
                     ViewerEye(ctx, (offsetFactor * offset).eval(), HEAD_PATH,
                               computeViewport(eye, desc), computeRect(desc),
                               eyesDesc[eye].m_rotate180,

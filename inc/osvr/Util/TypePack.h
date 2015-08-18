@@ -231,6 +231,9 @@ namespace util {
         /// parameters, \e with short-circuiting.
         template <typename... Bools> using or_ = t_<detail::or_impl<Bools...>>;
 
+        /// Logical not on a single boolean.
+        template <typename Bool> using not_ = bool_<!Bool::value>;
+
         namespace detail {
             /// General/dummy case.
             template <typename... List> struct split_list_ {

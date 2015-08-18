@@ -72,6 +72,12 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
         return true;
     }
 
+    template <typename ReportType> bool hasStateForReportType() const {
+        return m_state.hasState<ReportType>();
+    }
+
+    bool hasAnyState() const { return m_state.hasAnyState(); }
+
     /// @brief Register a callback for a known report type.
     template <typename CallbackType>
     void registerCallback(CallbackType cb, void *userdata) {
