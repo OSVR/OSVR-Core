@@ -72,6 +72,9 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
         return true;
     }
 
+    template <typename ReportType> bool hasStateForReportType() const {
+        return m_state.hasState<ReportType>();
+    }
 
     bool hasAnyState() const { return m_state.hasAnyState(); }
 
