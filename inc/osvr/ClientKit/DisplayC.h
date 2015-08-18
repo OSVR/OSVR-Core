@@ -196,7 +196,7 @@ osvrClientGetViewerEyeSurfaceProjectionMatrixd(
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetViewerEyeSurfaceProjectionMatrixf(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_SurfaceCount surface, double near, double far,
+    OSVR_SurfaceCount surface, float near, float far,
     OSVR_MatrixConventions flags, float *matrix);
 
 /** @brief Determines if a surface seen by an eye of a viewer in a display
