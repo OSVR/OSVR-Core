@@ -125,7 +125,7 @@ namespace client {
                     distortEye->centerOfProjection.data[1] =
                         eyesDesc[eye].m_CenterProjY;
                 }
-                viewer.m_eyes.emplace_back(
+                viewer.container().emplace_back(
                     ViewerEye(ctx, (offsetFactor * offset).eval(), HEAD_PATH,
                               computeViewport(eye, desc), computeRect(desc),
                               eyesDesc[eye].m_rotate180,

@@ -31,6 +31,7 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Client/ViewerEye.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
+#include <osvr/Util/ContainerWrapper.h>
 
 // Library/third-party includes
 // - none
@@ -41,24 +42,19 @@
 namespace osvr {
 namespace client {
     class DisplayConfigFactory;
-    class Viewer {
+    namespace detail {
+        typedef util::ContainerWrapper<
+            std::vector<ViewerEye>, util::container_policies::const_iterators,
+            util::container_policies::subscript> ViewerEyeContainerBase;
+    } // namespace detail
+    class Viewer : public detail::ViewerEyeContainerBase {
       public:
         Viewer(Viewer const &) = delete;
         Viewer &operator=(Viewer const &) = delete;
-        Viewer(Viewer &&other)
-            : m_head(std::move(other.m_head)), m_eyes(std::move(other.m_eyes)) {
-        }
+        Viewer(Viewer &&other) : m_head(std::move(other.m_head)) {}
 
         inline OSVR_EyeCount size() const {
-            return static_cast<OSVR_EyeCount>(m_eyes.size());
-        }
-
-        inline ViewerEye &operator[](OSVR_EyeCount index) {
-            return m_eyes[index];
-        }
-
-        inline ViewerEye const &operator[](OSVR_EyeCount index) const {
-            return m_eyes[index];
+            return static_cast<OSVR_EyeCount>(container().size());
         }
 
         OSVR_CLIENT_EXPORT OSVR_Pose3 getPose() const;
@@ -67,7 +63,6 @@ namespace client {
         friend class DisplayConfigFactory;
         Viewer(OSVR_ClientContext ctx, const char path[]);
         InternalInterfaceOwner m_head;
-        std::vector<ViewerEye> m_eyes;
     };
 
 } // namespace client
