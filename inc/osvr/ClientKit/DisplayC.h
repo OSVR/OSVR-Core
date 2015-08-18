@@ -136,8 +136,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumSurfacesForViewerEye(
     input** for a surface seen by an eye of a viewer
     in a display config. (This does not include other video inputs that may be
     on a single virtual desktop, etc. and does not necessarily indicate that a
-   viewport in the sense of glViewport must be created with these parameters,
-   though the output order matches for convenience.)
+    viewport in the sense of glViewport must be created with these parameters,
+    though the output order matches for convenience.)
 
     @param disp Display config object
     @param viewer Viewer ID
