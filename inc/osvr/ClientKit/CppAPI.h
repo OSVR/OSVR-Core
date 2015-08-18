@@ -35,11 +35,13 @@
 // Standard includes
 // - none
 
-#ifdef _MSC_VER
-#if (_MSC_VER >= 1800) && !defined(OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF)
+#ifndef OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
+#if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined()
 #define OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
-#endif // _MSC_VER >= 1800
-#endif // _MSC_VER
+#elif defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
+#define OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
+#endif // conditions when we know we have template universal ref.
+#endif
 
 /// @brief Define if your compiler supports && in a type-deduced context.
 #ifdef OSVR_CLIENTKIT_HAVE_TEMPLATE_UNIVERSAL_REF
