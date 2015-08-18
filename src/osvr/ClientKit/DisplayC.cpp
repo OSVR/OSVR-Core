@@ -130,6 +130,12 @@ OSVR_ReturnCode osvrClientFreeDisplay(OSVR_DisplayConfig disp) {
     return freed ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
 }
 
+OSVR_ReturnCode
+osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    return disp->cfg->isStartupComplete() ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+}
+
 OSVR_ReturnCode osvrClientGetNumViewers(OSVR_DisplayConfig disp,
                                         OSVR_ViewerCount *viewers) {
     OSVR_VALIDATE_DISPLAY_CONFIG;

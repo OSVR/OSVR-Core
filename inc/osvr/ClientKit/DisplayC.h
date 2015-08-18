@@ -70,6 +70,16 @@ osvrClientGetDisplay(OSVR_ClientContext ctx, OSVR_DisplayConfig *disp);
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 
+/** @brief Checks to see if a display is fully configured and ready, including
+   having received its first pose update.
+
+
+    @return OSVR_RETURN_FAILURE if a null config was passed, or if the given
+    display config object was otherwise not ready for full use.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp);
+
 /** @brief A display config can have one (or theoretically more) viewers */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetNumViewers(OSVR_DisplayConfig disp, OSVR_ViewerCount *viewers);
