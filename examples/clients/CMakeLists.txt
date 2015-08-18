@@ -28,6 +28,7 @@ foreach(name ${MAINCLIENTS} ${CLIENTS})
 endforeach()
 
 target_link_libraries(Imaging_cpp opencv_core opencv_highgui)
+target_link_libraries(ViewerEyeSurfaces_cpp osvr_cxx11_flags)
 
 foreach(name ${MAINCLIENTS})
     if(TARGET ${name}_cpp)
