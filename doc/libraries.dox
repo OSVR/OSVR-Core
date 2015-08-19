@@ -7,13 +7,9 @@
 
     See examples:
     - Comprehensive (auto-detects hardware and creates device): com_osvr_example_DummyDetectAndCreateAsync.cpp
-    - com_osvr_example_NullPlugin.cpp
-    - com_osvr_example_NullDevice.cpp
-    - com_osvr_example_DummyAsync.cpp
-    - com_osvr_example_DummySync.cpp
-    - com_osvr_example_DummyHardwareDetect.cpp
-    - com_osvr_example_DummyHardwareDetectCpp.cpp
-    - com_osvr_example_DummyHardwareDetectCpp2.cpp
+    - com_osvr_example_AnalogSync.cpp
+    - com_osvr_example_EyeTracker.cpp
+    - com_osvr_example_MultipleSync.cpp
 */
 
 /** @defgroup ClientKit ClientKit
@@ -32,6 +28,11 @@
         - AnalogCallback.cpp
         - ButtonCallback.cpp
         - DisplayParameter.cpp
+        - EyeTracker.cpp
+        - Imaging.cpp
+        - Location2D.cpp
+        - ViewerEyeSurfaces.cpp
+        - OpenGLSample.cpp
     - C-only:
         - MinimalInit.c
         - TrackerCallback.c
@@ -39,6 +40,8 @@
         - AnalogCallback.c
         - ButtonCallback.c
         - DisplayParameter.c
+        - ViewerEyeSurfaces.c
+        - OpenGLSampleCAPI.cpp - in C++ but uses the display C API.
 
 */
 
