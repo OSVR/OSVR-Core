@@ -16,7 +16,7 @@ This snapshot contains documentation, example code, JSON schemas, and JSON descr
 ## Source Documentation
 See [the HACKING file](HACKING.md) for some development guidelines for working on this code base itself.
 
-If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](doc/Building.md). You may also be interested in binary snapshots at <http://access.osvr.com> .
+If you're looking at the source tree, not a binary snapshot, you may be interested in [build docs](doc/Building.md). You may also be interested in binary snapshots at <http://osvr.github.io> .
 
 ## License and Vendored Projects
 
