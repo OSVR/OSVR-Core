@@ -28,4 +28,21 @@
 #include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Interface.h>
 
+namespace osvr {
+
+/** @brief Contains C++ header-only wrappers for the ClientKit C API.
+    @ingroup ClientKit
+
+    Use of these wrappers is optional: they duplicate functionality found in the
+    C API as they are implemented in headers on top of the C API. However, they
+    also provide a much cleaner, low-boilerplate interface for the most common
+    operations.
+
+    Some functionality may not be "wrapped" in a C++ API, however, it is
+    always possible to extract the C entities being wrapped and use them with
+    the C API in those cases.
+*/
+namespace clientkit {} // namespace clientkit
+} // namespace osvr
+
 #endif // INCLUDED_ClientKit_h_GUID_DD0155F5_61A4_4A76_8C2E_D9614C7A9EBD
