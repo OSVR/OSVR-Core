@@ -26,16 +26,20 @@
 #ifndef INCLUDED_EigenCoreGeometry_h_GUID_84777061_9532_4BBD_0ADC_3E53E516AE23
 #define INCLUDED_EigenCoreGeometry_h_GUID_84777061_9532_4BBD_0ADC_3E53E516AE23
 
+#if 0 // warning suppressions no longer needed with currently-used Eigen version
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4127)
+#endif
 #endif
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#if 0
 #ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 #endif
 
 #endif // INCLUDED_EigenCoreGeometry_h_GUID_84777061_9532_4BBD_0ADC_3E53E516AE23

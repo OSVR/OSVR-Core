@@ -55,6 +55,7 @@ target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE
 target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 
 # Interface target for Eigen
+# Actually a post-3.2.5 commit on the 3.2 branch: ec9c7b2e30a85212efd90937597e33515eff0c90
 add_library(eigen-headers INTERFACE)
-target_include_directories(eigen-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.4")
+target_include_directories(eigen-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.5")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
