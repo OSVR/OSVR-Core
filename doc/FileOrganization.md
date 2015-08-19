@@ -23,7 +23,7 @@ There are three main code directories in the root of this repository that contri
 
 - `vendor` - contains "vendored-in" third-party libraries in individual folders. These are typically not relevant to consumers of the overall framework.
 - `inc` - This directory contains header (`.h`) files intended for some form of external consumption.  Note that the meaning of "external consumption" varies between the libraries that make up the framework.
-    - As a guideline, each header in this directory should compile cleanly when in a translation unit of its own. This guideline is subject to possible testing. (Inspired by [Boost's header policy][boost-header-policy])
+    - As a guideline, each header in this directory should compile cleanly when in a translation unit of its own. (Inspired by [Boost's header policy][boost-header-policy])  (Enforced by build system "header dependency test" targets)
 - `src` - This directory contains implementation (typically `.cpp`) files to provide the facilities advertised by the interfaces in `inc`. It also contains some header (`.h`) files that provide interfaces that are purely internal within a library. Headers located here (with the exception of `.h.in` files that may be configured to generate API headers in a build or install tree) are not considered part of the API and should typically be ignored by framework consumers as implementation details.
 
 [boost-header-policy]: http://www.boost.org/development/header.html
@@ -32,13 +32,13 @@ There are three main code directories in the root of this repository that contri
 There are just a few general file name guidelines that might help you find your way around.
 
 - For shared library support, each library has a generated `Export.h` file which may not necessarily end up in the documentation due to how it is built.
-- Headers matching the pattern `*_fwd.h` are header files forward-declaring whatever items are more fully declared or defined in the corresponding main header without the trailing `_fwd`. To avoid mis-matches, these should always be included in the main header.
-- Similarly, headers matching the pattern `*Ptr.h` typically contain a forward declaration as well as a smart pointer typedef intended for use with the corresponding main header. These should likewise be included in the main header.
+- Headers matching the pattern `*_fwd.h` are header files forward-declaring whatever items are more fully declared or defined in the corresponding main header without the trailing `_fwd`. To avoid mis-matches, these should always be included in the main header. (Enforced by a test)
+- Similarly, headers matching the pattern `*Ptr.h` typically contain a forward declaration as well as a smart pointer typedef intended for use with the corresponding main header. These should likewise be included in the main header. (Enforced by a test)
 - Any file matching the pattern `*C.h` is a C API header file, required to be "C-safe". As such, it must contain only valid C code. Notes:
     - Any included files must also be C-safe.
     - No C++-style (`//`) comments.
     - Everything is wrapped in `extern "C" {}` when in a C++ compiler.
-    - A modified guideline for clean compilation applies and may be tested: such headers should be compilable in both a C translation unit and a C++ translation unit.
+    - A modified guideline for clean compilation applies and may be tested: such headers should be compilable in both a C translation unit and a C++ translation unit. (Enforced by build system "header dependency test" targets)
     - The corresponding implementation in the source directory is _not_ required to be in C, in fact, it's probably in C++, but that shouldn't matter to a framework consumer.
 - Implementation files are C++ files, with the same name as the corresponding header but with a `.cpp` extension instead. Yes, this means there are "*C.cpp" files.
 
