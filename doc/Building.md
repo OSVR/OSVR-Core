@@ -18,7 +18,8 @@ You'll need:
 
 For Linux:
 
-- The above (any reasonably recent Clang or GCC is fine), plus `libusb-1.0-0-dev`
+- The above (any reasonably recent Clang or GCC is fine for a compiler), plus:
+- `libusb1` - this is the Debian package `libusb-1.0-0-dev`. Do not confuse it with `libusb` aka `libusb0`: those packages are frozen in the past and incompatible with `libusb1`.
 
 [libfunctionality]:https://github.com/OSVR/libfunctionality
 [jsoncpp]:https://github.com/VRPN/jsoncpp
