@@ -146,5 +146,19 @@ namespace client {
         }
     }
     DisplayConfig::DisplayConfig() {}
+
+    bool DisplayConfig::isStartupComplete() const {
+        for (auto const &viewer : *this) {
+            if (!viewer.hasPose()) {
+                return false;
+            }
+            for (auto const& eye : viewer) {
+                if (!eye.hasPose()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 } // namespace client
 } // namespace osvr

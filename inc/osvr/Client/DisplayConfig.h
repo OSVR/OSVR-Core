@@ -79,6 +79,8 @@ namespace client {
                                              OSVR_EyeCount eye,
                                              OSVR_SurfaceCount surface) const;
 
+        OSVR_CLIENT_EXPORT bool isStartupComplete() const;
+
       private:
         friend class DisplayConfigFactory;
         DisplayConfig();
