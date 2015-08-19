@@ -153,10 +153,36 @@ namespace clientkit {
             return (distort == OSVR_TRUE);
         }
 
-        bool getRadialDistortion(OSVR_RadialDistortionParameters &params) {
+        /// @brief Get the priority/availability of radial distortion parameters
+        /// for this surface. Negative values (canonically,
+        /// OSVR_DISTORTION_PRIORITY_UNAVAILABLE) indicate that this distortion
+        /// strategy is not available/parameterized for the surface in question.
+        /// Larger values indicate more highly-preferred distortion strategies.
+        ///
+        /// @sa osvrClientGetViewerEyeSurfaceRadialDistortionPriority()
+        OSVR_DistortionPriority getRadialDistortionPriority() {
+            OSVR_DistortionPriority prio;
+            OSVR_ReturnCode ret =
+                osvrClientGetViewerEyeSurfaceRadialDistortionPriority(
+                    m_disp, m_viewer, m_eye, m_surface, &prio);
+
+            return prio;
+        }
+
+        /// @brief Get the radial distortion parameters.
+        ///
+        /// Will only succeed if getRadialDistortionPriority() is non-negative.
+        ///
+        /// @sa osvrClientGetViewerEyeSurfaceRadialDistortionPriority()
+        OSVR_RadialDistortionParameters getRadialDistortion() {
+            OSVR_RadialDistortionParameters params;
             OSVR_ReturnCode ret = osvrClientGetViewerEyeSurfaceRadialDistortion(
                 m_disp, m_viewer, m_eye, m_surface, &params);
-            return (ret == OSVR_RETURN_SUCCESS);
+            if (OSVR_RETURN_SUCCESS != ret) {
+                handleDisplayError(
+                    "Could not get radial distortion params for surface!");
+            }
+            return params;
         }
         /// @name Identification getters
         /// @{
