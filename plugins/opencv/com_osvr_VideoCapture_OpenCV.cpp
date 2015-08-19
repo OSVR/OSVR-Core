@@ -32,7 +32,13 @@
 // Library/third-party includes
 #include <opencv2/core/core.hpp> // for basic OpenCV types
 #include <opencv2/core/operations.hpp>
+
+#include <opencv2/core/version.hpp>
+#if CV_VERSION_EPOCH == 2
 #include <opencv2/highgui/highgui.hpp> // for image capture
+#else
+#include <opencv2/videoio.hpp> // for image capture
+#endif
 
 #include <boost/noncopyable.hpp>
 #include <boost/lexical_cast.hpp>

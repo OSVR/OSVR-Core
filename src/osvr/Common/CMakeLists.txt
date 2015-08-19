@@ -171,7 +171,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvr_cxx11_flags
     ${OSVR_CODECVT_LIBRARIES})
 
-osvr_delayload_opencv(${LIBNAME_FULL} opencv_core)
+osvr_delayload_opencv(${LIBNAME_FULL} ${OPENCV_CORE_MODULES})
 
 ###
 # Grab DLLs please.

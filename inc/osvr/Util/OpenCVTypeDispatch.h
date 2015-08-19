@@ -31,7 +31,12 @@
 #include <osvr/Util/ImagingReportTypesC.h>
 
 // Library/third-party includes
-#include <opencv2/core/types_c.h>
+#include <opencv2/core/version.hpp>
+#if CV_VERSION_EPOCH == 2
+#include <opencv2/core/core_c.h>
+#else
+#include <opencv2/core/core.hpp>
+#endif
 #include <boost/mpl/identity.hpp>
 
 // Standard includes
