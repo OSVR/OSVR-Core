@@ -79,8 +79,8 @@
     @ingroup InternalAPI
 */
 
-/** @defgroup Routing Routing
-    @brief Infrastructure for the path tree, aliases, and the routing graph.
+/** @defgroup Common Common
+    @brief Shared code between client and server/plugins, including infrastructure for the path tree, aliases, and the routing graph.
     @ingroup InternalAPI
 */
 
