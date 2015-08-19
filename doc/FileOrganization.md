@@ -47,19 +47,19 @@ Within `inc` and `src`, the top level directory is `osvr`, serving as an umbrell
 
 These follow in alphabetical order. For logically-ordered documentation, see the Modules link on the left.
 
-- `Client` - Implementation details internal to the client side. Provides the implementation that ClientKit effectively wraps. (See @ref Client)
+- `Client` - Internal API: Implementation details internal to the client side. Provides the implementation that ClientKit effectively wraps. (See @ref Client)
 
 - `ClientKit` - The C API (with C++ header-only wrappers) used by client applications: games, etc. (See @ref ClientKit)
 
-- `Connection` - The workings of devices and connections for the framework's messaging system. (See @ref Connection)
+- `Connection` - Internal API: The workings of devices and connections for the framework's messaging system. (See @ref Connection)
 
-- `PluginHost` - This is the host for plugins that build against @ref PluginKit. It is primarily consumed by other code in the framework. (See @ref PluginHost)
+- `PluginHost` - Internal API: This is the host for plugins that build against @ref PluginKit. It is primarily consumed by other code in the framework. (See @ref PluginHost)
 
 - `PluginKit` - This is the interface presented to device and analysis plugins. For binary compatibility, it is a C API with header-only C++ wrappers. (See @ref PluginKit)
 
-- `Routing` - Code related to the path tree and routing graph. (See @ref Routing)
+- `Common` - Internal API: Shared internal workings between client and plugin/server sides (See @ref Common).
 
-- `Server` - A higher-level library used to develop server applications, wrapping connection and plugin handling. (See @ref Server)
+- `Server` - Internal API: A higher-level library used to develop server applications, wrapping connection and plugin handling. (See @ref Server)
 
 - `Util` - Contains shared code useful to the framework but not directly pertaining to any particular facet. Much of this code is header-only: either self-configuring headers wrapping include files, C macro definitions, or C++ template code. (See @ref Util)
 
