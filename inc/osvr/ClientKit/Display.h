@@ -71,12 +71,17 @@ inline OSVR_ReturnCode osvrClientGetRelativeViewportForViewerEyeSurface(
 
 namespace osvr {
 namespace clientkit {
+/// Define OSVR_CLIENTKIT_CUSTOM_DISPLAY_ERROR_HANDLER and provide your own
+/// implementation of void osvr::clientkit::handleDisplayError(const char msg[])
+/// if you don't want exceptions thrown.
 #ifndef OSVR_CLIENTKIT_CUSTOM_DISPLAY_ERROR_HANDLER
     static inline void handleDisplayError(const char msg[]) {
         throw std::runtime_error(msg);
     }
 #endif
 
+    /// @addtogroup ClientKitCPP
+    /// @{
     typedef shared_ptr<OSVR_DisplayConfigObject> UnderlyingDisplayConfigPtr;
 
     /// @brief Get a shared_ptr to a DisplayConfig (with appropriate deleter
@@ -103,6 +108,10 @@ namespace clientkit {
                 OSVR_EyeCount eye, OSVR_SurfaceCount surface)
             : m_disp(disp), m_viewer(viewer), m_eye(eye), m_surface(surface) {}
 
+        /// @brief Gets the video-input-relative viewport corresponding to this
+        /// surface.
+        ///
+        /// @sa osvrClientGetRelativeViewportForViewerEyeSurface()
         RelativeViewport getRelativeViewport() const {
             RelativeViewport viewport;
             OSVR_ReturnCode ret =
@@ -116,6 +125,9 @@ namespace clientkit {
             return viewport;
         }
 
+        /// @brief Gets the projection matrix.
+        ///
+        /// @sa osvrClientGetViewerEyeSurfaceProjectionMatrixd
         void getProjectionMatrix(double near, double far,
                                  OSVR_MatrixConventions flags,
                                  double matrix[OSVR_MATRIX_SIZE]) const {
@@ -129,6 +141,7 @@ namespace clientkit {
             }
         }
 
+        /// @overload
         void getProjectionMatrix(float near, float far,
                                  OSVR_MatrixConventions flags,
                                  float matrix[OSVR_MATRIX_SIZE]) const {
@@ -142,6 +155,10 @@ namespace clientkit {
             }
         }
 
+        /// @brief Determines if the description of the surface requests any
+        /// distortion to be performed.
+        ///
+        /// @sa osvrClientDoesViewerEyeSurfaceWantDistortion()
         bool isDistortionRequested() const {
             OSVR_CBool distort;
             OSVR_ReturnCode ret = osvrClientDoesViewerEyeSurfaceWantDistortion(
@@ -479,6 +496,8 @@ namespace clientkit {
         OSVR_DisplayConfig m_disp;
         UnderlyingDisplayConfigPtr m_owningDisp;
     };
+    /// @}
+    // end of group
 
 } // namespace clientkit
 } // namespace osvr
