@@ -60,6 +60,17 @@ typedef uint32_t OSVR_SurfaceCount;
     viewport.  */
 typedef int32_t OSVR_ViewportDimension;
 
+/** @brief The integer type used to indicate relative priorities of a display
+    distortion strategy. Negative values are defined to mean that strategy is
+    unavailable.
+*/
+typedef int32_t OSVR_DistortionPriority;
+
+/** @brief The constant to return as an OSVR_DistortionPriority if a given
+    strategy is not available for a surface.
+*/
+#define OSVR_DISTORTION_PRIORITY_UNAVAILABLE (-1)
+
 /** @} */
 
 OSVR_EXTERN_C_END
