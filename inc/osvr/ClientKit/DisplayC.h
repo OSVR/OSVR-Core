@@ -49,6 +49,8 @@
 OSVR_EXTERN_C_BEGIN
 /** @addtogroup ClientKit
     @{
+    @name Display API
+    @{
 */
 
 /** @brief Opaque type of a display configuration. */
@@ -128,9 +130,11 @@ osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp);
     retrieve the viewer count.
 
     @param disp Display config object.
-    @param[out] viewers Number of viewers in the logical display topology.
-    **Constant** throughout the active, valid lifetime of a display config
+    @param[out] viewers Number of viewers in the logical display topology,
+    **constant** throughout the active, valid lifetime of a display config
     object.
+
+    @sa OSVR_ViewerCount
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
     the output argument is unmodified.
@@ -157,9 +161,12 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerPose(
     have a substantially similar pose: get the count.
 
     @param disp Display config object.
-    @param[out] viewers Number of viewers in the logical display topology.
-    **Constant** throughout the active, valid lifetime of a display config
-    object
+    @param viewer Viewer ID
+    @param[out] eyes Number of eyes for this viewer in the logical display
+   topology, **constant** throughout the active, valid lifetime of a display
+   config object
+
+    @sa OSVR_EyeCount
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
     the output argument is unmodified.
@@ -192,8 +199,8 @@ osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
     @param disp Display config object
     @param viewer Viewer ID
     @param eye Eye ID
-    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
-    @param[out] mat Pass a double[OSVR_MATRIX_SIZE] to get the transformation
+    @param flags Bitwise OR of matrix convention flags (see @ref MatrixFlags)
+    @param[out] mat Pass a double[::OSVR_MATRIX_SIZE] to get the transformation
     matrix from room space to eye space (not relative to pose of the viewer)
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
@@ -211,8 +218,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
     @param disp Display config object
     @param viewer Viewer ID
     @param eye Eye ID
-    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
-    @param[out] mat Pass a float[OSVR_MATRIX_SIZE] to get the transformation
+    @param flags Bitwise OR of matrix convention flags (see @ref MatrixFlags)
+    @param[out] mat Pass a float[::OSVR_MATRIX_SIZE] to get the transformation
     matrix from room space to eye space (not relative to pose of the viewer)
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
@@ -231,6 +238,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
     @param[out] surfaces Number of surfaces (numbered [0, surfaces - 1]) for the
     given viewer and eye. **Constant** throughout the active, valid lifetime of
     a display config object.
+
+    @sa OSVR_SurfaceCount
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
     the output argument is unmodified.
@@ -280,9 +289,9 @@ osvrClientGetRelativeViewportForViewerEyeSurface(
     positive.
     @param far Distance from viewpoint to far clipping plane - must be positive
     and not equal to near, typically greater than near.
-    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+    @param flags Bitwise OR of matrix convention flags (see @ref MatrixFlags)
     @param[out] matrix Output projection matrix: supply an array of 16
-    (OSVR_MATRIX_SIZE) doubles.
+    (::OSVR_MATRIX_SIZE) doubles.
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
     the output argument is unmodified.
@@ -304,9 +313,9 @@ osvrClientGetViewerEyeSurfaceProjectionMatrixd(
     positive.
     @param far Distance to far clipping plane - must be nonzero, typically
     positive and greater than near.
-    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+    @param flags Bitwise OR of matrix convention flags (see @ref MatrixFlags)
     @param[out] matrix Output projection matrix: supply an array of 16
-    (OSVR_MATRIX_SIZE) floats.
+    (::OSVR_MATRIX_SIZE) floats.
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
     the output argument is unmodified.
@@ -390,7 +399,9 @@ osvrClientGetViewerEyeSurfaceRadialDistortion(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, OSVR_RadialDistortionParameters *params);
 
-/** @} */
+/** @}
+    @}
+*/
 
 OSVR_EXTERN_C_END
 
