@@ -95,6 +95,12 @@ namespace client {
             return m_radDistortParams;
         }
 
+        OSVR_DistortionPriority getRadialDistortionPriority() const {
+            return (m_radDistortParams.is_initialized())
+                       ? 1
+                       : OSVR_DISTORTION_PRIORITY_UNAVAILABLE;
+        }
+
         /// @brief Gets a matrix that takes in row vectors in a right-handed
         /// system and outputs signed Z.
         OSVR_CLIENT_EXPORT Eigen::Matrix4d getProjection(double near,
