@@ -13,6 +13,7 @@ You'll need:
     - 1.58.0 is not compatible due to a bug in Boost, the fix will be included in 1.58.1
 - [libfunctionality][] compiled
 - [jsoncpp][] compiled, with the `JSONCPP_WITH_CMAKE_PACKAGE` option turned on, and the `JSONCPP_LIB_BUILD_SHARED` option turned off on Windows and on for other platforms.
+- OpenCV 2.4.x - there is some initial work on porting to support 3.0 but it's not widely tested.
 - A C++11 capable compiler: VS 2013 is the main one used in development. (VS 2012 doesn't support enough C++11 to build the core currently.) MSYS2 with MinGW64 GCC and GCC in the nuwen distro of MinGW also work, at least as of some time in the recent past. CI builds regularly on Linux using GCC and Clang, so ideally GCC in MinGW should also stay working, or at least not very broken.
 
 For Linux:
