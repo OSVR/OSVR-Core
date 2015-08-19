@@ -32,7 +32,7 @@
 
 // Library/third-party includes
 #include <opencv2/core/version.hpp>
-#if CV_VERSION_EPOCH == 2
+#if CV_MAJOR_VERSION == 2 || CV_VERSION_EPOCH == 2
 #include <opencv2/core/core_c.h>
 #else
 #include <opencv2/core/core.hpp>
