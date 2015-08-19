@@ -10,3 +10,6 @@
 [submodule "vendor/discount-windows-bins"]
 	path = vendor/discount-windows-bins
 	url = https://github.com/OSVR/discount.git
+[submodule "vendor/UIforETWbins"]
+	path = vendor/UIforETWbins
+	url = https://github.com/OSVR/UIforETWbins.git
