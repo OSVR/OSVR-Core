@@ -451,6 +451,7 @@ namespace clientkit {
             ensureValid();
             return Surface(m_disp, viewer, eye, surface);
         }
+
         /// @}
 
         /// @name Iteration methods
@@ -481,16 +482,19 @@ namespace clientkit {
                 getViewer(viewer).forEachSurface(functor);
             };
         }
+
         ///}
 
         /// @name Identification getters
         /// @{
+
         /// @brief Gets the raw OSVR_DisplayConfig
         OSVR_DisplayConfig getDisplayConfig() const { return m_disp; }
 
         /// @brief Gets a copy of the owning pointer, if we hold shared
         /// ownership over this DisplayConfig.
         UnderlyingDisplayConfigPtr getOwningPtr() const { return m_owningDisp; }
+
         /// @}
       private:
         OSVR_DisplayConfig m_disp;
