@@ -334,6 +334,19 @@ OSVR_ReturnCode osvrClientDoesViewerEyeSurfaceWantDistortion(
     return OSVR_RETURN_SUCCESS;
 }
 
+OSVR_ReturnCode osvrClientGetViewerEyeSurfaceRadialDistortionPriority(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_DistortionPriority *priority) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_SURFACE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(priority, "distortion technique priority");
+    *priority = disp->cfg->getViewerEyeSurface(viewer, eye, surface)
+                    .getRadialDistortionPriority();
+    return OSVR_RETURN_SUCCESS;
+}
+
 OSVR_ReturnCode osvrClientGetViewerEyeSurfaceRadialDistortion(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, OSVR_RadialDistortionParameters *params) {

@@ -233,6 +233,32 @@ osvrClientDoesViewerEyeSurfaceWantDistortion(OSVR_DisplayConfig disp,
                                              OSVR_SurfaceCount surface,
                                              OSVR_CBool *distortionRequested);
 
+/** @brief Returns the priority/availability of radial distortion parameters for
+    a surface seen by an eye of a viewer in a display config.
+
+    If osvrClientDoesViewerEyeSurfaceWantDistortion() reports false, then the
+    display does not request distortion of any sort, and thus neither this nor
+    any other distortion strategy priority function will report an "available"
+    priority.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param[out] priority Output: the priority level. Negative values
+    (canonically OSVR_DISTORTION_PRIORITY_UNAVAILABLE) indicate this technique
+    not available, higher values indicate higher preference for the given
+    technique based on the device's description. **Constant** throughout the
+    active, valid lifetime of a display config object.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetViewerEyeSurfaceRadialDistortionPriority(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_DistortionPriority *priority);
+
 /** @brief Returns the radial distortion parameters, if known/requested, for a
     surface seen by an eye of a viewer in a display config.
 
