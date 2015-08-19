@@ -47,14 +47,55 @@
 /* none */
 
 OSVR_EXTERN_C_BEGIN
+/** @addtogroup ClientKit
+    @{
+*/
 
 /** @brief Opaque type of a display configuration. */
 typedef struct OSVR_DisplayConfigObject *OSVR_DisplayConfig;
 
-/** @brief Allocates a display configuration object.
+/** @brief Allocates a display configuration object populated with data from the
+    OSVR system.
+
+    Before this call will succeed, your application will need to be correctly
+   and fully connected to an OSVR server. You may consider putting this call in
+   a loop alternating with osvrClientUpdate() until this call succeeds.
+
+    Data provided by a display configuration object:
+
+    - The logical display topology (number and relationship of viewers, eyes,
+        and surfaces), which remains constant throughout the life of the
+        configuration object. (A method of notification of change here is TBD).
+    - Pose data for viewers (not required for rendering) and pose/view data for
+        eyes (used for rendering) which is based on tracker data: if used, these
+        should be queried every frame.
+    - Projection matrix data for surfaces, which while in current practice may
+        be relatively unchanging, we are not guaranteeing them to be constant:
+        these should be queried every frame.
+    - Video-input-relative viewport size/location for a surface: would like this
+        to be variable, but probably not feasible. If you have input, please
+        comment on the dev mailing list.
+    - Per-surface distortion strategy priorities/availabilities: constant. Note
+        the following, though...
+    - Per-surface distortion strategy parameters: variable, request each frame.
+        (Could make constant with a notification if needed?)
+
+    Important note: While most of this data is immediately available if you are
+   successful in getting a display config object, the pose-based data (viewer
+   pose, eye pose, eye view matrix) needs tracker state, so at least one (and in
+   practice, typically more) osvrClientUpdate() must be performed before a new
+   tracker report is available to populate that state. See
+   osvrClientCheckDisplayStartup() to query if all startup data is available.
+
+    @todo Decide if relative viewport should be constant in a display config,
+   and update docs accordingly.
+
+    @todo Decide if distortion params should be constant in a display config,
+   and update docs accordingly.
+
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or some other
-    error occured, in which case the output argument is unmodified.
-  */
+    error occurred, in which case the output argument is unmodified.
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetDisplay(OSVR_ClientContext ctx, OSVR_DisplayConfig *disp);
 
@@ -71,8 +112,11 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 
 /** @brief Checks to see if a display is fully configured and ready, including
-   having received its first pose update.
+    having received its first pose update.
 
+    Once this first succeeds, it will continue to succeed for the lifetime of
+    the display config object, so it is not necessary to keep calling once you
+    get a successful result.
 
     @return OSVR_RETURN_FAILURE if a null config was passed, or if the given
     display config object was otherwise not ready for full use.
@@ -80,34 +124,58 @@ osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp);
 
-/** @brief A display config can have one (or theoretically more) viewers */
+/** @brief A display config can have one (or theoretically more) viewers:
+    retrieve the viewer count.
+
+    @param disp Display config object.
+    @param[out] viewers Number of viewers in the logical display topology.
+    **Constant** throughout the active, valid lifetime of a display config
+    object.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetNumViewers(OSVR_DisplayConfig disp, OSVR_ViewerCount *viewers);
 
-/** @brief Get the center of projection/"eye point" for a viewer in a display
-    config.
+/** @brief Get the pose of a viewer in a display config.
 
     Note that there may not necessarily be any surfaces rendered from this pose
-    (it's the unused "center" eye in a stereo configuration) so only use this if
-    it makes integration into your engine or existing applications (not
-    originally designed for stereo) easier.
+    (it's the unused "center" eye in a stereo configuration, for instance) so
+    only use this if it makes integration into your engine or existing
+    applications (not originally designed for stereo) easier.
+
+    Will only succeed if osvrClientCheckDisplayStartup() succeeds.
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
     yet available, in which case the pose argument is unmodified.
-  */
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerPose(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_Pose3 *pose);
 
 /** @brief Each viewer in a display config can have one or more "eyes" which
-    have a substantially similar pose
+    have a substantially similar pose: get the count.
 
-    @return OSVR_RETURN_FAILURE if invalid parameters were passed.
+    @param disp Display config object.
+    @param[out] viewers Number of viewers in the logical display topology.
+    **Constant** throughout the active, valid lifetime of a display config
+    object
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumEyesForViewer(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount *eyes);
 
-/** @brief Get the center of projection/"eye point" for the given eye of a
-    viewer in a display config
+/** @brief Get the "viewpoint" for the given eye of a viewer in a display
+   config.
+
+    Will only succeed if osvrClientCheckDisplayStartup() succeeds.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param[out] pose Room-space pose (not relative to pose of the viewer)
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
     yet available, in which case the pose argument is unmodified.
@@ -117,7 +185,16 @@ osvrClientGetViewerEyePose(OSVR_DisplayConfig disp, OSVR_ViewerCount viewer,
                            OSVR_EyeCount eye, OSVR_Pose3 *pose);
 
 /** @brief Get the view matrix (inverse of pose) for the given eye of a
-    viewer in a display config - matrix of doubles.
+    viewer in a display config - matrix of **doubles**.
+
+    Will only succeed if osvrClientCheckDisplayStartup() succeeds.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+    @param[out] mat Pass a double[OSVR_MATRIX_SIZE] to get the transformation
+    matrix from room space to eye space (not relative to pose of the viewer)
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
     yet available, in which case the output argument is unmodified.
@@ -127,7 +204,16 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
     OSVR_MatrixConventions flags, double *mat);
 
 /** @brief Get the view matrix (inverse of pose) for the given eye of a
-    viewer in a display config - matrix of doubles.
+    viewer in a display config - matrix of **floats**.
+
+    Will only succeed if osvrClientCheckDisplayStartup() succeeds.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+    @param[out] mat Pass a float[OSVR_MATRIX_SIZE] to get the transformation
+    matrix from room space to eye space (not relative to pose of the viewer)
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed or no pose was
     yet available, in which case the output argument is unmodified.
@@ -137,28 +223,44 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
     OSVR_MatrixConventions flags, float *mat);
 
 /** @brief Each eye of each viewer in a display config has one or more surfaces
- * (aka "screens") on which content should be rendered. */
+    (aka "screens") on which content should be rendered.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param[out] surfaces Number of surfaces (numbered [0, surfaces - 1]) for the
+    given viewer and eye. **Constant** throughout the active, valid lifetime of
+    a display config object.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
+*/
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumSurfacesForViewerEye(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount *surfaces);
 
 /** @brief Get the dimensions/location of the viewport **within the display
-    input** for a surface seen by an eye of a viewer
-    in a display config. (This does not include other video inputs that may be
-    on a single virtual desktop, etc. and does not necessarily indicate that a
-    viewport in the sense of glViewport must be created with these parameters,
-    though the output order matches for convenience.)
+    input** for a surface seen by an eye of a viewer in a display config. (This
+    does not include other video inputs that may be on a single virtual desktop,
+    etc. or explicitly account for display configurations that use multiple
+    video inputs. It does not necessarily indicate that a viewport in the sense
+    of glViewport must be created with these parameters, though the parameter
+    order matches for convenience.)
 
     @param disp Display config object
     @param viewer Viewer ID
     @param eye Eye ID
     @param surface Surface ID
-    @param left Output: Distance in pixels from the left of the video input to
-    the left of the viewport.
-    @param bottom Output: Distance in pixels from the bottom of the video input
-    to the bottom of the viewport.
-    @param width Output: Width of viewport in pixels.
-    @param height Output: Height of viewport in pixels.
+    @param[out] left Output: Distance in pixels from the left of the video input
+    to the left of the viewport.
+    @param[out] bottom Output: Distance in pixels from the bottom of the video
+    input to the bottom of the viewport.
+    @param[out] width Output: Width of viewport in pixels.
+    @param[out] height Output: Height of viewport in pixels.
+
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output arguments are unmodified.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetRelativeViewportForViewerEyeSurface(
@@ -174,13 +276,16 @@ osvrClientGetRelativeViewportForViewerEyeSurface(
     @param viewer Viewer ID
     @param eye Eye ID
     @param surface Surface ID
-    @param near Distance to near clipping plane - must be nonzero, typically
+    @param near Distance from viewpoint to near clipping plane - must be
     positive.
-    @param far Distance to far clipping plane - must be nonzero, typically
-    positive and greater than near.
+    @param far Distance from viewpoint to far clipping plane - must be positive
+    and not equal to near, typically greater than near.
     @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
-    @param matrix Output projection matrix: supply an array of 16
-   (OSVR_MATRIX_SIZE) doubles.
+    @param[out] matrix Output projection matrix: supply an array of 16
+    (OSVR_MATRIX_SIZE) doubles.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetViewerEyeSurfaceProjectionMatrixd(
@@ -199,9 +304,12 @@ osvrClientGetViewerEyeSurfaceProjectionMatrixd(
     positive.
     @param far Distance to far clipping plane - must be nonzero, typically
     positive and greater than near.
-    @param matrix Output projection matrix: supply an array of 16
-    (OSVR_MATRIX_SIZE) floats.
     @param flags Bitwise OR of matrix convention flags (see OSVR_MatrixFlags)
+    @param[out] matrix Output projection matrix: supply an array of 16
+    (OSVR_MATRIX_SIZE) floats.
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output argument is unmodified.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetViewerEyeSurfaceProjectionMatrixf(
@@ -215,14 +323,16 @@ osvrClientGetViewerEyeSurfaceProjectionMatrixf(
     This simply reports true or false, and does not specify which kind of
     distortion implementations have been parameterized for this display. For
     each distortion implementation your application supports, you'll want to
-    call the function to retrieve the parameters to find out if it is available.
+    call the corresponding priority function to find out if it is available.
 
     @param disp Display config object
     @param viewer Viewer ID
     @param eye Eye ID
     @param surface Surface ID
-    @param distortionRequested Output parameter: whether distortion is
-    requested.
+    @param[out] distortionRequested Output parameter: whether distortion is
+    requested. **Constant** throughout the active, valid lifetime of a display
+    config object.
+
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
     the output argument is unmodified.
 */
@@ -262,11 +372,15 @@ osvrClientGetViewerEyeSurfaceRadialDistortionPriority(
 /** @brief Returns the radial distortion parameters, if known/requested, for a
     surface seen by an eye of a viewer in a display config.
 
+    Will only succeed if osvrClientGetViewerEyeSurfaceRadialDistortionPriority()
+    reports a non-negative priority.
+
     @param disp Display config object
     @param viewer Viewer ID
     @param eye Eye ID
     @param surface Surface ID
-    @param params Output: the parameters for radial distortion
+    @param[out] params Output: the parameters for radial distortion
+
     @return OSVR_RETURN_FAILURE if this surface does not have these parameters
     described, or if invalid parameters were passed, in which case the output
     argument is unmodified.
@@ -275,6 +389,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetViewerEyeSurfaceRadialDistortion(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, OSVR_RadialDistortionParameters *params);
+
+/** @} */
 
 OSVR_EXTERN_C_END
 

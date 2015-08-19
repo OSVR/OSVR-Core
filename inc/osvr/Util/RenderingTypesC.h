@@ -53,11 +53,13 @@ typedef uint32_t OSVR_ViewerCount;
 typedef uint8_t OSVR_EyeCount;
 
 /** @brief The integer type specifying the number of surfaces seen by a viewer's
-    eye. */
+    eye.
+*/
 typedef uint32_t OSVR_SurfaceCount;
 
 /** @brief The integer type used in specification of size or location of a
-    viewport.  */
+    viewport.
+*/
 typedef int32_t OSVR_ViewportDimension;
 
 /** @brief The integer type used to indicate relative priorities of a display
