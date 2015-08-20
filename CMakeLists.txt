@@ -85,6 +85,7 @@ set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
 # Must be before MapImportedReleaseVariants
 find_package(OpenGL)
 find_package(SDL2)
+find_package(GLEW)
 
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
@@ -105,6 +106,8 @@ use_folders()
 
 include(PlatformDefinitions)
 define_platform_macros(OSVR)
+
+include(EmbedShader)
 
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)

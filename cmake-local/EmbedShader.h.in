@@ -1,0 +1,3 @@
+/* Generated file - created from @SOURCE@ - do not edit! */
+
+static const char @SYMBOL@[] = @STRING@;
