@@ -38,6 +38,8 @@ struct OSVR_ClientContextObject;
 namespace osvr {
 namespace common {
     typedef ::OSVR_ClientContextObject ClientContext;
+
+    typedef void (*ClientContextDeleter)(ClientContext *);
 } // namespace common
 } // namespace osvr
 

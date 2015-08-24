@@ -104,8 +104,9 @@ namespace client {
     static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
     static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
-    PureClientContext::PureClientContext(const char appId[], const char host[])
-        : ::OSVR_ClientContextObject(appId), m_host(host) {
+    PureClientContext::PureClientContext(const char appId[], const char host[],
+                                         common::ClientContextDeleter del)
+        : ::OSVR_ClientContextObject(appId, del), m_host(host) {
 
         if (!m_network.isUp()) {
             throw std::runtime_error("Network error: " + m_network.getError());

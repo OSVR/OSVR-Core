@@ -49,7 +49,10 @@ namespace client {
 
     class PureClientContext : public ::OSVR_ClientContextObject {
       public:
-        PureClientContext(const char appId[], const char host[] = "localhost");
+        PureClientContext(const char appId[], common::ClientContextDeleter del)
+            : PureClientContext(appId, "localhost", del) {}
+        PureClientContext(const char appId[], const char host[],
+                          common::ClientContextDeleter del);
         virtual ~PureClientContext();
 
       private:
