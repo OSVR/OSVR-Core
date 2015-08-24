@@ -100,8 +100,8 @@ namespace common {
             return 0;
         }
         inline void driverUpdateEnd(TraceBeginStamp) {}
-        template<typename Policy>
-        inline void markConcatenation(...) {}
+        template <typename Policy>
+        inline void markConcatenation(const char *, std::string const &) {}
 #endif // !OSVR_COMMON_TRACING_ENABLED
 
         // -- Common code between dummy implementation and real implementation
