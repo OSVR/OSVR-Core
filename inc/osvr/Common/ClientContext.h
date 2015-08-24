@@ -131,6 +131,23 @@ namespace common {
     /// @brief Use the stored deleter to appropriately delete the client
     /// context.
     OSVR_COMMON_EXPORT void deleteContext(ClientContext *ctx);
+    namespace detail {
+        namespace {
+            template <typename T>
+            inline void context_deleter(ClientContext *obj) {
+                T *o = static_cast<T *>(obj);
+                delete o;
+            }
+        } // namespace
+    }     // namespace detail
+
+    /// @brief Create a subclass object of ClientContext, setting the deleter
+    /// appropriately by passing it as the last parameter. Compare to
+    /// std::make_shared.
+    template <typename T, typename... Args>
+    inline T *makeContext(Args... args) {
+        return new T(std::forward<Args>(args)..., &detail::context_deleter<T>);
+    }
 } // namespace common
 } // namespace osvr
 

@@ -35,13 +35,6 @@
 
 namespace osvr {
 namespace client {
-
-    template <typename T>
-    inline void context_deleter(common::ClientContext *obj) {
-        T *o = static_cast<T *>(obj);
-        delete o;
-    }
-
     common::ClientContext *createContext(const char appId[],
                                          const char host[]) {
         common::ClientContext *ret = nullptr;
@@ -50,8 +43,7 @@ namespace client {
                              "appId provided!");
             return ret;
         }
-        ret = new PureClientContext(appId, host,
-                                    &context_deleter<PureClientContext>);
+        ret = common::makeContext<PureClientContext>(appId, host);
         return ret;
     }
 
