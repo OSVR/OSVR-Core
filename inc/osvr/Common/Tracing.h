@@ -75,8 +75,9 @@ namespace common {
             TraceBeginStamp m_stamp;
             const char *m_text;
         };
-        template<typename Policy>
-        inline void markConcatenation(const char * fixedString, std::string const& string) {
+        template <typename Policy>
+        inline void markConcatenation(const char *fixedString,
+                                      std::string const &string) {
             Policy::mark((fixedString + string).c_str());
         }
 #else  // OSVR_COMMON_TRACING_ENABLED ^^ // vv !OSVR_COMMON_TRACING_ENABLED
@@ -121,14 +122,14 @@ namespace common {
 
         /// @brief "Guard"-type class to trace the region of a server update
         class ClientUpdate : public TracingRegion<MainTracePolicy> {
-        public:
+          public:
             ClientUpdate() : TracingRegion<MainTracePolicy>("ClientUpdate") {}
         };
         inline void markUpdateState() {}
-        inline void markGetState(std::string const& path) {
+        inline void markGetState(std::string const &path) {
             markConcatenation<WorkerTracePolicy>("GetState", path);
         }
-        inline void markGetInterface(std::string const& path) {
+        inline void markGetInterface(std::string const &path) {
             markConcatenation<WorkerTracePolicy>("GetState", path);
         }
 
