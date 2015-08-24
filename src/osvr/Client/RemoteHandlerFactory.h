@@ -30,7 +30,9 @@
 #include <osvr/Common/PathNode_fwd.h>
 #include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/InterfaceList.h>
+#include <osvr/Common/ClientContext_fwd.h>
 #include "RemoteHandler.h"
+#include "VRPNConnectionCollection.h"
 
 // Library/third-party includes
 // - none
@@ -75,6 +77,11 @@ namespace client {
       private:
         std::unordered_map<std::string, SpecificFactory> m_factoriesByInterface;
     };
+
+    /// @brief Populates a RemoteHandlerFactory with each of the specific
+    /// factories included with OSVR.
+    void populateRemoteHandlerFactory(RemoteHandlerFactory &factory,
+                                      VRPNConnectionCollection const &conns);
 
 } // namespace client
 } // namespace osvr

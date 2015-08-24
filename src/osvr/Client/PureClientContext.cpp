@@ -30,13 +30,6 @@
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ClientInterface.h>
-#include "AnalogRemoteFactory.h"
-#include "ButtonRemoteFactory.h"
-#include "DirectionRemoteFactory.h"
-#include "EyeTrackerRemoteFactory.h"
-#include "ImagingRemoteFactory.h"
-#include "Location2DRemoteFactory.h"
-#include "TrackerRemoteFactory.h"
 #include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathTreeSerialization.h>
@@ -111,14 +104,8 @@ namespace client {
             throw std::runtime_error("Network error: " + m_network.getError());
         }
 
-        /// Register all the factories.
-        TrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        AnalogRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        ButtonRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        ImagingRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        EyeTrackerRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        Location2DRemoteFactory(m_vrpnConns).registerWith(m_factory);
-        DirectionRemoteFactory(m_vrpnConns).registerWith(m_factory);
+        /// Create all the remote handler factories.
+        populateRemoteHandlerFactory(m_factory, m_vrpnConns);
 
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + host;

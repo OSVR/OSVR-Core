@@ -32,6 +32,7 @@ set(SOURCE
     PureClientContext.h
     RemoteHandler.cpp
     RemoteHandler.h
+    RemoteHandlerFactory.cpp
     RemoteHandlerFactory.h
     RouterPredicates.h
     RouterTransforms.h
