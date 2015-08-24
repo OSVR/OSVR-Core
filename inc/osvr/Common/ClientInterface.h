@@ -33,6 +33,7 @@
 #include <osvr/Common/InterfaceCallbacks.h>
 #include <osvr/Common/StateType.h>
 #include <osvr/Common/ReportStateTraits.h>
+#include <osvr/Common/Tracing.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientCallbackTypesC.h>
 
@@ -65,6 +66,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     bool getState(osvr::util::time::TimeValue &timestamp,
                   typename osvr::common::traits::StateType<ReportType>::type &
                       state) const {
+        osvr::common::tracing::markGetState(m_path);
         if (!m_state.hasState<ReportType>()) {
             return false;
         }

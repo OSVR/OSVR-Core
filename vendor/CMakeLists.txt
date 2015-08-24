@@ -59,3 +59,40 @@ target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 add_library(eigen-headers INTERFACE)
 target_include_directories(eigen-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.5")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
+
+# ETWProviders from UIforETW
+set(ETWROOT "${CMAKE_CURRENT_SOURCE_DIR}/UIforETWbins")
+set(ETWPROVIDERS_FOUND "FALSE" CACHE INTERNAL "" FORCE)
+
+# TODO Current binaries were not built with extern "C" so name-mangling incompatible with MinGW
+# https://github.com/google/UIforETW/pull/50
+if(MSVC)
+    set(ETWSUFFIX)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(ETWSUFFIX 64)
+    endif()
+    set(ETWPROVIDERS_RUNTIME_LIBRARY "${ETWROOT}/bin/ETWProviders${ETWSUFFIX}.dll")
+    if(EXISTS "${ETWPROVIDERS_RUNTIME_LIBRARY}")
+        add_library(ETWProviders INTERFACE)
+        target_include_directories(ETWProviders INTERFACE "${ETWROOT}/include")
+        # set_target_properties(ETWProviders PROPERTIES
+        #     INTERFACE_INCLUDE_DIRECTORIES "${ETWROOT}/include")
+        if(NOT MSVC)
+            target_include_directories(ETWProviders INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dummy-sal")
+        endif()
+        if(MINGW)
+            target_link_libraries(ETWProviders INTERFACE "${ETWPROVIDERS_RUNTIME_LIBRARY}")
+        else()
+            target_link_libraries(ETWProviders INTERFACE "${ETWROOT}/lib/ETWProviders${ETWSUFFIX}.lib")
+        endif()
+        set(ETWPROVIDERS_RUNTIME_LIBRARY "${ETWPROVIDERS_RUNTIME_LIBRARY}" CACHE INTERNAL "" FORCE)
+        set(ETWPROVIDERS_MANIFEST "${ETWROOT}/bin/ETWProviders.man" CACHE INTERNAL "" FORCE)
+        set(ETWPROVIDERS_FOUND "TRUE" CACHE INTERNAL "" FORCE)
+        # set_target_properties(ETWProviders PROPERTIES
+        #     IMPORTED_IMPLIB "${ETWROOT}/lib/ETWProviders${ETWSUFFIX}.lib"
+        #     IMPORTED_LOCATION "${ETWPROVIDERS_RUNTIME_LIBRARY}"
+        # )
+    else()
+        message(STATUS "UIforETWbins submodule missing, so ETW-based tracing unavailable.")
+    endif()
+endif()
