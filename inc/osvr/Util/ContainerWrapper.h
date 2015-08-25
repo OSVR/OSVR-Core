@@ -221,8 +221,8 @@ namespace util {
     /// functionality exposed.
     /// @tparam Container the underlying container you want, reference
     /// accessible via Base::container()
-    /// @tparam Args 0 or more tag types from container_policies indicating the
-    /// features you want publicly exposed
+    /// @tparam Args 0 or more tag types from osvr::util::container_policies
+    /// indicating the features you want publicly exposed
     template <typename Container, typename... Args>
     using ContainerWrapper = detail::ContainerWrapper_t<Container, Args...>;
 
