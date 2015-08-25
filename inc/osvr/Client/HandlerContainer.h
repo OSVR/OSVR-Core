@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Client/RemoteHandler.h>
+#include <osvr/Util/UniqueContainer.h>
 
 // Library/third-party includes
 // - none
@@ -50,11 +51,7 @@ namespace client {
                 // Early out for null pointers.
                 return;
             }
-            auto it = std::find(begin(m_handlers), end(m_handlers), handler);
-            if (end(m_handlers) == it) {
-                // OK, not already in there. Add it.
-                m_handlers.push_back(handler);
-            }
+            m_handlers.insert(handler);
         }
 
         void remove(RemoteHandlerPtr const &handler) {
@@ -62,15 +59,16 @@ namespace client {
                 // Early out for null pointers.
                 return;
             }
-            auto it = std::find(begin(m_handlers), end(m_handlers), handler);
-            if (end(m_handlers) != it) {
-                // Found it - erase it.
-                m_handlers.erase(it);
-            }
+            m_handlers.remove(handler);
         }
 
       private:
-        std::vector<RemoteHandlerPtr> m_handlers;
+        typedef std::vector<RemoteHandlerPtr> BaseContainer;
+        typedef osvr::util::unique_container_policies::PushBack UniquePolicy;
+        typedef util::UniqueContainer<BaseContainer, UniquePolicy,
+                                      util::container_policies::iterators>
+            InternalHandlerContainer;
+        InternalHandlerContainer m_handlers;
     };
 } // namespace client
 } // namespace osvr
