@@ -31,7 +31,7 @@
 #include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Common/ClientContext_fwd.h>
-#include "RemoteHandler.h"
+#include <osvr/Client/RemoteHandler.h>
 #include "VRPNConnectionCollection.h"
 
 // Library/third-party includes

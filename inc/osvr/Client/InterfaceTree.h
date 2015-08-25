@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Util/TreeNode.h>
-#include "RemoteHandler.h"
+#include <osvr/Client/RemoteHandler.h>
 #include "HandlerContainer.h"
 
 // Library/third-party includes

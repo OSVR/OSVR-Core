@@ -34,7 +34,7 @@
 #include <osvr/Util/TimeValue_fwd.h>
 #include <osvr/Util/DefaultBool.h>
 #include "VRPNConnectionCollection.h"
-#include "InterfaceTree.h"
+#include <osvr/Client/InterfaceTree.h>
 #include "RemoteHandlerFactory.h"
 
 // Library/third-party includes

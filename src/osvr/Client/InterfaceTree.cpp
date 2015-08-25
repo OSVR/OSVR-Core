@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "InterfaceTree.h"
+#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Common/ClientInterface.h>
 #include "../Common/PathParseAndRetrieve.h" /// @todo internal header cross-include
 

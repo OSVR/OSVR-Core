@@ -26,7 +26,7 @@
 #define INCLUDED_HandlerContainer_h_GUID_EAD5E6BA_FEDA_428B_0F12_B30FBE4AD6DB
 
 // Internal Includes
-#include "RemoteHandler.h"
+#include <osvr/Client/RemoteHandler.h>
 
 // Library/third-party includes
 // - none

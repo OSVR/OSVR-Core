@@ -35,7 +35,7 @@
 #include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/JSONTransformVisitor.h>
 #include "PureClientContext.h"
-#include "InterfaceTree.h"
+#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/ValueOrRange.h>
 #include <osvr/Util/Verbosity.h>
 
