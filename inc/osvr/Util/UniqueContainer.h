@@ -92,8 +92,8 @@ namespace util {
                 }
 
                 /// @brief Time complexity: O(std::find) = O(n)
-                static const_iterator find(Container const &c,
-                                           const_reference v) {
+                static auto find(Container const &c, const_reference v)
+                    -> decltype(std::find(begin(c), end(c), v)) {
                     return std::find(begin(c), end(c), v);
                 }
             };
