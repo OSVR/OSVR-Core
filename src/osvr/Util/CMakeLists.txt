@@ -90,6 +90,7 @@ set(API
     "${HEADER_LOCATION}/TreeNodeFullPath.h"
     "${HEADER_LOCATION}/TreeTraversalVisitor.h"
     "${HEADER_LOCATION}/TypePack.h"
+    "${HEADER_LOCATION}/TypePackRuntime.h"
     "${HEADER_LOCATION}/TypeSafeId.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/UniqueContainer.h"
