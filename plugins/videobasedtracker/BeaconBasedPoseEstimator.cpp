@@ -207,9 +207,10 @@ namespace vbtracker {
         // m_permittedOutliers outliers. Even in simulation data, we sometimes
         // find duplicate IDs for LEDs, indicating that we are getting
         // mis-identified ones sometimes.
+        bool usePreviousGuess = false;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, true, 5, 8.0f,
+            m_tvec, usePreviousGuess, 5, 8.0f,
             static_cast<int>(objectPoints.size() - m_permittedOutliers));
 
         //==========================================================================
