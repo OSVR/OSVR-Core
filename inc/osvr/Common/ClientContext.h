@@ -139,7 +139,7 @@ namespace common {
                 delete o;
             }
         } // namespace
-    }     // namespace detail
+    } // namespace detail
 
     /// @brief Create a subclass object of ClientContext, setting the deleter
     /// appropriately by passing it as the last parameter. Compare to
