@@ -73,7 +73,7 @@
 //#define VBHMD_FAKE_IMAGES "C:/tmp/HDK_far"
 //#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/simulated_images/animation_from_fake"
 //#define VBHMD_FAKE_IMAGES "F:/taylorr/Personal/Work/consulting/sensics/OSVR/src/OSVR-Core/plugins/videobasedtracker/HDK_random_images"
-//#define VBHMD_FAKE_IMAGES "C:/tmp/0727_1m"
+//#define VBHMD_FAKE_IMAGES "C:/tmp/Roman_125_400_GAIN_1p5m"
 
 // Anonymous namespace to avoid symbol collision
 namespace {
