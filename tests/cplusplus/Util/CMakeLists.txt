@@ -1,4 +1,4 @@
-foreach(testname TreeNode TypePack ContainerWrapper Projection)
+foreach(testname TreeNode TypePack ContainerWrapper UniqueContainer Projection)
     add_executable(${testname} ${testname}.cpp)
     target_link_libraries(${testname} osvrUtilCpp)
     setup_gtest(${testname})

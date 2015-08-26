@@ -58,6 +58,9 @@ namespace util {
         /// @brief Request the const overload only of operator[] to be publicly
         /// accessible and forwarded to the container.
         struct const_subscript;
+        /// @brief Request the empty() method be publicly accessible and
+        /// forwarded to the container.
+        struct empty;
     } // namespace container_policies
 
     namespace detail {
@@ -109,6 +112,13 @@ namespace util {
           public:
             typedef typename Container::size_type size_type;
             size_type size() const { return Base::container().size(); }
+        };
+
+        /// @brief Container wrapper mixin for consumers that want size.
+        template <typename Container, typename Base>
+        class ContainerWrapperEmpty : public Base {
+          public:
+            bool empty() const { return Base::container().empty(); }
         };
 
         /// @brief Container wrapper mixin for consumers that want const array
@@ -185,13 +195,18 @@ namespace util {
             using wants_size =
                 typepack::contains<ArgList, container_policies::size>;
 
+            // Check for empty requests
+            using wants_empty =
+                typepack::contains<ArgList, container_policies::empty>;
+
             // List of conditions and their associated mixin class templates
             using option_list = typepack::list<
                 Option<wants_const_iterators, ContainerWrapperConstIterators>,
                 Option<wants_iterators, ContainerWrapperIterators>,
                 Option<wants_const_subscript, ContainerWrapperConstSubscript>,
                 Option<wants_subscript, ContainerWrapperSubscript>,
-                Option<wants_size, ContainerWrapperSize>>;
+                Option<wants_size, ContainerWrapperSize>,
+                Option<wants_empty, ContainerWrapperEmpty>>;
             using type =
                 typepack::fold<option_list, ContainerWrapperBase<Container>,
                                ContainerWrapperFold<Container>>;
@@ -206,8 +221,8 @@ namespace util {
     /// functionality exposed.
     /// @tparam Container the underlying container you want, reference
     /// accessible via Base::container()
-    /// @tparam Args 0 or more tag types from container_policies indicating the
-    /// features you want publicly exposed
+    /// @tparam Args 0 or more tag types from osvr::util::container_policies
+    /// indicating the features you want publicly exposed
     template <typename Container, typename... Args>
     using ContainerWrapper = detail::ContainerWrapper_t<Container, Args...>;
 
