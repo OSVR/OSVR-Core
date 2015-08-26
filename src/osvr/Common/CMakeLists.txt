@@ -83,6 +83,9 @@ set(API
     "${HEADER_LOCATION}/PathNode_fwd.h"
     "${HEADER_LOCATION}/PathTree.h"
     "${HEADER_LOCATION}/PathTreeFull.h"
+    "${HEADER_LOCATION}/PathTreeObserver.h"
+    "${HEADER_LOCATION}/PathTreeObserverPtr.h"
+    "${HEADER_LOCATION}/PathTreeOwner.h"
     "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
@@ -151,6 +154,8 @@ set(SOURCE
     PathNode.cpp
     PathParseAndRetrieve.h
     PathTree.cpp
+    PathTreeObserver.cpp
+    PathTreeOwner.cpp
     PathTreeSerialization.cpp
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
