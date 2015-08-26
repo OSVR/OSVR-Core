@@ -63,9 +63,10 @@ namespace client {
         /// elements
         void operator()(osvr::common::PathNode &,
                         osvr::common::elements::DeviceElement &elt) {
+            static const auto LOCALHOST = "localhost";
             std::string &server = elt.getServer();
 
-            auto it = server.find("localhost");
+            auto it = server.find(LOCALHOST);
 
             if (it != server.npos) {
                 // Do a bit of surgery, only the "localhost" must be replaced,
@@ -80,7 +81,7 @@ namespace client {
                 // Better be safe than sorry :(
 
                 server = boost::algorithm::ireplace_first_copy(
-                    server, "localhost",
+                    server, LOCALHOST,
                     m_host); // Go through a copy, just to be extra safe
             }
         }
