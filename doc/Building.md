@@ -10,7 +10,7 @@ You'll need:
 
 - CMake, fairly recent (3.0 or newer, 3.0.2 most tested, that or the latest preferred.)
 - A relatively recent version of Boost (1.44 or newer, 1.57.0 on Windows the most tested, the latest is usually preferred barring any weird bugs which will be noted here if discovered.)
-    - 1.58.0 is not compatible due to a bug in Boost, the fix will be included in 1.58.1
+    - 1.58.0 is not compatible due to a [bug in Boost](http://lists.boost.org/Archives/boost/2015/05/221933.php), the fix will be included in 1.58.1
 - [libfunctionality][] compiled
 - [jsoncpp][] compiled, with the `JSONCPP_WITH_CMAKE_PACKAGE` option turned on, and the `JSONCPP_LIB_BUILD_SHARED` option turned off on Windows and on for other platforms.
 - OpenCV 2.4.x - there is some initial work on porting to support 3.0 but it's not widely tested.
