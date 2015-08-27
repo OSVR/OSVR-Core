@@ -46,7 +46,7 @@ namespace vbtracker {
                                       size_t requiredInliers,
                                       size_t permittedOutliers) {
         addSensor(LedIdentifierPtr(identifier), m, d, locations,
-            requiredInliers, permittedOutliers);
+                  requiredInliers, permittedOutliers);
     }
 
     void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
@@ -56,9 +56,8 @@ namespace vbtracker {
                                       size_t requiredInliers,
                                       size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));
-        m_estimators.emplace_back(
-            new BeaconBasedPoseEstimator(m, d, locations,
-            requiredInliers, permittedOutliers));
+        m_estimators.emplace_back(new BeaconBasedPoseEstimator(
+            m, d, locations, requiredInliers, permittedOutliers));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
@@ -80,6 +79,10 @@ namespace vbtracker {
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
+        // @todo are any of the above steps already being performed in the blob
+        // detector (if configured in a given way?)
+        // http://docs.opencv.org/master/d0/d7a/classcv_1_1SimpleBlobDetector.html#details
+
         // Construct a blob detector and find the blobs in the image.
         // This set of parameters is optimized for the OSVR HDK prototype
         // that has exposed LEDs.
@@ -90,15 +93,17 @@ namespace vbtracker {
         /// camera.
         cv::SimpleBlobDetector::Params params;
         params.minThreshold = static_cast<float>(thresholdValue);
-        params.maxThreshold = static_cast<float>(thresholdValue + (maxVal - thresholdValue) * 0.3);
+        params.maxThreshold = static_cast<float>(
+            thresholdValue + (maxVal - thresholdValue) * 0.3);
         params.thresholdStep = (params.maxThreshold - params.minThreshold) / 10;
         params.blobColor = static_cast<uchar>(255);
-        params.filterByColor = false;       // Look for bright blobs: there is a bug in this code
+        params.filterByColor =
+            false; // Look for bright blobs: there is a bug in this code
         params.minInertiaRatio = 0.5;
         params.maxInertiaRatio = 1.0;
-        params.filterByInertia = false;     // Do we test for non-elongated blobs?
-        params.minArea = 1;                 // How small can the blobs be?
-        params.filterByConvexity = false;   // Test for convexity?
+        params.filterByInertia = false;   // Do we test for non-elongated blobs?
+        params.minArea = 1;               // How small can the blobs be?
+        params.filterByConvexity = false; // Test for convexity?
         params.filterByCircularity = false; // Test for circularity?
         params.minDistBetweenBlobs = 3;
 #if CV_MAJOR_VERSION == 2
@@ -185,13 +190,14 @@ namespace vbtracker {
             }
 
 #ifdef VBHMD_DEBUG
-            // Don't display the debugging info every frame, or we can't go fast enough.
+            // Don't display the debugging info every frame, or we can't go fast
+            // enough.
             static int count = 0;
             if (++count == 11) {
                 // Draw detected blobs as red circles.
                 cv::drawKeypoints(m_frame, keyPoints, m_imageWithBlobs,
-                    cv::Scalar(0, 0, 255),
-                    cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+                                  cv::Scalar(0, 0, 255),
+                                  cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
                 // Label the keypoints with their IDs.
                 for (led = m_led_groups[sensor].begin();
@@ -202,8 +208,8 @@ namespace vbtracker {
                     where.x += 1;
                     where.y += 1;
                     cv::putText(m_imageWithBlobs, label, where,
-                        cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                        cv::Scalar(0, 0, 255));
+                                cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                                cv::Scalar(0, 0, 255));
                 }
 
                 // If we have a transform, reproject all of the points from the
@@ -220,8 +226,8 @@ namespace vbtracker {
                         where.x += 1;
                         where.y += 1;
                         cv::putText(m_imageWithBlobs, label, where,
-                            cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                            cv::Scalar(0, 255, 0));
+                                    cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                                    cv::Scalar(0, 255, 0));
                     }
                 }
 
@@ -257,9 +263,9 @@ namespace vbtracker {
                 // Report the pose, if we got one
                 if (gotPose) {
                     std::cout << "Pos (sensor " << sensor
-                        << "): " << m_pose.translation.data[0] << ", "
-                        << m_pose.translation.data[1] << ", "
-                        << m_pose.translation.data[2] << std::endl;
+                              << "): " << m_pose.translation.data[0] << ", "
+                              << m_pose.translation.data[1] << ", "
+                              << m_pose.translation.data[2] << std::endl;
                 }
 
                 count = 0;
