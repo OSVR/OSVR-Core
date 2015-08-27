@@ -163,12 +163,9 @@ namespace vbtracker {
             // LED, then we add a new LED for each of them.
             // std::cout << "Had " << Leds.size() << " LEDs, " <<
             // keyPoints.size() << " new ones available" << std::endl;
-            while (keyPoints.size() > 0) {
-                osvr::vbtracker::Led newLed(m_identifiers[sensor].get(),
-                                            keyPoints.begin()->pt,
-                                            keyPoints.begin()->size);
-                m_led_groups[sensor].push_back(newLed);
-                keyPoints.erase(keyPoints.begin());
+            for (auto &keypoint : keyPoints) {
+                m_led_groups[sensor].emplace_back(m_identifiers[sensor].get(),
+                                                  keypoint.pt, keypoint.size);
             }
 
             //==================================================================
