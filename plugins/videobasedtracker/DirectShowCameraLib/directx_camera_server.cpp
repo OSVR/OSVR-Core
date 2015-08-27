@@ -34,9 +34,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// Libraries we need to link with to use what we're using.
-#pragma comment(lib,"strmiids.lib")
-
 //#define HACK_TO_REOPEN
 //#define	DEBUG
 

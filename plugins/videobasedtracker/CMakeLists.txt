@@ -56,7 +56,9 @@ add_library(directshow-camera STATIC
 
 target_link_libraries(directshow-camera
     PUBLIC
-    vendored-vrpn 
+    vendored-vrpn
+    PRIVATE
+    strmiids # TODO search for this
     )
 target_compile_options(directshow-camera
     PUBLIC
