@@ -43,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <tuple>
 
 namespace osvr {
 /// @brief Messaging transport and device communication functionality
@@ -68,6 +69,9 @@ namespace connection {
         OSVR_CONNECTION_EXPORT static ConnectionPtr
         createSharedConnection(boost::optional<std::string const &> iface,
                                boost::optional<int> port);
+
+        OSVR_CONNECTION_EXPORT static std::tuple<void *, ConnectionPtr>
+        createLoopbackConnection();
         /// @}
 
         /// @name Context Storage
@@ -144,10 +148,9 @@ namespace connection {
         /// that.
         ///
         /// This also adds the device so created to the device list.
-        OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-        registerAdvancedDevice(std::string const &deviceName,
-                               OSVR_DeviceUpdateCallback updateFunction,
-                               void *userdata);
+        OSVR_CONNECTION_EXPORT ConnectionDevicePtr registerAdvancedDevice(
+            std::string const &deviceName,
+            OSVR_DeviceUpdateCallback updateFunction, void *userdata);
 
         /// @brief Type of list of device names.
         typedef std::vector<std::string> NameList;
@@ -162,10 +165,9 @@ namespace connection {
         /// This also adds the device so created to the device list.
         ///
         /// For use when a single device exposes more than one name.
-        OSVR_CONNECTION_EXPORT ConnectionDevicePtr
-        registerAdvancedDevice(NameList const &deviceNames,
-                               OSVR_DeviceUpdateCallback updateFunction,
-                               void *userdata);
+        OSVR_CONNECTION_EXPORT ConnectionDevicePtr registerAdvancedDevice(
+            NameList const &deviceNames,
+            OSVR_DeviceUpdateCallback updateFunction, void *userdata);
 
         /// @brief Access implementation details.
         OSVR_CONNECTION_EXPORT virtual void *getUnderlyingObject();

@@ -35,7 +35,6 @@
 
 namespace osvr {
 namespace client {
-
     common::ClientContext *createContext(const char appId[],
                                          const char host[]) {
         common::ClientContext *ret = nullptr;
@@ -44,7 +43,7 @@ namespace client {
                              "appId provided!");
             return ret;
         }
-        ret = new PureClientContext(appId, host);
+        ret = common::makeContext<PureClientContext>(appId, host);
         return ret;
     }
 

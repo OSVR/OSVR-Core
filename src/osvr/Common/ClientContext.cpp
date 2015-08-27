@@ -36,10 +36,20 @@
 
 using ::osvr::common::ClientInterfacePtr;
 using ::osvr::common::ClientInterface;
+using ::osvr::common::ClientContextDeleter;
 using ::osvr::make_shared;
 
-OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[])
-    : m_appId(appId) {
+namespace osvr {
+    namespace common {
+        void deleteContext(ClientContext *ctx) {
+            auto del = ctx->getDeleter();
+            (*del)(ctx);
+        }
+    } // namespace common
+} // namespace osvr
+OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[],
+                                                   ClientContextDeleter del)
+    : m_appId(appId), m_deleter(del) {
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
 }
 
@@ -116,6 +126,10 @@ void OSVR_ClientContextObject::sendRoute(std::string const &route) {
 
 bool OSVR_ClientContextObject::releaseObject(void *obj) {
     return m_ownedObjects.release(obj);
+}
+
+ClientContextDeleter OSVR_ClientContextObject::getDeleter() const {
+    return m_deleter;
 }
 
 void OSVR_ClientContextObject::m_handleNewInterface(

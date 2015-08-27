@@ -57,6 +57,10 @@ OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
 }
 
 OSVR_ReturnCode osvrClientShutdown(OSVR_ClientContext ctx) {
-    delete ctx;
+    if (nullptr == ctx) {
+        OSVR_DEV_VERBOSE("Can't delete a null Client Context!");
+        return OSVR_RETURN_FAILURE;
+    }
+    osvr::common::deleteContext(ctx);
     return OSVR_RETURN_SUCCESS;
 }

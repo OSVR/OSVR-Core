@@ -48,6 +48,8 @@ namespace server {
         return ret;
     }
 
+    void Server::update() { m_impl->update(); }
+
     void Server::start() { m_impl->start(); }
 
     void Server::awaitShutdown() { m_impl->awaitShutdown(); }

@@ -31,7 +31,7 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Common/OriginalSource.h>
-#include "InterfaceTree.h"
+#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/ImagingComponent.h>

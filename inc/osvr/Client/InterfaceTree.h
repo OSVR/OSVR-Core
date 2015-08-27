@@ -26,10 +26,11 @@
 #define INCLUDED_InterfaceTree_h_GUID_7F88FD57_3657_4AA6_B725_A1C69AA21ED2
 
 // Internal Includes
+#include <osvr/Client/Export.h>
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Util/TreeNode.h>
-#include "RemoteHandler.h"
-#include "HandlerContainer.h"
+#include <osvr/Client/RemoteHandler.h>
+#include <osvr/Client/HandlerContainer.h>
 
 // Library/third-party includes
 // - none
@@ -51,38 +52,43 @@ namespace client {
         typedef InterfaceTreeValue value_type;
         typedef util::TreeNode<value_type> node_type;
         /// @brief Constructor
-        InterfaceTree();
+        OSVR_CLIENT_EXPORT InterfaceTree();
 
         /// @brief Add an interface to the tree.
         ///
         /// @returns true if this is the first interface for that path.
-        bool addInterface(common::ClientInterfacePtr const &iface);
+        OSVR_CLIENT_EXPORT bool
+        addInterface(common::ClientInterfacePtr const &iface);
 
         /// @brief Remove an interface from the tree.
         ///
         /// @returns true if that path no longer has any interfaces.
-        bool removeInterface(common::ClientInterfacePtr const &iface);
+        OSVR_CLIENT_EXPORT bool
+        removeInterface(common::ClientInterfacePtr const &iface);
 
         /// @brief Returns a reference to the list of interfaces registered for
         /// a given path.
-        common::InterfaceList &getInterfacesForPath(std::string const &path);
+        OSVR_CLIENT_EXPORT common::InterfaceList &
+        getInterfacesForPath(std::string const &path);
 
         /// @brief Returns the handler for a given path.
-        RemoteHandlerPtr getHandlerForPath(std::string const &path);
+        OSVR_CLIENT_EXPORT RemoteHandlerPtr
+        getHandlerForPath(std::string const &path);
 
         /// @brief Clears and returns the handler for a given path.
-        RemoteHandlerPtr eraseHandlerForPath(std::string const &path);
+        OSVR_CLIENT_EXPORT RemoteHandlerPtr
+        eraseHandlerForPath(std::string const &path);
 
         /// @brief Sets the handler for a given path, returning the old handler
         /// if any.
-        RemoteHandlerPtr replaceHandlerForPath(std::string const &path,
-                                               RemoteHandlerPtr const &handler);
+        OSVR_CLIENT_EXPORT RemoteHandlerPtr replaceHandlerForPath(
+            std::string const &path, RemoteHandlerPtr const &handler);
 
         /// @brief Call the update method on all handlers.
-        void updateHandlers();
+        OSVR_CLIENT_EXPORT void updateHandlers();
 
         /// @brief Removes all handlers
-        void clearHandlers();
+        OSVR_CLIENT_EXPORT void clearHandlers();
 
       private:
         /// @brief Returns a reference to a node for a given path.

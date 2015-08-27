@@ -14,7 +14,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// 	http://www.apache.org/licenses/LICENSE-2.0
+//        http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_PureClientContext_h_GUID_0A40DCCB_0451_4DB0_855B_7ECE66C52D07
-#define INCLUDED_PureClientContext_h_GUID_0A40DCCB_0451_4DB0_855B_7ECE66C52D07
+#ifndef INCLUDED_JointClientContext_h_GUID_A27BCE12_7FFD_4FA8_C320_5D61AE94BC50
+#define INCLUDED_JointClientContext_h_GUID_A27BCE12_7FFD_4FA8_C320_5D61AE94BC50
 
 // Internal Includes
 #include <osvr/Common/ClientContext.h>
@@ -33,9 +33,10 @@
 #include <osvr/Common/NetworkingSupport.h>
 #include <osvr/Util/TimeValue_fwd.h>
 #include <osvr/Util/DefaultBool.h>
-#include "VRPNConnectionCollection.h"
+#include "../Client/VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
-#include "RemoteHandlerFactory.h"
+#include "../Client/RemoteHandlerFactory.h"
+#include <osvr/Server/ServerPtr.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -47,13 +48,16 @@
 namespace osvr {
 namespace client {
 
-    class PureClientContext : public ::OSVR_ClientContextObject {
+    class JointClientContext : public ::OSVR_ClientContextObject {
       public:
-        PureClientContext(const char appId[], common::ClientContextDeleter del)
-            : PureClientContext(appId, "localhost", del) {}
-        PureClientContext(const char appId[], const char host[],
-                          common::ClientContextDeleter del);
-        virtual ~PureClientContext();
+        JointClientContext(const char appId[],
+                           common::ClientContextDeleter del);
+        virtual ~JointClientContext();
+
+        server::Server &getServer() {
+            auto pin = m_server;
+            return *pin;
+        }
 
       private:
         virtual void m_update();
@@ -98,6 +102,8 @@ namespace client {
         /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;
 
+        server::ServerPtr m_server;
+
         /// @brief The "OSVR" system device for control messages
         common::BaseDevicePtr m_systemDevice;
 
@@ -117,16 +123,7 @@ namespace client {
 
         /// @brief Factory for producing remote handlers.
         RemoteHandlerFactory m_factory;
-
-        /// @brief RAII holder for networking start/stop
-        common::NetworkingSupport m_network;
-
-        /// @brief Have we gotten a connection to the main server?
-        util::DefaultBool<false> m_gotConnection;
-
-        /// @brief Have we gotten a path tree?
-        util::DefaultBool<false> m_gotTree;
     };
 } // namespace client
 } // namespace osvr
-#endif // INCLUDED_PureClientContext_h_GUID_0A40DCCB_0451_4DB0_855B_7ECE66C52D07
+#endif // INCLUDED_JointClientContext_h_GUID_A27BCE12_7FFD_4FA8_C320_5D61AE94BC50

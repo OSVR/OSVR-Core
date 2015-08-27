@@ -124,11 +124,17 @@ namespace server {
                                std::string const &driver,
                                std::string const &params);
 
-        /// @brief The method called from the server thread repeatedly.
-        /// @returns true if the loop should continue running
-        bool loop();
+        /// @brief The method to just do the update stuff, not in a thread.
+        void update();
 
       private:
+        /// @brief The method called from the server thread repeatedly.
+        /// @returns true if the loop should continue running
+        bool m_loop();
+
+        /// @brief The actual guts of the update
+        void m_update();
+
         /// @brief Internal function to call a callable if the thread isn't
         /// running, or to queue up the callable if it is running.
         template <typename Callable> void m_callControlled(Callable f);
@@ -147,8 +153,8 @@ namespace server {
         void m_sendTree();
 
         /// @brief handles updated route message from client
-        static int VRPN_CALLBACK
-        m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p);
+        static int VRPN_CALLBACK m_handleUpdatedRoute(void *userdata,
+                                                      vrpn_HANDLERPARAM p);
 
         /// @brief adds a route - assumes that you've handled ensuring this is
         /// the main server thread.
@@ -203,9 +209,11 @@ namespace server {
         boost::thread m_thread;
         ::util::RunLoopManagerBoost m_run;
         bool m_running;
+        bool m_everStarted = false;
         /// @}
 
-        /// @brief Number of microseconds to sleep after each loop iteration.
+        /// @brief Number of microseconds to sleep after each loop
+        /// iteration.
         int m_sleepTime;
     };
 

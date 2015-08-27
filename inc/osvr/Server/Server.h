@@ -96,6 +96,10 @@ namespace server {
         OSVR_SERVER_EXPORT static ServerPtr
         create(connection::ConnectionPtr const &conn);
 
+        /// @brief If you aren't using a separate thread for the server, this
+        /// method will run a single update of the server.
+        OSVR_SERVER_EXPORT void update();
+
         /// @brief Launch a thread running the server.
         ///
         /// @throws std::logic_error if called after the server has stopped.

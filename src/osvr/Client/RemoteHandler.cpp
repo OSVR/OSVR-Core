@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "RemoteHandler.h"
+#include <osvr/Client/RemoteHandler.h>
 
 // Library/third-party includes
 // - none

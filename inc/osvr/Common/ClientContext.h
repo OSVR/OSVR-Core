@@ -95,9 +95,13 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @returns true if the object was found and released.
     OSVR_COMMON_EXPORT bool releaseObject(void *obj);
 
+    /// @brief Returns the specialized deleter for this object.
+    OSVR_COMMON_EXPORT osvr::common::ClientContextDeleter getDeleter() const;
   protected:
     /// @brief Constructor for derived class use only.
-    OSVR_COMMON_EXPORT OSVR_ClientContextObject(const char appId[]);
+    OSVR_COMMON_EXPORT
+    OSVR_ClientContextObject(const char appId[],
+                             osvr::common::ClientContextDeleter del);
 
   private:
     virtual void m_update() = 0;
@@ -119,6 +123,32 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     InterfaceList m_interfaces;
 
     osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
+    osvr::common::ClientContextDeleter m_deleter;
 };
+
+namespace osvr {
+namespace common {
+    /// @brief Use the stored deleter to appropriately delete the client
+    /// context.
+    OSVR_COMMON_EXPORT void deleteContext(ClientContext *ctx);
+    namespace detail {
+        namespace {
+            template <typename T>
+            inline void context_deleter(ClientContext *obj) {
+                T *o = static_cast<T *>(obj);
+                delete o;
+            }
+        } // namespace
+    } // namespace detail
+
+    /// @brief Create a subclass object of ClientContext, setting the deleter
+    /// appropriately by passing it as the last parameter. Compare to
+    /// std::make_shared.
+    template <typename T, typename... Args>
+    inline T *makeContext(Args... args) {
+        return new T(std::forward<Args>(args)..., &detail::context_deleter<T>);
+    }
+} // namespace common
+} // namespace osvr
 
 #endif // INCLUDED_ContextImpl_h_GUID_9000C62E_3693_4888_83A2_0D26F4591B6A

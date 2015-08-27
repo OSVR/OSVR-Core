@@ -44,7 +44,7 @@ namespace connection {
     } // namespace messageid
     class VrpnBasedConnection : public Connection {
       public:
-        enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
+        enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED, VRPN_LOOPBACK };
 
         /// @brief Constructor for the VRPN connection.
         VrpnBasedConnection(ConnectionType type);
@@ -74,8 +74,8 @@ namespace connection {
         virtual void m_registerConnectionHandler(std::function<void()> handler);
         virtual void m_process();
 
-        static int VRPN_CALLBACK
-        m_connectionHandler(void *userdata, vrpn_HANDLERPARAM);
+        static int VRPN_CALLBACK m_connectionHandler(void *userdata,
+                                                     vrpn_HANDLERPARAM);
 
         vrpn_ConnectionPtr m_vrpnConnection;
         std::vector<std::function<void()> > m_connectionHandlers;
