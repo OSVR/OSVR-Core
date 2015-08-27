@@ -26,7 +26,7 @@
 #include "VideoBasedTracker.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/core/version.hpp>
 
 // Standard includes
 // - none
@@ -101,10 +101,17 @@ namespace vbtracker {
         params.filterByConvexity = false;   // Test for convexity?
         params.filterByCircularity = false; // Test for circularity?
         params.minDistBetweenBlobs = 3;
-        cv::SimpleBlobDetector detector(params);
+#if CV_MAJOR_VERSION == 2
+        cv::Ptr<cv::SimpleBlobDetector> detector =
+            new cv::SimpleBlobDetector(params);
+#elif CV_MAJOR_VERSION == 3
+        auto detector = cv::SimpleBlobDetector::create(params);
+#else
+#error "Unrecognized OpenCV version!"
+#endif
         /// @todo this variable is a candidate for hoisting to member
         std::vector<cv::KeyPoint> foundKeyPoints;
-        detector.detect(m_imageGray, foundKeyPoints);
+        detector->detect(m_imageGray, foundKeyPoints);
 
         // TODO: Consider computing the center of mass of a dilated bounding
         // rectangle around each keypoint to produce a more precise subpixel
