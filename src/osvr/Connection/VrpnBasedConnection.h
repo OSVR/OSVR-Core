@@ -74,8 +74,8 @@ namespace connection {
         virtual void m_registerConnectionHandler(std::function<void()> handler);
         virtual void m_process();
 
-        static int VRPN_CALLBACK
-        m_connectionHandler(void *userdata, vrpn_HANDLERPARAM);
+        static int VRPN_CALLBACK m_connectionHandler(void *userdata,
+                                                     vrpn_HANDLERPARAM);
 
         vrpn_ConnectionPtr m_vrpnConnection;
         std::vector<std::function<void()> > m_connectionHandlers;

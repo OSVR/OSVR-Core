@@ -153,8 +153,8 @@ namespace server {
         void m_sendTree();
 
         /// @brief handles updated route message from client
-        static int VRPN_CALLBACK
-        m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p);
+        static int VRPN_CALLBACK m_handleUpdatedRoute(void *userdata,
+                                                      vrpn_HANDLERPARAM p);
 
         /// @brief adds a route - assumes that you've handled ensuring this is
         /// the main server thread.
@@ -212,7 +212,8 @@ namespace server {
         bool m_everStarted = false;
         /// @}
 
-        /// @brief Number of microseconds to sleep after each loop iteration.
+        /// @brief Number of microseconds to sleep after each loop
+        /// iteration.
         int m_sleepTime;
     };
 
