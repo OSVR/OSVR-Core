@@ -52,6 +52,10 @@ namespace connection {
             m_initConnection();
             break;
         }
+        case VRPN_LOOPBACK: {
+            m_initConnection("loopback:");
+            break;
+        }
         }
     }
 

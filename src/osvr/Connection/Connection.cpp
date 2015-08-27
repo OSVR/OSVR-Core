@@ -54,6 +54,12 @@ namespace connection {
         ConnectionPtr conn(make_shared<VrpnBasedConnection>(iface, port));
         return conn;
     }
+    std::tuple<void *, ConnectionPtr> Connection::createLoopbackConnection() {
+        auto conn = make_shared<VrpnBasedConnection>(
+            VrpnBasedConnection::VRPN_LOOPBACK);
+        return std::make_tuple(conn->getUnderlyingObject(),
+                               ConnectionPtr{conn});
+    }
 
     ConnectionPtr
     Connection::retrieveConnection(const pluginhost::RegistrationContext &ctx) {

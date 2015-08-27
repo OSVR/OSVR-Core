@@ -44,7 +44,7 @@ namespace connection {
     } // namespace messageid
     class VrpnBasedConnection : public Connection {
       public:
-        enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED };
+        enum ConnectionType { VRPN_LOCAL_ONLY, VRPN_SHARED, VRPN_LOOPBACK };
 
         /// @brief Constructor for the VRPN connection.
         VrpnBasedConnection(ConnectionType type);

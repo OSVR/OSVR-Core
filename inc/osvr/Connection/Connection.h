@@ -43,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <tuple>
 
 namespace osvr {
 /// @brief Messaging transport and device communication functionality
@@ -68,6 +69,9 @@ namespace connection {
         OSVR_CONNECTION_EXPORT static ConnectionPtr
         createSharedConnection(boost::optional<std::string const &> iface,
                                boost::optional<int> port);
+
+        OSVR_CONNECTION_EXPORT static std::tuple<void *, ConnectionPtr>
+        createLoopbackConnection();
         /// @}
 
         /// @name Context Storage

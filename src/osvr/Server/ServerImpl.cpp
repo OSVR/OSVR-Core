@@ -112,6 +112,7 @@ namespace server {
                                    "connection destroyed (probably attempting "
                                    "to restart a stopped server)");
         }
+        m_everStarted = true;
         m_running = true;
 
         // Use a lambda to run the loop.
@@ -119,7 +120,7 @@ namespace server {
             bool keepRunning = true;
             ::util::LoopGuard guard(m_run);
             do {
-                keepRunning = this->loop();
+                keepRunning = this->m_loop();
             } while (keepRunning);
             m_orderedDestruction();
             m_running = false;
@@ -136,9 +137,13 @@ namespace server {
 
     void ServerImpl::stop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
-        m_run.signalAndWaitForShutdown();
-        m_thread.join();
-        m_thread = boost::thread();
+        if (m_everStarted) {
+            m_run.signalAndWaitForShutdown();
+            m_thread.join();
+            m_thread = boost::thread();
+        } else {
+            m_orderedDestruction();
+        }
     }
 
     void ServerImpl::signalStop() {
@@ -172,23 +177,35 @@ namespace server {
         }
     }
 
-    bool ServerImpl::loop() {
+    void ServerImpl::update() {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (m_everStarted) {
+            throw std::logic_error("Can't call update() if you've ever started "
+                                   "the server in its own thread!");
+        }
+        m_update();
+    }
+    void ServerImpl::m_update() {
+        osvr::common::tracing::ServerUpdate trace;
+        m_conn->process();
+        if (m_treeDirty) {
+            OSVR_DEV_VERBOSE("Path tree updated");
+            m_sendTree();
+            m_treeDirty.reset();
+        }
+        m_systemDevice->update();
+        for (auto &f : m_mainloopMethods) {
+            f();
+        }
+    }
+
+    bool ServerImpl::m_loop() {
         bool shouldContinue;
         {
             /// @todo More elegant way of running queued things than grabbing a
             /// mutex each time through?
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
-            osvr::common::tracing::ServerUpdate trace;
-            m_conn->process();
-            if (m_treeDirty) {
-                OSVR_DEV_VERBOSE("Path tree updated");
-                m_sendTree();
-                m_treeDirty.reset();
-            }
-            m_systemDevice->update();
-            for (auto &f : m_mainloopMethods) {
-                f();
-            }
+            m_update();
             shouldContinue = m_run.shouldContinue();
         }
 
