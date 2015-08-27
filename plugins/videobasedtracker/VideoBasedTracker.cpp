@@ -156,7 +156,7 @@ namespace vbtracker {
                     // matches.
                     led->addMeasurement(nearest->pt, nearest->size);
                     keyPoints.erase(nearest);
-                    led++;
+                    ++led;
                 }
             }
             // If we have any blobs that have not been associated with an
