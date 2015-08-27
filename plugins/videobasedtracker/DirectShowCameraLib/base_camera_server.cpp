@@ -1,12 +1,12 @@
 /** @file
-@brief Implementation
+    @brief Implementation
 
-@date 2015
+    @date 2015
 
-@author
-Russ Taylor working through ReliaSolve for Sensics.
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Russ Taylor working through ReliaSolve for Sensics.
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2015 Sensics, Inc.
@@ -32,4 +32,3 @@ Sensics, Inc.
 // Standard includes
 #include <math.h>
 #include <stdio.h>
-
