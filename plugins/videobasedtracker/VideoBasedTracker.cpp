@@ -200,11 +200,10 @@ namespace vbtracker {
                                   cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
                 // Label the keypoints with their IDs.
-                for (led = m_led_groups[sensor].begin();
-                    led != m_led_groups[sensor].end(); led++) {
+                for (auto &led : m_led_groups[sensor]) {
                     // Print 1-based LED ID for actual LEDs
-                    auto label = std::to_string(led->getOneBasedID());
-                    cv::Point where = led->getLocation();
+                    auto label = std::to_string(led.getOneBasedID());
+                    cv::Point where = led.getLocation();
                     where.x += 1;
                     where.y += 1;
                     cv::putText(m_imageWithBlobs, label, where,
