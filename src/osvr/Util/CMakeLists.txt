@@ -87,6 +87,7 @@ set(API
     "${HEADER_LOCATION}/TreeTraversalVisitor.h"
     "${HEADER_LOCATION}/TypePack.h"
     "${HEADER_LOCATION}/UniquePtr.h"
+    "${HEADER_LOCATION}/UniqueContainer.h"
     "${HEADER_LOCATION}/Util.h"
     "${HEADER_LOCATION}/ValueOrRange.h"
     "${HEADER_LOCATION}/Vec2C.h"
