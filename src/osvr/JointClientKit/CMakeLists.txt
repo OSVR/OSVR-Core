@@ -4,6 +4,8 @@ set(API
     "${HEADER_LOCATION}/JointClientKitC.h")
 
 set(SOURCE
+    JointClientContext.cpp
+    JointClientContext.h
     JointClientKitC.cpp)
 
 osvr_add_library()
@@ -28,6 +30,9 @@ target_link_libraries(${LIBNAME_FULL}
     osvrClient
     osvrUtilCpp
     osvrCommon
+    osvrServer
+    jsoncpp_lib
+    vendored-vrpn
     eigen-headers)
 
 ###

@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include <osvr/JointClientKit/JointClientKitC.h>
+#include "JointClientContext.h"
 
 // Library/third-party includes
 // - none
@@ -31,4 +32,10 @@
 // Standard includes
 // - none
 
+OSVR_ClientContext osvrJointClientInit(const char applicationIdentifier[],
+                                       OSVR_JointClientOpts opts) {
 
+    auto ctx = osvr::common::makeContext<osvr::client::JointClientContext>(
+        applicationIdentifier);
+    return ctx;
+}

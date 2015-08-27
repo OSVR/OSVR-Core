@@ -64,6 +64,7 @@ OSVR_EXTERN_C_BEGIN
 */
 typedef struct OSVR_JointClientContextOptsObject *OSVR_JointClientOpts;
 
+#if 0
 /** @brief Creates an OSVR_JointClientOpts that specifies the full path to a
     JSON config file (as would be passed to the osvr_server app) to load on
     context init.
@@ -74,6 +75,7 @@ typedef struct OSVR_JointClientContextOptsObject *OSVR_JointClientOpts;
 */
 OSVR_JOINTCLIENTKIT_EXPORT OSVR_JointClientOpts
 osvrJointClientUseJsonConfig(const char *configFilename);
+#endif
 
 /** @brief Initialize the library, starting up a "joint" context that also
     contains a server.

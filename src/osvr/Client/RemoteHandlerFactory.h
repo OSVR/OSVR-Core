@@ -26,6 +26,7 @@
 #define INCLUDED_RemoteHandlerFactory_h_GUID_3B3394C0_DADA_4BAA_3EDD_6CDA96760D91
 
 // Internal Includes
+#include <osvr/Client/Export.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Common/PathNode_fwd.h>
 #include <osvr/Common/OriginalSource.h>
@@ -80,8 +81,9 @@ namespace client {
 
     /// @brief Populates a RemoteHandlerFactory with each of the specific
     /// factories included with OSVR.
-    void populateRemoteHandlerFactory(RemoteHandlerFactory &factory,
-                                      VRPNConnectionCollection const &conns);
+    OSVR_CLIENT_EXPORT void
+    populateRemoteHandlerFactory(RemoteHandlerFactory &factory,
+                                 VRPNConnectionCollection const &conns);
 
 } // namespace client
 } // namespace osvr
