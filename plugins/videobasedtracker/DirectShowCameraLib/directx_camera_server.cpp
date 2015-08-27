@@ -33,9 +33,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <cmath>
 
 //#define HACK_TO_REOPEN
 //#define	DEBUG
+
+/// @brief Computes bytes required for an UNCOMPRESSED RGB DIB
+inline DWORD dibsize(BITMAPINFOHEADER const &bi) {
+    // cf:
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd318229(v=vs.85).aspx
+    auto stride = ((((bi.biWidth * bi.biBitCount) + 31) & ~31) >> 3);
+    return stride * std::abs(bi.biHeight);
+}
 
 // This class is used to handle callbacks from the SampleGrabber filter.  It
 // grabs each sample and holds onto it until the camera server that is
@@ -472,7 +481,7 @@ bool directx_camera_server::open_and_find_parameters(const int which,
         pVideoHeader->bmiHeader.biHeight = height;
         pVideoHeader->bmiHeader.biPlanes = 1;
         pVideoHeader->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        pVideoHeader->bmiHeader.biSizeImage = DIBSIZE(pVideoHeader->bmiHeader);
+        pVideoHeader->bmiHeader.biSizeImage = dibsize(pVideoHeader->bmiHeader);
 
         // Set the format type and size.
         mt.formattype = FORMAT_VideoInfo;
@@ -480,7 +489,7 @@ bool directx_camera_server::open_and_find_parameters(const int which,
 
         // Set the sample size.
         mt.bFixedSizeSamples = TRUE;
-        mt.lSampleSize = DIBSIZE(pVideoHeader->bmiHeader);
+        mt.lSampleSize = dibsize(pVideoHeader->bmiHeader);
 
         // Make the call to actually set the video type to what we want.
         if (_pStreamConfig->SetFormat(&mt) != S_OK) {
