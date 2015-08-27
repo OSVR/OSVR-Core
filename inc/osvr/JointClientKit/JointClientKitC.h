@@ -60,22 +60,30 @@ OSVR_EXTERN_C_BEGIN
 */
 
 /** @brief Opaque typedef for options used when starting up a joint client
-    context.
+    context. Serves as a queue for configuration operations to perform on the
+   server.
 */
 typedef struct OSVR_JointClientContextOptsObject *OSVR_JointClientOpts;
 
-#if 0
-/** @brief Creates an OSVR_JointClientOpts that specifies the full path to a
-    JSON config file (as would be passed to the osvr_server app) to load on
-    context init.
+/** @brief Creates an empty OSVR_JointClientOpts.
 
-    @param configFilename (Preferably full) path to a JSON config file.
+    The only way to deallocate this object is to pass it to
+    osvrJointClientInit().
 
     @returns the options object - if NULL, an error occurred.
 */
-OSVR_JOINTCLIENTKIT_EXPORT OSVR_JointClientOpts
-osvrJointClientUseJsonConfig(const char *configFilename);
-#endif
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_JointClientOpts osvrJointClientCreateOptions();
+
+/** @brief Queues up the autoloading of plugins. May only be called once per
+    options object.
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode
+osvrJointClientOptionsAutoloadPlugins(OSVR_JointClientOpts opts);
+
+/** @brief Queues up a trigger for hardware detection.
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode
+osvrJointClientOptionsTriggerHardwareDetect(OSVR_JointClientOpts opts);
 
 /** @brief Initialize the library, starting up a "joint" context that also
     contains a server.
@@ -83,7 +91,8 @@ osvrJointClientUseJsonConfig(const char *configFilename);
     @param applicationIdentifier A null terminated string identifying your
     application. Reverse DNS format strongly suggested.
     @param opts The configuration options object for starting the joint server
-    operations.
+    operations. Pass NULL/nullptr for default operation: loading of all
+   autoload-enabled plugins, and a hardware detection.
 
     @returns Client context - will be needed for subsequent calls
 */

@@ -69,8 +69,6 @@ namespace client {
 
         /// Get the OSVR connection out and use it to make a server.
         m_server = server::Server::create(std::get<1>(conn));
-        m_server->loadAutoPlugins();
-        m_server->triggerHardwareDetect();
 
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + m_host;
@@ -83,17 +81,6 @@ namespace client {
             DedupJsonFunction;
         m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
             [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
-#if 0
-        typedef std::chrono::system_clock clock;
-        auto begin = clock::now();
-
-        // Spin the update to get a connection
-        auto connEnd = begin + STARTUP_CONNECT_TIMEOUT;
-        while (clock::now() < connEnd && !m_mainConn->doingOkay()) {
-            m_update();
-            std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
-        }
-#endif
     }
 
     JointClientContext::~JointClientContext() {}

@@ -54,6 +54,11 @@ namespace client {
                            common::ClientContextDeleter del);
         virtual ~JointClientContext();
 
+        server::Server &getServer() {
+            auto pin = m_server;
+            return *pin;
+        }
+
       private:
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
