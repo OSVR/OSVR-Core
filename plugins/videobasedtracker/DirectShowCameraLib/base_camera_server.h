@@ -264,10 +264,13 @@ class base_camera_server : public image_wrapper {
     }
 
   protected:
-    bool _status;                        //< True is working, false is not
-    unsigned _num_rows, _num_columns;    //< Size of the memory buffer
-    unsigned _minX, _minY, _maxX, _maxY; //< Region of the image in memory
-    unsigned _binning; //< How many camera pixels compressed into image pixel
+    bool _status;                     //< True is working, false is not
+    unsigned _num_rows, _num_columns; //< Size of the memory buffer
+    unsigned _minX = 0;
+    unsigned _minY = 0;
+    unsigned _maxX = 0;
+    unsigned _maxY = 0; //< Region of the image in memory
+    unsigned _binning;  //< How many camera pixels compressed into image pixel
 
     virtual bool open_and_find_parameters(void) { return false; };
     base_camera_server(unsigned binning = 1) {

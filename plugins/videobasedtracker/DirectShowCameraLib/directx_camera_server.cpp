@@ -38,6 +38,16 @@
 //#define HACK_TO_REOPEN
 //#define	DEBUG
 
+/// @brief Checks something to see if it's false-ish, printing a message and
+/// throwing an exception if it is.
+template <typename T>
+inline void checkForConstructionError(T const &ptr, const char objName[]) {
+    if (!ptr) {
+        fprintf(stderr, "directx_camera_server: Can't create %s\n", objName);
+        throw ConstructionError(objName);
+    }
+}
+
 /// @brief Computes bytes required for an UNCOMPRESSED RGB DIB
 inline DWORD dibsize(BITMAPINFOHEADER const &bi) {
     // cf:
@@ -45,6 +55,15 @@ inline DWORD dibsize(BITMAPINFOHEADER const &bi) {
     auto stride = ((((bi.biWidth * bi.biBitCount) + 31) & ~31) >> 3);
     return stride * std::abs(bi.biHeight);
 }
+
+ComInit::ComInit() {
+    auto hr = CoInitialize(nullptr);
+    if (FAILED(hr)) {
+        throw std::runtime_error("Could not initialize COM!");
+    }
+}
+
+ComInit::~ComInit() { CoUninitialize(); }
 
 // This class is used to handle callbacks from the SampleGrabber filter.  It
 // grabs each sample and holds onto it until the camera server that is
@@ -106,40 +125,25 @@ class directx_samplegrabber_callback : public ISampleGrabberCB {
 //-----------------------------------------------------------------------
 // Helper functions for editing the filter graph:
 
-static HRESULT GetPin(IBaseFilter *pFilter, PIN_DIRECTION PinDir,
-                      IPin **ppPin) {
-    IEnumPins *pEnum;
-    IPin *pPin;
-    pFilter->EnumPins(&pEnum);
-    while (pEnum->Next(1, &pPin, 0) == S_OK) {
+static WinPtr<IPin> GetPin(IBaseFilter &pFilter, PIN_DIRECTION const PinDir) {
+    auto pEnum = WinPtr<IEnumPins>{};
+    auto pPin = WinPtr<IPin>{};
+    pFilter.EnumPins(AttachPtr(pEnum));
+    while (pEnum->Next(1, AttachPtr(pPin), nullptr) == S_OK) {
         PIN_DIRECTION PinDirThis;
         pPin->QueryDirection(&PinDirThis);
         if (PinDir == PinDirThis) {
-            pEnum->Release();
-            *ppPin = pPin;
-            return S_OK;
+            return pPin;
         }
-        pPin->Release();
     }
-    pEnum->Release();
-    return E_FAIL;
+    return WinPtr<IPin>{};
 }
 
-static HRESULT ConnectTwoFilters(IGraphBuilder *pGraph, IBaseFilter *pFirst,
-                                 IBaseFilter *pSecond) {
-    IPin *pOut = NULL, *pIn = NULL;
-    HRESULT hr = GetPin(pFirst, PINDIR_OUTPUT, &pOut);
-    if (FAILED(hr))
-        return hr;
-    hr = GetPin(pSecond, PINDIR_INPUT, &pIn);
-    if (FAILED(hr)) {
-        pOut->Release();
-        return E_FAIL;
-    }
-    hr = pGraph->Connect(pOut, pIn);
-    pIn->Release();
-    pOut->Release();
-    return hr;
+static HRESULT ConnectTwoFilters(IGraphBuilder &pGraph, IBaseFilter &pFirst,
+                                 IBaseFilter &pSecond) {
+    auto pOut = GetPin(pFirst, PINDIR_OUTPUT);
+    auto pIn = GetPin(pSecond, PINDIR_INPUT);
+    return pGraph.Connect(pOut.get(), pIn.get());
 }
 
 //-----------------------------------------------------------------------
@@ -268,12 +272,12 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     static int frame_count = 0;
 
     if (first_time) {
-      gettimeofday(&last_print_time, NULL);
+      gettimeofday(&last_print_time, nullptr);
       first_time = false;
     } else {
       static	unsigned  last_r = 10000;
       frame_count++;
-      gettimeofday(&now, NULL);
+      gettimeofday(&now, nullptr);
       double timesecs = 0.001 * vrpn_TimevalMsecs(vrpn_TimevalDiff(now, last_print_time));
       if (timesecs >= 5) {
 	double frames_per_sec = frame_count / timesecs;
@@ -296,7 +300,6 @@ bool directx_camera_server::open_and_find_parameters(const int which,
                                                      unsigned width,
                                                      unsigned height) {
     HRESULT hr;
-
 //-------------------------------------------------------------------
 // Create COM and DirectX objects needed to access a video stream.
 
@@ -306,42 +309,35 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoInitialize\n");
 #endif
-    CoInitialize(NULL);
 
+    _com = ComInit::init();
 // Create the filter graph manager
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoCreateInstance FilterGraph\n");
 #endif
-    CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
-                     IID_IGraphBuilder, (void **)&_pGraph);
-    if (_pGraph == NULL) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't create graph manager\n");
-        return false;
-    }
-    _pGraph->QueryInterface(IID_IMediaControl, (void **)&_pMediaControl);
-    _pGraph->QueryInterface(IID_IMediaEvent, (void **)&_pEvent);
+    CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER,
+                     IID_IGraphBuilder, AttachPtr(_pGraph));
+    checkForConstructionError(_pGraph, "graph manager");
+
+    _pGraph->QueryInterface(IID_IMediaControl, AttachPtr(_pMediaControl));
+    _pGraph->QueryInterface(IID_IMediaEvent, AttachPtr(_pEvent));
 
 // Create the Capture Graph Builder.
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoCreateInstance CaptureGraphBuilder2\n");
 #endif
-    CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC,
-                     IID_ICaptureGraphBuilder2, (void **)&_pBuilder);
-    if (_pBuilder == NULL) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't create graph builder\n");
-        return false;
-    }
+    CoCreateInstance(CLSID_CaptureGraphBuilder2, nullptr, CLSCTX_INPROC,
+                     IID_ICaptureGraphBuilder2, AttachPtr(_pBuilder));
+    checkForConstructionError(_pBuilder, "graph builder");
 
 // Associate the graph with the builder.
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "SetFilterGraph\n");
 #endif
-    _pBuilder->SetFiltergraph(_pGraph);
+    _pBuilder->SetFiltergraph(_pGraph.get());
 
 //-------------------------------------------------------------------
 // Go find a video device to use: in this case, we are using the first
@@ -352,71 +348,51 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoCreateInstance SystemDeviceEnum\n");
 #endif
-    ICreateDevEnum *pDevEnum = NULL;
-    CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC,
-                     IID_ICreateDevEnum, (void **)&pDevEnum);
-    if (pDevEnum == NULL) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't create device enumerator\n");
-        return false;
-    }
+    auto pDevEnum = WinPtr<ICreateDevEnum>{};
+    CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC,
+                     IID_ICreateDevEnum, AttachPtr(pDevEnum));
+    checkForConstructionError(pDevEnum, "device enumerator");
 
 // Create an enumerator for video capture devices.
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CreateClassEnumerator\n");
 #endif
-    IEnumMoniker *pClassEnum = NULL;
-    pDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &pClassEnum,
-                                    0);
-    if (pClassEnum == NULL) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't create video enumerator (no cameras?)\n");
-        pDevEnum->Release();
-        return false;
-    }
+    auto pClassEnum = WinPtr<IEnumMoniker>{};
+    pDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
+                                    AttachPtr(pClassEnum), 0);
+    checkForConstructionError(pClassEnum, "video enumerator (no cameras?)");
 
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before Loop "
            "over enumerators\n");
 #endif
     ULONG cFetched;
-    IMoniker *pMoniker = NULL;
-    IBaseFilter *pSrc = NULL;
+    auto pMoniker = WinPtr<IMoniker>{};
     // Skip (which - 1) cameras
-    int i;
-    for (i = 0; i < which - 1; i++) {
-        if (pClassEnum->Next(1, &pMoniker, &cFetched) != S_OK) {
+    for (int i = 0; i < which - 1; i++) {
+        if (pClassEnum->Next(1, AttachPtr(pMoniker), &cFetched) != S_OK) {
             fprintf(stderr, "directx_camera_server::open_and_find_parameters():"
                             " Can't open camera (not enough cameras)\n");
-            pMoniker->Release();
             return false;
         }
     }
+
+    auto pSrc = WinPtr<IBaseFilter>{};
     // Take the next camera and bind it
-    if (pClassEnum->Next(1, &pMoniker, &cFetched) == S_OK) {
+    if (pClassEnum->Next(1, AttachPtr(pMoniker), &cFetched) == S_OK) {
         // Bind the first moniker to a filter object.
-        pMoniker->BindToObject(0, 0, IID_IBaseFilter, (void **)&pSrc);
-        pMoniker->Release();
+        pMoniker->BindToObject(0, 0, IID_IBaseFilter, AttachPtr(pSrc));
     } else {
         fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
                         "Can't open camera (not enough cameras)\n");
-        pMoniker->Release();
         return false;
     }
-
-    pClassEnum->Release();
-    pDevEnum->Release();
 
     //-------------------------------------------------------------------
     // Construct the sample grabber callback handler that will be used
     // to receive image data from the sample grabber.
-    if ((_pCallback = new directx_samplegrabber_callback()) == NULL) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't create sample grabber callback handler (out of "
-                        "memory?)\n");
-        return false;
-    }
+    _pCallback.reset(new directx_samplegrabber_callback());
 
 //-------------------------------------------------------------------
 // Construct the sample grabber that will be used to snatch images from
@@ -427,29 +403,25 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoCreateInstance SampleGrabber\n");
 #endif
-    CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER,
-                     IID_IBaseFilter,
-                     reinterpret_cast<void **>(&_pSampleGrabberFilter));
-    if (_pSampleGrabberFilter == NULL) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't get SampleGrabber filter (not DirectX 8.1+?)\n");
-        return false;
-    }
+    CoCreateInstance(CLSID_SampleGrabber, nullptr, CLSCTX_INPROC_SERVER,
+                     IID_IBaseFilter, AttachPtr(_pSampleGrabberFilter));
+    checkForConstructionError(_pSampleGrabberFilter,
+                              "SampleGrabber filter (not DirectX 8.1+?)");
+
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "QueryInterface\n");
 #endif
-    _pSampleGrabberFilter->QueryInterface(
-        IID_ISampleGrabber, reinterpret_cast<void **>(&_pGrabber));
+    _pSampleGrabberFilter->QueryInterface(IID_ISampleGrabber,
+                                          AttachPtr(_pGrabber));
 
 // Set the media type to video
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "SetMediaType\n");
 #endif
-    AM_MEDIA_TYPE mt;
+    AM_MEDIA_TYPE mt = {0};
     // Ask for video media producers that produce 8-bit RGB
-    ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
     mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
     mt.subtype = MEDIASUBTYPE_RGB24; // Ask for 8 bit RGB
     _pGrabber->SetMediaType(&mt);
@@ -462,20 +434,17 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     // If the width and height are specified as 0, then they are not set
     // in the header, letting them use whatever is the default.
     if ((width != 0) && (height != 0)) {
-        _pBuilder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, pSrc,
-                                 IID_IAMStreamConfig, (void **)&_pStreamConfig);
-        if (_pStreamConfig == NULL) {
-            fprintf(stderr, "directx_camera_server::open_and_find_parameters():"
-                            " Can't get StreamConfig interface\n");
-            return false;
-        }
+        _pBuilder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video,
+                                 pSrc.get(), IID_IAMStreamConfig,
+                                 AttachPtr(_pStreamConfig));
+        checkForConstructionError(_pStreamConfig, "StreamConfig interface");
 
         ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
         mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
         mt.subtype = MEDIASUBTYPE_RGB24; // Ask for 8 bit RGB
-        mt.pbFormat = (BYTE *)CoTaskMemAlloc(sizeof(VIDEOINFOHEADER));
-        VIDEOINFOHEADER *pVideoHeader = (VIDEOINFOHEADER *)mt.pbFormat;
-        ZeroMemory(pVideoHeader, sizeof(VIDEOINFOHEADER));
+        VIDEOINFOHEADER vih = {0};
+        mt.pbFormat = reinterpret_cast<BYTE *>(&vih);
+        auto pVideoHeader = &vih;
         pVideoHeader->bmiHeader.biBitCount = 24;
         pVideoHeader->bmiHeader.biWidth = width;
         pVideoHeader->bmiHeader.biHeight = height;
@@ -500,48 +469,45 @@ bool directx_camera_server::open_and_find_parameters(const int which,
                     pVideoHeader->bmiHeader.biHeight);
             return false;
         }
-
-        // Clean up the pbFormat header memory we allocated above.
-        CoTaskMemFree(mt.pbFormat);
     }
 
 //-------------------------------------------------------------------
-// Create a NULL renderer that will be used to discard the video frames
+// Create a null renderer that will be used to discard the video frames
 // on the output pin of the sample grabber
 
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
-           "CoCreateInstance NullRenderer\n");
+           "CoCreateInstance nullptrRenderer\n");
 #endif
-    IBaseFilter *pNull = NULL;
-    CoCreateInstance(CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER,
-                     IID_IBaseFilter, reinterpret_cast<void **>(&pNull));
+    auto pNullRender = WinPtr<IBaseFilter>{};
+    CoCreateInstance(CLSID_NullRenderer, nullptr, CLSCTX_INPROC_SERVER,
+                     IID_IBaseFilter, AttachPtr(pNullRender));
 
     //-------------------------------------------------------------------
     // Build the filter graph.  First add the filters and then connect them.
 
     // pSrc is the capture filter for the video device we found above.
-    _pGraph->AddFilter(pSrc, L"Video Capture");
+    _pGraph->AddFilter(pSrc.get(), L"Video Capture");
 
     // Add the sample grabber filter
-    _pGraph->AddFilter(_pSampleGrabberFilter, L"SampleGrabber");
+    _pGraph->AddFilter(_pSampleGrabberFilter.get(), L"SampleGrabber");
 
     // Add the null renderer filter
-    _pGraph->AddFilter(pNull, L"NullRenderer");
+    _pGraph->AddFilter(pNullRender.get(), L"NullRenderer");
 
     // Connect the output of the video reader to the sample grabber input
-    ConnectTwoFilters(_pGraph, pSrc, _pSampleGrabberFilter);
+    ConnectTwoFilters(*_pGraph, *pSrc, *_pSampleGrabberFilter);
 
-    // Connect the output of the sample grabber to the NULL renderer input
-    ConnectTwoFilters(_pGraph, _pSampleGrabberFilter, pNull);
+    // Connect the output of the sample grabber to the null renderer input
+    ConnectTwoFilters(*_pGraph, *_pSampleGrabberFilter, *pNullRender);
 
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
-    IAMTVTuner *pTuner = NULL;
-    hr = _pBuilder->FindInterface(NULL, NULL, pSrc, IID_IAMTVTuner,
-                                  (void **)&pTuner);
-    if (pTuner != NULL) {
+    auto pTuner = WinPtr<IAMTVTuner>{};
+    hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(), IID_IAMTVTuner,
+                                  AttachPtr(pTuner));
+    if (pTuner) {
 #ifdef DEBUG
         printf("directx_camera_server::open_and_find_parameters(): Found a TV "
                "Tuner!\n");
@@ -561,17 +527,15 @@ bool directx_camera_server::open_and_find_parameters(const int which,
             fprintf(stderr, "directx_camera_server::open_and_find_parameters():"
                             " Can't set channel\n");
         }
-
-        pTuner->Release();
     }
 
     //-------------------------------------------------------------------
     // Find _num_rows and _num_columns in the video stream.
     _pGrabber->GetConnectedMediaType(&mt);
     VIDEOINFOHEADER *pVih;
-    if (mt.formattype == FORMAT_VideoInfo) {
+    if (mt.formattype == FORMAT_VideoInfo ||
+        mt.formattype == FORMAT_VideoInfo2) {
         pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
-    } else if (mt.formattype == FORMAT_VideoInfo2) {
         pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
     } else {
         fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
@@ -641,30 +605,20 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     _stride = (_num_columns * BytesPerPixel + 3) & ~3;
 
     // Set the callback, where '0' means 'use the SampleCB callback'
-    _pGrabber->SetCallback(_pCallback, 0);
+    _pGrabber->SetCallback(_pCallback.get(), 0);
 
-    //-------------------------------------------------------------------
-    // Release resources that won't be used later and return
-    pSrc->Release();
-    pNull->Release();
     return true;
 }
 
 /// Construct but do not open a camera
-directx_camera_server::directx_camera_server()
-    : _pGraph(NULL), _pBuilder(NULL), _pMediaControl(NULL), _pEvent(NULL),
-      _pSampleGrabberFilter(NULL), _pGrabber(NULL), _pStreamConfig(NULL),
-      _pCallback(NULL), _started_graph(false), _mode(0), _buffer(NULL) {
+directx_camera_server::directx_camera_server() {
     // No image in memory yet.
     _minX = _maxX = _minY = _maxY = 0;
 }
 
 /// Open nth available camera with specified resolution.
 directx_camera_server::directx_camera_server(int which, unsigned width,
-                                             unsigned height)
-    : _pGraph(NULL), _pBuilder(NULL), _pMediaControl(NULL), _pEvent(NULL),
-      _pSampleGrabberFilter(NULL), _pGrabber(NULL), _pStreamConfig(NULL),
-      _pCallback(NULL), _started_graph(false), _mode(0), _buffer(NULL) {
+                                             unsigned height) {
     //---------------------------------------------------------------------
     if (!open_and_find_parameters(which, width, height)) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
@@ -678,7 +632,7 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
     // image with no binning.
     _buflen =
         (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
-    if ((_buffer = new unsigned char[_buflen]) == NULL) {
+    if ((_buffer = new unsigned char[_buflen]) == nullptr) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): Out "
                         "of memory for buffer\n");
         _status = false;
@@ -697,33 +651,19 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
 //---------------------------------------------------------------------
 // Close the camera and the system.  Free up memory.
 
-void directx_camera_server::close_device(void) {
+void directx_camera_server::close_device() {
     // Clean up.
-    if (_pGrabber) {
-        _pGrabber->Release();
-    };
-    if (_pSampleGrabberFilter) {
-        _pSampleGrabberFilter->Release();
-    };
-    if (_pStreamConfig) {
-        _pStreamConfig->Release();
-    };
-    if (_pEvent) {
-        _pEvent->Release();
-    };
-    if (_pMediaControl) {
-        _pMediaControl->Release();
-    };
-    if (_pBuilder) {
-        _pBuilder->Release();
-    };
-    if (_pGraph) {
-        _pGraph->Release();
-    };
-    CoUninitialize();
+    _pGraph.reset();
+    _pMediaControl.reset();
+    _pEvent.reset();
+    _pBuilder.reset();
+    _pSampleGrabberFilter.reset();
+    _pGrabber.reset();
+    _pStreamConfig.reset();
+    _com.reset();
 }
 
-directx_camera_server::~directx_camera_server(void) {
+directx_camera_server::~directx_camera_server() {
     // Get the callback device to immediately return all samples
     // it has queued up, then shut down the filter graph.
     if (_pCallback) {
@@ -731,13 +671,13 @@ directx_camera_server::~directx_camera_server(void) {
     }
     close_device();
 
-    if (_buffer != NULL) {
+    if (_buffer != nullptr) {
         delete[] _buffer;
     }
 
     // Delete the callback object, so that it can clean up and
     // make sure all of its threads exit.
-    delete _pCallback;
+    _pCallback.reset();
 }
 
 bool directx_camera_server::read_image_to_memory(unsigned minX, unsigned maxX,
@@ -852,11 +792,11 @@ bool directx_camera_server::get_pixel_from_memory(unsigned X, unsigned Y,
 // This section implements the callback handler that gets frames from the
 // SampleGrabber filter.
 
-directx_samplegrabber_callback::directx_samplegrabber_callback(void)
-    : imageReady(false), imageDone(false), imageSample(NULL), _stayAlive(true) {
-}
+directx_samplegrabber_callback::directx_samplegrabber_callback()
+    : imageReady(false), imageDone(false), imageSample(nullptr),
+      _stayAlive(true) {}
 
-directx_samplegrabber_callback::~directx_samplegrabber_callback(void) {
+directx_samplegrabber_callback::~directx_samplegrabber_callback() {
     // Make sure the other thread knows that it is okay to return the
     // buffer and wait until it has had time to do so.
     _stayAlive = false;
@@ -865,7 +805,7 @@ directx_samplegrabber_callback::~directx_samplegrabber_callback(void) {
 
 HRESULT directx_samplegrabber_callback::QueryInterface(
     REFIID interfaceRequested, void **handleToInterfaceRequested) {
-    if (handleToInterfaceRequested == NULL) {
+    if (handleToInterfaceRequested == nullptr) {
         return E_POINTER;
     }
     if (interfaceRequested == IID_IUnknown) {

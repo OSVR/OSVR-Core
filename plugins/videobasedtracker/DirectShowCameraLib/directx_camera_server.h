@@ -31,10 +31,13 @@
 #include "base_camera_server.h"
 
 // Library/third-party includes
-// - none
+#include <boost/intrusive_ptr.hpp>
+#include <intrusive_ptr_COM.h>
 
 // Standard includes
 #include <windows.h>
+#include <stdexcept>
+#include <memory>
 
 // Horrible hack to get around missing file in Platform SDK
 #pragma include_alias("dxtrans.h", "qedit.h")
@@ -46,6 +49,30 @@
 // Include files for DirectShow video input
 #include <dshow.h>
 #include <qedit.h>
+
+/// @brief Template alias for our desired COM smart pointer.
+template <typename T> using WinPtr = boost::intrusive_ptr<T>;
+
+struct ConstructionError : std::runtime_error {
+    ConstructionError(const char objName[])
+        : std::runtime_error(
+              std::string("directx_camera_server: Can't create ") + objName) {}
+};
+
+class ComInit;
+using ComInstance = std::unique_ptr<ComInit>;
+/// @brief Simple RAII class for handling COM initialization.
+class ComInit {
+  public:
+    ComInit();
+    ~ComInit();
+    static ComInstance init() {
+        auto ret = ComInstance{new ComInit};
+        return ret;
+    }
+    ComInit(ComInit const &) = delete;
+    ComInit &operator=(ComInit const &) = delete;
+};
 
 // This code (and the code in the derived videofile server) is
 // based on information the book "Programming Microsoft DirectShow
@@ -104,27 +131,34 @@ class directx_camera_server : public base_camera_server {
     /// Construct but do not open camera (used by derived classes)
     directx_camera_server();
 
+    ComInstance _com;
+
     // Objects needed for DirectShow video input.
-    IGraphBuilder *_pGraph;           // Constructs a DirectShow filter graph
-    ICaptureGraphBuilder2 *_pBuilder; // Filter graph builder
-    IMediaControl
-        *_pMediaControl;  // Handles media streaming in the filter graph
-    IMediaEvent *_pEvent; // Handles filter graph events
-    IBaseFilter *_pSampleGrabberFilter; // Grabs samples from the media stream
-    ISampleGrabber *_pGrabber;       // Interface for the sample grabber filter
-    IAMStreamConfig *_pStreamConfig; // Interface to set the video dimensions
+    WinPtr<IGraphBuilder> _pGraph; // Constructs a DirectShow filter graph
+
+    WinPtr<IMediaControl>
+        _pMediaControl;          // Handles media streaming in the filter graph
+    WinPtr<IMediaEvent> _pEvent; // Handles filter graph events
+
+    WinPtr<ICaptureGraphBuilder2> _pBuilder; // Filter graph builder
+
+    WinPtr<IBaseFilter>
+        _pSampleGrabberFilter;        // Grabs samples from the media stream
+    WinPtr<ISampleGrabber> _pGrabber; // Interface for the sample grabber filter
+    WinPtr<IAMStreamConfig>
+        _pStreamConfig; // Interface to set the video dimensions
 
     // Memory pointers used to get non-virtual memory
-    unsigned char *_buffer; //< Buffer for what comes from camera,
-    size_t _buflen;         //< Length of that buffer
-    bool _started_graph;    //< Did we start the filter graph running?
-    unsigned _mode;         //< Mode 0 = running, Mode 1 = paused.
+    unsigned char *_buffer = nullptr; //< Buffer for what comes from camera,
+    size_t _buflen = 0;               //< Length of that buffer
+    bool _started_graph = false;      //< Did we start the filter graph running?
+    unsigned _mode = 0;               //< Mode 0 = running, Mode 1 = paused.
 
     long _stride; //< How many bytes to skip when going to next line (may be
-                  //negative for upside-down images)
+    // negative for upside-down images)
 
     // Pointer to the associated sample grabber callback object.
-    directx_samplegrabber_callback *_pCallback;
+    std::unique_ptr<directx_samplegrabber_callback> _pCallback;
 
     virtual bool open_and_find_parameters(const int which, unsigned width,
                                           unsigned height);
