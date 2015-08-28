@@ -53,6 +53,9 @@
 
 #include "qedit_wrapper.h"
 
+extern "C" const CLSID CLSID_SampleGrabber;
+extern "C" const CLSID CLSID_NullRenderer;
+
 /// @brief Template alias for our desired COM smart pointer.
 template <typename T> using WinPtr = boost::intrusive_ptr<T>;
 
