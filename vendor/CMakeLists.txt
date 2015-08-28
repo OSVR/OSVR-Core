@@ -54,6 +54,10 @@ add_library(util-runloopmanager INTERFACE)
 target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers")
 target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 
+# Interface target for intrusive_ptr support for COM
+add_library(com_smart_pointer INTERFACE)
+target_include_directories(com_smart_pointer INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/com_smart_pointer" ${Boost_INCLUDE_DIRS})
+
 # Interface target for Eigen
 # Actually a post-3.2.5 commit on the 3.2 branch: ec9c7b2e30a85212efd90937597e33515eff0c90
 add_library(eigen-headers INTERFACE)
