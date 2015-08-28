@@ -77,7 +77,7 @@ if(WIN32 AND BUILD_SERVER_PLUGINS)
         # can't find them
         set(BUILD_VIDEOTRACKER_PLUGIN ON)
     else()
-        message(STATUS "Skipping the video-based tracker plugin: Requires the 'Microsoft Windows SDK Update for Windows Vista' or older")
+        message(STATUS "Skipping the video-based tracker plugin: Requires the 'Microsoft Windows SDK Update for Windows Vista' or older <http://www.microsoft.com/en-us/download/details.aspx?id=23719>")
     endif()
 endif()
 ###

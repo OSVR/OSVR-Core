@@ -49,7 +49,12 @@ if(WIN32)
     # @toto This will be removed when OpenCV knows how to read from the
     # HDK camera.
     #
+    # qedit.h
     # MSVC: Needs Microsoft Windows SDK Update for Windows Vista and .NET Framework 3.0 or older
+    # See https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/2ab5c212-5824-419d-b5d9-7f5db82f57cd
+    # (though the DL link there is wrong)
+    # They also have a workaround header posted there, but sadly with no license/copyright info.
+    # (Hasn't stopped it from spreading into other projects online, though)
     ###
 
     find_package(DirectShow QUIET)
