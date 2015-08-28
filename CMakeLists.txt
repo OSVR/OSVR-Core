@@ -65,6 +65,21 @@ if(ANDROID)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
 endif()
 
+set(BUILD_VIDEOTRACKER_PLUGIN OFF)
+# TODO enable this on non-Windows once it's not tied to the DirectShow driver.
+if(WIN32 AND BUILD_SERVER_PLUGINS)
+    # TODO fix this package so it finds things on MSYS2/MinGW64
+    # - the lib is in /mingw64/lib
+    # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
+    find_package(DirectShow QUIET)
+    if(MINGW OR (DIRECTSHOW_QEDIT_INCLUDE_DIR AND DIRECTSHOW_STRMIIDS_LIBRARY))
+        # MinGW may include the header/lib in such a way that the find module
+        # can't find them
+        set(BUILD_VIDEOTRACKER_PLUGIN ON)
+    else()
+        message(STATUS "Skipping the video-based tracker plugin: Requires the 'Microsoft Windows SDK Update for Windows Vista' or older <http://www.microsoft.com/en-us/download/details.aspx?id=23719>")
+    endif()
+endif()
 ###
 # CMake Modules
 ###
@@ -105,6 +120,8 @@ use_folders()
 
 include(PlatformDefinitions)
 define_platform_macros(OSVR)
+
+include(osvrGtest)
 
 # Modules that get shipped with an installed SDK
 include(osvrAddPlugin)
@@ -171,6 +188,17 @@ if(BUILD_OPENCV_CAMERA_PLUGIN)
         set(OPENCV_CAMERA_EXTRA_LIBS opencv_videoio)
     endif()
     list(APPEND OPENCV_MODULES_USED ${OPENCV_CAMERA_EXTRA_LIBS})
+endif()
+
+if(BUILD_VIDEOTRACKER_PLUGIN)
+    set(VIDEOTRACKER_EXTRA_LIBS
+        opencv_imgproc
+        opencv_features2d
+        opencv_calib3d
+        opencv_highgui
+        opencv_imgproc
+        opencv_flann)
+    list(APPEND OPENCV_MODULES_USED ${VIDEOTRACKER_EXTRA_LIBS})
 endif()
 
 list(REMOVE_DUPLICATES OPENCV_MODULES_USED)

@@ -26,7 +26,8 @@
 #ifndef INCLUDED_intrusive_ptr_COM_h_GUID_BB97FC94_B320_4FB9_5379_940B0A631CA6
 #define INCLUDED_intrusive_ptr_COM_h_GUID_BB97FC94_B320_4FB9_5379_940B0A631CA6
 
-#ifndef COM_NO_WINDOWS_H
+// If we haven't yet included windows.h, don't make COM do it.
+#if !defined(COM_NO_WINDOWS_H) && !defined(_WINDOWS_)
 #define COM_NO_WINDOWS_H
 #endif
 #include <unknwn.h>

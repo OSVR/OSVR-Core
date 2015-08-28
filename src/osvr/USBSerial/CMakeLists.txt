@@ -24,7 +24,6 @@ set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
 
 target_include_directories(${LIBNAME_FULL}
     PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../vendor/com_smart_pointer"
     ${Boost_INCLUDE_DIRS})
 
 target_compile_options(${LIBNAME_FULL}
@@ -40,5 +39,6 @@ target_link_libraries(${LIBNAME_FULL}
 if(WIN32)
     target_link_libraries(${LIBNAME_FULL}
         PRIVATE
-        wbemuuid)
+        wbemuuid
+        com_smart_pointer)
 endif()

@@ -42,7 +42,7 @@ target_link_libraries(vendored-hidapi INTERFACE vendored-vrpn)
 if(VRPN_HIDAPI_SOURCE_ROOT)
     target_include_directories(vendored-hidapi INTERFACE "${VRPN_HIDAPI_SOURCE_ROOT}")
 else()
-    target_include_directories(vendored-hidapi INTERFACE vrpn/submodules/hidapi)
+    target_include_directories(vendored-hidapi INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/submodules/hidapi")
 endif()
 
 # Interface target for util headers
@@ -53,6 +53,10 @@ target_include_directories(util-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/u
 add_library(util-runloopmanager INTERFACE)
 target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers")
 target_link_libraries(util-runloopmanager INTERFACE boost_thread)
+
+# Interface target for intrusive_ptr support for COM
+add_library(com_smart_pointer INTERFACE)
+target_include_directories(com_smart_pointer INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/com_smart_pointer" ${Boost_INCLUDE_DIRS})
 
 # Interface target for Eigen
 # Actually a post-3.2.5 commit on the 3.2 branch: ec9c7b2e30a85212efd90937597e33515eff0c90
