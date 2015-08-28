@@ -61,7 +61,7 @@ if(WIN32)
     endif()
 
     if(DIRECTSHOW_QEDIT_INCLUDE_DIR)
-        set(QEDIT_WRAPPER_INCLUDE_FILE "${DIRECTSHOW_QEDIT_INCLUDE_DIR}")
+        set(QEDIT_WRAPPER_INCLUDE_FILE "${DIRECTSHOW_QEDIT_INCLUDE_DIR}/qedit.h")
     endif()
     configure_file(qedit_wrapper.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/qedit_wrapper.h" @ONLY)
 
