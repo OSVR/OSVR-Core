@@ -1,0 +1,49 @@
+/** @file
+    @brief Header wrapping/handling inclusion of the prematurely-deprecated
+    qedit.h DirectShow header.
+
+    All we actually use from it are the few following names:
+
+    - ISampleGrabber
+    - ISampleGrabberCB
+    - CLSID_SampleGrabber
+    - IID_ISampleGrabber
+    - CLSID_NullRenderer
+    - IID_ISampleGrabberCB
+
+    @date 2015
+
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
+*/
+
+//               Copyright Sensics, Inc. 2015.
+//  Distributed under the Boost Software License, Version 1.0.
+//     (See accompanying file LICENSE_1_0.txt or copy at
+//           http://www.boost.org/LICENSE_1_0.txt)
+
+#ifndef INCLUDED_qedit_wrapper_h_GUID_6C99EA87_E201_4FAD_0C19_2310504624FF
+#define INCLUDED_qedit_wrapper_h_GUID_6C99EA87_E201_4FAD_0C19_2310504624FF
+
+#ifdef _MSC_VER
+// Handle some broken-ness (missing include in Platform SDK) in the MS header
+#pragma include_alias("dxtrans.h", "qedit.h")
+#define __IDxtCompositor_INTERFACE_DEFINED__
+#define __IDxtAlphaSetter_INTERFACE_DEFINED__
+#define __IDxtJpeg_INTERFACE_DEFINED__
+#define __IDxtKey_INTERFACE_DEFINED__
+#endif
+
+#cmakedefine QEDIT_WRAPPER_INCLUDE_FILE
+
+#ifdef QEDIT_WRAPPER_INCLUDE_FILE
+#include "@QEDIT_WRAPPER_INCLUDE_FILE@"
+#else
+// Didn't configure a location - hopefully we can find it!
+#include <qedit.h>
+#endif
+
+#undef QEDIT_WRAPPER_INCLUDE_FILE
+
+#endif // INCLUDED_qedit_wrapper_h_GUID_6C99EA87_E201_4FAD_0C19_2310504624FF

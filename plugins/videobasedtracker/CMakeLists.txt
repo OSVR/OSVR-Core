@@ -42,31 +42,49 @@ target_compile_options(vbtracker-core
 set_target_properties(vbtracker-core PROPERTIES
     FOLDER "OSVR Plugins/Video-Based Tracker")
 
-###
-# Build a static library to read from an DirectShow camera.
-# @toto This will be removed when OpenCV knows how to read from the
-# HDK camera.
-###
-add_library(directshow-camera STATIC
-    DirectShowCameraLib/base_camera_server.h
-    DirectShowCameraLib/base_camera_server.cpp
-    DirectShowCameraLib/directx_camera_server.h
-    DirectShowCameraLib/directx_camera_server.cpp
-    )
 
-target_link_libraries(directshow-camera
-    PUBLIC
-    vendored-vrpn
-    PRIVATE
-    strmiids # TODO search for this
-    )
-target_compile_options(directshow-camera
-    PUBLIC
-    ${OSVR_CXX11_FLAGS})
+if(WIN32)
+    ###
+    # Build a static library to read from an DirectShow camera.
+    # @toto This will be removed when OpenCV knows how to read from the
+    # HDK camera.
+    #
+    # MSVC: Needs Microsoft Windows SDK Update for Windows Vista and .NET Framework 3.0 or older
+    ###
 
-set_target_properties(directshow-camera PROPERTIES
-    FOLDER "OSVR Plugins/Video-Based Tracker")
+    # TODO fix this package so it finds things on MSYS2/MinGW64
+    # - the lib is in /mingw64/lib
+    # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
+    find_package(DirectShow QUIET)
+    if(NOT DIRECTSHOW_STRMIIDS_LIBRARY)
+        set(DIRECTSHOW_STRMIIDS_LIBRARY strmiids)
+    endif()
 
+    if(DIRECTSHOW_QEDIT_INCLUDE_DIR)
+        set(QEDIT_WRAPPER_INCLUDE_FILE "${DIRECTSHOW_QEDIT_INCLUDE_DIR}")
+    endif()
+    configure_file(qedit_wrapper.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/qedit_wrapper.h" @ONLY)
+
+    add_library(directshow-camera STATIC
+        DirectShowCameraLib/base_camera_server.h
+        DirectShowCameraLib/base_camera_server.cpp
+        DirectShowCameraLib/directx_camera_server.h
+        DirectShowCameraLib/directx_camera_server.cpp
+        )
+    target_include_directories(directshow-camera PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
+    target_link_libraries(directshow-camera
+        PUBLIC
+        vendored-vrpn
+        com_smart_pointer
+        PRIVATE
+        ${DIRECTSHOW_STRMIIDS_LIBRARY}
+        )
+    target_compile_options(directshow-camera
+        PUBLIC
+        ${OSVR_CXX11_FLAGS})
+    set_target_properties(directshow-camera PROPERTIES
+        FOLDER "OSVR Plugins/Video-Based Tracker")
+endif()
 ###
 # Build the plugin
 ###
@@ -83,9 +101,13 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
 
 target_link_libraries(com_osvr_VideoBasedHMDTracker
     vbtracker-core
-    directshow-camera
     vendored-hidapi
 )
+if(WIN32)
+    target_link_libraries(com_osvr_VideoBasedHMDTracker
+        directshow-camera
+    )
+endif()
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins/Video-Based Tracker")
