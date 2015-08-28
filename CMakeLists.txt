@@ -60,13 +60,26 @@ endif()
 
 set(BUILD_USBSERIALENUM ${BUILD_SERVER_PLUGINS})
 set(BUILD_OPENCV_CAMERA_PLUGIN ${BUILD_SERVER_PLUGINS})
-set(BUILD_VIDEOTRACKER_PLUGIN ${BUILD_SERVER_PLUGINS})
 if(ANDROID)
     set(BUILD_USBSERIALENUM OFF)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
-    set(BUILD_VIDEOTRACKER_PLUGIN OFF)
 endif()
 
+set(BUILD_VIDEOTRACKER_PLUGIN OFF)
+# TODO enable this on non-Windows once it's not tied to the DirectShow driver.
+if(WIN32 AND BUILD_SERVER_PLUGINS)
+    # TODO fix this package so it finds things on MSYS2/MinGW64
+    # - the lib is in /mingw64/lib
+    # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
+    find_package(DirectShow QUIET)
+    if(MINGW OR (DIRECTSHOW_QEDIT_INCLUDE_DIR AND DIRECTSHOW_STRMIIDS_LIBRARY))
+        # MinGW may include the header/lib in such a way that the find module
+        # can't find them
+        set(BUILD_VIDEOTRACKER_PLUGIN ON)
+    else()
+        message(STATUS "Skipping the video-based tracker plugin: Requires the 'Microsoft Windows SDK Update for Windows Vista' or older")
+    endif()
+endif()
 ###
 # CMake Modules
 ###

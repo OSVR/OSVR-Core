@@ -52,9 +52,6 @@ if(WIN32)
     # MSVC: Needs Microsoft Windows SDK Update for Windows Vista and .NET Framework 3.0 or older
     ###
 
-    # TODO fix this package so it finds things on MSYS2/MinGW64
-    # - the lib is in /mingw64/lib
-    # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
     find_package(DirectShow QUIET)
     if(NOT DIRECTSHOW_STRMIIDS_LIBRARY)
         set(DIRECTSHOW_STRMIIDS_LIBRARY strmiids)
