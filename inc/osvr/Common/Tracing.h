@@ -125,12 +125,20 @@ namespace common {
           public:
             ClientUpdate() : TracingRegion<MainTracePolicy>("ClientUpdate") {}
         };
-        inline void markUpdateState() {}
+        inline void markTimestampOutOfOrder() {
+            MainTracePolicy::mark("Timestamp out of order");
+        }
+        inline void markNewTrackerData() {
+            MainTracePolicy::mark("New tracker data");
+        }
         inline void markGetState(std::string const &path) {
-            markConcatenation<WorkerTracePolicy>("GetState", path);
+            markConcatenation<WorkerTracePolicy>("GetState ", path);
         }
         inline void markGetInterface(std::string const &path) {
-            markConcatenation<WorkerTracePolicy>("GetState", path);
+            markConcatenation<WorkerTracePolicy>("GetInterface ", path);
+        }
+        inline void markReleaseInterface(std::string const &path) {
+            markConcatenation<WorkerTracePolicy>("ReleaseInterface ", path);
         }
 
     } // namespace tracing
