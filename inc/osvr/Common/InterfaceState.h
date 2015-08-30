@@ -30,6 +30,7 @@
 #include <osvr/Common/StateType.h>
 #include <osvr/Common/ReportState.h>
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Common/Tracing.h>
 
 // Library/third-party includes
 #include <boost/fusion/include/has_key.hpp>
