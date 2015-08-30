@@ -37,6 +37,7 @@
 #include "PureClientContext.h"
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Common/Tracing.h>
 
 // Library/third-party includes
 #include <vrpn_Tracker.h>
@@ -88,6 +89,7 @@ namespace client {
 
       private:
         void m_handle(vrpn_TRACKERCB const &info) {
+            common::tracing::markNewTrackerData();
             OSVR_PoseReport report;
             report.sensor = info.sensor;
             OSVR_TimeValue timestamp;
