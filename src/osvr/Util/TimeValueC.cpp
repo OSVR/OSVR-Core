@@ -80,6 +80,19 @@ void osvrTimeValueDifference(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
     osvrTimeValueNormalize(tvA);
 }
 
+template <typename T> inline int numcmp(T a, T b) {
+    return (a == b) ? 0 : (a < b ? -1 : 1);
+}
+
+int osvrTimeValueCmp(OSVR_IN_PTR const OSVR_TimeValue *tvA,
+                     OSVR_IN_PTR const OSVR_TimeValue *tvB) {
+    if (!tvA || !tvB) {
+        return 0;
+    }
+    auto major = numcmp(tvA->seconds, tvB->seconds);
+    return (major != 0) ? major : numcmp(tvA->microseconds, tvB->microseconds);
+}
+
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
 
 void osvrTimeValueGetNow(OSVR_INOUT_PTR OSVR_TimeValue *dest) {
