@@ -172,7 +172,7 @@ OSVR_EXTERN_C_END
 /** @brief True if A is later than B */
 OSVR_INLINE OSVR_CBool osvrTimeValueGreater(
     OSVR_IN_PTR const OSVR_TimeValue *tvA,
-    OSVR_IN_PTR const OSVR_TimeValue *tvB) OSVR_FUNC_NONNULL((1, 2)) {
+    OSVR_IN_PTR const OSVR_TimeValue *tvB) {
     if (!tvA || !tvB) {
         return OSVR_FALSE;
     }
