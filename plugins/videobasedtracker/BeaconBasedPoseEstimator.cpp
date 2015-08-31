@@ -207,10 +207,13 @@ namespace vbtracker {
         // m_permittedOutliers outliers. Even in simulation data, we sometimes
         // find duplicate IDs for LEDs, indicating that we are getting
         // mis-identified ones sometimes.
+        // We tried using the previous guess to reduce the amount of computation
+        // being done, but this got us stuck in infinite locations.  We seem to
+        // do okay without using it, so leaving it out.
         bool usePreviousGuess = false;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, 5, 8.0f,
+            m_tvec, usePreviousGuess, 10, 8.0f,
             static_cast<int>(objectPoints.size() - m_permittedOutliers));
 
         //==========================================================================
@@ -242,7 +245,7 @@ namespace vbtracker {
         cv::Mat rot;
         cv::Rodrigues(m_rvec, rot);
 
-        // TODO: Replace this code with Eigen code.
+        // @todo: Replace this code with Eigen code.
 
         if (rot.type() != CV_64F) {
             return false;
