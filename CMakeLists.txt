@@ -65,6 +65,11 @@ if(ANDROID)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
 endif()
 
+set(BUILD_JOINTCLIENTKIT OFF)
+if(BUILD_CLIENT AND BUILD_SERVER)
+    set(BUILD_JOINTCLIENTKIT ON)
+endif()
+
 set(BUILD_VIDEOTRACKER_PLUGIN OFF)
 # TODO enable this on non-Windows once it's not tied to the DirectShow driver.
 if(WIN32 AND BUILD_SERVER_PLUGINS)
