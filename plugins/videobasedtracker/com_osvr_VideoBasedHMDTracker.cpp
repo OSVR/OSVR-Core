@@ -90,6 +90,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
 #endif
 #endif
     {
+        // Set the number of threads for OpenCV to use.
+        cv::setNumThreads(1);
+
         // Initialize things from parameters and from defaults.  Do it here
         // rather than
         // in an initialization list so that we're independent of member order
