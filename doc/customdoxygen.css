@@ -1,0 +1,385 @@
+@import url(http://fonts.googleapis.com/css?family=Titillium+Web:300,400,700,400italic|Anonymous+Pro:400,400italic);
+body, table, div, p, dl {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+.title {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+/* #ff7f27 is the standard orange */
+/* light bg grey is #f8f8f8, border grey is #e7e7e7 */
+a.code, a.code:visited, a.line, a.line:visited {
+    color: #ff7f27;
+}
+a.codeRef, a.codeRef:visited, a.lineRef, a.lineRef:visited {
+    color: #ff7f27;
+}
+table.directory {
+    font: 400 14px "Titillium Web", Roboto,sans-serif;
+}
+
+div.header {
+    background-image: none; /*url('nav_h.png');*/
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
+}
+
+
+.navpath ul {
+    background-image: none;
+    background-color: #f8f8f8;
+    color: #888;
+    border: solid 1px #f8f8f8;
+}
+.navpath li {
+    background-image: url('bc_s.png');
+    color: #444;
+}
+.navpath li.navelem a {
+    color: #444;
+    font-family: "Titillium Web", Roboto,sans-serif;
+}
+.navpath li.navelem a:hover {
+    color: #222;
+}
+.navpath li.footer {
+    color: #444;
+}
+
+#projectname {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+#projectbrief {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+#projectnumber {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+#titlearea {
+    border-bottom: 1px solid #888;
+}
+
+#powerTip div {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+
+
+#nav-tree {
+    background-image: none;
+    background-color: #f8f8f8;
+}
+#nav-tree .label {
+    font-family: "Titillium Web", Roboto, sans-serif;
+}
+#nav-tree .selected {
+    background-image: none;
+    background-color: #888;
+}
+#nav-tree a {
+    color: #444;
+}
+
+.ui-resizable-e {
+    background: #888;
+}
+
+/* these are for tree view inside a (index) page */
+
+div.directory {
+    border-top: 1px solid #888;
+    border-bottom: 1px solid #888;
+}
+.directory tr.even {
+    background-color: #F8F8F8;
+}
+.directory .levels span {
+    color: #ff7f27;
+}
+.arrow {
+    color: #888;
+}
+.icon {
+    font-family: Arial, Helvetica;
+    font-weight: bold;
+    font-size: 12px;
+    height: 14px;
+    width: 16px;
+    display: inline-block;
+    background-color: #728DC1;
+    color: white;
+    text-align: center;
+    border-radius: 4px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+.icona {
+    width: 24px;
+    height: 22px;
+    display: inline-block;
+}
+.iconfopen {
+    background-image: url('ftv2folderopen.png');
+    background-position: 0px -4px;
+}
+.iconfclosed {
+    background-image: url('ftv2folderclosed.png');
+    background-position: 0px -4px;
+}
+.icondoc {
+    background-image: url('ftv2doc.png');
+    background-position: 0px -4px;
+}
+
+/* @end */
+
+/* todo haven't changed yet */
+
+h2.groupheader {
+    border-bottom: 1px solid #879ECB;
+    color: #354C7B;
+}
+h1.glow, h2.glow, h3.glow, h4.glow, h5.glow, h6.glow {
+    text-shadow: 0 0 15px cyan;
+}
+div.qindex, div.navtab {
+    background-color: #EBEFF6;
+    border: 1px solid #A3B4D7;
+    text-align: center;
+}
+a {
+    color: #ff7f27;
+    font-weight: normal;
+    text-decoration: none;
+}
+.contents a:visited {
+    color: #ff7f27;
+}
+a.qindexHL {
+    background-color: #888;
+    color: #ffffff;
+    border: 1px double #869DCA;
+}
+.contents a.qindexHL:visited {
+    color: #ffffff;
+}
+pre.fragment {
+    border: 1px solid #C4CFE5;
+    background-color: #FBFCFD;
+    font-family: "Anonymous Pro", monospace, fixed;
+}
+div.fragment {
+    background-color: #FBFCFD;
+    border: 1px solid #C4CFE5;
+}
+div.line {
+    font-family: "Anonymous Pro", monospace, fixed;
+}
+div.line.glow {
+    background-color: cyan;
+    box-shadow: 0 0 10px cyan;
+}
+span.lineno {
+    border-right: 2px solid #0F0;
+    background-color: #E8E8E8;
+}
+span.lineno a {
+    background-color: #D8D8D8;
+}
+span.lineno a:hover {
+    background-color: #C8C8C8;
+}
+td.indexkey {
+    background-color: #EBEFF6;
+    border: 1px solid #C4CFE5;
+}
+td.indexvalue {
+    background-color: #EBEFF6;
+    border: 1px solid #C4CFE5;
+}
+tr.memlist {
+    background-color: #EEF1F7;
+}
+
+/* @group Code Colorization */
+
+span.keyword {
+    color: #008000
+}
+span.keywordtype {
+    color: #604020
+}
+span.keywordflow {
+    color: #e08000
+}
+span.comment {
+    color: #800000
+}
+span.preprocessor {
+    color: #806020
+}
+span.stringliteral {
+    color: #002080
+}
+span.charliteral {
+    color: #008080
+}
+span.vhdldigit {
+    color: #ff00ff
+}
+span.vhdlchar {
+    color: #000000
+}
+span.vhdlkeyword {
+    color: #700070
+}
+span.vhdllogic {
+    color: #ff0000
+}
+blockquote {
+    background-color: #f8f8f8;
+    border-left: 2px solid #888;
+    margin: 0 24px 0 4px;
+    padding: 0 12px 0 16px;
+}
+
+/* @end */
+
+.dirtab {
+    border: 1px solid #A3B4D7;
+}
+th.dirtab {
+    background: #EBEFF6;
+}
+hr {
+    border-top: 1px solid #4A6AAA;
+}
+.memberdecls td.glow, .fieldtable tr.glow {
+    background-color: cyan;
+    box-shadow: 0 0 15px cyan;
+}
+.mdescLeft, .mdescRight, .memItemLeft, .memItemRight, .memTemplItemLeft, .memTemplItemRight, .memTemplParams {
+    background-color: #F9FAFC;
+}
+.memSeparator {
+    border-bottom: 1px solid #DEE4F0;
+}
+.memTemplParams {
+    color: #ff7f27;
+}
+.memtemplate {
+    color: #ff7f27;
+}
+.memnav {
+    background-color: #EBEFF6;
+    border: 1px solid #A3B4D7;
+}
+.memitem.glow {
+    box-shadow: 0 0 15px cyan;
+}
+.memproto, dl.reflist dt {
+    border-top: 1px solid #A8B8D9;
+    border-left: 1px solid #A8B8D9;
+    border-right: 1px solid #A8B8D9;
+    color: #253555;
+    background-image: url('nav_f.png');
+    background-repeat: repeat-x;
+    background-color: #E2E8F2;
+}
+.memdoc, dl.reflist dd {
+    border-bottom: 1px solid #A8B8D9;
+    border-left: 1px solid #A8B8D9;
+    border-right: 1px solid #A8B8D9;
+    background-color: #FBFCFD;
+    background-image: url('nav_g.png');
+    background-repeat: repeat-x;
+    background-color: #FFFFFF;
+}
+.paramname {
+    color: #602020;
+}
+.params .paramdir {
+    font-family: "Anonymous Pro", "courier new", courier, monospace;
+}
+span.mlabel {
+    background-color: #728DC1;
+    border-top: 1px solid #5373B4;
+    border-left: 1px solid #5373B4;
+    border-right: 1px solid #C4CFE5;
+    border-bottom: 1px solid #C4CFE5;
+}
+
+/* @end */
+
+
+address {
+    color: #2A3D61;
+}
+table.doxtable td, table.doxtable th {
+    border: 1px solid #2D4068;
+}
+table.doxtable th {
+    background-color: #374F7F;
+    color: #FFFFFF;
+}
+table.fieldtable {
+    border: 1px solid #A8B8D9;
+}
+.fieldtable td.fieldtype, .fieldtable td.fieldname {
+    border-right: 1px solid #A8B8D9;
+    border-bottom: 1px solid #A8B8D9;
+}
+.fieldtable td.fielddoc {
+    border-bottom: 1px solid #A8B8D9;
+    /*width: 100%;*/
+}
+.fieldtable th {
+    background-image: url('nav_f.png');
+    background-repeat: repeat-x;
+    background-color: #E2E8F2;
+    color: #253555;
+    border-bottom: 1px solid #A8B8D9;
+}
+.tabsearch {
+    background-image: url('tab_b.png');
+}
+dl.note {
+    border-color: #D0C000;
+}
+dl.warning, dl.attention {
+    border-color: #FF0000;
+}
+dl.pre, dl.post, dl.invariant {
+    border-color: #00D000;
+}
+dl.deprecated {
+    border-color: #505050;
+}
+dl.todo {
+    border-color: #00C0E0;
+}
+dl.test {
+    border-color: #3030E0;
+}
+dl.bug {
+    border-color: #C08050;
+}
+div.zoom {
+    border: 1px solid #90A5CE;
+}
+dl.citelist dt {
+    color: #334975;
+}
+div.toc {
+    background-color: #F4F6FA;
+    border: 1px solid #D8DFEE;
+}
+div.toc li {
+    background: url("bdwn.png") no-repeat scroll 0 5px transparent;
+    font: 10px/1.2 Verdana, DejaVu Sans, Geneva, sans-serif;
+}
+div.toc h3 {
+    font: bold 12px/1.2 Arial, FreeSans, sans-serif;
+    color: #ff7f27;
+}
+#powerTip div.ttdeci {
+    color: #006318;
+}

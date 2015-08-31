@@ -384,6 +384,21 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     INSTALL_COMPONENT DevelDocs
     NO_PDF)
 
+# Replace some of the images from doxygen.
+foreach(fn ftv2mnode.png ftv2pnode.png ftv2mlastnode.png)
+    add_custom_command(TARGET doc
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-generated/html/"
+        VERBATIM
+        COMMENT "Copying image ${fn} to override Doxygen theme")
+
+    add_custom_command(TARGET doc_external
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-external/html/"
+        VERBATIM
+        COMMENT "Copying image ${fn} to override Doxygen theme")
+endforeach()
+
 ###
 # Set Up Package for External Usage
 ###
