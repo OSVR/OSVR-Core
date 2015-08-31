@@ -24,11 +24,22 @@ target_link_libraries(OpenGLSampleCAPI
     SDL2::SDL2main
     osvr_cxx11_flags)
 
-foreach(target OpenGLSample OpenGLSampleCAPI)
+if(BUILD_JOINTCLIENTKIT)
+    set(OPENGL_JOINT_SAMPLE OpenGLSampleJoint)
+    add_executable(OpenGLSampleJoint ${SHARED_FILES} OpenGLSampleJoint.cpp)
+    target_link_libraries(OpenGLSampleJoint
+        PRIVATE
+        osvrJointClientKit
+        osvrClientKitCpp
+        ${OPENGL_LIBRARY}
+        SDL2::SDL2main
+        osvr_cxx11_flags)
+endif()
+
+foreach(target OpenGLSample OpenGLSampleCAPI ${OPENGL_JOINT_SAMPLE})
     set_target_properties(${target} PROPERTIES
         FOLDER "OSVR Example Clients")
 
     install(TARGETS ${target}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ExampleClients)
 endforeach()
-
