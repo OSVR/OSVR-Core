@@ -27,6 +27,7 @@
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/ClientKit/Display.h>
 #include "SDL2Helpers.h"
+#include "OpenGLCube.h"
 
 // Library/third-party includes
 #include <SDL.h>
@@ -39,7 +40,6 @@ static auto const WIDTH = 1920;
 static auto const HEIGHT = 1080;
 
 // Forward declarations of rendering functions defined below.
-void draw_cube(double radius);
 bool render(osvr::clientkit::DisplayConfig &disp);
 void renderScene();
 
@@ -197,80 +197,4 @@ bool render(osvr::clientkit::DisplayConfig &disp) {
 
     /// Successfully completed a frame render.
     return success;
-}
-
-/// @brief Fixed-function pipeline OpenGL code to draw a cube
-void draw_cube(double radius) {
-    static const GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
-    static const float red_col[] = {1.0, 0.0, 0.0};
-    static const float grn_col[] = {0.0, 1.0, 0.0};
-    static const float blu_col[] = {0.0, 0.0, 1.0};
-    static const float yel_col[] = {1.0, 1.0, 0.0};
-    static const float lightblu_col[] = {0.0, 1.0, 1.0};
-    static const float pur_col[] = {1.0, 0.0, 1.0};
-    glPushMatrix();
-    glScaled(radius, radius, radius);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, matspec);
-    glMaterialf(GL_FRONT, GL_SHININESS, 64.0);
-    glBegin(GL_POLYGON);
-    glColor3fv(lightblu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lightblu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lightblu_col);
-    glNormal3f(0.0, 0.0, -1.0);
-    glVertex3f(1.0, 1.0, -1.0);
-    glVertex3f(1.0, -1.0, -1.0);
-    glVertex3f(-1.0, -1.0, -1.0);
-    glVertex3f(-1.0, 1.0, -1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(blu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, blu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, blu_col);
-    glNormal3f(0.0, 0.0, 1.0);
-    glVertex3f(-1.0, 1.0, 1.0);
-    glVertex3f(-1.0, -1.0, 1.0);
-    glVertex3f(1.0, -1.0, 1.0);
-    glVertex3f(1.0, 1.0, 1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(yel_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, yel_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, yel_col);
-    glNormal3f(0.0, -1.0, 0.0);
-    glVertex3f(1.0, -1.0, 1.0);
-    glVertex3f(-1.0, -1.0, 1.0);
-    glVertex3f(-1.0, -1.0, -1.0);
-    glVertex3f(1.0, -1.0, -1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(grn_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, grn_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grn_col);
-    glNormal3f(0.0, 1.0, 0.0);
-    glVertex3f(1.0, 1.0, 1.0);
-    glVertex3f(1.0, 1.0, -1.0);
-    glVertex3f(-1.0, 1.0, -1.0);
-    glVertex3f(-1.0, 1.0, 1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(pur_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pur_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pur_col);
-    glNormal3f(-1.0, 0.0, 0.0);
-    glVertex3f(-1.0, 1.0, 1.0);
-    glVertex3f(-1.0, 1.0, -1.0);
-    glVertex3f(-1.0, -1.0, -1.0);
-    glVertex3f(-1.0, -1.0, 1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(red_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, red_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red_col);
-    glNormal3f(1.0, 0.0, 0.0);
-    glVertex3f(1.0, -1.0, 1.0);
-    glVertex3f(1.0, -1.0, -1.0);
-    glVertex3f(1.0, 1.0, -1.0);
-    glVertex3f(1.0, 1.0, 1.0);
-    glEnd();
-    glPopMatrix();
 }

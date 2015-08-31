@@ -3,7 +3,8 @@ if(NOT OPENGL_FOUND OR NOT SDL2_FOUND)
     return()
 endif()
 
-add_executable(OpenGLSample SDL2Helpers.h OpenGLSample.cpp)
+set(SHARED_FILES SDL2Helpers.h OpenGLCube.h)
+add_executable(OpenGLSample ${SHARED_FILES} OpenGLSample.cpp)
 target_link_libraries(OpenGLSample
     PRIVATE
     osvrClientKitCpp
@@ -15,7 +16,7 @@ if(SDL2_DYNAMIC)
     osvr_copy_dep(OpenGLSample SDL2::SDL2)
 endif()
 
-add_executable(OpenGLSampleCAPI SDL2Helpers.h OpenGLSampleCAPI.cpp)
+add_executable(OpenGLSampleCAPI ${SHARED_FILES} OpenGLSampleCAPI.cpp)
 target_link_libraries(OpenGLSampleCAPI
     PRIVATE
     osvrClientKitCpp
