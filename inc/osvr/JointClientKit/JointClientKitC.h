@@ -80,6 +80,36 @@ OSVR_JOINTCLIENTKIT_EXPORT OSVR_JointClientOpts osvrJointClientCreateOptions();
 OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode
 osvrJointClientOptionsAutoloadPlugins(OSVR_JointClientOpts opts);
 
+/** @brief Queues up the manual load of a plugin by name.
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode osvrJointClientOptionsLoadPlugin(
+    OSVR_JointClientOpts opts, const char *pluginName);
+
+/** @brief Queues up the manual instantiation of a plugin/driver by name with
+    optional parameters (JSON).
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode
+osvrJointClientOptionsInstantiateDriver(OSVR_JointClientOpts opts,
+                                        const char *pluginName,
+                                        const char *driverName,
+                                        const char *params);
+
+/** @brief Queues up the manual addition of an alias to the path tree.
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode osvrJointClientOptionsAddAlias(
+    OSVR_JointClientOpts opts, const char *path, const char *source);
+
+/** @brief Queues up the manual addition of aliases specified in JSON to the
+    path tree.
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode osvrJointClientOptionsAddAliases(
+    OSVR_JointClientOpts opts, const char *aliases);
+
+/** @brief Queues up the manual addition of a string element to the path tree.
+*/
+OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode osvrJointClientOptionsAddString(
+    OSVR_JointClientOpts opts, const char *path, const char *s);
+
 /** @brief Queues up a trigger for hardware detection.
 */
 OSVR_JOINTCLIENTKIT_EXPORT OSVR_ReturnCode
@@ -92,7 +122,10 @@ osvrJointClientOptionsTriggerHardwareDetect(OSVR_JointClientOpts opts);
     application. Reverse DNS format strongly suggested.
     @param opts The configuration options object for starting the joint server
     operations. Pass NULL/nullptr for default operation: loading of all
-   autoload-enabled plugins, and a hardware detection.
+    autoload-enabled plugins, and a hardware detection. If a valid pointer is
+    passed, the enqueued operations will be performed in-order (the default
+    operations will not be performed). Any exceptions thrown will cause the
+   initialization to fail, returning a null context.
 
     @returns Client context - will be needed for subsequent calls
 */

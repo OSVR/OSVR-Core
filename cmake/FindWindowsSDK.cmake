@@ -39,11 +39,23 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-set(_preferred_sdk_dirs)
-set(_win_sdk_dirs)
-set(_win_sdk_versanddirs)
-if(MSVC_VERSION GREATER 1310) # Newer than VS .NET/VS Toolkit 2003
+set(_preferred_sdk_dirs) # pre-output
+set(_win_sdk_dirs) # pre-output
+set(_win_sdk_versanddirs) # pre-output
+set(_winsdk_vistaonly) # search parameters
+set(_winsdk_kits) # search parameters
 
+# Appends to the two main pre-output lists used only if the path exists
+macro(_winsdk_conditional_append _vername _path)
+	if(EXISTS "${_path}")
+		list(APPEND _win_sdk_dirs "${_path}")
+		list(APPEND
+			_win_sdk_versanddirs
+			"${_vername}"
+			"${_path}")
+	endif()
+endmacro()
+if(MSVC AND MSVC_VERSION GREATER 1310) # Newer than VS .NET/VS Toolkit 2003
 	# Environment variable for SDK dir
 	if(EXISTS "$ENV{WindowsSDKDir}" AND (NOT "$ENV{WindowsSDKDir}" STREQUAL ""))
 		message(STATUS "Got $ENV{WindowsSDKDir} - Windows/Platform SDK directories: ${_win_sdk_dirs}")
@@ -68,42 +80,59 @@ if(MSVC_VERSION GREATER 1310) # Newer than VS .NET/VS Toolkit 2003
 		endif()
 	endif()
 
+	# VC 10 and older has broad target support
 	if(MSVC_VERSION LESS 1700)
-		# VC 10 and older has broad target support
-		set(_winsdk_vistaonly)
-	else()
 		# VC 11 by default targets Vista and later only, so we can add a few more SDKs that (might?) only work on vista+
-		if("${CMAKE_VS_PLATFORM_TOOLSET}" MATCHES "_xp")
-			# This is the XP-compatible v110 toolset
-		elseif("${CMAKE_VS_PLATFORM_TOOLSET}" STREQUAL "v100")
-			# This is the VS2010 toolset
-		else()
-			if((NOT WINDOWSSDK_FOUND) AND (NOT WindowsSDK_FIND_QUIETLY))
-				message(STATUS "FindWindowsSDK: Detected Visual Studio 2012 or newer, not using the _xp toolset variant: including SDK versions that drop XP support in search!")
-			endif()
-			# These versions have no XP (and possibly Vista pre-SP1) support
-			set(_winsdk_vistaonly)
-			if(NOT MSVC_VERSION LESS 1800)
-				list(APPEND _winsdk_vistaonly
-					# Windows Software Development Kit (SDK) for Windows 8.1
-					# http://msdn.microsoft.com/en-gb/windows/desktop/bg162891
-					v8.1)
-			endif()
-			list(APPEND _winsdk_vistaonly
-				# Included in Visual Studio 2012
-				v8.0A
-
-				# Microsoft Windows SDK for Windows 8 and .NET Framework 4.5
-				# This is the first version to also include the DirectX SDK
-				# http://msdn.microsoft.com/en-US/windows/desktop/hh852363.aspx
-				v8.0
-
-				# Microsoft Windows SDK for Windows 7 and .NET Framework 4
-				# http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b
-				v7.1
-				)
+	elseif("${CMAKE_VS_PLATFORM_TOOLSET}" MATCHES "_xp")
+		# This is the XP-compatible v110+ toolset
+	elseif("${CMAKE_VS_PLATFORM_TOOLSET}" STREQUAL "v100" OR "${CMAKE_VS_PLATFORM_TOOLSET}" STREQUAL "v90")
+		# This is the VS2010/VS2008 toolset
+	else()
+		# OK, we're VC11 or newer and not using a backlevel or XP-compatible toolset.
+		# These versions have no XP (and possibly Vista pre-SP1) support
+		if((NOT WINDOWSSDK_FOUND) AND (NOT WindowsSDK_FIND_QUIETLY))
+			message(STATUS "FindWindowsSDK: Detected Visual Studio 2012 or newer, not using the _xp toolset variant: including SDK versions that drop XP support in search!")
 		endif()
+		if(NOT MSVC_VERSION LESS 1800)
+			# These require at least Visual Studio 2013 (VC12)
+			list(APPEND _winsdk_vistaonly
+				v10.0A
+
+				# Windows Software Development Kit (SDK) for Windows 10
+				v10.0
+
+				# Windows Software Development Kit (SDK) for Windows 8.1
+				# http://msdn.microsoft.com/en-gb/windows/desktop/bg162891
+				v8.1)
+			list(APPEND _winsdk_kits
+				"Windows Kits 10:KitsRoot10"
+				"Windows Kits 8.1:KitsRoot81")
+		endif()
+		list(APPEND _winsdk_kits
+			"Windows Kits 8.0:KitsRoot")
+		list(APPEND _winsdk_vistaonly
+
+			# Included in Visual Studio 2012
+			v8.0A
+
+			# Microsoft Windows SDK for Windows 8 and .NET Framework 4.5
+			# This is the first version to also include the DirectX SDK
+			# http://msdn.microsoft.com/en-US/windows/desktop/hh852363.aspx
+			v8.0
+
+			# Microsoft Windows SDK for Windows 7 and .NET Framework 4
+			# http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b
+			v7.1
+			)
 	endif()
+	foreach(_winkit ${_winsdk_kits})
+		string(REGEX REPLACE "[^:]*:" "" _winkit_key "${_winkit}")
+		string(REGEX REPLACE ":[^:]*" "" _winkit_name "${_winkit}")
+		get_filename_component(_sdkdir
+			"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;${_winkit_key}]"
+			ABSOLUTE)
+		_winsdk_conditional_append("${_winkit_name}" "${_sdkdir}")
+	endforeach()
 	foreach(_winsdkver
 		${_winsdk_vistaonly}
 
@@ -144,16 +173,10 @@ if(MSVC_VERSION GREATER 1310) # Newer than VS .NET/VS Toolkit 2003
 		get_filename_component(_sdkdir
 			"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\${_winsdkver};InstallationFolder]"
 			ABSOLUTE)
-		if(EXISTS "${_sdkdir}")
-			list(APPEND _win_sdk_dirs "${_sdkdir}")
-			list(APPEND
-				_win_sdk_versanddirs
-				"Windows SDK ${_winsdkver}"
-				"${_sdkdir}")
-		endif()
+		_winsdk_conditional_append("Windows SDK ${_winsdkver}" "${_sdkdir}")
 	endforeach()
 endif()
-if(MSVC_VERSION GREATER 1200)
+if(MSVC AND MSVC_VERSION GREATER 1200)
 	foreach(_platformsdkinfo
 		"D2FF9F89-8AA2-4373-8A31-C838BF4DBBE1_Microsoft Platform SDK for Windows Server 2003 R2"
 		"8F9E5EF3-A9A5-491B-A889-C58EFFECE8B3_Microsoft Platform SDK for Windows Server 2003 SP1")
@@ -163,10 +186,7 @@ if(MSVC_VERSION GREATER 1200)
 			get_filename_component(_sdkdir
 				"[${HIVE}\\SOFTWARE\\Microsoft\\MicrosoftSDK\\InstalledSDKs\\${_platformsdkguid};Install Dir]"
 				ABSOLUTE)
-			if(EXISTS "${_sdkdir}")
-				list(APPEND _win_sdk_dirs "${_sdkdir}")
-				list(APPEND _win_sdk_versanddirs "${_platformsdkname}" "${_sdkdir}")
-			endif()
+			_winsdk_conditional_append("${_platformsdkname}" "${_sdkdir}")
 		endforeach()
 	endforeach()
 endif()

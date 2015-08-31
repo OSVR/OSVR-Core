@@ -56,7 +56,9 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     OSVR_ClientInterfaceObject(osvr::common::ClientContext *ctx,
                                std::string const &path,
                                PrivateConstructor const &);
-
+    ~OSVR_ClientInterfaceObject() {
+        osvr::common::tracing::markReleaseInterface(m_path);
+    }
     /// @brief Get the path as a string.
     OSVR_COMMON_EXPORT std::string const &getPath() const;
 
