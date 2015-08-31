@@ -12,11 +12,11 @@ Writing a device plugin means you'll be building against the [PluginKit](@ref Pl
 
    This can take the form of a class with a function call operator (`operator()`), taking an @ref OSVR_PluginRegContext parameter named `ctx` and returning an @ref OSVR_ReturnCode value. The sample plugin source includes an example of this.
 
-4. From within your callback, if the device exists, create a device token (as seen in the sample, or as in the `DummySync` examples). You need to have your device hold on to the device token to send data with it later on.
+4. From within your callback, if the device exists, create a device token (as seen in the sample, or as in the examples). You need to have your device hold on to the device token to send data with it later on.
 
 5. The guts of implementing a device start at about line 51 of the sample: wait until there is data then call @ref osvrDeviceSendData. (There are two versions of this function: one where you provide a timestamp, and one where the timestamp is automatically created for you.) Your device may have different types of sensors (e.g., tracker, button, analog) and you will need to use appropriate interfaces for each to send reports from device in your plugin.
 
-6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample JSON descriptor and modify it according to you needs or use the [Device Descriptor Editor](http://opengoggles.org/tools/osvr-json/) to create the JSON descriptor. For each interface (e.g., tracker, button, analog), you will need to describe its semantics—that is, assign useful names to analog channels, etc.). The device descriptor's purpose is to tell the OSVR server what kind of sensors your device has. Specifying the device vendor and the product name in device descriptor file is for informational purposes.
+6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample JSON descriptor and modify it according to you needs or use the [Device Descriptor Editor](http://tools.getosvr.org/json-editor/) to create the JSON descriptor. For each interface (e.g., tracker, button, analog), you will need to describe its semantics—that is, assign useful names to analog channels, etc.). The device descriptor's purpose is to tell the OSVR server what kind of sensors your device has. Specifying the device vendor and the product name in device descriptor file is for informational purposes.
 
 Note that these instructions are only for drivers that can fully self-configure. Manually-configured drivers are also possible, but no minimal sample has yet been created. You essentially take the same steps as in an auto-detected plugin, except instead of registering a hardware detection callback, you call @ref osvrRegisterDriverInstantiationCallback providing a name for your driver and a function pointer. The function you provide will be called by the server and passed a JSON string of configuration data if the user configures your plugin in the `osvr_server` config file.
 
@@ -89,4 +89,3 @@ Here is some example output from a tracker device:
             pos ( 0.00,  0.00,  0.00); quat (-0.12,  0.48,  0.03,  0.87)
     Tracker com_osvr_Vuzix/Vuzix@localhost, sensor 0:
             pos ( 0.00,  0.00,  0.00); quat (-0.12, -0.88,  0.03,  0.46)
-
