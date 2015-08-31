@@ -41,19 +41,27 @@ namespace util {
     /// @ingroup UtilTime
     ///
     /// Note that this is for C API-bordering areas. For purely C++ code, please
-    /// use Boost.Chrono for your time needs.
+    /// use std::chrono for your time needs.
     namespace time {
         /// @brief C++-friendly typedef for the OSVR_TimeValue structure.
         typedef ::OSVR_TimeValue TimeValue;
 
         /// @brief Set the given TimeValue to the current time.
         inline void getNow(TimeValue &tv) { osvrTimeValueGetNow(&tv); }
+
+        /// @brief Get a TimeValue for the current time.
+        inline TimeValue getNow() {
+            TimeValue tv;
+            getNow(tv);
+            return tv;
+        }
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
         /// @brief Convert a TimeValue to a struct timeval
         inline void toStructTimeval(struct timeval &dest,
                                     TimeValue const &src) {
             osvrTimeValueToStructTimeval(&dest, &src);
         }
+
         /// @brief Convert a struct timeval to a TimeValue
         inline void fromStructTimeval(TimeValue &dest,
                                       struct timeval const &src) {
@@ -61,11 +69,16 @@ namespace util {
         }
 
         /// @brief Convert a struct timeval to a TimeValue
-        inline TimeValue fromStructTimeval(struct timeval const &src) {
+        inline TimeValue toTimeValue(struct timeval const &src) {
             TimeValue dest;
             osvrStructTimevalToTimeValue(&dest, &src);
             return dest;
         }
+        /// @brief Convert a struct timeval to a TimeValue
+        inline TimeValue fromStructTimeval(struct timeval const &src) {
+            return toTimeValue(src);
+        }
+
 #ifdef OSVR_STRUCT_TIMEVAL_INCLUDED
         /// @brief Convert a TimeValue to a struct timeval
         inline struct timeval toStructTimeval(TimeValue const &src) {
@@ -73,9 +86,9 @@ namespace util {
             osvrTimeValueToStructTimeval(&dest, &src);
             return dest;
         }
-#endif
+#endif // OSVR_STRUCT_TIMEVAL_INCLUDED
 
-#endif
+#endif // OSVR_HAVE_STRUCT_TIMEVAL
     } // namespace time
 } // namespace util
 } // namespace osvr
