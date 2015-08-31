@@ -1,5 +1,8 @@
 @INCLUDE = Doxyfile-common
 
+# This file is only used by the external/library users documentation, so
+# it should hide things that might be considered "implementation details"
+
 # If the HIDE_UNDOC_MEMBERS tag is set to YES, Doxygen will hide all
 # undocumented members of documented classes, files or namespaces.
 # If set to NO (the default) these members will be included in the
@@ -38,4 +41,5 @@ EXCLUDE += inc/osvr/Client \
            inc/osvr/Server \
            inc/osvr/Transform \
            inc/osvr/VRPN \
-           examples/plugin-hosts
+           examples/plugin-hosts \
+           examples/internals

@@ -1,5 +1,7 @@
 @INCLUDE = Doxyfile-common
 
+# This file is only used by the "internal" contributor's documentation, so
+# it should include everything, even things that might be considered "implementation details"
 
 PROJECT_NAME           = "OSVR Framework (Internal Development Docs)"
 
