@@ -40,7 +40,7 @@ static auto const WIDTH = 1920;
 static auto const HEIGHT = 1080;
 
 // Forward declarations of rendering functions defined below.
-bool render(osvr::clientkit::DisplayConfig &disp);
+void render(osvr::clientkit::DisplayConfig &disp);
 void renderScene();
 
 int main(int argc, char *argv[]) {
@@ -78,6 +78,14 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    std::cout << "Waiting for the display to fully start up, including "
+                 "receiving initial pose update..."
+              << std::endl;
+    while (!display.checkStartup()) {
+        ctx.update();
+    }
+    std::cout << "OK, display startup status is good!" << std::endl;
+
     // Event handler
     SDL_Event e;
 #ifndef __ANDROID__ // Don't want to pop up the on-screen keyboard
@@ -108,12 +116,10 @@ int main(int argc, char *argv[]) {
         ctx.update();
 
         // Render
-        bool valid = render(display);
+        render(display);
 
-        // Swap buffers if we had all the data to render.
-        if (valid) {
-            SDL_GL_SwapWindow(window.get());
-        }
+        // Swap buffers
+        SDL_GL_SwapWindow(window.get());
     }
 
     return 0;
@@ -130,32 +136,19 @@ void renderScene() { draw_cube(1.0); }
 /// This function will set up viewport, initialize view and projection matrices
 /// to current values, then call `renderScene()` as needed (e.g. once for each
 /// eye, for a simple HMD.)
-///
-/// @return false if we didn't render (typically because we just started up and
-/// don't have pose data for head/eyes yet)
-bool render(osvr::clientkit::DisplayConfig &disp) {
-    static bool announcedPose = false;
-    bool success = false;
+void render(osvr::clientkit::DisplayConfig &disp) {
 
     // Clear the screen to black and clear depth
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /// For each viewer, eye combination...
-    disp.forEachEye([&success](osvr::clientkit::Eye eye) {
+    disp.forEachEye([](osvr::clientkit::Eye eye) {
 
         /// Try retrieving the view matrix (based on eye pose) from OSVR
         double viewMat[OSVR_MATRIX_SIZE];
-        auto gotView = eye.getViewMatrix(
-            OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS, viewMat);
-        if (!gotView) {
-            std::cout << "Waiting for view pose..." << std::endl;
-            return;
-        }
-        if (!announcedPose) {
-            std::cout << "Got view pose, rendering will commence!" << std::endl;
-            announcedPose = true;
-        }
+        eye.getViewMatrix(OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS,
+                          viewMat);
         /// Initialize the ModelView transform with the view matrix we
         /// received
         glMatrixMode(GL_MODELVIEW);
@@ -192,9 +185,7 @@ bool render(osvr::clientkit::DisplayConfig &disp) {
             /// Call out to render our scene.
             renderScene();
         });
-        success = true;
     });
 
     /// Successfully completed a frame render.
-    return success;
 }
