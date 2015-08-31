@@ -33,13 +33,15 @@
 
 // Standard includes
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
 
-class MultipleSyncDevice {
+class MultipleAsyncDevice {
   public:
-    MultipleSyncDevice(OSVR_PluginRegContext ctx)
+    MultipleAsyncDevice(OSVR_PluginRegContext ctx)
         : m_myVal(0), m_buttonPressed(false) {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -54,7 +56,7 @@ class MultipleSyncDevice {
         osvrDeviceTrackerConfigure(opts, &m_tracker);
 
         /// Create the sync device token with the options
-        m_dev.initSync(ctx, "MySyncDevice", opts);
+        m_dev.initSync(ctx, "MyAsyncDevice", opts);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
@@ -76,6 +78,10 @@ class MultipleSyncDevice {
             m_dev, m_button,
             m_buttonPressed ? OSVR_BUTTON_PRESSED : OSVR_BUTTON_NOT_PRESSED, 0);
 
+        /// Because this is an async device, we can block for data,
+        /// simulated here with a sleep.
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
         /// Report the identity pose for sensor 0
         OSVR_PoseState pose;
         osvrPose3SetIdentity(&pose);
@@ -93,11 +99,11 @@ class MultipleSyncDevice {
 };
 } // namespace
 
-OSVR_PLUGIN(com_osvr_example_MultipleSync) {
+OSVR_PLUGIN(com_osvr_example_MultipleAsync) {
 
     /// Create device object.
     osvr::pluginkit::registerObjectForDeletion(ctx,
-                                               new MultipleSyncDevice(ctx));
+                                               new MultipleAsyncDevice(ctx));
 
     return OSVR_RETURN_SUCCESS;
 }
