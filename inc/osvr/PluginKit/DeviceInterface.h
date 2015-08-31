@@ -165,6 +165,9 @@ namespace pluginkit {
         /// timestamp yourself
         ///
         /// Templated to call implementation in the InterfaceType class.
+        ///
+        /// @sa osvr::clientkit::ImagingInterface,
+        /// osvr::clientkit::ImagingMessage
         template <typename InterfaceType, typename MessageType>
         void send(InterfaceType &iface, MessageType const &msg,
                   OSVR_TimeValue const &timestamp) {
@@ -172,14 +175,70 @@ namespace pluginkit {
         }
 
         /// @overload
+        /// This version takes the current time and uses it as the timestamp.
         template <typename InterfaceType, typename MessageType>
         void send(InterfaceType &iface, MessageType const &msg) {
-            OSVR_TimeValue timestamp;
-            util::time::getNow(timestamp);
-            send(iface, msg, timestamp);
+            send(iface, msg, util::time::getNow());
         }
 
-        /// @brief Send a raw bytestream from your device.
+
+        /// @brief Submit a JSON self-descriptor string for the device.
+        ///
+        /// @param json The JSON string to transmit.
+        /// @param len The length of the string.
+        ///
+        /// @throws std::runtime_error if error in sending.
+        void sendJsonDescriptor(OSVR_IN_READS(len) const char *json,
+            OSVR_IN size_t len) {
+            m_validateToken();
+            OSVR_ReturnCode ret =
+                osvrDeviceSendJsonDescriptor(m_dev, json, len);
+            if (OSVR_RETURN_SUCCESS != ret) {
+                throw std::runtime_error("Could not send JSON descriptor!");
+            }
+        }
+
+        /// @overload
+        ///
+        /// For string literals: automatically deduces the length at compile
+        /// time.
+        template <size_t N> void sendJsonDescriptor(const char(&json)[N]) {
+            sendJsonDescriptor(json, N);
+        }
+
+        /// @overload
+        void sendJsonDescriptor(OSVR_IN std::string const &json) {
+            if (json.empty()) {
+                throw std::runtime_error(
+                    "Cannot send an empty JSON descriptor!");
+            }
+            sendJsonDescriptor(json.c_str(), json.length());
+        }
+
+        /// @brief Given a pointer to your object that has a public
+        /// `OSVR_ReturnCode update()` method, registers that instance and
+        /// method as the update callback for the device.
+        ///
+        /// @throws std::runtime_error if update callback registration fails
+        template <typename DeviceObjectType>
+        void registerUpdateCallback(OSVR_IN_PTR DeviceObjectType *object) {
+            if (!object) {
+                throw std::logic_error(
+                    "Cannot register update callback for a null object!");
+            }
+            m_validateToken();
+            OSVR_ReturnCode ret = osvrDeviceRegisterUpdateCallback(
+                m_dev, &detail::UpdateTrampoline<DeviceObjectType>::update,
+                static_cast<void *>(object));
+            if (OSVR_RETURN_SUCCESS != ret) {
+                throw std::runtime_error("Could not register update callback!");
+            }
+        }
+
+        /// @name Advanced Functionality
+        /// @brief Rarely needed
+        /// @{
+        /// @brief Send a raw bytestream from your device with a custom message type.
         ///
         /// @note The same function is used for synchronous and asynchronous
         /// devices: the device token is sufficient to determine whether locking
@@ -287,59 +346,7 @@ namespace pluginkit {
                 sendData(timestamp, msg, bytestream.data(), bytestream.size());
             }
         }
-
-        /// @brief Submit a JSON self-descriptor string for the device.
-        ///
-        /// @param json The JSON string to transmit.
-        /// @param len The length of the string.
-        ///
-        /// @throws std::runtime_error if error in sending.
-        void sendJsonDescriptor(OSVR_IN_READS(len) const char *json,
-                                OSVR_IN size_t len) {
-            m_validateToken();
-            OSVR_ReturnCode ret =
-                osvrDeviceSendJsonDescriptor(m_dev, json, len);
-            if (OSVR_RETURN_SUCCESS != ret) {
-                throw std::runtime_error("Could not send JSON descriptor!");
-            }
-        }
-
-        /// @overload
-        ///
-        /// For string literals: automatically deduces the length at compile
-        /// time.
-        template <size_t N> void sendJsonDescriptor(const char(&json)[N]) {
-            sendJsonDescriptor(json, N);
-        }
-
-        /// @overload
-        void sendJsonDescriptor(OSVR_IN std::string const &json) {
-            if (json.empty()) {
-                throw std::runtime_error(
-                    "Cannot send an empty JSON descriptor!");
-            }
-            sendJsonDescriptor(json.c_str(), json.length());
-        }
-
-        /// @brief Given a pointer to your object that has a public
-        /// `OSVR_ReturnCode update()` method, registers that instance and
-        /// method as the update callback for the device.
-        ///
-        /// @throws std::runtime_error if update callback registration fails
-        template <typename DeviceObjectType>
-        void registerUpdateCallback(OSVR_IN_PTR DeviceObjectType *object) {
-            if (!object) {
-                throw std::logic_error(
-                    "Cannot register update callback for a null object!");
-            }
-            m_validateToken();
-            OSVR_ReturnCode ret = osvrDeviceRegisterUpdateCallback(
-                m_dev, &detail::UpdateTrampoline<DeviceObjectType>::update,
-                static_cast<void *>(object));
-            if (OSVR_RETURN_SUCCESS != ret) {
-                throw std::runtime_error("Could not register update callback!");
-            }
-        }
+        /// @}
 
       private:
         /// @brief Verifies that the user calls some init member before using
