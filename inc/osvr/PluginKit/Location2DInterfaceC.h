@@ -39,11 +39,17 @@
 
 OSVR_EXTERN_C_BEGIN
 
+/** @defgroup PluginKitCLocation2D 2D location interface (base C API)
+    @brief Sending a normalized 2D location from a device in your plugin.
+    @ingroup PluginKit
+    @{
+*/
+
 /** @brief Opaque type used in conjunction with a device token to send data on
     2D Location interface
 */
-typedef struct OSVR_Location2D_DeviceInterfaceObject *
-    OSVR_Location2D_DeviceInterface;
+typedef struct OSVR_Location2D_DeviceInterfaceObject
+    *OSVR_Location2D_DeviceInterface;
 
 /** @brief Specify that your device will implement the Location2D interface.
 
@@ -63,7 +69,6 @@ OSVR_ReturnCode osvrDeviceLocation2DConfigure(
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report data for a specific sensor.
-    @param dev Device token
     @param iface Location2D interface
     @param locationData Copy of 2D Location data
     @param sensor Sensor number

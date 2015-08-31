@@ -39,11 +39,27 @@
 
 OSVR_EXTERN_C_BEGIN
 
-/** @brief Opaque type used in conjunction with a device token to send data on
-    eye tracker interface (which internally is carried over several interfaces).
+/** @defgroup PluginKitEyeTracker Eye tracker interface (base C API)
+    @brief Sending eye tracker reports from a device in your plugin.
+
+    Note: At this time, a single device exposing an eye tracker interface cannot
+    also separately expose a tracker, direction, button, or 2D location
+    interface, due to use of those interfaces internally to carry eye tracker
+    data. This is an implementation limitation, not an inherent design
+    limitation, but it has not yet been necessary to resolve it.
+
+    @todo Handle creating an EyeTracker on the same device as separate button,
+    tracker, direction, and 2D location interfaces.
+
+    @ingroup PluginKit
+    @{
 */
-typedef struct OSVR_EyeTrackerDeviceInterfaceObject *
-    OSVR_EyeTrackerDeviceInterface;
+
+/** @brief Opaque type used to send data on eye tracker interface (which
+    internally is carried over several interfaces).
+*/
+typedef struct OSVR_EyeTrackerDeviceInterfaceObject
+    *OSVR_EyeTrackerDeviceInterface;
 
 /** @brief Specify that your device will implement the Eye Tracker interface.
 
@@ -64,9 +80,6 @@ OSVR_ReturnCode osvrDeviceEyeTrackerConfigure(
     normalized from 0 to 1, lower-left corner of the screen is (0, 0) with the
     screen extending along the positive axes.
 
-    @todo remove dev parameter
-
-    @param dev Device token
     @param iface Eye Tracker interface
     @param gazePosition The 2D eye gaze position
     @param sensor Sensor number
@@ -80,7 +93,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport2DGaze(
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
 
 /** @brief Report 3D gaze ray for an eye
-    @param dev Device token
+
     @param iface Eye Tracker interface
     @param gazeDirection The 3D eye gaze direction - unit vector
     @param gazeBasePoint The 3D eye gaze base - origin of the gaze ray
@@ -96,7 +109,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGaze(
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 5));
 
 /** @brief 3D gaze direction for an eye
-    @param dev Device token
+
     @param iface Eye Tracker interface
     @param gazeDirection The 3D eye gaze direction - unit vector
     @param sensor Sensor number
@@ -110,7 +123,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
 
 /** @brief Report both 2D and 3D gaze for an eye
-    @param dev Device token
+
     @param iface Eye Tracker interface
     @param gazePosition The 2D eye gaze position
     @param gazeDirection The 3D eye gaze direction - unit vector
@@ -128,7 +141,7 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReportGaze(
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 6));
 
 /** @brief Report the blink state
-    @param dev Device token
+
     @param iface Eye Tracker interface
     @param blink Whether the eye is blinking ("pressed") or not.
     @param sensor Sensor number
@@ -139,6 +152,8 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReportBlink(
     OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
     OSVR_IN OSVR_EyeTrackerBlinkState blink, OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
+
+/** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
 

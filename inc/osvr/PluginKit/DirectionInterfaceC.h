@@ -39,11 +39,17 @@
 
 OSVR_EXTERN_C_BEGIN
 
+/** @defgroup PluginKitCDirection 3D direction interface (base C API)
+    @brief Sending 3D direction from a device in your plugin.
+    @ingroup PluginKit
+    @{
+*/
+
 /** @brief Opaque type used in conjunction with a device token to send data on
     3D Direction interface.
 */
-typedef struct OSVR_DirectionDeviceInterfaceObject *
-    OSVR_DirectionDeviceInterface;
+typedef struct OSVR_DirectionDeviceInterfaceObject
+    *OSVR_DirectionDeviceInterface;
 
 /** @brief Specify that your device will implement the Direction interface.
 
@@ -56,20 +62,18 @@ typedef struct OSVR_DirectionDeviceInterfaceObject *
     limitations.
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode
-osvrDeviceDirectionConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-                             OSVR_OUT_PTR OSVR_DirectionDeviceInterface *iface,
-                             OSVR_IN OSVR_ChannelCount numSensors
-                                 OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
+OSVR_ReturnCode osvrDeviceDirectionConfigure(
+    OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+    OSVR_OUT_PTR OSVR_DirectionDeviceInterface *iface,
+    OSVR_IN OSVR_ChannelCount numSensors OSVR_CPP_ONLY(= 1))
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report data for a specific sensor.
-    @param dev Device token
+
     @param iface Direction interface
     @param directionData Copy of 3D Direction data
     @param sensor Sensor number
     @param timestamp Timestamp correlating to 3D direction data.
-
-    @todo Remove the dev parameter
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceDirectionReportData(
