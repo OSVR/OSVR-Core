@@ -15,7 +15,6 @@ set(API
     "${HEADER_LOCATION}/Fold.h"
     "${HEADER_LOCATION}/HasType.h"
     "${HEADER_LOCATION}/Head.h"
-    "${HEADER_LOCATION}/HomogeneousTypeMap.h"
     "${HEADER_LOCATION}/If.h"
     "${HEADER_LOCATION}/Length.h"
     "${HEADER_LOCATION}/List.h"
@@ -32,6 +31,7 @@ set(API
     "${HEADER_LOCATION}/Tail.h"
     "${HEADER_LOCATION}/Transform.h"
     "${HEADER_LOCATION}/TypePack.h"
+    "${HEADER_LOCATION}/TypeKeyedMap.h"
     "${HEADER_LOCATION}/TypeKeyedTuple.h"
     "${HEADER_LOCATION}/Void.h")
 

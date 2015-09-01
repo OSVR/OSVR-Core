@@ -57,7 +57,6 @@ namespace typepack {} // namespace typepack
 #include "Fold.h"
 #include "HasType.h"
 #include "Head.h"
-#include "HomogeneousTypeMap.h"
 #include "If.h"
 #include "Length.h"
 #include "List.h"
@@ -73,6 +72,7 @@ namespace typepack {} // namespace typepack
 #include "T.h"
 #include "Tail.h"
 #include "Transform.h"
+#include "TypeKeyedMap.h"
 #include "TypeKeyedTuple.h"
 #include "Void.h"
 
