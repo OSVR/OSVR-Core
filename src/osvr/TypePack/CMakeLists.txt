@@ -1,8 +1,38 @@
 osvr_setup_lib_vars(TypePack)
 
 set(API
+    "${HEADER_LOCATION}/Always.h"
+    "${HEADER_LOCATION}/And.h"
+    "${HEADER_LOCATION}/Apply.h"
+    "${HEADER_LOCATION}/ApplyList.h"
+    "${HEADER_LOCATION}/Bool.h"
+    "${HEADER_LOCATION}/CoerceList.h"
+    "${HEADER_LOCATION}/Compose.h"
+    "${HEADER_LOCATION}/Concat.h"
+    "${HEADER_LOCATION}/Contains.h"
+    "${HEADER_LOCATION}/Defer.h"
+    "${HEADER_LOCATION}/FindFirst.h"
+    "${HEADER_LOCATION}/Fold.h"
+    "${HEADER_LOCATION}/HasType.h"
+    "${HEADER_LOCATION}/Head.h"
+    "${HEADER_LOCATION}/HomogeneousTypeMap.h"
+    "${HEADER_LOCATION}/If.h"
+    "${HEADER_LOCATION}/Length.h"
+    "${HEADER_LOCATION}/List.h"
+    "${HEADER_LOCATION}/Not.h"
+    "${HEADER_LOCATION}/Or.h"
+    "${HEADER_LOCATION}/PushBack.h"
+    "${HEADER_LOCATION}/PushFront.h"
+    "${HEADER_LOCATION}/Quote.h"
+    "${HEADER_LOCATION}/QuoteTrait.h"
+    "${HEADER_LOCATION}/Size.h"
+    "${HEADER_LOCATION}/SizeT.h"
+    "${HEADER_LOCATION}/SplitList.h"
+    "${HEADER_LOCATION}/T.h"
+    "${HEADER_LOCATION}/Tail.h"
+    "${HEADER_LOCATION}/Transform.h"
     "${HEADER_LOCATION}/TypePack.h"
-    "${HEADER_LOCATION}/TypePackRuntime.h")
+    "${HEADER_LOCATION}/Void.h")
 
 ###
 # Add the dummy target to make the headers show up in IDEs

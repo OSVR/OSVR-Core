@@ -1,5 +1,5 @@
 /** @file
-    @brief Header with run-time extensions to the TypePack simple
+    @brief Header with a run-time extensions to the TypePack simple
     template-parameter-pack-based metaprogramming library
 
     @date 2015
@@ -19,11 +19,13 @@
 // Project home: https://github.com/ericniebler/meta
 //
 
-#ifndef INCLUDED_TypePackRuntime_h_GUID_29C6B905_4493_43AF_A811_71589CFD6FBC
-#define INCLUDED_TypePackRuntime_h_GUID_29C6B905_4493_43AF_A811_71589CFD6FBC
+#ifndef INCLUDED_HomogeneousTypeMap_h_GUID_29C6B905_4493_43AF_A811_71589CFD6FBC
+#define INCLUDED_HomogeneousTypeMap_h_GUID_29C6B905_4493_43AF_A811_71589CFD6FBC
 
 // Internal Includes
-#include <osvr/TypePack/TypePack.h>
+#include "Contains.h"
+#include "FindFirst.h"
+#include "Length.h"
 
 // Library/third-party includes
 // - none
@@ -33,30 +35,6 @@
 
 namespace osvr {
 namespace typepack {
-    namespace detail {
-        template <typename Needle, std::size_t i, typename... Ts>
-        struct find_first_impl;
-        // Expand lists
-        template <typename Needle, typename... Ts>
-        struct find_first_impl<Needle, 0, list<Ts...>>
-            : find_first_impl<Needle, 0, Ts...> {};
-        // base case: at the head
-        template <typename Needle, std::size_t i, typename... Ts>
-        struct find_first_impl<Needle, i, Needle, Ts...> {
-            using type = typepack::size_t_<i>;
-        };
-        // Recursive case
-        template <typename Needle, std::size_t i, typename Head, typename... Ts>
-        struct find_first_impl<Needle, i, Head, Ts...> {
-            using type = typepack::t_<find_first_impl<Needle, i + 1, Ts...>>;
-        };
-        /// base case not found
-        template <typename Needle, std::size_t i>
-        struct find_first_impl<Needle, i> {};
-
-        template <typename List, typename Needle>
-        using find_first = typepack::t_<find_first_impl<Needle, 0, List>>;
-    } // namespace detail
     /// @brief A class that uses types as an index into a container with
     /// uniform-typed contents, somewhat like a map except all elements are
     /// default-constructed rather than having an optional "not set" status.
@@ -68,31 +46,31 @@ namespace typepack {
         using reference = value_type &;
         using const_reference = value_type const &;
         using key_types = KeyList;
-        template <typename Key>
-        using valid_key = typepack::contains<key_types, Key>;
+        template <typename Key> using valid_key = contains<key_types, Key>;
+        template <typename Key> using index = find_first<key_types, Key>;
 
         template <typename Key> reference operator()() {
             static_assert(valid_key<Key>::value,
                           "Key type not found in the list!");
-            return m_contents[detail::find_first<key_types, Key>::value];
+            return m_contents[index<Key>::value];
         }
 
         template <typename Key> const_reference operator()() const {
             static_assert(valid_key<Key>::value,
                           "Key type not found in the list!");
-            return m_contents[detail::find_first<key_types, Key>::value];
+            return m_contents[index<Key>::value];
         }
 
         template <typename Key> reference operator[](Key &&) {
             static_assert(valid_key<Key>::value,
                           "Key type not found in the list!");
-            return m_contents[detail::find_first<key_types, Key>::value];
+            return m_contents[index<Key>::value];
         }
 
         template <typename Key> const_reference operator[](Key &&) const {
             static_assert(valid_key<Key>::value,
                           "Key type not found in the list!");
-            return m_contents[detail::find_first<key_types, Key>::value];
+            return m_contents[index<Key>::value];
         }
 
       private:
