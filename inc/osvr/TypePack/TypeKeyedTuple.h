@@ -52,6 +52,9 @@ namespace typepack {
     /// Values can be accessed with a templated getElement member function, a
     /// subscript operator overload, as well as the nonmember get() free
     /// function templates.
+    ///
+    /// Element access performance is equal to `get()` on a std::tuple (should
+    /// be constant)
     template <typename KeyList, typename ComputeValueTypes>
     class TypeKeyedTuple {
         using value_types = transform<KeyList, ComputeValueTypes>;
