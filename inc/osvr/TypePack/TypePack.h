@@ -73,6 +73,7 @@ namespace typepack {} // namespace typepack
 #include "T.h"
 #include "Tail.h"
 #include "Transform.h"
+#include "TypeKeyedTuple.h"
 #include "Void.h"
 
 #endif // INCLUDED_TypePack_h_GUID_3431E1BF_7DF4_429A_0C80_2D14E1948181
