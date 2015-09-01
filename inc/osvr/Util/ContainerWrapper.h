@@ -27,7 +27,7 @@
 #define INCLUDED_ContainerWrapper_h_GUID_87C9C3C2_1A4E_4BA8_A160_96145B60CEDB
 
 // Internal Includes
-#include <osvr/Util/TypePack.h>
+#include <osvr/TypePack/TypePack.h>
 
 // Library/third-party includes
 // - none

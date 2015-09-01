@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Util/TypePack.h>
+#include <osvr/TypePack/TypePack.h>
 
 // Library/third-party includes
 #include "gtest/gtest.h"
@@ -37,7 +37,7 @@
 using std::is_same;
 using std::true_type;
 using std::false_type;
-namespace tp = osvr::util::typepack;
+namespace tp = osvr::typepack;
 
 // THIS SECTION MUST BE MANUALLY KEPT IN-SYNC!
 using myhead = uint32_t;
@@ -66,8 +66,9 @@ TEST(TypePack, basicListStructure) {
                   "Result of list is list");
     static_assert(is_same<mylist, tp::coerce_list<mylist>>::value,
                   "Coerce list from list");
-    static_assert(is_same<mylist, tp::coerce_list<tp::list<tp::list<mylist>>>>::value,
-                  "Coerce list from double-wrapped list");
+    static_assert(
+        is_same<mylist, tp::coerce_list<tp::list<tp::list<mylist>>>>::value,
+        "Coerce list from double-wrapped list");
 }
 
 TEST(TypePack, splitList) {

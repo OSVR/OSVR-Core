@@ -11,6 +11,7 @@ endif()
 
 set(LIBRARIES_PluginKit libfunctionality::functionality)
 set(LIBRARIES_VRPNServer libfunctionality::functionality)
+set(LIBRARIES_TypePack osvrTypePack)
 
 set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_thread)
 if(TARGET boost_filesystem)

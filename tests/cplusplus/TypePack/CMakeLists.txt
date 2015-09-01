@@ -1,0 +1,5 @@
+foreach(testname TypePack)
+    add_executable(${testname} ${testname}.cpp)
+    target_link_libraries(${testname} osvrTypePack)
+    osvr_setup_gtest(${testname})
+endforeach()
