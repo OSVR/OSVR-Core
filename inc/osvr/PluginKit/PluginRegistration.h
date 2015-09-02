@@ -96,8 +96,7 @@ namespace pluginkit {
         }
 
         /// @brief Traits based overload to copy a hardware detect callback
-        /// passed
-        /// by value then register the copy.
+        /// passed by value then register the copy.
         template <typename T>
         inline OSVR_ReturnCode registerHardwareDetectCallbackImpl(
             OSVR_PluginRegContext ctx, T functor,
@@ -110,6 +109,37 @@ namespace pluginkit {
 #endif
             T *functorCopy = new T(functor);
             return registerHardwareDetectCallbackImpl(ctx, functorCopy);
+        }
+
+        /// @brief Traits-based overload to register an instantiation callback
+        /// where we're given a pointer to a function object.
+        template <typename T>
+        inline OSVR_ReturnCode registerDriverInstantiationCallbackImpl(
+            OSVR_PluginRegContext ctx, const char driverName[], T functor,
+            typename boost::enable_if<boost::is_pointer<T> >::type * = NULL) {
+            typedef typename boost::remove_pointer<T>::type FunctorType;
+            registerObjectForDeletion(ctx, functor);
+            return osvrPluginRegisterHardwareDetectCallback(
+                ctx, driverName,
+                &util::GenericCaller<OSVR_DriverInstantiationCallback,
+                                     FunctorType, util::this_last_t>::call,
+                static_cast<void *>(functor));
+        }
+        /// @brief Traits based overload to copy an instantiation callback
+        /// passed by value then register the copy.
+        template <typename T>
+        inline OSVR_ReturnCode registerDriverInstantiationCallbackImpl(
+            OSVR_PluginRegContext ctx, const char driverName[], T functor,
+            typename boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
+#ifdef OSVR_HAVE_BOOST_IS_COPY_CONSTRUCTIBLE
+            BOOST_STATIC_ASSERT_MSG(boost::is_copy_constructible<T>::value,
+                                    "Hardware detect callback functors must be "
+                                    "either passed as a pointer or be "
+                                    "copy-constructible");
+#endif
+            T *functorCopy = new T(functor);
+            return registerDriverInstantiationCallbackImpl(ctx, driverName,
+                                                           functorCopy);
         }
     } // namespace detail
 #endif
@@ -130,6 +160,28 @@ namespace pluginkit {
             detail::registerHardwareDetectCallbackImpl(ctx, functor);
         if (ret != OSVR_RETURN_SUCCESS) {
             throw std::runtime_error("registerHardwareDetectCallback failed!");
+        }
+    }
+
+    /// @brief Registers a function object to be called when the server is told
+    /// to instantiate a driver by name with parameters.
+    ///
+    /// Also provides for deletion of the function object.
+    ///
+    /// @param ctx The registration context passed to your entry point.
+    /// @param driverName The driver name you're advertising.
+    /// @param functor An function object (with operator() defined). Pass either
+    /// a pointer, which will transfer ownership, or an object by value, which
+    /// will result in a copy being made.
+    template <typename T>
+    inline void registerDriverInstantiationCallback(OSVR_PluginRegContext ctx,
+                                                    const char driverName[],
+                                                    T functor) {
+        OSVR_ReturnCode ret = detail::registerDriverInstantiationCallbackImpl(
+            ctx, driverName, functor);
+        if (ret != OSVR_RETURN_SUCCESS) {
+            throw std::runtime_error(
+                "registerDriverInstantiationCallback failed!");
         }
     }
     /// @}
