@@ -102,9 +102,7 @@ namespace client {
             report.sensor = data.sensor;
             report.state = data.gestureState;
             report.gestureID = id;
-            common::ClientInterfacePtr anInterface;
             for (auto &iface : m_interfaces) {
-                anInterface = iface;
                 iface->triggerCallbacks(timestamp, report);
             }
         }
