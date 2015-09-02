@@ -88,8 +88,12 @@ class CameraDevice : boost::noncopyable {
             return OSVR_RETURN_SUCCESS;
         }
 
+        // Get a timestamp for the upcoming camera grab.
+        auto frameTime = osvr::util::time::getNow();
+
         // Trigger a camera grab.
         bool grabbed = m_camera.grab();
+
         if (!grabbed) {
             // No frame available.
             return OSVR_RETURN_SUCCESS;
@@ -99,8 +103,11 @@ class CameraDevice : boost::noncopyable {
             return OSVR_RETURN_FAILURE;
         }
 
-        // If larger than 160x120, will used shared memory backend only.
-        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_frame));
+        // Send the image.
+        // Note that if larger than 160x120 (RGB), will used shared memory
+        // backend only.
+        m_dev.send(m_imaging, osvr::pluginkit::ImagingMessage(m_frame),
+                   frameTime);
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -111,7 +118,6 @@ class CameraDevice : boost::noncopyable {
     cv::VideoCapture m_camera;
     int m_channel;
     cv::Mat m_frame;
-    cv::Mat m_scaledFrame;
 };
 
 class CameraDetection {

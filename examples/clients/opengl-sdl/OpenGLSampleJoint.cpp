@@ -1,8 +1,7 @@
 /** @file
     @brief Simple example OpenGL application using the OSVR ClientKit display
-   methods. This example shows the use of the C API display methods, even though
-   it is in C++. See OpenGLSample.cpp for a more idiomatic-C++ sample using the
-   C++ API headers.
+   methods in the C++ API headers, using the @ref JointClientKit to run an
+   internal server.
 
     @date 2015
 
@@ -26,8 +25,9 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/JointClientKit/JointClientKitC.h>
 #include <osvr/ClientKit/ClientKit.h>
-#include <osvr/ClientKit/DisplayC.h>
+#include <osvr/ClientKit/Display.h>
 #include "SDL2Helpers.h"
 #include "OpenGLCube.h"
 
@@ -42,7 +42,7 @@ static auto const WIDTH = 1920;
 static auto const HEIGHT = 1080;
 
 // Forward declarations of rendering functions defined below.
-void render(OSVR_DisplayConfig disp);
+void render(osvr::clientkit::DisplayConfig &disp);
 void renderScene();
 
 int main(int argc, char *argv[]) {
@@ -70,21 +70,42 @@ int main(int argc, char *argv[]) {
     // Turn on V-SYNC
     SDL_GL_SetSwapInterval(1);
 
+    //--- BEGIN JointClientKit-specific code ---//
+    // Prepare JointClientKit options: just an auto-load and a hardware detect
+    // for this sample. (Thus, only fully-autoconfigurable systems like the HDK
+    // will work with this sample.)
+    OSVR_JointClientOpts opts = osvrJointClientCreateOptions();
+    osvrJointClientOptionsAutoloadPlugins(opts);
+    osvrJointClientOptionsTriggerHardwareDetect(opts);
+
+    // Now start it up and get the context
+    OSVR_ClientContext rawCtx =
+        osvrJointClientInit("com.osvr.example.SDLOpenGLJoint", opts);
+    if (!rawCtx) {
+        std::cerr << "Error starting up the joint client/server" << std::endl;
+        return -1;
+    }
+
+    // Wrap the context in the C++ API's client context object, which will take
+    // ownership of it.
+    osvr::clientkit::ClientContext ctx(rawCtx);
+
+    // Update it once just to get things going.
+    ctx.update();
+
+    //--- END JointClientKit-specific code ---//
+    // Past here, everything is the same as in OpenGLSample.cpp
     // Start OSVR and get OSVR display config
-    osvr::clientkit::ClientContext ctx("com.osvr.example.SDLOpenGL");
-    OSVR_DisplayConfig display;
-    auto ret = osvrClientGetDisplay(ctx.get(), &display);
-    if (ret != OSVR_RETURN_SUCCESS) {
-        std::cerr << "\nCould not get display config (server probably not "
-                     "running or not behaving), exiting."
-                  << std::endl;
+    osvr::clientkit::DisplayConfig display(ctx);
+    if (!display.valid()) {
+        std::cerr << "\nCould not get display config, exiting." << std::endl;
         return -1;
     }
 
     std::cout << "Waiting for the display to fully start up, including "
                  "receiving initial pose update..."
               << std::endl;
-    while (osvrClientCheckDisplayStartup(display) != OSVR_RETURN_SUCCESS) {
+    while (!display.checkStartup()) {
         ctx.update();
     }
     std::cout << "OK, display startup status is good!" << std::endl;
@@ -139,75 +160,56 @@ void renderScene() { draw_cube(1.0); }
 /// This function will set up viewport, initialize view and projection matrices
 /// to current values, then call `renderScene()` as needed (e.g. once for each
 /// eye, for a simple HMD.)
-void render(OSVR_DisplayConfig disp) {
-    /// For each viewer...
-    OSVR_ViewerCount viewers;
-    osvrClientGetNumViewers(disp, &viewers);
+void render(osvr::clientkit::DisplayConfig &disp) {
 
     // Clear the screen to black and clear depth
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (OSVR_ViewerCount viewer = 0; viewer < viewers; ++viewer) {
+    /// For each viewer, eye combination...
+    disp.forEachEye([](osvr::clientkit::Eye eye) {
 
-        /// For each eye of the given viewer...
-        OSVR_EyeCount eyes;
-        osvrClientGetNumEyesForViewer(disp, viewer, &eyes);
-        for (OSVR_EyeCount eye = 0; eye < eyes; ++eye) {
+        /// Try retrieving the view matrix (based on eye pose) from OSVR
+        double viewMat[OSVR_MATRIX_SIZE];
+        eye.getViewMatrix(OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS,
+                          viewMat);
+        /// Initialize the ModelView transform with the view matrix we
+        /// received
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glMultMatrixd(viewMat);
 
-            /// Try retrieving the view matrix (based on eye pose) from OSVR
-            double viewMat[OSVR_MATRIX_SIZE];
-            osvrClientGetViewerEyeViewMatrixd(
-                disp, viewer, eye,
-                OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS, viewMat);
+        /// For each display surface seen by the given eye of the given
+        /// viewer...
+        eye.forEachSurface([](osvr::clientkit::Surface surface) {
+            auto viewport = surface.getRelativeViewport();
+            glViewport(static_cast<GLint>(viewport.left),
+                       static_cast<GLint>(viewport.bottom),
+                       static_cast<GLsizei>(viewport.width),
+                       static_cast<GLsizei>(viewport.height));
 
-            /// Initialize the ModelView transform with the view matrix we
-            /// received
-            glMatrixMode(GL_MODELVIEW);
+            /// Set the OpenGL projection matrix based on the one we
+            /// computed.
+            double zNear = 0.1;
+            double zFar = 100;
+            double projMat[OSVR_MATRIX_SIZE];
+            surface.getProjectionMatrix(
+                zNear, zFar, OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
+                                 OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT,
+                projMat);
+
+            glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glMultMatrixd(viewMat);
+            glMultMatrixd(projMat);
 
-            /// For each display surface seen by the given eye of the given
-            /// viewer...
-            OSVR_SurfaceCount surfaces;
-            osvrClientGetNumSurfacesForViewerEye(disp, viewer, eye, &surfaces);
-            for (OSVR_SurfaceCount surface = 0; surface < surfaces; ++surface) {
+            /// Set the matrix mode to ModelView, so render code doesn't
+            /// mess with the projection matrix on accident.
+            glMatrixMode(GL_MODELVIEW);
 
-                /// Set the OpenGL viewport based on the one we computed.
-                OSVR_ViewportDimension left;
-                OSVR_ViewportDimension bottom;
-                OSVR_ViewportDimension width;
-                OSVR_ViewportDimension height;
-                osvrClientGetRelativeViewportForViewerEyeSurface(
-                    disp, viewer, eye, surface, &left, &bottom, &width,
-                    &height);
+            /// Call out to render our scene.
+            renderScene();
+        });
+    });
 
-                glViewport(static_cast<GLint>(left), static_cast<GLint>(bottom),
-                           static_cast<GLsizei>(width),
-                           static_cast<GLsizei>(height));
-
-                /// Set the OpenGL projection matrix based on the one we
-                /// computed.
-                double zNear = 0.1;
-                double zFar = 100;
-                double projMat[OSVR_MATRIX_SIZE];
-                osvrClientGetViewerEyeSurfaceProjectionMatrixd(
-                    disp, viewer, eye, surface, zNear, zFar,
-                    OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS |
-                        OSVR_MATRIX_SIGNEDZ | OSVR_MATRIX_RHINPUT,
-                    projMat);
-                glMatrixMode(GL_PROJECTION);
-                glLoadIdentity();
-                glMultMatrixd(projMat);
-
-                /// Set the matrix mode to ModelView, so render code doesn't
-                /// mess with the projection matrix on accident.
-                glMatrixMode(GL_MODELVIEW);
-
-                /// Call out to render our scene.
-                renderScene();
-            }
-        }
-    }
     /// Successfully completed a frame render.
 }

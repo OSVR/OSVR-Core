@@ -40,6 +40,8 @@
 namespace osvr {
 
 namespace clientkit {
+    /// @addtogroup ClientKitCPP
+    /// @{
     /// @brief A smart pointer controlling deletion of the image buffer. The
     /// buffer is automatically wrapped in one of these before your callback
     /// gets it.
@@ -66,8 +68,7 @@ namespace clientkit {
         void *userdata, util::time::TimeValue const &timestamp,
         ImagingReportOpenCV report);
 
-    /// @brief Register a callback to receive each new full frame of imaging
-    /// data.
+    /// @}
 } // end namespace clientkit
 
 } // end namespace osvr

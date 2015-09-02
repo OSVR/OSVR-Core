@@ -1,6 +1,6 @@
 set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
     com_osvr_example_DummyDetectAndCreateAsync
-    com_osvr_example_MultipleSync)
+    com_osvr_example_MultipleAsync)
 
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
     com_osvr_example_AnalogSync
@@ -42,6 +42,8 @@ osvr_add_plugin(NAME com_osvr_example_EyeTracker
 set_target_properties(com_osvr_example_EyeTracker PROPERTIES
     FOLDER "OSVR Example Plugins")
 target_link_libraries(com_osvr_example_EyeTracker osvr_cxx11_flags)
+
+target_link_libraries(com_osvr_example_MultipleAsync osvr_cxx11_flags)
 
 ## Build the code from the selfcontained example
 osvr_convert_json(com_osvr_example_selfcontainedDetectAndCreate_json

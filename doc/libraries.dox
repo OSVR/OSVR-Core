@@ -9,7 +9,8 @@
     - Comprehensive (auto-detects hardware and creates device): com_osvr_example_DummyDetectAndCreateAsync.cpp
     - com_osvr_example_AnalogSync.cpp
     - com_osvr_example_EyeTracker.cpp
-    - com_osvr_example_MultipleSync.cpp
+    - com_osvr_example_MultipleAsync.cpp
+    - com_osvr_VideoCapture_OpenCV.cpp - not strictly an example, but an actual functioning plugin using OpenCV to supply images.
 */
 
 /** @defgroup ClientKit ClientKit

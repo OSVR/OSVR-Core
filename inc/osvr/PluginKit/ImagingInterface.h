@@ -47,15 +47,24 @@ namespace pluginkit {
         @{
     */
 
+    /// @brief A class wrapping a cv::Mat representing a frame, as well as the
+    /// sensor ID it corresponds to. Pass to
+    /// osvr::pluginkit::DeviceToken::send() along with your
+    /// osvr::pluginkit::ImagingInterface.
     class ImagingMessage {
       public:
+        /// @brief Constructor, optionally taking a sensor number. Clones the
+        /// supplied image/data as the imaging interface will take ownership of
+        /// the given buffer and free it when done.
         ImagingMessage(cv::Mat const &frame, OSVR_ChannelCount sensor = 0)
             : m_sensor(sensor) {
             m_frame = frame.clone();
         }
 
+        /// @brief Retrieves a reference to the internal (cloned) data.
         cv::Mat const &getFrame() const { return m_frame; }
 
+        /// @brief Gets the sensor number.
         OSVR_ChannelCount getSensor() const { return m_sensor; }
 
       private:
@@ -63,10 +72,17 @@ namespace pluginkit {
         OSVR_ChannelCount m_sensor;
     };
 
+    /// @brief A class wrapping an imaging interface for a device.
     class ImagingInterface {
       public:
+        /// @brief Default constructor or constructor from an existing
+        /// OSVR_ImagingDeviceInterface (assumed to be registered with an
+        /// OSVR_DeviceInitOptions already)
         ImagingInterface(OSVR_ImagingDeviceInterface iface = NULL)
             : m_iface(iface) {}
+
+        /// @brief Constructor that registers an imaging interface with the
+        /// device init options object.
         explicit ImagingInterface(OSVR_DeviceInitOptions opts,
                                   OSVR_ChannelCount numSensors = 1) {
             OSVR_ReturnCode ret =
@@ -78,6 +94,8 @@ namespace pluginkit {
             }
         }
 
+        /// @brief Send method - usually called by
+        /// osvr::pluginkit::DeviceToken::send()
         void send(DeviceToken &dev, ImagingMessage const &message,
                   OSVR_TimeValue const &timestamp) {
             if (!m_iface) {

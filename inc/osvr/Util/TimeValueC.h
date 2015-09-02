@@ -50,10 +50,13 @@ OSVR_EXTERN_C_BEGIN
     @ingroup Util
 
     This provides a level of interoperability with struct timeval on systems
-   with that facility. It provides a neutral representation with sufficiently
-   large types.
+    with that facility. It provides a neutral representation with sufficiently
+    large types.
 
-    For C++ code, use of boost::chrono instead is recommended.
+    For C++ code, use of std::chrono or boost::chrono instead is recommended.
+
+    Note that these time values may not necessarily correlate between processes
+   so should not be used to estimate or measure latency, etc.
 
     @{
 */

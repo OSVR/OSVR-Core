@@ -65,6 +65,11 @@ if(ANDROID)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
 endif()
 
+set(BUILD_JOINTCLIENTKIT OFF)
+if(BUILD_CLIENT AND BUILD_SERVER)
+    set(BUILD_JOINTCLIENTKIT ON)
+endif()
+
 set(BUILD_VIDEOTRACKER_PLUGIN OFF)
 # TODO enable this on non-Windows once it's not tied to the DirectShow driver.
 if(WIN32 AND BUILD_SERVER_PLUGINS)
@@ -383,6 +388,21 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     INSTALL_DESTINATION "${CMAKE_INSTALL_DOCDIR}/api"
     INSTALL_COMPONENT DevelDocs
     NO_PDF)
+
+# Replace some of the images from doxygen.
+foreach(fn ftv2mnode.png ftv2pnode.png ftv2mlastnode.png)
+    add_custom_command(TARGET doc
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-generated/html/"
+        VERBATIM
+        COMMENT "Copying image ${fn} to override Doxygen theme")
+
+    add_custom_command(TARGET doc_external
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-external/html/"
+        VERBATIM
+        COMMENT "Copying image ${fn} to override Doxygen theme")
+endforeach()
 
 ###
 # Set Up Package for External Usage

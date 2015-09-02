@@ -171,11 +171,23 @@ class VRPNHardwareDetect : boost::noncopyable {
                     gotDevice = true;
                     m_handlePath(dev->path);
                     osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+                    auto name = m_data.getName("OSVRHackerDevKit");
+                    auto decName = reg.useDecoratedName(name);
                     reg.constructAndRegisterDevice<
-                        vrpn_Tracker_OSVRHackerDevKit>(
-                        m_data.getName("OSVRHackerDevKit"));
+                        vrpn_Tracker_OSVRHackerDevKit>(name);
                     reg.setDeviceDescriptor(osvr::util::makeString(
                         com_osvr_Multiserver_OSVRHackerDevKit_json));
+                    {
+                        osvr::vrpnserver::VRPNDeviceRegistration reg2(ctx);
+                        reg2.registerDevice(
+                            new vrpn_Tracker_DeadReckoning_Rotation(
+                                reg2.useDecoratedName(m_data.getName(
+                                    "OSVRHackerDevKitPrediction")),
+                                reg2.getVRPNConnection(), "*" + decName, 1,
+                                1.0 / 60.0, false));
+                        reg2.setDeviceDescriptor(osvr::util::makeString(
+                            com_osvr_Multiserver_OSVRHackerDevKit_json));
+                    }
                     continue;
                 }
             }

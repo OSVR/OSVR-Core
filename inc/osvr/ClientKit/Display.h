@@ -403,9 +403,10 @@ namespace clientkit {
         }
 
         /// @brief Construct from a (presumably-externally-managed) raw display
-        /// config, not affecting lifetime..
+        /// config, not affecting lifetime.
         explicit DisplayConfig(OSVR_DisplayConfig disp) : m_disp(disp) {}
 
+        /// @brief Checks the validity of the contained pointer.
         bool valid() const { return m_disp != NULL; }
 
         DisplayConfig &ensureValid() {
@@ -421,6 +422,14 @@ namespace clientkit {
                     "Can't operate on an invalid DisplayConfig!");
             }
             return *this;
+        }
+
+        /// @brief Checks if the display is fully configured and ready,
+        /// including first pose.
+        /// @sa osvrClientCheckDisplayStartup()
+        bool checkStartup() const {
+            ensureValid();
+            return osvrClientCheckDisplayStartup(m_disp) == OSVR_RETURN_SUCCESS;
         }
 
         /// @name Child-related methods

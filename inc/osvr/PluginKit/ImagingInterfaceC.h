@@ -40,10 +40,12 @@
 /* Standard includes */
 /* none */
 
-/** @defgroup PluginKitCImaging Imaging interface underlying C API - not
-   intended for direct usage
+/** @defgroup PluginKitCImaging Imaging interface (underlying C API)
+
     @brief Used by the C++ header-only wrappers to send image reports from a
-   device in your plugin.
+    device in your plugin. **Not intended for direct usage if it can be
+    avoided** due to lifetime management and datatypes.
+
     @ingroup PluginKit
     @{
 */
@@ -72,7 +74,10 @@ osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                            OSVR_IN OSVR_ChannelCount numSensors
                                OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
 
-/** @brief Report a frame for a sensor.
+/** @brief Report a frame for a sensor. Takes ownership of the buffer and
+    **frees it with the OpenCV deallocation functions** when done, so only
+    pass in memory allocated by the matching version of OpenCV.
+
     @param dev Device token
     @param iface Imaging interface
     @param metadata Image metadata

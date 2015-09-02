@@ -45,8 +45,13 @@
 namespace osvr {
 
 namespace clientkit {
+    /// @addtogroup ClientKitCPP
+    /// @{
+    /// @brief Register a callback to receive each new full frame of imaging
+    /// data.
     void registerImagingCallback(Interface &iface, ImagingCallbackOpenCV cb,
                                  void *userdata);
+#ifndef OSVR_DOXYGEN_EXTERNAL
     /// @brief Implementation details
     namespace detail {
         /// @brief Class serving to maintain the registration of and wrap a
@@ -108,6 +113,8 @@ namespace clientkit {
         };
     } // namespace detail
 
+#endif // OSVR_DOXYGEN_EXTERNAL
+
     inline void registerImagingCallback(Interface &iface,
                                         ImagingCallbackOpenCV cb,
                                         void *userdata) {
@@ -115,6 +122,8 @@ namespace clientkit {
             new detail::ImagingCallbackRegistration(iface, cb, userdata));
         iface.takeOwnership(ptr);
     }
+
+    /// @]
 
 } // end namespace clientkit
 

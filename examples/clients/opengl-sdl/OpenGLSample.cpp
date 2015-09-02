@@ -27,6 +27,7 @@
 #include <osvr/ClientKit/ClientKit.h>
 #include <osvr/ClientKit/Display.h>
 #include "SDL2Helpers.h"
+#include "OpenGLCube.h"
 
 // Library/third-party includes
 #include <SDL.h>
@@ -39,8 +40,7 @@ static auto const WIDTH = 1920;
 static auto const HEIGHT = 1080;
 
 // Forward declarations of rendering functions defined below.
-void draw_cube(double radius);
-bool render(osvr::clientkit::DisplayConfig &disp);
+void render(osvr::clientkit::DisplayConfig &disp);
 void renderScene();
 
 int main(int argc, char *argv[]) {
@@ -78,6 +78,14 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    std::cout << "Waiting for the display to fully start up, including "
+                 "receiving initial pose update..."
+              << std::endl;
+    while (!display.checkStartup()) {
+        ctx.update();
+    }
+    std::cout << "OK, display startup status is good!" << std::endl;
+
     // Event handler
     SDL_Event e;
 #ifndef __ANDROID__ // Don't want to pop up the on-screen keyboard
@@ -108,12 +116,10 @@ int main(int argc, char *argv[]) {
         ctx.update();
 
         // Render
-        bool valid = render(display);
+        render(display);
 
-        // Swap buffers if we had all the data to render.
-        if (valid) {
-            SDL_GL_SwapWindow(window.get());
-        }
+        // Swap buffers
+        SDL_GL_SwapWindow(window.get());
     }
 
     return 0;
@@ -130,32 +136,19 @@ void renderScene() { draw_cube(1.0); }
 /// This function will set up viewport, initialize view and projection matrices
 /// to current values, then call `renderScene()` as needed (e.g. once for each
 /// eye, for a simple HMD.)
-///
-/// @return false if we didn't render (typically because we just started up and
-/// don't have pose data for head/eyes yet)
-bool render(osvr::clientkit::DisplayConfig &disp) {
-    static bool announcedPose = false;
-    bool success = false;
+void render(osvr::clientkit::DisplayConfig &disp) {
 
     // Clear the screen to black and clear depth
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /// For each viewer, eye combination...
-    disp.forEachEye([&success](osvr::clientkit::Eye eye) {
+    disp.forEachEye([](osvr::clientkit::Eye eye) {
 
         /// Try retrieving the view matrix (based on eye pose) from OSVR
         double viewMat[OSVR_MATRIX_SIZE];
-        auto gotView = eye.getViewMatrix(
-            OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS, viewMat);
-        if (!gotView) {
-            std::cout << "Waiting for view pose..." << std::endl;
-            return;
-        }
-        if (!announcedPose) {
-            std::cout << "Got view pose, rendering will commence!" << std::endl;
-            announcedPose = true;
-        }
+        eye.getViewMatrix(OSVR_MATRIX_COLMAJOR | OSVR_MATRIX_COLVECTORS,
+                          viewMat);
         /// Initialize the ModelView transform with the view matrix we
         /// received
         glMatrixMode(GL_MODELVIEW);
@@ -192,85 +185,7 @@ bool render(osvr::clientkit::DisplayConfig &disp) {
             /// Call out to render our scene.
             renderScene();
         });
-        success = true;
     });
 
     /// Successfully completed a frame render.
-    return success;
-}
-
-/// @brief Fixed-function pipeline OpenGL code to draw a cube
-void draw_cube(double radius) {
-    static const GLfloat matspec[4] = {0.5, 0.5, 0.5, 0.0};
-    static const float red_col[] = {1.0, 0.0, 0.0};
-    static const float grn_col[] = {0.0, 1.0, 0.0};
-    static const float blu_col[] = {0.0, 0.0, 1.0};
-    static const float yel_col[] = {1.0, 1.0, 0.0};
-    static const float lightblu_col[] = {0.0, 1.0, 1.0};
-    static const float pur_col[] = {1.0, 0.0, 1.0};
-    glPushMatrix();
-    glScaled(radius, radius, radius);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, matspec);
-    glMaterialf(GL_FRONT, GL_SHININESS, 64.0);
-    glBegin(GL_POLYGON);
-    glColor3fv(lightblu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lightblu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lightblu_col);
-    glNormal3f(0.0, 0.0, -1.0);
-    glVertex3f(1.0, 1.0, -1.0);
-    glVertex3f(1.0, -1.0, -1.0);
-    glVertex3f(-1.0, -1.0, -1.0);
-    glVertex3f(-1.0, 1.0, -1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(blu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, blu_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, blu_col);
-    glNormal3f(0.0, 0.0, 1.0);
-    glVertex3f(-1.0, 1.0, 1.0);
-    glVertex3f(-1.0, -1.0, 1.0);
-    glVertex3f(1.0, -1.0, 1.0);
-    glVertex3f(1.0, 1.0, 1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(yel_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, yel_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, yel_col);
-    glNormal3f(0.0, -1.0, 0.0);
-    glVertex3f(1.0, -1.0, 1.0);
-    glVertex3f(-1.0, -1.0, 1.0);
-    glVertex3f(-1.0, -1.0, -1.0);
-    glVertex3f(1.0, -1.0, -1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(grn_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, grn_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, grn_col);
-    glNormal3f(0.0, 1.0, 0.0);
-    glVertex3f(1.0, 1.0, 1.0);
-    glVertex3f(1.0, 1.0, -1.0);
-    glVertex3f(-1.0, 1.0, -1.0);
-    glVertex3f(-1.0, 1.0, 1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(pur_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, pur_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pur_col);
-    glNormal3f(-1.0, 0.0, 0.0);
-    glVertex3f(-1.0, 1.0, 1.0);
-    glVertex3f(-1.0, 1.0, -1.0);
-    glVertex3f(-1.0, -1.0, -1.0);
-    glVertex3f(-1.0, -1.0, 1.0);
-    glEnd();
-    glBegin(GL_POLYGON);
-    glColor3fv(red_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, red_col);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red_col);
-    glNormal3f(1.0, 0.0, 0.0);
-    glVertex3f(1.0, -1.0, 1.0);
-    glVertex3f(1.0, -1.0, -1.0);
-    glVertex3f(1.0, 1.0, -1.0);
-    glVertex3f(1.0, 1.0, 1.0);
-    glEnd();
-    glPopMatrix();
 }
