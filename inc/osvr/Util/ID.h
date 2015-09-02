@@ -48,21 +48,16 @@ template <class Tag, class impl> class ID {
     // Explicit constructor:
     explicit ID(impl val) : m_val(val) {}
 
-    // Explicit conversion to get back the impl:
-    // explicit operator impl() const { return m_val; }
-
-    // Implicit conversion to get back the impl
-    operator impl() const { return m_val; }
-
     bool empty() const { return m_val == 0xffffffff ? true : false; }
 
-    // this messes with implicit conversion (type casting)
-    /*
-    friend bool operator>(ID a, impl b) { return a.m_val > b; }
-    friend bool operator<(ID a, impl b) { return a.m_val < b; }
+    operator impl & () {return m_val; }
     friend bool operator==(ID a, ID b) { return a.m_val == b.m_val; }
     friend bool operator!=(ID a, ID b) { return a.m_val != b.m_val; }
-    */
+
+    impl& value() { return m_val; }
+    impl value() const { return m_val; }
+
+  private:
     impl m_val;
 };
 
