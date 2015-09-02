@@ -373,13 +373,6 @@ typedef uint8_t OSVR_GestureState;
 #define OSVR_GESTURE_CLOSED_HAND "ClosedHand"
 
 /** @brief Report type for a gesture event */
-typedef struct OSVR_GestureReportWithName {
-    OSVR_GestureName gestureName;
-    OSVR_GestureState state;
-    OSVR_ChannelCount sensor;
-} OSVR_GestureReportWithName;
-
-/** @brief Report type for a gesture event */
 typedef struct OSVR_GestureReport {
     OSVR_GestureID gestureID;
     OSVR_GestureState state;

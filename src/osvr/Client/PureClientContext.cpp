@@ -225,7 +225,7 @@ namespace client {
     }
 
     void PureClientContext::m_handleRegStringMap(
-        common::MapData const &data, util::time::TimeValue const &timestamp) {
+        common::MapData const &data, util::time::TimeValue const &) {
         auto map = m_systemComponent->getRegStringMap();
         map->corrMap.setupPeerMappings(data.serializedMap);
     }
