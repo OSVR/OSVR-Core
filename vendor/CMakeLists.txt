@@ -68,9 +68,7 @@ target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
 set(ETWROOT "${CMAKE_CURRENT_SOURCE_DIR}/UIforETWbins")
 set(ETWPROVIDERS_FOUND "FALSE" CACHE INTERNAL "" FORCE)
 
-# TODO Current binaries were not built with extern "C" so name-mangling incompatible with MinGW
-# https://github.com/google/UIforETW/pull/50
-if(MSVC)
+if(WIN32)
     set(ETWSUFFIX)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(ETWSUFFIX 64)
