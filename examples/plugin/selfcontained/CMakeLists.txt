@@ -6,7 +6,7 @@ project(SampleExternalPlugin) # Change this line.
 # C:/Users/Ryan/Desktop/build/OSVR-Core-vc12 or
 # C:/Users/Ryan/Downloads/OSVR-Core-Snapshot-v0.1-406-gaa55515-build54-vs12-32bit
 # in the CMake GUI or command line.
-find_package(osvr)
+find_package(osvr REQUIRED)
 
 # This generates a header file, from the named json file, containing a string literal
 # named com_osvr_example_selfcontained_json (not null terminated)
