@@ -359,6 +359,10 @@ set(README_MARKDOWN
     CONTRIBUTING.md
     README.md
     NEWS.md)
+
+if(BUILD_WITH_TRACING)
+    list(APPEND README_MARKDOWN "${ETWPROVIDERS_OSVR_README}")
+endif()
 if(MARKDOWN_FOUND)
     include(UseMarkdown)
     add_markdown_target(markdown-readme ${CMAKE_CURRENT_BINARY_DIR} ${README_MARKDOWN})
