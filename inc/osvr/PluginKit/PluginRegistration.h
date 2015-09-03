@@ -148,6 +148,9 @@ namespace pluginkit {
     /// @brief Registers a function object to be called when the core requests a
     /// hardware detection.
     ///
+    /// Your callback should take one parameter of type
+    /// ::OSVR_PluginRegContext and return a value of type ::OSVR_ReturnCode
+    ///
     /// Also provides for deletion of the function object.
     ///
     /// @param ctx The registration context passed to your entry point.
@@ -166,6 +169,11 @@ namespace pluginkit {
 
     /// @brief Registers a function object to be called when the server is told
     /// to instantiate a driver by name with parameters.
+    ///
+    /// Your callback should take a parameter of type
+    /// ::OSVR_PluginRegContext and a parameter of type const char * (the
+    /// JSON parameters as a string) and return a value of type
+    /// ::OSVR_ReturnCode
     ///
     /// Also provides for deletion of the function object.
     ///
