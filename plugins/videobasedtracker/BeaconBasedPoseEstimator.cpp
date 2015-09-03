@@ -337,6 +337,18 @@ namespace vbtracker {
         //==============================================================
         // Put into OSVR format.
         osvrPose3FromQuatlib(&outPose, &forward);
+
+        //==========================================================================
+        // Put the values back to normal so that the debugging windows will show
+        // the right reprojections.
+        m_tvec.at<double>(0) *= -1;
+        m_tvec.at<double>(1) *= -1;
+        m_tvec.at<double>(2) *= -1;
+
+        m_rvec.at<double>(0) *= -1;
+        m_rvec.at<double>(1) *= -1;
+        m_rvec.at<double>(2) *= -1;
+
         return true;
     }
 
