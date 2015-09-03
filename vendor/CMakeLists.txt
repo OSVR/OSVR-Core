@@ -64,6 +64,7 @@ add_library(eigen-headers INTERFACE)
 target_include_directories(eigen-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.5")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
 
+###
 # ETWProviders from UIforETW
 set(ETWROOT "${CMAKE_CURRENT_SOURCE_DIR}/UIforETWbins")
 set(ETWPROVIDERS_FOUND "FALSE" CACHE INTERNAL "" FORCE)
@@ -97,4 +98,21 @@ if(WIN32)
     else()
         message(STATUS "UIforETWbins submodule missing, so ETW-based tracing unavailable.")
     endif()
+endif()
+
+# ETW README
+if(ETWPROVIDERS_FOUND)
+    # Trigger CMake if this file changes.
+    configure_file("${ETWROOT}/README.md" "${CMAKE_CURRENT_BINARY_DIR}/README.junk" COPYONLY)
+
+    # Extract the release URL, which is always on its own line in the submodule readme.
+    file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/README.junk" UIFORETW_RELEASE
+        LIMIT_COUNT 1
+        REGEX "^<.*>$")
+
+    # Set the location for the generated README file, for use further up in the build system.
+    set(ETWPROVIDERS_OSVR_README "${CMAKE_CURRENT_BINARY_DIR}/README-ETW.md" CACHE INTERNAL "" FORCE)
+
+    # Actually do the generation, to put the release URL in the readme we'll distribute.
+    configure_file("README-ETW.md.in" "${ETWPROVIDERS_OSVR_README}" @ONLY)
 endif()
