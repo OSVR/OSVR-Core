@@ -1,26 +1,27 @@
 # Writing a basic device plugin              {#TopicWritingDevicePlugin}
 
-Writing a device plugin means you'll be building against the [PluginKit](@ref PluginKit) library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure, so you can more easily integrate it with an existing driver codebase. However, the following steps can help you build a plugin from scratch.
+Writing a device plugin means you'll be building against the [PluginKit](@ref PluginKit) library, which presents a C API, as well as some C++ header-only wrappers. The API does not impose a required structure, so you can more easily integrate it with an existing driver codebase. However, the following steps can help you build a plugin from scratch. (
+For more information, please see the @ref PluginKit documentation, as well as the @ref ::osvr::PluginKit namespace for C++ API where available.)
 
-1. Make a copy of the directory `/examples/plugin/selfcontained` as the starting point for your new plugin repository.
+1. Make a copy of the directory `/examples/plugin/selfcontained` as the starting point for your new plugin repository. The core of the code there is in @ref com_osvr_example_selfcontained.cpp - you might want to follow along.
 
-   This assumes that your plugin will be "out-of-tree"—that is, not hosted in the main OSVR-Core repository.
+   This assumes that your plugin will be "out-of-tree" -- that is, not hosted in the main OSVR-Core repository.
 
 2. Follow the instructions in the `EXAMPLE_PLUGIN_README.md` file to change the plugin name and set up the build system.
 
 3. Implement a hardware detection callback (to determine if your device is connected):
 
-   This can take the form of a class with a function call operator (`operator()`), taking an @ref OSVR_PluginRegContext parameter named `ctx` and returning an @ref OSVR_ReturnCode value. The sample plugin source includes an example of this.
+   This can take the form of a class with a function call operator (`operator()`), taking an @ref OSVR_PluginRegContext parameter named `ctx` and returning an @ref OSVR_ReturnCode value. The sample plugin source includes an example of this starting around line 88.
 
-4. From within your callback, if the device exists, create a device token (as seen in the sample, or as in the examples). You need to have your device hold on to the device token to send data with it later on.
+4. From within your callback, if the device exists, create whatever state you need. Here, we're creating an object for the device: declared starting around line 42. One way or another, you'll need to create @ref OSVR_DeviceInitOptions describing the interface(s) you'll implement, use it to create a device token, send a JSON device descriptor string, and register an update callback. In the sample, this is all done in the device object's constructor. You need to have your device hold on to the device token and the interface objects received when configuring the @ref OSVR_DeviceInitOptions to send data later on.
 
-5. The guts of implementing a device start at about line 51 of the sample: wait until there is data then call @ref osvrDeviceSendData. (There are two versions of this function: one where you provide a timestamp, and one where the timestamp is automatically created for you.) Your device may have different types of sensors (e.g., tracker, button, analog) and you will need to use appropriate interfaces for each to send reports from device in your plugin.
+5. The guts of sending data from your device start at about line 61 of the sample: wait until there is data then call some data sending function. (There are two versions of many of these functions: one where you provide a timestamp, and one where the timestamp is automatically created for you at call time.) Your device may have different types of sensors (e.g., tracker, button, analog) and you will need to use appropriate interfaces for each to send reports from device in your plugin.
 
-6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample JSON descriptor and modify it according to you needs or use the [Device Descriptor Editor](http://tools.getosvr.org/json-editor/) to create the JSON descriptor. For each interface (e.g., tracker, button, analog), you will need to describe its semantics—that is, assign useful names to analog channels, etc.). The device descriptor's purpose is to tell the OSVR server what kind of sensors your device has. Specifying the device vendor and the product name in device descriptor file is for informational purposes.
+6. Create device descriptor JSON and name it `com_VendorName_DeviceName.json`. You can either use the sample JSON descriptor and modify it according to you needs or use the [Device Descriptor Editor](http://tools.getosvr.org/json-editor/) to create the JSON descriptor. For each interface (e.g., tracker, button, analog), you will need to describe its semantics -- that is, assign useful names to analog channels, etc.). The device descriptor's purpose is to tell the OSVR server what kind of sensors your device has. Specifying the device vendor and the product name in device descriptor file is for informational purposes.
 
-Note that these instructions are only for drivers that can fully self-configure. Manually-configured drivers are also possible, but no minimal sample has yet been created. You essentially take the same steps as in an auto-detected plugin, except instead of registering a hardware detection callback, you call @ref osvrRegisterDriverInstantiationCallback providing a name for your driver and a function pointer. The function you provide will be called by the server and passed a JSON string of configuration data if the user configures your plugin in the `osvr_server` config file.
+Note that these instructions are for drivers that can fully self-configure. Manually-configured drivers are also possible, and are fundamentally the same, except that the hardware detection callback is replaced with a device instantiation callback: see @ref com_osvr_example_Configured.cpp for an example. The function you provide will be called by the server and passed a JSON string of configuration data if the user configures your plugin in the `osvr_server` config file.
 
-For auto-configured drivers, you should remove the `"driver"` section from the `osvr_server_config.json` file, otherwise it will try to load name of specific driver and you would get an error similar to:
+For auto-configured drivers, you should not have your driver listed in the `"driver"` section of the `osvr_server_config.json` file: this is only for manually-configured drivers. Otherwise, it will try to find a manually-configured driver of that name and you would get an error similar to:
 
     [OSVR Server] - com_example_MyDevice/DeviceName No driver initialization callback was registered for the driver name DeviceName
 
@@ -67,8 +68,9 @@ These are instructions for Windows and Visual Studio, but they follow similarly 
 
 In order for the OSVR server to properly load the plugin and find your device, you will need to create a new `osvr_server_config.json` file. You can start by modifying an existing config file and changing the configuration appropriately. You will need to add routes to `osvr_server_config.json` file for sensors that you specified in your device descriptor.
 
-Once your plugin loads succesfully, you can view the data that the OSVR server is transmitting from your plugin. The `vrpn_print_devices` utility will display this information:
+Once your plugin loads successfully, you can view the data that the OSVR server is transmitting from your plugin. If you created a tracker plugin, get the OSVR Tracker Viewer to view the data graphically.
 
+The `vrpn_print_devices` utility from VRPN can also display this information for select device interfaces (analog, button, tracker):
 
     vrpn_print_devices org_example_MyDevice/DeviceName@localhost
 
