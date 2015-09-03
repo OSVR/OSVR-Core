@@ -157,6 +157,8 @@ namespace pluginkit {
     /// @param functor An function object (with operator() defined). Pass either
     /// a pointer, which will transfer ownership, or an object by value, which
     /// will result in a copy being made.
+    ///
+    /// @sa PluginContext::registerHardwareDetectCallback
     template <typename T>
     inline void registerHardwareDetectCallback(OSVR_PluginRegContext ctx,
                                                T functor) {
@@ -182,6 +184,8 @@ namespace pluginkit {
     /// @param functor An function object (with operator() defined). Pass either
     /// a pointer, which will transfer ownership, or an object by value, which
     /// will result in a copy being made.
+    ///
+    /// @sa PluginContext::registerDriverInstantiationCallback
     template <typename T>
     inline void registerDriverInstantiationCallback(OSVR_PluginRegContext ctx,
                                                     const char driverName[],
