@@ -1,48 +1,38 @@
+# These plugins require nothing more than an implementation file and possibly a JSON header.
 set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
+    com_osvr_example_AnalogSync
     com_osvr_example_DummyDetectAndCreateAsync
+    com_osvr_example_EyeTracker
     com_osvr_example_MultipleAsync)
 
+# These are all the plugin targets: one listed only here need more careful configuration.
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
-    com_osvr_example_AnalogSync
-    com_osvr_example_EyeTracker
     com_osvr_example_selfcontained
     ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE}
     CACHE INTERNAL "" FORCE)
 
-foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
-    osvr_add_plugin(NAME ${pluginname} NO_INSTALL MANUAL_LOAD CPP SOURCES ${pluginname}.cpp)
-    set_target_properties(${pluginname} PROPERTIES
-        FOLDER "OSVR Example Plugins")
-endforeach()
-
 # Needed to find our generated json headers
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-## Build the example with a json: com_osvr_example_AnalogSync
-osvr_convert_json(com_osvr_example_AnalogSync_json
-    com_osvr_example_AnalogSync.json
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-osvr_add_plugin(NAME com_osvr_example_AnalogSync
-    NO_INSTALL MANUAL_LOAD CPP
-    SOURCES
-    com_osvr_example_AnalogSync.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_AnalogSync_json.h")
-set_target_properties(com_osvr_example_AnalogSync PROPERTIES
-    FOLDER "OSVR Example Plugins")
+foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
+    set(json_header)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${pluginname}.json")
+        set(json_header "${CMAKE_CURRENT_BINARY_DIR}/${pluginname}_json.h")
+        osvr_convert_json(${pluginname}_json
+            ${pluginname}.json
+            "${json_header}")
+    endif()
+    osvr_add_plugin(NAME ${pluginname}
+        NO_INSTALL
+        MANUAL_LOAD
+        CPP
+        SOURCES
+        ${pluginname}.cpp
+        ${json_header})
+endforeach()
 
-## Build the eyetracker example
-osvr_convert_json(com_osvr_example_EyeTracker_json
-    com_osvr_example_EyeTracker.json
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_EyeTracker_json.h")
-osvr_add_plugin(NAME com_osvr_example_EyeTracker
-    NO_INSTALL MANUAL_LOAD CPP
-    SOURCES
-    com_osvr_example_EyeTracker.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_EyeTracker_json.h")
-set_target_properties(com_osvr_example_EyeTracker PROPERTIES
-    FOLDER "OSVR Example Plugins")
+# Extra libraries needed
 target_link_libraries(com_osvr_example_EyeTracker osvr_cxx11_flags)
-
 target_link_libraries(com_osvr_example_MultipleAsync osvr_cxx11_flags)
 
 ## Build the code from the selfcontained example
@@ -56,6 +46,13 @@ osvr_add_plugin(NAME com_osvr_example_selfcontained
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontained_json.h")
 set_target_properties(com_osvr_example_selfcontained PROPERTIES
     FOLDER "OSVR Example Plugins")
+
+
+# Put all the example plugins in a suitable solution folder.
+foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS})
+    set_target_properties(${pluginname} PROPERTIES
+        FOLDER "OSVR Example Plugins")
+endforeach()
 
 if(BUILD_TESTING)
     ###
