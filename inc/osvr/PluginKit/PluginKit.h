@@ -66,6 +66,16 @@ namespace pluginkit {
             ::osvr::pluginkit::registerHardwareDetectCallback(m_ctx, functor);
         }
 
+        /// @brief Register a driver instantiation callback
+        ///
+        /// @sa ::osvr::pluginkit::registerDriverInstantiationCallback()
+        template <typename T>
+        void registerDriverInstantiationCallback(const char driverName[],
+                                                 T functor) {
+            ::osvr::pluginkit::registerDriverInstantiationCallback(
+                m_ctx, driverName, functor);
+        }
+
         /// @brief Register the given object (assumed to be deletable by
         /// `delete`) to be deleted on plugin unload. (Transfers lifetime
         /// control to the plugin context)
