@@ -5,7 +5,7 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
     com_osvr_example_AnalogSync
     com_osvr_example_EyeTracker
-    com_osvr_example_selfcontainedDetectAndCreate
+    com_osvr_example_selfcontained
     ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE}
     CACHE INTERNAL "" FORCE)
 
@@ -46,15 +46,15 @@ target_link_libraries(com_osvr_example_EyeTracker osvr_cxx11_flags)
 target_link_libraries(com_osvr_example_MultipleAsync osvr_cxx11_flags)
 
 ## Build the code from the selfcontained example
-osvr_convert_json(com_osvr_example_selfcontainedDetectAndCreate_json
-    selfcontained/com_osvr_example_selfcontainedDetectAndCreate.json
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-osvr_add_plugin(NAME com_osvr_example_selfcontainedDetectAndCreate
+osvr_convert_json(com_osvr_example_selfcontained_json
+    selfcontained/com_osvr_example_selfcontained.json
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontained_json.h")
+osvr_add_plugin(NAME com_osvr_example_selfcontained
     NO_INSTALL MANUAL_LOAD CPP
     SOURCES
-    selfcontained/com_osvr_example_selfcontainedDetectAndCreate.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontainedDetectAndCreate_json.h")
-set_target_properties(com_osvr_example_selfcontainedDetectAndCreate PROPERTIES
+    selfcontained/com_osvr_example_selfcontained.cpp
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontained_json.h")
+set_target_properties(com_osvr_example_selfcontained PROPERTIES
     FOLDER "OSVR Example Plugins")
 
 if(BUILD_TESTING)

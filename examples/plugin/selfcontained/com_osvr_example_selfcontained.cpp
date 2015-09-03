@@ -28,7 +28,7 @@
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
 // Generated JSON header file
-#include "com_osvr_example_selfcontainedDetectAndCreate_json.h"
+#include "com_osvr_example_selfcontained_json.h"
 
 // Library/third-party includes
 // - none
@@ -52,8 +52,7 @@ class AnalogSyncDevice {
         m_dev.initSync(ctx, "MySyncDevice", opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(
-            com_osvr_example_selfcontainedDetectAndCreate_json);
+        m_dev.sendJsonDescriptor(com_osvr_example_selfcontained_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
@@ -85,7 +84,8 @@ class HardwareDetection {
         std::cout << "PLUGIN: Got a hardware detection request" << std::endl;
         if (!m_found) {
             std::cout << "PLUGIN: We have detected our fake device! Doing "
-                         "setup stuff!" << std::endl;
+                         "setup stuff!"
+                      << std::endl;
             m_found = true;
 
             /// Create our device object
