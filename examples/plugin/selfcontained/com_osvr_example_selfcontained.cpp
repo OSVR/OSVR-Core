@@ -99,7 +99,7 @@ class HardwareDetection {
 
             /// Create our device object
             osvr::pluginkit::registerObjectForDeletion(
-                ctx, new AnalogSyncDevice(ctx));
+                ctx, new AnalogExampleDevice(ctx));
         }
         return OSVR_RETURN_SUCCESS;
     }
