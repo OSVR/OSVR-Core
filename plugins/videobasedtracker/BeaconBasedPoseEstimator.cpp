@@ -212,7 +212,7 @@ namespace vbtracker {
         // do okay without using it, so leaving it out.
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
-        int iterationsCount = 20;
+        int iterationsCount = 5;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
             m_tvec, usePreviousGuess, iterationsCount, 8.0f,
@@ -235,7 +235,8 @@ namespace vbtracker {
         //  That is, it rotates into the camera coordinate system and then adds
         // the translation, which is in the camera coordinate system.
         //  This is the transformation we want, since it reports the sensor's
-        // position and orientation in camera space, except that we want to convert
+        // position and orientation in camera space, except that we want to
+        // convert
         // the units into meters and the orientation into a Quaternion.
         //  NOTE: This is a right-handed coordinate system with X pointing
         // towards the right from the camera center of projection, Y pointing
