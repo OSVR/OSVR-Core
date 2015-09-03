@@ -7,10 +7,10 @@ You can add the root directory of a snapshot to your `CMAKE_PREFIX_PATH` when ru
 
 - `*-ver.txt` - Version stamp files: results of `git describe` when run in the library's repository as well as dependencies.
 - `bin/` - Executable files, including example clients and servers, as well as:
-	- `bin/osvr_server.*` - the main server executable (`.exe` on Windows) and its default JSON config file (`.json`). Note that you can pass the path to an alternate config file as the first argument to the server.
+	- `bin/osvr_server*` - the main server executable (`.exe` on Windows) and its default JSON config file (`_config.json`). Note that you can pass the path to an alternate config file as the first argument to the server.
 	- `bin/osvr*.dll`, `bin/osvr-plugins-0/*.dll` - On Windows, the shared library runtime files (`osvr*.dll`) as well as dynamically-loadable plugins are included in the same directory as the executables to simplify search paths for now.
 - `include/` - In here you'll find the public header files for all OSVR modules and non-internal dependencies. This corresponds to the `inc` directory, whenever it is discussed later.
-- `lib/` or similar - Contains the DLL import libraries (`*.lib`) on Windows, and the shared libraries and dynamically-loaded plugins on non-Windows platforms.
+- `lib/` or similar - Contains the DLL import libraries (`.lib`) on Windows, and the shared libraries and dynamically-loaded plugins on non-Windows platforms.
 	- `lib/cmake/` - In these directories are the CMake config files used by the [`find_package()`][find_package] command to allow you to easily use the OSVR framework from your CMake-based project.
 - `share/doc/osvrcore/` - This directory contains documentation and samples. Depending on your snapshot, it may also include a copy of the Doxygen-based API docs. This directory is optional and for human consumption: no compiled OSVR code uses files from this directory.
 
