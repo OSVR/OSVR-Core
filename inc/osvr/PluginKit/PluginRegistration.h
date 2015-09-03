@@ -119,7 +119,7 @@ namespace pluginkit {
             typename boost::enable_if<boost::is_pointer<T> >::type * = NULL) {
             typedef typename boost::remove_pointer<T>::type FunctorType;
             registerObjectForDeletion(ctx, functor);
-            return osvrPluginRegisterHardwareDetectCallback(
+            return osvrRegisterDriverInstantiationCallback(
                 ctx, driverName,
                 &util::GenericCaller<OSVR_DriverInstantiationCallback,
                                      FunctorType, util::this_last_t>::call,
@@ -132,10 +132,11 @@ namespace pluginkit {
             OSVR_PluginRegContext ctx, const char driverName[], T functor,
             typename boost::disable_if<boost::is_pointer<T> >::type * = NULL) {
 #ifdef OSVR_HAVE_BOOST_IS_COPY_CONSTRUCTIBLE
-            BOOST_STATIC_ASSERT_MSG(boost::is_copy_constructible<T>::value,
-                                    "Hardware detect callback functors must be "
-                                    "either passed as a pointer or be "
-                                    "copy-constructible");
+            BOOST_STATIC_ASSERT_MSG(
+                boost::is_copy_constructible<T>::value,
+                "Driver instantiation callback functors must be "
+                "either passed as a pointer or be "
+                "copy-constructible");
 #endif
             T *functorCopy = new T(functor);
             return registerDriverInstantiationCallbackImpl(ctx, driverName,
