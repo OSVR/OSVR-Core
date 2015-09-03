@@ -213,10 +213,19 @@ namespace vbtracker {
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
         int maxIterations = 5;
+        cv::Mat inlierIndices;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
             m_tvec, usePreviousGuess, 5, 8.0f,
-            static_cast<int>(objectPoints.size() - m_permittedOutliers));
+            static_cast<int>(objectPoints.size() - m_permittedOutliers),
+            inlierIndices);
+
+        //==========================================================================
+        // Make sure we got all the inliers we needed.  Otherwise, reject this
+        // pose.
+        if (inlierIndices.rows < m_requiredInliers) {
+          return false;
+        }
 
         //==========================================================================
         // Convert this into an OSVR representation of the transformation that
