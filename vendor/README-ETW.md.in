@@ -1,0 +1,16 @@
+# OSVR ETW Tracing Support
+
+The binaries in this directory differ from those in the `bin/` directory in exactly one way: they have been built with support for generating custom Event Tracing for Windows (ETW) events.
+
+If you want to permit this custom tracing, simply replace the OSVR standard `.dll` files (alongside the server, or as packaged with an application, etc) with the ones from this directory. Be sure to also copy the additional DLL file present here, `ETWProviders.dll` or `ETWProviders64.dll`: this is the library (from the [UIforETW][] project) used by the OSVR tracing code to access ETW. You may also need the `ETWProviders.man` instrumentation manifest, depending on how you use ETW.
+
+[UIforETW][] is the recommended way of controlling ETW traces related to OSVR. The published releases on GitHub provide a `etwpackage.zip` file, which contains statically-linked UIforETW applications and redistributable installers for the Windows Performance Toolkit components needed for use of ETW. For size reasons, that package is not bundled with this snapshot, however, it can be easily downloaded. For best results, download and use the version of UIforETW that was used to build this binary snapshot:
+
+@UIFORETW_RELEASE@
+
+For more information on using ETW with OSVR, see <http://osvr.github.io>.
+
+## License
+UIforETW itself and its components (including `ETWProviders[64].dll`) are used under the Apache Software License, version 2.0, the same license as OSVR-Core. See the contents of the `etwpackage.zip` file for license information on the redistributable installers included for convenience.
+
+[UIforETW]: https://github.com/google/UIforETW
