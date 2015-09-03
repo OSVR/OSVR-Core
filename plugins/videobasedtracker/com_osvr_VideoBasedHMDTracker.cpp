@@ -60,7 +60,7 @@
 
 // Define the constant below to print timing information (how many updates
 // per second we are getting).
-#define VBHMD_TIMING
+//#define VBHMD_TIMING
 
 // Define the constant below to set a directory to save the video frames that
 // are acquired
