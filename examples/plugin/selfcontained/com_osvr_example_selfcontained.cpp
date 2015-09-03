@@ -39,17 +39,17 @@
 // Anonymous namespace to avoid symbol collision
 namespace {
 
-class AnalogSyncDevice {
+class AnalogExampleDevice {
   public:
-    AnalogSyncDevice(OSVR_PluginRegContext ctx) : m_myVal(0) {
+    AnalogExampleDevice(OSVR_PluginRegContext ctx) : m_myVal(0) {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
         /// Indicate that we'll want 1 analog channel.
         osvrDeviceAnalogConfigure(opts, &m_analog, 1);
 
-        /// Create the sync device token with the options
-        m_dev.initSync(ctx, "MySyncDevice", opts);
+        /// Create the device token with the options
+        m_dev.initAsync(ctx, "MyExampleDevice", opts);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(com_osvr_example_selfcontained_json);
@@ -59,6 +59,15 @@ class AnalogSyncDevice {
     }
 
     OSVR_ReturnCode update() {
+        /// This dummy loop just wastes time, to pretend to be your plugin
+        /// blocking to wait for the arrival of data. It should be completely
+        /// removed from your plugin.
+        volatile int j; // volatile to keep it from being optimized out.
+        for (int i = 0; i < 10000; ++i) {
+            j = i;
+        }
+        /// End time-waster loop.
+
         /// Make up some dummy data that changes to report.
         m_myVal = (m_myVal + 0.1);
         if (m_myVal > 10.0) {
@@ -102,7 +111,7 @@ class HardwareDetection {
 };
 } // namespace
 
-OSVR_PLUGIN(com_osvr_example_selfcontainedDetectAndCreate) {
+OSVR_PLUGIN(com_osvr_example_selfcontained) {
     osvr::pluginkit::PluginContext context(ctx);
 
     /// Register a detection callback function object.
