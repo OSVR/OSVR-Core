@@ -1,0 +1,26 @@
+{
+    "plugins": [
+        "com_osvr_example_Configured"
+    ],
+    "drivers": [{
+        "plugin": "com_osvr_example_Configured",
+        "driver": "ConfiguredDevice",
+        "params": {
+            "value": 0.5,
+            "sleepTime": 3
+        }
+    }, {
+        "plugin": "com_osvr_example_Configured",
+        "driver": "ConfiguredDevice",
+        "params": {
+            "value": 0.8,
+            "sleepTime": 2
+        }
+    }, {
+        "plugin": "com_osvr_example_Configured",
+        "driver": "ConfiguredDevice",
+        "params": {
+            "value": 3
+        }
+    }]
+}

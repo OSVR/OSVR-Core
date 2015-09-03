@@ -1,0 +1,24 @@
+{
+  "deviceVendor": "OSVR",
+  "deviceName": "Configured Plugin Example",
+  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "version": 1,
+  "lastModified": "2015-09-03T22:58:24.431Z",
+  "interfaces": {
+    "analog": {
+      "count": 1,
+      "traits": [
+        {
+          "min": 0,
+          "max": 10,
+          "rest": 0
+        }
+      ]
+    }
+  },
+  "semantics": {
+    "value": {
+      "$target": "analog/0"
+    }
+  }
+}

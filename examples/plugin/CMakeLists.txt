@@ -1,6 +1,7 @@
 # These plugins require nothing more than an implementation file and possibly a JSON header.
 set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
     com_osvr_example_AnalogSync
+    com_osvr_example_Configured
     com_osvr_example_DummyDetectAndCreateAsync
     com_osvr_example_EyeTracker
     com_osvr_example_MultipleAsync)
@@ -31,9 +32,16 @@ foreach(pluginname ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE})
         ${json_header})
 endforeach()
 
-# Extra libraries needed
-target_link_libraries(com_osvr_example_EyeTracker osvr_cxx11_flags)
-target_link_libraries(com_osvr_example_MultipleAsync osvr_cxx11_flags)
+# These need C++11.
+foreach(pluginname
+    com_osvr_example_Configured
+    com_osvr_example_EyeTracker
+    com_osvr_example_MultipleAsync)
+    target_link_libraries(${pluginname} osvr_cxx11_flags)
+endforeach()
+
+# Extra Libraries
+target_link_libraries(com_osvr_example_Configured jsoncpp_lib)
 
 ## Build the code from the selfcontained example
 osvr_convert_json(com_osvr_example_selfcontained_json
