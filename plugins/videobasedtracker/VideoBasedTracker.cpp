@@ -73,9 +73,10 @@ namespace vbtracker {
 
         // Threshold the image based on the brightness value that is between
         // the darkest and brightest pixel in the image.
+        // @todo Make this a parameter.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = 240;
+        double thresholdValue = 220;
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
