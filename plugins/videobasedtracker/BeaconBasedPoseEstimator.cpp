@@ -212,9 +212,10 @@ namespace vbtracker {
         // do okay without using it, so leaving it out.
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
+        int maxIterations = 5;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, 20, 8.0f,
+            m_tvec, usePreviousGuess, 5, 8.0f,
             static_cast<int>(objectPoints.size() - m_permittedOutliers));
 
         //==========================================================================
