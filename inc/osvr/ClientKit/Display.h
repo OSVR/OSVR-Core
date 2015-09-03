@@ -509,6 +509,93 @@ namespace clientkit {
         OSVR_DisplayConfig m_disp;
         UnderlyingDisplayConfigPtr m_owningDisp;
     };
+
+    /// @brief Equality operator for clientkit::Surface
+    /// @relates clientkit::Surface
+    inline bool operator==(Surface const &lhs, Surface const &rhs) {
+        return (lhs.getSurfaceID() == rhs.getSurfaceID()) &&
+               (lhs.getEyeID() == rhs.getEyeID()) &&
+               (lhs.getViewerID() == rhs.getViewerID()) &&
+               (lhs.getDisplayConfig() == rhs.getDisplayConfig());
+    }
+
+    /// @brief Inequality operator for clientkit::Surface
+    /// @relates clientkit::Surface
+    inline bool operator!=(Surface const &lhs, Surface const &rhs) {
+        return (lhs.getSurfaceID() != rhs.getSurfaceID()) ||
+               (lhs.getEyeID() != rhs.getEyeID()) ||
+               (lhs.getViewerID() != rhs.getViewerID()) ||
+               (lhs.getDisplayConfig() != rhs.getDisplayConfig());
+    }
+
+    /// @brief Equality operator for clientkit::Eye
+    /// @relates clientkit::Eye
+    inline bool operator==(Eye const &lhs, Eye const &rhs) {
+        return (lhs.getEyeID() == rhs.getEyeID()) &&
+               (lhs.getViewerID() == rhs.getViewerID()) &&
+               (lhs.getDisplayConfig() == rhs.getDisplayConfig());
+    }
+
+    /// @brief Inequality operator for clientkit::Eye
+    /// @relates clientkit::Eye
+    inline bool operator!=(Eye const &lhs, Eye const &rhs) {
+        return (lhs.getEyeID() != rhs.getEyeID()) ||
+               (lhs.getViewerID() != rhs.getViewerID()) ||
+               (lhs.getDisplayConfig() != rhs.getDisplayConfig());
+    }
+
+    /// @brief Equality operator for clientkit::Viewer
+    /// @relates clientkit::Viewer
+    inline bool operator==(Viewer const &lhs, Viewer const &rhs) {
+        return (lhs.getViewerID() == rhs.getViewerID()) &&
+               (lhs.getDisplayConfig() == rhs.getDisplayConfig());
+    }
+
+    /// @brief Inequality operator for clientkit::Viewer
+    /// @relates clientkit::Viewer
+    inline bool operator!=(Viewer const &lhs, Viewer const &rhs) {
+        return (lhs.getViewerID() != rhs.getViewerID()) ||
+               (lhs.getDisplayConfig() != rhs.getDisplayConfig());
+    }
+
+    /// @brief Equality operator for clientkit::DisplayConfig - does not
+    /// consider the ownership status in the comparison.
+    /// @relates clientkit::DisplayConfig
+    inline bool operator==(DisplayConfig const &lhs, DisplayConfig const &rhs) {
+        return lhs.getDisplayConfig() == rhs.getDisplayConfig();
+    }
+
+    /// @brief Equality operator for clientkit::DisplayConfig
+    /// @relates clientkit::DisplayConfig
+    inline bool operator==(DisplayConfig const &lhs, OSVR_DisplayConfig rhs) {
+        return lhs.getDisplayConfig() == rhs;
+    }
+
+    /// @brief Equality operator for clientkit::DisplayConfig
+    /// @relates clientkit::DisplayConfig
+    inline bool operator==(OSVR_DisplayConfig lhs, DisplayConfig const &rhs) {
+        return lhs == rhs.getDisplayConfig();
+    }
+
+    /// @brief Inequality operator for clientkit::DisplayConfig - does not
+    /// consider the ownership status in the comparison.
+    /// @relates clientkit::DisplayConfig
+    inline bool operator!=(DisplayConfig const &lhs, DisplayConfig const &rhs) {
+        return lhs.getDisplayConfig() != rhs.getDisplayConfig();
+    }
+
+    /// @brief Inequality operator for clientkit::DisplayConfig
+    /// @relates clientkit::DisplayConfig
+    inline bool operator!=(DisplayConfig const &lhs, OSVR_DisplayConfig rhs) {
+        return lhs.getDisplayConfig() != rhs;
+    }
+
+    /// @brief Inequality operator for clientkit::DisplayConfig
+    /// @relates clientkit::DisplayConfig
+    inline bool operator!=(OSVR_DisplayConfig lhs, DisplayConfig const &rhs) {
+        return lhs != rhs.getDisplayConfig();
+    }
+
     /// @}
     // end of group
 
