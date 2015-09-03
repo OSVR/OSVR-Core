@@ -68,6 +68,11 @@ macro(osvr_add_interface_library _suffix)
     set(LIBNAME_INTERFACE ${LIBNAME_FULL}${_suffix})
     add_library(${LIBNAME_INTERFACE} INTERFACE)
     target_link_libraries(${LIBNAME_INTERFACE} INTERFACE ${LIBNAME_FULL})
+    target_include_directories(${LIBNAME_INTERFACE}
+        INTERFACE
+        $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
+        $<BUILD_INTERFACE:${HEADER_BASE}>
+        $<INSTALL_INTERFACE:include>)
     install(TARGETS ${LIBNAME_INTERFACE}
         EXPORT osvrTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime
