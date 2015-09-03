@@ -394,7 +394,7 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     NO_PDF)
 
 # Replace some of the images from doxygen.
-foreach(fn ftv2mnode.png ftv2pnode.png ftv2mlastnode.png)
+foreach(fn ftv2mnode.png ftv2pnode.png ftv2mlastnode.png sync_on.png sync_off.png)
     add_custom_command(TARGET doc
         POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-generated/html/"
