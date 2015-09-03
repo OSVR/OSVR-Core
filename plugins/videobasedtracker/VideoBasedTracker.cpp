@@ -178,14 +178,30 @@ namespace vbtracker {
             // Compute the pose of the HMD w.r.t. the camera frame of reference.
             bool gotPose = false;
             if (m_estimators[sensor]) {
+              
+                // Get an estimated pose, if we have enough data.
                 OSVR_PoseState pose;
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
                         m_led_groups[sensor], pose)) {
+
+                    // Project the expected locations of the beacons
+                    // into the image and then compute the error between the expected
+                    // locations and the visible locations for all of the visible
+                    // beacons.  If they are too far off, cancel the pose.
+                    std::vector<cv::Point2f> imagePoints;
+                    m_estimators[sensor]->ProjectBeaconsToImage(imagePoints);
+                    for (auto &led : m_led_groups[sensor]) {
+                      auto label = std::to_string(led.getOneBasedID());
+                      cv::Point where = led.getLocation();
+                    }
+                    // XXX
+
                     m_pose = pose;
                     handler(static_cast<unsigned>(sensor), pose);
                     gotPose = true;
                 }
             }
+
 
 #ifdef VBHMD_DEBUG
             // Don't display the debugging info every frame, or we can't go fast
