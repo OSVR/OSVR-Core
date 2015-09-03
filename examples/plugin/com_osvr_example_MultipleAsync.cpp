@@ -55,7 +55,7 @@ class MultipleAsyncDevice {
         /// Indicate that we'll report tracking too.
         osvrDeviceTrackerConfigure(opts, &m_tracker);
 
-        /// Create the sync device token with the options
+        /// Create the async device token with the options
         m_dev.initSync(ctx, "MyAsyncDevice", opts);
 
         /// Register update callback
@@ -63,6 +63,10 @@ class MultipleAsyncDevice {
     }
 
     OSVR_ReturnCode update() {
+        /// Because this is an async device, we can block for data,
+        /// simulated here with a sleep.
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
         /// Make up some dummy data that changes to report.
         m_myVal = (m_myVal + 0.1);
         if (m_myVal > 10.0) {
@@ -77,10 +81,6 @@ class MultipleAsyncDevice {
         osvrDeviceButtonSetValue(
             m_dev, m_button,
             m_buttonPressed ? OSVR_BUTTON_PRESSED : OSVR_BUTTON_NOT_PRESSED, 0);
-
-        /// Because this is an async device, we can block for data,
-        /// simulated here with a sleep.
-        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         /// Report the identity pose for sensor 0
         OSVR_PoseState pose;
