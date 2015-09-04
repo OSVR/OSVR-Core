@@ -131,7 +131,11 @@ bool OSVR_ClientContextObject::releaseObject(void *obj) {
 ClientContextDeleter OSVR_ClientContextObject::getDeleter() const {
     return m_deleter;
 }
-
+bool OSVR_ClientContextObject::getStatus() const { return m_getStatus(); }
+bool OSVR_ClientContextObject::m_getStatus() const {
+    // by default, assume we are started up.
+    return true;
+}
 void OSVR_ClientContextObject::m_handleNewInterface(
     ::osvr::common::ClientInterfacePtr const &) {
     // by default do nothing

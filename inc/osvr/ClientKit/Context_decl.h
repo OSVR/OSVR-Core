@@ -87,6 +87,14 @@ namespace clientkit {
         /// context close).
         void free(Interface &iface);
 
+        /// @brief Checks to see if the client context is properly and fully
+        /// started up.
+        ///
+        /// If this returns false, there may not be a server running, or it may
+        /// be taking longer than usual to connect. The result will not change
+        /// from false to true without calling update() - consider a loop.
+        bool checkStatus() const;
+
         /// @brief Gets the bare OSVR_ClientContext.
         OSVR_ClientContext get();
 

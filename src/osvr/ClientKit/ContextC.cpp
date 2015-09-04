@@ -50,6 +50,12 @@ OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
         return ::osvr::client::createContext(applicationIdentifier);
     }
 }
+OSVR_ReturnCode osvrClientCheckStatus(OSVR_ClientContext ctx) {
+    if (!ctx) {
+        return OSVR_RETURN_FAILURE;
+    }
+    return ctx->getStatus() ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+}
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
     osvr::common::tracing::ClientUpdate region;
     ctx->update();

@@ -206,6 +206,10 @@ namespace client {
         }
     }
 
+    bool PureClientContext::m_getStatus() const {
+        return m_gotConnection && m_gotTree;
+    }
+
     common::PathTree const &PureClientContext::m_getPathTree() const {
         return m_pathTree;
     }

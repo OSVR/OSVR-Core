@@ -97,6 +97,11 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     /// @brief Returns the specialized deleter for this object.
     OSVR_COMMON_EXPORT osvr::common::ClientContextDeleter getDeleter() const;
+
+    /// @brief Returns true if we are started up and fully connected (path tree
+    /// received, etc.)
+    OSVR_COMMON_EXPORT bool getStatus() const;
+
   protected:
     /// @brief Constructor for derived class use only.
     OSVR_COMMON_EXPORT
@@ -106,6 +111,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
   private:
     virtual void m_update() = 0;
     virtual void m_sendRoute(std::string const &route) = 0;
+    OSVR_COMMON_EXPORT virtual bool m_getStatus() const;
     /// @brief Optional implementation-specific handling of interface retrieval,
     /// before the interface is returned to the client.
     OSVR_COMMON_EXPORT virtual void

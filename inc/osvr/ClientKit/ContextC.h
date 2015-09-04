@@ -59,15 +59,30 @@ OSVR_EXTERN_C_BEGIN
 
     @returns Client context - will be needed for subsequent calls
 */
-OSVR_CLIENTKIT_EXPORT OSVR_ClientContext
-osvrClientInit(const char applicationIdentifier[],
-               uint32_t flags OSVR_CPP_ONLY(= 0));
+OSVR_CLIENTKIT_EXPORT OSVR_ClientContext osvrClientInit(
+    const char applicationIdentifier[], uint32_t flags OSVR_CPP_ONLY(= 0));
 
 /** @brief Updates the state of the context - call regularly in your mainloop.
 
     @param ctx Client context
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx);
+
+/** @brief Checks to see if the client context is fully started up and connected
+    properly to a server.
+
+    If this reports that the client context is not OK, there may not be a server
+    running, or you may just have to call osvrClientUpdate() a few times to
+    permit startup to finish. The return value of this call will not change from
+    failure to success without calling osvrClientUpdate().
+
+    @param ctx Client context
+
+    @return OSVR_RETURN_FAILURE if not yet fully connected/initialized, or if
+    some other error (null context) occurs.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientCheckStatus(OSVR_ClientContext ctx);
 
 /** @brief Shutdown the library.
     @param ctx Client context

@@ -107,6 +107,10 @@ namespace clientkit {
 
     inline OSVR_ClientContext ClientContext::get() { return m_context; }
 
+    inline bool ClientContext::checkStatus() const {
+        return osvrClientCheckStatus(m_context) == OSVR_RETURN_SUCCESS;
+    }
+
 } // end namespace clientkit
 
 } // end namespace osvr
