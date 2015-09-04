@@ -156,7 +156,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     virtual void
     m_setRoomToWorldTransform(osvr::common::Transform const &xform) = 0;
 
-    /// @brief Implementation of accessor for the path tree.
+    /// @brief Implementation of accessor for the system component
     OSVR_COMMON_EXPORT virtual osvr::common::SystemComponent *
     m_getSystemComponent() = 0;
 

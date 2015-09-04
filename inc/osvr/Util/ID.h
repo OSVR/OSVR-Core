@@ -50,11 +50,11 @@ template <class Tag, class impl> class ID {
 
     bool empty() const { return m_val == 0xffffffff ? true : false; }
 
-    operator impl & () {return m_val; }
+    operator impl &() { return m_val; }
     friend bool operator==(ID a, ID b) { return a.m_val == b.m_val; }
     friend bool operator!=(ID a, ID b) { return a.m_val != b.m_val; }
 
-    impl& value() { return m_val; }
+    impl &value() { return m_val; }
     impl value() const { return m_val; }
 
   private:
