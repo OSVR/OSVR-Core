@@ -37,7 +37,7 @@ namespace vbtracker {
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
-    const DoubleVecVec OsvrHdkLedLocations_SENSOR0 = {
+    const Point3Vector OsvrHdkLedLocations_SENSOR0 = {
         {-85, 3, 24.09},
         { -83.2, -14.01, 13.89 },
         { -47, 51, 24.09 },
@@ -76,7 +76,7 @@ namespace vbtracker {
 
     // Default 3D locations for the beacons on an OSVR HDK back plate, in
     // millimeters
-    const DoubleVecVec OsvrHdkLedLocations_SENSOR1 = {
+    const Point3Vector OsvrHdkLedLocations_SENSOR1 = {
         {1, 23.8, 0},
         { 11, 5.8, 0 },
         { 9, -23.8, 0 },
@@ -88,7 +88,7 @@ namespace vbtracker {
 
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
-        const DoubleVecVec &beacons, size_t requiredInliers,
+        const Point3Vector &beacons, size_t requiredInliers,
         size_t permittedOutliers) {
         SetBeacons(beacons);
         SetCameraMatrix(cameraMatrix);
@@ -98,20 +98,10 @@ namespace vbtracker {
         m_permittedOutliers = permittedOutliers;
     }
 
-    bool BeaconBasedPoseEstimator::SetBeacons(const DoubleVecVec &beacons) {
+    bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
-
-        for (int i = 0; i < beacons.size(); i++) {
-            if (beacons[i].size() != 3) {
-                m_beacons.clear();
-                return false;
-            }
-            cv::Point3f p(static_cast<float>(beacons[i][0]),
-                          static_cast<float>(beacons[i][1]),
-                          static_cast<float>(beacons[i][2]));
-            m_beacons.push_back(p);
-        }
+        m_beacons = beacons;
 
         return true;
     }

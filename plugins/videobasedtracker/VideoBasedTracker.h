@@ -64,17 +64,15 @@ namespace vbtracker {
         /// @todo Remove this raw pointer version.
         void addSensor(LedIdentifier *identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
-                       DoubleVecVec const &locations
-                       , size_t requiredInliers = 4
-                       , size_t permittedOutliers = 2
-                       );
+                       Point3Vector const &locations,
+                       size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
         /// @overload
         void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
-                       DoubleVecVec const &locations
-                       , size_t requiredInliers = 4
-                       , size_t permittedOutliers = 2
-                       );
+                       Point3Vector const &locations,
+                       size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
