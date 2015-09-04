@@ -212,10 +212,43 @@ namespace vbtracker {
         // do okay without using it, so leaving it out.
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
+        int maxIterations = 5;
+        cv::Mat inlierIndices;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, 20, 8.0f,
-            static_cast<int>(objectPoints.size() - m_permittedOutliers));
+            m_tvec, usePreviousGuess, 5, 8.0f,
+            static_cast<int>(objectPoints.size() - m_permittedOutliers),
+            inlierIndices);
+
+        //==========================================================================
+        // Make sure we got all the inliers we needed.  Otherwise, reject this
+        // pose.
+        if (inlierIndices.rows < m_requiredInliers) {
+          return false;
+        }
+
+        //==========================================================================
+        // Reproject the inliers into the image and make sure they are actually
+        // close to the expected location; otherwise, we have a bad pose.
+        if (inlierIndices.rows > 0) {
+          std::vector<cv::Point3f>  inlierObjectPoints;
+          std::vector<cv::Point2f> inlierImagePoints;
+          for (int i = 0; i < inlierIndices.rows; i++) {
+            inlierObjectPoints.push_back(objectPoints[i]);
+            inlierImagePoints.push_back(imagePoints[i]);
+          }
+          std::vector<cv::Point2f> reprojectedPoints;
+          cv::projectPoints(inlierObjectPoints, m_rvec, m_tvec, m_cameraMatrix,
+            m_distCoeffs, reprojectedPoints);
+          for (size_t i = 0; i < reprojectedPoints.size(); i++) {
+            if (reprojectedPoints[i].x - inlierImagePoints[i].x > 4) {
+              return false;
+            }
+            if (reprojectedPoints[i].y - inlierImagePoints[i].y > 4) {
+              return false;
+            }
+          }
+        }
 
         //==========================================================================
         // Convert this into an OSVR representation of the transformation that
@@ -240,6 +273,19 @@ namespace vbtracker {
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction.
 
+        //==========================================================================
+        // When we do what is described above, the X, Y, and Z axes are the inverse
+        // of what we'd like to have (we'd like to have X right, Y up, and Z
+        // into the screen for the basic HDK).  So we invert the translation
+        // and rotation, which is like switching the axes.
+        m_tvec.at<double>(0) *= -1;
+        m_tvec.at<double>(1) *= -1;
+        m_tvec.at<double>(2) *= -1;
+
+        m_rvec.at<double>(0) *= -1;
+        m_rvec.at<double>(1) *= -1;
+        m_rvec.at<double>(2) *= -1;
+
         // Compose the transform in original units.
         // We start by making a 3x3 rotation matrix out of the rvec, which
         // is done by a function that for some reason is named Rodrigues.
@@ -253,10 +299,12 @@ namespace vbtracker {
         }
 
         // Get the forward transform
+        // Scale to meters
         q_xyz_quat_type forward;
         forward.xyz[Q_X] = m_tvec.at<double>(0);
         forward.xyz[Q_Y] = m_tvec.at<double>(1);
         forward.xyz[Q_Z] = m_tvec.at<double>(2);
+        q_vec_scale(forward.xyz, 1e-3, forward.xyz);
 
         // Fill in a 4x4 matrix that starts as the identity
         // matrix with the 3x3 part from the rotation matrix.
@@ -276,12 +324,30 @@ namespace vbtracker {
         }
         q_from_row_matrix(forward.quat, rot4x4);
 
-        // Scale to meters
-        q_vec_scale(forward.xyz, 1e-3, forward.xyz);
+        //==============================================================
+        // When we do all of that, we end up with translation in Y
+        // being backwards, and also rotations about X and Z being
+        // backwards.  Not sure why that is, but we correct it here.
+        // @todo Figure out what is going on that this is wrong.
+        forward.xyz[Q_Y] *= -1;
+        forward.quat[Q_X] *= -1;
+        forward.quat[Q_Z] *= -1;
 
         //==============================================================
         // Put into OSVR format.
         osvrPose3FromQuatlib(&outPose, &forward);
+
+        //==========================================================================
+        // Put the values back to normal so that the debugging windows will show
+        // the right reprojections.
+        m_tvec.at<double>(0) *= -1;
+        m_tvec.at<double>(1) *= -1;
+        m_tvec.at<double>(2) *= -1;
+
+        m_rvec.at<double>(0) *= -1;
+        m_rvec.at<double>(1) *= -1;
+        m_rvec.at<double>(2) *= -1;
+
         return true;
     }
 
