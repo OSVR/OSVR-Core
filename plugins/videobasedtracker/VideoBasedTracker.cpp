@@ -42,7 +42,7 @@ namespace vbtracker {
     void VideoBasedTracker::addSensor(LedIdentifier *identifier,
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
-                                      DoubleVecVec const &locations,
+                                      Point3Vector const &locations,
                                       size_t requiredInliers,
                                       size_t permittedOutliers) {
         addSensor(LedIdentifierPtr(identifier), m, d, locations,
@@ -52,7 +52,7 @@ namespace vbtracker {
     void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
-                                      DoubleVecVec const &locations,
+                                      Point3Vector const &locations,
                                       size_t requiredInliers,
                                       size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));

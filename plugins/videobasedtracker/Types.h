@@ -43,6 +43,8 @@ namespace vbtracker {
     class LedIdentifier;
     class BeaconBasedPoseEstimator;
 
+    typedef std::vector<cv::Point3f> Point3Vector;
+
     /// @todo Replace usages of this with Eigen or cv matrices.
     typedef std::vector<std::vector<double> > DoubleVecVec;
 
