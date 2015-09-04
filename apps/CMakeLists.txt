@@ -13,7 +13,8 @@ if(BUILD_CLIENT_APPS)
         osvrClientKitCpp
         osvrCommon
         jsoncpp_lib
-        boost_program_options)
+        boost_program_options
+        osvr_cxx11_flags)
     set_target_properties(osvr_print_tree PROPERTIES
         FOLDER "OSVR Stock Applications")
     install(TARGETS osvr_print_tree

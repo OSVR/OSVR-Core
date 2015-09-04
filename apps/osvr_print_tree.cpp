@@ -43,6 +43,8 @@
 // Standard includes
 #include <iostream>
 #include <iomanip>
+#include <thread>
+#include <chrono>
 
 struct Options {
     bool showAliasSource;
@@ -182,6 +184,14 @@ int main(int argc, char *argv[]) {
         /// path tree and clone it.
         osvr::clientkit::ClientContext context("com.osvr.tools.printtree");
 
+        if (!context.checkStatus()) {
+            std::cerr << "Client context has not yet started up - waiting. Make sure the server is running." << std::endl;
+            do {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                context.update();
+            } while (!context.checkStatus());
+            std::cerr << "OK, client context ready. Proceeding." << std::endl;
+        }
         /// Get a non-const copy of the path tree.
         osvr::common::clonePathTree(context.get()->getPathTree(), pathTree);
         /// Resolve all aliases
