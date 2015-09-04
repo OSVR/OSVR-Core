@@ -60,7 +60,8 @@ namespace vbtracker {
         /// @param d A 5-dimensional distortion parameter vector
         /// @param locations A list of the 3d locations (in mm) of each marker
         /// @param requiredInliers How many "good" points must be available
-        /// @param permittedOutliers How many additional "bad" points we can have
+        /// @param permittedOutliers How many additional "bad" points we can
+        /// have
         /// @todo Remove this raw pointer version.
         void addSensor(LedIdentifier *identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
