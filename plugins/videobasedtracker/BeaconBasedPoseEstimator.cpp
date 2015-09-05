@@ -264,19 +264,6 @@ namespace vbtracker {
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction.
 
-        //==========================================================================
-        // When we do what is described above, the X, Y, and Z axes are the inverse
-        // of what we'd like to have (we'd like to have X right, Y up, and Z
-        // into the screen for the basic HDK).  So we invert the translation
-        // and rotation, which is like switching the axes.
-        m_tvec.at<double>(0) *= -1;
-        m_tvec.at<double>(1) *= -1;
-        m_tvec.at<double>(2) *= -1;
-
-        m_rvec.at<double>(0) *= -1;
-        m_rvec.at<double>(1) *= -1;
-        m_rvec.at<double>(2) *= -1;
-
         // Compose the transform in original units.
         // We start by making a 3x3 rotation matrix out of the rvec, which
         // is done by a function that for some reason is named Rodrigues.
@@ -299,11 +286,13 @@ namespace vbtracker {
 
         // Fill in a 4x4 matrix that starts as the identity
         // matrix with the 3x3 part from the rotation matrix.
+        // We need to transpose the matrix to make it row
+        // major.
         q_matrix_type rot4x4;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if ((i < 3) && (j < 3)) {
-                    rot4x4[i][j] = rot.at<double>(i, j);
+                    rot4x4[i][j] = rot.at<double>(j, i);
                 } else {
                     if (i == j) {
                         rot4x4[i][j] = 1;
@@ -316,28 +305,8 @@ namespace vbtracker {
         q_from_row_matrix(forward.quat, rot4x4);
 
         //==============================================================
-        // When we do all of that, we end up with translation in Y
-        // being backwards, and also rotations about X and Z being
-        // backwards.  Not sure why that is, but we correct it here.
-        // @todo Figure out what is going on that this is wrong.
-        forward.xyz[Q_Y] *= -1;
-        forward.quat[Q_X] *= -1;
-        forward.quat[Q_Z] *= -1;
-
-        //==============================================================
         // Put into OSVR format.
         osvrPose3FromQuatlib(&outPose, &forward);
-
-        //==========================================================================
-        // Put the values back to normal so that the debugging windows will show
-        // the right reprojections.
-        m_tvec.at<double>(0) *= -1;
-        m_tvec.at<double>(1) *= -1;
-        m_tvec.at<double>(2) *= -1;
-
-        m_rvec.at<double>(0) *= -1;
-        m_rvec.at<double>(1) *= -1;
-        m_rvec.at<double>(2) *= -1;
 
         return true;
     }
