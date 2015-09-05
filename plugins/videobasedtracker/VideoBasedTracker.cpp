@@ -42,7 +42,7 @@ namespace vbtracker {
     void VideoBasedTracker::addSensor(LedIdentifier *identifier,
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
-                                      DoubleVecVec const &locations,
+                                      Point3Vector const &locations,
                                       size_t requiredInliers,
                                       size_t permittedOutliers) {
         addSensor(LedIdentifierPtr(identifier), m, d, locations,
@@ -52,7 +52,7 @@ namespace vbtracker {
     void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
                                       DoubleVecVec const &m,
                                       std::vector<double> const &d,
-                                      DoubleVecVec const &locations,
+                                      Point3Vector const &locations,
                                       size_t requiredInliers,
                                       size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));
@@ -73,9 +73,10 @@ namespace vbtracker {
 
         // Threshold the image based on the brightness value that is between
         // the darkest and brightest pixel in the image.
+        // @todo Make this a parameter.
         double minVal, maxVal;
         cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = 150;
+        double thresholdValue = 220;
         cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
                       CV_THRESH_BINARY);
 
@@ -118,12 +119,12 @@ namespace vbtracker {
         std::vector<cv::KeyPoint> foundKeyPoints;
         detector->detect(m_imageGray, foundKeyPoints);
 
-        // TODO: Consider computing the center of mass of a dilated bounding
+        // @todo: Consider computing the center of mass of a dilated bounding
         // rectangle around each keypoint to produce a more precise subpixel
         // localization of each LED.  The moments() function may be helpful
         // with this.
 
-        // TODO: Estimate the summed brightness of each blob so that we can
+        // @todo: Estimate the summed brightness of each blob so that we can
         // detect when they are getting brighter and dimmer.  Pass this as
         // the brightness parameter to the Led class when adding a new one
         // or augmenting with a new frame.
@@ -142,7 +143,7 @@ namespace vbtracker {
             // update it.  If not, we delete the LED from the list.  Once we
             // have matched a blob to an LED, we remove it from the list.  If
             // there are any blobs leftover, we create new LEDs from them.
-            // TODO: Include motion estimate based on Kalman filter along with
+            // @todo: Include motion estimate based on Kalman filter along with
             // model of the projection once we have one built.  Note that this
             // will require handling the lens distortion appropriately.
             auto led = begin(m_led_groups[sensor]);
@@ -175,14 +176,27 @@ namespace vbtracker {
 
             //==================================================================
             // Compute the pose of the HMD w.r.t. the camera frame of reference.
-            // TODO: Keep track of whether we already have a good pose and, if
-            // so, have the algorithm initialize using it so we do less work on
-            // average.
             bool gotPose = false;
             if (m_estimators[sensor]) {
+
+                // Get an estimated pose, if we have enough data.
                 OSVR_PoseState pose;
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
                         m_led_groups[sensor], pose)) {
+
+                    // Project the expected locations of the beacons
+                    // into the image and then compute the error between the
+                    // expected locations and the visible locations for all of
+                    // the visible beacons.  If they are too far off, cancel the
+                    // pose.
+                    std::vector<cv::Point2f> imagePoints;
+                    m_estimators[sensor]->ProjectBeaconsToImage(imagePoints);
+                    for (auto &led : m_led_groups[sensor]) {
+                        auto label = std::to_string(led.getOneBasedID());
+                        cv::Point where = led.getLocation();
+                    }
+                    // XXX
+
                     m_pose = pose;
                     handler(static_cast<unsigned>(sensor), pose);
                     gotPose = true;

@@ -43,8 +43,8 @@ namespace vbtracker {
     /// @name Default 3D locations for the beacons on an OSVR HDK, in
     /// millimeters
     /// @{
-    extern const DoubleVecVec OsvrHdkLedLocations_SENSOR0;
-    extern const DoubleVecVec OsvrHdkLedLocations_SENSOR1;
+    extern const Point3Vector OsvrHdkLedLocations_SENSOR0;
+    extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
     /// @}
 
     /// @brief Class to track an object that has identified LED beacons
@@ -65,14 +65,13 @@ namespace vbtracker {
         /// @param distCoeffs Distortion coefficients for OpenCV
         /// @param beacons 3D beacon locations
         /// @param requiredInliers How many "good" points must be available
-        /// @param permittedOutliers How many additional "bad" points we can have
-        BeaconBasedPoseEstimator(
-            const DoubleVecVec &cameraMatrix
-            , const std::vector<double> &distCoeffs
-            , const DoubleVecVec &beacons
-            , size_t requiredInliers = 4
-            , size_t permittedOutliers = 2
-            );
+        /// @param permittedOutliers How many additional "bad" points we can
+        /// have
+        BeaconBasedPoseEstimator(const DoubleVecVec &cameraMatrix,
+                                 const std::vector<double> &distCoeffs,
+                                 const Point3Vector &beacons,
+                                 size_t requiredInliers = 4,
+                                 size_t permittedOutliers = 2);
 
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as
@@ -92,7 +91,7 @@ namespace vbtracker {
         /// @name Data set resets
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
-        bool SetBeacons(const DoubleVecVec &beacons);
+        bool SetBeacons(const Point3Vector &beacons);
         bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
@@ -100,11 +99,11 @@ namespace vbtracker {
         /// @brief Implementation - doesn't set m_gotPose;
         bool m_estimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
 
-        std::vector<cv::Point3f> m_beacons; //< 3D location of LED beacons
-        cv::Mat m_cameraMatrix;             //< 3x3 camera matrix
-        cv::Mat m_distCoeffs;               //< Distortion coefficients
-        size_t m_requiredInliers;           //< How many inliers do we require?
-        size_t m_permittedOutliers;         //< How many outliers do we allow?
+        Point3Vector m_beacons;     //< 3D location of LED beacons
+        cv::Mat m_cameraMatrix;     //< 3x3 camera matrix
+        cv::Mat m_distCoeffs;       //< Distortion coefficients
+        size_t m_requiredInliers;   //< How many inliers do we require?
+        size_t m_permittedOutliers; //< How many outliers do we allow?
 
         /// @name Pose cache
         /// @brief Stores the most-recent solution, in case we need it again
