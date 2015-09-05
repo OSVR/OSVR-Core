@@ -220,6 +220,7 @@ namespace vbtracker {
         //==========================================================================
         // Reproject the inliers into the image and make sure they are actually
         // close to the expected location; otherwise, we have a bad pose.
+        const double pixelReprojectionErrorForSingleAxisMax = 4;
         if (inlierIndices.rows > 0) {
           std::vector<cv::Point3f>  inlierObjectPoints;
           std::vector<cv::Point2f> inlierImagePoints;
@@ -231,10 +232,12 @@ namespace vbtracker {
           cv::projectPoints(inlierObjectPoints, m_rvec, m_tvec, m_cameraMatrix,
             m_distCoeffs, reprojectedPoints);
           for (size_t i = 0; i < reprojectedPoints.size(); i++) {
-            if (reprojectedPoints[i].x - inlierImagePoints[i].x > 4) {
+            if (reprojectedPoints[i].x - inlierImagePoints[i].x > 
+                pixelReprojectionErrorForSingleAxisMax) {
               return false;
             }
-            if (reprojectedPoints[i].y - inlierImagePoints[i].y > 4) {
+            if (reprojectedPoints[i].y - inlierImagePoints[i].y > 
+              pixelReprojectionErrorForSingleAxisMax) {
               return false;
             }
           }
