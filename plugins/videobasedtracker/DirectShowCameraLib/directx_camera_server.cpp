@@ -107,7 +107,8 @@ class directx_samplegrabber_callback : public ISampleGrabberCB {
     // connected to in order to avoid segmentations faults.
     STDMETHODIMP_(ULONG) AddRef(void) { return 1; }
     STDMETHODIMP_(ULONG) Release(void) { return 2; }
-    STDMETHOD(QueryInterface)(REFIID interfaceRequested, void **handleToInterfaceRequested);
+    STDMETHOD(QueryInterface)
+    (REFIID interfaceRequested, void **handleToInterfaceRequested);
 
     // One of the following two methods must be defined do to the
     // ISampleGraberCB parent class; this is the way we hear from the grabber.
@@ -127,8 +128,8 @@ class directx_samplegrabber_callback : public ISampleGrabberCB {
 
 static WinPtr<IPin> GetPin(IBaseFilter &pFilter, PIN_DIRECTION const PinDir) {
     auto pEnum = WinPtr<IEnumPins>{};
-    auto pPin = WinPtr<IPin>{};
     pFilter.EnumPins(AttachPtr(pEnum));
+    auto pPin = WinPtr<IPin>{};
     while (pEnum->Next(1, AttachPtr(pPin), nullptr) == S_OK) {
         PIN_DIRECTION PinDirThis;
         pPin->QueryDirection(&PinDirThis);
@@ -535,7 +536,6 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     VIDEOINFOHEADER *pVih;
     if (mt.formattype == FORMAT_VideoInfo ||
         mt.formattype == FORMAT_VideoInfo2) {
-        pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
         pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
     } else {
         fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
