@@ -61,7 +61,6 @@ if(WIN32)
     if(NOT DIRECTSHOW_STRMIIDS_LIBRARY)
         set(DIRECTSHOW_STRMIIDS_LIBRARY strmiids)
     endif()
-
     if(DIRECTSHOW_QEDIT_INCLUDE_DIR)
         set(QEDIT_WRAPPER_INCLUDE_FILE "${DIRECTSHOW_QEDIT_INCLUDE_DIR}/qedit.h")
     endif()
@@ -72,6 +71,7 @@ if(WIN32)
         DirectShowCameraLib/base_camera_server.cpp
         DirectShowCameraLib/directx_camera_server.h
         DirectShowCameraLib/directx_camera_server.cpp
+        DirectShowCameraLib/WinVariant.h
         )
     target_include_directories(directshow-camera PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
     target_link_libraries(directshow-camera
@@ -79,8 +79,11 @@ if(WIN32)
         vendored-vrpn
         com_smart_pointer
         PRIVATE
+        osvrUtilCpp
+        ${OSVR_CODECVT_LIBRARIES}
         ${DIRECTSHOW_STRMIIDS_LIBRARY}
         )
+
     target_compile_options(directshow-camera
         PUBLIC
         ${OSVR_CXX11_FLAGS})

@@ -103,7 +103,7 @@ class directx_samplegrabber_callback; //< Forward declaration
 
 class directx_camera_server : public base_camera_server {
   public:
-    /// Open the nth available camera.  First camera is 1.
+    /// Open the nth available camera.  First camera is 0.
     directx_camera_server(int which, unsigned width = 0, unsigned height = 0);
     virtual ~directx_camera_server(void);
 
@@ -132,6 +132,9 @@ class directx_camera_server : public base_camera_server {
     bool isOpened(void) const { return _started_graph; }
 
   protected:
+    bool start_com_and_graphbuilder();
+    bool open_moniker_and_finish_setup(WinPtr<IMoniker> pMoniker,
+                                       unsigned width, unsigned height);
     virtual void close_device(void);
 
     /// Construct but do not open camera (used by derived classes)

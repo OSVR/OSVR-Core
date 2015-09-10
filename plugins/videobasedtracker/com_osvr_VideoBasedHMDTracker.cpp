@@ -83,11 +83,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, int cameraNum = 0,
                          int channel = 0)
 #ifndef VBHMD_FAKE_IMAGES
-#ifdef VBHMD_USE_DIRECTSHOW
-    : m_camera(cameraNum + 1)   // DirectShow uses 1-based first camera
-#else
     : m_camera(cameraNum)
-#endif
 #endif
     {
         // Set the number of threads for OpenCV to use.
@@ -504,7 +500,7 @@ class HardwareDetection {
             // We need the camera object to be destroyed before we try
             // and open it again when we create the VideoBasedHMDTracker
             // object below, so that object can open the camera.
-            directx_camera_server svr(1);
+            directx_camera_server svr(0);
             if (!svr.read_image_to_memory()) {
                 return OSVR_RETURN_FAILURE;
             }
