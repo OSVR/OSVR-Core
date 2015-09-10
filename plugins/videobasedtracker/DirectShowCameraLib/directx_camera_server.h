@@ -105,6 +105,9 @@ class directx_camera_server : public base_camera_server {
   public:
     /// Open the nth available camera.  First camera is 0.
     directx_camera_server(int which, unsigned width = 0, unsigned height = 0);
+    /// Open the first camera whose DevicePath begins with the supplied prefix.
+    directx_camera_server(std::string const &pathPrefix, unsigned width = 0,
+                          unsigned height = 0);
     virtual ~directx_camera_server(void);
 
     /// Return the number of colors that the device has
@@ -171,6 +174,8 @@ class directx_camera_server : public base_camera_server {
 
     virtual bool open_and_find_parameters(const int which, unsigned width,
                                           unsigned height);
+    bool open_and_find_parameters(std::string const &pathPrefix, unsigned width,
+                                  unsigned height);
     virtual bool read_one_frame(unsigned minX, unsigned maxX, unsigned minY,
                                 unsigned maxY, unsigned exposure_millisecs);
 };

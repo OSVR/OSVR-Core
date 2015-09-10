@@ -454,6 +454,33 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     return open_moniker_and_finish_setup(pMoniker, width, height);
 }
 
+bool directx_camera_server::open_and_find_parameters(
+    std::string const &pathPrefix, unsigned width, unsigned height) {
+    auto graphbuilderRet = start_com_and_graphbuilder();
+    if (!graphbuilderRet) {
+        return false;
+    }
+
+    auto pMoniker =
+        find_first_capture_device_where([&pathPrefix](IMoniker &mon) {
+            auto path = getDevicePath(mon);
+            if (path.length() < pathPrefix.length()) {
+                return false;
+            }
+            return (path.substr(0, pathPrefix.length()) == pathPrefix);
+        });
+
+    if (!pMoniker) {
+        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
+                        "Could not get the device requested - not enough "
+                        "cameras?\n");
+        return false;
+    }
+    std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
+              << std::endl;
+    return open_moniker_and_finish_setup(pMoniker, width, height);
+}
+
 bool directx_camera_server::open_moniker_and_finish_setup(
     WinPtr<IMoniker> pMoniker, unsigned width, unsigned height) {
 
@@ -712,6 +739,38 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
     //---------------------------------------------------------------------
     // Allocate a buffer that is large enough to read the maximum-sized
     // image with no binning.
+    _buflen =
+        (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
+    if ((_buffer = new unsigned char[_buflen]) == nullptr) {
+        fprintf(stderr, "directx_camera_server::directx_camera_server(): Out "
+                        "of memory for buffer\n");
+        _status = false;
+        return;
+    }
+    // No image in memory yet.
+    _minX = _maxX = _minY = _maxY = 0;
+
+#ifdef HACK_TO_REOPEN
+    close_device();
+#endif
+
+    _status = true;
+}
+
+directx_camera_server::directx_camera_server(std::string const &pathPrefix,
+                                             unsigned width, unsigned height) {
+    //---------------------------------------------------------------------
+    if (!open_and_find_parameters(pathPrefix, width, height)) {
+        fprintf(stderr, "directx_camera_server::directx_camera_server(): "
+                        "Cannot open camera\n");
+        _status = false;
+        return;
+    }
+
+    //---------------------------------------------------------------------
+    // Allocate a buffer that is large enough to read the maximum-sized
+    // image with no binning.
+    /// @todo replace with a vector that gets sized here!
     _buflen =
         (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
     if ((_buffer = new unsigned char[_buflen]) == nullptr) {
