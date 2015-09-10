@@ -46,6 +46,9 @@
 #include <sstream>
 #include <memory>
 
+// This string begins the DevicePath provided by Windows for the HDK's camera.
+static const auto HDK_CAMERA_PATH_PREFIX = "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
+
 // Define the constant below to use a DirectShow-based workaround to not
 // being able to open the OSVR HDK camera using OpenCV.
 /// @todo Remove this code and the DirectShow stuff once the camera can be read
@@ -491,8 +494,9 @@ class HardwareDetection {
 #ifndef VBHMD_FAKE_IMAGES
 #ifdef VBHMD_USE_DIRECTSHOW
         // Open a DirectShow camera and make sure we can read an
-        // image from it.
-        cam.reset(new directx_camera_server(0));
+        // image from it. We now filter by path prefix to make sure it only
+        // finds HDK cameras, not whatever random webcam comes up first.
+        cam.reset(new directx_camera_server(HDK_CAMERA_PATH_PREFIX));
         if (!cam->read_image_to_memory()) {
             return OSVR_RETURN_FAILURE;
         }
