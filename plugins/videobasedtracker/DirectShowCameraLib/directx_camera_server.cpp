@@ -38,6 +38,10 @@
 #include <cmath>
 #include <iostream>
 
+// Uncomment to get a full device name and path listing in enumeration, instead
+// of silently enumerating and early-exiting when we find one we like.
+//#define VERBOSE_ENUM
+
 //#define HACK_TO_REOPEN
 //#define	DEBUG
 
@@ -405,22 +409,42 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     printf("find_first_capture_device_where(): Before Loop "
            "over enumerators\n");
 #endif
-    // see
-    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd377566(v=vs.85).aspx
-    // for how to choose a camera
+// see
+// https://msdn.microsoft.com/en-us/library/windows/desktop/dd377566(v=vs.85).aspx
+// for how to choose a camera
+#ifdef VERBOSE_ENUM
+    printf("\ndirectx_camera_server find_first_capture_device_where(): "
+           "Beginning enumeration of video capture devices.\n\n");
+#endif
     auto pMoniker = WinPtr<IMoniker>{};
     while (pClassEnum->Next(1, AttachPtr(pMoniker), nullptr) == S_OK) {
-        printf("find_first_capture_device_where(): '%s' at path '%s'\n",
-               getDeviceHumanDesc(*pMoniker).c_str(),
+
+#ifdef VERBOSE_ENUM
+        printf("- '%s' at path:\n  '%s'\n\n", getDeviceHumanDesc(*pMoniker).c_str(),
                getDevicePath(*pMoniker).c_str());
-        if (f(*pMoniker)) {
+#endif // VERBOSE_ENUM
+
+        if (!ret && f(*pMoniker)) {
             ret = pMoniker;
-            return ret;
+#ifdef VERBOSE_ENUM
+            printf("^^ Accepted that device! (Would have exited "
+                   "enumeration here if VERBOSE_ENUM were not defined)\n\n");
+#else // !VERBOSE_ENUM
+            return ret; // Early out if we find it and we're not in verbose enum
+                        // mode.
+#endif
         }
     }
 
-    fprintf(stderr, "find_first_capture_device_where(): No device satisfied "
-                    "the predicate.\n");
+#ifdef VERBOSE_ENUM
+    printf("\ndirectx_camera_server find_first_capture_device_where(): End enumeration.\n\n");
+#endif
+
+    if (!ret) {
+        fprintf(stderr,
+                "directx_camera_server find_first_capture_device_where(): "
+                "No device satisfied the predicate.\n");
+    }
     return ret;
 }
 
@@ -451,6 +475,10 @@ bool directx_camera_server::open_and_find_parameters(const int which,
                         "cameras?\n");
         return false;
     }
+#ifdef DEBUG
+    std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
+              << std::endl;
+#endif
     return open_moniker_and_finish_setup(pMoniker, width, height);
 }
 
@@ -476,8 +504,11 @@ bool directx_camera_server::open_and_find_parameters(
                         "cameras?\n");
         return false;
     }
+
+#ifdef DEBUG
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
+#endif
     return open_moniker_and_finish_setup(pMoniker, width, height);
 }
 
@@ -490,8 +521,8 @@ bool directx_camera_server::open_moniker_and_finish_setup(
                 "Null device moniker passed: no device found?\n");
         return false;
     }
-    printf("directx_camera_server::open_moniker_and_finish_setup(): Using "
-           "capture device '%s' at path '%s'\n",
+
+    printf("directx_camera_server: Using capture device '%s' at path '%s'\n",
            getDeviceHumanDesc(*pMoniker).c_str(),
            getDevicePath(*pMoniker).c_str());
 
