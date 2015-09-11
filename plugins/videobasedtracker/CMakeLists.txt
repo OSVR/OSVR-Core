@@ -96,7 +96,6 @@ endif()
 osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
     MANUAL_LOAD
     CPP # indicates we'd like to use the C++ wrapper
-    NO_INSTALL # while in development, don't install
     SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
     Oculus_DK2.cpp
