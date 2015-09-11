@@ -1,19 +1,56 @@
 {
-  "deviceVendor": "OSVR",
-  "deviceName": "Video-Based Head-Mounted Display Tracker",
-  "author": "Russ Taylor <russ@reliasolve.com>",
-  "version": 1,
-  "lastModified": "2015-04-15T14:27:0.000Z",
-  "interfaces": {
-    "tracker": {
-      "count": 1,
-      "position": true,
-      "orientation": true
+    "deviceVendor": "OSVR",
+    "deviceName": "Video-Based Head-Mounted Display Tracker",
+    "author": "Russ Taylor <russ@reliasolve.com>",
+    "version": 1,
+    "lastModified": "2015-04-15T14:27:0.000Z",
+    "interfaces": {
+        "tracker": {
+            "count": 2,
+            "position": true,
+            "orientation": true
+        }
+    },
+    "semantic": {
+        "hmd": {
+            "front": {
+                "$target": {
+                    "rotate": {
+                        "axis": "x",
+                        "degrees": 180
+                    },
+                    "child": {
+                        "changeBasis": {
+                            "x": "-x",
+                            "y": "-y",
+                            "z": "z"
+                        },
+                        "child": "tracker/0"
+                    }
+                }
+            },
+            "back": {
+                "$target": {
+                    "rotate": {
+                        "axis": "y",
+                        "degrees": 180
+                    },
+                    "child": {
+                        "rotate": {
+                            "axis": "x",
+                            "degrees": 180
+                        },
+                        "child": {
+                            "changeBasis": {
+                                "x": "-x",
+                                "y": "-y",
+                                "z": "z"
+                            },
+                            "child": "tracker/1"
+                        }
+                    }
+                }
+            }
+        }
     }
-  },
-  "semantics": {
-    "value": {
-      "$target": "tracker/0"
-    }
-  }
 }

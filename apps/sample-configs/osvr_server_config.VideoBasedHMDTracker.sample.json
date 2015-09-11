@@ -3,19 +3,6 @@
     "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
   ],
   "aliases": {
-    "/me/head": { /* This is a null rotation and change of basis, just showing syntax. */
-      "postrotate": {
-        "axis": "x",
-        "degrees": 0
-      },
-      "child": {
-        "changeBasis": {
-          "x": "x",
-          "y": "y",
-          "z": "z"
-        },
-        "child": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/tracker/0"
-      }
-    }
+    "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
   }
 }
