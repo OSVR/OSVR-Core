@@ -54,7 +54,16 @@ namespace pluginhost {
         // binDir now normalized to PREFIX/bin
         auto root = binDir.parent_path();
 
+        // current working directory
+        auto currentWorkingDirectory = boost::filesystem::current_path();
+
         SearchPath paths;
+
+        // current working directory, if different from root
+        if (currentWorkingDirectory != root) {
+            paths.push_back((currentWorkingDirectory / OSVR_PLUGIN_DIR).string());
+        }
+
 #ifdef _MSC_VER
         paths.push_back((root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
 #endif
