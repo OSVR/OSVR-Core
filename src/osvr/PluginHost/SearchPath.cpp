@@ -54,15 +54,15 @@ namespace pluginhost {
         // binDir now normalized to PREFIX/bin
         auto root = binDir.parent_path();
 
-        // current working directory
-        auto currentWorkingDirectory = boost::filesystem::current_path();
-
         SearchPath paths;
 
+#ifdef __ANDROID__
         // current working directory, if different from root
+        auto currentWorkingDirectory = boost::filesystem::current_path();
         if (currentWorkingDirectory != root) {
             paths.push_back((currentWorkingDirectory / OSVR_PLUGIN_DIR).string());
         }
+#endif
 
 #ifdef _MSC_VER
         paths.push_back((root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
