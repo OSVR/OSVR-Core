@@ -1,5 +1,5 @@
 
-foreach(test JointClientKit)
+foreach(test JointClientKit JointClientKitWithInterface)
     add_executable(Test${test}
         ${test}.cpp)
     target_link_libraries(Test${test} osvrClientKitCpp osvrJointClientKit osvr_cxx11_flags)
