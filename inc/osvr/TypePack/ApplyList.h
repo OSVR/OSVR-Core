@@ -32,7 +32,6 @@
 #include "List.h"
 #include "T.h"
 #include "Apply.h"
-#include "CoerceList.h"
 
 // Library/third-party includes
 // - none
@@ -47,13 +46,14 @@ namespace typepack {
         template <typename F, typename List> struct apply_list_;
         template <typename F, typename... Args>
         struct apply_list_<F, list<Args...>> {
-            using type = typepack::apply<F, Args...>;
+            // the simpler solution doesn't build with MSVC 2013
+            template <typename...> using apply = typepack::apply<F, Args...>;
         };
     } // namespace detail
 
     /// Apply an alias class, exploding the list of args
     template <typename F, typename Args>
-    using apply_list = t_<detail::apply_list_<F, coerce_list<Args>>>;
+    using apply_list = apply<detail::apply_list_<F, Args>>;
 } // namespace typepack
 } // namespace osvr
 
