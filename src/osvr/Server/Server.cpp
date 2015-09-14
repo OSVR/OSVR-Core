@@ -66,6 +66,10 @@ namespace server {
 
     void Server::loadAutoPlugins() { m_impl->loadAutoPlugins(); }
 
+    void Server::setHardwareDetectOnConnection() {
+        m_impl->setHardwareDetectOnConnection();
+    }
+
     void Server::instantiateDriver(std::string const &plugin,
                                    std::string const &driver,
                                    std::string const &params) {

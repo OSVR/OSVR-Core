@@ -137,6 +137,13 @@ namespace server {
         /// @brief Load all auto-loadable plugins.
         OSVR_SERVER_EXPORT void loadAutoPlugins();
 
+        /// @brief Adds the behavior that hardware detection should take place
+        /// on client connection.
+        ///
+        /// Safe to call from any thread, even when server is running, though it
+        /// makes the most sense as a startup option.
+        OSVR_SERVER_EXPORT void setHardwareDetectOnConnection();
+
         /// @brief Instantiate the named driver with parameters.
         /// @param plugin The name of a plugin.
         /// @param driver The name of a driver registered by the plugin for

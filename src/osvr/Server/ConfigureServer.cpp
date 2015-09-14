@@ -152,6 +152,8 @@ namespace server {
         if (sleepTime > 0.0)
             m_server->setSleepTime(sleepTime);
 
+        m_server->setHardwareDetectOnConnection();
+
         return m_server;
     }
 
