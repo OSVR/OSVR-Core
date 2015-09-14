@@ -161,9 +161,8 @@ namespace util {
                   template <class, class> class ContainerMixin>
         struct Option {
             using condition = Condition;
-            template <typename Container, typename Base> struct apply {
-                using type = ContainerMixin<Container, Base>;
-            };
+            template <typename Container, typename Base>
+            using apply = ContainerMixin<Container, Base>;
         };
 
         /// @brief Alias class to use in fold when computing a container wrapper
@@ -172,7 +171,7 @@ namespace util {
                 using condition = typename Option::condition;
                 using type = typepack::if_<
                     condition,
-                    typepack::t_<typepack::apply<Option, Container, Base>>,
+                    typepack::apply<Option, Container, Base>,
                     Base>;
             };
         };
