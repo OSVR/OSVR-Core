@@ -31,6 +31,7 @@
 // Internal Includes
 #include "List.h"
 #include "T.h"
+#include "Apply.h"
 #include "CoerceList.h"
 
 // Library/third-party includes
@@ -43,10 +44,10 @@ namespace osvr {
 namespace typepack {
     namespace detail {
         /// General/dummy case.
-        template <typename F, typename List> struct apply_list_ {};
+        template <typename F, typename List> struct apply_list_;
         template <typename F, typename... Args>
         struct apply_list_<F, list<Args...>> {
-            typedef typename F::template apply<Args...>::type type;
+            using type = typepack::apply<F, Args...>;
         };
     } // namespace detail
 
