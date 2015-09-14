@@ -33,9 +33,7 @@ namespace osvr {
 namespace typepack {
     namespace detail {
         template <typename T> struct push_front_impl {
-            template <typename... Ts> struct apply {
-                using type = list<T, Ts...>;
-            };
+            template <typename... Ts> using apply = list<T, Ts...>;
         };
     }
 
