@@ -149,8 +149,9 @@ namespace server {
             m_server = Server::create(connPtr);
         }
 
-        if (sleepTime > 0.0)
+        if (sleepTime > 0.0) {
             m_server->setSleepTime(sleepTime);
+        }
 
         m_server->setHardwareDetectOnConnection();
 
