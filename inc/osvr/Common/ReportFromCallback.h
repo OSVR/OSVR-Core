@@ -1,5 +1,8 @@
 /** @file
-    @brief Header
+    @brief Header providing common::traits::ReportFromCallback.
+
+    Actually just includes a single file that provides that, but this is the one
+   you should include.
 
     @date 2014
 
@@ -25,13 +28,6 @@
 #ifndef INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
 #define INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
 
-// Internal Includes
 #include <osvr/Common/ReportTraits.h>
-
-// Library/third-party includes
-// - none
-
-// Standard includes
-// - none
 
 #endif // INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
