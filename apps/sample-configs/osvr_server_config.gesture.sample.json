@@ -1,0 +1,9 @@
+{
+    "plugins": [
+        "com_osvr_example_Gesture"
+    ],
+    "aliases": {
+        "/me/hands/left/gesture": "/com_osvr_example_Gesture/Gesture/gesture/0",
+        "/me/hands/right/gesture": "/com_osvr_example_Gesture/Gesture/gesture/1"
+    }
+}
