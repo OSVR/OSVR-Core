@@ -76,23 +76,20 @@ osvrClientFreeInterface(OSVR_ClientContext ctx, OSVR_ClientInterface iface);
 if the parameter does not exist or is not a string.
 
 */
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientGetNameLength(OSVR_ClientContext ctx, uint32_t id, size_t *len);
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetGestureNameLength(
+    OSVR_ClientContext ctx, uint32_t id, size_t *len);
 
-/** @brief Convert the ID to string name representation
+/** @brief Convert the gesture ID to string name representation
 
-@param ctx Client context
-@param id  An id that corresponds to an entry in string to ID map
-@param [in, out] buf A buffer that you allocate of appropriate size.
-Must be at least the length returned by osvrClientGetStringParameterLength.
-Will contain the null-terminated string parameter value.
-@param len The length of the buffer you're providing. If the buffer is too
-short, an error is returned and the buffer is unchanged.
-
-@returns It will copy the name of entry name that corresponds to the
-provided id
+    @param ctx Client context
+    @param id  An id that corresponds to an entry in gesture string to ID map
+    @param [in, out] buf A buffer that you allocate of appropriate size.
+    Must be at least the length returned by osvrClientGetStringParameterLength.
+    Will contain the null-terminated string name of the gesture ID.
+    @param len The length of the buffer you're providing. If the buffer is too
+    short, an error is returned and the buffer is unchanged.
 */
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNameFromID(
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetGestureNameFromID(
     OSVR_ClientContext ctx, uint32_t id, char *buf, size_t len);
 
 /** @} */

@@ -74,8 +74,8 @@ OSVR_ReturnCode osvrClientFreeInterface(OSVR_ClientContext ctx,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientGetNameLength(OSVR_ClientContext ctx, uint32_t id, size_t *len) {
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetGestureNameLength(
+    OSVR_ClientContext ctx, uint32_t id, size_t *len) {
 
     if (ctx == nullptr) {
         return OSVR_RETURN_FAILURE;
@@ -83,6 +83,8 @@ osvrClientGetNameLength(OSVR_ClientContext ctx, uint32_t id, size_t *len) {
     if (len == nullptr) {
         return OSVR_RETURN_FAILURE;
     }
+    /// @todo Shouldn't be hardcoded as the only registered string map - this
+    /// should be accessible as "interface-class-level" data for Gesture.
     std::string entryName =
         ctx->getSystemComponent()->getRegStringMap()->corrMap.getNameFromID(
             StringID(id));
@@ -90,8 +92,9 @@ osvrClientGetNameLength(OSVR_ClientContext ctx, uint32_t id, size_t *len) {
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetNameFromID(OSVR_ClientContext ctx, uint32_t id,
-                                        char *buf, size_t len) {
+OSVR_ReturnCode osvrClientGetGestureNameFromID(OSVR_ClientContext ctx,
+                                               uint32_t id, char *buf,
+                                               size_t len) {
 
     if (ctx == nullptr) {
         return OSVR_RETURN_FAILURE;
@@ -100,6 +103,8 @@ OSVR_ReturnCode osvrClientGetNameFromID(OSVR_ClientContext ctx, uint32_t id,
         return OSVR_RETURN_FAILURE;
     }
 
+    /// @todo Shouldn't be hardcoded as the only registered string map - this
+    /// should be accessible as "interface-class-level" data for Gesture.
     std::string entryName =
         ctx->getSystemComponent()->getRegStringMap()->corrMap.getNameFromID(
             StringID(id));
@@ -108,6 +113,8 @@ OSVR_ReturnCode osvrClientGetNameFromID(OSVR_ClientContext ctx, uint32_t id,
         /// buffer too small.
         return OSVR_RETURN_FAILURE;
     }
+
+    /// @todo refactor to eliminate duplication
     entryName.copy(buf, entryName.size());
     buf[entryName.size()] = '\0';
     return OSVR_RETURN_SUCCESS;
