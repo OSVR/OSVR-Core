@@ -84,6 +84,9 @@ namespace server {
         /// @brief Load all auto-loadable plugins.
         void loadAutoPlugins();
 
+        /// @copydoc Server::setHardwareDetectOnConnection()
+        void setHardwareDetectOnConnection();
+
         /// @copydoc Server::triggerHardwareDetect()
         void triggerHardwareDetect();
 

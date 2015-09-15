@@ -90,10 +90,9 @@ namespace server {
             &ServerImpl::m_handleUpdatedRoute, this);
 
         // Things to do when we get a new incoming connection
+        // No longer doing hardware detect unconditionally here - see triggerHardwareDetect()
         m_commonComponent =
             m_systemDevice->addComponent(common::CommonComponent::create());
-        m_commonComponent->registerPingHandler(
-            [&] { triggerHardwareDetect(); });
         m_commonComponent->registerPingHandler([&] { m_sendTree(); });
 
         // Set up the default display descriptor.
@@ -156,6 +155,11 @@ namespace server {
     }
 
     void ServerImpl::loadAutoPlugins() { m_ctx->loadPlugins(); }
+
+    void ServerImpl::setHardwareDetectOnConnection() {
+        m_commonComponent->registerPingHandler(
+            [&] { triggerHardwareDetect(); });
+    }
 
     void ServerImpl::instantiateDriver(std::string const &plugin,
                                        std::string const &driver,
