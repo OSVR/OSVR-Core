@@ -45,10 +45,10 @@ typedef struct OSVR_GestureDeviceInterfaceObject *OSVR_GestureDeviceInterface;
 
 /** @brief Specify that your device will implement the Gesture interface.
 
-@param opts The device init options object.
-@param [out] iface An interface object you should retain with the same
-lifetime as the device token in order to send messages conforming to an
-Gesture interface.
+    @param opts The device init options object.
+    @param [out] iface An interface object you should retain with the same
+    lifetime as the device token in order to send messages conforming to an
+    Gesture interface.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
@@ -57,31 +57,29 @@ osvrDeviceGestureConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Obtain an ID for a given gesture name
-@param iface GestureInterface
-@param gestureName String name of gesture
-@param gestureID pointer to an id variable
+    @param iface GestureInterface
+    @param gestureName String name of gesture
+    @param gestureID pointer to an id variable
 */
 OSVR_PLUGINKIT_EXPORT
 void osvrDeviceGestureGetID(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
-                            OSVR_IN_PTR const char *gestureName,
-                            OSVR_IN_PTR OSVR_GestureID *gestureID)
+                            OSVR_IN_STRZ const char *gestureName,
+                            OSVR_OUT_PTR OSVR_GestureID *gestureID)
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report data for a specific sensor.
-@param iface Gesture interface
-@param gestureID Pre-fetched ID of the gesture
-@param gestureState Current state of gesture (In process vs Completed)
-@param sensor Sensor number
-@param timestamp Timestamp correlating to Gesture data.
+    @param iface Gesture interface
+    @param gestureID Pre-fetched ID of the gesture
+    @param gestureState Current state of gesture (In process vs Completed)
+    @param sensor Sensor number
+    @param timestamp Timestamp correlating to Gesture data.
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode
-osvrDeviceGestureReportData(OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
-                            OSVR_IN OSVR_GestureID gestureID,
-                            OSVR_IN_PTR OSVR_GestureState gestureState,
-                            OSVR_IN OSVR_ChannelCount sensor,
-                            OSVR_IN_PTR OSVR_TimeValue const *timestamp)
-    OSVR_FUNC_NONNULL((1, 5));
+OSVR_ReturnCode osvrDeviceGestureReportData(
+    OSVR_IN_PTR OSVR_GestureDeviceInterface iface,
+    OSVR_IN OSVR_GestureID gestureID, OSVR_IN OSVR_GestureState gestureState,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 5));
 
 /** @} */ /* end of group */
 
