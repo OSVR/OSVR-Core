@@ -92,9 +92,8 @@ short, an error is returned and the buffer is unchanged.
 @returns It will copy the name of entry name that corresponds to the
 provided id
 */
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientGetNameFromID(OSVR_ClientContext ctx, uint32_t id, char *buf,
-                        size_t len);
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNameFromID(
+    OSVR_ClientContext ctx, uint32_t id, char *buf, size_t len);
 
 /** @} */
 OSVR_EXTERN_C_END

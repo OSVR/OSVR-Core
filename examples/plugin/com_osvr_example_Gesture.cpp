@@ -64,8 +64,8 @@ class GestureDevice {
 
     OSVR_ReturnCode update() {
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(
-			1000)); // Simulate waiting a quarter second for data.
+        std::this_thread::sleep_for(std::chrono::milliseconds(
+            1000)); // Simulate waiting a quarter second for data.
 
         OSVR_TimeValue times;
 

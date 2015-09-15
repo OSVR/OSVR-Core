@@ -93,8 +93,8 @@ namespace common {
 
         virtual void m_parentSet();
 
-        static int VRPN_CALLBACK
-        m_handleGestureRecord(void *userdata, vrpn_HANDLERPARAM p);
+        static int VRPN_CALLBACK m_handleGestureRecord(void *userdata,
+                                                       vrpn_HANDLERPARAM p);
 
         void m_checkFirst(OSVR_GestureState const &gesture);
 

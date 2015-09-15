@@ -119,9 +119,8 @@ namespace common {
                                   timestamp);
     }
 
-    int VRPN_CALLBACK
-    GestureComponent::m_handleGestureRecord(void *userdata,
-                                            vrpn_HANDLERPARAM p) {
+    int VRPN_CALLBACK GestureComponent::m_handleGestureRecord(
+        void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<GestureComponent *>(userdata);
         auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
