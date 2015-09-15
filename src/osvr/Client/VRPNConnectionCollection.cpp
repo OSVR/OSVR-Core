@@ -50,6 +50,7 @@ namespace client {
             return existing->second;
         }
         connMap[host] = conn;
+        BOOST_ASSERT(!empty());
         return conn;
     }
 
@@ -68,6 +69,7 @@ namespace client {
                                         nullptr, nullptr, nullptr, true));
         connMap[host] = newConn;
         newConn->removeReference(); // Remove extra reference.
+        BOOST_ASSERT(!empty());
         return newConn;
     }
 

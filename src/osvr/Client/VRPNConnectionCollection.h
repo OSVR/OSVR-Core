@@ -51,6 +51,9 @@ namespace client {
         vrpn_ConnectionPtr
         getConnection(common::elements::DeviceElement const &elt);
         OSVR_CLIENT_EXPORT void updateAll();
+        bool empty() const {
+            return m_connMap->empty();
+        }
 
       private:
         typedef std::unordered_map<std::string, vrpn_ConnectionPtr>
