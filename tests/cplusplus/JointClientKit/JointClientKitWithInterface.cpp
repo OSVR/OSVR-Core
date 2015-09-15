@@ -37,8 +37,8 @@
 
 static bool reportReceived = false;
 
-static void myEyeTracker2DCallback(void *userdata, const OSVR_TimeValue *timestamp,
-                           const struct OSVR_EyeTracker2DReport *report) {
+static void myAnalogCallback(void *userdata, const OSVR_TimeValue *timestamp,
+                           const struct OSVR_AnalogReport *report) {
     reportReceived = true;
 }
 
@@ -47,7 +47,7 @@ TEST(BasicJointClientKitWithInterface, ConstructDestruct) {
     ASSERT_NE(nullptr, options);
 
     ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrJointClientOptionsLoadPlugin(options, "com_osvr_example_EyeTracker"));
+      osvrJointClientOptionsLoadPlugin(options, "com_osvr_example_AnalogSync"));
 
     ASSERT_EQ(OSVR_RETURN_SUCCESS,
       osvrJointClientOptionsTriggerHardwareDetect(options));
@@ -59,15 +59,13 @@ TEST(BasicJointClientKitWithInterface, ConstructDestruct) {
 
     OSVR_ClientInterface eye = nullptr;
     ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrClientGetInterface(ctx, "/me/eyes/left", &eye));
+      osvrClientGetInterface(ctx, "/com_osvr_example_AnalogSync/MySyncDevice/analog/0", &eye));
 
     ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrRegisterEyeTracker2DCallback(eye, &myEyeTracker2DCallback, nullptr));
+      osvrRegisterAnalogCallback(eye, &myAnalogCallback, nullptr));
 
-    for(int i = 0; i < 100; i++) {
-      ASSERT_EQ(OSVR_RETURN_SUCCESS,
-        osvrClientUpdate(ctx));
-    }
+    ASSERT_EQ(OSVR_RETURN_SUCCESS,
+      osvrClientUpdate(ctx));
 
     ASSERT_EQ(true, reportReceived);
 
