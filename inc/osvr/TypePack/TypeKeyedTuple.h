@@ -60,7 +60,7 @@ namespace typepack {
         using value_types = transform<KeyList, ComputeValueTypes>;
 
       public:
-        using container_type = apply_list<detail::make_tuple, value_types>;
+        using container_type = apply_list<quote<std::tuple>, value_types>;
         using key_types = KeyList;
 
         template <typename Key>
