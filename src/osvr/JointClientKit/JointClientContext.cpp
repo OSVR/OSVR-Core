@@ -66,6 +66,7 @@ namespace client {
         /// Get the VRPN connection out and use it.
         m_mainConn = static_cast<vrpn_Connection *>(std::get<0>(conn));
         m_vrpnConns.addConnection(m_mainConn, m_host);
+        BOOST_ASSERT(!m_vrpnConns.empty());
 
         /// Get the OSVR connection out and use it to make a server.
         m_server = server::Server::create(std::get<1>(conn));
