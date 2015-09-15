@@ -34,45 +34,34 @@
 #include <iostream>
 #include <string>
 
-typedef struct ContextData {
-    osvr::clientkit::ClientContext *context;
-} ContextData;
-
-void printGestureReport(const OSVR_GestureReport *report, std::string name) {
-
-    std::string state;
-    if (report->state == OSVR_GESTURE_COMPLETE) {
-        state = "COMPLETE";
-    } else {
-        state = "IN PROCESS";
-    }
-    std::cout << name << "; " << report->gestureID << "; " << state << "\t"
-              << std::endl;
-}
-
 void gestureCallback(void *userdata, const OSVR_TimeValue * /*timestamp*/,
                      const OSVR_GestureReport *report) {
-    auto ctx = static_cast<ContextData *>(userdata);
-    std::string name = ctx->context->getNamefromID(StringID(report->gestureID));
-    std::cout << "Got Gesture Report, for sensor #" << report->sensor
+    auto &ctx = *static_cast<osvr::clientkit::ClientContext *>(userdata);
+
+    /// You would typically not do this every frame - you'd retrieve the ID
+    /// based on the string, and then just compare the ID. This is just to make
+    /// a more compelling example.
+    std::string name = ctx.getNamefromID(StringID(report->gestureID));
+    std::cout << "Gesture: Sensor " << report->sensor << ": ID "
+              << report->gestureID << " (" << name << ") "
+              << (report->state == OSVR_GESTURE_COMPLETE ? "COMPLETE"
+                                                         : "IN PROGRESS")
               << std::endl;
-    printGestureReport(report, name);
 }
 
 int main() {
 
-    ContextData ctx;
-    ctx.context = new osvr::clientkit::ClientContext(
+    osvr::clientkit::ClientContext ctx(
         "com.osvr.exampleclients.GestureCallback");
 
     osvr::clientkit::Interface gesture =
-        ctx.context->getInterface("/com_osvr_example_Gesture/Gesture/gesture");
+        ctx.getInterface("/com_osvr_example_Gesture/Gesture/gesture");
 
-    gesture.registerCallback(&gestureCallback, static_cast<void *>(&ctx));
+    gesture.registerCallback(&gestureCallback, &ctx);
 
     // Pretend that this is your application's mainloop.
     while (1) {
-        ctx.context->update();
+        ctx.update();
     }
 
     std::cout << "Library shut down, exiting." << std::endl;
