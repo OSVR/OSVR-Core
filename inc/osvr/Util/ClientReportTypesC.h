@@ -350,10 +350,10 @@ typedef char const *OSVR_GestureName;
 typedef uint8_t OSVR_GestureState;
 
 /** @brief OSVR_GestureState value indicating "gesture started/currently in
-   process(ocurring)"
+   progress (occurring)"
     (should be used for continuous gestures, since discrete start and complete
    at the same time) */
-#define OSVR_GESTURE_IN_PROCESS (1)
+#define OSVR_GESTURE_IN_PROGRESS (1)
 
 /** @brief OSVR_GestureState value indicating "gesture is finished" */
 #define OSVR_GESTURE_COMPLETE (0)
