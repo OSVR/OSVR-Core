@@ -65,7 +65,6 @@ set(API
     "${HEADER_LOCATION}/ExtractYaw.h"
     "${HEADER_LOCATION}/Finally.h"
     "${HEADER_LOCATION}/Flag.h"
-    "${HEADER_LOCATION}/ID.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
     "${HEADER_LOCATION}/GuardInterface.h"
