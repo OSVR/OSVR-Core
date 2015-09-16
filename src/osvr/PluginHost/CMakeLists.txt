@@ -41,8 +41,6 @@ target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     libfunctionality::functionality
     osvrUtilCpp
-    osvrCommon
-    jsoncpp_lib
     PRIVATE
     boost_filesystem)
 
