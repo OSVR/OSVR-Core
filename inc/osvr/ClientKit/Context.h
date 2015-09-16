@@ -113,11 +113,11 @@ namespace clientkit {
         return osvrClientCheckStatus(m_context) == OSVR_RETURN_SUCCESS;
     }
 
-    inline std::string ClientContext::getGestureNamefromID(StringID id) {
+    inline std::string ClientContext::getGestureNamefromID(util::StringID id) {
 
         size_t length = 0;
         OSVR_ReturnCode ret =
-            osvrClientGetGestureNameLength(m_context, id, &length);
+            osvrClientGetGestureNameLength(m_context, id.get(), &length);
         if (OSVR_RETURN_SUCCESS != ret) {
             throw std::runtime_error(
                 "Invalid context or null reference to length variable.");
@@ -128,7 +128,7 @@ namespace clientkit {
         }
 
         boost::scoped_array<char> buf(new char[length]);
-        ret = osvrClientGetGestureNameFromID(m_context, id, buf.get(), length);
+        ret = osvrClientGetGestureNameFromID(m_context, id.get(), buf.get(), length);
         if (OSVR_RETURN_SUCCESS != ret) {
             throw std::runtime_error("Invalid context, null reference to "
                                      "buffer, or buffer is too small.");

@@ -28,7 +28,7 @@
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/Common/SystemComponent.h>
-#include <osvr/Util/ID.h>
+#include <osvr/Util/StringIds.h>
 
 // Library/third-party includes
 // - none
@@ -87,7 +87,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetGestureNameLength(
     /// should be accessible as "interface-class-level" data for Gesture.
     std::string entryName =
         ctx->getSystemComponent()->getRegStringMap()->corrMap.getNameFromID(
-            StringID(id));
+            osvr::util::StringID(id));
     *len = entryName.empty() ? 0 : (entryName.size() + 1);
     return OSVR_RETURN_SUCCESS;
 }
@@ -107,7 +107,7 @@ OSVR_ReturnCode osvrClientGetGestureNameFromID(OSVR_ClientContext ctx,
     /// should be accessible as "interface-class-level" data for Gesture.
     std::string entryName =
         ctx->getSystemComponent()->getRegStringMap()->corrMap.getNameFromID(
-            StringID(id));
+        osvr::util::StringID(id));
 
     if (entryName.size() + 1 > len) {
         /// buffer too small.

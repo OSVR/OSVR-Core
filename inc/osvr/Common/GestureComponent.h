@@ -35,6 +35,7 @@
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Util/StringIds.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -48,7 +49,7 @@ namespace common {
     struct GestureData {
         OSVR_ChannelCount sensor;
         OSVR_GestureState gestureState;
-        StringID gestureID;
+        util::StringID gestureID;
     };
 
     namespace messages {

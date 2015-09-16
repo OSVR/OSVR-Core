@@ -105,7 +105,7 @@ namespace common {
         /// @brief Serialize a value to a buffer, with optional tag to specify
         /// non-default traits.
         template <typename T, typename BufferType,
-                  typename Tag = DefaultSerializationTag<T> >
+                  typename Tag = DefaultSerializationTag<T>>
         inline void serializeRaw(BufferType &buf, T const &v,
                                  Tag const &tag = Tag()) {
             SerializationTraits<Tag>::serialize(buf, v, tag);
@@ -114,7 +114,7 @@ namespace common {
         /// @brief Deserialize a value from a buffer, with optional tag to
         /// specify non-default traits.
         template <typename T, typename BufferReaderType,
-                  typename Tag = DefaultSerializationTag<T> >
+                  typename Tag = DefaultSerializationTag<T>>
         inline void deserializeRaw(BufferReaderType &reader, T &v,
                                    Tag const &tag = Tag()) {
             SerializationTraits<Tag>::deserialize(reader, v, tag);
@@ -122,7 +122,7 @@ namespace common {
 
         /// @brief Get the size a value from a buffer, with optional tag to
         /// specify non-default traits.
-        template <typename T, typename Tag = DefaultSerializationTag<T> >
+        template <typename T, typename Tag = DefaultSerializationTag<T>>
         inline size_t getBufferSpaceRequiredRaw(size_t existingBufferSize,
                                                 T const &v,
                                                 Tag const &tag = Tag()) {
