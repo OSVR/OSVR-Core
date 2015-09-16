@@ -35,10 +35,7 @@ unsigned int reportNumber = 0;
 
 void imagingCallback(void *userdata, const OSVR_TimeValue *timestamp,
                       const OSVR_ImagingReport *report) {
-    //if (report->state.metadata.) {
-    //    printf("Error, frame empty!\n");
-    //    return;
-    //}
+    // @todo implement a C equivalent to the C++ empty() check here.
     OSVR_ClientContext* ctx = (OSVR_ClientContext*)userdata;
     /// The first time, let's print some info.
     if (reportNumber == 0) {
