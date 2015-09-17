@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief C Imaging interface sample
 
     @date 2015
 
@@ -8,6 +8,7 @@
     <http://sensics.com/osvr>
 */
 
+/*
 // Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,23 +22,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+*/
 
-// Internal Includes
+/* Internal Includes */
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
 #include <osvr/ClientKit/ImagingC.h>
 
-// Standard includes
+/* Standard includes */
 #include <stdio.h>
 
 unsigned int reportNumber = 0;
 
 void imagingCallback(void *userdata, const OSVR_TimeValue *timestamp,
                       const OSVR_ImagingReport *report) {
-    // @todo implement a C equivalent to the C++ empty() check here.
+    /* @todo implement a C equivalent to the C++ empty() check here. */
     OSVR_ClientContext* ctx = (OSVR_ClientContext*)userdata;
-    /// The first time, let's print some info.
+
+    /* The first time, let's print some info. */
     if (reportNumber == 0) {
         printf("Got first report: image is %d width and %d height.\n",
         report->state.metadata.width, report->state.metadata.height);
@@ -66,17 +69,12 @@ int main() {
         return -1;
     }
 
-    /// We keep a copy of the last report to avoid de-allocating the image
-    /// buffer until we have a new report.
-    //osvr::clientkit::ImagingReportOpenCV lastReport;
-
-    // Register the imaging callback.
+    /* Register the imaging callback. */
     if(OSVR_RETURN_SUCCESS != osvrRegisterImagingCallback(camera, &imagingCallback, &ctx)) {
         printf("Error, could not register image callback.");
         return -1;
     }
 
-    // Pretend that this is your application's mainloop.
     /* Pretend that this is your application's mainloop. */
     int i;
     for (i = 0; i < 1000000; ++i) {
