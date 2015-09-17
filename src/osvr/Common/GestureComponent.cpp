@@ -65,11 +65,11 @@ namespace common {
 
           private:
             OSVR_GestureState m_gestureState;
-            StringID m_gestureID;
+            util::StringID m_gestureID;
             OSVR_ChannelCount m_sensor;
         };
         const char *GestureRecord::identifier() {
-            return "com.osvr.gesture.gesturerecord";
+            return "org.osvr.gesture.gesturerecord";
         }
 
     } // namespace messages
@@ -150,10 +150,7 @@ namespace common {
     OSVR_GestureID GestureComponent::getGestureID(const char *gestureName) {
 
         OSVR_GestureID gestureID =
-            m_gestureNameMap->map.getStringID(gestureName);
-
-        OSVR_TimeValue now;
-        osvrTimeValueGetNow(&now);
+            m_gestureNameMap->map.getStringID(gestureName).value();
 
         // if we just inserted new gesture ID then send gesture map
         if (m_gestureNameMap->map.isUpdateAvailable()) {

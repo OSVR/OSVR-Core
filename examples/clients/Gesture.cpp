@@ -27,8 +27,10 @@
 #include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Interface.h>
 #include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/StringIds.h>
 
 // Library/third-party includes
+// - none
 
 // Standard includes
 #include <iostream>
@@ -41,7 +43,7 @@ void gestureCallback(void *userdata, const OSVR_TimeValue * /*timestamp*/,
     /// You would typically not do this every frame - you'd retrieve the ID
     /// based on the string, and then just compare the ID. This is just to make
     /// a more compelling example.
-    std::string name = ctx.getNamefromID(StringID(report->gestureID));
+    std::string name = ctx.getGestureNamefromID(osvr::util::StringID(report->gestureID));
     std::cout << "Gesture: Sensor " << report->sensor << ": ID "
               << report->gestureID << " (" << name << ") "
               << (report->state == OSVR_GESTURE_COMPLETE ? "COMPLETE"

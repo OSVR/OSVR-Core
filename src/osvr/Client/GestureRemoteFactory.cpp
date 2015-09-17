@@ -92,8 +92,8 @@ namespace client {
             }
 
             OSVR_GestureReport report;
-            StringID id =
-                m_gestureNameMap->corrMap.convertPeerToLocalID(data.gestureID);
+            util::StringID id =
+                m_gestureNameMap->corrMap.convertPeerToLocalID(util::PeerStringID(data.gestureID.value()));
             if (id.empty()) {
                 // could not find a peer to local mapping, discarding report
                 return;
@@ -101,7 +101,7 @@ namespace client {
 
             report.sensor = data.sensor;
             report.state = data.gestureState;
-            report.gestureID = id;
+            report.gestureID = id.value();
             for (auto &iface : m_interfaces) {
                 iface->triggerCallbacks(timestamp, report);
             }
