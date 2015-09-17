@@ -35,135 +35,76 @@
 namespace osvr {
 namespace common {
 
-    /// @brief set the initial number of entries to zero, and flag to update the
-    /// Map (since it's new)
-    RegisteredStringMap::RegisteredStringMap()
-        : m_numEntries(0), m_updateMap(true) {}
-
-    /// @todo add proper destructor
-    RegisteredStringMap::~RegisteredStringMap() {}
-
     /// @brief helper function to print size and contents of the map
     void RegisteredStringMap::printCurrentMap() {
-
+        auto n = m_regEntries.size();
         std::cout << "Current map contains " << m_regEntries.size()
                   << " entries: " << std::endl;
-        for (auto &entry : m_regEntries) {
-            std::cout << "ID: " << entry.second.value() << "; "
-                      << "Name: " << entry.first << std::endl;
+        for (decltype(n) i = 0; i < n; ++i) {
+            std::cout << "ID: " << i << "; "
+                      << "Name: " << m_regEntries[i] << std::endl;
         }
-    }
-
-    SerializedStringMap RegisteredStringMap::getMap() const {
-
-        Json::Value serializedMap;
-
-        for (auto &entry : m_regEntries) {
-
-            serializedMap[entry.first] = entry.second.value();
-        }
-        return serializedMap;
-    }
-
-    util::StringID
-    RegisteredStringMap::registerStringID(std::string const &str) {
-
-        // we've checked the entries before and haven't found so we'll just add
-        // new one
-        std::string name = str;
-        util::StringID newID(m_regEntries.size());
-
-        m_regEntries.insert(std::make_pair(name, newID));
-        m_numEntries++;
-
-        m_updateMap = true;
-        return newID;
     }
 
     util::StringID RegisteredStringMap::getStringID(std::string const &str) {
-
-        // check the existing registry first
-        for (auto &entry : m_regEntries) {
-            // found a matching name, NOTE: CaSe Sensitive
-            if (boost::equals(str, entry.first)) {
-                m_updateMap = false;
-                return entry.second;
-            }
+        auto entry = std::find(begin(m_regEntries), end(m_regEntries), str);
+        if (end(m_regEntries) != entry) {
+            // we found it.
+            return util::StringID(std::distance(begin(m_regEntries), entry));
         }
 
         // we didn't find an entry in the registry so we'll add a new one
-        return registerStringID(str);
+        auto ret = util::StringID(
+            m_regEntries.size()); // will be the location of the next insert.
+        m_regEntries.push_back(str);
+        m_modified = true;
+        return ret;
     }
 
-    std::string RegisteredStringMap::getNameFromID(util::StringID &id) const {
+    std::string RegisteredStringMap::getStringFromId(util::StringID id) const {
 
         // requested non-existent ID (include sanity check)
         if (id.value() >= m_regEntries.size()) {
             // returning empty string
+            /// @todo should we throw here?
             return std::string();
         }
 
-        // entries should be ordered 0-.. with new ones
-        // appending to the end, so we should be safe at pulling by vector index
-
-        for (auto &entry : m_regEntries) {
-            if (entry.second == id) {
-                // found name for this ID
-                return entry.first;
-            }
-        }
-        // returning empty string
-        return std::string();
+        return m_regEntries[id.value()];
     };
 
-    bool RegisteredStringMap::isUpdateAvailable() { return m_updateMap; }
+    bool RegisteredStringMap::isModified() const { return m_modified; }
+    void RegisteredStringMap::clearModifiedFlag() { m_modified = false; }
+    std::vector<std::string> RegisteredStringMap::getEntries() const {
+        return m_regEntries;
+    }
 
-    CorrelatedStringMap::CorrelatedStringMap() {}
+    util::StringID CorrelatedStringMap::getStringID(std::string const &str) {
+        return m_local.getStringID(str);
+    }
 
-    /// @todo add proper destructor
-    CorrelatedStringMap::~CorrelatedStringMap() {}
+    std::string CorrelatedStringMap::getStringFromId(util::StringID id) const {
+        return m_local.getStringFromId(id);
+    }
 
     util::StringID
     CorrelatedStringMap::convertPeerToLocalID(util::PeerStringID peerID) const {
-
-        // go thru the mappings and return an empty StringID if nothing's found
-        for (auto &mapping : mappings) {
-
-            if (mapping.first == peerID) {
-                return mapping.second;
-            }
+        if (peerID.empty()) {
+            return util::StringID();
         }
-
-        return util::StringID();
+        if (peerID.value() >= m_remoteToLocal.size()) {
+            throw std::out_of_range("Peer ID out of range!");
+        }
+        return util::StringID(m_remoteToLocal[peerID.value()]);
     }
 
-    void CorrelatedStringMap::addPeerToLocalMapping(util::PeerStringID peerID,
-                                                    util::StringID localID) {
-
-        // there should be 1 to 1 mapping between peer and local IDs,
-        // so if we find one, it should be correct
-        for (auto &mapping : mappings) {
-            // got a match
-            if ((mapping.first == peerID) && (mapping.second == localID)) {
-                return;
-            }
-        }
-        // add new mapping
-        mappings.push_back(std::make_pair(peerID, localID));
-    }
-
-    void CorrelatedStringMap::setupPeerMappings(SerializedStringMap peerData) {
-
-        // go thru the peerData, you get name and id
-        // this name may already be stored in correlatedMap
-        // so we get the localID first (or register it)
-        // then store it in the mappings
-
-        for (auto &name : peerData.getMemberNames()) {
-
-            util::PeerStringID peerID(peerData[name].asUInt());
-            util::StringID localID = getStringID(name);
-            addPeerToLocalMapping(peerID, localID);
+    void CorrelatedStringMap::setupPeerMappings(
+        std::vector<std::string> const &peerEntries) {
+        m_remoteToLocal.clear();
+        auto n = peerEntries.size();
+        for (uint32_t i = 0; i < n; ++i) {
+            m_remoteToLocal.push_back(
+                m_local.getStringID(peerEntries[i]).value());
         }
     }
 }

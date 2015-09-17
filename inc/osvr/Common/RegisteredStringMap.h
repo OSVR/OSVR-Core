@@ -38,62 +38,47 @@
 namespace osvr {
 namespace common {
 
-    /// map<name, id>
-    typedef std::map<std::string, util::StringID> RegistryList;
-
-    /// @todo change this to serialized bytestream in the future
-    typedef Json::Value SerializedStringMap;
-
     /// Centralize a string registry. Basically, the server side, and part
     /// of the client side internals.
     class RegisteredStringMap {
       public:
-        /// @brief Constructor
-        OSVR_COMMON_EXPORT RegisteredStringMap();
-
-        OSVR_COMMON_EXPORT ~RegisteredStringMap();
-
         /// retrieve the ID for the current name or register new ID and return
         /// that
         OSVR_COMMON_EXPORT util::StringID getStringID(std::string const &str);
 
         /// retrieve the name of the string given the ID
         /// returns empty string if nothing found
-        OSVR_COMMON_EXPORT std::string getNameFromID(util::StringID &id) const;
+        OSVR_COMMON_EXPORT std::string getStringFromId(util::StringID id) const;
 
-        /// package the entire (current) map into bytestream and return its copy
-        /// will be used to transport of maps between server and client
-        OSVR_COMMON_EXPORT SerializedStringMap getMap() const;
-
-        /// add new entry to the string map and return new ID
-        OSVR_COMMON_EXPORT util::StringID
-        registerStringID(std::string const &str);
-
-        OSVR_COMMON_EXPORT bool isUpdateAvailable();
+        /// Has a new entry been added since the flag was last cleared?
+        OSVR_COMMON_EXPORT bool isModified() const;
+        /// Clear the modified flag
+        OSVR_COMMON_EXPORT void clearModifiedFlag();
 
         OSVR_COMMON_EXPORT void printCurrentMap();
 
+        OSVR_COMMON_EXPORT std::vector<std::string> getEntries() const;
+
       protected:
-        /// keep track of number of entries in the registry,
-        /// may not be needed if we stick with vectors
-        int m_numEntries;
-        RegistryList m_regEntries;
+        std::vector<std::string> m_regEntries;
 
         /// special flag that gets switched whenever new element is inserted;
-        bool m_updateMap;
+        bool m_modified = false;
     };
 
     /// This is like a RegisteredStringMap, except it also knows that some peer
     /// also has a string map, likely with some of the same strings, but with
     /// different ids. Used in reconciliation between server and client since
-    /// they are
-    /// separate entities
-    class CorrelatedStringMap : public RegisteredStringMap {
+    /// they are separate entities
+    class CorrelatedStringMap {
       public:
-        /// @brief Constructor
-        OSVR_COMMON_EXPORT CorrelatedStringMap();
+        /// retrieve the ID for the current name or register new ID and return
+        /// that
+        OSVR_COMMON_EXPORT util::StringID getStringID(std::string const &str);
 
-        OSVR_COMMON_EXPORT ~CorrelatedStringMap();
+        /// retrieve the name of the string given the ID
+        /// returns empty string if nothing found
+        OSVR_COMMON_EXPORT std::string getStringFromId(util::StringID id) const;
 
         /// This is the extra method used by clients, to convert from server's
         /// ids. Will return NULL if peerID to Local ID mapping doesn't exist
@@ -101,15 +86,13 @@ namespace common {
         convertPeerToLocalID(util::PeerStringID peerID) const;
 
         /// This populates the data structure used by the above method.
-        OSVR_COMMON_EXPORT void setupPeerMappings(SerializedStringMap peerdata);
-
-        /// This will add the mapping or ignore it if it's present
-        void addPeerToLocalMapping(util::PeerStringID peerID,
-                                   util::StringID localID);
+        OSVR_COMMON_EXPORT void
+        setupPeerMappings(std::vector<std::string> const &peerEntries);
 
       private:
+        RegisteredStringMap m_local;
         /// keeps the peer to local string ID mappings
-        std::vector<std::pair<util::PeerStringID, util::StringID>> mappings;
+        std::vector<uint32_t> m_remoteToLocal;
     };
 } // namespace common
 } // namespace osvr
