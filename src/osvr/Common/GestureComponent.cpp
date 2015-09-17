@@ -153,7 +153,8 @@ namespace common {
             m_gestureNameMap->map.getStringID(gestureName).value();
 
         // if we just inserted new gesture ID then send gesture map
-        if (m_gestureNameMap->map.isUpdateAvailable()) {
+        if (m_gestureNameMap->map.isModified()) {
+            m_gestureNameMap->map.clearModifiedFlag();
             m_systemComponent->sendRegisteredStringMap();
         }
         return gestureID;
