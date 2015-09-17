@@ -38,7 +38,6 @@
 // Standard includes
 #include <string>
 #include <stdexcept>
-#include <iostream>
 
 namespace osvr {
 
@@ -127,13 +126,15 @@ namespace clientkit {
             return std::string();
         }
 
-        boost::scoped_array<char> buf(new char[length]);
-        ret = osvrClientGetGestureNameFromID(m_context, id.value(), buf.get(), length);
+        util::StringBufferBuilder buf;
+
+        ret = osvrClientGetGestureNameFromID(
+            m_context, id.value(), buf.getBufferOfSize(length), length);
         if (OSVR_RETURN_SUCCESS != ret) {
             throw std::runtime_error("Invalid context, null reference to "
                                      "buffer, or buffer is too small.");
         }
-        return std::string(buf.get());
+        return buf.str();
     }
 
 } // end namespace clientkit
