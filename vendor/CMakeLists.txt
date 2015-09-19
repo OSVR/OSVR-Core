@@ -12,6 +12,7 @@ endif()
 
 # Build VRPN as subproject
 set(VRPN_GPL_SERVER FALSE CACHE INTERNAL "" FORCE)
+set(VRPN_USE_LOCAL_JSONCPP TRUE CACHE INTERNAL "" FORCE)
 if(BUILD_CLIENT AND NOT BUILD_SERVER)
     set(VRPN_BUILD_SERVER_LIBRARY FALSE CACHE INTERNAL "" FORCE)
     set(VRPN_BUILD_CLIENT_LIBRARY TRUE CACHE INTERNAL "" FORCE)
@@ -43,6 +44,13 @@ if(VRPN_HIDAPI_SOURCE_ROOT)
     target_include_directories(vendored-hidapi INTERFACE "${VRPN_HIDAPI_SOURCE_ROOT}")
 else()
     target_include_directories(vendored-hidapi INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/submodules/hidapi")
+endif()
+
+# Set the include directories for the jsoncpp_lib target.
+if(VRPN_JSONCPP_SOURCE_ROOT)
+    target_include_directories(jsoncpp_lib INTERFACE "${VRPN_JSONCPP_SOURCE_ROOT}/include")
+else()
+    target_include_directories(jsoncpp_lib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/submodules/jsoncpp/include")
 endif()
 
 # Interface target for util headers
