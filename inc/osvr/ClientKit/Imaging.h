@@ -94,6 +94,7 @@ namespace clientkit {
                     static_cast<ImagingCallbackRegistration *>(userdata);
                 ImagingReport newReport;
                 newReport.sensor = report->sensor;
+                newReport.metadata = report->state.metadata;
                 newReport.buffer.reset(report->state.data,
                                        ImagingDeleter(self->m_ctx));
                 self->m_cb(self->m_userdata, *timestamp, newReport);

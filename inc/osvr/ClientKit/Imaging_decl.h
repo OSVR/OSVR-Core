@@ -53,6 +53,9 @@ namespace clientkit {
         /// @brief The device sensor number this frame came from.
         OSVR_ChannelCount sensor;
 
+        /// @brief Metadata containing the properties of this frame.
+        OSVR_ImagingMetadata metadata;
+
         /// @brief A shared pointer with custom deleter that owns the underlying
         /// image data buffer for the frame.
         ImageBufferPtr buffer;
