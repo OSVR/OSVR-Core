@@ -26,6 +26,7 @@
 #include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Interface.h>
 #include <osvr/ClientKit/Imaging.h>
+#include <osvr/Util/OpenCVTypeDispatch.h>
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp>
@@ -44,7 +45,12 @@ bool gotSomething = false;
 void imagingCallback(void *userdata,
                      osvr::util::time::TimeValue const &timestamp,
                      osvr::clientkit::ImagingReport report) {
-    if (report.frame.empty()) {
+    // Convert the image pointer into an OpenCV matrix.
+    cv::Mat frame(report.metadata.height, report.metadata.width,
+        osvr::util::computeOpenCVMatType(report.metadata),
+        report.buffer.get());
+
+    if (frame.empty()) {
         std::cout << "Error, frame empty!" << std::endl;
         return;
     }
@@ -52,11 +58,11 @@ void imagingCallback(void *userdata,
     /// The first time, let's print some info.
     if (!gotSomething) {
         gotSomething = true;
-        std::cout << "Got first report: image is " << report.frame.cols << "x"
-                  << report.frame.rows << std::endl;
+        std::cout << "Got first report: image is " << frame.cols << "x"
+                  << frame.rows << std::endl;
     }
 
-    cv::imshow(windowNameAndInstructions, report.frame);
+    cv::imshow(windowNameAndInstructions, frame);
     osvr::clientkit::ImagingReport &lastReport =
         *static_cast<osvr::clientkit::ImagingReport *>(userdata);
     lastReport = report;
