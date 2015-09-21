@@ -400,31 +400,41 @@ add_doxygen("${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-external"
     NO_PDF)
 
 # Replace some of the images from doxygen.
-foreach(fn ftv2mnode.png ftv2pnode.png ftv2mlastnode.png sync_on.png sync_off.png)
-    add_custom_command(TARGET doc
-        POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-generated/html/"
-        VERBATIM
-        COMMENT "Copying image ${fn} to override Doxygen theme")
+if(TARGET doc AND TARGET doc_external)
+    foreach(fn ftv2mnode.png ftv2pnode.png ftv2mlastnode.png sync_on.png sync_off.png)
+        add_custom_command(TARGET doc
+            POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-generated/html/"
+            VERBATIM
+            COMMENT "Copying image ${fn} to override Doxygen theme")
 
-    add_custom_command(TARGET doc_external
-        POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-external/html/"
-        VERBATIM
-        COMMENT "Copying image ${fn} to override Doxygen theme")
-endforeach()
+        add_custom_command(TARGET doc_external
+            POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_CURRENT_SOURCE_DIR}/assets/doxygen/${fn}" "${CMAKE_CURRENT_BINARY_DIR}/docs-external/html/"
+            VERBATIM
+            COMMENT "Copying image ${fn} to override Doxygen theme")
+    endforeach()
+endif()
 
 ###
 # Set Up Package for External Usage
 ###
 include(CMakePackageConfigHelpers)
+include(GenerateCompatibilityVersionFile)
 set(PLUGINDIR ${OSVR_PLUGIN_DIR})
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
-write_basic_package_version_file(
+generate_compatibility_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
     VERSION ${OSVR_VERSION}
-    COMPATIBILITY AnyNewerVersion)
+    COMPATIBILITY AnyNewerVersion
+    C_ABI)
+
+generate_compatibility_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrInternalConfigVersion.cmake"
+    VERSION ${OSVR_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    CXX_ABI)
 
 export(EXPORT osvrTargets
     FILE "${CMAKE_CURRENT_BINARY_DIR}/osvrTargets.cmake"
@@ -474,6 +484,7 @@ install(FILES
     Devel)
 
 if(WIN32)
+    # Windows-only helpers for CMake
     install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetMSVCVersion.cmake"
         "${LOCAL_CMAKE_MODULE_DIR}/CMakeBoostHelper.cmake"
@@ -481,6 +492,14 @@ if(WIN32)
         ${CONFIG_INSTALL_DIR}
         COMPONENT
         Devel)
+endif()
+if(CMAKE_HOST_WIN32)
+    # Scripts to register the SDK with CMake for easier building.
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/devtools/add_sdk_to_registry.cmd"
+        "${CMAKE_CURRENT_SOURCE_DIR}/devtools/add_sdk_to_registry.ps1"
+        DESTINATION .
+        COMPONENT Devel)
 endif()
 
 if(ANDROID AND "${ANDROID_STL}" STREQUAL "gnustl_shared")
