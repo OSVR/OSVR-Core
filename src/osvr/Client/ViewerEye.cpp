@@ -184,10 +184,12 @@ namespace client {
         OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
         const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
         bool rot180, double pitchTilt,
-        boost::optional<OSVR_RadialDistortionParameters> radDistortParams)
+        boost::optional<OSVR_RadialDistortionParameters> radDistortParams,
+        OSVR_DisplayInputCount displayInputIdx)
         : m_pose(ctx, path), m_offset(offset), m_viewport(viewport),
           m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt),
-          m_radDistortParams(radDistortParams) {}
+          m_radDistortParams(radDistortParams),
+          m_displayInputIdx(displayInputIdx) {}
 
 } // namespace client
 } // namespace osvr

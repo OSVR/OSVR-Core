@@ -66,7 +66,8 @@ namespace client {
               m_offset(std::move(other.m_offset)), m_viewport(other.m_viewport),
               m_unitBounds(std::move(other.m_unitBounds)),
               m_rot180(other.m_rot180), m_pitchTilt(other.m_pitchTilt),
-              m_radDistortParams(std::move(other.m_radDistortParams)) {}
+              m_radDistortParams(std::move(other.m_radDistortParams)),
+              m_displayInputIdx(std::move(other.m_displayInputIdx)) {}
 
         inline OSVR_SurfaceCount size() const { return 1; }
 #if 0
@@ -111,13 +112,18 @@ namespace client {
 
         Viewport getDisplayRelativeViewport() const { return m_viewport; }
 
+        OSVR_DisplayInputCount getDisplayInputIdx() const {
+            return m_displayInputIdx;
+        }
+
       private:
         friend class DisplayConfigFactory;
         ViewerEye(
             OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
             const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
             bool rot180, double pitchTilt,
-            boost::optional<OSVR_RadialDistortionParameters> radDistortParams);
+            boost::optional<OSVR_RadialDistortionParameters> radDistortParams,
+            OSVR_DisplayInputCount displayInputIdx);
         util::Rectd m_getRect(double near, double far) const;
         Eigen::Isometry3d getPoseIsometry() const;
         InternalInterfaceOwner m_pose;
@@ -131,6 +137,7 @@ namespace client {
         bool m_rot180;
         double m_pitchTilt;
         boost::optional<OSVR_RadialDistortionParameters> m_radDistortParams;
+        OSVR_DisplayInputCount m_displayInputIdx;
     };
 
 } // namespace client
