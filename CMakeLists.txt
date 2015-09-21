@@ -484,6 +484,7 @@ install(FILES
     Devel)
 
 if(WIN32)
+    # Windows-only helpers for CMake
     install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GetMSVCVersion.cmake"
         "${LOCAL_CMAKE_MODULE_DIR}/CMakeBoostHelper.cmake"
@@ -491,6 +492,12 @@ if(WIN32)
         ${CONFIG_INSTALL_DIR}
         COMPONENT
         Devel)
+    # Scripts to register the SDK with CMake for easier building.
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/devtools/add_sdk_to_registry.cmd"
+        "${CMAKE_CURRENT_SOURCE_DIR}/devtools/add_sdk_to_registry.ps1"
+        DESTINATION .
+        COMPONENT Devel)
 endif()
 
 if(ANDROID AND "${ANDROID_STL}" STREQUAL "gnustl_shared")
