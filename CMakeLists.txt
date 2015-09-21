@@ -418,13 +418,21 @@ endforeach()
 # Set Up Package for External Usage
 ###
 include(CMakePackageConfigHelpers)
+include(GenerateCompatibilityVersionFile)
 set(PLUGINDIR ${OSVR_PLUGIN_DIR})
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/osvr")
 
-write_basic_package_version_file(
+generate_compatibility_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/osvrConfigVersion.cmake"
     VERSION ${OSVR_VERSION}
-    COMPATIBILITY AnyNewerVersion)
+    COMPATIBILITY AnyNewerVersion
+    C_ABI)
+
+generate_compatibility_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/osvrInternalConfigVersion.cmake"
+    VERSION ${OSVR_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    CXX_ABI)
 
 export(EXPORT osvrTargets
     FILE "${CMAKE_CURRENT_BINARY_DIR}/osvrTargets.cmake"
