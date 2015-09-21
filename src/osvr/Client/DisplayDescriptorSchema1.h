@@ -70,6 +70,7 @@ namespace client {
             std::string getVersion() const;
             std::string getNote() const;
             int getNumDisplays() const;
+            int getNumDisplayInputs() const;
 
             int getDisplayTop() const;
             int getDisplayLeft() const;
