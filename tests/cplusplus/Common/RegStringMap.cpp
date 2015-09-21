@@ -38,7 +38,15 @@ using osvr::common::CorrelatedStringMap;
 
 class RegisteredStringMapTest : public ::testing::Test {
   public:
-    RegisteredStringMapTest() {}
+    virtual void SetUp() {
+        regID0 = regMap.getStringID("RegVal0");
+        regID1 = regMap.getStringID("RegVal1");
+        regID2 = regMap.getStringID("RegVal2");
+
+        corID0 = corMap.getStringID("CorVal0");
+        corID1 = corMap.getStringID("CorVal1");
+        corID2 = corMap.getStringID("CorVal2");
+    }
 
     RegisteredStringMap regMap;
     CorrelatedStringMap corMap;
@@ -54,17 +62,19 @@ TEST(RegisteredStringMap, create) {
     ASSERT_FALSE(regMap.isModified());
 }
 
-TEST_F(RegisteredStringMapTest, addNewValues) {
+TEST(RegisteredStringMap, addNewValues) {
+    RegisteredStringMap regMap;
+    CorrelatedStringMap corMap;
 
-    regID0 = regMap.getStringID("RegVal0");
+    StringID regID0 = regMap.getStringID("RegVal0");
     ASSERT_TRUE(regMap.isModified());
     ASSERT_EQ(1, regMap.getEntries().size());
 
-    regID1 = regMap.getStringID("RegVal1");
+    StringID regID1 = regMap.getStringID("RegVal1");
     ASSERT_TRUE(regMap.isModified());
     ASSERT_EQ(2, regMap.getEntries().size());
 
-    regID2 = regMap.getStringID("RegVal2");
+    StringID regID2 = regMap.getStringID("RegVal2");
     ASSERT_TRUE(regMap.isModified());
     ASSERT_EQ(3, regMap.getEntries().size());
 }
@@ -116,9 +126,15 @@ TEST_F(RegisteredStringMapTest, checkModified) {
     ASSERT_FALSE(regMap.isModified());
 }
 
+TEST_F(RegisteredStringMapTest, checkOutOfRangePeerID) {
+
+    ASSERT_THROW(corMap.convertPeerToLocalID(PeerStringID(100)),
+                 std::out_of_range);
+}
+
 TEST_F(RegisteredStringMapTest, checkEmptyPeerMapping) {
 
-    StringID emptID = corMap.convertPeerToLocalID(PeerStringID(100));
+    StringID emptID = corMap.convertPeerToLocalID(PeerStringID());
     ASSERT_TRUE(emptID.empty());
 }
 
