@@ -45,8 +45,8 @@ class LocomotionDevice {
 
         osvrDeviceLocomotionConfigure(opts, &m_locomotion);
 
-        /// Create the sync device token with the options
-        m_dev.initSync(ctx, "Locomotion", opts);
+        /// Create the device token with the options
+        m_dev.initAsync(ctx, "Locomotion", opts);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(com_osvr_example_Locomotion_json);
