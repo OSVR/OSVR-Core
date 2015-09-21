@@ -88,8 +88,8 @@ namespace client {
             report.state.metadata = data.metadata;
             report.state.data = data.buffer.get();
             for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
                 iface->getContext().acquireObject(data.buffer);
+                iface->triggerCallbacks(timestamp, report);
             }
         }
 
