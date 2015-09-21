@@ -492,6 +492,8 @@ if(WIN32)
         ${CONFIG_INSTALL_DIR}
         COMPONENT
         Devel)
+endif()
+if(CMAKE_HOST_WIN32)
     # Scripts to register the SDK with CMake for easier building.
     install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/devtools/add_sdk_to_registry.cmd"
