@@ -71,6 +71,7 @@ namespace client {
         default:
             throw std::logic_error("Unrecognized enum value for display mode");
         }
+
         return viewport;
     }
 
@@ -112,6 +113,25 @@ namespace client {
                 params.k1.data[2] = k1.k1_blue;
                 distort = params;
             }
+
+            // get the number of display inputs
+            // if larger than one then we need to assign input index for each
+            // viewer eye
+            auto numDispInputs = desc.getNumDisplayInputs();
+            std::vector<uint8_t> displayInputIndices;
+            if (numDispInputs == 2) {
+                displayInputIndices = {0, 1};
+            } else {
+                displayInputIndices = {0};
+            }
+
+            if ((numDispInputs > 1) && (eyesDesc.size() == 1)) {
+                OSVR_DEV_VERBOSE("DisplayConfig::DisplayConfigFactory: ERROR: "
+                                 "We have two video inputs"
+                                 "for just one eye");
+                /// @todo throw an error?
+            }
+
             for (auto eye : eyeIndices) {
                 double offsetFactor =
                     (2. * eye) -
@@ -125,11 +145,22 @@ namespace client {
                     distortEye->centerOfProjection.data[1] =
                         eyesDesc[eye].m_CenterProjY;
                 }
-                viewer.container().emplace_back(
-                    ViewerEye(ctx, (offsetFactor * offset).eval(), HEAD_PATH,
-                              computeViewport(eye, desc), computeRect(desc),
-                              eyesDesc[eye].m_rotate180,
-                              desc.getPitchTilt().value(), distortEye));
+
+                OSVR_DisplayInputCount displayInputIdx;
+                // 2 eyes with 1 input
+                if (eyesDesc.size() > displayInputIndices.size()) {
+                    displayInputIdx = displayInputIndices.front();
+                }
+                // 2 eyes with 2 inputs OR 2 eye with 1 input
+                else {
+                    displayInputIdx = displayInputIndices[eye];
+                }
+
+                viewer.container().emplace_back(ViewerEye(
+                    ctx, (offsetFactor * offset).eval(), HEAD_PATH,
+                    computeViewport(eye, desc), computeRect(desc),
+                    eyesDesc[eye].m_rotate180, desc.getPitchTilt().value(),
+                    distortEye, displayInputIdx));
             }
 
             OSVR_DEV_VERBOSE("Display: " << desc.getHumanReadableDescription());
@@ -152,13 +183,41 @@ namespace client {
             if (!viewer.hasPose()) {
                 return false;
             }
-            for (auto const& eye : viewer) {
+            for (auto const &eye : viewer) {
                 if (!eye.hasPose()) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    OSVR_DisplayInputCount DisplayConfig::getNumDisplayInputs() const {
+
+        // assume there's 1 input but still check if there are more than one
+        // display inputs by checking every viewer eye
+        uint8_t maxDisplayInputIdx = 0;
+
+        for (auto const &viewer : *this) {
+            for (auto const &viewerEye : viewer) {
+                uint8_t dispInputIdx = viewerEye.getDisplayInputIdx();
+                if (dispInputIdx > maxDisplayInputIdx) {
+                    maxDisplayInputIdx = dispInputIdx;
+                }
+            }
+        }
+        return (maxDisplayInputIdx + 1);
+    }
+
+    const ViewerEye &
+    DisplayConfig::getViewerEye(OSVR_DisplayInputCount dispInputIdx) const {
+        for (auto const &viewer : *this) {
+            for (auto const &viewerEye : viewer) {
+                if (viewerEye.getDisplayInputIdx() == dispInputIdx) {
+                    return viewerEye;
+                }
+            }
+        }
     }
 } // namespace client
 } // namespace osvr

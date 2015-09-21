@@ -80,6 +80,9 @@ namespace client {
                                              OSVR_SurfaceCount surface) const;
 
         OSVR_CLIENT_EXPORT bool isStartupComplete() const;
+        OSVR_CLIENT_EXPORT OSVR_DisplayInputCount getNumDisplayInputs() const;
+        OSVR_CLIENT_EXPORT const ViewerEye &
+        getViewerEye(OSVR_DisplayInputCount dispInputIdx) const;
 
       private:
         friend class DisplayConfigFactory;
@@ -129,6 +132,7 @@ namespace client {
         /// @todo right now only a single surface per viewer eye
         return getViewerEye(viewer, eye);
     }
+
 } // namespace client
 } // namespace osvr
 
