@@ -43,6 +43,12 @@
 namespace osvr {
 namespace client {
 
+    struct NoViewerEyeParam : std::runtime_error {
+        NoViewerEyeParam(std::string const &param)
+            : std::runtime_error("No viewer eye available for provided " +
+                                 param + " parameter!") {}
+    };
+
     namespace detail {
         typedef util::ContainerWrapper<
             std::vector<Viewer>, util::container_policies::const_iterators,

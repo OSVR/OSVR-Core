@@ -195,22 +195,25 @@ namespace client {
     OSVR_DisplayInputCount DisplayConfig::getNumDisplayInputs() const {
 
         // assume there's 1 input but still check if there are more than one
-        // display inputs by checking every viewer eye
-        uint8_t maxDisplayInputIdx = 0;
+        // display inputs by checking every viewer eye (0 based index)
+        OSVR_DisplayInputCount maxDisplayInputIdx = 0;
 
         for (auto const &viewer : *this) {
             for (auto const &viewerEye : viewer) {
-                uint8_t dispInputIdx = viewerEye.getDisplayInputIdx();
+                auto dispInputIdx = viewerEye.getDisplayInputIdx();
                 if (dispInputIdx > maxDisplayInputIdx) {
                     maxDisplayInputIdx = dispInputIdx;
                 }
             }
         }
+        // since the display input index is 0 based we will increment
+        // the values by 1
         return (maxDisplayInputIdx + 1);
     }
 
     const ViewerEye &
     DisplayConfig::getViewerEye(OSVR_DisplayInputCount dispInputIdx) const {
+
         for (auto const &viewer : *this) {
             for (auto const &viewerEye : viewer) {
                 if (viewerEye.getDisplayInputIdx() == dispInputIdx) {
@@ -218,6 +221,8 @@ namespace client {
                 }
             }
         }
+        throw NoViewerEyeParam("display input index: " +
+                               std::to_string(dispInputIdx));
     }
 } // namespace client
 } // namespace osvr
