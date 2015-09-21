@@ -11,6 +11,7 @@ set(API
     "${HEADER_LOCATION}/ImagingInterface.h"
     "${HEADER_LOCATION}/ImagingInterfaceC.h"
     "${HEADER_LOCATION}/Location2DInterfaceC.h"
+    "${HEADER_LOCATION}/LocomotionInterfaceC.h"
     "${HEADER_LOCATION}/PluginKit.h"
     "${HEADER_LOCATION}/PluginKitC.h"
     "${HEADER_LOCATION}/PluginRegistration.h"
@@ -26,6 +27,7 @@ set(SOURCE
     EyeTrackerInterfaceC.cpp
     ImagingInterfaceC.cpp
     Location2DInterfaceC.cpp
+    LocomotionInterfaceC.cpp
     PluginRegistrationC.cpp
     TrackerInterfaceC.cpp)
 

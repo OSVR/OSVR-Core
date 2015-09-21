@@ -200,6 +200,12 @@ typedef struct OSVR_EyeTrackerBlinkReport {
 /** @brief C function type for a callback for EyeTrackerBlink */
 OSVR_DEFINE_CLIENT_CALLBACK_TYPE(EyeTrackerBlink);
 
+/** @brief C function type for a callback for NavigationVelocity */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(NaviVelocity);
+
+/** @brief C function type for a callback for NavigationPosition */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(NaviPosition);
+
 #undef OSVR_DEFINE_CALLBACK
 /** @} */
 OSVR_EXTERN_C_END

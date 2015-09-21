@@ -79,6 +79,8 @@ namespace common {
         OSVR_REPORT_TRAITS(EyeTracker2D)
         OSVR_REPORT_TRAITS(EyeTracker3D)
         OSVR_REPORT_TRAITS(EyeTrackerBlink)
+        OSVR_REPORT_TRAITS(NaviVelocity)
+        OSVR_REPORT_TRAITS(NaviPosition)
 #undef OSVR_REPORT_TRAITS
     } // namespace traits
 

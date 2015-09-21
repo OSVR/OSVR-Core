@@ -45,7 +45,8 @@ namespace common {
             OSVR_PositionReport, OSVR_OrientationReport, OSVR_ImagingReport,
             OSVR_Location2DReport, OSVR_DirectionReport,
             OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
-            OSVR_EyeTrackerBlinkReport> ReportTypes;
+            OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
+            OSVR_NaviPositionReport> ReportTypes;
 
     } // namespace traits
 
