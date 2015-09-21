@@ -38,6 +38,7 @@
 #include <osvr/Util/Vec3C.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/BoolC.h>
+#include <osvr/Util/PredefinedGesturesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -357,20 +358,6 @@ typedef uint8_t OSVR_GestureState;
 
 /** @brief OSVR_GestureState value indicating "gesture is finished" */
 #define OSVR_GESTURE_COMPLETE (0)
-
-/** @brief a list of pre-set gestures available (can be expanded) */
-#define OSVR_GESTURE_SWIPE_LEFT "SwipeLeft"
-#define OSVR_GESTURE_SWIPE_RIGHT "SwipeRight"
-#define OSVR_GESTURE_SCROLL_UP "ScrollUp"
-#define OSVR_GESTURE_SCROLL_DOWN "ScrollDown"
-#define OSVR_GESTURE_SINGLE_TAP "SingleTap"
-#define OSVR_GESTURE_DOUBLE_TAP "DoubleTap"
-#define OSVR_GESTURE_PINCH "Pinch"
-#define OSVR_GESTURE_FINGER_SPREAD "FingerSpread"
-#define OSVR_GESTURE_CIRCLE "Circle"
-#define OSVR_GESTURE_LONG_PRESS "LongPress"
-#define OSVR_GESTURE_OPEN_HAND "OpenHand"
-#define OSVR_GESTURE_CLOSED_HAND "ClosedHand"
 
 /** @brief Report type for a gesture event */
 typedef struct OSVR_GestureReport {
