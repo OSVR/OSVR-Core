@@ -25,6 +25,33 @@ check_cxx_symbol_exists("std::align" "memory" OSVR_HAVE_STDALIGN)
 configure_file(StdAlignWrapper.h.in "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper.h" @ONLY)
 
 ###
+# Gestures-related generation
+###
+set(GESTURE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/GesturesData.txt")
+# Dummy configure to make us re-cmake
+configure_file("${GESTURE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/GesturesData.dummy")
+
+# Parse the gesture list
+file(STRINGS "${GESTURE_FILE}" _gestures)
+set(BODY)
+set(GESTURE_NAMES)
+foreach(line ${_gestures})
+    string(REGEX REPLACE ":.*" "" gesture_name "${line}")
+    string(REGEX REPLACE "[^:]*:" "" gesture_string "${line}")
+    set(BODY "${BODY}\n#define ${gesture_name} \"${gesture_string}\"")
+    list(APPEND GESTURE_NAMES "${gesture_name}")
+endforeach()
+
+# Create the PredefinedGestures header.
+configure_file("PredefinedGesturesC.h.in" "${CMAKE_CURRENT_BINARY_DIR}/PredefinedGesturesC.h" @ONLY)
+
+# Create the X-Macro header for gestures.
+osvr_generate_x_macro(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/PredefinedGesturesXMacroC.h"
+    INVOCATION_NAME OSVR_GESTURE_X
+    DEPENDS "${GESTURE_FILE}"
+    ELEMENTS ${GESTURE_NAMES})
+
+###
 # Library build
 ###
 osvr_setup_lib_vars(Util)
@@ -122,7 +149,9 @@ set(API
     "${HEADER_LOCATION}/Vec2C.h"
     "${HEADER_LOCATION}/Vec3C.h"
     "${HEADER_LOCATION}/WindowsVariantC.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
+    "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/PredefinedGesturesC.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/PredefinedGesturesXMacroC.h")
 
 set(SOURCE
     AlignedMemoryC.cpp
