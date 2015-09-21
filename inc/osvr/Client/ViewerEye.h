@@ -110,6 +110,9 @@ namespace client {
         getProjection(double near, double far,
                       OSVR_MatrixConventions flags) const;
 
+        /// @brief Gets clipping plane for a given eye
+        OSVR_CLIENT_EXPORT util::Rectd getRect(double near, double far) const;
+
         Viewport getDisplayRelativeViewport() const { return m_viewport; }
 
         OSVR_DisplayInputCount getDisplayInputIdx() const {
