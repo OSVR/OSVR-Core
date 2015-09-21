@@ -1,0 +1,5 @@
+set(OSVR_XMACRO_CONTENTS)
+foreach(elt ${ELEMENTS})
+    set(OSVR_XMACRO_CONTENTS "${OSVR_XMACRO_CONTENTS} \\\nOSVR_X(${elt})")
+endforeach()
+configure_file("${INFILE}" "${OUTFILE}" @ONLY NEWLINE_STYLE LF)
