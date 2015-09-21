@@ -32,6 +32,7 @@
 #include <osvr/Util/BoolC.h>
 #include <osvr/Util/Vec2C.h>
 #include <osvr/Util/Vec3C.h>
+#include <osvr/Util/TypeSafeId.h>
 
 // Library/third-party includes
 #include <boost/call_traits.hpp>
@@ -510,6 +511,15 @@ namespace common {
                 f(val.data[2]);
             }
         };
+
+        template <typename Tag>
+        struct SimpleStructSerialization<util::TypeSafeId<Tag>>
+            : SimpleStructSerializationBase {
+            template <typename F, typename T> static void apply(F &f, T &val) {
+                f(val.value());
+            }
+        };
+
     } // namespace serialization
 
 } // namespace common
