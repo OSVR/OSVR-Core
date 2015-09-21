@@ -40,25 +40,26 @@
 OSVR_EXTERN_C_BEGIN
 
 /** @defgroup PluginKitCLocomotion Locomotion interface (base C API)
-@brief Sending locomotion reports from a device in your plugin.
-@ingroup PluginKit
-@{
+    @brief Sending locomotion reports from a device in your plugin.
+    @ingroup PluginKit
+    @{
 */
 
 /** @brief Opaque type used in conjunction with a device token to send data on
- * Locomotion Interface
+    Locomotion Interface
 */
-typedef struct OSVR_LocomotionDeviceInterfaceObject *
-    OSVR_LocomotionDeviceInterface;
+typedef struct OSVR_LocomotionDeviceInterfaceObject
+    *OSVR_LocomotionDeviceInterface;
 
 /** @brief Specify that your device will implement the Locomotion interface.
 
-@param opts The device init options object.
-@param [out] iface An interface object you should retain with the same
-lifetime as the device token in order to send messages conforming to an
-Locomotion interface.
-@param numSensors The number of sensors you will be reporting Locomotion data :
-You can report for 1 sensor per device.
+    @param opts The device init options object.
+    @param [out] iface An interface object you should retain with the same
+    lifetime as the device token in order to send messages conforming to an
+    Locomotion interface.
+    @param numSensors The number of sensors you will be reporting Locomotion
+   data :
+    You can report for 1 sensor per device.
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceLocomotionConfigure(
@@ -66,37 +67,35 @@ OSVR_ReturnCode osvrDeviceLocomotionConfigure(
     OSVR_OUT_PTR OSVR_LocomotionDeviceInterface *iface)
     OSVR_FUNC_NONNULL((1, 2));
 
-/** @brief Report data for a specific sensor.
-@param dev Device token
-@param iface Locomotion Interface
-@param naviVelocity pointer to navigation velocity
-@param sensor Sensor number
-@param timestamp Timestamp correlating to navigation velocity
+/** @brief Report velocity data for a specific sensor.
+    @param dev Device token
+    @param iface Locomotion Interface
+    @param naviVelocity navigation velocity
+    @param sensor Sensor number
+    @param timestamp Timestamp correlating to navigation velocity
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceLocomotionReportNaviVelocity(
     OSVR_IN_PTR OSVR_LocomotionDeviceInterface iface,
-    OSVR_IN_PTR OSVR_NaviVelocityState naviVelocity,
+    OSVR_IN OSVR_NaviVelocityState naviVelocity,
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
-/**
 
-/** @brief Report data for a specific sensor.
-@param dev Device token
-@param iface Locomotion Interface
-@param naviPosition pointer to navigation Position
-@param sensor Sensor number
-@param timestamp Timestamp correlating to navigation position
+/** @brief Report position data for a specific sensor.
+   @param dev Device token
+   @param iface Locomotion Interface
+   @param naviPosition navigation position
+   @param sensor Sensor number
+   @param timestamp Timestamp correlating to navigation position
 */
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode osvrDeviceLocomotionReportNaviPosition(
     OSVR_IN_PTR OSVR_LocomotionDeviceInterface iface,
-    OSVR_IN_PTR OSVR_NaviPositionState naviPosition,
+    OSVR_IN OSVR_NaviPositionState naviPosition,
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) OSVR_FUNC_NONNULL((1, 4));
-/**
 
-@} */ /* end of group */
+/**@} */ /* end of group */
 
 OSVR_EXTERN_C_END
 

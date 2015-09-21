@@ -62,7 +62,7 @@ OSVR_ReturnCode osvrDeviceLocomotionConfigure(
 
 OSVR_ReturnCode osvrDeviceLocomotionReportNaviVelocity(
     OSVR_IN_PTR OSVR_LocomotionDeviceInterface iface,
-    OSVR_IN_PTR OSVR_NaviVelocityState naviVelocity,
+    OSVR_IN OSVR_NaviVelocityState naviVelocity,
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     auto guard = iface->getSendGuard();
@@ -77,7 +77,7 @@ OSVR_ReturnCode osvrDeviceLocomotionReportNaviVelocity(
 
 OSVR_ReturnCode osvrDeviceLocomotionReportNaviPosition(
     OSVR_IN_PTR OSVR_LocomotionDeviceInterface iface,
-    OSVR_IN_PTR OSVR_NaviPositionState naviPosition,
+    OSVR_IN OSVR_NaviPositionState naviPosition,
     OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     auto guard = iface->getSendGuard();
