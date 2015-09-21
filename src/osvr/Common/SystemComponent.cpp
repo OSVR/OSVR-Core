@@ -97,22 +97,16 @@ namespace common {
 
         class RegisteredStringMapRecord::MessageSerialization {
           public:
-            MessageSerialization(SerializedStringMap serializedMap)
-                : m_serializedMap(serializedMap) {}
+            explicit MessageSerialization(RegisteredStringMap const &myMap)
+                : m_data(myMap.getEntries()) {}
 
-            MessageSerialization() {}
+            MessageSerialization() = default;
 
-            template <typename T> void processMessage(T &p) {
-                p(m_serializedMap);
-            }
-            MapData getData() const {
-                MapData ret;
-                ret.serializedMap = m_serializedMap;
-                return ret;
-            }
+            template <typename T> void processMessage(T &p) { p(m_data); }
+            GestureMapData const &getData() const { return m_data; }
 
           private:
-            SerializedStringMap m_serializedMap;
+            GestureMapData m_data;
         };
         const char *RegisteredStringMapRecord::identifier() {
             return "com.osvr.system.regstringmaprecord";
@@ -128,7 +122,8 @@ namespace common {
         return ret;
     }
 
-    SystemComponent::SystemComponent() : m_nameToIDMap(new RegStringMapData) {}
+    SystemComponent::SystemComponent()
+        : m_nameToIDMap(make_shared<RegStringMapData>()) {}
 
     void SystemComponent::sendRoutes(std::string const &routes) {
         Buffer<> buf;
@@ -164,7 +159,7 @@ namespace common {
         m_getParent().sendPending(); // forcing this since it will cause
                                      // shuffling of remotes on the client.
     }
-    void SystemComponent::registerReplaceTreeHandler(JsonHandler cb) {
+    void SystemComponent::registerReplaceTreeHandler(JsonHandler const &cb) {
         if (m_replaceTreeHandlers.empty()) {
             m_registerHandler(&SystemComponent::m_handleReplaceTree, this,
                               treeOut.getMessageType());
@@ -172,27 +167,24 @@ namespace common {
         m_replaceTreeHandlers.push_back(cb);
     }
 
-    MapPtr SystemComponent::getRegStringMap() { return m_nameToIDMap; }
+    GestureDataPtr SystemComponent::getGestureMap() { return m_nameToIDMap; }
 
-    void SystemComponent::sendRegisteredStringMap() {
-
+    void SystemComponent::sendGestureMap() {
+        m_nameToIDMap->map.clearModifiedFlag();
         Buffer<> buf;
-        // serialize the map before sending it
-        SerializedStringMap serializedMap = m_nameToIDMap->map.getMap();
-
-        messages::RegisteredStringMapRecord::MessageSerialization msg(
-            serializedMap);
+        auto msg = messages::RegisteredStringMapRecord::MessageSerialization{
+            m_nameToIDMap->map};
         serialize(buf, msg);
-        m_getParent().packMessage(buf, regStringMap.getMessageType());
+        m_getParent().packMessage(buf, gestureStringMap.getMessageType());
     }
 
-    void SystemComponent::registerStringMapHandler(
-        RegisteredStringMapHandler handler) {
+    void
+    SystemComponent::registerGestureMapHandler(GestureMapHandler const &cb) {
         if (m_cb_map.empty()) {
             m_registerHandler(&SystemComponent::m_handleRegStringMap, this,
-                              regStringMap.getMessageType());
+                              gestureStringMap.getMessageType());
         }
-        m_cb_map.push_back(handler);
+        m_cb_map.push_back(cb);
     }
 
     void SystemComponent::m_parentSet() {
@@ -201,16 +193,13 @@ namespace common {
         // connection(ping) occurs
         m_commonComponent =
             m_getParent().addComponent(osvr::common::CommonComponent::create());
-        OSVR_TimeValue now;
-        osvrTimeValueGetNow(&now);
-        m_commonComponent->registerPingHandler(
-            [&] { sendRegisteredStringMap(); });
 
         m_getParent().registerMessageType(routesOut);
         m_getParent().registerMessageType(appStartup);
         m_getParent().registerMessageType(routeIn);
         m_getParent().registerMessageType(treeOut);
-        m_getParent().registerMessageType(regStringMap);
+        m_getParent().registerMessageType(gestureStringMap);
+        m_commonComponent->registerPingHandler([&] { sendGestureMap(); });
     }
 
     int SystemComponent::m_handleReplaceTree(void *userdata,
@@ -238,7 +227,7 @@ namespace common {
         auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
         for (auto const &cb : self->m_cb_map) {
-            cb(data, timestamp);
+            cb(data);
         }
         return 0;
     }

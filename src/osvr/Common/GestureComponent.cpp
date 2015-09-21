@@ -29,6 +29,7 @@
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/PredefinedGesturesXMacroC.h>
 
 // Library/third-party includes
 // - none
@@ -75,33 +76,37 @@ namespace common {
     } // namespace messages
 
     shared_ptr<GestureComponent>
-    GestureComponent::create(common::SystemComponent *systemComponent) {
+    GestureComponent::create(common::SystemComponent &systemComponent) {
         shared_ptr<GestureComponent> ret(new GestureComponent(systemComponent));
         return ret;
     }
 
-    GestureComponent::GestureComponent(
-        common::SystemComponent *systemComponent) {
-        // Add system component and gesture map
-        m_systemComponent = systemComponent;
-        m_gestureNameMap = m_systemComponent->getRegStringMap();
+    GestureComponent::GestureComponent(common::SystemComponent &systemComponent)
+        : m_systemComponent(systemComponent),
+          m_gestureNameMap(m_systemComponent.getGestureMap()) {
 
         // populate the gesture map
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_SWIPE_LEFT);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_SWIPE_RIGHT);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_SCROLL_UP);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_SCROLL_DOWN);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_SINGLE_TAP);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_DOUBLE_TAP);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_PINCH);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_FINGER_SPREAD);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_CIRCLE);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_LONG_PRESS);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_OPEN_HAND);
-        m_gestureNameMap->map.registerStringID(OSVR_GESTURE_CLOSED_HAND);
+#define OSVR_X(GESTURE) m_getStringID(GESTURE);
+        OSVR_GESTURE_X()
+#undef OSVR_X
+
+#if 0
+        m_getStringID(OSVR_GESTURE_SWIPE_LEFT);
+        m_getStringID(OSVR_GESTURE_SWIPE_RIGHT);
+        m_getStringID(OSVR_GESTURE_SCROLL_UP);
+        m_getStringID(OSVR_GESTURE_SCROLL_DOWN);
+        m_getStringID(OSVR_GESTURE_SINGLE_TAP);
+        m_getStringID(OSVR_GESTURE_DOUBLE_TAP);
+        m_getStringID(OSVR_GESTURE_PINCH);
+        m_getStringID(OSVR_GESTURE_FINGER_SPREAD);
+        m_getStringID(OSVR_GESTURE_CIRCLE);
+        m_getStringID(OSVR_GESTURE_LONG_PRESS);
+        m_getStringID(OSVR_GESTURE_OPEN_HAND);
+        m_getStringID(OSVR_GESTURE_CLOSED_HAND);
+#endif
 
         // send out an updated map
-        m_systemComponent->sendRegisteredStringMap();
+        m_systemComponent.sendGestureMap();
     }
 
     void GestureComponent::sendGestureData(OSVR_GestureState gestureState,
@@ -135,6 +140,10 @@ namespace common {
         return 0;
     }
 
+    util::StringID GestureComponent::m_getStringID(std::string const &str) {
+        return m_gestureNameMap->map.getStringID(str);
+    }
+
     void GestureComponent::registerGestureHandler(GestureHandler handler) {
         if (m_cb.empty()) {
             m_registerHandler(&GestureComponent::m_handleGestureRecord, this,
@@ -149,13 +158,11 @@ namespace common {
 
     OSVR_GestureID GestureComponent::getGestureID(const char *gestureName) {
 
-        OSVR_GestureID gestureID =
-            m_gestureNameMap->map.getStringID(gestureName).value();
+        OSVR_GestureID gestureID = m_getStringID(gestureName).value();
 
         // if we just inserted new gesture ID then send gesture map
         if (m_gestureNameMap->map.isModified()) {
-            m_gestureNameMap->map.clearModifiedFlag();
-            m_systemComponent->sendRegisteredStringMap();
+            m_systemComponent.sendGestureMap();
         }
         return gestureID;
     }

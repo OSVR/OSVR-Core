@@ -70,7 +70,7 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<GestureComponent>
-        create(common::SystemComponent *systemComponent);
+        create(common::SystemComponent &systemComponent);
 
         /// @brief Message from server to client, containing Gesture data.
         messages::GestureRecord gestureRecord;
@@ -90,9 +90,12 @@ namespace common {
         OSVR_COMMON_EXPORT OSVR_GestureID getGestureID(const char *gestureName);
 
       private:
-        GestureComponent(common::SystemComponent *systemComponent);
 
-        virtual void m_parentSet();
+        explicit GestureComponent(common::SystemComponent &systemComponent);
+
+        void m_parentSet() override;
+
+        util::StringID m_getStringID(std::string const& str);
 
         static int VRPN_CALLBACK m_handleGestureRecord(void *userdata,
                                                        vrpn_HANDLERPARAM p);
@@ -102,12 +105,11 @@ namespace common {
         OSVR_ChannelCount m_numSensor;
         std::vector<GestureHandler> m_cb;
 
-        // name to ID map used by the server
-        // RegisteredStringMap m_gestureNameMap;
-        MapPtr m_gestureNameMap;
-
         /// @brief System device component
-        common::SystemComponent *m_systemComponent;
+        common::SystemComponent &m_systemComponent;
+
+        /// name to ID map used by the server
+        GestureDataPtr m_gestureNameMap;
     };
 
 } // namespace common
