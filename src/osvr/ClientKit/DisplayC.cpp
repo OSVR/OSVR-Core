@@ -365,6 +365,28 @@ OSVR_ReturnCode osvrClientGetViewerEyeSurfaceProjectionMatrixf(
                                    matrix);
 }
 
+OSVR_ReturnCode osvrClientGetViewerEyeSurfaceProjectionClippingPlanes(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, double *left, double *right, double *bottom,
+    double *top) {
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(left, "left");
+    OSVR_VALIDATE_OUTPUT_PTR(right, "right");
+    OSVR_VALIDATE_OUTPUT_PTR(bottom, "bottom");
+    OSVR_VALIDATE_OUTPUT_PTR(top, "top");
+    double near = 1.0;
+    double far = 100;
+    auto rect =
+        disp->cfg->getViewerEyeSurface(viewer, eye, surface).getRect(near, far);
+    *left = rect[rect.LEFT];
+    *right = rect[rect.RIGHT];
+    *bottom = rect[rect.BOTTOM];
+    *top = rect[rect.TOP];
+    return OSVR_RETURN_SUCCESS;
+}
+
 OSVR_ReturnCode osvrClientDoesViewerEyeSurfaceWantDistortion(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, OSVR_CBool *distortionRequested) {
