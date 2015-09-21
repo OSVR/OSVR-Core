@@ -40,6 +40,7 @@
 
 // Standard includes
 #include <string>
+#include <vector>
 #include <type_traits>
 
 namespace osvr {
@@ -490,6 +491,51 @@ namespace common {
                                         tag_type const &tag) {
                 return computeAlignmentPadding(tag.alignment(), existingBytes) +
                        tag.length();
+            }
+        };
+
+        template <typename ValueType>
+        struct SerializationTraits<
+            DefaultSerializationTag<std::vector<ValueType>>, void>
+            : BaseSerializationTraits<std::vector<ValueType>> {
+            using value_type = std::vector<ValueType>;
+            using param_type = value_type const &;
+            using reference_type = value_type &;
+            typedef BaseSerializationTraits<std::vector<ValueType>> Base;
+            typedef DefaultSerializationTag<std::vector<ValueType>> tag_type;
+
+            template <typename BufferType>
+            static void serialize(BufferType &buf, param_type val,
+                                  tag_type const &) {
+                serializeRaw(buf, static_cast<uint32_t>(val.size()));
+                for (auto &elt : val) {
+                    serializeRaw(buf, elt);
+                }
+            }
+
+            template <typename BufferReaderType>
+            static void deserialize(BufferReaderType &buf, reference_type val,
+                                    tag_type const &) {
+                uint32_t n;
+                deserializeRaw(buf, n);
+                val.clear();
+                val.reserve(n);
+                for (uint32_t i = 0; i < n; ++i) {
+                    ValueType elt;
+                    deserializeRaw(buf, elt);
+                    val.push_back(elt);
+                }
+            }
+
+            static size_t spaceRequired(size_t existingBytes, param_type val,
+                                        tag_type const &) {
+                size_t bytes = existingBytes;
+                bytes += getBufferSpaceRequiredRaw(
+                    bytes, static_cast<uint32_t>(val.size()));
+                for (auto &elt : val) {
+                    bytes += getBufferSpaceRequiredRaw(bytes, elt);
+                }
+                return bytes - existingBytes;
             }
         };
 
