@@ -117,6 +117,10 @@ OSVR_ReturnCode osvrClientGetDisplay(OSVR_ClientContext ctx,
 #define OSVR_VALIDATE_SURFACE_ID                                               \
     BOOST_ASSERT_MSG(surface == 0, "Must pass a valid surface ID.")
 
+#define OSVR_VALIDATE_DISPLAY_INPUT_ID                                         \
+    BOOST_ASSERT_MSG(displayInputIndex < disp->cfg->getNumDisplayInputs(),     \
+                     "Must pass a valid display input index.")
+
 OSVR_ReturnCode osvrClientFreeDisplay(OSVR_DisplayConfig disp) {
     OSVR_VALIDATE_DISPLAY_CONFIG;
     OSVR_ClientContext ctx = disp->ctx;
@@ -130,10 +134,35 @@ OSVR_ReturnCode osvrClientFreeDisplay(OSVR_DisplayConfig disp) {
     return freed ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp) {
+OSVR_ReturnCode osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp) {
     OSVR_VALIDATE_DISPLAY_CONFIG;
-    return disp->cfg->isStartupComplete() ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+    return disp->cfg->isStartupComplete() ? OSVR_RETURN_SUCCESS
+                                          : OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
+osvrClientGetNumDisplayInputs(OSVR_DisplayConfig disp,
+                              OSVR_DisplayInputCount *numDisplayInputs) {
+
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(numDisplayInputs, "display inputs count");
+    *numDisplayInputs = disp->cfg->getNumDisplayInputs();
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetDisplayDimensions(
+    OSVR_DisplayConfig disp, OSVR_DisplayInputCount displayInputIndex,
+    OSVR_DisplayDimension *width, OSVR_DisplayDimension *height) {
+
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_DISPLAY_INPUT_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(width, "width");
+    OSVR_VALIDATE_OUTPUT_PTR(height, "height");
+    auto viewport =
+        disp->cfg->getViewerEye(displayInputIndex).getDisplayRelativeViewport();
+    *width = viewport.width;
+    *height = viewport.height;
+    return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode osvrClientGetNumViewers(OSVR_DisplayConfig disp,
@@ -143,6 +172,7 @@ OSVR_ReturnCode osvrClientGetNumViewers(OSVR_DisplayConfig disp,
     *viewers = disp->cfg->getNumViewers();
     return OSVR_RETURN_SUCCESS;
 }
+
 OSVR_ReturnCode osvrClientGetViewerPose(OSVR_DisplayConfig disp,
                                         OSVR_ViewerCount viewer,
                                         OSVR_Pose3 *pose) {
@@ -269,6 +299,22 @@ OSVR_ReturnCode osvrClientGetRelativeViewportForViewerEyeSurface(
     *bottom = viewport.bottom;
     *width = viewport.width;
     *height = viewport.height;
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetViewerEyeSurfaceDisplayInputIndex(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_DisplayInputCount *displayInput) {
+
+    OSVR_VALIDATE_DISPLAY_CONFIG;
+    OSVR_VALIDATE_VIEWER_ID;
+    OSVR_VALIDATE_EYE_ID;
+    OSVR_VALIDATE_SURFACE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(displayInput, "index of display input");
+
+    *displayInput = disp->cfg->getViewerEyeSurface(viewer, eye, surface)
+                        .getDisplayInputIdx();
+
     return OSVR_RETURN_SUCCESS;
 }
 
