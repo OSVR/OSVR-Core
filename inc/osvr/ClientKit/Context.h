@@ -30,10 +30,10 @@
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/ClientKit/ParametersC.h>
 #include <osvr/ClientKit/Interface.h>
+#include <osvr/Util/StringBufferBuilder.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_array.hpp>
+// - none
 
 // Standard includes
 #include <string>
@@ -84,15 +84,16 @@ namespace clientkit {
             return std::string();
         }
 
-        boost::scoped_array<char> buf(new char[length]);
-        ret = osvrClientGetStringParameter(m_context, path.c_str(), buf.get(),
-                                           length);
+        util::StringBufferBuilder buf;
+
+        ret = osvrClientGetStringParameter(m_context, path.c_str(),
+                                           buf.getBufferOfSize(length), length);
         if (OSVR_RETURN_SUCCESS != ret) {
             throw std::runtime_error("Invalid context, null reference to "
                                      "buffer, or buffer is too small.");
         }
 
-        return std::string(buf.get(), length);
+        return buf.str();
     }
 
     inline void ClientContext::free(Interface &iface) {
