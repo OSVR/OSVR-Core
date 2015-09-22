@@ -36,9 +36,32 @@ using osvr::util::PeerStringID;
 using osvr::common::RegisteredStringMap;
 using osvr::common::CorrelatedStringMap;
 
+TEST(RegisteredStringMap, create) {
+
+    RegisteredStringMap regMap;
+    ASSERT_EQ(0, regMap.getEntries().size());
+    ASSERT_FALSE(regMap.isModified());
+}
+
+TEST(RegisteredStringMap, addNewValues) {
+    RegisteredStringMap regMap;
+
+    StringID regID0 = regMap.getStringID("RegVal0");
+    ASSERT_TRUE(regMap.isModified());
+    ASSERT_EQ(1, regMap.getEntries().size());
+
+    StringID regID1 = regMap.getStringID("RegVal1");
+    ASSERT_TRUE(regMap.isModified());
+    ASSERT_EQ(2, regMap.getEntries().size());
+
+    StringID regID2 = regMap.getStringID("RegVal2");
+    ASSERT_TRUE(regMap.isModified());
+    ASSERT_EQ(3, regMap.getEntries().size());
+}
+
 class RegisteredStringMapTest : public ::testing::Test {
   public:
-    virtual void SetUp() {
+    RegisteredStringMapTest() {
         regID0 = regMap.getStringID("RegVal0");
         regID1 = regMap.getStringID("RegVal1");
         regID2 = regMap.getStringID("RegVal2");
@@ -54,30 +77,6 @@ class RegisteredStringMapTest : public ::testing::Test {
     StringID regID0, regID1, regID2;
     StringID corID0, corID1, corID2;
 };
-
-TEST(RegisteredStringMap, create) {
-
-    RegisteredStringMap regMap;
-    ASSERT_EQ(0, regMap.getEntries().size());
-    ASSERT_FALSE(regMap.isModified());
-}
-
-TEST(RegisteredStringMap, addNewValues) {
-    RegisteredStringMap regMap;
-    CorrelatedStringMap corMap;
-
-    StringID regID0 = regMap.getStringID("RegVal0");
-    ASSERT_TRUE(regMap.isModified());
-    ASSERT_EQ(1, regMap.getEntries().size());
-
-    StringID regID1 = regMap.getStringID("RegVal1");
-    ASSERT_TRUE(regMap.isModified());
-    ASSERT_EQ(2, regMap.getEntries().size());
-
-    StringID regID2 = regMap.getStringID("RegVal2");
-    ASSERT_TRUE(regMap.isModified());
-    ASSERT_EQ(3, regMap.getEntries().size());
-}
 
 TEST_F(RegisteredStringMapTest, checkExistingValues) {
 
@@ -101,10 +100,10 @@ TEST_F(RegisteredStringMapTest, checkExistingValues) {
 
 TEST_F(RegisteredStringMapTest, getValues) {
 
-    ASSERT_STREQ("RegVal0", regMap.getStringFromId(regID0).c_str());
-    ASSERT_STREQ("RegVal1", regMap.getStringFromId(regID1).c_str());
-    ASSERT_STREQ("RegVal2", regMap.getStringFromId(regID2).c_str());
-    ASSERT_EQ(0, std::strlen(regMap.getStringFromId(StringID(1000)).c_str()));
+    ASSERT_EQ("RegVal0", regMap.getStringFromId(regID0));
+    ASSERT_EQ("RegVal1", regMap.getStringFromId(regID1));
+    ASSERT_EQ("RegVal2", regMap.getStringFromId(regID2));
+    ASSERT_TRUE(regMap.getStringFromId(StringID(1000)).empty());
 
     ASSERT_STREQ("CorVal0", corMap.getStringFromId(corID0).c_str());
     ASSERT_STREQ("CorVal1", corMap.getStringFromId(corID1).c_str());
