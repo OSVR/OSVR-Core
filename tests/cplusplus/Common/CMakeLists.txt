@@ -15,6 +15,7 @@ endif()
 add_executable(TestCommon
     DummyTree.h
     PathTreeResolution.cpp
+    RegStringMap.cpp
     Serialization.cpp
     SerializationExamples.cpp
     "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Simple.h"

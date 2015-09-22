@@ -88,6 +88,7 @@ set(API
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
+    "${HEADER_LOCATION}/RegisteredStringMap.h"
     "${HEADER_LOCATION}/ReportFromCallback.h"
     "${HEADER_LOCATION}/ReportMap.h"
     "${HEADER_LOCATION}/ReportState.h"
@@ -154,6 +155,7 @@ set(SOURCE
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp
+    RegisteredStringMap.cpp
     ResolveFullTree.cpp
     ResolveTreeNode.cpp
     RouteContainer.cpp

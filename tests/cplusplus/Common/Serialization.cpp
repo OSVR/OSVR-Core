@@ -151,6 +151,27 @@ TYPED_TEST(ArithmeticRawSerialization, RoundTrip0) {
     ASSERT_EQ(reader.bytesRemaining(), 0);
 }
 
+TYPED_TEST(ArithmeticRawSerialization, VectorRoundTrip) {
+    Buffer<> buf;
+    TypeParam in(0);
+    static const auto count = 5;
+    std::vector<TypeParam> inVal;
+    for (int i = 0; i < count; ++i) {
+        in += 1.8;
+        inVal.push_back(in);
+    }
+
+    osvr::common::serialization::serializeRaw(buf, inVal);
+    ASSERT_GE(buf.size(), sizeof(uint32_t) + count * sizeof(TypeParam));
+
+    auto reader = buf.startReading();
+
+    std::vector<TypeParam> outVal(1);
+    osvr::common::serialization::deserializeRaw(reader, outVal);
+    ASSERT_EQ(inVal, outVal);
+    ASSERT_EQ(reader.bytesRemaining(), 0);
+}
+
 #ifdef _MSC_VER
 /// Disable "truncation of constant value" warning here.
 #pragma warning(push)
@@ -228,6 +249,28 @@ TEST(BoolSerialization, RoundTripFalse) {
     osvr::common::serialization::deserializeRaw(reader, outVal);
     ASSERT_EQ(inVal, outVal);
     ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
+    ASSERT_EQ(reader.bytesRemaining(), 0);
+}
+
+TEST(StringVectorSerialization, RoundTrip) {
+    auto buf = Buffer<>{};
+    using TypeParam = std::vector<std::string>;
+    auto inVal = TypeParam{};
+    auto os = std::ostringstream{};
+    static const auto count = 10;
+    for (int i = 0; i < count; ++i) {
+        inVal.push_back(os.str());
+        os << "x";
+    }
+
+    osvr::common::serialization::serializeRaw(buf, inVal);
+    ASSERT_GE(buf.size(), sizeof(uint32_t) + count * sizeof(char));
+
+    auto reader = buf.startReading();
+
+    auto outVal = TypeParam{};
+    osvr::common::serialization::deserializeRaw(reader, outVal);
+    ASSERT_EQ(inVal, outVal);
     ASSERT_EQ(reader.bytesRemaining(), 0);
 }
 
