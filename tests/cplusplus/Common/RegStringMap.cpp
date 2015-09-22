@@ -105,10 +105,10 @@ TEST_F(RegisteredStringMapTest, getValues) {
     ASSERT_EQ("RegVal2", regMap.getStringFromId(regID2));
     ASSERT_TRUE(regMap.getStringFromId(StringID(1000)).empty());
 
-    ASSERT_STREQ("CorVal0", corMap.getStringFromId(corID0).c_str());
-    ASSERT_STREQ("CorVal1", corMap.getStringFromId(corID1).c_str());
-    ASSERT_STREQ("CorVal2", corMap.getStringFromId(corID2).c_str());
-    ASSERT_EQ(0, std::strlen(corMap.getStringFromId(StringID(1000)).c_str()));
+    ASSERT_EQ("CorVal0", corMap.getStringFromId(corID0));
+    ASSERT_EQ("CorVal1", corMap.getStringFromId(corID1));
+    ASSERT_EQ("CorVal2", corMap.getStringFromId(corID2));
+    ASSERT_TRUE(corMap.getStringFromId(StringID(1000)).empty());
 }
 
 TEST_F(RegisteredStringMapTest, getEntries) {
