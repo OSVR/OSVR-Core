@@ -256,7 +256,7 @@ TEST(StringVectorSerialization, RoundTrip) {
     auto buf = Buffer<>{};
     using TypeParam = std::vector<std::string>;
     auto inVal = TypeParam{};
-    auto os = std::ostringstream{};
+    std::ostringstream os;
     static const auto count = 10;
     for (int i = 0; i < count; ++i) {
         inVal.push_back(os.str());
