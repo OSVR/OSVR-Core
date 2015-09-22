@@ -379,6 +379,17 @@ bool directx_camera_server::start_com_and_graphbuilder() {
     return true;
 }
 
+/// @brief Checks something to see if it's false-ish, printing a message and
+/// throwing an exception if it is.
+template <typename T>
+inline bool didConstructionFail(T const &ptr, const char objName[]) {
+    if (!ptr) {
+        fprintf(stderr, "directx_camera_server: Can't create %s\n", objName);
+        return true;
+    }
+    return false;
+}
+
 // Enumerates the capture devices available, returning the first one where the
 // passed functor (taking IMoniker& as a param) returns true.
 template <typename F>
@@ -392,7 +403,9 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     auto pDevEnum = WinPtr<ICreateDevEnum>{};
     CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC,
                      IID_ICreateDevEnum, AttachPtr(pDevEnum));
-    checkForConstructionError(pDevEnum, "device enumerator");
+    if (didConstructionFail(pDevEnum, "device enumerator")) {
+        return ret;
+    }
 
 // Create an enumerator for video capture devices.
 // https://msdn.microsoft.com/en-us/library/windows/desktop/dd407292(v=vs.85).aspx
@@ -403,7 +416,9 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     auto pClassEnum = WinPtr<IEnumMoniker>{};
     pDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
                                     AttachPtr(pClassEnum), 0);
-    checkForConstructionError(pClassEnum, "video enumerator (no cameras?)");
+    if (didConstructionFail(pClassEnum, "video enumerator (no cameras?)")) {
+        return ret;
+    }
 
 #ifdef DEBUG
     printf("find_first_capture_device_where(): Before Loop "
