@@ -17,6 +17,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${LOCAL_CMAKE
 # Package Options
 ###
 include(Version)
+include(GetSubprojectStatus)
 
 ###
 # Library ABI versions
