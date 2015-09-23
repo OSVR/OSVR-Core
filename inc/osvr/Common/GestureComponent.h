@@ -92,6 +92,9 @@ namespace common {
       private:
 
         explicit GestureComponent(common::SystemComponent &systemComponent);
+        // @brief Disable assignment operator, since we have reference
+        /// members
+        GestureComponent &operator=(const GestureComponent &) = delete;
 
         void m_parentSet() override;
 
