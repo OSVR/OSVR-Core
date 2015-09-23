@@ -56,7 +56,7 @@ osvrDeviceGestureConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     *iface = ifaceObj;
 
     auto systemComponent = opts->getParentContext()->getSystemComponent();
-    auto gesture = osvr::common::GestureComponent::create(systemComponent);
+    auto gesture = osvr::common::GestureComponent::create(*systemComponent);
     ifaceObj->gesture = gesture.get();
     opts->addComponent(gesture);
     return OSVR_RETURN_SUCCESS;
