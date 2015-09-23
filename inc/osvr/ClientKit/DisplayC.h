@@ -173,9 +173,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetDisplayDimensions(
 
     @sa OSVR_ViewerCount
 
-    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in
-   which case
-    the output argument is unmodified.
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+   the output argument is unmodified.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetNumViewers(OSVR_DisplayConfig disp, OSVR_ViewerCount *viewers);
