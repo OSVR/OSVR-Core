@@ -114,22 +114,21 @@ namespace client {
                 distort = params;
             }
 
-            // get the number of display inputs
-            // if larger than one then we need to assign input index for each
-            // viewer eye
+            // get the number of display inputs if larger than one then we need
+            // to assign input index for each viewer eye
             auto numDispInputs = desc.getNumDisplayInputs();
             std::vector<uint8_t> displayInputIndices;
-            if (numDispInputs == 2) {
+            if (numDispInputs ==
+                display_schema_1::DisplayDescriptor::FULL_SCREEN) {
                 displayInputIndices = {0, 1};
             } else {
-                displayInputIndices = {0};
+                displayInputIndices = {0, 0};
             }
 
             if ((numDispInputs > 1) && (eyesDesc.size() == 1)) {
-                OSVR_DEV_VERBOSE("DisplayConfig::DisplayConfigFactory: ERROR: "
-                                 "We have two video inputs"
-                                 "for just one eye");
-                /// @todo throw an error?
+                throw std::out_of_range("DisplayConfig::DisplayConfigFactory: "
+                                        "Provided 2 video inputs for just one "
+                                        "eye");
             }
 
             for (auto eye : eyeIndices) {
@@ -146,15 +145,8 @@ namespace client {
                         eyesDesc[eye].m_CenterProjY;
                 }
 
-                OSVR_DisplayInputCount displayInputIdx;
-                // 2 eyes with 1 input
-                if (eyesDesc.size() > displayInputIndices.size()) {
-                    displayInputIdx = displayInputIndices.front();
-                }
-                // 2 eyes with 2 inputs OR 2 eye with 1 input
-                else {
-                    displayInputIdx = displayInputIndices[eye];
-                }
+                OSVR_DisplayInputCount displayInputIdx =
+                    displayInputIndices[eye];
 
                 viewer.container().emplace_back(ViewerEye(
                     ctx, (offsetFactor * offset).eval(), HEAD_PATH,
