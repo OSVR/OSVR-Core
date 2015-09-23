@@ -108,11 +108,10 @@ namespace client {
             m_systemDevice->addComponent(common::SystemComponent::create());
 
         /// Receive string map data whenever it comes
-        m_systemComponent->registerStringMapHandler(
-            [&](common::MapData const &dataMap,
-            util::time::TimeValue const &timestamp) {
-            m_handleRegStringMap(dataMap, timestamp);
-        });
+        m_systemComponent->registerGestureMapHandler(
+            [&](common::GestureMapData const &dataMap) {
+                m_handleRegStringMap(dataMap);
+            });
         using DedupJsonFunction =
             common::DeduplicatingFunctionWrapper<Json::Value const &>;
         m_systemComponent->registerReplaceTreeHandler(
@@ -225,9 +224,9 @@ namespace client {
     }
 
     void PureClientContext::m_handleRegStringMap(
-        common::MapData const &data, util::time::TimeValue const &) {
-        auto map = m_systemComponent->getRegStringMap();
-        map->corrMap.setupPeerMappings(data.serializedMap);
+        common::GestureMapData const &data) {
+        auto map = m_systemComponent->getGestureMap();
+        map->corrMap.setupPeerMappings(data);
     }
 } // namespace client
 } // namespace osvr

@@ -119,8 +119,7 @@ namespace client {
         ClientInterfaceObjectManager m_ifaceMgr;
 
         /// @brief Called whenever an updated string to ID map is available
-        void m_handleRegStringMap(common::MapData const &data,
-                                  util::time::TimeValue const &timestamp);
+        void m_handleRegStringMap(common::GestureMapData const &data);
     };
 } // namespace client
 } // namespace osvr
