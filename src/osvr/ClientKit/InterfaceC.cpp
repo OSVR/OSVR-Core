@@ -86,7 +86,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetGestureNameLength(
     /// @todo Shouldn't be hardcoded as the only registered string map - this
     /// should be accessible as "interface-class-level" data for Gesture.
     std::string entryName =
-        ctx->getSystemComponent()->getRegStringMap()->corrMap.getNameFromID(
+        ctx->getSystemComponent()->getGestureMap()->corrMap.getStringFromId(
             osvr::util::StringID(id));
     *len = entryName.empty() ? 0 : (entryName.size() + 1);
     return OSVR_RETURN_SUCCESS;
@@ -106,8 +106,8 @@ OSVR_ReturnCode osvrClientGetGestureNameFromID(OSVR_ClientContext ctx,
     /// @todo Shouldn't be hardcoded as the only registered string map - this
     /// should be accessible as "interface-class-level" data for Gesture.
     std::string entryName =
-        ctx->getSystemComponent()->getRegStringMap()->corrMap.getNameFromID(
-        osvr::util::StringID(id));
+        ctx->getSystemComponent()->getGestureMap()->corrMap.getStringFromId(
+            osvr::util::StringID(id));
 
     if (entryName.size() + 1 > len) {
         /// buffer too small.
