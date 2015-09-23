@@ -224,7 +224,6 @@ namespace common {
         messages::RegisteredStringMapRecord::MessageSerialization msg;
         deserialize(bufReader, msg);
         auto data = msg.getData();
-        auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
         for (auto const &cb : self->m_cb_map) {
             cb(data);
