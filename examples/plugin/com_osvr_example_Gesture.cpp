@@ -53,7 +53,7 @@ class GestureDevice {
         // get an ID for gesture names to be used in plugin
         osvrDeviceGestureGetID(m_gesture, OSVR_GESTURE_DOUBLE_TAP,
                                &m_double_tap_gesture);
-        osvrDeviceGestureGetID(m_gesture, "FIST", &m_fist_gesture);
+        osvrDeviceGestureGetID(m_gesture, "LASSO", &m_lasso_gesture);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(com_osvr_example_Gesture_json);
@@ -73,7 +73,7 @@ class GestureDevice {
 
         osvrDeviceGestureReportData(m_gesture, m_double_tap_gesture,
                                     OSVR_GESTURE_COMPLETE, 0, &times);
-        osvrDeviceGestureReportData(m_gesture, m_fist_gesture,
+        osvrDeviceGestureReportData(m_gesture, m_lasso_gesture,
                                     OSVR_GESTURE_COMPLETE, 1, &times);
 
         return OSVR_RETURN_SUCCESS;
@@ -82,7 +82,7 @@ class GestureDevice {
   private:
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_GestureDeviceInterface m_gesture;
-    OSVR_GestureID m_fist_gesture;
+    OSVR_GestureID m_lasso_gesture;
     OSVR_GestureID m_double_tap_gesture;
 };
 
