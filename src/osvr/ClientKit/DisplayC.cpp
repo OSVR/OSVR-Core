@@ -376,10 +376,7 @@ OSVR_ReturnCode osvrClientGetViewerEyeSurfaceProjectionClippingPlanes(
     OSVR_VALIDATE_OUTPUT_PTR(right, "right");
     OSVR_VALIDATE_OUTPUT_PTR(bottom, "bottom");
     OSVR_VALIDATE_OUTPUT_PTR(top, "top");
-    double near = 1.0;
-    double far = 100;
-    auto rect =
-        disp->cfg->getViewerEyeSurface(viewer, eye, surface).getRect(near, far);
+    auto rect = disp->cfg->getViewerEyeSurface(viewer, eye, surface).getRect();
     *left = rect[rect.LEFT];
     *right = rect[rect.RIGHT];
     *bottom = rect[rect.BOTTOM];

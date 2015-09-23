@@ -180,9 +180,7 @@ namespace client {
         return ret;
     }
 
-    util::Rectd ViewerEye::getRect(double near, double far) const {
-        return m_getRect(near, far);
-    }
+    util::Rectd ViewerEye::getRect() const { return m_getRect(1.0, 100); }
 
     ViewerEye::ViewerEye(
         OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
