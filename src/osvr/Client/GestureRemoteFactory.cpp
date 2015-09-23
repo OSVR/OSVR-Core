@@ -59,8 +59,8 @@ namespace client {
               m_sensor(sensor), m_ctx(ctx) {
 
             m_sysComponent = m_ctx->getSystemComponent();
-            m_gestureNameMap = m_sysComponent->getRegStringMap();
-            auto gesture = common::GestureComponent::create(m_sysComponent);
+            m_gestureNameMap = m_sysComponent->getGestureMap();
+            auto gesture = common::GestureComponent::create(*m_sysComponent);
             m_dev->addComponent(gesture);
 
             gesture->registerGestureHandler(
@@ -112,7 +112,7 @@ namespace client {
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
         // map to keep track of gesture map and server to local ID map
-        common::MapPtr m_gestureNameMap;
+        common::GestureDataPtr m_gestureNameMap;
         common::ClientContext *m_ctx;
         common::SystemComponent *m_sysComponent;
     };
