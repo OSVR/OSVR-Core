@@ -86,6 +86,7 @@ set(API
     "${HEADER_LOCATION}/TimeValue_fwd.h"
     "${HEADER_LOCATION}/TreeNode.h"
     "${HEADER_LOCATION}/TreeNode_fwd.h"
+    "${HEADER_LOCATION}/TreeNodeFullPath.h"
     "${HEADER_LOCATION}/TreeTraversalVisitor.h"
     "${HEADER_LOCATION}/TypePack.h"
     "${HEADER_LOCATION}/TypeSafeId.h"

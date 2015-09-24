@@ -26,6 +26,7 @@
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/RoutingConstants.h>
 #include <osvr/Common/PathElementTools.h>
+#include <osvr/Util/TreeNodeFullPath.h>
 
 // Library/third-party includes
 // - none
@@ -38,24 +39,8 @@ namespace common {
     const char *getTypeName(PathNode const &node) {
         return elements::getTypeName(node.value());
     }
-    static inline void buildPathRecursively(PathNode const &node,
-                                            std::ostream &os) {
-        auto parent = node.getParent();
-        if (parent) {
-            buildPathRecursively(*parent, os);
-        }
-        if (!node.isRoot()) {
-            os << getPathSeparator() << node.getName();
-        }
-    }
     std::string getFullPath(PathNode const &node) {
-        /// Special case the root
-        if (node.isRoot()) {
-            return getPathSeparator();
-        }
-        std::ostringstream os;
-        buildPathRecursively(node, os);
-        return os.str();
+        return util::getTreeNodeFullPath(node, getPathSeparator());
     }
 } // namespace common
 } // namespace osvr
