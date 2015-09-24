@@ -246,28 +246,22 @@ namespace client {
     }
 
     void PureClientContext::m_connectNeededCallbacks() {
-        std::unordered_set<std::string> failedPaths;
-        size_t successfulPaths{0};
-        for (auto const &iface : getInterfaces()) {
-            /// @todo slightly overkill, but it works - tree traversal would be
-            /// better.
-            auto path = iface->getPath();
-            /// For every interface, if there's no handler at that path on the
-            /// interface tree, try to set one up.
-            if (!m_interfaces.getHandlerForPath(path)) {
-                auto success = m_connectCallbacksOnPath(path);
-                if (success) {
-                    successfulPaths++;
-                } else {
-                    failedPaths.insert(path);
-                }
+        auto failedPaths = std::unordered_set<std::string>{};
+        auto successfulPaths = size_t{0};
+        /// Call our little lambda with every path that has interfaces but no
+        /// handler, and see what we can do.
+        m_interfaces.visitPathsWithoutHandlers([&](std::string const &path) {
+            auto success = m_connectCallbacksOnPath(path);
+            if (success) {
+                successfulPaths++;
+            } else {
+                failedPaths.insert(path);
             }
-        }
+        });
         OSVR_DEV_VERBOSE("Connected " << successfulPaths << " of "
                                       << successfulPaths + failedPaths.size()
                                       << " unconnected paths successfully");
     }
-
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
         m_gotTree = true;
         OSVR_DEV_VERBOSE("Got updated path tree, processing");
