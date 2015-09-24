@@ -142,7 +142,7 @@ namespace client {
 
         // Spin the update to get a path tree
         auto treeEnd = begin + STARTUP_TREE_TIMEOUT;
-        while (clock::now() < treeEnd && !m_gotTree) {
+        while (clock::now() < treeEnd && !m_pathTreeOwner) {
             m_update();
             std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
         }
@@ -154,7 +154,7 @@ namespace client {
                    .count()
             << "ms: " << (m_gotConnection ? "have connection to server, "
                                           : "don't have connection to server, ")
-            << (m_gotTree ? "have path tree" : "don't have path tree"));
+            << (m_pathTreeOwner ? "have path tree" : "don't have path tree"));
     }
 
     PureClientContext::~PureClientContext() {}
@@ -196,7 +196,7 @@ namespace client {
     }
 
     bool PureClientContext::m_getStatus() const {
-        return m_gotConnection && m_gotTree;
+        return m_gotConnection && m_pathTreeOwner;
     }
 
     common::PathTree const &PureClientContext::m_getPathTree() const {
@@ -252,7 +252,6 @@ namespace client {
                                       << " unconnected paths successfully");
     }
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
-        m_gotTree = true;
         OSVR_DEV_VERBOSE("Got updated path tree, processing");
 
         // Replace localhost before we even convert the json to a tree.

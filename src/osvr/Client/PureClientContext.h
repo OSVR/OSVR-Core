@@ -126,8 +126,6 @@ namespace client {
         /// @brief Have we gotten a connection to the main server?
         bool m_gotConnection = false;
 
-        /// @brief Have we gotten a path tree?
-        bool m_gotTree = false;
     };
 } // namespace client
 } // namespace osvr
