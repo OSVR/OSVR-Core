@@ -85,11 +85,6 @@ namespace client {
         /// both the handler container and the interface tree.
         void m_removeCallbacksOnPath(std::string const &path);
 
-        /// @brief Given a JSON array of nodes representing a path tree, wipe
-        /// out existing path tree and remote handlers, build new path tree, and
-        /// set up new remote handlers for all known interfaces.
-        void m_handleReplaceTree(Json::Value const &nodes);
-
         /// @brief Calls m_connectCallbacksOnPath() for every path that has one
         /// or more interface objects but no remote handler.
         void m_connectNeededCallbacks();

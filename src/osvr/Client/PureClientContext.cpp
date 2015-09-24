@@ -106,20 +106,25 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-#define OSVR_USE_DEDUP
-#ifdef OSVR_USE_DEDUP
-        typedef common::DeduplicatingFunctionWrapper<Json::Value const &>
-            DedupJsonFunction;
-        m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
-            [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
-#else
-        // Just for testing purposes, figuring out why we end up looping too
-        // much.
+        using DedupJsonFunction =
+            common::DeduplicatingFunctionWrapper<Json::Value const &>;
         m_systemComponent->registerReplaceTreeHandler(
-            [&](Json::Value const &nodes, util::time::TimeValue const &) {
-                m_handleReplaceTree(nodes);
-            });
-#endif
+            DedupJsonFunction([&](Json::Value nodes) {
+
+                OSVR_DEV_VERBOSE("Got updated path tree, processing");
+                // Replace localhost before we even convert the json to a tree.
+                // replace the @localhost with the correct host name
+                // in case we are a remote client, otherwise the connection
+                // would fail
+                replaceLocalhostServers(nodes, m_host);
+
+                // wipe out handlers in the interface tree
+                m_interfaces.clearHandlers();
+
+                m_pathTreeOwner.replaceTree(nodes);
+                m_connectNeededCallbacks();
+            }));
+
         typedef std::chrono::system_clock clock;
         auto begin = clock::now();
 
@@ -251,24 +256,5 @@ namespace client {
                                       << successfulPaths + failedPaths.size()
                                       << " unconnected paths successfully");
     }
-    void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
-        OSVR_DEV_VERBOSE("Got updated path tree, processing");
-
-        // Replace localhost before we even convert the json to a tree.
-        // replace the @localhost with the correct host name
-        // in case we are a remote client, otherwise the connection
-        // would fail
-        auto newTreeNodes = nodes;
-        replaceLocalhostServers(newTreeNodes, m_host);
-
-        // wipe out handlers in the interface tree
-        m_interfaces.clearHandlers();
-
-        m_pathTreeOwner.replaceTree(newTreeNodes);
-
-        // re-connect handlers.
-        m_connectNeededCallbacks();
-    }
-
 } // namespace client
 } // namespace osvr
