@@ -4,11 +4,13 @@ set(API
     "${HEADER_LOCATION}/ClientObjectsAndCallbacks.h"
     "${HEADER_LOCATION}/CreateContext.h"
     "${HEADER_LOCATION}/DisplayConfig.h"
+    "${HEADER_LOCATION}/DisplayInput.h"
     "${HEADER_LOCATION}/HandlerContainer.h"
     "${HEADER_LOCATION}/InternalInterfaceOwner.h"
     "${HEADER_LOCATION}/InterfaceTree.h"
     "${HEADER_LOCATION}/RemoteHandler.h"
     "${HEADER_LOCATION}/Viewer.h"
+    "${HEADER_LOCATION}/Viewers.h"
     "${HEADER_LOCATION}/ViewerEye.h"
     "${HEADER_LOCATION}/ViewerEyeSurface.h")
 
@@ -24,6 +26,7 @@ set(SOURCE
     DisplayConfig.cpp
     DisplayDescriptorSchema1.cpp
     DisplayDescriptorSchema1.h
+    DisplayInput.cpp
     EyeTrackerRemoteFactory.cpp
     EyeTrackerRemoteFactory.h
     ImagingRemoteFactory.cpp
@@ -41,6 +44,7 @@ set(SOURCE
     TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h
     Viewer.cpp
+    Viewers.cpp
     ViewerEye.cpp
     ViewerEyeSurface.cpp
     VRPNConnectionCollection.cpp
