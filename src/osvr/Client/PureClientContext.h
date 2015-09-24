@@ -35,6 +35,7 @@
 #include "VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
+#include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Common/PathTreeOwner.h>
 
 // Library/third-party includes
@@ -74,21 +75,6 @@ namespace client {
 
         bool m_getStatus() const override;
 
-        /// @brief Given a path, remove any existing handler for that path, then
-        /// attempt to fully resolve the path to its source and construct a
-        /// handler for it.
-        ///
-        /// @return true if we were able to connect the path.
-        bool m_connectCallbacksOnPath(std::string const &path);
-
-        /// @brief Given a path, remove any existing handler for that path from
-        /// both the handler container and the interface tree.
-        void m_removeCallbacksOnPath(std::string const &path);
-
-        /// @brief Calls m_connectCallbacksOnPath() for every path that has one
-        /// or more interface objects but no remote handler.
-        void m_connectNeededCallbacks();
-
         /// @brief The main OSVR server host: usually localhost
         std::string m_host;
 
@@ -108,10 +94,6 @@ namespace client {
         /// @brief Object owning a path tree.
         common::PathTreeOwner m_pathTreeOwner;
 
-        /// @brief Tree parallel to path tree for holding interface objects and
-        /// remote handlers.
-        InterfaceTree m_interfaces;
-
         /// @brief Factory for producing remote handlers.
         RemoteHandlerFactory m_factory;
 
@@ -121,6 +103,9 @@ namespace client {
         /// @brief Have we gotten a connection to the main server?
         bool m_gotConnection = false;
 
+        /// @brief Manager of client interface objects and their interaction
+        /// with the path tree.
+        ClientInterfaceObjectManager m_ifaceMgr;
     };
 } // namespace client
 } // namespace osvr

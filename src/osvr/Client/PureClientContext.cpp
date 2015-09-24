@@ -88,7 +88,9 @@ namespace client {
 
     PureClientContext::PureClientContext(const char appId[], const char host[],
                                          common::ClientContextDeleter del)
-        : ::OSVR_ClientContextObject(appId, del), m_host(host) {
+        : ::OSVR_ClientContextObject(appId, del), m_host(host),
+          m_ifaceMgr(m_pathTreeOwner, m_factory,
+                     *static_cast<common::ClientContext *>(this)) {
 
         if (!m_network.isUp()) {
             throw std::runtime_error("Network error: " + m_network.getError());
@@ -118,11 +120,9 @@ namespace client {
                 // would fail
                 replaceLocalhostServers(nodes, m_host);
 
-                // wipe out handlers in the interface tree
-                m_interfaces.clearHandlers();
-
+                // Tree observers will handle destruction/creation of remote
+                // handlers.
                 m_pathTreeOwner.replaceTree(nodes);
-                m_connectNeededCallbacks();
             }));
 
         typedef std::chrono::system_clock clock;
@@ -176,7 +176,7 @@ namespace client {
         /// Update system device
         m_systemDevice->update();
         /// Update handlers.
-        m_interfaces.updateHandlers();
+        m_ifaceMgr.updateHandlers();
     }
 
     void PureClientContext::m_sendRoute(std::string const &route) {
@@ -186,18 +186,12 @@ namespace client {
 
     void PureClientContext::m_handleNewInterface(
         common::ClientInterfacePtr const &iface) {
-        bool isNew = m_interfaces.addInterface(iface);
-        if (isNew) {
-            m_connectCallbacksOnPath(iface->getPath());
-        }
+        m_ifaceMgr.addInterface(iface);
     }
 
     void PureClientContext::m_handleReleasingInterface(
         common::ClientInterfacePtr const &iface) {
-        bool isEmpty = m_interfaces.removeInterface(iface);
-        if (isEmpty) {
-            m_removeCallbacksOnPath(iface->getPath());
-        }
+        m_ifaceMgr.releaseInterface(iface);
     }
 
     bool PureClientContext::m_getStatus() const {
@@ -206,55 +200,6 @@ namespace client {
 
     common::PathTree const &PureClientContext::m_getPathTree() const {
         return m_pathTreeOwner.get();
-    }
-
-    bool PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
-        /// Start by removing handler from interface tree and handler container
-        /// for this path, if found. Ensures that if we early-out (fail to set
-        /// up a handler) we don't have a leftover one still active.
-        m_interfaces.eraseHandlerForPath(path);
-
-        auto source = common::resolveTreeNode(m_pathTreeOwner.get(), path);
-        if (!source.is_initialized()) {
-            OSVR_DEV_VERBOSE("Could not resolve source for " << path);
-            return false;
-        }
-        auto handler = m_factory.invokeFactory(
-            *source, m_interfaces.getInterfacesForPath(path), *this);
-        if (handler) {
-            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
-            // Store the new handler in the interface tree
-            auto oldHandler = m_interfaces.replaceHandlerForPath(path, handler);
-            BOOST_ASSERT_MSG(
-                !oldHandler,
-                "We removed the old handler before so it should be null now");
-            return true;
-        }
-
-        OSVR_DEV_VERBOSE("Could not produce handler for " << path);
-        return false;
-    }
-
-    void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
-        m_interfaces.eraseHandlerForPath(path);
-    }
-
-    void PureClientContext::m_connectNeededCallbacks() {
-        auto failedPaths = std::unordered_set<std::string>{};
-        auto successfulPaths = size_t{0};
-        /// Call our little lambda with every path that has interfaces but no
-        /// handler, and see what we can do.
-        m_interfaces.visitPathsWithoutHandlers([&](std::string const &path) {
-            auto success = m_connectCallbacksOnPath(path);
-            if (success) {
-                successfulPaths++;
-            } else {
-                failedPaths.insert(path);
-            }
-        });
-        OSVR_DEV_VERBOSE("Connected " << successfulPaths << " of "
-                                      << successfulPaths + failedPaths.size()
-                                      << " unconnected paths successfully");
     }
 } // namespace client
 } // namespace osvr
