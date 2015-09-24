@@ -88,8 +88,8 @@ namespace client {
             auto const descriptorString = ctx->getStringParameter("/display");
 
             auto desc = display_schema_1::DisplayDescriptor(descriptorString);
-            cfg->container().emplace_back(Viewer(ctx, HEAD_PATH));
-            auto &viewer = cfg->container().front();
+            cfg->m_viewers.container().emplace_back(Viewer(ctx, HEAD_PATH));
+            auto &viewer = cfg->m_viewers.container().front();
             auto eyesDesc = desc.getEyes();
             std::vector<uint8_t> eyeIndices;
             Eigen::Vector3d offset;
@@ -171,7 +171,7 @@ namespace client {
     DisplayConfig::DisplayConfig() {}
 
     bool DisplayConfig::isStartupComplete() const {
-        for (auto const &viewer : *this) {
+        for (auto const &viewer : this->m_viewers) {
             if (!viewer.hasPose()) {
                 return false;
             }
@@ -184,37 +184,5 @@ namespace client {
         return true;
     }
 
-    OSVR_DisplayInputCount DisplayConfig::getNumDisplayInputs() const {
-
-        // assume there's 1 input but still check if there are more than one
-        // display inputs by checking every viewer eye (0 based index)
-        OSVR_DisplayInputCount maxDisplayInputIdx = 0;
-
-        for (auto const &viewer : *this) {
-            for (auto const &viewerEye : viewer) {
-                auto dispInputIdx = viewerEye.getDisplayInputIdx();
-                if (dispInputIdx > maxDisplayInputIdx) {
-                    maxDisplayInputIdx = dispInputIdx;
-                }
-            }
-        }
-        // since the display input index is 0 based we will increment
-        // the values by 1
-        return (maxDisplayInputIdx + 1);
-    }
-
-    const ViewerEye &
-    DisplayConfig::getViewerEye(OSVR_DisplayInputCount dispInputIdx) const {
-
-        for (auto const &viewer : *this) {
-            for (auto const &viewerEye : viewer) {
-                if (viewerEye.getDisplayInputIdx() == dispInputIdx) {
-                    return viewerEye;
-                }
-            }
-        }
-        throw NoViewerEyeParam("display input index: " +
-                               std::to_string(dispInputIdx));
-    }
 } // namespace client
 } // namespace osvr
