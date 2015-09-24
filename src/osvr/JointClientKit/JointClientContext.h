@@ -35,7 +35,7 @@
 #include <osvr/Util/DefaultBool.h>
 #include "../Client/VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
-#include "../Client/RemoteHandlerFactory.h"
+#include <osvr/Client/RemoteHandlerFactory.h>
 #include <osvr/Server/ServerPtr.h>
 
 // Library/third-party includes
