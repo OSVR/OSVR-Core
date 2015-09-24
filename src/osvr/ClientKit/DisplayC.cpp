@@ -158,10 +158,9 @@ OSVR_ReturnCode osvrClientGetDisplayDimensions(
     OSVR_VALIDATE_DISPLAY_INPUT_ID;
     OSVR_VALIDATE_OUTPUT_PTR(width, "width");
     OSVR_VALIDATE_OUTPUT_PTR(height, "height");
-    auto viewport =
-        disp->cfg->getViewerEye(displayInputIndex).getDisplayRelativeViewport();
-    *width = viewport.width;
-    *height = viewport.height;
+    auto dispInput = disp->cfg->getDisplayInput(displayInputIndex);
+    *width = dispInput.getDisplayWidth();
+    *height = dispInput.getDisplayHeight();
     return OSVR_RETURN_SUCCESS;
 }
 
