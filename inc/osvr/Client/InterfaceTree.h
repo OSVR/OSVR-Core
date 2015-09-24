@@ -29,8 +29,11 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Util/TreeNode.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Client/RemoteHandler.h>
 #include <osvr/Client/HandlerContainer.h>
+#include <osvr/Util/TreeNodeFullPath.h>
+#include <osvr/Common/RoutingConstants.h>
 
 // Library/third-party includes
 // - none
@@ -89,6 +92,16 @@ namespace client {
 
         /// @brief Removes all handlers
         OSVR_CLIENT_EXPORT void clearHandlers();
+
+        /// @brief Visit all paths with interfaces in their list but no handler.
+        template <typename F> void visitPathsWithoutHandlers(F &&func) {
+            osvr::util::traverseWith(*m_root, [&](node_type &node) {
+                if (!node.value().handler && !node.value().interfaces.empty()) {
+                    func(util::getTreeNodeFullPath(node,
+                                                   common::getPathSeparator()));
+                }
+            });
+        }
 
       private:
         /// @brief Returns a reference to a node for a given path.
