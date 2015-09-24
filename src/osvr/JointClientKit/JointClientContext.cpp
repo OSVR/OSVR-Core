@@ -30,17 +30,13 @@
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ClientInterface.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
-#include <osvr/Common/ResolveTreeNode.h>
-#include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/Server/Server.h>
 
 // Library/third-party includes
-#include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
 #include <unordered_set>
