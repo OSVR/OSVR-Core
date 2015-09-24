@@ -38,6 +38,8 @@
 
 namespace osvr {
 namespace common {
+    /// @brief Base class used to implement BaseDevice/DeviceComponent-based
+    /// devices on top of VRPN.
     class DeviceWrapper : public vrpn_BaseClass, public BaseDevice {
       public:
         DeviceWrapper(std::string const &name, vrpn_ConnectionPtr const &conn,
