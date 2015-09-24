@@ -127,6 +127,11 @@ namespace client {
         m_ifaceMgr.releaseInterface(iface);
     }
 
+    bool JointClientContext::m_getStatus() const {
+        /// Always connected, but don't always have a path tree.
+        return bool(m_pathTreeOwner);
+    }
+
     common::PathTree const &JointClientContext::m_getPathTree() const {
         return m_pathTreeOwner.get();
     }

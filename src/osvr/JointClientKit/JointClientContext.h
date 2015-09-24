@@ -77,6 +77,7 @@ namespace client {
 
         common::PathTree const &m_getPathTree() const override;
 
+        bool m_getStatus() const override;
 
         /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;
