@@ -32,7 +32,6 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/NetworkingSupport.h>
 #include <osvr/Util/TimeValue_fwd.h>
-#include <osvr/Util/DefaultBool.h>
 #include "VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
@@ -124,10 +123,10 @@ namespace client {
         common::NetworkingSupport m_network;
 
         /// @brief Have we gotten a connection to the main server?
-        util::DefaultBool<false> m_gotConnection;
+        bool m_gotConnection = false;
 
         /// @brief Have we gotten a path tree?
-        util::DefaultBool<false> m_gotTree;
+        bool m_gotTree = false;
     };
 } // namespace client
 } // namespace osvr
