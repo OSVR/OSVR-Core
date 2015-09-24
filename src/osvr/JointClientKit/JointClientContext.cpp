@@ -49,13 +49,16 @@
 namespace osvr {
 namespace client {
 
+    static const auto HOST = "localhost";
     static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
     static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
     static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
     JointClientContext::JointClientContext(const char appId[],
                                            common::ClientContextDeleter del)
-        : ::OSVR_ClientContextObject(appId, del), m_host("localhost") {
+        : ::OSVR_ClientContextObject(appId, del),
+          m_ifaceMgr(m_pathTreeOwner, m_factory,
+                     *static_cast<common::ClientContext *>(this)) {
 
         /// Create all the remote handler factories.
         populateRemoteHandlerFactory(m_factory, m_vrpnConns);
@@ -65,14 +68,14 @@ namespace client {
 
         /// Get the VRPN connection out and use it.
         m_mainConn = static_cast<vrpn_Connection *>(std::get<0>(conn));
-        m_vrpnConns.addConnection(m_mainConn, m_host);
+        m_vrpnConns.addConnection(m_mainConn, HOST);
         BOOST_ASSERT(!m_vrpnConns.empty());
 
         /// Get the OSVR connection out and use it to make a server.
         m_server = server::Server::create(std::get<1>(conn));
 
         std::string sysDeviceName =
-            std::string(common::SystemComponent::deviceName()) + "@" + m_host;
+            std::string(common::SystemComponent::deviceName()) + "@" + HOST;
 
         /// Create the system client device.
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
@@ -80,8 +83,18 @@ namespace client {
             m_systemDevice->addComponent(common::SystemComponent::create());
         typedef common::DeduplicatingFunctionWrapper<Json::Value const &>
             DedupJsonFunction;
-        m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
-            [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
+
+        using DedupJsonFunction =
+            common::DeduplicatingFunctionWrapper<Json::Value const &>;
+        m_systemComponent->registerReplaceTreeHandler(
+            DedupJsonFunction([&](Json::Value nodes) {
+
+                OSVR_DEV_VERBOSE("Got updated path tree, processing");
+
+                // Tree observers will handle destruction/creation of remote
+                // handlers.
+                m_pathTreeOwner.replaceTree(nodes);
+            }));
     }
 
     JointClientContext::~JointClientContext() {}
@@ -96,7 +109,7 @@ namespace client {
         /// Update system device
         m_systemDevice->update();
         /// Update handlers.
-        m_interfaces.updateHandlers();
+        m_ifaceMgr.updateHandlers();
     }
 
     void JointClientContext::m_sendRoute(std::string const &route) {
@@ -106,91 +119,16 @@ namespace client {
 
     void JointClientContext::m_handleNewInterface(
         common::ClientInterfacePtr const &iface) {
-        bool isNew = m_interfaces.addInterface(iface);
-        if (isNew) {
-            m_connectCallbacksOnPath(iface->getPath());
-        }
+        m_ifaceMgr.addInterface(iface);
     }
 
     void JointClientContext::m_handleReleasingInterface(
         common::ClientInterfacePtr const &iface) {
-        bool isEmpty = m_interfaces.removeInterface(iface);
-        if (isEmpty) {
-            m_removeCallbacksOnPath(iface->getPath());
-        }
+        m_ifaceMgr.releaseInterface(iface);
     }
 
     common::PathTree const &JointClientContext::m_getPathTree() const {
-        return m_pathTree;
+        return m_pathTreeOwner.get();
     }
-
-    bool JointClientContext::m_connectCallbacksOnPath(std::string const &path) {
-        /// Start by removing handler from interface tree and handler container
-        /// for this path, if found. Ensures that if we early-out (fail to set
-        /// up a handler) we don't have a leftover one still active.
-        m_interfaces.eraseHandlerForPath(path);
-
-        auto source = common::resolveTreeNode(m_pathTree, path);
-        if (!source.is_initialized()) {
-            OSVR_DEV_VERBOSE("Could not resolve source for " << path);
-            return false;
-        }
-        auto handler = m_factory.invokeFactory(
-            *source, m_interfaces.getInterfacesForPath(path), *this);
-        if (handler) {
-            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
-            // Store the new handler in the interface tree
-            auto oldHandler = m_interfaces.replaceHandlerForPath(path, handler);
-            BOOST_ASSERT_MSG(
-                !oldHandler,
-                "We removed the old handler before so it should be null now");
-            return true;
-        }
-
-        OSVR_DEV_VERBOSE("Could not produce handler for " << path);
-        return false;
-    }
-
-    void JointClientContext::m_removeCallbacksOnPath(std::string const &path) {
-        m_interfaces.eraseHandlerForPath(path);
-    }
-
-    void JointClientContext::m_connectNeededCallbacks() {
-        std::unordered_set<std::string> failedPaths;
-        size_t successfulPaths{0};
-        for (auto const &iface : getInterfaces()) {
-            /// @todo slightly overkill, but it works - tree traversal would be
-            /// better.
-            auto path = iface->getPath();
-            /// For every interface, if there's no handler at that path on the
-            /// interface tree, try to set one up.
-            if (!m_interfaces.getHandlerForPath(path)) {
-                auto success = m_connectCallbacksOnPath(path);
-                if (success) {
-                    successfulPaths++;
-                } else {
-                    failedPaths.insert(path);
-                }
-            }
-        }
-        OSVR_DEV_VERBOSE("Connected " << successfulPaths << " of "
-                                      << successfulPaths + failedPaths.size()
-                                      << " unconnected paths successfully");
-    }
-
-    void JointClientContext::m_handleReplaceTree(Json::Value const &nodes) {
-        OSVR_DEV_VERBOSE("Got updated path tree, processing");
-        // reset path tree
-        m_pathTree.reset();
-        // wipe out handlers in the interface tree
-        m_interfaces.clearHandlers();
-
-        // populate path tree from message
-        common::jsonToPathTree(m_pathTree, nodes);
-
-        // re-connect handlers.
-        m_connectNeededCallbacks();
-    }
-
 } // namespace client
 } // namespace osvr
