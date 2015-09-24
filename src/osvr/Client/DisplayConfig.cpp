@@ -112,11 +112,23 @@ namespace client {
                 params.k1.data[2] = k1.k1_blue;
                 distort = params;
             }
+            // Compute angular offset about Y of the optical (view) axis
+            util::Angle axisOffset = 0. * util::radians;
+            {
+                auto overlapPct = desc.getOverlapPercent();
+
+                if (overlapPct < 1.) {
+                    const auto hfov = desc.getHorizontalFOV();
+                    const auto angularOverlap = hfov * overlapPct;
+                    axisOffset = (hfov - angularOverlap) / 2.;
+                }
+            }
+
             for (auto eye : eyeIndices) {
                 double offsetFactor =
                     (2. * eye) -
-                    1; // turns 0 into -1 and 1 into 1. Doesn't affect
-                       // mono, which has a zero offset vector.
+                    1.; // turns 0 into -1 and 1 into 1. Doesn't affect
+                        // mono, which has a zero offset vector.
                 boost::optional<OSVR_RadialDistortionParameters> distortEye(
                     distort);
                 if (distortEye.is_initialized()) {
@@ -125,11 +137,15 @@ namespace client {
                     distortEye->centerOfProjection.data[1] =
                         eyesDesc[eye].m_CenterProjY;
                 }
-                viewer.container().emplace_back(
-                    ViewerEye(ctx, (offsetFactor * offset).eval(), HEAD_PATH,
-                              computeViewport(eye, desc), computeRect(desc),
-                              eyesDesc[eye].m_rotate180,
-                              desc.getPitchTilt().value(), distortEye));
+                auto xlateOffset = (offsetFactor * offset).eval();
+
+                // here, the left eye should get a positive offset since it's a
+                // positive rotation about y, hence the -1 factor.
+                auto eyeAxisOffset = axisOffset * -1. * offsetFactor;
+                viewer.container().emplace_back(ViewerEye(
+                    ctx, xlateOffset, HEAD_PATH, computeViewport(eye, desc),
+                    computeRect(desc), eyesDesc[eye].m_rotate180,
+                    desc.getPitchTilt().value(), distortEye, eyeAxisOffset));
             }
 
             OSVR_DEV_VERBOSE("Display: " << desc.getHumanReadableDescription());
@@ -152,7 +168,7 @@ namespace client {
             if (!viewer.hasPose()) {
                 return false;
             }
-            for (auto const& eye : viewer) {
+            for (auto const &eye : viewer) {
                 if (!eye.hasPose()) {
                     return false;
                 }

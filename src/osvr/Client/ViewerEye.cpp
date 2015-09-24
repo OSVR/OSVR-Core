@@ -45,14 +45,16 @@ namespace client {
         if (!hasState) {
             throw NoPoseYet();
         }
-        Eigen::Isometry3d translatedPose =
-            util::fromPose(pose) * Eigen::Translation3d(m_offset);
-        return translatedPose;
+        Eigen::Isometry3d transformedPose =
+            util::fromPose(pose) * Eigen::Translation3d(m_offset) *
+            Eigen::AngleAxisd(util::getRadians(m_opticalAxisOffsetY),
+                              Eigen::Vector3d::UnitY());
+        return transformedPose;
     }
     OSVR_Pose3 ViewerEye::getPose() const {
-        Eigen::Isometry3d translatedPose = getPoseIsometry();
+        Eigen::Isometry3d transformedPose = getPoseIsometry();
         OSVR_Pose3 pose;
-        util::toPose(translatedPose, pose);
+        util::toPose(transformedPose, pose);
         return pose;
     }
 
@@ -61,8 +63,8 @@ namespace client {
     }
 
     Eigen::Matrix4d ViewerEye::getView() const {
-        Eigen::Isometry3d translatedPose = getPoseIsometry();
-        return translatedPose.inverse().matrix();
+        Eigen::Isometry3d transformedPose = getPoseIsometry();
+        return transformedPose.inverse().matrix();
     }
 
     util::Rectd ViewerEye::m_getRect(double near, double /*far*/) const {
@@ -184,10 +186,12 @@ namespace client {
         OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
         const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
         bool rot180, double pitchTilt,
-        boost::optional<OSVR_RadialDistortionParameters> radDistortParams)
+        boost::optional<OSVR_RadialDistortionParameters> radDistortParams,
+        util::Angle opticalAxisOffsetY)
         : m_pose(ctx, path), m_offset(offset), m_viewport(viewport),
           m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt),
-          m_radDistortParams(radDistortParams) {}
+          m_radDistortParams(radDistortParams),
+          m_opticalAxisOffsetY(opticalAxisOffsetY) {}
 
 } // namespace client
 } // namespace osvr
