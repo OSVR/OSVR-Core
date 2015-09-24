@@ -32,9 +32,7 @@
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/ResolveTreeNode.h>
-#include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
 
 #include <boost/algorithm/string.hpp>
@@ -48,50 +46,41 @@
 
 namespace osvr {
 namespace client {
+    inline void replaceLocalhostServers(Json::Value &nodes,
+                                        std::string const &host) {
+        BOOST_ASSERT_MSG(host.length() > 0,
+                         "Cannot replace localhost with an empty host name!");
+        const auto deviceElementTypeName =
+            common::elements::getTypeName<common::elements::DeviceElement>();
+        static const auto LOCALHOST = "localhost";
+        for (auto &node : nodes) {
+            if (node["type"].asString() == deviceElementTypeName) {
+                auto &serverRef = node["server"];
+                auto server = serverRef.asString();
 
-    class LocalhostReplacer : public boost::static_visitor<>,
-                              boost::noncopyable {
-      public:
-        LocalhostReplacer(const std::string &host)
-            : boost::static_visitor<>(), m_host(host) {
-            BOOST_ASSERT_MSG(
-                m_host.length() > 0,
-                "Cannot replace localhost with an empty host name!");
-        }
+                auto it = server.find(LOCALHOST);
 
-        /// @brief Replace localhost with proper hostname:port for Device
-        /// elements
-        void operator()(osvr::common::PathNode &,
-                        osvr::common::elements::DeviceElement &elt) {
-            static const auto LOCALHOST = "localhost";
-            std::string &server = elt.getServer();
+                if (it != server.npos) {
+                    // Do a bit of surgery, only the "localhost" must be
+                    // replaced, keeping the ":xxxx" part with the port number
+                    // (or even the potential "tcp://" prefix) - the host could
+                    // be running a local VRPN/OSVR service on another port!
 
-            auto it = server.find(LOCALHOST);
+                    // We have to do it like this, because
+                    // std::string::replace() has a silly undefined corner case
+                    // when the string we are replacing localhost with is
+                    // shorter than the length of string being replaced (see
+                    // http://www.cplusplus.com/reference/string/string/replace/
+                    // )
+                    // Better be safe than sorry :(
 
-            if (it != server.npos) {
-                // Do a bit of surgery, only the "localhost" must be replaced,
-                // keeping the ":xxxx" part with the port number - the host
-                // could be running a local VRPN/OSVR service on another port!
-
-                // We have to do it like this, because std::string::replace()
-                // has a silly undefined corner case when the string we are
-                // replacing localhost with is shorter than the length of string
-                // being replaced (see
-                // http://www.cplusplus.com/reference/string/string/replace/ )
-                // Better be safe than sorry :(
-
-                server = boost::algorithm::ireplace_first_copy(
-                    server, LOCALHOST,
-                    m_host); // Go through a copy, just to be extra safe
+                    serverRef = boost::algorithm::ireplace_first_copy(
+                        server, LOCALHOST,
+                        host); // Go through a copy, just to be extra safe
+                }
             }
         }
-
-        /// @brief Catch-all for other element types.
-        template <typename T> void operator()(osvr::common::PathNode &, T &) {}
-
-      protected:
-        const std::string m_host;
-    };
+    }
 
     static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
     static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
@@ -211,7 +200,7 @@ namespace client {
     }
 
     common::PathTree const &PureClientContext::m_getPathTree() const {
-        return m_pathTree;
+        return m_pathTreeOwner.get();
     }
 
     bool PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
@@ -220,7 +209,7 @@ namespace client {
         /// up a handler) we don't have a leftover one still active.
         m_interfaces.eraseHandlerForPath(path);
 
-        auto source = common::resolveTreeNode(m_pathTree, path);
+        auto source = common::resolveTreeNode(m_pathTreeOwner.get(), path);
         if (!source.is_initialized()) {
             OSVR_DEV_VERBOSE("Could not resolve source for " << path);
             return false;
@@ -265,23 +254,18 @@ namespace client {
     void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
         m_gotTree = true;
         OSVR_DEV_VERBOSE("Got updated path tree, processing");
-        // reset path tree
-        m_pathTree.reset();
-        // wipe out handlers in the interface tree
-        m_interfaces.clearHandlers();
 
-        // populate path tree from message
-        common::jsonToPathTree(m_pathTree, nodes);
-
+        // Replace localhost before we even convert the json to a tree.
         // replace the @localhost with the correct host name
         // in case we are a remote client, otherwise the connection
         // would fail
+        auto newTreeNodes = nodes;
+        replaceLocalhostServers(newTreeNodes, m_host);
 
-        LocalhostReplacer replacer(m_host);
-        util::traverseWith(m_pathTree.getRoot(),
-                           [&replacer](osvr::common::PathNode &node) {
-                               common::applyPathNodeVisitor(replacer, node);
-                           });
+        // wipe out handlers in the interface tree
+        m_interfaces.clearHandlers();
+
+        m_pathTreeOwner.replaceTree(newTreeNodes);
 
         // re-connect handlers.
         m_connectNeededCallbacks();

@@ -35,6 +35,7 @@
 #include "VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
+#include <osvr/Common/PathTreeOwner.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -109,8 +110,8 @@ namespace client {
         /// @brief All open VRPN connections, keyed by host
         VRPNConnectionCollection m_vrpnConns;
 
-        /// @brief Path tree
-        common::PathTree m_pathTree;
+        /// @brief Object owning a path tree.
+        common::PathTreeOwner m_pathTreeOwner;
 
         /// @brief Tree parallel to path tree for holding interface objects and
         /// remote handlers.
