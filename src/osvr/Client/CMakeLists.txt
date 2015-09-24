@@ -1,7 +1,7 @@
 osvr_setup_lib_vars(Client)
 
 set(API
-    "${HEADER_LOCATION}/ClientObjectsAndCallbacks.h"
+    "${HEADER_LOCATION}/ClientInterfaceObjectManager.h"
     "${HEADER_LOCATION}/CreateContext.h"
     "${HEADER_LOCATION}/DisplayConfig.h"
     "${HEADER_LOCATION}/HandlerContainer.h"
@@ -18,7 +18,7 @@ set(SOURCE
     AnalogRemoteFactory.h
     ButtonRemoteFactory.cpp
     ButtonRemoteFactory.h
-    ClientObjectsAndCallbacks.cpp
+    ClientInterfaceObjectManager.cpp
     CreateContext.cpp
     DirectionRemoteFactory.cpp
     DirectionRemoteFactory.h
