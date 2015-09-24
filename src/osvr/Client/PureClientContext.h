@@ -60,16 +60,16 @@ namespace client {
 
         /// @brief Called with each new interface object before it is returned
         /// to the client.
-        virtual void
-        m_handleNewInterface(common::ClientInterfacePtr const &iface);
+        void
+        m_handleNewInterface(common::ClientInterfacePtr const &iface) override;
 
         /// @brief Called with each interface object to be released/deleted
         /// after it is removed from the context's list of interfaces but before
         /// it is deleted.
-        virtual void
-        m_handleReleasingInterface(common::ClientInterfacePtr const &iface);
+        void m_handleReleasingInterface(
+            common::ClientInterfacePtr const &iface) override;
 
-        virtual common::PathTree const &m_getPathTree() const;
+        common::PathTree const &m_getPathTree() const override;
 
         bool m_getStatus() const override;
 
