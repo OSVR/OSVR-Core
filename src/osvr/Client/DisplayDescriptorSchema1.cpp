@@ -244,10 +244,6 @@ namespace client {
             return activeResolution().height;
         }
 
-        int DisplayDescriptor::getNumDisplayInputs() const {
-            return activeResolution().video_inputs;
-        }
-
         DisplayDescriptor::DisplayMode
         DisplayDescriptor::getDisplayMode() const {
             return activeResolution().display_mode;

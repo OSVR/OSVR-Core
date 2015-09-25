@@ -70,7 +70,6 @@ namespace client {
             std::string getVersion() const;
             std::string getNote() const;
             int getNumDisplays() const;
-            int getNumDisplayInputs() const;
 
             int getDisplayTop() const;
             int getDisplayLeft() const;
@@ -129,6 +128,7 @@ namespace client {
             Resolution const &activeResolution() const {
                 return m_resolutions.at(m_activeResolution);
             }
+
             void m_processResolution(Json::Value const &resolution);
 
             std::string m_vendor;
