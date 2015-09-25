@@ -116,16 +116,25 @@ namespace client {
 
             // get the number of display inputs if larger than one then we need
             // to assign input index for each viewer eye
-            auto numDispInputs = desc.getNumDisplayInputs();
             std::vector<uint8_t> displayInputIndices;
-            if (numDispInputs ==
-                display_schema_1::DisplayDescriptor::FULL_SCREEN) {
+            if (display_schema_1::DisplayDescriptor::FULL_SCREEN ==
+                desc.getDisplayMode()) {
                 displayInputIndices = {0, 1};
+                /// @todo resolutions may not be the same, currently same
+                /// resolution even if 2 inputs
+                cfg->m_displayInputs.push_back(DisplayInput(
+                    desc.getDisplayWidth(), desc.getDisplayHeight()));
+                cfg->m_displayInputs.push_back(DisplayInput(
+                    desc.getDisplayWidth(), desc.getDisplayHeight()));
             } else {
                 displayInputIndices = {0, 0};
+                cfg->m_displayInputs.push_back(DisplayInput(
+                    desc.getDisplayWidth(), desc.getDisplayHeight()));
             }
 
-            if ((numDispInputs > 1) && (eyesDesc.size() == 1)) {
+            if ((desc.getDisplayMode() ==
+                 display_schema_1::DisplayDescriptor::FULL_SCREEN) &&
+                (eyesDesc.size() == 1)) {
                 throw std::out_of_range("DisplayConfig::DisplayConfigFactory: "
                                         "Provided 2 video inputs for just one "
                                         "eye");
