@@ -29,7 +29,7 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ChannelCountC.h>
-#include <osvr/Client/ViewerEye.h>
+#include <osvr/Client/Viewer.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
 #include <osvr/Util/ContainerWrapper.h>
 
@@ -53,13 +53,12 @@ namespace client {
       public:
         Viewers(Viewers const &) = delete;
         Viewers &operator=(Viewers const &) = delete;
-
+        Viewers();
         inline OSVR_EyeCount size() const {
             return static_cast<OSVR_EyeCount>(container().size());
         }
 
       private:
-        Viewers();
         friend class DisplayConfigFactory;
     };
 
