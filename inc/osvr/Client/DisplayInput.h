@@ -26,7 +26,8 @@
 #define INCLUDED_DisplayInput_h_GUID_66C8D271_F035_499C_6BD9_DCA114E2C9AF
 
 // Internal Includes
-// - none
+#include <osvr/Client/Export.h>
+#include <osvr/Util/RenderingTypesC.h>
 
 // Library/third-party includes
 // - none
@@ -39,22 +40,16 @@ namespace client {
     class DisplayConfigFactory;
     class DisplayInput {
       public:
-        DisplayInput(DisplayInput const &) = delete;
-        DisplayInput &operator=(DisplayInput const &) = delete;
-          DisplayInput(DisplayInput &&other)
-            : m_width(std::move(other.m_width)),
-              m_height(std::move(other.m_height))) {}
+        DisplayInput(OSVR_DisplayDimension width, OSVR_DisplayDimension height);
 
-          OSVR_CLIENT_EXPORT OSVR_DisplayDimension getDisplayWidth() const;
-          OSVR_CLIENT_EXPORT OSVR_DisplayDimension getDisplayHeight() const;
+        OSVR_CLIENT_EXPORT OSVR_DisplayDimension getDisplayWidth() const;
+        OSVR_CLIENT_EXPORT OSVR_DisplayDimension getDisplayHeight() const;
 
-        private:
-          DisplayInput(OSVR_DisplayDimension width,
-                       OSVR_DisplayDimension height);
-          /// @todo stick these in a struct?
-          uint32_t m_width;
-          uint32_t m_height;
-          friend class DisplayConfigFactory;
+      private:
+        /// @todo stick these in a struct?
+        uint32_t m_width;
+        uint32_t m_height;
+        friend class DisplayConfigFactory;
     };
 
 } // namespace client

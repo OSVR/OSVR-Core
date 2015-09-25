@@ -37,5 +37,12 @@ namespace client {
                                OSVR_DisplayDimension height)
         : m_width(width), m_height(height) {}
 
+    OSVR_DisplayDimension DisplayInput::getDisplayWidth() const {
+        return m_width;
+    }
+
+    OSVR_DisplayDimension DisplayInput::getDisplayHeight() const {
+        return m_height;
+    }
 } // namespace client
 } // namespace osvr
