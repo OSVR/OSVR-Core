@@ -163,6 +163,9 @@ namespace client {
 
         void
         DisplayDescriptor::m_processResolution(Json::Value const &resolution) {
+            // if there is more than 1 input, display descriptor right now
+            // specifies one resolution value for both inputs. that may be
+            // changed in the future
             Resolution res;
             res.video_inputs = resolution.get("video_inputs", 1).asInt();
 

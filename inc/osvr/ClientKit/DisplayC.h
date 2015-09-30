@@ -126,6 +126,43 @@ osvrClientFreeDisplay(OSVR_DisplayConfig disp);
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp);
 
+/** @brief A display config can have one or more display inputs to pass pixels
+    over (HDMI/DVI connections, etc): retrieve the number of display inputs in
+   the current configuration.
+
+    @param disp Display config object.
+    @param[out] numDisplayInputs Number of display inputs in the logical display
+    topology, **constant** throughout the active, valid lifetime of a display
+    config object.
+
+    @sa OSVR_DisplayInputCount
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in
+   which case the output argument is unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetNumDisplayInputs(
+    OSVR_DisplayConfig disp, OSVR_DisplayInputCount *numDisplayInputs);
+
+/** @brief Retrieve the pixel dimensions of a given display input for a display
+   config
+
+    @param disp Display config object.
+    @param displayInputIndex The zero-based index of the display input.
+    @param[out] width Width (in pixels) of the display input.
+    @param[out] height Height (in pixels) of the display input.
+
+    The out parameters are **constant** throughout the active, valid lifetime of
+    a display config object.
+
+    @sa OSVR_DisplayDimension
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in
+   which case the output arguments are unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetDisplayDimensions(
+    OSVR_DisplayConfig disp, OSVR_DisplayInputCount displayInputIndex,
+    OSVR_DisplayDimension *width, OSVR_DisplayDimension *height);
+
 /** @brief A display config can have one (or theoretically more) viewers:
     retrieve the viewer count.
 
@@ -137,7 +174,7 @@ osvrClientCheckDisplayStartup(OSVR_DisplayConfig disp);
     @sa OSVR_ViewerCount
 
     @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
-    the output argument is unmodified.
+   the output argument is unmodified.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetNumViewers(OSVR_DisplayConfig disp, OSVR_ViewerCount *viewers);
@@ -278,6 +315,35 @@ osvrClientGetRelativeViewportForViewerEyeSurface(
     OSVR_ViewportDimension *bottom, OSVR_ViewportDimension *width,
     OSVR_ViewportDimension *height);
 
+/** @brief Get the index of the display input for a surface seen by an eye of a
+   viewer in a display config.
+
+    This is the OSVR-assigned display input: it may not (and in practice,
+    usually will not) match any platform-specific display indices. This function
+    exists to associate surfaces with video inputs as enumerated by
+    osvrClientGetNumDisplayInputs().
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param[out] displayInput Zero-based index of the display input pixels for
+    this surface are tranmitted over.
+
+    This association is **constant** throughout the active, valid lifetime of a
+    display config object.
+
+    @sa osvrClientGetNumDisplayInputs(),
+    osvrClientGetRelativeViewportForViewerEyeSurface()
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which
+    case the output argument is unmodified.
+ */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetViewerEyeSurfaceDisplayInputIndex(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, OSVR_DisplayInputCount *displayInput);
+
 /** @brief Get the projection matrix for a surface seen by an eye of a viewer
     in a display config. (double version)
 
@@ -325,6 +391,38 @@ osvrClientGetViewerEyeSurfaceProjectionMatrixf(
     OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
     OSVR_SurfaceCount surface, float near, float far,
     OSVR_MatrixConventions flags, float *matrix);
+
+/** @brief Get the clipping planes (positions at unit distance) for a surface
+   seen by an eye of a viewer
+    in a display config.
+
+    This is only for use in integrations that cannot accept a fully-formulated
+    projection matrix as returned by
+    osvrClientGetViewerEyeSurfaceProjectionMatrixf() or
+    osvrClientGetViewerEyeSurfaceProjectionMatrixd(), and may not necessarily
+    provide the same optimizations.
+
+    As all the planes are given at unit (1) distance, before passing these
+   planes to a consuming function in your application/engine, you will typically
+   divide them by your near clipping plane distance.
+
+    @param disp Display config object
+    @param viewer Viewer ID
+    @param eye Eye ID
+    @param surface Surface ID
+    @param[out] left Distance to left clipping plane
+    @param[out] right Distance to right clipping plane
+    @param[out] bottom Distance to bottom clipping plane
+    @param[out] top Distance to top clipping plane
+
+    @return OSVR_RETURN_FAILURE if invalid parameters were passed, in which case
+    the output arguments are unmodified.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetViewerEyeSurfaceProjectionClippingPlanes(
+    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
+    OSVR_SurfaceCount surface, double *left, double *right, double *bottom,
+    double *top);
 
 /** @brief Determines if a surface seen by an eye of a viewer in a display
     config requests some distortion to be performed.

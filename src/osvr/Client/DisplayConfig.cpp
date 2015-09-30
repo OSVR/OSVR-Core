@@ -71,6 +71,7 @@ namespace client {
         default:
             throw std::logic_error("Unrecognized enum value for display mode");
         }
+
         return viewport;
     }
 
@@ -87,8 +88,8 @@ namespace client {
             auto const descriptorString = ctx->getStringParameter("/display");
 
             auto desc = display_schema_1::DisplayDescriptor(descriptorString);
-            cfg->container().emplace_back(Viewer(ctx, HEAD_PATH));
-            auto &viewer = cfg->container().front();
+            cfg->m_viewers.container().emplace_back(Viewer(ctx, HEAD_PATH));
+            auto &viewer = cfg->m_viewers.container().front();
             auto eyesDesc = desc.getEyes();
             std::vector<uint8_t> eyeIndices;
             Eigen::Vector3d offset;
@@ -124,6 +125,33 @@ namespace client {
                 }
             }
 
+
+            // get the number of display inputs if larger than one then we need
+            // to assign input index for each viewer eye
+            std::vector<uint8_t> displayInputIndices;
+            if (display_schema_1::DisplayDescriptor::FULL_SCREEN ==
+                desc.getDisplayMode()) {
+                displayInputIndices = {0, 1};
+                /// @todo resolutions may not be the same, currently same
+                /// resolution even if 2 inputs
+                cfg->m_displayInputs.push_back(DisplayInput(
+                    desc.getDisplayWidth(), desc.getDisplayHeight()));
+                cfg->m_displayInputs.push_back(DisplayInput(
+                    desc.getDisplayWidth(), desc.getDisplayHeight()));
+            } else {
+                displayInputIndices = {0, 0};
+                cfg->m_displayInputs.push_back(DisplayInput(
+                    desc.getDisplayWidth(), desc.getDisplayHeight()));
+            }
+
+            if ((desc.getDisplayMode() ==
+                 display_schema_1::DisplayDescriptor::FULL_SCREEN) &&
+                (eyesDesc.size() == 1)) {
+                throw std::out_of_range("DisplayConfig::DisplayConfigFactory: "
+                                        "Provided 2 video inputs for just one "
+                                        "eye");
+            }
+
             for (auto eye : eyeIndices) {
                 double offsetFactor =
                     (2. * eye) -
@@ -142,10 +170,12 @@ namespace client {
                 // here, the left eye should get a positive offset since it's a
                 // positive rotation about y, hence the -1 factor.
                 auto eyeAxisOffset = axisOffset * -1. * offsetFactor;
+                OSVR_DisplayInputCount displayInputIdx =
+                    displayInputIndices[eye];
                 viewer.container().emplace_back(ViewerEye(
                     ctx, xlateOffset, HEAD_PATH, computeViewport(eye, desc),
                     computeRect(desc), eyesDesc[eye].m_rotate180,
-                    desc.getPitchTilt().value(), distortEye, eyeAxisOffset));
+                    desc.getPitchTilt().value(), distortEye, displayInputIdx, eyeAxisOffset));
             }
 
             OSVR_DEV_VERBOSE("Display: " << desc.getHumanReadableDescription());
@@ -164,7 +194,7 @@ namespace client {
     DisplayConfig::DisplayConfig() {}
 
     bool DisplayConfig::isStartupComplete() const {
-        for (auto const &viewer : *this) {
+        for (auto const &viewer : this->m_viewers) {
             if (!viewer.hasPose()) {
                 return false;
             }
@@ -176,5 +206,6 @@ namespace client {
         }
         return true;
     }
+
 } // namespace client
 } // namespace osvr

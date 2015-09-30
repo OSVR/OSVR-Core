@@ -67,7 +67,7 @@ namespace client {
         return transformedPose.inverse().matrix();
     }
 
-    util::Rectd ViewerEye::m_getRect(double near, double /*far*/) const {
+    util::Rectd ViewerEye::m_getRect(double near, double /*far*/ = 100) const {
         util::Rectd rect(m_unitBounds);
         // Scale the in-plane positions based on the near plane to put
         // the virtual viewing window on the near plane with the eye at the
@@ -182,15 +182,19 @@ namespace client {
         return ret;
     }
 
+    util::Rectd ViewerEye::getRect() const { return m_getRect(1.0); }
+
     ViewerEye::ViewerEye(
         OSVR_ClientContext ctx, Eigen::Vector3d const &offset,
         const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
         bool rot180, double pitchTilt,
         boost::optional<OSVR_RadialDistortionParameters> radDistortParams,
+        OSVR_DisplayInputCount displayInputIdx,
         util::Angle opticalAxisOffsetY)
         : m_pose(ctx, path), m_offset(offset), m_viewport(viewport),
           m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt),
           m_radDistortParams(radDistortParams),
+          m_displayInputIdx(displayInputIdx),
           m_opticalAxisOffsetY(opticalAxisOffsetY) {}
 
 } // namespace client

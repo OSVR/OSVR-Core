@@ -46,6 +46,15 @@ OSVR_EXTERN_C_BEGIN
 @{
 */
 
+/** @brief A count or index for a display input in a display config.
+*/
+typedef uint8_t OSVR_DisplayInputCount;
+
+/** @brief The integer type used in specification of size or location of a
+    display input, in pixels.
+*/
+typedef int32_t OSVR_DisplayDimension;
+
 /** @brief The integer type specifying a number of viewers in a system.
 
     A "head" is a viewer (though not all viewers are necessarily heads).

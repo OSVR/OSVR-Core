@@ -128,6 +128,7 @@ namespace client {
             Resolution const &activeResolution() const {
                 return m_resolutions.at(m_activeResolution);
             }
+
             void m_processResolution(Json::Value const &resolution);
 
             std::string m_vendor;
