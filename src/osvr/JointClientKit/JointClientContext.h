@@ -32,10 +32,11 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/NetworkingSupport.h>
 #include <osvr/Util/TimeValue_fwd.h>
-#include <osvr/Util/DefaultBool.h>
 #include "../Client/VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
-#include "../Client/RemoteHandlerFactory.h"
+#include <osvr/Client/RemoteHandlerFactory.h>
+#include <osvr/Client/ClientInterfaceObjectManager.h>
+#include <osvr/Common/PathTreeOwner.h>
 #include <osvr/Server/ServerPtr.h>
 
 // Library/third-party includes
@@ -60,44 +61,23 @@ namespace client {
         }
 
       private:
-        virtual void m_update();
-        virtual void m_sendRoute(std::string const &route);
+        void m_update() override;
+        void m_sendRoute(std::string const &route) override;
 
         /// @brief Called with each new interface object before it is returned
         /// to the client.
-        virtual void
-        m_handleNewInterface(common::ClientInterfacePtr const &iface);
+        void
+        m_handleNewInterface(common::ClientInterfacePtr const &iface) override;
 
         /// @brief Called with each interface object to be released/deleted
         /// after it is removed from the context's list of interfaces but before
         /// it is deleted.
-        virtual void
-        m_handleReleasingInterface(common::ClientInterfacePtr const &iface);
+        void
+        m_handleReleasingInterface(common::ClientInterfacePtr const &iface) override;
 
-        virtual common::PathTree const &m_getPathTree() const;
+        common::PathTree const &m_getPathTree() const override;
 
-        /// @brief Given a path, remove any existing handler for that path, then
-        /// attempt to fully resolve the path to its source and construct a
-        /// handler for it.
-        ///
-        /// @return true if we were able to connect the path.
-        bool m_connectCallbacksOnPath(std::string const &path);
-
-        /// @brief Given a path, remove any existing handler for that path from
-        /// both the handler container and the interface tree.
-        void m_removeCallbacksOnPath(std::string const &path);
-
-        /// @brief Given a JSON array of nodes representing a path tree, wipe
-        /// out existing path tree and remote handlers, build new path tree, and
-        /// set up new remote handlers for all known interfaces.
-        void m_handleReplaceTree(Json::Value const &nodes);
-
-        /// @brief Calls m_connectCallbacksOnPath() for every path that has one
-        /// or more interface objects but no remote handler.
-        void m_connectNeededCallbacks();
-
-        /// @brief The main OSVR server host: usually localhost
-        std::string m_host;
+        bool m_getStatus() const override;
 
         /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;
@@ -114,15 +94,15 @@ namespace client {
         /// @brief All open VRPN connections, keyed by host
         VRPNConnectionCollection m_vrpnConns;
 
-        /// @brief Path tree
-        common::PathTree m_pathTree;
-
-        /// @brief Tree parallel to path tree for holding interface objects and
-        /// remote handlers.
-        InterfaceTree m_interfaces;
+        /// @brief Object owning a path tree.
+        common::PathTreeOwner m_pathTreeOwner;
 
         /// @brief Factory for producing remote handlers.
         RemoteHandlerFactory m_factory;
+
+        /// @brief Manager of client interface objects and their interaction
+        /// with the path tree.
+        ClientInterfaceObjectManager m_ifaceMgr;
     };
 } // namespace client
 } // namespace osvr

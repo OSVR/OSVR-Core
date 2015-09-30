@@ -95,6 +95,8 @@ namespace common {
     /// if it needs updating.
     ///
     /// @return true if the node was changed
+    ///
+    /// @relates osvr::common::PathTree
     OSVR_COMMON_EXPORT bool
     addAlias(PathNode &node, std::string const &source,
              AliasPriority priority = ALIASPRIORITY_MANUAL);
@@ -106,6 +108,8 @@ namespace common {
     /// Can also handle normal alias descriptions without complaint.
     ///
     /// @return true if the node was changed
+    ///
+    /// @relates osvr::common::PathTree
     OSVR_COMMON_EXPORT bool
     addAliasFromRoute(PathNode &node, std::string const &route,
                       AliasPriority priority = ALIASPRIORITY_MANUAL);
@@ -117,6 +121,8 @@ namespace common {
     bool isPathAbsolute(std::string const &source);
 
     /// @brief Clones a path tree
+    ///
+    /// @relates osvr::common::PathTree
     OSVR_COMMON_EXPORT void clonePathTree(PathTree const &src, PathTree &dest);
 
 } // namespace common

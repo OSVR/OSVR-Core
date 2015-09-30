@@ -33,7 +33,6 @@
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Common/ClientContext_fwd.h>
 #include <osvr/Client/RemoteHandler.h>
-#include "VRPNConnectionCollection.h"
 
 // Library/third-party includes
 // - none
@@ -44,7 +43,7 @@
 
 namespace osvr {
 namespace client {
-
+    class VRPNConnectionCollection;
     class RemoteHandlerFactory {
       public:
         typedef shared_ptr<RemoteHandler> FactoryProduct;

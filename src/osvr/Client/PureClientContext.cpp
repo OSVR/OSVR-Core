@@ -30,17 +30,13 @@
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ClientInterface.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
-#include <osvr/Common/ResolveTreeNode.h>
-#include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
 
 #include <boost/algorithm/string.hpp>
 
 // Library/third-party includes
-#include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
 #include <unordered_set>
@@ -48,50 +44,41 @@
 
 namespace osvr {
 namespace client {
+    inline void replaceLocalhostServers(Json::Value &nodes,
+                                        std::string const &host) {
+        BOOST_ASSERT_MSG(host.length() > 0,
+                         "Cannot replace localhost with an empty host name!");
+        const auto deviceElementTypeName =
+            common::elements::getTypeName<common::elements::DeviceElement>();
+        static const auto LOCALHOST = "localhost";
+        for (auto &node : nodes) {
+            if (node["type"].asString() == deviceElementTypeName) {
+                auto &serverRef = node["server"];
+                auto server = serverRef.asString();
 
-    class LocalhostReplacer : public boost::static_visitor<>,
-                              boost::noncopyable {
-      public:
-        LocalhostReplacer(const std::string &host)
-            : boost::static_visitor<>(), m_host(host) {
-            BOOST_ASSERT_MSG(
-                m_host.length() > 0,
-                "Cannot replace localhost with an empty host name!");
-        }
+                auto it = server.find(LOCALHOST);
 
-        /// @brief Replace localhost with proper hostname:port for Device
-        /// elements
-        void operator()(osvr::common::PathNode &,
-                        osvr::common::elements::DeviceElement &elt) {
-            static const auto LOCALHOST = "localhost";
-            std::string &server = elt.getServer();
+                if (it != server.npos) {
+                    // Do a bit of surgery, only the "localhost" must be
+                    // replaced, keeping the ":xxxx" part with the port number
+                    // (or even the potential "tcp://" prefix) - the host could
+                    // be running a local VRPN/OSVR service on another port!
 
-            auto it = server.find(LOCALHOST);
+                    // We have to do it like this, because
+                    // std::string::replace() has a silly undefined corner case
+                    // when the string we are replacing localhost with is
+                    // shorter than the length of string being replaced (see
+                    // http://www.cplusplus.com/reference/string/string/replace/
+                    // )
+                    // Better be safe than sorry :(
 
-            if (it != server.npos) {
-                // Do a bit of surgery, only the "localhost" must be replaced,
-                // keeping the ":xxxx" part with the port number - the host
-                // could be running a local VRPN/OSVR service on another port!
-
-                // We have to do it like this, because std::string::replace()
-                // has a silly undefined corner case when the string we are
-                // replacing localhost with is shorter than the length of string
-                // being replaced (see
-                // http://www.cplusplus.com/reference/string/string/replace/ )
-                // Better be safe than sorry :(
-
-                server = boost::algorithm::ireplace_first_copy(
-                    server, LOCALHOST,
-                    m_host); // Go through a copy, just to be extra safe
+                    serverRef = boost::algorithm::ireplace_first_copy(
+                        server, LOCALHOST,
+                        host); // Go through a copy, just to be extra safe
+                }
             }
         }
-
-        /// @brief Catch-all for other element types.
-        template <typename T> void operator()(osvr::common::PathNode &, T &) {}
-
-      protected:
-        const std::string m_host;
-    };
+    }
 
     static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
     static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
@@ -99,7 +86,9 @@ namespace client {
 
     PureClientContext::PureClientContext(const char appId[], const char host[],
                                          common::ClientContextDeleter del)
-        : ::OSVR_ClientContextObject(appId, del), m_host(host) {
+        : ::OSVR_ClientContextObject(appId, del), m_host(host),
+          m_ifaceMgr(m_pathTreeOwner, m_factory,
+                     *static_cast<common::ClientContext *>(this)) {
 
         if (!m_network.isUp()) {
             throw std::runtime_error("Network error: " + m_network.getError());
@@ -117,20 +106,23 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
-#define OSVR_USE_DEDUP
-#ifdef OSVR_USE_DEDUP
-        typedef common::DeduplicatingFunctionWrapper<Json::Value const &>
-            DedupJsonFunction;
-        m_systemComponent->registerReplaceTreeHandler(DedupJsonFunction(
-            [&](Json::Value const &nodes) { m_handleReplaceTree(nodes); }));
-#else
-        // Just for testing purposes, figuring out why we end up looping too
-        // much.
+        using DedupJsonFunction =
+            common::DeduplicatingFunctionWrapper<Json::Value const &>;
         m_systemComponent->registerReplaceTreeHandler(
-            [&](Json::Value const &nodes, util::time::TimeValue const &) {
-                m_handleReplaceTree(nodes);
-            });
-#endif
+            DedupJsonFunction([&](Json::Value nodes) {
+
+                OSVR_DEV_VERBOSE("Got updated path tree, processing");
+                // Replace localhost before we even convert the json to a tree.
+                // replace the @localhost with the correct host name
+                // in case we are a remote client, otherwise the connection
+                // would fail
+                replaceLocalhostServers(nodes, m_host);
+
+                // Tree observers will handle destruction/creation of remote
+                // handlers.
+                m_pathTreeOwner.replaceTree(nodes);
+            }));
+
         typedef std::chrono::system_clock clock;
         auto begin = clock::now();
 
@@ -153,7 +145,7 @@ namespace client {
 
         // Spin the update to get a path tree
         auto treeEnd = begin + STARTUP_TREE_TIMEOUT;
-        while (clock::now() < treeEnd && !m_gotTree) {
+        while (clock::now() < treeEnd && !m_pathTreeOwner) {
             m_update();
             std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
         }
@@ -165,7 +157,7 @@ namespace client {
                    .count()
             << "ms: " << (m_gotConnection ? "have connection to server, "
                                           : "don't have connection to server, ")
-            << (m_gotTree ? "have path tree" : "don't have path tree"));
+            << (m_pathTreeOwner ? "have path tree" : "don't have path tree"));
     }
 
     PureClientContext::~PureClientContext() {}
@@ -182,7 +174,7 @@ namespace client {
         /// Update system device
         m_systemDevice->update();
         /// Update handlers.
-        m_interfaces.updateHandlers();
+        m_ifaceMgr.updateHandlers();
     }
 
     void PureClientContext::m_sendRoute(std::string const &route) {
@@ -192,106 +184,20 @@ namespace client {
 
     void PureClientContext::m_handleNewInterface(
         common::ClientInterfacePtr const &iface) {
-        bool isNew = m_interfaces.addInterface(iface);
-        if (isNew) {
-            m_connectCallbacksOnPath(iface->getPath());
-        }
+        m_ifaceMgr.addInterface(iface);
     }
 
     void PureClientContext::m_handleReleasingInterface(
         common::ClientInterfacePtr const &iface) {
-        bool isEmpty = m_interfaces.removeInterface(iface);
-        if (isEmpty) {
-            m_removeCallbacksOnPath(iface->getPath());
-        }
+        m_ifaceMgr.releaseInterface(iface);
     }
 
     bool PureClientContext::m_getStatus() const {
-        return m_gotConnection && m_gotTree;
+        return m_gotConnection && m_pathTreeOwner;
     }
 
     common::PathTree const &PureClientContext::m_getPathTree() const {
-        return m_pathTree;
+        return m_pathTreeOwner.get();
     }
-
-    bool PureClientContext::m_connectCallbacksOnPath(std::string const &path) {
-        /// Start by removing handler from interface tree and handler container
-        /// for this path, if found. Ensures that if we early-out (fail to set
-        /// up a handler) we don't have a leftover one still active.
-        m_interfaces.eraseHandlerForPath(path);
-
-        auto source = common::resolveTreeNode(m_pathTree, path);
-        if (!source.is_initialized()) {
-            OSVR_DEV_VERBOSE("Could not resolve source for " << path);
-            return false;
-        }
-        auto handler = m_factory.invokeFactory(
-            *source, m_interfaces.getInterfacesForPath(path), *this);
-        if (handler) {
-            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
-            // Store the new handler in the interface tree
-            auto oldHandler = m_interfaces.replaceHandlerForPath(path, handler);
-            BOOST_ASSERT_MSG(
-                !oldHandler,
-                "We removed the old handler before so it should be null now");
-            return true;
-        }
-
-        OSVR_DEV_VERBOSE("Could not produce handler for " << path);
-        return false;
-    }
-
-    void PureClientContext::m_removeCallbacksOnPath(std::string const &path) {
-        m_interfaces.eraseHandlerForPath(path);
-    }
-
-    void PureClientContext::m_connectNeededCallbacks() {
-        std::unordered_set<std::string> failedPaths;
-        size_t successfulPaths{0};
-        for (auto const &iface : getInterfaces()) {
-            /// @todo slightly overkill, but it works - tree traversal would be
-            /// better.
-            auto path = iface->getPath();
-            /// For every interface, if there's no handler at that path on the
-            /// interface tree, try to set one up.
-            if (!m_interfaces.getHandlerForPath(path)) {
-                auto success = m_connectCallbacksOnPath(path);
-                if (success) {
-                    successfulPaths++;
-                } else {
-                    failedPaths.insert(path);
-                }
-            }
-        }
-        OSVR_DEV_VERBOSE("Connected " << successfulPaths << " of "
-                                      << successfulPaths + failedPaths.size()
-                                      << " unconnected paths successfully");
-    }
-
-    void PureClientContext::m_handleReplaceTree(Json::Value const &nodes) {
-        m_gotTree = true;
-        OSVR_DEV_VERBOSE("Got updated path tree, processing");
-        // reset path tree
-        m_pathTree.reset();
-        // wipe out handlers in the interface tree
-        m_interfaces.clearHandlers();
-
-        // populate path tree from message
-        common::jsonToPathTree(m_pathTree, nodes);
-
-        // replace the @localhost with the correct host name
-        // in case we are a remote client, otherwise the connection
-        // would fail
-
-        LocalhostReplacer replacer(m_host);
-        util::traverseWith(m_pathTree.getRoot(),
-                           [&replacer](osvr::common::PathNode &node) {
-                               common::applyPathNodeVisitor(replacer, node);
-                           });
-
-        // re-connect handlers.
-        m_connectNeededCallbacks();
-    }
-
 } // namespace client
 } // namespace osvr

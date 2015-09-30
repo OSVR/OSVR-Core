@@ -142,21 +142,12 @@ namespace client {
 
         shared_ptr<RemoteHandler> ret;
 
-        /// @todo set this struct correctly from the descriptor, or perhaps
-        /// the path?
+        /// @todo set this struct correctly from the descriptor
         VRPNTrackerHandler::Options opts;
 
-        auto interfaceType = source.getInterfaceName();
-        if ("position" == interfaceType) {
-            opts.reportPosition = true;
-        } else if ("orientation" == interfaceType) {
-            opts.reportOrientation = true;
-        } else {
-            /// pose and tracker both imply full reports (?)
-            opts.reportOrientation = true;
-            opts.reportPosition = true;
-            opts.reportPose = true;
-        }
+        opts.reportOrientation = true;
+        opts.reportPosition = true;
+        opts.reportPose = true;
 
         auto const &devElt = source.getDeviceElement();
 

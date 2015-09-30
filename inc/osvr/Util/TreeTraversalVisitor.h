@@ -29,19 +29,24 @@
 #include <osvr/Util/TreeNode_fwd.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
+// - none
 
 // Standard includes
-// - none
+#include <utility>
 
 namespace osvr {
 namespace util {
     namespace tree {
         /// @brief A wrapper for pre-order traversal of a TreeNode-based tree
         /// with something like a lambda.
-        template <typename F> class TreeTraversalWrapper : boost::noncopyable {
+        template <typename F> class TreeTraversalWrapper {
           public:
-            TreeTraversalWrapper(F functor) : m_functor(functor) {}
+            explicit TreeTraversalWrapper(F &&functor)
+                : m_functor(std::move(functor)) {}
+
+            TreeTraversalWrapper(TreeTraversalWrapper const &) = delete;
+            TreeTraversalWrapper &
+            operator=(TreeTraversalWrapper const &) = delete;
 
             template <typename T> void operator()(TreeNode<T> &node) {
                 m_functor(node);
@@ -59,8 +64,8 @@ namespace util {
         /// @brief A method to handle visiting every node in a tree with a
         /// lambda or other by-value function object
         template <typename T, typename F>
-        inline void traverseWith(T &node, F functor) {
-            TreeTraversalWrapper<F> funcWrap{functor};
+        inline void traverseWith(T &node, F &&functor) {
+            TreeTraversalWrapper<F> funcWrap{std::forward<F>(functor)};
             funcWrap(node);
         }
     } // namespace tree

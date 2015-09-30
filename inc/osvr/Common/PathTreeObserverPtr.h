@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2015
 
@@ -22,11 +22,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef INCLUDED_PathTreeObserverPtr_h_GUID_4ECB1A3C_D7B5_41B1_6A74_E88657469ED2
+#define INCLUDED_PathTreeObserverPtr_h_GUID_4ECB1A3C_D7B5_41B1_6A74_E88657469ED2
+
 // Internal Includes
-#include <osvr/Client/ClientObjectsAndCallbacks.h>
+// - none
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/SharedPtr.h>
 
 // Standard includes
 // - none
+
+namespace osvr {
+namespace common {
+    class PathTreeObserver;
+    typedef shared_ptr<PathTreeObserver> PathTreeObserverPtr;
+    typedef weak_ptr<PathTreeObserver> PathTreeObserverWeakPtr;
+} // namespace common
+} // namespace osvr
+
+#endif // INCLUDED_PathTreeObserverPtr_h_GUID_4ECB1A3C_D7B5_41B1_6A74_E88657469ED2

@@ -49,9 +49,6 @@ namespace client {
 
         template <typename T> void registerWith(T &factory) const {
             factory.addFactory("tracker", *this);
-            factory.addFactory("pose", *this);
-            factory.addFactory("position", *this);
-            factory.addFactory("orientation", *this);
         }
 
         shared_ptr<RemoteHandler>

@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "RemoteHandlerFactory.h"
+#include <osvr/Client/RemoteHandlerFactory.h>
 #include "AnalogRemoteFactory.h"
 #include "ButtonRemoteFactory.h"
 #include "DirectionRemoteFactory.h"

@@ -1,20 +1,20 @@
 /** @file
     @brief Implementation
 
-    @date 2014
+    @date 2015
 
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
 */
 
-// Copyright 2014 Sensics, Inc.
+// Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//        http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,24 +23,32 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/RoutingConstants.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Util/TreeNodeFullPath.h>
+#include <osvr/Common/PathTreeObserver.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <sstream>
+// - none
 
 namespace osvr {
 namespace common {
-    const char *getTypeName(PathNode const &node) {
-        return elements::getTypeName(node.value());
+
+    void PathTreeObserver::notifyEvent(
+        PathTreeEvents e, PathTreeObserver::callback_argument arg) const {
+        auto it = m_handlers.find(e);
+        if (end(m_handlers) != it) {
+            auto &callback = (*it).second;
+            if (callback) {
+                callback(arg);
+            }
+        }
     }
-    std::string getFullPath(PathNode const &node) {
-        return util::getTreeNodeFullPath(node, getPathSeparator());
+
+    void PathTreeObserver::setEventCallback(
+        PathTreeEvents e, PathTreeObserver::callback_type const &callback) {
+        m_handlers[e] = callback;
     }
+
 } // namespace common
 } // namespace osvr
