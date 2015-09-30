@@ -125,7 +125,6 @@ namespace client {
                 }
             }
 
-
             // get the number of display inputs if larger than one then we need
             // to assign input index for each viewer eye
             std::vector<uint8_t> displayInputIndices;
@@ -144,12 +143,11 @@ namespace client {
                     desc.getDisplayWidth(), desc.getDisplayHeight()));
             }
 
-            if ((desc.getDisplayMode() ==
-                 display_schema_1::DisplayDescriptor::FULL_SCREEN) &&
-                (eyesDesc.size() == 1)) {
-                throw std::out_of_range("DisplayConfig::DisplayConfigFactory: "
-                                        "Provided 2 video inputs for just one "
-                                        "eye");
+            if (eyesDesc.size() == 1) {
+                // A mono display should only worry about one display input for
+                // now, until multiple surfaces per eye lands.
+                displayInputIndices.resize(1);
+                cfg->m_displayInputs.resize(1);
             }
 
             for (auto eye : eyeIndices) {
