@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/common/PathTreeOwner.h>
-#include <osvr/common/PathTreeObserver.h>
+#include <osvr/Common/PathTreeOwner.h>
+#include <osvr/Common/PathTreeObserver.h>
 #include <osvr/Common/PathTreeSerialization.h>
 
 // Library/third-party includes
