@@ -128,7 +128,8 @@ namespace client {
             const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
             bool rot180, double pitchTilt,
             boost::optional<OSVR_RadialDistortionParameters> radDistortParams,
-            OSVR_DisplayInputCount displayInputIdx, util::Angle opticalAxisOffsetY = 0. * util::radians);
+            OSVR_DisplayInputCount displayInputIdx,
+            util::Angle opticalAxisOffsetY = 0. * util::radians);
         util::Rectd m_getRect(double near, double far) const;
         Eigen::Isometry3d getPoseIsometry() const;
         InternalInterfaceOwner m_pose;

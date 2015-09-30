@@ -189,8 +189,7 @@ namespace client {
         const char path[], Viewport &&viewport, util::Rectd &&unitBounds,
         bool rot180, double pitchTilt,
         boost::optional<OSVR_RadialDistortionParameters> radDistortParams,
-        OSVR_DisplayInputCount displayInputIdx,
-        util::Angle opticalAxisOffsetY)
+        OSVR_DisplayInputCount displayInputIdx, util::Angle opticalAxisOffsetY)
         : m_pose(ctx, path), m_offset(offset), m_viewport(viewport),
           m_unitBounds(unitBounds), m_rot180(rot180), m_pitchTilt(pitchTilt),
           m_radDistortParams(radDistortParams),

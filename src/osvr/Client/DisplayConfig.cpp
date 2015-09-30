@@ -175,7 +175,8 @@ namespace client {
                 viewer.container().emplace_back(ViewerEye(
                     ctx, xlateOffset, HEAD_PATH, computeViewport(eye, desc),
                     computeRect(desc), eyesDesc[eye].m_rotate180,
-                    desc.getPitchTilt().value(), distortEye, displayInputIdx, eyeAxisOffset));
+                    desc.getPitchTilt().value(), distortEye, displayInputIdx,
+                    eyeAxisOffset));
             }
 
             OSVR_DEV_VERBOSE("Display: " << desc.getHumanReadableDescription());
