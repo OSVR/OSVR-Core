@@ -91,6 +91,8 @@ namespace client {
             cfg->m_viewers.container().emplace_back(Viewer(ctx, HEAD_PATH));
             auto &viewer = cfg->m_viewers.container().front();
             auto eyesDesc = desc.getEyes();
+
+            /// Set up stereo vs mono
             std::vector<uint8_t> eyeIndices;
             Eigen::Vector3d offset;
             if (eyesDesc.size() == 2) {
@@ -104,6 +106,7 @@ namespace client {
                 eyeIndices = {0};
             }
 
+            /// Handle radial distortion parameters
             boost::optional<OSVR_RadialDistortionParameters> distort;
             auto k1 = desc.getDistortion();
             if (k1.k1_red != 0 || k1.k1_green != 0 || k1.k1_blue != 0) {
@@ -113,7 +116,8 @@ namespace client {
                 params.k1.data[2] = k1.k1_blue;
                 distort = params;
             }
-            // Compute angular offset about Y of the optical (view) axis
+
+            /// Compute angular offset about Y of the optical (view) axis
             util::Angle axisOffset = 0. * util::radians;
             {
                 auto overlapPct = desc.getOverlapPercent();
@@ -152,27 +156,35 @@ namespace client {
             BOOST_ASSERT_MSG(displayInputIndices.size() >= eyesDesc.size(),
                              "Must have at least as many indices as eyes");
 
-
+            /// Create the actual eye (with implied surface) objects
             for (auto eye : eyeIndices) {
-                double offsetFactor =
-                    (2. * eye) -
-                    1.; // turns 0 into -1 and 1 into 1. Doesn't affect
-                        // mono, which has a zero offset vector.
+                // This little computation turns 0 into -1 and 1 into 1, used as
+                // a coefficient to make the two eyes do opposite things.
+                // Doesn't affect mono, which has a zero offset vector.
+                double offsetFactor = (2. * eye) - 1.;
+
+                // Set up per-eye distortion parameters, if needed
                 boost::optional<OSVR_RadialDistortionParameters> distortEye(
                     distort);
-                if (distortEye.is_initialized()) {
+                if (distortEye) {
                     distortEye->centerOfProjection.data[0] =
                         eyesDesc[eye].m_CenterProjX;
                     distortEye->centerOfProjection.data[1] =
                         eyesDesc[eye].m_CenterProjY;
                 }
+
+                // precompute translation offset for this eye
                 auto xlateOffset = (offsetFactor * offset).eval();
 
+                // precompute the optical axis rotation for this eye
                 // here, the left eye should get a positive offset since it's a
                 // positive rotation about y, hence the -1 factor.
                 auto eyeAxisOffset = axisOffset * -1. * offsetFactor;
-                OSVR_DisplayInputCount displayInputIdx =
-                    displayInputIndices[eye];
+
+                // Look up the display index for this eye.
+                auto displayInputIdx = displayInputIndices[eye];
+
+                /// Create the ViewerEye[Surface] and add it to the container.
                 viewer.container().emplace_back(ViewerEye(
                     ctx, xlateOffset, HEAD_PATH, computeViewport(eye, desc),
                     computeRect(desc), eyesDesc[eye].m_rotate180,
@@ -196,7 +208,7 @@ namespace client {
     DisplayConfig::DisplayConfig() {}
 
     bool DisplayConfig::isStartupComplete() const {
-        for (auto const &viewer : this->m_viewers) {
+        for (auto const &viewer : m_viewers) {
             if (!viewer.hasPose()) {
                 return false;
             }
