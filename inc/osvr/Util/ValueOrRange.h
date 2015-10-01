@@ -33,6 +33,7 @@
 #include <boost/assert.hpp>
 
 // Standard includes
+#include <algorithm>
 #include <type_traits>
 #include <stdexcept>
 

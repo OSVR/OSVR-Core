@@ -33,6 +33,7 @@
 
 // Standard includes
 #include <stdexcept>
+#include <string>
 
 namespace osvr {
 namespace common {
