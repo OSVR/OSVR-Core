@@ -30,6 +30,7 @@
 #include <osvr/Common/ClientContext_fwd.h>
 #include <osvr/Common/ClientInterfacePtr.h>
 #include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/ClientInterfaceFactory.h>
 #include <osvr/Util/KeyedOwnershipContainer.h>
 
 // Library/third-party includes
@@ -107,6 +108,12 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     OSVR_COMMON_EXPORT
     OSVR_ClientContextObject(const char appId[],
                              osvr::common::ClientContextDeleter del);
+    /// @brief Constructor for derived class use only.
+    OSVR_COMMON_EXPORT
+    OSVR_ClientContextObject(
+        const char appId[],
+        osvr::common::ClientInterfaceFactory const &interfaceFactory,
+        osvr::common::ClientContextDeleter del);
 
   private:
     virtual void m_update() = 0;
@@ -127,6 +134,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     std::string const m_appId;
     InterfaceList m_interfaces;
+    osvr::common::ClientInterfaceFactory m_clientInterfaceFactory;
 
     osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
     osvr::common::ClientContextDeleter m_deleter;

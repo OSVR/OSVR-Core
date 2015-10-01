@@ -47,11 +47,18 @@ namespace common {
     }
 } // namespace common
 } // namespace osvr
-OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[],
-                                                   ClientContextDeleter del)
-    : m_appId(appId), m_deleter(del) {
+OSVR_ClientContextObject::OSVR_ClientContextObject(
+    const char appId[],
+    osvr::common::ClientInterfaceFactory const &interfaceFactory,
+    osvr::common::ClientContextDeleter del)
+    : m_appId(appId), m_clientInterfaceFactory(interfaceFactory),
+      m_deleter(del) {
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
 }
+OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[],
+                                                   ClientContextDeleter del)
+    : OSVR_ClientContextObject(
+          appId, osvr::common::getStandardClientInterfaceFactory(), del) {}
 
 OSVR_ClientContextObject::~OSVR_ClientContextObject() {
     OSVR_DEV_VERBOSE("Client context shut down for " << m_appId);
@@ -69,16 +76,10 @@ void OSVR_ClientContextObject::update() {
 }
 
 ClientInterfacePtr OSVR_ClientContextObject::getInterface(const char path[]) {
-    ClientInterfacePtr ret;
-    if (!path) {
+    auto ret = m_clientInterfaceFactory(*this, path);
+    if (!ret) {
         return ret;
     }
-    std::string p(path);
-    if (p.empty()) {
-        return ret;
-    }
-    ret = make_shared<ClientInterface>(this, path,
-                                       ClientInterface::PrivateConstructor());
     m_handleNewInterface(ret);
     m_interfaces.push_back(ret);
     return ret;
