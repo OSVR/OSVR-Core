@@ -32,6 +32,10 @@
 #include <windows.h>
 #endif // OSVR_WINDOWS
 
+#ifdef OSVR_MACOSX
+#include <mach-o/dyld.h>
+#endif // OSVR_MACOSX
+
 #include <boost/filesystem.hpp>
 
 // Standard includes
@@ -71,6 +75,16 @@ namespace pluginhost {
 #elif defined(OSVR_ANDROID)
     std::string getBinaryLocation() {
         return boost::filesystem::canonical("/proc/self/exe").generic_string();
+    }
+#elif defined(OSVR_MACOSX)
+    std::string getBinaryLocation() {
+        char buf[1024] = {0};
+        uint32_t len = sizeof(buf);
+        std::string ret;
+        if (0 == _NSGetExecutablePath(buf, &len)) {
+            ret.assign(buf, len);
+        }
+        return ret;
     }
 #else
 #error "getBinaryLocation() not yet implemented for this platform!"

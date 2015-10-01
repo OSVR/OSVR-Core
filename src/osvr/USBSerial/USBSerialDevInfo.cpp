@@ -39,6 +39,8 @@
 #include "USBSerialDevInfo_Linux.h"
 #elif defined(OSVR_ANDROID)
 #include "USBSerialDevInfo_Linux.h"
+#elif defined(OSVR_MACOSX)
+#include "USBSerialDevInfo_MacOSX.h"
 #else
 #error "getPortNumber() not yet implemented for this platform!"
 namespace osvr {
