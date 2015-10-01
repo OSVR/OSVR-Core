@@ -125,30 +125,33 @@ namespace client {
                 }
             }
 
-            // get the number of display inputs if larger than one then we need
-            // to assign input index for each viewer eye
-            std::vector<uint8_t> displayInputIndices;
-            if (display_schema_1::DisplayDescriptor::FULL_SCREEN ==
-                desc.getDisplayMode()) {
+            /// Infer the number of display inputs and their association with
+            /// eyes (actually surfaces) based on the descriptor.
+            std::vector<OSVR_DisplayInputCount> displayInputIndices;
+            if (eyesDesc.size() == 2 &&
+                display_schema_1::DisplayDescriptor::FULL_SCREEN ==
+                    desc.getDisplayMode()) {
+                // two eyes, full screen - that means two screens.
+
                 displayInputIndices = {0, 1};
-                /// @todo resolutions may not be the same, currently same
-                /// resolution even if 2 inputs
+
                 cfg->m_displayInputs.push_back(DisplayInput(
                     desc.getDisplayWidth(), desc.getDisplayHeight()));
                 cfg->m_displayInputs.push_back(DisplayInput(
                     desc.getDisplayWidth(), desc.getDisplayHeight()));
             } else {
+                // everything else, assume 1 screen.
+                // Note that it's OK that displayInputIndices.size() >=
+                // eyesDesc.size(), we'll just not end up using the second
+                // entry.
                 displayInputIndices = {0, 0};
+
                 cfg->m_displayInputs.push_back(DisplayInput(
                     desc.getDisplayWidth(), desc.getDisplayHeight()));
             }
+            BOOST_ASSERT_MSG(displayInputIndices.size() >= eyesDesc.size(),
+                             "Must have at least as many indices as eyes");
 
-            if (eyesDesc.size() == 1) {
-                // A mono display should only worry about one display input for
-                // now, until multiple surfaces per eye lands.
-                displayInputIndices.resize(1);
-                cfg->m_displayInputs.resize(1);
-            }
 
             for (auto eye : eyeIndices) {
                 double offsetFactor =
