@@ -158,7 +158,7 @@ namespace pluginkit {
                 throw std::runtime_error("Could not initialize device token "
                                          "with an empty name field!");
             }
-            initSync(ctx, name.c_str(), options);
+            initAsync(ctx, name.c_str(), options);
         }
 
         /// @brief Send a message on a registered interface type, providing the
@@ -180,7 +180,6 @@ namespace pluginkit {
         void send(InterfaceType &iface, MessageType const &msg) {
             send(iface, msg, util::time::getNow());
         }
-
 
         /// @brief Submit a JSON self-descriptor string for the device.
         ///
