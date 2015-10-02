@@ -96,7 +96,7 @@ namespace client {
             m_report(timestamp, info.button, info.state);
         }
         void m_handle(vrpn_BUTTONSTATESCB const &info) {
-            auto maxChannel = info.num_buttons - 1;
+            auto maxChannel = m_all ? info.num_buttons - 1 : m_sensors.getValue();
             if (!m_all &&
                 m_sensors.getIntersection(RangeType::RangeZeroTo(maxChannel))
                     .empty()) {

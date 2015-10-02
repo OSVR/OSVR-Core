@@ -81,8 +81,8 @@ namespace client {
 
       private:
         void m_handle(vrpn_ANALOGCB const &info) {
-            auto maxChannel = info.num_channel - 1;
-            if (m_sensors.isValue() && maxChannel < m_sensors.getValue()) {
+            auto maxChannel = m_all ? info.num_channel - 1 : m_sensors.getValue();
+            if (m_sensors.isValue() && (maxChannel < m_sensors.getValue())) {
                 // early out if we're looking for just a single channel number
                 // that isn't in this report.
                 return;
