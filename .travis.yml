@@ -1,0 +1,21 @@
+language: cpp
+compiler:
+  - clang
+os:
+  - osx
+before_install:
+  - brew update
+  - brew tap homebrew/science
+  - brew tap d235j/osvr
+install:
+  - brew uninstall json-c
+  - brew -v install libusb
+  - brew -v install jsoncpp --HEAD
+  - brew -v install libfunctionality --HEAD
+  - brew -v install opencv
+script:
+  - git submodule update --init --recursive
+  - mkdir build
+  - cd build
+  - 'cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64'
+  - make all -j2
