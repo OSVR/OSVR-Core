@@ -39,7 +39,6 @@
 /* Using SAL attribute format:
  * http://msdn.microsoft.com/en-us/library/ms182032(v=vs.120).aspx */
 
-#include <CodeAnalysis/SourceAnnotations.h>
 #include <sal.h>
 
 #define OSVR_IN _In_
