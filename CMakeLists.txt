@@ -9,6 +9,10 @@ if(ANDROID AND CMAKE_VERSION VERSION_LESS 3.1.0)
     message(FATAL_ERROR "You must use CMake 3.1.0 or greater to build for Android.")
 endif()
 
+if (NOT DEFINED CMAKE_MACOSX_RPATH)
+    set(CMAKE_MACOSX_RPATH ON)
+endif()
+
 set(LOCAL_CMAKE_MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-local")
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${LOCAL_CMAKE_MODULE_DIR}")
@@ -284,9 +288,19 @@ endif()
 add_subdirectory(vendor)
 
 # Set RPATH for dynamic library search.
-if(NOT WIN32 AND NOT APPLE)
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+if(NOT WIN32) # Have not set this up for Windows yet
+    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+    if("${isSystemDir}" STREQUAL "-1")
+        if(APPLE)
+            set(CMAKE_INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
+        else()
+            set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+        endif()
+    else() #Use default rpath if libs installed in a system dir
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    endif()
 endif()
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
