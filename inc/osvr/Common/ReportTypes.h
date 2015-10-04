@@ -26,6 +26,7 @@
 #define INCLUDED_ReportTypes_h_GUID_BB8F47AD_5F82_439E_C3F9_7C57D016D3C9
 
 // Internal Includes
+#define FUSION_MAX_VECTOR_SIZE 20 //Default is 10, too small for typelist
 #include <osvr/Util/ClientCallbackTypesC.h>
 
 // Library/third-party includes
