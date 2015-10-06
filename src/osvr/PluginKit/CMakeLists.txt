@@ -53,6 +53,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrConnection
     osvrUtilCpp
     osvrCommon
+    log
     vendored-vrpn
     boost_thread)
 
@@ -84,7 +85,6 @@ add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
 # Imaging interface library
 ###
 osvr_add_interface_library(Imaging)
-
 
 # In an installed version, we search and add the dependency in the
 # osvrConfigInstalledOpenCV.cmake script since we don't need the same version in
