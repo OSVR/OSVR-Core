@@ -32,6 +32,7 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ImagingReportTypesC.h>
 #include <osvr/Common/IPCRingBuffer.h>
+#include <osvr/Common/ImagingComponentConfig.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -54,6 +55,14 @@ namespace common {
 
             static const char *identifier();
         };
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        class ImagePlacedInProcessMemory
+            : public MessageRegistration<ImagePlacedInProcessMemory> {
+          public:
+            class MessageSerialization;
+            static const char *identifier();
+        };
+#endif
         class ImagePlacedInSharedMemory
             : public MessageRegistration<ImagePlacedInSharedMemory> {
           public:
@@ -79,6 +88,12 @@ namespace common {
         /// shared memory ring buffer.
         messages::ImagePlacedInSharedMemory imagePlacedInSharedMemory;
 
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        /// @brief Message from server to client, notifying of image data in process
+        /// memory (assumes joint client kit)
+        messages::ImagePlacedInProcessMemory imagePlacedInProcessMemory;
+#endif
+
         OSVR_COMMON_EXPORT void sendImageData(
             OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
             OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
@@ -103,11 +118,24 @@ namespace common {
                                       OSVR_ChannelCount sensor,
                                       OSVR_TimeValue const &timestamp);
 
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        /// @return true if we could send it.
+        bool m_sendImageDataViaInProcessMemory(OSVR_ImagingMetadata metadata,
+                                               OSVR_ImageBufferElement *imageData,
+                                               OSVR_ChannelCount sensor,
+                                               OSVR_TimeValue const &timestamp);
+#endif
+
         static int VRPN_CALLBACK
         m_handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
 
         static int VRPN_CALLBACK
         m_handleImagePlacedInSharedMemory(void *userdata, vrpn_HANDLERPARAM p);
+
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        static int VRPN_CALLBACK
+        m_handleImagePlacedInProcessMemory(void *userdata, vrpn_HANDLERPARAM p);
+#endif
 
         void m_checkFirst(OSVR_ImagingMetadata const &metadata);
         void m_growShmVecIfRequired(OSVR_ChannelCount sensor);

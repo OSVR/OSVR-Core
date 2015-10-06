@@ -23,8 +23,11 @@ if(BUILD_WITH_TRACING)
     endif()
 endif()
 
+option(OSVR_COMMON_IN_PROCESS_IMAGING OFF)
+
 configure_file(TracingConfig.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
 
+configure_file(ImagingComponentConfig.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/ImagingComponentConfig.h")
 
 set(API
     "${HEADER_LOCATION}/AddDevice.h"
@@ -58,6 +61,7 @@ set(API
     "${HEADER_LOCATION}/GeneralizedTransform.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/ImagingComponentConfig.h"
     "${HEADER_LOCATION}/IntegerByteSwap.h"
     "${HEADER_LOCATION}/InterfaceCallbacks.h"
     "${HEADER_LOCATION}/InterfaceList.h"
