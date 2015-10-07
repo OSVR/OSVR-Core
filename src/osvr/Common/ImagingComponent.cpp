@@ -230,12 +230,13 @@ namespace common {
         OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
         OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
 
-        auto imgBufferSize = getBufferSize(metadata);
-        auto dataCopy = new OSVR_ImageBufferElement[imgBufferSize];
-        memcpy(dataCopy, imageData, imgBufferSize);
+        auto imageBufferSize = getBufferSize(metadata);
+        auto imageBufferCopy = reinterpret_cast<OSVR_ImageBufferElement*>(cv::fastMalloc(imageBufferSize));
+        memcpy(imageBufferCopy, imageData, imageBufferSize);
+
         Buffer<> buf;
         messages::ImagePlacedInProcessMemory::MessageSerialization serialization(
-            messages::InProcessMemoryMessage{ metadata, sensor, reinterpret_cast<int>(dataCopy) });
+            messages::InProcessMemoryMessage{ metadata, sensor, reinterpret_cast<int>(imageBufferCopy) });
 
         serialize(buf, serialization);
         m_getParent().packMessage(
@@ -339,7 +340,7 @@ namespace common {
         ImageData data;
         data.sensor = msg.sensor;
         data.metadata = msg.metadata;
-        data.buffer.reset(reinterpret_cast<OSVR_ImageBufferElement*>(msg.buffer));
+        data.buffer.reset(reinterpret_cast<OSVR_ImageBufferElement*>(msg.buffer), &cv::fastFree);
         auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
         self->m_checkFirst(msg.metadata);
