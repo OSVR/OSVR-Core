@@ -23,7 +23,6 @@
 // limitations under the License.
 
 // Internal Includes
-#define BOOST_INTERPROCESS_SHARED_DIR_PATH "/sdcard"
 #include <osvr/Common/IPCRingBuffer.h>
 #include "IPCRingBufferResults.h"
 #include "IPCRingBufferSharedObjects.h"

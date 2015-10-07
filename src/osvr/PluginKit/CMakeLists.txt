@@ -53,7 +53,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrConnection
     osvrUtilCpp
     osvrCommon
-    log
     vendored-vrpn
     boost_thread)
 
