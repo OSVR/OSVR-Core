@@ -1,0 +1,66 @@
+language: cpp
+compiler:
+  - clang
+os:
+  - osx
+  - linux
+before_install:
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap homebrew/science; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap d235j/osvr; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      INSTPRF=$HOME/p;
+      mkdir $INSTPRF;
+      pushd $HOME;
+      git clone https://github.com/OSVR/libfunctionality.git;
+      git clone https://github.com/open-source-parsers/jsoncpp.git;
+      popd;
+    fi"
+install:
+    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall json-c; fi"
+    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libusb opencv; fi"
+    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp --HEAD; fi"
+    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libfunctionality --HEAD; fi"
+    - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+        INSTPRF=$HOME/p;
+        mkdir $HOME/libfunctionality/build;
+        pushd $HOME/libfunctionality/build;
+        cmake .. -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF;
+        make -j2 install;
+        popd;
+      fi"
+    - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+        INSTPRF=$HOME/p;
+        mkdir $HOME/jsoncpp/build;
+        pushd $HOME/jsoncpp/build;
+        cmake .. -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=on;
+        make -j2 install;
+        popd;
+      fi"
+script:
+  - "git submodule update --init --recursive;"
+  - "mkdir build;"
+  - "cd build;"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF -Dlibfunctionality_DIR=$INSTPRF/lib/cmake/libfunctionality -Djsoncpp_DIR=$INSTPRF/lib/cmake/jsoncpp; fi"
+  - "make all -j2"
+sudo: false
+addons:
+  apt:
+    sources:
+    - boost-latest
+    - george-edison55-precise-backports
+    - ubuntu-toolchain-r-test
+    packages:
+    - libusb-1.0-0-dev
+    - libopencv-dev
+    - libboost-thread1.55-dev
+    - libboost-system1.55-dev
+    - libboost-date-time1.55-dev
+    - libboost-chrono1.55-dev
+    - libboost-program-options1.55-dev
+    - libboost-filesystem1.55-dev
+    - cmake-data
+    - cmake
+    - gcc-5
+    - g++-5
