@@ -38,6 +38,11 @@
 
 // Standard includes
 // - none
+
+// @todo This is a hack. expect this to be moved to a separate osvrJniBridge
+// library and encapsulated behind a proper API.
+
+#if defined(__ANDROID__)
 #include <jni.h>
 OSVR_ImageBufferElement *gLastFrame = NULL;
 OSVR_ImagingMetadata gLastFrameMetadata;
@@ -68,6 +73,7 @@ JNIEXPORT void JNICALL Java_com_osvr_android_gles2sample_MainActivityJNILib_repo
     gLastFrame = new OSVR_ImageBufferElement[size];
     env->GetByteArrayRegion(data, 0, size, reinterpret_cast<jbyte*>(gLastFrame));
 }
+#endif
 
 struct OSVR_ImagingDeviceInterfaceObject
     : public osvr::connection::DeviceInterfaceBase {
