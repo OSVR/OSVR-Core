@@ -45,14 +45,15 @@
 #if defined(__ANDROID__)
 #include <jni.h>
 OSVR_ImageBufferElement *gLastFrame = NULL;
+OSVR_ImageBufferElement *gLastFrameBuffer = NULL;
 OSVR_ImagingMetadata gLastFrameMetadata;
 
 extern "C" {
-    JNIEXPORT void JNICALL Java_com_osvr_android_gles2sample_MainActivityJNILib_reportFrame(JNIEnv * env, jclass clazz,
+    JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
       jbyteArray data, jlong width, jlong height, jshort channels, jshort depth);
 }
 
-JNIEXPORT void JNICALL Java_com_osvr_android_gles2sample_MainActivityJNILib_reportFrame(JNIEnv * env, jclass clazz,
+JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
     jbyteArray data, jlong width, jlong height, jshort channels, jshort depth) {
 
     gLastFrameMetadata.height = (OSVR_ImageDimension)height;
@@ -64,14 +65,13 @@ JNIEXPORT void JNICALL Java_com_osvr_android_gles2sample_MainActivityJNILib_repo
     // and if so, reuse the last frame buffer instead of deleting and recreating.
     // better yet, use a ring buffer so that image reports aren't lost if update
     // isn't called frequently enough.
-    if(gLastFrame) {
-        // this image will be lost. the plugin's update method wasn't called
-        // fast enough.
-        delete[] gLastFrame;
-    }
     int size = env->GetArrayLength(data);
-    gLastFrame = new OSVR_ImageBufferElement[size];
-    env->GetByteArrayRegion(data, 0, size, reinterpret_cast<jbyte*>(gLastFrame));
+
+    if(gLastFrameBuffer == NULL) {
+        gLastFrameBuffer = new OSVR_ImageBufferElement[size];
+    }
+    gLastFrame = gLastFrameBuffer;
+    env->GetByteArrayRegion(data, 0, size, reinterpret_cast<jbyte*>(gLastFrameBuffer));
 }
 #endif
 
