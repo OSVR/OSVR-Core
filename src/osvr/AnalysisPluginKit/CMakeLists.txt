@@ -25,12 +25,11 @@ target_link_libraries(${LIBNAME_FULL}
     osvrPluginKit
     osvrClientKit
     PRIVATE
+    osvrPluginKit
     osvrPluginHost
     osvrConnection
     osvrUtilCpp
-    osvrCommon
-    vendored-vrpn
-    boost_thread)
+    osvrCommon)
 
 # Add library alias to allow use of the same osvr_add_plugin script within this
 # tree and outside of it.

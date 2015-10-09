@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
+#include <osvr/Connection/DeviceToken.h>
 #include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/Verbosity.h>
 
@@ -43,24 +44,50 @@
     }                                                                          \
     OSVR_UTIL_MULTILINE_END
 
-
 OSVR_ReturnCode
 osvrAnalysisSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
                      OSVR_IN_STRZ const char *name,
                      OSVR_IN_PTR OSVR_DeviceInitOptions options,
                      OSVR_OUT_PTR OSVR_DeviceToken *device,
                      OSVR_OUT_PTR OSVR_ClientContext *clientCtx) {
-	if (!ctx) {
-		OSVR_DEV_VERBOSE("osvrAnalysisSyncInit: can't use a null plugin registration context.");
-		return OSVR_RETURN_FAILURE;
-	}
-	if (!name || !(name[0])) {
-		OSVR_DEV_VERBOSE("osvrAnalysisSyncInit: can't use a null or empty device name.");
-		return OSVR_RETURN_FAILURE;
-	}
-	OSVR_VALIDATE_OUTPUT_PTR(device, "device token");
-	OSVR_VALIDATE_OUTPUT_PTR(clientCtx, "client context");
+    if (!ctx) {
+        OSVR_DEV_VERBOSE("osvrAnalysisSyncInit: can't use a null plugin "
+                         "registration context.");
+        return OSVR_RETURN_FAILURE;
+    }
+    if (!name || !(name[0])) {
+        OSVR_DEV_VERBOSE(
+            "osvrAnalysisSyncInit: can't use a null or empty device name.");
+        return OSVR_RETURN_FAILURE;
+    }
+    OSVR_VALIDATE_OUTPUT_PTR(device, "device token");
+    OSVR_VALIDATE_OUTPUT_PTR(clientCtx, "client context");
 
+    auto initialResult =
+        osvrDeviceSyncInitWithOptions(ctx, name, options, device);
+    if (initialResult == OSVR_RETURN_FAILURE) {
+        OSVR_DEV_VERBOSE(
+            "osvrAnalysisSyncInit: couldn't create initial device token.");
+        return OSVR_RETURN_FAILURE;
+    }
 
-	return OSVR_RETURN_FAILURE;
+/// @todo Create a client context here, with an interface factory that handles
+/// relative paths.
+/// @todo pass ownership
+#if 0
+	device->acquireObject(clientContextSmartPtr);
+#endif
+/// @todo register client context update
+#if 0
+	device->setPreConnectionInteract([=clientContextSmartPtr] {
+		clientContextSmartPtr->update();
+	});
+#endif
+
+/// @todo finally return the client context too.
+#if 0
+	*clientCtx = clientContextSmartPtr.get();
+	return OSVR_RETURN_SUCCESS;
+#endif
+    return OSVR_RETURN_FAILURE;
 }
