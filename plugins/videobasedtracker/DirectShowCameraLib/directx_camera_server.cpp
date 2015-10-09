@@ -32,6 +32,9 @@
 #include "PropertyBagHelper.h"
 #include "NullRenderFilter.h"
 
+#include <Vidcap.h>  // for IKsTopologyInfo
+#include <Ksmedia.h> // for KSNODETYPE_VIDEO_PROCESSING
+
 // Library/third-party includes
 // - none
 
@@ -366,6 +369,60 @@ bool directx_camera_server::open_and_find_parameters(
 #endif
     return open_moniker_and_finish_setup(pMoniker, sourcePreAction, width,
                                          height);
+}
+static inline WinPtr<IVideoProcAmp> getIVideoProcAmp(IBaseFilter &filter) {
+	auto ret = WinPtr<IVideoProcAmp>{};
+
+	auto ksTopoInfo = WinPtr<IKsTopologyInfo>{};
+	filter.QueryInterface(IID_IKsTopologyInfo, AttachPtr(ksTopoInfo));
+	if (!ksTopoInfo) {
+		std::cout << "directx_camera_server: Couldn't get IKsTopologyInfo"
+			<< std::endl;
+		return ret;
+	}
+	auto numNodes = DWORD{ 0 };
+	ksTopoInfo->get_NumNodes(&numNodes);
+
+	std::cout << "directx_camera_server: has " << numNodes << " nodes"
+		<< std::endl;
+	for (DWORD i = 0; i < numNodes; ++i) {
+		GUID nodeType;
+		ksTopoInfo->get_NodeType(i, &nodeType);
+		if (nodeType == KSNODETYPE_VIDEO_PROCESSING) {
+			std::cout
+				<< "directx_camera_server: node has video processing type: "
+				<< i << std::endl;
+			ksTopoInfo->CreateNodeInstance(i, IID_IVideoProcAmp,
+				AttachPtr(ret));
+			if (ret) {
+				return ret;
+			}
+		}
+	}
+	return ret;
+}
+
+static inline void setPowerlineFrequencyTo50(IBaseFilter &filter) {
+	auto procAmp = getIVideoProcAmp(filter);
+    if (!procAmp) {
+        std::cout << "directx_camera_server: Couldn't get IVideoProcAmp"
+                  << std::endl;
+        return;
+    }
+    static const long POWERLINE_DISABLED = 0;
+    static const long POWERLINE_50HZ = 1;
+    static const long POWERLINE_60HZ = 2;
+    auto hr = procAmp->put_PowerlineFrequency(POWERLINE_50HZ,
+                                              VideoProcAmp_Flags_Manual);
+    if (SUCCEEDED(hr)) {
+        std::cout << "directx_camera_server: Successfully set powerline "
+                     "frequency to 50Hz"
+                  << std::endl;
+    } else {
+        std::cout << "directx_camera_server: Almost, but couldn't, set "
+                     "powerline frequency to 50Hz"
+                  << std::endl;
+    }
 }
 
 bool directx_camera_server::open_moniker_and_finish_setup(
