@@ -50,16 +50,16 @@ OSVR_ImagingMetadata gLastFrameMetadata;
 
 extern "C" {
     JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
-      jbyteArray data, jlong width, jlong height, jshort channels, jshort depth);
+      jbyteArray data, jlong width, jlong height);
 }
 
 JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
-    jbyteArray data, jlong width, jlong height, jshort channels, jshort depth) {
+    jbyteArray data, jlong width, jlong height) {
 
     gLastFrameMetadata.height = (OSVR_ImageDimension)height;
     gLastFrameMetadata.width = (OSVR_ImageDimension)width;
-    gLastFrameMetadata.channels = (OSVR_ImageChannels)channels;
-    gLastFrameMetadata.depth = (OSVR_ImageDepth)depth;
+    gLastFrameMetadata.channels = (OSVR_ImageChannels)4;
+    gLastFrameMetadata.depth = (OSVR_ImageDepth)1;
 
     // @todo determine whether the current metadata matches the last metadata,
     // and if so, reuse the last frame buffer instead of deleting and recreating.
