@@ -41,8 +41,11 @@
 #include <sys/ioctl.h>    // for ioctl
 #include <unistd.h>       // for open, close
 
-// IOKit includes
+// System includes
+#include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/IOKitKeys.h>
+#include <IOKit/serial/IOSerialKeys.h>
 #include <IOKit/usb/IOUSBLib.h>
 
 namespace osvr {
@@ -51,51 +54,87 @@ namespace usbserial {
     namespace {
 
         /**
-         * Given the name of a device, this function will create a
-         *USBSerialDevice
-         * object. If the device can be created successfully it will return
-         * @c boost::none.
-         *
-         * @param device The name of the device to create (e.g., "ttyACM0")
-         *
-         * @return an optional USBSerialDevice
+         * Helper function that returns an IOKit iterator for all serial ports on the system.
+         * @param matchingServices pointer which will be set to the value of the iterator
+         * @return 0 on success, -1 on failure
          */
-        boost::optional<USBSerialDevice>
-        make_USBSerialDevice(const std::string &device) {
-            //FIXME: STUB
-            return boost::none;
+        int findSerialPorts(io_iterator_t *matchingServices) {
+
+            kern_return_t kernResult;
+            CFMutableDictionaryRef classesToMatch;
+            // Query IOKit for services matching kIOSerialBSDServiceValue
+            classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue);
+            if (classesToMatch == NULL) {
+                return -1;
+            }
+            else {
+                // Query only for serial ports
+                CFDictionarySetValue(classesToMatch,
+                                     CFSTR(kIOSerialBSDTypeKey),
+                                     CFSTR(kIOSerialBSDAllTypes));
+            }
+            // Run the query
+            kernResult = IOServiceGetMatchingServices(kIOMasterPortDefault, classesToMatch, matchingServices);
+            if(KERN_SUCCESS !=kernResult) {
+                return -1;
+            }
+            return 0;
         }
-
-        /**
-         * Predicate that determines if the given vendor and product IDs match
-         * that of the provided USB serial device. If the @param vendorID or
-         * @param productID is @c boost::none, that parameter will match and ID.
-         *
-         * @param device the USB serial device to compare against
-         * @param vendorID optional vendor ID
-         * @param productID optional product ID
-         *
-         * @return true if the vendor and product IDs match, false otherwise
-         */
-        bool matches_ids(const USBSerialDevice &device,
-                         const boost::optional<uint16_t> &vendorID,
-                         const boost::optional<uint16_t> &productID) {
-            const bool vendor_matches =
-                (!vendorID || *vendorID == device.getVID());
-            const bool product_matches =
-                (!productID || *productID == device.getPID());
-
-            return (vendor_matches && product_matches);
-        }
-
-    } // end namespace
+    }
 
     std::vector<USBSerialDevice>
     getSerialDeviceList(boost::optional<uint16_t> vendorID,
                         boost::optional<uint16_t> productID) {
 
-        //FIXME: STUB
         std::vector<USBSerialDevice> devices;
+
+        io_iterator_t serialPortIterator;
+        io_object_t serialPortService;
+        // find all serial ports
+        if(findSerialPorts(&serialPortIterator) != 0) {
+            goto bailout;
+        }
+
+        // iterate over serial ports, getting vid and pid
+        while((serialPortService = IOIteratorNext(serialPortIterator)) != 0) {
+            CFNumberRef vidObj = (CFNumberRef) IORegistryEntrySearchCFProperty(serialPortService
+                                                                                 , kIOServicePlane
+                                                                                 , CFSTR("idVendor")
+                                                                                 , NULL
+                                                                                 , kIORegistryIterateRecursively | kIORegistryIterateParents);
+            CFNumberRef pidObj = (CFNumberRef) IORegistryEntrySearchCFProperty(serialPortService
+                                                                                 , kIOServicePlane
+                                                                                 , CFSTR("idProduct")
+                                                                                 , NULL
+                                                                                 , kIORegistryIterateRecursively | kIORegistryIterateParents);
+            CFStringRef bsdPathObj = (CFStringRef) IORegistryEntryCreateCFProperty(serialPortService,
+                                                                          CFSTR(kIOCalloutDeviceKey),
+                                                                          kCFAllocatorDefault,
+                                                                          0);
+
+            if(vidObj != NULL && pidObj != NULL && bsdPathObj != NULL) {
+                // handle device
+                uint16_t vid, pid;
+                CFNumberGetValue(vidObj, kCFNumberSInt16Type, &vid);
+                CFNumberGetValue(pidObj, kCFNumberSInt16Type, &pid);
+
+                // printf("ALL DATA: VID: %d, PID: %d, PATH: %s\n", vid, pid, bsdPathBuf);
+                if(vid == vendorID && pid == productID) {
+                    // convert the string object into a C-string
+                    CFIndex bufferSize = CFStringGetMaximumSizeForEncoding(CFStringGetLength(bsdPathObj), kCFStringEncodingMacRoman) + sizeof('\0');
+                    char *  bsdPathBuf     = (char *) malloc(bufferSize);
+                    CFStringGetCString(bsdPathObj, bsdPathBuf, bufferSize, kCFStringEncodingMacRoman);
+                    // create the device
+                    USBSerialDevice usb_serial_device(vid,
+                                                      pid,
+                                                      bsdPathBuf, bsdPathBuf);
+                    devices.push_back(usb_serial_device);
+                    free(bsdPathBuf);
+                }
+            }
+        }
+
+    bailout:
         return devices;
     }
 
