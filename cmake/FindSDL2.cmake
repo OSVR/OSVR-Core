@@ -69,14 +69,14 @@ find_library(SDL2_LIBRARY
 set(_sdl2_framework FALSE)
 # Some special-casing if we've found/been given a framework.
 # Handles whether we're given the library inside the framework or the framework itself.
-if(APPLE AND "${SDL2_LIBRARY}" MATCHES "/([^/]+)\\.framework(/.*)$")
+if(APPLE AND "${SDL2_LIBRARY}" MATCHES "(/[^/]+)*.framework(/.*)?$")
 	set(_sdl2_framework TRUE)
 	set(SDL2_FRAMEWORK "${SDL2_LIBRARY}")
 	# Move up in the directory tree as required to get the framework directory.
-	while("${SDL2_FRAMEWORK}" MATCHES "/([^/]+)\\.framework(/.*)$" AND NOT "${SDL2_FRAMEWORK}" MATCHES "/([^/]+)\\.framework$")
+	while("${SDL2_FRAMEWORK}" MATCHES "(/[^/]+)*.framework(/.*)$" AND NOT "${SDL2_FRAMEWORK}" MATCHES "(/[^/]+)*.framework$")
 		get_filename_component(SDL2_FRAMEWORK "${SDL2_FRAMEWORK}" DIRECTORY)
 	endwhile()
-	if("${SDL2_FRAMEWORK}" MATCHES "/([^/]+)\\.framework$")
+	if("${SDL2_FRAMEWORK}" MATCHES "(/[^/]+)*.framework$")
 		set(SDL2_FRAMEWORK_NAME ${CMAKE_MATCH_1})
 		# If we found a framework, do a search for the header ahead of time that will be more likely to get the framework header.
 		find_path(SDL2_INCLUDE_DIR
@@ -126,28 +126,6 @@ if(WIN32 OR ANDROID OR IOS OR (APPLE AND NOT _sdl2_framework))
 		PATH_SUFFIXES lib ${SDL2_LIB_PATH_SUFFIX})
 endif()
 
-if(APPLE)
-	# Need Cocoa here, should always be a framework
-	# Code inspired by similar code in CMake's stock FindGLUT.cmake
-	find_library(SDL2_COCOA_LIBRARY Cocoa)
-
-	list(APPEND SDL2_EXTRA_REQUIRED SDL2_COCOA_LIBRARY)
-	if(SDL2_COCOA_LIBRARY AND NOT TARGET SDL2::Cocoa)
-		add_library(SDL2::Cocoa UNKNOWN IMPORTED)
-		if(SDL2_COCOA_LIBRARY MATCHES "/([^/]+)\\.framework$")
-			# Should always be true, but...
-			# This takes the basename of the framework, without the extension,
-			# and sets it (as a child of the framework) as the imported location for the target.
-			set_target_properties(SDL2::Cocoa PROPERTIES
-				IMPORTED_LOCATION "${SDL2_COCOA_LIBRARY}/${CMAKE_MATCH_1}")
-		else()
-			# Handle the unlikely case Cocoa is just a normal library (or we found the library inside of the framework)
-			set_target_properties(SDL2::Cocoa PROPERTIES
-				IMPORTED_LOCATION "${SDL2_COCOA_LIBRARY}")
-		endif()
-	endif()
-endif()
-
 if(MINGW AND NOT SDL2PC_FOUND)
 	find_library(SDL2_MINGW_LIBRARY mingw32)
 	find_library(SDL2_MWINDOWS_LIBRARY mwindows)
@@ -185,7 +163,7 @@ if(SDL2_FOUND)
 				# Handle the case that SDL2 is a framework and we were able to decompose it above.
 				set_target_properties(SDL2::SDL2 PROPERTIES
 					IMPORTED_LOCATION "${SDL2_FRAMEWORK}/${SDL2_FRAMEWORK_NAME}")
-			elseif(_sdl2_framework AND SDL2_LIBRARY MATCHES "/([^/]+)\\.framework$")
+			elseif(_sdl2_framework AND SDL2_LIBRARY MATCHES "(/[^/]+)*.framework$")
 				# Handle the case that SDL2 is a framework and SDL_LIBRARY is just the framework itself.
 
 				# This takes the basename of the framework, without the extension,
@@ -204,10 +182,16 @@ if(SDL2_FOUND)
 			)
 		endif()
 
-		if(TARGET SDL2::Cocoa)
-			set_property(TARGET SDL2::SDL2 APPEND
-				PROPERTY INTERFACE_LINK_LIBRARIES SDL2::Cocoa)
-		endif()
+        if(APPLE)
+            # Need Cocoa here, is always a framework
+            find_library(SDL2_COCOA_LIBRARY Cocoa)
+            list(APPEND SDL2_EXTRA_REQUIRED SDL2_COCOA_LIBRARY)
+            if(SDL2_COCOA_LIBRARY)
+                set_target_properties(SDL2::SDL2 PROPERTIES
+                        IMPORTED_LINK_INTERFACE_LIBRARIES ${SDL2_COCOA_LIBRARY})
+            endif()
+        endif()
+
 
 		# Compute what to do with SDL2main
 		set(SDL2MAIN_LIBRARIES SDL2::SDL2)
