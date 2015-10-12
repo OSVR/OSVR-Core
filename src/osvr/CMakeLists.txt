@@ -24,7 +24,7 @@ if(BUILD_CLIENT)
     add_subdirectory(ClientKit)
 endif()
 
-if(BUILD_SERVER AND BUILD_CLIENT)
+if(BUILD_ANALYSISPLUGINKIT)
     add_subdirectory(AnalysisPluginKit)
 endif()
 
