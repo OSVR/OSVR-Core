@@ -21,3 +21,6 @@ target_link_libraries(org_osvr_filter_oneeuro
 target_compile_options(org_osvr_filter_oneeuro
     PRIVATE
     ${OSVR_CXX11_FLAGS})
+
+set_target_properties(org_osvr_filter_oneeuro PROPERTIES
+    FOLDER "OSVR Plugins")
