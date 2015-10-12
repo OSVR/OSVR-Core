@@ -66,8 +66,7 @@ namespace low_pass {
 
         /// Feeds in new data with the specified alpha.
         /// @returns the new hatx
-        value_type const &filter(Eigen::Ref<const value_type> const &x,
-                                 scalar alpha) {
+        value_type const &filter(value_type const &x, scalar alpha) {
             if (m_firstTime) {
                 m_firstTime = false;
                 m_hatx = x;
@@ -155,20 +154,19 @@ namespace one_euro {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         explicit OneEuroFilter(Params const &p) : m_params(p) {}
 
-        value_type const &filter(scalar dt,
-                                 value_type const &x) {
+        value_type const &filter(scalar dt, value_type const &x) {
             auto dx = value_type{};
             if (m_firstTime) {
                 m_firstTime = false;
-                detail::setDerivativeIdentity(dx);
+                setDerivativeIdentity(dx);
             } else {
-                dx = detail::computeDerivative(m_xFilter.hatx(), x, dt);
+                dx = computeDerivative(m_xFilter.hatx(), x, dt);
             }
             // Low-pass-filter the derivative.
             m_dxFilter.filter(dx, detail::computeAlpha<scalar>(
                                       dt, m_params.derivativeCutoff));
             // Get the magnitude of the (filtered) derivative
-            auto dxMag = detail::computeDerivativeMagnitude(m_dxFilter.hatx());
+            auto dxMag = computeDerivativeMagnitude(m_dxFilter.hatx());
             // Compute the cutoff to use for the x filter
             auto cutoff = m_params.minCutoff + m_params.beta * dxMag;
 

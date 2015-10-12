@@ -17,3 +17,7 @@ target_link_libraries(org_osvr_filter_oneeuro
     osvr::osvrAnalysisPluginKit
     eigen-headers
     jsoncpp_lib)
+
+target_compile_options(org_osvr_filter_oneeuro
+    PRIVATE
+    ${OSVR_CXX11_FLAGS})

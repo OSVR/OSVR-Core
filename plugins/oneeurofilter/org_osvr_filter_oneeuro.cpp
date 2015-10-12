@@ -26,7 +26,10 @@
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include <osvr/ClientKit/InterfaceC.h>
+#include <osvr/ClientKit/InterfaceCallbackC.h>
 #include "EigenFilters.h"
+#include <osvr/Util/EigenInterop.h>
 
 // Generated JSON header file
 #include "org_osvr_filter_oneeuro_json.h"
@@ -37,6 +40,8 @@
 
 // Standard includes
 #include <iostream>
+#include <memory>
+#include <vector>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -73,11 +78,80 @@ class OneEuroFilterDevice {
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
+
+        /// Create our client interface and register a callback.
+        if (OSVR_RETURN_FAILURE == osvrClientGetInterface(m_clientCtx,
+                                                          input.c_str(),
+                                                          &m_clientInterface)) {
+            throw std::runtime_error(
+                "Could not get client interface for analysis plugin!");
+        }
+        osvrRegisterPoseCallback(m_clientInterface,
+                                 &OneEuroFilterDevice::poseCallback, this);
+    }
+
+    ~OneEuroFilterDevice() {
+        /// Free the client interface so we don't end up getting called after
+        /// destruction.
+        osvrClientFreeInterface(m_clientCtx, m_clientInterface);
+    }
+
+    static void poseCallback(void *userdata, const OSVR_TimeValue *timestamp,
+                             const OSVR_PoseReport *report) {
+        auto &self = *static_cast<OneEuroFilterDevice *>(userdata);
+        self.handleData(*timestamp, *report);
+    }
+
+    /// Processes a tracker report.
+    void handleData(OSVR_TimeValue const &timestamp,
+                    OSVR_PoseReport const &report) {
+        ensureSensorId(report.sensor);
+
+        auto &sensorData = *m_sensors[report.sensor];
+        double dt =
+            (timestamp.microseconds - sensorData.lastReport.microseconds) /
+                1000000.0 +
+            (timestamp.seconds - sensorData.lastReport.seconds);
+        if (dt <= 0) {
+            dt = 1; // in case of weirdness, avoid divide by zero.
+        }
+        OSVR_PoseState filteredPose;
+        using osvr::util::vecMap;
+        using osvr::util::toQuat;
+        using osvr::util::fromQuat;
+
+        /// Perform filtration
+        vecMap(filteredPose.translation) = sensorData.positionFilter.filter(
+            dt, vecMap(report.pose.translation));
+        auto filteredQuat = sensorData.orientationFilter.filter(
+            dt, fromQuat(report.pose.rotation));
+        toQuat(filteredQuat, filteredPose.rotation);
+
+        /// Update last report time.
+        sensorData.lastReport = timestamp;
+
+        /// Send report
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &filteredPose,
+                                             report.sensor, &timestamp);
     }
 
     OSVR_ReturnCode update() {
         // Nothing to do here - everything happens in a callback.
         return OSVR_RETURN_SUCCESS;
+    }
+
+    void ensureSensorId(OSVR_ChannelCount sensor) {
+        /// Make sure there's enough entries in the vector.
+        if (m_sensors.size() <= sensor) {
+            std::cout << "Resizing to handle sensor #" << sensor << "\n";
+            m_sensors.resize(sensor + 1);
+        }
+        /// Make sure the desired entry isn't a null pointer.
+        if (!m_sensors[sensor]) {
+            std::cout << "Creating sensor data object for sensor #" << sensor
+                      << std::endl;
+            m_sensors[sensor] = makeSensorData();
+        }
     }
 
   private:
@@ -87,6 +161,24 @@ class OneEuroFilterDevice {
     OSVR_TrackerDeviceInterface m_trackerOut;
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_ClientContext m_clientCtx;
+    OSVR_ClientInterface m_clientInterface;
+
+    struct SensorData {
+        SensorData(Params const &posParams, Params const &oriParams)
+            : positionFilter(posParams), orientationFilter(oriParams),
+              lastReport(osvr::util::time::getNow()) {}
+
+        filters::OneEuroFilter<Eigen::Vector3d> positionFilter;
+        filters::OneEuroFilter<Eigen::Quaterniond> orientationFilter;
+        osvr::util::time::TimeValue lastReport;
+    };
+    using SensorDataPtr = std::unique_ptr<SensorData>;
+
+    SensorDataPtr makeSensorData() const {
+        SensorDataPtr ret(new SensorData(m_posParams, m_oriParams));
+        return ret;
+    }
+    std::vector<SensorDataPtr> m_sensors;
 };
 
 class AnalysisPluginInstantiation {
@@ -115,8 +207,10 @@ class AnalysisPluginInstantiation {
             parseOneEuroParams(oriParams, root["orientation"]);
         }
 
+        // required
         auto input = root["input"].asString();
 
+        // optional
         auto deviceName = root.get("name", DRIVER_NAME).asString();
 
         return OSVR_RETURN_SUCCESS;
@@ -137,7 +231,7 @@ OSVR_PLUGIN(org_osvr_filter_oneeuro) {
 
     /// Register a detection callback function object.
     context.registerDriverInstantiationCallback(DRIVER_NAME,
-        new AnalysisPluginInstantiation());
+                                                AnalysisPluginInstantiation());
 
     return OSVR_RETURN_SUCCESS;
 }
