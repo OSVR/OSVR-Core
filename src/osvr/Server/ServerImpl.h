@@ -241,7 +241,8 @@ namespace server {
     };
 
     inline bool ServerImpl::m_inServerThread() const {
-        return boost::this_thread::get_id() == m_mainThreadId;
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        return !m_running || (boost::this_thread::get_id() == m_mainThreadId);
     }
 
     template <typename Callable>
