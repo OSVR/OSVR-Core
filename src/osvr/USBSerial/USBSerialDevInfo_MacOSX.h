@@ -61,24 +61,22 @@ namespace usbserial {
          * @return 0 on success, -1 on failure
          */
         int findSerialPorts(io_iterator_t *matchingServices) {
-
-            kern_return_t kernResult;
             // Query IOKit for services matching kIOSerialBSDServiceValue
             CFMutableDictionaryRef classesToMatch =
                 IOServiceMatching(kIOSerialBSDServiceValue);
             if (classesToMatch == NULL) {
-                return -1;
+                return false;
             }
             // Query only for serial ports
             CFDictionarySetValue(classesToMatch, CFSTR(kIOSerialBSDTypeKey),
                                  CFSTR(kIOSerialBSDAllTypes));
             // Run the query
-            kernResult = IOServiceGetMatchingServices(
+            kern_return_t kernResult = IOServiceGetMatchingServices(
                 kIOMasterPortDefault, classesToMatch, matchingServices);
             if (KERN_SUCCESS != kernResult) {
-                return -1;
+                return false;
             }
-            return 0;
+            return true;
         }
 
         /**
@@ -113,7 +111,7 @@ namespace usbserial {
         io_iterator_t serialPortIterator;
         io_object_t serialPortService;
         // find all serial ports
-        if (findSerialPorts(&serialPortIterator) == 0) {
+        if (findSerialPorts(&serialPortIterator) == true) {
             // iterate over serial ports, getting vid and pid
             while ((serialPortService = IOIteratorNext(serialPortIterator)) !=
                    0) {
