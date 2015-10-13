@@ -26,27 +26,12 @@
 // Internal Includes
 #include "USBSerialDevInfo.h"
 
-// Library/third-party includes
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/string.hpp>
-
-// Standard includes
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-
-#include <fcntl.h>     // for O_NONBLOCK
-#include <sys/ioctl.h> // for ioctl
-#include <unistd.h>    // for open, close
 
 // System includes
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/serial/IOSerialKeys.h>
-#include <IOKit/usb/IOUSBLib.h>
 
 namespace osvr {
 namespace usbserial {
