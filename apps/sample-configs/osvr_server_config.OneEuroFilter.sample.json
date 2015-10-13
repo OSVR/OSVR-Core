@@ -20,6 +20,6 @@
     }
   ],
   "aliases": {
-      "/me/head": "/org_osvr_filter_oneeuro/FilteredHead"
+      "/me/head": "/org_osvr_filter_oneeuro/FilteredHead/tracker/0"
   }
 }
