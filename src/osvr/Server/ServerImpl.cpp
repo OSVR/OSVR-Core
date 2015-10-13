@@ -90,10 +90,11 @@ namespace server {
             &ServerImpl::m_handleUpdatedRoute, this);
 
         // Things to do when we get a new incoming connection
-        // No longer doing hardware detect unconditionally here - see triggerHardwareDetect()
+        // No longer doing hardware detect unconditionally here - see
+        // triggerHardwareDetect()
         m_commonComponent =
             m_systemDevice->addComponent(common::CommonComponent::create());
-        m_commonComponent->registerPingHandler([&] { m_sendTree(); });
+        m_commonComponent->registerPingHandler([&] { m_queueTreeSend(); });
 
         // Set up the default display descriptor.
         m_tree.getNodeByPath("/display").value() =
@@ -171,11 +172,7 @@ namespace server {
     }
 
     void ServerImpl::triggerHardwareDetect() {
-        OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
-        m_callControlled([&] {
-            common::tracing::markHardwareDetect();
-            m_ctx->triggerHardwareDetect();
-        });
+        m_callControlled([&] { m_triggeredDetect = true; });
     }
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
@@ -195,14 +192,20 @@ namespace server {
     void ServerImpl::m_update() {
         osvr::common::tracing::ServerUpdate trace;
         m_conn->process();
-        if (m_treeDirty) {
-            OSVR_DEV_VERBOSE("Path tree updated");
-            m_sendTree();
-            m_treeDirty.reset();
-        }
         m_systemDevice->update();
         for (auto &f : m_mainloopMethods) {
             f();
+        }
+        if (m_triggeredDetect) {
+            OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
+            common::tracing::markHardwareDetect();
+            m_ctx->triggerHardwareDetect();
+            m_triggeredDetect = false;
+        }
+        if (m_treeDirty) {
+            OSVR_DEV_VERBOSE("Path tree updated or connection detected");
+            m_sendTree();
+            m_treeDirty.reset();
         }
     }
 
@@ -333,7 +336,9 @@ namespace server {
         m_treeDirty += change;
         return change;
     }
-
+    void ServerImpl::m_queueTreeSend() {
+        m_callControlled([&] { m_treeDirty += true; });
+    }
     void ServerImpl::m_sendTree() {
         OSVR_DEV_VERBOSE("Sending path tree to clients.");
         common::tracing::markPathTreeBroadcast();

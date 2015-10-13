@@ -145,6 +145,8 @@ namespace server {
         /// order.
         void m_orderedDestruction();
 
+        /// @brief Queues up a tree transmission for next time around
+        void m_queueTreeSend();
 
         /// @brief sends full path tree contents
         void m_sendTree();
@@ -194,10 +196,9 @@ namespace server {
         /// @brief Common component for system device
         common::CommonComponent *m_commonComponent;
 
-        /// @brief Queue of actions to take next mainloop (potentially
-        /// time-consuming so we move them out of message handlers)
-        std::vector<std::function<void()> > m_queuedActions;
-
+        /// @brief a flag to indicate whether we should run a hardware
+        /// detection.
+        bool m_triggeredDetect = false;
 
         /// @brief Path tree
         common::PathTree m_tree;
