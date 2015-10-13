@@ -108,6 +108,47 @@ namespace common {
             return "com.osvr.imaging.imageregion";
         }
 
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        namespace {
+            struct InProcessMemoryMessage {
+                OSVR_ImagingMetadata metadata;
+                OSVR_ChannelCount sensor;
+                int buffer;
+            };
+            template <typename T>
+            void process(InProcessMemoryMessage &ipmmMsg, T &p) {
+                process(ipmmMsg.metadata, p);
+                p(ipmmMsg.sensor);
+                p(ipmmMsg.buffer);
+            }
+        } // namespace
+
+        const char *ImagePlacedInProcessMemory::identifier() {
+            return "com.osvr.imaging.imageplacedinprocessmemory";
+        }
+
+        class ImagePlacedInProcessMemory::MessageSerialization {
+        public:
+            MessageSerialization() {}
+            explicit MessageSerialization(InProcessMemoryMessage &&msg)
+                : m_msgData(std::move(msg)) {}
+
+#if defined(_MSC_VER) && defined(_PREFAST_)
+            // @todo workaround for apparent bug in VS2013 /analyze
+            explicit MessageSerialization(InProcessMemoryMessage const &msg)
+                : m_msgData(msg) { }
+#endif
+            template <typename T> void processMessage(T &p) {
+                process(m_msgData, p);
+            }
+
+            InProcessMemoryMessage const &getMessage() { return m_msgData; }
+
+        private:
+            InProcessMemoryMessage m_msgData;
+        };
+#endif
+
         namespace {
             struct SharedMemoryMessage {
                 OSVR_ImagingMetadata metadata;
@@ -169,14 +210,41 @@ namespace common {
                                          OSVR_TimeValue const &timestamp) {
 
         util::Flag dataSent;
+
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        dataSent +=
+            m_sendImageDataViaInProcessMemory(metadata, imageData, sensor, timestamp);
+#else
         dataSent += m_sendImageDataViaSharedMemory(metadata, imageData, sensor,
                                                    timestamp);
+#endif
         dataSent +=
             m_sendImageDataOnTheWire(metadata, imageData, sensor, timestamp);
         if (dataSent) {
             m_checkFirst(metadata);
         }
     }
+
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+    bool ImagingComponent::m_sendImageDataViaInProcessMemory(
+        OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
+        OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
+
+        auto imageBufferSize = getBufferSize(metadata);
+        auto imageBufferCopy = reinterpret_cast<OSVR_ImageBufferElement*>(cv::fastMalloc(imageBufferSize));
+        memcpy(imageBufferCopy, imageData, imageBufferSize);
+
+        Buffer<> buf;
+        messages::ImagePlacedInProcessMemory::MessageSerialization serialization(
+            messages::InProcessMemoryMessage{ metadata, sensor, reinterpret_cast<int>(imageBufferCopy) });
+
+        serialize(buf, serialization);
+        m_getParent().packMessage(
+            buf, imagePlacedInProcessMemory.getMessageType(), timestamp);
+
+        return true;
+    }
+#endif
 
     bool ImagingComponent::m_sendImageDataViaSharedMemory(
         OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
@@ -259,6 +327,30 @@ namespace common {
         return 0;
     }
 
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+    int VRPN_CALLBACK
+    ImagingComponent::m_handleImagePlacedInProcessMemory(void *userdata,
+                                                         vrpn_HANDLERPARAM p) {
+        auto self = static_cast<ImagingComponent *>(userdata);
+        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
+
+        messages::ImagePlacedInProcessMemory::MessageSerialization msgSerialize;
+        deserialize(bufReader, msgSerialize);
+        auto msg = msgSerialize.getMessage();
+        ImageData data;
+        data.sensor = msg.sensor;
+        data.metadata = msg.metadata;
+        data.buffer.reset(reinterpret_cast<OSVR_ImageBufferElement*>(msg.buffer), &cv::fastFree);
+        auto timestamp = util::time::fromStructTimeval(p.msg_time);
+
+        self->m_checkFirst(msg.metadata);
+        for (auto const &cb : self->m_cb) {
+            cb(data, timestamp);
+        }
+        return 0;
+    }
+#endif
+
     int VRPN_CALLBACK
     ImagingComponent::m_handleImagePlacedInSharedMemory(void *userdata,
                                                         vrpn_HANDLERPARAM p) {
@@ -317,12 +409,21 @@ namespace common {
             m_registerHandler(
                 &ImagingComponent::m_handleImagePlacedInSharedMemory, this,
                 imagePlacedInSharedMemory.getMessageType());
+
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+            m_registerHandler(
+                &ImagingComponent::m_handleImagePlacedInProcessMemory, this,
+                imagePlacedInProcessMemory.getMessageType());
+#endif
         }
         m_cb.push_back(handler);
     }
     void ImagingComponent::m_parentSet() {
         m_getParent().registerMessageType(imageRegion);
         m_getParent().registerMessageType(imagePlacedInSharedMemory);
+#ifdef OSVR_COMMON_IN_PROCESS_IMAGING
+        m_getParent().registerMessageType(imagePlacedInProcessMemory);
+#endif
     }
 
     void ImagingComponent::m_checkFirst(OSVR_ImagingMetadata const &metadata) {

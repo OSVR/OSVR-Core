@@ -85,7 +85,6 @@ add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
 ###
 osvr_add_interface_library(Imaging)
 
-
 # In an installed version, we search and add the dependency in the
 # osvrConfigInstalledOpenCV.cmake script since we don't need the same version in
 # the same place. Thus, here we only add it to the interface if using a build tree.
