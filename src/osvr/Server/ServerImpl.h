@@ -27,7 +27,6 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
-#include <osvr/Common/RouteContainer.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
@@ -199,8 +198,6 @@ namespace server {
         /// time-consuming so we move them out of message handlers)
         std::vector<std::function<void()> > m_queuedActions;
 
-        /// @brief JSON routing directives
-        common::RouteContainer m_routes;
 
         /// @brief Path tree
         common::PathTree m_tree;
