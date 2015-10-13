@@ -290,13 +290,6 @@ namespace server {
         return wasChanged;
     }
 
-    std::string ServerImpl::getSource(std::string const &destination) const {
-        /// @todo needs removal/replacement post path tree
-        std::string ret;
-        m_callControlled([&] { ret = m_routes.getSource(destination); });
-        return ret;
-    }
-
     void ServerImpl::m_orderedDestruction() {
         m_ctx.reset();
         m_systemComponent = nullptr; // non-owning pointer

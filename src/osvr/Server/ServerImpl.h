@@ -113,9 +113,6 @@ namespace server {
         /// @copydoc Server::addString
         bool addString(std::string const &path, std::string const &value);
 
-        /// @copydoc Server::getSource()
-        std::string getSource(std::string const &destination) const;
-
         /// @copydoc Server::setSleepTime()
         void setSleepTime(int microseconds);
 
