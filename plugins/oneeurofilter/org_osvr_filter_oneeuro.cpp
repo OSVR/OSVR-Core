@@ -64,8 +64,8 @@ class OneEuroFilterDevice {
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
         osvrDeviceTrackerConfigure(opts, &m_trackerOut);
+
         /// Create the device token with the options
-        m_dev.initSync(ctx, name, opts);
         OSVR_DeviceToken dev;
         if (OSVR_RETURN_FAILURE ==
             osvrAnalysisSyncInit(ctx, name.c_str(), opts, &dev, &m_clientCtx)) {
@@ -88,6 +88,8 @@ class OneEuroFilterDevice {
         }
         osvrRegisterPoseCallback(m_clientInterface,
                                  &OneEuroFilterDevice::poseCallback, this);
+
+        std::cout << "OneEuroFilterDevice constructor finished." << std::endl;
     }
 
     ~OneEuroFilterDevice() {
@@ -106,7 +108,6 @@ class OneEuroFilterDevice {
     void handleData(OSVR_TimeValue const &timestamp,
                     OSVR_PoseReport const &report) {
         ensureSensorId(report.sensor);
-
         auto &sensorData = *m_sensors[report.sensor];
         double dt =
             (timestamp.microseconds - sensorData.lastReport.microseconds) /
@@ -168,6 +169,8 @@ class OneEuroFilterDevice {
             : positionFilter(posParams), orientationFilter(oriParams),
               lastReport(osvr::util::time::getNow()) {}
 
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
         filters::OneEuroFilter<Eigen::Vector3d> positionFilter;
         filters::OneEuroFilter<Eigen::Quaterniond> orientationFilter;
         osvr::util::time::TimeValue lastReport;
@@ -213,6 +216,11 @@ class AnalysisPluginInstantiation {
         // optional
         auto deviceName = root.get("name", DRIVER_NAME).asString();
 
+        osvr::pluginkit::PluginContext context(ctx);
+
+        /// @todo make the token own this instead once there is API for that.
+        context.registerObjectForDeletion(new OneEuroFilterDevice(
+            ctx, deviceName, input, posParams, oriParams));
         return OSVR_RETURN_SUCCESS;
     }
 

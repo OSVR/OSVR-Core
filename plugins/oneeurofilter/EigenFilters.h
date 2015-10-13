@@ -43,14 +43,16 @@ namespace low_pass {
     inline Derived computeStep(Eigen::MatrixBase<Derived> const &hatx,
                                Eigen::MatrixBase<Derived> const &x,
                                typename Derived::Scalar alpha) {
-        return alpha * x + (1 - alpha) * hatx;
+        Derived ret = alpha * x + (1 - alpha) * hatx;
+        return ret;
     }
 
     template <typename Derived>
     inline Derived computeStep(Eigen::QuaternionBase<Derived> const &hatx,
                                Eigen::QuaternionBase<Derived> const &x,
                                typename Derived::Scalar alpha) {
-        return hatx.slerp(alpha, x).normalized();
+        Derived ret = hatx.slerp(alpha, x).normalized();
+        return ret;
     }
 
     /// Low pass filter (designed for use within the One Euro filter) that works
@@ -62,7 +64,7 @@ namespace low_pass {
       public:
         using value_type = T;
         using scalar = typename T::Scalar;
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /// Feeds in new data with the specified alpha.
         /// @returns the new hatx
@@ -151,7 +153,9 @@ namespace one_euro {
       public:
         using value_type = T;
         using scalar = typename T::Scalar;
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
         explicit OneEuroFilter(Params const &p) : m_params(p) {}
 
         value_type const &filter(scalar dt, value_type const &x) {
