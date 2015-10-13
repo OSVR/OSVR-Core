@@ -97,20 +97,20 @@ namespace usbserial {
 
         // iterate over serial ports, getting vid and pid
         while((serialPortService = IOIteratorNext(serialPortIterator)) != 0) {
-            CFNumberRef vidObj = (CFNumberRef) IORegistryEntrySearchCFProperty(serialPortService
+            const CFNumberRef vidObj = static_cast<CFNumberRef> (IORegistryEntrySearchCFProperty(serialPortService
                                                                                  , kIOServicePlane
                                                                                  , CFSTR("idVendor")
                                                                                  , NULL
-                                                                                 , kIORegistryIterateRecursively | kIORegistryIterateParents);
-            CFNumberRef pidObj = (CFNumberRef) IORegistryEntrySearchCFProperty(serialPortService
+                                                                                 , kIORegistryIterateRecursively | kIORegistryIterateParents));
+            const CFNumberRef pidObj = static_cast<CFNumberRef> (IORegistryEntrySearchCFProperty(serialPortService
                                                                                  , kIOServicePlane
                                                                                  , CFSTR("idProduct")
                                                                                  , NULL
-                                                                                 , kIORegistryIterateRecursively | kIORegistryIterateParents);
-            CFStringRef bsdPathObj = (CFStringRef) IORegistryEntryCreateCFProperty(serialPortService,
+                                                                                 , kIORegistryIterateRecursively | kIORegistryIterateParents));
+            const CFStringRef bsdPathObj = static_cast<CFStringRef> (IORegistryEntryCreateCFProperty(serialPortService,
                                                                           CFSTR(kIOCalloutDeviceKey),
                                                                           kCFAllocatorDefault,
-                                                                          0);
+                                                                          0));
 
             if(vidObj != NULL && pidObj != NULL && bsdPathObj != NULL) {
                 // handle device
@@ -122,14 +122,14 @@ namespace usbserial {
                 if(vid == vendorID && pid == productID) {
                     // convert the string object into a C-string
                     CFIndex bufferSize = CFStringGetMaximumSizeForEncoding(CFStringGetLength(bsdPathObj), kCFStringEncodingMacRoman) + sizeof('\0');
-                    char *  bsdPathBuf     = (char *) malloc(bufferSize);
-                    CFStringGetCString(bsdPathObj, bsdPathBuf, bufferSize, kCFStringEncodingMacRoman);
+                    std::vector<char> bsdPathBuf(bufferSize);
+                    CFStringGetCString(bsdPathObj, &bsdPathBuf[0]
+                        , bufferSize, kCFStringEncodingMacRoman);
                     // create the device
                     USBSerialDevice usb_serial_device(vid,
                                                       pid,
-                                                      bsdPathBuf, bsdPathBuf);
+                                                      &bsdPathBuf[0], &bsdPathBuf[0]);
                     devices.push_back(usb_serial_device);
-                    free(bsdPathBuf);
                 }
             }
         }
