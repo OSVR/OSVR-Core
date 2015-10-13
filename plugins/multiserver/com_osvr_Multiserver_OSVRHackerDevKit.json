@@ -1,34 +1,36 @@
 {
-  "deviceVendor": "OSVR",
-  "deviceName": "Hacker Development Kit Tracker",
-  "author": "Ryan Pavlik <ryan@sensics.com>",
-  "version": 1,
-  "lastModified": "2015-04-22T04:03:54.323Z",
-  "interfaces": {
-    "tracker": {
-      "count": 1,
-      "bounded": true,
-      "position": false,
-      "orientation": true
+    "deviceVendor": "OSVR",
+    "deviceName": "Hacker Development Kit Tracker",
+    "author": "Ryan Pavlik <ryan@sensics.com>",
+    "version": 1,
+    "lastModified": "2015-10-13T19:29:37.857Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1,
+            "bounded": true,
+            "position": false,
+            "orientation": true
+        }
+    },
+    "semantic": {
+        "hmd": {
+            "$target": {
+                "rotate": {
+                    "axis": "x",
+                    "degrees": 90
+                },
+                "child": {
+                    "changeBasis": {
+                        "x": "-x",
+                        "y": "-z",
+                        "z": "y"
+                    },
+                    "child": "tracker/0"
+                }
+            }
+        }
+    },
+    "automaticAliases": {
+        "/me/head": "semantic/hmd"
     }
-  },
-  "semantic": {
-    "hmd": "tracker/0"
-  },
-  "automaticAliases": {
-    "/me/head": {
-      "rotate": {
-        "axis": "x",
-        "degrees": 90
-      },
-      "child": {
-        "changeBasis": {
-          "x": "-x",
-          "y": "-z",
-          "z": "y"
-        },
-        "child": "semantic/hmd"
-      }
-    }
-  }
 }
