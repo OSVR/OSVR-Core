@@ -23,7 +23,9 @@ if(BUILD_WITH_TRACING)
     endif()
 endif()
 
-option(OSVR_COMMON_IN_PROCESS_IMAGING OFF)
+option(OSVR_COMMON_IN_PROCESS_IMAGING "Option to switch from shared-memory imaging messages to use only in-process memory messages. Requires single-process client/server." OFF)
+
+mark_as_advanced(OSVR_COMMON_IN_PROCESS_IMAGING)
 
 configure_file(TracingConfig.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
 

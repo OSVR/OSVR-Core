@@ -121,7 +121,7 @@ namespace common {
                 p(ipmmMsg.sensor);
                 p(ipmmMsg.buffer);
             }
-        }
+        } // namespace
 
         const char *ImagePlacedInProcessMemory::identifier() {
             return "com.osvr.imaging.imageplacedinprocessmemory";
