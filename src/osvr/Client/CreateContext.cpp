@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/Client/CreateContext.h>
 #include "PureClientContext.h"
+#include "AnalysisClientContext.h"
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -44,6 +45,32 @@ namespace client {
             return ret;
         }
         ret = common::makeContext<PureClientContext>(appId, host);
+        return ret;
+    }
+
+    common::ClientContext *
+    createAnalysisClientContext(const char appId[], const char host[],
+                                vrpn_ConnectionPtr const &conn) {
+        common::ClientContext *ret = nullptr;
+        if (!appId || !appId[0]) {
+            OSVR_DEV_VERBOSE("Could not create analysis client context - null "
+                             "or empty appId provided!");
+            return ret;
+        }
+
+        if (!host || !host[0]) {
+            OSVR_DEV_VERBOSE("Could not create analysis client context - null "
+                             "or empty host provided!");
+            return ret;
+        }
+
+        if (!conn) {
+            OSVR_DEV_VERBOSE("Could not create analysis client context - null "
+                             "connection provided!");
+            return ret;
+        }
+
+        ret = common::makeContext<AnalysisClientContext>(appId, host, conn);
         return ret;
     }
 

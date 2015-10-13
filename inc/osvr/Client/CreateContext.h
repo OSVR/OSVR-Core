@@ -35,12 +35,17 @@
 // Standard includes
 // - none
 
+class vrpn_ConnectionPtr;
+
 namespace osvr {
 namespace client {
 
     OSVR_CLIENT_EXPORT common::ClientContext *
     createContext(const char appId[], const char host[] = "localhost");
 
+    OSVR_CLIENT_EXPORT common::ClientContext *
+    createAnalysisClientContext(const char appId[], const char host[],
+                                vrpn_ConnectionPtr const& conn);
 } // namespace client
 } // namespace osvr
 
