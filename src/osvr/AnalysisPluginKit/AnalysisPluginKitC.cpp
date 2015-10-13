@@ -25,11 +25,17 @@
 // Internal Includes
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
 #include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Client/CreateContext.h>
 #include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/Verbosity.h>
+#include "../Connection/VrpnConnectionKind.h" /// @todo Internal header!
+#include "../Connection/VrpnConnectionKind.h" /// @todo Internal header!
 
 // Library/third-party includes
-// - none
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
 // - none
@@ -43,6 +49,19 @@
         return OSVR_RETURN_FAILURE;                                            \
     }                                                                          \
     OSVR_UTIL_MULTILINE_END
+
+class vrpn_Connection;
+
+namespace {
+	inline vrpn_Connection * extractVrpnConnection(osvr::connection::Connection & conn) {
+		vrpn_Connection *ret = nullptr;
+		if (std::string(conn.getConnectionKindID()) ==
+			osvr::connection::getVRPNConnectionKindID()) {
+			ret = static_cast<vrpn_Connection *>(conn.getUnderlyingObject());
+		}
+		return ret;
+	}
+} // namespace
 
 OSVR_ReturnCode
 osvrAnalysisSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
@@ -71,23 +90,27 @@ osvrAnalysisSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
         return OSVR_RETURN_FAILURE;
     }
 
-/// @todo Create a client context here, with an interface factory that handles
-/// relative paths.
-/// @todo pass ownership
-#if 0
-	device->acquireObject(clientContextSmartPtr);
-#endif
-/// @todo register client context update
-#if 0
-	device->setPreConnectionInteract([=clientContextSmartPtr] {
-		clientContextSmartPtr->update();
-	});
-#endif
+    /// Dig the VRPN connection out of the server.
+    auto osvrConn = osvr::connection::Connection::retrieveConnection(
+        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .getParent());
+    auto vrpnConn = extractVrpnConnection(*osvrConn);
 
-/// @todo finally return the client context too.
-#if 0
-	*clientCtx = clientContextSmartPtr.get();
-	return OSVR_RETURN_SUCCESS;
-#endif
-    return OSVR_RETURN_FAILURE;
+    /// Create a client context here
+
+    /// @todo Use an interface factory that handles relative paths.
+    auto clientCtxSmart = osvr::common::wrapSharedContext(
+        osvr::client::createAnalysisClientContext(
+            "org.osvr.analysisplugin" /**< @todo */, "localhost" /**< @todo */,
+            vrpn_ConnectionPtr(vrpnConn)));
+    auto & dev = **device;
+    /// pass ownership
+    dev.acquireObject(clientCtxSmart);
+
+    /// register client context update
+	dev.setPreConnectionInteract([=] { clientCtxSmart->update(); });
+
+    /// finally return the client context too.
+    *clientCtx = clientCtxSmart.get();
+    return OSVR_RETURN_SUCCESS;
 }
