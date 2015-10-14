@@ -30,7 +30,10 @@
 #include <osvr/Common/ClientContext_fwd.h>
 #include <osvr/Common/ClientInterfacePtr.h>
 #include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/ClientInterfaceFactory.h>
 #include <osvr/Util/KeyedOwnershipContainer.h>
+#include <osvr/Util/UniquePtr.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -107,6 +110,12 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     OSVR_COMMON_EXPORT
     OSVR_ClientContextObject(const char appId[],
                              osvr::common::ClientContextDeleter del);
+    /// @brief Constructor for derived class use only.
+    OSVR_COMMON_EXPORT
+    OSVR_ClientContextObject(
+        const char appId[],
+        osvr::common::ClientInterfaceFactory const &interfaceFactory,
+        osvr::common::ClientContextDeleter del);
 
   private:
     virtual void m_update() = 0;
@@ -127,6 +136,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     std::string const m_appId;
     InterfaceList m_interfaces;
+    osvr::common::ClientInterfaceFactory m_clientInterfaceFactory;
 
     osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
     osvr::common::ClientContextDeleter m_deleter;
@@ -137,8 +147,18 @@ namespace common {
     /// @brief Use the stored deleter to appropriately delete the client
     /// context.
     OSVR_COMMON_EXPORT void deleteContext(ClientContext *ctx);
+
     namespace detail {
+        /// @brief Deleter for use with std::unique_ptr
+        class ClientContextDeleter {
+            void operator()(ClientContext *ctx) const {
+                if (ctx) {
+                    deleteContext(ctx);
+                }
+            }
+        };
         namespace {
+            /// @brief Function template to produce the client context deleters.
             template <typename T>
             inline void context_deleter(ClientContext *obj) {
                 T *o = static_cast<T *>(obj);
@@ -147,12 +167,26 @@ namespace common {
         } // namespace
     } // namespace detail
 
+    /// @brief Template alias for a ClientContext unique_ptr with the correct
+    /// deleter class.
+    template <typename T = ClientContext>
+    using ClientContextUniquePtr = unique_ptr<T, ClientContextDeleter>;
+    using ClientContextSharedPtr = shared_ptr<ClientContext>;
+
     /// @brief Create a subclass object of ClientContext, setting the deleter
     /// appropriately by passing it as the last parameter. Compare to
     /// std::make_shared.
     template <typename T, typename... Args>
     inline T *makeContext(Args... args) {
         return new T(std::forward<Args>(args)..., &detail::context_deleter<T>);
+    }
+
+    /// @brief Wrap a client context pointer in a shared pointer with the
+    /// correct custom deleter.
+    template <typename T>
+    inline ClientContextSharedPtr wrapSharedContext(T *context) {
+        ClientContextSharedPtr ret(context, &deleteContext);
+        return ret;
     }
 } // namespace common
 } // namespace osvr

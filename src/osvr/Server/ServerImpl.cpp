@@ -90,10 +90,11 @@ namespace server {
             &ServerImpl::m_handleUpdatedRoute, this);
 
         // Things to do when we get a new incoming connection
-        // No longer doing hardware detect unconditionally here - see triggerHardwareDetect()
+        // No longer doing hardware detect unconditionally here - see
+        // triggerHardwareDetect()
         m_commonComponent =
             m_systemDevice->addComponent(common::CommonComponent::create());
-        m_commonComponent->registerPingHandler([&] { m_sendTree(); });
+        m_commonComponent->registerPingHandler([&] { m_queueTreeSend(); });
 
         // Set up the default display descriptor.
         m_tree.getNodeByPath("/display").value() =
@@ -117,6 +118,7 @@ namespace server {
         // Use a lambda to run the loop.
         m_thread = boost::thread([&] {
             bool keepRunning = true;
+            m_mainThreadId = m_thread.get_id();
             ::util::LoopGuard guard(m_run);
             do {
                 keepRunning = this->m_loop();
@@ -164,15 +166,13 @@ namespace server {
     void ServerImpl::instantiateDriver(std::string const &plugin,
                                        std::string const &driver,
                                        std::string const &params) {
+        BOOST_ASSERT_MSG(m_inServerThread(),
+                         "This method is only available in the server thread!");
         m_ctx->instantiateDriver(plugin, driver, params);
     }
 
     void ServerImpl::triggerHardwareDetect() {
-        OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
-        m_callControlled([&] {
-            common::tracing::markHardwareDetect();
-            m_ctx->triggerHardwareDetect();
-        });
+        m_callControlled([&] { m_triggeredDetect = true; });
     }
 
     void ServerImpl::registerMainloopMethod(MainloopMethod f) {
@@ -192,14 +192,20 @@ namespace server {
     void ServerImpl::m_update() {
         osvr::common::tracing::ServerUpdate trace;
         m_conn->process();
-        if (m_treeDirty) {
-            OSVR_DEV_VERBOSE("Path tree updated");
-            m_sendTree();
-            m_treeDirty.reset();
-        }
         m_systemDevice->update();
         for (auto &f : m_mainloopMethods) {
             f();
+        }
+        if (m_triggeredDetect) {
+            OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
+            common::tracing::markHardwareDetect();
+            m_ctx->triggerHardwareDetect();
+            m_triggeredDetect = false;
+        }
+        if (m_treeDirty) {
+            OSVR_DEV_VERBOSE("Path tree updated or connection detected");
+            m_sendTree();
+            m_treeDirty.reset();
         }
     }
 
@@ -287,13 +293,6 @@ namespace server {
         return wasChanged;
     }
 
-    std::string ServerImpl::getSource(std::string const &destination) const {
-        /// @todo needs removal/replacement post path tree
-        std::string ret;
-        m_callControlled([&] { ret = m_routes.getSource(destination); });
-        return ret;
-    }
-
     void ServerImpl::m_orderedDestruction() {
         m_ctx.reset();
         m_systemComponent = nullptr; // non-owning pointer
@@ -303,6 +302,9 @@ namespace server {
 
     int ServerImpl::m_handleUpdatedRoute(void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ServerImpl *>(userdata);
+        BOOST_ASSERT_MSG(
+            self->m_inServerThread(),
+            "This callback should never happen outside the server thread!");
         OSVR_DEV_VERBOSE("Got an updated route from a client.");
         self->m_addRoute(std::string(p.buffer, p.payload_len));
         return 0;
@@ -334,7 +336,9 @@ namespace server {
         m_treeDirty += change;
         return change;
     }
-
+    void ServerImpl::m_queueTreeSend() {
+        m_callControlled([&] { m_treeDirty += true; });
+    }
     void ServerImpl::m_sendTree() {
         OSVR_DEV_VERBOSE("Sending path tree to clients.");
         common::tracing::markPathTreeBroadcast();

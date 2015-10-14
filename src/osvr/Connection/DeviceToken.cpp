@@ -97,9 +97,22 @@ void OSVR_DeviceTokenObject::setUpdateCallback(
     m_setUpdateCallback(cb);
 }
 
-void OSVR_DeviceTokenObject::connectionInteract() { m_connectionInteract(); }
+void OSVR_DeviceTokenObject::setPreConnectionInteract(EventFunction const &f) {
+    m_preConnectionInteract = f;
+}
+
+void OSVR_DeviceTokenObject::connectionInteract() {
+    if (m_preConnectionInteract) {
+        m_preConnectionInteract();
+    }
+    m_connectionInteract();
+}
 
 void OSVR_DeviceTokenObject::stopThreads() { m_stopThreads(); }
+
+bool OSVR_DeviceTokenObject::releaseObject(void *obj) {
+    return m_ownedObjects.release(obj);
+}
 
 void OSVR_DeviceTokenObject::setDeviceDescriptor(
     std::string const &jsonString) {

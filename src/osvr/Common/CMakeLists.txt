@@ -46,6 +46,7 @@ set(API
     "${HEADER_LOCATION}/ChangeOfBasis.h"
     "${HEADER_LOCATION}/ClientContext.h"
     "${HEADER_LOCATION}/ClientContext_fwd.h"
+    "${HEADER_LOCATION}/ClientInterfaceFactory.h"
     "${HEADER_LOCATION}/ClientInterface.h"
     "${HEADER_LOCATION}/ClientInterfacePtr.h"
     "${HEADER_LOCATION}/Common.h"
@@ -126,6 +127,7 @@ set(SOURCE
     AliasProcessor.cpp
     BaseDevice.cpp
     ClientContext.cpp
+    ClientInterfaceFactory.cpp
     ClientInterface.cpp
     Common.cpp
     CommonComponent.cpp

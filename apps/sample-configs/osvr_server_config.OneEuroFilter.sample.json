@@ -1,0 +1,25 @@
+{
+  "drivers": [
+    {
+      "plugin": "org_osvr_filter_oneeuro",
+      "driver": "OneEuroFilter",
+      "params": {
+          "name": "FilteredHead",
+          "input": "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd",
+          "position": {
+              "minCutoff": 1.15,
+              "beta": 0.5,
+              "derivativeCutoff": 1.2
+          },
+          "orientation": {
+              "minCutoff": 1.5,
+              "beta": 0.5,
+              "derivativeCutoff": 1.2
+          }
+      }
+    }
+  ],
+  "aliases": {
+      "/me/head": "/org_osvr_filter_oneeuro/FilteredHead/tracker/0"
+  }
+}

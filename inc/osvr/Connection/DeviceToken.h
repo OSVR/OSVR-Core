@@ -36,6 +36,7 @@
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Util/GuardPtr.h>
 #include <osvr/Connection/ServerInterfaceList.h>
+#include <osvr/Util/KeyedOwnershipContainer.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -73,6 +74,8 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
                         osvr::connection::ConnectionPtr const &conn);
     /// @}
 
+    using EventFunction = std::function<void()>;
+
     /// @brief Destructor
     virtual ~OSVR_DeviceTokenObject();
 
@@ -82,6 +85,11 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     /// @brief Sets the update/wait callback.
     OSVR_CONNECTION_EXPORT void
     setUpdateCallback(osvr::connection::DeviceUpdateCallback const &cb);
+
+    /// @brief Sets a function to be executed at the beginning of
+    /// connectionInteract()
+    OSVR_CONNECTION_EXPORT void
+    setPreConnectionInteract(EventFunction const &f);
 
     /// @brief Send data.
     ///
@@ -117,6 +125,18 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     OSVR_CONNECTION_EXPORT void
     setDeviceDescriptor(std::string const &jsonString);
 
+    /// @brief Pass (smart-pointer) ownership of some object to the client
+    /// context.
+    template <typename T> void *acquireObject(T obj) {
+        return m_ownedObjects.acquire(obj);
+    }
+
+    /// @brief Frees some object whose lifetime is controlled by the client
+    /// context.
+    ///
+    /// @returns true if the object was found and released.
+    OSVR_CONNECTION_EXPORT bool releaseObject(void *obj);
+
   protected:
     OSVR_DeviceTokenObject(std::string const &name);
     osvr::connection::ConnectionPtr m_getConnection();
@@ -136,6 +156,8 @@ struct OSVR_DeviceTokenObject : boost::noncopyable {
     osvr::connection::ConnectionPtr m_conn;
     osvr::connection::ConnectionDevicePtr m_dev;
     osvr::connection::ServerInterfaceList m_serverInterfaces;
+    EventFunction m_preConnectionInteract;
+    osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
 };
 
 #endif // INCLUDED_DeviceToken_h_GUID_428B015C_19A2_46B0_CFE6_CC100763D387

@@ -18,6 +18,8 @@ set(API
 set(SOURCE
     AnalogRemoteFactory.cpp
     AnalogRemoteFactory.h
+    AnalysisClientContext.cpp
+    AnalysisClientContext.h
     ButtonRemoteFactory.cpp
     ButtonRemoteFactory.h
     ClientInterfaceObjectManager.cpp

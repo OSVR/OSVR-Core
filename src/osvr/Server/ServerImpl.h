@@ -27,7 +27,6 @@
 
 // Internal Includes
 #include <osvr/Server/Server.h>
-#include <osvr/Common/RouteContainer.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
@@ -113,9 +112,6 @@ namespace server {
         /// @copydoc Server::addString
         bool addString(std::string const &path, std::string const &value);
 
-        /// @copydoc Server::getSource()
-        std::string getSource(std::string const &destination) const;
-
         /// @copydoc Server::setSleepTime()
         void setSleepTime(int microseconds);
 
@@ -149,8 +145,8 @@ namespace server {
         /// order.
         void m_orderedDestruction();
 
-        /// @brief sends route message.
-        void m_sendRoutes();
+        /// @brief Queues up a tree transmission for next time around
+        void m_queueTreeSend();
 
         /// @brief sends full path tree contents
         void m_sendTree();
@@ -176,6 +172,12 @@ namespace server {
         /// @brief Handle new or updated device descriptors.
         void m_handleDeviceDescriptors();
 
+        /// @brief Some things are only safe in the server thread. This is how
+        /// to check if we're in the server thread. (Use m_callControlled with a
+        /// lambda to perform operations guaranteed to be in the server thread
+        /// or effectively so)
+        bool m_inServerThread() const;
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -194,8 +196,9 @@ namespace server {
         /// @brief Common component for system device
         common::CommonComponent *m_commonComponent;
 
-        /// @brief JSON routing directives
-        common::RouteContainer m_routes;
+        /// @brief a flag to indicate whether we should run a hardware
+        /// detection.
+        bool m_triggeredDetect = false;
 
         /// @brief Path tree
         common::PathTree m_tree;
@@ -215,16 +218,40 @@ namespace server {
         bool m_everStarted = false;
         /// @}
 
-        /// @brief Number of microseconds to sleep after each loop
-        /// iteration.
+        /// @brief The effective "main thread" - usually equivalent to
+        /// m_thread.get_id() but a callControlled might change it.
+        mutable boost::thread::id m_mainThreadId;
+
+        /// @brief Number of microseconds to sleep after each loop iteration.
         int m_sleepTime;
     };
+
+    /// @brief Class to temporarily (in RAII style) change a thread ID variable
+    /// to the current thread, then back again when we leave scope.
+    class TemporaryThreadIDChanger : boost::noncopyable {
+      public:
+        TemporaryThreadIDChanger(boost::thread::id &id)
+            : m_id(id), m_origID(id) {
+            m_id = boost::this_thread::get_id();
+        }
+        ~TemporaryThreadIDChanger() { m_id = m_origID; }
+
+      private:
+        boost::thread::id &m_id;
+        boost::thread::id m_origID;
+    };
+
+    inline bool ServerImpl::m_inServerThread() const {
+        boost::unique_lock<boost::mutex> lock(m_runControl);
+        return !m_running || (boost::this_thread::get_id() == m_mainThreadId);
+    }
 
     template <typename Callable>
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
             f();
@@ -236,6 +263,7 @@ namespace server {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
             boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
             f();

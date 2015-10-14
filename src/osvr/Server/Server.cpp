@@ -107,10 +107,6 @@ namespace server {
         m_impl->addExternalDevice(path, deviceName, server, descriptor);
     }
 
-    std::string Server::getSource(std::string const &destination) const {
-        return m_impl->getSource(destination);
-    }
-
     void Server::setSleepTime(int microseconds) {
         m_impl->setSleepTime(microseconds);
     }

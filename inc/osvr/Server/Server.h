@@ -217,13 +217,6 @@ namespace server {
             std::string const &path, std::string const &deviceName,
             std::string const &server, std::string const &descriptor);
 
-        /// @brief Gets the source for a given named destination in the routing
-        /// directives.
-        ///
-        /// Safe to call from any thread, even when server is running.
-        OSVR_SERVER_EXPORT std::string
-        getSource(std::string const &destination) const;
-
         /// @brief Sets the amount of time (in microseconds) that the server
         /// loop will sleep each loop.
         ///
