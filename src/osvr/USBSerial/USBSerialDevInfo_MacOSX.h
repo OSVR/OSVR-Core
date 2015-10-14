@@ -129,11 +129,11 @@ namespace usbserial {
                                          kCFStringEncodingMacRoman) +
                                      sizeof('\0');
                 std::vector<char> bsdPathBuf(bufferSize);
-                CFStringGetCString(bsdPathObj, &bsdPathBuf[0], bufferSize,
+                CFStringGetCString(bsdPathObj, bsdPathBuf.data(), bufferSize,
                                    kCFStringEncodingMacRoman);
                 // create the device
-                USBSerialDevice usb_serial_device(vid, pid, &bsdPathBuf[0],
-                                                  &bsdPathBuf[0]);
+                USBSerialDevice usb_serial_device(vid, pid, bsdPathBuf.data(),
+                                                  bsdPathBuf.data());
                 // check if IDs match and add
                 if (matches_ids(usb_serial_device, vendorID, productID)) {
                     devices.push_back(usb_serial_device);
