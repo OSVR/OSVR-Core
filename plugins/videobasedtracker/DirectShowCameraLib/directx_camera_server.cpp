@@ -30,6 +30,7 @@
 #include "directx_samplegrabber_callback.h"
 #include "ConnectTwoFilters.h"
 #include "PropertyBagHelper.h"
+#include "NullRenderFilter.h"
 
 // Library/third-party includes
 // - none
@@ -49,8 +50,6 @@
 //#define	DEBUG
 
 extern "C" const CLSID CLSID_SampleGrabber;
-
-extern "C" const CLSID CLSID_NullRenderer;
 
 /// @brief Checks something to see if it's false-ish, printing a message and
 /// throwing an exception if it is.
@@ -522,9 +521,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoCreateInstance nullptrRenderer\n");
 #endif
-    auto pNullRender = comutils::Ptr<IBaseFilter>{};
-    CoCreateInstance(CLSID_NullRenderer, nullptr, CLSCTX_INPROC_SERVER,
-                     IID_IBaseFilter, AttachPtr(pNullRender));
+    auto pNullRender = createNullRenderFilter();
 
     //-------------------------------------------------------------------
     // Build the filter graph.  First add the filters and then connect them.

@@ -29,6 +29,8 @@ add_library(directshow-camera STATIC
     directx_samplegrabber_callback.h
     directx_samplegrabber_callback.cpp
     GetPin.h
+    NullRenderFilter.cpp
+    NullRenderFilter.h
     PropertyBagHelper.h)
 target_include_directories(directshow-camera
     PUBLIC
