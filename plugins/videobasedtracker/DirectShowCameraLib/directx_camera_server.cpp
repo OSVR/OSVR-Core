@@ -27,7 +27,7 @@
 #include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
 #include "ConnectTwoFilters.h"
-#include "comutils/ComVariant.h"
+#include "PropertyBagHelper.h"
 
 // Library/third-party includes
 // - none
@@ -266,40 +266,16 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     return true;
 }
 
-inline std::string getProperty(IMoniker &mon, const wchar_t *propName) {
-    using namespace comutils::variant;
-    auto pPropBag = comutils::Ptr<IPropertyBag>{};
-    mon.BindToStorage(nullptr, nullptr, IID_IPropertyBag, AttachPtr(pPropBag));
-
-    auto ret = std::string{};
-    if (!pPropBag) {
-#ifdef DEBUG
-        std::cerr << "Could not get the property bag" << std::endl;
-#endif
-        return ret;
-    }
-    auto val = Variant{};
-    pPropBag->Read(propName, AttachVariant(val), nullptr);
-    if (!contains<std::wstring>(val)) {
-#ifdef DEBUG
-        std::cerr << "!contains<std::wstring>(val) for property "
-                  << osvr::util::wideToUTF8String(propName) << std::endl;
-#endif
-        return ret;
-    }
-    return osvr::util::wideToUTF8String(get<std::wstring>(val));
+inline std::string getDevicePath(PropertyBagHelper &prop) {
+    return osvr::util::wideToUTF8String(prop.read(L"DevicePath"));
 }
 
-inline std::string getDevicePath(IMoniker &mon) {
-    return getProperty(mon, L"DevicePath");
-}
-
-inline std::string getDeviceHumanDesc(IMoniker &mon) {
-    auto desc = getProperty(mon, L"Description");
+inline std::string getDeviceHumanDesc(PropertyBagHelper &prop) {
+    auto desc = prop.read(L"Description");
     if (desc.empty()) {
-        desc = getProperty(mon, L"FriendlyName");
+        desc = prop.read(L"FriendlyName");
     }
-    return desc;
+    return desc.empty() ? std::string() : osvr::util::wideToUTF8String(desc);
 }
 
 bool directx_camera_server::start_com_and_graphbuilder() {
@@ -474,7 +450,11 @@ bool directx_camera_server::open_and_find_parameters(
 
     auto pMoniker =
         find_first_capture_device_where([&pathPrefix](IMoniker &mon) {
-            auto path = getDevicePath(mon);
+            auto props = PropertyBagHelper{mon};
+            if (!props) {
+                return false;
+            }
+            auto path = getDevicePath(props);
             if (path.length() < pathPrefix.length()) {
                 return false;
             }
@@ -504,10 +484,9 @@ bool directx_camera_server::open_moniker_and_finish_setup(
                 "Null device moniker passed: no device found?\n");
         return false;
     }
-
+    auto prop = PropertyBagHelper{*pMoniker};
     printf("directx_camera_server: Using capture device '%s' at path '%s'\n",
-           getDeviceHumanDesc(*pMoniker).c_str(),
-           getDevicePath(*pMoniker).c_str());
+           getDeviceHumanDesc(prop).c_str(), getDevicePath(prop).c_str());
 
     // Bind the chosen moniker to a filter object.
     auto pSrc = comutils::Ptr<IBaseFilter>{};

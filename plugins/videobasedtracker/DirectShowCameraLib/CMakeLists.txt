@@ -26,7 +26,8 @@ add_library(directshow-camera STATIC
     ConnectTwoFilters.h
     directx_camera_server.h
     directx_camera_server.cpp
-    GetPin.h)
+    GetPin.h
+    PropertyBagHelper.h)
 target_include_directories(directshow-camera
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
