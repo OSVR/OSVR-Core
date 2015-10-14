@@ -26,7 +26,7 @@
 // Internal Includes
 #include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
-#include "WinVariant.h"
+#include "comutils/ComVariant.h"
 
 // Library/third-party includes
 // - none
@@ -62,15 +62,6 @@ inline DWORD dibsize(BITMAPINFOHEADER const &bi) {
     auto stride = ((((bi.biWidth * bi.biBitCount) + 31) & ~31) >> 3);
     return stride * std::abs(bi.biHeight);
 }
-
-ComInit::ComInit() {
-    auto hr = CoInitialize(nullptr);
-    if (FAILED(hr)) {
-        throw std::runtime_error("Could not initialize COM!");
-    }
-}
-
-ComInit::~ComInit() { CoUninitialize(); }
 
 // This class is used to handle callbacks from the SampleGrabber filter.  It
 // grabs each sample and holds onto it until the camera server that is
@@ -133,10 +124,11 @@ class directx_samplegrabber_callback : public ISampleGrabberCB {
 //-----------------------------------------------------------------------
 // Helper functions for editing the filter graph:
 
-static WinPtr<IPin> GetPin(IBaseFilter &pFilter, PIN_DIRECTION const PinDir) {
-    auto pEnum = WinPtr<IEnumPins>{};
+static comutils::Ptr<IPin> GetPin(IBaseFilter &pFilter,
+                                  PIN_DIRECTION const PinDir) {
+    auto pEnum = comutils::Ptr<IEnumPins>{};
     pFilter.EnumPins(AttachPtr(pEnum));
-    auto pPin = WinPtr<IPin>{};
+    auto pPin = comutils::Ptr<IPin>{};
     while (pEnum->Next(1, AttachPtr(pPin), nullptr) == S_OK) {
         PIN_DIRECTION PinDirThis;
         pPin->QueryDirection(&PinDirThis);
@@ -144,7 +136,7 @@ static WinPtr<IPin> GetPin(IBaseFilter &pFilter, PIN_DIRECTION const PinDir) {
             return pPin;
         }
     }
-    return WinPtr<IPin>{};
+    return comutils::Ptr<IPin>{};
 }
 
 static HRESULT ConnectTwoFilters(IGraphBuilder &pGraph, IBaseFilter &pFirst,
@@ -301,8 +293,8 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
 }
 
 inline std::string getProperty(IMoniker &mon, const wchar_t *propName) {
-
-    auto pPropBag = WinPtr<IPropertyBag>{};
+    using namespace comutils::variant;
+    auto pPropBag = comutils::Ptr<IPropertyBag>{};
     mon.BindToStorage(nullptr, nullptr, IID_IPropertyBag, AttachPtr(pPropBag));
 
     auto ret = std::string{};
@@ -312,7 +304,7 @@ inline std::string getProperty(IMoniker &mon, const wchar_t *propName) {
 #endif
         return ret;
     }
-    auto val = WinVariant{};
+    auto val = Variant{};
     pPropBag->Read(propName, AttachVariant(val), nullptr);
     if (!contains<std::wstring>(val)) {
 #ifdef DEBUG
@@ -348,7 +340,7 @@ bool directx_camera_server::start_com_and_graphbuilder() {
            "CoInitialize\n");
 #endif
 
-    _com = ComInit::init();
+    _com = comutils::ComInit::init();
 // Create the filter graph manager
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
@@ -393,14 +385,14 @@ inline bool didConstructionFail(T const &ptr, const char objName[]) {
 // Enumerates the capture devices available, returning the first one where the
 // passed functor (taking IMoniker& as a param) returns true.
 template <typename F>
-inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
-    auto ret = WinPtr<IMoniker>{};
+inline comutils::Ptr<IMoniker> find_first_capture_device_where(F &&f) {
+    auto ret = comutils::Ptr<IMoniker>{};
 // Create the system device enumerator.
 #ifdef DEBUG
     printf("find_first_capture_device_where(): Before "
            "CoCreateInstance SystemDeviceEnum\n");
 #endif
-    auto pDevEnum = WinPtr<ICreateDevEnum>{};
+    auto pDevEnum = comutils::Ptr<ICreateDevEnum>{};
     CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC,
                      IID_ICreateDevEnum, AttachPtr(pDevEnum));
     if (didConstructionFail(pDevEnum, "device enumerator")) {
@@ -413,7 +405,7 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     printf("find_first_capture_device_where(): Before "
            "CreateClassEnumerator\n");
 #endif
-    auto pClassEnum = WinPtr<IEnumMoniker>{};
+    auto pClassEnum = comutils::Ptr<IEnumMoniker>{};
     pDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
                                     AttachPtr(pClassEnum), 0);
     if (didConstructionFail(pClassEnum, "video enumerator (no cameras?)")) {
@@ -431,7 +423,7 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     printf("\ndirectx_camera_server find_first_capture_device_where(): "
            "Beginning enumeration of video capture devices.\n\n");
 #endif
-    auto pMoniker = WinPtr<IMoniker>{};
+    auto pMoniker = comutils::Ptr<IMoniker>{};
     while (pClassEnum->Next(1, AttachPtr(pMoniker), nullptr) == S_OK) {
 
 #ifdef VERBOSE_ENUM
@@ -530,7 +522,7 @@ bool directx_camera_server::open_and_find_parameters(
 }
 
 bool directx_camera_server::open_moniker_and_finish_setup(
-    WinPtr<IMoniker> pMoniker, unsigned width, unsigned height) {
+    comutils::Ptr<IMoniker> pMoniker, unsigned width, unsigned height) {
 
     if (!pMoniker) {
         fprintf(stderr,
@@ -544,7 +536,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
            getDevicePath(*pMoniker).c_str());
 
     // Bind the chosen moniker to a filter object.
-    auto pSrc = WinPtr<IBaseFilter>{};
+    auto pSrc = comutils::Ptr<IBaseFilter>{};
     pMoniker->BindToObject(0, 0, IID_IBaseFilter, AttachPtr(pSrc));
 
     //-------------------------------------------------------------------
@@ -637,7 +629,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     printf("directx_camera_server::open_and_find_parameters(): Before "
            "CoCreateInstance nullptrRenderer\n");
 #endif
-    auto pNullRender = WinPtr<IBaseFilter>{};
+    auto pNullRender = comutils::Ptr<IBaseFilter>{};
     CoCreateInstance(CLSID_NullRenderer, nullptr, CLSCTX_INPROC_SERVER,
                      IID_IBaseFilter, AttachPtr(pNullRender));
 
@@ -662,7 +654,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
-    auto pTuner = WinPtr<IAMTVTuner>{};
+    auto pTuner = comutils::Ptr<IAMTVTuner>{};
     auto hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(),
                                        IID_IAMTVTuner, AttachPtr(pTuner));
     if (pTuner) {

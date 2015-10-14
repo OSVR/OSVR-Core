@@ -70,14 +70,12 @@ if(WIN32)
         DirectShowCameraLib/base_camera_server.h
         DirectShowCameraLib/base_camera_server.cpp
         DirectShowCameraLib/directx_camera_server.h
-        DirectShowCameraLib/directx_camera_server.cpp
-        DirectShowCameraLib/WinVariant.h
-        )
+        DirectShowCameraLib/directx_camera_server.cpp)
     target_include_directories(directshow-camera PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
     target_link_libraries(directshow-camera
         PUBLIC
         vendored-vrpn
-        com_smart_pointer
+        comutils
         PRIVATE
         osvrUtilCpp
         ${OSVR_CODECVT_LIBRARIES}

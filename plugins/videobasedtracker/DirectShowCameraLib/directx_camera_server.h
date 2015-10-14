@@ -29,10 +29,10 @@
 
 // Internal Includes
 #include "base_camera_server.h"
+#include "comutils/ComPtr.h"
+#include "comutils/ComInit.h"
 
 // Library/third-party includes
-#include <boost/intrusive_ptr.hpp>
-#include <intrusive_ptr_COM.h>
 
 // Standard includes
 #include <windows.h>
@@ -56,28 +56,10 @@
 extern "C" const CLSID CLSID_SampleGrabber;
 extern "C" const CLSID CLSID_NullRenderer;
 
-/// @brief Template alias for our desired COM smart pointer.
-template <typename T> using WinPtr = boost::intrusive_ptr<T>;
-
 struct ConstructionError : std::runtime_error {
     ConstructionError(const char objName[])
         : std::runtime_error(
               std::string("directx_camera_server: Can't create ") + objName) {}
-};
-
-class ComInit;
-using ComInstance = std::unique_ptr<ComInit>;
-/// @brief Simple RAII class for handling COM initialization.
-class ComInit {
-  public:
-    ComInit();
-    ~ComInit();
-    static ComInstance init() {
-        auto ret = ComInstance{new ComInit};
-        return ret;
-    }
-    ComInit(ComInit const &) = delete;
-    ComInit &operator=(ComInit const &) = delete;
 };
 
 // This code (and the code in the derived videofile server) is
@@ -136,28 +118,30 @@ class directx_camera_server : public base_camera_server {
 
   protected:
     bool start_com_and_graphbuilder();
-    bool open_moniker_and_finish_setup(WinPtr<IMoniker> pMoniker,
+    bool open_moniker_and_finish_setup(comutils::Ptr<IMoniker> pMoniker,
                                        unsigned width, unsigned height);
     virtual void close_device(void);
 
     /// Construct but do not open camera (used by derived classes)
     directx_camera_server();
 
-    ComInstance _com;
+    comutils::ComInstance _com;
 
     // Objects needed for DirectShow video input.
-    WinPtr<IGraphBuilder> _pGraph; // Constructs a DirectShow filter graph
+    comutils::Ptr<IGraphBuilder>
+        _pGraph; // Constructs a DirectShow filter graph
 
-    WinPtr<IMediaControl>
-        _pMediaControl;          // Handles media streaming in the filter graph
-    WinPtr<IMediaEvent> _pEvent; // Handles filter graph events
+    comutils::Ptr<IMediaControl>
+        _pMediaControl; // Handles media streaming in the filter graph
+    comutils::Ptr<IMediaEvent> _pEvent; // Handles filter graph events
 
-    WinPtr<ICaptureGraphBuilder2> _pBuilder; // Filter graph builder
+    comutils::Ptr<ICaptureGraphBuilder2> _pBuilder; // Filter graph builder
 
-    WinPtr<IBaseFilter>
-        _pSampleGrabberFilter;        // Grabs samples from the media stream
-    WinPtr<ISampleGrabber> _pGrabber; // Interface for the sample grabber filter
-    WinPtr<IAMStreamConfig>
+    comutils::Ptr<IBaseFilter>
+        _pSampleGrabberFilter; // Grabs samples from the media stream
+    comutils::Ptr<ISampleGrabber>
+        _pGrabber; // Interface for the sample grabber filter
+    comutils::Ptr<IAMStreamConfig>
         _pStreamConfig; // Interface to set the video dimensions
 
     // Memory pointers used to get non-virtual memory
