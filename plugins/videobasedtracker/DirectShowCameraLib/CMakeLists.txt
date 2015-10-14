@@ -26,6 +26,8 @@ add_library(directshow-camera STATIC
     ConnectTwoFilters.h
     directx_camera_server.h
     directx_camera_server.cpp
+    directx_samplegrabber_callback.h
+    directx_samplegrabber_callback.cpp
     GetPin.h
     PropertyBagHelper.h)
 target_include_directories(directshow-camera

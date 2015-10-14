@@ -125,6 +125,10 @@ class directx_camera_server : public base_camera_server {
     /// Construct but do not open camera (used by derived classes)
     directx_camera_server();
 
+    /// Destructor - out of line so we don't need a definition of
+    /// directx_samplegrabber_callback
+    //~directx_camera_server();
+
     comutils::ComInstance _com;
 
     // Objects needed for DirectShow video input.

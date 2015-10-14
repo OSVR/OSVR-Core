@@ -26,6 +26,8 @@
 // Internal Includes
 #include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
+#include "dibsize.h"
+#include "directx_samplegrabber_callback.h"
 #include "ConnectTwoFilters.h"
 #include "PropertyBagHelper.h"
 
@@ -55,72 +57,6 @@ inline void checkForConstructionError(T const &ptr, const char objName[]) {
         throw ConstructionError(objName);
     }
 }
-
-/// @brief Computes bytes required for an UNCOMPRESSED RGB DIB
-inline DWORD dibsize(BITMAPINFOHEADER const &bi) {
-    // cf:
-    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd318229(v=vs.85).aspx
-    auto stride = ((((bi.biWidth * bi.biBitCount) + 31) & ~31) >> 3);
-    return stride * std::abs(bi.biHeight);
-}
-
-// This class is used to handle callbacks from the SampleGrabber filter.  It
-// grabs each sample and holds onto it until the camera server that is
-// associated with the object comes and gets it.  The callback method in this
-// class is called in another thread, so its methods need to be guarded with
-// semaphores.
-
-class directx_samplegrabber_callback : public ISampleGrabberCB {
-  public:
-    directx_samplegrabber_callback(void);
-    ~directx_samplegrabber_callback(void);
-
-    void shutdown(void) {
-        _stayAlive = false;
-        Sleep(100);
-    }
-
-    // Boolean flag telling whether there is a sample in the image
-    // buffer ready for the application thread to consume.  Set to
-    // true by the callback when there is an image there, and back
-    // to false by the application thread when it reads the image.
-    // XXX This should be done using a semaphore to avoid having
-    // to poll in the application.
-    bool imageReady; //< true when there is an image ready to be processed
-
-    // Boolean flag telling whether the app is done processing the image
-    // buffer so that the callback thread can return it to the filter graph.
-    // Set to true by the application when it finishes, and back
-    // to false by the callback thread when it gets a new image.
-    // XXX This should be done using a semaphore to avoid having
-    // to poll in the callback thread.
-    bool imageDone; //< true when the app has finished processing an image
-
-    // A pointer to the image sample that has been passed to the sample
-    // grabber callback handler.
-    IMediaSample *imageSample;
-
-    // These three methods must be defined because of the IUnknown parent class.
-    // XXX The first two are a hack to pretend that we are doing reference
-    // counting; this object must last longer than the sample grabber it is
-    // connected to in order to avoid segmentations faults.
-    STDMETHODIMP_(ULONG) AddRef(void) { return 1; }
-    STDMETHODIMP_(ULONG) Release(void) { return 2; }
-    STDMETHOD(QueryInterface)
-    (REFIID interfaceRequested, void **handleToInterfaceRequested);
-
-    // One of the following two methods must be defined do to the
-    // ISampleGraberCB parent class; this is the way we hear from the grabber.
-    // We implement the one that gives us unbuffered access.  Be sure to turn
-    // off buffering in the SampleGrabber that is associated with this callback
-    // handler.
-    STDMETHODIMP BufferCB(double, BYTE *, long) { return E_NOTIMPL; }
-    STDMETHOD(SampleCB)(double time, IMediaSample *sample);
-
-  protected:
-    BITMAPINFOHEADER _bitmapInfo; //< Describes format of the bitmap
-    bool _stayAlive;              //< Tells all threads to exit
-};
 
 /** The first time we are called, start the filter graph running in continuous
     mode and grab the first image that comes out.  Later times, grab each new
@@ -920,77 +856,4 @@ bool directx_camera_server::get_pixel_from_memory(unsigned X, unsigned Y,
     unsigned cols = _num_columns;
     val = _buffer[(Y * cols + X) * 3 + RGB];
     return true;
-}
-
-//--------------------------------------------------------------------------------------------
-// This section implements the callback handler that gets frames from the
-// SampleGrabber filter.
-
-directx_samplegrabber_callback::directx_samplegrabber_callback()
-    : imageReady(false), imageDone(false), imageSample(nullptr),
-      _stayAlive(true) {}
-
-directx_samplegrabber_callback::~directx_samplegrabber_callback() {
-    // Make sure the other thread knows that it is okay to return the
-    // buffer and wait until it has had time to do so.
-    _stayAlive = false;
-    Sleep(100);
-};
-
-HRESULT directx_samplegrabber_callback::QueryInterface(
-    REFIID interfaceRequested, void **handleToInterfaceRequested) {
-    if (handleToInterfaceRequested == nullptr) {
-        return E_POINTER;
-    }
-    if (interfaceRequested == IID_IUnknown) {
-        *handleToInterfaceRequested = static_cast<IUnknown *>(this);
-    } else if (interfaceRequested == IID_ISampleGrabberCB) {
-        *handleToInterfaceRequested = static_cast<ISampleGrabberCB *>(this);
-    } else {
-        return E_NOINTERFACE;
-    }
-    AddRef();
-    return S_OK;
-}
-
-// This is the routine that processes each sample.  It gets the information
-// about
-// the sample (one frame) from the SampleGrabber, then marks itself as being
-// ready
-// to process the sample.  It then blocks until the sample has been processed by
-// the associated camera server.
-// The hand-off is handled by using two booleans acting as semaphores.
-// The first semaphore (imageReady)
-// controls access to the callback handler's buffer so that the application
-// thread
-// will only read it when it is full.  The second sempaphore (imageDone)
-// controls when
-// the handler routine can release a sample; it makes sure that the sample is
-// not
-// released before the application thread is done processing it.
-// The directx camera must be sure to free an open sample (if any) after
-// changing
-// the state of the filter graph, so that this doesn't block indefinitely.  This
-// means
-// that the destructor for any object using this callback object has to destroy
-// this object.  The destructor sets _stayAlive to false to make sure this
-// thread terminates.
-
-HRESULT directx_samplegrabber_callback::SampleCB(double time,
-                                                 IMediaSample *sample) {
-    // Point the image sample to the media sample we have and then set the flag
-    // to tell the application it can process it.
-    imageSample = sample;
-    imageReady = true;
-
-    // Wait until the image has been processed and then return the buffer to the
-    // filter graph
-    while (!imageDone && _stayAlive) {
-        vrpn_SleepMsecs(1);
-    }
-    if (_stayAlive) {
-        imageDone = false;
-    }
-
-    return S_OK;
 }
