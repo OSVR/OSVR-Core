@@ -53,9 +53,6 @@
 
 #include "qedit_wrapper.h"
 
-extern "C" const CLSID CLSID_SampleGrabber;
-extern "C" const CLSID CLSID_NullRenderer;
-
 struct ConstructionError : std::runtime_error {
     ConstructionError(const char objName[])
         : std::runtime_error(

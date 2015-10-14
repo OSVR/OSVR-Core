@@ -48,6 +48,10 @@
 //#define HACK_TO_REOPEN
 //#define	DEBUG
 
+extern "C" const CLSID CLSID_SampleGrabber;
+
+extern "C" const CLSID CLSID_NullRenderer;
+
 /// @brief Checks something to see if it's false-ish, printing a message and
 /// throwing an exception if it is.
 template <typename T>
