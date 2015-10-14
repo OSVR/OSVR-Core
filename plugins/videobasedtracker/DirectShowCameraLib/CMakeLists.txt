@@ -23,8 +23,10 @@ configure_file(qedit_wrapper.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/qedit_wrapp
 add_library(directshow-camera STATIC
     base_camera_server.h
     base_camera_server.cpp
+    ConnectTwoFilters.h
     directx_camera_server.h
-    directx_camera_server.cpp)
+    directx_camera_server.cpp
+    GetPin.h)
 target_include_directories(directshow-camera
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"

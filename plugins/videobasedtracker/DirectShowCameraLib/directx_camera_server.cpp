@@ -26,6 +26,7 @@
 // Internal Includes
 #include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
+#include "ConnectTwoFilters.h"
 #include "comutils/ComVariant.h"
 
 // Library/third-party includes
@@ -120,33 +121,6 @@ class directx_samplegrabber_callback : public ISampleGrabberCB {
     BITMAPINFOHEADER _bitmapInfo; //< Describes format of the bitmap
     bool _stayAlive;              //< Tells all threads to exit
 };
-
-//-----------------------------------------------------------------------
-// Helper functions for editing the filter graph:
-
-static comutils::Ptr<IPin> GetPin(IBaseFilter &pFilter,
-                                  PIN_DIRECTION const PinDir) {
-    auto pEnum = comutils::Ptr<IEnumPins>{};
-    pFilter.EnumPins(AttachPtr(pEnum));
-    auto pPin = comutils::Ptr<IPin>{};
-    while (pEnum->Next(1, AttachPtr(pPin), nullptr) == S_OK) {
-        PIN_DIRECTION PinDirThis;
-        pPin->QueryDirection(&PinDirThis);
-        if (PinDir == PinDirThis) {
-            return pPin;
-        }
-    }
-    return comutils::Ptr<IPin>{};
-}
-
-static HRESULT ConnectTwoFilters(IGraphBuilder &pGraph, IBaseFilter &pFirst,
-                                 IBaseFilter &pSecond) {
-    auto pOut = GetPin(pFirst, PINDIR_OUTPUT);
-    auto pIn = GetPin(pSecond, PINDIR_INPUT);
-    return pGraph.Connect(pOut.get(), pIn.get());
-}
-
-//-----------------------------------------------------------------------
 
 /** The first time we are called, start the filter graph running in continuous
     mode and grab the first image that comes out.  Later times, grab each new
