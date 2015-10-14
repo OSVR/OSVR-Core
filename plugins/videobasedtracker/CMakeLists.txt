@@ -65,6 +65,15 @@ target_link_libraries(com_osvr_VideoBasedHMDTracker
 )
 if(WIN32)
     target_link_libraries(com_osvr_VideoBasedHMDTracker directshow-camera)
+    add_executable(ViewTrackingCamera
+        DirectShowToCV.h
+        ViewTrackingCamera.cpp)
+    target_link_libraries(ViewTrackingCamera PRIVATE
+        opencv_core
+        opencv_highgui
+        directshow-camera)
+    set_target_properties(ViewTrackingCamera PROPERTIES
+        FOLDER "OSVR Plugins/Video-Based Tracker")
 endif()
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
