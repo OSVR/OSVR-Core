@@ -32,6 +32,7 @@
 // Standard includes
 #include <memory>
 #include <iostream>
+#include <chrono>
 
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
 /// make this global for a simpler demo.
@@ -40,6 +41,37 @@ static const std::string windowNameAndInstructions(
 
 // This string begins the DevicePath provided by Windows for the HDK's camera.
 static const auto HDK_CAMERA_PATH_PREFIX = "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
+
+class FrameCounter {
+  public:
+    FrameCounter() { reset(); }
+
+    void gotFrame() {
+        ++m_frames;
+        auto now = clock::now();
+        if (now >= m_end) {
+            auto duration =
+                std::chrono::duration_cast<std::chrono::duration<double>>(
+                    now - m_begin);
+            std::cout << m_frames / duration.count() << " FPS read from camera"
+                      << std::endl;
+            reset();
+        }
+    }
+
+    void reset() {
+        m_begin = clock::now();
+        m_end = m_begin + std::chrono::seconds(1);
+        m_frames = 0;
+    }
+
+  private:
+    using clock = std::chrono::system_clock;
+    using time_point = std::chrono::time_point<clock>;
+    time_point m_begin;
+    time_point m_end;
+    std::size_t m_frames = 0;
+};
 
 int main() {
     auto cam = std::unique_ptr<directx_camera_server>{
@@ -52,14 +84,18 @@ int main() {
     }
     auto frame = cv::Mat{};
 
+    FrameCounter counter;
     cv::namedWindow(windowNameAndInstructions);
     do {
         frame = retrieve(*cam);
+        counter.gotFrame();
         cv::imshow(windowNameAndInstructions, frame);
+
         char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key
         if ('q' == key || 'Q' == key || 27 /*esc*/ == key) {
             break;
         }
+
     } while (cam->read_image_to_memory());
     return 0;
 }
