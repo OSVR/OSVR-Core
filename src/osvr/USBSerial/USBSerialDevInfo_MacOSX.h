@@ -26,24 +26,12 @@
 // Internal Includes
 #include "USBSerialDevInfo.h"
 
-// Library/third-party includes
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/string.hpp>
 
-// Standard includes
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-
-#include <fcntl.h>        // for O_NONBLOCK
-#include <sys/ioctl.h>    // for ioctl
-#include <unistd.h>       // for open, close
-
-// IOKit includes
+// System includes
+#include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
-#include <IOKit/usb/IOUSBLib.h>
+#include <IOKit/IOKitKeys.h>
+#include <IOKit/serial/IOSerialKeys.h>
 
 namespace osvr {
 namespace usbserial {
@@ -51,19 +39,29 @@ namespace usbserial {
     namespace {
 
         /**
-         * Given the name of a device, this function will create a
-         *USBSerialDevice
-         * object. If the device can be created successfully it will return
-         * @c boost::none.
-         *
-         * @param device The name of the device to create (e.g., "ttyACM0")
-         *
-         * @return an optional USBSerialDevice
+         * Helper function that returns an IOKit iterator for all serial ports
+         * on the system.
+         * @param matchingServices pointer which will be set to the value of the
+         * iterator
+         * @return 0 on success, -1 on failure
          */
-        boost::optional<USBSerialDevice>
-        make_USBSerialDevice(const std::string &device) {
-            //FIXME: STUB
-            return boost::none;
+        int findSerialPorts(io_iterator_t *matchingServices) {
+            // Query IOKit for services matching kIOSerialBSDServiceValue
+            CFMutableDictionaryRef classesToMatch =
+                IOServiceMatching(kIOSerialBSDServiceValue);
+            if (classesToMatch == NULL) {
+                return false;
+            }
+            // Query only for serial ports
+            CFDictionarySetValue(classesToMatch, CFSTR(kIOSerialBSDTypeKey),
+                                 CFSTR(kIOSerialBSDAllTypes));
+            // Run the query
+            kern_return_t kernResult = IOServiceGetMatchingServices(
+                kIOMasterPortDefault, classesToMatch, matchingServices);
+            if (KERN_SUCCESS != kernResult) {
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -87,15 +85,62 @@ namespace usbserial {
 
             return (vendor_matches && product_matches);
         }
-
-    } // end namespace
+    }
 
     std::vector<USBSerialDevice>
     getSerialDeviceList(boost::optional<uint16_t> vendorID,
                         boost::optional<uint16_t> productID) {
 
-        //FIXME: STUB
         std::vector<USBSerialDevice> devices;
+
+        io_iterator_t serialPortIterator;
+        io_object_t serialPortService;
+        // find all serial ports
+        if (findSerialPorts(&serialPortIterator) == true) {
+            // iterate over serial ports, getting vid and pid
+            while ((serialPortService = IOIteratorNext(serialPortIterator)) !=
+                   0) {
+                const CFNumberRef vidObj =
+                    static_cast<CFNumberRef>(IORegistryEntrySearchCFProperty(
+                        serialPortService, kIOServicePlane, CFSTR("idVendor"),
+                        NULL, kIORegistryIterateRecursively |
+                                  kIORegistryIterateParents));
+                const CFNumberRef pidObj =
+                    static_cast<CFNumberRef>(IORegistryEntrySearchCFProperty(
+                        serialPortService, kIOServicePlane, CFSTR("idProduct"),
+                        NULL, kIORegistryIterateRecursively |
+                                  kIORegistryIterateParents));
+                const CFStringRef bsdPathObj =
+                    static_cast<CFStringRef>(IORegistryEntryCreateCFProperty(
+                        serialPortService, CFSTR(kIOCalloutDeviceKey),
+                        kCFAllocatorDefault, 0));
+
+                if (!vidObj || !pidObj || !bsdPathObj) {
+                    continue;
+                }
+                // handle device
+                uint16_t vid, pid;
+                CFNumberGetValue(vidObj, kCFNumberSInt16Type, &vid);
+                CFNumberGetValue(pidObj, kCFNumberSInt16Type, &pid);
+
+                // convert the string object into a C-string
+                CFIndex bufferSize = CFStringGetMaximumSizeForEncoding(
+                                         CFStringGetLength(bsdPathObj),
+                                         kCFStringEncodingMacRoman) +
+                                     sizeof('\0');
+                std::vector<char> bsdPathBuf(bufferSize);
+                CFStringGetCString(bsdPathObj, bsdPathBuf.data(), bufferSize,
+                                   kCFStringEncodingMacRoman);
+                // create the device
+                USBSerialDevice usb_serial_device(vid, pid, bsdPathBuf.data(),
+                                                  bsdPathBuf.data());
+                // check if IDs match and add
+                if (matches_ids(usb_serial_device, vendorID, productID)) {
+                    devices.push_back(usb_serial_device);
+                }
+            }
+        }
+
         return devices;
     }
 

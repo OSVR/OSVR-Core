@@ -42,3 +42,12 @@ if(WIN32)
         wbemuuid
         com_smart_pointer)
 endif()
+if(APPLE)
+    # find_library must be used for OS X frameworks
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+    find_library(IOKIT_LIBRARY IOKit)
+    target_link_libraries(${LIBNAME_FULL}
+        PRIVATE
+        ${COREFOUNDATION_LIBRARY}
+        ${IOKIT_LIBRARY})
+endif()
