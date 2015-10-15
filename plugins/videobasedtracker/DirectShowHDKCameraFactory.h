@@ -27,12 +27,45 @@
 
 // Internal Includes
 #include "directx_camera_server.h"
+#include "GetIVideoProcAmp.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <memory>
+
+#ifdef OSVR_HAVE_IVIDEOPROCAMP
+#include <iostream>
+#include <vidcap.h> // for IVideoProcAmp
+
+static void setPowerlineFrequencyTo50(IBaseFilter &filter) {
+    auto procAmp = getIVideoProcAmp(filter);
+    if (!procAmp) {
+        std::cout << "directx_camera_server: Couldn't get IVideoProcAmp"
+                  << std::endl;
+        return;
+    }
+    static const long POWERLINE_DISABLED = 0;
+    static const long POWERLINE_50HZ = 1;
+    static const long POWERLINE_60HZ = 2;
+    auto hr = procAmp->put_PowerlineFrequency(POWERLINE_50HZ,
+                                              VideoProcAmp_Flags_Manual);
+    if (SUCCEEDED(hr)) {
+        std::cout << "directx_camera_server: Successfully set powerline "
+                     "frequency to 50Hz"
+                  << std::endl;
+    } else {
+        std::cout << "directx_camera_server: Almost, but couldn't, set "
+                     "powerline frequency to 50Hz"
+                  << std::endl;
+    }
+}
+#else
+static void setPowerlineFrequencyTo50(IBaseFilter &) {
+    // no-op, header missing
+}
+#endif
 
 std::unique_ptr<directx_camera_server> getDirectShowHDKCamera() {
     // This string begins the DevicePath provided by Windows for the HDK's
