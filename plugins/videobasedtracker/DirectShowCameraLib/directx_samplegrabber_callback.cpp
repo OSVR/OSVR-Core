@@ -49,6 +49,8 @@ directx_samplegrabber_callback::~directx_samplegrabber_callback() {
 
 void directx_samplegrabber_callback::shutdown() {
     _stayAlive = false;
+    /// @todo this is an awfully crude and hacky way of ensuring the callback
+    /// has finished.
     Sleep(100);
 }
 HRESULT directx_samplegrabber_callback::QueryInterface(
@@ -71,17 +73,23 @@ HRESULT directx_samplegrabber_callback::QueryInterface(
 // about the sample (one frame) from the SampleGrabber, then marks itself as
 // being ready to process the sample.  It then blocks until the sample has been
 // processed by the associated camera server. The hand-off is handled by using
-// two booleans  acting as semaphores.
-// The first semaphore (imageReady) controls access to the callback handler's
-// buffer so that the application thread will only read it when it is full. The
-// second sempaphore (imageDone) controls when the handler routine can release a
-// sample; it makes sure that the sample is not released before the application
-// thread is done processing it.
+// two Windows system events, acting somewhat like semaphores, in
+// MediaSampleExchange.
+//
 // The directx camera must be sure to free an open sample (if any) after
 // changing the state of the filter graph, so that this doesn't block
 // indefinitely.  This means that the destructor for any object using this
 // callback object has to destroy this object.  The destructor sets _stayAlive
 // to false to make sure this thread terminates.
+//
+// The discussion below relates more closely to an earlier implementation that
+// used booleans as crude semaphore substitutes: it has been left for its
+// instructive value.
+// The first semaphore (imageReady) controls access to the callback handler's
+// buffer so that the application thread will only read it when it is full. The
+// second sempaphore (imageDone) controls when the handler routine can release a
+// sample; it makes sure that the sample is not released before the application
+// thread is done processing it.
 
 HRESULT directx_samplegrabber_callback::SampleCB(double time,
                                                  IMediaSample *sample) {
@@ -90,6 +98,10 @@ HRESULT directx_samplegrabber_callback::SampleCB(double time,
     BOOST_ASSERT_MSG(_stayAlive, "Should be alive when samplecb is called");
     sampleExchange_->signalSampleProduced(sample);
 
+    // Wait for either this object to be destroyed/shutdown (_stayAlive ==
+    // false), or for the application/consumer to finish with this sample (which
+    // would return true from the wait function, rather than false as a timeout
+    // does).
     while (_stayAlive &&
            !sampleExchange_->waitForSampleConsumed(WAIT_FOR_CONSUMER_TIMEOUT)) {
     }

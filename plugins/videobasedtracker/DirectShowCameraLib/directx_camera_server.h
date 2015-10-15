@@ -52,6 +52,10 @@
 // - IID_ISampleGrabber
 // - CLSID_NullRenderer
 // - IID_ISampleGrabberCB
+//
+// The NullRenderer CLSID is used in the NullRenderFilter.cpp file, the rest are
+// used in the SampleGrabberWrapper.cpp and directx_samplegrabber_callback.*
+// files.
 
 struct ConstructionError : std::runtime_error {
     ConstructionError(const char objName[])
@@ -74,9 +78,11 @@ struct ConstructionError : std::runtime_error {
 // code.  What a sick world we live in when example code can't be freely
 // shared.
 
-// The Microsoft Platform SDK must be installed on your machine
-// to make this work; this code makes use of the BaseClasses library and
-// other parts of the library.
+// If you're using Visual Studio, an old (pre-7.0) version of the Microsoft
+// Platform SDK must be installed on your machine to make this work; the qedit.h
+// header is used in very encapsulated locations, but used nonetheless.
+// If you're building with MinGW64, they've got a reimplementation of that
+// header that works fine, no worries.
 
 class directx_samplegrabber_callback; //< Forward declaration
 
