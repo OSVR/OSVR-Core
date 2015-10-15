@@ -40,6 +40,7 @@
 #include <windows.h>
 #include <stdexcept>
 #include <memory>
+#include <vector>
 
 // Include files for DirectShow video input
 #include <dshow.h>
@@ -84,6 +85,8 @@ class directx_samplegrabber_callback; //< Forward declaration
 
 class directx_camera_server : public base_camera_server {
   public:
+    using BufferType = std::vector<unsigned char>;
+
     /// Open the nth available camera.  First camera is 0.
     directx_camera_server(int which, unsigned width = 0, unsigned height = 0);
     /// Open the first camera whose DevicePath begins with the supplied prefix.
@@ -105,11 +108,11 @@ class directx_camera_server : public base_camera_server {
     virtual bool get_pixel_from_memory(unsigned X, unsigned Y, vrpn_uint16 &val,
                                        int RGB = 0) const;
 
-    /// Get a pointer to the actual memory buffer.
-    /// @todo Construct a safer way to access this.
-    const unsigned char *get_pixel_buffer_pointer(void) const {
-        return _buffer;
-    }
+    /// Get the actual memory buffer.
+    BufferType const &get_pixel_buffer() const { return _buffer; }
+
+    /// Get the actual memory buffer.
+    BufferType &get_pixel_buffer() { return _buffer; }
 
     /// Matches a method on the OpenCV camera, to let us easily integrate into
     /// existing code.
@@ -147,10 +150,9 @@ class directx_camera_server : public base_camera_server {
         _pStreamConfig; // Interface to set the video dimensions
 
     // Memory pointers used to get non-virtual memory
-    unsigned char *_buffer = nullptr; //< Buffer for what comes from camera,
-    size_t _buflen = 0;               //< Length of that buffer
-    bool _started_graph = false;      //< Did we start the filter graph running?
-    unsigned _mode = 0;               //< Mode 0 = running, Mode 1 = paused.
+    BufferType _buffer;          //< Buffer for what comes from camera
+    bool _started_graph = false; //< Did we start the filter graph running?
+    unsigned _mode = 0;          //< Mode 0 = running, Mode 1 = paused.
 
     long _stride; //< How many bytes to skip when going to next line (may be
     // negative for upside-down images)
@@ -164,6 +166,9 @@ class directx_camera_server : public base_camera_server {
                                   unsigned height);
     virtual bool read_one_frame(unsigned minX, unsigned maxX, unsigned minY,
                                 unsigned maxY, unsigned exposure_millisecs);
+
+  private:
+    void allocate_buffer();
 };
 
 #endif // INCLUDED_directx_camera_server_h_GUID_9322F126_0DA4_4DB9_11F3_DDBF76A6D9D9

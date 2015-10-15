@@ -39,11 +39,12 @@ template <typename CameraType> inline cv::Mat retrieve(CameraType &camera) {
     camera.read_range(minx, maxx, miny, maxy);
     auto height = maxy - miny + 1;
     auto width = maxx - minx + 1;
+    // auto frame = cv::Mat(height, width, CV_8UC3, camera.get_pixel_buffer());
     auto frame =
-        cv::Mat(height, width, CV_8UC3,
-                const_cast<unsigned char *>(camera.get_pixel_buffer_pointer()));
-    cv::flip(frame, frame, 0);
-    return frame;
+        cv::Mat(camera.get_pixel_buffer()).reshape(3 /*channels*/, height);
+    auto ret = cv::Mat{};
+    cv::flip(frame, ret, 0);
+    return ret;
 }
 
 #endif // INCLUDED_DirectShowToCV_h_GUID_C9B19C46_CA43_4481_A5B9_CB76397DD2C3

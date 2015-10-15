@@ -147,7 +147,7 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     // do one line at a time here because there can be padding at the end of
     // each line on some video formats.
     for (DWORD iRow = 0; iRow < _num_rows; iRow++) {
-        memcpy(_buffer + _num_columns * 3 * iRow,
+        memcpy(_buffer.data() + _num_columns * 3 * iRow,
                imageLocation + _stride * iRow, _num_columns * 3);
     }
 
@@ -593,19 +593,7 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
         return;
     }
 
-    //---------------------------------------------------------------------
-    // Allocate a buffer that is large enough to read the maximum-sized
-    // image with no binning.
-    _buflen =
-        (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
-    if ((_buffer = new unsigned char[_buflen]) == nullptr) {
-        fprintf(stderr, "directx_camera_server::directx_camera_server(): Out "
-                        "of memory for buffer\n");
-        _status = false;
-        return;
-    }
-    // No image in memory yet.
-    _minX = _maxX = _minY = _maxY = 0;
+    allocate_buffer();
 
 #ifdef HACK_TO_REOPEN
     close_device();
@@ -623,21 +611,7 @@ directx_camera_server::directx_camera_server(std::string const &pathPrefix,
         _status = false;
         return;
     }
-
-    //---------------------------------------------------------------------
-    // Allocate a buffer that is large enough to read the maximum-sized
-    // image with no binning.
-    /// @todo replace with a vector that gets sized here!
-    _buflen =
-        (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
-    if ((_buffer = new unsigned char[_buflen]) == nullptr) {
-        fprintf(stderr, "directx_camera_server::directx_camera_server(): Out "
-                        "of memory for buffer\n");
-        _status = false;
-        return;
-    }
-    // No image in memory yet.
-    _minX = _maxX = _minY = _maxY = 0;
+    allocate_buffer();
 
 #ifdef HACK_TO_REOPEN
     close_device();
@@ -663,11 +637,8 @@ directx_camera_server::~directx_camera_server() {
     // Get the callback device to immediately return all samples
     // it has queued up, then shut down the filter graph.
     _pSampleGrabberWrapper->shutdown();
-    close_device();
 
-    if (_buffer != nullptr) {
-        delete[] _buffer;
-    }
+    close_device();
 
     // Delete the callback object, so that it can clean up and
     // make sure all of its threads exit.
@@ -780,4 +751,16 @@ bool directx_camera_server::get_pixel_from_memory(unsigned X, unsigned Y,
     unsigned cols = _num_columns;
     val = _buffer[(Y * cols + X) * 3 + RGB];
     return true;
+}
+
+void directx_camera_server::allocate_buffer() {
+    //---------------------------------------------------------------------
+    // Allocate a buffer that is large enough to read the maximum-sized
+    // image with no binning.
+    /// @todo replace with a vector that gets sized here!
+    auto buflen = (_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
+    _buffer.resize(buflen);
+
+    // No image in memory yet.
+    _minX = _maxX = _minY = _maxY = 0;
 }
