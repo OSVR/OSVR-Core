@@ -577,8 +577,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 }
 
 /// Construct but do not open a camera
-directx_camera_server::directx_camera_server()
-    : sampleExchange_(std::make_shared<MediaSampleExchange>()) {
+directx_camera_server::directx_camera_server() {
     // No image in memory yet.
     _minX = _maxX = _minY = _maxY = 0;
 }
