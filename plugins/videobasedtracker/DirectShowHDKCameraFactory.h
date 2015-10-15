@@ -27,54 +27,72 @@
 
 // Internal Includes
 #include "directx_camera_server.h"
-#include "GetIVideoProcAmp.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <memory>
-
-#ifdef OSVR_HAVE_IVIDEOPROCAMP
 #include <iostream>
-#include <vidcap.h> // for IVideoProcAmp
 
+#include <ks.h>
+#include <ksmedia.h>
+#include <ksproxy.h>
+
+// On the HDK IR camera, this actually puts the camera into the correct
+// high-gain mode and has apparently nothing to do with powerline frequency.
 static void setPowerlineFrequencyTo50(IBaseFilter &filter) {
-    auto procAmp = getIVideoProcAmp(filter);
-    if (!procAmp) {
-        std::cout << "directx_camera_server: Couldn't get IVideoProcAmp"
-                  << std::endl;
+    auto ksPropSet = comutils::Ptr<IKsPropertySet>{};
+    filter.QueryInterface(__uuidof(IKsPropertySet), AttachPtr(ksPropSet));
+    if (!ksPropSet) {
+        // std::cout << "Couldn't get ksPropSet" << std::endl;
         return;
     }
-    static const long POWERLINE_DISABLED = 0;
-    static const long POWERLINE_50HZ = 1;
-    static const long POWERLINE_60HZ = 2;
-    auto hr = procAmp->put_PowerlineFrequency(POWERLINE_50HZ,
-                                              VideoProcAmp_Flags_Manual);
-    if (SUCCEEDED(hr)) {
-        std::cout << "directx_camera_server: Successfully set powerline "
-                     "frequency to 50Hz"
-                  << std::endl;
-    } else {
-        std::cout << "directx_camera_server: Almost, but couldn't, set "
-                     "powerline frequency to 50Hz"
-                  << std::endl;
+    auto prop = KSPROPERTY{};
+    prop.Set = GUID{STATICGUIDOF(
+        PROPSETID_VIDCAP_VIDEOPROCAMP)}; // workaround undefined reference, no
+                                         // need to link for one silly guid.
+    prop.Id = KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY;
+
+    auto supportType = DWORD{0};
+    auto hr = ksPropSet->QuerySupported(prop.Set, prop.Id, &supportType);
+    if (SUCCEEDED(hr) && (supportType & KSPROPERTY_SUPPORT_SET)) {
+        // If we got here, we know we can set the "powerline" property
+        // past this point MSDN was almost useless to a non-driver-writer
+        // Chrome source code path below was a useful reference
+        // chromium/src/media/capture/video/win/video_capture_device_win.cc
+        static const long POWERLINE_DISABLED = 0;
+        static const long POWERLINE_50HZ = 1;
+        static const long POWERLINE_60HZ = 2;
+
+        auto propData = KSPROPERTY_VIDEOPROCAMP_S{};
+        propData.Property = prop;
+        propData.Property.Flags = KSPROPERTY_TYPE_SET;
+
+        propData.Value = POWERLINE_50HZ;
+        propData.Flags = KSPROPERTY_VIDEOPROCAMP_FLAGS_MANUAL;
+
+        hr = ksPropSet->Set(prop.Set, prop.Id, &propData, sizeof(propData),
+                            &propData, sizeof(propData));
+
+        if (FAILED(hr)) {
+            std::cout
+                << "Tried but failed to put the camera in high gain mode..."
+                << std::endl;
+        }
     }
 }
-#else
-static void setPowerlineFrequencyTo50(IBaseFilter &) {
-    // no-op, header missing
-}
-#endif
 
 std::unique_ptr<directx_camera_server> getDirectShowHDKCamera() {
     // This string begins the DevicePath provided by Windows for the HDK's
     // camera.
     static const auto HDK_CAMERA_PATH_PREFIX =
         "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
-    auto ret = std::unique_ptr<directx_camera_server>{
-        new directx_camera_server(HDK_CAMERA_PATH_PREFIX)};
+    auto ret = std::unique_ptr<directx_camera_server>{new directx_camera_server(
+        HDK_CAMERA_PATH_PREFIX, &setPowerlineFrequencyTo50)};
+
     if (!ret->working()) {
+        // If it didn't start up right, just ditch it now.
         ret.reset();
     }
     return ret;
