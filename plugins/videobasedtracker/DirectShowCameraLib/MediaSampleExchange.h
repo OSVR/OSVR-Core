@@ -35,19 +35,30 @@
 #include <memory>
 #include <chrono>
 #include <utility>
+#include <cassert>
 
 struct IMediaSample;
 class MediaSampleExchange;
 /// An RAII class for retrieving the sample and signalling consumption complete.
+/// (A move-construction-only object.)
 class Sample {
   public:
+    /// Destructor - signals consumer finished.
     ~Sample();
+    /// Move constructor
     Sample(Sample &&other)
         : sampleExchange_(other.sampleExchange_), sample_(other.sample_),
           owning_(false) {
         std::swap(owning_, other.owning_);
     }
-    IMediaSample &get() { return sample_; }
+    /// Access the contained sample.
+    /// Do not retain pointers to this or any sub-object after this Sample
+    /// object goes out of scope!
+    IMediaSample &get() {
+        assert(owning_ && "Shouldn't try to get the contained sample from a "
+                          "moved-from wrapper!");
+        return sample_;
+    }
 
   private:
     Sample(MediaSampleExchange &exchange, IMediaSample &sample)
@@ -57,6 +68,13 @@ class Sample {
     IMediaSample &sample_;
     bool owning_;
 };
+
+/// A class to mediate between a consumer of directshow image samples and the
+/// ISampleGrabberCallback implementation, with signalling on the producer and
+/// consumer side.
+///
+/// Hides the newer Windows API used for the sync primitives from the ancient
+/// DirectShow-affiliated headers.
 class MediaSampleExchange {
   public:
     MediaSampleExchange();
@@ -71,11 +89,15 @@ class MediaSampleExchange {
         return *pin;
     }
 
+    /// Retrieves the sample in an RAII wrapper, so that signalling of
+    /// consumption is automatic when the sample object goes out of scope.
     Sample get() {
         IMediaSample *pin{sample_};
         return Sample{*this, *pin};
     }
 
+    /// Indicates consumer finished - don't need to manually call if you use the
+    /// Sample class.
     void signalSampleConsumed();
     /// @returns true if sample was consumed, false if it timed out.
     bool waitForSampleConsumed(std::chrono::milliseconds timeout);
