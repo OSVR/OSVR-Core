@@ -26,11 +26,10 @@
 #include "directx_samplegrabber_callback.h"
 
 // Library/third-party includes
-#include <vrpn_Shared.h>
 #include <boost/assert.hpp>
 
 // Standard includes
-// - none
+#include <chrono>
 
 static const auto WAIT_FOR_CONSUMER_TIMEOUT = std::chrono::milliseconds{50};
 
