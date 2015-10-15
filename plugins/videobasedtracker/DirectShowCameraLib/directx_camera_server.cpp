@@ -50,8 +50,6 @@
 //#define HACK_TO_REOPEN
 //#define	DEBUG
 
-extern "C" const CLSID CLSID_SampleGrabber;
-
 /// @brief Checks something to see if it's false-ish, printing a message and
 /// throwing an exception if it is.
 template <typename T>
@@ -87,15 +85,6 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     // frame
     // as it comes in.  Then set the filter graph running.
     if (!_started_graph) {
-        // Set the grabber do not do one-shot mode because that would cause
-        // it to stop the filter graph after a single frame is captured.
-        _pGrabber->SetOneShot(FALSE);
-
-        // Set the grabber to not do buffering mode, because we've not
-        // implemented
-        // the handler for buffered callbacks.
-        _pGrabber->SetBufferSamples(FALSE);
-
         // Run the graph and wait until it captures a frame into its buffer
         switch (_mode) {
         case 0: // Case 0 = run
@@ -395,41 +384,14 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     pMoniker->BindToObject(0, 0, IID_IBaseFilter, AttachPtr(pSrc));
 
     //-------------------------------------------------------------------
-    // Construct the sample grabber callback handler that will be used
-    // to receive image data from the sample grabber.
-    _pCallback.reset(new directx_samplegrabber_callback(sampleExchange_));
+    // Construct the sample grabber that will be used to snatch images from
+    // the video stream as they go by.  Set its media type and callback.
 
-//-------------------------------------------------------------------
-// Construct the sample grabber that will be used to snatch images from
-// the video stream as they go by.  Set its media type and callback.
+    // Create and configure the Sample Grabber.
+    _pSampleGrabberWrapper.reset(new SampleGrabberWrapper);
 
-// Create the Sample Grabber.
-#ifdef DEBUG
-    printf("directx_camera_server::open_and_find_parameters(): Before "
-           "CoCreateInstance SampleGrabber\n");
-#endif
-    CoCreateInstance(CLSID_SampleGrabber, nullptr, CLSCTX_INPROC_SERVER,
-                     IID_IBaseFilter, AttachPtr(_pSampleGrabberFilter));
-    checkForConstructionError(_pSampleGrabberFilter,
-                              "SampleGrabber filter (not DirectX 8.1+?)");
-
-#ifdef DEBUG
-    printf("directx_camera_server::open_and_find_parameters(): Before "
-           "QueryInterface\n");
-#endif
-    _pSampleGrabberFilter->QueryInterface(IID_ISampleGrabber,
-                                          AttachPtr(_pGrabber));
-
-// Set the media type to video
-#ifdef DEBUG
-    printf("directx_camera_server::open_and_find_parameters(): Before "
-           "SetMediaType\n");
-#endif
-    AM_MEDIA_TYPE mt = {0};
-    // Ask for video media producers that produce 8-bit RGB
-    mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
-    mt.subtype = MEDIASUBTYPE_RGB24; // Ask for 8 bit RGB
-    _pGrabber->SetMediaType(&mt);
+    // Get the exchange object for receiving data from the sample grabber.
+    sampleExchange_ = _pSampleGrabberWrapper->getExchange();
 
     //-------------------------------------------------------------------
     // Ask for the video resolution that has been passed in.
@@ -444,7 +406,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
                                  AttachPtr(_pStreamConfig));
         checkForConstructionError(_pStreamConfig, "StreamConfig interface");
 
-        ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
+        AM_MEDIA_TYPE mt = {0};
         mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
         mt.subtype = MEDIASUBTYPE_RGB24; // Ask for 8 bit RGB
         VIDEOINFOHEADER vih = {0};
@@ -485,31 +447,34 @@ bool directx_camera_server::open_moniker_and_finish_setup(
            "createNullRenderFilter\n");
 #endif
     auto pNullRender = createNullRenderFilter();
-
+    auto sampleGrabberFilter = _pSampleGrabberWrapper->getFilter();
     //-------------------------------------------------------------------
     // Build the filter graph.  First add the filters and then connect them.
 
     // pSrc is the capture filter for the video device we found above.
-    _pGraph->AddFilter(pSrc.get(), L"Video Capture");
+    auto hr = _pGraph->AddFilter(pSrc.get(), L"Video Capture");
+    BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding Video Capture filter to graph");
 
     // Add the sample grabber filter
-    _pGraph->AddFilter(_pSampleGrabberFilter.get(), L"SampleGrabber");
+    hr = _pGraph->AddFilter(sampleGrabberFilter.get(), L"SampleGrabber");
+    BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding SampleGrabber filter to graph");
 
     // Add the null renderer filter
-    _pGraph->AddFilter(pNullRender.get(), L"NullRenderer");
+    hr = _pGraph->AddFilter(pNullRender.get(), L"NullRenderer");
+    BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding NullRenderer filter to graph");
 
     // Connect the output of the video reader to the sample grabber input
-    ConnectTwoFilters(*_pGraph, *pSrc, *_pSampleGrabberFilter);
+    ConnectTwoFilters(*_pGraph, *pSrc, *sampleGrabberFilter);
 
     // Connect the output of the sample grabber to the null renderer input
-    ConnectTwoFilters(*_pGraph, *_pSampleGrabberFilter, *pNullRender);
+    ConnectTwoFilters(*_pGraph, *sampleGrabberFilter, *pNullRender);
 
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
     auto pTuner = comutils::Ptr<IAMTVTuner>{};
-    auto hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(),
-                                       IID_IAMTVTuner, AttachPtr(pTuner));
+    hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(), IID_IAMTVTuner,
+                                  AttachPtr(pTuner));
     if (pTuner) {
 #ifdef DEBUG
         printf("directx_camera_server::open_and_find_parameters(): Found a TV "
@@ -534,7 +499,8 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 
     //-------------------------------------------------------------------
     // Find _num_rows and _num_columns in the video stream.
-    _pGrabber->GetConnectedMediaType(&mt);
+    AM_MEDIA_TYPE mt = {0};
+    _pSampleGrabberWrapper->getConnectedMediaType(mt);
     VIDEOINFOHEADER *pVih;
     if (mt.formattype == FORMAT_VideoInfo ||
         mt.formattype == FORMAT_VideoInfo2) {
@@ -606,9 +572,6 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // next.  This is rounded up to the nearest DWORD.
     _stride = (_num_columns * BytesPerPixel + 3) & ~3;
 
-    // Set the callback, where '0' means 'use the SampleCB callback'
-    _pGrabber->SetCallback(_pCallback.get(), 0);
-
     return true;
 }
 
@@ -652,8 +615,7 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
 }
 
 directx_camera_server::directx_camera_server(std::string const &pathPrefix,
-                                             unsigned width, unsigned height)
-    : sampleExchange_(std::make_shared<MediaSampleExchange>()) {
+                                             unsigned width, unsigned height) {
     //---------------------------------------------------------------------
     if (!open_and_find_parameters(pathPrefix, width, height)) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
@@ -694,17 +656,13 @@ void directx_camera_server::close_device() {
     _pEvent.reset();
     _pBuilder.reset();
     _pSampleGrabberFilter.reset();
-    _pGrabber.reset();
     _pStreamConfig.reset();
-    _com.reset();
 }
 
 directx_camera_server::~directx_camera_server() {
     // Get the callback device to immediately return all samples
     // it has queued up, then shut down the filter graph.
-    if (_pCallback) {
-        _pCallback->shutdown();
-    }
+    _pSampleGrabberWrapper->shutdown();
     close_device();
 
     if (_buffer != nullptr) {
@@ -713,7 +671,7 @@ directx_camera_server::~directx_camera_server() {
 
     // Delete the callback object, so that it can clean up and
     // make sure all of its threads exit.
-    _pCallback.reset();
+    _pSampleGrabberWrapper.reset();
 }
 
 bool directx_camera_server::read_image_to_memory(unsigned minX, unsigned maxX,

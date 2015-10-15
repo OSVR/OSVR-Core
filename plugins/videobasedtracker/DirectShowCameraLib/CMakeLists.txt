@@ -33,7 +33,10 @@ add_library(directshow-camera STATIC
     MediaSampleExchange.cpp
     NullRenderFilter.cpp
     NullRenderFilter.h
-    PropertyBagHelper.h)
+    PropertyBagHelper.h
+    SampleGrabberWrapper.h
+    SampleGrabberWrapper.cpp
+    SignalEvent.h)
 target_include_directories(directshow-camera
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"

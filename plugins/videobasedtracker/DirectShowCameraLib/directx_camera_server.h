@@ -30,6 +30,7 @@
 // Internal Includes
 #include "base_camera_server.h"
 #include "MediaSampleExchange.h"
+#include "SampleGrabberWrapper.h"
 #include "comutils/ComPtr.h"
 #include "comutils/ComInit.h"
 
@@ -139,10 +140,9 @@ class directx_camera_server : public base_camera_server {
 
     comutils::Ptr<ICaptureGraphBuilder2> _pBuilder; // Filter graph builder
 
+    std::unique_ptr<SampleGrabberWrapper> _pSampleGrabberWrapper;
     comutils::Ptr<IBaseFilter>
         _pSampleGrabberFilter; // Grabs samples from the media stream
-    comutils::Ptr<ISampleGrabber>
-        _pGrabber; // Interface for the sample grabber filter
     comutils::Ptr<IAMStreamConfig>
         _pStreamConfig; // Interface to set the video dimensions
 
@@ -157,9 +157,6 @@ class directx_camera_server : public base_camera_server {
 
     // How we interact with the sample grabber callback.
     MediaSampleExchangePtr sampleExchange_;
-
-    // Pointer to the associated sample grabber callback object.
-    std::unique_ptr<directx_samplegrabber_callback> _pCallback;
 
     virtual bool open_and_find_parameters(const int which, unsigned width,
                                           unsigned height);
