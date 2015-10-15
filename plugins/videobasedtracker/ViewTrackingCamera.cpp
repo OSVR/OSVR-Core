@@ -43,10 +43,10 @@ static const std::string windowNameAndInstructions(
 // This string begins the DevicePath provided by Windows for the HDK's camera.
 static const auto HDK_CAMERA_PATH_PREFIX = "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
 
+static const auto FPS_MEASUREMENT_PERIOD = std::chrono::seconds(3);
 class FrameCounter {
   public:
     FrameCounter() { reset(); }
-
     void gotFrame() {
         ++m_frames;
         auto now = clock::now();
@@ -62,7 +62,7 @@ class FrameCounter {
 
     void reset() {
         m_begin = clock::now();
-        m_end = m_begin + std::chrono::seconds(1);
+        m_end = m_begin + FPS_MEASUREMENT_PERIOD;
         m_frames = 0;
     }
 
@@ -78,9 +78,10 @@ int main(int argc, char *argv[]) {
     auto cam = std::unique_ptr<directx_camera_server>{
         new directx_camera_server(HDK_CAMERA_PATH_PREFIX)};
     if (!cam->read_image_to_memory()) {
-        std::cerr
-            << "Couldn't find, open, or read from the OSVR HDK tracking camera."
-            << std::endl;
+        std::cerr << "Couldn't find, open, or read from the OSVR HDK tracking "
+                     "camera.\n"
+                  << "Press enter to exit." << std::endl;
+        std::cin.ignore();
         return -1;
     }
     auto FRAME_DISPLAY_STRIDE = 3u;
