@@ -381,7 +381,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 
     // Bind the chosen moniker to a filter object.
     auto pSrc = comutils::Ptr<IBaseFilter>{};
-    pMoniker->BindToObject(0, 0, IID_IBaseFilter, AttachPtr(pSrc));
+    pMoniker->BindToObject(nullptr, nullptr, IID_IBaseFilter, AttachPtr(pSrc));
 
     //-------------------------------------------------------------------
     // Construct the sample grabber that will be used to snatch images from
