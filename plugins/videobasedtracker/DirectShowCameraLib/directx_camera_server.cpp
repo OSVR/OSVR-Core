@@ -333,7 +333,7 @@ bool directx_camera_server::open_and_find_parameters(const int which,
 }
 
 bool directx_camera_server::open_and_find_parameters(
-    std::string const &pathPrefix, FilterOperation const &sourcePreAction,
+    std::string const &pathPrefix, FilterOperation const &sourceConfig,
     unsigned width, unsigned height) {
     auto graphbuilderRet = start_com_and_graphbuilder();
     if (!graphbuilderRet) {
@@ -364,12 +364,11 @@ bool directx_camera_server::open_and_find_parameters(
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
 #endif
-    return open_moniker_and_finish_setup(pMoniker, sourcePreAction, width,
-                                         height);
+    return open_moniker_and_finish_setup(pMoniker, sourceConfig, width, height);
 }
 
 bool directx_camera_server::open_moniker_and_finish_setup(
-    comutils::Ptr<IMoniker> pMoniker, FilterOperation const &sourcePreAction,
+    comutils::Ptr<IMoniker> pMoniker, FilterOperation const &sourceConfig,
     unsigned width, unsigned height) {
 
     if (!pMoniker) {
@@ -386,10 +385,6 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     auto pSrc = comutils::Ptr<IBaseFilter>{};
     pMoniker->BindToObject(nullptr, nullptr, IID_IBaseFilter, AttachPtr(pSrc));
 
-    // If we were given a pre-action for the source, do it now.
-    if (sourcePreAction) {
-        sourcePreAction(pSrc);
-    }
     //-------------------------------------------------------------------
     // Construct the sample grabber that will be used to snatch images from
     // the video stream as they go by.  Set its media type and callback.
@@ -478,6 +473,10 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // Connect the output of the sample grabber to the null renderer input
     ConnectTwoFilters(*_pGraph, *sampleGrabberFilter, *pNullRender);
 
+    // If we were given a config action for the source, do it now.
+    if (sourceConfig) {
+        sourceConfig(*pSrc);
+    }
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
@@ -630,8 +629,8 @@ directx_camera_server::directx_camera_server(std::string const &pathPrefix,
 }
 
 directx_camera_server::directx_camera_server(
-    std::string const &pathPrefix, FilterOperation const &sourcePreAction) {
-    if (!open_and_find_parameters(pathPrefix, sourcePreAction)) {
+    std::string const &pathPrefix, FilterOperation const &sourceConfig) {
+    if (!open_and_find_parameters(pathPrefix, sourceConfig)) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
                         "Cannot open camera\n");
         _status = false;
