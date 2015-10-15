@@ -43,6 +43,9 @@ MediaSampleExchange::~MediaSampleExchange() {
     // Required for unique_ptr pimpl - see http://herbsutter.com/gotw/_100/
 }
 void MediaSampleExchange::signalSampleProduced(IMediaSample *sample) {
+    BOOST_ASSERT_MSG(
+        sample != nullptr,
+        "Should not be signalling that there is a null sample available!");
     BOOST_ASSERT_MSG(sample_ == nullptr,
                      "Sample should be consumed before the next one produced!");
     sample_ = sample;
@@ -62,5 +65,8 @@ void MediaSampleExchange::signalSampleConsumed() {
 
 bool MediaSampleExchange::waitForSampleConsumed(
     std::chrono::milliseconds timeout) {
+    BOOST_ASSERT_MSG(
+        sample_ != nullptr,
+        "Sample pointer should not be null when waiting for consumer!");
     return impl_->consumed.wait(timeout.count());
 }
