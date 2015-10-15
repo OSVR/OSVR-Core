@@ -33,6 +33,7 @@
 #include <memory>
 #include <iostream>
 #include <chrono>
+#include <sstream>
 
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
 /// make this global for a simpler demo.
@@ -73,7 +74,7 @@ class FrameCounter {
     std::size_t m_frames = 0;
 };
 
-int main() {
+int main(int argc, char *argv[]) {
     auto cam = std::unique_ptr<directx_camera_server>{
         new directx_camera_server(HDK_CAMERA_PATH_PREFIX)};
     if (!cam->read_image_to_memory()) {
@@ -82,20 +83,38 @@ int main() {
             << std::endl;
         return -1;
     }
+    auto FRAME_DISPLAY_STRIDE = 3u;
+    if (argc > 1) {
+        auto is = std::istringstream{argv[1]};
+        if (is >> FRAME_DISPLAY_STRIDE) {
+            std::cout << "Custom display stride passed: "
+                      << FRAME_DISPLAY_STRIDE << std::endl;
+        } else {
+            std::cout << "Could not parse first command-line argument as a "
+                         "display stride : '"
+                      << argv[1] << "' (will use default)" << std::endl;
+        }
+    }
+    std::cout << "Will display 1 out of every " << FRAME_DISPLAY_STRIDE
+              << " frames captured." << std::endl;
     auto frame = cv::Mat{};
 
     FrameCounter counter;
     cv::namedWindow(windowNameAndInstructions);
+    auto frameCount = std::size_t{0};
     do {
         frame = retrieve(*cam);
         counter.gotFrame();
-        cv::imshow(windowNameAndInstructions, frame);
+        ++frameCount;
+        if (frameCount % FRAME_DISPLAY_STRIDE == 0) {
+            frameCount = 0;
+            cv::imshow(windowNameAndInstructions, frame);
 
-        char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key
-        if ('q' == key || 'Q' == key || 27 /*esc*/ == key) {
-            break;
+            char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key
+            if ('q' == key || 'Q' == key || 27 /*esc*/ == key) {
+                break;
+            }
         }
-
     } while (cam->read_image_to_memory());
     return 0;
 }
