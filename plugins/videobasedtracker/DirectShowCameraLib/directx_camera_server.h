@@ -37,7 +37,6 @@
 // Library/third-party includes
 
 // Standard includes
-#include <windows.h>
 #include <stdexcept>
 #include <memory>
 #include <vector>
@@ -53,8 +52,6 @@
 // - IID_ISampleGrabber
 // - CLSID_NullRenderer
 // - IID_ISampleGrabberCB
-
-#include "qedit_wrapper.h"
 
 struct ConstructionError : std::runtime_error {
     ConstructionError(const char objName[])
