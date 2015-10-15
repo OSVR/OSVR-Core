@@ -328,11 +328,13 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
 #endif
-    return open_moniker_and_finish_setup(pMoniker, width, height);
+    return open_moniker_and_finish_setup(pMoniker, FilterOperation{}, width,
+                                         height);
 }
 
 bool directx_camera_server::open_and_find_parameters(
-    std::string const &pathPrefix, unsigned width, unsigned height) {
+    std::string const &pathPrefix, FilterOperation const &sourcePreAction,
+    unsigned width, unsigned height) {
     auto graphbuilderRet = start_com_and_graphbuilder();
     if (!graphbuilderRet) {
         return false;
@@ -362,11 +364,13 @@ bool directx_camera_server::open_and_find_parameters(
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
 #endif
-    return open_moniker_and_finish_setup(pMoniker, width, height);
+    return open_moniker_and_finish_setup(pMoniker, sourcePreAction, width,
+                                         height);
 }
 
 bool directx_camera_server::open_moniker_and_finish_setup(
-    comutils::Ptr<IMoniker> pMoniker, unsigned width, unsigned height) {
+    comutils::Ptr<IMoniker> pMoniker, FilterOperation const &sourcePreAction,
+    unsigned width, unsigned height) {
 
     if (!pMoniker) {
         fprintf(stderr,
@@ -382,6 +386,10 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     auto pSrc = comutils::Ptr<IBaseFilter>{};
     pMoniker->BindToObject(nullptr, nullptr, IID_IBaseFilter, AttachPtr(pSrc));
 
+    // If we were given a pre-action for the source, do it now.
+    if (sourcePreAction) {
+        sourcePreAction(pSrc);
+    }
     //-------------------------------------------------------------------
     // Construct the sample grabber that will be used to snatch images from
     // the video stream as they go by.  Set its media type and callback.
@@ -605,7 +613,8 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
 directx_camera_server::directx_camera_server(std::string const &pathPrefix,
                                              unsigned width, unsigned height) {
     //---------------------------------------------------------------------
-    if (!open_and_find_parameters(pathPrefix, width, height)) {
+    if (!open_and_find_parameters(pathPrefix, FilterOperation{}, width,
+                                  height)) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
                         "Cannot open camera\n");
         _status = false;
@@ -620,6 +629,22 @@ directx_camera_server::directx_camera_server(std::string const &pathPrefix,
     _status = true;
 }
 
+directx_camera_server::directx_camera_server(
+    std::string const &pathPrefix, FilterOperation const &sourcePreAction) {
+    if (!open_and_find_parameters(pathPrefix, sourcePreAction)) {
+        fprintf(stderr, "directx_camera_server::directx_camera_server(): "
+                        "Cannot open camera\n");
+        _status = false;
+        return;
+    }
+    allocate_buffer();
+
+#ifdef HACK_TO_REOPEN
+    close_device();
+#endif
+
+    _status = true;
+}
 //---------------------------------------------------------------------
 // Close the camera and the system.  Free up memory.
 

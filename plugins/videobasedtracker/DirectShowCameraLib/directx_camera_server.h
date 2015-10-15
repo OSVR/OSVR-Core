@@ -40,6 +40,7 @@
 #include <stdexcept>
 #include <memory>
 #include <vector>
+#include <functional>
 
 // Include files for DirectShow video input
 #include <dshow.h>
@@ -84,7 +85,7 @@ struct ConstructionError : std::runtime_error {
 // If you're building with MinGW64, they've got a reimplementation of that
 // header that works fine, no worries.
 
-class directx_samplegrabber_callback; //< Forward declaration
+using FilterOperation = std::function<void(comutils::Ptr<IBaseFilter>)>;
 
 class directx_camera_server : public base_camera_server {
   public:
@@ -95,6 +96,12 @@ class directx_camera_server : public base_camera_server {
     /// Open the first camera whose DevicePath begins with the supplied prefix.
     directx_camera_server(std::string const &pathPrefix, unsigned width = 0,
                           unsigned height = 0);
+
+    /// Open the first camera whose DevicePath begins with the supplied prefix,
+    /// and call a user-provided function on the video source before adding it
+    /// to the filter graph..
+    directx_camera_server(std::string const &pathPrefix,
+                          FilterOperation const &sourcePreAction);
     virtual ~directx_camera_server(void);
 
     /// Return the number of colors that the device has
@@ -124,15 +131,12 @@ class directx_camera_server : public base_camera_server {
   protected:
     bool start_com_and_graphbuilder();
     bool open_moniker_and_finish_setup(comutils::Ptr<IMoniker> pMoniker,
+                                       FilterOperation const &sourcePreAction,
                                        unsigned width, unsigned height);
     virtual void close_device(void);
 
     /// Construct but do not open camera (used by derived classes)
     directx_camera_server();
-
-    /// Destructor - out of line so we don't need a definition of
-    /// directx_samplegrabber_callback
-    //~directx_camera_server();
 
     comutils::ComInstance _com;
 
@@ -162,8 +166,9 @@ class directx_camera_server : public base_camera_server {
 
     virtual bool open_and_find_parameters(const int which, unsigned width,
                                           unsigned height);
-    bool open_and_find_parameters(std::string const &pathPrefix, unsigned width,
-                                  unsigned height);
+    bool open_and_find_parameters(std::string const &pathPrefix,
+                                  FilterOperation const &sourcePreAction,
+                                  unsigned width = 0, unsigned height = 0);
     virtual bool read_one_frame(unsigned minX, unsigned maxX, unsigned minY,
                                 unsigned maxY, unsigned exposure_millisecs);
 
