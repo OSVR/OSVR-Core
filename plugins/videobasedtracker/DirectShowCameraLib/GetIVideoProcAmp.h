@@ -25,6 +25,13 @@
 #ifndef INCLUDED_GetIVideoProcAmp_h_GUID_F35BD30E_FB93_45BF_9957_8E7F69290E46
 #define INCLUDED_GetIVideoProcAmp_h_GUID_F35BD30E_FB93_45BF_9957_8E7F69290E46
 
+#ifdef _MSC_VER
+/// Apparently no vidcap header in MinGW64 yet.
+/// @todo actually test for vidcap.h
+#define OSVR_HAVE_IVIDEOPROCAMP
+#endif
+
+#ifdef OSVR_HAVE_IVIDEOPROCAMP
 // Internal Includes
 #include "comutils/ComPtr.h"
 
@@ -32,16 +39,43 @@
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
-#ifdef _MSC_VER
-/// Apparently no vidcap header in MinGW64 yet.
-/// @todo actually test for vidcap.h
-#define OSVR_HAVE_IVIDEOPROCAMP
+#include <strmif.h>
+#include <vidcap.h>  // for IKsTopologyInfo
+#include <ksmedia.h> // for KSNODETYPE_VIDEO_PROCESSING
 
-struct IBaseFilter;
-struct IVideoProcAmp;
-comutils::Ptr<IVideoProcAmp> getIVideoProcAmp(IBaseFilter &filter);
-#endif
+inline comutils::Ptr<IVideoProcAmp> getIVideoProcAmp(IBaseFilter &filter) {
+    auto ret = comutils::Ptr<IVideoProcAmp>{};
+
+    auto ksTopoInfo = comutils::Ptr<IKsTopologyInfo>{};
+    filter.QueryInterface(__uuidof(IKsTopologyInfo), AttachPtr(ksTopoInfo));
+    if (!ksTopoInfo) {
+        std::cout << "directx_camera_server: Couldn't get IKsTopologyInfo"
+                  << std::endl;
+        return ret;
+    }
+    auto numNodes = DWORD{0};
+    ksTopoInfo->get_NumNodes(&numNodes);
+
+    std::cout << "directx_camera_server: has " << numNodes << " nodes"
+              << std::endl;
+    for (DWORD i = 0; i < numNodes; ++i) {
+        GUID nodeType;
+        ksTopoInfo->get_NodeType(i, &nodeType);
+        if (nodeType == KSNODETYPE_VIDEO_PROCESSING) {
+            std::cout
+                << "directx_camera_server: node has video processing type: "
+                << i << std::endl;
+            ksTopoInfo->CreateNodeInstance(i, __uuidof(IVideoProcAmp),
+                                           AttachPtr(ret));
+            if (ret) {
+                return ret;
+            }
+        }
+    }
+    return ret;
+}
+#endif // OSVR_HAVE_IVIDEOPROCAMP
 
 #endif // INCLUDED_GetIVideoProcAmp_h_GUID_F35BD30E_FB93_45BF_9957_8E7F69290E46

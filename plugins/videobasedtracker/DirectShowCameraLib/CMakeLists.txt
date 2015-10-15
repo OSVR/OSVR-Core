@@ -29,7 +29,6 @@ add_library(directshow-camera STATIC
     directx_samplegrabber_callback.h
     directx_samplegrabber_callback.cpp
     GetIVideoProcAmp.h
-    GetIVideoProcAmp.cpp
     GetPin.h
     MediaSampleExchange.h
     MediaSampleExchange.cpp
