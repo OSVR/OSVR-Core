@@ -26,7 +26,7 @@
 #define INCLUDED_directx_samplegrabber_callback_h_GUID_F0A39DA1_440B_4E8A_AF25_1383D20934AA
 
 // Internal Includes
-// - none
+#include "MediaSampleExchange.h"
 
 // Library/third-party includes
 // - none
@@ -41,7 +41,7 @@
 // semaphores.
 class directx_samplegrabber_callback : public ISampleGrabberCB {
   public:
-    directx_samplegrabber_callback() = default;
+    directx_samplegrabber_callback(MediaSampleExchangePtr const &exchange);
     ~directx_samplegrabber_callback();
 
     void shutdown();
@@ -88,6 +88,12 @@ class directx_samplegrabber_callback : public ISampleGrabberCB {
   protected:
     BITMAPINFOHEADER _bitmapInfo;    //< Describes format of the bitmap
     volatile bool _stayAlive = true; //< Tells all threads to exit
+  private:
+    MediaSampleExchangePtr sampleExchange_;
+};
+
+class directx_samplegrabber_deleter {
+    void operator()(directx_samplegrabber_callback *cb) { delete cb; }
 };
 
 #endif // INCLUDED_directx_samplegrabber_callback_h_GUID_F0A39DA1_440B_4E8A_AF25_1383D20934AA

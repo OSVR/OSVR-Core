@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <iostream>
+#include <chrono>
 
 // Uncomment to get a full device name and path listing in enumeration, instead
 // of silently enumerating and early-exiting when we find one we like.
@@ -129,20 +130,15 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     // sample.
     // If it takes too long, time out.
     BYTE *imageLocation;
-    if (!_pCallback->imageReady) {
-        for (int i = 0; i < TIMEOUT_MSECS; i++) {
-            vrpn_SleepMsecs(1);
-            if (_pCallback->imageReady) {
-                break;
-            } // Break out of the wait if its ready
-        }
-        if (!_pCallback->imageReady) {
+    auto imageReady = sampleExchange_->waitForSample(
+        std::chrono::milliseconds(TIMEOUT_MSECS));
+
+    if (!imageReady) {
 #ifdef DEBUG
-            fprintf(stderr, "directx_camera_server::read_one_frame(): Timeout "
-                            "when reading image\n");
+        fprintf(stderr, "directx_camera_server::read_one_frame(): Timeout "
+                        "when reading image\n");
 #endif
-            return false;
-        }
+        return false;
     }
 
     // If we are in mode 2, then we pause the graph after we captured one image.
@@ -151,25 +147,28 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         _mode = 1;
     }
 
-    if (_pCallback->imageReady) {
-        _pCallback->imageReady = false;
-        if (FAILED(_pCallback->imageSample->GetPointer(&imageLocation))) {
-            fprintf(
-                stderr,
+    if (FAILED(sampleExchange_->getSample().GetPointer(&imageLocation))) {
+        fprintf(stderr,
                 "directx_camera_server::read_one_frame(): Can't get buffer\n");
-            _status = false;
-            _pCallback->imageDone = true;
-            return false;
-        }
-        // Step through each line of the video and copy it into the buffer.  We
-        // do one line at a time here because there can be padding at the end of
-        // each line on some video formats.
-        for (DWORD iRow = 0; iRow < _num_rows; iRow++) {
-            memcpy(_buffer + _num_columns * 3 * iRow,
-                   imageLocation + _stride * iRow, _num_columns * 3);
-        }
+        _status = false;
+        sampleExchange_->signalSampleConsumed();
+#if 0
         _pCallback->imageDone = true;
+#endif
+        return false;
     }
+    // Step through each line of the video and copy it into the buffer.  We
+    // do one line at a time here because there can be padding at the end of
+    // each line on some video formats.
+    for (DWORD iRow = 0; iRow < _num_rows; iRow++) {
+        memcpy(_buffer + _num_columns * 3 * iRow,
+               imageLocation + _stride * iRow, _num_columns * 3);
+    }
+
+    sampleExchange_->signalSampleConsumed();
+#if 0
+    _pCallback->imageDone = true;
+#endif
 
 #ifdef HACK_TO_REOPEN
     close_device();
@@ -434,7 +433,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     //-------------------------------------------------------------------
     // Construct the sample grabber callback handler that will be used
     // to receive image data from the sample grabber.
-    _pCallback.reset(new directx_samplegrabber_callback());
+    _pCallback.reset(new directx_samplegrabber_callback(sampleExchange_));
 
 //-------------------------------------------------------------------
 // Construct the sample grabber that will be used to snatch images from
@@ -519,7 +518,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
-           "CoCreateInstance nullptrRenderer\n");
+           "createNullRenderFilter\n");
 #endif
     auto pNullRender = createNullRenderFilter();
 
@@ -650,7 +649,8 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 }
 
 /// Construct but do not open a camera
-directx_camera_server::directx_camera_server() {
+directx_camera_server::directx_camera_server()
+    : sampleExchange_(std::make_shared<MediaSampleExchange>()) {
     // No image in memory yet.
     _minX = _maxX = _minY = _maxY = 0;
 }
@@ -688,7 +688,8 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
 }
 
 directx_camera_server::directx_camera_server(std::string const &pathPrefix,
-                                             unsigned width, unsigned height) {
+                                             unsigned width, unsigned height)
+    : sampleExchange_(std::make_shared<MediaSampleExchange>()) {
     //---------------------------------------------------------------------
     if (!open_and_find_parameters(pathPrefix, width, height)) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "

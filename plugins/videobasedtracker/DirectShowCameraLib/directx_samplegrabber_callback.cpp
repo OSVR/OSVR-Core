@@ -27,13 +27,19 @@
 
 // Library/third-party includes
 #include <vrpn_Shared.h>
+#include <boost/assert.hpp>
 
 // Standard includes
 // - none
 
+static const auto WAIT_FOR_CONSUMER_TIMEOUT = std::chrono::milliseconds{50};
+
 //--------------------------------------------------------------------------------------------
 // This section implements the callback handler that gets frames from the
 // SampleGrabber filter.
+directx_samplegrabber_callback::directx_samplegrabber_callback(
+    MediaSampleExchangePtr const &exchange)
+    : sampleExchange_(exchange) {}
 
 directx_samplegrabber_callback::~directx_samplegrabber_callback() {
     // Make sure the other thread knows that it is okay to return the
@@ -62,32 +68,28 @@ HRESULT directx_samplegrabber_callback::QueryInterface(
 }
 
 // This is the routine that processes each sample.  It gets the information
-// about
-// the sample (one frame) from the SampleGrabber, then marks itself as being
-// ready
-// to process the sample.  It then blocks until the sample has been processed by
-// the associated camera server.
-// The hand-off is handled by using two booleans acting as semaphores.
-// The first semaphore (imageReady)
-// controls access to the callback handler's buffer so that the application
-// thread
-// will only read it when it is full.  The second sempaphore (imageDone)
-// controls when
-// the handler routine can release a sample; it makes sure that the sample is
-// not
-// released before the application thread is done processing it.
+// about the sample (one frame) from the SampleGrabber, then marks itself as
+// being ready to process the sample.  It then blocks until the sample has been
+// processed by the associated camera server. The hand-off is handled by using
+// two booleans  acting as semaphores.
+// The first semaphore (imageReady) controls access to the callback handler's
+// buffer so that the application thread will only read it when it is full. The
+// second sempaphore (imageDone) controls when the handler routine can release a
+// sample; it makes sure that the sample is not released before the application
+// thread is done processing it.
 // The directx camera must be sure to free an open sample (if any) after
-// changing
-// the state of the filter graph, so that this doesn't block indefinitely.  This
-// means
-// that the destructor for any object using this callback object has to destroy
-// this object.  The destructor sets _stayAlive to false to make sure this
-// thread terminates.
+// changing the state of the filter graph, so that this doesn't block
+// indefinitely.  This means that the destructor for any object using this
+// callback object has to destroy this object.  The destructor sets _stayAlive
+// to false to make sure this thread terminates.
 
 HRESULT directx_samplegrabber_callback::SampleCB(double time,
                                                  IMediaSample *sample) {
     // Point the image sample to the media sample we have and then set the flag
     // to tell the application it can process it.
+    BOOST_ASSERT_MSG(_stayAlive, "Should be alive when samplecb is called");
+    sampleExchange_->signalSampleProduced(sample);
+#if 0
     imageSample = sample;
     imageReady = true;
 
@@ -98,6 +100,10 @@ HRESULT directx_samplegrabber_callback::SampleCB(double time,
     }
     if (_stayAlive) {
         imageDone = false;
+    }
+#endif
+    while (_stayAlive &&
+           !sampleExchange_->waitForSampleConsumed(WAIT_FOR_CONSUMER_TIMEOUT)) {
     }
 
     return S_OK;

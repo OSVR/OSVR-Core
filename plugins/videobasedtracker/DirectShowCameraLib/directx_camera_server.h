@@ -29,6 +29,7 @@
 
 // Internal Includes
 #include "base_camera_server.h"
+#include "MediaSampleExchange.h"
 #include "comutils/ComPtr.h"
 #include "comutils/ComInit.h"
 
@@ -153,6 +154,9 @@ class directx_camera_server : public base_camera_server {
 
     long _stride; //< How many bytes to skip when going to next line (may be
     // negative for upside-down images)
+
+    // How we interact with the sample grabber callback.
+    MediaSampleExchangePtr sampleExchange_;
 
     // Pointer to the associated sample grabber callback object.
     std::unique_ptr<directx_samplegrabber_callback> _pCallback;
