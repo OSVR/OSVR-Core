@@ -71,6 +71,7 @@ if(WIN32)
     target_link_libraries(ViewTrackingCamera PRIVATE
         opencv_core
         opencv_highgui
+        ${VIDEOTRACKER_EXTRA_LIBS}
         directshow-camera)
     set_target_properties(ViewTrackingCamera PROPERTIES
         FOLDER "OSVR Plugins/Video-Based Tracker")

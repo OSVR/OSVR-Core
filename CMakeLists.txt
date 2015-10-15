@@ -216,6 +216,11 @@ if(BUILD_VIDEOTRACKER_PLUGIN)
         opencv_highgui
         opencv_imgproc
         opencv_flann)
+
+    if(WIN32 AND NOT OpenCV_VERSION_MAJOR LESS 3)
+        # for the tracker camera viewer to be able to save a capture.
+        list(APPEND VIDEOTRACKER_EXTRA_LIBS opencv_imgcodecs)
+    endif()
     list(APPEND OPENCV_MODULES_USED ${VIDEOTRACKER_EXTRA_LIBS})
 endif()
 

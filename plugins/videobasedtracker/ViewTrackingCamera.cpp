@@ -99,6 +99,9 @@ int main(int argc, char *argv[]) {
               << " frames captured." << std::endl;
     auto frame = cv::Mat{};
 
+    auto savedFrame = false;
+    static const auto FILENAME = "capture.png";
+
     FrameCounter counter;
     cv::namedWindow(windowNameAndInstructions);
     auto frameCount = std::size_t{0};
@@ -109,7 +112,12 @@ int main(int argc, char *argv[]) {
         if (frameCount % FRAME_DISPLAY_STRIDE == 0) {
             frameCount = 0;
             cv::imshow(windowNameAndInstructions, frame);
-
+            if (!savedFrame) {
+                savedFrame = true;
+                cv::imwrite(FILENAME, frame);
+                std::cout << "Wrote a captured frame to " << FILENAME
+                          << std::endl;
+            }
             char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key
             if ('q' == key || 'Q' == key || 27 /*esc*/ == key) {
                 break;
