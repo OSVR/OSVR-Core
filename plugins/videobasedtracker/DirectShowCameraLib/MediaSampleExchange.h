@@ -79,15 +79,13 @@ class MediaSampleExchange {
   public:
     MediaSampleExchange();
     ~MediaSampleExchange();
-
+    /// Signals that a sample (passed in) was produced. The producer should not
+    /// return from its callback (that is, not release that sample) until the
+    /// sample has been consumed or some other event has taken place (shutdown).
     void signalSampleProduced(IMediaSample *sample);
+
     /// @returns true if sample was made available, false if it timed out.
     bool waitForSample(std::chrono::milliseconds timeout);
-
-    IMediaSample &getSample() {
-        IMediaSample *pin{sample_};
-        return *pin;
-    }
 
     /// Retrieves the sample in an RAII wrapper, so that signalling of
     /// consumption is automatic when the sample object goes out of scope.
@@ -96,13 +94,13 @@ class MediaSampleExchange {
         return Sample{*this, *pin};
     }
 
-    /// Indicates consumer finished - don't need to manually call if you use the
-    /// Sample class.
-    void signalSampleConsumed();
     /// @returns true if sample was consumed, false if it timed out.
     bool waitForSampleConsumed(std::chrono::milliseconds timeout);
 
   private:
+    /// Indicates consumer finished - called by the Sample class
+    void signalSampleConsumed();
+    friend class Sample;
     struct Impl;
     IMediaSample *volatile sample_ = nullptr;
     std::unique_ptr<Impl> impl_;

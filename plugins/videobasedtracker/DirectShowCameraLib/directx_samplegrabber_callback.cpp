@@ -89,19 +89,7 @@ HRESULT directx_samplegrabber_callback::SampleCB(double time,
     // to tell the application it can process it.
     BOOST_ASSERT_MSG(_stayAlive, "Should be alive when samplecb is called");
     sampleExchange_->signalSampleProduced(sample);
-#if 0
-    imageSample = sample;
-    imageReady = true;
 
-    // Wait until the image has been processed and then return the buffer to the
-    // filter graph
-    while (!imageDone && _stayAlive) {
-        vrpn_SleepMsecs(1);
-    }
-    if (_stayAlive) {
-        imageDone = false;
-    }
-#endif
     while (_stayAlive &&
            !sampleExchange_->waitForSampleConsumed(WAIT_FOR_CONSUMER_TIMEOUT)) {
     }

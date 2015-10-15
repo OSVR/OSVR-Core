@@ -147,14 +147,11 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         _mode = 1;
     }
 
-    if (FAILED(sampleExchange_->getSample().GetPointer(&imageLocation))) {
+    auto sampleWrapper = sampleExchange_->get();
+    if (FAILED(sampleWrapper.get().GetPointer(&imageLocation))) {
         fprintf(stderr,
                 "directx_camera_server::read_one_frame(): Can't get buffer\n");
         _status = false;
-        sampleExchange_->signalSampleConsumed();
-#if 0
-        _pCallback->imageDone = true;
-#endif
         return false;
     }
     // Step through each line of the video and copy it into the buffer.  We
@@ -165,42 +162,9 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
                imageLocation + _stride * iRow, _num_columns * 3);
     }
 
-    sampleExchange_->signalSampleConsumed();
-#if 0
-    _pCallback->imageDone = true;
-#endif
-
 #ifdef HACK_TO_REOPEN
     close_device();
 #endif
-
-// Capture timing information and print out how many frames per second
-// are being received.
-
-#if 0
-  { static struct timeval last_print_time;
-    struct timeval now;
-    static bool first_time = true;
-    static int frame_count = 0;
-
-    if (first_time) {
-      gettimeofday(&last_print_time, nullptr);
-      first_time = false;
-    } else {
-      static	unsigned  last_r = 10000;
-      frame_count++;
-      gettimeofday(&now, nullptr);
-      double timesecs = 0.001 * vrpn_TimevalMsecs(vrpn_TimevalDiff(now, last_print_time));
-      if (timesecs >= 5) {
-	double frames_per_sec = frame_count / timesecs;
-	frame_count = 0;
-	printf("Received frames per second = %lg\n", frames_per_sec);
-	last_print_time = now;
-      }
-    }
-  }
-#endif
-
     return true;
 }
 
