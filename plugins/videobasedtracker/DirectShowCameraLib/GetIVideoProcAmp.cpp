@@ -33,12 +33,13 @@
 #include <strmif.h>
 #include <vidcap.h>  // for IKsTopologyInfo
 #include <ksmedia.h> // for KSNODETYPE_VIDEO_PROCESSING
+#include <iostream>
 
 comutils::Ptr<IVideoProcAmp> getIVideoProcAmp(IBaseFilter &filter) {
     auto ret = comutils::Ptr<IVideoProcAmp>{};
 
     auto ksTopoInfo = comutils::Ptr<IKsTopologyInfo>{};
-    filter.QueryInterface(IID_IKsTopologyInfo, AttachPtr(ksTopoInfo));
+    filter.QueryInterface(__uuidof(IKsTopologyInfo), AttachPtr(ksTopoInfo));
     if (!ksTopoInfo) {
         std::cout << "directx_camera_server: Couldn't get IKsTopologyInfo"
                   << std::endl;
@@ -56,7 +57,7 @@ comutils::Ptr<IVideoProcAmp> getIVideoProcAmp(IBaseFilter &filter) {
             std::cout
                 << "directx_camera_server: node has video processing type: "
                 << i << std::endl;
-            ksTopoInfo->CreateNodeInstance(i, IID_IVideoProcAmp,
+            ksTopoInfo->CreateNodeInstance(i, __uuidof(IVideoProcAmp),
                                            AttachPtr(ret));
             if (ret) {
                 return ret;
