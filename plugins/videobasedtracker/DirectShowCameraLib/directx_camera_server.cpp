@@ -192,7 +192,6 @@ bool directx_camera_server::start_com_and_graphbuilder() {
     checkForConstructionError(_pGraph, "graph manager");
 
     _pGraph->QueryInterface(IID_IMediaControl, AttachPtr(_pMediaControl));
-    _pGraph->QueryInterface(IID_IMediaEvent, AttachPtr(_pEvent));
 
 // Create the Capture Graph Builder.
 #ifdef DEBUG
@@ -400,11 +399,13 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // interface; this interface is described in the help pages.
     // If the width and height are specified as 0, then they are not set
     // in the header, letting them use whatever is the default.
+    /// @todo factor this out into its own header.
     if ((width != 0) && (height != 0)) {
+        auto pStreamConfig = comutils::Ptr<IAMStreamConfig>{};
         _pBuilder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video,
                                  pSrc.get(), IID_IAMStreamConfig,
-                                 AttachPtr(_pStreamConfig));
-        checkForConstructionError(_pStreamConfig, "StreamConfig interface");
+                                 AttachPtr(pStreamConfig));
+        checkForConstructionError(pStreamConfig, "StreamConfig interface");
 
         AM_MEDIA_TYPE mt = {0};
         mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
@@ -428,7 +429,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
         mt.lSampleSize = dibsize(pVideoHeader->bmiHeader);
 
         // Make the call to actually set the video type to what we want.
-        if (_pStreamConfig->SetFormat(&mt) != S_OK) {
+        if (pStreamConfig->SetFormat(&mt) != S_OK) {
             fprintf(stderr, "directx_camera_server::open_and_find_parameters():"
                             " Can't set resolution to %dx%d using uncompressed "
                             "24-bit video\n",
@@ -627,10 +628,7 @@ void directx_camera_server::close_device() {
     // Clean up.
     _pGraph.reset();
     _pMediaControl.reset();
-    _pEvent.reset();
     _pBuilder.reset();
-    _pSampleGrabberFilter.reset();
-    _pStreamConfig.reset();
 }
 
 directx_camera_server::~directx_camera_server() {

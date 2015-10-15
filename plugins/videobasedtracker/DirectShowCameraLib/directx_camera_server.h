@@ -139,15 +139,12 @@ class directx_camera_server : public base_camera_server {
 
     comutils::Ptr<IMediaControl>
         _pMediaControl; // Handles media streaming in the filter graph
-    comutils::Ptr<IMediaEvent> _pEvent; // Handles filter graph events
 
     comutils::Ptr<ICaptureGraphBuilder2> _pBuilder; // Filter graph builder
 
+    /// Manages setup of the sample grabber filter, its callback, and the media
+    /// sample exchange.
     std::unique_ptr<SampleGrabberWrapper> _pSampleGrabberWrapper;
-    comutils::Ptr<IBaseFilter>
-        _pSampleGrabberFilter; // Grabs samples from the media stream
-    comutils::Ptr<IAMStreamConfig>
-        _pStreamConfig; // Interface to set the video dimensions
 
     // Memory pointers used to get non-virtual memory
     BufferType _buffer;          //< Buffer for what comes from camera
