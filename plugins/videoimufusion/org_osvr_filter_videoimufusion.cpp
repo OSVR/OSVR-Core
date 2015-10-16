@@ -37,7 +37,7 @@
 // Anonymous namespace to avoid symbol collision
 namespace {
 
-static const auto DRIVER_NAME = "IMUVideoFusion";
+static const auto DRIVER_NAME = "VideoIMUFusion";
 
 class AnalysisPluginInstantiation {
   public:
