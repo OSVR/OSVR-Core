@@ -9,7 +9,6 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 osvr_add_plugin(NAME org_osvr_filter_oneeuro
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
-    EigenFilters.h
     org_osvr_filter_oneeuro.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_oneeuro_json.h")
 
