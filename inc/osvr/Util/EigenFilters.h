@@ -59,8 +59,7 @@ namespace util {
             }
 
             /// Low pass filter (designed for use within the One Euro filter)
-            /// that works
-            /// with Eigen types.
+            /// that works with Eigen types.
             ///
             /// Requires that a `computeStep()` overload exist that can take the
             /// data type.
@@ -91,14 +90,14 @@ namespace util {
             };
 
         } // namespace low_pass
-          /// @brief "One-Euro" filter class and supporting structs and free
-          /// functions.
+
+        /// @brief "One-Euro" filter class and supporting structs and free
+        /// functions.
         namespace one_euro {
 
             namespace detail {
                 /// Computing the alpha value for a step in the one euro filter
-                /// for any
-                /// scalar type.
+                /// for any scalar type.
                 template <typename T> inline T computeAlpha(T dt, T cutoff) {
                     auto tau = T(1) / (T(2) * M_PI * cutoff);
                     return T(1) / (T(1) + tau / dt);
@@ -106,10 +105,28 @@ namespace util {
 
             } // namespace detail
 
-            /// Parameters needed for the one-euro filter
+            /// Parameters needed for the one-euro filter.
+            ///
+            /// A reasonable place to start tuning is minCutoff=1Hz, beta=0, and
+            /// derivativeCutoff=1Hz. Per the original paper, a suggested
+            /// procedure for tuning is:
+            ///
+            /// - Adjust minCutoff to eliminate jitter with acceptable lag
+            ///   during slow movements.
+            /// - Then, increase beta during rapid movements in all directions
+            ///   until lag is reduced to the desired level.
             struct Params {
+                Params() : minCutoff(1), beta(0), derivativeCutoff(1) {}
+                Params(double minCut, double b, double dCut = 1)
+                    : minCutoff(minCut), beta(b), derivativeCutoff(dCut) {}
+
+                /// Minimum cutoff frequency (in Hz) at "0" speed.
                 double minCutoff;
+                /// Slope of cutoff frequency with respect to speed.
                 double beta;
+                /// Cutoff frequency used for the low-pass filter applied to the
+                /// derivative, in Hz.
+                /// The original paper fixed this at 1 Hz.
                 double derivativeCutoff;
             };
 
@@ -150,8 +167,7 @@ namespace util {
             /// @}
 
             /// A simple filter designed for human input sources: high accuracy
-            /// at
-            /// low velocity, low latency at high velocity.
+            /// at low velocity, low latency at high velocity.
             ///
             /// See http://hal.inria.fr/hal-00670496/
             ///
@@ -188,6 +204,8 @@ namespace util {
                     return m_xFilter.filter(
                         x, detail::computeAlpha<scalar>(dt, cutoff));
                 }
+
+                value_type const &getState() const { return m_xFilter.hatx(); }
 
               private:
                 bool m_firstTime = true;
