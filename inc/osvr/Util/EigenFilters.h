@@ -99,7 +99,7 @@ namespace util {
                 /// Computing the alpha value for a step in the one euro filter
                 /// for any
                 /// scalar type.
-                template <typename T> T computeAlpha(T dt, T cutoff) {
+                template <typename T> inline T computeAlpha(T dt, T cutoff) {
                     auto tau = T(1) / (T(2) * M_PI * cutoff);
                     return T(1) / (T(1) + tau / dt);
                 }
@@ -115,34 +115,36 @@ namespace util {
 
             /// @name One-Euro Filter required functions for Eigen::Vector3d
             /// @{
-            void setDerivativeIdentity(Eigen::Vector3d &dx) {
+            inline void setDerivativeIdentity(Eigen::Vector3d &dx) {
                 dx = Eigen::Vector3d::Zero();
             }
-            Eigen::Vector3d computeDerivative(Eigen::Vector3d const &prev,
-                                              Eigen::Vector3d const &curr,
-                                              double dt) {
+            inline Eigen::Vector3d
+            computeDerivative(Eigen::Vector3d const &prev,
+                              Eigen::Vector3d const &curr, double dt) {
                 return (curr - prev) / dt;
             }
-            double computeDerivativeMagnitude(Eigen::Vector3d const &dx) {
+            inline double
+            computeDerivativeMagnitude(Eigen::Vector3d const &dx) {
                 return dx.norm();
             }
             /// @}
 
             /// @name One-Euro Filter required functions for Eigen::Quaterniond
             /// @{
-            void setDerivativeIdentity(Eigen::Quaterniond &dx) {
+            inline void setDerivativeIdentity(Eigen::Quaterniond &dx) {
                 dx = Eigen::Quaterniond::Identity();
             }
-            Eigen::Quaterniond computeDerivative(Eigen::Quaterniond const &prev,
-                                                 Eigen::Quaterniond const &curr,
-                                                 double dt) {
+            inline Eigen::Quaterniond
+            computeDerivative(Eigen::Quaterniond const &prev,
+                              Eigen::Quaterniond const &curr, double dt) {
                 // slerp, based on dt, between the identity and our difference
                 // rotation.
                 return Eigen::Quaterniond::Identity()
                     .slerp(dt, curr * prev.inverse())
                     .normalized();
             }
-            double computeDerivativeMagnitude(Eigen::Quaterniond const &quat) {
+            inline double
+            computeDerivativeMagnitude(Eigen::Quaterniond const &quat) {
                 return 2.0 * std::acos(quat.w());
             }
             /// @}
