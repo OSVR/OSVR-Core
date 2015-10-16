@@ -58,6 +58,17 @@ target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 add_library(com_smart_pointer INTERFACE)
 target_include_directories(com_smart_pointer INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/com_smart_pointer" ${Boost_INCLUDE_DIRS})
 
+if(WIN32)
+    add_library(comutils STATIC
+        comutils/ComInit.cpp
+        comutils/ComInit.h
+        comutils/ComPtr.h
+        comutils/ComVariant.h)
+    target_link_libraries(comutils PUBLIC com_smart_pointer)
+    target_include_directories(comutils PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_compile_options(comutils PUBLIC "${OSVR_CXX11_FLAGS}")
+endif()
+
 # Interface target for Eigen
 # Actually a post-3.2.5 commit on the 3.2 branch: ec9c7b2e30a85212efd90937597e33515eff0c90
 add_library(eigen-headers INTERFACE)

@@ -46,9 +46,6 @@
 #include <sstream>
 #include <memory>
 
-// This string begins the DevicePath provided by Windows for the HDK's camera.
-static const auto HDK_CAMERA_PATH_PREFIX = "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
-
 // Define the constant below to use a DirectShow-based workaround to not
 // being able to open the OSVR HDK camera using OpenCV.
 /// @todo Remove this code and the DirectShow stuff once the camera can be read
@@ -56,6 +53,8 @@ static const auto HDK_CAMERA_PATH_PREFIX = "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
 #define VBHMD_USE_DIRECTSHOW
 #ifdef VBHMD_USE_DIRECTSHOW
 #include "directx_camera_server.h"
+#include "DirectShowHDKCameraFactory.h"
+#include "DirectShowToCV.h"
 using CameraPtr = std::unique_ptr<directx_camera_server>;
 #else
 using CameraPtr = std::unique_ptr<cv::VideoCapture>;
@@ -361,17 +360,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // camera will be plugged back in later.
             return OSVR_RETURN_SUCCESS;
         }
-        int minx, miny, maxx, maxy;
-        m_camera->read_range(minx, maxx, miny, maxy);
-        int height = maxy - miny + 1;
-        int width = maxx - minx + 1;
-        m_frame = cv::Mat(height, width, CV_8UC3,
-                          (BYTE *)(m_camera->get_pixel_buffer_pointer()));
+        m_frame = retrieve(*m_camera);
 
-        //==================================================================
-        // Flip the image in Y to take it from DirectShow space into
-        // OpenCV space.
-        cv::flip(m_frame, m_frame, 0);
 #else
         if (!m_camera->grab()) {
             // No frame available.
@@ -496,8 +486,8 @@ class HardwareDetection {
         // Open a DirectShow camera and make sure we can read an
         // image from it. We now filter by path prefix to make sure it only
         // finds HDK cameras, not whatever random webcam comes up first.
-        cam.reset(new directx_camera_server(HDK_CAMERA_PATH_PREFIX));
-        if (!cam->read_image_to_memory()) {
+        cam = getDirectShowHDKCamera();
+        if (!cam || !cam->read_image_to_memory()) {
             return OSVR_RETURN_FAILURE;
         }
 #else

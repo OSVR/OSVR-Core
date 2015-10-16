@@ -26,7 +26,11 @@
 // Internal Includes
 #include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
-#include "WinVariant.h"
+#include "dibsize.h"
+#include "directx_samplegrabber_callback.h"
+#include "ConnectTwoFilters.h"
+#include "PropertyBagHelper.h"
+#include "NullRenderFilter.h"
 
 // Library/third-party includes
 // - none
@@ -37,6 +41,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <iostream>
+#include <chrono>
 
 // Uncomment to get a full device name and path listing in enumeration, instead
 // of silently enumerating and early-exiting when we find one we like.
@@ -54,107 +59,6 @@ inline void checkForConstructionError(T const &ptr, const char objName[]) {
         throw ConstructionError(objName);
     }
 }
-
-/// @brief Computes bytes required for an UNCOMPRESSED RGB DIB
-inline DWORD dibsize(BITMAPINFOHEADER const &bi) {
-    // cf:
-    // https://msdn.microsoft.com/en-us/library/windows/desktop/dd318229(v=vs.85).aspx
-    auto stride = ((((bi.biWidth * bi.biBitCount) + 31) & ~31) >> 3);
-    return stride * std::abs(bi.biHeight);
-}
-
-ComInit::ComInit() {
-    auto hr = CoInitialize(nullptr);
-    if (FAILED(hr)) {
-        throw std::runtime_error("Could not initialize COM!");
-    }
-}
-
-ComInit::~ComInit() { CoUninitialize(); }
-
-// This class is used to handle callbacks from the SampleGrabber filter.  It
-// grabs each sample and holds onto it until the camera server that is
-// associated with the object comes and gets it.  The callback method in this
-// class is called in another thread, so its methods need to be guarded with
-// semaphores.
-
-class directx_samplegrabber_callback : public ISampleGrabberCB {
-  public:
-    directx_samplegrabber_callback(void);
-    ~directx_samplegrabber_callback(void);
-
-    void shutdown(void) {
-        _stayAlive = false;
-        Sleep(100);
-    }
-
-    // Boolean flag telling whether there is a sample in the image
-    // buffer ready for the application thread to consume.  Set to
-    // true by the callback when there is an image there, and back
-    // to false by the application thread when it reads the image.
-    // XXX This should be done using a semaphore to avoid having
-    // to poll in the application.
-    bool imageReady; //< true when there is an image ready to be processed
-
-    // Boolean flag telling whether the app is done processing the image
-    // buffer so that the callback thread can return it to the filter graph.
-    // Set to true by the application when it finishes, and back
-    // to false by the callback thread when it gets a new image.
-    // XXX This should be done using a semaphore to avoid having
-    // to poll in the callback thread.
-    bool imageDone; //< true when the app has finished processing an image
-
-    // A pointer to the image sample that has been passed to the sample
-    // grabber callback handler.
-    IMediaSample *imageSample;
-
-    // These three methods must be defined because of the IUnknown parent class.
-    // XXX The first two are a hack to pretend that we are doing reference
-    // counting; this object must last longer than the sample grabber it is
-    // connected to in order to avoid segmentations faults.
-    STDMETHODIMP_(ULONG) AddRef(void) { return 1; }
-    STDMETHODIMP_(ULONG) Release(void) { return 2; }
-    STDMETHOD(QueryInterface)
-    (REFIID interfaceRequested, void **handleToInterfaceRequested);
-
-    // One of the following two methods must be defined do to the
-    // ISampleGraberCB parent class; this is the way we hear from the grabber.
-    // We implement the one that gives us unbuffered access.  Be sure to turn
-    // off buffering in the SampleGrabber that is associated with this callback
-    // handler.
-    STDMETHODIMP BufferCB(double, BYTE *, long) { return E_NOTIMPL; }
-    STDMETHOD(SampleCB)(double time, IMediaSample *sample);
-
-  protected:
-    BITMAPINFOHEADER _bitmapInfo; //< Describes format of the bitmap
-    bool _stayAlive;              //< Tells all threads to exit
-};
-
-//-----------------------------------------------------------------------
-// Helper functions for editing the filter graph:
-
-static WinPtr<IPin> GetPin(IBaseFilter &pFilter, PIN_DIRECTION const PinDir) {
-    auto pEnum = WinPtr<IEnumPins>{};
-    pFilter.EnumPins(AttachPtr(pEnum));
-    auto pPin = WinPtr<IPin>{};
-    while (pEnum->Next(1, AttachPtr(pPin), nullptr) == S_OK) {
-        PIN_DIRECTION PinDirThis;
-        pPin->QueryDirection(&PinDirThis);
-        if (PinDir == PinDirThis) {
-            return pPin;
-        }
-    }
-    return WinPtr<IPin>{};
-}
-
-static HRESULT ConnectTwoFilters(IGraphBuilder &pGraph, IBaseFilter &pFirst,
-                                 IBaseFilter &pSecond) {
-    auto pOut = GetPin(pFirst, PINDIR_OUTPUT);
-    auto pIn = GetPin(pSecond, PINDIR_INPUT);
-    return pGraph.Connect(pOut.get(), pIn.get());
-}
-
-//-----------------------------------------------------------------------
 
 /** The first time we are called, start the filter graph running in continuous
     mode and grab the first image that comes out.  Later times, grab each new
@@ -181,15 +85,6 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     // frame
     // as it comes in.  Then set the filter graph running.
     if (!_started_graph) {
-        // Set the grabber do not do one-shot mode because that would cause
-        // it to stop the filter graph after a single frame is captured.
-        _pGrabber->SetOneShot(FALSE);
-
-        // Set the grabber to not do buffering mode, because we've not
-        // implemented
-        // the handler for buffered callbacks.
-        _pGrabber->SetBufferSamples(FALSE);
-
         // Run the graph and wait until it captures a frame into its buffer
         switch (_mode) {
         case 0: // Case 0 = run
@@ -224,20 +119,15 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
     // sample.
     // If it takes too long, time out.
     BYTE *imageLocation;
-    if (!_pCallback->imageReady) {
-        for (int i = 0; i < TIMEOUT_MSECS; i++) {
-            vrpn_SleepMsecs(1);
-            if (_pCallback->imageReady) {
-                break;
-            } // Break out of the wait if its ready
-        }
-        if (!_pCallback->imageReady) {
+    auto imageReady = sampleExchange_->waitForSample(
+        std::chrono::milliseconds(TIMEOUT_MSECS));
+
+    if (!imageReady) {
 #ifdef DEBUG
-            fprintf(stderr, "directx_camera_server::read_one_frame(): Timeout "
-                            "when reading image\n");
+        fprintf(stderr, "directx_camera_server::read_one_frame(): Timeout "
+                        "when reading image\n");
 #endif
-            return false;
-        }
+        return false;
     }
 
     // If we are in mode 2, then we pause the graph after we captured one image.
@@ -246,94 +136,37 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         _mode = 1;
     }
 
-    if (_pCallback->imageReady) {
-        _pCallback->imageReady = false;
-        if (FAILED(_pCallback->imageSample->GetPointer(&imageLocation))) {
-            fprintf(
-                stderr,
+    auto sampleWrapper = sampleExchange_->get();
+    if (FAILED(sampleWrapper.get().GetPointer(&imageLocation))) {
+        fprintf(stderr,
                 "directx_camera_server::read_one_frame(): Can't get buffer\n");
-            _status = false;
-            _pCallback->imageDone = true;
-            return false;
-        }
-        // Step through each line of the video and copy it into the buffer.  We
-        // do one line at a time here because there can be padding at the end of
-        // each line on some video formats.
-        for (DWORD iRow = 0; iRow < _num_rows; iRow++) {
-            memcpy(_buffer + _num_columns * 3 * iRow,
-                   imageLocation + _stride * iRow, _num_columns * 3);
-        }
-        _pCallback->imageDone = true;
+        _status = false;
+        return false;
+    }
+    // Step through each line of the video and copy it into the buffer.  We
+    // do one line at a time here because there can be padding at the end of
+    // each line on some video formats.
+    for (DWORD iRow = 0; iRow < _num_rows; iRow++) {
+        memcpy(_buffer.data() + _num_columns * 3 * iRow,
+               imageLocation + _stride * iRow, _num_columns * 3);
     }
 
 #ifdef HACK_TO_REOPEN
     close_device();
 #endif
-
-// Capture timing information and print out how many frames per second
-// are being received.
-
-#if 0
-  { static struct timeval last_print_time;
-    struct timeval now;
-    static bool first_time = true;
-    static int frame_count = 0;
-
-    if (first_time) {
-      gettimeofday(&last_print_time, nullptr);
-      first_time = false;
-    } else {
-      static	unsigned  last_r = 10000;
-      frame_count++;
-      gettimeofday(&now, nullptr);
-      double timesecs = 0.001 * vrpn_TimevalMsecs(vrpn_TimevalDiff(now, last_print_time));
-      if (timesecs >= 5) {
-	double frames_per_sec = frame_count / timesecs;
-	frame_count = 0;
-	printf("Received frames per second = %lg\n", frames_per_sec);
-	last_print_time = now;
-      }
-    }
-  }
-#endif
-
     return true;
 }
 
-inline std::string getProperty(IMoniker &mon, const wchar_t *propName) {
-
-    auto pPropBag = WinPtr<IPropertyBag>{};
-    mon.BindToStorage(nullptr, nullptr, IID_IPropertyBag, AttachPtr(pPropBag));
-
-    auto ret = std::string{};
-    if (!pPropBag) {
-#ifdef DEBUG
-        std::cerr << "Could not get the property bag" << std::endl;
-#endif
-        return ret;
-    }
-    auto val = WinVariant{};
-    pPropBag->Read(propName, AttachVariant(val), nullptr);
-    if (!contains<std::wstring>(val)) {
-#ifdef DEBUG
-        std::cerr << "!contains<std::wstring>(val) for property "
-                  << osvr::util::wideToUTF8String(propName) << std::endl;
-#endif
-        return ret;
-    }
-    return osvr::util::wideToUTF8String(get<std::wstring>(val));
+inline std::string getDevicePath(PropertyBagHelper &prop) {
+    return osvr::util::wideToUTF8String(prop.read(L"DevicePath"));
 }
 
-inline std::string getDevicePath(IMoniker &mon) {
-    return getProperty(mon, L"DevicePath");
-}
-
-inline std::string getDeviceHumanDesc(IMoniker &mon) {
-    auto desc = getProperty(mon, L"Description");
+inline std::string getDeviceHumanDesc(PropertyBagHelper &prop) {
+    auto desc = prop.read(L"Description");
     if (desc.empty()) {
-        desc = getProperty(mon, L"FriendlyName");
+        desc = prop.read(L"FriendlyName");
     }
-    return desc;
+    return desc.empty() ? std::string() : osvr::util::wideToUTF8String(desc);
 }
 
 bool directx_camera_server::start_com_and_graphbuilder() {
@@ -348,7 +181,7 @@ bool directx_camera_server::start_com_and_graphbuilder() {
            "CoInitialize\n");
 #endif
 
-    _com = ComInit::init();
+    _com = comutils::ComInit::init();
 // Create the filter graph manager
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
@@ -359,7 +192,6 @@ bool directx_camera_server::start_com_and_graphbuilder() {
     checkForConstructionError(_pGraph, "graph manager");
 
     _pGraph->QueryInterface(IID_IMediaControl, AttachPtr(_pMediaControl));
-    _pGraph->QueryInterface(IID_IMediaEvent, AttachPtr(_pEvent));
 
 // Create the Capture Graph Builder.
 #ifdef DEBUG
@@ -393,14 +225,14 @@ inline bool didConstructionFail(T const &ptr, const char objName[]) {
 // Enumerates the capture devices available, returning the first one where the
 // passed functor (taking IMoniker& as a param) returns true.
 template <typename F>
-inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
-    auto ret = WinPtr<IMoniker>{};
+inline comutils::Ptr<IMoniker> find_first_capture_device_where(F &&f) {
+    auto ret = comutils::Ptr<IMoniker>{};
 // Create the system device enumerator.
 #ifdef DEBUG
     printf("find_first_capture_device_where(): Before "
            "CoCreateInstance SystemDeviceEnum\n");
 #endif
-    auto pDevEnum = WinPtr<ICreateDevEnum>{};
+    auto pDevEnum = comutils::Ptr<ICreateDevEnum>{};
     CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC,
                      IID_ICreateDevEnum, AttachPtr(pDevEnum));
     if (didConstructionFail(pDevEnum, "device enumerator")) {
@@ -413,7 +245,7 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     printf("find_first_capture_device_where(): Before "
            "CreateClassEnumerator\n");
 #endif
-    auto pClassEnum = WinPtr<IEnumMoniker>{};
+    auto pClassEnum = comutils::Ptr<IEnumMoniker>{};
     pDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
                                     AttachPtr(pClassEnum), 0);
     if (didConstructionFail(pClassEnum, "video enumerator (no cameras?)")) {
@@ -431,7 +263,7 @@ inline WinPtr<IMoniker> find_first_capture_device_where(F &&f) {
     printf("\ndirectx_camera_server find_first_capture_device_where(): "
            "Beginning enumeration of video capture devices.\n\n");
 #endif
-    auto pMoniker = WinPtr<IMoniker>{};
+    auto pMoniker = comutils::Ptr<IMoniker>{};
     while (pClassEnum->Next(1, AttachPtr(pMoniker), nullptr) == S_OK) {
 
 #ifdef VERBOSE_ENUM
@@ -496,11 +328,13 @@ bool directx_camera_server::open_and_find_parameters(const int which,
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
 #endif
-    return open_moniker_and_finish_setup(pMoniker, width, height);
+    return open_moniker_and_finish_setup(pMoniker, FilterOperation{}, width,
+                                         height);
 }
 
 bool directx_camera_server::open_and_find_parameters(
-    std::string const &pathPrefix, unsigned width, unsigned height) {
+    std::string const &pathPrefix, FilterOperation const &sourceConfig,
+    unsigned width, unsigned height) {
     auto graphbuilderRet = start_com_and_graphbuilder();
     if (!graphbuilderRet) {
         return false;
@@ -508,7 +342,11 @@ bool directx_camera_server::open_and_find_parameters(
 
     auto pMoniker =
         find_first_capture_device_where([&pathPrefix](IMoniker &mon) {
-            auto path = getDevicePath(mon);
+            auto props = PropertyBagHelper{mon};
+            if (!props) {
+                return false;
+            }
+            auto path = getDevicePath(props);
             if (path.length() < pathPrefix.length()) {
                 return false;
             }
@@ -526,11 +364,12 @@ bool directx_camera_server::open_and_find_parameters(
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
 #endif
-    return open_moniker_and_finish_setup(pMoniker, width, height);
+    return open_moniker_and_finish_setup(pMoniker, sourceConfig, width, height);
 }
 
 bool directx_camera_server::open_moniker_and_finish_setup(
-    WinPtr<IMoniker> pMoniker, unsigned width, unsigned height) {
+    comutils::Ptr<IMoniker> pMoniker, FilterOperation const &sourceConfig,
+    unsigned width, unsigned height) {
 
     if (!pMoniker) {
         fprintf(stderr,
@@ -538,51 +377,23 @@ bool directx_camera_server::open_moniker_and_finish_setup(
                 "Null device moniker passed: no device found?\n");
         return false;
     }
-
+    auto prop = PropertyBagHelper{*pMoniker};
     printf("directx_camera_server: Using capture device '%s' at path '%s'\n",
-           getDeviceHumanDesc(*pMoniker).c_str(),
-           getDevicePath(*pMoniker).c_str());
+           getDeviceHumanDesc(prop).c_str(), getDevicePath(prop).c_str());
 
     // Bind the chosen moniker to a filter object.
-    auto pSrc = WinPtr<IBaseFilter>{};
-    pMoniker->BindToObject(0, 0, IID_IBaseFilter, AttachPtr(pSrc));
+    auto pSrc = comutils::Ptr<IBaseFilter>{};
+    pMoniker->BindToObject(nullptr, nullptr, IID_IBaseFilter, AttachPtr(pSrc));
 
     //-------------------------------------------------------------------
-    // Construct the sample grabber callback handler that will be used
-    // to receive image data from the sample grabber.
-    _pCallback.reset(new directx_samplegrabber_callback());
+    // Construct the sample grabber that will be used to snatch images from
+    // the video stream as they go by.  Set its media type and callback.
 
-//-------------------------------------------------------------------
-// Construct the sample grabber that will be used to snatch images from
-// the video stream as they go by.  Set its media type and callback.
+    // Create and configure the Sample Grabber.
+    _pSampleGrabberWrapper.reset(new SampleGrabberWrapper);
 
-// Create the Sample Grabber.
-#ifdef DEBUG
-    printf("directx_camera_server::open_and_find_parameters(): Before "
-           "CoCreateInstance SampleGrabber\n");
-#endif
-    CoCreateInstance(CLSID_SampleGrabber, nullptr, CLSCTX_INPROC_SERVER,
-                     IID_IBaseFilter, AttachPtr(_pSampleGrabberFilter));
-    checkForConstructionError(_pSampleGrabberFilter,
-                              "SampleGrabber filter (not DirectX 8.1+?)");
-
-#ifdef DEBUG
-    printf("directx_camera_server::open_and_find_parameters(): Before "
-           "QueryInterface\n");
-#endif
-    _pSampleGrabberFilter->QueryInterface(IID_ISampleGrabber,
-                                          AttachPtr(_pGrabber));
-
-// Set the media type to video
-#ifdef DEBUG
-    printf("directx_camera_server::open_and_find_parameters(): Before "
-           "SetMediaType\n");
-#endif
-    AM_MEDIA_TYPE mt = {0};
-    // Ask for video media producers that produce 8-bit RGB
-    mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
-    mt.subtype = MEDIASUBTYPE_RGB24; // Ask for 8 bit RGB
-    _pGrabber->SetMediaType(&mt);
+    // Get the exchange object for receiving data from the sample grabber.
+    sampleExchange_ = _pSampleGrabberWrapper->getExchange();
 
     //-------------------------------------------------------------------
     // Ask for the video resolution that has been passed in.
@@ -591,13 +402,15 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // interface; this interface is described in the help pages.
     // If the width and height are specified as 0, then they are not set
     // in the header, letting them use whatever is the default.
+    /// @todo factor this out into its own header.
     if ((width != 0) && (height != 0)) {
+        auto pStreamConfig = comutils::Ptr<IAMStreamConfig>{};
         _pBuilder->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video,
                                  pSrc.get(), IID_IAMStreamConfig,
-                                 AttachPtr(_pStreamConfig));
-        checkForConstructionError(_pStreamConfig, "StreamConfig interface");
+                                 AttachPtr(pStreamConfig));
+        checkForConstructionError(pStreamConfig, "StreamConfig interface");
 
-        ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
+        AM_MEDIA_TYPE mt = {0};
         mt.majortype = MEDIATYPE_Video;  // Ask for video media producers
         mt.subtype = MEDIASUBTYPE_RGB24; // Ask for 8 bit RGB
         VIDEOINFOHEADER vih = {0};
@@ -619,7 +432,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
         mt.lSampleSize = dibsize(pVideoHeader->bmiHeader);
 
         // Make the call to actually set the video type to what we want.
-        if (_pStreamConfig->SetFormat(&mt) != S_OK) {
+        if (pStreamConfig->SetFormat(&mt) != S_OK) {
             fprintf(stderr, "directx_camera_server::open_and_find_parameters():"
                             " Can't set resolution to %dx%d using uncompressed "
                             "24-bit video\n",
@@ -635,36 +448,41 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 
 #ifdef DEBUG
     printf("directx_camera_server::open_and_find_parameters(): Before "
-           "CoCreateInstance nullptrRenderer\n");
+           "createNullRenderFilter\n");
 #endif
-    auto pNullRender = WinPtr<IBaseFilter>{};
-    CoCreateInstance(CLSID_NullRenderer, nullptr, CLSCTX_INPROC_SERVER,
-                     IID_IBaseFilter, AttachPtr(pNullRender));
-
+    auto pNullRender = createNullRenderFilter();
+    auto sampleGrabberFilter = _pSampleGrabberWrapper->getFilter();
     //-------------------------------------------------------------------
     // Build the filter graph.  First add the filters and then connect them.
 
     // pSrc is the capture filter for the video device we found above.
-    _pGraph->AddFilter(pSrc.get(), L"Video Capture");
+    auto hr = _pGraph->AddFilter(pSrc.get(), L"Video Capture");
+    BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding Video Capture filter to graph");
 
     // Add the sample grabber filter
-    _pGraph->AddFilter(_pSampleGrabberFilter.get(), L"SampleGrabber");
+    hr = _pGraph->AddFilter(sampleGrabberFilter.get(), L"SampleGrabber");
+    BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding SampleGrabber filter to graph");
 
     // Add the null renderer filter
-    _pGraph->AddFilter(pNullRender.get(), L"NullRenderer");
+    hr = _pGraph->AddFilter(pNullRender.get(), L"NullRenderer");
+    BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding NullRenderer filter to graph");
 
     // Connect the output of the video reader to the sample grabber input
-    ConnectTwoFilters(*_pGraph, *pSrc, *_pSampleGrabberFilter);
+    ConnectTwoFilters(*_pGraph, *pSrc, *sampleGrabberFilter);
 
     // Connect the output of the sample grabber to the null renderer input
-    ConnectTwoFilters(*_pGraph, *_pSampleGrabberFilter, *pNullRender);
+    ConnectTwoFilters(*_pGraph, *sampleGrabberFilter, *pNullRender);
 
+    // If we were given a config action for the source, do it now.
+    if (sourceConfig) {
+        sourceConfig(*pSrc);
+    }
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
-    auto pTuner = WinPtr<IAMTVTuner>{};
-    auto hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(),
-                                       IID_IAMTVTuner, AttachPtr(pTuner));
+    auto pTuner = comutils::Ptr<IAMTVTuner>{};
+    hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(), IID_IAMTVTuner,
+                                  AttachPtr(pTuner));
     if (pTuner) {
 #ifdef DEBUG
         printf("directx_camera_server::open_and_find_parameters(): Found a TV "
@@ -689,7 +507,8 @@ bool directx_camera_server::open_moniker_and_finish_setup(
 
     //-------------------------------------------------------------------
     // Find _num_rows and _num_columns in the video stream.
-    _pGrabber->GetConnectedMediaType(&mt);
+    AM_MEDIA_TYPE mt = {0};
+    _pSampleGrabberWrapper->getConnectedMediaType(mt);
     VIDEOINFOHEADER *pVih;
     if (mt.formattype == FORMAT_VideoInfo ||
         mt.formattype == FORMAT_VideoInfo2) {
@@ -761,9 +580,6 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // next.  This is rounded up to the nearest DWORD.
     _stride = (_num_columns * BytesPerPixel + 3) & ~3;
 
-    // Set the callback, where '0' means 'use the SampleCB callback'
-    _pGrabber->SetCallback(_pCallback.get(), 0);
-
     return true;
 }
 
@@ -784,19 +600,7 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
         return;
     }
 
-    //---------------------------------------------------------------------
-    // Allocate a buffer that is large enough to read the maximum-sized
-    // image with no binning.
-    _buflen =
-        (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
-    if ((_buffer = new unsigned char[_buflen]) == nullptr) {
-        fprintf(stderr, "directx_camera_server::directx_camera_server(): Out "
-                        "of memory for buffer\n");
-        _status = false;
-        return;
-    }
-    // No image in memory yet.
-    _minX = _maxX = _minY = _maxY = 0;
+    allocate_buffer();
 
 #ifdef HACK_TO_REOPEN
     close_device();
@@ -808,27 +612,14 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
 directx_camera_server::directx_camera_server(std::string const &pathPrefix,
                                              unsigned width, unsigned height) {
     //---------------------------------------------------------------------
-    if (!open_and_find_parameters(pathPrefix, width, height)) {
+    if (!open_and_find_parameters(pathPrefix, FilterOperation{}, width,
+                                  height)) {
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
                         "Cannot open camera\n");
         _status = false;
         return;
     }
-
-    //---------------------------------------------------------------------
-    // Allocate a buffer that is large enough to read the maximum-sized
-    // image with no binning.
-    /// @todo replace with a vector that gets sized here!
-    _buflen =
-        (unsigned)(_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
-    if ((_buffer = new unsigned char[_buflen]) == nullptr) {
-        fprintf(stderr, "directx_camera_server::directx_camera_server(): Out "
-                        "of memory for buffer\n");
-        _status = false;
-        return;
-    }
-    // No image in memory yet.
-    _minX = _maxX = _minY = _maxY = 0;
+    allocate_buffer();
 
 #ifdef HACK_TO_REOPEN
     close_device();
@@ -837,6 +628,22 @@ directx_camera_server::directx_camera_server(std::string const &pathPrefix,
     _status = true;
 }
 
+directx_camera_server::directx_camera_server(
+    std::string const &pathPrefix, FilterOperation const &sourceConfig) {
+    if (!open_and_find_parameters(pathPrefix, sourceConfig)) {
+        fprintf(stderr, "directx_camera_server::directx_camera_server(): "
+                        "Cannot open camera\n");
+        _status = false;
+        return;
+    }
+    allocate_buffer();
+
+#ifdef HACK_TO_REOPEN
+    close_device();
+#endif
+
+    _status = true;
+}
 //---------------------------------------------------------------------
 // Close the camera and the system.  Free up memory.
 
@@ -844,29 +651,19 @@ void directx_camera_server::close_device() {
     // Clean up.
     _pGraph.reset();
     _pMediaControl.reset();
-    _pEvent.reset();
     _pBuilder.reset();
-    _pSampleGrabberFilter.reset();
-    _pGrabber.reset();
-    _pStreamConfig.reset();
-    _com.reset();
 }
 
 directx_camera_server::~directx_camera_server() {
     // Get the callback device to immediately return all samples
     // it has queued up, then shut down the filter graph.
-    if (_pCallback) {
-        _pCallback->shutdown();
-    }
-    close_device();
+    _pSampleGrabberWrapper->shutdown();
 
-    if (_buffer != nullptr) {
-        delete[] _buffer;
-    }
+    close_device();
 
     // Delete the callback object, so that it can clean up and
     // make sure all of its threads exit.
-    _pCallback.reset();
+    _pSampleGrabberWrapper.reset();
 }
 
 bool directx_camera_server::read_image_to_memory(unsigned minX, unsigned maxX,
@@ -977,75 +774,14 @@ bool directx_camera_server::get_pixel_from_memory(unsigned X, unsigned Y,
     return true;
 }
 
-//--------------------------------------------------------------------------------------------
-// This section implements the callback handler that gets frames from the
-// SampleGrabber filter.
+void directx_camera_server::allocate_buffer() {
+    //---------------------------------------------------------------------
+    // Allocate a buffer that is large enough to read the maximum-sized
+    // image with no binning.
+    /// @todo replace with a vector that gets sized here!
+    auto buflen = (_num_rows * _num_columns * 3); // Expect B,G,R; 8-bits each.
+    _buffer.resize(buflen);
 
-directx_samplegrabber_callback::directx_samplegrabber_callback()
-    : imageReady(false), imageDone(false), imageSample(nullptr),
-      _stayAlive(true) {}
-
-directx_samplegrabber_callback::~directx_samplegrabber_callback() {
-    // Make sure the other thread knows that it is okay to return the
-    // buffer and wait until it has had time to do so.
-    _stayAlive = false;
-    Sleep(100);
-};
-
-HRESULT directx_samplegrabber_callback::QueryInterface(
-    REFIID interfaceRequested, void **handleToInterfaceRequested) {
-    if (handleToInterfaceRequested == nullptr) {
-        return E_POINTER;
-    }
-    if (interfaceRequested == IID_IUnknown) {
-        *handleToInterfaceRequested = static_cast<IUnknown *>(this);
-    } else if (interfaceRequested == IID_ISampleGrabberCB) {
-        *handleToInterfaceRequested = static_cast<ISampleGrabberCB *>(this);
-    } else {
-        return E_NOINTERFACE;
-    }
-    AddRef();
-    return S_OK;
-}
-
-// This is the routine that processes each sample.  It gets the information
-// about
-// the sample (one frame) from the SampleGrabber, then marks itself as being
-// ready
-// to process the sample.  It then blocks until the sample has been processed by
-// the associated camera server.
-// The hand-off is handled by using two booleans acting as semaphores.
-// The first semaphore (imageReady)
-// controls access to the callback handler's buffer so that the application
-// thread
-// will only read it when it is full.  The second sempaphore (imageDone)
-// controls when
-// the handler routine can release a sample; it makes sure that the sample is
-// not
-// released before the application thread is done processing it.
-// The directx camera must be sure to free an open sample (if any) after
-// changing
-// the state of the filter graph, so that this doesn't block indefinitely.  This
-// means
-// that the destructor for any object using this callback object has to destroy
-// this object.  The destructor sets _stayAlive to false to make sure this
-// thread terminates.
-
-HRESULT directx_samplegrabber_callback::SampleCB(double time,
-                                                 IMediaSample *sample) {
-    // Point the image sample to the media sample we have and then set the flag
-    // to tell the application it can process it.
-    imageSample = sample;
-    imageReady = true;
-
-    // Wait until the image has been processed and then return the buffer to the
-    // filter graph
-    while (!imageDone && _stayAlive) {
-        vrpn_SleepMsecs(1);
-    }
-    if (_stayAlive) {
-        imageDone = false;
-    }
-
-    return S_OK;
+    // No image in memory yet.
+    _minX = _maxX = _minY = _maxY = 0;
 }
