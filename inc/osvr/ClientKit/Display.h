@@ -100,6 +100,13 @@ namespace clientkit {
         OSVR_ViewportDimension height;
     };
 
+    struct ProjectionClippingPlanes {
+        double left;
+        double right;
+        double top;
+        double bottom;
+    };
+
     /// @brief Wrapper for a viewer, eye, and surface bound to a display config.
     /// DOES NOT provide lifetime management for the associated display config!
     class Surface {
@@ -153,6 +160,22 @@ namespace clientkit {
                 handleDisplayError(
                     "Could not access projection matrix for surface!");
             }
+        }
+
+        /// @brief Gets the clipping planes.
+        ///
+        /// @sa osvrClientGetViewerEyeSurfaceProjectionClippingPlanes
+        ProjectionClippingPlanes getProjectionClippingPlanes() const {
+            ProjectionClippingPlanes clippingPlanes;
+            OSVR_ReturnCode ret =
+                osvrClientGetViewerEyeSurfaceProjectionClippingPlanes(
+                    m_disp, m_viewer, m_eye, m_surface, &clippingPlanes.left,
+                    &clippingPlanes.right, &clippingPlanes.bottom, &clippingPlanes.top);
+            if (OSVR_RETURN_SUCCESS != ret) {
+                handleDisplayError(
+                    "Could not access projection clipping planes for surface!");
+            }
+            return clippingPlanes;
         }
 
         /// @brief Determines if the description of the surface requests any
