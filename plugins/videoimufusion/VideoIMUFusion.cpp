@@ -174,7 +174,7 @@ class VideoIMUFusion::RunningData {
 
   private:
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
-        return fromPose(pose) * m_cTr;
+        return m_cTr * fromPose(pose);
     }
     const Eigen::Isometry3d m_cTr;
     Eigen::Quaterniond m_orientation;
