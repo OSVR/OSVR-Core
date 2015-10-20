@@ -28,6 +28,8 @@
 
 // Required for DLL linkage on Windows
 #include <osvr/Client/Export.h>
+#include <osvr/Util/UniquePtr.h>
+#include <osvr/Util/ClientOpaqueTypesC.h>
 
 // Standard includes
 #include <string>
@@ -52,6 +54,14 @@ namespace client {
 
     private:
         const std::string m_message;
+    };
+
+    class RenderManagerConfig;
+    typedef unique_ptr<RenderManagerConfig> RenderManagerConfigPtr;
+    class RenderManagerConfigFactory {
+    public:
+        OSVR_CLIENT_EXPORT static RenderManagerConfigPtr
+            create(OSVR_ClientContext ctx);
     };
 
     class RenderManagerConfig {
