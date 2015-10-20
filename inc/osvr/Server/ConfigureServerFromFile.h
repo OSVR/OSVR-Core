@@ -159,6 +159,11 @@ namespace server {
                    "may use the OSVR HDK as a default." << endl;
         }
 
+        if (srvConfig.processRenderManagerParameters()) {
+            out << "RenderManager config found and parsed from the config file"
+                << endl;
+        }
+
         out << "Triggering a hardware detection..." << endl;
         ret->triggerHardwareDetect();
 
