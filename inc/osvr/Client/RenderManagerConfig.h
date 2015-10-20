@@ -40,22 +40,6 @@
 namespace osvr {
 namespace client {
 
-    class RenderManagerConfigParseException : public std::exception {
-    public:
-        OSVR_CLIENT_EXPORT RenderManagerConfigParseException(const std::string& message) /*OSVR_NOEXCEPT*/ : std::exception(), m_message(message)
-        {
-            // do nothing
-        }
-
-        virtual const char OSVR_CLIENT_EXPORT *what() const /*OSVR_NOEXCEPT OSVR_OVERRIDE*/
-        {
-            return m_message.c_str();
-        }
-
-    private:
-        const std::string m_message;
-    };
-
     class RenderManagerConfig;
     typedef unique_ptr<RenderManagerConfig> RenderManagerConfigPtr;
     class RenderManagerConfigFactory {
