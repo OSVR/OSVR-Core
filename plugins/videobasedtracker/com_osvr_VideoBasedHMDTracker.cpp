@@ -565,8 +565,5 @@ OSVR_PLUGIN(com_osvr_VideoBasedHMDTracker) {
     osvr::pluginkit::registerDriverInstantiationCallback(
       ctx, "VideoBasedHMDTracker", new ConfiguredDeviceConstructor);
 
-    /// Register a detection callback function object.
-    //context.registerHardwareDetectCallback(new HardwareDetection());
-
     return OSVR_RETURN_SUCCESS;
 }
