@@ -1,4 +1,12 @@
 {
+    "drivers": [{
+        "plugin": "com_osvr_VideoBasedHMDTracker",
+        "driver": "VideoBasedHMDTracker",
+        "params": {
+            "cameraID": 0,
+            "showDebug": false
+        }
+    }],
   "plugins": [
     "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
   ],
