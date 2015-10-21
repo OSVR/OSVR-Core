@@ -16,7 +16,7 @@ First plug the USB cable, shipped with the HDK, into the micro-USB port on the s
 ![USB to camera](./camera_USB.png)
 
 Next, plug the phono cable that is attached to the power-supply connector into the camera.  Note: Be sure to plug the connector **all the way in** so that the edge of the connector is right up against the side of the camera.  The connector will go in easily most of the way and then snaps in after a final push.
-![Camera both plugs](./camera_plugs.png]
+![Camera both plugs](./camera_plugs.png)
 
 ### Running the server
 
