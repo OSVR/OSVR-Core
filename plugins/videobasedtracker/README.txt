@@ -13,3 +13,6 @@ HDK_random_images:
         Debugging images using the OSVR HDK views from an unsynchronized camera.  They were used to make sure that the blob-finding an size-detection code worked with the flash pattern in use during development in early May 2015.
 	See README in simulated_images for how to point at them.
 
+doc:
+	Documentation on how to use the OSVR HDK video-based tracking and on how to develop new devices to be compatible with it.
+
