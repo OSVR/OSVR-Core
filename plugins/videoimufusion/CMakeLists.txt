@@ -10,6 +10,7 @@ osvr_add_plugin(NAME org_osvr_filter_videoimufusion
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
     org_osvr_filter_videoimufusion.cpp
+    PoseState.h
     VideoIMUFusion.h
     VideoIMUFusion.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_videoimufusion_json.h")
