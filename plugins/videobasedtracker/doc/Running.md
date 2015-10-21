@@ -40,7 +40,7 @@ Once everthing is plugged in and the server is running, you can use any client a
 
 ### Debugging
 
-**(This is available in the OSVR master source as of 10/21/2015, and will be included in releases after the 0.7 release.) **
+**(This is available in the OSVR master source as of 10/22/2015, and will be included in releases after the 0.7 release.) **
 
 If you want to see what is going on under the covers, or if you're not getting any tracker data and want to see what may be wrong, you can edit the osvr_server_config.VideoBasedHMDTracker.sample.json file (or make a new one and edit that) to change the *showDebug* parameter from *false* to *true*.  When you do this, two things happen:
 
@@ -66,5 +66,5 @@ Each of the debug windows responds to keyboard commands, letting you look in mor
 
 ## Coming Soon
 
-Sensics is developing an analysis plug-in that will combine video + intertial tracker reports into a single tracker state that includes estimates on velocity and acceleration.
+Sensics is developing an analysis plug-in that will combine video + inertial tracker reports into a single tracker state that includes estimates on velocity and acceleration.
 
