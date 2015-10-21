@@ -40,7 +40,27 @@ Once everthing is plugged in and the server is running, you can use any client a
 
 ### Debugging
 
-If you want to see what is going on under the covers, or if you're not getting any tracker data and want to see what may be wrong, you can... hold on just a few days... until we have a parameter in the configuration file that lets you turn on video windows showing debug info on the tracking system.
+If you want to see what is going on under the covers, or if you're not getting any tracker data and want to see what may be wrong, you can edit the osvr_server_config.VideoBasedHMDTracker.sample.json file (or make a new one and edit that) to change the *showDebug* parameter from *false* to *true*.  When you do this, two things happen:
+
+* The locations of sensors will be printed to the console as they are found.  Only every 11th value will be printed.  The coordinate system is in meters and has +X to the right when looking from the camera's point of view, +Y down from the camera's point of view, and +Z forward from the camera's point of view.  The center of projection of the camera is the origin.
+
+* A window will appear for each sensor showing video from the camera annotated by any available tracking information.  The contents of this window vary based on the state of the tracking system and based on keyboard commands.  Again, only every 11th frame is shown in each window.
+
+If everything is working, you will see yellow numbers attached to the visible beacons on the HDK, as in the image below.
+
+![Video debug when working](./video_debug.png)
+
+Each debug image shows red numbers indicating each beacon that has been identified in the 2D image.  When it has aquired a 3D estimate of the sensor, it overlays green numbers that are reprojections from the 3D space back into the 2D scene using the camera model.  When the camera model (or beacon location) is not completely accurate, there will be a slight misalignment between the red and green.  When they overlay well, red numbers will not be seen.
+
+If there is not currently a model for the sensor, there will be no green numbers and only red numbers indicating beacons that have been seen.  If the beacon number is -1, this means that it has not been seen in enough consecutive frames to be identified.  If it is -3 it means that the code has been completely read but does not match any beacons for this sensor.  If there is more than one sensor window, each will have -3 beacons for beacons on other sensors, as with the window shown below.
+
+![Video debug when no known sensors](./video_debug_unknown_sensors.png)
+
+#### Keyboard commands
+
+Each of the debug windows responds to keyboard commands, letting you look in more detail at what is going on.  The setting describes above is the *beacon* setting, which is the default and is also what happens whenyou press **b**.  The *image* setting (**i**) shows the original image with no overlays.  The *threshold* setting (**t**) shows the thresholded image, from which the beacons are extracted.  An example threshold image is shown below.
+
+![Video debug threshold](./video_debug_threshold.png)
 
 ## Coming Soon
 
