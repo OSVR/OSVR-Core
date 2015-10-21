@@ -62,6 +62,7 @@ osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
 target_link_libraries(com_osvr_VideoBasedHMDTracker
     vbtracker-core
     vendored-hidapi
+    jsoncpp_lib
 )
 if(WIN32)
     target_link_libraries(com_osvr_VideoBasedHMDTracker directshow-camera)

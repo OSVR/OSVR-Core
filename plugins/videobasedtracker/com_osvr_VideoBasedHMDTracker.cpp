@@ -37,6 +37,8 @@
 #include <opencv2/core/operations.hpp>
 #include <opencv2/highgui/highgui.hpp> // for image capture
 #include <opencv2/imgproc/imgproc.hpp> // for image scaling
+#include <json/value.h>
+#include <json/reader.h>
 
 #include <boost/noncopyable.hpp>
 
@@ -59,10 +61,6 @@ using CameraPtr = std::unique_ptr<directx_camera_server>;
 #else
 using CameraPtr = std::unique_ptr<cv::VideoCapture>;
 #endif
-
-// Define the constant below to provide debugging (window showing video and
-// behavior, printing tracked positions)
-// -> now located in VideoBasedTracker.h
 
 // Define the constant below to print timing information (how many updates
 // per second we are getting).
@@ -87,9 +85,10 @@ namespace {
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, CameraPtr &&camera,
-                         int devNumber = 0)
+      int devNumber = 0, bool showDebug = false)
 #ifndef VBHMD_FAKE_IMAGES
         : m_camera(std::move(camera))
+        , m_vbtracker(showDebug)
 #endif
     {
         // Set the number of threads for OpenCV to use.
@@ -133,10 +132,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
             fileName << std::setfill('0') << std::setw(4) << imageNum++;
             fileName << ".tif";
             cv::Mat image;
-#ifdef VBHMD_DEBUG
             std::cout << "Trying to read image from " << fileName.str()
                       << std::endl;
-#endif
             image = cv::imread(fileName.str().c_str(), CV_LOAD_IMAGE_COLOR);
             if (!image.data) {
                 break;
@@ -230,10 +227,6 @@ class VideoBasedHMDTracker : boost::noncopyable {
                 /// HDK camera
                 m_type = OSVRHDK;
             }
-#ifdef VBHMD_DEBUG
-            std::cout << "Got image from camera of size " << width << "x"
-                      << height << std::endl;
-#endif
             if (m_type == OculusDK2) {
                 std::cout << "Is Oculus camera, reformatting to mono"
                           << std::endl;
@@ -474,7 +467,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
 class HardwareDetection {
   public:
-    HardwareDetection() : m_found(false) {}
+    HardwareDetection(int cameraID = 0, bool showDebug = false)
+      : m_found(false)
+    {
+      m_cameraID = cameraID;
+      m_showDebug = showDebug;
+    }
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
         if (m_found) {
@@ -492,7 +490,7 @@ class HardwareDetection {
         }
 #else
         // Autodetect camera.
-        cam.reset(new cv::VideoCapture(0));
+        cam.reset(new cv::VideoCapture(m_cameraID));
         if (!cap->isOpened()) {
             // Failed to find camera
             return OSVR_RETURN_FAILURE;
@@ -502,8 +500,10 @@ class HardwareDetection {
         m_found = true;
 
         /// Create our device object, passing the context and moving the camera.
+        std::cout << "Opening camera " << m_cameraID << std::endl;
         osvr::pluginkit::registerObjectForDeletion(
-            ctx, new VideoBasedHMDTracker(ctx, std::move(cam)));
+            ctx, new VideoBasedHMDTracker(ctx, std::move(cam),
+            m_cameraID, m_showDebug));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -512,14 +512,61 @@ class HardwareDetection {
     /// @brief Have we found our device yet? (this limits the plugin to one
     /// instance, so that only one tracker will use this camera.)
     bool m_found;
+
+    int m_cameraID; //< Which OpenCV camera should we open?
+    bool m_showDebug; //< Show windows with video to help debug?
 };
+
+class ConfiguredDeviceConstructor {
+public:
+  /// @brief This is the required signature for a device instantiation
+  /// callback.
+  OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
+    // Read the JSON data from parameters.
+    Json::Value root;
+    if (params) {
+      Json::Reader r;
+      if (!r.parse(params, root)) {
+        std::cerr << "Could not parse parameters!" << std::endl;
+      }
+    }
+
+    // Read these parameters from a "params" field in the device Json
+    // configuration file.
+
+    // If they configured us but didn't provide a "value" item, warn
+    // - pretending that "value" is some important config value.
+    // If very important, could just return OSVR_RETURN_FAILURE here.
+    if (!root.isMember("value")) {
+      std::cerr << "Warning: got configuration, but nothing specified "
+        "for \"value\" - will use default!"
+        << std::endl;
+    }
+
+    // Using `get` here instead of `[]` lets us provide a default value.
+    int cameraID = root.get("cameraID", 0).asInt();
+    bool showDebug = root.get("showDebug", false).asBool();
+
+    // OK, now that we have our parameters, create the device.
+    osvr::pluginkit::PluginContext context(ctx);
+    context.registerHardwareDetectCallback(
+      new HardwareDetection(cameraID, showDebug));
+
+    return OSVR_RETURN_SUCCESS;
+  }
+};
+
 } // namespace
 
 OSVR_PLUGIN(com_osvr_VideoBasedHMDTracker) {
     osvr::pluginkit::PluginContext context(ctx);
 
+    /// Tell the core we're available to create a device object.
+    osvr::pluginkit::registerDriverInstantiationCallback(
+      ctx, "VideoBasedHMDTracker", new ConfiguredDeviceConstructor);
+
     /// Register a detection callback function object.
-    context.registerHardwareDetectCallback(new HardwareDetection());
+    //context.registerHardwareDetectCallback(new HardwareDetection());
 
     return OSVR_RETURN_SUCCESS;
 }

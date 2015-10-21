@@ -49,6 +49,9 @@ namespace osvr {
 namespace vbtracker {
     class VideoBasedTracker {
       public:
+        VideoBasedTracker(bool showDebugWindows = false)
+          : m_showDebugWindows(showDebugWindows) {};
+
         void addOculusSensor();
         /// @name Sensor addition methods
         /// @{
@@ -83,6 +86,7 @@ namespace vbtracker {
                           PoseHandler handler);
 
       private:
+        bool m_showDebugWindows;  //< Should we show debugging windows?
 #if 0
         void m_processSensor(KeyPointList const &foundKeyPoints,
                              LedGroup &ledGroup);
@@ -93,9 +97,7 @@ namespace vbtracker {
         cv::Mat m_imageGray;
         cv::Mat m_thresholdImage;
         cv::Mat m_imageWithBlobs;
-#ifdef VBHMD_DEBUG
         cv::Mat *m_shownImage = &m_imageWithBlobs;
-#endif
         /// @}
 
         /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
