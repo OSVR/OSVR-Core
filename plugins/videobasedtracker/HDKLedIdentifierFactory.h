@@ -42,6 +42,12 @@ namespace vbtracker {
     /// @param sensor either 0 (front plate) or 1 (back plate)
     LedIdentifierPtr createHDKLedIdentifier(uint8_t sensor);
 
+    /// @brief Factory function to create an HDK Led Identifier object
+    ///        using the presumed order that generated the simulated
+    ///        images, which turned out to be changed before release.
+    /// @param sensor either 0 (front plate) or 1 (back plate)
+    LedIdentifierPtr createHDKLedIdentifierSimulated(uint8_t sensor);
+
     /// @brief Factory function to create an HDK Led Identifier object using the
     /// random images patterns.
     LedIdentifierPtr createRandomHDKLedIdentifier();

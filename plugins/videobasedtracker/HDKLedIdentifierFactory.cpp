@@ -169,6 +169,21 @@ namespace vbtracker {
         return ret;
     }
 
+    LedIdentifierPtr createHDKLedIdentifierSimulated(uint8_t sensor) {
+      LedIdentifierPtr ret;
+      switch (sensor) {
+      case 0:
+        ret = createHDKLedIdentifier(OsvrHdkLedIdentifier_SENSOR0_PATTERNS_ORIGINAL);
+        break;
+      case 1:
+        ret = createHDKLedIdentifier(OsvrHdkLedIdentifier_SENSOR1_PATTERNS_ORIGINAL);
+      default:
+        BOOST_ASSERT_MSG(sensor < 2, "Valid sensors are only 0 or 1!");
+        break;
+      }
+      return ret;
+    }
+
     // clang-format off
     /// @brief Patterns found in the "HDK_random_images" folder, which has only
     /// 8 images for each and they are a random subset of the actual images.

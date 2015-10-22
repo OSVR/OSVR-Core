@@ -89,6 +89,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
 #ifndef VBHMD_FAKE_IMAGES
         : m_camera(std::move(camera))
         , m_vbtracker(showDebug)
+#else
+        : m_vbtracker(showDebug)
 #endif
     {
         // Set the number of threads for OpenCV to use.
@@ -187,12 +189,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
         //        m_identifiers.push_back(new
         //        osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
 
-        m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifier(0), m, d,
+        m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifierSimulated(0), m, d,
                               osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 4,
                               2);
         // There are sometimes only four beacons on the back unit (two of
         // the LEDs are disabled), so we let things work with just those.
-        m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifier(1), m, d,
+        m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifierSimulated(1), m, d,
                               osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4,
                               0);
 
@@ -336,7 +338,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
 // Sleep 1/120th of a second, to simulate a reasonable
 // frame rate.
-//        vrpn_SleepMsecs(1000 / 120);
+        vrpn_SleepMsecs(1000 / 120);
 #else
         if (!m_camera->isOpened()) {
             // Couldn't open the camera.  Failing silently for now. Maybe the
@@ -533,15 +535,6 @@ public:
 
     // Read these parameters from a "params" field in the device Json
     // configuration file.
-
-    // If they configured us but didn't provide a "value" item, warn
-    // - pretending that "value" is some important config value.
-    // If very important, could just return OSVR_RETURN_FAILURE here.
-    if (!root.isMember("value")) {
-      std::cerr << "Warning: got configuration, but nothing specified "
-        "for \"value\" - will use default!"
-        << std::endl;
-    }
 
     // Using `get` here instead of `[]` lets us provide a default value.
     int cameraID = root.get("cameraID", 0).asInt();
