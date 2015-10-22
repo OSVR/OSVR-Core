@@ -70,9 +70,9 @@ if(WIN32)
 endif()
 
 # Interface target for Eigen
-# Actually a post-3.2.5 commit on the 3.2 branch: ec9c7b2e30a85212efd90937597e33515eff0c90
 add_library(eigen-headers INTERFACE)
-target_include_directories(eigen-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.5")
+set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.6" CACHE INTERNAL "" FORCE)
+target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
 
 ###
