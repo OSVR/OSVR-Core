@@ -1,0 +1,18 @@
+{
+  "deviceVendor": "OSVR",
+  "deviceName": "IMU and Video Tracking Fusion Filter",
+  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "version": 1,
+  "lastModified": "2015-10-12T21:13:07.585Z",
+  "interfaces": {
+    "tracker": {
+      "count": 2,
+      "position": true,
+      "orientation": true
+    }
+  },
+  "semantic": {
+    "fused": "tracker/0",
+    "reorientedVideo": "tracker/1"
+  }
+}
