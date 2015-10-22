@@ -63,13 +63,13 @@ namespace client {
         ViewerEye(ViewerEye const &) = delete;
         ViewerEye &operator=(ViewerEye const &) = delete;
         ViewerEye(ViewerEye &&other)
-            : m_pose(std::move(other.m_pose)),
-              m_offset(std::move(other.m_offset)), m_viewport(other.m_viewport),
+            : m_pose(std::move(other.m_pose)), m_offset(other.m_offset),
+              m_viewport(other.m_viewport),
               m_unitBounds(std::move(other.m_unitBounds)),
               m_rot180(other.m_rot180), m_pitchTilt(other.m_pitchTilt),
               m_radDistortParams(std::move(other.m_radDistortParams)),
-              m_opticalAxisOffsetY(std::move(other.m_opticalAxisOffsetY)),
-              m_displayInputIdx(std::move(other.m_displayInputIdx)) {}
+              m_displayInputIdx(other.m_displayInputIdx),
+              m_opticalAxisOffsetY(other.m_opticalAxisOffsetY) {}
 
         inline OSVR_SurfaceCount size() const { return 1; }
 #if 0
