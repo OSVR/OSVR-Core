@@ -68,6 +68,8 @@ using detail::wrapCallback;
 
 using namespace osvr::util;
 
+static const OSVR_ChannelCount FUSED_SENSOR_ID = 0;
+
 VideoIMUFusion::VideoIMUFusion(OSVR_PluginRegContext ctx,
                                std::string const &name,
                                std::string const &imuPath,
@@ -215,8 +217,8 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
     auto newPose = OSVR_PoseState{};
     toQuat(m_runningData->getOrientation(), newPose.rotation);
     vecMap(newPose.translation) = m_runningData->getPosition();
-    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose, 0,
-                                         &timestamp);
+    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose,
+                                         FUSED_SENSOR_ID, &timestamp);
 }
 void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
                                             const OSVR_PoseReport &report) {
