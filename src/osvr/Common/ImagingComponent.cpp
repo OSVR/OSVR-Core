@@ -31,8 +31,11 @@
 #include <osvr/Util/Verbosity.h>
 
 // Standard includes
+#include <stdlib.h>
 #include <sstream>
 #include <utility>
+
+#define OSVR_ALIGN_SIZE 16
 
 namespace osvr {
 namespace common {
@@ -67,12 +70,30 @@ namespace common {
 
             template <typename T>
             void allocateBuffer(T &, size_t bytes, std::true_type const &) {
-                m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(malloc(bytes)));
+                // Allocate a memory buffer with enough space to store a pointer to the
+                // original buffer.
+                size_t space = bytes + OSVR_ALIGN_SIZE;
+                void* buffer = malloc(space + sizeof(void*));
+                void* aligned = (void**)buffer + 1;
+
+                // After this call the 'aligned' pointer will be aligned to a boundary.
+                // If there is not enough space to align the pointer, it stays unaligned.
+                std::align(OSVR_ALIGN_SIZE, bytes, aligned, space);
+
+                // Store the buffer pointer for the delete call.
+                ((void **)aligned)[-1] = buffer;
+
+                m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(aligned), deleteBuffer);
             }
 
             template <typename T>
             void allocateBuffer(T &, size_t, std::false_type const &) {
                 // Does nothing if we're serializing.
+            }
+
+            static void deleteBuffer(void* p) {
+                if (p)
+                    free(((void **)p)[-1]);
             }
 
             template <typename T> void processMessage(T &p) {
