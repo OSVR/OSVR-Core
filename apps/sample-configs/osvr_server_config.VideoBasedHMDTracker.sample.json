@@ -7,10 +7,10 @@
             "showDebug": false
         }
     }],
-  "plugins": [
-    "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
-  ],
-  "aliases": {
-    "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
-  }
+    "plugins": [
+        "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
+    ],
+    "aliases": {
+        "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+    }
 }
