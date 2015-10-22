@@ -16,6 +16,11 @@ if(OpenCV_DIR_IMPORTED AND NOT OPENCV_FOUND)
     list(APPEND CMAKE_PREFIX_PATH "${OpenCV_DIR_IMPORTED}")
 endif()
 
+# Likewise for our vendored header-only libraries - just Eigen for now.
+if(NOT EIGEN3_FOUND)
+    list(APPEND CMAKE_PREFIX_PATH "@OSVR_VENDORED_EIGEN_ROOT@")
+endif()
+
 # Help out with boost.
 if(NOT BOOST_FOUND)
     include("${CMAKE_CURRENT_LIST_DIR}/CMakeBoostHelper.cmake" OPTIONAL)
