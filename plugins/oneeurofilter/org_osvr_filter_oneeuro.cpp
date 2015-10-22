@@ -28,7 +28,7 @@
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
-#include "EigenFilters.h"
+#include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/EigenInterop.h>
 
 // Generated JSON header file
@@ -48,7 +48,9 @@ namespace {
 
 static const auto DRIVER_NAME = "OneEuroFilter";
 
-using filters::one_euro::Params;
+using osvr::util::filters::one_euro::Params;
+namespace filters = osvr::util::filters;
+
 /// Default parameters for a position one-euro filter in meters.
 inline Params getPositionDefaults() { return Params{1.15, 0.5, 1.2}; }
 /// Default parameters for an orientation one-euro filter using quaternions.

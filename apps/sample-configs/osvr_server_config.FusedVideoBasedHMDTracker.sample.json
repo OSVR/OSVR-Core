@@ -1,0 +1,20 @@
+{
+    "drivers": [{
+        "plugin": "org_osvr_filter_videoimufusion",
+        "driver": "VideoIMUFusion",
+        "params": {
+            "name": "HeadFusion",
+            "input": {
+                "imu": "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd",
+                "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+            }
+        }
+    }],
+    "plugins": [
+        "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
+    ],
+    "aliases": {
+        "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused",
+        "/me/headReorientedVideo": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/reorientedVideo"
+    }
+}
