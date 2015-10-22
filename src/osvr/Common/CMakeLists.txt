@@ -200,7 +200,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     PRIVATE
     jsoncpp_lib
-    opencv_core
     vendored-vrpn
     eigen-headers
     osvr_cxx11_flags
@@ -218,8 +217,6 @@ if(OSVR_COMMON_TRACING_ETW)
         "${ETWPROVIDERS_MANIFEST}"
         DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endif()
-
-osvr_delayload_opencv(${LIBNAME_FULL} ${OPENCV_CORE_MODULES})
 
 ###
 # Grab DLLs please.

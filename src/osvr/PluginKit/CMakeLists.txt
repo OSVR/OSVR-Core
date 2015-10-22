@@ -53,6 +53,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrConnection
     osvrUtilCpp
     osvrCommon
+    opencv_core
     vendored-vrpn
     boost_thread)
 
@@ -96,3 +97,5 @@ target_link_libraries(${LIBNAME_INTERFACE}
 # Add library alias to allow use of the same osvr_add_plugin script within this
 # tree and outside of it.
 add_library(osvr::${LIBNAME_INTERFACE} ALIAS ${LIBNAME_INTERFACE})
+
+osvr_delayload_opencv(${LIBNAME_FULL} ${OPENCV_CORE_MODULES})

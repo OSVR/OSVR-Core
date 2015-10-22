@@ -43,7 +43,7 @@ bool gotSomething = false;
 
 void imagingCallback(void *userdata,
                      osvr::util::time::TimeValue const &timestamp,
-                     osvr::clientkit::ImagingReportOpenCV report) {
+                     osvr::clientkit::ImagingReport report) {
     if (report.frame.empty()) {
         std::cout << "Error, frame empty!" << std::endl;
         return;
@@ -57,8 +57,8 @@ void imagingCallback(void *userdata,
     }
 
     cv::imshow(windowNameAndInstructions, report.frame);
-    osvr::clientkit::ImagingReportOpenCV &lastReport =
-        *static_cast<osvr::clientkit::ImagingReportOpenCV *>(userdata);
+    osvr::clientkit::ImagingReport &lastReport =
+        *static_cast<osvr::clientkit::ImagingReport *>(userdata);
     lastReport = report;
 }
 int main() {
@@ -68,7 +68,7 @@ int main() {
 
     /// We keep a copy of the last report to avoid de-allocating the image
     /// buffer until we have a new report.
-    osvr::clientkit::ImagingReportOpenCV lastReport;
+    osvr::clientkit::ImagingReport lastReport;
 
     // Register the imaging callback.
     osvr::clientkit::registerImagingCallback(camera, &imagingCallback,
