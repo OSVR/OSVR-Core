@@ -1,5 +1,12 @@
 {
     "drivers": [{
+        "plugin": "com_osvr_VideoBasedHMDTracker",
+        "driver": "VideoBasedHMDTracker",
+        "params": {
+            "cameraID": 0,
+            "showDebug": false
+        }
+    }, {
         "plugin": "org_osvr_filter_videoimufusion",
         "driver": "VideoIMUFusion",
         "params": {
