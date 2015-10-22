@@ -6,8 +6,13 @@
   "lastModified": "2015-10-12T21:13:07.585Z",
   "interfaces": {
     "tracker": {
+      "count": 2,
       "position": true,
       "orientation": true
     }
+  },
+  "semantic": {
+    "fused": "tracker/0",
+    "reorientedVideo": "tracker/1"
   }
 }

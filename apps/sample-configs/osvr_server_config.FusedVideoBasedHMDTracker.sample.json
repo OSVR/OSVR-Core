@@ -14,6 +14,7 @@
         "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
     ],
     "aliases": {
-        "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/tracker/0"
+        "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused",
+        "/me/headReorientedVideo": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/reorientedVideo"
     }
 }
