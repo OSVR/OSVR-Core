@@ -2,14 +2,23 @@
     "deviceVendor": "OSVR",
     "deviceName": "Hacker Development Kit Tracker",
     "author": "Ryan Pavlik <ryan@sensics.com>",
-    "version": 1,
-    "lastModified": "2015-10-13T19:29:37.857Z",
+    "version": 2,
+    "lastModified": "2015-10-22T20:20:08.606Z",
     "interfaces": {
         "tracker": {
             "count": 1,
             "bounded": true,
             "position": false,
             "orientation": true
+        },
+        "analog": {
+            "count": 2,
+            "traits": [{
+                "min": 0
+            }, {
+                "min": 0,
+                "max": 3
+            }]
         }
     },
     "semantic": {
@@ -28,6 +37,10 @@
                     "child": "tracker/0"
                 }
             }
+        },
+        "status": {
+            "reportVersion": "analog/0",
+            "videoStatus": "analog/1"
         }
     },
     "automaticAliases": {
