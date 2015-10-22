@@ -69,6 +69,7 @@ using detail::wrapCallback;
 using namespace osvr::util;
 
 static const OSVR_ChannelCount FUSED_SENSOR_ID = 0;
+static const OSVR_ChannelCount TRANSFORMED_VIDEO_SENSOR_ID = 1;
 
 VideoIMUFusion::VideoIMUFusion(OSVR_PluginRegContext ctx,
                                std::string const &name,
@@ -174,10 +175,11 @@ class VideoIMUFusion::RunningData {
         return positionFilter.getState();
     }
 
-  private:
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
         return m_cTr * fromPose(pose);
     }
+
+  private:
     const Eigen::Isometry3d m_cTr;
     Eigen::Quaterniond m_orientation;
     OSVR_TimeValue m_lastPosition;
@@ -227,7 +229,16 @@ void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
         return;
     }
     m_runningData->handleVideoTrackerReport(timestamp, report);
-    // Not issuing a new output here, let the IMU trigger that.
+    // Not issuing a new main output here, let the IMU trigger that.
+
+    // However, for debugging, we will output a second sensor that is just the
+    // video tracker data re-oriented.
+    auto videoPose = m_runningData->takeCameraPoseToRoom(report.pose);
+    auto newDebugPose = OSVR_PoseState{};
+    toPose(videoPose, newDebugPose);
+    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newDebugPose,
+                                         TRANSFORMED_VIDEO_SENSOR_ID,
+                                         &timestamp);
 }
 
 class VideoIMUFusion::StartupData {
