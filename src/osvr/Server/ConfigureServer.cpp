@@ -352,6 +352,29 @@ namespace server {
         return success;
     }
 
+    static const char RENDERMANAGER_KEY[] = "renderManagerConfig";
+    static const char RENDERMANAGER_PATH[] = "/renderManagerConfig";
+    bool ConfigureServer::processRenderManagerParameters() {
+        bool success = false;
+        Json::Value const &renderManager = m_data->getMember(RENDERMANAGER_KEY);
+        if (renderManager.isNull()) {
+            return success;
+        }
+
+        auto result = resolvePossibleRef(renderManager);
+        if (result.isNull()) {
+            OSVR_DEV_VERBOSE(
+                "ERROR: Could not load an object or render manager config "
+                "file specified by: "
+                << renderManager.toStyledString());
+            return success;
+        }
+
+        // OK, got it
+        success = m_server->addString(RENDERMANAGER_PATH, result.toStyledString());
+        return success;
+    }
+
     void ConfigureServer::loadAutoPlugins() { m_server->loadAutoPlugins(); }
 
 } // namespace server

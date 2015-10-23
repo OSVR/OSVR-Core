@@ -10,6 +10,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceTree.h"
     "${HEADER_LOCATION}/RemoteHandler.h"
     "${HEADER_LOCATION}/RemoteHandlerFactory.h"
+    "${HEADER_LOCATION}/RenderManagerConfig.h"
     "${HEADER_LOCATION}/Viewer.h"
     "${HEADER_LOCATION}/Viewers.h"
     "${HEADER_LOCATION}/ViewerEye.h"
@@ -43,6 +44,7 @@ set(SOURCE
     PureClientContext.h
     RemoteHandler.cpp
     RemoteHandlerFactory.cpp
+    RenderManagerConfig.cpp
     RouterPredicates.h
     RouterTransforms.h
     TrackerRemoteFactory.cpp

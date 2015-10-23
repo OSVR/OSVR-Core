@@ -151,6 +151,10 @@ namespace server {
         /// @return true if one was found and it was successfully loaded.
         OSVR_SERVER_EXPORT bool processDisplay();
 
+        /// @brief Process a RenderManager config element in the config.
+        /// @return true if one was found and it was successfully loaded.
+        OSVR_SERVER_EXPORT bool processRenderManagerParameters();
+
         /// @brief Loads all plugins not marked for manual load.
         OSVR_SERVER_EXPORT void loadAutoPlugins();
 
