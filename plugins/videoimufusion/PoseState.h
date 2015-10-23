@@ -27,11 +27,11 @@
 
 // Internal Includes
 #include "FlexibleKalmanBase.h"
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include "ExternalQuaternion.h"
 
 // Library/third-party includes
-#include <boost/assert.hpp>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 // Standard includes
 // - none
@@ -39,7 +39,6 @@
 namespace osvr {
 namespace kalman {
     namespace pose_externalized_rotation {
-        // static const types::DimensionType DIMENSION = 12;
         using Dimension = types::DimensionConstant<12>;
         using StateVector = types::DimVector<Dimension>;
         using StateVectorBlock3 =
@@ -127,49 +126,9 @@ namespace kalman {
             velocities(state) *= attenuation;
         }
 
-        /// For use in maintaining an "external quaternion" and 3 incremental
-        /// orientations, as done by Welch based on earlier work.
-        ///
-        /// In particular, this function implements equation 6 from a work cited
-        /// by Welch,
-        /// Azarbayejani, A., & Pentland, A. P. (1995). Recursive estimation of
-        /// motion, structure, and focal length. Pattern Analysis and Machine
-        /// Intelligence, IEEE Transactions on, 17(6), 562--575.
-        /// http://doi.org/10.1109/34.387503
-        template <typename Derived>
-        inline typename std::enable_if<Derived::SizeAtCompileTime == 3,
-                                       Eigen::Quaterniond>::type
-        incrementalOrientationToQuat(
-            Eigen::MatrixBase<Derived> const &incRotVec) {
-            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-            auto epsilon = incRotVec.dot(incRotVec) / 4.;
-            Eigen::Quaterniond ret;
-            ret.vec() = incRotVec / 2.;
-            ret.w() = std::sqrt(1. - epsilon);
-            return ret;
-        }
-
         inline Eigen::Quaterniond
         incrementalOrientationToQuat(StateVector const &state) {
-            return incrementalOrientationToQuat(incrementalOrientation(state));
-        }
-
-        /// Computes what is effectively the Jacobian matrix of partial
-        /// derivatives of incrementalOrientationToQuat() (except just taking in
-        /// the orientation part)
-        template <typename Derived>
-        inline types::Matrix<4, 3> incrementalQuaternionJacobian(
-            Eigen::MatrixBase<Derived> const &incRotVec) {
-            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-            // eigen internally stores quaternions x, y, z, w
-            types::Matrix<4, 3> ret;
-            // vector components of jacobian are all 1/2 identity
-            ret.topLeftCorner<3, 3>() =
-                types::SquareMatrix<3>::Identity() * 0.5;
-            ret.bottomRows<1>() =
-                incRotVec.transpose() /
-                (-4 * sqrt(1. - incRotVec.dot(incRotVec) / 4.));
-            return ret;
+            return external_quat::vecToQuat(incrementalOrientation(state));
         }
 
         class State {
@@ -222,92 +181,6 @@ namespace kalman {
             Eigen::Quaterniond m_orientation;
         };
     } // namespace pose_externalized_rotation
-
-    /// A basically-constant-velocity model, with the addition of some
-    /// damping of the velocities inspired by TAG
-    class PoseDampedConstantVelocityProcessModel {
-      public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        using State = pose_externalized_rotation::State;
-        using StateVector = pose_externalized_rotation::StateVector;
-        using StateSquareMatrix = pose_externalized_rotation::StateSquareMatrix;
-        static const auto DIMENSION = State::DIMENSION;
-        using NoiseAutocorrelation = types::Vector<6>;
-        PoseDampedConstantVelocityProcessModel()
-            : noiseAutocorrelation(NoiseAutocorrelation::Constant(1)) {}
-        /// this is mu-arrow, the auto-correlation vector of the noise
-        /// sources
-        NoiseAutocorrelation noiseAutocorrelation;
-
-        /// Set the damping - must be non-negative
-        void setDamping(double damping) {
-            if (damping >= 0) {
-                m_damp = damping;
-            }
-        }
-        /// Also known as the "process model jacobian" in TAG, this is A.
-        StateSquareMatrix getStateTransitionMatrix(State const &,
-                                                   double dt) const {
-            return pose_externalized_rotation::
-                stateTransitionMatrixWithVelocityDamping(dt, m_damp);
-        }
-
-        StateSquareMatrix A(State const &s, double dt) const {
-            return getStateTransitionMatrix(s, dt);
-        }
-
-        void predictState(State &s, double dt) {
-            auto xHatMinus = computeEstimate(s, dt);
-            auto Pminus = predictErrorCovariance(s, *this, dt);
-            s.setStateVector(xHatMinus);
-            s.setErrorCovariance(Pminus);
-        }
-
-        /// This is Q(deltaT) - the Sampled Process Noise Covariance
-        /// @return a matrix of dimension n x n. Note that it is real
-        /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>() can
-        /// provide useful performance enhancements.
-        StateSquareMatrix const &Q(double dt) {
-            m_cov = StateSquareMatrix::Zero();
-            auto dt3 = (dt * dt * dt) / 3;
-            auto dt2 = (dt * dt) / 2;
-            for (std::size_t xIndex = 0; xIndex < DIMENSION / 2; ++xIndex) {
-                auto xDotIndex = xIndex + DIMENSION / 2;
-                // xIndex is 'i' and xDotIndex is 'j' in eq. 4.8
-                const auto mu = getMu(xDotIndex);
-                m_cov(xIndex, xIndex) = mu * dt3;
-                auto symmetric = mu * dt2;
-                m_cov(xIndex, xDotIndex) = symmetric;
-                m_cov(xDotIndex, xIndex) = symmetric;
-                m_cov(xDotIndex, xDotIndex) = mu * dt;
-            }
-            return m_cov;
-        }
-
-        /// Returns a 12-element vector containing a predicted state based on a
-        /// constant velocity process model.
-        StateVector computeEstimate(State &state, double dt) const {
-            StateVector ret = pose_externalized_rotation::applyVelocity(
-                state.stateVector(), dt);
-            // Dampen velocities
-            pose_externalized_rotation::dampenVelocities(ret, m_damp, dt);
-            return ret;
-        }
-
-      private:
-        double getMu(std::size_t index) const {
-            BOOST_ASSERT_MSG(index < DIMENSION / 2, "Should only be passing "
-                                                    "'i' - the main state, not "
-                                                    "the derivative");
-            // This may not be totally correct but it's one of the parameters
-            // you can kind of fudge in kalman filters anyway.
-            // Should techincally be the diagonal of the correlation kernel of
-            // the noise sources. (p77, p197 in Welch 1996)
-            return noiseAutocorrelation(index);
-        }
-        StateSquareMatrix m_cov;
-        double m_damp = 0;
-    };
 } // namespace kalman
 } // namespace osvr
 

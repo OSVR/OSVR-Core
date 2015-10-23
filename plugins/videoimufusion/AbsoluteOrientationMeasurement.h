@@ -89,7 +89,7 @@ namespace kalman {
             using namespace pose_externalized_rotation;
             using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
             Jacobian ret = Jacobian::Zero();
-            ret.block<DIMENSION, 3>(0, 3) = incrementalQuaternionJacobian(
+            ret.block<DIMENSION, 3>(0, 3) = external_quat::jacobian(
                 incrementalOrientation(s.stateVector()));
             return ret;
         }

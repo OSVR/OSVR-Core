@@ -8,8 +8,11 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 set(KALMAN_SOURCES
     AbsoluteOrientationMeasurement.h
+    AbsolutePoseMeasurement.h
+    ExternalQuaternion.h
     FlexibleKalmanBase.h
     FlexibleKalmanFilter.h
+    PoseDampedConstantVelocity.h
     PoseState.h)
 
 osvr_add_plugin(NAME org_osvr_filter_videoimufusion

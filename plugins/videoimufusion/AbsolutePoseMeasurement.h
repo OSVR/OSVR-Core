@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2015
 
@@ -22,11 +22,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef INCLUDED_AbsolutePoseMeasurement_h_GUID_A7DDC7F5_CBA1_41AB_B80C_5A9DA444AF48
+#define INCLUDED_AbsolutePoseMeasurement_h_GUID_A7DDC7F5_CBA1_41AB_B80C_5A9DA444AF48
+
+
 // Internal Includes
-#include "FlexibleKalmanFilter.h"
-#include "PoseState.h"
-#include "PoseDampedConstantVelocity.h"
-#include "AbsoluteOrientationMeasurement.h"
+// - none
 
 // Library/third-party includes
 // - none
@@ -34,15 +35,5 @@
 // Standard includes
 // - none
 
-int main() {
-    using namespace osvr::kalman;
-    using State = osvr::kalman::pose_externalized_rotation::State;
-    using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
-    using AbsoluteOrientationMeasurement =
-        osvr::kalman::AbsoluteOrientationMeasurement<State>;
-    using Filter = osvr::kalman::FlexibleKalmanFilter<State, ProcessModel>;
-    auto filter = Filter{State{}, ProcessModel{}};
-    auto measurement = AbsoluteOrientationMeasurement{
-        Eigen::Quaterniond::Identity(), Eigen::Matrix4d::Identity()};
-    return 0;
-}
+#endif // INCLUDED_AbsolutePoseMeasurement_h_GUID_A7DDC7F5_CBA1_41AB_B80C_5A9DA444AF48
+
