@@ -27,6 +27,7 @@
 #include "PoseState.h"
 #include "PoseDampedConstantVelocity.h"
 #include "AbsoluteOrientationMeasurement.h"
+#include "AbsolutePoseMeasurement.h"
 
 // Library/third-party includes
 // - none
@@ -40,9 +41,22 @@ int main() {
     using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
     using AbsoluteOrientationMeasurement =
         osvr::kalman::AbsoluteOrientationMeasurement<State>;
+    using AbsolutePoseMeasurement =
+        osvr::kalman::AbsolutePoseMeasurement<State>;
     using Filter = osvr::kalman::FlexibleKalmanFilter<State, ProcessModel>;
     auto filter = Filter{State{}, ProcessModel{}};
-    auto measurement = AbsoluteOrientationMeasurement{
-        Eigen::Quaterniond::Identity(), Eigen::Matrix4d::Identity()};
+    {
+        auto meas = AbsoluteOrientationMeasurement{
+            Eigen::Quaterniond::Identity(), Eigen::Matrix4d::Identity()};
+        filter.predict(0.1);
+        filter.correct(meas);
+    }
+    {
+        auto meas = AbsolutePoseMeasurement{
+            Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity(),
+            Eigen::Matrix<double, 7, 7>::Identity()};
+        filter.predict(0.1);
+        filter.correct(meas);
+    }
     return 0;
 }

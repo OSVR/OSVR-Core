@@ -54,7 +54,7 @@ namespace kalman {
         void predict(double dt) { m_processModel.predictState(state(), dt); }
 
         template <typename MeasurementType>
-        void correct(MeasurementType &meas) {
+        void correct(MeasurementType const &meas) {
             auto H = meas.getJacobian(state());
             auto R = meas.getCovariance(state());
             auto P = state().errorCovariance();
@@ -75,6 +75,10 @@ namespace kalman {
             // Correct the error covariance
             state().setErrorCovariance(
                 (types::DimSquareMatrix<State>::Identity() - K * H) * P);
+
+            // Let the state do any cleanup it has to (like fixing externalized
+            // quaternions)
+            state().postCorrect();
         }
 
         State &state() { return m_state; }

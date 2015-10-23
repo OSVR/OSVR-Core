@@ -157,14 +157,23 @@ namespace kalman {
             }
             StateSquareMatrix const &P() const { return m_errorCovariance; }
 
+            void postCorrect() { externalizeRotation(); }
+
             void externalizeRotation() {
                 m_orientation = getCombinedQuaternion();
                 incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
             }
 
+            StateVectorBlock3 getPosition() { return position(m_state); }
+
+            ConstStateVectorBlock3 getPosition() const {
+                return position(m_state);
+            }
+
             Eigen::Quaterniond const &getQuaternion() const {
                 return m_orientation;
             }
+
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
                 return incrementalOrientationToQuat(m_state) * m_orientation;

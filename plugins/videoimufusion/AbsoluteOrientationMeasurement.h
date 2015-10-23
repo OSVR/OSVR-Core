@@ -47,7 +47,7 @@ namespace kalman {
             : m_measurement(quat), m_covariance(covariance) {}
 
         template <typename State>
-        MeasurementVector getCovariance(State const &) {
+        MeasurementVector getCovariance(State const &) const {
             return m_covariance;
         }
 
@@ -57,13 +57,10 @@ namespace kalman {
         ///
         /// State type doesn't matter as long as we can getCombinedQuaternion()
         template <typename State>
-        MeasurementVector getResidual(State const &s) {
+        MeasurementVector getResidual(State const &s) const {
             Eigen::Quaterniond prediction = s.getCombinedQuaternion();
             return MeasurementVector(prediction * m_measurement.conjugate());
         }
-
-      protected:
-        Eigen::Quaterniond const &measurement() const { return m_measurement; }
 
       private:
         Eigen::Quaterniond m_measurement;
@@ -85,7 +82,8 @@ namespace kalman {
             types::SquareMatrix<DIMENSION> const &covariance)
             : Base(quat, covariance) {}
 
-        types::Matrix<DIMENSION, STATE_DIMENSION> getJacobian(State const &s) {
+        types::Matrix<DIMENSION, STATE_DIMENSION>
+        getJacobian(State const &s) const {
             using namespace pose_externalized_rotation;
             using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
             Jacobian ret = Jacobian::Zero();
