@@ -25,6 +25,7 @@
 // Internal Includes
 #include "FlexibleKalmanFilter.h"
 #include "PoseState.h"
+#include "AbsoluteOrientationMeasurement.h"
 
 // Library/third-party includes
 // - none
@@ -32,4 +33,15 @@
 // Standard includes
 // - none
 
-int main() { return 0; }
+int main() {
+    using namespace osvr::kalman;
+    using State = osvr::kalman::pose_externalized_rotation::State;
+    using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
+    using AbsoluteOrientationMeasurement =
+        osvr::kalman::AbsoluteOrientationMeasurement<State>;
+    using Filter = osvr::kalman::FlexibleKalmanFilter<State, ProcessModel>;
+    auto filter = Filter{State{}, ProcessModel{}};
+    auto measurement = AbsoluteOrientationMeasurement{
+        Eigen::Quaterniond::Identity(), Eigen::Matrix4d::Identity()};
+    return 0;
+}

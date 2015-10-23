@@ -91,9 +91,7 @@ namespace kalman {
         /// This returns A(deltaT), though if you're just predicting xhat-, use
         /// applyVelocity() instead for performance.
         inline StateSquareMatrix stateTransitionMatrix(double dt) {
-
             // eq. 4.5 in Welch 1996
-
             StateSquareMatrix A = StateSquareMatrix::Identity();
             A.block<3, 3>(0, 3) = Eigen::Matrix3d::Identity() * dt;
             A.block<3, 3>(6, 9) = Eigen::Matrix3d::Identity() * dt;
@@ -177,7 +175,7 @@ namespace kalman {
         class State {
           public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-            static const std::size_t DIMENSION = 12;
+            static const types::DimensionType DIMENSION = 12;
 
             /// Default constructor
             State()

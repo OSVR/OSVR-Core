@@ -26,14 +26,62 @@
 #define INCLUDED_AbsoluteOrientationMeasurement_h_GUID_71285DD8_A6F1_47A8_4B2E_B10171C91248
 
 // Internal Includes
-// - none
+#include "PoseState.h"
 
 // Library/third-party includes
-// - none
+#include <Eigen/Geometry>
 
 // Standard includes
 // - none
+
 namespace osvr {
-namespace kalman {} // namespace kalman
+namespace kalman {
+    class AbsoluteOrientationBase {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        static const types::DimensionType DIMENSION = 4;
+        AbsoluteOrientationBase(
+            Eigen::Quaterniond const &quat,
+            types::SquareMatrix<DIMENSION> const &covariance)
+            : m_measurement(quat), m_covariance(covariance) {}
+
+        template <typename State>
+        types::SquareMatrix<DIMENSION> getCovariance(State const &) {
+            return m_covariance;
+        }
+
+      protected:
+        Eigen::Quaterniond const &measurement() const { return m_measurement; }
+
+      private:
+        Eigen::Quaterniond m_measurement;
+        types::SquareMatrix<DIMENSION> m_covariance;
+    };
+    template <typename StateType> class AbsoluteOrientationMeasurement;
+    template <>
+    class AbsoluteOrientationMeasurement<pose_externalized_rotation::State>
+        : public AbsoluteOrientationBase {
+      public:
+        using State = pose_externalized_rotation::State;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        static const types::DimensionType STATE_DIMENSION =
+            types::Dimension<State>::value;
+        using Base = AbsoluteOrientationBase;
+
+        AbsoluteOrientationMeasurement(
+            Eigen::Quaterniond const &quat,
+            types::SquareMatrix<DIMENSION> const &covariance)
+            : Base(quat, covariance) {}
+
+        types::Matrix<DIMENSION, STATE_DIMENSION> getJacobian(State const &s) {
+            using namespace pose_externalized_rotation;
+            using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
+            Jacobian ret = Jacobian::Zero();
+            ret.block<DIMENSION, 3>(0, 3) = incrementalQuaternionJacobian(
+                incrementalOrientation(s.stateVector()));
+            return ret;
+        }
+    };
+} // namespace kalman
 } // namespace osvr
 #endif // INCLUDED_AbsoluteOrientationMeasurement_h_GUID_71285DD8_A6F1_47A8_4B2E_B10171C91248
