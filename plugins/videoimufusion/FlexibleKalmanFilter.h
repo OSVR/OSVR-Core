@@ -36,18 +36,6 @@
 
 namespace osvr {
 namespace kalman {
-#if 0
-    template <typename FilterType> using StateType = typename FilterType::State;
-    template <typename FilterType>
-    using ProcessModelType = typename FilterType::ProcessModel;
-    template <typename StateType, typename ProcessModelType>
-    class KalmanPrediction {
-      public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-        StateSquareMatrix
-    };
-#endif
     template <typename StateType, typename ProcessModelType>
     class FlexibleKalmanFilter {
       public:
@@ -63,7 +51,31 @@ namespace kalman {
         FlexibleKalmanFilter(State &&state, ProcessModel &&processModel)
             : m_state(state), m_processModel(processModel) {}
 
-        void predict(double dt) { m_processModel.predictState(m_state, dt); }
+        void predict(double dt) { m_processModel.predictState(state(), dt); }
+
+        template <typename MeasurementType>
+        void correct(MeasurementType &meas) {
+            auto H = meas.getJacobian(state());
+            auto R = meas.getCovariance(state());
+            auto P = state().errorCovariance();
+
+            // the stuff to invert for the kalman gain
+            // AK = B
+            types::DimSquareMatrix<MeasurementType> A =
+                H * P * H.transpose() + R;
+            // The kalman gain stuff to not invert
+            types::DimMatrix<State, MeasurementType> B = P * H.transpose();
+            types::DimMatrix<State, MeasurementType> K =
+                A.colPivHouseholderQr().solve(B);
+            // Residual/innovation
+            auto deltaz = meas.getResidual(state());
+
+            // Correct the state estimate
+            state().setStateVector(state().stateVector() + K * deltaz);
+            // Correct the error covariance
+            state().setErrorCovariance(
+                (types::DimSquareMatrix<State>::Identity() - K * H) * P);
+        }
 
         State &state() { return m_state; }
         State const &state() const { return m_state; }

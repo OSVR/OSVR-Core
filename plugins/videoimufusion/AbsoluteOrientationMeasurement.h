@@ -40,14 +40,26 @@ namespace kalman {
       public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType DIMENSION = 4;
+        using MeasurementVector = types::SquareMatrix<DIMENSION>;
         AbsoluteOrientationBase(
             Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)
             : m_measurement(quat), m_covariance(covariance) {}
 
         template <typename State>
-        types::SquareMatrix<DIMENSION> getCovariance(State const &) {
+        MeasurementVector getCovariance(State const &) {
             return m_covariance;
+        }
+
+        /// Gets the measurement residual, also known as innovation: predicts
+        /// the measurement from the predicted state, and returns the
+        /// difference.
+        ///
+        /// State type doesn't matter as long as we can getCombinedQuaternion()
+        template <typename State>
+        MeasurementVector getResidual(State const &s) {
+            Eigen::Quaterniond prediction = s.getCombinedQuaternion();
+            return MeasurementVector(prediction * m_measurement.conjugate());
         }
 
       protected:

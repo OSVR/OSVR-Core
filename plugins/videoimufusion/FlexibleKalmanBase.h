@@ -100,10 +100,11 @@ namespace kalman {
     template <typename StateType, typename ProcessModelType>
     class FlexibleKalmanFilter;
 
+    /// Computes P-
     template <typename StateType, typename ProcessModelType>
     inline types::DimSquareMatrix<StateType>
     predictErrorCovariance(StateType const &state,
-                           ProcessModelType const &processModel, double dt) {
+                           ProcessModelType &processModel, double dt) {
         auto A = processModel.A(state, dt);
         return A * state.P() * A.transpose() + processModel.Q(dt);
     }

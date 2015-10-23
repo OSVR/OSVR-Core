@@ -263,31 +263,27 @@ namespace kalman {
             s.setErrorCovariance(Pminus);
         }
 
-        /// This is Q(deltaT)
+        /// This is Q(deltaT) - the Sampled Process Noise Covariance
         /// @return a matrix of dimension n x n. Note that it is real
         /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>() can
         /// provide useful performance enhancements.
-        StateSquareMatrix
-        computeSampledProcessNoiseCovariance(double dt) const {
-            StateSquareMatrix Q = StateSquareMatrix::Zero();
+        StateSquareMatrix const &Q(double dt) {
+            m_cov = StateSquareMatrix::Zero();
             auto dt3 = (dt * dt * dt) / 3;
             auto dt2 = (dt * dt) / 2;
             for (std::size_t xIndex = 0; xIndex < DIMENSION / 2; ++xIndex) {
                 auto xDotIndex = xIndex + DIMENSION / 2;
                 // xIndex is 'i' and xDotIndex is 'j' in eq. 4.8
                 const auto mu = getMu(xDotIndex);
-                Q(xIndex, xIndex) = mu * dt3;
+                m_cov(xIndex, xIndex) = mu * dt3;
                 auto symmetric = mu * dt2;
-                Q(xIndex, xDotIndex) = symmetric;
-                Q(xDotIndex, xIndex) = symmetric;
-                Q(xDotIndex, xDotIndex) = mu * dt;
+                m_cov(xIndex, xDotIndex) = symmetric;
+                m_cov(xDotIndex, xIndex) = symmetric;
+                m_cov(xDotIndex, xDotIndex) = mu * dt;
             }
-            return Q;
+            return m_cov;
         }
 
-        StateSquareMatrix Q(double dt) const {
-            return computeSampledProcessNoiseCovariance(dt);
-        }
         /// Returns a 12-element vector containing a predicted state based on a
         /// constant velocity process model.
         StateVector computeEstimate(State &state, double dt) const {
@@ -309,6 +305,7 @@ namespace kalman {
             // the noise sources. (p77, p197 in Welch 1996)
             return noiseAutocorrelation(index);
         }
+        StateSquareMatrix m_cov;
         double m_damp = 0;
     };
 } // namespace kalman
