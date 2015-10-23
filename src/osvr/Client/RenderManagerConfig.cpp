@@ -33,6 +33,9 @@
 #include <json/value.h>
 #include <json/reader.h>
 
+// Standard includes
+#include <stdexcept>
+
 namespace osvr {
 namespace client {
 
