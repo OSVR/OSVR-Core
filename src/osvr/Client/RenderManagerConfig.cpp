@@ -27,6 +27,7 @@
 #include <osvr/Client/RenderManagerConfig.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Common/JSONHelpers.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -35,9 +36,9 @@
 namespace osvr {
 namespace client {
 
-    RenderManagerConfigPtr RenderManagerConfigFactory::create(OSVR_ClientContext ctx) {
+    RenderManagerConfigPtr RenderManagerConfigFactory::createShared(OSVR_ClientContext ctx) {
         try {
-            auto const configString = ctx->getStringParameter("/display");
+            auto const configString = ctx->getStringParameter("/renderManagerConfig");
             RenderManagerConfigPtr cfg(new RenderManagerConfig(configString));
             return cfg;
         }
@@ -48,43 +49,57 @@ namespace client {
             return RenderManagerConfigPtr{};
         }
         catch (...) {
-            OSVR_DEV_VERBOSE("Couldn't create a display config internally! "
+            OSVR_DEV_VERBOSE("Couldn't create a render manager config internally! "
                 "Unknown exception!");
             return RenderManagerConfigPtr{};
         }
     }
 
-    RenderManagerConfig::RenderManagerConfig(const std::string& render_manager_config)
+    RenderManagerConfig::RenderManagerConfig(const std::string& renderManagerConfig)
     {
-        parse(render_manager_config);
+        parse(renderManagerConfig);
     }
 
-    void RenderManagerConfig::parse(const std::string& render_manager_config)
+    void RenderManagerConfig::parse(const std::string& renderManagerConfig)
     {
       Json::Reader reader;
       Json::Value root;
-      reader.parse(render_manager_config, root, false);
+      if (!reader.parse(renderManagerConfig, root, false)) {
+        throw std::runtime_error("RenderManagerConfig::parse - failed to parse render manager config string. Invalid JSON value?");
+      }
 
-      m_directMode = root["render_manager_parameters"]["direct_mode"].asBool();
-      m_displayIndex = root["render_manager_parameters"]["direct_display_index"].asUInt();
-      m_directHighPriority = root["render_manager_parameters"]["direct_high_priority"].asBool();
+      auto &params = root["renderManagerConfig"];
+      m_directMode = params["directModeEnabled"].asBool();
+      m_displayIndex = params["directDisplayIndex"].asUInt();
+      m_directHighPriority = params["directHighPriorityEnabled"].asBool();
+      m_numBuffers = params["numBuffers"].asUInt();
+      m_verticalSync = params["verticalSyncEnabled"].asBool();
+      m_verticalSyncBlockRendering = params["verticalSyncBlockRenderingEnabled"].asBool();
+      m_renderOverfillFactor = params["renderOverfillFactor"].asFloat();
 
-      m_numBuffers = root["render_manager_parameters"]["num_buffers"].asUInt();
-      m_verticalSync = root["render_manager_parameters"]["vertical_sync"].asBool();
-      m_verticalSyncBlockRendering = root["render_manager_parameters"]
-        ["vertical_sync_block_rendering"].asBool();
-      m_windowTitle = root["render_manager_parameters"]["window_title"].asString();
-      m_windowFullScreen = root["render_manager_parameters"]["window_full_screen"].asBool();
-      m_windowXPosition = root["render_manager_parameters"]["window_x_position"].asInt();
-      m_windowYPosition = root["render_manager_parameters"]["window_y_position"].asInt();
-      m_displayRotation = root["render_manager_parameters"]["display_rotation"].asUInt();
-      m_bitsPerColor = root["render_manager_parameters"]["bits_per_color"].asBool();
+      // window
+      {
+          auto &window = params["window"];
+          m_windowTitle = window["title"].asString();
+          m_windowFullScreen = window["fullScreenEnabled"].asBool();
+          m_windowXPosition = window["xPosition"].asInt();
+          m_windowYPosition = window["yPosition"].asInt();
+      }
 
-      m_enableTimeWarp = root["render_manager_parameters"]["time_warp"]["enable"].asBool();
-      m_asynchronousTimeWarp = root["render_manager_parameters"]["time_warp"]["asynchronous_time_warp"].asBool();
-      m_maxMSBeforeVsyncTimeWarp = root["render_manager_parameters"]["time_warp"]["max_ms_before_vsync"].asFloat();
- 
-      m_renderOverfillFactor = root["render_manager_parameters"]["render_overfill_factor"].asFloat();
+      // display
+      {
+          auto display = params["display"];
+          m_displayRotation = display["rotation"].asUInt();
+          m_bitsPerColor = display["bitsPerColor"].asUInt();
+      }
+
+      // time warp
+      {
+          auto &timeWarp = params["timeWarp"];
+          m_enableTimeWarp = timeWarp["enabled"].asBool();
+          m_asynchronousTimeWarp = timeWarp["asynchronous"].asBool();
+          m_maxMSBeforeVsyncTimeWarp = timeWarp["maxMsBeforeVSync"].asFloat();
+      }
     }
 
     void RenderManagerConfig::print() const
@@ -111,7 +126,7 @@ namespace client {
       return m_directMode;
     }
 
-    unsigned RenderManagerConfig::getDisplayIndex() const
+    uint32_t RenderManagerConfig::getDisplayIndex() const
     {
       return m_displayIndex;
     }
@@ -121,7 +136,7 @@ namespace client {
       return m_directHighPriority;
     }
 
-    unsigned RenderManagerConfig::getNumBuffers() const
+    std::size_t RenderManagerConfig::getNumBuffers() const
     {
       return m_numBuffers;
     }
@@ -146,22 +161,22 @@ namespace client {
       return m_windowFullScreen;
     }
 
-    int RenderManagerConfig::getWindowXPosition() const
+    int32_t RenderManagerConfig::getWindowXPosition() const
     {
       return m_windowXPosition;
     }
 
-    int RenderManagerConfig::getWindowYPosition() const
+    int32_t RenderManagerConfig::getWindowYPosition() const
     {
       return m_windowYPosition;
     }
 
-    unsigned RenderManagerConfig::getDisplayRotation() const
+    uint32_t RenderManagerConfig::getDisplayRotation() const
     {
       return m_displayRotation;
     }
 
-    unsigned RenderManagerConfig::getBitsPerColor() const
+    uint32_t RenderManagerConfig::getBitsPerColor() const
     {
       return m_bitsPerColor;
     }

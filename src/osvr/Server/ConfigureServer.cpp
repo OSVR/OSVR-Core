@@ -352,8 +352,8 @@ namespace server {
         return success;
     }
 
-    static const char RENDERMANAGER_KEY[] = "render_manager_parameters";
-    static const char RENDERMANAGER_PATH[] = "/render_manager_parameters";
+    static const char RENDERMANAGER_KEY[] = "renderManagerConfig";
+    static const char RENDERMANAGER_PATH[] = "/renderManagerConfig";
     bool ConfigureServer::processRenderManagerParameters() {
         bool success = false;
         Json::Value const &renderManager = m_data->getMember(RENDERMANAGER_KEY);

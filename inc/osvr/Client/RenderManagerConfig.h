@@ -26,10 +26,13 @@
 #ifndef INCLUDED_RenderManagerConfig_h_GUID_C8DA5781_5B6C_454A_B4FF_1DB50CBE3479
 #define INCLUDED_RenderManagerConfig_h_GUID_C8DA5781_5B6C_454A_B4FF_1DB50CBE3479
 
-// Required for DLL linkage on Windows
+// Internal Includes
 #include <osvr/Client/Export.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
+
+// Library/third-party includes
+// - none
 
 // Standard includes
 #include <string>
@@ -41,56 +44,56 @@ namespace osvr {
 namespace client {
 
     class RenderManagerConfig;
-    typedef unique_ptr<RenderManagerConfig> RenderManagerConfigPtr;
+    typedef std::shared_ptr<RenderManagerConfig> RenderManagerConfigPtr;
     class RenderManagerConfigFactory {
     public:
         OSVR_CLIENT_EXPORT static RenderManagerConfigPtr
-            create(OSVR_ClientContext ctx);
+            createShared(OSVR_ClientContext ctx);
     };
 
     class RenderManagerConfig {
     public:
-        OSVR_CLIENT_EXPORT RenderManagerConfig(const std::string& render_manager_config);
+        OSVR_CLIENT_EXPORT RenderManagerConfig(const std::string& renderManagerConfig);
         OSVR_CLIENT_EXPORT RenderManagerConfig() {};
 
-        void OSVR_CLIENT_EXPORT parse(const std::string& render_manager_config);
-        void OSVR_CLIENT_EXPORT print() const;
+        OSVR_CLIENT_EXPORT void parse(const std::string& renderManagerConfig);
+        OSVR_CLIENT_EXPORT void print() const;
 
         /// Read the property information.
-        bool OSVR_CLIENT_EXPORT getDirectMode() const;
-        unsigned OSVR_CLIENT_EXPORT getDisplayIndex() const;
-        bool OSVR_CLIENT_EXPORT getDirectHighPriority() const;
+        OSVR_CLIENT_EXPORT bool getDirectMode() const;
+        OSVR_CLIENT_EXPORT uint32_t getDisplayIndex() const;
+        OSVR_CLIENT_EXPORT bool getDirectHighPriority() const;
 
-        bool OSVR_CLIENT_EXPORT getEnableTimeWarp() const;
-        bool OSVR_CLIENT_EXPORT getAsynchronousTimeWarp() const;
-        float OSVR_CLIENT_EXPORT getMaxMSBeforeVsyncTimeWarp() const;
-        float OSVR_CLIENT_EXPORT getRenderOverfillFactor() const;
+        OSVR_CLIENT_EXPORT bool getEnableTimeWarp() const;
+        OSVR_CLIENT_EXPORT bool getAsynchronousTimeWarp() const;
+        OSVR_CLIENT_EXPORT float getMaxMSBeforeVsyncTimeWarp() const;
+        OSVR_CLIENT_EXPORT float getRenderOverfillFactor() const;
 
-        unsigned OSVR_CLIENT_EXPORT getNumBuffers() const;
-        bool OSVR_CLIENT_EXPORT getVerticalSync() const;
-        bool OSVR_CLIENT_EXPORT getVerticalSyncBlockRendering() const;
+        OSVR_CLIENT_EXPORT std::size_t getNumBuffers() const;
+        OSVR_CLIENT_EXPORT bool getVerticalSync() const;
+        OSVR_CLIENT_EXPORT bool getVerticalSyncBlockRendering() const;
 
-        std::string OSVR_CLIENT_EXPORT getWindowTitle() const;
-        bool OSVR_CLIENT_EXPORT getWindowFullScreen() const;
-        int OSVR_CLIENT_EXPORT getWindowXPosition() const;
-        int OSVR_CLIENT_EXPORT getWindowYPosition() const;
-        unsigned OSVR_CLIENT_EXPORT getDisplayRotation() const;
-        unsigned OSVR_CLIENT_EXPORT getBitsPerColor() const;
+        OSVR_CLIENT_EXPORT std::string getWindowTitle() const;
+        OSVR_CLIENT_EXPORT bool getWindowFullScreen() const;
+        OSVR_CLIENT_EXPORT int32_t getWindowXPosition() const;
+        OSVR_CLIENT_EXPORT int32_t getWindowYPosition() const;
+        OSVR_CLIENT_EXPORT uint32_t getDisplayRotation() const;
+        OSVR_CLIENT_EXPORT uint32_t getBitsPerColor() const;
 
     private:
         bool m_directMode;
-        unsigned m_displayIndex;
+        uint32_t m_displayIndex;
         bool m_directHighPriority;
-        unsigned m_numBuffers;
+        std::size_t m_numBuffers;
         bool m_verticalSync;
         bool m_verticalSyncBlockRendering;
 
         std::string m_windowTitle;
         bool m_windowFullScreen;
-        int m_windowXPosition;
-        int m_windowYPosition;
-        unsigned m_displayRotation;
-        unsigned m_bitsPerColor;
+        int32_t m_windowXPosition;
+        int32_t m_windowYPosition;
+        uint32_t m_displayRotation;
+        uint32_t m_bitsPerColor;
 
         bool m_enableTimeWarp;
         bool m_asynchronousTimeWarp;
