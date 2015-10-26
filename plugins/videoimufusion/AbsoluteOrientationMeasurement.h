@@ -40,14 +40,15 @@ namespace kalman {
       public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType DIMENSION = 4;
-        using MeasurementVector = types::SquareMatrix<DIMENSION>;
+        using MeasurementVector = types::Vector<DIMENSION>;
         AbsoluteOrientationBase(
             Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)
             : m_measurement(quat), m_covariance(covariance) {}
 
         template <typename State>
-        MeasurementVector getCovariance(State const &) const {
+        types::DimSquareMatrix<AbsoluteOrientationBase>
+        getCovariance(State const &) const {
             return m_covariance;
         }
 
@@ -59,12 +60,15 @@ namespace kalman {
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             Eigen::Quaterniond prediction = s.getCombinedQuaternion();
-            return MeasurementVector(prediction * m_measurement.conjugate());
+            MeasurementVector ret;
+            Eigen::Map<Eigen::Quaterniond>(ret.data()) =
+                prediction * m_measurement.conjugate();
+            return ret;
         }
 
       private:
         Eigen::Quaterniond m_measurement;
-        types::SquareMatrix<DIMENSION> m_covariance;
+        types::DimSquareMatrix<AbsoluteOrientationBase> m_covariance;
     };
     template <typename StateType> class AbsoluteOrientationMeasurement;
     template <>

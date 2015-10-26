@@ -55,23 +55,35 @@ namespace kalman {
 
         template <typename MeasurementType>
         void correct(MeasurementType const &meas) {
+            /// Dimension of measurement
+            static const auto m = types::Dimension<MeasurementType>::value;
+            /// Dimension of state
+            static const auto n = types::Dimension<State>::value;
             auto H = meas.getJacobian(state());
+            EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(H), m, n);
+
             auto R = meas.getCovariance(state());
+            EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(R), m, m);
+
             auto P = state().errorCovariance();
+            EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(P), n, n);
 
             // the stuff to invert for the kalman gain
-            // AK = B
-            types::DimSquareMatrix<MeasurementType> A =
-                H * P * H.transpose() + R;
+            // denom * K = numer
+            types::SquareMatrix<m> denom = H * P * H.transpose() + R;
+
             // The kalman gain stuff to not invert
-            types::DimMatrix<State, MeasurementType> B = P * H.transpose();
-            types::DimMatrix<State, MeasurementType> K =
-                A.colPivHouseholderQr().solve(B);
+            types::Matrix<n, m> numer = P * H.transpose();
+            types::Matrix<n, m> K = denom.colPivHouseholderQr().solve(numer);
+
             // Residual/innovation
             auto deltaz = meas.getResidual(state());
+            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(decltype(deltaz), m);
 
+            types::Vector<n> correctedState =
+                state().stateVector() + K * deltaz;
             // Correct the state estimate
-            state().setStateVector(state().stateVector() + K * deltaz);
+            state().setStateVector(correctedState);
             // Correct the error covariance
             state().setErrorCovariance(
                 (types::DimSquareMatrix<State>::Identity() - K * H) * P);

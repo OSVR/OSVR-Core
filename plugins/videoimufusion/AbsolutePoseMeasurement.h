@@ -40,14 +40,15 @@ namespace kalman {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType DIMENSION =
             7; // 3 position, 4 elements from quat
-        using MeasurementVector = types::SquareMatrix<DIMENSION>;
+        using MeasurementVector = types::Vector<DIMENSION>;
+        using MeasurementMatrix = types::SquareMatrix<DIMENSION>;
         using Position = types::Vector<3>;
         AbsolutePoseBase(Position const &pos, Eigen::Quaterniond const &quat,
                          types::SquareMatrix<DIMENSION> const &covariance)
             : m_ori(quat), m_covariance(covariance) {}
 
         template <typename State>
-        MeasurementVector getCovariance(State const &) const {
+        MeasurementMatrix getCovariance(State const &) const {
             return m_covariance;
         }
 
@@ -61,15 +62,17 @@ namespace kalman {
         MeasurementVector getResidual(State const &s) const {
             MeasurementVector residual;
             residual.head<3>() = s.getPosition() - m_pos;
-            residual.tail<4>() =
-                (s.getCombinedQuaternion() * m_ori.conjugate());
+            Eigen::Vector4d quatAsVec;
+            Eigen::Map<Eigen::Quaterniond>(quatAsVec.data()) =
+                s.getCombinedQuaternion() * m_ori.conjugate();
+            residual.tail<4>() = quatAsVec;
             return residual;
         }
 
       private:
         Position m_pos;
         Eigen::Quaterniond m_ori;
-        types::SquareMatrix<DIMENSION> m_covariance;
+        MeasurementMatrix m_covariance;
     };
     template <typename StateType> class AbsolutePoseMeasurement;
     template <>
