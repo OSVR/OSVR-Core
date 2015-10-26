@@ -29,10 +29,10 @@
 #include "PoseState.h"
 
 // Library/third-party includes
-#include <boost/assert.hpp>
+// - none
 
 // Standard includes
-// - none
+#include <cassert>
 
 namespace osvr {
 namespace kalman {
@@ -105,9 +105,9 @@ namespace kalman {
 
       private:
         double getMu(std::size_t index) const {
-            BOOST_ASSERT_MSG(index < DIMENSION / 2, "Should only be passing "
-                                                    "'i' - the main state, not "
-                                                    "the derivative");
+            assert(index < DIMENSION / 2 && "Should only be passing "
+                                            "'i' - the main state, not "
+                                            "the derivative");
             // This may not be totally correct but it's one of the parameters
             // you can kind of fudge in kalman filters anyway.
             // Should techincally be the diagonal of the correlation kernel of
