@@ -30,7 +30,7 @@ The types involved are loosely related/coupled: the Process Model has to know ab
 
 They are all tied together in the `FlexibleKalmanFilter<>` template object, which holds both an instance of Process Model and State, and has a function that takes a (deduced, templated) Measurement argument to its `correct()` method.
 
-Process Model computations of predicted error covariance often take a similar form, so a convenience free function `Matrix<n, n> predictErrorCovariance(State const& state, ProcessModel & model, double dt)` is provided. It's optional, but its usage is encouraged if your math matches what it does (as it likely will), so its requirements are also listed below, in addition to the requirements of the `FlexibleKalmanFilter` class methods proper.
+Process Model computations of predicted error covariance often take a similar form, so a convenience free function `Matrix<n, n> predictErrorCovariance(State const& state, ProcessModel & model, double dt)` is provided. (If you must know: it performs `A P Atranspose + Q(dt)`)It's optional, but its usage is encouraged if your math matches what it does (as it likely will), so its requirements are also listed below, in addition to the requirements of the `FlexibleKalmanFilter` class methods proper.
 
 Also, a brief note: Most of these types will probably hold what Eigen refers to as a "fixed-size vectorizable" member, so you'll almost certainly want this line in the `public` section of your types:
 
@@ -47,7 +47,7 @@ All the interface stuff below required should be public.
 Needs public members:
 
 - `static const types::DimensionType DIMENSION = 12;`
-	-	to indicate dimension, aka *n* - here 12. Used all over.
+	-	to indicate dimension, aka *n* - here 12. Used all over. (You can instead publicly derive from `HasDimension<12>` or equivalent, to get a nested `integral_constant` type alias named `Dimension` if you prefer types for your constants.)
 - `void setStateVector(? state)`
 	- to replace the *n*-dimensional state vector, used by `FlexibleKalmanFilter::correct()`
 - `Vector<n> stateVector() const`
@@ -66,8 +66,10 @@ Should *not* contain the filter state - that separate object is kept separately 
 	- used for convenience and reducing the number of required parameters to `FlexibleKalmanFilter<>`
 - `void predictState(State & state, double dt)`
 	- Called by `FlexibleKalmanFilter::predict(dt)`, should update the state to the predicted state after an elapsed `dt` seconds. Often uses the convenience free function `predictErrorCovariance`.
-- `Matrix<n,n> getStateTransitionMatrix(State const&, double dt) const`
-	- Gets the state transition matrix *A* that represents the process model's effects on the state over the given time interval - You may choose to use this to update the state within `predictState()` (if manual computation is not more efficient). *Optional, but recommended*: **required** if `predictErrorCovariance` is used in `predictState()`
+- `Matrix<n, n> getStateTransitionMatrix(State const&, double dt) const`
+	- Gets the state transition matrix *A* that represents the process model's effects on the state over the given time interval. You may choose to use this to update the state within `predictState()` (if manual computation is not more efficient). *Optional, but recommended*: **required** if `predictErrorCovariance` is used in `predictState()`
+- `Matrix<n, n> getSampledProcessNoiseCovariance(double dt)`
+	- Gets the matrix *Q* that represents the local effect of your process on state noise. *Optional, but recommended*: **required** if `predictErrorCovariance` is used in `predictState()`
 
 ### Measurement
 
@@ -76,7 +78,7 @@ Note that there may (and often are) several types of measurements used in a part
 Only `FlexibleKalmanFilter::correct()` interacts with Measurement types.
 
 - `static const types::DimensionType DIMENSION = 4;`
-	-	to indicate dimension of your measurement, aka *m* - here 4.
+	-	to indicate dimension of your measurement, aka *m* - here 4. (You can instead publicly derive from `HasDimension<12>` or equivalent, to get a nested `integral_constant` type alias named `Dimension` if you prefer types for your constants.)
 - `Vector<m> getResidual(State const& state) const`
 	- Also known as the "innovation" or delta *z* - this function predicts the measurement expected given the (predicted) state provided, then takes the difference (contextually defined - may be multiplicative) and returns that, typically by value.
 - `Matrix<m,m> getCovariance(State & state) const`
