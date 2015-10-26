@@ -1,0 +1,59 @@
+{
+    "deviceVendor": "Sensics",
+    "deviceName": "Gesture",
+    "author": "Georgiy Frolov georgiy@sensics.com",
+    "version": 1,
+    "lastModified": "",
+    "interfaces": {
+        "skeleton": {
+            "count": 2
+        },
+        "tracker": {
+            "count": 12
+        }
+    },
+    "semantic": {
+        "hands": {
+            "left": {
+                "$target": "tracker/0",
+                "thumb": {
+                    "distal": "tracker/1"
+                },
+                "index": {
+                    "distal": "tracker/2"
+                },
+                "middle": {
+                    "distal": "tracker/3"
+                },
+                "ring": {
+                    "distal": "tracker/4"
+                },
+                "pinky": {
+                    "distal": "tracker/5"
+                }
+            },
+            "right": {
+                "$target": "tracker/6",
+                "thumb": {
+                    "distal": "tracker/7"
+                },
+                "index": {
+                    "distal": "tracker/8"
+                },
+                "middle": {
+                    "distal": "tracker/9"
+                },
+                "ring": {
+                    "distal": "tracker/10"
+                },
+                "pinky": {
+                    "distal": "tracker/11"
+                }
+            }
+        }
+    },
+    "automaticAliases": {
+        "me/hands/left": "semantic/hands/left/",
+        "me/hands/right": "semantic/hands/right/"
+    }
+}
