@@ -63,10 +63,8 @@ namespace kalman {
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             Eigen::Quaterniond prediction = s.getCombinedQuaternion();
-            MeasurementVector ret;
-            Eigen::Map<Eigen::Quaterniond>(ret.data()) =
-                prediction * m_measurement.conjugate();
-            return ret;
+            return external_quat::getVec4(prediction *
+                                          m_measurement.conjugate());
         }
 
       private:
