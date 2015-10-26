@@ -46,6 +46,19 @@ namespace kalman {
         using State = StateType;
         using ProcessModel = ProcessModelType;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        /// Default initialization - depends on default-initializable process
+        /// model and state.
+        FlexibleKalmanFilter() : m_processModel(), m_state() {}
+
+        /// Copy initialization from just state - depends on
+        /// default-initializable process model.
+        explicit FlexibleKalmanFilter(State const &state)
+            : m_processModel(), m_state(state) {}
+
+        /// Move initialization from just state - depends on
+        /// default-initializable process model.
+        explicit FlexibleKalmanFilter(State *&state)
+            : m_processModel(), m_state(state) {}
 
         /// copy initialization
         FlexibleKalmanFilter(ProcessModel const &processModel,

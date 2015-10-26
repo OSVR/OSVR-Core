@@ -46,5 +46,10 @@ int main() {
         filter.predict(0.1);
         filter.correct(meas);
     }
+
+    {
+        auto defaultFilter = Filter{};
+        auto moveStateFilter = Filter{State{}};
+    }
     return 0;
 }
