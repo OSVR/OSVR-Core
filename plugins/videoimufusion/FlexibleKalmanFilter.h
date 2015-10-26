@@ -36,20 +36,25 @@
 
 namespace osvr {
 namespace kalman {
-    template <typename StateType, typename ProcessModelType>
+    /// The main class implementing the common components of the Kalman family
+    /// of filters. Holds an instance of the state as well as an instance of the
+    /// process model.
+    template <typename ProcessModelType,
+              typename StateType = typename ProcessModelType::State>
     class FlexibleKalmanFilter {
       public:
         using State = StateType;
         using ProcessModel = ProcessModelType;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        static const std::size_t STATE_DIMENSION = StateType::DIMENSION;
+
         /// copy initialization
-        FlexibleKalmanFilter(State const &state,
-                             ProcessModel const &processModel)
-            : m_state(state), m_processModel(processModel) {}
+        FlexibleKalmanFilter(ProcessModel const &processModel,
+                             State const &state)
+            : m_processModel(processModel), m_state(state) {}
+
         /// move initialization.
-        FlexibleKalmanFilter(State &&state, ProcessModel &&processModel)
-            : m_state(state), m_processModel(processModel) {}
+        FlexibleKalmanFilter(ProcessModel &&processModel, State &&state)
+            : m_processModel(processModel), m_state(state) {}
 
         void predict(double dt) { m_processModel.predictState(state(), dt); }
 
@@ -96,14 +101,15 @@ namespace kalman {
             state().postCorrect();
         }
 
-        State &state() { return m_state; }
-        State const &state() const { return m_state; }
         ProcessModel &processModel() { return m_processModel; }
         ProcessModel const &processModel() const { return m_processModel; }
 
+        State &state() { return m_state; }
+        State const &state() const { return m_state; }
+
       private:
-        State m_state;
         ProcessModel m_processModel;
+        State m_state;
     };
 
 } // namespace kalman
