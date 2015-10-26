@@ -38,6 +38,7 @@
 #include <osvr/Util/Vec3C.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/BoolC.h>
+#include <osvr/Util/SkeletonReportTypesC.h>
 
 /* Library/third-party includes */
 /* none */
