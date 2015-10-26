@@ -37,10 +37,10 @@ int main() {
     osvr::clientkit::ClientContext context(
         "com.osvr.exampleclients.SkeletonCallback");
 
-    osvr::clientkit::Interface skeleton = context.getInterface(
-        "/com_osvr_example_Skeleton/Skeleton/skeleton");
+    osvr::clientkit::Interface skeleton =
+        context.getInterface("/com_osvr_example_Skeleton/Skeleton/skeleton");
 
-    //eyetracker.registerCallback(&eyeTracker2DCallback, NULL);
+    // skeleton.registerCallback(&skeletonWholeCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     while (1) {

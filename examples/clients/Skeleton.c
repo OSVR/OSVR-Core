@@ -33,18 +33,19 @@
 #include <stdio.h>
 
 int main() {
-    OSVR_ClientContext ctx = osvrClientInit("com.osvr.exampleclients.SkeletonCallback", 0);
+    OSVR_ClientContext ctx =
+        osvrClientInit("com.osvr.exampleclients.SkeletonCallback", 0);
 
     OSVR_ClientInterface leftHand = NULL;
-    OSVR_ClientInterface rightHand = NULL;    
-    
+    OSVR_ClientInterface rightHand = NULL;
+
     osvrClientGetInterface(ctx, "/me/hands/left", &leftHand);
     osvrClientGetInterface(ctx, "/me/hands/right", &rightHand);
 
     // Pretend that this is your application's mainloop.
     while (1) {
         osvrClientUpdate(ctx);
-        //get some skeleton Reports
+        // get some skeleton Reports
     }
 
     osvrClientShutdown(ctx);
