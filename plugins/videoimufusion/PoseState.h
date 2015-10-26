@@ -155,6 +155,11 @@ namespace kalman {
                 return m_errorCovariance;
             }
 
+            /// Intended for startup use.
+            void setQuaternion(Eigen::Quaterniond const &quaternion) {
+                m_orientation = quaternion;
+            }
+
             void postCorrect() { externalizeRotation(); }
 
             void externalizeRotation() {
