@@ -54,7 +54,7 @@ osvrDeviceSkeletonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_SkeletonDeviceInterface ifaceObj =
         opts->makeInterfaceObject<OSVR_SkeletonDeviceInterfaceObject>();
     *iface = ifaceObj;
-    auto skeleton = osvr::common::SkeletonComponent::create();
+    auto skeleton = osvr::common::SkeletonComponent::create(numSensors);
     ifaceObj->skeleton = skeleton.get();
     opts->addComponent(skeleton);
     return OSVR_RETURN_SUCCESS;
