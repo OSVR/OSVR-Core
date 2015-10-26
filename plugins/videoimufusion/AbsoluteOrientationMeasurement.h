@@ -44,14 +44,14 @@ namespace kalman {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType DIMENSION = 4;
         using MeasurementVector = types::Vector<DIMENSION>;
+        using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
         AbsoluteOrientationBase(
             Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)
             : m_measurement(quat), m_covariance(covariance) {}
 
         template <typename State>
-        types::DimSquareMatrix<AbsoluteOrientationBase>
-        getCovariance(State const &) const {
+        MeasurementSquareMatrix getCovariance(State const &) const {
             return m_covariance;
         }
 
@@ -71,7 +71,7 @@ namespace kalman {
 
       private:
         Eigen::Quaterniond m_measurement;
-        types::DimSquareMatrix<AbsoluteOrientationBase> m_covariance;
+        MeasurementSquareMatrix m_covariance;
     };
 
     /// This is the subclass of AbsoluteOrientationBase: only explicit
