@@ -47,14 +47,31 @@ namespace kalman {
         template <DimensionType n>
         using DimensionConstant = std::integral_constant<DimensionType, n>;
 
+        struct HasDimensionBase {};
+    } // namespace types
+
+    /// Convenience base class for things (like states and measurements) that
+    /// have a dimension.
+    template <types::DimensionType DIM>
+    struct HasDimension : types::HasDimensionBase {
+        using Dimension = types::DimensionConstant<DIM>;
+    };
+
+    namespace types {
         namespace detail {
-            template <typename T> struct Dimension_impl {
+            template <typename T, typename = void> struct Dimension_impl {
                 using type = DimensionConstant<T::DIMENSION>;
             };
             // explicit specialization
             template <DimensionType n>
-            struct Dimension_impl<DimensionConstant<n>> {
+            struct Dimension_impl<DimensionConstant<n>, void> {
                 using type = DimensionConstant<n>;
+            };
+            // explicit specialization
+            template <typename T>
+            struct Dimension_impl<T, typename std::enable_if<std::is_base_of<
+                                         HasDimensionBase, T>::value>::type> {
+                using type = typename T::Dimension;
             };
         } // namespace detail
         /// Given a state or measurement, get the dimension as a
