@@ -36,15 +36,14 @@
 
 namespace osvr {
 namespace kalman {
-
-    /// @brief Template type aliases.
+    /// @brief Type aliases, including template type aliases.
     namespace types {
         /// Common scalar type
         using Scalar = double;
 
         /// Type for dimensions
         using DimensionType = std::size_t;
-
+        /// Type constant for dimensions
         template <DimensionType n>
         using DimensionConstant = std::integral_constant<DimensionType, n>;
 
@@ -93,20 +92,22 @@ namespace kalman {
         using DimMatrix = Matrix<Dimension<T>::value, Dimension<U>::value>;
 
     } // namespace types
-    // forward declaration
-    template <typename StateType, typename ProcessModelType>
-    class KalmanPrediction;
-    // forward declaration
-    template <typename StateType, typename ProcessModelType>
-    class FlexibleKalmanFilter;
 
     /// Computes P-
+    ///
+    /// Usage is optional, most likely called from the process model
+    /// `updateState()`` method.
     template <typename StateType, typename ProcessModelType>
     inline types::DimSquareMatrix<StateType>
     predictErrorCovariance(StateType const &state,
                            ProcessModelType &processModel, double dt) {
-        auto A = processModel.A(state, dt);
-        return A * state.P() * A.transpose() + processModel.Q(dt);
+        auto A = processModel.getStateTransitionMatrix(state, dt);
+        auto &P = state.errorCovariance();
+        /// @todo Determine if the fact that Q is (at least in one case)
+        /// symmetrical implies anything else useful performance-wise here or
+        /// later in the data flow.
+        auto Q = processModel.getSampledProcessNoiseCovariance(dt);
+        return A * P * A.transpose() + Q;
     }
 
 } // namespace kalman

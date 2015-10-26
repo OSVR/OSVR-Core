@@ -155,7 +155,6 @@ namespace kalman {
             StateSquareMatrix const &errorCovariance() const {
                 return m_errorCovariance;
             }
-            StateSquareMatrix const &P() const { return m_errorCovariance; }
 
             void postCorrect() { externalizeRotation(); }
 

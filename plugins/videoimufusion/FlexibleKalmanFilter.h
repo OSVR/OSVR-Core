@@ -74,6 +74,9 @@ namespace kalman {
 
             // The kalman gain stuff to not invert
             types::Matrix<n, m> numer = P * H.transpose();
+
+            // Solve for the Kalman gain
+            /// @todo Figure out if this is the best decomp to use
             types::Matrix<n, m> K = denom.colPivHouseholderQr().solve(numer);
 
             // Residual/innovation

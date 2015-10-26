@@ -65,10 +65,6 @@ namespace kalman {
                 stateTransitionMatrixWithVelocityDamping(dt, m_damp);
         }
 
-        StateSquareMatrix A(State const &s, double dt) const {
-            return getStateTransitionMatrix(s, dt);
-        }
-
         void predictState(State &s, double dt) {
             auto xHatMinus = computeEstimate(s, dt);
             auto Pminus = predictErrorCovariance(s, *this, dt);
@@ -78,9 +74,9 @@ namespace kalman {
 
         /// This is Q(deltaT) - the Sampled Process Noise Covariance
         /// @return a matrix of dimension n x n. Note that it is real
-        /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>() can
-        /// provide useful performance enhancements.
-        StateSquareMatrix const &Q(double dt) {
+        /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>()
+        /// might provide useful performance enhancements.
+        StateSquareMatrix const &getSampledProcessNoiseCovariance(double dt) {
             m_cov = StateSquareMatrix::Zero();
             auto dt3 = (dt * dt * dt) / 3;
             auto dt2 = (dt * dt) / 2;

@@ -35,6 +35,9 @@
 // - none
 namespace osvr {
 namespace kalman {
+    /// The measurement here has been split into a base and derived type, so
+    /// that the derived type only contains the little bit that depends on a
+    /// particular state type.
     class AbsolutePoseBase {
       public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -74,7 +77,12 @@ namespace kalman {
         Eigen::Quaterniond m_ori;
         MeasurementMatrix m_covariance;
     };
+
+    /// This is the subclass of AbsolutePoseBase: only explicit specializations,
+    /// and on state types.
     template <typename StateType> class AbsolutePoseMeasurement;
+
+    /// AbsolutePoseMeasurement with a pose_externalized_rotation::State
     template <>
     class AbsolutePoseMeasurement<pose_externalized_rotation::State>
         : public AbsolutePoseBase {
