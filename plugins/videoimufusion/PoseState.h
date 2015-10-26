@@ -131,10 +131,9 @@ namespace kalman {
             return external_quat::vecToQuat(incrementalOrientation(state));
         }
 
-        class State {
+        class State : public HasDimension<12> {
           public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-            static const types::DimensionType DIMENSION = 12;
 
             /// Default constructor
             State()
