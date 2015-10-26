@@ -44,7 +44,6 @@ namespace kalman {
         using State = pose_externalized_rotation::State;
         using StateVector = pose_externalized_rotation::StateVector;
         using StateSquareMatrix = pose_externalized_rotation::StateSquareMatrix;
-        static const auto DIMENSION = State::DIMENSION;
         using NoiseAutocorrelation = types::Vector<6>;
         PoseDampedConstantVelocityProcessModel()
             : noiseAutocorrelation(NoiseAutocorrelation::Constant(1)) {}
@@ -77,11 +76,12 @@ namespace kalman {
         /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>()
         /// might provide useful performance enhancements.
         StateSquareMatrix const &getSampledProcessNoiseCovariance(double dt) {
+            auto const dim = types::Dimension<State>::value;
             m_cov = StateSquareMatrix::Zero();
             auto dt3 = (dt * dt * dt) / 3;
             auto dt2 = (dt * dt) / 2;
-            for (std::size_t xIndex = 0; xIndex < DIMENSION / 2; ++xIndex) {
-                auto xDotIndex = xIndex + DIMENSION / 2;
+            for (std::size_t xIndex = 0; xIndex < dim / 2; ++xIndex) {
+                auto xDotIndex = xIndex + dim / 2;
                 // xIndex is 'i' and xDotIndex is 'j' in eq. 4.8
                 const auto mu = getMu(xDotIndex);
                 m_cov(xIndex, xIndex) = mu * dt3;
