@@ -30,6 +30,11 @@
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/EigenInterop.h>
 
+#include "FlexibleKalmanFilter.h"
+#include "PoseDampedConstantVelocity.h"
+#include "AbsoluteOrientationMeasurement.h"
+#include "AbsolutePoseMeasurement.h"
+
 // Generated JSON header file
 #include "org_osvr_filter_videoimufusion_json.h"
 
@@ -38,6 +43,14 @@
 
 // Standard includes
 #include <iostream>
+
+using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
+using FilterState = ProcessModel::State;
+using AbsoluteOrientationMeasurement =
+    osvr::kalman::AbsoluteOrientationMeasurement<FilterState>;
+using AbsolutePoseMeasurement =
+    osvr::kalman::AbsolutePoseMeasurement<FilterState>;
+using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
 namespace detail {
 template <typename ReportType>
@@ -137,17 +150,41 @@ static inline double secondsElapsed(const OSVR_TimeValue &earlier,
     return dt;
 }
 
+static const double InitialStateError[] = {1., 1., 1., 1., 1., 1.,
+                                           1., 1., 1., 1., 1., 1.};
+static const double IMUError[] = {1., 1.5, 1.};
+static const double CameraOrientationError[] = {1.1, 1.1, 1.1};
+static const double CameraPositionError[] = {1., 1., 1.};
+using osvr::kalman::types::Vector;
 class VideoIMUFusion::RunningData {
   public:
     RunningData(Eigen::Isometry3d const &cTr,
                 OSVR_OrientationState const &initialIMU,
-                OSVR_PoseState const &initialVideo)
-        : m_cTr(cTr), m_orientation(fromQuat(initialIMU)),
-          m_lastPosition(time::getNow()),
-          positionFilter(filters::one_euro::Params{1.5, 0.0001}) {
+                OSVR_PoseState const &initialVideo,
+                OSVR_TimeValue const &lastPosition,
+                OSVR_TimeValue const &lastIMU)
+        : m_filter(), m_cTr(cTr), m_orientation(fromQuat(initialIMU)),
+          m_lastPosition(lastPosition), m_lastIMU(lastIMU) {
 
         Eigen::Isometry3d roomPose = takeCameraPoseToRoom(initialVideo);
-        positionFilter.filter(1, roomPose.translation());
+        osvr::kalman::types::DimVector<FilterState> initialState =
+            osvr::kalman::types::DimVector<FilterState>::Zero();
+        using namespace osvr::kalman::pose_externalized_rotation;
+        position(initialState) = roomPose.translation();
+        m_filter.state().setStateVector(initialState);
+        m_filter.state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
+        m_filter.state().setErrorCovariance(
+            Vector<12>(InitialStateError).asDiagonal());
+
+        m_filter.processModel().noiseAutocorrelation *= 0.5;
+
+        // Very crudely set up some error estimates.
+        using osvr::kalman::external_quat::vecToQuat;
+        using osvr::kalman::external_quat::getVec4;
+        m_imuError = getVec4(vecToQuat(Vector<3>::Map(IMUError)));
+        m_cameraError.head<3>() = Vector<3>::Map(CameraPositionError);
+        m_cameraError.tail<4>() =
+            getVec4(vecToQuat(Vector<3>::Map(CameraOrientationError)));
     }
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -156,34 +193,71 @@ class VideoIMUFusion::RunningData {
         /// Right now, just accepting the orientation report as it is. This
         /// does not correct for gyro drift.
         m_orientation = fromQuat(report.rotation);
+
+        if (preReport(timestamp, m_lastIMU)) {
+            AbsoluteOrientationMeasurement meas{fromQuat(report.rotation),
+                                                m_imuError.asDiagonal()};
+            m_filter.correct(meas);
+        }
     }
     void handleVideoTrackerReport(const OSVR_TimeValue &timestamp,
                                   const OSVR_PoseReport &report) {
-        auto dt = secondsElapsed(m_lastPosition, timestamp);
-        /// avoid divide by zero in weird cases
-        if (dt <= 0) {
-            dt = 1;
-        }
-        m_lastPosition = timestamp;
         Eigen::Isometry3d roomPose = takeCameraPoseToRoom(report.pose);
-        /// Right now, only using the translation.
-        positionFilter.filter(dt, roomPose.translation());
+
+        if (preReport(timestamp, m_lastPosition)) {
+            Eigen::Quaterniond ori(roomPose.rotation());
+            Eigen::Vector3d pos(roomPose.translation());
+            AbsolutePoseMeasurement meas{pos, ori, m_cameraError.asDiagonal()};
+            m_filter.correct(meas);
+            std::cout << "State: " << m_filter.state().stateVector().transpose()
+                      << "\n";
+            std::cout << "Quat: "
+                      << osvr::kalman::external_quat::getVec4(
+                             m_filter.state().getQuaternion())
+                             .transpose()
+                      << "\n";
+            std::cout << "Error:\n";
+            std::cout << m_filter.state().errorCovariance() << std::endl;
+        }
     }
 
+    /// Returns true if we succeeded and can filter in some data.
+    bool preReport(const OSVR_TimeValue &timestamp, OSVR_TimeValue &last) {
+        auto dt = secondsElapsed(last, timestamp);
+        if (dt <= 0) {
+            return false;
+        }
+
+        last = timestamp;
+        m_filter.predict(dt);
+        return true;
+    }
+#if 0
     Eigen::Quaterniond const &getOrientation() const { return m_orientation; }
     Eigen::Vector3d const &getPosition() const {
         return positionFilter.getState();
     }
+#else
+    Eigen::Quaterniond getOrientation() const {
+        return m_filter.state().getQuaternion();
+    }
+    Eigen::Vector3d getPosition() const {
+        return m_filter.state().getPosition();
+    }
+#endif
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
         return m_cTr * fromPose(pose);
     }
 
   private:
+    Filter m_filter;
+    Vector<4> m_imuError;
+    Vector<7> m_cameraError;
     const Eigen::Isometry3d m_cTr;
     Eigen::Quaterniond m_orientation;
     OSVR_TimeValue m_lastPosition;
-    filters::OneEuroFilter<Eigen::Vector3d> positionFilter;
+    OSVR_TimeValue m_lastIMU;
 };
 
 void VideoIMUFusion::enterRunningState(Eigen::Isometry3d const &cTr) {
@@ -191,18 +265,19 @@ void VideoIMUFusion::enterRunningState(Eigen::Isometry3d const &cTr) {
     std::cout << "Camera is located in the room at roughly "
               << m_cTr.translation().transpose() << std::endl;
     m_state = State::Running;
-    auto ts = OSVR_TimeValue{};
+    auto oriTs = OSVR_TimeValue{};
     auto imuState = OSVR_OrientationState{};
-    auto ret = osvrGetOrientationState(m_imu, &ts, &imuState);
+    auto ret = osvrGetOrientationState(m_imu, &oriTs, &imuState);
     BOOST_ASSERT_MSG(ret == OSVR_RETURN_SUCCESS,
                      "Must have one IMU report by now!");
+    auto posTs = OSVR_TimeValue{};
     auto videoState = OSVR_PoseState{};
-    ret = osvrGetPoseState(m_videoTracker, &ts, &videoState);
+    ret = osvrGetPoseState(m_videoTracker, &posTs, &videoState);
     BOOST_ASSERT_MSG(ret == OSVR_RETURN_SUCCESS,
                      "Must have one video report by now!");
 
-    m_runningData.reset(
-        new VideoIMUFusion::RunningData(cTr, imuState, videoState));
+    m_runningData.reset(new VideoIMUFusion::RunningData(
+        cTr, imuState, videoState, posTs, oriTs));
     /// @todo should we just let it hang around instead of releasing memory in a
     /// callback?
     m_startupData.reset();
@@ -229,8 +304,17 @@ void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
         return;
     }
     m_runningData->handleVideoTrackerReport(timestamp, report);
+#if 0
     // Not issuing a new main output here, let the IMU trigger that.
+#else
 
+    // send a pose report
+    auto newPose = OSVR_PoseState{};
+    toQuat(m_runningData->getOrientation(), newPose.rotation);
+    vecMap(newPose.translation) = m_runningData->getPosition();
+    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose,
+                                         FUSED_SENSOR_ID, &timestamp);
+#endif
     // However, for debugging, we will output a second sensor that is just the
     // video tracker data re-oriented.
     auto videoPose = m_runningData->takeCameraPoseToRoom(report.pose);
