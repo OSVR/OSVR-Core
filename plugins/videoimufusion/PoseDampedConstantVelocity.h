@@ -105,9 +105,10 @@ namespace kalman {
 
       private:
         double getMu(std::size_t index) const {
-            assert(index < DIMENSION / 2 && "Should only be passing "
-                                            "'i' - the main state, not "
-                                            "the derivative");
+            assert(index < types::Dimension<State>::value / 2 &&
+                   "Should only be passing "
+                   "'i' - the main state, not "
+                   "the derivative");
             // This may not be totally correct but it's one of the parameters
             // you can kind of fudge in kalman filters anyway.
             // Should techincally be the diagonal of the correlation kernel of
