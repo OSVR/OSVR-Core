@@ -50,11 +50,8 @@ namespace vbtracker {
 
     typedef std::vector<std::string> PatternStringList;
 
-    /// @todo std::list used here for ease of rotate, but has terrible data
-    /// locality - consider changing when a more efficient rotation-invariant
-    /// string match algorithm is used.
-    typedef std::list<bool> LedPattern;
-    typedef std::vector<LedPattern> PatternList;
+    typedef std::string LedPatternWrapped;  //< Pattern repeated almost twice
+    typedef std::vector<LedPatternWrapped> PatternList; //< Ordered set of patterns to search
 
     typedef std::vector<cv::KeyPoint> KeyPointList;
     typedef KeyPointList::iterator KeyPointIterator;
