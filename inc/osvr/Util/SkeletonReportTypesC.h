@@ -64,7 +64,7 @@ typedef enum OSVR_SkeletonJoints {
     OSVR_SKELETON_THUMB_DISTAL_LEFT,
     OSVR_SKELETON_INDEX_PROXIMAL_LEFT,
     OSVR_SKELETON_INDEX_MEDIAL_LEFT,
-    OSVR_SKELETON_IDNEX_DISTAL_LEFT,
+    OSVR_SKELETON_INDEX_DISTAL_LEFT,
     OSVR_SKELETON_MIDDLE_PROXIMAL_LEFT,
     OSVR_SKELETON_MIDDLE_MEDIAL_LEFT,
     OSVR_SKELETON_MIDDLE_DISTAL_LEFT,
@@ -86,7 +86,7 @@ typedef enum OSVR_SkeletonJoints {
     OSVR_SKELETON_THUMB_DISTAL_RIGHT,
     OSVR_SKELETON_INDEX_PROXIMAL_RIGHT,
     OSVR_SKELETON_INDEX_MEDIAL_RIGHT,
-    OSVR_SKELETON_IDNEX_DISTAL_RIGHT,
+    OSVR_SKELETON_INDEX_DISTAL_RIGHT,
     OSVR_SKELETON_MIDDLE_PROXIMAL_RIGHT,
     OSVR_SKELETON_MIDDLE_MEDIAL_RIGHT,
     OSVR_SKELETON_MIDDLE_DISTAL_RIGHT,
@@ -110,8 +110,9 @@ typedef enum OSVR_SkeletonJoints {
 /** @brief There are various types of skeleton reports that allow to get
  * different skeleton joints/bones. Note, Each report can include information
  * from one skeleton sensor due to connectedness of skeleton. Refer to the
- * definition of each report below for a complete description of which bones are
- * included */
+ * definition of each report below for a complete description of which
+ * joints/bones are included
+ */
 typedef enum OSVR_SkeletonReportSizes {
     OSVR_SKELETON_REP_HEAD_ = 2,
     OSVR_SKELETON_REP_ARM = 19,
@@ -125,7 +126,7 @@ typedef enum OSVR_SkeletonReportSizes {
 /** @brief A state of a single skeleton joint (joint/bone) */
 typedef struct OSVR_SkeletonJointState {
     /** @brief A skeleton joint ID that specifies which bone/joint it is. May
-     * not be valid if joint not */
+     * not be valid if joint is not part of OSVR defined canonical names */
     uint32_t joint;
     /** @brief A tracker pose state */
     OSVR_Pose3 pose;
