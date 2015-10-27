@@ -59,19 +59,16 @@ namespace vbtracker {
                 return;
             }
 
-            // Make a new boolean-list encoding from it, replacing every
-            // non-'.' character with true and every '.' with false.
-            std::list<bool> pattern;
-            for (size_t j = 0; j < PATTERNS[i].size(); j++) {
-                if (PATTERNS[i][j] == '.') {
-                    pattern.push_back(false);
-                } else {
-                    pattern.push_back(true);
-                }
-            }
+            // Make a wrapped pattern, which is the original pattern plus
+            // a second copy of the pattern that has all but the last
+            // character in it.  This will enable use to use the string
+            // find() routine to see if any shift of the pattern is a
+            // match.
+            std::string wrapped = PATTERNS[i] + PATTERNS[i];
+            wrapped.pop_back();
 
             // Add the pattern to the vector of lists.
-            d_patterns.push_back(pattern);
+            d_patterns.push_back(wrapped);
         }
         // std::cout << "XXX d_length = " << d_length << ", num patterns = " <<
         // d_patterns.size() << std::endl;
@@ -111,22 +108,13 @@ namespace vbtracker {
         // pattern matches any of them.  If so, return that pattern.  We
         // need to check all potential rotations of the pattern, since we
         // don't know when the code started.  For the HDK, the codes are
-        // rotationally invariant.
-
-        /// @todo feels like there should be a good algorithm for
-        /// rotation-invariant string matching besides brute-forcing it here.
-        ///  -- rpavlik
+        // rotationally invariant.  We do this by making wrapped strings
+        // and seeing if the pattern shows up anywhe in them, relying on
+        // the std::string find method to do efficiently.
         for (size_t i = 0; i < d_patterns.size(); i++) {
-            for (size_t j = 0; j < bits.size(); j++) {
-                if (bits == d_patterns[i]) {
-                    return static_cast<int>(i);
-                }
-
-                // So long as we don't find the solution, this rotates
-                // back to the initial configuration after each inner loop.
-                std::list<bool>::iterator mid = bits.begin();
-                std::rotate(bits.begin(), ++mid, bits.end());
-            }
+          if (d_patterns[i].find(bits) != std::string::npos) {
+            return static_cast<int>(i);
+          }
         }
 
         // No pattern recognized and we should have recognized one, so return
