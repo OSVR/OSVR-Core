@@ -55,6 +55,12 @@ namespace util {
             getNow(tv);
             return tv;
         }
+
+        /// @brief Get a double containing seconds between the time points.
+        /// @sa osvrTimeValueDurationSeconds()
+        inline double duration(TimeValue const &a, TimeValue const &b) {
+            return osvrTimeValueDurationSeconds(&a, &b);
+        }
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
         /// @brief Convert a TimeValue to a struct timeval
         inline void toStructTimeval(struct timeval &dest,
@@ -89,6 +95,7 @@ namespace util {
 #endif // OSVR_STRUCT_TIMEVAL_INCLUDED
 
 #endif // OSVR_HAVE_STRUCT_TIMEVAL
+
     } // namespace time
 } // namespace util
 } // namespace osvr

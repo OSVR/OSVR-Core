@@ -172,6 +172,24 @@ OSVR_UTIL_EXPORT int osvrTimeValueCmp(OSVR_IN_PTR const OSVR_TimeValue *tvA,
 
 OSVR_EXTERN_C_END
 
+/** @brief Compute the difference between the two time values, returning the
+    duration as a double-precision floating-point number of seconds.
+
+    Effectively, `ret = *tvA - *tvB`
+
+    @param tvA first source.
+    @param tvB second source
+    @return Duration of timespan in seconds (floating-point)
+*/
+OSVR_INLINE double
+osvrTimeValueDurationSeconds(OSVR_IN_PTR const OSVR_TimeValue *tvA,
+                             OSVR_IN_PTR const OSVR_TimeValue *tvB) {
+    OSVR_TimeValue A = *tvA;
+    osvrTimeValueDifference(&A, tvB);
+    double dt = A.seconds + A.microseconds / 1000000.0;
+    return dt;
+}
+
 /** @brief True if A is later than B */
 OSVR_INLINE OSVR_CBool osvrTimeValueGreater(
     OSVR_IN_PTR const OSVR_TimeValue *tvA,
