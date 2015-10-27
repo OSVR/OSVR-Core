@@ -107,7 +107,8 @@ typedef enum OSVR_SkeletonJoints {
     OSVR_SKELETON_TOES_RIGHT
 } OSVR_SkeletonJoints;
 
-/** @brief The integer type specifying a number of joints/bones or a joint index.
+/** @brief The integer type specifying a number of joints/bones or a joint
+ * index.
 */
 typedef uint32_t OSVR_JointCount;
 
@@ -144,7 +145,8 @@ typedef struct OSVR_SkeletonJointReport {
 } OSVR_SkeletonJointReport;
 
 /** @brief A type of skeleton state Low level of Articulation LOA1 (see below
- * for definition) */
+ * for definition)
+ */
 typedef struct OSVR_SkeletonTrimmedState {
     /** @brief a collection of skeleton joint reports */
     OSVR_SkeletonJointReport joints[OSVR_SKELETON_REP_LOA1];
@@ -152,10 +154,17 @@ typedef struct OSVR_SkeletonTrimmedState {
 
 /** @brief Report for Skeleton Level of Articulation 1 (LOA1) As defined in
  * H-Anim Low Level of Articulation provides a scaled down version of skeleton
- * joints and includes the following: Head, Neck, Clavicle Left/Right
- * (Shoulders), Arm Upper Left/Right (Elbows), Arm Lower Left/Right (Elbows)
- * Hand Left/Right (Wrists), Spine 0/1/2/3 (Center spine), Pelvis, Leg Upper
- * Left/Right (Hips), Leg Lower Left/Right (Knees), Foot Left/Right
+ * joints and includes joints in the following order:
+ * OSVR_SKELETON_PELVIS, OSVR_SKELETON_SPINE0, OSVR_SKELETON_SPINE1,
+ * OSVR_SKELETON_SPINE2, OSVR_SKELETON_SPINE3, OSVR_SKELETON_NECK,
+ * OSVR_SKELETON_HEAD,   OSVR_SKELETON_CLAVICLE_LEFT,
+ * OSVR_SKELETON_ARM_UPPER_LEFT, OSVR_SKELETON_ARM_LOWER_LEFT,
+ * OSVR_SKELETON_HAND_LOWER_LEFT, OSVR_SKELETON_HAND_LEFT,
+ * OSVR_SKELETON_HAND_RIGHT, OSVR_SKELETON_LEG_UPPER_LEFT,
+ * OSVR_SKELETON_LEG_LOWER_LEFT, OSVR_SKELETON_FOOT_LEFT,
+ * OSVR_SKELETON_TOES_LEFT, OSVR_SKELETON_LEG_UPPER_RIGHT,
+ * OSVR_SKELETON_LEG_LOWER_RIGHT, OSVR_SKELETON_FOOT_RIGHT,
+ * OSVR_SKELETON_TOES_RIGHT
 */
 typedef struct OSVR_SkeletonTrimmedReport {
     OSVR_ChannelCount sensor;
@@ -163,7 +172,8 @@ typedef struct OSVR_SkeletonTrimmedReport {
 } OSVR_SkeletonTrimmedReport;
 
 /** @brief A type of skeleton state Hgh level of Articulation LOA2 (see below
- * for definition) */
+ * for definition)
+ */
 typedef struct OSVR_SkeletonWholeState {
     /** @brief a collection of skeleton joint reports */
     OSVR_SkeletonJointReport joints[OSVR_SKELETON_REP_LOA2];
@@ -172,7 +182,10 @@ typedef struct OSVR_SkeletonWholeState {
 /** @brief Report for Skeleton Level of Articulation 2 (LOA2) : H-Anim defines a
  *  humanoid figure with 72 joints to have high Level of articulation however
  *  OSVR Skeleton Interface defines a total of 55 joints/bones and it includes
- *  all joints described above: Pelvis, Spine 0/1/2/3, Neck, Head, Clavicle
+ *  all joints described above.
+ *  The order of joints is the same as the order of OSVR_SkeletonJoints
+ *  enum (see the above definition):
+ *  Pelvis, Spine 0/1/2/3, Neck, Head, Clavicle
  *  Left/Right (Shoulders), Arm Upper Left/Right (Elbows), Arm Lower
  *  Left/Right(forearms), Hand Left/Right (Wrists), Left/Right Thumb
  *  Proximal/Medial/Distal, Left/Right Index Proximal/Medial/Distal, Left/Right
@@ -194,8 +207,12 @@ typedef struct OSVR_SkeletonHandState {
 } OSVR_SkeletonHandState;
 
 /** @brief Report for One Hand (Left or Right)
-    Each hand report includes : Hand (Wrist), Thumb/Index/Middle/Ring/Pinky
-   Proximal/Medial/Distal
+ * Each hand report includes the following joints in this order :
+ * Hand, Thumb Proximal, Thumb Medial, Thumb Distal,
+ * Index Proximal, Index Medial, Index Distal,
+ * Middle Proximal, Middle Medial, Middle Distal,
+ * Ring Proximal, Ring Medial, Ring Distal,
+ * Pinky Proximal, Pinky Medial, Pinky Distal
 */
 typedef struct OSVR_SkeletonHandReport {
     /** @brief A skeleton interface sensor ID */
@@ -212,8 +229,13 @@ typedef struct OSVR_SkeletonArmState {
 } OSVR_SkeletonArmState;
 
 /** @brief Report for a single Arm (Left or Right)
-    Each hand report includes : Clavicle, Arm Upper, Arm Lower, Hand,
-   Thumb/Index/Middle/Ring/Pinky Proximal/Medial/Distal
+ * Each hand report includes the following joints in this order :
+ * Clavicle, Arm Upper, Arm Lower, Hand,
+ * Thumb Proximal, Thumb Medial, Thumb Distal,
+ * Index Proximal, Index Medial, Index Distal,
+ * Middle Proximal, Middle Medial, Middle Distal,
+ * Ring Proximal, Ring Medial, Ring Distal,
+ * Pinky Proximal, Pinky Medial, Pinky Distal
 */
 typedef struct OSVR_SkeletonArmReport {
     /** @brief A skeleton interface sensor ID */
@@ -223,14 +245,14 @@ typedef struct OSVR_SkeletonArmReport {
     OSVR_SkeletonArmState state;
 } OSVR_SkeletonArmReport;
 
-/** @brief A type of skeleton foot state  */
+/** @brief A type of skeleton foot state */
 typedef struct OSVR_SkeletonFootState {
     /** @brief a collection of skeleton joint reports */
     OSVR_SkeletonJointReport joints[OSVR_SKELETON_REP_FOOT];
 } OSVR_SkeletonFootState;
 
 /** @brief Report for a single foot
-    The report includes the following joints: Foot, Toes
+ * The report includes the following joints in this order: Foot, Toes
 */
 typedef struct OSVR_SkeletonFootReport {
     /** @brief A skeleton interface sensor ID */
@@ -247,7 +269,8 @@ typedef struct OSVR_SkeletonLegState {
 } OSVR_SkeletonLegState;
 
 /** @brief Report for a single leg
-    The report includes the following joints: Leg Lower, Leg Upper, Foot, Toes
+ * The report includes the following joints in this order:
+ * Leg Upper, Leg Lower, Foot, Toes
 */
 typedef struct OSVR_SkeletonLegReport {
     /** @brief A skeleton interface sensor ID */
