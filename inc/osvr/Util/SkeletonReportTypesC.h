@@ -107,8 +107,6 @@ typedef enum OSVR_SkeletonJoints {
     OSVR_SKELETON_TOES_RIGHT
 } OSVR_SkeletonJoints;
 
-typedef uint32_t OSVR_SkeletonJoint;
-
 /** @brief There are various types of skeleton reports that allow to get
  * different skeleton joints/bones. Note, Each report can include information
  * from one skeleton sensor due to connectedness of skeleton. Refer to the
