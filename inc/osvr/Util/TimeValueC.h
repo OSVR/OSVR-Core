@@ -144,7 +144,7 @@ OSVR_UTIL_EXPORT void osvrTimeValueSum(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Computes the difference between two time values, replacing the first
-   with the result.
+    with the result.
 
     Effectively, `*tvA = *tvA - *tvB`
 
@@ -160,11 +160,11 @@ osvrTimeValueDifference(OSVR_INOUT_PTR OSVR_TimeValue *tvA,
                         OSVR_IN_PTR const OSVR_TimeValue *tvB)
     OSVR_FUNC_NONNULL((1, 2));
 
-/** @brief  Compares two time values (assumed to be normalized), returning the
-    same values as strcmp
+/** @brief  Compares two time values (assumed to be normalized), returning
+    the same values as strcmp
 
-    @return <0 if A is earlier than B, 0 if they are the same, and >0 if A is
-   later than B.
+    @return <0 if A is earlier than B, 0 if they are the same, and >0 if A
+    is later than B.
 */
 OSVR_UTIL_EXPORT int osvrTimeValueCmp(OSVR_IN_PTR const OSVR_TimeValue *tvA,
                                       OSVR_IN_PTR const OSVR_TimeValue *tvB)
@@ -191,9 +191,9 @@ osvrTimeValueDurationSeconds(OSVR_IN_PTR const OSVR_TimeValue *tvA,
 }
 
 /** @brief True if A is later than B */
-OSVR_INLINE OSVR_CBool osvrTimeValueGreater(
-    OSVR_IN_PTR const OSVR_TimeValue *tvA,
-    OSVR_IN_PTR const OSVR_TimeValue *tvB) {
+OSVR_INLINE OSVR_CBool
+osvrTimeValueGreater(OSVR_IN_PTR const OSVR_TimeValue *tvA,
+                     OSVR_IN_PTR const OSVR_TimeValue *tvB) {
     if (!tvA || !tvB) {
         return OSVR_FALSE;
     }
