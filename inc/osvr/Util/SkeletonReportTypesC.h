@@ -107,6 +107,10 @@ typedef enum OSVR_SkeletonJoints {
     OSVR_SKELETON_TOES_RIGHT
 } OSVR_SkeletonJoints;
 
+/** @brief The integer type specifying a number of joints/bones or a joint index.
+*/
+typedef uint32_t OSVR_JointCount;
+
 /** @brief There are various types of skeleton reports that allow to get
  * different skeleton joints/bones. Note, Each report can include information
  * from one skeleton sensor due to connectedness of skeleton. Refer to the
@@ -127,7 +131,7 @@ typedef enum OSVR_SkeletonReportSizes {
 typedef struct OSVR_SkeletonJointState {
     /** @brief A skeleton joint ID that specifies which bone/joint it is. May
      * not be valid if joint is not part of OSVR defined canonical names */
-    uint32_t joint;
+    OSVR_JointCount joint;
     /** @brief A tracker pose state */
     OSVR_Pose3 pose;
 } OSVR_SkeletonJointState;
@@ -154,7 +158,7 @@ typedef struct OSVR_SkeletonTrimmedState {
  * Left/Right (Hips), Leg Lower Left/Right (Knees), Foot Left/Right
 */
 typedef struct OSVR_SkeletonTrimmedReport {
-    uint32_t sensor;
+    OSVR_ChannelCount sensor;
     OSVR_SkeletonTrimmedState state;
 } OSVR_SkeletonTrimmedReport;
 
@@ -178,7 +182,7 @@ typedef struct OSVR_SkeletonWholeState {
 */
 typedef struct OSVR_SkeletonWholeReport {
     /** @brief A skeleton interface sensor ID */
-    uint32_t sensor;
+    OSVR_ChannelCount sensor;
     /** @brief A collection of skeleton joint interface */
     OSVR_SkeletonWholeState state;
 } OSVR_SkeletonWholeReport;
@@ -195,7 +199,7 @@ typedef struct OSVR_SkeletonHandState {
 */
 typedef struct OSVR_SkeletonHandReport {
     /** @brief A skeleton interface sensor ID */
-    uint32_t sensor;
+    OSVR_ChannelCount sensor;
     /** @brief A collection of skeleton joint reports that only contains the
      * above joints */
     OSVR_SkeletonHandState state;
@@ -213,7 +217,7 @@ typedef struct OSVR_SkeletonArmState {
 */
 typedef struct OSVR_SkeletonArmReport {
     /** @brief A skeleton interface sensor ID */
-    uint32_t sensor;
+    OSVR_ChannelCount sensor;
     /** @brief A collection of skeleton joint reports that only contains the
      * above joints */
     OSVR_SkeletonArmState state;
@@ -230,7 +234,7 @@ typedef struct OSVR_SkeletonFootState {
 */
 typedef struct OSVR_SkeletonFootReport {
     /** @brief A skeleton interface sensor ID */
-    uint32_t sensor;
+    OSVR_ChannelCount sensor;
     /** @brief A collection of skeleton joint reports that only contains the
      * above joints */
     OSVR_SkeletonFootState state;
@@ -247,7 +251,7 @@ typedef struct OSVR_SkeletonLegState {
 */
 typedef struct OSVR_SkeletonLegReport {
     /** @brief A skeleton interface sensor ID */
-    uint32_t sensor;
+    OSVR_ChannelCount sensor;
     /** @brief A collection of skeleton joint reports that only contains the
      * above joints */
     OSVR_SkeletonLegState state;
