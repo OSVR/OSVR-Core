@@ -31,7 +31,10 @@
 #ifndef INCLUDED_FPExceptionEnabler_h_GUID_81267DBA_F50F_4DBE_BF35_73DE28741E86
 #define INCLUDED_FPExceptionEnabler_h_GUID_81267DBA_F50F_4DBE_BF35_73DE28741E86
 
-#ifdef _MSC_VER
+#ifdef _WIN32
+#ifndef _MSC_VER
+#undef __STRICT_ANSI__
+#endif
 
 #include <float.h> // For _clearfp and _controlfp_s
 
