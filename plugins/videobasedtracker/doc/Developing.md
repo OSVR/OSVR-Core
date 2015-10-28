@@ -37,14 +37,60 @@ A program that can determine the set of rotationally-invariant patterns that has
 
 ![Video debug when working](./video_debug.png)
 
-The beacons are arranged in space
+The beacons should be arranged in space such that at least four beacons can be seen largely front-on from any angle that the sensor should be tracked.  The image above shows the beacon layout for one view of the OSVR HDK.  There are several criteria for placement, some of which are at odds with one another:
 
-XXX Coordinate system.
-XXX separated enough.
-XXX 4+ beacons always visible.
-XXX Non-degenerate positions.
+* **Visibility:*  There should be mostly head-on views of at least four beacons from any viewpoint.  Note that there are beacons on the sides, top, and bottom of the HDK that become face-on as the unit is rotated.
+* **Separation:** As the sensor moves further from the camera, the beacons come closer together in the image.  As they do so, their bright regions get closer together, which reduces the baseline for measurement (increasing the angular error in the estimates) and eventually causes them to overlap (losing identification of both beacons).
+* **Generality:** The pose-estimation algorithms require the poses to be generic.  It does not help to see four beacons if they are in a degenerate configuration where they all lie along the same line because the rotation about that line cannot be determined.
+* **Rigidity:** The relative positions of the beacons must remain fixed relative to each other as the sensor is moved.  Flexible objects or beacons mounted on slender portions may move relative to one another, introducing errors in the pose estimation.
 
 ### Config files
+
+The OSVR video-based tracker is run using configuration files that can include descriptions of the sensors it should be looking for, including their flash patterns and 3D positions.  It is also possible to adjust parameters of the algorithm from within the configuration file, enabling peformance tuning without recompilation.  A configuration file that handles just the back-plate sensor on the OSVR HDK is shown below, with a description of its entries following.
+
+    {
+        "drivers": [{
+            "plugin": "com_osvr_VideoBasedHMDTracker",
+            "driver": "VideoBasedHMDTracker",
+            "params": {
+                "cameraID": 0,
+                "showDebug": true,
+                "solveIterations": 5,
+                "maxReprojectionAxisError": 4,
+                "sensors" : [
+                    {
+                        "name": "OSVRHDKBack",
+                        "requiredInliers": 4,
+                        "permittedOutliers": 0,
+                        "patterns": [
+                                    "*...........**.."
+                                  , "......**.*......"
+                                  , ".............***"
+                                  , "..........*....."
+                                  , "...*.......**..."
+                                  , "...**.....*....."
+                        ],
+                        "positions": [
+                                [-1, 23.8, -228.6],
+                                [-11, 5.8, -228.6],
+                                [-9, -23.8, -228.6],
+                                [0, -8.8, -228.6],
+                                [9, -23.8, -228.6],
+                                [12, 5.8, -228.6]
+                        ]
+                    }
+                ]
+            }
+        }],
+        "plugins": [
+            "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
+        ],
+        "aliases": {
+            "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+        }
+    }
+
+The 
 
 ## Appendix: Design criteria and resulting coding for OSVR HDK
 
