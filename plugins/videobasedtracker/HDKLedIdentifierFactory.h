@@ -51,6 +51,11 @@ namespace vbtracker {
     /// @brief Factory function to create an HDK Led Identifier object using the
     /// random images patterns.
     LedIdentifierPtr createRandomHDKLedIdentifier();
+
+    /// @brief Factory function to create a sensor identifier based on
+    /// a vector of strings.
+    LedIdentifierPtr createSpecificLedIdentifier(PatternStringList patterns);
+
 } // End namespace vbtracker
 } // End namespace osvr
 

@@ -86,7 +86,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, CameraPtr &&camera,
       int devNumber = 0, bool showDebug = false, size_t solveIterations = 5,
-      double maxReprojectionAxisError = 4)
+      double maxReprojectionAxisError = 4,
+      osvr::vbtracker::SensorDescriptionList sensors =
+        osvr::vbtracker::SensorDescriptionList())
 #ifndef VBHMD_FAKE_IMAGES
         : m_camera(std::move(camera))
         , m_vbtracker(showDebug)
@@ -146,7 +148,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_currentImage = 0;
 
         if (m_images.size() == 0) {
-            std::cerr << "Could not read any images from " << VBHMD_FAKE_IMAGES
+            std::cerr << "com_osvr_VideoBasedHMDTracker: com_osvr_VideoBasedHMDTracker: Could not read any images from " << VBHMD_FAKE_IMAGES
                       << std::endl;
             return;
         }
@@ -222,6 +224,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // See if this is an Oculus camera by checking the dimensions of
             // the image.  This camera type improperly describes its format
             // as being a color format when it is in fact a mono format.
+            // @todo Check this by camera vendor name parameter added to config file
+            // rather than camera resolution found.
             bool isOculusCamera = (width == 376) && (height == 480);
             if (isOculusCamera) {
                 m_type = OculusDK2;
@@ -240,6 +244,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
         //===============================================
         // Configure objects and set up data structures and devices based on the
         // type of device we have.
+        // @todo separate this into a camera and a sensor portion, and base
+        // both off the config file rather than associated type.
 
         switch (m_type) {
         case OculusDK2: {
@@ -305,14 +311,29 @@ class VideoBasedHMDTracker : boost::noncopyable {
             d.push_back(0);
             d.push_back(0);
             d.push_back(0);
-            m_vbtracker.addSensor(
+
+            // If we have been passed a non-empty vector of sensors, we use these
+            // parameters when adding the senors.  Otherwise, swap in those from
+            // the OSVR HDK.
+            if (sensors.size() == 0) {
+              m_vbtracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(0), m, d,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0,
                 solveIterations, maxReprojectionAxisError);
-            m_vbtracker.addSensor(
+              m_vbtracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(1), m, d,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0,
                 solveIterations, maxReprojectionAxisError);
+            } else {
+              for (size_t i = 0; i < sensors.size(); i++) {
+                m_vbtracker.addSensor(
+                  osvr::vbtracker::createSpecificLedIdentifier(sensors[i].patterns),
+                  m, d,
+                  sensors[i].positions,
+                  sensors[i].requiredInliers, sensors[i].permittedOutliers,
+                  solveIterations, maxReprojectionAxisError);
+              }
+            }
 
         } break;
 
@@ -378,7 +399,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
         fileName << ".tif";
         if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
-            std::cerr << "Could not write image to " << fileName.str()
+            std::cerr << "com_osvr_VideoBasedHMDTracker: Could not write image to " << fileName.str()
                       << std::endl;
         }
 
@@ -473,13 +494,16 @@ class VideoBasedHMDTracker : boost::noncopyable {
 class HardwareDetection {
   public:
     HardwareDetection(int cameraID = 0, bool showDebug = false,
-      size_t solveIterations = 5, double maxReprojectionAxisError = 4)
+      size_t solveIterations = 5, double maxReprojectionAxisError = 4,
+      osvr::vbtracker::SensorDescriptionList sensors =
+        osvr::vbtracker::SensorDescriptionList())
       : m_found(false)
     {
       m_cameraID = cameraID;
       m_showDebug = showDebug;
       m_solveIterations = solveIterations;
       m_maxReprojectionAxisError = maxReprojectionAxisError;
+      m_sensors = sensors;
     }
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
@@ -512,7 +536,7 @@ class HardwareDetection {
         osvr::pluginkit::registerObjectForDeletion(
             ctx, new VideoBasedHMDTracker(ctx, std::move(cam),
             m_cameraID, m_showDebug, m_solveIterations,
-            m_maxReprojectionAxisError));
+            m_maxReprojectionAxisError, m_sensors));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -526,6 +550,7 @@ class HardwareDetection {
     bool m_showDebug; //< Show windows with video to help debug?
     size_t m_solveIterations;   //< How many iterations to run (at most) in solver
     double m_maxReprojectionAxisError;  //< Maximum allowed reprojection error
+    osvr::vbtracker::SensorDescriptionList m_sensors; //< Sensor descriptions (if available)
 };
 
 class ConfiguredDeviceConstructor {
@@ -538,7 +563,8 @@ public:
     if (params) {
       Json::Reader r;
       if (!r.parse(params, root)) {
-        std::cerr << "Could not parse parameters!" << std::endl;
+        std::cerr << "com_osvr_VideoBasedHMDTracker: Could not parse parameters!" << std::endl;
+        return OSVR_RETURN_FAILURE;
       }
     }
 
@@ -551,11 +577,60 @@ public:
     size_t solveIterations = root.get("solveIterations", 0).asInt();
     double maxReprojectionAxisError = root.get("maxReprojectionAxisError", 0).asDouble();
 
+    // Default is an empty list, which can be filled in from the config
+    // file if we find entries there.
+    osvr::vbtracker::SensorDescriptionList mySensors;
+    if (root.isMember("sensors")) {
+      Json::Value sensors = root["sensors"];
+      for (Json::ArrayIndex i = 0; i < sensors.size(); ++i) {
+        if ( !sensors[i].isMember("patterns") ||
+             !sensors[i].isMember("positions") ) {
+          std::cerr << "com_osvr_VideoBasedHMDTracker: Expected patterns "
+            "and positions in sensor description for sensor" << i << std::endl;
+          return OSVR_RETURN_FAILURE;
+        }
+
+        Json::Value patterns = sensors[i]["patterns"];
+        Json::Value positions = sensors[i]["positions"];
+        if (patterns.size() != positions.size()) {
+          std::cerr << "com_osvr_VideoBasedHMDTracker: Mismatched pattern count ("
+            << patterns.size() << ") and position count ("
+            << positions.size() << ") in sensor description for sensor"
+            << i << std::endl;
+          return OSVR_RETURN_FAILURE;
+        }
+
+        // Read each pattern and position into the sensors list.
+        mySensors.push_back(osvr::vbtracker::SensorDescription());
+        for (Json::ArrayIndex b = 0; b < patterns.size(); ++b) {
+          mySensors.back().patterns.push_back(patterns[b].asString());
+
+          Json::Value position = positions[b];
+          if (position.size() != 3) {
+            std::cerr << "com_osvr_VideoBasedHMDTracker: Mismatched position size ("
+              << position.size() << "), expected 3, "
+              "in sensor description for sensor" << i
+              << ", beacon" << b << std::endl;
+            return OSVR_RETURN_FAILURE;
+          }
+          cv::Point3f v;
+          v.x = position[static_cast<Json::ArrayIndex>(0)].asFloat();
+          v.y = position[static_cast<Json::ArrayIndex>(1)].asFloat();
+          v.z = position[static_cast<Json::ArrayIndex>(2)].asFloat();
+          mySensors.back().positions.push_back(v);
+        }
+
+        // Fill in the other parameters
+        mySensors.back().requiredInliers = sensors[i].get("requiredInliers", 6).asInt();
+        mySensors.back().permittedOutliers = sensors[i].get("permittedOutliers", 0).asInt();
+      }
+    }
+
     // OK, now that we have our parameters, create the device.
     osvr::pluginkit::PluginContext context(ctx);
     context.registerHardwareDetectCallback(
       new HardwareDetection(cameraID, showDebug,
-      solveIterations, maxReprojectionAxisError));
+      solveIterations, maxReprojectionAxisError, mySensors));
 
     return OSVR_RETURN_SUCCESS;
   }
