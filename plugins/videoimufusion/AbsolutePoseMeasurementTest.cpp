@@ -31,7 +31,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
 int main() {
     using namespace osvr::kalman;
@@ -40,13 +40,16 @@ int main() {
     using Measurement = osvr::kalman::AbsolutePoseMeasurement<State>;
     using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
     auto filter = Filter{ProcessModel{}, State{}};
+    std::cout << filter.state() << std::endl;
     {
         auto meas =
             Measurement{Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity(),
                         Eigen::Matrix<double, 3, 3>::Identity() * 0.000007,
                         Eigen::Vector3d::Constant(.00001)};
         filter.predict(0.1);
+        std::cout << filter.state() << std::endl;
         filter.correct(meas);
+        std::cout << filter.state() << std::endl;
     }
     return 0;
 }

@@ -192,6 +192,17 @@ namespace kalman {
             /// Externally-maintained orientation per Welch 1996
             Eigen::Quaterniond m_orientation;
         };
+
+        /// Stream insertion operator, for displaying the state of the state
+        /// class.
+        template <typename OutputStream>
+        inline OutputStream &operator<<(OutputStream &os, State const &state) {
+            os << "State:" << state.stateVector().transpose() << "\n";
+            os << "quat:" << state.getCombinedQuaternion().coeffs().transpose()
+               << "\n";
+            os << "error:\n" << state.errorCovariance() << "\n";
+            return os;
+        }
     } // namespace pose_externalized_rotation
 } // namespace kalman
 } // namespace osvr

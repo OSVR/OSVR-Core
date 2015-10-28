@@ -31,7 +31,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
 int main() {
     using namespace osvr::kalman;
@@ -43,8 +43,11 @@ int main() {
     {
         auto meas = Measurement{Eigen::Quaterniond::Identity(),
                                 Eigen::Vector3d(0.00001, 0.00001, 0.00001)};
+        std::cout << filter.state() << std::endl;
         filter.predict(0.1);
+        std::cout << filter.state() << std::endl;
         filter.correct(meas);
+        std::cout << filter.state() << std::endl;
     }
 
     {
