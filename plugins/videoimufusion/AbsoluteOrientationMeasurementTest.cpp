@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include "FlexibleKalmanFilter.h"
-#include "PoseDampedConstantVelocity.h"
+#include "PoseConstantVelocity.h"
 #include "AbsoluteOrientationMeasurement.h"
 
 // Library/third-party includes
@@ -35,7 +35,7 @@
 
 int main() {
     using namespace osvr::kalman;
-    using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
+    using ProcessModel = osvr::kalman::PoseConstantVelocityProcessModel;
     using State = ProcessModel::State;
     using Measurement = osvr::kalman::AbsoluteOrientationMeasurement<State>;
     using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
