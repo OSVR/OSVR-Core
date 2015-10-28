@@ -54,7 +54,8 @@ using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 using osvr::util::fromPose;
 using osvr::util::fromQuat;
 using osvr::util::vecMap;
-namespace time = osvr::util::time;
+using osvr::util::time::getNow;
+using osvr::util::time::duration;
 
 static const double InitialStateError[] = {1., 1., 1., 1., 1., 1.,
                                            1., 1., 1., 1., 1., 1.};
@@ -140,8 +141,8 @@ class VideoIMUFusion::RunningData {
 
     /// Returns true if we succeeded and can filter in some data.
     bool preReport() {
-        auto timestamp = time::getNow();
-        auto dt = time::duration(timestamp, m_last);
+        auto timestamp = getNow();
+        auto dt = duration(timestamp, m_last);
         if (dt <= 0) {
             return false;
         }
