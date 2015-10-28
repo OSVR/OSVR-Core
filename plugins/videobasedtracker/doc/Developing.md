@@ -46,14 +46,13 @@ The beacons should be arranged in space such that at least four beacons can be s
 
 ### Config files
 
-The OSVR video-based tracker is run using configuration files that can include descriptions of the sensors it should be looking for, including their flash patterns and 3D positions.  It is also possible to adjust parameters of the algorithm from within the configuration file, enabling peformance tuning without recompilation.  A configuration file that handles just the back-plate sensor on the OSVR HDK is shown below, with a description of its entries following.
+The OSVR video-based tracker is run using [json](http://www.json.org/)-formatted configuration files that can include descriptions of the sensors it should be looking for, including their flash patterns and 3D positions.  It is also possible to adjust parameters of the algorithm from within the configuration file, enabling peformance tuning without recompilation.  A configuration file that handles just the back-plate sensor on the OSVR HDK is shown below, with a description of its entries following.
 
     {
         "drivers": [{
             "plugin": "com_osvr_VideoBasedHMDTracker",
             "driver": "VideoBasedHMDTracker",
             "params": {
-                "cameraID": 0,
                 "showDebug": true,
                 "solveIterations": 5,
                 "maxReprojectionAxisError": 4,
@@ -90,7 +89,17 @@ The OSVR video-based tracker is run using configuration files that can include d
         }
     }
 
-The 
+The portion of the config file relevant to the development of new sensors is in the **"params"** section.  The meaning of each parameter is as follows:
+* **showDebug**: This parameter controls whether a debuggin window appears showing the video image, identified beacons (in red) and identified sensors (whose beacons become green).  The [running document](./Running.md) describes how to use this window and what is shown in it.
+* **solveIterations**: This controls the maximum number of iterations performed by the OpenCV optimization algorithm to determine the optimal pose.  Increasing this can improve tracking accuracy, but it also uses more CPU power and too-large values will eventually reduce tracking rate so much that the system can no longer identify beacons.
+* **maxReprojectionError**: This parameter is used to discard bad poses that can cause jitter in the tracking reports.  It is the maximum distance in pixels that either axis (x or y) can vary between the location of a beacon identified in the image and its reprojected 3D location from the model.
+* **sensors**: This section provides a list of available sensors in the system.  There can be more than one sensor described, but this example shows only one.  Each sensor is reported with a differnt ID by the video-based tracker.  The first listed sensor is given ID 0.  Within a sensor, there are several fields:
+
+* **name**: Descriptive name of the sensor, currenlty not usd by the system.
+* **requiredInliers**: How many beacons must be identified before the system attempts to report a pose.  For the OSVR HDK rear panel, some units only have four of the six sensors visible, so this is chosen as 4.  For the front panel on the HDK, the default configuration requires at least six beacons to be visible to reduce jitter in the reported poses.
+* **permittedOutliers**: Reflections of beacons off of specular surfaces, extra lights in the scene, and mis-identified beacons can produce completely wrong estimates for one or a few beacons in the scene.  This parameter specifies how many "outlier" responses are allowed, where the beacon complely mis-matches the expected location.  In this case, the beacon is completely ignored.  In the case of 4 inliers, all are needed.
+* **patterns**: There is one pattern for each beacon on the sensor.  These must be listed in the same order as the **positions** parameter described below.  All of the patterns must be of the same length for a given sensor.  If sensors with different pattern lengths are visible together, **all shorter-length subsets of the longer patterns must be distinct from all rotations of all of the shorter patterns present in the scene**.  The rotation of each pattern is not important, because it matches all rotations.  The pattern is encoded using a period ('.') for each dim flash and an asterisk ('*') for each bright flash.
+* **positions**: There is one position for each beacon on the sensor.  These must be listed in the same order as the **patterns** parameter described above.  This is the position in millimeters of each object on the sensor.  These can be defined in any consistent coordinate system.  The origin of that coordinate system becomes the origin of the sensor as reported by the video-based tracking system.  The orientation of that coordinate system becomes the orientation reported.
 
 ## Appendix: Design criteria and resulting coding for OSVR HDK
 
