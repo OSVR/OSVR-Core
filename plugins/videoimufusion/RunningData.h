@@ -91,8 +91,10 @@ class VideoIMUFusion::RunningData {
         m_filter.state().setErrorCovariance(
             Vector<12>(InitialStateError).asDiagonal());
 
-        m_filter.processModel().noiseAutocorrelation.head<3>() *= 0.001;
-        m_filter.processModel().noiseAutocorrelation.tail<3>() *= 0.01;
+        Vector<6> noiseAutocorrelation;
+        noiseAutocorrelation.head<3>() = Vector<3>::Constant(0.001);
+        noiseAutocorrelation.tail<3>() = Vector<3>::Constant(0.01);
+        m_filter.processModel().setNoiseAutocorrelation(noiseAutocorrelation);
 
 #if 0
         // Very crudely set up some error estimates.

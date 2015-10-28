@@ -12,6 +12,7 @@ set(KALMAN_SOURCES
     ExternalQuaternion.h
     FlexibleKalmanBase.h
     FlexibleKalmanFilter.h
+    PoseConstantVelocity.h
     PoseDampedConstantVelocity.h
     PoseState.h)
 
