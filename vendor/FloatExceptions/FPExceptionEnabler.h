@@ -31,6 +31,8 @@
 #ifndef INCLUDED_FPExceptionEnabler_h_GUID_81267DBA_F50F_4DBE_BF35_73DE28741E86
 #define INCLUDED_FPExceptionEnabler_h_GUID_81267DBA_F50F_4DBE_BF35_73DE28741E86
 
+#ifdef _MSC_VER
+
 #include <float.h> // For _clearfp and _controlfp_s
 
 // Declare an object of this type in a scope in order to enable a
@@ -78,5 +80,21 @@ private:
     FPExceptionEnabler(const FPExceptionEnabler&);
     FPExceptionEnabler& operator=(const FPExceptionEnabler&);
 };
+
+#else // !defined(_MSC_VER)
+class FPExceptionEnabler
+{
+public:
+    FPExceptionEnabler(unsigned int  = 0)
+    {
+    }
+private:
+
+    // Make the copy constructor and assignment operator private
+    // and unimplemented to prohibit copying.
+    FPExceptionEnabler(const FPExceptionEnabler&);
+    FPExceptionEnabler& operator=(const FPExceptionEnabler&);
+};
+#endif // defined(_MSC_VER)
 
 #endif // INCLUDED_FPExceptionEnabler_h_GUID_81267DBA_F50F_4DBE_BF35_73DE28741E86

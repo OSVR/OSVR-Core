@@ -14,7 +14,7 @@ The following files have been added:
 - `README.md` - this file
 - `LICENSE.txt` - The copyright notice from `FloatExceptions.cpp`, with leading `// ` removed
 
-The following additional files are excerpts of `FloatExceptions.cpp`, with tidy header dressing (include guards, includes, license and attribution boilerplate, etc.) around them. They are named for the single class they contain.
+The following additional files are excerpts of `FloatExceptions.cpp`, with tidy header dressing (include guards, includes, license and attribution boilerplate, etc.) around them and dummy do-nothing implementations for non-MSVC compilers. They are named for the single class they contain.
 
 - `FPExceptionDisabler.h`
 - `FPExceptionEnabler.h`
