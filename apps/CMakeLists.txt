@@ -6,6 +6,7 @@ endif()
 
 if(BUILD_CLIENT_APPS)
     add_subdirectory(PathTreeExport)
+    add_subdirectory(osvr_log_to_csv)
 
     add_executable(osvr_print_tree
         osvr_print_tree.cpp)
