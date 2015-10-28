@@ -96,6 +96,9 @@ namespace kalman {
             // Solve for the Kalman gain
             /// @todo Figure out if this is the best decomp to use
             types::Matrix<n, m> K = denom.colPivHouseholderQr().solve(numer);
+            // types::Matrix<n, m> K = denom.ldlt().solve(numer);
+            // types::Matrix<n, m> K = numer * denom.inverse(); // this one
+            // creates lots of nans.
 
             // Residual/innovation
             auto deltaz = meas.getResidual(state());
