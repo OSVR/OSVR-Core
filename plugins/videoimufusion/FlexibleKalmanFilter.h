@@ -57,7 +57,7 @@ namespace kalman {
 
         /// Move initialization from just state - depends on
         /// default-initializable process model.
-        explicit FlexibleKalmanFilter(State *&state)
+        explicit FlexibleKalmanFilter(State &&state)
             : m_processModel(), m_state(state) {}
 
         /// copy initialization
