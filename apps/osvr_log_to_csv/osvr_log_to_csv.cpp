@@ -140,9 +140,11 @@ int main(int argc, char *argv[]) {
     auto begin = our_clock::now();
     auto runTimeLimit = begin + std::chrono::seconds(MAX_SECONDS);
     do {
+#if 0
         g_csvOutput.add(osvr::CSV::Row() << (osvr::util::time::getNow())
                                          << cell("MarkBeforeUpdate", "TRUE"));
 		g_markRows++;
+#endif
         context.update();
     } while (!shouldStop(runTimeLimit));
     /// Client context closed by now, just output the file.
