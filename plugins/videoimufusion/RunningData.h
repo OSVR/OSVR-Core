@@ -65,6 +65,7 @@ static const double CameraPositionError[] = {3.0E-8, 3.0E-8, 8.5E-7};
 using osvr::kalman::types::Vector;
 class VideoIMUFusion::RunningData {
   public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     RunningData(Eigen::Isometry3d const &cTr,
                 OSVR_OrientationState const &initialIMU,
                 OSVR_PoseState const &initialVideo,
@@ -121,7 +122,6 @@ class VideoIMUFusion::RunningData {
 #endif
     }
 
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     void handleIMUReport(const OSVR_TimeValue &timestamp,
                          const OSVR_OrientationReport &report) {
         /// Right now, just accepting the orientation report as it is. This
