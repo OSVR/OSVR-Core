@@ -4,7 +4,9 @@
         "driver": "VideoBasedHMDTracker",
         "params": {
             "cameraID": 0,
-            "showDebug": false
+            "showDebug": false,
+            "solveIterations": 5,
+            "maxReprojectionAxisError": 4
         }
     }],
     "plugins": [
