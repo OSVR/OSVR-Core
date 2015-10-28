@@ -17,18 +17,27 @@ The video-based tracking system is provided with a description for each sensor t
 
 ## New sensor design
 
-If you want to make a new sensor that is compatible with the OSVR video-based tracking system, it needs to have beacon flash patterns and layouts that are consistent with the system and which do not include beacons whose flash patterns match any other beacons in the system, in particular the exiting 40 LEDs on the front and back panels of the OSVR HDK.
-
-### Flash characteristics
+New sensors that are to be compatible with the OSVR video-based tracking system must have beacon flash patterns and layouts that are consistent with the system and which do not include beacons whose flash patterns that match any other beacons in the system, in particular the exiting 40 LEDs on the front and back panels of the OSVR HDK (whose patterns are listed in the appendix).
 
 ### Flash patterns
 
-XXX Rotationally invariant.
-XXX Not conflicting with existing patterns.  XXX Find the available ones in odd parity.  XXX Even parity ones are available for other sensors.
+The patterns used are rotationally invariant.  The detection algorithms used in the system act independently on each beacon to determine the pattern.  This enables multiple sensors to operate at an arbitary phase relative to one another while still having their beacons recognized.  **This means that the strobe patterns of all beacons must be unique under all rotations -- shifting an existing pattern one or more frames later does not produce a new pattern.**  Therefore any new patterns introduced must be distinct compared to **all rotations** of existing patterns.
 
-XXX Include the program to find patterns.
+#### Available patterns
+
+The OSVR HDK uses all of the 16-bit, odd-parity patterns with 1 and 3 bright flashes, and four of the patterns with 5 bright flashes.  Patterns with seven or more bright flashes are not currently being used.  Maintaining good error characteristics in the presence of multiple devices will require choosing odd parities for all devices.  There are 2048 total odd-parity codes.
+
+Relaxing the constraint that single-bit errors must result in invalid codes would allow the use of even-parity codes.  None of these codes are currently in use.  There are 2067 total even-parity codes.  Single-bit errors can convert even-parity codes into odd-parity codes.
+
+A program that can determine the set of rotationally-invariant patterns that has the smallest maximum instantaneous power draw can be found [in this repository](https://github.com/sensics/LED_encoding).
+
+#### ToDo: Determine how to allocate codes to vendors
 
 ### Beacon layout
+
+![Video debug when working](./video_debug.png)
+
+The beacons are arranged in space
 
 XXX Coordinate system.
 XXX separated enough.
@@ -56,13 +65,13 @@ The assumptions on the system characteristics, which must be satisfied for the p
 
 Each LED pattern consists of an infinitely-repeated series of frames.  Each frame consists of a series of bright(1)/dim(0) bits lasting for one camera frame, synchronized with the camera exposures.
 
-There are N bits within a frame (N=16 was selected for reasons described below).  See a later secion for LED pattern tables.  The patterns have the characteristic that no patterns can be rotated to produce another so that the ID for a particular LED can be reliably determined by looking only at that LED’s sequence.  The relative start time of the transmissions for different LEDs does not matter.  Patterns with even, odd, and no parity checking were tested, to see the impact of enabling parity checking to detect single-bit errors.
+There are N bits within a frame (N=16 was selected).  See below for the LED pattern tables.  The patterns have the characteristic that no patterns can be rotated to produce another so that the ID for a particular LED can be reliably determined by looking only at that LED’s sequence.  The relative start time of the transmissions for different LEDs does not matter.  Patterns with even, odd, and no parity checking were tested, to see the impact of enabling parity checking to detect single-bit errors.
 
 This forms a family of encodings parameterized by N (the number of bits used to encode) and parity.  As N increases, the time to determine a complete encoding increases but the maximum number of overlapping LEDs in the high state decreases.  The minimum counts with optimal packing was computed for a range of choices and a size of 16 with odd parity was selected.
 
 #### Encoding
 
-The encoding selected for the OSVR HDK is shown below.  Each period ('.') indicates a dim flash nd each asterisk ('*') indicates a bright flash.  The LED index is listed along the left edge (this does not match the final hardware ordering in the as-designed unit).
+The encoding selected for the OSVR HDK is shown below.  Each period ('.') indicates a dim flash and each asterisk ('*') indicates a bright flash.  The LED index is listed along the left edge (this does not match the final hardware ordering in the as-designed unit).
 
      0: ***...*........*
      1: ...****..*......
