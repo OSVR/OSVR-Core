@@ -75,22 +75,22 @@ namespace kalman {
         /// @return a matrix of dimension n x n. Note that it is real
         /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>()
         /// might provide useful performance enhancements.
-        StateSquareMatrix const &getSampledProcessNoiseCovariance(double dt) {
+        StateSquareMatrix getSampledProcessNoiseCovariance(double dt) const {
             auto const dim = types::Dimension<State>::value;
-            m_cov = StateSquareMatrix::Zero();
+            StateSquareMatrix cov = StateSquareMatrix::Zero();
             auto dt3 = (dt * dt * dt) / 3;
             auto dt2 = (dt * dt) / 2;
             for (std::size_t xIndex = 0; xIndex < dim / 2; ++xIndex) {
                 auto xDotIndex = xIndex + dim / 2;
                 // xIndex is 'i' and xDotIndex is 'j' in eq. 4.8
                 const auto mu = getMu(xDotIndex);
-                m_cov(xIndex, xIndex) = mu * dt3;
+                cov(xIndex, xIndex) = mu * dt3;
                 auto symmetric = mu * dt2;
-                m_cov(xIndex, xDotIndex) = symmetric;
-                m_cov(xDotIndex, xIndex) = symmetric;
-                m_cov(xDotIndex, xDotIndex) = mu * dt;
+                cov(xIndex, xDotIndex) = symmetric;
+                cov(xDotIndex, xIndex) = symmetric;
+                cov(xDotIndex, xDotIndex) = mu * dt;
             }
-            return m_cov;
+            return cov;
         }
 
         /// Returns a 12-element vector containing a predicted state based on a
@@ -115,7 +115,6 @@ namespace kalman {
             // the noise sources. (p77, p197 in Welch 1996)
             return noiseAutocorrelation(index);
         }
-        StateSquareMatrix m_cov;
         double m_damp = 0;
     };
 
