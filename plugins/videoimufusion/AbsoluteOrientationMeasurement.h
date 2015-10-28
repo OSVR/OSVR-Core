@@ -67,6 +67,10 @@ namespace kalman {
                 prediction * m_measurement.conjugate();
             return residual.coeffs();
         }
+        /// Convenience method to be able to store and re-use measurements.
+        void setMeasurement(Eigen::Quaterniond const &quat) {
+            m_measurement = quat;
+        }
 
       private:
         Eigen::Quaterniond m_measurement;

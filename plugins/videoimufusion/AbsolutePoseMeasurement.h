@@ -70,6 +70,13 @@ namespace kalman {
             return residual;
         }
 
+        /// Convenience method to be able to store and re-use measurements.
+        void setMeasurement(Position const &pos,
+                            Eigen::Quaterniond const &quat) {
+            m_pos = pos;
+            m_ori = quat;
+        }
+
       private:
         Position m_pos;
         Eigen::Quaterniond m_ori;
