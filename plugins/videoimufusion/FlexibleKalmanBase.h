@@ -118,13 +118,15 @@ namespace kalman {
     inline types::DimSquareMatrix<StateType>
     predictErrorCovariance(StateType const &state,
                            ProcessModelType &processModel, double dt) {
-        auto A = processModel.getStateTransitionMatrix(state, dt);
-        auto &P = state.errorCovariance();
+        types::DimSquareMatrix<StateType> A =
+            processModel.getStateTransitionMatrix(state, dt);
+        types::DimSquareMatrix<StateType> P = state.errorCovariance();
         /// @todo Determine if the fact that Q is (at least in one case)
         /// symmetrical implies anything else useful performance-wise here or
         /// later in the data flow.
-        auto Q = processModel.getSampledProcessNoiseCovariance(dt);
-        return A * P * A.transpose() + Q;
+        // auto Q = processModel.getSampledProcessNoiseCovariance(dt);
+        return A * P * A.transpose() +
+               processModel.getSampledProcessNoiseCovariance(dt);
     }
 
 } // namespace kalman
