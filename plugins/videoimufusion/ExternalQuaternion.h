@@ -46,12 +46,7 @@ namespace kalman {
         /// motion, structure, and focal length. Pattern Analysis and Machine
         /// Intelligence, IEEE Transactions on, 17(6), 562--575.
         /// http://doi.org/10.1109/34.387503
-        template <typename Derived>
-        inline typename std::enable_if<Derived::SizeAtCompileTime == 3,
-                                       Eigen::Quaterniond>::type
-        vecToQuat(Eigen::MatrixBase<Derived> const &incRotVec) {
-            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
-            auto epsilon = incRotVec.dot(incRotVec) / 4.;
+        inline Eigen::Quaterniond vecToQuat(types::Vector<3> const &incRotVec) {
             Eigen::Quaterniond ret;
             ret.vec() = incRotVec / 2.;
             ret.w() = std::sqrt(1. - epsilon);
@@ -60,10 +55,7 @@ namespace kalman {
 
         /// Computes what is effectively the Jacobian matrix of partial
         /// derivatives of incrementalOrientationToQuat()
-        template <typename Derived>
-        inline types::Matrix<4, 3>
-        jacobian(Eigen::MatrixBase<Derived> const &incRotVec) {
-            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+        inline types::Matrix<4, 3> jacobian(Eigen::Vector3d const &incRotVec) {
             // eigen internally stores quaternions x, y, z, w
             types::Matrix<4, 3> ret;
             // vector components of jacobian are all 1/2 identity
