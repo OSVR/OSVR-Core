@@ -37,6 +37,13 @@
 namespace osvr {
 namespace kalman {
     namespace external_quat {
+
+        /// Helper for vecToQuat() and covarianceFromEulerVariance()
+        inline double
+            vecToQuatScalarPartSquared(types::Vector<3> const &incRotVec) {
+            auto epsilon = incRotVec.dot(incRotVec) / 4.;
+            return 1. - epsilon;
+        }
         /// For use in maintaining an "external quaternion" and 3 incremental
         /// orientations, as done by Welch based on earlier work.
         ///
@@ -49,7 +56,7 @@ namespace kalman {
         inline Eigen::Quaterniond vecToQuat(types::Vector<3> const &incRotVec) {
             Eigen::Quaterniond ret;
             ret.vec() = incRotVec / 2.;
-            ret.w() = std::sqrt(1. - epsilon);
+            ret.w() = std::sqrt(vecToQuatScalarPartSquared(incRotVec));
             return ret;
         }
 
@@ -65,6 +72,26 @@ namespace kalman {
                 incRotVec.transpose() /
                 (-4. * sqrt(1. - incRotVec.dot(incRotVec) / 4.));
             return ret;
+        }
+
+        inline types::SquareMatrix<4>
+            covarianceFromEulerVariance(types::Vector<3> const &s) {
+            auto quatScalarPartSquared = vecToQuatScalarPartSquared(s);
+            auto quatScalarPart = std::sqrt(quatScalarPartSquared);
+
+            // Top left corner cell
+            types::SquareMatrix<4> cov;
+            cov(0, 0) = quatScalarPartSquared;
+
+            // Remainder of top and left
+            types::Vector<3> topAndLeft = s * quatScalarPart / 2.;
+            cov.bottomLeftCorner<3, 1>() = topAndLeft;
+            cov.topRightCorner<1, 3>() = topAndLeft.transpose();
+
+            // Bottom right block
+            cov.bottomRightCorner<3, 3>() = s * s.transpose() / 4.;
+
+            return cov;
         }
     } // namespace external_quat
 } // namespace kalman

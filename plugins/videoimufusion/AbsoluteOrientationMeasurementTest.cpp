@@ -42,7 +42,7 @@ int main() {
     auto filter = Filter{ProcessModel{}, State{}};
     {
         auto meas = Measurement{Eigen::Quaterniond::Identity(),
-                                Eigen::Matrix4d::Identity()};
+                                Eigen::Vector3d(0.00001, 0.00001, 0.00001)};
         filter.predict(0.1);
         filter.correct(meas);
     }

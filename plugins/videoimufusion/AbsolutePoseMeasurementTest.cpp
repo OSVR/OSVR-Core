@@ -43,7 +43,8 @@ int main() {
     {
         auto meas =
             Measurement{Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity(),
-                        Eigen::Matrix<double, 7, 7>::Identity()};
+                        Eigen::Matrix<double, 3, 3>::Identity() * 0.000007,
+                        Eigen::Vector3d::Constant(.00001)};
         filter.predict(0.1);
         filter.correct(meas);
     }

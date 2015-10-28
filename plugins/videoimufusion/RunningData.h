@@ -59,9 +59,9 @@ using osvr::util::time::duration;
 
 static const double InitialStateError[] = {1., 1., 1., 1., 1., 1.,
                                            1., 1., 1., 1., 1., 1.};
-static const double IMUError[] = {1., 1.5, 1.};
-static const double CameraOrientationError[] = {1.1, 1.1, 1.1};
-static const double CameraPositionError[] = {1., 1., 1.};
+static const double IMUError[] = {1.0E-10, 5.0E-10, 1.0E-10};
+static const double CameraOrientationError[] = {0.00001, 0.00001, 0.00001};
+static const double CameraPositionError[] = {3.0E-8, 3.0E-8, 8.5E-7};
 using osvr::kalman::types::Vector;
 class VideoIMUFusion::RunningData {
   public:
@@ -70,7 +70,12 @@ class VideoIMUFusion::RunningData {
                 OSVR_PoseState const &initialVideo,
                 OSVR_TimeValue const &lastPosition,
                 OSVR_TimeValue const &lastIMU)
-        : m_filter(), m_cTr(cTr), m_orientation(fromQuat(initialIMU)),
+        : m_filter(),
+          m_imuMeas(fromQuat(initialIMU), Vector<3>::Map(IMUError).eval()),
+          m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
+                       Vector<3>::Map(CameraPositionError).asDiagonal(),
+                       Vector<3>::Map(CameraOrientationError)),
+          m_cTr(cTr), m_orientation(fromQuat(initialIMU)),
           m_last(lastPosition) {
 
 #ifdef OSVR_FPE
@@ -89,6 +94,7 @@ class VideoIMUFusion::RunningData {
         m_filter.processModel().noiseAutocorrelation.head<3>() *= 0.001;
         m_filter.processModel().noiseAutocorrelation.tail<3>() *= 0.01;
 
+#if 0
         // Very crudely set up some error estimates.
         using osvr::kalman::external_quat::vecToQuat;
 
@@ -97,15 +103,20 @@ class VideoIMUFusion::RunningData {
         // vecToQuat(Vector<3>::Map(IMUError));
 
         // This line is OK but not very good
-        // Eigen::Vector4d quatError(1, 1, 1, 1); m_imuError = quatError;
-
+        Eigen::Vector4d quatError(1, 1, 1, 1);
+        m_imuError = quatError;
+#if 0
         Eigen::Quaterniond imuQuatError = vecToQuat(Vector<3>::Map(IMUError));
         m_imuError = imuQuatError.coeffs();
-
+#endif
         m_cameraError.head<3>() = Vector<3>::Map(CameraPositionError);
         Eigen::Quaterniond cameraQuatError =
             vecToQuat(Vector<3>::Map(CameraOrientationError));
+#if 0
         m_cameraError.tail<4>() = cameraQuatError.coeffs();
+#endif
+        m_cameraError.tail<4>() = quatError;
+#endif
     }
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -120,9 +131,8 @@ class VideoIMUFusion::RunningData {
 #endif
 
         if (preReport()) {
-            AbsoluteOrientationMeasurement meas{fromQuat(report.rotation),
-                                                m_imuError.asDiagonal()};
-            m_filter.correct(meas);
+            m_imuMeas.setMeasurement(fromQuat(report.rotation));
+            m_filter.correct(m_imuMeas);
         }
     }
     void handleVideoTrackerReport(const OSVR_TimeValue &timestamp,
@@ -133,10 +143,12 @@ class VideoIMUFusion::RunningData {
         FPExceptionEnabler fpe;
 #endif
         if (preReport()) {
-            Eigen::Quaterniond ori(roomPose.rotation());
-            Eigen::Vector3d pos(roomPose.translation());
-            AbsolutePoseMeasurement meas{pos, ori, m_cameraError.asDiagonal()};
-            m_filter.correct(meas);
+            m_cameraMeas.setMeasurement(
+                roomPose.translation(),
+                Eigen::Quaterniond(roomPose.rotation()));
+            Eigen::Quaterniond(roomPose.rotation());
+            m_filter.correct(m_cameraMeas);
+#if 0
             OSVR_DEV_VERBOSE(
                 "State: "
                 << m_filter.state().stateVector().transpose() << "\n"
@@ -145,6 +157,7 @@ class VideoIMUFusion::RunningData {
                 << "\n"
                    "Error:\n"
                 << m_filter.state().errorCovariance());
+#endif
         }
     }
 
@@ -173,6 +186,8 @@ class VideoIMUFusion::RunningData {
 
   private:
     Filter m_filter;
+    AbsoluteOrientationMeasurement m_imuMeas;
+    AbsolutePoseMeasurement m_cameraMeas;
     Vector<4> m_imuError;
     Vector<7> m_cameraError;
     const Eigen::Isometry3d m_cTr;

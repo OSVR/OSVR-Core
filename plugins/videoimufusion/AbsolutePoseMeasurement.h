@@ -47,6 +47,14 @@ namespace kalman {
         using MeasurementMatrix = types::SquareMatrix<DIMENSION>;
         using Position = types::Vector<3>;
         AbsolutePoseBase(Position const &pos, Eigen::Quaterniond const &quat,
+                         types::SquareMatrix<3> const &posCovariance,
+                         types::Vector<3> const &eulerError)
+            : m_pos(pos), m_ori(quat), m_covariance(MeasurementMatrix::Zero()) {
+            m_covariance.topLeftCorner<3, 3>() = posCovariance;
+            m_covariance.bottomLeftCorner<4, 4>() =
+                external_quat::covarianceFromEulerVariance(eulerError);
+        }
+        AbsolutePoseBase(Position const &pos, Eigen::Quaterniond const &quat,
                          types::SquareMatrix<DIMENSION> const &covariance)
             : m_pos(pos), m_ori(quat), m_covariance(covariance) {}
 
@@ -97,7 +105,11 @@ namespace kalman {
         static const types::DimensionType STATE_DIMENSION =
             types::Dimension<State>::value;
         using Base = AbsolutePoseBase;
-
+        AbsolutePoseMeasurement(Position const &pos,
+                                Eigen::Quaterniond const &quat,
+                                types::SquareMatrix<3> const &posCovariance,
+                                types::Vector<3> const &eulerError)
+            : Base(pos, quat, posCovariance, eulerError) {}
         AbsolutePoseMeasurement(
             Position const &pos, Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)

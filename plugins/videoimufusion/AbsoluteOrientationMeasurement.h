@@ -45,6 +45,11 @@ namespace kalman {
         static const types::DimensionType DIMENSION = 4;
         using MeasurementVector = types::Vector<DIMENSION>;
         using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
+        AbsoluteOrientationBase(Eigen::Quaterniond const &quat,
+                                types::Vector<3> const &eulerStdDev)
+            : AbsoluteOrientationBase(
+                  quat,
+                  external_quat::covarianceFromEulerVariance(eulerStdDev)) {}
         AbsoluteOrientationBase(
             Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)
@@ -92,6 +97,10 @@ namespace kalman {
         static const types::DimensionType STATE_DIMENSION =
             types::Dimension<State>::value;
         using Base = AbsoluteOrientationBase;
+
+        AbsoluteOrientationMeasurement(Eigen::Quaterniond const &quat,
+                                       types::Vector<3> const &eulerStdDev)
+            : Base(quat, eulerStdDev) {}
 
         AbsoluteOrientationMeasurement(
             Eigen::Quaterniond const &quat,
