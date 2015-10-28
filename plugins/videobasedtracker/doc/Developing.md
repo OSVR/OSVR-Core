@@ -93,7 +93,9 @@ The portion of the config file relevant to the development of new sensors is in 
 * **showDebug**: This parameter controls whether a debuggin window appears showing the video image, identified beacons (in red) and identified sensors (whose beacons become green).  The [running document](./Running.md) describes how to use this window and what is shown in it.
 * **solveIterations**: This controls the maximum number of iterations performed by the OpenCV optimization algorithm to determine the optimal pose.  Increasing this can improve tracking accuracy, but it also uses more CPU power and too-large values will eventually reduce tracking rate so much that the system can no longer identify beacons.
 * **maxReprojectionError**: This parameter is used to discard bad poses that can cause jitter in the tracking reports.  It is the maximum distance in pixels that either axis (x or y) can vary between the location of a beacon identified in the image and its reprojected 3D location from the model.
-* **sensors**: This section provides a list of available sensors in the system.  There can be more than one sensor described, but this example shows only one.  Each sensor is reported with a differnt ID by the video-based tracker.  The first listed sensor is given ID 0.  Within a sensor, there are several fields:
+* **sensors**: This section provides a list of available sensors in the system.  There can be more than one sensor described, but this example shows only one.  Each sensor is reported with a differnt ID by the video-based tracker.  The first listed sensor is given ID 0.
+
+Within each sensor, there are several fields:
 
 * **name**: Descriptive name of the sensor, currenlty not usd by the system.
 * **requiredInliers**: How many beacons must be identified before the system attempts to report a pose.  For the OSVR HDK rear panel, some units only have four of the six sensors visible, so this is chosen as 4.  For the front panel on the HDK, the default configuration requires at least six beacons to be visible to reduce jitter in the reported poses.
