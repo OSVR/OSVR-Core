@@ -91,11 +91,21 @@ class VideoIMUFusion::RunningData {
 
         // Very crudely set up some error estimates.
         using osvr::kalman::external_quat::vecToQuat;
-        using osvr::kalman::external_quat::getVec4;
-        m_imuError = getVec4(vecToQuat(Vector<3>::Map(IMUError)));
+
+        // This line produces FPE
+        // Eigen::Quaterniond IMUErrorQuat =
+        // vecToQuat(Vector<3>::Map(IMUError));
+
+        // This line is OK but not very good
+        // Eigen::Vector4d quatError(1, 1, 1, 1); m_imuError = quatError;
+
+        Eigen::Quaterniond imuQuatError = vecToQuat(Vector<3>::Map(IMUError));
+        m_imuError = imuQuatError.coeffs();
+
         m_cameraError.head<3>() = Vector<3>::Map(CameraPositionError);
-        m_cameraError.tail<4>() =
-            getVec4(vecToQuat(Vector<3>::Map(CameraOrientationError)));
+        Eigen::Quaterniond cameraQuatError =
+            vecToQuat(Vector<3>::Map(CameraOrientationError));
+        m_cameraError.tail<4>() = cameraQuatError.coeffs();
     }
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -128,14 +138,13 @@ class VideoIMUFusion::RunningData {
             AbsolutePoseMeasurement meas{pos, ori, m_cameraError.asDiagonal()};
             m_filter.correct(meas);
             OSVR_DEV_VERBOSE(
-                "State: " << m_filter.state().stateVector().transpose() << "\n"
-                          << "Quat: "
-                          << osvr::kalman::external_quat::getVec4(
-                                 m_filter.state().getQuaternion())
-                                 .transpose()
-                          << "\n"
-                             "Error:\n"
-                          << m_filter.state().errorCovariance());
+                "State: "
+                << m_filter.state().stateVector().transpose() << "\n"
+                << "Quat: "
+                << m_filter.state().getQuaternion().coeffs().transpose()
+                << "\n"
+                   "Error:\n"
+                << m_filter.state().errorCovariance());
         }
     }
 

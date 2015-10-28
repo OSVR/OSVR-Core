@@ -65,8 +65,8 @@ namespace kalman {
         MeasurementVector getResidual(State const &s) const {
             MeasurementVector residual;
             residual.head<3>() = s.getPosition() - m_pos;
-            residual.tail<4>() = external_quat::getVec4(
-                s.getCombinedQuaternion() * m_ori.conjugate());
+            residual.tail<4>() =
+                (s.getCombinedQuaternion() * m_ori.conjugate()).coeffs();
             return residual;
         }
 

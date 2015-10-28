@@ -74,13 +74,6 @@ namespace kalman {
                 (-4. * sqrt(1. - incRotVec.dot(incRotVec) / 4.));
             return ret;
         }
-
-        /// Extract the quaternion's vector representation.
-        inline types::Vector<4> getVec4(Eigen::Quaterniond const &quat) {
-            Eigen::Vector4d quatAsVec;
-            Eigen::Map<Eigen::Quaterniond>(quatAsVec.data()) = quat;
-            return quatAsVec;
-        }
     } // namespace external_quat
 } // namespace kalman
 } // namespace osvr

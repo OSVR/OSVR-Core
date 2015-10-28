@@ -62,9 +62,10 @@ namespace kalman {
         /// State type doesn't matter as long as we can getCombinedQuaternion()
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
-            Eigen::Quaterniond prediction = s.getCombinedQuaternion();
-            return external_quat::getVec4(prediction *
-                                          m_measurement.conjugate());
+            const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
+            const Eigen::Quaterniond residual =
+                prediction * m_measurement.conjugate();
+            return residual.coeffs();
         }
 
       private:
