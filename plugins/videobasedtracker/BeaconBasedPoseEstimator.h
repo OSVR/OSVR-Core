@@ -66,12 +66,20 @@ namespace vbtracker {
         /// @param beacons 3D beacon locations
         /// @param requiredInliers How many "good" points must be available
         /// @param permittedOutliers How many additional "bad" points we can
+        /// @param solveIterations How many iterations to run the optimization algorithm for
+        /// @param maxReprojectionAxisError Maximum permitted reprojection error for a
+        ///        beacon that was identified in the image.  This is handled on a per-
+        ///        axis basis (it checks the maximum of X and Y reprojection error).
+        ///        It compares the image distance between the located beacon and the
+        ///        3D point reprojected into the image using the camera matrix.
         /// have
         BeaconBasedPoseEstimator(const DoubleVecVec &cameraMatrix,
                                  const std::vector<double> &distCoeffs,
                                  const Point3Vector &beacons,
                                  size_t requiredInliers = 4,
-                                 size_t permittedOutliers = 2);
+                                 size_t permittedOutliers = 2,
+                                 size_t solveIterations = 5,
+                                 double maxReprojectionAxisError = 4);
 
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as
@@ -104,6 +112,8 @@ namespace vbtracker {
         cv::Mat m_distCoeffs;       //< Distortion coefficients
         size_t m_requiredInliers;   //< How many inliers do we require?
         size_t m_permittedOutliers; //< How many outliers do we allow?
+        size_t m_solveIterations;   //< How many iterations to run (at most) in solver
+        double m_maxReprojectionAxisError;  //< Maximum allowed reprojection error
 
         /// @name Pose cache
         /// @brief Stores the most-recent solution, in case we need it again

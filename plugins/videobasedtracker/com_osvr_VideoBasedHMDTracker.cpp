@@ -85,7 +85,8 @@ namespace {
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, CameraPtr &&camera,
-      int devNumber = 0, bool showDebug = false)
+      int devNumber = 0, bool showDebug = false, size_t solveIterations = 5,
+      double maxReprojectionAxisError = 4)
 #ifndef VBHMD_FAKE_IMAGES
         : m_camera(std::move(camera))
         , m_vbtracker(showDebug)
@@ -191,12 +192,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifierSimulated(0), m, d,
                               osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 4,
-                              2);
+                              2, solveIterations, maxReprojectionAxisError);
         // There are sometimes only four beacons on the back unit (two of
         // the LEDs are disabled), so we let things work with just those.
         m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifierSimulated(1), m, d,
                               osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4,
-                              0);
+                              0, solveIterations, maxReprojectionAxisError);
 
 #else
 #ifdef VBHMD_USE_DIRECTSHOW
@@ -306,10 +307,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
             d.push_back(0);
             m_vbtracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(0), m, d,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0);
+                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0,
+                solveIterations, maxReprojectionAxisError);
             m_vbtracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(1), m, d,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
+                osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0,
+                solveIterations, maxReprojectionAxisError);
 
         } break;
 
@@ -469,11 +472,14 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
 class HardwareDetection {
   public:
-    HardwareDetection(int cameraID = 0, bool showDebug = false)
+    HardwareDetection(int cameraID = 0, bool showDebug = false,
+      size_t solveIterations = 5, double maxReprojectionAxisError = 4)
       : m_found(false)
     {
       m_cameraID = cameraID;
       m_showDebug = showDebug;
+      m_solveIterations = solveIterations;
+      m_maxReprojectionAxisError = maxReprojectionAxisError;
     }
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
@@ -505,7 +511,8 @@ class HardwareDetection {
         std::cout << "Opening camera " << m_cameraID << std::endl;
         osvr::pluginkit::registerObjectForDeletion(
             ctx, new VideoBasedHMDTracker(ctx, std::move(cam),
-            m_cameraID, m_showDebug));
+            m_cameraID, m_showDebug, m_solveIterations,
+            m_maxReprojectionAxisError));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -517,6 +524,8 @@ class HardwareDetection {
 
     int m_cameraID; //< Which OpenCV camera should we open?
     bool m_showDebug; //< Show windows with video to help debug?
+    size_t m_solveIterations;   //< How many iterations to run (at most) in solver
+    double m_maxReprojectionAxisError;  //< Maximum allowed reprojection error
 };
 
 class ConfiguredDeviceConstructor {
@@ -539,11 +548,14 @@ public:
     // Using `get` here instead of `[]` lets us provide a default value.
     int cameraID = root.get("cameraID", 0).asInt();
     bool showDebug = root.get("showDebug", false).asBool();
+    size_t solveIterations = root.get("solveIterations", 0).asInt();
+    double maxReprojectionAxisError = root.get("maxReprojectionAxisError", 0).asDouble();
 
     // OK, now that we have our parameters, create the device.
     osvr::pluginkit::PluginContext context(ctx);
     context.registerHardwareDetectCallback(
-      new HardwareDetection(cameraID, showDebug));
+      new HardwareDetection(cameraID, showDebug,
+      solveIterations, maxReprojectionAxisError));
 
     return OSVR_RETURN_SUCCESS;
   }

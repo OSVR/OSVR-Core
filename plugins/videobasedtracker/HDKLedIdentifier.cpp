@@ -115,7 +115,8 @@ namespace vbtracker {
         }
 
         // No pattern recognized and we should have recognized one, so return
-        // a low negative.  We've used -2 so return -3.
+        // a low negative.  We've used -2 for too-small brightness
+        // difference so return -3 for this.
         return -3;
     }
 
