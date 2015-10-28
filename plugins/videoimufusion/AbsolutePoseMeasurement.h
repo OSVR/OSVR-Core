@@ -48,7 +48,7 @@ namespace kalman {
         using Position = types::Vector<3>;
         AbsolutePoseBase(Position const &pos, Eigen::Quaterniond const &quat,
                          types::SquareMatrix<DIMENSION> const &covariance)
-            : m_ori(quat), m_covariance(covariance) {}
+            : m_pos(pos), m_ori(quat), m_covariance(covariance) {}
 
         template <typename State>
         MeasurementMatrix getCovariance(State const &) const {
