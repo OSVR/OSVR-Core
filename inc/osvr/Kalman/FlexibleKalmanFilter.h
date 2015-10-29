@@ -95,66 +95,56 @@ namespace kalman {
             // also sometimes called S or the "Innovation Covariance"
             types::SquareMatrix<m> S = H * PHt + R;
 
-            // Not going to directly compute K = PHt (S^-1)
+            // Not going to directly compute Kalman gain K = PHt (S^-1)
             // Instead, decomposed S to solve things of the form (S^-1)x
-            // repeatedly later, by using the substitution Kx = PHt
-            // denom.solve(x)
+            // repeatedly later, by using the substitution
+            // Kx = PHt denom.solve(x)
 
-            // TooN/TAG use this one, but reduces numerical stability in tests
-            Eigen::LDLT<types::SquareMatrix<m>> denom(S);
             // Eigen::ColPivHouseholderQR<types::SquareMatrix<m>> denom(S);
-
-            // Solve for the Kalman gain
             /// @todo Figure out if this is the best decomp to use
+            // TooN/TAG use this one, and others online seem to suggest it.
+            Eigen::LDLT<types::SquareMatrix<m>> denom(S);
+#if 0
+            // Solve for the Kalman gain
             types::Matrix<n, m> K = denom.solve(PHt);
             // types::Matrix<n, m> K = denom.ldlt().solve(numer);
             // types::Matrix<n, m> K = numer * denom.inverse(); // this one
             // creates lots of nans.
             OSVR_KALMAN_DEBUG_OUTPUT("Kalman gain K", K);
+#endif
 
             // Residual/innovation
             auto deltaz = meas.getResidual(state());
             EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(decltype(deltaz), m);
             OSVR_KALMAN_DEBUG_OUTPUT("deltaz", deltaz.transpose());
 
-            types::Vector<n> stateCorrection1 = K * deltaz;
-            types::Vector<n> stateCorrection2 = PHt * denom.solve(deltaz);
+            types::Vector<n> stateCorrection = PHt * denom.solve(deltaz);
             OSVR_KALMAN_DEBUG_OUTPUT("state correction",
-                                     stateCorrection1.transpose());
-            OSVR_KALMAN_DEBUG_OUTPUT("state correction",
-                                     stateCorrection2.transpose());
-            OSVR_KALMAN_DEBUG_OUTPUT(
-                "difference in state correction computations",
-                ((stateCorrection1) - (stateCorrection2)).stableNorm());
-#if 0
-            types::Vector<n> correctedState =
-                state().stateVector() + stateCorrection1;
-#else
-            types::Vector<n> correctedState =
-                state().stateVector() + stateCorrection2;
-#endif
-            // Correct the state estimate
-            state().setStateVector(correctedState);
+                                     stateCorrection.transpose());
 
-// Correct the error covariance
-// differs from the (I-KH)P form by not factoring out the P (since
-// we already have PHt computed).
+            // Correct the state estimate
+            state().setStateVector(state().stateVector() + stateCorrection);
+
 #if 1
+            // Correct the error covariance
+            // differs from the (I-KH)P form by not factoring out the P (since
+            // we already have PHt computed).
             OSVR_KALMAN_DEBUG_OUTPUT("error covariance difference",
                                      (PHt * denom.solve(PHt.transpose())));
             types::SquareMatrix<n> newP =
                 P - (PHt * denom.solve(PHt.transpose()));
 #else
-            OSVR_KALMAN_DEBUG_OUTPUT("error covariance correction factor",
-                                     types::SquareMatrix<n>::Identity() -
-                                         (K * H));
+            // Test fails with this one:
+            // VariedProcessModelStability/1.AbsolutePoseMeasurementXlate111,
+            // where TypeParam =
+            // osvr::kalman::PoseDampedConstantVelocityProcessModel
             types::SquareMatrix<n> newP =
-                (types::SquareMatrix<n>::Identity() - K * H) * P;
+                (types::SquareMatrix<n>::Identity() - PHt * denom.solve(H)) * P;
+
 #endif
 
 #if 0
-            // Doesn't appear to keep things symmetrical with the QR decomp,
-            // so symmetrize here.
+            // doesn't seem to be necessary to re-symmetrize the covariance matrix.
             state().setErrorCovariance((newP + newP.transpose()) / 2.);
 #else
             state().setErrorCovariance(newP);
