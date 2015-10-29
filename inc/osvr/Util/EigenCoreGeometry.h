@@ -28,18 +28,32 @@
 
 #if 0 // warning suppressions no longer needed with currently-used Eigen version
 #ifdef _MSC_VER
+#define OSVR_MSVC_WARNINGS_PUSHED
 #pragma warning(push)
 #pragma warning(disable : 4127)
 #endif
 #endif
 
+#if defined(__clang__) ||                                                      \
+    (defined(__GNUC__) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 406))
+// Suppress std::binder1st/std::binder2nd deprecation notices when building as
+// new c++
+#define OSVR_GCC_WARNINGS_PUSHED
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#if 0
-#ifdef _MSC_VER
-#pragma warning(pop)
+#ifdef OSVR_GCC_WARNINGS_PUSHED
+#undef OSVR_GCC_WARNINGS_PUSHED
+#pragma GCC diagnostic pop
 #endif
+
+#ifdef OSVR_MSVC_WARNINGS_PUSHED
+#undef OSVR_MSVC_WARNINGS_PUSHED
+#pragma warning(pop)
 #endif
 
 #endif // INCLUDED_EigenCoreGeometry_h_GUID_84777061_9532_4BBD_0ADC_3E53E516AE23
