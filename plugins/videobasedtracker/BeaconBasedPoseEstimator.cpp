@@ -204,12 +204,12 @@ namespace vbtracker {
         // We tried using the previous guess to reduce the amount of computation
         // being done, but this got us stuck in infinite locations.  We seem to
         // do okay without using it, so leaving it out.
-        // @todo Make number of iterations into a parameter.
+        const float MaxReprojectionErrorForInlier = 87.0f;
         bool usePreviousGuess = false;
         cv::Mat inlierIndices;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, m_solveIterations, 8.0f,
+            m_tvec, usePreviousGuess, m_solveIterations, MaxReprojectionErrorForInlier,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 
