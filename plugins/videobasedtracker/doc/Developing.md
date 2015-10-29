@@ -85,7 +85,7 @@ The OSVR video-based tracker is run using [json](http://www.json.org/)-formatted
             "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
         ],
         "aliases": {
-            "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+            "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/OSVRHDKBack"
         }
     }
 
@@ -97,7 +97,7 @@ The portion of the config file relevant to the development of new sensors is in 
 
 Within each sensor, there are several fields:
 
-* **name**: Descriptive name of the sensor, currenlty not usd by the system.
+* **name**: Descriptive name of the sensor, set as the semantic name.
 * **requiredInliers**: How many beacons must be identified before the system attempts to report a pose.  For the OSVR HDK rear panel, some units only have four of the six sensors visible, so this is chosen as 4.  For the front panel on the HDK, the default configuration requires at least six beacons to be visible to reduce jitter in the reported poses.
 * **permittedOutliers**: Reflections of beacons off of specular surfaces, extra lights in the scene, and mis-identified beacons can produce completely wrong estimates for one or a few beacons in the scene.  This parameter specifies how many "outlier" responses are allowed, where the beacon complely mis-matches the expected location.  In this case, the beacon is completely ignored.  In the case of 4 inliers, all are needed.
 * **patterns**: There is one pattern for each beacon on the sensor.  These must be listed in the same order as the **positions** parameter described below.  All of the patterns must be of the same length for a given sensor.  If sensors with different pattern lengths are visible together, **all shorter-length subsets of the longer patterns must be distinct from all rotations of all of the shorter patterns present in the scene**.  The rotation of each pattern is not important, because it matches all rotations.  The pattern is encoded using a period ('.') for each dim flash and an asterisk ('*') for each bright flash.
