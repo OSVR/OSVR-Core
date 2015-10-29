@@ -90,10 +90,10 @@ namespace kalman {
         /// This returns A(deltaT), though if you're just predicting xhat-, use
         /// applyVelocity() instead for performance.
         inline StateSquareMatrix stateTransitionMatrix(double dt) {
-            // eq. 4.5 in Welch 1996
+            // eq. 4.5 in Welch 1996 - except we have all the velocities at the
+            // end
             StateSquareMatrix A = StateSquareMatrix::Identity();
-            A.block<3, 3>(0, 3) = Eigen::Matrix3d::Identity() * dt;
-            A.block<3, 3>(6, 9) = Eigen::Matrix3d::Identity() * dt;
+            A.topRightCorner<6, 6>() = types::SquareMatrix<6>::Identity() * dt;
 
             return A;
         }
@@ -104,7 +104,7 @@ namespace kalman {
 
             auto A = stateTransitionMatrix(dt);
             auto attenuation = std::pow(damping, dt);
-            A.block<6, 6>(6, 6) *= attenuation;
+            A.bottomRightCorner<6, 6>() *= attenuation;
             return A;
         }
         /// Computes A(deltaT)xhat(t-deltaT)
