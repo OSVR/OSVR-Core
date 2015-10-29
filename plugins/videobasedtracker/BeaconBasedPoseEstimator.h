@@ -65,14 +65,14 @@ namespace vbtracker {
         /// @param distCoeffs Distortion coefficients for OpenCV
         /// @param beacons 3D beacon locations
         /// @param requiredInliers How many "good" points must be available
-        /// @param permittedOutliers How many additional "bad" points we can
+        /// @param permittedOutliers How many additional "bad" points we can have
         /// @param solveIterations How many iterations to run the optimization algorithm for
         /// @param maxReprojectionAxisError Maximum permitted reprojection error for a
         ///        beacon that was identified in the image.  This is handled on a per-
         ///        axis basis (it checks the maximum of X and Y reprojection error).
         ///        It compares the image distance between the located beacon and the
         ///        3D point reprojected into the image using the camera matrix.
-        /// have
+        ///        This is specified in camera pixels.
         BeaconBasedPoseEstimator(const DoubleVecVec &cameraMatrix,
                                  const std::vector<double> &distCoeffs,
                                  const Point3Vector &beacons,
