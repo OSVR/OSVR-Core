@@ -25,31 +25,23 @@
 // Internal Includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/PoseConstantVelocity.h>
-#include <osvr/Kalman/AbsolutePoseMeasurement.h>
 
 // Library/third-party includes
-// - none
+#include "gtest/gtest.h"
 
 // Standard includes
 #include <iostream>
 
-int main() {
-    using namespace osvr::kalman;
-    using ProcessModel = osvr::kalman::PoseConstantVelocityProcessModel;
-    using State = ProcessModel::State;
-    using Measurement = osvr::kalman::AbsolutePoseMeasurement<State>;
-    using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
-    auto filter = Filter{ProcessModel{}, State{}};
-    std::cout << filter.state() << std::endl;
-    {
-        auto meas =
-            Measurement{Eigen::Vector3d::Zero(), Eigen::Quaterniond::Identity(),
-                        Eigen::Matrix<double, 3, 3>::Identity() * 0.000007,
-                        Eigen::Vector3d::Constant(.00001)};
-        filter.predict(0.1);
-        std::cout << filter.state() << std::endl;
-        filter.correct(meas);
-        std::cout << filter.state() << std::endl;
-    }
-    return 0;
+using ProcessModel = osvr::kalman::PoseConstantVelocityProcessModel;
+using State = ProcessModel::State;
+using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
+
+TEST(KalmanFilter, DefaultConstruction) {
+    ASSERT_NO_THROW(auto filter = Filter{});
+}
+TEST(KalmanFilter, MoveStateConstructions) {
+    ASSERT_NO_THROW(auto filter = Filter{State{}});
+}
+TEST(KalmanFilter, MoveStateProcessConstructions) {
+    ASSERT_NO_THROW(auto filter = Filter(ProcessModel{}, State{}));
 }

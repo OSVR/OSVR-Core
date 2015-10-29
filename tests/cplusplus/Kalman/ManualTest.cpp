@@ -23,6 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
+#include "ContentsInvalid.h"
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/PoseConstantVelocity.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
@@ -40,19 +41,36 @@ int main() {
     using Measurement = osvr::kalman::AbsoluteOrientationMeasurement<State>;
     using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
     auto filter = Filter{ProcessModel{}, State{}};
+    std::cout << "Initial state:" << std::endl;
+    std::cout << filter.state() << std::endl;
     {
         auto meas = Measurement{Eigen::Quaterniond::Identity(),
                                 Eigen::Vector3d(0.00001, 0.00001, 0.00001)};
-        std::cout << filter.state() << std::endl;
-        filter.predict(0.1);
-        std::cout << filter.state() << std::endl;
-        filter.correct(meas);
-        std::cout << filter.state() << std::endl;
-    }
+        std::cout << "Measurement covariance:\n"
+                  << meas.getCovariance(filter.state()) << std::endl;
 
-    {
-        auto defaultFilter = Filter{};
-        auto moveStateFilter = Filter{State{}};
+        for (int i = 0; i < 100; ++i) {
+            filter.predict(0.1);
+
+            std::cout << "\nAfter prediction (iteration " << i << "):\n"
+                      << filter.state() << std::endl;
+            if (contentsInvalid(filter.state())) {
+                std::cout << "ERROR: Detected invalid contents after "
+                             "prediction step of iteration "
+                          << i << std::endl;
+                return -1;
+            }
+
+            filter.correct(meas);
+            std::cout << "\nAfter correction (iteration " << i << "):\n"
+                      << filter.state() << std::endl;
+            if (contentsInvalid(filter.state())) {
+                std::cout << "ERROR: Detected invalid contents after "
+                             "correction step of iteration "
+                          << i << std::endl;
+                return -1;
+            }
+        }
     }
     return 0;
 }
