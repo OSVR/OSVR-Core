@@ -39,17 +39,15 @@ inline bool contentsInvalid(double n) { return !(n == 0. || std::isnormal(n)); }
 
 template <typename Derived>
 inline bool contentsInvalid(Eigen::MatrixBase<Derived> const &v) {
-    for (std::size_t i = 0; i < Derived::SizeAtCompileTime; ++i) {
-        if (contentsInvalid(v[i])) {
-            return true;
-        }
-    }
-    return false;
+    return v.unaryExpr(
+                [](typename Derived::Scalar s) { return contentsInvalid(s); })
+        .any();
 }
 
 inline bool
 contentsInvalid(osvr::kalman::pose_externalized_rotation::State const &state) {
     return contentsInvalid(state.stateVector()) ||
-           contentsInvalid(state.getQuaternion().coeffs());
+           contentsInvalid(state.getQuaternion().coeffs()) ||
+           contentsInvalid(state.errorCovariance());
 }
 #endif // INCLUDED_ContentsInvalid_h_GUID_E3C95D05_0BEF_4A9F_933A_35FD0B7D3745
