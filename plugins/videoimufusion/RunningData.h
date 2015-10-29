@@ -30,10 +30,10 @@
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/TimeValue.h>
 
-#include "FlexibleKalmanFilter.h"
-#include "PoseDampedConstantVelocity.h"
-#include "AbsoluteOrientationMeasurement.h"
-#include "AbsolutePoseMeasurement.h"
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
+#include <osvr/Kalman/PoseDampedConstantVelocity.h>
+#include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
+#include <osvr/Kalman/AbsolutePoseMeasurement.h>
 
 #include <osvr/Util/Verbosity.h>
 

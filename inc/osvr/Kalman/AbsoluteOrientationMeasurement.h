@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header for measurements of absolute orientation.
 
     @date 2015
 
@@ -26,10 +26,13 @@
 #define INCLUDED_AbsoluteOrientationMeasurement_h_GUID_71285DD8_A6F1_47A8_4B2E_B10171C91248
 
 // Internal Includes
+#include "FlexibleKalmanBase.h"
 #include "PoseState.h"
+#include "ExternalQuaternion.h"
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Library/third-party includes
-#include <Eigen/Geometry>
+// - none
 
 // Standard includes
 // - none
@@ -83,8 +86,7 @@ namespace kalman {
     };
 
     /// This is the subclass of AbsoluteOrientationBase: only explicit
-    /// specializations,
-    /// and on state types.
+    /// specializations, and on state types.
     template <typename StateType> class AbsoluteOrientationMeasurement;
 
     /// AbsoluteOrientationMeasurement with a pose_externalized_rotation::State

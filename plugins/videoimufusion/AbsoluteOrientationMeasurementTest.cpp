@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
-#include "FlexibleKalmanFilter.h"
-#include "PoseConstantVelocity.h"
-#include "AbsoluteOrientationMeasurement.h"
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
+#include <osvr/Kalman/PoseConstantVelocity.h>
+#include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
 
 // Library/third-party includes
 // - none

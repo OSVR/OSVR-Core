@@ -29,7 +29,7 @@
 #include "FlexibleKalmanBase.h"
 
 // Library/third-party includes
-#include <Eigen/Geometry>
+// - none
 
 // Standard includes
 #include <type_traits>

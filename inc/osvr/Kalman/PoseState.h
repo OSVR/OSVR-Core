@@ -163,9 +163,11 @@ namespace kalman {
             void postCorrect() { externalizeRotation(); }
 
             void externalizeRotation() {
-                m_orientation = getCombinedQuaternion().normalized();
+                m_orientation = getCombinedQuaternion();
                 incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
             }
+
+            void normalizeQuaternion() { m_orientation.normalize(); }
 
             StateVectorBlock3 getPosition() { return position(m_state); }
 

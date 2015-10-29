@@ -26,15 +26,17 @@
 #define INCLUDED_FlexibleKalmanBase_h_GUID_E4CC84A0_1B4F_4389_95ED_9C37F5FEE95D
 
 // Internal Includes
-// - none
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Library/third-party includes
-#include <Eigen/Core>
+// - none
 
 // Standard includes
 #include <type_traits>
 
 namespace osvr {
+/// @brief Header-only framework for building Kalman-style filters, prediction,
+/// and sensor fusion
 namespace kalman {
     /// @brief Type aliases, including template type aliases.
     namespace types {
@@ -43,6 +45,7 @@ namespace kalman {
 
         /// Type for dimensions
         using DimensionType = std::size_t;
+
         /// Type constant for dimensions
         template <DimensionType n>
         using DimensionConstant = std::integral_constant<DimensionType, n>;

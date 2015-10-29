@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Header for measurements of absolute pose (position and orientation).
 
     @date 2015
 
@@ -26,13 +26,17 @@
 #define INCLUDED_AbsolutePoseMeasurement_h_GUID_A7DDC7F5_CBA1_41AB_B80C_5A9DA444AF48
 
 // Internal Includes
-// - none
+#include "FlexibleKalmanBase.h"
+#include "PoseState.h"
+#include "ExternalQuaternion.h"
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 // - none
+
 namespace osvr {
 namespace kalman {
     /// The measurement here has been split into a base and derived type, so

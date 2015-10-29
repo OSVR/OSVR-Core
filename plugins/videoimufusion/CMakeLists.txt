@@ -6,15 +6,6 @@ osvr_convert_json(org_osvr_filter_videoimufusion_json
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-set(KALMAN_SOURCES
-    AbsoluteOrientationMeasurement.h
-    AbsolutePoseMeasurement.h
-    ExternalQuaternion.h
-    FlexibleKalmanBase.h
-    FlexibleKalmanFilter.h
-    PoseConstantVelocity.h
-    PoseDampedConstantVelocity.h
-    PoseState.h)
 
 osvr_add_plugin(NAME org_osvr_filter_videoimufusion
     CPP # indicates we'd like to use the C++ wrapper
@@ -23,13 +14,13 @@ osvr_add_plugin(NAME org_osvr_filter_videoimufusion
     RunningData.h
     VideoIMUFusion.h
     VideoIMUFusion.cpp
-    "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_videoimufusion_json.h"
-    ${KALMAN_SOURCES})
+    "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_videoimufusion_json.h")
 
 target_link_libraries(org_osvr_filter_videoimufusion
     osvr::osvrAnalysisPluginKit
     eigen-headers
-    jsoncpp_lib)
+    jsoncpp_lib
+    osvrKalman)
 
 target_compile_options(org_osvr_filter_videoimufusion
     PRIVATE
@@ -47,7 +38,8 @@ if(BUILD_TESTING)
             ${test}Test.cpp
             ${KALMAN_SOURCES})
         target_link_libraries(KalmanBuildTest_${test}
-            eigen-headers)
+            eigen-headers
+            osvrKalman)
         target_compile_options(KalmanBuildTest_${test}
             PRIVATE
             ${OSVR_CXX11_FLAGS})
