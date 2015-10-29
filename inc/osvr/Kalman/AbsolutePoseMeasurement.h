@@ -76,9 +76,9 @@ namespace kalman {
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             MeasurementVector residual;
-            residual.head<3>() = s.getPosition() - m_pos;
+            residual.head<3>() = m_pos - s.getPosition();
             residual.tail<4>() =
-                (s.getCombinedQuaternion() * m_ori.conjugate()).coeffs();
+                (m_ori * s.getCombinedQuaternion().conjugate()).coeffs();
             return residual;
         }
 
