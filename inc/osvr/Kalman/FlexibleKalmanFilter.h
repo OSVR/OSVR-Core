@@ -78,9 +78,11 @@ namespace kalman {
             /// Dimension of state
             static const auto n = types::Dimension<State>::value;
             auto H = meas.getJacobian(state());
+            OSVR_KALMAN_DEBUG_OUTPUT("Measurement jacobian", H);
             EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(H), m, n);
 
             auto R = meas.getCovariance(state());
+            OSVR_KALMAN_DEBUG_OUTPUT("Measurement covariance", R);
             EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(R), m, m);
 
             auto P = state().errorCovariance();
@@ -99,16 +101,25 @@ namespace kalman {
             // types::Matrix<n, m> K = denom.ldlt().solve(numer);
             // types::Matrix<n, m> K = numer * denom.inverse(); // this one
             // creates lots of nans.
+            OSVR_KALMAN_DEBUG_OUTPUT("Kalman gain K", K);
 
             // Residual/innovation
             auto deltaz = meas.getResidual(state());
             EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(decltype(deltaz), m);
+
+            OSVR_KALMAN_DEBUG_OUTPUT("deltaz", deltaz.transpose());
+
+            OSVR_KALMAN_DEBUG_OUTPUT("state correction",
+                                     (K * deltaz).transpose());
 
             types::Vector<n> correctedState =
                 state().stateVector() + K * deltaz;
             // Correct the state estimate
             state().setStateVector(correctedState);
             // Correct the error covariance
+            OSVR_KALMAN_DEBUG_OUTPUT("state error covariance correction factor",
+                                     types::DimSquareMatrix<State>::Identity() -
+                                         (K * H));
             state().setErrorCovariance(
                 (types::DimSquareMatrix<State>::Identity() - K * H) * P);
 

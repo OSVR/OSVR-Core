@@ -34,6 +34,10 @@
 // Standard includes
 #include <type_traits>
 
+#ifndef OSVR_KALMAN_DEBUG_OUTPUT
+#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)
+#endif
+
 namespace osvr {
 /// @brief Header-only framework for building Kalman-style filters, prediction,
 /// and sensor fusion
