@@ -22,6 +22,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+#include <osvr/Util/EigenCoreGeometry.h>
+template <typename T>
+inline void dumpKalmanDebugOuput(const char name[], const char expr[],
+                                 T const &value) {
+    std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
+              << value << std::endl;
+}
+
+#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
+    dumpKalmanDebugOuput(Name, #Value, Value)
+
 // Internal Includes
 #include "ContentsInvalid.h"
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
@@ -60,14 +72,14 @@ class Stability : public ::testing::Test {
     template <typename Filter, typename Measurement>
     void filterAndCheck(Filter &filter, Measurement &meas, double dt = 0.1) {
         filter.predict(dt);
-        // dumpState(filter.state(), "After prediction");
+        dumpState(filter.state(), "After prediction");
         ASSERT_FALSE(contentsInvalid(filter.state()))
             << "ERROR: Detected a NAN or other invalid contents after "
                "prediction step of iteration "
             << iteration << "\n" << filter.state();
 
         filter.correct(meas);
-        // dumpState(filter.state(), "After correction");
+        dumpState(filter.state(), "After correction");
         ASSERT_FALSE(contentsInvalid(filter.state()))
             << "ERROR: Detected a NAN or other invalid contents after "
                "correction step of iteration "
@@ -81,14 +93,14 @@ class Stability : public ::testing::Test {
                                   std::size_t iterations = 100) {
         for (iteration = 0; iteration < iterations; iteration++) {
             filter.predict(dt);
-            // dumpState(filter.state(), "After prediction");
+            dumpState(filter.state(), "After prediction");
             ASSERT_FALSE(contentsInvalid(filter.state()))
                 << "ERROR: Detected a NAN or other invalid contents after "
                    "prediction step of iteration "
                 << iteration << "\n" << filter.state();
 
             filter.correct(meas);
-            // dumpState(filter.state(), "After correction");
+            dumpState(filter.state(), "After correction");
             ASSERT_FALSE(contentsInvalid(filter.state()))
                 << "ERROR: Detected a NAN or other invalid contents after "
                    "correction step of iteration "
