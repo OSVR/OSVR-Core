@@ -62,18 +62,22 @@ namespace vbtracker {
     /// @brief Helper for implementations of LedIdentifier to turn a
     /// brightness list into a boolean list based on thresholding on the
     /// halfway point between minimum and maximum brightness.
-    inline LedPatternWrapped getBitsUsingThreshold(const BrightnessList &brightnesses,
-                                            float threshold) {
+    inline LedPatternWrapped
+    getBitsUsingThreshold(const BrightnessList &brightnesses, float threshold) {
         LedPatternWrapped ret;
         // Allocate output space for our transform.
         ret.resize(brightnesses.size());
 
         // Transform the brightnesses into a string with '.' for dim
         // and '*' for bright.
-        std::transform(
-            begin(brightnesses), end(brightnesses), begin(ret),
-            [threshold](Brightness val) {
-          if (val >= threshold) { return '*'; } else { return '.'; } });
+        std::transform(begin(brightnesses), end(brightnesses), begin(ret),
+                       [threshold](Brightness val) {
+                           if (val >= threshold) {
+                               return '*';
+                           } else {
+                               return '.';
+                           }
+                       });
 
         return ret;
     }
