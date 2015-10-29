@@ -78,12 +78,12 @@ namespace vbtracker {
 
     /// Container for the information needed to define a sensor,
     /// both the patterns of its beacons and their 3D spatial coordinates.
-    typedef struct {
+    struct SensorDescription {
       PatternStringList patterns;
       Point3Vector positions;
       size_t requiredInliers;
       size_t permittedOutliers;
-    } SensorDescription;
+    };
     /// Description for a list of sensors.
     typedef std::vector<SensorDescription> SensorDescriptionList;
 
