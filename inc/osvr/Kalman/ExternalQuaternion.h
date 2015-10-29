@@ -79,17 +79,17 @@ namespace kalman {
             auto quatScalarPartSquared = vecToQuatScalarPartSquared(s);
             auto quatScalarPart = std::sqrt(quatScalarPartSquared);
 
-            // Top left corner cell
+            // bottom-right corner cell
             types::SquareMatrix<4> cov;
-            cov(0, 0) = quatScalarPartSquared;
+            cov(3, 3) = quatScalarPartSquared;
 
-            // Remainder of top and left
-            types::Vector<3> topAndLeft = s * quatScalarPart / 2.;
-            cov.bottomLeftCorner<3, 1>() = topAndLeft;
-            cov.topRightCorner<1, 3>() = topAndLeft.transpose();
+            // Remainder of bottom and right
+            types::Vector<3> bottomAndRight = s * quatScalarPart / 2.;
+            cov.bottomLeftCorner<1, 3>() = bottomAndRight;
+            cov.topRightCorner<3, 1>() = bottomAndRight.transpose();
 
-            // Bottom right block
-            cov.bottomRightCorner<3, 3>() = s * s.transpose() / 4.;
+            // Top-left block
+            cov.topLeftCorner<3, 3>() = s * s.transpose() / 4.;
 
             return cov;
         }
