@@ -28,6 +28,7 @@
 #include "HDKLedIdentifierFactory.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include <osvr/Util/StringLiteralFileToString.h>
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -118,9 +119,57 @@ class VideoBasedHMDTracker : boost::noncopyable {
         /// Create an asynchronous (threaded) device
         m_dev.initAsync(ctx, os.str(), opts);
 
-        /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(com_osvr_VideoBasedHMDTracker_json);
+        ///===============================================================
+        /// Modify our JSON descriptor based on whether the configuration
+        /// parameters specify the sensors (in which case we change the number
+        /// to match) or whether they do not (in which case we add semantic
+        /// paths for the OSVR HDK, which is the default).
 
+        // First read in and parse our compiled-in constant string
+        std::string myJsonString = osvr::util::makeString(
+          com_osvr_VideoBasedHMDTracker_json);
+        Json::Value myJson;
+        Json::Reader reader;
+        if (!reader.parse(myJsonString, myJson)) {
+          throw std::logic_error("Faulty JSON file for Video-based tracker - "
+            "should not be possible!");
+        }
+
+        // Next, adjust as needed and add new entries into the Json.
+        // We we are using the default case, we don't need to change
+        // anything.
+        Json::Value myFixedJson = myJson;
+        if (sensors.size() != 0) {
+          // We need to update the number of tracker sensors to match the
+          // number of sensors.
+          myFixedJson["interfaces"]["tracker"]["count"] =
+            static_cast<int>(sensors.size());
+
+          // We need to build a new semantic entry for each of
+          // them that wraps the appropriate tracker sensor.  We use the
+          // name specified in the sensor for the semantic name.
+          Json::Value mySemantic;
+          for (size_t i = 0; i < sensors.size(); i++) {
+            Json::Value mySensor;
+
+            // Fill in the entries needed to get us to the tracker
+            std::string trackerSensor = "tracker/" + std::to_string(i);
+            mySensor["$target"]["child"] = trackerSensor;
+
+            mySemantic[sensors[i].name] = mySensor;
+          }
+
+          // Fill in the new semantic section.
+          myFixedJson["semantic"] = mySemantic;
+        }
+
+        /// Add the semantic values into the fixed Json.
+        /// @todo
+
+        /// Send adjusted JSON descriptor as our device descriptor
+        m_dev.sendJsonDescriptor(myFixedJson.toStyledString());
+
+        ///===============================================================
         /// Register update callback
         m_dev.registerUpdateCallback(this);
 
@@ -574,8 +623,8 @@ public:
     // Using `get` here instead of `[]` lets us provide a default value.
     int cameraID = root.get("cameraID", 0).asInt();
     bool showDebug = root.get("showDebug", false).asBool();
-    size_t solveIterations = root.get("solveIterations", 0).asInt();
-    double maxReprojectionAxisError = root.get("maxReprojectionAxisError", 0).asDouble();
+    size_t solveIterations = root.get("solveIterations", 5).asInt();
+    double maxReprojectionAxisError = root.get("maxReprojectionAxisError", 4).asDouble();
 
     // Default is an empty list, which can be filled in from the config
     // file if we find entries there.
@@ -621,7 +670,8 @@ public:
         }
 
         // Fill in the other parameters
-        mySensors.back().requiredInliers = sensors[i].get("requiredInliers", 6).asInt();
+        mySensors.back().name = sensors[i].get("name", "NULLSensorName").asString();
+        mySensors.back().requiredInliers = sensors[i].get("requiredInliers", 4).asInt();
         mySensors.back().permittedOutliers = sensors[i].get("permittedOutliers", 0).asInt();
       }
     }

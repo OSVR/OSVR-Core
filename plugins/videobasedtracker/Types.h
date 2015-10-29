@@ -83,6 +83,7 @@ namespace vbtracker {
       Point3Vector positions;
       size_t requiredInliers;
       size_t permittedOutliers;
+      std::string name;
     };
     /// Description for a list of sensors.
     typedef std::vector<SensorDescription> SensorDescriptionList;
