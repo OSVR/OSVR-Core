@@ -148,7 +148,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_currentImage = 0;
 
         if (m_images.size() == 0) {
-            std::cerr << "com_osvr_VideoBasedHMDTracker: com_osvr_VideoBasedHMDTracker: Could not read any images from " << VBHMD_FAKE_IMAGES
+            std::cerr << "com_osvr_VideoBasedHMDTracker: Could not read any images from " << VBHMD_FAKE_IMAGES
                       << std::endl;
             return;
         }
