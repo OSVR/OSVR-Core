@@ -22,6 +22,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+#include <osvr/Util/EigenCoreGeometry.h>
+template <typename T>
+inline void dumpKalmanDebugOuput(const char name[], const char expr[],
+                                 T const &value) {
+    std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
+              << value << std::endl;
+}
+
+#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
+    dumpKalmanDebugOuput(Name, #Value, Value)
+
 // Internal Includes
 #include "ContentsInvalid.h"
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
@@ -72,5 +84,8 @@ int main() {
             }
         }
     }
+    std::cout << "SUCCESS: ran till completion of configured number of "
+                 "iterations without denormalizing in some way."
+              << std::endl;
     return 0;
 }
