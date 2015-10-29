@@ -51,9 +51,9 @@ namespace kalman {
         void setNoiseAutocorrelation(NoiseAutocorrelation const &noise) {
             m_constantVelModel.setNoiseAutocorrelation(noise);
         }
-        /// Set the damping - must be non-negative
+        /// Set the damping - must be positive
         void setDamping(double damping) {
-            if (damping >= 0) {
+            if (damping > 0) {
                 m_damp = damping;
             }
         }
@@ -91,7 +91,7 @@ namespace kalman {
 
       private:
         PoseConstantVelocityProcessModel m_constantVelModel;
-        double m_damp = 0;
+        double m_damp = 0.1;
     };
 
 } // namespace kalman
