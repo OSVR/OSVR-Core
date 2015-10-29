@@ -55,7 +55,7 @@ namespace kalman {
                          types::Vector<3> const &eulerError)
             : m_pos(pos), m_ori(quat), m_covariance(MeasurementMatrix::Zero()) {
             m_covariance.topLeftCorner<3, 3>() = posCovariance;
-            m_covariance.bottomLeftCorner<4, 4>() =
+            m_covariance.bottomRightCorner<4, 4>() =
                 external_quat::covarianceFromEulerVariance(eulerError);
         }
         AbsolutePoseBase(Position const &pos, Eigen::Quaterniond const &quat,
