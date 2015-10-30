@@ -34,6 +34,7 @@
 #include <iostream>
 #include <fstream>
 #include <exception>
+#include <vector>
 
 using osvr::server::detail::out;
 using osvr::server::detail::err;
@@ -48,15 +49,16 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
-    std::string configName(osvr::server::getDefaultConfigFilename());
+    std::vector<std::string> configNames;
     if (argc > 1) {
-        configName = argv[1];
+        configNames = {std::string(argv[1])};
     } else {
-        out << "Using default config file - pass a filename on the command "
+        out << "Using default config files - pass a filename on the command "
                "line to use a different one." << endl;
+        configNames = osvr::server::getDefaultConfigFilenames();
     }
 
-    server = osvr::server::configureServerFromFile(configName);
+    server = osvr::server::configureServerFromFirstFileInList(configNames);
     if (!server) {
         return -1;
     }

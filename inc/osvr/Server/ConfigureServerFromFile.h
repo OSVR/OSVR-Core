@@ -36,6 +36,7 @@
 #include <iostream>
 #include <fstream>
 #include <exception>
+#include <vector>
 
 namespace osvr {
 namespace server {
@@ -57,13 +58,26 @@ namespace server {
         static detail::StreamPrefixer err("[OSVR Server] ", std::cerr);
     } // namespace detail
 
-    inline const char *getDefaultConfigFilename() {
-        return "osvr_server_config.json";
+    inline std::vector<std::string> getDefaultConfigFilenames() {
+        std::vector<std::string> names;
+        names.push_back("HOME/.osvr/osvr_server_config.json");
+        names.push_back("PREFIX/etc/osvr_server_config.json");
+#ifdef WINDOWS
+        names.push_back("osvr_server_config.json");
+#elif MAC
+        names.push_back("HOME/Library/Application Support/OSVR/osvr_server_config.json");
+#endif
+        for (auto i = names.begin(); i != names.end(); i++) {
+            std::cout << *i << std::endl;
+        }
+
+        return names;
     }
 
     /// @brief This is the basic common code of a server app's setup, ripped out
     /// of the main server app to make alternate server-acting apps simpler to
     /// develop.
+
     inline ServerPtr configureServerFromFile(std::string const &configName) {
         using detail::out;
         using detail::err;
@@ -169,6 +183,26 @@ namespace server {
 
         return ret;
     }
+
+    inline ServerPtr configureServerFromFirstFileInList(std::vector<std::string> const &configNames) {
+        using detail::out;
+        using detail::err;
+        using std::endl;
+        for(const auto name: configNames) {
+            std::ifstream config(name);
+            if(config.good()) {
+                out << "Using config file '" << name << "'" << endl;
+                return configureServerFromFile(name);
+            }
+        }
+        err << "Could not open config file!" << endl;
+        err << "Attempted the following files:" << endl;
+        for (auto i = configNames.begin(); i != configNames.end(); i++) {
+            std::cout << *i << std::endl;
+        }
+        return nullptr;
+    }
+
 } // namespace server
 } // namespace osvr
 
