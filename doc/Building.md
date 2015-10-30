@@ -24,10 +24,10 @@ For Linux:
 You'll need:
 
 - Git (make sure to clone OSVR-Core with `--recursive` flag to get all submodules)
-- Any reasonably recent Clang, GCC (or G++) is fine for a compiler:
-- CMake, fairly recent (3.0 or newer, 3.0.2 most tested, that or the latest preferred.) Package manager may not have version 3.0+, so you will need to get it from <http://CMake.org> 
+- Any reasonably recent Clang, GCC/G++ is fine for a compiler:
+- CMake, fairly recent (3.0 or newer, 3.0.2 most tested, that or the latest preferred.) Depending on your Linux distribution, package manager may or may not have version 3.0+, so you can get it from <http://CMake.org> or backports/PPA.
 - [libfunctionality][] is standalone, so you will need to build it first
-- [jsoncpp][], you will need to compile it with `-DJSONCPP_WITH_CMAKE_PACKAGE=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -DCMAKE_CXX_FLAGS=-fPIC` flags in order to generate CMake project config files (don't forget to `make install` after building) 
+- [jsoncpp][], you will need to compile it with `-DJSONCPP_WITH_CMAKE_PACKAGE=ON` in order to generate CMake project config files. Optionally you can make it a static library with ` -DJSONCPP_LIB_BUILD_SHARED=OFF -DCMAKE_CXX_FLAGS=-fPIC` flags (don't forget to `make install` after building) 
 - OpenCV 2.4.x
 - Boost libraries (1.44 or newer, see note above about bug in Boost 1.58.0), which you can get through package manager. You don't need all of them but you'll need at least : `libboost1.xx-dev, libboost-thread1.xx-dev (includes required system, date-time and chrono), libboost-program-options1.xx-dev, libboost-filesystem1.xx-dev)`
 - `libusb1` - this is the Debian package `libusb-1.0-0-dev`. Do not confuse it with `libusb` aka `libusb0`: those packages are frozen in the past and incompatible with `libusb1`.
