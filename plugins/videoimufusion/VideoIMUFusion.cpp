@@ -165,6 +165,7 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
     if (m_state != State::Running) {
         return;
     }
+#if 0
     m_runningData->handleIMUReport(timestamp, report);
 
     // send a pose report
@@ -173,6 +174,7 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
     vecMap(newPose.translation) = m_runningData->getPosition();
     osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose,
                                          FUSED_SENSOR_ID, &timestamp);
+#endif
 }
 void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
                                             const OSVR_PoseReport &report) {
@@ -180,17 +182,19 @@ void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
         handleVideoTrackerDataDuringStartup(timestamp, report);
         return;
     }
+#if 0
     m_runningData->handleVideoTrackerReport(timestamp, report);
 #if 0
     // Not issuing a new main output here, let the IMU trigger that.
 #else
-
     // send a pose report
     auto newPose = OSVR_PoseState{};
     toQuat(m_runningData->getOrientation(), newPose.rotation);
     vecMap(newPose.translation) = m_runningData->getPosition();
     osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose,
                                          FUSED_SENSOR_ID, &timestamp);
+#endif
+
 #endif
     // However, for debugging, we will output a second sensor that is just the
     // video tracker data re-oriented.

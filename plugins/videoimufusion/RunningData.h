@@ -25,6 +25,20 @@
 #ifndef INCLUDED_RunningData_h_GUID_6B3479E5_9D56_4BA9_DEC0_84AF53842168
 #define INCLUDED_RunningData_h_GUID_6B3479E5_9D56_4BA9_DEC0_84AF53842168
 
+#if 0
+#include <iostream>
+#include <osvr/Util/EigenCoreGeometry.h>
+template <typename T>
+inline void dumpKalmanDebugOuput(const char name[], const char expr[],
+	T const &value) {
+	std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
+		<< value << std::endl;
+}
+
+#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
+    dumpKalmanDebugOuput(Name, #Value, Value)
+
+#endif
 // Internal Includes
 #include "VideoIMUFusion.h"
 #include <osvr/Util/EigenInterop.h>
@@ -43,7 +57,8 @@
 // Standard includes
 // - none
 
-using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
+
+using ProcessModel = osvr::kalman::PoseConstantVelocityProcessModel;
 using FilterState = ProcessModel::State;
 using AbsoluteOrientationMeasurement =
     osvr::kalman::AbsoluteOrientationMeasurement<FilterState>;
@@ -52,16 +67,8 @@ using AbsolutePoseMeasurement =
 using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
 using osvr::util::fromPose;
-using osvr::util::fromQuat;
 using osvr::util::vecMap;
-using osvr::util::time::getNow;
-using osvr::util::time::duration;
 
-static const double InitialStateError[] = {1., 1., 1., 1., 1., 1.,
-                                           1., 1., 1., 1., 1., 1.};
-static const double IMUError[] = {1.0E-10, 5.0E-10, 1.0E-10};
-static const double CameraOrientationError[] = {0.00001, 0.00001, 0.00001};
-static const double CameraPositionError[] = {3.0E-8, 3.0E-8, 8.5E-7};
 using osvr::kalman::types::Vector;
 class VideoIMUFusion::RunningData {
   public:
@@ -70,111 +77,17 @@ class VideoIMUFusion::RunningData {
                 OSVR_OrientationState const &initialIMU,
                 OSVR_PoseState const &initialVideo,
                 OSVR_TimeValue const &lastPosition,
-                OSVR_TimeValue const &lastIMU)
-        : m_filter(),
-          m_imuMeas(fromQuat(initialIMU), Vector<3>::Map(IMUError).eval()),
-          m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
-                       Vector<3>::Map(CameraPositionError).asDiagonal(),
-                       Vector<3>::Map(CameraOrientationError)),
-          m_cTr(cTr), m_orientation(fromQuat(initialIMU)),
-          m_last(lastPosition) {
-
-#ifdef OSVR_FPE
-        FPExceptionEnabler fpe;
-#endif
-        Eigen::Isometry3d roomPose = takeCameraPoseToRoom(initialVideo);
-        osvr::kalman::types::DimVector<FilterState> initialState =
-            osvr::kalman::types::DimVector<FilterState>::Zero();
-        using namespace osvr::kalman::pose_externalized_rotation;
-        position(initialState) = roomPose.translation();
-        m_filter.state().setStateVector(initialState);
-        m_filter.state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
-        m_filter.state().setErrorCovariance(
-            Vector<12>(InitialStateError).asDiagonal());
-
-        Vector<6> noiseAutocorrelation;
-        noiseAutocorrelation.head<3>() = Vector<3>::Constant(0.001);
-        noiseAutocorrelation.tail<3>() = Vector<3>::Constant(0.01);
-        m_filter.processModel().setNoiseAutocorrelation(noiseAutocorrelation);
-
-#if 0
-        // Very crudely set up some error estimates.
-        using osvr::kalman::external_quat::vecToQuat;
-
-        // This line produces FPE
-        // Eigen::Quaterniond IMUErrorQuat =
-        // vecToQuat(Vector<3>::Map(IMUError));
-
-        // This line is OK but not very good
-        Eigen::Vector4d quatError(1, 1, 1, 1);
-        m_imuError = quatError;
-#if 0
-        Eigen::Quaterniond imuQuatError = vecToQuat(Vector<3>::Map(IMUError));
-        m_imuError = imuQuatError.coeffs();
-#endif
-        m_cameraError.head<3>() = Vector<3>::Map(CameraPositionError);
-        Eigen::Quaterniond cameraQuatError =
-            vecToQuat(Vector<3>::Map(CameraOrientationError));
-#if 0
-        m_cameraError.tail<4>() = cameraQuatError.coeffs();
-#endif
-        m_cameraError.tail<4>() = quatError;
-#endif
-    }
+                OSVR_TimeValue const &lastIMU);
 
     void handleIMUReport(const OSVR_TimeValue &timestamp,
-                         const OSVR_OrientationReport &report) {
-        /// Right now, just accepting the orientation report as it is. This
-        /// does not correct for gyro drift.
-        m_orientation = fromQuat(report.rotation);
+                         const OSVR_OrientationReport &report);
 
-#ifdef OSVR_FPE
-        FPExceptionEnabler fpe;
-#endif
-
-        if (preReport()) {
-            m_imuMeas.setMeasurement(fromQuat(report.rotation));
-            m_filter.correct(m_imuMeas);
-        }
-    }
     void handleVideoTrackerReport(const OSVR_TimeValue &timestamp,
-                                  const OSVR_PoseReport &report) {
-        Eigen::Isometry3d roomPose = takeCameraPoseToRoom(report.pose);
-
-#ifdef OSVR_FPE
-        FPExceptionEnabler fpe;
-#endif
-        if (preReport()) {
-            m_cameraMeas.setMeasurement(
-                roomPose.translation(),
-                Eigen::Quaterniond(roomPose.rotation()));
-            Eigen::Quaterniond(roomPose.rotation());
-            m_filter.correct(m_cameraMeas);
-#if 0
-            OSVR_DEV_VERBOSE(
-                "State: "
-                << m_filter.state().stateVector().transpose() << "\n"
-                << "Quat: "
-                << m_filter.state().getQuaternion().coeffs().transpose()
-                << "\n"
-                   "Error:\n"
-                << m_filter.state().errorCovariance());
-#endif
-        }
-    }
+                                  const OSVR_PoseReport &report);
 
     /// Returns true if we succeeded and can filter in some data.
-    bool preReport() {
-        auto timestamp = getNow();
-        auto dt = duration(timestamp, m_last);
-        if (dt <= 0) {
-            return false;
-        }
+    bool preReport(const OSVR_TimeValue &timestamp);
 
-        m_last = timestamp;
-        m_filter.predict(dt);
-        return true;
-    }
     Eigen::Quaterniond getOrientation() const {
         return m_filter.state().getQuaternion();
     }

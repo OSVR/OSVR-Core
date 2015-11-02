@@ -12,6 +12,8 @@ osvr_add_plugin(NAME org_osvr_filter_videoimufusion
     SOURCES
     org_osvr_filter_videoimufusion.cpp
     RunningData.h
+    RunningData.cpp
+    RunningDataPredictCorrect.cpp
     VideoIMUFusion.h
     VideoIMUFusion.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_videoimufusion_json.h")
