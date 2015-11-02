@@ -40,7 +40,7 @@ namespace common {
     static const char USECONDS_KEY[] = "microseconds";
     inline Json::Value toJson(OSVR_TimeValue const &ts) {
         Json::Value val = Json::objectValue;
-        val[SECONDS_KEY] = ts.seconds;
+        val[SECONDS_KEY] = Json::Value(Json::Int64(ts.seconds));
         val[USECONDS_KEY] = ts.microseconds;
         return val;
     }
