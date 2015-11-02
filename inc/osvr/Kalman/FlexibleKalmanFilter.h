@@ -69,7 +69,11 @@ namespace kalman {
         FlexibleKalmanFilter(ProcessModel &&processModel, State &&state)
             : m_processModel(processModel), m_state(state) {}
 
-        void predict(double dt) { m_processModel.predictState(state(), dt); }
+        void predict(double dt) {
+            m_processModel.predictState(state(), dt);
+            OSVR_KALMAN_DEBUG_OUTPUT("Predicted state",
+                                     state().stateVector().transpose());
+        }
 
         template <typename MeasurementType>
         void correct(MeasurementType const &meas) {
@@ -78,11 +82,11 @@ namespace kalman {
             /// Dimension of state
             static const auto n = types::Dimension<State>::value;
             auto H = meas.getJacobian(state());
-            OSVR_KALMAN_DEBUG_OUTPUT("Measurement jacobian", H);
+            //OSVR_KALMAN_DEBUG_OUTPUT("Measurement jacobian", H);
             EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(H), m, n);
 
             auto R = meas.getCovariance(state());
-            OSVR_KALMAN_DEBUG_OUTPUT("Measurement covariance", R);
+            //OSVR_KALMAN_DEBUG_OUTPUT("Measurement covariance", R);
             EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(R), m, m);
 
             auto P = state().errorCovariance();
@@ -129,8 +133,10 @@ namespace kalman {
             // Correct the error covariance
             // differs from the (I-KH)P form by not factoring out the P (since
             // we already have PHt computed).
+#if 0
             OSVR_KALMAN_DEBUG_OUTPUT("error covariance difference",
                                      (PHt * denom.solve(PHt.transpose())));
+#endif
             types::SquareMatrix<n> newP =
                 P - (PHt * denom.solve(PHt.transpose()));
 #else
