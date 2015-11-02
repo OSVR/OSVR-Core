@@ -187,11 +187,14 @@ namespace util {
 				BaseQuatMap(BaseQuatMap const&) = delete;
 				BaseQuatMap(BaseQuatMap && other) : m_quat(other.m_quat) {}
 #endif
+
+                /// Read-only accessor for the quaternion as an Eigen
+                /// quaternion.
+                Eigen::Quaterniond quat() const { return fromQuat(*m_quat); }
+
                 /// Read-only conversion operator for the quaternion as an Eigen
                 /// quaternion.
-                operator Eigen::Quaterniond() const {
-                    return fromQuat(*m_quat);
-                }
+                operator Eigen::Quaterniond() const { return quat(); }
 
                 /// Read-only accessor for the w component of the quaternion.
                 double w() const { return osvrQuatGetW(m_quat); }
