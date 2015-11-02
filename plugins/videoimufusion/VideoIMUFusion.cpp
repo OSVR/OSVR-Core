@@ -72,8 +72,9 @@ using osvr::util::fromQuat;
 using osvr::util::vecMap;
 using osvr::util::toPose;
 using osvr::util::toQuat;
+using osvr::util::time::duration;
+using osvr::util::time::getNow;
 
-namespace time = osvr::util::time;
 namespace filters = osvr::util::filters;
 
 static const OSVR_ChannelCount FUSED_SENSOR_ID = 0;
@@ -209,13 +210,13 @@ void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
 class VideoIMUFusion::StartupData {
   public:
     StartupData()
-        : last(time::getNow()), positionFilter(filters::one_euro::Params{}),
+        : last(getNow()), positionFilter(filters::one_euro::Params{}),
           orientationFilter(filters::one_euro::Params{}) {}
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     void handleReport(const OSVR_TimeValue &timestamp,
                       const OSVR_PoseReport &report,
                       const OSVR_OrientationState &orientation) {
-        auto dt = time::duration(timestamp, last);
+        auto dt = duration(timestamp, last);
         if (dt <= 0) {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
