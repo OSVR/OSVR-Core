@@ -40,33 +40,6 @@
 // Standard includes
 #include <iostream>
 
-namespace detail {
-template <typename ReportType>
-void callbackCaller(void *userdata, const OSVR_TimeValue *timestamp,
-                    const ReportType *report) {
-    auto &f = *static_cast<WrappedCallbackFunction<ReportType> *>(userdata);
-    f(timestamp, report);
-}
-template <typename ReportType> struct CallbackType_impl {
-    typedef void (*type)(void *, const OSVR_TimeValue *, const ReportType *);
-};
-template <typename ReportType>
-using CallbackType = typename CallbackType_impl<ReportType>::type;
-
-template <typename ReportType> inline CallbackType<ReportType> getCaller() {
-    return &callbackCaller<ReportType>;
-}
-
-template <typename ReportType, typename F>
-inline std::pair<CallbackType<ReportType>, WrappedCallbackPtr<ReportType>>
-wrapCallback(F &&f) {
-    auto functor = WrappedCallbackPtr<ReportType>{
-        new WrappedCallbackFunction<ReportType>{std::forward<F>(f)}};
-    return std::make_pair(getCaller<ReportType>(), std::move(functor));
-}
-} // namespace detail
-using detail::wrapCallback;
-
 using osvr::util::fromPose;
 using osvr::util::fromQuat;
 using osvr::util::vecMap;
@@ -74,6 +47,8 @@ using osvr::util::toPose;
 using osvr::util::toQuat;
 using osvr::util::time::duration;
 using osvr::util::time::getNow;
+
+using osvr::pluginkit::wrapCallback;
 
 namespace filters = osvr::util::filters;
 

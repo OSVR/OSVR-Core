@@ -30,6 +30,7 @@
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/ClientKit/InterfaceC.h>
+#include "WrapCallback.h"
 
 // Library/third-party includes
 // - none
@@ -37,15 +38,6 @@
 // Standard includes
 #include <functional>
 #include <memory>
-
-namespace detail {
-template <typename ReportType>
-using WrappedCallbackFunction =
-    std::function<void(const OSVR_TimeValue *, const ReportType *)>;
-
-template <typename ReportType>
-using WrappedCallbackPtr = std::unique_ptr<WrappedCallbackFunction<ReportType>>;
-} // namespace detail
 
 class VideoIMUFusion {
   public:
@@ -70,10 +62,10 @@ class VideoIMUFusion {
     OSVR_ClientContext m_clientCtx;
 
     OSVR_ClientInterface m_imu = nullptr;
-    detail::WrappedCallbackPtr<OSVR_OrientationReport> m_imuCb;
+    osvr::pluginkit::WrappedCallbackPtr<OSVR_OrientationReport> m_imuCb;
 
     OSVR_ClientInterface m_videoTracker = nullptr;
-    detail::WrappedCallbackPtr<OSVR_PoseReport> m_videoTrackerCb;
+    osvr::pluginkit::WrappedCallbackPtr<OSVR_PoseReport> m_videoTrackerCb;
 
     enum class State {
         /// We do not yet know the relative pose of the camera
