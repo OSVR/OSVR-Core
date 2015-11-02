@@ -28,7 +28,9 @@
 #include "RunningData.h"
 
 // Library/third-party includes
-// - none
+#ifdef OSVR_FPE
+#include <FPExceptionEnabler.h>
+#endif
 
 // Standard includes
 // - none

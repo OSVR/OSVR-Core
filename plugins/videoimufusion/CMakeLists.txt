@@ -1,3 +1,9 @@
+if(WIN32)
+    option(OSVR_FPE
+        "Enable floating-point exceptions - only works with MSVC and should never be used for shipping code!"
+        OFF)
+    mark_as_advanced(OSVR_FPE)
+endif()
 
 osvr_convert_json(org_osvr_filter_videoimufusion_json
     org_osvr_filter_videoimufusion.json
@@ -32,3 +38,16 @@ target_compile_options(org_osvr_filter_videoimufusion
 
 set_target_properties(org_osvr_filter_videoimufusion PROPERTIES
     FOLDER "OSVR Plugins")
+
+if(WIN32 AND OSVR_FPE)
+    set(msg_type WARNING)
+    if(OSVR_OFFICIAL)
+        # set in our CI
+        set(msg_type FATAL_ERROR)
+    endif()
+    message(${msg_type} "OSVR_FPE enabled, will affect the VideoIMUFusion plugin! Do not ship these binaries!")
+
+    target_compile_definitions(org_osvr_filter_videoimufusion PRIVATE OSVR_FPE)
+    target_link_libraries(org_osvr_filter_videoimufusion
+        FloatExceptions)
+endif()
