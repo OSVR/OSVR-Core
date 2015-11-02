@@ -40,10 +40,6 @@ using osvr::util::fromQuat;
 
 void VideoIMUFusion::RunningData::handleIMUReport(
     const OSVR_TimeValue &timestamp, const OSVR_OrientationReport &report) {
-    /// Right now, just accepting the orientation report as it is. This
-    /// does not correct for gyro drift.
-    m_orientation = fromQuat(report.rotation);
-
 #ifdef OSVR_FPE
     FPExceptionEnabler fpe;
 #endif
@@ -87,5 +83,12 @@ bool VideoIMUFusion::RunningData::preReport(const OSVR_TimeValue &timestamp) {
         m_filter.predict(dt);
     }
     // Can always correct though.
+    /// @todo this is a crude way of handing video timestamps in the past.
+    /// Video tracker data is usually timestamped "in the past" - ideally would
+    /// probably roll back the state to the next earlier report then apply the
+    /// measurements again in order.
+    /// Right now, we're just not advancing time at all for such "out of order"
+    /// reports, meaning that they're being incorporated as if they were roughly
+    /// 5ms newer than they actually are.
     return true;
 }

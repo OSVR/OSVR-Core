@@ -101,10 +101,7 @@ class VideoIMUFusion::RunningData {
     Filter m_filter;
     AbsoluteOrientationMeasurement m_imuMeas;
     AbsolutePoseMeasurement m_cameraMeas;
-    Vector<4> m_imuError;
-    Vector<7> m_cameraError;
     const Eigen::Isometry3d m_cTr;
-    Eigen::Quaterniond m_orientation;
     OSVR_TimeValue m_last;
 };
 
