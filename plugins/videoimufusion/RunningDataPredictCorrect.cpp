@@ -36,7 +36,8 @@
 // - none
 
 using osvr::util::time::duration;
-using osvr::util::fromQuat;
+
+namespace ei = osvr::util::eigen_interop;
 
 void VideoIMUFusion::RunningData::handleIMUReport(
     const OSVR_TimeValue &timestamp, const OSVR_OrientationReport &report) {
@@ -45,7 +46,7 @@ void VideoIMUFusion::RunningData::handleIMUReport(
 #endif
 
     if (preReport(timestamp)) {
-        m_imuMeas.setMeasurement(fromQuat(report.rotation));
+        m_imuMeas.setMeasurement(ei::map(report.rotation));
         m_filter.correct(m_imuMeas);
     }
 }
@@ -59,7 +60,6 @@ void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     if (preReport(timestamp)) {
         m_cameraMeas.setMeasurement(roomPose.translation(),
                                     Eigen::Quaterniond(roomPose.rotation()));
-        Eigen::Quaterniond(roomPose.rotation());
         m_filter.correct(m_cameraMeas);
 #if 0
                         OSVR_DEV_VERBOSE(

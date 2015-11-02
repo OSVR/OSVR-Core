@@ -39,13 +39,14 @@ static const double IMUError[] = {1.0E-5, 5.0E-5, 1.0E-5};
 static const double CameraOrientationError[] = {0.0001, 0.0001, 0.0001};
 static const double CameraPositionError[] = {3.0E-8, 3.0E-8, 8.5E-7};
 
-using osvr::util::fromQuat;
+using osvr::kalman::types::Vector;
+namespace ei = osvr::util::eigen_interop;
 
 VideoIMUFusion::RunningData::RunningData(
     Eigen::Isometry3d const &cTr, OSVR_OrientationState const &initialIMU,
     OSVR_PoseState const &initialVideo, OSVR_TimeValue const &lastTS)
     : m_filter(),
-      m_imuMeas(fromQuat(initialIMU), Vector<3>::Map(IMUError).eval()),
+      m_imuMeas(ei::map(initialIMU), Vector<3>::Map(IMUError).eval()),
       m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
                    Vector<3>::Map(CameraPositionError).asDiagonal(),
                    Vector<3>::Map(CameraOrientationError)),

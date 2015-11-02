@@ -38,14 +38,9 @@
 #include <FPExceptionEnabler.h>
 #endif
 
-using osvr::util::fromPose;
-using osvr::util::fromQuat;
-using osvr::util::vecMap;
-using osvr::util::toPose;
-using osvr::util::toQuat;
 using osvr::util::time::duration;
 using osvr::util::time::getNow;
-
+namespace ei = osvr::util::eigen_interop;
 
 namespace filters = osvr::util::filters;
 
@@ -65,8 +60,8 @@ void VideoIMUFusion::enterRunningState(
     std::cout << "Camera is located in the room at roughly "
               << m_cTr.translation().transpose() << std::endl;
     m_state = State::Running;
-    m_runningData.reset(
-        new VideoIMUFusion::RunningData(cTr, orientation, report.pose, timestamp));
+    m_runningData.reset(new VideoIMUFusion::RunningData(
+        cTr, orientation, report.pose, timestamp));
     /// @todo should we just let it hang around instead of releasing memory in a
     /// callback?
     m_startupData.reset();
@@ -84,8 +79,8 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
 }
 
 void VideoIMUFusion::updateFusedOutput(const OSVR_TimeValue &timestamp) {
-    toQuat(m_runningData->getOrientation(), m_lastFusion.rotation);
-    vecMap(m_lastFusion.translation) = m_runningData->getPosition();
+    ei::map(m_lastFusion).rotation() = m_runningData->getOrientation();
+    ei::map(m_lastFusion).translation() = m_runningData->getPosition();
     m_lastFusionTime = timestamp;
 }
 
@@ -97,11 +92,10 @@ void VideoIMUFusion::handleVideoTrackerDataWhileRunning(
     m_runningData->handleVideoTrackerReport(timestamp, report);
 
     updateFusedOutput(timestamp);
-
     // For debugging, we will output a second sensor that is just the
     // video tracker data re-oriented.
     auto videoPose = m_runningData->takeCameraPoseToRoom(report.pose);
-    toPose(videoPose, m_reorientedVideo);
+    ei::map(m_reorientedVideo) = videoPose;
 }
 
 class VideoIMUFusion::StartupData {
@@ -117,13 +111,12 @@ class VideoIMUFusion::StartupData {
         if (dt <= 0) {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
-        // tranform from camera to tracked device
-        auto dTc = fromPose(report.pose);
+        // tranform from camera to tracked device is dTc
         // orientation is dTr: room to tracked device
         // cTr is room to camera, so we can take camera-reported dTc * cTr and
         // get dTr with position...
-        Eigen::Isometry3d cTr =
-            dTc.inverse() * Eigen::Isometry3d(fromQuat(orientation));
+        Eigen::Isometry3d cTr = ei::map(report.pose).transform().inverse() *
+                                Eigen::Isometry3d(ei::map(orientation).quat());
         positionFilter.filter(dt, cTr.translation());
         orientationFilter.filter(dt, Eigen::Quaterniond(cTr.rotation()));
         ++reports;

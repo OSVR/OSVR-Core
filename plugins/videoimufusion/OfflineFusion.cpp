@@ -41,6 +41,8 @@
 #include <iostream>
 #include <fstream>
 
+namespace ei = osvr::util::eigen_interop;
+
 static const auto IMU_PATH =
     "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
 static const auto VIDEO_PATH =
@@ -60,15 +62,14 @@ void processReports(Json::Value const &log) {
         if (path == IMU_PATH) {
             std::cout << " - IMU" << std::endl;
             gotOri = true;
-            osvr::util::toQuat(quat, ori.rotation);
+            ei::map(ori.rotation) = quat;
             fusion.handleIMUData(timestamp, ori);
         } else if (path == VIDEO_PATH) {
             std::cout << " - Video-based tracker" << std::endl;
-            Eigen::Vector3d vec =
-                osvr::common::vec3FromJson(report["translation"]);
             OSVR_PoseReport pose;
-            osvr::util::vecMap(pose.pose.translation) = vec;
-            osvr::util::toQuat(quat, pose.pose.rotation);
+            ei::map(pose.pose).translation() =
+                osvr::common::vec3FromJson(report["translation"]);
+            ei::map(pose.pose).rotation() = quat;
             if (fusion.running()) {
                 fusion.handleVideoTrackerDataWhileRunning(timestamp, pose);
             } else {

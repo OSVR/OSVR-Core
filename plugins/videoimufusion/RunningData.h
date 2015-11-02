@@ -66,10 +66,6 @@ using AbsolutePoseMeasurement =
     osvr::kalman::AbsolutePoseMeasurement<FilterState>;
 using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
-using osvr::util::fromPose;
-using osvr::util::vecMap;
-
-using osvr::kalman::types::Vector;
 class VideoIMUFusion::RunningData {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -95,7 +91,7 @@ class VideoIMUFusion::RunningData {
     }
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
-        return m_cTr * fromPose(pose);
+        return m_cTr * osvr::util::eigen_interop::map(pose);
     }
 
   private:
