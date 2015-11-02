@@ -25,20 +25,21 @@
 #ifndef INCLUDED_RunningData_h_GUID_6B3479E5_9D56_4BA9_DEC0_84AF53842168
 #define INCLUDED_RunningData_h_GUID_6B3479E5_9D56_4BA9_DEC0_84AF53842168
 
-#if 0
+#ifdef OSVR_VIDEOIMUFUSION_VERBOSE
 #include <iostream>
 #include <osvr/Util/EigenCoreGeometry.h>
 template <typename T>
 inline void dumpKalmanDebugOuput(const char name[], const char expr[],
-	T const &value) {
-	std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
-		<< value << std::endl;
+                                 T const &value) {
+    std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
+              << value << std::endl;
 }
 
 #define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
     dumpKalmanDebugOuput(Name, #Value, Value)
 
-#endif
+#endif // OSVR_VIDEOIMUFUSION_VERBOSE
+
 // Internal Includes
 #include "VideoIMUFusion.h"
 #include <osvr/Util/EigenInterop.h>
