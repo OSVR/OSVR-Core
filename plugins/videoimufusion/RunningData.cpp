@@ -41,14 +41,13 @@ using osvr::util::fromQuat;
 
 VideoIMUFusion::RunningData::RunningData(
     Eigen::Isometry3d const &cTr, OSVR_OrientationState const &initialIMU,
-    OSVR_PoseState const &initialVideo, OSVR_TimeValue const &lastPosition,
-    OSVR_TimeValue const &lastIMU)
+    OSVR_PoseState const &initialVideo, OSVR_TimeValue const &lastTS)
     : m_filter(),
       m_imuMeas(fromQuat(initialIMU), Vector<3>::Map(IMUError).eval()),
       m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
                    Vector<3>::Map(CameraPositionError).asDiagonal(),
                    Vector<3>::Map(CameraOrientationError)),
-      m_cTr(cTr), m_orientation(fromQuat(initialIMU)), m_last(lastPosition) {
+      m_cTr(cTr), m_last(lastTS) {
 
 #ifdef OSVR_FPE
     FPExceptionEnabler fpe;

@@ -6,7 +6,6 @@ osvr_convert_json(org_osvr_filter_videoimufusion_json
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-
 osvr_add_plugin(NAME org_osvr_filter_videoimufusion
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
@@ -16,6 +15,8 @@ osvr_add_plugin(NAME org_osvr_filter_videoimufusion
     RunningDataPredictCorrect.cpp
     VideoIMUFusion.h
     VideoIMUFusion.cpp
+    VideoIMUFusionDevice.h
+    VideoIMUFusionDevice.cpp
     WrapCallback.h
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_videoimufusion_json.h")
 

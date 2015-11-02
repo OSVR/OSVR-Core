@@ -25,20 +25,18 @@
 // Internal Includes
 #include "VideoIMUFusion.h"
 #include "RunningData.h"
-#include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
-#include <osvr/ClientKit/InterfaceCallbackC.h>
-#include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/EigenInterop.h>
-
-// Generated JSON header file
-#include "org_osvr_filter_videoimufusion_json.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
 
 // Standard includes
 #include <iostream>
+
+#ifdef OSVR_FPE
+#include <FPExceptionEnabler.h>
+#endif
 
 using osvr::util::fromPose;
 using osvr::util::fromQuat;
@@ -48,89 +46,27 @@ using osvr::util::toQuat;
 using osvr::util::time::duration;
 using osvr::util::time::getNow;
 
-using osvr::pluginkit::wrapCallback;
 
 namespace filters = osvr::util::filters;
 
-static const OSVR_ChannelCount FUSED_SENSOR_ID = 0;
-static const OSVR_ChannelCount TRANSFORMED_VIDEO_SENSOR_ID = 1;
+VideoIMUFusion::VideoIMUFusion() { enterCameraPoseAcquisitionState(); }
 
-VideoIMUFusion::VideoIMUFusion(OSVR_PluginRegContext ctx,
-                               std::string const &name,
-                               std::string const &imuPath,
-                               std::string const &videoPath) {
-    /// Create the initialization options
-    OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
-
-    osvrDeviceTrackerConfigure(opts, &m_trackerOut);
-
-    /// Create the device token with the options
-    OSVR_DeviceToken dev;
-    if (OSVR_RETURN_FAILURE ==
-        osvrAnalysisSyncInit(ctx, name.c_str(), opts, &dev, &m_clientCtx)) {
-        throw std::runtime_error("Could not initialize analysis plugin!");
-    }
-    m_dev = osvr::pluginkit::DeviceToken(dev);
-
-    /// Send JSON descriptor
-    m_dev.sendJsonDescriptor(org_osvr_filter_videoimufusion_json);
-
-    /// Register update callback
-    m_dev.registerUpdateCallback(this);
-
-    /// Set up to receive our input.
-    osvrClientGetInterface(m_clientCtx, imuPath.c_str(), &m_imu);
-    auto imuCb = wrapCallback<OSVR_OrientationReport>([&](
-        const OSVR_TimeValue *timestamp, const OSVR_OrientationReport *report) {
-        handleIMUData(*timestamp, *report);
-    });
-    osvrRegisterOrientationCallback(m_imu, imuCb.first, imuCb.second.get());
-    m_imuCb = std::move(imuCb.second);
-
-    osvrClientGetInterface(m_clientCtx, videoPath.c_str(), &m_videoTracker);
-    auto videoTrackerCb = wrapCallback<OSVR_PoseReport>(
-        [&](const OSVR_TimeValue *timestamp, const OSVR_PoseReport *report) {
-            handleVideoTrackerData(*timestamp, *report);
-        });
-    osvrRegisterPoseCallback(m_videoTracker, videoTrackerCb.first,
-                             videoTrackerCb.second.get());
-    m_videoTrackerCb = std::move(videoTrackerCb.second);
-
-    enterCameraPoseAcquisitionState();
-}
-
-VideoIMUFusion::~VideoIMUFusion() {
-    /// free the interfaces before the pointed-to function objects disappear.
-    if (m_imu) {
-        osvrClientFreeInterface(m_clientCtx, m_imu);
-        m_imu = nullptr;
-    }
-    if (m_videoTracker) {
-        osvrClientFreeInterface(m_clientCtx, m_videoTracker);
-        m_imu = nullptr;
-    }
-}
+VideoIMUFusion::~VideoIMUFusion() {}
 
 OSVR_ReturnCode VideoIMUFusion::update() { return OSVR_RETURN_SUCCESS; }
 
-void VideoIMUFusion::enterRunningState(Eigen::Isometry3d const &cTr) {
+void VideoIMUFusion::enterRunningState(
+    Eigen::Isometry3d const &cTr, const OSVR_TimeValue &timestamp,
+    const OSVR_PoseReport &report, const OSVR_OrientationState &orientation) {
+#ifdef OSVR_FPE
+    FPExceptionEnabler fpe;
+#endif
     m_cTr = cTr;
     std::cout << "Camera is located in the room at roughly "
               << m_cTr.translation().transpose() << std::endl;
     m_state = State::Running;
-    auto oriTs = OSVR_TimeValue{};
-    auto imuState = OSVR_OrientationState{};
-    auto ret = osvrGetOrientationState(m_imu, &oriTs, &imuState);
-    BOOST_ASSERT_MSG(ret == OSVR_RETURN_SUCCESS,
-                     "Must have one IMU report by now!");
-    auto posTs = OSVR_TimeValue{};
-    auto videoState = OSVR_PoseState{};
-    ret = osvrGetPoseState(m_videoTracker, &posTs, &videoState);
-    BOOST_ASSERT_MSG(ret == OSVR_RETURN_SUCCESS,
-                     "Must have one video report by now!");
-
-    m_runningData.reset(new VideoIMUFusion::RunningData(
-        cTr, imuState, videoState, posTs, oriTs));
+    m_runningData.reset(
+        new VideoIMUFusion::RunningData(cTr, orientation, report.pose, timestamp));
     /// @todo should we just let it hang around instead of releasing memory in a
     /// callback?
     m_startupData.reset();
@@ -141,45 +77,31 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
     if (m_state != State::Running) {
         return;
     }
-#if 0
     m_runningData->handleIMUReport(timestamp, report);
 
     // send a pose report
-    auto newPose = OSVR_PoseState{};
-    toQuat(m_runningData->getOrientation(), newPose.rotation);
-    vecMap(newPose.translation) = m_runningData->getPosition();
-    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose,
-                                         FUSED_SENSOR_ID, &timestamp);
-#endif
+    updateFusedOutput(timestamp);
 }
-void VideoIMUFusion::handleVideoTrackerData(const OSVR_TimeValue &timestamp,
-                                            const OSVR_PoseReport &report) {
-    if (m_state == State::AcquiringCameraPose) {
-        handleVideoTrackerDataDuringStartup(timestamp, report);
-        return;
-    }
-#if 0
-    m_runningData->handleVideoTrackerReport(timestamp, report);
-#if 0
-    // Not issuing a new main output here, let the IMU trigger that.
-#else
-    // send a pose report
-    auto newPose = OSVR_PoseState{};
-    toQuat(m_runningData->getOrientation(), newPose.rotation);
-    vecMap(newPose.translation) = m_runningData->getPosition();
-    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newPose,
-                                         FUSED_SENSOR_ID, &timestamp);
-#endif
 
-#endif
-    // However, for debugging, we will output a second sensor that is just the
+void VideoIMUFusion::updateFusedOutput(const OSVR_TimeValue &timestamp) {
+    toQuat(m_runningData->getOrientation(), m_lastFusion.rotation);
+    vecMap(m_lastFusion.translation) = m_runningData->getPosition();
+    m_lastFusionTime = timestamp;
+}
+
+void VideoIMUFusion::handleVideoTrackerDataWhileRunning(
+    const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
+    assert(running() &&
+           "handleVideoTrackerDataWhileRunning() called when not running!");
+    // Pass this along to the filter
+    m_runningData->handleVideoTrackerReport(timestamp, report);
+
+    updateFusedOutput(timestamp);
+
+    // For debugging, we will output a second sensor that is just the
     // video tracker data re-oriented.
     auto videoPose = m_runningData->takeCameraPoseToRoom(report.pose);
-    auto newDebugPose = OSVR_PoseState{};
-    toPose(videoPose, newDebugPose);
-    osvrDeviceTrackerSendPoseTimestamped(m_dev, m_trackerOut, &newDebugPose,
-                                         TRANSFORMED_VIDEO_SENSOR_ID,
-                                         &timestamp);
+    toPose(videoPose, m_reorientedVideo);
 }
 
 class VideoIMUFusion::StartupData {
@@ -226,22 +148,20 @@ class VideoIMUFusion::StartupData {
     filters::OneEuroFilter<Eigen::Vector3d> positionFilter;
     filters::OneEuroFilter<Eigen::Quaterniond> orientationFilter;
 };
+
 void VideoIMUFusion::enterCameraPoseAcquisitionState() {
     m_startupData.reset(new VideoIMUFusion::StartupData);
     m_state = State::AcquiringCameraPose;
 }
+
 void VideoIMUFusion::handleVideoTrackerDataDuringStartup(
-    const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
-    auto lastIMU = OSVR_TimeValue{};
-    auto imuState = OSVR_OrientationState{};
-    auto ret = osvrGetOrientationState(m_imu, &lastIMU, &imuState);
-    if (ret != OSVR_RETURN_SUCCESS) {
-        // We don't yet have a state for the IMU, remarkably, so we'll wait
-        // until next time.
-        return;
-    }
-    m_startupData->handleReport(timestamp, report, imuState);
+    const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report,
+    const OSVR_OrientationState &orientation) {
+    assert(!running() &&
+           "handleVideoTrackerDataDuringStartup() called when running!");
+    m_startupData->handleReport(timestamp, report, orientation);
     if (m_startupData->finished()) {
-        enterRunningState(m_startupData->getRoomToCamera());
+        enterRunningState(m_startupData->getRoomToCamera(), timestamp, report,
+                          orientation);
     }
 }

@@ -76,8 +76,7 @@ class VideoIMUFusion::RunningData {
     RunningData(Eigen::Isometry3d const &cTr,
                 OSVR_OrientationState const &initialIMU,
                 OSVR_PoseState const &initialVideo,
-                OSVR_TimeValue const &lastPosition,
-                OSVR_TimeValue const &lastIMU);
+                OSVR_TimeValue const &lastTS);
 
     void handleIMUReport(const OSVR_TimeValue &timestamp,
                          const OSVR_OrientationReport &report);

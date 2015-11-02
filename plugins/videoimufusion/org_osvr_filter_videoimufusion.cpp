@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "VideoIMUFusion.h"
+#include "VideoIMUFusionDevice.h"
 #include <osvr/PluginKit/PluginKit.h>
 
 // Library/third-party includes
@@ -65,7 +65,7 @@ class AnalysisPluginInstantiation {
 
         /// @todo make the token own this instead once there is API for that.
         context.registerObjectForDeletion(
-            new VideoIMUFusion(ctx, deviceName, imu, faceplate));
+            new VideoIMUFusionDevice(ctx, deviceName, imu, faceplate));
         return OSVR_RETURN_SUCCESS;
     }
 };
