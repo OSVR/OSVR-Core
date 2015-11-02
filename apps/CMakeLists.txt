@@ -50,6 +50,15 @@ if(BUILD_CLIENT_APPS)
         FOLDER "OSVR Stock Applications")
     install(TARGETS osvr_reset_yaw
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+
+    add_executable(osvr_log_to_json
+        osvr_log_to_json.cpp)
+    target_link_libraries(osvr_log_to_json
+        jsoncpp_lib
+        osvrClientKitCpp
+        osvrClient
+        osvrCommon
+        eigen-headers)
 endif()
 
 if(BUILD_SERVER_EXAMPLES)
