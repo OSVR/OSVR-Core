@@ -64,7 +64,6 @@ using AbsoluteOrientationMeasurement =
     osvr::kalman::AbsoluteOrientationMeasurement<FilterState>;
 using AbsolutePoseMeasurement =
     osvr::kalman::AbsolutePoseMeasurement<FilterState>;
-using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
 class VideoIMUFusion::RunningData {
   public:
@@ -84,22 +83,25 @@ class VideoIMUFusion::RunningData {
     bool preReport(const OSVR_TimeValue &timestamp);
 
     Eigen::Quaterniond getOrientation() const {
-        return m_filter.state().getQuaternion();
+        return state().getQuaternion();
     }
-    Eigen::Vector3d getPosition() const {
-        return m_filter.state().getPosition();
-    }
+    Eigen::Vector3d getPosition() const { return state().getPosition(); }
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
         return m_cTr * osvr::util::eigen_interop::map(pose);
     }
 
     Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const {
-        return m_filter.state().errorCovariance();
+        return state().errorCovariance();
     }
 
   private:
-    Filter m_filter;
+    FilterState &state() { return m_state; }
+    FilterState const &state() const { return m_state; }
+    ProcessModel &processModel() { return m_processModel; }
+    ProcessModel const &processModel() const { return m_processModel; }
+    ProcessModel m_processModel;
+    FilterState m_state;
     AbsoluteOrientationMeasurement m_imuMeas;
     AbsolutePoseMeasurement m_cameraMeas;
     const Eigen::Isometry3d m_cTr;

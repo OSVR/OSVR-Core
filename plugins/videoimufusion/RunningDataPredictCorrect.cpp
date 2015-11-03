@@ -47,7 +47,7 @@ void VideoIMUFusion::RunningData::handleIMUReport(
 
     if (preReport(timestamp)) {
         m_imuMeas.setMeasurement(ei::map(report.rotation));
-        m_filter.correct(m_imuMeas);
+        osvr::kalman::correct(state(), processModel(), m_imuMeas);
     }
 }
 void VideoIMUFusion::RunningData::handleVideoTrackerReport(
@@ -60,16 +60,16 @@ void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     if (preReport(timestamp)) {
         m_cameraMeas.setMeasurement(roomPose.translation(),
                                     Eigen::Quaterniond(roomPose.rotation()));
-        m_filter.correct(m_cameraMeas);
+        osvr::kalman::correct(state(), processModel(), m_cameraMeas);
 
 #if 0
-        OSVR_DEV_VERBOSE(
-            "State: " << m_filter.state().stateVector().transpose() << "\n"
-                      << "Quat: "
-                      << m_filter.state().getQuaternion().coeffs().transpose()
-                      << "\n"
-                         "Error:\n"
-                      << m_filter.state().errorCovariance());
+    OSVR_DEV_VERBOSE(
+        "State: " << state().stateVector().transpose() << "\n"
+                  << "Quat: "
+                  << state().getQuaternion().coeffs().transpose()
+                  << "\n"
+                     "Error:\n"
+                  << state().errorCovariance());
 #endif
     }
 }
@@ -80,7 +80,7 @@ bool VideoIMUFusion::RunningData::preReport(const OSVR_TimeValue &timestamp) {
     if (dt > 0) {
         m_last = timestamp;
         // only predict if time has moved forward
-        m_filter.predict(dt);
+        osvr::kalman::predict(state(), processModel(), dt);
     }
     // Can always correct though.
     /// @todo this is a crude way of handing video timestamps in the past.

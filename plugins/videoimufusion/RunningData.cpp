@@ -55,8 +55,9 @@ namespace ei = osvr::util::eigen_interop;
 VideoIMUFusion::RunningData::RunningData(
     Eigen::Isometry3d const &cTr, OSVR_OrientationState const &initialIMU,
     OSVR_PoseState const &initialVideo, OSVR_TimeValue const &lastTS)
-    : m_filter(ProcessModel{VelocityDamping, PositionNoiseAutocorrelation,
-                            OrientationNoiseAutocorrelation}),
+    : m_processModel(VelocityDamping, PositionNoiseAutocorrelation,
+                     OrientationNoiseAutocorrelation),
+      m_state(),
       m_imuMeas(ei::map(initialIMU), Vector<3>::Map(IMUErrorVector).eval()),
       m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
                    Vector<3>::Map(CameraPositionError).asDiagonal(),
@@ -72,8 +73,7 @@ VideoIMUFusion::RunningData::RunningData(
     using namespace osvr::kalman::pose_externalized_rotation;
 
     position(initialState) = roomPose.translation();
-    m_filter.state().setStateVector(initialState);
-    m_filter.state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
-    m_filter.state().setErrorCovariance(
-        Vector<12>(InitialStateError).asDiagonal());
+    state().setStateVector(initialState);
+    state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
+    state().setErrorCovariance(Vector<12>(InitialStateError).asDiagonal());
 }
