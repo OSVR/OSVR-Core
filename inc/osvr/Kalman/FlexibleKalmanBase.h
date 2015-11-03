@@ -127,7 +127,7 @@ namespace kalman {
                            ProcessModelType &processModel, double dt) {
         types::DimSquareMatrix<StateType> A =
             processModel.getStateTransitionMatrix(state, dt);
-        OSVR_KALMAN_DEBUG_OUTPUT("State transition matrix", A);
+        // OSVR_KALMAN_DEBUG_OUTPUT("State transition matrix", A);
         types::DimSquareMatrix<StateType> P = state.errorCovariance();
         /// @todo Determine if the fact that Q is (at least in one case)
         /// symmetrical implies anything else useful performance-wise here or
