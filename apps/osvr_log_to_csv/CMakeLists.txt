@@ -1,5 +1,4 @@
 add_executable(osvr_log_to_csv
-    CSV.h
     osvr_log_to_csv.cpp)
 target_link_libraries(osvr_log_to_csv
     osvrClientKitCpp

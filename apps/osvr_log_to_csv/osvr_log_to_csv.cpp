@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "CSV.h"
+#include <osvr/Util/CSV.h>
 #include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Interface.h>
 #include <osvr/Util/TimeValue.h>
@@ -37,7 +37,7 @@
 #include <chrono>
 #include <thread>
 
-osvr::CSV g_csvOutput;
+osvr::util::CSV g_csvOutput;
 
 static const auto MAX_ROWS = 1000;
 static std::size_t g_markRows = 0;
@@ -47,69 +47,37 @@ static const auto OUTFILE = "osvrdata.csv";
 
 using our_clock = std::chrono::system_clock;
 
+using osvr::util::cell;
+
 template <typename T> inline bool shouldStop(T const &deadline) {
     return (g_csvOutput.numDataRows() - g_markRows) > MAX_ROWS ||
            our_clock::now() > deadline;
 }
 
-namespace detail {
-template <typename T> class Cell {
-  public:
-    Cell(std::string const &header, T const &data)
-        : header_(header), data_(data){};
-    std::string const &getHeader() const { return header_; };
-    T const &getData() const { return data_; }
-
-  private:
-    std::string const &header_;
-    T const &data_;
-};
-}
-
-template <typename T>
-inline detail::Cell<T> cell(std::string const &header, T const &data) {
-    return detail::Cell<T>{header, data};
-}
-
-template <typename T>
-inline osvr::CSV::Row &&operator<<(osvr::CSV::Row &&row,
-                                   detail::Cell<T> const &cell) {
-    row.addCol(cell.getHeader(), cell.getData());
-    return std::move(row);
-}
-
-inline osvr::CSV::Row &&operator<<(osvr::CSV::Row &&row,
-                                   osvr::util::time::TimeValue const &ts) {
+inline osvr::util::CSV::Row &&
+operator<<(osvr::util::CSV::Row &&row, osvr::util::time::TimeValue const &ts) {
     row.addCol("ts:seconds", ts.seconds);
     row.addCol("ts:microseconds", ts.microseconds);
     return std::move(row);
 }
 
-#if 0
-static inline osvr::CSV::Row &&
-createTimestampedRow(OSVR_TimeValue const &ts = osvr::util::time::getNow()) {
-    return std::move(osvr::CSV::Row("ts:seconds", ts.seconds)("ts:microseconds",
-                                                              ts.microseconds));
-}
-#endif
-
 static void poseCallback(void *userdata, const OSVR_TimeValue *timestamp,
                          const OSVR_PoseReport *report) {
     auto path = static_cast<char *>(userdata);
-    g_csvOutput
-        .add(osvr::CSV::Row()
-             << (*timestamp)
-             << cell(path + std::string{":x"}, report->pose.translation.data[0])
-             << cell(path + std::string{":y"}, report->pose.translation.data[1])
-             << cell(path + std::string{":z"}, report->pose.translation.data[2])
-             << cell(path + std::string{":qx"},
-                     osvrQuatGetX(&(report->pose.rotation)))
-             << cell(path + std::string{":qy"},
-                     osvrQuatGetY(&(report->pose.rotation)))
-             << cell(path + std::string{":qz"},
-                     osvrQuatGetZ(&(report->pose.rotation)))
-             << cell(path + std::string{":qw"},
-                     osvrQuatGetW(&(report->pose.rotation))));
+    g_csvOutput.add(
+        osvr::util::CSV::Row()
+        << (*timestamp)
+        << cell(path + std::string{":x"}, report->pose.translation.data[0])
+        << cell(path + std::string{":y"}, report->pose.translation.data[1])
+        << cell(path + std::string{":z"}, report->pose.translation.data[2])
+        << cell(path + std::string{":qx"},
+                osvrQuatGetX(&(report->pose.rotation)))
+        << cell(path + std::string{":qy"},
+                osvrQuatGetY(&(report->pose.rotation)))
+        << cell(path + std::string{":qz"},
+                osvrQuatGetZ(&(report->pose.rotation)))
+        << cell(path + std::string{":qw"},
+                osvrQuatGetW(&(report->pose.rotation))));
 }
 
 int main(int argc, char *argv[]) {
