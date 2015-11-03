@@ -45,8 +45,14 @@ namespace kalman {
         using State = pose_externalized_rotation::State;
         using StateVector = pose_externalized_rotation::StateVector;
         using StateSquareMatrix = pose_externalized_rotation::StateSquareMatrix;
-        using NoiseAutocorrelation = types::Vector<6>;
-        PoseDampedConstantVelocityProcessModel() {}
+        using BaseProcess = PoseConstantVelocityProcessModel;
+        using NoiseAutocorrelation = BaseProcess::NoiseAutocorrelation;
+        PoseDampedConstantVelocityProcessModel(double damping = 0.1,
+                                               double positionNoise = 0.01,
+                                               double orientationNoise = 0.1)
+            : m_constantVelModel(positionNoise, orientationNoise) {
+            setDamping(damping);
+        }
 
         void setNoiseAutocorrelation(NoiseAutocorrelation const &noise) {
             m_constantVelModel.setNoiseAutocorrelation(noise);
@@ -90,7 +96,7 @@ namespace kalman {
         }
 
       private:
-        PoseConstantVelocityProcessModel m_constantVelModel;
+        BaseProcess m_constantVelModel;
         double m_damp = 0.1;
     };
 
