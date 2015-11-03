@@ -80,7 +80,7 @@ namespace kalman {
                 types::SquareMatrix<3>::Identity() * 0.5;
             ret.bottomRows<1>() =
                 incRotVec.transpose() /
-                (-4. * sqrt(1. - incRotVec.dot(incRotVec) / 4.));
+                (-4. * std::sqrt(vecToQuatScalarPartSquared(incRotVec)));
             return ret;
         }
 
