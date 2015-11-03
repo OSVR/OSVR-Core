@@ -35,14 +35,17 @@
 
 static const double InitialStateError[] = {1.,   1.,   1.,   1.,   1.,   1.,
                                            100., 100., 100., 100., 100., 100.};
-static const double IMUError = 1.0E-5;
+static const double IMUError = 1.0E-2;
 static const double IMUErrorVector[] = {IMUError, IMUError * 5., IMUError};
-static const double CameraOriError = 1.0E-2;
+static const double CameraOriError = 1.0E0;
 static const double CameraOrientationError[] = {CameraOriError, CameraOriError,
                                                 CameraOriError};
-static const double CameraPosError = 3.0E-3;
+static const double CameraPosError = 3.0E-2;
 static const double CameraPositionError[] = {CameraPosError, CameraPosError,
                                              CameraPosError * 0.1};
+
+static const double PositionNoiseAutocorrelation = 0.00001;
+static const double OrientationNoiseAutocorrelation = 0.0001;
 
 using osvr::kalman::types::Vector;
 namespace ei = osvr::util::eigen_interop;
@@ -72,7 +75,9 @@ VideoIMUFusion::RunningData::RunningData(
         Vector<12>(InitialStateError).asDiagonal());
 
     Vector<6> noiseAutocorrelation;
-    noiseAutocorrelation.head<3>() = Vector<3>::Constant(0.00001);
-    noiseAutocorrelation.tail<3>() = Vector<3>::Constant(0.0001);
+    noiseAutocorrelation.head<3>() =
+        Vector<3>::Constant(PositionNoiseAutocorrelation);
+    noiseAutocorrelation.tail<3>() =
+        Vector<3>::Constant(OrientationNoiseAutocorrelation);
     m_filter.processModel().setNoiseAutocorrelation(noiseAutocorrelation);
 }
