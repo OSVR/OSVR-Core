@@ -59,9 +59,10 @@ VideoIMUFusion::RunningData::RunningData(
                      OrientationNoiseAutocorrelation),
       m_state(),
       m_imuMeas(ei::map(initialIMU), Vector<3>::Map(IMUErrorVector).eval()),
-      m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
-                   Vector<3>::Map(CameraPositionError).asDiagonal(),
-                   Vector<3>::Map(CameraOrientationError)),
+      m_cameraMeasOri(Eigen::Quaterniond::Identity(),
+                      Vector<3>::Map(CameraOrientationError)),
+      m_cameraMeasPos(Vector<3>::Zero(),
+                      Vector<3>::Map(CameraPositionError).asDiagonal()),
       m_cTr(cTr), m_last(lastTS) {
 
 #ifdef OSVR_FPE

@@ -58,9 +58,10 @@ void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     FPExceptionEnabler fpe;
 #endif
     if (preReport(timestamp)) {
-        m_cameraMeas.setMeasurement(roomPose.translation(),
-                                    Eigen::Quaterniond(roomPose.rotation()));
-        osvr::kalman::correct(state(), processModel(), m_cameraMeas);
+        m_cameraMeasPos.setMeasurement(roomPose.translation());
+        osvr::kalman::correct(state(), processModel(), m_cameraMeasPos);
+        m_cameraMeasOri.setMeasurement(Eigen::Quaterniond(roomPose.rotation()));
+        osvr::kalman::correct(state(), processModel(), m_cameraMeasOri);
 
 #if 0
     OSVR_DEV_VERBOSE(

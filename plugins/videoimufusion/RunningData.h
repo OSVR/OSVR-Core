@@ -48,7 +48,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/PoseDampedConstantVelocity.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
-#include <osvr/Kalman/AbsolutePoseMeasurement.h>
+#include <osvr/Kalman/AbsolutePositionMeasurement.h>
 
 #include <osvr/Util/Verbosity.h>
 
@@ -62,8 +62,8 @@ using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
 using FilterState = ProcessModel::State;
 using AbsoluteOrientationMeasurement =
     osvr::kalman::AbsoluteOrientationMeasurement<FilterState>;
-using AbsolutePoseMeasurement =
-    osvr::kalman::AbsolutePoseMeasurement<FilterState>;
+using AbsolutePositionMeasurement =
+    osvr::kalman::AbsolutePositionMeasurement<FilterState>;
 
 class VideoIMUFusion::RunningData {
   public:
@@ -103,7 +103,8 @@ class VideoIMUFusion::RunningData {
     ProcessModel m_processModel;
     FilterState m_state;
     AbsoluteOrientationMeasurement m_imuMeas;
-    AbsolutePoseMeasurement m_cameraMeas;
+    AbsoluteOrientationMeasurement m_cameraMeasOri;
+    AbsolutePositionMeasurement m_cameraMeasPos;
     const Eigen::Isometry3d m_cTr;
     OSVR_TimeValue m_last;
 };
