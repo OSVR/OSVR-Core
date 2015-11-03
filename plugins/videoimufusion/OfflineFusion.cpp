@@ -54,7 +54,7 @@ void processReports(Json::Value const &log) {
     bool gotOri = false;
     OSVR_OrientationReport ori;
     for (auto &report : log) {
-        std::cout << "Report #" << reportNumber;
+        std::cout << "\n***********************\nReport #" << reportNumber;
         auto timestamp = osvr::common::timevalueFromJson(report["timestamp"]);
         Eigen::Quaterniond quat =
             osvr::common::quatFromJson(report["rotation"]);
@@ -87,6 +87,16 @@ void processReports(Json::Value const &log) {
                       << std::endl;
             throw std::runtime_error("Unrecognized path: " +
                                      path.toStyledString());
+        }
+        if (fusion.running()) {
+            std::cout << "Error Covariance:\n"
+                      << fusion.getErrorCovariance().diagonal() << std::endl;
+            if ((fusion.getErrorCovariance().diagonal().array() < 0.).any()) {
+                std::cerr << "Got a negative variance (diagonal of state "
+                             "covariance matrix) - bailing out!"
+                          << std::endl;
+                throw std::runtime_error("Negative variance!");
+            }
         }
         reportNumber++;
     }
