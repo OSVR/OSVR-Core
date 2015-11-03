@@ -66,9 +66,15 @@ int main() {
 
             std::cout << "\nAfter prediction (iteration " << i << "):\n"
                       << filter.state() << std::endl;
-            if (contentsInvalid(filter.state())) {
-                std::cout << "ERROR: Detected invalid contents after "
+            if (stateContentsInvalid(filter.state())) {
+                std::cout << "ERROR: Detected invalid state contents after "
                              "prediction step of iteration "
+                          << i << std::endl;
+                return -1;
+            }
+            if (covarianceContentsInvalid(filter.state())) {
+                std::cout << "ERROR: Detected invalid covariance contents "
+                             "after prediction step of iteration "
                           << i << std::endl;
                 return -1;
             }
@@ -76,9 +82,15 @@ int main() {
             filter.correct(meas);
             std::cout << "\nAfter correction (iteration " << i << "):\n"
                       << filter.state() << std::endl;
-            if (contentsInvalid(filter.state())) {
-                std::cout << "ERROR: Detected invalid contents after "
+            if (stateContentsInvalid(filter.state())) {
+                std::cout << "ERROR: Detected invalid state contents after "
                              "correction step of iteration "
+                          << i << std::endl;
+                return -1;
+            }
+            if (covarianceContentsInvalid(filter.state())) {
+                std::cout << "ERROR: Detected invalid covariance contents "
+                             "after correction step of iteration "
                           << i << std::endl;
                 return -1;
             }

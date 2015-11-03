@@ -73,17 +73,34 @@ class Stability : public ::testing::Test {
     void filterAndCheck(Filter &filter, Measurement &meas, double dt = 0.1) {
         filter.predict(dt);
         dumpState(filter.state(), "After prediction");
-        ASSERT_FALSE(contentsInvalid(filter.state()))
-            << "ERROR: Detected a NAN or other invalid contents after "
-               "prediction step of iteration "
-            << iteration << "\n" << filter.state();
+        ASSERT_FALSE(stateContentsInvalid(filter.state()))
+            << "ERROR: Detected an invalid floating-point value in the state "
+               "after prediction step of iteration "
+            << iteration;
+        ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
+            << "ERROR: Detected an invalid state covariance matrix (invalid "
+               "floating-point, or invariants violated) after prediction step "
+               "of iteration "
+            << iteration;
+
+        ASSERT_FALSE(
+            covarianceContentsInvalid(meas.getCovariance(filter.state())))
+            << "ERROR: Detected invalid contents (invalid floating-point, or "
+               "invariants violated) in measurement covariance "
+               "matrix, iteration "
+            << iteration << "\n" << meas.getCovariance(filter.state());
 
         filter.correct(meas);
         dumpState(filter.state(), "After correction");
-        ASSERT_FALSE(contentsInvalid(filter.state()))
-            << "ERROR: Detected a NAN or other invalid contents after "
-               "correction step of iteration "
-            << iteration << "\n" << filter.state();
+        ASSERT_FALSE(stateContentsInvalid(filter.state()))
+            << "ERROR: Detected an invalid floating-point value in the state "
+               "after correction step of iteration "
+            << iteration;
+        ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
+            << "ERROR: Detected an invalid state covariance matrix (invalid "
+               "floating-point, or invariants violated) after correction step "
+               "of iteration "
+            << iteration;
         iteration++;
     }
 
@@ -94,17 +111,41 @@ class Stability : public ::testing::Test {
         for (iteration = 0; iteration < iterations; iteration++) {
             filter.predict(dt);
             dumpState(filter.state(), "After prediction");
-            ASSERT_FALSE(contentsInvalid(filter.state()))
-                << "ERROR: Detected a NAN or other invalid contents after "
-                   "prediction step of iteration "
-                << iteration << "\n" << filter.state();
+            ASSERT_FALSE(stateContentsInvalid(filter.state()))
+                << "ERROR: Detected an invalid floating-point value in the "
+                   "state "
+                   "after prediction step of iteration "
+                << iteration;
+            ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
+                << "ERROR: Detected an invalid state covariance matrix "
+                   "(invalid "
+                   "floating-point, or invariants violated) after prediction "
+                   "step "
+                   "of iteration "
+                << iteration;
+
+            ASSERT_FALSE(
+                covarianceContentsInvalid(meas.getCovariance(filter.state())))
+                << "ERROR: Detected invalid contents (invalid floating-point, "
+                   "or "
+                   "invariants violated) in measurement covariance "
+                   "matrix, iteration "
+                << iteration << "\n" << meas.getCovariance(filter.state());
 
             filter.correct(meas);
             dumpState(filter.state(), "After correction");
-            ASSERT_FALSE(contentsInvalid(filter.state()))
-                << "ERROR: Detected a NAN or other invalid contents after "
-                   "correction step of iteration "
-                << iteration << "\n" << filter.state();
+            ASSERT_FALSE(stateContentsInvalid(filter.state()))
+                << "ERROR: Detected an invalid floating-point value in the "
+                   "state "
+                   "after correction step of iteration "
+                << iteration;
+            ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
+                << "ERROR: Detected an invalid state covariance matrix "
+                   "(invalid "
+                   "floating-point, or invariants violated) after correction "
+                   "step "
+                   "of iteration "
+                << iteration;
         }
     }
 

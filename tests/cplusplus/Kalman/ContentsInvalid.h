@@ -51,20 +51,30 @@ inline bool contentsInvalid(Eigen::MatrixBase<Derived> const &v) {
 /// Applies contentsInvalid() to a covariance matrix, and also checks other
 /// invariant(s) of a covariance matrix.
 template <typename Derived>
-inline bool
-covarianceMatrixContentsInvalid(Eigen::MatrixBase<Derived> const &v) {
+inline bool covarianceContentsInvalid(Eigen::MatrixBase<Derived> const &v) {
     // If not zero and not normal, or if any of the diagonal values (variances)
     // are negative.
     return contentsInvalid(v) || (v.diagonal().array() < 0.).any();
 }
 
-/// Applies contentsInvalid() to all aspects of a
+/// Applies contentsInvalid() to state aspects of a
 /// pose_externalized_rotation::State
+inline bool stateContentsInvalid(
+    osvr::kalman::pose_externalized_rotation::State const &state) {
+    return contentsInvalid(state.stateVector()) ||
+           contentsInvalid(state.getQuaternion().coeffs());
+}
+
+/// Applies contentsInvalid() and covarianceContentsInvalid() to the covariance
+/// of a pose_externalized_rotation::State
+inline bool covarianceContentsInvalid(
+    osvr::kalman::pose_externalized_rotation::State const &state) {
+    return covarianceContentsInvalid(state.errorCovariance());
+}
+
 inline bool
 contentsInvalid(osvr::kalman::pose_externalized_rotation::State const &state) {
-    return contentsInvalid(state.stateVector()) ||
-           contentsInvalid(state.getQuaternion().coeffs()) ||
-           covarianceMatrixContentsInvalid(state.errorCovariance());
+    return stateContentsInvalid(state) || covarianceContentsInvalid(state);
 }
 
 #endif // INCLUDED_ContentsInvalid_h_GUID_E3C95D05_0BEF_4A9F_933A_35FD0B7D3745
