@@ -56,6 +56,8 @@ if(BUILD_TESTING)
     target_compile_definitions(VideoIMUFusion_Offline PRIVATE OSVR_VIDEOIMUFUSION_VERBOSE)
     set_target_properties(VideoIMUFusion_Offline PROPERTIES
         FOLDER "OSVR Plugins")
+    add_test(NAME VideoIMUFusion_Offline_NearOnDesk
+        COMMAND VideoIMUFusion_Offline "${CMAKE_CURRENT_SOURCE_DIR}/near-on-desk.json")
 endif()
 
 if(WIN32 AND OSVR_FPE)
