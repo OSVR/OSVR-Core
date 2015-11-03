@@ -61,15 +61,15 @@ void VideoIMUFusion::RunningData::handleVideoTrackerReport(
         m_cameraMeas.setMeasurement(roomPose.translation(),
                                     Eigen::Quaterniond(roomPose.rotation()));
         m_filter.correct(m_cameraMeas);
+
 #if 0
-                        OSVR_DEV_VERBOSE(
-                            "State: "
-                            << m_filter.state().stateVector().transpose() << "\n"
-                            << "Quat: "
-                            << m_filter.state().getQuaternion().coeffs().transpose()
-                            << "\n"
-                               "Error:\n"
-                            << m_filter.state().errorCovariance());
+        OSVR_DEV_VERBOSE(
+            "State: " << m_filter.state().stateVector().transpose() << "\n"
+                      << "Quat: "
+                      << m_filter.state().getQuaternion().coeffs().transpose()
+                      << "\n"
+                         "Error:\n"
+                      << m_filter.state().errorCovariance());
 #endif
     }
 }
