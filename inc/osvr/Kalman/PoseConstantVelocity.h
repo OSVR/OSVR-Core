@@ -44,8 +44,11 @@ namespace kalman {
         using StateVector = pose_externalized_rotation::StateVector;
         using StateSquareMatrix = pose_externalized_rotation::StateSquareMatrix;
         using NoiseAutocorrelation = types::Vector<6>;
-        PoseConstantVelocityProcessModel()
-            : m_mu(NoiseAutocorrelation::Constant(.00001)) {}
+        PoseConstantVelocityProcessModel(double positionNoise = 0.01,
+                                         double orientationNoise = 0.1) {
+            m_mu.head<3>() = types::Vector<3>::Constant(positionNoise);
+            m_mu.tail<3>() = types::Vector<3>::Constant(orientationNoise);
+        }
 
         void setNoiseAutocorrelation(NoiseAutocorrelation const &noise) {
             m_mu = noise;
