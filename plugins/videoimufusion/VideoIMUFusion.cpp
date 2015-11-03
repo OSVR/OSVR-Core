@@ -45,10 +45,14 @@ namespace ei = osvr::util::eigen_interop;
 namespace filters = osvr::util::filters;
 
 VideoIMUFusion::VideoIMUFusion() { enterCameraPoseAcquisitionState(); }
+VideoIMUFusion::~VideoIMUFusion() = default;
 
-VideoIMUFusion::~VideoIMUFusion() {}
-
-OSVR_ReturnCode VideoIMUFusion::update() { return OSVR_RETURN_SUCCESS; }
+Eigen::Matrix<double, 12, 12> const &
+VideoIMUFusion::getErrorCovariance() const {
+    BOOST_ASSERT_MSG(running(),
+                     "Only valid if fusion is in the running state!");
+    return m_runningData->getErrorCovariance();
+}
 
 void VideoIMUFusion::enterRunningState(
     Eigen::Isometry3d const &cTr, const OSVR_TimeValue &timestamp,
@@ -57,6 +61,7 @@ void VideoIMUFusion::enterRunningState(
     FPExceptionEnabler fpe;
 #endif
     m_cTr = cTr;
+    ei::map(m_camera) = cTr;
     std::cout << "Camera is located in the room at roughly "
               << m_cTr.translation().transpose() << std::endl;
     m_state = State::Running;

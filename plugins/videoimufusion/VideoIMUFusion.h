@@ -27,7 +27,6 @@
 
 // Internal Includes
 #include <osvr/Util/ClientReportTypesC.h>
-#include <osvr/Util/ReturnCodesC.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/TimeValue.h>
 
@@ -36,35 +35,71 @@
 
 // Standard includes
 #include <memory>
+#include <cassert>
 
 /// The core of the fusion code - doesn't deal with getting data in or reporting
 /// it out, for easier use in testing.
 class VideoIMUFusion {
   public:
+    /// Constructor
     VideoIMUFusion();
+    /// Out-of-line destructor required for unique_ptr pimpl idiom
     ~VideoIMUFusion();
-    OSVR_ReturnCode update();
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    /// Call with each new IMU report, whether or not fusion is in running
+    /// state.
     void handleIMUData(const OSVR_TimeValue &timestamp,
                        const OSVR_OrientationReport &report);
+    /// Call with each new video tracker report once we've entered running
+    /// state.
     void handleVideoTrackerDataWhileRunning(const OSVR_TimeValue &timestamp,
                                             const OSVR_PoseReport &report);
+    /// Call with each new video tracker report, as well as the most recent IMU
+    /// orientation state, while the filter has not yet entered running state.
+    ///
+    /// The IMU state is required to compute a filtered estimate of the
+    /// position/orientation of the camera relative to the room and IMU
     void handleVideoTrackerDataDuringStartup(
         const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report,
         const OSVR_OrientationState &orientation);
 
     bool running() const { return m_state == State::Running; }
 
-    OSVR_PoseState const &getLatestFusedPose() const { return m_lastFusion; }
+    /// Returns the latest fusion result pose.
+    /// Only valid once running state is entered!
+    OSVR_PoseState const &getLatestFusedPose() const {
+        assert(running());
+        return m_lastFusion;
+    }
+
+    /// Returns the timestamp associated with the latest fusion result pose.
+    /// Only valid once running state is entered!
     osvr::util::time::TimeValue const &getLatestFusedTime() const {
+        assert(running());
         return m_lastFusionTime;
     }
 
+    /// Returns the latest video-tracker pose, re-oriented to be in room space.
+    /// Only valid once running state is entered!
     OSVR_PoseState const &getLatestReorientedVideoPose() const {
+        assert(running());
         return m_reorientedVideo;
     }
 
-    OSVR_PoseState const &getLatestCameraPose() const { return m_camera; }
+    /// Returns the latest pose of the camera in the room.
+    /// Only valid once running state is entered!
+    ///
+    /// Currently constant once running state is entered.
+    OSVR_PoseState const &getLatestCameraPose() const {
+        assert(running());
+        return m_camera;
+    }
+
+    /// Returns the current state error covariance matrix
+    /// Only valid once running state is entered!
+    Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const;
 
   private:
     void enterCameraPoseAcquisitionState();

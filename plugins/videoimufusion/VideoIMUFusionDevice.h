@@ -47,7 +47,7 @@ class VideoIMUFusionDevice {
                          std::string const &imuPath,
                          std::string const &videoPath);
     ~VideoIMUFusionDevice();
-    OSVR_ReturnCode update() { return m_fusion.update(); }
+    OSVR_ReturnCode update() { return OSVR_RETURN_SUCCESS; }
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   private:
     void handleIMUData(const OSVR_TimeValue &timestamp,

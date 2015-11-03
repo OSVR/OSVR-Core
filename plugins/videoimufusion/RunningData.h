@@ -94,6 +94,10 @@ class VideoIMUFusion::RunningData {
         return m_cTr * osvr::util::eigen_interop::map(pose);
     }
 
+    Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const {
+        return m_filter.state().errorCovariance();
+    }
+
   private:
     Filter m_filter;
     AbsoluteOrientationMeasurement m_imuMeas;
