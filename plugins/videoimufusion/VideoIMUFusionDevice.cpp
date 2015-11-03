@@ -128,6 +128,6 @@ void VideoIMUFusionDevice::handleVideoTrackerData(
 
 void VideoIMUFusionDevice::sendMainPoseReport() {
     osvrDeviceTrackerSendPoseTimestamped(
-        m_dev, m_trackerOut, &m_fusion.getLatestFusedPose(),
-        TRANSFORMED_VIDEO_SENSOR_ID, &m_fusion.getLatestFusedTime());
+        m_dev, m_trackerOut, &m_fusion.getLatestFusedPose(), FUSED_SENSOR_ID,
+        &m_fusion.getLatestFusedTime());
 }
