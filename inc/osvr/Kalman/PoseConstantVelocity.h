@@ -76,7 +76,7 @@ namespace kalman {
             for (std::size_t xIndex = 0; xIndex < dim / 2; ++xIndex) {
                 auto xDotIndex = xIndex + dim / 2;
                 // xIndex is 'i' and xDotIndex is 'j' in eq. 4.8
-                const auto mu = getMu(xDotIndex);
+                const auto mu = getMu(xIndex);
                 cov(xIndex, xIndex) = mu * dt3;
                 auto symmetric = mu * dt2;
                 cov(xIndex, xDotIndex) = symmetric;
