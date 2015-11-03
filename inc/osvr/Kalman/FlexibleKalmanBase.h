@@ -133,6 +133,9 @@ namespace kalman {
         /// symmetrical implies anything else useful performance-wise here or
         /// later in the data flow.
         // auto Q = processModel.getSampledProcessNoiseCovariance(dt);
+        OSVR_KALMAN_DEBUG_OUTPUT(
+            "Process Noise Covariance Q",
+            processModel.getSampledProcessNoiseCovariance(dt));
         return A * P * A.transpose() +
                processModel.getSampledProcessNoiseCovariance(dt);
     }
