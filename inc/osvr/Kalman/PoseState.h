@@ -97,13 +97,16 @@ namespace kalman {
 
             return A;
         }
+        inline double computeAttenuation(double damping, double dt) {
+            return std::pow(damping, dt);
+        }
         inline StateSquareMatrix
         stateTransitionMatrixWithVelocityDamping(double dt, double damping) {
 
             // eq. 4.5 in Welch 1996
 
             auto A = stateTransitionMatrix(dt);
-            auto attenuation = std::pow(damping, dt);
+            auto attenuation = computeAttenuation(damping, dt);
             A.bottomRightCorner<6, 6>() *= attenuation;
             return A;
         }
@@ -122,7 +125,7 @@ namespace kalman {
 
         inline void dampenVelocities(StateVector &state, double damping,
                                      double dt) {
-            auto attenuation = std::pow(damping, dt);
+            auto attenuation = computeAttenuation(damping, dt);
             velocities(state) *= attenuation;
         }
 
