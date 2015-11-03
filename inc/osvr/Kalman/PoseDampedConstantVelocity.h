@@ -54,6 +54,12 @@ namespace kalman {
             setDamping(damping);
         }
 
+        void setNoiseAutocorrelation(double positionNoise = 0.01,
+                                     double orientationNoise = 0.1) {
+            m_constantVelModel.setNoiseAutocorrelation(positionNoise,
+                                                       orientationNoise);
+        }
+
         void setNoiseAutocorrelation(NoiseAutocorrelation const &noise) {
             m_constantVelModel.setNoiseAutocorrelation(noise);
         }

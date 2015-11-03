@@ -44,8 +44,8 @@ static const double CameraPosError = 3.0E-2;
 static const double CameraPositionError[] = {CameraPosError, CameraPosError,
                                              CameraPosError * 0.1};
 
-static const double PositionNoiseAutocorrelation = 0.00001;
-static const double OrientationNoiseAutocorrelation = 0.0001;
+static const double PositionNoiseAutocorrelation = 0.01;
+static const double OrientationNoiseAutocorrelation = 0.1;
 
 static const double VelocityDamping = .001;
 
@@ -55,7 +55,8 @@ namespace ei = osvr::util::eigen_interop;
 VideoIMUFusion::RunningData::RunningData(
     Eigen::Isometry3d const &cTr, OSVR_OrientationState const &initialIMU,
     OSVR_PoseState const &initialVideo, OSVR_TimeValue const &lastTS)
-    : m_filter(),
+    : m_filter(ProcessModel{VelocityDamping, PositionNoiseAutocorrelation,
+                            OrientationNoiseAutocorrelation}),
       m_imuMeas(ei::map(initialIMU), Vector<3>::Map(IMUErrorVector).eval()),
       m_cameraMeas(Vector<3>::Zero(), Eigen::Quaterniond::Identity(),
                    Vector<3>::Map(CameraPositionError).asDiagonal(),
@@ -75,13 +76,4 @@ VideoIMUFusion::RunningData::RunningData(
     m_filter.state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
     m_filter.state().setErrorCovariance(
         Vector<12>(InitialStateError).asDiagonal());
-
-    m_filter.processModel().setDamping(VelocityDamping);
-
-    Vector<6> noiseAutocorrelation;
-    noiseAutocorrelation.head<3>() =
-        Vector<3>::Constant(PositionNoiseAutocorrelation);
-    noiseAutocorrelation.tail<3>() =
-        Vector<3>::Constant(OrientationNoiseAutocorrelation);
-    m_filter.processModel().setNoiseAutocorrelation(noiseAutocorrelation);
 }

@@ -46,10 +46,13 @@ namespace kalman {
         using NoiseAutocorrelation = types::Vector<6>;
         PoseConstantVelocityProcessModel(double positionNoise = 0.01,
                                          double orientationNoise = 0.1) {
+            setNoiseAutocorrelation(positionNoise, orientationNoise);
+        }
+        void setNoiseAutocorrelation(double positionNoise = 0.01,
+                                     double orientationNoise = 0.1) {
             m_mu.head<3>() = types::Vector<3>::Constant(positionNoise);
             m_mu.tail<3>() = types::Vector<3>::Constant(orientationNoise);
         }
-
         void setNoiseAutocorrelation(NoiseAutocorrelation const &noise) {
             m_mu = noise;
         }
