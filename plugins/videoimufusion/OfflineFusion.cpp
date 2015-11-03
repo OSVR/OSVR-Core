@@ -50,11 +50,16 @@ static const auto VIDEO_PATH =
 void processReports(Json::Value const &log) {
     VideoIMUFusion fusion;
     auto reportNumber = std::size_t{0};
-
+    bool gotRunning = false;
+    auto firstRunningReport = std::size_t{0};
     bool gotOri = false;
     OSVR_OrientationReport ori;
     for (auto &report : log) {
         std::cout << "\n***********************\nReport #" << reportNumber;
+        if (gotRunning) {
+            std::cout << " (report #" << (reportNumber - firstRunningReport)
+                      << " in running state)";
+        }
         auto timestamp = osvr::common::timevalueFromJson(report["timestamp"]);
         Eigen::Quaterniond quat =
             osvr::common::quatFromJson(report["rotation"]);
@@ -89,10 +94,18 @@ void processReports(Json::Value const &log) {
                                      path.toStyledString());
         }
         if (fusion.running()) {
+            if (!gotRunning) {
+                gotRunning = true;
+                firstRunningReport = reportNumber;
+                std::cout << "---- Fusion just switched to running state!"
+                          << std::endl;
+            }
             std::cout << "Error Covariance:\n"
                       << fusion.getErrorCovariance().diagonal() << std::endl;
             if ((fusion.getErrorCovariance().diagonal().array() < 0.).any()) {
-                std::cerr << "Got a negative variance (diagonal of state "
+                std::cout << std::flush;
+                std::cerr << std::flush
+                          << "Got a negative variance (diagonal of state "
                              "covariance matrix) - bailing out!"
                           << std::endl;
                 throw std::runtime_error("Negative variance!");
