@@ -49,17 +49,38 @@ namespace kalman {
         using MeasurementVector = types::Vector<DIMENSION>;
         using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
         AbsoluteOrientationBase(Eigen::Quaterniond const &quat,
-                                types::Vector<3> const &eulerStdDev)
-            : AbsoluteOrientationBase(
-                  quat,
-                  external_quat::covarianceFromEulerVariance(eulerStdDev)) {}
+                                types::Vector<3> const &eulerVariance)
+            : m_measurement(quat),
+              m_covariance(MeasurementSquareMatrix::Identity()),
+              m_eulerVariance(eulerVariance) {
+            /// The covariance in Quat space is G C G^T, where G is the Jacobian
+            /// of a quaternion with respect to euler angles (evaluated at the
+            /// delta-quaternion in getCovariance) and C is the covariance in
+            /// Euler space.
+            /// Substitutions of w1 = q1 / 2 and so forth were made to allow
+            /// evaluating the jacobian given a delta quat, rather than small
+            /// euler angles
+            m_covariance.topLeftCorner<3, 3>().diagonal() =
+                m_eulerVariance / 4.;
+        }
+#if 0
         AbsoluteOrientationBase(
             Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)
             : m_measurement(quat), m_covariance(covariance) {}
+#endif
 
         template <typename State>
-        MeasurementSquareMatrix getCovariance(State const &) const {
+        MeasurementSquareMatrix const &getCovariance(State const &s) {
+            const types::Vector<3> q = getResidual(s).template head<3>();
+            const types::Vector<3> q2 = (q.array() * q.array()).matrix();
+            double denom = -16 * std::sqrt(1 - (q.dot(q) / 16.));
+            const types::Vector<3> edge =
+                (q.array() * m_eulerVariance.array() / denom).matrix();
+            m_covariance.topRightCorner<3, 1>() = edge;
+            m_covariance.bottomLeftCorner<1, 3>() = edge.transpose();
+            m_covariance(3, 3) =
+                (q2.dot(m_eulerVariance)) / (64. - 4. * (q2.sum()));
             return m_covariance;
         }
 
@@ -83,6 +104,7 @@ namespace kalman {
       private:
         Eigen::Quaterniond m_measurement;
         MeasurementSquareMatrix m_covariance;
+        types::Vector<3> m_eulerVariance;
     };
 
     /// This is the subclass of AbsoluteOrientationBase: only explicit
@@ -101,13 +123,14 @@ namespace kalman {
         using Base = AbsoluteOrientationBase;
 
         AbsoluteOrientationMeasurement(Eigen::Quaterniond const &quat,
-                                       types::Vector<3> const &eulerStdDev)
-            : Base(quat, eulerStdDev) {}
-
+                                       types::Vector<3> const &eulerVariance)
+            : Base(quat, eulerVariance) {}
+#if 0
         AbsoluteOrientationMeasurement(
             Eigen::Quaterniond const &quat,
             types::SquareMatrix<DIMENSION> const &covariance)
             : Base(quat, covariance) {}
+#endif
 
         types::Matrix<DIMENSION, STATE_DIMENSION>
         getJacobian(State const &s) const {
