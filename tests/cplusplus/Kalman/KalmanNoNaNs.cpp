@@ -41,6 +41,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <osvr/Kalman/PoseDampedConstantVelocity.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
 #include <osvr/Kalman/AbsolutePoseMeasurement.h>
+#include <osvr/Kalman/AbsolutePositionMeasurement.h>
 
 // Library/third-party includes
 #include "gtest/gtest.h"
@@ -53,6 +54,8 @@ using State = ProcessModel::State;
 using AbsoluteOrientationMeasurement =
     osvr::kalman::AbsoluteOrientationMeasurement<State>;
 using AbsolutePoseMeasurement = osvr::kalman::AbsolutePoseMeasurement<State>;
+using AbsolutePositionMeasurement =
+    osvr::kalman::AbsolutePositionMeasurement<State>;
 using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
 class Stability : public ::testing::Test {
@@ -173,6 +176,7 @@ TYPED_TEST(VariedProcessModelStability,
     /// @todo check that it's roughly identity
 }
 
+#if 0
 TYPED_TEST(VariedProcessModelStability, IdentityAbsolutePoseMeasurement) {
     using Filter = osvr::kalman::FlexibleKalmanFilter<TypeParam>;
 
@@ -194,6 +198,31 @@ TYPED_TEST(VariedProcessModelStability, AbsolutePoseMeasurementXlate111) {
         Eigen::Vector3d::Constant(1), Eigen::Quaterniond::Identity(),
         Eigen::Matrix<double, 3, 3>::Identity() * 0.000007,
         Eigen::Vector3d::Constant(.00001)};
+    this->dumpInitialState(filter);
+    this->filterAndCheckRepeatedly(filter, meas);
+    /// @todo check that it's roughly identity orientation, position of 1, 1, 1
+}
+#endif
+
+TYPED_TEST(VariedProcessModelStability, IdentityAbsolutePositionMeasurement) {
+    using Filter = osvr::kalman::FlexibleKalmanFilter<TypeParam>;
+
+    auto filter = Filter{};
+    auto meas = AbsolutePositionMeasurement{
+        Eigen::Vector3d::Zero(),
+        Eigen::Matrix<double, 3, 3>::Identity() * 0.000007};
+    this->dumpInitialState(filter);
+    this->filterAndCheckRepeatedly(filter, meas);
+    /// @todo check that it's roughly identity
+}
+
+TYPED_TEST(VariedProcessModelStability, AbsolutePositionMeasurementXlate111) {
+    using Filter = osvr::kalman::FlexibleKalmanFilter<TypeParam>;
+
+    auto filter = Filter{};
+    auto meas = AbsolutePositionMeasurement{
+        Eigen::Vector3d::Constant(1),
+        Eigen::Matrix<double, 3, 3>::Identity() * 0.000007};
     this->dumpInitialState(filter);
     this->filterAndCheckRepeatedly(filter, meas);
     /// @todo check that it's roughly identity orientation, position of 1, 1, 1
