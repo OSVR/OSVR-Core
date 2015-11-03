@@ -58,7 +58,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 // Standard includes
 // - none
 
-using ProcessModel = osvr::kalman::PoseConstantVelocityProcessModel;
+using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
 using FilterState = ProcessModel::State;
 using AbsoluteOrientationMeasurement =
     osvr::kalman::AbsoluteOrientationMeasurement<FilterState>;

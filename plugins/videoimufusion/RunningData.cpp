@@ -47,6 +47,8 @@ static const double CameraPositionError[] = {CameraPosError, CameraPosError,
 static const double PositionNoiseAutocorrelation = 0.00001;
 static const double OrientationNoiseAutocorrelation = 0.0001;
 
+static const double VelocityDamping = .001;
+
 using osvr::kalman::types::Vector;
 namespace ei = osvr::util::eigen_interop;
 
@@ -73,6 +75,8 @@ VideoIMUFusion::RunningData::RunningData(
     m_filter.state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
     m_filter.state().setErrorCovariance(
         Vector<12>(InitialStateError).asDiagonal());
+
+    m_filter.processModel().setDamping(VelocityDamping);
 
     Vector<6> noiseAutocorrelation;
     noiseAutocorrelation.head<3>() =
