@@ -50,7 +50,7 @@ namespace kalman {
     template <typename StateType, typename ProcessModelType,
               typename MeasurementType>
     inline void correct(StateType &state, ProcessModelType &processModel,
-                        MeasurementType const &meas) {
+                        MeasurementType &meas) {
         /// Dimension of measurement
         static const auto m = types::Dimension<MeasurementType>::value;
         /// Dimension of state
@@ -173,7 +173,7 @@ namespace kalman {
         }
 
         template <typename MeasurementType>
-        void correct(MeasurementType const &meas) {
+        void correct(MeasurementType &meas) {
             kalman::correct(state(), processModel(), meas);
         }
 
