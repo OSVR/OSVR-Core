@@ -64,9 +64,8 @@ VideoIMUFusion::RunningData::RunningData(
     osvr::kalman::types::DimVector<FilterState> initialState =
         osvr::kalman::types::DimVector<FilterState>::Zero();
     using namespace osvr::kalman::pose_externalized_rotation;
-#if 0
+
     position(initialState) = roomPose.translation();
-#endif
     m_filter.state().setStateVector(initialState);
     m_filter.state().setQuaternion(Eigen::Quaterniond(roomPose.rotation()));
     m_filter.state().setErrorCovariance(
