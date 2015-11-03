@@ -35,8 +35,12 @@
 // Standard includes
 // - none
 
+/// Are the contents of a value invalid? (Invalid is defined to be any "weird"
+/// floating point value - nan, inf, denormalized, etc. - anything that
+/// std::isnormal() returns false on that isn't just zero)
 inline bool contentsInvalid(double n) { return !(n == 0. || std::isnormal(n)); }
 
+/// Applies contentsInvalid() to a matrix or vector.
 template <typename Derived>
 inline bool contentsInvalid(Eigen::MatrixBase<Derived> const &v) {
     return v.unaryExpr(
@@ -44,10 +48,23 @@ inline bool contentsInvalid(Eigen::MatrixBase<Derived> const &v) {
         .any();
 }
 
+/// Applies contentsInvalid() to a covariance matrix, and also checks other
+/// invariant(s) of a covariance matrix.
+template <typename Derived>
+inline bool
+covarianceMatrixContentsInvalid(Eigen::MatrixBase<Derived> const &v) {
+    // If not zero and not normal, or if any of the diagonal values (variances)
+    // are negative.
+    return contentsInvalid(v) || (v.diagonal().array() < 0.).any();
+}
+
+/// Applies contentsInvalid() to all aspects of a
+/// pose_externalized_rotation::State
 inline bool
 contentsInvalid(osvr::kalman::pose_externalized_rotation::State const &state) {
     return contentsInvalid(state.stateVector()) ||
            contentsInvalid(state.getQuaternion().coeffs()) ||
-           contentsInvalid(state.errorCovariance());
+           covarianceMatrixContentsInvalid(state.errorCovariance());
 }
+
 #endif // INCLUDED_ContentsInvalid_h_GUID_E3C95D05_0BEF_4A9F_933A_35FD0B7D3745
