@@ -32,12 +32,9 @@
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/TypePack/TypeKeyedTuple.h>
-#include <osvr/TypePack/QuoteTrait.h>
+#include <osvr/TypePack/Quote.h>
 
 // Library/third-party includes
-#include <boost/fusion/include/has_key.hpp>
-#include <boost/fusion/include/at_key.hpp>
-#include <boost/mpl/placeholders.hpp>
 #include <boost/optional.hpp>
 
 // Standard includes
@@ -48,7 +45,7 @@ namespace common {
     /// @brief A templated type containing state and a timestamp for known,
     /// specialized report types.
     template <typename ReportType> struct StateMapContents {
-        using state_type = typepack::t_<traits::StateType<ReportType>>;
+        using state_type = traits::StateFromReport_t<ReportType>;
         state_type state;
         util::time::TimeValue timestamp;
     };
@@ -58,12 +55,11 @@ namespace common {
     template <typename ReportType>
     using StateMapValueType = boost::optional<StateMapContents<ReportType>>;
 
-    using MakeStateMapValue = typepack::quote<StateMapValueType>;
-
     /// @brief Data structure mapping from a report type to an optional state
     /// value.
     using StateMap =
-        typepack::TypeKeyedTuple<traits::ReportTypeList, MakeStateMapValue>;
+        typepack::TypeKeyedTuple<traits::ReportTypeList,
+                                 typepack::quote<StateMapValueType>>;
 
     /// @brief Class to maintain state for an interface for each report (and
     /// thus state) type explicitly enumerated.
@@ -95,9 +91,8 @@ namespace common {
         bool hasAnyState() const { return m_hasState; }
 
         template <typename ReportType>
-        void
-        getState(util::time::TimeValue &timestamp,
-                 typename traits::StateType<ReportType>::type &state) const {
+        void getState(util::time::TimeValue &timestamp,
+                      traits::StateFromReport_t<ReportType> &state) const {
             using typepack::get;
             if (hasState<ReportType>()) {
                 timestamp = get<ReportType>(m_states)->timestamp;
