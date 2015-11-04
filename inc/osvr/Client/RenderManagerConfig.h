@@ -54,7 +54,7 @@ namespace client {
     class RenderManagerConfig {
     public:
         OSVR_CLIENT_EXPORT RenderManagerConfig(const std::string& renderManagerConfig);
-        OSVR_CLIENT_EXPORT RenderManagerConfig() {};
+        RenderManagerConfig() {}
 
         OSVR_CLIENT_EXPORT void parse(const std::string& renderManagerConfig);
         OSVR_CLIENT_EXPORT void print() const;
