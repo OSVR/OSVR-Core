@@ -32,6 +32,7 @@
 
 // Internal Includes
 #include <osvr/Util/ClientCallbackTypesC.h>
+#include <osvr/TypePack/T.h>
 
 // Library/third-party includes
 // - none
@@ -42,19 +43,18 @@
 namespace osvr {
 namespace common {
     namespace traits {
-        /// @brief Metafunction taking a ReportType and returning the associated
-        /// CallbackType
+        /// @brief Metafunction/trait taking a ReportType and returning the
+        /// associated CallbackType
         /// @headerfile CallbackType.h <osvr/Common/CallbackType.h>
         template <typename T> struct CallbackType {};
 
-        /** @brief Metafunction taking a CallbackType and returning the
-        associated ReportType
-        @headerfile ReportFromCallback.h <osvr/Common/ReportFromCallback.h>
-        */
+        /// @brief Metafunction/trait taking a CallbackType and returning the
+        /// associated ReportType
+        /// @headerfile ReportFromCallback.h <osvr/Common/ReportFromCallback.h>
         template <typename T> struct ReportFromCallback {};
 
-        /// @brief Metafunction taking a ReportType and returning the associated
-        /// StateType
+        /// @brief Metafunction/trait taking a ReportType and returning the
+        /// associated StateType
         /// @headerfile StateType.h <osvr/Common/StateType.h>
         template <typename T> struct StateType {};
 
@@ -82,6 +82,21 @@ namespace common {
         OSVR_REPORT_TRAITS(NaviVelocity)
         OSVR_REPORT_TRAITS(NaviPosition)
 #undef OSVR_REPORT_TRAITS
+
+        /// @brief Alias for the CallbackType associated with a given ReportType
+        /// @headerfile CallbackType.h <osvr/Common/CallbackType.h>
+        template <typename T>
+        using CallbackFromReport_t = typepack::t_<CallbackType<T>>;
+
+        /// @brief Alias for the StateType associated with a given ReportType
+        /// @headerfile CallbackType.h <osvr/Common/CallbackType.h>
+        template <typename T>
+        using StateFromReport_t = typepack::t_<StateType<T>>;
+
+        /// @brief Alias for the ReportType associated with a given CallbackType
+        /// @headerfile ReportFromCallback.h <osvr/Common/ReportFromCallback.h>
+        template <typename T>
+        using ReportFromCallback_t = typepack::t_<ReportFromCallback<T>>;
     } // namespace traits
 
 } // namespace common
