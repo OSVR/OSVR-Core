@@ -46,17 +46,18 @@ namespace client {
     class RenderManagerConfig;
     typedef std::shared_ptr<RenderManagerConfig> RenderManagerConfigPtr;
     class RenderManagerConfigFactory {
-    public:
+      public:
         OSVR_CLIENT_EXPORT static RenderManagerConfigPtr
-            createShared(OSVR_ClientContext ctx);
+        createShared(OSVR_ClientContext ctx);
     };
 
     class RenderManagerConfig {
-    public:
-        OSVR_CLIENT_EXPORT RenderManagerConfig(const std::string& renderManagerConfig);
-        OSVR_CLIENT_EXPORT RenderManagerConfig() {};
+      public:
+        OSVR_CLIENT_EXPORT
+        RenderManagerConfig(const std::string &renderManagerConfig);
+        RenderManagerConfig() {}
 
-        OSVR_CLIENT_EXPORT void parse(const std::string& renderManagerConfig);
+        OSVR_CLIENT_EXPORT void parse(const std::string &renderManagerConfig);
         OSVR_CLIENT_EXPORT void print() const;
 
         /// Read the property information.
@@ -80,7 +81,7 @@ namespace client {
         OSVR_CLIENT_EXPORT uint32_t getDisplayRotation() const;
         OSVR_CLIENT_EXPORT uint32_t getBitsPerColor() const;
 
-    private:
+      private:
         bool m_directMode;
         uint32_t m_displayIndex;
         bool m_directHighPriority;

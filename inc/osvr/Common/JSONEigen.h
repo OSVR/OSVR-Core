@@ -50,6 +50,7 @@ namespace common {
         ret["x"] = quat.x();
         ret["y"] = quat.y();
         ret["z"] = quat.z();
+        return ret;
     }
 
     /// @brief Converts vectors to JSON arrays.
