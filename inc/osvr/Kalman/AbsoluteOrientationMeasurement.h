@@ -62,6 +62,13 @@ namespace kalman {
             /// euler angles
             m_covariance.topLeftCorner<3, 3>().diagonal() =
                 m_eulerVariance / 4.;
+
+#if 1
+            // This is not actually what the above comment describes - that was
+            // giving too
+            // small of values. This is a wild guess.
+            m_covariance(3, 3) = m_eulerVariance.sum() / 4.;
+#endif
         }
 #if 0
         AbsoluteOrientationBase(
@@ -72,6 +79,7 @@ namespace kalman {
 
         template <typename State>
         MeasurementSquareMatrix const &getCovariance(State const &s) {
+#if 0
             const types::Vector<3> q = getResidual(s).template head<3>();
             const types::Vector<3> q2 = (q.array() * q.array()).matrix();
             double denom = -16 * std::sqrt(1 - (q.dot(q) / 16.));
@@ -81,6 +89,7 @@ namespace kalman {
             m_covariance.bottomLeftCorner<1, 3>() = edge.transpose();
             m_covariance(3, 3) =
                 (q2.dot(m_eulerVariance)) / (64. - 4. * (q2.sum()));
+#endif
             return m_covariance;
         }
 
