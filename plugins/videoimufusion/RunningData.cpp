@@ -33,21 +33,21 @@
 // Standard includes
 // - none
 
-static const double InitialStateError[] = {1.,   1.,   1.,   1.,   1.,   1.,
-                                           100., 100., 100., 100., 100., 100.};
-static const double IMUError = 1.0E-2;
+static const double InitialStateError[] = {
+    1., 1., 1., 10., 10., 10., 100., 100., 100., 1000., 1000., 1000.};
+static const double IMUError = 1.0E-8;
 static const double IMUErrorVector[] = {IMUError, IMUError * 5., IMUError};
-static const double CameraOriError = 1.0E0;
+static const double CameraOriError = 1.0E-1;
 static const double CameraOrientationError[] = {CameraOriError, CameraOriError,
                                                 CameraOriError};
-static const double CameraPosError = 3.0E-2;
+static const double CameraPosError = 3.0E-4;
 static const double CameraPositionError[] = {CameraPosError, CameraPosError,
                                              CameraPosError * 0.1};
 
 static const double PositionNoiseAutocorrelation = 0.01;
 static const double OrientationNoiseAutocorrelation = 0.1;
 
-static const double VelocityDamping = .001;
+static const double VelocityDamping = .01;
 
 using osvr::kalman::types::Vector;
 namespace ei = osvr::util::eigen_interop;
