@@ -24,6 +24,7 @@ osvr_setup_lib_vars(Util)
 
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
+    "${HEADER_LOCATION}/AlignedMemory.h"
     "${HEADER_LOCATION}/Angles.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
