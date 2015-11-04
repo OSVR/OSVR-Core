@@ -68,10 +68,13 @@ namespace kalman {
 
         // The kalman gain stuff to not invert (called P12 in TAG)
         types::Matrix<n, m> PHt = P * H.transpose();
+        // OSVR_KALMAN_DEBUG_OUTPUT("PHt/numerator", P * H.transpose());
 
         // the stuff to invert for the kalman gain
         // also sometimes called S or the "Innovation Covariance"
         types::SquareMatrix<m> S = H * PHt + R;
+        // OSVR_KALMAN_DEBUG_OUTPUT("Transformed covariance", H * PHt);
+        // OSVR_KALMAN_DEBUG_OUTPUT("S: Innovation covariance", H * PHt + R);
 
         // Not going to directly compute Kalman gain K = PHt (S^-1)
         // Instead, decomposed S to solve things of the form (S^-1)x
@@ -98,7 +101,7 @@ namespace kalman {
 
         types::Vector<n> stateCorrection = PHt * denom.solve(deltaz);
         OSVR_KALMAN_DEBUG_OUTPUT("state correction",
-                                 stateCorrection.transpose());
+                                 (PHt * denom.solve(deltaz)).transpose());
 
         // Correct the state estimate
         state.setStateVector(state.stateVector() + stateCorrection);
