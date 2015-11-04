@@ -173,9 +173,9 @@ OSVR_UTIL_EXPORT int osvrTimeValueCmp(OSVR_IN_PTR const OSVR_TimeValue *tvA,
 OSVR_EXTERN_C_END
 
 /** @brief True if A is later than B */
-OSVR_INLINE OSVR_CBool osvrTimeValueGreater(
-    OSVR_IN_PTR const OSVR_TimeValue *tvA,
-    OSVR_IN_PTR const OSVR_TimeValue *tvB) {
+OSVR_INLINE OSVR_CBool
+osvrTimeValueGreater(OSVR_IN_PTR const OSVR_TimeValue *tvA,
+                     OSVR_IN_PTR const OSVR_TimeValue *tvB) {
     if (!tvA || !tvB) {
         return OSVR_FALSE;
     }
@@ -187,11 +187,59 @@ OSVR_INLINE OSVR_CBool osvrTimeValueGreater(
 }
 
 #ifdef __cplusplus
-/// @overload
+
+#include <cmath>
+#include <cassert>
+
+/// Returns true if the time value is normalized. Typically used in assertions.
+inline bool osvrTimeValueIsNormalized(const OSVR_TimeValue &tv) {
+    return std::abs(tv.microseconds) < 1000000 &&
+           ((tv.seconds > 0) == (tv.microseconds > 0));
+}
+
+/// True if A is later than B
 inline bool osvrTimeValueGreater(const OSVR_TimeValue &tvA,
                                  const OSVR_TimeValue &tvB) {
+    assert(osvrTimeValueIsNormalized(tvA) &&
+           "First timevalue argument to comparison was not normalized!");
+    assert(osvrTimeValueIsNormalized(tvB) &&
+           "Second timevalue argument to comparison was not normalized!");
     return (tvA.seconds > tvB.seconds) ||
            (tvA.seconds == tvB.seconds && tvA.microseconds > tvB.microseconds);
+}
+
+/// Operator > overload for time values
+inline bool operator>(const OSVR_TimeValue &tvA, const OSVR_TimeValue &tvB) {
+    return osvrTimeValueGreater(tvA, tvB);
+}
+
+/// Operator < overload for time values
+inline bool operator<(const OSVR_TimeValue &tvA, const OSVR_TimeValue &tvB) {
+    // Change the order of arguments before forwarding.
+    return osvrTimeValueGreater(tvB, tvA);
+}
+
+/// Operator == overload for time values
+inline bool operator==(const OSVR_TimeValue &tvA, const OSVR_TimeValue &tvB) {
+    assert(
+        osvrTimeValueIsNormalized(tvA) &&
+        "First timevalue argument to equality comparison was not normalized!");
+    assert(
+        osvrTimeValueIsNormalized(tvB) &&
+        "Second timevalue argument to equality comparison was not normalized!");
+    return (tvA.seconds == tvB.seconds) &&
+           (tvA.microseconds == tvB.microseconds);
+}
+/// Operator == overload for time values
+inline bool operator!=(const OSVR_TimeValue &tvA, const OSVR_TimeValue &tvB) {
+    assert(osvrTimeValueIsNormalized(tvA) && "First timevalue argument to "
+                                             "inequality comparison was not "
+                                             "normalized!");
+    assert(osvrTimeValueIsNormalized(tvB) && "Second timevalue argument to "
+                                             "inequality comparison was not "
+                                             "normalized!");
+    return (tvA.seconds != tvB.seconds) ||
+           (tvA.microseconds != tvB.microseconds);
 }
 #endif
 
