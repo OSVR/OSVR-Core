@@ -31,6 +31,7 @@
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
 #include <osvr/Util/PointerWrapper.h>
+#include "UseSendGuard.h"
 
 // Library/third-party includes
 // - none
@@ -63,15 +64,10 @@ osvrTrackerSend(const char method[], OSVR_DeviceToken,
                 OSVR_ChannelCount sensor, OSVR_TimeValue const *timestamp) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
-
-    auto guard = iface->getSendGuard();
-    if (guard->lock()) {
-        iface->tracker->sendReport(*val, sensor, *timestamp);
-        return OSVR_RETURN_SUCCESS;
-    }
-
-    return OSVR_RETURN_FAILURE;
+    return useSendGuardVoid(
+        iface, [&]() { iface->tracker->sendReport(*val, sensor, *timestamp); });
 }
+
 template <typename StateType>
 static inline OSVR_ReturnCode
 osvrTrackerSendVel(const char method[], OSVR_DeviceToken,
@@ -79,14 +75,9 @@ osvrTrackerSendVel(const char method[], OSVR_DeviceToken,
                    OSVR_ChannelCount sensor, OSVR_TimeValue const *timestamp) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
-
-    auto guard = iface->getSendGuard();
-    if (guard->lock()) {
+    return useSendGuardVoid(iface, [&]() {
         iface->tracker->sendVelReport(*val, sensor, *timestamp);
-        return OSVR_RETURN_SUCCESS;
-    }
-
-    return OSVR_RETURN_FAILURE;
+    });
 }
 
 template <typename StateType>
@@ -98,14 +89,11 @@ osvrTrackerSendAccel(const char method[], OSVR_DeviceToken,
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
 
-    auto guard = iface->getSendGuard();
-    if (guard->lock()) {
+    return useSendGuardVoid(iface, [&]() {
         iface->tracker->sendAccelReport(*val, sensor, *timestamp);
-        return OSVR_RETURN_SUCCESS;
-    }
-
-    return OSVR_RETURN_FAILURE;
+    });
 }
+
 OSVR_ReturnCode
 osvrDeviceTrackerSendPose(OSVR_IN_PTR OSVR_DeviceToken dev,
                           OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
