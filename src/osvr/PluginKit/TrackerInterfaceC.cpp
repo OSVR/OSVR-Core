@@ -59,13 +59,13 @@ template <typename StateType>
 static inline OSVR_ReturnCode
 osvrTrackerSend(const char method[], OSVR_DeviceToken,
                 OSVR_TrackerDeviceInterface iface, StateType const *val,
-                OSVR_ChannelCount chan, OSVR_TimeValue const *timestamp) {
+                OSVR_ChannelCount sensor, OSVR_TimeValue const *timestamp) {
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
 
     auto guard = iface->getSendGuard();
     if (guard->lock()) {
-        iface->tracker->sendReport(*val, chan, *timestamp);
+        iface->tracker->sendReport(*val, sensor, *timestamp);
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -75,52 +75,52 @@ OSVR_ReturnCode
 osvrDeviceTrackerSendPose(OSVR_IN_PTR OSVR_DeviceToken dev,
                           OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
                           OSVR_IN_PTR OSVR_PoseState const *val,
-                          OSVR_IN OSVR_ChannelCount chan) {
+                          OSVR_IN OSVR_ChannelCount sensor) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
 
-    return osvrDeviceTrackerSendPoseTimestamped(dev, iface, val, chan, &now);
+    return osvrDeviceTrackerSendPoseTimestamped(dev, iface, val, sensor, &now);
 }
 
 OSVR_ReturnCode osvrDeviceTrackerSendPoseTimestamped(
     OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
-    OSVR_IN_PTR OSVR_PoseState const *val, OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_PoseState const *val, OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     return osvrTrackerSend("osvrDeviceTrackerSendPoseTimestamped", dev, iface,
-                           val, chan, timestamp);
+                           val, sensor, timestamp);
 }
 
 OSVR_ReturnCode
 osvrDeviceTrackerSendPosition(OSVR_IN_PTR OSVR_DeviceToken dev,
                               OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
                               OSVR_IN_PTR OSVR_PositionState const *val,
-                              OSVR_IN OSVR_ChannelCount chan) {
+                              OSVR_IN OSVR_ChannelCount sensor) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
 
-    return osvrDeviceTrackerSendPositionTimestamped(dev, iface, val, chan,
+    return osvrDeviceTrackerSendPositionTimestamped(dev, iface, val, sensor,
                                                     &now);
 }
 
 OSVR_ReturnCode osvrDeviceTrackerSendPositionTimestamped(
     OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
-    OSVR_IN_PTR OSVR_PositionState const *val, OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN_PTR OSVR_PositionState const *val, OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     return osvrTrackerSend("osvrDeviceTrackerSendPoseTimestamped", dev, iface,
-                           val, chan, timestamp);
+                           val, sensor, timestamp);
 }
 
 OSVR_ReturnCode
 osvrDeviceTrackerSendOrientation(OSVR_IN_PTR OSVR_DeviceToken dev,
                                  OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
                                  OSVR_IN_PTR OSVR_OrientationState const *val,
-                                 OSVR_IN OSVR_ChannelCount chan) {
+                                 OSVR_IN OSVR_ChannelCount sensor) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
 
-    return osvrDeviceTrackerSendOrientationTimestamped(dev, iface, val, chan,
+    return osvrDeviceTrackerSendOrientationTimestamped(dev, iface, val, sensor,
                                                        &now);
 }
 
@@ -128,8 +128,8 @@ OSVR_ReturnCode osvrDeviceTrackerSendOrientationTimestamped(
     OSVR_IN_PTR OSVR_DeviceToken dev,
     OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
     OSVR_IN_PTR OSVR_OrientationState const *val,
-    OSVR_IN OSVR_ChannelCount chan,
+    OSVR_IN OSVR_ChannelCount sensor,
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     return osvrTrackerSend("osvrDeviceTrackerSendPoseTimestamped", dev, iface,
-                           val, chan, timestamp);
+                           val, sensor, timestamp);
 }

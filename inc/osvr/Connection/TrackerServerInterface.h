@@ -46,15 +46,15 @@ namespace connection {
     class TrackerServerInterface {
       public:
         virtual void sendReport(OSVR_PositionState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) = 0;
 
         virtual void sendReport(OSVR_OrientationState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) = 0;
 
         virtual void sendReport(OSVR_PoseState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) = 0;
     };
 

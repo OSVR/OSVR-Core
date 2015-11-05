@@ -54,27 +54,27 @@ namespace connection {
         static const vrpn_uint32 CLASS_OF_SERVICE = vrpn_CONNECTION_LOW_LATENCY;
 
         virtual void sendReport(OSVR_PositionState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) {
             m_resetQuat();
             osvrVec3ToQuatlib(Base::pos, &val);
-            m_sendPose(chan, timestamp);
+            m_sendPose(sensor, timestamp);
         }
 
         virtual void sendReport(OSVR_OrientationState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) {
             m_resetPos();
             osvrQuatToQuatlib(Base::d_quat, &val);
-            m_sendPose(chan, timestamp);
+            m_sendPose(sensor, timestamp);
         }
 
         virtual void sendReport(OSVR_PoseState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) {
-            osvrQuatToQuatlib(Base::d_quat, &(val.rotation));
             osvrVec3ToQuatlib(Base::pos, &(val.translation));
-            m_sendPose(chan, timestamp);
+            osvrQuatToQuatlib(Base::d_quat, &(val.rotation));
+            m_sendPose(sensor, timestamp);
         }
 
       private:
@@ -91,10 +91,10 @@ namespace connection {
             quat[Q_Z] = 0;
         }
         void m_resetQuat() { m_resetQuat(d_quat); }
-        void m_sendPose(OSVR_ChannelCount chan,
+        void m_sendPose(OSVR_ChannelCount sensor,
                         util::time::TimeValue const &ts) {
 
-            Base::d_sensor = chan;
+            Base::d_sensor = sensor;
             util::time::toStructTimeval(Base::timestamp, ts);
             char msgbuf[1000];
             vrpn_int32 len = Base::encode_to(msgbuf);
