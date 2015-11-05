@@ -118,6 +118,7 @@ set(API
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${HEADER_LOCATION}/Tracing.h"
+    "${HEADER_LOCATION}/TrackerSensorInfo.h"
     "${HEADER_LOCATION}/Transform.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h"
     "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
