@@ -17,11 +17,13 @@ set(CLIENTS
     TrackerState
     ViewerEyeSurfaces)
 
+set(LIB_c osvrClientKit)
+set(LIB_cpp osvrClientKitCpp)
 foreach(name ${MAINCLIENTS} ${CLIENTS})
     foreach(suffix c cpp)
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.${suffix}")
             add_executable(${name}_${suffix} ${name}.${suffix})
-            target_link_libraries(${name}_${suffix} osvrClientKitCpp)
+            target_link_libraries(${name}_${suffix} ${LIB_${suffix}})
             set_target_properties(${name}_${suffix} PROPERTIES
                 FOLDER "OSVR Example Clients")
         endif()
