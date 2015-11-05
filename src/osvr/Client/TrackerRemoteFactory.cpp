@@ -126,6 +126,7 @@ namespace client {
         virtual void update() { m_remote->mainloop(); }
 
       private:
+        /// Pass pose messages on to the client
         void m_handle(vrpn_TRACKERCB const &info) {
             common::tracing::markNewTrackerData();
             OSVR_PoseReport report;
@@ -163,28 +164,105 @@ namespace client {
                 }
             }
         }
+
+        /// Pass velocity messages on to the client
         void m_handle(vrpn_TRACKERVELCB const &info) {
-            common::tracing::markNewTrackerData();
+            /// @todo should we be marking a trace event here?
+            // common::tracing::markNewTrackerData();
+
             OSVR_TimeValue timestamp;
             osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
-            /// @todo overall velocity report
+
+            OSVR_VelocityReport overallReport;
+            overallReport.sensor = info.sensor;
+
+            overallReport.state.linearVelocityValid =
+                m_info.reportsLinearVelocity;
             if (m_info.reportsLinearVelocity) {
-                /// @todo
+                OSVR_LinearVelocityState vel;
+                osvrVec3FromQuatlib(&(vel), info.vel);
+
+                /// @todo rotate the velocity
+
+                overallReport.state.linearVelocity = vel;
+                OSVR_LinearVelocityReport report;
+                report.sensor = info.sensor;
+                report.state = vel;
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, report);
+                }
             }
+
+            overallReport.state.angularVelocityValid =
+                m_info.reportsAngularVelocity;
             if (m_info.reportsAngularVelocity) {
-                /// @todo
+                OSVR_AngularVelocityState state;
+                osvrQuatFromQuatlib(&(state.incrementalRotation),
+                                    info.vel_quat);
+                state.dt = info.vel_quat_dt;
+
+                /// @todo rotate the velocity?
+                overallReport.state.angularVelocity = state;
+                OSVR_AngularVelocityReport report;
+                report.sensor = info.sensor;
+                report.state = state;
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, report);
+                }
+            }
+
+            for (auto &iface : m_interfaces) {
+                iface->triggerCallbacks(timestamp, overallReport);
             }
         }
+
+        /// Pass acceleration messages on to the client
         void m_handle(vrpn_TRACKERACCCB const &info) {
-            common::tracing::markNewTrackerData();
+            /// @todo should we be marking a trace event here?
+            // common::tracing::markNewTrackerData();
             OSVR_TimeValue timestamp;
             osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
-            /// @todo overall accel report
+
+            OSVR_AccelerationReport overallReport;
+            overallReport.sensor = info.sensor;
+
+            overallReport.state.linearAccelerationValid =
+                m_info.reportsLinearAcceleration;
             if (m_info.reportsLinearAcceleration) {
-                /// @todo
+                OSVR_LinearAccelerationState accel;
+                osvrVec3FromQuatlib(&(accel), info.acc);
+
+                /// @todo rotate the acceleration
+
+                overallReport.state.linearAcceleration = accel;
+                OSVR_LinearAccelerationReport report;
+                report.sensor = info.sensor;
+                report.state = accel;
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, report);
+                }
             }
+            overallReport.state.angularAccelerationValid =
+                m_info.reportsAngularAcceleration;
             if (m_info.reportsAngularAcceleration) {
-                /// @todo
+
+                OSVR_AngularAccelerationState state;
+                osvrQuatFromQuatlib(&(state.incrementalRotation),
+                                    info.acc_quat);
+                state.dt = info.acc_quat_dt;
+
+                /// @todo rotate the acceleration?
+                overallReport.state.angularAcceleration = state;
+                OSVR_AngularAccelerationReport report;
+                report.sensor = info.sensor;
+                report.state = state;
+                for (auto &iface : m_interfaces) {
+                    iface->triggerCallbacks(timestamp, report);
+                }
+            }
+
+            for (auto &iface : m_interfaces) {
+                iface->triggerCallbacks(timestamp, overallReport);
             }
         }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
