@@ -43,7 +43,7 @@
 /* none */
 
 /* Standard includes */
-#include <stdbool.h>
+/* none */
 
 OSVR_EXTERN_C_BEGIN
 
