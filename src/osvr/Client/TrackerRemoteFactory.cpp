@@ -51,6 +51,8 @@
 // Standard includes
 // - none
 
+namespace ei = osvr::util::eigen_interop;
+
 namespace osvr {
 namespace client {
     class VRPNTrackerHandler : public RemoteHandler {
@@ -135,9 +137,8 @@ namespace client {
             osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
             osvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
             osvrVec3FromQuatlib(&(report.pose.translation), info.pos);
-            Eigen::Matrix4d pose =
-                m_transform.transform(util::fromPose(report.pose).matrix());
-            util::toPose(pose, report.pose);
+            ei::map(report.pose) =
+                m_transform.transform(ei::map(report.pose).matrix());
 
             if (m_opts.reportPose) {
                 for (auto &iface : m_interfaces) {
