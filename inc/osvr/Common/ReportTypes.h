@@ -44,19 +44,24 @@ namespace common {
         /// @brief A typelist containing all specially-handled report types.
         typedef boost::mpl::vector<
             OSVR_AnalogReport, OSVR_ButtonReport, OSVR_PoseReport,
-            OSVR_PositionReport, OSVR_OrientationReport, OSVR_ImagingReport,
+            OSVR_PositionReport, OSVR_OrientationReport, OSVR_VelocityReport,
+            OSVR_LinearVelocityReport, OSVR_AngularVelocityReport,
+            OSVR_AccelerationReport, OSVR_LinearAccelerationReport,
+            OSVR_AngularAccelerationReport, OSVR_ImagingReport,
             OSVR_Location2DReport, OSVR_DirectionReport,
             OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
             OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
             OSVR_NaviPositionReport> ReportTypes;
-        using ReportTypeList =
-            typepack::list<OSVR_AnalogReport, OSVR_ButtonReport,
-                           OSVR_PoseReport, OSVR_PositionReport,
-                           OSVR_OrientationReport, OSVR_ImagingReport,
-                           OSVR_Location2DReport, OSVR_DirectionReport,
-                           OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
-                           OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
-                           OSVR_NaviPositionReport>;
+        using ReportTypeList = typepack::list<
+            OSVR_AnalogReport, OSVR_ButtonReport, OSVR_PoseReport,
+            OSVR_PositionReport, OSVR_OrientationReport, OSVR_VelocityReport,
+            OSVR_LinearVelocityReport, OSVR_AngularVelocityReport,
+            OSVR_AccelerationReport, OSVR_LinearAccelerationReport,
+            OSVR_AngularAccelerationReport, OSVR_ImagingReport,
+            OSVR_ImagingReport, OSVR_Location2DReport, OSVR_DirectionReport,
+            OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
+            OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
+            OSVR_NaviPositionReport>;
     } // namespace traits
 
 } // namespace common
