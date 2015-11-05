@@ -83,7 +83,7 @@ namespace common {
         /// First see if there are device-global properties
         setupFromJson(ret, devDescriptor);
 
-        /// Now check for a traits array - not yet in the schema, but soon
+        /// Now check for a traits array - overrides device-global propertes
         auto sensor = source.getSensorNumber();
         if (sensor) {
             setupFromJson(ret, devDescriptor["traits"][*sensor]);
