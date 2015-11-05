@@ -27,14 +27,12 @@
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
-#include <osvr/Util/OpenCVTypeDispatch.h>
+#include <osvr/Util/AlignedMemory.h>
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>
 
-// Library/third-party includes
-#include <opencv2/core/core.hpp>
-
 // Standard includes
+#include <stdlib.h>
 #include <sstream>
 #include <utility>
 
@@ -71,9 +69,7 @@ namespace common {
 
             template <typename T>
             void allocateBuffer(T &, size_t bytes, std::true_type const &) {
-                m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(
-                                   cv::fastMalloc(bytes)),
-                               &cv::fastFree);
+                m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(util::aligned_alloc(bytes)), util::aligned_free);
             }
 
             template <typename T>
