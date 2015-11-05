@@ -105,7 +105,11 @@ namespace server {
         bool local = true;
         std::string iface;
         boost::optional<int> port;
+#ifdef _WIN32
+        int sleepTime = 0; // microseconds - default to 0 on Windows
+#else
         int sleepTime = 1000; // microseconds
+#endif
 
         /// Extract data from the JSON structure.
         if (root.isMember(SERVER_KEY)) {
