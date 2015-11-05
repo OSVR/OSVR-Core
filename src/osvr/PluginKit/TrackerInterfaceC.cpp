@@ -40,7 +40,8 @@
 
 struct OSVR_TrackerDeviceInterfaceObject
     : public osvr::connection::DeviceInterfaceBase {
-    osvr::util::PointerWrapper<osvr::connection::TrackerServerInterface> tracker;
+    osvr::util::PointerWrapper<osvr::connection::TrackerServerInterface>
+        tracker;
 };
 
 OSVR_ReturnCode
@@ -66,6 +67,40 @@ osvrTrackerSend(const char method[], OSVR_DeviceToken,
     auto guard = iface->getSendGuard();
     if (guard->lock()) {
         iface->tracker->sendReport(*val, sensor, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
+
+    return OSVR_RETURN_FAILURE;
+}
+template <typename StateType>
+static inline OSVR_ReturnCode
+osvrTrackerSendVel(const char method[], OSVR_DeviceToken,
+                   OSVR_TrackerDeviceInterface iface, StateType const *val,
+                   OSVR_ChannelCount sensor, OSVR_TimeValue const *timestamp) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
+
+    auto guard = iface->getSendGuard();
+    if (guard->lock()) {
+        iface->tracker->sendVelReport(*val, sensor, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
+
+    return OSVR_RETURN_FAILURE;
+}
+
+template <typename StateType>
+static inline OSVR_ReturnCode
+osvrTrackerSendAccel(const char method[], OSVR_DeviceToken,
+                     OSVR_TrackerDeviceInterface iface, StateType const *val,
+                     OSVR_ChannelCount sensor,
+                     OSVR_TimeValue const *timestamp) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, iface);
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT(method, timestamp);
+
+    auto guard = iface->getSendGuard();
+    if (guard->lock()) {
+        iface->tracker->sendAccelReport(*val, sensor, *timestamp);
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -132,4 +167,65 @@ OSVR_ReturnCode osvrDeviceTrackerSendOrientationTimestamped(
     OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
     return osvrTrackerSend("osvrDeviceTrackerSendPoseTimestamped", dev, iface,
                            val, sensor, timestamp);
+}
+
+OSVR_ReturnCode osvrDeviceTrackerSendVelocityTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_VelocityState const *val, OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    return osvrTrackerSendVel("osvrDeviceTrackerSendVelocityTimestamped", dev,
+                              iface, val, sensor, timestamp);
+}
+
+OSVR_ReturnCode osvrDeviceTrackerSendLinearVelocityTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_LinearVelocityState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    return osvrTrackerSendVel("osvrDeviceTrackerSendLinearVelocityTimestamped",
+                              dev, iface, val, sensor, timestamp);
+}
+
+OSVR_ReturnCode osvrDeviceTrackerSendAngularVelocityTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AngularVelocityState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    return osvrTrackerSendVel("osvrDeviceTrackerSendAngularVelocityTimestamped",
+                              dev, iface, val, sensor, timestamp);
+}
+
+OSVR_ReturnCode osvrDeviceTrackerSendAccelerationTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AccelerationState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    return osvrTrackerSendAccel("osvrDeviceTrackerSendAccelerationTimestamped",
+                                dev, iface, val, sensor, timestamp);
+}
+
+OSVR_ReturnCode osvrDeviceTrackerSendLinearAccelerationTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_LinearAccelerationState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    return osvrTrackerSendAccel(
+        "osvrDeviceTrackerSendLinearAccelerationTimestamped", dev, iface, val,
+        sensor, timestamp);
+}
+
+OSVR_ReturnCode osvrDeviceTrackerSendAngularAccelerationTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AngularAccelerationState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+    return osvrTrackerSendAccel(
+        "osvrDeviceTrackerSendAngularAccelerationTimestamped", dev, iface, val,
+        sensor, timestamp);
 }

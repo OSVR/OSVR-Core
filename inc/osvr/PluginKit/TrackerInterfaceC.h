@@ -134,6 +134,77 @@ OSVR_ReturnCode osvrDeviceTrackerSendOrientationTimestamped(
     OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 2, 3, 5));
 
+/** @brief Report the linear and angular velocity of a sensor, using the
+   supplied timestamp.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceTrackerSendVelocityTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_VelocityState const *val, OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @brief Report the linear velocity of a sensor that doesn't report angular
+   velocity, using the supplied timestamp.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceTrackerSendLinearVelocityTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_LinearVelocityState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @brief Report the angular velocity of a sensor that doesn't report linear
+   velocity, using the supplied timestamp.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceTrackerSendAngularVelocityTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AngularVelocityState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @brief Report the linear and angular Acceleration of a sensor, using the
+   supplied timestamp.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceTrackerSendAccelerationTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AccelerationState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @brief Report the linear acceleration of a sensor that doesn't report
+   angular acceleration, using the supplied timestamp.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceTrackerSendLinearAccelerationTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_LinearAccelerationState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
+/** @brief Report the angular acceleration of a sensor that doesn't report
+   linear acceleration, using the supplied timestamp.
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode osvrDeviceTrackerSendAngularAccelerationTimestamped(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN_PTR OSVR_TrackerDeviceInterface iface,
+    OSVR_IN_PTR OSVR_AngularAccelerationState const *val,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp)
+    OSVR_FUNC_NONNULL((1, 2, 3, 5));
+
 /** @} */ /* end of group */
 
 OSVR_EXTERN_C_END
