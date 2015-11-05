@@ -98,6 +98,24 @@ typedef void (*OSVR_PoseCallback)(void *userdata,
                                   const struct OSVR_TimeValue *timestamp,
                                   const struct OSVR_PoseReport *report);
 
+/** @brief C function type for a callback for tracker velocity */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Velocity);
+
+/** @brief C function type for a callback for tracker linear velocity */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(LinearVelocity);
+
+/** @brief C function type for a callback for tracker angular velocity */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(AngularVelocity);
+
+/** @brief C function type for a callback for tracker acceleration */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(Acceleration);
+
+/** @brief C function type for a callback for tracker linear acceleration */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(LinearAcceleration);
+
+/** @brief C function type for a callback for tracker angular acceleration */
+OSVR_DEFINE_CLIENT_CALLBACK_TYPE(AngularAcceleration);
+
 /** @brief Type of button state */
 typedef uint8_t OSVR_ButtonState;
 
