@@ -38,6 +38,7 @@
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Common/TrackerSensorInfo.h>
 
 // Library/third-party includes
 #include <vrpn_Tracker.h>
@@ -55,33 +56,70 @@ namespace client {
     class VRPNTrackerHandler : public RemoteHandler {
       public:
         struct Options {
-            Options()
-                : reportPose(false), reportPosition(false),
-                  reportOrientation(false) {}
-            bool reportPose;
-            bool reportPosition;
-            bool reportOrientation;
+            bool reportPose = false;
+            bool reportPosition = false;
+            bool reportOrientation = false;
         };
         VRPNTrackerHandler(vrpn_ConnectionPtr const &conn, const char *src,
-                           Options const &options, common::Transform const &t,
+                           Options const &options,
+                           common::TrackerSensorInfo const &info,
+                           common::Transform const &t,
                            boost::optional<int> sensor,
                            common::InterfaceList &ifaces)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
               m_transform(t), m_interfaces(ifaces), m_opts(options),
-              m_sensor(sensor) {
-            m_remote->register_change_handler(this, &VRPNTrackerHandler::handle,
-                                              sensor.get_value_or(-1));
+              m_info(info), m_sensor(sensor) {
+            if (m_info.reportsPosition || m_info.reportsOrientation) {
+                m_remote->register_change_handler(this,
+                                                  &VRPNTrackerHandler::handle,
+                                                  m_sensor.get_value_or(-1));
+            }
+            if (m_info.reportsLinearVelocity || m_info.reportsAngularVelocity) {
+                m_remote->register_change_handler(
+                    this, &VRPNTrackerHandler::handleVel,
+                    m_sensor.get_value_or(-1));
+            }
+            if (m_info.reportsLinearAcceleration ||
+                m_info.reportsAngularAcceleration) {
+                m_remote->register_change_handler(
+                    this, &VRPNTrackerHandler::handleAccel,
+                    m_sensor.get_value_or(-1));
+            }
             OSVR_DEV_VERBOSE("Constructed a TrackerHandler for "
-                             << src << " sensor " << sensor.get_value_or(-1));
+                             << src << " sensor " << m_sensor.get_value_or(-1));
         }
         virtual ~VRPNTrackerHandler() {
-            m_remote->unregister_change_handler(
-                this, &VRPNTrackerHandler::handle, m_sensor.get_value_or(-1));
+            if (m_info.reportsPosition || m_info.reportsOrientation) {
+                m_remote->unregister_change_handler(this,
+                                                    &VRPNTrackerHandler::handle,
+                                                    m_sensor.get_value_or(-1));
+            }
+            if (m_info.reportsLinearVelocity || m_info.reportsAngularVelocity) {
+                m_remote->unregister_change_handler(
+                    this, &VRPNTrackerHandler::handleVel,
+                    m_sensor.get_value_or(-1));
+            }
+            if (m_info.reportsLinearAcceleration ||
+                m_info.reportsAngularAcceleration) {
+                m_remote->unregister_change_handler(
+                    this, &VRPNTrackerHandler::handleAccel,
+                    m_sensor.get_value_or(-1));
+            }
         }
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         static void VRPN_CALLBACK handle(void *userdata, vrpn_TRACKERCB info) {
+            auto self = static_cast<VRPNTrackerHandler *>(userdata);
+            self->m_handle(info);
+        }
+        static void VRPN_CALLBACK handleVel(void *userdata,
+                                            vrpn_TRACKERVELCB info) {
+            auto self = static_cast<VRPNTrackerHandler *>(userdata);
+            self->m_handle(info);
+        }
+        static void VRPN_CALLBACK handleAccel(void *userdata,
+                                              vrpn_TRACKERACCCB info) {
             auto self = static_cast<VRPNTrackerHandler *>(userdata);
             self->m_handle(info);
         }
@@ -125,10 +163,35 @@ namespace client {
                 }
             }
         }
+        void m_handle(vrpn_TRACKERVELCB const &info) {
+            common::tracing::markNewTrackerData();
+            OSVR_TimeValue timestamp;
+            osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
+            /// @todo overall velocity report
+            if (m_info.reportsLinearVelocity) {
+                /// @todo
+            }
+            if (m_info.reportsAngularVelocity) {
+                /// @todo
+            }
+        }
+        void m_handle(vrpn_TRACKERACCCB const &info) {
+            common::tracing::markNewTrackerData();
+            OSVR_TimeValue timestamp;
+            osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
+            /// @todo overall accel report
+            if (m_info.reportsLinearAcceleration) {
+                /// @todo
+            }
+            if (m_info.reportsAngularAcceleration) {
+                /// @todo
+            }
+        }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         common::Transform m_transform;
         common::InterfaceList &m_interfaces;
         Options m_opts;
+        common::TrackerSensorInfo m_info;
         boost::optional<int> m_sensor;
     };
 
@@ -142,12 +205,16 @@ namespace client {
 
         shared_ptr<RemoteHandler> ret;
 
-        /// @todo set this struct correctly from the descriptor
-        VRPNTrackerHandler::Options opts;
+        auto info = common::getTrackerSensorInfo(source);
 
-        opts.reportOrientation = true;
-        opts.reportPosition = true;
-        opts.reportPose = true;
+        VRPNTrackerHandler::Options opts;
+        /// @todo right now always reporting pose if we report either position
+        /// or orientation as a backward-compatibility move, since we did so
+        /// before, at least until we have a report like pose with validity
+        /// bools in it.
+        opts.reportPose = info.reportsPosition || info.reportsOrientation;
+        opts.reportPosition = info.reportsPosition;
+        opts.reportOrientation = info.reportsOrientation;
 
         auto const &devElt = source.getDeviceElement();
 
@@ -160,7 +227,7 @@ namespace client {
         /// @todo find out why make_shared causes a crash here
         ret.reset(new VRPNTrackerHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName().c_str(),
-            opts, xform, source.getSensorNumber(), ifaces));
+            opts, info, xform, source.getSensorNumber(), ifaces));
         return ret;
     }
 
