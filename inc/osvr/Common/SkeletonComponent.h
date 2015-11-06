@@ -31,9 +31,13 @@
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/ReturnCodesC.h>
+
+#include <osvr/Common/CommonComponent_fwd.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
+#include <json/value.h>
 
 // Standard includes
 // - none
@@ -45,8 +49,19 @@ namespace common {
         OSVR_ChannelCount sensor;
     };
 
+    struct SkeletonSpec {
+        Json::Value spec;
+    };
+
     namespace messages {
         class SkeletonRecord : public MessageRegistration<SkeletonRecord> {
+          public:
+            class MessageSerialization;
+
+            static const char *identifier();
+        };
+        class SkeletonSpecRecord
+            : public MessageRegistration<SkeletonSpecRecord> {
           public:
             class MessageSerialization;
 
@@ -63,30 +78,56 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<SkeletonComponent>
-        create(OSVR_ChannelCount numSensor = 1);
+        create(std::string const &jsonSpec, OSVR_ChannelCount numSensor = 1);
 
         /// @brief Message from server to client, containing skeleton
         /// notification.
         messages::SkeletonRecord skeletonRecord;
 
+        /// @brief Message from server to client, containing new/updated
+        /// skeleton articulation spec
+        messages::SkeletonSpecRecord skeletonSpecRecord;
+
+        /// @brief Sends a notification to the client that tracker reports for
+        /// given skeleton had finished reporting and it can coalesce reports
+        /// now
         OSVR_COMMON_EXPORT void
         sendNotification(OSVR_ChannelCount sensor,
                          OSVR_TimeValue const &timestamp);
 
+        /// @brief Sends a new or updated articulation specification to the
+        /// client. Used by plugins and internally when client first connects
+        OSVR_COMMON_EXPORT void sendArticulationSpec(std::string const &spec);
+
+        /// @brief Sets the articultion specification. Should be used during the creation of skeleton component.
+        OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(std::string const &jsonDescriptor);
+
         typedef std::function<void(SkeletonNotification const &,
                                    util::time::TimeValue const &)>
             SkeletonHandler;
+        typedef std::function<void(SkeletonSpec const &,
+                                   util::time::TimeValue const &)>
+            SkeletonSpecHandler;
         OSVR_COMMON_EXPORT void registerSkeletonHandler(SkeletonHandler cb);
+        OSVR_COMMON_EXPORT void
+        registerSkeletonSpecHandler(SkeletonSpecHandler cb);
 
       private:
-        SkeletonComponent(OSVR_ChannelCount numChan);
+        SkeletonComponent(std::string const &jsonSpec, OSVR_ChannelCount numChan);
         virtual void m_parentSet();
 
         static int VRPN_CALLBACK m_handleSkeletonRecord(void *userdata,
                                                         vrpn_HANDLERPARAM p);
-
+        static int VRPN_CALLBACK
+        m_handleSkeletonSpecRecord(void *userdata, vrpn_HANDLERPARAM p);
         OSVR_ChannelCount m_numSensor;
+        /// @brief Articulation specs
+        std::string m_spec;
         std::vector<SkeletonHandler> m_cb;
+        std::vector<SkeletonSpecHandler> m_cb_spec;
+
+        /// @brief Common component for system device
+        common::CommonComponent *m_commonComponent;
     };
 
 } // namespace common
