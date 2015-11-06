@@ -343,7 +343,7 @@ namespace common {
         data.metadata = msg.metadata;
         data.buffer.reset(
             reinterpret_cast<OSVR_ImageBufferElement *>(msg.buffer),
-            &osvrAllignedFree);
+            &util::alignedFree);
         auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
         self->m_checkFirst(msg.metadata);
