@@ -69,6 +69,9 @@ if(ANDROID)
     set(BUILD_USBSERIALENUM OFF)
     set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
 endif()
+if(NOT BUILD_WITH_OPENCV)
+    set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
+endif()
 
 set(BUILD_JOINTCLIENTKIT OFF)
 set(BUILD_ANALYSISPLUGINKIT OFF)
@@ -79,7 +82,7 @@ endif()
 
 set(BUILD_VIDEOTRACKER_PLUGIN OFF)
 # TODO enable this on non-Windows once it's not tied to the DirectShow driver.
-if(WIN32 AND BUILD_SERVER_PLUGINS)
+if(WIN32 AND BUILD_SERVER_PLUGINS AND BUILD_WITH_OPENCV)
     # TODO fix this package so it finds things on MSYS2/MinGW64
     # - the lib is in /mingw64/lib
     # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
@@ -97,11 +100,6 @@ if(WIN32 AND BUILD_SERVER_PLUGINS)
             message(STATUS " - DIRECTSHOW_STRMIIDS_LIBRARY not found: Couldn't find the strmiids.lib or libstrmiids.a library.")
         endif()
     endif()
-endif()
-
-set(OSVR_NEED_OPENCV OFF)
-if(BUILD_CLIENT_EXAMPLES OR BUILD_OPENCV_CAMERA_PLUGIN OR BUILD_VIDEOTRACKER_PLUGIN)
-    set(OSVR_NEED_OPENCV ON)
 endif()
 
 ###
@@ -168,12 +166,15 @@ endif()
 if(BUILD_SERVER)
     find_package(libfunctionality REQUIRED)
 endif()
-if(OSVR_NEED_OPENCV)
-    find_package(OpenCV REQUIRED)
+
+set(OSVR_COPY_OPENCV OFF)
+if(BUILD_WITH_OPENCV)
+    find_package(OpenCV)
+    if(NOT OpenCV_FOUND)
+        message(FATAL_ERROR "BUILD_WITH_OPENCV is enabled, but OpenCV was not found! Either help CMake find OpenCV or disable BUILD_WITH_OPENCV.")
+    endif()
     if(WIN32)
         set(OSVR_COPY_OPENCV ON)
-    else()
-        set(OSVR_COPY_OPENCV OFF)
     endif()
     if(ANDROID)
         include(OpenCVAndroid)
@@ -198,7 +199,7 @@ include(CompilerFeatures)
 
 set(OPENCV_MODULES_USED)
 
-if(OSVR_NEED_OPENCV)
+if(BUILD_WITH_OPENCV)
     if(NOT OpenCV_VERSION_MAJOR LESS 3)
         list(APPEND OPENCV_MODULES_USED opencv_hal)
     endif()

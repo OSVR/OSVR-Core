@@ -6,11 +6,14 @@ set(MAINCLIENTS
     ButtonCallback
     TrackerCallback
     DisplayParameter
-    Imaging
     EyeTracker
     Location2D
     Direction
     Locomotion)
+if(BUILD_WITH_OPENCV)
+    list(APPEND MAINCLIENTS Imaging)
+endif()
+
 # These are "extra"
 set(CLIENTS
     MinimalInit
@@ -30,7 +33,9 @@ foreach(name ${MAINCLIENTS} ${CLIENTS})
     endforeach()
 endforeach()
 
-target_link_libraries(Imaging_cpp opencv_core opencv_highgui)
+if(BUILD_WITH_OPENCV)
+    target_link_libraries(Imaging_cpp opencv_core opencv_highgui)
+endif()
 target_link_libraries(ViewerEyeSurfaces_cpp osvr_cxx11_flags)
 
 foreach(name ${MAINCLIENTS})
