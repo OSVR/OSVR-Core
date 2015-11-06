@@ -50,10 +50,7 @@ namespace common {
             OSVR_ImagingReport, OSVR_Location2DReport, OSVR_DirectionReport,
             OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
             OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
-            OSVR_NaviPositionReport, OSVR_SkeletonJointReport,
-            OSVR_SkeletonTrimmedReport, OSVR_SkeletonWholeReport,
-            OSVR_SkeletonHandReport, OSVR_SkeletonArmReport,
-            OSVR_SkeletonFootReport, OSVR_SkeletonLegReport>;
+            OSVR_NaviPositionReport, OSVR_SkeletonReport>;
     } // namespace traits
 
 } // namespace common
