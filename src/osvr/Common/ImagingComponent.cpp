@@ -230,15 +230,14 @@ namespace common {
         OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
 
         auto imageBufferSize = getBufferSize(metadata);
-        /// @todo Assuming we should be releasing this pointer from the control
-        /// of the unique_ptr that holds it now, rather than freeing?
         auto imageBufferCopy = util::makeAlignedImageBuffer(imageBufferSize);
         memcpy(imageBufferCopy.get(), imageData, imageBufferSize);
 
         Buffer<> buf;
         messages::ImagePlacedInProcessMemory::MessageSerialization
             serialization(messages::InProcessMemoryMessage{
-                metadata, sensor, reinterpret_cast<int>(imageBufferCopy)});
+                metadata, sensor,
+                reinterpret_cast<int>(imageBufferCopy.release())});
 
         serialize(buf, serialization);
         m_getParent().packMessage(
