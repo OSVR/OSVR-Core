@@ -112,7 +112,7 @@ namespace common {
             struct InProcessMemoryMessage {
                 OSVR_ImagingMetadata metadata;
                 OSVR_ChannelCount sensor;
-                int buffer;
+                intptr_t buffer;
             };
             template <typename T>
             void process(InProcessMemoryMessage &ipmmMsg, T &p) {
@@ -237,7 +237,7 @@ namespace common {
         messages::ImagePlacedInProcessMemory::MessageSerialization
             serialization(messages::InProcessMemoryMessage{
                 metadata, sensor,
-                reinterpret_cast<int>(imageBufferCopy.release())});
+                reinterpret_cast<intptr_t>(imageBufferCopy.release())});
 
         serialize(buf, serialization);
         m_getParent().packMessage(
