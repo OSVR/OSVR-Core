@@ -98,6 +98,12 @@ if(WIN32 AND BUILD_SERVER_PLUGINS)
         endif()
     endif()
 endif()
+
+set(OSVR_NEED_OPENCV OFF)
+if(BUILD_CLIENT_EXAMPLES OR BUILD_OPENCV_CAMERA_PLUGIN OR BUILD_VIDEOTRACKER_PLUGIN)
+    set(OSVR_NEED_OPENCV ON)
+endif()
+
 ###
 # CMake Modules
 ###
@@ -162,7 +168,7 @@ endif()
 if(BUILD_SERVER)
     find_package(libfunctionality REQUIRED)
 endif()
-if(BUILD_SERVER OR BUILD_CLIENT_EXAMPLES OR BUILD_OPENCV_CAMERA_PLUGIN OR BUILD_VIDEOTRACKER_PLUGIN)
+if(OSVR_NEED_OPENCV)
     find_package(OpenCV REQUIRED)
     if(WIN32)
         set(OSVR_COPY_OPENCV ON)
@@ -172,12 +178,12 @@ if(BUILD_SERVER OR BUILD_CLIENT_EXAMPLES OR BUILD_OPENCV_CAMERA_PLUGIN OR BUILD_
     if(ANDROID)
         include(OpenCVAndroid)
     endif()
-endif()
-# Include dir specifically required by 3.0 and up, but missing from config.
-if(NOT OpenCV_VERSION VERSION_LESS 3.0.0)
-    list(REMOVE_DUPLICATES OpenCV_INCLUDE_DIRS)
-    set_target_properties(opencv_core PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${OpenCV_INCLUDE_DIRS}")
+    # Include dir specifically required by 3.0 and up, but missing from config.
+    if(NOT OpenCV_VERSION VERSION_LESS 3.0.0)
+        list(REMOVE_DUPLICATES OpenCV_INCLUDE_DIRS)
+        set_target_properties(opencv_core PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${OpenCV_INCLUDE_DIRS}")
+    endif()
 endif()
 
 find_package(Threads REQUIRED)
@@ -192,39 +198,40 @@ include(CompilerFeatures)
 
 set(OPENCV_MODULES_USED)
 
-if(BUILD_SERVER)
+if(OSVR_NEED_OPENCV)
     if(NOT OpenCV_VERSION_MAJOR LESS 3)
         list(APPEND OPENCV_MODULES_USED opencv_hal)
     endif()
     list(APPEND OPENCV_MODULES_USED opencv_core)
-endif()
 
-# Extra OpenCV components.
-# We set this up here so that if we need to copy DLLs, we can do it in the main
-# library builds where it's easier to get the right directory on Windows in a build tree.
-if(BUILD_OPENCV_CAMERA_PLUGIN)
-    if(OpenCV_VERSION_MAJOR LESS 3)
-        set(OPENCV_CAMERA_EXTRA_LIBS opencv_highgui)
-    else()
-        set(OPENCV_CAMERA_EXTRA_LIBS opencv_videoio)
+    # Extra OpenCV components.
+    # We set this up here so that if we need to copy DLLs, we can do it in the main
+    # library builds where it's easier to get the right directory on Windows in a build tree.
+    if(BUILD_OPENCV_CAMERA_PLUGIN)
+        if(OpenCV_VERSION_MAJOR LESS 3)
+            set(OPENCV_CAMERA_EXTRA_LIBS opencv_highgui)
+        else()
+            set(OPENCV_CAMERA_EXTRA_LIBS opencv_videoio)
+        endif()
+        list(APPEND OPENCV_MODULES_USED ${OPENCV_CAMERA_EXTRA_LIBS})
     endif()
-    list(APPEND OPENCV_MODULES_USED ${OPENCV_CAMERA_EXTRA_LIBS})
-endif()
 
-if(BUILD_VIDEOTRACKER_PLUGIN)
-    set(VIDEOTRACKER_EXTRA_LIBS
-        opencv_imgproc
-        opencv_features2d
-        opencv_calib3d
-        opencv_highgui
-        opencv_imgproc
-        opencv_flann)
+    if(BUILD_VIDEOTRACKER_PLUGIN)
+        set(VIDEOTRACKER_EXTRA_LIBS
+            opencv_imgproc
+            opencv_features2d
+            opencv_calib3d
+            opencv_highgui
+            opencv_imgproc
+            opencv_flann)
 
-    if(WIN32 AND NOT OpenCV_VERSION_MAJOR LESS 3)
-        # for the tracker camera viewer to be able to save a capture.
-        list(APPEND VIDEOTRACKER_EXTRA_LIBS opencv_imgcodecs)
+        if(WIN32 AND NOT OpenCV_VERSION_MAJOR LESS 3)
+            # for the tracker camera viewer to be able to save a capture.
+            list(APPEND VIDEOTRACKER_EXTRA_LIBS opencv_imgcodecs)
+        endif()
+        list(APPEND OPENCV_MODULES_USED ${VIDEOTRACKER_EXTRA_LIBS})
     endif()
-    list(APPEND OPENCV_MODULES_USED ${VIDEOTRACKER_EXTRA_LIBS})
+
 endif()
 
 if(OPENCV_MODULES_USED)
