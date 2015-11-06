@@ -43,8 +43,8 @@ if(MSVC)
     option(BUILD_IN_PARALLEL "Should we use the MSVC /mp option to compile in parallel? Usually faster, but sometimes makes build errors harder to fix." ON)
 endif()
 
-set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload" CACHE STRING "Suffix for plugins that shouldn't be loaded automatically")
-mark_as_advanced(OSVR_PLUGIN_IGNORE_SUFFIX)
+# Shouldn't be changed without being fully aware of the consequences.
+set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload")
 
 # Figure out what to do with osvr_json_to_c
 if(CMAKE_CROSSCOMPILING OR ANDROID)
@@ -115,7 +115,7 @@ include(GNUInstallDirs)
 if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
-set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/extra-sample-apps)
+set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/extra-sample-apps)
 
 # Shared modules from rpavlik/cmake-modules
 
@@ -377,6 +377,8 @@ install(DIRECTORY examples/
 ###
 install(FILES
     json-schemas/device_descriptor_schema.json
+    json-schemas/display_descriptor_schema_v1.json
+    json-schemas/osvr_server_config_schema.json
     json-schemas/README.md
     DESTINATION "${CMAKE_INSTALL_DOCDIR}/json-schemas"
     COMPONENT Doc)
