@@ -31,13 +31,11 @@
 #include <osvr/ClientKit/ImagingC.h>
 #include <osvr/Util/ImagingReportTypesC.h>
 #include <osvr/Util/TimeValue.h>
-#include <osvr/Util/OpenCVTypeDispatch.h>
 #include <osvr/Util/Deletable.h>
 
 // Library/third-party includes
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <opencv2/core/core.hpp>
 
 // Standard includes
 // - none
@@ -49,7 +47,7 @@ namespace clientkit {
     /// @{
     /// @brief Register a callback to receive each new full frame of imaging
     /// data.
-    void registerImagingCallback(Interface &iface, ImagingCallbackOpenCV cb,
+    void registerImagingCallback(Interface &iface, ImagingCallback cb,
                                  void *userdata);
 #ifndef OSVR_DOXYGEN_EXTERNAL
     /// @brief Implementation details
@@ -65,7 +63,7 @@ namespace clientkit {
             /// @brief Constructor - private so that only the factory
             /// (registration) function can create it.
             ImagingCallbackRegistration(osvr::clientkit::Interface iface,
-                                        ImagingCallbackOpenCV cb,
+                                        ImagingCallback cb,
                                         void *userdata)
                 : m_cb(cb), m_userdata(userdata),
                   m_ctx(iface.getContext().get()) {
@@ -94,29 +92,26 @@ namespace clientkit {
                                      const struct OSVR_ImagingReport *report) {
                 ImagingCallbackRegistration *self =
                     static_cast<ImagingCallbackRegistration *>(userdata);
-                ImagingReportOpenCV newReport;
+                ImagingReport newReport;
                 newReport.sensor = report->sensor;
+                newReport.metadata = report->state.metadata;
                 newReport.buffer.reset(report->state.data,
                                        ImagingDeleter(self->m_ctx));
-                newReport.frame = cv::Mat(
-                    report->state.metadata.height, report->state.metadata.width,
-                    util::computeOpenCVMatType(report->state.metadata),
-                    newReport.buffer.get());
                 self->m_cb(self->m_userdata, *timestamp, newReport);
             }
 
-            ImagingCallbackOpenCV m_cb;
+            ImagingCallback m_cb;
             void *m_userdata;
             OSVR_ClientContext m_ctx;
             friend void osvr::clientkit::registerImagingCallback(
-                Interface &iface, ImagingCallbackOpenCV cb, void *userdata);
+                Interface &iface, ImagingCallback cb, void *userdata);
         };
     } // namespace detail
 
 #endif // OSVR_DOXYGEN_EXTERNAL
 
     inline void registerImagingCallback(Interface &iface,
-                                        ImagingCallbackOpenCV cb,
+                                        ImagingCallback cb,
                                         void *userdata) {
         util::boost_util::DeletablePtr ptr(
             new detail::ImagingCallbackRegistration(iface, cb, userdata));

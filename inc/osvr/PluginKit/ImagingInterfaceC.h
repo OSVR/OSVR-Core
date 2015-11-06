@@ -68,15 +68,16 @@ typedef struct OSVR_ImagingDeviceInterfaceObject *OSVR_ImagingDeviceInterface;
    be subject to external limitations.
 */
 OSVR_PLUGINKIT_EXPORT
-OSVR_ReturnCode
-osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
-                           OSVR_OUT_PTR OSVR_ImagingDeviceInterface *iface,
-                           OSVR_IN OSVR_ChannelCount numSensors
-                               OSVR_CPP_ONLY(= 1)) OSVR_FUNC_NONNULL((1, 2));
+OSVR_ReturnCode osvrDeviceImagingConfigure(
+    OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
+    OSVR_OUT_PTR OSVR_ImagingDeviceInterface *iface,
+    OSVR_IN OSVR_ChannelCount numSensors OSVR_CPP_ONLY(= 1))
+    OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report a frame for a sensor. Takes ownership of the buffer and
-    **frees it with the OpenCV deallocation functions** when done, so only
-    pass in memory allocated by the matching version of OpenCV.
+    **frees it with the `osvrAlignedFree` function** when done, so for stability
+    only pass in memory allocated by `osvrAlignedAlloc`. The C++ wrapper for
+    this function takes care of this automatically.
 
     @param dev Device token
     @param iface Imaging interface
