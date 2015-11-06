@@ -6,12 +6,79 @@
     "lastModified": "",
     "interfaces": {
         "skeleton": {
-            "count": 2
+            "count": 2,
+            "bounded": true
         },
         "tracker": {
             "count": 12
         }
     },
+    "articulationSpec": [
+        {
+            "leftWrist" : {
+                "$data" : {
+                    "data" : "tracker/0"
+                },
+                "thumbMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/1"
+                    }
+                },
+                "indexMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/2"
+                    }
+                },
+                "middleMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/3"
+                    }
+                },
+                "ringMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/4"
+                    }
+                },
+                "pinkyMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/5"
+                    }
+                }
+            }
+        },
+        {
+            "rightWrist" : {
+                "$data" : {
+                    "data" : "tracker/0"
+                },
+                "thumbMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/1"
+                    }
+                },
+                "indexMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/2"
+                    }
+                },
+                "middleMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/3"
+                    }
+                },
+                "ringMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/4"
+                    }
+                },
+                "pinkyMetacarpal" : {
+                    "$data" : {
+                        "data": "tracker/5"
+                    }
+                }
+            }
+        }
+    ],
     "semantic": {
         "hands": {
             "left": {
