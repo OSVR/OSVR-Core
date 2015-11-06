@@ -102,6 +102,11 @@ if(WIN32 AND BUILD_SERVER_PLUGINS AND BUILD_WITH_OPENCV)
     endif()
 endif()
 
+set(OSVR_COPY_LIBFUNC OFF)
+if(BUILD_SERVER AND (WIN32 OR ANDROID))
+    set(OSVR_COPY_LIBFUNC ON)
+endif()
+
 ###
 # CMake Modules
 ###
