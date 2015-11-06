@@ -60,7 +60,7 @@ namespace pluginhost {
 #ifdef OSVR_PLUGINS_UNDER_BINDIR
         // If the plugin directory is a subdirectory of where the binaries are,
         // no need to go up a level before searching.
-        paths.push_back(binDir / OSVR_PLUGIN_SUBDIR);
+        paths.push_back((binDir / OSVR_PLUGIN_SUBDIR).string());
 #endif
 
         // For each component of the compiled-in binary directory, we lop off a
