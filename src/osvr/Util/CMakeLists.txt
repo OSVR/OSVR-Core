@@ -25,6 +25,8 @@ osvr_setup_lib_vars(Util)
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
     "${HEADER_LOCATION}/AlignedMemory.h"
+    "${HEADER_LOCATION}/AlignedMemoryC.h"
+    "${HEADER_LOCATION}/AlignedMemoryUniquePtr.h"
     "${HEADER_LOCATION}/Angles.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
@@ -102,6 +104,7 @@ set(API
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
 
 set(SOURCE
+    AlignedMemoryC.cpp
     AnyMap.cpp
     Deletable.cpp
     GuardInterface.cpp
