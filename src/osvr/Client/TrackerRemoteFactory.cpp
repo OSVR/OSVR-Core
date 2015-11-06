@@ -183,7 +183,7 @@ namespace client {
                 OSVR_LinearVelocityState vel;
                 osvrVec3FromQuatlib(&(vel), info.vel);
 
-                /// @todo rotate the velocity
+                ei::map(vel) = m_transform.transformLinear(ei::map(vel));
 
                 overallReport.state.linearVelocity = vel;
                 OSVR_LinearVelocityReport report;
@@ -202,7 +202,10 @@ namespace client {
                                     info.vel_quat);
                 state.dt = info.vel_quat_dt;
 
-                /// @todo rotate the velocity?
+                ei::map(state.incrementalRotation) =
+                    m_transform.transformLinear(
+                        ei::map(state.incrementalRotation));
+
                 overallReport.state.angularVelocity = state;
                 OSVR_AngularVelocityReport report;
                 report.sensor = info.sensor;
@@ -233,7 +236,7 @@ namespace client {
                 OSVR_LinearAccelerationState accel;
                 osvrVec3FromQuatlib(&(accel), info.acc);
 
-                /// @todo rotate the acceleration
+                ei::map(accel) = m_transform.transformLinear(ei::map(accel));
 
                 overallReport.state.linearAcceleration = accel;
                 OSVR_LinearAccelerationReport report;
@@ -252,7 +255,10 @@ namespace client {
                                     info.acc_quat);
                 state.dt = info.acc_quat_dt;
 
-                /// @todo rotate the acceleration?
+                ei::map(state.incrementalRotation) =
+                    m_transform.transformLinear(
+                        ei::map(state.incrementalRotation));
+
                 overallReport.state.angularAcceleration = state;
                 OSVR_AngularAccelerationReport report;
                 report.sensor = info.sensor;
