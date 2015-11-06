@@ -38,7 +38,6 @@
 #include <osvr/Util/Vec3C.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/BoolC.h>
-#include <osvr/Util/SkeletonReportTypesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -340,6 +339,35 @@ typedef struct OSVR_NaviPositionReport {
      * starting position */
     OSVR_NaviPositionState state;
 } OSVR_NaviPositionReport;
+
+/** @brief integer type specifying joint count/index(Id) */
+typedef uint32_t OSVR_SkeletonJointCount;
+
+/** @brief integer type specifying bone count/index(Id) */
+typedef uint32_t OSVR_SkeletonBoneCount;
+
+/** @brief A state of a single skeleton joint (joint/bone) */
+typedef struct OSVR_SkeletonJointState {
+  OSVR_SkeletonJointCount jointId;
+  /** @brief A tracker pose state */
+  OSVR_Pose3 pose;
+} OSVR_SkeletonJointState;
+
+/** @brief bone contains same attributes as does the joint */
+typedef OSVR_SkeletonJointState OSVR_SkeletonBoneState;
+
+/** @brief Type of Skeleton state */
+typedef struct OSVR_SkeletonState {
+    OSVR_CBool dataAvailable;
+} OSVR_SkeletonState;
+
+/** @brief Report type for a skeleton callback. Provided whenever skeleton data
+ * for given sensor becomes available (When tracker sensors for each joint/site
+ * have finished reporting */
+typedef struct OSVR_SkeletonReport {
+    OSVR_ChannelCount sensor;
+    OSVR_SkeletonState state;
+} OSVR_SkeletonReport;
 
 /** @} */
 
