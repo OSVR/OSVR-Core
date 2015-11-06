@@ -18,13 +18,7 @@ set(OSVR_REPORT_TYPES
     EyeTrackerBlink
     NaviVelocity
     NaviPosition
-    SkeletonJoint
-    SkeletonWhole
-    SkeletonTrimmed
-    SkeletonHand
-    SkeletonArm
-    SkeletonFoot
-    SkeletonLeg
+    Skeleton
     CACHE INTERNAL "" FORCE)
 
 # Generate a file using a template with the placeholder @BODY@, as well as a
