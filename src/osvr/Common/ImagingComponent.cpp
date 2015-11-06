@@ -27,12 +27,14 @@
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
-#include <osvr/Util/AlignedMemory.h>
+#include <osvr/Util/AlignedMemoryUniquePtr.h>
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>
 
+// Library/third-party includes
+// - none
+
 // Standard includes
-#include <stdlib.h>
 #include <sstream>
 #include <utility>
 
@@ -54,6 +56,7 @@ namespace common {
                                                   uint8_t>());
             }
         } // namespace
+
         class ImageRegion::MessageSerialization {
           public:
             MessageSerialization(OSVR_ImagingMetadata const &meta,
@@ -69,7 +72,7 @@ namespace common {
 
             template <typename T>
             void allocateBuffer(T &, size_t bytes, std::true_type const &) {
-                m_imgBuf.reset(reinterpret_cast<OSVR_ImageBufferElement *>(util::aligned_alloc(bytes)), util::aligned_free);
+                m_imgBuf = util::makeAlignedImageBuffer(bytes);
             }
 
             template <typename T>
@@ -124,7 +127,7 @@ namespace common {
         }
 
         class ImagePlacedInProcessMemory::MessageSerialization {
-        public:
+          public:
             MessageSerialization() {}
             explicit MessageSerialization(InProcessMemoryMessage &&msg)
                 : m_msgData(std::move(msg)) {}
@@ -132,7 +135,7 @@ namespace common {
 #if defined(_MSC_VER) && defined(_PREFAST_)
             // @todo workaround for apparent bug in VS2013 /analyze
             explicit MessageSerialization(InProcessMemoryMessage const &msg)
-                : m_msgData(msg) { }
+                : m_msgData(msg) {}
 #endif
             template <typename T> void processMessage(T &p) {
                 process(m_msgData, p);
@@ -140,7 +143,7 @@ namespace common {
 
             InProcessMemoryMessage const &getMessage() { return m_msgData; }
 
-        private:
+          private:
             InProcessMemoryMessage m_msgData;
         };
 #endif
@@ -208,8 +211,8 @@ namespace common {
         util::Flag dataSent;
 
 #ifdef OSVR_COMMON_IN_PROCESS_IMAGING
-        dataSent +=
-            m_sendImageDataViaInProcessMemory(metadata, imageData, sensor, timestamp);
+        dataSent += m_sendImageDataViaInProcessMemory(metadata, imageData,
+                                                      sensor, timestamp);
 #else
         dataSent += m_sendImageDataViaSharedMemory(metadata, imageData, sensor,
                                                    timestamp);
@@ -227,12 +230,15 @@ namespace common {
         OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp) {
 
         auto imageBufferSize = getBufferSize(metadata);
-        auto imageBufferCopy = reinterpret_cast<OSVR_ImageBufferElement*>(cv::fastMalloc(imageBufferSize));
-        memcpy(imageBufferCopy, imageData, imageBufferSize);
+        /// @todo Assuming we should be releasing this pointer from the control
+        /// of the unique_ptr that holds it now, rather than freeing?
+        auto imageBufferCopy = util::makeAlignedImageBuffer(imageBufferSize);
+        memcpy(imageBufferCopy.get(), imageData, imageBufferSize);
 
         Buffer<> buf;
-        messages::ImagePlacedInProcessMemory::MessageSerialization serialization(
-            messages::InProcessMemoryMessage{ metadata, sensor, reinterpret_cast<int>(imageBufferCopy) });
+        messages::ImagePlacedInProcessMemory::MessageSerialization
+            serialization(messages::InProcessMemoryMessage{
+                metadata, sensor, reinterpret_cast<int>(imageBufferCopy)});
 
         serialize(buf, serialization);
         m_getParent().packMessage(
@@ -251,12 +257,12 @@ namespace common {
         if (!m_shmBuf[sensor] ||
             m_shmBuf[sensor]->getEntrySize() != imageBufferSize) {
             // create or replace the shared memory ring buffer.
-            auto makeName =
-                [](OSVR_ChannelCount sensor, std::string const &devName) {
-                    std::ostringstream os;
-                    os << "com.osvr.imaging/" << devName << "/" << int(sensor);
-                    return os.str();
-                };
+            auto makeName = [](OSVR_ChannelCount sensor,
+                               std::string const &devName) {
+                std::ostringstream os;
+                os << "com.osvr.imaging/" << devName << "/" << int(sensor);
+                return os.str();
+            };
             m_shmBuf[sensor] = IPCRingBuffer::create(
                 IPCRingBuffer::Options(
                     makeName(sensor, m_getParent().getDeviceName()))
@@ -324,9 +330,8 @@ namespace common {
     }
 
 #ifdef OSVR_COMMON_IN_PROCESS_IMAGING
-    int VRPN_CALLBACK
-    ImagingComponent::m_handleImagePlacedInProcessMemory(void *userdata,
-                                                         vrpn_HANDLERPARAM p) {
+    int VRPN_CALLBACK ImagingComponent::m_handleImagePlacedInProcessMemory(
+        void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ImagingComponent *>(userdata);
         auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
@@ -336,7 +341,9 @@ namespace common {
         ImageData data;
         data.sensor = msg.sensor;
         data.metadata = msg.metadata;
-        data.buffer.reset(reinterpret_cast<OSVR_ImageBufferElement*>(msg.buffer), &cv::fastFree);
+        data.buffer.reset(
+            reinterpret_cast<OSVR_ImageBufferElement *>(msg.buffer),
+            &osvrAllignedFree);
         auto timestamp = util::time::fromStructTimeval(p.msg_time);
 
         self->m_checkFirst(msg.metadata);
@@ -347,9 +354,8 @@ namespace common {
     }
 #endif
 
-    int VRPN_CALLBACK
-    ImagingComponent::m_handleImagePlacedInSharedMemory(void *userdata,
-                                                        vrpn_HANDLERPARAM p) {
+    int VRPN_CALLBACK ImagingComponent::m_handleImagePlacedInSharedMemory(
+        void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<ImagingComponent *>(userdata);
         auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
