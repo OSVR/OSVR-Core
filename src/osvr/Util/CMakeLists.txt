@@ -8,7 +8,7 @@ configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
 
 ###
-# Platform Config Header
+# Platform Config Header (and other external and internal configured headers)
 ###
 include(CheckStructHasMember)
 check_struct_has_member("struct timeval" tv_sec sys/time.h OSVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H LANGUAGE C)
@@ -16,6 +16,13 @@ check_struct_has_member("struct timeval" tv_sec winsock2.h OSVR_HAVE_STRUCT_TIME
 configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
 
 configure_file(WideToUTF8.h.in "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h" @ONLY)
+
+set(CMAKE_REQUIRED_FLAGS ${OSVR_CXX11_FLAGS})
+include(CheckCXXSymbolExists)
+
+# check for std::align
+check_cxx_symbol_exists("std::align" "memory" OSVR_HAVE_STDALIGN)
+configure_file(StdAlignWrapper.h.in "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper.h" @ONLY)
 
 ###
 # Library build
@@ -116,6 +123,7 @@ set(SOURCE
     ClientCallbackTypesCSnippet.h.in
     WideToUTF8.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h"
     "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h")
 
@@ -144,6 +152,12 @@ target_link_libraries(${LIBNAME_FULL}
     vendored-vrpn
     eigen-headers
     osvrTypePack)
+
+if(NOT OSVR_HAVE_STDALIGN)
+    target_link_libraries(${LIBNAME_FULL}
+        PRIVATE
+        libcxx_backports)
+endif()
 
 ###
 # C++ util library/headers

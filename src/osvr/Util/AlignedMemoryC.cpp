@@ -24,13 +24,13 @@
 
 // Internal Includes
 #include <osvr/Util/AlignedMemoryC.h>
+#include <osvr/Util/StdAlignWrapper.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <stdlib.h>
-#include <memory>
 #include <cassert>
 
 void *osvrAlignedAlloc(size_t bytes, size_t alignment) {
@@ -48,7 +48,7 @@ void *osvrAlignedAlloc(size_t bytes, size_t alignment) {
     // After this call the 'aligned' pointer will be aligned to a boundary.
     // If there is not enough space to align the pointer, it stays
     // unaligned.
-    std::align(alignment, bytes, aligned, space);
+    osvr::align(alignment, bytes, aligned, space);
 
     if (space < bytes || !aligned) {
         free(buffer);
