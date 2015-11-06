@@ -1,0 +1,5 @@
+{
+    "plugins": [
+        "com_osvr_example_Skeleton"
+    ]
+}
