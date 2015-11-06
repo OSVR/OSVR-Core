@@ -38,6 +38,7 @@
 
 // Standard includes
 #include <iosfwd>
+#include <cstring> // for std::memcpy
 
 namespace osvr {
 namespace pluginkit {
