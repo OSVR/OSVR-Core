@@ -1,5 +1,11 @@
 set(LIB_FOLDER "OSVR Libraries")
 
+set(OSVR_BUILDTREE_TARGETS "" CACHE INTERNAL "" FORCE)
+macro(osvr_append_target _targetlist _target)
+    list(APPEND OSVR_${_targetlist}_TARGETS "${_target}")
+    set(OSVR_${_targetlist}_TARGETS "${OSVR_${_targetlist}_TARGETS}" CACHE INTERNAL "" FORCE)
+endmacro()
+
 ## Based on a library name without the osvr prefix, sets the following
 ## variables:
 ##  - LIBNAME - the input name
@@ -60,6 +66,7 @@ macro(osvr_add_library)
         DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/osvr/${LIBNAME}
         COMPONENT Devel)
+    osvr_append_target(BUILDTREE ${LIBNAME_FULL})
 endmacro()
 
 # For libraries with an additional optional "interface library", this creates
@@ -79,6 +86,7 @@ macro(osvr_add_interface_library _suffix)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Devel
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    osvr_append_target(BUILDTREE ${LIBNAME_INTERFACE})
 endmacro()
 
 ## For libraries with a C++ interface "library", this creates the INTERFACE

@@ -41,6 +41,10 @@ namespace common {
 
         /// @brief Helper traits struct for reportState(), to access the state
         /// member of the various report types.
+        ///
+        /// Default implementation is fine for any reports where the state
+        /// member of the report struct is called simply `state` - only
+        /// explicitly specialize if that isn't the case.
         template <typename ReportType> struct ReportStateGetter {
             static typename StateType<ReportType>::type const &
             apply(ReportType const &r) {

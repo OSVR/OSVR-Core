@@ -1,3 +1,4 @@
+add_subdirectory(TypePack)
 add_subdirectory(Util)
 add_subdirectory(Routing)
 add_subdirectory(Common)

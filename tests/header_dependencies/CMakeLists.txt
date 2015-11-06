@@ -11,6 +11,7 @@ endif()
 
 set(LIBRARIES_PluginKit libfunctionality::functionality)
 set(LIBRARIES_VRPNServer libfunctionality::functionality)
+set(LIBRARIES_TypePack osvrTypePack)
 
 set(COMMON_TEST_LIBRARIES jsoncpp_lib eigen-headers vendored-vrpn boost_thread)
 if(TARGET boost_filesystem)
@@ -41,7 +42,6 @@ foreach(HEADER ${headers})
 
         #message(STATUS "${HEADER}: '${symbolname}' - '${libname}'")
 
-
         set(extensions cpp)
         if (${HEADER} MATCHES "C.h$")
             # Header required to be C-safe, enforce it!
@@ -50,18 +50,17 @@ foreach(HEADER ${headers})
 
         foreach(extension ${extensions})
             # Name the test and output file with a number, to dodge Windows path length limits.
-            # Call it header, instead of test, to avoid polluting the 'executable'
+            # Call it header, instead of test, to avoid polluting the 'executable namespace'
             set(test_name "header_${extension}_${test_index}")
 
-            set(source_file "${CMAKE_CURRENT_BINARY_DIR}/main${test_index}.${extension}")
-            configure_file(test_header_prereqs.${extension}.in "${source_file}" @ONLY)
+            set(source_file "${CMAKE_CURRENT_SOURCE_DIR}/main.${extension}")
 
             add_executable(${test_name} "${source_file}")
+            target_compile_definitions(${test_name} PRIVATE HEADER_TO_TEST="${HEADER}")
             target_include_directories(${test_name}
-                PUBLIC
-                $<BUILD_INTERFACE:${BUILDTREE_HEADER_BASE}>
-                $<BUILD_INTERFACE:${HEADER_BASE}>
-                $<INSTALL_INTERFACE:include>)
+                PRIVATE
+                ${BUILDTREE_HEADER_BASE}
+                ${HEADER_BASE})
 
             set_target_properties(${test_name} PROPERTIES
                 FOLDER "OSVR Header dependency tests")

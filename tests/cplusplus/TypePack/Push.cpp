@@ -1,17 +1,15 @@
 /** @file
-    @brief Header providing common::traits::ReportFromCallback.
+    @brief Test Implementation
 
-    Actually just includes a single file that provides that, but this is the one
-   you should include.
-
-    @date 2014
+    @date 2015
 
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
+
 */
 
-// Copyright 2014 Sensics, Inc.
+// Copyright 2015 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +23,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
-#define INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
+// Internal Includes
+#include "TypePackTestShared.h"
 
-#include <osvr/Common/ReportTraits.h>
+// Yes, I know these are all static (compile-time) tests, but using the gtest
+// structure to split them into logical units.
 
-#endif // INCLUDED_ReportFromCallback_h_GUID_9B477F43_5807_4884_F079_1B32FE8CAAA3
+TEST(TypePack, push) {
+    static_assert(is_same<tp::head<mylist>, myhead>::value, "Correct head");
+    static_assert(is_same<mylist, tp::push_front<mytail, myhead>>::value,
+                  "Push front");
+    static_assert(is_same<mylist, tp::push_back<myhead2, myelt3>>::value,
+                  "Push back");
+}
