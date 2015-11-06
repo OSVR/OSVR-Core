@@ -43,22 +43,22 @@ void *osvrAlignedAlloc(size_t bytes, size_t alignment) {
     }
 
     // Reserve the first byte for our buffer pointer for later freeing.
-    void *aligned = (void **)buffer + 1;
+    void *alignBase = (void **)buffer + 1;
 
-    // After this call the 'aligned' pointer will be aligned to a boundary.
+    // After this call the 'alignBase' pointer will be aligned to a boundary.
     // If there is not enough space to align the pointer, it stays
-    // unaligned.
-    osvr::align(alignment, bytes, aligned, space);
+    // unaligned, and nullptr is returned insted of the updated alignBase.
+    void *ret = osvr::align(alignment, bytes, alignBase, space);
 
-    if (space < bytes || !aligned) {
+    if (space < bytes || !ret) {
         free(buffer);
         return nullptr;
     }
 
     // Store the buffer pointer for the free call.
-    ((void **)aligned)[-1] = buffer;
+    ((void **)ret)[-1] = buffer;
 
-    return aligned;
+    return ret;
 }
 
 void osvrAlignedFree(void *p) {
