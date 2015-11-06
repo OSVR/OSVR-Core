@@ -70,7 +70,7 @@ namespace common {
         typedef OSVR_##TYPE##State type;                                       \
     };
         OSVR_INVOKE_REPORT_TYPES_XMACRO()
-#undef OSVR_REPORT_TRAITS
+#undef OSVR_X
 
         /// @brief Alias for the CallbackType associated with a given ReportType
         /// @headerfile CallbackType.h <osvr/Common/CallbackType.h>
