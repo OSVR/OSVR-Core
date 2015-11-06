@@ -47,6 +47,7 @@ struct OSVR_SkeletonDeviceInterfaceObject
 OSVR_ReturnCode
 osvrDeviceSkeletonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                             OSVR_OUT_PTR OSVR_SkeletonDeviceInterface *iface,
+                            OSVR_IN_READS(len) const char *jsonDescriptor,
                             OSVR_IN OSVR_ChannelCount numSensors) {
 
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSkeletonConfigure", opts);
@@ -54,7 +55,7 @@ osvrDeviceSkeletonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     OSVR_SkeletonDeviceInterface ifaceObj =
         opts->makeInterfaceObject<OSVR_SkeletonDeviceInterfaceObject>();
     *iface = ifaceObj;
-    auto skeleton = osvr::common::SkeletonComponent::create(numSensors);
+    auto skeleton = osvr::common::SkeletonComponent::create(jsonDescriptor, numSensors);
     ifaceObj->skeleton = skeleton.get();
     opts->addComponent(skeleton);
     return OSVR_RETURN_SUCCESS;
@@ -67,6 +68,19 @@ osvrDeviceSkeletonComplete(OSVR_IN_PTR OSVR_SkeletonDeviceInterface iface,
     auto guard = iface->getSendGuard();
     if (guard->lock()) {
         iface->skeleton->sendNotification(sensor, *timestamp);
+        return OSVR_RETURN_SUCCESS;
+    }
+
+    return OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode
+osvrDeviceSkeletonUpdateSpec(OSVR_IN_PTR OSVR_SkeletonDeviceInterface iface,
+                             OSVR_IN_READS(len) const char *spec) {
+
+    auto guard = iface->getSendGuard();
+    if (guard->lock()) {
+        iface->skeleton->sendArticulationSpec(spec);
         return OSVR_RETURN_SUCCESS;
     }
 

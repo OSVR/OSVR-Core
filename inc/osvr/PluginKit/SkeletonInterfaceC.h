@@ -62,6 +62,7 @@ typedef struct OSVR_SkeletonDeviceInterfaceObject *OSVR_SkeletonDeviceInterface;
     @param [out] iface An interface object you should retain with the same
     lifetime as the device token in order to send messages conforming to a
    Skeleton interface.
+   @param jsonDescriptor A device descriptor json that contains skeleton spec
     @param numSensors The number of non-connected skeletons you will be
    reporting. Note that the number of skeleton sensors is not the same as number
    of skeleton elements. For example if plugin device reports two hands that
@@ -73,6 +74,7 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceSkeletonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                             OSVR_OUT_PTR OSVR_SkeletonDeviceInterface *iface,
+                            OSVR_IN_READS(len) const char *jsonDescriptor,
                             OSVR_IN OSVR_ChannelCount numSensors)
     OSVR_FUNC_NONNULL((1, 2));
 
@@ -95,6 +97,24 @@ osvrDeviceSkeletonComplete(OSVR_IN_PTR OSVR_SkeletonDeviceInterface iface,
                            OSVR_IN OSVR_ChannelCount sensor,
                            OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 3));
+
+/** @brief If device detects another skeleton and/or change in existing articulation
+specification, then it needs to update the spec with the client as well. 
+During the skeleton interface initialization this is performed once using
+the spec provided in the device descriptor. This should be used for unbounded
+skeletons where the articulation spec may change over time. Devices with bounded
+skeletons don't need to use this method because the articulation spec remains
+the same throughout plugin runtime
+@param dev Device token
+@param iface Skeleton Interface
+@param spec Updated/New Skeleton Articulation Spec in JSON format
+@param timestamp The same timestamp as for your tracker reports
+*/
+OSVR_PLUGINKIT_EXPORT
+OSVR_ReturnCode
+osvrDeviceSkeletonUpdateSpec(OSVR_IN_PTR OSVR_SkeletonDeviceInterface iface,
+                            OSVR_IN_READS(len) const char *spec)
+    OSVR_FUNC_NONNULL((1, 2));
 
 /**@} */ /* end of group */
 
