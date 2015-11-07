@@ -89,13 +89,17 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
         const Point3Vector &beacons, size_t requiredInliers,
-        size_t permittedOutliers) {
+        size_t permittedOutliers,
+        size_t solveIterations,
+        double maxReprojectionAxisError) {
         SetBeacons(beacons);
         SetCameraMatrix(cameraMatrix);
         SetDistCoeffs(distCoeffs);
         m_gotPose = false;
         m_requiredInliers = requiredInliers;
         m_permittedOutliers = permittedOutliers;
+        m_solveIterations = solveIterations;
+        m_maxReprojectionAxisError = maxReprojectionAxisError;
     }
 
     bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons) {
@@ -200,13 +204,12 @@ namespace vbtracker {
         // We tried using the previous guess to reduce the amount of computation
         // being done, but this got us stuck in infinite locations.  We seem to
         // do okay without using it, so leaving it out.
-        // @todo Make number of iterations into a parameter.
+        const float MaxReprojectionErrorForInlier = 87.0f;
         bool usePreviousGuess = false;
-        int iterationsCount = 5;
         cv::Mat inlierIndices;
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, iterationsCount, 8.0f,
+            m_tvec, usePreviousGuess, m_solveIterations, MaxReprojectionErrorForInlier,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 
@@ -220,7 +223,6 @@ namespace vbtracker {
         //==========================================================================
         // Reproject the inliers into the image and make sure they are actually
         // close to the expected location; otherwise, we have a bad pose.
-        const double pixelReprojectionErrorForSingleAxisMax = 4;
         if (inlierIndices.rows > 0) {
           std::vector<cv::Point3f>  inlierObjectPoints;
           std::vector<cv::Point2f> inlierImagePoints;
@@ -233,11 +235,11 @@ namespace vbtracker {
             m_distCoeffs, reprojectedPoints);
           for (size_t i = 0; i < reprojectedPoints.size(); i++) {
             if (reprojectedPoints[i].x - inlierImagePoints[i].x > 
-                pixelReprojectionErrorForSingleAxisMax) {
+              m_maxReprojectionAxisError) {
               return false;
             }
             if (reprojectedPoints[i].y - inlierImagePoints[i].y > 
-              pixelReprojectionErrorForSingleAxisMax) {
+              m_maxReprojectionAxisError) {
               return false;
             }
           }

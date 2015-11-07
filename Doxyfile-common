@@ -98,7 +98,7 @@ INPUT                  = README.md \
 # For config item RECURSIVE, default is 0
 RECURSIVE              = YES
 
-IMAGE_PATH = doc
+IMAGE_PATH = doc plugins/videobasedtracker/doc
 MSCFILE_DIRS = doc
 
 # If the USE_MDFILE_AS_MAINPAGE tag refers to the name of a markdown file that

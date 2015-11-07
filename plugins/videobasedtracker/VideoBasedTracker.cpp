@@ -44,9 +44,12 @@ namespace vbtracker {
                                       std::vector<double> const &d,
                                       Point3Vector const &locations,
                                       size_t requiredInliers,
-                                      size_t permittedOutliers) {
+                                      size_t permittedOutliers,
+                                      size_t solveIterations,
+                                      double maxReprojectionAxisError) {
         addSensor(LedIdentifierPtr(identifier), m, d, locations,
-                  requiredInliers, permittedOutliers);
+                  requiredInliers, permittedOutliers,
+                  solveIterations, maxReprojectionAxisError);
     }
 
     void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
@@ -54,10 +57,13 @@ namespace vbtracker {
                                       std::vector<double> const &d,
                                       Point3Vector const &locations,
                                       size_t requiredInliers,
-                                      size_t permittedOutliers) {
+                                      size_t permittedOutliers,
+                                      size_t solveIterations,
+                                      double maxReprojectionAxisError) {
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            m, d, locations, requiredInliers, permittedOutliers));
+          m, d, locations, requiredInliers, permittedOutliers,
+          solveIterations, maxReprojectionAxisError));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }

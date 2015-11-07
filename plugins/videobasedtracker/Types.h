@@ -50,11 +50,8 @@ namespace vbtracker {
 
     typedef std::vector<std::string> PatternStringList;
 
-    /// @todo std::list used here for ease of rotate, but has terrible data
-    /// locality - consider changing when a more efficient rotation-invariant
-    /// string match algorithm is used.
-    typedef std::list<bool> LedPattern;
-    typedef std::vector<LedPattern> PatternList;
+    typedef std::string LedPatternWrapped;  //< Pattern repeated almost twice
+    typedef std::vector<LedPatternWrapped> PatternList; //< Ordered set of patterns to search
 
     typedef std::vector<cv::KeyPoint> KeyPointList;
     typedef KeyPointList::iterator KeyPointIterator;
@@ -78,6 +75,19 @@ namespace vbtracker {
     typedef std::vector<LedGroup> LedGroupList;
     typedef std::vector<EstimatorPtr> EstimatorList;
     /// @}
+
+    /// Container for the information needed to define a sensor,
+    /// both the patterns of its beacons and their 3D spatial coordinates.
+    struct SensorDescription {
+      PatternStringList patterns;
+      Point3Vector positions;
+      size_t requiredInliers;
+      size_t permittedOutliers;
+      std::string name;
+    };
+    /// Description for a list of sensors.
+    typedef std::vector<SensorDescription> SensorDescriptionList;
+
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
