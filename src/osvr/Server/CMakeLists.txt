@@ -11,12 +11,15 @@ set(API
 
 set(SOURCE
     ConfigureServer.cpp
+    ConfigureServerFromFile.cpp
     JSONResolvePossibleRef.h
     JSONResolvePossibleRef.cpp
     Server.cpp
     ServerImpl.cpp
     ServerImpl.h
     "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
+
+configure_file(ConfigFilePaths.h.cmake_in "${CMAKE_CURRENT_BINARY_DIR}/ConfigFilePaths.h")
 
 # Fallback display descriptor
 set(DISPLAY_JSON ../../../apps/displays/OSVR_HDK_1_1.json)

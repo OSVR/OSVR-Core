@@ -26,6 +26,7 @@
 // Internal Includes
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
+#include <osvr/Server/ConfigFilePaths.h>
 
 // Library/third-party includes
 // - none
@@ -49,16 +50,20 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
-    std::vector<std::string> configNames;
+    std::vector<std::string> configPaths;
     if (argc > 1) {
-        configNames = {std::string(argv[1])};
+        configPaths = {std::string(argv[1])};
     } else {
         out << "Using default config files - pass a filename on the command "
                "line to use a different one." << endl;
-        configNames = osvr::server::getDefaultConfigFilenames();
+        configPaths = osvr::server::getDefaultConfigFilePaths();
     }
 
-    server = osvr::server::configureServerFromFirstFileInList(configNames);
+    server = osvr::server::configureServerFromFirstFileInList(configPaths);
+    if (!server) {
+        out << "Using default config data." << endl;
+        server = osvr::server::configureServerFromFile("");
+    }
     if (!server) {
         return -1;
     }
