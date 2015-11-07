@@ -61,7 +61,8 @@ namespace server {
     /// @brief this returns a vector of default server configuration file paths.
     std::vector<std::string> getDefaultConfigFilePaths();
 
-    /// @brief This uses a file name to attempt to configure the server with that config file.
+    /// @brief This uses a file name to attempt to configure the server with
+    /// that config file.
     /// Pass an empty string to use the default config.
     /// This is the basic common code of a server app's setup, ripped out
     /// of the main server app to make alternate server-acting apps simpler to
@@ -69,8 +70,10 @@ namespace server {
     ServerPtr configureServerFromFile(std::string const &configName);
 
     /// @brief This iterates over a vector that contains a list of potential
-    /// config files, and uses the first working one to create the server instance.
-    ServerPtr configureServerFromFirstFileInList(std::vector<std::string> const &configNames);
+    /// config files, and uses the first working one to create the server
+    /// instance.
+    ServerPtr configureServerFromFirstFileInList(
+        std::vector<std::string> const &configNames);
 
 } // namespace server
 } // namespace osvr

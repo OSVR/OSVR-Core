@@ -41,7 +41,6 @@
 namespace osvr {
 namespace server {
 
-
     ServerPtr configureServerFromFile(std::string const &configName) {
         using detail::out;
         using detail::err;
@@ -49,20 +48,23 @@ namespace server {
         ServerPtr ret;
         osvr::server::ConfigureServer srvConfig;
 
-        if(!configName.empty()) {
+        if (!configName.empty()) {
             out << "Using config file '" << configName << "'" << endl;
             std::ifstream config(configName);
             if (!config.good()) {
                 err << "\n"
                     << "Could not open config file!" << endl;
                 err << "Searched in the current directory; file may be "
-                       "misspelled, missing, or in a different directory." << endl;
+                       "misspelled, missing, or in a different directory."
+                    << endl;
                 return nullptr;
             }
             try {
                 srvConfig.loadConfig(config);
             } catch (std::exception &e) {
-                err << "Caught exception attempting to parse server JSON config file: " << e.what() << endl;
+                err << "Caught exception attempting to parse server JSON "
+                       "config file: "
+                    << e.what() << endl;
                 return nullptr;
             }
         } else {
@@ -72,7 +74,8 @@ namespace server {
             ret = srvConfig.constructServer();
         } catch (std::exception &e) {
             err << "Caught exception constructing server from JSON config "
-                   "file: " << e.what() << endl;
+                   "file: "
+                << e.what() << endl;
             return nullptr;
         }
 
@@ -142,7 +145,8 @@ namespace server {
                 << endl;
         } else {
             out << "No valid 'display' object found in config file - server "
-                   "may use the OSVR HDK as a default." << endl;
+                   "may use the OSVR HDK as a default."
+                << endl;
         }
 
         if (srvConfig.processRenderManagerParameters()) {
@@ -156,13 +160,14 @@ namespace server {
         return ret;
     }
 
-    ServerPtr configureServerFromFirstFileInList(std::vector<std::string> const &configNames) {
+    ServerPtr configureServerFromFirstFileInList(
+        std::vector<std::string> const &configNames) {
         using detail::out;
         using detail::err;
         using std::endl;
-        for(const auto name: configNames) {
+        for (const auto name : configNames) {
             std::ifstream config(name);
-            if(config.good()) {
+            if (config.good()) {
                 return configureServerFromFile(name);
             }
         }

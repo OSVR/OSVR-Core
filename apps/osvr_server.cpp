@@ -55,7 +55,8 @@ int main(int argc, char *argv[]) {
         configPaths = {std::string(argv[1])};
     } else {
         out << "Using default config files - pass a filename on the command "
-               "line to use a different one." << endl;
+               "line to use a different one."
+            << endl;
         configPaths = osvr::server::getDefaultConfigFilePaths();
     }
 

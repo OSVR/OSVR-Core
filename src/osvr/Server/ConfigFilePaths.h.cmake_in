@@ -27,7 +27,7 @@
 
 #include <osvr/Util/PlatformConfig.h>
 namespace osvr {
-  namespace server {
+namespace server {
 
     std::vector<std::string> getDefaultConfigFilePaths() {
 
@@ -39,17 +39,19 @@ namespace osvr {
 
         std::vector<std::string> names;
         names.push_back(home + "/.osvr/osvr_server_config.json");
-        names.push_back("@CMAKE_INSTALL_FULL_SYSCONFDIR@/osvr_server_config.json");
+        names.push_back(
+            "@CMAKE_INSTALL_FULL_SYSCONFDIR@/osvr_server_config.json");
 
 #if defined(OSVR_WINDOWS)
         names.push_back(appdata + "\\OSVR\\osvr_server_config.json");
         names.push_back("osvr_server_config.json");
 #elif defined(OSVR_MACOSX)
-        names.push_back(home + "/Library/Application Support/OSVR/osvr_server_config.json");
+        names.push_back(
+            home + "/Library/Application Support/OSVR/osvr_server_config.json");
 #endif
 
         return names;
     }
-  }
+}
 }
 #endif // INCLUDED_ConfigFilePaths_h_GUID_241E9C9C_0E0E_46B0_9DED_8F8059306192
