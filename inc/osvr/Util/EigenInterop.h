@@ -273,13 +273,18 @@ namespace util {
 				BasePoseMap(BasePoseMap const&) = delete;
 				BasePoseMap(BasePoseMap && other) : m_pose(other.m_pose) {}
 #endif
+                typedef Eigen::Isometry3d TransformType;
+                typedef typename TransformType::MatrixType MatrixType;
+
                 /// Read-only accessor for the pose as an Eigen transform.
-                Eigen::Isometry3d transform() const {
-                    return fromPose(*m_pose);
-                }
+                TransformType transform() const { return fromPose(*m_pose); }
                 /// Read-only conversion operator for the pose as an Eigen
                 /// transform.
-                operator Eigen::Isometry3d() const { return transform(); }
+                operator TransformType() const { return transform(); }
+
+                /// Read-only accessor for the pose as an Eigen Matrix
+                MatrixType matrix() const { return fromPose(*m_pose).matrix(); }
+
                 /// Read-only accessor for the translation as an Eigen vector
                 /// map.
                 Eigen::Map<const Eigen::Vector3d> translation() const {

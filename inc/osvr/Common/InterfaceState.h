@@ -31,11 +31,10 @@
 #include <osvr/Common/ReportState.h>
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/TypePack/TypeKeyedTuple.h>
+#include <osvr/TypePack/Quote.h>
 
 // Library/third-party includes
-#include <boost/fusion/include/has_key.hpp>
-#include <boost/fusion/include/at_key.hpp>
-#include <boost/mpl/placeholders.hpp>
 #include <boost/optional.hpp>
 
 // Standard includes
@@ -46,21 +45,21 @@ namespace common {
     /// @brief A templated type containing state and a timestamp for known,
     /// specialized report types.
     template <typename ReportType> struct StateMapContents {
-        typedef typename traits::StateType<ReportType>::type state_type;
+        using state_type = traits::StateFromReport_t<ReportType>;
         state_type state;
         util::time::TimeValue timestamp;
     };
 
-    /// @brief Metafunction taking a report type and returning a state map
+    /// @brief Alias taking a report type and returning a state map
     /// value type.
-    template <typename ReportType> struct StateMapValueType {
-        typedef boost::optional<StateMapContents<ReportType> > type;
-    };
+    template <typename ReportType>
+    using StateMapValueType = boost::optional<StateMapContents<ReportType>>;
 
     /// @brief Data structure mapping from a report type to an optional state
     /// value.
-    typedef traits::GenerateReportMap<StateMapValueType<boost::mpl::_1> >::type
-        StateMap;
+    using StateMap =
+        typepack::TypeKeyedTuple<traits::ReportTypeList,
+                                 typepack::quote<StateMapValueType>>;
 
     /// @brief Class to maintain state for an interface for each report (and
     /// thus state) type explicitly enumerated.
@@ -69,9 +68,9 @@ namespace common {
         template <typename ReportType>
         void setStateFromReport(util::time::TimeValue const &timestamp,
                                 ReportType const &report) {
+            using typepack::get;
             if (hasState<ReportType>()) {
-                auto &oldTimestamp =
-                    boost::fusion::at_key<ReportType>(m_states)->timestamp;
+                auto &oldTimestamp = get<ReportType>(m_states)->timestamp;
                 if (osvrTimeValueGreater(oldTimestamp, timestamp)) {
                     tracing::markTimestampOutOfOrder();
                     return;
@@ -80,25 +79,24 @@ namespace common {
             StateMapContents<ReportType> c;
             c.state = reportState(report);
             c.timestamp = timestamp;
-            boost::fusion::at_key<ReportType>(m_states) = c;
+            get<ReportType>(m_states) = c;
             m_hasState = true;
         }
 
         template <typename ReportType> bool hasState() const {
-            return m_hasState &&
-                   bool(boost::fusion::at_key<ReportType>(m_states));
+            using typepack::get;
+            return m_hasState && bool(get<ReportType>(m_states));
         }
 
         bool hasAnyState() const { return m_hasState; }
 
         template <typename ReportType>
-        void
-        getState(util::time::TimeValue &timestamp,
-                 typename traits::StateType<ReportType>::type &state) const {
+        void getState(util::time::TimeValue &timestamp,
+                      traits::StateFromReport_t<ReportType> &state) const {
+            using typepack::get;
             if (hasState<ReportType>()) {
-                timestamp =
-                    boost::fusion::at_key<ReportType>(m_states)->timestamp;
-                state = boost::fusion::at_key<ReportType>(m_states)->state;
+                timestamp = get<ReportType>(m_states)->timestamp;
+                state = get<ReportType>(m_states)->state;
             }
             /// @todo do we fail silently or throw exception if we are asked for
             /// state we don't have?

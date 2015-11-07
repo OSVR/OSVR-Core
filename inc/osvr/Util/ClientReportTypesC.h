@@ -43,7 +43,7 @@
 /* none */
 
 /* Standard includes */
-#include <stdbool.h>
+/* none */
 
 OSVR_EXTERN_C_BEGIN
 
@@ -62,6 +62,58 @@ typedef OSVR_Quaternion OSVR_OrientationState;
 
 /** @brief Type of pose state */
 typedef OSVR_Pose3 OSVR_PoseState;
+
+/** @brief Type of linear velocity state */
+typedef OSVR_Vec3 OSVR_LinearVelocityState;
+
+/** @brief The quaternion represents the incremental rotation taking place over
+    a period of dt seconds. Use of dt (which does not necessarily
+    have to be 1, as other velocity/acceleration representations imply) and an
+    incremental quaternion allows device reports to be scaled to avoid aliasing
+*/
+typedef struct OSVR_IncrementalQuaternion {
+    OSVR_Quaternion incrementalRotation;
+    double dt;
+} OSVR_IncrementalQuaternion;
+
+/** @brief Type of angular velocity state: an incremental quaternion, providing
+    the incremental rotation taking place due to velocity over a period of dt
+    seconds.
+*/
+typedef OSVR_IncrementalQuaternion OSVR_AngularVelocityState;
+
+/** @brief Struct for combined velocity state */
+typedef struct OSVR_VelocityState {
+    OSVR_LinearVelocityState linearVelocity;
+    /** @brief Whether the data source reports valid data for
+        #OSVR_VelocityState::linearVelocity */
+    OSVR_CBool linearVelocityValid;
+
+    OSVR_AngularVelocityState angularVelocity;
+    /** @brief Whether the data source reports valid data for
+    #OSVR_VelocityState::angularVelocity */
+    OSVR_CBool angularVelocityValid;
+} OSVR_VelocityState;
+
+/** @brief Type of linear acceleration state */
+typedef OSVR_Vec3 OSVR_LinearAccelerationState;
+
+/** @brief Type of angular acceleration state
+*/
+typedef OSVR_IncrementalQuaternion OSVR_AngularAccelerationState;
+
+/** @brief Struct for combined acceleration state */
+typedef struct OSVR_AccelerationState {
+    OSVR_LinearAccelerationState linearAcceleration;
+    /** @brief Whether the data source reports valid data for
+    #OSVR_AccelerationState::linearAcceleration */
+    OSVR_CBool linearAccelerationValid;
+
+    OSVR_AngularAccelerationState angularAcceleration;
+    /** @brief Whether the data source reports valid data for
+    #OSVR_AccelerationState::angularAcceleration */
+    OSVR_CBool angularAccelerationValid;
+} OSVR_AccelerationState;
 
 /** @brief Type of button state */
 typedef uint8_t OSVR_ButtonState;
@@ -107,6 +159,67 @@ typedef struct OSVR_PoseReport {
     */
     OSVR_PoseState pose;
 } OSVR_PoseReport;
+
+/** @brief Report type for a velocity (linear and angular) callback on a
+    tracker interface
+*/
+typedef struct OSVR_VelocityReport {
+    /** @brief Identifies the sensor that the report comes from */
+    int32_t sensor;
+    /** @brief The data state - note that not all fields are neccesarily valid,
+        use the `Valid` members to check the status of the other fields.
+    */
+    OSVR_VelocityState state;
+} OSVR_VelocityReport;
+
+/** @brief Report type for a linear velocity callback on a tracker interface
+*/
+typedef struct OSVR_LinearVelocityReport {
+    /** @brief Identifies the sensor that the report comes from */
+    int32_t sensor;
+    /** @brief The state itself */
+    OSVR_LinearVelocityState state;
+} OSVR_LinearVelocityReport;
+
+/** @brief Report type for an angular velocity callback on a tracker interface
+*/
+typedef struct OSVR_AngularVelocityReport {
+    /** @brief Identifies the sensor that the report comes from */
+    int32_t sensor;
+    /** @brief The state itself */
+    OSVR_AngularVelocityState state;
+} OSVR_AngularVelocityReport;
+
+/** @brief Report type for an acceleration (linear and angular) callback on a
+    tracker interface
+*/
+typedef struct OSVR_AccelerationReport {
+    /** @brief Identifies the sensor that the report comes from */
+    int32_t sensor;
+    /** @brief The data state - note that not all fields are neccesarily valid,
+        use the `Valid` members to check the status of the other fields.
+    */
+    OSVR_AccelerationState state;
+} OSVR_AccelerationReport;
+
+/** @brief Report type for a linear acceleration callback on a tracker interface
+*/
+typedef struct OSVR_LinearAccelerationReport {
+    /** @brief Identifies the sensor that the report comes from */
+    int32_t sensor;
+    /** @brief The state itself */
+    OSVR_LinearAccelerationState state;
+} OSVR_LinearAccelerationReport;
+
+/** @brief Report type for an angular acceleration callback on a tracker
+    interface
+*/
+typedef struct OSVR_AngularAccelerationReport {
+    /** @brief Identifies the sensor that the report comes from */
+    int32_t sensor;
+    /** @brief The state itself */
+    OSVR_AngularAccelerationState state;
+} OSVR_AngularAccelerationReport;
 
 /** @brief Report type for a callback on a button interface */
 typedef struct OSVR_ButtonReport {

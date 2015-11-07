@@ -8,7 +8,7 @@ configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
 
 ###
-# Platform Config Header
+# Platform Config Header (and other external and internal configured headers)
 ###
 include(CheckStructHasMember)
 check_struct_has_member("struct timeval" tv_sec sys/time.h OSVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H LANGUAGE C)
@@ -17,13 +17,28 @@ configure_file(PlatformConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h
 
 configure_file(WideToUTF8.h.in "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h" @ONLY)
 
+set(CMAKE_REQUIRED_FLAGS ${OSVR_CXX11_FLAGS})
+include(CheckCXXSymbolExists)
+
+# check for std::align
+check_cxx_symbol_exists("std::align" "memory" OSVR_HAVE_STDALIGN)
+configure_file(StdAlignWrapper.h.in "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper.h" @ONLY)
+
 ###
 # Library build
 ###
 osvr_setup_lib_vars(Util)
 
+osvr_generate_x_macro(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/ReportTypesX.h"
+    INVOCATION_NAME OSVR_INVOKE_REPORT_TYPES_XMACRO
+    ELEMENTS
+    ${OSVR_REPORT_TYPES})
+
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
+    "${HEADER_LOCATION}/AlignedMemory.h"
+    "${HEADER_LOCATION}/AlignedMemoryC.h"
+    "${HEADER_LOCATION}/AlignedMemoryUniquePtr.h"
     "${HEADER_LOCATION}/Angles.h"
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
@@ -74,6 +89,7 @@ set(API
     "${HEADER_LOCATION}/RadialDistortionParametersC.h"
     "${HEADER_LOCATION}/Rect.h"
     "${HEADER_LOCATION}/RenderingTypesC.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/ReportTypesX.h"
     "${HEADER_LOCATION}/ResetPointerList.h"
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"
@@ -90,7 +106,6 @@ set(API
     "${HEADER_LOCATION}/TreeNode_fwd.h"
     "${HEADER_LOCATION}/TreeNodeFullPath.h"
     "${HEADER_LOCATION}/TreeTraversalVisitor.h"
-    "${HEADER_LOCATION}/TypePack.h"
     "${HEADER_LOCATION}/TypeSafeId.h"
     "${HEADER_LOCATION}/UniquePtr.h"
     "${HEADER_LOCATION}/UniqueContainer.h"
@@ -102,6 +117,7 @@ set(API
     "${CMAKE_CURRENT_BINARY_DIR}/PlatformConfig.h")
 
 set(SOURCE
+    AlignedMemoryC.cpp
     AnyMap.cpp
     Deletable.cpp
     GuardInterface.cpp
@@ -114,6 +130,7 @@ set(SOURCE
     ClientCallbackTypesCSnippet.h.in
     WideToUTF8.h.in
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h"
     "${CMAKE_CURRENT_BINARY_DIR}/WideToUTF8.h")
 
@@ -137,7 +154,17 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
     COMPONENT Devel)
 
 # TODO VRPN used in this lib only for gettimeofday wrapper: do we need it?
-target_link_libraries(${LIBNAME_FULL} PRIVATE vendored-vrpn eigen-headers)
+target_link_libraries(${LIBNAME_FULL}
+    PRIVATE
+    vendored-vrpn
+    eigen-headers
+    osvrTypePack)
+
+if(NOT OSVR_HAVE_STDALIGN)
+    target_link_libraries(${LIBNAME_FULL}
+        PRIVATE
+        libcxx_backports)
+endif()
 
 ###
 # C++ util library/headers
@@ -149,5 +176,9 @@ target_include_directories(${LIBNAME_INTERFACE}
     INTERFACE
     $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 
+target_link_libraries(${LIBNAME_INTERFACE}
+    INTERFACE
+    $<BUILD_INTERFACE:osvrTypePack>)
+
 target_compile_options(${LIBNAME_INTERFACE}
-    INTERFACE ${OSVR_CXX11_FLAGS})
+    INTERFACE $<BUILD_INTERFACE:${OSVR_CXX11_FLAGS}>)

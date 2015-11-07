@@ -32,7 +32,6 @@
 
 // Library/third-party includes
 #include <boost/shared_ptr.hpp>
-#include <opencv2/core/core.hpp>
 
 // Standard includes
 // - none
@@ -50,13 +49,12 @@ namespace clientkit {
     /// @brief The user-friendly imaging report. Note that passing this around
     /// by value is OK (doesn't copy the image), and the easiest way to ensure
     /// that the image buffer doesn't get freed before you're done using it.
-    struct ImagingReportOpenCV {
+    struct ImagingReport {
         /// @brief The device sensor number this frame came from.
         OSVR_ChannelCount sensor;
 
-        /// @brief An OpenCV Mat header for accessing the image data in the
-        /// buffer. Does not store the data internally (to reduce copies)!
-        cv::Mat frame;
+        /// @brief Metadata containing the properties of this frame.
+        OSVR_ImagingMetadata metadata;
 
         /// @brief A shared pointer with custom deleter that owns the underlying
         /// image data buffer for the frame.
@@ -64,9 +62,9 @@ namespace clientkit {
     };
 
     /// @brief The user-friendly imaging callback type
-    typedef void (*ImagingCallbackOpenCV)(
+    typedef void (*ImagingCallback)(
         void *userdata, util::time::TimeValue const &timestamp,
-        ImagingReportOpenCV report);
+        ImagingReport report);
 
     /// @}
 } // end namespace clientkit

@@ -26,6 +26,7 @@
 #include <osvr/ClientKit/Context.h>
 #include <osvr/ClientKit/Interface.h>
 #include <osvr/ClientKit/Imaging.h>
+#include <osvr/Util/OpenCVTypeDispatch.h>
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp>
@@ -43,8 +44,13 @@ bool gotSomething = false;
 
 void imagingCallback(void *userdata,
                      osvr::util::time::TimeValue const &timestamp,
-                     osvr::clientkit::ImagingReportOpenCV report) {
-    if (report.frame.empty()) {
+                     osvr::clientkit::ImagingReport report) {
+    // Convert the image pointer into an OpenCV matrix.
+    cv::Mat frame(report.metadata.height, report.metadata.width,
+        osvr::util::computeOpenCVMatType(report.metadata),
+        report.buffer.get());
+
+    if (frame.empty()) {
         std::cout << "Error, frame empty!" << std::endl;
         return;
     }
@@ -52,13 +58,13 @@ void imagingCallback(void *userdata,
     /// The first time, let's print some info.
     if (!gotSomething) {
         gotSomething = true;
-        std::cout << "Got first report: image is " << report.frame.cols << "x"
-                  << report.frame.rows << std::endl;
+        std::cout << "Got first report: image is " << frame.cols << "x"
+                  << frame.rows << std::endl;
     }
 
-    cv::imshow(windowNameAndInstructions, report.frame);
-    osvr::clientkit::ImagingReportOpenCV &lastReport =
-        *static_cast<osvr::clientkit::ImagingReportOpenCV *>(userdata);
+    cv::imshow(windowNameAndInstructions, frame);
+    osvr::clientkit::ImagingReport &lastReport =
+        *static_cast<osvr::clientkit::ImagingReport *>(userdata);
     lastReport = report;
 }
 int main() {
@@ -68,7 +74,7 @@ int main() {
 
     /// We keep a copy of the last report to avoid de-allocating the image
     /// buffer until we have a new report.
-    osvr::clientkit::ImagingReportOpenCV lastReport;
+    osvr::clientkit::ImagingReport lastReport;
 
     // Register the imaging callback.
     osvr::clientkit::registerImagingCallback(camera, &imagingCallback,

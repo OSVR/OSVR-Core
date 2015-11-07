@@ -33,12 +33,13 @@
 #include <boost/range/iterator_range.hpp>
 
 // Standard includes
-// - none
+#include <vector>
 
 namespace osvr {
 namespace pluginhost {
     SearchPath getPluginSearchPath() {
-        boost::filesystem::path exeLocation(getBinaryLocation());
+        using boost::filesystem::path;
+        auto exeLocation = path{getBinaryLocation()};
 #ifdef __ANDROID__
         OSVR_DEV_VERBOSE("Binary location: " << exeLocation);
 #endif
@@ -51,23 +52,47 @@ namespace pluginhost {
             binDir = binDir.parent_path();
         }
 #endif
+
         // binDir now normalized to PREFIX/bin
-        auto root = binDir.parent_path();
 
         SearchPath paths;
+
+#ifdef OSVR_PLUGINS_UNDER_BINDIR
+        // If the plugin directory is a subdirectory of where the binaries are,
+        // no need to go up a level before searching.
+        paths.push_back((binDir / OSVR_PLUGIN_SUBDIR).string());
+#endif
+
+        // For each component of the compiled-in binary directory, we lop off a
+        // component from the binary location we've detected, and add it to the
+        // list of possible roots.
+        std::vector<path> rootDirCandidates;
+        {
+            auto compiledBinDir = path{OSVR_BINDIR};
+            auto root = binDir.parent_path();
+            do {
+                rootDirCandidates.push_back(root);
+                root = root.parent_path();
+                compiledBinDir = compiledBinDir.parent_path();
+            } while (!compiledBinDir.empty() && !root.empty());
+        }
 
 #ifdef __ANDROID__
         // current working directory, if different from root
         auto currentWorkingDirectory = boost::filesystem::current_path();
         if (currentWorkingDirectory != root) {
-            paths.push_back((currentWorkingDirectory / OSVR_PLUGIN_DIR).string());
+            paths.push_back(
+                (currentWorkingDirectory / OSVR_PLUGIN_DIR).string());
         }
 #endif
 
+        for (auto const &possibleRoot : rootDirCandidates) {
 #ifdef _MSC_VER
-        paths.push_back((root / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
+            paths.push_back(
+                (possibleRoot / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
 #endif
-        paths.push_back((root / OSVR_PLUGIN_DIR).string());
+            paths.push_back((possibleRoot / OSVR_PLUGIN_DIR).string());
+        }
 
         /// @todo add user's home directory to search path
 

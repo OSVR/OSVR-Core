@@ -119,6 +119,7 @@ set(API
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
     "${HEADER_LOCATION}/Tracing.h"
+    "${HEADER_LOCATION}/TrackerSensorInfo.h"
     "${HEADER_LOCATION}/Transform.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h"
     "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
@@ -201,7 +202,6 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     PRIVATE
     jsoncpp_lib
-    opencv_core
     vendored-vrpn
     eigen-headers
     osvr_cxx11_flags
@@ -220,12 +220,10 @@ if(OSVR_COMMON_TRACING_ETW)
         DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endif()
 
-osvr_delayload_opencv(${LIBNAME_FULL} ${OPENCV_CORE_MODULES})
-
 ###
 # Grab DLLs please.
 ###
-if(OSVR_COPY_OPENCV)
+if(OSVR_NEED_OPENCV AND OSVR_COPY_OPENCV)
     # This copies the DLLs used by the core, as well as by any enabled in-tree plugins.
     foreach(opencvlib ${OPENCV_MODULES_USED})
         osvr_copy_dep(${LIBNAME_FULL} ${opencvlib})

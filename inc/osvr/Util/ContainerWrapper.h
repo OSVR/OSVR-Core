@@ -27,7 +27,13 @@
 #define INCLUDED_ContainerWrapper_h_GUID_87C9C3C2_1A4E_4BA8_A160_96145B60CEDB
 
 // Internal Includes
-#include <osvr/Util/TypePack.h>
+#include <osvr/TypePack/T.h>
+#include <osvr/TypePack/List.h>
+#include <osvr/TypePack/If.h>
+#include <osvr/TypePack/Contains.h>
+#include <osvr/TypePack/And.h>
+#include <osvr/TypePack/Fold.h>
+#include <osvr/TypePack/Not.h>
 
 // Library/third-party includes
 // - none
@@ -155,9 +161,8 @@ namespace util {
                   template <class, class> class ContainerMixin>
         struct Option {
             using condition = Condition;
-            template <typename Container, typename Base> struct apply {
-                using type = ContainerMixin<Container, Base>;
-            };
+            template <typename Container, typename Base>
+            using apply = ContainerMixin<Container, Base>;
         };
 
         /// @brief Alias class to use in fold when computing a container wrapper
@@ -166,7 +171,7 @@ namespace util {
                 using condition = typename Option::condition;
                 using type = typepack::if_<
                     condition,
-                    typepack::t_<typepack::apply<Option, Container, Base>>,
+                    typepack::apply<Option, Container, Base>,
                     Base>;
             };
         };

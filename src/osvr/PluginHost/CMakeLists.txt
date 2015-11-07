@@ -47,4 +47,6 @@ target_link_libraries(${LIBNAME_FULL}
 ###
 # Grab DLLs please.
 ###
-osvr_copy_dep(${LIBNAME_FULL} libfunctionality::functionality)
+if(OSVR_COPY_LIBFUNC)
+    osvr_copy_dep(${LIBNAME_FULL} libfunctionality::functionality)
+endif()

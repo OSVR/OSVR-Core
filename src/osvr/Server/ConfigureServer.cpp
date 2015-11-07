@@ -105,7 +105,11 @@ namespace server {
         bool local = true;
         std::string iface;
         boost::optional<int> port;
+#ifdef _WIN32
+        int sleepTime = 0; // microseconds - default to 0 on Windows
+#else
         int sleepTime = 1000; // microseconds
+#endif
 
         /// Extract data from the JSON structure.
         if (root.isMember(SERVER_KEY)) {
@@ -349,6 +353,29 @@ namespace server {
 
         // OK, got it.
         success = m_server->addString(DISPLAY_PATH, result.toStyledString());
+        return success;
+    }
+
+    static const char RENDERMANAGER_KEY[] = "renderManagerConfig";
+    static const char RENDERMANAGER_PATH[] = "/renderManagerConfig";
+    bool ConfigureServer::processRenderManagerParameters() {
+        bool success = false;
+        Json::Value const &renderManager = m_data->getMember(RENDERMANAGER_KEY);
+        if (renderManager.isNull()) {
+            return success;
+        }
+
+        auto result = resolvePossibleRef(renderManager);
+        if (result.isNull()) {
+            OSVR_DEV_VERBOSE(
+                "ERROR: Could not load an object or render manager config "
+                "file specified by: "
+                << renderManager.toStyledString());
+            return success;
+        }
+
+        // OK, got it
+        success = m_server->addString(RENDERMANAGER_PATH, result.toStyledString());
         return success;
     }
 

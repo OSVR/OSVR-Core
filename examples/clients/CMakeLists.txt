@@ -6,29 +6,36 @@ set(MAINCLIENTS
     ButtonCallback
     TrackerCallback
     DisplayParameter
-    Imaging
     EyeTracker
     Location2D
     Direction
     Locomotion)
+if(BUILD_WITH_OPENCV)
+    list(APPEND MAINCLIENTS Imaging)
+endif()
+
 # These are "extra"
 set(CLIENTS
     MinimalInit
     TrackerState
     ViewerEyeSurfaces)
 
+set(LIB_c osvrClientKit)
+set(LIB_cpp osvrClientKitCpp)
 foreach(name ${MAINCLIENTS} ${CLIENTS})
     foreach(suffix c cpp)
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${name}.${suffix}")
             add_executable(${name}_${suffix} ${name}.${suffix})
-            target_link_libraries(${name}_${suffix} osvrClientKitCpp)
+            target_link_libraries(${name}_${suffix} ${LIB_${suffix}})
             set_target_properties(${name}_${suffix} PROPERTIES
                 FOLDER "OSVR Example Clients")
         endif()
     endforeach()
 endforeach()
 
-target_link_libraries(Imaging_cpp opencv_core opencv_highgui)
+if(BUILD_WITH_OPENCV)
+    target_link_libraries(Imaging_cpp opencv_core opencv_highgui)
+endif()
 target_link_libraries(ViewerEyeSurfaces_cpp osvr_cxx11_flags)
 
 foreach(name ${MAINCLIENTS})

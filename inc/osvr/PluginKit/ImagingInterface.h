@@ -30,6 +30,7 @@
 #include <osvr/PluginKit/ImagingInterfaceC.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/OpenCVTypeDispatch.h>
+#include <osvr/Util/AlignedMemory.h>
 
 // Library/third-party includes
 #include <opencv2/core/core_c.h>
@@ -37,6 +38,7 @@
 
 // Standard includes
 #include <iosfwd>
+#include <cstring> // for std::memcpy
 
 namespace osvr {
 namespace pluginkit {
@@ -58,17 +60,33 @@ namespace pluginkit {
         /// the given buffer and free it when done.
         ImagingMessage(cv::Mat const &frame, OSVR_ChannelCount sensor = 0)
             : m_sensor(sensor) {
-            m_frame = frame.clone();
+            std::size_t bytes = frame.total() * frame.elemSize();
+            m_buf = reinterpret_cast<OSVR_ImageBufferElement *>(
+                util::alignedAlloc(bytes));
+            std::memcpy(m_buf, frame.data, bytes);
+            m_frame = cv::Mat(frame.size(), frame.type(), m_buf);
+        }
+        ~ImagingMessage() {
+            util::alignedFree(m_buf);
+            m_buf = NULL;
         }
 
-        /// @brief Retrieves a reference to the internal (cloned) data.
+        /// @brief Retrieves a reference to the cv::Mat object.
         cv::Mat const &getFrame() const { return m_frame; }
+
+        /// @brief Retrieves the (cloned) buffer pointer.
+        OSVR_ImageBufferElement *getBuf() const { return m_buf; }
 
         /// @brief Gets the sensor number.
         OSVR_ChannelCount getSensor() const { return m_sensor; }
 
       private:
+        // noncopyable
+        ImagingMessage(ImagingMessage const &);
+        // nonassignable
+        ImagingMessage &operator=(ImagingMessage const &);
         cv::Mat m_frame;
+        OSVR_ImageBufferElement *m_buf;
         OSVR_ChannelCount m_sensor;
     };
 
@@ -115,9 +133,9 @@ namespace pluginkit {
                                 : (typedata.isSigned() ? OSVR_IVT_SIGNED_INT
                                                        : OSVR_IVT_UNSIGNED_INT);
 
-            OSVR_ReturnCode ret =
-                osvrDeviceImagingReportFrame(dev, m_iface, metadata, frame.data,
-                                             message.getSensor(), &timestamp);
+            OSVR_ReturnCode ret = osvrDeviceImagingReportFrame(
+                dev, m_iface, metadata, message.getBuf(), message.getSensor(),
+                &timestamp);
             if (OSVR_RETURN_SUCCESS != ret) {
                 throw std::runtime_error("Could not send imaging message!");
             }

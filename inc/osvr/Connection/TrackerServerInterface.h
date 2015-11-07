@@ -46,16 +46,39 @@ namespace connection {
     class TrackerServerInterface {
       public:
         virtual void sendReport(OSVR_PositionState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) = 0;
 
         virtual void sendReport(OSVR_OrientationState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) = 0;
 
         virtual void sendReport(OSVR_PoseState const &val,
-                                OSVR_ChannelCount chan,
+                                OSVR_ChannelCount sensor,
                                 util::time::TimeValue const &timestamp) = 0;
+
+        virtual void sendVelReport(OSVR_VelocityState const &val,
+                                   OSVR_ChannelCount sensor,
+                                   util::time::TimeValue const &timestamp) = 0;
+        virtual void sendVelReport(OSVR_LinearVelocityState const &val,
+                                   OSVR_ChannelCount sensor,
+                                   util::time::TimeValue const &timestamp) = 0;
+        virtual void sendVelReport(OSVR_AngularVelocityState const &val,
+                                   OSVR_ChannelCount sensor,
+                                   util::time::TimeValue const &timestamp) = 0;
+
+        virtual void
+        sendAccelReport(OSVR_AccelerationState const &val,
+                        OSVR_ChannelCount sensor,
+                        util::time::TimeValue const &timestamp) = 0;
+        virtual void
+        sendAccelReport(OSVR_LinearAccelerationState const &val,
+                        OSVR_ChannelCount sensor,
+                        util::time::TimeValue const &timestamp) = 0;
+        virtual void
+        sendAccelReport(OSVR_AngularAccelerationState const &val,
+                        OSVR_ChannelCount sensor,
+                        util::time::TimeValue const &timestamp) = 0;
     };
 
 } // namespace connection

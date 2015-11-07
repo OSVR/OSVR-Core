@@ -14,5 +14,3 @@ endif()
 # OpenCV is required for these targets, so adding regardless of if we found it - make the build fail early if it's not found.
 set_property(TARGET osvr::osvrPluginKitImaging APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${OpenCV_LIBS})
 set_property(TARGET osvr::osvrPluginKitImaging APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})
-set_property(TARGET osvr::osvrClientKitImaging APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${OpenCV_LIBS})
-set_property(TARGET osvr::osvrClientKitImaging APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})

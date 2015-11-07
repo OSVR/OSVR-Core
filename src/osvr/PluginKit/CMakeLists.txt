@@ -29,7 +29,8 @@ set(SOURCE
     Location2DInterfaceC.cpp
     LocomotionInterfaceC.cpp
     PluginRegistrationC.cpp
-    TrackerInterfaceC.cpp)
+    TrackerInterfaceC.cpp
+    UseSendGuard.h)
 
 osvr_add_library()
 
