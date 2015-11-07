@@ -29,6 +29,11 @@ configure_file(StdAlignWrapper.h.in "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper
 ###
 osvr_setup_lib_vars(Util)
 
+osvr_generate_x_macro(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/ReportTypesX.h"
+    INVOCATION_NAME OSVR_INVOKE_REPORT_TYPES_XMACRO
+    ELEMENTS
+    ${OSVR_REPORT_TYPES})
+
 set(API
     "${HEADER_LOCATION}/APIBaseC.h"
     "${HEADER_LOCATION}/AlignedMemory.h"
@@ -83,6 +88,7 @@ set(API
     "${HEADER_LOCATION}/RadialDistortionParametersC.h"
     "${HEADER_LOCATION}/Rect.h"
     "${HEADER_LOCATION}/RenderingTypesC.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/ReportTypesX.h"
     "${HEADER_LOCATION}/ResetPointerList.h"
     "${HEADER_LOCATION}/ResourcePath.h"
     "${HEADER_LOCATION}/ReturnCodesC.h"

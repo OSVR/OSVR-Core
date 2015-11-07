@@ -1,7 +1,13 @@
-set(REPORT_TYPES
+set(OSVR_REPORT_TYPES
+    Pose
     Position
     Orientation
-    Pose
+    Velocity
+    LinearVelocity
+    AngularVelocity
+    Acceleration
+    LinearAcceleration
+    AngularAcceleration
     Button
     Analog
     Imaging
@@ -11,7 +17,8 @@ set(REPORT_TYPES
     EyeTracker3D
     EyeTrackerBlink
     NaviVelocity
-    NaviPosition)
+    NaviPosition
+    CACHE INTERNAL "" FORCE)
 
 # Generate a file using a template with the placeholder @BODY@, as well as a
 # repeated template with the placeholder @TYPE@ - repeated once for each report type.
@@ -23,7 +30,7 @@ function(osvr_generate_for_report_types _fileTemplate _snippetTemplate _outFile)
 
     file(READ "${_snippetTemplate}" SNIPPET)
     set(BODY "/* generated file - do not edit! */")
-    foreach(TYPE ${REPORT_TYPES})
+    foreach(TYPE ${OSVR_REPORT_TYPES})
         string(CONFIGURE "${SNIPPET}" snippetConfigured @ONLY)
         set(BODY "${BODY}\n${snippetConfigured}")
     endforeach()

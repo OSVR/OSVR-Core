@@ -33,6 +33,7 @@
 // Internal Includes
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/TypePack/T.h>
+#include <osvr/Util/ReportTypesX.h>
 
 // Library/third-party includes
 // - none
@@ -58,7 +59,7 @@ namespace common {
         /// @headerfile StateType.h <osvr/Common/StateType.h>
         template <typename T> struct StateType {};
 
-#define OSVR_REPORT_TRAITS(TYPE)                                               \
+#define OSVR_X(TYPE)                                                           \
     template <> struct CallbackType<OSVR_##TYPE##Report> {                     \
         typedef OSVR_##TYPE##Callback type;                                    \
     };                                                                         \
@@ -68,20 +69,8 @@ namespace common {
     template <> struct StateType<OSVR_##TYPE##Report> {                        \
         typedef OSVR_##TYPE##State type;                                       \
     };
-        OSVR_REPORT_TRAITS(Analog)
-        OSVR_REPORT_TRAITS(Button)
-        OSVR_REPORT_TRAITS(Pose)
-        OSVR_REPORT_TRAITS(Position)
-        OSVR_REPORT_TRAITS(Orientation)
-        OSVR_REPORT_TRAITS(Imaging)
-        OSVR_REPORT_TRAITS(Location2D)
-        OSVR_REPORT_TRAITS(Direction)
-        OSVR_REPORT_TRAITS(EyeTracker2D)
-        OSVR_REPORT_TRAITS(EyeTracker3D)
-        OSVR_REPORT_TRAITS(EyeTrackerBlink)
-        OSVR_REPORT_TRAITS(NaviVelocity)
-        OSVR_REPORT_TRAITS(NaviPosition)
-#undef OSVR_REPORT_TRAITS
+        OSVR_INVOKE_REPORT_TYPES_XMACRO()
+#undef OSVR_X
 
         /// @brief Alias for the CallbackType associated with a given ReportType
         /// @headerfile CallbackType.h <osvr/Common/CallbackType.h>
