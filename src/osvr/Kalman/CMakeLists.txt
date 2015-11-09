@@ -2,7 +2,6 @@ osvr_setup_lib_vars(Kalman)
 
 set(API
     "${HEADER_LOCATION}/AbsoluteOrientationMeasurement.h"
-    "${HEADER_LOCATION}/AbsolutePoseMeasurement.h"
     "${HEADER_LOCATION}/AbsolutePositionMeasurement.h"
     "${HEADER_LOCATION}/ExternalQuaternion.h"
     "${HEADER_LOCATION}/FlexibleKalmanBase.h"
