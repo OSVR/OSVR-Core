@@ -179,8 +179,7 @@ TYPED_TEST(VariedProcessModelStability, IdentityAbsolutePositionMeasurement) {
 
     auto filter = Filter{};
     auto meas = AbsolutePositionMeasurement{
-        Eigen::Vector3d::Zero(),
-        Eigen::Matrix<double, 3, 3>::Identity() * 0.000007};
+        Eigen::Vector3d::Zero(), Eigen::Vector3d::Constant(0.000007)};
     this->dumpInitialState(filter);
     this->filterAndCheckRepeatedly(filter, meas);
     /// @todo check that it's roughly identity
@@ -191,8 +190,7 @@ TYPED_TEST(VariedProcessModelStability, AbsolutePositionMeasurementXlate111) {
 
     auto filter = Filter{};
     auto meas = AbsolutePositionMeasurement{
-        Eigen::Vector3d::Constant(1),
-        Eigen::Matrix<double, 3, 3>::Identity() * 0.000007};
+        Eigen::Vector3d::Constant(1), Eigen::Vector3d::Constant(0.000007)};
     this->dumpInitialState(filter);
     this->filterAndCheckRepeatedly(filter, meas);
     /// @todo check that it's roughly identity orientation, position of 1, 1, 1

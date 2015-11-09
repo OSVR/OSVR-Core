@@ -47,10 +47,11 @@ namespace kalman {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType DIMENSION = 3; // 3 position
         using MeasurementVector = types::Vector<DIMENSION>;
+        using MeasurementDiagonalMatrix = types::DiagonalMatrix<DIMENSION>;
         using MeasurementMatrix = types::SquareMatrix<DIMENSION>;
         AbsolutePositionBase(MeasurementVector const &pos,
-                             types::SquareMatrix<DIMENSION> const &covariance)
-            : m_pos(pos), m_covariance(covariance) {}
+                             MeasurementVector const &variance)
+            : m_pos(pos), m_covariance(variance.asDiagonal()) {}
 
         template <typename State>
         MeasurementMatrix getCovariance(State const &) const {
@@ -73,7 +74,7 @@ namespace kalman {
 
       private:
         MeasurementVector m_pos;
-        MeasurementMatrix m_covariance;
+        MeasurementDiagonalMatrix m_covariance;
     };
 
     /// This is the subclass of AbsolutePositionBase: only explicit
@@ -93,8 +94,8 @@ namespace kalman {
         using Base = AbsolutePositionBase;
         using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
         AbsolutePositionMeasurement(MeasurementVector const &pos,
-                                    types::SquareMatrix<3> const &posCovariance)
-            : Base(pos, posCovariance), m_jacobian(Jacobian::Zero()) {
+                                    MeasurementVector const &variance)
+            : Base(pos, variance), m_jacobian(Jacobian::Zero()) {
             m_jacobian.block<3, 3>(0, 0) = types::SquareMatrix<3>::Identity();
         }
 
