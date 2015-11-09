@@ -168,24 +168,35 @@ namespace common {
             return m_descriptor;
         }
 
-        void ArticulationElement::setArticulationName(
-            std::string const &articulationName) {
-            m_articulationName = articulationName;
+        void ArticulationElement::setArticulationType(
+            std::string const &articulationType) {
+            m_articulationType = articulationType;
         }
 
         void ArticulationElement::setBoneName(std::string const &boneName) {
             m_boneName = boneName;
         }
 
+        void ArticulationElement::setTrackerPath(std::string const &trackerPath) {
+            m_trackerPath = trackerPath;
+        }
+
         std::string &ArticulationElement::getArticulationType() {
-            return m_articulationName;
+            return m_articulationType;
         }
         std::string const &ArticulationElement::getArticulationType() const {
-            return m_articulationName;
+            return m_articulationType;
         }
         std::string &ArticulationElement::getBoneName() { return m_boneName; }
         std::string const &ArticulationElement::getBoneName() const {
             return m_boneName;
+        }
+
+        std::string &ArticulationElement::getTrackerPath(){
+            return m_trackerPath;
+        }
+        std::string const &ArticulationElement::getTrackerPath() const{
+            return m_trackerPath;
         }
 
     } // namespace elements

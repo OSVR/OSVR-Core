@@ -245,31 +245,41 @@ namespace common {
                                     boost::operators<ArticulationElement> {
           public:
             ArticulationElement() = default;
-            ArticulationElement(std::string const &articulationName,
-                                std::string const &boneName)
-                : m_articulationName(articulationName), m_boneName(boneName) {}
+            ArticulationElement(std::string const &articulationType,
+                                std::string const &boneName,
+                                std::string const &trackerPath)
+                : m_articulationType(articulationType), m_boneName(boneName),
+                  m_trackerPath(trackerPath) {}
 
             /// @brief Sets the articulation type/name
             OSVR_COMMON_EXPORT void
-            setArticulationName(std::string const &articulationName);
+            setArticulationType(std::string const &articulationType);
 
             /// @brief Sets the bone name
             OSVR_COMMON_EXPORT void setBoneName(std::string const &boneName);
+
+            /// @brief Sets the bone name
+            OSVR_COMMON_EXPORT void
+            setTrackerPath(std::string const &trackerPath);
 
             OSVR_COMMON_EXPORT std::string &getArticulationType();
             OSVR_COMMON_EXPORT std::string const &getArticulationType() const;
             OSVR_COMMON_EXPORT std::string &getBoneName();
             OSVR_COMMON_EXPORT std::string const &getBoneName() const;
+            OSVR_COMMON_EXPORT std::string &getTrackerPath();
+            OSVR_COMMON_EXPORT std::string const &getTrackerPath() const;
 
             /// @brief Equality comparison operator
             bool operator==(ArticulationElement const &other) const {
-                return m_articulationName == other.m_articulationName &&
-                       m_boneName == other.m_boneName;
+                return m_articulationType == other.m_articulationType &&
+                       m_boneName == other.m_boneName &&
+                       m_trackerPath == other.m_trackerPath;
             }
 
           private:
-            std::string m_articulationName;
+            std::string m_articulationType;
             std::string m_boneName;
+            std::string m_trackerPath;
         };
 
         /// This inline implementation MUST remain at the bottom of this file,

@@ -69,6 +69,7 @@ namespace common {
         serializationDescription(Functor &f, ValType &value) {
             f("articulationName", value.getArticulationType());
             f("boneName", value.getBoneName());
+            f("trackerPath", value.getTrackerPath());
         }
 
         /// @brief Description for StringElement

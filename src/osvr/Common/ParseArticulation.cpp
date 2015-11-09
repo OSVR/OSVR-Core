@@ -93,9 +93,9 @@ namespace common {
                 (val[BONE_NAME_KEY].isNull() && val[BONE_NAME_KEY].isString())
                     ? std::string()
                     : val[BONE_NAME_KEY].asString();
-            m_trackerPath = (val[DATA_KEY].isNull() && val[DATA_KEY].isString())
+            m_articulationType = (val[ARTIC_TYPE_KEY].isNull() && val[ARTIC_TYPE_KEY].isString())
                                 ? std::string()
-                                : val[DATA_KEY].asString();
+                                : val[ARTIC_TYPE_KEY].asString();
             return;
         }
     }
