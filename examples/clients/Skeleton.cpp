@@ -33,14 +33,19 @@
 #include <iostream>
 #include <string>
 
+void skeletonCallback(void * /*userdata*/, const OSVR_TimeValue * /*timestamp*/,
+                      const OSVR_SkeletonReport *report) {
+    std::cout << "Got skeleton update callback, for sensor #" << report->sensor
+              << std::endl;
+}
+
 int main() {
     osvr::clientkit::ClientContext context(
         "com.osvr.exampleclients.SkeletonCallback");
 
     osvr::clientkit::Interface skeleton =
-        context.getInterface("/com_osvr_example_Skeleton/Skeleton/skeleton");
-
-    // skeleton.registerCallback(&skeletonWholeCallback, NULL);
+        context.getInterface("/com_osvr_example_Skeleton/Skeleton/skeleton/0");
+    skeleton.registerCallback(&skeletonCallback, NULL);
 
     // Pretend that this is your application's mainloop.
     while (1) {

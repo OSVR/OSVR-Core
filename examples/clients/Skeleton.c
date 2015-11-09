@@ -37,10 +37,9 @@ int main() {
         osvrClientInit("com.osvr.exampleclients.SkeletonCallback", 0);
 
     OSVR_ClientInterface leftHand = NULL;
-    OSVR_ClientInterface rightHand = NULL;
 
-    osvrClientGetInterface(ctx, "/me/hands/left", &leftHand);
-    osvrClientGetInterface(ctx, "/me/hands/right", &rightHand);
+    osvrClientGetInterface(
+        ctx, "/com_osvr_example_Skeleton/Skeleton/skeleton/0", &leftHand);
 
     // Pretend that this is your application's mainloop.
     while (1) {
