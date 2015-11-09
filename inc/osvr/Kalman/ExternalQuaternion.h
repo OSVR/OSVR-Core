@@ -84,6 +84,8 @@ namespace kalman {
             return ret;
         }
 
+#if 0
+        /// @todo Still seems to be faulty.
         inline types::SquareMatrix<4>
             covarianceFromEulerVariance(types::Vector<3> const &s) {
             auto quatScalarPartSquared = vecToQuatScalarPartSquared(s);
@@ -103,6 +105,7 @@ namespace kalman {
 
             return cov;
         }
+#endif
     } // namespace external_quat
 } // namespace kalman
 } // namespace osvr
