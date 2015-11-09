@@ -118,6 +118,9 @@ namespace common {
         PathNode &node, std::string const &source, std::string const &dest,
         AliasPriority priority = ALIASPRIORITY_MANUAL);
 
+    bool addArticulation(PathNode &node, std::string const &source,
+                         std::string const &dest);
+
     bool isPathAbsolute(std::string const &source);
 
     /// @brief Clones a path tree

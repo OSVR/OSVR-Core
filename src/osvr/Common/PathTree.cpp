@@ -28,6 +28,7 @@
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/RouteContainer.h>
 #include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/ParseArticulation.h>
 #include <osvr/Common/RoutingConstants.h>
 #include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
@@ -100,6 +101,17 @@ namespace common {
         return true;
     }
 
+    static inline bool addArticulationImpl(PathNode &node,
+                                           std::string const &articulationName,
+                                           std::string const &boneName) {
+
+        elements::ArticulationElement elt;
+        elt.setArticulationName(articulationName);
+        elt.setBoneName(boneName);
+        node.value() = elt;
+        return true;
+    }
+
     bool addAlias(PathNode &node, std::string const &source,
                   AliasPriority priority) {
         ParsedAlias newSource(source);
@@ -146,6 +158,23 @@ namespace common {
         auto absSource = getAbsolutePath(node, newSource.getLeaf());
         newSource.setLeaf(absSource);
         return addAliasImpl(aliasNode, newSource.getAlias(), priority);
+    }
+
+    bool addArticulation(PathNode &node, std::string const &source,
+                         std::string const &dest) {
+        auto &articulationNode = treePathRetrieve(node, dest);
+        ParsedArticulation articulationData(source);
+        if (!articulationData.isValid()) {
+            /// @todo signify invalid route in some other way?
+            OSVR_DEV_VERBOSE("Could not parse source: " << source);
+            return false;
+        }
+        auto fullTrackerPath =
+            getAbsolutePath(node, articulationData.getTrackerPath());
+        articulationData.setTrackerPath(fullTrackerPath);
+        return addArticulationImpl(articulationNode,
+                                   articulationData.getArticulationType(),
+                                   articulationData.getBoneName());
     }
 
     bool isPathAbsolute(std::string const &source) {
