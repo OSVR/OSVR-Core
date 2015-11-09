@@ -25,7 +25,7 @@ This project: Licensed under the Apache License, Version 2.0.
 - `/cmake` - Git subtree from <https://github.com/rpavlik/cmake-modules> used at compile-time only. Primarily BSL 1.0, some items under the license used by CMake (BSD-style)
 - `/vendor/com_smart_pointer` - Header (for integrating `boost::intrusive_ptr` with MS COM) extracted from the following project and file: <https://github.com/rengeln/nyx/blob/master/src/Prefix.h>, modified as needed for compatibility. MIT license.
 - `/vendor/discount-windows-bins` - Submodule containing source, build script, and Windows binaries for the "Discount" Markdown processor, used only during the build process on Windows. Upstream at <https://github.com/Orc/discount>. 3-clause BSD license.
-- `/vendor/eigen-3.2.6` - Unpacked release from <http://eigen.tuxfamily.org/> - header-only library under the MPL2 (a file-level copyleft, compatible with proprietary software), define `EIGEN_MPL2_ONLY` to exclude modules with other license from the build (done in OSVR-Core build system).
+- `/vendor/eigen-3.2.7` - Unpacked release from <http://eigen.tuxfamily.org/> - header-only library under the MPL2 (a file-level copyleft, compatible with proprietary software), define `EIGEN_MPL2_ONLY` to exclude modules with other license from the build (done in OSVR-Core build system).
 - `/vendor/FloatExceptions` - Code for development use only, usage should not be committed or merged into master. MIT licensed.
 - `/vendor/gtest-1.7.0` - Unpacked source from <https://code.google.com/p/googletest/> - 3-clause BSD license. Used only for building/running tests.
 - `/vendor/jenkins-ctest-plugin` - Git submodule from <https://github.com/rpavlik/jenkins-ctest-plugin>, used only for building/running tests and CI. MIT license.

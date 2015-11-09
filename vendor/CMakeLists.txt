@@ -81,7 +81,7 @@ endif()
 
 # Interface target for Eigen
 add_library(eigen-headers INTERFACE)
-set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.6" CACHE INTERNAL "" FORCE)
+set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.7" CACHE INTERNAL "" FORCE)
 target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
 
