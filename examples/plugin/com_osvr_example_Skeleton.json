@@ -13,72 +13,89 @@
             "count": 12
         }
     },
-    "articulationSpec": [
-        {
+    "articulationSpec": {
             "leftWrist" : {
                 "$data" : {
-                    "data" : "tracker/0"
+                    "data" : "tracker/0",
+                    "type" : "joint"
                 },
                 "thumbMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/1"
+                        "data": "tracker/1",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "indexMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/2"
+                        "data": "tracker/2",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "middleMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/3"
+                        "data": "tracker/3",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "ringMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/4"
+                        "data": "tracker/4",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "pinkyMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/5"
+                        "data": "tracker/5",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 }
-            }
-        },
-        {
-            "rightWrist" : {
+            },
+        "rightWrist" : {
                 "$data" : {
-                    "data" : "tracker/0"
+                    "data" : "tracker/6"
                 },
                 "thumbMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/1"
+                        "data": "tracker/7",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "indexMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/2"
+                        "data": "tracker/8",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "middleMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/3"
+                        "data": "tracker/9",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "ringMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/4"
+                        "data": "tracker/10",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 },
                 "pinkyMetacarpal" : {
                     "$data" : {
-                        "data": "tracker/5"
+                        "data": "tracker/11",
+                        "boneName" : "metacarpalPhalanx",
+                        "type" : "joint"
                     }
                 }
             }
-        }
-    ],
+    },
     "semantic": {
         "hands": {
             "left": {
@@ -120,7 +137,5 @@
         }
     },
     "automaticAliases": {
-        "me/hands/left": "semantic/hands/left/",
-        "me/hands/right": "semantic/hands/right/"
     }
 }

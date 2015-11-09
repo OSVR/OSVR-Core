@@ -44,7 +44,8 @@ class SkeletonDevice {
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
-        osvrDeviceSkeletonConfigure(opts, &m_skeleton, com_osvr_example_Skeleton_json, 2);
+        osvrDeviceSkeletonConfigure(opts, &m_skeleton,
+                                    com_osvr_example_Skeleton_json, 2);
         osvrDeviceTrackerConfigure(opts, &m_tracker);
 
         /// Create the device token with the options
@@ -60,15 +61,44 @@ class SkeletonDevice {
     OSVR_ReturnCode update() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(
-            250)); // Simulate waiting a quarter second for data.
+            500)); // Simulate waiting half a second for data.
 
         // add reporting of pre-recorded finger positions to send
         // sensible tracker reports
 
+        OSVR_Pose3 samplePose;
+        samplePose.rotation.data[0] = mVal;
+        samplePose.rotation.data[1] = mVal;
+        samplePose.rotation.data[2] = mVal;
+        samplePose.rotation.data[3] = mVal;
+
+        samplePose.translation.data[0] = mVal;
+        samplePose.translation.data[1] = mVal;
+        samplePose.translation.data[2] = mVal;
+
+        OSVR_TimeValue timestamp;
+        osvrTimeValueGetNow(&timestamp);
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 0,
+                                             &timestamp);
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 1,
+                                             &timestamp);
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 2,
+                                             &timestamp);
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 3,
+                                             &timestamp);
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 4,
+                                             &timestamp);
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 5,
+                                             &timestamp);
+        osvrDeviceSkeletonComplete(m_skeleton, 0, &timestamp);
+
+        mVal += mIncr;
         return OSVR_RETURN_SUCCESS;
     }
 
   private:
+    double mIncr = 0.01;
+    double mVal = 1.0;
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_SkeletonDeviceInterface m_skeleton;
     OSVR_TrackerDeviceInterface m_tracker;
