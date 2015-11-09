@@ -239,6 +239,39 @@ namespace common {
             std::string m_val;
         };
 
+        /// @brief The element type corresponding to a articulation element
+
+        class ArticulationElement : public ElementBase<ArticulationElement>,
+                                    boost::operators<ArticulationElement> {
+          public:
+            ArticulationElement() = default;
+            ArticulationElement(std::string const &articulationName,
+                                std::string const &boneName)
+                : m_articulationName(articulationName), m_boneName(boneName) {}
+
+            /// @brief Sets the articulation type/name
+            OSVR_COMMON_EXPORT void
+            setArticulationName(std::string const &articulationName);
+
+            /// @brief Sets the bone name
+            OSVR_COMMON_EXPORT void setBoneName(std::string const &boneName);
+
+            OSVR_COMMON_EXPORT std::string &getArticulationType();
+            OSVR_COMMON_EXPORT std::string const &getArticulationType() const;
+            OSVR_COMMON_EXPORT std::string &getBoneName();
+            OSVR_COMMON_EXPORT std::string const &getBoneName() const;
+
+            /// @brief Equality comparison operator
+            bool operator==(ArticulationElement const &other) const {
+                return m_articulationName == other.m_articulationName &&
+                       m_boneName == other.m_boneName;
+            }
+
+          private:
+            std::string m_articulationName;
+            std::string m_boneName;
+        };
+
         /// This inline implementation MUST remain at the bottom of this file,
         /// after all full declarations of types to be included in PathElement.
         /// It consists entirely of compile time checks, so it is effectively

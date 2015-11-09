@@ -167,6 +167,27 @@ namespace common {
         Json::Value const &DeviceElement::getDescriptor() const {
             return m_descriptor;
         }
+
+        void ArticulationElement::setArticulationName(
+            std::string const &articulationName) {
+            m_articulationName = articulationName;
+        }
+
+        void ArticulationElement::setBoneName(std::string const &boneName) {
+            m_boneName = boneName;
+        }
+
+        std::string &ArticulationElement::getArticulationType() {
+            return m_articulationName;
+        }
+        std::string const &ArticulationElement::getArticulationType() const {
+            return m_articulationName;
+        }
+        std::string &ArticulationElement::getBoneName() { return m_boneName; }
+        std::string const &ArticulationElement::getBoneName() const {
+            return m_boneName;
+        }
+
     } // namespace elements
 } // namespace common
 } // namespace osvr

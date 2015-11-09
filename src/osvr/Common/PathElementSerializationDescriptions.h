@@ -63,6 +63,14 @@ namespace common {
             f("priority", value.priority());
         }
 
+        /// @brief Description for ArticulationElement
+        template <typename Functor, typename ValType>
+        inline enable_if_element_type<ValType, elements::ArticulationElement>
+        serializationDescription(Functor &f, ValType &value) {
+            f("articulationName", value.getArticulationType());
+            f("boneName", value.getBoneName());
+        }
+
         /// @brief Description for StringElement
         template <typename Functor, typename ValType>
         inline enable_if_element_type<ValType, elements::StringElement>

@@ -55,6 +55,7 @@ namespace common {
             /// All types included in the bounded typelist of PathElement must
             /// be in this list. It's kept sorted for ease of maintenance.
             OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(ArticulationElement)
             OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(NullElement)

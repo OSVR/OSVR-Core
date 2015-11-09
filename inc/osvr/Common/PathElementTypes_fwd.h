@@ -45,6 +45,7 @@ namespace common {
     namespace elements {
         // list is kept sorted here for convenience
         class AliasElement;
+        class ArticulationElement;
         class DeviceElement;
         class InterfaceElement;
         class NullElement;
@@ -60,14 +61,15 @@ namespace common {
 /// - forward-declared above
 /// - declared in PathElementTypes.h
 /// - included in the name list in PathElementTools.cpp
+/// - add serialization description in PathElementSerializationDescriptions.h
 ///
 /// Note that while most lists of these types are not order sensitive, and so
 /// have been sorted, order does matter for the types in this typedef. Above
 /// all, NullElement must remain first.
 #endif
-        typedef boost::variant<NullElement, AliasElement, SensorElement,
-                               InterfaceElement, DeviceElement, PluginElement,
-                               StringElement> PathElement;
+        typedef boost::variant<NullElement, AliasElement, ArticulationElement,
+                               SensorElement, InterfaceElement, DeviceElement,
+                               PluginElement, StringElement> PathElement;
     } // namespace elements
 
     using elements::PathElement;
