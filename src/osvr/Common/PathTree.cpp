@@ -103,11 +103,13 @@ namespace common {
 
     static inline bool addArticulationImpl(PathNode &node,
                                            std::string const &articulationName,
-                                           std::string const &boneName) {
+                                           std::string const &boneName,
+                                           std::string const &trackerPath) {
 
         elements::ArticulationElement elt;
-        elt.setArticulationName(articulationName);
+        elt.setArticulationType(articulationName);
         elt.setBoneName(boneName);
+        elt.setTrackerPath(trackerPath);
         node.value() = elt;
         return true;
     }
@@ -166,15 +168,17 @@ namespace common {
         ParsedArticulation articulationData(source);
         if (!articulationData.isValid()) {
             /// @todo signify invalid route in some other way?
-            OSVR_DEV_VERBOSE("Could not parse source: " << source);
+            OSVR_DEV_VERBOSE(
+                "Articulation spec missing tracker path data: " << source);
             return false;
         }
+
         auto fullTrackerPath =
             getAbsolutePath(node, articulationData.getTrackerPath());
         articulationData.setTrackerPath(fullTrackerPath);
-        return addArticulationImpl(articulationNode,
-                                   articulationData.getArticulationType(),
-                                   articulationData.getBoneName());
+        return addArticulationImpl(
+            articulationNode, articulationData.getArticulationType(),
+            articulationData.getBoneName(), articulationData.getTrackerPath());
     }
 
     bool isPathAbsolute(std::string const &source) {
