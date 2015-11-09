@@ -108,9 +108,18 @@ namespace kalman {
         template <typename T>
         using DimSquareMatrix = SquareMatrix<Dimension<T>::value>;
 
+        /// A square diagonal matrix, n x n
+        template <DimensionType n>
+        using DiagonalMatrix = Eigen::DiagonalMatrix<Scalar, n>;
+
+        /// A square diagonal matrix, n x n, where n is the dimension of T
+        template <typename T>
+        using DimDiagonalMatrix = DiagonalMatrix<Dimension<T>::value>;
+
         /// A matrix with rows = m,  cols = n
         template <DimensionType m, DimensionType n>
         using Matrix = Eigen::Matrix<Scalar, m, n>;
+
         /// A matrix with rows = dimension of T, cols = dimension of U
         template <typename T, typename U>
         using DimMatrix = Matrix<Dimension<T>::value, Dimension<U>::value>;
