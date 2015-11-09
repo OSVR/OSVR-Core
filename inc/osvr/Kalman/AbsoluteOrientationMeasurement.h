@@ -67,15 +67,9 @@ namespace kalman {
             // This is not actually what the above comment describes - that was
             // giving too
             // small of values. This is a wild guess.
-            m_covariance(3, 3) = m_eulerVariance.sum() / 4.;
+            m_covariance(3, 3) = m_eulerVariance.sum();
 #endif
         }
-#if 0
-        AbsoluteOrientationBase(
-            Eigen::Quaterniond const &quat,
-            types::SquareMatrix<DIMENSION> const &covariance)
-            : m_measurement(quat), m_covariance(covariance) {}
-#endif
 
         template <typename State>
         MeasurementSquareMatrix const &getCovariance(State const &s) {
@@ -134,12 +128,6 @@ namespace kalman {
         AbsoluteOrientationMeasurement(Eigen::Quaterniond const &quat,
                                        types::Vector<3> const &eulerVariance)
             : Base(quat, eulerVariance) {}
-#if 0
-        AbsoluteOrientationMeasurement(
-            Eigen::Quaterniond const &quat,
-            types::SquareMatrix<DIMENSION> const &covariance)
-            : Base(quat, covariance) {}
-#endif
 
         types::Matrix<DIMENSION, STATE_DIMENSION>
         getJacobian(State const &s) const {
