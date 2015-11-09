@@ -84,6 +84,7 @@ set(API
     "${HEADER_LOCATION}/NormalizeDeviceDescriptor.h"
     "${HEADER_LOCATION}/OriginalSource.h"
     "${HEADER_LOCATION}/ParseAlias.h"
+    "${HEADER_LOCATION}/ParseArticulation.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
@@ -158,6 +159,7 @@ set(SOURCE
     NormalizeDeviceDescriptor.cpp
     OriginalSource.cpp
     ParseAlias.cpp
+    ParseArticulation.cpp
     PathElementSerialization.h
     PathElementSerializationDescriptions.h
     PathElementTools.cpp
