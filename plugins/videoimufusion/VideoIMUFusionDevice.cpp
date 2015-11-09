@@ -27,6 +27,7 @@
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
+#include <osvr/Util/EigenInterop.h>
 
 // Generated JSON header file
 #include "org_osvr_filter_videoimufusion_json.h"
@@ -36,6 +37,7 @@
 
 // Standard includes
 #include <iostream>
+#include <cmath>
 
 static const OSVR_ChannelCount FUSED_SENSOR_ID = 0;
 static const OSVR_ChannelCount TRANSFORMED_VIDEO_SENSOR_ID = 1;
@@ -67,6 +69,8 @@ VideoIMUFusionDevice::VideoIMUFusionDevice(OSVR_PluginRegContext ctx,
     osvrClientGetInterface(m_clientCtx, imuPath.c_str(), &m_imu);
     osvrRegisterOrientationCallback(
         m_imu, &VideoIMUFusionDevice::s_handleIMUData, this);
+    osvrRegisterAngularVelocityCallback(
+        m_imu, &VideoIMUFusionDevice::s_handleIMUVelocity, this);
 
     osvrClientGetInterface(m_clientCtx, videoPath.c_str(), &m_videoTracker);
 
@@ -93,6 +97,12 @@ void VideoIMUFusionDevice::s_handleIMUData(
     static_cast<VideoIMUFusionDevice *>(userdata)
         ->handleIMUData(*timestamp, *report);
 }
+void VideoIMUFusionDevice::s_handleIMUVelocity(
+    void *userdata, const OSVR_TimeValue *timestamp,
+    const OSVR_AngularVelocityReport *report) {
+    static_cast<VideoIMUFusionDevice *>(userdata)
+        ->handleIMUVelocity(*timestamp, *report);
+}
 void VideoIMUFusionDevice::s_handleVideoTrackerData(
     void *userdata, const OSVR_TimeValue *timestamp,
     const OSVR_PoseReport *report) {
@@ -106,6 +116,49 @@ void VideoIMUFusionDevice::handleIMUData(const OSVR_TimeValue &timestamp,
     if (m_fusion.running()) {
         sendMainPoseReport();
     }
+}
+void VideoIMUFusionDevice::handleIMUVelocity(
+    const OSVR_TimeValue &timestamp, const OSVR_AngularVelocityReport &report) {
+
+    using namespace osvr::util::eigen_interop;
+    Eigen::Quaterniond q = map(report.state.incrementalRotation);
+    Eigen::Vector3d rot;
+    if (q.w() >= 1.) {
+        rot = Eigen::Vector3d::Zero();
+    } else {
+        auto magnitude = q.vec().stableNorm();
+        rot = (q.vec() / magnitude / (2. * std::atan2(magnitude, q.w()))) /
+              report.state.dt;
+        /// @todo without transformations being applied to vel quats, this
+        /// is needed.
+        std::swap(rot[0], rot[1]);
+        OSVR_DEV_VERBOSE(rot.transpose());
+#if 0
+        auto halfIncMagnitude = std::acos(q.w());
+        auto angularSpeed = halfIncMagnitude * 2. / report.state.dt;
+        rot = q.vec() / (std::sin(halfIncMagnitude) / angularSpeed);
+#endif
+#if 0
+        Eigen::Vector3d rot = q.vec().normalized() *
+                              angularSpeed; // just normalizing the vector
+                                            // instead of dividing it
+                                            // by sin(halfIncMagnitude)/angularSpeed
+        OSVR_DEV_VERBOSE(halfIncMagnitude << " : " << rot.transpose());
+#endif
+    }
+
+    m_fusion.handleIMUVelocity(timestamp, rot);
+#if 0
+    if (m_fusion.running()) {
+        sendMainPoseReport();
+    }
+    static int s = 0;
+
+    if (s == 0) {
+    }
+
+    s = (s + 1) % 100;
+#endif
 }
 void VideoIMUFusionDevice::handleVideoTrackerData(
     const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {

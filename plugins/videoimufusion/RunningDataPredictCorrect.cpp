@@ -50,6 +50,18 @@ void VideoIMUFusion::RunningData::handleIMUReport(
         osvr::kalman::correct(state(), processModel(), m_imuMeas);
     }
 }
+void VideoIMUFusion::RunningData::handleIMUVelocity(
+    const OSVR_TimeValue &timestamp, const Eigen::Vector3d &angVel) {
+#ifdef OSVR_FPE
+    FPExceptionEnabler fpe;
+#endif
+
+    if (preReport(timestamp)) {
+        m_imuMeasVel.setMeasurement(angVel);
+        osvr::kalman::correct(state(), processModel(), m_imuMeasVel);
+    }
+}
+
 void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
     Eigen::Isometry3d roomPose = takeCameraPoseToRoom(report.pose);

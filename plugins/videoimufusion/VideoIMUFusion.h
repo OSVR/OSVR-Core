@@ -52,6 +52,9 @@ class VideoIMUFusion {
     /// state.
     void handleIMUData(const OSVR_TimeValue &timestamp,
                        const OSVR_OrientationReport &report);
+
+    void handleIMUVelocity(const OSVR_TimeValue &timestamp,
+                           const Eigen::Vector3d &angVel);
     /// Call with each new video tracker report once we've entered running
     /// state.
     void handleVideoTrackerDataWhileRunning(const OSVR_TimeValue &timestamp,

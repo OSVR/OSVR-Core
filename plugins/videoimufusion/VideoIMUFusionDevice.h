@@ -51,11 +51,17 @@ class VideoIMUFusionDevice {
   private:
     static void s_handleIMUData(void *userdata, const OSVR_TimeValue *timestamp,
                                 const OSVR_OrientationReport *report);
+    static void s_handleIMUVelocity(void *userdata,
+                                    const OSVR_TimeValue *timestamp,
+                                    const OSVR_AngularVelocityReport *report);
     static void s_handleVideoTrackerData(void *userdata,
                                          const OSVR_TimeValue *timestamp,
                                          const OSVR_PoseReport *report);
     void handleIMUData(const OSVR_TimeValue &timestamp,
                        const OSVR_OrientationReport &report);
+
+    void handleIMUVelocity(const OSVR_TimeValue &timestamp,
+                           const OSVR_AngularVelocityReport &report);
     void handleVideoTrackerData(const OSVR_TimeValue &timestamp,
                                 const OSVR_PoseReport &report);
 

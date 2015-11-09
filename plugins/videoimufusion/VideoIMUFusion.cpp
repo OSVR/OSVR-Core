@@ -82,6 +82,15 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
     // send a pose report
     updateFusedOutput(timestamp);
 }
+void VideoIMUFusion::handleIMUVelocity(const OSVR_TimeValue &timestamp,
+                                       const Eigen::Vector3d &angVel) {
+    if (m_state != State::Running) {
+        return;
+    }
+    m_runningData->handleIMUVelocity(timestamp, angVel);
+    // send a pose report
+    updateFusedOutput(timestamp);
+}
 
 void VideoIMUFusion::updateFusedOutput(const OSVR_TimeValue &timestamp) {
     ei::map(m_lastFusion).rotation() = m_runningData->getOrientation();
