@@ -30,6 +30,7 @@
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/BoostDeletable.h>
+#include <osvr/Util/ReportTypesX.h>
 
 // Library/third-party includes
 
@@ -59,26 +60,14 @@ namespace clientkit {
         /// @brief Empty constructor.
         Interface();
 
-#define OSVR_CALLBACK_METHODS(TYPE)                                            \
+#define OSVR_X(TYPE)                                                           \
     void registerCallback(OSVR_##TYPE##Callback cb, void *userdata);
 
         /// @name Callback registration methods
         /// @{
-        OSVR_CALLBACK_METHODS(Pose)
-        OSVR_CALLBACK_METHODS(Position)
-        OSVR_CALLBACK_METHODS(Orientation)
-        OSVR_CALLBACK_METHODS(Button)
-        OSVR_CALLBACK_METHODS(Analog)
-        OSVR_CALLBACK_METHODS(Location2D)
-        OSVR_CALLBACK_METHODS(Direction)
-        OSVR_CALLBACK_METHODS(EyeTracker2D)
-        OSVR_CALLBACK_METHODS(EyeTracker3D)
-        OSVR_CALLBACK_METHODS(EyeTrackerBlink)
-        OSVR_CALLBACK_METHODS(NaviVelocity)
-        OSVR_CALLBACK_METHODS(NaviPosition)
-/// @}
-
-#undef OSVR_CALLBACK_METHODS
+        OSVR_INVOKE_REPORT_TYPES_XMACRO()
+#undef OSVR_X
+        /// @}
 
         /// @brief Determine if this interface object is empty (that is, was
         /// it once initialized). Does not determine if it has already been
