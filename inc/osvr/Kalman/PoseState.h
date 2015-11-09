@@ -178,6 +178,20 @@ namespace kalman {
                 return position(m_state);
             }
 
+            StateVectorBlock3 getVelocity() { return velocity(m_state); }
+
+            ConstStateVectorBlock3 getVelocity() const {
+                return velocity(m_state);
+            }
+
+            StateVectorBlock3 getAngularVelocity() {
+                return angularVelocity(m_state);
+            }
+
+            ConstStateVectorBlock3 getAngularVelocity() const {
+                return angularVelocity(m_state);
+            }
+
             Eigen::Quaterniond const &getQuaternion() const {
                 return m_orientation;
             }
