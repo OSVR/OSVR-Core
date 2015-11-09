@@ -30,7 +30,6 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/ClientKit/InterfaceC.h>
-#include "WrapCallback.h"
 
 // Library/third-party includes
 // - none
@@ -50,6 +49,11 @@ class VideoIMUFusionDevice {
     OSVR_ReturnCode update() { return OSVR_RETURN_SUCCESS; }
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   private:
+    static void s_handleIMUData(void *userdata, const OSVR_TimeValue *timestamp,
+                                const OSVR_OrientationReport *report);
+    static void s_handleVideoTrackerData(void *userdata,
+                                         const OSVR_TimeValue *timestamp,
+                                         const OSVR_PoseReport *report);
     void handleIMUData(const OSVR_TimeValue &timestamp,
                        const OSVR_OrientationReport &report);
     void handleVideoTrackerData(const OSVR_TimeValue &timestamp,
@@ -62,10 +66,8 @@ class VideoIMUFusionDevice {
     OSVR_ClientContext m_clientCtx;
 
     OSVR_ClientInterface m_imu = nullptr;
-    osvr::pluginkit::WrappedCallbackPtr<OSVR_OrientationReport> m_imuCb;
 
     OSVR_ClientInterface m_videoTracker = nullptr;
-    osvr::pluginkit::WrappedCallbackPtr<OSVR_PoseReport> m_videoTrackerCb;
 
     VideoIMUFusion m_fusion;
 };

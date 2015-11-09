@@ -40,8 +40,6 @@
 static const OSVR_ChannelCount FUSED_SENSOR_ID = 0;
 static const OSVR_ChannelCount TRANSFORMED_VIDEO_SENSOR_ID = 1;
 
-using osvr::pluginkit::wrapCallback;
-
 VideoIMUFusionDevice::VideoIMUFusionDevice(OSVR_PluginRegContext ctx,
                                            std::string const &name,
                                            std::string const &imuPath,
@@ -67,21 +65,13 @@ VideoIMUFusionDevice::VideoIMUFusionDevice(OSVR_PluginRegContext ctx,
 
     /// Set up to receive our input.
     osvrClientGetInterface(m_clientCtx, imuPath.c_str(), &m_imu);
-    auto imuCb = wrapCallback<OSVR_OrientationReport>([&](
-        const OSVR_TimeValue *timestamp, const OSVR_OrientationReport *report) {
-        handleIMUData(*timestamp, *report);
-    });
-    osvrRegisterOrientationCallback(m_imu, imuCb.first, imuCb.second.get());
-    m_imuCb = std::move(imuCb.second);
+    osvrRegisterOrientationCallback(
+        m_imu, &VideoIMUFusionDevice::s_handleIMUData, this);
 
     osvrClientGetInterface(m_clientCtx, videoPath.c_str(), &m_videoTracker);
-    auto videoTrackerCb = wrapCallback<OSVR_PoseReport>(
-        [&](const OSVR_TimeValue *timestamp, const OSVR_PoseReport *report) {
-            handleVideoTrackerData(*timestamp, *report);
-        });
-    osvrRegisterPoseCallback(m_videoTracker, videoTrackerCb.first,
-                             videoTrackerCb.second.get());
-    m_videoTrackerCb = std::move(videoTrackerCb.second);
+
+    osvrRegisterPoseCallback(
+        m_videoTracker, &VideoIMUFusionDevice::s_handleVideoTrackerData, this);
 }
 
 VideoIMUFusionDevice::~VideoIMUFusionDevice() {
@@ -95,6 +85,19 @@ VideoIMUFusionDevice::~VideoIMUFusionDevice() {
         osvrClientFreeInterface(m_clientCtx, m_videoTracker);
         m_imu = nullptr;
     }
+}
+
+void VideoIMUFusionDevice::s_handleIMUData(
+    void *userdata, const OSVR_TimeValue *timestamp,
+    const OSVR_OrientationReport *report) {
+    static_cast<VideoIMUFusionDevice *>(userdata)
+        ->handleIMUData(*timestamp, *report);
+}
+void VideoIMUFusionDevice::s_handleVideoTrackerData(
+    void *userdata, const OSVR_TimeValue *timestamp,
+    const OSVR_PoseReport *report) {
+    static_cast<VideoIMUFusionDevice *>(userdata)
+        ->handleVideoTrackerData(*timestamp, *report);
 }
 
 void VideoIMUFusionDevice::handleIMUData(const OSVR_TimeValue &timestamp,
