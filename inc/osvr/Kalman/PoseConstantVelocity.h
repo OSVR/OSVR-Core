@@ -71,9 +71,11 @@ namespace kalman {
         }
 
         /// This is Q(deltaT) - the Sampled Process Noise Covariance
-        /// @return a matrix of dimension n x n. Note that it is real
-        /// symmetrical (self-adjoint), so .selfAdjointView<Eigen::Upper>()
-        /// might provide useful performance enhancements.
+        /// @return a matrix of dimension n x n.
+        ///
+        /// Like all covariance matrices, it is real symmetrical (self-adjoint),
+        /// so .selfAdjointView<Eigen::Upper>() might provide useful performance
+        /// enhancements in some algorithms.
         StateSquareMatrix getSampledProcessNoiseCovariance(double dt) const {
             auto const dim = types::Dimension<State>::value;
             StateSquareMatrix cov = StateSquareMatrix::Zero();

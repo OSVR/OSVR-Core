@@ -55,16 +55,14 @@ namespace kalman {
         static const auto m = types::Dimension<MeasurementType>::value;
         /// Dimension of state
         static const auto n = types::Dimension<StateType>::value;
-        auto H = meas.getJacobian(state);
+
+        types::Matrix<m, n> H = meas.getJacobian(state);
         // OSVR_KALMAN_DEBUG_OUTPUT("Measurement jacobian", H);
-        EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(H), m, n);
 
-        auto R = meas.getCovariance(state);
+        types::SquareMatrix<m> R = meas.getCovariance(state);
         // OSVR_KALMAN_DEBUG_OUTPUT("Measurement covariance", R);
-        EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(R), m, m);
 
-        auto P = state.errorCovariance();
-        EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(decltype(P), n, n);
+        types::SquareMatrix<n> P = state.errorCovariance();
 
         // The kalman gain stuff to not invert (called P12 in TAG)
         types::Matrix<n, m> PHt = P * H.transpose();
