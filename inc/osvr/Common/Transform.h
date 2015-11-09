@@ -81,11 +81,16 @@ namespace common {
         /// @brief Apply only the rotation/basis change (not the translation) to
         /// a quaternion, typically representing a velocity or acceleration
         Eigen::Quaterniond transformLinear(Eigen::Quaterniond const &quat) {
-            Eigen::Isometry3d pose =
-                Eigen::Isometry3d(m_post.topLeftCorner<3, 3>()) *
-                Eigen::Isometry3d(quat) *
-                Eigen::Isometry3d(m_pre.topLeftCorner<3, 3>());
-            return Eigen::Quaterniond(pose.rotation());
+            ///  @todo figure out the right way to do this. The if-0 section is
+            ///  closer but not quite.
+            return quat;
+#if 0
+            Eigen::Quaterniond transformedQuat = Eigen::Quaterniond(
+                reorientIsometry(Eigen::Isometry3d(quat)).rotation());
+            Eigen::Quaterniond transformedIdentity = Eigen::Quaterniond(
+                reorientIsometry(Eigen::Isometry3d::Identity()).rotation());
+            return transformedQuat * transformedIdentity.conjugate();
+#endif
         }
 
         Eigen::Matrix4d const &getPre() const { return m_pre; }
@@ -93,6 +98,13 @@ namespace common {
         Eigen::Matrix4d const &getPost() const { return m_post; }
 
       private:
+        Eigen::Isometry3d
+        reorientIsometry(Eigen::Isometry3d const &input) const {
+            Eigen::Isometry3d ret =
+                Eigen::Isometry3d(m_post.topLeftCorner<3, 3>()) * input *
+                Eigen::Isometry3d(m_pre.topLeftCorner<3, 3>());
+            return ret;
+        }
         Eigen::Matrix4d m_pre;
         Eigen::Matrix4d m_post;
     };
