@@ -28,6 +28,7 @@
 #include <osvr/ClientKit/InterfaceCallbackC.h>
 #include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/Verbosity.h>
 
 // Generated JSON header file
 #include "org_osvr_filter_videoimufusion_json.h"
@@ -126,38 +127,31 @@ void VideoIMUFusionDevice::handleIMUVelocity(
     if (q.w() >= 1.) {
         rot = Eigen::Vector3d::Zero();
     } else {
-        auto magnitude = q.vec().stableNorm();
-        rot = (q.vec() / magnitude / (2. * std::atan2(magnitude, q.w()))) /
+        auto magnitude = q.vec().blueNorm();
+        rot = (q.vec() / magnitude * (2. * std::atan2(magnitude, q.w()))) /
               report.state.dt;
         /// @todo without transformations being applied to vel quats, this
         /// is needed.
-        std::swap(rot[0], rot[1]);
-        OSVR_DEV_VERBOSE(rot.transpose());
-#if 0
-        auto halfIncMagnitude = std::acos(q.w());
-        auto angularSpeed = halfIncMagnitude * 2. / report.state.dt;
-        rot = q.vec() / (std::sin(halfIncMagnitude) / angularSpeed);
-#endif
-#if 0
-        Eigen::Vector3d rot = q.vec().normalized() *
-                              angularSpeed; // just normalizing the vector
-                                            // instead of dividing it
-                                            // by sin(halfIncMagnitude)/angularSpeed
-        OSVR_DEV_VERBOSE(halfIncMagnitude << " : " << rot.transpose());
-#endif
+        // std::swap(rot[0], rot[1]);
+        rot[1] *= -1.;
+        rot[2] *= -1.;
     }
+#if 0
+	static int s = 0;
+
+	if (s == 0) {
+        static const Eigen::IOFormat fmt(3, 0, ", ", "; ", ", ", "[", "]");
+        OSVR_DEV_VERBOSE(rot.transpose().format(fmt));
+	}
+
+	s = (s + 1) % 100;
+#endif
 
     m_fusion.handleIMUVelocity(timestamp, rot);
 #if 0
     if (m_fusion.running()) {
         sendMainPoseReport();
     }
-    static int s = 0;
-
-    if (s == 0) {
-    }
-
-    s = (s + 1) % 100;
 #endif
 }
 void VideoIMUFusionDevice::handleVideoTrackerData(
