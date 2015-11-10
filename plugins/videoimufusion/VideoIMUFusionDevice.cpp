@@ -46,7 +46,9 @@ static const OSVR_ChannelCount TRANSFORMED_VIDEO_SENSOR_ID = 1;
 VideoIMUFusionDevice::VideoIMUFusionDevice(OSVR_PluginRegContext ctx,
                                            std::string const &name,
                                            std::string const &imuPath,
-                                           std::string const &videoPath) {
+                                           std::string const &videoPath,
+                                           VideoIMUFusionParams const &params)
+    : m_fusion(params) {
     /// Create the initialization options
     OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 

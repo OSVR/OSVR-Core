@@ -42,6 +42,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 // Internal Includes
 #include "VideoIMUFusion.h"
+#include "FusionParams.h"
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/TimeValue.h>
 
@@ -71,7 +72,8 @@ using AngularVelocityMeasurement =
 class VideoIMUFusion::RunningData {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    RunningData(Eigen::Isometry3d const &cTr,
+    RunningData(VideoIMUFusionParams const &params,
+                Eigen::Isometry3d const &cTr,
                 OSVR_OrientationState const &initialIMU,
                 OSVR_PoseState const &initialVideo,
                 OSVR_TimeValue const &lastTS);

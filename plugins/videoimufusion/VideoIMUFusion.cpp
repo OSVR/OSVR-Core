@@ -44,7 +44,10 @@ namespace ei = osvr::util::eigen_interop;
 
 namespace filters = osvr::util::filters;
 
-VideoIMUFusion::VideoIMUFusion() { enterCameraPoseAcquisitionState(); }
+VideoIMUFusion::VideoIMUFusion(VideoIMUFusionParams const &params)
+    : m_params(params) {
+    enterCameraPoseAcquisitionState();
+}
 VideoIMUFusion::~VideoIMUFusion() = default;
 
 Eigen::Matrix<double, 12, 12> const &
@@ -66,7 +69,7 @@ void VideoIMUFusion::enterRunningState(
               << m_cTr.translation().transpose() << std::endl;
     m_state = State::Running;
     m_runningData.reset(new VideoIMUFusion::RunningData(
-        cTr, orientation, report.pose, timestamp));
+        m_params, cTr, orientation, report.pose, timestamp));
     /// @todo should we just let it hang around instead of releasing memory in a
     /// callback?
     m_startupData.reset();

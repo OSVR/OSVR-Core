@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include "VideoIMUFusionDevice.h"
+#include "FusionParams.h"
 #include <osvr/PluginKit/PluginKit.h>
 
 // Library/third-party includes
@@ -61,11 +62,14 @@ class AnalysisPluginInstantiation {
         // optional
         auto deviceName = root.get("name", DRIVER_NAME).asString();
 
+        /// @todo populate this from the config
+        VideoIMUFusionParams fusionParams;
+
         osvr::pluginkit::PluginContext context(ctx);
 
         /// @todo make the token own this instead once there is API for that.
-        context.registerObjectForDeletion(
-            new VideoIMUFusionDevice(ctx, deviceName, imu, faceplate));
+        context.registerObjectForDeletion(new VideoIMUFusionDevice(
+            ctx, deviceName, imu, faceplate, fusionParams));
         return OSVR_RETURN_SUCCESS;
     }
 };

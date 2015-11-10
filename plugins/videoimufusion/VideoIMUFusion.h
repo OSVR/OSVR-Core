@@ -26,6 +26,7 @@
 #define INCLUDED_VideoIMUFusion_h_GUID_85338EA5_58E6_4787_16D2_EC53201EFE9F
 
 // Internal Includes
+#include "FusionParams.h"
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/TimeValue.h>
@@ -42,7 +43,7 @@
 class VideoIMUFusion {
   public:
     /// Constructor
-    VideoIMUFusion();
+    VideoIMUFusion(VideoIMUFusionParams const &params = VideoIMUFusionParams());
     /// Out-of-line destructor required for unique_ptr pimpl idiom
     ~VideoIMUFusion();
 
@@ -129,6 +130,7 @@ class VideoIMUFusion {
     OSVR_PoseState m_reorientedVideo;
     OSVR_PoseState m_lastFusion;
     osvr::util::time::TimeValue m_lastFusionTime;
+    VideoIMUFusionParams m_params;
 };
 
 #endif // INCLUDED_VideoIMUFusion_h_GUID_85338EA5_58E6_4787_16D2_EC53201EFE9F

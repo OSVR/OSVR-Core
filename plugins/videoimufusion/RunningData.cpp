@@ -35,6 +35,7 @@
 
 static const double InitialStateError[] = {
     1., 1., 1., 10., 10., 10., 100., 100., 100., 1000., 1000., 1000.};
+#if 0
 static const double IMUError = 1.0E-8;
 static const double IMUErrorVector[] = {IMUError, IMUError * 5., IMUError};
 static const double CameraOriError = 1.0E-1;
@@ -48,21 +49,24 @@ static const double PositionNoiseAutocorrelation = 0.01;
 static const double OrientationNoiseAutocorrelation = 0.1;
 
 static const double VelocityDamping = .01;
+#endif
 
 using osvr::kalman::types::Vector;
 namespace ei = osvr::util::eigen_interop;
 
 VideoIMUFusion::RunningData::RunningData(
-    Eigen::Isometry3d const &cTr, OSVR_OrientationState const &initialIMU,
-    OSVR_PoseState const &initialVideo, OSVR_TimeValue const &lastTS)
-    : m_processModel(VelocityDamping, PositionNoiseAutocorrelation,
-                     OrientationNoiseAutocorrelation),
-      m_state(),
-      m_imuMeas(ei::map(initialIMU), Vector<3>::Map(IMUErrorVector).eval()),
-      m_imuMeasVel(Vector<3>::Zero(), Vector<3>::Map(IMUErrorVector).eval()),
+    VideoIMUFusionParams const &params, Eigen::Isometry3d const &cTr,
+    OSVR_OrientationState const &initialIMU, OSVR_PoseState const &initialVideo,
+    OSVR_TimeValue const &lastTS)
+    : m_processModel(params.damping, params.positionNoise, params.oriNoise),
+      m_state(), m_imuMeas(ei::map(initialIMU),
+                           Vector<3>::Constant(params.imuOriVariance)),
+      m_imuMeasVel(Vector<3>::Zero(),
+                   Vector<3>::Constant(params.imuAngVelVariance)),
       m_cameraMeasOri(Eigen::Quaterniond::Identity(),
-                      Vector<3>::Map(CameraOrientationError)),
-      m_cameraMeasPos(Vector<3>::Zero(), Vector<3>::Map(CameraPositionError)),
+                      Vector<3>::Constant(params.videoOriVariance)),
+      m_cameraMeasPos(Vector<3>::Zero(),
+                      Vector<3>::Constant(params.videoPosVariance)),
       m_cTr(cTr), m_last(lastTS) {
 
 #ifdef OSVR_FPE

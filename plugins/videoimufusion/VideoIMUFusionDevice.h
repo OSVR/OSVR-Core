@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "VideoIMUFusion.h"
+#include "FusionParams.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/ClientKit/InterfaceC.h>
@@ -42,9 +43,10 @@
 /// its state as appropriate.
 class VideoIMUFusionDevice {
   public:
-    VideoIMUFusionDevice(OSVR_PluginRegContext ctx, std::string const &name,
-                         std::string const &imuPath,
-                         std::string const &videoPath);
+    VideoIMUFusionDevice(
+        OSVR_PluginRegContext ctx, std::string const &name,
+        std::string const &imuPath, std::string const &videoPath,
+        VideoIMUFusionParams const &params = VideoIMUFusionParams());
     ~VideoIMUFusionDevice();
     OSVR_ReturnCode update() { return OSVR_RETURN_SUCCESS; }
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
