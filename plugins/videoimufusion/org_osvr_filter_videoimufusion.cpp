@@ -62,8 +62,38 @@ class AnalysisPluginInstantiation {
         // optional
         auto deviceName = root.get("name", DRIVER_NAME).asString();
 
-        /// @todo populate this from the config
         VideoIMUFusionParams fusionParams;
+
+        if (root.isMember("videoTrackerVariance")) {
+            auto &variance = root["videoTrackerVariance"];
+            fusionParams.videoPosVariance =
+                variance.get("position", fusionParams.videoPosVariance)
+                    .asDouble();
+            fusionParams.videoOriVariance =
+                variance.get("orientation", fusionParams.videoOriVariance)
+                    .asDouble();
+        }
+
+        if (root.isMember("imuVariance")) {
+            auto &variance = root["imuVariance"];
+            fusionParams.imuOriVariance =
+                variance.get("orientation", fusionParams.imuOriVariance)
+                    .asDouble();
+            fusionParams.imuAngVelVariance =
+                variance.get("angularVelocity", fusionParams.imuAngVelVariance)
+                    .asDouble();
+        }
+
+        if (root.isMember("processNoise")) {
+            auto &noise = root["processNoise"];
+            fusionParams.positionNoise =
+                noise.get("position", fusionParams.positionNoise).asDouble();
+            fusionParams.oriNoise =
+                noise.get("orientation", fusionParams.oriNoise).asDouble();
+        }
+
+        fusionParams.damping =
+            root.get("damping", fusionParams.damping).asDouble();
 
         osvr::pluginkit::PluginContext context(ctx);
 
