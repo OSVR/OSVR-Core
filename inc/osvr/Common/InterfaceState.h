@@ -68,9 +68,8 @@ namespace common {
         template <typename ReportType>
         void setStateFromReport(util::time::TimeValue const &timestamp,
                                 ReportType const &report) {
-            using typepack::get;
             if (hasState<ReportType>()) {
-                auto &oldTimestamp = get<ReportType>(m_states)->timestamp;
+                auto &oldTimestamp = m_states.get<ReportType>()->timestamp;
                 if (osvrTimeValueGreater(oldTimestamp, timestamp)) {
                     tracing::markTimestampOutOfOrder();
                     return;
@@ -79,13 +78,13 @@ namespace common {
             StateMapContents<ReportType> c;
             c.state = reportState(report);
             c.timestamp = timestamp;
-            get<ReportType>(m_states) = c;
+            m_states.get<ReportType>() = StateMapValueType<ReportType>(c);
             m_hasState = true;
         }
 
         template <typename ReportType> bool hasState() const {
-            using typepack::get;
-            return m_hasState && bool(get<ReportType>(m_states));
+            // using typepack::get;
+            return m_hasState && bool(m_states.get<ReportType>());
         }
 
         bool hasAnyState() const { return m_hasState; }
@@ -93,10 +92,9 @@ namespace common {
         template <typename ReportType>
         void getState(util::time::TimeValue &timestamp,
                       traits::StateFromReport_t<ReportType> &state) const {
-            using typepack::get;
             if (hasState<ReportType>()) {
-                timestamp = get<ReportType>(m_states)->timestamp;
-                state = get<ReportType>(m_states)->state;
+                timestamp = m_states.get<ReportType>()->timestamp;
+                state = m_states.get<ReportType>()->state;
             }
             /// @todo do we fail silently or throw exception if we are asked for
             /// state we don't have?
