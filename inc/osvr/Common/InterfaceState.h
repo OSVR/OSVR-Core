@@ -78,7 +78,7 @@ namespace common {
             StateMapContents<ReportType> c;
             c.state = reportState(report);
             c.timestamp = timestamp;
-            m_states.get<ReportType>() = StateMapValueType<ReportType>(c);
+            m_states.get<ReportType>() = c;
             m_hasState = true;
         }
 
