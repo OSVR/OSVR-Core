@@ -90,10 +90,16 @@ void VideoIMUFusion::RunningData::handleVideoTrackerReport(
 #ifdef OSVR_FPE
     FPExceptionEnabler fpe;
 #endif
+    Eigen::Quaterniond orientation(roomPose.rotation());
+    auto oriChange = state().getQuaternion().angularDistance(orientation);
+    if (std::abs(oriChange) > M_PI / 2.) {
+        OSVR_DEV_VERBOSE("Throwing out a bad video pose");
+        return;
+    }
     if (preReport(timestamp)) {
         m_cameraMeasPos.setMeasurement(roomPose.translation());
         osvr::kalman::correct(state(), processModel(), m_cameraMeasPos);
-        m_cameraMeasOri.setMeasurement(Eigen::Quaterniond(roomPose.rotation()));
+        m_cameraMeasOri.setMeasurement(orientation);
         osvr::kalman::correct(state(), processModel(), m_cameraMeasOri);
 
 #if 0
