@@ -46,8 +46,8 @@ namespace common {
     /// @brief Metafunction computing the storage for callbacks for a report
     /// type.
     template <typename ReportType> struct CallbackStorageType {
-        typedef std::vector<std::function<void(const OSVR_TimeValue *,
-                                               const ReportType *)> > type;
+        using type = std::vector<
+            std::function<void(const OSVR_TimeValue *, const ReportType *)> >;
     };
 
     typedef traits::GenerateReportMap<CallbackStorageType<boost::mpl::_> >::type
@@ -59,9 +59,7 @@ namespace common {
       public:
         template <typename CallbackType>
         void addCallback(CallbackType cb, void *userdata) {
-            typedef typename traits::ReportFromCallback<CallbackType>::type
-                ReportType;
-            using namespace std::placeholders;
+            using ReportType = traits::ReportFromCallback_t<CallbackType>;
             boost::fusion::at_key<ReportType>(m_callbacks)
                 .push_back(
                     [cb, userdata](util::time::TimeValue const *timestamp,
