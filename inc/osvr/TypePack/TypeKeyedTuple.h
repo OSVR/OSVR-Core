@@ -50,10 +50,13 @@ namespace typepack {
         using value_types = transform<KeyList, ComputeValueTypes>;
 
       public:
+        using key_types = KeyList;
+
         using container_type = apply_list<quote<std::tuple>, value_types>;
 
       private:
-        friend class typekeyed_detail::ContainerAccessor;
+        template <typename, typename>
+        friend struct typekeyed_detail::ValueAccessor;
 
         /// Internal method/implementation detail, do not use in consuming code!
         container_type &nested_container() { return container_; }
@@ -66,24 +69,10 @@ namespace typepack {
 
     // Required traits
     namespace typekeyed_detail {
-
-        template <typename KeyList, typename ComputeValueTypes>
-        struct KeyTypesTraits<TypeKeyedTuple<KeyList, ComputeValueTypes>> {
-            using type = KeyList;
-        };
-
         template <typename KeyList, typename ComputeValueTypes, typename Key>
         struct ValueTypeAtKeyTraits<TypeKeyedTuple<KeyList, ComputeValueTypes>,
                                     Key> {
             using type = apply<ComputeValueTypes, Key>;
-        };
-
-        template <typename KeyList, typename ComputeValueTypes>
-        struct NestedContainerTraits<
-            TypeKeyedTuple<KeyList, ComputeValueTypes>> {
-            using type =
-                typename TypeKeyedTuple<KeyList,
-                                        ComputeValueTypes>::container_type;
         };
     } // namespace typekeyed_detail
 

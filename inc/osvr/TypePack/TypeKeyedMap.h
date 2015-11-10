@@ -51,12 +51,13 @@ namespace typepack {
         using size_constant = length<KeyList>;
 
       public:
+        using key_types = KeyList;
         using value_type = ValueType;
-        using container_type = std::array<value_type, size_constant::value>;
 
       private:
-        friend class typekeyed_detail::ContainerAccessor;
-
+        template <typename, typename>
+        friend struct typekeyed_detail::ValueAccessor;
+        using container_type = std::array<value_type, size_constant::value>;
         /// Internal method/implementation detail, do not use in consuming code!
         container_type &nested_container() { return container_; }
         /// Internal method/implementation detail, do not use in consuming code!
@@ -68,22 +69,11 @@ namespace typepack {
 
     // Required traits
     namespace typekeyed_detail {
-
-        template <typename KeyList, typename ValueType>
-        struct KeyTypesTraits<TypeKeyedMap<KeyList, ValueType>> {
-            using type = KeyList;
-        };
-
         template <typename KeyList, typename ValueType, typename Key>
         struct ValueTypeAtKeyTraits<TypeKeyedMap<KeyList, ValueType>, Key> {
             using type = ValueType;
         };
 
-        template <typename KeyList, typename ValueType>
-        struct NestedContainerTraits<TypeKeyedMap<KeyList, ValueType>> {
-            using type =
-                typename TypeKeyedMap<KeyList, ValueType>::container_type;
-        };
     } // namespace typekeyed_detail
 } // namespace typepack
 } // namespace osvr
