@@ -140,11 +140,9 @@ void VideoIMUFusionDevice::handleIMUVelocity(
     }
 
     m_fusion.handleIMUVelocity(timestamp, rot);
-#if 0
     if (m_fusion.running()) {
         sendMainPoseReport();
     }
-#endif
 }
 void VideoIMUFusionDevice::handleVideoTrackerData(
     const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
