@@ -14,11 +14,24 @@
             "input": {
                 "imu": "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd",
                 "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
-            }
+            },
+            "videoTrackerVariance": {
+                "position": 3.0e-4,
+                "orientation": 1.0e-1
+            },
+            "imuVariance": {
+                "orientation": 1.0e-8,
+                "angularVelocity": 1.0e-10
+            },
+            "processNoise": {
+                "position": 0.01,
+                "orientation": 0.1
+            },
+            "damping": 0.1
         }
     }],
     "plugins": [
-        "com_osvr_VideoBasedHMDTracker" /* This is a manual-load plugin, so we must explicitly list it */
+        "com_osvr_VideoBasedHMDTracker"
     ],
     "aliases": {
         "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused",
