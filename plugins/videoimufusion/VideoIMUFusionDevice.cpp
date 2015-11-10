@@ -138,16 +138,6 @@ void VideoIMUFusionDevice::handleIMUVelocity(
         rot[1] *= -1.;
         rot[2] *= -1.;
     }
-#if 0
-	static int s = 0;
-
-	if (s == 0) {
-        static const Eigen::IOFormat fmt(3, 0, ", ", "; ", ", ", "[", "]");
-        OSVR_DEV_VERBOSE(rot.transpose().format(fmt));
-	}
-
-	s = (s + 1) % 100;
-#endif
 
     m_fusion.handleIMUVelocity(timestamp, rot);
 #if 0

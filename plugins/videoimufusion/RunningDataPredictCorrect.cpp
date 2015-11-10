@@ -59,8 +59,8 @@ void VideoIMUFusion::RunningData::handleIMUVelocity(
 
     if (preReport(timestamp)) {
 
+#if 0
         static int s = 0;
-
         if (s == 0) {
             static const Eigen::IOFormat fmt(3, 0, ", ", ";\n", "", "", "[",
                                              "]");
@@ -76,8 +76,9 @@ void VideoIMUFusion::RunningData::handleIMUVelocity(
                        .transpose()
                        .format(fmt));
         }
-
         s = (s + 1) % 100;
+#endif
+
         m_imuMeasVel.setMeasurement(angVel);
         osvr::kalman::correct(state(), processModel(), m_imuMeasVel);
     }
