@@ -26,6 +26,7 @@
 
 // Internal Includes
 #include "RunningData.h"
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #ifdef OSVR_FPE
@@ -57,6 +58,26 @@ void VideoIMUFusion::RunningData::handleIMUVelocity(
 #endif
 
     if (preReport(timestamp)) {
+
+        static int s = 0;
+
+        if (s == 0) {
+            static const Eigen::IOFormat fmt(3, 0, ", ", ";\n", "", "", "[",
+                                             "]");
+            OSVR_DEV_VERBOSE(
+                "\nprediction: "
+                << state().getAngularVelocity().transpose().format(fmt)
+                << "\nMeasurement: " << angVel.transpose().format(fmt)
+                << "\nVariance: "
+                << state()
+                       .errorCovariance()
+                       .diagonal()
+                       .tail<3>()
+                       .transpose()
+                       .format(fmt));
+        }
+
+        s = (s + 1) % 100;
         m_imuMeasVel.setMeasurement(angVel);
         osvr::kalman::correct(state(), processModel(), m_imuMeasVel);
     }
