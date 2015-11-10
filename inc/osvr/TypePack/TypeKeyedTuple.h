@@ -77,8 +77,8 @@ namespace typepack {
                                     Key> {
             using type = apply<ComputeValueTypes, Key>;
         };
-        template <typename KeyList, typename ComputeValueTypes>
 
+        template <typename KeyList, typename ComputeValueTypes>
         struct NestedContainerTraits<
             TypeKeyedTuple<KeyList, ComputeValueTypes>> {
             using type =
