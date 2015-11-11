@@ -69,7 +69,8 @@ namespace common {
         void setStateFromReport(util::time::TimeValue const &timestamp,
                                 ReportType const &report) {
             if (hasState<ReportType>()) {
-                auto &oldTimestamp = m_states.get<ReportType>()->timestamp;
+                auto &oldTimestamp =
+                    typepack::cget<ReportType, StateMap>(m_states)->timestamp;
                 if (osvrTimeValueGreater(oldTimestamp, timestamp)) {
                     tracing::markTimestampOutOfOrder();
                     return;
@@ -78,13 +79,13 @@ namespace common {
             StateMapContents<ReportType> c;
             c.state = reportState(report);
             c.timestamp = timestamp;
-            m_states.get<ReportType>() = c;
+            typepack::get<ReportType, StateMap>(m_states) = c;
             m_hasState = true;
         }
 
         template <typename ReportType> bool hasState() const {
             // using typepack::get;
-            return m_hasState && bool(m_states.get<ReportType>());
+            return m_hasState && bool(typepack::cget<ReportType>(m_states));
         }
 
         bool hasAnyState() const { return m_hasState; }
@@ -93,8 +94,8 @@ namespace common {
         void getState(util::time::TimeValue &timestamp,
                       traits::StateFromReport_t<ReportType> &state) const {
             if (hasState<ReportType>()) {
-                timestamp = m_states.get<ReportType>()->timestamp;
-                state = m_states.get<ReportType>()->state;
+                timestamp = typepack::cget<ReportType>(m_states)->timestamp;
+                state = typepack::cget<ReportType>(m_states)->state;
             }
             /// @todo do we fail silently or throw exception if we are asked for
             /// state we don't have?
