@@ -173,7 +173,7 @@ namespace util {
                     return QuatAccessor<Coefficient>::get(*m_quat);
                 }
                 QuatCoefficientMap const &operator=(double v) const {
-                    QuatAccessor<Coefficient>::set(*m_quat);
+                    QuatAccessor<Coefficient>::set(*m_quat, v);
                     return *this;
                 }
 
