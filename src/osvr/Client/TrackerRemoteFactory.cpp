@@ -68,9 +68,10 @@ namespace client {
                            common::TrackerSensorInfo const &info,
                            common::Transform const &t,
                            boost::optional<int> sensor,
-                           common::InterfaceList &ifaces)
+                           common::InterfaceList &ifaces,
+                           common::ClientContext &ctx)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
-              m_transform(t), m_internals(ifaces), m_opts(options),
+              m_transform(t), m_ctx(ctx), m_internals(ifaces), m_opts(options),
               m_info(info), m_sensor(sensor) {
             if (m_info.reportsPosition || m_info.reportsOrientation) {
                 m_remote->register_change_handler(this,
@@ -112,6 +113,12 @@ namespace client {
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+        common::Transform getCurrentTransform() const {
+            auto ret = m_transform;
+            ret.transform(m_ctx.getRoomToWorldTransform());
+            return ret;
+        }
+
         static void VRPN_CALLBACK handle(void *userdata, vrpn_TRACKERCB info) {
             auto self = static_cast<VRPNTrackerHandler *>(userdata);
             self->m_handle(info);
@@ -138,8 +145,9 @@ namespace client {
             osvrStructTimevalToTimeValue(&timestamp, &(info.msg_time));
             osvrQuatFromQuatlib(&(report.pose.rotation), info.quat);
             osvrVec3FromQuatlib(&(report.pose.translation), info.pos);
+            auto xform = getCurrentTransform();
             ei::map(report.pose) =
-                m_transform.transform(ei::map(report.pose).matrix());
+                xform.transform(ei::map(report.pose).matrix());
 
             if (m_opts.reportPose) {
                 m_internals.setStateAndTriggerCallbacks(timestamp, report);
@@ -173,6 +181,7 @@ namespace client {
 
             OSVR_VelocityReport overallReport;
             overallReport.sensor = info.sensor;
+            auto xform = getCurrentTransform();
 
             overallReport.state.linearVelocityValid =
                 m_info.reportsLinearVelocity;
@@ -180,7 +189,7 @@ namespace client {
                 OSVR_LinearVelocityState vel;
                 osvrVec3FromQuatlib(&(vel), info.vel);
 
-                ei::map(vel) = m_transform.transformLinear(ei::map(vel));
+                ei::map(vel) = xform.transformLinear(ei::map(vel));
 
                 overallReport.state.linearVelocity = vel;
                 OSVR_LinearVelocityReport report;
@@ -198,8 +207,7 @@ namespace client {
                 state.dt = info.vel_quat_dt;
 
                 ei::map(state.incrementalRotation) =
-                    m_transform.transformLinear(
-                        ei::map(state.incrementalRotation));
+                    xform.transformLinear(ei::map(state.incrementalRotation));
 
                 overallReport.state.angularVelocity = state;
                 OSVR_AngularVelocityReport report;
@@ -221,13 +229,15 @@ namespace client {
             OSVR_AccelerationReport overallReport;
             overallReport.sensor = info.sensor;
 
+            auto xform = getCurrentTransform();
+
             overallReport.state.linearAccelerationValid =
                 m_info.reportsLinearAcceleration;
             if (m_info.reportsLinearAcceleration) {
                 OSVR_LinearAccelerationState accel;
                 osvrVec3FromQuatlib(&(accel), info.acc);
 
-                ei::map(accel) = m_transform.transformLinear(ei::map(accel));
+                ei::map(accel) = xform.transformLinear(ei::map(accel));
 
                 overallReport.state.linearAcceleration = accel;
                 OSVR_LinearAccelerationReport report;
@@ -245,8 +255,7 @@ namespace client {
                 state.dt = info.acc_quat_dt;
 
                 ei::map(state.incrementalRotation) =
-                    m_transform.transformLinear(
-                        ei::map(state.incrementalRotation));
+                    xform.transformLinear(ei::map(state.incrementalRotation));
 
                 overallReport.state.angularAcceleration = state;
                 OSVR_AngularAccelerationReport report;
@@ -259,6 +268,7 @@ namespace client {
         }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         common::Transform m_transform;
+        common::ClientContext &m_ctx;
         RemoteHandlerInternals m_internals;
         Options m_opts;
         common::TrackerSensorInfo m_info;
@@ -271,7 +281,7 @@ namespace client {
 
     shared_ptr<RemoteHandler> TrackerRemoteFactory::
     operator()(common::OriginalSource const &source,
-               common::InterfaceList &ifaces, common::ClientContext &) {
+               common::InterfaceList &ifaces, common::ClientContext &ctx) {
 
         shared_ptr<RemoteHandler> ret;
 
@@ -297,7 +307,7 @@ namespace client {
         /// @todo find out why make_shared causes a crash here
         ret.reset(new VRPNTrackerHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName().c_str(),
-            opts, info, xform, source.getSensorNumber(), ifaces));
+            opts, info, xform, source.getSensorNumber(), ifaces, ctx));
         return ret;
     }
 
