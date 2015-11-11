@@ -26,12 +26,11 @@
 #define INCLUDED_ReportTypes_h_GUID_BB8F47AD_5F82_439E_C3F9_7C57D016D3C9
 
 // Internal Includes
-#define FUSION_MAX_VECTOR_SIZE 20 // Default is 10, too small for typelist
 #include <osvr/Util/ClientCallbackTypesC.h>
 #include <osvr/TypePack/List.h>
 
 // Library/third-party includes
-#include <boost/mpl/vector.hpp>
+// - none
 
 // Standard includes
 // - none
@@ -41,17 +40,7 @@ namespace common {
     /// @brief Type traits and metaprogramming supports related to
     /// specially-handled reports.
     namespace traits {
-        /// @brief A typelist containing all specially-handled report types.
-        typedef boost::mpl::vector<
-            OSVR_AnalogReport, OSVR_ButtonReport, OSVR_PoseReport,
-            OSVR_PositionReport, OSVR_OrientationReport, OSVR_VelocityReport,
-            OSVR_LinearVelocityReport, OSVR_AngularVelocityReport,
-            OSVR_AccelerationReport, OSVR_LinearAccelerationReport,
-            OSVR_AngularAccelerationReport, OSVR_ImagingReport,
-            OSVR_Location2DReport, OSVR_DirectionReport,
-            OSVR_EyeTracker2DReport, OSVR_EyeTracker3DReport,
-            OSVR_EyeTrackerBlinkReport, OSVR_NaviVelocityReport,
-            OSVR_NaviPositionReport> ReportTypes;
+        /// @brief A typelist containing all internally-handled report types.
         using ReportTypeList = typepack::list<
             OSVR_AnalogReport, OSVR_ButtonReport, OSVR_PoseReport,
             OSVR_PositionReport, OSVR_OrientationReport, OSVR_VelocityReport,

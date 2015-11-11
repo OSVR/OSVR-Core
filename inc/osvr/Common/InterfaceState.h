@@ -26,7 +26,7 @@
 #define INCLUDED_InterfaceState_h_GUID_FFF8951B_3677_4EB5_373A_3A1A697AECDE
 
 // Internal Includes
-#include <osvr/Common/ReportMap.h>
+#include <osvr/Common/ReportTypes.h>
 #include <osvr/Common/StateType.h>
 #include <osvr/Common/ReportState.h>
 #include <osvr/Util/TimeValue.h>

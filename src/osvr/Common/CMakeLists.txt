@@ -100,7 +100,6 @@ set(API
     "${HEADER_LOCATION}/RawSenderType.h"
     "${HEADER_LOCATION}/RegisteredStringMap.h"
     "${HEADER_LOCATION}/ReportFromCallback.h"
-    "${HEADER_LOCATION}/ReportMap.h"
     "${HEADER_LOCATION}/ReportState.h"
     "${HEADER_LOCATION}/ReportStateTraits.h"
     "${HEADER_LOCATION}/ReportTraits.h"
