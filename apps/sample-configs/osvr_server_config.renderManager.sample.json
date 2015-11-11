@@ -4,12 +4,12 @@
 			"schemaVersion": 1
 		},
 		"renderManagerConfig": {
-			"directModeEnabled": false,
+			"directModeEnabled": true,
 			"directDisplayIndex": 0,
 			"directHighPriorityEnabled": true,
 			"numBuffers": 2,
 			"verticalSyncEnabled": false,
-			"verticalSyncBlockRenderingEnabled": false,
+			"verticalSyncBlockRenderingEnabled": true,
 			"renderOverfillFactor": 2.0,
 			
 			"window": {
@@ -27,7 +27,7 @@
 			"timeWarp": {
 				"enabled": true,
 				"asynchronous": false,
-				"maxMsBeforeVSync": 3
+				"maxMsBeforeVSync": 1
 			}
 		}
 	},
