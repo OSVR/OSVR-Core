@@ -30,6 +30,7 @@
 #include <osvr/Common/BaseDevicePtr.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Common/Transform.h>
 #include <osvr/Common/NetworkingSupport.h>
 #include <osvr/Util/TimeValue_fwd.h>
 #include "VRPNConnectionCollection.h"
@@ -55,7 +56,7 @@ namespace client {
         PureClientContext(const char appId[], const char host[],
                           common::ClientContextDeleter del);
         virtual ~PureClientContext();
-
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       private:
         virtual void m_update();
         virtual void m_sendRoute(std::string const &route);
@@ -72,6 +73,10 @@ namespace client {
             common::ClientInterfacePtr const &iface) override;
 
         common::PathTree const &m_getPathTree() const override;
+
+        common::Transform const &m_getRoomToWorldTransform() const override;
+
+        void m_setRoomToWorldTransform(common::Transform const &xform) override;
 
         bool m_getStatus() const override;
 
@@ -102,6 +107,9 @@ namespace client {
 
         /// @brief Have we gotten a connection to the main server?
         bool m_gotConnection = false;
+
+        /// @brief Room to world transform.
+        common::Transform m_roomToWorld;
 
         /// @brief Manager of client interface objects and their interaction
         /// with the path tree.

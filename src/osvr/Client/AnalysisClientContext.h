@@ -25,10 +25,10 @@
 #ifndef INCLUDED_AnalysisClientContext_h_GUID_6B2A41C3_C718_45AD_223E_4271ABBA8427
 #define INCLUDED_AnalysisClientContext_h_GUID_6B2A41C3_C718_45AD_223E_4271ABBA8427
 
-
 // Internal Includes
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/Transform.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Util/TimeValue_fwd.h>
@@ -44,59 +44,69 @@
 // Standard includes
 // - none
 
-
 namespace osvr {
-	namespace client {
+namespace client {
 
-		class AnalysisClientContext : public ::OSVR_ClientContextObject {
-		public:
-			AnalysisClientContext(const char appId[], const char host[], vrpn_ConnectionPtr const& conn, common::ClientContextDeleter del);
-			virtual ~AnalysisClientContext();
+    class AnalysisClientContext : public ::OSVR_ClientContextObject {
+      public:
+        AnalysisClientContext(const char appId[], const char host[],
+                              vrpn_ConnectionPtr const &conn,
+                              common::ClientContextDeleter del);
+        virtual ~AnalysisClientContext();
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      private:
+        void m_update() override;
+        void m_sendRoute(std::string const &route) override;
 
-		private:
-			void m_update() override;
-			void m_sendRoute(std::string const &route) override;
+        /// @brief Called with each new interface object before it is returned
+        /// to the client.
+        void
+        m_handleNewInterface(common::ClientInterfacePtr const &iface) override;
 
-			/// @brief Called with each new interface object before it is returned
-			/// to the client.
-			void
-				m_handleNewInterface(common::ClientInterfacePtr const &iface) override;
+        /// @brief Called with each interface object to be released/deleted
+        /// after it is removed from the context's list of interfaces but before
+        /// it is deleted.
+        void m_handleReleasingInterface(
+            common::ClientInterfacePtr const &iface) override;
 
-			/// @brief Called with each interface object to be released/deleted
-			/// after it is removed from the context's list of interfaces but before
-			/// it is deleted.
-			void m_handleReleasingInterface(
-				common::ClientInterfacePtr const &iface) override;
+        common::PathTree const &m_getPathTree() const override;
+        common::Transform const &m_getRoomToWorldTransform() const override {
+            return m_roomToWorld;
+        }
 
-			common::PathTree const &m_getPathTree() const override;
+        void
+        m_setRoomToWorldTransform(common::Transform const &xform) override {
+            m_roomToWorld = xform;
+        }
+        bool m_getStatus() const override;
 
-			bool m_getStatus() const override;
+        /// @brief the vrpn_Connection corresponding to m_host
+        vrpn_ConnectionPtr m_mainConn;
 
-			/// @brief the vrpn_Connection corresponding to m_host
-			vrpn_ConnectionPtr m_mainConn;
+        /// @brief The "OSVR" system device for control messages
+        common::BaseDevicePtr m_systemDevice;
 
-			/// @brief The "OSVR" system device for control messages
-			common::BaseDevicePtr m_systemDevice;
+        /// @brief The system component providing access to sending/receiving
+        /// control messages.
+        common::SystemComponent *m_systemComponent;
 
-			/// @brief The system component providing access to sending/receiving
-			/// control messages.
-			common::SystemComponent *m_systemComponent;
+        /// @brief All open VRPN connections, keyed by host
+        VRPNConnectionCollection m_vrpnConns;
 
-			/// @brief All open VRPN connections, keyed by host
-			VRPNConnectionCollection m_vrpnConns;
+        /// @brief Object owning a path tree.
+        common::PathTreeOwner m_pathTreeOwner;
 
-			/// @brief Object owning a path tree.
-			common::PathTreeOwner m_pathTreeOwner;
+        /// @brief Factory for producing remote handlers.
+        RemoteHandlerFactory m_factory;
 
-			/// @brief Factory for producing remote handlers.
-			RemoteHandlerFactory m_factory;
+        /// @brief Room to world transform.
+        common::Transform m_roomToWorld;
 
-			/// @brief Manager of client interface objects and their interaction
-			/// with the path tree.
-			ClientInterfaceObjectManager m_ifaceMgr;
-		};
-	} // namespace client
+        /// @brief Manager of client interface objects and their interaction
+        /// with the path tree.
+        ClientInterfaceObjectManager m_ifaceMgr;
+    };
+} // namespace client
 } // namespace osvr
 
 #endif // INCLUDED_AnalysisClientContext_h_GUID_6B2A41C3_C718_45AD_223E_4271ABBA8427
-
