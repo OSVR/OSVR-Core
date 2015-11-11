@@ -66,7 +66,7 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// will be returned in the arguments, and true will be returned.
     template <typename ReportType>
     bool getState(osvr::util::time::TimeValue &timestamp,
-                  typename osvr::common::traits::StateType<ReportType>::type &
+                  osvr::common::traits::StateFromReport_t<ReportType> &
                       state) const {
         osvr::common::tracing::markGetState(m_path);
         if (!m_state.hasState<ReportType>()) {
