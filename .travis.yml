@@ -1,10 +1,21 @@
 language: cpp
 compiler:
   - clang
+  - gcc
 os:
   - osx
   - linux
+env:
+  - CONFIG=Release
+  - CONFIG=Debug
+  - GCC_VERSION=5
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
 before_install:
+  - if [ $CC = gcc ]; then export CXX="g++-${GCC_VERSION}" CC="gcc-${GCC_VERSION}"; fi
+  - $CC -v
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap homebrew/science; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap d235j/osvr; fi"
@@ -41,8 +52,8 @@ script:
   - "git submodule update --init --recursive;"
   - "mkdir build;"
   - "cd build;"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
-  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF -Dlibfunctionality_DIR=$INSTPRF/lib/cmake/libfunctionality -Djsoncpp_DIR=$INSTPRF/lib/cmake/jsoncpp; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_PREFIX_PATH=$INSTPRF; fi"
   - "make all -j2"
 sudo: false
 addons:
