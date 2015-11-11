@@ -46,12 +46,12 @@
 namespace osvr {
 namespace client {
 
-    class NetworkImagingRemoteHandler : public RemoteHandler {
+    class ImagingRemoteHandler : public RemoteHandler {
       public:
-        NetworkImagingRemoteHandler(vrpn_ConnectionPtr const &conn,
-                                    std::string const &deviceName,
-                                    boost::optional<OSVR_ChannelCount> sensor,
-                                    common::InterfaceList &ifaces)
+        ImagingRemoteHandler(vrpn_ConnectionPtr const &conn,
+                             std::string const &deviceName,
+                             boost::optional<OSVR_ChannelCount> sensor,
+                             common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
               m_internals(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
@@ -67,10 +67,9 @@ namespace client {
         }
 
         /// @brief Deleted assignment operator.
-        NetworkImagingRemoteHandler &
-        operator=(NetworkImagingRemoteHandler const &) = delete;
+        ImagingRemoteHandler &operator=(ImagingRemoteHandler const &) = delete;
 
-        virtual ~NetworkImagingRemoteHandler() {
+        virtual ~ImagingRemoteHandler() {
             /// @todo do we need to unregister?
         }
 
@@ -123,11 +122,10 @@ namespace client {
                 "Ignoring transform found on route for Imaging data!");
         }
 
-        /// @todo This is where we'd take a different path for IPC imaging data.
         auto const &devElt = source.getDeviceElement();
 
         /// @todo find out why make_shared causes a crash here
-        ret.reset(new NetworkImagingRemoteHandler(
+        ret.reset(new ImagingRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(),
             source.getSensorNumberAsChannelCount(), ifaces));
         return ret;
