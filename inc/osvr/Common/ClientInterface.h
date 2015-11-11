@@ -98,6 +98,11 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
         m_callbacks.triggerCallbacks(timestamp, report);
     }
 
+    /// @brief Get the number of registered callbacks for the given report type.
+    template <typename ReportType>
+    std::size_t getNumCallbacksFor(ReportType const &r) const {
+        return m_callbacks.getNumCallbacksFor(r);
+    }
     /// @brief Update any state.
     void update();
 

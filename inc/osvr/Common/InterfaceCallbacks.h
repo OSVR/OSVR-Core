@@ -73,8 +73,11 @@ namespace common {
             for (auto const &f : typepack::cget<ReportType>(m_callbacks)) {
                 f(&timestamp, &report);
             }
-            /// @todo do we fail silently or throw exception if we are asked for
-            /// state we don't have?
+        }
+
+        template <typename ReportType>
+        std::size_t getNumCallbacksFor(ReportType const &) const {
+            return typepack::cget<ReportType>(m_callbacks).size();
         }
 
       private:
