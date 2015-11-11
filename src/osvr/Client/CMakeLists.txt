@@ -44,6 +44,7 @@ set(SOURCE
     PureClientContext.h
     RemoteHandler.cpp
     RemoteHandlerFactory.cpp
+    RemoteHandlerInternals.h
     RenderManagerConfig.cpp
     TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h

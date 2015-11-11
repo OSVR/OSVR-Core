@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ImagingRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
@@ -52,7 +53,7 @@ namespace client {
                                     boost::optional<OSVR_ChannelCount> sensor,
                                     common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()),
+              m_internals(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
             auto imaging = common::ImagingComponent::create();
             m_dev->addComponent(imaging);
@@ -87,14 +88,22 @@ namespace client {
             report.sensor = data.sensor;
             report.state.metadata = data.metadata;
             report.state.data = data.buffer.get();
-            for (auto &iface : m_interfaces) {
-                iface->getContext().acquireObject(data.buffer);
-                iface->triggerCallbacks(timestamp, report);
-            }
+
+            m_internals.forEachInterface(
+                [&timestamp, &report, &data](common::ClientInterface &iface) {
+                    // Note: not setting state here! we don't store image state.
+                    auto n = iface.getNumCallbacksFor(report);
+                    for (std::size_t i = 0; i < n; ++i) {
+                        // Acquire a reference for each callback we're going to
+                        // call.
+                        iface.getContext().acquireObject(data.buffer);
+                    }
+                    iface.triggerCallbacks(timestamp, report);
+                });
         }
 
         common::BaseDevicePtr m_dev;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
     };

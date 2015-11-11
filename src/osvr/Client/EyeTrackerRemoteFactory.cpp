@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "EyeTrackerRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/PathTreeFull.h>
@@ -78,7 +79,7 @@ namespace client {
                                 boost::optional<OSVR_ChannelCount> sensor,
                                 common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()),
+              m_internals(ifaces), m_all(!sensor.is_initialized()),
               m_opts(options), m_sensor(sensor) {
             auto eyetracker = common::EyeTrackerComponent::create();
             m_dev->addComponent(eyetracker);
@@ -126,9 +127,8 @@ namespace client {
             /// @todo what timestamp do we use - the one from the notification
             /// or the ones from the original reports? At least right now
             /// they're theoretically the same, but...
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         void m_handleEyeTracking2d(common::OSVR_EyeNotification const &data,
@@ -152,9 +152,8 @@ namespace client {
             /// @todo what timestamp do we use - the one from the notification
             /// or the one from the original report? At least right now they're
             /// the same, but...
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         void m_handleEyeBlink(common::OSVR_EyeNotification const &data,
@@ -176,9 +175,8 @@ namespace client {
             /// @todo what timestamp do we use - the one from the notification
             /// or the one from the original report? At least right now they're
             /// the same, but...
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         void m_handleEyeTracking(common::OSVR_EyeNotification const &data,
@@ -194,7 +192,7 @@ namespace client {
         }
 
         common::BaseDevicePtr m_dev;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         Options m_opts;
         boost::optional<OSVR_ChannelCount> m_sensor;

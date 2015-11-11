@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ButtonRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/PathTreeFull.h>
@@ -55,7 +56,7 @@ namespace client {
                           boost::optional<int> sensor,
                           common::InterfaceList &ifaces)
             : m_remote(new vrpn_Button_Remote(src, conn.get())),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()) {
+              m_internals(ifaces), m_all(!sensor.is_initialized()) {
             m_remote->register_change_handler(this, &VRPNButtonHandler::handle);
             m_remote->register_states_handler(
                 this, &VRPNButtonHandler::handle_states);
@@ -77,8 +78,8 @@ namespace client {
             self->m_handle(info);
         }
 
-        static void VRPN_CALLBACK
-        handle_states(void *userdata, vrpn_BUTTONSTATESCB info) {
+        static void VRPN_CALLBACK handle_states(void *userdata,
+                                                vrpn_BUTTONSTATESCB info) {
             auto self = static_cast<VRPNButtonHandler *>(userdata);
             self->m_handle(info);
         }
@@ -96,7 +97,8 @@ namespace client {
             m_report(timestamp, info.button, info.state);
         }
         void m_handle(vrpn_BUTTONSTATESCB const &info) {
-            auto maxChannel = m_all ? info.num_buttons - 1 : m_sensors.getValue();
+            auto maxChannel =
+                m_all ? info.num_buttons - 1 : m_sensors.getValue();
             if (!m_all &&
                 m_sensors.getIntersection(RangeType::RangeZeroTo(maxChannel))
                     .empty()) {
@@ -124,12 +126,10 @@ namespace client {
             OSVR_ButtonReport report;
             report.sensor = sensor;
             report.state = static_cast<uint8_t>(state);
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
         unique_ptr<vrpn_Button_Remote> m_remote;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         RangeType m_sensors;
     };

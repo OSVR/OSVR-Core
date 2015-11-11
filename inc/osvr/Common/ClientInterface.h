@@ -85,6 +85,15 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
     bool hasAnyState() const { return m_state.hasAnyState(); }
 
+    /// @brief Set saved state for a report type.
+    template <typename ReportType>
+    void setState(const OSVR_TimeValue &timestamp, ReportType const &report) {
+        static_assert(
+            osvr::common::traits::KeepStateForReport<ReportType>::value,
+            "Should only call setState if we're keeping state for this report "
+            "type!");
+        m_state.setStateFromReport(timestamp, report);
+    }
     /// @}
 
     /// @name Callback-related wrapper methods
@@ -96,13 +105,11 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
         m_callbacks.addCallback(cb, userdata);
     }
 
-    /// @brief Save state and trigger all callbacks for the given known report
+    /// @brief Trigger all callbacks for the given known report
     /// type.
     template <typename ReportType>
     void triggerCallbacks(const OSVR_TimeValue &timestamp,
                           ReportType const &report) {
-        m_setState(timestamp, report,
-                   osvr::common::traits::KeepStateForReport<ReportType>());
         m_callbacks.triggerCallbacks(timestamp, report);
     }
 
@@ -122,18 +129,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     boost::any &data() { return m_data; }
 
   private:
-    /// @brief Helper function for setting state
-    template <typename ReportType>
-    void m_setState(const OSVR_TimeValue &timestamp, ReportType const &report,
-                    std::true_type const &) {
-        m_state.setStateFromReport(timestamp, report);
-    }
-
-    /// @brief Helper function for "setting state" on reports we don't keep
-    /// state from
-    template <typename ReportType>
-    void m_setState(const OSVR_TimeValue &, ReportType const &,
-                    std::false_type const &) {}
     osvr::common::ClientContext &m_ctx;
     std::string const m_path;
     osvr::common::InterfaceCallbacks m_callbacks;

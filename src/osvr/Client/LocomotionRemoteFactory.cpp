@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "LocomotionRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
@@ -52,7 +53,7 @@ namespace client {
                                 boost::optional<OSVR_ChannelCount> sensor,
                                 common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()),
+              m_internals(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
 
             auto locomotion = common::LocomotionComponent::create();
@@ -96,9 +97,7 @@ namespace client {
 
             report.sensor = data.sensor;
             report.state = data.naviVelState;
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         void m_handleNaviPosition(common::NaviPositionData const &data,
@@ -111,13 +110,11 @@ namespace client {
             OSVR_NaviPositionReport report;
             report.sensor = data.sensor;
             report.state = data.naviPosnState;
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         common::BaseDevicePtr m_dev;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
     };

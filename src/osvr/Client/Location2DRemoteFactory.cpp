@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "Location2DRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
@@ -52,7 +53,7 @@ namespace client {
             boost::optional<OSVR_ChannelCount> sensor,
             common::InterfaceList &ifaces)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()),
+              m_internals(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor) {
             auto location = common::Location2DComponent::create();
             m_dev->addComponent(location);
@@ -86,15 +87,11 @@ namespace client {
             OSVR_Location2DReport report;
             report.sensor = data.sensor;
             report.location = data.location;
-            common::ClientInterfacePtr anInterface;
-            for (auto &iface : m_interfaces) {
-                anInterface = iface;
-                iface->triggerCallbacks(timestamp, report);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         common::BaseDevicePtr m_dev;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
     };

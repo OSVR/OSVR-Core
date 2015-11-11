@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "TrackerRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/QuatlibInteropC.h>
@@ -69,7 +70,7 @@ namespace client {
                            boost::optional<int> sensor,
                            common::InterfaceList &ifaces)
             : m_remote(new vrpn_Tracker_Remote(src, conn.get())),
-              m_transform(t), m_interfaces(ifaces), m_opts(options),
+              m_transform(t), m_internals(ifaces), m_opts(options),
               m_info(info), m_sensor(sensor) {
             if (m_info.reportsPosition || m_info.reportsOrientation) {
                 m_remote->register_change_handler(this,
@@ -141,18 +142,16 @@ namespace client {
                 m_transform.transform(ei::map(report.pose).matrix());
 
             if (m_opts.reportPose) {
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, report);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, report);
             }
 
             if (m_opts.reportPosition) {
                 OSVR_PositionReport positionReport;
                 positionReport.sensor = info.sensor;
                 positionReport.xyz = report.pose.translation;
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, positionReport);
-                }
+
+                m_internals.setStateAndTriggerCallbacks(timestamp,
+                                                        positionReport);
             }
 
             if (m_opts.reportOrientation) {
@@ -160,9 +159,7 @@ namespace client {
                 oriReport.sensor = info.sensor;
                 oriReport.rotation = report.pose.rotation;
 
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, oriReport);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, oriReport);
             }
         }
 
@@ -189,9 +186,7 @@ namespace client {
                 OSVR_LinearVelocityReport report;
                 report.sensor = info.sensor;
                 report.state = vel;
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, report);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, report);
             }
 
             overallReport.state.angularVelocityValid =
@@ -210,14 +205,10 @@ namespace client {
                 OSVR_AngularVelocityReport report;
                 report.sensor = info.sensor;
                 report.state = state;
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, report);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, report);
             }
 
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, overallReport);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, overallReport);
         }
 
         /// Pass acceleration messages on to the client
@@ -242,9 +233,7 @@ namespace client {
                 OSVR_LinearAccelerationReport report;
                 report.sensor = info.sensor;
                 report.state = accel;
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, report);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, report);
             }
             overallReport.state.angularAccelerationValid =
                 m_info.reportsAngularAcceleration;
@@ -263,18 +252,14 @@ namespace client {
                 OSVR_AngularAccelerationReport report;
                 report.sensor = info.sensor;
                 report.state = state;
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, report);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, report);
             }
 
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, overallReport);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, overallReport);
         }
         unique_ptr<vrpn_Tracker_Remote> m_remote;
         common::Transform m_transform;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         Options m_opts;
         common::TrackerSensorInfo m_info;
         boost::optional<int> m_sensor;
