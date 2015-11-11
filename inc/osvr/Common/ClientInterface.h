@@ -48,13 +48,13 @@
 
 struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
-    protected:
+  protected:
     /// @brief Constructor - only to be called by a factory function.
     OSVR_COMMON_EXPORT
     OSVR_ClientInterfaceObject(osvr::common::ClientContext &ctx,
                                std::string const &path);
 
-    public:
+  public:
     ~OSVR_ClientInterfaceObject() {
         osvr::common::tracing::markReleaseInterface(m_path);
     }
@@ -62,12 +62,15 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the path as a string.
     OSVR_COMMON_EXPORT std::string const &getPath() const;
 
+    /// @name State-related wrapper methods
+    /// @brief Primarily forwarding to the nested InterfaceState instance.
+    /// @{
     /// @brief If state exists for the given ReportType on this interface, it
     /// will be returned in the arguments, and true will be returned.
     template <typename ReportType>
-    bool getState(osvr::util::time::TimeValue &timestamp,
-                  osvr::common::traits::StateFromReport_t<ReportType> &
-                      state) const {
+    bool
+    getState(osvr::util::time::TimeValue &timestamp,
+             osvr::common::traits::StateFromReport_t<ReportType> &state) const {
         osvr::common::tracing::markGetState(m_path);
         if (!m_state.hasState<ReportType>()) {
             return false;
@@ -82,6 +85,11 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
     bool hasAnyState() const { return m_state.hasAnyState(); }
 
+    /// @}
+
+    /// @name Callback-related wrapper methods
+    /// @brief Primarily forwarding to the nested InterfaceCallbacks instance.
+    /// @{
     /// @brief Register a callback for a known report type.
     template <typename CallbackType>
     void registerCallback(CallbackType cb, void *userdata) {
@@ -103,6 +111,8 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     std::size_t getNumCallbacksFor(ReportType const &r) const {
         return m_callbacks.getNumCallbacksFor(r);
     }
+    /// @}
+
     /// @brief Update any state.
     void update();
 
