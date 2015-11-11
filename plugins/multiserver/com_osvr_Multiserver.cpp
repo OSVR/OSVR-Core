@@ -184,7 +184,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                                 reg2.useDecoratedName(m_data.getName(
                                     "OSVRHackerDevKitPrediction")),
                                 reg2.getVRPNConnection(), "*" + decName, 1,
-                                1.0 / 60.0, false));
+                                32.0e-3, false));
                         reg2.setDeviceDescriptor(osvr::util::makeString(
                             com_osvr_Multiserver_OSVRHackerDevKit_json));
                     }
