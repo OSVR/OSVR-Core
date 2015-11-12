@@ -483,6 +483,11 @@ generate_compatibility_version_file(
     COMPATIBILITY AnyNewerVersion
     CXX_ABI)
 
+# Be sure to export the json-to-c tool if we have built it.
+if(TARGET osvr_json_to_c)
+    list(APPEND OSVR_BUILDTREE_TARGETS osvr_json_to_c)
+endif()
+
 # Export the targets we want in the build tree.
 # TODO exporting osvr_cxx11_flags means the build tree (only) is fairly compiler-specific
 export(TARGETS
