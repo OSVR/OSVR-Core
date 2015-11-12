@@ -10,6 +10,7 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
 # These are all the plugin targets: one listed only here need more careful configuration.
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
     com_osvr_example_selfcontained
+    org_osvr_example_SampleCPlugin
     ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE}
     CACHE INTERNAL "" FORCE)
 
@@ -55,6 +56,18 @@ osvr_add_plugin(NAME com_osvr_example_selfcontained
     selfcontained/com_osvr_example_selfcontained.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_selfcontained_json.h")
 set_target_properties(com_osvr_example_selfcontained PROPERTIES
+    FOLDER "OSVR Example Plugins")
+
+## Build the C-only example
+osvr_convert_json(org_osvr_example_SampleCPlugin_json
+    org_osvr_example_SampleCPlugin.json
+    "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_example_SampleCPlugin_json.h")
+osvr_add_plugin(NAME org_osvr_example_SampleCPlugin
+    NO_INSTALL MANUAL_LOAD
+    SOURCES
+    org_osvr_example_SampleCPlugin.c
+    "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_example_SampleCPlugin_json.h")
+set_target_properties(org_osvr_example_SampleCPlugin PROPERTIES
     FOLDER "OSVR Example Plugins")
 
 

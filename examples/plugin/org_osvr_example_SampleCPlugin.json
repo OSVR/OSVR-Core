@@ -1,0 +1,21 @@
+{
+    "deviceVendor": "Sensics",
+    "deviceName": "Sample C Plugin",
+    "author": "Ryan Pavlik <ryan@sensics.com>",
+    "version": 1,
+    "lastModified": "2015-11-12T23:00:24.431Z",
+    "interfaces": {
+        "analog": {
+            "count": 1
+        },
+        "button": {
+            "count": 1
+        },
+        "tracker": {
+            "position": true,
+            "orientation": true,
+            "bounded": true,
+            "count": 1
+        }
+    }
+}
