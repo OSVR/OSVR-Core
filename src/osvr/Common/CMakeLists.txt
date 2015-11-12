@@ -222,8 +222,8 @@ endif()
 ###
 # Grab DLLs please.
 ###
-if(OSVR_NEED_OPENCV AND OSVR_COPY_OPENCV)
-    # This copies the DLLs used by the core, as well as by any enabled in-tree plugins.
+if(BUILD_WITH_OPENCV AND OSVR_COPY_OPENCV)
+    # This copies the DLLs used by any enabled in-tree plugins and examples
     foreach(opencvlib ${OPENCV_MODULES_USED})
         osvr_copy_dep(${LIBNAME_FULL} ${opencvlib})
     endforeach()
