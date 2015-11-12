@@ -74,5 +74,4 @@ osvr_add_interface_library(Imaging)
 # since we don't need the same version in the same place.
 target_link_libraries(${LIBNAME_INTERFACE}
     INTERFACE
-    ${LIBNAME_FULL}Cpp
-    $<BUILD_INTERFACE:opencv_core>)
+    ${LIBNAME_FULL}Cpp)
