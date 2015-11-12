@@ -31,7 +31,7 @@
       "k1_blue": 0.5
     },
     "rendering": {
-      "right_roll": 180,
+      "right_roll": 0,
       "left_roll": 0
     },
     "eyes": [
@@ -43,7 +43,7 @@
       {
         "center_proj_x": 0.5,
         "center_proj_y": 0.5,
-        "rotate_180": 0
+        "rotate_180": 1
       }
     ]
   }
