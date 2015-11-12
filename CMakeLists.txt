@@ -121,6 +121,11 @@ if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/extra-sample-apps)
+if(WIN32)
+    set(SAMPLE_CONFIGS_DIR "$<TARGET_FILE_DIR:osvr_server>")
+else()
+    set(SAMPLE_CONFIGS_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+endif()
 
 # Shared modules from rpavlik/cmake-modules
 

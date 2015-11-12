@@ -132,32 +132,39 @@ if(BUILD_SERVER_APP)
     endforeach()
 
     # Copy contents of dir for both build and install trees.
-    macro(osvr_copy_dir _dirname _glob _comment)
-        add_custom_command(OUTPUT "${_dirname}-stamp"
-            COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:osvr_server>${_dirname}"
+    macro(osvr_copy_dir _dirname _glob _builddir _installdir _comment)
+        STRING(REPLACE "/" "-" targetname ${_dirname})
+        add_custom_target("${targetname}-stamp"
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${_builddir}/${_dirname}"
             COMMENT "Making ${_comment} directory"
             VERBATIM)
-        set_source_files_properties("${_dirname}-stamp" PROPERTIES SYMBOLIC TRUE)
+        set_source_files_properties("${targetname}-stamp" PROPERTIES SYMBOLIC TRUE)
         # Grab all the files with a glob, to avoid missing one.
-        file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}" "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${_glob}")
+        file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/${_dirname}" "${CMAKE_CURRENT_SOURCE_DIR}/${_dirname}/${_glob}")
 
         foreach(FN ${_files})
             list(APPEND FILE_OUTPUTS "${_dirname}/${FN}")
             add_custom_command(OUTPUT "${_dirname}/${FN}"
-                COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}" "$<TARGET_FILE_DIR:osvr_server>${_dirname}/"
-                MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}"
-                DEPENDS "${_dirname}-stamp"
+                COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${_dirname}/${FN}" "${_builddir}/${_dirname}/"
+                MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${_dirname}/${FN}"
+                DEPENDS "${targetname}-stamp"
                 COMMENT "Copying ${_comment} ${FN}"
                 VERBATIM)
-            install(FILES "${CMAKE_CURRENT_SOURCE_DIR}${_dirname}/${FN}"
-                DESTINATION ${CMAKE_INSTALL_BINDIR}${_dirname} COMPONENT Server)
+            install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${_dirname}/${FN}"
+                DESTINATION "${_installdir}/${_dirname}" COMPONENT Server)
         endforeach()
     endmacro()
 
-    osvr_copy_dir(/displays *.json "JSON display descriptor")
-    osvr_copy_dir(/sample-configs *.json "sample OSVR Server config")
-    osvr_copy_dir(/external-devices *.json "OSVR Server Configs for External VRPN devices")
-    osvr_copy_dir(/external-devices/device-descriptors *.json "Device Descriptors for External VRPN devices")
+    if(WIN32)
+        set(data_buildtree_dir "$<TARGET_FILE_DIR:osvr_server>")
+    else()
+        set(data_buildtree_dir "${PROJECT_BINARY_DIR}/data")
+    endif()
+
+    osvr_copy_dir(displays *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "JSON display descriptor")
+    osvr_copy_dir(sample-configs *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "sample OSVR Server config")
+    osvr_copy_dir(external-devices *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "OSVR Server Configs for External VRPN devices")
+    osvr_copy_dir(external-devices/device-descriptors *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "Device Descriptors for External VRPN devices")
 
     # Have to set them as symbolic because we can't use a generator expression in add_custom_command(OUTPUT
     set_source_files_properties(${FILE_OUTPUTS} PROPERTIES SYMBOLIC TRUE)
