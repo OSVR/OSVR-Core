@@ -121,6 +121,12 @@ if(NOT CMAKE_INSTALL_DOCDIR)
 	set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/extra-sample-apps)
+if(WIN32)
+    # On Windows, install sample configs, etc. to a subdirectory of bin.
+    set(SAMPLE_CONFIGS_DIR "${CMAKE_INSTALL_BINDIR}")
+else()
+    set(SAMPLE_CONFIGS_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+endif()
 
 # Shared modules from rpavlik/cmake-modules
 
