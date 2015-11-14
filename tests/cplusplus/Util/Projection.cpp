@@ -91,8 +91,8 @@ class ParameterizedProjectionTest : public ::testing::Test {
                     Vec4 bound(x, y, z, 1);
                     auto result =
                         osvr::util::extractPoint((inv * bound).eval());
-                    std::cout << bound.transpose() << "\t<-\t"
-                              << result.transpose() << "\n";
+                    std::cout << bound.transpose() << "\t<-\t" << result
+                              << "\n";
                     if (z == getMinZ()) {
                         // near plane
                         ASSERT_NEAR(near * handednessCorrection, result.z(),

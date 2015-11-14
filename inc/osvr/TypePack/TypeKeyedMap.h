@@ -23,8 +23,8 @@
 #define INCLUDED_TypeKeyedMap_h_GUID_29C6B905_4493_43AF_A811_71589CFD6FBC
 
 // Internal Includes
+#include "TypeKeyed.h"
 #include "Contains.h"
-#include "FindFirst.h"
 #include "Length.h"
 
 // Library/third-party includes
@@ -41,75 +41,40 @@ namespace typepack {
     /// (You may emulate this by providing a specialization of
     /// boost::optional<> as your value type.)
     ///
-    /// Values can be accessed with a templated getElement member function, a
-    /// subscript operator overload, as well as the nonmember get() free
-    /// function templates.
+    /// Values can be accessed just as all other type-keyed containers.
     ///
     /// Runtime performance of element access is constant (equal to array
     /// element access with a constant index)
-    template <typename KeyList, typename ValueType> class TypeKeyedMap {
+    template <typename KeyList, typename ValueType>
+    class TypeKeyedMap
+        : public TypeKeyedBase<TypeKeyedMap<KeyList, ValueType>> {
+        using size_constant = length<KeyList>;
+
       public:
-        using value_type = ValueType;
-        using reference = value_type &;
-        using const_reference = value_type const &;
         using key_types = KeyList;
-        template <typename Key> using valid_key = contains<key_types, Key>;
-        template <typename Key> using index = find_first<key_types, Key>;
-
-        /// @brief Accessor by key type - either cast nullptr to a Key const *,
-        /// or explicitly specify a template argument.
-        template <typename Key> reference getElement(Key const * = nullptr) {
-            static_assert(valid_key<Key>::value,
-                          "Key type not found in the list!");
-            return m_contents[index<Key>::value];
-        }
-
-        /// @brief Const accessor by key type - either cast nullptr to a Key
-        /// const *, or explicitly specify a template argument.
-        template <typename Key>
-        const_reference getElement(Key const * = nullptr) const {
-            static_assert(valid_key<Key>::value,
-                          "Key type not found in the list!");
-            return m_contents[index<Key>::value];
-        }
-
-        /// @brief Subscript operator, if you don't mind instantiating your key
-        /// type.
-        template <typename Key> reference operator[](Key &&) {
-            return getElement<Key>();
-        }
-
-        /// @brief Const subscript operator, if you don't mind instantiating
-        /// your key type.
-        template <typename Key> const_reference operator[](Key &&) const {
-            return getElement<Key>();
-        }
+        using value_type = ValueType;
 
       private:
-        static const auto SIZE = length<key_types>::value;
-        using container = std::array<value_type, SIZE>;
-        container m_contents;
+        template <typename, typename>
+        friend struct typekeyed_detail::ValueAccessor;
+        using container_type = std::array<value_type, size_constant::value>;
+        /// Internal method/implementation detail, do not use in consuming code!
+        container_type &nested_container() { return container_; }
+        /// Internal method/implementation detail, do not use in consuming code!
+        container_type const &nested_container() const { return container_; }
+
+      private:
+        container_type container_;
     };
 
-    /// @brief Nonmember accessor for typepack::TypeKeyedMap - explicitly
-    /// specify your key type.
-    ///
-    /// @relates typepack::HomogeneousTypeMap<>
-    template <typename Key, typename KeyList, typename ValueType>
-    inline auto get(TypeKeyedMap<KeyList, ValueType> &c) ->
-        typename TypeKeyedMap<KeyList, ValueType>::reference {
-        return c.template getElement<Key>();
-    }
+    // Required traits
+    namespace typekeyed_detail {
+        template <typename KeyList, typename ValueType, typename Key>
+        struct ValueTypeAtKeyTraits<TypeKeyedMap<KeyList, ValueType>, Key> {
+            using type = ValueType;
+        };
 
-    /// @brief Nonmember const accessor for typepack::TypeKeyedMap -
-    /// explicitly specify your key type.
-    ///
-    /// @relates typepack::HomogeneousTypeMap<>
-    template <typename Key, typename KeyList, typename ValueType>
-    inline auto get(TypeKeyedMap<KeyList, ValueType> const &c) ->
-        typename TypeKeyedMap<KeyList, ValueType>::const_reference {
-        return c.template getElement<Key>();
-    }
+    } // namespace typekeyed_detail
 } // namespace typepack
 } // namespace osvr
 

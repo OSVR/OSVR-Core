@@ -31,6 +31,7 @@ set(API
     "${HEADER_LOCATION}/Tail.h"
     "${HEADER_LOCATION}/Transform.h"
     "${HEADER_LOCATION}/TypePack.h"
+    "${HEADER_LOCATION}/TypeKeyed.h"
     "${HEADER_LOCATION}/TypeKeyedMap.h"
     "${HEADER_LOCATION}/TypeKeyedTuple.h"
     "${HEADER_LOCATION}/Void.h")

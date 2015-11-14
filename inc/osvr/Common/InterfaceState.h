@@ -26,7 +26,7 @@
 #define INCLUDED_InterfaceState_h_GUID_FFF8951B_3677_4EB5_373A_3A1A697AECDE
 
 // Internal Includes
-#include <osvr/Common/ReportMap.h>
+#include <osvr/Common/ReportTypes.h>
 #include <osvr/Common/StateType.h>
 #include <osvr/Common/ReportState.h>
 #include <osvr/Util/TimeValue.h>
@@ -68,9 +68,9 @@ namespace common {
         template <typename ReportType>
         void setStateFromReport(util::time::TimeValue const &timestamp,
                                 ReportType const &report) {
-            using typepack::get;
             if (hasState<ReportType>()) {
-                auto &oldTimestamp = get<ReportType>(m_states)->timestamp;
+                auto &oldTimestamp =
+                    typepack::cget<ReportType, StateMap>(m_states)->timestamp;
                 if (osvrTimeValueGreater(oldTimestamp, timestamp)) {
                     tracing::markTimestampOutOfOrder();
                     return;
@@ -79,13 +79,13 @@ namespace common {
             StateMapContents<ReportType> c;
             c.state = reportState(report);
             c.timestamp = timestamp;
-            get<ReportType>(m_states) = c;
+            typepack::get<ReportType, StateMap>(m_states) = c;
             m_hasState = true;
         }
 
         template <typename ReportType> bool hasState() const {
-            using typepack::get;
-            return m_hasState && bool(get<ReportType>(m_states));
+            // using typepack::get;
+            return m_hasState && bool(typepack::cget<ReportType>(m_states));
         }
 
         bool hasAnyState() const { return m_hasState; }
@@ -93,10 +93,9 @@ namespace common {
         template <typename ReportType>
         void getState(util::time::TimeValue &timestamp,
                       traits::StateFromReport_t<ReportType> &state) const {
-            using typepack::get;
             if (hasState<ReportType>()) {
-                timestamp = get<ReportType>(m_states)->timestamp;
-                state = get<ReportType>(m_states)->state;
+                timestamp = typepack::cget<ReportType>(m_states)->timestamp;
+                state = typepack::cget<ReportType>(m_states)->state;
             }
             /// @todo do we fail silently or throw exception if we are asked for
             /// state we don't have?

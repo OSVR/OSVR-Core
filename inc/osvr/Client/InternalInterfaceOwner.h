@@ -39,6 +39,9 @@
 
 namespace osvr {
 namespace client {
+    /// @brief Class that should be used for all internally-used client
+    /// interface objects as it handles ownership with respect to the client
+    /// context properly.
     class InternalInterfaceOwner {
       public:
         /// @brief Empty constructor

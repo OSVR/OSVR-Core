@@ -199,5 +199,15 @@ namespace client {
     common::PathTree const &PureClientContext::m_getPathTree() const {
         return m_pathTreeOwner.get();
     }
+
+    common::Transform const &
+    PureClientContext::m_getRoomToWorldTransform() const {
+        return m_roomToWorld;
+    }
+
+    void PureClientContext::m_setRoomToWorldTransform(
+        common::Transform const &xform) {
+        m_roomToWorld = xform;
+    }
 } // namespace client
 } // namespace osvr

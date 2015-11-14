@@ -1,49 +1,59 @@
 language: cpp
 compiler:
   - clang
+  - gcc
 os:
   - osx
   - linux
+env:
+  - CONFIG=Release
+  - CONFIG=Debug
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
 before_install:
+  - if [ $CC = gcc ]; then export CXX="g++-5" CC="gcc-5"; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' -a $CC = 'clang' ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+  - $CC -v
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then export INSTPRF=$HOME/p; mkdir -p $INSTPRF; fi
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap homebrew/science; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap d235j/osvr; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-      INSTPRF=$HOME/p;
-      mkdir $INSTPRF;
       pushd $HOME;
       git clone https://github.com/OSVR/libfunctionality.git;
       git clone https://github.com/open-source-parsers/jsoncpp.git;
       popd;
     fi"
 install:
-    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall json-c; fi"
-    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libusb opencv; fi"
-    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp --HEAD; fi"
-    - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libfunctionality --HEAD; fi"
-    - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-        INSTPRF=$HOME/p;
-        mkdir $HOME/libfunctionality/build;
-        pushd $HOME/libfunctionality/build;
-        cmake .. -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF;
-        make -j2 install;
-        popd;
-      fi"
-    - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-        INSTPRF=$HOME/p;
-        mkdir $HOME/jsoncpp/build;
-        pushd $HOME/jsoncpp/build;
-        cmake .. -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=on;
-        make -j2 install;
-        popd;
-      fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall json-c; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libusb opencv; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp --HEAD; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libfunctionality --HEAD; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      mkdir -p $HOME/libfunctionality/build;
+      pushd $HOME/libfunctionality/build;
+      cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG};
+      make -j2 install;
+      popd;
+    fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      mkdir $HOME/jsoncpp/build;
+      pushd $HOME/jsoncpp/build;
+      cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=on -DCMAKE_BUILD_TYPE=${CONFIG};
+      make -j2 install;
+      popd;
+    fi"
 script:
   - "git submodule update --init --recursive;"
   - "mkdir build;"
   - "cd build;"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
-  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-5 -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_INSTALL_PREFIX=$INSTPRF -Dlibfunctionality_DIR=$INSTPRF/lib/cmake/libfunctionality -Djsoncpp_DIR=$INSTPRF/lib/cmake/jsoncpp; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_PREFIX_PATH=$INSTPRF; fi"
   - "make all -j2"
+# TODO need to sort out false-failures due to container/platform issues.
+#  - "ctest -V"
 sudo: false
 addons:
   apt:
@@ -51,6 +61,7 @@ addons:
     - boost-latest
     - george-edison55-precise-backports
     - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.7
     packages:
     - libusb-1.0-0-dev
     - libopencv-dev
@@ -64,3 +75,4 @@ addons:
     - cmake
     - gcc-5
     - g++-5
+    - clang-3.7

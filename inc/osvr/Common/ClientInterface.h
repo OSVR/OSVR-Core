@@ -48,13 +48,13 @@
 
 struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
-    protected:
+  protected:
     /// @brief Constructor - only to be called by a factory function.
     OSVR_COMMON_EXPORT
     OSVR_ClientInterfaceObject(osvr::common::ClientContext &ctx,
                                std::string const &path);
 
-    public:
+  public:
     ~OSVR_ClientInterfaceObject() {
         osvr::common::tracing::markReleaseInterface(m_path);
     }
@@ -62,12 +62,15 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     /// @brief Get the path as a string.
     OSVR_COMMON_EXPORT std::string const &getPath() const;
 
+    /// @name State-related wrapper methods
+    /// @brief Primarily forwarding to the nested InterfaceState instance.
+    /// @{
     /// @brief If state exists for the given ReportType on this interface, it
     /// will be returned in the arguments, and true will be returned.
     template <typename ReportType>
-    bool getState(osvr::util::time::TimeValue &timestamp,
-                  typename osvr::common::traits::StateType<ReportType>::type &
-                      state) const {
+    bool
+    getState(osvr::util::time::TimeValue &timestamp,
+             osvr::common::traits::StateFromReport_t<ReportType> &state) const {
         osvr::common::tracing::markGetState(m_path);
         if (!m_state.hasState<ReportType>()) {
             return false;
@@ -82,21 +85,40 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
 
     bool hasAnyState() const { return m_state.hasAnyState(); }
 
+    /// @brief Set saved state for a report type.
+    template <typename ReportType>
+    void setState(const OSVR_TimeValue &timestamp, ReportType const &report) {
+        static_assert(
+            osvr::common::traits::KeepStateForReport<ReportType>::value,
+            "Should only call setState if we're keeping state for this report "
+            "type!");
+        m_state.setStateFromReport(timestamp, report);
+    }
+    /// @}
+
+    /// @name Callback-related wrapper methods
+    /// @brief Primarily forwarding to the nested InterfaceCallbacks instance.
+    /// @{
     /// @brief Register a callback for a known report type.
     template <typename CallbackType>
     void registerCallback(CallbackType cb, void *userdata) {
         m_callbacks.addCallback(cb, userdata);
     }
 
-    /// @brief Save state and trigger all callbacks for the given known report
+    /// @brief Trigger all callbacks for the given known report
     /// type.
     template <typename ReportType>
     void triggerCallbacks(const OSVR_TimeValue &timestamp,
                           ReportType const &report) {
-        m_setState(timestamp, report,
-                   osvr::common::traits::KeepStateForReport<ReportType>());
         m_callbacks.triggerCallbacks(timestamp, report);
     }
+
+    /// @brief Get the number of registered callbacks for the given report type.
+    template <typename ReportType>
+    std::size_t getNumCallbacksFor(ReportType const &r) const {
+        return m_callbacks.getNumCallbacksFor(r);
+    }
+    /// @}
 
     /// @brief Update any state.
     void update();
@@ -107,18 +129,6 @@ struct OSVR_ClientInterfaceObject : boost::noncopyable {
     boost::any &data() { return m_data; }
 
   private:
-    /// @brief Helper function for setting state
-    template <typename ReportType>
-    void m_setState(const OSVR_TimeValue &timestamp, ReportType const &report,
-                    std::true_type const &) {
-        m_state.setStateFromReport(timestamp, report);
-    }
-
-    /// @brief Helper function for "setting state" on reports we don't keep
-    /// state from
-    template <typename ReportType>
-    void m_setState(const OSVR_TimeValue &, ReportType const &,
-                    std::false_type const &) {}
     osvr::common::ClientContext &m_ctx;
     std::string const m_path;
     osvr::common::InterfaceCallbacks m_callbacks;

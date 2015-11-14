@@ -100,7 +100,6 @@ set(API
     "${HEADER_LOCATION}/RawSenderType.h"
     "${HEADER_LOCATION}/RegisteredStringMap.h"
     "${HEADER_LOCATION}/ReportFromCallback.h"
-    "${HEADER_LOCATION}/ReportMap.h"
     "${HEADER_LOCATION}/ReportState.h"
     "${HEADER_LOCATION}/ReportStateTraits.h"
     "${HEADER_LOCATION}/ReportTraits.h"
@@ -120,6 +119,7 @@ set(API
     "${HEADER_LOCATION}/Tracing.h"
     "${HEADER_LOCATION}/TrackerSensorInfo.h"
     "${HEADER_LOCATION}/Transform.h"
+    "${HEADER_LOCATION}/Transform_fwd.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ConfigByteSwapping.h"
     "${CMAKE_CURRENT_BINARY_DIR}/TracingConfig.h")
 

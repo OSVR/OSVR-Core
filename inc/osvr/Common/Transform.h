@@ -26,6 +26,7 @@
 #define INCLUDED_Transform_h_GUID_8BF4BBD8_CDC1_48BC_DC27_BFDA42A3212E
 
 // Internal Includes
+#include <osvr/Common/Transform_fwd.h>
 #include <osvr/Common/DegreesToRadians.h>
 
 // Library/third-party includes

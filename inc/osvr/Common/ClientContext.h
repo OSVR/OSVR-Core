@@ -30,6 +30,7 @@
 #include <osvr/Common/ClientContext_fwd.h>
 #include <osvr/Common/ClientInterfacePtr.h>
 #include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Common/Transform_fwd.h>
 #include <osvr/Common/ClientInterfaceFactory.h>
 #include <osvr/Util/KeyedOwnershipContainer.h>
 #include <osvr/Util/UniquePtr.h>
@@ -98,6 +99,14 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// @returns true if the object was found and released.
     OSVR_COMMON_EXPORT bool releaseObject(void *obj);
 
+    /// @brief Gets the transform from room space to world space.
+    OSVR_COMMON_EXPORT osvr::common::Transform const &
+    getRoomToWorldTransform() const;
+
+    /// @brief Sets the transform from room space to world space.
+    OSVR_COMMON_EXPORT void
+    setRoomToWorldTransform(osvr::common::Transform const &xform);
+
     /// @brief Returns the specialized deleter for this object.
     OSVR_COMMON_EXPORT osvr::common::ClientContextDeleter getDeleter() const;
 
@@ -134,6 +143,16 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     OSVR_COMMON_EXPORT virtual osvr::common::PathTree const &
     m_getPathTree() const = 0;
 
+    /// @brief Implementation of accessor for the transform from room space to
+    /// world space.
+    virtual osvr::common::Transform const &
+    m_getRoomToWorldTransform() const = 0;
+
+    /// @brief Implementation of mutator for the transform from room space to
+    /// world space.
+    virtual void
+    m_setRoomToWorldTransform(osvr::common::Transform const &xform) = 0;
+
     std::string const m_appId;
     InterfaceList m_interfaces;
     osvr::common::ClientInterfaceFactory m_clientInterfaceFactory;
@@ -165,7 +184,7 @@ namespace common {
                 delete o;
             }
         } // namespace
-    } // namespace detail
+    }     // namespace detail
 
     /// @brief Template alias for a ClientContext unique_ptr with the correct
     /// deleter class.

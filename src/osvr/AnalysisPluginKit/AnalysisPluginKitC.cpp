@@ -32,7 +32,6 @@
 #include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/Verbosity.h>
 #include "../Connection/VrpnConnectionKind.h" /// @todo Internal header!
-#include "../Connection/VrpnConnectionKind.h" /// @todo Internal header!
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -53,14 +52,15 @@
 class vrpn_Connection;
 
 namespace {
-	inline vrpn_Connection * extractVrpnConnection(osvr::connection::Connection & conn) {
-		vrpn_Connection *ret = nullptr;
-		if (std::string(conn.getConnectionKindID()) ==
-			osvr::connection::getVRPNConnectionKindID()) {
-			ret = static_cast<vrpn_Connection *>(conn.getUnderlyingObject());
-		}
-		return ret;
-	}
+inline vrpn_Connection *
+extractVrpnConnection(osvr::connection::Connection &conn) {
+    vrpn_Connection *ret = nullptr;
+    if (std::string(conn.getConnectionKindID()) ==
+        osvr::connection::getVRPNConnectionKindID()) {
+        ret = static_cast<vrpn_Connection *>(conn.getUnderlyingObject());
+    }
+    return ret;
+}
 } // namespace
 
 OSVR_ReturnCode
@@ -103,12 +103,12 @@ osvrAnalysisSyncInit(OSVR_IN_PTR OSVR_PluginRegContext ctx,
         osvr::client::createAnalysisClientContext(
             "org.osvr.analysisplugin" /**< @todo */, "localhost" /**< @todo */,
             vrpn_ConnectionPtr(vrpnConn)));
-    auto & dev = **device;
+    auto &dev = **device;
     /// pass ownership
     dev.acquireObject(clientCtxSmart);
 
     /// register client context update
-	dev.setPreConnectionInteract([=] { clientCtxSmart->update(); });
+    dev.setPreConnectionInteract([=] { clientCtxSmart->update(); });
 
     /// finally return the client context too.
     *clientCtx = clientCtxSmart.get();

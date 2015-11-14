@@ -41,6 +41,8 @@ namespace osvr {
 namespace typepack {
 
     /// Turn a class template or alias template \p C into a Alias Class.
+    /// @todo doesn't work if used more than once in a single translation unit
+    /// on MSVC2013?
     template <template <typename...> class C> struct quote {
         // Indirection through defer here needed to avoid Core issue 1430
         // http://open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1430

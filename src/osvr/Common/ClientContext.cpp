@@ -47,6 +47,7 @@ namespace common {
     }
 } // namespace common
 } // namespace osvr
+
 OSVR_ClientContextObject::OSVR_ClientContextObject(
     const char appId[],
     osvr::common::ClientInterfaceFactory const &interfaceFactory,
@@ -55,6 +56,7 @@ OSVR_ClientContextObject::OSVR_ClientContextObject(
       m_deleter(del) {
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
 }
+
 OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[],
                                                    ClientContextDeleter del)
     : OSVR_ClientContextObject(
@@ -128,18 +130,32 @@ bool OSVR_ClientContextObject::releaseObject(void *obj) {
     return m_ownedObjects.release(obj);
 }
 
+osvr::common::Transform const &
+OSVR_ClientContextObject::getRoomToWorldTransform() const {
+    return m_getRoomToWorldTransform();
+}
+
+void OSVR_ClientContextObject::setRoomToWorldTransform(
+    osvr::common::Transform const &xform) {
+    m_setRoomToWorldTransform(xform);
+}
+
 ClientContextDeleter OSVR_ClientContextObject::getDeleter() const {
     return m_deleter;
 }
+
 bool OSVR_ClientContextObject::getStatus() const { return m_getStatus(); }
+
 bool OSVR_ClientContextObject::m_getStatus() const {
     // by default, assume we are started up.
     return true;
 }
+
 void OSVR_ClientContextObject::m_handleNewInterface(
     ::osvr::common::ClientInterfacePtr const &) {
     // by default do nothing
 }
+
 void OSVR_ClientContextObject::m_handleReleasingInterface(
     ::osvr::common::ClientInterfacePtr const &) {
     // by default do nothing

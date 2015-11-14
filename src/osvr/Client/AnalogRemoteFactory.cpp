@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "AnalogRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/QuatlibInteropC.h>
@@ -60,7 +61,7 @@ namespace client {
                           boost::optional<int> sensor,
                           common::InterfaceList &ifaces)
             : m_remote(new vrpn_Analog_Remote(src, conn.get())),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()) {
+              m_internals(ifaces), m_all(!sensor.is_initialized()) {
             m_remote->register_change_handler(this, &VRPNAnalogHandler::handle);
             OSVR_DEV_VERBOSE("Constructed an AnalogHandler for " << src);
 
@@ -81,7 +82,8 @@ namespace client {
 
       private:
         void m_handle(vrpn_ANALOGCB const &info) {
-            auto maxChannel = m_all ? info.num_channel - 1 : m_sensors.getValue();
+            auto maxChannel =
+                m_all ? info.num_channel - 1 : m_sensors.getValue();
             if (m_sensors.isValue() && (maxChannel < m_sensors.getValue())) {
                 // early out if we're looking for just a single channel number
                 // that isn't in this report.
@@ -103,13 +105,11 @@ namespace client {
                 report.sensor = sensor;
                 /// @todo handle transform?
                 report.state = info.channel[report.sensor];
-                for (auto &iface : m_interfaces) {
-                    iface->triggerCallbacks(timestamp, report);
-                }
+                m_internals.setStateAndTriggerCallbacks(timestamp, report);
             }
         }
         unique_ptr<vrpn_Analog_Remote> m_remote;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         RangeType m_sensors;
     };

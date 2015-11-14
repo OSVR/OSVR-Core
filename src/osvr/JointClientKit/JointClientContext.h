@@ -28,6 +28,7 @@
 // Internal Includes
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/Transform.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/NetworkingSupport.h>
@@ -59,7 +60,7 @@ namespace client {
             auto pin = m_server;
             return *pin;
         }
-
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       private:
         void m_update() override;
         void m_sendRoute(std::string const &route) override;
@@ -72,10 +73,19 @@ namespace client {
         /// @brief Called with each interface object to be released/deleted
         /// after it is removed from the context's list of interfaces but before
         /// it is deleted.
-        void
-        m_handleReleasingInterface(common::ClientInterfacePtr const &iface) override;
+        void m_handleReleasingInterface(
+            common::ClientInterfacePtr const &iface) override;
 
         common::PathTree const &m_getPathTree() const override;
+
+        common::Transform const &m_getRoomToWorldTransform() const override {
+            return m_roomToWorld;
+        }
+
+        void
+        m_setRoomToWorldTransform(common::Transform const &xform) override {
+            m_roomToWorld = xform;
+        }
 
         bool m_getStatus() const override;
 
@@ -99,6 +109,9 @@ namespace client {
 
         /// @brief Factory for producing remote handlers.
         RemoteHandlerFactory m_factory;
+
+        /// @brief Room to world transform.
+        common::Transform m_roomToWorld;
 
         /// @brief Manager of client interface objects and their interaction
         /// with the path tree.

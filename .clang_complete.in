@@ -1,5 +1,5 @@
 -std=c++11
--Iinclude
+-I@CMAKE_CURRENT_SOURCE_DIR@/inc
 -I@CMAKE_CURRENT_BINARY_DIR@/src
 -I@Boost_INCLUDE_DIR@
 

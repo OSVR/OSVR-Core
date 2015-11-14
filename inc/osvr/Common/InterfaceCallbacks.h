@@ -26,16 +26,13 @@
 #define INCLUDED_InterfaceCallbacks_h_GUID_0CE1EE79_D74A_4EAA_CF16_3AABDA3A1B6A
 
 // Internal Includes
-#include <osvr/Common/ReportMap.h>
 #include <osvr/Common/ReportTypes.h>
 #include <osvr/Common/ReportFromCallback.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
-#include <boost/fusion/include/has_key.hpp>
-#include <boost/fusion/include/at_key.hpp>
-#include <boost/mpl/placeholders.hpp>
-#include <boost/optional.hpp>
+#include <osvr/TypePack/TypeKeyedTuple.h>
+#include <osvr/TypePack/Quote.h>
 
 // Standard includes
 #include <vector>
@@ -43,26 +40,26 @@
 
 namespace osvr {
 namespace common {
-    /// @brief Metafunction computing the storage for callbacks for a report
+    /// @brief Trait computing the storage for callbacks for a report
     /// type.
-    template <typename ReportType> struct CallbackStorageType {
-        typedef std::vector<std::function<void(const OSVR_TimeValue *,
-                                               const ReportType *)> > type;
+    /// @todo can't use quote because of bad interaction with MSVC 2013 that
+    /// causes types to get mixed up - only the first quote works.
+    struct CallbackStorage {
+        template <typename ReportType>
+        using apply = std::vector<
+            std::function<void(const OSVR_TimeValue *, const ReportType *)>>;
     };
 
-    typedef traits::GenerateReportMap<CallbackStorageType<boost::mpl::_> >::type
-        CallbackMap;
-
+    using CallbackTuple =
+        typepack::TypeKeyedTuple<traits::ReportTypeList, CallbackStorage>;
     /// @brief Class to maintain callbacks for an interface for each report type
     /// explicitly enumerated.
     class InterfaceCallbacks {
       public:
         template <typename CallbackType>
         void addCallback(CallbackType cb, void *userdata) {
-            typedef typename traits::ReportFromCallback<CallbackType>::type
-                ReportType;
-            using namespace std::placeholders;
-            boost::fusion::at_key<ReportType>(m_callbacks)
+            using ReportType = traits::ReportFromCallback_t<CallbackType>;
+            typepack::get<ReportType>(m_callbacks)
                 .push_back(
                     [cb, userdata](util::time::TimeValue const *timestamp,
                                    ReportType const *report) {
@@ -73,16 +70,18 @@ namespace common {
         template <typename ReportType>
         void triggerCallbacks(util::time::TimeValue const &timestamp,
                               ReportType const &report) const {
-            for (auto const &f :
-                 boost::fusion::at_key<ReportType>(m_callbacks)) {
+            for (auto const &f : typepack::cget<ReportType>(m_callbacks)) {
                 f(&timestamp, &report);
             }
-            /// @todo do we fail silently or throw exception if we are asked for
-            /// state we don't have?
+        }
+
+        template <typename ReportType>
+        std::size_t getNumCallbacksFor(ReportType const &) const {
+            return typepack::cget<ReportType>(m_callbacks).size();
         }
 
       private:
-        CallbackMap m_callbacks;
+        CallbackTuple m_callbacks;
     };
 
 } // namespace common
