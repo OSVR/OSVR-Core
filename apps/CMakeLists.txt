@@ -157,7 +157,7 @@ if(BUILD_SERVER_APP)
     if(WIN32)
         set(data_buildtree_dir "$<TARGET_FILE_DIR:osvr_server>")
     else()
-        set(data_buildtree_dir "${PROJECT_BINARY_DIR}/data")
+        set(data_buildtree_dir "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
     endif()
 
     osvr_copy_dir(displays *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "JSON display descriptor")
