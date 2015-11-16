@@ -1,5 +1,9 @@
 {
     "plugins": [
         "com_osvr_example_Skeleton"
-    ]
+    ],
+    "aliases": {
+        "/me/hands/left": "/com_osvr_example_Skeleton/Skeleton/skeleton/0",
+        "/me/hands/right": "/com_osvr_example_Skeleton/Skeleton/skeleton/1"
+    }
 }
