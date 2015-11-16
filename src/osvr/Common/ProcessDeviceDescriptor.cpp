@@ -128,48 +128,6 @@ namespace common {
             util::Flag m_flag;
         };
 
-        class ArticulationsRecursion : boost::noncopyable {
-          public:
-            ArticulationsRecursion(PathNode &devNode) : m_devNode(devNode) {}
-
-            util::Flag operator()(Json::Value const &articulationsObject) {
-                m_recurse(articulationsObject, ARTICULATION_KEY);
-                return m_flag;
-            }
-
-          private:
-            bool m_add(Json::Value const &currentLevel,
-                       std::string const &relativeArticulationsPath) {
-                return addArticulation(m_devNode, currentLevel.toStyledString(),
-                                       relativeArticulationsPath);
-            }
-            void m_recurse(Json::Value const &currentLevel,
-                           std::string const &relativeArticulationsPath) {
-                // if (currentLevel.isString()) {
-                //    m_flag += m_add(currentLevel, relativeArticulationsPath);
-                //    return;
-                //}
-                if (currentLevel.isObject()) {
-                    Json::Value data = currentLevel[DATA_KEY];
-                    if (!data.isNull()) {
-                        m_flag += m_add(data, relativeArticulationsPath);
-                    }
-
-                    for (auto const &memberName :
-                         currentLevel.getMemberNames()) {
-                        if (DATA_KEY == memberName) {
-                            continue;
-                        }
-                        m_recurse(currentLevel[memberName],
-                                  relativeArticulationsPath +
-                                      getPathSeparator() + memberName);
-                    }
-                }
-            }
-            PathNode &m_devNode;
-            util::Flag m_flag;
-        };
-
     } // namespace
 
     static inline util::Flag
@@ -182,20 +140,6 @@ namespace common {
         }
         SemanticRecursion f{devNode};
         changed += f(sem);
-        return changed;
-    }
-
-    static inline util::Flag
-    processArticulationSpecFromDescriptor(PathNode &devNode,
-                                          Json::Value const &desc) {
-        util::Flag changed;
-        Json::Value const &articulations = desc[ARTICULATION_KEY];
-        if (!articulations.isObject()) {
-            // Articulation spec member isn't an object or isn't a member
-            return changed;
-        }
-        ArticulationsRecursion f{devNode};
-        changed += f(articulations);
         return changed;
     }
 
@@ -290,9 +234,6 @@ namespace common {
 
         changed +=
             processAutomaticFromDescriptor(devNode, devElt.getDescriptor());
-
-        changed += processArticulationSpecFromDescriptor(
-            devNode, devElt.getDescriptor());
 
         return changed.get();
     }

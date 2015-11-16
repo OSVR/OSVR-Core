@@ -97,6 +97,7 @@ set(API
     "${HEADER_LOCATION}/PathTreeOwner.h"
     "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
+    "${HEADER_LOCATION}/ProcessArticulationSpec.h"
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
@@ -170,6 +171,7 @@ set(SOURCE
     PathTreeObserver.cpp
     PathTreeOwner.cpp
     PathTreeSerialization.cpp
+    ProcessArticulationSpec.cpp
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp
