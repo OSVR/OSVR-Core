@@ -96,7 +96,7 @@ if(BUILD_EXPERIMENTAL_APPS)
     set_target_properties(diagnose-rotation PROPERTIES
         FOLDER "OSVR Experimental Applications")
 
-    install(TARGETS osvr_calibrate osvr_reset_yaw diagnose-rotation
+    install(TARGETS osvr_calibrate diagnose-rotation
         RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExperimentalApps)
 endif()
 
