@@ -5,8 +5,14 @@ if(BUILD_EXPERIMENTAL_APPS AND (NOT BUILD_SERVER OR NOT BUILD_CLIENT))
 endif()
 
 if(BUILD_CLIENT_APPS)
+    ###
+    # PathTreeExport - installed
+    ###
     add_subdirectory(PathTreeExport)
 
+    ###
+    # osvr_print_tree - installed
+    ###
     add_executable(osvr_print_tree
         osvr_print_tree.cpp)
     target_link_libraries(osvr_print_tree
@@ -20,6 +26,9 @@ if(BUILD_CLIENT_APPS)
     install(TARGETS osvr_print_tree
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
+    ###
+    # osvr_dump_tree_json - NOT installed
+    ###
     add_executable(osvr_dump_tree_json
         osvr_dump_tree_json.cpp)
     target_link_libraries(osvr_dump_tree_json
@@ -33,6 +42,9 @@ if(BUILD_CLIENT_APPS)
     #install(TARGETS osvr_dump_tree_json
     #    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
+    ###
+    # osvr_reset_yaw - installed
+    ###
     add_executable(osvr_reset_yaw
         osvr_reset_yaw.cpp
         ClientMainloop.h
@@ -52,6 +64,9 @@ if(BUILD_CLIENT_APPS)
 endif()
 
 if(BUILD_SERVER_EXAMPLES)
+    ###
+    # BasicServer - installed to ExtraSampleBinaries
+    ###
     add_executable(BasicServer BasicServer.cpp)
     target_link_libraries(BasicServer
         osvrServer
@@ -64,6 +79,9 @@ if(BUILD_SERVER_EXAMPLES)
 endif()
 
 if(BUILD_EXPERIMENTAL_APPS)
+    ###
+    # osvr_calibrate - EXPERIMENTAL - not built by default but installed in ExtraSampleBinaries if built
+    ###
     add_executable(osvr_calibrate
         osvr_calibrate.cpp
         ClientMainloop.h
@@ -80,6 +98,9 @@ if(BUILD_EXPERIMENTAL_APPS)
     set_target_properties(osvr_calibrate PROPERTIES
         FOLDER "OSVR Experimental Applications")
 
+    ###
+    # diagnose-rotation - EXPERIMENTAL - not built by default but installed in ExtraSampleBinaries if built
+    ###
     add_executable(diagnose-rotation
         diagnose-rotation.cpp
         ClientMainloop.h
@@ -96,11 +117,16 @@ if(BUILD_EXPERIMENTAL_APPS)
     set_target_properties(diagnose-rotation PROPERTIES
         FOLDER "OSVR Experimental Applications")
 
+    # Install the experimental apps
     install(TARGETS osvr_calibrate diagnose-rotation
         RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExperimentalApps)
 endif()
 
 if(BUILD_SERVER_APP)
+
+    ###
+    # osvr_server - installed
+    ###
     set(OSVR_SERVER_RESOURCE)
     if(WIN32)
         set(OSVR_SERVER_RESOURCE osvr_server.rc)
@@ -115,11 +141,11 @@ if(BUILD_SERVER_APP)
     install(TARGETS osvr_server
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
-    # Copy contents of dir for both build and install trees.
+    # Macro:
+    # Copy contents of dir for both build and install trees - directories of JSON configs and descriptors
     macro(osvr_copy_dir _dirname _glob _builddir _installdir _comment)
         add_custom_command(OUTPUT "${_dirname}-stamp"
             COMMAND "${CMAKE_COMMAND}" -E make_directory "${_builddir}/${_dirname}"
-            COMMENT "Making ${_comment} directory"
             VERBATIM)
         set_source_files_properties("${_dirname}-stamp" PROPERTIES SYMBOLIC TRUE)
         # Grab all the files with a glob, to avoid missing one.
