@@ -115,22 +115,6 @@ if(BUILD_SERVER_APP)
     install(TARGETS osvr_server
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
-    set(FILE_OUTPUTS)
-
-    # Grab all the config files with a glob, to avoid missing one.
-    file(GLOB CONFIG_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/osvr_server_config*.json")
-
-    foreach(FN ${CONFIG_FILES})
-        list(APPEND FILE_OUTPUTS "${FN}")
-        add_custom_command(OUTPUT "${FN}"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FN}" "$<TARGET_FILE_DIR:osvr_server>"
-            MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
-            COMMENT "Copying JSON config file ${FN}"
-            VERBATIM)
-        install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${FN}"
-            DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Server)
-    endforeach()
-
     # Copy contents of dir for both build and install trees.
     macro(osvr_copy_dir _dirname _glob _builddir _installdir _comment)
         add_custom_command(OUTPUT "${_dirname}-stamp"
@@ -159,7 +143,21 @@ if(BUILD_SERVER_APP)
     else()
         set(data_buildtree_dir "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
     endif()
+    set(data_installtree_dir ${SAMPLE_CONFIGS_DIR})
+    set(FILE_OUTPUTS)
 
+    # Copy/install the default config file from the current directory.
+    set(DEFAULT_CONFIG_FILE osvr_server_config.json)
+    list(APPEND FILE_OUTPUTS "${DEFAULT_CONFIG_FILE}")
+    add_custom_command(OUTPUT "${DEFAULT_CONFIG_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}" "${data_buildtree_dir}"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}"
+        COMMENT "Copying ${DEFAULT_CONFIG_FILE}"
+        VERBATIM)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}"
+        DESTINATION "${data_installtree_dir}" COMPONENT Server)
+
+    # Copy/install subdirectories of JSON files
     osvr_copy_dir(displays *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "JSON display descriptor")
     osvr_copy_dir(sample-configs *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "sample OSVR Server config")
     osvr_copy_dir(external-devices *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "OSVR Server Configs for External VRPN devices")
