@@ -41,6 +41,7 @@
 
 /* Standard includes */
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct MyDevice {
     OSVR_DeviceToken devToken;
