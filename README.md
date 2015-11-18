@@ -11,7 +11,7 @@ This is the code and libraries to use when developing with OSVR.
 - For developing applications using the framework, you'll use the @ref ClientKit library.
 
 ## Binary Snapshot Documentation
-This snapshot contains documentation, example code, JSON schemas, and JSON descriptor files in the `share/doc/osvrcore` directory. More information is available online.
+If you're looking at this file in a binary build of OSVR-Core, please seen the `BINARY_README` file for more targeted information, as this main README file is focused on the source tree.
 
 ## Source Documentation
 See [the HACKING file](HACKING.md) for some development guidelines for working on this code base itself.

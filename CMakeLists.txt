@@ -415,6 +415,7 @@ endif()
 find_package(Markdown)
 
 set(README_MARKDOWN
+    BINARY_README.md
     CONTRIBUTING.md
     README.md
     NEWS.md)
