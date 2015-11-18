@@ -5,7 +5,7 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "z_sight 1920",
+      "model": "zSight 1920",
       "num_displays": 2,
       "Version": "",
       "Note": "1920x1080, 2 video inputs"

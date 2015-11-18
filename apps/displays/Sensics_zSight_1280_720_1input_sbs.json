@@ -5,7 +5,7 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "z_sight",
+      "model": "zSight",
       "num_displays": 2,
       "Version": "1.1",
       "Note": "1280x720 resolution mode, 1 video input"

@@ -5,10 +5,10 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "d_sight",
+      "model": "dSight",
       "num_displays": 2,
       "Version": "landscape",
-      "Note": "Suitable when d_sight receives 1080x1920 landscape-mode video, 1 video input"
+      "Note": "Suitable when dSight receives 1080x1920 landscape-mode video, 1 video input"
     },
     "field_of_view": {
       "monocular_horizontal": 95,

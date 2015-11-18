@@ -5,10 +5,10 @@
   "hmd": {
     "device": {
       "vendor": "Sensics",
-      "model": "d_sight",
+      "model": "dSight",
       "num_displays": 2,
       "Version": "portrait",
-      "Note": "Suitable when d_sight receives 1080x1920 portrait-mode video, 2 video inputs"
+      "Note": "Suitable when dSight receives 1080x1920 portrait-mode video, 2 video inputs"
     },
     "field_of_view": {
       "monocular_horizontal": 95,
