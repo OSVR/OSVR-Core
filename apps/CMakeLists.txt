@@ -138,20 +138,30 @@ if(BUILD_SERVER_APP)
         endforeach()
     endmacro()
 
+    # Set up variables to begin the JSON copying
     if(WIN32)
         set(data_buildtree_dir "$<TARGET_FILE_DIR:osvr_server>")
+        set(DEFAULT_CONFIG_EXTRA_ARGS)
     else()
         set(data_buildtree_dir "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+        # Here, we need to create the directory to copy to.
+        add_custom_command(OUTPUT "data_buildtree_dir-stamp"
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${data_buildtree_dir}"
+            VERBATIM)
+        set_source_files_properties("data_buildtree_dir-stamp" PROPERTIES SYMBOLIC TRUE)
+        set(DEFAULT_CONFIG_EXTRA_ARGS DEPENDS "data_buildtree_dir-stamp")
     endif()
     set(data_installtree_dir ${SAMPLE_CONFIGS_DIR})
     set(FILE_OUTPUTS)
 
     # Copy/install the default config file from the current directory.
     set(DEFAULT_CONFIG_FILE osvr_server_config.json)
+
     list(APPEND FILE_OUTPUTS "${DEFAULT_CONFIG_FILE}")
     add_custom_command(OUTPUT "${DEFAULT_CONFIG_FILE}"
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}" "${data_buildtree_dir}"
         MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}"
+        ${DEFAULT_CONFIG_EXTRA_ARGS}
         COMMENT "Copying ${DEFAULT_CONFIG_FILE}"
         VERBATIM)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}"
