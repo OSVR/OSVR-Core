@@ -44,6 +44,10 @@ foreach(name ${MAINCLIENTS})
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ExampleClients)
     endif()
     if(TARGET ${name}_c)
+        if(NOT WIN32)
+            set_target_properties(${name}_c PROPERTIES
+                INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${EXTRABINARIES_INSTALL_RPATH}")
+        endif()
         install(TARGETS ${name}_c
             RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
     endif()
@@ -51,10 +55,18 @@ endforeach()
 
 foreach(name ${CLIENTS})
     if(TARGET ${name}_cpp)
+        if(NOT WIN32)
+            set_target_properties(${name}_cpp PROPERTIES
+                INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${EXTRABINARIES_INSTALL_RPATH}")
+        endif()
         install(TARGETS ${name}_cpp
             RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
     endif()
     if(TARGET ${name}_c)
+        if(NOT WIN32)
+            set_target_properties(${name}_c PROPERTIES
+                INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${EXTRABINARIES_INSTALL_RPATH}")
+        endif()
         install(TARGETS ${name}_c
             RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
     endif()

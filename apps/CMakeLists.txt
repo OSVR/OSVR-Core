@@ -73,6 +73,10 @@ if(BUILD_SERVER_EXAMPLES)
         jsoncpp_lib)
     set_target_properties(BasicServer PROPERTIES
         FOLDER "OSVR Stock Applications")
+    if(NOT WIN32)
+        set_target_properties(BasicServer PROPERTIES
+            INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${EXTRABINARIES_INSTALL_RPATH}")
+    endif()
 
     install(TARGETS BasicServer
         RUNTIME DESTINATION ${EXTRA_SAMPLE_BINDIR} COMPONENT ExtraSampleBinaries)
@@ -97,6 +101,10 @@ if(BUILD_EXPERIMENTAL_APPS)
         boost_program_options)
     set_target_properties(osvr_calibrate PROPERTIES
         FOLDER "OSVR Experimental Applications")
+    if(NOT WIN32)
+        set_target_properties(osvr_calibrate PROPERTIES
+            INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${EXTRABINARIES_INSTALL_RPATH}")
+    endif()
 
     ###
     # diagnose-rotation - EXPERIMENTAL - not built by default but installed in ExtraSampleBinaries if built
@@ -116,6 +124,10 @@ if(BUILD_EXPERIMENTAL_APPS)
         boost_program_options)
     set_target_properties(diagnose-rotation PROPERTIES
         FOLDER "OSVR Experimental Applications")
+    if(NOT WIN32)
+        set_target_properties(diagnose-rotation PROPERTIES
+            INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${EXTRABINARIES_INSTALL_RPATH}")
+    endif()
 
     # Install the experimental apps
     install(TARGETS osvr_calibrate diagnose-rotation

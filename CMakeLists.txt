@@ -330,9 +330,15 @@ if(NOT WIN32) # Have not set this up for Windows yet
     list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
     if("${isSystemDir}" STREQUAL "-1")
         if(APPLE)
+            # Standard RPATH
             set(CMAKE_INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
+            # Extra install RPATH for those binaries installed in the EXTRA_SAMPLE_BINDIR
+            set(EXTRABINARIES_INSTALL_RPATH "@loader_path/../../../${CMAKE_INSTALL_LIBDIR}")
         else()
+            # Standard RPATH
             set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+            # Extra install RPATH for those binaries installed in the EXTRA_SAMPLE_BINDIR
+            set(EXTRABINARIES_INSTALL_RPATH "\$ORIGIN/../../../${CMAKE_INSTALL_LIBDIR}")
         endif()
     else() #Use default rpath if libs installed in a system dir
         set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
