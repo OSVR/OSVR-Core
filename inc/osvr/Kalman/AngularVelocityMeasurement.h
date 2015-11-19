@@ -28,6 +28,7 @@
 // Internal Includes
 #include "FlexibleKalmanBase.h"
 #include "PoseState.h"
+#include "OrientationState.h"
 #include "ExternalQuaternion.h"
 #include <osvr/Util/EigenCoreGeometry.h>
 
@@ -76,16 +77,42 @@ namespace kalman {
         MeasurementDiagonalMatrix m_covariance;
     };
 
-    /// This is the subclass of AbsoluteOrientationBase: only explicit
+    /// This is the subclass of AngularVelocityBase: only explicit
     /// specializations, and on state types.
     template <typename StateType> class AngularVelocityMeasurement;
 
-    /// AbsoluteOrientationMeasurement with a pose_externalized_rotation::State
+    /// AngularVelocityMeasurement with a pose_externalized_rotation::State
     template <>
     class AngularVelocityMeasurement<pose_externalized_rotation::State>
         : public AngularVelocityBase {
       public:
         using State = pose_externalized_rotation::State;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        static const types::DimensionType STATE_DIMENSION =
+            types::Dimension<State>::value;
+        using Base = AngularVelocityBase;
+
+        AngularVelocityMeasurement(MeasurementVector const &vel,
+                                   MeasurementVector const &variance)
+            : Base(vel, variance) {}
+
+        types::Matrix<DIMENSION, STATE_DIMENSION>
+        getJacobian(State const &) const {
+            using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
+            Jacobian ret = Jacobian::Zero();
+            ret.topRightCorner<3, 3>() = types::SquareMatrix<3>::Identity();
+            return ret;
+        }
+    };
+
+    /// AngularVelocityMeasurement with a orient_externalized_rotation::State
+    /// The code is in fact identical except for the state types, due to a
+    /// coincidence of how the state vectors are arranged.
+    template <>
+    class AngularVelocityMeasurement<orient_externalized_rotation::State>
+        : public AngularVelocityBase {
+      public:
+        using State = orient_externalized_rotation::State;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType STATE_DIMENSION =
             types::Dimension<State>::value;
