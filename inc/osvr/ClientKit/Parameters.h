@@ -29,10 +29,11 @@
 #include <osvr/ClientKit/ParametersC.h>
 
 // Library/third-party includes
-#include <boost/scoped_array.hpp>
+// - none
 
 // Standard includes
 #include <string>
+#include <memory>
 
 namespace osvr {
 namespace clientkit {
@@ -49,7 +50,7 @@ namespace clientkit {
         if (len == 0) {
             return ret;
         }
-        boost::scoped_array<char> buf(new char[len]);
+        std::unique_ptr<char[]> buf(new char[len]);
         osvrClientGetStringParameter(ctx, path, buf.get(), len);
         ret.assign(buf.get());
         return ret;

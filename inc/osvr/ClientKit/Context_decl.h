@@ -38,7 +38,7 @@
 #include <osvr/ClientKit/ContextC.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
+// - none
 
 // Standard includes
 #include <string>
@@ -53,7 +53,7 @@ namespace clientkit {
     /// Handles lifetime management and provides access to ClientKit
     /// functionality.
     /// @ingroup ClientKitCPP
-    class ClientContext : private boost::noncopyable {
+    class ClientContext {
       public:
         /// @brief Initialize the library.
         /// @param applicationIdentifier A string identifying your application.
@@ -100,6 +100,9 @@ namespace clientkit {
 
       private:
         OSVR_ClientContext m_context;
+        // Prevent copying
+        ClientContext( const ClientContext& ) = delete;
+        ClientContext& operator=( const ClientContext& ) = delete;
     };
 
 } // end namespace clientkit

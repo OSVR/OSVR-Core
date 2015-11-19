@@ -34,8 +34,7 @@
 #include <osvr/Util/Deletable.h>
 
 // Library/third-party includes
-#include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
+// - none
 
 // Standard includes
 // - none
@@ -54,8 +53,7 @@ namespace clientkit {
     namespace detail {
         /// @brief Class serving to maintain the registration of and wrap a
         /// friendly imaging callback
-        class ImagingCallbackRegistration : public util::Deletable,
-                                            boost::noncopyable {
+        class ImagingCallbackRegistration : public util::Deletable {
           public:
             virtual ~ImagingCallbackRegistration() {}
 
@@ -105,6 +103,8 @@ namespace clientkit {
             OSVR_ClientContext m_ctx;
             friend void osvr::clientkit::registerImagingCallback(
                 Interface &iface, ImagingCallback cb, void *userdata);
+            ImagingCallbackRegistration( const ImagingCallbackRegistration& ) = delete;
+            ImagingCallbackRegistration& operator=( const ImagingCallbackRegistration& ) = delete;
         };
     } // namespace detail
 
@@ -113,7 +113,7 @@ namespace clientkit {
     inline void registerImagingCallback(Interface &iface,
                                         ImagingCallback cb,
                                         void *userdata) {
-        util::boost_util::DeletablePtr ptr(
+        util::DeletablePtr ptr(
             new detail::ImagingCallbackRegistration(iface, cb, userdata));
         iface.takeOwnership(ptr);
     }

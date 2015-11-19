@@ -31,10 +31,10 @@
 #include <osvr/Util/Deletable.h>
 
 // Library/third-party includes
-#include <boost/shared_ptr.hpp>
+// - none
 
 // Standard includes
-// - none
+#include <memory>
 
 namespace osvr {
 
@@ -44,7 +44,7 @@ namespace clientkit {
     /// @brief A smart pointer controlling deletion of the image buffer. The
     /// buffer is automatically wrapped in one of these before your callback
     /// gets it.
-    typedef boost::shared_ptr<OSVR_ImageBufferElement> ImageBufferPtr;
+    typedef std::shared_ptr<OSVR_ImageBufferElement> ImageBufferPtr;
 
     /// @brief The user-friendly imaging report. Note that passing this around
     /// by value is OK (doesn't copy the image), and the easiest way to ensure
