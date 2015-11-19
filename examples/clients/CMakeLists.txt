@@ -29,6 +29,7 @@ foreach(name ${MAINCLIENTS} ${CLIENTS})
             target_link_libraries(${name}_${suffix} ${LIB_${suffix}})
             set_target_properties(${name}_${suffix} PROPERTIES
                 FOLDER "OSVR Example Clients")
+            target_compile_features(${name}_${suffix} PRIVATE cxx_range_for)
         endif()
     endforeach()
 endforeach()

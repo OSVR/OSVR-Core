@@ -44,7 +44,7 @@ set(API
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/AnyMap_fwd.h"
     "${HEADER_LOCATION}/BoolC.h"
-    "${HEADER_LOCATION}/BoostDeletable.h"
+    "${HEADER_LOCATION}/StdDeletable.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
     "${HEADER_LOCATION}/CallbackWrapper.h"
     "${HEADER_LOCATION}/ContainerWrapper.h"

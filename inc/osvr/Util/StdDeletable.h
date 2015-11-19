@@ -22,25 +22,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_StdDeletable_h_GUID_2C03AF21_E4B8_44B3_0F77_630666063711
-#define INCLUDED_StdDeletable_h_GUID_2C03AF21_E4B8_44B3_0F77_630666063711
+#ifndef INCLUDED_Deletable_h_GUID_66D6C45A_7AB7_4198_F8EE_202F0FCE682C
+#define INCLUDED_Deletable_h_GUID_66D6C45A_7AB7_4198_F8EE_202F0FCE682C
 
 // Internal Includes
 #include <osvr/Util/Deletable.h>
-#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
 #include <vector>
+#include <memory>
 
 namespace osvr {
 namespace util {
-    /// @brief Shared-ownership smart pointer to a Deletable
-    typedef shared_ptr<Deletable> DeletablePtr;
+    /// @brief Shared-ownership smart pointer to a Deletable, using std's
+    /// shared pointers.
+    typedef ::std::shared_ptr<Deletable> DeletablePtr;
     /// @brief Vector of shared-ownership smart pointers
     typedef ::std::vector<DeletablePtr> DeletableList;
 } // namespace util
 } // namespace osvr
-#endif // INCLUDED_StdDeletable_h_GUID_2C03AF21_E4B8_44B3_0F77_630666063711
+
+#endif // INCLUDED_Deletable_h_GUID_66D6C45A_7AB7_4198_F8EE_202F0FCE682C
