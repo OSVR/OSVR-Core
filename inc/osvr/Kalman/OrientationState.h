@@ -186,7 +186,7 @@ namespace kalman {
         template <typename OutputStream>
         inline OutputStream &operator<<(OutputStream &os, State const &state) {
             os << "State:" << state.stateVector().transpose() << "\n";
-            os << "quat:" << state.getCombinedQuaternion().coeffs().transpose()
+            os << "quat:" << state.getQuaternion().coeffs().transpose()
                << "\n";
             os << "error:\n" << state.errorCovariance() << "\n";
             return os;
