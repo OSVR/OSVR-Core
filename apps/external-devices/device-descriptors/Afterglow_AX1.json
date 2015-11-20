@@ -2,8 +2,8 @@
     "deviceVendor": "Performance Designed Products",
     "deviceName": "Afterglow Ax1 Controller for XBox 360",
     "author": "Georgiy Frolov <georgiy@sensics.com>",
-    "version": 1,
-    "lastModified": "2015-05-12T17:38:49.659Z",
+    "version": 2,
+    "lastModified": "2015-11-20T17:39:34.133Z",
     "interfaces": {
         "analog": {
             "count": 6
