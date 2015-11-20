@@ -23,7 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include "DirectShowImageSource.h"
+#include "ImageSourceFactories.h"
 #include "DirectShowHDKCameraFactory.h"
 #include "DirectShowToCV.h"
 
@@ -48,7 +48,8 @@ namespace vbtracker {
         virtual ~DirectShowImageSource() {}
 
         bool ok() const override {
-            return m_camera && m_gotRes && m_camera->working() && m_camera->isOpened();
+            return m_camera && m_gotRes && m_camera->working() &&
+                   m_camera->isOpened();
         }
         bool grab() override;
         cv::Mat retrieve() override;

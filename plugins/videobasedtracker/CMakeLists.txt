@@ -55,16 +55,14 @@ set(PLUGIN_SOURCES
     Oculus_DK2.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
     CVImageSource.cpp
-    CVImageSource.h
     ImageSource.cpp
     ImageSource.h
-    FakeImageSource.cpp
-    FakeImageSource.h)
+    ImageSourceFactories.h
+    FakeImageSource.cpp)
 if(WIN32)
     list(APPEND PLUGIN_SOURCES
         DirectShowHDKCameraFactory.h
         DirectShowImageSource.cpp
-        DirectShowImageSource.h
         DirectShowToCV.h)
 endif()
 

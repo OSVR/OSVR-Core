@@ -22,8 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_FakeImageSource_h_GUID_BE629DEC_1342_4280_1316_24D5A4A5A239
-#define INCLUDED_FakeImageSource_h_GUID_BE629DEC_1342_4280_1316_24D5A4A5A239
+#ifndef INCLUDED_ImageSourceFactories_h_GUID_9C2DA062_802C_41A0_E014_82E9EB8A7D5F
+#define INCLUDED_ImageSourceFactories_h_GUID_9C2DA062_802C_41A0_E014_82E9EB8A7D5F
 
 // Internal Includes
 #include "ImageSource.h"
@@ -32,12 +32,21 @@
 // - none
 
 // Standard includes
-#include <string>
+// - none
 
 namespace osvr {
 namespace vbtracker {
+    /// Factory method to open an OpenCV camera by number.
+    ImageSourcePtr openOpenCVCamera(int which);
+
+#ifdef _WIN32
+    /// Factory method to get the HDK camera as an image source, via DirectShow.
+    ImageSourcePtr openHDKCameraDirectShow();
+#endif
+
+    /// Factory method to open a directory of tif files named 0001.tif and
+    /// onward as an image source (looping)
     ImageSourcePtr openImageFileSequence(std::string const &dir);
 } // namespace vbtracker
 } // namespace osvr
-
-#endif // INCLUDED_FakeImageSource_h_GUID_BE629DEC_1342_4280_1316_24D5A4A5A239
+#endif // INCLUDED_ImageSourceFactories_h_GUID_9C2DA062_802C_41A0_E014_82E9EB8A7D5F
