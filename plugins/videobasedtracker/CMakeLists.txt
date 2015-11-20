@@ -49,14 +49,30 @@ endif()
 ###
 # Build the plugin
 ###
-osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
-    MANUAL_LOAD
-    CPP # indicates we'd like to use the C++ wrapper
-    SOURCES
+set(PLUGIN_SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
     Oculus_DK2.cpp
     Oculus_DK2.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
+    CVImageSource.cpp
+    CVImageSource.h
+    ImageSource.cpp
+    ImageSource.h
+    FakeImageSource.cpp
+    FakeImageSource.h)
+if(WIN32)
+    list(APPEND PLUGIN_SOURCES
+        DirectShowHDKCameraFactory.h
+        DirectShowImageSource.cpp
+        DirectShowImageSource.h
+        DirectShowToCV.h)
+endif()
+
+osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
+    MANUAL_LOAD
+    CPP # indicates we'd like to use the C++ wrapper
+    SOURCES
+    ${PLUGIN_SOURCES}
 )
 
 target_link_libraries(com_osvr_VideoBasedHMDTracker
