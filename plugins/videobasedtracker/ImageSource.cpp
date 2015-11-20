@@ -26,7 +26,7 @@
 #include "ImageSource.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/imgproc/imgproc.hpp>
 
 // Standard includes
 // - none
@@ -34,5 +34,9 @@
 namespace osvr {
 namespace vbtracker {
     ImageSource::~ImageSource() {}
+    void ImageSource::retrieve(cv::Mat &color, cv::Mat &gray) {
+        retrieveColor(color);
+        cv::cvtColor(color, gray, CV_RGB2GRAY);
+    }
 } // namespace vbtracker
 } // namespace osvr

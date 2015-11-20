@@ -33,6 +33,8 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 namespace osvr {
 namespace vbtracker {
@@ -43,7 +45,7 @@ namespace vbtracker {
 
         bool ok() const override { return !m_images.empty(); }
         bool grab() override;
-        cv::Mat retrieve() override;
+        void retrieveColor(cv::Mat &color) override;
         cv::Size resolution() const override;
 
       private:
@@ -79,11 +81,14 @@ namespace vbtracker {
         }
     }
     bool FakeImageSource::grab() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         m_currentImage = (m_currentImage + 1) % m_images.size();
         return ok();
     }
 
-    cv::Mat FakeImageSource::retrieve() { return m_images[m_currentImage]; }
+    void FakeImageSource::retrieveColor(cv::Mat &color) {
+        m_images[m_currentImage].copyTo(color);
+    }
 
     cv::Size FakeImageSource::resolution() const {
         return m_images.front().size();

@@ -55,10 +55,15 @@ namespace vbtracker {
         virtual bool grab() = 0;
 
         /// Call after grab() to get the actual image data.
-        virtual cv::Mat retrieve() = 0;
+        virtual void retrieve(cv::Mat &color, cv::Mat &gray);
 
         /// Get resolution of the images from this source.
         virtual cv::Size resolution() const = 0;
+
+        /// For those devices that naturally read a non-corrupt color image,
+        /// overriding just this method will let the default implementation of
+        /// retrieve() do the RGB to Gray for you.
+        virtual void retrieveColor(cv::Mat &color) = 0;
 
       protected:
         ImageSource() = default;

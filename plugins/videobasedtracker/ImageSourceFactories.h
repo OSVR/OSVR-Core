@@ -47,6 +47,10 @@ namespace vbtracker {
     /// Factory method to open a directory of tif files named 0001.tif and
     /// onward as an image source (looping)
     ImageSourcePtr openImageFileSequence(std::string const &dir);
+
+    /// Factory method to wrap an image source, already determined to be an
+    /// Oculus DK2 camera, with unscrambling and keep-alive code.
+    ImageSourcePtr openDK2WrappedCamera(ImageSourcePtr &&cam, bool doHid);
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_ImageSourceFactories_h_GUID_9C2DA062_802C_41A0_E014_82E9EB8A7D5F

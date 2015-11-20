@@ -54,7 +54,9 @@ set(PLUGIN_SOURCES
     Oculus_DK2.cpp
     Oculus_DK2.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
+    CameraParameters.h
     CVImageSource.cpp
+    DK2ImageSource.cpp
     ImageSource.cpp
     ImageSource.h
     ImageSourceFactories.h

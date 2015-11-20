@@ -46,7 +46,7 @@ namespace vbtracker {
 
         bool ok() const override { return m_camera && m_camera->isOpened(); }
         bool grab() override;
-        cv::Mat retrieve() override;
+        void retrieveColor(cv::Mat &color) override;
         cv::Size resolution() const override;
 
       private:
@@ -68,10 +68,8 @@ namespace vbtracker {
 
     bool OpenCVImageSource::grab() { return m_camera->grab(); }
 
-    cv::Mat OpenCVImageSource::retrieve() {
-        cv::Mat frame;
-        m_camera->retrieve(frame);
-        return frame;
+    void OpenCVImageSource::retrieveColor(cv::Mat &color) {
+        m_camera->retrieve(color);
     }
 
     cv::Size OpenCVImageSource::resolution() const { return m_res; }
