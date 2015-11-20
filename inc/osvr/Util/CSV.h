@@ -52,7 +52,7 @@ namespace util {
             template <typename T>
             void addCol(std::string const &col, T &&data) {
 
-                auto os = std::ostringstream{};
+                std::ostringstream os;
                 os << std::forward<T>(data);
                 headings_.push_back(col);
                 data_.push_back(os.str());
