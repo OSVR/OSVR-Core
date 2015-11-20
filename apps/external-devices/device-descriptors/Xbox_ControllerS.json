@@ -1,49 +1,51 @@
 {
-    "deviceVendor": "Microsoft",
-    "deviceName": "X-Box Controller S",
-    "author": "Georgiy Frolov <georgiy@sensics.com>",
-    "version": 1,
-    "lastModified": "2015-05-12T18:01:45.492Z",
-    "interfaces": {
-        "analog": {
-            "count": 5
-        },
-        "button": {
-            "count": 16
-        }
+  "deviceVendor": "Microsoft",
+  "deviceName": "X-Box Controller S (and compatible - raw driver)",
+  "author": "Georgiy Frolov <georgiy@sensics.com>",
+  "version": 2,
+  "lastModified": "2015-11-20T17:51:30.473Z",
+  "interfaces": {
+    "analog": {
+      "count": 5
     },
-    "semantic": {
-        "a": "button/0",
-        "b": "button/1",
-        "x": "button/2",
-        "y": "button/3",
-        "black": "button/4",
-        "white": "button/5",
-        "start": "button/6",
-        "back": "button/7",
-        "up": "button/12",
-        "down": "button/14",
-        "right": {
-            "button": "button/13",
-            "trigger": "button/11",
-            "joystick": {
-                "x": "analog/2",
-                "y": "analog/3",
-                "button": "button/9"
-            }
-        },
-        "left": {
-            "button": "button/15",
-            "trigger": "button/10",
-            "joystick": {
-                "x": "analog/0",
-                "y": "analog/1",
-                "button": "button/8"
-            }
-        },
-        "dpad": "analog/4"
-    },
-    "automaticAliases": {
-        "/controller": "semantic/*"
+    "button": {
+      "count": 16
     }
+  },
+  "semantic": {
+    "hat": {
+      "$target": "analog/4",
+      "up": "button/12",
+      "right": "button/13",
+      "down": "button/14",
+      "left": "button/15"
+    },
+    "a": "button/0",
+    "b": "button/1",
+    "x": "button/2",
+    "y": "button/3",
+    "back": "button/7",
+    "start": "button/6",
+    "right": {
+      "joystick": {
+        "x": "analog/2",
+        "y": "analog/3",
+        "button": "button/9"
+      },
+      "trigger": "button/11"
+    },
+    "left": {
+      "joystick": {
+        "x": "analog/0",
+        "y": "analog/1",
+        "button": "button/8"
+      },
+      "trigger": "button/10"
+    },
+    "black": "button/4",
+    "white": "button/5"
+  },
+  "automaticAliases": {
+    "/controller": "semantic/*"
+  }
 }

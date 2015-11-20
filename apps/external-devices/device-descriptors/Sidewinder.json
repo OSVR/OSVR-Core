@@ -1,6 +1,6 @@
 {
     "deviceVendor": "Microsoft",
-    "deviceName": "SideWinder Precision",
+    "deviceName": "SideWinder Precision (raw driver)",
     "author": "Georgiy Frolov <georgiy@sensics.com>",
     "version": 1,
     "lastModified": "2015-05-12T17:38:49.659Z",

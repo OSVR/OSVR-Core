@@ -1,6 +1,6 @@
 {
     "deviceVendor": "OSVR",
-    "deviceName": "Hacker Development Kit Tracker",
+    "deviceName": "Hacker Development Kit (HDK) Integrated IMU Tracker",
     "author": "Ryan Pavlik <ryan@sensics.com>",
     "version": 3,
     "lastModified": "2015-11-05T20:44:16+00:00",

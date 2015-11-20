@@ -1,48 +1,50 @@
 {
-    "deviceVendor": "Microsoft",
-    "deviceName": "X-Box Controller 360",
-    "author": "Georgiy Frolov <georgiy@sensics.com>",
-    "version": 1,
-    "lastModified": "2015-05-12T18:01:45.492Z",
-    "interfaces": {
-        "analog": {
-            "count": 6
-        },
-        "button": {
-            "count": 14
-        }
+  "deviceVendor": "Microsoft",
+  "deviceName": "X-Box Controller 360 (and compatible - raw driver)",
+  "author": "Georgiy Frolov <georgiy@sensics.com>",
+  "version": 2,
+  "lastModified": "2015-11-20T17:51:05.955Z",
+  "interfaces": {
+    "analog": {
+      "count": 6
     },
-    "semantic": {
-        "a": "button/0",
-        "b": "button/1",
-        "x": "button/2",
-        "y": "button/3",
-        "back": "button/6",
-        "start": "button/7",
-        "up": "button/10",
-        "down": "button/12",
-        "right": {
-            "bumper": "button/5",
-            "button": "button/11",
-            "joystick": {
-                "x": "analog/2",
-                "y": "analog/3",
-                "button": "button/9"
-            }
-        },
-        "left": {
-            "bumper": "button/4",
-            "button": "button/13",
-            "joystick": {
-                "x": "analog/0",
-                "y": "analog/1",
-                "button": "button/8"
-            }
-        },
-        "trigger": "analog/4",
-        "dpad": "analog/5"
-    },
-    "automaticAliases": {
-        "/controller": "semantic/*"
+    "button": {
+      "count": 14
     }
+  },
+  "semantic": {
+    "hat": {
+      "$target": "analog/5",
+      "up": "button/10",
+      "right": "button/11",
+      "down": "button/12",
+      "left": "button/13"
+    },
+    "a": "button/0",
+    "b": "button/1",
+    "x": "button/2",
+    "y": "button/3",
+    "back": "button/6",
+    "start": "button/7",
+    "right": {
+      "bumper": "button/5",
+      "joystick": {
+        "x": "analog/2",
+        "y": "analog/3",
+        "button": "button/9"
+      }
+    },
+    "left": {
+      "bumper": "button/4",
+      "joystick": {
+        "x": "analog/0",
+        "y": "analog/1",
+        "button": "button/8"
+      }
+    },
+    "triggers": "analog/4"
+  },
+  "automaticAliases": {
+    "/controller": "semantic/*"
+  }
 }

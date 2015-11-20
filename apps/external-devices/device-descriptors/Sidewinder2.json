@@ -1,9 +1,9 @@
 {
     "deviceVendor": "Microsoft",
-    "deviceName": "SideWinder Precision 2",
+    "deviceName": "SideWinder Precision 2 (raw driver)",
     "author": "Georgiy Frolov <georgiy@sensics.com>",
     "version": 1,
-    "lastModified": "2015-05-12T17:38:49.659Z",
+    "lastModified": "2015-11-20T17:50:39.323Z",
     "interfaces": {
         "analog": {
             "count": 5
@@ -21,17 +21,19 @@
         "6": "button/5",
         "7": "button/6",
         "8": "button/8",
+        "hat": {
+            "$target": "analog/4",
+            "up": "button/8",
+            "right": "button/9",
+            "down": "button/10",
+            "left": "button/11"
+        },
         "joystick": {
             "x": "analog/0",
             "y": "analog/1",
-            "z": "analog/2"
+            "rotate": "analog/2"
         },
-        "slider": "analog/3",
-        "dpad": "analog/4",
-        "up": "button/8",
-        "right": "button/9",
-        "down": "button/10",
-        "left": "button/11"
+        "slider": "analog/3"
     },
     "automaticAliases": {
         "/controller": "semantic/*"

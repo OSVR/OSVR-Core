@@ -1,6 +1,6 @@
 {
     "deviceVendor": "Saitek",
-    "deviceName": "ST290",
+    "deviceName": "ST290 Pro Joystick",
     "author": "Georgiy Frolov <georgiy@sensics.com>",
     "version": 1,
     "lastModified": "2015-05-12T17:38:49.659Z",
@@ -26,11 +26,13 @@
             "z": "analog/2"
         },
         "slider": "analog/3",
-        "dpad": "analog/4",
-        "up": "button/7",
-        "down": "button/8",
-        "left": "button/9",
-        "right": "button/10"
+        "hat": {
+            "$target": "analog/4",
+            "up": "button/7",
+            "down": "button/8",
+            "left": "button/9",
+            "right": "button/10"
+        }
     },
     "automaticAliases": {
         "/controller": "semantic/*"
