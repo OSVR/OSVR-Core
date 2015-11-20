@@ -3,36 +3,7 @@
     "/FutabaInterLinkDevice": {
       "deviceName": "futaba0",
       "server": "localhost:3884",
-      "descriptor": {
-        "interfaces": {
-          "analog": {},
-          "button": {}
-        }
-      }
+      "descriptor": "external-devices/device-descriptors/Futaba_InterLink_Elite.json"
     }
-  },
-  "aliases": {
-    "/controller/trigger/rudder": "/FutabaInterLinkDevice/analog/0",
-    "/controller/trigger/throttle": "/FutabaInterLinkDevice/analog/1",
-    "/controller/trigger/aileron": "/FutabaInterLinkDevice/analog/2",
-    "/controller/trigger/elevtr": "/FutabaInterLinkDevice/analog/3",
-    "/controller/trigger/ch6flaps": "/FutabaInterLinkDevice/analog/4",
-    "/controller/ch5fwd": "/FutabaInterLinkDevice/button/0",
-    "/controller/ch7fwd": "/FutabaInterLinkDevice/button/1",
-    "/controller/reset": "/FutabaInterLinkDevice/button/2",
-    "/controller/ch8down": "/FutabaInterLinkDevice/button/3",
-    "/controller/ch8up": "/FutabaInterLinkDevice/button/4",
-    "/controller/menu": "/FutabaInterLinkDevice/button/6",
-    "/controller/cancel": "/FutabaInterLinkDevice/button/7",
-    "/controller/aileronRgt": "/FutabaInterLinkDevice/button/8",
-    "/controller/aileronLft": "/FutabaInterLinkDevice/button/9",
-    "/controller/elevtrUp": "/FutabaInterLinkDevice/button/10",
-    "/controller/elevtrDwn": "/FutabaInterLinkDevice/button/11",
-    "/controller/rudderRgt": "/FutabaInterLinkDevice/button/12",
-    "/controller/rudderLft": "/FutabaInterLinkDevice/button/13",
-    "/controller/throttlUp": "/FutabaInterLinkDevice/button/14",
-    "/controller/throttlDwn": "/FutabaInterLinkDevice/button/15",
-    "/controller/up": "/FutabaInterLinkDevice/button/16",
-    "/controller/down": "/FutabaInterLinkDevice/button/17"
   }
 }

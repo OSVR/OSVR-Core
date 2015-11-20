@@ -1,0 +1,58 @@
+{
+    "deviceVendor": "Futaba",
+    "deviceName": "InterLink Elite Controller",
+    "author": "Ryan Pavlik <ryan@sensics.com>",
+    "version": 1,
+    "lastModified": "2015-11-20T17:40:24.732Z",
+    "interfaces": {
+        "analog": {
+            "count": 5
+        },
+        "button": {
+            "count": 17
+        }
+    },
+    "semantic": {
+        "up": "button/16",
+        "down": "button/17",
+        "rudder": {
+            "$target": "analog/0",
+            "trim": {
+                "right": "button/12",
+                "left": "button/13"
+            }
+        },
+        "throttle": {
+            "$target": "analog/1",
+            "trim": {
+                "up": "button/14",
+                "down": "button/15"
+            }
+        },
+        "aileron": {
+            "$target": "analog/2",
+            "trim": {
+                "right": "button/8",
+                "left": "button/9"
+            }
+        },
+        "elevator": {
+            "$target": "analog/3",
+            "trim": {
+                "up": "button/10",
+                "down": "button/11"
+            }
+        },
+        "ch6": "analog/4",
+        "ch5fwd": "button/0",
+        "ch7fwd": "button/1",
+        "reset": "button/2",
+        "ch8/down": "button/3",
+        "ch8/up": "button/4",
+        "menu": "button/6",
+        "cancel": "button/7"
+    },
+    "automaticAliases": {
+        "/controller": "semantic/*"
+    }
+}
