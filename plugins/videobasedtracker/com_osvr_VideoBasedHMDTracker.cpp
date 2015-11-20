@@ -280,8 +280,20 @@ class ConfiguredDeviceConstructor {
 
 #ifdef _WIN32
         /// @todo speed of a function pointer here vs a lambda?
-        auto cameraDetection = &osvr::vbtracker::openHDKCameraDirectShow;
+        auto cameraFactory = &osvr::vbtracker::openHDKCameraDirectShow;
+
+#else // !_WIN32
+        /// @todo This is rather crude, as we can't select the exact camera we
+        /// want, nor set the "50Hz" high-gain mode (and only works with HDK
+        /// camera firmware v7 and up). Presumably eventually use libuvc on
+        /// other platforms instead, at least for the HDK IR camera.
+
+        auto cameraFactory = [] {
+            return osvr::vbtracker::openOpenCVCamera(cameraID);
+        };
 #endif
+
+        /// Function to execute after the device is created, to add the sensors.
         auto setupHDKParamsAndSensors = [](VideoBasedHMDTracker &newTracker) {
             auto camParams = osvr::vbtracker::getHDKCameraParameters();
             newTracker.addSensor(
@@ -291,10 +303,11 @@ class ConfiguredDeviceConstructor {
                 osvr::vbtracker::createHDKLedIdentifier(1), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
         };
+
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);
         context.registerHardwareDetectCallback(new HardwareDetection(
-            cameraDetection, setupHDKParamsAndSensors, cameraID, showDebug));
+            cameraFactory, setupHDKParamsAndSensors, cameraID, showDebug));
 
         return OSVR_RETURN_SUCCESS;
     }
