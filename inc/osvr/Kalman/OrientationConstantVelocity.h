@@ -25,7 +25,6 @@
 #ifndef INCLUDED_OrientationConstantVelocity_h_GUID_72B09543_A2CC_458F_2973_7DFD0593F8CC
 #define INCLUDED_OrientationConstantVelocity_h_GUID_72B09543_A2CC_458F_2973_7DFD0593F8CC
 
-
 // Internal Includes
 #include "OrientationState.h"
 
@@ -43,7 +42,8 @@ namespace kalman {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         using State = orient_externalized_rotation::State;
         using StateVector = orient_externalized_rotation::StateVector;
-        using StateSquareMatrix = orient_externalized_rotation::StateSquareMatrix;
+        using StateSquareMatrix =
+            orient_externalized_rotation::StateSquareMatrix;
         using NoiseAutocorrelation = types::Vector<3>;
         OrientationConstantVelocityProcessModel(double orientationNoise = 0.1) {
             setNoiseAutocorrelation(orientationNoise);
@@ -120,4 +120,3 @@ namespace kalman {
 } // namespace kalman
 } // namespace osvr
 #endif // INCLUDED_OrientationConstantVelocity_h_GUID_72B09543_A2CC_458F_2973_7DFD0593F8CC
-

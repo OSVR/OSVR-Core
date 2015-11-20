@@ -25,7 +25,6 @@
 #ifndef INCLUDED_OrientationState_h_GUID_B2EA5856_0B18_43B1_CE18_8B7385E607CA
 #define INCLUDED_OrientationState_h_GUID_B2EA5856_0B18_43B1_CE18_8B7385E607CA
 
-
 // Internal Includes
 #include "FlexibleKalmanBase.h"
 #include "ExternalQuaternion.h"
@@ -54,15 +53,15 @@ namespace kalman {
         inline StateVectorBlock3 incrementalOrientation(StateVector &vec) {
             return vec.head<3>();
         }
-        inline ConstStateVectorBlock3 incrementalOrientation(StateVector const &vec) {
+        inline ConstStateVectorBlock3
+        incrementalOrientation(StateVector const &vec) {
             return vec.head<3>();
         }
 
         inline StateVectorBlock3 angularVelocity(StateVector &vec) {
             return vec.tail<3>();
         }
-        inline ConstStateVectorBlock3
-        angularVelocity(StateVector const &vec) {
+        inline ConstStateVectorBlock3 angularVelocity(StateVector const &vec) {
             return vec.tail<3>();
         }
         /// @}
@@ -115,7 +114,8 @@ namespace kalman {
             State()
                 : m_state(StateVector::Zero()),
                   m_errorCovariance(
-                      StateSquareMatrix::Identity() /** @todo almost certainly wrong */),
+                      StateSquareMatrix::
+                          Identity() /** @todo almost certainly wrong */),
                   m_orientation(Eigen::Quaterniond::Identity()) {}
             /// set xhat
             void setStateVector(StateVector const &state) { m_state = state; }
@@ -137,15 +137,13 @@ namespace kalman {
 
             void postCorrect() { externalizeRotation(); }
 
-            
             void externalizeRotation() {
                 m_orientation = getCombinedQuaternion();
                 incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
             }
-            
+
             void normalizeQuaternion() { m_orientation.normalize(); }
 
-            
             StateVectorBlock3 getAngularVelocity() {
                 return angularVelocity(m_state);
             }
@@ -154,20 +152,18 @@ namespace kalman {
                 return angularVelocity(m_state);
             }
 
-
             Eigen::Quaterniond const &getQuaternion() const {
                 return m_orientation;
             }
-            
-            
+
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
                 return incrementalOrientationToQuat(m_state) * m_orientation;
             }
-            
-            
+
           private:
-            /// In order: x, y, z, orientation , then its derivatives in the same
+            /// In order: x, y, z, orientation , then its derivatives in the
+            /// same
             /// order.
             StateVector m_state;
             /// P
@@ -191,4 +187,3 @@ namespace kalman {
 } // namespace osvr
 
 #endif // INCLUDED_OrientationState_h_GUID_B2EA5856_0B18_43B1_CE18_8B7385E607CA
-
