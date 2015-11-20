@@ -344,22 +344,27 @@ class VideoBasedHMDTracker : boost::noncopyable {
             //  344.000	0.013194444
             //  368.000	0.011527778
             //  396.667	0.009444444
+            // (which of course is the second column of the first table /100)
             // Using the "R" programming environment to solve for the k1, k2, k3
             // for the equation Y = k1*x^2 + k2*x^4 + x3*x^6, where X = r (left
-            // column) and Y = rCorrected/2-1 (right column), yields:
-            // k1 = @todo, k2 = @todo, k3 = @todo
+            // column) and Y = rCorrected/2-1 (right column):
             // R code:
-            //  x <- c(1.333, 27.333, 69.333, 100.667, 122.667, 171.333, 214.000, 296.667, 344.000, 368.000, 396.667)
-            //  y <- c(0.000277778, 0.006666667, 0.018611111, 0.023472222, 0.023472222, 0.020416667, 0.018333333, 0.014305556, 0.013194444, 0.011527778, 0.009444444)
-            //  lm(y ~ x ...... @todo Figure this out
-
-            /// @todo
-            // http://stackoverflow.com/questions/3822535/fitting-polynomial-model-to-data-in-r
-
+            /*
+              x <- c(1.333, 27.333, 69.333, 100.667, 122.667, 171.333, 214.000,
+              296.667, 344.000, 368.000, 396.667)
+              y <- c(0.000277778, 0.006666667, 0.018611111, 0.023472222,
+              0.023472222, 0.020416667, 0.018333333, 0.014305556, 0.013194444,
+              0.011527778, 0.009444444)
+              model <- lm(y~0+I(x^2)+I(x^4)+I(x^6))
+              coefficients(model)
+            */
+            // Output:
+            //       I(x^2)        I(x^4)        I(x^6)
+            // 1.252916e-06 -1.752020e-11  6.405327e-17
 
             // The manufacturer specs distortion < 3% on the module and 1.5% on
-            // the lens, so we ignore the distortion and put in 0 coefficients.
-            /// @todo Calibrate camera and distortion parameters in OpenCV.
+            // the lens, so we ignore the distortion where unknown and put in 0
+            // coefficients.
             double cx = width / 2.0;
             double cy = height / 2.0;
             double fx =
@@ -369,16 +374,14 @@ class VideoBasedHMDTracker : boost::noncopyable {
             m.push_back({fx, 0.0, cx});
             m.push_back({0.0, fy, cy});
             m.push_back({0.0, 0.0, 1.0});
-            // Distortion parameters are k1, k2, p1, p2, k3.
-            /// @todo Fill these in with the above-computed values.
-            /// @todo Make it possible to read these values from the config file for the camera
-            double k1 = 0, k2 = 0, p1 = 0, p2 = 0, k3 = 0;
-            std::vector<double> d;
-            d.push_back(k1);
-            d.push_back(k2);
-            d.push_back(p1);
-            d.push_back(p2);
-            d.push_back(k3);
+            /// @todo Make it possible to read these values from the config file
+            /// for the camera
+            double k1 = 1.252916e-06;
+            double k2 = -1.752020e-11;
+            double k3 = 6.405327e-17;
+            double p1 = 0;
+            double p2 = 0;
+            std::vector<double> d = {k1, k2, p1, p2, k3};
             m_vbtracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(0), m, d,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0);
