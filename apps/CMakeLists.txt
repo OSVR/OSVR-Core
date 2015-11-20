@@ -9,6 +9,7 @@ if(BUILD_CLIENT_APPS)
     # PathTreeExport - installed
     ###
     add_subdirectory(PathTreeExport)
+    add_subdirectory(osvr_log_to_csv)
 
     ###
     # osvr_print_tree - installed

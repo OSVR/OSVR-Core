@@ -73,9 +73,15 @@ if(WIN32)
     target_compile_options(comutils PUBLIC "${OSVR_CXX11_FLAGS}")
 endif()
 
+if(WIN32 AND NOT OSVR_OFFICIAL)
+    # Only known to work on Windows, should only be used for development.
+    add_library(FloatExceptions INTERFACE)
+    target_include_directories(FloatExceptions INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/FloatExceptions")
+endif()
+
 # Interface target for Eigen
 add_library(eigen-headers INTERFACE)
-set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.6" CACHE INTERNAL "" FORCE)
+set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen-3.2.7" CACHE INTERNAL "" FORCE)
 target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
 

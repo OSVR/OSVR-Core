@@ -59,8 +59,8 @@ namespace common {
             source.getInterfaceName() == "tracker",
             "Can't pass a non-tracker source to getTrackerSensorInfo!");
 
-        auto &devDescriptor = source.getDeviceElement().getDescriptor();
-
+        auto &devDescriptor =
+            source.getDeviceElement().getDescriptor()["interfaces"]["tracker"];
         /// Get the named value from the object, using the given value reference
         /// as both a default value and a destination.
         auto getBool = [](Json::Value const &root, const char key[],

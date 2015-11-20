@@ -24,7 +24,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include "VideoIMUFusion.h"
+#include "VideoIMUFusionDevice.h"
+#include "FusionParams.h"
 #include <osvr/PluginKit/PluginKit.h>
 
 // Library/third-party includes
@@ -61,11 +62,44 @@ class AnalysisPluginInstantiation {
         // optional
         auto deviceName = root.get("name", DRIVER_NAME).asString();
 
+        VideoIMUFusionParams fusionParams;
+
+        if (root.isMember("videoTrackerVariance")) {
+            auto &variance = root["videoTrackerVariance"];
+            fusionParams.videoPosVariance =
+                variance.get("position", fusionParams.videoPosVariance)
+                    .asDouble();
+            fusionParams.videoOriVariance =
+                variance.get("orientation", fusionParams.videoOriVariance)
+                    .asDouble();
+        }
+
+        if (root.isMember("imuVariance")) {
+            auto &variance = root["imuVariance"];
+            fusionParams.imuOriVariance =
+                variance.get("orientation", fusionParams.imuOriVariance)
+                    .asDouble();
+            fusionParams.imuAngVelVariance =
+                variance.get("angularVelocity", fusionParams.imuAngVelVariance)
+                    .asDouble();
+        }
+
+        if (root.isMember("processNoise")) {
+            auto &noise = root["processNoise"];
+            fusionParams.positionNoise =
+                noise.get("position", fusionParams.positionNoise).asDouble();
+            fusionParams.oriNoise =
+                noise.get("orientation", fusionParams.oriNoise).asDouble();
+        }
+
+        fusionParams.damping =
+            root.get("damping", fusionParams.damping).asDouble();
+
         osvr::pluginkit::PluginContext context(ctx);
 
         /// @todo make the token own this instead once there is API for that.
-        context.registerObjectForDeletion(
-            new VideoIMUFusion(ctx, deviceName, imu, faceplate));
+        context.registerObjectForDeletion(new VideoIMUFusionDevice(
+            ctx, deviceName, imu, faceplate, fusionParams));
         return OSVR_RETURN_SUCCESS;
     }
 };

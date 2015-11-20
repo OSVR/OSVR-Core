@@ -18,6 +18,7 @@ if(BUILD_SERVER)
     if(BUILD_USBSERIALENUM)
         add_subdirectory(USBSerial)
     endif()
+    add_subdirectory(Kalman)
 endif()
 
 if(BUILD_CLIENT)

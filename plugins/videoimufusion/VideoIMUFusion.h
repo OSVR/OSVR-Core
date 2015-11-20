@@ -26,55 +26,92 @@
 #define INCLUDED_VideoIMUFusion_h_GUID_85338EA5_58E6_4787_16D2_EC53201EFE9F
 
 // Internal Includes
-#include <osvr/PluginKit/PluginKit.h>
+#include "FusionParams.h"
+#include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/EigenCoreGeometry.h>
-#include <osvr/PluginKit/TrackerInterfaceC.h>
-#include <osvr/ClientKit/InterfaceC.h>
+#include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <functional>
 #include <memory>
+#include <cassert>
 
-namespace detail {
-template <typename ReportType>
-using WrappedCallbackFunction =
-    std::function<void(const OSVR_TimeValue *, const ReportType *)>;
-
-template <typename ReportType>
-using WrappedCallbackPtr = std::unique_ptr<WrappedCallbackFunction<ReportType>>;
-} // namespace detail
-
+/// The core of the fusion code - doesn't deal with getting data in or reporting
+/// it out, for easier use in testing.
 class VideoIMUFusion {
   public:
-    VideoIMUFusion(OSVR_PluginRegContext ctx, std::string const &name,
-                   std::string const &imuPath, std::string const &videoPath);
+    /// Constructor
+    VideoIMUFusion(VideoIMUFusionParams const &params = VideoIMUFusionParams());
+    /// Out-of-line destructor required for unique_ptr pimpl idiom
     ~VideoIMUFusion();
-    OSVR_ReturnCode update();
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  private:
+
+    /// Call with each new IMU report, whether or not fusion is in running
+    /// state.
     void handleIMUData(const OSVR_TimeValue &timestamp,
                        const OSVR_OrientationReport &report);
-    void handleVideoTrackerData(const OSVR_TimeValue &timestamp,
-                                const OSVR_PoseReport &report);
-    void handleVideoTrackerDataDuringStartup(const OSVR_TimeValue &timestamp,
-                                             const OSVR_PoseReport &report);
 
+    void handleIMUVelocity(const OSVR_TimeValue &timestamp,
+                           const Eigen::Vector3d &angVel);
+    /// Call with each new video tracker report once we've entered running
+    /// state.
+    void handleVideoTrackerDataWhileRunning(const OSVR_TimeValue &timestamp,
+                                            const OSVR_PoseReport &report);
+    /// Call with each new video tracker report, as well as the most recent IMU
+    /// orientation state, while the filter has not yet entered running state.
+    ///
+    /// The IMU state is required to compute a filtered estimate of the
+    /// position/orientation of the camera relative to the room and IMU
+    void handleVideoTrackerDataDuringStartup(
+        const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report,
+        const OSVR_OrientationState &orientation);
+
+    bool running() const { return m_state == State::Running; }
+
+    /// Returns the latest fusion result pose.
+    /// Only valid once running state is entered!
+    OSVR_PoseState const &getLatestFusedPose() const {
+        assert(running());
+        return m_lastFusion;
+    }
+
+    /// Returns the timestamp associated with the latest fusion result pose.
+    /// Only valid once running state is entered!
+    osvr::util::time::TimeValue const &getLatestFusedTime() const {
+        assert(running());
+        return m_lastFusionTime;
+    }
+
+    /// Returns the latest video-tracker pose, re-oriented to be in room space.
+    /// Only valid once running state is entered!
+    OSVR_PoseState const &getLatestReorientedVideoPose() const {
+        assert(running());
+        return m_reorientedVideo;
+    }
+
+    /// Returns the latest pose of the camera in the room.
+    /// Only valid once running state is entered!
+    ///
+    /// Currently constant once running state is entered.
+    OSVR_PoseState const &getLatestCameraPose() const {
+        assert(running());
+        return m_camera;
+    }
+
+    /// Returns the current state error covariance matrix
+    /// Only valid once running state is entered!
+    Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const;
+
+  private:
     void enterCameraPoseAcquisitionState();
-    void enterRunningState(Eigen::Isometry3d const &cTr);
-
-    OSVR_TrackerDeviceInterface m_trackerOut;
-    osvr::pluginkit::DeviceToken m_dev;
-    OSVR_ClientContext m_clientCtx;
-
-    OSVR_ClientInterface m_imu = nullptr;
-    detail::WrappedCallbackPtr<OSVR_OrientationReport> m_imuCb;
-
-    OSVR_ClientInterface m_videoTracker = nullptr;
-    detail::WrappedCallbackPtr<OSVR_PoseReport> m_videoTrackerCb;
-
+    void enterRunningState(Eigen::Isometry3d const &cTr,
+                           const OSVR_TimeValue &timestamp,
+                           const OSVR_PoseReport &report,
+                           const OSVR_OrientationState &orientation);
+    void updateFusedOutput(const OSVR_TimeValue &timestamp);
     enum class State {
         /// We do not yet know the relative pose of the camera
         AcquiringCameraPose,
@@ -88,6 +125,12 @@ class VideoIMUFusion {
     class RunningData;
     std::unique_ptr<RunningData> m_runningData;
     Eigen::Isometry3d m_cTr;
+
+    OSVR_PoseState m_camera;
+    OSVR_PoseState m_reorientedVideo;
+    OSVR_PoseState m_lastFusion;
+    osvr::util::time::TimeValue m_lastFusionTime;
+    VideoIMUFusionParams m_params;
 };
 
 #endif // INCLUDED_VideoIMUFusion_h_GUID_85338EA5_58E6_4787_16D2_EC53201EFE9F

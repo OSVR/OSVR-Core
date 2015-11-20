@@ -5,6 +5,7 @@ add_subdirectory(Common)
 
 if(BUILD_SERVER)
     add_subdirectory(Connection)
+    add_subdirectory(Kalman)
 endif()
 
 if(BUILD_CLIENT)

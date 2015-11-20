@@ -73,6 +73,7 @@ set(API
     "${HEADER_LOCATION}/JSONEigen.h"
     "${HEADER_LOCATION}/JSONHelpers.h"
     "${HEADER_LOCATION}/JSONSerializationTags.h"
+    "${HEADER_LOCATION}/JSONTimestamp.h"
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Location2DComponent.h"
     "${HEADER_LOCATION}/LocomotionComponent.h"

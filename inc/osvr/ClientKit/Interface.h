@@ -31,6 +31,7 @@
 #include <osvr/ClientKit/Context_decl.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
+#include <osvr/Util/ReportTypesX.h>
 
 // Library/third-party includes
 #include <boost/function.hpp>
@@ -67,26 +68,13 @@ namespace clientkit {
         m_deletables.push_back(obj);
     }
 
-#define OSVR_CALLBACK_METHODS(TYPE)                                            \
+#define OSVR_X(TYPE)                                                           \
     inline void Interface::registerCallback(OSVR_##TYPE##Callback cb,          \
                                             void *userdata) {                  \
         osvrRegister##TYPE##Callback(m_interface, cb, userdata);               \
     }
-
-    OSVR_CALLBACK_METHODS(Pose)
-    OSVR_CALLBACK_METHODS(Position)
-    OSVR_CALLBACK_METHODS(Orientation)
-    OSVR_CALLBACK_METHODS(Button)
-    OSVR_CALLBACK_METHODS(Analog)
-    OSVR_CALLBACK_METHODS(Location2D)
-    OSVR_CALLBACK_METHODS(Direction)
-    OSVR_CALLBACK_METHODS(EyeTracker2D)
-    OSVR_CALLBACK_METHODS(EyeTracker3D)
-    OSVR_CALLBACK_METHODS(EyeTrackerBlink)
-    OSVR_CALLBACK_METHODS(NaviVelocity)
-    OSVR_CALLBACK_METHODS(NaviPosition)
-
-#undef OSVR_CALLBACK_METHODS
+    OSVR_INVOKE_REPORT_TYPES_XMACRO()
+#undef OSVR_X
 
 } // end namespace clientkit
 
