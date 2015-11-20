@@ -1,9 +1,9 @@
 {
     "externalDevices": {
         "/Xbox_360Device": {
-            "deviceName": "Xbox_360",
+            "deviceName": "microsoft0",
             "server": "localhost:3884",
-            "descriptor": "device-descriptors/Xbox_Controller360.json"
+            "descriptor": "external-devices/device-descriptors/Xbox_Controller360.json"
         }
     }
 }

@@ -3,7 +3,7 @@
         "/Logitech_Extreme_3D_ProDevice": {
             "deviceName": "logitech0",
             "server": "localhost:3884",
-            "descriptor": "device-descriptors/Logitech_Extreme_3D_Pro.json"
+            "descriptor": "external-devices/device-descriptors/Logitech_Extreme_3D_Pro.json"
         }
     }
 }
