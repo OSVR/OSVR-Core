@@ -7,7 +7,6 @@ set(API
     "${HEADER_LOCATION}/ExternalQuaternion.h"
     "${HEADER_LOCATION}/FlexibleKalmanBase.h"
     "${HEADER_LOCATION}/FlexibleKalmanFilter.h"
-    "${HEADER_LOCATION}/OrientationMeasurement.h"
     "${HEADER_LOCATION}/OrientationConstantVelocity.h"
     "${HEADER_LOCATION}/OrientationState.h"
     "${HEADER_LOCATION}/PoseConstantVelocity.h"
