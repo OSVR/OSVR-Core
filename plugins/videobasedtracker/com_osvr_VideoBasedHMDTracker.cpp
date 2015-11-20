@@ -85,10 +85,9 @@ namespace {
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx, CameraPtr &&camera,
-      int devNumber = 0, bool showDebug = false)
+                         int devNumber = 0, bool showDebug = false)
 #ifndef VBHMD_FAKE_IMAGES
-        : m_camera(std::move(camera))
-        , m_vbtracker(showDebug)
+        : m_camera(std::move(camera)), m_vbtracker(showDebug)
 #else
         : m_vbtracker(showDebug)
 #endif
@@ -189,14 +188,14 @@ class VideoBasedHMDTracker : boost::noncopyable {
         //        m_identifiers.push_back(new
         //        osvr::vbtracker::OsvrHdkLedIdentifier(osvr::vbtracker::OsvrHdkLedIdentifier_RANDOM_IMAGES_PATTERNS));
 
-        m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifierSimulated(0), m, d,
-                              osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 4,
-                              2);
+        m_vbtracker.addSensor(
+            osvr::vbtracker::createHDKLedIdentifierSimulated(0), m, d,
+            osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 4, 2);
         // There are sometimes only four beacons on the back unit (two of
         // the LEDs are disabled), so we let things work with just those.
-        m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifierSimulated(1), m, d,
-                              osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4,
-                              0);
+        m_vbtracker.addSensor(
+            osvr::vbtracker::createHDKLedIdentifierSimulated(1), m, d,
+            osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
 
 #else
 #ifdef VBHMD_USE_DIRECTSHOW
@@ -285,10 +284,88 @@ class VideoBasedHMDTracker : boost::noncopyable {
             // of 0.255, where 0.254 is expected.  This is well within the
             // ruler-based method of estimating 10 inches, so seems to be
             // correct.
+
+            // Distortion correction comes from the following data points:
+            // (first column is distance from center in units of millimeters;
+            // second column is distortion in percent).
+            // 1.19     0.944444444
+            // 1.104    1.152777778
+            // 1.032    1.319444444
+            // 0.89     1.430555556
+            // 0.642    1.833333333
+            // 0.514    2.041666667
+            // 0.368    2.347222222
+            // 0.302    2.347222222
+            // 0.208    1.861111111
+            // 0.082    0.666666667
+            // 0.004    0.027777778
+            // 0 0
+            // Convert these to a function as follows:
+            // -The sensor is 640x480 with 3 micron pixels.
+            // -Center of the sensor is (320, 240)
+            // -So, for instance, if you have a pixel at (500,400), it is (180,
+            //   160) pixels away from the center so sqrt(180x180 + 160x160) =
+            //   240.83 pixels.
+            //   This means 240.83 x 3 = 722.49 microns or 0.72249 mm.
+            //   Thus, you read 0.722 on the left column and you get the
+            //   distortion value in percent by reading from the right column.
+            //  -Multiply (@todo or divide, I'm never certain) the distance by
+            //   (1 + that factor)
+            // (That's the real radius.)
+            // That conversion followed by multiplying back to pixel units
+            // results in the following camera-pixel to actual-location mapping
+            // (inverting the order, so the center is at the top):
+            //  0.000	0.000
+            //  1.333	1.334
+            //  27.333	27.516
+            //  69.333	70.624
+            //  100.667	103.030
+            //  122.667	125.546
+            //  171.333	174.831
+            //  214.000	217.923
+            //  296.667	300.911
+            //  344.000	348.539
+            //  368.000	372.242
+            //  396.667	400.413
+            // The k1-k3 coefficients we want to solve for are the ones that
+            // solve the equation: rCorrected = r(1 + k1*r^2 + k2*r^4 + k3*r^6)
+            // So, rCorrected/r = 1 + k1*r^2 + k2*r^4 + k3*r^6
+            // So, rCorrected/r - 1 = k1*r^2 + k2*r^4 + k3*r^6
+            // Solving for (rCorrected/r - 1) in the above equations, ignoring
+            // 0, produces the following list of values, where the left column
+            // is r and the right is rCorrected/r - 1:
+            //  1.333	0.000277778
+            //  27.333	0.006666667
+            //  69.333	0.018611111
+            //  100.667	0.023472222
+            //  122.667	0.023472222
+            //  171.333	0.020416667
+            //  214.000	0.018333333
+            //  296.667	0.014305556
+            //  344.000	0.013194444
+            //  368.000	0.011527778
+            //  396.667	0.009444444
+            // (which of course is the second column of the first table /100)
+            // Using the "R" programming environment to solve for the k1, k2, k3
+            // for the equation Y = k1*x^2 + k2*x^4 + x3*x^6, where X = r (left
+            // column) and Y = rCorrected/2-1 (right column):
+            // R code:
+            /*
+              x <- c(1.333, 27.333, 69.333, 100.667, 122.667, 171.333, 214.000,
+              296.667, 344.000, 368.000, 396.667)
+              y <- c(0.000277778, 0.006666667, 0.018611111, 0.023472222,
+              0.023472222, 0.020416667, 0.018333333, 0.014305556, 0.013194444,
+              0.011527778, 0.009444444)
+              model <- lm(y~0+I(x^2)+I(x^4)+I(x^6))
+              coefficients(model)
+            */
+            // Output:
+            //       I(x^2)        I(x^4)        I(x^6)
+            // 1.252916e-06 -1.752020e-11  6.405327e-17
+
             // The manufacturer specs distortion < 3% on the module and 1.5% on
-            // the lens, so we ignore the distortion and put in 0 coefficients.
-            /// @todo Come up with actual estimates for distortion
-            /// parameters by calibrating them in OpenCV.
+            // the lens, so we ignore the distortion where unknown and put in 0
+            // coefficients.
             double cx = width / 2.0;
             double cy = height / 2.0;
             double fx =
@@ -298,12 +375,14 @@ class VideoBasedHMDTracker : boost::noncopyable {
             m.push_back({fx, 0.0, cx});
             m.push_back({0.0, fy, cy});
             m.push_back({0.0, 0.0, 1.0});
-            std::vector<double> d;
-            d.push_back(0);
-            d.push_back(0);
-            d.push_back(0);
-            d.push_back(0);
-            d.push_back(0);
+            /// @todo Make it possible to read these values from the config file
+            /// for the camera
+            double k1 = 1.252916e-06;
+            double k2 = -1.752020e-11;
+            double k3 = 6.405327e-17;
+            double p1 = 0;
+            double p2 = 0;
+            std::vector<double> d = {k1, k2, p1, p2, k3};
             m_vbtracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(0), m, d,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0);
@@ -336,8 +415,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
             m_frame = m_images[m_currentImage++];
         }
 
-// Sleep 1/120th of a second, to simulate a reasonable
-// frame rate.
+        // Sleep 1/120th of a second, to simulate a reasonable
+        // frame rate.
         vrpn_SleepMsecs(1000 / 120);
 #else
         if (!m_camera->isOpened()) {
@@ -470,10 +549,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
 class HardwareDetection {
   public:
     HardwareDetection(int cameraID = 0, bool showDebug = false)
-      : m_found(false)
-    {
-      m_cameraID = cameraID;
-      m_showDebug = showDebug;
+        : m_found(false) {
+        m_cameraID = cameraID;
+        m_showDebug = showDebug;
     }
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
@@ -504,8 +582,8 @@ class HardwareDetection {
         /// Create our device object, passing the context and moving the camera.
         std::cout << "Opening camera " << m_cameraID << std::endl;
         osvr::pluginkit::registerObjectForDeletion(
-            ctx, new VideoBasedHMDTracker(ctx, std::move(cam),
-            m_cameraID, m_showDebug));
+            ctx, new VideoBasedHMDTracker(ctx, std::move(cam), m_cameraID,
+                                          m_showDebug));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -515,38 +593,38 @@ class HardwareDetection {
     /// instance, so that only one tracker will use this camera.)
     bool m_found;
 
-    int m_cameraID; //< Which OpenCV camera should we open?
+    int m_cameraID;   //< Which OpenCV camera should we open?
     bool m_showDebug; //< Show windows with video to help debug?
 };
 
 class ConfiguredDeviceConstructor {
-public:
-  /// @brief This is the required signature for a device instantiation
-  /// callback.
-  OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
-    // Read the JSON data from parameters.
-    Json::Value root;
-    if (params) {
-      Json::Reader r;
-      if (!r.parse(params, root)) {
-        std::cerr << "Could not parse parameters!" << std::endl;
-      }
+  public:
+    /// @brief This is the required signature for a device instantiation
+    /// callback.
+    OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
+        // Read the JSON data from parameters.
+        Json::Value root;
+        if (params) {
+            Json::Reader r;
+            if (!r.parse(params, root)) {
+                std::cerr << "Could not parse parameters!" << std::endl;
+            }
+        }
+
+        // Read these parameters from a "params" field in the device Json
+        // configuration file.
+
+        // Using `get` here instead of `[]` lets us provide a default value.
+        int cameraID = root.get("cameraID", 0).asInt();
+        bool showDebug = root.get("showDebug", false).asBool();
+
+        // OK, now that we have our parameters, create the device.
+        osvr::pluginkit::PluginContext context(ctx);
+        context.registerHardwareDetectCallback(
+            new HardwareDetection(cameraID, showDebug));
+
+        return OSVR_RETURN_SUCCESS;
     }
-
-    // Read these parameters from a "params" field in the device Json
-    // configuration file.
-
-    // Using `get` here instead of `[]` lets us provide a default value.
-    int cameraID = root.get("cameraID", 0).asInt();
-    bool showDebug = root.get("showDebug", false).asBool();
-
-    // OK, now that we have our parameters, create the device.
-    osvr::pluginkit::PluginContext context(ctx);
-    context.registerHardwareDetectCallback(
-      new HardwareDetection(cameraID, showDebug));
-
-    return OSVR_RETURN_SUCCESS;
-  }
 };
 
 } // namespace
@@ -556,7 +634,7 @@ OSVR_PLUGIN(com_osvr_VideoBasedHMDTracker) {
 
     /// Tell the core we're available to create a device object.
     osvr::pluginkit::registerDriverInstantiationCallback(
-      ctx, "VideoBasedHMDTracker", new ConfiguredDeviceConstructor);
+        ctx, "VideoBasedHMDTracker", new ConfiguredDeviceConstructor);
 
     return OSVR_RETURN_SUCCESS;
 }
