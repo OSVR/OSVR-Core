@@ -81,24 +81,30 @@ if(BUILD_CLIENT AND BUILD_SERVER)
 endif()
 
 set(BUILD_VIDEOTRACKER_PLUGIN OFF)
-# TODO enable this on non-Windows once it's not tied to the DirectShow driver.
-if(WIN32 AND BUILD_SERVER_PLUGINS AND BUILD_WITH_OPENCV)
-    # TODO fix this package so it finds things on MSYS2/MinGW64
-    # - the lib is in /mingw64/lib
-    # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
-    find_package(DirectShow QUIET)
-    if(MINGW OR (DIRECTSHOW_QEDIT_INCLUDE_DIR AND DIRECTSHOW_STRMIIDS_LIBRARY))
-        # MinGW may include the header/lib in such a way that the find module
-        # can't find them
+if(BUILD_SERVER_PLUGINS AND BUILD_WITH_OPENCV)
+    if(WIN32)
+        # On Win32, for best experience, enforce the use of the DirectShow capture library.
+        # TODO fix this package so it finds things on MSYS2/MinGW64
+        # - the lib is in /mingw64/lib
+        # - qedit.h is in /mingw64/x86_64-w64-mingw32/include
+        find_package(DirectShow QUIET)
+        if(MINGW OR (DIRECTSHOW_QEDIT_INCLUDE_DIR AND DIRECTSHOW_STRMIIDS_LIBRARY))
+            # MinGW may include the header/lib in such a way that the find module
+            # can't find them
+            set(BUILD_VIDEOTRACKER_PLUGIN ON)
+        else()
+            message(STATUS "Skipping the video-based tracker plugin: Requires the 'Microsoft Windows SDK Update for Windows Vista' or older <http://www.microsoft.com/en-us/download/details.aspx?id=23719>")
+            if(NOT DIRECTSHOW_QEDIT_INCLUDE_DIR)
+                message(STATUS " - DIRECTSHOW_QEDIT_INCLUDE_DIR not found: Couldn't find a qedit.h file declaring ISampleGrabber.")
+            endif()
+            if(NOT DIRECTSHOW_STRMIIDS_LIBRARY)
+                message(STATUS " - DIRECTSHOW_STRMIIDS_LIBRARY not found: Couldn't find the strmiids.lib or libstrmiids.a library.")
+            endif()
+        endif()
+    elseif(NOT ANDROID)
+        # Non-Windows desktop platforms can use the experimental OpenCV capture.
+        # TODO get alternate capture libraries, like libuvc, that let us be choosier about our input.
         set(BUILD_VIDEOTRACKER_PLUGIN ON)
-    else()
-        message(STATUS "Skipping the video-based tracker plugin: Requires the 'Microsoft Windows SDK Update for Windows Vista' or older <http://www.microsoft.com/en-us/download/details.aspx?id=23719>")
-        if(NOT DIRECTSHOW_QEDIT_INCLUDE_DIR)
-            message(STATUS " - DIRECTSHOW_QEDIT_INCLUDE_DIR not found: Couldn't find a qedit.h file declaring ISampleGrabber.")
-        endif()
-        if(NOT DIRECTSHOW_STRMIIDS_LIBRARY)
-            message(STATUS " - DIRECTSHOW_STRMIIDS_LIBRARY not found: Couldn't find the strmiids.lib or libstrmiids.a library.")
-        endif()
     endif()
 endif()
 

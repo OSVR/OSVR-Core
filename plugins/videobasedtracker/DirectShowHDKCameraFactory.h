@@ -41,7 +41,7 @@
 
 // On the HDK IR camera, this actually puts the camera into the correct
 // high-gain mode and has apparently nothing to do with powerline frequency.
-static void setPowerlineFrequencyTo50(IBaseFilter &filter) {
+inline void setPowerlineFrequencyTo50(IBaseFilter &filter) {
     auto ksPropSet = comutils::Ptr<IKsPropertySet>{};
     filter.QueryInterface(__uuidof(IKsPropertySet), AttachPtr(ksPropSet));
     if (!ksPropSet) {
@@ -83,7 +83,7 @@ static void setPowerlineFrequencyTo50(IBaseFilter &filter) {
     }
 }
 
-std::unique_ptr<directx_camera_server> getDirectShowHDKCamera() {
+inline std::unique_ptr<directx_camera_server> getDirectShowHDKCamera() {
     // This string begins the DevicePath provided by Windows for the HDK's
     // camera.
     static const auto HDK_CAMERA_PATH_PREFIX =
