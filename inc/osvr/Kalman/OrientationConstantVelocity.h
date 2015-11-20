@@ -98,6 +98,7 @@ namespace kalman {
             OSVR_KALMAN_DEBUG_OUTPUT("Time change", dt);
             StateVector ret = orient_externalized_rotation::applyVelocity(
                 state.stateVector(), dt);
+            return ret;
         }
 
       private:
