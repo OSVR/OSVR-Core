@@ -123,7 +123,7 @@ namespace kalman {
             using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
             Jacobian ret = Jacobian::Zero();
             ret.block<DIMENSION, 3>(0, 3) = external_quat::jacobian(
-                orientation(s.stateVector()));
+                incrementalOrientation(s.stateVector()));
             return ret;
         }
     };

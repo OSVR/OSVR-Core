@@ -51,19 +51,19 @@ namespace kalman {
 
         /// @name Accessors to blocks in the state vector.
         /// @{
-        inline StateVectorBlock3 orientation(StateVector &vec) {
+        inline StateVectorBlock3 incrementalOrientation(StateVector &vec) {
             return vec.head<3>();
         }
-        inline ConstStateVectorBlock3 orientation(StateVector const &vec) {
+        inline ConstStateVectorBlock3 incrementalOrientation(StateVector const &vec) {
             return vec.head<3>();
         }
 
         inline StateVectorBlock3 angularVelocity(StateVector &vec) {
-            return vec.segment<3>(3);
+            return vec.tail<3>();
         }
         inline ConstStateVectorBlock3
         angularVelocity(StateVector const &vec) {
-            return vec.segment<3>(3);
+            return vec.tail<3>();
         }
         /// @}
 
@@ -92,7 +92,7 @@ namespace kalman {
             /// calcuations are faster than the matrix ones.
 
             StateVector ret = state;
-            orientation(ret) += angularVelocity(state) * dt;
+            incrementalOrientation(ret) += angularVelocity(state) * dt;
             return ret;
         }
 
@@ -103,8 +103,8 @@ namespace kalman {
         }
 
         inline Eigen::Quaterniond
-        orientationToQuat(StateVector const &state) {
-            return external_quat::vecToQuat(orientation(state));
+        incrementalOrientationToQuat(StateVector const &state) {
+            return external_quat::vecToQuat(incrementalOrientation(state));
         }
 
         class State : public HasDimension<6> {
@@ -135,21 +135,16 @@ namespace kalman {
                 m_orientation = quaternion;
             }
 
-            void postCorrect() { /*externalizeRotation();*/ }
+            void postCorrect() { externalizeRotation(); }
 
-            /*
+            
             void externalizeRotation() {
                 m_orientation = getCombinedQuaternion();
                 incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
             }
-            */
+            
             void normalizeQuaternion() { m_orientation.normalize(); }
 
-            StateVectorBlock3 getOrientation() { return orientation(m_state); }
-
-            ConstStateVectorBlock3 getOrientation() const {
-                return orientation(m_state);
-            }
             
             StateVectorBlock3 getAngularVelocity() {
                 return angularVelocity(m_state);
@@ -164,12 +159,12 @@ namespace kalman {
                 return m_orientation;
             }
             
-            /*
+            
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
                 return incrementalOrientationToQuat(m_state) * m_orientation;
             }
-            */
+            
             
           private:
             /// In order: x, y, z, orientation , then its derivatives in the same
