@@ -4,6 +4,7 @@ set(API
     "${HEADER_LOCATION}/AbsoluteOrientationMeasurement.h"
     "${HEADER_LOCATION}/AbsolutePositionMeasurement.h"
     "${HEADER_LOCATION}/AngularVelocityMeasurement.h"
+    "${HEADER_LOCATION}/AugmentedState.h"
     "${HEADER_LOCATION}/ExternalQuaternion.h"
     "${HEADER_LOCATION}/FlexibleKalmanBase.h"
     "${HEADER_LOCATION}/FlexibleKalmanFilter.h"
