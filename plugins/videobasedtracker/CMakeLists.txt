@@ -33,6 +33,7 @@ target_link_libraries(vbtracker-core
     ${VIDEOTRACKER_EXTRA_LIBS}
     opencv_core
     osvrUtilCpp # for typedefs and boost headers
+    osvrKalman
     vendored-vrpn # for quatlib
     eigen-headers)
 target_compile_options(vbtracker-core
