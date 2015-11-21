@@ -42,12 +42,12 @@ namespace kalman {
         using Dimension = types::DimensionConstant<12>;
         using StateVector = types::DimVector<Dimension>;
         using StateVectorBlock3 =
-            StateVector::template FixedSegmentReturnType<3>::Type;
+            StateVector::FixedSegmentReturnType<3>::Type;
         using ConstStateVectorBlock3 =
-            StateVector::template ConstFixedSegmentReturnType<3>::Type;
+            StateVector::ConstFixedSegmentReturnType<3>::Type;
 
         using StateVectorBlock6 =
-            StateVector::template FixedSegmentReturnType<6>::Type;
+            StateVector::FixedSegmentReturnType<6>::Type;
         using StateSquareMatrix = types::DimSquareMatrix<Dimension>;
 
         /// @name Accessors to blocks in the state vector.
