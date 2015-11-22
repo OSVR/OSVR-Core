@@ -38,7 +38,6 @@
 #include <osvr/Util/ClientCallbackTypesC.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
 #include <boost/any.hpp>
 
 // Standard includes
@@ -46,13 +45,19 @@
 #include <vector>
 #include <functional>
 
-struct OSVR_ClientInterfaceObject : boost::noncopyable {
+struct OSVR_ClientInterfaceObject {
 
   protected:
     /// @brief Constructor - only to be called by a factory function.
     OSVR_COMMON_EXPORT
     OSVR_ClientInterfaceObject(osvr::common::ClientContext &ctx,
                                std::string const &path);
+
+    /// @brief Explicitly forbid copying of this object.
+    OSVR_ClientInterfaceObject( const OSVR_ClientInterfaceObject& ) = delete;
+
+    /// @brief Explicitly forbid copying of this object.
+    OSVR_ClientInterfaceObject& operator=( const OSVR_ClientInterfaceObject& ) = delete;
 
   public:
     ~OSVR_ClientInterfaceObject() {

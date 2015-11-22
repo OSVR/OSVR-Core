@@ -37,7 +37,6 @@
 #include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
 #include <boost/any.hpp>
 
 // Standard includes
@@ -45,7 +44,7 @@
 #include <vector>
 #include <map>
 
-struct OSVR_ClientContextObject : boost::noncopyable {
+struct OSVR_ClientContextObject {
   public:
     typedef std::vector<osvr::common::ClientInterfacePtr> InterfaceList;
     /// @brief Destructor
@@ -125,6 +124,14 @@ struct OSVR_ClientContextObject : boost::noncopyable {
         const char appId[],
         osvr::common::ClientInterfaceFactory const &interfaceFactory,
         osvr::common::ClientContextDeleter del);
+
+    /// @brief Forbid copying of this object.
+    OSVR_COMMON_EXPORT
+    OSVR_ClientContextObject(const OSVR_ClientContextObject& ) = delete;
+    
+    /// @brief Forbid copying of this object.
+    OSVR_COMMON_EXPORT
+    OSVR_ClientContextObject& operator=(const OSVR_ClientContextObject& ) = delete;
 
   private:
     virtual void m_update() = 0;
