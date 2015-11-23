@@ -1,9 +1,9 @@
 {
   "deviceVendor": "Sensics",
-  "deviceName": "Sensics zSight HMD",
-  "author": "Virendra Singh",
+  "deviceName": "zSight HMD",
+  "author": "Virendra Singh <virneo@gmail.com>",
   "version": 1,
-  "lastModified": "2015-09-28",
+  "lastModified": "2015-11-23",
   "interfaces": {
     "tracker": {
       "count": 1,
@@ -13,6 +13,24 @@
     }
   },
   "semantic": {
-    "untared_orientation": "tracker/0"
+	"hmd": {
+        "$target": {
+            "rotate": {
+                "axis": "x",
+                "degrees": 90
+            },
+            "child": {
+                "changeBasis": {
+                    "x": "-x",
+                    "y": "-z",
+                    "z": "y"
+                },
+                "child": "tracker/0"
+            }
+        }
+    }
+  },
+  "automaticAliases": {
+        "/me/head": "semantic/hmd"
   }
 }
