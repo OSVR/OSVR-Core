@@ -8,6 +8,9 @@ osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/DirectShowCameraLib")
 
+# Make sure we can link these upcoming static libraries into a shared lib
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 ###
 # Build a separate static library with the core of the video-based tracker
 ###
