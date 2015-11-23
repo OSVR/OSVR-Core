@@ -1,0 +1,18 @@
+{
+  "deviceVendor": "Sensics",
+  "deviceName": "Sensics zSight HMD",
+  "author": "Virendra Singh",
+  "version": 1,
+  "lastModified": "2015-09-28",
+  "interfaces": {
+    "tracker": {
+      "count": 1,
+      "bounded": true,
+      "position": false,
+      "orientation": true
+    }
+  },
+  "semantic": {
+    "untared_orientation": "tracker/0"
+  }
+}
