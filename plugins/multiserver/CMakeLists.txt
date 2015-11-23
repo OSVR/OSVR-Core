@@ -3,7 +3,7 @@ set(DESCRIPTORS
     com_osvr_Multiserver_OSVRHackerDevKit
     com_osvr_Multiserver_RazerHydra
     com_osvr_Multiserver_YEI_3Space_Sensor
-	com_osvr_Multiserver_Sensics_zSight)
+    com_osvr_Multiserver_Sensics_zSight)
 set(JSON_HEADERS)
 set(JSON_DESCRIPTORS)
 
