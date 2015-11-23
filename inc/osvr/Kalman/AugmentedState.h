@@ -32,10 +32,12 @@
 // - none
 
 // Standard includes
-// - none
+#include <type_traits>
 
 namespace osvr {
 namespace kalman {
+    /// State type that consists entirely of references to two independent
+    /// sub-states.
     template <typename StateA, typename StateB> class AugmentedState {
       public:
         using StateTypeA = StateA;
@@ -49,13 +51,27 @@ namespace kalman {
 
         using SquareMatrix = types::SquareMatrix<DIMENSION>;
         using StateVector = types::Vector<DIMENSION>;
+
+        /// Constructor
         AugmentedState(StateA &a, StateB &b) : a_(a), b_(b) {}
+
+        /// Copy constructor
         AugmentedState(AugmentedState const &other) = default;
+
+        /// Move constructor
         AugmentedState(AugmentedState &&other) : a_(other.a_), b_(other.b_) {}
 
-        void setStateVector(StateVector const &state) {
-            a().setStateVector(state.head<DIM_A>());
-            b().setStateVector(state.tail<DIM_B>());
+        /// non-assignable
+        AugmentedState &operator=(AugmentedState const &other) = delete;
+
+        /// @name Methods required of State types
+        /// @{
+        template <typename Derived>
+        void setStateVector(Eigen::MatrixBase<Derived> const &state) {
+            /// template used here to avoid a temporary
+            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, DIMENSION);
+            a().setStateVector(state.derived().template head<DIM_A>());
+            b().setStateVector(state.derived().template tail<DIM_B>());
         }
 
         StateVector stateVector() const {
@@ -66,34 +82,57 @@ namespace kalman {
 
         SquareMatrix errorCovariance() const {
             SquareMatrix ret = SquareMatrix::Zero();
-            ret.topLeftCorner<DIM_A, DIM_A>() = a().errorCovariance();
-            ret.bottomRightCorner<DIM_B, DIM_B>() = b().errorCovariance();
+            ret.template topLeftCorner<DIM_A, DIM_A>() = a().errorCovariance();
+            ret.template bottomRightCorner<DIM_B, DIM_B>() =
+                b().errorCovariance();
         }
 
-        void setErrorCovariance(SquareMatrix const &P) {
-            a().setErrorCovariance(P.topLeftCorner<DIM_A, DIM_A>());
-            b().setErrorCovariance(P.bottomRightCorner<DIM_B, DIM_B>());
+        template <typename Derived>
+        void setErrorCovariance(Eigen::MatrixBase<Derived> const &P) {
+            /// template used here to avoid evaluating elements we'll never
+            /// access to a temporary.
+            EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived, DIMENSION,
+                                                     DIMENSION);
+            a().setErrorCovariance(P.template topLeftCorner<DIM_A, DIM_A>());
+            b().setErrorCovariance(
+                P.template bottomRightCorner<DIM_B, DIM_B>());
         }
 
         void postCorrect() {
             a().postCorrect();
             b().postCorrect();
         }
+        /// @}
 
+        /// @name Access to the components of the state
+        /// @{
+        /// Access the first part of the state
         StateTypeA &a() { return a_; }
+        /// Access the first part of the state
         StateTypeA const &a() const { return a_; }
 
+        /// Access the second part of the state
         StateTypeB &b() { return b_; }
+        /// Access the second part of the state
         StateTypeB const &b() const { return b_; }
+        /// @}
 
       private:
         StateA &a_;
         StateB &b_;
     };
-
+    /// Template alias to make removing const from the deduced types less
+    /// verbose/painful.
     template <typename StateA, typename StateB>
-    inline AugmentedState<StateA, StateB> augmentedState(StateA &a, StateB &b) {
-        return AugmentedState<StateA, StateB>(a, b);
+    using DeducedAugmentedState =
+        AugmentedState<typename std::remove_const<StateA>::type,
+                       typename std::remove_const<StateB>::type>;
+
+    /// Factory function, akin to `std::tie()`, to make an augmented state.
+    template <typename StateA, typename StateB>
+    inline DeducedAugmentedState<StateA, StateB> makeAugmentedState(StateA &a,
+                                                                    StateB &b) {
+        return DeducedAugmentedState<StateA, StateB>{a, b};
     }
 
 } // namespace kalman
