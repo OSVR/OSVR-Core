@@ -20,11 +20,6 @@
                 "degrees": 90
             },
             "child": {
-                "changeBasis": {
-                    "x": "-x",
-                    "y": "-z",
-                    "z": "y"
-                },
                 "child": "tracker/0"
             }
         }
