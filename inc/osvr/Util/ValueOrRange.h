@@ -173,8 +173,8 @@ namespace util {
                 other.setEmpty();
                 return other;
             }
-            auto newMax = std::max(this->getMax(), other.getMax());
-            auto newMin = std::min(this->getMin(), other.getMin());
+            auto newMax = std::min(this->getMax(), other.getMax());
+            auto newMin = std::max(this->getMin(), other.getMin());
             other.setRangeMaxMin(newMax, newMin);
             return other;
         }
