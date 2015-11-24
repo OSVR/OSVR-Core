@@ -24,9 +24,12 @@
 
 // Internal Includes
 #include "BeaconBasedPoseEstimator.h"
+#include "cvToEigen.h"
+#include "VideoJacobian.h"
 
 // Library/third-party includes
 #include <osvr/Util/QuatlibInteropC.h>
+#include <osvr/Util/EigenInterop.h>
 
 // Standard includes
 // - none
@@ -227,7 +230,7 @@ namespace vbtracker {
         // Make sure we got all the inliers we needed.  Otherwise, reject this
         // pose.
         if (inlierIndices.rows < m_requiredInliers) {
-          return false;
+            return false;
         }
 
         //==========================================================================
@@ -235,25 +238,26 @@ namespace vbtracker {
         // close to the expected location; otherwise, we have a bad pose.
         const double pixelReprojectionErrorForSingleAxisMax = 4;
         if (inlierIndices.rows > 0) {
-          std::vector<cv::Point3f>  inlierObjectPoints;
-          std::vector<cv::Point2f> inlierImagePoints;
-          for (int i = 0; i < inlierIndices.rows; i++) {
-            inlierObjectPoints.push_back(objectPoints[i]);
-            inlierImagePoints.push_back(imagePoints[i]);
-          }
-          std::vector<cv::Point2f> reprojectedPoints;
-          cv::projectPoints(inlierObjectPoints, m_rvec, m_tvec, m_cameraMatrix,
-            m_distCoeffs, reprojectedPoints);
-          for (size_t i = 0; i < reprojectedPoints.size(); i++) {
-            if (reprojectedPoints[i].x - inlierImagePoints[i].x > 
-                pixelReprojectionErrorForSingleAxisMax) {
-              return false;
+            std::vector<cv::Point3f> inlierObjectPoints;
+            std::vector<cv::Point2f> inlierImagePoints;
+            for (int i = 0; i < inlierIndices.rows; i++) {
+                inlierObjectPoints.push_back(objectPoints[i]);
+                inlierImagePoints.push_back(imagePoints[i]);
             }
-            if (reprojectedPoints[i].y - inlierImagePoints[i].y > 
-              pixelReprojectionErrorForSingleAxisMax) {
-              return false;
+            std::vector<cv::Point2f> reprojectedPoints;
+            cv::projectPoints(inlierObjectPoints, m_rvec, m_tvec,
+                              m_cameraMatrix, m_distCoeffs, reprojectedPoints);
+
+            for (size_t i = 0; i < reprojectedPoints.size(); i++) {
+                if (reprojectedPoints[i].x - inlierImagePoints[i].x >
+                    pixelReprojectionErrorForSingleAxisMax) {
+                    return false;
+                }
+                if (reprojectedPoints[i].y - inlierImagePoints[i].y >
+                    pixelReprojectionErrorForSingleAxisMax) {
+                    return false;
+                }
             }
-          }
         }
 
         //==========================================================================
