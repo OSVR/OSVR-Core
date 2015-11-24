@@ -31,6 +31,7 @@
 
 // Library/third-party includes
 #include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Kalman/PureVectorState.h>
 
 // Standard includes
 #include <vector>
@@ -72,6 +73,7 @@ namespace vbtracker {
                                  const Point3Vector &beacons,
                                  size_t requiredInliers = 4,
                                  size_t permittedOutliers = 2);
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as
@@ -99,7 +101,11 @@ namespace vbtracker {
         /// @brief Implementation - doesn't set m_gotPose;
         bool m_estimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
 
-        Point3Vector m_beacons;     //< 3D location of LED beacons
+        using BeaconState = kalman::PureVectorState<3>;
+        using BeaconStateVec = std::vector<std::unique_ptr<BeaconState>>;
+        BeaconStateVec m_beacons;
+        Eigen::Vector2d m_principalPoint;
+        double m_focalLength;
         cv::Mat m_cameraMatrix;     //< 3x3 camera matrix
         cv::Mat m_distCoeffs;       //< Distortion coefficients
         size_t m_requiredInliers;   //< How many inliers do we require?

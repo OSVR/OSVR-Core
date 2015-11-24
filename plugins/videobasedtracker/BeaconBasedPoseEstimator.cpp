@@ -101,7 +101,14 @@ namespace vbtracker {
     bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
-        m_beacons = beacons;
+        m_beacons.clear();
+        static const double INITIAL_BEACON_ERROR = 3.0;
+        Eigen::Matrix3d beaconError =
+            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+        for (auto &beacon : beacons) {
+            m_beacons.emplace_back(new BeaconState{
+                cvToVector(beacon).cast<double>(), beaconError});
+        }
 
         return true;
     }
@@ -130,6 +137,11 @@ namespace vbtracker {
         }
 
         m_cameraMatrix = newCameraMatrix;
+
+        // Extract just the pieces we'll use
+        m_focalLength = m_cameraMatrix.at<double>(0, 0);
+        m_principalPoint = Eigen::Vector2d{m_cameraMatrix.at<double>(0, 2),
+                                           m_cameraMatrix.at<double>(1, 2)};
         //    std::cout << "XXX cameraMatrix =" << std::endl << m_cameraMatrix
         //    << std::endl;
         return true;
@@ -183,7 +195,8 @@ namespace vbtracker {
             auto id = led.getID();
             if (id < beaconsSize) {
                 imagePoints.push_back(led.getLocation());
-                objectPoints.push_back(m_beacons[id]);
+                objectPoints.push_back(
+                    vec3dToCVPoint3f(m_beacons[id]->stateVector()));
             }
         }
 
@@ -273,6 +286,26 @@ namespace vbtracker {
         cv::Mat rot;
         cv::Rodrigues(m_rvec, rot);
 
+        Eigen::Vector3d xlate{m_tvec.at<double>(0), m_tvec.at<double>(1),
+                              m_tvec.at<double>(2)};
+        Eigen::Quaterniond rotate = cvRotVecToQuat(m_rvec);
+
+        {
+            static int i = 0;
+            if (i == 0) {
+                Eigen::Vector3d camPoints =
+                    rotate * cvToVector(objectPoints.front()).cast<double>() +
+                    xlate;
+                Eigen::Vector2d uv =
+                    (camPoints.head<2>() / camPoints[2]) * m_focalLength +
+                    m_principalPoint;
+
+                std::cout << "First model point:\n" << objectPoints.front()
+                          << " projected to " << uv.transpose() << " found at "
+                          << imagePoints.front() << "\n";
+            }
+            i = (i + 1) % 200;
+        }
         // @todo: Replace this code with Eigen code.
 
         if (rot.type() != CV_64F) {
@@ -320,9 +353,14 @@ namespace vbtracker {
         if (!m_gotPose) {
             return false;
         }
-
-        cv::projectPoints(m_beacons, m_rvec, m_tvec, m_cameraMatrix,
-                          m_distCoeffs, out);
+        // Convert our beacon-states into OpenCV-friendly structures.
+        Point3Vector beacons;
+        for (auto const &beacon : m_beacons) {
+            beacons.push_back(vec3dToCVPoint3f(beacon->stateVector()));
+        }
+        // Do the OpenCV projection.
+        cv::projectPoints(beacons, m_rvec, m_tvec, m_cameraMatrix, m_distCoeffs,
+                          out);
         return true;
     }
 

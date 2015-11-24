@@ -14,6 +14,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/D
 add_library(vbtracker-core STATIC
     BeaconBasedPoseEstimator.cpp
     BeaconBasedPoseEstimator.h
+    cvToEigen.h
     GetCameraMatrix.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
@@ -26,7 +27,8 @@ add_library(vbtracker-core STATIC
     LED.h
     Types.h
     VideoBasedTracker.cpp
-    VideoBasedTracker.h)
+    VideoBasedTracker.h
+    VideoJacobian.h)
 
 target_link_libraries(vbtracker-core
     PUBLIC
