@@ -1,4 +1,9 @@
 #!/bin/sed -f
+
+# unwrap string
+s/^"//
+s/"$//
+
 # Start the output with a matrix declaration and comma initializer.
 s/matrix[(]\[/Eigen::MatrixXd result;\nresult <</
 

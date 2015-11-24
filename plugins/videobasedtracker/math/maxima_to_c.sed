@@ -1,10 +1,15 @@
 #!/bin/sed -f
+
+# unwrap string
+s/^"//
+s/"$//
+
 # Intermediate result declarations
 s/^%/auto v/
 s/:/ = /
 
-# End of lines - assumes you've split ,% to ,\n% already
-s/,$/;/
+# End of lines
+s/$/;/
 
 # variable references
 s/%/v/g

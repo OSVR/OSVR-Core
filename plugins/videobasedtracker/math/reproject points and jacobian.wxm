@@ -47,14 +47,16 @@ nonDistortedJacobian : jacobian(projectPoint([q0, q1, q2, q3], [x,y,z], [xb, yb,
 /* [wxMaxima: comment start ]
 This version uses subscripts in the final result, making it more readable (?)
 and, for some reason it's also different, which I don't understand at all.
+Quaternion is q4, q1, q2, q3 because Eigen puts w at the end, while I accidentally
+put w at the beginning of the rest of this math.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
 H : block([myquat, mypos, mybeacon],
-    myquat : [q[1], q[2], q[3], q[4]],
+    myquat : [q[4], q[1], q[2], q[3]],
     mypos : [pos[1], pos[2], pos[3]],
     mybeacon : [beacon[1], beacon[2], beacon[3]],
-jacobian(projectPoint(myquat, mypos, mybeacon, fl, fl, cx, cy), [q[1], q[2], q[3], q[4], pos[1], pos[2], pos[3], beacon[1], beacon[2], beacon[3]]));
+jacobian(projectPoint(myquat, mypos, mybeacon, fl, fl, cx, cy), [q[4], q[1], q[2], q[3], pos[1], pos[2], pos[3], beacon[1], beacon[2], beacon[3]]));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -129,7 +131,24 @@ optimH:optimize(H);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-string(optimH);
+exportBlock(myblock) := block([blockargs, len],
+    blockargs: args(myblock),
+    len: length(blockargs),
+    for i:2 thru len do print(string(blockargs[i]))
+    )$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+exportBlock(optimH);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+myargs:args(optimH)$
+mylen:length(myargs);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+args(myargs[mylen]);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
