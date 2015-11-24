@@ -31,6 +31,7 @@
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/eigen.hpp>
 
 // Standard includes
 // - none
@@ -41,20 +42,14 @@ namespace vbtracker {
         // Inspection of the OpenCV source suggests that the rotation vector
         // manipulated by the Rodrigues function is of the type where the
         // magnitude is the angle, and the normalized vector is the axis.
-        Eigen::Vector3d rot{vec.at<double>(0), vec.at<double>(1),
-                            vec.at<double>(2)};
-        auto sqNorm = rot.squaredNorm();
-        if (sqNorm < DBL_EPSILON) {
-            return Eigen::Quaterniond::Identity();
-        }
-        auto angle = std::sqrt(sqNorm);
-        return Eigen::Quaterniond(Eigen::AngleAxisd(angle, rot / sqNorm));
-    }
-    inline Eigen::Vector3d cvFloatToVector3d(cv::InputArray const &vec) {
-        cv::Mat src = vec.getMat();
-        CV_Assert(src.type() == CV_32FC1);
-        return Eigen::Vector3d(src.at<float>(0), src.at<float>(1),
-                               src.at<float>(2));
+        // However, converting this way resulted in faulty (incredibly small)
+        // rotations, so the roundabout way of using the Rodrigues OpenCV
+        // function then converting the matrix to a quaternion was used instead.
+        cv::Mat rot;
+        cv::Rodrigues(vec, rot);
+        Eigen::Matrix3d rotMat;
+        cv::cv2eigen(rot, rotMat);
+        return Eigen::Quaterniond(rotMat);
     }
     inline Eigen::Vector3f cvToVector(cv::Point3f const &point) {
         return Eigen::Vector3f(point.x, point.y, point.z);
@@ -63,8 +58,9 @@ namespace vbtracker {
     inline Eigen::Vector3d cvToVector3d(cv::InputArray const &vec) {
         cv::Mat src = vec.getMat();
         CV_Assert(src.type() == CV_64FC1);
-        return Eigen::Vector3d(src.at<double>(0), src.at<double>(1),
-                               src.at<double>(2));
+        Eigen::Vector3d ret;
+        cv::cv2eigen(src, ret);
+        return ret;
     }
     inline cv::Point3f vec3dToCVPoint3f(Eigen::Vector3d const &vec) {
         return cv::Point3f(vec.x(), vec.y(), vec.z());
