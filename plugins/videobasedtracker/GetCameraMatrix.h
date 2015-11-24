@@ -56,7 +56,7 @@ namespace vbtracker {
     getCameraMatrix(const Eigen::Ref<const Eigen::Vector2d> &principalPoint,
                     double focalLength) {
         return getCameraMatrix(principalPoint,
-                               Eigen::Vector2d::Ones() * focalLength);
+                               Eigen::Vector2d::Constant(focalLength));
     }
 
     /// @brief Compute a camera matrix given an image width and height in
