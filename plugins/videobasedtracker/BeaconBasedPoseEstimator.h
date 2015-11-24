@@ -32,6 +32,7 @@
 // Library/third-party includes
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Kalman/PureVectorState.h>
+#include <osvr/Kalman/PoseState.h>
 
 // Standard includes
 #include <vector>
@@ -90,6 +91,15 @@ namespace vbtracker {
         /// @return true on success, false on failure.
         bool ProjectBeaconsToImage(std::vector<cv::Point2f> &outPose);
 
+        /// @name State getting methods
+        /// @brief They extract state in the OSVR units (meters, not mm, for
+        /// instance) even when the internal storage may vary.
+        /// @{
+        OSVR_PoseState GetState() const;
+        Eigen::Vector3d GetLinearVelocity() const;
+        Eigen::Vector3d GetAngularVelocity() const;
+        /// @}
+
         /// @name Data set resets
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
@@ -101,6 +111,11 @@ namespace vbtracker {
         /// @brief Implementation - doesn't set m_gotPose;
         bool m_estimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
 
+
+        /// @brief Resets the Kalman filter main state based on the
+        /// direct-calculation outputs.
+        void m_resetState(Eigen::Vector3d const &xlate,
+                          Eigen::Quaterniond const &quat);
         using BeaconState = kalman::PureVectorState<3>;
         using BeaconStateVec = std::vector<std::unique_ptr<BeaconState>>;
         BeaconStateVec m_beacons;
@@ -121,6 +136,8 @@ namespace vbtracker {
         cv::Mat m_rvec;
         /// @brief Translation vector associated with the most-recent pose.
         cv::Mat m_tvec;
+        using State = kalman::pose_externalized_rotation::State;
+        State m_state;
         /// @}
     };
 

@@ -36,7 +36,8 @@
 
 namespace osvr {
 namespace vbtracker {
-
+    /// millimeters to meters
+    static const double LINEAR_SCALE_FACTOR = 1000.;
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
@@ -170,6 +171,22 @@ namespace vbtracker {
         return true;
     }
 
+    OSVR_PoseState BeaconBasedPoseEstimator::GetState() const {
+        OSVR_PoseState ret;
+        util::eigen_interop::map(ret).rotation() = m_state.getQuaternion();
+        util::eigen_interop::map(ret).translation() =
+            m_state.getPosition() / LINEAR_SCALE_FACTOR; // convert from mm to m
+        return ret;
+    }
+
+    Eigen::Vector3d BeaconBasedPoseEstimator::GetLinearVelocity() const {
+        return m_state.getVelocity() / LINEAR_SCALE_FACTOR;
+    }
+
+    Eigen::Vector3d BeaconBasedPoseEstimator::GetAngularVelocity() const {
+        return m_state.getAngularVelocity();
+    }
+
     bool
     BeaconBasedPoseEstimator::EstimatePoseFromLeds(const LedGroup &leds,
                                                    OSVR_PoseState &outPose) {
@@ -284,22 +301,15 @@ namespace vbtracker {
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction.
 
-        // Compose the transform in original units.
-        // We start by making a 3x3 rotation matrix out of the rvec, which
-        // is done by a function that for some reason is named Rodrigues.
-        cv::Mat rot;
-        cv::Rodrigues(m_rvec, rot);
-
-        Eigen::Vector3d xlate{m_tvec.at<double>(0), m_tvec.at<double>(1),
-                              m_tvec.at<double>(2)};
-        Eigen::Quaterniond rotate = cvRotVecToQuat(m_rvec);
+        m_resetState(cvToVector3d(m_tvec), cvRotVecToQuat(m_rvec));
 
         {
             static int i = 0;
             if (i == 0) {
                 Eigen::Vector3d camPoints =
-                    rotate * cvToVector(objectPoints.front()).cast<double>() +
-                    xlate;
+                    m_state.getQuaternion() *
+                        cvToVector(objectPoints.front()).cast<double>() +
+                    m_state.getPosition();
                 Eigen::Vector2d uv =
                     (camPoints.head<2>() / camPoints[2]) * m_focalLength +
                     m_principalPoint;
@@ -310,47 +320,27 @@ namespace vbtracker {
             }
             i = (i + 1) % 200;
         }
-        // @todo: Replace this code with Eigen code.
-
-        if (rot.type() != CV_64F) {
-            return false;
-        }
-
-        // Get the forward transform
-        // Scale to meters
-        q_xyz_quat_type forward;
-        forward.xyz[Q_X] = m_tvec.at<double>(0);
-        forward.xyz[Q_Y] = m_tvec.at<double>(1);
-        forward.xyz[Q_Z] = m_tvec.at<double>(2);
-        q_vec_scale(forward.xyz, 1e-3, forward.xyz);
-
-        // Fill in a 4x4 matrix that starts as the identity
-        // matrix with the 3x3 part from the rotation matrix.
-        // We need to transpose the matrix to make it row
-        // major.
-        q_matrix_type rot4x4;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if ((i < 3) && (j < 3)) {
-                    rot4x4[i][j] = rot.at<double>(j, i);
-                } else {
-                    if (i == j) {
-                        rot4x4[i][j] = 1;
-                    } else {
-                        rot4x4[i][j] = 0;
-                    }
-                }
-            }
-        }
-        q_from_row_matrix(forward.quat, rot4x4);
 
         //==============================================================
         // Put into OSVR format.
-        osvrPose3FromQuatlib(&outPose, &forward);
+        outPose = GetState();
 
         return true;
     }
 
+    static const double InitialStateError[] = {100.,  100.,  100.,  10.,
+                                               10.,   10.,   1000., 1000.,
+                                               1000., 1000., 1000., 1000.};
+    void
+    BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
+                                           Eigen::Quaterniond const &quat) {
+        using StateVec = kalman::types::DimVector<State>;
+        StateVec state(StateVec::Zero());
+        state.head<3>() = xlate;
+        m_state.setStateVector(state);
+        m_state.setQuaternion(quat);
+        m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
+    }
     bool BeaconBasedPoseEstimator::ProjectBeaconsToImage(
         std::vector<cv::Point2f> &out) {
         // Make sure we have a pose.  Otherwise, we can't do anything.
