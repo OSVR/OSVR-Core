@@ -1,0 +1,136 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.08.2 ] */
+
+/* [wxMaxima: section start ]
+Utility definitions
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+quat to rotation matrix
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+This is the rotation matrix corresponding to a unit quaternion in wxyz format.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+quatToRotMatrix(q) := matrix(
+    [1-2*(q[3]^2 + q[4]^2), 2*(q[2]*q[3] - q[1] * q[4]), 2*(q[2]*q[4] + q[1]*q[3])],
+    [2*(q[2]*q[3]+q[1]*q[4]), 1 - 2*(q[2]^2 + q[4]^2), 2*(q[3]*q[4] - q[1]*q[2])],
+    [2*(q[2]*q[4] - q[1]*q[3]), 2*(q[3]*q[4] + q[1]*q[2]), 1-2*(q[2]^2+q[3]^2)]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Projecting without distortion
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+This is the "simple" version without distortion in it.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+projectPoint(quat, translation, objPt, fx, fy, cx, cy) := 
+block([xformed, xp, yp, x, y, z, u, v],
+    xformed : quatToRotMatrix(quat) . transpose(matrix(objPt)) + translation,
+    xp : (xformed[1]/xformed[3])[1],
+    yp : (xformed[2]/xformed[3])[1],
+    u : fx * xp + cx,
+    v : fy * yp + cy,
+    [u,v]);
+projectPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nonDistortedJacobian : jacobian(projectPoint([q0, q1, q2, q3], [x,y,z], [xb, yb, zb], fl, fl, cx, cy), [x,y,z, q0, q1, q2, q3,  xb, yb, zb]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+This version uses subscripts in the final result, making it more readable (?)
+and, for some reason it's also different, which I don't understand at all.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+H : block([myquat, mypos, mybeacon],
+    myquat : [q[1], q[2], q[3], q[4]],
+    mypos : [pos[1], pos[2], pos[3]],
+    mybeacon : [beacon[1], beacon[2], beacon[3]],
+jacobian(projectPoint(myquat, mypos, mybeacon, fl, fl, cx, cy), [q[1], q[2], q[3], q[4], pos[1], pos[2], pos[3], beacon[1], beacon[2], beacon[3]]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Distortion
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Now for the version with distortion -
+right now only handling up through k3, k4-k6 go on the bottom instead...
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+projectDistortedPoint(quat, translation, objPt, fx, fy, cx, cy, k, p) := 
+block([xformed, xp, yp, r2, radDistort, xpp, ypp, x, y, z, u, v],
+    xformed : quatToRotMatrix(quat) . objPt + translation,
+    xp : (xformed[1]/xformed[3])[1],
+    yp : (xformed[2]/xformed[3])[1],
+    r2 : xp^2 + yp^2,
+    radDistort : (1+k[1]*r2+k[2]*r2^2+k[3]*r2^3),
+    xpp : xp * radDistort + 2*p[1]*xp*yp + p[2]*(r2 + 2*xp^2),
+    ypp : yp * radDistort + p[1]*(r2+2*yp^2)+2*p[2]*xp*yp,
+    u : fx * xpp + cx,
+    v : fy * ypp + cy,
+    [u,v]);
+projectDistortedPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Comparing
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
+buildq([quat, translation, fx, fy, cx, cy, k, p],
+    projectDistortedPoint(quat, translation, point, fx, fy, cx, cy, k, p) - projectPoint(quat, translation, point, fx, fy, cx, cy));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
+buildq([quat, translation, fx, fy, cx, cy, k, p],lambda([point], 
+    projectDistortedPoint(quat, translation, point, fx, fy, cx, cy, k, p) - projectPoint(quat, translation, point, fx, fy, cx, cy)));
+distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+%([1,1,1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Outputting jacobian in a way we can compute
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Will need some transformation, initially a search and replace for ,% with ,\n%
+followed by a split into two files and the seds committed into the repo,
+and finally manual touch-ups (making sure some numbers are doubles, replacing ^
+    
+Didn't have time to write the Maxima or Lisp code to properly export directly
+to C code, so the stepwise procedure will have to suffice.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+H;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+optimH:optimize(H);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+string(optimH);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
