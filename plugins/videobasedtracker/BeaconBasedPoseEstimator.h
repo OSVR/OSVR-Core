@@ -30,6 +30,7 @@
 #include "LED.h"
 
 // Library/third-party includes
+#include <osvr/Util/TimeValue.h>
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Kalman/PureVectorState.h>
 #include <osvr/Kalman/PoseState.h>
@@ -75,7 +76,6 @@ namespace vbtracker {
                                  size_t requiredInliers = 4,
                                  size_t permittedOutliers = 2);
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as
         /// described by the camera matrix.
@@ -84,7 +84,9 @@ namespace vbtracker {
         /// locations and camera focal depth are in millimeters.
         ///
         /// @return Returns true on success, false on failure to make a pose.
-        bool EstimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
+        bool EstimatePoseFromLeds(const LedGroup &leds,
+                                  OSVR_TimeValue const &tv,
+                                  OSVR_PoseState &out);
 
         /// @brief Project the beacons into image space given the most-recent
         /// estimation of pose.
@@ -109,8 +111,17 @@ namespace vbtracker {
         /// @}
       private:
         /// @brief Implementation - doesn't set m_gotPose;
-        bool m_estimatePoseFromLeds(const LedGroup &leds, OSVR_PoseState &out);
+        bool m_estimatePoseFromLeds(const LedGroup &leds,
+                                    OSVR_TimeValue const &tv,
+                                    OSVR_PoseState &out);
 
+        /// @brief The internals of m_estimatePoseFromLeds that use
+        /// cv::computePnPRansac to compute an estimate.
+        bool m_pnpransacEstimator(const LedGroup &leds);
+
+        /// @brief The internals of m_estimatePoseFromLeds that use a Kalman
+        /// filter with beacon position auto-calibration to compute an estimate.
+        bool m_kalmanAutocalibEstimator(const LedGroup &leds, double dt);
 
         /// @brief Resets the Kalman filter main state based on the
         /// direct-calculation outputs.
@@ -125,6 +136,11 @@ namespace vbtracker {
         cv::Mat m_distCoeffs;       //< Distortion coefficients
         size_t m_requiredInliers;   //< How many inliers do we require?
         size_t m_permittedOutliers; //< How many outliers do we allow?
+
+        /// Timestamp of previous frame
+        OSVR_TimeValue m_prev;
+        /// whether m_prev is a valid timestamp
+        bool m_gotPrev = false;
 
         /// @name Pose cache
         /// @brief Stores the most-recent solution, in case we need it again

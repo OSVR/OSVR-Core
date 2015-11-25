@@ -98,13 +98,14 @@ class Main {
             return true;
         }
 
+        auto tv = osvr::util::time::getNow();
         //==================================================================
         // Convert the image into a format we can use.
         // TODO: Consider reading in the image in gray scale to begin with
         cv::cvtColor(m_frame, m_imageGray, CV_RGB2GRAY);
 
         return m_vbtracker.processImage(
-            m_frame, m_imageGray,
+            m_frame, m_imageGray, tv,
             [&](OSVR_ChannelCount sensor, OSVR_Pose3 const &pose) {
                 std::cout << "Sensor " << sensor << ": Translation "
                           << pose.translation << " rotation " << pose.rotation

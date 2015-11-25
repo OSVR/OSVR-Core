@@ -166,6 +166,8 @@ namespace vbtracker {
         }
 
         m_distCoeffs = newDistCoeffs;
+        /// @todo use these in the kalman path
+
         //    std::cout << "XXX distCoeffs =" << std::endl << m_distCoeffs <<
         //    std::endl;
         return true;
@@ -189,15 +191,43 @@ namespace vbtracker {
 
     bool
     BeaconBasedPoseEstimator::EstimatePoseFromLeds(const LedGroup &leds,
+                                                   OSVR_TimeValue const &tv,
                                                    OSVR_PoseState &outPose) {
-        auto ret = m_estimatePoseFromLeds(leds, outPose);
+        auto ret = m_estimatePoseFromLeds(leds, tv, outPose);
         m_gotPose = ret;
         return ret;
     }
 
     bool
     BeaconBasedPoseEstimator::m_estimatePoseFromLeds(const LedGroup &leds,
+                                                     OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
+        bool result = false;
+#if 0
+        if (!m_gotPose || !m_gotPrev) {
+#endif
+        // Must use the direct approach
+        result = m_pnpransacEstimator(leds);
+#if 0
+        } else {
+            auto dt = osvrTimeValueDurationSeconds(&tv, &m_prev);
+            // Can use kalman approach
+            result = m_kalmanAutocalibEstimator(leds, dt);
+        }
+#endif
+        if (!result) {
+            return false;
+        }
+        m_prev = tv;
+        m_gotPrev = true;
+        //==============================================================
+        // Put into OSVR format.
+        outPose = GetState();
+
+        return true;
+    }
+
+    bool BeaconBasedPoseEstimator::m_pnpransacEstimator(const LedGroup &leds) {
         // We need to get a pair of matched vectors of points: 2D locations
         // with in the image and 3D locations in model space.  There needs to
         // be a correspondence between the points in these vectors, such that
@@ -320,12 +350,12 @@ namespace vbtracker {
             }
             i = (i + 1) % 200;
         }
+    }
 
-        //==============================================================
-        // Put into OSVR format.
-        outPose = GetState();
-
-        return true;
+    bool
+    BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
+                                                         double dt) {
+        return false;
     }
 
     static const double InitialStateError[] = {100.,  100.,  100.,  10.,

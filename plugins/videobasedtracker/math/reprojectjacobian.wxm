@@ -172,18 +172,26 @@ replaceExponentsOnce(expr) := block([arg, power, newexpr, i],
     if atom(expr) then expr elseif operatorp(expr, "^") then (
         arg : args(expr)[1],
         power: args(expr)[2],
-        return("std::pow"(arg, power))
+        newexpr : string(arg),
+        for i: 2 thru power do ( newexpr : concat(string(arg), " * ", newexpr)),
+        return(concat("(", newexpr, ")"))
     ) else (return(expr))
 );
 replaceExponents(expr) := scanmap(replaceExponentsOnce, expr);
+replaceExponents(x^3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-commonSubs : append(makelist(incrot[i]^2 = incrotSqr[i], i, 3), makelist(incrot[i]^3 = incrotCu[i], i, 3), makelist(q[i]^2 = qSqr[i], i, 4), makelist(q[i]^3 = qCu[i], i, 4));
+commonSubs : append(
+    makelist(incrot[i]^2 = incrotSqr[i], i, 3),
+    makelist(incrot[i]^3 = incrotCu[i], i, 3),
+    [incrotSqr[1] + incrotSqr[2]+incrotSqr[3] = incrotSqrNorm, sqrt(incrotSqrNorm) = incrotNorm],
+    makelist(q[i]^2 = qSqr[i], i, 4),
+    makelist(q[i]^3 = qCu[i], i, 4));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-optimH:optimize(subst(commonSubs, H));
+optimH:optimize(replaceExponents(subst(commonSubs, H)));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */

@@ -21,10 +21,12 @@ add_library(vbtracker-core STATIC
     HDKLedIdentifierFactory.cpp
     HDKLedIdentifierFactory.h
     IdentifierHelpers.h
+    ImagePointMeasurement.h
     LedIdentifier.cpp
     LedIdentifier.h
     LED.cpp
     LED.h
+    ProjectPoint.h
     Types.h
     VideoBasedTracker.cpp
     VideoBasedTracker.h

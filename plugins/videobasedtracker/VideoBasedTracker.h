@@ -50,7 +50,7 @@ namespace vbtracker {
     class VideoBasedTracker {
       public:
         VideoBasedTracker(bool showDebugWindows = false)
-          : m_showDebugWindows(showDebugWindows) {};
+            : m_showDebugWindows(showDebugWindows){};
 
         void addOculusSensor();
         /// @name Sensor addition methods
@@ -81,16 +81,14 @@ namespace vbtracker {
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
             PoseHandler;
+
         /// @return true if user hit q to quit.
         bool processImage(cv::Mat frame, cv::Mat grayImage,
-                          PoseHandler handler);
+                          OSVR_TimeValue const &tv, PoseHandler handler);
 
       private:
-        bool m_showDebugWindows;  //< Should we show debugging windows?
-#if 0
-        void m_processSensor(KeyPointList const &foundKeyPoints,
-                             LedGroup &ledGroup);
-#endif
+        bool m_showDebugWindows; //< Should we show debugging windows?
+
         /// @name Images
         /// @{
         cv::Mat m_frame;

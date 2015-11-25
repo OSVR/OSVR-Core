@@ -62,6 +62,7 @@ namespace vbtracker {
         m_assertInvariants();
     }
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
+                                         OSVR_TimeValue const &tv,
                                          PoseHandler handler) {
         m_assertInvariants();
         bool done = false;
@@ -182,7 +183,7 @@ namespace vbtracker {
                 // Get an estimated pose, if we have enough data.
                 OSVR_PoseState pose;
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
-                        m_led_groups[sensor], pose)) {
+                        m_led_groups[sensor], tv, pose)) {
 
                     // Project the expected locations of the beacons
                     // into the image and then compute the error between the
