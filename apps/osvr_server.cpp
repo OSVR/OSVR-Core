@@ -28,7 +28,9 @@
 #include <osvr/Server/RegisterShutdownHandler.h>
 
 // Library/third-party includes
-// - none
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 // Standard includes
 #include <iostream>
@@ -38,6 +40,8 @@
 using osvr::server::detail::out;
 using osvr::server::detail::err;
 using std::endl;
+namespace opt = boost::program_options;
+namespace fs = boost::filesystem;
 
 static osvr::server::ServerPtr server;
 
@@ -48,12 +52,55 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
-    std::string configName(osvr::server::getDefaultConfigFilename());
-    if (argc > 1) {
-        configName = argv[1];
+    const std::string helpOpt("help");
+    const std::string configOpt("config");
+
+    std::string configName;
+
+    opt::options_description options("OSVR Server Options");
+    options.add_options()(
+        configOpt.c_str(),
+        opt::value<std::string>(&configName)
+            ->default_value(osvr::server::getDefaultConfigFilename()),
+        "override config filename")(helpOpt.c_str(),
+                                    "display this help message");
+
+    opt::variables_map values;
+    try {
+        opt::store(opt::parse_command_line(argc, argv, options), values);
+        opt::notify(values);
+    } catch (opt::invalid_command_line_syntax &e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+
+    if (values.count(helpOpt)) {
+        std::cout << options << std::endl;
+        return 1;
+    }
+
+    if (!values.count(configOpt)) {
+        out << "Using default config file - pass a filename with --config= "
+               "to use a different one."
+            << endl;
     } else {
-        out << "Using default config file - pass a filename on the command "
-               "line to use a different one." << endl;
+        configName = values[configOpt].as<std::string>();
+    }
+
+    fs::path configPath(configName);
+    if (!fs::exists(configPath)) {
+        out << "Creating blank config at \"" << configName << "\"" << endl;
+        fs::ofstream configOut{configPath};
+        configOut << "{ }\n";
+        configOut.close();
+    } else {
+        if (fs::is_directory(configPath)) {
+            err << "\"" << configName << "\" is a directory" << endl;
+            return -1;
+        } else if (!fs::is_regular_file(configPath)) {
+            err << "\"" << configName << "\" is special file" << endl;
+            return -1;
+        }
     }
 
     server = osvr::server::configureServerFromFile(configName);

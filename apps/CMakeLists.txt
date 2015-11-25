@@ -148,7 +148,7 @@ if(BUILD_SERVER_APP)
     add_executable(osvr_server
         osvr_server.cpp
         ${OSVR_SERVER_RESOURCE})
-    target_link_libraries(osvr_server osvrServer jsoncpp_lib)
+    target_link_libraries(osvr_server osvrServer boost_program_options boost_filesystem jsoncpp_lib)
     set_target_properties(osvr_server PROPERTIES
         FOLDER "OSVR Stock Applications")
     install(TARGETS osvr_server
