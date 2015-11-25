@@ -53,35 +53,47 @@ void handleShutdown() {
 
 int main(int argc, char *argv[]) {
     const std::string helpOpt("help");
-    const std::string configOpt("config");
+    const std::string configOpt("option");
 
     std::string configName;
 
-    opt::options_description options("OSVR Server Options");
-    options.add_options()(
+    opt::options_description optionsAll("All Options");
+    opt::options_description optionsVisible("Command Line Options");
+    opt::positional_options_description optionsPositional;
+
+    optionsPositional.add(configOpt.c_str(), -1);
+    optionsAll.add_options()(
         configOpt.c_str(),
         opt::value<std::string>(&configName)
             ->default_value(osvr::server::getDefaultConfigFilename()),
-        "override config filename")(helpOpt.c_str(),
-                                    "display this help message");
+        "override config filename");
+    optionsVisible.add_options()(helpOpt.c_str(), "display this help message");
+    optionsAll.add(optionsVisible);
 
     opt::variables_map values;
     try {
-        opt::store(opt::parse_command_line(argc, argv, options), values);
+        opt::store(opt::command_line_parser(argc, argv)
+                       .options(optionsAll)
+                       .positional(optionsPositional)
+                       .run(),
+                   values);
         opt::notify(values);
     } catch (opt::invalid_command_line_syntax &e) {
         std::cerr << e.what() << std::endl;
         return 1;
-    }
-
-    if (values.count(helpOpt)) {
-        std::cout << options << std::endl;
+    } catch (opt::unknown_option &e) {
+        std::cerr << e.what() << std::endl; // may want to replace boost msg
         return 1;
     }
 
+    if (values.count(helpOpt)) {
+        std::cout << optionsVisible << std::endl;
+        return 0;
+    }
+
     if (!values.count(configOpt)) {
-        out << "Using default config file - pass a filename with --config= "
-               "to use a different one."
+        out << "Using default config file - pass a filename on the command "
+               "line to use a different one."
             << endl;
     } else {
         configName = values[configOpt].as<std::string>();
@@ -89,10 +101,16 @@ int main(int argc, char *argv[]) {
 
     fs::path configPath(configName);
     if (!fs::exists(configPath)) {
-        out << "Creating blank config at \"" << configName << "\"" << endl;
-        fs::ofstream configOut{configPath};
-        configOut << "{ }\n";
-        configOut.close();
+        try {
+            out << "Creating blank config at \"" << configName << "\"" << endl;
+            fs::ofstream configOut{configPath};
+            configOut << "{ }\n";
+            configOut.close();
+        } catch (fs::filesystem_error &e) {
+            err << "Could not create config file at \"" << configName << "\""
+                << endl;
+            err << "Reason " << e.what() << endl;
+        }
     } else {
         if (fs::is_directory(configPath)) {
             err << "\"" << configName << "\" is a directory" << endl;
