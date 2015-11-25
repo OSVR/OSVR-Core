@@ -85,6 +85,7 @@ namespace kalman {
             ret.template topLeftCorner<DIM_A, DIM_A>() = a().errorCovariance();
             ret.template bottomRightCorner<DIM_B, DIM_B>() =
                 b().errorCovariance();
+                return ret;
         }
 
         template <typename Derived>
