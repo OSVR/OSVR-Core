@@ -40,6 +40,14 @@ qPureExp(src) := block([theta, scale],
 qPureExp([.1, .1, .1]/2);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Small angle rotation
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+smallAngleMatrix(w) := matrix([0, -w[3], w[2]], [w[3], 0, -w[1]], [-w[2], w[1], 0]);
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: section start ]
 Projecting without distortion
    [wxMaxima: section end   ] */
@@ -89,7 +97,7 @@ H : block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon],
     myincrot: [incrot[1], incrot[2], incrot[3]],
     mypos : [pos[1], pos[2], pos[3]],
     mybeacon : [beacon[1], beacon[2], beacon[3]],
-jacobian(projectPointRotMatrix(quatToRotMatrix(qPureExp(myincrot)) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy), [pos[1], pos[2], pos[3],incrot[1], incrot[2], incrot[3], beacon[1], beacon[2], beacon[3]]));
+jacobian(projectPointRotMatrix(smallAngleMatrix(myincrot) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy), [pos[1], pos[2], pos[3],incrot[1], incrot[2], incrot[3], beacon[1], beacon[2], beacon[3]]));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -168,6 +176,24 @@ Some of these seem to be pretty common quantities, for instance, componentwise s
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
+exportBlock(myblock, incrementalFn, matrixFn) := block([blockargs, len, incFile, matrixFile, i],
+    blockargs: args(myblock),
+    len: length(blockargs),
+    incFile: openw(incrementalFn),
+    for i:2 thru len - 1 do printf(incFile, "~a~%", blockargs[i]),
+    close(incFile),
+    matrixFile: openw(matrixFn),
+    printf(matrixFile, "~a~%", blockargs[len]),
+    close(matrixFile)
+    )$
+printBlock(myblock, func) := block([blockargs, len, i],
+    blockargs: args(myblock),
+    len: length(blockargs),
+    for i:2 thru len do print(string(func(blockargs[i])))
+    )$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 replaceExponentsOnce(expr) := block([arg, power, newexpr, i],
     if atom(expr) then expr elseif operatorp(expr, "^") then (
         arg : args(expr)[1],
@@ -182,6 +208,54 @@ replaceExponents(x^3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+tempreplaceExponentsOnce(expr) := block([arg, power, newexpr, i],
+    if atom(expr) then (print("got atom", expr), expr) elseif operatorp(expr, "^") then (
+        arg : args(expr)[1],
+        power: args(expr)[2],
+        print("got exponentiation, arg", arg, "power", power),
+        if power < 0 then return(1/tempreplaceExponentsOnce(1/expr)) else 
+        return(cons(arg, join(makelist("*", power-1), makelist(arg, power-1))))
+    ) else (print("Got something else, op ", op(expr), "args ", args(expr)), return(expr))
+);
+tempreplaceExponents(expr) := (print("Starting with expression ", expr),scanmap(tempreplaceExponentsOnce, expr));
+tempreplaceExponents(1/%36^2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+processSubscripts(a) := a;
+processExpression(expr) := replaceExponents(processSubscripts(expr));
+processLine(line) := block([lineargs],
+    lineargs : args(line),
+    if operatorp(line, ":") then (
+        sconcat("auto ", string(lineargs[1]), " = ", processExpression(lineargs[2]), ";" )
+    ) else (
+        string(line)
+    )
+);
+matrixCodegen(mat) := block([myblock, blockargs, len, i],
+    myblock: ev(optimize(mat), optimprefix: v),
+    blockargs: args(myblock),
+    len: length(blockargs),
+    for i:2 thru len do print(processLine(blockargs[i])),
+    print(processLine(blockargs(len)))
+);
+matrixCodegen(H);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+matrixCodegen(H);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+
+    for i:2 thru len do print(string(func(blockargs[i])))
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+printBlock(optimize(H), args);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 commonSubs : append(
     makelist(incrot[i]^2 = incrotSqr[i], i, 3),
     makelist(incrot[i]^3 = incrotCu[i], i, 3),
@@ -191,20 +265,15 @@ commonSubs : append(
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-optimH:optimize(replaceExponents(subst(commonSubs, H)));
+optimH:optimize(H);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-exportBlock(myblock, incrementalFn, matrixFn) := block([blockargs, len, incFile, matrixFile, i],
-    blockargs: args(myblock),
-    len: length(blockargs),
-    incFile: openw(incrementalFn),
-    for i:2 thru len - 1 do printf(incFile, "~a~%", blockargs[i]),
-    close(incFile),
-    matrixFile: openw(matrixFn),
-    printf(matrixFile, "~a~%", blockargs[len]),
-    close(matrixFile)
-    )$
+optimH:optimize(subst(commonSubs, H));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+optimH:optimize(replaceExponents(subst(commonSubs, H)));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */

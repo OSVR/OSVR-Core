@@ -43,6 +43,7 @@ inline Eigen::Matrix<double, 2, 9>
 getVideoJacobian(Eigen::Vector3d const &pos, Eigen::Vector3d const &incrot,
                  Eigen::Quaterniond const &q, double fl,
                  Eigen::Vector3d const &beacon) {
+#if 0
     /// Begin manually-created shortcut substitutions to improve performance
     /// through SIMD and reduce number of exponents that have to be manually
     /// fixed.
@@ -229,6 +230,66 @@ getVideoJacobian(Eigen::Vector3d const &pos, Eigen::Vector3d const &incrot,
         v115 * v31 * fl - v29 * v33 * v116 * fl,
         v113 * v31 * fl - v25 * v33 * v116 * fl,
         v114 * v31 * fl - v20 * v33 * v116 * fl;
+    return result;
+#endif
+
+    auto v1 = q.y() * q.z();
+    auto v2 = v1 - q.x() * q.w();
+    auto v3 = q.x() * q.z();
+    auto v4 = v3 + q.y() * q.w();
+    auto v5 = 2 * incrot[0] * v2 - 2 * incrot[1] * v4;
+    auto v6 = (q.x() * q.x());
+    auto v7 = (q.z() * q.z());
+    auto v8 = v7 + v6;
+    auto v9 = 1 - 2 * v8;
+    auto v10 = q.x() * q.y();
+    auto v11 = v10 - q.z() * q.w();
+    auto v12 = incrot[0] * v9 - 2 * incrot[1] * v11;
+    auto v13 = (q.y() * q.y());
+    auto v14 = v7 + v13;
+    auto v15 = 1 - 2 * v14;
+    auto v16 = v10 + q.z() * q.w();
+    auto v17 = 2 * incrot[0] * v16 - incrot[1] * v15;
+    auto v18 = beacon[2] * v5 + beacon[0] * v17 + beacon[1] * v12 + pos[2];
+    auto v19 = 1 / v18;
+    auto v20 = fl * v19;
+    auto v21 = 1 / (v18 * v18);
+    auto v22 = v6 + v13;
+    auto v23 = 1 - 2 * v22;
+    auto v24 = incrot[1] * v23 - 2 * incrot[2] * v2;
+    auto v25 = v1 + q.x() * q.w();
+    auto v26 = 2 * incrot[1] * v25 - incrot[2] * v9;
+    auto v27 = v3 - q.y() * q.w();
+    auto v28 = 2 * incrot[1] * v27 - 2 * incrot[2] * v16;
+    auto v29 = beacon[0] * v28 + beacon[1] * v26 + beacon[2] * v24 + pos[0];
+    auto v30 = beacon[1] * v9 + 2 * beacon[2] * v2 + 2 * beacon[0] * v16;
+    auto v31 =
+        (-2 * beacon[2] * v4) + beacon[0] * (2 * v14 - 1) - 2 * beacon[1] * v11;
+    auto v32 = incrot[2] * v15 - 2 * incrot[0] * v27;
+    auto v33 = 2 * incrot[2] * v4 - incrot[0] * v23;
+    auto v34 = 2 * incrot[2] * v11 - 2 * incrot[0] * v25;
+    auto v35 = beacon[1] * v34 + beacon[2] * v33 + beacon[0] * v32 + pos[1];
+
+    Eigen::Matrix<double, 2, 9> result;
+    result << v20, 0, -v21 * v29 * fl, -v30 * v21 * v29 * fl,
+        (v23 * beacon[3] + 2 * beacon[2] * v25 + 2 * beacon[1] * v27) * v19 *
+                fl -
+            v31 * v21 * v29 * fl,
+        ((-2 * beacon[1] * v16) - 2 * beacon[3] * v2 +
+         beacon[2] * (2 * v8 - 1)) *
+            v19 * fl,
+        v28 * v19 * fl - v17 * v21 * v29 * fl,
+        v26 * v19 * fl - v12 * v21 * v29 * fl,
+        v24 * v19 * fl - v5 * v21 * v29 * fl, 0, v20, -v35 * v21 * fl,
+        ((2 * v22 - 1) * beacon[3] - 2 * beacon[2] * v25 -
+         2 * beacon[1] * v27) *
+                v19 * fl -
+            v30 * v35 * v21 * fl,
+        -v31 * v35 * v21 * fl,
+        (2 * beacon[2] * v11 + 2 * beacon[3] * v4 + beacon[1] * v15) * v19 * fl,
+        v32 * v19 * fl - v17 * v35 * v21 * fl,
+        v34 * v19 * fl - v12 * v35 * v21 * fl,
+        v33 * v19 * fl - v5 * v35 * v21 * fl;
     return result;
 }
 
