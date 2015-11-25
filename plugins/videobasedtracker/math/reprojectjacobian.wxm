@@ -20,6 +20,26 @@ quatToRotMatrix(q) := matrix(
     [2*(q[2]*q[4] - q[1]*q[3]), 2*(q[3]*q[4] + q[1]*q[2]), 1-2*(q[2]^2+q[3]^2)]);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Quaternion Exponentiation
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+Takes in just the vector part of a quaternion.
+Note that divide an angular velocity dt (or incremental rotation) by 2 and you can feed it into this function to get a quaternion to compose.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+qPureExp(src) := block([theta, scale],
+    theta : sqrt(src . transpose(src)),
+    scale : sin(theta)/theta,
+    [cos(theta), src[1]*scale, src[2]*scale, src[3]*scale]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+qPureExp([.1, .1, .1]/2);
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: section start ]
 Projecting without distortion
    [wxMaxima: section end   ] */
@@ -29,17 +49,27 @@ This is the "simple" version without distortion in it.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-projectPoint(quat, translation, objPt, fx, fy, cx, cy) := 
+projectPointRotMatrix(rot, translation, objPt, fx, fy, cx, cy) := 
 block([xformed, xp, yp, x, y, z, u, v],
-    xformed : quatToRotMatrix(quat) . transpose(matrix(objPt)) + translation,
+    xformed : rot . transpose(matrix(objPt)) + translation,
     xp : (xformed[1]/xformed[3])[1],
     yp : (xformed[2]/xformed[3])[1],
     u : fx * xp + cx,
     v : fy * yp + cy,
     [u,v]);
+projectPoint(quat, translation, objPt, fx, fy, cx, cy) := projectPointRotMatrix(quatToRotMatrix(quat), translation, objPt, fx, fy, cx, cy);
 projectPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Corresponding jacobian
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+This is the jacobian of the measurement (image points [u, v]) with respect to the augmented state vector, which is the externalized-quat-pose-state as well as the beacon state.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: hide output   ] */
 /* [wxMaxima: input   start ] */
 nonDistortedJacobian : jacobian(projectPoint([q0, q1, q2, q3], [x,y,z], [xb, yb, zb], fl, fl, cx, cy), [x,y,z, q0, q1, q2, q3,  xb, yb, zb]);
 /* [wxMaxima: input   end   ] */
@@ -49,19 +79,24 @@ This version uses subscripts in the final result, making it more readable (?)
 and, for some reason it's also different, which I don't understand at all.
 Quaternion is q4, q1, q2, q3 because Eigen puts w at the end, while I accidentally
 put w at the beginning of the rest of this math.
+
+This is also using the correct columns, though there needs to be 6 zero columns inserted after the first 6 columns.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-H : block([myquat, mypos, mybeacon],
+H : block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon],
     myquat : [q[4], q[1], q[2], q[3]],
+    myincrot: [incrot[1], incrot[2], incrot[3]],
     mypos : [pos[1], pos[2], pos[3]],
     mybeacon : [beacon[1], beacon[2], beacon[3]],
-jacobian(projectPoint(myquat, mypos, mybeacon, fl, fl, cx, cy), [q[4], q[1], q[2], q[3], pos[1], pos[2], pos[3], beacon[1], beacon[2], beacon[3]]));
+jacobian(projectPointRotMatrix(quatToRotMatrix(qPureExp(myincrot)) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy), [pos[1], pos[2], pos[3],incrot[1], incrot[2], incrot[3], beacon[1], beacon[2], beacon[3]]));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
 Distortion
    [wxMaxima: section end   ] */
+
+/* [wxMaxima: fold    start ] */
 
 /* [wxMaxima: comment start ]
 Now for the version with distortion -
@@ -84,9 +119,13 @@ block([xformed, xp, yp, r2, radDistort, xpp, ypp, x, y, z, u, v],
 projectDistortedPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: fold    end   ] */
+
 /* [wxMaxima: section start ]
 Comparing
    [wxMaxima: section end   ] */
+
+/* [wxMaxima: fold    start ] */
 
 /* [wxMaxima: input   start ] */
 distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
@@ -109,46 +148,59 @@ distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, 
 %([1,1,1]);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: fold    end   ] */
+
 /* [wxMaxima: section start ]
 Outputting jacobian in a way we can compute
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: comment start ]
-Will need some transformation, initially a search and replace for ,% with ,\n%
-followed by a split into two files and the seds committed into the repo,
-and finally manual touch-ups (making sure some numbers are doubles, replacing ^
+Will need some transformation, the seds committed into the repo,
+and finally manual touch-ups (making sure some numbers are doubles, replacing ^, etc)
     
 Didn't have time to write the Maxima or Lisp code to properly export directly
 to C code, so the stepwise procedure will have to suffice.
    [wxMaxima: comment end   ] */
 
+/* [wxMaxima: comment start ]
+A few notes:
+Some of these seem to be pretty common quantities, for instance, componentwise squared and cubed incrot was seen. So was a component-wise squaring of the quaternion.
+   [wxMaxima: comment end   ] */
+
 /* [wxMaxima: input   start ] */
-H;
+replaceExponentsOnce(expr) := block([arg, power, newexpr, i],
+    if atom(expr) then expr elseif operatorp(expr, "^") then (
+        arg : args(expr)[1],
+        power: args(expr)[2],
+        return("std::pow"(arg, power))
+    ) else (return(expr))
+);
+replaceExponents(expr) := scanmap(replaceExponentsOnce, expr);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-optimH:optimize(H);
+commonSubs : append(makelist(incrot[i]^2 = incrotSqr[i], i, 3), makelist(incrot[i]^3 = incrotCu[i], i, 3), makelist(q[i]^2 = qSqr[i], i, 4), makelist(q[i]^3 = qCu[i], i, 4));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-exportBlock(myblock) := block([blockargs, len],
+optimH:optimize(subst(commonSubs, H));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+exportBlock(myblock, incrementalFn, matrixFn) := block([blockargs, len, incFile, matrixFile, i],
     blockargs: args(myblock),
     len: length(blockargs),
-    for i:2 thru len do print(string(blockargs[i]))
+    incFile: openw(incrementalFn),
+    for i:2 thru len - 1 do printf(incFile, "~a~%", blockargs[i]),
+    close(incFile),
+    matrixFile: openw(matrixFn),
+    printf(matrixFile, "~a~%", blockargs[len]),
+    close(matrixFile)
     )$
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-exportBlock(optimH);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-myargs:args(optimH)$
-mylen:length(myargs);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-args(myargs[mylen]);
+exportBlock(optimH, "videotrackerjacobian.txt", "jacobianmatrix.txt");
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
