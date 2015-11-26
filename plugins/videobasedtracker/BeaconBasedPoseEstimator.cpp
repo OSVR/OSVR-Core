@@ -22,14 +22,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if 0
+#include <iostream>
+#include <osvr/Util/EigenCoreGeometry.h>
+template <typename T>
+inline void dumpKalmanDebugOuput(const char name[], const char expr[],
+    T const &value) {
+    std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
+        << value << std::endl;
+}
+
+#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
+    dumpKalmanDebugOuput(Name, #Value, Value)
+#endif
+
 // Internal Includes
 #include "BeaconBasedPoseEstimator.h"
 #include "cvToEigen.h"
 #include "VideoJacobian.h"
+#include "ImagePointMeasurement.h"
 
 // Library/third-party includes
 #include <osvr/Util/QuatlibInteropC.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
+#include <osvr/Kalman/AugmentedProcessModel.h>
+#include <osvr/Kalman/AugmentedState.h>
+#include <osvr/Kalman/ConstantProcess.h>
 
 // Standard includes
 // - none
@@ -203,12 +222,12 @@ namespace vbtracker {
                                                      OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
         bool result = false;
-#if 0
+#if 1
         if (!m_gotPose || !m_gotPrev) {
 #endif
-        // Must use the direct approach
-        result = m_pnpransacEstimator(leds);
-#if 0
+            // Must use the direct approach
+            result = m_pnpransacEstimator(leds);
+#if 1
         } else {
             auto dt = osvrTimeValueDurationSeconds(&tv, &m_prev);
             // Can use kalman approach
@@ -350,12 +369,42 @@ namespace vbtracker {
             }
             i = (i + 1) % 200;
         }
+        return true;
     }
 
     bool
     BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
                                                          double dt) {
-        return false;
+        bool predicted = false;
+        auto const beaconsSize = m_beacons.size();
+        CameraModel cam;
+        cam.focalLength = m_focalLength;
+        cam.principalPoint = m_principalPoint;
+        ImagePointMeasurement meas{cam};
+        kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
+        Eigen::Vector2d pt;
+        for (auto const &led : leds) {
+            if (!led.identified()) {
+                continue;
+            }
+            auto id = led.getID();
+
+            if (id < beaconsSize) {
+                if (!predicted) {
+                    kalman::predict(m_state, m_model, dt);
+                    predicted = true;
+                }
+                meas.setMeasurement(
+                    Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
+                auto state =
+                    kalman::makeAugmentedState(m_state, *(m_beacons[id]));
+                auto model =
+                    kalman::makeAugmentedProcessModel(m_model, beaconProcess);
+                kalman::correct(state, model, meas);
+            }
+        }
+
+        return predicted;
     }
 
     static const double InitialStateError[] = {100.,  100.,  100.,  10.,
@@ -370,6 +419,9 @@ namespace vbtracker {
         m_state.setStateVector(state);
         m_state.setQuaternion(quat);
         m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
+        std::cout << "State:" << m_state.stateVector().transpose()
+                  << "\n  with quaternion "
+                  << m_state.getQuaternion().coeffs().transpose() << std::endl;
     }
     bool BeaconBasedPoseEstimator::ProjectBeaconsToImage(
         std::vector<cv::Point2f> &out) {

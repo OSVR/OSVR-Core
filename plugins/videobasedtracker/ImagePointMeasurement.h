@@ -60,7 +60,7 @@ namespace vbtracker {
         using Jacobian =
             kalman::types::Matrix<DIMENSION,
                                   kalman::types::Dimension<State>::value>;
-
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         explicit ImagePointMeasurement(CameraModel const &cam) : m_cam(cam) {}
         Vector getResidual(State const &state) const {
             // 3d position of beacon
@@ -75,15 +75,24 @@ namespace vbtracker {
         void setMeasurement(Vector const &m) { m_measurement = m; }
 
         Jacobian getJacobian(State const &state) const {
-            return getVideoJacobian(
+            Eigen::Matrix<double, 2, 9> nonzero = getVideoJacobian(
                 state.a().getPosition(),
                 kalman::pose_externalized_rotation::incrementalOrientation(
                     state.a().stateVector()),
-                state.a().getCombinedQuaternion(), m_cam.focalLength,
+                /// @todo should be getCombinedQuaternion but that one is
+                /// broken?
+                state.a().getQuaternion(), m_cam.focalLength,
                 state.b().stateVector());
+            /// Need 6 cols of 0 in there because velocity doesn't affect
+            /// measurement.
+            Jacobian ret;
+            ret << nonzero.topLeftCorner<2, 6>(),
+                Eigen::Matrix<double, 2, 6>::Zero(),
+                nonzero.topRightCorner<2, 3>();
+            return ret;
         }
 
-        SquareMatrix getCovariance(State & state) const {
+        SquareMatrix getCovariance(State &state) const {
             /// @todo make this better, perhaps state dependent.
             return Vector::Constant(2.0).asDiagonal();
         }

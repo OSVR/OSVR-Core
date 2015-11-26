@@ -34,6 +34,7 @@
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Kalman/PureVectorState.h>
 #include <osvr/Kalman/PoseState.h>
+#include <osvr/Kalman/PoseDampedConstantVelocity.h>
 
 // Standard includes
 #include <vector>
@@ -154,6 +155,8 @@ namespace vbtracker {
         cv::Mat m_tvec;
         using State = kalman::pose_externalized_rotation::State;
         State m_state;
+        using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
+        ProcessModel m_model;
         /// @}
     };
 
