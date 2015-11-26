@@ -64,25 +64,16 @@ namespace server {
     /// @brief This is the basic common code of a server app's setup, ripped out
     /// of the main server app to make alternate server-acting apps simpler to
     /// develop.
-    inline ServerPtr configureServerFromFile(std::string const &configName) {
+    inline ServerPtr configureServerFromString(std::string const &json) {
         using detail::out;
         using detail::err;
         using std::endl;
+        
         ServerPtr ret;
-        out << "Using config file '" << configName << "'" << endl;
-        std::ifstream config(configName);
-        if (!config.good()) {
-            err << "\n"
-                << "Could not open config file!" << endl;
-            err << "Searched in the current directory; file may be "
-                   "misspelled, missing, or in a different directory." << endl;
-            return nullptr;
-        }
-
         osvr::server::ConfigureServer srvConfig;
         out << "Constructing server as configured..." << endl;
         try {
-            srvConfig.loadConfig(config);
+            srvConfig.loadConfig(json);
             ret = srvConfig.constructServer();
         } catch (std::exception &e) {
             err << "Caught exception constructing server from JSON config "
@@ -168,6 +159,26 @@ namespace server {
         ret->triggerHardwareDetect();
 
         return ret;
+    }
+
+    /// @Brief Convenience wrapper for configureServerFromString
+    inline ServerPtr configureServerFromFile(std::string const &configName) {
+        using detail::out;
+        using detail::err;
+        using std::endl;
+        
+        out << "Using config file '" << configName << "'" << endl;
+        std::ifstream config(configName);
+        if (!config.good()) {
+            err << "\n"
+                << "Could not open config file!" << endl;
+            err << "Searched in the current directory; file may be "
+                   "misspelled, missing, or in a different directory." << endl;
+            return nullptr;
+        }
+
+        std::string json(std::istreambuf_iterator<char>(config), {});
+        return configureServerFromString(json);
     }
 } // namespace server
 } // namespace osvr

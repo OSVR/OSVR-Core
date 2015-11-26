@@ -31,6 +31,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <iostream>
@@ -91,37 +92,36 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (!values.count(configOpt)) {
-        out << "Using default config file - pass a filename on the command "
-               "line to use a different one."
+    configName = values[configOpt].as<std::string>();
+
+    boost::optional<fs::path> configPath(configName);
+    try {
+        if (!fs::exists(*configPath)) {
+            out << "File '" << configName
+                << "' not found.  Using blank config" << endl;
+            configPath = boost::none;
+        } else {
+            if (fs::is_directory(*configPath)) {
+                err << "'" << configName << "' is a directory" << endl;
+                return -1;
+            } else if (!fs::is_regular_file(*configPath)) {
+                err << "'" << configName << "' is special file" << endl;
+                return -1;
+            }
+        }
+    } catch (fs::filesystem_error &e) {
+        err << "Could not open config file at '" << configName << "'"
             << endl;
-    } else {
-        configName = values[configOpt].as<std::string>();
+        err << "Reason " << e.what() << endl;
+        configPath = boost::none;
     }
-
-    fs::path configPath(configName);
-    if (!fs::exists(configPath)) {
-        try {
-            out << "Creating blank config at \"" << configName << "\"" << endl;
-            fs::ofstream configOut{configPath};
-            configOut << "{ }\n";
-            configOut.close();
-        } catch (fs::filesystem_error &e) {
-            err << "Could not create config file at \"" << configName << "\""
-                << endl;
-            err << "Reason " << e.what() << endl;
-        }
+    
+    if (configPath) {
+        server = osvr::server::configureServerFromFile(configName);
     } else {
-        if (fs::is_directory(configPath)) {
-            err << "\"" << configName << "\" is a directory" << endl;
-            return -1;
-        } else if (!fs::is_regular_file(configPath)) {
-            err << "\"" << configName << "\" is special file" << endl;
-            return -1;
-        }
+        server = osvr::server::configureServerFromString("{ }");
     }
-
-    server = osvr::server::configureServerFromFile(configName);
+    
     if (!server) {
         return -1;
     }
