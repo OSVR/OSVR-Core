@@ -32,6 +32,7 @@
 // - none
 
 // Standard includes
+#include <dshow.h>
 #include "qedit_wrapper.h"
 
 // This class is used to handle callbacks from the SampleGrabber filter.  It
