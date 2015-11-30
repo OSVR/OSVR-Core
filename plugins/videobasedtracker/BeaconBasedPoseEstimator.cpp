@@ -222,18 +222,15 @@ namespace vbtracker {
                                                      OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
         bool result = false;
-#if 1
         if (!m_gotPose || !m_gotPrev) {
-#endif
             // Must use the direct approach
             result = m_pnpransacEstimator(leds);
-#if 1
         } else {
             auto dt = osvrTimeValueDurationSeconds(&tv, &m_prev);
             // Can use kalman approach
             result = m_kalmanAutocalibEstimator(leds, dt);
         }
-#endif
+
         if (!result) {
             return false;
         }
@@ -355,19 +352,36 @@ namespace vbtracker {
         {
             static int i = 0;
             if (i == 0) {
-                Eigen::Vector3d camPoints =
-                    m_state.getQuaternion() *
-                        cvToVector(objectPoints.front()).cast<double>() +
-                    m_state.getPosition();
-                Eigen::Vector2d uv =
-                    (camPoints.head<2>() / camPoints[2]) * m_focalLength +
-                    m_principalPoint;
+                const double pixelReprojectionErrorForSingleAxisMax = 4;
+                if (inlierIndices.rows > 0) {
 
-                std::cout << "First model point:\n" << objectPoints.front()
-                          << " projected to " << uv.transpose() << " found at "
-                          << imagePoints.front() << "\n";
+                    double squaredError = 0;
+                    for (int i = 0; i < inlierIndices.rows; i++) {
+
+                        Eigen::Vector3d objPoint =
+                            cvToVector(objectPoints[i]).cast<double>();
+                        Eigen::Vector2d imgPoint = projectPoint(
+                            m_state.getPosition(), m_state.getQuaternion(),
+                            m_focalLength, m_principalPoint, objPoint);
+                        double err = (imgPoint -
+                                      cvToVector(imagePoints[i]).cast<double>())
+                                         .squaredNorm();
+                        squaredError += err;
+                        if (std::sqrt(err) >
+                            pixelReprojectionErrorForSingleAxisMax) {
+                            std::cout
+                                << "Got a reprojection error of "
+                                << std::sqrt(err)
+                                << " using the Kalman-utilized projection code!"
+                                << std::endl;
+                        }
+                    }
+                    std::cout
+                        << "RMS error for kalman-utilized projection code: "
+                        << std::sqrt(squaredError) << std::endl;
+                }
             }
-            i = (i + 1) % 200;
+            i = (i + 1) % 50;
         }
         return true;
     }
@@ -375,7 +389,6 @@ namespace vbtracker {
     bool
     BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
                                                          double dt) {
-        bool predicted = false;
         auto const beaconsSize = m_beacons.size();
         CameraModel cam;
         cam.focalLength = m_focalLength;
@@ -383,28 +396,33 @@ namespace vbtracker {
         ImagePointMeasurement meas{cam};
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         Eigen::Vector2d pt;
+
+        kalman::predict(m_state, m_model, dt);
+
         for (auto const &led : leds) {
             if (!led.identified()) {
                 continue;
             }
             auto id = led.getID();
-
-            if (id < beaconsSize) {
-                if (!predicted) {
-                    kalman::predict(m_state, m_model, dt);
-                    predicted = true;
-                }
-                meas.setMeasurement(
-                    Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
-                auto state =
-                    kalman::makeAugmentedState(m_state, *(m_beacons[id]));
-                auto model =
-                    kalman::makeAugmentedProcessModel(m_model, beaconProcess);
-                kalman::correct(state, model, meas);
+            if (id >= beaconsSize) {
+                continue;
             }
+            meas.setMeasurement(
+                Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
+            auto state = kalman::makeAugmentedState(m_state, *(m_beacons[id]));
+            auto model =
+                kalman::makeAugmentedProcessModel(m_model, beaconProcess);
+            kalman::correct(state, model, meas);
         }
 
-        return predicted;
+        /// Output to the OpenCV state types so we can see the reprojection
+        /// debug view.
+        cv::Mat rotMatrix;
+        cv::eigen2cv(m_state.getQuaternion().toRotationMatrix(), rotMatrix);
+        cv::Mat rot;
+        cv::Rodrigues(rotMatrix, m_rvec);
+        cv::eigen2cv(m_state.getPosition().eval(), m_tvec);
+        return true;
     }
 
     static const double InitialStateError[] = {100.,  100.,  100.,  10.,
