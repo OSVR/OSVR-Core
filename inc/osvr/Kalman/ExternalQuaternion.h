@@ -57,10 +57,10 @@ namespace kalman {
 /// motion, structure, and focal length. Pattern Analysis and Machine
 /// Intelligence, IEEE Transactions on, 17(6), 562--575.
 /// http://doi.org/10.1109/34.387503
-#if 1
+#if 0
         inline Eigen::Quaterniond vecToQuat(types::Vector<3> const &incRotVec) {
             assert(vecToQuatScalarPartSquared(incRotVec) >= 0 &&
-                   "Incremental rotation vector's squared norm was greawter "
+                   "Incremental rotation vector's squared norm was greater "
                    "than 1! Precondition fail!");
             Eigen::Quaterniond ret;
             ret.vec() = incRotVec / 2.;
@@ -68,15 +68,17 @@ namespace kalman {
             return ret;
         }
 #else
+        static const double QUAT_SCALE_EPSILON = 1e-10;
         inline Eigen::Quaterniond vecToQuat(types::Vector<3> const &incRotVec) {
             Eigen::Quaterniond ret;
             double theta = (incRotVec / 2.).norm();
-            double scale = std::sin(theta) / theta;
+            double scale =
+                theta > QUAT_SCALE_EPSILON ? std::sin(theta) / theta : 1.0;
             ret.vec() = scale * incRotVec / 2.;
             ret.w() = std::cos(theta);
             return ret.normalized();
         }
-        #endif
+#endif
 /// Computes what is effectively the Jacobian matrix of partial
 /// derivatives of incrementalOrientationToQuat()
 #if 0
