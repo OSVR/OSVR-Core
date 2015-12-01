@@ -38,7 +38,23 @@
 namespace osvr {
 namespace kalman {
     namespace external_quat {
-
+        /// Computes sinc(Theta) (roughly sine(theta)/theta except defined at
+        /// theta = 0)
+        inline double qsinc(double theta) {
+            /// machine epsilon is roughly 1e-16, so fourth root is roughly
+            /// 1e-4, recommended cutoff for taylor series expansion vs. direct
+            /// computation per
+            /// Grassia, F. S. (1998). Practical Parameterization of Rotations
+            /// Using the Exponential Map. Journal of Graphics Tools, 3(3),
+            /// 29–48. http://doi.org/10.1080/10867651.1998.10487493
+            double ret;
+            if (theta < 1.e-4) {
+                ret = 1. - theta * theta / 6.;
+                return ret;
+            }
+            ret = std::sin(theta) / theta;
+            return ret;
+        }
         /// Helper for vecToQuat() and covarianceFromEulerVariance()
         inline double
             vecToQuatScalarPartSquared(types::Vector<3> const &incRotVec) {
@@ -69,13 +85,13 @@ namespace kalman {
         }
 #else
         static const double QUAT_SCALE_EPSILON = 1e-10;
+        /// Performs exponentiation from a vector to a quaternion.
         inline Eigen::Quaterniond vecToQuat(types::Vector<3> const &incRotVec) {
             Eigen::Quaterniond ret;
             double theta = (incRotVec / 2.).norm();
-            double scale =
-                theta > QUAT_SCALE_EPSILON ? std::sin(theta) / theta : 1.0;
+            double scale = qsinc(theta / 2.) / 2.;
             ret.vec() = scale * incRotVec / 2.;
-            ret.w() = std::cos(theta);
+            ret.w() = std::cos(theta / 2);
             return ret.normalized();
         }
 #endif
