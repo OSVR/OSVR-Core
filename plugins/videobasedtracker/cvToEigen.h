@@ -51,6 +51,16 @@ namespace vbtracker {
         cv::cv2eigen(rot, rotMat);
         return Eigen::Quaterniond(rotMat);
     }
+
+    inline cv::Mat eiQuatToRotVec(Eigen::Quaterniond const &q) {
+        cv::Mat rotMatrix;
+        Eigen::Matrix3d eiRotMatrix = q.toRotationMatrix();
+        cv::eigen2cv(eiRotMatrix, rotMatrix);
+        cv::Mat rot;
+        cv::Rodrigues(rotMatrix, rot);
+        return rot;
+    }
+
     inline Eigen::Vector3f cvToVector(cv::Point3f const &point) {
         return Eigen::Vector3f(point.x, point.y, point.z);
     }
@@ -69,6 +79,7 @@ namespace vbtracker {
     inline cv::Point3f vec3dToCVPoint3f(Eigen::Vector3d const &vec) {
         return cv::Point3f(vec.x(), vec.y(), vec.z());
     }
+
 } // namespace vbtracker
 } // namespace osvr
 

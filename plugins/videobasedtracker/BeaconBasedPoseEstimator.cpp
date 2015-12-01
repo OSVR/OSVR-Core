@@ -22,33 +22,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if 0
-#include <iostream>
-#include <osvr/Util/EigenCoreGeometry.h>
-template <typename T>
-inline void dumpKalmanDebugOuput(const char name[], const char expr[],
-    T const &value) {
-    std::cout << "\n(Kalman Debug Output) " << name << " [" << expr << "]:\n"
-        << value << std::endl;
-}
-
-#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
-    dumpKalmanDebugOuput(Name, #Value, Value)
-#endif
-
 // Internal Includes
 #include "BeaconBasedPoseEstimator.h"
 #include "cvToEigen.h"
-#include "VideoJacobian.h"
-#include "ImagePointMeasurement.h"
+#include "ImagePointMeasurement.h" // for projectPoint
 
 // Library/third-party includes
-#include <osvr/Util/QuatlibInteropC.h>
+#include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenInterop.h>
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
-#include <osvr/Kalman/AugmentedProcessModel.h>
-#include <osvr/Kalman/AugmentedState.h>
-#include <osvr/Kalman/ConstantProcess.h>
 
 // Standard includes
 // - none
@@ -349,6 +330,10 @@ namespace vbtracker {
 
         m_resetState(cvToVector3d(m_tvec), cvRotVecToQuat(m_rvec));
 
+        cv::Mat rvec;
+        m_rvec.copyTo(rvec);
+        cv::Mat roundTripped = eiQuatToRotVec(m_state.getQuaternion());
+        std::cout << "Round-trip error: " << rvec - roundTripped << std::endl;
         {
             static int i = 0;
             if (i == 0) {
@@ -363,6 +348,11 @@ namespace vbtracker {
                         Eigen::Vector2d imgPoint = projectPoint(
                             m_state.getPosition(), m_state.getQuaternion(),
                             m_focalLength, m_principalPoint, objPoint);
+                        std::cout << "reproj residual "
+                                  << (imgPoint -
+                                      cvToVector(imagePoints[i]).cast<double>())
+                                         .transpose()
+                                  << std::endl;
                         double err = (imgPoint -
                                       cvToVector(imagePoints[i]).cast<double>())
                                          .squaredNorm();
@@ -381,66 +371,11 @@ namespace vbtracker {
                         << std::sqrt(squaredError) << std::endl;
                 }
             }
-            i = (i + 1) % 50;
+            i = (i + 1) % 200;
         }
         return true;
     }
 
-    bool
-    BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
-                                                         double dt) {
-        auto const beaconsSize = m_beacons.size();
-        CameraModel cam;
-        cam.focalLength = m_focalLength;
-        cam.principalPoint = m_principalPoint;
-        ImagePointMeasurement meas{cam};
-        kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
-        Eigen::Vector2d pt;
-
-        kalman::predict(m_state, m_model, dt);
-
-        for (auto const &led : leds) {
-            if (!led.identified()) {
-                continue;
-            }
-            auto id = led.getID();
-            if (id >= beaconsSize) {
-                continue;
-            }
-            meas.setMeasurement(
-                Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
-            auto state = kalman::makeAugmentedState(m_state, *(m_beacons[id]));
-            auto model =
-                kalman::makeAugmentedProcessModel(m_model, beaconProcess);
-            kalman::correct(state, model, meas);
-        }
-
-        /// Output to the OpenCV state types so we can see the reprojection
-        /// debug view.
-        cv::Mat rotMatrix;
-        cv::eigen2cv(m_state.getQuaternion().toRotationMatrix(), rotMatrix);
-        cv::Mat rot;
-        cv::Rodrigues(rotMatrix, m_rvec);
-        cv::eigen2cv(m_state.getPosition().eval(), m_tvec);
-        return true;
-    }
-
-    static const double InitialStateError[] = {100.,  100.,  100.,  10.,
-                                               10.,   10.,   1000., 1000.,
-                                               1000., 1000., 1000., 1000.};
-    void
-    BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
-                                           Eigen::Quaterniond const &quat) {
-        using StateVec = kalman::types::DimVector<State>;
-        StateVec state(StateVec::Zero());
-        state.head<3>() = xlate;
-        m_state.setStateVector(state);
-        m_state.setQuaternion(quat);
-        m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
-        std::cout << "State:" << m_state.stateVector().transpose()
-                  << "\n  with quaternion "
-                  << m_state.getQuaternion().coeffs().transpose() << std::endl;
-    }
     bool BeaconBasedPoseEstimator::ProjectBeaconsToImage(
         std::vector<cv::Point2f> &out) {
         // Make sure we have a pose.  Otherwise, we can't do anything.
@@ -458,5 +393,5 @@ namespace vbtracker {
         return true;
     }
 
-} // End namespace vbtracker
-} // End namespace osvr
+} // namespace vbtracker
+} // namespace osvr

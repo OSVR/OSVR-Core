@@ -37,7 +37,15 @@ qPureExp(src) := block([theta, scale],
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+qSmallPureExp(src):= block([theta, scale],
+    theta : sqrt(src . transpose(src)),
+    scale : 1,
+    [cos(theta), src[1]*scale, src[2]*scale, src[3]*scale]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 qPureExp([.1, .1, .1]/2);
+qSmallPureExp([.1, .1, .1]/2);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -67,6 +75,7 @@ block([xformed, xp, yp, x, y, z, u, v],
     [u,v]);
 projectPoint(quat, translation, objPt, fx, fy, cx, cy) := projectPointRotMatrix(quatToRotMatrix(quat), translation, objPt, fx, fy, cx, cy);
 projectPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240);
+projectPointRotMatrix(quatToRotMatrix(qSmallPureExp([0,0,0])), [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -74,30 +83,30 @@ Corresponding jacobian
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: comment start ]
-This is the jacobian of the measurement (image points [u, v]) with respect to the augmented state vector, which is the externalized-quat-pose-state as well as the beacon state.
+This version uses subscripts in the final result, making it more readable.
+
+
+There needs to be 6 zero columns inserted after the first 6 columns.
    [wxMaxima: comment end   ] */
 
-/* [wxMaxima: hide output   ] */
 /* [wxMaxima: input   start ] */
-nonDistortedJacobian : jacobian(projectPoint([q0, q1, q2, q3], [x,y,z], [xb, yb, zb], fl, fl, cx, cy), [x,y,z, q0, q1, q2, q3,  xb, yb, zb]);
+block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon, meas],
+    myincrot: [incrot[0], incrot[1], incrot[2]],
+    myquat: [qw, qx, qy, qz],
+    mypos : [pos[0], pos[1], pos[2]],
+    mybeacon : [beacon[0], beacon[1], beacon[2]],
+    meas : projectPointRotMatrix(quatToRotMatrix(qSmallPureExp(myincrot)) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy),
+jacobian(meas, [pos[0], pos[1], pos[2],incrot[0], incrot[1], incrot[2], beacon[0], beacon[1], beacon[2]]));
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: comment start ]
-This version uses subscripts in the final result, making it more readable (?)
-and, for some reason it's also different, which I don't understand at all.
-Quaternion is q4, q1, q2, q3 because Eigen puts w at the end, while I accidentally
-put w at the beginning of the rest of this math.
-
-This is also using the correct columns, though there needs to be 6 zero columns inserted after the first 6 columns.
-   [wxMaxima: comment end   ] */
-
 /* [wxMaxima: input   start ] */
-H : block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon],
-    myquat : [q[4], q[1], q[2], q[3]],
-    myincrot: [incrot[1], incrot[2], incrot[3]],
-    mypos : [pos[1], pos[2], pos[3]],
-    mybeacon : [beacon[1], beacon[2], beacon[3]],
-jacobian(projectPointRotMatrix(smallAngleMatrix(myincrot) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy), [pos[1], pos[2], pos[3],incrot[1], incrot[2], incrot[3], beacon[1], beacon[2], beacon[3]]));
+block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon, meas],
+    myincrot: [incrot[0], incrot[1], incrot[2]],
+    myquat: [qw, qx, qy, qz],
+    mypos : [pos[0], pos[1], pos[2]],
+    mybeacon : [beacon[0], beacon[1], beacon[2]],
+    meas : projectPointRotMatrix(quatToRotMatrix(qSmallPureExp(myincrot)) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy),
+[jacobian(meas, mypos), jacobian(meas, myincrot), jacobian(meas, mybeacon)]);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
