@@ -106,7 +106,7 @@ namespace vbtracker {
         // Our existing pose won't match anymore.
         m_gotPose = false;
         m_beacons.clear();
-        static const double INITIAL_BEACON_ERROR = 3.0;
+        static const double INITIAL_BEACON_ERROR = 0.0;
         Eigen::Matrix3d beaconError =
             Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
         for (auto &beacon : beacons) {
