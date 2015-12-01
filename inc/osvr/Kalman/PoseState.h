@@ -170,8 +170,6 @@ namespace kalman {
                 incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
             }
 
-            void normalizeQuaternion() { m_orientation.normalize(); }
-
             StateVectorBlock3 getPosition() { return position(m_state); }
 
             ConstStateVectorBlock3 getPosition() const {
@@ -198,7 +196,8 @@ namespace kalman {
 
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
-                return incrementalOrientationToQuat(m_state) * m_orientation;
+                return (incrementalOrientationToQuat(m_state) * m_orientation)
+                    .normalized();
             }
 
           private:
