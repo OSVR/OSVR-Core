@@ -108,6 +108,24 @@ namespace vbtracker {
                     v5 * m_rot(2, 2) * v3 * m_cam.focalLength;
             return ret;
         }
+
+        Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
+            auto v1 = m_rotatedObjPoint[0] + m_xlate[0];
+            auto v2 = m_rotatedObjPoint[2] + m_xlate[2];
+            auto v3 = 1 / (v2 * v2);
+            auto v4 = 1 / v2;
+            auto v5 = m_rotatedObjPoint[1] + m_xlate[1];
+            Eigen::Matrix<double, 2, 3> ret;
+            ret << -v1 * m_rotatedObjPoint[1] * v3 * m_cam.focalLength,
+                m_rotatedObjPoint[2] * v4 * m_cam.focalLength +
+                    m_rotatedObjPoint[0] * v1 * v3 * m_cam.focalLength,
+                -m_rotatedObjPoint[1] * v4 * m_cam.focalLength,
+                (-m_rotatedObjPoint[2] * v4 * m_cam.focalLength) -
+                    m_rotatedObjPoint[1] * v5 * v3 * m_cam.focalLength,
+                m_rotatedObjPoint[0] * v5 * v3 * m_cam.focalLength,
+                m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
+            return ret;
+        }
         Jacobian getJacobian(State const &state) const {
             Jacobian ret;
             ret <<
@@ -118,12 +136,11 @@ namespace vbtracker {
                 -m_rotatedTranslatedPoint.head<2>() * m_cam.focalLength /
                     (m_rotatedTranslatedPoint.z() *
                      m_rotatedTranslatedPoint.z()),
-                // with respect to change in incremental rotation, @todo
-                Eigen::Matrix<double, 2, 3>::Zero(),
+                // with respect to change in incremental rotation
+                getRotationJacobian(),
                 // with respect to change in linear/angular velocity
                 Eigen::Matrix<double, 2, 6>::Zero(),
-                // with respect to change in beacon position, @todo
-
+                // with respect to change in beacon position
                 getBeaconJacobian();
 #if 0
             ret << nonzero.topLeftCorner<2, 6>(),
