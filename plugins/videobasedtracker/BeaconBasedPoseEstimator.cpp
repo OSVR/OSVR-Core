@@ -114,9 +114,14 @@ namespace vbtracker {
         m_beacons.clear();
         Eigen::Matrix3d beaconError =
             Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+        auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
-                cvToVector(beacon).cast<double>(), beaconError});
+                cvToVector(beacon).cast<double>(),
+                // This forces the first 3 beacons to be artificially "perfect"
+                // to avoid hunting by the algorithm
+                bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
+            bNum++;
         }
 
         return true;
