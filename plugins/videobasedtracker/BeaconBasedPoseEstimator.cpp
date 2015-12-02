@@ -38,6 +38,12 @@ namespace osvr {
 namespace vbtracker {
     /// millimeters to meters
     static const double LINEAR_SCALE_FACTOR = 1000.;
+
+    // 0 effectively turns off beacon auto-calib.
+    // This is a variance number, so std deviation squared, but it's between 0
+    // and 1, so the variance will be smaller than the standard deviation.
+    static const double INITIAL_BEACON_ERROR = 0.01;
+
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
@@ -106,7 +112,6 @@ namespace vbtracker {
         // Our existing pose won't match anymore.
         m_gotPose = false;
         m_beacons.clear();
-        static const double INITIAL_BEACON_ERROR = 0.0;
         Eigen::Matrix3d beaconError =
             Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
         for (auto &beacon : beacons) {
