@@ -42,7 +42,7 @@ namespace vbtracker {
     // 0 effectively turns off beacon auto-calib.
     // This is a variance number, so std deviation squared, but it's between 0
     // and 1, so the variance will be smaller than the standard deviation.
-    static const double INITIAL_BEACON_ERROR = 0.01;
+    static const double INITIAL_BEACON_ERROR = 0.001;
 
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
@@ -400,6 +400,30 @@ namespace vbtracker {
         cv::projectPoints(beacons, m_rvec, m_tvec, m_cameraMatrix, m_distCoeffs,
                           out);
         return true;
+    }
+
+    static const double InitialStateError[] = {1.,  1.,  10., 1.,  1.,  1.,
+                                               10., 10., 10., 10., 10., 10.};
+    static const double NoiseAutoCorrelation[] = {1e+2, 2e+1, 1e+2,
+                                                  1e-2, 1e-2, 1e-2};
+    void
+    BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
+                                           Eigen::Quaterniond const &quat) {
+        // Note that here, units are millimeters and radians, and x and z are
+        // the lateral translation dimensions, with z being distance from camera
+        using StateVec = kalman::types::DimVector<State>;
+        StateVec state(StateVec::Zero());
+        state.head<3>() = xlate;
+        m_state.setStateVector(state);
+        m_state.setQuaternion(quat);
+        m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
+
+        m_model.setNoiseAutocorrelation(
+            kalman::types::Vector<6>(NoiseAutoCorrelation));
+
+        std::cout << "State:" << m_state.stateVector().transpose()
+                  << "\n  with quaternion "
+                  << m_state.getQuaternion().coeffs().transpose() << std::endl;
     }
 
 } // namespace vbtracker

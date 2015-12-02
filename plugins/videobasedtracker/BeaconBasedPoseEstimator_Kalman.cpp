@@ -110,21 +110,5 @@ namespace vbtracker {
         return true;
     }
 
-    static const double InitialStateError[] = {
-        10., 10., 10., 1., 1., 1., 100., 100., 100., 100., 100., 100.};
-    void
-    BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
-                                           Eigen::Quaterniond const &quat) {
-        using StateVec = kalman::types::DimVector<State>;
-        StateVec state(StateVec::Zero());
-        state.head<3>() = xlate;
-        m_state.setStateVector(state);
-        m_state.setQuaternion(quat);
-        m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
-        std::cout << "State:" << m_state.stateVector().transpose()
-                  << "\n  with quaternion "
-                  << m_state.getQuaternion().coeffs().transpose() << std::endl;
-    }
-
 } // namespace vbtracker
 } // namespace osvr
