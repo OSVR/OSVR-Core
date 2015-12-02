@@ -329,7 +329,7 @@ namespace vbtracker {
         // down, and Z pointing along the camera viewing direction.
 
         m_resetState(cvToVector3d(m_tvec), cvRotVecToQuat(m_rvec));
-
+#if 0
         cv::Mat rvec;
         m_rvec.copyTo(rvec);
         cv::Mat roundTripped = eiQuatToRotVec(m_state.getQuaternion());
@@ -373,6 +373,7 @@ namespace vbtracker {
             }
             i = (i + 1) % 200;
         }
+#endif
         return true;
     }
 
