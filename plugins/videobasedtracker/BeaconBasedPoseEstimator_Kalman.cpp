@@ -53,6 +53,10 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 namespace osvr {
 namespace vbtracker {
+    /// This is the constant maximum distance in image space (pixels) permitted
+    /// between a projected beacon location and its detected location.
+    static const auto MAX_RESIDUAL = 100.0;
+    static const auto MAX_SQUARED_RESIDUAL = MAX_RESIDUAL * MAX_RESIDUAL;
 
     bool
     BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
@@ -83,12 +87,14 @@ namespace vbtracker {
             meas.updateFromState(state);
             auto model =
                 kalman::makeAugmentedProcessModel(m_model, beaconProcess);
-            if (meas.getResidual(state).squaredNorm() > 2500) {
-                // more than 50 pixels off - probably bad
-                std::cout << "skipping a measurement with a high residual"
-                          << std::endl;
+
+            if (meas.getResidual(state).squaredNorm() > MAX_SQUARED_RESIDUAL) {
+                // probably bad
+                std::cout << "skipping a measurement with a high residual: id "
+                          << id << std::endl;
                 continue;
             }
+
             if (i == 0) {
                 std::cout << "beacon " << id << " residual "
                           << meas.getResidual(state).transpose() << "\n";
