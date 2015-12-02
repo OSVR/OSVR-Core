@@ -216,7 +216,10 @@ namespace vbtracker {
             return false;
         }
         m_prev = tv;
+        /// @todo need to advance this if we do the kalman thing no matter if we
+        /// get results or not
         m_gotPrev = true;
+
         //==============================================================
         // Put into OSVR format.
         outPose = GetState();

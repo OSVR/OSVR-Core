@@ -78,7 +78,9 @@ namespace vbtracker {
             }
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
+
             auto state = kalman::makeAugmentedState(m_state, *(m_beacons[id]));
+            meas.updateFromState(state);
             auto model =
                 kalman::makeAugmentedProcessModel(m_model, beaconProcess);
             if (meas.getResidual(state).squaredNorm() > 2500) {

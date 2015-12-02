@@ -62,6 +62,17 @@ namespace vbtracker {
                                   kalman::types::Dimension<State>::value>;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         explicit ImagePointMeasurement(CameraModel const &cam) : m_cam(cam) {}
+
+        /// Updates some internal cached partial solutions.
+        void updateFromState(State const &state) {
+            // 3d position of beacon
+            m_beacon = state.b().stateVector();
+            m_rot = state.a().getCombinedQuaternion().toRotationMatrix();
+            m_rotatedObjPoint = m_rot * m_beacon;
+            m_rotatedTranslatedPoint =
+                m_rotatedObjPoint + state.a().getPosition();
+            m_xlate = state.a().getPosition();
+        }
         Vector getResidual(State const &state) const {
             // 3d position of beacon
             Eigen::Vector3d beacon = state.b().stateVector();
@@ -73,22 +84,52 @@ namespace vbtracker {
         }
 
         void setMeasurement(Vector const &m) { m_measurement = m; }
-
+        Eigen::Matrix<double, 2, 3> getBeaconJacobian() const {
+            auto v1 = m_rot(0, 2) * m_beacon[2] + m_rot(0, 1) * m_beacon[1] +
+                      m_beacon[0] * m_rot(0, 0) + m_xlate[0];
+            auto v2 = m_beacon[2] * m_rot(2, 2) + m_beacon[1] * m_rot(2, 1) +
+                      m_beacon[0] * m_rot(2, 0) + m_xlate[2];
+            auto v3 = 1 / (v2 * v2);
+            auto v4 = 1 / v2;
+            auto v5 = m_rot(1, 2) * m_beacon[2] + m_beacon[1] * m_rot(1, 1) +
+                      m_beacon[0] * m_rot(1, 0) + m_xlate[1];
+            Eigen::Matrix<double, 2, 3> ret;
+            ret << m_rot(0, 0) * v4 * m_cam.focalLength -
+                       v1 * m_rot(2, 0) * v3 * m_cam.focalLength,
+                m_rot(0, 1) * v4 * m_cam.focalLength -
+                    v1 * m_rot(2, 1) * v3 * m_cam.focalLength,
+                m_rot(0, 2) * v4 * m_cam.focalLength -
+                    v1 * m_rot(2, 2) * v3 * m_cam.focalLength,
+                m_rot(1, 0) * v4 * m_cam.focalLength -
+                    v5 * m_rot(2, 0) * v3 * m_cam.focalLength,
+                m_rot(1, 1) * v4 * m_cam.focalLength -
+                    v5 * m_rot(2, 1) * v3 * m_cam.focalLength,
+                m_rot(1, 2) * v4 * m_cam.focalLength -
+                    v5 * m_rot(2, 2) * v3 * m_cam.focalLength;
+            return ret;
+        }
         Jacobian getJacobian(State const &state) const {
-            Eigen::Matrix<double, 2, 9> nonzero = getVideoJacobian(
-                state.a().getPosition(),
-                kalman::pose_externalized_rotation::incrementalOrientation(
-                    state.a().stateVector()),
-                /// @todo should be getCombinedQuaternion but that one is
-                /// broken?
-                state.a().getQuaternion(), m_cam.focalLength,
-                state.b().stateVector());
-            /// Need 6 cols of 0 in there because velocity doesn't affect
-            /// measurement.
             Jacobian ret;
+            ret <<
+                // with respect to change in x or y
+                Eigen::Matrix2d::Identity() *
+                    (m_cam.focalLength / m_rotatedTranslatedPoint.z()),
+                // with respect to change in z
+                -m_rotatedTranslatedPoint.head<2>() * m_cam.focalLength /
+                    (m_rotatedTranslatedPoint.z() *
+                     m_rotatedTranslatedPoint.z()),
+                // with respect to change in incremental rotation, @todo
+                Eigen::Matrix<double, 2, 3>::Zero(),
+                // with respect to change in linear/angular velocity
+                Eigen::Matrix<double, 2, 6>::Zero(),
+                // with respect to change in beacon position, @todo
+
+                getBeaconJacobian();
+#if 0
             ret << nonzero.topLeftCorner<2, 6>(),
                 Eigen::Matrix<double, 2, 6>::Zero(),
                 nonzero.topRightCorner<2, 3>();
+#endif
             return ret;
         }
 
@@ -100,6 +141,11 @@ namespace vbtracker {
       private:
         Vector m_measurement;
         CameraModel m_cam;
+        Eigen::Vector3d m_beacon;
+        Eigen::Vector3d m_rotatedObjPoint;
+        Eigen::Vector3d m_rotatedTranslatedPoint;
+        Eigen::Vector3d m_xlate;
+        Eigen::Matrix3d m_rot;
     };
 } // namespace vbtracker
 } // namespace osvr
