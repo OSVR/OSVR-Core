@@ -142,6 +142,11 @@ namespace util {
         row.addCol(cell.getHeader(), cell.getData());
         return std::move(row);
     }
+    template <typename T>
+    inline CSV::Row &operator<<(CSV::Row &row, detail::Cell<T> const &cell) {
+        row.addCol(cell.getHeader(), cell.getData());
+        return row;
+    }
 } // namespace util
 } // namespace osvr
 
