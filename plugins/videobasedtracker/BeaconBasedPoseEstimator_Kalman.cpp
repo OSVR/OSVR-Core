@@ -60,14 +60,54 @@ namespace vbtracker {
     static const auto MAX_RESIDUAL = 75.0;
     static const auto MAX_SQUARED_RESIDUAL = MAX_RESIDUAL * MAX_RESIDUAL;
 
+    static const auto DEFAULT_MEASUREMENT_VARIANCE = 2.0;
+    static const auto LOW_BEACON_MEASUREMENT_VARIANCE = 1.0;
+    static const auto LOW_BEACON_CUTOFF = 5;
+
+    static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
     bool
     BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
                                                          double dt) {
         auto const beaconsSize = m_beacons.size();
+        // Default measurement variance per axis.
+        auto variance = DEFAULT_MEASUREMENT_VARIANCE;
+        // Default to using all the measurements we can
+        auto skipBright = false;
+        {
+            auto totalLeds = leds.size();
+            auto identified = std::size_t{0};
+            auto inBoundsID = std::size_t{0};
+            auto inBoundsBright = std::size_t{0};
+            for (auto const &led : leds) {
+                if (!led.identified()) {
+                    continue;
+                }
+                identified++;
+                auto id = led.getID();
+                if (id >= beaconsSize) {
+                    continue;
+                }
+                inBoundsID++;
+                if (led.isBright()) {
+                    inBoundsBright++;
+                }
+            }
+
+            // Now we decide if we want to cut the variance artificially to
+            // reduce latency in low-beacon situations
+            if (inBoundsID < LOW_BEACON_CUTOFF) {
+                variance = LOW_BEACON_MEASUREMENT_VARIANCE;
+            }
+            if (inBoundsID - inBoundsBright > DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS) {
+                skipBright = true;
+            }
+        }
+
         CameraModel cam;
         cam.focalLength = m_focalLength;
         cam.principalPoint = m_principalPoint;
         ImagePointMeasurement meas{cam};
+        meas.setVariance(variance);
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         Eigen::Vector2d pt;
 
@@ -81,6 +121,9 @@ namespace vbtracker {
             }
             auto id = led.getID();
             if (id >= beaconsSize) {
+                continue;
+            }
+            if (skipBright && led.isBright()) {
                 continue;
             }
             meas.setMeasurement(
