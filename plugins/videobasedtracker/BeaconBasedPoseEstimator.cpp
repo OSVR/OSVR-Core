@@ -374,8 +374,8 @@ namespace vbtracker {
 
     static const double InitialStateError[] = {1.,  1.,  10., 1.,  1.,  1.,
                                                10., 10., 10., 10., 10., 10.};
-    static const double NoiseAutoCorrelation[] = {1e+2, 2e+1, 1e+2,
-                                                  1e-2, 1e-2, 1e-2};
+    static const double NoiseAutoCorrelation[] = {1e+2, 5e+1, 1e+2,
+                                                  5e-1, 5e-1, 5e-1};
     void
     BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
                                            Eigen::Quaterniond const &quat) {
