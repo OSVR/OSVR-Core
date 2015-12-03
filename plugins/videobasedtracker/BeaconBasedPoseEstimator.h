@@ -99,6 +99,7 @@ namespace vbtracker {
         /// instance) even when the internal storage may vary.
         /// @{
         OSVR_PoseState GetState() const;
+        OSVR_PoseState GetPredictedState(double dt) const;
         Eigen::Vector3d GetLinearVelocity() const;
         Eigen::Vector3d GetAngularVelocity() const;
         /// @}

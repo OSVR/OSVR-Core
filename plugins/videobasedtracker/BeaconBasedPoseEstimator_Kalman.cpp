@@ -46,6 +46,8 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <osvr/Kalman/AugmentedState.h>
 #include <osvr/Kalman/ConstantProcess.h>
 
+#include <osvr/Util/EigenInterop.h>
+
 #include <opencv2/core/eigen.hpp>
 
 // Standard includes
@@ -127,6 +129,21 @@ namespace vbtracker {
         m_rvec = eiQuatToRotVec(m_state.getQuaternion());
         cv::eigen2cv(m_state.getPosition().eval(), m_tvec);
         return true;
+    }
+
+    /// millimeters to meters
+    static const double LINEAR_SCALE_FACTOR = 1000.;
+    OSVR_PoseState
+    BeaconBasedPoseEstimator::GetPredictedState(double dt) const {
+        auto state = m_state;
+        auto model = m_model;
+        kalman::predict(state, model, dt);
+        state.postCorrect();
+        OSVR_PoseState ret;
+        util::eigen_interop::map(ret).rotation() = state.getQuaternion();
+        util::eigen_interop::map(ret).translation() =
+            state.getPosition() / LINEAR_SCALE_FACTOR; // convert from mm to m
+        return ret;
     }
 
 } // namespace vbtracker

@@ -216,6 +216,7 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::m_estimatePoseFromLeds(const LedGroup &leds,
                                                      OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
+        bool usedKalman = false;
         bool result = false;
         if (m_framesInProbation > MAX_PROBATION_FRAMES) {
             // Kalman filter started returning too high of residuals - going
@@ -230,6 +231,7 @@ namespace vbtracker {
             auto dt = osvrTimeValueDurationSeconds(&tv, &m_prev);
             // Can use kalman approach
             result = m_kalmanAutocalibEstimator(leds, dt);
+            usedKalman = true;
         }
 
         if (!result) {
@@ -243,7 +245,11 @@ namespace vbtracker {
         //==============================================================
         // Put into OSVR format.
         outPose = GetState();
-
+        if (usedKalman) {
+            auto currentTime = util::time::getNow();
+            auto dt2 = osvrTimeValueDurationSeconds(&currentTime, &tv);
+            outPose = GetPredictedState(dt2);
+        }
         return true;
     }
 
