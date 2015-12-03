@@ -192,16 +192,44 @@ simpleProjectForIncRot(xlate, incRot, fl, pp, initiallyRotatedObjPt) :=block([ca
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-block([genvec, myincrot, mypos, myrotatedbeacon, q, incrot, pos, beacon, meas, rb, H],
+block([genvec, myincrot, mypos, myrotatedbeacon, q, incrot, pos, beacon, meas, rb, H, myincrotOP, incrotOP, fullMeas, i, j],
     genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
     myincrot: genvec(incrot, 3),
     mypos : genvec(pos, 3),
     meas: simpleProjectForIncRot(mypos, myincrot, fl, genvec(pp, 2), genvec(m_rotatedObjPoint, 3)),
-    print(meas[u], meas[v]),
-    H : vectorsimp(jacobian([meas[u], meas[v]], [incrot[1], incrot[2], incrot[3]])),
+    fullMeas: [meas[u], meas[v]],
+    print(fullMeas),
+    H : vectorsimp(jacobian(fullMeas, [incrot[1], incrot[2], incrot[3]])),
     /* evaluating at incrot = 0 since we're zeroing each cycle effectively - hopefully this is an acceptable assumption to make */
     print(ev(H, incrot = [0,0,0])),
     matrixCodegen(ev(H, incrot = [0,0,0]))
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsubsect start ]
+Trying it without incrot=0
+   [wxMaxima: subsubsect end   ] */
+
+/* [wxMaxima: input   start ] */
+block([genvec, myincrot, mypos, myrotatedbeacon, q, incrot, pos, beacon, meas, rb, H, myincrotOP, incrotOP, fullMeas, i, j],
+    genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
+    myincrot: genvec(m_incRot, 3),
+    mypos : genvec(m_xlate, 3),
+    myincrotOP: genmatrix(incrotOP, 3, 3),
+    meas: simpleProjectForIncRot(mypos, myincrot, fl, genvec(pp, 2), genvec(m_objExtRot, 3)),
+    fullMeas: [meas[u], meas[v]],
+    /*print(fullMeas),*/
+    H : vectorsimp(jacobian(fullMeas, [m_incRot[1], m_incRot[2], m_incRot[3]])),
+    /* We'll pre-calculate a triangular matrix of incremental rotation outer products to simplify this somewhat */
+    for i: 1 thru 3 do (
+        H: subst([m_incRot[i]^2 = incrotOP[i,i]], H),
+        for j: i+1 thru 3 do (
+            H: subst([m_incRot[i]*m_incRot[j]=incrotOP[i,j]], H)
+        )
+    ),
+    print(listofvars(H)),
+    print(H),
+    matrixCodegen(H)
 );
 /* [wxMaxima: input   end   ] */
 

@@ -68,6 +68,10 @@ namespace vbtracker {
             // 3d position of beacon
             m_beacon = state.b().stateVector();
             m_rot = state.a().getCombinedQuaternion().toRotationMatrix();
+            m_objExtRot = state.a().getQuaternion() * m_beacon;
+            m_incRot =
+                kalman::pose_externalized_rotation::incrementalOrientation(
+                    state.a().stateVector());
             m_rotatedObjPoint = m_rot * m_beacon;
             m_rotatedTranslatedPoint =
                 m_rotatedObjPoint + state.a().getPosition();
@@ -108,7 +112,8 @@ namespace vbtracker {
                     v5 * m_rot(2, 2) * v3 * m_cam.focalLength;
             return ret;
         }
-
+#if 0
+        /// This version assumes incrot == 0
         Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
             auto v1 = m_rotatedObjPoint[0] + m_xlate[0];
             auto v2 = m_rotatedObjPoint[2] + m_xlate[2];
@@ -126,6 +131,85 @@ namespace vbtracker {
                 m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
             return ret;
         }
+#else
+        /// This substantially-more-complex-looking version does separately use
+        /// the incremental rotation state.
+        Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
+            /// Precalculated outer product of the incremental rotation to
+            /// simplify the generated code.
+            Eigen::Matrix3d incrotOP;
+            incrotOP.triangularView<Eigen::Upper>() =
+                m_incRot * m_incRot.transpose();
+
+            auto v1 = 0.5 - incrotOP(1, 2) / 24;
+            auto v2 = 2 * m_incRot[0] * v1;
+            auto v3 = -incrotOP(1, 2) / 6;
+            auto v4 = incrotOP(1, 2) / 6;
+            auto v5 = -(incrotOP(1, 1) * m_incRot[2]) / 24;
+            auto v6 =
+                m_objExtRot[0] * (v5 + v4) + m_objExtRot[1] * (v3 + v2 + 1);
+            auto v7 = -incrotOP(0, 2) / 6;
+            auto v8 = v7 + 1;
+            auto v9 = 0.5 - incrotOP(0, 2) / 24;
+            auto v10 = incrotOP(1, 1) * v9;
+            auto v11 = v3 + 1;
+            auto v12 = incrotOP(0, 0) * v1;
+            auto v13 = m_objExtRot[0] * (v10 - m_incRot[1] * v8) +
+                       m_objExtRot[1] * (v12 + m_incRot[0] * v11) +
+                       m_objExtRot[2] + m_xlate[2];
+            auto v14 = 1 / (v13 * v13);
+            auto v15 = -incrotOP(0, 1) / 6;
+            auto v16 = v15 + 1;
+            auto v17 = 0.5 - incrotOP(0, 1) / 24;
+            auto v18 = incrotOP(2, 2) * v17;
+            auto v19 = m_objExtRot[2] * (m_incRot[1] * v8 + v10) +
+                       m_objExtRot[1] * (v18 - m_incRot[2] * v16) +
+                       m_objExtRot[0] + m_xlate[0];
+            auto v20 = 1 / v13;
+            auto v21 = -(m_incRot[1] * incrotOP(2, 2)) / 24;
+            auto v22 = 2 * m_incRot[1] * v9;
+            auto v23 = incrotOP(0, 2) / 6;
+            auto v24 = -(m_incRot[0] * incrotOP(2, 2)) / 24;
+            auto v25 = -(incrotOP(0, 0) * m_incRot[2]) / 24;
+            auto v26 =
+                m_objExtRot[1] * (v7 + v25) + m_objExtRot[0] * (v23 + v22 - 1);
+            auto v27 = incrotOP(0, 1) / 6;
+            auto v28 = 2 * m_incRot[2] * v17;
+            auto v29 = -(m_incRot[0] * incrotOP(1, 1)) / 24;
+            auto v30 = -(incrotOP(0, 0) * m_incRot[1]) / 24;
+            auto v31 =
+                m_objExtRot[1] * (v30 + v15) + m_objExtRot[0] * (v29 + v27);
+            auto v32 = m_objExtRot[0] * (v18 + m_incRot[2] * v16) +
+                       m_objExtRot[2] * (v12 - m_incRot[0] * v11) +
+                       m_objExtRot[1] + m_xlate[1];
+            Eigen::Matrix<double, 2, 3> ret;
+            ret << v20 * (m_objExtRot[1] * (v21 + v4) +
+                          (v5 + v3) * m_objExtRot[2]) *
+                           m_cam.focalLength -
+                       v6 * v14 * v19 * m_cam.focalLength,
+                v20 * (m_objExtRot[1] * (v24 + v23) +
+                       (v22 + v7 + 1) * m_objExtRot[2]) *
+                        m_cam.focalLength -
+                    v26 * v14 * v19 * m_cam.focalLength,
+                v20 * ((v29 + v15) * m_objExtRot[2] +
+                       m_objExtRot[1] * (v28 + v27 - 1)) *
+                        m_cam.focalLength -
+                    v31 * v14 * v19 * m_cam.focalLength,
+                v20 * (m_objExtRot[0] * (v21 + v3) +
+                       (v4 + v2 - 1) * m_objExtRot[2]) *
+                        m_cam.focalLength -
+                    v6 * v14 * v32 * m_cam.focalLength,
+                v20 * (m_objExtRot[0] * (v24 + v7) +
+                       (v25 + v23) * m_objExtRot[2]) *
+                        m_cam.focalLength -
+                    v26 * v14 * v32 * m_cam.focalLength,
+                v20 * ((v30 + v27) * m_objExtRot[2] +
+                       m_objExtRot[0] * (v28 + v15 + 1)) *
+                        m_cam.focalLength -
+                    v31 * v14 * v32 * m_cam.focalLength;
+            return ret;
+        }
+#endif
         Jacobian getJacobian(State const &state) const {
             Jacobian ret;
             ret <<
@@ -154,6 +238,8 @@ namespace vbtracker {
         Vector m_measurement;
         CameraModel m_cam;
         Eigen::Vector3d m_beacon;
+        Eigen::Vector3d m_objExtRot;
+        Eigen::Vector3d m_incRot;
         Eigen::Vector3d m_rotatedObjPoint;
         Eigen::Vector3d m_rotatedTranslatedPoint;
         Eigen::Vector3d m_xlate;
