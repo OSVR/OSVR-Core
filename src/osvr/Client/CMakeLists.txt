@@ -45,7 +45,6 @@ set(SOURCE
     RemoteHandler.cpp
     RemoteHandlerFactory.cpp
     RemoteHandlerInternals.h
-    RenderManagerConfig.cpp
     TrackerRemoteFactory.cpp
     TrackerRemoteFactory.h
     Viewer.cpp

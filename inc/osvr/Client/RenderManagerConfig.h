@@ -30,79 +30,223 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/JSONHelpers.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
+#include <json/reader.h>
 
 // Standard includes
 #include <string>
 #include <iostream>
 #include <exception>
 #include <vector>
+#include <stdexcept>
 
 namespace osvr {
-namespace client {
+    namespace client {
 
-    class RenderManagerConfig;
-    typedef std::shared_ptr<RenderManagerConfig> RenderManagerConfigPtr;
-    class RenderManagerConfigFactory {
-      public:
-        OSVR_CLIENT_EXPORT static RenderManagerConfigPtr
-        createShared(OSVR_ClientContext ctx);
-    };
+        class RenderManagerConfig {
+        public:
 
-    class RenderManagerConfig {
-      public:
-        OSVR_CLIENT_EXPORT
-        RenderManagerConfig(const std::string &renderManagerConfig);
-        RenderManagerConfig() {}
+            inline RenderManagerConfig(const std::string &renderManagerConfig)
+            {
+                parse(renderManagerConfig);
+            }
 
-        OSVR_CLIENT_EXPORT void parse(const std::string &renderManagerConfig);
-        OSVR_CLIENT_EXPORT void print() const;
+            inline RenderManagerConfig() {}
 
-        /// Read the property information.
-        OSVR_CLIENT_EXPORT bool getDirectMode() const;
-        OSVR_CLIENT_EXPORT uint32_t getDisplayIndex() const;
-        OSVR_CLIENT_EXPORT bool getDirectHighPriority() const;
+            inline void parse(const std::string &renderManagerConfig)
+            {
+                Json::Reader reader;
+                Json::Value root;
+                if (!reader.parse(renderManagerConfig, root, false)) {
+                    throw std::runtime_error("RenderManagerConfig::parse - failed to parse render manager config string. Invalid JSON value?");
+                }
 
-        OSVR_CLIENT_EXPORT bool getEnableTimeWarp() const;
-        OSVR_CLIENT_EXPORT bool getAsynchronousTimeWarp() const;
-        OSVR_CLIENT_EXPORT float getMaxMSBeforeVsyncTimeWarp() const;
-        OSVR_CLIENT_EXPORT float getRenderOverfillFactor() const;
+                auto &params = root["renderManagerConfig"];
+                m_directMode = params["directModeEnabled"].asBool();
+                m_displayIndex = params["directDisplayIndex"].asUInt();
+                m_directHighPriority = params["directHighPriorityEnabled"].asBool();
+                m_numBuffers = params["numBuffers"].asUInt();
+                m_verticalSync = params["verticalSyncEnabled"].asBool();
+                m_verticalSyncBlockRendering = params["verticalSyncBlockRenderingEnabled"].asBool();
+                m_renderOverfillFactor = params["renderOverfillFactor"].asFloat();
 
-        OSVR_CLIENT_EXPORT std::size_t getNumBuffers() const;
-        OSVR_CLIENT_EXPORT bool getVerticalSync() const;
-        OSVR_CLIENT_EXPORT bool getVerticalSyncBlockRendering() const;
+                // window
+                {
+                    auto &window = params["window"];
+                    m_windowTitle = window["title"].asString();
+                    m_windowFullScreen = window["fullScreenEnabled"].asBool();
+                    m_windowXPosition = window["xPosition"].asInt();
+                    m_windowYPosition = window["yPosition"].asInt();
+                }
 
-        OSVR_CLIENT_EXPORT std::string getWindowTitle() const;
-        OSVR_CLIENT_EXPORT bool getWindowFullScreen() const;
-        OSVR_CLIENT_EXPORT int32_t getWindowXPosition() const;
-        OSVR_CLIENT_EXPORT int32_t getWindowYPosition() const;
-        OSVR_CLIENT_EXPORT uint32_t getDisplayRotation() const;
-        OSVR_CLIENT_EXPORT uint32_t getBitsPerColor() const;
+                // display
+                    {
+                        auto display = params["display"];
+                        m_displayRotation = display["rotation"].asUInt();
+                        m_bitsPerColor = display["bitsPerColor"].asUInt();
+                    }
 
-      private:
-        bool m_directMode;
-        uint32_t m_displayIndex;
-        bool m_directHighPriority;
-        std::size_t m_numBuffers;
-        bool m_verticalSync;
-        bool m_verticalSyncBlockRendering;
+                    // time warp
+                    {
+                        auto &timeWarp = params["timeWarp"];
+                        m_enableTimeWarp = timeWarp["enabled"].asBool();
+                        m_asynchronousTimeWarp = timeWarp["asynchronous"].asBool();
+                        m_maxMSBeforeVsyncTimeWarp = timeWarp["maxMsBeforeVSync"].asFloat();
+                    }
+            }
 
-        std::string m_windowTitle;
-        bool m_windowFullScreen;
-        int32_t m_windowXPosition;
-        int32_t m_windowYPosition;
-        uint32_t m_displayRotation;
-        uint32_t m_bitsPerColor;
+            inline void print() const
+            {
+                std::cout << "Direct mode: " << m_directMode << std::endl;
+                std::cout << "Direct mode display index: " << m_displayIndex << std::endl;
+                std::cout << "Number of buffers: " << m_numBuffers << std::endl;
+                std::cout << "Vertical sync: " << m_verticalSync << std::endl;
+                std::cout << "Vertical sync block rendering: " << m_verticalSyncBlockRendering << std::endl;
+                std::cout << "Window Title: " << m_windowTitle << std::endl;
+                std::cout << "Window full screen: " << m_windowFullScreen << std::endl;
+                std::cout << "Window X Position: " << m_windowXPosition << std::endl;
+                std::cout << "Window Y Position: " << m_windowYPosition << std::endl;
+                std::cout << "Display rotation: " << m_displayRotation << std::endl;
+                std::cout << "Bits per color: " << m_bitsPerColor << std::endl;
+                std::cout << "Enable time warp: " << m_enableTimeWarp << std::endl;
+                std::cout << "Asynchronous time warp: " << m_asynchronousTimeWarp << std::endl;
+                std::cout << "Max ms before vsync time warp: " << m_maxMSBeforeVsyncTimeWarp << std::endl;
+                std::cout << "Render overfill factor: " << m_renderOverfillFactor << std::endl;
+            }
 
-        bool m_enableTimeWarp;
-        bool m_asynchronousTimeWarp;
-        float m_maxMSBeforeVsyncTimeWarp;
-        float m_renderOverfillFactor;
-    };
+            /// Read the property information.
+            inline bool getDirectMode() const
+            {
+                return m_directMode;
+            }
 
-} // namespace client
+            inline uint32_t getDisplayIndex() const
+            {
+                return m_displayIndex;
+            }
+
+            inline bool getDirectHighPriority() const
+            {
+                return m_directHighPriority;
+            }
+
+            inline bool getEnableTimeWarp() const
+            {
+                return m_enableTimeWarp;
+            }
+
+            inline bool getAsynchronousTimeWarp() const
+            {
+                return m_asynchronousTimeWarp;
+            }
+
+            inline float getMaxMSBeforeVsyncTimeWarp() const
+            {
+                return m_maxMSBeforeVsyncTimeWarp;
+            }
+
+            inline float getRenderOverfillFactor() const
+            {
+                return m_renderOverfillFactor;
+            }
+
+            inline std::size_t getNumBuffers() const
+            {
+                return m_numBuffers;
+            }
+
+            inline bool getVerticalSync() const
+            {
+                return m_verticalSync;
+            }
+
+            inline bool getVerticalSyncBlockRendering() const
+            {
+                return m_verticalSyncBlockRendering;
+            }
+
+            inline std::string getWindowTitle() const
+            {
+                return m_windowTitle;
+            }
+
+            inline bool getWindowFullScreen() const
+            {
+                return m_windowFullScreen;
+            }
+
+            inline int32_t getWindowXPosition() const
+            {
+                return m_windowXPosition;
+            }
+
+            inline int32_t getWindowYPosition() const
+            {
+                return m_windowYPosition;
+            }
+
+            inline uint32_t getDisplayRotation() const
+            {
+                return m_displayRotation;
+            }
+
+            inline uint32_t getBitsPerColor() const
+            {
+                return m_bitsPerColor;
+            }
+
+
+        private:
+            bool m_directMode;
+            uint32_t m_displayIndex;
+            bool m_directHighPriority;
+            std::size_t m_numBuffers;
+            bool m_verticalSync;
+            bool m_verticalSyncBlockRendering;
+
+            std::string m_windowTitle;
+            bool m_windowFullScreen;
+            int32_t m_windowXPosition;
+            int32_t m_windowYPosition;
+            uint32_t m_displayRotation;
+            uint32_t m_bitsPerColor;
+
+            bool m_enableTimeWarp;
+            bool m_asynchronousTimeWarp;
+            float m_maxMSBeforeVsyncTimeWarp;
+            float m_renderOverfillFactor;
+        };
+
+        typedef std::shared_ptr<RenderManagerConfig> RenderManagerConfigPtr;
+
+        class RenderManagerConfigFactory {
+        public:
+            inline static RenderManagerConfigPtr createShared(OSVR_ClientContext ctx)
+            {
+                try {
+                    auto const configString = ctx->getStringParameter("/renderManagerConfig");
+                    RenderManagerConfigPtr cfg(new RenderManagerConfig(configString));
+                    return cfg;
+                }
+                catch (std::exception const &e) {
+                    std::cerr <<
+                        "Couldn't create a render manager config internally! Exception: "
+                        << e.what() << std::endl;
+                    return RenderManagerConfigPtr{};
+                }
+                catch (...) {
+                    std::cerr << "Couldn't create a render manager config internally! "
+                        "Unknown exception!" << std::endl;
+                    return RenderManagerConfigPtr{};
+                }
+            }
+        };
+
+    } // namespace client
 } // namespace osvr
 
 #endif // INCLUDED_RenderManagerConfig_h_GUID_C8DA5781_5B6C_454A_B4FF_1DB50CBE3479
