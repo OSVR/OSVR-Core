@@ -61,7 +61,8 @@ namespace vbtracker {
             kalman::types::Matrix<DIMENSION,
                                   kalman::types::Dimension<State>::value>;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        explicit ImagePointMeasurement(CameraModel const &cam) : m_cam(cam) {}
+        explicit ImagePointMeasurement(CameraModel const &cam)
+            : m_variance(2.0), m_cam(cam) {}
 
         /// Updates some internal cached partial solutions.
         void updateFromState(State const &state) {
@@ -229,12 +230,18 @@ namespace vbtracker {
             return ret;
         }
 
+        void setVariance(double s) {
+            if (s > 0) {
+                m_variance = s;
+            }
+        }
         SquareMatrix getCovariance(State &state) const {
-            /// @todo make this better, perhaps state dependent.
-            return Vector::Constant(2.0).asDiagonal();
+            /// @todo make this better, perhaps state dependent?
+            return Vector::Constant(m_variance).asDiagonal();
         }
 
       private:
+        double m_variance;
         Vector m_measurement;
         CameraModel m_cam;
         Eigen::Vector3d m_beacon;
