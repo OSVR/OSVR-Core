@@ -46,7 +46,7 @@ namespace vbtracker {
         if (!m_identifier) {
             m_id = -1;
         } else {
-            m_id = m_identifier->getId(m_brightnessHistory);
+            m_id = m_identifier->getId(m_brightnessHistory, m_lastBright);
         }
     }
 

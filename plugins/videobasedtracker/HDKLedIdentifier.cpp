@@ -77,7 +77,7 @@ namespace vbtracker {
         // d_patterns.size() << std::endl;
     }
 
-    int OsvrHdkLedIdentifier::getId(std::list<float> &brightnesses) const {
+    int OsvrHdkLedIdentifier::getId(std::list<float> &brightnesses, bool & lastBright) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {
@@ -98,6 +98,8 @@ namespace vbtracker {
             return -2;
         }
         const auto threshold = (minVal + maxVal) / 2;
+        // Set the `lastBright` out variable
+        lastBright = brightnesses.back() >= threshold;
 
         // Get a list of boolean values for 0's and 1's using
         // the threshold computed above.
