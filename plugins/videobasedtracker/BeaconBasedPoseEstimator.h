@@ -158,6 +158,12 @@ namespace vbtracker {
         using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
         ProcessModel m_model;
         /// @}
+
+        /// @name Kalman startup status
+        /// @{
+        /// How long we've been turning in low ratios of good to bad residuals.
+        std::size_t m_framesInProbation = 0;
+        /// @}
     };
 
 } // namespace vbtracker

@@ -44,6 +44,10 @@ namespace vbtracker {
     // and 1, so the variance will be smaller than the standard deviation.
     static const double INITIAL_BEACON_ERROR = 0.001;
 
+    // The total number of frames that we can have dodgy Kalman tracking for
+    // before RANSAC takes over again.
+    static const std::size_t MAX_PROBATION_FRAMES = 10;
+
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
@@ -213,6 +217,12 @@ namespace vbtracker {
                                                      OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
         bool result = false;
+        if (m_framesInProbation > MAX_PROBATION_FRAMES) {
+            // Kalman filter started returning too high of residuals - going
+            // back to RANSAC until we get a good lock again.
+            m_gotPose = false;
+            m_framesInProbation = 0;
+        }
         if (!m_gotPose || !m_gotPrev) {
             // Must use the direct approach
             result = m_pnpransacEstimator(leds);

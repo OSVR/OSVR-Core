@@ -71,6 +71,8 @@ namespace vbtracker {
 
         kalman::predict(m_state, m_model, dt);
 
+        auto numBad = std::size_t{0};
+        auto numGood = std::size_t{0};
         static int i = 0;
         for (auto const &led : leds) {
             if (!led.identified()) {
@@ -92,8 +94,10 @@ namespace vbtracker {
                 // probably bad
                 std::cout << "skipping a measurement with a high residual: id "
                           << id << std::endl;
+                numBad++;
                 continue;
             }
+            numGood++;
 
             if (i == 0) {
                 std::cout << "beacon " << id << " residual "
@@ -103,6 +107,27 @@ namespace vbtracker {
         }
         i = (i + 1) % 200;
 
+        bool incrementProbation = false;
+        if (0 == m_framesInProbation) {
+            // Let's try to keep a 3:2 ratio of good to bad when not "in
+            // probation"
+            incrementProbation = (numBad * 3 > numGood * 2);
+
+        } else {
+            // Already in trouble, add a bit of hysteresis and raising the bar
+            // so we don't hop out easily.
+            incrementProbation = numBad * 2 > numGood;
+            if (!incrementProbation) {
+                // OK, we're good again
+                std::cout << "Re-attained our tracking goal." << std::endl;
+                m_framesInProbation = 0;
+            }
+        }
+        if (incrementProbation) {
+            std::cout << "Fell below our target for tracking residuals: "
+                      << numBad << " bad, " << numGood << " good." << std::endl;
+            m_framesInProbation++;
+        }
         /// Output to the OpenCV state types so we can see the reprojection
         /// debug view.
         m_rvec = eiQuatToRotVec(m_state.getQuaternion());
