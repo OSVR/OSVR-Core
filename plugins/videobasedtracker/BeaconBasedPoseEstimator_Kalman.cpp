@@ -57,7 +57,7 @@ namespace osvr {
 namespace vbtracker {
     /// This is the constant maximum distance in image space (pixels) permitted
     /// between a projected beacon location and its detected location.
-    static const auto MAX_RESIDUAL = 75.0;
+    static const auto MAX_RESIDUAL = 100.0;
     static const auto MAX_SQUARED_RESIDUAL = MAX_RESIDUAL * MAX_RESIDUAL;
 
     static const auto DEFAULT_MEASUREMENT_VARIANCE = 2.0;
