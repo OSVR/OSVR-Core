@@ -39,11 +39,13 @@
 #include "com_osvr_Multiserver_OSVRHackerDevKit_json.h"
 #include "com_osvr_Multiserver_OneEuroFilter_json.h"
 #include "com_osvr_Multiserver_RazerHydra_json.h"
+#include "com_osvr_Multiserver_Sensics_zSight_json.h"
 
 // Library/third-party includes
 #include "hidapi/hidapi.h"
 #include "vrpn_Connection.h"
 #include "vrpn_Tracker_RazerHydra.h"
+#include "vrpn_Tracker_zSight.h"
 #include "vrpn_Tracker_OSVRHackerDevKit.h"
 #include "vrpn_Tracker_Filter.h"
 #include <boost/noncopyable.hpp>
@@ -190,6 +192,23 @@ class VRPNHardwareDetect : boost::noncopyable {
                     }
                     continue;
                 }
+
+				//Sensics zSight (This block adds detection of Sensics zSight 1280 dual input device by osvr server)
+				//you can add other zSight devices by adding vendor id and product id in if block.
+				#if defined(_WIN32) && defined(VRPN_USE_DIRECTINPUT) && defined(VRPN_HAVE_ATLBASE)
+					if ((dev->vendor_id == 0x16d0 && dev->product_id == 0x0515)) {
+						gotDevice = true;
+						m_handlePath(dev->path);
+						osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+						auto name = m_data.getName("Sensics_zSight");
+						auto decName = reg.useDecoratedName(name);
+						reg.constructAndRegisterDevice<
+							vrpn_Tracker_zSight>(name);
+						reg.setDeviceDescriptor(osvr::util::makeString(
+							com_osvr_Multiserver_Sensics_zSight_json));
+						continue;
+					}
+				#endif
             }
             hid_free_enumeration(enumData);
 
