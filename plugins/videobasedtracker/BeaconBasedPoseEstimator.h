@@ -112,6 +112,11 @@ namespace vbtracker {
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
       private:
+        /// @brief Internal position differs in scale and origin from external.
+        /// This function deals with that for you.
+        Eigen::Vector3d
+        m_convertInternalPositionRepToExternal(Eigen::Vector3d const &pos) const;
+
         /// @brief Implementation - doesn't set m_gotPose;
         bool m_estimatePoseFromLeds(const LedGroup &leds,
                                     OSVR_TimeValue const &tv,
@@ -138,6 +143,10 @@ namespace vbtracker {
         cv::Mat m_distCoeffs;       //< Distortion coefficients
         size_t m_requiredInliers;   //< How many inliers do we require?
         size_t m_permittedOutliers; //< How many outliers do we allow?
+
+        /// Sensor centroid, subtracted out of the beacon coordinates when
+        /// initially set.
+        Eigen::Vector3d m_centroid;
 
         /// Timestamp of previous frame
         OSVR_TimeValue m_prev;

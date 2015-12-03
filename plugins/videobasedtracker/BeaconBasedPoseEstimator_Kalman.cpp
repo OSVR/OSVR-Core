@@ -98,7 +98,8 @@ namespace vbtracker {
             if (inBoundsID < LOW_BEACON_CUTOFF) {
                 variance = LOW_BEACON_MEASUREMENT_VARIANCE;
             }
-            if (inBoundsID - inBoundsBright > DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS) {
+            if (inBoundsID - inBoundsBright >
+                DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS) {
                 skipBright = true;
             }
         }
@@ -112,7 +113,6 @@ namespace vbtracker {
         Eigen::Vector2d pt;
 
         kalman::predict(m_state, m_model, dt);
-
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
         for (auto const &led : leds) {
@@ -174,8 +174,6 @@ namespace vbtracker {
         return true;
     }
 
-    /// millimeters to meters
-    static const double LINEAR_SCALE_FACTOR = 1000.;
     OSVR_PoseState
     BeaconBasedPoseEstimator::GetPredictedState(double dt) const {
         auto state = m_state;
@@ -185,7 +183,7 @@ namespace vbtracker {
         OSVR_PoseState ret;
         util::eigen_interop::map(ret).rotation() = state.getQuaternion();
         util::eigen_interop::map(ret).translation() =
-            state.getPosition() / LINEAR_SCALE_FACTOR; // convert from mm to m
+            m_convertInternalPositionRepToExternal(state.getPosition());
         return ret;
     }
 

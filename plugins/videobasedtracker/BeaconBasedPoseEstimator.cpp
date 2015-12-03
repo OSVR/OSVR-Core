@@ -118,10 +118,19 @@ namespace vbtracker {
         m_beacons.clear();
         Eigen::Matrix3d beaconError =
             Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+        {
+            Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
+            auto bNum = size_t{ 0 };
+            for (auto &beacon : beacons) {
+                beaconSum += cvToVector(beacon).cast<double>();
+                bNum++;
+            }
+            m_centroid = beaconSum / bNum;
+        }
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
-                cvToVector(beacon).cast<double>(),
+                cvToVector(beacon).cast<double>() - m_centroid,
                 // This forces the first 3 beacons to be artificially "perfect"
                 // to avoid hunting by the algorithm
                 bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
@@ -191,7 +200,7 @@ namespace vbtracker {
         OSVR_PoseState ret;
         util::eigen_interop::map(ret).rotation() = m_state.getQuaternion();
         util::eigen_interop::map(ret).translation() =
-            m_state.getPosition() / LINEAR_SCALE_FACTOR; // convert from mm to m
+            m_convertInternalPositionRepToExternal(m_state.getPosition());
         return ret;
     }
 
@@ -211,7 +220,11 @@ namespace vbtracker {
         m_gotPose = ret;
         return ret;
     }
-
+    Eigen::Vector3d
+    BeaconBasedPoseEstimator::m_convertInternalPositionRepToExternal(
+        Eigen::Vector3d const &pos) const {
+        return (pos + m_centroid) / LINEAR_SCALE_FACTOR;
+    }
     bool
     BeaconBasedPoseEstimator::m_estimatePoseFromLeds(const LedGroup &leds,
                                                      OSVR_TimeValue const &tv,
