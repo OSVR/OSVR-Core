@@ -1,59 +1,16 @@
 /* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
-/* [ Created with wxMaxima version 15.08.2 ] */
+/* [ Created with wxMaxima version 15.08.1+git ] */
 
 /* [wxMaxima: section start ]
-Utility definitions
+Startup Functionality
    [wxMaxima: section end   ] */
 
-/* [wxMaxima: subsect start ]
-quat to rotation matrix
-   [wxMaxima: subsect end   ] */
-
-/* [wxMaxima: comment start ]
-This is the rotation matrix corresponding to a unit quaternion in wxyz format.
-   [wxMaxima: comment end   ] */
-
 /* [wxMaxima: input   start ] */
-quatToRotMatrix(q) := matrix(
-    [1-2*(q[3]^2 + q[4]^2), 2*(q[2]*q[3] - q[1] * q[4]), 2*(q[2]*q[4] + q[1]*q[3])],
-    [2*(q[2]*q[3]+q[1]*q[4]), 1 - 2*(q[2]^2 + q[4]^2), 2*(q[3]*q[4] - q[1]*q[2])],
-    [2*(q[2]*q[4] - q[1]*q[3]), 2*(q[3]*q[4] + q[1]*q[2]), 1-2*(q[2]^2+q[3]^2)]);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: subsect start ]
-Quaternion Exponentiation
-   [wxMaxima: subsect end   ] */
-
-/* [wxMaxima: comment start ]
-Takes in just the vector part of a quaternion.
-Note that divide an angular velocity dt (or incremental rotation) by 2 and you can feed it into this function to get a quaternion to compose.
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-qPureExp(src) := block([theta, scale],
-    theta : sqrt(src . transpose(src)),
-    scale : sin(theta)/theta,
-    [cos(theta), src[1]*scale, src[2]*scale, src[3]*scale]);
+file_search_maxima : cons(sconcat("C:/Users/Ryan/Desktop/src/OSVR-Core/plugins/videobasedtracker/math/###.{lisp,mac,mc}"), file_search_maxima)$
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-qSmallPureExp(src):= block([theta, scale],
-    theta : sqrt(src . transpose(src)),
-    scale : 1,
-    [cos(theta), src[1]*scale, src[2]*scale, src[3]*scale]);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-qPureExp([.1, .1, .1]/2);
-qSmallPureExp([.1, .1, .1]/2);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: subsect start ]
-Small angle rotation
-   [wxMaxima: subsect end   ] */
-
-/* [wxMaxima: input   start ] */
-smallAngleMatrix(w) := matrix([0, -w[3], w[2]], [w[3], 0, -w[1]], [-w[2], w[1], 0]);
+load("common-vr-math");
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -65,48 +22,13 @@ This is the "simple" version without distortion in it.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-projectPointRotMatrix(rot, translation, objPt, fx, fy, cx, cy) := 
-block([xformed, xp, yp, x, y, z, u, v],
-    xformed : rot . transpose(matrix(objPt)) + translation,
-    xp : (xformed[1]/xformed[3])[1],
-    yp : (xformed[2]/xformed[3])[1],
-    u : fx * xp + cx,
-    v : fy * yp + cy,
-    [u,v]);
-projectPoint(quat, translation, objPt, fx, fy, cx, cy) := projectPointRotMatrix(quatToRotMatrix(quat), translation, objPt, fx, fy, cx, cy);
-projectPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240);
-projectPointRotMatrix(quatToRotMatrix(qSmallPureExp([0,0,0])), [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: subsect start ]
-Corresponding jacobian
-   [wxMaxima: subsect end   ] */
-
-/* [wxMaxima: comment start ]
-This version uses subscripts in the final result, making it more readable.
-
-
-There needs to be 6 zero columns inserted after the first 6 columns.
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon, meas],
-    myincrot: [incrot[0], incrot[1], incrot[2]],
-    myquat: [qw, qx, qy, qz],
-    mypos : [pos[0], pos[1], pos[2]],
-    mybeacon : [beacon[0], beacon[1], beacon[2]],
-    meas : projectPointRotMatrix(quatToRotMatrix(qSmallPureExp(myincrot)) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy),
-jacobian(meas, [pos[0], pos[1], pos[2],incrot[0], incrot[1], incrot[2], beacon[0], beacon[1], beacon[2]]));
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-block([myquat, myincrot, mypos, mybeacon, q, incrot, pos, beacon, meas],
-    myincrot: [incrot[0], incrot[1], incrot[2]],
-    myquat: [qw, qx, qy, qz],
-    mypos : [pos[0], pos[1], pos[2]],
-    mybeacon : [beacon[0], beacon[1], beacon[2]],
-    meas : projectPointRotMatrix(quatToRotMatrix(qSmallPureExp(myincrot)) . quatToRotMatrix(myquat), mypos, mybeacon, fl, fl, cx, cy),
-[jacobian(meas, mypos), jacobian(meas, myincrot), jacobian(meas, mybeacon)]);
+projectPointRotMatrix(rot, translation, objPt, fl, c) := 
+block([xformed],
+    xformed : rot . transpose(objPt) + transpose(translation),
+    print(xformed),
+    transpose((submatrix(3, xformed) / xformed[3][1]) * fl + c));
+/*projectPoint(quat, translation, objPt, fx, fy, cx, cy) := projectPointRotMatrix(quatToRotMatrix(quat), translation, objPt, fx, fy, cx, cy);*/
+projectPointRotMatrix(qtorotmatrix(qfromtaylorincremental([0.01,0.01,0.01])), [0,0,0], [1, 2, 3], 452.9, [320, 240]);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -168,125 +90,147 @@ distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, 
 /* [wxMaxima: fold    end   ] */
 
 /* [wxMaxima: section start ]
-Outputting jacobian in a way we can compute
+Simpler Jacobian Parts
    [wxMaxima: section end   ] */
 
+/* [wxMaxima: input   start ] */
+genvec(sym, dim) := block([i], express(transpose(matrix(makelist(sym[i], i, dim)))))$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+vectolist(vec) := if (listp(vec)) then (flatten(vec)) elseif (matrixp(vec)) then (flatten(args(vec)))$
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: comment start ]
-Will need some transformation, the seds committed into the repo,
-and finally manual touch-ups (making sure some numbers are doubles, replacing ^, etc)
-    
-Didn't have time to write the Maxima or Lisp code to properly export directly
-to C code, so the stepwise procedure will have to suffice.
+This function takes in 3d column vector camPoints (before perspective divide), a single focal length, and 2d column vector principal point, and returns a [u, v] image point vector/list
    [wxMaxima: comment end   ] */
 
+/* [wxMaxima: input   start ] */
+finalProjectionNoDistort(camPoints, fl, pp) := block([imgu, imgv, u, v, returnval],
+    imgu: camPoints[1][1]/(camPoints[3][1]) * (fl) + pp[1],
+    imgv: camPoints[2][1]/(camPoints[3][1]) * (fl) + pp[2],
+    [u = imgu, v = imgv],
+    returnval[u] : imgu,
+    returnval[v] : imgv,
+    returnval
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+finalProjectionDistort(camPoints, fl, pp) := block([myk, divided, r2, distort, i, result, returnval, u, v],
+    myk: [k1, k2, k3]/*[1.252916e-06, -1.752020e-11, 6.405327e-17]*/,
+    divided: [camPoints[1][1]/camPoints[3][1], camPoints[2][1]/camPoints[3][1]],
+    r2: divided . transpose(divided),
+    distort: 1 + myk . transpose(makelist(r2^i,i,3)),
+    print(distort),
+    result : vectolist(divided * distort * fl + pp),
+    returnval['distort] : distort,
+    returnval[u] : result[1],
+    returnval[v] : result[2],
+    returnval
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Position
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+simpleProjectForPosition(project, xlate, fl, pp, rotatedObjPt) :=block([camPoints],
+    camPoints: rotatedObjPt + xlate,
+    project(camPoints, fl, pp));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+declare(x, scalar, y, scalar, z, scalar);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+simplePositionMeas : simpleProjectForPosition(finalProjectionNoDistort, transpose([x, y, z]), hdkFL, [320, 240], transpose([bx, by, bz]));
+[simplePositionMeas[u], simplePositionMeas[v]];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+jacobian([simplePositionMeas[u], simplePositionMeas[v]], [x, y, z]);
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: comment start ]
-A few notes:
-Some of these seem to be pretty common quantities, for instance, componentwise squared and cubed incrot was seen. So was a component-wise squaring of the quaternion.
+Trying it with distortion, just to see what happens - looks awful, and even when factoring out the distortion coefficient.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-exportBlock(myblock, incrementalFn, matrixFn) := block([blockargs, len, incFile, matrixFile, i],
-    blockargs: args(myblock),
-    len: length(blockargs),
-    incFile: openw(incrementalFn),
-    for i:2 thru len - 1 do printf(incFile, "~a~%", blockargs[i]),
-    close(incFile),
-    matrixFile: openw(matrixFn),
-    printf(matrixFile, "~a~%", blockargs[len]),
-    close(matrixFile)
-    )$
-printBlock(myblock, func) := block([blockargs, len, i],
-    blockargs: args(myblock),
-    len: length(blockargs),
-    for i:2 thru len do print(string(func(blockargs[i])))
-    )$
+distortPositionMeas : simpleProjectForPosition(finalProjectionDistort, transpose([x, y, z]), hdkFL, [320, 240], transpose([bx, by, bz]));
+[distortPositionMeas[u], distortPositionMeas[v]];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-replaceExponentsOnce(expr) := block([arg, power, newexpr, i],
-    if atom(expr) then expr elseif operatorp(expr, "^") then (
-        arg : args(expr)[1],
-        power: args(expr)[2],
-        newexpr : string(arg),
-        for i: 2 thru power do ( newexpr : concat(string(arg), " * ", newexpr)),
-        return(concat("(", newexpr, ")"))
-    ) else (return(expr))
+ratsubst(distort, distortPositionMeas[distort], jacobian([distortPositionMeas[u]], [bx, by, bz]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Incremental Rotation
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+incrementalRotationMatrixQ : qtorotmatrix(qfromtaylorincremental([w[1], w[2], w[3]]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for mat in [incrementalRotationMatrixQ, incrementalRotationMatrixRT, incrementalRotationMatrixR] do (
+    print(ev(mat, w = [0.1, 0.1, 0.1]) . transpose([1, 2, 3]))
 );
-replaceExponents(expr) := scanmap(replaceExponentsOnce, expr);
-replaceExponents(x^3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsubsect start ]
+the actual measurement stuff
+   [wxMaxima: subsubsect end   ] */
+
+/* [wxMaxima: input   start ] */
+simpleProjectForIncRot(xlate, incRot, fl, pp, initiallyRotatedObjPt) :=block([camPoints],
+    camPoints: rodriguesTaylor(incRot). initiallyRotatedObjPt + xlate,
+    finalProjectionNoDistort(camPoints, fl, pp));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-tempreplaceExponentsOnce(expr) := block([arg, power, newexpr, i],
-    if atom(expr) then (print("got atom", expr), expr) elseif operatorp(expr, "^") then (
-        arg : args(expr)[1],
-        power: args(expr)[2],
-        print("got exponentiation, arg", arg, "power", power),
-        if power < 0 then return(1/tempreplaceExponentsOnce(1/expr)) else 
-        return(cons(arg, join(makelist("*", power-1), makelist(arg, power-1))))
-    ) else (print("Got something else, op ", op(expr), "args ", args(expr)), return(expr))
+block([genvec, myincrot, mypos, myrotatedbeacon, q, incrot, pos, beacon, meas, rb, H],
+    genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
+    myincrot: genvec(incrot, 3),
+    mypos : genvec(pos, 3),
+    meas: simpleProjectForIncRot(mypos, myincrot, fl, genvec(pp, 2), genvec(m_rotatedObjPoint, 3)),
+    print(meas[u], meas[v]),
+    H : vectorsimp(jacobian([meas[u], meas[v]], [incrot[1], incrot[2], incrot[3]])),
+    /* evaluating at incrot = 0 since we're zeroing each cycle effectively - hopefully this is an acceptable assumption to make */
+    print(ev(H, incrot = [0,0,0])),
+    matrixCodegen(ev(H, incrot = [0,0,0]))
 );
-tempreplaceExponents(expr) := (print("Starting with expression ", expr),scanmap(tempreplaceExponentsOnce, expr));
-tempreplaceExponents(1/%36^2);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Beacon Position
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: subsubsect start ]
+with R as a rotation matrix
+   [wxMaxima: subsubsect end   ] */
+
 /* [wxMaxima: input   start ] */
-processSubscripts(a) := a;
-processExpression(expr) := replaceExponents(processSubscripts(expr));
-processLine(line) := block([lineargs],
-    lineargs : args(line),
-    if operatorp(line, ":") then (
-        sconcat("auto ", string(lineargs[1]), " = ", processExpression(lineargs[2]), ";" )
-    ) else (
-        string(line)
-    )
+block([camPoints, myrot, m_rot, mybeacon, m_beacon, myxlate, xlate, fl, pp, meas, vec, i, u, v, H, HwithSubstitutions],
+    local(mybeacon, beacon, xlate, m_rot),
+    genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
+    mybeacon: genvec(m_beacon, 3),
+    camPoints : genmatrix(m_rot,3,3) . mybeacon + genvec(xlate, 3),
+    /*print(camPoints),*/
+    u: camPoints[1][1]/(camPoints[3][1]) * (fl) + pp[1],
+    v: camPoints[2][1]/(camPoints[3][1]) * (fl) + pp[2],
+    /*meas: submatrix(3, camPoints)/(camPoints[3][1]) * (fl) + genvec(pp, 2),
+    print(rr(meas)),
+jacobian([meas[1][1], meas[2][1]], [m_beacon[1], m_beacon[2], m_beacon[3]])*/
+
+    print([u, v]),
+    H: jacobian([u, v], [m_beacon[1], m_beacon[2], m_beacon[3]]),
+    print(H),
+    matrixCodegen(H)
 );
-matrixCodegen(mat) := block([myblock, blockargs, len, i],
-    myblock: ev(optimize(mat), optimprefix: v),
-    blockargs: args(myblock),
-    len: length(blockargs),
-    for i:2 thru len do print(processLine(blockargs[i])),
-    print(processLine(blockargs(len)))
-);
-matrixCodegen(H);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-matrixCodegen(H);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-
-    for i:2 thru len do print(string(func(blockargs[i])))
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-printBlock(optimize(H), args);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-commonSubs : append(
-    makelist(incrot[i]^2 = incrotSqr[i], i, 3),
-    makelist(incrot[i]^3 = incrotCu[i], i, 3),
-    [incrotSqr[1] + incrotSqr[2]+incrotSqr[3] = incrotSqrNorm, sqrt(incrotSqrNorm) = incrotNorm],
-    makelist(q[i]^2 = qSqr[i], i, 4),
-    makelist(q[i]^3 = qCu[i], i, 4));
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-optimH:optimize(H);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-optimH:optimize(subst(commonSubs, H));
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-optimH:optimize(replaceExponents(subst(commonSubs, H)));
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-exportBlock(optimH, "videotrackerjacobian.txt", "jacobianmatrix.txt");
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
