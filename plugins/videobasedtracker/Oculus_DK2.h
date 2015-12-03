@@ -57,8 +57,7 @@ namespace oculus_dk2 {
         virtual ~Oculus_DK2_HID();
 
         /// Return the latest IMU report(s).  Even if reports are not desired,
-        /// must be
-        // called periodically to keep the LED patterns flashing.
+        /// must be called periodically to keep the LED patterns flashing.
         std::vector<OCULUS_IMU_REPORT> poll();
 
       private:

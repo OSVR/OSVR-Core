@@ -8,6 +8,9 @@ osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/DirectShowCameraLib")
 
+# Make sure we can link these upcoming static libraries into a shared lib
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 ###
 # Build a separate static library with the core of the video-based tracker
 ###
@@ -49,14 +52,30 @@ endif()
 ###
 # Build the plugin
 ###
-osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
-    MANUAL_LOAD
-    CPP # indicates we'd like to use the C++ wrapper
-    SOURCES
+set(PLUGIN_SOURCES
     com_osvr_VideoBasedHMDTracker.cpp
     Oculus_DK2.cpp
     Oculus_DK2.h
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
+    CameraParameters.h
+    CVImageSource.cpp
+    DK2ImageSource.cpp
+    ImageSource.cpp
+    ImageSource.h
+    ImageSourceFactories.h
+    FakeImageSource.cpp)
+if(WIN32)
+    list(APPEND PLUGIN_SOURCES
+        DirectShowHDKCameraFactory.h
+        DirectShowImageSource.cpp
+        DirectShowToCV.h)
+endif()
+
+osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
+    MANUAL_LOAD
+    CPP # indicates we'd like to use the C++ wrapper
+    SOURCES
+    ${PLUGIN_SOURCES}
 )
 
 target_link_libraries(com_osvr_VideoBasedHMDTracker
