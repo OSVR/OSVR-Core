@@ -184,7 +184,7 @@ namespace client {
                 const std::string display_mode_str = display_mode.asString();
                 if ("horz_side_by_side" == display_mode_str) {
                     res.display_mode = HORIZONTAL_SIDE_BY_SIDE;
-                } else if ("vert_side_by_size" == display_mode_str) {
+                } else if ("vert_side_by_side" == display_mode_str) {
                     res.display_mode = VERTICAL_SIDE_BY_SIDE;
                 } else if ("full_screen" == display_mode_str) {
                     res.display_mode = FULL_SCREEN;
