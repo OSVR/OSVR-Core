@@ -342,51 +342,6 @@ namespace vbtracker {
         // down, and Z pointing along the camera viewing direction.
 
         m_resetState(cvToVector3d(m_tvec), cvRotVecToQuat(m_rvec));
-#if 0
-        cv::Mat rvec;
-        m_rvec.copyTo(rvec);
-        cv::Mat roundTripped = eiQuatToRotVec(m_state.getQuaternion());
-        std::cout << "Round-trip error: " << rvec - roundTripped << std::endl;
-        {
-            static int i = 0;
-            if (i == 0) {
-                const double pixelReprojectionErrorForSingleAxisMax = 4;
-                if (inlierIndices.rows > 0) {
-
-                    double squaredError = 0;
-                    for (int i = 0; i < inlierIndices.rows; i++) {
-
-                        Eigen::Vector3d objPoint =
-                            cvToVector(objectPoints[i]).cast<double>();
-                        Eigen::Vector2d imgPoint = projectPoint(
-                            m_state.getPosition(), m_state.getQuaternion(),
-                            m_focalLength, m_principalPoint, objPoint);
-                        std::cout << "reproj residual "
-                                  << (imgPoint -
-                                      cvToVector(imagePoints[i]).cast<double>())
-                                         .transpose()
-                                  << std::endl;
-                        double err = (imgPoint -
-                                      cvToVector(imagePoints[i]).cast<double>())
-                                         .squaredNorm();
-                        squaredError += err;
-                        if (std::sqrt(err) >
-                            pixelReprojectionErrorForSingleAxisMax) {
-                            std::cout
-                                << "Got a reprojection error of "
-                                << std::sqrt(err)
-                                << " using the Kalman-utilized projection code!"
-                                << std::endl;
-                        }
-                    }
-                    std::cout
-                        << "RMS error for kalman-utilized projection code: "
-                        << std::sqrt(squaredError) << std::endl;
-                }
-            }
-            i = (i + 1) % 200;
-        }
-#endif
         return true;
     }
 
