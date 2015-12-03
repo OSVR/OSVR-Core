@@ -73,7 +73,6 @@ namespace vbtracker {
 
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
-        static int i = 0;
         for (auto const &led : leds) {
             if (!led.identified()) {
                 continue;
@@ -99,13 +98,8 @@ namespace vbtracker {
             }
             numGood++;
 
-            if (i == 0) {
-                std::cout << "beacon " << id << " residual "
-                          << meas.getResidual(state).transpose() << "\n";
-            }
             kalman::correct(state, model, meas);
         }
-        i = (i + 1) % 200;
 
         bool incrementProbation = false;
         if (0 == m_framesInProbation) {

@@ -91,9 +91,8 @@ namespace vbtracker {
         // they are too close to each other, we have a light rather
         // than an LED.  If not, compute a threshold to separate the
         // 0's and 1's.
-        auto extrema = findMinMaxBrightness(brightnesses);
-        const auto minVal = extrema.first;
-        const auto maxVal = extrema.second;
+        Brightness minVal, maxVal;
+        std::tie(minVal, maxVal) = findMinMaxBrightness(brightnesses);
         static const double TODO_MIN_BRIGHTNESS_DIFF = 0.5;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
             return -2;

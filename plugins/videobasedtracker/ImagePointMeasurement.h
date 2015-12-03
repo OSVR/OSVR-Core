@@ -142,11 +142,6 @@ namespace vbtracker {
                 Eigen::Matrix<double, 2, 6>::Zero(),
                 // with respect to change in beacon position
                 getBeaconJacobian();
-#if 0
-            ret << nonzero.topLeftCorner<2, 6>(),
-                Eigen::Matrix<double, 2, 6>::Zero(),
-                nonzero.topRightCorner<2, 3>();
-#endif
             return ret;
         }
 

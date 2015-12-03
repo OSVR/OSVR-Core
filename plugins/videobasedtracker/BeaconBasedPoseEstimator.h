@@ -148,7 +148,7 @@ namespace vbtracker {
         /// (for example, to project our beacons into the image).
         /// @{
         /// @brief Have we produced a pose estimate yet?
-        bool m_gotPose;
+        bool m_gotPose = false;
         /// @brief Rotation vector associated with the most-recent pose
         cv::Mat m_rvec;
         /// @brief Translation vector associated with the most-recent pose.
