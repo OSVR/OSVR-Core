@@ -114,31 +114,16 @@ namespace kalman {
         }
 #endif
         inline types::Matrix<4, 3> jacobian(Eigen::Vector3d const &w) {
-            Eigen::Vector3d wSquared = w.array() * w.array();
-
-            auto v4 = wSquared[2] / 4 + wSquared[1] / 4 + wSquared[0] / 4;
-            auto v5 = 1 / v4;
-            auto v6 = std::sqrt(v4);
-            auto v7 = std::cos(v6);
-            auto v8 = 1 / (v6 * v6 * v6);
-            auto v9 = std::sin(v6);
-            auto v10 = 1 / v6;
-            auto v11 = (v10 * v9) / 2;
-            auto v12 =
-                (w[0] * w[1] * v5 * v7) / 8 - (w[0] * w[1] * v8 * v9) / 8;
-            auto v13 =
-                (w[0] * w[2] * v5 * v7) / 8 - (w[0] * w[2] * v8 * v9) / 8;
-            auto v14 =
-                (w[1] * w[2] * v5 * v7) / 8 - (w[1] * w[2] * v8 * v9) / 8;
+            double a = w.squaredNorm() / 48 + 0.5;
+            // outer product over 24, plus a on the diagonal
+            Eigen::Matrix3d topBlock =
+                (w * w.transpose()) / 24. + Eigen::Matrix3d::Identity() * a;
+            // this weird thing on the bottom row.
+            Eigen::RowVector3d bottomRow =
+                (Eigen::Vector3d(2 * a, 0, 0) + (w[0] * w) / 12 - w / 4)
+                    .transpose();
             types::Matrix<4, 3> ret;
-            ret << v11 - (wSquared[0] * v8 * v9) / 8 +
-                       (wSquared[0] * v5 * v7) / 8,
-                v12, v13, v12,
-                v11 - (wSquared[1] * v8 * v9) / 8 + (wSquared[1] * v5 * v7) / 8,
-                v14, v13, v14,
-                v11 - (wSquared[2] * v8 * v9) / 8 + (wSquared[2] * v5 * v7) / 8,
-                -(w[0] * v10 * v9) / 4, -(w[1] * v10 * v9) / 4,
-                -(w[2] * v10 * v9) / 4;
+            ret << topBlock, bottomRow;
             return ret;
         }
 #if 0
