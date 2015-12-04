@@ -132,7 +132,39 @@ namespace vbtracker {
                 m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
             return ret;
         }
-#else
+#endif
+
+#if 1
+        /// This version also assumes incrot == 0 but does the computation in a
+        /// much more elegant way.
+        Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
+            // just grabbing x and y as an array for component-wise manip right
+            // now.
+            Eigen::Array2d rotXlated =
+                m_rotatedTranslatedPoint.head<2>().array();
+            Eigen::Array2d rotObj = m_rotatedObjPoint.head<2>().array();
+
+            // Utility because a lot of this requires negatives applied in one
+            // row but not the other.
+            Eigen::Array2d negativePositive(-1, 1);
+            Eigen::Array2d positiveNegative(1, -1);
+            // Some common Z stuff
+            double zRecip = 1. / m_rotatedTranslatedPoint.z();
+            double rotObjZ = m_rotatedObjPoint.z();
+            Eigen::Array2d mainDiagonal =
+                rotXlated * rotObj.reverse() * negativePositive * zRecip;
+            Eigen::Array2d otherDiagonal =
+                (rotObj * rotXlated * zRecip + rotObjZ) * positiveNegative;
+            Eigen::Array2d lastCol = rotObj.reverse() * negativePositive;
+            Eigen::Matrix<double, 2, 3> prelim;
+            prelim.leftCols<2>() << mainDiagonal[0], otherDiagonal[0],
+                otherDiagonal[1], mainDiagonal[1];
+            prelim.rightCols<1>() << lastCol.matrix();
+            return prelim * zRecip * m_cam.focalLength;
+        }
+#endif
+
+#if 0
         /// This substantially-more-complex-looking version does separately use
         /// the incremental rotation state.
         Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
