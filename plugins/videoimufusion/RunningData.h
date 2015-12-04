@@ -94,7 +94,8 @@ class VideoIMUFusion::RunningData {
     Eigen::Vector3d getPosition() const { return state().getPosition(); }
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
-        return m_cTr * osvr::util::eigen_interop::map(pose);
+        return m_cTr.linear() * (Eigen::Translation3d(m_cTr.translation()) *
+               osvr::util::eigen_interop::map(pose).transform());
     }
 
     Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const {
