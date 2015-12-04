@@ -126,7 +126,7 @@ void VideoIMUFusionDevice::handleIMUVelocity(
     using namespace osvr::util::eigen_interop;
     Eigen::Quaterniond q = map(report.state.incrementalRotation);
     Eigen::Vector3d rot;
-    if (q.w() >= 1.) {
+    if (q.w() >= 1. || q.vec().isZero(1e-10)) {
         rot = Eigen::Vector3d::Zero();
     } else {
         auto magnitude = q.vec().blueNorm();
