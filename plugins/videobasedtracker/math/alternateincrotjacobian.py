@@ -68,5 +68,6 @@ class Chainable:
 out = Chainable(raw
                 ).replace('fl', 'm_cam.focalLength'
                 ).replace('1/2', '0.5'
+                ).replace('v13^2', '(v13*v13)'
                          ).string()
 print(out)
