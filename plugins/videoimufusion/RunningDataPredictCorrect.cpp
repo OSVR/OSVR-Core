@@ -94,7 +94,7 @@ void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     Eigen::Quaterniond orientation(roomPose.rotation());
     auto oriChange = state().getQuaternion().angularDistance(orientation);
     if (std::abs(oriChange) > M_PI) {
-        OSVR_DEV_VERBOSE("Throwing out a bad video pose");
+        //OSVR_DEV_VERBOSE("Throwing out a bad video pose");
         return;
     }
     if (preReport(timestamp)) {
