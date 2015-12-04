@@ -129,6 +129,7 @@ void VideoIMUFusionDevice::handleIMUVelocity(
     if (q.w() >= 1. || q.vec().isZero(1e-10)) {
         rot = Eigen::Vector3d::Zero();
     } else {
+#if 0
         auto magnitude = q.vec().blueNorm();
         rot = (q.vec() / magnitude * (2. * std::atan2(magnitude, q.w()))) /
               report.state.dt;
@@ -137,6 +138,15 @@ void VideoIMUFusionDevice::handleIMUVelocity(
         // std::swap(rot[0], rot[1]);
         rot[1] *= -1.;
         rot[2] *= -1.;
+#else
+        auto angle = std::acos(q.w());
+        rot = q.vec().normalized() * angle * 2 / report.state.dt;
+
+        /// @todo without transformations being applied to vel quats, this
+        /// is needed.
+        rot[1] *= -1.;
+        rot[2] *= -1.;
+#endif
     }
 
     m_fusion.handleIMUVelocity(timestamp, rot);
