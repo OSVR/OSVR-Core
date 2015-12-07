@@ -12,7 +12,7 @@
     },
     "field_of_view": {
       "monocular_horizontal": 90,
-      "monocular_vertical": 101.25,
+      "monocular_vertical": 96.73,
       "overlap_percent": 100,
       "pitch_tilt": 0
     },
