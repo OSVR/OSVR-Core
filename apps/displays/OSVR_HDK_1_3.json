@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "schemaVersion": 1
+  },
+  "hmd": {
+    "device": {
+      "vendor": "OSVR",
+      "model": "HDK",
+      "num_displays": 1,
+      "Version": "1.2",
+      "Note": "Suitable for HDK 1.0-1.2"
+    },
+    "field_of_view": {
+      "monocular_horizontal": 90,
+      "monocular_vertical": 96.73,
+      "overlap_percent": 100,
+      "pitch_tilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 1920,
+        "height": 1080,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side",
+        "swap_eyes": 0
+      }
+    ],
+    "distortion": {
+        "distance_scale_x": 1,
+        "distance_scale_y": 1,
+        "polynomial_coeffs_red": [ 0, 1, -0.95, 1.88, 1.62, 1.11 ],
+        "polynomial_coeffs_green": [ 0, 1, -0.95, 1.88, 1.62, 1.11 ],
+        "polynomial_coeffs_blue": [ 0, 1, -0.95, 1.88, 1.62, 1.11 ]
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.471,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
+      },
+      {
+        "center_proj_x": 0.529,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
+      }
+    ]
+  }
+}
