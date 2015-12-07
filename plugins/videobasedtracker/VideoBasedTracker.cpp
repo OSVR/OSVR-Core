@@ -69,67 +69,7 @@ namespace vbtracker {
         m_frame = frame;
         m_imageGray = grayImage;
 
-        //================================================================
-        // Tracking the points
-
-        // Threshold the image based on the brightness value that is between
-        // the darkest and brightest pixel in the image.
-        // @todo Make this a parameter.
-        double minVal, maxVal;
-        cv::minMaxLoc(m_imageGray, &minVal, &maxVal);
-        double thresholdValue = 220;
-        cv::threshold(m_imageGray, m_thresholdImage, thresholdValue, 255,
-                      CV_THRESH_BINARY);
-
-        // @todo are any of the above steps already being performed in the blob
-        // detector (if configured in a given way?)
-        // http://docs.opencv.org/master/d0/d7a/classcv_1_1SimpleBlobDetector.html#details
-
-        // Construct a blob detector and find the blobs in the image.
-        // This set of parameters is optimized for the OSVR HDK prototype
-        // that has exposed LEDs.
-        /// @todo: Make a different set of parameters optimized for the
-        /// Oculus Dk2.
-        /// @todo: Determine the maximum size of a trackable blob by seeing
-        /// when we're so close that we can't view at least four in the
-        /// camera.
-        cv::SimpleBlobDetector::Params params;
-        params.minThreshold = static_cast<float>(thresholdValue);
-        params.maxThreshold = static_cast<float>(
-            thresholdValue + (maxVal - thresholdValue) * 0.3);
-        params.thresholdStep = (params.maxThreshold - params.minThreshold) / 10;
-        params.blobColor = static_cast<uchar>(255);
-        params.filterByColor =
-            false; // Look for bright blobs: there is a bug in this code
-        params.minInertiaRatio = 0.5;
-        params.maxInertiaRatio = 1.0;
-        params.filterByInertia = false;   // Do we test for non-elongated blobs?
-        params.minArea = 1;               // How small can the blobs be?
-        params.filterByConvexity = false; // Test for convexity?
-        params.filterByCircularity = false; // Test for circularity?
-        params.minDistBetweenBlobs = 3;
-#if CV_MAJOR_VERSION == 2
-        cv::Ptr<cv::SimpleBlobDetector> detector =
-            new cv::SimpleBlobDetector(params);
-#elif CV_MAJOR_VERSION == 3
-        auto detector = cv::SimpleBlobDetector::create(params);
-#else
-#error "Unrecognized OpenCV version!"
-#endif
-        /// @todo this variable is a candidate for hoisting to member
-        std::vector<cv::KeyPoint> foundKeyPoints;
-        detector->detect(m_imageGray, foundKeyPoints);
-
-        // @todo: Consider computing the center of mass of a dilated bounding
-        // rectangle around each keypoint to produce a more precise subpixel
-        // localization of each LED.  The moments() function may be helpful
-        // with this.
-
-        // @todo: Estimate the summed brightness of each blob so that we can
-        // detect when they are getting brighter and dimmer.  Pass this as
-        // the brightness parameter to the Led class when adding a new one
-        // or augmenting with a new frame.
-
+        auto foundKeyPoints = extractKeypoints(grayImage);
         // We allow multiple sets of LEDs, each corresponding to a different
         // sensor, to be located in the same image.  We construct a new set
         // of LEDs for each and try to find them.  It is assumed that they all
@@ -311,6 +251,67 @@ namespace vbtracker {
 
         m_assertInvariants();
         return done;
+    }
+
+    std::vector<cv::KeyPoint>
+    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) const {
+
+        //================================================================
+        // Tracking the points
+
+        // Construct a blob detector and find the blobs in the image.
+
+        /// @todo: Make a different set of parameters optimized for the
+        /// Oculus Dk2.
+        /// @todo: Determine the maximum size of a trackable blob by seeing
+        /// when we're so close that we can't view at least four in the
+        /// camera.
+        int steps = 4;
+        cv::SimpleBlobDetector::Params params;
+        params.minThreshold = 50;
+        params.maxThreshold = 200;
+        params.thresholdStep =
+            (params.maxThreshold - params.minThreshold) / steps;
+
+        params.minDistBetweenBlobs = 3.0f;
+
+        params.minArea = 4.0f; // How small can the blobs be?
+
+        params.filterByColor =
+            false; // Look for bright blobs: there is a bug in this code
+        params.blobColor = static_cast<uchar>(255);
+
+        params.filterByInertia = false; // Do we test for non-elongated blobs?
+        params.minInertiaRatio = 0.5;
+        params.maxInertiaRatio = 1.0;
+
+        params.filterByConvexity = false; // Test for convexity?
+
+        params.filterByCircularity = true; // Test for circularity?
+        params.minCircularity = 0.7f; // default is 0.8, but the edge of the
+                                      // case can make the blobs "weird-shaped"
+#if CV_MAJOR_VERSION == 2
+        cv::Ptr<cv::SimpleBlobDetector> detector =
+            new cv::SimpleBlobDetector(params);
+#elif CV_MAJOR_VERSION == 3
+        auto detector = cv::SimpleBlobDetector::create(params);
+#else
+#error "Unrecognized OpenCV version!"
+#endif
+        /// @todo this variable is a candidate for hoisting to member
+        std::vector<cv::KeyPoint> foundKeyPoints;
+        detector->detect(grayImage, foundKeyPoints);
+
+        // @todo: Consider computing the center of mass of a dilated bounding
+        // rectangle around each keypoint to produce a more precise subpixel
+        // localization of each LED.  The moments() function may be helpful
+        // with this.
+
+        // @todo: Estimate the summed brightness of each blob so that we can
+        // detect when they are getting brighter and dimmer.  Pass this as
+        // the brightness parameter to the Led class when adding a new one
+        // or augmenting with a new frame.
+        return foundKeyPoints;
     }
 } // namespace vbtracker
 } // namespace osvr

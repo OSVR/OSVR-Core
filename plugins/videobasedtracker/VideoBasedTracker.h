@@ -87,6 +87,8 @@ namespace vbtracker {
                           OSVR_TimeValue const &tv, PoseHandler handler);
 
       private:
+        std::vector<cv::KeyPoint>
+        extractKeypoints(cv::Mat const &grayImage) const;
         bool m_showDebugWindows; //< Should we show debugging windows?
 
         /// @name Images
