@@ -206,15 +206,33 @@ namespace vbtracker {
 
             if (m_showDebugWindows) {
                 // Don't display the debugging info every frame, or we can't go
-                // fast
-                // enough.
+                // fast enough.
                 static int count = 0;
                 if (++count == 11) {
+                    // Fake the thresholded image to give an idea of what the
+                    // blob detector is doing.
+                    auto getCurrentThresh = [&](int i) {
+                        return i * params.thresholdStep + params.minThreshold;
+                    };
+                    cv::Mat temp;
+                    cv::threshold(m_imageGray, m_thresholdImage,
+                                  params.minThreshold, params.minThreshold,
+                                  CV_THRESH_BINARY);
+                    cv::Mat tempOut;
+                    for (int i = 1; getCurrentThresh(i) < params.maxThreshold;
+                         ++i) {
+                        auto currentThresh = getCurrentThresh(i);
+                        cv::threshold(m_imageGray, temp, currentThresh,
+                                      currentThresh, CV_THRESH_BINARY);
+                        cv::addWeighted(m_thresholdImage, 0.5, temp, 0.5, 0,
+                                        tempOut);
+                        m_thresholdImage = tempOut;
+                    }
 
-                    // Draw detected blobs as red circles.
+                    // Draw detected blobs as blue circles.
                     cv::drawKeypoints(
                         m_frame, foundKeyPoints, m_imageWithBlobs,
-                        cv::Scalar(0, 0, 255),
+                        cv::Scalar(255, 0, 0),
                         cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
                     // Label the keypoints with their IDs.
@@ -230,9 +248,8 @@ namespace vbtracker {
                     }
 
                     // If we have a transform, reproject all of the points from
-                    // the
-                    // model space (the LED locations) back into the image and
-                    // display them on the blob image in green.
+                    // the model space (the LED locations) back into the image
+                    // and display them on the blob image in green.
                     if (gotPose) {
                         std::vector<cv::Point2f> imagePoints;
                         m_estimators[sensor]->ProjectBeaconsToImage(
@@ -263,7 +280,7 @@ namespace vbtracker {
                             break;
 
                         case 't':
-                            // Show the thresholded image.
+                            // Show the thresholded image
                             m_shownImage = &m_thresholdImage;
                             break;
 
