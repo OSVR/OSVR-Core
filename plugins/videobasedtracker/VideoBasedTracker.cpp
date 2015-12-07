@@ -33,6 +33,33 @@
 
 namespace osvr {
 namespace vbtracker {
+    static inline cv::SimpleBlobDetector::Params getBlobDetectorParams() {
+        int steps = 4;
+        cv::SimpleBlobDetector::Params params;
+        params.minThreshold = 50;
+        params.maxThreshold = 200;
+        params.thresholdStep =
+            (params.maxThreshold - params.minThreshold) / steps;
+
+        params.minDistBetweenBlobs = 3.0f;
+
+        params.minArea = 4.0f; // How small can the blobs be?
+
+        params.filterByColor =
+            false; // Look for bright blobs: there is a bug in this code
+        params.blobColor = static_cast<uchar>(255);
+
+        params.filterByInertia = false; // Do we test for non-elongated blobs?
+        params.minInertiaRatio = 0.5;
+        params.maxInertiaRatio = 1.0;
+
+        params.filterByConvexity = false; // Test for convexity?
+
+        params.filterByCircularity = true; // Test for circularity?
+        params.minCircularity = 0.7f; // default is 0.8, but the edge of the
+                                      // case can make the blobs "weird-shaped"
+        return params;
+    }
     void VideoBasedTracker::addOculusSensor() {
         /// @todo this clearly violates what I expected was the invariant - not
         /// sure if it's because of incomplete Oculus information, or due to a
@@ -151,6 +178,7 @@ namespace vbtracker {
                 if (++count == 11) {
                     // Fake the thresholded image to give an idea of what the
                     // blob detector is doing.
+                    auto params = getBlobDetectorParams();
                     auto getCurrentThresh = [&](int i) {
                         return i * params.thresholdStep + params.minThreshold;
                     };
@@ -266,30 +294,7 @@ namespace vbtracker {
         /// @todo: Determine the maximum size of a trackable blob by seeing
         /// when we're so close that we can't view at least four in the
         /// camera.
-        int steps = 4;
-        cv::SimpleBlobDetector::Params params;
-        params.minThreshold = 50;
-        params.maxThreshold = 200;
-        params.thresholdStep =
-            (params.maxThreshold - params.minThreshold) / steps;
-
-        params.minDistBetweenBlobs = 3.0f;
-
-        params.minArea = 4.0f; // How small can the blobs be?
-
-        params.filterByColor =
-            false; // Look for bright blobs: there is a bug in this code
-        params.blobColor = static_cast<uchar>(255);
-
-        params.filterByInertia = false; // Do we test for non-elongated blobs?
-        params.minInertiaRatio = 0.5;
-        params.maxInertiaRatio = 1.0;
-
-        params.filterByConvexity = false; // Test for convexity?
-
-        params.filterByCircularity = true; // Test for circularity?
-        params.minCircularity = 0.7f; // default is 0.8, but the edge of the
-                                      // case can make the blobs "weird-shaped"
+        auto params = getBlobDetectorParams();
 #if CV_MAJOR_VERSION == 2
         cv::Ptr<cv::SimpleBlobDetector> detector =
             new cv::SimpleBlobDetector(params);
