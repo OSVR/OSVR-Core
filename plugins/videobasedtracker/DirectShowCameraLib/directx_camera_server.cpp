@@ -657,7 +657,9 @@ void directx_camera_server::close_device() {
 directx_camera_server::~directx_camera_server() {
     // Get the callback device to immediately return all samples
     // it has queued up, then shut down the filter graph.
-    _pSampleGrabberWrapper->shutdown();
+    if (_pSampleGrabberWrapper) {
+        _pSampleGrabberWrapper->shutdown();
+    }
 
     close_device();
 
