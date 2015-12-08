@@ -60,7 +60,7 @@ namespace vbtracker {
     static const auto MAX_RESIDUAL = 100.0;
     static const auto MAX_SQUARED_RESIDUAL = MAX_RESIDUAL * MAX_RESIDUAL;
 
-    static const auto DEFAULT_MEASUREMENT_VARIANCE = 2.0;
+    static const auto DEFAULT_MEASUREMENT_VARIANCE = 3.0;
     static const auto LOW_BEACON_MEASUREMENT_VARIANCE = 1.0;
     static const auto LOW_BEACON_CUTOFF = 5;
 
