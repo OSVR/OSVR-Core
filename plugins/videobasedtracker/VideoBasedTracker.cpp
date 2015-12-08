@@ -350,15 +350,6 @@ namespace vbtracker {
                             break;
                         }
                     }
-
-                    // Report the pose, if we got one
-                    if (gotPose) {
-                        std::cout << "Pos (sensor " << sensor
-                                  << "): " << m_pose.translation.data[0] << ", "
-                                  << m_pose.translation.data[1] << ", "
-                                  << m_pose.translation.data[2] << std::endl;
-                    }
-
                     count = 0;
                 }
             }
