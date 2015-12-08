@@ -157,8 +157,10 @@ namespace vbtracker {
         /// @brief Stores the most-recent solution, in case we need it again
         /// (for example, to project our beacons into the image).
         /// @{
-        /// @brief Have we produced a pose estimate yet?
+        /// @brief Did we produce a pose estimate last cycle?
         bool m_gotPose = false;
+        /// @brief Did our last cycle process any measurements?
+        bool m_gotMeasurement = false;
         /// @brief Rotation vector associated with the most-recent pose
         cv::Mat m_rvec;
         /// @brief Translation vector associated with the most-recent pose.

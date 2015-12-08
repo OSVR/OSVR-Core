@@ -370,6 +370,7 @@ namespace vbtracker {
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction.
 
+        m_gotMeasurement = true;
         m_resetState(cvToVector3d(m_tvec), cvRotVecToQuat(m_rvec));
         return true;
     }

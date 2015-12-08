@@ -144,6 +144,7 @@ namespace vbtracker {
             numGood++;
 
             kalman::correct(state, model, meas);
+            m_gotMeasurement = true;
         }
 
         bool incrementProbation = false;
