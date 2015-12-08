@@ -93,7 +93,9 @@ namespace vbtracker {
         // 0's and 1's.
         Brightness minVal, maxVal;
         std::tie(minVal, maxVal) = findMinMaxBrightness(brightnesses);
-        static const double TODO_MIN_BRIGHTNESS_DIFF = 0.5;
+        // Brightness is currently actually keypoint diameter in pixels, and
+        // it's being under-estimated by OpenCV.
+        static const double TODO_MIN_BRIGHTNESS_DIFF = 0.3;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
             return -2;
         }
