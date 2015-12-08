@@ -41,7 +41,7 @@ namespace vbtracker {
     static inline cv::SimpleBlobDetector::Params getBlobDetectorParams() {
         int steps = 4;
         cv::SimpleBlobDetector::Params params;
-        params.minThreshold = 50;
+        params.minThreshold = BASE_NOISE_THRESHOLD;
         params.maxThreshold = 200;
         params.thresholdStep =
             (params.maxThreshold - params.minThreshold) / steps;
@@ -61,7 +61,7 @@ namespace vbtracker {
         params.filterByConvexity = false; // Test for convexity?
 
         params.filterByCircularity = true; // Test for circularity?
-        params.minCircularity = 0.7f; // default is 0.8, but the edge of the
+        params.minCircularity = 0.5f; // default is 0.8, but the edge of the
                                       // case can make the blobs "weird-shaped"
         return params;
     }
