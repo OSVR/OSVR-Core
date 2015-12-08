@@ -31,8 +31,13 @@
 // Standard includes
 // - none
 
+#define OSVR_USE_SIMPLEBLOB
+#undef OSVR_USE_CANNY_EDGEDETECT
+
 namespace osvr {
 namespace vbtracker {
+    static const int BASE_NOISE_THRESHOLD = 100;
+
     static inline cv::SimpleBlobDetector::Params getBlobDetectorParams() {
         int steps = 4;
         cv::SimpleBlobDetector::Params params;
@@ -176,6 +181,7 @@ namespace vbtracker {
                 // fast enough.
                 static int count = 0;
                 if (++count == 11) {
+#ifdef OSVR_USE_SIMPLEBLOB
                     // Fake the thresholded image to give an idea of what the
                     // blob detector is doing.
                     auto params = getBlobDetectorParams();
@@ -196,7 +202,7 @@ namespace vbtracker {
                                         tempOut);
                         m_thresholdImage = tempOut;
                     }
-
+#endif
                     // Draw detected blobs as blue circles.
                     cv::drawKeypoints(
                         m_frame, foundKeyPoints, m_imageWithBlobs,
@@ -280,9 +286,9 @@ namespace vbtracker {
         m_assertInvariants();
         return done;
     }
-
+#ifdef OSVR_USE_SIMPLEBLOB
     std::vector<cv::KeyPoint>
-    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) const {
+    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
 
         //================================================================
         // Tracking the points
@@ -318,5 +324,65 @@ namespace vbtracker {
         // or augmenting with a new frame.
         return foundKeyPoints;
     }
+#endif
+
+#ifdef OSVR_USE_CANNY_EDGEDETECT
+    std::vector<cv::KeyPoint>
+    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
+
+        //================================================================
+        // Tracking the points
+
+        // Do edge detection: the LEDs are pretty clear edges.
+
+        cv::Mat noiseRemoved;
+        cv::threshold(grayImage, noiseRemoved, BASE_NOISE_THRESHOLD, 0,
+                      CV_THRESH_TOZERO);
+        cv::Canny(noiseRemoved, m_thresholdImage, 180, 220, 5);
+
+        std::vector<cv::KeyPoint> foundKeyPoints;
+
+        // Extract the contours.
+        std::vector<std::vector<cv::Point>> contours;
+        cv::Mat binaryImage = m_thresholdImage.clone();
+        cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
+                         CV_CHAIN_APPROX_NONE);
+
+        // We don't need this exact struct, but we use some similar parameters,
+        // so why not re-use it.
+        auto params = getBlobDetectorParams();
+
+        for (auto &contour : contours) {
+            cv::Mat points(contour);
+            cv::Moments moms = cv::moments(points);
+
+            /// @todo any advantage to contourArea over using the moments m00?
+            auto area = cv::contourArea(points) /*moms.m00*/;
+
+            /// Filter by area
+            if (area < params.minArea || area > params.maxArea) {
+                continue;
+            }
+            /// Filter by circularity
+            auto perim = cv::arcLength(points, true);
+            auto circularity = 4 * M_PI * area / (perim * perim);
+            if (circularity < params.minCircularity ||
+                circularity > params.maxCircularity) {
+                continue;
+            }
+
+            // OK, we think this one is valid. Make a keypoint for it.
+            auto x = moms.m10 / moms.m00;
+            auto y = moms.m01 / moms.m00;
+            foundKeyPoints.push_back(cv::KeyPoint(x, y, area / 4));
+        }
+
+        // @todo: Estimate the summed brightness of each blob so that we can
+        // detect when they are getting brighter and dimmer.  Pass this as
+        // the brightness parameter to the Led class when adding a new one
+        // or augmenting with a new frame.
+        return foundKeyPoints;
+    }
+#endif
 } // namespace vbtracker
 } // namespace osvr
