@@ -340,10 +340,6 @@ namespace vbtracker {
                             m_shownImage = &m_imageWithBlobs;
                             break;
 
-                        case 'k':
-                            // Show the enhancing keypoints image
-                            m_shownImage = &m_keypointEnhancement;
-
                         case 'q':
                             // Indicate we want to quit.
                             done = true;
