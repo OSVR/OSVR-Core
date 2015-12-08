@@ -413,5 +413,49 @@ namespace vbtracker {
         return foundKeyPoints;
     }
 #endif
+
+    cv::KeyPoint VideoBasedTracker::enhanceKeypoint(cv::Mat const &grayImage,
+                                                    cv::KeyPoint origKeypoint) {
+        auto radiusPoint =
+            1.5f *
+            cv::Point2f(origKeypoint.size, origKeypoint.size); // center of the
+                                                               // "neighborhood"
+                                                               // and also where
+                                                               // the original
+                                                               // keypoint was.
+        auto offset = origKeypoint.pt - radiusPoint;
+        cv::Mat neighborhood = grayImage(cv::Rect(offset, 2 * radiusPoint));
+        cv::Mat binary;
+        double t = cv::threshold(neighborhood, binary, 0, 255,
+                                 CV_THRESH_BINARY | CV_THRESH_OTSU);
+        std::vector<std::vector<cv::Point>> contours;
+        cv::Mat binaryImage = m_thresholdImage.clone();
+        cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
+                         CV_CHAIN_APPROX_NONE);
+        for (auto &contour : contours) {
+            auto result = cv::pointPolygonTest(contour, radiusPoint, false);
+            if (result > 0) {
+                // we're inside this contour, it's the one that we want.
+                cv::Mat points(contour);
+                cv::Moments moms = cv::moments(points);
+
+                /// @todo any advantage to contourArea over using the
+                /// moments m00?
+                auto area = cv::contourArea(points) /*moms.m00*/;
+                auto x = moms.m10 / moms.m00;
+                auto y = moms.m01 / moms.m00;
+                auto diameter = 2 * std::sqrt(area / M_PI);
+                auto ret = origKeypoint;
+                ret.pt = cv::Point2f(x, y) + offset;
+                ret.size = diameter;
+                return ret;
+            }
+        }
+
+        /// couldn't do better.
+        // std::cout << "couldn't do better" << std::endl;
+        return origKeypoint;
+    }
+
 } // namespace vbtracker
 } // namespace osvr

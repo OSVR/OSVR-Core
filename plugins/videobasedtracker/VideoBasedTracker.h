@@ -88,6 +88,8 @@ namespace vbtracker {
       private:
         std::vector<cv::KeyPoint>
         extractKeypoints(cv::Mat const &grayImage);
+        cv::KeyPoint enhanceKeypoint(cv::Mat const &grayImage,
+                                     cv::KeyPoint origKeypoint);
         bool m_showDebugWindows; //< Should we show debugging windows?
 
         /// @name Images
