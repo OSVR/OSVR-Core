@@ -36,34 +36,32 @@
 
 namespace osvr {
 namespace vbtracker {
-    static const int BASE_NOISE_THRESHOLD = 100;
+    /// This is the absolute minimum pixel value that will be considered as a
+    /// possible signal. Images that contain only values below this will be
+    /// totally discarded as containing zero keypoints.
+    static const double BASE_NOISE_THRESHOLD = 75.;
 
-    static inline cv::SimpleBlobDetector::Params getBlobDetectorParams() {
-        int steps = 4;
-        cv::SimpleBlobDetector::Params params;
-        params.minThreshold = BASE_NOISE_THRESHOLD;
-        params.maxThreshold = 200;
-        params.thresholdStep =
-            (params.maxThreshold - params.minThreshold) / steps;
+    VideoBasedTracker::VideoBasedTracker(bool showDebugWindows)
+        : m_showDebugWindows(showDebugWindows) {
 
-        params.minDistBetweenBlobs = 3.0f;
+        /// Set up blob params
+        m_params.minDistBetweenBlobs = 2.0f;
 
-        params.minArea = 4.0f; // How small can the blobs be?
+        m_params.minArea = 2.0f; // How small can the blobs be?
 
-        params.filterByColor =
-            false; // Look for bright blobs: there is a bug in this code
-        params.blobColor = static_cast<uchar>(255);
+        // Look for bright blobs: there is a bug in this code
+        m_params.filterByColor = false;
+        // m_params.blobColor = static_cast<uchar>(255);
 
-        params.filterByInertia = false; // Do we test for non-elongated blobs?
-        params.minInertiaRatio = 0.5;
-        params.maxInertiaRatio = 1.0;
+        m_params.filterByInertia = false; // Do we test for non-elongated blobs?
+        // m_params.minInertiaRatio = 0.5;
+        // m_params.maxInertiaRatio = 1.0;
 
-        params.filterByConvexity = false; // Test for convexity?
+        m_params.filterByConvexity = false; // Test for convexity?
 
-        params.filterByCircularity = true; // Test for circularity?
-        params.minCircularity = 0.5f; // default is 0.8, but the edge of the
-                                      // case can make the blobs "weird-shaped"
-        return params;
+        m_params.filterByCircularity = true; // Test for circularity?
+        m_params.minCircularity = 0.5f; // default is 0.8, but the edge of the
+        // case can make the blobs "weird-shaped"
     }
     void VideoBasedTracker::addOculusSensor() {
         /// @todo this clearly violates what I expected was the invariant - not
@@ -184,16 +182,16 @@ namespace vbtracker {
 #ifdef OSVR_USE_SIMPLEBLOB
                     // Fake the thresholded image to give an idea of what the
                     // blob detector is doing.
-                    auto params = getBlobDetectorParams();
                     auto getCurrentThresh = [&](int i) {
-                        return i * params.thresholdStep + params.minThreshold;
+                        return i * m_params.thresholdStep +
+                               m_params.minThreshold;
                     };
                     cv::Mat temp;
                     cv::threshold(m_imageGray, m_thresholdImage,
-                                  params.minThreshold, params.minThreshold,
+                                  m_params.minThreshold, m_params.minThreshold,
                                   CV_THRESH_BINARY);
                     cv::Mat tempOut;
-                    for (int i = 1; getCurrentThresh(i) < params.maxThreshold;
+                    for (int i = 1; getCurrentThresh(i) < m_params.maxThreshold;
                          ++i) {
                         auto currentThresh = getCurrentThresh(i);
                         cv::threshold(m_imageGray, temp, currentThresh,
@@ -290,27 +288,53 @@ namespace vbtracker {
     std::vector<cv::KeyPoint>
     VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
 
+        /// @todo this variable is a candidate for hoisting to member
+        std::vector<cv::KeyPoint> foundKeyPoints;
         //================================================================
         // Tracking the points
 
         // Construct a blob detector and find the blobs in the image.
+        double minVal, maxVal;
+        cv::minMaxIdx(grayImage, &minVal, &maxVal);
+        static int frames = 0;
+        static int earlyOuts = 0;
+        frames++;
+        if (maxVal < BASE_NOISE_THRESHOLD) {
+            earlyOuts++;
+            /// empty image, early out!
+            return foundKeyPoints;
+        }
 
-        /// @todo: Make a different set of parameters optimized for the
-        /// Oculus Dk2.
-        /// @todo: Determine the maximum size of a trackable blob by seeing
-        /// when we're so close that we can't view at least four in the
-        /// camera.
-        auto params = getBlobDetectorParams();
+        if (frames % 2000 == 0) {
+            std::cout << "Skipped " << earlyOuts << " of " << frames
+                      << " frames due to max value falling below threshold."
+                      << std::endl;
+        }
+
+        auto imageRangeLerp = [=](double alpha) {
+            return minVal + (maxVal - minVal) * alpha;
+        };
+        // 0.3 LERP between min and max as the min threshold, but
+        // don't let really dim frames confuse us.
+        m_params.minThreshold =
+            std::max(imageRangeLerp(0.3), BASE_NOISE_THRESHOLD);
+        m_params.maxThreshold = imageRangeLerp(0.8);
+        static const auto steps = 3;
+        m_params.thresholdStep =
+            (m_params.maxThreshold - m_params.minThreshold) / steps;
+/// @todo: Make a different set of parameters optimized for the
+/// Oculus Dk2.
+/// @todo: Determine the maximum size of a trackable blob by seeing
+/// when we're so close that we can't view at least four in the
+/// camera.
 #if CV_MAJOR_VERSION == 2
         cv::Ptr<cv::SimpleBlobDetector> detector =
-            new cv::SimpleBlobDetector(params);
+            new cv::SimpleBlobDetector(m_params);
 #elif CV_MAJOR_VERSION == 3
-        auto detector = cv::SimpleBlobDetector::create(params);
+        auto detector = cv::SimpleBlobDetector::create(m_params);
 #else
 #error "Unrecognized OpenCV version!"
 #endif
-        /// @todo this variable is a candidate for hoisting to member
-        std::vector<cv::KeyPoint> foundKeyPoints;
         detector->detect(grayImage, foundKeyPoints);
 
         // @todo: Consider computing the center of mass of a dilated bounding
@@ -348,9 +372,8 @@ namespace vbtracker {
         cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
                          CV_CHAIN_APPROX_NONE);
 
-        // We don't need this exact struct, but we use some similar parameters,
-        // so why not re-use it.
-        auto params = getBlobDetectorParams();
+        // We don't need the exact m_params struct, but we use some similar
+        // parameters, so why not re-use it.
 
         for (auto &contour : contours) {
             cv::Mat points(contour);
@@ -360,14 +383,14 @@ namespace vbtracker {
             auto area = cv::contourArea(points) /*moms.m00*/;
 
             /// Filter by area
-            if (area < params.minArea || area > params.maxArea) {
+            if (area < m_params.minArea || area > m_params.maxArea) {
                 continue;
             }
             /// Filter by circularity
             auto perim = cv::arcLength(points, true);
             auto circularity = 4 * M_PI * area / (perim * perim);
-            if (circularity < params.minCircularity ||
-                circularity > params.maxCircularity) {
+            if (circularity < m_params.minCircularity ||
+                circularity > m_params.maxCircularity) {
                 continue;
             }
 

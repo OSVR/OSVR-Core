@@ -49,8 +49,7 @@ namespace osvr {
 namespace vbtracker {
     class VideoBasedTracker {
       public:
-        VideoBasedTracker(bool showDebugWindows = false)
-            : m_showDebugWindows(showDebugWindows){};
+        VideoBasedTracker(bool showDebugWindows = false);
 
         void addOculusSensor();
         /// @name Sensor addition methods
@@ -99,6 +98,7 @@ namespace vbtracker {
         cv::Mat m_imageWithBlobs;
         cv::Mat *m_shownImage = &m_imageWithBlobs;
         /// @}
+        cv::SimpleBlobDetector::Params m_params;
 
         /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
         /// inline right out of existence in non-debug builds.
