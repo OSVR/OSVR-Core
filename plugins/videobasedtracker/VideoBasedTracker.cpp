@@ -227,7 +227,7 @@ namespace vbtracker {
                 OSVR_PoseState pose;
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
                         m_led_groups[sensor], tv, pose)) {
-
+#if 0
                     // Project the expected locations of the beacons
                     // into the image and then compute the error between the
                     // expected locations and the visible locations for all of
@@ -240,7 +240,7 @@ namespace vbtracker {
                         cv::Point where = led.getLocation();
                     }
                     // XXX
-
+#endif
                     m_pose = pose;
                     handler(static_cast<unsigned>(sensor), pose);
                     gotPose = true;
