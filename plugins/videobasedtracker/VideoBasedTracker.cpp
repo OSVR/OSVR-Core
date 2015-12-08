@@ -273,12 +273,13 @@ namespace vbtracker {
                                         tempOut);
                         m_thresholdImage = tempOut;
                     }
-
+#if 0
                     // Draw detected blobs as blue circles.
                     cv::drawKeypoints(
                         tempOut, foundKeyPoints, m_thresholdImage,
                         cv::Scalar(255, 0, 0),
                         cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+#endif
 #endif
                     // Draw detected blobs as blue circles.
                     cv::drawKeypoints(
