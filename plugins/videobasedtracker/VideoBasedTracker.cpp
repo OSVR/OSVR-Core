@@ -98,8 +98,13 @@ namespace vbtracker {
         bool done = false;
         m_frame = frame;
         m_imageGray = grayImage;
+        m_keypointEnhancement = grayImage.clone();
+        auto initialFoundKeyPoints = extractKeypoints(grayImage);
+        std::vector<cv::KeyPoint> foundKeyPoints;
+        for (auto const &keypoint : initialFoundKeyPoints) {
+            foundKeyPoints.push_back(enhanceKeypoint(grayImage, keypoint));
+        }
 
-        auto foundKeyPoints = extractKeypoints(grayImage);
         // We allow multiple sets of LEDs, each corresponding to a different
         // sensor, to be located in the same image.  We construct a new set
         // of LEDs for each and try to find them.  It is assumed that they all
@@ -267,6 +272,10 @@ namespace vbtracker {
                             m_shownImage = &m_imageWithBlobs;
                             break;
 
+                        case 'k':
+                            // Show the enhancing keypoints image
+                            m_shownImage = &m_keypointEnhancement;
+
                         case 'q':
                             // Indicate we want to quit.
                             done = true;
@@ -416,24 +425,42 @@ namespace vbtracker {
 
     cv::KeyPoint VideoBasedTracker::enhanceKeypoint(cv::Mat const &grayImage,
                                                     cv::KeyPoint origKeypoint) {
-        auto radiusPoint =
-            1.5f *
-            cv::Point2f(origKeypoint.size, origKeypoint.size); // center of the
-                                                               // "neighborhood"
-                                                               // and also where
-                                                               // the original
-                                                               // keypoint was.
-        auto offset = origKeypoint.pt - radiusPoint;
-        cv::Mat neighborhood = grayImage(cv::Rect(offset, 2 * radiusPoint));
+        // Initial center of the "neighborhood" and also where the original
+        // keypoint was.
+        auto initRadius =
+            2.f * cv::Point2f(origKeypoint.size, origKeypoint.size);
+        // Computing the coordinates of the top-left of where we want to look
+        auto initTL = origKeypoint.pt - initRadius;
+        // Adjust for edge of image - this value will also be our "offset" to
+        // transform between local and global
+        auto finalTL = cv::Point2i{std::max(int(std::floor(initTL.x)), 0),
+                                   std::max(int(std::floor(initTL.y)), 0)};
+        auto offset = cv::Point2f(finalTL);
+        // Computing the coordinates of the bottom-right of where we want to
+        // look.
+        auto initBR = origKeypoint.pt + initRadius;
+        // Adjust for edge of image
+        auto finalBR = cv::Point2i{std::min(int(initBR.x), grayImage.cols),
+                                   std::min(int(initBR.y), grayImage.rows)};
+        // Where the keypoint is in our little rectangle
+        auto localKeypointLocation = origKeypoint.pt - cv::Point2f(finalTL);
+        auto patchSize = cv::Size(finalBR - finalTL);
+
+        auto ourRect = cv::Rect(finalTL, patchSize);
+        cv::Mat neighborhood = grayImage(ourRect);
         cv::Mat binary;
         double t = cv::threshold(neighborhood, binary, 0, 255,
                                  CV_THRESH_BINARY | CV_THRESH_OTSU);
+        
+        // copy to debug image.
+        binary.copyTo(m_keypointEnhancement(ourRect));
+
         std::vector<std::vector<cv::Point>> contours;
-        cv::Mat binaryImage = m_thresholdImage.clone();
-        cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
+        cv::findContours(binary, contours, CV_RETR_EXTERNAL,
                          CV_CHAIN_APPROX_NONE);
         for (auto &contour : contours) {
-            auto result = cv::pointPolygonTest(contour, radiusPoint, false);
+            auto result =
+                cv::pointPolygonTest(contour, localKeypointLocation, false);
             if (result > 0) {
                 // we're inside this contour, it's the one that we want.
                 cv::Mat points(contour);

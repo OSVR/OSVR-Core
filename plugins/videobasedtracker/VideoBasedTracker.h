@@ -98,6 +98,7 @@ namespace vbtracker {
         cv::Mat m_imageGray;
         cv::Mat m_thresholdImage;
         cv::Mat m_imageWithBlobs;
+        cv::Mat m_keypointEnhancement;
         cv::Mat *m_shownImage = &m_imageWithBlobs;
         /// @}
         cv::SimpleBlobDetector::Params m_params;
