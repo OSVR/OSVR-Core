@@ -91,6 +91,72 @@ namespace vbtracker {
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
+    class KeypointEnhancer {
+      public:
+        std::vector<cv::KeyPoint>
+        enhanceKeypoints(cv::Mat const &grayImage,
+                         std::vector<cv::KeyPoint> const &foundKeyPoints) {
+            std::vector<cv::KeyPoint> ret;
+            cv::Mat greyCopy = grayImage.clone();
+            /// Reset the flood fill mask to just have a one-pixel border on the
+            /// edges.
+            m_floodFillMask =
+                cv::Mat::zeros(grayImage.rows + 2, grayImage.cols + 2, CV_8UC1);
+            m_floodFillMask.row(0) = 1;
+            m_floodFillMask.row(m_floodFillMask.rows - 1) = 1;
+            m_floodFillMask.col(0) = 1;
+            m_floodFillMask.col(m_floodFillMask.cols - 1) = 1;
+
+            for (auto const &keypoint : foundKeyPoints) {
+                ret.push_back(enhanceKeypoint(greyCopy, keypoint));
+            }
+
+            return ret;
+        }
+
+        cv::Mat getDebugImage() {
+            return m_floodFillMask(cv::Rect(1, 1, m_floodFillMask.cols - 2,
+                                            m_floodFillMask.rows - 2));
+        }
+
+      private:
+        cv::KeyPoint enhanceKeypoint(cv::Mat grayImage,
+                                     cv::KeyPoint origKeypoint) {
+            cv::Rect bounds;
+            int loDiff = 5;
+            int upDiff = 5;
+            // Saving this now before we monkey with m_floodFillMask
+            cv::bitwise_not(m_floodFillMask, m_scratchNotMask);
+
+            cv::floodFill(grayImage, m_floodFillMask, origKeypoint.pt, 255,
+                          &bounds, loDiff, upDiff,
+                          CV_FLOODFILL_MASK_ONLY |
+                              (/* connectivity 4 or 8 */ 4) |
+                              (/* value to write in to mask */ 255 << 8));
+            // Now m_floodFillMask contains the mask with both our point
+            // and all other points so far. We need to split them by ANDing with
+            // the NOT of the old flood-fill mask we saved earlier.
+            cv::bitwise_and(m_scratchNotMask, m_floodFillMask,
+                            m_perPointResults);
+            // OK, now we have the results for just this point in per-point
+            // results
+
+            cv::Mat binarySubImage = m_perPointResults(bounds);
+            cv::Moments moms = cv::moments(binarySubImage, true);
+
+            auto area = moms.m00;
+            auto x = moms.m10 / moms.m00;
+            auto y = moms.m01 / moms.m00;
+            auto diameter = 2 * std::sqrt(area / M_PI);
+            auto ret = origKeypoint;
+            ret.pt = cv::Point2f(x, y) + cv::Point2f(bounds.tl());
+            ret.size = diameter;
+            return ret;
+        }
+        cv::Mat m_scratchNotMask;
+        cv::Mat m_floodFillMask;
+        cv::Mat m_perPointResults;
+    };
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          OSVR_TimeValue const &tv,
                                          PoseHandler handler) {
@@ -99,6 +165,13 @@ namespace vbtracker {
         m_frame = frame;
         m_imageGray = grayImage;
         auto foundKeyPoints = extractKeypoints(grayImage);
+#if 0
+        /// @todo maybe hoist to avoid allocations?
+        KeypointEnhancer enh;
+        auto foundKeyPoints =
+            enh.enhanceKeypoints(grayImage, initialFoundKeyPoints);
+        enh.getDebugImage().copyTo(m_keypointEnhancement);
+#endif
 
         // We allow multiple sets of LEDs, each corresponding to a different
         // sensor, to be located in the same image.  We construct a new set
@@ -294,6 +367,7 @@ namespace vbtracker {
         m_assertInvariants();
         return done;
     }
+
 #ifdef OSVR_USE_SIMPLEBLOB
     std::vector<cv::KeyPoint>
     VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
