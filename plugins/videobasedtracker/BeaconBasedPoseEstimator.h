@@ -108,10 +108,13 @@ namespace vbtracker {
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
         bool SetBeacons(const Point3Vector &beacons);
+        bool SetBeacons(const Point3Vector &beacons, double variance);
+        bool SetBeacons(const Point3Vector &beacons, std::vector<double> const& variance);
         bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
       private:
+        void m_updateBeaconCentroid(const Point3Vector &beacons);
         /// @brief Internal position differs in scale and origin from external.
         /// This function deals with that for you.
         Eigen::Vector3d

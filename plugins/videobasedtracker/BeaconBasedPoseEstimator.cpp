@@ -113,20 +113,18 @@ namespace vbtracker {
     }
 
     bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons) {
+        return SetBeacons(beacons, INITIAL_BEACON_ERROR);
+    }
+
+    bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons,
+                                              double variance) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
         m_beacons.clear();
+        m_updateBeaconCentroid(beacons);
+
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
-        {
-            Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
-            auto bNum = size_t{ 0 };
-            for (auto &beacon : beacons) {
-                beaconSum += cvToVector(beacon).cast<double>();
-                bNum++;
-            }
-            m_centroid = beaconSum / bNum;
-        }
+            Eigen::Vector3d::Constant(variance).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
@@ -136,8 +134,35 @@ namespace vbtracker {
                 bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
-
         return true;
+    }
+
+    bool
+    BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons,
+                                         std::vector<double> const &variance) {
+        // Our existing pose won't match anymore.
+        m_gotPose = false;
+        m_beacons.clear();
+        m_updateBeaconCentroid(beacons);
+        auto bNum = size_t{0};
+        for (auto &beacon : beacons) {
+            m_beacons.emplace_back(new BeaconState{
+                cvToVector(beacon).cast<double>() - m_centroid,
+                Eigen::Vector3d::Constant(variance[bNum]).asDiagonal()});
+            bNum++;
+        }
+        return true;
+    }
+
+    void BeaconBasedPoseEstimator::m_updateBeaconCentroid(
+        const Point3Vector &beacons) {
+        Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
+        auto bNum = size_t{0};
+        for (auto &beacon : beacons) {
+            beaconSum += cvToVector(beacon).cast<double>();
+            bNum++;
+        }
+        m_centroid = beaconSum / bNum;
     }
 
     bool BeaconBasedPoseEstimator::SetCameraMatrix(
