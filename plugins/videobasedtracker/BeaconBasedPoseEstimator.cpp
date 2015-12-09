@@ -273,6 +273,9 @@ namespace vbtracker {
         if (m_framesInProbation > MAX_PROBATION_FRAMES) {
             // Kalman filter started returning too high of residuals - going
             // back to RANSAC until we get a good lock again.
+            std::cout << "Video-based tracker: lost fix, beacon tracking "
+                         "returning to startup state"
+                      << std::endl;
             m_gotPose = false;
             m_framesInProbation = 0;
         }
@@ -451,8 +454,8 @@ namespace vbtracker {
         m_model.setNoiseAutocorrelation(
             kalman::types::Vector<6>(NoiseAutoCorrelation));
 
-        std::cout << "State:" << m_state.stateVector().transpose()
-                  << "\n  with quaternion "
+        std::cout << "Video-based tracker: Beacon entering run state: pos:"
+                  << m_state.position().transpose() << "\n orientation: "
                   << m_state.getQuaternion().coeffs().transpose() << std::endl;
     }
 

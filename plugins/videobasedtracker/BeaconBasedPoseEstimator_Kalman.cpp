@@ -155,13 +155,10 @@ namespace vbtracker {
             incrementProbation = numBad * 2 > numGood;
             if (!incrementProbation) {
                 // OK, we're good again
-                std::cout << "Re-attained our tracking goal." << std::endl;
                 m_framesInProbation = 0;
             }
         }
         if (incrementProbation) {
-            std::cout << "Fell below our target for tracking residuals: "
-                      << numBad << " bad, " << numGood << " good." << std::endl;
             m_framesInProbation++;
         }
         /// Output to the OpenCV state types so we can see the reprojection
