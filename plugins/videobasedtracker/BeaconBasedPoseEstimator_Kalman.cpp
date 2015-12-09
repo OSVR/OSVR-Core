@@ -135,8 +135,6 @@ namespace vbtracker {
 
             if (meas.getResidual(state).squaredNorm() > MAX_SQUARED_RESIDUAL) {
                 // probably bad
-                std::cout << "skipping a measurement with a high residual: id "
-                          << id << std::endl;
                 numBad++;
                 continue;
             }
