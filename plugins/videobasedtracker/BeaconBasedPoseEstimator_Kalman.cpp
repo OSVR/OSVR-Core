@@ -68,7 +68,7 @@ namespace vbtracker {
                                                          double dt) {
         auto const beaconsSize = m_beacons.size();
         // Default measurement variance (for now, factor) per axis.
-        auto varianceFactor = 1;
+        double varianceFactor = 1;
         // Default to using all the measurements we can
         auto skipBright = false;
         {
