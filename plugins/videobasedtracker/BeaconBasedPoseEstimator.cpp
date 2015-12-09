@@ -448,7 +448,7 @@ namespace vbtracker {
         m_state.setQuaternion(quat);
         m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
 
-        m_model.setDamping(0.3);
+        m_model.setDamping(0.3, 0.01);
         m_model.setNoiseAutocorrelation(
             kalman::types::Vector<6>(NoiseAutoCorrelation));
 
