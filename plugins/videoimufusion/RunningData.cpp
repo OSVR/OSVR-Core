@@ -59,7 +59,9 @@ VideoIMUFusion::RunningData::RunningData(
     OSVR_OrientationState const &initialIMU, OSVR_PoseState const &initialVideo,
     OSVR_TimeValue const &lastTS)
     : m_processModel(params.damping, params.positionNoise, params.oriNoise),
-      m_state(), m_imuMeas(ei::map(initialIMU),
+      m_state(),
+#if 0
+      m_imuMeas(ei::map(initialIMU),
                            Vector<3>::Constant(params.imuOriVariance)),
       m_imuMeasVel(Vector<3>::Zero(),
                    Vector<3>::Constant(params.imuAngVelVariance)),
@@ -67,6 +69,7 @@ VideoIMUFusion::RunningData::RunningData(
                       Vector<3>::Constant(params.videoOriVariance)),
       m_cameraMeasPos(Vector<3>::Zero(),
                       Vector<3>::Constant(params.videoPosVariance)),
+#endif
       m_cTr(cTr), m_last(lastTS) {
 
 #ifdef OSVR_FPE
