@@ -4,6 +4,9 @@ set(API
     "${HEADER_LOCATION}/AbsoluteOrientationMeasurement.h"
     "${HEADER_LOCATION}/AbsolutePositionMeasurement.h"
     "${HEADER_LOCATION}/AngularVelocityMeasurement.h"
+    "${HEADER_LOCATION}/AugmentedProcessModel.h"
+    "${HEADER_LOCATION}/AugmentedState.h"
+    "${HEADER_LOCATION}/ConstantProcess.h"
     "${HEADER_LOCATION}/ExternalQuaternion.h"
     "${HEADER_LOCATION}/FlexibleKalmanBase.h"
     "${HEADER_LOCATION}/FlexibleKalmanFilter.h"
@@ -11,7 +14,8 @@ set(API
     "${HEADER_LOCATION}/OrientationState.h"
     "${HEADER_LOCATION}/PoseConstantVelocity.h"
     "${HEADER_LOCATION}/PoseDampedConstantVelocity.h"
-    "${HEADER_LOCATION}/PoseState.h")
+    "${HEADER_LOCATION}/PoseState.h"
+    "${HEADER_LOCATION}/PureVectorState.h")
 
 ###
 # Add the dummy target to make the headers show up in IDEs

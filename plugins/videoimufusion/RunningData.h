@@ -46,11 +46,13 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/TimeValue.h>
 
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/PoseDampedConstantVelocity.h>
+#if 0
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
 #include <osvr/Kalman/AbsolutePositionMeasurement.h>
 #include <osvr/Kalman/AngularVelocityMeasurement.h>
+#endif
 
 #include <osvr/Util/Verbosity.h>
 
@@ -62,13 +64,14 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
 using FilterState = ProcessModel::State;
+#if 0
 using AbsoluteOrientationMeasurement =
     osvr::kalman::AbsoluteOrientationMeasurement<FilterState>;
 using AbsolutePositionMeasurement =
     osvr::kalman::AbsolutePositionMeasurement<FilterState>;
 using AngularVelocityMeasurement =
     osvr::kalman::AngularVelocityMeasurement<FilterState>;
-
+#endif
 class VideoIMUFusion::RunningData {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -94,7 +97,8 @@ class VideoIMUFusion::RunningData {
     Eigen::Vector3d getPosition() const { return state().getPosition(); }
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
-        return m_cTr * osvr::util::eigen_interop::map(pose);
+        return m_cTr.linear() * (Eigen::Translation3d(m_cTr.translation()) *
+               osvr::util::eigen_interop::map(pose).transform());
     }
 
     Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const {
@@ -108,10 +112,12 @@ class VideoIMUFusion::RunningData {
     ProcessModel const &processModel() const { return m_processModel; }
     ProcessModel m_processModel;
     FilterState m_state;
+#if 0
     AbsoluteOrientationMeasurement m_imuMeas;
     AngularVelocityMeasurement m_imuMeasVel;
     AbsoluteOrientationMeasurement m_cameraMeasOri;
     AbsolutePositionMeasurement m_cameraMeasPos;
+#endif
     const Eigen::Isometry3d m_cTr;
     OSVR_TimeValue m_last;
 };

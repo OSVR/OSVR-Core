@@ -99,7 +99,9 @@ int main(int argc, char *argv[]) {
 
     auto savedFrame = false;
     static const auto FILENAME = "capture.png";
-
+    static const auto FILENAME_STEM = "image";
+    static const auto EXTENSION = ".png";
+    auto captures = std::size_t{0};
     FrameCounter counter;
     cv::namedWindow(windowNameAndInstructions);
     auto frameCount = std::size_t{0};
@@ -119,6 +121,13 @@ int main(int argc, char *argv[]) {
             char key = static_cast<char>(cv::waitKey(1)); // wait 1 ms for a key
             if ('q' == key || 'Q' == key || 27 /*esc*/ == key) {
                 break;
+            } else if ('c' == key) {
+                // capture
+                std::ostringstream os;
+                os << FILENAME_STEM << captures << EXTENSION;
+                cv::imwrite(os.str(), frame);
+                std::cout << "Captured frame to " << os.str() << std::endl;
+                captures++;
             }
         }
     } while (cam->read_image_to_memory());

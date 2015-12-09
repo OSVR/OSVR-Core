@@ -7,6 +7,12 @@ osvr_convert_json(com_osvr_VideoBasedHMDTracker_json
 
 # Be able to find our generated header file.
 include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/DirectShowCameraLib")
+if(WIN32)
+    option(OSVR_FPE
+        "Enable floating-point exceptions - only works with MSVC and should never be used for shipping code!"
+        OFF)
+    mark_as_advanced(OSVR_FPE)
+endif()
 
 # Make sure we can link these upcoming static libraries into a shared lib
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -16,26 +22,32 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ###
 add_library(vbtracker-core STATIC
     BeaconBasedPoseEstimator.cpp
+    BeaconBasedPoseEstimator_Kalman.cpp
     BeaconBasedPoseEstimator.h
+    cvToEigen.h
     GetCameraMatrix.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
     HDKLedIdentifierFactory.cpp
     HDKLedIdentifierFactory.h
     IdentifierHelpers.h
+    ImagePointMeasurement.h
     LedIdentifier.cpp
     LedIdentifier.h
     LED.cpp
     LED.h
+    ProjectPoint.h
     Types.h
     VideoBasedTracker.cpp
-    VideoBasedTracker.h)
+    VideoBasedTracker.h
+    VideoJacobian.h)
 
 target_link_libraries(vbtracker-core
     PUBLIC
     ${VIDEOTRACKER_EXTRA_LIBS}
     opencv_core
     osvrUtilCpp # for typedefs and boost headers
+    osvrKalman
     vendored-vrpn # for quatlib
     eigen-headers)
 target_compile_options(vbtracker-core
@@ -113,4 +125,23 @@ if(BUILD_TESTING)
     if(WIN32)
         target_link_libraries(vbtracker-cam PRIVATE directshow-camera)
     endif()
+endif()
+
+
+if(WIN32 AND OSVR_FPE)
+    set(msg_type WARNING)
+    if(OSVR_OFFICIAL)
+        # set in our CI
+        set(msg_type FATAL_ERROR)
+    endif()
+    message(${msg_type} "OSVR_FPE enabled, will affect the video-based tracker plugin! Do not ship these binaries!")
+
+    target_compile_definitions(com_osvr_VideoBasedHMDTracker PRIVATE OSVR_FPE)
+    target_link_libraries(com_osvr_VideoBasedHMDTracker FloatExceptions)
+    foreach(tgt vbtracker-cam vbtracker-core)
+        if(TARGET ${tgt})
+            target_compile_definitions(${tgt} PRIVATE OSVR_FPE)
+            target_link_libraries(${tgt} PRIVATE FloatExceptions)
+        endif()
+    endforeach()
 endif()

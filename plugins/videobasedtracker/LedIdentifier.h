@@ -58,11 +58,13 @@ namespace vbtracker {
         /// Truncates the passed-in list to the length needed to look for a
         /// pattern, so it does not grow too long and waste space and time,
         /// and perhaps produce spurious Ids.
+        /// @param[out] lastBright set to True if we determine that the LED is
+        /// currently "bright"
         /// @return -1 for unknown (not enough information) and
         /// less than -1 for definitely not an LED (light sources will be
         /// constant, mis-tracked LEDs may produce spurious changes in the
         /// pattern for example).
-        virtual int getId(BrightnessList &brightnesses) const = 0;
+        virtual int getId(BrightnessList &brightnesses, bool & lastBright) const = 0;
 
       protected:
     };

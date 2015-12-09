@@ -49,8 +49,7 @@ namespace osvr {
 namespace vbtracker {
     class VideoBasedTracker {
       public:
-        VideoBasedTracker(bool showDebugWindows = false)
-          : m_showDebugWindows(showDebugWindows) {};
+        VideoBasedTracker(bool showDebugWindows = false);
 
         void addOculusSensor();
         /// @name Sensor addition methods
@@ -77,20 +76,35 @@ namespace vbtracker {
                        Point3Vector const &locations,
                        size_t requiredInliers = 4,
                        size_t permittedOutliers = 2);
+        /// @overload
+        void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d,
+                       Point3Vector const &locations, double variance,
+                       size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
+        /// @overload
+        void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d,
+                       Point3Vector const &locations,
+                       std::vector<double> const &variance,
+                       size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
             PoseHandler;
+
         /// @return true if user hit q to quit.
         bool processImage(cv::Mat frame, cv::Mat grayImage,
-                          PoseHandler handler);
+                          OSVR_TimeValue const &tv, PoseHandler handler);
 
       private:
-        bool m_showDebugWindows;  //< Should we show debugging windows?
-#if 0
-        void m_processSensor(KeyPointList const &foundKeyPoints,
-                             LedGroup &ledGroup);
-#endif
+        std::vector<cv::KeyPoint>
+        extractKeypoints(cv::Mat const &grayImage);
+        cv::KeyPoint enhanceKeypoint(cv::Mat const &grayImage,
+                                     cv::KeyPoint origKeypoint);
+        bool m_showDebugWindows; //< Should we show debugging windows?
+
         /// @name Images
         /// @{
         cv::Mat m_frame;
@@ -99,6 +113,8 @@ namespace vbtracker {
         cv::Mat m_imageWithBlobs;
         cv::Mat *m_shownImage = &m_imageWithBlobs;
         /// @}
+
+        cv::SimpleBlobDetector::Params m_params;
 
         /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
         /// inline right out of existence in non-debug builds.

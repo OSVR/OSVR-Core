@@ -1,0 +1,349 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.08.1+git ] */
+
+/* [wxMaxima: section start ]
+Startup Functionality
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+file_search_maxima : cons(sconcat("C:/Users/Ryan/Desktop/src/OSVR-Core/plugins/videobasedtracker/math/###.{lisp,mac,mc}"), file_search_maxima)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load("common-vr-math");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Projecting without distortion
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+This is the "simple" version without distortion in it.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+projectPointRotMatrix(rot, translation, objPt, fl, c) := 
+block([xformed],
+    xformed : rot . transpose(objPt) + transpose(translation),
+    print(xformed),
+    transpose((submatrix(3, xformed) / xformed[3][1]) * fl + c));
+/*projectPoint(quat, translation, objPt, fx, fy, cx, cy) := projectPointRotMatrix(quatToRotMatrix(quat), translation, objPt, fx, fy, cx, cy);*/
+projectPointRotMatrix(qtorotmatrix(qfromtaylorincremental([0.01,0.01,0.01])), [0,0,0], [1, 2, 3], 452.9, [320, 240]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Distortion
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: fold    start ] */
+
+/* [wxMaxima: comment start ]
+Now for the version with distortion -
+right now only handling up through k3, k4-k6 go on the bottom instead...
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+projectDistortedPoint(quat, translation, objPt, fx, fy, cx, cy, k, p) := 
+block([xformed, xp, yp, r2, radDistort, xpp, ypp, x, y, z, u, v],
+    xformed : quatToRotMatrix(quat) . objPt + translation,
+    xp : (xformed[1]/xformed[3])[1],
+    yp : (xformed[2]/xformed[3])[1],
+    r2 : xp^2 + yp^2,
+    radDistort : (1+k[1]*r2+k[2]*r2^2+k[3]*r2^3),
+    xpp : xp * radDistort + 2*p[1]*xp*yp + p[2]*(r2 + 2*xp^2),
+    ypp : yp * radDistort + p[1]*(r2+2*yp^2)+2*p[2]*xp*yp,
+    u : fx * xpp + cx,
+    v : fy * ypp + cy,
+    [u,v]);
+projectDistortedPoint([1,0,0,0], [0,0,0], [1, 2, 3], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: fold    end   ] */
+
+/* [wxMaxima: section start ]
+Comparing
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: fold    start ] */
+
+/* [wxMaxima: input   start ] */
+distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
+buildq([quat, translation, fx, fy, cx, cy, k, p],
+    projectDistortedPoint(quat, translation, point, fx, fy, cx, cy, k, p) - projectPoint(quat, translation, point, fx, fy, cx, cy));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
+buildq([quat, translation, fx, fy, cx, cy, k, p],lambda([point], 
+    projectDistortedPoint(quat, translation, point, fx, fy, cx, cy, k, p) - projectPoint(quat, translation, point, fx, fy, cx, cy)));
+distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+%([1,1,1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: fold    end   ] */
+
+/* [wxMaxima: section start ]
+Simpler Jacobian Parts
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+genvec(sym, dim) := block([i], express(transpose(matrix(makelist(sym[i], i, dim)))))$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+vectolist(vec) := if (listp(vec)) then (flatten(vec)) elseif (matrixp(vec)) then (flatten(args(vec)))$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+This function takes in 3d column vector camPoints (before perspective divide), a single focal length, and 2d column vector principal point, and returns a [u, v] image point vector/list
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+finalProjectionNoDistort(camPoints, fl, pp) := block([imgu, imgv, u, v, returnval],
+    imgu: camPoints[1][1]/(camPoints[3][1]) * (fl) + pp[1][1],
+    imgv: camPoints[2][1]/(camPoints[3][1]) * (fl) + pp[2][1],
+    [u = imgu, v = imgv],
+    returnval[u] : imgu,
+    returnval[v] : imgv,
+    returnval
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+finalProjectionDistort(camPoints, fl, pp) := block([myk, divided, r2, distort, i, result, returnval, u, v],
+    myk: [k1, k2, k3]/*[1.252916e-06, -1.752020e-11, 6.405327e-17]*/,
+    divided: [camPoints[1][1]/camPoints[3][1], camPoints[2][1]/camPoints[3][1]],
+    r2: divided . transpose(divided),
+    distort: 1 + myk . transpose(makelist(r2^i,i,3)),
+    print(distort),
+    result : vectolist(divided * distort * fl + pp),
+    returnval['distort] : distort,
+    returnval[u] : result[1],
+    returnval[v] : result[2],
+    returnval
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Position
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+simpleProjectForPosition(project, xlate, fl, pp, rotatedObjPt) :=block([camPoints],
+    camPoints: rotatedObjPt + xlate,
+    project(camPoints, fl, pp));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+declare(x, scalar, y, scalar, z, scalar);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+simplePositionMeas : simpleProjectForPosition(finalProjectionNoDistort, transpose([x, y, z]), hdkFL, transpose([320, 240]), transpose([bx, by, bz]));
+[simplePositionMeas[u], simplePositionMeas[v]];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+jacobian([simplePositionMeas[u], simplePositionMeas[v]], [x, y, z]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Trying it with distortion, just to see what happens - looks awful, and even when factoring out the distortion coefficient.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+distortPositionMeas : simpleProjectForPosition(finalProjectionDistort, transpose([x, y, z]), hdkFL, [320, 240], transpose([bx, by, bz]));
+[distortPositionMeas[u], distortPositionMeas[v]];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ratsubst(distort, distortPositionMeas[distort], jacobian([distortPositionMeas[u]], [bx, by, bz]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Incremental Rotation
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+incrementalRotationMatrixQ : qtorotmatrix(qfromtaylorincremental([w[1], w[2], w[3]]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for mat in [incrementalRotationMatrixQ, incrementalRotationMatrixRT, incrementalRotationMatrixR] do (
+    print(ev(mat, w = [0.1, 0.1, 0.1]) . transpose([1, 2, 3]))
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsubsect start ]
+the actual measurement stuff
+   [wxMaxima: subsubsect end   ] */
+
+/* [wxMaxima: input   start ] */
+simpleProjectForIncRot(xlate, incRot, fl, pp, initiallyRotatedObjPt) :=block([camPoints],
+    camPoints: rodriguesTaylor(incRot). initiallyRotatedObjPt + xlate,
+    finalProjectionNoDistort(camPoints, fl, pp));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+simpleIncRotJacobian : block([genvec, myincrot, mypos, myrotatedbeacon, q, incrot, pos, beacon, meas, rb, H, myincrotOP, incrotOP, fullMeas, i, j],
+    genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
+    myincrot: genvec(incrot, 3),
+    mypos : genvec(pos, 3),
+    meas: simpleProjectForIncRot(mypos, myincrot, fl, genvec(pp, 2), genvec(m_rotatedObjPoint, 3)),
+    fullMeas: [meas[u][1], meas[v][1]],
+    print(fullMeas),
+    H : vectorsimp(jacobian(fullMeas, [incrot[1], incrot[2], incrot[3]])),
+    /* evaluating at incrot = 0 since we're zeroing each cycle effectively - hopefully this is an acceptable assumption to make */
+    print(ev(H, incrot = [0,0,0])),
+    matrixCodegen(ev(H, incrot = [0,0,0])),
+    ev(H, incrot = [0,0,0])
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsubsect start ]
+trying to reverse it
+   [wxMaxima: subsubsect end   ] */
+
+/* [wxMaxima: input   start ] */
+makexyz(sym) := []
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+This cell simulates the code that is in the "more elegant" C++ code and verifies that it matches the meaning of the symbolically computed jacobian.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+block([fl, rotXlated, rotXlatedXY, rotObj, negativePositive,positiveNegative, rotObjZ, m_rotatedObjPoint, pos, zRecip, zSqRecip, i, mainDiagonal, otherDiagonal, lastCol, myMat],
+    rotXlated : makelist(m_rotatedObjPoint[i], i, 3) + makelist(pos[i], i, 3),
+    rotXlatedXY : makelist(m_rotatedObjPoint[i], i, 2) + makelist(pos[i], i, 2),
+    rotObj : makelist(m_rotatedObjPoint[i], i, 2),
+    negativePositive: [-1, 1],
+    positiveNegative: [1, -1],
+    rotObjZ: m_rotatedObjPoint[3],
+    zRecip: 1 / rotXlated[3],
+    mainDiagonal: rotXlatedXY * reverse(rotObj) * negativePositive * zRecip,
+    otherDiagonal: (rotObj * rotXlatedXY * zRecip + rotObjZ) * positiveNegative,
+    lastCol: reverse(rotObj) * negativePositive,
+    myMat : ratsimp(matrix([mainDiagonal[1], otherDiagonal[1], lastCol[1]],
+    [otherDiagonal[2],mainDiagonal[2],lastCol[2]]) * zRecip * fl)
+    );
+if(equal(%, simpleIncRotJacobian)) then (print("still groovy"));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+block([rotXlated, rotXlatedXY, rotObj, negativePositive,positiveNegative, rotObjZ, m_rotatedObjPoint, pos, zRecip, zSqRecip, i, mainDiagonal, otherDiagonal, lastCol, myMat],
+    rotXlated : makelist(m_rotatedObjPoint[i], i, 3) + makelist(pos[i], i, 3),
+    rotXlatedXY : makelist(m_rotatedObjPoint[i], i, 2) + makelist(pos[i], i, 2),
+    rotObj : makelist(m_rotatedObjPoint[i], i, 2),
+    negativePositive: [-1, 1],
+    positiveNegative: [1, -1],
+    rotObjZ: m_rotatedObjPoint[3],
+    zRecip: 1 / rotXlated[3],
+    mainDiagonal: rotXlatedXY * reverse(rotObj) * negativePositive * zRecip,
+    otherDiagonal: (rotObj * rotXlatedXY * zRecip + rotObjZ) * positiveNegative,
+    lastCol: reverse(rotObj) * negativePositive,
+    myMat : matrix([-rotXlated[1] * m_rotatedObjPoint[2] * zSqRecip * fl,
+m_rotatedObjPoint[3] * zRecip * fl + m_rotatedObjPoint[1] * rotXlated[1] * zSqRecip * fl,
+-m_rotatedObjPoint[2] * zRecip * fl],
+    [(-m_rotatedObjPoint[3] * zRecip * fl) - m_rotatedObjPoint[2] * rotXlated[2] * zSqRecip * fl,
+m_rotatedObjPoint[1] * rotXlated[2] * zSqRecip * fl,
+m_rotatedObjPoint[1] * zRecip * fl])
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+block([rotXlated, m_rotatedObjPoint, pos, zRecip, zSqRecip, fl, m_rotatedObjPoint, myMat],
+    
+    myMat: (zRecip * fl) * matrix(
+        [-rotXlated[1]*m_rotatedObjPoint[2]*zRecip
+        ,m_rotatedObjPoint[1]*rotXlated[1]*zRecip+m_rotatedObjPoint[3],-m_rotatedObjPoint[2]],
+        [-m_rotatedObjPoint[2]*rotXlated[2]*zRecip-m_rotatedObjPoint[3],m_rotatedObjPoint[1]*rotXlated[2]*zRecip,m_rotatedObjPoint[1]]),
+    print(ratsimp(myMat / (zRecip * fl))),
+    block([myMat:myMat, evaluated],
+        evaluated: ev(
+            ev(myMat, zRecip = 1 / rotXlated[3]),
+            rotXlated = makelist(m_rotatedObjPoint[i], i, 3) + makelist(pos[i], i, 3)),
+        if(equal(evaluated, simpleIncRotJacobian)) then (print("still groovy"))
+    )
+);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+matrix([-rotXlated[1]*m_rotatedObjPoint[2]*zRecip,m_rotatedObjPoint[1]*rotXlated[1]*zRecip+m_rotatedObjPoint[3],-m_rotatedObjPoint[2]],[-m_rotatedObjPoint[2]*rotXlated[2]*zRecip-m_rotatedObjPoint[3],m_rotatedObjPoint[1]*rotXlated[2]*zRecip,m_rotatedObjPoint[1]]);
+ev(%, m_rotatedObjPoint[3] = rotObj[Z], m_rotatedObjPoint[1] = rotObj[X], m_rotatedObjPoint[2] = rotObj[Y], rotXlated[1] = rotXlated[X], rotXlated[2]=rotXlated[Y]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ev(%, rotXlated = makelist(m_rotatedObjPoint[i], i, 3) + makelist(pos[i], i, 3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+submatrix(expand(ev(matrix([-rotXlated[1]*m_rotatedObjPoint[2]*zRecip,m_rotatedObjPoint[1]*rotXlated[1]*zRecip+m_rotatedObjPoint[3],-m_rotatedObjPoint[2]],[-m_rotatedObjPoint[2]*rotXlated[2]*zRecip-m_rotatedObjPoint[3],m_rotatedObjPoint[1]*rotXlated[2]*zRecip,m_rotatedObjPoint[1]]),
+    rotXlated = makelist(m_rotatedObjPoint[i], i, 3) + makelist(pos[i], i, 3))), 3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsubsect start ]
+Trying it without incrot=0
+   [wxMaxima: subsubsect end   ] */
+
+/* [wxMaxima: input   start ] */
+block([genvec, myincrot, mypos, myrotatedbeacon, q, incrot, pos, beacon, meas, rb, H, myincrotOP, incrotOP, fullMeas, i, j],
+    genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
+    myincrot: genvec(m_incRot, 3),
+    mypos : genvec(m_xlate, 3),
+    myincrotOP: genmatrix(incrotOP, 3, 3),
+    meas: simpleProjectForIncRot(mypos, myincrot, fl, genvec(pp, 2), genvec(m_objExtRot, 3)),
+    fullMeas: [meas[u], meas[v]],
+    /*print(fullMeas),*/
+    H : vectorsimp(jacobian(fullMeas, [m_incRot[1], m_incRot[2], m_incRot[3]])),
+    /* We'll pre-calculate a triangular matrix of incremental rotation outer products to simplify this somewhat */
+    for i: 1 thru 3 do (
+        H: subst([m_incRot[i]^2 = incrotOP[i,i]], H),
+        for j: i+1 thru 3 do (
+            H: subst([m_incRot[i]*m_incRot[j]=incrotOP[i,j]], H)
+        )
+    ),
+    print(listofvars(H)),
+    print(H),
+    matrixCodegen(H)
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Beacon Position
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: subsubsect start ]
+with R as a rotation matrix
+   [wxMaxima: subsubsect end   ] */
+
+/* [wxMaxima: input   start ] */
+block([camPoints, myrot, m_rot, mybeacon, m_beacon, myxlate, xlate, fl, pp, meas, vec, i, u, v, H, HwithSubstitutions],
+    local(mybeacon, beacon, xlate, m_rot),
+    genvec(sym, dim) := express(transpose(matrix(makelist(sym[i], i, dim)))),
+    mybeacon: genvec(m_beacon, 3),
+    camPoints : genmatrix(m_rot,3,3) . mybeacon + genvec(xlate, 3),
+    /*print(camPoints),*/
+    u: camPoints[1][1]/(camPoints[3][1]) * (fl) + pp[1],
+    v: camPoints[2][1]/(camPoints[3][1]) * (fl) + pp[2],
+    /*meas: submatrix(3, camPoints)/(camPoints[3][1]) * (fl) + genvec(pp, 2),
+    print(rr(meas)),
+jacobian([meas[1][1], meas[2][1]], [m_beacon[1], m_beacon[2], m_beacon[3]])*/
+
+    print([u, v]),
+    H: jacobian([u, v], [m_beacon[1], m_beacon[2], m_beacon[3]]),
+    print(H),
+    matrixCodegen(H)
+);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

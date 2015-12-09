@@ -1,0 +1,203 @@
+
+/*
+Quaternion ATENSOR basics
+*/
+
+/*
+Single-startup only
+*/
+
+setup_autoload("atensor", init_atensor)$
+setup_autoload("vect", express)$
+
+/*
+https://www.ma.utexas.edu/pipermail/maxima/2010/022969.html
+*/
+
+init_atensor(quaternion);
+express(x);
+
+/*
+Basics
+*/
+
+/*declare([w,x,y,z], scalar)$*/
+i : v[1]$
+j : v[2]$
+k : v[1] . v[2]$
+quat(w,x,y,z):=w+x.i+y.j+z.k$
+qfromvecscalar(vec, scalar) := scalar + vec . [i, j, k]$
+conj(x):=subst([v[1]=-v[1],v[2]=-v[2],v[1] . v[2]=-v[1] . v[2]] , x)$
+
+/*
+Helpers to decompose/access components of the atensor
+*/
+
+qw(q) :=subst([v[1]=0,v[2]=0,v[1].v[2]=0] , q)$
+/*
+qx(q) := subst([v[1].v[2]= 0, v[1]=1, v[2]=0], q - qw(q))
+qy(q) := subst([v[1].v[2]= 0, v[1]=0, v[2]=1], q - qw(q))$
+qz(q) := subst([v[1].v[2]= 1, v[1]=0, v[2]=0], q - qw(q))$
+*/
+qx(q) := coeff(q, i)$
+qy(q) := coeff(q, j)$
+qz(q) := coeff(q, k)$
+/* gets the so-called vector component */
+qvec(q) := [qx(q), qy(q), qz(q)]$
+
+/*
+Note that for any quaternion q, q = qfromvecscalar(qvec(q), qw(q))
+*/
+
+qidentity : qfromvecscalar([0,0,0], 1)$
+
+/*
+Given a normalized quaternion and a vector, rotates the vector treating the quaternion as a spatial rotation.
+*/
+
+qtransform(q, vec) := qvec( q . qfromvecscalar(vec, 0) . conj(q))$
+
+qtorotmatrix(q) := matrix(
+    [1-2*(qy(q)^2 + qz(q)^2), 2*(qx(q)*qy(q) - qw(q) * qz(q)), 2*(qx(q)*qz(q) + qy(q)*qw(q))],
+    [2*(qw(q)*qz(q)+qx(q)*qy(q)),1-2*(qx(q)^2+qz(q)^2),2*(qy(q)*qz(q)-qw(q)*qx(q))],
+    [2*(qx(q)*qz(q)-qw(q)*qy(q)),2*(qy(q)*qz(q)+qw(q)*qx(q)),1-2*(qx(q)^2+qy(q)^2)]);
+
+qnorm(q) := block([v],v:flatten([qw(q), qvec(q)]), sqrt(v . transpose(v)))$
+qnormalized(q) := block([mynorm],
+    mynorm : qnorm(q),
+    if mynorm < ratepsilon then (return(qfromvecscalar([0,0,0], 1))) else (return(qfromvecscalar(qvec(q)/mynorm, qw(q)/mynorm)))
+)$
+qunsafenormalized(q):= block([mynorm],
+    mynorm : qnorm(q),
+    qfromvecscalar(qvec(q)/mynorm, qw(q)/mynorm))$
+
+/*
+plain vector-math versions
+*/
+
+qmult(q, p) := qfromvecscalar(express(qvec(q) ~ qvec(p) + qw(q) * qvec(p) + qw(p) * qvec(q)),
+    qw(q) * qw(p) - qvec(q) . qvec(p))$
+qtransformvec(q, vec) := qvec(qmult(qmult(q, qfromvecscalar(vec, 0)), conj(q)));
+
+/*
+Quaternion Exponential Map
+*/
+
+/*
+Takes in an incremental rotation, halves it and treats it as just the vector part of a quaternion.
+*/
+
+qfromsmallincremental(vec) := if equal(vec . transpose(vec), 0) then (qidentity) else(qunsafenormalized(qfromvecscalar(vec / 2, 1)))$
+
+/*
+small-angle approximation
+*/
+
+qfromtaylorincremental(vec) := block([thetasq, scale],
+    thetasq: vec . transpose(vec),
+    scale : 1/2 + thetasq / 48,
+    qunsafenormalized(qfromvecscalar(vec * scale, 1-thetasq/8))
+)$
+
+/*
+Utility definitions
+*/
+
+/*
+Small angle rotation
+*/
+
+OmegaMatrix(w) := matrix([0, -w[3], w[2]], [w[3], 0, -w[1]], [-w[2], w[1], 0])$
+block([w],
+    local(w),
+    rodriguesTaylor(w):= block([thSq, bigomega],
+        thSq : w . transpose(w),
+        bigomega : OmegaMatrix(w),
+        ident(3) + (1-thSq/6) * bigomega + (1/2 - thSq/24) * bigomega^2),
+    rodrigues(w):= block([th, bigomega],
+        th : sqrt(w . transpose(w)),
+        bigomega : OmegaMatrix(w),
+        ident(3) + sin(th)/th * bigomega + (1-cos(th))/th^2 * bigomega^2))$
+
+incrementalRotationMatrixRT : rodriguesTaylor(makelist(w[i],i,3));
+
+/*
+A bit of auto-testing to make sure that things work out OK for trivial cases
+*/
+
+block([testcases, data, xform, input, expectedoutput],
+    testcases: [
+        [[%pi, 0, 0], [1, 0, 0], [1, 0, 0]],
+        [[0, %pi, 0], [0, 1, 0], [0, 1, 0]],
+        [[0, 0, %pi], [0, 0, 1], [0, 0, 1]]
+    ],
+    for data in testcases do (
+        xform: data[1],
+        input: data[2],
+        expectedoutput: data[3],
+        if (notequal(rodriguesTaylor(xform) . transpose(input), transpose(expectedoutput))) then (throw(sconcat("rodriguesTaylor sanity check failed on ", string(xform), string(input)))),
+        if (notequal(rodrigues(xform) . transpose(input), transpose(expectedoutput))) then (throw(sconcat("rodrigues sanity check failed on ", string(xform), string(input))))
+    )
+);
+/* this one only works with the taylor series because it's all zero */
+if (equal(rodriguesTaylor([0,0,0]) . transpose([1, 1, 1]), transpose([1,1,1]))) then ("rodriguesTaylor ok") else (throw("rodriguesTaylor sanity check failed!"));
+
+incrementalRotationMatrixR : rodrigues(makelist(w[i],i,3));
+
+/*
+Code Export
+*/
+
+/*
+Actual active definitions
+*/
+
+block([codegen_replaceExponentsOnce, codegen_replaceExponents, codegen_processSubscripts, codegen_processExpression, codegen_processLine],
+    codegen_replaceExponentsOnce(expr) := block([arg, power, newexpr, i],
+        if atom(expr) then expr elseif operatorp(expr, "^") then (
+            arg : args(expr)[1],
+            power: args(expr)[2],
+            newexpr : string(arg),
+            for i: 2 thru power do ( newexpr : concat(string(arg), " * ", newexpr)),
+            return(concat("(", newexpr, ")"))
+        ) else (return(expr))
+    ),
+    codegen_replaceExponents(expr) := scanmap(codegen_replaceExponentsOnce, expr),
+    codegen_processSubscripts(a) := a,
+    codegen_processExpression(expr) := codegen_replaceExponents(codegen_processSubscripts(expr)),
+    codegen_processLine(line) := block([lineargs],
+        if atom(line) then line else (
+            lineargs : args(line),
+            if operatorp(line, ":") then (
+                sconcat("auto ", string(lineargs[1]), " = ", codegen_processExpression(lineargs[2]), ";" )
+            ) else (
+                line
+            )
+        )
+    ),
+    matrixCodegenStream(stream, mat) := block([myblock, blockargs, len, i, finalMat, rows, cols, finalFlat, elt],
+        myblock: ev(optimize(mat), optimprefix: 'v),
+        blockargs: args(myblock),
+        len: length(blockargs),
+
+        /* print the common subexpressions */
+        for i:2 thru len - 1 do printf(stream, "~a~%", codegen_processLine(blockargs[i])),
+
+        /* set up the result variable */
+        finalMat : blockargs[len],
+        rows: length(args(finalMat)),
+        cols: length(args(finalMat[1])),
+        printf(stream, "Eigen::Matrix<double,~d,~d> ret;~%ret <<~%", rows, cols),
+
+        /* output comma-initializer of result variable */
+        finalFlat: flatten(args(finalMat)),
+        len: length(finalFlat),
+        for i:1 thru len - 1 do printf(stream, "~t~a,~%",codegen_processLine(finalFlat[i])),
+        printf(stream, "~t~a;~%",codegen_processLine(finalFlat[len])),
+        printf(stream, "return ret;~%")
+    ),
+    matrixCodegen(mat) := matrixCodegenStream(true, mat)
+)$
+
+print("OK - VR math loaded")$
+

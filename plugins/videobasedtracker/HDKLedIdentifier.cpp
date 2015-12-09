@@ -77,7 +77,7 @@ namespace vbtracker {
         // d_patterns.size() << std::endl;
     }
 
-    int OsvrHdkLedIdentifier::getId(std::list<float> &brightnesses) const {
+    int OsvrHdkLedIdentifier::getId(std::list<float> &brightnesses, bool & lastBright) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {
@@ -91,14 +91,17 @@ namespace vbtracker {
         // they are too close to each other, we have a light rather
         // than an LED.  If not, compute a threshold to separate the
         // 0's and 1's.
-        auto extrema = findMinMaxBrightness(brightnesses);
-        const auto minVal = extrema.first;
-        const auto maxVal = extrema.second;
-        static const double TODO_MIN_BRIGHTNESS_DIFF = 0.5;
+        Brightness minVal, maxVal;
+        std::tie(minVal, maxVal) = findMinMaxBrightness(brightnesses);
+        // Brightness is currently actually keypoint diameter in pixels, and
+        // it's being under-estimated by OpenCV.
+        static const double TODO_MIN_BRIGHTNESS_DIFF = 0.3;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
             return -2;
         }
         const auto threshold = (minVal + maxVal) / 2;
+        // Set the `lastBright` out variable
+        lastBright = brightnesses.back() >= threshold;
 
         // Get a list of boolean values for 0's and 1's using
         // the threshold computed above.

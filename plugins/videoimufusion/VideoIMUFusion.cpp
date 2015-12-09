@@ -78,6 +78,11 @@ void VideoIMUFusion::enterRunningState(
 void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
                                    const OSVR_OrientationReport &report) {
     if (m_state != State::Running) {
+        // Just report the orientation with height added on.
+        m_lastPose.rotation = report.rotation;
+        ei::map(m_lastPose).translation() =
+            Eigen::Vector3d::UnitY() * m_params.eyeHeight;
+        m_lastTime = timestamp;
         return;
     }
     m_runningData->handleIMUReport(timestamp, report);
@@ -96,9 +101,11 @@ void VideoIMUFusion::handleIMUVelocity(const OSVR_TimeValue &timestamp,
 }
 
 void VideoIMUFusion::updateFusedOutput(const OSVR_TimeValue &timestamp) {
-    ei::map(m_lastFusion).rotation() = m_runningData->getOrientation();
-    ei::map(m_lastFusion).translation() = m_runningData->getPosition();
-    m_lastFusionTime = timestamp;
+    ei::map(m_lastPose).rotation() = m_runningData->getOrientation();
+    ei::map(m_lastPose).translation() =
+        m_runningData->getPosition() +
+        Eigen::Vector3d::UnitY() * m_params.eyeHeight;
+    m_lastTime = timestamp;
 }
 
 void VideoIMUFusion::handleVideoTrackerDataWhileRunning(

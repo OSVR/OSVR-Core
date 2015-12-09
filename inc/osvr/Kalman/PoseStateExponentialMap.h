@@ -1,5 +1,7 @@
 /** @file
-    @brief Header
+    @brief Header defining a state that uses the "Exponential Map" rotation
+   formalism" instead of the "internal incremental rotation, externalized
+   quaternion" representation.
 
     @date 2015
 
@@ -22,32 +24,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_PoseState_h_GUID_57A246BA_940D_4386_ECA4_4C4172D97F5A
-#define INCLUDED_PoseState_h_GUID_57A246BA_940D_4386_ECA4_4C4172D97F5A
+#ifndef INCLUDED_PoseStateExponentialMap_h_GUID_3D1B779A_6DBE_4993_0AE7_C28344E55A51
+#define INCLUDED_PoseStateExponentialMap_h_GUID_3D1B779A_6DBE_4993_0AE7_C28344E55A51
 
 // Internal Includes
 #include "FlexibleKalmanBase.h"
-#include "ExternalQuaternion.h"
+#include "MatrixExponentialMap.h"
 
 // Library/third-party includes
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+// - none
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace kalman {
-    namespace pose_externalized_rotation {
+    namespace pose_exp_map {
+
         using Dimension = types::DimensionConstant<12>;
         using StateVector = types::DimVector<Dimension>;
         using StateVectorBlock3 =
-            StateVector::FixedSegmentReturnType<3>::Type;
+            StateVector::template FixedSegmentReturnType<3>::Type;
         using ConstStateVectorBlock3 =
-            StateVector::ConstFixedSegmentReturnType<3>::Type;
+            StateVector::template ConstFixedSegmentReturnType<3>::Type;
 
         using StateVectorBlock6 =
-            StateVector::FixedSegmentReturnType<6>::Type;
+            StateVector::template FixedSegmentReturnType<6>::Type;
         using StateSquareMatrix = types::DimSquareMatrix<Dimension>;
 
         /// @name Accessors to blocks in the state vector.
@@ -59,11 +61,10 @@ namespace kalman {
             return vec.head<3>();
         }
 
-        inline StateVectorBlock3 incrementalOrientation(StateVector &vec) {
+        inline StateVectorBlock3 orientation(StateVector &vec) {
             return vec.segment<3>(3);
         }
-        inline ConstStateVectorBlock3
-        incrementalOrientation(StateVector const &vec) {
+        inline ConstStateVectorBlock3 orientation(StateVector const &vec) {
             return vec.segment<3>(3);
         }
 
@@ -119,7 +120,7 @@ namespace kalman {
 
             StateVector ret = state;
             position(ret) += velocity(state) * dt;
-            incrementalOrientation(ret) += angularVelocity(state) * dt;
+            orientation(ret) += angularVelocity(state) * dt;
             return ret;
         }
 
@@ -128,12 +129,6 @@ namespace kalman {
             auto attenuation = computeAttenuation(damping, dt);
             velocities(state) *= attenuation;
         }
-
-        inline Eigen::Quaterniond
-        incrementalOrientationToQuat(StateVector const &state) {
-            return external_quat::vecToQuat(incrementalOrientation(state));
-        }
-
         class State : public HasDimension<12> {
           public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -143,8 +138,7 @@ namespace kalman {
                 : m_state(StateVector::Zero()),
                   m_errorCovariance(
                       StateSquareMatrix::
-                          Identity() /** @todo almost certainly wrong */),
-                  m_orientation(Eigen::Quaterniond::Identity()) {}
+                          Identity() /** @todo almost certainly wrong */) {}
             /// set xhat
             void setStateVector(StateVector const &state) { m_state = state; }
             /// xhat
@@ -158,22 +152,23 @@ namespace kalman {
                 return m_errorCovariance;
             }
 
-            /// Intended for startup use.
-            void setQuaternion(Eigen::Quaterniond const &quaternion) {
-                m_orientation = quaternion;
-            }
-
-            void postCorrect() { externalizeRotation(); }
-
-            void externalizeRotation() {
-                m_orientation = getCombinedQuaternion();
-                incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
+            void postCorrect() {
+                matrix_exponential_map::avoidSingularities(
+                    orientation(m_state));
+                m_cacheData.reset(Eigen::Vector3d(orientation(m_state)));
             }
 
             StateVectorBlock3 getPosition() { return position(m_state); }
 
             ConstStateVectorBlock3 getPosition() const {
                 return position(m_state);
+            }
+
+            Eigen::Quaterniond const &getQuaternion() {
+                return m_cacheData.getQuaternion();
+            }
+            Eigen::Matrix3d const &getRotationMatrix() {
+                return m_cacheData.getRotationMatrix();
             }
 
             StateVectorBlock3 getVelocity() { return velocity(m_state); }
@@ -190,25 +185,15 @@ namespace kalman {
                 return angularVelocity(m_state);
             }
 
-            Eigen::Quaterniond const &getQuaternion() const {
-                return m_orientation;
-            }
-
-            Eigen::Quaterniond getCombinedQuaternion() const {
-                /// @todo is just quat multiplication OK here? Order right?
-                return (incrementalOrientationToQuat(m_state) * m_orientation)
-                    .normalized();
-            }
-
           private:
-            /// In order: x, y, z, incremental rotations phi (about x), theta
-            /// (about y), psy (about z), then their derivatives in the same
-            /// order.
+            /// In order: x, y, z, exponential rotation coordinates w1, w2, w3,
+            /// then their derivatives in the same order.
             StateVector m_state;
             /// P
             StateSquareMatrix m_errorCovariance;
-            /// Externally-maintained orientation per Welch 1996
-            Eigen::Quaterniond m_orientation;
+
+            /// Cached data for use in consuming the exponential map rotation.
+            matrix_exponential_map::ExponentialMapData m_cacheData;
         };
 
         /// Stream insertion operator, for displaying the state of the state
@@ -216,13 +201,10 @@ namespace kalman {
         template <typename OutputStream>
         inline OutputStream &operator<<(OutputStream &os, State const &state) {
             os << "State:" << state.stateVector().transpose() << "\n";
-            os << "quat:" << state.getCombinedQuaternion().coeffs().transpose()
-               << "\n";
             os << "error:\n" << state.errorCovariance() << "\n";
             return os;
         }
-    } // namespace pose_externalized_rotation
+    } // namespace pose_exp_map
 } // namespace kalman
 } // namespace osvr
-
-#endif // INCLUDED_PoseState_h_GUID_57A246BA_940D_4386_ECA4_4C4172D97F5A
+#endif // INCLUDED_PoseStateExponentialMap_h_GUID_3D1B779A_6DBE_4993_0AE7_C28344E55A51

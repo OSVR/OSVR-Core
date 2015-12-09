@@ -89,6 +89,11 @@ namespace vbtracker {
         KeyPointIterator nearest(KeyPointList &keypoints,
                                  double threshold) const;
 
+        /// @brief Returns the most-recent boolean "bright" state according to
+        /// the LED identifier. Note that the value is only meaningful if
+        /// `identified()` is true.
+        bool isBright() const { return m_lastBright; }
+
       private:
         /// Starting from current frame going backwards
         BrightnessList m_brightnessHistory;
@@ -102,6 +107,9 @@ namespace vbtracker {
 
         /// @brief Object used to determine the identity of an LED
         LedIdentifier *m_identifier;
+
+        /// @brief If identified, whether it is most recently in "bright" mode.
+        bool m_lastBright = false;
     };
 
 } // End namespace vbtracker

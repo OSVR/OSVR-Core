@@ -42,77 +42,23 @@ namespace ei = osvr::util::eigen_interop;
 
 void VideoIMUFusion::RunningData::handleIMUReport(
     const OSVR_TimeValue &timestamp, const OSVR_OrientationReport &report) {
-#ifdef OSVR_FPE
-    FPExceptionEnabler fpe;
-#endif
-
-    if (preReport(timestamp)) {
-        m_imuMeas.setMeasurement(ei::map(report.rotation));
-        osvr::kalman::correct(state(), processModel(), m_imuMeas);
-    }
+    state().setQuaternion(ei::map(report.rotation));
 }
+
 void VideoIMUFusion::RunningData::handleIMUVelocity(
     const OSVR_TimeValue &timestamp, const Eigen::Vector3d &angVel) {
-#ifdef OSVR_FPE
-    FPExceptionEnabler fpe;
-#endif
-
-    if (preReport(timestamp)) {
-
-#if 0
-        static int s = 0;
-        if (s == 0) {
-            static const Eigen::IOFormat fmt(3, 0, ", ", ";\n", "", "", "[",
-                                             "]");
-            OSVR_DEV_VERBOSE(
-                "\nprediction: "
-                << state().getAngularVelocity().transpose().format(fmt)
-                << "\nMeasurement: " << angVel.transpose().format(fmt)
-                << "\nVariance: "
-                << state()
-                       .errorCovariance()
-                       .diagonal()
-                       .tail<3>()
-                       .transpose()
-                       .format(fmt));
-        }
-        s = (s + 1) % 100;
-#endif
-
-        m_imuMeasVel.setMeasurement(angVel);
-        osvr::kalman::correct(state(), processModel(), m_imuMeasVel);
-    }
+    Eigen::Matrix<double, 12, 1> x = state().stateVector();
+    osvr::kalman::pose_externalized_rotation::angularVelocity(x) = angVel;
+    state().setStateVector(x);
 }
 
 void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
     Eigen::Isometry3d roomPose = takeCameraPoseToRoom(report.pose);
-
-#ifdef OSVR_FPE
-    FPExceptionEnabler fpe;
-#endif
-    Eigen::Quaterniond orientation(roomPose.rotation());
-    auto oriChange = state().getQuaternion().angularDistance(orientation);
-    if (std::abs(oriChange) > M_PI / 2.) {
-        OSVR_DEV_VERBOSE("Throwing out a bad video pose");
-        return;
-    }
-    if (preReport(timestamp)) {
-        m_cameraMeasPos.setMeasurement(roomPose.translation());
-        osvr::kalman::correct(state(), processModel(), m_cameraMeasPos);
-        m_cameraMeasOri.setMeasurement(orientation);
-        osvr::kalman::correct(state(), processModel(), m_cameraMeasOri);
-
-#if 0
-    OSVR_DEV_VERBOSE(
-        "State: " << state().stateVector().transpose() << "\n"
-                  << "Quat: "
-                  << state().getQuaternion().coeffs().transpose()
-                  << "\n"
-                     "Error:\n"
-                  << state().errorCovariance());
-#endif
-    }
+    Eigen::Matrix<double, 12, 1> x = state().stateVector();
+    osvr::kalman::pose_externalized_rotation::position(x) =
+        roomPose.translation();
+    state().setStateVector(x);
 }
 
 /// Returns true if we succeeded and can filter in some data.
@@ -120,16 +66,6 @@ bool VideoIMUFusion::RunningData::preReport(const OSVR_TimeValue &timestamp) {
     auto dt = duration(timestamp, m_last);
     if (dt > 0) {
         m_last = timestamp;
-        // only predict if time has moved forward
-        osvr::kalman::predict(state(), processModel(), dt);
     }
-    // Can always correct though.
-    /// @todo this is a crude way of handing video timestamps in the past.
-    /// Video tracker data is usually timestamped "in the past" - ideally would
-    /// probably roll back the state to the next earlier report then apply the
-    /// measurements again in order.
-    /// Right now, we're just not advancing time at all for such "out of order"
-    /// reports, meaning that they're being incorporated as if they were roughly
-    /// 5ms newer than they actually are.
     return true;
 }

@@ -116,9 +116,7 @@ void VideoIMUFusionDevice::s_handleVideoTrackerData(
 void VideoIMUFusionDevice::handleIMUData(const OSVR_TimeValue &timestamp,
                                          const OSVR_OrientationReport &report) {
     m_fusion.handleIMUData(timestamp, report);
-    if (m_fusion.running()) {
-        sendMainPoseReport();
-    }
+    sendMainPoseReport();
 }
 void VideoIMUFusionDevice::handleIMUVelocity(
     const OSVR_TimeValue &timestamp, const OSVR_AngularVelocityReport &report) {
@@ -126,9 +124,10 @@ void VideoIMUFusionDevice::handleIMUVelocity(
     using namespace osvr::util::eigen_interop;
     Eigen::Quaterniond q = map(report.state.incrementalRotation);
     Eigen::Vector3d rot;
-    if (q.w() >= 1.) {
+    if (q.w() >= 1. || q.vec().isZero(1e-10)) {
         rot = Eigen::Vector3d::Zero();
     } else {
+#if 0
         auto magnitude = q.vec().blueNorm();
         rot = (q.vec() / magnitude * (2. * std::atan2(magnitude, q.w()))) /
               report.state.dt;
@@ -137,6 +136,15 @@ void VideoIMUFusionDevice::handleIMUVelocity(
         // std::swap(rot[0], rot[1]);
         rot[1] *= -1.;
         rot[2] *= -1.;
+#else
+        auto angle = std::acos(q.w());
+        rot = q.vec().normalized() * angle * 2 / report.state.dt;
+
+        /// @todo without transformations being applied to vel quats, this
+        /// is needed.
+        rot[1] *= -1.;
+        rot[2] *= -1.;
+#endif
     }
 
     m_fusion.handleIMUVelocity(timestamp, rot);
@@ -168,6 +176,6 @@ void VideoIMUFusionDevice::handleVideoTrackerData(
 
 void VideoIMUFusionDevice::sendMainPoseReport() {
     osvrDeviceTrackerSendPoseTimestamped(
-        m_dev, m_trackerOut, &m_fusion.getLatestFusedPose(), FUSED_SENSOR_ID,
-        &m_fusion.getLatestFusedTime());
+        m_dev, m_trackerOut, &m_fusion.getLatestPose(), FUSED_SENSOR_ID,
+        &m_fusion.getLatestTime());
 }

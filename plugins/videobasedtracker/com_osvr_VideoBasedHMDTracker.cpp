@@ -91,79 +91,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
         m_dev.registerUpdateCallback(this);
     }
 
-    OSVR_ReturnCode update() {
-        if (!m_source->ok()) {
-            // Couldn't open the camera.  Failing silently for now. Maybe the
-            // camera will be plugged back in later.
-            return OSVR_RETURN_SUCCESS;
-        }
-
-        //==================================================================
-        // Trigger a camera grab.
-        if (!m_source->grab()) {
-            // Couldn't open the camera.  Failing silently for now. Maybe the
-            // camera will be plugged back in later.
-            return OSVR_RETURN_SUCCESS;
-        }
-
-        //==================================================================
-        // Keep track of when we got the image, since that is our
-        // best estimate for when the tracker was at the specified
-        // pose.
-        // TODO: Back-date the aquisition time by the expected image
-        // transfer time and perhaps by half the exposure time to say
-        // when the photons actually arrived.
-        OSVR_TimeValue timestamp;
-        osvrTimeValueGetNow(&timestamp);
-        // Pull the image into an OpenCV matrix named m_frame.
-        m_source->retrieve(m_frame, m_imageGray);
-
-#ifdef VBHMD_SAVE_IMAGES
-        // If we're supposed to save images, make file names that match the
-        // format we need to read them back in again and save the images.
-        std::ostringstream fileName;
-        fileName << VBHMD_SAVE_IMAGES << "/";
-        fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
-        fileName << ".tif";
-        if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
-            std::cerr << "Could not write image to " << fileName.str()
-                      << std::endl;
-        }
-
-#endif
-
-#ifdef VBHMD_TIMING
-        //==================================================================
-        // Time our performance
-        static struct timeval last = {0, 0};
-        if (last.tv_sec == 0) {
-            vrpn_gettimeofday(&last, NULL);
-        }
-        static unsigned count = 0;
-        if (++count == 100) {
-            struct timeval now;
-            vrpn_gettimeofday(&now, NULL);
-            double duration = vrpn_TimevalDurationSeconds(now, last);
-            std::cout << "Video-based tracker: update rate " << count / duration
-                      << " hz" << std::endl;
-            count = 0;
-            last = now;
-        }
-#endif
-
-        m_vbtracker.processImage(
-            m_frame, m_imageGray,
-            [&](OSVR_ChannelCount sensor, OSVR_Pose3 const &pose) {
-
-                //==================================================================
-                // Report the new pose, time-stamped with the time we
-                // received the image from the camera.
-                osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &pose,
-                                                     sensor, &timestamp);
-            });
-
-        return OSVR_RETURN_SUCCESS;
-    }
+    OSVR_ReturnCode update();
 
     /// Should be called immediately after construction for specifying the
     /// particulars of tracking.
@@ -173,6 +101,15 @@ class VideoBasedHMDTracker : boost::noncopyable {
                    size_t requiredInliers = 4, size_t permittedOutliers = 2) {
         m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
                               params.distortionParameters, locations,
+                              requiredInliers, permittedOutliers);
+    }
+    void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
+                   osvr::vbtracker::CameraParameters const &params,
+                   osvr::vbtracker::Point3Vector const &locations,
+                   std::vector<double> const &variance,
+                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
+        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
+                              params.distortionParameters, locations, variance,
                               requiredInliers, permittedOutliers);
     }
 
@@ -188,6 +125,79 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
     osvr::vbtracker::VideoBasedTracker m_vbtracker;
 };
+
+inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
+    if (!m_source->ok()) {
+        // Couldn't open the camera.  Failing silently for now. Maybe the
+        // camera will be plugged back in later.
+        return OSVR_RETURN_SUCCESS;
+    }
+
+    //==================================================================
+    // Trigger a camera grab.
+    if (!m_source->grab()) {
+        // Couldn't open the camera.  Failing silently for now. Maybe the
+        // camera will be plugged back in later.
+        return OSVR_RETURN_SUCCESS;
+    }
+
+    //==================================================================
+    // Keep track of when we got the image, since that is our
+    // best estimate for when the tracker was at the specified
+    // pose.
+    // TODO: Back-date the aquisition time by the expected image
+    // transfer time and perhaps by half the exposure time to say
+    // when the photons actually arrived.
+    OSVR_TimeValue timestamp;
+    osvrTimeValueGetNow(&timestamp);
+    // Pull the image into an OpenCV matrix named m_frame.
+    m_source->retrieve(m_frame, m_imageGray);
+
+#ifdef VBHMD_SAVE_IMAGES
+    // If we're supposed to save images, make file names that match the
+    // format we need to read them back in again and save the images.
+    std::ostringstream fileName;
+    fileName << VBHMD_SAVE_IMAGES << "/";
+    fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
+    fileName << ".tif";
+    if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
+        std::cerr << "Could not write image to " << fileName.str() << std::endl;
+    }
+
+#endif
+
+#ifdef VBHMD_TIMING
+    //==================================================================
+    // Time our performance
+    static struct timeval last = {0, 0};
+    if (last.tv_sec == 0) {
+        vrpn_gettimeofday(&last, NULL);
+    }
+    static unsigned count = 0;
+    if (++count == 100) {
+        struct timeval now;
+        vrpn_gettimeofday(&now, NULL);
+        double duration = vrpn_TimevalDurationSeconds(now, last);
+        std::cout << "Video-based tracker: update rate " << count / duration
+                  << " hz" << std::endl;
+        count = 0;
+        last = now;
+    }
+#endif
+
+    m_vbtracker.processImage(
+        m_frame, m_imageGray, timestamp,
+        [&](OSVR_ChannelCount sensor, OSVR_Pose3 const &pose) {
+
+            //==================================================================
+            // Report the new pose, time-stamped with the time we
+            // received the image from the camera.
+            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &pose,
+                                                 sensor, &timestamp);
+        });
+
+    return OSVR_RETURN_SUCCESS;
+}
 
 class HardwareDetection {
   public:
@@ -298,7 +308,8 @@ class ConfiguredDeviceConstructor {
             auto camParams = osvr::vbtracker::getHDKCameraParameters();
             newTracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(0), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0);
+                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                osvr::vbtracker::OsvrHdkLedVariances_SENSOR0, 6, 0);
             newTracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(1), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
