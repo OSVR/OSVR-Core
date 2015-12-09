@@ -73,15 +73,14 @@ namespace vbtracker {
                 kalman::pose_externalized_rotation::incrementalOrientation(
                     state.a().stateVector());
             m_rotatedObjPoint = m_rot * m_beacon;
-            m_rotatedTranslatedPoint =
-                m_rotatedObjPoint + state.a().getPosition();
-            m_xlate = state.a().getPosition();
+            m_rotatedTranslatedPoint = m_rotatedObjPoint + state.a().position();
+            m_xlate = state.a().position();
         }
         Vector getResidual(State const &state) const {
             // 3d position of beacon
             Eigen::Vector3d beacon = state.b().stateVector();
             Eigen::Vector2d predicted = projectPoint(
-                state.a().getPosition(), state.a().getCombinedQuaternion(),
+                state.a().position(), state.a().getCombinedQuaternion(),
                 m_cam.focalLength, m_cam.principalPoint,
                 state.b().stateVector());
             return m_measurement - predicted;

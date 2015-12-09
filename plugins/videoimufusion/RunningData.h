@@ -94,11 +94,12 @@ class VideoIMUFusion::RunningData {
     Eigen::Quaterniond getOrientation() const {
         return state().getQuaternion();
     }
-    Eigen::Vector3d getPosition() const { return state().getPosition(); }
+    Eigen::Vector3d getPosition() const { return state().position(); }
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
-        return m_cTr.linear() * (Eigen::Translation3d(m_cTr.translation()) *
-               osvr::util::eigen_interop::map(pose).transform());
+        return m_cTr.linear() *
+               (Eigen::Translation3d(m_cTr.translation()) *
+                osvr::util::eigen_interop::map(pose).transform());
     }
 
     Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const {

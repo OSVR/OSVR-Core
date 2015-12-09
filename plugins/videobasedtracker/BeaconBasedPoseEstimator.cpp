@@ -239,16 +239,16 @@ namespace vbtracker {
         OSVR_PoseState ret;
         util::eigen_interop::map(ret).rotation() = m_state.getQuaternion();
         util::eigen_interop::map(ret).translation() =
-            m_convertInternalPositionRepToExternal(m_state.getPosition());
+            m_convertInternalPositionRepToExternal(m_state.position());
         return ret;
     }
 
     Eigen::Vector3d BeaconBasedPoseEstimator::GetLinearVelocity() const {
-        return m_state.getVelocity() / LINEAR_SCALE_FACTOR;
+        return m_state.velocity() / LINEAR_SCALE_FACTOR;
     }
 
     Eigen::Vector3d BeaconBasedPoseEstimator::GetAngularVelocity() const {
-        return m_state.getAngularVelocity();
+        return m_state.angularVelocity();
     }
 
     bool
@@ -444,9 +444,7 @@ namespace vbtracker {
         // Note that here, units are millimeters and radians, and x and z are
         // the lateral translation dimensions, with z being distance from camera
         using StateVec = kalman::types::DimVector<State>;
-        StateVec state(StateVec::Zero());
-        state.head<3>() = xlate;
-        m_state.setStateVector(state);
+        m_state.position() = xlate;
         m_state.setQuaternion(quat);
         m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
 

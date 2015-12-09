@@ -62,10 +62,10 @@ namespace kalman {
         /// the measurement from the predicted state, and returns the
         /// difference.
         ///
-        /// State type doesn't matter as long as we can getPosition()
+        /// State type doesn't matter as long as we can `.position()`
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
-            MeasurementVector residual = m_pos - s.getPosition();
+            MeasurementVector residual = m_pos - s.position();
             return residual;
         }
 

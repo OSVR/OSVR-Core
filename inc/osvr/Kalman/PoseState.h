@@ -197,24 +197,28 @@ namespace kalman {
                 incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
             }
 
-            StateVectorBlock3 getPosition() { return position(m_state); }
-
-            ConstStateVectorBlock3 getPosition() const {
-                return position(m_state);
+            StateVectorBlock3 position() {
+                return pose_externalized_rotation::position(m_state);
             }
 
-            StateVectorBlock3 getVelocity() { return velocity(m_state); }
-
-            ConstStateVectorBlock3 getVelocity() const {
-                return velocity(m_state);
+            ConstStateVectorBlock3 position() const {
+                return pose_externalized_rotation::position(m_state);
             }
 
-            StateVectorBlock3 getAngularVelocity() {
-                return angularVelocity(m_state);
+            StateVectorBlock3 velocity() {
+                return pose_externalized_rotation::velocity(m_state);
             }
 
-            ConstStateVectorBlock3 getAngularVelocity() const {
-                return angularVelocity(m_state);
+            ConstStateVectorBlock3 velocity() const {
+                return pose_externalized_rotation::velocity(m_state);
+            }
+
+            StateVectorBlock3 angularVelocity() {
+                return pose_externalized_rotation::angularVelocity(m_state);
+            }
+
+            ConstStateVectorBlock3 angularVelocity() const {
+                return pose_externalized_rotation::angularVelocity(m_state);
             }
 
             Eigen::Quaterniond const &getQuaternion() const {

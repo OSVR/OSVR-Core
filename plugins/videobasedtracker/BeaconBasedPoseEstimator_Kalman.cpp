@@ -164,7 +164,7 @@ namespace vbtracker {
         /// Output to the OpenCV state types so we can see the reprojection
         /// debug view.
         m_rvec = eiQuatToRotVec(m_state.getQuaternion());
-        cv::eigen2cv(m_state.getPosition().eval(), m_tvec);
+        cv::eigen2cv(m_state.position().eval(), m_tvec);
         return true;
     }
 
@@ -177,7 +177,7 @@ namespace vbtracker {
         OSVR_PoseState ret;
         util::eigen_interop::map(ret).rotation() = state.getQuaternion();
         util::eigen_interop::map(ret).translation() =
-            m_convertInternalPositionRepToExternal(state.getPosition());
+            m_convertInternalPositionRepToExternal(state.position());
         return ret;
     }
 
