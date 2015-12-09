@@ -27,7 +27,8 @@
                 "position": 0.01,
                 "orientation": 0.1
             },
-            "damping": 0.1
+            "damping": 0.1,
+            "eyeHeight": 1.6
         }
     }],
     "plugins": [
