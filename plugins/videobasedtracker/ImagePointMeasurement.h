@@ -26,7 +26,6 @@
 #define INCLUDED_ImagePointMeasurement_h_GUID_BE292A08_8C31_4987_E179_CD2F0CE63183
 
 // Internal Includes
-#include "VideoJacobian.h"
 #include "ProjectPoint.h"
 #include <osvr/Kalman/FlexibleKalmanBase.h>
 #include <osvr/Kalman/PureVectorState.h>

@@ -36,7 +36,6 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 // Internal Includes
 #include "BeaconBasedPoseEstimator.h"
-#include "VideoJacobian.h"
 #include "ImagePointMeasurement.h"
 #include "cvToEigen.h"
 

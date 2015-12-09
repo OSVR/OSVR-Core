@@ -39,8 +39,7 @@ add_library(vbtracker-core STATIC
     ProjectPoint.h
     Types.h
     VideoBasedTracker.cpp
-    VideoBasedTracker.h
-    VideoJacobian.h)
+    VideoBasedTracker.h)
 
 target_link_libraries(vbtracker-core
     PUBLIC
