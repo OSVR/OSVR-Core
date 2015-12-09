@@ -42,6 +42,7 @@ struct VideoIMUFusionParams {
     double positionNoise = 0.01;
     double oriNoise = 0.1;
     double damping = 0.1;
+    double eyeHeight = 1.6;
 };
 
 #endif // INCLUDED_FusionParams_h_GUID_BD4F7F35_7854_4C9C_F4FF_73F62D33287D

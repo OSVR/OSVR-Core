@@ -116,9 +116,7 @@ void VideoIMUFusionDevice::s_handleVideoTrackerData(
 void VideoIMUFusionDevice::handleIMUData(const OSVR_TimeValue &timestamp,
                                          const OSVR_OrientationReport &report) {
     m_fusion.handleIMUData(timestamp, report);
-    if (m_fusion.running()) {
-        sendMainPoseReport();
-    }
+    sendMainPoseReport();
 }
 void VideoIMUFusionDevice::handleIMUVelocity(
     const OSVR_TimeValue &timestamp, const OSVR_AngularVelocityReport &report) {
@@ -178,6 +176,6 @@ void VideoIMUFusionDevice::handleVideoTrackerData(
 
 void VideoIMUFusionDevice::sendMainPoseReport() {
     osvrDeviceTrackerSendPoseTimestamped(
-        m_dev, m_trackerOut, &m_fusion.getLatestFusedPose(), FUSED_SENSOR_ID,
-        &m_fusion.getLatestFusedTime());
+        m_dev, m_trackerOut, &m_fusion.getLatestPose(), FUSED_SENSOR_ID,
+        &m_fusion.getLatestTime());
 }
