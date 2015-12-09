@@ -47,18 +47,12 @@ void VideoIMUFusion::RunningData::handleIMUReport(
 
 void VideoIMUFusion::RunningData::handleIMUVelocity(
     const OSVR_TimeValue &timestamp, const Eigen::Vector3d &angVel) {
-    Eigen::Matrix<double, 12, 1> x = state().stateVector();
-    osvr::kalman::pose_externalized_rotation::angularVelocity(x) = angVel;
-    state().setStateVector(x);
+    state().angularVelocity() = angVel;
 }
 
 void VideoIMUFusion::RunningData::handleVideoTrackerReport(
     const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
-    Eigen::Isometry3d roomPose = takeCameraPoseToRoom(report.pose);
-    Eigen::Matrix<double, 12, 1> x = state().stateVector();
-    osvr::kalman::pose_externalized_rotation::position(x) =
-        roomPose.translation();
-    state().setStateVector(x);
+    state().position() = takeCameraPoseToRoom(report.pose).translation();
 }
 
 /// Returns true if we succeeded and can filter in some data.
