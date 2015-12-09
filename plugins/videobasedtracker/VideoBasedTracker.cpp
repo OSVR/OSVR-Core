@@ -114,6 +114,8 @@ namespace vbtracker {
                   permittedOutliers);
         m_estimators.back()->SetBeacons(locations, variance);
     }
+#if 0
+    /// This class is not currently used because it needs some more tuning.
     class KeypointEnhancer {
       public:
         std::vector<cv::KeyPoint>
@@ -180,6 +182,8 @@ namespace vbtracker {
         cv::Mat m_floodFillMask;
         cv::Mat m_perPointResults;
     };
+#endif
+
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          OSVR_TimeValue const &tv,
                                          PoseHandler handler) {
