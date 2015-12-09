@@ -3,6 +3,8 @@
    formalism" instead of the "internal incremental rotation, externalized
    quaternion" representation.
 
+   @todo incomplete
+
     @date 2015
 
     @author
