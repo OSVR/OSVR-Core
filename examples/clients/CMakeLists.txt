@@ -1,7 +1,13 @@
 # NOTE: When adding examples here, add them to the list in doc/libraries.dox as well!
 
 # These we install alongside the main binaries
-set(MAINCLIENTS
+set(MAINCLIENTS)
+if(BUILD_WITH_OPENCV)
+    list(APPEND MAINCLIENTS Imaging)
+endif()
+
+# These are "extra"
+set(CLIENTS
     AnalogCallback
     ButtonCallback
     TrackerCallback
@@ -9,13 +15,7 @@ set(MAINCLIENTS
     EyeTracker
     Location2D
     Direction
-    Locomotion)
-if(BUILD_WITH_OPENCV)
-    list(APPEND MAINCLIENTS Imaging)
-endif()
-
-# These are "extra"
-set(CLIENTS
+    Locomotion
     MinimalInit
     TrackerState
     ViewerEyeSurfaces)
