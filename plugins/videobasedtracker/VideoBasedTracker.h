@@ -76,6 +76,19 @@ namespace vbtracker {
                        Point3Vector const &locations,
                        size_t requiredInliers = 4,
                        size_t permittedOutliers = 2);
+        /// @overload
+        void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d,
+                       Point3Vector const &locations, double variance,
+                       size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
+        /// @overload
+        void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d,
+                       Point3Vector const &locations,
+                       std::vector<double> const &variance,
+                       size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>

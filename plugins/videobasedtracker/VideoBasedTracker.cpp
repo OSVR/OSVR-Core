@@ -91,6 +91,29 @@ namespace vbtracker {
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
+
+    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
+                                      DoubleVecVec const &m,
+                                      std::vector<double> const &d,
+                                      Point3Vector const &locations,
+                                      double variance, size_t requiredInliers,
+                                      size_t permittedOutliers) {
+        addSensor(std::move(identifier), m, d, locations, requiredInliers,
+                  permittedOutliers);
+        m_estimators.back()->SetBeacons(locations, variance);
+    }
+
+    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
+                                      DoubleVecVec const &m,
+                                      std::vector<double> const &d,
+                                      Point3Vector const &locations,
+                                      std::vector<double> const &variance,
+                                      size_t requiredInliers,
+                                      size_t permittedOutliers) {
+        addSensor(std::move(identifier), m, d, locations, requiredInliers,
+                  permittedOutliers);
+        m_estimators.back()->SetBeacons(locations, variance);
+    }
     class KeypointEnhancer {
       public:
         std::vector<cv::KeyPoint>

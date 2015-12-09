@@ -44,6 +44,8 @@ namespace vbtracker {
     // and 1, so the variance will be smaller than the standard deviation.
     static const double INITIAL_BEACON_ERROR = 0.001;
 
+    static const auto DEFAULT_MEASUREMENT_VARIANCE = 3.0;
+
     // The total number of frames that we can have dodgy Kalman tracking for
     // before RANSAC takes over again.
     static const std::size_t MAX_PROBATION_FRAMES = 10;
@@ -100,6 +102,11 @@ namespace vbtracker {
     };
     // clang-format on
 
+    const std::vector<double> OsvrHdkLedVariances_SENSOR0 = {
+        15.0, 15.0, 6.0, 3.0, 15.0, 15.0, 15.0, 6.0, 6.0, 15.0, 3.0, 3.0,
+        3.0,  3.0,  3.0, 3.0, 3.0,  3.0,  3.0,  3.0, 3.0, 3.0,  3.0, 3.0,
+        3.0,  6.0,  3.0, 3.0, 3.0,  3.0,  3.0,  3.0, 6.0, 3.0};
+
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
         const Point3Vector &beacons, size_t requiredInliers,
@@ -113,7 +120,7 @@ namespace vbtracker {
     }
 
     bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons) {
-        return SetBeacons(beacons, INITIAL_BEACON_ERROR);
+        return SetBeacons(beacons, DEFAULT_MEASUREMENT_VARIANCE);
     }
 
     bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons,
@@ -124,7 +131,7 @@ namespace vbtracker {
         m_updateBeaconCentroid(beacons);
 
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(variance).asDiagonal();
+            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
@@ -134,6 +141,7 @@ namespace vbtracker {
                 bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
+        m_beaconMeasurementVariance.assign(m_beacons.size(), variance);
         return true;
     }
 
@@ -144,13 +152,19 @@ namespace vbtracker {
         m_gotPose = false;
         m_beacons.clear();
         m_updateBeaconCentroid(beacons);
+        Eigen::Matrix3d beaconError =
+            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
                 cvToVector(beacon).cast<double>() - m_centroid,
-                Eigen::Vector3d::Constant(variance[bNum]).asDiagonal()});
+                bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
+        m_beaconMeasurementVariance = variance;
+        // ensure it's the right size
+        m_beaconMeasurementVariance.resize(m_beacons.size(),
+                                           DEFAULT_MEASUREMENT_VARIANCE);
         return true;
     }
 

@@ -51,6 +51,8 @@ namespace vbtracker {
     extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
     /// @}
 
+    extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
+
     /// @brief Class to track an object that has identified LED beacons
     /// on it as seen in a camera, where the absolute location of the
     /// LEDs with respect to a common frame of reference is known.
@@ -140,6 +142,7 @@ namespace vbtracker {
         using BeaconState = kalman::PureVectorState<3>;
         using BeaconStateVec = std::vector<std::unique_ptr<BeaconState>>;
         BeaconStateVec m_beacons;
+        std::vector<double> m_beaconMeasurementVariance;
         Eigen::Vector2d m_principalPoint;
         double m_focalLength;
         cv::Mat m_cameraMatrix;     //< 3x3 camera matrix

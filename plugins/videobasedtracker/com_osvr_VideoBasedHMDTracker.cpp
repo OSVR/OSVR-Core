@@ -98,7 +98,20 @@ class VideoBasedHMDTracker : boost::noncopyable {
     void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
                    osvr::vbtracker::CameraParameters const &params,
                    osvr::vbtracker::Point3Vector const &locations,
-                   size_t requiredInliers = 4, size_t permittedOutliers = 2);
+                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
+        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
+                              params.distortionParameters, locations,
+                              requiredInliers, permittedOutliers);
+    }
+    void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
+                   osvr::vbtracker::CameraParameters const &params,
+                   osvr::vbtracker::Point3Vector const &locations,
+                   std::vector<double> const &variance,
+                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
+        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
+                              params.distortionParameters, locations, variance,
+                              requiredInliers, permittedOutliers);
+    }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
@@ -148,8 +161,7 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
     fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
     fileName << ".tif";
     if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
-        std::cerr << "Could not write image to " << fileName.str()
-            << std::endl;
+        std::cerr << "Could not write image to " << fileName.str() << std::endl;
     }
 
 #endif
@@ -157,7 +169,7 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
 #ifdef VBHMD_TIMING
     //==================================================================
     // Time our performance
-    static struct timeval last = { 0, 0 };
+    static struct timeval last = {0, 0};
     if (last.tv_sec == 0) {
         vrpn_gettimeofday(&last, NULL);
     }
@@ -167,7 +179,7 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
         vrpn_gettimeofday(&now, NULL);
         double duration = vrpn_TimevalDurationSeconds(now, last);
         std::cout << "Video-based tracker: update rate " << count / duration
-            << " hz" << std::endl;
+                  << " hz" << std::endl;
         count = 0;
         last = now;
     }
@@ -177,23 +189,14 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
         m_frame, m_imageGray, timestamp,
         [&](OSVR_ChannelCount sensor, OSVR_Pose3 const &pose) {
 
-        //==================================================================
-        // Report the new pose, time-stamped with the time we
-        // received the image from the camera.
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &pose,
-            sensor, &timestamp);
-    });
+            //==================================================================
+            // Report the new pose, time-stamped with the time we
+            // received the image from the camera.
+            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &pose,
+                                                 sensor, &timestamp);
+        });
 
     return OSVR_RETURN_SUCCESS;
-}
-
-inline void VideoBasedHMDTracker::addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
-    osvr::vbtracker::CameraParameters const &params,
-    osvr::vbtracker::Point3Vector const &locations,
-    size_t requiredInliers, size_t permittedOutliers) {
-    m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
-        params.distortionParameters, locations,
-        requiredInliers, permittedOutliers);
 }
 
 class HardwareDetection {
@@ -305,7 +308,8 @@ class ConfiguredDeviceConstructor {
             auto camParams = osvr::vbtracker::getHDKCameraParameters();
             newTracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(0), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 6, 0);
+                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                osvr::vbtracker::OsvrHdkLedVariances_SENSOR0, 6, 0);
             newTracker.addSensor(
                 osvr::vbtracker::createHDKLedIdentifier(1), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);

@@ -60,8 +60,6 @@ namespace vbtracker {
     static const auto MAX_RESIDUAL = 100.0;
     static const auto MAX_SQUARED_RESIDUAL = MAX_RESIDUAL * MAX_RESIDUAL;
 
-    static const auto DEFAULT_MEASUREMENT_VARIANCE = 3.0;
-    static const auto LOW_BEACON_MEASUREMENT_VARIANCE = 1.0;
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
@@ -69,8 +67,8 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
                                                          double dt) {
         auto const beaconsSize = m_beacons.size();
-        // Default measurement variance per axis.
-        auto variance = DEFAULT_MEASUREMENT_VARIANCE;
+        // Default measurement variance (for now, factor) per axis.
+        auto varianceFactor = 1;
         // Default to using all the measurements we can
         auto skipBright = false;
         {
@@ -96,7 +94,7 @@ namespace vbtracker {
             // Now we decide if we want to cut the variance artificially to
             // reduce latency in low-beacon situations
             if (inBoundsID < LOW_BEACON_CUTOFF) {
-                variance = LOW_BEACON_MEASUREMENT_VARIANCE;
+                varianceFactor = 0.5;
             }
             if (inBoundsID - inBoundsBright >
                 DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS) {
@@ -108,7 +106,7 @@ namespace vbtracker {
         cam.focalLength = m_focalLength;
         cam.principalPoint = m_principalPoint;
         ImagePointMeasurement meas{cam};
-        meas.setVariance(variance);
+
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         Eigen::Vector2d pt;
 
@@ -126,6 +124,7 @@ namespace vbtracker {
             if (skipBright && led.isBright()) {
                 continue;
             }
+            meas.setVariance(varianceFactor * m_beaconMeasurementVariance[id]);
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
 
