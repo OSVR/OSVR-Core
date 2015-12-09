@@ -132,7 +132,7 @@ namespace kalman {
 
             /// Intended for startup use.
             void setQuaternion(Eigen::Quaterniond const &quaternion) {
-                m_orientation = quaternion;
+                m_orientation = quaternion.normalized();
             }
 
             void postCorrect() { externalizeRotation(); }
@@ -158,7 +158,8 @@ namespace kalman {
 
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
-                return incrementalOrientationToQuat(m_state) * m_orientation;
+                return (incrementalOrientationToQuat(m_state) * m_orientation)
+                    .normalized();
             }
 
           private:

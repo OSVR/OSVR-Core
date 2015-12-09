@@ -160,7 +160,7 @@ namespace kalman {
 
             /// Intended for startup use.
             void setQuaternion(Eigen::Quaterniond const &quaternion) {
-                m_orientation = quaternion;
+                m_orientation = quaternion.normalized();
             }
 
             void postCorrect() { externalizeRotation(); }
