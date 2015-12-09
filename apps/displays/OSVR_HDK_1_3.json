@@ -7,8 +7,8 @@
       "vendor": "OSVR",
       "model": "HDK",
       "num_displays": 1,
-      "Version": "1.2",
-      "Note": "Suitable for HDK 1.0-1.2"
+      "Version": "1.3",
+      "Note": "Adds distortion correction but otherwise matches HDK 1.2 config"
     },
     "field_of_view": {
       "monocular_horizontal": 90,
