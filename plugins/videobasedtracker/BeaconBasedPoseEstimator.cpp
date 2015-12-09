@@ -42,7 +42,7 @@ namespace vbtracker {
     // 0 effectively turns off beacon auto-calib.
     // This is a variance number, so std deviation squared, but it's between 0
     // and 1, so the variance will be smaller than the standard deviation.
-    static const double INITIAL_BEACON_ERROR = 0.001;
+    static const double INITIAL_BEACON_ERROR = 0.005;
 
     static const auto DEFAULT_MEASUREMENT_VARIANCE = 3.0;
 
