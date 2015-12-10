@@ -37,10 +37,6 @@ option(BUILD_WITH_OPENCV "Should we build the stock and example plugins and apps
 
 option(BUILD_HEADER_DEPENDENCY_TESTS "Should we add targets to ensure that every public header compiles cleanly on its own? Increases number of targets greatly..." ${OSVR_ON_UNLESS_SUBPROJECT})
 
-if(NOT BUILD_CLIENT AND NOT BUILD_SERVER)
-    message(FATAL_ERROR "Must have at least one of BUILD_CLIENT and BUILD_SERVER enabled!")
-endif()
-
 # Consistency: can't build the examples, apps, etc if you don't have the library
 set(dependent_options
     BUILD_SERVER_EXAMPLES

@@ -190,6 +190,12 @@ if(BUILD_WITH_OPENCV)
     if(NOT OpenCV_FOUND)
         message(FATAL_ERROR "BUILD_WITH_OPENCV is enabled, but OpenCV was not found! Either help CMake find OpenCV or disable BUILD_WITH_OPENCV.")
     endif()
+    if(OpenCV_VERSION VERSION_LESS 2.4)
+        # At least one 2.3 version (used in Precise) is missing a header that
+        # breaks their Eigen compatibility header. This seemed like the easiest
+        # fix.
+        set(BUILD_OPENCV_CAMERA_PLUGIN OFF)
+    endif()
     if(WIN32)
         set(OSVR_COPY_OPENCV ON)
     endif()

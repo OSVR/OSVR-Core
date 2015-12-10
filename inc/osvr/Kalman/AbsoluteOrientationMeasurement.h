@@ -91,7 +91,8 @@ namespace kalman {
         /// the measurement from the predicted state, and returns the
         /// difference.
         ///
-        /// State type doesn't matter as long as we can getCombinedQuaternion()
+        /// State type doesn't matter as long as we can
+        /// `.getCombinedQuaternion()`
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
@@ -102,6 +103,13 @@ namespace kalman {
         /// Convenience method to be able to store and re-use measurements.
         void setMeasurement(Eigen::Quaterniond const &quat) {
             m_measurement = quat;
+        }
+
+        /// Get the block of jacobian that is non-zero: your subclass will have
+        /// to put it where it belongs for each particular state type.
+        types::Matrix<DIMENSION, 3>
+            getJacobianWRTIncRot(types::Vector<3> const &incRot) const {
+            return external_quat::jacobian(incRot);
         }
 
       private:
@@ -134,7 +142,7 @@ namespace kalman {
             using namespace pose_externalized_rotation;
             using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
             Jacobian ret = Jacobian::Zero();
-            ret.block<DIMENSION, 3>(0, 3) = external_quat::jacobian(
+            ret.block<DIMENSION, 3>(0, 3) = Base::getJacobianWRTIncRot(
                 incrementalOrientation(s.stateVector()));
             return ret;
         }

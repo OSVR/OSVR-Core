@@ -59,11 +59,11 @@ namespace kalman {
         /// the measurement from the predicted state, and returns the
         /// difference.
         ///
-        /// State type doesn't matter as long as we can getAngularVelocity()
+        /// State type doesn't matter as long as we can `.angularVelocity()`
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             const MeasurementVector residual =
-                m_measurement - s.getAngularVelocity();
+                m_measurement - s.angularVelocity();
             return residual;
         }
 

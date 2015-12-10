@@ -3,6 +3,8 @@
    formalism" instead of the "internal incremental rotation, externalized
    quaternion" representation.
 
+   @todo incomplete
+
     @date 2015
 
     @author
@@ -156,10 +158,12 @@ namespace kalman {
                 m_cacheData.reset(Eigen::Vector3d(orientation(m_state)));
             }
 
-            StateVectorBlock3 getPosition() { return position(m_state); }
+            StateVectorBlock3 position() {
+                return pose_exp_map::position(m_state);
+            }
 
-            ConstStateVectorBlock3 getPosition() const {
-                return position(m_state);
+            ConstStateVectorBlock3 position() const {
+                return pose_exp_map::position(m_state);
             }
 
             Eigen::Quaterniond const &getQuaternion() {
@@ -169,18 +173,20 @@ namespace kalman {
                 return m_cacheData.getRotationMatrix();
             }
 
-            StateVectorBlock3 getVelocity() { return velocity(m_state); }
-
-            ConstStateVectorBlock3 getVelocity() const {
-                return velocity(m_state);
+            StateVectorBlock3 velocity() {
+                return pose_exp_map::velocity(m_state);
             }
 
-            StateVectorBlock3 getAngularVelocity() {
-                return angularVelocity(m_state);
+            ConstStateVectorBlock3 velocity() const {
+                return pose_exp_map::velocity(m_state);
             }
 
-            ConstStateVectorBlock3 getAngularVelocity() const {
-                return angularVelocity(m_state);
+            StateVectorBlock3 angularVelocity() {
+                return pose_exp_map::angularVelocity(m_state);
+            }
+
+            ConstStateVectorBlock3 angularVelocity() const {
+                return pose_exp_map::angularVelocity(m_state);
             }
 
           private:

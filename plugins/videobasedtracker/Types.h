@@ -78,6 +78,86 @@ namespace vbtracker {
     typedef std::vector<LedGroup> LedGroupList;
     typedef std::vector<EstimatorPtr> EstimatorList;
     /// @}
+
+    /// Blob detection configuration parameters
+    struct BlobParams {
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
+        /// pixel units
+        float minDistBetweenBlobs = 2.0f;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
+        /// pixel units
+        float minArea = 2.0f;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
+        float minCircularity = 0.5;
+        /// This is the absolute minimum pixel value that will be considered as
+        /// a possible signal. Images that contain only values below this will
+        /// be totally discarded as containing zero keypoints.
+        double absoluteMinThreshold = 75.;
+        /// This value, in the range (0, 1), is the linear interpolation factor
+        /// between the minimum and maximum value pixel in a frame that will be
+        /// the *minimum* threshold value used by the simple blob detector (if
+        /// it does not drop below absoluteMinThreshold)
+        double minThresholdAlpha = 0.3;
+        /// This value, in the range (0, 1), is the linear interpolation factor
+        /// between the minimum and maximum value pixel in a frame that will be
+        /// the *maximum* threshold value used by the simple blob detector (if
+        /// it does not drop below absoluteMinThreshold)
+        double maxThresholdAlpha = 0.7;
+        /// This is the number of thresholding and contour extraction steps that
+        /// the blob extractor will take between the two threshold extrema, and
+        /// thus greatly impacts performance. Adjust with care.
+        int thresholdSteps = 3;
+    };
+    /// General configuration parameters
+    struct ConfigParams {
+        /// Parameters specific to the blob-detection step of the algorithm
+        BlobParams blobParams;
+        /// Seconds beyond the current time to predict, using the Kalman state.
+        double additionalPrediction = 24. / 1000.;
+        /// Max residual (pixel units) for a beacon before throwing that
+        /// measurement out.
+        double maxResidual = 100;
+        /// Initial beacon error for autocalibration (units: mm^2).
+        /// 0 effectively turns off beacon auto-calib.
+        /// This is a variance number, so std deviation squared, but it's
+        /// pretty likely to be between 0 and 1, so the variance will be smaller
+        /// than the standard deviation.
+        double initialBeaconError = 0.005;
+        /// Maximum distance a blob can move, in pixel units, and still be
+        /// considered the same blob.
+        double blobMoveThreshold = 10.;
+        bool debug = false;
+        /// How many threads to let OpenCV use.
+        int numThreads = 1;
+        /// This is the autocorrelation kernel of the process noise. The first
+        /// three elements correspond to position, the second three to
+        /// incremental rotation.
+        double processNoiseAutocorrelation[6];
+        /// The value used in exponential decay of linear velocity: it's the
+        /// proportion of that velocity remaining at the end of 1 second. Thus,
+        /// smaller = faster decay/higher damping.
+        double linearVelocityDecayCoefficient = 0.3;
+        /// The value used in exponential decay of angular velocity: it's the
+        /// proportion of that velocity remaining at the end of 1 second. Thus,
+        /// smaller = faster decay/higher damping.
+        double angularVelocityDecayCoefficient = 0.01;
+        /// The measurement variance (units: mm^2) is included in the plugin
+        /// along with the coordinates of the beacons. Some beacons are observed
+        /// with higher variance than others, due to known difficulties in
+        /// tracking them, etc. However, for testing you may fine-tine the
+        /// measurement variances globally by scaling them here.
+        double measurementVarianceScaleFactor = 1.;
+        ConfigParams() {
+            // Apparently I can't non-static-data-initializer initialize an
+            // array member. Sad. GCC almost let me. MSVC said no way.
+            processNoiseAutocorrelation[0] = 1e+2;
+            processNoiseAutocorrelation[1] = 5e+1;
+            processNoiseAutocorrelation[2] = 1e+2;
+            processNoiseAutocorrelation[3] = 5e-1;
+            processNoiseAutocorrelation[4] = 5e-1;
+            processNoiseAutocorrelation[5] = 5e-1;
+        }
+    };
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08

@@ -41,8 +41,7 @@ namespace kalman {
     namespace orient_externalized_rotation {
         using Dimension = types::DimensionConstant<6>;
         using StateVector = types::DimVector<Dimension>;
-        using StateVectorBlock3 =
-            StateVector::FixedSegmentReturnType<3>::Type;
+        using StateVectorBlock3 = StateVector::FixedSegmentReturnType<3>::Type;
         using ConstStateVectorBlock3 =
             StateVector::ConstFixedSegmentReturnType<3>::Type;
 
@@ -132,7 +131,7 @@ namespace kalman {
 
             /// Intended for startup use.
             void setQuaternion(Eigen::Quaterniond const &quaternion) {
-                m_orientation = quaternion;
+                m_orientation = quaternion.normalized();
             }
 
             void postCorrect() { externalizeRotation(); }
@@ -144,12 +143,12 @@ namespace kalman {
 
             void normalizeQuaternion() { m_orientation.normalize(); }
 
-            StateVectorBlock3 getAngularVelocity() {
-                return angularVelocity(m_state);
+            StateVectorBlock3 angularVelocity() {
+                return orient_externalized_rotation::angularVelocity(m_state);
             }
 
-            ConstStateVectorBlock3 getAngularVelocity() const {
-                return angularVelocity(m_state);
+            ConstStateVectorBlock3 angularVelocity() const {
+                return orient_externalized_rotation::angularVelocity(m_state);
             }
 
             Eigen::Quaterniond const &getQuaternion() const {
@@ -158,7 +157,8 @@ namespace kalman {
 
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
-                return incrementalOrientationToQuat(m_state) * m_orientation;
+                return (incrementalOrientationToQuat(m_state) * m_orientation)
+                    .normalized();
             }
 
           private:

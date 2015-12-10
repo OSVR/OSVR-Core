@@ -39,11 +39,6 @@ namespace vbtracker {
     /// millimeters to meters
     static const double LINEAR_SCALE_FACTOR = 1000.;
 
-    // 0 effectively turns off beacon auto-calib.
-    // This is a variance number, so std deviation squared, but it's between 0
-    // and 1, so the variance will be smaller than the standard deviation.
-    static const double INITIAL_BEACON_ERROR = 0.005;
-
     static const auto DEFAULT_MEASUREMENT_VARIANCE = 3.0;
 
     // The total number of frames that we can have dodgy Kalman tracking for
@@ -110,7 +105,8 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
         const Point3Vector &beacons, size_t requiredInliers,
-        size_t permittedOutliers) {
+        size_t permittedOutliers, ConfigParams const &params)
+        : m_params(params) {
         SetBeacons(beacons);
         SetCameraMatrix(cameraMatrix);
         SetDistCoeffs(distCoeffs);
@@ -131,7 +127,7 @@ namespace vbtracker {
         m_updateBeaconCentroid(beacons);
 
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+            Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
@@ -153,7 +149,7 @@ namespace vbtracker {
         m_beacons.clear();
         m_updateBeaconCentroid(beacons);
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+            Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
@@ -239,16 +235,16 @@ namespace vbtracker {
         OSVR_PoseState ret;
         util::eigen_interop::map(ret).rotation() = m_state.getQuaternion();
         util::eigen_interop::map(ret).translation() =
-            m_convertInternalPositionRepToExternal(m_state.getPosition());
+            m_convertInternalPositionRepToExternal(m_state.position());
         return ret;
     }
 
     Eigen::Vector3d BeaconBasedPoseEstimator::GetLinearVelocity() const {
-        return m_state.getVelocity() / LINEAR_SCALE_FACTOR;
+        return m_state.velocity() / LINEAR_SCALE_FACTOR;
     }
 
     Eigen::Vector3d BeaconBasedPoseEstimator::GetAngularVelocity() const {
-        return m_state.getAngularVelocity();
+        return m_state.angularVelocity();
     }
 
     bool
@@ -273,6 +269,9 @@ namespace vbtracker {
         if (m_framesInProbation > MAX_PROBATION_FRAMES) {
             // Kalman filter started returning too high of residuals - going
             // back to RANSAC until we get a good lock again.
+            std::cout << "Video-based tracker: lost fix, beacon tracking "
+                         "returning to startup state"
+                      << std::endl;
             m_gotPose = false;
             m_framesInProbation = 0;
         }
@@ -300,7 +299,7 @@ namespace vbtracker {
         if (usedKalman) {
             auto currentTime = util::time::getNow();
             auto dt2 = osvrTimeValueDurationSeconds(&currentTime, &tv);
-            outPose = GetPredictedState(dt2);
+            outPose = GetPredictedState(dt2 + m_params.additionalPrediction);
         }
         return true;
     }
@@ -345,11 +344,29 @@ namespace vbtracker {
         bool usePreviousGuess = false;
         int iterationsCount = 5;
         cv::Mat inlierIndices;
+
+#if CV_MAJOR_VERSION == 2
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
             m_tvec, usePreviousGuess, iterationsCount, 8.0f,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
+#elif CV_MAJOR_VERSION == 3
+        // parameter added to the OpenCV 3.0 interface in place of the number of
+        // inliers
+        /// @todo how to determine this requested confidence from the data we're
+        /// given?
+        double confidence = 0.99;
+        auto ransacResult = cv::solvePnPRansac(
+            objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
+            m_tvec, usePreviousGuess, iterationsCount, 8.0f, confidence,
+            inlierIndices);
+        if (!ransacResult) {
+            return false;
+        }
+#else
+#error "Unrecognized OpenCV version!"
+#endif
 
         //==========================================================================
         // Make sure we got all the inliers we needed.  Otherwise, reject this
@@ -431,28 +448,25 @@ namespace vbtracker {
         return true;
     }
 
-    static const double InitialStateError[] = {1.,  1.,  10., 1.,  1.,  1.,
+    static const double InitialStateError[] = {.01, .01, .1,  1.,  1.,  .1,
                                                10., 10., 10., 10., 10., 10.};
-    static const double NoiseAutoCorrelation[] = {1e+2, 5e+1, 1e+2,
-                                                  5e-1, 5e-1, 5e-1};
     void
     BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
                                            Eigen::Quaterniond const &quat) {
         // Note that here, units are millimeters and radians, and x and z are
         // the lateral translation dimensions, with z being distance from camera
         using StateVec = kalman::types::DimVector<State>;
-        StateVec state(StateVec::Zero());
-        state.head<3>() = xlate;
-        m_state.setStateVector(state);
+        m_state.position() = xlate;
         m_state.setQuaternion(quat);
         m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
 
-        m_model.setDamping(0.3);
+        m_model.setDamping(m_params.linearVelocityDecayCoefficient,
+                           m_params.angularVelocityDecayCoefficient);
         m_model.setNoiseAutocorrelation(
-            kalman::types::Vector<6>(NoiseAutoCorrelation));
+            kalman::types::Vector<6>(m_params.processNoiseAutocorrelation));
 
-        std::cout << "State:" << m_state.stateVector().transpose()
-                  << "\n  with quaternion "
+        std::cout << "Video-based tracker: Beacon entering run state: pos:"
+                  << m_state.position().transpose() << "\n orientation: "
                   << m_state.getQuaternion().coeffs().transpose() << std::endl;
     }
 

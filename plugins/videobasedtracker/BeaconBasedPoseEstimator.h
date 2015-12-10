@@ -34,7 +34,7 @@
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Kalman/PureVectorState.h>
 #include <osvr/Kalman/PoseState.h>
-#include <osvr/Kalman/PoseDampedConstantVelocity.h>
+#include <osvr/Kalman/PoseSeparatelyDampedConstantVelocity.h>
 
 // Standard includes
 #include <vector>
@@ -77,7 +77,8 @@ namespace vbtracker {
                                  const std::vector<double> &distCoeffs,
                                  const Point3Vector &beacons,
                                  size_t requiredInliers = 4,
-                                 size_t permittedOutliers = 2);
+                                 size_t permittedOutliers = 2,
+                                 ConfigParams const &params = ConfigParams{});
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as
@@ -111,7 +112,8 @@ namespace vbtracker {
         /// @{
         bool SetBeacons(const Point3Vector &beacons);
         bool SetBeacons(const Point3Vector &beacons, double variance);
-        bool SetBeacons(const Point3Vector &beacons, std::vector<double> const& variance);
+        bool SetBeacons(const Point3Vector &beacons,
+                        std::vector<double> const &variance);
         bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
@@ -119,8 +121,8 @@ namespace vbtracker {
         void m_updateBeaconCentroid(const Point3Vector &beacons);
         /// @brief Internal position differs in scale and origin from external.
         /// This function deals with that for you.
-        Eigen::Vector3d
-        m_convertInternalPositionRepToExternal(Eigen::Vector3d const &pos) const;
+        Eigen::Vector3d m_convertInternalPositionRepToExternal(
+            Eigen::Vector3d const &pos) const;
 
         /// @brief Implementation - doesn't set m_gotPose;
         bool m_estimatePoseFromLeds(const LedGroup &leds,
@@ -149,6 +151,7 @@ namespace vbtracker {
         cv::Mat m_distCoeffs;       //< Distortion coefficients
         size_t m_requiredInliers;   //< How many inliers do we require?
         size_t m_permittedOutliers; //< How many outliers do we allow?
+        ConfigParams const m_params;
 
         /// Sensor centroid, subtracted out of the beacon coordinates when
         /// initially set.
@@ -173,7 +176,8 @@ namespace vbtracker {
         cv::Mat m_tvec;
         using State = kalman::pose_externalized_rotation::State;
         State m_state;
-        using ProcessModel = osvr::kalman::PoseDampedConstantVelocityProcessModel;
+        using ProcessModel =
+            osvr::kalman::PoseSeparatelyDampedConstantVelocityProcessModel;
         ProcessModel m_model;
         /// @}
 

@@ -54,11 +54,6 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 namespace osvr {
 namespace vbtracker {
-    /// This is the constant maximum distance in image space (pixels) permitted
-    /// between a projected beacon location and its detected location.
-    static const auto MAX_RESIDUAL = 100.0;
-    static const auto MAX_SQUARED_RESIDUAL = MAX_RESIDUAL * MAX_RESIDUAL;
-
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
@@ -109,6 +104,9 @@ namespace vbtracker {
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         Eigen::Vector2d pt;
 
+        const auto maxSquaredResidual =
+            m_params.maxResidual * m_params.maxResidual;
+
         kalman::predict(m_state, m_model, dt);
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
@@ -123,7 +121,9 @@ namespace vbtracker {
             if (skipBright && led.isBright()) {
                 continue;
             }
-            meas.setVariance(varianceFactor * m_beaconMeasurementVariance[id]);
+            meas.setVariance(varianceFactor *
+                             m_params.measurementVarianceScaleFactor *
+                             m_beaconMeasurementVariance[id]);
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
 
@@ -132,7 +132,7 @@ namespace vbtracker {
             auto model =
                 kalman::makeAugmentedProcessModel(m_model, beaconProcess);
 
-            if (meas.getResidual(state).squaredNorm() > MAX_SQUARED_RESIDUAL) {
+            if (meas.getResidual(state).squaredNorm() > maxSquaredResidual) {
                 // probably bad
                 numBad++;
                 continue;
@@ -155,19 +155,16 @@ namespace vbtracker {
             incrementProbation = numBad * 2 > numGood;
             if (!incrementProbation) {
                 // OK, we're good again
-                std::cout << "Re-attained our tracking goal." << std::endl;
                 m_framesInProbation = 0;
             }
         }
         if (incrementProbation) {
-            std::cout << "Fell below our target for tracking residuals: "
-                      << numBad << " bad, " << numGood << " good." << std::endl;
             m_framesInProbation++;
         }
         /// Output to the OpenCV state types so we can see the reprojection
         /// debug view.
         m_rvec = eiQuatToRotVec(m_state.getQuaternion());
-        cv::eigen2cv(m_state.getPosition().eval(), m_tvec);
+        cv::eigen2cv(m_state.position().eval(), m_tvec);
         return true;
     }
 
@@ -180,7 +177,7 @@ namespace vbtracker {
         OSVR_PoseState ret;
         util::eigen_interop::map(ret).rotation() = state.getQuaternion();
         util::eigen_interop::map(ret).translation() =
-            m_convertInternalPositionRepToExternal(state.getPosition());
+            m_convertInternalPositionRepToExternal(state.position());
         return ret;
     }
 
