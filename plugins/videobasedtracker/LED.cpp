@@ -57,31 +57,32 @@ namespace vbtracker {
             return end(keypoints);
         }
 
+        // Squaring the threshold to avoid doing a square-root in a tight loop.
+        auto thresholdSquared = threshold * threshold;
         auto location = m_location;
-        /// @todo can we use squared-norm instead of doing a square-root inside
-        /// of a tight loop like this?
-        auto computeDist = [location](KeyPointIterator it) {
-            return sqrt(norm(location - it->pt));
+
+        auto computeDistSquared = [location](KeyPointIterator it) {
+            return norm(location - it->pt);
         };
 
         // Find the distance to the first point and record it as the
         // current minimum distance;
         auto ret = begin(keypoints);
-        auto minDist = computeDist(ret);
+        auto minDistSq = computeDistSquared(ret);
 
         // Search the rest of the elements to see if we can find a
         // better one.
         for (auto it = begin(keypoints), e = end(keypoints); it != e; ++it) {
-            auto dist = computeDist(it);
-            if (dist < minDist) {
-                minDist = dist;
+            auto distSq = computeDistSquared(it);
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
                 ret = it;
             }
         }
 
         // If the closest is within the threshold, return it.  Otherwise,
         // return the end.
-        if (minDist <= threshold) {
+        if (minDistSq <= thresholdSquared) {
             return ret;
         }
         return end(keypoints);
