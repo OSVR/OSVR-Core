@@ -85,7 +85,7 @@ namespace vbtracker {
                                       size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            m, d, locations, requiredInliers, permittedOutliers));
+            m, d, locations, requiredInliers, permittedOutliers, m_params));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }

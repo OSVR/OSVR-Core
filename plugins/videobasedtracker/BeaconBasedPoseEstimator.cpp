@@ -39,14 +39,6 @@ namespace vbtracker {
     /// millimeters to meters
     static const double LINEAR_SCALE_FACTOR = 1000.;
 
-    /// Predict out an extra 24 ms when we have the data to.
-    static const double ADDITIONAL_PREDICTION_INTERVAL = 24./1000.;
-
-    // 0 effectively turns off beacon auto-calib.
-    // This is a variance number, so std deviation squared, but it's between 0
-    // and 1, so the variance will be smaller than the standard deviation.
-    static const double INITIAL_BEACON_ERROR = 0.005;
-
     static const auto DEFAULT_MEASUREMENT_VARIANCE = 3.0;
 
     // The total number of frames that we can have dodgy Kalman tracking for
@@ -113,7 +105,8 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
         const Point3Vector &beacons, size_t requiredInliers,
-        size_t permittedOutliers) {
+        size_t permittedOutliers, ConfigParams const &params)
+        : m_params(params) {
         SetBeacons(beacons);
         SetCameraMatrix(cameraMatrix);
         SetDistCoeffs(distCoeffs);
@@ -134,7 +127,7 @@ namespace vbtracker {
         m_updateBeaconCentroid(beacons);
 
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+            Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
@@ -156,7 +149,7 @@ namespace vbtracker {
         m_beacons.clear();
         m_updateBeaconCentroid(beacons);
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(INITIAL_BEACON_ERROR).asDiagonal();
+            Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             m_beacons.emplace_back(new BeaconState{
@@ -306,7 +299,7 @@ namespace vbtracker {
         if (usedKalman) {
             auto currentTime = util::time::getNow();
             auto dt2 = osvrTimeValueDurationSeconds(&currentTime, &tv);
-            outPose = GetPredictedState(dt2 + ADDITIONAL_PREDICTION_INTERVAL);
+            outPose = GetPredictedState(dt2 + m_params.additionalPrediction);
         }
         return true;
     }
@@ -455,10 +448,8 @@ namespace vbtracker {
         return true;
     }
 
-    static const double InitialStateError[] = {1.,  1.,  10., 1.,  1.,  1.,
+    static const double InitialStateError[] = {.01, .01, .1,  1.,  1.,  .1,
                                                10., 10., 10., 10., 10., 10.};
-    static const double NoiseAutoCorrelation[] = {1e+2, 5e+1, 1e+2,
-                                                  5e-1, 5e-1, 5e-1};
     void
     BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
                                            Eigen::Quaterniond const &quat) {
@@ -469,9 +460,10 @@ namespace vbtracker {
         m_state.setQuaternion(quat);
         m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
 
-        m_model.setDamping(0.3, 0.01);
+        m_model.setDamping(m_params.linearVelocityDecayCoefficient,
+                           m_params.angularVelocityDecayCoefficient);
         m_model.setNoiseAutocorrelation(
-            kalman::types::Vector<6>(NoiseAutoCorrelation));
+            kalman::types::Vector<6>(m_params.processNoiseAutocorrelation));
 
         std::cout << "Video-based tracker: Beacon entering run state: pos:"
                   << m_state.position().transpose() << "\n orientation: "
