@@ -53,7 +53,10 @@
         "com_osvr_VideoBasedHMDTracker"
     ],
     "aliases": {
-        "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused",
+        "/me/head": {
+            "posttranslate": [0,0,0.075],
+            "child": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
+        },
         "/me/headReorientedVideo": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/reorientedVideo"
     }
 }
