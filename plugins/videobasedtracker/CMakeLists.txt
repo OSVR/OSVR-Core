@@ -71,6 +71,7 @@ set(PLUGIN_SOURCES
     CameraParameters.h
     CVImageSource.cpp
     DK2ImageSource.cpp
+    GetOptionalParameter.h
     ImageSource.cpp
     ImageSource.h
     ImageSourceFactories.h
