@@ -160,7 +160,7 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
     fileName << VBHMD_SAVE_IMAGES << "/";
     fileName << std::setfill('0') << std::setw(4) << m_imageNum++;
     fileName << ".tif";
-    if (!cv::imwrite(fileName.str().c_str(), m_frame)) {
+    if (!cv::imwrite(fileName.str(), m_frame)) {
         std::cerr << "Could not write image to " << fileName.str() << std::endl;
     }
 
