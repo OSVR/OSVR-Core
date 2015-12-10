@@ -110,16 +110,6 @@ namespace vbtracker {
     };
     /// General configuration parameters
     struct ConfigParams {
-        ConfigParams() {
-            // Apparently I can't non-static-data-initializer initialize an
-            // array member. Sad. GCC almost let me. MSVC said no way.
-            processNoiseAutocorrelation[0] = 1e+2;
-            processNoiseAutocorrelation[1] = 5e+1;
-            processNoiseAutocorrelation[2] = 1e+2;
-            processNoiseAutocorrelation[3] = 5e-1;
-            processNoiseAutocorrelation[4] = 5e-1;
-            processNoiseAutocorrelation[5] = 5e-1;
-        }
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
         /// Seconds beyond the current time to predict, using the Kalman state.
@@ -157,6 +147,16 @@ namespace vbtracker {
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
         double measurementVarianceScaleFactor = 1.;
+        ConfigParams() {
+            // Apparently I can't non-static-data-initializer initialize an
+            // array member. Sad. GCC almost let me. MSVC said no way.
+            processNoiseAutocorrelation[0] = 1e+2;
+            processNoiseAutocorrelation[1] = 5e+1;
+            processNoiseAutocorrelation[2] = 1e+2;
+            processNoiseAutocorrelation[3] = 5e-1;
+            processNoiseAutocorrelation[4] = 5e-1;
+            processNoiseAutocorrelation[5] = 5e-1;
+        }
     };
 } // namespace vbtracker
 } // namespace osvr
