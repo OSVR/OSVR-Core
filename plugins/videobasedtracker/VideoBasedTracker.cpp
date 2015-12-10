@@ -218,7 +218,6 @@ namespace vbtracker {
             auto led = begin(m_led_groups[sensor]);
             auto e = end(m_led_groups[sensor]);
             while (led != e) {
-                double TODO_BLOB_MOVE_THRESHOLD = 10;
                 auto nearest =
                     led->nearest(keyPoints, m_params.blobMoveThreshold);
                 if (nearest == keyPoints.end()) {
