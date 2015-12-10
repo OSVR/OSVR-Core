@@ -395,19 +395,9 @@ namespace vbtracker {
         // Construct a blob detector and find the blobs in the image.
         double minVal, maxVal;
         cv::minMaxIdx(grayImage, &minVal, &maxVal);
-        static int frames = 0;
-        static int earlyOuts = 0;
-        frames++;
         if (maxVal < BASE_NOISE_THRESHOLD) {
-            earlyOuts++;
             /// empty image, early out!
             return foundKeyPoints;
-        }
-
-        if (frames % 2000 == 0) {
-            std::cout << "Skipped " << earlyOuts << " of " << frames
-                      << " frames due to max value falling below threshold."
-                      << std::endl;
         }
 
         auto imageRangeLerp = [=](double alpha) {
