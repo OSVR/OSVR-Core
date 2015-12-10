@@ -96,14 +96,12 @@ namespace vbtracker {
         /// This value, in the range (0, 1), is the linear interpolation factor
         /// between the minimum and maximum value pixel in a frame that will be
         /// the *minimum* threshold value used by the simple blob detector (if
-        /// it
-        /// does not drop below absoluteMinThreshold)
+        /// it does not drop below absoluteMinThreshold)
         double minThresholdAlpha = 0.3;
         /// This value, in the range (0, 1), is the linear interpolation factor
         /// between the minimum and maximum value pixel in a frame that will be
         /// the *maximum* threshold value used by the simple blob detector (if
-        /// it
-        /// does not drop below absoluteMinThreshold)
+        /// it does not drop below absoluteMinThreshold)
         double maxThresholdAlpha = 0.7;
         /// This is the number of thresholding and contour extraction steps that
         /// the blob extractor will take between the two threshold extrema, and
@@ -112,13 +110,28 @@ namespace vbtracker {
     };
     /// General configuration parameters
     struct ConfigParams {
+        ConfigParams() {
+            // Apparently I can't non-static-data-initializer initialize an
+            // array member. Sad. GCC almost let me. MSVC said no way.
+            processNoiseAutocorrelation[0] = 1e+2;
+            processNoiseAutocorrelation[1] = 5e+1;
+            processNoiseAutocorrelation[2] = 1e+2;
+            processNoiseAutocorrelation[3] = 5e-1;
+            processNoiseAutocorrelation[4] = 5e-1;
+            processNoiseAutocorrelation[5] = 5e-1;
+        }
+        /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
         /// Max residual (pixel units) for a beacon before throwing that
         /// measurement out.
         double maxResidual = 100;
-        /// Initial beacon error for autocalibration.
+        /// Initial beacon error for autocalibration (units: mm^2).
+        /// 0 effectively turns off beacon auto-calib.
+        /// This is a variance number, so std deviation squared, but it's
+        /// pretty likely to be between 0 and 1, so the variance will be smaller
+        /// than the standard deviation.
         double initialBeaconError = 0.005;
         /// Maximum distance a blob can move, in pixel units, and still be
         /// considered the same blob.
@@ -126,6 +139,18 @@ namespace vbtracker {
         bool debug = false;
         /// How many threads to let OpenCV use.
         int numThreads = 1;
+        /// This is the autocorrelation kernel of the process noise. The first
+        /// three elements correspond to position, the second three to
+        /// incremental rotation.
+        double processNoiseAutocorrelation[6];
+        /// The value used in exponential decay of linear velocity: it's the
+        /// proportion of that velocity remaining at the end of 1 second. Thus,
+        /// smaller = faster decay/higher damping.
+        double linearVelocityDecayCoefficient = 0.3;
+        /// The value used in exponential decay of angular velocity: it's the
+        /// proportion of that velocity remaining at the end of 1 second. Thus,
+        /// smaller = faster decay/higher damping.
+        double angularVelocityDecayCoefficient = 0.01;
     };
 } // namespace vbtracker
 } // namespace osvr
