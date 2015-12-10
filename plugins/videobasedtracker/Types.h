@@ -78,6 +78,27 @@ namespace vbtracker {
     typedef std::vector<LedGroup> LedGroupList;
     typedef std::vector<EstimatorPtr> EstimatorList;
     /// @}
+
+    /// Blob detection configuration parameters
+    struct BlobParams {
+        double absoluteMinThreshold = 75.;
+        float minDistBetweenBlobs = 2.0f;
+        float minArea = 2.0f;
+        float minCircularity = 0.5;
+        double minThresholdAlpha = 0.3;
+        double maxThresholdAlpha = 0.7;
+        int thresholdSteps = 3;
+    };
+    /// General configuration parameters
+    struct ConfigParams {
+        BlobParams blobParams;
+        double additionalPrediction = 24. / 1000.;
+        /// max residual for a beacon before throwing that measurement out.
+        double maxResidual = 100;
+        double initialBeaconError = 0.005;
+        bool debug = false;
+        int numThreads = 1;
+    };
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
