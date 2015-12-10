@@ -39,6 +39,9 @@ namespace vbtracker {
     /// millimeters to meters
     static const double LINEAR_SCALE_FACTOR = 1000.;
 
+    /// Predict out an extra 24 ms when we have the data to.
+    static const double ADDITIONAL_PREDICTION_INTERVAL = 24./1000.;
+
     // 0 effectively turns off beacon auto-calib.
     // This is a variance number, so std deviation squared, but it's between 0
     // and 1, so the variance will be smaller than the standard deviation.
@@ -303,7 +306,7 @@ namespace vbtracker {
         if (usedKalman) {
             auto currentTime = util::time::getNow();
             auto dt2 = osvrTimeValueDurationSeconds(&currentTime, &tv);
-            outPose = GetPredictedState(dt2);
+            outPose = GetPredictedState(dt2 + ADDITIONAL_PREDICTION_INTERVAL);
         }
         return true;
     }
