@@ -30,6 +30,7 @@
 #include "ImageSourceFactories.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include "GetOptionalParameter.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -66,10 +67,12 @@ class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx,
                          osvr::vbtracker::ImageSourcePtr &&source,
-                         int devNumber = 0, bool showDebug = false)
-        : m_source(std::move(source)), m_vbtracker(showDebug) {
+                         int devNumber = 0,
+                         osvr::vbtracker::ConfigParams const &params =
+                             osvr::vbtracker::ConfigParams{})
+        : m_source(std::move(source)), m_vbtracker(params), m_params(params) {
         // Set the number of threads for OpenCV to use.
-        cv::setNumThreads(1);
+        cv::setNumThreads(params.numThreads);
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -117,6 +120,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_TrackerDeviceInterface m_tracker;
     osvr::vbtracker::ImageSourcePtr m_source;
+    osvr::vbtracker::ConfigParams const m_params;
 #ifdef VBHMD_SAVE_IMAGES
     int m_imageNum = 1;
 #endif
@@ -204,9 +208,11 @@ class HardwareDetection {
     using CameraFactoryType = std::function<osvr::vbtracker::ImageSourcePtr()>;
     using SensorSetupType = std::function<void(VideoBasedHMDTracker &)>;
     HardwareDetection(CameraFactoryType camFactory, SensorSetupType setup,
-                      int cameraID = 0, bool showDebug = false)
+                      int cameraID = 0,
+                      osvr::vbtracker::ConfigParams const &params =
+                          osvr::vbtracker::ConfigParams{})
         : m_found(false), m_cameraFactory(camFactory), m_sensorSetup(setup),
-          m_cameraID(cameraID), m_showDebug(showDebug) {}
+          m_cameraID(cameraID), m_params(params) {}
 
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx) {
         if (m_found) {
@@ -222,7 +228,7 @@ class HardwareDetection {
         std::cout << "Opening camera " << m_cameraID << std::endl;
         auto newTracker = osvr::pluginkit::registerObjectForDeletion(
             ctx, new VideoBasedHMDTracker(ctx, std::move(src), m_cameraID,
-                                          m_showDebug));
+                                          m_params));
         m_sensorSetup(*newTracker);
         return OSVR_RETURN_SUCCESS;
     }
@@ -235,8 +241,8 @@ class HardwareDetection {
     CameraFactoryType m_cameraFactory;
     SensorSetupType m_sensorSetup;
 
-    int m_cameraID;   //< Which OpenCV camera should we open?
-    bool m_showDebug; //< Show windows with video to help debug?
+    int m_cameraID; //< Which OpenCV camera should we open?
+    osvr::vbtracker::ConfigParams const m_params;
 };
 
 class ConfiguredDeviceConstructor {
@@ -259,6 +265,35 @@ class ConfiguredDeviceConstructor {
         // Using `get` here instead of `[]` lets us provide a default value.
         int cameraID = root.get("cameraID", 0).asInt();
         bool showDebug = root.get("showDebug", false).asBool();
+        osvr::vbtracker::ConfigParams config;
+        config.debug = showDebug;
+
+        using osvr::vbtracker::getOptionalParameter;
+        getOptionalParameter(config.additionalPrediction, root,
+                             "additionalPrediction");
+        getOptionalParameter(config.maxResidual, root, "maxResidual");
+        getOptionalParameter(config.initialBeaconError, root,
+                             "initialBeaconError");
+        getOptionalParameter(config.blobMoveThreshold, root,
+                             "blobMoveThreshold");
+        getOptionalParameter(config.numThreads, root, "numThreads");
+        if (root.isMember("blobParams")) {
+            Json::Value const &blob = root["blobParams"];
+
+            getOptionalParameter(config.blobParams.absoluteMinThreshold, blob,
+                                 "absoluteMinThreshold");
+            getOptionalParameter(config.blobParams.minDistBetweenBlobs, blob,
+                                 "minDistBetweenBlobs");
+            getOptionalParameter(config.blobParams.minArea, blob, "minArea");
+            getOptionalParameter(config.blobParams.minCircularity, blob,
+                                 "minCircularity");
+            getOptionalParameter(config.blobParams.minThresholdAlpha, blob,
+                                 "minThresholdAlpha");
+            getOptionalParameter(config.blobParams.maxThresholdAlpha, blob,
+                                 "maxThresholdAlpha");
+            getOptionalParameter(config.blobParams.thresholdSteps, blob,
+                                 "thresholdSteps");
+        }
 
         /// @todo get this (and the path) from the config file
         bool fakeImages = false;
@@ -272,7 +307,7 @@ class ConfiguredDeviceConstructor {
             }
             auto newTracker = osvr::pluginkit::registerObjectForDeletion(
                 ctx, new VideoBasedHMDTracker(ctx, std::move(src), cameraID,
-                                              showDebug));
+                                              config));
             auto camParams = osvr::vbtracker::getSimulatedHDKCameraParameters();
             newTracker->addSensor(
                 osvr::vbtracker::createHDKLedIdentifierSimulated(0), camParams,
@@ -318,7 +353,7 @@ class ConfiguredDeviceConstructor {
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);
         context.registerHardwareDetectCallback(new HardwareDetection(
-            cameraFactory, setupHDKParamsAndSensors, cameraID, showDebug));
+            cameraFactory, setupHDKParamsAndSensors, cameraID, config));
 
         return OSVR_RETURN_SUCCESS;
     }

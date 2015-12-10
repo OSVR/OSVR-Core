@@ -49,7 +49,7 @@ namespace osvr {
 namespace vbtracker {
     class VideoBasedTracker {
       public:
-        VideoBasedTracker(bool showDebugWindows = false);
+        VideoBasedTracker(ConfigParams const &params = ConfigParams{});
 
         void addOculusSensor();
         /// @name Sensor addition methods
@@ -99,11 +99,9 @@ namespace vbtracker {
                           OSVR_TimeValue const &tv, PoseHandler handler);
 
       private:
-        std::vector<cv::KeyPoint>
-        extractKeypoints(cv::Mat const &grayImage);
+        std::vector<cv::KeyPoint> extractKeypoints(cv::Mat const &grayImage);
         cv::KeyPoint enhanceKeypoint(cv::Mat const &grayImage,
                                      cv::KeyPoint origKeypoint);
-        bool m_showDebugWindows; //< Should we show debugging windows?
 
         /// @name Images
         /// @{
@@ -114,7 +112,8 @@ namespace vbtracker {
         cv::Mat *m_shownImage = &m_imageWithBlobs;
         /// @}
 
-        cv::SimpleBlobDetector::Params m_params;
+        ConfigParams m_params;
+        cv::SimpleBlobDetector::Params m_sbdParams;
 
         /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
         /// inline right out of existence in non-debug builds.

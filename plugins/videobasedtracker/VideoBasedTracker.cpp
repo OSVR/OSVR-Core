@@ -36,32 +36,30 @@
 
 namespace osvr {
 namespace vbtracker {
-    /// This is the absolute minimum pixel value that will be considered as a
-    /// possible signal. Images that contain only values below this will be
-    /// totally discarded as containing zero keypoints.
-    static const double BASE_NOISE_THRESHOLD = 75.;
 
-    VideoBasedTracker::VideoBasedTracker(bool showDebugWindows)
-        : m_showDebugWindows(showDebugWindows) {
-
+    VideoBasedTracker::VideoBasedTracker(ConfigParams const &params)
+        : m_params(params) {
+        auto &p = m_params.blobParams;
         /// Set up blob params
-        m_params.minDistBetweenBlobs = 2.0f;
+        m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
 
-        m_params.minArea = 2.0f; // How small can the blobs be?
+        m_sbdParams.minArea = p.minArea; // How small can the blobs be?
 
         // Look for bright blobs: there is a bug in this code
-        m_params.filterByColor = false;
-        // m_params.blobColor = static_cast<uchar>(255);
+        m_sbdParams.filterByColor = false;
+        // m_sbdParams.blobColor = static_cast<uchar>(255);
 
-        m_params.filterByInertia = false; // Do we test for non-elongated blobs?
-        // m_params.minInertiaRatio = 0.5;
-        // m_params.maxInertiaRatio = 1.0;
+        m_sbdParams.filterByInertia =
+            false; // Do we test for non-elongated blobs?
+                   // m_sbdParams.minInertiaRatio = 0.5;
+                   // m_sbdParams.maxInertiaRatio = 1.0;
 
-        m_params.filterByConvexity = false; // Test for convexity?
+        m_sbdParams.filterByConvexity = false; // Test for convexity?
 
-        m_params.filterByCircularity = true; // Test for circularity?
-        m_params.minCircularity = 0.5f; // default is 0.8, but the edge of the
-        // case can make the blobs "weird-shaped"
+        m_sbdParams.filterByCircularity = true; // Test for circularity?
+        m_sbdParams.minCircularity =
+            p.minCircularity; // default is 0.8, but the edge of the
+                              // case can make the blobs "weird-shaped"
     }
     void VideoBasedTracker::addOculusSensor() {
         /// @todo this clearly violates what I expected was the invariant - not
@@ -222,7 +220,7 @@ namespace vbtracker {
             while (led != e) {
                 double TODO_BLOB_MOVE_THRESHOLD = 10;
                 auto nearest =
-                    led->nearest(keyPoints, TODO_BLOB_MOVE_THRESHOLD);
+                    led->nearest(keyPoints, m_params.blobMoveThreshold);
                 if (nearest == keyPoints.end()) {
                     // We have no blob corresponding to this LED, so we need
                     // to delete this LED.
@@ -274,7 +272,7 @@ namespace vbtracker {
                 }
             }
 
-            if (m_showDebugWindows) {
+            if (m_params.debug) {
                 // Don't display the debugging info every frame, or we can't go
                 // fast enough.
                 static int count = 0;
@@ -283,16 +281,16 @@ namespace vbtracker {
                     // Fake the thresholded image to give an idea of what the
                     // blob detector is doing.
                     auto getCurrentThresh = [&](int i) {
-                        return i * m_params.thresholdStep +
-                               m_params.minThreshold;
+                        return i * m_sbdParams.thresholdStep +
+                               m_sbdParams.minThreshold;
                     };
                     cv::Mat temp;
                     cv::threshold(m_imageGray, m_thresholdImage,
-                                  m_params.minThreshold, m_params.minThreshold,
-                                  CV_THRESH_BINARY);
+                                  m_sbdParams.minThreshold,
+                                  m_sbdParams.minThreshold, CV_THRESH_BINARY);
                     cv::Mat tempOut;
-                    for (int i = 1; getCurrentThresh(i) < m_params.maxThreshold;
-                         ++i) {
+                    for (int i = 1;
+                         getCurrentThresh(i) < m_sbdParams.maxThreshold; ++i) {
                         auto currentThresh = getCurrentThresh(i);
                         cv::threshold(m_imageGray, temp, currentThresh,
                                       currentThresh, CV_THRESH_BINARY);
@@ -395,7 +393,8 @@ namespace vbtracker {
         // Construct a blob detector and find the blobs in the image.
         double minVal, maxVal;
         cv::minMaxIdx(grayImage, &minVal, &maxVal);
-        if (maxVal < BASE_NOISE_THRESHOLD) {
+        auto &p = m_params.blobParams;
+        if (maxVal < p.absoluteMinThreshold) {
             /// empty image, early out!
             return foundKeyPoints;
         }
@@ -405,12 +404,13 @@ namespace vbtracker {
         };
         // 0.3 LERP between min and max as the min threshold, but
         // don't let really dim frames confuse us.
-        m_params.minThreshold =
-            std::max(imageRangeLerp(0.3), BASE_NOISE_THRESHOLD);
-        m_params.maxThreshold = imageRangeLerp(0.8);
-        static const auto steps = 3;
-        m_params.thresholdStep =
-            (m_params.maxThreshold - m_params.minThreshold) / steps;
+        m_sbdParams.minThreshold = std::max(imageRangeLerp(p.minThresholdAlpha),
+                                            p.absoluteMinThreshold);
+        m_sbdParams.maxThreshold =
+            std::max(imageRangeLerp(0.8), p.absoluteMinThreshold);
+        m_sbdParams.thresholdStep =
+            (m_sbdParams.maxThreshold - m_sbdParams.minThreshold) /
+            p.thresholdSteps;
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
 /// @todo: Determine the maximum size of a trackable blob by seeing
@@ -418,9 +418,9 @@ namespace vbtracker {
 /// camera.
 #if CV_MAJOR_VERSION == 2
         cv::Ptr<cv::SimpleBlobDetector> detector =
-            new cv::SimpleBlobDetector(m_params);
+            new cv::SimpleBlobDetector(m_sbdParams);
 #elif CV_MAJOR_VERSION == 3
-        auto detector = cv::SimpleBlobDetector::create(m_params);
+        auto detector = cv::SimpleBlobDetector::create(m_sbdParams);
 #else
 #error "Unrecognized OpenCV version!"
 #endif
@@ -461,7 +461,7 @@ namespace vbtracker {
         cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
                          CV_CHAIN_APPROX_NONE);
 
-        // We don't need the exact m_params struct, but we use some similar
+        // We don't need the exact m_sbdParams struct, but we use some similar
         // parameters, so why not re-use it.
 
         for (auto &contour : contours) {
@@ -472,14 +472,14 @@ namespace vbtracker {
             auto area = cv::contourArea(points) /*moms.m00*/;
 
             /// Filter by area
-            if (area < m_params.minArea || area > m_params.maxArea) {
+            if (area < m_sbdParams.minArea || area > m_sbdParams.maxArea) {
                 continue;
             }
             /// Filter by circularity
             auto perim = cv::arcLength(points, true);
             auto circularity = 4 * M_PI * area / (perim * perim);
-            if (circularity < m_params.minCircularity ||
-                circularity > m_params.maxCircularity) {
+            if (circularity < m_sbdParams.minCircularity ||
+                circularity > m_sbdParams.maxCircularity) {
                 continue;
             }
 
