@@ -81,22 +81,50 @@ namespace vbtracker {
 
     /// Blob detection configuration parameters
     struct BlobParams {
-        double absoluteMinThreshold = 75.;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
+        /// pixel units
         float minDistBetweenBlobs = 2.0f;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
+        /// pixel units
         float minArea = 2.0f;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
         float minCircularity = 0.5;
+        /// This is the absolute minimum pixel value that will be considered as
+        /// a possible signal. Images that contain only values below this will
+        /// be totally discarded as containing zero keypoints.
+        double absoluteMinThreshold = 75.;
+        /// This value, in the range (0, 1), is the linear interpolation factor
+        /// between the minimum and maximum value pixel in a frame that will be
+        /// the *minimum* threshold value used by the simple blob detector (if
+        /// it
+        /// does not drop below absoluteMinThreshold)
         double minThresholdAlpha = 0.3;
+        /// This value, in the range (0, 1), is the linear interpolation factor
+        /// between the minimum and maximum value pixel in a frame that will be
+        /// the *maximum* threshold value used by the simple blob detector (if
+        /// it
+        /// does not drop below absoluteMinThreshold)
         double maxThresholdAlpha = 0.7;
+        /// This is the number of thresholding and contour extraction steps that
+        /// the blob extractor will take between the two threshold extrema, and
+        /// thus greatly impacts performance. Adjust with care.
         int thresholdSteps = 3;
     };
     /// General configuration parameters
     struct ConfigParams {
         BlobParams blobParams;
+        /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
-        /// max residual for a beacon before throwing that measurement out.
+        /// Max residual (pixel units) for a beacon before throwing that
+        /// measurement out.
         double maxResidual = 100;
+        /// Initial beacon error for autocalibration.
         double initialBeaconError = 0.005;
+        /// Maximum distance a blob can move, in pixel units, and still be
+        /// considered the same blob.
+        double blobMoveThreshold = 10.;
         bool debug = false;
+        /// How many threads to let OpenCV use.
         int numThreads = 1;
     };
 } // namespace vbtracker
