@@ -151,6 +151,12 @@ namespace vbtracker {
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping.
         double angularVelocityDecayCoefficient = 0.01;
+        /// The measurement variance (units: mm^2) is included in the plugin
+        /// along with the coordinates of the beacons. Some beacons are observed
+        /// with higher variance than others, due to known difficulties in
+        /// tracking them, etc. However, for testing you may fine-tine the
+        /// measurement variances globally by scaling them here.
+        double measurementVarianceScaleFactor = 1.;
     };
 } // namespace vbtracker
 } // namespace osvr

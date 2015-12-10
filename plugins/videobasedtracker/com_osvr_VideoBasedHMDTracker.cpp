@@ -296,6 +296,8 @@ class ConfiguredDeviceConstructor {
                              "linearVelocityDecayCoefficient");
         getOptionalParameter(config.angularVelocityDecayCoefficient, root,
                              "angularVelocityDecayCoefficient");
+        getOptionalParameter(config.measurementVarianceScaleFactor, root,
+                             "measurementVarianceScaleFactor");
 
         if (root.isMember("blobParams")) {
             Json::Value const &blob = root["blobParams"];
