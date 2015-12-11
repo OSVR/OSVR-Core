@@ -156,6 +156,22 @@ namespace vbtracker {
         /// one target, only used if offsetToCentroid is false.
         double manualBeaconOffset[3];
 
+        /// If true, this will replace the two sensors with just a single one,
+        /// including the beacons at the back of the head "rigidly" as a part of
+        /// it. If true, recommend offsetToCentroid = false, and
+        /// manualBeaconOffset to be 0, 0, -75.
+        bool includeRearPanel = false;
+
+        /// Head circumference at the head strap, in cm - 55.75 is our estimate
+        /// for an average based on some hat sizing guidelines. Only matters if
+        /// includeRearPanel is true.
+        double headCircumference = 55.75;
+
+        /// This is the distance fron the front of the head to the origin of the
+        /// front sensor coordinate system in the Z axis, in mm.
+        /// @todo this is an estimate!
+        double headToFrontBeaconOriginDistance = 75;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.

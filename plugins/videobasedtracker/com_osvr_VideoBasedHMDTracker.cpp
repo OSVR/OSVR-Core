@@ -288,8 +288,16 @@ class ConfiguredDeviceConstructor {
                              "measurementVarianceScaleFactor");
 
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
-        getOptionalParameter(config.manualBeaconOffset, root,
-                             "manualBeaconOffset");
+        if (!config.offsetToCentroid) {
+            getOptionalParameter(config.manualBeaconOffset, root,
+                                 "manualBeaconOffset");
+        }
+
+        getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
+        getOptionalParameter(config.headCircumference, root,
+                             "headCircumference");
+        getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
+                             "headToFrontBeaconOriginDistance");
 
         if (root.isMember("blobParams")) {
             Json::Value const &blob = root["blobParams"];
