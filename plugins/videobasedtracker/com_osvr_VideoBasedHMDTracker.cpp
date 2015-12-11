@@ -287,6 +287,10 @@ class ConfiguredDeviceConstructor {
         getOptionalParameter(config.measurementVarianceScaleFactor, root,
                              "measurementVarianceScaleFactor");
 
+        getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
+        getOptionalParameter(config.manualBeaconOffset, root,
+                             "manualBeaconOffset");
+
         if (root.isMember("blobParams")) {
             Json::Value const &blob = root["blobParams"];
 

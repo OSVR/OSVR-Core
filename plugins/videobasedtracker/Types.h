@@ -147,6 +147,15 @@ namespace vbtracker {
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
         double measurementVarianceScaleFactor = 1.;
+
+        /// Whether the tracking algorithm internally adjusts beacon positions
+        /// based on the centroid of the input beacon positions.
+        bool offsetToCentroid = true;
+
+        /// Manual beacon offset - only really sensible if you only have one
+        /// target, only used if offsetToCentroid is false.
+        double manualBeaconOffset[3];
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
@@ -156,6 +165,9 @@ namespace vbtracker {
             processNoiseAutocorrelation[3] = 5e-1;
             processNoiseAutocorrelation[4] = 5e-1;
             processNoiseAutocorrelation[5] = 5e-1;
+            manualBeaconOffset[0] = 0;
+            manualBeaconOffset[1] = 0;
+            manualBeaconOffset[2] = 0;
         }
     };
 } // namespace vbtracker
