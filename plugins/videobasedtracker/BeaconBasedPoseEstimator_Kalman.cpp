@@ -121,8 +121,12 @@ namespace vbtracker {
             if (skipBright && led.isBright()) {
                 continue;
             }
+            auto newIdentificationVariancePenalty = led.newlyIdentified()
+                ? 4.0
+                : 1.0;
             meas.setVariance(varianceFactor *
                              m_params.measurementVarianceScaleFactor *
+                             newIdentificationVariancePenalty *
                              m_beaconMeasurementVariance[id]);
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
