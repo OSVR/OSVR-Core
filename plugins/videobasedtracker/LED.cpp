@@ -46,7 +46,23 @@ namespace vbtracker {
         if (!m_identifier) {
             m_id = -1;
         } else {
+            auto oldId = m_id;
             m_id = m_identifier->getId(m_brightnessHistory, m_lastBright);
+#if 0
+            m_newlyRecognized = oldId < 0 && m_id >= 0;
+            auto lostRecognition = m_id < 0 && oldId >= 0;
+            if (!m_newlyRecognized && !lostRecognition && oldId != m_id) {
+                std::cout << "Identity theft detected!" << std::endl;
+            }
+#endif
+
+            /// @todo it seems like LEDs are re-recognized every frame? so
+            /// presumably it's possible that oldId != m_id without one being a
+            /// sentinel.
+
+            /// Right now, any change in ID is considered being "newly
+            /// recognized".
+            m_newlyRecognized = oldId != m_id;
         }
     }
 

@@ -79,6 +79,12 @@ namespace vbtracker {
         /// @brief Do we have a positive identification as a known LED?
         bool identified() const { return !(m_id < 0); }
 
+        /// @brief Newly identified beacons may be less trustworthy or
+        /// associated measurements may wish to be "eased in" to the solution.
+        /// This provides the mechanism for determining this. Only provides a
+        /// reasonable answer if identified() is true.
+        bool newlyIdentified() const { return m_newlyRecognized; }
+
         /// @brief Reports the most-recently-added position.
         cv::Point2f getLocation() const { return m_location; }
 
@@ -110,6 +116,8 @@ namespace vbtracker {
 
         /// @brief If identified, whether it is most recently in "bright" mode.
         bool m_lastBright = false;
+
+        bool m_newlyRecognized = false;
     };
 
 } // End namespace vbtracker
