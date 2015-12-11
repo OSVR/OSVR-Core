@@ -166,13 +166,17 @@ namespace vbtracker {
 
     void BeaconBasedPoseEstimator::m_updateBeaconCentroid(
         const Point3Vector &beacons) {
-        Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
-        auto bNum = size_t{0};
-        for (auto &beacon : beacons) {
-            beaconSum += cvToVector(beacon).cast<double>();
-            bNum++;
+        if (m_params.offsetToCentroid) {
+            Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
+            auto bNum = size_t{0};
+            for (auto &beacon : beacons) {
+                beaconSum += cvToVector(beacon).cast<double>();
+                bNum++;
+            }
+            m_centroid = beaconSum / bNum;
+        } else {
+            m_centroid = Eigen::Vector3d::Map(m_params.manualBeaconOffset);
         }
-        m_centroid = beaconSum / bNum;
     }
 
     bool BeaconBasedPoseEstimator::SetCameraMatrix(
