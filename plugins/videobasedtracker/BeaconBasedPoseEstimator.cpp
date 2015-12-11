@@ -451,9 +451,12 @@ namespace vbtracker {
                           out);
         return true;
     }
-
+#if 0
     static const double InitialStateError[] = {.01, .01, .1,  1.,  1.,  .1,
                                                10., 10., 10., 10., 10., 10.};
+#endif
+    static const double InitialStateError[] = {0, 0, 0, 0, 0, 0,
+                                               0, 0, 0, 0, 0, 0};
     void
     BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
                                            Eigen::Quaterniond const &quat) {
