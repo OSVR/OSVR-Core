@@ -29,7 +29,7 @@
 #include <opencv2/core/version.hpp>
 
 // Standard includes
-// - none
+#include <fstream>
 
 #define OSVR_USE_SIMPLEBLOB
 #undef OSVR_USE_CANNY_EDGEDETECT
@@ -363,6 +363,18 @@ namespace vbtracker {
                         case 'b':
                             // Show the blob/keypoints image (default)
                             m_shownImage = &m_imageWithBlobs;
+                            break;
+
+                        case 'p':
+                            // Dump the beacon positions to file.
+                            {
+                                std::ofstream beaconfile("beacons.csv");
+                                for (auto const &estimator : m_estimators) {
+                                    beaconfile << "----" << std::endl;
+                                    estimator->dumpBeaconLocationsToStream(beaconfile);
+                                }
+                                beaconfile.close();
+                            }
                             break;
 
                         case 'q':

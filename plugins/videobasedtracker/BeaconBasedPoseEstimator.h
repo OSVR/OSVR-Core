@@ -40,6 +40,7 @@
 #include <vector>
 #include <list>
 #include <memory>
+#include <iosfwd>
 
 namespace osvr {
 namespace vbtracker {
@@ -117,6 +118,8 @@ namespace vbtracker {
         bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
+
+        void dumpBeaconLocationsToStream(std::ostream & os) const;
       private:
         void m_updateBeaconCentroid(const Point3Vector &beacons);
         /// @brief Internal position differs in scale and origin from external.

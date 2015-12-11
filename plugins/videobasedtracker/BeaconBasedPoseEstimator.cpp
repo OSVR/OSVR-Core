@@ -477,5 +477,13 @@ namespace vbtracker {
                   << m_state.getQuaternion().coeffs().transpose() << std::endl;
     }
 
+    void BeaconBasedPoseEstimator::dumpBeaconLocationsToStream(
+        std::ostream &os) const {
+        Eigen::IOFormat ourFormat(Eigen::StreamPrecision, 0, ",");
+        for (auto const &beacon : m_beacons) {
+            os << beacon->stateVector().transpose().format(ourFormat) << std::endl;
+        }
+    }
+
 } // namespace vbtracker
 } // namespace osvr
