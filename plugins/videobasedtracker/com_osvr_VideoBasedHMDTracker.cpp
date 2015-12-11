@@ -278,20 +278,8 @@ class ConfiguredDeviceConstructor {
                              "blobMoveThreshold");
         getOptionalParameter(config.numThreads, root, "numThreads");
 
-        Json::Value const &processNoise = root["processNoiseAutocorrelation"];
-        if (processNoise.isArray()) {
-            if (processNoise.size() != 6) {
-                std::cout << "Got a processNoiseAutocorrelation array, but it "
-                             "needs exactly 6 elements, and instead contains "
-                          << processNoise.size() << " so will be ignored."
-                          << std::endl;
-            } else {
-                for (Json::Value::ArrayIndex i = 0; i < 6; ++i) {
-                    config.processNoiseAutocorrelation[i] =
-                        processNoise[i].asDouble();
-                }
-            }
-        }
+        getOptionalParameter(config.processNoiseAutocorrelation, root,
+                             "processNoiseAutocorrelation");
         getOptionalParameter(config.linearVelocityDecayCoefficient, root,
                              "linearVelocityDecayCoefficient");
         getOptionalParameter(config.angularVelocityDecayCoefficient, root,
