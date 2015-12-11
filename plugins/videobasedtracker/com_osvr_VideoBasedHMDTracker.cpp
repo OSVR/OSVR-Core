@@ -361,16 +361,47 @@ class ConfiguredDeviceConstructor {
 #endif
 
         /// Function to execute after the device is created, to add the sensors.
-        auto setupHDKParamsAndSensors = [](VideoBasedHMDTracker &newTracker) {
-            auto camParams = osvr::vbtracker::getHDKCameraParameters();
-            newTracker.addSensor(
-                osvr::vbtracker::createHDKLedIdentifier(0), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
-                osvr::vbtracker::OsvrHdkLedVariances_SENSOR0, 6, 0);
-            newTracker.addSensor(
-                osvr::vbtracker::createHDKLedIdentifier(1), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
-        };
+        std::function<void (VideoBasedHMDTracker &newTracker)> setupHDKParamsAndSensors;
+
+        if (config.includeRearPanel) {
+            // distance between front and back panel target origins, in mm.
+            auto distanceBetweenPanels = config.headCircumference / M_PI * 10. +
+                                         config.headToFrontBeaconOriginDistance;
+            setupHDKParamsAndSensors = [config, distanceBetweenPanels](
+                VideoBasedHMDTracker &newTracker) {
+                osvr::vbtracker::Point3Vector locations =
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR0;
+                std::vector<double> variances =
+                    osvr::vbtracker::OsvrHdkLedVariances_SENSOR0;
+
+                // For the back panel beacons: have to rotate 180 degrees
+                // about Y, which is the same as flipping sign on X and Z
+                // then we must translate along Z by head diameter +
+                // distance from head to front beacon origins
+                for (auto &pt : osvr::vbtracker::OsvrHdkLedLocations_SENSOR1) {
+                    locations.emplace_back(-pt.x, pt.y,
+                                           -pt.z + distanceBetweenPanels);
+                    variances.push_back(config.backPanelMeasurementError);
+                }
+                auto camParams = osvr::vbtracker::getHDKCameraParameters();
+                newTracker.addSensor(
+                    osvr::vbtracker::createHDKUnifiedLedIdentifier(), camParams,
+                    locations, variances, 4, 0);
+            };
+        } else {
+            // OK, so if we don't have to include the rear panel as part of the
+            // single sensor, that's easy.
+            setupHDKParamsAndSensors = [](VideoBasedHMDTracker &newTracker) {
+                auto camParams = osvr::vbtracker::getHDKCameraParameters();
+                newTracker.addSensor(
+                    osvr::vbtracker::createHDKLedIdentifier(0), camParams,
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                    osvr::vbtracker::OsvrHdkLedVariances_SENSOR0, 6, 0);
+                newTracker.addSensor(
+                    osvr::vbtracker::createHDKLedIdentifier(1), camParams,
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
+            };
+        }
 
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);

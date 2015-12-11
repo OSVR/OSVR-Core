@@ -172,6 +172,8 @@ namespace vbtracker {
         /// @todo this is an estimate!
         double headToFrontBeaconOriginDistance = 75;
 
+        double backPanelMeasurementError = 1.5;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.

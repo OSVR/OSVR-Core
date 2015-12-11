@@ -169,6 +169,16 @@ namespace vbtracker {
         return ret;
     }
 
+    LedIdentifierPtr createHDKUnifiedLedIdentifier() {
+        LedIdentifierPtr ret;
+        std::vector<std::string> patterns = OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
+        patterns.insert(end(patterns),
+                        begin(OsvrHdkLedIdentifier_SENSOR1_PATTERNS),
+                        end(OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+        ret = createHDKLedIdentifier(patterns);
+        return ret;
+    }
+
     LedIdentifierPtr createHDKLedIdentifierSimulated(uint8_t sensor) {
       LedIdentifierPtr ret;
       switch (sensor) {
