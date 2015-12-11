@@ -159,8 +159,17 @@ void VideoIMUFusionDevice::handleVideoTrackerData(
         auto oriState = OSVR_OrientationState{};
         auto ret = osvrGetOrientationState(m_imu, &ts, &oriState);
         if (ret != OSVR_RETURN_SUCCESS) {
-            std::cout << "Got a video report before an IMU report, ignoring it"
-                      << std::endl;
+            static int i = 0;
+            if (i == 20) {
+                std::cout << "Warning: Have received several video tracker "
+                             "reports without receiving one from the IMU, "
+                             "which shouldn't happen. Please try "
+                             "disconnecting/reconnecting and restarting the "
+                             "server, and if this re-occurs, double-check your "
+                             "configuration files."
+                          << std::endl;
+            }
+            i++;
             return;
         }
         m_fusion.handleVideoTrackerDataDuringStartup(timestamp, report,
