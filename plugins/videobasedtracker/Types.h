@@ -152,8 +152,8 @@ namespace vbtracker {
         /// based on the centroid of the input beacon positions.
         bool offsetToCentroid = true;
 
-        /// Manual beacon offset - only really sensible if you only have one
-        /// target, only used if offsetToCentroid is false.
+        /// Manual beacon offset (in mm) - only really sensible if you only have
+        /// one target, only used if offsetToCentroid is false.
         double manualBeaconOffset[3];
 
         ConfigParams() {
