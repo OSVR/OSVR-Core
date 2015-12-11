@@ -55,6 +55,10 @@ namespace vbtracker {
         Led(LedIdentifier *identifier, cv::Point2f loc,
             Brightness brightness = 0);
         /// @}
+        typedef int ID;
+
+        static const ID SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA = -1;
+        static const ID SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA = -3;
 
         /// @brief Add a new measurement for this LED, which must be for a frame
         /// that is just following the previous measurement, so that the
