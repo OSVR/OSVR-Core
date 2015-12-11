@@ -380,7 +380,7 @@ class ConfiguredDeviceConstructor {
                 // distance from head to front beacon origins
                 for (auto &pt : osvr::vbtracker::OsvrHdkLedLocations_SENSOR1) {
                     locations.emplace_back(-pt.x, pt.y,
-                                           -pt.z + distanceBetweenPanels);
+                                           -pt.z - distanceBetweenPanels);
                     variances.push_back(config.backPanelMeasurementError);
                 }
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
