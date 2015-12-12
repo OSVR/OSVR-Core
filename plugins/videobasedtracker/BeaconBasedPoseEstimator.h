@@ -61,6 +61,10 @@ namespace vbtracker {
     /// coordinate system to the camera coordinate system.
     class BeaconBasedPoseEstimator {
       public:
+        static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
+            return [](int id) { return id <= 4; };
+        }
+
         /// @brief Constructor needs to be told the 3D locations of the beacons
         /// on the object that is to be tracked.  These define the model
         /// coordinate system.
@@ -74,12 +78,13 @@ namespace vbtracker {
         /// @param requiredInliers How many "good" points must be available
         /// @param permittedOutliers How many additional "bad" points we can
         /// have
-        BeaconBasedPoseEstimator(const DoubleVecVec &cameraMatrix,
-                                 const std::vector<double> &distCoeffs,
-                                 const Point3Vector &beacons,
-                                 size_t requiredInliers = 4,
-                                 size_t permittedOutliers = 2,
-                                 ConfigParams const &params = ConfigParams{});
+        BeaconBasedPoseEstimator(
+            const DoubleVecVec &cameraMatrix,
+            const std::vector<double> &distCoeffs, const Point3Vector &beacons,
+            size_t requiredInliers = 4, size_t permittedOutliers = 2,
+            BeaconIDPredicate const &autocalibrationFixedPredicate =
+                getDefaultBeaconFixedPredicate(),
+            ConfigParams const &params = ConfigParams{});
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as
@@ -111,15 +116,19 @@ namespace vbtracker {
         /// @name Data set resets
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
-        bool SetBeacons(const Point3Vector &beacons);
-        bool SetBeacons(const Point3Vector &beacons, double variance);
         bool SetBeacons(const Point3Vector &beacons,
-                        std::vector<double> const &variance);
+                        BeaconIDPredicate const &autocalibrationFixedPredicate);
+        bool SetBeacons(const Point3Vector &beacons, double variance,
+                        BeaconIDPredicate const &autocalibrationFixedPredicate);
+        bool SetBeacons(const Point3Vector &beacons,
+                        std::vector<double> const &variance,
+                        BeaconIDPredicate const &autocalibrationFixedPredicate);
         bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
         bool SetDistCoeffs(const std::vector<double> &distCoeffs);
         /// @}
 
-        void dumpBeaconLocationsToStream(std::ostream & os) const;
+        void dumpBeaconLocationsToStream(std::ostream &os) const;
+
       private:
         void m_updateBeaconCentroid(const Point3Vector &beacons);
         /// @brief Internal position differs in scale and origin from external.

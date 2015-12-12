@@ -36,6 +36,7 @@
 #include <list>
 #include <string>
 #include <memory>
+#include <functional>
 
 namespace osvr {
 namespace vbtracker {
@@ -78,6 +79,10 @@ namespace vbtracker {
     typedef std::vector<LedGroup> LedGroupList;
     typedef std::vector<EstimatorPtr> EstimatorList;
     /// @}
+
+    /// Takes in a 1-based index, returns true or false (true if the beacon
+    /// should be considered fixed - not subject to autocalibration)
+    using BeaconIDPredicate = std::function<bool(int)>;
 
     /// Blob detection configuration parameters
     struct BlobParams {

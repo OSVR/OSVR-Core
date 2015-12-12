@@ -67,50 +67,39 @@ namespace vbtracker {
         /// misunderstanding of how this all works.
         m_led_groups.emplace_back();
     }
-    void VideoBasedTracker::addSensor(LedIdentifier *identifier,
-                                      DoubleVecVec const &m,
-                                      std::vector<double> const &d,
-                                      Point3Vector const &locations,
-                                      size_t requiredInliers,
-                                      size_t permittedOutliers) {
-        addSensor(LedIdentifierPtr(identifier), m, d, locations,
-                  requiredInliers, permittedOutliers);
-    }
 
-    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
-                                      DoubleVecVec const &m,
-                                      std::vector<double> const &d,
-                                      Point3Vector const &locations,
-                                      size_t requiredInliers,
-                                      size_t permittedOutliers) {
+    void VideoBasedTracker::addSensor(
+        LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+        std::vector<double> const &d, Point3Vector const &locations,
+        BeaconIDPredicate const &autocalibrationFixedPredicate,
+        size_t requiredInliers, size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            m, d, locations, requiredInliers, permittedOutliers, m_params));
+            m, d, locations, requiredInliers, permittedOutliers,
+            autocalibrationFixedPredicate, m_params));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
 
-    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
-                                      DoubleVecVec const &m,
-                                      std::vector<double> const &d,
-                                      Point3Vector const &locations,
-                                      double variance, size_t requiredInliers,
-                                      size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, locations, requiredInliers,
+    void VideoBasedTracker::addSensor(
+        LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+        std::vector<double> const &d, Point3Vector const &locations,
+        double variance, BeaconIDPredicate const &autocalibrationFixedPredicate,
+        size_t requiredInliers, size_t permittedOutliers) {
+        addSensor(std::move(identifier), m, d, locations, autocalibrationFixedPredicate, requiredInliers,
                   permittedOutliers);
-        m_estimators.back()->SetBeacons(locations, variance);
+        m_estimators.back()->SetBeacons(locations, variance, autocalibrationFixedPredicate);
     }
 
-    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
-                                      DoubleVecVec const &m,
-                                      std::vector<double> const &d,
-                                      Point3Vector const &locations,
-                                      std::vector<double> const &variance,
-                                      size_t requiredInliers,
-                                      size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, locations, requiredInliers,
+    void VideoBasedTracker::addSensor(
+        LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+        std::vector<double> const &d, Point3Vector const &locations,
+        std::vector<double> const &variance,
+        BeaconIDPredicate const &autocalibrationFixedPredicate,
+        size_t requiredInliers, size_t permittedOutliers) {
+        addSensor(std::move(identifier), m, d, locations, autocalibrationFixedPredicate, requiredInliers,
                   permittedOutliers);
-        m_estimators.back()->SetBeacons(locations, variance);
+        m_estimators.back()->SetBeacons(locations, variance, autocalibrationFixedPredicate);
     }
 #if 0
     /// This class is not currently used because it needs some more tuning.
