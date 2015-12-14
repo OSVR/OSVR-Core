@@ -48,17 +48,18 @@ namespace vbtracker {
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
+    // Appears to correspond to manufacturing specs starting at LED7
     const Point3Vector OsvrHdkLedLocations_SENSOR0 = {
-        cv::Point3f( -85, 3, 24.09 ),
-        cv::Point3f( -83.2, -14.01, 13.89 ),
+        cv::Point3f( -84.93, 2.65, 23.59 ), // LED7 - updated 20151211
+        cv::Point3f( -83.27, -14.33, 13.89 ), // LED8 - updated 20151211
         cv::Point3f( -47, 51, 24.09 ),
         cv::Point3f( 47, 51, 24.09 ),
-        cv::Point3f( 86.6, 2.65, 24.09 ),
-        cv::Point3f( 85.5, -14.31, 13.89 ),
-        cv::Point3f( 85.2, 19.68, 13.89 ),
+        cv::Point3f( 84.93, 2.65, 23.59 ),// LED11 - updated 20151211
+        cv::Point3f( 83.27, -14.33, 13.89 ), // LED12 - updated 20151211
+        cv::Point3f( 84.1, 19.76, 13.89 ), // LED13 - updated 20151211
         cv::Point3f( 21, 51, 24.09 ),  // Original spec was 13.09, new position works better
         cv::Point3f( -21, 51, 24.09 ), // Original spec was 13.09, new position works better
-        cv::Point3f( -84.2, 19.99, 13.89 ),
+        cv::Point3f( -84.1, 19.76, 13.89 ), // LED16
         cv::Point3f( -60.41, 47.55, 44.6 ),
         cv::Point3f( -80.42, 20.48, 42.9 ),
         cv::Point3f( -82.01, 2.74, 42.4 ),
