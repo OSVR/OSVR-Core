@@ -179,6 +179,12 @@ namespace vbtracker {
 
         double backPanelMeasurementError = 1.5;
 
+        /// This is the process-model noise in the beacon-auto-calibration, in
+        /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
+        /// gets used for a measurement, but it should be enough to keep beacons
+        /// from converging in a bad local minimum.
+        double beaconProcessNoise = 0.001;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.

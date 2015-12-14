@@ -280,6 +280,7 @@ class ConfiguredDeviceConstructor {
                              "blobMoveThreshold");
         getOptionalParameter(config.numThreads, root, "numThreads");
 
+        /// General kalman stuff
         getOptionalParameter(config.processNoiseAutocorrelation, root,
                              "processNoiseAutocorrelation");
         getOptionalParameter(config.linearVelocityDecayCoefficient, root,
@@ -295,12 +296,19 @@ class ConfiguredDeviceConstructor {
                                  "manualBeaconOffset");
         }
 
+        /// Rear panel stuff
         getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
         getOptionalParameter(config.headCircumference, root,
                              "headCircumference");
         getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
                              "headToFrontBeaconOriginDistance");
+        getOptionalParameter(config.backPanelMeasurementError, root,
+                             "backPanelMeasurementError");
 
+        getOptionalParameter(config.beaconProcessNoise, root,
+                             "beaconProcessNoise");
+
+        /// Blob-detection stuff
         if (root.isMember("blobParams")) {
             Json::Value const &blob = root["blobParams"];
 
