@@ -53,7 +53,8 @@ int main(int argc, char *argv[]) {
         configName = argv[1];
     } else {
         out << "Using default config file - pass a filename on the command "
-               "line to use a different one." << endl;
+               "line to use a different one."
+            << endl;
     }
 
     server = osvr::server::configureServerFromFile(configName);
@@ -64,10 +65,10 @@ int main(int argc, char *argv[]) {
     out << "Registering shutdown handler..." << endl;
     osvr::server::registerShutdownHandler<&handleShutdown>();
 
-    out << "Starting server mainloop..." << endl;
+    out << "Starting server mainloop: OSVR Server is ready to go!" << endl;
     server->startAndAwaitShutdown();
 
-    out << "Server mainloop exited." << endl;
+    out << "OSVR Server exited." << endl;
 
     return 0;
 }
