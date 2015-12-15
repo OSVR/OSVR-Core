@@ -44,8 +44,12 @@ namespace kalman {
     /// filter.
     template <typename StateType> class ConstantProcess {
       public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         using State = StateType;
-        void predictState(State & /*state*/, double /*dt*/) {
+        using StateVector = types::DimVector<State>;
+        using StateSquareMatrix = types::DimSquareMatrix<State>;
+        ConstantProcess() : m_constantNoise(StateSquareMatrix::Zero()) {}
+        void predictState(State &state, double dt) {
 
             // Predict a-priori P
             // The formula for this prediction is AP(A^T) + Q, where Q is
@@ -55,9 +59,20 @@ namespace kalman {
             // is just the identity, this simplifies to a sum, so we just
             // directly do the computation here rather than calling the
             // predictErrorCovariance() free function.
-
-            /// @todo actually a no-op right now.
+            StateSquareMatrix Pminus =
+                state.errorCovariance() + dt * m_constantNoise;
+            state.setErrorCovariance(Pminus);
         }
+        void setNoiseAutocorrelation(double noise) {
+            m_constantNoise = StateVector::Constant(noise).asDiagonal();
+        }
+
+        void setNoiseAutocorrelation(StateVector const &noise) {
+            m_constantNoise = noise.asDiagonal;
+        }
+
+      private:
+        StateSquareMatrix m_constantNoise;
     };
 
 } // namespace kalman
