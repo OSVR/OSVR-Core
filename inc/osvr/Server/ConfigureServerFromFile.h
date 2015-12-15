@@ -99,14 +99,14 @@ namespace server {
             out << "Loading plugins..." << endl;
             srvConfig.loadPlugins();
             if (!srvConfig.getSuccessfulPlugins().empty()) {
-                out << "Successful plugins:" << endl;
+                out << "Successfully loaded the following plugins:" << endl;
                 for (auto const &plugin : srvConfig.getSuccessfulPlugins()) {
                     out << " - " << plugin << endl;
                 }
                 out << "\n";
             }
             if (!srvConfig.getFailedPlugins().empty()) {
-                out << "Failed plugins:" << endl;
+                out << "Failed to load the following plugins:" << endl;
                 for (auto const &pluginError : srvConfig.getFailedPlugins()) {
                     out << " - " << pluginError.first << "\t"
                         << pluginError.second << endl;
@@ -155,8 +155,8 @@ namespace server {
             out << "Display descriptor found and parsed from config file"
                 << endl;
         } else {
-            out << "No valid 'display' object found in config file - server "
-                   "may use the OSVR HDK as a default." << endl;
+            out << "Using OSVR HDK for display configuration. "
+                   "Did not find an alternate valid 'display' object in config file - server ." << endl;
         }
 
         if (srvConfig.processRenderManagerParameters()) {
@@ -164,7 +164,7 @@ namespace server {
                 << endl;
         }
 
-        out << "Triggering a hardware detection..." << endl;
+        out << "Triggering automatic hardware detection..." << endl;
         ret->triggerHardwareDetect();
 
         return ret;
