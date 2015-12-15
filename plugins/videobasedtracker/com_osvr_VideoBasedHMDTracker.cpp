@@ -331,7 +331,7 @@ class ConfiguredDeviceConstructor {
         /// not autocalibrated.
         auto backPanelFixedBeacon = [](int) { return true; };
         auto frontPanelFixedBeacon = [](int id) {
-            return (id == 15) || (id == 19) || (id == 32);
+            return (id == 16) || (id == 17) || (id == 19) || (id == 20);
         };
 
         /// @todo get this (and the path) from the config file
