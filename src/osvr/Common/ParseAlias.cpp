@@ -74,8 +74,12 @@ namespace common {
             return m_value.asString();
         }
         Json::FastWriter writer;
-        writer.omitEndingLineFeed();
-        return writer.write(m_value);
+        std::string ret = writer.write(m_value);
+        // Remove trailing line feed, if any.
+        while (ret.back() == '\n' || ret.back() == '\r') {
+            ret.pop_back();
+        }
+        return ret;
     }
 
     Json::Value ParsedAlias::getAliasValue() const { return m_value; }
