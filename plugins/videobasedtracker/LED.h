@@ -59,7 +59,7 @@ namespace vbtracker {
 
         static const ID SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA = -1;
         static const ID SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA = -3;
-
+        static const uint8_t MAX_NOVELTY = 4;
         /// @brief Add a new measurement for this LED, which must be for a frame
         /// that is just following the previous measurement, so that the
         /// encoding of brightness and darkness can be used to identify it.
@@ -88,6 +88,14 @@ namespace vbtracker {
         /// This provides the mechanism for determining this. Only provides a
         /// reasonable answer if identified() is true.
         bool newlyIdentified() const { return m_newlyRecognized; }
+
+        /// @brief Returns a value (decreasing per frame from some maximum down
+        /// to a minimum of zero) indicating how new the identification of this
+        /// blob with its current ID is. This can be used to compensate for
+        /// accidental mis-identifications, identity switching, or the simple
+        /// fact that new identifications might contain highly novel information
+        /// that would otherwise "shock" the tracked state.
+        uint8_t novelty() const { return m_novelty; }
 
         /// @brief Reports the most-recently-added position.
         cv::Point2f getLocation() const { return m_location; }
@@ -122,6 +130,7 @@ namespace vbtracker {
         bool m_lastBright = false;
 
         bool m_newlyRecognized = false;
+        uint8_t m_novelty;
     };
 
 } // End namespace vbtracker

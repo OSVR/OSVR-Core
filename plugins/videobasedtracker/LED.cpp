@@ -63,6 +63,11 @@ namespace vbtracker {
             /// Right now, any change in ID is considered being "newly
             /// recognized".
             m_newlyRecognized = oldId != m_id;
+            if (m_newlyRecognized) {
+                m_novelty = MAX_NOVELTY;
+            } else if (m_novelty != 0) {
+                m_novelty--;
+            }
         }
     }
 
