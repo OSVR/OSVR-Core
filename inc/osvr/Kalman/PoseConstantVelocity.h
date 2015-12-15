@@ -101,18 +101,6 @@ namespace kalman {
             StateVector ret = pose_externalized_rotation::applyVelocity(
                 state.stateVector(), dt);
 
-            auto squaredIncRotNorm =
-                pose_externalized_rotation::incrementalOrientation(ret)
-                    .squaredNorm();
-            if (squaredIncRotNorm > 1) {
-                /// clamping the incremental rotation here!
-                auto scaleFactor = int(squaredIncRotNorm) + 1;
-                OSVR_KALMAN_DEBUG_OUTPUT(
-                    "Applying angular velocity mitigation!", scaleFactor);
-                pose_externalized_rotation::incrementalOrientation(ret) /=
-                    scaleFactor;
-                pose_externalized_rotation::angularVelocity(ret) /= scaleFactor;
-            }
             return ret;
         }
 

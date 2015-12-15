@@ -48,17 +48,18 @@ namespace vbtracker {
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
+    // Appears to correspond to manufacturing specs starting at LED7
     const Point3Vector OsvrHdkLedLocations_SENSOR0 = {
-        cv::Point3f( -85, 3, 24.09 ),
-        cv::Point3f( -83.2, -14.01, 13.89 ),
+        cv::Point3f( -84.93, 2.65, 23.59 ), // LED7 - updated 20151211
+        cv::Point3f( -83.27, -14.33, 13.89 ), // LED8 - updated 20151211
         cv::Point3f( -47, 51, 24.09 ),
         cv::Point3f( 47, 51, 24.09 ),
-        cv::Point3f( 86.6, 2.65, 24.09 ),
-        cv::Point3f( 85.5, -14.31, 13.89 ),
-        cv::Point3f( 85.2, 19.68, 13.89 ),
+        cv::Point3f( 84.93, 2.65, 23.59 ),// LED11 - updated 20151211
+        cv::Point3f( 83.27, -14.33, 13.89 ), // LED12 - updated 20151211
+        cv::Point3f( 84.1, 19.76, 13.89 ), // LED13 - updated 20151211
         cv::Point3f( 21, 51, 24.09 ),  // Original spec was 13.09, new position works better
         cv::Point3f( -21, 51, 24.09 ), // Original spec was 13.09, new position works better
-        cv::Point3f( -84.2, 19.99, 13.89 ),
+        cv::Point3f( -84.1, 19.76, 13.89 ), // LED16
         cv::Point3f( -60.41, 47.55, 44.6 ),
         cv::Point3f( -80.42, 20.48, 42.9 ),
         cv::Point3f( -82.01, 2.74, 42.4 ),
@@ -105,9 +106,11 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
         const Point3Vector &beacons, size_t requiredInliers,
-        size_t permittedOutliers, ConfigParams const &params)
+        size_t permittedOutliers,
+        BeaconIDPredicate const &autocalibrationFixedPredicate,
+        ConfigParams const &params)
         : m_params(params) {
-        SetBeacons(beacons);
+        SetBeacons(beacons, autocalibrationFixedPredicate);
         SetCameraMatrix(cameraMatrix);
         SetDistCoeffs(distCoeffs);
         m_gotPose = false;
@@ -115,12 +118,16 @@ namespace vbtracker {
         m_permittedOutliers = permittedOutliers;
     }
 
-    bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons) {
-        return SetBeacons(beacons, DEFAULT_MEASUREMENT_VARIANCE);
+    bool BeaconBasedPoseEstimator::SetBeacons(
+        const Point3Vector &beacons,
+        BeaconIDPredicate const &autocalibrationFixedPredicate) {
+        return SetBeacons(beacons, DEFAULT_MEASUREMENT_VARIANCE,
+                          autocalibrationFixedPredicate);
     }
 
-    bool BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons,
-                                              double variance) {
+    bool BeaconBasedPoseEstimator::SetBeacons(
+        const Point3Vector &beacons, double variance,
+        BeaconIDPredicate const &autocalibrationFixedPredicate) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
         m_beacons.clear();
@@ -130,20 +137,22 @@ namespace vbtracker {
             Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
+            auto isFixed = autocalibrationFixedPredicate(bNum + 1);
+            m_beaconFixed.push_back(isFixed);
             m_beacons.emplace_back(new BeaconState{
                 cvToVector(beacon).cast<double>() - m_centroid,
-                // This forces the first 3 beacons to be artificially "perfect"
+                // This forces the some beacons to be artificially "perfect"
                 // to avoid hunting by the algorithm
-                bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
+                isFixed ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
         m_beaconMeasurementVariance.assign(m_beacons.size(), variance);
         return true;
     }
 
-    bool
-    BeaconBasedPoseEstimator::SetBeacons(const Point3Vector &beacons,
-                                         std::vector<double> const &variance) {
+    bool BeaconBasedPoseEstimator::SetBeacons(
+        const Point3Vector &beacons, std::vector<double> const &variance,
+        BeaconIDPredicate const &autocalibrationFixedPredicate) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
         m_beacons.clear();
@@ -152,9 +161,11 @@ namespace vbtracker {
             Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
+            auto isFixed = autocalibrationFixedPredicate(bNum + 1);
+            m_beaconFixed.push_back(isFixed);
             m_beacons.emplace_back(new BeaconState{
                 cvToVector(beacon).cast<double>() - m_centroid,
-                bNum < 4 ? Eigen::Matrix3d::Zero() : beaconError});
+                isFixed ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
         m_beaconMeasurementVariance = variance;
@@ -166,13 +177,17 @@ namespace vbtracker {
 
     void BeaconBasedPoseEstimator::m_updateBeaconCentroid(
         const Point3Vector &beacons) {
-        Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
-        auto bNum = size_t{0};
-        for (auto &beacon : beacons) {
-            beaconSum += cvToVector(beacon).cast<double>();
-            bNum++;
+        if (m_params.offsetToCentroid) {
+            Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
+            auto bNum = size_t{0};
+            for (auto &beacon : beacons) {
+                beaconSum += cvToVector(beacon).cast<double>();
+                bNum++;
+            }
+            m_centroid = beaconSum / bNum;
+        } else {
+            m_centroid = Eigen::Vector3d::Map(m_params.manualBeaconOffset);
         }
-        m_centroid = beaconSum / bNum;
     }
 
     bool BeaconBasedPoseEstimator::SetCameraMatrix(
@@ -269,9 +284,11 @@ namespace vbtracker {
         if (m_framesInProbation > MAX_PROBATION_FRAMES) {
             // Kalman filter started returning too high of residuals - going
             // back to RANSAC until we get a good lock again.
-            std::cout << "Video-based tracker: lost fix, beacon tracking "
-                         "returning to startup state"
-                      << std::endl;
+            if (m_params.debug) {
+                std::cout << "Video-based tracker: lost fix, beacon tracking "
+                             "returning to startup state"
+                          << std::endl;
+            }
             m_gotPose = false;
             m_framesInProbation = 0;
         }
@@ -447,8 +464,11 @@ namespace vbtracker {
                           out);
         return true;
     }
-
+#if 0
     static const double InitialStateError[] = {.01, .01, .1,  1.,  1.,  .1,
+                                               10., 10., 10., 10., 10., 10.};
+#endif
+    static const double InitialStateError[] = {0,   0,   0,   0,   0,   0,
                                                10., 10., 10., 10., 10., 10.};
     void
     BeaconBasedPoseEstimator::m_resetState(Eigen::Vector3d const &xlate,
@@ -465,9 +485,23 @@ namespace vbtracker {
         m_model.setNoiseAutocorrelation(
             kalman::types::Vector<6>(m_params.processNoiseAutocorrelation));
 
-        std::cout << "Video-based tracker: Beacon entering run state: pos:"
-                  << m_state.position().transpose() << "\n orientation: "
-                  << m_state.getQuaternion().coeffs().transpose() << std::endl;
+        if (m_params.debug) {
+            std::cout << "Video-based tracker: Beacon entering run state: pos:"
+                      << m_state.position().transpose() << "\n orientation: "
+                      << m_state.getQuaternion().coeffs().transpose()
+                      << std::endl;
+        }
+    }
+
+    void BeaconBasedPoseEstimator::dumpBeaconLocationsToStream(
+        std::ostream &os) const {
+        Eigen::IOFormat ourFormat(Eigen::StreamPrecision, 0, ",");
+        for (auto const &beacon : m_beacons) {
+            os << (beacon->stateVector() + m_centroid)
+                      .transpose()
+                      .format(ourFormat)
+               << std::endl;
+        }
     }
 
 } // namespace vbtracker

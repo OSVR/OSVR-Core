@@ -36,6 +36,7 @@
 #include <list>
 #include <string>
 #include <memory>
+#include <functional>
 
 namespace osvr {
 namespace vbtracker {
@@ -78,6 +79,10 @@ namespace vbtracker {
     typedef std::vector<LedGroup> LedGroupList;
     typedef std::vector<EstimatorPtr> EstimatorList;
     /// @}
+
+    /// Takes in a 1-based index, returns true or false (true if the beacon
+    /// should be considered fixed - not subject to autocalibration)
+    using BeaconIDPredicate = std::function<bool(int)>;
 
     /// Blob detection configuration parameters
     struct BlobParams {
@@ -147,6 +152,39 @@ namespace vbtracker {
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
         double measurementVarianceScaleFactor = 1.;
+
+        /// Whether the tracking algorithm internally adjusts beacon positions
+        /// based on the centroid of the input beacon positions.
+        bool offsetToCentroid = true;
+
+        /// Manual beacon offset (in mm) - only really sensible if you only have
+        /// one target, only used if offsetToCentroid is false.
+        double manualBeaconOffset[3];
+
+        /// If true, this will replace the two sensors with just a single one,
+        /// including the beacons at the back of the head "rigidly" as a part of
+        /// it. If true, recommend offsetToCentroid = false, and
+        /// manualBeaconOffset to be 0, 0, -75.
+        bool includeRearPanel = false;
+
+        /// Head circumference at the head strap, in cm - 55.75 is our estimate
+        /// for an average based on some hat sizing guidelines. Only matters if
+        /// includeRearPanel is true.
+        double headCircumference = 55.75;
+
+        /// This is the distance fron the front of the head to the origin of the
+        /// front sensor coordinate system in the Z axis, in mm.
+        /// @todo this is an estimate!
+        double headToFrontBeaconOriginDistance = 75;
+
+        double backPanelMeasurementError = 1.5;
+
+        /// This is the process-model noise in the beacon-auto-calibration, in
+        /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
+        /// gets used for a measurement, but it should be enough to keep beacons
+        /// from converging in a bad local minimum.
+        double beaconProcessNoise = 0.001;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
@@ -156,6 +194,9 @@ namespace vbtracker {
             processNoiseAutocorrelation[3] = 5e-1;
             processNoiseAutocorrelation[4] = 5e-1;
             processNoiseAutocorrelation[5] = 5e-1;
+            manualBeaconOffset[0] = 0;
+            manualBeaconOffset[1] = 0;
+            manualBeaconOffset[2] = 0;
         }
     };
 } // namespace vbtracker

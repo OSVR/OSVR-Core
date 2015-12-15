@@ -48,6 +48,11 @@ namespace vbtracker {
     /// @param sensor either 0 (front plate) or 1 (back plate)
     LedIdentifierPtr createHDKLedIdentifierSimulated(uint8_t sensor);
 
+    /// @brief Factory function to create an HDK Led Identifier object
+    /// containing all the beacons in order for the front plate followed by the
+    /// back plate.
+    LedIdentifierPtr createHDKUnifiedLedIdentifier();
+
     /// @brief Factory function to create an HDK Led Identifier object using the
     /// random images patterns.
     LedIdentifierPtr createRandomHDKLedIdentifier();

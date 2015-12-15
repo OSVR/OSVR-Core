@@ -95,7 +95,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
     }
 
     OSVR_ReturnCode update();
-
+#if 0
     /// Should be called immediately after construction for specifying the
     /// particulars of tracking.
     void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
@@ -115,6 +115,8 @@ class VideoBasedHMDTracker : boost::noncopyable {
                               params.distortionParameters, locations, variance,
                               requiredInliers, permittedOutliers);
     }
+#endif
+    osvr::vbtracker::VideoBasedTracker &vbtracker() { return m_vbtracker; }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
@@ -278,20 +280,9 @@ class ConfiguredDeviceConstructor {
                              "blobMoveThreshold");
         getOptionalParameter(config.numThreads, root, "numThreads");
 
-        Json::Value const &processNoise = root["processNoiseAutocorrelation"];
-        if (processNoise.isArray()) {
-            if (processNoise.size() != 6) {
-                std::cout << "Got a processNoiseAutocorrelation array, but it "
-                             "needs exactly 6 elements, and instead contains "
-                          << processNoise.size() << " so will be ignored."
-                          << std::endl;
-            } else {
-                for (Json::Value::ArrayIndex i = 0; i < 6; ++i) {
-                    config.processNoiseAutocorrelation[i] =
-                        processNoise[i].asDouble();
-                }
-            }
-        }
+        /// General kalman stuff
+        getOptionalParameter(config.processNoiseAutocorrelation, root,
+                             "processNoiseAutocorrelation");
         getOptionalParameter(config.linearVelocityDecayCoefficient, root,
                              "linearVelocityDecayCoefficient");
         getOptionalParameter(config.angularVelocityDecayCoefficient, root,
@@ -299,6 +290,25 @@ class ConfiguredDeviceConstructor {
         getOptionalParameter(config.measurementVarianceScaleFactor, root,
                              "measurementVarianceScaleFactor");
 
+        getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
+        if (!config.offsetToCentroid) {
+            getOptionalParameter(config.manualBeaconOffset, root,
+                                 "manualBeaconOffset");
+        }
+
+        /// Rear panel stuff
+        getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
+        getOptionalParameter(config.headCircumference, root,
+                             "headCircumference");
+        getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
+                             "headToFrontBeaconOriginDistance");
+        getOptionalParameter(config.backPanelMeasurementError, root,
+                             "backPanelMeasurementError");
+
+        getOptionalParameter(config.beaconProcessNoise, root,
+                             "beaconProcessNoise");
+
+        /// Blob-detection stuff
         if (root.isMember("blobParams")) {
             Json::Value const &blob = root["blobParams"];
 
@@ -317,6 +327,13 @@ class ConfiguredDeviceConstructor {
                                  "thresholdSteps");
         }
 
+        /// Functions to indicate which beacons should be considered "fixed" -
+        /// not autocalibrated.
+        auto backPanelFixedBeacon = [](int) { return true; };
+        auto frontPanelFixedBeacon = [](int id) {
+            return (id == 16) || (id == 17) || (id == 19) || (id == 20);
+        };
+
         /// @todo get this (and the path) from the config file
         bool fakeImages = false;
         if (fakeImages) {
@@ -331,14 +348,18 @@ class ConfiguredDeviceConstructor {
                 ctx, new VideoBasedHMDTracker(ctx, std::move(src), cameraID,
                                               config));
             auto camParams = osvr::vbtracker::getSimulatedHDKCameraParameters();
-            newTracker->addSensor(
-                osvr::vbtracker::createHDKLedIdentifierSimulated(0), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0, 4, 2);
+            newTracker->vbtracker().addSensor(
+                osvr::vbtracker::createHDKLedIdentifierSimulated(0),
+                camParams.cameraMatrix, camParams.distortionParameters,
+                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                frontPanelFixedBeacon, 4, 2);
             // There are sometimes only four beacons on the back unit (two of
             // the LEDs are disabled), so we let things work with just those.
-            newTracker->addSensor(
-                osvr::vbtracker::createHDKLedIdentifierSimulated(1), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
+            newTracker->vbtracker().addSensor(
+                osvr::vbtracker::createHDKLedIdentifierSimulated(1),
+                camParams.cameraMatrix, camParams.distortionParameters,
+                osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                backPanelFixedBeacon, 4, 0);
             return OSVR_RETURN_SUCCESS;
         }
 #if 0
@@ -361,16 +382,56 @@ class ConfiguredDeviceConstructor {
 #endif
 
         /// Function to execute after the device is created, to add the sensors.
-        auto setupHDKParamsAndSensors = [](VideoBasedHMDTracker &newTracker) {
-            auto camParams = osvr::vbtracker::getHDKCameraParameters();
-            newTracker.addSensor(
-                osvr::vbtracker::createHDKLedIdentifier(0), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
-                osvr::vbtracker::OsvrHdkLedVariances_SENSOR0, 6, 0);
-            newTracker.addSensor(
-                osvr::vbtracker::createHDKLedIdentifier(1), camParams,
-                osvr::vbtracker::OsvrHdkLedLocations_SENSOR1, 4, 0);
-        };
+        std::function<void(VideoBasedHMDTracker & newTracker)>
+            setupHDKParamsAndSensors;
+
+        if (config.includeRearPanel) {
+            // distance between front and back panel target origins, in mm.
+            auto distanceBetweenPanels = config.headCircumference / M_PI * 10. +
+                                         config.headToFrontBeaconOriginDistance;
+            setupHDKParamsAndSensors = [config, distanceBetweenPanels,
+                                        frontPanelFixedBeacon](
+                VideoBasedHMDTracker &newTracker) {
+                osvr::vbtracker::Point3Vector locations =
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR0;
+                std::vector<double> variances =
+                    osvr::vbtracker::OsvrHdkLedVariances_SENSOR0;
+
+                // For the back panel beacons: have to rotate 180 degrees
+                // about Y, which is the same as flipping sign on X and Z
+                // then we must translate along Z by head diameter +
+                // distance from head to front beacon origins
+                for (auto &pt : osvr::vbtracker::OsvrHdkLedLocations_SENSOR1) {
+                    locations.emplace_back(-pt.x, pt.y,
+                                           -pt.z - distanceBetweenPanels);
+                    variances.push_back(config.backPanelMeasurementError);
+                }
+                auto camParams = osvr::vbtracker::getHDKCameraParameters();
+                newTracker.vbtracker().addSensor(
+                    osvr::vbtracker::createHDKUnifiedLedIdentifier(),
+                    camParams.cameraMatrix, camParams.distortionParameters,
+                    locations, variances, frontPanelFixedBeacon, 4, 0);
+            };
+        } else {
+            // OK, so if we don't have to include the rear panel as part of the
+            // single sensor, that's easy.
+            setupHDKParamsAndSensors = [frontPanelFixedBeacon,
+                                        backPanelFixedBeacon](
+                VideoBasedHMDTracker &newTracker) {
+                auto camParams = osvr::vbtracker::getHDKCameraParameters();
+                newTracker.vbtracker().addSensor(
+                    osvr::vbtracker::createHDKLedIdentifier(0),
+                    camParams.cameraMatrix, camParams.distortionParameters,
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                    osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
+                    frontPanelFixedBeacon, 6, 0);
+                newTracker.vbtracker().addSensor(
+                    osvr::vbtracker::createHDKLedIdentifier(1),
+                    camParams.cameraMatrix, camParams.distortionParameters,
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                    backPanelFixedBeacon, 4, 0);
+            };
+        }
 
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);

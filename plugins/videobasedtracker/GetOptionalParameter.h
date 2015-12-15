@@ -60,6 +60,22 @@ namespace vbtracker {
                                      const char *key) {
         dest = json_cast<T>(obj.get(key, dest));
     }
+    /// Gets an optional array parameter from a JSON object: if it's not
+    /// present and the exact size, the existing value is left there.
+    template <typename T, Json::Value::ArrayIndex N>
+    inline void getOptionalParameter(T (&dest)[N], Json::Value const &obj,
+                                     const char *key) {
+        Json::Value const &node = obj[key];
+        if (!node.isArray()) {
+            return;
+        }
+        if (node.size() != N) {
+            return;
+        }
+        for (Json::Value::ArrayIndex i = 0; i < N; ++i) {
+            dest[i] = json_cast<T>(node[i]);
+        }
+    }
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_GetOptionalParameter_h_GUID_F4FA55E0_C946_4AAE_6741_57C269C56D24

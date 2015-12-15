@@ -51,6 +51,10 @@ namespace vbtracker {
       public:
         VideoBasedTracker(ConfigParams const &params = ConfigParams{});
 
+        static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
+            return [](int id) { return id <= 4; };
+        }
+
         void addOculusSensor();
         /// @name Sensor addition methods
         /// @{
@@ -64,22 +68,19 @@ namespace vbtracker {
         /// @param requiredInliers How many "good" points must be available
         /// @param permittedOutliers How many additional "bad" points we can
         /// have
-        /// @todo Remove this raw pointer version.
-        void addSensor(LedIdentifier *identifier, DoubleVecVec const &m,
-                       std::vector<double> const &d,
-                       Point3Vector const &locations,
-                       size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
-        /// @overload
         void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
                        Point3Vector const &locations,
+                       BeaconIDPredicate const &autocalibrationFixedPredicate =
+                           getDefaultBeaconFixedPredicate(),
                        size_t requiredInliers = 4,
                        size_t permittedOutliers = 2);
         /// @overload
         void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,
                        Point3Vector const &locations, double variance,
+                       BeaconIDPredicate const &autocalibrationFixedPredicate =
+                           getDefaultBeaconFixedPredicate(),
                        size_t requiredInliers = 4,
                        size_t permittedOutliers = 2);
         /// @overload
@@ -87,6 +88,8 @@ namespace vbtracker {
                        std::vector<double> const &d,
                        Point3Vector const &locations,
                        std::vector<double> const &variance,
+                       BeaconIDPredicate const &autocalibrationFixedPredicate =
+                           getDefaultBeaconFixedPredicate(),
                        size_t requiredInliers = 4,
                        size_t permittedOutliers = 2);
         /// @}

@@ -118,12 +118,23 @@ namespace vbtracker {
             if (id >= beaconsSize) {
                 continue;
             }
+            auto localVarianceFactor = varianceFactor;
             if (skipBright && led.isBright()) {
                 continue;
             }
-            meas.setVariance(varianceFactor *
-                             m_params.measurementVarianceScaleFactor *
-                             m_beaconMeasurementVariance[id]);
+            auto newIdentificationVariancePenalty =
+                std::pow(2.0, led.novelty());
+
+            /// Stick a little bit of process model uncertainty in the beacon,
+            /// if it's meant to have some
+            if (m_beaconFixed[id]) {
+                beaconProcess.setNoiseAutocorrelation(0);
+            } else {
+                beaconProcess.setNoiseAutocorrelation(
+                    m_params.beaconProcessNoise);
+                kalman::predict(*(m_beacons[id]), beaconProcess, dt);
+            }
+
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
 
@@ -135,10 +146,16 @@ namespace vbtracker {
             if (meas.getResidual(state).squaredNorm() > maxSquaredResidual) {
                 // probably bad
                 numBad++;
-                continue;
+                localVarianceFactor *= 4.0;
+            } else {
+                numGood++;
             }
-            numGood++;
+            meas.setVariance(localVarianceFactor *
+                             m_params.measurementVarianceScaleFactor *
+                             newIdentificationVariancePenalty *
+                             m_beaconMeasurementVariance[id]);
 
+            /// Now, do the correction.
             kalman::correct(state, model, meas);
             m_gotMeasurement = true;
         }
