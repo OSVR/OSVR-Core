@@ -497,7 +497,9 @@ namespace vbtracker {
         std::ostream &os) const {
         Eigen::IOFormat ourFormat(Eigen::StreamPrecision, 0, ",");
         for (auto const &beacon : m_beacons) {
-            os << beacon->stateVector().transpose().format(ourFormat)
+            os << (beacon->stateVector() + m_centroid)
+                      .transpose()
+                      .format(ourFormat)
                << std::endl;
         }
     }
