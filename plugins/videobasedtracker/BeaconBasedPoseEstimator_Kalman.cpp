@@ -128,6 +128,17 @@ namespace vbtracker {
                              m_params.measurementVarianceScaleFactor *
                              newIdentificationVariancePenalty *
                              m_beaconMeasurementVariance[id]);
+
+            /// Stick a little bit of process model uncertainty in the beacon,
+            /// if it's meant to have some
+            if (m_beaconFixed[id]) {
+                beaconProcess.setNoiseAutocorrelation(0);
+            } else {
+                beaconProcess.setNoiseAutocorrelation(
+                    m_params.beaconProcessNoise);
+                kalman::predict(*(m_beacons[id]), beaconProcess, dt);
+            }
+
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
 

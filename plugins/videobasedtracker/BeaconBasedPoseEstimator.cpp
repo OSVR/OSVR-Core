@@ -137,13 +137,13 @@ namespace vbtracker {
             Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
+            auto isFixed = autocalibrationFixedPredicate(bNum + 1);
+            m_beaconFixed.push_back(isFixed);
             m_beacons.emplace_back(new BeaconState{
                 cvToVector(beacon).cast<double>() - m_centroid,
-                // This forces the first 3 beacons to be artificially "perfect"
+                // This forces the some beacons to be artificially "perfect"
                 // to avoid hunting by the algorithm
-                autocalibrationFixedPredicate(bNum + 1)
-                    ? Eigen::Matrix3d::Zero()
-                    : beaconError});
+                isFixed ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
         m_beaconMeasurementVariance.assign(m_beacons.size(), variance);
@@ -161,11 +161,11 @@ namespace vbtracker {
             Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
-            m_beacons.emplace_back(
-                new BeaconState{cvToVector(beacon).cast<double>() - m_centroid,
-                                autocalibrationFixedPredicate(bNum + 1)
-                                    ? Eigen::Matrix3d::Zero()
-                                    : beaconError});
+            auto isFixed = autocalibrationFixedPredicate(bNum + 1);
+            m_beaconFixed.push_back(isFixed);
+            m_beacons.emplace_back(new BeaconState{
+                cvToVector(beacon).cast<double>() - m_centroid,
+                isFixed ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
         m_beaconMeasurementVariance = variance;

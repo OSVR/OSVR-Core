@@ -157,6 +157,8 @@ namespace vbtracker {
         using BeaconStateVec = std::vector<std::unique_ptr<BeaconState>>;
         BeaconStateVec m_beacons;
         std::vector<double> m_beaconMeasurementVariance;
+        /// Should this beacon be "fixed" (no auto-calibration?)
+        std::vector<bool> m_beaconFixed;
         Eigen::Vector2d m_principalPoint;
         double m_focalLength;
         cv::Mat m_cameraMatrix;     //< 3x3 camera matrix
