@@ -22,7 +22,8 @@
             "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2,  5e-1, 5e-1, 5e-1],
             "linearVelocityDecayCoefficient": 0.3,
             "angularVelocityDecayCoefficient": 0.01,
-            "measurementVarianceScaleFactor" : 1.0
+            "includeRearPanel": false,
+            "headCircumference": 55.75
         }
     }, {
         "plugin": "org_osvr_filter_videoimufusion",
@@ -33,30 +34,10 @@
                 "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd",
                 "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
             },
-            "videoTrackerVariance": {
-                "position": 3.0e-4,
-                "orientation": 1.0e-1
-            },
-            "imuVariance": {
-                "orientation": 1.0e-8,
-                "angularVelocity": 1.0e-10
-            },
-            "processNoise": {
-                "position": 0.01,
-                "orientation": 0.1
-            },
-            "damping": 0.1,
-            "eyeHeight": 1.6
+            "eyeHeight": 1.5
         }
     }],
     "plugins": [
         "com_osvr_VideoBasedHMDTracker"
-    ],
-    "aliases": {
-        "/me/head": {
-            "posttranslate": [0,0,0.075],
-            "child": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
-        },
-        "/me/headReorientedVideo": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/reorientedVideo"
-    }
+    ]
 }

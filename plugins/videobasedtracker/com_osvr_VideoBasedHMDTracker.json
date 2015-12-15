@@ -52,5 +52,11 @@
                 }
             }
         }
+    },
+  "automaticAliases": {
+    "/me/head": {
+        "posttranslate": [0,0,0.075],
+        "child": "semantic/front"
     }
+  }
 }

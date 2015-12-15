@@ -14,5 +14,11 @@
   "semantic": {
     "fused": "tracker/0",
     "reorientedVideo": "tracker/1"
+  },
+  "automaticAliases": {
+    "/me/head": {
+        "posttranslate": [0,0,0.075],
+        "child": "semantic/fused"
+    }
   }
 }
