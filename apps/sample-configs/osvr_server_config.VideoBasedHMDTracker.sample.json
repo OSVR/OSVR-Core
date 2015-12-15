@@ -22,14 +22,17 @@
             "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2,  5e-1, 5e-1, 5e-1],
             "linearVelocityDecayCoefficient": 0.3,
             "angularVelocityDecayCoefficient": 0.01,
-            "measurementVarianceScaleFactor" : 1.0,
             "includeRearPanel": false,
-            "headCircumference": 55.75,
-            "headToFrontBeaconOriginDistance": 75,
-            "backPanelMeasurementError": 1.5
+            "headCircumference": 55.75
         }
     }],
     "plugins": [
         "com_osvr_VideoBasedHMDTracker"
-    ]
+    ],
+    "aliases": {
+        "/me/head": {
+            "posttranslate": [0,0,0.075],
+            "child": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/front"
+        }
+    }
 }
