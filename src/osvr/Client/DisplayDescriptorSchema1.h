@@ -144,7 +144,7 @@ namespace client {
 
             util::Angle m_monocularHorizontalFOV;
             util::Angle m_monocularVerticalFOV;
-            double m_OverlapPercent;
+            double m_overlapPercent;
             util::Angle m_pitchTilt;
 
             std::vector<Resolution> m_resolutions;
@@ -153,8 +153,8 @@ namespace client {
             DistortionParams m_distort;
 
             // Rendering
-            double m_RightRoll = 0.;
-            double m_LeftRoll = 0.;
+            double m_rightRoll = 0.;
+            double m_leftRoll = 0.;
 
             // Eyes
             std::vector<EyeInfo> m_eyes;
