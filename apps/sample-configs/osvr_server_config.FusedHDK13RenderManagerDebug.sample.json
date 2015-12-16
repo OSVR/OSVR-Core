@@ -1,10 +1,12 @@
 {
+    "display": "displays/OSVR_HDK_1_3.json",
+    "renderManagerConfig": "sample-configs/renderManager.landscape.json",
     "drivers": [{
         "plugin": "com_osvr_VideoBasedHMDTracker",
         "driver": "VideoBasedHMDTracker",
         "params": {
             "cameraID": 0,
-            "showDebug": false,
+            "showDebug": true,
             "blobParams": {
                 "minDistBetweenBlobs": 2.0,
                 "minArea": 2.0,

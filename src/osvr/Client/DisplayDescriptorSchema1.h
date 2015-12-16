@@ -69,6 +69,11 @@ namespace client {
             std::string getModel() const;
             std::string getVersion() const;
             std::string getNote() const;
+            // Since the original "numDisplays" value in descriptors is
+            // redundant and inconsistent, this "accessor" actually computes
+            // what that value should be. Usually, you either want this computed
+            // value, or activeResolution().videoInputs (which should generally
+            // be in sync)
             int getNumDisplays() const;
 
             int getDisplayTop() const;
@@ -114,18 +119,19 @@ namespace client {
 
             std::vector<EyeInfo> const &getEyes() const;
 
-          private:
             struct Resolution {
                 int width;
                 int height;
-                int video_inputs;
+                int video_inputs = 1;
                 DisplayMode display_mode;
             };
 
-            Resolution &activeResolution() {
+            Resolution const &activeResolution() const {
                 return m_resolutions.at(m_activeResolution);
             }
-            Resolution const &activeResolution() const {
+
+          private:
+            Resolution &activeResolution() {
                 return m_resolutions.at(m_activeResolution);
             }
 
@@ -135,11 +141,10 @@ namespace client {
             std::string m_model;
             std::string m_version;
             std::string m_note;
-            int m_NumDisplays;
 
             util::Angle m_monocularHorizontalFOV;
             util::Angle m_monocularVerticalFOV;
-            double m_OverlapPercent;
+            double m_overlapPercent;
             util::Angle m_pitchTilt;
 
             std::vector<Resolution> m_resolutions;
@@ -148,8 +153,8 @@ namespace client {
             DistortionParams m_distort;
 
             // Rendering
-            double m_RightRoll;
-            double m_LeftRoll;
+            double m_rightRoll = 0.;
+            double m_leftRoll = 0.;
 
             // Eyes
             std::vector<EyeInfo> m_eyes;

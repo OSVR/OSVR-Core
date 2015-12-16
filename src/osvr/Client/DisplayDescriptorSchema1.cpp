@@ -26,10 +26,10 @@
 #include "DisplayDescriptorSchema1.h"
 #include <osvr/Common/JSONHelpers.h>
 #include <osvr/Util/Verbosity.h>
-#include <boost/units/io.hpp>
 
 // Library/third-party includes
-// - none
+#include <boost/units/io.hpp>
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <sstream>
@@ -59,7 +59,7 @@ namespace client {
                     fov["monocular_horizontal"].asDouble() * util::degrees);
                 m_monocularVerticalFOV = util::Angle(
                     fov["monocular_vertical"].asDouble() * util::degrees);
-                m_OverlapPercent =
+                m_overlapPercent =
                     fov.get("overlap_percent", 100).asDouble() / 100.0;
                 m_pitchTilt = util::Angle(fov.get("pitch_tilt", 0).asDouble() *
                                           util::degrees);
@@ -71,8 +71,6 @@ namespace client {
                 m_model = devprops["model"].asString();
                 m_version = devprops["Version"].asString();
                 m_note = devprops["Note"].asString();
-                // Note that this parameter is redundant and not used.
-                m_NumDisplays = devprops.get("num_displays", 1).asInt();
             }
             {
                 auto const &resolutions = hmd["resolutions"];
@@ -99,8 +97,8 @@ namespace client {
 
             {
                 auto const &rendering = hmd["rendering"];
-                m_RightRoll = rendering.get("right_roll", 0).asDouble();
-                m_LeftRoll = rendering.get("left_roll", 0).asDouble();
+                m_rightRoll = rendering.get("right_roll", 0).asDouble();
+                m_leftRoll = rendering.get("left_roll", 0).asDouble();
             }
             {
                 auto const &distortion = hmd["distortion"];
@@ -121,7 +119,12 @@ namespace client {
                     e.m_CenterProjX = eye.get("center_proj_x", 0.5).asDouble();
                     e.m_CenterProjY = eye.get("center_proj_y", 0.5).asDouble();
                     if (eye.isMember("rotate_180")) {
-                        e.m_rotate180 = (eye["rotate_180"].asInt() != 0);
+                        auto const& rot = eye["rotate_180"];
+                        if (rot.isBool()) {
+                            e.m_rotate180 = rot.asBool();
+                        } else {
+                            e.m_rotate180 = (rot.asInt() != 0);
+                        }
                     }
                     m_eyes.push_back(e);
                 }
@@ -203,7 +206,7 @@ namespace client {
                       << m_monocularHorizontalFOV << std::endl;
             std::cout << "Monocular vertical FOV: " << m_monocularVerticalFOV
                       << std::endl;
-            std::cout << "Overlap percent: " << m_OverlapPercent << "%"
+            std::cout << "Overlap percent: " << m_overlapPercent << "%"
                       << std::endl;
             std::cout << "Pitch tilt: " << m_pitchTilt << std::endl;
             std::cout << "Resolution: " << activeResolution().width << " x "
@@ -212,8 +215,8 @@ namespace client {
                       << std::endl;
             std::cout << "Display mode: " << activeResolution().display_mode
                       << std::endl;
-            std::cout << "Right roll: " << m_RightRoll << std::endl;
-            std::cout << "Left roll: " << m_LeftRoll << std::endl;
+            std::cout << "Right roll: " << m_rightRoll << std::endl;
+            std::cout << "Left roll: " << m_leftRoll << std::endl;
             std::cout << "Number of eyes: " << m_eyes.size() << std::endl;
             for (std::vector<EyeInfo>::size_type i = 0; i < m_eyes.size();
                  ++i) {
@@ -230,7 +233,17 @@ namespace client {
 
         std::string DisplayDescriptor::getNote() const { return m_note; }
 
-        int DisplayDescriptor::getNumDisplays() const { return m_NumDisplays; }
+        int DisplayDescriptor::getNumDisplays() const {
+            if (m_eyes.size() < 2) {
+                return 1;
+            }
+            // OK, so two eyes now.
+            if (activeResolution().display_mode == DisplayMode::FULL_SCREEN) {
+                BOOST_ASSERT(activeResolution().video_inputs == 2);
+                return 2;
+            }
+            return 1;
+        }
 
         int DisplayDescriptor::getDisplayTop() const { return 0; }
 
@@ -262,7 +275,7 @@ namespace client {
         }
 
         double DisplayDescriptor::getOverlapPercent() const {
-            return m_OverlapPercent;
+            return m_overlapPercent;
         }
 
         util::Angle DisplayDescriptor::getPitchTilt() const {
