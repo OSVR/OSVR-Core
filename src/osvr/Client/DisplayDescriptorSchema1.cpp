@@ -26,10 +26,10 @@
 #include "DisplayDescriptorSchema1.h"
 #include <osvr/Common/JSONHelpers.h>
 #include <osvr/Util/Verbosity.h>
-#include <boost/units/io.hpp>
 
 // Library/third-party includes
-// - none
+#include <boost/units/io.hpp>
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <sstream>
@@ -71,8 +71,6 @@ namespace client {
                 m_model = devprops["model"].asString();
                 m_version = devprops["Version"].asString();
                 m_note = devprops["Note"].asString();
-                // Note that this parameter is redundant and not used.
-                m_NumDisplays = devprops.get("num_displays", 1).asInt();
             }
             {
                 auto const &resolutions = hmd["resolutions"];
@@ -121,7 +119,12 @@ namespace client {
                     e.m_CenterProjX = eye.get("center_proj_x", 0.5).asDouble();
                     e.m_CenterProjY = eye.get("center_proj_y", 0.5).asDouble();
                     if (eye.isMember("rotate_180")) {
-                        e.m_rotate180 = (eye["rotate_180"].asInt() != 0);
+                        auto const& rot = eye["rotate_180"];
+                        if (rot.isBool()) {
+                            e.m_rotate180 = rot.asBool();
+                        } else {
+                            e.m_rotate180 = (rot.asInt() != 0);
+                        }
                     }
                     m_eyes.push_back(e);
                 }
@@ -230,7 +233,17 @@ namespace client {
 
         std::string DisplayDescriptor::getNote() const { return m_note; }
 
-        int DisplayDescriptor::getNumDisplays() const { return m_NumDisplays; }
+        int DisplayDescriptor::getNumDisplays() const {
+            if (m_eyes.size() < 2) {
+                return 1;
+            }
+            // OK, so two eyes now.
+            if (activeResolution().display_mode == DisplayMode::FULL_SCREEN) {
+                BOOST_ASSERT(activeResolution().video_inputs == 2);
+                return 2;
+            }
+            return 1;
+        }
 
         int DisplayDescriptor::getDisplayTop() const { return 0; }
 
