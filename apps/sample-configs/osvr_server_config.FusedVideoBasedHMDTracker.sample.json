@@ -32,7 +32,7 @@
             "name": "HeadFusion",
             "input": {
                 "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd",
-                "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+                "faceplate": "/headSpace"
             },
             "eyeHeight": 1.5
         }
@@ -41,9 +41,10 @@
         "com_osvr_VideoBasedHMDTracker"
     ],
     "aliases": {
-        "/me/head": {
-            "posttranslate": [0, 0, 0.075],
-            "child": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
-        }
+        "/headSpace": {
+            "posttranslate": [0.0, 0.0, 0.075],
+            "child": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+        },
+        "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
     }
 }
