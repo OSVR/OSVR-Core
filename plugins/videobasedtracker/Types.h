@@ -51,8 +51,9 @@ namespace vbtracker {
 
     typedef std::vector<std::string> PatternStringList;
 
-    typedef std::string LedPatternWrapped;  //< Pattern repeated almost twice
-    typedef std::vector<LedPatternWrapped> PatternList; //< Ordered set of patterns to search
+    typedef std::string LedPatternWrapped; //< Pattern repeated almost twice
+    typedef std::vector<LedPatternWrapped>
+        PatternList; //< Ordered set of patterns to search
 
     typedef std::vector<cv::KeyPoint> KeyPointList;
     typedef KeyPointList::iterator KeyPointIterator;
