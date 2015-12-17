@@ -54,12 +54,15 @@ namespace vbtracker {
                    // m_sbdParams.minInertiaRatio = 0.5;
                    // m_sbdParams.maxInertiaRatio = 1.0;
 
-        m_sbdParams.filterByConvexity = false; // Test for convexity?
-
-        m_sbdParams.filterByCircularity = true; // Test for circularity?
+        m_sbdParams.filterByCircularity =
+            p.filterByCircularity; // Test for circularity?
         m_sbdParams.minCircularity =
             p.minCircularity; // default is 0.8, but the edge of the
                               // case can make the blobs "weird-shaped"
+
+        m_sbdParams.filterByConvexity =
+            p.filterByConvexity; // Test for convexity?
+        m_sbdParams.minConvexity = p.minConvexity;
     }
     void VideoBasedTracker::addOculusSensor() {
         /// @todo this clearly violates what I expected was the invariant - not
@@ -86,9 +89,11 @@ namespace vbtracker {
         std::vector<double> const &d, Point3Vector const &locations,
         double variance, BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, locations, autocalibrationFixedPredicate, requiredInliers,
+        addSensor(std::move(identifier), m, d, locations,
+                  autocalibrationFixedPredicate, requiredInliers,
                   permittedOutliers);
-        m_estimators.back()->SetBeacons(locations, variance, autocalibrationFixedPredicate);
+        m_estimators.back()->SetBeacons(locations, variance,
+                                        autocalibrationFixedPredicate);
     }
 
     void VideoBasedTracker::addSensor(
@@ -97,9 +102,11 @@ namespace vbtracker {
         std::vector<double> const &variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, locations, autocalibrationFixedPredicate, requiredInliers,
+        addSensor(std::move(identifier), m, d, locations,
+                  autocalibrationFixedPredicate, requiredInliers,
                   permittedOutliers);
-        m_estimators.back()->SetBeacons(locations, variance, autocalibrationFixedPredicate);
+        m_estimators.back()->SetBeacons(locations, variance,
+                                        autocalibrationFixedPredicate);
     }
 #if 0
     /// This class is not currently used because it needs some more tuning.
@@ -360,7 +367,8 @@ namespace vbtracker {
                                 std::ofstream beaconfile("beacons.csv");
                                 for (auto const &estimator : m_estimators) {
                                     beaconfile << "----" << std::endl;
-                                    estimator->dumpBeaconLocationsToStream(beaconfile);
+                                    estimator->dumpBeaconLocationsToStream(
+                                        beaconfile);
                                 }
                                 beaconfile.close();
                             }
