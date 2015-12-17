@@ -85,6 +85,23 @@ namespace vbtracker {
             BeaconIDPredicate const &autocalibrationFixedPredicate =
                 getDefaultBeaconFixedPredicate(),
             ConfigParams const &params = ConfigParams{});
+
+        /// @brief Constructor that expects its beacons to be set later.
+        /// It is told the camera matrix and distortion coefficients, in a
+        /// format suitable to send to OpenCV. See
+        /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
+        /// for details on these formats.
+        /// @param cameraMatrix 3x3 camera matrix for OpenCV
+        /// @param distCoeffs Distortion coefficients for OpenCV
+        /// @param beacons 3D beacon locations
+        /// @param requiredInliers How many "good" points must be available
+        /// @param permittedOutliers How many additional "bad" points we can
+        /// have
+        BeaconBasedPoseEstimator(const DoubleVecVec &cameraMatrix,
+                                 const std::vector<double> &distCoeffs,
+                                 size_t requiredInliers = 4,
+                                 size_t permittedOutliers = 2,
+                                 ConfigParams const &params = ConfigParams{});
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /// @brief Produce an estimate of the pose of the model-space origin in
         /// camera space, where the origin is at the center of the image as

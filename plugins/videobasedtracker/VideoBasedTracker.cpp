@@ -71,6 +71,7 @@ namespace vbtracker {
         m_led_groups.emplace_back();
     }
 
+    // This version adds the beacons as a part of the constructor.
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, DoubleVecVec const &m,
         std::vector<double> const &d, Point3Vector const &locations,
@@ -84,16 +85,30 @@ namespace vbtracker {
         m_assertInvariants();
     }
 
+    // This version requires YOU to add your beacons! You!
+    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
+                                      DoubleVecVec const &m,
+                                      std::vector<double> const &d,
+                                      size_t requiredInliers,
+                                      size_t permittedOutliers) {
+
+        m_identifiers.emplace_back(std::move(identifier));
+        m_estimators.emplace_back(new BeaconBasedPoseEstimator(
+            m, d, requiredInliers, permittedOutliers, m_params));
+        m_led_groups.emplace_back();
+        m_assertInvariants();
+    }
+
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, DoubleVecVec const &m,
         std::vector<double> const &d, Point3Vector const &locations,
         double variance, BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, locations,
-                  autocalibrationFixedPredicate, requiredInliers,
+        addSensor(std::move(identifier), m, d, requiredInliers,
                   permittedOutliers);
         m_estimators.back()->SetBeacons(locations, variance,
                                         autocalibrationFixedPredicate);
+        m_assertInvariants();
     }
 
     void VideoBasedTracker::addSensor(
@@ -102,11 +117,11 @@ namespace vbtracker {
         std::vector<double> const &variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, locations,
-                  autocalibrationFixedPredicate, requiredInliers,
+        addSensor(std::move(identifier), m, d, requiredInliers,
                   permittedOutliers);
         m_estimators.back()->SetBeacons(locations, variance,
                                         autocalibrationFixedPredicate);
+        m_assertInvariants();
     }
 #if 0
     /// This class is not currently used because it needs some more tuning.

@@ -75,6 +75,10 @@ namespace vbtracker {
                            getDefaultBeaconFixedPredicate(),
                        size_t requiredInliers = 4,
                        size_t permittedOutliers = 2);
+
+        void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
+                       std::vector<double> const &d, size_t requiredInliers = 4,
+                       size_t permittedOutliers = 2);
         /// @overload
         void addSensor(LedIdentifierPtr &&identifier, DoubleVecVec const &m,
                        std::vector<double> const &d,

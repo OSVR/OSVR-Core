@@ -118,6 +118,18 @@ namespace vbtracker {
         m_permittedOutliers = permittedOutliers;
     }
 
+    BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
+        const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
+        size_t requiredInliers, size_t permittedOutliers,
+        ConfigParams const &params)
+        : m_params(params) {
+        SetCameraMatrix(cameraMatrix);
+        SetDistCoeffs(distCoeffs);
+        m_gotPose = false;
+        m_requiredInliers = requiredInliers;
+        m_permittedOutliers = permittedOutliers;
+    }
+
     bool BeaconBasedPoseEstimator::SetBeacons(
         const Point3Vector &beacons,
         BeaconIDPredicate const &autocalibrationFixedPredicate) {
