@@ -103,8 +103,6 @@ namespace vbtracker {
 
       private:
         std::vector<cv::KeyPoint> extractKeypoints(cv::Mat const &grayImage);
-        cv::KeyPoint enhanceKeypoint(cv::Mat const &grayImage,
-                                     cv::KeyPoint origKeypoint);
 
         /// @name Images
         /// @{
