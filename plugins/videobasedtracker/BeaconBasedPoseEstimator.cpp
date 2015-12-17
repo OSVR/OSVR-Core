@@ -185,6 +185,10 @@ namespace vbtracker {
                 bNum++;
             }
             m_centroid = beaconSum / bNum;
+            if (m_params.debug) {
+                std::cout << "Beacon centroid: " << m_centroid.transpose()
+                          << std::endl;
+            }
         } else {
             m_centroid = Eigen::Vector3d::Map(m_params.manualBeaconOffset);
         }
