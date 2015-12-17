@@ -20,6 +20,7 @@
             "additionalPrediction": 0.024,
             "maxResidual": 100,
             "initialBeaconError": 0.01,
+            "beaconProcessNoise": 0.001,
             "blobMoveThreshold": 15,
             "numThreads": 1,
             "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2,  5e-1, 5e-1, 5e-1],
