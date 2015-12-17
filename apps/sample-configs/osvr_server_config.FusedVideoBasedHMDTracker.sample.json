@@ -5,24 +5,15 @@
         "params": {
             "cameraID": 0,
             "showDebug": false,
-            "blobParams": {
-                "minDistBetweenBlobs": 2.0,
-                "minArea": 2.0,
-                "minCircularity": 0.5,
-                "absoluteMinThreshold": 75,
-                "minThresholdAlpha": 0.3,
-                "maxThresholdAlpha": 0.7,
-                "thresholdSteps": 3
-            },
             "additionalPrediction": 0.024,
             "maxResidual": 100,
             "initialBeaconError": 0.01,
             "blobMoveThreshold": 15,
             "numThreads": 1,
             "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2, 5e-1, 5e-1, 5e-1],
-            "linearVelocityDecayCoefficient": 0.3,
+            "linearVelocityDecayCoefficient": 0.15,
             "angularVelocityDecayCoefficient": 0.01,
-            "includeRearPanel": false,
+            "includeRearPanel": true,
             "headCircumference": 55.75
         }
     }, {
@@ -32,7 +23,7 @@
             "name": "HeadFusion",
             "input": {
                 "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd",
-                "faceplate": "/headSpace"
+                "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
             },
             "eyeHeight": 1.5
         }
@@ -42,9 +33,9 @@
     ],
     "aliases": {
         "/headSpace": {
-            "posttranslate": [0.0, 0.0, 0.075],
-            "child": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+            "translate": [0.0, 0.0, 0.075],
+            "child": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
         },
-        "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
+        "/me/head": "/headSpace"
     }
 }
