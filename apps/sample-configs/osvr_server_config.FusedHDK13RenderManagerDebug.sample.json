@@ -35,7 +35,7 @@
     ],
     "aliases": {
         "/headSpace": {
-            "posttranslate": [0.0, 0.0, 0.075],
+            "translate": [0.0, 0.0, 0.075],
             "child": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
         },
         "/me/head": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
