@@ -8,7 +8,10 @@
             "blobParams": {
                 "minDistBetweenBlobs": 2.0,
                 "minArea": 2.0,
-                "minCircularity": 0.5,
+                "filterByCircularity": true,
+                "minCircularity": 0.2,
+                "filterByConvexity": true,
+                "minConvexity": 0.80,
                 "absoluteMinThreshold": 75,
                 "minThresholdAlpha": 0.3,
                 "maxThresholdAlpha": 0.7,

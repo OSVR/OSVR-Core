@@ -317,8 +317,14 @@ class ConfiguredDeviceConstructor {
             getOptionalParameter(config.blobParams.minDistBetweenBlobs, blob,
                                  "minDistBetweenBlobs");
             getOptionalParameter(config.blobParams.minArea, blob, "minArea");
+            getOptionalParameter(config.blobParams.filterByCircularity, blob,
+                                 "filterByCircularity");
             getOptionalParameter(config.blobParams.minCircularity, blob,
                                  "minCircularity");
+            getOptionalParameter(config.blobParams.filterByConvexity, blob,
+                                 "filterByConvexity");
+            getOptionalParameter(config.blobParams.minConvexity, blob,
+                                 "minConvexity");
             getOptionalParameter(config.blobParams.minThresholdAlpha, blob,
                                  "minThresholdAlpha");
             getOptionalParameter(config.blobParams.maxThresholdAlpha, blob,

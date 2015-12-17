@@ -51,11 +51,9 @@ namespace vbtracker {
 
     typedef std::vector<std::string> PatternStringList;
 
-    /// @todo std::list used here for ease of rotate, but has terrible data
-    /// locality - consider changing when a more efficient rotation-invariant
-    /// string match algorithm is used.
-    typedef std::list<bool> LedPattern;
-    typedef std::vector<LedPattern> PatternList;
+    typedef std::string LedPatternWrapped; //< Pattern repeated almost twice
+    typedef std::vector<LedPatternWrapped>
+        PatternList; //< Ordered set of patterns to search
 
     typedef std::vector<cv::KeyPoint> KeyPointList;
     typedef KeyPointList::iterator KeyPointIterator;
@@ -92,8 +90,17 @@ namespace vbtracker {
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
         /// pixel units
         float minArea = 2.0f;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
+        /// is faster than convexity but may be confused by side-views of LEDs.
+        bool filterByCircularity = true;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minCircularity = 0.5;
+        float minCircularity = 0.2;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
+        /// is a lot more expensive than filterByCircularity
+        bool filterByConvexity = true;
+        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
+        float minConvexity = 0.80f;
+
         /// This is the absolute minimum pixel value that will be considered as
         /// a possible signal. Images that contain only values below this will
         /// be totally discarded as containing zero keypoints.
@@ -127,10 +134,10 @@ namespace vbtracker {
         /// This is a variance number, so std deviation squared, but it's
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
-        double initialBeaconError = 0.005;
+        double initialBeaconError = 0.01;
         /// Maximum distance a blob can move, in pixel units, and still be
         /// considered the same blob.
-        double blobMoveThreshold = 10.;
+        double blobMoveThreshold = 15.;
         bool debug = false;
         /// How many threads to let OpenCV use.
         int numThreads = 1;
@@ -141,7 +148,7 @@ namespace vbtracker {
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping.
-        double linearVelocityDecayCoefficient = 0.3;
+        double linearVelocityDecayCoefficient = 0.15;
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping.

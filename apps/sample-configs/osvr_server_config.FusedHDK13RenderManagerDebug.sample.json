@@ -1,30 +1,21 @@
 {
     "display": "displays/OSVR_HDK_1_3.json",
-    "renderManagerConfig": "sample-configs/renderManager.landscape.json",
+    "renderManagerConfig": "sample-configs/renderManager.portrait.json",
     "drivers": [{
         "plugin": "com_osvr_VideoBasedHMDTracker",
         "driver": "VideoBasedHMDTracker",
         "params": {
             "cameraID": 0,
             "showDebug": true,
-            "blobParams": {
-                "minDistBetweenBlobs": 2.0,
-                "minArea": 2.0,
-                "minCircularity": 0.5,
-                "absoluteMinThreshold": 75,
-                "minThresholdAlpha": 0.3,
-                "maxThresholdAlpha": 0.7,
-                "thresholdSteps": 3
-            },
             "additionalPrediction": 0.024,
             "maxResidual": 100,
             "initialBeaconError": 0.01,
             "blobMoveThreshold": 15,
             "numThreads": 1,
             "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2, 5e-1, 5e-1, 5e-1],
-            "linearVelocityDecayCoefficient": 0.3,
+            "linearVelocityDecayCoefficient": 0.15,
             "angularVelocityDecayCoefficient": 0.01,
-            "includeRearPanel": false,
+            "includeRearPanel": true,
             "headCircumference": 55.75
         }
     }, {
