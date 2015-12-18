@@ -96,6 +96,8 @@ class AnalysisPluginInstantiation {
             root.get("damping", fusionParams.damping).asDouble();
         fusionParams.eyeHeight =
             root.get("eyeHeight", fusionParams.eyeHeight).asDouble();
+        fusionParams.cameraIsForward =
+            root.get("cameraIsForward", fusionParams.cameraIsForward).asBool();
 
         osvr::pluginkit::PluginContext context(ctx);
 

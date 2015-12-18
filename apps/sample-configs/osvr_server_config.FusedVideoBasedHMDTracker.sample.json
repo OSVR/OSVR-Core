@@ -25,7 +25,8 @@
                 "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd",
                 "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
             },
-            "eyeHeight": 1.5
+            "eyeHeight": 1.5,
+            "cameraIsForward": true
         }
     }],
     "plugins": [

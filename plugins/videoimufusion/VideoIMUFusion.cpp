@@ -45,7 +45,7 @@ namespace ei = osvr::util::eigen_interop;
 namespace filters = osvr::util::filters;
 
 VideoIMUFusion::VideoIMUFusion(VideoIMUFusionParams const &params)
-    : m_params(params) {
+    : m_params(params), m_roomCalib(Eigen::Isometry3d::Identity()) {
     enterCameraPoseAcquisitionState();
 }
 VideoIMUFusion::~VideoIMUFusion() = default;
@@ -67,6 +67,15 @@ void VideoIMUFusion::enterRunningState(
     ei::map(m_camera) = cTr;
     std::cout << "Camera is located in the room at roughly "
               << m_cTr.translation().transpose() << std::endl;
+    if (m_params.cameraIsForward) {
+        auto q = ei::map(orientation);
+        // see
+        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
+        auto yaw = std::atan2(2 * (q.y() * q.w() - q.x() * q.z()),
+                              1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
+        Eigen::AngleAxisd correction(-yaw, Eigen::Vector3d::UnitY());
+        m_roomCalib = Eigen::Isometry3d(correction);
+    }
     m_state = State::Running;
     m_runningData.reset(new VideoIMUFusion::RunningData(
         m_params, cTr, orientation, report.pose, timestamp));
@@ -101,10 +110,14 @@ void VideoIMUFusion::handleIMUVelocity(const OSVR_TimeValue &timestamp,
 }
 
 void VideoIMUFusion::updateFusedOutput(const OSVR_TimeValue &timestamp) {
-    ei::map(m_lastPose).rotation() = m_runningData->getOrientation();
+    Eigen::Isometry3d initialPose =
+        Eigen::Translation3d(m_runningData->getPosition() +
+                             Eigen::Vector3d::UnitY() * m_params.eyeHeight) *
+        m_runningData->getOrientation();
+    Eigen::Isometry3d transformed = m_roomCalib * initialPose;
+    ei::map(m_lastPose).rotation() = Eigen::Quaterniond(transformed.rotation());
     ei::map(m_lastPose).translation() =
-        m_runningData->getPosition() +
-        Eigen::Vector3d::UnitY() * m_params.eyeHeight;
+        Eigen::Vector3d(transformed.translation());
     m_lastTime = timestamp;
 }
 
