@@ -46,8 +46,13 @@ namespace pluginhost {
         // Should be something like PREFIX/bin or PREFIX/bin/Release (depending
         // on if we're installed or in a build tree)
         auto binDir = exeLocation.parent_path();
-#ifdef _MSC_VER
-        /// CMAKE_INTDIR is a string like "Debug", defined automatically
+
+#if defined(_MSC_VER) && defined(CMAKE_INTDIR)
+        /// CMAKE_INTDIR is a string like "Debug", defined automatically if
+        /// building in some multi-config generator mode of using the MSVC
+        /// compiler (the IDE or MSBuild on a solution).
+        /// Not defined in makefiles (nmake, jom, ninja), though, hence why we
+        /// have to check both definitions.
         if (binDir.filename() == CMAKE_INTDIR) {
             binDir = binDir.parent_path();
         }
@@ -87,7 +92,8 @@ namespace pluginhost {
 #endif
 
         for (auto const &possibleRoot : rootDirCandidates) {
-#ifdef _MSC_VER
+
+#if defined(_MSC_VER) && defined(CMAKE_INTDIR)
             paths.push_back(
                 (possibleRoot / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
 #endif
