@@ -30,6 +30,7 @@
 #include <osvr/Common/Transform.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/ExtractYaw.h>
 
 // Library/third-party includes
 // - none
@@ -56,12 +57,7 @@ OSVR_ReturnCode osvrClientSetRoomRotationUsingHead(OSVR_ClientContext ctx) {
             // OK, we've gotten state successfully: extract yaw, update
             // transform, and return success.
             auto q = osvr::util::eigen_interop::map(state);
-
-            // see
-            // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
-            auto yaw = std::atan2(2 * (q.y() * q.w() - q.x() * q.z()),
-                                  1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
-
+            auto yaw = osvr::util::extractYaw(q);
             Eigen::AngleAxisd correction(-yaw, Eigen::Vector3d::UnitY());
             xform.concatPost(Eigen::Isometry3d(correction).matrix());
             ctx->setRoomToWorldTransform(xform);

@@ -27,6 +27,7 @@
 #include "RunningData.h"
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/ExtractYaw.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -69,10 +70,7 @@ void VideoIMUFusion::enterRunningState(
               << m_cTr.translation().transpose() << std::endl;
     if (m_params.cameraIsForward) {
         auto q = ei::map(orientation);
-        // see
-        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
-        auto yaw = std::atan2(2 * (q.y() * q.w() - q.x() * q.z()),
-                              1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
+        auto yaw = osvr::util::extractYaw(q);
         Eigen::AngleAxisd correction(-yaw, Eigen::Vector3d::UnitY());
         m_roomCalib = Eigen::Isometry3d(correction);
     }

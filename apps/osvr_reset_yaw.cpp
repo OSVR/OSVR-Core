@@ -37,6 +37,7 @@
 #include <osvr/Common/GeneralizedTransform.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/UniquePtr.h>
+#include <osvr/Util/ExtractYaw.h>
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
@@ -184,12 +185,8 @@ int main(int argc, char *argv[]) {
                 std::cin.ignore();
                 return -1;
             }
-            auto q = osvr::util::fromQuat(state);
-
-            // see
-            // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
-            double yaw = std::atan2(2 * (q.y() * q.w() - q.x() * q.z()),
-                                    1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
+            auto q = osvr::util::eigen_interop::map(state);
+            auto yaw = osvr::util::extractYaw(q);
             cout << "Correction: " << -yaw << " radians about Y" << endl;
 
             Json::Value newLayer(Json::objectValue);
