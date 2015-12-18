@@ -26,9 +26,6 @@
             "headCircumference": 55.75
         }
     }],
-    "plugins": [
-        "com_osvr_VideoBasedHMDTracker"
-    ],
     "aliases": {
         "/me/head": {
             "translate": [0,0,0.075],

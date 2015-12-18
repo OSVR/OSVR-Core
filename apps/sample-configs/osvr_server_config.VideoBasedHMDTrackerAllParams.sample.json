@@ -37,9 +37,6 @@
             "highResidualVariancePenalty": 8.0
         }
     }],
-    "plugins": [
-        "com_osvr_VideoBasedHMDTracker"
-    ],
     "aliases": {
         "/me/head": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
     }

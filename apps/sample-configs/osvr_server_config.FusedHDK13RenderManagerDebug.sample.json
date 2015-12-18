@@ -30,9 +30,6 @@
             "eyeHeight": 1.5
         }
     }],
-    "plugins": [
-        "com_osvr_VideoBasedHMDTracker"
-    ],
     "aliases": {
         "/headSpace": {
             "translate": [0.0, 0.0, 0.075],

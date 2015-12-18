@@ -84,7 +84,6 @@ if(WIN32)
 endif()
 
 osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
-    MANUAL_LOAD
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
     ${PLUGIN_SOURCES}
