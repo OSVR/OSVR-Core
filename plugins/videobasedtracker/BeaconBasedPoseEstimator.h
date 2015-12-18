@@ -45,6 +45,16 @@
 namespace osvr {
 namespace vbtracker {
 
+    struct BeaconData {
+        bool seen = false;
+        double size = 0;
+        cv::Point2d measurement = {0, 0};
+        cv::Point2d residual = {0, 0};
+        double variance = 0;
+        void reset() {
+            *this = BeaconData{};
+        }
+    };
     /// @name Default 3D locations for the beacons on an OSVR HDK, in
     /// millimeters
     /// @{
@@ -146,8 +156,13 @@ namespace vbtracker {
 
         void dumpBeaconLocationsToStream(std::ostream &os) const;
 
+        std::vector<BeaconData> const& getBeaconDebugData() const {
+            return m_beaconDebugData;
+        }
+
       private:
         void m_updateBeaconCentroid(const Point3Vector &beacons);
+        void m_updateBeaconDebugInfoArray();
         /// @brief Internal position differs in scale and origin from external.
         /// This function deals with that for you.
         Eigen::Vector3d m_convertInternalPositionRepToExternal(
@@ -176,6 +191,9 @@ namespace vbtracker {
         std::vector<double> m_beaconMeasurementVariance;
         /// Should this beacon be "fixed" (no auto-calibration?)
         std::vector<bool> m_beaconFixed;
+
+        std::vector<BeaconData> m_beaconDebugData;
+
         Eigen::Vector2d m_principalPoint;
         double m_focalLength;
         cv::Mat m_cameraMatrix;     //< 3x3 camera matrix

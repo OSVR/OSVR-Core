@@ -159,6 +159,8 @@ namespace vbtracker {
             bNum++;
         }
         m_beaconMeasurementVariance.assign(m_beacons.size(), variance);
+        // Prep the debug data.
+        m_updateBeaconDebugInfoArray();
         return true;
     }
 
@@ -184,6 +186,9 @@ namespace vbtracker {
         // ensure it's the right size
         m_beaconMeasurementVariance.resize(m_beacons.size(),
                                            DEFAULT_MEASUREMENT_VARIANCE);
+
+        // Prep the debug data.
+        m_updateBeaconDebugInfoArray();
         return true;
     }
 
@@ -204,6 +209,10 @@ namespace vbtracker {
         } else {
             m_centroid = Eigen::Vector3d::Map(m_params.manualBeaconOffset);
         }
+    }
+
+    void BeaconBasedPoseEstimator::m_updateBeaconDebugInfoArray() {
+        m_beaconDebugData.resize(m_beacons.size());
     }
 
     bool BeaconBasedPoseEstimator::SetCameraMatrix(
@@ -295,6 +304,13 @@ namespace vbtracker {
     BeaconBasedPoseEstimator::m_estimatePoseFromLeds(const LedGroup &leds,
                                                      OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
+        if (m_params.streamBeaconDebugInfo) {
+            /// Only bother resetting if anyone is actually going to receive the
+            /// data.
+            for (auto &data : m_beaconDebugData) {
+                data.reset();
+            }
+        }
         bool usedKalman = false;
         bool result = false;
         if (m_framesInProbation > MAX_PROBATION_FRAMES) {
@@ -354,6 +370,8 @@ namespace vbtracker {
             }
             auto id = led.getID();
             if (id < beaconsSize) {
+                m_beaconDebugData[id].variance = -1;
+                m_beaconDebugData[id].measurement = led.getLocation();
                 imagePoints.push_back(led.getLocation());
                 objectPoints.push_back(
                     vec3dToCVPoint3f(m_beacons[id]->stateVector()));

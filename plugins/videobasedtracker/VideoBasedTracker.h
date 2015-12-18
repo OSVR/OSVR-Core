@@ -105,6 +105,10 @@ namespace vbtracker {
         bool processImage(cv::Mat frame, cv::Mat grayImage,
                           OSVR_TimeValue const &tv, PoseHandler handler);
 
+        /// For debug purposes
+        BeaconBasedPoseEstimator const& getFirstEstimator() const {
+            return *(m_estimators.front());
+        }
       private:
         std::vector<cv::KeyPoint> extractKeypoints(cv::Mat const &grayImage);
 

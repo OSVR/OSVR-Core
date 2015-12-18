@@ -9,6 +9,9 @@
             "count": 2,
             "position": true,
             "orientation": true
+        },
+        "analog": {
+            "count": 170
         }
     },
     "semantic": {

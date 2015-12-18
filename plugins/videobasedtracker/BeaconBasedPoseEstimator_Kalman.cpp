@@ -118,6 +118,9 @@ namespace vbtracker {
             if (id >= beaconsSize) {
                 continue;
             }
+            auto &debug = m_beaconDebugData[id];
+            debug.seen = true;
+            debug.measurement = led.getLocation();
             auto localVarianceFactor = varianceFactor;
             if (skipBright && led.isBright()) {
                 continue;
@@ -142,18 +145,22 @@ namespace vbtracker {
             meas.updateFromState(state);
             auto model =
                 kalman::makeAugmentedProcessModel(m_model, beaconProcess);
-
-            if (meas.getResidual(state).squaredNorm() > maxSquaredResidual) {
+            Eigen::Vector2d residual = meas.getResidual(state);
+            if (residual.squaredNorm() > maxSquaredResidual) {
                 // probably bad
                 numBad++;
                 localVarianceFactor *= 4.0;
             } else {
                 numGood++;
             }
-            meas.setVariance(localVarianceFactor *
-                             m_params.measurementVarianceScaleFactor *
-                             newIdentificationVariancePenalty *
-                             m_beaconMeasurementVariance[id]);
+            debug.residual.x = residual.x();
+            debug.residual.y = residual.y();
+            auto effectiveVariance = localVarianceFactor *
+                                     m_params.measurementVarianceScaleFactor *
+                                     newIdentificationVariancePenalty *
+                                     m_beaconMeasurementVariance[id];
+            debug.variance = effectiveVariance;
+            meas.setVariance(effectiveVariance);
 
             /// Now, do the correction.
             kalman::correct(state, model, meas);

@@ -192,6 +192,11 @@ namespace vbtracker {
         /// from converging in a bad local minimum.
         double beaconProcessNoise = 0.001;
 
+        /// When true, will stream debug info (variance, pixel measurement,
+        /// pixel residual) on up to the first 34 beacons of your first sensor
+        /// as analogs.
+        bool streamBeaconDebugInfo = false;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.

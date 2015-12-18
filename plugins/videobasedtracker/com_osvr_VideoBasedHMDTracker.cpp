@@ -30,6 +30,7 @@
 #include "ImageSourceFactories.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include <osvr/PluginKit/AnalogInterfaceC.h>
 #include "GetOptionalParameter.h"
 
 // Generated JSON header file
@@ -63,6 +64,9 @@
 // Anonymous namespace to avoid symbol collision
 namespace {
 
+static const auto DEBUGGABLE_BEACONS = 34;
+static const auto DATAPOINTS_PER_BEACON = 5;
+
 class VideoBasedHMDTracker : boost::noncopyable {
   public:
     VideoBasedHMDTracker(OSVR_PluginRegContext ctx,
@@ -79,6 +83,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
 
         // Configure the tracker interface.
         osvrDeviceTrackerConfigure(opts, &m_tracker);
+
+        osvrDeviceAnalogConfigure(opts, &m_analog,
+                                  DEBUGGABLE_BEACONS * DATAPOINTS_PER_BEACON);
 
         /// Come up with a device name
         std::ostringstream os;
@@ -121,6 +128,7 @@ class VideoBasedHMDTracker : boost::noncopyable {
   private:
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_TrackerDeviceInterface m_tracker;
+    OSVR_AnalogDeviceInterface m_analog;
     osvr::vbtracker::ImageSourcePtr m_source;
     osvr::vbtracker::ConfigParams const m_params;
 #ifdef VBHMD_SAVE_IMAGES
@@ -190,7 +198,7 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
         last = now;
     }
 #endif
-
+    bool shouldSendDebug = false;
     m_vbtracker.processImage(
         m_frame, m_imageGray, timestamp,
         [&](OSVR_ChannelCount sensor, OSVR_Pose3 const &pose) {
@@ -200,7 +208,28 @@ inline OSVR_ReturnCode VideoBasedHMDTracker::update() {
             // received the image from the camera.
             osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &pose,
                                                  sensor, &timestamp);
+            if (sensor == 0) {
+                shouldSendDebug = true;
+            }
         });
+    if (shouldSendDebug && m_params.streamBeaconDebugInfo) {
+        double data[DEBUGGABLE_BEACONS * DATAPOINTS_PER_BEACON];
+        auto &debug = m_vbtracker.getFirstEstimator().getBeaconDebugData();
+        auto now = osvr::util::time::getNow();
+        auto n = std::min(size_t(DEBUGGABLE_BEACONS), debug.size());
+        for (std::size_t i = 0; i < n; ++i) {
+            double *buf = &data[i];
+            auto j = i * DATAPOINTS_PER_BEACON;
+            // yes, using postincrement since we want the previous value
+            // returned. Borderline "too clever" but it's debug code.
+            data[j] = debug[i].variance;
+            data[j + 1] = debug[i].measurement.x;
+            data[j + 2] = debug[i].measurement.y;
+            data[j + 3] = debug[i].residual.x;
+            data[j + 4] = debug[i].residual.y;
+        }
+        osvrDeviceAnalogSetValuesTimestamped(m_dev, m_analog, data, n, &now);
+    }
 
     return OSVR_RETURN_SUCCESS;
 }
@@ -279,6 +308,8 @@ class ConfiguredDeviceConstructor {
         getOptionalParameter(config.blobMoveThreshold, root,
                              "blobMoveThreshold");
         getOptionalParameter(config.numThreads, root, "numThreads");
+        getOptionalParameter(config.streamBeaconDebugInfo, root,
+                             "streamBeaconDebugInfo");
 
         /// General kalman stuff
         getOptionalParameter(config.processNoiseAutocorrelation, root,
