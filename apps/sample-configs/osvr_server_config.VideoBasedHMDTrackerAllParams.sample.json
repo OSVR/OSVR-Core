@@ -33,7 +33,8 @@
             "manualBeaconOffset": [0.0, 0.0, 0.0],
             "includeRearPanel": false,
             "headCircumference": 55.75,
-            "headToFrontBeaconOriginDistance": 75
+            "headToFrontBeaconOriginDistance": 75,
+            "highResidualVariancePenalty": 8.0
         }
     }],
     "plugins": [

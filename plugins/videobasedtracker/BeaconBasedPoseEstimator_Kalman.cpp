@@ -149,7 +149,7 @@ namespace vbtracker {
             if (residual.squaredNorm() > maxSquaredResidual) {
                 // probably bad
                 numBad++;
-                localVarianceFactor *= 4.0;
+                localVarianceFactor *= m_params.highResidualVariancePenalty;
             } else {
                 numGood++;
             }

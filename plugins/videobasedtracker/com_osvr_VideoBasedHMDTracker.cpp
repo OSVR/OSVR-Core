@@ -320,6 +320,8 @@ class ConfiguredDeviceConstructor {
                              "angularVelocityDecayCoefficient");
         getOptionalParameter(config.measurementVarianceScaleFactor, root,
                              "measurementVarianceScaleFactor");
+        getOptionalParameter(config.highResidualVariancePenalty, root,
+                             "highResidualVariancePenalty");
 
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
         if (!config.offsetToCentroid) {

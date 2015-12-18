@@ -192,6 +192,10 @@ namespace vbtracker {
         /// from converging in a bad local minimum.
         double beaconProcessNoise = 0.001;
 
+        /// This is the multiplicative penalty applied to the variance of
+        /// measurements with a "bad" residual
+        double highResidualVariancePenalty = 8.;
+
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
         /// as analogs.
