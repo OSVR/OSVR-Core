@@ -86,20 +86,20 @@ namespace vbtracker {
     struct BlobParams {
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
         /// pixel units
-        float minDistBetweenBlobs = 2.0f;
+        float minDistBetweenBlobs = 3.0f;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
-        /// pixel units
-        float minArea = 2.0f;
+        /// square pixel units
+        float minArea = 4.0f;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
         /// is faster than convexity but may be confused by side-views of LEDs.
-        bool filterByCircularity = true;
+        bool filterByCircularity = false;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
         float minCircularity = 0.2;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
         /// is a lot more expensive than filterByCircularity
         bool filterByConvexity = true;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minConvexity = 0.80f;
+        float minConvexity = 0.90f;
 
         /// This is the absolute minimum pixel value that will be considered as
         /// a possible signal. Images that contain only values below this will
@@ -109,16 +109,16 @@ namespace vbtracker {
         /// between the minimum and maximum value pixel in a frame that will be
         /// the *minimum* threshold value used by the simple blob detector (if
         /// it does not drop below absoluteMinThreshold)
-        double minThresholdAlpha = 0.3;
+        double minThresholdAlpha = 0.5;
         /// This value, in the range (0, 1), is the linear interpolation factor
         /// between the minimum and maximum value pixel in a frame that will be
         /// the *maximum* threshold value used by the simple blob detector (if
         /// it does not drop below absoluteMinThreshold)
-        double maxThresholdAlpha = 0.7;
+        double maxThresholdAlpha = 0.8;
         /// This is the number of thresholding and contour extraction steps that
         /// the blob extractor will take between the two threshold extrema, and
         /// thus greatly impacts performance. Adjust with care.
-        int thresholdSteps = 3;
+        int thresholdSteps = 4;
     };
     /// General configuration parameters
     struct ConfigParams {
@@ -128,16 +128,16 @@ namespace vbtracker {
         double additionalPrediction = 24. / 1000.;
         /// Max residual (pixel units) for a beacon before throwing that
         /// measurement out.
-        double maxResidual = 100;
+        double maxResidual = 75;
         /// Initial beacon error for autocalibration (units: mm^2).
         /// 0 effectively turns off beacon auto-calib.
         /// This is a variance number, so std deviation squared, but it's
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
-        double initialBeaconError = 0.01;
+        double initialBeaconError = 0.001;
         /// Maximum distance a blob can move, in pixel units, and still be
         /// considered the same blob.
-        double blobMoveThreshold = 15.;
+        double blobMoveThreshold = 20.;
         bool debug = false;
         /// How many threads to let OpenCV use.
         int numThreads = 1;
@@ -148,17 +148,17 @@ namespace vbtracker {
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping.
-        double linearVelocityDecayCoefficient = 0.15;
+        double linearVelocityDecayCoefficient = 0.2;
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping.
-        double angularVelocityDecayCoefficient = 0.01;
+        double angularVelocityDecayCoefficient = 0.1;
         /// The measurement variance (units: mm^2) is included in the plugin
         /// along with the coordinates of the beacons. Some beacons are observed
         /// with higher variance than others, due to known difficulties in
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.;
+        double measurementVarianceScaleFactor = 1.6;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
@@ -193,11 +193,11 @@ namespace vbtracker {
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
         /// gets used for a measurement, but it should be enough to keep beacons
         /// from converging in a bad local minimum.
-        double beaconProcessNoise = 0.001;
+        double beaconProcessNoise = 0.0000001;
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
-        double highResidualVariancePenalty = 8.;
+        double highResidualVariancePenalty = 10.;
 
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
@@ -207,12 +207,12 @@ namespace vbtracker {
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
-            processNoiseAutocorrelation[0] = 1e+2;
-            processNoiseAutocorrelation[1] = 5e+1;
-            processNoiseAutocorrelation[2] = 1e+2;
-            processNoiseAutocorrelation[3] = 5e-1;
-            processNoiseAutocorrelation[4] = 5e-1;
-            processNoiseAutocorrelation[5] = 5e-1;
+            processNoiseAutocorrelation[0] = 3e+2;
+            processNoiseAutocorrelation[1] = 3e+2;
+            processNoiseAutocorrelation[2] = 3e+2;
+            processNoiseAutocorrelation[3] = 1e0;
+            processNoiseAutocorrelation[4] = 1e0;
+            processNoiseAutocorrelation[5] = 1e0;
             manualBeaconOffset[0] = 0;
             manualBeaconOffset[1] = 0;
             manualBeaconOffset[2] = 0;
