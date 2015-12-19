@@ -181,10 +181,13 @@ namespace vbtracker {
 
         /// This is the distance fron the front of the head to the origin of the
         /// front sensor coordinate system in the Z axis, in mm.
-        /// @todo this is an estimate!
-        double headToFrontBeaconOriginDistance = 75;
+        /// This is a rough estimate - the origin of the coordinate system is
+        /// roughly the flat part of the hard plastic.
+        double headToFrontBeaconOriginDistance = 0;
 
-        double backPanelMeasurementError = 1.5;
+        /// There's fewer of them, so we'd get bad latency otherwise,
+        /// and hey - they work a treat!
+        double backPanelMeasurementError = 1.0;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
