@@ -5,32 +5,16 @@
         "params": {
             "cameraID": 0,
             "showDebug": false,
-            "blobParams": {
-                "minDistBetweenBlobs": 2.0,
-                "minArea": 2.0,
-                "minCircularity": 0.5,
-                "absoluteMinThreshold": 75,
-                "minThresholdAlpha": 0.3,
-                "maxThresholdAlpha": 0.8,
-                "thresholdSteps": 3
-            },
-            "additionalPrediction": 0.024,
             "offsetToCentroid": false,
             "manualBeaconOffset": [0, 0, 38.8676],
-            "maxResidual": 100,
-            "initialBeaconError": 0.001,
-            "blobMoveThreshold": 15,
             "numThreads": 1,
-            "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2,  5e-1, 5e-1, 5e-1],
-            "linearVelocityDecayCoefficient": 0.3,
-            "angularVelocityDecayCoefficient": 0.01,
             "includeRearPanel": false,
             "headCircumference": 55.75
         }
     }],
     "aliases": {
         "/me/head": {
-            "translate": [0,0,0.075],
+            "translate": [0, 0, 0.04141],
             "child": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/front"
         }
     }
