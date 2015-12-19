@@ -1,12 +1,12 @@
 defaultVariance = 3.0
-highVariance = 6.0
-turnedOffVariance = 15.0
+sideVariance = 12.0
+edgeVariance = 8.0
 def getVariance(oneBasedIndex):
     # side beacons
-    if oneBasedIndex in [1,2,10,5,6,7]:
-        return turnedOffVariance
-    elif oneBasedIndex in [3,26,33,9,8]:
-        return highVariance
+    if oneBasedIndex in [1,2,10,5,6,7,9,3,4,8,9]:
+        return sideVariance
+    elif oneBasedIndex in [12,13,14,15,18,21,22,23,24,25,27,28,29,30]:
+        return edgeVariance
     else:
         return defaultVariance
 
