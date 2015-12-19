@@ -8,6 +8,8 @@
             "cameraID": 0,
             "showDebug": true,
             "additionalPrediction": 0.024,
+            "offsetToCentroid": false,
+            "manualBeaconOffset": [0, 0, 38.8676],
             "maxResidual": 100,
             "initialBeaconError": 0.01,
             "blobMoveThreshold": 15,

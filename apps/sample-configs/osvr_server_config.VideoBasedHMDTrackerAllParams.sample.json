@@ -29,11 +29,11 @@
             "linearVelocityDecayCoefficient": 0.3,
             "angularVelocityDecayCoefficient": 0.01,
             "measurementVarianceScaleFactor" : 1.0,
-            "offsetToCentroid": true,
-            "manualBeaconOffset": [0.0, 0.0, 0.0],
+            "offsetToCentroid": false,
+            "manualBeaconOffset": [0, 0, 38.8676],
             "includeRearPanel": false,
             "headCircumference": 55.75,
-            "headToFrontBeaconOriginDistance": 75,
+            "headToFrontBeaconOriginDistance": 0,
             "highResidualVariancePenalty": 8.0
         }
     }],
