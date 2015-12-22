@@ -90,7 +90,6 @@ namespace client {
             double getHorizontalFOV() const;
             double getHorizontalFOVRadians() const;
 #endif
-            double getFOVAspectRatio() const;
             double getOverlapPercent() const;
 #if 0
             double getPitchTilt() const;

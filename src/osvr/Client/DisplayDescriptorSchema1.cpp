@@ -270,10 +270,6 @@ namespace client {
             return m_monocularHorizontalFOV;
         }
 
-        double DisplayDescriptor::getFOVAspectRatio() const {
-            return (m_monocularVerticalFOV / m_monocularHorizontalFOV).value();
-        }
-
         double DisplayDescriptor::getOverlapPercent() const {
             return m_overlapPercent;
         }
