@@ -184,12 +184,12 @@ void VideoIMUFusionDevice::handleVideoTrackerData(
         if (ret != OSVR_RETURN_SUCCESS) {
             static int i = 0;
             if (i == 20) {
-                std::cout << "Warning: Have received several video tracker "
+                std::cout << "\n\nWarning: Have received several video tracker "
                              "reports without receiving one from the IMU, "
                              "which shouldn't happen. Please try "
                              "disconnecting/reconnecting and restarting the "
                              "server, and if this re-occurs, double-check your "
-                             "configuration files."
+                             "configuration files.\n"
                           << std::endl;
             }
             i++;
