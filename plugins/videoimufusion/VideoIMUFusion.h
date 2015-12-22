@@ -102,7 +102,7 @@ class VideoIMUFusion {
 
   private:
     void enterCameraPoseAcquisitionState();
-    void enterRunningState(Eigen::Isometry3d const &cTr,
+    void enterRunningState(Eigen::Isometry3d const &rTc,
                            const OSVR_TimeValue &timestamp,
                            const OSVR_PoseReport &report,
                            const OSVR_OrientationState &orientation);
@@ -119,7 +119,7 @@ class VideoIMUFusion {
     std::unique_ptr<StartupData> m_startupData;
     class RunningData;
     std::unique_ptr<RunningData> m_runningData;
-    Eigen::Isometry3d m_cTr;
+    Eigen::Isometry3d m_rTc;
 
     OSVR_PoseState m_camera;
     OSVR_PoseState m_reorientedVideo;

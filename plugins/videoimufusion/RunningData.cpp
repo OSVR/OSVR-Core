@@ -55,7 +55,7 @@ using osvr::kalman::types::Vector;
 namespace ei = osvr::util::eigen_interop;
 
 VideoIMUFusion::RunningData::RunningData(
-    VideoIMUFusionParams const &params, Eigen::Isometry3d const &cTr,
+    VideoIMUFusionParams const &params, Eigen::Isometry3d const &rTc,
     OSVR_OrientationState const &initialIMU, OSVR_PoseState const &initialVideo,
     OSVR_TimeValue const &lastTS)
     : m_processModel(params.damping, params.positionNoise, params.oriNoise),
@@ -70,7 +70,7 @@ VideoIMUFusion::RunningData::RunningData(
       m_cameraMeasPos(Vector<3>::Zero(),
                       Vector<3>::Constant(params.videoPosVariance)),
 #endif
-      m_cTr(cTr), m_last(lastTS) {
+      m_rTc(rTc), m_last(lastTS) {
 
 #ifdef OSVR_FPE
     FPExceptionEnabler fpe;

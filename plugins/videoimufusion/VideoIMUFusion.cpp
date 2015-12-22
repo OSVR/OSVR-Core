@@ -73,27 +73,28 @@ VideoIMUFusion::getErrorCovariance() const {
 }
 
 void VideoIMUFusion::enterRunningState(
-    Eigen::Isometry3d const &cTr, const OSVR_TimeValue &timestamp,
+    Eigen::Isometry3d const &rTc, const OSVR_TimeValue &timestamp,
     const OSVR_PoseReport &report, const OSVR_OrientationState &orientation) {
 #ifdef OSVR_FPE
     FPExceptionEnabler fpe;
 #endif
-    m_cTr = cTr;
-    ei::map(m_camera) = cTr;
+    m_rTc = rTc;
     std::cout << "Camera is located in the room at roughly "
-              << m_cTr.translation().transpose() << std::endl;
+              << m_rTc.translation().transpose() << std::endl;
+
     if (m_params.cameraIsForward) {
-        auto q = ei::map(orientation);
-        auto yaw = osvr::util::extractYaw(q);
+        auto yaw = osvr::util::extractYaw(Eigen::Quaterniond(m_rTc.rotation()));
         Eigen::AngleAxisd correction(-yaw, Eigen::Vector3d::UnitY());
         m_roomCalib = Eigen::Isometry3d(correction);
     }
+
     m_state = State::Running;
     m_runningData.reset(new VideoIMUFusion::RunningData(
-        m_params, cTr, orientation, report.pose, timestamp));
+        m_params, m_rTc, orientation, report.pose, timestamp));
     /// @todo should we just let it hang around instead of releasing memory in a
     /// callback?
     m_startupData.reset();
+    ei::map(m_camera) = m_roomCalib * m_rTc;
 }
 
 void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
@@ -161,12 +162,14 @@ class VideoIMUFusion::StartupData {
         if (dt <= 0) {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
-        // tranform from camera to tracked device is dTc
-        // orientation is dTr: room to tracked device
-        // cTr is room to camera, so we can take camera-reported dTc * cTr and
-        // get dTr with position...
-        Eigen::Isometry3d cTr = ei::map(report.pose).transform().inverse() *
-                                Eigen::Isometry3d(ei::map(orientation).quat());
+        // Pose of tracked device (in camera space) is cTd
+        // orientation is rTd or iTd: tracked device in IMU space (aka room
+        // space, modulo yaw)
+        // rTc is camera in room space (what we want to find), so we can take
+        // camera-reported cTd, perform rTc * cTd, and end up with rTd with
+        // position...
+        Eigen::Isometry3d rTc = Eigen::Isometry3d(ei::map(orientation).quat()) *
+                                ei::map(report.pose).transform().inverse();
         positionFilter.filter(dt, rTc.translation());
         orientationFilter.filter(dt, Eigen::Quaterniond(rTc.rotation()));
         auto linearVel = positionFilter.getDerivativeMagnitude();

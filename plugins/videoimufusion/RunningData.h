@@ -76,7 +76,7 @@ class VideoIMUFusion::RunningData {
   public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     RunningData(VideoIMUFusionParams const &params,
-                Eigen::Isometry3d const &cTr,
+                Eigen::Isometry3d const &rTc,
                 OSVR_OrientationState const &initialIMU,
                 OSVR_PoseState const &initialVideo,
                 OSVR_TimeValue const &lastTS);
@@ -97,9 +97,7 @@ class VideoIMUFusion::RunningData {
     Eigen::Vector3d getPosition() const { return state().position(); }
 
     Eigen::Isometry3d takeCameraPoseToRoom(OSVR_PoseState const &pose) {
-        return m_cTr.linear() *
-               (Eigen::Translation3d(m_cTr.translation()) *
-                osvr::util::eigen_interop::map(pose).transform());
+        return m_rTc * osvr::util::eigen_interop::map(pose);
     }
 
     Eigen::Matrix<double, 12, 12> const &getErrorCovariance() const {
@@ -119,7 +117,7 @@ class VideoIMUFusion::RunningData {
     AbsoluteOrientationMeasurement m_cameraMeasOri;
     AbsolutePositionMeasurement m_cameraMeasPos;
 #endif
-    const Eigen::Isometry3d m_cTr;
+    const Eigen::Isometry3d m_rTc;
     OSVR_TimeValue m_last;
 };
 
