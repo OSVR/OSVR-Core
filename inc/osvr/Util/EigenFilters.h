@@ -206,6 +206,9 @@ namespace util {
                 }
 
                 value_type const &getState() const { return m_xFilter.hatx(); }
+                scalar getDerivativeMagnitude() const {
+                    return computeDerivativeMagnitude(m_dxFilter.hatx());
+                }
 
               private:
                 bool m_firstTime = true;
