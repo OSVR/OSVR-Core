@@ -45,6 +45,20 @@ namespace ei = osvr::util::eigen_interop;
 
 namespace filters = osvr::util::filters;
 
+/// These are the levels that the velocity must remain below for a given number
+/// of consecutive frames before we accept a correlation between the IMU and
+/// video as truth.
+static const auto LINEAR_VELOCITY_CUTOFF = 0.2;
+static const auto ANGULAR_VELOCITY_CUTOFF = 1.e-4;
+
+/// The number of low-velocity frames required
+static const std::size_t REQUIRED_SAMPLES = 10;
+
+/// The distance from the camera that we want to encourage users to move within
+/// for best initial startup. Provides the best view of beacons for initial
+/// start of autocalibration.
+static const auto NEAR_MESSAGE_CUTOFF = 0.5;
+
 VideoIMUFusion::VideoIMUFusion(VideoIMUFusionParams const &params)
     : m_params(params), m_roomCalib(Eigen::Isometry3d::Identity()) {
     enterCameraPoseAcquisitionState();
@@ -152,10 +166,51 @@ class VideoIMUFusion::StartupData {
         // get dTr with position...
         Eigen::Isometry3d cTr = ei::map(report.pose).transform().inverse() *
                                 Eigen::Isometry3d(ei::map(orientation).quat());
-        positionFilter.filter(dt, cTr.translation());
-        orientationFilter.filter(dt, Eigen::Quaterniond(cTr.rotation()));
-        ++reports;
+        positionFilter.filter(dt, rTc.translation());
+        orientationFilter.filter(dt, Eigen::Quaterniond(rTc.rotation()));
+        auto linearVel = positionFilter.getDerivativeMagnitude();
+        auto angVel = orientationFilter.getDerivativeMagnitude();
+        // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
+        if (linearVel < LINEAR_VELOCITY_CUTOFF &&
+            angVel < ANGULAR_VELOCITY_CUTOFF) {
+            // OK, velocity within bounds
+            if (reports == 0) {
+                std::cout
+                    << "Video-IMU fusion: Hold still, measuring camera pose";
+            }
+            std::cout << "." << std::flush;
+            ++reports;
+        } else {
+            // reset the count if movement too fast.
+            if (reports > 0) {
+                /// put an end to the dots
+                std::cout << std::endl;
+            }
+            reports = 0;
+            if (!toldToMoveCloser &&
+                osvrVec3GetZ(&report.pose.translation) > NEAR_MESSAGE_CUTOFF) {
+                std::cout
+                    << "\n\nNOTE: For best results, during tracker/server "
+                       "startup, hold your head/HMD still closer than "
+                    << NEAR_MESSAGE_CUTOFF
+                    << " meters from the tracking camera for a few "
+                       "seconds, then rotate slowly in all directions.\n\n"
+                    << std::endl;
+                toldToMoveCloser = true;
+            } else if (toldToMoveCloser && !toldDistanceIsGood &&
+                       osvrVec3GetZ(&report.pose.translation) <
+                           0.9 * NEAR_MESSAGE_CUTOFF) {
+                std::cout
+                    << "\nThat distance looks good, hold it right there.\n"
+                    << std::endl;
+                toldDistanceIsGood = true;
+            }
+        }
         last = timestamp;
+        if (finished()) {
+            /// put an end to the dots
+            std::cout << "\n" << std::endl;
+        }
     }
 
     bool finished() const { return reports >= REQUIRED_SAMPLES; }
@@ -169,9 +224,11 @@ class VideoIMUFusion::StartupData {
     }
 
   private:
-    static const std::size_t REQUIRED_SAMPLES = 10;
     std::size_t reports = 0;
     OSVR_TimeValue last;
+
+    bool toldToMoveCloser = false;
+    bool toldDistanceIsGood = false;
 
     filters::OneEuroFilter<Eigen::Vector3d> positionFilter;
     filters::OneEuroFilter<Eigen::Quaterniond> orientationFilter;
