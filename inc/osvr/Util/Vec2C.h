@@ -52,7 +52,7 @@ typedef struct OSVR_Vec2 {
 
 #define OSVR_VEC_MEMBER(COMPONENT, INDEX)                                      \
     /** @brief Accessor for Vec2 component COMPONENT */                        \
-    OSVR_INLINE double osvrVec2Get##COMPONENT(OSVR_Vec2 *v) {                  \
+    OSVR_INLINE double osvrVec2Get##COMPONENT(OSVR_Vec2 const *v) {            \
         return v->data[INDEX];                                                 \
     }                                                                          \
     /** @brief Setter for Vec2 component COMPONENT */                          \
