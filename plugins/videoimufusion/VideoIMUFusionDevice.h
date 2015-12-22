@@ -80,7 +80,7 @@ class VideoIMUFusionDevice {
     bool m_shouldReportCamera() const;
 
     VideoIMUFusion m_fusion;
-    using our_clock = std::chrono::monotonic_clock;
+    using our_clock = std::chrono::system_clock;
     bool m_reportedCamera = false;
     our_clock::time_point m_nextCameraReport;
 };
