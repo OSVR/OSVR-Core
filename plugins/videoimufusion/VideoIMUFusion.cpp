@@ -143,7 +143,8 @@ void VideoIMUFusion::handleVideoTrackerDataWhileRunning(
     updateFusedOutput(timestamp);
     // For debugging, we will output a second sensor that is just the
     // video tracker data re-oriented.
-    auto videoPose = m_runningData->takeCameraPoseToRoom(report.pose);
+    Eigen::Isometry3d videoPose =
+        m_roomCalib * m_runningData->takeCameraPoseToRoom(report.pose);
     ei::map(m_reorientedVideo) = videoPose;
 }
 
