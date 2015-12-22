@@ -36,7 +36,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <chrono>
 
 /// Wrapper for VideoIMUFusion that handles the specifics of being an analysis
 /// plugin. Forwards events to the nested VideoIMUFusion instance, and reports
@@ -48,7 +48,7 @@ class VideoIMUFusionDevice {
         std::string const &imuPath, std::string const &videoPath,
         VideoIMUFusionParams const &params = VideoIMUFusionParams());
     ~VideoIMUFusionDevice();
-    OSVR_ReturnCode update() { return OSVR_RETURN_SUCCESS; }
+    OSVR_ReturnCode update();
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   private:
     static void s_handleIMUData(void *userdata, const OSVR_TimeValue *timestamp,
@@ -77,7 +77,12 @@ class VideoIMUFusionDevice {
 
     OSVR_ClientInterface m_videoTracker = nullptr;
 
+    bool m_shouldReportCamera() const;
+
     VideoIMUFusion m_fusion;
+    using our_clock = std::chrono::monotonic_clock;
+    bool m_reportedCamera = false;
+    our_clock::time_point m_nextCameraReport;
 };
 
 #endif // INCLUDED_VideoIMUFusionDevice_h_GUID_477141AB_39F3_489A_8C15_BF558BECB7E0
