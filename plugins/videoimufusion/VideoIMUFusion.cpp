@@ -57,7 +57,7 @@ static const std::size_t REQUIRED_SAMPLES = 10;
 /// The distance from the camera that we want to encourage users to move within
 /// for best initial startup. Provides the best view of beacons for initial
 /// start of autocalibration.
-static const auto NEAR_MESSAGE_CUTOFF = 0.5;
+static const auto NEAR_MESSAGE_CUTOFF = 0.3;
 
 VideoIMUFusion::VideoIMUFusion(VideoIMUFusionParams const &params)
     : m_params(params), m_roomCalib(Eigen::Isometry3d::Identity()) {
