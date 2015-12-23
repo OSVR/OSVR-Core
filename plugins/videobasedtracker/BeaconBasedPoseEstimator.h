@@ -52,9 +52,7 @@ namespace vbtracker {
         cv::Point2d measurement = {0, 0};
         cv::Point2d residual = {0, 0};
         double variance = 0;
-        void reset() {
-            *this = BeaconData{};
-        }
+        void reset() { *this = BeaconData{}; }
     };
     /// @name Default 3D locations for the beacons on an OSVR HDK, in
     /// millimeters
@@ -156,7 +154,7 @@ namespace vbtracker {
 
         void dumpBeaconLocationsToStream(std::ostream &os) const;
 
-        std::vector<BeaconData> const& getBeaconDebugData() const {
+        std::vector<BeaconData> const &getBeaconDebugData() const {
             return m_beaconDebugData;
         }
 
@@ -197,10 +195,12 @@ namespace vbtracker {
         CameraParameters m_camParams;
         size_t m_requiredInliers;   //< How many inliers do we require?
         size_t m_permittedOutliers; //< How many outliers do we allow?
+
         ConfigParams const m_params;
 
         /// Sensor centroid, subtracted out of the beacon coordinates when
-        /// initially set.
+        /// initially set. May be user-configured in which case it may not be
+        /// the actual centroid, but servies the same purpose.
         Eigen::Vector3d m_centroid;
 
         /// Timestamp of previous frame
