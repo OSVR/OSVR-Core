@@ -66,12 +66,6 @@ namespace vbtracker {
             p.filterByConvexity; // Test for convexity?
         m_sbdParams.minConvexity = p.minConvexity;
     }
-    void VideoBasedTracker::addOculusSensor() {
-        /// @todo this clearly violates what I expected was the invariant - not
-        /// sure if it's because of incomplete Oculus information, or due to a
-        /// misunderstanding of how this all works.
-        m_led_groups.emplace_back();
-    }
 
     // This version adds the beacons as a part of the constructor.
     void VideoBasedTracker::addSensor(
