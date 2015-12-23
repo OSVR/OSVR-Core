@@ -94,7 +94,7 @@ namespace vbtracker {
         /// is faster than convexity but may be confused by side-views of LEDs.
         bool filterByCircularity = false;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minCircularity = 0.2;
+        float minCircularity = 0.2f;
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
         /// is a lot more expensive than filterByCircularity
         bool filterByConvexity = true;
