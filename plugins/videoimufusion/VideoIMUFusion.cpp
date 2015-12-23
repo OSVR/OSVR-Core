@@ -79,6 +79,8 @@ void VideoIMUFusion::enterRunningState(
     FPExceptionEnabler fpe;
 #endif
     m_rTc = rTc;
+    std::cout << "\nVideo-IMU fusion: Camera pose acquired, entering normal "
+                 "run mode!\n";
     std::cout << "Camera is located in the room at roughly "
               << m_rTc.translation().transpose() << std::endl;
 
