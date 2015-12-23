@@ -354,7 +354,7 @@ namespace vbtracker {
                     if (m_frame.data) {
                         std::ostringstream windowName;
                         windowName << "Sensor" << sensor;
-                        cv::imshow(windowName.str().c_str(), *m_shownImage);
+                        cv::imshow(windowName.str(), *m_shownImage);
                         int key = cv::waitKey(1);
                         switch (key) {
                         case 'i':
