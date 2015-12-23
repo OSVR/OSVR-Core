@@ -388,6 +388,10 @@ namespace vbtracker {
                         case 'q':
                             // Indicate we want to quit.
                             done = true;
+                            // Also, if we can't "quit", at least hide the debug
+                            // window.
+                            m_params.debug = false;
+                            cv::destroyAllWindows();
                             break;
                         }
                     }

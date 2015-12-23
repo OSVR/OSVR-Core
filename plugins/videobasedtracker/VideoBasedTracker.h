@@ -100,7 +100,8 @@ namespace vbtracker {
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
             PoseHandler;
 
-        /// @return true if user hit q to quit.
+        /// @return true if user hit q to quit in a debug window, if such a
+        /// thing exists.
         bool processImage(cv::Mat frame, cv::Mat grayImage,
                           OSVR_TimeValue const &tv, PoseHandler handler);
 
