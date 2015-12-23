@@ -139,7 +139,8 @@ namespace vbtracker {
         /// considered the same blob.
         double blobMoveThreshold = 20.;
         bool debug = false;
-        /// How many threads to let OpenCV use.
+        /// How many threads to let OpenCV use. Set to 0 or less to let OpenCV
+        /// decide (that is, not set an explicit preference)
         int numThreads = 1;
         /// This is the autocorrelation kernel of the process noise. The first
         /// three elements correspond to position, the second three to

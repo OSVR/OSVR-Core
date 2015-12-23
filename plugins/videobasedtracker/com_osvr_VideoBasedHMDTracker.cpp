@@ -75,8 +75,10 @@ class VideoBasedHMDTracker : boost::noncopyable {
                          osvr::vbtracker::ConfigParams const &params =
                              osvr::vbtracker::ConfigParams{})
         : m_source(std::move(source)), m_vbtracker(params), m_params(params) {
-        // Set the number of threads for OpenCV to use.
-        cv::setNumThreads(params.numThreads);
+        if (params.numThreads > 0) {
+            // Set the number of threads for OpenCV to use.
+            cv::setNumThreads(params.numThreads);
+        }
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
