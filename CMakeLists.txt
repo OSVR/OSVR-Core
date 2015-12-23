@@ -247,7 +247,7 @@ if(BUILD_WITH_OPENCV)
             opencv_calib3d
             opencv_highgui
             opencv_imgproc
-            opencv_flann)
+            opencv_flann) # flann is a transitive dependency
 
         if(WIN32 AND NOT OpenCV_VERSION_MAJOR LESS 3)
             # for the tracker camera viewer to be able to save a capture.

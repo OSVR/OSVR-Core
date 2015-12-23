@@ -29,7 +29,7 @@
 #include "LedIdentifier.h"
 
 // Library/third-party includes
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <vector>

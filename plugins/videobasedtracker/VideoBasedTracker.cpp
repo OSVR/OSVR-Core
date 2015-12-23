@@ -27,6 +27,8 @@
 
 // Library/third-party includes
 #include <opencv2/core/version.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 // Standard includes
 #include <fstream>
