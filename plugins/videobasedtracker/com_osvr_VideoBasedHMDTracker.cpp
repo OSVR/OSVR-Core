@@ -390,15 +390,13 @@ class ConfiguredDeviceConstructor {
                                               config));
             auto camParams = osvr::vbtracker::getSimulatedHDKCameraParameters();
             newTracker->vbtracker().addSensor(
-                osvr::vbtracker::createHDKLedIdentifierSimulated(0),
-                camParams.cameraMatrix, camParams.distortionParameters,
+                osvr::vbtracker::createHDKLedIdentifierSimulated(0), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
                 frontPanelFixedBeacon, 4, 2);
             // There are sometimes only four beacons on the back unit (two of
             // the LEDs are disabled), so we let things work with just those.
             newTracker->vbtracker().addSensor(
-                osvr::vbtracker::createHDKLedIdentifierSimulated(1),
-                camParams.cameraMatrix, camParams.distortionParameters,
+                osvr::vbtracker::createHDKLedIdentifierSimulated(1), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
                 backPanelFixedBeacon, 4, 0);
             return OSVR_RETURN_SUCCESS;
@@ -449,8 +447,7 @@ class ConfiguredDeviceConstructor {
                 }
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
                 newTracker.vbtracker().addSensor(
-                    osvr::vbtracker::createHDKUnifiedLedIdentifier(),
-                    camParams.cameraMatrix, camParams.distortionParameters,
+                    osvr::vbtracker::createHDKUnifiedLedIdentifier(), camParams,
                     locations, variances, frontPanelFixedBeacon, 4, 0);
             };
         } else {
@@ -461,14 +458,12 @@ class ConfiguredDeviceConstructor {
                 VideoBasedHMDTracker &newTracker) {
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
                 newTracker.vbtracker().addSensor(
-                    osvr::vbtracker::createHDKLedIdentifier(0),
-                    camParams.cameraMatrix, camParams.distortionParameters,
+                    osvr::vbtracker::createHDKLedIdentifier(0), camParams,
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
                     osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
                     frontPanelFixedBeacon, 6, 0);
                 newTracker.vbtracker().addSensor(
-                    osvr::vbtracker::createHDKLedIdentifier(1),
-                    camParams.cameraMatrix, camParams.distortionParameters,
+                    osvr::vbtracker::createHDKLedIdentifier(1), camParams,
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
                     backPanelFixedBeacon, 4, 0);
             };

@@ -28,6 +28,7 @@
 // Internal Includes
 #include "Types.h"
 #include "LED.h"
+#include "CameraParameters.h"
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
@@ -82,15 +83,14 @@ namespace vbtracker {
         /// format suitable to send to OpenCV. See
         /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
         /// for details on these formats.
-        /// @param cameraMatrix 3x3 camera matrix for OpenCV
-        /// @param distCoeffs Distortion coefficients for OpenCV
+        /// @param camParams Intrinsic camera parameters (camera matrix and
+        /// distortion)
         /// @param beacons 3D beacon locations
         /// @param requiredInliers How many "good" points must be available
         /// @param permittedOutliers How many additional "bad" points we can
         /// have
         BeaconBasedPoseEstimator(
-            const DoubleVecVec &cameraMatrix,
-            const std::vector<double> &distCoeffs, const Point3Vector &beacons,
+            CameraParameters const &camParams, const Point3Vector &beacons,
             size_t requiredInliers = 4, size_t permittedOutliers = 2,
             BeaconIDPredicate const &autocalibrationFixedPredicate =
                 getDefaultBeaconFixedPredicate(),
@@ -101,14 +101,13 @@ namespace vbtracker {
         /// format suitable to send to OpenCV. See
         /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
         /// for details on these formats.
-        /// @param cameraMatrix 3x3 camera matrix for OpenCV
-        /// @param distCoeffs Distortion coefficients for OpenCV
+        /// @param camParams Intrinsic camera parameters (camera matrix and
+        /// distortion)
         /// @param beacons 3D beacon locations
         /// @param requiredInliers How many "good" points must be available
         /// @param permittedOutliers How many additional "bad" points we can
         /// have
-        BeaconBasedPoseEstimator(const DoubleVecVec &cameraMatrix,
-                                 const std::vector<double> &distCoeffs,
+        BeaconBasedPoseEstimator(CameraParameters const &camParams,
                                  size_t requiredInliers = 4,
                                  size_t permittedOutliers = 2,
                                  ConfigParams const &params = ConfigParams{});
@@ -150,8 +149,7 @@ namespace vbtracker {
         bool SetBeacons(const Point3Vector &beacons,
                         std::vector<double> const &variance,
                         BeaconIDPredicate const &autocalibrationFixedPredicate);
-        bool SetCameraMatrix(const DoubleVecVec &cameraMatrix);
-        bool SetDistCoeffs(const std::vector<double> &distCoeffs);
+        bool SetCameraParameters(CameraParameters const &camParams);
         /// @}
 
         void dumpBeaconLocationsToStream(std::ostream &os) const;
@@ -194,10 +192,7 @@ namespace vbtracker {
 
         std::vector<BeaconData> m_beaconDebugData;
 
-        Eigen::Vector2d m_principalPoint;
-        double m_focalLength;
-        cv::Mat m_cameraMatrix;     //< 3x3 camera matrix
-        cv::Mat m_distCoeffs;       //< Distortion coefficients
+        CameraParameters m_camParams;
         size_t m_requiredInliers;   //< How many inliers do we require?
         size_t m_permittedOutliers; //< How many outliers do we allow?
         ConfigParams const m_params;

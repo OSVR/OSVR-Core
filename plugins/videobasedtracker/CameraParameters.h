@@ -33,29 +33,65 @@
 
 // Standard includes
 #include <initializer_list>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
     struct CameraParameters {
-        CameraParameters(std::vector<std::vector<double>> matrix,
+        /// Separate focal lengths, distortion specified.
+        CameraParameters(double fx, double fy, cv::Size size,
                          std::initializer_list<double> distortionParams)
-            : cameraMatrix(matrix), distortionParameters(distortionParams) {}
-
-        CameraParameters(double focalLength, cv::Size size,
-                         std::initializer_list<double> distortionParams)
-            : distortionParameters(distortionParams) {
-            cameraMatrix.push_back({focalLength, 0., size.width / 2.});
-            cameraMatrix.push_back({0., focalLength, size.height / 2.});
-            cameraMatrix.push_back({0., 0., 0.});
+            : cameraMatrix(cv::Matx33d::eye()),
+              distortionParameters(distortionParams) {
+            cameraMatrix(0, 0) = fx;
+            cameraMatrix(1, 1) = fy;
+            cameraMatrix(0, 2) = size.width / 2.;
+            cameraMatrix(1, 2) = size.height / 2.;
+            normalizeDistortionParameters();
         }
 
-        /// The zero-distortion constructor
-        CameraParameters(double focalLength, cv::Size size)
-            : CameraParameters(focalLength, size, {0., 0., 0., 0., 0.}) {}
+        /// Single focal length, distortion specified.
+        CameraParameters(double focalLength, cv::Size size,
+                         std::initializer_list<double> distortionParams)
+            : CameraParameters(focalLength, focalLength, size,
+                               distortionParams) {}
 
-        std::vector<std::vector<double>> cameraMatrix;
+        /// The zero-distortion constructor, separate focal lengths
+        CameraParameters(double fx, double fy, cv::Size size)
+            : CameraParameters(fx, fy, size, {0., 0., 0., 0., 0.}) {}
+
+        /// The zero-distortion constructor, single focal length
+        CameraParameters(double focalLength, cv::Size size)
+            : CameraParameters(focalLength, focalLength, size) {}
+
+        /// Copy-constructs, with zero distortion parameters.
+        CameraParameters createUndistortedVariant() const {
+            // copy
+            auto ret = *this;
+            // zero the distortion
+            ret.distortionParameters.clear();
+            ret.normalizeDistortionParameters();
+            return ret;
+        }
+
+        double focalLengthX() const { return cameraMatrix(0, 0); }
+        double focalLengthY() const { return cameraMatrix(1, 1); }
+        double focalLength() const { return focalLengthX(); }
+
+        cv::Point2d principalPoint() const {
+            return cv::Point2d(cameraMatrix(0, 2), cameraMatrix(1, 2));
+        }
+
+        cv::Matx33d cameraMatrix;
         std::vector<double> distortionParameters;
+
+      private:
+        void normalizeDistortionParameters() {
+            /// @todo handle higher order distortion?
+            distortionParameters.resize(5, 0.);
+        }
     };
+
     inline CameraParameters getSimulatedHDKCameraParameters() {
 
         // The fake tracker uses real LED positions and a

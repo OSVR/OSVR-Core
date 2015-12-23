@@ -106,27 +106,21 @@ namespace vbtracker {
         8.0,  3.0,  8.0,  8.0,  8.0,  8.0,  3.0,  3.0,  3.0,  3.0};
 
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
-        const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
-        const Point3Vector &beacons, size_t requiredInliers,
-        size_t permittedOutliers,
+        CameraParameters const &camParams, const Point3Vector &beacons,
+        size_t requiredInliers, size_t permittedOutliers,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         ConfigParams const &params)
-        : m_params(params) {
+        : m_params(params), m_camParams(camParams) {
         SetBeacons(beacons, autocalibrationFixedPredicate);
-        SetCameraMatrix(cameraMatrix);
-        SetDistCoeffs(distCoeffs);
         m_gotPose = false;
         m_requiredInliers = requiredInliers;
         m_permittedOutliers = permittedOutliers;
     }
 
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
-        const DoubleVecVec &cameraMatrix, const std::vector<double> &distCoeffs,
-        size_t requiredInliers, size_t permittedOutliers,
-        ConfigParams const &params)
-        : m_params(params) {
-        SetCameraMatrix(cameraMatrix);
-        SetDistCoeffs(distCoeffs);
+        CameraParameters const &camParams, size_t requiredInliers,
+        size_t permittedOutliers, ConfigParams const &params)
+        : m_params(params), m_camParams(camParams) {
         m_gotPose = false;
         m_requiredInliers = requiredInliers;
         m_permittedOutliers = permittedOutliers;
@@ -217,59 +211,12 @@ namespace vbtracker {
         m_beaconDebugData.resize(m_beacons.size());
     }
 
-    bool BeaconBasedPoseEstimator::SetCameraMatrix(
-        const DoubleVecVec &cameraMatrix) {
+    bool BeaconBasedPoseEstimator::SetCameraParameters(
+        CameraParameters const &camParams) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
 
-        // Construct the camera matrix from the vectors we received.
-        if (cameraMatrix.size() != 3) {
-            return false;
-        }
-        for (size_t i = 0; i < cameraMatrix.size(); i++) {
-            if (cameraMatrix[i].size() != 3) {
-                return false;
-            }
-        }
-        cv::Mat newCameraMatrix(static_cast<int>(cameraMatrix.size()),
-                                static_cast<int>(cameraMatrix[0].size()),
-                                CV_64F);
-        for (int i = 0; i < cameraMatrix.size(); i++) {
-            for (int j = 0; j < cameraMatrix[i].size(); j++) {
-                newCameraMatrix.at<double>(i, j) = cameraMatrix[i][j];
-            }
-        }
-
-        m_cameraMatrix = newCameraMatrix;
-
-        // Extract just the pieces we'll use
-        m_focalLength = m_cameraMatrix.at<double>(0, 0);
-        m_principalPoint = Eigen::Vector2d{m_cameraMatrix.at<double>(0, 2),
-                                           m_cameraMatrix.at<double>(1, 2)};
-        //    std::cout << "XXX cameraMatrix =" << std::endl << m_cameraMatrix
-        //    << std::endl;
-        return true;
-    }
-
-    bool BeaconBasedPoseEstimator::SetDistCoeffs(
-        const std::vector<double> &distCoeffs) {
-        // Our existing pose won't match anymore.
-        m_gotPose = false;
-
-        // Construct the distortion matrix from the vectors we received.
-        if (distCoeffs.size() < 5) {
-            return false;
-        }
-        cv::Mat newDistCoeffs(static_cast<int>(distCoeffs.size()), 1, CV_64F);
-        for (int i = 0; i < distCoeffs.size(); i++) {
-            newDistCoeffs.at<double>(i, 0) = distCoeffs[i];
-        }
-
-        m_distCoeffs = newDistCoeffs;
-        /// @todo use these in the kalman path
-
-        //    std::cout << "XXX distCoeffs =" << std::endl << m_distCoeffs <<
-        //    std::endl;
+        m_camParams = camParams;
         return true;
     }
 
@@ -400,8 +347,9 @@ namespace vbtracker {
 
 #if CV_MAJOR_VERSION == 2
         cv::solvePnPRansac(
-            objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, iterationsCount, 8.0f,
+            objectPoints, imagePoints, m_camParams.cameraMatrix,
+            m_camParams.distortionParameters, m_rvec, m_tvec, usePreviousGuess,
+            iterationsCount, 8.0f,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 #elif CV_MAJOR_VERSION == 3
@@ -411,9 +359,9 @@ namespace vbtracker {
         /// given?
         double confidence = 0.99;
         auto ransacResult = cv::solvePnPRansac(
-            objectPoints, imagePoints, m_cameraMatrix, m_distCoeffs, m_rvec,
-            m_tvec, usePreviousGuess, iterationsCount, 8.0f, confidence,
-            inlierIndices);
+            objectPoints, imagePoints, m_camParams.cameraMatrix,
+            m_camParams.distortionParameters, m_rvec, m_tvec, usePreviousGuess,
+            iterationsCount, 8.0f, confidence, inlierIndices);
         if (!ransacResult) {
             return false;
         }
@@ -440,8 +388,9 @@ namespace vbtracker {
                 inlierImagePoints.push_back(imagePoints[i]);
             }
             std::vector<cv::Point2f> reprojectedPoints;
-            cv::projectPoints(inlierObjectPoints, m_rvec, m_tvec,
-                              m_cameraMatrix, m_distCoeffs, reprojectedPoints);
+            cv::projectPoints(
+                inlierObjectPoints, m_rvec, m_tvec, m_camParams.cameraMatrix,
+                m_camParams.distortionParameters, reprojectedPoints);
 
             for (size_t i = 0; i < reprojectedPoints.size(); i++) {
                 if (reprojectedPoints[i].x - inlierImagePoints[i].x >
@@ -496,8 +445,8 @@ namespace vbtracker {
             beacons.push_back(vec3dToCVPoint3f(beacon->stateVector()));
         }
         // Do the OpenCV projection.
-        cv::projectPoints(beacons, m_rvec, m_tvec, m_cameraMatrix, m_distCoeffs,
-                          out);
+        cv::projectPoints(beacons, m_rvec, m_tvec, m_camParams.cameraMatrix,
+                          m_camParams.distortionParameters, out);
         return true;
     }
 #if 0

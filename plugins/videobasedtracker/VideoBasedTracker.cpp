@@ -69,55 +69,56 @@ namespace vbtracker {
 
     // This version adds the beacons as a part of the constructor.
     void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, DoubleVecVec const &m,
-        std::vector<double> const &d, Point3Vector const &locations,
+        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
+        Point3Vector const &locations,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            m, d, locations, requiredInliers, permittedOutliers,
+            camParams, locations, requiredInliers, permittedOutliers,
             autocalibrationFixedPredicate, m_params));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
 
     // This version requires YOU to add your beacons! You!
-    void VideoBasedTracker::addSensor(LedIdentifierPtr &&identifier,
-                                      DoubleVecVec const &m,
-                                      std::vector<double> const &d,
-                                      size_t requiredInliers,
-                                      size_t permittedOutliers) {
+    void VideoBasedTracker::addSensor(
+        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
+        std::function<void(BeaconBasedPoseEstimator &)> const &beaconAdder,
+        size_t requiredInliers, size_t permittedOutliers) {
 
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            m, d, requiredInliers, permittedOutliers, m_params));
+            camParams, requiredInliers, permittedOutliers, m_params));
         m_led_groups.emplace_back();
+        beaconAdder(*m_estimators.back());
         m_assertInvariants();
     }
 
     void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, DoubleVecVec const &m,
-        std::vector<double> const &d, Point3Vector const &locations,
-        double variance, BeaconIDPredicate const &autocalibrationFixedPredicate,
-        size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, requiredInliers,
-                  permittedOutliers);
-        m_estimators.back()->SetBeacons(locations, variance,
-                                        autocalibrationFixedPredicate);
-        m_assertInvariants();
-    }
-
-    void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, DoubleVecVec const &m,
-        std::vector<double> const &d, Point3Vector const &locations,
-        std::vector<double> const &variance,
+        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
+        Point3Vector const &locations, double variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), m, d, requiredInliers,
-                  permittedOutliers);
-        m_estimators.back()->SetBeacons(locations, variance,
-                                        autocalibrationFixedPredicate);
-        m_assertInvariants();
+        addSensor(std::move(identifier), camParams,
+                  [&](BeaconBasedPoseEstimator &estimator) {
+                      estimator.SetBeacons(locations, variance,
+                                           autocalibrationFixedPredicate);
+                  },
+                  requiredInliers, permittedOutliers);
+    }
+
+    void VideoBasedTracker::addSensor(
+        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
+        Point3Vector const &locations, std::vector<double> const &variance,
+        BeaconIDPredicate const &autocalibrationFixedPredicate,
+        size_t requiredInliers, size_t permittedOutliers) {
+        addSensor(std::move(identifier), camParams,
+                  [&](BeaconBasedPoseEstimator &estimator) {
+                      estimator.SetBeacons(locations, variance,
+                                           autocalibrationFixedPredicate);
+                  },
+                  requiredInliers, permittedOutliers);
     }
 #if 0
     /// This class is not currently used because it needs some more tuning.

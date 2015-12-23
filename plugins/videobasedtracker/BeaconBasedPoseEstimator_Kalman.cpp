@@ -97,8 +97,8 @@ namespace vbtracker {
         }
 
         CameraModel cam;
-        cam.focalLength = m_focalLength;
-        cam.principalPoint = m_principalPoint;
+        cam.focalLength = m_camParams.focalLength();
+        cam.principalPoint = cvToVector(m_camParams.principalPoint());
         ImagePointMeasurement meas{cam};
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
