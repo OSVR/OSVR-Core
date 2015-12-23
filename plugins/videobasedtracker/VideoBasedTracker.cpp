@@ -24,6 +24,9 @@
 
 // Internal Includes
 #include "VideoBasedTracker.h"
+#include "cvToEigen.h"
+#include "CameraDistortionModel.h"
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Library/third-party includes
 #include <opencv2/core/version.hpp>
@@ -32,6 +35,7 @@
 
 // Standard includes
 #include <fstream>
+#include <algorithm>
 
 #define OSVR_USE_SIMPLEBLOB
 #undef OSVR_USE_CANNY_EDGEDETECT
@@ -73,10 +77,12 @@ namespace vbtracker {
         Point3Vector const &locations,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
+        m_camParams = camParams;
+
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            camParams, locations, requiredInliers, permittedOutliers,
-            autocalibrationFixedPredicate, m_params));
+            camParams.createUndistortedVariant(), locations, requiredInliers,
+            permittedOutliers, autocalibrationFixedPredicate, m_params));
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
@@ -86,10 +92,11 @@ namespace vbtracker {
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
         std::function<void(BeaconBasedPoseEstimator &)> const &beaconAdder,
         size_t requiredInliers, size_t permittedOutliers) {
-
+        m_camParams = camParams;
         m_identifiers.emplace_back(std::move(identifier));
         m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            camParams, requiredInliers, permittedOutliers, m_params));
+            camParams.createUndistortedVariant(), requiredInliers,
+            permittedOutliers, m_params));
         m_led_groups.emplace_back();
         beaconAdder(*m_estimators.back());
         m_assertInvariants();
@@ -206,13 +213,33 @@ namespace vbtracker {
         enh.getDebugImage().copyTo(m_keypointEnhancement);
 #endif
 
+        /// Perform the undistortion of keypoints
+        std::vector<cv::KeyPoint> undistortedKeypoints;
+        undistortedKeypoints.resize(foundKeyPoints.size());
+        auto distortionModel = CameraDistortionModel{
+            Eigen::Vector2d{m_camParams.focalLengthX(),
+                            m_camParams.focalLengthY()},
+            cvToVector(m_camParams.principalPoint()),
+            Eigen::Vector3d{m_camParams.k1(), m_camParams.k2(),
+                            m_camParams.k3()}};
+        auto keypointUndistort = [&distortionModel](
+            cv::KeyPoint const &keypoint) {
+            cv::KeyPoint ret{keypoint};
+            Eigen::Vector2d undistorted = distortionModel.undistortPoint(
+                cvToVector(ret.pt).cast<double>());
+            ret.pt = vecToPoint(undistorted.cast<float>());
+            return ret;
+        };
+        std::transform(begin(foundKeyPoints), end(foundKeyPoints),
+                       begin(undistortedKeypoints), keypointUndistort);
+
         // We allow multiple sets of LEDs, each corresponding to a different
         // sensor, to be located in the same image.  We construct a new set
         // of LEDs for each and try to find them.  It is assumed that they all
         // have unique ID patterns across all sensors.
         for (size_t sensor = 0; sensor < m_identifiers.size(); sensor++) {
             osvrPose3SetIdentity(&m_pose);
-            std::vector<cv::KeyPoint> keyPoints = foundKeyPoints;
+            std::vector<cv::KeyPoint> keyPoints = undistortedKeypoints;
 
             // Locate the closest blob from this frame to each LED found
             // in the previous frame.  If it is close enough to the nearest

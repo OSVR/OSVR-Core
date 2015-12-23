@@ -163,6 +163,9 @@ namespace vbtracker {
 
         /// @brief The pose that we report
         OSVR_PoseState m_pose;
+
+        /// A captured copy of the camera parameters;
+        CameraParameters m_camParams;
     };
 
 } // namespace vbtracker

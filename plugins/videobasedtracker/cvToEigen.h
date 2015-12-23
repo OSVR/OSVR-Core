@@ -89,6 +89,10 @@ namespace vbtracker {
         return cv::Point3f(vec.x(), vec.y(), vec.z());
     }
 
+    inline cv::Point2f vecToPoint(Eigen::Vector2f const &vec) {
+        return cv::Point2f(vec.x(), vec.y());
+    }
+
 } // namespace vbtracker
 } // namespace osvr
 

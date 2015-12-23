@@ -61,7 +61,8 @@ namespace vbtracker {
             : CameraParameters(fx, fy, size, {0., 0., 0., 0., 0.}) {}
 
         /// The zero-distortion constructor, single focal length
-        CameraParameters(double focalLength, cv::Size size)
+        CameraParameters(double focalLength = 700,
+                         cv::Size size = cv::Size(640, 480))
             : CameraParameters(focalLength, focalLength, size) {}
 
         /// Copy-constructs, with zero distortion parameters.
@@ -77,7 +78,9 @@ namespace vbtracker {
         double focalLengthX() const { return cameraMatrix(0, 0); }
         double focalLengthY() const { return cameraMatrix(1, 1); }
         double focalLength() const { return focalLengthX(); }
-
+        double k1() const { return distortionParameters[0]; }
+        double k2() const { return distortionParameters[1]; }
+        double k3() const { return distortionParameters[2]; }
         cv::Point2d principalPoint() const {
             return cv::Point2d(cameraMatrix(0, 2), cameraMatrix(1, 2));
         }

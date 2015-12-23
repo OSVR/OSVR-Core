@@ -24,6 +24,7 @@ add_library(vbtracker-core STATIC
     BeaconBasedPoseEstimator.cpp
     BeaconBasedPoseEstimator_Kalman.cpp
     BeaconBasedPoseEstimator.h
+    CameraDistortionModel.h
     CameraParameters.h
     cvToEigen.h
     HDKLedIdentifier.cpp
