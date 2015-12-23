@@ -146,6 +146,13 @@ namespace vbtracker {
             BOOST_ASSERT_MSG(m_identifiers.size() == m_estimators.size(),
                              "Expected to have as many identifier objects as "
                              "estimator objects");
+
+            for (auto &e : m_estimators) {
+                BOOST_ASSERT_MSG(
+                    e->getNumBeacons() > 4,
+                    "Expected each estimator to have at least 4 beacons");
+
+            }
         }
         /// @name Structures needed to do the tracking.
         /// @{

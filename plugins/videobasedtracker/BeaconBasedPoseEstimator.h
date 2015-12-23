@@ -124,6 +124,8 @@ namespace vbtracker {
                                   OSVR_TimeValue const &tv,
                                   OSVR_PoseState &out);
 
+        std::size_t getNumBeacons() const { return m_beacons.size(); }
+
         /// @brief Project the beacons into image space given the most-recent
         /// estimation of pose.
         /// @return true on success, false on failure.
