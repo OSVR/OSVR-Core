@@ -28,9 +28,9 @@
     "distortion": {
         "distance_scale_x": 1,
         "distance_scale_y": 1,
-        "polynomial_coeffs_red": [ 0, 1, -0.95, 1.88, 1.62, 1.11 ],
-        "polynomial_coeffs_green": [ 0, 1, -0.95, 1.88, 1.62, 1.11 ],
-        "polynomial_coeffs_blue": [ 0, 1, -0.95, 1.88, 1.62, 1.11 ]
+        "polynomial_coeffs_red": [0, 1, -1.74, 5.15, -1.27, -2.23 ],
+        "polynomial_coeffs_green": [0, 1, -1.74, 5.15, -1.27, -2.23 ],
+        "polynomial_coeffs_blue": [0, 1, -1.74, 5.15, -1.27, -2.23 ]
     },
     "rendering": {
       "right_roll": 0,
