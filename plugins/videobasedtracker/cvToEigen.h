@@ -66,8 +66,16 @@ namespace vbtracker {
         return Eigen::Vector3f(point.x, point.y, point.z);
     }
 
+    inline Eigen::Vector3d cvToVector(cv::Point3d const &point) {
+        return Eigen::Vector3d(point.x, point.y, point.z);
+    }
+
     inline Eigen::Vector2f cvToVector(cv::Point2f const &point) {
         return Eigen::Vector2f(point.x, point.y);
+    }
+
+    inline Eigen::Vector2d cvToVector(cv::Point2d const &point) {
+        return Eigen::Vector2d(point.x, point.y);
     }
 
     inline Eigen::Vector3d cvToVector3d(cv::InputArray const &vec) {
