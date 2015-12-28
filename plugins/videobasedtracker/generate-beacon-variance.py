@@ -1,5 +1,5 @@
 defaultVariance = 3.0
-sideVariance = 12.0
+sideVariance = 5.0
 edgeVariance = 8.0
 def getVariance(oneBasedIndex):
     # side beacons
