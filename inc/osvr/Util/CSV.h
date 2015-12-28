@@ -40,34 +40,93 @@
 
 namespace osvr {
 namespace util {
-    /// Class for easily outputting CSV files
+
+    namespace detail {
+        /// Utility class used in conjunction with osvr::util::CSV, to store a
+        /// single table cell's column header and data value temporarily until
+        /// it is added to the row. Construct with the `cell()` helper
+        /// functions.
+        template <typename T> class Cell {
+          public:
+            Cell(std::string const &header, T const &data)
+                : header_(header), data_(data){};
+
+            Cell(std::string &&header, T const &data)
+                : header_(std::move(header)), data_(data){};
+
+            std::string const &getHeader() const { return header_; }
+
+            T const &getData() const { return data_; }
+
+          private:
+            std::string header_;
+            T const &data_;
+        };
+    } // namespace detail
+
+    /// Class for easily outputting CSV files. Just call the .row() method and
+    /// feed it << cell("header", yourdata) << cell("anotherheader", moredata);
+    /// for as many rows as you want (one row call per row, of course).
+    ///
+    /// When you're ready to get your output, hand an ostream (like std::cout or
+    /// your favorite std::ofstream) to .output()
     class CSV {
       public:
-        class Row {
+        /// Returned by calls to .row() on a CSV object (you'll never need
+        /// instantiate manually), and only really interacted with using the
+        /// operator<< and cell() calls.
+        ///
+        /// Intended only to survive a single statement, and for only one to be
+        /// alive (for a given CSV object) at a time. You have been warned.
+        class RowProxy {
           public:
-            Row() = default;
-            template <typename T> Row(std::string const &col, T &&data) {
-                addCol(col, std::forward<T>(data));
-            }
-            template <typename T>
-            void addCol(std::string const &col, T &&data) {
+            explicit RowProxy(CSV &csv) : csv_(csv) {}
+            /// non-copyable
+            RowProxy(RowProxy const &) = delete;
+            /// non-assignable
+            RowProxy &operator=(RowProxy const &) = delete;
+            /// move constructible
+            RowProxy(RowProxy &&other)
+                : csv_(other.csv_), addedRow_(other.addedRow_) {}
 
-                std::ostringstream os;
-                os << std::forward<T>(data);
-                headings_.push_back(col);
-                data_.push_back(os.str());
+            /// Main function, used by the operator<< to add your cell to the
+            /// row in progress. All the non-type-dependent stuff is pulled out
+            /// into separate methods to let the compiler optionally reduce code
+            /// size.
+            template <typename T> void add(detail::Cell<T> const &c) {
+                commonPreAdd();
+                os_ << c.getData();
+                commonPostAdd(c.getHeader());
             }
 
           private:
-            friend class CSV;
-            std::vector<std::string> headings_;
-            std::vector<std::string> data_;
+            /// non-template-parameter-dependent things we do before
+            /// type-dependent stuff in add()
+            void commonPreAdd() {
+                if (!addedRow_) {
+                    csv_.pushRow();
+                    addedRow_ = true;
+                } else {
+                    os_.clear();
+                }
+            }
+            /// non-template-parameter-dependent things we do after
+            /// type-dependent stuff in add()
+            void commonPostAdd(std::string const &header) {
+                csv_.insertInLastRow(header, os_.str());
+            }
+
+            CSV &csv_;
+            std::ostringstream os_;
+            bool addedRow_ = false;
         };
 
-        std::size_t getColumn(std::string const &heading) {
+        using column_id = std::size_t;
+
+        column_id getColumn(std::string const &heading) {
             auto it = columnsMap_.find(heading);
             // If we don't find it, this is where it will be.
-            std::size_t ret = columns_.size();
+            column_id ret = columns_.size();
             if (end(columnsMap_) != it) {
                 // OK, found it somewhere already.
                 ret = it->second;
@@ -79,25 +138,17 @@ namespace util {
             return ret;
         }
 
-        void add(Row const &row) {
-            std::vector<std::string> rowData(numColumns());
-
-            const auto size = row.headings_.size();
-            for (std::size_t i = 0; i < size; ++i) {
-                auto colId = getColumn(row.headings_[i]);
-                /// ensure vector is big enough.
-                if (colId >= rowData.size()) {
-                    rowData.resize(colId + 1);
-                }
-                rowData[colId] = std::move(row.data_[i]);
-            }
-            data_.emplace_back(std::move(rowData));
-        }
+        /// Main call for the CSV object: returns a proxy object that you can
+        /// redirect "cells" into, in order to add them to a new row in the CSV
+        /// table.
+        RowProxy row() { return RowProxy(*this); }
 
         std::size_t numDataRows() const { return data_.size(); }
 
-        std::size_t numColumns() const { return columns_.size(); }
+        column_id numColumns() const { return columns_.size(); }
 
+        /// Outputs all the stored rows and columns, with the union of all
+        /// headers in the first row, quoted, to the std::ostream given.
         void output(std::ostream &os) const {
             for (auto &colName : columns_) {
                 os << "\"" << colName << "\",";
@@ -111,41 +162,47 @@ namespace util {
             }
         }
 
+        void pushRow() { data_.emplace_back(); }
+
+        void insertInLastRow(std::string const &heading,
+                             std::string const &data) {
+            auto col = getColumn(heading);
+            ensureLastRowCanHoldColId(col);
+            lastRow()[col] = data;
+        }
+
       private:
-        // std::ostringstream body_;
+        using DataRow = std::vector<std::string>;
+        void ensureLastRowCanHoldColId(column_id id) {
+            if (id >= lastRow().size()) {
+                lastRow().resize(id + 1);
+            }
+        }
+        DataRow &lastRow() { return data_.back(); }
 
         std::vector<std::string> columns_;
-        std::unordered_map<std::string, std::size_t> columnsMap_;
-        std::vector<std::vector<std::string> > data_;
+        std::unordered_map<std::string, column_id> columnsMap_;
+        std::vector<DataRow> data_;
     };
-    namespace detail {
-        template <typename T> class Cell {
-          public:
-            Cell(std::string const &header, T const &data)
-                : header_(header), data_(data){};
-            std::string const &getHeader() const { return header_; };
-            T const &getData() const { return data_; }
 
-          private:
-            std::string const &header_;
-            T const &data_;
-        };
-    } // namespace detail
+    /// Helper function to make a CSV cell
+    template <typename T>
+    inline detail::Cell<T> cell(const char *header, T const &data) {
+        return detail::Cell<T>{header, data};
+    }
 
+    /// Helper function to make a CSV cell
     template <typename T>
     inline detail::Cell<T> cell(std::string const &header, T const &data) {
         return detail::Cell<T>{header, data};
     }
 
+    /// Left-shift/redirection operator to add a cell to a row proxy object
     template <typename T>
-    inline CSV::Row &&operator<<(CSV::Row &&row, detail::Cell<T> const &cell) {
-        row.addCol(cell.getHeader(), cell.getData());
+    inline CSV::RowProxy &&operator<<(CSV::RowProxy &&row,
+                                      detail::Cell<T> const &cell) {
+        row.add(cell);
         return std::move(row);
-    }
-    template <typename T>
-    inline CSV::Row &operator<<(CSV::Row &row, detail::Cell<T> const &cell) {
-        row.addCol(cell.getHeader(), cell.getData());
-        return row;
     }
 } // namespace util
 } // namespace osvr
