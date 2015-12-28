@@ -27,6 +27,7 @@
 #include "cvToEigen.h"
 #include "CameraDistortionModel.h"
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/CSV.h>
 
 // Library/third-party includes
 #include <opencv2/core/version.hpp>
@@ -36,6 +37,7 @@
 // Standard includes
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 
 #define OSVR_USE_SIMPLEBLOB
 #undef OSVR_USE_CANNY_EDGEDETECT
@@ -196,7 +198,56 @@ namespace vbtracker {
         cv::Mat m_perPointResults;
     };
 #endif
+    void VideoBasedTracker::dumpKeypointDebugData(
+        std::vector<cv::KeyPoint> const &keypoints) {
+        {
+            std::cout << "Dumping blob detection debug data, capture frame "
+                      << m_debugFrame << std::endl;
+            cv::imwrite("debug_rawimage" + std::to_string(m_debugFrame) +
+                            ".png",
+                        m_frame);
+            cv::imwrite("debug_blobframe" + std::to_string(m_debugFrame) +
+                            ".png",
+                        m_imageWithBlobs);
+            cv::imwrite("debug_thresholded" + std::to_string(m_debugFrame) +
+                            ".png",
+                        m_thresholdImage);
+        }
 
+        {
+            auto filename = std::string{"debug_data" +
+                                        std::to_string(m_debugFrame) + ".txt"};
+            std::ofstream datafile{filename.c_str()};
+            datafile << "MinThreshold: " << m_sbdParams.minThreshold
+                     << std::endl;
+            datafile << "MaxThreshold: " << m_sbdParams.maxThreshold
+                     << std::endl;
+            datafile << "ThresholdStep: " << m_sbdParams.thresholdStep
+                     << std::endl;
+            datafile << "Thresholds:" << std::endl;
+            for (double thresh = m_sbdParams.minThreshold;
+                 thresh < m_sbdParams.maxThreshold;
+                 thresh += m_sbdParams.thresholdStep) {
+                datafile << thresh << std::endl;
+            }
+        }
+        {
+            using namespace osvr::util;
+            CSV kpcsv;
+            for (auto &keypoint : keypoints) {
+                kpcsv.row() << cell("x", keypoint.pt.x)
+                            << cell("y", keypoint.pt.y)
+                            << cell("size", keypoint.size);
+            }
+            auto filename = std::string{"debug_blobdetect" +
+                                        std::to_string(m_debugFrame) + ".csv"};
+            std::ofstream csvfile{filename.c_str()};
+            kpcsv.output(csvfile);
+            csvfile.close();
+        }
+        std::cout << "Data dump complete." << std::endl;
+        m_debugFrame++;
+    }
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          OSVR_TimeValue const &tv,
                                          PoseHandler handler) {
@@ -399,7 +450,9 @@ namespace vbtracker {
                             // Show the blob/keypoints image (default)
                             m_shownImage = &m_imageWithBlobs;
                             break;
-
+                        case 'd':
+                            dumpKeypointDebugData(foundKeyPoints);
+                            break;
                         case 'p':
                             // Dump the beacon positions to file.
                             {

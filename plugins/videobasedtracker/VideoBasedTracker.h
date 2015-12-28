@@ -125,6 +125,7 @@ namespace vbtracker {
             size_t requiredInliers = 4, size_t permittedOutliers = 2);
         std::vector<cv::KeyPoint> extractKeypoints(cv::Mat const &grayImage);
 
+        void dumpKeypointDebugData(std::vector<cv::KeyPoint> const &keypoints);
         /// @name Images
         /// @{
         cv::Mat m_frame;
@@ -132,6 +133,7 @@ namespace vbtracker {
         cv::Mat m_thresholdImage;
         cv::Mat m_imageWithBlobs;
         cv::Mat *m_shownImage = &m_imageWithBlobs;
+        int m_debugFrame = 0;
         /// @}
 
         ConfigParams m_params;
@@ -151,7 +153,6 @@ namespace vbtracker {
                 BOOST_ASSERT_MSG(
                     e->getNumBeacons() > 4,
                     "Expected each estimator to have at least 4 beacons");
-
             }
         }
         /// @name Structures needed to do the tracking.
