@@ -23,6 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
+#include "LED.h"
 #include "HDKLedIdentifier.h"
 #include "IdentifierHelpers.h"
 
@@ -78,7 +79,7 @@ namespace vbtracker {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {
-            return -1;
+            return Led::SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
         }
 
         // We only care about the d_length most-recent levels.
@@ -90,11 +91,11 @@ namespace vbtracker {
         // 0's and 1's.
         Brightness minVal, maxVal;
         std::tie(minVal, maxVal) = findMinMaxBrightness(brightnesses);
-        // Brightness is currently actually keypoint diameter in pixels, and
-        // it's being under-estimated by OpenCV.
+        // Brightness is currently actually keypoint diameter (radius?) in
+        // pixels, and it's being under-estimated by OpenCV.
         static const double TODO_MIN_BRIGHTNESS_DIFF = 0.3;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
-            return -2;
+            return Led::SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE;
         }
         const auto threshold = (minVal + maxVal) / 2;
         // Set the `lastBright` out variable
@@ -119,7 +120,7 @@ namespace vbtracker {
 
         // No pattern recognized and we should have recognized one, so return
         // a low negative.  We've used -2 so return -3.
-        return -3;
+        return Led::SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA;
     }
 
 } // End namespace vbtracker
