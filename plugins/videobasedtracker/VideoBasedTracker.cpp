@@ -320,14 +320,14 @@ namespace vbtracker {
                     };
                     cv::Mat temp;
                     cv::threshold(m_imageGray, m_thresholdImage,
-                                  m_sbdParams.minThreshold,
-                                  m_sbdParams.minThreshold, CV_THRESH_BINARY);
+                                  m_sbdParams.minThreshold, 255,
+                                  CV_THRESH_BINARY);
                     cv::Mat tempOut;
                     for (int i = 1;
                          getCurrentThresh(i) < m_sbdParams.maxThreshold; ++i) {
                         auto currentThresh = getCurrentThresh(i);
-                        cv::threshold(m_imageGray, temp, currentThresh,
-                                      currentThresh, CV_THRESH_BINARY);
+                        cv::threshold(m_imageGray, temp, currentThresh, 255,
+                                      CV_THRESH_BINARY);
                         cv::addWeighted(m_thresholdImage, 0.5, temp, 0.5, 0,
                                         tempOut);
                         m_thresholdImage = tempOut;
