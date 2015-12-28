@@ -44,7 +44,7 @@ namespace vbtracker {
         // If we don't have an identifier, then our ID is unknown.
         // Otherwise, try and find it.
         if (!m_identifier) {
-            m_id = -1;
+            m_id = SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
         } else {
             auto oldId = m_id;
             m_id = m_identifier->getId(m_brightnessHistory, m_lastBright);
