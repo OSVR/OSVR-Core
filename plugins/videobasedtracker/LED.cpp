@@ -83,7 +83,8 @@ namespace vbtracker {
         auto location = m_location;
 
         auto computeDistSquared = [location](KeyPointIterator it) {
-            return norm(location - it->pt);
+            auto diff = (location - it->pt);
+            return diff.dot(diff);
         };
 
         // Find the distance to the first point and record it as the
