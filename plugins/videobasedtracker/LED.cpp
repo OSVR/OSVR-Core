@@ -47,7 +47,7 @@ namespace vbtracker {
             m_id = SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
         } else {
             auto oldId = m_id;
-            m_id = m_identifier->getId(m_brightnessHistory, m_lastBright);
+            m_id = m_identifier->getId(m_id, m_brightnessHistory, m_lastBright);
 #if 0
             m_newlyRecognized = oldId < 0 && m_id >= 0;
             auto lostRecognition = m_id < 0 && oldId >= 0;
