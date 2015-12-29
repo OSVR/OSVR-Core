@@ -30,7 +30,7 @@
 #include "LED.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/features2d/features2d.hpp>
 
 // Standard includes
 #include <vector>
@@ -41,19 +41,31 @@ namespace vbtracker {
     class SBDBlobExtractor {
       public:
         explicit SBDBlobExtractor(ConfigParams const &params);
+
         std::vector<LedMeasurement> const &
         extractBlobs(cv::Mat const &grayImage);
+
         cv::Mat const &getDebugThresholdImage();
+
         cv::Mat const &getDebugBlobImage();
 
       private:
         void getKeypoints(cv::Mat const &grayImage);
+        cv::Mat generateDebugThresholdImage() const;
+        cv::Mat generateDebugBlobImage() const;
+
         ConfigParams m_params;
         cv::SimpleBlobDetector::Params m_sbdParams;
-        std::vector<cv::KeyPoint> m_tempKeyPoints;
         std::vector<LedMeasurement> m_latestMeasurements;
+
+        std::vector<cv::KeyPoint> m_keyPoints;
+
         cv::Mat m_lastGrayImage;
+
+        bool m_debugThresholdImageDirty = true;
         cv::Mat m_debugThresholdImage;
+
+        bool m_debugBlobImageDirty = true;
         cv::Mat m_debugBlobImage;
     };
 } // namespace vbtracker

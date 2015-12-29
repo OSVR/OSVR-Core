@@ -26,7 +26,8 @@
 #include "SBDBlobExtractor.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
 
 // Standard includes
 // - none
@@ -64,8 +65,11 @@ namespace vbtracker {
     SBDBlobExtractor::extractBlobs(cv::Mat const &grayImage) {
         m_latestMeasurements.clear();
         m_lastGrayImage = grayImage.clone();
+        m_debugThresholdImageDirty = true;
+        m_debugBlobImageDirty = true;
+
         getKeypoints(grayImage);
-        for (auto &kp : m_tempKeyPoints) {
+        for (auto &kp : m_keyPoints) {
             auto measurement = LedMeasurement{};
             /// @todo actually populate this with real data.
             measurement.loc = kp.pt;
@@ -77,7 +81,7 @@ namespace vbtracker {
     }
 
     void SBDBlobExtractor::getKeypoints(cv::Mat const &grayImage) {
-        m_tempKeyPoints.clear();
+        m_keyPoints.clear();
         //================================================================
         // Tracking the points
 
@@ -115,7 +119,7 @@ namespace vbtracker {
 #else
 #error "Unrecognized OpenCV version!"
 #endif
-        detector->detect(grayImage, m_tempKeyPoints);
+        detector->detect(grayImage, m_keyPoints);
 
         // @todo: Consider computing the center of mass of a dilated bounding
         // rectangle around each keypoint to produce a more precise subpixel
@@ -127,11 +131,51 @@ namespace vbtracker {
         // the brightness parameter to the Led class when adding a new one
         // or augmenting with a new frame.
     }
-    cv::Mat const &SBDBlobExtractor::getDebugThresholdImage() {
 
+    cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {
+
+        // Fake the thresholded image to give an idea of what the
+        // blob detector is doing.
+        auto getCurrentThresh = [&](int i) {
+            return i * m_sbdParams.thresholdStep + m_sbdParams.minThreshold;
+        };
+        cv::Mat ret;
+        cv::Mat temp;
+        cv::threshold(m_lastGrayImage, ret, m_sbdParams.minThreshold, 255,
+                      CV_THRESH_BINARY);
+        cv::Mat tempOut;
+        for (int i = 1; getCurrentThresh(i) < m_sbdParams.maxThreshold; ++i) {
+            auto currentThresh = getCurrentThresh(i);
+            cv::threshold(m_lastGrayImage, temp, currentThresh, currentThresh,
+                          CV_THRESH_BINARY);
+            cv::addWeighted(ret, 0.5, temp, 0.5, 0, tempOut);
+            ret = tempOut;
+        }
+        return ret;
+    }
+    cv::Mat const &SBDBlobExtractor::getDebugThresholdImage() {
+        if (m_debugThresholdImageDirty) {
+            m_debugThresholdImage = generateDebugThresholdImage();
+            m_debugThresholdImageDirty = false;
+        }
         return m_debugThresholdImage;
     }
+
+    cv::Mat SBDBlobExtractor::generateDebugBlobImage() const {
+        cv::Mat ret;
+        cv::Mat tempColor;
+        cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
+        // Draw detected blobs as blue circles.
+        cv::drawKeypoints(tempColor, m_keyPoints, ret, cv::Scalar(255, 0, 0),
+                          cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+        return ret;
+    }
     cv::Mat const &SBDBlobExtractor::getDebugBlobImage() {
+        if (m_debugBlobImageDirty) {
+            m_debugBlobImage = generateDebugBlobImage();
+            m_debugBlobImageDirty = false;
+        }
         return m_debugBlobImage;
     }
 
