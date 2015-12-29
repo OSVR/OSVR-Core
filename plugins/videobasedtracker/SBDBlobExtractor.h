@@ -34,14 +34,17 @@
 
 // Standard includes
 #include <vector>
+#include <memory>
 
 namespace osvr {
 namespace vbtracker {
+    class KeypointDetailer;
+
     /// A class performing blob-extraction duties on incoming frames.
     class SBDBlobExtractor {
       public:
         explicit SBDBlobExtractor(ConfigParams const &params);
-
+        ~SBDBlobExtractor();
         std::vector<LedMeasurement> const &
         extractBlobs(cv::Mat const &grayImage);
 
@@ -60,6 +63,7 @@ namespace vbtracker {
 
         std::vector<cv::KeyPoint> m_keyPoints;
 
+        std::unique_ptr<KeypointDetailer> m_keypointDetailer;
         cv::Mat m_lastGrayImage;
 
         bool m_debugThresholdImageDirty = true;

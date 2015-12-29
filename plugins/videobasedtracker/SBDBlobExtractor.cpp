@@ -32,10 +32,129 @@
 // Standard includes
 // - none
 
+#include <iostream>
+
 namespace osvr {
 namespace vbtracker {
+
+    /// This class used to be the "keypoint enhancer" - it now is used to
+    /// after-the-fact extract additional data per keypoint.
+    class KeypointDetailer {
+      public:
+        using ContourType = std::vector<cv::Point2i>;
+        std::vector<LedMeasurement>
+        augmentKeypoints(cv::Mat const &grayImage,
+                         std::vector<cv::KeyPoint> const &foundKeyPoints) {
+
+            std::vector<LedMeasurement> ret;
+            cv::Mat greyCopy = grayImage.clone();
+
+            /// Reset the flood fill mask to just have a one-pixel border on the
+            /// edges.
+            m_floodFillMask =
+                cv::Mat::zeros(grayImage.rows + 2, grayImage.cols + 2, CV_8UC1);
+            m_floodFillMask.row(0) = 1;
+            m_floodFillMask.row(m_floodFillMask.rows - 1) = 1;
+            m_floodFillMask.col(0) = 1;
+            m_floodFillMask.col(m_floodFillMask.cols - 1) = 1;
+
+            for (auto const &keypoint : foundKeyPoints) {
+                ret.push_back(augmentKeypoint(greyCopy, keypoint));
+            }
+
+            return ret;
+        }
+
+        cv::Mat getDebugImage() {
+            return m_floodFillMask(cv::Rect(1, 1, m_floodFillMask.cols - 2,
+                                            m_floodFillMask.rows - 2));
+        }
+
+      private:
+        LedMeasurement augmentKeypoint(cv::Mat grayImage,
+                                       cv::KeyPoint origKeypoint) {
+            cv::Rect bounds;
+            int loDiff = 5;
+            int upDiff = 5;
+            // Saving this now before we monkey with m_floodFillMask
+            cv::bitwise_not(m_floodFillMask, m_scratchNotMask);
+
+            cv::floodFill(grayImage, m_floodFillMask, origKeypoint.pt, 255,
+                          &bounds, loDiff, upDiff,
+                          CV_FLOODFILL_MASK_ONLY |
+                              (/* connectivity 4 or 8 */ 4) |
+                              (/* value to write in to mask */ 1 << 8));
+            // Now m_floodFillMask contains the mask with both our point
+            // and all other points so far. We need to split them by ANDing with
+            // the NOT of the old flood-fill mask we saved earlier.
+            cv::bitwise_and(m_scratchNotMask, m_floodFillMask,
+                            m_perPointResults);
+            // OK, now we have the results for just this point in per-point
+            // results
+
+            m_binarySubImage = m_perPointResults(bounds);
+            computeContour();
+            m_moments = haveContour() ? cv::moments(m_contour, false)
+                                      : cv::moments(m_binarySubImage, true);
+
+            /// Initialize return value
+            auto ret = static_cast<LedMeasurement>(origKeypoint);
+
+            /// Estimate diameter
+            ret.diameter = diameter();
+            if (haveContour()) {
+                ret.circularity = circularity();
+            }
+            return ret;
+        }
+
+        /// Gets the contour of the binary sub image.
+        void computeContour() {
+            cv::Mat input = m_binarySubImage.clone();
+            std::vector<ContourType> contours;
+            cv::findContours(input, contours, CV_RETR_EXTERNAL,
+                             CV_CHAIN_APPROX_NONE);
+#if 0
+            if (contours.size() != 1) {
+                std::cout << "Weird, we have " << contours.size()
+                          << " contours!" << std::endl;
+            }
+#endif
+            if (!contours.empty()) {
+                m_contour = std::move(contours[0]);
+            } else {
+                m_contour.clear();
+            }
+        }
+
+        bool haveContour() { return !m_contour.empty(); }
+
+        double area() const { return m_moments.m00; }
+
+        /// Approximation of a diameter based on assumption of circularity.
+        double diameter() const { return 2 * std::sqrt(area() / CV_PI); }
+
+        double perimeter() const { return cv::arcLength(m_contour, true); }
+
+        /// As used by OpenCV, return value in [0, 1]
+        double circularity() const {
+            auto perim = perimeter();
+            return 4 * CV_PI * area() / (perim * perim);
+        }
+
+        cv::Mat m_scratchNotMask;
+        cv::Mat m_floodFillMask;
+        /// @name Per-keypoint data
+        /// @{
+        cv::Mat m_perPointResults;
+        cv::Mat m_binarySubImage;
+        ContourType m_contour;
+        cv::Moments m_moments;
+        /// @}
+    };
+
     SBDBlobExtractor::SBDBlobExtractor(ConfigParams const &params)
-        : m_params(params) {
+        : m_params(params), m_keypointDetailer(new KeypointDetailer) {
         auto &p = m_params.blobParams;
         /// Set up blob params
         m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
@@ -61,6 +180,11 @@ namespace vbtracker {
             p.filterByConvexity; // Test for convexity?
         m_sbdParams.minConvexity = p.minConvexity;
     }
+
+    SBDBlobExtractor::~SBDBlobExtractor() {
+        /// Needed here where KeypointDetailer is defined.
+    }
+
     std::vector<LedMeasurement> const &
     SBDBlobExtractor::extractBlobs(cv::Mat const &grayImage) {
         m_latestMeasurements.clear();
@@ -69,14 +193,17 @@ namespace vbtracker {
         m_debugBlobImageDirty = true;
 
         getKeypoints(grayImage);
-        for (auto &kp : m_keyPoints) {
-            auto measurement = LedMeasurement{};
-            /// @todo actually populate this with real data.
-            measurement.loc = kp.pt;
-            measurement.brightness = kp.size;
-            measurement.diameter = 2 * kp.size;
-            m_latestMeasurements.emplace_back(std::move(measurement));
-        }
+
+        /// We'll apply the threshold here first, instead of trusting the flood
+        /// fill to repeatably find the same points.
+        cv::Mat thresholded;
+        cv::threshold(grayImage, thresholded, m_sbdParams.maxThreshold, 255,
+                      cv::THRESH_BINARY);
+
+        KeypointDetailer detailer;
+        m_latestMeasurements =
+            detailer.augmentKeypoints(thresholded, m_keyPoints);
+
         return m_latestMeasurements;
     }
 
