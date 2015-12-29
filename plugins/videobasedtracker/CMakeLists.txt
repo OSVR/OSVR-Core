@@ -38,6 +38,8 @@ add_library(vbtracker-core STATIC
     LED.cpp
     LED.h
     ProjectPoint.h
+    SBDBlobExtractor.cpp
+    SBDBlobExtractor.h
     Types.h
     VideoBasedTracker.cpp
     VideoBasedTracker.h)
