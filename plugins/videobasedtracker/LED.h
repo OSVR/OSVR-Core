@@ -38,6 +38,10 @@ namespace osvr {
 namespace vbtracker {
 
     struct LedMeasurement {
+        LedMeasurement() = default;
+        explicit LedMeasurement(cv::KeyPoint const &kp)
+            : loc(kp.pt), brightness(kp.size) {}
+
         /// Location in image space - should be undistorted when passed to the
         /// Led class.
         cv::Point2f loc;
