@@ -58,6 +58,10 @@ namespace vbtracker {
     typedef std::vector<cv::KeyPoint> KeyPointList;
     typedef KeyPointList::iterator KeyPointIterator;
 
+    struct LedMeasurement;
+    typedef std::vector<LedMeasurement> LedMeasurementList;
+    typedef LedMeasurementList::iterator LedMeasurementIterator;
+
     typedef float Brightness;
     typedef std::list<Brightness> BrightnessList;
     typedef std::pair<Brightness, Brightness> BrightnessMinMax;

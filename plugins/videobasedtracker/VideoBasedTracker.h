@@ -31,6 +31,7 @@
 #include "LedIdentifier.h"
 #include "BeaconBasedPoseEstimator.h"
 #include "CameraParameters.h"
+#include "SBDBlobExtractor.h"
 #include <osvr/Util/ChannelCountC.h>
 
 // Library/third-party includes
@@ -123,7 +124,6 @@ namespace vbtracker {
             LedIdentifierPtr &&identifier, CameraParameters const &camParams,
             std::function<void(BeaconBasedPoseEstimator &)> const &beaconAdder,
             size_t requiredInliers = 4, size_t permittedOutliers = 2);
-        std::vector<cv::KeyPoint> extractKeypoints(cv::Mat const &grayImage);
 
         void dumpKeypointDebugData(std::vector<cv::KeyPoint> const &keypoints);
         /// @name Images
@@ -137,6 +137,7 @@ namespace vbtracker {
         /// @}
 
         ConfigParams m_params;
+        SBDBlobExtractor m_blobExtractor;
         cv::SimpleBlobDetector::Params m_sbdParams;
 
         /// @brief Test (with asserts) what Ryan thinks are the invariants. Will

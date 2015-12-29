@@ -107,5 +107,44 @@ namespace vbtracker {
         return end(keypoints);
     }
 
+    LedMeasurementIterator Led::nearest(LedMeasurementList &meas,
+                                        double threshold) const {
+        // If we have no elements in the vector, return the end().
+        if (meas.empty()) {
+            return end(meas);
+        }
+
+        // Squaring the threshold to avoid doing a square-root in a tight loop.
+        auto thresholdSquared = threshold * threshold;
+        auto location = getLocation();
+
+        auto computeDistSquared = [location](LedMeasurementIterator it) {
+            auto diff = (location - it->loc);
+            return diff.dot(diff);
+        };
+
+        // Find the distance to the first point and record it as the
+        // current minimum distance;
+        auto ret = begin(meas);
+        auto minDistSq = computeDistSquared(ret);
+
+        // Search the rest of the elements to see if we can find a
+        // better one.
+        for (auto it = begin(meas), e = end(meas); it != e; ++it) {
+            auto distSq = computeDistSquared(it);
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                ret = it;
+            }
+        }
+
+        // If the closest is within the threshold, return it.  Otherwise,
+        // return the end.
+        if (minDistSq <= thresholdSquared) {
+            return ret;
+        }
+        return end(meas);
+    }
+
 } // End namespace vbtracker
 } // End namespace osvr

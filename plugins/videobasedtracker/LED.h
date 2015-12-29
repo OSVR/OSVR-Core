@@ -120,6 +120,10 @@ namespace vbtracker {
         KeyPointIterator nearest(KeyPointList &keypoints,
                                  double threshold) const;
 
+        /// @overload
+        LedMeasurementIterator Led::nearest(LedMeasurementList &meas,
+                                            double threshold) const;
+
         /// @brief Returns the most-recent boolean "bright" state according to
         /// the LED identifier. Note that the value is only meaningful if
         /// `identified()` is true.
