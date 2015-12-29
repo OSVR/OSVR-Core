@@ -27,19 +27,15 @@ Sensics, Inc.
 namespace osvr {
 namespace vbtracker {
 
-    Led::Led(LedIdentifier *identifier, float x, float y, Brightness brightness)
-        : m_id(-1), m_identifier(identifier) {
-        addMeasurement(cv::Point2f(x, y), brightness);
+    Led::Led(LedIdentifier *identifier, LedMeasurement const &meas)
+        : m_id(SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA),
+          m_identifier(identifier) {
+        addMeasurement(meas);
     }
 
-    Led::Led(LedIdentifier *identifier, cv::Point2f loc, Brightness brightness)
-        : m_id(-1), m_identifier(identifier) {
-        addMeasurement(loc, brightness);
-    }
-
-    void Led::addMeasurement(cv::Point2f loc, Brightness brightness) {
-        m_location = loc;
-        m_brightnessHistory.push_back(brightness);
+    void Led::addMeasurement(LedMeasurement const &meas) {
+        m_latestMeasurement = meas;
+        m_brightnessHistory.push_back(meas.brightness);
 
         // If we don't have an identifier, then our ID is unknown.
         // Otherwise, try and find it.
@@ -62,10 +58,11 @@ namespace vbtracker {
 
             /// Right now, any change in ID is considered being "newly
             /// recognized".
-            m_newlyRecognized = oldId != m_id;
-            if (m_newlyRecognized) {
+            if (oldId != m_id) {
+                /// If newly recognized, start at max novelty
                 m_novelty = MAX_NOVELTY;
             } else if (m_novelty != 0) {
+                /// Novelty decays linearly to 0
                 m_novelty--;
             }
         }
@@ -80,7 +77,7 @@ namespace vbtracker {
 
         // Squaring the threshold to avoid doing a square-root in a tight loop.
         auto thresholdSquared = threshold * threshold;
-        auto location = m_location;
+        auto location = getLocation();
 
         auto computeDistSquared = [location](KeyPointIterator it) {
             auto diff = (location - it->pt);

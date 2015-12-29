@@ -284,6 +284,14 @@ namespace vbtracker {
         std::transform(begin(foundKeyPoints), end(foundKeyPoints),
                        begin(undistortedKeypoints), keypointUndistort);
 
+        auto wrapKeypointIntoLedMeasurement = [](cv::KeyPoint const &keypoint) {
+            auto measurement = LedMeasurement{};
+            measurement.loc = keypoint.pt;
+            measurement.brightness = keypoint.size;
+            measurement.diameter = 2 * keypoint.size;
+            return measurement;
+        };
+
         // We allow multiple sets of LEDs, each corresponding to a different
         // sensor, to be located in the same image.  We construct a new set
         // of LEDs for each and try to find them.  It is assumed that they all
@@ -314,7 +322,8 @@ namespace vbtracker {
                     // Update the values in this LED and then go on to the
                     // next one.  Remove this blob from the list of potential
                     // matches.
-                    led->addMeasurement(nearest->pt, nearest->size);
+                    led->addMeasurement(
+                        wrapKeypointIntoLedMeasurement(*nearest));
                     keyPoints.erase(nearest);
                     ++led;
                 }
@@ -324,8 +333,9 @@ namespace vbtracker {
             // std::cout << "Had " << Leds.size() << " LEDs, " <<
             // keyPoints.size() << " new ones available" << std::endl;
             for (auto &keypoint : keyPoints) {
-                m_led_groups[sensor].emplace_back(m_identifiers[sensor].get(),
-                                                  keypoint.pt, keypoint.size);
+                m_led_groups[sensor].emplace_back(
+                    m_identifiers[sensor].get(),
+                    wrapKeypointIntoLedMeasurement(keypoint));
             }
 
             //==================================================================
