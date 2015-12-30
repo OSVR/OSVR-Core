@@ -39,9 +39,6 @@
 #include <algorithm>
 #include <iostream>
 
-#define OSVR_USE_SIMPLEBLOB
-#undef OSVR_USE_CANNY_EDGEDETECT
-
 namespace osvr {
 namespace vbtracker {
 
@@ -519,64 +516,6 @@ namespace vbtracker {
         cv::putText(m_statusImage, label, led.getLocation(),
                     cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(127, 127, 127));
     }
-
-#ifdef OSVR_USE_CANNY_EDGEDETECT
-    std::vector<cv::KeyPoint>
-    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
-
-        //================================================================
-        // Tracking the points
-
-        // Do edge detection: the LEDs are pretty clear edges.
-
-        cv::Mat noiseRemoved;
-        cv::threshold(grayImage, noiseRemoved, BASE_NOISE_THRESHOLD, 0,
-                      CV_THRESH_TOZERO);
-        cv::Canny(noiseRemoved, m_thresholdImage, 180, 220, 5);
-
-        std::vector<cv::KeyPoint> foundKeyPoints;
-
-        // Extract the contours.
-        std::vector<std::vector<cv::Point>> contours;
-        cv::Mat binaryImage = m_thresholdImage.clone();
-        cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
-                         CV_CHAIN_APPROX_NONE);
-
-        // We don't need the exact m_sbdParams struct, but we use some similar
-        // parameters, so why not re-use it.
-
-        for (auto &contour : contours) {
-            cv::Mat points(contour);
-            cv::Moments moms = cv::moments(points);
-
-            /// @todo any advantage to contourArea over using the moments m00?
-            auto area = cv::contourArea(points) /*moms.m00*/;
-
-            /// Filter by area
-            if (area < m_sbdParams.minArea || area > m_sbdParams.maxArea) {
-                continue;
-            }
-            /// Filter by circularity
-            auto perim = cv::arcLength(points, true);
-            auto circularity = 4 * M_PI * area / (perim * perim);
-            if (circularity < m_sbdParams.minCircularity ||
-                circularity > m_sbdParams.maxCircularity) {
-                continue;
-            }
-
-            // OK, we think this one is valid. Make a keypoint for it.
-            auto x = moms.m10 / moms.m00;
-            auto y = moms.m01 / moms.m00;
-            foundKeyPoints.push_back(cv::KeyPoint(x, y, area / 4));
-        }
-
-        // @todo: Estimate the summed brightness of each blob so that we can
-        // detect when they are getting brighter and dimmer.  Pass this as
-        // the brightness parameter to the Led class when adding a new one
-        // or augmenting with a new frame.
-        return foundKeyPoints;
-    }
-#endif
 
 } // namespace vbtracker
 } // namespace osvr
