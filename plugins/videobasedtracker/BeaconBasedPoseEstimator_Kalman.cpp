@@ -145,19 +145,19 @@ namespace vbtracker {
             if (skipBright && led.isBright()) {
                 continue;
             }
-            if (!led.getMeasurement().knowBoundingBox) {
-                if (m_params.debug) {
-                    std::cout << "Beacon number " << led.getOneBasedID()
-                              << ": don't know bounding box, skipping.\n";
+            if (led.getMeasurement().knowBoundingBox) {
+                /// @todo For right now, if we don't have a bounding box, we're
+                /// assuming it's square enough (and only testing for
+                /// non-squareness on those who actually do have bounding
+                /// boxes). This is very much a temporary situation.
+                auto boundingBoxRatio =
+                    led.getMeasurement().boundingBox.height /
+                    led.getMeasurement().boundingBox.width;
+                if (boundingBoxRatio < minBoxRatio ||
+                    boundingBoxRatio > maxBoxRatio) {
+                    /// skip non-circular blobs.
+                    continue;
                 }
-                continue;
-            }
-            auto boundingBoxRatio = led.getMeasurement().boundingBox.height /
-                                    led.getMeasurement().boundingBox.width;
-            if (boundingBoxRatio < minBoxRatio ||
-                boundingBoxRatio > maxBoxRatio) {
-                /// skip non-circular blobs.
-                continue;
             }
             auto localVarianceFactor = varianceFactor;
             auto newIdentificationVariancePenalty =
