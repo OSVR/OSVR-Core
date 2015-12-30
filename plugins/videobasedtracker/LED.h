@@ -58,6 +58,10 @@ namespace vbtracker {
         /// Blob circularity (as defined by OpenCV) - in [0,1]
         float circularity = 0.f;
 
+        /// Do we know an upright bounding box? (that is, is the next member
+        /// valid?)
+        bool knowBoundingBox = false;
+
         /// Dimensions of the upright bounding box.
         cv::Size2f boundingBox;
     };
