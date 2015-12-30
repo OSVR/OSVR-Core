@@ -58,7 +58,7 @@ namespace vbtracker {
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
     bool
-    BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(const LedGroup &leds,
+    BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
                                                          double dt) {
         auto const beaconsSize = m_beacons.size();
         // Default measurement variance (for now, factor) per axis.

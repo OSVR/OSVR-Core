@@ -118,7 +118,7 @@ namespace vbtracker {
         /// locations and camera focal depth are in millimeters.
         ///
         /// @return Returns true on success, false on failure to make a pose.
-        bool EstimatePoseFromLeds(const LedGroup &leds,
+        bool EstimatePoseFromLeds(LedGroup &leds,
                                   OSVR_TimeValue const &tv,
                                   OSVR_PoseState &out);
 
@@ -167,17 +167,17 @@ namespace vbtracker {
             Eigen::Vector3d const &pos) const;
 
         /// @brief Implementation - doesn't set m_gotPose;
-        bool m_estimatePoseFromLeds(const LedGroup &leds,
+        bool m_estimatePoseFromLeds(LedGroup &leds,
                                     OSVR_TimeValue const &tv,
                                     OSVR_PoseState &out);
 
         /// @brief The internals of m_estimatePoseFromLeds that use
         /// cv::computePnPRansac to compute an estimate.
-        bool m_pnpransacEstimator(const LedGroup &leds);
+        bool m_pnpransacEstimator(LedGroup &leds);
 
         /// @brief The internals of m_estimatePoseFromLeds that use a Kalman
         /// filter with beacon position auto-calibration to compute an estimate.
-        bool m_kalmanAutocalibEstimator(const LedGroup &leds, double dt);
+        bool m_kalmanAutocalibEstimator(LedGroup &leds, double dt);
 
         /// @brief Resets the Kalman filter main state based on the
         /// direct-calculation outputs.

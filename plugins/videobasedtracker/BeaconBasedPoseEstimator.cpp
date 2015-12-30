@@ -237,7 +237,7 @@ namespace vbtracker {
     }
 
     bool
-    BeaconBasedPoseEstimator::EstimatePoseFromLeds(const LedGroup &leds,
+    BeaconBasedPoseEstimator::EstimatePoseFromLeds(LedGroup &leds,
                                                    OSVR_TimeValue const &tv,
                                                    OSVR_PoseState &outPose) {
         auto ret = m_estimatePoseFromLeds(leds, tv, outPose);
@@ -250,7 +250,7 @@ namespace vbtracker {
         return (pos + m_centroid) / LINEAR_SCALE_FACTOR;
     }
     bool
-    BeaconBasedPoseEstimator::m_estimatePoseFromLeds(const LedGroup &leds,
+    BeaconBasedPoseEstimator::m_estimatePoseFromLeds(LedGroup &leds,
                                                      OSVR_TimeValue const &tv,
                                                      OSVR_PoseState &outPose) {
         if (m_params.streamBeaconDebugInfo) {
@@ -302,7 +302,7 @@ namespace vbtracker {
         return true;
     }
 
-    bool BeaconBasedPoseEstimator::m_pnpransacEstimator(const LedGroup &leds) {
+    bool BeaconBasedPoseEstimator::m_pnpransacEstimator(LedGroup &leds) {
         // We need to get a pair of matched vectors of points: 2D locations
         // with in the image and 3D locations in model space.  There needs to
         // be a correspondence between the points in these vectors, such that
