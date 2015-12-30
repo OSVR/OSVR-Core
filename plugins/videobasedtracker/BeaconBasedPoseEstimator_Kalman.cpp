@@ -216,7 +216,7 @@ namespace vbtracker {
             debug.residual.y = residual.y();
             auto effectiveVariance =
                 localVarianceFactor * m_params.measurementVarianceScaleFactor *
-                newIdentificationVariancePenalty *
+                newIdentificationVariancePenalty * (led.isBright() ? 2 : 1) *
                 m_beaconMeasurementVariance[id] / led.getMeasurement().area;
             debug.variance = effectiveVariance;
             meas.setVariance(effectiveVariance);
