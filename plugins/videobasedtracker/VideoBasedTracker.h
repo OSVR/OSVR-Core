@@ -126,12 +126,18 @@ namespace vbtracker {
             size_t requiredInliers = 4, size_t permittedOutliers = 2);
 
         void dumpKeypointDebugData(std::vector<cv::KeyPoint> const &keypoints);
+
+        void drawLedCircleOnStatusImage(Led const &led, bool filled,
+                                        cv::Vec3b color);
+
+        bool m_debugHelpDisplayed = false;
         /// @name Images
         /// @{
         cv::Mat m_frame;
         cv::Mat m_imageGray;
         cv::Mat m_thresholdImage;
         cv::Mat m_imageWithBlobs;
+        cv::Mat m_statusImage;
         cv::Mat *m_shownImage = &m_imageWithBlobs;
         int m_debugFrame = 0;
         /// @}

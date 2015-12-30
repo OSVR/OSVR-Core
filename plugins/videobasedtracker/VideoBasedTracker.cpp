@@ -288,6 +288,7 @@ namespace vbtracker {
                 auto e = end(myLeds);
                 while (led != end(myLeds)) {
                     led->resetUsed();
+
                     auto nearest = led->nearest(ledsMeasurements,
                                                 m_params.blobMoveThreshold);
                     if (nearest == end(ledsMeasurements)) {
@@ -331,6 +332,9 @@ namespace vbtracker {
             if (m_params.debug) {
                 // Don't display the debugging info every frame, or we can't go
                 // fast enough.
+                static const auto RED = cv::Vec3b(0, 0, 255);
+                static const auto YELLOW = cv::Vec3b(0, 255, 255);
+                static const auto GREEN = cv::Vec3b(0, 255, 0);
                 static int count = 0;
                 if (++count == 11) {
                     // Fake the thresholded image to give an idea of what the
@@ -340,7 +344,21 @@ namespace vbtracker {
                     // Draw detected blobs as blue circles.
                     m_imageWithBlobs = m_blobExtractor.getDebugBlobImage();
 
-                    // Label the keypoints with their IDs.
+                    // Draw the unidentified (flying?) blobs (UFBs?) on the
+                    // status image
+                    m_frame.copyTo(m_statusImage);
+                    for (auto const &led : m_led_groups[sensor]) {
+                        auto loc = led.getLocation();
+                        if (!led.identified()) {
+                            drawLedCircleOnStatusImage(led, false, RED);
+                        } else if (!gotPose) {
+                            // If identified, but we don't have a pose, draw
+                            // them as yellow outlines.
+                            drawLedCircleOnStatusImage(led, false, YELLOW);
+                        }
+                    }
+
+                    // Label the keypoints with their IDs in the "blob" image
                     for (auto &led : m_led_groups[sensor]) {
                         // Print 1-based LED ID for actual LEDs
                         auto label = std::to_string(led.getOneBasedID());
@@ -359,7 +377,7 @@ namespace vbtracker {
                         std::vector<cv::Point2f> imagePoints;
                         m_estimators[sensor]->ProjectBeaconsToImage(
                             imagePoints);
-                        size_t n = imagePoints.size();
+                        const size_t n = imagePoints.size();
                         for (size_t i = 0; i < n; ++i) {
                             // Print 1-based LED IDs
                             auto label = std::to_string(i + 1);
@@ -368,10 +386,65 @@ namespace vbtracker {
                             where.y += 1;
                             cv::putText(m_imageWithBlobs, label, where,
                                         cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                                        cv::Scalar(0, 255, 0));
+                                        cv::Scalar(GREEN));
                         }
+
+                        // Now, also set up the status image, as long as we have
+                        // a reprojection.
+                        for (auto const &led : m_led_groups[sensor]) {
+                            if (led.identified()) {
+                                // Color-code identified beacons based on
+                                // whether or not we used their data.
+                                auto color =
+                                    led.wasUsedLastFrame() ? GREEN : YELLOW;
+
+                                // Draw a filled circle at the keypoint.
+                                drawLedCircleOnStatusImage(led, true, color);
+                                if (led.getID() < n) {
+                                    auto reprojection =
+                                        imagePoints[led.getID()];
+#if 0
+                                    /// If possible, put a black dot at the
+                                    /// reprojection of the beacon.
+                                    m_statusImage.at<cv::Vec3b>(reprojection) =
+                                        cv::Vec3b(0, 0, 0);
+#endif
+                                    auto label =
+                                        std::to_string(led.getOneBasedID());
+                                    cv::putText(m_statusImage, label,
+                                                led.getLocation(),
+                                                cv::FONT_HERSHEY_SIMPLEX, 0.25,
+                                                cv::Scalar(127, 127, 127));
+
+                                    cv::putText(m_statusImage, label,
+                                                reprojection,
+                                                cv::FONT_HERSHEY_SIMPLEX, 0.25,
+                                                cv::Scalar(0, 0, 0));
+                                }
+                            }
+                        }
+                        // end of status image setup
                     }
 
+                    if (!m_debugHelpDisplayed) {
+                        std::cout
+                            << "\nVideo-based tracking debug windows help:\n";
+                        std::cout
+                            << "  - press 'b' to show the labeled blobs and "
+                               "the reprojected beacons (default)\n"
+                            << "  - press 's' to show the detected blobs and "
+                               "the status of recognized beacons\n"
+                            << "  - press 'i' to show the raw input image\n"
+                            << "  - press 't' to show the blob-detecting "
+                               "threshold image\n"
+                            << "  - press 'p' to dump the current "
+                               "auto-calibrated beacon positions to a CSV "
+                               "file\n"
+                            << "  - press 'q' to quit the debug windows "
+                               "(tracker will continue operation)\n"
+                            << std::endl;
+                        m_debugHelpDisplayed = true;
+                    }
                     // Pick which image to show and show it.
                     if (m_frame.data) {
                         std::ostringstream windowName;
@@ -379,6 +452,13 @@ namespace vbtracker {
                         cv::imshow(windowName.str(), *m_shownImage);
                         int key = cv::waitKey(1);
                         switch (key) {
+                        case 'b':
+                            // Show the blob/keypoints image (default)
+                            m_shownImage = &m_imageWithBlobs;
+                            break;
+                        case 's':
+                            m_shownImage = &m_statusImage;
+                            break;
                         case 'i':
                             // Show the input image.
                             m_shownImage = &m_frame;
@@ -389,10 +469,6 @@ namespace vbtracker {
                             m_shownImage = &m_thresholdImage;
                             break;
 
-                        case 'b':
-                            // Show the blob/keypoints image (default)
-                            m_shownImage = &m_imageWithBlobs;
-                            break;
 #if 0
                         case 'd':
                             dumpKeypointDebugData(foundKeyPoints);
@@ -428,6 +504,14 @@ namespace vbtracker {
 
         m_assertInvariants();
         return done;
+    }
+
+    void VideoBasedTracker::drawLedCircleOnStatusImage(Led const &led,
+                                                       bool filled,
+                                                       cv::Vec3b color) {
+        cv::circle(m_statusImage, led.getLocation(),
+                   led.getMeasurement().diameter / 2., cv::Scalar(color),
+                   filled ? -1 : 1);
     }
 
 #ifdef OSVR_USE_CANNY_EDGEDETECT
