@@ -180,10 +180,10 @@ namespace vbtracker {
             }
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
-            auto effectiveVariance = localVarianceFactor *
-                                     m_params.measurementVarianceScaleFactor *
-                                     newIdentificationVariancePenalty *
-                                     m_beaconMeasurementVariance[id];
+            auto effectiveVariance =
+                localVarianceFactor * m_params.measurementVarianceScaleFactor *
+                newIdentificationVariancePenalty *
+                m_beaconMeasurementVariance[id] / led.getMeasurement().area;
             debug.variance = effectiveVariance;
             meas.setVariance(effectiveVariance);
 
