@@ -57,6 +57,9 @@ namespace vbtracker {
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
+
+    static const auto MAX_Z_COMPONENT = -0.3;
+
     bool BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
                                                               double dt) {
         auto const beaconsSize = m_beacons.size();
@@ -129,6 +132,11 @@ namespace vbtracker {
             m_params.maxResidual * m_params.maxResidual;
 
         kalman::predict(m_state, m_model, dt);
+
+        /// @todo should we be recalculating this for each beacon after each
+        /// correction step? The order we filter them in is rather arbitrary...
+        Eigen::Matrix3d rotate =
+            Eigen::Matrix3d(m_state.getCombinedQuaternion());
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
         for (auto &led : leds) {
@@ -145,6 +153,22 @@ namespace vbtracker {
             if (skipBright && led.isBright()) {
                 continue;
             }
+
+            // Angle of emission checking
+            // If we transform the body-local emission vector, an LED pointed
+            // right at the camera will be -Z. Anything with a 0 or positive z
+            // component is clearly out, and realistically, anything with a z
+            // component over -0.5 is probably fairly oblique. We don't want to
+            // use such beacons since they can easily introduce substantial
+            // error.
+            double zComponent =
+                (rotate * cvToVector(m_beaconEmissionDirection[id])).z();
+            /// @todo if z component is positive, we shouldn't even be able to
+            /// see this since it's pointed away from us.
+            if (zComponent > MAX_Z_COMPONENT) {
+                continue;
+            }
+
             if (led.getMeasurement().knowBoundingBox) {
                 /// @todo For right now, if we don't have a bounding box, we're
                 /// assuming it's square enough (and only testing for
