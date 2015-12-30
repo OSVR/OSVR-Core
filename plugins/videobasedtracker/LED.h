@@ -146,6 +146,13 @@ namespace vbtracker {
         /// `identified()` is true.
         bool isBright() const { return m_lastBright; }
 
+        bool wasUsedLastFrame() const { return m_wasUsedLastFrame; }
+
+        /// Call from inside the tracking algorithm to mark that it was used.
+        void markAsUsed() { m_wasUsedLastFrame = true; }
+
+        void resetUsed() { m_wasUsedLastFrame = false; }
+
       private:
         /// Most recent measurement
         LedMeasurement m_latestMeasurement;
@@ -165,6 +172,8 @@ namespace vbtracker {
 
         bool m_newlyRecognized = false;
         uint8_t m_novelty;
+
+        bool m_wasUsedLastFrame = false;
     };
 
 } // End namespace vbtracker
