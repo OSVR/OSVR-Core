@@ -105,27 +105,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
     }
 
     OSVR_ReturnCode update();
-#if 0
-    /// Should be called immediately after construction for specifying the
-    /// particulars of tracking.
-    void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
-                   osvr::vbtracker::CameraParameters const &params,
-                   osvr::vbtracker::Point3Vector const &locations,
-                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
-        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
-                              params.distortionParameters, locations,
-                              requiredInliers, permittedOutliers);
-    }
-    void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
-                   osvr::vbtracker::CameraParameters const &params,
-                   osvr::vbtracker::Point3Vector const &locations,
-                   std::vector<double> const &variance,
-                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
-        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
-                              params.distortionParameters, locations, variance,
-                              requiredInliers, permittedOutliers);
-    }
-#endif
+
+    /// Provides access to the underlying video-based tracker object to add
+    /// sensors.
     osvr::vbtracker::VideoBasedTracker &vbtracker() { return m_vbtracker; }
 
   private:

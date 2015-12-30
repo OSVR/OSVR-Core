@@ -44,23 +44,7 @@ namespace vbtracker {
 
     VideoBasedTracker::VideoBasedTracker(ConfigParams const &params)
         : m_params(params), m_blobExtractor(params) {}
-#if 0
-    // This version adds the beacons as a part of the constructor.
-    void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
-        Point3Vector const &locations,
-        BeaconIDPredicate const &autocalibrationFixedPredicate,
-        size_t requiredInliers, size_t permittedOutliers) {
-        m_camParams = camParams;
 
-        m_identifiers.emplace_back(std::move(identifier));
-        m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            camParams.createUndistortedVariant(), locations, requiredInliers,
-            permittedOutliers, autocalibrationFixedPredicate, m_params));
-        m_led_groups.emplace_back();
-        m_assertInvariants();
-    }
-#endif
     // This version requires YOU to add your beacons! You!
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
@@ -75,21 +59,7 @@ namespace vbtracker {
         beaconAdder(*m_estimators.back());
         m_assertInvariants();
     }
-#if 0
-    void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
-        Point3Vector const &locations, double variance,
-        BeaconIDPredicate const &autocalibrationFixedPredicate,
-        size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), camParams,
-                  [&](BeaconBasedPoseEstimator &estimator) {
-                      estimator.SetBeacons(locations, variance,
-                                           autocalibrationFixedPredicate);
-                  },
-                  requiredInliers, permittedOutliers);
-    }
 
-#endif
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
         Point3Vector const &locations, Vec3Vector const &emissionDirection,
@@ -104,75 +74,7 @@ namespace vbtracker {
                   },
                   requiredInliers, permittedOutliers);
     }
-#if 0
-    /// This class is not currently used because it needs some more tuning.
-    class KeypointEnhancer {
-      public:
-        std::vector<cv::KeyPoint>
-        enhanceKeypoints(cv::Mat const &grayImage,
-                         std::vector<cv::KeyPoint> const &foundKeyPoints) {
-            std::vector<cv::KeyPoint> ret;
-            cv::Mat greyCopy = grayImage.clone();
-            /// Reset the flood fill mask to just have a one-pixel border on the
-            /// edges.
-            m_floodFillMask =
-                cv::Mat::zeros(grayImage.rows + 2, grayImage.cols + 2, CV_8UC1);
-            m_floodFillMask.row(0) = 1;
-            m_floodFillMask.row(m_floodFillMask.rows - 1) = 1;
-            m_floodFillMask.col(0) = 1;
-            m_floodFillMask.col(m_floodFillMask.cols - 1) = 1;
 
-            for (auto const &keypoint : foundKeyPoints) {
-                ret.push_back(enhanceKeypoint(greyCopy, keypoint));
-            }
-
-            return ret;
-        }
-
-        cv::Mat getDebugImage() {
-            return m_floodFillMask(cv::Rect(1, 1, m_floodFillMask.cols - 2,
-                                            m_floodFillMask.rows - 2));
-        }
-
-      private:
-        cv::KeyPoint enhanceKeypoint(cv::Mat grayImage,
-                                     cv::KeyPoint origKeypoint) {
-            cv::Rect bounds;
-            int loDiff = 5;
-            int upDiff = 5;
-            // Saving this now before we monkey with m_floodFillMask
-            cv::bitwise_not(m_floodFillMask, m_scratchNotMask);
-
-            cv::floodFill(grayImage, m_floodFillMask, origKeypoint.pt, 255,
-                          &bounds, loDiff, upDiff,
-                          CV_FLOODFILL_MASK_ONLY |
-                              (/* connectivity 4 or 8 */ 4) |
-                              (/* value to write in to mask */ 255 << 8));
-            // Now m_floodFillMask contains the mask with both our point
-            // and all other points so far. We need to split them by ANDing with
-            // the NOT of the old flood-fill mask we saved earlier.
-            cv::bitwise_and(m_scratchNotMask, m_floodFillMask,
-                            m_perPointResults);
-            // OK, now we have the results for just this point in per-point
-            // results
-
-            cv::Mat binarySubImage = m_perPointResults(bounds);
-            cv::Moments moms = cv::moments(binarySubImage, true);
-
-            auto area = moms.m00;
-            auto x = moms.m10 / moms.m00;
-            auto y = moms.m01 / moms.m00;
-            auto diameter = 2 * std::sqrt(area / M_PI);
-            auto ret = origKeypoint;
-            ret.pt = cv::Point2f(x, y) + cv::Point2f(bounds.tl());
-            ret.size = diameter;
-            return ret;
-        }
-        cv::Mat m_scratchNotMask;
-        cv::Mat m_floodFillMask;
-        cv::Mat m_perPointResults;
-    };
-#endif
     void VideoBasedTracker::dumpKeypointDebugData(
         std::vector<cv::KeyPoint> const &keypoints) {
         {
@@ -406,12 +308,6 @@ namespace vbtracker {
                                 if (led.getID() < n) {
                                     auto reprojection =
                                         imagePoints[led.getID()];
-#if 0
-                                    /// If possible, put a black dot at the
-                                    /// reprojection of the beacon.
-                                    m_statusImage.at<cv::Vec3b>(reprojection) =
-                                        cv::Vec3b(0, 0, 0);
-#endif
 
                                     drawRecognizedLedIdOnStatusImage(led);
                                     cv::putText(

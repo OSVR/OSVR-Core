@@ -56,6 +56,7 @@ namespace vbtracker {
         static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
             return [](int id) { return id <= 4; };
         }
+
         /// @name Sensor addition methods
         /// @{
         /// @brief Adds a sensor, given an LedIdentifier and parameters to

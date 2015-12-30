@@ -45,19 +45,7 @@ namespace vbtracker {
     // The total number of frames that we can have dodgy Kalman tracking for
     // before RANSAC takes over again.
     static const std::size_t MAX_PROBATION_FRAMES = 10;
-#if 0
-    BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
-        CameraParameters const &camParams, const Point3Vector &beacons,
-        size_t requiredInliers, size_t permittedOutliers,
-        BeaconIDPredicate const &autocalibrationFixedPredicate,
-        ConfigParams const &params)
-        : m_params(params), m_camParams(camParams) {
-        SetBeacons(beacons, autocalibrationFixedPredicate);
-        m_gotPose = false;
-        m_requiredInliers = requiredInliers;
-        m_permittedOutliers = permittedOutliers;
-    }
-#endif
+
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         CameraParameters const &camParams, size_t requiredInliers,
         size_t permittedOutliers, ConfigParams const &params)
@@ -66,41 +54,6 @@ namespace vbtracker {
         m_requiredInliers = requiredInliers;
         m_permittedOutliers = permittedOutliers;
     }
-#if 0
-    bool BeaconBasedPoseEstimator::SetBeacons(
-        const Point3Vector &beacons,
-        BeaconIDPredicate const &autocalibrationFixedPredicate) {
-        return SetBeacons(beacons, DEFAULT_MEASUREMENT_VARIANCE,
-                          autocalibrationFixedPredicate);
-    }
-    bool BeaconBasedPoseEstimator::SetBeacons(
-        const Point3Vector &beacons, double variance,
-        BeaconIDPredicate const &autocalibrationFixedPredicate) {
-        // Our existing pose won't match anymore.
-        m_gotPose = false;
-        m_beacons.clear();
-        m_updateBeaconCentroid(beacons);
-
-        Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
-        auto bNum = size_t{0};
-        for (auto &beacon : beacons) {
-            auto isFixed = autocalibrationFixedPredicate(bNum + 1);
-            m_beaconFixed.push_back(isFixed);
-            m_beacons.emplace_back(new BeaconState{
-                cvToVector(beacon).cast<double>() - m_centroid,
-                // This forces the some beacons to be artificially "perfect"
-                // to avoid hunting by the algorithm
-                isFixed ? Eigen::Matrix3d::Zero() : beaconError});
-            bNum++;
-        }
-        m_beaconMeasurementVariance.assign(m_beacons.size(), variance);
-        // Prep the debug data.
-        m_updateBeaconDebugInfoArray();
-        return true;
-    }
-
-#endif
 
     bool BeaconBasedPoseEstimator::SetBeacons(
         const Point3Vector &beacons, Vec3Vector const &emissionDirection,

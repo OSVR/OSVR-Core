@@ -138,14 +138,15 @@ namespace vbtracker {
                                  double threshold) const;
 
         /// @overload
-        LedMeasurementIterator Led::nearest(LedMeasurementList &meas,
-                                            double threshold) const;
+        LedMeasurementIterator nearest(LedMeasurementList &meas,
+                                       double threshold) const;
 
         /// @brief Returns the most-recent boolean "bright" state according to
         /// the LED identifier. Note that the value is only meaningful if
         /// `identified()` is true.
         bool isBright() const { return m_lastBright; }
 
+        /// Used for a status display in debug windows.
         bool wasUsedLastFrame() const { return m_wasUsedLastFrame; }
 
         /// Call from inside the tracking algorithm to mark that it was used.

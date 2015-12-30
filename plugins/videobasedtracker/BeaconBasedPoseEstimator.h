@@ -65,27 +65,6 @@ namespace vbtracker {
         static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
             return [](int id) { return id <= 4; };
         }
-#if 0
-        /// @brief Constructor needs to be told the 3D locations of the beacons
-        /// on the object that is to be tracked.  These define the model
-        /// coordinate system.
-        /// It is also told the camera matrix and distortion coefficients, in a
-        /// format suitable to send to OpenCV. See
-        /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
-        /// for details on these formats.
-        /// @param camParams Intrinsic camera parameters (camera matrix and
-        /// distortion)
-        /// @param beacons 3D beacon locations
-        /// @param requiredInliers How many "good" points must be available
-        /// @param permittedOutliers How many additional "bad" points we can
-        /// have
-        BeaconBasedPoseEstimator(
-            CameraParameters const &camParams, const Point3Vector &beacons,
-            size_t requiredInliers = 4, size_t permittedOutliers = 2,
-            BeaconIDPredicate const &autocalibrationFixedPredicate =
-                getDefaultBeaconFixedPredicate(),
-            ConfigParams const &params = ConfigParams{});
-#endif
 
         /// @brief Constructor that expects its beacons to be set later.
         /// It is told the camera matrix and distortion coefficients, in a
@@ -134,12 +113,6 @@ namespace vbtracker {
         /// @name Data set resets
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
-#if 0
-        bool SetBeacons(const Point3Vector &beacons,
-                        BeaconIDPredicate const &autocalibrationFixedPredicate);
-        bool SetBeacons(const Point3Vector &beacons, double variance,
-                        BeaconIDPredicate const &autocalibrationFixedPredicate);
-#endif
         bool SetBeacons(const Point3Vector &beacons,
                         Vec3Vector const &emissionDirection,
                         std::vector<double> const &variance,
