@@ -171,8 +171,6 @@ namespace vbtracker {
 
             auto state = kalman::makeAugmentedState(m_state, *(m_beacons[id]));
             meas.updateFromState(state);
-            auto model =
-                kalman::makeAugmentedProcessModel(m_model, beaconProcess);
             Eigen::Vector2d residual = meas.getResidual(state);
             if (residual.squaredNorm() > maxSquaredResidual) {
                 // probably bad
@@ -191,6 +189,8 @@ namespace vbtracker {
             meas.setVariance(effectiveVariance);
 
             /// Now, do the correction.
+            auto model =
+                kalman::makeAugmentedProcessModel(m_model, beaconProcess);
             kalman::correct(state, model, meas);
             m_gotMeasurement = true;
         }
