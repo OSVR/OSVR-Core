@@ -147,6 +147,7 @@ namespace vbtracker {
             if (id >= beaconsSize) {
                 continue;
             }
+
             auto &debug = m_beaconDebugData[id];
             debug.seen = true;
             debug.measurement = led.getLocation();
@@ -170,6 +171,7 @@ namespace vbtracker {
                 continue;
             }
 
+#if 0
             if (led.getMeasurement().knowBoundingBox) {
                 /// @todo For right now, if we don't have a bounding box, we're
                 /// assuming it's square enough (and only testing for
@@ -185,6 +187,8 @@ namespace vbtracker {
                     continue;
                 }
             }
+#endif
+
             auto localVarianceFactor = varianceFactor;
             auto newIdentificationVariancePenalty =
                 std::pow(2.0, led.novelty());
