@@ -309,6 +309,9 @@ class ConfiguredDeviceConstructor {
                              "highResidualVariancePenalty");
         getOptionalParameter(config.boundingBoxFilterRatio, root,
                              "boundingBoxFilterRatio");
+        getOptionalParameter(config.maxZComponent, root, "maxZComponent");
+        getOptionalParameter(config.shouldSkipBrightLeds, root,
+                             "shouldSkipBrightLeds");
 
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
         if (!config.offsetToCentroid) {

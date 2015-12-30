@@ -215,6 +215,15 @@ namespace vbtracker {
         /// be filtered in. Larger side first, please.
         float boundingBoxFilterRatio = 5.f / 4.f;
 
+        /// This should be a negative number - it's the largest the z component
+        /// of the camera-space LED emission vector is permitted to be and still
+        /// be used in estimation.
+        double maxZComponent = -0.3;
+
+        /// Should we attempt to skip bright-mode LEDs? The alternative is to
+        /// just give them slightly higher variance.
+        bool shouldSkipBrightLeds = true;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
