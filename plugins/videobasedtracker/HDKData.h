@@ -43,6 +43,12 @@ namespace vbtracker {
     extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
     /// @}
 
+    /// @name Emission directions for the beacons on an OSVR HDK
+    /// @{
+    extern const Vec3Vector OsvrHdkLedDirections_SENSOR0;
+    extern const Vec3Vector OsvrHdkLedDirections_SENSOR1;
+    /// @}
+
     extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
 
 } // namespace vbtracker

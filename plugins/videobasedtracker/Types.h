@@ -46,6 +46,8 @@ namespace vbtracker {
 
     typedef std::vector<cv::Point3f> Point3Vector;
 
+    typedef std::vector<cv::Vec3d> Vec3Vector;
+
     /// @todo Replace usages of this with Eigen or cv matrices.
     typedef std::vector<std::vector<double> > DoubleVecVec;
 
