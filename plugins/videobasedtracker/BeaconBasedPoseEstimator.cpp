@@ -177,10 +177,8 @@ namespace vbtracker {
         return m_state.angularVelocity();
     }
 
-    bool
-    BeaconBasedPoseEstimator::EstimatePoseFromLeds(LedGroup &leds,
-                                                   OSVR_TimeValue const &tv,
-                                                   OSVR_PoseState &outPose) {
+    bool BeaconBasedPoseEstimator::EstimatePoseFromLeds(
+        LedGroup &leds, OSVR_TimeValue const &tv, OSVR_PoseState &outPose) {
         auto ret = m_estimatePoseFromLeds(leds, tv, outPose);
         m_gotPose = ret;
         return ret;
@@ -190,10 +188,8 @@ namespace vbtracker {
         Eigen::Vector3d const &pos) const {
         return (pos + m_centroid) / LINEAR_SCALE_FACTOR;
     }
-    bool
-    BeaconBasedPoseEstimator::m_estimatePoseFromLeds(LedGroup &leds,
-                                                     OSVR_TimeValue const &tv,
-                                                     OSVR_PoseState &outPose) {
+    bool BeaconBasedPoseEstimator::m_estimatePoseFromLeds(
+        LedGroup &leds, OSVR_TimeValue const &tv, OSVR_PoseState &outPose) {
         if (m_params.streamBeaconDebugInfo) {
             /// Only bother resetting if anyone is actually going to receive the
             /// data.
