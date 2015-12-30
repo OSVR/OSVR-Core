@@ -166,6 +166,7 @@ namespace vbtracker {
             /// @todo if z component is positive, we shouldn't even be able to
             /// see this since it's pointed away from us.
             if (zComponent > MAX_Z_COMPONENT) {
+                numBad++;
                 continue;
             }
 
@@ -180,6 +181,7 @@ namespace vbtracker {
                 if (boundingBoxRatio < minBoxRatio ||
                     boundingBoxRatio > maxBoxRatio) {
                     /// skip non-circular blobs.
+                    numBad++;
                     continue;
                 }
             }
