@@ -32,6 +32,7 @@
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 #include "GetOptionalParameter.h"
+#include "HDKData.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"

@@ -26,6 +26,7 @@
 #include "VideoBasedTracker.h"
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
+#include "HDKData.h"
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>

@@ -27,6 +27,8 @@ add_library(vbtracker-core STATIC
     CameraDistortionModel.h
     CameraParameters.h
     cvToEigen.h
+    HDKData.cpp
+    HDKData.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
     HDKLedIdentifierFactory.cpp

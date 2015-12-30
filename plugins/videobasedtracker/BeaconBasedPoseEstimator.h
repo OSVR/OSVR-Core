@@ -54,14 +54,6 @@ namespace vbtracker {
         double variance = 0;
         void reset() { *this = BeaconData{}; }
     };
-    /// @name Default 3D locations for the beacons on an OSVR HDK, in
-    /// millimeters
-    /// @{
-    extern const Point3Vector OsvrHdkLedLocations_SENSOR0;
-    extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
-    /// @}
-
-    extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
 
     /// @brief Class to track an object that has identified LED beacons
     /// on it as seen in a camera, where the absolute location of the
@@ -118,8 +110,7 @@ namespace vbtracker {
         /// locations and camera focal depth are in millimeters.
         ///
         /// @return Returns true on success, false on failure to make a pose.
-        bool EstimatePoseFromLeds(LedGroup &leds,
-                                  OSVR_TimeValue const &tv,
+        bool EstimatePoseFromLeds(LedGroup &leds, OSVR_TimeValue const &tv,
                                   OSVR_PoseState &out);
 
         std::size_t getNumBeacons() const { return m_beacons.size(); }
@@ -167,8 +158,7 @@ namespace vbtracker {
             Eigen::Vector3d const &pos) const;
 
         /// @brief Implementation - doesn't set m_gotPose;
-        bool m_estimatePoseFromLeds(LedGroup &leds,
-                                    OSVR_TimeValue const &tv,
+        bool m_estimatePoseFromLeds(LedGroup &leds, OSVR_TimeValue const &tv,
                                     OSVR_PoseState &out);
 
         /// @brief The internals of m_estimatePoseFromLeds that use
