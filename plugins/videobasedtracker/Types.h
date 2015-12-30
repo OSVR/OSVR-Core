@@ -209,6 +209,10 @@ namespace vbtracker {
         /// as analogs.
         bool streamBeaconDebugInfo = false;
 
+        /// This should be the ratio of lengths of sides that you'll permit to
+        /// be filtered in. Larger side first, please.
+        float boundingBoxFilterRatio = 5.f / 4.f;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.

@@ -51,6 +51,7 @@ namespace vbtracker {
         cv::Mat const &getDebugThresholdImage();
 
         cv::Mat const &getDebugBlobImage();
+        cv::Mat const &getDebugExtraImage();
 
       private:
         void getKeypoints(cv::Mat const &grayImage);
@@ -71,6 +72,8 @@ namespace vbtracker {
 
         bool m_debugBlobImageDirty = true;
         cv::Mat m_debugBlobImage;
+
+        cv::Mat m_extraImage;
     };
 } // namespace vbtracker
 } // namespace osvr

@@ -324,6 +324,8 @@ class ConfiguredDeviceConstructor {
                              "measurementVarianceScaleFactor");
         getOptionalParameter(config.highResidualVariancePenalty, root,
                              "highResidualVariancePenalty");
+        getOptionalParameter(config.boundingBoxFilterRatio, root,
+                             "boundingBoxFilterRatio");
 
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
         if (!config.offsetToCentroid) {

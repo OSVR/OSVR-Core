@@ -47,10 +47,18 @@ namespace vbtracker {
         cv::Point2f loc;
         /// "Brightness" - currently actually diameter or radius.
         Brightness brightness;
+
         /// Blob diameter in pixels.
         float diameter = 0.f;
+
+        /// Area in pixels
+        float area = 0.f;
+
         /// Blob circularity (as defined by OpenCV) - in [0,1]
         float circularity = 0.f;
+
+        /// Dimensions of the upright bounding box.
+        cv::Size2f boundingBox;
     };
 
     /// @brief Helper class to keep track of the state of a blob over time. This

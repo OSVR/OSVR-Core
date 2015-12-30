@@ -63,6 +63,10 @@ namespace vbtracker {
         auto const beaconsSize = m_beacons.size();
         // Default measurement variance (for now, factor) per axis.
         double varianceFactor = 1;
+
+        auto maxBoxRatio = m_params.boundingBoxFilterRatio;
+        auto minBoxRatio = 1.f / m_params.boundingBoxFilterRatio;
+
         // Default to using all the measurements we can
         auto skipBright = false;
         {
@@ -70,6 +74,7 @@ namespace vbtracker {
             auto identified = std::size_t{0};
             auto inBoundsID = std::size_t{0};
             auto inBoundsBright = std::size_t{0};
+            auto inBoundsRound = std::size_t{0};
             for (auto const &led : leds) {
                 if (!led.identified()) {
                     continue;
@@ -83,6 +88,14 @@ namespace vbtracker {
                 if (led.isBright()) {
                     inBoundsBright++;
                 }
+
+                auto boundingBoxRatio =
+                    led.getMeasurement().boundingBox.height /
+                    led.getMeasurement().boundingBox.width;
+                if (boundingBoxRatio > minBoxRatio &&
+                    boundingBoxRatio < maxBoxRatio) {
+                    inBoundsRound++;
+                }
             }
 
             // Now we decide if we want to cut the variance artificially to
@@ -93,6 +106,14 @@ namespace vbtracker {
             if (inBoundsID - inBoundsBright >
                 DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS) {
                 skipBright = true;
+            } else {
+#if 0
+                if (m_params.debug) {
+                    std::cout << "Can't afford to skip brights this frame"
+                              << std::endl;
+                }
+#endif
+            }
             }
         }
 
@@ -116,6 +137,13 @@ namespace vbtracker {
             }
             auto id = led.getID();
             if (id >= beaconsSize) {
+                continue;
+            }
+            auto boundingBoxRatio = led.getMeasurement().boundingBox.height /
+                                    led.getMeasurement().boundingBox.width;
+            if (boundingBoxRatio < minBoxRatio ||
+                boundingBoxRatio > maxBoxRatio) {
+                /// skip non-circular blobs.
                 continue;
             }
             auto &debug = m_beaconDebugData[id];
