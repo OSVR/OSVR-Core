@@ -9,7 +9,7 @@
             "streamBeaconDebugInfo": false,
             "blobParams": {
                 "minDistBetweenBlobs": 3.0,
-                "minArea": 4.0,
+                "minArea": 2.0,
                 "filterByCircularity": false,
                 "minCircularity": 0.2,
                 "filterByConvexity": true,
@@ -26,17 +26,20 @@
             "beaconProcessNoise": 0.0000001,
             "blobMoveThreshold": 20,
             "numThreads": 1,
-            "processNoiseAutocorrelation": [1e+2, 5e+1, 1e+2,  5e-1, 5e-1, 5e-1],
+            "processNoiseAutocorrelation": [3e+2, 3e+2, 3e+2, 1e0, 1e0, 1e0],
             "linearVelocityDecayCoefficient": 0.2,
             "angularVelocityDecayCoefficient": 0.1,
-            "measurementVarianceScaleFactor" : 1.6,
+            "measurementVarianceScaleFactor": 1.6,
             "offsetToCentroid": false,
             "manualBeaconOffset": [0, 0, 38.8676],
             "includeRearPanel": false,
             "headCircumference": 55.75,
             "headToFrontBeaconOriginDistance": 0,
-            "backPanelMeasurementError": 1.0,
-            "streamBeaconDebugInfo": false
+            "backPanelMeasurementError": 2.0,
+            "streamBeaconDebugInfo": false,
+            "boundingBoxFilterRatio": 1.25,
+            "maxZComponent": -0.3,
+            "shouldSkipBrightLeds": true
         }
     }],
     "aliases": {
