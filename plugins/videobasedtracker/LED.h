@@ -40,7 +40,8 @@ namespace vbtracker {
     struct LedMeasurement {
         LedMeasurement() = default;
         explicit LedMeasurement(cv::KeyPoint const &kp)
-            : loc(kp.pt), brightness(kp.size) {}
+            : loc(kp.pt), brightness(kp.size), diameter(kp.size),
+              area((diameter / 2) * (diameter / 2) * CV_PI) {}
 
         /// Location in image space - should be undistorted when passed to the
         /// Led class.
