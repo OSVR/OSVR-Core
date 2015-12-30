@@ -57,9 +57,8 @@ namespace vbtracker {
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
-    bool
-    BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
-                                                         double dt) {
+    bool BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
+                                                              double dt) {
         auto const beaconsSize = m_beacons.size();
         // Default measurement variance (for now, factor) per axis.
         double varianceFactor = 1;
@@ -89,12 +88,14 @@ namespace vbtracker {
                     inBoundsBright++;
                 }
 
-                auto boundingBoxRatio =
-                    led.getMeasurement().boundingBox.height /
-                    led.getMeasurement().boundingBox.width;
-                if (boundingBoxRatio > minBoxRatio &&
-                    boundingBoxRatio < maxBoxRatio) {
-                    inBoundsRound++;
+                if (led.getMeasurement().knowBoundingBox) {
+                    auto boundingBoxRatio =
+                        led.getMeasurement().boundingBox.height /
+                        led.getMeasurement().boundingBox.width;
+                    if (boundingBoxRatio > minBoxRatio &&
+                        boundingBoxRatio < maxBoxRatio) {
+                        inBoundsRound++;
+                    }
                 }
             }
 
@@ -130,12 +131,25 @@ namespace vbtracker {
         kalman::predict(m_state, m_model, dt);
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
-        for (auto const &led : leds) {
+        for (auto &led : leds) {
             if (!led.identified()) {
                 continue;
             }
             auto id = led.getID();
             if (id >= beaconsSize) {
+                continue;
+            }
+            auto &debug = m_beaconDebugData[id];
+            debug.seen = true;
+            debug.measurement = led.getLocation();
+            if (skipBright && led.isBright()) {
+                continue;
+            }
+            if (!led.getMeasurement().knowBoundingBox) {
+                if (m_params.debug) {
+                    std::cout << "Beacon number " << led.getOneBasedID()
+                              << ": don't know bounding box, skipping.\n";
+                }
                 continue;
             }
             auto boundingBoxRatio = led.getMeasurement().boundingBox.height /
@@ -145,13 +159,7 @@ namespace vbtracker {
                 /// skip non-circular blobs.
                 continue;
             }
-            auto &debug = m_beaconDebugData[id];
-            debug.seen = true;
-            debug.measurement = led.getLocation();
             auto localVarianceFactor = varianceFactor;
-            if (skipBright && led.isBright()) {
-                continue;
-            }
             auto newIdentificationVariancePenalty =
                 std::pow(2.0, led.novelty());
 
@@ -167,7 +175,7 @@ namespace vbtracker {
 
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
-
+            led.markAsUsed();
             auto state = kalman::makeAugmentedState(m_state, *(m_beacons[id]));
             meas.updateFromState(state);
             Eigen::Vector2d residual = meas.getResidual(state);

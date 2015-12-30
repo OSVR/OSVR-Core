@@ -287,6 +287,7 @@ namespace vbtracker {
                 auto led = begin(myLeds);
                 auto e = end(myLeds);
                 while (led != end(myLeds)) {
+                    led->resetUsed();
                     auto nearest = led->nearest(ledsMeasurements,
                                                 m_params.blobMoveThreshold);
                     if (nearest == end(ledsMeasurements)) {
