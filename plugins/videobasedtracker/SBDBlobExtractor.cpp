@@ -97,19 +97,20 @@ namespace vbtracker {
             }
             m_binarySubImage = m_perPointResults(m_filledBounds);
             computeContour();
-            m_moments =
-                haveContour()
-                    ? cv::moments(m_contour, false)
-                    : cv::moments(m_binarySubImage, true);
+            m_moments = haveContour() ? cv::moments(m_contour, false)
+                                      : cv::moments(m_binarySubImage, true);
 
+// the first two we are using from the keypoint description, the latter we can't
+// always get (contour-based)
+#if 0
             /// Estimate diameter
             ret.diameter = diameter();
             ret.area = area();
-#if 0
             if (haveContour()) {
                 ret.circularity = circularity();
             }
 #endif
+            ret.knowBoundingBox = true;
             ret.boundingBox =
                 cv::Size2f(m_filledBounds.width, m_filledBounds.height);
             return ret;
