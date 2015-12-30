@@ -129,6 +129,7 @@ namespace vbtracker {
 
         void drawLedCircleOnStatusImage(Led const &led, bool filled,
                                         cv::Vec3b color);
+        void drawRecognizedLedIdOnStatusImage(Led const &led);
 
         bool m_debugHelpDisplayed = false;
         /// @name Images

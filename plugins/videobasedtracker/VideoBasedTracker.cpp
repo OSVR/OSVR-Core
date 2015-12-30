@@ -270,6 +270,7 @@ namespace vbtracker {
         // of LEDs for each and try to find them.  It is assumed that they all
         // have unique ID patterns across all sensors.
         for (size_t sensor = 0; sensor < m_identifiers.size(); sensor++) {
+
             osvrPose3SetIdentity(&m_pose);
             auto ledsMeasurements = undistortedLeds;
 
@@ -355,6 +356,8 @@ namespace vbtracker {
                             // If identified, but we don't have a pose, draw
                             // them as yellow outlines.
                             drawLedCircleOnStatusImage(led, false, YELLOW);
+
+                            drawRecognizedLedIdOnStatusImage(led);
                         }
                     }
 
@@ -409,17 +412,13 @@ namespace vbtracker {
                                     m_statusImage.at<cv::Vec3b>(reprojection) =
                                         cv::Vec3b(0, 0, 0);
 #endif
-                                    auto label =
-                                        std::to_string(led.getOneBasedID());
-                                    cv::putText(m_statusImage, label,
-                                                led.getLocation(),
-                                                cv::FONT_HERSHEY_SIMPLEX, 0.25,
-                                                cv::Scalar(127, 127, 127));
 
-                                    cv::putText(m_statusImage, label,
-                                                reprojection,
-                                                cv::FONT_HERSHEY_SIMPLEX, 0.25,
-                                                cv::Scalar(0, 0, 0));
+                                    drawRecognizedLedIdOnStatusImage(led);
+                                    cv::putText(
+                                        m_statusImage,
+                                        std::to_string(led.getOneBasedID()),
+                                        reprojection, cv::FONT_HERSHEY_SIMPLEX,
+                                        0.25, cv::Scalar(0, 0, 0));
                                 }
                             }
                         }
@@ -512,6 +511,13 @@ namespace vbtracker {
         cv::circle(m_statusImage, led.getLocation(),
                    led.getMeasurement().diameter / 2., cv::Scalar(color),
                    filled ? -1 : 1);
+    }
+
+    void VideoBasedTracker::drawRecognizedLedIdOnStatusImage(Led const &led) {
+
+        auto label = std::to_string(led.getOneBasedID());
+        cv::putText(m_statusImage, label, led.getLocation(),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(127, 127, 127));
     }
 
 #ifdef OSVR_USE_CANNY_EDGEDETECT
