@@ -65,7 +65,7 @@ namespace vbtracker {
         static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
             return [](int id) { return id <= 4; };
         }
-
+#if 0
         /// @brief Constructor needs to be told the 3D locations of the beacons
         /// on the object that is to be tracked.  These define the model
         /// coordinate system.
@@ -85,6 +85,7 @@ namespace vbtracker {
             BeaconIDPredicate const &autocalibrationFixedPredicate =
                 getDefaultBeaconFixedPredicate(),
             ConfigParams const &params = ConfigParams{});
+#endif
 
         /// @brief Constructor that expects its beacons to be set later.
         /// It is told the camera matrix and distortion coefficients, in a
@@ -133,11 +134,14 @@ namespace vbtracker {
         /// @name Data set resets
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
+#if 0
         bool SetBeacons(const Point3Vector &beacons,
                         BeaconIDPredicate const &autocalibrationFixedPredicate);
         bool SetBeacons(const Point3Vector &beacons, double variance,
                         BeaconIDPredicate const &autocalibrationFixedPredicate);
+#endif
         bool SetBeacons(const Point3Vector &beacons,
+                        Vec3Vector const &emissionDirection,
                         std::vector<double> const &variance,
                         BeaconIDPredicate const &autocalibrationFixedPredicate);
         bool SetCameraParameters(CameraParameters const &camParams);
@@ -179,6 +183,7 @@ namespace vbtracker {
         std::vector<double> m_beaconMeasurementVariance;
         /// Should this beacon be "fixed" (no auto-calibration?)
         std::vector<bool> m_beaconFixed;
+        Vec3Vector m_beaconEmissionDirection;
 
         std::vector<BeaconData> m_beaconDebugData;
 

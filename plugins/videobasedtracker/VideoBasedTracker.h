@@ -56,7 +56,6 @@ namespace vbtracker {
         static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
             return [](int id) { return id <= 4; };
         }
-
         /// @name Sensor addition methods
         /// @{
         /// @brief Adds a sensor, given an LedIdentifier and parameters to
@@ -66,6 +65,10 @@ namespace vbtracker {
         /// @param camParams An object with the camera matrix and distortion
         /// parameters.
         /// @param locations A list of the 3d locations (in mm) of each marker
+        /// @param emissionDirection Normalized vectors for each beacon in body
+        /// space giving their emission direction.
+        /// @param variance A single default base measurement variance used as a
+        /// starting point for all beacons.
         /// @param autocalibrationFixedPredicate A function that, when given a
         /// 1-based ID of a beacon, returns "true" if the autocalibration
         /// routines should consider that beacon "fixed" and not subject to
@@ -76,36 +79,53 @@ namespace vbtracker {
         void addSensor(LedIdentifierPtr &&identifier,
                        CameraParameters const &camParams,
                        Point3Vector const &locations,
+                       Vec3Vector const &emissionDirection, double variance,
                        BeaconIDPredicate const &autocalibrationFixedPredicate =
                            getDefaultBeaconFixedPredicate(),
                        size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
+                       size_t permittedOutliers = 2) {
+            addSensor(std::move(identifier), camParams, locations,
+                      emissionDirection, std::vector<double>{variance},
+                      autocalibrationFixedPredicate, requiredInliers,
+                      permittedOutliers);
+        }
 
         /// @overload
-        /// Takes a single default measurement variance, to override the
-        /// internal/configured default.
-        void addSensor(LedIdentifierPtr &&identifier,
-                       CameraParameters const &camParams,
-                       Point3Vector const &locations, double variance,
-                       BeaconIDPredicate const &autocalibrationFixedPredicate =
-                           getDefaultBeaconFixedPredicate(),
-                       size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
-        /// @overload
-        /// Takes a vector of default measurement variances, one per beacon.
+        ///
+        /// For those who want the default variance but want to provide an
+        /// autocalibration fixed predicate or more.
         void addSensor(LedIdentifierPtr &&identifier,
                        CameraParameters const &camParams,
                        Point3Vector const &locations,
-                       std::vector<double> const &variance,
-                       BeaconIDPredicate const &autocalibrationFixedPredicate =
-                           getDefaultBeaconFixedPredicate(),
+                       Vec3Vector const &emissionDirection,
+                       BeaconIDPredicate const &autocalibrationFixedPredicate,
                        size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
+                       size_t permittedOutliers = 2) {
+            addSensor(std::move(identifier), camParams, locations,
+                      emissionDirection, std::vector<double>{},
+                      autocalibrationFixedPredicate, requiredInliers,
+                      permittedOutliers);
+        }
+        /// @overload
+        /// Takes a vector of default measurement variances, one per beacon. By
+        /// default (if empty) a default overall base measurement variance is
+        /// used. If only a single entry is in the vector, it is used for every
+        /// beacon.
+        ///
+        /// (This is actually the one that does the work.)
+        void addSensor(
+            LedIdentifierPtr &&identifier, CameraParameters const &camParams,
+            Point3Vector const &locations, Vec3Vector const &emissionDirection,
+            std::vector<double> const &variance = std::vector<double>{},
+            BeaconIDPredicate const &autocalibrationFixedPredicate =
+                getDefaultBeaconFixedPredicate(),
+            size_t requiredInliers = 4, size_t permittedOutliers = 2);
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
             PoseHandler;
 
+        /// @brief The main method that processes an image into tracked poses.
         /// @return true if user hit q to quit in a debug window, if such a
         /// thing exists.
         bool processImage(cv::Mat frame, cv::Mat grayImage,

@@ -375,7 +375,8 @@ class ConfiguredDeviceConstructor {
         /// not autocalibrated.
         auto backPanelFixedBeacon = [](int) { return true; };
         auto frontPanelFixedBeacon = [](int id) {
-            return (id == 16) || (id == 17) || (id == 19) || (id == 20);
+            return (id == 16) || (id == 17) || (id == 19) || (id == 20) ||
+                   (id > 34 /* rear panel */);
         };
 
         /// @todo get this (and the path) from the config file
@@ -395,12 +396,14 @@ class ConfiguredDeviceConstructor {
             newTracker->vbtracker().addSensor(
                 osvr::vbtracker::createHDKLedIdentifierSimulated(0), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                osvr::vbtracker::OsvrHdkLedDirections_SENSOR0,
                 frontPanelFixedBeacon, 4, 2);
             // There are sometimes only four beacons on the back unit (two of
             // the LEDs are disabled), so we let things work with just those.
             newTracker->vbtracker().addSensor(
                 osvr::vbtracker::createHDKLedIdentifierSimulated(1), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                osvr::vbtracker::OsvrHdkLedDirections_SENSOR1,
                 backPanelFixedBeacon, 4, 0);
             return OSVR_RETURN_SUCCESS;
         }
@@ -436,6 +439,8 @@ class ConfiguredDeviceConstructor {
                 VideoBasedHMDTracker &newTracker) {
                 osvr::vbtracker::Point3Vector locations =
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR0;
+                osvr::vbtracker::Vec3Vector directions =
+                    osvr::vbtracker::OsvrHdkLedDirections_SENSOR0;
                 std::vector<double> variances =
                     osvr::vbtracker::OsvrHdkLedVariances_SENSOR0;
 
@@ -448,10 +453,16 @@ class ConfiguredDeviceConstructor {
                                            -pt.z - distanceBetweenPanels);
                     variances.push_back(config.backPanelMeasurementError);
                 }
+                // Similarly, rotate the directions.
+                for (auto &vec :
+                     osvr::vbtracker::OsvrHdkLedDirections_SENSOR1) {
+                    directions.emplace_back(-vec[0], vec[1], -vec[2]);
+                }
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
                 newTracker.vbtracker().addSensor(
                     osvr::vbtracker::createHDKUnifiedLedIdentifier(), camParams,
-                    locations, variances, frontPanelFixedBeacon, 4, 0);
+                    locations, directions, variances, frontPanelFixedBeacon, 4,
+                    0);
             };
         } else {
             // OK, so if we don't have to include the rear panel as part of the
@@ -463,11 +474,13 @@ class ConfiguredDeviceConstructor {
                 newTracker.vbtracker().addSensor(
                     osvr::vbtracker::createHDKLedIdentifier(0), camParams,
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                    osvr::vbtracker::OsvrHdkLedDirections_SENSOR0,
                     osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
                     frontPanelFixedBeacon, 6, 0);
                 newTracker.vbtracker().addSensor(
                     osvr::vbtracker::createHDKLedIdentifier(1), camParams,
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                    osvr::vbtracker::OsvrHdkLedDirections_SENSOR1,
                     backPanelFixedBeacon, 4, 0);
             };
         }

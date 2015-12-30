@@ -45,7 +45,7 @@ namespace vbtracker {
     // The total number of frames that we can have dodgy Kalman tracking for
     // before RANSAC takes over again.
     static const std::size_t MAX_PROBATION_FRAMES = 10;
-
+#if 0
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         CameraParameters const &camParams, const Point3Vector &beacons,
         size_t requiredInliers, size_t permittedOutliers,
@@ -57,7 +57,7 @@ namespace vbtracker {
         m_requiredInliers = requiredInliers;
         m_permittedOutliers = permittedOutliers;
     }
-
+#endif
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         CameraParameters const &camParams, size_t requiredInliers,
         size_t permittedOutliers, ConfigParams const &params)
@@ -66,14 +66,13 @@ namespace vbtracker {
         m_requiredInliers = requiredInliers;
         m_permittedOutliers = permittedOutliers;
     }
-
+#if 0
     bool BeaconBasedPoseEstimator::SetBeacons(
         const Point3Vector &beacons,
         BeaconIDPredicate const &autocalibrationFixedPredicate) {
         return SetBeacons(beacons, DEFAULT_MEASUREMENT_VARIANCE,
                           autocalibrationFixedPredicate);
     }
-
     bool BeaconBasedPoseEstimator::SetBeacons(
         const Point3Vector &beacons, double variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate) {
@@ -101,8 +100,11 @@ namespace vbtracker {
         return true;
     }
 
+#endif
+
     bool BeaconBasedPoseEstimator::SetBeacons(
-        const Point3Vector &beacons, std::vector<double> const &variance,
+        const Point3Vector &beacons, Vec3Vector const &emissionDirection,
+        std::vector<double> const &variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
@@ -119,11 +121,22 @@ namespace vbtracker {
                 isFixed ? Eigen::Matrix3d::Zero() : beaconError});
             bNum++;
         }
-        m_beaconMeasurementVariance = variance;
+        if (1 == variance.size()) {
+            /// A single entry in the variance array implies use that for all
+            /// beacons.
+            m_beaconMeasurementVariance.resize(m_beacons.size(), variance[0]);
+        } else {
+            m_beaconMeasurementVariance = variance;
+        }
         // ensure it's the right size
         m_beaconMeasurementVariance.resize(m_beacons.size(),
                                            DEFAULT_MEASUREMENT_VARIANCE);
 
+        m_beaconEmissionDirection = emissionDirection;
+        if (m_beaconEmissionDirection.size() != m_beacons.size()) {
+            throw std::runtime_error("Beacon emission direction array size did "
+                                     "not match number of beacons!");
+        }
         // Prep the debug data.
         m_updateBeaconDebugInfoArray();
         return true;

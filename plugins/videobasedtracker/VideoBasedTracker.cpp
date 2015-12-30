@@ -44,7 +44,7 @@ namespace vbtracker {
 
     VideoBasedTracker::VideoBasedTracker(ConfigParams const &params)
         : m_params(params), m_blobExtractor(params) {}
-
+#if 0
     // This version adds the beacons as a part of the constructor.
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
@@ -60,7 +60,7 @@ namespace vbtracker {
         m_led_groups.emplace_back();
         m_assertInvariants();
     }
-
+#endif
     // This version requires YOU to add your beacons! You!
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
@@ -75,7 +75,7 @@ namespace vbtracker {
         beaconAdder(*m_estimators.back());
         m_assertInvariants();
     }
-
+#if 0
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
         Point3Vector const &locations, double variance,
@@ -89,14 +89,17 @@ namespace vbtracker {
                   requiredInliers, permittedOutliers);
     }
 
+#endif
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
-        Point3Vector const &locations, std::vector<double> const &variance,
+        Point3Vector const &locations, Vec3Vector const &emissionDirection,
+        std::vector<double> const &variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
         addSensor(std::move(identifier), camParams,
                   [&](BeaconBasedPoseEstimator &estimator) {
-                      estimator.SetBeacons(locations, variance,
+                      estimator.SetBeacons(locations, emissionDirection,
+                                           variance,
                                            autocalibrationFixedPredicate);
                   },
                   requiredInliers, permittedOutliers);
