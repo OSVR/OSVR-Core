@@ -52,7 +52,7 @@ namespace vbtracker {
         float diameter = 0.f;
 
         /// Area in pixels
-        float area = 0.f;
+        float area = 1.f;
 
         /// Blob circularity (as defined by OpenCV) - in [0,1]
         float circularity = 0.f;

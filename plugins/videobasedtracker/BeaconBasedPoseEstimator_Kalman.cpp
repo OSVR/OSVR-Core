@@ -114,7 +114,6 @@ namespace vbtracker {
                 }
 #endif
             }
-            }
         }
 
         CameraModel cam;
