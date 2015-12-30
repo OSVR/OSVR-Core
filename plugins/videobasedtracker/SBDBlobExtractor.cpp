@@ -228,6 +228,9 @@ namespace vbtracker {
 
         getKeypoints(grayImage);
 
+#if 0
+        // This code uses the Keypoint Detailer, but is slightly unreliable.
+
         /// We'll apply the threshold here first, instead of trusting the flood
         /// fill to repeatably find the same points.
         cv::Mat thresholded;
@@ -236,6 +239,14 @@ namespace vbtracker {
 
         m_latestMeasurements =
             m_keypointDetailer->augmentKeypoints(thresholded, m_keyPoints);
+#endif
+
+        /// Use the LedMeasurement constructor to do the conversion from
+        /// keypoint to measurement right now.
+        m_latestMeasurements.resize(m_keyPoints.size());
+        std::transform(
+            begin(m_keyPoints), end(m_keyPoints), begin(m_latestMeasurements),
+            [](cv::KeyPoint const &kp) { return LedMeasurement{kp}; });
 
         return m_latestMeasurements;
     }
