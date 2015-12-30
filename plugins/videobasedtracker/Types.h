@@ -192,7 +192,7 @@ namespace vbtracker {
 
         /// There's fewer of them, so we'd get bad latency otherwise,
         /// and hey - they work a treat!
-        double backPanelMeasurementError = 1.0;
+        double backPanelMeasurementError = 2.0;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
