@@ -42,6 +42,7 @@
 #include <vector>
 #include <list>
 #include <functional>
+#include <algorithm>
 
 // Define the constant below to provide debugging (window showing video and
 // behavior, printing tracked positions)
@@ -134,6 +135,11 @@ namespace vbtracker {
 
         /// For debug purposes
         BeaconBasedPoseEstimator const &getFirstEstimator() const {
+            return *(m_estimators.front());
+        }
+
+        /// For debug purposes
+        BeaconBasedPoseEstimator &getFirstEstimator() {
             return *(m_estimators.front());
         }
 

@@ -116,6 +116,32 @@ endif()
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins/Video-Based Tracker")
 
+###
+# Calibration utility
+###
+if(WIN32)
+    set(CALIB_SOURCES
+        VideoTrackerCalibrationUtility.cpp
+        ConfigurationParser.h
+        GetOptionalParameter.h
+        ImageSource.cpp
+        ImageSource.h
+        ImageSourceFactories.h
+        DirectShowHDKCameraFactory.h
+        DirectShowImageSource.cpp
+        DirectShowToCV.h)
+    add_executable(VideoTrackerCalibrationUtility ${CALIB_SOURCES})
+    target_link_libraries(VideoTrackerCalibrationUtility
+        PRIVATE
+        vbtracker-core
+        jsoncpp_lib
+        osvrServer
+        directshow-camera)
+    set_target_properties(VideoTrackerCalibrationUtility PROPERTIES
+        FOLDER "OSVR Plugins/Video-Based Tracker")
+endif()
+
+
 if(BUILD_TESTING)
     add_executable(vbtracker-cam
         TestStandalone.cpp)
