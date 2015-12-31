@@ -109,13 +109,6 @@ namespace vbtracker {
                     DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS &&
                 m_params.shouldSkipBrightLeds) {
                 skipBright = true;
-            } else {
-#if 0
-                if (m_params.debug) {
-                    std::cout << "Can't afford to skip brights this frame"
-                              << std::endl;
-                }
-#endif
             }
         }
 
@@ -125,7 +118,6 @@ namespace vbtracker {
         ImagePointMeasurement meas{cam};
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
-        Eigen::Vector2d pt;
 
         const auto maxSquaredResidual =
             m_params.maxResidual * m_params.maxResidual;
@@ -219,7 +211,8 @@ namespace vbtracker {
             debug.residual.y = residual.y();
             auto effectiveVariance =
                 localVarianceFactor * m_params.measurementVarianceScaleFactor *
-                newIdentificationVariancePenalty * (led.isBright() ? BRIGHT_PENALTY : 1.) *
+                newIdentificationVariancePenalty *
+                (led.isBright() ? BRIGHT_PENALTY : 1.) *
                 m_beaconMeasurementVariance[id] / led.getMeasurement().area;
             debug.variance = effectiveVariance;
             meas.setVariance(effectiveVariance);
