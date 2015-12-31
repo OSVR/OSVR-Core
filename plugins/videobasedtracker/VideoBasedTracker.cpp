@@ -156,13 +156,6 @@ namespace vbtracker {
         m_frame = frame;
         m_imageGray = grayImage;
         auto foundLeds = m_blobExtractor.extractBlobs(grayImage);
-#if 0
-        /// @todo maybe hoist to avoid allocations?
-        KeypointEnhancer enh;
-        auto foundKeyPoints =
-            enh.enhanceKeypoints(grayImage, initialFoundKeyPoints);
-        enh.getDebugImage().copyTo(m_keypointEnhancement);
-#endif
 
         /// Perform the undistortion of keypoints
         auto undistortedLeds = undistortLeds(foundLeds, m_camParams);
