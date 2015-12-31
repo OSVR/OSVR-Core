@@ -57,6 +57,7 @@ namespace vbtracker {
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
+    static const auto BRIGHT_PENALTY = 8.;
     bool BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
                                                               double dt) {
         auto const beaconsSize = m_beacons.size();
@@ -218,7 +219,7 @@ namespace vbtracker {
             debug.residual.y = residual.y();
             auto effectiveVariance =
                 localVarianceFactor * m_params.measurementVarianceScaleFactor *
-                newIdentificationVariancePenalty * (led.isBright() ? 2 : 1) *
+                newIdentificationVariancePenalty * (led.isBright() ? BRIGHT_PENALTY : 1.) *
                 m_beaconMeasurementVariance[id] / led.getMeasurement().area;
             debug.variance = effectiveVariance;
             meas.setVariance(effectiveVariance);
