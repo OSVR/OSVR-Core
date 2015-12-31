@@ -155,10 +155,24 @@ namespace vbtracker {
             // error.
             double zComponent =
                 (rotate * cvToVector(m_beaconEmissionDirection[id])).z();
-            /// @todo if z component is positive, we shouldn't even be able to
-            /// see this since it's pointed away from us.
-            if (zComponent > maxZComponent) {
+            if (zComponent > 0.) {
+                if (m_params.extraVerbose) {
+                    std::cout << "Rejecting an LED at " << led.getLocation()
+                              << " claiming ID " << led.getOneBasedID()
+                              << std::endl;
+                }
+                /// This means the LED is pointed away from us - so we shouldn't
+                /// be able to see it.
+                led.markMisidentified();
+
+                /// @todo This could be a mis-identification, or it could mean
+                /// we're in a totally messed up state. Do we count this against
+                /// ourselves?
                 numBad++;
+                continue;
+            } else if (zComponent > maxZComponent) {
+                /// LED is too askew of the camera to provide reliable data, so
+                /// skip it.
                 continue;
             }
 
