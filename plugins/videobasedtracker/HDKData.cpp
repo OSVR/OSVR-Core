@@ -78,10 +78,10 @@ namespace vbtracker {
     // Default 3D locations for the beacons on an OSVR HDK back plate, in
     // millimeters
     const Point3Vector OsvrHdkLedLocations_SENSOR1 = {
-        cv::Point3f( 1, 23.8, 0 ),
+        cv::Point3f( 1, 23.8, 0 ), // never actually turns on in production
         cv::Point3f( 11, 5.8, 0 ),
         cv::Point3f( 9, -23.8, 0 ),
-        cv::Point3f( 0, -8.8, 0 ),
+        cv::Point3f( 0, -8.8, 0 ), // never actually turns on in production
         cv::Point3f( -9, -23.8, 0 ),
         cv::Point3f( -12, 5.8, 0 )
     };

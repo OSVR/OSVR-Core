@@ -145,10 +145,10 @@ namespace vbtracker {
     /// These are from the as-built measurements.
     static const std::vector<std::string>
         OsvrHdkLedIdentifier_SENSOR1_PATTERNS = {
-            "*...........**.."    // 37 31
+            "X............**.."    // 37 31 // never actually turns on in production
           , "......**.*......"    // 38 32
           , ".............***"    // 39 33
-          , "..........*....."    // 40 34
+          , "X..........*....."    // 40 34 // never actually turns on in production
           , "...*.......**..."    // 33 27
           , "...**.....*....."    // 34 28
     };
