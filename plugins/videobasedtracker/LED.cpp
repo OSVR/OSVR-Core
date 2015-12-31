@@ -30,10 +30,12 @@ namespace vbtracker {
     Led::Led(LedIdentifier *identifier, LedMeasurement const &meas)
         : m_id(SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA),
           m_identifier(identifier) {
-        addMeasurement(meas);
+        /// Doesn't matter what the blobs keep ID pref is here, because this is
+        /// a new blob so there's no ID to keep.
+        addMeasurement(meas, false);
     }
 
-    void Led::addMeasurement(LedMeasurement const &meas) {
+    void Led::addMeasurement(LedMeasurement const &meas, bool blobsKeepId) {
         m_latestMeasurement = meas;
         m_brightnessHistory.push_back(meas.brightness);
 
@@ -43,7 +45,8 @@ namespace vbtracker {
             m_id = SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
         } else {
             auto oldId = m_id;
-            m_id = m_identifier->getId(m_id, m_brightnessHistory, m_lastBright);
+            m_id = m_identifier->getId(m_id, m_brightnessHistory, m_lastBright,
+                                       blobsKeepId);
 #if 0
             m_newlyRecognized = oldId < 0 && m_id >= 0;
             auto lostRecognition = m_id < 0 && oldId >= 0;

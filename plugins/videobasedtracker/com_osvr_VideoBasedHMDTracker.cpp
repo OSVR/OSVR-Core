@@ -309,6 +309,8 @@ class ConfiguredDeviceConstructor {
                              "initialBeaconError");
         getOptionalParameter(config.blobMoveThreshold, root,
                              "blobMoveThreshold");
+        getOptionalParameter(config.blobsKeepIdentity, root,
+                             "blobsKeepIdentity");
         getOptionalParameter(config.numThreads, root, "numThreads");
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
@@ -320,7 +322,7 @@ class ConfiguredDeviceConstructor {
 
         /// Kalman-related parameters
         getOptionalParameter(config.beaconProcessNoise, root,
-            "beaconProcessNoise");
+                             "beaconProcessNoise");
         getOptionalParameter(config.processNoiseAutocorrelation, root,
                              "processNoiseAutocorrelation");
         getOptionalParameter(config.linearVelocityDecayCoefficient, root,

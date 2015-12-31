@@ -195,7 +195,8 @@ namespace vbtracker {
                         // Update the values in this LED and then go on to the
                         // next one. Remove this blob from the list of
                         // potential matches.
-                        led->addMeasurement(*nearest);
+                        led->addMeasurement(*nearest,
+                                            m_params.blobsKeepIdentity);
                         ledsMeasurements.erase(nearest);
                         ++led;
                     }

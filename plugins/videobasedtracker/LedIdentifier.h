@@ -65,7 +65,7 @@ namespace vbtracker {
         /// constant, mis-tracked LEDs may produce spurious changes in the
         /// pattern for example).
         virtual int getId(int currentId, BrightnessList &brightnesses,
-                          bool &lastBright) const = 0;
+                          bool &lastBright, bool blobsKeepId) const = 0;
 
       protected:
     };

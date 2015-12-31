@@ -97,7 +97,7 @@ namespace vbtracker {
         /// along in the hope that they may be useful to later code. (For
         /// instance, not all identified beacons may be good choices to use in
         /// determining tracking pose)
-        void addMeasurement(LedMeasurement const &meas);
+        void addMeasurement(LedMeasurement const &meas, bool blobsKeepId);
 
         LedMeasurement const &getMeasurement() const {
             return m_latestMeasurement;

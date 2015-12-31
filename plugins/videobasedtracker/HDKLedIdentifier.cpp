@@ -33,8 +33,6 @@
 // Standard includes
 // - none
 
-#undef OSVR_LED_IDENTIFICATION_EARLY_OUT
-
 namespace osvr {
 namespace vbtracker {
     static const auto VALIDCHARS = "*.";
@@ -92,7 +90,7 @@ namespace vbtracker {
 
     int OsvrHdkLedIdentifier::getId(int currentId,
                                     std::list<float> &brightnesses,
-                                    bool &lastBright) const {
+                                    bool &lastBright, bool blobsKeepId) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {
@@ -118,12 +116,10 @@ namespace vbtracker {
         // Set the `lastBright` out variable
         lastBright = brightnesses.back() >= threshold;
 
-#ifdef OSVR_LED_IDENTIFICATION_EARLY_OUT
-        if (currentId >= 0) {
+        if (blobsKeepId && currentId >= 0) {
             // Early out if we already have identified this LED.
             return currentId;
         }
-#endif
 
         // Get a list of boolean values for 0's and 1's using
         // the threshold computed above.

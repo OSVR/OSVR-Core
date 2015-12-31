@@ -236,6 +236,13 @@ namespace vbtracker {
         /// just give them slightly higher variance.
         bool shouldSkipBrightLeds = false;
 
+        /// If this option is set to true, then while some of the pattern
+        /// identifier is run each frame, an "early-out" will be taken if the
+        /// blob/LED already has a valid (non-negative) ID assigned to it. This
+        /// can help keep IDs on hard to identify blobs, but it can also persist
+        /// errors longer. That's why it's an option.
+        bool blobsKeepIdentity = false;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
