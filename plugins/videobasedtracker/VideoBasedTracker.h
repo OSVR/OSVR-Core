@@ -160,7 +160,7 @@ namespace vbtracker {
         cv::Mat m_thresholdImage;
         cv::Mat m_imageWithBlobs;
         cv::Mat m_statusImage;
-        cv::Mat *m_shownImage = &m_imageWithBlobs;
+        cv::Mat *m_shownImage = &m_statusImage;
         int m_debugFrame = 0;
         /// @}
 

@@ -325,10 +325,10 @@ namespace vbtracker {
                         std::cout
                             << "\nVideo-based tracking debug windows help:\n";
                         std::cout
-                            << "  - press 'b' to show the labeled blobs and "
-                               "the reprojected beacons (default)\n"
                             << "  - press 's' to show the detected blobs and "
-                               "the status of recognized beacons\n"
+                               "the status of recognized beacons (default)\n"
+                            << "  - press 'b' to show the labeled blobs and "
+                               "the reprojected beacons\n"
                             << "  - press 'i' to show the raw input image\n"
                             << "  - press 't' to show the blob-detecting "
                                "threshold image\n"
@@ -347,12 +347,13 @@ namespace vbtracker {
                         cv::imshow(windowName.str(), *m_shownImage);
                         int key = cv::waitKey(1);
                         switch (key) {
-                        case 'b':
-                            // Show the blob/keypoints image (default)
-                            m_shownImage = &m_imageWithBlobs;
-                            break;
                         case 's':
+                            // Show the concise "status" image (default)
                             m_shownImage = &m_statusImage;
+                            break;
+                        case 'b':
+                            // Show the blob/keypoints image
+                            m_shownImage = &m_imageWithBlobs;
                             break;
                         case 'i':
                             // Show the input image.
