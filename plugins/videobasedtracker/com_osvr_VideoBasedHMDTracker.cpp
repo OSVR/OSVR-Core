@@ -285,6 +285,23 @@ class ConfiguredDeviceConstructor {
         config.debug = showDebug;
 
         using osvr::vbtracker::getOptionalParameter;
+
+        /// Rear panel stuff
+        getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
+        getOptionalParameter(config.headCircumference, root,
+                             "headCircumference");
+        getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
+                             "headToFrontBeaconOriginDistance");
+        getOptionalParameter(config.backPanelMeasurementError, root,
+                             "backPanelMeasurementError");
+
+        // If we include the rear panel, we default to not offsetting to
+        // centroid since it causes strange tracking.
+        if (config.includeRearPanel) {
+            config.offsetToCentroid = false;
+        }
+
+        /// General parameters
         getOptionalParameter(config.additionalPrediction, root,
                              "additionalPrediction");
         getOptionalParameter(config.maxResidual, root, "maxResidual");
@@ -295,8 +312,15 @@ class ConfiguredDeviceConstructor {
         getOptionalParameter(config.numThreads, root, "numThreads");
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
+        getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
+        if (!config.offsetToCentroid) {
+            getOptionalParameter(config.manualBeaconOffset, root,
+                                 "manualBeaconOffset");
+        }
 
-        /// General kalman stuff
+        /// Kalman-related parameters
+        getOptionalParameter(config.beaconProcessNoise, root,
+            "beaconProcessNoise");
         getOptionalParameter(config.processNoiseAutocorrelation, root,
                              "processNoiseAutocorrelation");
         getOptionalParameter(config.linearVelocityDecayCoefficient, root,
@@ -313,25 +337,7 @@ class ConfiguredDeviceConstructor {
         getOptionalParameter(config.shouldSkipBrightLeds, root,
                              "shouldSkipBrightLeds");
 
-        getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
-        if (!config.offsetToCentroid) {
-            getOptionalParameter(config.manualBeaconOffset, root,
-                                 "manualBeaconOffset");
-        }
-
-        /// Rear panel stuff
-        getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
-        getOptionalParameter(config.headCircumference, root,
-                             "headCircumference");
-        getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
-                             "headToFrontBeaconOriginDistance");
-        getOptionalParameter(config.backPanelMeasurementError, root,
-                             "backPanelMeasurementError");
-
-        getOptionalParameter(config.beaconProcessNoise, root,
-                             "beaconProcessNoise");
-
-        /// Blob-detection stuff
+        /// Blob-detection parameters
         if (root.isMember("blobParams")) {
             Json::Value const &blob = root["blobParams"];
 
