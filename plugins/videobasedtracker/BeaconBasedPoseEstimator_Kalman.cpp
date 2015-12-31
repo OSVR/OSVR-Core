@@ -57,9 +57,6 @@ namespace vbtracker {
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
-
-    static const auto MAX_Z_COMPONENT = -0.3;
-
     bool BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
                                                               double dt) {
         auto const beaconsSize = m_beacons.size();
@@ -108,7 +105,8 @@ namespace vbtracker {
                 varianceFactor = 0.5;
             }
             if (inBoundsID - inBoundsBright >
-                DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS) {
+                    DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS &&
+                m_params.shouldSkipBrightLeds) {
                 skipBright = true;
             } else {
 #if 0
@@ -130,7 +128,7 @@ namespace vbtracker {
 
         const auto maxSquaredResidual =
             m_params.maxResidual * m_params.maxResidual;
-
+        const auto maxZComponent = m_params.maxZComponent;
         kalman::predict(m_state, m_model, dt);
 
         /// @todo should we be recalculating this for each beacon after each
@@ -166,7 +164,7 @@ namespace vbtracker {
                 (rotate * cvToVector(m_beaconEmissionDirection[id])).z();
             /// @todo if z component is positive, we shouldn't even be able to
             /// see this since it's pointed away from us.
-            if (zComponent > MAX_Z_COMPONENT) {
+            if (zComponent > maxZComponent) {
                 numBad++;
                 continue;
             }
