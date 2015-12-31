@@ -184,18 +184,17 @@ namespace vbtracker {
                 auto e = end(myLeds);
                 while (led != end(myLeds)) {
                     led->resetUsed();
-
-                    auto nearest = led->nearest(ledsMeasurements,
-                                                m_params.blobMoveThreshold);
+                    auto threshold = m_params.blobMoveThreshold *
+                                     led->getMeasurement().diameter;
+                    auto nearest = led->nearest(ledsMeasurements, threshold);
                     if (nearest == end(ledsMeasurements)) {
                         // We have no blob corresponding to this LED, so we need
                         // to delete this LED.
                         led = myLeds.erase(led);
                     } else {
                         // Update the values in this LED and then go on to the
-                        // next one.  Remove this blob from the list of
-                        // potential
-                        // matches.
+                        // next one. Remove this blob from the list of
+                        // potential matches.
                         led->addMeasurement(*nearest);
                         ledsMeasurements.erase(nearest);
                         ++led;
