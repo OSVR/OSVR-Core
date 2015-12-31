@@ -37,29 +37,46 @@
 
 namespace osvr {
 namespace vbtracker {
-
+    static const auto VALIDCHARS = "*.";
     OsvrHdkLedIdentifier::~OsvrHdkLedIdentifier() {}
     // Convert from string encoding representations into lists
     // of boolean values for use in comparison.
     OsvrHdkLedIdentifier::OsvrHdkLedIdentifier(
         const PatternStringList &PATTERNS) {
         // Ensure that we have at least one entry in our list and
-        // find the length of the first entry.
-        if (PATTERNS.size() == 0) {
-            d_length = 0;
+        // find the length of the first valid entry.
+        d_length = 0;
+        if (PATTERNS.empty()) {
             return;
         }
-        d_length = PATTERNS[0].size();
+
+        for (auto &pat : PATTERNS) {
+            if (!pat.empty() && pat.find_first_not_of(VALIDCHARS) == pat.npos) {
+                // All characters in this pattern are valid - we can consider
+                // this to be a valid pattern and thus establish the size.
+                d_length = pat.length();
+                break;
+            }
+        }
+
+        if (0 == d_length) {
+            // If we still have 0 as the pattern length, return.
+            return;
+        }
 
         // Decode each string into a new list of boolean values, making
         // sure each have the correct length.
-        for (size_t i = 0; i < PATTERNS.size(); i++) {
+
+        for (auto &pat : PATTERNS) {
+            if (pat.empty() || pat.find_first_not_of(VALIDCHARS) != pat.npos) {
+                // This is an intentionally disabled beacon/pattern.
+                d_patterns.emplace_back();
+                continue;
+            }
 
             // Make sure the pattern is the correct length.
-            if (PATTERNS[i].size() != d_length) {
-                d_patterns.clear();
-                d_length = 0;
-                return;
+            if (pat.size() != d_length) {
+                throw std::runtime_error("Got a pattern of incorrect length!");
             }
 
             // Make a wrapped pattern, which is the original pattern plus
@@ -67,17 +84,15 @@ namespace vbtracker {
             // character in it.  This will enable use to use the string
             // find() routine to see if any shift of the pattern is a
             // match.
-            std::string wrapped = PATTERNS[i] + PATTERNS[i];
+            auto wrapped = pat + pat;
             wrapped.pop_back();
-
-            // Add the pattern to the vector of lists.
-            d_patterns.push_back(wrapped);
+            d_patterns.push_back(std::move(wrapped));
         }
-        // std::cout << "XXX d_length = " << d_length << ", num patterns = " <<
-        // d_patterns.size() << std::endl;
     }
 
-    int OsvrHdkLedIdentifier::getId(int currentId, std::list<float> &brightnesses, bool & lastBright) const {
+    int OsvrHdkLedIdentifier::getId(int currentId,
+                                    std::list<float> &brightnesses,
+                                    bool &lastBright) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {
@@ -122,9 +137,13 @@ namespace vbtracker {
         // and seeing if the pattern shows up anywhe in them, relying on
         // the std::string find method to do efficiently.
         for (size_t i = 0; i < d_patterns.size(); i++) {
-          if (d_patterns[i].find(bits) != std::string::npos) {
-            return static_cast<int>(i);
-          }
+            if (d_patterns[i].empty()) {
+                /// Skip turned-off patterns.
+                continue;
+            }
+            if (d_patterns[i].find(bits) != std::string::npos) {
+                return static_cast<int>(i);
+            }
         }
 
         // No pattern recognized and we should have recognized one, so return
