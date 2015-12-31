@@ -130,10 +130,12 @@ namespace vbtracker {
     struct ConfigParams {
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
+
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
-        /// Max residual (pixel units) for a beacon before throwing that
-        /// measurement out.
+
+        /// Max residual (pixel units) for a beacon before applying a variance
+        /// penalty.
         double maxResidual = 75;
         /// Initial beacon error for autocalibration (units: mm^2).
         /// 0 effectively turns off beacon auto-calib.
@@ -141,31 +143,39 @@ namespace vbtracker {
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
         double initialBeaconError = 0.001;
-        /// Maximum distance a blob can move, in pixel units, and still be
-        /// considered the same blob.
-        double blobMoveThreshold = 20.;
+
+        /// Maximum distance a blob can move, in multiples of its previous
+        /// "keypoint diameter", and still be considered the same blob.
+        double blobMoveThreshold = 4.;
+
+        /// Whether to show the debug windows and debug messages.
         bool debug = false;
+
         /// How many threads to let OpenCV use. Set to 0 or less to let OpenCV
         /// decide (that is, not set an explicit preference)
         int numThreads = 1;
+
         /// This is the autocorrelation kernel of the process noise. The first
         /// three elements correspond to position, the second three to
         /// incremental rotation.
         double processNoiseAutocorrelation[6];
+
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
-        /// smaller = faster decay/higher damping.
-        double linearVelocityDecayCoefficient = 0.2;
+        /// smaller = faster decay/higher damping. In range [0, 1]
+        double linearVelocityDecayCoefficient = 1.;
+
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
-        /// smaller = faster decay/higher damping.
-        double angularVelocityDecayCoefficient = 0.1;
+        /// smaller = faster decay/higher damping. In range [0, 1]
+        double angularVelocityDecayCoefficient = 1.;
+
         /// The measurement variance (units: mm^2) is included in the plugin
         /// along with the coordinates of the beacons. Some beacons are observed
         /// with higher variance than others, due to known difficulties in
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.6;
+        double measurementVarianceScaleFactor = 1.;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
@@ -192,9 +202,9 @@ namespace vbtracker {
         /// roughly the flat part of the hard plastic.
         double headToFrontBeaconOriginDistance = 0;
 
-        /// There's fewer of them, so we'd get bad latency otherwise,
-        /// and hey - they work a treat!
-        double backPanelMeasurementError = 2.0;
+        /// This used to be different than the other beacons, but now it's
+        /// mostly the same.
+        double backPanelMeasurementError = 3.0;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
@@ -213,16 +223,18 @@ namespace vbtracker {
 
         /// This should be the ratio of lengths of sides that you'll permit to
         /// be filtered in. Larger side first, please.
+        /// May not currently be used.
         float boundingBoxFilterRatio = 5.f / 4.f;
 
         /// This should be a negative number - it's the largest the z component
         /// of the camera-space LED emission vector is permitted to be and still
-        /// be used in estimation.
+        /// be used in estimation. acos(this number) is the maximum angle away
+        /// from pointing at the camera that we'll accept an LED pointing.
         double maxZComponent = -0.3;
 
         /// Should we attempt to skip bright-mode LEDs? The alternative is to
         /// just give them slightly higher variance.
-        bool shouldSkipBrightLeds = true;
+        bool shouldSkipBrightLeds = false;
 
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
