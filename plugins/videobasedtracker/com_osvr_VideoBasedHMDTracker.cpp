@@ -31,8 +31,9 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
-#include "GetOptionalParameter.h"
 #include "HDKData.h"
+
+#include "ConfigurationParser.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -280,90 +281,9 @@ class ConfiguredDeviceConstructor {
 
         // Using `get` here instead of `[]` lets us provide a default value.
         int cameraID = root.get("cameraID", 0).asInt();
-        bool showDebug = root.get("showDebug", false).asBool();
-        osvr::vbtracker::ConfigParams config;
-        config.debug = showDebug;
 
-        using osvr::vbtracker::getOptionalParameter;
-
-        /// Rear panel stuff
-        getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
-        getOptionalParameter(config.headCircumference, root,
-                             "headCircumference");
-        getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
-                             "headToFrontBeaconOriginDistance");
-        getOptionalParameter(config.backPanelMeasurementError, root,
-                             "backPanelMeasurementError");
-
-        // If we include the rear panel, we default to not offsetting to
-        // centroid since it causes strange tracking.
-        if (config.includeRearPanel) {
-            config.offsetToCentroid = false;
-        }
-
-        /// General parameters
-        getOptionalParameter(config.extraVerbose, root, "extraVerbose");
-        getOptionalParameter(config.additionalPrediction, root,
-                             "additionalPrediction");
-        getOptionalParameter(config.maxResidual, root, "maxResidual");
-        getOptionalParameter(config.initialBeaconError, root,
-                             "initialBeaconError");
-        getOptionalParameter(config.blobMoveThreshold, root,
-                             "blobMoveThreshold");
-        getOptionalParameter(config.blobsKeepIdentity, root,
-                             "blobsKeepIdentity");
-        getOptionalParameter(config.numThreads, root, "numThreads");
-        getOptionalParameter(config.streamBeaconDebugInfo, root,
-                             "streamBeaconDebugInfo");
-        getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
-        if (!config.offsetToCentroid) {
-            getOptionalParameter(config.manualBeaconOffset, root,
-                                 "manualBeaconOffset");
-        }
-
-        /// Kalman-related parameters
-        getOptionalParameter(config.beaconProcessNoise, root,
-                             "beaconProcessNoise");
-        getOptionalParameter(config.processNoiseAutocorrelation, root,
-                             "processNoiseAutocorrelation");
-        getOptionalParameter(config.linearVelocityDecayCoefficient, root,
-                             "linearVelocityDecayCoefficient");
-        getOptionalParameter(config.angularVelocityDecayCoefficient, root,
-                             "angularVelocityDecayCoefficient");
-        getOptionalParameter(config.measurementVarianceScaleFactor, root,
-                             "measurementVarianceScaleFactor");
-        getOptionalParameter(config.highResidualVariancePenalty, root,
-                             "highResidualVariancePenalty");
-        getOptionalParameter(config.boundingBoxFilterRatio, root,
-                             "boundingBoxFilterRatio");
-        getOptionalParameter(config.maxZComponent, root, "maxZComponent");
-        getOptionalParameter(config.shouldSkipBrightLeds, root,
-                             "shouldSkipBrightLeds");
-
-        /// Blob-detection parameters
-        if (root.isMember("blobParams")) {
-            Json::Value const &blob = root["blobParams"];
-
-            getOptionalParameter(config.blobParams.absoluteMinThreshold, blob,
-                                 "absoluteMinThreshold");
-            getOptionalParameter(config.blobParams.minDistBetweenBlobs, blob,
-                                 "minDistBetweenBlobs");
-            getOptionalParameter(config.blobParams.minArea, blob, "minArea");
-            getOptionalParameter(config.blobParams.filterByCircularity, blob,
-                                 "filterByCircularity");
-            getOptionalParameter(config.blobParams.minCircularity, blob,
-                                 "minCircularity");
-            getOptionalParameter(config.blobParams.filterByConvexity, blob,
-                                 "filterByConvexity");
-            getOptionalParameter(config.blobParams.minConvexity, blob,
-                                 "minConvexity");
-            getOptionalParameter(config.blobParams.minThresholdAlpha, blob,
-                                 "minThresholdAlpha");
-            getOptionalParameter(config.blobParams.maxThresholdAlpha, blob,
-                                 "maxThresholdAlpha");
-            getOptionalParameter(config.blobParams.thresholdSteps, blob,
-                                 "thresholdSteps");
-        }
+        // This is in a separate function/header foro sharing and for clarity.
+        auto config = osvr::vbtracker::parseConfigParams(root);
 
         /// Functions to indicate which beacons should be considered "fixed" -
         /// not autocalibrated.

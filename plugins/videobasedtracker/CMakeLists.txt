@@ -75,6 +75,7 @@ set(PLUGIN_SOURCES
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
     CVImageSource.cpp
     DK2ImageSource.cpp
+    ConfigurationParser.h
     GetOptionalParameter.h
     ImageSource.cpp
     ImageSource.h
