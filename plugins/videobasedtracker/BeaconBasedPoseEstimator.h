@@ -146,6 +146,14 @@ namespace vbtracker {
         /// filter with beacon position auto-calibration to compute an estimate.
         bool m_kalmanAutocalibEstimator(LedGroup &leds, double dt);
 
+        /// @brief A method that determines if the Kalman filter has gotten
+        /// itself into a bad situation and we should start again with RANSAC.
+        ///
+        /// Note that this clears the values it checks, since it resets a value
+        /// that will cause the estimator to use RANSAC for the next frame
+        /// dispatched.
+        bool m_forceRansacIfKalmanNeedsReset();
+
         /// @brief Resets the Kalman filter main state based on the
         /// direct-calculation outputs.
         void m_resetState(Eigen::Vector3d const &xlate,
@@ -199,6 +207,9 @@ namespace vbtracker {
         /// @{
         /// How long we've been turning in low ratios of good to bad residuals.
         std::size_t m_framesInProbation = 0;
+        /// How long we've had what might have been valid measurements but
+        /// excluded all of them.
+        std::size_t m_framesWithoutUtilizedMeasurements = 0;
         /// @}
     };
 

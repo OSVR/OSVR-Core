@@ -46,6 +46,8 @@ namespace vbtracker {
     // before RANSAC takes over again.
     static const std::size_t MAX_PROBATION_FRAMES = 10;
 
+    static const std::size_t MAX_FRAMES_WITHOUT_MEASUREMENTS = 50;
+
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         CameraParameters const &camParams, size_t requiredInliers,
         size_t permittedOutliers, ConfigParams const &params)
@@ -163,19 +165,16 @@ namespace vbtracker {
                 data.reset();
             }
         }
+
+        /// Check on the health of the Kalman filter.
+        auto didReset = m_forceRansacIfKalmanNeedsReset();
+        if (didReset && m_params.debug) {
+            std::cout << "Video-based tracker: lost fix, in-flight reset"
+                      << std::endl;
+        }
+
         bool usedKalman = false;
         bool result = false;
-        if (m_framesInProbation > MAX_PROBATION_FRAMES) {
-            // Kalman filter started returning too high of residuals - going
-            // back to RANSAC until we get a good lock again.
-            if (m_params.debug) {
-                std::cout << "Video-based tracker: lost fix, beacon tracking "
-                             "returning to startup state"
-                          << std::endl;
-            }
-            m_gotPose = false;
-            m_framesInProbation = 0;
-        }
         if (!m_gotPose || !m_gotPrev) {
             // Must use the direct approach
             result = m_pnpransacEstimator(leds);
@@ -203,6 +202,22 @@ namespace vbtracker {
             outPose = GetPredictedState(dt2 + m_params.additionalPrediction);
         }
         return true;
+    }
+
+    bool BeaconBasedPoseEstimator::m_forceRansacIfKalmanNeedsReset() {
+        auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES) ||
+                          (m_framesWithoutUtilizedMeasurements >
+                           MAX_FRAMES_WITHOUT_MEASUREMENTS);
+
+        if (needsReset) {
+            m_framesInProbation = 0;
+            m_framesWithoutUtilizedMeasurements = 0;
+
+            /// This is what triggers RANSAC instead of the Kalman mode for the
+            /// next frame.
+            m_gotPose = false;
+        }
+        return needsReset;
     }
 
     bool BeaconBasedPoseEstimator::m_pnpransacEstimator(LedGroup &leds) {

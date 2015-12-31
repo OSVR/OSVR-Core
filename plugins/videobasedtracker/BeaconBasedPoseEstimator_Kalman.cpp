@@ -67,12 +67,12 @@ namespace vbtracker {
         auto maxBoxRatio = m_params.boundingBoxFilterRatio;
         auto minBoxRatio = 1.f / m_params.boundingBoxFilterRatio;
 
+        auto inBoundsID = std::size_t{0};
         // Default to using all the measurements we can
         auto skipBright = false;
         {
             auto totalLeds = leds.size();
             auto identified = std::size_t{0};
-            auto inBoundsID = std::size_t{0};
             auto inBoundsBright = std::size_t{0};
             auto inBoundsRound = std::size_t{0};
             for (auto const &led : leds) {
@@ -238,6 +238,7 @@ namespace vbtracker {
             m_gotMeasurement = true;
         }
 
+        /// Probation: Dealing with ratios of bad to good residuals
         bool incrementProbation = false;
         if (0 == m_framesInProbation) {
             // Let's try to keep a 3:2 ratio of good to bad when not "in
@@ -256,6 +257,18 @@ namespace vbtracker {
         if (incrementProbation) {
             m_framesInProbation++;
         }
+
+        /// Frames without measurements: dealing with getting in a bad state
+        if (m_gotMeasurement) {
+            m_framesWithoutUtilizedMeasurements = 0;
+        } else {
+            if (inBoundsID > 0) {
+                /// We had a measurement, we rejected it. The problem may be the
+                /// plank in our own eye, not the speck in our beacon's eye.
+                m_framesWithoutUtilizedMeasurements++;
+            }
+        }
+
         /// Output to the OpenCV state types so we can see the reprojection
         /// debug view.
         m_rvec = eiQuatToRotVec(m_state.getQuaternion());
