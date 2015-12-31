@@ -24,12 +24,12 @@
             "highResidualVariancePenalty": 10.0,
             "initialBeaconError": 0.001,
             "beaconProcessNoise": 0.0000001,
-            "blobMoveThreshold": 20,
+            "blobMoveThreshold": 4,
             "numThreads": 1,
             "processNoiseAutocorrelation": [3e+2, 3e+2, 3e+2, 1e0, 1e0, 1e0],
-            "linearVelocityDecayCoefficient": 0.2,
-            "angularVelocityDecayCoefficient": 0.1,
-            "measurementVarianceScaleFactor": 1.6,
+            "linearVelocityDecayCoefficient": 1,
+            "angularVelocityDecayCoefficient": 1,
+            "measurementVarianceScaleFactor": 1,
             "offsetToCentroid": false,
             "manualBeaconOffset": [0, 0, 38.8676],
             "includeRearPanel": false,
@@ -39,7 +39,8 @@
             "streamBeaconDebugInfo": false,
             "boundingBoxFilterRatio": 1.25,
             "maxZComponent": -0.3,
-            "shouldSkipBrightLeds": true
+            "shouldSkipBrightLeds": false,
+            "blobsKeepIdentity": false
         }
     }],
     "aliases": {
