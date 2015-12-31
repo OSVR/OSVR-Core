@@ -154,6 +154,10 @@ namespace vbtracker {
 
         void resetUsed() { m_wasUsedLastFrame = false; }
 
+        /// Called from within pose estimation or elsewhere with model-based
+        /// knowledge that can refute the identification of this blob.
+        void markMisidentified();
+
       private:
         /// Most recent measurement
         LedMeasurement m_latestMeasurement;

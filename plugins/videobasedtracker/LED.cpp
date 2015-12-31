@@ -149,5 +149,13 @@ namespace vbtracker {
         return end(meas);
     }
 
+    void Led::markMisidentified() {
+        m_id = SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
+        if (!m_brightnessHistory.empty()) {
+            m_brightnessHistory.clear();
+            m_brightnessHistory.push_back(getMeasurement().brightness);
+        }
+    }
+
 } // End namespace vbtracker
 } // End namespace osvr
