@@ -175,7 +175,7 @@ namespace vbtracker {
 
         bool usedKalman = false;
         bool result = false;
-        if (!m_gotPose || !m_gotPrev) {
+        if (!m_gotPose || !m_gotPrev || !m_permitKalman) {
             // Must use the direct approach
             result = m_pnpransacEstimator(leds);
         } else {
@@ -367,6 +367,11 @@ namespace vbtracker {
                           m_camParams.distortionParameters, out);
         return true;
     }
+
+    void BeaconBasedPoseEstimator::permitKalmanMode(bool permitKalman) {
+        m_permitKalman = permitKalman;
+    }
+
 #if 0
     static const double InitialStateError[] = {.01, .01, .1,  1.,  1.,  .1,
                                                10., 10., 10., 10., 10., 10.};

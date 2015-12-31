@@ -100,6 +100,10 @@ namespace vbtracker {
         /// @return true on success, false on failure.
         bool ProjectBeaconsToImage(std::vector<cv::Point2f> &outPose);
 
+        /// Some uses of this may require explicitly disabling kalman mode until
+        /// a condition is met. This permits that.
+        void permitKalmanMode(bool permitKalman);
+
         /// @name State getting methods
         /// @brief They extract state in the OSVR units (meters, not mm, for
         /// instance) even when the internal storage may vary.
@@ -183,6 +187,8 @@ namespace vbtracker {
         OSVR_TimeValue m_prev;
         /// whether m_prev is a valid timestamp
         bool m_gotPrev = false;
+
+        bool m_permitKalman = true;
 
         /// @name Pose cache
         /// @brief Stores the most-recent solution, in case we need it again
