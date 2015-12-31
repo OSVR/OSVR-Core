@@ -245,9 +245,14 @@ namespace vbtracker {
             processNoiseAutocorrelation[3] = 1e0;
             processNoiseAutocorrelation[4] = 1e0;
             processNoiseAutocorrelation[5] = 1e0;
+
+            /// If you use manual beacon offset (aka turn off offsetToCentroid),
+            /// this is a good default since it's the best beacon offset for the
+            /// HDK we've found so far - centroid of front beacons, with only z
+            /// component retained.
             manualBeaconOffset[0] = 0;
             manualBeaconOffset[1] = 0;
-            manualBeaconOffset[2] = 0;
+            manualBeaconOffset[2] = 38.8676;
         }
     };
 } // namespace vbtracker
