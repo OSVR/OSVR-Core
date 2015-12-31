@@ -302,6 +302,7 @@ class ConfiguredDeviceConstructor {
         }
 
         /// General parameters
+        getOptionalParameter(config.extraVerbose, root, "extraVerbose");
         getOptionalParameter(config.additionalPrediction, root,
                              "additionalPrediction");
         getOptionalParameter(config.maxResidual, root, "maxResidual");

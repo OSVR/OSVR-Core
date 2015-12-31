@@ -243,6 +243,9 @@ namespace vbtracker {
         /// errors longer. That's why it's an option.
         bool blobsKeepIdentity = false;
 
+        /// Extra verbose developer debugging messages
+        bool extraVerbose = false;
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
