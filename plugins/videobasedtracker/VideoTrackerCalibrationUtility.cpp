@@ -36,6 +36,7 @@
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <json/reader.h>
 #include <json/value.h>
 
