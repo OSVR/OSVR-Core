@@ -49,7 +49,7 @@ namespace vbtracker {
             double r2 = normalizedDistorted.squaredNorm();
             Eigen::Vector2d normalizedUndistorted =
                 normalizedDistorted *
-                (1 + m_k[0] * r2 + m_k[1] * r2 * r2 + m_k[3] * r2 * r2 * r2);
+                (1 + m_k[0] * r2 + m_k[1] * r2 * r2 + m_k[2] * r2 * r2 * r2);
             Eigen::Vector2d undistorted =
                 (normalizedUndistorted.array() * m_fl.array()).matrix() + m_c;
             return undistorted;

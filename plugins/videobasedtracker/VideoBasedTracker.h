@@ -31,6 +31,7 @@
 #include "LedIdentifier.h"
 #include "BeaconBasedPoseEstimator.h"
 #include "CameraParameters.h"
+#include "SBDBlobExtractor.h"
 #include <osvr/Util/ChannelCountC.h>
 
 // Library/third-party includes
@@ -41,6 +42,7 @@
 #include <vector>
 #include <list>
 #include <functional>
+#include <algorithm>
 
 // Define the constant below to provide debugging (window showing video and
 // behavior, printing tracked positions)
@@ -65,6 +67,10 @@ namespace vbtracker {
         /// @param camParams An object with the camera matrix and distortion
         /// parameters.
         /// @param locations A list of the 3d locations (in mm) of each marker
+        /// @param emissionDirection Normalized vectors for each beacon in body
+        /// space giving their emission direction.
+        /// @param variance A single default base measurement variance used as a
+        /// starting point for all beacons.
         /// @param autocalibrationFixedPredicate A function that, when given a
         /// 1-based ID of a beacon, returns "true" if the autocalibration
         /// routines should consider that beacon "fixed" and not subject to
@@ -75,36 +81,53 @@ namespace vbtracker {
         void addSensor(LedIdentifierPtr &&identifier,
                        CameraParameters const &camParams,
                        Point3Vector const &locations,
+                       Vec3Vector const &emissionDirection, double variance,
                        BeaconIDPredicate const &autocalibrationFixedPredicate =
                            getDefaultBeaconFixedPredicate(),
                        size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
+                       size_t permittedOutliers = 2) {
+            addSensor(std::move(identifier), camParams, locations,
+                      emissionDirection, std::vector<double>{variance},
+                      autocalibrationFixedPredicate, requiredInliers,
+                      permittedOutliers);
+        }
 
         /// @overload
-        /// Takes a single default measurement variance, to override the
-        /// internal/configured default.
-        void addSensor(LedIdentifierPtr &&identifier,
-                       CameraParameters const &camParams,
-                       Point3Vector const &locations, double variance,
-                       BeaconIDPredicate const &autocalibrationFixedPredicate =
-                           getDefaultBeaconFixedPredicate(),
-                       size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
-        /// @overload
-        /// Takes a vector of default measurement variances, one per beacon.
+        ///
+        /// For those who want the default variance but want to provide an
+        /// autocalibration fixed predicate or more.
         void addSensor(LedIdentifierPtr &&identifier,
                        CameraParameters const &camParams,
                        Point3Vector const &locations,
-                       std::vector<double> const &variance,
-                       BeaconIDPredicate const &autocalibrationFixedPredicate =
-                           getDefaultBeaconFixedPredicate(),
+                       Vec3Vector const &emissionDirection,
+                       BeaconIDPredicate const &autocalibrationFixedPredicate,
                        size_t requiredInliers = 4,
-                       size_t permittedOutliers = 2);
+                       size_t permittedOutliers = 2) {
+            addSensor(std::move(identifier), camParams, locations,
+                      emissionDirection, std::vector<double>{},
+                      autocalibrationFixedPredicate, requiredInliers,
+                      permittedOutliers);
+        }
+        /// @overload
+        /// Takes a vector of default measurement variances, one per beacon. By
+        /// default (if empty) a default overall base measurement variance is
+        /// used. If only a single entry is in the vector, it is used for every
+        /// beacon.
+        ///
+        /// (This is actually the one that does the work.)
+        void addSensor(
+            LedIdentifierPtr &&identifier, CameraParameters const &camParams,
+            Point3Vector const &locations, Vec3Vector const &emissionDirection,
+            std::vector<double> const &variance = std::vector<double>{},
+            BeaconIDPredicate const &autocalibrationFixedPredicate =
+                getDefaultBeaconFixedPredicate(),
+            size_t requiredInliers = 4, size_t permittedOutliers = 2);
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>
             PoseHandler;
 
+        /// @brief The main method that processes an image into tracked poses.
         /// @return true if user hit q to quit in a debug window, if such a
         /// thing exists.
         bool processImage(cv::Mat frame, cv::Mat grayImage,
@@ -112,6 +135,11 @@ namespace vbtracker {
 
         /// For debug purposes
         BeaconBasedPoseEstimator const &getFirstEstimator() const {
+            return *(m_estimators.front());
+        }
+
+        /// For debug purposes
+        BeaconBasedPoseEstimator &getFirstEstimator() {
             return *(m_estimators.front());
         }
 
@@ -123,18 +151,27 @@ namespace vbtracker {
             LedIdentifierPtr &&identifier, CameraParameters const &camParams,
             std::function<void(BeaconBasedPoseEstimator &)> const &beaconAdder,
             size_t requiredInliers = 4, size_t permittedOutliers = 2);
-        std::vector<cv::KeyPoint> extractKeypoints(cv::Mat const &grayImage);
 
+        void dumpKeypointDebugData(std::vector<cv::KeyPoint> const &keypoints);
+
+        void drawLedCircleOnStatusImage(Led const &led, bool filled,
+                                        cv::Vec3b color);
+        void drawRecognizedLedIdOnStatusImage(Led const &led);
+
+        bool m_debugHelpDisplayed = false;
         /// @name Images
         /// @{
         cv::Mat m_frame;
         cv::Mat m_imageGray;
         cv::Mat m_thresholdImage;
         cv::Mat m_imageWithBlobs;
-        cv::Mat *m_shownImage = &m_imageWithBlobs;
+        cv::Mat m_statusImage;
+        cv::Mat *m_shownImage = &m_statusImage;
+        int m_debugFrame = 0;
         /// @}
 
         ConfigParams m_params;
+        SBDBlobExtractor m_blobExtractor;
         cv::SimpleBlobDetector::Params m_sbdParams;
 
         /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
@@ -151,7 +188,6 @@ namespace vbtracker {
                 BOOST_ASSERT_MSG(
                     e->getNumBeacons() > 4,
                     "Expected each estimator to have at least 4 beacons");
-
             }
         }
         /// @name Structures needed to do the tracking.

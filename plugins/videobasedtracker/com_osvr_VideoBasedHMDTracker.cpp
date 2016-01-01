@@ -31,7 +31,9 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
-#include "GetOptionalParameter.h"
+#include "HDKData.h"
+
+#include "ConfigurationParser.h"
 
 // Generated JSON header file
 #include "com_osvr_VideoBasedHMDTracker_json.h"
@@ -48,6 +50,7 @@
 
 // Standard includes
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <memory>
@@ -104,27 +107,9 @@ class VideoBasedHMDTracker : boost::noncopyable {
     }
 
     OSVR_ReturnCode update();
-#if 0
-    /// Should be called immediately after construction for specifying the
-    /// particulars of tracking.
-    void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
-                   osvr::vbtracker::CameraParameters const &params,
-                   osvr::vbtracker::Point3Vector const &locations,
-                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
-        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
-                              params.distortionParameters, locations,
-                              requiredInliers, permittedOutliers);
-    }
-    void addSensor(osvr::vbtracker::LedIdentifierPtr &&identifier,
-                   osvr::vbtracker::CameraParameters const &params,
-                   osvr::vbtracker::Point3Vector const &locations,
-                   std::vector<double> const &variance,
-                   size_t requiredInliers = 4, size_t permittedOutliers = 2) {
-        m_vbtracker.addSensor(std::move(identifier), params.cameraMatrix,
-                              params.distortionParameters, locations, variance,
-                              requiredInliers, permittedOutliers);
-    }
-#endif
+
+    /// Provides access to the underlying video-based tracker object to add
+    /// sensors.
     osvr::vbtracker::VideoBasedTracker &vbtracker() { return m_vbtracker; }
 
   private:
@@ -278,6 +263,53 @@ class HardwareDetection {
     osvr::vbtracker::ConfigParams const m_params;
 };
 
+/// @name Helper functions for loading calibration files
+/// @{
+inline cv::Point3f parsePoint(Json::Value const &jsonArray) {
+    return cv::Point3f(jsonArray[0].asFloat(), jsonArray[1].asFloat(),
+                       jsonArray[2].asFloat());
+}
+
+inline std::vector<cv::Point3f>
+parseArrayOfPoints(Json::Value const &jsonArray) {
+    /// in case of error, we just return an empty array.
+    std::vector<cv::Point3f> ret;
+    if (!jsonArray.isArray()) {
+        return ret;
+    }
+    for (auto &entry : jsonArray) {
+
+        if (!entry.isArray() || entry.size() != 3) {
+            ret.clear();
+            return ret;
+        }
+        ret.emplace_back(parsePoint(entry));
+    }
+    return ret;
+}
+
+inline std::vector<cv::Point3f>
+tryLoadingArrayOfPointsFromFile(std::string const &filename) {
+    std::vector<cv::Point3f> ret;
+    if (filename.empty()) {
+        return ret;
+    }
+    Json::Value root;
+    {
+        std::ifstream calibfile(filename);
+        if (!calibfile.good()) {
+            return ret;
+        }
+        Json::Reader reader;
+        if (!reader.parse(calibfile, root)) {
+            return ret;
+        }
+    }
+    ret = parseArrayOfPoints(root);
+    return ret;
+}
+/// @}
+
 class ConfiguredDeviceConstructor {
   public:
     /// @brief This is the required signature for a device instantiation
@@ -297,76 +329,9 @@ class ConfiguredDeviceConstructor {
 
         // Using `get` here instead of `[]` lets us provide a default value.
         int cameraID = root.get("cameraID", 0).asInt();
-        bool showDebug = root.get("showDebug", false).asBool();
-        osvr::vbtracker::ConfigParams config;
-        config.debug = showDebug;
 
-        using osvr::vbtracker::getOptionalParameter;
-        getOptionalParameter(config.additionalPrediction, root,
-                             "additionalPrediction");
-        getOptionalParameter(config.maxResidual, root, "maxResidual");
-        getOptionalParameter(config.initialBeaconError, root,
-                             "initialBeaconError");
-        getOptionalParameter(config.blobMoveThreshold, root,
-                             "blobMoveThreshold");
-        getOptionalParameter(config.numThreads, root, "numThreads");
-        getOptionalParameter(config.streamBeaconDebugInfo, root,
-                             "streamBeaconDebugInfo");
-
-        /// General kalman stuff
-        getOptionalParameter(config.processNoiseAutocorrelation, root,
-                             "processNoiseAutocorrelation");
-        getOptionalParameter(config.linearVelocityDecayCoefficient, root,
-                             "linearVelocityDecayCoefficient");
-        getOptionalParameter(config.angularVelocityDecayCoefficient, root,
-                             "angularVelocityDecayCoefficient");
-        getOptionalParameter(config.measurementVarianceScaleFactor, root,
-                             "measurementVarianceScaleFactor");
-        getOptionalParameter(config.highResidualVariancePenalty, root,
-                             "highResidualVariancePenalty");
-
-        getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
-        if (!config.offsetToCentroid) {
-            getOptionalParameter(config.manualBeaconOffset, root,
-                                 "manualBeaconOffset");
-        }
-
-        /// Rear panel stuff
-        getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
-        getOptionalParameter(config.headCircumference, root,
-                             "headCircumference");
-        getOptionalParameter(config.headToFrontBeaconOriginDistance, root,
-                             "headToFrontBeaconOriginDistance");
-        getOptionalParameter(config.backPanelMeasurementError, root,
-                             "backPanelMeasurementError");
-
-        getOptionalParameter(config.beaconProcessNoise, root,
-                             "beaconProcessNoise");
-
-        /// Blob-detection stuff
-        if (root.isMember("blobParams")) {
-            Json::Value const &blob = root["blobParams"];
-
-            getOptionalParameter(config.blobParams.absoluteMinThreshold, blob,
-                                 "absoluteMinThreshold");
-            getOptionalParameter(config.blobParams.minDistBetweenBlobs, blob,
-                                 "minDistBetweenBlobs");
-            getOptionalParameter(config.blobParams.minArea, blob, "minArea");
-            getOptionalParameter(config.blobParams.filterByCircularity, blob,
-                                 "filterByCircularity");
-            getOptionalParameter(config.blobParams.minCircularity, blob,
-                                 "minCircularity");
-            getOptionalParameter(config.blobParams.filterByConvexity, blob,
-                                 "filterByConvexity");
-            getOptionalParameter(config.blobParams.minConvexity, blob,
-                                 "minConvexity");
-            getOptionalParameter(config.blobParams.minThresholdAlpha, blob,
-                                 "minThresholdAlpha");
-            getOptionalParameter(config.blobParams.maxThresholdAlpha, blob,
-                                 "maxThresholdAlpha");
-            getOptionalParameter(config.blobParams.thresholdSteps, blob,
-                                 "thresholdSteps");
-        }
+        // This is in a separate function/header foro sharing and for clarity.
+        auto config = osvr::vbtracker::parseConfigParams(root);
 
         /// Functions to indicate which beacons should be considered "fixed" -
         /// not autocalibrated.
@@ -392,12 +357,14 @@ class ConfiguredDeviceConstructor {
             newTracker->vbtracker().addSensor(
                 osvr::vbtracker::createHDKLedIdentifierSimulated(0), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                osvr::vbtracker::OsvrHdkLedDirections_SENSOR0,
                 frontPanelFixedBeacon, 4, 2);
             // There are sometimes only four beacons on the back unit (two of
             // the LEDs are disabled), so we let things work with just those.
             newTracker->vbtracker().addSensor(
                 osvr::vbtracker::createHDKLedIdentifierSimulated(1), camParams,
                 osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                osvr::vbtracker::OsvrHdkLedDirections_SENSOR1,
                 backPanelFixedBeacon, 4, 0);
             return OSVR_RETURN_SUCCESS;
         }
@@ -433,6 +400,8 @@ class ConfiguredDeviceConstructor {
                 VideoBasedHMDTracker &newTracker) {
                 osvr::vbtracker::Point3Vector locations =
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR0;
+                osvr::vbtracker::Vec3Vector directions =
+                    osvr::vbtracker::OsvrHdkLedDirections_SENSOR0;
                 std::vector<double> variances =
                     osvr::vbtracker::OsvrHdkLedVariances_SENSOR0;
 
@@ -445,26 +414,61 @@ class ConfiguredDeviceConstructor {
                                            -pt.z - distanceBetweenPanels);
                     variances.push_back(config.backPanelMeasurementError);
                 }
+                // Similarly, rotate the directions.
+                for (auto &vec :
+                     osvr::vbtracker::OsvrHdkLedDirections_SENSOR1) {
+                    directions.emplace_back(-vec[0], vec[1], -vec[2]);
+                }
+
+                auto calibLocations =
+                    tryLoadingArrayOfPointsFromFile(config.calibrationFile);
+                if (calibLocations.size() == locations.size()) {
+                    std::cout << "Video-based tracker: Successfully loaded "
+                                 "beacon calibration file "
+                              << config.calibrationFile << std::endl;
+                    locations = calibLocations;
+                }
+
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
                 newTracker.vbtracker().addSensor(
                     osvr::vbtracker::createHDKUnifiedLedIdentifier(), camParams,
-                    locations, variances, frontPanelFixedBeacon, 4, 0);
+                    locations, directions, variances, frontPanelFixedBeacon, 4,
+                    0);
             };
         } else {
             // OK, so if we don't have to include the rear panel as part of the
             // single sensor, that's easy.
-            setupHDKParamsAndSensors = [frontPanelFixedBeacon,
+            setupHDKParamsAndSensors = [frontPanelFixedBeacon, config,
                                         backPanelFixedBeacon](
                 VideoBasedHMDTracker &newTracker) {
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
-                newTracker.vbtracker().addSensor(
-                    osvr::vbtracker::createHDKLedIdentifier(0), camParams,
-                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
-                    osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
-                    frontPanelFixedBeacon, 6, 0);
+
+                auto calibLocations =
+                    tryLoadingArrayOfPointsFromFile(config.calibrationFile);
+                if (calibLocations.size() ==
+                    osvr::vbtracker::OsvrHdkLedLocations_SENSOR0.size()) {
+                    std::cout << "Video-based tracker: Successfully loaded "
+                                 "beacon calibration file "
+                              << config.calibrationFile << std::endl;
+
+                    newTracker.vbtracker().addSensor(
+                        osvr::vbtracker::createHDKLedIdentifier(0), camParams,
+                        calibLocations,
+                        osvr::vbtracker::OsvrHdkLedDirections_SENSOR0,
+                        osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
+                        frontPanelFixedBeacon, 6, 0);
+                } else {
+                    newTracker.vbtracker().addSensor(
+                        osvr::vbtracker::createHDKLedIdentifier(0), camParams,
+                        osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                        osvr::vbtracker::OsvrHdkLedDirections_SENSOR0,
+                        osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
+                        frontPanelFixedBeacon, 6, 0);
+                }
                 newTracker.vbtracker().addSensor(
                     osvr::vbtracker::createHDKLedIdentifier(1), camParams,
                     osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                    osvr::vbtracker::OsvrHdkLedDirections_SENSOR1,
                     backPanelFixedBeacon, 4, 0);
             };
         }

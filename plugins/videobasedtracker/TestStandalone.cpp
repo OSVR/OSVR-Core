@@ -26,6 +26,7 @@
 #include "VideoBasedTracker.h"
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
+#include "HDKData.h"
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
@@ -73,10 +74,12 @@ class Main {
         CameraParameters camParams(fx, fy, cv::Size(width, height));
         m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifier(0),
                               camParams,
-                              osvr::vbtracker::OsvrHdkLedLocations_SENSOR0);
+                              osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
+                              osvr::vbtracker::OsvrHdkLedDirections_SENSOR0);
         m_vbtracker.addSensor(osvr::vbtracker::createHDKLedIdentifier(1),
                               camParams,
-                              osvr::vbtracker::OsvrHdkLedLocations_SENSOR1);
+                              osvr::vbtracker::OsvrHdkLedLocations_SENSOR1,
+                              osvr::vbtracker::OsvrHdkLedDirections_SENSOR1);
         m_valid = true;
     }
 

@@ -27,6 +27,8 @@ add_library(vbtracker-core STATIC
     CameraDistortionModel.h
     CameraParameters.h
     cvToEigen.h
+    HDKData.cpp
+    HDKData.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
     HDKLedIdentifierFactory.cpp
@@ -38,6 +40,8 @@ add_library(vbtracker-core STATIC
     LED.cpp
     LED.h
     ProjectPoint.h
+    SBDBlobExtractor.cpp
+    SBDBlobExtractor.h
     Types.h
     VideoBasedTracker.cpp
     VideoBasedTracker.h)
@@ -71,6 +75,7 @@ set(PLUGIN_SOURCES
     "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_VideoBasedHMDTracker_json.h"
     CVImageSource.cpp
     DK2ImageSource.cpp
+    ConfigurationParser.h
     GetOptionalParameter.h
     ImageSource.cpp
     ImageSource.h
@@ -110,6 +115,35 @@ endif()
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
     FOLDER "OSVR Plugins/Video-Based Tracker")
+
+###
+# Calibration utility
+###
+if(WIN32)
+    set(CALIB_SOURCES
+        VideoTrackerCalibrationUtility.cpp
+        ConfigurationParser.h
+        GetOptionalParameter.h
+        ImageSource.cpp
+        ImageSource.h
+        ImageSourceFactories.h
+        DirectShowHDKCameraFactory.h
+        DirectShowImageSource.cpp
+        DirectShowToCV.h)
+    add_executable(VideoTrackerCalibrationUtility ${CALIB_SOURCES})
+    target_link_libraries(VideoTrackerCalibrationUtility
+        PRIVATE
+        vbtracker-core
+        jsoncpp_lib
+        osvrServer
+        directshow-camera)
+    set_target_properties(VideoTrackerCalibrationUtility PROPERTIES
+        FOLDER "OSVR Plugins/Video-Based Tracker")
+
+    install(TARGETS VideoTrackerCalibrationUtility
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+endif()
+
 
 if(BUILD_TESTING)
     add_executable(vbtracker-cam

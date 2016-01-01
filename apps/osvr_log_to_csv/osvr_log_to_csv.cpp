@@ -54,18 +54,18 @@ template <typename T> inline bool shouldStop(T const &deadline) {
            our_clock::now() > deadline;
 }
 
-inline osvr::util::CSV::Row &&
-operator<<(osvr::util::CSV::Row &&row, osvr::util::time::TimeValue const &ts) {
-    row.addCol("ts:seconds", ts.seconds);
-    row.addCol("ts:microseconds", ts.microseconds);
-    return std::move(row);
+inline osvr::util::CSV::RowProxy &&
+operator<<(osvr::util::CSV::RowProxy &&row,
+           osvr::util::time::TimeValue const &ts) {
+    return std::move(row) << osvr::util::cell("ts:seconds", ts.seconds)
+                          << osvr::util::cell("ts:microseconds",
+                                              ts.microseconds);
 }
 
 static void poseCallback(void *userdata, const OSVR_TimeValue *timestamp,
                          const OSVR_PoseReport *report) {
     auto path = static_cast<char *>(userdata);
-    g_csvOutput.add(
-        osvr::util::CSV::Row()
+    g_csvOutput.row()
         << (*timestamp)
         << cell(path + std::string{":x"}, report->pose.translation.data[0])
         << cell(path + std::string{":y"}, report->pose.translation.data[1])
@@ -77,7 +77,7 @@ static void poseCallback(void *userdata, const OSVR_TimeValue *timestamp,
         << cell(path + std::string{":qz"},
                 osvrQuatGetZ(&(report->pose.rotation)))
         << cell(path + std::string{":qw"},
-                osvrQuatGetW(&(report->pose.rotation))));
+                osvrQuatGetW(&(report->pose.rotation)));
 }
 
 int main(int argc, char *argv[]) {
@@ -108,11 +108,6 @@ int main(int argc, char *argv[]) {
     auto begin = our_clock::now();
     auto runTimeLimit = begin + std::chrono::seconds(MAX_SECONDS);
     do {
-#if 0
-        g_csvOutput.add(osvr::CSV::Row() << (osvr::util::time::getNow())
-                                         << cell("MarkBeforeUpdate", "TRUE"));
-		g_markRows++;
-#endif
         context.update();
     } while (!shouldStop(runTimeLimit));
     /// Client context closed by now, just output the file.

@@ -27,6 +27,7 @@
 #include "cvToEigen.h"
 #include "CameraDistortionModel.h"
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/CSV.h>
 
 // Library/third-party includes
 #include <opencv2/core/version.hpp>
@@ -36,56 +37,13 @@
 // Standard includes
 #include <fstream>
 #include <algorithm>
-
-#define OSVR_USE_SIMPLEBLOB
-#undef OSVR_USE_CANNY_EDGEDETECT
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
 
     VideoBasedTracker::VideoBasedTracker(ConfigParams const &params)
-        : m_params(params) {
-        auto &p = m_params.blobParams;
-        /// Set up blob params
-        m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
-
-        m_sbdParams.minArea = p.minArea; // How small can the blobs be?
-
-        // Look for bright blobs: there is a bug in this code
-        m_sbdParams.filterByColor = false;
-        // m_sbdParams.blobColor = static_cast<uchar>(255);
-
-        m_sbdParams.filterByInertia =
-            false; // Do we test for non-elongated blobs?
-                   // m_sbdParams.minInertiaRatio = 0.5;
-                   // m_sbdParams.maxInertiaRatio = 1.0;
-
-        m_sbdParams.filterByCircularity =
-            p.filterByCircularity; // Test for circularity?
-        m_sbdParams.minCircularity =
-            p.minCircularity; // default is 0.8, but the edge of the
-                              // case can make the blobs "weird-shaped"
-
-        m_sbdParams.filterByConvexity =
-            p.filterByConvexity; // Test for convexity?
-        m_sbdParams.minConvexity = p.minConvexity;
-    }
-
-    // This version adds the beacons as a part of the constructor.
-    void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
-        Point3Vector const &locations,
-        BeaconIDPredicate const &autocalibrationFixedPredicate,
-        size_t requiredInliers, size_t permittedOutliers) {
-        m_camParams = camParams;
-
-        m_identifiers.emplace_back(std::move(identifier));
-        m_estimators.emplace_back(new BeaconBasedPoseEstimator(
-            camParams.createUndistortedVariant(), locations, requiredInliers,
-            permittedOutliers, autocalibrationFixedPredicate, m_params));
-        m_led_groups.emplace_back();
-        m_assertInvariants();
-    }
+        : m_params(params), m_blobExtractor(params) {}
 
     // This version requires YOU to add your beacons! You!
     void VideoBasedTracker::addSensor(
@@ -104,98 +62,91 @@ namespace vbtracker {
 
     void VideoBasedTracker::addSensor(
         LedIdentifierPtr &&identifier, CameraParameters const &camParams,
-        Point3Vector const &locations, double variance,
+        Point3Vector const &locations, Vec3Vector const &emissionDirection,
+        std::vector<double> const &variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
         size_t requiredInliers, size_t permittedOutliers) {
         addSensor(std::move(identifier), camParams,
                   [&](BeaconBasedPoseEstimator &estimator) {
-                      estimator.SetBeacons(locations, variance,
+                      estimator.SetBeacons(locations, emissionDirection,
+                                           variance,
                                            autocalibrationFixedPredicate);
                   },
                   requiredInliers, permittedOutliers);
     }
 
-    void VideoBasedTracker::addSensor(
-        LedIdentifierPtr &&identifier, CameraParameters const &camParams,
-        Point3Vector const &locations, std::vector<double> const &variance,
-        BeaconIDPredicate const &autocalibrationFixedPredicate,
-        size_t requiredInliers, size_t permittedOutliers) {
-        addSensor(std::move(identifier), camParams,
-                  [&](BeaconBasedPoseEstimator &estimator) {
-                      estimator.SetBeacons(locations, variance,
-                                           autocalibrationFixedPredicate);
-                  },
-                  requiredInliers, permittedOutliers);
-    }
-#if 0
-    /// This class is not currently used because it needs some more tuning.
-    class KeypointEnhancer {
-      public:
-        std::vector<cv::KeyPoint>
-        enhanceKeypoints(cv::Mat const &grayImage,
-                         std::vector<cv::KeyPoint> const &foundKeyPoints) {
-            std::vector<cv::KeyPoint> ret;
-            cv::Mat greyCopy = grayImage.clone();
-            /// Reset the flood fill mask to just have a one-pixel border on the
-            /// edges.
-            m_floodFillMask =
-                cv::Mat::zeros(grayImage.rows + 2, grayImage.cols + 2, CV_8UC1);
-            m_floodFillMask.row(0) = 1;
-            m_floodFillMask.row(m_floodFillMask.rows - 1) = 1;
-            m_floodFillMask.col(0) = 1;
-            m_floodFillMask.col(m_floodFillMask.cols - 1) = 1;
+    void VideoBasedTracker::dumpKeypointDebugData(
+        std::vector<cv::KeyPoint> const &keypoints) {
+        {
+            std::cout << "Dumping blob detection debug data, capture frame "
+                      << m_debugFrame << std::endl;
+            cv::imwrite("debug_rawimage" + std::to_string(m_debugFrame) +
+                            ".png",
+                        m_frame);
+            cv::imwrite("debug_blobframe" + std::to_string(m_debugFrame) +
+                            ".png",
+                        m_imageWithBlobs);
+            cv::imwrite("debug_thresholded" + std::to_string(m_debugFrame) +
+                            ".png",
+                        m_thresholdImage);
+        }
 
-            for (auto const &keypoint : foundKeyPoints) {
-                ret.push_back(enhanceKeypoint(greyCopy, keypoint));
+        {
+            auto filename = std::string{"debug_data" +
+                                        std::to_string(m_debugFrame) + ".txt"};
+            std::ofstream datafile{filename.c_str()};
+            datafile << "MinThreshold: " << m_sbdParams.minThreshold
+                     << std::endl;
+            datafile << "MaxThreshold: " << m_sbdParams.maxThreshold
+                     << std::endl;
+            datafile << "ThresholdStep: " << m_sbdParams.thresholdStep
+                     << std::endl;
+            datafile << "Thresholds:" << std::endl;
+            for (double thresh = m_sbdParams.minThreshold;
+                 thresh < m_sbdParams.maxThreshold;
+                 thresh += m_sbdParams.thresholdStep) {
+                datafile << thresh << std::endl;
             }
+        }
+        {
+            using namespace osvr::util;
+            CSV kpcsv;
+            for (auto &keypoint : keypoints) {
+                kpcsv.row() << cell("x", keypoint.pt.x)
+                            << cell("y", keypoint.pt.y)
+                            << cell("size", keypoint.size);
+            }
+            auto filename = std::string{"debug_blobdetect" +
+                                        std::to_string(m_debugFrame) + ".csv"};
+            std::ofstream csvfile{filename.c_str()};
+            kpcsv.output(csvfile);
+            csvfile.close();
+        }
+        std::cout << "Data dump complete." << std::endl;
+        m_debugFrame++;
+    }
 
+    /// Perform the undistortion of LED measurements.
+    inline std::vector<LedMeasurement>
+    undistortLeds(std::vector<LedMeasurement> const &distortedMeasurements,
+                  CameraParameters const &camParams) {
+        std::vector<LedMeasurement> ret;
+        ret.resize(distortedMeasurements.size());
+        auto distortionModel = CameraDistortionModel{
+            Eigen::Vector2d{camParams.focalLengthX(), camParams.focalLengthY()},
+            cvToVector(camParams.principalPoint()),
+            Eigen::Vector3d{camParams.k1(), camParams.k2(), camParams.k3()}};
+        auto ledUndistort = [&distortionModel](LedMeasurement const &meas) {
+            LedMeasurement ret{meas};
+            Eigen::Vector2d undistorted = distortionModel.undistortPoint(
+                cvToVector(meas.loc).cast<double>());
+            ret.loc = vecToPoint(undistorted.cast<float>());
             return ret;
-        }
-
-        cv::Mat getDebugImage() {
-            return m_floodFillMask(cv::Rect(1, 1, m_floodFillMask.cols - 2,
-                                            m_floodFillMask.rows - 2));
-        }
-
-      private:
-        cv::KeyPoint enhanceKeypoint(cv::Mat grayImage,
-                                     cv::KeyPoint origKeypoint) {
-            cv::Rect bounds;
-            int loDiff = 5;
-            int upDiff = 5;
-            // Saving this now before we monkey with m_floodFillMask
-            cv::bitwise_not(m_floodFillMask, m_scratchNotMask);
-
-            cv::floodFill(grayImage, m_floodFillMask, origKeypoint.pt, 255,
-                          &bounds, loDiff, upDiff,
-                          CV_FLOODFILL_MASK_ONLY |
-                              (/* connectivity 4 or 8 */ 4) |
-                              (/* value to write in to mask */ 255 << 8));
-            // Now m_floodFillMask contains the mask with both our point
-            // and all other points so far. We need to split them by ANDing with
-            // the NOT of the old flood-fill mask we saved earlier.
-            cv::bitwise_and(m_scratchNotMask, m_floodFillMask,
-                            m_perPointResults);
-            // OK, now we have the results for just this point in per-point
-            // results
-
-            cv::Mat binarySubImage = m_perPointResults(bounds);
-            cv::Moments moms = cv::moments(binarySubImage, true);
-
-            auto area = moms.m00;
-            auto x = moms.m10 / moms.m00;
-            auto y = moms.m01 / moms.m00;
-            auto diameter = 2 * std::sqrt(area / M_PI);
-            auto ret = origKeypoint;
-            ret.pt = cv::Point2f(x, y) + cv::Point2f(bounds.tl());
-            ret.size = diameter;
-            return ret;
-        }
-        cv::Mat m_scratchNotMask;
-        cv::Mat m_floodFillMask;
-        cv::Mat m_perPointResults;
-    };
-#endif
+        };
+        std::transform(begin(distortedMeasurements), end(distortedMeasurements),
+                       begin(ret), ledUndistort);
+        return ret;
+    }
 
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
                                          OSVR_TimeValue const &tv,
@@ -204,42 +155,19 @@ namespace vbtracker {
         bool done = false;
         m_frame = frame;
         m_imageGray = grayImage;
-        auto foundKeyPoints = extractKeypoints(grayImage);
-#if 0
-        /// @todo maybe hoist to avoid allocations?
-        KeypointEnhancer enh;
-        auto foundKeyPoints =
-            enh.enhanceKeypoints(grayImage, initialFoundKeyPoints);
-        enh.getDebugImage().copyTo(m_keypointEnhancement);
-#endif
+        auto foundLeds = m_blobExtractor.extractBlobs(grayImage);
 
         /// Perform the undistortion of keypoints
-        std::vector<cv::KeyPoint> undistortedKeypoints;
-        undistortedKeypoints.resize(foundKeyPoints.size());
-        auto distortionModel = CameraDistortionModel{
-            Eigen::Vector2d{m_camParams.focalLengthX(),
-                            m_camParams.focalLengthY()},
-            cvToVector(m_camParams.principalPoint()),
-            Eigen::Vector3d{m_camParams.k1(), m_camParams.k2(),
-                            m_camParams.k3()}};
-        auto keypointUndistort = [&distortionModel](
-            cv::KeyPoint const &keypoint) {
-            cv::KeyPoint ret{keypoint};
-            Eigen::Vector2d undistorted = distortionModel.undistortPoint(
-                cvToVector(ret.pt).cast<double>());
-            ret.pt = vecToPoint(undistorted.cast<float>());
-            return ret;
-        };
-        std::transform(begin(foundKeyPoints), end(foundKeyPoints),
-                       begin(undistortedKeypoints), keypointUndistort);
+        auto undistortedLeds = undistortLeds(foundLeds, m_camParams);
 
         // We allow multiple sets of LEDs, each corresponding to a different
         // sensor, to be located in the same image.  We construct a new set
         // of LEDs for each and try to find them.  It is assumed that they all
         // have unique ID patterns across all sensors.
         for (size_t sensor = 0; sensor < m_identifiers.size(); sensor++) {
+
             osvrPose3SetIdentity(&m_pose);
-            std::vector<cv::KeyPoint> keyPoints = undistortedKeypoints;
+            auto ledsMeasurements = undistortedLeds;
 
             // Locate the closest blob from this frame to each LED found
             // in the previous frame.  If it is close enough to the nearest
@@ -250,35 +178,41 @@ namespace vbtracker {
             // @todo: Include motion estimate based on Kalman filter along with
             // model of the projection once we have one built.  Note that this
             // will require handling the lens distortion appropriately.
-            auto led = begin(m_led_groups[sensor]);
-            auto e = end(m_led_groups[sensor]);
-            while (led != e) {
-                auto nearest =
-                    led->nearest(keyPoints, m_params.blobMoveThreshold);
-                if (nearest == keyPoints.end()) {
-                    // We have no blob corresponding to this LED, so we need
-                    // to delete this LED.
-                    led = m_led_groups[sensor].erase(led);
-                } else {
-                    // Update the values in this LED and then go on to the
-                    // next one.  Remove this blob from the list of potential
-                    // matches.
-                    led->addMeasurement(nearest->pt, nearest->size);
-                    keyPoints.erase(nearest);
-                    ++led;
+            {
+                auto &myLeds = m_led_groups[sensor];
+                auto led = begin(myLeds);
+                auto e = end(myLeds);
+                while (led != end(myLeds)) {
+                    led->resetUsed();
+                    auto threshold = m_params.blobMoveThreshold *
+                                     led->getMeasurement().diameter;
+                    auto nearest = led->nearest(ledsMeasurements, threshold);
+                    if (nearest == end(ledsMeasurements)) {
+                        // We have no blob corresponding to this LED, so we need
+                        // to delete this LED.
+                        led = myLeds.erase(led);
+                    } else {
+                        // Update the values in this LED and then go on to the
+                        // next one. Remove this blob from the list of
+                        // potential matches.
+                        led->addMeasurement(*nearest,
+                                            m_params.blobsKeepIdentity);
+                        ledsMeasurements.erase(nearest);
+                        ++led;
+                    }
+                }
+                // If we have any blobs that have not been associated with an
+                // LED, then we add a new LED for each of them.
+                // std::cout << "Had " << Leds.size() << " LEDs, " <<
+                // keyPoints.size() << " new ones available" << std::endl;
+                for (auto &remainingLed : ledsMeasurements) {
+                    myLeds.emplace_back(m_identifiers[sensor].get(),
+                                        remainingLed);
                 }
             }
-            // If we have any blobs that have not been associated with an
-            // LED, then we add a new LED for each of them.
-            // std::cout << "Had " << Leds.size() << " LEDs, " <<
-            // keyPoints.size() << " new ones available" << std::endl;
-            for (auto &keypoint : keyPoints) {
-                m_led_groups[sensor].emplace_back(m_identifiers[sensor].get(),
-                                                  keypoint.pt, keypoint.size);
-            }
-
             //==================================================================
-            // Compute the pose of the HMD w.r.t. the camera frame of reference.
+            // Compute the pose of the HMD w.r.t. the camera frame of
+            // reference.
             bool gotPose = false;
             if (m_estimators[sensor]) {
 
@@ -286,67 +220,43 @@ namespace vbtracker {
                 OSVR_PoseState pose;
                 if (m_estimators[sensor]->EstimatePoseFromLeds(
                         m_led_groups[sensor], tv, pose)) {
-#if 0
-                    // Project the expected locations of the beacons
-                    // into the image and then compute the error between the
-                    // expected locations and the visible locations for all of
-                    // the visible beacons.  If they are too far off, cancel the
-                    // pose.
-                    std::vector<cv::Point2f> imagePoints;
-                    m_estimators[sensor]->ProjectBeaconsToImage(imagePoints);
-                    for (auto &led : m_led_groups[sensor]) {
-                        auto label = std::to_string(led.getOneBasedID());
-                        cv::Point where = led.getLocation();
-                    }
-                    // XXX
-#endif
                     m_pose = pose;
                     handler(static_cast<unsigned>(sensor), pose);
                     gotPose = true;
                 }
             }
-
             if (m_params.debug) {
                 // Don't display the debugging info every frame, or we can't go
                 // fast enough.
+                static const auto RED = cv::Vec3b(0, 0, 255);
+                static const auto YELLOW = cv::Vec3b(0, 255, 255);
+                static const auto GREEN = cv::Vec3b(0, 255, 0);
                 static int count = 0;
                 if (++count == 11) {
-#ifdef OSVR_USE_SIMPLEBLOB
                     // Fake the thresholded image to give an idea of what the
                     // blob detector is doing.
-                    auto getCurrentThresh = [&](int i) {
-                        return i * m_sbdParams.thresholdStep +
-                               m_sbdParams.minThreshold;
-                    };
-                    cv::Mat temp;
-                    cv::threshold(m_imageGray, m_thresholdImage,
-                                  m_sbdParams.minThreshold,
-                                  m_sbdParams.minThreshold, CV_THRESH_BINARY);
-                    cv::Mat tempOut;
-                    for (int i = 1;
-                         getCurrentThresh(i) < m_sbdParams.maxThreshold; ++i) {
-                        auto currentThresh = getCurrentThresh(i);
-                        cv::threshold(m_imageGray, temp, currentThresh,
-                                      currentThresh, CV_THRESH_BINARY);
-                        cv::addWeighted(m_thresholdImage, 0.5, temp, 0.5, 0,
-                                        tempOut);
-                        m_thresholdImage = tempOut;
-                    }
-#if 0
-                    // Draw detected blobs as blue circles.
-                    cv::drawKeypoints(
-                        tempOut, foundKeyPoints, m_thresholdImage,
-                        cv::Scalar(255, 0, 0),
-                        cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-#endif
-#endif
-                    // Draw detected blobs as blue circles.
-                    cv::drawKeypoints(
-                        m_frame, foundKeyPoints, m_imageWithBlobs,
-                        cv::Scalar(255, 0, 0),
-                        cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+                    m_thresholdImage = m_blobExtractor.getDebugThresholdImage();
 
-                    // Label the keypoints with their IDs.
+                    // Draw detected blobs as blue circles.
+                    m_imageWithBlobs = m_blobExtractor.getDebugBlobImage();
+
+                    // Draw the unidentified (flying?) blobs (UFBs?) on the
+                    // status image
+                    m_frame.copyTo(m_statusImage);
+                    for (auto const &led : m_led_groups[sensor]) {
+                        auto loc = led.getLocation();
+                        if (!led.identified()) {
+                            drawLedCircleOnStatusImage(led, false, RED);
+                        } else if (!gotPose) {
+                            // If identified, but we don't have a pose, draw
+                            // them as yellow outlines.
+                            drawLedCircleOnStatusImage(led, false, YELLOW);
+
+                            drawRecognizedLedIdOnStatusImage(led);
+                        }
+                    }
+
+                    // Label the keypoints with their IDs in the "blob" image
                     for (auto &led : m_led_groups[sensor]) {
                         // Print 1-based LED ID for actual LEDs
                         auto label = std::to_string(led.getOneBasedID());
@@ -365,7 +275,7 @@ namespace vbtracker {
                         std::vector<cv::Point2f> imagePoints;
                         m_estimators[sensor]->ProjectBeaconsToImage(
                             imagePoints);
-                        size_t n = imagePoints.size();
+                        const size_t n = imagePoints.size();
                         for (size_t i = 0; i < n; ++i) {
                             // Print 1-based LED IDs
                             auto label = std::to_string(i + 1);
@@ -374,10 +284,55 @@ namespace vbtracker {
                             where.y += 1;
                             cv::putText(m_imageWithBlobs, label, where,
                                         cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                                        cv::Scalar(0, 255, 0));
+                                        cv::Scalar(GREEN));
                         }
+
+                        // Now, also set up the status image, as long as we have
+                        // a reprojection.
+                        for (auto const &led : m_led_groups[sensor]) {
+                            if (led.identified()) {
+                                // Color-code identified beacons based on
+                                // whether or not we used their data.
+                                auto color =
+                                    led.wasUsedLastFrame() ? GREEN : YELLOW;
+
+                                // Draw a filled circle at the keypoint.
+                                drawLedCircleOnStatusImage(led, true, color);
+                                if (led.getID() < n) {
+                                    auto reprojection =
+                                        imagePoints[led.getID()];
+
+                                    drawRecognizedLedIdOnStatusImage(led);
+                                    cv::putText(
+                                        m_statusImage,
+                                        std::to_string(led.getOneBasedID()),
+                                        reprojection, cv::FONT_HERSHEY_SIMPLEX,
+                                        0.25, cv::Scalar(0, 0, 0));
+                                }
+                            }
+                        }
+                        // end of status image setup
                     }
 
+                    if (!m_debugHelpDisplayed) {
+                        std::cout
+                            << "\nVideo-based tracking debug windows help:\n";
+                        std::cout
+                            << "  - press 's' to show the detected blobs and "
+                               "the status of recognized beacons (default)\n"
+                            << "  - press 'b' to show the labeled blobs and "
+                               "the reprojected beacons\n"
+                            << "  - press 'i' to show the raw input image\n"
+                            << "  - press 't' to show the blob-detecting "
+                               "threshold image\n"
+                            << "  - press 'p' to dump the current "
+                               "auto-calibrated beacon positions to a CSV "
+                               "file\n"
+                            << "  - press 'q' to quit the debug windows "
+                               "(tracker will continue operation)\n"
+                            << std::endl;
+                        m_debugHelpDisplayed = true;
+                    }
                     // Pick which image to show and show it.
                     if (m_frame.data) {
                         std::ostringstream windowName;
@@ -385,6 +340,14 @@ namespace vbtracker {
                         cv::imshow(windowName.str(), *m_shownImage);
                         int key = cv::waitKey(1);
                         switch (key) {
+                        case 's':
+                            // Show the concise "status" image (default)
+                            m_shownImage = &m_statusImage;
+                            break;
+                        case 'b':
+                            // Show the blob/keypoints image
+                            m_shownImage = &m_imageWithBlobs;
+                            break;
                         case 'i':
                             // Show the input image.
                             m_shownImage = &m_frame;
@@ -395,11 +358,11 @@ namespace vbtracker {
                             m_shownImage = &m_thresholdImage;
                             break;
 
-                        case 'b':
-                            // Show the blob/keypoints image (default)
-                            m_shownImage = &m_imageWithBlobs;
+#if 0
+                        case 'd':
+                            dumpKeypointDebugData(foundKeyPoints);
                             break;
-
+#endif
                         case 'p':
                             // Dump the beacon positions to file.
                             {
@@ -432,121 +395,20 @@ namespace vbtracker {
         return done;
     }
 
-#ifdef OSVR_USE_SIMPLEBLOB
-    std::vector<cv::KeyPoint>
-    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
-
-        /// @todo this variable is a candidate for hoisting to member
-        std::vector<cv::KeyPoint> foundKeyPoints;
-        //================================================================
-        // Tracking the points
-
-        // Construct a blob detector and find the blobs in the image.
-        double minVal, maxVal;
-        cv::minMaxIdx(grayImage, &minVal, &maxVal);
-        auto &p = m_params.blobParams;
-        if (maxVal < p.absoluteMinThreshold) {
-            /// empty image, early out!
-            return foundKeyPoints;
-        }
-
-        auto imageRangeLerp = [=](double alpha) {
-            return minVal + (maxVal - minVal) * alpha;
-        };
-        // 0.3 LERP between min and max as the min threshold, but
-        // don't let really dim frames confuse us.
-        m_sbdParams.minThreshold = std::max(imageRangeLerp(p.minThresholdAlpha),
-                                            p.absoluteMinThreshold);
-        m_sbdParams.maxThreshold =
-            std::max(imageRangeLerp(0.8), p.absoluteMinThreshold);
-        m_sbdParams.thresholdStep =
-            (m_sbdParams.maxThreshold - m_sbdParams.minThreshold) /
-            p.thresholdSteps;
-/// @todo: Make a different set of parameters optimized for the
-/// Oculus Dk2.
-/// @todo: Determine the maximum size of a trackable blob by seeing
-/// when we're so close that we can't view at least four in the
-/// camera.
-#if CV_MAJOR_VERSION == 2
-        cv::Ptr<cv::SimpleBlobDetector> detector =
-            new cv::SimpleBlobDetector(m_sbdParams);
-#elif CV_MAJOR_VERSION == 3
-        auto detector = cv::SimpleBlobDetector::create(m_sbdParams);
-#else
-#error "Unrecognized OpenCV version!"
-#endif
-        detector->detect(grayImage, foundKeyPoints);
-
-        // @todo: Consider computing the center of mass of a dilated bounding
-        // rectangle around each keypoint to produce a more precise subpixel
-        // localization of each LED.  The moments() function may be helpful
-        // with this.
-
-        // @todo: Estimate the summed brightness of each blob so that we can
-        // detect when they are getting brighter and dimmer.  Pass this as
-        // the brightness parameter to the Led class when adding a new one
-        // or augmenting with a new frame.
-        return foundKeyPoints;
+    void VideoBasedTracker::drawLedCircleOnStatusImage(Led const &led,
+                                                       bool filled,
+                                                       cv::Vec3b color) {
+        cv::circle(m_statusImage, led.getLocation(),
+                   led.getMeasurement().diameter / 2., cv::Scalar(color),
+                   filled ? -1 : 1);
     }
-#endif
 
-#ifdef OSVR_USE_CANNY_EDGEDETECT
-    std::vector<cv::KeyPoint>
-    VideoBasedTracker::extractKeypoints(cv::Mat const &grayImage) {
+    void VideoBasedTracker::drawRecognizedLedIdOnStatusImage(Led const &led) {
 
-        //================================================================
-        // Tracking the points
-
-        // Do edge detection: the LEDs are pretty clear edges.
-
-        cv::Mat noiseRemoved;
-        cv::threshold(grayImage, noiseRemoved, BASE_NOISE_THRESHOLD, 0,
-                      CV_THRESH_TOZERO);
-        cv::Canny(noiseRemoved, m_thresholdImage, 180, 220, 5);
-
-        std::vector<cv::KeyPoint> foundKeyPoints;
-
-        // Extract the contours.
-        std::vector<std::vector<cv::Point>> contours;
-        cv::Mat binaryImage = m_thresholdImage.clone();
-        cv::findContours(binaryImage, contours, CV_RETR_EXTERNAL,
-                         CV_CHAIN_APPROX_NONE);
-
-        // We don't need the exact m_sbdParams struct, but we use some similar
-        // parameters, so why not re-use it.
-
-        for (auto &contour : contours) {
-            cv::Mat points(contour);
-            cv::Moments moms = cv::moments(points);
-
-            /// @todo any advantage to contourArea over using the moments m00?
-            auto area = cv::contourArea(points) /*moms.m00*/;
-
-            /// Filter by area
-            if (area < m_sbdParams.minArea || area > m_sbdParams.maxArea) {
-                continue;
-            }
-            /// Filter by circularity
-            auto perim = cv::arcLength(points, true);
-            auto circularity = 4 * M_PI * area / (perim * perim);
-            if (circularity < m_sbdParams.minCircularity ||
-                circularity > m_sbdParams.maxCircularity) {
-                continue;
-            }
-
-            // OK, we think this one is valid. Make a keypoint for it.
-            auto x = moms.m10 / moms.m00;
-            auto y = moms.m01 / moms.m00;
-            foundKeyPoints.push_back(cv::KeyPoint(x, y, area / 4));
-        }
-
-        // @todo: Estimate the summed brightness of each blob so that we can
-        // detect when they are getting brighter and dimmer.  Pass this as
-        // the brightness parameter to the Led class when adding a new one
-        // or augmenting with a new frame.
-        return foundKeyPoints;
+        auto label = std::to_string(led.getOneBasedID());
+        cv::putText(m_statusImage, label, led.getLocation(),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(127, 127, 127));
     }
-#endif
 
 } // namespace vbtracker
 } // namespace osvr

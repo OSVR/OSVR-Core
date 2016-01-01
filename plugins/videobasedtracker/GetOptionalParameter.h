@@ -46,6 +46,7 @@ namespace vbtracker {
         OSVR_DECLARE_JSON_TYPE_GETTER(float, asFloat)
         OSVR_DECLARE_JSON_TYPE_GETTER(double, asDouble)
         OSVR_DECLARE_JSON_TYPE_GETTER(int, asInt)
+        OSVR_DECLARE_JSON_TYPE_GETTER(std::string, asString)
 
 #undef OSVR_DECLARE_JSON_TYPE_GETTER
     } // namespace detail

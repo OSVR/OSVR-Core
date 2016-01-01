@@ -54,14 +54,6 @@ namespace vbtracker {
         double variance = 0;
         void reset() { *this = BeaconData{}; }
     };
-    /// @name Default 3D locations for the beacons on an OSVR HDK, in
-    /// millimeters
-    /// @{
-    extern const Point3Vector OsvrHdkLedLocations_SENSOR0;
-    extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
-    /// @}
-
-    extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
 
     /// @brief Class to track an object that has identified LED beacons
     /// on it as seen in a camera, where the absolute location of the
@@ -73,26 +65,6 @@ namespace vbtracker {
         static BeaconIDPredicate getDefaultBeaconFixedPredicate() {
             return [](int id) { return id <= 4; };
         }
-
-        /// @brief Constructor needs to be told the 3D locations of the beacons
-        /// on the object that is to be tracked.  These define the model
-        /// coordinate system.
-        /// It is also told the camera matrix and distortion coefficients, in a
-        /// format suitable to send to OpenCV. See
-        /// http://docs.opencv.org/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
-        /// for details on these formats.
-        /// @param camParams Intrinsic camera parameters (camera matrix and
-        /// distortion)
-        /// @param beacons 3D beacon locations
-        /// @param requiredInliers How many "good" points must be available
-        /// @param permittedOutliers How many additional "bad" points we can
-        /// have
-        BeaconBasedPoseEstimator(
-            CameraParameters const &camParams, const Point3Vector &beacons,
-            size_t requiredInliers = 4, size_t permittedOutliers = 2,
-            BeaconIDPredicate const &autocalibrationFixedPredicate =
-                getDefaultBeaconFixedPredicate(),
-            ConfigParams const &params = ConfigParams{});
 
         /// @brief Constructor that expects its beacons to be set later.
         /// It is told the camera matrix and distortion coefficients, in a
@@ -118,8 +90,7 @@ namespace vbtracker {
         /// locations and camera focal depth are in millimeters.
         ///
         /// @return Returns true on success, false on failure to make a pose.
-        bool EstimatePoseFromLeds(const LedGroup &leds,
-                                  OSVR_TimeValue const &tv,
+        bool EstimatePoseFromLeds(LedGroup &leds, OSVR_TimeValue const &tv,
                                   OSVR_PoseState &out);
 
         std::size_t getNumBeacons() const { return m_beacons.size(); }
@@ -128,6 +99,10 @@ namespace vbtracker {
         /// estimation of pose.
         /// @return true on success, false on failure.
         bool ProjectBeaconsToImage(std::vector<cv::Point2f> &outPose);
+
+        /// Some uses of this may require explicitly disabling kalman mode until
+        /// a condition is met. This permits that.
+        void permitKalmanMode(bool permitKalman);
 
         /// @name State getting methods
         /// @brief They extract state in the OSVR units (meters, not mm, for
@@ -143,10 +118,7 @@ namespace vbtracker {
         /// @brief Replace one of the data sets we're using with a new one.
         /// @{
         bool SetBeacons(const Point3Vector &beacons,
-                        BeaconIDPredicate const &autocalibrationFixedPredicate);
-        bool SetBeacons(const Point3Vector &beacons, double variance,
-                        BeaconIDPredicate const &autocalibrationFixedPredicate);
-        bool SetBeacons(const Point3Vector &beacons,
+                        Vec3Vector const &emissionDirection,
                         std::vector<double> const &variance,
                         BeaconIDPredicate const &autocalibrationFixedPredicate);
         bool SetCameraParameters(CameraParameters const &camParams);
@@ -158,6 +130,10 @@ namespace vbtracker {
             return m_beaconDebugData;
         }
 
+        Eigen::Vector3d getBeaconAutocalibPosition(std::size_t i) const;
+
+        Eigen::Vector3d getBeaconAutocalibVariance(std::size_t i) const;
+
       private:
         void m_updateBeaconCentroid(const Point3Vector &beacons);
         void m_updateBeaconDebugInfoArray();
@@ -167,17 +143,24 @@ namespace vbtracker {
             Eigen::Vector3d const &pos) const;
 
         /// @brief Implementation - doesn't set m_gotPose;
-        bool m_estimatePoseFromLeds(const LedGroup &leds,
-                                    OSVR_TimeValue const &tv,
+        bool m_estimatePoseFromLeds(LedGroup &leds, OSVR_TimeValue const &tv,
                                     OSVR_PoseState &out);
 
         /// @brief The internals of m_estimatePoseFromLeds that use
         /// cv::computePnPRansac to compute an estimate.
-        bool m_pnpransacEstimator(const LedGroup &leds);
+        bool m_pnpransacEstimator(LedGroup &leds);
 
         /// @brief The internals of m_estimatePoseFromLeds that use a Kalman
         /// filter with beacon position auto-calibration to compute an estimate.
-        bool m_kalmanAutocalibEstimator(const LedGroup &leds, double dt);
+        bool m_kalmanAutocalibEstimator(LedGroup &leds, double dt);
+
+        /// @brief A method that determines if the Kalman filter has gotten
+        /// itself into a bad situation and we should start again with RANSAC.
+        ///
+        /// Note that this clears the values it checks, since it resets a value
+        /// that will cause the estimator to use RANSAC for the next frame
+        /// dispatched.
+        bool m_forceRansacIfKalmanNeedsReset();
 
         /// @brief Resets the Kalman filter main state based on the
         /// direct-calculation outputs.
@@ -189,6 +172,7 @@ namespace vbtracker {
         std::vector<double> m_beaconMeasurementVariance;
         /// Should this beacon be "fixed" (no auto-calibration?)
         std::vector<bool> m_beaconFixed;
+        Vec3Vector m_beaconEmissionDirection;
 
         std::vector<BeaconData> m_beaconDebugData;
 
@@ -207,6 +191,8 @@ namespace vbtracker {
         OSVR_TimeValue m_prev;
         /// whether m_prev is a valid timestamp
         bool m_gotPrev = false;
+
+        bool m_permitKalman = true;
 
         /// @name Pose cache
         /// @brief Stores the most-recent solution, in case we need it again
@@ -231,6 +217,9 @@ namespace vbtracker {
         /// @{
         /// How long we've been turning in low ratios of good to bad residuals.
         std::size_t m_framesInProbation = 0;
+        /// How long we've had what might have been valid measurements but
+        /// excluded all of them.
+        std::size_t m_framesWithoutUtilizedMeasurements = 0;
         /// @}
     };
 
