@@ -31,7 +31,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <stdexcept>
 
 namespace osvr {
 namespace vbtracker {

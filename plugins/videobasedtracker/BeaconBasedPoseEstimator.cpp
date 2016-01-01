@@ -34,6 +34,7 @@
 
 // Standard includes
 #include <iostream>
+#include <stdexcept>
 
 namespace osvr {
 namespace vbtracker {
