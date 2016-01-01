@@ -58,7 +58,7 @@ namespace vbtracker {
 
         /// General parameters
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
-        getOptionalParameter(config.extraVerbose, root, "extraVerbose");
+        getOptionalParameter(config.calibrationFile, root, "calibrationFile");
         getOptionalParameter(config.additionalPrediction, root,
                              "additionalPrediction");
         getOptionalParameter(config.maxResidual, root, "maxResidual");

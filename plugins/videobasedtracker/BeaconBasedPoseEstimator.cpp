@@ -372,6 +372,16 @@ namespace vbtracker {
         m_permitKalman = permitKalman;
     }
 
+    Eigen::Vector3d
+    BeaconBasedPoseEstimator::getBeaconAutocalibPosition(std::size_t i) const {
+        return m_beacons.at(i)->stateVector();
+    }
+
+    Eigen::Vector3d
+    BeaconBasedPoseEstimator::getBeaconAutocalibVariance(std::size_t i) const {
+        return m_beacons.at(i)->errorCovariance().diagonal();
+    }
+
 #if 0
     static const double InitialStateError[] = {.01, .01, .1,  1.,  1.,  .1,
                                                10., 10., 10., 10., 10., 10.};
@@ -393,7 +403,7 @@ namespace vbtracker {
         m_model.setNoiseAutocorrelation(
             kalman::types::Vector<6>(m_params.processNoiseAutocorrelation));
 
-        if (m_params.debug) {
+        if (m_params.debug && m_permitKalman) {
             std::cout << "Video-based tracker: Beacon entering run state: pos:"
                       << m_state.position().transpose() << "\n orientation: "
                       << m_state.getQuaternion().coeffs().transpose()

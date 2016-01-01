@@ -246,6 +246,10 @@ namespace vbtracker {
         /// Extra verbose developer debugging messages
         bool extraVerbose = false;
 
+        /// If non-empty, the file to load (or save to) for calibration data.
+        /// Only make sense for a single target.
+        std::string calibrationFile = "";
+
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.

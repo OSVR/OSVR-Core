@@ -130,6 +130,10 @@ namespace vbtracker {
             return m_beaconDebugData;
         }
 
+        Eigen::Vector3d getBeaconAutocalibPosition(std::size_t i) const;
+
+        Eigen::Vector3d getBeaconAutocalibVariance(std::size_t i) const;
+
       private:
         void m_updateBeaconCentroid(const Point3Vector &beacons);
         void m_updateBeaconDebugInfoArray();
