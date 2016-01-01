@@ -139,6 +139,9 @@ if(WIN32)
         directshow-camera)
     set_target_properties(VideoTrackerCalibrationUtility PROPERTIES
         FOLDER "OSVR Plugins/Video-Based Tracker")
+
+    install(TARGETS VideoTrackerCalibrationUtility
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 endif()
 
 

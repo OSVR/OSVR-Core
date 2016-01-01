@@ -353,7 +353,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (params.calibrationFile.empty()) {
-        err << "calibrationFile not specified in configuration file! no clue where to write to!" << endl;
+        err << "calibrationFile not specified in configuration file! no clue "
+               "where to write to!"
+            << endl;
         return withAnError();
     }
 
