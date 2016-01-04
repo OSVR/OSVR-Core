@@ -7,9 +7,9 @@
         "directDisplayIndex": 0,
         "directHighPriorityEnabled": true,
         "numBuffers": 2,
-        "verticalSyncEnabled": false,
+        "verticalSyncEnabled": true,
         "verticalSyncBlockRenderingEnabled": true,
-        "renderOverfillFactor": 2.0,
+        "renderOverfillFactor": 1.5,
 
         "window": {
             "title": "OSVR",
@@ -19,7 +19,7 @@
         },
 
         "display": {
-            "rotation": 90,
+            "rotation": 0,
             "bitsPerColor": 8
         },
 
