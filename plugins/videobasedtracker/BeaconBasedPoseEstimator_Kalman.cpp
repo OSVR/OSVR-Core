@@ -110,6 +110,11 @@ namespace vbtracker {
                 m_params.shouldSkipBrightLeds) {
                 skipBright = true;
             }
+            if (0 == inBoundsID) {
+                m_framesWithoutIdentifiedBlobs++;
+            } else {
+                m_framesWithoutIdentifiedBlobs = 0;
+            }
         }
 
         CameraModel cam;

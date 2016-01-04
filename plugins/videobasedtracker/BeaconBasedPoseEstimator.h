@@ -160,7 +160,7 @@ namespace vbtracker {
         /// Note that this clears the values it checks, since it resets a value
         /// that will cause the estimator to use RANSAC for the next frame
         /// dispatched.
-        bool m_forceRansacIfKalmanNeedsReset();
+        bool m_forceRansacIfKalmanNeedsReset(LedGroup const &leds);
 
         /// @brief Resets the Kalman filter main state based on the
         /// direct-calculation outputs.
@@ -220,6 +220,8 @@ namespace vbtracker {
         /// How long we've had what might have been valid measurements but
         /// excluded all of them.
         std::size_t m_framesWithoutUtilizedMeasurements = 0;
+
+        std::size_t m_framesWithoutIdentifiedBlobs = 0;
         /// @}
     };
 

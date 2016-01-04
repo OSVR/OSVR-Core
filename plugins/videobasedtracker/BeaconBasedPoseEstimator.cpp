@@ -49,6 +49,8 @@ namespace vbtracker {
 
     static const std::size_t MAX_FRAMES_WITHOUT_MEASUREMENTS = 50;
 
+    static const std::size_t MAX_FRAMES_WITHOUT_ID_BLOBS = 10;
+
     BeaconBasedPoseEstimator::BeaconBasedPoseEstimator(
         CameraParameters const &camParams, size_t requiredInliers,
         size_t permittedOutliers, ConfigParams const &params)
@@ -168,7 +170,7 @@ namespace vbtracker {
         }
 
         /// Check on the health of the Kalman filter.
-        auto didReset = m_forceRansacIfKalmanNeedsReset();
+        auto didReset = m_forceRansacIfKalmanNeedsReset(leds);
         if (didReset && m_params.debug) {
             std::cout << "Video-based tracker: lost fix, in-flight reset"
                       << std::endl;
@@ -205,14 +207,31 @@ namespace vbtracker {
         return true;
     }
 
-    bool BeaconBasedPoseEstimator::m_forceRansacIfKalmanNeedsReset() {
+    bool BeaconBasedPoseEstimator::m_forceRansacIfKalmanNeedsReset(
+        LedGroup const &leds) {
         auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES) ||
                           (m_framesWithoutUtilizedMeasurements >
                            MAX_FRAMES_WITHOUT_MEASUREMENTS);
-
+        /// Additional case: We've been a while without blobs...
+        if (!needsReset &&
+            m_framesWithoutIdentifiedBlobs > MAX_FRAMES_WITHOUT_ID_BLOBS) {
+            // In this case, we force ransac once we get blobs once again.
+            auto const beaconsSize = m_beacons.size();
+            for (auto const &led : leds) {
+                if (!led.identified()) {
+                    continue;
+                }
+                auto id = led.getID();
+                if (id < beaconsSize) {
+                    needsReset = true;
+                    break;
+                }
+            }
+        }
         if (needsReset) {
             m_framesInProbation = 0;
             m_framesWithoutUtilizedMeasurements = 0;
+            m_framesWithoutIdentifiedBlobs = 0;
 
             /// This is what triggers RANSAC instead of the Kalman mode for the
             /// next frame.
