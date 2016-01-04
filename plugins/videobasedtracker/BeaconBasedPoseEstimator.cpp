@@ -233,6 +233,14 @@ namespace vbtracker {
             m_framesWithoutUtilizedMeasurements = 0;
             m_framesWithoutIdentifiedBlobs = 0;
 
+            /// Need to reset all elements of the state vector
+            /// The directly-set ones will be set once RANSAC has a pose, but
+            /// incremental orientation, and the velocities, aren't directly set
+            /// by ransac and we don't want old values to hang around there,
+            /// it's a good way to poison a new state.
+            using StateVec = kalman::types::DimVector<State>;
+            m_state.setStateVector(StateVec::Zero());
+
             /// This is what triggers RANSAC instead of the Kalman mode for the
             /// next frame.
             m_gotPose = false;
@@ -414,7 +422,9 @@ namespace vbtracker {
         // Note that here, units are millimeters and radians, and x and z are
         // the lateral translation dimensions, with z being distance from camera
         using StateVec = kalman::types::DimVector<State>;
+
         m_state.position() = xlate;
+
         m_state.setQuaternion(quat);
         m_state.setErrorCovariance(StateVec(InitialStateError).asDiagonal());
 
