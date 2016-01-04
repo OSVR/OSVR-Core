@@ -427,6 +427,13 @@ class ConfiguredDeviceConstructor {
                                  "beacon calibration file "
                               << config.calibrationFile << std::endl;
                     locations = calibLocations;
+                } else if (!config.calibrationFile.empty()) {
+                    std::cout
+                        << "Video-based tracker: NOTE: Beacon calibration filename "
+                        << config.calibrationFile
+                        << " was specified, but not found or could not "
+                           "be loaded."
+                        << std::endl;
                 }
 
                 auto camParams = osvr::vbtracker::getHDKCameraParameters();
@@ -458,6 +465,15 @@ class ConfiguredDeviceConstructor {
                         osvr::vbtracker::OsvrHdkLedVariances_SENSOR0,
                         frontPanelFixedBeacon, 6, 0);
                 } else {
+                    if (!config.calibrationFile.empty()) {
+                        std::cout
+                            << "Video-based tracker: NOTE: Beacon calibration "
+                               "filename "
+                            << config.calibrationFile
+                            << " was specified, but not found or could not "
+                               "be loaded."
+                            << std::endl;
+                    }
                     newTracker.vbtracker().addSensor(
                         osvr::vbtracker::createHDKLedIdentifier(0), camParams,
                         osvr::vbtracker::OsvrHdkLedLocations_SENSOR0,
