@@ -121,7 +121,8 @@ namespace vbtracker {
             std::vector<double> const &variance = std::vector<double>{},
             BeaconIDPredicate const &autocalibrationFixedPredicate =
                 getDefaultBeaconFixedPredicate(),
-            size_t requiredInliers = 4, size_t permittedOutliers = 2);
+            size_t requiredInliers = 4, size_t permittedOutliers = 2,
+            double beaconAutocalibErrorScale = 1);
         /// @}
 
         typedef std::function<void(OSVR_ChannelCount, OSVR_Pose3 const &)>

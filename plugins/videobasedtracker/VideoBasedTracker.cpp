@@ -65,12 +65,14 @@ namespace vbtracker {
         Point3Vector const &locations, Vec3Vector const &emissionDirection,
         std::vector<double> const &variance,
         BeaconIDPredicate const &autocalibrationFixedPredicate,
-        size_t requiredInliers, size_t permittedOutliers) {
+        size_t requiredInliers, size_t permittedOutliers,
+        double beaconAutocalibErrorScale) {
         addSensor(std::move(identifier), camParams,
                   [&](BeaconBasedPoseEstimator &estimator) {
                       estimator.SetBeacons(locations, emissionDirection,
                                            variance,
-                                           autocalibrationFixedPredicate);
+                                           autocalibrationFixedPredicate,
+                                           beaconAutocalibErrorScale);
                   },
                   requiredInliers, permittedOutliers);
     }

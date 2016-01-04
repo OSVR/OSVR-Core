@@ -120,7 +120,8 @@ namespace vbtracker {
         bool SetBeacons(const Point3Vector &beacons,
                         Vec3Vector const &emissionDirection,
                         std::vector<double> const &variance,
-                        BeaconIDPredicate const &autocalibrationFixedPredicate);
+                        BeaconIDPredicate const &autocalibrationFixedPredicate,
+                        double beaconAutocalibErrorScale = 1);
         bool SetCameraParameters(CameraParameters const &camParams);
         /// @}
 

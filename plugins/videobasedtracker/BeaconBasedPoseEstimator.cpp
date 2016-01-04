@@ -63,13 +63,16 @@ namespace vbtracker {
     bool BeaconBasedPoseEstimator::SetBeacons(
         const Point3Vector &beacons, Vec3Vector const &emissionDirection,
         std::vector<double> const &variance,
-        BeaconIDPredicate const &autocalibrationFixedPredicate) {
+        BeaconIDPredicate const &autocalibrationFixedPredicate,
+        double beaconAutocalibErrorScale) {
         // Our existing pose won't match anymore.
         m_gotPose = false;
         m_beacons.clear();
         m_updateBeaconCentroid(beacons);
         Eigen::Matrix3d beaconError =
-            Eigen::Vector3d::Constant(m_params.initialBeaconError).asDiagonal();
+            Eigen::Vector3d::Constant(m_params.initialBeaconError)
+                .asDiagonal() *
+            beaconAutocalibErrorScale;
         auto bNum = size_t{0};
         for (auto &beacon : beacons) {
             auto isFixed = autocalibrationFixedPredicate(bNum + 1);
