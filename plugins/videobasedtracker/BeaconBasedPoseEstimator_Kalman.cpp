@@ -100,11 +100,16 @@ namespace vbtracker {
                 }
             }
 
+/// If we only see a few beacons, they may be as likely to send us spinning as
+/// help us keep tracking.
+#if 0
             // Now we decide if we want to cut the variance artificially to
             // reduce latency in low-beacon situations
             if (inBoundsID < LOW_BEACON_CUTOFF) {
                 varianceFactor = 0.5;
             }
+#endif
+
             if (inBoundsID - inBoundsBright >
                     DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS &&
                 m_params.shouldSkipBrightLeds) {
