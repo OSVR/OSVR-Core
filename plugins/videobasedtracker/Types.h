@@ -163,12 +163,12 @@ namespace vbtracker {
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double linearVelocityDecayCoefficient = 1.;
+        double linearVelocityDecayCoefficient = 0.9;
 
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double angularVelocityDecayCoefficient = 1.;
+        double angularVelocityDecayCoefficient = 0.9;
 
         /// The measurement variance (units: mm^2) is included in the plugin
         /// along with the coordinates of the beacons. Some beacons are observed
@@ -223,7 +223,8 @@ namespace vbtracker {
 
         /// This should be the ratio of lengths of sides that you'll permit to
         /// be filtered in. Larger side first, please.
-        /// May not currently be used.
+        ///
+        /// Not currently being used.
         float boundingBoxFilterRatio = 5.f / 4.f;
 
         /// This should be a negative number - it's the largest the z component
@@ -241,9 +242,13 @@ namespace vbtracker {
         /// blob/LED already has a valid (non-negative) ID assigned to it. This
         /// can help keep IDs on hard to identify blobs, but it can also persist
         /// errors longer. That's why it's an option.
+        ///
+        /// Defaulting to off because it adds some jitter for some reason.
         bool blobsKeepIdentity = false;
 
-        /// Extra verbose developer debugging messages
+        /// Extra verbose developer debugging messages (right now just "hey, you
+        /// can't possibly be that beacon, I shouldn't be able to see you"
+        /// messages)
         bool extraVerbose = false;
 
         /// If non-empty, the file to load (or save to) for calibration data.
