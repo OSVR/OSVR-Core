@@ -11,7 +11,7 @@
         "plugin": "com_osvr_VideoBasedHMDTracker",
         "driver": "VideoBasedHMDTracker",
         "params": {
-            "showDebug": true,
+            "showDebug": false,
             "includeRearPanel": true,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json"
