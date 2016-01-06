@@ -73,6 +73,7 @@ namespace osvr {
                 m_verticalSync = params["verticalSyncEnabled"].asBool();
                 m_verticalSyncBlockRendering = params["verticalSyncBlockRenderingEnabled"].asBool();
                 m_renderOverfillFactor = params["renderOverfillFactor"].asFloat();
+                m_renderOversampleFactor = params.get("renderOversampleFactor", 1).asFloat();
 
                 // window
                 {
@@ -83,7 +84,7 @@ namespace osvr {
                     m_windowYPosition = window["yPosition"].asInt();
                 }
 
-                // display
+                    // display
                     {
                         auto display = params["display"];
                         m_displayRotation = display["rotation"].asUInt();
@@ -116,6 +117,7 @@ namespace osvr {
                 std::cout << "Asynchronous time warp: " << m_asynchronousTimeWarp << std::endl;
                 std::cout << "Max ms before vsync time warp: " << m_maxMSBeforeVsyncTimeWarp << std::endl;
                 std::cout << "Render overfill factor: " << m_renderOverfillFactor << std::endl;
+                std::cout << "Render oversample factor: " << m_renderOversampleFactor << std::endl;
             }
 
             /// Read the property information.
@@ -152,6 +154,11 @@ namespace osvr {
             inline float getRenderOverfillFactor() const
             {
                 return m_renderOverfillFactor;
+            }
+
+            inline float getRenderOversampleFactor() const
+            {
+              return m_renderOversampleFactor;
             }
 
             inline std::size_t getNumBuffers() const
@@ -219,6 +226,7 @@ namespace osvr {
             bool m_asynchronousTimeWarp;
             float m_maxMSBeforeVsyncTimeWarp;
             float m_renderOverfillFactor;
+            float m_renderOversampleFactor;
         };
 
         typedef std::shared_ptr<RenderManagerConfig> RenderManagerConfigPtr;
