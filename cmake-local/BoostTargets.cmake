@@ -18,6 +18,9 @@ if(NEED_BOOST_LOCALE)
 endif()
 
 find_package(Boost 1.44 COMPONENTS ${required_boost_components} REQUIRED) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
+if(Boost_VERSION GREATER 105900)
+    message(SEND_ERROR "Using an untested Boost version - inspect the Boost Interprocess release notes/changelog to see if any ABI breaks affect us.")
+endif(Boost_VERSION GREATER 105900)
 
 if(NEED_BOOST_THREAD)
     add_library(boost_thread INTERFACE)
