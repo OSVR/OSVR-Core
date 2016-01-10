@@ -10,6 +10,7 @@
         "verticalSyncEnabled": true,
         "verticalSyncBlockRenderingEnabled": true,
         "renderOverfillFactor": 1.5,
+        "renderOversampleFactor": 1.0,
 
         "window": {
             "title": "OSVR",
