@@ -35,3 +35,28 @@ function(osvr_generate_x_macro)
         VERBATIM
         COMMENT "Generating X-Macro file ${XMACRO_OUTPUT}")
 endfunction()
+
+include(GenerateXMacroFunction.cmake)
+
+# Generate an x-macro header at cmake/configure time.
+# Args:
+#  OUTPUT complete_path_to_outfilename (required)
+#  INVOCATION_NAME invocation_macro_name (required)
+#  ELEMENTS the elements of the list to generate the X macro for.
+function(osvr_generate_x_macro_now)
+    set(__func__ osvr_generate_x_macro_now)
+    cmake_parse_arguments(XMACRO "" "OUTPUT;INVOCATION_NAME" "ELEMENTS" ${ARGN})
+    foreach(required OUTPUT INVOCATION_NAME ELEMENTS)
+        if(NOT XMACRO_${required})
+            message(FATAL_ERROR "${__func__} requires the ${required} argument to be passed!")
+        endif()
+    endforeach()
+    if(NOT IS_ABSOLUTE "${XMACRO_OUTPUT}")
+        message(FATAL_ERROR "${__func__} requires the OUTPUT argument to be an absolute path!")
+    endif()
+    message(STATUS "Generating ${XMACRO_OUTPUT}")
+    __osvr_generate_xmacro_contents_now("${OSVR_X_MACRO_TEMPLATE}"
+        "${XMACRO_OUTPUT}"
+        "${XMACRO_INVOCATION_NAME}"
+        ${XMACRO_ELEMENTS})
+endfunction()

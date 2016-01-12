@@ -1,5 +1,2 @@
-set(OSVR_XMACRO_CONTENTS)
-foreach(elt ${ELEMENTS})
-    set(OSVR_XMACRO_CONTENTS "${OSVR_XMACRO_CONTENTS} \\\nOSVR_X(${elt})")
-endforeach()
-configure_file("${INFILE}" "${OUTFILE}" @ONLY NEWLINE_STYLE LF)
+include("${CMAKE_CURRENT_LIST_DIR}/GenerateXMacroFunction.cmake")
+__osvr_generate_xmacro_contents_now("${INFILE}" "${OUTFILE}" ${OSVR_XMACRO_INVOKE} ${ELEMENTS})
