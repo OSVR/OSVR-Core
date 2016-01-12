@@ -274,6 +274,19 @@ template <> struct VariantTypeTraits<const char *> {
         return v && contains<Dest>(v.get());
     }
 
+    /// @brief Determines if the type of data in the variant can be described as
+    /// an array of the type parameter @p Dest (without coercion)
+    template <typename Dest, typename T>
+    inline detail::enable_for_variants_t<T, bool> containsArray(T const &v) {
+        return (v.vt == detail::VariantTypeTraits<Dest>::vt & VT_ARRAY);
+    }
+    /// @overload
+    /// For wrapped variants.
+    template <typename Dest, typename T>
+    inline bool containsArray(VariantWrapper<T> const &v) {
+        return v && containsArray<Dest>(v.get());
+    }
+
     /// @brief Determines if the variant passed is "empty"
     template <typename T>
     inline detail::enable_for_variants_t<T, bool> is_empty(T const &v) {
