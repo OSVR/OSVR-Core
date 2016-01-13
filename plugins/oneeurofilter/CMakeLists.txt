@@ -15,7 +15,7 @@ osvr_add_plugin(NAME org_osvr_filter_oneeuro
 target_link_libraries(org_osvr_filter_oneeuro
     osvr::osvrAnalysisPluginKit
     eigen-headers
-    jsoncpp_lib)
+    JsonCpp::JsonCpp)
 
 target_compile_options(org_osvr_filter_oneeuro
     PRIVATE

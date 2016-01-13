@@ -33,7 +33,7 @@ osvr_add_plugin(NAME com_osvr_Multiserver
     VRPNMultiserver.h
     ${JSON_HEADERS})
 
-target_link_libraries(com_osvr_Multiserver osvrVRPNServer osvrConnection osvrPluginHost jsoncpp_lib vendored-vrpn vendored-hidapi)
+target_link_libraries(com_osvr_Multiserver osvrVRPNServer osvrConnection osvrPluginHost JsonCpp::JsonCpp vendored-vrpn vendored-hidapi)
 
 if(BUILD_USBSERIALENUM)
     target_link_libraries(com_osvr_Multiserver osvrUSBSerial)

@@ -7,7 +7,7 @@ add_executable(PathTreeExport
     PathTreeExport.cpp)
 target_link_libraries(PathTreeExport
     osvrCommon
-    jsoncpp_lib
+    JsonCpp::JsonCpp
     osvrClientKitCpp
     ${Boost_PROGRAM_OPTIONS_LIBRARIES})
 set_target_properties(PathTreeExport PROPERTIES

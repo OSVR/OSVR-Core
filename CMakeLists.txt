@@ -212,11 +212,8 @@ endif()
 
 find_package(Threads REQUIRED)
 
-find_package(jsoncpp REQUIRED)
-if(TARGET jsoncpp_lib_static AND NOT TARGET jsoncpp_lib)
-    add_library(jsoncpp_lib INTERFACE)
-    target_link_libraries(jsoncpp_lib INTERFACE jsoncpp_lib_static)
-endif()
+# This find module wraps both the cmake config file-having and config-file-lacking builds.
+find_package(JsonCpp REQUIRED)
 
 include(CompilerFeatures)
 

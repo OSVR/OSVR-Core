@@ -49,5 +49,5 @@ target_link_libraries(${LIBNAME_FULL}
     osvrCommon
     boost_filesystem
     vendored-vrpn
-    jsoncpp_lib
+    JsonCpp::JsonCpp
     util-runloopmanager)
