@@ -201,7 +201,7 @@ target_link_libraries(${LIBNAME_FULL}
     PUBLIC
     osvrUtilCpp
     PRIVATE
-    jsoncpp_lib
+    JsonCpp::JsonCpp
     vendored-vrpn
     eigen-headers
     osvr_cxx11_flags

@@ -19,7 +19,7 @@ if(BUILD_CLIENT_APPS)
     target_link_libraries(osvr_print_tree
         osvrClientKitCpp
         osvrCommon
-        jsoncpp_lib
+        JsonCpp::JsonCpp
         boost_program_options
         osvr_cxx11_flags)
     set_target_properties(osvr_print_tree PROPERTIES
@@ -35,7 +35,7 @@ if(BUILD_CLIENT_APPS)
     target_link_libraries(osvr_dump_tree_json
         osvrClientKitCpp
         osvrCommon
-        jsoncpp_lib
+        JsonCpp::JsonCpp
         boost_program_options
         osvr_cxx11_flags)
     set_target_properties(osvr_dump_tree_json PROPERTIES
@@ -51,7 +51,7 @@ if(BUILD_CLIENT_APPS)
         ClientMainloop.h
         ClientMainloopThread.h)
     target_link_libraries(osvr_reset_yaw
-        jsoncpp_lib
+        JsonCpp::JsonCpp
         osvrClientKitCpp
         osvrClient
         osvrCommon
@@ -71,7 +71,7 @@ if(BUILD_SERVER_EXAMPLES)
     add_executable(BasicServer BasicServer.cpp)
     target_link_libraries(BasicServer
         osvrServer
-        jsoncpp_lib)
+        JsonCpp::JsonCpp)
     set_target_properties(BasicServer PROPERTIES
         FOLDER "OSVR Stock Applications")
     if(NOT WIN32)
@@ -94,7 +94,7 @@ if(BUILD_EXPERIMENTAL_APPS)
         WrapRoute.h)
     target_link_libraries(osvr_calibrate
         osvrServer
-        jsoncpp_lib
+        JsonCpp::JsonCpp
         osvrClientKitCpp
         osvrCommon
         eigen-headers
@@ -116,7 +116,7 @@ if(BUILD_EXPERIMENTAL_APPS)
         ClientMainloopThread.h
         RecomposeTransform.h)
     target_link_libraries(diagnose-rotation
-        jsoncpp_lib
+        JsonCpp::JsonCpp
         osvrClientKitCpp
         osvrClient
         osvrCommon
@@ -148,7 +148,7 @@ if(BUILD_SERVER_APP)
     add_executable(osvr_server
         osvr_server.cpp
         ${OSVR_SERVER_RESOURCE})
-    target_link_libraries(osvr_server osvrServer jsoncpp_lib)
+    target_link_libraries(osvr_server osvrServer JsonCpp::JsonCpp)
     set_target_properties(osvr_server PROPERTIES
         FOLDER "OSVR Stock Applications")
     install(TARGETS osvr_server

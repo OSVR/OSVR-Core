@@ -44,7 +44,7 @@ foreach(pluginname
 endforeach()
 
 # Extra Libraries
-target_link_libraries(com_osvr_example_Configured jsoncpp_lib)
+target_link_libraries(com_osvr_example_Configured JsonCpp::JsonCpp)
 
 ## Build the code from the selfcontained example
 osvr_convert_json(com_osvr_example_selfcontained_json

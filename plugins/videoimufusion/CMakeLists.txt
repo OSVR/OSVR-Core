@@ -31,7 +31,7 @@ osvr_add_plugin(NAME org_osvr_filter_videoimufusion
 target_link_libraries(org_osvr_filter_videoimufusion
     osvr::osvrAnalysisPluginKit
     eigen-headers
-    jsoncpp_lib
+    JsonCpp::JsonCpp
     osvrKalman)
 
 target_compile_options(org_osvr_filter_videoimufusion
@@ -48,7 +48,7 @@ if(BUILD_TESTING)
     target_link_libraries(VideoIMUFusion_Offline
         osvrCommon
         eigen-headers
-        jsoncpp_lib
+        JsonCpp::JsonCpp
         osvrKalman)
 
     target_compile_options(VideoIMUFusion_Offline

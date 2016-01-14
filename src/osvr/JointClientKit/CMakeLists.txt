@@ -31,7 +31,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     osvrCommon
     osvrServer
-    jsoncpp_lib
+    JsonCpp::JsonCpp
     vendored-vrpn
     eigen-headers)
 
