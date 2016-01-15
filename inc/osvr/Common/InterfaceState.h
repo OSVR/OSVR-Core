@@ -68,14 +68,6 @@ namespace common {
         template <typename ReportType>
         void setStateFromReport(util::time::TimeValue const &timestamp,
                                 ReportType const &report) {
-            if (hasState<ReportType>()) {
-                auto &oldTimestamp =
-                    typepack::cget<ReportType, StateMap>(m_states)->timestamp;
-                if (osvrTimeValueGreater(oldTimestamp, timestamp)) {
-                    tracing::markTimestampOutOfOrder();
-                    return;
-                }
-            }
             StateMapContents<ReportType> c;
             c.state = reportState(report);
             c.timestamp = timestamp;
