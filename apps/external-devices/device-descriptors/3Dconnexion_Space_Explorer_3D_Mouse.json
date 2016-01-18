@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "3Dconnexion",
+    "deviceName": "Space Explorer 3D Mouse",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-17T23:35:01Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 15
+        },
+        "tracker": {
+            "count": 0
+        },
+    }
+}
+

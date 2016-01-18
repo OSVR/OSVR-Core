@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "3Dconnexion",
+    "deviceName": "Space Navigator 3D Mouse for Notebooks",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-17T23:26:18Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 2
+        },
+        "tracker": {
+            "count": 0
+        },
+    }
+}
+

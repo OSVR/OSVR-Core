@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "3Dconnexion",
+    "deviceName": "Spaceball 5000",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-17T23:35:55Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 12
+        },
+        "tracker": {
+            "count": 0
+        },
+    }
+}
+

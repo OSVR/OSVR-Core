@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "3Dconnexion",
+    "deviceName": "Spacemouse Wireless",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-17T23:33:58Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 2
+        },
+        "tracker": {
+            "count": 0
+        },
+    }
+}
+
