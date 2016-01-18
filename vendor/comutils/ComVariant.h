@@ -51,9 +51,7 @@ namespace variant {
                                        std::is_same<T, VARIANTARG>::value>;
 
         /// @brief An enable_if_t-alike that has the specific condition built in
-        /// as
-        /// well
-        /// as a default result type.
+        /// as well as a default result type.
         template <typename T, typename Result = void *>
         using enable_for_variants_t =
             typename std::enable_if<is_variant_type<T>::value, Result>::type;
@@ -187,8 +185,7 @@ template <> struct VariantTypeTraits<const char *> {
         }
 
         /// @brief Copy-assignment - copies a variant (without following
-        /// indirection
-        /// of VT_BYREF)
+        /// indirection of VT_BYREF)
         type &operator=(VariantWrapper const &other) {
             if (!other) {
                 throw std::logic_error(
@@ -265,8 +262,7 @@ template <> struct VariantTypeTraits<const char *> {
     using VariantArg = VariantWrapper<VARIANTARG>;
 
     /// @brief Determines if the type of data in the variant can be described as
-    /// the
-    /// type parameter @p Dest (without coercion)
+    /// the type parameter @p Dest (without coercion)
     template <typename Dest, typename T>
     inline detail::enable_for_variants_t<T, bool> contains(T const &v) {
         return (v.vt == detail::VariantTypeTraits<Dest>::vt);
@@ -276,6 +272,19 @@ template <> struct VariantTypeTraits<const char *> {
     template <typename Dest, typename T>
     inline bool contains(VariantWrapper<T> const &v) {
         return v && contains<Dest>(v.get());
+    }
+
+    /// @brief Determines if the type of data in the variant can be described as
+    /// an array of the type parameter @p Dest (without coercion)
+    template <typename Dest, typename T>
+    inline detail::enable_for_variants_t<T, bool> containsArray(T const &v) {
+        return (v.vt == detail::VariantTypeTraits<Dest>::vt & VT_ARRAY);
+    }
+    /// @overload
+    /// For wrapped variants.
+    template <typename Dest, typename T>
+    inline bool containsArray(VariantWrapper<T> const &v) {
+        return v && containsArray<Dest>(v.get());
     }
 
     /// @brief Determines if the variant passed is "empty"
@@ -291,8 +300,7 @@ template <> struct VariantTypeTraits<const char *> {
     }
 
     /// @brief Get the data of type @p Dest from the variant: no
-    /// conversion/coercion
-    /// applied.
+    /// conversion/coercion applied.
     template <typename Dest, typename T>
     inline detail::enable_for_variants_t<T, Dest> get(T const &v) {
         if (!contains<Dest>(v)) {
