@@ -14,6 +14,7 @@ endif()
 
 add_executable(TestCommon
     DummyTree.h
+    CommonComponent.cpp
     PathTreeResolution.cpp
     RegStringMap.cpp
     Serialization.cpp
