@@ -35,8 +35,24 @@ namespace osvr {
 namespace common {
     namespace messages {
 
+        // These messages all must match the ones in VRPN exactly.
+        /// @todo add tests to verify that these message identifiers match VRPN
+        /// string constants.
+
         const char *VRPNPing::identifier() { return "vrpn_Base ping_message"; }
         const char *VRPNPong::identifier() { return "vrpn_Base pong_message"; }
+        const char *VRPNGotFirstConnection::identifier() {
+            return "VRPN_Connection_Got_First_Connection";
+        }
+        const char *VRPNGotConnection::identifier() {
+            return "VRPN_Connection_Got_Connection";
+        }
+        const char *VRPNDroppedConnection::identifier() {
+            return "VRPN_Connection_Dropped_Connection";
+        }
+        const char *VRPNDroppedLastConnection::identifier() {
+            return "VRPN_Connection_Dropped_Last_Connection";
+        }
 
     } // namespace messages
     shared_ptr<CommonComponent> CommonComponent::create() {

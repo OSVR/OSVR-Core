@@ -48,6 +48,26 @@ namespace common {
           public:
             static const char *identifier();
         };
+        class VRPNGotFirstConnection
+            : public MessageRegistration<VRPNGotFirstConnection> {
+          public:
+            static const char *identifier();
+        };
+        class VRPNGotConnection
+            : public MessageRegistration<VRPNGotConnection> {
+          public:
+            static const char *identifier();
+        };
+        class VRPNDroppedConnection
+            : public MessageRegistration<VRPNDroppedConnection> {
+          public:
+            static const char *identifier();
+        };
+        class VRPNDroppedLastConnection
+            : public MessageRegistration<VRPNDroppedLastConnection> {
+          public:
+            static const char *identifier();
+        };
     } // namespace messages
     /// @brief BaseDevice component, for the VRPN built-in common messages
     class CommonComponent : public DeviceComponent {
