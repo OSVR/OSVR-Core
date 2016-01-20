@@ -114,15 +114,9 @@ namespace server {
     }
 
     ServerImpl::~ServerImpl() {
-#if 0
-        vrpnConn->unregister_handler(
-            m_commonComponent->gotFirstConnection.getMessageType().get(),
-            &ServerImpl::m_exitIdle, this);
-        vrpnConn->unregister_handler(
-            m_commonComponent->droppedLastConnection.getMessageType().get(),
-            &ServerImpl::m_enterIdle, this);
-#endif
         stop();
+        // Not unregistering idle handlers because doing so caused crashes, and
+        // I think that this object should outlive the connection anyway.
     }
 
     void ServerImpl::start() {
