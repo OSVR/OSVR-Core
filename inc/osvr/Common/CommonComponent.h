@@ -110,19 +110,22 @@ namespace common {
         void registerHandler(MessageRegistration<T> const &message,
                              Handler const &handler) {
             auto &handlers = typepack::get<T>(m_handlers);
-            if (handlers.empty()) {
-                m_registerHandler(&CommonComponent::m_baseHandler, &handlers,
-                                  message.getMessageType());
-            }
-            handlers.push_back(handler);
+            m_registerHandlerImpl(handlers, message.getMessageType(), handler);
         }
 
       private:
         CommonComponent();
         void m_parentSet() override;
 
+        using HandlerList = std::vector<Handler>;
+        OSVR_COMMON_EXPORT void
+        m_registerHandlerImpl(HandlerList &handlers,
+                              osvr::common::RawMessageType rawMessageType,
+                              Handler const &handler);
+
         static int VRPN_CALLBACK m_baseHandler(void *userdata,
                                                vrpn_HANDLERPARAM);
+
         typepack::TypeKeyedMap<messages::CommonComponentMessageTypes,
                                std::vector<Handler>> m_handlers;
     };

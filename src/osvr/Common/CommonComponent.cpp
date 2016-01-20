@@ -70,6 +70,16 @@ namespace common {
         registerHandler(pong, handler);
     }
 
+    void CommonComponent::m_registerHandlerImpl(
+        HandlerList &handlers, osvr::common::RawMessageType rawMessageType,
+        Handler const &handler) {
+        if (handlers.empty()) {
+            m_registerHandler(&CommonComponent::m_baseHandler, &handlers,
+                              rawMessageType);
+        }
+        handlers.push_back(handler);
+    }
+
     CommonComponent::CommonComponent() {}
     void CommonComponent::m_parentSet() {
         m_getParent().registerMessageType(ping);
