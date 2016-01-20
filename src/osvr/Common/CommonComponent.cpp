@@ -61,36 +61,30 @@ namespace common {
     }
 
     void CommonComponent::registerPingHandler(Handler const &handler) {
-        if (m_pingHandlers.empty()) {
-            m_registerHandler(&CommonComponent::m_handlePing, this,
-                              ping.getMessageType());
-        }
-        m_pingHandlers.push_back(handler);
+        /// Just forward to the templated implementation.
+        registerHandler(ping, handler);
     }
 
     void CommonComponent::registerPongHandler(Handler const &handler) {
-        if (m_pongHandlers.empty()) {
-            m_registerHandler(&CommonComponent::m_handlePing, this,
-                              pong.getMessageType());
-        }
-        m_pongHandlers.push_back(handler);
+        /// Just forward to the templated implementation.
+        registerHandler(pong, handler);
     }
 
     CommonComponent::CommonComponent() {}
     void CommonComponent::m_parentSet() {
         m_getParent().registerMessageType(ping);
         m_getParent().registerMessageType(pong);
+        m_getParent().registerMessageType(gotFirstConnection);
+        m_getParent().registerMessageType(gotConnection);
+        m_getParent().registerMessageType(droppedConnection);
+        m_getParent().registerMessageType(droppedLastConnection);
     }
-    int CommonComponent::m_handlePing(void *userdata, vrpn_HANDLERPARAM) {
-        auto self = static_cast<CommonComponent *>(userdata);
-        for (auto const &cb : self->m_pingHandlers) {
-            cb();
-        }
-        return 0;
-    }
-    int CommonComponent::m_handlePong(void *userdata, vrpn_HANDLERPARAM) {
-        auto self = static_cast<CommonComponent *>(userdata);
-        for (auto const &cb : self->m_pongHandlers) {
+
+    int CommonComponent::m_baseHandler(void *userdata, vrpn_HANDLERPARAM) {
+        /// Our userdata here is a pointer to a vector of handlers - it doesn't
+        /// matter to us what kind.
+        auto &handlers = *static_cast<std::vector<Handler> *>(userdata);
+        for (auto const &cb : handlers) {
             cb();
         }
         return 0;
