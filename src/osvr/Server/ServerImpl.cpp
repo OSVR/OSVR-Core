@@ -100,9 +100,30 @@ namespace server {
             common::elements::StringElement(util::makeString(display_json));
         // Deal with updated device descriptors.
         m_conn->registerDescriptorHandler([&] { m_handleDeviceDescriptors(); });
+
+        // Set up handlers to enter/exit idle sleep mode.
+        // Can't do this with the nice wrappers on the CommonComponent of the
+        // system device, I suppose since people aren't really connecting to
+        // that device.
+        vrpnConn->register_handler(
+            vrpnConn->register_message_type(vrpn_got_first_connection),
+            &ServerImpl::m_exitIdle, this);
+        vrpnConn->register_handler(
+            vrpnConn->register_message_type(vrpn_dropped_last_connection),
+            &ServerImpl::m_enterIdle, this);
     }
 
-    ServerImpl::~ServerImpl() { stop(); }
+    ServerImpl::~ServerImpl() {
+#if 0
+        vrpnConn->unregister_handler(
+            m_commonComponent->gotFirstConnection.getMessageType().get(),
+            &ServerImpl::m_exitIdle, this);
+        vrpnConn->unregister_handler(
+            m_commonComponent->droppedLastConnection.getMessageType().get(),
+            &ServerImpl::m_enterIdle, this);
+#endif
+        stop();
+    }
 
     void ServerImpl::start() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
@@ -218,10 +239,8 @@ namespace server {
             shouldContinue = m_run.shouldContinue();
         }
 
-        if (m_sleepTime > 0) {
-            osvr::util::time::microsleep(m_sleepTime);
-        } else {
-            m_thread.yield();
+        if (m_currentSleepTime > 0) {
+            osvr::util::time::microsleep(m_currentSleepTime);
         }
         return shouldContinue;
     }
@@ -361,6 +380,21 @@ namespace server {
                     m_tree, dev->getName(), descriptor);
             }
         }
+    }
+
+    int ServerImpl::m_exitIdle(void *userdata, vrpn_HANDLERPARAM) {
+        auto self = static_cast<ServerImpl *>(userdata);
+
+        OSVR_DEV_VERBOSE("Got first client connection, exiting idle mode.");
+        self->m_currentSleepTime = self->m_sleepTime;
+        return 0;
+    }
+
+    int ServerImpl::m_enterIdle(void *userdata, vrpn_HANDLERPARAM) {
+        auto self = static_cast<ServerImpl *>(userdata);
+        OSVR_DEV_VERBOSE("Dropped last client connection, entering idle mode.");
+        self->m_currentSleepTime = IDLE_SLEEP_TIME;
+        return 0;
     }
 
 } // namespace server

@@ -178,6 +178,11 @@ namespace server {
         /// or effectively so)
         bool m_inServerThread() const;
 
+        /// @brief Callback on getting first connection, to exit idle state.
+        static int VRPN_CALLBACK m_exitIdle(void *userdata, vrpn_HANDLERPARAM);
+        /// @brief Callback on dropping last connection, to enter idle state.
+        static int VRPN_CALLBACK m_enterIdle(void *userdata, vrpn_HANDLERPARAM);
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -225,6 +230,16 @@ namespace server {
         /// @brief Number of microseconds to sleep after each loop iteration
         /// when at least one client is connected. 0 = no sleeping.
         int m_sleepTime = 0;
+
+        /// @brief Number of microseconds to sleep after each loop iteration
+        /// when no clients are connected.
+        ///
+        /// This is 1 millisecond, the minimum sleep resolution on Windows.
+        static const int IDLE_SLEEP_TIME = 1000;
+
+        /// @brief Number of microseconds to sleep after each loop iteration
+        /// right now. 0 = no sleeping.
+        int m_currentSleepTime = IDLE_SLEEP_TIME;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable
