@@ -114,10 +114,10 @@ namespace server {
 
         /// @copydoc Server::setSleepTime()
         void setSleepTime(int microseconds);
-
+#if 0
         /// @copydoc Server::getSleepTime()
         int getSleepTime() const;
-
+#endif
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
                                std::string const &driver,

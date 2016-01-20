@@ -348,9 +348,9 @@ namespace server {
     void ServerImpl::setSleepTime(int microseconds) {
         m_sleepTime = microseconds;
     }
-
+#if 0
     int ServerImpl::getSleepTime() const { return m_sleepTime; }
-
+#endif
     void ServerImpl::m_handleDeviceDescriptors() {
         for (auto const &dev : m_conn->getDevices()) {
             auto const &descriptor = dev->getDeviceDescriptor();

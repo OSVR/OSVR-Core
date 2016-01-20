@@ -110,9 +110,9 @@ namespace server {
     void Server::setSleepTime(int microseconds) {
         m_impl->setSleepTime(microseconds);
     }
-
+#if 0
     int Server::getSleepTime() const { return m_impl->getSleepTime(); }
-
+#endif
     Server::Server(connection::ConnectionPtr const &conn,
                    private_constructor const &)
         : m_impl(new ServerImpl(conn)) {}
