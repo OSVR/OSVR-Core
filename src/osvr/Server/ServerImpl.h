@@ -191,10 +191,10 @@ namespace server {
         common::BaseDevicePtr m_systemDevice;
 
         /// @brief System device component
-        common::SystemComponent *m_systemComponent;
+        common::SystemComponent *m_systemComponent = nullptr;
 
         /// @brief Common component for system device
-        common::CommonComponent *m_commonComponent;
+        common::CommonComponent *m_commonComponent = nullptr;
 
         /// @brief a flag to indicate whether we should run a hardware
         /// detection.
@@ -214,7 +214,7 @@ namespace server {
         /// @{
         boost::thread m_thread;
         ::util::RunLoopManagerBoost m_run;
-        bool m_running;
+        bool m_running = false;
         bool m_everStarted = false;
         /// @}
 
@@ -222,8 +222,9 @@ namespace server {
         /// m_thread.get_id() but a callControlled might change it.
         mutable boost::thread::id m_mainThreadId;
 
-        /// @brief Number of microseconds to sleep after each loop iteration.
-        int m_sleepTime;
+        /// @brief Number of microseconds to sleep after each loop iteration
+        /// when at least one client is connected. 0 = no sleeping.
+        int m_sleepTime = 0;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable

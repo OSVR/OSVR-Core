@@ -65,8 +65,7 @@ namespace server {
         return ret;
     }
     ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
-        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
-          m_systemComponent(nullptr), m_running(false), m_sleepTime(0) {
+        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
