@@ -378,16 +378,25 @@ namespace server {
 
     int ServerImpl::m_exitIdle(void *userdata, vrpn_HANDLERPARAM) {
         auto self = static_cast<ServerImpl *>(userdata);
-
-        OSVR_DEV_VERBOSE("Got first client connection, exiting idle mode.");
-        self->m_currentSleepTime = self->m_sleepTime;
+        /// Conditional ensures that we don't "idle" faster than we run: Make
+        /// sure we're sleeping longer now than we will be once we exit idle.
+        if (self->m_currentSleepTime > self->m_sleepTime) {
+            OSVR_DEV_VERBOSE("Got first client connection, exiting idle mode.");
+            self->m_currentSleepTime = self->m_sleepTime;
+        }
         return 0;
     }
 
     int ServerImpl::m_enterIdle(void *userdata, vrpn_HANDLERPARAM) {
         auto self = static_cast<ServerImpl *>(userdata);
-        OSVR_DEV_VERBOSE("Dropped last client connection, entering idle mode.");
-        self->m_currentSleepTime = IDLE_SLEEP_TIME;
+
+        /// Conditional ensures that we don't "idle" faster than we run: Make
+        /// sure we're sleeping shorter now than we will be once we enter idle.
+        if (self->m_currentSleepTime < IDLE_SLEEP_TIME) {
+            OSVR_DEV_VERBOSE(
+                "Dropped last client connection, entering idle mode.");
+            self->m_currentSleepTime = IDLE_SLEEP_TIME;
+        }
         return 0;
     }
 
