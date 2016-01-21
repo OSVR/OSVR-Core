@@ -36,11 +36,17 @@ namespace common {
     namespace messages {
 
         // These messages all must match the ones in VRPN exactly.
-        /// @todo add tests to verify that these message identifiers match VRPN
-        /// string constants.
 
+        /// @todo add test to verify that this matches VRPN: message type string
+        /// not accessible as a constant, so we have to extract the message ID
+        /// instead.
         const char *VRPNPing::identifier() { return "vrpn_Base ping_message"; }
+
+        /// @todo add test to verify that this matches VRPN: message type string
+        /// not accessible as a constant, so we have to extract the message ID
+        /// instead.
         const char *VRPNPong::identifier() { return "vrpn_Base pong_message"; }
+
         const char *VRPNGotFirstConnection::identifier() {
             return "VRPN_Connection_Got_First_Connection";
         }
