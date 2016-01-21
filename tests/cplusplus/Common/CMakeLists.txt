@@ -23,5 +23,5 @@ add_executable(TestCommon
     "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Complicated.h"
     ${PATHTREEJSON_SOURCES})
 
-target_link_libraries(TestCommon osvrCommon JsonCpp::JsonCpp)
+target_link_libraries(TestCommon osvrCommon JsonCpp::JsonCpp vendored-vrpn)
 osvr_setup_gtest(TestCommon)
