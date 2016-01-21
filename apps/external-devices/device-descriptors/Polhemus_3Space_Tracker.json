@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Polhemus",
+    "deviceName": "3Space",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-18T12:48:37Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

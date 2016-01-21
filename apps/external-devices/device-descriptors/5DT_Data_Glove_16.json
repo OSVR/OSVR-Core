@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Fifth Dimension Technologies",
+    "deviceName": "5DT Data Glove 16",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-18T12:53:21Z",
+    "interfaces": {
+        "analog": {
+            "count": 16
+        }
+    }
+}
+
