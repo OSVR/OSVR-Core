@@ -114,10 +114,10 @@ namespace server {
 
         /// @copydoc Server::setSleepTime()
         void setSleepTime(int microseconds);
-
+#if 0
         /// @copydoc Server::getSleepTime()
         int getSleepTime() const;
-
+#endif
         /// @copydoc Server::instantiateDriver()
         void instantiateDriver(std::string const &plugin,
                                std::string const &driver,
@@ -178,6 +178,11 @@ namespace server {
         /// or effectively so)
         bool m_inServerThread() const;
 
+        /// @brief Callback on getting first connection, to exit idle state.
+        static int VRPN_CALLBACK m_exitIdle(void *userdata, vrpn_HANDLERPARAM);
+        /// @brief Callback on dropping last connection, to enter idle state.
+        static int VRPN_CALLBACK m_enterIdle(void *userdata, vrpn_HANDLERPARAM);
+
         /// @brief Connection ownership.
         connection::ConnectionPtr m_conn;
 
@@ -191,10 +196,10 @@ namespace server {
         common::BaseDevicePtr m_systemDevice;
 
         /// @brief System device component
-        common::SystemComponent *m_systemComponent;
+        common::SystemComponent *m_systemComponent = nullptr;
 
         /// @brief Common component for system device
-        common::CommonComponent *m_commonComponent;
+        common::CommonComponent *m_commonComponent = nullptr;
 
         /// @brief a flag to indicate whether we should run a hardware
         /// detection.
@@ -214,7 +219,7 @@ namespace server {
         /// @{
         boost::thread m_thread;
         ::util::RunLoopManagerBoost m_run;
-        bool m_running;
+        bool m_running = false;
         bool m_everStarted = false;
         /// @}
 
@@ -222,8 +227,19 @@ namespace server {
         /// m_thread.get_id() but a callControlled might change it.
         mutable boost::thread::id m_mainThreadId;
 
-        /// @brief Number of microseconds to sleep after each loop iteration.
-        int m_sleepTime;
+        /// @brief Number of microseconds to sleep after each loop iteration
+        /// when at least one client is connected. 0 = no sleeping.
+        int m_sleepTime = 0;
+
+        /// @brief Number of microseconds to sleep after each loop iteration
+        /// when no clients are connected.
+        ///
+        /// This is 1 millisecond, the minimum sleep resolution on Windows.
+        static const int IDLE_SLEEP_TIME = 1000;
+
+        /// @brief Number of microseconds to sleep after each loop iteration
+        /// right now. 0 = no sleeping.
+        int m_currentSleepTime = IDLE_SLEEP_TIME;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable

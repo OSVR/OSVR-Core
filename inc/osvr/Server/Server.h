@@ -218,17 +218,19 @@ namespace server {
             std::string const &server, std::string const &descriptor);
 
         /// @brief Sets the amount of time (in microseconds) that the server
-        /// loop will sleep each loop.
+        /// loop will sleep each loop when a client is connected (0 means no
+        /// sleep)
         ///
         /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT void setSleepTime(int microseconds);
 
+#if 0
         /// @brief Returns the amount of time (in microseconds) that the server
         /// loop sleeps each loop.
         ///
         /// Call only before starting the server or from within server thread.
         OSVR_SERVER_EXPORT int getSleepTime() const;
-
+#endif
       private:
         unique_ptr<ServerImpl> m_impl;
     };

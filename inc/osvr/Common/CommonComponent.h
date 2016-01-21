@@ -29,6 +29,8 @@
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
+#include <osvr/TypePack/List.h>
+#include <osvr/TypePack/TypeKeyedMap.h>
 
 // Library/third-party includes
 // - none
@@ -42,12 +44,39 @@ namespace common {
     namespace messages {
         class VRPNPing : public MessageRegistration<VRPNPing> {
           public:
-            static const char *identifier();
+            OSVR_COMMON_EXPORT static const char *identifier();
         };
         class VRPNPong : public MessageRegistration<VRPNPong> {
           public:
-            static const char *identifier();
+            OSVR_COMMON_EXPORT static const char *identifier();
         };
+        class VRPNGotFirstConnection
+            : public MessageRegistration<VRPNGotFirstConnection> {
+          public:
+            OSVR_COMMON_EXPORT static const char *identifier();
+        };
+        class VRPNGotConnection
+            : public MessageRegistration<VRPNGotConnection> {
+          public:
+            OSVR_COMMON_EXPORT static const char *identifier();
+        };
+        class VRPNDroppedConnection
+            : public MessageRegistration<VRPNDroppedConnection> {
+          public:
+            OSVR_COMMON_EXPORT static const char *identifier();
+        };
+        class VRPNDroppedLastConnection
+            : public MessageRegistration<VRPNDroppedLastConnection> {
+          public:
+            OSVR_COMMON_EXPORT static const char *identifier();
+        };
+
+        /// List of message types used in the CommonComponent that share the
+        /// same handler behavior, so we can share registration behavior.
+        using CommonComponentMessageTypes =
+            typepack::list<VRPNPing, VRPNPong, VRPNGotFirstConnection,
+                           VRPNGotConnection, VRPNDroppedConnection,
+                           VRPNDroppedLastConnection>;
     } // namespace messages
     /// @brief BaseDevice component, for the VRPN built-in common messages
     class CommonComponent : public DeviceComponent {
@@ -68,20 +97,37 @@ namespace common {
 
         messages::VRPNPong pong;
 
-        /// @brief Register a pong handler: a pong replies to a ping, and  is
+        /// @brief Register a pong handler: a pong replies to a ping, and is
         /// sent from a server device to the corresponding client device.
         OSVR_COMMON_EXPORT void registerPongHandler(Handler const &handler);
 
+        messages::VRPNGotFirstConnection gotFirstConnection;
+        messages::VRPNGotConnection gotConnection;
+        messages::VRPNDroppedConnection droppedConnection;
+        messages::VRPNDroppedLastConnection droppedLastConnection;
+
+        template <typename T>
+        void registerHandler(MessageRegistration<T> const &message,
+                             Handler const &handler) {
+            auto &handlers = typepack::get<T>(m_handlers);
+            m_registerHandlerImpl(handlers, message.getMessageType(), handler);
+        }
+
       private:
         CommonComponent();
-        virtual void m_parentSet();
-        static int VRPN_CALLBACK
-        m_handlePing(void *userdata, vrpn_HANDLERPARAM);
-        static int VRPN_CALLBACK
-        m_handlePong(void *userdata, vrpn_HANDLERPARAM);
+        void m_parentSet() override;
 
-        std::vector<Handler> m_pingHandlers;
-        std::vector<Handler> m_pongHandlers;
+        using HandlerList = std::vector<Handler>;
+        OSVR_COMMON_EXPORT void
+        m_registerHandlerImpl(HandlerList &handlers,
+                              osvr::common::RawMessageType rawMessageType,
+                              Handler const &handler);
+
+        static int VRPN_CALLBACK m_baseHandler(void *userdata,
+                                               vrpn_HANDLERPARAM);
+
+        typepack::TypeKeyedMap<messages::CommonComponentMessageTypes,
+                               std::vector<Handler>> m_handlers;
     };
 } // namespace common
 } // namespace osvr
