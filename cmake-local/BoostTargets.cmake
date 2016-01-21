@@ -12,14 +12,22 @@ if(NEED_BOOST_FILESYSTEM)
     list(APPEND required_boost_components filesystem)
 endif()
 
-
 if(NEED_BOOST_LOCALE)
     list(APPEND required_boost_components locale)
 endif()
 
-find_package(Boost 1.44 COMPONENTS ${required_boost_components} REQUIRED) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
-if(Boost_VERSION GREATER 105900)
-    message(SEND_ERROR "Using an untested Boost version - inspect the Boost Interprocess release notes/changelog/diffs to see if any ABI breaks affect us.")
+if(WIN32)
+    set(OSVR_MIN_BOOST 1.54) # ABI break in Boost IPC on Windows pre 1.54
+else()
+    set(OSVR_MIN_BOOST 1.44) # Lower version bound of 1.43 for range adapters, 1.44 for Filesystem v3
+endif()
+
+find_package(Boost ${OSVR_MIN_BOOST} COMPONENTS ${required_boost_components} REQUIRED)
+if(Boost_VERSION GREATER 106000)
+    # Current max code-reviewed version: Boost 1.60
+    # When this is updated - source code must also be updated!
+    message(SEND_ERROR "Using an unreviewed Boost version - inspect the Boost Interprocess release notes/changelog/diffs to see if any ABI breaks took place as they may affect client/server interoperability.")
+    message(SEND_ERROR "The corresponding source file to update is src/osvr/Common/IPCRingBuffer.cpp")
 endif()
 
 if(NEED_BOOST_THREAD)
