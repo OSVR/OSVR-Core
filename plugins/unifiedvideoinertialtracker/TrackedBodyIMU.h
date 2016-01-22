@@ -25,7 +25,6 @@
 #ifndef INCLUDED_TrackedBodyIMU_h_GUID_65A86547_8C4C_43B5_906C_361178DCCE06
 #define INCLUDED_TrackedBodyIMU_h_GUID_65A86547_8C4C_43B5_906C_361178DCCE06
 
-
 // Internal Includes
 // - none
 
@@ -35,5 +34,10 @@
 // Standard includes
 // - none
 
-#endif // INCLUDED_TrackedBodyIMU_h_GUID_65A86547_8C4C_43B5_906C_361178DCCE06
+namespace osvr {
+namespace vbtracker {
+    class TrackedBodyIMU {};
+} // namespace vbtracker
+} // namespace osvr
 
+#endif // INCLUDED_TrackedBodyIMU_h_GUID_65A86547_8C4C_43B5_906C_361178DCCE06

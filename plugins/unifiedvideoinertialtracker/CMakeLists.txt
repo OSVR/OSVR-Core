@@ -19,7 +19,9 @@ add_library(uvbi-core STATIC
     TrackedBodyIMU.cpp
     TrackedBodyIMU.h
     TrackedBodyTarget.cpp
-    TrackedBodyTarget.h)
+    TrackedBodyTarget.h
+    TrackingSystem.cpp
+    TrackingSystem.h)
 target_compile_options(uvbi-core
     PUBLIC
     ${OSVR_CXX11_FLAGS})

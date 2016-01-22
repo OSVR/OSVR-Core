@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief Implementation
 
     @date 2016
 
@@ -22,11 +22,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_TrackedBodyTarget_h_GUID_E4315530_5C4F_4DB4_2497_11686F0F6E0E
-#define INCLUDED_TrackedBodyTarget_h_GUID_E4315530_5C4F_4DB4_2497_11686F0F6E0E
-
 // Internal Includes
-// - none
+#include "TrackingSystem.h"
 
 // Library/third-party includes
 // - none
@@ -34,10 +31,4 @@
 // Standard includes
 // - none
 
-namespace osvr {
-namespace vbtracker {
-    class TrackedBodyTarget {};
-} // namespace vbtracker
-} // namespace osvr
 
-#endif // INCLUDED_TrackedBodyTarget_h_GUID_E4315530_5C4F_4DB4_2497_11686F0F6E0E
