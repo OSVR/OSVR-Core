@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Hayden-Kerk",
+    "deviceName": "IDEA PCM4806X Motor Controller",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T20:11:37Z",
+    "interfaces": {
+        "analog": {
+            "count": 1
+        },
+        "button": {
+            "count": 4
+        }
+    }
+}
+

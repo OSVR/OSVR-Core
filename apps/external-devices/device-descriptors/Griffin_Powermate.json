@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Griffin Technology",
+    "deviceName": "PowerMate Controller",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T20:01:21Z",
+    "interfaces": {
+        "analog": {
+            "count": 1
+        },
+        "button": {
+            "count": 1
+        }
+    }
+}
+

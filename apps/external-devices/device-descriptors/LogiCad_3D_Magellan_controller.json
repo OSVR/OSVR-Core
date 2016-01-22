@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "LogiCad 3D",
+    "deviceName": "Magellan controller",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T20:47:29Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 9
+        }
+    }
+}
+

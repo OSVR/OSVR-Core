@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Bauhaus University Weimar",
+    "deviceName": "Inertia Mouse",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T20:31:49Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 2
+        }
+    }
+}
+

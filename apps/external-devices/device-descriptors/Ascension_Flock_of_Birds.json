@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Ascension Technology Corporation",
+    "deviceName": "Flock of Birds",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T19:15:14Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+
