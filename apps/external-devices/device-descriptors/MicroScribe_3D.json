@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Solution Technologies, Inc.",
+    "deviceName": "MicroScribe 3D",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-18T12:43:34Z",
+    "interfaces": {
+        "button": {
+            "count": 2
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

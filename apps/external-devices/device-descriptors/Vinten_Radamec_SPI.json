@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Vinten Radamec",
+    "deviceName": "Serial Port Interface (SPI)",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-18T18:29:00Z",
+    "interfaces": {
+        "analog": {
+            "count": 8
+        }
+    }
+}
+

@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "CH Products",
+    "deviceName": "Fighterstick USB",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T18:04:42Z",
+    "interfaces": {
+        "analog": {
+            "count": 8
+        },
+        "button": {
+            "count": 24
+        }
+    }
+}
+

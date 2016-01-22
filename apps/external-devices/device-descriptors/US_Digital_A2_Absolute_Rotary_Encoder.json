@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "US Digital",
+    "deviceName": "A2 Absolute Rotary Encoder",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-18T18:32:29Z",
+    "interfaces": {
+        "analog": {
+            "count": 1
+        }
+    }
+}
+

@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Global Haptics",
+    "deviceName": "Orb",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T19:59:29Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "button": {
+            "count": 30
+        }
+    }
+}
+

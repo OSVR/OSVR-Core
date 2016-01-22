@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "Hillcrest Labs",
+    "deviceName": "Freespace",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T19:48:33Z",
+    "interfaces": {
+        "analog": {
+            "count": 1
+        },
+        "button": {
+            "count": 5
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Atmel Corporation",
+    "deviceName": "ATmega32",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T17:24:42Z",
+    "interfaces": {
+        "analog": {
+            "count": 8
+        }
+    }
+}
+

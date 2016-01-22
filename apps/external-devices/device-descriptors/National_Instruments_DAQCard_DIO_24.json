@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "National Instruments",
+    "deviceName": "DAQCard DIO 24",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T17:45:33Z",
+    "interfaces": {
+        "button": {
+            "count": 24
+        }
+    }
+}
+
