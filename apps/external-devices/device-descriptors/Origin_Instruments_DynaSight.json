@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Origin Instruments",
+    "deviceName": "DynaSight",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T18:19:02Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

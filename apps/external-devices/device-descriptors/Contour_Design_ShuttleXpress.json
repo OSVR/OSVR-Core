@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Contour Design, Inc.",
+    "deviceName": "ShuttleXpress",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T18:06:56Z",
+    "interfaces": {
+        "analog": {
+            "count": 3
+        },
+        "button": {
+            "count": 5
+        }
+    }
+}
+

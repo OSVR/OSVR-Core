@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Dream Cheeky",
+    "deviceName": "Roll-up Drum Kit USB",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-01-21T18:15:35Z",
+    "interfaces": {
+        "button": {
+            "count": 8
+        }
+    }
+}
+
