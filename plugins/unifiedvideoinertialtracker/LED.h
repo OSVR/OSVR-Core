@@ -36,14 +36,7 @@
 
 namespace osvr {
 namespace vbtracker {
-#if 0
-    static const auto SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA =
-        SentinelBeaconId(-1);
-    static const auto SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE =
-        SentinelBeaconId(-2);
-    static const auto SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA =
-        SentinelBeaconId(-3);
-#endif
+
     struct LedMeasurement {
 
         LedMeasurement() = default;

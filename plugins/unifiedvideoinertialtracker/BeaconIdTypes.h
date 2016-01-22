@@ -30,7 +30,6 @@
 
 // Library/third-party includes
 #include <osvr/Util/TypeSafeId.h>
-#include <boost/assert.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -73,33 +72,6 @@ namespace vbtracker {
     using ZeroBasedBeaconId = util::TypeSafeId<detail::ZeroBasedBeaconIdTag>;
     /// Type-safe one-based beacon ID.
     using OneBasedBeaconId = util::TypeSafeId<detail::OneBasedBeaconIdTag>;
-
-    /// Class just for constant sentinels that can be converted to or compared
-    /// with beacons with either index.
-    class SentinelBeaconId {
-      public:
-        explicit SentinelBeaconId(UnderlyingBeaconIdType val) : m_val(val) {
-            BOOST_ASSERT_MSG(val < 0, "SentinelBeaconId is only for use with "
-                                      "negative sentinel values that are the "
-                                      "same in both beacon representations!");
-            if (!(val < 0)) {
-                throw std::logic_error("SentinelBeaconId given a non-negative "
-                                       "number, but is for use only with "
-                                       "negative sentinel values that are the "
-                                       "same in both beacon representations!");
-            }
-        }
-        SentinelBeaconId(SentinelBeaconId const &other) = default;
-        /// Conversion to zero-based beacon id
-        operator ZeroBasedBeaconId() const { return ZeroBasedBeaconId(m_val); }
-        /// Conversion to one-based beacon id
-        operator OneBasedBeaconId() const { return OneBasedBeaconId(m_val); }
-
-        UnderlyingBeaconIdType value() const { return m_val; }
-
-      private:
-        const UnderlyingBeaconIdType m_val;
-    };
 
     /// Overloaded conversion function to turn any beacon ID into one-based,
     /// respecting the convention that negative values don't change.
