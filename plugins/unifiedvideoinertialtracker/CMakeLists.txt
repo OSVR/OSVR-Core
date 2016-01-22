@@ -12,5 +12,29 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(ImageSources)
 
+add_library(uvbi-core STATIC
+    StateHistory.h
+    TrackedBody.cpp
+    TrackedBody.h
+    TrackedBodyIMU.cpp
+    TrackedBodyIMU.h
+    TrackedBodyTarget.cpp
+    TrackedBodyTarget.h)
+target_compile_options(uvbi-core
+    PUBLIC
+    ${OSVR_CXX11_FLAGS})
+target_link_libraries(uvbi-core
+    PUBLIC
+    ${VIDEOTRACKER_EXTRA_LIBS}
+    opencv_core
+    osvrUtilCpp # for typedefs and boost headers
+    osvrKalman
+    eigen-headers)
+set_target_properties(uvbi-core PROPERTIES
+    FOLDER "${PROJ_FOLDER}")
+
 add_executable(uvbi-view-camera ViewTrackingCamera.cpp)
 target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources)
+set_target_properties(uvbi-view-camera PROPERTIES
+    FOLDER "${PROJ_FOLDER}")
+return()
