@@ -38,6 +38,14 @@ namespace osvr {
 namespace util {
     struct LocalStringIdTag;
     struct PeerStringIdTag;
+    namespace typesafeid_traits {
+        template <>
+        struct ProvideReferenceAccessor<LocalStringIdTag>
+            : ShouldHaveReferenceAccessor {};
+        template <>
+        struct ProvideReferenceAccessor<PeerStringIdTag>
+            : ShouldHaveReferenceAccessor {};
+    } // namespace typesafeid_traits
     typedef TypeSafeId<LocalStringIdTag> StringID;
     typedef TypeSafeId<PeerStringIdTag> PeerStringID;
 } // namespace util
