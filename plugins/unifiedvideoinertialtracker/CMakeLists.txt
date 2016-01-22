@@ -12,6 +12,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(ImageSources)
 
+###
+# Static library with core of the tracker
+###
 add_library(uvbi-core STATIC
     StateHistory.h
     TrackedBody.cpp
@@ -35,8 +38,27 @@ target_link_libraries(uvbi-core
 set_target_properties(uvbi-core PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
+###
+# Convenience tool to view the tracker camera using the same pipeline as the tracker plugin.
+###
 add_executable(uvbi-view-camera ViewTrackingCamera.cpp)
 target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources)
 set_target_properties(uvbi-view-camera PROPERTIES
     FOLDER "${PROJ_FOLDER}")
-return()
+
+osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
+    CPP # indicates we'd like to use the C++ wrapper
+    SOURCES
+    org_osvr_unifiedvideoinertial.cpp
+    "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_unifiedvideoinertial_json.h"
+    ConfigurationParser.h
+    GetOptionalParameter.h)
+
+target_link_libraries(org_osvr_unifiedvideoinertial
+    uvbi-core
+    uvbi-image-sources
+    JsonCpp::JsonCpp
+)
+
+set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
+    FOLDER "${PROJ_FOLDER}")

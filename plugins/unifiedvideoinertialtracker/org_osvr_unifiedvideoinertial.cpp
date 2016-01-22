@@ -23,17 +23,17 @@
 // limitations under the License.
 
 // Internal Includes
+#include "ImageSources/ImageSource.h"
+#include "ImageSources/ImageSourceFactories.h"
 //#include "VideoBasedTracker.h"
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
-#include "ImageSource.h"
-#include "ImageSourceFactories.h"
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 #include "HDKData.h"
 
-//#include "ConfigurationParser.h"
+#include "ConfigurationParser.h"
 
 // Generated JSON header file
 #include "org_osvr_unifiedvideoinertial_json.h"
@@ -57,6 +57,7 @@
 
 // Anonymous namespace to avoid symbol collision
 namespace {
+static const auto DRIVER_NAME = "UnifiedTrackingSystem";
 
 static const auto DEBUGGABLE_BEACONS = 34;
 static const auto DATAPOINTS_PER_BEACON = 5;
@@ -64,7 +65,8 @@ static const auto DATAPOINTS_PER_BEACON = 5;
 class UnifiedVideoInertialTracker : boost::noncopyable {
   public:
     UnifiedVideoInertialTracker(OSVR_PluginRegContext ctx,
-                                osvr::vbtracker::ImageSourcePtr &&source)
+                                osvr::vbtracker::ImageSourcePtr &&source,
+                                osvr::vbtracker::ConfigParams params)
         : m_source(std::move(source)) {
 
         /// Create the initialization options
@@ -78,7 +80,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
 #endif
 
         /// Create an asynchronous (threaded) device
-        m_dev.initAsync(ctx, "UnifiedTrackingSystem", opts);
+        m_dev.initAsync(ctx, DRIVER_NAME, opts);
 
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(org_osvr_unifiedvideoinertial_json);
@@ -127,13 +129,31 @@ class ConfiguredDeviceConstructor {
         // Read these parameters from a "params" field in the device Json
         // configuration file.
 
+        // This is in a separate function/header for sharing and for clarity.
+        auto config = osvr::vbtracker::parseConfigParams(root);
+
+#ifdef _WIN32
+        auto cam = osvr::vbtracker::openHDKCameraDirectShow();
+#else // !_WIN32
+        /// @todo This is rather crude, as we can't select the exact camera we
+        /// want, nor set the "50Hz" high-gain mode (and only works with HDK
+        /// camera firmware v7 and up). Presumably eventually use libuvc on
+        /// other platforms instead, at least for the HDK IR camera.
+
+        auto cam = osvr::vbtracker::openOpenCVCamera(0);
+#endif
+
+        if (!cam || !cam->ok()) {
+            std::cerr << "Could not access the tracking camera, skipping "
+                         "video-based tracking!"
+                      << std::endl;
+            return OSVR_RETURN_FAILURE;
+        }
+
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);
         auto newTracker = osvr::pluginkit::registerObjectForDeletion(
-            ctx, new UnifiedVideoInertialTracker(ctx, std::move(src),
-                                                 m_cameraID, m_params));
-        context.registerHardwareDetectCallback(new HardwareDetection(
-            cameraFactory, setupHDKParamsAndSensors, cameraID, config));
+            ctx, new UnifiedVideoInertialTracker(ctx, std::move(cam), config));
 
         return OSVR_RETURN_SUCCESS;
     }
@@ -146,7 +166,7 @@ OSVR_PLUGIN(org_osvr_unifiedvideoinertial) {
 
     /// Tell the core we're available to create a device object.
     osvr::pluginkit::registerDriverInstantiationCallback(
-        ctx, "UnifiedTrackingSystem", new ConfiguredDeviceConstructor);
+        ctx, DRIVER_NAME, new ConfiguredDeviceConstructor);
 
     return OSVR_RETURN_SUCCESS;
 }
