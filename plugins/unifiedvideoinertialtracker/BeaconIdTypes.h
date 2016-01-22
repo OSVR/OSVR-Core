@@ -30,9 +30,11 @@
 
 // Library/third-party includes
 #include <osvr/Util/TypeSafeId.h>
+#include <boost/assert.hpp>
 
 // Standard includes
-// - none
+#include <stdexcept>
+
 namespace osvr {
 namespace vbtracker {
     namespace detail {
@@ -41,10 +43,10 @@ namespace vbtracker {
         /// Type tag for type-safe one-based beacon id
         struct OneBasedBeaconIdTag;
 
-        /// All beacon IDs, whether 0 or 1 based, are ints on the inside.
-        using UnderlyingBeaconIdType = int;
     } // namespace detail
 
+    /// All beacon IDs, whether 0 or 1 based, are ints on the inside.
+    using UnderlyingBeaconIdType = int;
 } // namespace vbtracker
 } // namespace osvr
 
@@ -54,11 +56,11 @@ namespace util {
         /// Tag-based specialization of underlying value type for beacon ID
         template <>
         struct WrappedType<vbtracker::detail::ZeroBasedBeaconIdTag> {
-            using type = vbtracker::detail::UnderlyingBeaconIdType;
+            using type = vbtracker::UnderlyingBeaconIdType;
         };
         /// Tag-based specialization of underlying value type for beacon ID
         template <> struct WrappedType<vbtracker::detail::OneBasedBeaconIdTag> {
-            using type = vbtracker::detail::UnderlyingBeaconIdType;
+            using type = vbtracker::UnderlyingBeaconIdType;
         };
     } // namespace typesafeid_traits
 
@@ -71,6 +73,33 @@ namespace vbtracker {
     using ZeroBasedBeaconId = util::TypeSafeId<detail::ZeroBasedBeaconIdTag>;
     /// Type-safe one-based beacon ID.
     using OneBasedBeaconId = util::TypeSafeId<detail::OneBasedBeaconIdTag>;
+
+    /// Class just for constant sentinels that can be converted to or compared
+    /// with beacons with either index.
+    class SentinelBeaconId {
+      public:
+        explicit SentinelBeaconId(UnderlyingBeaconIdType val) : m_val(val) {
+            BOOST_ASSERT_MSG(val < 0, "SentinelBeaconId is only for use with "
+                                      "negative sentinel values that are the "
+                                      "same in both beacon representations!");
+            if (!(val < 0)) {
+                throw std::logic_error("SentinelBeaconId given a non-negative "
+                                       "number, but is for use only with "
+                                       "negative sentinel values that are the "
+                                       "same in both beacon representations!");
+            }
+        }
+        SentinelBeaconId(SentinelBeaconId const &other) = default;
+        /// Conversion to zero-based beacon id
+        operator ZeroBasedBeaconId() const { return ZeroBasedBeaconId(m_val); }
+        /// Conversion to one-based beacon id
+        operator OneBasedBeaconId() const { return OneBasedBeaconId(m_val); }
+
+        UnderlyingBeaconIdType value() const { return m_val; }
+
+      private:
+        const UnderlyingBeaconIdType m_val;
+    };
 
     /// Overloaded conversion function to turn any beacon ID into one-based,
     /// respecting the convention that negative values don't change.
@@ -97,6 +126,14 @@ namespace vbtracker {
     /// I think the direction of conversion is primarily from 0-based to
     /// 1-based...
 
+    /// Does the given beacon ID indicate that it's identified?
+    inline bool beaconIdentified(ZeroBasedBeaconId id) {
+        return (!id.empty() && id.value() >= 0);
+    }
+    /// Does the given beacon ID indicate that it's identified?
+    inline bool beaconIdentified(OneBasedBeaconId id) {
+        return (!id.empty() && id.value() > 0);
+    }
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_BeaconIdTypes_h_GUID_8C85DE41_5CAC_4DA2_6C2A_962680202E1B

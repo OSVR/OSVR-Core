@@ -36,8 +36,16 @@
 
 namespace osvr {
 namespace vbtracker {
-
+#if 0
+    static const auto SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA =
+        SentinelBeaconId(-1);
+    static const auto SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE =
+        SentinelBeaconId(-2);
+    static const auto SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA =
+        SentinelBeaconId(-3);
+#endif
     struct LedMeasurement {
+
         LedMeasurement() = default;
         explicit LedMeasurement(cv::KeyPoint const &kp)
             : loc(kp.pt), brightness(kp.size), diameter(kp.size),
@@ -72,6 +80,12 @@ namespace vbtracker {
     /// be a light source.
     class Led {
       public:
+        static const int SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA =
+            -1;
+        static const int SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE = -2;
+        static const int
+            SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA = -3;
+
         /// @name Constructors
         /// @brief Constructor takes initial values for the location and
         /// brightness, and a pointer to an object that will be used to identify
@@ -79,12 +93,7 @@ namespace vbtracker {
         /// @{
         Led(LedIdentifier *identifier, LedMeasurement const &meas);
         /// @}
-        typedef int ID;
 
-        static const ID SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA = -1;
-        static const ID SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE = -2;
-        static const ID SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA =
-            -3;
         static const uint8_t MAX_NOVELTY = 4;
         /// @brief Add a new measurement for this LED, which must be for a frame
         /// that is just following the previous measurement, so that the
@@ -109,14 +118,14 @@ namespace vbtracker {
         /// - An index below -1 means known not to be an LED (different
         ///   identifiers use different codes to differentiate between cases).
         /// - An index of 0 or higher is determined based on the flash pattern.
-        int getID() const { return m_id; }
+        ZeroBasedBeaconId getID() const { return m_id; }
 
         /// @brief Gets either the raw negative sentinel ID or a 1-based ID (for
         /// display purposes)
-        int getOneBasedID() const { return (m_id < 0) ? m_id : m_id + 1; }
+        OneBasedBeaconId getOneBasedID() const { return makeOneBased(getID()); }
 
         /// @brief Do we have a positive identification as a known LED?
-        bool identified() const { return !(m_id < 0); }
+        bool identified() const { return beaconIdentified(getID()); }
 
         /// @brief Returns a value (decreasing per frame from some maximum down
         /// to a minimum of zero) indicating how new the identification of this
@@ -167,10 +176,10 @@ namespace vbtracker {
 
         /// @brief Which LED am I? Non-negative are indices, negative are
         /// sentinels
-        int m_id;
+        ZeroBasedBeaconId m_id = ZeroBasedBeaconId(-1);
 
         /// @brief Object used to determine the identity of an LED
-        LedIdentifier *m_identifier;
+        LedIdentifier *m_identifier = nullptr;
 
         /// @brief If identified, whether it is most recently in "bright" mode.
         bool m_lastBright = false;

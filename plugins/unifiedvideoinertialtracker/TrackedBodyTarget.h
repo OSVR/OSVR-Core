@@ -62,7 +62,7 @@ namespace vbtracker {
             return m_beaconDebugData;
         }
 
-        detail::UnderlyingBeaconIdType getNumBeacons() const {
+        UnderlyingBeaconIdType getNumBeacons() const {
             return m_beacons.size();
         }
 

@@ -26,6 +26,7 @@
 #define INCLUDED_LedIdentifier_h_GUID_674F7CDB_87AD_41AA_2475_134F2B4A3FF9
 
 // Internal Includes
+#include "BeaconIdTypes.h"
 #include "Types.h"
 
 // Library/third-party includes
@@ -64,8 +65,10 @@ namespace vbtracker {
         /// less than -1 for definitely not an LED (light sources will be
         /// constant, mis-tracked LEDs may produce spurious changes in the
         /// pattern for example).
-        virtual int getId(int currentId, BrightnessList &brightnesses,
-                          bool &lastBright, bool blobsKeepId) const = 0;
+        virtual ZeroBasedBeaconId getId(ZeroBasedBeaconId currentId,
+                                        BrightnessList &brightnesses,
+                                        bool &lastBright,
+                                        bool blobsKeepId) const = 0;
 
       protected:
     };

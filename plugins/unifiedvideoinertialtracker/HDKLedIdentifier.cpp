@@ -88,13 +88,15 @@ namespace vbtracker {
         }
     }
 
-    int OsvrHdkLedIdentifier::getId(int currentId,
-                                    std::list<float> &brightnesses,
-                                    bool &lastBright, bool blobsKeepId) const {
+    ZeroBasedBeaconId
+    OsvrHdkLedIdentifier::getId(ZeroBasedBeaconId currentId,
+                                std::list<float> &brightnesses,
+                                bool &lastBright, bool blobsKeepId) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
         if (brightnesses.size() < d_length) {
-            return Led::SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
+            return ZeroBasedBeaconId(
+                Led::SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA);
         }
 
         // We only care about the d_length most-recent levels.
@@ -110,13 +112,14 @@ namespace vbtracker {
         // pixels, and it's being under-estimated by OpenCV.
         static const double TODO_MIN_BRIGHTNESS_DIFF = 0.3;
         if (maxVal - minVal <= TODO_MIN_BRIGHTNESS_DIFF) {
-            return Led::SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE;
+            return ZeroBasedBeaconId(
+                Led::SENTINEL_INSUFFICIENT_EXTREMA_DIFFERENCE);
         }
         const auto threshold = (minVal + maxVal) / 2;
         // Set the `lastBright` out variable
         lastBright = brightnesses.back() >= threshold;
 
-        if (blobsKeepId && currentId >= 0) {
+        if (blobsKeepId && beaconIdentified(currentId)) {
             // Early out if we already have identified this LED.
             return currentId;
         }
@@ -138,13 +141,14 @@ namespace vbtracker {
                 continue;
             }
             if (d_patterns[i].find(bits) != std::string::npos) {
-                return static_cast<int>(i);
+                return ZeroBasedBeaconId(i);
             }
         }
 
         // No pattern recognized and we should have recognized one, so return
         // a low negative.  We've used -2 so return -3.
-        return Led::SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA;
+        return ZeroBasedBeaconId(
+            Led::SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA);
     }
 
 } // End namespace vbtracker

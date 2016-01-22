@@ -22,6 +22,14 @@ add_library(uvbi-core STATIC
     CameraParameters.h
     ConfigParams.h
     cvToEigen.h
+    HDKLedIdentifier.cpp
+    HDKLedIdentifier.h
+    HDKLedIdentifierFactory.cpp
+    HDKLedIdentifierFactory.h
+    LED.cpp
+    LED.h
+    LedIdentifier.cpp
+    LedIdentifier.h
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h
     StateHistory.h

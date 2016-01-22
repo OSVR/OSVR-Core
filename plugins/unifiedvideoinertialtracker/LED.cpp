@@ -42,7 +42,8 @@ namespace vbtracker {
         // If we don't have an identifier, then our ID is unknown.
         // Otherwise, try and find it.
         if (!m_identifier) {
-            m_id = SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
+            m_id = ZeroBasedBeaconId(
+                SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA);
         } else {
             auto oldId = m_id;
             m_id = m_identifier->getId(m_id, m_brightnessHistory, m_lastBright,
@@ -150,7 +151,8 @@ namespace vbtracker {
     }
 
     void Led::markMisidentified() {
-        m_id = SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA;
+        m_id = ZeroBasedBeaconId(
+            SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA);
         if (!m_brightnessHistory.empty()) {
             m_brightnessHistory.clear();
             m_brightnessHistory.push_back(getMeasurement().brightness);

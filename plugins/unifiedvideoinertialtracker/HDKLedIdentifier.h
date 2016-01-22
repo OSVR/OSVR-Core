@@ -51,8 +51,9 @@ namespace vbtracker {
         /// This truncates the passed-in list to only as many elements
         /// as are in the pattern list, to keep it from growing too
         /// large and wasting time and space.
-        int getId(int currentId, BrightnessList &brightnesses, bool &lastBright,
-                  bool blobsKeepId) const override;
+        ZeroBasedBeaconId getId(ZeroBasedBeaconId currentId,
+                                BrightnessList &brightnesses, bool &lastBright,
+                                bool blobsKeepId) const override;
 
       private:
         size_t d_length;        //< Length of all patterns
