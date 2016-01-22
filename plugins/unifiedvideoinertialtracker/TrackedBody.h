@@ -26,17 +26,77 @@
 #define INCLUDED_TrackedBody_h_GUID_1FC60169_196A_4F89_551C_E1B41531BBC8
 
 // Internal Includes
-// - none
+#include "ConfigParams.h"
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Standard includes
-// - none
+#include <memory>
 
 namespace osvr {
 namespace vbtracker {
-    class TrackedBody {};
+    class TrackingSystem;
+    class TrackedBodyIMU;
+    class TrackedBodyTarget;
+
+    /// This is the class representing a tracked rigid body in the system. It
+    /// may be tracked by one (or eventually more) video-based "target"
+    /// (constellation of beacons in a known pattern with other known traits),
+    /// and optionally by an IMU/AHRS - an orientation/angular-velocity-only
+    /// high speed sensor.
+    ///
+    /// This class has overall state
+    class TrackedBody {
+      public:
+        /// Constructor
+        TrackedBody(TrackingSystem &system);
+        /// Destructor - explicit so we can use unique_ptr for our pimpls.
+        ~TrackedBody();
+        /// Noncopyable
+        TrackedBody(TrackedBody const &) = delete;
+        /// Non-copy-assignable
+        TrackedBody &operator=(TrackedBody const &) = delete;
+
+        /// Creates a fully-integrated IMU data source (that is, one that
+        /// reports a reliable quaternion, and potentially angular velocity) to
+        /// add to this body.
+        ///
+        /// @todo eventually fix: Right now assumes that there is only one IMU
+        /// per body
+        /// @todo assumes the IMU is at the origin of the body (most important
+        /// for velocity)
+        ///
+        /// You do not own the pointer you get back - the tracked body does.
+        ///
+        /// @return nullptr if an error occurred (such as an IMU already being
+        /// added to this body)
+        TrackedBodyIMU *createIntegratedIMU();
+
+        /// Creates a video-based tracking target (constellation of beacons) to
+        /// add to this body.
+        ///
+        /// @todo eventually fix: Right now assumes that there is only one
+        /// target per body
+        /// @todo assumes the target is at the origin of the body
+        ///
+        /// You do not own the pointer you get back - the tracked body does.
+        ///
+        /// @return nullptr if an error occurred (such as a target already being
+        /// added to this body)
+        TrackedBodyTarget *createTarget(Eigen::Isometry3d const &targetToBody);
+
+        /// @todo refactor
+        ConfigParams const &getParams() const;
+
+      private:
+        TrackingSystem &m_system;
+        /// private implementation data
+        struct ImplData;
+        std::unique_ptr<ImplData> m_data;
+        std::unique_ptr<TrackedBodyIMU> m_imu;
+        std::unique_ptr<TrackedBodyTarget> m_target;
+    };
 } // namespace vbtracker
 } // namespace osvr
 

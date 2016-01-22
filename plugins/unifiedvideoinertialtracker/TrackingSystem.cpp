@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "TrackingSystem.h"
+#include "TrackedBody.h"
 
 // Library/third-party includes
 // - none
@@ -31,4 +32,20 @@
 // Standard includes
 // - none
 
+namespace osvr {
+namespace vbtracker {
+    struct TrackingSystem::Impl {};
 
+    TrackingSystem::TrackingSystem(ConfigParams const &params)
+        : m_params(params), m_impl(new Impl) {}
+
+    TrackingSystem::~TrackingSystem() {}
+
+    TrackedBody *TrackingSystem::createTrackedBody() {
+        BodyPtr newBody(new TrackedBody(*this));
+        m_bodies.emplace_back(std::move(newBody));
+        return m_bodies.back().get();
+    }
+
+} // namespace vbtracker
+} // namespace osvr

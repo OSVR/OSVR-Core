@@ -24,6 +24,9 @@
 
 // Internal Includes
 #include "TrackedBody.h"
+#include "TrackedBodyIMU.h"
+#include "TrackedBodyTarget.h"
+#include "TrackingSystem.h"
 
 // Library/third-party includes
 // - none
@@ -31,4 +34,26 @@
 // Standard includes
 // - none
 
+namespace osvr {
+namespace vbtracker {
+    struct TrackedBody::ImplData {};
+    TrackedBody::TrackedBody(TrackingSystem &system)
+        : m_system(system), m_data(new ImplData) {}
+    TrackedBody::~TrackedBody() {}
+    TrackedBodyIMU *TrackedBody::createIntegratedIMU() { return nullptr; }
+    TrackedBodyTarget *
+    TrackedBody::createTarget(Eigen::Isometry3d const &targetToBody) {
+        if (m_target) {
+            // already have a target!
+            /// @todo handle multiple targets!
+            return nullptr;
+        }
+        m_target.reset(new TrackedBodyTarget(*this, targetToBody));
+        return m_target.get();
+    }
+    ConfigParams const &TrackedBody::getParams() const {
+        return m_system.getParams();
+    }
 
+} // namespace vbtracker
+} // namespace osvr

@@ -26,17 +26,39 @@
 #define INCLUDED_TrackingSystem_h_GUID_B94B2C23_321F_45B4_5167_CB32D2624B50
 
 // Internal Includes
-// - none
+#include "ConfigParams.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <vector>
+#include <memory>
 
 namespace osvr {
 namespace vbtracker {
-    class TrackingSystem {};
+    class TrackedBody;
+    class TrackingSystem {
+      public:
+        TrackingSystem(ConfigParams const &params);
+        ~TrackingSystem();
+        TrackedBody *createTrackedBody();
+
+        std::size_t getNumBodies() const { return m_bodies.size(); }
+        TrackedBody &getBody(std::size_t i) { return *m_bodies.at(i); }
+
+        /// @todo refactor;
+        ConfigParams const &getParams() const { return m_params; }
+
+      private:
+        using BodyPtr = std::unique_ptr<TrackedBody>;
+        ConfigParams m_params;
+        std::vector<BodyPtr> m_bodies;
+
+        /// private impl;
+        struct Impl;
+        std::unique_ptr<Impl> m_impl;
+    };
 } // namespace vbtracker
 } // namespace osvr
 

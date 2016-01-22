@@ -16,6 +16,14 @@ add_subdirectory(ImageSources)
 # Static library with core of the tracker
 ###
 add_library(uvbi-core STATIC
+    BeaconIdTypes.h
+    BeaconSetupData.h
+    CameraDistortionModel.h
+    CameraParameters.h
+    ConfigParams.h
+    cvToEigen.h
+    SBDBlobExtractor.cpp
+    SBDBlobExtractor.h
     StateHistory.h
     TrackedBody.cpp
     TrackedBody.h
@@ -24,7 +32,8 @@ add_library(uvbi-core STATIC
     TrackedBodyTarget.cpp
     TrackedBodyTarget.h
     TrackingSystem.cpp
-    TrackingSystem.h)
+    TrackingSystem.h
+    Types.h)
 target_compile_options(uvbi-core
     PUBLIC
     ${OSVR_CXX11_FLAGS})

@@ -26,9 +26,39 @@
 #include "TrackedBodyTarget.h"
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
 // - none
 
+namespace osvr {
+namespace vbtracker {
+    struct TrackedBodyTarget::Impl {};
+    TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body,
+                                         Eigen::Isometry3d const &targetToBody)
+        : m_body(body), m_targetToBody(targetToBody) {}
 
+    TrackedBodyTarget::~TrackedBodyTarget() {}
+
+    Eigen::Vector3d
+    TrackedBodyTarget::getBeaconAutocalibPosition(ZeroBasedBeaconId i) const {
+        BOOST_ASSERT(!i.empty());
+        BOOST_ASSERT_MSG(i.value() < getNumBeacons(),
+                         "Beacon ID must be less than number of beacons.");
+        BOOST_ASSERT_MSG(i.value() >= 0,
+                         "Beacon ID must not be a sentinel value!");
+        return m_beacons.at(i.value())->stateVector();
+    }
+
+    Eigen::Vector3d
+    TrackedBodyTarget::getBeaconAutocalibVariance(ZeroBasedBeaconId i) const {
+        BOOST_ASSERT(!i.empty());
+        BOOST_ASSERT_MSG(i.value() < getNumBeacons(),
+                         "Beacon ID must be less than number of beacons.");
+        BOOST_ASSERT_MSG(i.value() >= 0,
+                         "Beacon ID must not be a sentinel value!");
+        return m_beacons.at(i.value())->errorCovariance().diagonal();
+    }
+
+} // namespace vbtracker
+} // namespace osvr
