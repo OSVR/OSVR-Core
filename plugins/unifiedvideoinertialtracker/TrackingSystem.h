@@ -27,25 +27,54 @@
 
 // Internal Includes
 #include "ConfigParams.h"
+#include "ImageProcessing.h"
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/TimeValue.h>
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <vector>
 #include <memory>
+#include <cstddef>
 
 namespace osvr {
 namespace vbtracker {
     class TrackedBody;
     class TrackingSystem {
       public:
+        /// @name Setup and Teardown
+        /// @{
         TrackingSystem(ConfigParams const &params);
         ~TrackingSystem();
         TrackedBody *createTrackedBody();
+        /// @}
 
+        /// @name Runtime methods
+        /// @{
+        /// Perform the initial phase of image processing. This does not modify
+        /// the bodies, so it can happen in parallel/background processing. It's
+        /// also the most expensive, so that's handy.
+        ImageOutputDataPtr
+        performInitialImageProcessing(util::time::TimeValue const &tv,
+                                      cv::Mat const &frame,
+                                      cv::Mat const &frameGray);
+        using BodyIndicies = std::vector<std::size_t>;
+        /// This is the second half of the video-based tracking algorithm - the
+        /// part that actually changes tracking state. Please std::move the
+        /// output of the first step into this step.
+        ///
+        /// @return A reference to a vector of body indices that were updated
+        /// with this latest frame.
+        BodyIndicies const &
+        updateTrackingFromVideoData(ImageOutputDataPtr &&imageData);
+        /// @}
+
+        /// @name Accessors
+        /// @{
         std::size_t getNumBodies() const { return m_bodies.size(); }
         TrackedBody &getBody(std::size_t i) { return *m_bodies.at(i); }
+        /// @}
 
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
@@ -53,6 +82,7 @@ namespace vbtracker {
       private:
         using BodyPtr = std::unique_ptr<TrackedBody>;
         ConfigParams m_params;
+        std::vector<std::size_t> m_updated;
         std::vector<BodyPtr> m_bodies;
 
         /// private impl;

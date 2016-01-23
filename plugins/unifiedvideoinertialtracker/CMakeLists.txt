@@ -26,6 +26,7 @@ add_library(uvbi-core STATIC
     HDKLedIdentifier.h
     HDKLedIdentifierFactory.cpp
     HDKLedIdentifierFactory.h
+    ImageProcessing.h
     LED.cpp
     LED.h
     LedIdentifier.cpp
