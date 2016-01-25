@@ -31,6 +31,7 @@ add_library(uvbi-core STATIC
     LED.h
     LedIdentifier.cpp
     LedIdentifier.h
+    ModelTypes.h
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h
     StateHistory.h
@@ -70,9 +71,12 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     org_osvr_unifiedvideoinertial.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_unifiedvideoinertial_json.h"
     ConfigurationParser.h
-    GetOptionalParameter.h)
+    GetOptionalParameter.h
+    ThreadsafeBodyReporting.cpp
+    ThreadsafeBodyReporting.h)
 
 target_link_libraries(org_osvr_unifiedvideoinertial
+    osvr::osvrAnalysisPluginKit
     uvbi-core
     uvbi-image-sources
     JsonCpp::JsonCpp

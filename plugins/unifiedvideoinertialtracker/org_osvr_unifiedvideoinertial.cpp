@@ -28,10 +28,11 @@
 //#include "VideoBasedTracker.h"
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
+#include "HDKData.h"
+#include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
-#include "HDKData.h"
 
 #include "ConfigurationParser.h"
 
@@ -54,6 +55,9 @@
 #include <iomanip>
 #include <sstream>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <stdexcept>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -79,9 +83,14 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
                                   DEBUGGABLE_BEACONS * DATAPOINTS_PER_BEACON);
 #endif
 
-        /// Create an asynchronous (threaded) device
-        m_dev.initAsync(ctx, DRIVER_NAME, opts);
-
+        /// Create the analysis device token with the options
+        OSVR_DeviceToken dev;
+        if (OSVR_RETURN_FAILURE ==
+            osvrAnalysisSyncInit(ctx, DRIVER_NAME, opts, &dev, &m_clientCtx)) {
+            throw std::runtime_error("Could not initialize analysis plugin!");
+        }
+        m_dev = osvr::pluginkit::DeviceToken(dev);
+        
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(org_osvr_unifiedvideoinertial_json);
 
@@ -93,6 +102,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
+    OSVR_ClientContext m_clientCtx;
+    OSVR_ClientInterface m_clientInterface;
     OSVR_TrackerDeviceInterface m_tracker;
 #if 0
     OSVR_AnalogDeviceInterface m_analog;
