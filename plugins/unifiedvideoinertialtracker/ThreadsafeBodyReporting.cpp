@@ -62,11 +62,18 @@ namespace vbtracker {
         return tv + additionalTime;
     }
 
+    /// Helper function to assign from a Kalman state to a body report, whether
+    /// we predicted or not.
     inline void assignStateToBodyReport(BodyState const &state,
                                         BodyReport &report) {
         util::eigen_interop::map(report.pose).rotation() =
             state.getQuaternion();
         util::eigen_interop::map(report.pose).translation() = state.position();
+    }
+
+    std::unique_ptr<BodyReporting> BodyReporting::make() {
+        std::unique_ptr<BodyReporting> ret(new BodyReporting);
+        return ret;
     }
 
     boost::optional<BodyReport>
@@ -81,10 +88,9 @@ namespace vbtracker {
             // Told we shouldn't report, OK.
             return boost::none;
         }
-        /// @todo predict ahead to current time + additional prediction.
 
+        /// If we got here, then we're reporting something.
         BodyReport ret;
-
         if (m_state.stateVector().tail<6>() !=
             kalman::types::Vector<6>::Zero()) {
             // If we have non-zero velocity, then we can do some prediction.
@@ -130,6 +136,16 @@ namespace vbtracker {
         m_state = state;
         m_process = process;
     }
+
+    void BodyReporting::updateState(util::time::TimeValue const &tv,
+                                    BodyState const &state) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_shouldReport = true;
+        m_dataTime = tv;
+        m_state = state;
+    }
+
+    BodyReporting::BodyReporting() {}
 
 } // namespace vbtracker
 } // namespace osvr

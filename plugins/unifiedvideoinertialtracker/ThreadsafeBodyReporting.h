@@ -35,6 +35,7 @@
 
 // Standard includes
 #include <mutex>
+#include <memory>
 
 namespace osvr {
 namespace vbtracker {
@@ -45,8 +46,13 @@ namespace vbtracker {
         // OSVR_AngularVelocityState angVel;
     };
 
+    /// A per-body class intended to marshall data coming from the
+    /// tracking/processing thread back to the mainloop thread.
     class BodyReporting {
       public:
+        /// Factory function
+        static std::unique_ptr<BodyReporting> make();
+
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /// @name mainloop-thread methods
         /// @{
@@ -54,8 +60,7 @@ namespace vbtracker {
         /// you don't get one, then either the mutex was locked (you're in a
         /// fast-spinning loop, just get it next time), or there's nothing worth
         /// reporting.
-        boost::optional<BodyReport>
-        getReport(double additionalPrediction);
+        boost::optional<BodyReport> getReport(double additionalPrediction);
         /// @}
 
         /// @name processing-thread methods
@@ -71,8 +76,12 @@ namespace vbtracker {
         void updateState(util::time::TimeValue const &tv,
                          BodyState const &state,
                          BodyProcessModel const &process);
+        /// @overload
+        void updateState(util::time::TimeValue const &tv,
+                         BodyState const &state);
         /// @}
       private:
+        BodyReporting();
         std::mutex m_mutex;
         /// @name Protected by mutex
         /// @{
