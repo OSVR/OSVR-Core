@@ -76,44 +76,55 @@ namespace vbtracker {
                     bool gotError = false;
                     checkPatternLength(i, gotError);
                     checkLocationValidity(i, gotError);
-                    /// @todo more here
+                    checkEmissionDirection(i, gotError);
+                    checkMeasVariance(i, gotError);
+                    checkAutocalib(i, gotError);
 
                     if (!gotError) {
                         m_summary.validBeacons.push_back(wrapIndex(i));
                     }
                 }
 
-                /// Now look at unevent tails.
-                /// here this variable is kind of a dummy - we won't get any
-                /// valid beacons out of this section, we just need a reference
-                /// to pass.
-                bool gotError = false;
+                /// Now look at uneven tails.
                 for (size_type i = m_sizes.minSize; i < m_sizes.maxSize; ++i) {
 
+                    /// here this variable is kind of a dummy - we won't get any
+                    /// valid beacons out of this section, we just need a
+                    /// reference to pass.
+                    bool gotError = false;
                     recordError(
                         i, "Mismatched vectors: Beacon ID exists "
                            "in at least one vector, but not in all vectors.");
-                    if (i < d.patterns.size()) {
+                    if (inRange(i, d.patterns, "pattern")) {
                         if (disabledBeacon(i)) {
                             /// @todo how to handle "uneven tails" with a
                             /// "disabled beacon" pattern?
                             continue;
                         }
                         checkPatternLength(i, gotError);
-                    } else {
-                        recordError(i, "Mismatched vectors: Beacon ID exists "
-                                       "in at least one vector, but not enough "
-                                       "entries in the pattern vector!");
                     }
 
-                    if (i < d.locations.size()) {
+                    if (inRange(i, d.locations, "locations")) {
                         checkLocationValidity(i, gotError);
-                    } else {
-                        recordError(i, "Mismatched vectors: Beacon ID exists "
-                                       "in at least one vector, but not enough "
-                                       "entries in the locations vector!");
                     }
-                    /// @todo more here.
+
+                    if (inRange(i, d.emissionDirections,
+                                "emissionDirections")) {
+                        checkEmissionDirection(i, gotError);
+                    }
+
+                    if (inRange(i, d.baseMeasurementVariances,
+                                "baseMeasurementVariances")) {
+                        checkMeasVariance(i, gotError);
+                    }
+
+                    auto gotInitialAutocalib =
+                        inRange(i, d.initialAutocalibrationErrors,
+                                "initialAutocalibrationErrors");
+                    auto gotIsFixed = inRange(i, d.isFixed, "isFixed");
+                    if (gotInitialAutocalib && gotIsFixed) {
+                        checkAutocalib(i, gotError);
+                    }
                 }
             }
 
@@ -157,16 +168,61 @@ namespace vbtracker {
             }
 
             void checkEmissionDirection(size_type i, bool &gotError) {
-                /// @todo
+                if (d.emissionDirections[i] == EmissionDirectionVec(0, 0, 0)) {
+                    gotError = true;
+                    recordError(
+                        i,
+                        "Beacon emission direction is zero - uninitialized.");
+                }
+                /// @todo check for unit vector?
+            }
+
+            void checkMeasVariance(size_type i, bool &gotError) {
+                if (d.baseMeasurementVariances[i] <= 0) {
+                    gotError = true;
+                    recordError(
+                        i, "Beacon base measurement variance is not positive.");
+                }
+            }
+            void checkAutocalib(size_type i, bool &gotError) {
+                if (d.isFixed[i]) {
+                    // Just make sure this is normalized here in case they
+                    // didn't use our helper function.
+                    d.initialAutocalibrationErrors[i] = 0;
+                } else if (d.initialAutocalibrationErrors[i] == 0.) {
+                    gotError = true;
+                    recordError(i, "Beacon initial autocalib error is zero, "
+                                   "but not marked as fixed (so autocalib "
+                                   "process noise would apply, etc.)");
+                } else if (d.initialAutocalibrationErrors[i] < 0.) {
+
+                    gotError = true;
+                    recordError(i,
+                                "Beacon initial autocalib error is negative.");
+                }
             }
             /// @}
 
-            /// @name Helpers for the loop methods
+            /// @name Helpers for the main or loop methods
             /// @{
+            template <typename T>
+            bool inRange(size_type i, T &vec, std::string const &name) {
+                if (i < vec.size()) {
+                    return true;
+                }
+
+                recordError(i,
+                            "Mismatched vectors: Beacon ID exists in at least "
+                            "one vector, but not enough entries in the " +
+                                name + " vector!");
+                return false;
+            }
+
             template <typename T> void recordError(size_type i, T &&arg) {
                 m_summary.errors.emplace_back(wrapIndex(i),
                                               std::forward<T>(arg));
             }
+
             static OneBasedBeaconId wrapIndex(size_type i) {
                 return makeOneBased(ZeroBasedBeaconId(i));
             }
