@@ -2,6 +2,7 @@
 /.clang_complete
 /.linter-clang-flags
 /.linter-clang-includes
+/compile_commands.json
 
 # Doxygen output
 /doxygen/
