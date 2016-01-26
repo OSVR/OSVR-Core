@@ -93,10 +93,25 @@ namespace vbtracker {
         return id;
     }
 
-    /// @todo create counterpart makeZeroBased() functions to get 0-based beacon
-    /// IDs?
-    /// I think the direction of conversion is primarily from 0-based to
-    /// 1-based...
+    /// Overloaded conversion function to turn any beacon ID into zero-based,
+    /// respecting the convention that negative values don't change.
+    inline ZeroBasedBeaconId makeZeroBased(OneBasedBeaconId id) {
+        ZeroBasedBeaconId ret;
+        if (id.empty()) {
+            return ret;
+        } else if (id.value() < 0) {
+            ret = ZeroBasedBeaconId(id.value());
+        } else {
+            ret = ZeroBasedBeaconId(id.value() - 1);
+        }
+        return ret;
+    }
+
+    /// No-op overload, so you can take any beacon ID and ensure it is
+    /// zero-based.
+    inline ZeroBasedBeaconId const &makeZeroBased(ZeroBasedBeaconId const &id) {
+        return id;
+    }
 
     /// Does the given beacon ID indicate that it's identified?
     inline bool beaconIdentified(ZeroBasedBeaconId id) {
