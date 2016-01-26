@@ -95,8 +95,6 @@ namespace vbtracker {
         std::unique_ptr<Impl> m_impl;
     };
 
-    inline std::unique_ptr<TrackingSystem>
-    makeHDKTrackingSystem(ConfigParams const &params) {}
 } // namespace vbtracker
 } // namespace osvr
 

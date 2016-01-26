@@ -32,7 +32,6 @@ add_library(uvbi-core STATIC
     LED.h
     LedIdentifier.cpp
     LedIdentifier.h
-    MakeHDKTrackingSystem.h
     ModelTypes.h
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h
@@ -74,6 +73,9 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_unifiedvideoinertial_json.h"
     ConfigurationParser.h
     GetOptionalParameter.h
+    MakeHDKTrackingSystem.h
+    HDKData.cpp
+    HDKData.h
     ThreadsafeBodyReporting.cpp
     ThreadsafeBodyReporting.h)
 

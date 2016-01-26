@@ -26,13 +26,14 @@
 #define INCLUDED_BeaconSetupData_h_GUID_AEDF8B01_FC4D_4388_2C88_0351E5E7FD83
 
 // Internal Includes
-// - none
+#include "Types.h"
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <string>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
@@ -56,6 +57,16 @@ namespace vbtracker {
         bool isFixed = false;
     };
 
+    /// Data for a full target (all the beacons), unswizzled into a "struct of
+    /// vectors". All should be the same size, since they are parallel.
+    struct TargetSetupData {
+        std::vector<std::string> patterns;
+        Point3Vector locations;
+        Vec3Vector emissionDirections;
+        std::vector<double> baseMeasurementVariances;
+        std::vector<double> initialAutocalibrationErrors;
+        std::vector<bool> isFixed;
+    };
 } // namespace vbtracker
 } // namespace osvr
 
