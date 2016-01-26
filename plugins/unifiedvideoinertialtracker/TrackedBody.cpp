@@ -39,8 +39,14 @@ namespace vbtracker {
     struct TrackedBody::ImplData {};
     TrackedBody::TrackedBody(TrackingSystem &system)
         : m_system(system), m_data(new ImplData) {}
+
     TrackedBody::~TrackedBody() {}
-    TrackedBodyIMU *TrackedBody::createIntegratedIMU() { return nullptr; }
+
+    TrackedBodyIMU *TrackedBody::createIntegratedIMU() {
+        /// @todo
+        return nullptr;
+    }
+
     TrackedBodyTarget *
     TrackedBody::createTarget(Eigen::Isometry3d const &targetToBody) {
         if (m_target) {
@@ -51,8 +57,13 @@ namespace vbtracker {
         m_target.reset(new TrackedBodyTarget(*this, targetToBody));
         return m_target.get();
     }
+
     ConfigParams const &TrackedBody::getParams() const {
         return m_system.getParams();
+    }
+
+    BodyId TrackedBody::getId() const {
+        return m_system.getIdForBody(*this);
     }
 
 } // namespace vbtracker

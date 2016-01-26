@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "ConfigParams.h"
+#include "BodyIdTypes.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -85,6 +86,9 @@ namespace vbtracker {
         /// @return nullptr if an error occurred (such as a target already being
         /// added to this body)
         TrackedBodyTarget *createTarget(Eigen::Isometry3d const &targetToBody);
+
+        /// Gets the body ID within the tracking system.
+        BodyId getId() const;
 
         /// @todo refactor
         ConfigParams const &getParams() const;

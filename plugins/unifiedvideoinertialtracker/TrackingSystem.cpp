@@ -27,10 +27,11 @@
 #include "TrackedBody.h"
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
-// - none
+#include <algorithm>
+#include <iterator>
 
 namespace osvr {
 namespace vbtracker {
@@ -45,6 +46,28 @@ namespace vbtracker {
         BodyPtr newBody(new TrackedBody(*this));
         m_bodies.emplace_back(std::move(newBody));
         return m_bodies.back().get();
+    }
+
+
+    BodyId TrackingSystem::getIdForBody(TrackedBody const &body) const {
+        BodyId ret;
+
+        auto bodyPtr = &body;
+        /// Find iterator to the body whose smart pointer's raw contents compare
+        /// equal to the raw address we just got.
+        auto it = std::find_if(
+            begin(m_bodies), end(m_bodies),
+            [bodyPtr](BodyPtr const &ptr) { return ptr.get() == bodyPtr; });
+
+        BOOST_ASSERT_MSG(end(m_bodies) != it,
+            "Shouldn't be able to be asked about a tracked "
+            "body that's not in our tracking system!");
+        if (end(m_bodies) == it) {
+            /// Return an empty/invalid ID if we couldn't find it - that would be weird.
+            return ret; 
+        }
+        ret = BodyId(std::distance(begin(m_bodies), it));
+        return ret;
     }
 
 } // namespace vbtracker

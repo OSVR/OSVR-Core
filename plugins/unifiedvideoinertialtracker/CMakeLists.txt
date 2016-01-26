@@ -16,6 +16,7 @@ add_subdirectory(ImageSources)
 # Static library with core of the tracker
 ###
 add_library(uvbi-core STATIC
+    BodyIdTypes.h
     BeaconIdTypes.h
     BeaconSetupData.h
     CameraDistortionModel.h
@@ -31,6 +32,7 @@ add_library(uvbi-core STATIC
     LED.h
     LedIdentifier.cpp
     LedIdentifier.h
+    MakeHDKTrackingSystem.h
     ModelTypes.h
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h

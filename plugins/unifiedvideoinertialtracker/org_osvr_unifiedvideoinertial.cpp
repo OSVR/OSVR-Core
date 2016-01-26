@@ -25,7 +25,10 @@
 // Internal Includes
 #include "ImageSources/ImageSource.h"
 #include "ImageSources/ImageSourceFactories.h"
-//#include "VideoBasedTracker.h"
+
+#include "MakeHDKTrackingSystem.h"
+#include "TrackingSystem.h"
+
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
 #include "HDKData.h"
@@ -90,7 +93,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
             throw std::runtime_error("Could not initialize analysis plugin!");
         }
         m_dev = osvr::pluginkit::DeviceToken(dev);
-        
+
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(org_osvr_unifiedvideoinertial_json);
 
@@ -111,6 +114,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     osvr::vbtracker::ImageSourcePtr m_source;
     cv::Mat m_frame;
     cv::Mat m_imageGray;
+    std::unique_ptr<osvr::vbtracker::TrackingSystem> m_trackingSystem;
 };
 
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
@@ -161,6 +165,7 @@ class ConfiguredDeviceConstructor {
             return OSVR_RETURN_FAILURE;
         }
 
+        auto trackingSystem = osvr::vbtracker::makeHDKTrackingSystem(config);
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);
         auto newTracker = osvr::pluginkit::registerObjectForDeletion(

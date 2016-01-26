@@ -28,6 +28,7 @@
 // Internal Includes
 #include "ConfigParams.h"
 #include "ImageProcessing.h"
+#include "BodyIdTypes.h"
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
@@ -59,7 +60,7 @@ namespace vbtracker {
         performInitialImageProcessing(util::time::TimeValue const &tv,
                                       cv::Mat const &frame,
                                       cv::Mat const &frameGray);
-        using BodyIndicies = std::vector<std::size_t>;
+        using BodyIndicies = std::vector<BodyId>;
         /// This is the second half of the video-based tracking algorithm - the
         /// part that actually changes tracking state. Please std::move the
         /// output of the first step into this step.
@@ -73,8 +74,12 @@ namespace vbtracker {
         /// @name Accessors
         /// @{
         std::size_t getNumBodies() const { return m_bodies.size(); }
-        TrackedBody &getBody(std::size_t i) { return *m_bodies.at(i); }
+        TrackedBody &getBody(BodyId i) { return *m_bodies.at(i.value()); }
         /// @}
+
+        /// Given a body, return its ID. Returns an empty/invalid ID if it's not
+        /// part of this system.
+        BodyId getIdForBody(TrackedBody const &body) const;
 
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
@@ -89,6 +94,9 @@ namespace vbtracker {
         struct Impl;
         std::unique_ptr<Impl> m_impl;
     };
+
+    inline std::unique_ptr<TrackingSystem>
+    makeHDKTrackingSystem(ConfigParams const &params) {}
 } // namespace vbtracker
 } // namespace osvr
 
