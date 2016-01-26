@@ -43,6 +43,7 @@ set(API
     "${HEADER_LOCATION}/AnnotationMacrosC.h"
     "${HEADER_LOCATION}/AnyMap.h"
     "${HEADER_LOCATION}/AnyMap_fwd.h"
+    "${HEADER_LOCATION}/BasicTypeTraits.h"
     "${HEADER_LOCATION}/BoolC.h"
     "${HEADER_LOCATION}/BoostDeletable.h"
     "${HEADER_LOCATION}/BoostIsCopyConstructible.h"
