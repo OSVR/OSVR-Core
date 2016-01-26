@@ -18,6 +18,7 @@ add_subdirectory(ImageSources)
 add_library(uvbi-core STATIC
     BodyIdTypes.h
     BeaconIdTypes.h
+    BeaconSetupData.cpp
     BeaconSetupData.h
     CameraDistortionModel.h
     CameraParameters.h

@@ -38,6 +38,7 @@
 // Standard includes
 #include <memory>
 #include <stdexcept>
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -98,9 +99,12 @@ namespace vbtracker {
     };
         // clang-format on
     } // namespace
+
     inline std::unique_ptr<TrackingSystem>
     makeHDKTrackingSystem(ConfigParams const &params) {
         std::unique_ptr<TrackingSystem> sys(new TrackingSystem(params));
+
+        static const auto SCALE_FACTOR = 0.001; // mm to m
 
         auto hmd = sys->createTrackedBody();
         if (!hmd) {
@@ -115,75 +119,86 @@ namespace vbtracker {
                 "Could not create a tracked target for the HMD!");
         }
 
+        auto numFrontBeacons = OsvrHdkLedLocations_SENSOR0.size();
+        auto numRearBeacons = OsvrHdkLedLocations_SENSOR1.size();
+        auto const useRear = params.includeRearPanel;
+        auto numBeacons = numFrontBeacons + (useRear ? numRearBeacons : 0);
+
+        /// Start setting up the data.
         TargetSetupData data;
+        data.setBeaconCount(numBeacons);
+
         /// Fill in the patterns.
         data.patterns = OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
-        /// Patterns for the second part.
-        data.patterns.insert(end(data.patterns),
-                             begin(OsvrHdkLedIdentifier_SENSOR1_PATTERNS),
-                             end(OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+
+        if (useRear) {
+            /// Patterns for the second part.
+            data.patterns.insert(end(data.patterns),
+                                 begin(OsvrHdkLedIdentifier_SENSOR1_PATTERNS),
+                                 end(OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
+        }
 
         /// Scale from millimeters to meters, and make the coordinate system
         /// what we want.
-        auto transformPoints = [](cv::Point3f pt) {
-            auto p = pt * .001;
-            return cv::Point3f(-p.x, p.y, -p.z);
+        auto transformPoints = [](LocationPoint pt) {
+            auto p = pt * SCALE_FACTOR;
+            return LocationPoint(-p.x, p.y, -p.z);
         };
 
-        data.locations.resize(OsvrHdkLedLocations_SENSOR0.size() +
-                              OsvrHdkLedLocations_SENSOR1.size());
-        auto lastOf0 = std::transform(begin(OsvrHdkLedLocations_SENSOR0),
-                                      end(OsvrHdkLedLocations_SENSOR0),
-                                      begin(data.locations), transformPoints);
-        // distance between front and back panel target origins, in m.
-        auto distanceBetweenPanels = (params.headCircumference / M_PI * 10. +
-                                      params.headToFrontBeaconOriginDistance) *
-                                     .001;
+        auto locationsEnd =
+            std::transform(begin(OsvrHdkLedLocations_SENSOR0),
+                           end(OsvrHdkLedLocations_SENSOR0),
+                           begin(data.locations), transformPoints);
+        if (useRear) {
+            // distance between front and back panel target origins, in m.
+            auto distanceBetweenPanels =
+                (params.headCircumference / M_PI * 10. +
+                 params.headToFrontBeaconOriginDistance) *
+                SCALE_FACTOR;
 
-        /// Put on the back points too.
-        auto transformBackPoints = [distanceBetweenPanels](cv::Point3f pt) {
-            auto p = pt * .001;
-            p.z += distanceBetweenPanels;
-            return p;
-        };
-        std::transform(begin(OsvrHdkLedLocations_SENSOR1),
-                       end(OsvrHdkLedLocations_SENSOR1), lastOf0,
-                       transformBackPoints);
+            /// Put on the back points too.
+            auto transformBackPoints = [distanceBetweenPanels](
+                LocationPoint pt) {
+                auto p = pt * SCALE_FACTOR;
+                p.z += distanceBetweenPanels;
+                return p;
+            };
+            std::transform(begin(OsvrHdkLedLocations_SENSOR1),
+                           end(OsvrHdkLedLocations_SENSOR1), locationsEnd,
+                           transformBackPoints);
+        }
 
         /// Just changes the basis.
-        auto transformVector = [](cv::Vec3f v) {
-            return cv::Vec3f(-v[0], v[1], -v[2]);
+        auto transformVector = [](EmissionDirectionVec v) {
+            return EmissionDirectionVec(-v[0], v[1], -v[2]);
         };
 
-        data.emissionDirections.resize(OsvrHdkLedDirections_SENSOR0.size());
+        data.emissionDirections.resize(numFrontBeacons);
         std::transform(begin(OsvrHdkLedDirections_SENSOR0),
                        end(OsvrHdkLedDirections_SENSOR0),
                        begin(data.emissionDirections), transformVector);
-        data.emissionDirections.resize(OsvrHdkLedDirections_SENSOR0.size() + 6,
-                                       cv::Vec3d(0, 0, 1));
-
+        if (useRear) {
+            // This is why we resized down earlier - so we can resize up to fill
+            // those last elements with constant values.
+            data.emissionDirections.resize(numBeacons,
+                                           EmissionDirectionVec(0, 0, 1));
+        }
         /// Set up autocalib.
-        data.isFixed.resize(OsvrHdkLedLocations_SENSOR0.size() +
-                                OsvrHdkLedLocations_SENSOR1.size(),
-                            false);
-        data.initialAutocalibrationErrors.resize(
-            OsvrHdkLedLocations_SENSOR0.size() +
-                OsvrHdkLedLocations_SENSOR1.size(),
-            0.001);
         /// Set the ones that are fixed.
         for (auto idx : {16, 17, 19, 20}) {
-            data.isFixed[idx] = true;
-            data.initialAutocalibrationErrors[idx] = 0;
+            data.markBeaconFixed(OneBasedBeaconId(idx));
         }
 
-        data.baseMeasurementVariances.resize(
-            OsvrHdkLedLocations_SENSOR0.size() +
-                OsvrHdkLedLocations_SENSOR1.size(),
-            3. / 100.);
+        /// Put in the measurement variances.
         std::transform(begin(OsvrHdkLedVariances_SENSOR0),
                        end(OsvrHdkLedVariances_SENSOR0),
                        begin(data.baseMeasurementVariances),
                        [](double s) { return s / 100.; });
+
+        /// Clean, validate, and print a summary of the data.
+        auto summary = data.cleanAndValidate();
+
+        std::cout << summary << std::endl;
         return sys;
     }
 } // namespace vbtracker
