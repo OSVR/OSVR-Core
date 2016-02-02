@@ -56,6 +56,7 @@ struct Options {
     bool showDeviceDescriptor;
     bool showSensors;
     bool showStringData;
+    bool showArticulations;
 };
 
 using osvr::common::PathNode;
@@ -135,6 +136,15 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
         }
     }
 
+    void operator()(osvr::common::PathNode const &node,
+                    osvr::common::elements::ArticulationElement const &elt) {
+        m_outputBasics(node, elt) << std::endl;
+        // if (m_opts.showStringData) {
+        m_indentStream << "- Contained value: Articulation Type = " << elt.getArticulationType()
+            << "; Tracker path = " << elt.getTrackerPath() << "; Bone Name = " << elt.getBoneName() << std::endl;
+        //}
+    }
+
     /// @brief Catch-all for other element types.
     template <typename T> void operator()(PathNode const &node, T const &elt) {
         outputBasics(node, elt) << "\n";
@@ -171,6 +181,7 @@ int main(int argc, char *argv[]) {
         ("device-descriptors", po::value<bool>(&opts.showDeviceDescriptor)->default_value(false), "Whether or not to show the JSON descriptors associated with each device")
         ("sensors", po::value<bool>(&opts.showSensors)->default_value(true), "Whether or not to show the 'sensor' nodes")
         ("string-data", po::value<bool>(&opts.showStringData)->default_value(true), "Whether or not to show the data in 'string' nodes")
+        ("articulations", po::value<bool>(&opts.showArticulations)->default_value(true), "Whether or not to show the articulations")
         ;
     // clang-format on
     po::variables_map vm;
