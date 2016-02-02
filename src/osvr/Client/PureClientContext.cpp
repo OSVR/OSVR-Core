@@ -212,8 +212,10 @@ namespace client {
     void PureClientContext::m_setRoomToWorldTransform(
         common::Transform const &xform) {
         m_roomToWorld = xform;
+    }
 
-    RemoteHandlerPtr PureClientContext::m_getRemoteHandler(std::string const &path){
+    RemoteHandlerPtr
+    PureClientContext::m_getRemoteHandler(std::string const &path) {
         return m_ifaceMgr.getRemoteHandlerForPath(path);
     }
 } // namespace client
