@@ -194,7 +194,8 @@ if(BUILD_SERVER_APP)
     set(FILE_OUTPUTS)
 
     # Macro to easily copy for build and install a single file.
-    # Put in a macro because we do different things on Windows vs. other platforms, including installing different number of files.
+    # Put in a macro because we do different things on Windows vs. other platforms,
+    # including installing different number of files.
     macro(osvr_copy_file _infile _outfile)
         list(APPEND FILE_OUTPUTS "${_infile}")
         set(__comment "Copying ${_infile}")
