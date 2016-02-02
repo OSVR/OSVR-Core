@@ -117,6 +117,9 @@ namespace vbtracker {
         /// @{
         std::size_t getNumBodies() const { return m_bodies.size(); }
         TrackedBody &getBody(BodyId i) { return *m_bodies.at(i.value()); }
+        TrackedBody const &getBody(BodyId i) const {
+            return *m_bodies.at(i.value());
+        }
         TrackedBodyTarget *getTarget(BodyTargetId target);
 /// @}
 
@@ -127,17 +130,6 @@ namespace vbtracker {
 #endif
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
-
-        template <typename F> void forEachTarget(F &&f) {
-            for (auto &body : m_bodies) {
-                body->forEachTarget(std::forward<F>(f));
-            }
-        }
-        template <typename F> void forEachTarget(F &&f) const {
-            for (auto &body : m_bodies) {
-                body->forEachTarget(std::forward<F>(f));
-            }
-        }
 
       private:
         /// The third phase of the tracking algorithm - LEDs have been updated

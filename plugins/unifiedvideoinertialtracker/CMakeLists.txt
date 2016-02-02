@@ -24,6 +24,7 @@ add_library(uvbi-core STATIC
     CameraParameters.h
     ConfigParams.h
     cvToEigen.h
+    ForEachTracked.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
     HDKLedIdentifierFactory.cpp
