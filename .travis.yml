@@ -35,7 +35,7 @@ before_install:
           git pull;
           popd;
         else
-          git clone https://github.com/vrpn/jsoncpp.git -b 0.y.z;
+          git clone https://github.com/open-source-parsers/jsoncpp.git;
         fi;
         if [ -d libfunctionality ]; then
           pushd libfunctionality;
