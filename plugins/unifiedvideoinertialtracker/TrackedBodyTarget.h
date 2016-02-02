@@ -68,6 +68,9 @@ namespace vbtracker {
             return m_beacons.size();
         }
 
+        TrackedBody &getBody() { return m_body; }
+        TrackedBody const &getBody() const { return m_body; }
+
         /// Used to extract autocalibration results in a standalone calibration
         /// app
         Eigen::Vector3d getBeaconAutocalibPosition(ZeroBasedBeaconId i) const;

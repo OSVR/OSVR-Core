@@ -26,10 +26,11 @@
 #define INCLUDED_ImageProcessing_h_GUID_3E426FCE_BED1_4DAC_0669_70D55A14A507
 
 // Internal Includes
-// - none
+#include "Types.h"
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <memory>
@@ -38,6 +39,9 @@ namespace osvr {
 namespace vbtracker {
     struct ImageProcessingOutput {
         util::time::TimeValue tv;
+        LedMeasurementList ledMeasurements;
+        cv::Mat frame;
+        cv::Mat frameGray;
     };
     using ImageOutputDataPtr = std::unique_ptr<ImageProcessingOutput>;
 } // namespace vbtracker

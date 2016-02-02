@@ -25,6 +25,9 @@
 // Internal Includes
 #include "TrackingSystem.h"
 #include "TrackedBody.h"
+#include "TrackedBodyTarget.h"
+#include "SBDBlobExtractor.h"
+#include "UndistortMeasurements.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -35,10 +38,16 @@
 
 namespace osvr {
 namespace vbtracker {
-    struct TrackingSystem::Impl {};
+    struct TrackingSystem::Impl {
+        Impl(ConfigParams const &params)
+            : blobExtractor(new SBDBlobExtractor(params)) {}
+        cv::Mat frame;
+        cv::Mat grayImage;
+        std::unique_ptr<SBDBlobExtractor> blobExtractor;
+    };
 
     TrackingSystem::TrackingSystem(ConfigParams const &params)
-        : m_params(params), m_impl(new Impl) {}
+        : m_params(params), m_impl(new Impl(params)) {}
 
     TrackingSystem::~TrackingSystem() {}
 
@@ -47,7 +56,6 @@ namespace vbtracker {
         m_bodies.emplace_back(std::move(newBody));
         return m_bodies.back().get();
     }
-
 
     BodyId TrackingSystem::getIdForBody(TrackedBody const &body) const {
         BodyId ret;
@@ -60,14 +68,43 @@ namespace vbtracker {
             [bodyPtr](BodyPtr const &ptr) { return ptr.get() == bodyPtr; });
 
         BOOST_ASSERT_MSG(end(m_bodies) != it,
-            "Shouldn't be able to be asked about a tracked "
-            "body that's not in our tracking system!");
+                         "Shouldn't be able to be asked about a tracked "
+                         "body that's not in our tracking system!");
         if (end(m_bodies) == it) {
-            /// Return an empty/invalid ID if we couldn't find it - that would be weird.
-            return ret; 
+            /// Return an empty/invalid ID if we couldn't find it - that would
+            /// be weird.
+            return ret;
         }
         ret = BodyId(std::distance(begin(m_bodies), it));
         return ret;
+    }
+
+    ImageOutputDataPtr TrackingSystem::performInitialImageProcessing(
+        util::time::TimeValue const &tv, cv::Mat const &frame,
+        cv::Mat const &frameGray, CameraParameters const &camParams) {
+
+        ImageOutputDataPtr ret(new ImageProcessingOutput);
+        ret->tv = tv;
+        ret->frame = frame;
+        ret->frameGray = frameGray;
+        auto rawMeasurements =
+            m_impl->blobExtractor->extractBlobs(ret->frameGray);
+        ret->ledMeasurements = undistortLeds(rawMeasurements, camParams);
+        return ret;
+    }
+
+    BodyIndices const &TrackingSystem::updateTrackingFromVideoData(
+        ImageOutputDataPtr &&imageData) {
+        m_updated.clear();
+        forEachTarget([&](TrackedBodyTarget &target) {
+            auto usedMeasurements =
+                target.processLedMeasurements(imageData->ledMeasurements);
+            if (usedMeasurements != 0) {
+                m_updated.push_back(target.getBody().getId());
+            }
+        });
+        /// @todo OK, now we've updated the LEDs now update the poses.
+        return m_updated;
     }
 
 } // namespace vbtracker

@@ -94,6 +94,19 @@ namespace vbtracker {
         /// @todo refactor
         ConfigParams const &getParams() const;
 
+        TrackedBodyTarget *getTarget() const { return m_target.get(); }
+
+        template <typename F> void forEachTarget(F &&f) {
+            if (m_target) {
+                std::forward<F>(f)(*m_target);
+            }
+        }
+        template <typename F> void forEachTarget(F &&f) const {
+            if (m_target) {
+                std::forward<F>(f)(*m_target);
+            }
+        }
+
       private:
         TrackingSystem &m_system;
         /// private implementation data

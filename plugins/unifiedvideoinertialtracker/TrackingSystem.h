@@ -29,6 +29,7 @@
 #include "ConfigParams.h"
 #include "ImageProcessing.h"
 #include "BodyIdTypes.h"
+#include "CameraParameters.h"
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
@@ -42,6 +43,7 @@
 namespace osvr {
 namespace vbtracker {
     class TrackedBody;
+    using BodyIndices = std::vector<BodyId>;
     class TrackingSystem {
       public:
         /// @name Setup and Teardown
@@ -56,18 +58,16 @@ namespace vbtracker {
         /// Perform the initial phase of image processing. This does not modify
         /// the bodies, so it can happen in parallel/background processing. It's
         /// also the most expensive, so that's handy.
-        ImageOutputDataPtr
-        performInitialImageProcessing(util::time::TimeValue const &tv,
-                                      cv::Mat const &frame,
-                                      cv::Mat const &frameGray);
-        using BodyIndicies = std::vector<BodyId>;
+        ImageOutputDataPtr performInitialImageProcessing(
+            util::time::TimeValue const &tv, cv::Mat const &frame,
+            cv::Mat const &frameGray, CameraParameters const &camParams);
         /// This is the second half of the video-based tracking algorithm - the
         /// part that actually changes tracking state. Please std::move the
         /// output of the first step into this step.
         ///
         /// @return A reference to a vector of body indices that were updated
         /// with this latest frame.
-        BodyIndicies const &
+        BodyIndices const &
         updateTrackingFromVideoData(ImageOutputDataPtr &&imageData);
         /// @}
 
@@ -84,10 +84,22 @@ namespace vbtracker {
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
 
+        template <typename F> void forEachTarget(F &&f) {
+            for (auto &body : m_bodies) {
+                body->forEachTarget(std::forward<F>(f));
+            }
+        }
+        template <typename F> void forEachTarget(F &&f) const {
+            for (auto &body : m_bodies) {
+                body->forEachTarget(std::forward<F>(f));
+            }
+        }
+
       private:
         using BodyPtr = std::unique_ptr<TrackedBody>;
         ConfigParams m_params;
-        std::vector<std::size_t> m_updated;
+
+        BodyIndices m_updated;
         std::vector<BodyPtr> m_bodies;
 
         /// private impl;
