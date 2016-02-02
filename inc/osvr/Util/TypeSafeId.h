@@ -112,12 +112,15 @@ namespace util {
         /// @brief Static factory method to return an invalid/empty ID.
         static type invalid() { return type(); }
 
-        // Default constructor which will set m_val to the empty/invalid
-        // value.
+        /// Default constructor which will set m_val to the empty/invalid
+        /// value.
         TypeSafeIdBase() : m_val(sentinel()) {}
 
-        // Explicit constructor from the wrapped type
+        /// Explicit constructor from the wrapped type
         explicit TypeSafeIdBase(wrapped_type val) : m_val(val) {}
+
+        /// Copy constructor
+        TypeSafeIdBase(TypeSafeIdBase const &other) : m_val(other.m_val) {}
 
         /// @brief Check whether the ID is empty/invalid
         bool empty() const { return m_val == sentinel(); }
@@ -140,6 +143,8 @@ namespace util {
         typedef typename typesafeid_traits::WrappedType<Tag>::type wrapped_type;
         TypeSafeIdRefAccessorBase() : Base() {}
         explicit TypeSafeIdRefAccessorBase(wrapped_type val) : Base(val) {}
+        TypeSafeIdRefAccessorBase(TypeSafeIdRefAccessorBase const &other)
+            : Base(other) {}
 
         /// @brief Non-const reference accessor to the (non-type-safe!)
         /// wrapped value - only available if specifically provided for by a tag
@@ -157,6 +162,7 @@ namespace util {
         typedef typename typesafeid_traits::WrappedType<Tag>::type wrapped_type;
         TypeSafeId() : Base() {}
         explicit TypeSafeId(wrapped_type val) : Base(val) {}
+        TypeSafeId(TypeSafeId const &other) : Base(other) {}
     };
 
     /// @brief Equality comparison operator for type-safe IDs
