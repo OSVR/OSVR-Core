@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "SkeletonRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
@@ -61,33 +62,6 @@
 namespace osvr {
 namespace client {
 
-    /*class SkeletonTraverser : public boost::static_visitor<> {
-      public:
-        /// @brief Constructor
-        SkeletonTraverser() : boost::static_visitor<>() {}
-
-        /// @brief ignore null element
-        void operator()(osvr::common::PathNode const &,
-                        osvr::common::elements::NullElement const &) {}
-
-        /// @brief We might print something for a sensor element.
-        void
-        operator()(osvr::common::PathNode const &node,
-                   osvr::common::elements::ArticulationElement const &elt) {
-            std::cout << "Contained values: fullPath = "
-                      << osvr::common::getFullPath(node)
-                      << " Articulation Type = " << elt.getArticulationType()
-                      << "; Tracker path = " << elt.getTrackerPath()
-                      << "; Bone Name = " << elt.getBoneName() << std::endl;
-        }
-
-        /// @brief Catch-all for other element types.
-        template <typename T>
-        void operator()(osvr::common::PathNode const &node, T const &elt) {}
-
-      private:
-    };*/
-
     class SkeletonRemoteHandler : public RemoteHandler {
       public:
         SkeletonRemoteHandler(vrpn_ConnectionPtr const &conn,
@@ -96,12 +70,12 @@ namespace client {
                               common::InterfaceList &ifaces,
                               common::ClientContext *ctx)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_interfaces(ifaces), m_sensor(sensor), m_ctx(ctx),
+              m_internals(ifaces), m_sensor(sensor), m_ctx(ctx),
               m_deviceName(deviceName) {
 
             auto skeleton = common::SkeletonComponent::create("");
             m_skeleton = m_dev->addComponent(skeleton);
-            
+
             m_skeleton->registerSkeletonHandler(
                 [&](common::SkeletonNotification const &data,
                     util::time::TimeValue const &timestamp) {
@@ -140,11 +114,7 @@ namespace client {
             OSVR_SkeletonReport report;
             report.sensor = data.sensor;
             report.state.dataAvailable = 1;
-            common::ClientInterfacePtr anInterface;
-            for (auto &iface : m_interfaces) {
-                anInterface = iface;
-                iface->triggerCallbacks(timestamp, report);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         void m_handleSkeletonSpec(common::SkeletonSpec const &data,
@@ -156,23 +126,15 @@ namespace client {
             }
             // get the articulation spec for specified skeleton sensor
             Json::Value articSpec = data.spec[m_sensor.value()];
-            //update articulationSpec of skeleton component
+            // update articulationSpec of skeleton component
             Json::FastWriter fastWriter;
             std::string strSpec = fastWriter.write(articSpec);
             m_skeleton->setArticulationSpec(strSpec, m_deviceName);
-
-            /// Now traverse for output
-            //SkeletonTraverser printer{};
-            //osvr::util::traverseWith(
-            //    m_skeleton->getArticulationTree().getRoot(),
-            //    [&printer](osvr::common::PathNode const &node) {
-            //        osvr::common::applyPathNodeVisitor(printer, node);
-            //    });
         }
         common::BaseDevicePtr m_dev;
-        common::InterfaceList &m_interfaces;
         common::ClientContext *m_ctx;
         common::SkeletonComponent *m_skeleton;
+        RemoteHandlerInternals m_internals;
         boost::optional<OSVR_ChannelCount> m_sensor;
         std::string m_deviceName;
     };
