@@ -21,18 +21,19 @@ before_install:
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap homebrew/science; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap d235j/osvr; fi"
-  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then if [ $CONFIG = 'Release' ]; then
-       export DEPSDIR=deps-rel;
-     else
-       export DEPSDIR=deps-dbg;
-     fi; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-      pushd $HOME;
-        mkdir -p $DEPSDIR;
-        cd $DEPSDIR;
+       if [ $CONFIG = 'Release' ]; then
+         export DEPSDIR=$HOME/deps-rel;
+       else
+         export DEPSDIR=$HOME/deps-dbg;
+       fi;
+     fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      mkdir -p $DEPSDIR;
+      pushd $DEPSDIR;
         if [ -d jsoncpp ]; then
           pushd jsoncpp;
-          git pull;
+            git pull;
           popd;
         else
           git clone https://github.com/open-source-parsers/jsoncpp.git;
@@ -56,7 +57,7 @@ install:
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libfunctionality --HEAD; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-      pushd $HOME/$DEPSDIR;
+      pushd $DEPSDIR;
         mkdir -p libfunctionality/build;
         pushd libfunctionality/build;
           cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG};
@@ -71,6 +72,7 @@ install:
         pushd opencv-${OPENCV_VER}/build;
           cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DWITH_IPP=OFF -DWITH_1394=OFF -DWITH_FFMPEG=OFF;
           make -j2 install;
+        popd;
       popd;
     fi"
 script:
