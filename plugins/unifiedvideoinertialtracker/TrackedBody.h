@@ -40,6 +40,7 @@ namespace vbtracker {
     class TrackingSystem;
     class TrackedBodyIMU;
     class TrackedBodyTarget;
+    struct TargetSetupData;
 
     /// This is the class representing a tracked rigid body in the system. It
     /// may be tracked by one (or eventually more) video-based "target"
@@ -79,13 +80,13 @@ namespace vbtracker {
         ///
         /// @todo eventually fix: Right now assumes that there is only one
         /// target per body
-        /// @todo assumes the target is at the origin of the body
         ///
         /// You do not own the pointer you get back - the tracked body does.
         ///
         /// @return nullptr if an error occurred (such as a target already being
         /// added to this body)
-        TrackedBodyTarget *createTarget(Eigen::Isometry3d const &targetToBody);
+        TrackedBodyTarget *createTarget(Eigen::Isometry3d const &targetToBody,
+                                        TargetSetupData const &setupData);
 
         /// Gets the body ID within the tracking system.
         BodyId getId() const;

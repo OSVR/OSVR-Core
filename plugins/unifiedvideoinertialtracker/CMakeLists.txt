@@ -45,7 +45,8 @@ add_library(uvbi-core STATIC
     TrackedBodyTarget.h
     TrackingSystem.cpp
     TrackingSystem.h
-    Types.h)
+    Types.h
+    UndistortMeasurements.h)
 target_compile_options(uvbi-core
     PUBLIC
     ${OSVR_CXX11_FLAGS})

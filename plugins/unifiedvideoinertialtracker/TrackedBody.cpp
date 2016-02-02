@@ -48,13 +48,14 @@ namespace vbtracker {
     }
 
     TrackedBodyTarget *
-    TrackedBody::createTarget(Eigen::Isometry3d const &targetToBody) {
+    TrackedBody::createTarget(Eigen::Isometry3d const &targetToBody,
+                              TargetSetupData const &setupData) {
         if (m_target) {
             // already have a target!
             /// @todo handle multiple targets!
             return nullptr;
         }
-        m_target.reset(new TrackedBodyTarget(*this, targetToBody));
+        m_target.reset(new TrackedBodyTarget(*this, targetToBody, setupData));
         return m_target.get();
     }
 
@@ -62,9 +63,7 @@ namespace vbtracker {
         return m_system.getParams();
     }
 
-    BodyId TrackedBody::getId() const {
-        return m_system.getIdForBody(*this);
-    }
+    BodyId TrackedBody::getId() const { return m_system.getIdForBody(*this); }
 
 } // namespace vbtracker
 } // namespace osvr

@@ -28,6 +28,7 @@
 // Internal Includes
 #include "Types.h"
 #include "BeaconIdTypes.h"
+#include "BeaconSetupData.h"
 
 // Library/third-party includes
 #include <osvr/Kalman/PureVectorState.h>
@@ -54,7 +55,8 @@ namespace vbtracker {
     class TrackedBodyTarget {
       public:
         TrackedBodyTarget(TrackedBody &body,
-                          Eigen::Isometry3d const &targetToBody);
+                          Eigen::Isometry3d const &targetToBody,
+                          TargetSetupData const &setupData);
         ~TrackedBodyTarget();
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -73,7 +75,16 @@ namespace vbtracker {
         /// app
         Eigen::Vector3d getBeaconAutocalibVariance(ZeroBasedBeaconId i) const;
 
+        /// Called each frame with the results of the blob finding and
+        /// undistortion.
+        ///
+        /// @return number of LED measurements/blobs used locally on existing
+        /// LEDs.
+        std::size_t processLedMeasurements(
+            std::vector<LedMeasurement> const &undistortedLeds);
+
       private:
+        ConfigParams const &getParams() const;
         void m_verifyInvariants() const {
             BOOST_ASSERT_MSG(m_beacons.size() ==
                                  m_beaconMeasurementVariance.size(),
@@ -109,6 +120,8 @@ namespace vbtracker {
         ///@}
         /// @todo will this always have the same number of entries?
         std::vector<BeaconData> m_beaconDebugData;
+
+        Eigen::Vector3d m_beaconOffset;
 
         /// private implementation
         struct Impl;

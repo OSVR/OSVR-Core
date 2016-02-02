@@ -111,13 +111,6 @@ namespace vbtracker {
             throw std::runtime_error(
                 "Could not create a tracked body for the HMD!");
         }
-        auto opticalTarget = hmd->createTarget(
-            Eigen::Isometry3d(Eigen::Translation3d(0, 0, 0.04141)));
-
-        if (!opticalTarget) {
-            throw std::runtime_error(
-                "Could not create a tracked target for the HMD!");
-        }
 
         auto numFrontBeacons = OsvrHdkLedLocations_SENSOR0.size();
         auto numRearBeacons = OsvrHdkLedLocations_SENSOR1.size();
@@ -152,7 +145,7 @@ namespace vbtracker {
         if (useRear) {
             // distance between front and back panel target origins, in m.
             auto distanceBetweenPanels =
-                (params.headCircumference / M_PI * 10. +
+                (params.headCircumference / M_PI * 10.f +
                  params.headToFrontBeaconOriginDistance) *
                 SCALE_FACTOR;
 
@@ -199,6 +192,14 @@ namespace vbtracker {
         auto summary = data.cleanAndValidate();
 
         std::cout << summary << std::endl;
+
+        auto opticalTarget = hmd->createTarget(
+            Eigen::Isometry3d(Eigen::Translation3d(0, 0, 0.04141)), data);
+
+        if (!opticalTarget) {
+            throw std::runtime_error(
+                "Could not create a tracked target for the HMD!");
+        }
         return sys;
     }
 } // namespace vbtracker

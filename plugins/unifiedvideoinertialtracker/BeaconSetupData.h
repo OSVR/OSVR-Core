@@ -77,6 +77,10 @@ namespace vbtracker {
         std::vector<double> initialAutocalibrationErrors;
         std::vector<bool> isFixed;
 
+        using size_type = std::vector<double>::size_type;
+
+        size_type numBeacons() const { return locations.size(); }
+
         static LocationPoint getBogusLocation() {
             return LocationPoint(-10000, -10000, -314159);
         }
