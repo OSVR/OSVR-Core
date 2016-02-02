@@ -80,6 +80,8 @@ namespace client {
 
         bool m_getStatus() const override;
 
+        RemoteHandlerPtr m_getRemoteHandler(std::string const &path);
+
         /// @brief The main OSVR server host: usually localhost
         std::string m_host;
 
