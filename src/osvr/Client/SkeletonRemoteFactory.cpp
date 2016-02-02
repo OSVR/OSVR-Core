@@ -50,6 +50,7 @@
 #include <boost/variant/get.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <json/writer.h>
 
 // Standard includes
 
@@ -60,7 +61,7 @@
 namespace osvr {
 namespace client {
 
-    class SkeletonTraverser : public boost::static_visitor<> {
+    /*class SkeletonTraverser : public boost::static_visitor<> {
       public:
         /// @brief Constructor
         SkeletonTraverser() : boost::static_visitor<>() {}
@@ -85,7 +86,7 @@ namespace client {
         void operator()(osvr::common::PathNode const &node, T const &elt) {}
 
       private:
-    };
+    };*/
 
     class SkeletonRemoteHandler : public RemoteHandler {
       public:
@@ -99,14 +100,14 @@ namespace client {
               m_deviceName(deviceName) {
 
             auto skeleton = common::SkeletonComponent::create("");
-            m_dev->addComponent(skeleton);
-
-            skeleton->registerSkeletonHandler(
+            m_skeleton = m_dev->addComponent(skeleton);
+            
+            m_skeleton->registerSkeletonHandler(
                 [&](common::SkeletonNotification const &data,
                     util::time::TimeValue const &timestamp) {
                     m_handleSkeleton(data, timestamp);
                 });
-            skeleton->registerSkeletonSpecHandler(
+            m_skeleton->registerSkeletonSpecHandler(
                 [&](common::SkeletonSpec const &data,
                     util::time::TimeValue const &timestamp) {
                     m_handleSkeletonSpec(data, timestamp);
@@ -155,23 +156,23 @@ namespace client {
             }
             // get the articulation spec for specified skeleton sensor
             Json::Value articSpec = data.spec[m_sensor.value()];
-            m_skeletonTree.reset();
-
-            osvr::common::processArticulationSpecForPathTree(
-                m_skeletonTree, m_deviceName, articSpec);
+            //update articulationSpec of skeleton component
+            Json::FastWriter fastWriter;
+            std::string strSpec = fastWriter.write(articSpec);
+            m_skeleton->setArticulationSpec(strSpec, m_deviceName);
 
             /// Now traverse for output
-            SkeletonTraverser printer{};
-            osvr::util::traverseWith(
-                m_skeletonTree.getRoot(),
-                [&printer](osvr::common::PathNode const &node) {
-                    osvr::common::applyPathNodeVisitor(printer, node);
-                });
+            //SkeletonTraverser printer{};
+            //osvr::util::traverseWith(
+            //    m_skeleton->getArticulationTree().getRoot(),
+            //    [&printer](osvr::common::PathNode const &node) {
+            //        osvr::common::applyPathNodeVisitor(printer, node);
+            //    });
         }
-        common::PathTree m_skeletonTree;
         common::BaseDevicePtr m_dev;
         common::InterfaceList &m_interfaces;
         common::ClientContext *m_ctx;
+        common::SkeletonComponent *m_skeleton;
         boost::optional<OSVR_ChannelCount> m_sensor;
         std::string m_deviceName;
     };

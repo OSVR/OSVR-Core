@@ -32,11 +32,27 @@
 #include <osvr/Common/CommonComponent.h>
 #include <osvr/Connection/Connection.h>
 
+#include <osvr/Common/ProcessArticulationSpec.h>
+
 // Library/third-party includes
 #include <json/reader.h>
 
 // Standard includes
 // - none
+
+#include <osvr/Util/TreeNode.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/ProcessArticulationSpec.h>
+#include <osvr/Common/ApplyPathNodeVisitor.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
+// Library/third-party includes
+#include <boost/variant/get.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/erase.hpp>
 
 namespace osvr {
 namespace common {
@@ -89,19 +105,67 @@ namespace common {
         }
     } // namespace messages
 
+    class SkeletonTraverser : public boost::static_visitor<> {
+    public:
+        /// @brief Constructor
+        SkeletonTraverser() : boost::static_visitor<>() {}
+
+        /// @brief ignore null element
+        void operator()(osvr::common::PathNode const &,
+            osvr::common::elements::NullElement const &) {}
+
+        /// @brief We might print something for a sensor element.
+        void
+            operator()(osvr::common::PathNode const &node,
+            osvr::common::elements::ArticulationElement const &elt) {
+            std::cout << "Contained values: fullPath = "
+                << osvr::common::getFullPath(node)
+                << " Articulation Type = " << elt.getArticulationType()
+                << "; Tracker path = " << elt.getTrackerPath()
+                << "; Bone Name = " << elt.getBoneName() << std::endl;
+        }
+
+        /// @brief Catch-all for other element types.
+        template <typename T>
+        void operator()(osvr::common::PathNode const &node, T const &elt) {}
+
+    private:
+    };
+
     shared_ptr<SkeletonComponent>
-      SkeletonComponent::create(std::string const &jsonSpec, OSVR_ChannelCount numChan) {
-        shared_ptr<SkeletonComponent> ret(new SkeletonComponent(jsonSpec, numChan));
+    SkeletonComponent::create(std::string const &jsonSpec,
+                              OSVR_ChannelCount numChan) {
+        shared_ptr<SkeletonComponent> ret(
+            new SkeletonComponent(jsonSpec, numChan));
         return ret;
     }
 
-    SkeletonComponent::SkeletonComponent(std::string const &jsonSpec, OSVR_ChannelCount numChan)
+    SkeletonComponent::SkeletonComponent(std::string const &jsonSpec,
+                                         OSVR_ChannelCount numChan)
         : m_numSensor(numChan), m_spec(jsonSpec) {}
 
     OSVR_ReturnCode
     SkeletonComponent::setArticulationSpec(std::string const &jsonDescriptor) {
         /// @todo add validation to make sure that articulation spec is provided
         m_spec = jsonDescriptor;
+        return OSVR_RETURN_SUCCESS;
+    }
+
+    OSVR_ReturnCode
+    SkeletonComponent::setArticulationSpec(std::string const &jsonDescriptor,
+                                           std::string const &deviceName) {
+        m_spec = jsonDescriptor;
+        m_articulationTree.reset();
+        osvr::common::processArticulationSpecForPathTree(
+            m_articulationTree, deviceName, jsonDescriptor);
+
+        /// Now traverse for output
+        SkeletonTraverser printer{};
+        osvr::util::traverseWith(
+            m_articulationTree.getRoot(),
+            [&printer](osvr::common::PathNode const &node) {
+            osvr::common::applyPathNodeVisitor(printer, node);
+        });
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -198,6 +262,14 @@ namespace common {
 
         m_getParent().registerMessageType(skeletonRecord);
         m_getParent().registerMessageType(skeletonSpecRecord);
+    }
+
+    PathTree const &SkeletonComponent::getArticulationTree() const {
+        return m_articulationTree;
+    }
+
+    PathTree &SkeletonComponent::getArticulationTree() {
+        return m_articulationTree;
     }
 
 } // namespace common

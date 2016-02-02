@@ -32,6 +32,7 @@
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/ReturnCodesC.h>
+#include <osvr/Common/PathTree.h>
 
 #include <osvr/Common/CommonComponent_fwd.h>
 
@@ -102,6 +103,9 @@ namespace common {
         /// @brief Sets the articultion specification. Should be used during the creation of skeleton component.
         OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(std::string const &jsonDescriptor);
 
+        /// @brief Sets the articultion specification. This will auto-update the articulation tree
+        OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(std::string const &jsonDescriptor, std::string const &deviceName);
+
         typedef std::function<void(SkeletonNotification const &,
                                    util::time::TimeValue const &)>
             SkeletonHandler;
@@ -111,6 +115,9 @@ namespace common {
         OSVR_COMMON_EXPORT void registerSkeletonHandler(SkeletonHandler cb);
         OSVR_COMMON_EXPORT void
         registerSkeletonSpecHandler(SkeletonSpecHandler cb);
+
+        OSVR_COMMON_EXPORT PathTree const &getArticulationTree() const;
+        OSVR_COMMON_EXPORT PathTree &getArticulationTree();
 
       private:
         SkeletonComponent(std::string const &jsonSpec, OSVR_ChannelCount numChan);
@@ -128,6 +135,8 @@ namespace common {
 
         /// @brief Common component for system device
         common::CommonComponent *m_commonComponent;
+
+        common::PathTree m_articulationTree;
     };
 
 } // namespace common
