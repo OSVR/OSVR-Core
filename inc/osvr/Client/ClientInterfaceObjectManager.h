@@ -78,6 +78,9 @@ namespace client {
         /// @brief run update on all remote handlers
         OSVR_CLIENT_EXPORT void updateHandlers();
 
+        /// @brief returns a remoteHandlerPtr for given path
+        OSVR_CLIENT_EXPORT RemoteHandlerPtr getRemoteHandlerForPath(std::string const &path);
+
       private:
         /// @brief Given a path, remove any existing handler for that path, then
         /// attempt to fully resolve the path to its source and construct a
