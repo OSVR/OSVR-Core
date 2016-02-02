@@ -123,11 +123,6 @@ namespace vbtracker {
         TrackedBodyTarget *getTarget(BodyTargetId target);
 /// @}
 
-#if 0
-        /// Given a body, return its ID. Returns an empty/invalid ID if it's not
-        /// part of this system.
-        BodyId getIdForBody(TrackedBody const &body) const;
-#endif
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
 
