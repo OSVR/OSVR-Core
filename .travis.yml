@@ -102,7 +102,6 @@ addons:
     - llvm-toolchain-precise-3.7
     packages:
     - libusb-1.0-0-dev
-    - libopencv-dev
     - libboost-thread1.55-dev
     - libboost-system1.55-dev
     - libboost-date-time1.55-dev
