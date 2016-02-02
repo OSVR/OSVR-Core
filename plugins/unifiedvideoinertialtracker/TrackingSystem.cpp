@@ -31,6 +31,7 @@
 
 // Library/third-party includes
 #include <boost/assert.hpp>
+#include <util/Stride.h>
 
 // Standard includes
 #include <algorithm>
@@ -38,12 +39,32 @@
 
 namespace osvr {
 namespace vbtracker {
+    enum class DebugDisplayMode { InputImage, Thresholding, Blobs };
+
+    static const auto DEBUG_FRAME_STRIDE = 11;
+    class TrackingDebugDisplay {
+      public:
+        TrackingDebugDisplay(ConfigParams const &params)
+            : m_enabled(params.debug), m_debugStride(DEBUG_FRAME_STRIDE) {}
+
+        void processFrame(TrackingSystem::Impl &impl);
+
+      private:
+        bool m_enabled;
+        DebugDisplayMode m_mode = DebugDisplayMode::Blobs;
+        ::util::Stride m_debugStride;
+    };
+
     struct TrackingSystem::Impl {
         Impl(ConfigParams const &params)
-            : blobExtractor(new SBDBlobExtractor(params)) {}
+            : blobExtractor(new SBDBlobExtractor(params)),
+              debugDisplay(params) {}
         cv::Mat frame;
-        cv::Mat grayImage;
+        cv::Mat frameGray;
+        util::time::TimeValue lastFrame;
+        LedUpdateCount updateCount;
         std::unique_ptr<SBDBlobExtractor> blobExtractor;
+        TrackingDebugDisplay debugDisplay;
     };
 
     TrackingSystem::TrackingSystem(ConfigParams const &params)
@@ -52,11 +73,17 @@ namespace vbtracker {
     TrackingSystem::~TrackingSystem() {}
 
     TrackedBody *TrackingSystem::createTrackedBody() {
-        BodyPtr newBody(new TrackedBody(*this));
+        auto newId = BodyId(m_bodies.size());
+        BodyPtr newBody(new TrackedBody(*this, newId));
         m_bodies.emplace_back(std::move(newBody));
         return m_bodies.back().get();
     }
 
+    TrackedBodyTarget *TrackingSystem::getTarget(BodyTargetId target) {
+        return getBody(target.first).getTarget(target.second);
+    }
+
+#if 0
     BodyId TrackingSystem::getIdForBody(TrackedBody const &body) const {
         BodyId ret;
 
@@ -78,6 +105,7 @@ namespace vbtracker {
         ret = BodyId(std::distance(begin(m_bodies), it));
         return ret;
     }
+#endif
 
     ImageOutputDataPtr TrackingSystem::performInitialImageProcessing(
         util::time::TimeValue const &tv, cv::Mat const &frame,
@@ -93,19 +121,42 @@ namespace vbtracker {
         return ret;
     }
 
-    BodyIndices const &TrackingSystem::updateTrackingFromVideoData(
-        ImageOutputDataPtr &&imageData) {
+    LedUpdateCount const &
+    TrackingSystem::updateLedsFromVideoData(ImageOutputDataPtr &&imageData) {
+        /// Clear internal data, we're invalidating things here.
         m_updated.clear();
+        auto &updateCount = m_impl->updateCount;
+        updateCount.clear();
+
+        /// Update our frame cache, since we're taking ownership of the image
+        /// data now.
+        m_impl->frame = imageData->frame;
+        m_impl->frameGray = imageData->frameGray;
+
+        /// Go through each target and try to process the measurements.
         forEachTarget([&](TrackedBodyTarget &target) {
             auto usedMeasurements =
                 target.processLedMeasurements(imageData->ledMeasurements);
             if (usedMeasurements != 0) {
-                m_updated.push_back(target.getBody().getId());
+                updateCount[target.getQualifiedId()] = usedMeasurements;
             }
         });
-        /// @todo OK, now we've updated the LEDs now update the poses.
+        return updateCount;
+    }
+
+    BodyIndices const &
+    TrackingSystem::updateBodiesFromVideoData(ImageOutputDataPtr &&imageData) {
+        updateLedsFromVideoData(std::move(imageData));
+
+        auto const &updateCount = m_impl->updateCount;
+        for (auto &bodyWithMeasurements : updateCount) {
+            auto bodyId = bodyWithMeasurements.first;
+        }
+        updatePoseEstimates();
         return m_updated;
     }
+
+    void TrackingSystem::updatePoseEstimates() {}
 
 } // namespace vbtracker
 } // namespace osvr

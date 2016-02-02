@@ -39,7 +39,7 @@ namespace osvr {
 namespace vbtracker {
     struct ImageProcessingOutput {
         util::time::TimeValue tv;
-        LedMeasurementList ledMeasurements;
+        LedMeasurementVec ledMeasurements;
         cv::Mat frame;
         cv::Mat frameGray;
     };

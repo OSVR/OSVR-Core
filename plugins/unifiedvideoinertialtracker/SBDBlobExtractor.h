@@ -45,7 +45,7 @@ namespace vbtracker {
       public:
         explicit SBDBlobExtractor(ConfigParams const &params);
         ~SBDBlobExtractor();
-        std::vector<LedMeasurement> const &
+        LedMeasurementVec const &
         extractBlobs(cv::Mat const &grayImage);
 
         cv::Mat const &getDebugThresholdImage();
@@ -60,7 +60,7 @@ namespace vbtracker {
 
         ConfigParams m_params;
         cv::SimpleBlobDetector::Params m_sbdParams;
-        std::vector<LedMeasurement> m_latestMeasurements;
+        LedMeasurementVec m_latestMeasurements;
 
         std::vector<cv::KeyPoint> m_keyPoints;
 

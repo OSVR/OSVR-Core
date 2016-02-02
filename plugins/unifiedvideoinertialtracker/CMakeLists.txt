@@ -56,7 +56,9 @@ target_link_libraries(uvbi-core
     opencv_core
     osvrUtilCpp # for typedefs and boost headers
     osvrKalman
-    eigen-headers)
+    eigen-headers
+    PRIVATE
+    util-headers)
 set_target_properties(uvbi-core PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 

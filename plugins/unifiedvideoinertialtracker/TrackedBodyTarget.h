@@ -28,6 +28,7 @@
 // Internal Includes
 #include "Types.h"
 #include "BeaconIdTypes.h"
+#include "BodyIdTypes.h"
 #include "BeaconSetupData.h"
 
 // Library/third-party includes
@@ -56,7 +57,7 @@ namespace vbtracker {
       public:
         TrackedBodyTarget(TrackedBody &body,
                           Eigen::Isometry3d const &targetToBody,
-                          TargetSetupData const &setupData);
+                          TargetSetupData const &setupData, TargetId id);
         ~TrackedBodyTarget();
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -71,6 +72,12 @@ namespace vbtracker {
         TrackedBody &getBody() { return m_body; }
         TrackedBody const &getBody() const { return m_body; }
 
+        /// Get the target id within this body.
+        TargetId getId() const { return m_id; }
+
+        /// Get a fully-qualified (within a tracking system) id for this target.
+        BodyTargetId getQualifiedId() const;
+
         /// Used to extract autocalibration results in a standalone calibration
         /// app
         Eigen::Vector3d getBeaconAutocalibPosition(ZeroBasedBeaconId i) const;
@@ -83,8 +90,8 @@ namespace vbtracker {
         ///
         /// @return number of LED measurements/blobs used locally on existing
         /// LEDs.
-        std::size_t processLedMeasurements(
-            std::vector<LedMeasurement> const &undistortedLeds);
+        std::size_t
+        processLedMeasurements(LedMeasurementVec const &undistortedLeds);
 
       private:
         ConfigParams const &getParams() const;
@@ -106,6 +113,9 @@ namespace vbtracker {
 
         /// Reference to our parent body.
         TrackedBody &m_body;
+
+        /// Our target id relative to our parent body.
+        const TargetId m_id;
 
         /// Transformation from target coordinate frame to body coordinate
         /// frame.

@@ -60,10 +60,6 @@ namespace vbtracker {
     typedef std::vector<cv::KeyPoint> KeyPointList;
     typedef KeyPointList::iterator KeyPointIterator;
 
-    struct LedMeasurement;
-    typedef std::vector<LedMeasurement> LedMeasurementList;
-    typedef LedMeasurementList::iterator LedMeasurementIterator;
-
     typedef float Brightness;
     typedef std::list<Brightness> BrightnessList;
     typedef std::pair<Brightness, Brightness> BrightnessMinMax;
@@ -72,6 +68,38 @@ namespace vbtracker {
     typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
 
     typedef std::list<Led> LedGroup;
+
+    struct LedMeasurement {
+
+        LedMeasurement() = default;
+        explicit LedMeasurement(cv::KeyPoint const &kp)
+            : loc(kp.pt), brightness(kp.size), diameter(kp.size),
+              area(static_cast<float>((diameter / 2) * (diameter / 2) * CV_PI)) {}
+
+        /// Location in image space - should be undistorted when passed to the
+        /// Led class.
+        cv::Point2f loc;
+        /// "Brightness" - currently actually diameter or radius.
+        Brightness brightness;
+
+        /// Blob diameter in pixels.
+        float diameter = 0.f;
+
+        /// Area in pixels
+        float area = 1.f;
+
+        /// Blob circularity (as defined by OpenCV) - in [0,1]
+        float circularity = 0.f;
+
+        /// Do we know an upright bounding box? (that is, is the next member
+        /// valid?)
+        bool knowBoundingBox = false;
+
+        /// Dimensions of the upright bounding box.
+        cv::Size2f boundingBox;
+    };
+    typedef std::vector<LedMeasurement> LedMeasurementVec;
+    typedef LedMeasurementVec::iterator LedMeasurementVecIterator;
 
     /// @name Containers of "per-sensor" objects
     /// @brief It seems like in a "well-formed" video-based tracker, there is

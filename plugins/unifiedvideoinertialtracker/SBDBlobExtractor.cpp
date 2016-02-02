@@ -42,11 +42,11 @@ namespace vbtracker {
     class KeypointDetailer {
       public:
         using ContourType = std::vector<cv::Point2i>;
-        std::vector<LedMeasurement>
+        LedMeasurementVec
         augmentKeypoints(cv::Mat const &grayImage,
                          std::vector<cv::KeyPoint> const &foundKeyPoints) {
 
-            std::vector<LedMeasurement> ret;
+            LedMeasurementVec ret;
             cv::Mat greyCopy = grayImage.clone();
 
             /// Reset the flood fill mask to just have a one-pixel border on the
@@ -219,7 +219,7 @@ namespace vbtracker {
         /// Needed here where KeypointDetailer is defined.
     }
 
-    std::vector<LedMeasurement> const &
+    LedMeasurementVec const &
     SBDBlobExtractor::extractBlobs(cv::Mat const &grayImage) {
         m_latestMeasurements.clear();
         m_lastGrayImage = grayImage.clone();

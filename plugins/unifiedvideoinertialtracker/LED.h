@@ -37,36 +37,6 @@
 namespace osvr {
 namespace vbtracker {
 
-    struct LedMeasurement {
-
-        LedMeasurement() = default;
-        explicit LedMeasurement(cv::KeyPoint const &kp)
-            : loc(kp.pt), brightness(kp.size), diameter(kp.size),
-              area((diameter / 2) * (diameter / 2) * CV_PI) {}
-
-        /// Location in image space - should be undistorted when passed to the
-        /// Led class.
-        cv::Point2f loc;
-        /// "Brightness" - currently actually diameter or radius.
-        Brightness brightness;
-
-        /// Blob diameter in pixels.
-        float diameter = 0.f;
-
-        /// Area in pixels
-        float area = 1.f;
-
-        /// Blob circularity (as defined by OpenCV) - in [0,1]
-        float circularity = 0.f;
-
-        /// Do we know an upright bounding box? (that is, is the next member
-        /// valid?)
-        bool knowBoundingBox = false;
-
-        /// Dimensions of the upright bounding box.
-        cv::Size2f boundingBox;
-    };
-
     /// @brief Helper class to keep track of the state of a blob over time. This
     /// is used to help determine the identity of each LED in the scene. The
     /// LEDs are identified by their blink codes.  A steady one is presumed to
@@ -140,8 +110,8 @@ namespace vbtracker {
                                  double threshold) const;
 
         /// @overload
-        LedMeasurementIterator nearest(LedMeasurementList &meas,
-                                       double threshold) const;
+        LedMeasurementVecIterator nearest(LedMeasurementVec &meas,
+                                          double threshold) const;
 
         /// @brief Returns the most-recent boolean "bright" state according to
         /// the LED identifier. Note that the value is only meaningful if

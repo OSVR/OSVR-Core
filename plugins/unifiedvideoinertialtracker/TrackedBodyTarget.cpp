@@ -93,8 +93,9 @@ namespace vbtracker {
 
     TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body,
                                          Eigen::Isometry3d const &targetToBody,
-                                         TargetSetupData const &setupData)
-        : m_body(body), m_targetToBody(targetToBody),
+                                         TargetSetupData const &setupData,
+                                         TargetId id)
+        : m_body(body), m_id(id), m_targetToBody(targetToBody),
           m_beaconMeasurementVariance(setupData.baseMeasurementVariances),
           m_beaconFixed(setupData.isFixed),
           m_beaconEmissionDirection(setupData.emissionDirections),
@@ -112,6 +113,10 @@ namespace vbtracker {
     }
 
     TrackedBodyTarget::~TrackedBodyTarget() {}
+
+    BodyTargetId TrackedBodyTarget::getQualifiedId() const {
+        return BodyTargetId(getBody().getId(), getId());
+    }
 
     Eigen::Vector3d
     TrackedBodyTarget::getBeaconAutocalibPosition(ZeroBasedBeaconId i) const {
@@ -134,10 +139,10 @@ namespace vbtracker {
     }
 
     std::size_t TrackedBodyTarget::processLedMeasurements(
-        std::vector<LedMeasurement> const &undistortedLeds) {
+        LedMeasurementVec const &undistortedLeds) {
         // std::list<LedMeasurement> measurements{begin(undistortedLeds),
         // end(undistortedLeds)};
-        std::vector<LedMeasurement> measurements{undistortedLeds};
+        LedMeasurementVec measurements{undistortedLeds};
 
         auto usedMeasurements = std::size_t{0};
         const auto blobMoveThreshold = getParams().blobMoveThreshold;

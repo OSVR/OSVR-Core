@@ -26,7 +26,7 @@
 #define INCLUDED_BeaconIdTypes_h_GUID_8C85DE41_5CAC_4DA2_6C2A_962680202E1B
 
 // Internal Includes
-// - none
+#include "BodyIdTypes.h"
 
 // Library/third-party includes
 #include <osvr/Util/TypeSafeId.h>
@@ -121,6 +121,7 @@ namespace vbtracker {
     inline bool beaconIdentified(OneBasedBeaconId id) {
         return (!id.empty() && id.value() > 0);
     }
+
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_BeaconIdTypes_h_GUID_8C85DE41_5CAC_4DA2_6C2A_962680202E1B

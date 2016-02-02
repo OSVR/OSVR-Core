@@ -52,7 +52,7 @@ namespace vbtracker {
     class TrackedBody {
       public:
         /// Constructor
-        TrackedBody(TrackingSystem &system);
+        TrackedBody(TrackingSystem &system, BodyId id);
         /// Destructor - explicit so we can use unique_ptr for our pimpls.
         ~TrackedBody();
         /// Noncopyable
@@ -94,7 +94,12 @@ namespace vbtracker {
         /// @todo refactor
         ConfigParams const &getParams() const;
 
-        TrackedBodyTarget *getTarget() const { return m_target.get(); }
+        TrackedBodyTarget *getTarget(TargetId id) const {
+            if (TargetId(0) == id) {
+                return m_target.get();
+            }
+            return nullptr;
+        }
 
         template <typename F> void forEachTarget(F &&f) {
             if (m_target) {
@@ -109,6 +114,7 @@ namespace vbtracker {
 
       private:
         TrackingSystem &m_system;
+        const BodyId m_id;
         /// private implementation data
         struct ImplData;
         std::unique_ptr<ImplData> m_data;

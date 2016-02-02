@@ -37,8 +37,8 @@
 namespace osvr {
 namespace vbtracker {
     struct TrackedBody::ImplData {};
-    TrackedBody::TrackedBody(TrackingSystem &system)
-        : m_system(system), m_data(new ImplData) {}
+    TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
+        : m_system(system), m_id(id), m_data(new ImplData) {}
 
     TrackedBody::~TrackedBody() {}
 
@@ -55,7 +55,9 @@ namespace vbtracker {
             /// @todo handle multiple targets!
             return nullptr;
         }
-        m_target.reset(new TrackedBodyTarget(*this, targetToBody, setupData));
+        /// The target will always be target 0...
+        m_target.reset(
+            new TrackedBodyTarget(*this, targetToBody, setupData, TargetId{0}));
         return m_target.get();
     }
 
@@ -63,7 +65,12 @@ namespace vbtracker {
         return m_system.getParams();
     }
 
-    BodyId TrackedBody::getId() const { return m_system.getIdForBody(*this); }
+    BodyId TrackedBody::getId() const {
+#if 0
+        return m_system.getIdForBody(*this);
+#endif
+        return m_id;
+    }
 
 } // namespace vbtracker
 } // namespace osvr

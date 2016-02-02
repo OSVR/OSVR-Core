@@ -33,17 +33,23 @@
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/TypeSafeIdHash.h>
 #include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <vector>
 #include <memory>
 #include <cstddef>
+#include <unordered_map>
 
 namespace osvr {
 namespace vbtracker {
     class TrackedBody;
+    class TrackedBodyTarget;
     using BodyIndices = std::vector<BodyId>;
+
+    using LedUpdateCount = std::unordered_map<BodyTargetId, std::size_t>;
+
     class TrackingSystem {
       public:
         /// @name Setup and Teardown
@@ -61,26 +67,64 @@ namespace vbtracker {
         ImageOutputDataPtr performInitialImageProcessing(
             util::time::TimeValue const &tv, cv::Mat const &frame,
             cv::Mat const &frameGray, CameraParameters const &camParams);
-        /// This is the second half of the video-based tracking algorithm - the
-        /// part that actually changes tracking state. Please std::move the
-        /// output of the first step into this step.
+        /// This is the second phase of the video-based tracking algorithm - the
+        /// part that actually changes LED state.
+        ///
+        /// @param imageData Output from the first step - **please std::move()
+        /// the output of the first step into this step.**
+        ///
+        /// If you don't require updated poses, you can stop after this step,
+        /// not proceeding to the third and final phase, and still keep track of
+        /// which beacons are which.
+        ///
+        /// @return a reference to an internal map of body IDs to counts of
+        /// used LED measurements for debugging.
+        LedUpdateCount const &
+        updateLedsFromVideoData(ImageOutputDataPtr &&imageData);
+
+        /// The combined second and third phases of the video-based tracking
+        /// algorithm. The third phase uses the updated LED data stored in each
+        /// target to arrive at updated pose estimates.
+        ///
+        /// These two phases are combined in one call to ensure preconditions -
+        /// it would be invalid to call the third phase without immediately
+        /// previously calling this second phase, but no state handover needs to
+        /// take place.
+        ///
+        /// @param imageData Output from the first step - **please std::move()
+        /// the output of the first step into this step.**
         ///
         /// @return A reference to a vector of body indices that were updated
         /// with this latest frame.
         BodyIndices const &
-        updateTrackingFromVideoData(ImageOutputDataPtr &&imageData);
+        updateBodiesFromVideoData(ImageOutputDataPtr &&imageData);
+
+        /// All parts of the tracking algorithm combined for convenience.
+        ///
+        /// @return A reference to a vector of body indices that were
+        /// updated with this latest frame.
+        BodyIndices const &processFrame(util::time::TimeValue const &tv,
+                                        cv::Mat const &frame,
+                                        cv::Mat const &frameGray,
+                                        CameraParameters const &camParams) {
+            auto imageOutput =
+                performInitialImageProcessing(tv, frame, frameGray, camParams);
+            return updateBodiesFromVideoData(std::move(imageOutput));
+        }
         /// @}
 
         /// @name Accessors
         /// @{
         std::size_t getNumBodies() const { return m_bodies.size(); }
         TrackedBody &getBody(BodyId i) { return *m_bodies.at(i.value()); }
-        /// @}
+        TrackedBodyTarget *getTarget(BodyTargetId target);
+/// @}
 
+#if 0
         /// Given a body, return its ID. Returns an empty/invalid ID if it's not
         /// part of this system.
         BodyId getIdForBody(TrackedBody const &body) const;
-
+#endif
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
 
@@ -96,6 +140,10 @@ namespace vbtracker {
         }
 
       private:
+        /// The third phase of the tracking algorithm - LEDs have been updated
+        /// with new measurements, we just need to estimate poses.
+        void updatePoseEstimates();
+
         using BodyPtr = std::unique_ptr<TrackedBody>;
         ConfigParams m_params;
 
@@ -105,6 +153,8 @@ namespace vbtracker {
         /// private impl;
         struct Impl;
         std::unique_ptr<Impl> m_impl;
+
+        friend class TrackingDebugDisplay;
     };
 
 } // namespace vbtracker

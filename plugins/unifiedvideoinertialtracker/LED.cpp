@@ -111,7 +111,7 @@ namespace vbtracker {
         return end(keypoints);
     }
 
-    LedMeasurementIterator Led::nearest(LedMeasurementList &meas,
+    LedMeasurementVecIterator Led::nearest(LedMeasurementVec &meas,
                                         double threshold) const {
         // If we have no elements in the vector, return the end().
         if (meas.empty()) {
@@ -122,7 +122,7 @@ namespace vbtracker {
         auto thresholdSquared = threshold * threshold;
         auto location = getLocation();
 
-        auto computeDistSquared = [location](LedMeasurementIterator it) {
+        auto computeDistSquared = [location](LedMeasurementVecIterator it) {
             auto diff = (location - it->loc);
             return diff.dot(diff);
         };

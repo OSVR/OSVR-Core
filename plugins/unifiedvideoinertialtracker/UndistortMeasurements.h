@@ -28,7 +28,8 @@
 // Internal Includes
 #include "LED.h"
 #include "cvToEigen.h"
-#include "CameraParamteres.h"
+#include "CameraParameters.h"
+#include "CameraDistortionModel.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -40,10 +41,10 @@
 namespace osvr {
 namespace vbtracker {
     /// Perform the undistortion of LED measurements.
-    inline std::vector<LedMeasurement>
-    undistortLeds(std::vector<LedMeasurement> const &distortedMeasurements,
+    inline LedMeasurementVec
+    undistortLeds(LedMeasurementVec const &distortedMeasurements,
                   CameraParameters const &camParams) {
-        std::vector<LedMeasurement> ret;
+        LedMeasurementVec ret;
         ret.resize(distortedMeasurements.size());
         auto distortionModel = CameraDistortionModel{
             Eigen::Vector2d{camParams.focalLengthX(), camParams.focalLengthY()},
