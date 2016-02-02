@@ -17,6 +17,9 @@ if(WIN32)
         DirectShowToCV.h)
 endif()
 add_library(uvbi-image-sources STATIC ${SOURCES})
+target_compile_options(uvbi-image-sources
+    PUBLIC
+    ${OSVR_CXX11_FLAGS})
 
 set_target_properties(uvbi-image-sources PROPERTIES
     FOLDER "${PROJ_FOLDER}")
