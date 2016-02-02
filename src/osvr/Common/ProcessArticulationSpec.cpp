@@ -99,7 +99,7 @@ namespace common {
     void processArticulationSpec(PathNode &devNode, Json::Value const &desc) {
         Json::Value const &articulations = desc;
         if (!articulations.isObject()) {
-            // Articulation spec member isn't an array
+            // Articulation spec member isn't an object
             return;
         }
         ArticulationsRecursion f{devNode};
