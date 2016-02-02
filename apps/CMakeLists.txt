@@ -193,18 +193,43 @@ if(BUILD_SERVER_APP)
     set(data_installtree_dir ${SAMPLE_CONFIGS_DIR})
     set(FILE_OUTPUTS)
 
-    # Copy/install the default config file from the current directory.
-    set(DEFAULT_CONFIG_FILE osvr_server_config.json)
+    # Macro to easily copy for build and install a single file.
+    # Put in a macro because we do different things on Windows vs. other platforms,
+    # including installing different number of files.
+    macro(osvr_copy_file _infile _outfile)
+        list(APPEND FILE_OUTPUTS "${_infile}")
+        set(__comment "Copying ${_infile}")
+        if(NOT "${_infile}" STREQUAL "${_outfile}")
+            set(__comment "${__comment} to ${_outfile}")
+        endif()
+        add_custom_command(OUTPUT "${_infile}"
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${_infile}" "${data_buildtree_dir}/${_outfile}"
+            MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${_infile}"
+            ${DEFAULT_CONFIG_EXTRA_ARGS}
+            COMMENT "${__comment}"
+            VERBATIM)
+        install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${_infile}"
+            RENAME "${_outfile}"
+            DESTINATION "${data_installtree_dir}" COMPONENT Server)
+    endmacro()
 
-    list(APPEND FILE_OUTPUTS "${DEFAULT_CONFIG_FILE}")
-    add_custom_command(OUTPUT "${DEFAULT_CONFIG_FILE}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}" "${data_buildtree_dir}"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}"
-        ${DEFAULT_CONFIG_EXTRA_ARGS}
-        COMMENT "Copying ${DEFAULT_CONFIG_FILE}"
-        VERBATIM)
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${DEFAULT_CONFIG_FILE}"
-        DESTINATION "${data_installtree_dir}" COMPONENT Server)
+    # The name of the default config file.
+    set(DEFAULT_CONFIG_FILE osvr_server_config.json)
+    # Config file to use by default on Windows
+    set(DEFAULT_CONFIG_FILE_WIN sample-configs/osvr_server_config.HDK13DirectMode.sample.json)
+    # What we should call the normally-default (empty-ish) config file on Windows.
+    set(DEFAULT_CONFIG_FILE_ALTNAME osvr_server_config.autodetectall.json)
+
+    # Copy/install the default config file from the current directory.
+    if(WIN32)
+        # Copy the default empty config file to an alternate name.
+        osvr_copy_file(${DEFAULT_CONFIG_FILE} ${DEFAULT_CONFIG_FILE_ALTNAME})
+        # Copy the designated default config file for Windows to the right name to be the default.
+        osvr_copy_file(${DEFAULT_CONFIG_FILE_WIN} ${DEFAULT_CONFIG_FILE})
+    else()
+        # If we're not Windows, we just use the standard (autoconfiguring) config file.
+        osvr_copy_file(${DEFAULT_CONFIG_FILE} ${DEFAULT_CONFIG_FILE})
+    endif()
 
     # Copy/install subdirectories of JSON files
     osvr_copy_dir(displays *.json ${data_buildtree_dir} ${SAMPLE_CONFIGS_DIR} "JSON display descriptor")

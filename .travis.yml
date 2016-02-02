@@ -12,37 +12,75 @@ matrix:
   exclude:
   - os: osx
     compiler: gcc
+cache:
+  directories:
+    $HOME/deps-rel
+    $HOME/deps-dbg
 before_install:
   - if [ $CC = gcc ]; then export CXX="g++-5" CC="gcc-5"; fi
   - if [ $TRAVIS_OS_NAME = 'linux' -a $CC = 'clang' ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
   - $CC -v
   - if [ $TRAVIS_OS_NAME = 'linux' ]; then export INSTPRF=$HOME/p; mkdir -p $INSTPRF; fi
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then export OPENCV_VER=3.0.0; fi
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap homebrew/science; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap d235j/osvr; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-      pushd $HOME;
-      git clone https://github.com/OSVR/libfunctionality.git;
-      git clone https://github.com/open-source-parsers/jsoncpp.git;
+       if [ $CONFIG = 'Release' ]; then
+         export DEPSDIR=$HOME/deps-rel;
+       else
+         export DEPSDIR=$HOME/deps-dbg;
+       fi;
+     fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
+      mkdir -p $DEPSDIR;
+      pushd $DEPSDIR;
+        if [ -d jsoncpp ]; then
+          pushd jsoncpp;
+            git pull;
+          popd;
+        else
+          git clone https://github.com/open-source-parsers/jsoncpp.git;
+        fi;
+        if [ -d libfunctionality ]; then
+          pushd libfunctionality;
+            git pull;
+          popd;
+        else
+          git clone https://github.com/OSVR/libfunctionality.git;
+        fi;
+        if [ ! -d opencv-${OPENCV_VER} ]; then
+          curl -LR https://github.com/Itseez/opencv/archive/${OPENCV_VER}.zip -o opencv-${OPENCV_VER}.zip;
+          unzip opencv-${OPENCV_VER}.zip;
+        fi;
       popd;
     fi"
 install:
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall json-c; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libusb opencv; fi"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp --HEAD; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libfunctionality --HEAD; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-      mkdir -p $HOME/libfunctionality/build;
-      pushd $HOME/libfunctionality/build;
-      cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG};
-      make -j2 install;
-      popd;
-    fi"
-  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
-      mkdir $HOME/jsoncpp/build;
-      pushd $HOME/jsoncpp/build;
-      cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=on -DCMAKE_BUILD_TYPE=${CONFIG};
-      make -j2 install;
+      pushd $DEPSDIR;
+        mkdir -p libfunctionality/build;
+        pushd libfunctionality/build;
+          cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG};
+          make -j2 install;
+        popd;
+        mkdir -p jsoncpp/build;
+        pushd jsoncpp/build;
+          cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DBUILD_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=ON;
+          make -j2 install;
+        popd;
+        mkdir -p opencv-${OPENCV_VER}/build;
+        pushd opencv-${OPENCV_VER}/build;
+          cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} \
+            -DWITH_1394=OFF -DWITH_FFMPEG=OFF -DWITH_IPP=OFF -DWITH_WEBP=OFF \
+            -DBUILD_DOCS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF \
+            -DBUILD_opencv_apps=OFF -DBUILD_opencv_java=OFF -DBUILD_opencv_python2=OFF \
+            -DBUILD_opencv_ts=OFF;
+          make -j2 install;
+        popd;
       popd;
     fi"
 script:
@@ -50,7 +88,7 @@ script:
   - "mkdir build;"
   - "cd build;"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
-  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_PREFIX_PATH=$INSTPRF; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_PREFIX_PATH=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG}; fi"
   - "make all -j2"
 # TODO need to sort out false-failures due to container/platform issues.
 #  - "ctest -V"
@@ -64,7 +102,6 @@ addons:
     - llvm-toolchain-precise-3.7
     packages:
     - libusb-1.0-0-dev
-    - libopencv-dev
     - libboost-thread1.55-dev
     - libboost-system1.55-dev
     - libboost-date-time1.55-dev
