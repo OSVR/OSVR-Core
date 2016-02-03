@@ -96,7 +96,9 @@ class TrackerThread : boost::noncopyable {
                 keepGoing = m_run;
             }
             if (!keepGoing) {
-                msg() << "Tracker thread object: Just checked our run flag and noticed it turned false..." << std::endl;
+                msg() << "Tracker thread object: Just checked our run flag and "
+                         "noticed it turned false..."
+                      << std::endl;
             }
         }
         msg() << "Tracker thread object: functor exiting." << std::endl;
@@ -168,6 +170,10 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
                                 TrackingSystemPtr &&trackingSystem)
         : m_source(std::move(source)),
           m_trackingSystem(std::move(trackingSystem)) {
+        if (params.numThreads > 0) {
+            // Set the number of threads for OpenCV to use.
+            cv::setNumThreads(params.numThreads);
+        }
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
