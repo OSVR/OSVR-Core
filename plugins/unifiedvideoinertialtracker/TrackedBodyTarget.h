@@ -105,6 +105,12 @@ namespace vbtracker {
         /// estimate?
         bool hasPoseEstimate() const { return m_hasPoseEstimate; }
 
+        /// Get the offset that was subtracted from all beacon positions upon
+        /// initialization.
+        Eigen::Vector3d const &getBeaconOffset() const {
+            return m_beaconOffset;
+        }
+
       private:
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
