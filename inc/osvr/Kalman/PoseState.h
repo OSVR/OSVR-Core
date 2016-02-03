@@ -231,6 +231,15 @@ namespace kalman {
                     .normalized();
             }
 
+            /// Get the position and quaternion combined into a single isometry
+            /// (transformation)
+            Eigen::Isometry3d getIsometry() const {
+                Eigen::Isometry3d ret;
+                ret.fromPositionOrientationScale(position(), getQuaternion(),
+                                                 Eigen::Vector3d::Constant(1));
+                return ret;
+            }
+
           private:
             /// In order: x, y, z, incremental rotations phi (about x), theta
             /// (about y), psy (about z), then their derivatives in the same
