@@ -36,7 +36,7 @@
 #include <boost/assert.hpp>
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -159,10 +159,31 @@ namespace vbtracker {
         const auto blobsKeepIdentity = getParams().blobsKeepIdentity;
         auto &myLeds = m_impl->leds;
 
+        const auto numBeacons = getNumBeacons();
+
+        /// In theory this shouldn't happen, but there are checks
+        /// scattered all over the code. Now we can say that it doesn't
+        /// happen because we won't let any bad values escape this
+        /// routine.
+        auto handleOutOfRangeIds = [numBeacons](Led &led) {
+            if (led.identified() &&
+                makeZeroBased(led.getID()).value() > numBeacons) {
+                std::cerr << "Got a beacon claiming to be "
+                          << led.getOneBasedID().value()
+                          << " when we only have " << numBeacons << " beacons"
+                          << std::endl;
+                /// @todo a kinder way of doing this? Right now this blows away
+                /// the measurement history
+                led.markMisidentified();
+                return true;
+            }
+            return false;
+        };
+
         auto led = begin(myLeds);
         while (led != end(myLeds)) {
             led->resetUsed();
-
+            handleOutOfRangeIds(*led);
             auto threshold = blobMoveThreshold * led->getMeasurement().diameter;
             auto nearest = led->nearest(measurements, threshold);
             if (nearest == end(measurements)) {
@@ -174,11 +195,16 @@ namespace vbtracker {
                 // next one. Remove this blob from the list of
                 // potential matches.
                 led->addMeasurement(*nearest, blobsKeepIdentity);
-                measurements.erase(nearest);
+                if (!handleOutOfRangeIds(*led)) {
+                    /// If that measurement didn't cause this beacon to go awry,
+                    /// then we'll actually handle the measurement and increment
+                    /// used measurements.
+                    measurements.erase(nearest);
+                    /// @todo do we increment this only if the LED is
+                    /// recognized?
+                    usedMeasurements++;
+                }
                 ++led;
-
-                /// @todo do we increment this only if the LED is recognized?
-                usedMeasurements++;
             }
         }
 
@@ -217,8 +243,8 @@ namespace vbtracker {
 
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo right now just ransac.
-        m_hasPoseEstimate = m_impl->ransacEstimator(camParams, usable, m_beacons,
-                                               m_impl->bodyInterface.state);
+        m_hasPoseEstimate = m_impl->ransacEstimator(
+            camParams, usable, m_beacons, m_impl->bodyInterface.state);
 
         /// Corresponding post-correction.
         m_impl->bodyInterface.state.position() -= getStateCorrection();
