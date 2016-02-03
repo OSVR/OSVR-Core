@@ -39,7 +39,21 @@
 
 namespace osvr {
 namespace vbtracker {
+    enum class ReportStatus { Valid, MutexLocked, NoReportAvailable };
     struct BodyReport {
+
+        static BodyReport
+        makeReportWithStatus(ReportStatus status = ReportStatus::Valid) {
+            BodyReport ret;
+            ret.status = status;
+            return ret;
+        }
+
+        /// Explicit boolean operator, so you can `if (report)` to see if it's
+        /// valid.
+        explicit operator bool() const { return status == ReportStatus::Valid; }
+
+        ReportStatus status;
         util::time::TimeValue timestamp;
         OSVR_PoseState pose;
         // OSVR_VelocityState vel;
@@ -56,11 +70,15 @@ namespace vbtracker {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /// @name mainloop-thread methods
         /// @{
-        /// If you get one, then it's the timestamp it says on the object. If
-        /// you don't get one, then either the mutex was locked (you're in a
+
+        /// Before using the contents of the report, check the status field -
+        /// only if it is ReportStatus::Valid does it contain anything useful,
+        /// for the timestamp it says on the object.
+        ///
+        /// Otherwise either the mutex was locked (you're in a
         /// fast-spinning loop, just get it next time), or there's nothing worth
-        /// reporting.
-        boost::optional<BodyReport> getReport(double additionalPrediction);
+        /// reporting - in both cases, the other fields are not initialized!
+        BodyReport getReport(double additionalPrediction);
         /// @}
 
         /// @name processing-thread methods
@@ -91,6 +109,7 @@ namespace vbtracker {
         BodyProcessModel m_process;
         /// @}
     };
+    using BodyReportingPtr = std::unique_ptr<BodyReporting>;
 
 } // namespace vbtracker
 } // namespace osvr

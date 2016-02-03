@@ -41,6 +41,7 @@
 #include <iterator>
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 namespace osvr {
 namespace vbtracker {
@@ -74,8 +75,6 @@ namespace vbtracker {
                    "continue operation)\n"
                 << std::endl;
         }
-
-        ~TrackingDebugDisplay() { quitDebug(); }
 
         TrackingDebugDisplay(TrackingDebugDisplay const &) = delete;
         TrackingDebugDisplay &operator=(TrackingDebugDisplay const &) = delete;
@@ -147,7 +146,7 @@ namespace vbtracker {
         switch (key) {
 #if 0
         case 's':
-        case 'S': 
+        case 'S':
             // Show the concise "status" image (default)
             /// @todo
             m_mode = DebugDisplayMode::Status;
@@ -274,6 +273,11 @@ namespace vbtracker {
                                        "LEDs from data this frame.");
             }
             auto &target = *targetPtr;
+
+            /// @todo call into the target here.
+
+            /// @todo deduplicate in making this list.
+            m_updated.push_back(target.getBody().getId());
         }
     }
 

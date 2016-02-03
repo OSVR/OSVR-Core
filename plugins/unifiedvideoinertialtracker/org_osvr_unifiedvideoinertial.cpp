@@ -28,6 +28,7 @@
 
 #include "MakeHDKTrackingSystem.h"
 #include "TrackingSystem.h"
+#include "ThreadsafeBodyReporting.h"
 
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
@@ -68,13 +69,84 @@ static const auto DRIVER_NAME = "UnifiedTrackingSystem";
 
 static const auto DEBUGGABLE_BEACONS = 34;
 static const auto DATAPOINTS_PER_BEACON = 5;
+using TrackingSystemPtr = std::unique_ptr<osvr::vbtracker::TrackingSystem>;
+using BodyReportingVector = std::vector<osvr::vbtracker::BodyReportingPtr>;
+class TrackerThread : boost::noncopyable {
+  public:
+    TrackerThread(osvr::vbtracker::TrackingSystem &trackingSystem,
+                  osvr::vbtracker::ImageSource &imageSource,
+                  BodyReportingVector &reportingVec,
+                  osvr::vbtracker::CameraParameters const &camParams)
+        : m_trackingSystem(trackingSystem), m_cam(imageSource),
+          m_reportingVec(reportingVec), m_camParams(camParams) {}
+
+    void operator()() {
+        bool keepGoing = true;
+        while (keepGoing) {
+            doFrame();
+
+            {
+                /// Copy the run flag.
+                std::lock_guard<std::mutex> lock(m_runMutex);
+                keepGoing = m_run;
+            }
+        }
+    }
+
+    /// Call from the main thread!
+    void triggerStop() {
+        std::lock_guard<std::mutex> lock(m_runMutex);
+        m_run = false;
+    }
+
+  private:
+    void doFrame() {
+        // Check camera status.
+        if (!m_cam.ok()) {
+            // Hmm, camera seems bad. Might regain it? Skip for now...
+            return;
+        }
+        // Trigger a grab.
+        if (!m_cam.grab()) {
+            // Again failing silently, in hopes we get better luck next time...
+            return;
+        }
+        // When we triggered the grab is our current best guess of the time for
+        // the image
+        /// @todo backdate to account for image transfer image, exposure time,
+        /// etc.
+        auto tv = osvr::util::time::getNow();
+
+        // Pull the image into an OpenCV matrix named m_frame.
+        m_cam.retrieve(m_frame, m_frameGray);
+
+        // Submit to the tracking system.
+        auto bodyIds = m_trackingSystem.processFrame(tv, m_frame, m_frameGray,
+                                                     m_camParams);
+
+        for (auto const &bodyId : bodyIds) {
+            /// @todo stick stuff in m_reportingVec here.
+        }
+    }
+    osvr::vbtracker::TrackingSystem &m_trackingSystem;
+    osvr::vbtracker::ImageSource &m_cam;
+    BodyReportingVector &m_reportingVec;
+    osvr::vbtracker::CameraParameters m_camParams;
+    cv::Mat m_frame;
+    cv::Mat m_frameGray;
+    std::mutex m_runMutex;
+    volatile bool m_run = true;
+};
 
 class UnifiedVideoInertialTracker : boost::noncopyable {
   public:
+    using size_type = std::size_t;
     UnifiedVideoInertialTracker(OSVR_PluginRegContext ctx,
                                 osvr::vbtracker::ImageSourcePtr &&source,
-                                osvr::vbtracker::ConfigParams params)
-        : m_source(std::move(source)) {
+                                osvr::vbtracker::ConfigParams params,
+                                TrackingSystemPtr &&trackingSystem)
+        : m_source(std::move(source)),
+          m_trackingSystem(std::move(trackingSystem)) {
 
         /// Create the initialization options
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
@@ -97,11 +169,50 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(org_osvr_unifiedvideoinertial_json);
 
+        /// Set up thread communication.
+        setupBodyReporting();
+
+        /// Set up the object that will run in the other thread, and spawn the
+        /// thread.
+        startTrackerThread();
+
         /// Register update callback
         m_dev.registerUpdateCallback(this);
     }
 
+    ~UnifiedVideoInertialTracker() { stopTrackerThread(); }
+
+    /// Create a "BodyReporting" interchange structure for each body we track.
+    void setupBodyReporting() {
+        m_bodyReportingVector.clear();
+        auto n = m_trackingSystem->getNumBodies();
+        for (size_type i = 0; i < n; ++i) {
+            m_bodyReportingVector.emplace_back(
+                osvr::vbtracker::BodyReporting::make());
+        }
+    }
+
     OSVR_ReturnCode update();
+
+    void startTrackerThread() {
+        if (m_trackerThreadFunctor) {
+            throw std::logic_error("Trying to start the tracker thread when "
+                                   "it's already started!");
+        }
+        m_trackerThreadFunctor.reset(new TrackerThread(
+            *m_trackingSystem, *m_source, m_bodyReportingVector,
+            osvr::vbtracker::getHDKCameraParameters()));
+        m_trackerThread = std::thread([&] { (*m_trackerThreadFunctor)(); });
+    }
+    void stopTrackerThread() {
+        if (m_trackerThreadFunctor) {
+            std::cout << "Shutting down the tracker thread..." << std::endl;
+            m_trackerThreadFunctor->triggerStop();
+            m_trackerThread.join();
+            m_trackerThreadFunctor.reset();
+            m_trackerThread = std::thread();
+        }
+    }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
@@ -114,7 +225,10 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     osvr::vbtracker::ImageSourcePtr m_source;
     cv::Mat m_frame;
     cv::Mat m_imageGray;
-    std::unique_ptr<osvr::vbtracker::TrackingSystem> m_trackingSystem;
+    TrackingSystemPtr m_trackingSystem;
+    std::vector<osvr::vbtracker::BodyReportingPtr> m_bodyReportingVector;
+    std::unique_ptr<TrackerThread> m_trackerThreadFunctor;
+    std::thread m_trackerThread;
 };
 
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
@@ -169,7 +283,8 @@ class ConfiguredDeviceConstructor {
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);
         auto newTracker = osvr::pluginkit::registerObjectForDeletion(
-            ctx, new UnifiedVideoInertialTracker(ctx, std::move(cam), config));
+            ctx, new UnifiedVideoInertialTracker(ctx, std::move(cam), config,
+                                                 std::move(trackingSystem)));
 
         return OSVR_RETURN_SUCCESS;
     }

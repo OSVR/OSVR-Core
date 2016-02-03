@@ -76,21 +76,21 @@ namespace vbtracker {
         return ret;
     }
 
-    boost::optional<BodyReport>
-    BodyReporting::getReport(double additionalPrediction) {
+    BodyReport BodyReporting::getReport(double additionalPrediction) {
         std::unique_lock<std::mutex> lock{m_mutex, std::try_to_lock};
         if (!lock.owns_lock()) {
             // Didn't get the lock.
-            return boost::none;
+            return BodyReport::makeReportWithStatus(ReportStatus::MutexLocked);
         }
         // OK, we got the lock.
         if (!m_shouldReport) {
             // Told we shouldn't report, OK.
-            return boost::none;
+            return BodyReport::makeReportWithStatus(
+                ReportStatus::NoReportAvailable);
         }
 
         /// If we got here, then we're reporting something.
-        BodyReport ret;
+        auto ret = BodyReport::makeReportWithStatus();
         if (m_state.stateVector().tail<6>() !=
             kalman::types::Vector<6>::Zero()) {
             // If we have non-zero velocity, then we can do some prediction.
