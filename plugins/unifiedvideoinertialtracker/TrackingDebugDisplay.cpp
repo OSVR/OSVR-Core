@@ -41,10 +41,10 @@
 
 namespace osvr {
 namespace vbtracker {
-    // static const auto RED_SCALAR = cv::Scalar(0, 0, 255);
     static const auto CVCOLOR_RED = cv::Vec3b(0, 0, 255);
     static const auto CVCOLOR_YELLOW = cv::Vec3b(0, 255, 255);
     static const auto CVCOLOR_GREEN = cv::Vec3b(0, 255, 0);
+    static const auto CVCOLOR_BLUE = cv::Vec3b(255, 0, 0);
     static const auto CVCOLOR_GRAY = cv::Vec3b(127, 127, 127);
     static const auto CVCOLOR_BLACK = cv::Vec3b(0, 0, 0);
 
@@ -60,10 +60,8 @@ namespace vbtracker {
 
         std::cout << "\nVideo-based tracking debug windows help:\n";
         std::cout
-#if 0
-        << "  - press 's' to show the detected blobs and the status of "
-           "recognized beacons (default)\n"
-#endif
+            << "  - press 's' to show the detected blobs and the status of "
+               "recognized beacons (default)\n"
             << "  - press 'b' to show the labeled blobs and the "
                "reprojected beacons\n"
             << "  - press 'i' to show the raw input image\n"
@@ -258,7 +256,7 @@ namespace vbtracker {
         /// the base image as we'd like.
 
         const auto textSize = 0.25;
-        const auto mainBeaconLabelColor = CVCOLOR_GRAY;
+        const auto mainBeaconLabelColor = CVCOLOR_BLUE;
 
         auto gotPose = targetPtr->hasPoseEstimate();
         auto numBeacons = targetPtr->getNumBeacons();
@@ -285,15 +283,19 @@ namespace vbtracker {
                         led.wasUsedLastFrame() ? CVCOLOR_GREEN : CVCOLOR_YELLOW;
                     drawLedCircleOnImage(output, led, true, color);
 
-                    /// Draw main label in gray, then draw the reprojection in
-                    /// black on top, creating a bit of a shadow effect. Not
+                    /// Draw main label in black, then draw the reprojection in
+                    /// blue on top, creating a bit of a shadow effect. Not
                     /// best visiblity ever, but...
-                    drawLedLabelOnImage(output, led, mainBeaconLabelColor,
-                                        textSize);
+
+                    /// label at keypoint location
+                    drawLedLabelOnImage(output, led, CVCOLOR_BLACK, textSize);
+
+                    /// label at reprojection
                     Eigen::Vector2d imagePoint = reproject(
                         targetPtr->getBeaconAutocalibPosition(beaconId));
                     drawLedLabelOnImage(output, makeOneBased(beaconId),
-                                        imagePoint, CVCOLOR_BLACK, textSize);
+                                        imagePoint, mainBeaconLabelColor,
+                                        textSize);
                 } else {
                     drawUnidentifiedBlob(led);
                 }

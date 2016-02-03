@@ -38,7 +38,7 @@
 namespace osvr {
 namespace vbtracker {
     bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList const &leds,
+                                         LedPtrList &leds,
                                          BeaconStateVec const &beacons,
                                          Eigen::Vector3d &outXlate,
                                          Eigen::Quaterniond &outQuat) {
@@ -52,15 +52,17 @@ namespace vbtracker {
 
         std::vector<cv::Point3f> objectPoints;
         std::vector<cv::Point2f> imagePoints;
+        std::vector<ZeroBasedBeaconId> beaconIds;
         for (auto const &led : leds) {
-            auto id = led->getID();
+            auto id = makeZeroBased(led->getID());
 #if 0
             m_beaconDebugData[id].variance = -1;
             m_beaconDebugData[id].measurement = led.getLocation();
 #endif
+            beaconIds.push_back(id);
             imagePoints.push_back(led->getLocation());
-            objectPoints.push_back(vec3dToCVPoint3f(
-                beacons[makeZeroBased(id).value()]->stateVector()));
+            objectPoints.push_back(
+                vec3dToCVPoint3f(beacons[id.value()]->stateVector()));
         }
 
         // Make sure we have enough points to do our estimation.
@@ -121,9 +123,11 @@ namespace vbtracker {
         if (inlierIndices.rows > 0) {
             std::vector<cv::Point3f> inlierObjectPoints;
             std::vector<cv::Point2f> inlierImagePoints;
+            std::vector<ZeroBasedBeaconId> inlierBeaconIds;
             for (int i = 0; i < inlierIndices.rows; i++) {
                 inlierObjectPoints.push_back(objectPoints[i]);
                 inlierImagePoints.push_back(imagePoints[i]);
+                inlierBeaconIds.push_back(beaconIds[i]);
             }
             std::vector<cv::Point2f> reprojectedPoints;
             cv::projectPoints(
@@ -138,6 +142,30 @@ namespace vbtracker {
                 if (reprojectedPoints[i].y - inlierImagePoints[i].y >
                     pixelReprojectionErrorForSingleAxisMax) {
                     return false;
+                }
+            }
+
+            /// Now, we will sort that vector of inlier beacon IDs so we can
+            /// rapidly binary search it to flag the LEDs we used.
+
+            // Need a custom comparator for the ID type.
+            auto idComparator = [](ZeroBasedBeaconId const &lhs,
+                                   ZeroBasedBeaconId const &rhs) {
+                return lhs.value() < rhs.value();
+            };
+            std::sort(begin(inlierBeaconIds), end(inlierBeaconIds),
+                      idComparator);
+            // This lambda wraps binary_search to do what it says: check to see
+            // if a given beacon ID is in the list of inlier beacons.
+            auto isAnInlierBeacon = [&inlierBeaconIds, &idComparator](
+                ZeroBasedBeaconId const &needle) {
+                return std::binary_search(begin(inlierBeaconIds),
+                                          end(inlierBeaconIds), needle,
+                                          idComparator);
+            };
+            for (auto &led : leds) {
+                if (isAnInlierBeacon(led->getID())) {
+                    led->markAsUsed();
                 }
             }
         }
@@ -185,7 +213,7 @@ namespace vbtracker {
                                                10.,
                                                10.};
     bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList const &leds,
+                                         LedPtrList &leds,
                                          BeaconStateVec const &beacons,
                                          BodyState &state) {
         Eigen::Vector3d xlate;

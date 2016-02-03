@@ -44,8 +44,8 @@ namespace vbtracker {
         /// @param[out] outXlate translation output parameter
         /// @param[out] outQuat rotation output parameter
         /// @return true if a pose was estimated.
-        bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds, BeaconStateVec const &beacons,
+        bool operator()(CameraParameters const &camParams, LedPtrList &leds,
+                        BeaconStateVec const &beacons,
                         Eigen::Vector3d &outXlate, Eigen::Quaterniond &outQuat);
 
         /// Perform RANSAC-based pose estimation and use it to update a body
@@ -54,9 +54,8 @@ namespace vbtracker {
         /// @param[out] state Tracked body state that will be updated if a pose
         /// was estimated
         /// @return true if a pose was estimated.
-        bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds, BeaconStateVec const &beacons,
-                        BodyState &state);
+        bool operator()(CameraParameters const &camParams, LedPtrList &leds,
+                        BeaconStateVec const &beacons, BodyState &state);
 
       private:
         const std::size_t m_requiredInliers = 4;
