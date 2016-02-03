@@ -50,6 +50,10 @@ add_library(uvbi-core STATIC
     TrackedBodyIMU.h
     TrackedBodyTarget.cpp
     TrackedBodyTarget.h
+    TrackingDebugDisplay.cpp
+    TrackingDebugDisplay.h
+    TrackingSystem_Impl.cpp
+    TrackingSystem_Impl.h
     TrackingSystem.cpp
     TrackingSystem.h
     Types.h
