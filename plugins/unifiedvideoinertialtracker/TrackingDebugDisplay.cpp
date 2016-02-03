@@ -46,6 +46,7 @@ namespace vbtracker {
     static const auto CVCOLOR_YELLOW = cv::Vec3b(0, 255, 255);
     static const auto CVCOLOR_GREEN = cv::Vec3b(0, 255, 0);
     static const auto CVCOLOR_GRAY = cv::Vec3b(127, 127, 127);
+    static const auto CVCOLOR_BLACK = cv::Vec3b(0, 0, 0);
 
     static const auto DEBUG_WINDOW_NAME = "OSVR Tracker Debug Window";
     static const auto DEBUG_FRAME_STRIDE = 11;
@@ -111,7 +112,16 @@ namespace vbtracker {
         cv::putText(image, label, location, cv::FONT_HERSHEY_SIMPLEX, size,
                     cv::Scalar(color));
     }
-
+    /// @overload
+    /// Takes an Eigen::Vector2d as the location, with optional offset.
+    inline void drawLedLabelOnImage(cv::Mat &image, OneBasedBeaconId id,
+                                    Eigen::Vector2d const &loc,
+                                    cv::Vec3b color = CVCOLOR_GRAY,
+                                    double size = 0.5,
+                                    cv::Point2f offset = cv::Point2f(0, 0)) {
+        drawLedLabelOnImage(image, id, cv::Point2f(loc.x(), loc.y()) + offset,
+                            color, size);
+    }
     /// @overload
     /// Takes an LED directly, with optional offset.
     inline void drawLedLabelOnImage(cv::Mat &image, Led const &led,
@@ -120,6 +130,14 @@ namespace vbtracker {
                                     cv::Point2f offset = cv::Point2f(0, 0)) {
         drawLedLabelOnImage(image, led.getOneBasedID(),
                             led.getLocation() + offset, color, size);
+    }
+
+    inline void drawStatusMessageOnImage(cv::Mat &image, std::string message,
+                                         cv::Vec3b color = CVCOLOR_GREEN,
+                                         std::int16_t line = 1) {
+        static const auto LINE_OFFSET = 20.f;
+        cv::putText(image, message, cv::Point2f(0, line * LINE_OFFSET),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(color));
     }
     namespace {
         /// Functor to perform reprojection of beacons from target space to
@@ -155,6 +173,10 @@ namespace vbtracker {
 
         if (tracking.getNumBodies() == 0) {
             /// No bodies - just show blobs.
+            drawStatusMessageOnImage(
+                output,
+                "No tracked bodies registered, only showing detected blobs",
+                CVCOLOR_RED);
             return output;
         }
         /// @todo right now, just looks at body 0, target 0 - generalize
@@ -164,6 +186,10 @@ namespace vbtracker {
 
         if (!targetPtr) {
             /// No optical target 0 on this body, just show blobs.
+            drawStatusMessageOnImage(
+                output,
+                "No target registered on body 0, only showing detected blobs",
+                CVCOLOR_RED);
             return output;
         }
         const auto labelOffset = cv::Point2f(1, 1);
@@ -177,7 +203,6 @@ namespace vbtracker {
         }
 
         if (targetPtr->hasPoseEstimate()) {
-            //msg() << "Have a pose estimate, will reproject\n";
             /// Reproject the beacons.
             Reprojection reproject{*targetPtr, camParams};
 
@@ -187,18 +212,109 @@ namespace vbtracker {
                 auto beaconId = ZeroBasedBeaconId(i);
                 Eigen::Vector2d imagePoint =
                     reproject(targetPtr->getBeaconAutocalibPosition(beaconId));
-                drawLedLabelOnImage(
-                    output, makeOneBased(beaconId),
-                    cv::Point2f(imagePoint.x(), imagePoint.y()) + labelOffset,
-                    CVCOLOR_GREEN, textSize);
+                drawLedLabelOnImage(output, makeOneBased(beaconId), imagePoint,
+                                    CVCOLOR_GREEN, textSize, labelOffset);
             }
         } else {
-
-            //msg() << "Can't reproject\n";
+            drawStatusMessageOnImage(output, "No video tracker pose for this "
+                                             "target, so green reprojection "
+                                             "not shown",
+                                     CVCOLOR_GRAY);
         }
         return output;
     }
 
+    cv::Mat
+    TrackingDebugDisplay::createStatusImage(TrackingSystem const &tracking,
+                                            CameraParameters const &camParams,
+                                            cv::Mat const &baseImage) {
+        cv::Mat output;
+
+        baseImage.copyTo(output);
+
+        if (tracking.getNumBodies() == 0) {
+            /// No bodies - show a message and swit
+            drawStatusMessageOnImage(output, "No tracked bodies registered, "
+                                             "showing raw input image - press "
+                                             "b to show blobs",
+                                     CVCOLOR_RED);
+            return output;
+        }
+        /// @todo right now, just looks at body 0, target 0 - generalize
+        auto &body = tracking.getBody(BodyId{0});
+
+        auto targetPtr = body.getTarget(TargetId{0});
+
+        if (!targetPtr) {
+            /// No optical target 0 on this body
+            drawStatusMessageOnImage(output, "No target registered on body 0, "
+                                             "showing raw input image - press "
+                                             "b to show blobs",
+                                     CVCOLOR_RED);
+            return output;
+        }
+
+        /// OK, so if we get here, we have a valid target, so we can start with
+        /// the base image as we'd like.
+
+        const auto textSize = 0.25;
+        const auto mainBeaconLabelColor = CVCOLOR_GRAY;
+
+        auto gotPose = targetPtr->hasPoseEstimate();
+        auto numBeacons = targetPtr->getNumBeacons();
+
+        /// Unidentified blobs look the same whether or not we have a pose, so
+        /// we make a little lambda here to avoid repeating ourselves too much.
+        auto drawUnidentifiedBlob = [&output](Led const &led) {
+            /// Red empty circle for un-identified blob
+            drawLedCircleOnImage(output, led, false, CVCOLOR_RED);
+        };
+
+        if (gotPose) {
+            /// We have a pose - so we'll reproject identified beacons.
+            Reprojection reproject{*targetPtr, camParams};
+            for (auto const &led : targetPtr->leds()) {
+                if (led.identified()) {
+                    /// Identified, and we have a pose
+
+                    auto beaconId = led.getID();
+
+                    // Color-code identified beacons based on
+                    // whether or not we used their data.
+                    auto color =
+                        led.wasUsedLastFrame() ? CVCOLOR_GREEN : CVCOLOR_YELLOW;
+                    drawLedCircleOnImage(output, led, true, color);
+
+                    /// Draw main label in gray, then draw the reprojection in
+                    /// black on top, creating a bit of a shadow effect. Not
+                    /// best visiblity ever, but...
+                    drawLedLabelOnImage(output, led, mainBeaconLabelColor,
+                                        textSize);
+                    Eigen::Vector2d imagePoint = reproject(
+                        targetPtr->getBeaconAutocalibPosition(beaconId));
+                    drawLedLabelOnImage(output, makeOneBased(beaconId),
+                                        imagePoint, CVCOLOR_BLACK, textSize);
+                } else {
+                    drawUnidentifiedBlob(led);
+                }
+            }
+        } else {
+            /// If we don't have a pose...
+            for (auto const &led : targetPtr->leds()) {
+                if (led.identified()) {
+                    // If identified, but we don't have a pose, draw
+                    // them as yellow outlines.
+                    drawLedCircleOnImage(output, led, false, CVCOLOR_YELLOW);
+                    drawLedLabelOnImage(output, led, mainBeaconLabelColor,
+                                        textSize);
+                } else {
+                    drawUnidentifiedBlob(led);
+                }
+            }
+        }
+
+        return output;
+    }
     void
     TrackingDebugDisplay::triggerDisplay(TrackingSystem &tracking,
                                          TrackingSystem::Impl const &impl) {
@@ -227,19 +343,23 @@ namespace vbtracker {
                                          blobEx->getDebugBlobImage()),
                 false);
             break;
+        case DebugDisplayMode::Status:
+            showDebugImage(
+                createStatusImage(tracking, impl.camParams, impl.frame), false);
         }
 
         /// Run the event loop briefly to see if there were keyboard presses.
         int key = cv::waitKey(1);
         switch (key) {
-#if 0
+
         case 's':
         case 'S':
             // Show the concise "status" image (default)
-            /// @todo
+            msg() << "'s' pressed - Switching to the status image in the "
+                     "debug window."
+                  << std::endl;
             m_mode = DebugDisplayMode::Status;
             break;
-#endif
 
         case 'b':
         case 'B':

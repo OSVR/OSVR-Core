@@ -40,7 +40,7 @@
 
 namespace osvr {
 namespace vbtracker {
-    enum class DebugDisplayMode { InputImage, Thresholding, Blobs };
+    enum class DebugDisplayMode { InputImage, Thresholding, Blobs, Status };
     class TrackingSystem;
     class TrackedBodyTarget;
     struct CameraParameters;
@@ -59,15 +59,16 @@ namespace vbtracker {
         void quitDebug();
 
       private:
-        std::ostream & msg() const;
+        std::ostream &msg() const;
         cv::Mat createAnnotatedBlobImage(TrackingSystem const &tracking,
                                          CameraParameters const &camParams,
                                          cv::Mat const &blobImage);
         cv::Mat createStatusImage(TrackingSystem const &tracking,
-                                  cv::Mat const &blobImage);
+                                  CameraParameters const &camParams,
+                                  cv::Mat const &baseImage);
 
         bool m_enabled;
-        DebugDisplayMode m_mode = DebugDisplayMode::Blobs;
+        DebugDisplayMode m_mode = DebugDisplayMode::Status;
         std::string m_windowName;
         cv::Mat m_displayedFrame;
         ::util::Stride m_debugStride;
