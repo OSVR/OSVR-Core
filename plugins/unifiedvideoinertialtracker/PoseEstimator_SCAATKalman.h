@@ -22,32 +22,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ModelTypes_h_GUID_F873E106_09BF_41A7_B7C7_CCE59466A590
-#define INCLUDED_ModelTypes_h_GUID_F873E106_09BF_41A7_B7C7_CCE59466A590
+#ifndef INCLUDED_PoseEstimator_SCAATKalman_h_GUID_F1FC2154_E59B_4598_70C2_253F8EA31485
+#define INCLUDED_PoseEstimator_SCAATKalman_h_GUID_F1FC2154_E59B_4598_70C2_253F8EA31485
 
 // Internal Includes
-// - none
+#include "ConfigParams.h"
+#include "PoseEstimatorTypes.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/PoseState.h>
-#include <osvr/Kalman/PoseSeparatelyDampedConstantVelocity.h>
-#include <osvr/Kalman/PureVectorState.h>
+// - none
 
 // Standard includes
-#include <memory>
-#include <vector>
+// - none
 
 namespace osvr {
 namespace vbtracker {
-
-    using BodyState = kalman::pose_externalized_rotation::State;
-    using BodyProcessModel =
-        osvr::kalman::PoseSeparatelyDampedConstantVelocityProcessModel;
-
-    using BeaconState = kalman::PureVectorState<3>;
-    using BeaconStatePtr = std::unique_ptr<BeaconState>;
-    using BeaconStateVec = std::vector<BeaconStatePtr>;
+    class SCAATKalmanPoseEstimator {
+      public:
+        SCAATKalmanPoseEstimator(ConfigParams const &params);
+        bool operator()(CameraParameters const &camParams,
+                        LedPtrList const &leds, BeaconStateVec &beacons,
+                        BodyState &state);
+    };
 } // namespace vbtracker
 } // namespace osvr
 
-#endif // INCLUDED_ModelTypes_h_GUID_F873E106_09BF_41A7_B7C7_CCE59466A590
+#endif // INCLUDED_PoseEstimator_SCAATKalman_h_GUID_F1FC2154_E59B_4598_70C2_253F8EA31485

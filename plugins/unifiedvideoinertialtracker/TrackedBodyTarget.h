@@ -40,6 +40,8 @@
 
 namespace osvr {
 namespace vbtracker {
+    struct CameraParameters;
+
     /// @todo refactor? ported directly
     struct BeaconData {
         bool seen = false;
@@ -86,12 +88,16 @@ namespace vbtracker {
         Eigen::Vector3d getBeaconAutocalibVariance(ZeroBasedBeaconId i) const;
 
         /// Called each frame with the results of the blob finding and
-        /// undistortion.
+        /// undistortion (part of the first phase of the tracking system)
         ///
         /// @return number of LED measurements/blobs used locally on existing
         /// LEDs.
         std::size_t
         processLedMeasurements(LedMeasurementVec const &undistortedLeds);
+
+        /// Update the pose estimate using the updated LEDs - part of the third
+        /// phase of tracking.
+        void updatePoseEstimateFromLeds(CameraParameters const &camParams);
 
       private:
         ConfigParams const &getParams() const;

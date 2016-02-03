@@ -28,6 +28,8 @@
 #include "LED.h"
 #include "cvToEigen.h"
 #include "HDKLedIdentifier.h"
+#include "PoseEstimatorTypes.h"
+#include "PoseEstimator_RANSAC.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -38,14 +40,13 @@
 namespace osvr {
 namespace vbtracker {
     struct TrackedBodyTarget::Impl {
+        Impl(ConfigParams const &params) : ransacEstimator(params) {}
         LedGroup leds;
         LedIdentifierPtr identifier;
+        RANSACPoseEstimator ransacEstimator;
     };
 
     namespace detail {
-        using BeaconState = kalman::PureVectorState<3>;
-        using BeaconStatePtr = std::unique_ptr<BeaconState>;
-        using BeaconStateVec = std::vector<BeaconStatePtr>;
         inline BeaconStateVec
         createBeaconStateVec(ConfigParams const &params,
                              TargetSetupData const &setupData,
@@ -99,7 +100,7 @@ namespace vbtracker {
           m_beaconMeasurementVariance(setupData.baseMeasurementVariances),
           m_beaconFixed(setupData.isFixed),
           m_beaconEmissionDirection(setupData.emissionDirections),
-          m_impl(new Impl) {
+          m_impl(new Impl(getParams())) {
 
         /// Create the beacon state objects and initialize the beacon offset.
         m_beacons = detail::createBeaconStateVec(getParams(), setupData,
@@ -180,6 +181,24 @@ namespace vbtracker {
             myLeds.emplace_back(m_impl->identifier.get(), remainingLed);
         }
         return usedMeasurements;
+    }
+
+    void TrackedBodyTarget::updatePoseEstimateFromLeds(
+        CameraParameters const &camParams) {
+        LedPtrList usableLeds;
+
+        auto const beaconsSize = static_cast<int>(m_beacons.size());
+        auto &leds = m_impl->leds;
+        for (auto &led : leds) {
+            if (!led.identified()) {
+                continue;
+            }
+            if (led.getID().value() > beaconsSize) {
+                // out of bounds ID
+                continue;
+            }
+            usableLeds.push_back(&led);
+        }
     }
 
     ConfigParams const &TrackedBodyTarget::getParams() const {

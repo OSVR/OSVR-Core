@@ -22,32 +22,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ModelTypes_h_GUID_F873E106_09BF_41A7_B7C7_CCE59466A590
-#define INCLUDED_ModelTypes_h_GUID_F873E106_09BF_41A7_B7C7_CCE59466A590
+#ifndef INCLUDED_PoseEstimatorTypes_h_GUID_A9E792C9_4128_4B84_2108_DD3BA8B88061
+#define INCLUDED_PoseEstimatorTypes_h_GUID_A9E792C9_4128_4B84_2108_DD3BA8B88061
 
 // Internal Includes
-// - none
+#include "ModelTypes.h"
+#include "CameraParameters.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/PoseState.h>
-#include <osvr/Kalman/PoseSeparatelyDampedConstantVelocity.h>
-#include <osvr/Kalman/PureVectorState.h>
+// - none
 
 // Standard includes
-#include <memory>
 #include <vector>
 
 namespace osvr {
 namespace vbtracker {
-
-    using BodyState = kalman::pose_externalized_rotation::State;
-    using BodyProcessModel =
-        osvr::kalman::PoseSeparatelyDampedConstantVelocityProcessModel;
-
-    using BeaconState = kalman::PureVectorState<3>;
-    using BeaconStatePtr = std::unique_ptr<BeaconState>;
-    using BeaconStateVec = std::vector<BeaconStatePtr>;
+    class Led;
+    using LedPtrList = std::vector<Led *>;
 } // namespace vbtracker
 } // namespace osvr
 
-#endif // INCLUDED_ModelTypes_h_GUID_F873E106_09BF_41A7_B7C7_CCE59466A590
+#endif // INCLUDED_PoseEstimatorTypes_h_GUID_A9E792C9_4128_4B84_2108_DD3BA8B88061

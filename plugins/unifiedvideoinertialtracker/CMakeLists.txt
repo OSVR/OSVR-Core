@@ -35,6 +35,11 @@ add_library(uvbi-core STATIC
     LedIdentifier.cpp
     LedIdentifier.h
     ModelTypes.h
+    PoseEstimator_RANSAC.cpp
+    PoseEstimator_RANSAC.h
+    PoseEstimator_SCAATKalman.cpp
+    PoseEstimator_SCAATKalman.h
+    PoseEstimatorTypes.h
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h
     StateHistory.h
