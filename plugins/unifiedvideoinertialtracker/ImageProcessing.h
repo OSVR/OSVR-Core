@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "Types.h"
+#include "CameraParameters.h"
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
@@ -42,6 +43,7 @@ namespace vbtracker {
         LedMeasurementVec ledMeasurements;
         cv::Mat frame;
         cv::Mat frameGray;
+        CameraParameters camParams;
     };
     using ImageOutputDataPtr = std::unique_ptr<ImageProcessingOutput>;
 } // namespace vbtracker

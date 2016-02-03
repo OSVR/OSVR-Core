@@ -101,7 +101,14 @@ namespace vbtracker {
         /// phase of tracking.
         bool updatePoseEstimateFromLeds(CameraParameters const &camParams);
 
+        /// Did this target yet, or last time it was asked to, compute a pose
+        /// estimate?
+        bool hasPoseEstimate() const { return m_hasPoseEstimate; }
+
       private:
+        /// Get the beacon offset transformed into world space
+        Eigen::Vector3d getStateCorrection() const;
+
         ConfigParams const &getParams() const;
         void m_verifyInvariants() const {
             BOOST_ASSERT_MSG(m_beacons.size() ==
@@ -143,6 +150,8 @@ namespace vbtracker {
         std::vector<BeaconData> m_beaconDebugData;
 
         Eigen::Vector3d m_beaconOffset;
+
+        bool m_hasPoseEstimate = false;
 
         /// private implementation
         struct Impl;

@@ -28,6 +28,7 @@
 // Internal Includes
 #include "ConfigParams.h"
 #include "BodyIdTypes.h"
+#include "ModelTypes.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -59,6 +60,7 @@ namespace vbtracker {
         TrackedBody(TrackedBody const &) = delete;
         /// Non-copy-assignable
         TrackedBody &operator=(TrackedBody const &) = delete;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /// Creates a fully-integrated IMU data source (that is, one that
         /// reports a reliable quaternion, and potentially angular velocity) to
@@ -94,6 +96,8 @@ namespace vbtracker {
         /// @todo refactor
         ConfigParams const &getParams() const;
 
+        BodyState const &getState() const { return m_state; }
+
         TrackedBodyTarget *getTarget(TargetId id) const {
             if (TargetId(0) == id) {
                 return m_target.get();
@@ -106,15 +110,21 @@ namespace vbtracker {
                 std::forward<F>(f)(*m_target);
             }
         }
+
         template <typename F> void forEachTarget(F &&f) const {
             if (m_target) {
                 std::forward<F>(f)(*m_target);
             }
         }
 
+        /// Do we have a pose estimate for this body in general?
+        bool hasPoseEstimate() const;
+
       private:
+        BodyState &getState() { return m_state; }
         TrackingSystem &m_system;
         const BodyId m_id;
+        BodyState m_state;
         /// private implementation data
         struct Impl;
         std::unique_ptr<Impl> m_impl;

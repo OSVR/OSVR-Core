@@ -95,7 +95,8 @@ namespace vbtracker {
         }
     } // namespace detail
 
-    TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body, BodyTargetInterface const& bodyIface,
+    TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body,
+                                         BodyTargetInterface const &bodyIface,
                                          Eigen::Isometry3d const &targetToBody,
                                          TargetSetupData const &setupData,
                                          TargetId id)
@@ -188,8 +189,10 @@ namespace vbtracker {
 
     bool TrackedBodyTarget::updatePoseEstimateFromLeds(
         CameraParameters const &camParams) {
-        LedPtrList usableLeds;
 
+        /// Do the initial filtering of the LED group to just the identified,
+        /// in-bounds-ID ones before we pass it to an estimator.
+        LedPtrList usableLeds;
         auto const beaconsSize = static_cast<int>(m_beacons.size());
         auto &leds = m_impl->leds;
         for (auto &led : leds) {
@@ -203,11 +206,23 @@ namespace vbtracker {
             usableLeds.push_back(&led);
         }
 
+        /// Must pre/post correct the state by our offset :-/
+        /// @todo make this state correction less hacky.
+        m_impl->bodyInterface.state.position() += getStateCorrection();
+
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo right now just ransac.
         auto gotPose = m_impl->ransacEstimator(camParams, usableLeds, m_beacons,
                                                m_impl->bodyInterface.state);
+
+        /// Corresponding post-correction.
+        m_impl->bodyInterface.state.position() -= getStateCorrection();
+
         return gotPose;
+    }
+
+    Eigen::Vector3d TrackedBodyTarget::getStateCorrection() const {
+        return m_impl->bodyInterface.state.getQuaternion() * m_beaconOffset;
     }
 
     ConfigParams const &TrackedBodyTarget::getParams() const {

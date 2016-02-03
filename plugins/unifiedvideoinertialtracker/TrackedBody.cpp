@@ -37,9 +37,7 @@
 
 namespace osvr {
 namespace vbtracker {
-    struct TrackedBody::Impl {
-        BodyState state;
-    };
+    struct TrackedBody::Impl {};
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
         : m_system(system), m_id(id), m_impl(new Impl) {}
 
@@ -60,7 +58,7 @@ namespace vbtracker {
         }
         /// The target will always be target 0...
         m_target.reset(
-            new TrackedBodyTarget{*this, BodyTargetInterface{m_impl->state},
+            new TrackedBodyTarget{*this, BodyTargetInterface{getState()},
                                   targetToBody, setupData, TargetId{0}});
         return m_target.get();
     }

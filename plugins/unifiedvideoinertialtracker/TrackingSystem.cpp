@@ -109,9 +109,17 @@ namespace vbtracker {
 
         void sendFrameToDebugDisplay() { debugDisplay.displayNewFrame(*this); }
 
+        /// @name Cached data from the ImageProcessingOutput updated in phase 2
+        /// @{
+        /// Cached copy of the last grey frame
         cv::Mat frame;
+        /// Cached copy of the last grey frame
         cv::Mat frameGray;
+        /// Cached copy of the last (undistorted) camera parameters to be used.
+        CameraParameters camParams;
         util::time::TimeValue lastFrame;
+        /// @}
+
         LedUpdateCount updateCount;
         std::unique_ptr<SBDBlobExtractor> blobExtractor;
         TrackingDebugDisplay debugDisplay;
@@ -228,6 +236,7 @@ namespace vbtracker {
         ret->tv = tv;
         ret->frame = frame;
         ret->frameGray = frameGray;
+        ret->camParams = camParams.createUndistortedVariant();
         auto rawMeasurements =
             m_impl->blobExtractor->extractBlobs(ret->frameGray);
         ret->ledMeasurements = undistortLeds(rawMeasurements, camParams);
@@ -245,6 +254,7 @@ namespace vbtracker {
         /// data now.
         m_impl->frame = imageData->frame;
         m_impl->frameGray = imageData->frameGray;
+        m_impl->camParams = imageData->camParams;
 
         /// Go through each target and try to process the measurements.
         forEachTarget(*this, [&](TrackedBodyTarget &target) {
@@ -262,11 +272,11 @@ namespace vbtracker {
         /// Do the second phase of stuff
         updateLedsFromVideoData(std::move(imageData));
 
-        /// Trigger debug display, if activated.
-        m_impl->sendFrameToDebugDisplay();
-
         /// Do the third phase of tracking.
         updatePoseEstimates();
+
+        /// Trigger debug display, if activated.
+        m_impl->sendFrameToDebugDisplay();
 
         return m_updated;
     }
@@ -288,10 +298,20 @@ namespace vbtracker {
             auto &target = *targetPtr;
 
             /// @todo call into the target here.
+            auto gotPose = target.updatePoseEstimateFromLeds(m_impl->camParams);
 
             /// @todo deduplicate in making this list.
             m_updated.push_back(target.getBody().getId());
         }
+    }
+
+    bool TrackedBody::hasPoseEstimate() const {
+        /// @todo handle IMU here.
+        auto ret = false;
+        forEachTarget([&ret](TrackedBodyTarget &target) {
+            ret = ret || target.hasPoseEstimate();
+        });
+        return ret;
     }
 
 } // namespace vbtracker
