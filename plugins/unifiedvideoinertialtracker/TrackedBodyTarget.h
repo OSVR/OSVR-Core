@@ -53,11 +53,13 @@ namespace vbtracker {
     };
 
     class TrackedBody;
+    struct BodyTargetInterface;
     /// Corresponds to a rigid arrangements of discrete beacons detected by
     /// video-based tracking - typically IR LEDs.
     class TrackedBodyTarget {
       public:
         TrackedBodyTarget(TrackedBody &body,
+                          BodyTargetInterface const &bodyIface,
                           Eigen::Isometry3d const &targetToBody,
                           TargetSetupData const &setupData, TargetId id);
         ~TrackedBodyTarget();
@@ -97,7 +99,7 @@ namespace vbtracker {
 
         /// Update the pose estimate using the updated LEDs - part of the third
         /// phase of tracking.
-        void updatePoseEstimateFromLeds(CameraParameters const &camParams);
+        bool updatePoseEstimateFromLeds(CameraParameters const &camParams);
 
       private:
         ConfigParams const &getParams() const;

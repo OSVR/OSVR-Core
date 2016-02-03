@@ -30,6 +30,7 @@
 #include "HDKLedIdentifier.h"
 #include "PoseEstimatorTypes.h"
 #include "PoseEstimator_RANSAC.h"
+#include "BodyTargetInterface.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -40,7 +41,9 @@
 namespace osvr {
 namespace vbtracker {
     struct TrackedBodyTarget::Impl {
-        Impl(ConfigParams const &params) : ransacEstimator(params) {}
+        Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
+            : bodyInterface(bodyIface) {}
+        BodyTargetInterface bodyInterface;
         LedGroup leds;
         LedIdentifierPtr identifier;
         RANSACPoseEstimator ransacEstimator;
@@ -92,7 +95,7 @@ namespace vbtracker {
         }
     } // namespace detail
 
-    TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body,
+    TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body, BodyTargetInterface const& bodyIface,
                                          Eigen::Isometry3d const &targetToBody,
                                          TargetSetupData const &setupData,
                                          TargetId id)
@@ -100,7 +103,7 @@ namespace vbtracker {
           m_beaconMeasurementVariance(setupData.baseMeasurementVariances),
           m_beaconFixed(setupData.isFixed),
           m_beaconEmissionDirection(setupData.emissionDirections),
-          m_impl(new Impl(getParams())) {
+          m_impl(new Impl(getParams(), bodyIface)) {
 
         /// Create the beacon state objects and initialize the beacon offset.
         m_beacons = detail::createBeaconStateVec(getParams(), setupData,
@@ -183,7 +186,7 @@ namespace vbtracker {
         return usedMeasurements;
     }
 
-    void TrackedBodyTarget::updatePoseEstimateFromLeds(
+    bool TrackedBodyTarget::updatePoseEstimateFromLeds(
         CameraParameters const &camParams) {
         LedPtrList usableLeds;
 
@@ -199,6 +202,12 @@ namespace vbtracker {
             }
             usableLeds.push_back(&led);
         }
+
+        /// OK, now must decide who we talk to for pose estimation.
+        /// @todo right now just ransac.
+        auto gotPose = m_impl->ransacEstimator(camParams, usableLeds, m_beacons,
+                                               m_impl->bodyInterface.state);
+        return gotPose;
     }
 
     ConfigParams const &TrackedBodyTarget::getParams() const {

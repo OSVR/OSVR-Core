@@ -30,7 +30,7 @@
 #include "PoseEstimatorTypes.h"
 
 // Library/third-party includes
-#include <opencv2/core/core.hpp>
+// - none
 
 // Standard includes
 #include <cstddef>
@@ -39,14 +39,26 @@ namespace osvr {
 namespace vbtracker {
     class RANSACPoseEstimator {
       public:
-        RANSACPoseEstimator(ConfigParams const &params);
+        /// Perform RANSAC-based pose estimation.
+        ///
+        /// @param[out] outXlate translation output parameter
+        /// @param[out] outQuat rotation output parameter
+        /// @return true if a pose was estimated.
         bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds, BeaconStateVec &beacons,
+                        LedPtrList const &leds, BeaconStateVec const &beacons,
+                        Eigen::Vector3d &outXlate, Eigen::Quaterniond &outQuat);
+
+        /// Perform RANSAC-based pose estimation and use it to update a body
+        /// state (state vector and error covariance)
+        ///
+        /// @param[out] state Tracked body state that will be updated if a pose
+        /// was estimated
+        /// @return true if a pose was estimated.
+        bool operator()(CameraParameters const &camParams,
+                        LedPtrList const &leds, BeaconStateVec const &beacons,
                         BodyState &state);
 
       private:
-        void m_setStateFromCV(cv::Mat const &tvec, cv::Mat const &rvec,
-                              BodyState &state);
         const std::size_t m_requiredInliers = 4;
         const std::size_t m_permittedOutliers = 2;
     };

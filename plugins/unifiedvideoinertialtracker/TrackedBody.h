@@ -116,8 +116,8 @@ namespace vbtracker {
         TrackingSystem &m_system;
         const BodyId m_id;
         /// private implementation data
-        struct ImplData;
-        std::unique_ptr<ImplData> m_data;
+        struct Impl;
+        std::unique_ptr<Impl> m_impl;
         std::unique_ptr<TrackedBodyIMU> m_imu;
         std::unique_ptr<TrackedBodyTarget> m_target;
     };

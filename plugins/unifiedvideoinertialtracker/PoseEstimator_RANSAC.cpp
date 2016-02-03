@@ -37,11 +37,11 @@
 
 namespace osvr {
 namespace vbtracker {
-    RANSACPoseEstimator::RANSACPoseEstimator(ConfigParams const &params) {}
     bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
                                          LedPtrList const &leds,
-                                         BeaconStateVec &beacons,
-                                         BodyState &state) {
+                                         BeaconStateVec const &beacons,
+                                         Eigen::Vector3d &outXlate,
+                                         Eigen::Quaterniond &outQuat) {
 
         // We need to get a pair of matched vectors of points: 2D locations
         // with in the image and 3D locations in model space.  There needs to
@@ -165,7 +165,9 @@ namespace vbtracker {
         //  NOTE: This is a right-handed coordinate system with X pointing
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction.
-        m_setStateFromCV(tvec, rvec, state);
+
+        outXlate = cvToVector3d(tvec);
+        outQuat = cvRotVecToQuat(rvec);
         return true;
     }
 
@@ -182,11 +184,23 @@ namespace vbtracker {
                                                10.,
                                                10.,
                                                10.};
-    void RANSACPoseEstimator::m_setStateFromCV(cv::Mat const &tvec,
-                                               cv::Mat const &rvec,
-                                               BodyState &state) {
-        state.position() = cvToVector3d(tvec);
-        state.setQuaternion(cvRotVecToQuat(rvec));
+    bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
+                                         LedPtrList const &leds,
+                                         BeaconStateVec const &beacons,
+                                         BodyState &state) {
+        Eigen::Vector3d xlate;
+        Eigen::Quaterniond quat;
+        /// Call the main pose estimation to get the vector and quat.
+        {
+            auto ret = (*this)(camParams, leds, beacons, xlate, quat);
+            if (!ret) {
+                return false;
+            }
+        }
+        /// OK, so if we're here, estimation succeeded and we have valid data in
+        /// xlate and quat.
+        state.position() = xlate;
+        state.setQuaternion(quat);
 
         using StateVec = kalman::types::DimVector<BodyState>;
         using StateSquareMatrix = kalman::types::DimSquareMatrix<BodyState>;
@@ -196,6 +210,8 @@ namespace vbtracker {
         covariance.bottomRightCorner<3, 3>() =
             state.errorCovariance().bottomRightCorner<3, 3>();
         state.setErrorCovariance(covariance);
+        return true;
     }
+
 } // namespace vbtracker
 } // namespace osvr

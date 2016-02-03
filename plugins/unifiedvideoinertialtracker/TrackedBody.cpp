@@ -27,6 +27,7 @@
 #include "TrackedBodyIMU.h"
 #include "TrackedBodyTarget.h"
 #include "TrackingSystem.h"
+#include "BodyTargetInterface.h"
 
 // Library/third-party includes
 // - none
@@ -36,9 +37,11 @@
 
 namespace osvr {
 namespace vbtracker {
-    struct TrackedBody::ImplData {};
+    struct TrackedBody::Impl {
+        BodyState state;
+    };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
-        : m_system(system), m_id(id), m_data(new ImplData) {}
+        : m_system(system), m_id(id), m_impl(new Impl) {}
 
     TrackedBody::~TrackedBody() {}
 
@@ -57,7 +60,8 @@ namespace vbtracker {
         }
         /// The target will always be target 0...
         m_target.reset(
-            new TrackedBodyTarget(*this, targetToBody, setupData, TargetId{0}));
+            new TrackedBodyTarget{*this, BodyTargetInterface{m_impl->state},
+                                  targetToBody, setupData, TargetId{0}});
         return m_target.get();
     }
 
