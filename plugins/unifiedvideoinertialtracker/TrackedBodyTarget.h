@@ -83,7 +83,7 @@ namespace vbtracker {
         BodyTargetId getQualifiedId() const;
 
         /// Used to extract autocalibration results in a standalone calibration
-        /// app
+        /// app, and to show information in a debug window.
         Eigen::Vector3d getBeaconAutocalibPosition(ZeroBasedBeaconId i) const;
         /// Used to extract autocalibration results in a standalone calibration
         /// app
@@ -111,9 +111,19 @@ namespace vbtracker {
             return m_beaconOffset;
         }
 
+        /// Get all beacons/leds, including unrecognized ones
+        LedGroup const &leds() const;
+
+        /// Get a list of pointers to all recognized, in-range beacons/leds
+        LedPtrList const &usableLeds() const;
+
       private:
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
+
+        LedGroup &leds();
+
+        LedPtrList &usableLeds();
 
         ConfigParams const &getParams() const;
         void m_verifyInvariants() const {

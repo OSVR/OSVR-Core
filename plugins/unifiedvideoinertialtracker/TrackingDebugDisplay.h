@@ -36,10 +36,14 @@
 
 // Standard includes
 #include <string>
+#include <iosfwd>
 
 namespace osvr {
 namespace vbtracker {
     enum class DebugDisplayMode { InputImage, Thresholding, Blobs };
+    class TrackingSystem;
+    class TrackedBodyTarget;
+    struct CameraParameters;
     class TrackingDebugDisplay {
       public:
         TrackingDebugDisplay(ConfigParams const &params);
@@ -47,13 +51,21 @@ namespace vbtracker {
         TrackingDebugDisplay(TrackingDebugDisplay const &) = delete;
         TrackingDebugDisplay &operator=(TrackingDebugDisplay const &) = delete;
 
-        void triggerDisplay(TrackingSystem::Impl const &impl);
+        void triggerDisplay(TrackingSystem &tracking,
+                            TrackingSystem::Impl const &impl);
 
-        void showDebugImage(cv::Mat const &image);
+        void showDebugImage(cv::Mat const &image, bool needsCopy = true);
 
         void quitDebug();
 
       private:
+        std::ostream & msg() const;
+        cv::Mat createAnnotatedBlobImage(TrackingSystem const &tracking,
+                                         CameraParameters const &camParams,
+                                         cv::Mat const &blobImage);
+        cv::Mat createStatusImage(TrackingSystem const &tracking,
+                                  cv::Mat const &blobImage);
+
         bool m_enabled;
         DebugDisplayMode m_mode = DebugDisplayMode::Blobs;
         std::string m_windowName;

@@ -98,7 +98,14 @@ namespace vbtracker {
 
         BodyState const &getState() const { return m_state; }
 
-        TrackedBodyTarget *getTarget(TargetId id) const {
+        TrackedBodyTarget *getTarget(TargetId id) {
+            if (TargetId(0) == id) {
+                return m_target.get();
+            }
+            return nullptr;
+        }
+
+        TrackedBodyTarget const *getTarget(TargetId id) const {
             if (TargetId(0) == id) {
                 return m_target.get();
             }

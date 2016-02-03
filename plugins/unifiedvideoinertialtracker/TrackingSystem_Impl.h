@@ -47,7 +47,7 @@ namespace vbtracker {
         Impl(ConfigParams const &params);
         ~Impl();
 
-        void triggerDebugDisplay();
+        void triggerDebugDisplay(TrackingSystem &tracking);
 
         /// @name Cached data from the ImageProcessingOutput updated in phase 2
         /// @{

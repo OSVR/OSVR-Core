@@ -108,7 +108,7 @@ namespace vbtracker {
         updatePoseEstimates();
 
         /// Trigger debug display, if activated.
-        m_impl->triggerDebugDisplay();
+        m_impl->triggerDebugDisplay(*this);
 
         return m_updated;
     }
@@ -129,7 +129,6 @@ namespace vbtracker {
             }
             auto &target = *targetPtr;
 
-            /// @todo call into the target here.
             auto gotPose = target.updatePoseEstimateFromLeds(m_impl->camParams);
 
             /// @todo deduplicate in making this list.

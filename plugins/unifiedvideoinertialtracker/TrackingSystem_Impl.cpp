@@ -44,8 +44,8 @@ namespace vbtracker {
         // out line to break circular dep with this and the debug display.
     }
 
-    void TrackingSystem::Impl::triggerDebugDisplay() {
-        debugDisplay->triggerDisplay(*this);
+    void TrackingSystem::Impl::triggerDebugDisplay(TrackingSystem &tracking) {
+        debugDisplay->triggerDisplay(tracking, *this);
     }
 } // namespace vbtracker
 } // namespace osvr

@@ -26,6 +26,7 @@
 #define INCLUDED_PoseEstimatorTypes_h_GUID_A9E792C9_4128_4B84_2108_DD3BA8B88061
 
 // Internal Includes
+#include "Types.h"
 #include "ModelTypes.h"
 #include "CameraParameters.h"
 
@@ -38,7 +39,6 @@
 namespace osvr {
 namespace vbtracker {
     class Led;
-    using LedPtrList = std::vector<Led *>;
 } // namespace vbtracker
 } // namespace osvr
 

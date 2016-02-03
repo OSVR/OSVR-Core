@@ -29,6 +29,7 @@
 // - none
 
 // Library/third-party includes
+#include <osvr/Util/EigenCoreGeometry.h>
 #include <opencv2/core/core.hpp>
 
 // Standard includes
@@ -83,6 +84,10 @@ namespace vbtracker {
         double k3() const { return distortionParameters[2]; }
         cv::Point2d principalPoint() const {
             return cv::Point2d(cameraMatrix(0, 2), cameraMatrix(1, 2));
+        }
+
+        Eigen::Vector2d eiPrincipalPoint() const {
+            return Eigen::Vector2d(cameraMatrix(0, 2), cameraMatrix(1, 2));
         }
 
         cv::Matx33d cameraMatrix;

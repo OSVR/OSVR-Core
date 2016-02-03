@@ -45,6 +45,7 @@ namespace vbtracker {
             : bodyInterface(bodyIface) {}
         BodyTargetInterface bodyInterface;
         LedGroup leds;
+        LedPtrList usableLeds;
         LedIdentifierPtr identifier;
         RANSACPoseEstimator ransacEstimator;
     };
@@ -130,7 +131,7 @@ namespace vbtracker {
                          "Beacon ID must be less than number of beacons.");
         BOOST_ASSERT_MSG(i.value() >= 0,
                          "Beacon ID must not be a sentinel value!");
-        return m_beacons.at(i.value())->stateVector();
+        return m_beacons.at(i.value())->stateVector() + m_beaconOffset;
     }
 
     Eigen::Vector3d
@@ -148,6 +149,10 @@ namespace vbtracker {
         // std::list<LedMeasurement> measurements{begin(undistortedLeds),
         // end(undistortedLeds)};
         LedMeasurementVec measurements{undistortedLeds};
+
+        /// Clear the "usableLeds" that will be populated in a later step, if we
+        /// get that far.
+        m_impl->usableLeds.clear();
 
         auto usedMeasurements = std::size_t{0};
         const auto blobMoveThreshold = getParams().blobMoveThreshold;
@@ -192,7 +197,7 @@ namespace vbtracker {
 
         /// Do the initial filtering of the LED group to just the identified,
         /// in-bounds-ID ones before we pass it to an estimator.
-        LedPtrList usableLeds;
+        auto &usable = usableLeds();
         auto const beaconsSize = static_cast<int>(m_beacons.size());
         auto &leds = m_impl->leds;
         for (auto &led : leds) {
@@ -203,7 +208,7 @@ namespace vbtracker {
                 // out of bounds ID
                 continue;
             }
-            usableLeds.push_back(&led);
+            usable.push_back(&led);
         }
 
         /// Must pre/post correct the state by our offset :-/
@@ -212,13 +217,13 @@ namespace vbtracker {
 
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo right now just ransac.
-        auto gotPose = m_impl->ransacEstimator(camParams, usableLeds, m_beacons,
+        m_hasPoseEstimate = m_impl->ransacEstimator(camParams, usable, m_beacons,
                                                m_impl->bodyInterface.state);
 
         /// Corresponding post-correction.
         m_impl->bodyInterface.state.position() -= getStateCorrection();
 
-        return gotPose;
+        return m_hasPoseEstimate;
     }
 
     Eigen::Vector3d TrackedBodyTarget::getStateCorrection() const {
@@ -228,6 +233,16 @@ namespace vbtracker {
     ConfigParams const &TrackedBodyTarget::getParams() const {
         return m_body.getParams();
     }
+
+    LedGroup const &TrackedBodyTarget::leds() const { return m_impl->leds; }
+
+    LedPtrList const &TrackedBodyTarget::usableLeds() const {
+        return m_impl->usableLeds;
+    }
+
+    LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }
+
+    LedPtrList &TrackedBodyTarget::usableLeds() { return m_impl->usableLeds; }
 
 } // namespace vbtracker
 } // namespace osvr
