@@ -55,7 +55,7 @@ namespace vbtracker {
             if (!m_enabled) {
                 return;
             }
-            cv::namedWindow(DEBUG_WINDOW_NAME);
+            // cv::namedWindow(m_windowName);
 
             std::cout << "\nVideo-based tracking debug windows help:\n";
             std::cout
@@ -82,21 +82,22 @@ namespace vbtracker {
         void displayNewFrame(TrackingSystem::Impl const &impl);
 
         void showDebugImage(cv::Mat const &image) {
-            m_displayedFrame = image.clone();
-            cv::imshow(DEBUG_WINDOW_NAME, m_displayedFrame);
+            image.copyTo(m_displayedFrame);
+            cv::imshow(m_windowName, m_displayedFrame);
         }
 
         void quitDebug() {
             if (!m_enabled) {
                 return;
             }
-            cv::destroyWindow(DEBUG_WINDOW_NAME);
+            cv::destroyWindow(m_windowName);
             m_enabled = false;
         }
 
       private:
         bool m_enabled;
         DebugDisplayMode m_mode = DebugDisplayMode::Blobs;
+        std::string m_windowName = DEBUG_WINDOW_NAME;
         cv::Mat m_displayedFrame;
         ::util::Stride m_debugStride;
     };
@@ -123,7 +124,8 @@ namespace vbtracker {
             return;
         }
 
-        if (!m_debugStride++) {
+        m_debugStride.advance();
+        if (!m_debugStride) {
             /// not our turn.
             return;
         }
@@ -156,18 +158,27 @@ namespace vbtracker {
         case 'b':
         case 'B':
             // Show the blob/keypoints image
+            std::cout << "'b' pressed - Switching to the blobs image in the "
+                         "debug window."
+                      << std::endl;
             m_mode = DebugDisplayMode::Blobs;
             break;
 
         case 'i':
         case 'I':
             // Show the input image.
+            std::cout << "'i' pressed - Switching to the input image in the "
+                         "debug window."
+                      << std::endl;
             m_mode = DebugDisplayMode::InputImage;
             break;
 
         case 't':
         case 'T':
             // Show the thresholded image
+            std::cout << "'t' pressed - Switching to the thresholded image in "
+                         "the debug window."
+                      << std::endl;
             m_mode = DebugDisplayMode::Thresholding;
             break;
 
@@ -182,6 +193,8 @@ namespace vbtracker {
         case 'q':
         case 'Q':
             // Close the debug window.
+            std::cout << "'q' pressed - quitting the debug window."
+                      << std::endl;
             quitDebug();
             break;
 

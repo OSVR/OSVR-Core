@@ -53,6 +53,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <util/Stride.h>
+
 // Standard includes
 #include <iostream>
 #include <fstream>
@@ -78,9 +80,12 @@ class TrackerThread : boost::noncopyable {
                   BodyReportingVector &reportingVec,
                   osvr::vbtracker::CameraParameters const &camParams)
         : m_trackingSystem(trackingSystem), m_cam(imageSource),
-          m_reportingVec(reportingVec), m_camParams(camParams) {}
+          m_reportingVec(reportingVec), m_camParams(camParams) {
+        msg() << "Tracker thread object created." << std::endl;
+    }
 
     void operator()() {
+        msg() << "Tracker thread object invoked." << std::endl;
         bool keepGoing = true;
         while (keepGoing) {
             doFrame();
@@ -90,25 +95,35 @@ class TrackerThread : boost::noncopyable {
                 std::lock_guard<std::mutex> lock(m_runMutex);
                 keepGoing = m_run;
             }
+            if (!keepGoing) {
+                msg() << "Tracker thread object: Just checked our run flag and noticed it turned false..." << std::endl;
+            }
         }
+        msg() << "Tracker thread object: functor exiting." << std::endl;
     }
 
     /// Call from the main thread!
     void triggerStop() {
+        msg() << "Tracker thread object: triggerStop() called" << std::endl;
         std::lock_guard<std::mutex> lock(m_runMutex);
         m_run = false;
     }
 
   private:
+    std::ostream &msg() const { return std::cout << "[UnifiedTracker] "; }
+    std::ostream &warn() const { return msg() << "Warning: "; }
     void doFrame() {
         // Check camera status.
         if (!m_cam.ok()) {
             // Hmm, camera seems bad. Might regain it? Skip for now...
+            warn() << "Camera is reporting it is not OK." << std::endl;
             return;
         }
         // Trigger a grab.
         if (!m_cam.grab()) {
-            // Again failing silently, in hopes we get better luck next time...
+            // Again failing without quitting, in hopes we get better luck next
+            // time...
+            warn() << "Camera grab failed." << std::endl;
             return;
         }
         // When we triggered the grab is our current best guess of the time for
@@ -119,6 +134,12 @@ class TrackerThread : boost::noncopyable {
 
         // Pull the image into an OpenCV matrix named m_frame.
         m_cam.retrieve(m_frame, m_frameGray);
+        if (!m_frame.data || !m_frameGray.data) {
+            warn()
+                << "Camera retrieve appeared to fail: frames had null pointers!"
+                << std::endl;
+            return;
+        }
 
         // Submit to the tracking system.
         auto bodyIds = m_trackingSystem.processFrame(tv, m_frame, m_frameGray,
@@ -199,6 +220,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
             throw std::logic_error("Trying to start the tracker thread when "
                                    "it's already started!");
         }
+        std::cout << "Starting the tracker thread..." << std::endl;
         m_trackerThreadFunctor.reset(new TrackerThread(
             *m_trackingSystem, *m_source, m_bodyReportingVector,
             osvr::vbtracker::getHDKCameraParameters()));
@@ -232,11 +254,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
 };
 
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
-    if (!m_source->ok()) {
-        // Couldn't open the camera.  Failing silently for now. Maybe the
-        // camera will be plugged back in later.
-        return OSVR_RETURN_SUCCESS;
-    }
+    /// @todo use the m_bodyReportingVector to report stuff.
 
     return OSVR_RETURN_SUCCESS;
 }
