@@ -35,8 +35,6 @@
 // Standard includes
 #include <stdexcept>
 #include <cstdint>
-#include <type_traits>
-#include <limits.h>
 
 namespace osvr {
 namespace vbtracker {
@@ -78,30 +76,9 @@ namespace vbtracker {
 } // namespace osvr
 
 namespace std {
-template <> struct hash<osvr::vbtracker::BodyTargetId> {
-    using PairType = osvr::vbtracker::BodyTargetId;
-    using First = PairType::first_type;
-    using Second = PairType::second_type;
-
-    using FirstWrapped = First::wrapped_type;
-    using SecondWrapped = Second::wrapped_type;
-    using NewType = std::uint32_t;
-    static_assert(sizeof(FirstWrapped) + sizeof(SecondWrapped) <=
-                      sizeof(NewType),
-                  "New type must be chosen to accommodate the combined bits "
-                  "from both body and target ID!");
-
-    size_t operator()(const PairType &x) const {
-        auto extendedFirst = static_cast<NewType>(x.first.value());
-        auto extendedSecond = static_cast<NewType>(x.second.value());
-        /// Using xor for safety, in case I got the shifts wrong, but it should
-        /// be [padding][bits from first element][bits from second element]
-        NewType combinedValue =
-            (extendedFirst << (CHAR_BIT * sizeof(SecondWrapped))) ^
-            extendedSecond;
-        return std::hash<NewType>{}(combinedValue);
-    }
-};
+template <>
+struct hash<osvr::vbtracker::BodyTargetId>
+    : osvr::util::HashIdAggregate<osvr::vbtracker::BodyTargetId> {};
 } // namespace std
 
 #endif // INCLUDED_BodyIdTypes_h_GUID_4FD241A3_25E9_42AF_F075_8EE8191C02F0
