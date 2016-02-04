@@ -58,51 +58,45 @@ namespace vbtracker {
         osvr::util::time::TimeValue lastEstimate;
     };
 
-    namespace detail {
-        inline BeaconStateVec
-        createBeaconStateVec(ConfigParams const &params,
-                             TargetSetupData const &setupData,
-                             Eigen::Vector3d &beaconOffset) {
-            {
-                /// Compute or retrieve the beacon offset.
-                if (params.offsetToCentroid) {
-                    Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
-                    auto bNum = size_t{0};
-                    for (auto &beacon : setupData.locations) {
-                        beaconSum += cvToVector(beacon).cast<double>();
-                        bNum++;
-                    }
-                    beaconOffset = beaconSum / bNum;
-#if 0
+    inline BeaconStateVec createBeaconStateVec(ConfigParams const &params,
+                                               TargetSetupData const &setupData,
+                                               Eigen::Vector3d &beaconOffset) {
+        {
+            /// Compute or retrieve the beacon offset.
+            if (params.offsetToCentroid) {
+                Eigen::Vector3d beaconSum = Eigen::Vector3d::Zero();
+                auto bNum = size_t{0};
+                for (auto &beacon : setupData.locations) {
+                    beaconSum += cvToVector(beacon).cast<double>();
+                    bNum++;
+                }
+                beaconOffset = beaconSum / bNum;
                 if (params.debug) {
-                    std::cout << "Beacon centroid: " << m_centroid.transpose()
-                        << std::endl;
+                    std::cout << "[Tracker Target] Computed beacon centroid: "
+                              << beaconOffset.transpose() << std::endl;
                 }
-#endif
-                } else {
-                    beaconOffset =
-                        Eigen::Vector3d::Map(params.manualBeaconOffset);
-                }
+            } else {
+                beaconOffset = Eigen::Vector3d::Map(params.manualBeaconOffset);
             }
-            /// Create the vector we'll return, and then the beacon state
-            /// objects.
-            using size_type = TargetSetupData::size_type;
-            const auto n = setupData.numBeacons();
-            BeaconStateVec beacons;
-            beacons.reserve(n);
-            Eigen::Vector3d location;
-            for (size_type i = 0; i < n; ++i) {
-                location = cvToVector(setupData.locations[i]).cast<double>() -
-                           beaconOffset;
-                BeaconStatePtr beacon(new BeaconState(
-                    location, Eigen::Vector3d::Constant(
-                                  setupData.initialAutocalibrationErrors[i])
-                                  .asDiagonal()));
-                beacons.emplace_back(std::move(beacon));
-            }
-            return beacons;
         }
-    } // namespace detail
+        /// Create the vector we'll return, and then the beacon state
+        /// objects.
+        using size_type = TargetSetupData::size_type;
+        const auto n = setupData.numBeacons();
+        BeaconStateVec beacons;
+        beacons.reserve(n);
+        Eigen::Vector3d location;
+        for (size_type i = 0; i < n; ++i) {
+            location = cvToVector(setupData.locations[i]).cast<double>() -
+                       beaconOffset;
+            BeaconStatePtr beacon(new BeaconState(
+                location, Eigen::Vector3d::Constant(
+                              setupData.initialAutocalibrationErrors[i])
+                              .asDiagonal()));
+            beacons.emplace_back(std::move(beacon));
+        }
+        return beacons;
+    }
 
     TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body,
                                          BodyTargetInterface const &bodyIface,
@@ -116,8 +110,8 @@ namespace vbtracker {
           m_impl(new Impl(getParams(), bodyIface)) {
 
         /// Create the beacon state objects and initialize the beacon offset.
-        m_beacons = detail::createBeaconStateVec(getParams(), setupData,
-                                                 m_beaconOffset);
+        m_beacons =
+            createBeaconStateVec(getParams(), setupData, m_beaconOffset);
         {
             /// Create the LED identifier
             std::unique_ptr<OsvrHdkLedIdentifier> identifier(
@@ -376,12 +370,16 @@ namespace vbtracker {
 
     void TrackedBodyTarget::dumpBeaconsToConsole() const {
 
-        /// Dump the beacon locations to console
+        /// Dump the beacon locations to console in a CSV-like format.
         auto numBeacons = getNumBeacons();
+        std::cout << "BeaconsID,x,y,z" << std::endl;
+        Eigen::IOFormat ourFormat(Eigen::StreamPrecision, 0, ",");
         for (UnderlyingBeaconIdType i = 0; i < numBeacons; ++i) {
             auto id = ZeroBasedBeaconId(i);
-            std::cout << "Beacon " << i + 1 << ": "
-                      << getBeaconAutocalibPosition(id).transpose() << "\n";
+            std::cout << i + 1 << ","
+                      << getBeaconAutocalibPosition(id).transpose().format(
+                             ourFormat)
+                      << "\n";
         }
     }
 

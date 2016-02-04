@@ -105,7 +105,11 @@ namespace vbtracker {
 
         /// Rotation/basis-change part.
         template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
-            return cvMatx33<Scalar>::eye();
+            auto ret = cvMatx33<Scalar>::eye();
+            // flip sign of x and z axes
+            ret(0, 0) = -1;
+            ret(2, 2) = -1;
+            return ret;
         }
 
         /// Add the scaling part.
@@ -175,11 +179,10 @@ namespace vbtracker {
             [](LocationPoint pt) { return transformFromHDKData(pt); });
 
         if (useRear) {
-            // distance between front and back panel target origins, in m.
+            // distance between front and back panel target origins, in mm.
             auto distanceBetweenPanels =
                 (params.headCircumference / M_PI * 10.f +
-                 params.headToFrontBeaconOriginDistance) *
-                SCALE_FACTOR;
+                 params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
             auto transformBackPoints = [distanceBetweenPanels](
@@ -188,12 +191,15 @@ namespace vbtracker {
                 p.z += distanceBetweenPanels;
                 return p;
             };
-            auto alternateTransformBackPoints = [distanceBetweenPanels](
-                LocationPoint pt) {
-                auto p = transformFromHDKData(pt);
-                p.z -= distanceBetweenPanels;
-                return p;
+            auto rotate180aboutY = [](LocationPoint pt) {
+                return LocationPoint(-pt.x, pt.y, -pt.z);
             };
+            auto alternateTransformBackPoints =
+                [distanceBetweenPanels, &rotate180aboutY](LocationPoint pt) {
+                    auto p = rotate180aboutY(pt) -
+                             LocationPoint(0, 0, distanceBetweenPanels);
+                    return transformFromHDKData(p);
+                };
             std::transform(begin(OsvrHdkLedLocations_SENSOR1),
                            end(OsvrHdkLedLocations_SENSOR1), locationsEnd,
                            alternateTransformBackPoints);

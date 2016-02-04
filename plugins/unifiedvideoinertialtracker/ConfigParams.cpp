@@ -51,7 +51,7 @@ namespace vbtracker {
         /// component retained.
         manualBeaconOffset[0] = 0;
         manualBeaconOffset[1] = 0;
-        manualBeaconOffset[2] = 0.00388676;
+        manualBeaconOffset[2] = -0.0388676;
     }
 } // namespace vbtracker
 } // namespace osvr
