@@ -291,11 +291,13 @@ namespace vbtracker {
             break;
         }
         }
-#if 0
         if (m_hasPoseEstimate) {
-            msg() << getBody().getState().position().transpose() << std::endl;
+            static ::util::Stride s(13);
+            if (++s) {
+                msg() << getBody().getState().position().transpose()
+                      << std::endl;
+            }
         }
-#endif
 
         /// Update our local target-specific timestamp
         m_impl->lastEstimate = tv;
