@@ -66,6 +66,7 @@
 #include <thread>
 #include <mutex>
 #include <stdexcept>
+#include <future>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -145,9 +146,20 @@ class TrackerThread : boost::noncopyable {
             return;
         }
 
+        /// Launch an asynchronous task to perform the initial image processing.
+        auto imageProcFuture = std::async(
+            std::launch::async, [&]() -> osvr::vbtracker::ImageOutputDataPtr {
+                return m_trackingSystem.performInitialImageProcessing(
+                    tv, m_frame, m_frameGray, m_camParams);
+            });
+
+        /// @todo handle IMU reports in here
+
+        /// By calling .get() on the std::future we block on the async we
+        /// launched.
         // Submit to the tracking system.
-        auto bodyIds = m_trackingSystem.processFrame(tv, m_frame, m_frameGray,
-                                                     m_camParams);
+        auto bodyIds =
+            m_trackingSystem.updateBodiesFromVideoData(imageProcFuture.get());
 
         for (auto const &bodyId : bodyIds) {
             auto &body = m_trackingSystem.getBody(bodyId);
@@ -162,7 +174,7 @@ class TrackerThread : boost::noncopyable {
     cv::Mat m_frame;
     cv::Mat m_frameGray;
     std::mutex m_runMutex;
-    volatile bool m_run = true;
+    bool m_run = true;
 };
 
 class UnifiedVideoInertialTracker : boost::noncopyable {
