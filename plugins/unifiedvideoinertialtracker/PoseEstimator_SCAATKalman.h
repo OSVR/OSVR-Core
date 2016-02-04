@@ -42,6 +42,11 @@ namespace vbtracker {
     class SCAATKalmanPoseEstimator {
       public:
         enum class TriBool { False, True, Unknown };
+        enum class TrackingHealth {
+            Functioning,
+            NeedsResetNow,
+            ResetWhenBeaconsSeen
+        };
         struct InOutParams {
             BeaconStateVec &beacons;
             std::vector<double> const &beaconMeasurementVariance;
@@ -54,6 +59,17 @@ namespace vbtracker {
         bool operator()(CameraParameters const &camParams,
                         LedPtrList const &leds, double videoDt,
                         InOutParams const &p);
+
+        void resetCounters() {
+            m_framesInProbation = 0;
+            m_framesWithoutIdentifiedBlobs = 0;
+            m_framesWithoutUtilizedMeasurements = 0;
+        }
+
+        /// Determines whether the Kalman filter is in good working condition,
+        /// should fall back to RANSAC immediately, or should fall back next
+        /// time beacons are detected. When the algorithm switches f
+        TrackingHealth getTrackingHealth();
 
       private:
         TriBool inBoundingBoxRatioRange(Led const &led);

@@ -38,6 +38,7 @@
 
 // Standard includes
 #include <vector>
+#include <iosfwd>
 
 namespace osvr {
 namespace vbtracker {
@@ -122,6 +123,12 @@ namespace vbtracker {
       private:
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
+
+        std::ostream & msg() const;
+        void enterKalmanMode();
+        void enterRANSACMode();
+
+        void dumpBeaconsToConsole() const;
 
         LedGroup &leds();
 

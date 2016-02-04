@@ -42,7 +42,7 @@
 
 namespace osvr {
 namespace vbtracker {
-    enum class TargetTrackingState { RANSAC, Kalman };
+    enum class TargetTrackingState { RANSAC, Kalman, RANSACWhenBlobDetected };
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
             : bodyInterface(bodyIface), kalmanEstimator(params) {}
@@ -127,16 +127,11 @@ namespace vbtracker {
 
 #if 0
         /// Dump the beacon locations to console
-        auto numBeacons = getNumBeacons();
-        for (UnderlyingBeaconIdType i = 0; i < numBeacons; ++i) {
-            auto id = ZeroBasedBeaconId(i);
-            std::cout << "Beacon " << i + 1 << ": "
-                      << getBeaconAutocalibPosition(id).transpose() << "\n";
-        }
+        dumpBeaconsToConsole();
 #endif
     }
 
-    TrackedBodyTarget::~TrackedBodyTarget() {}
+    TrackedBodyTarget::~TrackedBodyTarget() { dumpBeaconsToConsole(); }
 
     BodyTargetId TrackedBodyTarget::getQualifiedId() const {
         return BodyTargetId(getBody().getId(), getId());
@@ -250,30 +245,42 @@ namespace vbtracker {
             }
             usable.push_back(&led);
         }
-        auto msg = [&]() -> std::ostream & {
-            return std::cout << "[Tracker Target " << getQualifiedId() << "] ";
-        };
         /// Must pre/post correct the state by our offset :-/
         /// @todo make this state correction less hacky.
         m_impl->bodyInterface.state.position() += getStateCorrection();
 
         /// @todo put this in the class
-        bool permitKalman = false;
+        bool permitKalman = true;
 
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo move state machine logic elsewhere
+
+        // pre-estimation transitions
+        switch (m_impl->trackingState) {
+        case TargetTrackingState::RANSACWhenBlobDetected: {
+            if (!usable.empty()) {
+                msg()
+                    << "In flight reset - beacons detected, re-acquiring fix..."
+                    << std::endl;
+                enterRANSACMode();
+            }
+            break;
+        }
+        default:
+            // other states don't have pre-estimation transitions.
+            break;
+        }
+
+        // main estimation dispatch
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
             m_hasPoseEstimate = m_impl->ransacEstimator(
                 camParams, usable, m_beacons, m_impl->bodyInterface.state);
 
-            if (m_hasPoseEstimate && permitKalman) {
-                msg() << "Entering SCAAT Kalman mode..." << std::endl;
-                m_impl->trackingState = TargetTrackingState::Kalman;
-            }
             break;
         }
 
+        case TargetTrackingState::RANSACWhenBlobDetected:
         case TargetTrackingState::Kalman: {
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
@@ -287,10 +294,39 @@ namespace vbtracker {
                 getBody().getProcessModel()};
             m_hasPoseEstimate =
                 m_impl->kalmanEstimator(camParams, usable, videoDt, params);
-            /// @todo exit conditions for kalman mode here...
             break;
         }
         }
+
+        // post-estimation transitions
+        switch (m_impl->trackingState) {
+        case TargetTrackingState::RANSAC: {
+            if (m_hasPoseEstimate && permitKalman) {
+                enterKalmanMode();
+            }
+            break;
+        }
+        case TargetTrackingState::Kalman: {
+            auto health = m_impl->kalmanEstimator.getTrackingHealth();
+            switch (health) {
+            case SCAATKalmanPoseEstimator::TrackingHealth::NeedsResetNow:
+                msg() << "In flight reset - lost fix..." << std::endl;
+                enterRANSACMode();
+                break;
+            case SCAATKalmanPoseEstimator::TrackingHealth::ResetWhenBeaconsSeen:
+                m_impl->trackingState =
+                    TargetTrackingState::RANSACWhenBlobDetected;
+                break;
+            case SCAATKalmanPoseEstimator::TrackingHealth::Functioning:
+                // OK!
+                break;
+            }
+        }
+        default:
+            // other states don't have post-estimation transitions.
+            break;
+        }
+
         if (m_hasPoseEstimate) {
             static ::util::Stride s(13);
             if (++s) {
@@ -315,6 +351,18 @@ namespace vbtracker {
     ConfigParams const &TrackedBodyTarget::getParams() const {
         return m_body.getParams();
     }
+    std::ostream &TrackedBodyTarget::msg() const {
+        return std::cout << "[Tracker Target " << getQualifiedId() << "] ";
+    }
+    void TrackedBodyTarget::enterKalmanMode() {
+        msg() << "Entering SCAAT Kalman mode..." << std::endl;
+        m_impl->trackingState = TargetTrackingState::Kalman;
+        m_impl->kalmanEstimator.resetCounters();
+    }
+
+    void TrackedBodyTarget::enterRANSACMode() {
+        m_impl->trackingState = TargetTrackingState::RANSAC;
+    }
 
     LedGroup const &TrackedBodyTarget::leds() const { return m_impl->leds; }
 
@@ -325,6 +373,17 @@ namespace vbtracker {
     LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }
 
     LedPtrList &TrackedBodyTarget::usableLeds() { return m_impl->usableLeds; }
+
+    void TrackedBodyTarget::dumpBeaconsToConsole() const {
+
+        /// Dump the beacon locations to console
+        auto numBeacons = getNumBeacons();
+        for (UnderlyingBeaconIdType i = 0; i < numBeacons; ++i) {
+            auto id = ZeroBasedBeaconId(i);
+            std::cout << "Beacon " << i + 1 << ": "
+                      << getBeaconAutocalibPosition(id).transpose() << "\n";
+        }
+    }
 
 } // namespace vbtracker
 } // namespace osvr

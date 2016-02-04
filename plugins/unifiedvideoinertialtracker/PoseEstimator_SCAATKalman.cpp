@@ -263,5 +263,31 @@ namespace vbtracker {
         }
         return TriBool::Unknown;
     }
+
+    // The total number of frames that we can have dodgy Kalman tracking for
+    // before RANSAC takes over again.
+    static const std::size_t MAX_PROBATION_FRAMES = 10;
+
+    static const std::size_t MAX_FRAMES_WITHOUT_MEASUREMENTS = 50;
+
+    static const std::size_t MAX_FRAMES_WITHOUT_ID_BLOBS = 10;
+
+    SCAATKalmanPoseEstimator::TrackingHealth
+    SCAATKalmanPoseEstimator::getTrackingHealth() {
+
+        auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES) ||
+                          (m_framesWithoutUtilizedMeasurements >
+                           MAX_FRAMES_WITHOUT_MEASUREMENTS);
+        if (needsReset) {
+            return TrackingHealth::NeedsResetNow;
+        }
+        /// Additional case: We've been a while without blobs...
+        if (m_framesWithoutIdentifiedBlobs > MAX_FRAMES_WITHOUT_ID_BLOBS) {
+            // In this case, we force ransac once we get blobs once again.
+            return TrackingHealth::ResetWhenBeaconsSeen;
+        }
+        /// Otherwise, we're doing OK!
+        return TrackingHealth::Functioning;
+    }
 } // namespace vbtracker
 } // namespace osvr
