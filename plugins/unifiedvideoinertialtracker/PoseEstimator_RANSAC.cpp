@@ -38,8 +38,9 @@
 namespace osvr {
 namespace vbtracker {
     bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList &leds,
+                                         LedPtrList const &leds,
                                          BeaconStateVec const &beacons,
+                                         std::vector<BeaconData> &beaconDebug,
                                          Eigen::Vector3d &outXlate,
                                          Eigen::Quaterniond &outQuat) {
 
@@ -55,14 +56,12 @@ namespace vbtracker {
         std::vector<ZeroBasedBeaconId> beaconIds;
         for (auto const &led : leds) {
             auto id = makeZeroBased(led->getID());
-#if 0
-            m_beaconDebugData[id].variance = -1;
-            m_beaconDebugData[id].measurement = led.getLocation();
-#endif
+            beaconDebug[asIndex(id)].variance = -1;
+            beaconDebug[asIndex(id)].measurement = led->getLocation();
             beaconIds.push_back(id);
             imagePoints.push_back(led->getLocation());
             objectPoints.push_back(
-                vec3dToCVPoint3f(beacons[id.value()]->stateVector()));
+                vec3dToCVPoint3f(beacons[asIndex(id)]->stateVector()));
         }
 
         // Make sure we have enough points to do our estimation.
@@ -112,7 +111,7 @@ namespace vbtracker {
         //==========================================================================
         // Make sure we got all the inliers we needed.  Otherwise, reject this
         // pose.
-        if (inlierIndices.rows < m_requiredInliers) {
+        if (inlierIndices.rows < static_cast<int>(m_requiredInliers)) {
             return false;
         }
 
@@ -213,22 +212,22 @@ namespace vbtracker {
                                                10.,
                                                10.};
     bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList &leds,
-                                         BeaconStateVec const &beacons,
-                                         BodyState &state) {
+                                         LedPtrList const &leds,
+                                         EstimatorInOutParams const &p) {
         Eigen::Vector3d xlate;
         Eigen::Quaterniond quat;
         /// Call the main pose estimation to get the vector and quat.
         {
-            auto ret = (*this)(camParams, leds, beacons, xlate, quat);
+            auto ret =
+                (*this)(camParams, leds, p.beacons, p.beaconDebug, xlate, quat);
             if (!ret) {
                 return false;
             }
         }
         /// OK, so if we're here, estimation succeeded and we have valid data in
         /// xlate and quat.
-        state.position() = xlate;
-        state.setQuaternion(quat);
+        p.state.position() = xlate;
+        p.state.setQuaternion(quat);
 
         using StateVec = kalman::types::DimVector<BodyState>;
         using StateSquareMatrix = kalman::types::DimSquareMatrix<BodyState>;
@@ -236,8 +235,8 @@ namespace vbtracker {
         StateSquareMatrix covariance = StateVec(InitialStateError).asDiagonal();
         // Copy the existing angular velocity error covariance
         covariance.bottomRightCorner<3, 3>() =
-            state.errorCovariance().bottomRightCorner<3, 3>();
-        state.setErrorCovariance(covariance);
+            p.state.errorCovariance().bottomRightCorner<3, 3>();
+        p.state.setErrorCovariance(covariance);
         return true;
     }
 

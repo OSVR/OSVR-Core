@@ -29,6 +29,7 @@
 #include "ConfigParams.h"
 #include "PoseEstimatorTypes.h"
 #include "ModelTypes.h"
+#include "TrackedBodyTarget.h"
 
 // Library/third-party includes
 // - none
@@ -47,6 +48,7 @@ namespace vbtracker {
             NeedsResetNow,
             ResetWhenBeaconsSeen
         };
+#if 0
         struct InOutParams {
             BeaconStateVec &beacons;
             std::vector<double> const &beaconMeasurementVariance;
@@ -54,11 +56,13 @@ namespace vbtracker {
             Vec3Vector const &beaconEmissionDirection;
             BodyState &state;
             BodyProcessModel &processModel;
+            std::vector<BeaconData> & beaconDebug;
         };
+#endif
         SCAATKalmanPoseEstimator(ConfigParams const &params);
         bool operator()(CameraParameters const &camParams,
                         LedPtrList const &leds, double videoDt,
-                        InOutParams const &p);
+                        EstimatorInOutParams const &p);
 
         void resetCounters() {
             m_framesInProbation = 0;
@@ -85,7 +89,6 @@ namespace vbtracker {
         std::size_t m_framesInProbation = 0;
         std::size_t m_framesWithoutIdentifiedBlobs = 0;
         std::size_t m_framesWithoutUtilizedMeasurements = 0;
-        bool m_gotMeasurement = false;
     };
 } // namespace vbtracker
 } // namespace osvr

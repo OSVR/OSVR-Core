@@ -112,6 +112,9 @@ namespace vbtracker {
         /// Create the beacon state objects and initialize the beacon offset.
         m_beacons =
             createBeaconStateVec(getParams(), setupData, m_beaconOffset);
+        /// Create the beacon debug data
+        m_beaconDebugData.resize(m_beacons.size());
+
         {
             /// Create the LED identifier
             std::unique_ptr<OsvrHdkLedIdentifier> identifier(
@@ -160,6 +163,14 @@ namespace vbtracker {
         /// Clear the "usableLeds" that will be populated in a later step, if we
         /// get that far.
         m_impl->usableLeds.clear();
+
+        if (getParams().streamBeaconDebugInfo) {
+            /// Only bother resetting if anyone is actually going to receive the
+            /// data.
+            for (auto &data : m_beaconDebugData) {
+                data.reset();
+            }
+        }
 
         auto usedMeasurements = std::size_t{0};
         const auto blobMoveThreshold = getParams().blobMoveThreshold;
@@ -266,11 +277,18 @@ namespace vbtracker {
         }
 
         // main estimation dispatch
+
+        auto params = EstimatorInOutParams{m_beacons,
+                                           m_beaconMeasurementVariance,
+                                           m_beaconFixed,
+                                           m_beaconEmissionDirection,
+                                           getBody().getState(),
+                                           getBody().getProcessModel(),
+                                           m_beaconDebugData};
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
-            m_hasPoseEstimate = m_impl->ransacEstimator(
-                camParams, usable, m_beacons, m_impl->bodyInterface.state);
-
+            m_hasPoseEstimate =
+                m_impl->ransacEstimator(camParams, usable, params);
             break;
         }
 
@@ -278,14 +296,6 @@ namespace vbtracker {
         case TargetTrackingState::Kalman: {
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
-
-            auto params = SCAATKalmanPoseEstimator::InOutParams{
-                m_beacons,
-                m_beaconMeasurementVariance,
-                m_beaconFixed,
-                m_beaconEmissionDirection,
-                getBody().getState(),
-                getBody().getProcessModel()};
             m_hasPoseEstimate =
                 m_impl->kalmanEstimator(camParams, usable, videoDt, params);
             break;
@@ -319,14 +329,6 @@ namespace vbtracker {
         default:
             // other states don't have post-estimation transitions.
             break;
-        }
-
-        if (m_hasPoseEstimate) {
-            static ::util::Stride s(13);
-            if (++s) {
-                msg() << getBody().getState().position().transpose()
-                      << std::endl;
-            }
         }
 
         /// Update our local target-specific timestamp

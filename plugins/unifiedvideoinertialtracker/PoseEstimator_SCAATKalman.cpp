@@ -34,6 +34,8 @@
 #include <osvr/Kalman/AugmentedState.h>
 #include <osvr/Kalman/ConstantProcess.h>
 
+#include <util/Stride.h>
+
 // Standard includes
 #include <algorithm>
 #include <iostream>
@@ -61,7 +63,8 @@ namespace vbtracker {
     bool SCAATKalmanPoseEstimator::operator()(CameraParameters const &camParams,
                                               LedPtrList const &leds,
                                               double videoDt,
-                                              InOutParams const &p) {
+                                              EstimatorInOutParams const &p) {
+        bool gotMeasurement = false;
         double varianceFactor = 1;
 
         const auto inBoundsID = leds.size();
@@ -113,17 +116,17 @@ namespace vbtracker {
             Eigen::Matrix3d(p.state.getCombinedQuaternion());
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
+        static ::util::Stride s{203};
+        s.advance();
         for (auto &ledPtr : leds) {
             auto &led = *ledPtr;
 
             auto id = led.getID();
             auto index = asIndex(id);
 
-#ifdef BEACON_DEBUG_DATA
-            auto &debug = m_beaconDebugData[id];
+            auto &debug = p.beaconDebug[index];
             debug.seen = true;
             debug.measurement = led.getLocation();
-#endif
             if (skipBright && led.isBright()) {
                 continue;
             }
@@ -197,25 +200,27 @@ namespace vbtracker {
             } else {
                 numGood++;
             }
-#ifdef BEACON_DEBUG_DATA
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
-#endif
             auto effectiveVariance =
                 localVarianceFactor * m_measurementVarianceScaleFactor *
                 newIdentificationVariancePenalty *
                 (led.isBright() ? BRIGHT_PENALTY : 1.) *
                 p.beaconMeasurementVariance[index] / led.getMeasurement().area;
-#ifdef BEACON_DEBUG_DATA
             debug.variance = effectiveVariance;
-#endif
             meas.setVariance(effectiveVariance);
 
             /// Now, do the correction.
             auto model = kalman::makeAugmentedProcessModel(p.processModel,
                                                            beaconProcess);
             kalman::correct(state, model, meas);
-            m_gotMeasurement = true;
+            gotMeasurement = true;
+
+            if (s) {
+                std::cout << "M: " << debug.measurement
+                          << "  R: " << debug.residual
+                          << "  s2: " << debug.variance << "\n";
+            }
         }
 
         /// Probation: Dealing with ratios of bad to good residuals
@@ -239,7 +244,7 @@ namespace vbtracker {
         }
 
         /// Frames without measurements: dealing with getting in a bad state
-        if (m_gotMeasurement) {
+        if (gotMeasurement) {
             m_framesWithoutUtilizedMeasurements = 0;
         } else {
             if (inBoundsID > 0) {

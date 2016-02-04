@@ -29,6 +29,8 @@
 #include "Types.h"
 #include "ModelTypes.h"
 #include "CameraParameters.h"
+#include "ConfigParams.h"
+#include "TrackedBodyTarget.h"
 
 // Library/third-party includes
 // - none
@@ -38,7 +40,15 @@
 
 namespace osvr {
 namespace vbtracker {
-    class Led;
+    struct EstimatorInOutParams {
+        BeaconStateVec &beacons;
+        std::vector<double> const &beaconMeasurementVariance;
+        std::vector<bool> const &beaconFixed;
+        Vec3Vector const &beaconEmissionDirection;
+        BodyState &state;
+        BodyProcessModel &processModel;
+        std::vector<BeaconData> &beaconDebug;
+    };
 } // namespace vbtracker
 } // namespace osvr
 
