@@ -168,58 +168,44 @@ namespace vbtracker {
 
         /// Scale from millimeters to meters, and make the coordinate system
         /// what we want.
-        auto transformPoints = [](LocationPoint pt) {
-            auto p = pt * SCALE_FACTOR;
-            return LocationPoint(-p.x, p.y, -p.z);
-        };
-
         auto locationsEnd = std::transform(
             begin(OsvrHdkLedLocations_SENSOR0),
             end(OsvrHdkLedLocations_SENSOR0), begin(data.locations),
             [](LocationPoint pt) { return transformFromHDKData(pt); });
 
         if (useRear) {
-            // distance between front and back panel target origins, in mm.
+            // distance between front and back panel target origins, in mm,
+            // because we'll apply this before converting coordinate systems.
             auto distanceBetweenPanels =
                 (params.headCircumference / M_PI * 10.f +
                  params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
-            auto transformBackPoints = [distanceBetweenPanels](
-                LocationPoint pt) {
-                auto p = pt * SCALE_FACTOR;
-                p.z += distanceBetweenPanels;
-                return p;
-            };
             auto rotate180aboutY = [](LocationPoint pt) {
                 return LocationPoint(-pt.x, pt.y, -pt.z);
             };
-            auto alternateTransformBackPoints =
-                [distanceBetweenPanels, &rotate180aboutY](LocationPoint pt) {
-                    auto p = rotate180aboutY(pt) -
-                             LocationPoint(0, 0, distanceBetweenPanels);
-                    return transformFromHDKData(p);
-                };
+            auto transformBackPoints = [distanceBetweenPanels,
+                                        &rotate180aboutY](LocationPoint pt) {
+                auto p = rotate180aboutY(pt) -
+                         LocationPoint(0, 0, distanceBetweenPanels);
+                return transformFromHDKData(p);
+            };
             std::transform(begin(OsvrHdkLedLocations_SENSOR1),
                            end(OsvrHdkLedLocations_SENSOR1), locationsEnd,
-                           alternateTransformBackPoints);
+                           transformBackPoints);
         }
 
-        /// Just changes the basis.
-        auto transformVector = [](EmissionDirectionVec v) {
-            return EmissionDirectionVec(-v[0], v[1], -v[2]);
-        };
-
-        data.emissionDirections.resize(numFrontBeacons);
         std::transform(
             begin(OsvrHdkLedDirections_SENSOR0),
             end(OsvrHdkLedDirections_SENSOR0), begin(data.emissionDirections),
             [](EmissionDirectionVec v) { return transformFromHDKData(v); });
         if (useRear) {
-            // This is why we resized down earlier - so we can resize up to fill
+            // Resize down - so we can resize up to fill
             // those last elements with constant values.
-            data.emissionDirections.resize(numBeacons,
-                                           EmissionDirectionVec(0, 0, 1));
+            data.emissionDirections.resize(numFrontBeacons);
+            data.emissionDirections.resize(
+                numBeacons,
+                transformFromHDKData(EmissionDirectionVec(0, 0, -1)));
         }
         /// Set up autocalib.
         /// Set the ones that are fixed.
@@ -234,10 +220,9 @@ namespace vbtracker {
 #endif
 
         /// Put in the measurement variances.
-        std::transform(begin(OsvrHdkLedVariances_SENSOR0),
-                       end(OsvrHdkLedVariances_SENSOR0),
-                       begin(data.baseMeasurementVariances),
-                       [](double s) { return s / 100.; });
+        std::copy(begin(OsvrHdkLedVariances_SENSOR0),
+                  end(OsvrHdkLedVariances_SENSOR0),
+                  begin(data.baseMeasurementVariances));
 
         /// Clean, validate, and print a summary of the data.
         auto summary = data.cleanAndValidate();
