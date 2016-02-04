@@ -32,6 +32,7 @@
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
 #include <memory>
@@ -127,11 +128,21 @@ namespace vbtracker {
         /// Do we have a pose estimate for this body in general?
         bool hasPoseEstimate() const;
 
+        /// Adjusts the state to prepare to receive corrections from
+        /// measurement(s) at time tv, rolling back to earlier state and/or
+        /// predicting as required.
+        void adjustToMeasurementTime(osvr::util::time::TimeValue const &tv);
+
+        /// Replay any IMU measurements that had to be rolled back.
+        /// @sa adjustToMeasurementTime()
+        void replayRewoundMeasurements();
+
       private:
         BodyState &getState() { return m_state; }
         TrackingSystem &m_system;
         const BodyId m_id;
         BodyState m_state;
+        BodyProcessModel m_processModel;
         /// private implementation data
         struct Impl;
         std::unique_ptr<Impl> m_impl;

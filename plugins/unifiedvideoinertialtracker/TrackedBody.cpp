@@ -30,14 +30,18 @@
 #include "BodyTargetInterface.h"
 
 // Library/third-party includes
-// - none
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace vbtracker {
-    struct TrackedBody::Impl {};
+    struct TrackedBody::Impl {
+        bool hasTime = false;
+        osvr::util::time::TimeValue latest;
+        osvr::util::time::TimeValue stateTime;
+    };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
         : m_system(system), m_id(id), m_impl(new Impl) {}
 
@@ -67,11 +71,50 @@ namespace vbtracker {
         return m_system.getParams();
     }
 
-    BodyId TrackedBody::getId() const {
-#if 0
-        return m_system.getIdForBody(*this);
-#endif
-        return m_id;
+    BodyId TrackedBody::getId() const { return m_id; }
+
+    void TrackedBody::adjustToMeasurementTime(
+        osvr::util::time::TimeValue const &tv) {
+        /// @todo implement the stack of IMU stuff.
+        if (m_impl->hasTime) {
+            /// Already had a time thing happen.
+            auto dt = osvrTimeValueDurationSeconds(&tv, &m_impl->stateTime);
+            if (tv != m_impl->stateTime) {
+                /// Right now predicting backwards and forwards...
+                kalman::predict(m_state, m_processModel, dt);
+                m_state.postCorrect();
+            }
+            if (tv < m_impl->latest) {
+                /// The new measurement is in the "past", oh dear.
+                /// We should roll back, but until then...
+
+                // predict backwards
+                m_impl->stateTime = tv;
+
+            } else {
+                /// Moving to the future.
+                m_impl->stateTime = m_impl->latest = tv;
+            }
+        } else {
+            /// This is our first timestamp.
+            m_impl->hasTime = true;
+            m_impl->stateTime = m_impl->latest = tv;
+        }
+    }
+
+    void osvr::vbtracker::TrackedBody::replayRewoundMeasurements() {
+        /// @todo No stack of history yet, so nothing to replay yet. Right now
+        /// just predicting both directions :-/
+        BOOST_ASSERT_MSG(m_impl->hasTime, "Only makes sense to call Replay "
+                                          "once you already called Adjust and "
+                                          "thus already have a time entered!");
+        if (m_impl->stateTime < m_impl->latest) {
+            /// "return" to where we were by means of prediction. :-/
+            auto dt = osvrTimeValueDurationSeconds(&m_impl->latest,
+                                                   &m_impl->stateTime);
+            kalman::predict(m_state, m_processModel, dt);
+            m_state.postCorrect();
+        }
     }
 
 } // namespace vbtracker

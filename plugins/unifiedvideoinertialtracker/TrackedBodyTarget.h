@@ -33,6 +33,7 @@
 
 // Library/third-party includes
 #include <osvr/Kalman/PureVectorState.h>
+#include <osvr/Util/TimeValue.h>
 #include <boost/assert.hpp>
 
 // Standard includes
@@ -99,7 +100,8 @@ namespace vbtracker {
 
         /// Update the pose estimate using the updated LEDs - part of the third
         /// phase of tracking.
-        bool updatePoseEstimateFromLeds(CameraParameters const &camParams);
+        bool updatePoseEstimateFromLeds(CameraParameters const &camParams,
+                                        osvr::util::time::TimeValue const &tv);
 
         /// Did this target yet, or last time it was asked to, compute a pose
         /// estimate?

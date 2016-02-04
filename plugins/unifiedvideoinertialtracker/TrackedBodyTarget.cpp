@@ -30,6 +30,7 @@
 #include "HDKLedIdentifier.h"
 #include "PoseEstimatorTypes.h"
 #include "PoseEstimator_RANSAC.h"
+#include "PoseEstimator_SCAATKalman.h"
 #include "BodyTargetInterface.h"
 
 // Library/third-party includes
@@ -42,12 +43,16 @@ namespace osvr {
 namespace vbtracker {
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
-            : bodyInterface(bodyIface) {}
+            : bodyInterface(bodyIface), kalmanEstimator(params) {}
         BodyTargetInterface bodyInterface;
         LedGroup leds;
         LedPtrList usableLeds;
         LedIdentifierPtr identifier;
         RANSACPoseEstimator ransacEstimator;
+        SCAATKalmanPoseEstimator kalmanEstimator;
+
+        bool hasPrev = false;
+        osvr::util::time::TimeValue lastEstimate;
     };
 
     namespace detail {
@@ -219,19 +224,15 @@ namespace vbtracker {
     }
 
     bool TrackedBodyTarget::updatePoseEstimateFromLeds(
-        CameraParameters const &camParams) {
+        CameraParameters const &camParams,
+        osvr::util::time::TimeValue const &tv) {
 
-        /// Do the initial filtering of the LED group to just the identified,
-        /// in-bounds-ID ones before we pass it to an estimator.
+        /// Do the initial filtering of the LED group to just the identified
+        /// ones before we pass it to an estimator.
         auto &usable = usableLeds();
-        auto const beaconsSize = static_cast<int>(m_beacons.size());
         auto &leds = m_impl->leds;
         for (auto &led : leds) {
             if (!led.identified()) {
-                continue;
-            }
-            if (led.getID().value() > beaconsSize) {
-                // out of bounds ID
                 continue;
             }
             usable.push_back(&led);
@@ -243,8 +244,24 @@ namespace vbtracker {
 
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo right now just ransac.
+        bool doKalman = m_hasPoseEstimate;
+        double videoDt;
+        if (m_impl->hasPrev) {
+            videoDt = osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
+            m_impl->lastEstimate = tv;
+            m_impl->hasPrev = true;
+        } else {
+            doKalman = false;
+        }
+#if 0
+        if (doKalman) {
+        } else {
+#endif
         m_hasPoseEstimate = m_impl->ransacEstimator(
             camParams, usable, m_beacons, m_impl->bodyInterface.state);
+#if 0
+        }
+#endif
 
         /// Corresponding post-correction.
         m_impl->bodyInterface.state.position() -= getStateCorrection();

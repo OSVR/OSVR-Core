@@ -42,7 +42,18 @@ namespace vbtracker {
         SCAATKalmanPoseEstimator(ConfigParams const &params);
         bool operator()(CameraParameters const &camParams,
                         LedPtrList const &leds, BeaconStateVec &beacons,
-                        BodyState &state);
+                        BodyState &state, double videoDt);
+
+      private:
+        float m_maxBoxRatio;
+        float m_minBoxRatio;
+        const bool m_shouldSkipBright;
+        const double m_maxSquaredResidual;
+        const double m_maxZComponent;
+        const double m_highResidualVariancePenalty;
+        std::size_t m_framesInProbation = 0;
+        std::size_t m_framesWithoutIdentifiedBlobs = 0;
+        std::size_t m_framesWithoutUtilizedMeasurements = 0;
     };
 } // namespace vbtracker
 } // namespace osvr

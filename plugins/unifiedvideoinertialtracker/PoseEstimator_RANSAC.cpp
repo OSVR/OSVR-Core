@@ -33,7 +33,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 
 // Standard includes
-// - none
+#include <algorithm>
 
 namespace osvr {
 namespace vbtracker {

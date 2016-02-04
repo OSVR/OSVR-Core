@@ -129,7 +129,8 @@ namespace vbtracker {
             }
             auto &target = *targetPtr;
 
-            auto gotPose = target.updatePoseEstimateFromLeds(m_impl->camParams);
+            auto gotPose = target.updatePoseEstimateFromLeds(m_impl->camParams,
+                                                             m_impl->lastFrame);
 
             /// @todo deduplicate in making this list.
             m_updated.push_back(target.getBody().getId());
