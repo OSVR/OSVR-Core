@@ -98,13 +98,44 @@ namespace vbtracker {
           , "...**.....*....."    // 34 28
     };
         // clang-format on
+
+        static const auto SCALE_FACTOR = 0.001; // mm to m
+
+        template <typename Scalar> using cvMatx33 = cv::Matx<Scalar, 3, 3>;
+
+        /// Rotation/basis-change part.
+        template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
+            return cvMatx33<Scalar>::eye();
+        }
+
+        /// Add the scaling part.
+        template <typename Scalar>
+        inline cvMatx33<Scalar> getTransformAndScale() {
+            return getTransform<Scalar>() *
+                   (cvMatx33<Scalar>::eye() * SCALE_FACTOR);
+        }
+
+        /// Transform points: we scale in addition to rotation/basis change
+        template <typename Scalar>
+        inline cv::Point3_<Scalar>
+        transformFromHDKData(cv::Point3_<Scalar> input) {
+            static const cvMatx33<Scalar> xformMatrix =
+                getTransformAndScale<Scalar>();
+            return xformMatrix * input;
+        }
+
+        /// Transform vectors: we only apply rotation/basis change
+        template <typename Scalar>
+        inline cv::Vec<Scalar, 3>
+            transformFromHDKData(cv::Vec<Scalar, 3> input) {
+            static const cvMatx33<Scalar> xformMatrix = getTransform<Scalar>();
+            return xformMatrix * input;
+        }
     } // namespace
 
     inline std::unique_ptr<TrackingSystem>
     makeHDKTrackingSystem(ConfigParams const &params) {
         std::unique_ptr<TrackingSystem> sys(new TrackingSystem(params));
-
-        static const auto SCALE_FACTOR = 0.001; // mm to m
 
         auto hmd = sys->createTrackedBody();
         if (!hmd) {
@@ -138,10 +169,11 @@ namespace vbtracker {
             return LocationPoint(-p.x, p.y, -p.z);
         };
 
-        auto locationsEnd =
-            std::transform(begin(OsvrHdkLedLocations_SENSOR0),
-                           end(OsvrHdkLedLocations_SENSOR0),
-                           begin(data.locations), transformPoints);
+        auto locationsEnd = std::transform(
+            begin(OsvrHdkLedLocations_SENSOR0),
+            end(OsvrHdkLedLocations_SENSOR0), begin(data.locations),
+            [](LocationPoint pt) { return transformFromHDKData(pt); });
+
         if (useRear) {
             // distance between front and back panel target origins, in m.
             auto distanceBetweenPanels =
@@ -156,9 +188,15 @@ namespace vbtracker {
                 p.z += distanceBetweenPanels;
                 return p;
             };
+            auto alternateTransformBackPoints = [distanceBetweenPanels](
+                LocationPoint pt) {
+                auto p = transformFromHDKData(pt);
+                p.z -= distanceBetweenPanels;
+                return p;
+            };
             std::transform(begin(OsvrHdkLedLocations_SENSOR1),
                            end(OsvrHdkLedLocations_SENSOR1), locationsEnd,
-                           transformBackPoints);
+                           alternateTransformBackPoints);
         }
 
         /// Just changes the basis.
@@ -167,9 +205,10 @@ namespace vbtracker {
         };
 
         data.emissionDirections.resize(numFrontBeacons);
-        std::transform(begin(OsvrHdkLedDirections_SENSOR0),
-                       end(OsvrHdkLedDirections_SENSOR0),
-                       begin(data.emissionDirections), transformVector);
+        std::transform(
+            begin(OsvrHdkLedDirections_SENSOR0),
+            end(OsvrHdkLedDirections_SENSOR0), begin(data.emissionDirections),
+            [](EmissionDirectionVec v) { return transformFromHDKData(v); });
         if (useRear) {
             // This is why we resized down earlier - so we can resize up to fill
             // those last elements with constant values.
