@@ -43,7 +43,13 @@ namespace vbtracker {
         osvr::util::time::TimeValue stateTime;
     };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
-        : m_system(system), m_id(id), m_impl(new Impl) {}
+        : m_system(system), m_id(id), m_impl(new Impl) {
+
+        m_processModel.setDamping(getParams().linearVelocityDecayCoefficient,
+                                  getParams().angularVelocityDecayCoefficient);
+        m_processModel.setNoiseAutocorrelation(
+            kalman::types::Vector<6>(getParams().processNoiseAutocorrelation));
+    }
 
     TrackedBody::~TrackedBody() {}
 
