@@ -53,9 +53,9 @@ namespace vbtracker {
         EmissionDirectionVec emissionDirection;
         /// Initial measurement variance before applying observation-based
         /// modifiers.
-        double baseMeasurementVariance = 3.0;
+        double baseMeasurementVariance = 3.e-6;
         /// Initial error in the beacon position state.
-        double initialAutocalibrationError = 0.001;
+        double initialAutocalibrationError = 1e-9;
         /// Is this beacon fixed, that is, not subject to autocalibration?
         bool isFixed = false;
     };
