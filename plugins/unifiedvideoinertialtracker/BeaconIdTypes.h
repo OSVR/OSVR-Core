@@ -30,6 +30,7 @@
 
 // Library/third-party includes
 #include <osvr/Util/TypeSafeId.h>
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -120,6 +121,24 @@ namespace vbtracker {
     /// Does the given beacon ID indicate that it's identified?
     inline bool beaconIdentified(OneBasedBeaconId id) {
         return (!id.empty() && id.value() > 0);
+    }
+
+    /// Turn a (valid non-sentinel, i.e. identified) beacon id into an array
+    /// index.
+    inline std::size_t asIndex(ZeroBasedBeaconId id) {
+        BOOST_ASSERT_MSG(beaconIdentified(id), "A beacon id must correspond to "
+                                               "an identified beacon to be "
+                                               "used as an index!");
+        if (!beaconIdentified(id)) {
+            throw std::logic_error("A beacon id must correspond to an "
+                                   "identified beacon to be used as an index!");
+        }
+        return id.value();
+    }
+
+    /// @overload
+    inline std::size_t asIndex(OneBasedBeaconId id) {
+        return asIndex(makeZeroBased(id));
     }
 
 } // namespace vbtracker

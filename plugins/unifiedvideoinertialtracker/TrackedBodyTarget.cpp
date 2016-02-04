@@ -35,12 +35,14 @@
 
 // Library/third-party includes
 #include <boost/assert.hpp>
+#include <util/Stride.h>
 
 // Standard includes
 #include <iostream>
 
 namespace osvr {
 namespace vbtracker {
+    enum class TargetTrackingState { RANSAC, Kalman };
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
             : bodyInterface(bodyIface), kalmanEstimator(params) {}
@@ -51,6 +53,7 @@ namespace vbtracker {
         RANSACPoseEstimator ransacEstimator;
         SCAATKalmanPoseEstimator kalmanEstimator;
 
+        TargetTrackingState trackingState = TargetTrackingState::RANSAC;
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
     };
@@ -121,6 +124,16 @@ namespace vbtracker {
                 new OsvrHdkLedIdentifier(setupData.patterns));
             m_impl->identifier = std::move(identifier);
         }
+
+#if 0
+        /// Dump the beacon locations to console
+        auto numBeacons = getNumBeacons();
+        for (UnderlyingBeaconIdType i = 0; i < numBeacons; ++i) {
+            auto id = ZeroBasedBeaconId(i);
+            std::cout << "Beacon " << i + 1 << ": "
+                      << getBeaconAutocalibPosition(id).transpose() << "\n";
+        }
+#endif
     }
 
     TrackedBodyTarget::~TrackedBodyTarget() {}
@@ -237,31 +250,55 @@ namespace vbtracker {
             }
             usable.push_back(&led);
         }
-
+        auto msg = [&]() -> std::ostream & {
+            return std::cout << "[Tracker Target " << getQualifiedId() << "] ";
+        };
         /// Must pre/post correct the state by our offset :-/
         /// @todo make this state correction less hacky.
         m_impl->bodyInterface.state.position() += getStateCorrection();
 
+        /// @todo put this in the class
+        bool permitKalman = false;
+
         /// OK, now must decide who we talk to for pose estimation.
-        /// @todo right now just ransac.
-        bool doKalman = m_hasPoseEstimate;
-        double videoDt;
-        if (m_impl->hasPrev) {
-            videoDt = osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
-            m_impl->lastEstimate = tv;
-            m_impl->hasPrev = true;
-        } else {
-            doKalman = false;
+        /// @todo move state machine logic elsewhere
+        switch (m_impl->trackingState) {
+        case TargetTrackingState::RANSAC: {
+            m_hasPoseEstimate = m_impl->ransacEstimator(
+                camParams, usable, m_beacons, m_impl->bodyInterface.state);
+
+            if (m_hasPoseEstimate && permitKalman) {
+                msg() << "Entering SCAAT Kalman mode..." << std::endl;
+                m_impl->trackingState = TargetTrackingState::Kalman;
+            }
+            break;
+        }
+
+        case TargetTrackingState::Kalman: {
+            auto videoDt =
+                osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
+
+            auto params = SCAATKalmanPoseEstimator::InOutParams{
+                m_beacons,
+                m_beaconMeasurementVariance,
+                m_beaconFixed,
+                m_beaconEmissionDirection,
+                getBody().getState(),
+                getBody().getProcessModel()};
+            m_hasPoseEstimate =
+                m_impl->kalmanEstimator(camParams, usable, videoDt, params);
+            /// @todo exit conditions for kalman mode here...
+            break;
+        }
         }
 #if 0
-        if (doKalman) {
-        } else {
-#endif
-        m_hasPoseEstimate = m_impl->ransacEstimator(
-            camParams, usable, m_beacons, m_impl->bodyInterface.state);
-#if 0
+        if (m_hasPoseEstimate) {
+            msg() << getBody().getState().position().transpose() << std::endl;
         }
 #endif
+
+        /// Update our local target-specific timestamp
+        m_impl->lastEstimate = tv;
 
         /// Corresponding post-correction.
         m_impl->bodyInterface.state.position() -= getStateCorrection();

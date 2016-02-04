@@ -137,8 +137,10 @@ namespace vbtracker {
         /// @sa adjustToMeasurementTime()
         void replayRewoundMeasurements();
 
-      private:
+        BodyProcessModel &getProcessModel() { return m_processModel; }
         BodyState &getState() { return m_state; }
+
+      private:
         TrackingSystem &m_system;
         const BodyId m_id;
         BodyState m_state;

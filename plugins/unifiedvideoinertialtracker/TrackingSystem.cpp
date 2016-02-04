@@ -129,8 +129,11 @@ namespace vbtracker {
             }
             auto &target = *targetPtr;
 
+            /// @todo right now assumes one target per body here!
+            target.getBody().adjustToMeasurementTime(m_impl->lastFrame);
             auto gotPose = target.updatePoseEstimateFromLeds(m_impl->camParams,
                                                              m_impl->lastFrame);
+            target.getBody().replayRewoundMeasurements();
 
             /// @todo deduplicate in making this list.
             m_updated.push_back(target.getBody().getId());

@@ -28,6 +28,7 @@
 // Internal Includes
 #include "ConfigParams.h"
 #include "PoseEstimatorTypes.h"
+#include "ModelTypes.h"
 
 // Library/third-party includes
 // - none
@@ -37,23 +38,38 @@
 
 namespace osvr {
 namespace vbtracker {
+
     class SCAATKalmanPoseEstimator {
       public:
+        enum class TriBool { False, True, Unknown };
+        struct InOutParams {
+            BeaconStateVec &beacons;
+            std::vector<double> const &beaconMeasurementVariance;
+            std::vector<bool> const &beaconFixed;
+            Vec3Vector const &beaconEmissionDirection;
+            BodyState &state;
+            BodyProcessModel &processModel;
+        };
         SCAATKalmanPoseEstimator(ConfigParams const &params);
         bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds, BeaconStateVec &beacons,
-                        BodyState &state, double videoDt);
+                        LedPtrList const &leds, double videoDt,
+                        InOutParams const &p);
 
       private:
+        TriBool inBoundingBoxRatioRange(Led const &led);
         float m_maxBoxRatio;
         float m_minBoxRatio;
         const bool m_shouldSkipBright;
         const double m_maxSquaredResidual;
         const double m_maxZComponent;
         const double m_highResidualVariancePenalty;
+        const double m_beaconProcessNoise;
+        const double m_measurementVarianceScaleFactor;
+        const bool m_extraVerbose;
         std::size_t m_framesInProbation = 0;
         std::size_t m_framesWithoutIdentifiedBlobs = 0;
         std::size_t m_framesWithoutUtilizedMeasurements = 0;
+        bool m_gotMeasurement = false;
     };
 } // namespace vbtracker
 } // namespace osvr

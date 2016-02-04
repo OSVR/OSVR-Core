@@ -26,6 +26,7 @@
 #include "PoseEstimator_SCAATKalman.h"
 #include "ImagePointMeasurement.h"
 #include "LED.h"
+#include "cvToEigen.h"
 
 // Library/third-party includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
@@ -35,6 +36,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -45,20 +47,24 @@ namespace vbtracker {
         : m_shouldSkipBright(params.shouldSkipBrightLeds),
           m_maxSquaredResidual(params.maxResidual * params.maxResidual),
           m_maxZComponent(params.maxZComponent),
-          m_highResidualVariancePenalty(params.highResidualVariancePenalty) {
+          m_highResidualVariancePenalty(params.highResidualVariancePenalty),
+          m_beaconProcessNoise(params.beaconProcessNoise),
+          m_measurementVarianceScaleFactor(
+              params.measurementVarianceScaleFactor),
+          m_extraVerbose(params.extraVerbose) {
         std::tie(m_minBoxRatio, m_maxBoxRatio) =
             std::minmax({params.boundingBoxFilterRatio,
                          1.f / params.boundingBoxFilterRatio});
 
         const auto maxSquaredResidual = params.maxResidual * params.maxResidual;
     }
-    #if 0
-    bool SCAATKalmanPoseEstimator::
-    operator()(CameraParameters const &camParams, LedPtrList const &leds,
-               BeaconStateVec &beacons, BodyState &state, double videoDt) {
+    bool SCAATKalmanPoseEstimator::operator()(CameraParameters const &camParams,
+                                              LedPtrList const &leds,
+                                              double videoDt,
+                                              InOutParams const &p) {
         double varianceFactor = 1;
 
-        auto inBoundsID = leds.size();
+        const auto inBoundsID = leds.size();
         // Default to using all the measurements we can
         auto skipBright = false;
 
@@ -73,14 +79,9 @@ namespace vbtracker {
                     inBoundsBright++;
                 }
 
-                if (led.getMeasurement().knowBoundingBox) {
-                    auto boundingBoxRatio =
-                        led.getMeasurement().boundingBox.height /
-                        led.getMeasurement().boundingBox.width;
-                    if (boundingBoxRatio > m_minBoxRatio &&
-                        boundingBoxRatio < m_maxBoxRatio) {
-                        inBoundsRound++;
-                    }
+                auto boundingBoxRatioResult = inBoundingBoxRatioRange(led);
+                if (TriBool::True == boundingBoxRatioResult) {
+                    inBoundsRound++;
                 }
             }
 
@@ -104,17 +105,20 @@ namespace vbtracker {
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
 
-        const auto maxSquaredResidual = params.maxResidual * params.maxResidual;
-        const auto maxZComponent = ;
         /// Prediction for overall state moved into the body itself
 
         /// @todo should we be recalculating this for each beacon after each
         /// correction step? The order we filter them in is rather arbitrary...
-        Eigen::Matrix3d rotate = Eigen::Matrix3d(state.getCombinedQuaternion());
+        Eigen::Matrix3d rotate =
+            Eigen::Matrix3d(p.state.getCombinedQuaternion());
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
         for (auto &ledPtr : leds) {
             auto &led = *ledPtr;
+
+            auto id = led.getID();
+            auto index = asIndex(id);
+
 #ifdef BEACON_DEBUG_DATA
             auto &debug = m_beaconDebugData[id];
             debug.seen = true;
@@ -123,7 +127,6 @@ namespace vbtracker {
             if (skipBright && led.isBright()) {
                 continue;
             }
-
             // Angle of emission checking
             // If we transform the body-local emission vector, an LED pointed
             // right at the camera will be -Z. Anything with a 0 or positive z
@@ -132,11 +135,11 @@ namespace vbtracker {
             // use such beacons since they can easily introduce substantial
             // error.
             double zComponent =
-                (rotate * cvToVector(m_beaconEmissionDirection[id])).z();
+                (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
             if (zComponent > 0.) {
-                if (m_params.extraVerbose) {
+                if (m_extraVerbose) {
                     std::cout << "Rejecting an LED at " << led.getLocation()
-                              << " claiming ID " << led.getOneBasedID()
+                              << " claiming ID " << led.getOneBasedID().value()
                               << std::endl;
                 }
                 /// This means the LED is pointed away from us - so we shouldn't
@@ -148,27 +151,22 @@ namespace vbtracker {
                 /// ourselves?
                 numBad++;
                 continue;
-            } else if (zComponent > maxZComponent) {
+            } else if (zComponent > m_maxZComponent) {
                 /// LED is too askew of the camera to provide reliable data, so
                 /// skip it.
                 continue;
             }
 
 #if 0
-            if (led.getMeasurement().knowBoundingBox) {
-                /// @todo For right now, if we don't have a bounding box, we're
-                /// assuming it's square enough (and only testing for
-                /// non-squareness on those who actually do have bounding
-                /// boxes). This is very much a temporary situation.
-                auto boundingBoxRatio =
-                    led.getMeasurement().boundingBox.height /
-                    led.getMeasurement().boundingBox.width;
-                if (boundingBoxRatio < minBoxRatio ||
-                    boundingBoxRatio > maxBoxRatio) {
-                    /// skip non-circular blobs.
-                    numBad++;
-                    continue;
-                }
+            /// @todo For right now, if we don't have a bounding box, we're
+            /// assuming it's square enough (and only testing for
+            /// non-squareness on those who actually do have bounding
+            /// boxes). This is very much a temporary situation.
+            auto boundingBoxRatioResult = inBoundingBoxRatioRange(led);
+            if (TriBool::False == boundingBoxRatioResult) {
+                /// skip non-circular blobs.
+                numBad++;
+                continue;
             }
 #endif
 
@@ -178,40 +176,44 @@ namespace vbtracker {
 
             /// Stick a little bit of process model uncertainty in the beacon,
             /// if it's meant to have some
-            if (m_beaconFixed[id]) {
+            if (p.beaconFixed[asIndex(id)]) {
                 beaconProcess.setNoiseAutocorrelation(0);
             } else {
-                beaconProcess.setNoiseAutocorrelation(
-                    m_params.beaconProcessNoise);
-                kalman::predict(*(m_beacons[id]), beaconProcess, dt);
+                beaconProcess.setNoiseAutocorrelation(m_beaconProcessNoise);
+                kalman::predict(*(p.beacons[index]), beaconProcess, videoDt);
             }
 
             meas.setMeasurement(
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
             led.markAsUsed();
-            auto state = kalman::makeAugmentedState(m_state, *(m_beacons[id]));
+            auto state =
+                kalman::makeAugmentedState(p.state, *(p.beacons[index]));
             meas.updateFromState(state);
             Eigen::Vector2d residual = meas.getResidual(state);
-            if (residual.squaredNorm() > maxSquaredResidual) {
+            if (residual.squaredNorm() > m_maxSquaredResidual) {
                 // probably bad
                 numBad++;
-                localVarianceFactor *= m_params.highResidualVariancePenalty;
+                localVarianceFactor *= m_highResidualVariancePenalty;
             } else {
                 numGood++;
             }
+#ifdef BEACON_DEBUG_DATA
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
+#endif
             auto effectiveVariance =
-                localVarianceFactor * m_params.measurementVarianceScaleFactor *
+                localVarianceFactor * m_measurementVarianceScaleFactor *
                 newIdentificationVariancePenalty *
                 (led.isBright() ? BRIGHT_PENALTY : 1.) *
-                m_beaconMeasurementVariance[id] / led.getMeasurement().area;
+                p.beaconMeasurementVariance[index] / led.getMeasurement().area;
+#ifdef BEACON_DEBUG_DATA
             debug.variance = effectiveVariance;
+#endif
             meas.setVariance(effectiveVariance);
 
             /// Now, do the correction.
-            auto model =
-                kalman::makeAugmentedProcessModel(m_model, beaconProcess);
+            auto model = kalman::makeAugmentedProcessModel(p.processModel,
+                                                           beaconProcess);
             kalman::correct(state, model, meas);
             m_gotMeasurement = true;
         }
@@ -246,7 +248,20 @@ namespace vbtracker {
                 m_framesWithoutUtilizedMeasurements++;
             }
         }
+        return true;
     }
-    #endif
+    SCAATKalmanPoseEstimator::TriBool
+    SCAATKalmanPoseEstimator::inBoundingBoxRatioRange(Led const &led) {
+        if (led.getMeasurement().knowBoundingBox) {
+            auto boundingBoxRatio = led.getMeasurement().boundingBox.height /
+                                    led.getMeasurement().boundingBox.width;
+            if (boundingBoxRatio > m_minBoxRatio &&
+                boundingBoxRatio < m_maxBoxRatio) {
+                return TriBool::True;
+            }
+            return TriBool::False;
+        }
+        return TriBool::Unknown;
+    }
 } // namespace vbtracker
 } // namespace osvr
