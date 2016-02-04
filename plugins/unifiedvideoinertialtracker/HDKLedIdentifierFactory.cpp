@@ -171,7 +171,8 @@ namespace vbtracker {
 
     LedIdentifierPtr createHDKUnifiedLedIdentifier() {
         LedIdentifierPtr ret;
-        std::vector<std::string> patterns = OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
+        std::vector<std::string> patterns =
+            OsvrHdkLedIdentifier_SENSOR0_PATTERNS;
         patterns.insert(end(patterns),
                         begin(OsvrHdkLedIdentifier_SENSOR1_PATTERNS),
                         end(OsvrHdkLedIdentifier_SENSOR1_PATTERNS));
@@ -180,18 +181,20 @@ namespace vbtracker {
     }
 
     LedIdentifierPtr createHDKLedIdentifierSimulated(uint8_t sensor) {
-      LedIdentifierPtr ret;
-      switch (sensor) {
-      case 0:
-        ret = createHDKLedIdentifier(OsvrHdkLedIdentifier_SENSOR0_PATTERNS_ORIGINAL);
-        break;
-      case 1:
-        ret = createHDKLedIdentifier(OsvrHdkLedIdentifier_SENSOR1_PATTERNS_ORIGINAL);
-      default:
-        BOOST_ASSERT_MSG(sensor < 2, "Valid sensors are only 0 or 1!");
-        break;
-      }
-      return ret;
+        LedIdentifierPtr ret;
+        switch (sensor) {
+        case 0:
+            ret = createHDKLedIdentifier(
+                OsvrHdkLedIdentifier_SENSOR0_PATTERNS_ORIGINAL);
+            break;
+        case 1:
+            ret = createHDKLedIdentifier(
+                OsvrHdkLedIdentifier_SENSOR1_PATTERNS_ORIGINAL);
+        default:
+            BOOST_ASSERT_MSG(sensor < 2, "Valid sensors are only 0 or 1!");
+            break;
+        }
+        return ret;
     }
 
     // clang-format off

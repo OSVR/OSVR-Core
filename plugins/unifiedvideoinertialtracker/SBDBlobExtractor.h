@@ -45,8 +45,7 @@ namespace vbtracker {
       public:
         explicit SBDBlobExtractor(ConfigParams const &params);
         ~SBDBlobExtractor();
-        LedMeasurementVec const &
-        extractBlobs(cv::Mat const &grayImage);
+        LedMeasurementVec const &extractBlobs(cv::Mat const &grayImage);
 
         cv::Mat const &getDebugThresholdImage();
 

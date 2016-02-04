@@ -112,7 +112,7 @@ namespace vbtracker {
     }
 
     LedMeasurementVecIterator Led::nearest(LedMeasurementVec &meas,
-                                        double threshold) const {
+                                           double threshold) const {
         // If we have no elements in the vector, return the end().
         if (meas.empty()) {
             return end(meas);
