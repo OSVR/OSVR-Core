@@ -33,7 +33,7 @@
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -96,7 +96,7 @@ namespace vbtracker {
             if (tv < m_impl->latest) {
                 /// The new measurement is in the "past", oh dear.
                 /// We should roll back, but until then...
-
+                std::cout << "Had to go back in time!" << std::endl;
                 // predict backwards
                 m_impl->stateTime = tv;
 
