@@ -152,7 +152,7 @@ namespace vbtracker {
 
         /// This used to be different than the other beacons, but now it's
         /// mostly the same.
-        double backPanelMeasurementError = 3.0e-6;
+        double backPanelMeasurementError = 3.0; // 3.0e-6;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
@@ -203,24 +203,7 @@ namespace vbtracker {
         /// Only make sense for a single target.
         std::string calibrationFile = "";
 
-        ConfigParams() {
-            // Apparently I can't non-static-data-initializer initialize an
-            // array member. Sad. GCC almost let me. MSVC said no way.
-            processNoiseAutocorrelation[0] = 3e-4;
-            processNoiseAutocorrelation[1] = 3e-4;
-            processNoiseAutocorrelation[2] = 3e-4;
-            processNoiseAutocorrelation[3] = 1e-6;
-            processNoiseAutocorrelation[4] = 1e-6;
-            processNoiseAutocorrelation[5] = 1e-6;
-
-            /// If you use manual beacon offset (aka turn off offsetToCentroid),
-            /// this is a good default since it's the best beacon offset for the
-            /// HDK we've found so far - centroid of front beacons, with only z
-            /// component retained.
-            manualBeaconOffset[0] = 0;
-            manualBeaconOffset[1] = 0;
-            manualBeaconOffset[2] = 0.00388676;
-        }
+        ConfigParams();
     };
 } // namespace vbtracker
 } // namespace osvr

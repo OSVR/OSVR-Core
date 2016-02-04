@@ -178,9 +178,15 @@ namespace vbtracker {
         }
         /// Set up autocalib.
         /// Set the ones that are fixed.
+        for (int i = 0; i < numBeacons; ++i) {
+            /// mark everybody fixed for testing.
+            data.markBeaconFixed(makeOneBased(ZeroBasedBeaconId(i)));
+        }
+#if 0
         for (auto idx : {16, 17, 19, 20}) {
             data.markBeaconFixed(OneBasedBeaconId(idx));
         }
+#endif
 
         /// Put in the measurement variances.
         std::transform(begin(OsvrHdkLedVariances_SENSOR0),

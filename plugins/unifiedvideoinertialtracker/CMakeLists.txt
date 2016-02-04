@@ -23,6 +23,7 @@ add_library(uvbi-core STATIC
     BodyTargetInterface.h
     CameraDistortionModel.h
     CameraParameters.h
+    ConfigParams.cpp
     ConfigParams.h
     cvToEigen.h
     ForEachTracked.h
@@ -31,6 +32,7 @@ add_library(uvbi-core STATIC
     HDKLedIdentifierFactory.cpp
     HDKLedIdentifierFactory.h
     ImageProcessing.h
+    ImagePointMeasurement.h
     LED.cpp
     LED.h
     LedIdentifier.cpp

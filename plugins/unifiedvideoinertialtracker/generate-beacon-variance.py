@@ -1,6 +1,11 @@
-defaultVariance = 3e-6
-sideVariance = 5e-6
-edgeVariance = 8e-6
+#defaultVariance = 3e-6
+#sideVariance = 5e-6
+#edgeVariance = 8e-6
+
+defaultVariance = 3.0
+sideVariance = 5.0
+edgeVariance = 8.0
+
 def getVariance(oneBasedIndex):
     # side beacons
     if oneBasedIndex in [1,2,10,5,6,7,9,3,4,8,9]:
