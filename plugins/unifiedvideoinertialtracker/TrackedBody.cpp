@@ -102,7 +102,7 @@ namespace vbtracker {
         }
     }
 
-    void osvr::vbtracker::TrackedBody::replayRewoundMeasurements() {
+    void TrackedBody::replayRewoundMeasurements() {
         /// @todo No stack of history yet, so nothing to replay yet. Right now
         /// just predicting both directions :-/
         BOOST_ASSERT_MSG(m_impl->hasTime, "Only makes sense to call Replay "
@@ -115,6 +115,10 @@ namespace vbtracker {
             kalman::predict(m_state, m_processModel, dt);
             m_state.postCorrect();
         }
+    }
+
+    osvr::util::time::TimeValue TrackedBody::getStateTime() const {
+        return m_impl->stateTime;
     }
 
 } // namespace vbtracker

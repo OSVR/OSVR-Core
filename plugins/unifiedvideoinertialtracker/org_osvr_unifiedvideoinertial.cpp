@@ -38,6 +38,8 @@
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
+#include <osvr/Util/EigenInterop.h>
+
 #include "ConfigurationParser.h"
 
 // Generated JSON header file
@@ -148,7 +150,9 @@ class TrackerThread : boost::noncopyable {
                                                      m_camParams);
 
         for (auto const &bodyId : bodyIds) {
-            /// @todo stick stuff in m_reportingVec here.
+            auto &body = m_trackingSystem.getBody(bodyId);
+            m_reportingVec[bodyId.value()]->updateState(
+                body.getStateTime(), body.getState(), body.getProcessModel());
         }
     }
     osvr::vbtracker::TrackingSystem &m_trackingSystem;
@@ -169,7 +173,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
                                 osvr::vbtracker::ConfigParams params,
                                 TrackingSystemPtr &&trackingSystem)
         : m_source(std::move(source)),
-          m_trackingSystem(std::move(trackingSystem)) {
+          m_trackingSystem(std::move(trackingSystem)),
+          m_additionalPrediction(params.additionalPrediction) {
         if (params.numThreads > 0) {
             // Set the number of threads for OpenCV to use.
             cv::setNumThreads(params.numThreads);
@@ -254,14 +259,26 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     cv::Mat m_frame;
     cv::Mat m_imageGray;
     TrackingSystemPtr m_trackingSystem;
+    const double m_additionalPrediction;
     std::vector<osvr::vbtracker::BodyReportingPtr> m_bodyReportingVector;
     std::unique_ptr<TrackerThread> m_trackerThreadFunctor;
     std::thread m_trackerThread;
 };
 
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
-    /// @todo use the m_bodyReportingVector to report stuff.
-
+    namespace ei = osvr::util::eigen_interop;
+    std::size_t numSensors = m_bodyReportingVector.size();
+    for (std::size_t i = 0; i < numSensors; ++i) {
+        auto report =
+            m_bodyReportingVector[i]->getReport(m_additionalPrediction);
+        if (!report) {
+            /// couldn't get a report for this sensor for one reason or another.
+            // std::cout << "Couldn't get report for " << i << std::endl;
+            continue;
+        }
+        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &report.pose, i,
+                                             &report.timestamp);
+    }
     return OSVR_RETURN_SUCCESS;
 }
 

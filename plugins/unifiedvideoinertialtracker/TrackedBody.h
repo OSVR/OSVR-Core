@@ -137,6 +137,9 @@ namespace vbtracker {
         /// @sa adjustToMeasurementTime()
         void replayRewoundMeasurements();
 
+        /// Get timestamp associated with current state.
+        osvr::util::time::TimeValue getStateTime() const;
+
         BodyProcessModel &getProcessModel() { return m_processModel; }
         BodyState &getState() { return m_state; }
 
