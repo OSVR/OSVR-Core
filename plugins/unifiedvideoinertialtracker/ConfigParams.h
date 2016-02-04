@@ -85,12 +85,12 @@ namespace vbtracker {
         /// Max residual (pixel units) for a beacon before applying a variance
         /// penalty.
         double maxResidual = 75;
-        /// Initial beacon error for autocalibration (units: mm^2).
+        /// Initial beacon error for autocalibration (units: m^2).
         /// 0 effectively turns off beacon auto-calib.
         /// This is a variance number, so std deviation squared, but it's
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
-        double initialBeaconError = 0.001;
+        double initialBeaconError = 1e-9; // 0.001;
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
@@ -118,18 +118,18 @@ namespace vbtracker {
         /// smaller = faster decay/higher damping. In range [0, 1]
         double angularVelocityDecayCoefficient = 0.9;
 
-        /// The measurement variance (units: mm^2) is included in the plugin
+        /// The measurement variance (units: m^2) is included in the plugin
         /// along with the coordinates of the beacons. Some beacons are observed
         /// with higher variance than others, due to known difficulties in
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.;
+        double measurementVarianceScaleFactor = 1e-6;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
         bool offsetToCentroid = true;
 
-        /// Manual beacon offset (in mm) - only really sensible if you only have
+        /// Manual beacon offset (in m) - only really sensible if you only have
         /// one target, only used if offsetToCentroid is false.
         double manualBeaconOffset[3];
 
@@ -152,13 +152,13 @@ namespace vbtracker {
 
         /// This used to be different than the other beacons, but now it's
         /// mostly the same.
-        double backPanelMeasurementError = 3.0;
+        double backPanelMeasurementError = 3.0e-6;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
         /// gets used for a measurement, but it should be enough to keep beacons
         /// from converging in a bad local minimum.
-        double beaconProcessNoise = 0.0000001;
+        double beaconProcessNoise = 1e-13;
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
@@ -206,12 +206,12 @@ namespace vbtracker {
         ConfigParams() {
             // Apparently I can't non-static-data-initializer initialize an
             // array member. Sad. GCC almost let me. MSVC said no way.
-            processNoiseAutocorrelation[0] = 3e+2;
-            processNoiseAutocorrelation[1] = 3e+2;
-            processNoiseAutocorrelation[2] = 3e+2;
-            processNoiseAutocorrelation[3] = 1e0;
-            processNoiseAutocorrelation[4] = 1e0;
-            processNoiseAutocorrelation[5] = 1e0;
+            processNoiseAutocorrelation[0] = 3e-4;
+            processNoiseAutocorrelation[1] = 3e-4;
+            processNoiseAutocorrelation[2] = 3e-4;
+            processNoiseAutocorrelation[3] = 1e-6;
+            processNoiseAutocorrelation[4] = 1e-6;
+            processNoiseAutocorrelation[5] = 1e-6;
 
             /// If you use manual beacon offset (aka turn off offsetToCentroid),
             /// this is a good default since it's the best beacon offset for the
@@ -219,7 +219,7 @@ namespace vbtracker {
             /// component retained.
             manualBeaconOffset[0] = 0;
             manualBeaconOffset[1] = 0;
-            manualBeaconOffset[2] = 38.8676;
+            manualBeaconOffset[2] = 0.00388676;
         }
     };
 } // namespace vbtracker
