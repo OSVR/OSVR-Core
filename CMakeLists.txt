@@ -220,7 +220,8 @@ include(CompilerFeatures)
 set(OPENCV_MODULES_USED)
 
 if(BUILD_WITH_OPENCV)
-    if(NOT OpenCV_VERSION_MAJOR LESS 3)
+    if(TARGET opencv_hal)
+        # Only exists for versions around 3.0
         list(APPEND OPENCV_MODULES_USED opencv_hal)
     endif()
     list(APPEND OPENCV_MODULES_USED opencv_core)
