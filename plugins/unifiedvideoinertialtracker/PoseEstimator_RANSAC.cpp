@@ -1,14 +1,14 @@
 /** @file
     @brief Implementation
 
-    @date 2016
+    @date 2015, 2016
 
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
 */
 
-// Copyright 2016 Sensics, Inc.
+// Copyright 2015, 2016 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,12 +56,13 @@ namespace vbtracker {
         std::vector<ZeroBasedBeaconId> beaconIds;
         for (auto const &led : leds) {
             auto id = makeZeroBased(led->getID());
-            beaconDebug[asIndex(id)].variance = -1;
-            beaconDebug[asIndex(id)].measurement = led->getLocation();
+            auto index = asIndex(id);
+            beaconDebug[index].variance = -1;
+            beaconDebug[index].measurement = led->getLocation();
             beaconIds.push_back(id);
             imagePoints.push_back(led->getLocation());
             objectPoints.push_back(
-                vec3dToCVPoint3f(beacons[asIndex(id)]->stateVector()));
+                vec3dToCVPoint3f(beacons[index]->stateVector()));
         }
 
         // Make sure we have enough points to do our estimation.

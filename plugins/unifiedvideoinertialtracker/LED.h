@@ -139,7 +139,8 @@ namespace vbtracker {
 
         /// @brief Which LED am I? Non-negative are indices, negative are
         /// sentinels
-        ZeroBasedBeaconId m_id = ZeroBasedBeaconId(-1);
+        ZeroBasedBeaconId m_id = ZeroBasedBeaconId(
+            SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA);
 
         /// @brief Object used to determine the identity of an LED
         LedIdentifier *m_identifier = nullptr;

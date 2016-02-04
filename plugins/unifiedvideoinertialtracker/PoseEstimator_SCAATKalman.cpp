@@ -1,14 +1,14 @@
 /** @file
     @brief Implementation
 
-    @date 2016
+    @date 2015, 2016
 
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
 */
 
-// Copyright 2016 Sensics, Inc.
+// Copyright 2015, 2016 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#include <util/Stride.h>
+#include <iostream>
+#include <osvr/Util/EigenCoreGeometry.h>
+static ::util::Stride debugStride{401};
+
+#if 0
+template <typename T>
+inline void dumpKalmanDebugOuput(const char name[], const char expr[],
+                                 T const &value) {
+    if (debugStride) {
+        std::cout << "\n(Kalman Debug Output) " << name << " [" << expr
+                  << "]:\n" << value << std::endl;
+    }
+}
+#define OSVR_KALMAN_DEBUG_OUTPUT(Name, Value)                                  \
+    dumpKalmanDebugOuput(Name, #Value, Value)
+#endif
 
 // Internal Includes
 #include "PoseEstimator_SCAATKalman.h"
@@ -118,6 +136,7 @@ namespace vbtracker {
         auto numGood = std::size_t{0};
         static ::util::Stride s{203};
         s.advance();
+        debugStride.advance();
         for (auto &ledPtr : leds) {
             auto &led = *ledPtr;
 
@@ -179,7 +198,7 @@ namespace vbtracker {
 
             /// Stick a little bit of process model uncertainty in the beacon,
             /// if it's meant to have some
-            if (p.beaconFixed[asIndex(id)]) {
+            if (p.beaconFixed[index]) {
                 beaconProcess.setNoiseAutocorrelation(0);
             } else {
                 beaconProcess.setNoiseAutocorrelation(m_beaconProcessNoise);
@@ -221,6 +240,9 @@ namespace vbtracker {
                           << "  R: " << debug.residual
                           << "  s2: " << debug.variance << "\n";
             }
+        }
+        if (s) {
+            std::cout << std::endl;
         }
 
         /// Probation: Dealing with ratios of bad to good residuals
