@@ -134,6 +134,12 @@ namespace vbtracker {
             Eigen::Matrix3d(p.state.getCombinedQuaternion());
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
+        static ::util::Stride varianceStride{809};
+        if (++varianceStride) {
+            std::cout << p.state.errorCovariance().diagonal().transpose()
+                      << std::endl;
+        }
+
         static ::util::Stride s{203};
         s.advance();
         debugStride.advance();
