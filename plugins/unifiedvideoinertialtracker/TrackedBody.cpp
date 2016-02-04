@@ -44,6 +44,9 @@ namespace vbtracker {
     };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
         : m_system(system), m_id(id), m_impl(new Impl) {
+        using StateVec = kalman::types::DimVector<BodyState>;
+        /// Set error covariance matrix diagonal to large values for safety.
+        m_state.setErrorCovariance(StateVec::Constant(10).asDiagonal());
 
         m_processModel.setDamping(getParams().linearVelocityDecayCoefficient,
                                   getParams().angularVelocityDecayCoefficient);

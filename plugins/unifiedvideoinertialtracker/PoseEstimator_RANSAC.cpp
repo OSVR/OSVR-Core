@@ -198,13 +198,16 @@ namespace vbtracker {
         return true;
     }
 
-    static const double InitialPositionStateError = 0.001;
+    /// Variance in Meters^2
+    static const double InitialPositionStateError = 1.;
+    /// Variance in Radians^2
+    static const double InitialOrientationStateError = 1.;
     static const double InitialStateError[] = {InitialPositionStateError,
                                                InitialPositionStateError,
                                                InitialPositionStateError,
-                                               0,
-                                               0,
-                                               0,
+                                               InitialOrientationStateError,
+                                               InitialOrientationStateError,
+                                               InitialOrientationStateError,
                                                10.,
                                                10.,
                                                10.,
