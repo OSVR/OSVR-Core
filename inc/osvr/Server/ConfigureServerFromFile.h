@@ -113,6 +113,7 @@ namespace server {
                     out << " - " << pluginError.first << "\t"
                         << pluginError.second << endl;
                 }
+				out << "Is the plugin built for the desired platform?" << endl;
                 out << "\n";
             }
 
