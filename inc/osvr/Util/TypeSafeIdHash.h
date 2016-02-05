@@ -39,6 +39,7 @@
 #include <functional>
 #include <type_traits>
 #include <cassert>
+#include <climits>
 
 namespace std {
 template <typename Tag> struct hash<osvr::util::TypeSafeId<Tag>> {
