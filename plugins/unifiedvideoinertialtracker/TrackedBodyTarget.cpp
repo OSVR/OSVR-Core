@@ -52,13 +52,13 @@ namespace vbtracker {
     static const auto MAX_FRAMES_WITHOUT_BEACONS = 150;
     static const double MAX_POSITIONAL_ERROR_VARIANCE = 15.;
     class TargetHealthEvaluator {
-    public:
+      public:
         TargetHealthState operator()(BodyState const &bodyState,
-            LedPtrList const &leds, TargetTrackingState trackingState) {
+                                     LedPtrList const &leds,
+                                     TargetTrackingState trackingState) {
             if (leds.empty()) {
                 m_framesWithoutValidBeacons++;
-            }
-            else {
+            } else {
                 m_framesWithoutValidBeacons = 0;
             }
 
@@ -78,7 +78,7 @@ namespace vbtracker {
             return TargetHealthState::OK;
         }
 
-    private:
+      private:
         std::size_t m_framesWithoutValidBeacons = 0;
     };
     struct TrackedBodyTarget::Impl {
@@ -427,6 +427,11 @@ namespace vbtracker {
     LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }
 
     LedPtrList &TrackedBodyTarget::usableLeds() { return m_impl->usableLeds; }
+
+    osvr::util::time::TimeValue const &
+    TrackedBodyTarget::getLastUpdate() const {
+        return m_impl->lastEstimate;
+    }
 
     void TrackedBodyTarget::dumpBeaconsToConsole() const {
 

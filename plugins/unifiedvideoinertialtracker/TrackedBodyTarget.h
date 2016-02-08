@@ -105,11 +105,14 @@ namespace vbtracker {
         bool updatePoseEstimateFromLeds(
             CameraParameters const &camParams,
             osvr::util::time::TimeValue const &tv, BodyState &bodyState,
-            osvr::util::time::TimeValue const &startingTime, bool validStateAndTime);
+            osvr::util::time::TimeValue const &startingTime,
+            bool validStateAndTime);
 
         /// Did this target yet, or last time it was asked to, compute a pose
         /// estimate?
         bool hasPoseEstimate() const { return m_hasPoseEstimate; }
+
+        osvr::util::time::TimeValue const &getLastUpdate() const;
 
         /// Get the offset that was subtracted from all beacon positions upon
         /// initialization.
@@ -127,7 +130,7 @@ namespace vbtracker {
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
 
-        std::ostream & msg() const;
+        std::ostream &msg() const;
         void enterKalmanMode();
         void enterRANSACMode();
 

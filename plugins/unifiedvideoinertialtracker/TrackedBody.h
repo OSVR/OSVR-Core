@@ -174,6 +174,11 @@ namespace vbtracker {
         void replaceStateSnapshot(osvr::util::time::TimeValue const &origTime,
                                   osvr::util::time::TimeValue const &newTime,
                                   BodyState const &newState);
+
+        /// Clean histories of no-longer-needed historical state and
+        /// measurements.
+        void pruneHistory();
+
         /// Get timestamp associated with current state.
         osvr::util::time::TimeValue getStateTime() const;
 

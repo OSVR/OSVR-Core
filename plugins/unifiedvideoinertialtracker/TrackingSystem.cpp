@@ -147,15 +147,10 @@ namespace vbtracker {
                 m_updated.push_back(body.getId());
             }
         }
-    }
-
-    bool TrackedBody::hasPoseEstimate() const {
-        /// @todo handle IMU here.
-        auto ret = false;
-        forEachTarget([&ret](TrackedBodyTarget &target) {
-            ret = ret || target.hasPoseEstimate();
-        });
-        return ret;
+        /// Prune history after video update.
+        for (auto &body : m_bodies) {
+            body->pruneHistory();
+        }
     }
 
 } // namespace vbtracker

@@ -33,6 +33,7 @@
 
 // Library/third-party includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <iostream>
@@ -103,6 +104,44 @@ namespace vbtracker {
         return true;
     }
 
+    inline boost::optional<osvr::util::time::TimeValue>
+    getOldestPossibleMeasurementSource(TrackedBody const &body) {
+        boost::optional<osvr::util::time::TimeValue> oldest;
+        body.forEachTarget([&oldest](TrackedBodyTarget const &target) {
+            if (!oldest || target.getLastUpdate() < *oldest) {
+                /// If we haven't recorded a timestamp or the current target has
+                /// an older timestamp
+                oldest = target.getLastUpdate();
+            }
+        });
+        /// @todo include IMU
+        return oldest;
+    }
+
+    void TrackedBody::pruneHistory() {
+        if (m_impl->stateHistory.empty()) {
+            // can't prune an empty structure
+            return;
+        }
+        auto oldestOptional = getOldestPossibleMeasurementSource(*this);
+        if (!oldestOptional) {
+            // No timestamp yet - don't prune anything out yet.
+            return;
+        }
+        auto oldest = *oldestOptional;
+        if (m_impl->stateHistory.newest_timestamp() < oldest) {
+            // It would be a strange set of circumstances to bring this about,
+            // but we don't want to go from a non-empty history to an empty one.
+            // So in this case, we want to make sure we have at least one entry
+            // left over in the state history. Here's a quick way of doing that.
+            oldest = m_impl->stateHistory.newest_timestamp();
+        }
+
+        m_impl->stateHistory.pop_before(oldest);
+
+        /// @todo prune IMU measurements as well.
+    }
+
     void TrackedBody::replaceStateSnapshot(
         osvr::util::time::TimeValue const &origTime,
         osvr::util::time::TimeValue const &newTime, BodyState const &newState) {
@@ -120,6 +159,15 @@ namespace vbtracker {
         /// @todo replay IMU measurements.
 
         m_state = newState;
+    }
+
+    bool TrackedBody::hasPoseEstimate() const {
+        /// @todo handle IMU here.
+        auto ret = false;
+        forEachTarget([&ret](TrackedBodyTarget &target) {
+            ret = ret || target.hasPoseEstimate();
+        });
+        return ret;
     }
 
 } // namespace vbtracker
