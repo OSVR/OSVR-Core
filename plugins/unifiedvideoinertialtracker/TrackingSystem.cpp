@@ -132,15 +132,17 @@ namespace vbtracker {
 
             /// @todo right now assumes one target per body here!
             auto &body = target.getBody();
-            util::time::TimeValue stateTime;
+            util::time::TimeValue stateTime = {};
             BodyState state;
             auto newTime = m_impl->lastFrame;
             auto validState =
                 body.getStateAtOrBefore(newTime, stateTime, state);
+            auto initialTime = stateTime;
+
             auto gotPose = target.updatePoseEstimateFromLeds(
                 m_impl->camParams, newTime, state, stateTime, validState);
             if (gotPose) {
-                body.replaceStateSnapshot(stateTime, newTime, state);
+                body.replaceStateSnapshot(initialTime, newTime, state);
                 /// @todo deduplicate in making this list.
                 m_updated.push_back(body.getId());
             }
