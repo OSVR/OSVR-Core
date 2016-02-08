@@ -43,6 +43,44 @@
 namespace osvr {
 namespace vbtracker {
     enum class TargetTrackingState { RANSAC, Kalman, RANSACWhenBlobDetected };
+
+    enum class TargetHealthState {
+        OK,
+        StopTrackingErrorBoundsExceeded,
+        StopTrackingLostSight
+    };
+    static const auto MAX_FRAMES_WITHOUT_BEACONS = 150;
+    static const double MAX_POSITIONAL_ERROR_VARIANCE = 15.;
+    class TargetHealthEvaluator {
+    public:
+        TargetHealthState operator()(BodyState const &bodyState,
+            LedPtrList const &leds, TargetTrackingState trackingState) {
+            if (leds.empty()) {
+                m_framesWithoutValidBeacons++;
+            }
+            else {
+                m_framesWithoutValidBeacons = 0;
+            }
+
+            // Eigen::Vector3d positionalError =
+            // bodyState.errorCovariance().diagonal().head<3>();
+            if (trackingState != TargetTrackingState::RANSAC) {
+                double maxPositionalError =
+                    bodyState.errorCovariance().diagonal().head<3>().maxCoeff();
+                if (maxPositionalError > MAX_POSITIONAL_ERROR_VARIANCE) {
+                    return TargetHealthState::StopTrackingErrorBoundsExceeded;
+                }
+            }
+
+            if (m_framesWithoutValidBeacons > MAX_FRAMES_WITHOUT_BEACONS) {
+                return TargetHealthState::StopTrackingLostSight;
+            }
+            return TargetHealthState::OK;
+        }
+
+    private:
+        std::size_t m_framesWithoutValidBeacons = 0;
+    };
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
             : bodyInterface(bodyIface), kalmanEstimator(params) {}
@@ -52,6 +90,8 @@ namespace vbtracker {
         LedIdentifierPtr identifier;
         RANSACPoseEstimator ransacEstimator;
         SCAATKalmanPoseEstimator kalmanEstimator;
+
+        TargetHealthEvaluator healthEval;
 
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
         bool hasPrev = false;
@@ -262,7 +302,23 @@ namespace vbtracker {
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo move state machine logic elsewhere
 
-        // pre-estimation transitions
+        /// pre-estimation transitions based on overall health
+        switch (m_impl->healthEval(bodyState, usable, m_impl->trackingState)) {
+        case TargetHealthState::StopTrackingErrorBoundsExceeded:
+            msg() << "In flight reset - error bounds exceeded..." << std::endl;
+            enterRANSACMode();
+            break;
+        case TargetHealthState::StopTrackingLostSight:
+            msg() << "Lost sight of beacons for too long, awaiting their "
+                     "return..."
+                  << std::endl;
+            enterRANSACMode();
+            break;
+        case TargetHealthState::OK:
+            // we're ok, no transition needed.
+            break;
+        }
+        /// Pre-estimation transitions per-state
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSACWhenBlobDetected: {
             if (!usable.empty()) {
@@ -278,8 +334,7 @@ namespace vbtracker {
             break;
         }
 
-        // main estimation dispatch
-
+        /// main estimation dispatch
         auto params = EstimatorInOutParams{camParams,
                                            m_beacons,
                                            m_beaconMeasurementVariance,
@@ -305,7 +360,7 @@ namespace vbtracker {
         }
         }
 
-        // post-estimation transitions
+        /// post-estimation transitions (based on state)
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
             if (m_hasPoseEstimate && permitKalman) {
