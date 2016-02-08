@@ -55,8 +55,7 @@ namespace vbtracker {
         /// @param[out] state Tracked body state that will be updated if a pose
         /// was estimated
         /// @return true if a pose was estimated.
-        bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds, EstimatorInOutParams const &p);
+        bool operator()(EstimatorInOutParams const &p, LedPtrList const &leds);
 
       private:
         const std::size_t m_requiredInliers = 4;

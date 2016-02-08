@@ -280,7 +280,8 @@ namespace vbtracker {
 
         // main estimation dispatch
 
-        auto params = EstimatorInOutParams{m_beacons,
+        auto params = EstimatorInOutParams{camParams,
+                                           m_beacons,
                                            m_beaconMeasurementVariance,
                                            m_beaconFixed,
                                            m_beaconEmissionDirection,
@@ -290,8 +291,7 @@ namespace vbtracker {
                                            m_beaconDebugData};
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
-            m_hasPoseEstimate =
-                m_impl->ransacEstimator(camParams, usable, params);
+            m_hasPoseEstimate = m_impl->ransacEstimator(params, usable);
             break;
         }
 
@@ -300,7 +300,7 @@ namespace vbtracker {
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
             m_hasPoseEstimate =
-                m_impl->kalmanEstimator(camParams, usable, tv, videoDt, params);
+                m_impl->kalmanEstimator(params, usable, tv, videoDt);
             break;
         }
         }

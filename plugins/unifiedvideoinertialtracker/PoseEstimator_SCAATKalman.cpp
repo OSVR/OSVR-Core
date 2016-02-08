@@ -79,9 +79,8 @@ namespace vbtracker {
         const auto maxSquaredResidual = params.maxResidual * params.maxResidual;
     }
     bool SCAATKalmanPoseEstimator::
-    operator()(CameraParameters const &camParams, LedPtrList const &leds,
-               osvr::util::time::TimeValue const &frameTime, double videoDt,
-               EstimatorInOutParams const &p) {
+    operator()(EstimatorInOutParams const &p, LedPtrList const &leds,
+               osvr::util::time::TimeValue const &frameTime, double videoDt) {
         bool gotMeasurement = false;
         double varianceFactor = 1;
 
@@ -120,15 +119,14 @@ namespace vbtracker {
         }
 
         CameraModel cam;
-        cam.focalLength = camParams.focalLength();
-        cam.principalPoint = camParams.eiPrincipalPoint();
+        cam.focalLength = p.camParams.focalLength();
+        cam.principalPoint = p.camParams.eiPrincipalPoint();
         ImagePointMeasurement meas{cam};
-
-        kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
 
         auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
         kalman::predict(p.state, p.processModel, dt);
 
+        kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         /// @todo should we be recalculating this for each beacon after each
         /// correction step? The order we filter them in is rather arbitrary...
         Eigen::Matrix3d rotate =

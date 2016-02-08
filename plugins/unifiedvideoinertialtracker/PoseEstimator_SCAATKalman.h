@@ -48,22 +48,10 @@ namespace vbtracker {
             NeedsResetNow,
             ResetWhenBeaconsSeen
         };
-#if 0
-        struct InOutParams {
-            BeaconStateVec &beacons;
-            std::vector<double> const &beaconMeasurementVariance;
-            std::vector<bool> const &beaconFixed;
-            Vec3Vector const &beaconEmissionDirection;
-            BodyState &state;
-            BodyProcessModel &processModel;
-            std::vector<BeaconData> & beaconDebug;
-        };
-#endif
         SCAATKalmanPoseEstimator(ConfigParams const &params);
-        bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds,
+        bool operator()(EstimatorInOutParams const &p, LedPtrList const &leds,
                         osvr::util::time::TimeValue const &frameTime,
-                        double videoDt, EstimatorInOutParams const &p);
+                        double videoDt);
 
         void resetCounters() {
             m_framesInProbation = 0;
@@ -73,7 +61,8 @@ namespace vbtracker {
 
         /// Determines whether the Kalman filter is in good working condition,
         /// should fall back to RANSAC immediately, or should fall back next
-        /// time beacons are detected. When the algorithm switches f
+        /// time beacons are detected. When the algorithm switches back to
+        /// Kalman, be sure to call resetCounters()
         TrackingHealth getTrackingHealth();
 
       private:

@@ -215,15 +215,14 @@ namespace vbtracker {
                                                10.,
                                                10.,
                                                10.};
-    bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList const &leds,
-                                         EstimatorInOutParams const &p) {
+    bool RANSACPoseEstimator::operator()(EstimatorInOutParams const &p,
+                                         LedPtrList const &leds) {
         Eigen::Vector3d xlate;
         Eigen::Quaterniond quat;
         /// Call the main pose estimation to get the vector and quat.
         {
-            auto ret =
-                (*this)(camParams, leds, p.beacons, p.beaconDebug, xlate, quat);
+            auto ret = (*this)(p.camParams, leds, p.beacons, p.beaconDebug,
+                               xlate, quat);
             if (!ret) {
                 return false;
             }

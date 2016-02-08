@@ -41,6 +41,7 @@
 namespace osvr {
 namespace vbtracker {
     struct EstimatorInOutParams {
+        CameraParameters const &camParams;
         BeaconStateVec &beacons;
         std::vector<double> const &beaconMeasurementVariance;
         std::vector<bool> const &beaconFixed;
