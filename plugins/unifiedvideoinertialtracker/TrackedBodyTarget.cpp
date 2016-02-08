@@ -238,7 +238,8 @@ namespace vbtracker {
 
     bool TrackedBodyTarget::updatePoseEstimateFromLeds(
         CameraParameters const &camParams,
-        osvr::util::time::TimeValue const &tv) {
+        osvr::util::time::TimeValue const &tv, BodyState &bodyState,
+        osvr::util::time::TimeValue const &startingTime, bool validStateAndTime) {
 
         /// Do the initial filtering of the LED group to just the identified
         /// ones before we pass it to an estimator.
@@ -252,10 +253,10 @@ namespace vbtracker {
         }
         /// Must pre/post correct the state by our offset :-/
         /// @todo make this state correction less hacky.
-        m_impl->bodyInterface.state.position() += getStateCorrection();
+        bodyState.position() += getStateCorrection();
 
         /// @todo put this in the class
-        bool permitKalman = true;
+        bool permitKalman = true && validStateAndTime;
 
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo move state machine logic elsewhere
@@ -282,7 +283,8 @@ namespace vbtracker {
                                            m_beaconMeasurementVariance,
                                            m_beaconFixed,
                                            m_beaconEmissionDirection,
-                                           getBody().getState(),
+                                           startingTime,
+                                           bodyState,
                                            getBody().getProcessModel(),
                                            m_beaconDebugData};
         switch (m_impl->trackingState) {
@@ -335,7 +337,7 @@ namespace vbtracker {
         m_impl->lastEstimate = tv;
 
         /// Corresponding post-correction.
-        m_impl->bodyInterface.state.position() -= getStateCorrection();
+        bodyState.position() -= getStateCorrection();
 
         return m_hasPoseEstimate;
     }

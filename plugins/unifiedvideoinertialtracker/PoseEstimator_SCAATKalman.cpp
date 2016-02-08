@@ -126,7 +126,9 @@ namespace vbtracker {
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
 
-        /// Prediction for overall state moved into the body itself
+        //auto dt = osvrTimeValueDurationSeconds()
+        /// @todo get the right DT here using p.startingTime
+        kalman::predict(p.state, p.processModel, videoDt);
 
         /// @todo should we be recalculating this for each beacon after each
         /// correction step? The order we filter them in is rather arbitrary...

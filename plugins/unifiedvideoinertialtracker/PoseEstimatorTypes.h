@@ -45,6 +45,8 @@ namespace vbtracker {
         std::vector<double> const &beaconMeasurementVariance;
         std::vector<bool> const &beaconFixed;
         Vec3Vector const &beaconEmissionDirection;
+        /// Time that the state is coming in at.
+        osvr::util::time::TimeValue const &startingTime;
         BodyState &state;
         BodyProcessModel &processModel;
         std::vector<BeaconData> &beaconDebug;

@@ -30,6 +30,7 @@
 #include "BeaconIdTypes.h"
 #include "BodyIdTypes.h"
 #include "BeaconSetupData.h"
+#include "ModelTypes.h"
 
 // Library/third-party includes
 #include <osvr/Kalman/PureVectorState.h>
@@ -101,8 +102,10 @@ namespace vbtracker {
 
         /// Update the pose estimate using the updated LEDs - part of the third
         /// phase of tracking.
-        bool updatePoseEstimateFromLeds(CameraParameters const &camParams,
-                                        osvr::util::time::TimeValue const &tv);
+        bool updatePoseEstimateFromLeds(
+            CameraParameters const &camParams,
+            osvr::util::time::TimeValue const &tv, BodyState &bodyState,
+            osvr::util::time::TimeValue const &startingTime, bool validStateAndTime);
 
         /// Did this target yet, or last time it was asked to, compute a pose
         /// estimate?

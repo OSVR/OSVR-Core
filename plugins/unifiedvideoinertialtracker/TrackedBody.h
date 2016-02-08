@@ -128,6 +128,53 @@ namespace vbtracker {
         /// Do we have a pose estimate for this body in general?
         bool hasPoseEstimate() const;
 
+        /// Requests a copy of (a possibly historical snapshot of) body state,
+        /// as close to desiredTime without being later than it. If no such
+        /// state is available (primarily because no valid state has been set
+        /// yet), false will be returned and the out parameters will be
+        /// untouched.
+        ///
+        /// The purpose is to provide state that is potentially in the past, to
+        /// integrate delayed measurements (like from video tracking) then later
+        /// incorporate that state and replay later low-latency measurements.
+        ///
+        /// @todo should this block others from trying to submit updates for
+        /// times between outTime and desiredTime?
+        ///
+        /// @param[in] desiredTime The time you'd like state to be at or before
+        /// - typically your measurement time.
+        /// @param[out] outTime The timestamp for the state copy you receive -
+        /// modified only if return value is true. You'll need to retain this to
+        /// re-submit with your updated state.
+        /// @param[out] outState The copy of the state will be placed here -
+        /// modified only if return value is true.
+        ///
+        /// @return true if a state for the body has been recorded at or prior
+        /// to desiredTime and has thus been returned in outTime and outState.
+        bool getStateAtOrBefore(osvr::util::time::TimeValue const &desiredTime,
+                                osvr::util::time::TimeValue &outTime,
+                                BodyState &outState);
+
+        /// This is the counterpart to getStateAtOrBefore() and should only be
+        /// called subsequent to it. You provide the timestamp that you
+        /// originally got with the state from getStateAtOrBefore(), then the
+        /// updated timestamp and state you got from incorporating your
+        /// measurement.
+        ///
+        /// In the history of this body, the old state will effectively be
+        /// replaced (or immediately followed, implementation detail) by this
+        /// one: classes of newer measurements will be replayed on the state as
+        /// required to update the current body state to properly incorporate
+        /// the presumably-dated information you just provided.
+        ///
+        /// @param origTime the timestamp originally received from
+        /// getStateAtOrBefore() as `outTime`
+        /// @param newTime the timestamp currently associated with the state
+        /// @param newState the updated state.
+        void replaceStateSnapshot(osvr::util::time::TimeValue const &origTime,
+                                  osvr::util::time::TimeValue const &newTime,
+                                  BodyState const &newState);
+#if 0
         /// Adjusts the state to prepare to receive corrections from
         /// measurement(s) at time tv, rolling back to earlier state and/or
         /// predicting as required.
@@ -136,7 +183,7 @@ namespace vbtracker {
         /// Replay any IMU measurements that had to be rolled back.
         /// @sa adjustToMeasurementTime()
         void replayRewoundMeasurements();
-
+        #endif
         /// Get timestamp associated with current state.
         osvr::util::time::TimeValue getStateTime() const;
 

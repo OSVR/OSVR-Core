@@ -53,7 +53,7 @@ namespace kalman {
 namespace osvr {
 namespace vbtracker {
 
-    namespace details {
+    namespace detail {
         /// Does the specified state type also have an "external" quaternion we
         /// should save and restore?
         template <typename StateType>
@@ -75,9 +75,11 @@ namespace vbtracker {
             // vector
             // without worrying about alignment.
             using StateDim = kalman::types::Dimension<State>;
-            using StateVectorBackup = std::array<StateDim::value>;
+            using StateVectorBackup =
+                std::array<kalman::types::Scalar, StateDim::value>;
             using StateCovarianceBackup =
-                std::array<StateDim::value * StateDim::value>;
+                std::array<kalman::types::Scalar,
+                           StateDim::value * StateDim::value>;
 
           public:
             /// Constructor - saves the state vector and error covariance
@@ -86,7 +88,7 @@ namespace vbtracker {
                 StateMatrix::Map(m_covariance.data()) = state.errorCovariance();
             }
 
-            void restore(State &state) {
+            void restore(State &state) const {
                 state.setStateVector(StateVec::Map(m_stateVector.data()));
                 state.setErrorCovariance(StateMatrix::Map(m_covariance.data()));
             }
@@ -101,18 +103,18 @@ namespace vbtracker {
         /// Select the tag for tag dispatching.
         template <typename State>
         using StateHistoryEntryTagSelector = typename std::conditional<
-            details::StateHasExternalQuaternion<State>::value,
-            ExternalQuaternion, NoExternalState>::type;
-    } // namespace details
+            detail::StateHasExternalQuaternion<State>::value,
+            HasExternalQuaternion, NoExternalState>::type;
+    } // namespace detail
 
     /// State history entry template - default implementation is for those that
     /// don't have added extras, just forwards directly to the Base.
     ///
     /// Uses tag dispatching to choose an alternate implementation if required.
     template <typename State,
-              typename Tag = details::StateHistoryEntryTagSelector<State>>
-    class StateHistoryEntry : public StateHistoryEntryBase<State> {
-        using Base = StateHistoryEntryBase<State>;
+              typename Tag = detail::StateHistoryEntryTagSelector<State>>
+    class StateHistoryEntry : public detail::StateHistoryEntryBase<State> {
+        using Base = detail::StateHistoryEntryBase<State>;
 
       public:
         explicit StateHistoryEntry(State const &state) : Base(state) {}
@@ -120,7 +122,7 @@ namespace vbtracker {
 
     template <typename State>
     class StateHistoryEntry<State, detail::HasExternalQuaternion> {
-        using BaseEntry = StateHistoryEntryBase<State>;
+        using BaseEntry = detail::StateHistoryEntryBase<State>;
 
       public:
         explicit StateHistoryEntry(State const &state) : m_baseEntry(state) {
@@ -129,7 +131,7 @@ namespace vbtracker {
                 state.getQuaternion().coeffs();
         }
 
-        void restore(State &state) {
+        void restore(State &state) const {
             m_baseEntry.restore(state);
             /// also restore the quat.
             Eigen::Quaterniond quat;
@@ -139,7 +141,7 @@ namespace vbtracker {
 
       private:
         BaseEntry m_baseEntry;
-        std::array<double, 4> m_quatBackup;
+        std::array<kalman::types::Scalar, 4> m_quatBackup;
     };
 } // namespace vbtracker
 } // namespace osvr
