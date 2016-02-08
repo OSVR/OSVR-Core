@@ -31,6 +31,7 @@ add_library(uvbi-core STATIC
     HDKLedIdentifier.h
     HDKLedIdentifierFactory.cpp
     HDKLedIdentifierFactory.h
+    HistoryContainer.h
     ImageProcessing.h
     ImagePointMeasurement.h
     LED.cpp
@@ -46,6 +47,7 @@ add_library(uvbi-core STATIC
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h
     StateHistory.h
+    TimeValueChrono.h
     TrackedBody.cpp
     TrackedBody.h
     TrackedBodyIMU.cpp
