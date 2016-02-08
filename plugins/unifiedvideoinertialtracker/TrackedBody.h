@@ -174,16 +174,6 @@ namespace vbtracker {
         void replaceStateSnapshot(osvr::util::time::TimeValue const &origTime,
                                   osvr::util::time::TimeValue const &newTime,
                                   BodyState const &newState);
-#if 0
-        /// Adjusts the state to prepare to receive corrections from
-        /// measurement(s) at time tv, rolling back to earlier state and/or
-        /// predicting as required.
-        void adjustToMeasurementTime(osvr::util::time::TimeValue const &tv);
-
-        /// Replay any IMU measurements that had to be rolled back.
-        /// @sa adjustToMeasurementTime()
-        void replayRewoundMeasurements();
-        #endif
         /// Get timestamp associated with current state.
         osvr::util::time::TimeValue getStateTime() const;
 
