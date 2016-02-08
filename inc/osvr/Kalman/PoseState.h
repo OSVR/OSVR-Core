@@ -184,6 +184,7 @@ namespace kalman {
             StateSquareMatrix const &errorCovariance() const {
                 return m_errorCovariance;
             }
+            StateSquareMatrix &errorCovariance() { return m_errorCovariance; }
 
             /// Intended for startup use.
             void setQuaternion(Eigen::Quaterniond const &quaternion) {
@@ -194,7 +195,7 @@ namespace kalman {
 
             void externalizeRotation() {
                 m_orientation = getCombinedQuaternion();
-                incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
+                incrementalOrientation() = Eigen::Vector3d::Zero();
             }
 
             StateVectorBlock3 position() {
@@ -203,6 +204,16 @@ namespace kalman {
 
             ConstStateVectorBlock3 position() const {
                 return pose_externalized_rotation::position(m_state);
+            }
+
+            StateVectorBlock3 incrementalOrientation() {
+                return pose_externalized_rotation::incrementalOrientation(
+                    m_state);
+            }
+
+            ConstStateVectorBlock3 incrementalOrientation() const {
+                return pose_externalized_rotation::incrementalOrientation(
+                    m_state);
             }
 
             StateVectorBlock3 velocity() {
