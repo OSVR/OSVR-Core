@@ -87,6 +87,7 @@ namespace vbtracker {
         m_impl->frame = imageData->frame;
         m_impl->frameGray = imageData->frameGray;
         m_impl->camParams = imageData->camParams;
+        m_impl->lastFrame = imageData->tv;
 
         /// Go through each target and try to process the measurements.
         forEachTarget(*this, [&](TrackedBodyTarget &target) {
