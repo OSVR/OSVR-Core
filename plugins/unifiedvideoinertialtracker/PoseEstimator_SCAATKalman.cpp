@@ -78,10 +78,10 @@ namespace vbtracker {
 
         const auto maxSquaredResidual = params.maxResidual * params.maxResidual;
     }
-    bool SCAATKalmanPoseEstimator::operator()(CameraParameters const &camParams,
-                                              LedPtrList const &leds,
-                                              double videoDt,
-                                              EstimatorInOutParams const &p) {
+    bool SCAATKalmanPoseEstimator::
+    operator()(CameraParameters const &camParams, LedPtrList const &leds,
+               osvr::util::time::TimeValue const &frameTime, double videoDt,
+               EstimatorInOutParams const &p) {
         bool gotMeasurement = false;
         double varianceFactor = 1;
 
@@ -126,9 +126,8 @@ namespace vbtracker {
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
 
-        //auto dt = osvrTimeValueDurationSeconds()
-        /// @todo get the right DT here using p.startingTime
-        kalman::predict(p.state, p.processModel, videoDt);
+        auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
+        kalman::predict(p.state, p.processModel, dt);
 
         /// @todo should we be recalculating this for each beacon after each
         /// correction step? The order we filter them in is rather arbitrary...

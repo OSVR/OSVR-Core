@@ -239,7 +239,8 @@ namespace vbtracker {
     bool TrackedBodyTarget::updatePoseEstimateFromLeds(
         CameraParameters const &camParams,
         osvr::util::time::TimeValue const &tv, BodyState &bodyState,
-        osvr::util::time::TimeValue const &startingTime, bool validStateAndTime) {
+        osvr::util::time::TimeValue const &startingTime,
+        bool validStateAndTime) {
 
         /// Do the initial filtering of the LED group to just the identified
         /// ones before we pass it to an estimator.
@@ -299,7 +300,7 @@ namespace vbtracker {
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
             m_hasPoseEstimate =
-                m_impl->kalmanEstimator(camParams, usable, videoDt, params);
+                m_impl->kalmanEstimator(camParams, usable, tv, videoDt, params);
             break;
         }
         }

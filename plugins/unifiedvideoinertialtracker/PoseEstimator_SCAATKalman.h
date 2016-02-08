@@ -61,8 +61,9 @@ namespace vbtracker {
 #endif
         SCAATKalmanPoseEstimator(ConfigParams const &params);
         bool operator()(CameraParameters const &camParams,
-                        LedPtrList const &leds, double videoDt,
-                        EstimatorInOutParams const &p);
+                        LedPtrList const &leds,
+                        osvr::util::time::TimeValue const &frameTime,
+                        double videoDt, EstimatorInOutParams const &p);
 
         void resetCounters() {
             m_framesInProbation = 0;
