@@ -127,6 +127,11 @@ namespace vbtracker {
         const_iterator upper_bound(timestamp_type const &tv) const {
             return std::upper_bound(begin(), end(), tv, comparator());
         }
+        /// Wrapper around std::lower_bound: returns iterator to first element
+        /// with timestamp equal or newer than timestamp given or end() if none.
+        const_iterator lower_bound(timestamp_type const &tv) const {
+            return std::lower_bound(begin(), end(), tv, comparator());
+        }
 
         /// Return an iterator to the newest, last pair of timestamp and value
         /// that is not newer than the given timestamp. If none meet this
@@ -146,6 +151,7 @@ namespace vbtracker {
             return it;
         }
 
+#if 0
         /// Remove all entries in history with timestamps strictly older than
         /// the given timestamp.
         /// @return number of elements removed.
@@ -157,6 +163,28 @@ namespace vbtracker {
             }
             return count;
         }
+#else
+        /// Remove all entries in history with timestamps strictly older than
+        /// the given timestamp.
+        /// @return number of elements removed.
+        size_type pop_before(timestamp_type const &tv) {
+            auto lastIt = lower_bound(tv);
+            if (end() == lastIt) {
+                // If we got end() back, that's ambiguous: is the last entry
+                // really >= our timestamp?
+                /// @todo is this right?
+                if (newest_timestamp() < tv) {
+                    // It's not - lower_bound couldn't find anything.
+                    return 0;
+                }
+            }
+            auto count = std::distance(begin(), lastIt);
+            m_history.erase(begin(), lastIt);
+            return count;
+        }
+#endif
+
+#if 0
 
         /// Remove all entries in history with timestamps strictly newer than
         /// the given timestamp.
@@ -169,6 +197,21 @@ namespace vbtracker {
             }
             return count;
         }
+#else
+        /// Remove all entries in history with timestamps strictly newer than
+        /// the given timestamp.
+        /// @return number of elements removed.
+        size_type pop_after(timestamp_type const &tv) {
+            auto firstIt = upper_bound(tv);
+            if (end() == firstIt) {
+                // If we got end() back, nothing found after our timestamp.
+                return 0;
+            }
+            auto count = std::distance(firstIt, end());
+            m_history.erase(firstIt, end());
+            return count;
+        }
+#endif
 
         /// Adds a new value to history. It must be newer (or equal time, based
         /// on template parameters) than the newest (or the history must be
