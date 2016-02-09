@@ -43,7 +43,6 @@ namespace vbtracker {
     using BodyStateHistoryEntry = StateHistoryEntry<BodyState>;
 
     struct TrackedBody::Impl {
-        osvr::util::time::TimeValue latest;
         osvr::util::time::TimeValue stateTime;
 
         HistoryContainer<BodyStateHistoryEntry> stateHistory;
@@ -159,6 +158,7 @@ namespace vbtracker {
         /// @todo replay IMU measurements.
 
         m_state = newState;
+        m_impl->stateTime = newTime;
     }
 
     bool TrackedBody::hasPoseEstimate() const {
