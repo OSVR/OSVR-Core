@@ -34,6 +34,8 @@
 // Library/third-party includes
 #include <boost/assert.hpp>
 
+#include <util/Stride.h>
+
 // Standard includes
 #include <algorithm>
 #include <iterator>
@@ -143,6 +145,12 @@ namespace vbtracker {
                 m_impl->camParams, newTime, state, stateTime, validState);
             if (gotPose) {
                 body.replaceStateSnapshot(initialTime, newTime, state);
+#if 0
+                static auto s = ::util::Stride{101};
+                if (++s) {
+                    std::cout << body.getState().position().transpose() << "\n";
+                }
+#endif
                 /// @todo deduplicate in making this list.
                 m_updated.push_back(body.getId());
             }
