@@ -20,8 +20,8 @@
             "input": {
                 "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd"
             },
-            "measurementVarianceScaleFactor": 1e0,
-            "processNoiseAutocorrelation": [3e+2, 3e+2, 3e+2, 1e0, 1e0, 1e0]
+            "measurementVarianceScaleFactor": 3e0,
+            "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e0, 1e0, 1e0]
         }
     }],
     "aliases": {
