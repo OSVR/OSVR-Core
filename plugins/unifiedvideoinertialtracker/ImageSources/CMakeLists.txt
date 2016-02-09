@@ -29,7 +29,9 @@ set_target_properties(uvbi-image-sources PROPERTIES
 target_link_libraries(uvbi-image-sources PUBLIC
     opencv_core
     opencv_highgui
-    ${VIDEOTRACKER_EXTRA_LIBS})
+    ${VIDEOTRACKER_EXTRA_LIBS}
+    PRIVATE
+    vendored-vrpn)
 if(WIN32)
     target_link_libraries(uvbi-image-sources PUBLIC directshow-camera)
 endif()
