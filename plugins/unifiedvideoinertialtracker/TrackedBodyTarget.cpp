@@ -42,7 +42,12 @@
 
 namespace osvr {
 namespace vbtracker {
-    enum class TargetTrackingState { RANSAC, Kalman, RANSACWhenBlobDetected };
+    enum class TargetTrackingState {
+        RANSAC,
+        EnteringKalman,
+        Kalman,
+        RANSACWhenBlobDetected
+    };
 
     enum class TargetHealthState {
         OK,
@@ -351,6 +356,7 @@ namespace vbtracker {
         }
 
         case TargetTrackingState::RANSACWhenBlobDetected:
+        case TargetTrackingState::EnteringKalman:
         case TargetTrackingState::Kalman: {
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
@@ -368,6 +374,10 @@ namespace vbtracker {
             }
             break;
         }
+        case TargetTrackingState::EnteringKalman:
+            m_impl->trackingState = TargetTrackingState::Kalman;
+            // Get one frame pass on the Kalman health check.
+            break;
         case TargetTrackingState::Kalman: {
             auto health = m_impl->kalmanEstimator.getTrackingHealth();
             switch (health) {
@@ -410,7 +420,7 @@ namespace vbtracker {
     }
     void TrackedBodyTarget::enterKalmanMode() {
         msg() << "Entering SCAAT Kalman mode..." << std::endl;
-        m_impl->trackingState = TargetTrackingState::Kalman;
+        m_impl->trackingState = TargetTrackingState::EnteringKalman;
         m_impl->kalmanEstimator.resetCounters();
     }
 
