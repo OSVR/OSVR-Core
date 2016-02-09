@@ -231,6 +231,10 @@ namespace vbtracker {
         /// xlate and quat.
         p.state.position() = xlate;
         p.state.setQuaternion(quat);
+        /// Zero things we can't measure.
+        p.state.incrementalOrientation() = Eigen::Vector3d::Zero();
+        p.state.velocity() = Eigen::Vector3d::Zero();
+        p.state.angularVelocity() = Eigen::Vector3d::Zero();
 
         using StateVec = kalman::types::DimVector<BodyState>;
         using StateSquareMatrix = kalman::types::DimSquareMatrix<BodyState>;
