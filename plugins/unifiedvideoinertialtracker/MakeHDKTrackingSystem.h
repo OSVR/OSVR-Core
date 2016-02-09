@@ -177,8 +177,8 @@ namespace vbtracker {
             // distance between front and back panel target origins, in mm,
             // because we'll apply this before converting coordinate systems.
             auto distanceBetweenPanels =
-                (params.headCircumference / M_PI * 10.f +
-                 params.headToFrontBeaconOriginDistance);
+                static_cast<float>(params.headCircumference / M_PI * 10.f +
+                                   params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
             auto rotate180aboutY = [](LocationPoint pt) {
