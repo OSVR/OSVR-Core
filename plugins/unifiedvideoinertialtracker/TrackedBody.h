@@ -33,6 +33,7 @@
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/TimeValue.h>
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <memory>
@@ -98,6 +99,25 @@ namespace vbtracker {
         ConfigParams const &getParams() const;
 
         BodyState const &getState() const { return m_state; }
+
+        /// Does this tracked body have an IMU?
+        bool hasIMU() const { return static_cast<bool>(m_imu); }
+
+        /// Get the IMU - only valid if hasIMU is true.
+        TrackedBodyIMU &getIMU() {
+            BOOST_ASSERT_MSG(m_imu, "getIMU() called when hasIMU() is false!");
+            return *m_imu;
+        }
+
+        /// Get the IMU - only valid if hasIMU is true.
+        TrackedBodyIMU const &getIMU() const {
+            BOOST_ASSERT_MSG(m_imu, "getIMU() called when hasIMU() is false!");
+            return *m_imu;
+        }
+
+        /// How many (if any) video-based tracking targets does this tracked
+        /// body have?
+        std::size_t getNumTargets() const { return m_target ? 1 : 0; }
 
         TrackedBodyTarget *getTarget(TargetId id) {
             if (TargetId(0) == id) {
@@ -183,6 +203,7 @@ namespace vbtracker {
         osvr::util::time::TimeValue getStateTime() const;
 
         BodyProcessModel &getProcessModel() { return m_processModel; }
+
         BodyState &getState() { return m_state; }
 
       private:

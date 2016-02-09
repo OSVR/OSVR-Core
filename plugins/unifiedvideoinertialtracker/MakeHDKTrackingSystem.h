@@ -209,7 +209,7 @@ namespace vbtracker {
         }
         /// Set up autocalib.
         /// Set the ones that are fixed.
-        for (int i = 0; i < numBeacons; ++i) {
+        for (decltype(numBeacons) i = 0; i < numBeacons; ++i) {
             /// mark everybody fixed for testing.
             data.markBeaconFixed(makeOneBased(ZeroBasedBeaconId(i)));
         }

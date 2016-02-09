@@ -166,7 +166,7 @@ namespace vbtracker {
                 new OsvrHdkLedIdentifier(setupData.patterns));
             m_impl->identifier = std::move(identifier);
         }
-
+        m_verifyInvariants();
 #if 0
         /// Dump the beacon locations to console
         dumpBeaconsToConsole();
@@ -207,7 +207,7 @@ namespace vbtracker {
 
         /// Clear the "usableLeds" that will be populated in a later step, if we
         /// get that far.
-        m_impl->usableLeds.clear();
+        usableLeds().clear();
 
         if (getParams().streamBeaconDebugInfo) {
             /// Only bother resetting if anyone is actually going to receive the
@@ -289,14 +289,8 @@ namespace vbtracker {
 
         /// Do the initial filtering of the LED group to just the identified
         /// ones before we pass it to an estimator.
-        auto &usable = usableLeds();
-        auto &leds = m_impl->leds;
-        for (auto &led : leds) {
-            if (!led.identified()) {
-                continue;
-            }
-            usable.push_back(&led);
-        }
+        updateUsableLeds();
+
         /// Must pre/post correct the state by our offset :-/
         /// @todo make this state correction less hacky.
         bodyState.position() += getStateCorrection();
@@ -308,7 +302,8 @@ namespace vbtracker {
         /// @todo move state machine logic elsewhere
 
         /// pre-estimation transitions based on overall health
-        switch (m_impl->healthEval(bodyState, usable, m_impl->trackingState)) {
+        switch (m_impl->healthEval(bodyState, usableLeds(),
+                                   m_impl->trackingState)) {
         case TargetHealthState::StopTrackingErrorBoundsExceeded:
             msg() << "In flight reset - error bounds exceeded..." << std::endl;
             enterRANSACMode();
@@ -326,7 +321,7 @@ namespace vbtracker {
         /// Pre-estimation transitions per-state
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSACWhenBlobDetected: {
-            if (!usable.empty()) {
+            if (!usableLeds().empty()) {
                 msg()
                     << "In flight reset - beacons detected, re-acquiring fix..."
                     << std::endl;
@@ -351,7 +346,7 @@ namespace vbtracker {
                                            m_beaconDebugData};
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
-            m_hasPoseEstimate = m_impl->ransacEstimator(params, usable);
+            m_hasPoseEstimate = m_impl->ransacEstimator(params, usableLeds());
             break;
         }
 
@@ -361,7 +356,7 @@ namespace vbtracker {
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
             m_hasPoseEstimate =
-                m_impl->kalmanEstimator(params, usable, tv, videoDt);
+                m_impl->kalmanEstimator(params, usableLeds(), tv, videoDt);
             break;
         }
         }
@@ -408,6 +403,27 @@ namespace vbtracker {
         return m_hasPoseEstimate;
     }
 
+    bool TrackedBodyTarget::uncalibratedRANSACPoseEstimateFromLeds(
+        CameraParameters const &camParams, Eigen::Vector3d &xlate,
+        Eigen::Quaterniond &quat) {
+
+        /// Do the initial filtering of the LED group to just the identified
+        /// ones before we pass it to an estimator.
+        updateUsableLeds();
+        Eigen::Vector3d outXlate;
+        Eigen::Quaterniond outQuat;
+        auto gotPose =
+            m_impl->ransacEstimator(camParams, usableLeds(), m_beacons,
+                                    m_beaconDebugData, outXlate, outQuat);
+        if (gotPose) {
+            // Post-correct the state
+            xlate = outXlate - outQuat * m_beaconOffset;
+            // copy the quat
+            quat = outQuat;
+        }
+        return gotPose;
+    }
+
     Eigen::Vector3d TrackedBodyTarget::getStateCorrection() const {
         return m_impl->bodyInterface.state.getQuaternion() * m_beaconOffset;
     }
@@ -437,7 +453,17 @@ namespace vbtracker {
     LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }
 
     LedPtrList &TrackedBodyTarget::usableLeds() { return m_impl->usableLeds; }
-
+    void TrackedBodyTarget::updateUsableLeds() {
+        auto &usable = usableLeds();
+        usable.clear();
+        auto &leds = m_impl->leds;
+        for (auto &led : leds) {
+            if (!led.identified()) {
+                continue;
+            }
+            usable.push_back(&led);
+        }
+    }
     osvr::util::time::TimeValue const &
     TrackedBodyTarget::getLastUpdate() const {
         return m_impl->lastEstimate;

@@ -21,6 +21,7 @@ add_library(uvbi-core STATIC
     BeaconSetupData.cpp
     BeaconSetupData.h
     BodyTargetInterface.h
+    CannedIMUMeasurement.h
     CameraDistortionModel.h
     CameraParameters.h
     ConfigParams.cpp

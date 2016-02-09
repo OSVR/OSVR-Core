@@ -108,8 +108,26 @@ namespace vbtracker {
             osvr::util::time::TimeValue const &startingTime,
             bool validStateAndTime);
 
-        /// Did this target yet, or last time it was asked to, compute a pose
-        /// estimate?
+        /// Perform a simple RANSAC pose estimation from updated LEDs (third
+        /// phase of tracking) without storing the results internally or
+        /// changing internal state, or using any internal calibration
+        /// transforms. Intended for use during initial room calibration
+        /// (startup).
+        ///
+        /// @param camParams Camera parameters for the image source (no
+        /// distortion)
+        /// @param [out] xlate Pose estimate: translation in meters. Only
+        /// modified if return value is true.
+        /// @param [out] quat Pose estimate: rotation. Only modified if return
+        /// value is true.
+        /// @return true if a pose was estimated and the out parameters were
+        /// modified.
+        bool uncalibratedRANSACPoseEstimateFromLeds(
+            CameraParameters const &camParams, Eigen::Vector3d &xlate,
+            Eigen::Quaterniond &quat);
+
+        /// Did this target yet, or last time it was asked to, compute a
+        /// pose estimate?
         bool hasPoseEstimate() const { return m_hasPoseEstimate; }
 
         osvr::util::time::TimeValue const &getLastUpdate() const;
@@ -137,6 +155,9 @@ namespace vbtracker {
         void dumpBeaconsToConsole() const;
 
         LedGroup &leds();
+
+        /// Update usableLeds() from leds()
+        void updateUsableLeds();
 
         LedPtrList &usableLeds();
 

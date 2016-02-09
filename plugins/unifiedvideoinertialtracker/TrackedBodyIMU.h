@@ -26,17 +26,54 @@
 #define INCLUDED_TrackedBodyIMU_h_GUID_65A86547_8C4C_43B5_906C_361178DCCE06
 
 // Internal Includes
-// - none
+#include "ModelTypes.h"
+#include "CannedIMUMeasurement.h"
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/Angles.h>
+#include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace vbtracker {
-    class TrackedBodyIMU {};
+    struct ConfigParams;
+    class TrackedBody;
+    class TrackedBodyIMU {
+      public:
+        explicit TrackedBodyIMU(TrackedBody &body);
+
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        TrackedBody &getBody() { return m_body; }
+        TrackedBody const &getBody() const { return m_body; }
+
+        /// Processes an orientation
+        CannedIMUMeasurement processOrientation(util::time::TimeValue const &tv,
+                                                Eigen::Quaterniond const &quat);
+
+        /// Processes an angular velocity
+        CannedIMUMeasurement
+        processAngularVelocity(util::time::TimeValue const &tv,
+                               Eigen::Quaterniond const &deltaquat, double dt);
+
+        bool hasPoseEstimate() const { return m_hasOrientation; }
+        osvr::util::time::TimeValue const &getLastUpdate() const {
+            return m_last;
+        }
+
+      private:
+        ConfigParams const &getParams() const;
+        TrackedBody &m_body;
+        bool m_yawKnown = false;
+        util::Angle m_yaw;
+
+        bool m_hasOrientation = false;
+        Eigen::Quaterniond m_quat;
+        util::time::TimeValue m_last;
+    };
 } // namespace vbtracker
 } // namespace osvr
 

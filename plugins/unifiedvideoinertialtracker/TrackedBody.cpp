@@ -62,8 +62,12 @@ namespace vbtracker {
     TrackedBody::~TrackedBody() {}
 
     TrackedBodyIMU *TrackedBody::createIntegratedIMU() {
-        /// @todo
-        return nullptr;
+        if (m_imu) {
+            // already have an IMU!
+            return nullptr;
+        }
+        m_imu.reset(new TrackedBodyIMU{*this});
+        return m_imu.get();
     }
 
     TrackedBodyTarget *
@@ -106,14 +110,25 @@ namespace vbtracker {
     inline boost::optional<osvr::util::time::TimeValue>
     getOldestPossibleMeasurementSource(TrackedBody const &body) {
         boost::optional<osvr::util::time::TimeValue> oldest;
-        body.forEachTarget([&oldest](TrackedBodyTarget const &target) {
-            if (!oldest || target.getLastUpdate() < *oldest) {
-                /// If we haven't recorded a timestamp or the current target has
-                /// an older timestamp
-                oldest = target.getLastUpdate();
+        /// Little lambda to set `oldest` if we haven't recorded a timestamp or
+        /// if the given timestamp is older.
+        auto updateOldest = [&oldest](util::time::TimeValue const &timestamp) {
+            if (!oldest || timestamp < *oldest) {
+                oldest = timestamp;
             }
+        };
+
+        body.forEachTarget([&updateOldest](TrackedBodyTarget const &target) {
+            /// If we haven't recorded a timestamp or the current target has
+            /// an older timestamp
+            updateOldest(target.getLastUpdate());
         });
-        /// @todo include IMU
+
+        if (body.hasIMU()) {
+            /// If we haven't recorded a timestamp or the IMU has an older
+            /// timestamp
+            updateOldest(body.getIMU().getLastUpdate());
+        }
         return oldest;
     }
 
