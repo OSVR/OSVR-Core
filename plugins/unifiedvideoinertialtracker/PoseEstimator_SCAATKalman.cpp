@@ -133,15 +133,20 @@ namespace vbtracker {
             Eigen::Matrix3d(p.state.getCombinedQuaternion());
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
+#if 0
         static ::util::Stride varianceStride{809};
         if (++varianceStride) {
             std::cout << p.state.errorCovariance().diagonal().transpose()
                       << std::endl;
         }
+#endif
 
         static ::util::Stride s{203};
+#if 0
         s.advance();
         debugStride.advance();
+#endif
+
         for (auto &ledPtr : leds) {
             auto &led = *ledPtr;
 
@@ -239,16 +244,19 @@ namespace vbtracker {
                                                            beaconProcess);
             kalman::correct(state, model, meas);
             gotMeasurement = true;
-
+#ifdef DEBUG_MEASUREMENT_RESIDUALS
             if (s) {
                 std::cout << "M: " << debug.measurement
                           << "  R: " << debug.residual
                           << "  s2: " << debug.variance << "\n";
             }
+#endif
         }
+#ifdef DEBUG_MEASUREMENT_RESIDUALS
         if (s) {
             std::cout << std::endl;
         }
+#endif
 
         /// Probation: Dealing with ratios of bad to good residuals
         bool incrementProbation = false;
