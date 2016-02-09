@@ -34,6 +34,7 @@
 // Standard includes
 #include <deque>
 #include <stdexcept>
+#include <iterator>
 
 namespace osvr {
 namespace vbtracker {
