@@ -240,7 +240,7 @@ namespace vbtracker {
         using StateSquareMatrix = kalman::types::DimSquareMatrix<BodyState>;
 
         StateSquareMatrix covariance = StateVec(InitialStateError).asDiagonal();
-        // Copy the existing angular velocity error covariance
+        /// @todo Copy the existing angular velocity error covariance
         /*
         covariance.bottomRightCorner<3, 3>() =
             p.state.errorCovariance().bottomRightCorner<3, 3>();
