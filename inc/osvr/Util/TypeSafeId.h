@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/StdInt.h>
+#include <osvr/Util/BasicTypeTraits.h>
 
 // Library/third-party includes
 // - none
@@ -36,17 +37,47 @@
 
 namespace osvr {
 namespace util {
+
+    template <class Tag> class TypeSafeId;
+    template <class Tag> class TypeSafeIdBase;
+    template <class Tag> class TypeSafeIdRefAccessorBase;
     /// @brief Namespace for traits templates associated with
     /// ::osvr::util::TypeSafeId
     namespace typesafeid_traits {
         /// @brief Explicitly specialize for your tag type if you want a
-        /// different
-        /// underlying type.
+        /// different underlying type.
         template <typename Tag> struct WrappedType { typedef uint32_t type; };
 
+        /// Class for your specialization of ProvideReferenceAccessor
+        /// to inherit from if you want to provide a non-const l-value reference
+        /// accessor, weakening the typesafety of this wrapper.
+        struct ShouldHaveReferenceAccessor {
+            enum { value = true };
+        };
+
+        /// Explicitly specialize this for your tag type to derive from
+        /// ProvideLValueReferenceAccessor if you want a `value()` member that
+        /// returns a non-const reference (an l-value reference) - which does
+        /// make it slightly less typesafe. For example,
+        /// <code>
+        /// template<> struct ProvideReferenceAccessor<MyTag> :
+        /// ShouldHaveReferenceAccessor {};
+        /// </code>
+        template <typename Tag> struct ProvideReferenceAccessor {
+            enum { value = false };
+        };
+
+        /// Selects one of the base classes based on whether we need that
+        /// reference accessor.
+        template <typename Tag> struct ComputeBaseClass {
+            typedef typename Conditional<ProvideReferenceAccessor<Tag>::value,
+                                         TypeSafeIdRefAccessorBase<Tag>,
+                                         TypeSafeIdBase<Tag> >::type type;
+        };
+
         /// @brief Explicitly specialize for your tag type if you want a
-        /// different signal value for invalid/empty: default is the maximum
-        /// representable value for your type.
+        /// different signal value for invalid/empty: default is the
+        /// maximum representable value for your type.
         template <typename Tag> struct SentinelValue {
             typedef typename WrappedType<Tag>::type wrapped_type;
             static wrapped_type get() {
@@ -59,20 +90,20 @@ namespace util {
     /// @brief A generic typesafe (as long as you use differing tag types)
     /// wrapper for identifiers (typically integers).
     ///
-    /// @tparam Tag any type - does not have to be defined, just declared (so
-    /// `struct mytag;` somewhere is fine). The tag serves to make integer IDs
-    /// have distinct types, and also serves as a look-up key in the
-    /// ::osvr::util::typesafeid_traits classes for underlying integer type and
-    /// sentinel empty/invalid value.
+    /// @tparam Tag any type - does not have to be defined, just declared
+    /// (so `struct mytag;` somewhere is fine). The tag serves to make integer
+    /// IDs have distinct types, and also serves as a look-up key in the
+    /// ::osvr::util::typesafeid_traits classes for underlying integer type
+    /// and sentinel empty/invalid value.
     ///
     /// Initial implementation inspired by
     /// http://www.ilikebigbits.com/blog/2014/5/6/type-safe-identifiers-in-c
-    /// though this version now strays quite far by strengthening type-safety
-    /// and encapsulation, and by using traits classes to specify details based
-    /// on tag type alone.
-    template <class Tag> class TypeSafeId {
+    /// though this version now strays quite far by strengthening
+    /// type-safety and encapsulation, and by using traits classes to specify
+    /// details based on tag type alone.
+    template <class Tag> class TypeSafeIdBase {
       public:
-        /// @brief The type of the current class.
+        /// @brief The "public" type of the current class.
         typedef TypeSafeId<Tag> type;
 
         /// @brief The contained/wrapped type.
@@ -81,11 +112,15 @@ namespace util {
         /// @brief Static factory method to return an invalid/empty ID.
         static type invalid() { return type(); }
 
-        // Default constructor which will set m_val to the empty/invalid value.
-        TypeSafeId() : m_val(sentinel()) {}
+        /// Default constructor which will set m_val to the empty/invalid
+        /// value.
+        TypeSafeIdBase() : m_val(sentinel()) {}
 
-        // Explicit constructor from the wrapped type
-        explicit TypeSafeId(wrapped_type val) : m_val(val) {}
+        /// Explicit constructor from the wrapped type
+        explicit TypeSafeIdBase(wrapped_type val) : m_val(val) {}
+
+        /// Copy constructor
+        TypeSafeIdBase(TypeSafeIdBase const &other) : m_val(other.m_val) {}
 
         /// @brief Check whether the ID is empty/invalid
         bool empty() const { return m_val == sentinel(); }
@@ -93,15 +128,41 @@ namespace util {
         /// @brief Read-only accessor to the (non-type-safe!) wrapped value
         wrapped_type value() const { return m_val; }
 
-        /// @brief Reference accessor to the (non-type-safe!) wrapped value
-        wrapped_type & value() { return m_val; }
-
-      private:
+      protected:
         /// @brief Utility function to access the SentinelValue trait.
         static wrapped_type sentinel() {
             return typesafeid_traits::SentinelValue<Tag>::get();
         }
         wrapped_type m_val;
+    };
+
+    template <class Tag>
+    class TypeSafeIdRefAccessorBase : public TypeSafeIdBase<Tag> {
+      public:
+        typedef TypeSafeIdBase<Tag> Base;
+        typedef typename typesafeid_traits::WrappedType<Tag>::type wrapped_type;
+        TypeSafeIdRefAccessorBase() : Base() {}
+        explicit TypeSafeIdRefAccessorBase(wrapped_type val) : Base(val) {}
+        TypeSafeIdRefAccessorBase(TypeSafeIdRefAccessorBase const &other)
+            : Base(other) {}
+
+        /// @brief Non-const reference accessor to the (non-type-safe!)
+        /// wrapped value - only available if specifically provided for by a tag
+        /// specialization of traits.
+        wrapped_type &value() { return Base::m_val; }
+    };
+
+    template <class Tag>
+    class TypeSafeId : public typesafeid_traits::ComputeBaseClass<Tag>::type {
+      public:
+        /// @brief The type of the current class.
+        typedef TypeSafeId<Tag> type;
+        /// @brief The implementation base.
+        typedef typename typesafeid_traits::ComputeBaseClass<Tag>::type Base;
+        typedef typename typesafeid_traits::WrappedType<Tag>::type wrapped_type;
+        TypeSafeId() : Base() {}
+        explicit TypeSafeId(wrapped_type val) : Base(val) {}
+        TypeSafeId(TypeSafeId const &other) : Base(other) {}
     };
 
     /// @brief Equality comparison operator for type-safe IDs
