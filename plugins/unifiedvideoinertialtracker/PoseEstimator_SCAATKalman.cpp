@@ -147,6 +147,8 @@ namespace vbtracker {
         debugStride.advance();
 #endif
 
+        Eigen::Vector2d imageSize(p.camParams.imageSize.width,
+                                  p.camParams.imageSize.height);
         for (auto &ledPtr : leds) {
             auto &led = *ledPtr;
 
@@ -215,8 +217,12 @@ namespace vbtracker {
                 kalman::predict(*(p.beacons[index]), beaconProcess, videoDt);
             }
 
+            /// subtracting from image size to flip signs of x and y, aka 180
+            /// degree rotation about z axis.
             meas.setMeasurement(
+                imageSize -
                 Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
+
             led.markAsUsed();
             auto state =
                 kalman::makeAugmentedState(p.state, *(p.beacons[index]));
