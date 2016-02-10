@@ -36,8 +36,8 @@ namespace vbtracker {
     ConfigParams::ConfigParams() {
         // Apparently I can't non-static-data-initializer initialize an
         // array member. Sad. GCC almost let me. MSVC said no way.
-        const double positionNoise = 3e+9;
-        const double rotationNoise = 1e+7;
+        const double positionNoise = 3e-2;
+        const double rotationNoise = 1e+0;
         processNoiseAutocorrelation[0] = positionNoise;
         processNoiseAutocorrelation[1] = positionNoise;
         processNoiseAutocorrelation[2] = positionNoise;

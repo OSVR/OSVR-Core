@@ -17,11 +17,10 @@
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "eyeHeight": 0,
             "cameraIsForward": true,
-            "input": {
-                "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd"
-            },
             "measurementVarianceScaleFactor": 3e0,
-            "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e0, 1e0, 1e0]
+            "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e1, 1e1, 1e1],
+            "beaconProcessNoise": 0,
+            "initialBeaconError": 0
         }
     }],
     "aliases": {

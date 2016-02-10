@@ -40,6 +40,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#undef OSVR_UVBI_DISABLE_AUTOCALIB
+
 namespace osvr {
 namespace vbtracker {
     namespace {
@@ -208,13 +210,15 @@ namespace vbtracker {
                 numBeacons,
                 transformFromHDKData(EmissionDirectionVec(0, 0, -1)));
         }
-        /// Set up autocalib.
-        /// Set the ones that are fixed.
+/// Set up autocalib.
+/// Set the ones that are fixed.
+
+#ifdef OSVR_UVBI_DISABLE_AUTOCALIB
         for (decltype(numBeacons) i = 0; i < numBeacons; ++i) {
             /// mark everybody fixed for testing.
             data.markBeaconFixed(makeOneBased(ZeroBasedBeaconId(i)));
         }
-#if 0
+#else
         for (auto idx : {16, 17, 19, 20}) {
             data.markBeaconFixed(OneBasedBeaconId(idx));
         }
