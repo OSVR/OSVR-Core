@@ -42,20 +42,24 @@
 
 // Standard includes
 #include <iosfwd>
-#include <deque>
+#include <queue>
 #include <thread>
 #include <mutex>
-#include <future>
+#include <condition_variable>
+#include <tuple>
 
 namespace osvr {
 namespace vbtracker {
+    class TrackedBodyIMU;
 
     using TimestampedOrientation =
-        std::pair<util::time::TimeValue, OSVR_OrientationReport>;
+        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
+                   OSVR_OrientationReport>;
     using TimestampedAngVel =
-        std::pair<util::time::TimeValue, OSVR_AngularVelocityReport>;
-    using MessageEntry =
-        boost::variant<TimestampedOrientation, TimestampedAngVel>;
+        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
+                   OSVR_AngularVelocityReport>;
+    using MessageEntry = boost::variant<boost::none_t, TimestampedOrientation,
+                                        TimestampedAngVel>;
 
     class TrackerThread : boost::noncopyable {
       public:
@@ -66,21 +70,57 @@ namespace vbtracker {
         /// dedicated thread.
         void operator()();
 
-        /// Call from the main thread!
+        /// @name Main thread methods
+        /// @{
+        /// Call from the main thread to trigger this thread's execution to exit
+        /// after the current frame.
         void triggerStop();
+
+        /// Submit an orientation report for an IMU
+        void submitIMUReport(TrackedBodyIMU &imu,
+                             util::time::TimeValue const &tv,
+                             OSVR_OrientationReport const &report);
+        void submitIMUReport(TrackedBodyIMU &imu,
+                             util::time::TimeValue const &tv,
+                             OSVR_AngularVelocityReport const &report);
+        /// @}
 
       private:
         /// Helper providing a prefixed output stream for normal messages.
         std::ostream &msg() const;
         /// Helper providing a prefixed output stream for warning messages.
         std::ostream &warn() const;
+
+        /// Main function called repeatedly, once for each (attempted) frame of
+        /// video.
         void doFrame();
+
+        /// Copy updated body state into the reporting vector.
+        void updateReportingVector(BodyIndices const &bodyIds);
+
+        /// This function is responsible for launching the descriptively-named
+        /// timeConsumingImageStep() asynchronously.
+        void launchTimeConsumingImageStep();
+
+        /// The "time consuming image step" - specifically, retrieving the image
+        /// and performing the initial blob detection on it. This gets launched
+        /// asynchronously by launchTimeConsumingImageStep()
+        void timeConsumingImageStep();
         TrackingSystem &m_trackingSystem;
         ImageSource &m_cam;
         BodyReportingVector &m_reportingVec;
         CameraParameters m_camParams;
+
+        /// Time that the last camera grab was triggered.
+        util::time::TimeValue m_triggerTime;
+
+        /// @name Updated asynchronously by timeConsumingImageStep()
+        /// @{
         cv::Mat m_frame;
         cv::Mat m_frameGray;
+        ImageOutputDataPtr m_imageData;
+        /// @}
+
         /// @name Run flag
         /// @{
         std::mutex m_runMutex;
@@ -92,8 +132,8 @@ namespace vbtracker {
         /// @{
         std::condition_variable m_messageCondVar;
         std::mutex m_messageMutex;
-        std::deque<MessageEntry> m_messages;
-        ImageOutputDataPtr m_imageData;
+        std::queue<MessageEntry> m_messages;
+        bool m_timeConsumingImageStepComplete = false;
         /// @}
     };
 } // namespace vbtracker

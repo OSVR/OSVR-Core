@@ -27,10 +27,11 @@
 #include "TrackedBody.h"
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/Finally.h>
 
 // Standard includes
 #include <iostream>
+#include <future>
 
 namespace osvr {
 namespace vbtracker {
@@ -68,11 +69,33 @@ namespace vbtracker {
         msg() << "Tracker thread object: functor exiting." << std::endl;
     }
 
-    /// Call from the main thread!
     void TrackerThread::triggerStop() {
+        /// Main thread method!
         msg() << "Tracker thread object: triggerStop() called" << std::endl;
         std::lock_guard<std::mutex> lock(m_runMutex);
         m_run = false;
+    }
+
+    void TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
+                                        util::time::TimeValue const &tv,
+                                        OSVR_OrientationReport const &report) {
+        /// Main thread method!
+        {
+            std::lock_guard<std::mutex> lock(m_messageMutex);
+            m_messages.push(std::make_tuple(&imu, tv, report));
+        }
+        m_messageCondVar.notify_one();
+    }
+    void
+    TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
+                                   util::time::TimeValue const &tv,
+                                   OSVR_AngularVelocityReport const &report) {
+        /// Main thread method!
+        {
+            std::lock_guard<std::mutex> lock(m_messageMutex);
+            m_messages.push(std::make_tuple(&imu, tv, report));
+        }
+        m_messageCondVar.notify_one();
     }
 
     std::ostream &TrackerThread::msg() const {
@@ -89,8 +112,7 @@ namespace vbtracker {
         // Trigger a grab.
         if (!m_cam.grab()) {
             // Again failing without quitting, in hopes we get better luck
-            // next
-            // time...
+            // next time...
             warn() << "Camera grab failed." << std::endl;
             return;
         }
@@ -98,38 +120,101 @@ namespace vbtracker {
         // for the image
         /// @todo backdate to account for image transfer image, exposure
         /// time, etc.
-        auto tv = util::time::getNow();
+        m_triggerTime = util::time::getNow();
 
-        // Pull the image into an OpenCV matrix named m_frame.
-        m_cam.retrieve(m_frame, m_frameGray);
+        /// Launch an asynchronous task to perform the image retrieval and
+        /// initial image processing.
+        launchTimeConsumingImageStep();
+
+        bool finishedImage = false;
+        do {
+
+            MessageEntry message = boost::none;
+            {
+                /// Wait for something to do (Completion of image, IMU reports)
+                std::unique_lock<std::mutex> lock(m_messageMutex);
+                m_messageCondVar.wait(lock, [&] {
+                    return m_timeConsumingImageStepComplete ||
+                           !m_messages.empty();
+                });
+                if (m_timeConsumingImageStepComplete) {
+                    /// Set a flag to get us out of this innermost loop - we'll
+                    /// finish up processing this frame and trigger another grab
+                    /// before we look at more IMU data.
+                    finishedImage = true;
+                } else {
+                    // OK, we have some IMU reports to keep us busy in the
+                    // meantime. Grab the first one and we'll process it while
+                    // not holding the mutex.
+                    message = m_messages.front();
+                    m_messages.pop();
+                }
+            } // unlock
+
+            if (!message.empty()) {
+                /// @todo handle IMU report in here - after unlocking
+            }
+        } while (!finishedImage);
+
+        // OK, once we get here, we know the timeConsumingImageStep is complete.
         if (!m_frame.data || !m_frameGray.data) {
+            // but it ended early due to error.
             warn() << "Camera retrieve appeared to fail: frames had null "
                       "pointers!"
                    << std::endl;
             return;
         }
 
-        /// Launch an asynchronous task to perform the initial image
-        /// processing.
-        auto imageProcFuture = std::async(
-            std::launch::async, [&]() -> vbtracker::ImageOutputDataPtr {
-                return m_trackingSystem.performInitialImageProcessing(
-                    tv, m_frame, m_frameGray, m_camParams);
-            });
+        if (!m_imageData) {
+            // but it failed to set the pointer? this is very strange...
+            warn() << "Initial image processing failed somehow!" << std::endl;
+            return;
+        }
 
-        /// @todo handle IMU reports in here
-
-        /// By calling .get() on the std::future we block on the async we
-        /// launched.
         // Submit to the tracking system.
         auto bodyIds =
-            m_trackingSystem.updateBodiesFromVideoData(imageProcFuture.get());
+            m_trackingSystem.updateBodiesFromVideoData(std::move(m_imageData));
+        m_imageData.reset();
 
+        updateReportingVector(bodyIds);
+    }
+
+    void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {
         for (auto const &bodyId : bodyIds) {
             auto &body = m_trackingSystem.getBody(bodyId);
             m_reportingVec[bodyId.value()]->updateState(
                 body.getStateTime(), body.getState(), body.getProcessModel());
         }
+    }
+    void TrackerThread::launchTimeConsumingImageStep() {
+        /// Our thread would be the only one reading or writing this flag at
+        /// this point, so it's OK now to write this without protection.
+        m_timeConsumingImageStepComplete = false;
+
+        std::async(std::launch::async, [&] { timeConsumingImageStep(); });
+    }
+    void TrackerThread::timeConsumingImageStep() {
+        /// When we return from this function, set a flag indicating we're done
+        /// and notify on the condition variable.
+        auto signalCompletion = util::finally([&] {
+            {
+                std::lock_guard<std::mutex> lock{m_messageMutex};
+                m_timeConsumingImageStepComplete = true;
+            }
+            m_messageCondVar.notify_one();
+        });
+
+        // Pull the image into an OpenCV matrix named m_frame.
+        m_cam.retrieve(m_frame, m_frameGray);
+        if (!m_frame.data || !m_frameGray.data) {
+            // let the tracker thread warn if it wants to, we'll just get out.
+            return;
+        }
+
+        // Do the slow, but intentionally async-able part of the image
+        // processing.
+        m_imageData = m_trackingSystem.performInitialImageProcessing(
+            m_triggerTime, m_frame, m_frameGray, m_camParams);
     }
 } // namespace vbtracker
 } // namespace osvr
