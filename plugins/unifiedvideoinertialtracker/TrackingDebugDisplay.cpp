@@ -93,50 +93,89 @@ namespace vbtracker {
         m_enabled = false;
     }
 
-    /// Utility function to draw a keypoint-sized circle on the image at the LED
-    /// location.
-    inline void drawLedCircleOnImage(cv::Mat &image, Led const &led,
-                                     bool filled, cv::Vec3b color) {
-        cv::circle(image, led.getLocation(), led.getMeasurement().diameter / 2.,
-                   cv::Scalar(color), filled ? -1 : 1);
+    struct WindowCoordsPoint {
+        // explicit WindowCoordsPoint(cv::Point2f p) : point(p) {}
+        cv::Point2f point;
+    };
+
+    inline WindowCoordsPoint invertLoc(cv::Mat const &image, cv::Point2f loc) {
+        return WindowCoordsPoint{
+            cv::Point2f(image.cols - loc.x, image.rows - loc.y)};
     }
 
-    /// Utility function to label an LED with its 1-based beacon ID
-    inline void drawLedLabelOnImage(cv::Mat &image, OneBasedBeaconId id,
-                                    cv::Point2f location,
-                                    cv::Vec3b color = CVCOLOR_GRAY,
-                                    double size = 0.5) {
-        auto label = std::to_string(id.value());
-        cv::putText(image, label, location, cv::FONT_HERSHEY_SIMPLEX, size,
-                    cv::Scalar(color));
+    inline Eigen::Vector2d pointToEigenVec(cv::Point2f pt) {
+        return Eigen::Vector2d(pt.x, pt.y);
     }
-    /// @overload
-    /// Takes an Eigen::Vector2d as the location, with optional offset.
-    inline void drawLedLabelOnImage(cv::Mat &image, OneBasedBeaconId id,
-                                    Eigen::Vector2d const &loc,
-                                    cv::Vec3b color = CVCOLOR_GRAY,
-                                    double size = 0.5,
-                                    cv::Point2f offset = cv::Point2f(0, 0)) {
-        drawLedLabelOnImage(image, id, cv::Point2f(loc.x(), loc.y()) + offset,
-                            color, size);
+    inline cv::Point2f eigenVecToPoint(Eigen::Vector2d const &vec) {
+        return cv::Point2f(vec.x(), vec.y());
     }
-    /// @overload
-    /// Takes an LED directly, with optional offset.
-    inline void drawLedLabelOnImage(cv::Mat &image, Led const &led,
-                                    cv::Vec3b color = CVCOLOR_GRAY,
-                                    double size = 0.5,
-                                    cv::Point2f offset = cv::Point2f(0, 0)) {
-        drawLedLabelOnImage(image, led.getOneBasedID(),
-                            led.getLocation() + offset, color, size);
-    }
+    namespace {
+        /// Utility class to hold on to a reference to an image so we can more
+        /// easily do things to it.
+        class DebugImage {
+          public:
+            explicit DebugImage(cv::Mat &im) : image(im) {}
+            DebugImage(DebugImage const &) = delete;
+            DebugImage &operator=(DebugImage const &) = delete;
 
-    inline void drawStatusMessageOnImage(cv::Mat &image, std::string message,
-                                         cv::Vec3b color = CVCOLOR_GREEN,
-                                         std::int16_t line = 1) {
-        static const auto LINE_OFFSET = 20.f;
-        cv::putText(image, message, cv::Point2f(0, line * LINE_OFFSET),
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(color));
-    }
+            /// Utility function to draw a keypoint-sized circle on the image at
+            /// the LED location.
+            void drawLedCircle(Led const &led, bool filled, cv::Vec3b color) {
+                cv::circle(image, led.getLocation(),
+                           led.getMeasurement().diameter / 2.,
+                           cv::Scalar(color), filled ? -1 : 1);
+            }
+            /// Utility function to label an LED with its 1-based beacon ID (in
+            /// window space)
+            void drawLedLabel(OneBasedBeaconId id, WindowCoordsPoint const &loc,
+                              cv::Vec3b color = CVCOLOR_GRAY, double size = 0.5,
+                              cv::Point2f offset = cv::Point2f(0, 0)) {
+                auto label = std::to_string(id.value());
+                cv::putText(image, label, loc.point + offset,
+                            cv::FONT_HERSHEY_SIMPLEX, size, cv::Scalar(color));
+            }
+
+            /// Utility function to label an LED with its 1-based beacon ID
+            void drawLedLabel(OneBasedBeaconId id, cv::Point2f location,
+                              cv::Vec3b color = CVCOLOR_GRAY, double size = 0.5,
+                              cv::Point2f offset = cv::Point2f(0, 0)) {
+                drawLedLabel(id, invertLoc(location), color, size, offset);
+            }
+
+            /// @overload
+            /// Takes an Eigen::Vector2d as the location, with optional offset.
+            void drawLedLabel(OneBasedBeaconId id, Eigen::Vector2d const &loc,
+                              cv::Vec3b color = CVCOLOR_GRAY, double size = 0.5,
+                              cv::Point2f offset = cv::Point2f(0, 0)) {
+                drawLedLabel(id, eigenVecToPoint(loc), color, size, offset);
+            }
+
+            /// @overload
+            /// Takes an LED directly, with optional offset.
+            void drawLedLabel(Led const &led, cv::Vec3b color = CVCOLOR_GRAY,
+                              double size = 0.5,
+                              cv::Point2f offset = cv::Point2f(0, 0)) {
+                drawLedLabel(led.getOneBasedID(),
+                             WindowCoordsPoint{led.getLocation()}, color, size,
+                             offset);
+            }
+
+            void drawStatusMessage(std::string message,
+                                   cv::Vec3b color = CVCOLOR_GREEN,
+                                   std::int16_t line = 1) {
+                static const auto LINE_OFFSET = 20.f;
+                cv::putText(image, message, cv::Point2f(0, line * LINE_OFFSET),
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(color));
+            }
+
+          private:
+            WindowCoordsPoint invertLoc(cv::Point2f loc) const {
+                return WindowCoordsPoint{
+                    cv::Point2f(image.cols - loc.x, image.rows - loc.y)};
+            }
+            cv::Mat &image;
+        };
+    } // namespace
     namespace {
         /// Functor to perform reprojection of beacons from target space to
         class Reprojection {
@@ -168,11 +207,10 @@ namespace vbtracker {
         cv::Mat const &blobImage) {
         cv::Mat output;
         blobImage.copyTo(output);
-
+        DebugImage img(output);
         if (tracking.getNumBodies() == 0) {
             /// No bodies - just show blobs.
-            drawStatusMessageOnImage(
-                output,
+            img.drawStatusMessage(
                 "No tracked bodies registered, only showing detected blobs",
                 CVCOLOR_RED);
             return output;
@@ -184,8 +222,7 @@ namespace vbtracker {
 
         if (!targetPtr) {
             /// No optical target 0 on this body, just show blobs.
-            drawStatusMessageOnImage(
-                output,
+            img.drawStatusMessage(
                 "No target registered on body 0, only showing detected blobs",
                 CVCOLOR_RED);
             return output;
@@ -196,8 +233,7 @@ namespace vbtracker {
         /// Label each of the blobs.
         auto &leds = targetPtr->leds();
         for (auto &led : leds) {
-            drawLedLabelOnImage(output, led, CVCOLOR_RED, textSize,
-                                labelOffset);
+            img.drawLedLabel(led, CVCOLOR_RED, textSize, labelOffset);
         }
 
         if (targetPtr->hasPoseEstimate()) {
@@ -210,14 +246,14 @@ namespace vbtracker {
                 auto beaconId = ZeroBasedBeaconId(i);
                 Eigen::Vector2d imagePoint =
                     reproject(targetPtr->getBeaconAutocalibPosition(beaconId));
-                drawLedLabelOnImage(output, makeOneBased(beaconId), imagePoint,
-                                    CVCOLOR_GREEN, textSize, labelOffset);
+                img.drawLedLabel(makeOneBased(beaconId), imagePoint,
+                                 CVCOLOR_GREEN, textSize, labelOffset);
             }
         } else {
-            drawStatusMessageOnImage(output, "No video tracker pose for this "
-                                             "target, so green reprojection "
-                                             "not shown",
-                                     CVCOLOR_GRAY);
+            img.drawStatusMessage("No video tracker pose for this "
+                                  "target, so green reprojection "
+                                  "not shown",
+                                  CVCOLOR_GRAY);
         }
         return output;
     }
@@ -228,14 +264,15 @@ namespace vbtracker {
                                             cv::Mat const &baseImage) {
         cv::Mat output;
 
+        DebugImage img(output);
         baseImage.copyTo(output);
 
         if (tracking.getNumBodies() == 0) {
             /// No bodies - show a message and swit
-            drawStatusMessageOnImage(output, "No tracked bodies registered, "
-                                             "showing raw input image - press "
-                                             "b to show blobs",
-                                     CVCOLOR_RED);
+            img.drawStatusMessage("No tracked bodies registered, "
+                                  "showing raw input image - press "
+                                  "b to show blobs",
+                                  CVCOLOR_RED);
             return output;
         }
         /// @todo right now, just looks at body 0, target 0 - generalize
@@ -245,10 +282,10 @@ namespace vbtracker {
 
         if (!targetPtr) {
             /// No optical target 0 on this body
-            drawStatusMessageOnImage(output, "No target registered on body 0, "
-                                             "showing raw input image - press "
-                                             "b to show blobs",
-                                     CVCOLOR_RED);
+            img.drawStatusMessage("No target registered on body 0, "
+                                  "showing raw input image - press "
+                                  "b to show blobs",
+                                  CVCOLOR_RED);
             return output;
         }
 
@@ -263,9 +300,9 @@ namespace vbtracker {
 
         /// Unidentified blobs look the same whether or not we have a pose, so
         /// we make a little lambda here to avoid repeating ourselves too much.
-        auto drawUnidentifiedBlob = [&output](Led const &led) {
+        auto drawUnidentifiedBlob = [&img](Led const &led) {
             /// Red empty circle for un-identified blob
-            drawLedCircleOnImage(output, led, false, CVCOLOR_RED);
+            img.drawLedCircle(led, false, CVCOLOR_RED);
         };
 
         if (gotPose) {
@@ -281,21 +318,22 @@ namespace vbtracker {
                     // whether or not we used their data.
                     auto color =
                         led.wasUsedLastFrame() ? CVCOLOR_GREEN : CVCOLOR_YELLOW;
-                    drawLedCircleOnImage(output, led, true, color);
+                    img.drawLedCircle(led, true, color);
 
                     /// Draw main label in black, then draw the reprojection in
                     /// blue on top, creating a bit of a shadow effect. Not
                     /// best visiblity ever, but...
 
                     /// label at keypoint location
-                    drawLedLabelOnImage(output, led, CVCOLOR_BLACK, textSize);
+                    img.drawLedLabel(led, CVCOLOR_BLACK, textSize);
 
                     /// label at reprojection
                     Eigen::Vector2d imagePoint = reproject(
                         targetPtr->getBeaconAutocalibPosition(beaconId));
-                    drawLedLabelOnImage(output, makeOneBased(beaconId),
-                                        imagePoint, mainBeaconLabelColor,
-                                        textSize);
+                    auto windowPoint =
+                        WindowCoordsPoint{eigenVecToPoint(imagePoint)};
+                    img.drawLedLabel(makeOneBased(beaconId), imagePoint,
+                                     mainBeaconLabelColor, textSize);
                 } else {
                     drawUnidentifiedBlob(led);
                 }
@@ -306,9 +344,8 @@ namespace vbtracker {
                 if (led.identified()) {
                     // If identified, but we don't have a pose, draw
                     // them as yellow outlines.
-                    drawLedCircleOnImage(output, led, false, CVCOLOR_YELLOW);
-                    drawLedLabelOnImage(output, led, mainBeaconLabelColor,
-                                        textSize);
+                    img.drawLedCircle(led, false, CVCOLOR_YELLOW);
+                    img.drawLedLabel(led, mainBeaconLabelColor, textSize);
                 } else {
                     drawUnidentifiedBlob(led);
                 }
