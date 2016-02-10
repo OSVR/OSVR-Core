@@ -61,12 +61,15 @@ namespace vbtracker {
 
     TrackedBody::~TrackedBody() {}
 
-    TrackedBodyIMU *TrackedBody::createIntegratedIMU() {
+    TrackedBodyIMU *
+    TrackedBody::createIntegratedIMU(double orientationVariance,
+                                     double angularVelocityVariance) {
         if (m_imu) {
             // already have an IMU!
             return nullptr;
         }
-        m_imu.reset(new TrackedBodyIMU{*this});
+        m_imu.reset(new TrackedBodyIMU{*this, orientationVariance,
+                                       angularVelocityVariance});
         return m_imu.get();
     }
 

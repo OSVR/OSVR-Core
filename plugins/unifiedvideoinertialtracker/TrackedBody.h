@@ -77,7 +77,9 @@ namespace vbtracker {
         ///
         /// @return nullptr if an error occurred (such as an IMU already being
         /// added to this body)
-        TrackedBodyIMU *createIntegratedIMU();
+        TrackedBodyIMU *
+        createIntegratedIMU(double orientationVariance,
+                            double angularVelocityVariance = 1.0);
 
         /// Creates a video-based tracking target (constellation of beacons) to
         /// add to this body.

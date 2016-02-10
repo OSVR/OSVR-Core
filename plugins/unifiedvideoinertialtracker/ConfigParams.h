@@ -213,6 +213,7 @@ namespace vbtracker {
         /// Only make sense for a single target.
         std::string calibrationFile = "";
 
+        /// @todo not yet parsed
         IMUInputParams imu;
 
         ConfigParams();

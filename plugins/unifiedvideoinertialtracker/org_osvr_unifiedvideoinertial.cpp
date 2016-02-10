@@ -41,6 +41,8 @@
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
+#include <osvr/ClientKit/InterfaceC.h>
+#include <osvr/ClientKit/InterfaceCallbackC.h>
 
 #include <osvr/Util/EigenInterop.h>
 
@@ -77,6 +79,9 @@ static const auto DATAPOINTS_PER_BEACON = 5;
 using TrackingSystemPtr = std::unique_ptr<osvr::vbtracker::TrackingSystem>;
 using osvr::vbtracker::TrackerThread;
 using osvr::vbtracker::BodyReportingVector;
+using osvr::vbtracker::TrackedBody;
+using osvr::vbtracker::TrackedBodyIMU;
+using osvr::vbtracker::BodyId;
 
 class UnifiedVideoInertialTracker : boost::noncopyable {
   public:
@@ -114,6 +119,24 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         /// Send JSON descriptor
         m_dev.sendJsonDescriptor(org_osvr_unifiedvideoinertial_json);
 
+        m_mainBody = &(m_trackingSystem->getBody(BodyId(0)));
+        if (m_mainBody->hasIMU()) {
+            m_imu = &(m_mainBody->getIMU());
+            /// Create our client interface and register a callback.
+            if (OSVR_RETURN_FAILURE ==
+                osvrClientGetInterface(m_clientCtx, params.imu.path.c_str(),
+                                       &m_clientInterface)) {
+                throw std::runtime_error(
+                    "Could not get client interface for analysis plugin!");
+            }
+            osvrRegisterOrientationCallback(
+                m_clientInterface, &UnifiedVideoInertialTracker::oriCallback,
+                this);
+            osvrRegisterAngularVelocityCallback(
+                m_clientInterface, &UnifiedVideoInertialTracker::angVelCallback,
+                this);
+        }
+
         /// Set up thread communication.
         setupBodyReporting();
 
@@ -123,6 +146,23 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
+    }
+
+    /// Processes a tracker report.
+    template <typename ReportType>
+    void handleData(OSVR_TimeValue const &timestamp, ReportType const &report) {
+        m_trackerThreadFunctor->submitIMUReport(*m_imu, timestamp, report);
+    }
+
+    static void oriCallback(void *userdata, const OSVR_TimeValue *timestamp,
+                            const OSVR_OrientationReport *report) {
+        auto &self = *static_cast<UnifiedVideoInertialTracker *>(userdata);
+        self.handleData(*timestamp, *report);
+    }
+    static void angVelCallback(void *userdata, const OSVR_TimeValue *timestamp,
+                               const OSVR_AngularVelocityReport *report) {
+        auto &self = *static_cast<UnifiedVideoInertialTracker *>(userdata);
+        self.handleData(*timestamp, *report);
     }
 
     ~UnifiedVideoInertialTracker() { stopTrackerThread(); }
@@ -172,6 +212,10 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     cv::Mat m_frame;
     cv::Mat m_imageGray;
     TrackingSystemPtr m_trackingSystem;
+    /// @todo kind-of assumes there's only one body.
+    TrackedBody *m_mainBody = nullptr;
+    /// @todo kind-of assumes there's only one body.
+    TrackedBodyIMU *m_imu = nullptr;
     const double m_additionalPrediction;
     BodyReportingVector m_bodyReportingVector;
     std::unique_ptr<TrackerThread> m_trackerThreadFunctor;

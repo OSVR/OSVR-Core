@@ -43,7 +43,8 @@ namespace vbtracker {
     class TrackedBody;
     class TrackedBodyIMU {
       public:
-        explicit TrackedBodyIMU(TrackedBody &body);
+        TrackedBodyIMU(TrackedBody &body, double orientationVariance,
+                       double angularVelocityVariance);
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -69,6 +70,9 @@ namespace vbtracker {
         TrackedBody &m_body;
         bool m_yawKnown = false;
         util::Angle m_yaw;
+
+        double m_orientationVariance;
+        double m_angularVelocityVariance;
 
         bool m_hasOrientation = false;
         Eigen::Quaterniond m_quat;

@@ -34,10 +34,11 @@
 
 namespace osvr {
 namespace vbtracker {
-    static const double ORI_VARIANCE = 1.0E-5;
-    static const double ANG_VEL_VARIANCE = 1.0E-8;
-    TrackedBodyIMU::TrackedBodyIMU(TrackedBody &body)
-        : m_body(body), m_yaw(0) {}
+    TrackedBodyIMU::TrackedBodyIMU(TrackedBody &body,
+                                   double orientationVariance,
+                                   double angularVelocityVariance)
+        : m_body(body), m_yaw(0), m_orientationVariance(orientationVariance),
+          m_angularVelocityVariance(angularVelocityVariance) {}
 
     CannedIMUMeasurement
     TrackedBodyIMU::processOrientation(util::time::TimeValue const &tv,
@@ -49,7 +50,8 @@ namespace vbtracker {
         m_quat = quat;
 
         auto ret = CannedIMUMeasurement{};
-        ret.setOrientation(m_quat, Eigen::Vector3d::Constant(ORI_VARIANCE));
+        ret.setOrientation(m_quat,
+                           Eigen::Vector3d::Constant(m_orientationVariance));
         return ret;
     }
 
@@ -73,7 +75,8 @@ namespace vbtracker {
             rot[2] *= -1.;
         }
         auto ret = CannedIMUMeasurement{};
-        ret.setAngVel(rot, Eigen::Vector3d::Constant(ANG_VEL_VARIANCE));
+        ret.setAngVel(rot,
+                      Eigen::Vector3d::Constant(m_angularVelocityVariance));
         return ret;
     }
 

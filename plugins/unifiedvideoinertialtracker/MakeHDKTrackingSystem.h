@@ -241,6 +241,16 @@ namespace vbtracker {
             throw std::runtime_error(
                 "Could not create a tracked target for the HMD!");
         }
+
+        if (!params.imu.path.empty()) {
+            auto imu =
+                hmd->createIntegratedIMU(params.imu.orientationVariance,
+                                         params.imu.angularVelocityVariance);
+            if (!imu) {
+                throw std::runtime_error(
+                    "Could not create an integrated IMU object for the HMD!");
+            }
+        }
         return sys;
     }
 } // namespace vbtracker
