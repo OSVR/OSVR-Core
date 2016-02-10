@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "P.I. Engineering",
+    "deviceName": "X-keys XK-12 Joystick",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T16:38:10Z",
+    "interfaces": {
+        "analog": {
+            "count": 4
+        },
+        "button": {
+            "count": 13
+        }
+    }
+}
+

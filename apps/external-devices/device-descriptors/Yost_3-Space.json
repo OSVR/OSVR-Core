@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "Yost Labs (YEI)",
+    "deviceName": "3-Space Sensor",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T16:51:55Z",
+    "interfaces": {
+        "analog": {
+            "count": 11
+        },
+        "button": {
+            "count": 8
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

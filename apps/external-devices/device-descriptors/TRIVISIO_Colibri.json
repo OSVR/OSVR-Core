@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "TRIVISIO Prototyping GmbH",
+    "deviceName": "Colibri",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T14:36:50Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

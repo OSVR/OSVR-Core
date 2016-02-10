@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "P.I. Engineering",
+    "deviceName": "X-keys Professional USB",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T16:35:02Z",
+    "interfaces": {
+        "button": {
+            "count": 58
+        }
+    }
+}
+

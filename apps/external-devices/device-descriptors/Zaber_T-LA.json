@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Zaber",
+    "deviceName": "T-LA linear actuator",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T16:57:16Z",
+    "interfaces": {
+        "analog": {
+            "count": 1
+        }
+    }
+}
+

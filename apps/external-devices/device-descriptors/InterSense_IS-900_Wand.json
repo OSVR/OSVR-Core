@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "InterSense",
+    "deviceName": "IS-900 MicroTrax Wand",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:08:21Z",
+    "interfaces": {
+        "analog": {
+            "count": 2
+        },
+        "button": {
+            "count": 6
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

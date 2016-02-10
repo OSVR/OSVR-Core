@@ -1,12 +1,12 @@
 {
     "deviceVendor": "Fifth Dimension Technologies",
-    "deviceName": "5DT Data Glove 5 Utra",
+    "deviceName": "5DT Data Glove 14 Ultra",
     "author": "Kevin M. Godby <kevin@godby.org>",
     "version": 1,
     "lastModified": "2016-01-18T12:53:21Z",
     "interfaces": {
         "analog": {
-            "count": 5
+            "count": 14
         }
     }
 }

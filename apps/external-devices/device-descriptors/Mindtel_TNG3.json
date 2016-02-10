@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Mindtel LLC",
+    "deviceName": "Totally Neat Gadget (TNG) 3",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T14:27:04Z",
+    "interfaces": {
+        "analog": {
+            "count": 8
+        },
+        "button": {
+            "count": 8
+        }
+    }
+}
+

@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Retrolink USB",
+    "deviceName": "Classic GameCube-style Controller",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-06T16:53:28Z",
+    "interfaces": {
+        "analog": {
+            "count": 5
+        },
+        "button": {
+            "count": 12
+        }
+    }
+}
+

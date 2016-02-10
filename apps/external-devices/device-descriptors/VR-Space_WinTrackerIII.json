@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "VR-Space",
+    "deviceName": "WinTrackerIII",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T16:21:26Z",
+    "interfaces": {
+        "tracker": {
+            "count": 3
+        }
+    }
+}
+

@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "Advanced Realtime Tracking GmbH",
+    "deviceName": "Flystick",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T14:45:31Z",
+    "interfaces": {
+        "analog": {
+            "count": 2
+        },
+        "button": {
+            "count": 8
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

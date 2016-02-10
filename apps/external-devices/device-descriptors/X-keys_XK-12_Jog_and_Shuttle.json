@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "P.I. Engineering",
+    "deviceName": "X-keys XK-12 Jog and Shuttle",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T16:44:28Z",
+    "interfaces": {
+        "analog": {
+            "count": 3
+        },
+        "button": {
+            "count": 13
+        }
+    }
+}
+
