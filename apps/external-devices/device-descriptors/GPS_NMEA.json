@@ -1,6 +1,6 @@
 {
     "deviceVendor": "Generic",
-    "deviceName": "GPS (NMEA)",
+    "deviceName": "GPS (serial NMEA protocol) tracker",
     "author": "Kevin M. Godby <kevin@godby.org>",
     "version": 1,
     "lastModified": "2016-02-10T15:02:07Z",
