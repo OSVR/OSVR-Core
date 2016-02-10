@@ -43,7 +43,7 @@ namespace vbtracker {
         CameraParameters(double fx, double fy, cv::Size size,
                          std::initializer_list<double> distortionParams)
             : cameraMatrix(cv::Matx33d::eye()),
-              distortionParameters(distortionParams) {
+              distortionParameters(distortionParams), imageSize(size) {
             cameraMatrix(0, 0) = fx;
             cameraMatrix(1, 1) = fy;
             cameraMatrix(0, 2) = size.width / 2.;
@@ -92,6 +92,7 @@ namespace vbtracker {
 
         cv::Matx33d cameraMatrix;
         std::vector<double> distortionParameters;
+        cv::Size imageSize;
 
       private:
         void normalizeDistortionParameters() {

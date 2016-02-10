@@ -60,7 +60,13 @@ namespace vbtracker {
             beaconDebug[index].variance = -1;
             beaconDebug[index].measurement = led->getLocation();
             beaconIds.push_back(id);
-            imagePoints.push_back(led->getLocation());
+
+            /// Effectively invert the image points here so we get the output of
+            /// a coordinate system we want.
+            auto loc = led->getLocation();
+            imagePoints.push_back(
+                cv::Point2f(camParams.imageSize.width - loc.x,
+                            camParams.imageSize.height - loc.y));
             objectPoints.push_back(
                 vec3dToCVPoint3f(beacons[index]->stateVector()));
         }
@@ -192,7 +198,8 @@ namespace vbtracker {
         // the units into meters and the orientation into a Quaternion.
         //  NOTE: This is a right-handed coordinate system with X pointing
         // towards the right from the camera center of projection, Y pointing
-        // down, and Z pointing along the camera viewing direction.
+        // down, and Z pointing along the camera viewing direction, if the input
+        // points are not inverted.
 
         outXlate = cvToVector3d(tvec);
         outQuat = cvRotVecToQuat(rvec);
