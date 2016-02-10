@@ -23,24 +23,26 @@
 // limitations under the License.
 
 // Internal Includes
+#include "MakeHDKTrackingSystem.h"
+#include "HDKData.h"
+#include "ConfigurationParser.h"
+#include "TrackerThread.h"
+
+// ImageSources mini-library
 #include "ImageSources/ImageSource.h"
 #include "ImageSources/ImageSourceFactories.h"
 
-#include "MakeHDKTrackingSystem.h"
+// uvbi-core mini-library
 #include "TrackingSystem.h"
 #include "ThreadsafeBodyReporting.h"
-
-#include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
-#include "HDKData.h"
+
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 #include <osvr/PluginKit/AnalogInterfaceC.h>
 
 #include <osvr/Util/EigenInterop.h>
-
-#include "ConfigurationParser.h"
 
 // Generated JSON header file
 #include "org_osvr_unifiedvideoinertial_json.h"
@@ -54,6 +56,7 @@
 #include <json/reader.h>
 
 #include <boost/noncopyable.hpp>
+#include <boost/variant.hpp>
 
 #include <util/Stride.h>
 
@@ -63,10 +66,7 @@
 #include <iomanip>
 #include <sstream>
 #include <memory>
-#include <thread>
-#include <mutex>
 #include <stdexcept>
-#include <future>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -75,107 +75,8 @@ static const auto DRIVER_NAME = "UnifiedTrackingSystem";
 static const auto DEBUGGABLE_BEACONS = 34;
 static const auto DATAPOINTS_PER_BEACON = 5;
 using TrackingSystemPtr = std::unique_ptr<osvr::vbtracker::TrackingSystem>;
-using BodyReportingVector = std::vector<osvr::vbtracker::BodyReportingPtr>;
-class TrackerThread : boost::noncopyable {
-  public:
-    TrackerThread(osvr::vbtracker::TrackingSystem &trackingSystem,
-                  osvr::vbtracker::ImageSource &imageSource,
-                  BodyReportingVector &reportingVec,
-                  osvr::vbtracker::CameraParameters const &camParams)
-        : m_trackingSystem(trackingSystem), m_cam(imageSource),
-          m_reportingVec(reportingVec), m_camParams(camParams) {
-        msg() << "Tracker thread object created." << std::endl;
-    }
-
-    void operator()() {
-        msg() << "Tracker thread object invoked." << std::endl;
-        bool keepGoing = true;
-        while (keepGoing) {
-            doFrame();
-
-            {
-                /// Copy the run flag.
-                std::lock_guard<std::mutex> lock(m_runMutex);
-                keepGoing = m_run;
-            }
-            if (!keepGoing) {
-                msg() << "Tracker thread object: Just checked our run flag and "
-                         "noticed it turned false..."
-                      << std::endl;
-            }
-        }
-        msg() << "Tracker thread object: functor exiting." << std::endl;
-    }
-
-    /// Call from the main thread!
-    void triggerStop() {
-        msg() << "Tracker thread object: triggerStop() called" << std::endl;
-        std::lock_guard<std::mutex> lock(m_runMutex);
-        m_run = false;
-    }
-
-  private:
-    std::ostream &msg() const { return std::cout << "[UnifiedTracker] "; }
-    std::ostream &warn() const { return msg() << "Warning: "; }
-    void doFrame() {
-        // Check camera status.
-        if (!m_cam.ok()) {
-            // Hmm, camera seems bad. Might regain it? Skip for now...
-            warn() << "Camera is reporting it is not OK." << std::endl;
-            return;
-        }
-        // Trigger a grab.
-        if (!m_cam.grab()) {
-            // Again failing without quitting, in hopes we get better luck next
-            // time...
-            warn() << "Camera grab failed." << std::endl;
-            return;
-        }
-        // When we triggered the grab is our current best guess of the time for
-        // the image
-        /// @todo backdate to account for image transfer image, exposure time,
-        /// etc.
-        auto tv = osvr::util::time::getNow();
-
-        // Pull the image into an OpenCV matrix named m_frame.
-        m_cam.retrieve(m_frame, m_frameGray);
-        if (!m_frame.data || !m_frameGray.data) {
-            warn()
-                << "Camera retrieve appeared to fail: frames had null pointers!"
-                << std::endl;
-            return;
-        }
-
-        /// Launch an asynchronous task to perform the initial image processing.
-        auto imageProcFuture = std::async(
-            std::launch::async, [&]() -> osvr::vbtracker::ImageOutputDataPtr {
-                return m_trackingSystem.performInitialImageProcessing(
-                    tv, m_frame, m_frameGray, m_camParams);
-            });
-
-        /// @todo handle IMU reports in here
-
-        /// By calling .get() on the std::future we block on the async we
-        /// launched.
-        // Submit to the tracking system.
-        auto bodyIds =
-            m_trackingSystem.updateBodiesFromVideoData(imageProcFuture.get());
-
-        for (auto const &bodyId : bodyIds) {
-            auto &body = m_trackingSystem.getBody(bodyId);
-            m_reportingVec[bodyId.value()]->updateState(
-                body.getStateTime(), body.getState(), body.getProcessModel());
-        }
-    }
-    osvr::vbtracker::TrackingSystem &m_trackingSystem;
-    osvr::vbtracker::ImageSource &m_cam;
-    BodyReportingVector &m_reportingVec;
-    osvr::vbtracker::CameraParameters m_camParams;
-    cv::Mat m_frame;
-    cv::Mat m_frameGray;
-    std::mutex m_runMutex;
-    bool m_run = true;
-};
+using osvr::vbtracker::TrackerThread;
+using osvr::vbtracker::BodyReportingVector;
 
 class UnifiedVideoInertialTracker : boost::noncopyable {
   public:
@@ -272,7 +173,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     cv::Mat m_imageGray;
     TrackingSystemPtr m_trackingSystem;
     const double m_additionalPrediction;
-    std::vector<osvr::vbtracker::BodyReportingPtr> m_bodyReportingVector;
+    BodyReportingVector m_bodyReportingVector;
     std::unique_ptr<TrackerThread> m_trackerThreadFunctor;
     std::thread m_trackerThread;
 };
@@ -280,6 +181,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
     namespace ei = osvr::util::eigen_interop;
     std::size_t numSensors = m_bodyReportingVector.size();
+    /// On each update pass, we go through and attempt to report for every body,
+    /// at the current time + additional prediction as requested.
     for (std::size_t i = 0; i < numSensors; ++i) {
         auto report =
             m_bodyReportingVector[i]->getReport(m_additionalPrediction);

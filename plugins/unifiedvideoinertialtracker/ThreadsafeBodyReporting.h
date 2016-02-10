@@ -111,6 +111,7 @@ namespace vbtracker {
     };
     using BodyReportingPtr = std::unique_ptr<BodyReporting>;
 
+    using BodyReportingVector = std::vector<BodyReportingPtr>;
 } // namespace vbtracker
 } // namespace osvr
 

@@ -97,7 +97,9 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     HDKData.cpp
     HDKData.h
     ThreadsafeBodyReporting.cpp
-    ThreadsafeBodyReporting.h)
+    ThreadsafeBodyReporting.h
+    TrackerThread.cpp
+    TrackerThread.h)
 
 target_link_libraries(org_osvr_unifiedvideoinertial
     osvr::osvrAnalysisPluginKit
