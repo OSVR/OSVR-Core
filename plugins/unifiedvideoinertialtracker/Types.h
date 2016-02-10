@@ -50,14 +50,10 @@ namespace vbtracker {
 
     class Led;
     class LedIdentifier;
-    class BeaconBasedPoseEstimator;
 
     typedef std::vector<cv::Point3f> Point3Vector;
 
     typedef std::vector<cv::Vec3d> Vec3Vector;
-
-    /// @todo Replace usages of this with Eigen or cv matrices.
-    typedef std::vector<std::vector<double> > DoubleVecVec;
 
     typedef std::vector<std::string> PatternStringList;
 
@@ -72,7 +68,6 @@ namespace vbtracker {
     typedef std::list<Brightness> BrightnessList;
     typedef std::pair<Brightness, Brightness> BrightnessMinMax;
 
-    typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
     typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
 
     typedef std::list<Led> LedGroup;
@@ -110,21 +105,6 @@ namespace vbtracker {
     };
     typedef std::vector<LedMeasurement> LedMeasurementVec;
     typedef LedMeasurementVec::iterator LedMeasurementVecIterator;
-
-    /// @name Containers of "per-sensor" objects
-    /// @brief It seems like in a "well-formed" video-based tracker, there is
-    /// one element in each of these containers for each "sensor" (known rigid
-    /// organization of markers), and these are parallel (indices between them
-    /// correlate)
-    /// @{
-    typedef std::vector<LedIdentifierPtr> LedIdentifierList;
-    typedef std::vector<LedGroup> LedGroupList;
-    typedef std::vector<EstimatorPtr> EstimatorList;
-    /// @}
-
-    /// Takes in a 1-based index, returns true or false (true if the beacon
-    /// should be considered fixed - not subject to autocalibration)
-    using BeaconIDPredicate = std::function<bool(int)>;
 
 } // namespace vbtracker
 } // namespace osvr
