@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Crossbow Technology, Inc.",
+    "deviceName": "RGA300CA",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T14:38:48Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

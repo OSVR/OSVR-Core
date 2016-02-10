@@ -1,0 +1,19 @@
+{
+    "deviceVendor": "Thalmic Labs",
+    "deviceName": "Myo",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:50:49Z",
+    "interfaces": {
+        "analog": {
+            "count": 9
+        },
+        "button": {
+            "count": 1
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

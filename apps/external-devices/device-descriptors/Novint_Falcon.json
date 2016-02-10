@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Novint Technologies Inc",
+    "deviceName": "Falcon",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:32:39Z",
+    "interfaces": {
+        "button": {
+            "count": 4
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

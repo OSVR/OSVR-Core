@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "PNI Sensor Corporation",
+    "deviceName": "SpacePoint Fusion",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:48:59Z",
+    "interfaces": {
+        "button": {
+            "count": 2
+        },
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

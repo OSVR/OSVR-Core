@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "InterSense",
+    "deviceName": "IS-900 MicroTrax Hand tracker",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:07:34Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+

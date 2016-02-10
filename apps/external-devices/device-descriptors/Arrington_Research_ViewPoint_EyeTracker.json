@@ -1,0 +1,16 @@
+{
+    "deviceVendor": "Arrington Research",
+    "deviceName": "ViewPoint EyeTracker",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:56:15Z",
+    "interfaces": {
+        "analog": {
+            "count": 6
+        },
+        "tracker": {
+            "count": 2
+        }
+    }
+}
+

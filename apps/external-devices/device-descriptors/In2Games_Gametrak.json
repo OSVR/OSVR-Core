@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "In2Games",
+    "deviceName": "Gametrak",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T14:57:57Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+
