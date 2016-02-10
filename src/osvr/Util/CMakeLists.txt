@@ -61,6 +61,7 @@ set(API
     "${HEADER_LOCATION}/EigenFilters.h"
     "${HEADER_LOCATION}/EigenInterop.h"
     "${HEADER_LOCATION}/ExtractYaw.h"
+    "${HEADER_LOCATION}/Finally.h"
     "${HEADER_LOCATION}/Flag.h"
     "${HEADER_LOCATION}/GenericCaller.h"
     "${HEADER_LOCATION}/GenericDeleter.h"
