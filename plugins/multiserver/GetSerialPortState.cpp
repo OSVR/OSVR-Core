@@ -25,9 +25,10 @@
 // Internal Includes
 #include "GetSerialPortState.h"
 #include <osvr/Util/MacroToolsC.h>
+#include <osvr/Util/Finally.h>
 
 // Library/third-party includes
-#include <boost/scope_exit.hpp>
+// - none
 
 // Standard includes
 #include <stdexcept>
@@ -48,8 +49,7 @@ inline SerialPortState getSerialPortStateImpl(std::string const &port) {
                              nullptr);
 
     /// auto-close handle.
-    BOOST_SCOPE_EXIT(&hCom) { CloseHandle(hCom); }
-    BOOST_SCOPE_EXIT_END
+    auto f = osvr::util::finally([&hCom] { CloseHandle(hCom); });
 
     if (INVALID_HANDLE_VALUE == hCom) {
         auto err = GetLastError();
