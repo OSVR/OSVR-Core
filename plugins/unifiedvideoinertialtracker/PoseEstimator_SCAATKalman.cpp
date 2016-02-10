@@ -58,6 +58,8 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <algorithm>
 #include <iostream>
 
+#undef DEBUG_MEASUREMENT_RESIDUALS
+
 namespace osvr {
 namespace vbtracker {
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
@@ -141,10 +143,9 @@ namespace vbtracker {
         }
 #endif
 
+#ifdef DEBUG_MEASUREMENT_RESIDUALS
         static ::util::Stride s{203};
-#if 0
         s.advance();
-        debugStride.advance();
 #endif
 
         Eigen::Vector2d imageSize(p.camParams.imageSize.width,
