@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Polhemus",
+    "deviceName": "lIBERTY lATUS",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-02-10T15:18:14Z",
+    "interfaces": {
+        "tracker": {
+            "count": 1
+        }
+    }
+}
+
