@@ -74,6 +74,16 @@ namespace vbtracker {
         /// thus greatly impacts performance. Adjust with care.
         int thresholdSteps = 4;
     };
+
+    struct IMUInputParams {
+        std::string path =
+            "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
+        /// units: rad^2
+        double orientationVariance = 1.0e-5;
+        /// units: (rad/sec)^2
+        double angularVelocityVariance = 1.0e-8;
+    };
+
     /// General configuration parameters
     struct ConfigParams {
         /// Parameters specific to the blob-detection step of the algorithm
@@ -202,6 +212,8 @@ namespace vbtracker {
         /// If non-empty, the file to load (or save to) for calibration data.
         /// Only make sense for a single target.
         std::string calibrationFile = "";
+
+        IMUInputParams imu;
 
         ConfigParams();
     };
