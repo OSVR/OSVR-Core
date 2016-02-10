@@ -106,7 +106,8 @@ namespace vbtracker {
         /// Rotation/basis-change part.
         template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
             auto ret = cvMatx33<Scalar>::eye();
-            // flip sign of x and z axes
+            // flip sign of x and z axes to make the HDK coordinate system match
+            // our desired one.
             ret(0, 0) = -1;
             ret(2, 2) = -1;
             return ret;
