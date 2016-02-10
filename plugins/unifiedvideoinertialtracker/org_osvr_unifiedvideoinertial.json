@@ -14,14 +14,14 @@
     "semantic": {
         "hmd": {
             "$target": {
-                "rotate": {
-                    "axis": "x",
-                    "degrees": 180
+                "postrotate": {
+                    "axis": "z",
+                    "degrees": 0
                 },
                 "child": {
                     "changeBasis": {
-                        "x": "-x",
-                        "y": "-y",
+                        "x": "x",
+                        "y": "y",
                         "z": "z"
                     },
                     "child": "tracker/0"
