@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "ConfigParams.h"
+#include "Assumptions.h"
 
 // Library/third-party includes
 #include <opencv2/features2d/features2d.hpp>
@@ -40,13 +41,6 @@
 
 namespace osvr {
 namespace vbtracker {
-/// @todo Remove when we no longer assume a single camera or monotonic camera
-/// timestamps, and the build will break in a few places
-/// where known "gotchas" exist
-#define OSVR_UVBI_ASSUME_SINGLE_CAMERA
-/// @todo Remove when we no longer assume that IMU reports arrive before video
-/// reports with same timestamps.
-#define OSVR_UVBI_ASSUME_CAMERA_ALWAYS_SLOWER
 
     class Led;
     class LedIdentifier;

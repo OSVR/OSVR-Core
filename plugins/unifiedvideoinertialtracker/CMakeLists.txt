@@ -18,6 +18,7 @@ add_subdirectory(ImageSources)
 add_library(uvbi-core STATIC
     ApplyIMUToState.cpp
     ApplyIMUToState.h
+    Assumptions.h
     BodyIdTypes.h
     BeaconIdTypes.h
     BeaconSetupData.cpp
