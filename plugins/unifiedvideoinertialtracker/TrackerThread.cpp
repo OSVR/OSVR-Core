@@ -43,6 +43,11 @@ namespace vbtracker {
           m_reportingVec(reportingVec), m_camParams(camParams) {
         msg() << "Tracker thread object created." << std::endl;
     }
+    TrackerThread::~TrackerThread() {
+        if (m_imageThread.joinable()) {
+            m_imageThread.join();
+        }
+    }
     void TrackerThread::operator()() {
         /// The thread internally is organized around processing video frames,
         /// with arrival of IMU reports internally handled as they come. Thus,
@@ -152,7 +157,7 @@ namespace vbtracker {
             } // unlock
 
             if (!message.empty()) {
-                /// @todo handle IMU report in here - after unlocking
+                processIMUMessage(message);
             }
         } while (!finishedImage);
 
@@ -171,14 +176,35 @@ namespace vbtracker {
             return;
         }
 
-        // Submit to the tracking system.
+        // Submit initial image data to the tracking system.
         auto bodyIds =
             m_trackingSystem.updateBodiesFromVideoData(std::move(m_imageData));
         m_imageData.reset();
 
+        // Process any accumulated IMU messages so we don't get backed up.
+        std::vector<MessageEntry> imuMessages;
+        {
+            // Copy out messages inside the mutex.
+            std::lock_guard<std::mutex> lock(m_messageMutex);
+            if (!m_messages.empty()) {
+                auto size = m_messages.size();
+                using size_type = decltype(size);
+                imuMessages.reserve(size);
+                for (size_type i = 0; i < size; ++i) {
+                    imuMessages.emplace_back(m_messages.front());
+                    m_messages.pop();
+                }
+            }
+        } // unlock
+        for (auto const &msg : imuMessages) {
+            processIMUMessage(msg);
+        }
+
         updateReportingVector(bodyIds);
     }
-
+    void TrackerThread::processIMUMessage(MessageEntry const &m) {
+        /// @todo process IMU message.
+    }
     void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {
         for (auto const &bodyId : bodyIds) {
             auto &body = m_trackingSystem.getBody(bodyId);
@@ -187,15 +213,18 @@ namespace vbtracker {
         }
     }
     void TrackerThread::launchTimeConsumingImageStep() {
+        if (m_imageThread.joinable()) {
+            m_imageThread.join();
+        }
         /// Our thread would be the only one reading or writing this flag at
         /// this point, so it's OK now to write this without protection.
         m_timeConsumingImageStepComplete = false;
-
-        std::async(std::launch::async, [&] { timeConsumingImageStep(); });
+        m_imageThread = std::thread{[&] { timeConsumingImageStep(); }};
     }
     void TrackerThread::timeConsumingImageStep() {
         /// When we return from this function, set a flag indicating we're done
         /// and notify on the condition variable.
+
         auto signalCompletion = util::finally([&] {
             {
                 std::lock_guard<std::mutex> lock{m_messageMutex};
@@ -207,7 +236,8 @@ namespace vbtracker {
         // Pull the image into an OpenCV matrix named m_frame.
         m_cam.retrieve(m_frame, m_frameGray);
         if (!m_frame.data || !m_frameGray.data) {
-            // let the tracker thread warn if it wants to, we'll just get out.
+            // let the tracker thread warn if it wants to, we'll just get
+            // out.
             return;
         }
 

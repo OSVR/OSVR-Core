@@ -41,10 +41,10 @@ namespace vbtracker {
           m_angularVelocityVariance(angularVelocityVariance) {}
 
     CannedIMUMeasurement
-    TrackedBodyIMU::processOrientation(util::time::TimeValue const &tv,
-                                       Eigen::Quaterniond const &quat) {
+    TrackedBodyIMU::preprocessOrientation(util::time::TimeValue const &tv,
+                                          Eigen::Quaterniond const &quat) {
         /// @todo apply transforms here
-
+        Eigen::Quaterniond xformedQuat = quat;
         m_hasOrientation = true;
         m_last = tv;
         m_quat = quat;
@@ -56,10 +56,9 @@ namespace vbtracker {
     }
 
     /// Processes an angular velocity
-    CannedIMUMeasurement
-    TrackedBodyIMU::processAngularVelocity(util::time::TimeValue const &tv,
-                                           Eigen::Quaterniond const &deltaquat,
-                                           double dt) {
+    CannedIMUMeasurement TrackedBodyIMU::preprocessAngularVelocity(
+        util::time::TimeValue const &tv, Eigen::Quaterniond const &deltaquat,
+        double dt) {
         /// @todo handle transform for off-center velocity!
 
         /// @todo This has HDK-specific transforms in it!
@@ -78,6 +77,20 @@ namespace vbtracker {
         ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
         return ret;
+    }
+
+    bool TrackedBodyIMU::updatePoseFromMeasurement(
+        util::time::TimeValue const &tv, CannedIMUMeasurement const &meas) {
+        if (!meas.orientationValid() && !meas.angVelValid()) {
+            return false;
+        }
+        if (meas.orientationValid()) {
+            m_hasOrientation = true;
+            m_last = tv;
+            meas.restoreQuat(m_quat);
+        }
+        getBody().incorporateNewMeasurementFromIMU(tv, meas);
+        return true;
     }
 
     ConfigParams const &TrackedBodyIMU::getParams() const {

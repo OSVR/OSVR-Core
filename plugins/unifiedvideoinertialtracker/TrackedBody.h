@@ -29,6 +29,7 @@
 #include "ConfigParams.h"
 #include "BodyIdTypes.h"
 #include "ModelTypes.h"
+#include "CannedIMUMeasurement.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -208,9 +209,24 @@ namespace vbtracker {
 
         BodyState &getState() { return m_state; }
 
+        /// Incorporates a brand-new measurement from the IMU into the state.
+        /// Called only from the TrackedBodyIMU itself, please!
+        void incorporateNewMeasurementFromIMU(util::time::TimeValue const &tv,
+                                              CannedIMUMeasurement const &meas);
+
       private:
+        /// Method used both when incorporating new measurements and replaying
+        /// historical measurements: pushes to state history but not to IMU
+        /// history.
+        void applyIMUMeasurement(util::time::TimeValue const &tv,
+                                 CannedIMUMeasurement const &meas);
+        /// Pushes current state on to history: assumes you've already updated
+        /// m_state and the stateTime.
+        void pushState();
         TrackingSystem &m_system;
         const BodyId m_id;
+
+        util::time::TimeValue m_stateTime;
         BodyState m_state;
         BodyProcessModel m_processModel;
         /// private implementation data

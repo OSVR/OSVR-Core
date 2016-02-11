@@ -66,6 +66,7 @@ namespace vbtracker {
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
                       BodyReportingVector &reportingVec,
                       CameraParameters const &camParams);
+        ~TrackerThread();
         /// Thread function-call operator: should be invoked by a lambda in a
         /// dedicated thread.
         void operator()();
@@ -106,6 +107,9 @@ namespace vbtracker {
         /// and performing the initial blob detection on it. This gets launched
         /// asynchronously by launchTimeConsumingImageStep()
         void timeConsumingImageStep();
+
+        void processIMUMessage(MessageEntry const &m);
+
         TrackingSystem &m_trackingSystem;
         ImageSource &m_cam;
         BodyReportingVector &m_reportingVec;
@@ -135,6 +139,9 @@ namespace vbtracker {
         std::queue<MessageEntry> m_messages;
         bool m_timeConsumingImageStepComplete = false;
         /// @}
+
+        /// The thread used by timeConsumingImageStep()
+        std::thread m_imageThread;
     };
 } // namespace vbtracker
 } // namespace osvr

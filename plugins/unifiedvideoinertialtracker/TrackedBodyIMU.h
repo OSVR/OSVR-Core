@@ -52,13 +52,32 @@ namespace vbtracker {
         TrackedBody const &getBody() const { return m_body; }
 
         /// Processes an orientation
-        CannedIMUMeasurement processOrientation(util::time::TimeValue const &tv,
-                                                Eigen::Quaterniond const &quat);
+        CannedIMUMeasurement
+        preprocessOrientation(util::time::TimeValue const &tv,
+                              Eigen::Quaterniond const &quat);
+
+        void updatePoseFromOrientation(util::time::TimeValue const &tv,
+                                       Eigen::Quaterniond const &quat) {
+            updatePoseFromMeasurement(tv, preprocessOrientation(tv, quat));
+        }
 
         /// Processes an angular velocity
         CannedIMUMeasurement
-        processAngularVelocity(util::time::TimeValue const &tv,
-                               Eigen::Quaterniond const &deltaquat, double dt);
+        preprocessAngularVelocity(util::time::TimeValue const &tv,
+                                  Eigen::Quaterniond const &deltaquat,
+                                  double dt);
+
+        void updatePoseFromAngularVelocity(util::time::TimeValue const &tv,
+                                           Eigen::Quaterniond const &deltaquat,
+                                           double dt) {
+            updatePoseFromMeasurement(
+                tv, preprocessAngularVelocity(tv, deltaquat, dt));
+        }
+
+        /// @return false if you pass a completely invalid/empty canned
+        /// measurement.
+        bool updatePoseFromMeasurement(util::time::TimeValue const &tv,
+                                       CannedIMUMeasurement const &meas);
 
         bool hasPoseEstimate() const { return m_hasOrientation; }
         osvr::util::time::TimeValue const &getLastUpdate() const {

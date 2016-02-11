@@ -30,6 +30,7 @@
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <array>
@@ -49,13 +50,40 @@ namespace vbtracker {
         }
         bool orientationValid() const { return m_orientationValid; }
 
+        void restoreQuat(Eigen::Quaterniond &quat) const {
+            BOOST_ASSERT_MSG(
+                orientationValid(),
+                "restoring quat on an invalid orientation measurement!");
+            quat.coeffs() = Eigen::Vector4d::Map(m_quat.data());
+        }
+
+        void restoreQuatVariance(Eigen::Vector3d &var) const {
+            BOOST_ASSERT_MSG(orientationValid(), "restoring quat variance on "
+                                                 "an invalid orientation "
+                                                 "measurement!");
+            var = Eigen::Vector3d::Map(m_quatVar.data());
+        }
+
         void setAngVel(Eigen::Vector3d const &angVel,
                        Eigen::Vector3d const &variance) {
             Eigen::Vector3d::Map(m_angVel.data()) = angVel;
             Eigen::Vector3d::Map(m_angVelVar.data()) = variance;
             m_angVelValid = true;
         }
+
         bool angVelValid() const { return m_angVelValid; }
+        void restoreAngVel(Eigen::Vector3d &angVel) const {
+            BOOST_ASSERT_MSG(angVelValid(), "restoring ang vel on "
+                                            "an invalid ang vel "
+                                            "measurement!");
+            angVel = Eigen::Vector3d::Map(m_angVel.data());
+        }
+        void restoreAngVelVariance(Eigen::Vector3d &var) const {
+            BOOST_ASSERT_MSG(angVelValid(), "restoring ang vel variance on "
+                                            "an invalid ang vel "
+                                            "measurement!");
+            var = Eigen::Vector3d::Map(m_angVelVar.data());
+        }
 
       private:
         bool m_orientationValid = false;

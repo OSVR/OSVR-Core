@@ -16,6 +16,8 @@ add_subdirectory(ImageSources)
 # Static library with core of the tracker
 ###
 add_library(uvbi-core STATIC
+    ApplyIMUToState.cpp
+    ApplyIMUToState.h
     BodyIdTypes.h
     BeaconIdTypes.h
     BeaconSetupData.cpp

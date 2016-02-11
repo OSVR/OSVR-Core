@@ -194,7 +194,9 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         if (m_trackerThreadFunctor) {
             std::cout << "Shutting down the tracker thread..." << std::endl;
             m_trackerThreadFunctor->triggerStop();
-            m_trackerThread.join();
+            if (m_trackerThread.joinable()) {
+                m_trackerThread.join();
+            }
             m_trackerThreadFunctor.reset();
             m_trackerThread = std::thread();
         }

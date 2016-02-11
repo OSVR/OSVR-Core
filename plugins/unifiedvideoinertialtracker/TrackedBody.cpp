@@ -24,16 +24,20 @@
 
 // Internal Includes
 #include "TrackedBody.h"
+#include "ApplyIMUToState.h"
 #include "TrackedBodyIMU.h"
 #include "TrackedBodyTarget.h"
 #include "TrackingSystem.h"
 #include "BodyTargetInterface.h"
 #include "StateHistory.h"
 #include "HistoryContainer.h"
+#include "CannedIMUMeasurement.h"
 
 // Library/third-party includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <boost/optional.hpp>
+
+#include <util/Stride.h>
 
 // Standard includes
 #include <iostream>
@@ -43,9 +47,9 @@ namespace vbtracker {
     using BodyStateHistoryEntry = StateHistoryEntry<BodyState>;
 
     struct TrackedBody::Impl {
-        osvr::util::time::TimeValue stateTime;
 
         HistoryContainer<BodyStateHistoryEntry> stateHistory;
+        HistoryContainer<CannedIMUMeasurement> imuMeasurements;
     };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
         : m_system(system), m_id(id), m_impl(new Impl) {
@@ -94,7 +98,7 @@ namespace vbtracker {
 
     BodyId TrackedBody::getId() const { return m_id; }
     osvr::util::time::TimeValue TrackedBody::getStateTime() const {
-        return m_impl->stateTime;
+        return m_stateTime;
     }
 
     bool TrackedBody::getStateAtOrBefore(
@@ -156,7 +160,7 @@ namespace vbtracker {
 
         m_impl->stateHistory.pop_before(oldest);
 
-        /// @todo prune IMU measurements as well.
+        m_impl->imuMeasurements.pop_before(oldest);
     }
 
     void TrackedBody::replaceStateSnapshot(
@@ -168,15 +172,55 @@ namespace vbtracker {
 #endif // !(defined(OSVR_UVBI_ASSUME_SINGLE_CAMERA) &&
         // defined(OSVR_UVBI_ASSUME_CAMERA_ALWAYS_SLOWER))
 
+        /// Clear off the state we're about to invalidate.
         auto numPopped = m_impl->stateHistory.pop_after(origTime);
-        /// @todo number popped should be the same as the number of IMU
-        /// measurements we replay.
-        m_impl->stateHistory.push_newest(newTime,
-                                         BodyStateHistoryEntry{newState});
-        /// @todo replay IMU measurements.
+        /// @todo number popped should be the same (or very nearly) as the
+        /// number of IMU measurements we replay.
 
+        /// Put on the new state estimate we just computed.
         m_state = newState;
-        m_impl->stateTime = newTime;
+        m_stateTime = newTime;
+        pushState();
+
+        /// Replay the IMU measurements timestamped later than our estimate
+        auto numReplayed = std::size_t{0};
+        for (auto &imuHist :
+             m_impl->imuMeasurements.get_range_newer_than(newTime)) {
+            applyIMUMeasurement(imuHist.first, imuHist.second);
+            ++numReplayed;
+        }
+
+        static ::util::Stride s{43};
+        if (++s) {
+            std::cout << "Popped " << numPopped << ", replayed " << numReplayed
+                      << "\n";
+        }
+    }
+
+    void TrackedBody::pushState() {
+        m_impl->stateHistory.push_newest(m_stateTime,
+                                         BodyStateHistoryEntry{m_state});
+    }
+
+    void TrackedBody::incorporateNewMeasurementFromIMU(
+        util::time::TimeValue const &tv, CannedIMUMeasurement const &meas) {
+        if (tv < m_impl->imuMeasurements.newest_timestamp()) {
+            // This one is out of order from the IMU!
+            /// @todo handle this better
+            throw std::runtime_error("Got out of order timestamps from IMU!");
+        }
+
+        applyIMUMeasurement(tv, meas);
+
+        m_impl->imuMeasurements.push_newest(tv, meas);
+    }
+
+    void TrackedBody::applyIMUMeasurement(util::time::TimeValue const &tv,
+                                          CannedIMUMeasurement const &meas) {
+
+        applyIMUToState(m_stateTime, m_state, m_processModel, tv, meas);
+        m_stateTime = tv;
+        pushState();
     }
 
     bool TrackedBody::hasPoseEstimate() const {
