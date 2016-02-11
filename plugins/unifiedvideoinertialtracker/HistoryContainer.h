@@ -223,6 +223,9 @@ namespace vbtracker {
             /// than the given timestamp.
             /// @return number of elements removed.
             size_type pop_before(timestamp_type const &tv) {
+                if (empty()) {
+                    return 0;
+                }
                 auto lastIt = lower_bound(tv);
                 if (end() == lastIt) {
                     // If we got end() back, that's ambiguous: is the last entry
@@ -257,6 +260,9 @@ namespace vbtracker {
             /// than the given timestamp.
             /// @return number of elements removed.
             size_type pop_after(timestamp_type const &tv) {
+                if (empty()) {
+                    return 0;
+                }
                 auto firstIt = upper_bound(tv);
                 if (end() == firstIt) {
                     // If we got end() back, nothing found after our timestamp.
