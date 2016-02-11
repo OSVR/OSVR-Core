@@ -1,0 +1,24 @@
+{
+  "deviceVendor": "OSVR",
+  "deviceName": "Dead-reckoning Rotation filter",
+  "author": "Russ Taylor <russ@reliasolve.com>",
+  "version": 1,
+  "lastModified": "2016-02-11T22:58:24.431Z",
+  "interfaces": {
+    "analog": {
+      "count": 1,
+      "traits": [
+        {
+          "min": 0,
+          "max": 10,
+          "rest": 0
+        }
+      ]
+    }
+  },
+  "semantics": {
+    "value": {
+      "$target": "analog/0"
+    }
+  }
+}
