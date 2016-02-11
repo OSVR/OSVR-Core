@@ -90,6 +90,10 @@ namespace vbtracker {
             // yet.
             return;
         }
+        if (!haveVideoData()) {
+            msg() << "Got first video report from target " << target
+                  << std::endl;
+        }
         bool firstData = !haveVideoData();
         m_videoTarget = target;
         auto dt = duration(timestamp, m_lastVideoData);
@@ -191,6 +195,8 @@ namespace vbtracker {
                 return;
             }
             // OK, so this is the first IMU report, fine with me.
+            msg() << "Got first IMU report from body " << body.value()
+                  << std::endl;
             m_imuBody = body;
         }
         BOOST_ASSERT_MSG(m_imuBody == body, "BodyID for incoming data and "
@@ -201,10 +207,23 @@ namespace vbtracker {
         m_imuOrientation = quat;
     }
 
+    void RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
+        if (!finished()) {
+            return;
+        }
+        msg() << "Room calibration process complete." << std::endl;
+        sys.setCameraPose(getIMUToCamera());
+
+        forEachIMU(sys, [&](TrackedBodyIMU &imu) {
+            imu.setCalibrationYaw(0 * util::radians);
+        });
+    }
+
     bool RoomCalibration::finished() const {
         return m_steadyVideoReports >= REQUIRED_SAMPLES;
     }
-    Eigen::Isometry3d RoomCalibration::getRoomToCamera() const {
+
+    Eigen::Isometry3d RoomCalibration::getIMUToCamera() const {
         Eigen::Isometry3d ret;
         ret.fromPositionOrientationScale(m_positionFilter.getState(),
                                          m_orientationFilter.getState(),

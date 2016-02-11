@@ -32,6 +32,7 @@
 #include "CameraParameters.h"
 
 // Library/third-party includes
+#include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Util/TypeSafeIdHash.h>
 #include <opencv2/core/core.hpp>
@@ -127,16 +128,27 @@ namespace vbtracker {
         ConfigParams const &getParams() const { return m_params; }
 
         bool haveCameraPose() const;
+        void setCameraPose(Eigen::Isometry3d const &camPose);
+
+        bool isRoomCalibrationComplete();
 
         /// private impl;
         struct Impl;
+
+        /// Called by TrackedBody::incorporateNewMeasurementFromIMU() if room
+        /// calibration is not complete.
+        void calibrationHandleIMUData(BodyId id,
+                                      util::time::TimeValue const &tv,
+                                      Eigen::Quaterniond const &quat);
 
       private:
         /// The third phase of the tracking algorithm - LEDs have been updated
         /// with new measurements, we just need to estimate poses.
         void updatePoseEstimates();
 
-        bool isRoomCalibrationComplete();
+        /// Alternate internals called by updatePoseEstimates() when room
+        /// calibration is incomplete.
+        void calibrationVideoPhaseThree();
 
         using BodyPtr = std::unique_ptr<TrackedBody>;
         ConfigParams m_params;

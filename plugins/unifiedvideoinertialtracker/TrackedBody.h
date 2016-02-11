@@ -207,6 +207,7 @@ namespace vbtracker {
 
         BodyProcessModel &getProcessModel() { return m_processModel; }
 
+        /// @todo Note that this is stored in camera space!
         BodyState &getState() { return m_state; }
 
         /// Incorporates a brand-new measurement from the IMU into the state.
@@ -215,6 +216,9 @@ namespace vbtracker {
                                               CannedIMUMeasurement const &meas);
 
       private:
+        TrackingSystem &getSystem() { return m_system; }
+        TrackingSystem const &getSystem() const { return m_system; }
+
         /// Method used both when incorporating new measurements and replaying
         /// historical measurements: pushes to state history but not to IMU
         /// history.

@@ -204,6 +204,18 @@ namespace vbtracker {
 
     void TrackedBody::incorporateNewMeasurementFromIMU(
         util::time::TimeValue const &tv, CannedIMUMeasurement const &meas) {
+        if (!getSystem().isRoomCalibrationComplete()) {
+            /// If room calibration is incomplete, don't handle this locally. If
+            /// it's an orientation, hand it to the tracking system to hand off
+            /// to the room calibrator.
+            if (meas.orientationValid()) {
+                Eigen::Quaterniond quat;
+                meas.restoreQuat(quat);
+                getSystem().calibrationHandleIMUData(getId(), tv, quat);
+            }
+            return;
+        }
+
         if (tv < m_impl->imuMeasurements.newest_timestamp()) {
             // This one is out of order from the IMU!
             /// @todo handle this better

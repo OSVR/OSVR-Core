@@ -60,8 +60,14 @@ namespace vbtracker {
         void processIMUData(TrackingSystem const &sys, BodyId const &body,
                             util::time::TimeValue const &timestamp,
                             Eigen::Quaterniond const &quat);
+
+        /// When completed feeding data, this method will check to see if
+        /// calibration has finished and perform updates accordingly.
+        void postCalibrationUpdate(TrackingSystem &sys);
+
         bool finished() const;
-        Eigen::Isometry3d getRoomToCamera() const;
+
+        Eigen::Isometry3d getIMUToCamera() const;
 
       private:
         /// The stream used by msg() and friends

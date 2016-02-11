@@ -85,6 +85,10 @@ namespace vbtracker {
         }
 
         bool calibrationYawKnown() const { return m_yawKnown; }
+        void setCalibrationYaw(util::Angle yaw) {
+            m_yaw = yaw;
+            m_yawKnown = true;
+        }
 
       private:
         ConfigParams const &getParams() const;

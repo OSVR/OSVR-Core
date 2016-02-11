@@ -116,21 +116,30 @@ namespace vbtracker {
 
         return m_updated;
     }
+    inline void
+    validateTargetPointerFromUpdateList(TrackedBodyTarget *targetPtr) {
 
+        BOOST_ASSERT_MSG(targetPtr != nullptr, "We should never be "
+                                               "retrieving a nullptr for a "
+                                               "target with measurements!");
+        if (!targetPtr) {
+            throw std::logic_error("Logical impossibility: Couldn't "
+                                   "retrieve a valid pointer for a target "
+                                   "that we were just told updated its "
+                                   "LEDs from data this frame.");
+        }
+    }
     void TrackingSystem::updatePoseEstimates() {
+        if (!isRoomCalibrationComplete()) {
+            /// If we need calibration, we need calibration. Go get it done.
+            calibrationVideoPhaseThree();
+            return;
+        }
 
         auto const &updateCount = m_impl->updateCount;
         for (auto &bodyTargetWithMeasurements : updateCount) {
             auto targetPtr = getTarget(bodyTargetWithMeasurements.first);
-            BOOST_ASSERT_MSG(targetPtr != nullptr, "We should never be "
-                                                   "retrieving a nullptr for a "
-                                                   "target with measurements!");
-            if (!targetPtr) {
-                throw std::logic_error("Logical impossibility: Couldn't "
-                                       "retrieve a valid pointer for a target "
-                                       "that we were just told updated its "
-                                       "LEDs from data this frame.");
-            }
+            validateTargetPointerFromUpdateList(targetPtr);
             auto &target = *targetPtr;
 
             /// @todo right now assumes one target per body here!
@@ -162,17 +171,58 @@ namespace vbtracker {
         }
     }
 
+    void TrackingSystem::calibrationVideoPhaseThree() {
+        auto const &updateCount = m_impl->updateCount;
+        for (auto &bodyTargetWithMeasurements : updateCount) {
+            auto &bodyTargetId = bodyTargetWithMeasurements.first;
+            if (!m_impl->calib.wantVideoData(*this, bodyTargetId)) {
+                // If the room calibrator doesn't want video tracking data from
+                // this target, then move along.
+                continue;
+            }
+            auto targetPtr = getTarget(bodyTargetId);
+            validateTargetPointerFromUpdateList(targetPtr);
+            auto &target = *targetPtr;
+            Eigen::Vector3d xlate;
+            Eigen::Quaterniond quat;
+            auto gotPose = target.uncalibratedRANSACPoseEstimateFromLeds(
+                m_impl->camParams, xlate, quat);
+            if (gotPose) {
+                m_impl->calib.processVideoData(*this, bodyTargetId,
+                                               m_impl->lastFrame, xlate, quat);
+            }
+        }
+
+        m_impl->calib.postCalibrationUpdate();
+    }
+
+    void
+    TrackingSystem::calibrationHandleIMUData(BodyId id,
+                                             util::time::TimeValue const &tv,
+                                             Eigen::Quaterniond const &quat) {
+        m_impl->calib.processIMUData(*this, id, tv, quat);
+    }
+
+    void TrackingSystem::setCameraPose(Eigen::Isometry3d const &camPose) {
+        m_impl->haveCameraPose = true;
+        m_impl->cameraPose = camPose;
+    }
+
     bool TrackingSystem::haveCameraPose() const {
         return m_impl->haveCameraPose;
     }
 
     bool TrackingSystem::isRoomCalibrationComplete() {
+        /// @todo should just be able to do this by checking the state of the
+        /// calibrator.
+
         /// If this is true, we know it's true. If it's false, we must go check.
         if (m_impl->roomCalibCompleteCached) {
             return true;
         }
         /// Update the cached value.
-        m_impl->roomCalibCompleteCached = vbtracker::isRoomCalibrationComplete(*this);
+        m_impl->roomCalibCompleteCached =
+            vbtracker::isRoomCalibrationComplete(*this);
         return m_impl->roomCalibCompleteCached;
     }
 
