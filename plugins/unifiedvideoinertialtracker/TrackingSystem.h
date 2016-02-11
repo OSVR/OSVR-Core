@@ -126,10 +126,17 @@ namespace vbtracker {
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
 
+        bool haveCameraPose() const;
+
+        /// private impl;
+        struct Impl;
+
       private:
         /// The third phase of the tracking algorithm - LEDs have been updated
         /// with new measurements, we just need to estimate poses.
         void updatePoseEstimates();
+
+        bool isRoomCalibrationComplete();
 
         using BodyPtr = std::unique_ptr<TrackedBody>;
         ConfigParams m_params;
@@ -137,8 +144,6 @@ namespace vbtracker {
         BodyIndices m_updated;
         std::vector<BodyPtr> m_bodies;
 
-        /// private impl;
-        struct Impl;
         std::unique_ptr<Impl> m_impl;
 
         friend class TrackingDebugDisplay;

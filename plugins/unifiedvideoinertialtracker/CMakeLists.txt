@@ -48,6 +48,8 @@ add_library(uvbi-core STATIC
     PoseEstimator_SCAATKalman.cpp
     PoseEstimator_SCAATKalman.h
     PoseEstimatorTypes.h
+    RoomCalibration.cpp
+    RoomCalibration.h
     SBDBlobExtractor.cpp
     SBDBlobExtractor.h
     StateHistory.h

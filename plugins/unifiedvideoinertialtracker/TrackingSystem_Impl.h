@@ -29,9 +29,11 @@
 #include "TrackingSystem.h"
 #include "CameraParameters.h"
 #include "ConfigParams.h"
+#include "RoomCalibration.h"
 
 // Library/third-party includes
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/EigenCoreGeometry.h>
 #include <opencv2/core/core.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -46,7 +48,7 @@ namespace vbtracker {
     struct TrackingSystem::Impl : private boost::noncopyable {
         Impl(ConfigParams const &params);
         ~Impl();
-
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         void triggerDebugDisplay(TrackingSystem &tracking);
 
         /// @name Cached data from the ImageProcessingOutput updated in phase 2
@@ -59,6 +61,12 @@ namespace vbtracker {
         CameraParameters camParams;
         util::time::TimeValue lastFrame;
         /// @}
+        bool roomCalibCompleteCached = false;
+
+        bool haveCameraPose = false;
+        Eigen::Isometry3d cameraPose;
+
+        RoomCalibration calib;
 
         LedUpdateCount updateCount;
         std::unique_ptr<SBDBlobExtractor> blobExtractor;

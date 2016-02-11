@@ -83,8 +83,27 @@ namespace vbtracker {
     /// For each target in a tracking system - const overload.
     template <typename F>
     inline void forEachTarget(TrackingSystem const &sys, F &&f) {
-        forEachBody(sys, [&](TrackedBody &body) {
+        forEachBody(sys, [&](TrackedBody const &body) {
             forEachTarget(body, std::forward<F>(f));
+        });
+    }
+
+    /// For each IMU in a tracking system
+    template <typename F> inline void forEachIMU(TrackingSystem &sys, F &&f) {
+        forEachBody(sys, [&](TrackedBody &body) {
+            if (body.hasIMU()) {
+                f(body.getIMU());
+            }
+        });
+    }
+
+    /// For each IMU in a tracking system - const overload.
+    template <typename F>
+    inline void forEachIMU(TrackingSystem const &sys, F &&f) {
+        forEachBody(sys, [&](TrackedBody const &body) {
+            if (body.hasIMU()) {
+                f(body.getIMU());
+            }
         });
     }
 } // namespace vbtracker

@@ -84,6 +84,8 @@ namespace vbtracker {
             return m_last;
         }
 
+        bool calibrationYawKnown() const { return m_yawKnown; }
+
       private:
         ConfigParams const &getParams() const;
         TrackedBody &m_body;

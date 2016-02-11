@@ -30,6 +30,7 @@
 #include "ForEachTracked.h"
 #include "TrackingSystem_Impl.h"
 #include "SBDBlobExtractor.h"
+#include "RoomCalibration.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -159,6 +160,20 @@ namespace vbtracker {
         for (auto &body : m_bodies) {
             body->pruneHistory();
         }
+    }
+
+    bool TrackingSystem::haveCameraPose() const {
+        return m_impl->haveCameraPose;
+    }
+
+    bool TrackingSystem::isRoomCalibrationComplete() {
+        /// If this is true, we know it's true. If it's false, we must go check.
+        if (m_impl->roomCalibCompleteCached) {
+            return true;
+        }
+        /// Update the cached value.
+        m_impl->roomCalibCompleteCached = vbtracker::isRoomCalibrationComplete(*this);
+        return m_impl->roomCalibCompleteCached;
     }
 
 } // namespace vbtracker
