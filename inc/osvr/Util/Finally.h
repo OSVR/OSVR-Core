@@ -54,7 +54,7 @@ namespace util {
     template <typename F> class FinalTask {
       public:
         /// Explicit constructor from something callable.
-        explicit FinalTask(F &&f) : f_(std::move(f)) {}
+        explicit FinalTask(F f) : f_(std::move(f)) {}
         /// Move constructor - cancels the moved-from task.
         FinalTask(FinalTask &&other) : f_(std::move(other.f_)), do_(other.do_) {
             other.cancel();
@@ -84,9 +84,18 @@ namespace util {
     /// Use like:
     /// `auto f = finally([&]{ dothis(); });` to have `dothis()` called when `f`
     /// goes out of scope, no matter how.
-    template <typename F> inline auto finally(F &&f) -> FinalTask<F> {
+    template <typename F> inline FinalTask<F> finally(F &&f) {
+        /// Perfect forwarding version.
         return FinalTask<F>(std::forward<F>(f));
     }
+
+    /// @overload
+    template <typename F> inline FinalTask<F> finally(F const &f) {
+        // Added this overload because GSL had it and GSL is supposed to be best
+        // practices guidelines...
+        return FinalTask<F>(f);
+    }
+
 } // namespace util
 } // namespace osvr
 
