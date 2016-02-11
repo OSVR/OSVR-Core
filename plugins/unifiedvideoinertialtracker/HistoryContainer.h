@@ -167,6 +167,13 @@ namespace vbtracker {
             const_iterator end() const { return m_history.cend(); }
             const_iterator cend() const { return m_history.cend(); }
 
+            /// Returns true if the given timestamp is strictly newer than the
+            /// newest timestamp in the container, or if the container is empty
+            /// (thus making the timestamp trivially newest)
+            bool is_strictly_newest(timestamp_type const& tv) const {
+                return empty() || newest_timestamp() < tv;
+            }
+
             /// Wrapper around std::upper_bound: returns iterator to first
             /// element newer than timestamp given or end() if none.
             const_iterator upper_bound(timestamp_type const &tv) const {
@@ -231,7 +238,7 @@ namespace vbtracker {
                     // If we got end() back, that's ambiguous: is the last entry
                     // really >= our timestamp?
                     /// @todo is this right?
-                    if (newest_timestamp() < tv) {
+                    if (is_strictly_newest(tv)) {
                         // It's not - lower_bound couldn't find anything.
                         return 0;
                     }
