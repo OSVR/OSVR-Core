@@ -29,7 +29,7 @@
 #include "Assumptions.h"
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <stdexcept>
@@ -60,7 +60,8 @@ namespace vbtracker {
           m_positionFilter(filters::one_euro::Params{}),
           m_orientationFilter(filters::one_euro::Params{}) {}
 
-    bool RoomCalibration::wantVideoData(BodyTargetId const &target) const {
+    bool RoomCalibration::wantVideoData(TrackingSystem const &sys,
+                                        BodyTargetId const &target) const {
         // This was once all in one conditional expression but it was almost
         // impossible for humans to parse, thus I leave it to computers to parse
         // this and optimize it.
@@ -81,9 +82,10 @@ namespace vbtracker {
     }
 
     void RoomCalibration::processVideoData(
-        BodyTargetId const &target, util::time::TimeValue const &timestamp,
-        Eigen::Vector3d const &xlate, Eigen::Quaterniond const &quat) {
-        if (!wantVideoData(target)) {
+        TrackingSystem const &sys, BodyTargetId const &target,
+        util::time::TimeValue const &timestamp, Eigen::Vector3d const &xlate,
+        Eigen::Quaterniond const &quat) {
+        if (!wantVideoData(sys, target)) {
             // early out if this is the wrong target, or we don't have IMU data
             // yet.
             return;
@@ -166,9 +168,38 @@ namespace vbtracker {
             break;
         }
     }
-    void RoomCalibration::processIMUData(BodyId const &target,
+    void RoomCalibration::processIMUData(TrackingSystem const &sys,
+                                         BodyId const &body,
                                          util::time::TimeValue const &timestamp,
-                                         Eigen::Quaterniond const &quat) {}
+                                         Eigen::Quaterniond const &quat) {
+        if (haveIMUData() && m_imuBody != body) {
+// Already got data from a different IMU
+#ifdef OSVR_UVBI_ASSUME_SINGLE_IMU
+            throw std::logic_error(
+                "RoomCalibration just received data from a second IMU, but the "
+                "single IMU assumption define is still in "
+                "place!");
+#endif
+            return;
+        }
+
+        if (!haveIMUData()) {
+            auto &trackedBody = sys.getBody(body);
+            if (trackedBody.getNumTargets() == 0) {
+                // Can't use an IMU on a body with no video-based targets for
+                // calibration.
+                return;
+            }
+            // OK, so this is the first IMU report, fine with me.
+            m_imuBody = body;
+        }
+        BOOST_ASSERT_MSG(m_imuBody == body, "BodyID for incoming data and "
+                                            "known IMU must be identical at "
+                                            "this point");
+
+        /// @todo something more elegant than just copying a quat?
+        m_imuOrientation = quat;
+    }
 
     bool RoomCalibration::finished() const {
         return m_steadyVideoReports >= REQUIRED_SAMPLES;

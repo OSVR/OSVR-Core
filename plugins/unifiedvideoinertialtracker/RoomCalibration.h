@@ -48,14 +48,16 @@ namespace vbtracker {
 
         /// Since during startup, we only want video data on a single target, we
         /// can save processing power by asking before we compute.
-        bool wantVideoData(BodyTargetId const &target) const;
+        bool wantVideoData(TrackingSystem const &sys,
+                           BodyTargetId const &target) const;
 
-        void processVideoData(BodyTargetId const &target,
+        void processVideoData(TrackingSystem const &sys,
+                              BodyTargetId const &target,
                               util::time::TimeValue const &timestamp,
                               Eigen::Vector3d const &xlate,
                               Eigen::Quaterniond const &quat);
 
-        void processIMUData(BodyId const &target,
+        void processIMUData(TrackingSystem const &sys, BodyId const &body,
                             util::time::TimeValue const &timestamp,
                             Eigen::Quaterniond const &quat);
         bool finished() const;
