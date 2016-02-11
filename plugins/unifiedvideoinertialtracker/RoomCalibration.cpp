@@ -56,9 +56,9 @@ namespace vbtracker {
     static const auto NEAR_MESSAGE_CUTOFF = 0.3;
 
     RoomCalibration::RoomCalibration()
-        : last(util::time::getNow()),
-          positionFilter(filters::one_euro::Params{}),
-          orientationFilter(filters::one_euro::Params{}) {}
+        : m_lastVideoData(util::time::getNow()),
+          m_positionFilter(filters::one_euro::Params{}),
+          m_orientationFilter(filters::one_euro::Params{}) {}
 
     bool RoomCalibration::wantVideoData(BodyTargetId const &target) const {
         // This was once all in one conditional expression but it was almost
@@ -90,8 +90,8 @@ namespace vbtracker {
         }
         bool firstData = !haveVideoData();
         m_videoTarget = target;
-        auto dt = duration(timestamp, last);
-        last = timestamp;
+        auto dt = duration(timestamp, m_lastVideoData);
+        m_lastVideoData = timestamp;
         if (dt <= 0) {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
@@ -109,22 +109,22 @@ namespace vbtracker {
         Eigen::Isometry3d rTc = m_imuOrientation * targetPose.inverse();
 
         // Feed this into the filters...
-        positionFilter.filter(dt, rTc.translation());
-        orientationFilter.filter(dt, Eigen::Quaterniond(rTc.rotation()));
+        m_positionFilter.filter(dt, rTc.translation());
+        m_orientationFilter.filter(dt, Eigen::Quaterniond(rTc.rotation()));
 
         // Look at the velocity to see if the user was holding still enough.
-        auto linearVel = positionFilter.getDerivativeMagnitude();
-        auto angVel = orientationFilter.getDerivativeMagnitude();
+        auto linearVel = m_positionFilter.getDerivativeMagnitude();
+        auto angVel = m_orientationFilter.getDerivativeMagnitude();
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
         if (linearVel < LINEAR_VELOCITY_CUTOFF &&
             angVel < ANGULAR_VELOCITY_CUTOFF) {
             // OK, velocity within bounds
-            if (reports == 0) {
+            if (m_steadyVideoReports == 0) {
                 msg() << "Hold still, performing room calibration";
             }
             msgStream() << "." << std::flush;
-            ++reports;
+            ++m_steadyVideoReports;
             if (finished()) {
                 /// put an end to the dots
                 msgStream() << "\n" << std::endl;
@@ -135,11 +135,11 @@ namespace vbtracker {
     }
     void RoomCalibration::handleExcessVelocity(double zTranslation) {
         // reset the count if movement too fast.
-        if (reports > 0) {
+        if (m_steadyVideoReports > 0) {
             /// put an end to the dots
             msgStream() << std::endl;
         }
-        reports = 0;
+        m_steadyVideoReports = 0;
         switch (m_instructionState) {
         case InstructionState::Uninstructed:
             if (zTranslation > NEAR_MESSAGE_CUTOFF) {
@@ -171,12 +171,12 @@ namespace vbtracker {
                                          Eigen::Quaterniond const &quat) {}
 
     bool RoomCalibration::finished() const {
-        return reports >= REQUIRED_SAMPLES;
+        return m_steadyVideoReports >= REQUIRED_SAMPLES;
     }
     Eigen::Isometry3d RoomCalibration::getRoomToCamera() const {
         Eigen::Isometry3d ret;
-        ret.fromPositionOrientationScale(positionFilter.getState(),
-                                         orientationFilter.getState(),
+        ret.fromPositionOrientationScale(m_positionFilter.getState(),
+                                         m_orientationFilter.getState(),
                                          Eigen::Vector3d::Ones());
         return ret;
     }

@@ -74,29 +74,34 @@ namespace vbtracker {
 
         bool haveVideoData() const { return !m_videoTarget.first.empty(); }
         bool haveIMUData() const { return !m_imuBody.empty(); }
-        std::size_t reports = 0;
+        std::size_t m_steadyVideoReports = 0;
 
         void handleExcessVelocity(double zTranslation);
-        enum class InstructionState { Uninstructed, ToldToMoveCloser, ToldDistanceIsGood};
+        enum class InstructionState {
+            Uninstructed,
+            ToldToMoveCloser,
+            ToldDistanceIsGood
+        };
         InstructionState m_instructionState = InstructionState::Uninstructed;
-        bool toldToMoveCloser = false;
-        bool toldDistanceIsGood = false;
 
         /// @name Video-based tracking data and input filters
         /// @{
         BodyTargetId m_videoTarget;
-        util::time::TimeValue last;
+        util::time::TimeValue m_lastVideoData;
         /// @}
 
         /// @name Input filters on camera in room/IMU space
         /// @{
-        util::filters::OneEuroFilter<Eigen::Vector3d> positionFilter;
-        util::filters::OneEuroFilter<Eigen::Quaterniond> orientationFilter;
+        util::filters::OneEuroFilter<Eigen::Vector3d> m_positionFilter;
+        util::filters::OneEuroFilter<Eigen::Quaterniond> m_orientationFilter;
         /// @}
 
         BodyId m_imuBody;
         Eigen::Quaterniond m_imuOrientation;
     };
+
+    /// A standalone function that looks at the camera and IMUs in a tracking
+    /// system to determine whether all calibration is complete.
     bool isRoomCalibrationComplete(TrackingSystem const &sys);
 } // namespace vbtracker
 } // namespace osvr
