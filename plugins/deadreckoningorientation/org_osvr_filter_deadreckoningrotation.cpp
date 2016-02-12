@@ -50,21 +50,7 @@ class DeadReckoningRotation {
     DeadReckoningRotation(OSVR_PluginRegContext ctx, std::string const &name,
       std::string const &input, int numSensors, double predictMS)
     {
-        /// Create the initialization options
-        //OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
-        //osvrDeviceTrackerConfigure(opts, &m_trackerOut);
-
-        /// Create the async device token with the options
-        //m_dev.initAsync(ctx, "DeadReckoningRotationTracker", opts);
-
-        /// Send JSON descriptor
-        /// @todo Fill in the number of sensors based on numSensors
-        //m_dev.sendJsonDescriptor(org_osvr_filter_deadreckoningrotation_json);
-
-        /// Register update callback
-        //m_dev.registerUpdateCallback(this);
-
-        /// Register the VRPN device that we will be listening to.
+        /// Register the VRPN device that we will be using.
         osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
         std::string decoratedName = reg.useDecoratedName(name);
         std::cout << "XXX Using decorated name " << decoratedName << std::endl;
@@ -72,7 +58,7 @@ class DeadReckoningRotation {
         std::cout << "XXX Using input name " << localInput << std::endl;
         std::cout << "XXX Using " << numSensors << " sensors and " << predictMS << "ms prediction" << std::endl;
         reg.registerDevice(new vrpn_Tracker_DeadReckoning_Rotation(
-          decoratedName.c_str(),
+          decoratedName,
           reg.getVRPNConnection(),
           localInput, numSensors, predictMS));
         reg.setDeviceDescriptor(osvr::util::makeString(
