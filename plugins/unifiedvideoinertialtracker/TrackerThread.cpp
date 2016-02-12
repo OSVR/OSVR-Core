@@ -35,6 +35,8 @@
 #include <iostream>
 #include <future>
 
+#define OSVR_TRACKER_THREAD_WRAP_WITH_TRY
+
 namespace osvr {
 namespace vbtracker {
     TrackerThread::TrackerThread(TrackingSystem &trackingSystem,
@@ -58,21 +60,32 @@ namespace vbtracker {
         /// messages.
 
         msg() << "Tracker thread object invoked." << std::endl;
-        bool keepGoing = true;
-        while (keepGoing) {
-            doFrame();
+#ifdef OSVR_TRACKER_THREAD_WRAP_WITH_TRY
+        try {
+#endif
+            bool keepGoing = true;
+            while (keepGoing) {
+                doFrame();
 
-            {
-                /// Copy the run flag.
-                std::lock_guard<std::mutex> lock(m_runMutex);
-                keepGoing = m_run;
+                {
+                    /// Copy the run flag.
+                    std::lock_guard<std::mutex> lock(m_runMutex);
+                    keepGoing = m_run;
+                }
+                if (!keepGoing) {
+                    msg() << "Tracker thread object: Just checked our run flag "
+                             "and noticed it turned false..."
+                          << std::endl;
+                }
             }
-            if (!keepGoing) {
-                msg() << "Tracker thread object: Just checked our run flag "
-                         "and noticed it turned false..."
-                      << std::endl;
-            }
+#ifdef OSVR_TRACKER_THREAD_WRAP_WITH_TRY
+        } catch (std::exception const &e) {
+            warn() << "Tracker thread object: exiting because of caught "
+                      "exception: "
+                   << e.what() << std::endl;
+            m_run = false;
         }
+#endif
         msg() << "Tracker thread object: functor exiting." << std::endl;
     }
 
