@@ -305,6 +305,12 @@ namespace vbtracker {
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo move state machine logic elsewhere
 
+        if (!m_hasPoseEstimate &&
+            m_impl->trackingState != TargetTrackingState::RANSAC) {
+            /// Lost tracking.
+            enterRANSACMode();
+        }
+
         /// pre-estimation transitions based on overall health
         switch (m_impl->healthEval(bodyState, usableLeds(),
                                    m_impl->trackingState)) {
