@@ -27,6 +27,7 @@ add_library(uvbi-core STATIC
     CannedIMUMeasurement.h
     CameraDistortionModel.h
     CameraParameters.h
+    CheckDeprecatedParameter.h
     ConfigParams.cpp
     ConfigParams.h
     cvToEigen.h
