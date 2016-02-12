@@ -46,6 +46,8 @@ add_library(uvbi-core STATIC
     ModelTypes.h
     PoseEstimator_RANSAC.cpp
     PoseEstimator_RANSAC.h
+    PoseEstimator_RANSACKalman.cpp
+    PoseEstimator_RANSACKalman.h
     PoseEstimator_SCAATKalman.cpp
     PoseEstimator_SCAATKalman.h
     PoseEstimatorTypes.h
