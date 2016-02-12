@@ -26,6 +26,7 @@
 #include "TrackerThread.h"
 #include "TrackedBody.h"
 #include "TrackedBodyIMU.h"
+#include "SpaceTransformations.h"
 
 // Library/third-party includes
 #include <osvr/Util/Finally.h>
@@ -255,11 +256,61 @@ namespace vbtracker {
     void TrackerThread::processIMUMessage(MessageEntry const &m) {
         boost::apply_visitor(IMUMessageProcessor{}, m);
     }
+
     void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {
         for (auto const &bodyId : bodyIds) {
             auto &body = m_trackingSystem.getBody(bodyId);
             m_reportingVec[bodyId.value()]->updateState(
                 body.getStateTime(), body.getState(), body.getProcessModel());
+        }
+
+        // Extra reports
+        if (!m_trackingSystem.haveCameraPose()) {
+            // if we don't have camera pose, we can't be calibrated, so none of
+            // the extra reports will have data.
+            return;
+        }
+
+        using namespace Eigen;
+        using namespace std::chrono;
+
+        auto numBodies = m_trackingSystem.getNumBodies();
+
+        auto &cameraPoseReporting = *m_reportingVec[numBodies];
+        auto &imuAlignedReporting = *m_reportingVec[numBodies + 1];
+        auto &imuCameraSpaceReporting = *m_reportingVec[numBodies + 2];
+
+        /// Are we due to report on the camera pose?
+        if (!m_nextCameraPoseReport ||
+            our_clock::now() > *m_nextCameraPoseReport) {
+            m_nextCameraPoseReport = our_clock::now() + seconds(1);
+            BodyState state;
+            state.position() = m_trackingSystem.getCameraPose().translation();
+            state.setQuaternion(
+                Quaterniond(m_trackingSystem.getCameraPose().rotation()));
+            cameraPoseReporting.updateState(util::time::getNow(), state);
+        }
+
+        if (m_trackingSystem.getBody(BodyId(0)).hasIMU()) {
+            auto &imu = m_trackingSystem.getBody(BodyId(0)).getIMU();
+            if (!imu.hasPoseEstimate()) {
+                return;
+            }
+            Eigen::Quaterniond imuQuat = imu.getPoseEstimate();
+            {
+                BodyState state;
+                state.setQuaternion(imuQuat);
+                imuAlignedReporting.updateState(imu.getLastUpdate(), state);
+            }
+            {
+                BodyState state;
+                state.setQuaternion(getQuatToCameraSpace(m_trackingSystem) *
+                                    imuQuat);
+                // Put this one up in the air a little so we can tell the
+                // difference.
+                state.position() = Eigen::Vector3d(0, 0.5, 0);
+                imuCameraSpaceReporting.updateState(imu.getLastUpdate(), state);
+            }
         }
     }
     void TrackerThread::launchTimeConsumingImageStep() {

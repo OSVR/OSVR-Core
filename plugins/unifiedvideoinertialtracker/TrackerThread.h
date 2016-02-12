@@ -47,6 +47,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <tuple>
+#include <chrono>
 
 namespace osvr {
 namespace vbtracker {
@@ -114,6 +115,9 @@ namespace vbtracker {
         ImageSource &m_cam;
         BodyReportingVector &m_reportingVec;
         CameraParameters m_camParams;
+
+        using our_clock = std::chrono::steady_clock;
+        boost::optional<our_clock::time_point> m_nextCameraPoseReport;
 
         /// Time that the last camera grab was triggered.
         util::time::TimeValue m_triggerTime;
