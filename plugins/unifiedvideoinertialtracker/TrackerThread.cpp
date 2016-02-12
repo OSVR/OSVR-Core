@@ -206,12 +206,12 @@ namespace vbtracker {
     }
     class IMUMessageProcessor : public boost::static_visitor<> {
       public:
-        void operator()(boost::none_t const&) {
+        void operator()(boost::none_t const &) const {
             /// dummy overload to handle empty messages
         }
 
         template <typename TimestampedReport>
-        void operator()(TimestampedReport const &report) {
+        void operator()(TimestampedReport const &report) const {
             /// templated overload to handle real messages since they're
             /// identical except for the final element of the tuple.
             auto &imu = *std::get<0>(report);
@@ -220,16 +220,16 @@ namespace vbtracker {
             updatePose(imu, timestamp, std::get<2>(report));
         }
 
-        void updatePose(TrackedBodyIMU &imu,
-                        util::time::TimeValue const &timestamp,
-                        OSVR_OrientationReport const &ori) {
+        static void updatePose(TrackedBodyIMU &imu,
+                               util::time::TimeValue const &timestamp,
+                               OSVR_OrientationReport const &ori) {
             imu.updatePoseFromOrientation(
                 timestamp, util::eigen_interop::map(ori.rotation).quat());
         }
 
-        void updatePose(TrackedBodyIMU &imu,
-                        util::time::TimeValue const &timestamp,
-                        OSVR_AngularVelocityReport const &angVel) {
+        static void updatePose(TrackedBodyIMU &imu,
+                               util::time::TimeValue const &timestamp,
+                               OSVR_AngularVelocityReport const &angVel) {
 
             imu.updatePoseFromAngularVelocity(
                 timestamp,
@@ -240,9 +240,7 @@ namespace vbtracker {
     };
 
     void TrackerThread::processIMUMessage(MessageEntry const &m) {
-        IMUMessageProcessor visitor;
-        boost::apply_visitor(visitor, m);
-        /// @todo process IMU message.
+        boost::apply_visitor(IMUMessageProcessor{}, m);
     }
     void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {
         for (auto const &bodyId : bodyIds) {
