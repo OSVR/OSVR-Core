@@ -103,11 +103,11 @@ namespace vbtracker {
             rot = deltaquat.vec().normalized() * angle * 2 / dt;
             /// @todo without transformations being applied to vel quats, this
             /// is needed.
-            rot[1] *= -1.;
-            rot[2] *= -1.;
+            rot.x() *= -1.;
         }
+        Eigen::Vector3d newRot(rot.x(), rot.z(), rot.y());
         auto ret = CannedIMUMeasurement{};
-        ret.setAngVel(rot,
+        ret.setAngVel(newRot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
         return ret;
     }
