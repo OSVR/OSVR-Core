@@ -43,7 +43,7 @@
 
 /// Define this to use the RANSAC Kalman instead of the autocalibrating SCAAT
 /// Kalman, primarily for troubleshooting purposes.
-#define OSVR_RANSACKALMAN
+#undef OSVR_RANSACKALMAN
 
 namespace osvr {
 namespace vbtracker {
