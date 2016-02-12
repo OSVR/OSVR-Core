@@ -31,6 +31,7 @@
 #include "PoseEstimatorTypes.h"
 #include "PoseEstimator_RANSAC.h"
 #include "PoseEstimator_SCAATKalman.h"
+#include "PoseEstimator_RANSACKalman.h"
 #include "BodyTargetInterface.h"
 
 // Library/third-party includes
@@ -39,6 +40,10 @@
 
 // Standard includes
 #include <iostream>
+
+/// Define this to use the RANSAC Kalman instead of the autocalibrating SCAAT
+/// Kalman, primarily for troubleshooting purposes.
+#define OSVR_RANSACKALMAN
 
 namespace osvr {
 namespace vbtracker {
@@ -95,6 +100,9 @@ namespace vbtracker {
         LedIdentifierPtr identifier;
         RANSACPoseEstimator ransacEstimator;
         SCAATKalmanPoseEstimator kalmanEstimator;
+#ifdef OSVR_RANSACKALMAN
+        RANSACKalmanPoseEstimator ransacKalmanEstimator;
+#endif
 
         TargetHealthEvaluator healthEval;
 
@@ -363,10 +371,15 @@ namespace vbtracker {
         case TargetTrackingState::RANSACWhenBlobDetected:
         case TargetTrackingState::EnteringKalman:
         case TargetTrackingState::Kalman: {
+#ifdef OSVR_RANSACKALMAN
+            m_hasPoseEstimate =
+                m_impl->ransacKalmanEstimator(params, usableLeds(), tv);
+#else
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
             m_hasPoseEstimate =
                 m_impl->kalmanEstimator(params, usableLeds(), tv, videoDt);
+#endif
             break;
         }
         }
@@ -384,6 +397,7 @@ namespace vbtracker {
             // Get one frame pass on the Kalman health check.
             break;
         case TargetTrackingState::Kalman: {
+#ifndef OSVR_RANSACKALMAN
             auto health = m_impl->kalmanEstimator.getTrackingHealth();
             switch (health) {
             case SCAATKalmanPoseEstimator::TrackingHealth::NeedsResetNow:
@@ -398,6 +412,8 @@ namespace vbtracker {
                 // OK!
                 break;
             }
+#endif
+            break;
         }
         default:
             // other states don't have post-estimation transitions.
