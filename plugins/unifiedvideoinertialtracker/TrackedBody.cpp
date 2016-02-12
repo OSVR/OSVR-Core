@@ -189,9 +189,11 @@ namespace vbtracker {
             applyIMUMeasurement(imuHist.first, imuHist.second);
             ++numReplayed;
         }
-
+#if 0
         static ::util::Stride s{43};
         if (++s) {
+#endif
+        if (numPopped != numReplayed) {
             std::cout << "Popped " << numPopped << ", replayed " << numReplayed
                       << "\n";
         }
