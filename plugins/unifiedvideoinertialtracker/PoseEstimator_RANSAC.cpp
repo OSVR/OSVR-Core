@@ -207,21 +207,18 @@ namespace vbtracker {
     }
 
     /// Variance in Meters^2
-    static const double InitialPositionStateError = 1.;
+    static const double InitialPositionStateError = 0.;
     /// Variance in Radians^2
-    static const double InitialOrientationStateError = 1.;
-    static const double InitialStateError[] = {InitialPositionStateError,
-                                               InitialPositionStateError,
-                                               InitialPositionStateError,
-                                               InitialOrientationStateError,
-                                               InitialOrientationStateError,
-                                               InitialOrientationStateError,
-                                               10.,
-                                               10.,
-                                               10.,
-                                               10.,
-                                               10.,
-                                               10.};
+    static const double InitialOrientationStateError = 0.;
+    static const double InitialVelocityStateError = 0.;
+    static const double InitialAngVelStateError =0.;
+    static const double InitialStateError[] = {
+        InitialPositionStateError,    InitialPositionStateError,
+        InitialPositionStateError,    InitialOrientationStateError,
+        InitialOrientationStateError, InitialOrientationStateError,
+        InitialVelocityStateError,    InitialVelocityStateError,
+        InitialVelocityStateError,    InitialAngVelStateError,
+        InitialAngVelStateError,      InitialAngVelStateError};
     bool RANSACPoseEstimator::operator()(EstimatorInOutParams const &p,
                                          LedPtrList const &leds) {
         Eigen::Vector3d xlate;
@@ -239,10 +236,11 @@ namespace vbtracker {
         p.state.position() = xlate;
         p.state.setQuaternion(quat);
         /// Zero things we can't measure.
+#if 0
         p.state.incrementalOrientation() = Eigen::Vector3d::Zero();
         p.state.velocity() = Eigen::Vector3d::Zero();
         p.state.angularVelocity() = Eigen::Vector3d::Zero();
-
+#endif
         using StateVec = kalman::types::DimVector<BodyState>;
         using StateSquareMatrix = kalman::types::DimSquareMatrix<BodyState>;
 

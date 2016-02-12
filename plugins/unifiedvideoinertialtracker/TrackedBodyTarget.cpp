@@ -467,6 +467,24 @@ namespace vbtracker {
     }
 
     void TrackedBodyTarget::enterRANSACMode() {
+
+#ifndef OSVR_UVBI_ASSUME_SINGLE_TARGET_PER_BODY
+#error                                                                         \
+    "We may not be able/willing to run right over the body velocity just because this target lost its fix"
+#endif
+        // Zero out velocities if we're coming from Kalman.
+        switch (m_impl->trackingState) {
+        case TargetTrackingState::RANSACWhenBlobDetected:
+        case TargetTrackingState::Kalman:
+            getBody().getState().angularVelocity() = Eigen::Vector3d::Zero();
+            getBody().getState().velocity() = Eigen::Vector3d::Zero();
+            break;
+        case TargetTrackingState::EnteringKalman:
+            /// unlikely to have messed up velocity in one step. let it be.
+            break;
+        default:
+            break;
+        }
         m_impl->trackingState = TargetTrackingState::RANSAC;
     }
 
