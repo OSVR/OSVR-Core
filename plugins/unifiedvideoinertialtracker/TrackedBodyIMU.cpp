@@ -38,7 +38,10 @@ namespace vbtracker {
     TrackedBodyIMU::TrackedBodyIMU(TrackedBody &body,
                                    double orientationVariance,
                                    double angularVelocityVariance)
-        : m_body(body), m_yaw(0), m_orientationVariance(orientationVariance),
+        : m_body(body), m_yaw(0),
+          m_useOrientation(getParams().imu.useOrientation),
+          m_orientationVariance(orientationVariance),
+          m_useAngularVelocity(getParams().imu.useAngularVelocity),
           m_angularVelocityVariance(angularVelocityVariance) {}
     void
     TrackedBodyIMU::updatePoseFromOrientation(util::time::TimeValue const &tv,
@@ -54,6 +57,9 @@ namespace vbtracker {
         m_hasOrientation = true;
         m_last = tv;
 
+        if (!m_useOrientation) {
+            return;
+        }
         // Can it and update the pose with it.
         updatePoseFromMeasurement(tv, preprocessOrientation(tv, quat));
     }
@@ -65,6 +71,9 @@ namespace vbtracker {
             return;
         }
 
+        if (!m_useAngularVelocity) {
+            return;
+        }
         // Can it and update the pose with it.
         updatePoseFromMeasurement(tv,
                                   preprocessAngularVelocity(tv, deltaquat, dt));

@@ -64,7 +64,7 @@ namespace vbtracker {
 
         /// Rotate it into camera space
         /// @todo do this without rotating into camera space?
-        //angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
+        // angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
         /// @todo transform variance?
 
         kalman::AngularVelocityMeasurement<BodyState> kalmanMeas{angVel, var};
@@ -81,9 +81,9 @@ namespace vbtracker {
             kalman::predict(state, processModel, dt);
         }
         if (meas.orientationValid()) {
-            //applyOriToState(sys, state, processModel, meas);
+            applyOriToState(sys, state, processModel, meas);
         } else if (meas.angVelValid()) {
-           applyAngVelToState(sys, state, processModel, meas);
+            applyAngVelToState(sys, state, processModel, meas);
 
         } else {
             // unusually, the measurement is totally invalid. Just normalize and

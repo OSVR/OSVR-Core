@@ -78,8 +78,16 @@ namespace vbtracker {
     struct IMUInputParams {
         std::string path =
             "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
+
+        /// Should orientation reports be used once calibration completes?
+        bool useOrientation = false;
+
         /// units: rad^2
         double orientationVariance = 1.0e-5;
+
+        /// Should angular velocity reports be used once calibration completes?
+        bool useAngularVelocity = true;
+
         /// units: (rad/sec)^2
         double angularVelocityVariance = 1.0e-8;
     };

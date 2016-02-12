@@ -108,7 +108,9 @@ namespace vbtracker {
         util::Angle m_yaw;
         Eigen::Quaterniond m_yawCorrection;
 
+        bool m_useOrientation;
         double m_orientationVariance;
+        bool m_useAngularVelocity;
         double m_angularVelocityVariance;
 
         bool m_hasOrientation = false;

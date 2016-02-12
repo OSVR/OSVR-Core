@@ -149,8 +149,12 @@ namespace vbtracker {
         if (root.isMember("imu")) {
             Json::Value const &imu = root["imu"];
             getOptionalParameter(config.imu.path, imu, "path");
+            getOptionalParameter(config.imu.useOrientation, imu,
+                                 "useOrientation");
             getOptionalParameter(config.imu.orientationVariance, imu,
                                  "orientationVariance");
+            getOptionalParameter(config.imu.useAngularVelocity, imu,
+                                 "useAngularVelocity");
             getOptionalParameter(config.imu.angularVelocityVariance, imu,
                                  "angularVelocityVariance");
         }
