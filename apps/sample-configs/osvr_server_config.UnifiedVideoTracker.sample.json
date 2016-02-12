@@ -15,7 +15,6 @@
             "includeRearPanel": true,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
-            "eyeHeight": 0,
             "cameraIsForward": true,
             "measurementVarianceScaleFactor": 3e0,
             "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e1, 1e1, 1e1],
