@@ -173,7 +173,11 @@ namespace vbtracker {
 #endif
     }
 
-    TrackedBodyTarget::~TrackedBodyTarget() { dumpBeaconsToConsole(); }
+    TrackedBodyTarget::~TrackedBodyTarget() {
+#if 0
+    dumpBeaconsToConsole();
+#endif
+    }
 
     BodyTargetId TrackedBodyTarget::getQualifiedId() const {
         return BodyTargetId(getBody().getId(), getId());
