@@ -125,8 +125,12 @@ namespace vbtracker {
         cam.principalPoint = p.camParams.eiPrincipalPoint();
         ImagePointMeasurement meas{cam};
 
-        auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
-        kalman::predict(p.state, p.processModel, dt);
+        if (p.startingTime != frameTime) {
+            /// Predict first if appropriate.
+            auto dt = util::time::duration(frameTime, p.startingTime);
+            //auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
+            kalman::predict(p.state, p.processModel, dt);
+        }
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         /// @todo should we be recalculating this for each beacon after each

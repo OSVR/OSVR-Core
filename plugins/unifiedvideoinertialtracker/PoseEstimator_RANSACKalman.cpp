@@ -51,11 +51,15 @@ namespace vbtracker {
                 return false;
             }
         }
-        /// If we got something, filter it in.
-        auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
 
-        /// Predict
-        kalman::predict(p.state, p.processModel, dt);
+        /// If we got something, filter it in!
+
+        if (p.startingTime != frameTime) {
+            /// Predict first if appropriate.
+            auto dt = util::time::duration(frameTime, p.startingTime);
+            //auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
+            kalman::predict(p.state, p.processModel, dt);
+        }
 
         /// Filter in the orientation
         {
