@@ -83,7 +83,7 @@ namespace vbtracker {
         if (meas.orientationValid()) {
             applyOriToState(sys, state, processModel, meas);
         } else if (meas.angVelValid()) {
-            applyAngVelToState(sys, state, processModel, meas);
+           // applyAngVelToState(sys, state, processModel, meas);
 
         } else {
             // unusually, the measurement is totally invalid. Just normalize and
