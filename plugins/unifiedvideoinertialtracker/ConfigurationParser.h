@@ -28,6 +28,7 @@
 // Internal Includes
 #include "Types.h"
 #include "GetOptionalParameter.h"
+#include "CheckDeprecatedParameter.h"
 
 // Library/third-party includes
 #include <json/value.h>
@@ -37,7 +38,9 @@
 
 namespace osvr {
 namespace vbtracker {
-
+    static const auto MESSAGE_PREFIX =
+        "[Unified Tracker] Configuration Parsing WARNING: ";
+#define PARAMNAME(X) "'" << X << "'"
     inline ConfigParams parseConfigParams(Json::Value const &root) {
         ConfigParams config;
         config.debug = root.get("showDebug", false).asBool();
@@ -69,8 +72,15 @@ namespace vbtracker {
         getOptionalParameter(config.blobsKeepIdentity, root,
                              "blobsKeepIdentity");
         getOptionalParameter(config.numThreads, root, "numThreads");
+#if 0
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
+#else
+        checkDeprecatedParameter(std::cout, root, "streamBeaconDebugInfo")
+            << MESSAGE_PREFIX << PARAMNAME("streamBeaconDebugInfo")
+            << " not yet implemented in the new tracker";
+#endif
+
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
         if (!config.offsetToCentroid) {
             getOptionalParameter(config.manualBeaconOffset, root,
@@ -80,6 +90,10 @@ namespace vbtracker {
         /// Fusion/Calibration parameters
         getOptionalParameter(config.cameraPosition, root, "cameraPosition");
         getOptionalParameter(config.cameraIsForward, root, "cameraIsForward");
+        checkDeprecatedParameter(std::cout, root, "eyeHeight")
+            << MESSAGE_PREFIX << PARAMNAME("eyeHeight")
+            << " is deprecated/ignored: use 'cameraPosition' for similar "
+               "effects with this plugin.";
 
         /// Kalman-related parameters
         getOptionalParameter(config.beaconProcessNoise, root,
@@ -94,8 +108,14 @@ namespace vbtracker {
                              "measurementVarianceScaleFactor");
         getOptionalParameter(config.highResidualVariancePenalty, root,
                              "highResidualVariancePenalty");
+#if 0
         getOptionalParameter(config.boundingBoxFilterRatio, root,
                              "boundingBoxFilterRatio");
+#else
+        checkDeprecatedParameter(std::cout, root, "boundingBoxFilterRatio")
+            << MESSAGE_PREFIX << PARAMNAME("boundingBoxFilterRatio")
+            << " parameter not actively used";
+#endif
         getOptionalParameter(config.maxZComponent, root, "maxZComponent");
         getOptionalParameter(config.shouldSkipBrightLeds, root,
                              "shouldSkipBrightLeds");
@@ -127,7 +147,7 @@ namespace vbtracker {
 
         return config;
     }
-
+#undef PARAMNAME
 } // End namespace vbtracker
 } // End namespace osvr
 #endif // INCLUDED_ConfigurationParser_h_GUID_933C79EE_3392_4C8D_74D5_D9A72580DA6A
