@@ -61,8 +61,24 @@ class DeadReckoningRotation {
         reg.setDeviceDescriptor(osvr::util::makeString(
           org_osvr_filter_deadreckoningrotation_json));
 
-        // @todo Build a new Json entry that has the correct number of
+        // Build a new Json entry that has the correct number of
         // sensors in it, rather than the default of 1.
+        {
+          Json::Reader reader;
+          Json::Value filterJson;
+          if (!reader.parse(
+            osvr::util::makeString(
+            org_osvr_filter_deadreckoningrotation_json),
+            filterJson)) {
+            throw std::logic_error("Faulty JSON file for Dead "
+              "Reckoning Rotation Filter - should not "
+              "be possible!");
+          }
+          filterJson["interfaces"]["tracker"]["count"] = numSensors;
+
+          // Corresponding filter
+          reg.setDeviceDescriptor(filterJson.toStyledString());
+        }
     }
 
     OSVR_ReturnCode update() {
