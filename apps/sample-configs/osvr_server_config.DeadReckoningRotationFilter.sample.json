@@ -5,7 +5,7 @@
       "driver": "DeadReckoningRotationTracker",
       "params": {
           "name": "FilteredHead",
-          "input": "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd",
+          "input": "com_osvr_Multiserver/OSVRHackerDevKit0",
           "numSensors": 1,
           "predictMilliSeconds": 32
       }
