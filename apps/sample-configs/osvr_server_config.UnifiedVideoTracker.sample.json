@@ -15,13 +15,13 @@
             "includeRearPanel": true,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
-            "cameraIsForward": false,
+            "cameraIsForward": true,
             "measurementVarianceScaleFactor": 3e0,
             "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e1, 1e1, 1e1],
             "beaconProcessNoise": 0,
             "initialBeaconError": 0,
             "imu": {
-                "orientationVariance": 1e-2,
+                "orientationVariance": 1e-4,
                 "angularVelocityVariance": 1e-2
             }
         }
@@ -31,6 +31,10 @@
             "translate": [0.0, 0.0, 0.04141],
             "child": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd"
         },
-        "/me/head": "/headSpace"
+        "/me/head": "/headSpace",
+        "/hmd": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/0",
+        "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/1",
+        "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/2",
+        "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/3"
     }
 }
