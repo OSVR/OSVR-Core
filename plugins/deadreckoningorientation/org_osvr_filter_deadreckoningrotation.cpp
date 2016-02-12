@@ -53,10 +53,7 @@ class DeadReckoningRotation {
         /// Register the VRPN device that we will be using.
         osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
         std::string decoratedName = reg.useDecoratedName(name);
-        std::cout << "XXX Using decorated name " << decoratedName << std::endl;
         std::string localInput = "*" + input;
-        std::cout << "XXX Using input name " << localInput << std::endl;
-        std::cout << "XXX Using " << numSensors << " sensors and " << predictMS << "ms prediction" << std::endl;
         reg.registerDevice(new vrpn_Tracker_DeadReckoning_Rotation(
           decoratedName,
           reg.getVRPNConnection(),
