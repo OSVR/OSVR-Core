@@ -145,6 +145,16 @@ namespace vbtracker {
                                  "thresholdSteps");
         }
 
+        /// IMU-related parameters
+        if (root.isMember("imu")) {
+            Json::Value const &imu = root["imu"];
+            getOptionalParameter(config.imu.path, imu, "path");
+            getOptionalParameter(config.imu.orientationVariance, imu,
+                                 "orientationVariance");
+            getOptionalParameter(config.imu.angularVelocityVariance, imu,
+                                 "angularVelocityVariance");
+        }
+
         return config;
     }
 #undef PARAMNAME
