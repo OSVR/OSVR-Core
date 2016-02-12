@@ -25,9 +25,10 @@
 
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
-#include <osvr/PluginKit/AnalogInterfaceC.h>
-#include <osvr/PluginKit/ButtonInterfaceC.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
+#include <osvr/VRPNServer/VRPNDeviceRegistration.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+#include <vrpn_Tracker_Filter.h>
 
 // Generated JSON header file
 #include "org_osvr_filter_deadreckoningrotation_json.h"
@@ -46,39 +47,50 @@ namespace {
 
 class DeadReckoningRotation {
   public:
-    DeadReckoningRotation(OSVR_PluginRegContext ctx, double myVal, int sleepTime)
-        : m_myVal(myVal), m_sleepTime(sleepTime) {
+    DeadReckoningRotation(OSVR_PluginRegContext ctx, std::string const &name,
+      std::string const &input, int numSensors, double predictMS)
+    {
         /// Create the initialization options
-        OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
-
-        /// Indicate that we'll want 1 analog channel.
-        osvrDeviceAnalogConfigure(opts, &m_analog, 1);
+        //OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
+        //osvrDeviceTrackerConfigure(opts, &m_trackerOut);
 
         /// Create the async device token with the options
-        m_dev.initAsync(ctx, "DeadReckoningRotationTracker", opts);
+        //m_dev.initAsync(ctx, "DeadReckoningRotationTracker", opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(org_osvr_filter_deadreckoningrotation_json);
+        /// @todo Fill in the number of sensors based on numSensors
+        //m_dev.sendJsonDescriptor(org_osvr_filter_deadreckoningrotation_json);
 
         /// Register update callback
-        m_dev.registerUpdateCallback(this);
+        //m_dev.registerUpdateCallback(this);
+
+        /// Register the VRPN device that we will be listening to.
+        osvr::vrpnserver::VRPNDeviceRegistration reg(ctx);
+        std::string decoratedName = reg.useDecoratedName(name);
+        std::cout << "XXX Using decorated name " << decoratedName << std::endl;
+        std::string localInput = "*" + input;
+        std::cout << "XXX Using input name " << localInput << std::endl;
+        std::cout << "XXX Using " << numSensors << " sensors and " << predictMS << "ms prediction" << std::endl;
+        reg.registerDevice(new vrpn_Tracker_DeadReckoning_Rotation(
+          decoratedName.c_str(),
+          reg.getVRPNConnection(),
+          localInput, numSensors, predictMS));
+        reg.setDeviceDescriptor(osvr::util::makeString(
+          org_osvr_filter_deadreckoningrotation_json));
+
+        // @todo Register callbacks for the tracker so we can find its values?
+        // This is probably already handled, based on the com_osvr_Multiserver
+        // plug-in code.
     }
 
     OSVR_ReturnCode update() {
-        /// Because this is an async device, we can block for data,
-        /// simulated here with a sleep.
-        std::this_thread::sleep_for(std::chrono::seconds(m_sleepTime));
-
-        /// Report the value of channel 0
-        osvrDeviceAnalogSetValue(m_dev, m_analog, m_myVal, 0);
-        return OSVR_RETURN_SUCCESS;
+      // Nothing to do here - everything happens in a callback.
+      return OSVR_RETURN_SUCCESS;
     }
 
   private:
     osvr::pluginkit::DeviceToken m_dev;
-    OSVR_AnalogDeviceInterface m_analog;
-    double m_myVal;
-    int m_sleepTime;
+    OSVR_TrackerDeviceInterface m_trackerOut;
 };
 
 class DeadReckoningRotationConstructor {
@@ -95,25 +107,29 @@ class DeadReckoningRotationConstructor {
             }
         }
 
-        if (!root.isMember("value")) {
-            // If they configured us but didn't provide a "value" item, warn
-            // - pretending that "value" is some important config value.
-            // If very important, could just return OSVR_RETURN_FAILURE here.
-            std::cerr << "Warning: got configuration, but nothing specified "
-                         "for \"value\" - will use default!"
+        // Get the name we should use for the device
+        if (!root.isMember("name")) {
+            std::cerr << "Error: got configuration, but no name specified."
                       << std::endl;
+            return OSVR_RETURN_FAILURE;
         }
+        std::string name = root["name"].asString();
 
-        // Using `get` here instead of `[]` lets us provide a default value.
-        double val = root.get("value", 5.0).asDouble();
+        // Get the input device we should use to listen to
+        if (!root.isMember("input")) {
+          std::cerr << "Error: got configuration, but no input specified."
+            << std::endl;
+          return OSVR_RETURN_FAILURE;
+        }
+        std::string input = root["input"].asString();
 
-        // We didn't warn about this one, because we're pretending this is a
-        // less important optional parameter.
-        int sleepTime = root.get("sleepTime", 1).asInt();
+        int numSensors = root.get("numSensors", 1).asInt();
+
+        double predictMS = root.get("predictMilliSeconds", 32).asDouble();
 
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::registerObjectForDeletion(
-          ctx, new DeadReckoningRotation(ctx, val, sleepTime));
+          ctx, new DeadReckoningRotation(ctx, name, input, numSensors, predictMS));
 
         return OSVR_RETURN_SUCCESS;
     }
