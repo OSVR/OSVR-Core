@@ -25,9 +25,10 @@
 // Internal Includes
 #include "TrackedBodyIMU.h"
 #include "TrackedBody.h"
+#include "TrackingSystem.h"
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
 // Standard includes
 #include <cmath>
@@ -39,19 +40,50 @@ namespace vbtracker {
                                    double angularVelocityVariance)
         : m_body(body), m_yaw(0), m_orientationVariance(orientationVariance),
           m_angularVelocityVariance(angularVelocityVariance) {}
+    void
+    TrackedBodyIMU::updatePoseFromOrientation(util::time::TimeValue const &tv,
+                                              Eigen::Quaterniond const &quat) {
+        if (!m_yawKnown) {
+            // This needs to go to calibration instead of to our own pose.
+            getBody().getSystem().calibrationHandleIMUData(getBody().getId(),
+                                                           tv, quat);
+            return;
+        }
+        // Save some local state: we do have orientation ourselves now.
+        m_quat = transformRawIMUOrientation(quat);
+        m_hasOrientation = true;
+        m_last = tv;
+
+        // Can it and update the pose with it.
+        updatePoseFromMeasurement(tv, preprocessOrientation(tv, quat));
+    }
+    void TrackedBodyIMU::updatePoseFromAngularVelocity(
+        util::time::TimeValue const &tv, Eigen::Quaterniond const &deltaquat,
+        double dt) {
+        if (!m_yawKnown) {
+            // No calibration yet, and angular velocity isn't useful there.
+            return;
+        }
+
+        // Can it and update the pose with it.
+        updatePoseFromMeasurement(tv,
+                                  preprocessAngularVelocity(tv, deltaquat, dt));
+    }
+
+    Eigen::Quaterniond TrackedBodyIMU::transformRawIMUOrientation(
+        Eigen::Quaterniond const &input) const {
+        BOOST_ASSERT_MSG(
+            calibrationYawKnown(),
+            "transform called before calibration transform known!");
+        return m_yawCorrection * input;
+    }
 
     CannedIMUMeasurement
     TrackedBodyIMU::preprocessOrientation(util::time::TimeValue const &tv,
                                           Eigen::Quaterniond const &quat) {
-        /// @todo apply transforms here
-        Eigen::Quaterniond xformedQuat = quat;
-        m_hasOrientation = true;
-
-        m_last = tv;
-        m_quat = quat;
 
         auto ret = CannedIMUMeasurement{};
-        ret.setOrientation(m_quat,
+        ret.setOrientation(transformRawIMUOrientation(quat),
                            Eigen::Vector3d::Constant(m_orientationVariance));
         return ret;
     }
@@ -84,11 +116,6 @@ namespace vbtracker {
         util::time::TimeValue const &tv, CannedIMUMeasurement const &meas) {
         if (!meas.orientationValid() && !meas.angVelValid()) {
             return false;
-        }
-        if (meas.orientationValid()) {
-            m_hasOrientation = true;
-            m_last = tv;
-            meas.restoreQuat(m_quat);
         }
         getBody().incorporateNewMeasurementFromIMU(tv, meas);
         return true;

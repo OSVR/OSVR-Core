@@ -52,49 +52,59 @@ namespace vbtracker {
         TrackedBody const &getBody() const { return m_body; }
 
         /// Processes an orientation
-        CannedIMUMeasurement
-        preprocessOrientation(util::time::TimeValue const &tv,
-                              Eigen::Quaterniond const &quat);
-
         void updatePoseFromOrientation(util::time::TimeValue const &tv,
-                                       Eigen::Quaterniond const &quat) {
-            updatePoseFromMeasurement(tv, preprocessOrientation(tv, quat));
-        }
+                                       Eigen::Quaterniond const &quat);
 
         /// Processes an angular velocity
+        void updatePoseFromAngularVelocity(util::time::TimeValue const &tv,
+                                           Eigen::Quaterniond const &deltaquat,
+                                           double dt);
+
+        bool hasPoseEstimate() const { return m_hasOrientation; }
+        util::time::TimeValue const &getLastUpdate() const { return m_last; }
+
+        bool calibrationYawKnown() const { return m_yawKnown; }
+        void setCalibrationYaw(util::Angle yaw) {
+            using namespace Eigen;
+            using namespace util;
+            m_yaw = yaw;
+            m_yawCorrection =
+                Quaterniond(AngleAxisd(getRadians(m_yaw), Vector3d::UnitY()));
+            m_yawKnown = true;
+        }
+
+      private:
+        /// Apply the yaw transform required for "cameraIsForward"
+        Eigen::Quaterniond
+        transformRawIMUOrientation(Eigen::Quaterniond const &input) const;
+
+        /// Takes in raw delta quats, dt, and timestamps, transforms them, and
+        /// spits out a "canned" measurement that can be stored and incorporated
+        /// into state.
         CannedIMUMeasurement
         preprocessAngularVelocity(util::time::TimeValue const &tv,
                                   Eigen::Quaterniond const &deltaquat,
                                   double dt);
 
-        void updatePoseFromAngularVelocity(util::time::TimeValue const &tv,
-                                           Eigen::Quaterniond const &deltaquat,
-                                           double dt) {
-            updatePoseFromMeasurement(
-                tv, preprocessAngularVelocity(tv, deltaquat, dt));
-        }
+        /// Takes in raw (untransformed) quats and timestamps, transforms them,
+        /// and spits out a "canned" measurement that can be stored and
+        /// incorporated into state.
+        CannedIMUMeasurement
+        preprocessOrientation(util::time::TimeValue const &tv,
+                              Eigen::Quaterniond const &quat);
 
+        /// Takes in timestamps and a canned measurement and passes it to the
+        /// body to incorporate into state.
         /// @return false if you pass a completely invalid/empty canned
         /// measurement.
         bool updatePoseFromMeasurement(util::time::TimeValue const &tv,
                                        CannedIMUMeasurement const &meas);
 
-        bool hasPoseEstimate() const { return m_hasOrientation; }
-        osvr::util::time::TimeValue const &getLastUpdate() const {
-            return m_last;
-        }
-
-        bool calibrationYawKnown() const { return m_yawKnown; }
-        void setCalibrationYaw(util::Angle yaw) {
-            m_yaw = yaw;
-            m_yawKnown = true;
-        }
-
-      private:
         ConfigParams const &getParams() const;
         TrackedBody &m_body;
         bool m_yawKnown = false;
         util::Angle m_yaw;
+        Eigen::Quaterniond m_yawCorrection;
 
         double m_orientationVariance;
         double m_angularVelocityVariance;

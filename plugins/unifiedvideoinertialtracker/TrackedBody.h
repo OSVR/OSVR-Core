@@ -215,9 +215,10 @@ namespace vbtracker {
         void incorporateNewMeasurementFromIMU(util::time::TimeValue const &tv,
                                               CannedIMUMeasurement const &meas);
 
-      private:
         TrackingSystem &getSystem() { return m_system; }
         TrackingSystem const &getSystem() const { return m_system; }
+
+      private:
 
         /// Method used both when incorporating new measurements and replaying
         /// historical measurements: pushes to state history but not to IMU
