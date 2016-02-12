@@ -216,7 +216,7 @@ namespace vbtracker {
             return;
         }
 
-        if (tv < m_impl->imuMeasurements.newest_timestamp()) {
+        if (!m_impl->imuMeasurements.is_valid_to_push_newest(tv)) {
             // This one is out of order from the IMU!
             /// @todo handle this better
             throw std::runtime_error("Got out of order timestamps from IMU!");
