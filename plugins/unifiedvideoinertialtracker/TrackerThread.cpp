@@ -53,14 +53,23 @@ namespace vbtracker {
             m_imageThread.join();
         }
     }
-    void TrackerThread::operator()() {
+
+    void TrackerThread::permitStart() {
+        m_startupSignal.set_value();
+    }
+
+    void TrackerThread::threadAction() {
         /// The thread internally is organized around processing video frames,
         /// with arrival of IMU reports internally handled as they come. Thus,
         /// we keep getting frames and processing them until we're told to stop,
         /// doing what we can asynchronously to also process incoming IMU
         /// messages.
 
-        msg() << "Tracker thread object invoked." << std::endl;
+        msg() << "Tracker thread object invoked, waiting for permitStart()." << std::endl;
+        m_startupSignal.get_future().wait();
+        msg() << "Tracker thread object entering its main execution loop."
+              << std::endl;
+
 #ifdef OSVR_TRACKER_THREAD_WRAP_WITH_TRY
         try {
 #endif

@@ -48,6 +48,7 @@
 #include <condition_variable>
 #include <tuple>
 #include <chrono>
+#include <future>
 
 namespace osvr {
 namespace vbtracker {
@@ -70,10 +71,14 @@ namespace vbtracker {
         ~TrackerThread();
         /// Thread function-call operator: should be invoked by a lambda in a
         /// dedicated thread.
-        void operator()();
+        void threadAction();
 
         /// @name Main thread methods
         /// @{
+        /// The thread starts and immediately blocks. Calling this allows it to
+        /// proceed with execution.
+        void permitStart();
+
         /// Call from the main thread to trigger this thread's execution to exit
         /// after the current frame.
         void triggerStop();
@@ -121,6 +126,10 @@ namespace vbtracker {
 
         /// Time that the last camera grab was triggered.
         util::time::TimeValue m_triggerTime;
+
+        /// a void promise, as suggested by Scott Meyers, to hold the thread
+        /// operation at the beginning until we want it to really start running.
+        std::promise<void> m_startupSignal;
 
         /// @name Updated asynchronously by timeConsumingImageStep()
         /// @{

@@ -151,7 +151,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     /// Processes a tracker report.
     template <typename ReportType>
     void handleData(OSVR_TimeValue const &timestamp, ReportType const &report) {
-        m_trackerThreadFunctor->submitIMUReport(*m_imu, timestamp, report);
+        m_trackerThreadManager->submitIMUReport(*m_imu, timestamp, report);
     }
 
     static void oriCallback(void *userdata, const OSVR_TimeValue *timestamp,
@@ -183,24 +183,28 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     OSVR_ReturnCode update();
 
     void startTrackerThread() {
-        if (m_trackerThreadFunctor) {
+        if (m_trackerThreadManager) {
             throw std::logic_error("Trying to start the tracker thread when "
                                    "it's already started!");
         }
         std::cout << "Starting the tracker thread..." << std::endl;
-        m_trackerThreadFunctor.reset(new TrackerThread(
+        m_trackerThreadManager.reset(new TrackerThread(
             *m_trackingSystem, *m_source, m_bodyReportingVector,
             osvr::vbtracker::getHDKCameraParameters()));
-        m_trackerThread = std::thread([&] { (*m_trackerThreadFunctor)(); });
+
+        /// This will start the thread, but it won't enter its full main loop
+        /// until we call permitStart()
+        m_trackerThread =
+            std::thread([&] { m_trackerThreadManager->threadAction(); });
     }
     void stopTrackerThread() {
-        if (m_trackerThreadFunctor) {
+        if (m_trackerThreadManager) {
             std::cout << "Shutting down the tracker thread..." << std::endl;
-            m_trackerThreadFunctor->triggerStop();
+            m_trackerThreadManager->triggerStop();
             if (m_trackerThread.joinable()) {
                 m_trackerThread.join();
             }
-            m_trackerThreadFunctor.reset();
+            m_trackerThreadManager.reset();
             m_trackerThread = std::thread();
         }
     }
@@ -223,11 +227,18 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     TrackedBodyIMU *m_imu = nullptr;
     const double m_additionalPrediction;
     BodyReportingVector m_bodyReportingVector;
-    std::unique_ptr<TrackerThread> m_trackerThreadFunctor;
+    std::unique_ptr<TrackerThread> m_trackerThreadManager;
+    bool m_threadLoopStarted = false;
     std::thread m_trackerThread;
 };
 
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
+    if (!m_threadLoopStarted) {
+        /// First call to update, we let the tracker go flying.
+        m_threadLoopStarted = true;
+        m_trackerThreadManager->permitStart();
+        return OSVR_RETURN_SUCCESS;
+    }
     namespace ei = osvr::util::eigen_interop;
     std::size_t numSensors = m_bodyReportingVector.size();
     /// On each update pass, we go through and attempt to report for every body,
