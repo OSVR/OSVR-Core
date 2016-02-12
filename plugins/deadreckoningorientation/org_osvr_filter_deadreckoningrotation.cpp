@@ -115,7 +115,7 @@ class DeadReckoningRotationConstructor {
 
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::registerObjectForDeletion(
-          ctx, new DeadReckoningRotation(ctx, name, input, numSensors, predictMS));
+          ctx, new DeadReckoningRotation(ctx, name, input, numSensors, predictMS * 1e-3));
 
         return OSVR_RETURN_SUCCESS;
     }
