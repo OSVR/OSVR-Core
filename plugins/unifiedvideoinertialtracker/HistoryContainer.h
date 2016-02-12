@@ -96,7 +96,7 @@ namespace vbtracker {
 
         /// Stores values over time, in chronological order, in a deque for
         /// two-ended access.
-        template <typename ValueType, bool AllowDuplicateTimes = true>
+        template <typename ValueType, bool AllowDuplicateTimes_ = true>
         class HistoryContainer {
           public:
             using value_type = ValueType;
@@ -112,6 +112,10 @@ namespace vbtracker {
             using comparator_type = detail::TimestampPairLessThan<value_type>;
 
             using subset_range_type = detail::HistorySubsetRange<value_type>;
+
+            /// Whether multiple entries with the same timestamp are permitted
+            /// to be pushed.
+            static const bool AllowDuplicateTimes = AllowDuplicateTimes_;
 
             /// Get number of entries in history.
             size_type size() const { return m_history.size(); }
@@ -136,6 +140,12 @@ namespace vbtracker {
                 return m_history.front().first;
             }
 
+            /// Returns the newest timestamp in the container. Caveat: throws an
+            /// exception in an empty container - if you want to actually
+            /// compare to see if you're at least as new as the newest, see
+            /// is_as_new_as_newest(), if you want to see if your value is newer
+            /// than all others, see is_strictly_newest(). Both of these contain
+            /// special handling for empty containers.
             timestamp_type const &newest_timestamp() const {
                 if (empty()) {
                     throw std::logic_error(
@@ -172,6 +182,21 @@ namespace vbtracker {
             /// (thus making the timestamp trivially newest)
             bool is_strictly_newest(timestamp_type const& tv) const {
                 return empty() || newest_timestamp() < tv;
+            }
+
+            /// Returns true if the given timestamp is no older than the
+            /// newest timestamp in the container, or if the container is empty
+            /// (thus making the timestamp trivially newest)
+            bool is_as_new_as_newest(timestamp_type const& tv) const {
+                return empty() || !(tv < newest_timestamp());
+            }
+
+            /// Returns true if the given timestamp meets the criteria of
+            /// push_newest: strictly newest if AllowDuplicateTimes is false, as
+            /// new as newest if AllowDuplicateTimes is true.
+            bool is_valid_to_push_newest(timestamp_type const& tv) {
+                return empty() || tv > newest_timestamp() ||
+                       (AllowDuplicateTimes && newest_timestamp() == tv);
             }
 
             /// Wrapper around std::upper_bound: returns iterator to first
@@ -286,8 +311,7 @@ namespace vbtracker {
             /// must be empty).
             void push_newest(osvr::util::time::TimeValue const &tv,
                              value_type const &value) {
-                if (empty() || tv > newest_timestamp() ||
-                    (tv == newest_timestamp() && AllowDuplicateTimes)) {
+                if (is_valid_to_push_newest(tv)) {
                     m_history.emplace_back(tv, value);
                 } else {
                     throw std::logic_error(
