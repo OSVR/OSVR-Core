@@ -61,9 +61,8 @@ class DeadReckoningRotation {
         reg.setDeviceDescriptor(osvr::util::makeString(
           org_osvr_filter_deadreckoningrotation_json));
 
-        // @todo Register callbacks for the tracker so we can find its values?
-        // This is probably already handled, based on the com_osvr_Multiserver
-        // plug-in code.
+        // @todo Build a new Json entry that has the correct number of
+        // sensors in it, rather than the default of 1.
     }
 
     OSVR_ReturnCode update() {
