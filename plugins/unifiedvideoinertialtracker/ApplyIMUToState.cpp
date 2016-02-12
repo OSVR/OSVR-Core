@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include "ApplyIMUToState.h"
-#include "TrackingSystem.h"
+#include "SpaceTransformations.h"
 
 // Library/third-party includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
@@ -46,9 +46,8 @@ namespace vbtracker {
 
         /// Rotate it into camera space
         /// @todo do this without rotating into camera space?
-        Eigen::Quaterniond toCameraSpace(
-            sys.getCameraPose().rotation().transpose());
-        quat = toCameraSpace * quat;
+        quat = getQuatToCameraSpace(sys) * quat;
+        /// @todo transform variance?
 
         kalman::AbsoluteOrientationMeasurement<BodyState> kalmanMeas{quat, var};
         kalman::correct(state, processModel, kalmanMeas);
@@ -62,6 +61,11 @@ namespace vbtracker {
         meas.restoreAngVel(angVel);
         Eigen::Vector3d var;
         meas.restoreAngVelVariance(var);
+
+        /// Rotate it into camera space
+        /// @todo do this without rotating into camera space?
+        angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
+        /// @todo transform variance?
 
         kalman::AngularVelocityMeasurement<BodyState> kalmanMeas{angVel, var};
         kalman::correct(state, processModel, kalmanMeas);
@@ -79,10 +83,8 @@ namespace vbtracker {
         if (meas.orientationValid()) {
             applyOriToState(sys, state, processModel, meas);
         } else if (meas.angVelValid()) {
-/// @todo handle angular velocity transforms!
-#if 0
             applyAngVelToState(sys, state, processModel, meas);
-#endif
+
         } else {
             // unusually, the measurement is totally invalid. Just normalize and
             // go on.
