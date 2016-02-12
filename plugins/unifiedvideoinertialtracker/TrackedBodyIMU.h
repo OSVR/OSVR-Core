@@ -62,6 +62,8 @@ namespace vbtracker {
 
         bool hasPoseEstimate() const { return m_hasOrientation; }
         util::time::TimeValue const &getLastUpdate() const { return m_last; }
+        /// This estimate incorporates the calibration yaw correction.
+        Eigen::Quaterniond const& getPoseEstimate() const { return m_quat; }
 
         bool calibrationYawKnown() const { return m_yawKnown; }
         void setCalibrationYaw(util::Angle yaw) {
