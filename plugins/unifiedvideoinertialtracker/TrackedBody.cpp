@@ -230,7 +230,8 @@ namespace vbtracker {
     void TrackedBody::applyIMUMeasurement(util::time::TimeValue const &tv,
                                           CannedIMUMeasurement const &meas) {
 
-        applyIMUToState(m_stateTime, m_state, m_processModel, tv, meas);
+        applyIMUToState(getSystem(), m_stateTime, m_state, m_processModel, tv,
+                        meas);
         m_stateTime = tv;
         pushState();
     }

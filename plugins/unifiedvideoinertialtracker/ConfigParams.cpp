@@ -52,6 +52,12 @@ namespace vbtracker {
         manualBeaconOffset[0] = 0;
         manualBeaconOffset[1] = 0;
         manualBeaconOffset[2] = -0.0388676;
+
+        cameraPosition[0] = 0;
+        /// @todo this is just a guess of how high my camera is.
+        cameraPosition[1] = 1.2;
+        /// @todo this is just an estimate of how to not break most apps.
+        cameraPosition[2] = -0.5;
     }
 } // namespace vbtracker
 } // namespace osvr

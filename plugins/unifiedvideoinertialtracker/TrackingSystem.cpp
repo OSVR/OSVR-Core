@@ -193,7 +193,7 @@ namespace vbtracker {
             }
         }
 
-        m_impl->calib.postCalibrationUpdate();
+        m_impl->calib.postCalibrationUpdate(*this);
     }
 
     void
@@ -201,6 +201,7 @@ namespace vbtracker {
                                              util::time::TimeValue const &tv,
                                              Eigen::Quaterniond const &quat) {
         m_impl->calib.processIMUData(*this, id, tv, quat);
+        m_impl->calib.postCalibrationUpdate(*this);
     }
 
     void TrackingSystem::setCameraPose(Eigen::Isometry3d const &camPose) {
@@ -210,6 +211,10 @@ namespace vbtracker {
 
     bool TrackingSystem::haveCameraPose() const {
         return m_impl->haveCameraPose;
+    }
+
+    Eigen::Isometry3d const & TrackingSystem::getCameraPose() const {
+        return m_impl->cameraPose;
     }
 
     bool TrackingSystem::isRoomCalibrationComplete() {

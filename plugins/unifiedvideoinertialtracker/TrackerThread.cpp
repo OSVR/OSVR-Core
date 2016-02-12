@@ -25,9 +25,11 @@
 // Internal Includes
 #include "TrackerThread.h"
 #include "TrackedBody.h"
+#include "TrackedBodyIMU.h"
 
 // Library/third-party includes
 #include <osvr/Util/Finally.h>
+#include <osvr/Util/EigenInterop.h>
 
 // Standard includes
 #include <iostream>
@@ -202,7 +204,44 @@ namespace vbtracker {
 
         updateReportingVector(bodyIds);
     }
+    class IMUMessageProcessor : public boost::static_visitor<> {
+      public:
+        void operator()(boost::none_t const&) {
+            /// dummy overload to handle empty messages
+        }
+
+        template <typename TimestampedReport>
+        void operator()(TimestampedReport const &report) {
+            /// templated overload to handle real messages since they're
+            /// identical except for the final element of the tuple.
+            auto &imu = *std::get<0>(report);
+            auto timestamp = std::get<1>(report);
+            /// Go off to individual methods for the last argument.
+            updatePose(imu, timestamp, std::get<2>(report));
+        }
+
+        void updatePose(TrackedBodyIMU &imu,
+                        util::time::TimeValue const &timestamp,
+                        OSVR_OrientationReport const &ori) {
+            imu.updatePoseFromOrientation(
+                timestamp, util::eigen_interop::map(ori.rotation).quat());
+        }
+
+        void updatePose(TrackedBodyIMU &imu,
+                        util::time::TimeValue const &timestamp,
+                        OSVR_AngularVelocityReport const &angVel) {
+
+            imu.updatePoseFromAngularVelocity(
+                timestamp,
+                util::eigen_interop::map(angVel.state.incrementalRotation)
+                    .quat(),
+                angVel.state.dt);
+        }
+    };
+
     void TrackerThread::processIMUMessage(MessageEntry const &m) {
+        IMUMessageProcessor visitor;
+        boost::apply_visitor(visitor, m);
         /// @todo process IMU message.
     }
     void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {

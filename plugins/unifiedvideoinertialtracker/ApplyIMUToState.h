@@ -37,8 +37,10 @@
 
 namespace osvr {
 namespace vbtracker {
+    class TrackingSystem;
     /// @return updated state in place.
-    void applyIMUToState(util::time::TimeValue const &initialTime,
+    void applyIMUToState(TrackingSystem const &sys,
+                         util::time::TimeValue const &initialTime,
                          BodyState &state, BodyProcessModel &processModel,
                          util::time::TimeValue const &newTime,
                          CannedIMUMeasurement const &meas);

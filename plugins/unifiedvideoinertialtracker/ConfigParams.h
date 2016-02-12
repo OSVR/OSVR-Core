@@ -216,6 +216,13 @@ namespace vbtracker {
         /// @todo not yet parsed
         IMUInputParams imu;
 
+        /// x, y, z, with y up, all in meters.
+        double cameraPosition[3];
+
+        /// Whether we should adjust transforms to assume the camera looks along
+        /// the YZ plane in the +Z direction.
+        bool cameraIsForward = true;
+
         ConfigParams();
     };
 } // namespace vbtracker

@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ApplyIMUToState.h"
+#include "TrackingSystem.h"
 
 // Library/third-party includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
@@ -35,7 +36,7 @@
 
 namespace osvr {
 namespace vbtracker {
-    inline void applyOriToState(BodyState &state,
+    inline void applyOriToState(TrackingSystem const &sys, BodyState &state,
                                 BodyProcessModel &processModel,
                                 CannedIMUMeasurement const &meas) {
         Eigen::Quaterniond quat;
@@ -43,11 +44,17 @@ namespace vbtracker {
         Eigen::Vector3d var;
         meas.restoreQuatVariance(var);
 
+        /// Rotate it into camera space
+        /// @todo do this without rotating into camera space?
+        Eigen::Quaterniond toCameraSpace(
+            sys.getCameraPose().rotation().transpose());
+        quat = toCameraSpace * quat;
+
         kalman::AbsoluteOrientationMeasurement<BodyState> kalmanMeas{quat, var};
         kalman::correct(state, processModel, kalmanMeas);
     }
 
-    inline void applyAngVelToState(BodyState &state,
+    inline void applyAngVelToState(TrackingSystem const &sys, BodyState &state,
                                    BodyProcessModel &processModel,
                                    CannedIMUMeasurement const &meas) {
 
@@ -60,7 +67,8 @@ namespace vbtracker {
         kalman::correct(state, processModel, kalmanMeas);
     }
 
-    void applyIMUToState(util::time::TimeValue const &initialTime,
+    void applyIMUToState(TrackingSystem const &sys,
+                         util::time::TimeValue const &initialTime,
                          BodyState &state, BodyProcessModel &processModel,
                          util::time::TimeValue const &newTime,
                          CannedIMUMeasurement const &meas) {
@@ -69,9 +77,12 @@ namespace vbtracker {
             kalman::predict(state, processModel, dt);
         }
         if (meas.orientationValid()) {
-            applyOriToState(state, processModel, meas);
+            applyOriToState(sys, state, processModel, meas);
         } else if (meas.angVelValid()) {
-            applyAngVelToState(state, processModel, meas);
+/// @todo handle angular velocity transforms!
+#if 0
+            applyAngVelToState(sys, state, processModel, meas);
+#endif
         } else {
             // unusually, the measurement is totally invalid. Just normalize and
             // go on.

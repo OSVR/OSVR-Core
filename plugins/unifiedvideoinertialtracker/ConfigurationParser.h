@@ -77,6 +77,10 @@ namespace vbtracker {
                                  "manualBeaconOffset");
         }
 
+        /// Fusion/Calibration parameters
+        getOptionalParameter(config.cameraPosition, root, "cameraPosition");
+        getOptionalParameter(config.cameraIsForward, root, "cameraIsForward");
+
         /// Kalman-related parameters
         getOptionalParameter(config.beaconProcessNoise, root,
                              "beaconProcessNoise");

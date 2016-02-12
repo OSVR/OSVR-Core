@@ -46,6 +46,7 @@ namespace vbtracker {
         /// @todo apply transforms here
         Eigen::Quaterniond xformedQuat = quat;
         m_hasOrientation = true;
+
         m_last = tv;
         m_quat = quat;
 

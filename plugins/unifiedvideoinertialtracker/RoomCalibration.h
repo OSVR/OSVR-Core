@@ -32,6 +32,9 @@
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/Angles.h>
+
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <cstddef>
@@ -44,7 +47,7 @@ namespace vbtracker {
     /// the pose of the camera in space and the yaw offset of the IMU.
     class RoomCalibration {
       public:
-        RoomCalibration();
+        RoomCalibration(Eigen::Vector3d const& camPosition, bool cameraIsForward = true);
 
         /// Since during startup, we only want video data on a single target, we
         /// can save processing power by asking before we compute.
@@ -63,13 +66,32 @@ namespace vbtracker {
 
         /// When completed feeding data, this method will check to see if
         /// calibration has finished and perform updates accordingly.
-        void postCalibrationUpdate(TrackingSystem &sys);
+        bool postCalibrationUpdate(TrackingSystem &sys);
 
-        bool finished() const;
+        bool calibrationComplete() const {
+            return m_calibComplete;
+        }
 
-        Eigen::Isometry3d getIMUToCamera() const;
+        /// @name Accessors only valid once postCalibrationUpdate() has returned
+        /// true!
+        /// @{
+        /// Gets the calibration yaw for the IMU on a body. Returns an empty
+        /// optional if the body ID given was not the one with the IMU used to
+        /// calibrate.
+        boost::optional<util::Angle>
+        getCalibrationYaw(BodyId const &body) const;
+        /// Gets the pose of the camera in the room (the transform from camera
+        /// space to room space)
+        Eigen::Isometry3d getCameraPose() const;
+        /// Gets the transform from the IMU to the room/pose of the IMU in the
+        /// room - translation components are at the time of room calibration.
+        Eigen::Isometry3d getIMUToRoom() const;
+        /// @}
 
       private:
+        bool finished() const;
+        /// This gets a live transform from camera space to IMU space.
+        Eigen::Isometry3d getCameraToIMUCalibrationPoint() const;
         /// The stream used by msg() and friends
         std::ostream &msgStream() const;
         /// A nicely prefixed stream
@@ -106,6 +128,20 @@ namespace vbtracker {
 
         BodyId m_imuBody;
         Eigen::Quaterniond m_imuOrientation;
+
+        /// @name Supplied config
+        /// @{
+        Eigen::Vector3d m_suppliedCamPosition;
+        bool m_cameraIsForward;
+        /// @}
+
+        bool m_calibComplete = false;
+        /// @name Output
+        /// @{
+        util::Angle m_imuYaw;
+        Eigen::Isometry3d m_cameraPose;
+        Eigen::Isometry3d m_rTi;
+        /// @}
     };
 
     /// A standalone function that looks at the camera and IMUs in a tracking

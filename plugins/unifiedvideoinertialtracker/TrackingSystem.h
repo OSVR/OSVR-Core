@@ -129,6 +129,7 @@ namespace vbtracker {
 
         bool haveCameraPose() const;
         void setCameraPose(Eigen::Isometry3d const &camPose);
+        Eigen::Isometry3d const & getCameraPose() const;
 
         bool isRoomCalibrationComplete();
 

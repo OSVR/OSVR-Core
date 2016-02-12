@@ -30,6 +30,7 @@
 
 // Library/third-party includes
 #include <boost/assert.hpp>
+#include <osvr/Util/ExtractYaw.h>
 
 // Standard includes
 #include <stdexcept>
@@ -55,10 +56,13 @@ namespace vbtracker {
     /// initial start of autocalibration.
     static const auto NEAR_MESSAGE_CUTOFF = 0.3;
 
-    RoomCalibration::RoomCalibration()
+    RoomCalibration::RoomCalibration(Eigen::Vector3d const &camPosition,
+                                     bool cameraIsForward)
         : m_lastVideoData(util::time::getNow()),
           m_positionFilter(filters::one_euro::Params{}),
-          m_orientationFilter(filters::one_euro::Params{}) {}
+          m_orientationFilter(filters::one_euro::Params{}),
+          m_suppliedCamPosition(camPosition),
+          m_cameraIsForward(cameraIsForward) {}
 
     bool RoomCalibration::wantVideoData(TrackingSystem const &sys,
                                         BodyTargetId const &target) const {
@@ -207,23 +211,75 @@ namespace vbtracker {
         m_imuOrientation = quat;
     }
 
-    void RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
+    bool RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
         if (!finished()) {
-            return;
+            return false;
         }
         msg() << "Room calibration process complete." << std::endl;
-        sys.setCameraPose(getIMUToCamera());
 
+        Eigen::Isometry3d iTc = getCameraToIMUCalibrationPoint();
+        m_imuYaw = 0 * util::radians;
+        m_cameraPose = iTc;
+        m_rTi = Eigen::Isometry3d::Identity();
+
+        Eigen::AngleAxisd rTi_rotation(0, Eigen::Vector3d::UnitY());
+        if (m_cameraIsForward) {
+            // "Reset Yaw" - the camera looks along the YZ plane.
+            auto yaw = util::extractYaw(Eigen::Quaterniond(iTc.rotation()));
+            m_imuYaw = -yaw * util::radians;
+            rTi_rotation = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY());
+            m_cameraPose = Eigen::Isometry3d(rTi_rotation) * iTc;
+        }
+
+        // Account for the supplied camera pose.
+        Eigen::Vector3d cameraOffset =
+            m_suppliedCamPosition - m_cameraPose.translation();
+        Eigen::Translation3d rTi_translation(cameraOffset);
+        m_rTi = Eigen::Isometry3d(rTi_translation) *
+                Eigen::Isometry3d(rTi_rotation);
+        m_cameraPose = Eigen::Isometry3d(rTi_translation) * m_cameraPose;
+
+        m_calibComplete = true;
+
+        // Now go through the tracking system and pass along the information.
+        sys.setCameraPose(getCameraPose());
         forEachIMU(sys, [&](TrackedBodyIMU &imu) {
-            imu.setCalibrationYaw(0 * util::radians);
+            auto yaw = getCalibrationYaw(imu.getBody().getId());
+            if (yaw) {
+                imu.setCalibrationYaw(*yaw);
+            }
         });
+        return true;
+    }
+
+    boost::optional<util::Angle>
+    RoomCalibration::getCalibrationYaw(BodyId const &body) const {
+        BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
+                                                "getCalibrationYaw() unless "
+                                                "calibration is complete!");
+        if (m_imuBody == body) {
+            return m_imuYaw;
+        }
+        return boost::none;
+    }
+    Eigen::Isometry3d RoomCalibration::getCameraPose() const {
+        BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
+                                                "getCameraPose() unless "
+                                                "calibration is complete!");
+        return m_cameraPose;
+    }
+    Eigen::Isometry3d RoomCalibration::getIMUToRoom() const {
+        BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
+                                                "getIMUToRoom() unless "
+                                                "calibration is complete!");
+        return m_rTi;
     }
 
     bool RoomCalibration::finished() const {
         return m_steadyVideoReports >= REQUIRED_SAMPLES;
     }
 
-    Eigen::Isometry3d RoomCalibration::getIMUToCamera() const {
+    Eigen::Isometry3d RoomCalibration::getCameraToIMUCalibrationPoint() const {
         Eigen::Isometry3d ret;
         ret.fromPositionOrientationScale(m_positionFilter.getState(),
                                          m_orientationFilter.getState(),

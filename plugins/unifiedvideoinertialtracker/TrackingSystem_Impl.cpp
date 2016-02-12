@@ -38,7 +38,9 @@ namespace vbtracker {
 
     TrackingSystem::Impl::Impl(ConfigParams const &params)
         : blobExtractor(new SBDBlobExtractor(params)),
-          debugDisplay(new TrackingDebugDisplay(params)) {}
+          debugDisplay(new TrackingDebugDisplay(params)),
+          calib(Eigen::Vector3d(params.cameraPosition),
+                params.cameraIsForward) {}
 
     TrackingSystem::Impl::~Impl() {
         // out line to break circular dep with this and the debug display.
