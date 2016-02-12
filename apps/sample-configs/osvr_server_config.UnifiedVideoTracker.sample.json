@@ -15,11 +15,15 @@
             "includeRearPanel": true,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
-            "cameraIsForward": true,
+            "cameraIsForward": false,
             "measurementVarianceScaleFactor": 3e0,
             "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e1, 1e1, 1e1],
             "beaconProcessNoise": 0,
-            "initialBeaconError": 0
+            "initialBeaconError": 0,
+            "imu": {
+                "orientationVariance": 1e-2,
+                "angularVelocityVariance": 1e-2
+            }
         }
     }],
     "aliases": {
