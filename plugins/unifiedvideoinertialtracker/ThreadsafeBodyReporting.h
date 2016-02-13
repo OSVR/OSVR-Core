@@ -97,6 +97,11 @@ namespace vbtracker {
         /// @overload
         void updateState(util::time::TimeValue const &tv,
                          BodyState const &state);
+
+        /// This only needs to be called once - it sets a transform that will be
+        /// applied to each report just before it is used by the receiving
+        /// thread.
+        void setTrackerToRoomTransform(Eigen::Isometry3d const &xform);
         /// @}
       private:
         BodyReporting();
@@ -107,6 +112,7 @@ namespace vbtracker {
         util::time::TimeValue m_dataTime;
         BodyState m_state;
         BodyProcessModel m_process;
+        Eigen::Isometry3d m_trackerToRoom;
         /// @}
     };
     using BodyReportingPtr = std::unique_ptr<BodyReporting>;

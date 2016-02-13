@@ -64,11 +64,14 @@ namespace vbtracker {
 
     /// Helper function to assign from a Kalman state to a body report, whether
     /// we predicted or not.
-    inline void assignStateToBodyReport(BodyState const &state,
-                                        BodyReport &report) {
+    inline void
+    assignStateToBodyReport(BodyState const &state, BodyReport &report,
+                            Eigen::Isometry3d const &trackerToRoom) {
+        Eigen::Isometry3d output = trackerToRoom * state.getIsometry();
         util::eigen_interop::map(report.pose).rotation() =
-            state.getQuaternion();
-        util::eigen_interop::map(report.pose).translation() = state.position();
+            Eigen::Quaterniond(output.rotation());
+        util::eigen_interop::map(report.pose).translation() =
+            output.translation();
     }
 
     std::unique_ptr<BodyReporting> BodyReporting::make() {
@@ -77,42 +80,58 @@ namespace vbtracker {
     }
 
     BodyReport BodyReporting::getReport(double additionalPrediction) {
-        std::unique_lock<std::mutex> lock{m_mutex, std::try_to_lock};
-        if (!lock.owns_lock()) {
-            // Didn't get the lock.
-            return BodyReport::makeReportWithStatus(ReportStatus::MutexLocked);
-        }
-        // OK, we got the lock.
-        if (!m_shouldReport) {
-            // Told we shouldn't report, OK.
-            return BodyReport::makeReportWithStatus(
-                ReportStatus::NoReportAvailable);
-        }
+        BodyState state;
+        bool doingPrediction = false;
+        BodyProcessModel process;
+        util::time::TimeValue dataTime;
+        Eigen::Isometry3d trackerToRoom;
+        {
+            std::unique_lock<std::mutex> lock{m_mutex, std::try_to_lock};
+            if (!lock.owns_lock()) {
+                // Didn't get the lock.
+                return BodyReport::makeReportWithStatus(
+                    ReportStatus::MutexLocked);
+            }
+            // OK, we got the lock.
+            if (!m_shouldReport) {
+                // Told we shouldn't report, OK.
+                return BodyReport::makeReportWithStatus(
+                    ReportStatus::NoReportAvailable);
+            }
+            /// If we got here, then we're reporting something.
+            state = m_state;
+            if (state.stateVector().tail<6>() !=
+                kalman::types::Vector<6>::Zero()) {
+                // If we have non-zero velocity, then we can do some prediction,
+                // which we'll need the process for.
+                doingPrediction = true;
+                process = m_process;
+            }
+            dataTime = m_dataTime;
+            trackerToRoom = m_trackerToRoom;
+        } // unlock
 
-        /// If we got here, then we're reporting something.
         auto ret = BodyReport::makeReportWithStatus();
-        if (m_state.stateVector().tail<6>() !=
-            kalman::types::Vector<6>::Zero()) {
+        if (doingPrediction) {
             // If we have non-zero velocity, then we can do some prediction.
-            BodyState state = m_state;
             auto currentTime = util::time::getNow();
             /// Difference between measurement time and now.
-            auto dt = osvrTimeValueDurationSeconds(&currentTime, &m_dataTime);
+            auto dt = osvrTimeValueDurationSeconds(&currentTime, &dataTime);
             /// and the additional time into the future we'd like to predict.
             dt += additionalPrediction;
             /// Using computeEstimate instead of the normal prediction saves us
             /// the unneeded prediction of the error covariance.
-            state.setStateVector(m_process.computeEstimate(m_state, dt));
+            state.setStateVector(process.computeEstimate(state, dt));
             /// Be sure to post-correct.
             state.postCorrect();
 
             /// OK, now set a proper timestamp for our prediction.
             ret.timestamp = currentTime +
                             std::chrono::duration<double>(additionalPrediction);
-            assignStateToBodyReport(state, ret);
+            assignStateToBodyReport(state, ret, trackerToRoom);
         } else {
-            ret.timestamp = m_dataTime;
-            assignStateToBodyReport(m_state, ret);
+            ret.timestamp = dataTime;
+            assignStateToBodyReport(state, ret, trackerToRoom);
             /// @todo should we set the "don't report" flag here once we report
             /// a can't-predict state once?
         }
@@ -145,7 +164,14 @@ namespace vbtracker {
         m_state = state;
     }
 
-    BodyReporting::BodyReporting() {}
+    void
+    BodyReporting::setTrackerToRoomTransform(Eigen::Isometry3d const &xform) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_trackerToRoom = xform;
+    }
+
+    BodyReporting::BodyReporting()
+        : m_trackerToRoom(Eigen::Isometry3d::Identity()) {}
 
 } // namespace vbtracker
 } // namespace osvr
