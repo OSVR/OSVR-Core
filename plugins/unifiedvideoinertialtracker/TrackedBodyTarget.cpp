@@ -327,9 +327,11 @@ namespace vbtracker {
             enterRANSACMode();
             break;
         case TargetHealthState::StopTrackingLostSight:
+#if 0
             msg() << "Lost sight of beacons for too long, awaiting their "
                      "return..."
                   << std::endl;
+#endif
             enterRANSACMode();
             break;
         case TargetHealthState::OK:
