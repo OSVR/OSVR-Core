@@ -21,8 +21,10 @@
             "beaconProcessNoise": 0,
             "initialBeaconError": 0,
             "imu": {
+                "useOrientation": false,
                 "orientationVariance": 1e-4,
-                "angularVelocityVariance": 1e-2
+                "useAngularVelocity": true,
+                "angularVelocityVariance": 1e-3
             }
         }
     }],
