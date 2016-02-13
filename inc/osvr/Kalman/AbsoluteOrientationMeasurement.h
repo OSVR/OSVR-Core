@@ -97,7 +97,7 @@ namespace kalman {
         MeasurementVector getResidual(State const &s) const {
             const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
             const Eigen::Quaterniond residual =
-                m_measurement * prediction.conjugate();
+                m_measurement * prediction.inverse();
             return residual.coeffs();
         }
         /// Convenience method to be able to store and re-use measurements.
