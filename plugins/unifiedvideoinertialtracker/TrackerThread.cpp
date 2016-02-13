@@ -279,16 +279,30 @@ namespace vbtracker {
             // the extra reports will have data.
             return;
         }
-
-        using namespace Eigen;
-        using namespace std::chrono;
-
         auto numBodies = m_trackingSystem.getNumBodies();
 
         auto &cameraPoseReporting = *m_reportingVec[numBodies];
         auto &imuAlignedReporting = *m_reportingVec[numBodies + 1];
         auto &imuCameraSpaceReporting = *m_reportingVec[numBodies + 2];
 
+        if (!m_setCameraPose) {
+            m_setCameraPose = true;
+            Eigen::Isometry3d trackerToRoomXform =
+                m_trackingSystem.getCameraPose();
+            for (auto &reporting : m_reportingVec) {
+                if (reporting.get() == &cameraPoseReporting ||
+                    reporting.get() == &imuAlignedReporting ||
+                    reporting.get() == &imuCameraSpaceReporting) {
+                    /// Skip these special ones, leave them with an identity
+                    /// transform.
+                    continue;
+                }
+                reporting->setTrackerToRoomTransform(trackerToRoomXform);
+            }
+        }
+
+        using namespace Eigen;
+        using namespace std::chrono;
         /// Are we due to report on the camera pose?
         if (!m_nextCameraPoseReport ||
             our_clock::now() > *m_nextCameraPoseReport) {

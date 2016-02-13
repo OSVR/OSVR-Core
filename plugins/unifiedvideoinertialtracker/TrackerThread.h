@@ -131,6 +131,8 @@ namespace vbtracker {
         /// operation at the beginning until we want it to really start running.
         std::promise<void> m_startupSignal;
 
+        bool m_setCameraPose = false;
+
         /// @name Updated asynchronously by timeConsumingImageStep()
         /// @{
         cv::Mat m_frame;
