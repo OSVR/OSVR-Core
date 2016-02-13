@@ -59,7 +59,7 @@ namespace vbtracker {
 
       private:
         const std::size_t m_requiredInliers = 4;
-        const std::size_t m_permittedOutliers = 2;
+        const std::size_t m_permittedOutliers = 0;
     };
 } // namespace vbtracker
 } // namespace osvr
