@@ -17,14 +17,15 @@
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
             "measurementVarianceScaleFactor": 3e0,
-            "processNoiseAutocorrelation": [3e-2, 3e-2, 3e-2, 1e1, 1e1, 1e1],
+            "processNoiseAutocorrelation": [3e-1, 3e-1, 3e-1, 1e1, 1e1, 1e1],
             "beaconProcessNoise": 0,
-            "initialBeaconError": 0,
+            "initialBeaconError": 1e-7,
+            "cameraPosition": [0, 1.2, -0.5],
             "imu": {
                 "useOrientation": false,
                 "orientationVariance": 1e-4,
                 "useAngularVelocity": true,
-                "angularVelocityVariance": 1e-3
+                "angularVelocityVariance": 1e-4
             }
         }
     }],
