@@ -1,0 +1,16 @@
+{
+  "deviceVendor": "OSVR",
+  "deviceName": "Dead-reckoning Rotation filter",
+  "author": "Russ Taylor <russ@reliasolve.com>",
+  "version": 1,
+  "lastModified": "2016-02-12T22:58:24.431Z",
+  "interfaces": {
+        "tracker": {
+            "position": false,
+            "orientation": true,
+            "angularVelocity": true,
+            "bounded": false,
+            "count": 1
+        }
+  }
+}

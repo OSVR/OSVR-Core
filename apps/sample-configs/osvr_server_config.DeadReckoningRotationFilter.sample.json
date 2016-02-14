@@ -1,0 +1,17 @@
+{
+  "drivers": [
+    {
+      "plugin": "org_osvr_filter_deadreckoningrotation",
+      "driver": "DeadReckoningRotationTracker",
+      "params": {
+          "name": "FilteredHead",
+          "input": "com_osvr_Multiserver/OSVRHackerDevKit0",
+          "numSensors": 1,
+          "predictMilliSeconds": 32
+      }
+    }
+  ],
+  "aliases": {
+      "/me/head": "/org_osvr_filter_deadreckoningrotation/FilteredHead/tracker/0"
+  }
+}
