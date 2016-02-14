@@ -1,6 +1,4 @@
 
-find_package(VRPN REQUIRED)
-
 osvr_convert_json(org_osvr_filter_deadreckoningrotation_json
     org_osvr_filter_deadreckoningrotation.json
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_deadreckoningrotation_json.h")
@@ -14,14 +12,10 @@ osvr_add_plugin(NAME org_osvr_filter_deadreckoningrotation
     org_osvr_filter_deadreckoningrotation.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_filter_deadreckoningrotation_json.h")
 
-target_include_directories(org_osvr_filter_deadreckoningrotation
-    PUBLIC
-    ${VRPN_INCLUDE_DIRS})
-
 target_link_libraries(org_osvr_filter_deadreckoningrotation
     osvr::osvrAnalysisPluginKit
     osvrVRPNServer
-    ${VRPN_SERVER_LIBRARIES}
+    vendored-vrpn
     JsonCpp::JsonCpp)
 
 target_compile_options(org_osvr_filter_deadreckoningrotation
