@@ -76,6 +76,7 @@ namespace vbtracker {
             m_rotatedTranslatedPoint = m_rotatedObjPoint + state.a().position();
             m_xlate = state.a().position();
         }
+
         Vector getResidual(State const &state) const {
             // 3d position of beacon
             Eigen::Vector3d beacon = state.b().stateVector();
@@ -111,9 +112,9 @@ namespace vbtracker {
                     v5 * m_rot(2, 2) * v3 * m_cam.focalLength;
             return ret;
         }
-#if 0
+
         /// This version assumes incrot == 0
-        Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
+        Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrot() const {
             auto v1 = m_rotatedObjPoint[0] + m_xlate[0];
             auto v2 = m_rotatedObjPoint[2] + m_xlate[2];
             auto v3 = 1 / (v2 * v2);
@@ -130,12 +131,9 @@ namespace vbtracker {
                 m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
             return ret;
         }
-#endif
-
-#if 1
         /// This version also assumes incrot == 0 but does the computation in a
         /// much more elegant way.
-        Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
+        Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrotElegant() const {
             // just grabbing x and y as an array for component-wise manip right
             // now.
             Eigen::Array2d rotXlated =
@@ -160,7 +158,6 @@ namespace vbtracker {
             prelim.rightCols<1>() << lastCol.matrix();
             return prelim * zRecip * m_cam.focalLength;
         }
-#endif
 
 #if 0
         /// This substantially-more-complex-looking version does separately use
@@ -241,6 +238,11 @@ namespace vbtracker {
             return ret;
         }
 #endif
+
+        Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
+            return getRotationJacobianNoIncrotElegant();
+        }
+
         Jacobian getJacobian(State const &state) const {
             Jacobian ret;
             ret <<
