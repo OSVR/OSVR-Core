@@ -219,7 +219,8 @@ namespace vbtracker {
             data.markBeaconFixed(makeOneBased(ZeroBasedBeaconId(i)));
         }
 #else
-        for (auto idx : {16, 17, 34}) {
+        // for (auto idx : {16, 17, 34}) {
+        for (auto idx : {17, 33}) {
             data.markBeaconFixed(OneBasedBeaconId(idx));
         }
 #endif
