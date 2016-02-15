@@ -294,6 +294,7 @@ namespace vbtracker {
 
         const auto textSize = 0.25;
         const auto mainBeaconLabelColor = CVCOLOR_BLUE;
+        const auto baseBeaconLabelColor = CVCOLOR_BLACK;
 
         auto gotPose = targetPtr->hasPoseEstimate();
         auto numBeacons = targetPtr->getNumBeacons();
@@ -325,7 +326,7 @@ namespace vbtracker {
                     /// best visiblity ever, but...
 
                     /// label at keypoint location
-                    img.drawLedLabel(led, CVCOLOR_BLACK, textSize);
+                    img.drawLedLabel(led, baseBeaconLabelColor, textSize);
 
                     /// label at reprojection
                     Eigen::Vector2d imagePoint = reproject(
@@ -345,7 +346,7 @@ namespace vbtracker {
                     // If identified, but we don't have a pose, draw
                     // them as yellow outlines.
                     img.drawLedCircle(led, false, CVCOLOR_YELLOW);
-                    img.drawLedLabel(led, mainBeaconLabelColor, textSize);
+                    img.drawLedLabel(led, baseBeaconLabelColor, textSize);
                 } else {
                     drawUnidentifiedBlob(led);
                 }
