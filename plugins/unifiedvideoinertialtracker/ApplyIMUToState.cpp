@@ -79,6 +79,7 @@ namespace vbtracker {
         if (newTime != initialTime) {
             auto dt = osvrTimeValueDurationSeconds(&newTime, &initialTime);
             kalman::predict(state, processModel, dt);
+            state.externalizeRotation();
         }
         if (meas.orientationValid()) {
             applyOriToState(sys, state, processModel, meas);

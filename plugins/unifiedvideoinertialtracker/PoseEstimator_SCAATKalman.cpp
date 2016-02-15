@@ -142,6 +142,7 @@ namespace vbtracker {
             // auto dt = osvrTimeValueDurationSeconds(&frameTime,
             // &p.startingTime);
             kalman::predict(p.state, p.processModel, dt);
+            p.state.externalizeRotation();
         }
 
         bool doingAutoCalib = false;
