@@ -23,12 +23,12 @@
             "cameraPosition": [0, 1.2, -0.5],
             "shouldSkipBrightLeds": true,
             "brightLedVariancePenalty": 16,
-            /*"manualBeaconOffset": [0.5,0,0],*/
+            "manualBeaconOffset": [0,0,0.04141],
             "imu": {
                 "useOrientation": true,
                 "orientationVariance": 1e-5,
                 "useAngularVelocity": false,
-                "angularVelocityVariance": 1e-4
+                "angularVelocityVariance": 1e-1
             }
         }
     }],
@@ -37,7 +37,7 @@
             "translate": [0.0, 0.0, 0.04141],
             "child": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd"
         },
-        "/me/head": "/headSpace",
+        "/me/head": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd",
         "/hmd": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/0",
         "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/1",
         "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/2",
