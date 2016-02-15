@@ -139,7 +139,8 @@ namespace vbtracker {
         if (p.startingTime != frameTime) {
             /// Predict first if appropriate.
             auto dt = util::time::duration(frameTime, p.startingTime);
-            //auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
+            // auto dt = osvrTimeValueDurationSeconds(&frameTime,
+            // &p.startingTime);
             kalman::predict(p.state, p.processModel, dt);
         }
 
@@ -174,9 +175,6 @@ namespace vbtracker {
             auto &debug = p.beaconDebug[index];
             debug.seen = true;
             debug.measurement = led.getLocation();
-            if (skipBright && led.isBright()) {
-                continue;
-            }
             // Angle of emission checking
             // If we transform the body-local emission vector, an LED pointed
             // right at the camera will be -Z. Anything with a 0 or positive z
@@ -207,6 +205,9 @@ namespace vbtracker {
                 continue;
             }
 
+            if (skipBright && led.isBright()) {
+                continue;
+            }
 
             if (skipAll) {
                 continue;
@@ -315,6 +316,7 @@ namespace vbtracker {
                 m_framesWithoutUtilizedMeasurements++;
             }
         }
+
         return true;
     }
     SCAATKalmanPoseEstimator::TriBool
