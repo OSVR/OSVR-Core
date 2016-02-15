@@ -75,6 +75,7 @@ namespace vbtracker {
         const double m_highResidualVariancePenalty;
         const double m_beaconProcessNoise;
         const double m_measurementVarianceScaleFactor;
+        const double m_brightLedVariancePenalty;
         const bool m_extraVerbose;
         std::size_t m_framesInProbation = 0;
         std::size_t m_framesWithoutIdentifiedBlobs = 0;

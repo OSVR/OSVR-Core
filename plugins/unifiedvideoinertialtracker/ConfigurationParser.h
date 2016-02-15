@@ -119,6 +119,8 @@ namespace vbtracker {
         getOptionalParameter(config.maxZComponent, root, "maxZComponent");
         getOptionalParameter(config.shouldSkipBrightLeds, root,
                              "shouldSkipBrightLeds");
+        getOptionalParameter(config.brightLedVariancePenalty, root,
+                             "brightLedVariancePenalty");
 
         /// Blob-detection parameters
         if (root.isMember("blobParams")) {

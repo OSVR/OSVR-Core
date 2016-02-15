@@ -63,7 +63,6 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 namespace osvr {
 namespace vbtracker {
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
-    static const auto BRIGHT_PENALTY = 8.;
     SCAATKalmanPoseEstimator::SCAATKalmanPoseEstimator(
         ConfigParams const &params)
         : m_shouldSkipBright(params.shouldSkipBrightLeds),
@@ -71,6 +70,7 @@ namespace vbtracker {
           m_maxZComponent(params.maxZComponent),
           m_highResidualVariancePenalty(params.highResidualVariancePenalty),
           m_beaconProcessNoise(params.beaconProcessNoise),
+          m_brightLedVariancePenalty(params.brightLedVariancePenalty),
           m_measurementVarianceScaleFactor(
               params.measurementVarianceScaleFactor),
           m_extraVerbose(params.extraVerbose) {
@@ -245,7 +245,7 @@ namespace vbtracker {
             auto effectiveVariance =
                 localVarianceFactor * m_measurementVarianceScaleFactor *
                 newIdentificationVariancePenalty *
-                (led.isBright() ? BRIGHT_PENALTY : 1.) *
+                (led.isBright() ? m_brightLedVariancePenalty : 1.) *
                 p.beaconMeasurementVariance[index] / led.getMeasurement().area;
             debug.variance = effectiveVariance;
             meas.setVariance(effectiveVariance);

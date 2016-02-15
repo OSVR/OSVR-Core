@@ -203,6 +203,12 @@ namespace vbtracker {
         /// just give them slightly higher variance.
         bool shouldSkipBrightLeds = false;
 
+        /// If shouldSkipBrightLeds is false, we use this value as a factor to
+        /// increase the measurement variance of bright LEDs, to account for the
+        /// fact that they are less accurate because they tend to refract
+        /// through surrounding materials, etc.
+        double brightLedVariancePenalty = 16;
+
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the
         /// blob/LED already has a valid (non-negative) ID assigned to it. This
