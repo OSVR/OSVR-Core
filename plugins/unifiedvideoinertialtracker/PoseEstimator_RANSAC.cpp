@@ -209,7 +209,7 @@ namespace vbtracker {
     /// Variance in Meters^2
     static const double InitialPositionStateError = 0.;
     /// Variance in Radians^2
-    static const double InitialOrientationStateError = 0.;
+    static const double InitialOrientationStateError = 0.5;
     static const double InitialVelocityStateError = 0.;
     static const double InitialAngVelStateError =0.;
     static const double InitialStateError[] = {
@@ -236,7 +236,7 @@ namespace vbtracker {
         p.state.position() = xlate;
         p.state.setQuaternion(quat);
         /// Zero things we can't measure.
-#if 0
+#if 1
         p.state.incrementalOrientation() = Eigen::Vector3d::Zero();
         p.state.velocity() = Eigen::Vector3d::Zero();
         p.state.angularVelocity() = Eigen::Vector3d::Zero();
