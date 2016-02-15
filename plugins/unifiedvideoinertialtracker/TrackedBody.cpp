@@ -180,7 +180,9 @@ namespace vbtracker {
         /// Put on the new state estimate we just computed.
         m_state = newState;
         m_stateTime = newTime;
-        pushState();
+        if (m_impl->stateHistory.is_valid_to_push_newest(m_stateTime)) {
+            pushState();
+        }
 
         /// Replay the IMU measurements timestamped later than our estimate
         auto numReplayed = std::size_t{0};
@@ -231,11 +233,13 @@ namespace vbtracker {
 
     void TrackedBody::applyIMUMeasurement(util::time::TimeValue const &tv,
                                           CannedIMUMeasurement const &meas) {
-
-        applyIMUToState(getSystem(), m_stateTime, m_state, m_processModel, tv,
-                        meas);
-        m_stateTime = tv;
-        pushState();
+        // Only apply and push new stuff
+        if (m_impl->stateHistory.is_valid_to_push_newest(tv)) {
+            applyIMUToState(getSystem(), m_stateTime, m_state, m_processModel,
+                            tv, meas);
+            m_stateTime = tv;
+            pushState();
+        }
     }
 
     bool TrackedBody::hasPoseEstimate() const {
