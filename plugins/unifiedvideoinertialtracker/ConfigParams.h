@@ -129,7 +129,7 @@ namespace vbtracker {
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double linearVelocityDecayCoefficient = 0.9;
+        double linearVelocityDecayCoefficient = 0.8;
 
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
