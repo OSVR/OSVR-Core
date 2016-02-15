@@ -74,7 +74,9 @@ namespace vbtracker {
 
             /// Stream me anything! (I might do nothing with it, but...)
             template <typename T> Message &operator<<(T &&rhs) {
+#ifdef _MSC_VER
                 using ::operator<<;
+#endif
                 if (hasStream()) {
                     (*m_ss) << std::forward<T>(rhs);
                 }
