@@ -67,6 +67,8 @@ namespace vbtracker {
 
         msg() << "Tracker thread object invoked, waiting for permitStart()." << std::endl;
         m_startupSignal.get_future().wait();
+        /// sleep an extra half a second to give everyone else time to get off the starting blocks.
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         msg() << "Tracker thread object entering its main execution loop."
               << std::endl;
 
