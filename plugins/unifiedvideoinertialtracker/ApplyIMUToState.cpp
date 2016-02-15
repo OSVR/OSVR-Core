@@ -30,6 +30,7 @@
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
 #include <osvr/Kalman/AngularVelocityMeasurement.h>
+#include <osvr/Util/EigenQuatExponentialMap.h>
 
 // Standard includes
 // - none
@@ -62,8 +63,13 @@ namespace vbtracker {
         Eigen::Vector3d var;
         meas.restoreAngVelVariance(var);
 
-        /// Rotate it into camera space
+        /// Rotate it into camera space - it's bTb and we want cTc
         /// @todo do this without rotating into camera space?
+        Eigen::Quaterniond cTb = state.getQuaternion();
+        //Eigen::Matrix3d bTc(state.getQuaternion().conjugate());
+        Eigen::Quaterniond incrementalQuat = cTb * util::quat_exp_map(angVel).exp() *
+            cTb.conjugate();
+        angVel = util::quat_exp_map(incrementalQuat).ln();
         // angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
         /// @todo transform variance?
 
