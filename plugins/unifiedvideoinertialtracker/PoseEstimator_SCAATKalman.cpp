@@ -90,6 +90,8 @@ namespace vbtracker {
         // Default to using all the measurements we can
         auto skipBright = false;
 
+        auto skipAll = false;
+        auto numBeaconsToUse = std::size_t{0};
         {
             auto inBoundsBright = std::size_t{0};
             auto inBoundsRound = std::size_t{0};
@@ -118,7 +120,16 @@ namespace vbtracker {
             } else {
                 m_framesWithoutIdentifiedBlobs = 0;
             }
+            numBeaconsToUse =
+                skipBright ? (inBoundsID - inBoundsBright) : inBoundsID;
+            if (m_lastUsableBeaconsSeen > 0 && numBeaconsToUse == 1) {
+                // If we're losing sight of beacons and we can only see one,
+                // it's likely to give us nasty velocity, so in that case we
+                // skip it too.
+                skipAll = true;
+            }
         }
+        m_lastUsableBeaconsSeen = numBeaconsToUse;
 
         CameraModel cam;
         cam.focalLength = p.camParams.focalLength();
@@ -193,6 +204,11 @@ namespace vbtracker {
             } else if (zComponent > m_maxZComponent) {
                 /// LED is too askew of the camera to provide reliable data, so
                 /// skip it.
+                continue;
+            }
+
+
+            if (skipAll) {
                 continue;
             }
 

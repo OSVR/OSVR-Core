@@ -57,6 +57,7 @@ namespace vbtracker {
             m_framesInProbation = 0;
             m_framesWithoutIdentifiedBlobs = 0;
             m_framesWithoutUtilizedMeasurements = 0;
+            m_lastUsableBeaconsSeen = SIGNAL_HAVE_NOT_SEEN_BEACONS_YET;
         }
 
         /// Determines whether the Kalman filter is in good working condition,
@@ -77,6 +78,8 @@ namespace vbtracker {
         const double m_measurementVarianceScaleFactor;
         const double m_brightLedVariancePenalty;
         const bool m_extraVerbose;
+        static const int SIGNAL_HAVE_NOT_SEEN_BEACONS_YET = -1;
+        int m_lastUsableBeaconsSeen = SIGNAL_HAVE_NOT_SEEN_BEACONS_YET;
         std::size_t m_framesInProbation = 0;
         std::size_t m_framesWithoutIdentifiedBlobs = 0;
         std::size_t m_framesWithoutUtilizedMeasurements = 0;
