@@ -144,6 +144,9 @@ namespace vbtracker {
             kalman::predict(p.state, p.processModel, dt);
         }
 
+        bool doingAutoCalib = false;
+        auto numFixed = std::size_t{0};
+
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
         /// @todo should we be recalculating this for each beacon after each
         /// correction step? The order we filter them in is rather arbitrary...
@@ -234,9 +237,21 @@ namespace vbtracker {
             /// if it's meant to have some
             if (p.beaconFixed[index]) {
                 beaconProcess.setNoiseAutocorrelation(0);
+                numFixed++;
+                /// Add a bit of variance to the fixed ones, since the lack of
+                /// beacon autocalib otherwise make them seem
+                /// super-authoritative.
+                localVarianceFactor *= 2;
             } else {
+                doingAutoCalib = true;
                 beaconProcess.setNoiseAutocorrelation(m_beaconProcessNoise);
                 kalman::predict(*(p.beacons[index]), beaconProcess, videoDt);
+            }
+
+            if (doingAutoCalib && p.beaconFixed[index] && numFixed >= 3) {
+                /// Filtering in our third fixed beacon in a cycle tends to
+                /// cause jumps, so skip it.
+                continue;
             }
 
             /// subtracting from image size to flip signs of x and y, aka 180
