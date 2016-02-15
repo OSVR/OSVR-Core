@@ -210,7 +210,7 @@ namespace vbtracker {
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
         /// gets used for a measurement, but it should be enough to keep beacons
         /// from converging in a bad local minimum.
-        double beaconProcessNoise = 0.0000001;
+        double beaconProcessNoise = 1.e-15;
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
