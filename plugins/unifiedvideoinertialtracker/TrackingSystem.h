@@ -129,7 +129,12 @@ namespace vbtracker {
 
         bool haveCameraPose() const;
         void setCameraPose(Eigen::Isometry3d const &camPose);
-        Eigen::Isometry3d const & getCameraPose() const;
+
+        /// This gets rTc - the pose of the camera in the room.
+        Eigen::Isometry3d const &getCameraPose() const;
+        /// This gets cTr - the inverse of the camera pose, transforms from the
+        /// room coordinate system to the camera coordinate system.
+        Eigen::Isometry3d const &getRoomToCamera() const;
 
         bool isRoomCalibrationComplete();
 

@@ -207,14 +207,19 @@ namespace vbtracker {
     void TrackingSystem::setCameraPose(Eigen::Isometry3d const &camPose) {
         m_impl->haveCameraPose = true;
         m_impl->cameraPose = camPose;
+        m_impl->cameraPoseInv = camPose.inverse();
     }
 
     bool TrackingSystem::haveCameraPose() const {
         return m_impl->haveCameraPose;
     }
 
-    Eigen::Isometry3d const & TrackingSystem::getCameraPose() const {
+    Eigen::Isometry3d const &TrackingSystem::getCameraPose() const {
         return m_impl->cameraPose;
+    }
+
+    Eigen::Isometry3d const &TrackingSystem::getRoomToCamera() const {
+        return m_impl->cameraPoseInv;
     }
 
     bool TrackingSystem::isRoomCalibrationComplete() {
