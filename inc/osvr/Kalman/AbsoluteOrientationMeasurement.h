@@ -68,7 +68,13 @@ namespace kalman {
         MeasurementVector getResidual(State const &s) const {
             const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
             const Eigen::Quaterniond residual = m_quat * prediction.inverse();
-            return util::quat_exp_map(residual).ln();
+            // Use the dot product to choose which of the two equivalent
+            // quaternions to get the log of for the residual.
+            const Eigen::Quaterniond equivalentResidual =
+                Eigen::Quaterniond(-(residual.coeffs()));
+            auto dot = prediction.dot(residual);
+            return dot >= 0 ? util::quat_exp_map(residual).ln()
+                            : util::quat_exp_map(equivalentResidual).ln();
         }
         /// Convenience method to be able to store and re-use measurements.
         void setMeasurement(Eigen::Quaterniond const &quat) { m_quat = quat; }
