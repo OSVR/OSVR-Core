@@ -42,10 +42,10 @@ namespace vbtracker {
     ///
     /// This version takes in an point already in camera space.
     inline Eigen::Vector2d projectPoint(double focalLength,
-        Eigen::Vector2d const &principalPoint,
-        Eigen::Vector3d const &camPoint) {
+                                        Eigen::Vector2d const &principalPoint,
+                                        Eigen::Vector3d const &camPoint) {
         return (camPoint.head<2>() / camPoint[2]) * focalLength +
-            principalPoint;
+               principalPoint;
     }
 
     /// Project point for a simple pinhole camera model, with focal lengths
@@ -62,7 +62,6 @@ namespace vbtracker {
         return projectPoint(focalLength, principalPoint,
                             rotation * objectPoint + translation);
     }
-
 
 } // namespace vbtracker
 } // namespace osvr
