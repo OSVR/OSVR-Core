@@ -25,7 +25,7 @@
             "shouldSkipBrightLeds": true,
             "brightLedVariancePenalty": 16,
             "offsetToCentroid": false,
-            "manualBeaconOffset": [0,0,0],
+            "manualBeaconOffset": [0,0,0.04141],
             "imu": {
                 "useOrientation": true,
                 "orientationVariance": 5e-4,
