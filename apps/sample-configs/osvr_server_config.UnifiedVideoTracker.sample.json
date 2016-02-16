@@ -16,7 +16,8 @@
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
-            "measurementVarianceScaleFactor": 5e0,
+            "measurementVarianceScaleFactor": 1e-1,
+            "highResidualVariancePenalty": 15.0,
             "processNoiseAutocorrelation": [3e-1, 3e-1, 3e-1, 1e0, 1e0, 1e0],
             "beaconProcessNoise": 1e-15,
             "initialBeaconError": 1e-6,
@@ -26,7 +27,7 @@
             "manualBeaconOffset": [0,0,0.04141],
             "imu": {
                 "useOrientation": true,
-                "orientationVariance": 1e-5,
+                "orientationVariance": 5e-4,
                 "useAngularVelocity": false,
                 "angularVelocityVariance": 1e-1
             }
