@@ -1,0 +1,89 @@
+
+#ifndef @EXPORT_BASENAME@_EXPORT_H
+#define @EXPORT_BASENAME@_EXPORT_H
+
+#ifdef @EXPORT_BASENAME@_STATIC_DEFINE
+#  define @EXPORT_BASENAME@_EXPORT
+#  define @EXPORT_BASENAME@_NO_EXPORT
+#endif
+
+/* Per-platform defines */
+#if defined(_MSC_VER)
+/* MSVC on Windows */
+
+#ifndef @EXPORT_BASENAME@_EXPORT
+#  ifdef @LIBNAME_FULL@_EXPORTS
+      /* We are building this library */
+#    define @EXPORT_BASENAME@_EXPORT __declspec(dllexport)
+#  else
+      /* We are using this library */
+#    define @EXPORT_BASENAME@_EXPORT __declspec(dllimport)
+#  endif
+#endif
+
+#ifndef @EXPORT_BASENAME@_DEPRECATED
+#  define @EXPORT_BASENAME@_DEPRECATED __declspec(deprecated)
+#endif
+    
+#elif defined(_WIN32) && defined(_GNUC_)
+/* GCC-compatible on Windows */
+
+#ifndef @EXPORT_BASENAME@_EXPORT
+#  ifdef @LIBNAME_FULL@_EXPORTS
+      /* We are building this library */
+#    define @EXPORT_BASENAME@_EXPORT __attribute__((dllexport))
+#  else
+      /* We are using this library */
+#    define @EXPORT_BASENAME@_EXPORT __attribute__((dllimport))
+#  endif
+#endif
+
+#ifndef @EXPORT_BASENAME@_NO_EXPORT
+#  define @EXPORT_BASENAME@_NO_EXPORT __attribute__((visibility(\"hidden\")))
+#endif
+
+#ifndef @EXPORT_BASENAME@_DEPRECATED
+#  define @EXPORT_BASENAME@_DEPRECATED __attribute__ ((__deprecated__))"
+#endif
+
+#elif (defined(_GNUC_) && _GNUC_C >= 4) || defined(__APPLE__) ||               \
+    defined(__MACOSX__)
+/* *Nix, Android or Mac OS */
+
+#ifndef @EXPORT_BASENAME@_EXPORT
+  /* We are building/using this library */
+  #define @EXPORT_BASENAME@_EXPORT __attribute__((visibility(\"default\")))
+#endif
+
+#ifndef @EXPORT_BASENAME@_NO_EXPORT
+#  define @EXPORT_BASENAME@_NO_EXPORT __attribute__((visibility(\"hidden\")))
+#endif
+
+#ifndef @EXPORT_BASENAME@_DEPRECATED
+#  define @EXPORT_BASENAME@_DEPRECATED __attribute__ ((__deprecated__))
+#endif
+
+#endif
+/* End of platform ifdefs */
+
+/* fallback def */
+#ifndef @EXPORT_BASENAME@_EXPORT
+#  define @EXPORT_BASENAME@_EXPORT
+#endif
+
+/* fallback def */
+#ifndef @EXPORT_BASENAME@_NO_EXPORT
+#  define @EXPORT_BASENAME@_NO_EXPORT 
+#endif
+
+/* fallback def */
+#ifndef @EXPORT_BASENAME@_DEPRECATED_EXPORT
+#  define @EXPORT_BASENAME@_DEPRECATED_EXPORT @EXPORT_BASENAME@_EXPORT @EXPORT_BASENAME@_DEPRECATED
+#endif
+
+/* fallback def */
+#ifndef @EXPORT_BASENAME@_DEPRECATED_NO_EXPORT
+#  define @EXPORT_BASENAME@_DEPRECATED_NO_EXPORT @EXPORT_BASENAME@_NO_EXPORT @EXPORT_BASENAME@_DEPRECATED
+#endif
+
+#endif
