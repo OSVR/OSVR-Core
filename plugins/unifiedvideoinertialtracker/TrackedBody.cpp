@@ -194,8 +194,9 @@ namespace vbtracker {
 #if 0
         static ::util::Stride s{43};
         if (++s) {
-#endif
+#else
         if (numPopped != numReplayed) {
+#endif
             std::cout << "Popped " << numPopped << ", replayed " << numReplayed
                       << "\n";
         }
