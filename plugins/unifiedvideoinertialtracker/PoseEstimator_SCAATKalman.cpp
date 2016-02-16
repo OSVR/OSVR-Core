@@ -84,6 +84,15 @@ namespace vbtracker {
 
         const auto maxSquaredResidual = params.maxResidual * params.maxResidual;
     }
+
+    inline double xyDistanceFromMetersToPixels(double xyDistance, double depthInMeters, CameraModel const& cam) {
+        return (xyDistance / depthInMeters) * cam.focalLength;
+    }
+    inline double squaredXyDistanceFromMetersToPixels(double xyDistance, double depthInMeters, CameraModel const& cam) {
+        return (xyDistance * xyDistance / (depthInMeters * depthInMeters)) *
+               cam.focalLength * cam.focalLength;
+    }
+
     bool SCAATKalmanPoseEstimator::
     operator()(EstimatorInOutParams const &p, LedPtrList const &leds,
                osvr::util::time::TimeValue const &frameTime, double videoDt) {
@@ -225,7 +234,10 @@ namespace vbtracker {
                 kalman::makeAugmentedState(p.state, *(p.beacons[index]));
             meas.updateFromState(state);
             Eigen::Vector2d residual = meas.getResidual(state);
-            if (residual.squaredNorm() > m_maxSquaredResidual) {
+            auto depth = meas.getBeaconInCameraSpace().z();
+            // Only tolerate a residual of 0.15m at the beacon depth.
+            auto maxSquaredResidual = squaredXyDistanceFromMetersToPixels(0.15, depth, cam);
+            if (residual.squaredNorm() > maxSquaredResidual) {
                 // probably bad
                 numBad++;
                 localVarianceFactor *= m_highResidualVariancePenalty;

@@ -76,6 +76,10 @@ namespace vbtracker {
             m_xlate = state.a().position();
         }
 
+        Eigen::Vector3d const &getBeaconInCameraSpace() const {
+            return m_rotatedTranslatedPoint;
+        }
+
         Vector getResidual(State const &state) const {
             // 3d position of beacon
             Eigen::Vector2d predicted =
