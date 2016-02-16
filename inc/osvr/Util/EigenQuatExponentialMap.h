@@ -113,8 +113,8 @@ namespace util {
             // differently, since it gets a bit like sinc in that we want it
             // continuous but 0 is undefined.
             Scalar phiOverSin =
-                phi < 1e-4 ? thetaOverSinThetaTaylorExpansion<Scalar>(phi)
-                           : (phi / std::sin(phi));
+                vecnorm < 1e-4 ? thetaOverSinThetaTaylorExpansion<Scalar>(phi)
+                               : (phi / std::sin(phi));
             return quat.vec() * phiOverSin;
         }
 
