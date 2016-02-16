@@ -60,8 +60,9 @@ namespace vbtracker {
             kalman::types::Matrix<DIMENSION,
                                   kalman::types::Dimension<State>::value>;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        explicit ImagePointMeasurement(CameraModel const &cam)
-            : m_variance(2.0), m_cam(cam) {}
+        explicit ImagePointMeasurement(CameraModel const &cam,
+                                       Eigen::Vector3d const &targetFromBody)
+            : m_variance(2.0), m_cam(cam), m_targetFromBody(targetFromBody) {}
 
         /// Updates some internal cached partial solutions.
         void updateFromState(State const &state) {

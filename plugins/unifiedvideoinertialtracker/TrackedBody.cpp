@@ -78,7 +78,7 @@ namespace vbtracker {
     }
 
     TrackedBodyTarget *
-    TrackedBody::createTarget(Eigen::Isometry3d const &targetToBody,
+    TrackedBody::createTarget(Eigen::Vector3d const &targetToBody,
                               TargetSetupData const &setupData) {
         if (m_target) {
             // already have a target!

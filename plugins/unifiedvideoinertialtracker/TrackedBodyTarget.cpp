@@ -153,7 +153,7 @@ namespace vbtracker {
 
     TrackedBodyTarget::TrackedBodyTarget(TrackedBody &body,
                                          BodyTargetInterface const &bodyIface,
-                                         Eigen::Isometry3d const &targetToBody,
+                                         Eigen::Vector3d const &targetToBody,
                                          TargetSetupData const &setupData,
                                          TargetId id)
         : m_body(body), m_id(id), m_targetToBody(targetToBody),
@@ -363,7 +363,8 @@ namespace vbtracker {
                                            startingTime,
                                            bodyState,
                                            getBody().getProcessModel(),
-                                           m_beaconDebugData};
+                                           m_beaconDebugData,
+                                           m_targetToBody};
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
             m_hasPoseEstimate = m_impl->ransacEstimator(params, usableLeds());

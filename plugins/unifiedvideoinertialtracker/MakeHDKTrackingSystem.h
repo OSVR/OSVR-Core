@@ -235,8 +235,8 @@ namespace vbtracker {
 
         std::cout << summary << std::endl;
 
-        auto opticalTarget = hmd->createTarget(
-            Eigen::Isometry3d(Eigen::Translation3d(0, 0, 0.04141)), data);
+        auto opticalTarget =
+            hmd->createTarget(Eigen::Vector3d(0, 0, 0.04141), data);
 
         if (!opticalTarget) {
             throw std::runtime_error(

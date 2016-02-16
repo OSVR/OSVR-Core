@@ -53,6 +53,13 @@ namespace vbtracker {
                         osvr::util::time::TimeValue const &frameTime,
                         double videoDt);
 
+        /// Given a list of LED pointers, filters them out according to
+        /// configured parameters, updates the debug data, and returns a list of
+        /// just those LEDs to process.
+        LedPtrList filterLeds(LedPtrList const &leds, const bool skipBright,
+                              const bool skipAll, std::size_t &numBad,
+                              EstimatorInOutParams const &p);
+
         void resetCounters() {
             m_framesInProbation = 0;
             m_framesWithoutIdentifiedBlobs = 0;

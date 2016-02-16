@@ -65,6 +65,8 @@ namespace vbtracker {
         TrackedBody &operator=(TrackedBody const &) = delete;
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+        /// @name Child factories
+        /// @{
         /// Creates a fully-integrated IMU data source (that is, one that
         /// reports a reliable quaternion, and potentially angular velocity) to
         /// add to this body.
@@ -92,8 +94,9 @@ namespace vbtracker {
         ///
         /// @return nullptr if an error occurred (such as a target already being
         /// added to this body)
-        TrackedBodyTarget *createTarget(Eigen::Isometry3d const &targetToBody,
+        TrackedBodyTarget *createTarget(Eigen::Vector3d const &targetToBody,
                                         TargetSetupData const &setupData);
+        /// @}
 
         /// Gets the body ID within the tracking system.
         BodyId getId() const;
@@ -219,7 +222,6 @@ namespace vbtracker {
         TrackingSystem const &getSystem() const { return m_system; }
 
       private:
-
         /// Method used both when incorporating new measurements and replaying
         /// historical measurements: pushes to state history but not to IMU
         /// history.

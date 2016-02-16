@@ -63,7 +63,7 @@ namespace vbtracker {
       public:
         TrackedBodyTarget(TrackedBody &body,
                           BodyTargetInterface const &bodyIface,
-                          Eigen::Isometry3d const &targetToBody,
+                          Eigen::Vector3d const &targetToBody,
                           TargetSetupData const &setupData, TargetId id);
         ~TrackedBodyTarget();
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -186,7 +186,7 @@ namespace vbtracker {
 
         /// Transformation from target coordinate frame to body coordinate
         /// frame.
-        Eigen::Isometry3d m_targetToBody;
+        Eigen::Vector3d m_targetToBody;
 
         /// @name Parallel vectors, one entry per beacon
         /// @brief All should have the same number of values at all times.

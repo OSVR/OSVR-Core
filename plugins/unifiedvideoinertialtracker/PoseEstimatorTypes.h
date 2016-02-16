@@ -33,7 +33,7 @@
 #include "TrackedBodyTarget.h"
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Standard includes
 #include <vector>
@@ -41,6 +41,7 @@
 namespace osvr {
 namespace vbtracker {
     struct EstimatorInOutParams {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         CameraParameters const &camParams;
         BeaconStateVec &beacons;
         std::vector<double> const &beaconMeasurementVariance;
@@ -51,6 +52,7 @@ namespace vbtracker {
         BodyState &state;
         BodyProcessModel &processModel;
         std::vector<BeaconData> &beaconDebug;
+        Eigen::Vector3d targetToBody;
     };
 } // namespace vbtracker
 } // namespace osvr

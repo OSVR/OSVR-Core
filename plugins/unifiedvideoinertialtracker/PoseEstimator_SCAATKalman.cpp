@@ -131,14 +131,10 @@ namespace vbtracker {
                 // it's likely to give us nasty velocity, so in that case we
                 // skip it too.
                 skipAll = true;
+                // Set this here, because goodLeds will be empty below.
+                m_lastUsableBeaconsSeen = numBeaconsToUse;
             }
         }
-        m_lastUsableBeaconsSeen = numBeaconsToUse;
-
-        CameraModel cam;
-        cam.focalLength = p.camParams.focalLength();
-        cam.principalPoint = p.camParams.eiPrincipalPoint();
-        ImagePointMeasurement meas{cam};
 
         if (p.startingTime != frameTime) {
             /// Predict first if appropriate.
@@ -149,103 +145,47 @@ namespace vbtracker {
             p.state.externalizeRotation();
         }
 
-        bool doingAutoCalib = false;
-        auto numFixed = std::size_t{0};
-
-        kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
-        /// @todo should we be recalculating this for each beacon after each
-        /// correction step? The order we filter them in is rather arbitrary...
-        Eigen::Matrix3d rotate =
-            Eigen::Matrix3d(p.state.getCombinedQuaternion());
         auto numBad = std::size_t{0};
         auto numGood = std::size_t{0};
-#if 0
-        static ::util::Stride varianceStride{809};
-        if (++varianceStride) {
-            std::cout << p.state.errorCovariance().diagonal().transpose()
-                      << std::endl;
-        }
-#endif
+        auto goodLeds = filterLeds(leds, skipBright, skipAll, numBad, p);
 
-#ifdef DEBUG_MEASUREMENT_RESIDUALS
-        static ::util::Stride s{203};
-        s.advance();
-#endif
-        LedPtrList goodLeds;
-        Eigen::Vector2d imageSize(p.camParams.imageSize.width,
-                                  p.camParams.imageSize.height);
-        for (auto &ledPtr : leds) {
-            auto &led = *ledPtr;
-
-            auto id = led.getID();
-            auto index = asIndex(id);
-
-            auto &debug = p.beaconDebug[index];
-            debug.seen = true;
-            debug.measurement = led.getLocation();
-            // Angle of emission checking
-            // If we transform the body-local emission vector, an LED pointed
-            // right at the camera will be -Z. Anything with a 0 or positive z
-            // component is clearly out, and realistically, anything with a z
-            // component over -0.5 is probably fairly oblique. We don't want to
-            // use such beacons since they can easily introduce substantial
-            // error.
-            double zComponent =
-                (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
-            if (zComponent > 0.) {
-                if (m_extraVerbose) {
-                    std::cout << "Rejecting an LED at " << led.getLocation()
-                              << " claiming ID " << led.getOneBasedID().value()
-                              << std::endl;
-                }
-                /// This means the LED is pointed away from us - so we shouldn't
-                /// be able to see it.
-                led.markMisidentified();
-
-                /// @todo This could be a mis-identification, or it could mean
-                /// we're in a totally messed up state. Do we count this against
-                /// ourselves?
-                numBad++;
-                continue;
-            } else if (zComponent > m_maxZComponent) {
-                /// LED is too askew of the camera to provide reliable data, so
-                /// skip it.
-                continue;
-            }
-
-            if (skipBright && led.isBright()) {
-                continue;
-            }
-
-            if (skipAll) {
-                continue;
-            }
-
-#if 0
-            /// @todo For right now, if we don't have a bounding box, we're
-            /// assuming it's square enough (and only testing for
-            /// non-squareness on those who actually do have bounding
-            /// boxes). This is very much a temporary situation.
-            auto boundingBoxRatioResult = inBoundingBoxRatioRange(led);
-            if (TriBool::False == boundingBoxRatioResult) {
-                /// skip non-circular blobs.
-                numBad++;
-                continue;
-            }
-#endif
-            goodLeds.push_back(&led);
+        if (!skipAll) {
+            // if we were in skipAll mode, we set this above.
+            m_lastUsableBeaconsSeen = goodLeds.size();
         }
 
         /// Shuffle the order of the good LEDS
-
         std::shuffle(begin(goodLeds), end(goodLeds), m_randEngine);
 
 #if 0
+        /// Limit the number of measurements filtered in each time.
         static const auto MAX_MEASUREMENTS = 15;
         if (goodLeds.size() > MAX_MEASUREMENTS) {
             goodLeds.resize(MAX_MEASUREMENTS);
         }
 #endif
+
+        Eigen::Vector2d imageSize(p.camParams.imageSize.width,
+                                  p.camParams.imageSize.height);
+
+#if 0
+        static ::util::Stride varianceStride{ 809 };
+        if (++varianceStride) {
+            std::cout << p.state.errorCovariance().diagonal().transpose()
+                << std::endl;
+        }
+#endif
+#ifdef DEBUG_MEASUREMENT_RESIDUALS
+        static ::util::Stride s{203};
+        s.advance();
+#endif
+
+        CameraModel cam;
+        cam.focalLength = p.camParams.focalLength();
+        cam.principalPoint = p.camParams.eiPrincipalPoint();
+        ImagePointMeasurement meas{cam, p.targetToBody};
+
+        kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
 
         for (auto &ledPtr : goodLeds) {
             auto &led = *ledPtr;
@@ -263,10 +203,12 @@ namespace vbtracker {
             /// if it's meant to have some
             if (p.beaconFixed[index]) {
                 beaconProcess.setNoiseAutocorrelation(0);
+#ifdef VARIANCE_PENALTY_FOR_FIXED_BEACONS
                 /// Add a bit of variance to the fixed ones, since the lack of
                 /// beacon autocalib otherwise make them seem
                 /// super-authoritative.
                 localVarianceFactor *= 2;
+#endif
             } else {
                 beaconProcess.setNoiseAutocorrelation(m_beaconProcessNoise);
                 kalman::predict(*(p.beacons[index]), beaconProcess, videoDt);
@@ -352,6 +294,84 @@ namespace vbtracker {
 
         return true;
     }
+
+    LedPtrList SCAATKalmanPoseEstimator::filterLeds(
+        LedPtrList const &leds, const bool skipBright, const bool skipAll,
+        std::size_t &numBad, EstimatorInOutParams const &p) {
+        LedPtrList ret;
+
+        /// @todo should we be recalculating this for each beacon after each
+        /// correction step? The order we filter them in is rather arbitrary...
+        const Eigen::Matrix3d rotate =
+            Eigen::Matrix3d(p.state.getCombinedQuaternion());
+
+        std::copy_if(
+            begin(leds), end(leds), std::back_inserter(ret), [&](Led *ledPtr) {
+                auto &led = *ledPtr;
+
+                auto id = led.getID();
+                auto index = asIndex(id);
+
+                auto &debug = p.beaconDebug[index];
+                debug.seen = true;
+                debug.measurement = led.getLocation();
+
+                // Angle of emission checking
+                // If we transform the emission vector into camera space, an LED
+                // pointed right at the camera will be -Z. Anything with a 0 or
+                // positive z component is clearly out, and realistically,
+                // anything with a z component over -0.5 is probably fairly
+                // oblique. We don't want to use such beacons since they can
+                // easily introduce substantial error.
+                double zComponent =
+                    (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
+                if (zComponent > 0.) {
+                    if (m_extraVerbose) {
+                        std::cout << "Rejecting an LED at " << led.getLocation()
+                                  << " claiming ID "
+                                  << led.getOneBasedID().value() << std::endl;
+                    }
+                    /// This means the LED is pointed away from us - so we
+                    /// shouldn't be able to see it.
+                    led.markMisidentified();
+
+                    /// @todo This could be a mis-identification, or it could
+                    /// mean we're in a totally messed up state. Do we count
+                    /// this
+                    /// against ourselves?
+                    numBad++;
+                    return false;
+                } else if (zComponent > m_maxZComponent) {
+                    /// LED is too askew of the camera to provide reliable data,
+                    /// so skip it.
+                    return false;
+                }
+
+                if (skipBright && led.isBright()) {
+                    return false;
+                }
+
+                if (skipAll) {
+                    return false;
+                }
+
+#if 0
+                /// @todo For right now, if we don't have a bounding box, we're
+                /// assuming it's square enough (and only testing for
+                /// non-squareness on those who actually do have bounding
+                /// boxes). This is very much a temporary situation.
+                auto boundingBoxRatioResult = inBoundingBoxRatioRange(led);
+                if (TriBool::False == boundingBoxRatioResult) {
+                    /// skip non-circular blobs.
+                    numBad++;
+                    return false;
+                }
+#endif
+                return true;
+            });
+        return ret;
+    }
+
     SCAATKalmanPoseEstimator::TriBool
     SCAATKalmanPoseEstimator::inBoundingBoxRatioRange(Led const &led) {
         if (led.getMeasurement().knowBoundingBox) {
