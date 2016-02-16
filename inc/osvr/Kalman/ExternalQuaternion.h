@@ -63,6 +63,7 @@ namespace kalman {
             return ret;
         }
 #endif
+#if 0
         inline types::Matrix<4, 3> jacobian(Eigen::Vector3d const &w) {
             double a = w.squaredNorm() / 48 + 0.5;
             // outer product over 24, plus a on the diagonal
@@ -76,6 +77,7 @@ namespace kalman {
             ret << topBlock, bottomRow;
             return ret;
         }
+#endif
     } // namespace external_quat
 } // namespace kalman
 } // namespace osvr
