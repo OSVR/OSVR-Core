@@ -24,7 +24,8 @@
             "cameraPosition": [0, 1.2, -0.5],
             "shouldSkipBrightLeds": true,
             "brightLedVariancePenalty": 16,
-            "manualBeaconOffset": [0,0,0.04141],
+            "offsetToCentroid": false,
+            "manualBeaconOffset": [0,0,0],
             "imu": {
                 "useOrientation": true,
                 "orientationVariance": 5e-4,

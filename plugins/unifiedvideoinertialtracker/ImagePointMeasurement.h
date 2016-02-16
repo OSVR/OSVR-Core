@@ -67,12 +67,10 @@ namespace vbtracker {
         /// Updates some internal cached partial solutions.
         void updateFromState(State const &state) {
             // 3d position of beacon
-            m_beacon = state.b().stateVector();
+            m_beacon = m_targetFromBody + state.b().stateVector();
             m_rot = state.a().getCombinedQuaternion().toRotationMatrix();
             m_objExtRot = state.a().getQuaternion() * m_beacon;
-            m_incRot =
-                kalman::pose_externalized_rotation::incrementalOrientation(
-                    state.a().stateVector());
+            m_incRot = state.a().incrementalOrientation();
             m_rotatedObjPoint = m_rot * m_beacon;
             m_rotatedTranslatedPoint = m_rotatedObjPoint + state.a().position();
             m_xlate = state.a().position();
@@ -80,11 +78,9 @@ namespace vbtracker {
 
         Vector getResidual(State const &state) const {
             // 3d position of beacon
-            Eigen::Vector3d beacon = state.b().stateVector();
-            Eigen::Vector2d predicted = projectPoint(
-                state.a().position(), state.a().getCombinedQuaternion(),
-                m_cam.focalLength, m_cam.principalPoint,
-                state.b().stateVector());
+            Eigen::Vector2d predicted =
+                projectPoint(m_cam.focalLength, m_cam.principalPoint,
+                             m_rotatedTranslatedPoint);
             return m_measurement - predicted;
         }
 
@@ -132,6 +128,7 @@ namespace vbtracker {
                 m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
             return ret;
         }
+
         /// This version also assumes incrot == 0 but does the computation in a
         /// much more elegant way.
         Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrotElegant() const {
@@ -277,6 +274,7 @@ namespace vbtracker {
         double m_variance;
         Vector m_measurement;
         CameraModel m_cam;
+        Eigen::Vector3d m_targetFromBody;
         Eigen::Vector3d m_beacon;
         Eigen::Vector3d m_objExtRot;
         Eigen::Vector3d m_incRot;
