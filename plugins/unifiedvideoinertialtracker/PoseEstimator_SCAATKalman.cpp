@@ -260,6 +260,13 @@ namespace vbtracker {
             std::cout << std::endl;
         }
 #endif
+        if (gotMeasurement) {
+            // Re-symmetrize error covariance.
+            kalman::types::DimSquareMatrix<BodyState> cov =
+                0.5 * p.state.errorCovariance() +
+                0.5 * p.state.errorCovariance().transpose();
+            p.state.errorCovariance() = cov;
+        }
 
         /// Probation: Dealing with ratios of bad to good residuals
         bool incrementProbation = false;
