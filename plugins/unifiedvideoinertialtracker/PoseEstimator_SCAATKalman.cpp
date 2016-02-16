@@ -236,7 +236,8 @@ namespace vbtracker {
             Eigen::Vector2d residual = meas.getResidual(state);
             auto depth = meas.getBeaconInCameraSpace().z();
             // Only tolerate a residual of 0.15m at the beacon depth.
-            auto maxSquaredResidual = squaredXyDistanceFromMetersToPixels(0.15, depth, cam);
+            auto maxSquaredResidual =
+                squaredXyDistanceFromMetersToPixels(0.15, depth, cam);
             if (residual.squaredNorm() > maxSquaredResidual) {
                 // probably bad
                 numBad++;
