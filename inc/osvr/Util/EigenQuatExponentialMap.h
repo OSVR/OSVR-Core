@@ -77,16 +77,45 @@ namespace util {
             ret.w() = std::cos(theta / 2);
             return ret.normalized();
         }
+
+        template <typename Scalar>
+        inline Scalar thetaOverSinThetaTaylorExpansion(Scalar theta) {
+            return Scalar(1) +
+                   // theta ^ 2 / 6
+                   (theta * theta) / Scalar(6) +
+                   // 7 theta^4 / 360
+                   (Scalar(7) * theta * theta * theta * theta) / Scalar(360) +
+                   // 31 theta^6/15120
+                   (Scalar(31) * theta * theta * theta * theta * theta *
+                    theta) /
+                       Scalar(15120);
+        }
+
         /// fully-templated free function for quaternion log map, intended for
         /// implementation use within the class.
+        ///
+        /// Assumes a unit quaternion.
         template <typename Scalar>
         inline Eigen::Matrix<Scalar, 3, 1>
         quat_ln(Eigen::Quaternion<Scalar> const &quat) {
+            // ln q = ( (phi)/(norm of vec) vec, ln(norm of quat))
+            // When we assume a unit quaternion, ln(norm of quat) = 0
+            // so then we just scale the vector part by phi/sin(phi) to get the
+            // result (i.e., ln(qv, qw) = (phi/sin(phi)) * qv )
             Scalar vecnorm = quat.vec().norm();
+
+            // "best for numerical stability" vs asin or acon
             Scalar phi = std::atan2(vecnorm, quat.w());
-            Scalar phiOverNorm =
-                vecnorm < 1e-4 ? (phi / std::sin(phi)) : phi / vecnorm;
-            return quat.vec() * phiOverNorm;
+
+            // Here is where we compute the coefficient to scale the vector part
+            // by, which is nominally phi / std::sin(phi).
+            // When the angle approaches zero, we compute the coefficient
+            // differently, since it gets a bit like sinc in that we want it
+            // continuous but 0 is undefined.
+            Scalar phiOverSin =
+                phi < 1e-4 ? thetaOverSinThetaTaylorExpansion<Scalar>(phi)
+                           : (phi / std::sin(phi));
+            return quat.vec() * phiOverSin;
         }
 
         template <typename Derived> struct ScalarTrait;
