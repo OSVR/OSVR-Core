@@ -151,13 +151,7 @@ namespace util {
 
             /// Gets the log of the quat, in the exponential-map sense, as a 3d
             /// vector.
-            LogVectorType ln() const {
-                Scalar vecnorm = m_quat.vec().norm();
-                Scalar phi = std::atan2(vecnorm, m_quat.w());
-                Scalar phiOverNorm =
-                    vecnorm < 1e-4 ? (phi / std::sin(phi)) : phi / vecnorm;
-                return m_quat.vec() * phiOverNorm;
-            }
+            LogVectorType ln() const { return quat_ln<Scalar>(m_quat); }
 
             /// Access to just the vector part, in case we're actually trying to
             /// exponentiate here.
