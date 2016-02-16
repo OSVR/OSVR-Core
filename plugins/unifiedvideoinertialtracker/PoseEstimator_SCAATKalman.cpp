@@ -57,6 +57,8 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 // Standard includes
 #include <algorithm>
 #include <iostream>
+#include <random> // std::default_random_engine
+#include <chrono> // std::chrono::system_clock
 
 #undef DEBUG_MEASUREMENT_RESIDUALS
 
@@ -73,7 +75,9 @@ namespace vbtracker {
           m_brightLedVariancePenalty(params.brightLedVariancePenalty),
           m_measurementVarianceScaleFactor(
               params.measurementVarianceScaleFactor),
-          m_extraVerbose(params.extraVerbose) {
+          m_extraVerbose(params.extraVerbose),
+          m_randEngine(
+              std::chrono::system_clock::now().time_since_epoch().count()) {
         std::tie(m_minBoxRatio, m_maxBoxRatio) =
             std::minmax({params.boundingBoxFilterRatio,
                          1.f / params.boundingBoxFilterRatio});
@@ -167,7 +171,7 @@ namespace vbtracker {
         static ::util::Stride s{203};
         s.advance();
 #endif
-
+        LedPtrList goodLeds;
         Eigen::Vector2d imageSize(p.camParams.imageSize.width,
                                   p.camParams.imageSize.height);
         for (auto &ledPtr : leds) {
@@ -229,6 +233,27 @@ namespace vbtracker {
                 continue;
             }
 #endif
+            goodLeds.push_back(&led);
+        }
+
+        /// Shuffle the order of the good LEDS
+
+        std::shuffle(begin(goodLeds), end(goodLeds), m_randEngine);
+
+#if 0
+        static const auto MAX_MEASUREMENTS = 15;
+        if (goodLeds.size() > MAX_MEASUREMENTS) {
+            goodLeds.resize(MAX_MEASUREMENTS);
+        }
+#endif
+
+        for (auto &ledPtr : goodLeds) {
+            auto &led = *ledPtr;
+
+            auto id = led.getID();
+            auto index = asIndex(id);
+
+            auto &debug = p.beaconDebug[index];
 
             auto localVarianceFactor = varianceFactor;
             auto newIdentificationVariancePenalty =
@@ -238,21 +263,13 @@ namespace vbtracker {
             /// if it's meant to have some
             if (p.beaconFixed[index]) {
                 beaconProcess.setNoiseAutocorrelation(0);
-                numFixed++;
                 /// Add a bit of variance to the fixed ones, since the lack of
                 /// beacon autocalib otherwise make them seem
                 /// super-authoritative.
                 localVarianceFactor *= 2;
             } else {
-                doingAutoCalib = true;
                 beaconProcess.setNoiseAutocorrelation(m_beaconProcessNoise);
                 kalman::predict(*(p.beacons[index]), beaconProcess, videoDt);
-            }
-
-            if (doingAutoCalib && p.beaconFixed[index] && numFixed >= 3) {
-                /// Filtering in our third fixed beacon in a cycle tends to
-                /// cause jumps, so skip it.
-                continue;
             }
 
             /// subtracting from image size to flip signs of x and y, aka 180
