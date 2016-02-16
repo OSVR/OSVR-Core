@@ -1,6 +1,6 @@
 
-#ifndef @INCLUDE_GUARD_NAME@
-#define @INCLUDE_GUARD_NAME@
+#ifndef @EXPORT_BASENAME@
+#define @EXPORT_BASENAME@
 
 #ifdef @STATIC_DEFINE@
 #  define @EXPORT_MACRO_NAME@
