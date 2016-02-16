@@ -43,7 +43,7 @@
 #endif
 
 #ifndef @EXPORT_BASENAME@_DEPRECATED
-#  define @EXPORT_BASENAME@_DEPRECATED __attribute__ ((__deprecated__))"
+#  define @EXPORT_BASENAME@_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
 #elif (defined(_GNUC_) && _GNUC_C >= 4) || defined(__APPLE__) ||               \
