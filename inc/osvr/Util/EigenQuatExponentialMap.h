@@ -126,17 +126,32 @@ namespace util {
         template <typename Derived>
         using QuatType = Eigen::Quaternion<ScalarType<Derived>>;
 
+        template <typename Derived>
+        using VecType = Eigen::Matrix<ScalarType<Derived>, 3, 1>;
+
         /// CRTP base for quaternion exponential map
         template <typename Derived_> class QuatExpMapBase {
           public:
             using Derived = Derived_;
-
             QuatType<Derived> exp() const {
                 return quat_exp<ScalarType<Derived>>(derived().vec());
             }
 
             Derived const &derived() const {
                 return *static_cast<Derived const *>(this);
+            }
+
+            VecType<Derived> avoidSingularities() const {
+                /// @todo assert Derived::AlwaysPureVec || derived().pureVec()
+                VecType<Derived> myVec = derived().vec();
+                static const double eps = 1.e-2;
+                ScalarType<Derived> vecNorm = myVec.norm();
+                if (vecNorm > M_PI - eps) {
+                    // Too close to the sphere of 2pi - replace with the
+                    // equivalent rotation.
+                    myVec *= ((1. - 2. * M_PI) / vecNorm);
+                }
+                return myVec;
             }
         };
         // forward declaration
@@ -154,6 +169,9 @@ namespace util {
             explicit VecWrapper(VecType const &vec) : m_vec(vec) {}
 
             VecType const &vec() const { return m_vec; }
+
+            static const bool AlwaysPureVec = true;
+            static bool pureVec() { return true; }
 
           private:
             VecType const &m_vec;
@@ -185,6 +203,12 @@ namespace util {
             /// Access to just the vector part, in case we're actually trying to
             /// exponentiate here.
             VecBlock vec() const { return m_quat.vec(); }
+
+            static const bool AlwaysPureVec = false;
+            bool pureVec() const {
+                /// @todo floating point equality comparisons are bad
+                return m_quat.w() == 0;
+            }
 
           private:
             QuatType const &m_quat;
