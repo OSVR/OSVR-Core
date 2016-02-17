@@ -71,10 +71,10 @@ namespace pluginhost {
         // For each component of the compiled-in binary directory, we lop off a
         // component from the binary location we've detected, and add it to the
         // list of possible roots.
+        auto root = binDir.parent_path();
         std::vector<path> rootDirCandidates;
         {
             auto compiledBinDir = path{OSVR_BINDIR};
-            auto root = binDir.parent_path();
             do {
                 rootDirCandidates.push_back(root);
                 root = root.parent_path();
