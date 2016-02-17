@@ -39,15 +39,6 @@ macro(osvr_add_library)
 
     set_target_properties(${LIBNAME_FULL} PROPERTIES
         FOLDER "${LIB_FOLDER}")
-        
-    # Are we building or using this library?
-    get_target_property(EXPORT_IMPORT_CONDITION ${LIBNAME_FULL} DEFINE_SYMBOL)   
-    
-    # If we are building then set export condition
-    if(NOT EXPORT_IMPORT_CONDITION)
-        set(EXPORT_IMPORT_CONDITION ${LIBNAME_FULL}_EXPORTS)
-    endif()
-    string(MAKE_C_IDENTIFIER ${EXPORT_IMPORT_CONDITION} EXPORT_IMPORT_CONDITION)
                             
     configure_file("${_MACROS_DIR}/exportheader.cmake.in"
         Export.h
