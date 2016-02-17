@@ -242,3 +242,11 @@ if(BUILD_SERVER_APP)
     add_custom_target(copy_osvr_server_config_files ALL
         DEPENDS ${FILE_OUTPUTS})
 endif()
+
+# Simple application to list detected USB serial devices
+add_executable(osvr_list_usbserial osvr_list_usbserial.cpp)
+target_link_libraries(osvr_list_usbserial osvrUSBSerial)
+install(TARGETS osvr_list_usbserial
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
