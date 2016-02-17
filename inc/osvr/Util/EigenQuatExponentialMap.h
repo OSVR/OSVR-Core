@@ -71,11 +71,21 @@ namespace util {
         /// for implementation use within the class.
         template <typename Scalar, typename InputVec>
         inline Eigen::Quaternion<Scalar> quat_exp(InputVec &&vec) {
+            /// Implementation inspired by
+            /// Grassia, F. S. (1998). Practical Parameterization of Rotations
+            /// Using the Exponential Map. Journal of Graphics Tools, 3(3),
+            /// 29–48. http://doi.org/10.1080/10867651.1998.10487493
+            ///
+            /// However, that work introduced a factor of 1/2 which I could not
+            /// derive from the definition of quaternion exponentiation and
+            /// whose absence thus distinguishes this implementation. Without
+            /// that factor of 1/2, the exp and ln functions successfully
+            /// round-trip and match other implementations.
             Scalar theta = vec.norm();
-            Scalar vecscale = sinc(theta / 2) / 2;
+            Scalar vecscale = sinc(theta);
             Eigen::Quaternion<Scalar> ret;
             ret.vec() = vecscale * vec;
-            ret.w() = std::cos(theta / 2);
+            ret.w() = std::cos(theta);
             return ret.normalized();
         }
 
