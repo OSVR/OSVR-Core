@@ -47,8 +47,9 @@ namespace util {
             /// machine epsilon is 1e-24, so fourth root is 1e-6
             static float get() { return 1.e-6f; }
         };
-        /// Computes sinc(Theta) (roughly sine(theta)/theta except defined at
-        /// theta = 0)
+        /// Computes the "historical" (un-normalized) sinc(Theta)
+        /// (sine(theta)/theta for theta != 0, defined as the limit value of 0
+        /// at theta = 0)
         template <typename Scalar> inline Scalar sinc(Scalar theta) {
             /// fourth root of machine epsilon is recommended cutoff for taylor
             /// series expansion vs. direct computation per
