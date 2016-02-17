@@ -16,10 +16,11 @@
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
-            "measurementVarianceScaleFactor": 1e-1,
+            "measurementVarianceScaleFactor": 1e0,
             "highResidualVariancePenalty": 15.0,
-            "processNoiseAutocorrelation": [3e-1, 3e-1, 3e-1, 1e0, 1e0, 1e0],
-            "beaconProcessNoise": 1e-15,
+            "processNoiseAutocorrelation": [3e3, 3e3, 3e3, 1e-1, 1e-1, 1e-1],
+            "beaconProcessNoise": 0,
+            /*"initialBeaconError": 0,*/
             "initialBeaconError": 1e-6,
             "cameraPosition": [0, 1.2, -0.5],
             "shouldSkipBrightLeds": true,
@@ -27,9 +28,11 @@
             "offsetToCentroid": false,
             /*"manualBeaconOffset": [0,0,0.04141],*/
             "manualBeaconOffset": [0,0,0],
+            "linearVelocityDecayCoefficient": 1,
+            "angularVelocityDecayCoefficient": 1,
             "imu": {
-                "useOrientation": true,
-                "orientationVariance": 5e-4,
+                "useOrientation": false,
+                "orientationVariance": 5e-3,
                 "useAngularVelocity": false,
                 "angularVelocityVariance": 1e-1
             }
