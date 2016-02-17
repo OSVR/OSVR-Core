@@ -90,7 +90,7 @@ namespace vbtracker {
             // results
 
             /// Initialize return value
-            auto ret = static_cast<LedMeasurement>(origKeypoint);
+            auto ret = LedMeasurement{origKeypoint, grayImage.size()};
             if (m_area <= 0) {
                 // strange...
                 return ret;
@@ -240,13 +240,15 @@ namespace vbtracker {
         m_latestMeasurements =
             m_keypointDetailer->augmentKeypoints(thresholded, m_keyPoints);
 #endif
-
+        cv::Size sz = grayImage.size();
         /// Use the LedMeasurement constructor to do the conversion from
         /// keypoint to measurement right now.
         m_latestMeasurements.resize(m_keyPoints.size());
-        std::transform(
-            begin(m_keyPoints), end(m_keyPoints), begin(m_latestMeasurements),
-            [](cv::KeyPoint const &kp) { return LedMeasurement{kp}; });
+        std::transform(begin(m_keyPoints), end(m_keyPoints),
+                       begin(m_latestMeasurements),
+                       [sz](cv::KeyPoint const &kp) {
+                           return LedMeasurement{kp, sz};
+                       });
 
         return m_latestMeasurements;
     }

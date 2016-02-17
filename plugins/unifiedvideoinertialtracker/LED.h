@@ -101,6 +101,24 @@ namespace vbtracker {
         /// @brief Reports the most-recently-added position.
         cv::Point2f getLocation() const { return m_latestMeasurement.loc; }
 
+        /// @brief Gets the most-recently-added position, in a
+        /// xy-origin-at-bottom-left coordinate system
+        cv::Point2f getInverseLocation() const {
+            return cv::Point2f(m_latestMeasurement.imageSize.width -
+                                   m_latestMeasurement.loc.x,
+                               m_latestMeasurement.imageSize.height -
+                                   m_latestMeasurement.loc.y);
+        }
+
+        /// @brief Gets the most-recently-added position in the coordinate
+        /// system to be used for tracking.
+        ///
+        /// Provides a centralized place to switch between getLocation() and
+        /// getInverseLocation() for tracking purposes.
+        cv::Point2f getLocationForTracking() const {
+            return getInverseLocation();
+        }
+
         /// @brief Find the nearest KeyPoint from a container of points to me,
         /// if there is one within the specified threshold.  Runtime: O(n) where
         /// n is the number of elements in keypoints.

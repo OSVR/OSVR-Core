@@ -85,10 +85,14 @@ namespace vbtracker {
         const auto maxSquaredResidual = params.maxResidual * params.maxResidual;
     }
 
-    inline double xyDistanceFromMetersToPixels(double xyDistance, double depthInMeters, CameraModel const& cam) {
+    inline double xyDistanceFromMetersToPixels(double xyDistance,
+                                               double depthInMeters,
+                                               CameraModel const &cam) {
         return (xyDistance / depthInMeters) * cam.focalLength;
     }
-    inline double squaredXyDistanceFromMetersToPixels(double xyDistance, double depthInMeters, CameraModel const& cam) {
+    inline double squaredXyDistanceFromMetersToPixels(double xyDistance,
+                                                      double depthInMeters,
+                                                      CameraModel const &cam) {
         return (xyDistance * xyDistance / (depthInMeters * depthInMeters)) *
                cam.focalLength * cam.focalLength;
     }
@@ -174,9 +178,6 @@ namespace vbtracker {
         }
 #endif
 
-        Eigen::Vector2d imageSize(p.camParams.imageSize.width,
-                                  p.camParams.imageSize.height);
-
 #if 0
         static ::util::Stride varianceStride{ 809 };
         if (++varianceStride) {
@@ -225,9 +226,7 @@ namespace vbtracker {
 
             /// subtracting from image size to flip signs of x and y, aka 180
             /// degree rotation about z axis.
-            meas.setMeasurement(
-                imageSize -
-                Eigen::Vector2d(led.getLocation().x, led.getLocation().y));
+            meas.setMeasurement(cvToVector(led.getLocationForTracking()).cast<double>());
 
             led.markAsUsed();
             auto state =
@@ -334,7 +333,7 @@ namespace vbtracker {
 
                 auto &debug = p.beaconDebug[index];
                 debug.seen = true;
-                debug.measurement = led.getLocation();
+                debug.measurement = led.getLocationForTracking();
 
                 // Angle of emission checking
                 // If we transform the emission vector into camera space, an LED
@@ -347,7 +346,8 @@ namespace vbtracker {
                     (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
                 if (zComponent > 0.) {
                     if (m_extraVerbose) {
-                        std::cout << "Rejecting an LED at " << led.getLocation()
+                        std::cout << "Rejecting an LED at "
+                                  << led.getLocationForTracking()
                                   << " claiming ID "
                                   << led.getOneBasedID().value() << std::endl;
                     }

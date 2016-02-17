@@ -58,15 +58,12 @@ namespace vbtracker {
             auto id = makeZeroBased(led->getID());
             auto index = asIndex(id);
             beaconDebug[index].variance = -1;
-            beaconDebug[index].measurement = led->getLocation();
+            beaconDebug[index].measurement = led->getLocationForTracking();
             beaconIds.push_back(id);
 
             /// Effectively invert the image points here so we get the output of
             /// a coordinate system we want.
-            auto loc = led->getLocation();
-            imagePoints.push_back(
-                cv::Point2f(camParams.imageSize.width - loc.x,
-                            camParams.imageSize.height - loc.y));
+            imagePoints.push_back(led->getLocationForTracking());
             objectPoints.push_back(
                 vec3dToCVPoint3f(beacons[index]->stateVector()));
         }
