@@ -99,8 +99,11 @@ namespace vbtracker {
     };
 
     inline WindowCoordsPoint invertLoc(cv::Mat const &image, cv::Point2f loc) {
-        return WindowCoordsPoint{
-            cv::Point2f(image.cols - loc.x, image.rows - loc.y)};
+
+        return USING_INVERTED_LED_POSITION
+                   ? WindowCoordsPoint{cv::Point2f(image.cols - loc.x,
+                                                   image.rows - loc.y)}
+                   : WindowCoordsPoint{loc};
     }
 
     inline Eigen::Vector2d pointToEigenVec(cv::Point2f pt) {
@@ -139,7 +142,7 @@ namespace vbtracker {
             void drawLedLabel(OneBasedBeaconId id, cv::Point2f location,
                               cv::Vec3b color = CVCOLOR_GRAY, double size = 0.5,
                               cv::Point2f offset = cv::Point2f(0, 0)) {
-                drawLedLabel(id, invertLoc(location), color, size, offset);
+                drawLedLabel(id, toWindowCoords(location), color, size, offset);
             }
 
             /// @overload
@@ -169,9 +172,11 @@ namespace vbtracker {
             }
 
           private:
-            WindowCoordsPoint invertLoc(cv::Point2f loc) const {
-                return WindowCoordsPoint{
-                    cv::Point2f(image.cols - loc.x, image.rows - loc.y)};
+            WindowCoordsPoint toWindowCoords(cv::Point2f loc) const {
+                return USING_INVERTED_LED_POSITION
+                           ? WindowCoordsPoint{cv::Point2f(image.cols - loc.x,
+                                                           image.rows - loc.y)}
+                           : WindowCoordsPoint{loc};
             }
             cv::Mat &image;
         };

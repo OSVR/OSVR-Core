@@ -37,6 +37,8 @@
 namespace osvr {
 namespace vbtracker {
 
+    static const bool USING_INVERTED_LED_POSITION = false;
+
     /// @brief Helper class to keep track of the state of a blob over time. This
     /// is used to help determine the identity of each LED in the scene. The
     /// LEDs are identified by their blink codes.  A steady one is presumed to
@@ -116,7 +118,8 @@ namespace vbtracker {
         /// Provides a centralized place to switch between getLocation() and
         /// getInverseLocation() for tracking purposes.
         cv::Point2f getLocationForTracking() const {
-            return getInverseLocation();
+            return USING_INVERTED_LED_POSITION ? getInverseLocation()
+                                               : getLocation();
         }
 
         /// @brief Find the nearest KeyPoint from a container of points to me,
