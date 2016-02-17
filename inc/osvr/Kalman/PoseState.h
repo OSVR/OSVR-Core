@@ -194,7 +194,7 @@ namespace kalman {
             void postCorrect() { externalizeRotation(); }
 
             void externalizeRotation() {
-                m_orientation = getCombinedQuaternion();
+                setQuaternion(getCombinedQuaternion());
                 incrementalOrientation() = Eigen::Vector3d::Zero();
             }
 
@@ -238,8 +238,8 @@ namespace kalman {
 
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
-                return (incrementalOrientationToQuat(m_state) * m_orientation)
-                    .normalized();
+                return incrementalOrientationToQuat(m_state).normalized() *
+                       m_orientation;
             }
 
             /// Get the position and quaternion combined into a single isometry
