@@ -47,7 +47,7 @@
 #ifndef @EXPORT_BASENAME@_DEPRECATED
 #  define @EXPORT_BASENAME@_DEPRECATED __declspec(deprecated)
 #endif
-    
+
 #elif defined(_WIN32) && defined(_GNUC_)
 /* GCC-compatible on Windows */
 
@@ -71,7 +71,7 @@
 
 #elif (defined(_GNUC_) && _GNUC_C >= 4) || defined(__APPLE__) ||               \
     defined(__MACOSX__)
-/* *Nix, Android or Mac OS */
+/* *nix, Mac OS X*/
 
 #ifndef @EXPORT_BASENAME@_EXPORT
   /* We are building/using this library */
@@ -96,7 +96,7 @@
 
 /* fallback def */
 #ifndef @EXPORT_BASENAME@_NO_EXPORT
-#  define @EXPORT_BASENAME@_NO_EXPORT 
+#  define @EXPORT_BASENAME@_NO_EXPORT
 #endif
 
 /* fallback def */
