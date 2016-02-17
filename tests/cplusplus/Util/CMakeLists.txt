@@ -5,4 +5,4 @@ foreach(testname TreeNode ContainerWrapper UniqueContainer Projection QuatExpMap
 endforeach()
 
 target_link_libraries(Projection eigen-headers)
-target_link_libraries(QuatExpMap eigen-headers)
+target_link_libraries(QuatExpMap eigen-headers vendored-vrpn)

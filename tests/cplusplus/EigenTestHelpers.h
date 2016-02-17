@@ -36,7 +36,7 @@
 
 namespace Eigen {
 void PrintTo(Eigen::Quaterniond const &quat, ::std::ostream *os) {
-    (*os) << quat.coeffs().transpose();
+    (*os) << "[(" << quat.vec().transpose() << "), " << quat.w() << "]";
 }
 void PrintTo(Eigen::Vector3d const &vec, ::std::ostream *os) {
     (*os) << vec.transpose();
@@ -56,20 +56,35 @@ inline bool compareVecsEq_impl(Eigen::MatrixBase<Derived1> const &expected,
     }
     return true;
 }
+template <typename Scalar, typename T>
+inline void formatStreamableValOrRowForMessage(std::ostream &os, T &&val) {
+    os << std::setprecision(std::numeric_limits<Scalar>::digits10 + 2)
+       << std::forward<T>(val);
+}
 
 template <typename Derived>
 inline std::string
 formatVectorForMessage(Eigen::DenseBase<Derived> const &vec) {
+    using Scalar = typename Derived::Scalar;
     ::std::stringstream ss;
     if (1 == vec.rows()) {
-        ss << std::setprecision(
-                  std::numeric_limits<typename Derived::Scalar>::digits10 + 2)
-           << vec;
+        formatStreamableValOrRowForMessage<Scalar>(ss, vec);
     } else {
-        ss << std::setprecision(
-                  std::numeric_limits<typename Derived::Scalar>::digits10 + 2)
-           << vec.transpose();
+        formatStreamableValOrRowForMessage<Scalar>(ss, vec.transpose());
     }
+    return ss.str();
+}
+
+template <typename Derived>
+inline std::string
+formatQuatForMessage(Eigen::QuaternionBase<Derived> const &quat) {
+    using Scalar = typename Derived::Scalar;
+    ::std::stringstream ss;
+    ss << "[(";
+    formatStreamableValOrRowForMessage<Scalar>(ss, quat.vec().transpose());
+    ss << "), ";
+    formatStreamableValOrRowForMessage<Scalar>(ss, quat.w());
+    ss << "]";
     return ss.str();
 }
 
@@ -83,9 +98,8 @@ compareQuatsEq(const char *expected_expression, const char *actual_expression,
         return ::testing::AssertionSuccess();
     }
     return ::testing::internal::EqFailure(
-        expected_expression, actual_expression,
-        formatVectorForMessage(expected.coeffs()),
-        formatVectorForMessage(actual.coeffs()), false);
+        expected_expression, actual_expression, formatQuatForMessage(expected),
+        formatQuatForMessage(actual), false);
 }
 
 /// based on CmpHelperFloatingPointEQ
@@ -99,9 +113,9 @@ compareQuatsNe(const char *expected_expression, const char *actual_expression,
     }
     return ::testing::AssertionFailure()
            << " Expected " << expected_expression << " ( "
-           << formatVectorForMessage(expected.coeffs())
-           << ") != " << actual_expression << "\n  Got " << actual_expression
-           << " = " << formatVectorForMessage(actual.coeffs()) << " instead.";
+           << formatQuatForMessage(expected) << ") != " << actual_expression
+           << "\n  Got " << actual_expression << " = "
+           << formatQuatForMessage(actual) << " instead.";
 }
 
 template <typename Derived1, typename Derived2>

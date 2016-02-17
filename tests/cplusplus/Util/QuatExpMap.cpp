@@ -28,6 +28,7 @@
 // Library/third-party includes
 #include "gtest/gtest.h"
 #include "../EigenTestHelpers.h"
+#include "quat.h"
 
 // Standard includes
 #include <array>
@@ -62,6 +63,45 @@ inline Eigen::Quaterniond get(array_type const &arr) {
 using Eigen::Quaterniond;
 using Eigen::Vector3d;
 using Eigen::AngleAxisd;
+
+/// @name Quatlib interaction utilities
+/// @{
+/// Container for q_type that's C++-safe to pass around and such. To pass to
+/// quatlib functions, use the `.data()` member function.
+using QuatlibQuatArray = std::array<double, 4>;
+
+/// Convert Eigen vector to a quatlib (pure: w = 0) quaternion, wrapped in an
+/// std::array.
+inline QuatlibQuatArray toQuatlib(Vector3d const &vec) {
+    QuatlibQuatArray ret;
+    ret[Q_W] = 0;
+    ret[Q_X] = vec.x();
+    ret[Q_Y] = vec.y();
+    ret[Q_Z] = vec.z();
+    return ret;
+}
+/// Convert Eigen quat to a quatlib quaternion, wrapped in an std::array.
+inline QuatlibQuatArray toQuatlib(Quaterniond const &q) {
+    QuatlibQuatArray ret;
+    ret[Q_W] = q.w();
+    ret[Q_X] = q.x();
+    ret[Q_Y] = q.y();
+    ret[Q_Z] = q.z();
+    return ret;
+}
+
+/// Takes a quatlib quaternion wrapped in an array and converts it to an
+/// Eigen::Quaterniond, no questions asked.
+inline Quaterniond quatFromQuatlib(QuatlibQuatArray const &arr) {
+    return Quaterniond(arr[Q_W], arr[Q_X], arr[Q_Y], arr[Q_Z]);
+}
+/// Takes a quatlib quaternion wrapped in an array and converts it to an
+/// Eigen::Vector3d, no questions asked - assumes it's a pure quaternion (w=0)
+/// or that you just want the vector part.
+inline Vector3d vecFromQuatlib(QuatlibQuatArray const &arr) {
+    return Vector3d(arr[Q_X], arr[Q_Y], arr[Q_Z]);
+}
+/// @}
 
 inline std::string formatAngleAxis(double angle, Eigen::Vector3d const &axis) {
     auto os = std::ostringstream{};
@@ -120,13 +160,6 @@ class UnitQuatInput : public ::testing::TestWithParam<QuatCreator> {
     Eigen::Quaterniond getQuat() const { return GetParam().get(); }
 };
 
-class ExpMapVecInput : public ::testing::TestWithParam<Eigen::Vector3d> {
-  public:
-    // You can implement all the usual fixture class members here.
-    // To access the test parameter, call GetParam() from class
-    // TestWithParam<T>.
-};
-
 TEST_P(UnitQuatInput, BasicRunLn) {
     ASSERT_NO_THROW(quat_exp_map(getQuat()).ln());
     if (getQuat().vec().norm() > 0) {
@@ -138,6 +171,16 @@ TEST_P(UnitQuatInput, BasicRunLn) {
 TEST_P(UnitQuatInput, RoundTripLn) {
     ASSERT_QUAT_DOUBLE_EQ(getQuat(),
                           quat_exp_map(quat_exp_map(getQuat()).ln()).exp());
+}
+
+TEST_P(UnitQuatInput, QuatlibRoundTripLn) {
+    QuatlibQuatArray quatlib_q = toQuatlib(getQuat());
+    q_log(quatlib_q.data(), quatlib_q.data());
+    q_exp(quatlib_q.data(), quatlib_q.data());
+    ASSERT_QUAT_DOUBLE_EQ(getQuat(), quatFromQuatlib(quatlib_q))
+        << "Actual is result of applying q_log then q_exp to the input "
+           "quaternion.\nTests Quatlib as a source of truth - does not test "
+           "OSVR-custom code.";
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -161,6 +204,13 @@ QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitY()),
 QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitZ()),
 #endif
 
+class ExpMapVecInput : public ::testing::TestWithParam<Eigen::Vector3d> {
+  public:
+    // You can implement all the usual fixture class members here.
+    // To access the test parameter, call GetParam() from class
+    // TestWithParam<T>.
+};
+
 TEST_P(ExpMapVecInput, BasicRunExp) {
     ASSERT_NO_THROW(quat_exp_map(GetParam()).exp());
     if (GetParam() != Vector3d::Zero()) {
@@ -172,6 +222,17 @@ TEST_P(ExpMapVecInput, BasicRunExp) {
 TEST_P(ExpMapVecInput, RoundTripExp) {
     ASSERT_VEC_DOUBLE_EQ(GetParam(),
                          quat_exp_map(quat_exp_map(GetParam()).exp()).ln());
+}
+
+TEST_P(ExpMapVecInput, QuatlibRoundTripExp) {
+    QuatlibQuatArray quatlib_q = toQuatlib(GetParam());
+    q_exp(quatlib_q.data(), quatlib_q.data());
+    q_log(quatlib_q.data(), quatlib_q.data());
+    Vector3d vec = GetParam();
+    ASSERT_VEC_DOUBLE_EQ(GetParam(), vecFromQuatlib(quatlib_q))
+        << "Actual is result of applying q_exp then q_log to the input "
+           "quaternion.\nTests Quatlib as a source of truth - does not test "
+           "OSVR-custom code.";
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -223,6 +284,29 @@ TEST_P(EquivalentInput, Ln) {
     ASSERT_VEC_DOUBLE_EQ(getVec(), quat_exp_map(getQuat()).ln());
 }
 
+TEST_P(EquivalentInput, LnCompareWithQuatlib) {
+    QuatlibQuatArray quatlib_q = toQuatlib(getQuat());
+    q_log(quatlib_q.data(), quatlib_q.data());
+
+    // prepare message
+    std::stringstream ss;
+    PrintTo(getQuat(), &ss);
+#if 0
+    ASSERT_VEC_DOUBLE_EQ(
+        Vector3d(quatlib_q[Q_X], quatlib_q[Q_Y], quatlib_q[Q_Z]),
+        quat_exp_map(getQuat()).ln())
+        << "\n'Expected' value is the output of quatlib's q_log function on "
+           "the same input: " +
+               ss.str() + "\n";
+#else
+    ASSERT_VEC_DOUBLE_EQ(vecFromQuatlib(quatlib_q),
+                         quat_exp_map(getQuat()).ln())
+        << "\n'Expected' value is the output of quatlib's q_log function on "
+           "the same input: " +
+               ss.str() + "\n";
+#endif
+}
+
 TEST_P(EquivalentInput, Exp) {
 
     ASSERT_QUAT_DOUBLE_EQ(getQuat(),
@@ -230,13 +314,40 @@ TEST_P(EquivalentInput, Exp) {
                           quat_exp_map(getVec()).exp());
 }
 
+TEST_P(EquivalentInput, ExpCompareWithQuatlib) {
+    QuatlibQuatArray quatlib_q = toQuatlib(getVec());
+    q_exp(quatlib_q.data(), quatlib_q.data());
+    q_normalize(quatlib_q.data(), quatlib_q.data());
+
+    // prepare message
+    std::stringstream ss;
+    PrintTo(getVec(), &ss);
+
+    ASSERT_QUAT_DOUBLE_EQ(quatFromQuatlib(quatlib_q),
+                          quat_exp_map(getVec()).exp())
+        << "\n'Expected' value is the normalized output of quatlib's q_exp "
+           "function on the same input: " +
+               ss.str() + "\n";
+}
+
 INSTANTIATE_TEST_CASE_P(
-    HalfPi, EquivalentInput,
+    HalfPiMultiples, EquivalentInput,
     ::testing::Values(makePairFromAngleAxis(M_PI / 2, Vector3d::UnitX()),
                       makePairFromAngleAxis(M_PI / 2, Vector3d::UnitY()),
                       makePairFromAngleAxis(M_PI / 2, Vector3d::UnitZ()),
                       makePairFromAngleAxis(-M_PI / 2, Vector3d::UnitX()),
                       makePairFromAngleAxis(-M_PI / 2, Vector3d::UnitY()),
                       makePairFromAngleAxis(-M_PI / 2, Vector3d::UnitZ())
+
+                          ));
+
+INSTANTIATE_TEST_CASE_P(
+    SmallValues, EquivalentInput,
+    ::testing::Values(makePairFromAngleAxis(1.e-5, Vector3d::UnitX()),
+                      makePairFromAngleAxis(1.e-5, Vector3d::UnitY()),
+                      makePairFromAngleAxis(1.e-5, Vector3d::UnitZ()),
+                      makePairFromAngleAxis(0.1, Vector3d::UnitX()),
+                      makePairFromAngleAxis(0.1, Vector3d::UnitY()),
+                      makePairFromAngleAxis(0.1, Vector3d::UnitZ())
 
                           ));
