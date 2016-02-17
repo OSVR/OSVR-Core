@@ -37,7 +37,7 @@
 namespace osvr {
 namespace vbtracker {
 
-    static const bool USING_INVERTED_LED_POSITION = false;
+    static const bool USING_INVERTED_LED_POSITION = true;
 
     /// @brief Helper class to keep track of the state of a blob over time. This
     /// is used to help determine the identity of each LED in the scene. The
