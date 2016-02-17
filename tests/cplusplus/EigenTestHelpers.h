@@ -41,6 +41,20 @@ void PrintTo(Eigen::Quaterniond const &quat, ::std::ostream *os) {
 void PrintTo(Eigen::Vector3d const &vec, ::std::ostream *os) {
     (*os) << vec.transpose();
 }
+
+/// Helper to convert to string for messages.
+inline std::string to_string(Eigen::Quaterniond const &quat) {
+    std::stringstream ss;
+    PrintTo(quat, &ss);
+    return ss.str();
+}
+
+/// Helper to convert to string for messages.
+inline std::string to_string(Eigen::Vector3d const &vec) {
+    std::stringstream ss;
+    PrintTo(vec, &ss);
+    return ss.str();
+}
 }
 namespace EigenGTestCompareHelpers {
 template <typename Scalar, std::size_t SIZE, typename Derived1,
