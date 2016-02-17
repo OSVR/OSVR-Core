@@ -61,10 +61,6 @@
 #  endif
 #endif
 
-#ifndef @EXPORT_BASENAME@_NO_EXPORT
-#  define @EXPORT_BASENAME@_NO_EXPORT __attribute__((visibility("hidden")))
-#endif
-
 #ifndef @EXPORT_BASENAME@_DEPRECATED
 #  define @EXPORT_BASENAME@_DEPRECATED __attribute__ ((__deprecated__))
 #endif
