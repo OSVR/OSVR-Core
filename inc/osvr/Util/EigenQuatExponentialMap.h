@@ -95,6 +95,8 @@ namespace util {
         /// implementation use within the class.
         ///
         /// Assumes a unit quaternion.
+        ///
+        /// @todo seems to be off by a factor of two in testing?
         template <typename Scalar>
         inline Eigen::Matrix<Scalar, 3, 1>
         quat_ln(Eigen::Quaternion<Scalar> const &quat) {
