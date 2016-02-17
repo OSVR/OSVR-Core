@@ -27,7 +27,6 @@ add_library(uvbi-core STATIC
     CannedIMUMeasurement.h
     CameraDistortionModel.h
     CameraParameters.h
-    CheckDeprecatedParameter.h
     ConfigParams.cpp
     ConfigParams.h
     cvToEigen.h
@@ -44,6 +43,7 @@ add_library(uvbi-core STATIC
     LedIdentifier.cpp
     LedIdentifier.h
     ModelTypes.h
+    OptionalStream.h
     PoseEstimator_RANSAC.cpp
     PoseEstimator_RANSAC.h
     PoseEstimator_RANSACKalman.cpp

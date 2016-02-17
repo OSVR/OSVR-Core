@@ -28,7 +28,7 @@
 // Internal Includes
 #include "Types.h"
 #include "GetOptionalParameter.h"
-#include "CheckDeprecatedParameter.h"
+#include "OptionalStream.h"
 
 // Library/third-party includes
 #include <json/value.h>
@@ -61,7 +61,14 @@ namespace vbtracker {
 
         /// General parameters
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
+#if 0
         getOptionalParameter(config.calibrationFile, root, "calibrationFile");
+#else
+        outputUnless(std::cout, root["calibrationFile"].isNull())
+            << MESSAGE_PREFIX << PARAMNAME("calibrationFile")
+            << " not yet implemented in the new tracker";
+#endif
+
         getOptionalParameter(config.additionalPrediction, root,
                              "additionalPrediction");
         getOptionalParameter(config.maxResidual, root, "maxResidual");
@@ -76,7 +83,7 @@ namespace vbtracker {
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
 #else
-        checkDeprecatedParameter(std::cout, root, "streamBeaconDebugInfo")
+        outputUnless(std::cout, root["streamBeaconDebugInfo"].isNull())
             << MESSAGE_PREFIX << PARAMNAME("streamBeaconDebugInfo")
             << " not yet implemented in the new tracker";
 #endif
@@ -90,7 +97,7 @@ namespace vbtracker {
         /// Fusion/Calibration parameters
         getOptionalParameter(config.cameraPosition, root, "cameraPosition");
         getOptionalParameter(config.cameraIsForward, root, "cameraIsForward");
-        checkDeprecatedParameter(std::cout, root, "eyeHeight")
+        outputUnless(std::cout, root["eyeHeight"].isNull())
             << MESSAGE_PREFIX << PARAMNAME("eyeHeight")
             << " is deprecated/ignored: use 'cameraPosition' for similar "
                "effects with this plugin.";
@@ -112,7 +119,7 @@ namespace vbtracker {
         getOptionalParameter(config.boundingBoxFilterRatio, root,
                              "boundingBoxFilterRatio");
 #else
-        checkDeprecatedParameter(std::cout, root, "boundingBoxFilterRatio")
+        outputUnless(std::cout, root["boundingBoxFilterRatio"].isNull())
             << MESSAGE_PREFIX << PARAMNAME("boundingBoxFilterRatio")
             << " parameter not actively used";
 #endif
