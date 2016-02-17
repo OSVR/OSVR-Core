@@ -168,9 +168,8 @@ namespace kalman {
             /// Default constructor
             State()
                 : m_state(StateVector::Zero()),
-                  m_errorCovariance(
-                      StateSquareMatrix::
-                          Identity() /** @todo almost certainly wrong */),
+                  m_errorCovariance(StateSquareMatrix::Identity() *
+                                    10 /** @todo almost certainly wrong */),
                   m_orientation(Eigen::Quaterniond::Identity()) {}
             /// set xhat
             void setStateVector(StateVector const &state) { m_state = state; }
