@@ -55,49 +55,49 @@ struct Options {
     bool showStringData;
 };
 
+using osvr::common::PathNode;
+namespace elements = osvr::common::elements;
+
 class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
   public:
     /// @brief Constructor
     TreeNodePrinter(Options opts)
         : boost::static_visitor<>(), m_opts(opts),
-          m_maxTypeLen(osvr::common::elements::getMaxTypeNameLength()),
-          m_os(std::cout), m_indentStream{m_maxTypeLen + 2 + 1 + 2, m_os} {
-        // Some initial space to set the output off.
-        m_os << "\n\n";
-
+          m_maxTypeLen(elements::getMaxTypeNameLength()), m_os(std::cout),
+          m_indentStream{m_maxTypeLen + 2 + 1 + 2, m_os} {
         // Computation for initializing the indent stream above:
         // Indents type name size, +2 for the brackets, +1 for the space, and +2
         // so it doesn't line up with the path.
+
+        // Some initial space to set the output off.
+        m_os << "\n\n";
     }
 
     /// @brief print nothing for a null element.
-    void operator()(osvr::common::PathNode const &,
-                    osvr::common::elements::NullElement const &) {}
+    void operator()(PathNode const &, elements::NullElement const &) {}
 
     /// @brief We might print something for a sensor element.
-    void operator()(osvr::common::PathNode const &node,
-                    osvr::common::elements::SensorElement const &elt) {
+    void operator()(PathNode const &node, elements::SensorElement const &elt) {
         if (m_opts.showSensors) {
-            m_outputBasics(node, elt) << "\n";
+            outputBasics(node, elt) << "\n";
         }
     }
 
     /// @brief Print aliases
-    void operator()(osvr::common::PathNode const &node,
-                    osvr::common::elements::AliasElement const &elt) {
-        m_outputBasics(node, elt) << std::endl;
+    void operator()(PathNode const &node, elements::AliasElement const &elt) {
+        outputBasics(node, elt) << std::endl;
         if (m_opts.showAliasSource) {
             m_indentStream << "-> " << elt.getSource() << std::endl;
         }
         if (m_opts.showAliasPriority) {
-            m_indentStream << "Priority: " << osvr::common::outputPriority(
-                                                  elt.priority()) << std::endl;
+            m_indentStream << "Priority: "
+                           << osvr::common::outputPriority(elt.priority())
+                           << std::endl;
         }
     }
     /// @brief Print Devices
-    void operator()(osvr::common::PathNode const &node,
-                    osvr::common::elements::DeviceElement const &elt) {
-        m_outputBasics(node, elt) << std::endl;
+    void operator()(PathNode const &node, elements::DeviceElement const &elt) {
+        outputBasics(node, elt) << std::endl;
         if (m_opts.showDeviceDetails) {
             m_indentStream << "- corresponds to " << elt.getFullDeviceName()
                            << std::endl;
@@ -109,9 +109,8 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
     }
 
     /// @brief We might print something for a sensor element.
-    void operator()(osvr::common::PathNode const &node,
-                    osvr::common::elements::StringElement const &elt) {
-        m_outputBasics(node, elt) << std::endl;
+    void operator()(PathNode const &node, elements::StringElement const &elt) {
+        outputBasics(node, elt) << std::endl;
         if (m_opts.showStringData) {
             m_indentStream << "- Contained value: " << elt.getString()
                            << std::endl;
@@ -119,16 +118,15 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
     }
 
     /// @brief Catch-all for other element types.
-    template <typename T>
-    void operator()(osvr::common::PathNode const &node, T const &elt) {
-        m_outputBasics(node, elt) << "\n";
+    template <typename T> void operator()(PathNode const &node, T const &elt) {
+        outputBasics(node, elt) << "\n";
     }
 
   private:
-    /// @brief shared implementation
+    /// @brief shared implementation: prints type name in brackets padded to
+    /// fixed width, then the full path.
     template <typename T>
-    std::ostream &m_outputBasics(osvr::common::PathNode const &node,
-                                 T const &elt) {
+    std::ostream &outputBasics(PathNode const &node, T const &elt) {
         m_os << "[" << std::setw(m_maxTypeLen) << osvr::common::getTypeName(elt)
              << "] " << osvr::common::getFullPath(node);
         return m_os;
@@ -184,10 +182,12 @@ int main(int argc, char *argv[]) {
     {
         /// We only actually need the client open for long enough to get the
         /// path tree and clone it.
-        osvr::clientkit::ClientContext context("com.osvr.tools.printtree");
+        osvr::clientkit::ClientContext context("org.osvr.tools.printtree");
 
         if (!context.checkStatus()) {
-            std::cerr << "Client context has not yet started up - waiting. Make sure the server is running." << std::endl;
+            std::cerr << "Client context has not yet started up - waiting. "
+                         "Make sure the server is running."
+                      << std::endl;
             do {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 context.update();
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
     TreeNodePrinter printer{opts};
     /// Now traverse for output
     osvr::util::traverseWith(
-        pathTree.getRoot(), [&printer](osvr::common::PathNode const &node) {
+        pathTree.getRoot(), [&printer](PathNode const &node) {
             osvr::common::applyPathNodeVisitor(printer, node);
         });
 
