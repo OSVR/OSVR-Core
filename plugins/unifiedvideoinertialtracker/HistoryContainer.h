@@ -57,6 +57,10 @@ namespace vbtracker {
             using iterator =
                 typename inner_container_type<ValueType>::const_iterator;
 
+            template <typename ValueType>
+            using nonconst_iterator =
+                typename inner_container_type<ValueType>::iterator;
+
             /// Comparison functor for std algorithms usage with
             /// HistoryContainer and related containers.
             template <typename ValueType> class TimestampPairLessThan {
@@ -177,24 +181,33 @@ namespace vbtracker {
             const_iterator end() const { return m_history.cend(); }
             const_iterator cend() const { return m_history.cend(); }
 
+          private:
+            /// Needed due to some pre-modern-C++ library differences (like
+            /// containter_type::erase)
+            using nonconst_iterator = detail::nonconst_iterator<value_type>;
+
+            nonconst_iterator ncbegin() { return m_history.begin(); }
+            nonconst_iterator ncend() { return m_history.end(); }
+
+          public:
             /// Returns true if the given timestamp is strictly newer than the
             /// newest timestamp in the container, or if the container is empty
             /// (thus making the timestamp trivially newest)
-            bool is_strictly_newest(timestamp_type const& tv) const {
+            bool is_strictly_newest(timestamp_type const &tv) const {
                 return empty() || newest_timestamp() < tv;
             }
 
             /// Returns true if the given timestamp is no older than the
             /// newest timestamp in the container, or if the container is empty
             /// (thus making the timestamp trivially newest)
-            bool is_as_new_as_newest(timestamp_type const& tv) const {
+            bool is_as_new_as_newest(timestamp_type const &tv) const {
                 return empty() || !(tv < newest_timestamp());
             }
 
             /// Returns true if the given timestamp meets the criteria of
             /// push_newest: strictly newest if AllowDuplicateTimes is false, as
             /// new as newest if AllowDuplicateTimes is true.
-            bool is_valid_to_push_newest(timestamp_type const& tv) {
+            bool is_valid_to_push_newest(timestamp_type const &tv) {
                 return empty() || tv > newest_timestamp() ||
                        (AllowDuplicateTimes && newest_timestamp() == tv);
             }
@@ -211,6 +224,26 @@ namespace vbtracker {
                 return std::lower_bound(begin(), end(), tv, comparator());
             }
 
+          private:
+            /// Wrapper around std::upper_bound: returns iterator to first
+            /// element newer than timestamp given or end() if none.
+            ///
+            /// Returns a non-const iterator, for older C++ standard library
+            /// implementations that require one for erase and similar.
+            nonconst_iterator nc_upper_bound(timestamp_type const &tv) {
+                return std::upper_bound(ncbegin(), ncend(), tv, comparator());
+            }
+            /// Wrapper around std::lower_bound: returns iterator to first
+            /// element with timestamp equal or newer than timestamp given or
+            /// end() if none.
+            ///
+            /// Returns a non-const iterator, for older C++ standard library
+            /// implementations that require one for erase and similar.
+            nonconst_iterator nc_lower_bound(timestamp_type const &tv) {
+                return std::lower_bound(ncbegin(), ncend(), tv, comparator());
+            }
+
+          public:
             /// Return an iterator to the newest, last pair of timestamp and
             /// value that is not newer than the given timestamp. If none meet
             /// this criteria, returns end().
@@ -258,8 +291,8 @@ namespace vbtracker {
                 if (empty()) {
                     return 0;
                 }
-                auto lastIt = lower_bound(tv);
-                if (end() == lastIt) {
+                auto lastIt = nc_lower_bound(tv);
+                if (ncend() == lastIt) {
                     // If we got end() back, that's ambiguous: is the last entry
                     // really >= our timestamp?
                     /// @todo is this right?
@@ -268,8 +301,8 @@ namespace vbtracker {
                         return 0;
                     }
                 }
-                auto count = std::distance(begin(), lastIt);
-                m_history.erase(begin(), lastIt);
+                auto count = std::distance(ncbegin(), lastIt);
+                m_history.erase(ncbegin(), lastIt);
                 return count;
             }
 #endif
@@ -295,13 +328,13 @@ namespace vbtracker {
                 if (empty()) {
                     return 0;
                 }
-                auto firstIt = upper_bound(tv);
-                if (end() == firstIt) {
+                auto firstIt = nc_upper_bound(tv);
+                if (ncend() == firstIt) {
                     // If we got end() back, nothing found after our timestamp.
                     return 0;
                 }
-                auto count = std::distance(firstIt, end());
-                m_history.erase(firstIt, end());
+                auto count = std::distance(firstIt, ncend());
+                m_history.erase(firstIt, ncend());
                 return count;
             }
 #endif
