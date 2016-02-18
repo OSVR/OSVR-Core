@@ -48,7 +48,7 @@
 #  define @EXPORT_BASENAME@_DEPRECATED __declspec(deprecated)
 #endif
 
-#elif defined(_WIN32) && defined(_GNUC_)
+#elif defined(_WIN32) && defined(__GNUC__)
 /* GCC-compatible on Windows */
 
 #ifndef @EXPORT_BASENAME@_EXPORT
@@ -65,8 +65,7 @@
 #  define @EXPORT_BASENAME@_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
-#elif (defined(_GNUC_) && _GNUC_C >= 4) || defined(__APPLE__) ||               \
-    defined(__MACOSX__)
+#elif (defined(__GNUC__) && __GNUC__ >= 4) || defined(__APPLE__)
 /* *nix, Mac OS X*/
 
 #ifndef @EXPORT_BASENAME@_EXPORT
