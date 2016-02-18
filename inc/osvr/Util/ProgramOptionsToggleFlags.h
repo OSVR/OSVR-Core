@@ -38,15 +38,23 @@
 namespace osvr {
 namespace util {
     /// @brief An "additional parser" for Boost.Program_options that will turn
-    /// any --hide-xyz into --show-xyz false
+    /// any --hide-xyz into --xyz false and --show-xyz into --xyz true
     inline std::pair<std::string, std::string>
-    convertHideIntoFalseShow(const std::string &s) {
-        static const char hidePrefix[] = "--hide";
-        static const char showPrefix[] = "show";
-        if (s.find(hidePrefix) == 0) {
-            return std::make_pair(showPrefix + s.substr(sizeof(hidePrefix) - 1),
-                                  std::string("false"));
+    convertProgramOptionShowHideIntoTrueFalse(std::string s) {
+        static const char HIDE[] = "--hide-";
+        static const char SHOW[] = "--show-";
+        if (0 == s.find(SHOW)) {
+            // argument started with --show-
+            // strip it off to get the real option and give it the value "true"
+            s.erase(0, sizeof(SHOW) - 1);
+            return std::make_pair(s, std::string("true"));
+        } else if (0 == s.find(HIDE)) {
+            // argument started with --hide-
+            // strip it off to get the real option and give it the value "false"
+            s.erase(0, sizeof(HIDE) - 1);
+            return std::make_pair(s, std::string("false"));
         }
+        // program option we weren't able to add value to.
         return std::make_pair(std::string(), std::string());
     }
 } // namespace util

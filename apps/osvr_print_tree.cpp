@@ -146,12 +146,12 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Options");
     desc.add_options()
         ("help,h", "produce help message")
-        ("show-alias-source", po::value<bool>(&opts.showAliasSource)->default_value(true), "Whether or not to show the source associated with each alias")
-        ("show-alias-priority", po::value<bool>(&opts.showAliasPriority)->default_value(false), "Whether or not to show the priority associated with each alias")
-        ("show-device-details", po::value<bool>(&opts.showDeviceDetails)->default_value(true), "Whether or not to show the basic details associated with each device")
-        ("show-device-descriptors", po::value<bool>(&opts.showDeviceDescriptor)->default_value(false), "Whether or not to show the JSON descriptors associated with each device")
-        ("show-sensors", po::value<bool>(&opts.showSensors)->default_value(true), "Whether or not to show the 'sensor' nodes")
-        ("show-string-data", po::value<bool>(&opts.showStringData)->default_value(true), "Whether or not to show the data in 'string' nodes")
+        ("alias-source", po::value<bool>(&opts.showAliasSource)->default_value(true), "Whether or not to show the source associated with each alias")
+        ("alias-priority", po::value<bool>(&opts.showAliasPriority)->default_value(false), "Whether or not to show the priority associated with each alias")
+        ("device-details", po::value<bool>(&opts.showDeviceDetails)->default_value(true), "Whether or not to show the basic details associated with each device")
+        ("device-descriptors", po::value<bool>(&opts.showDeviceDescriptor)->default_value(false), "Whether or not to show the JSON descriptors associated with each device")
+        ("sensors", po::value<bool>(&opts.showSensors)->default_value(true), "Whether or not to show the 'sensor' nodes")
+        ("string-data", po::value<bool>(&opts.showStringData)->default_value(true), "Whether or not to show the data in 'string' nodes")
         ;
     // clang-format on
     po::variables_map vm;
@@ -159,7 +159,8 @@ int main(int argc, char *argv[]) {
     try {
         po::store(po::command_line_parser(argc, argv)
                       .options(desc)
-                      .extra_parser(osvr::util::convertHideIntoFalseShow)
+                      .extra_parser(
+                          osvr::util::convertProgramOptionShowHideIntoTrueFalse)
                       .run(),
                   vm);
         po::notify(vm);
@@ -168,12 +169,13 @@ int main(int argc, char *argv[]) {
         usage = true;
     }
     if (usage || vm.count("help")) {
-        std::cerr
-            << "\nTraverses the path tree and outputs it as text for "
-               "human consumption. See\n"
-               "PathTreeExport for structured output for graphical display.\n";
+        std::cerr << "\nTraverses the path tree and outputs it as text for "
+                     "human consumption. See\nPathTreeExport for structured "
+                     "output for graphical display.\n";
         std::cerr << "Usage: " << argv[0] << " [options]\n\n";
-        std::cerr << "All --show options have a matching --hide option.\n\n";
+        std::cerr << "All options are shown as being --option 1/0 (true/false) "
+                     "but may be expressed\nas --show-option or --hide-option "
+                     "instead (e.g. --show-alias-priority)\n\n";
         std::cerr << desc << "\n";
         return 1;
     }
