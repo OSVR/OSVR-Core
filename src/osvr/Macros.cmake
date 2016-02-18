@@ -40,7 +40,7 @@ macro(osvr_add_library)
     set_target_properties(${LIBNAME_FULL} PROPERTIES
         FOLDER "${LIB_FOLDER}")
 
-    configure_file("${_MACROS_DIR}/exportheader.cmake.in"
+    configure_file("${_MACROS_DIR}/Export.h.in"
         Export.h
         @ONLY NEWLINE_STYLE LF)
 
