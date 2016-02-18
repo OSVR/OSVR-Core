@@ -1,6 +1,11 @@
 set(LIB_FOLDER "OSVR Libraries")
 
 set(OSVR_BUILDTREE_TARGETS "" CACHE INTERNAL "" FORCE)
+
+# Get a path to this file
+get_filename_component(_MACROS_DIR
+    "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
 macro(osvr_append_target _targetlist _target)
     list(APPEND OSVR_${_targetlist}_TARGETS "${_target}")
     set(OSVR_${_targetlist}_TARGETS "${OSVR_${_targetlist}_TARGETS}" CACHE INTERNAL "" FORCE)
@@ -35,9 +40,9 @@ macro(osvr_add_library)
     set_target_properties(${LIBNAME_FULL} PROPERTIES
         FOLDER "${LIB_FOLDER}")
 
-    generate_export_header(${LIBNAME_FULL}
-        BASE_NAME ${EXPORT_BASENAME}
-        EXPORT_FILE_NAME Export.h)
+    configure_file("${_MACROS_DIR}/Export.h.in"
+        Export.h
+        @ONLY NEWLINE_STYLE LF)
 
     if(NOT BUILD_SHARED_LIBS)
         target_compile_definitions(${LIBNAME_FULL} PUBLIC ${EXPORT_BASENAME}_STATIC_DEFINE)
