@@ -39,14 +39,28 @@ namespace vbtracker {
     /// Project point for a simple pinhole camera model, with focal lengths
     /// equal on both axes and no distortion. (Camera intrinsic matrix is
     /// implied - not used directly because it's sparse.)
+    ///
+    /// This version takes in an point already in camera space.
+    inline Eigen::Vector2d projectPoint(double focalLength,
+                                        Eigen::Vector2d const &principalPoint,
+                                        Eigen::Vector3d const &camPoint) {
+        return (camPoint.head<2>() / camPoint[2]) * focalLength +
+               principalPoint;
+    }
+
+    /// Project point for a simple pinhole camera model, with focal lengths
+    /// equal on both axes and no distortion. (Camera intrinsic matrix is
+    /// implied - not used directly because it's sparse.)
+    ///
+    /// This version takes in a point in object space that needs to be
+    /// transformed to camera space with a translation and rotation.
     inline Eigen::Vector2d projectPoint(Eigen::Vector3d const &translation,
                                         Eigen::Quaterniond const &rotation,
                                         double focalLength,
                                         Eigen::Vector2d const &principalPoint,
                                         Eigen::Vector3d const &objectPoint) {
-        Eigen::Vector3d camPoints = rotation * objectPoint + translation;
-        return (camPoints.head<2>() / camPoints[2]) * focalLength +
-               principalPoint;
+        return projectPoint(focalLength, principalPoint,
+                            rotation * objectPoint + translation);
     }
 
 } // namespace vbtracker

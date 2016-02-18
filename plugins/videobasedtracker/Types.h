@@ -26,7 +26,8 @@
 #define INCLUDED_Types_h_GUID_819757A3_DE89_4BAD_3BF5_6FE152F1EA08
 
 // Internal Includes
-// - none
+#include "BasicTypes.h"
+#include "BlobParams.h"
 
 // Library/third-party includes
 #include <opencv2/features2d/features2d.hpp>
@@ -44,16 +45,11 @@ namespace vbtracker {
     class LedIdentifier;
     class BeaconBasedPoseEstimator;
 
-    typedef std::vector<cv::Point3f> Point3Vector;
-
-    typedef std::vector<cv::Vec3d> Vec3Vector;
-
     /// @todo Replace usages of this with Eigen or cv matrices.
     typedef std::vector<std::vector<double> > DoubleVecVec;
 
     typedef std::vector<std::string> PatternStringList;
 
-    typedef std::string LedPatternWrapped; //< Pattern repeated almost twice
     typedef std::vector<LedPatternWrapped>
         PatternList; //< Ordered set of patterns to search
 
@@ -63,10 +59,6 @@ namespace vbtracker {
     struct LedMeasurement;
     typedef std::vector<LedMeasurement> LedMeasurementList;
     typedef LedMeasurementList::iterator LedMeasurementIterator;
-
-    typedef float Brightness;
-    typedef std::list<Brightness> BrightnessList;
-    typedef std::pair<Brightness, Brightness> BrightnessMinMax;
 
     typedef std::unique_ptr<BeaconBasedPoseEstimator> EstimatorPtr;
     typedef std::unique_ptr<LedIdentifier> LedIdentifierPtr;
@@ -88,44 +80,6 @@ namespace vbtracker {
     /// should be considered fixed - not subject to autocalibration)
     using BeaconIDPredicate = std::function<bool(int)>;
 
-    /// Blob detection configuration parameters
-    struct BlobParams {
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
-        /// pixel units
-        float minDistBetweenBlobs = 3.0f;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
-        /// square pixel units
-        float minArea = 2.0f;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
-        /// is faster than convexity but may be confused by side-views of LEDs.
-        bool filterByCircularity = false;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minCircularity = 0.2f;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
-        /// is a lot more expensive than filterByCircularity
-        bool filterByConvexity = true;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minConvexity = 0.90f;
-
-        /// This is the absolute minimum pixel value that will be considered as
-        /// a possible signal. Images that contain only values below this will
-        /// be totally discarded as containing zero keypoints.
-        double absoluteMinThreshold = 75.;
-        /// This value, in the range (0, 1), is the linear interpolation factor
-        /// between the minimum and maximum value pixel in a frame that will be
-        /// the *minimum* threshold value used by the simple blob detector (if
-        /// it does not drop below absoluteMinThreshold)
-        double minThresholdAlpha = 0.5;
-        /// This value, in the range (0, 1), is the linear interpolation factor
-        /// between the minimum and maximum value pixel in a frame that will be
-        /// the *maximum* threshold value used by the simple blob detector (if
-        /// it does not drop below absoluteMinThreshold)
-        double maxThresholdAlpha = 0.8;
-        /// This is the number of thresholding and contour extraction steps that
-        /// the blob extractor will take between the two threshold extrema, and
-        /// thus greatly impacts performance. Adjust with care.
-        int thresholdSteps = 4;
-    };
     /// General configuration parameters
     struct ConfigParams {
         /// Parameters specific to the blob-detection step of the algorithm
@@ -210,7 +164,7 @@ namespace vbtracker {
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
         /// gets used for a measurement, but it should be enough to keep beacons
         /// from converging in a bad local minimum.
-        double beaconProcessNoise = 0.0000001;
+        double beaconProcessNoise = 1.e-15;
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual

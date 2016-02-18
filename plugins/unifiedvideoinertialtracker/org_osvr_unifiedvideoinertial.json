@@ -1,0 +1,32 @@
+{
+    "deviceVendor": "OSVR",
+    "deviceName": "Unified Video-Based and Inertial Tracker",
+    "author": "Ryan Pavlik <ryan@sensics.com>",
+    "version": 1,
+    "lastModified": "2016-01-22T00:26:46.255Z",
+    "interfaces": {
+        "tracker": {
+            "position": true,
+            "orientation": true,
+            "count": 1
+        }
+    },
+    "semantic": {
+        "hmd": {
+            "$target": {
+                "postrotate": {
+                    "axis": "z",
+                    "degrees": 0
+                },
+                "child": {
+                    "changeBasis": {
+                        "x": "x",
+                        "y": "y",
+                        "z": "z"
+                    },
+                    "child": "tracker/0"
+                }
+            }
+        }
+    }
+}

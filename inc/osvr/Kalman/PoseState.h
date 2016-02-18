@@ -168,9 +168,8 @@ namespace kalman {
             /// Default constructor
             State()
                 : m_state(StateVector::Zero()),
-                  m_errorCovariance(
-                      StateSquareMatrix::
-                          Identity() /** @todo almost certainly wrong */),
+                  m_errorCovariance(StateSquareMatrix::Identity() *
+                                    10 /** @todo almost certainly wrong */),
                   m_orientation(Eigen::Quaterniond::Identity()) {}
             /// set xhat
             void setStateVector(StateVector const &state) { m_state = state; }
@@ -184,6 +183,7 @@ namespace kalman {
             StateSquareMatrix const &errorCovariance() const {
                 return m_errorCovariance;
             }
+            StateSquareMatrix &errorCovariance() { return m_errorCovariance; }
 
             /// Intended for startup use.
             void setQuaternion(Eigen::Quaterniond const &quaternion) {
@@ -193,8 +193,8 @@ namespace kalman {
             void postCorrect() { externalizeRotation(); }
 
             void externalizeRotation() {
-                m_orientation = getCombinedQuaternion();
-                incrementalOrientation(m_state) = Eigen::Vector3d::Zero();
+                setQuaternion(getCombinedQuaternion());
+                incrementalOrientation() = Eigen::Vector3d::Zero();
             }
 
             StateVectorBlock3 position() {
@@ -203,6 +203,16 @@ namespace kalman {
 
             ConstStateVectorBlock3 position() const {
                 return pose_externalized_rotation::position(m_state);
+            }
+
+            StateVectorBlock3 incrementalOrientation() {
+                return pose_externalized_rotation::incrementalOrientation(
+                    m_state);
+            }
+
+            ConstStateVectorBlock3 incrementalOrientation() const {
+                return pose_externalized_rotation::incrementalOrientation(
+                    m_state);
             }
 
             StateVectorBlock3 velocity() {
@@ -227,8 +237,17 @@ namespace kalman {
 
             Eigen::Quaterniond getCombinedQuaternion() const {
                 /// @todo is just quat multiplication OK here? Order right?
-                return (incrementalOrientationToQuat(m_state) * m_orientation)
-                    .normalized();
+                return incrementalOrientationToQuat(m_state).normalized() *
+                       m_orientation;
+            }
+
+            /// Get the position and quaternion combined into a single isometry
+            /// (transformation)
+            Eigen::Isometry3d getIsometry() const {
+                Eigen::Isometry3d ret;
+                ret.fromPositionOrientationScale(position(), getQuaternion(),
+                                                 Eigen::Vector3d::Constant(1));
+                return ret;
             }
 
           private:

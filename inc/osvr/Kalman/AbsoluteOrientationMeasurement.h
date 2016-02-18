@@ -30,6 +30,7 @@
 #include "PoseState.h"
 #include "ExternalQuaternion.h"
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/EigenQuatExponentialMap.h>
 
 // Library/third-party includes
 // - none
@@ -45,45 +46,15 @@ namespace kalman {
     class AbsoluteOrientationBase {
       public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        static const types::DimensionType DIMENSION = 4;
+        static const types::DimensionType DIMENSION = 3;
         using MeasurementVector = types::Vector<DIMENSION>;
         using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
         AbsoluteOrientationBase(Eigen::Quaterniond const &quat,
-                                types::Vector<3> const &eulerVariance)
-            : m_measurement(quat),
-              m_covariance(MeasurementSquareMatrix::Identity()),
-              m_eulerVariance(eulerVariance) {
-            /// The covariance in Quat space is G C G^T, where G is the Jacobian
-            /// of a quaternion with respect to euler angles (evaluated at the
-            /// delta-quaternion in getCovariance) and C is the covariance in
-            /// Euler space.
-            /// Substitutions of w1 = q1 / 2 and so forth were made to allow
-            /// evaluating the jacobian given a delta quat, rather than small
-            /// euler angles
-            m_covariance.topLeftCorner<3, 3>().diagonal() =
-                m_eulerVariance / 4.;
-
-#if 1
-            // This is not actually what the above comment describes - that was
-            // giving too
-            // small of values. This is a wild guess.
-            m_covariance(3, 3) = m_eulerVariance.sum();
-#endif
-        }
+                                types::Vector<3> const &emVariance)
+            : m_quat(quat), m_covariance(emVariance.asDiagonal()) {}
 
         template <typename State>
-        MeasurementSquareMatrix const &getCovariance(State const &s) {
-#if 0
-            const types::Vector<3> q = getResidual(s).template head<3>();
-            const types::Vector<3> q2 = (q.array() * q.array()).matrix();
-            double denom = -16 * std::sqrt(1 - (q.dot(q) / 16.));
-            const types::Vector<3> edge =
-                (q.array() * m_eulerVariance.array() / denom).matrix();
-            m_covariance.topRightCorner<3, 1>() = edge;
-            m_covariance.bottomLeftCorner<1, 3>() = edge.transpose();
-            m_covariance(3, 3) =
-                (q2.dot(m_eulerVariance)) / (64. - 4. * (q2.sum()));
-#endif
+        MeasurementSquareMatrix const &getCovariance(State const &) {
             return m_covariance;
         }
 
@@ -96,26 +67,27 @@ namespace kalman {
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
-            const Eigen::Quaterniond residual =
-                m_measurement * prediction.conjugate();
-            return residual.coeffs();
+            const Eigen::Quaterniond residual = m_quat * prediction.inverse();
+            // Use the dot product to choose which of the two equivalent
+            // quaternions to get the log of for the residual.
+            const Eigen::Quaterniond equivalentResidual =
+                Eigen::Quaterniond(-(residual.coeffs()));
+            auto dot = prediction.dot(residual);
+            return dot >= 0 ? util::quat_exp_map(residual).ln()
+                            : util::quat_exp_map(equivalentResidual).ln();
         }
         /// Convenience method to be able to store and re-use measurements.
-        void setMeasurement(Eigen::Quaterniond const &quat) {
-            m_measurement = quat;
-        }
+        void setMeasurement(Eigen::Quaterniond const &quat) { m_quat = quat; }
 
         /// Get the block of jacobian that is non-zero: your subclass will have
         /// to put it where it belongs for each particular state type.
-        types::Matrix<DIMENSION, 3>
-            getJacobianWRTIncRot(types::Vector<3> const &incRot) const {
-            return external_quat::jacobian(incRot);
+        types::Matrix<DIMENSION, 3> getJacobianBlock() const {
+            return Eigen::Matrix3d::Identity();
         }
 
       private:
-        Eigen::Quaterniond m_measurement;
+        Eigen::Quaterniond m_quat;
         MeasurementSquareMatrix m_covariance;
-        types::Vector<3> m_eulerVariance;
     };
 
     /// This is the subclass of AbsoluteOrientationBase: only explicit
@@ -142,8 +114,7 @@ namespace kalman {
             using namespace pose_externalized_rotation;
             using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
             Jacobian ret = Jacobian::Zero();
-            ret.block<DIMENSION, 3>(0, 3) = Base::getJacobianWRTIncRot(
-                incrementalOrientation(s.stateVector()));
+            ret.block<DIMENSION, 3>(0, 3) = Base::getJacobianBlock();
             return ret;
         }
     };

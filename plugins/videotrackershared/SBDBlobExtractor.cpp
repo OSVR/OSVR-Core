@@ -36,17 +36,17 @@
 
 namespace osvr {
 namespace vbtracker {
-
+#if 0
     /// This class used to be the "keypoint enhancer" - it now is used to
     /// after-the-fact extract additional data per keypoint.
     class KeypointDetailer {
       public:
         using ContourType = std::vector<cv::Point2i>;
-        std::vector<LedMeasurement>
+        LedMeasurementVec
         augmentKeypoints(cv::Mat const &grayImage,
                          std::vector<cv::KeyPoint> const &foundKeyPoints) {
 
-            std::vector<LedMeasurement> ret;
+            LedMeasurementVec ret;
             cv::Mat greyCopy = grayImage.clone();
 
             /// Reset the flood fill mask to just have a one-pixel border on the
@@ -90,7 +90,7 @@ namespace vbtracker {
             // results
 
             /// Initialize return value
-            auto ret = static_cast<LedMeasurement>(origKeypoint);
+            auto ret = LedMeasurement{origKeypoint, grayImage.size()};
             if (m_area <= 0) {
                 // strange...
                 return ret;
@@ -186,10 +186,11 @@ namespace vbtracker {
         cv::Moments m_moments;
         /// @}
     };
+#endif
 
-    SBDBlobExtractor::SBDBlobExtractor(ConfigParams const &params)
-        : m_params(params), m_keypointDetailer(new KeypointDetailer) {
-        auto &p = m_params.blobParams;
+    SBDBlobExtractor::SBDBlobExtractor(BlobParams const &blobParams)
+        : m_params(blobParams) {
+        auto &p = m_params;
         /// Set up blob params
         m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
 
@@ -219,7 +220,7 @@ namespace vbtracker {
         /// Needed here where KeypointDetailer is defined.
     }
 
-    std::vector<LedMeasurement> const &
+    LedMeasurementVec const &
     SBDBlobExtractor::extractBlobs(cv::Mat const &grayImage) {
         m_latestMeasurements.clear();
         m_lastGrayImage = grayImage.clone();
@@ -240,13 +241,15 @@ namespace vbtracker {
         m_latestMeasurements =
             m_keypointDetailer->augmentKeypoints(thresholded, m_keyPoints);
 #endif
-
+        cv::Size sz = grayImage.size();
         /// Use the LedMeasurement constructor to do the conversion from
         /// keypoint to measurement right now.
         m_latestMeasurements.resize(m_keyPoints.size());
-        std::transform(
-            begin(m_keyPoints), end(m_keyPoints), begin(m_latestMeasurements),
-            [](cv::KeyPoint const &kp) { return LedMeasurement{kp}; });
+        std::transform(begin(m_keyPoints), end(m_keyPoints),
+                       begin(m_latestMeasurements),
+                       [sz](cv::KeyPoint const &kp) {
+                           return LedMeasurement{kp, sz};
+                       });
 
         return m_latestMeasurements;
     }
@@ -259,7 +262,7 @@ namespace vbtracker {
         // Construct a blob detector and find the blobs in the image.
         double minVal, maxVal;
         cv::minMaxIdx(grayImage, &minVal, &maxVal);
-        auto &p = m_params.blobParams;
+        auto &p = m_params;
         if (maxVal < p.absoluteMinThreshold) {
             /// empty image, early out!
             return;
@@ -349,11 +352,12 @@ namespace vbtracker {
         }
         return m_debugBlobImage;
     }
-
+#if 0
     cv::Mat const &SBDBlobExtractor::getDebugExtraImage() {
+
         m_extraImage = m_keypointDetailer->getDebugImage().clone();
         return m_extraImage;
     }
-
+#endif
 } // namespace vbtracker
 } // namespace osvr

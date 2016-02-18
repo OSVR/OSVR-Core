@@ -1,0 +1,52 @@
+{
+    /*
+    This configuration supports video (so-called "positional") and IMU fusion tracking,
+    in addition to orientation-only tracking, with the OSVR HDK.
+    It is configured for RenderManager applications in
+    direct mode (portrait) on HDK 1.3 optics.
+    */
+    "display": "displays/OSVR_HDK_1_3.json",
+    "renderManagerConfig": "sample-configs/renderManager.direct.portrait.json",
+    "drivers": [{
+        "plugin": "org_osvr_unifiedvideoinertial",
+        "driver": "UnifiedTrackingSystem",
+        "params": {
+            "showDebug": true,
+            "includeRearPanel": true,
+            "headCircumference": 55.75,
+            "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
+            "cameraIsForward": true,
+            "measurementVarianceScaleFactor": 5e-2,
+            "highResidualVariancePenalty": 15.0,
+            "processNoiseAutocorrelation": [4.14e-6, 4.14e-6, 4.14e-6, 1e-2, 1e-2, 1e-2],
+            "beaconProcessNoise": 0,
+            /*"initialBeaconError": 0,*/
+            "initialBeaconError": 1e-6,
+            "cameraPosition": [0, 1.2, -0.5],
+            "shouldSkipBrightLeds": true,
+            "brightLedVariancePenalty": 16,
+            "offsetToCentroid": false,
+            /*"manualBeaconOffset": [0,0,0.04141],*/
+            "manualBeaconOffset": [0,0,0],
+            "linearVelocityDecayCoefficient": 1,
+            "angularVelocityDecayCoefficient": 1,
+            "imu": {
+                "useOrientation": true,
+                "orientationVariance": 5e-3,
+                "useAngularVelocity": false,
+                "angularVelocityVariance": 1e-1
+            }
+        }
+    }],
+    "aliases": {
+        "/headSpace": {
+            "translate": [0.0, 0.0, 0.04141],
+            "child": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd"
+        },
+        "/me/head": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd",
+        "/hmd": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/0",
+        "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/1",
+        "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/2",
+        "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/3"
+    }
+}

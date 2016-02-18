@@ -26,6 +26,7 @@
 #include "VideoBasedTracker.h"
 #include "cvToEigen.h"
 #include "CameraDistortionModel.h"
+#include "UndistortMeasurements.h"
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/CSV.h>
 
@@ -43,7 +44,7 @@ namespace osvr {
 namespace vbtracker {
 
     VideoBasedTracker::VideoBasedTracker(ConfigParams const &params)
-        : m_params(params), m_blobExtractor(params) {}
+        : m_params(params), m_blobExtractor(params.blobParams) {}
 
     // This version requires YOU to add your beacons! You!
     void VideoBasedTracker::addSensor(
@@ -126,28 +127,6 @@ namespace vbtracker {
         }
         std::cout << "Data dump complete." << std::endl;
         m_debugFrame++;
-    }
-
-    /// Perform the undistortion of LED measurements.
-    inline std::vector<LedMeasurement>
-    undistortLeds(std::vector<LedMeasurement> const &distortedMeasurements,
-                  CameraParameters const &camParams) {
-        std::vector<LedMeasurement> ret;
-        ret.resize(distortedMeasurements.size());
-        auto distortionModel = CameraDistortionModel{
-            Eigen::Vector2d{camParams.focalLengthX(), camParams.focalLengthY()},
-            cvToVector(camParams.principalPoint()),
-            Eigen::Vector3d{camParams.k1(), camParams.k2(), camParams.k3()}};
-        auto ledUndistort = [&distortionModel](LedMeasurement const &meas) {
-            LedMeasurement ret{meas};
-            Eigen::Vector2d undistorted = distortionModel.undistortPoint(
-                cvToVector(meas.loc).cast<double>());
-            ret.loc = vecToPoint(undistorted.cast<float>());
-            return ret;
-        };
-        std::transform(begin(distortedMeasurements), end(distortedMeasurements),
-                       begin(ret), ledUndistort);
-        return ret;
     }
 
     bool VideoBasedTracker::processImage(cv::Mat frame, cv::Mat grayImage,
