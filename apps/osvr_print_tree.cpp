@@ -58,6 +58,12 @@ struct Options {
 using osvr::common::PathNode;
 namespace elements = osvr::common::elements;
 
+/// This functor is applied at each node to get the (type-safe variant) value
+/// out of it (hence the numerous overloads of the function call operator - one
+/// for each node element type we want to treat differently.)
+///
+/// As a "visitor", this visitor visits just a single node - it's used by a
+/// simple lambda to visit every node in the path tree.
 class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
   public:
     /// @brief Constructor
@@ -201,7 +207,10 @@ int main(int argc, char *argv[]) {
     }
 
     TreeNodePrinter printer{opts};
-    /// Now traverse for output
+    /// Now traverse for output - traverse every node in the path tree and apply
+    /// the node visitor to get the type-safe variant data out of the nodes. The
+    /// lambda will be called (and thus the TreeNodePrinter applied) at every
+    /// PathNode in the tree.
     osvr::util::traverseWith(
         pathTree.getRoot(), [&printer](PathNode const &node) {
             osvr::common::applyPathNodeVisitor(printer, node);
