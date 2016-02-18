@@ -4,8 +4,10 @@ osvr_convert_json(org_osvr_unifiedvideoinertial_json
     org_osvr_unifiedvideoinertial.json
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_unifiedvideoinertial_json.h")
 
-# Be able to find our generated header file.
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+# Be able to find our generated header file, have shared files find us, and have us find shared files.
+include_directories("${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${OSVR_VIDEOTRACKERSHARED_INCLUDE_DIR}")
 
 # Make sure we can link these upcoming static libraries into a shared lib
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -25,11 +27,8 @@ add_library(uvbi-core STATIC
     BeaconSetupData.h
     BodyTargetInterface.h
     CannedIMUMeasurement.h
-    CameraDistortionModel.h
-    CameraParameters.h
     ConfigParams.cpp
     ConfigParams.h
-    cvToEigen.h
     ForEachTracked.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
@@ -43,7 +42,6 @@ add_library(uvbi-core STATIC
     LedIdentifier.cpp
     LedIdentifier.h
     ModelTypes.h
-    OptionalStream.h
     PoseEstimator_RANSAC.cpp
     PoseEstimator_RANSAC.h
     PoseEstimator_RANSACKalman.cpp
@@ -53,8 +51,6 @@ add_library(uvbi-core STATIC
     PoseEstimatorTypes.h
     RoomCalibration.cpp
     RoomCalibration.h
-    SBDBlobExtractor.cpp
-    SBDBlobExtractor.h
     SpaceTransformations.h
     StateHistory.h
     TimeValueChrono.h
@@ -71,7 +67,7 @@ add_library(uvbi-core STATIC
     TrackingSystem.cpp
     TrackingSystem.h
     Types.h
-    UndistortMeasurements.h)
+    ${OSVR_VIDEOTRACKERSHARED_SOURCES_CORE})
 target_compile_options(uvbi-core
     PUBLIC
     ${OSVR_CXX11_FLAGS})
@@ -101,14 +97,13 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     org_osvr_unifiedvideoinertial.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_unifiedvideoinertial_json.h"
     ConfigurationParser.h
-    GetOptionalParameter.h
     MakeHDKTrackingSystem.h
-    HDKData.cpp
-    HDKData.h
     ThreadsafeBodyReporting.cpp
     ThreadsafeBodyReporting.h
     TrackerThread.cpp
-    TrackerThread.h)
+    TrackerThread.h
+    ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA}
+    ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
 
 target_link_libraries(org_osvr_unifiedvideoinertial
     osvr::osvrAnalysisPluginKit

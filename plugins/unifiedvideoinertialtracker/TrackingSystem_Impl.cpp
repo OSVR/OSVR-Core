@@ -37,7 +37,7 @@ namespace osvr {
 namespace vbtracker {
 
     TrackingSystem::Impl::Impl(ConfigParams const &params)
-        : blobExtractor(new SBDBlobExtractor(params)),
+        : blobExtractor(new SBDBlobExtractor(params.blobParams)),
           debugDisplay(new TrackingDebugDisplay(params)),
           calib(Eigen::Vector3d(params.cameraPosition), params.cameraIsForward),
           cameraPose(Eigen::Isometry3d::Identity()),

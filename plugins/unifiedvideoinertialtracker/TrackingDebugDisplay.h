@@ -28,6 +28,7 @@
 // Internal Includes
 #include "ConfigParams.h"
 #include "TrackingSystem_Impl.h"
+#include "LED.h"
 
 // Library/third-party includes
 #include <util/Stride.h>

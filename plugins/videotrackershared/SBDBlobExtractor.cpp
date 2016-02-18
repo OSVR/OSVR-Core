@@ -36,7 +36,7 @@
 
 namespace osvr {
 namespace vbtracker {
-
+#if 0
     /// This class used to be the "keypoint enhancer" - it now is used to
     /// after-the-fact extract additional data per keypoint.
     class KeypointDetailer {
@@ -186,10 +186,11 @@ namespace vbtracker {
         cv::Moments m_moments;
         /// @}
     };
+#endif
 
-    SBDBlobExtractor::SBDBlobExtractor(ConfigParams const &params)
-        : m_params(params), m_keypointDetailer(new KeypointDetailer) {
-        auto &p = m_params.blobParams;
+    SBDBlobExtractor::SBDBlobExtractor(BlobParams const &blobParams)
+        : m_params(blobParams) {
+        auto &p = m_params;
         /// Set up blob params
         m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
 
@@ -261,7 +262,7 @@ namespace vbtracker {
         // Construct a blob detector and find the blobs in the image.
         double minVal, maxVal;
         cv::minMaxIdx(grayImage, &minVal, &maxVal);
-        auto &p = m_params.blobParams;
+        auto &p = m_params;
         if (maxVal < p.absoluteMinThreshold) {
             /// empty image, early out!
             return;
@@ -351,11 +352,12 @@ namespace vbtracker {
         }
         return m_debugBlobImage;
     }
-
+#if 0
     cv::Mat const &SBDBlobExtractor::getDebugExtraImage() {
+
         m_extraImage = m_keypointDetailer->getDebugImage().clone();
         return m_extraImage;
     }
-
+#endif
 } // namespace vbtracker
 } // namespace osvr

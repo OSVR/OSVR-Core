@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "LedIdentifier.h"
+#include "LedMeasurement.h"
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>

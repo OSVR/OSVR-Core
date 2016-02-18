@@ -22,30 +22,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_ImageProcessing_h_GUID_3E426FCE_BED1_4DAC_0669_70D55A14A507
-#define INCLUDED_ImageProcessing_h_GUID_3E426FCE_BED1_4DAC_0669_70D55A14A507
+#ifndef INCLUDED_BasicTypes_h_GUID_50E022F0_DE76_4DA9_68DD_D503E4165E36
+#define INCLUDED_BasicTypes_h_GUID_50E022F0_DE76_4DA9_68DD_D503E4165E36
 
 // Internal Includes
-#include "LedMeasurement.h"
-#include "CameraParameters.h"
+// - none
 
 // Library/third-party includes
-#include <osvr/Util/TimeValue.h>
 #include <opencv2/core/core.hpp>
 
 // Standard includes
-#include <memory>
+#include <list>
+#include <utility>
+#include <string>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
-    struct ImageProcessingOutput {
-        util::time::TimeValue tv;
-        LedMeasurementVec ledMeasurements;
-        cv::Mat frame;
-        cv::Mat frameGray;
-        CameraParameters camParams;
-    };
-    using ImageOutputDataPtr = std::unique_ptr<ImageProcessingOutput>;
+
+    typedef float Brightness;
+    typedef std::list<Brightness> BrightnessList;
+    typedef std::pair<Brightness, Brightness> BrightnessMinMax;
+
+    /// Pattern repeated almost twice
+    typedef std::string LedPatternWrapped;
+
+    typedef std::vector<cv::Point3f> Point3Vector;
+
+    typedef std::vector<cv::Vec3d> Vec3Vector;
+
 } // namespace vbtracker
 } // namespace osvr
-#endif // INCLUDED_ImageProcessing_h_GUID_3E426FCE_BED1_4DAC_0669_70D55A14A507
+#endif // INCLUDED_BasicTypes_h_GUID_50E022F0_DE76_4DA9_68DD_D503E4165E36

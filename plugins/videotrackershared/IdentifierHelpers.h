@@ -26,7 +26,7 @@
 #define INCLUDED_IdentifierHelpers_h_GUID_B6F81E02_BE7B_4382_12E5_87296135997D
 
 // Internal Includes
-#include "Types.h"
+#include "BasicTypes.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>

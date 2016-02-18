@@ -26,7 +26,7 @@
 #define INCLUDED_ConfigParams_h_GUID_22101CEF_879B_4781_2733_F5F7AE4E3633
 
 // Internal Includes
-// - none
+#include "BlobParams.h"
 
 // Library/third-party includes
 // - none
@@ -36,44 +36,6 @@
 
 namespace osvr {
 namespace vbtracker {
-    /// Blob detection configuration parameters
-    struct BlobParams {
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
-        /// pixel units
-        float minDistBetweenBlobs = 3.0f;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
-        /// square pixel units
-        float minArea = 2.0f;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
-        /// is faster than convexity but may be confused by side-views of LEDs.
-        bool filterByCircularity = false;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minCircularity = 0.2f;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - this
-        /// is a lot more expensive than filterByCircularity
-        bool filterByConvexity = true;
-        /// Same meaning as the parameter to OpenCV's SimpleBlobDetector
-        float minConvexity = 0.90f;
-
-        /// This is the absolute minimum pixel value that will be considered as
-        /// a possible signal. Images that contain only values below this will
-        /// be totally discarded as containing zero keypoints.
-        double absoluteMinThreshold = 75.;
-        /// This value, in the range (0, 1), is the linear interpolation factor
-        /// between the minimum and maximum value pixel in a frame that will be
-        /// the *minimum* threshold value used by the simple blob detector (if
-        /// it does not drop below absoluteMinThreshold)
-        double minThresholdAlpha = 0.5;
-        /// This value, in the range (0, 1), is the linear interpolation factor
-        /// between the minimum and maximum value pixel in a frame that will be
-        /// the *maximum* threshold value used by the simple blob detector (if
-        /// it does not drop below absoluteMinThreshold)
-        double maxThresholdAlpha = 0.8;
-        /// This is the number of thresholding and contour extraction steps that
-        /// the blob extractor will take between the two threshold extrema, and
-        /// thus greatly impacts performance. Adjust with care.
-        int thresholdSteps = 4;
-    };
 
     struct IMUInputParams {
         std::string path =

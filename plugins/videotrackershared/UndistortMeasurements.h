@@ -26,7 +26,7 @@
 #define INCLUDED_UndistortMeasurements_h_GUID_EBA50677_306F_4985_BC70_393C58140FE4
 
 // Internal Includes
-#include "LED.h"
+#include "LedMeasurement.h"
 #include "cvToEigen.h"
 #include "CameraParameters.h"
 #include "CameraDistortionModel.h"

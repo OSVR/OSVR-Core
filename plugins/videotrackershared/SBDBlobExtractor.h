@@ -26,15 +26,14 @@
 #define INCLUDED_SBDBlobExtractor_h_GUID_E67E1F86_F827_48A3_5FA2_F9F241BA79AF
 
 // Internal Includes
-#include "Types.h"
-#include "LED.h"
+#include "LedMeasurement.h"
+#include "BlobParams.h"
 
 // Library/third-party includes
 #include <opencv2/features2d/features2d.hpp>
 
 // Standard includes
 #include <vector>
-#include <memory>
 
 namespace osvr {
 namespace vbtracker {
@@ -43,27 +42,30 @@ namespace vbtracker {
     /// A class performing blob-extraction duties on incoming frames.
     class SBDBlobExtractor {
       public:
-        explicit SBDBlobExtractor(ConfigParams const &params);
+        explicit SBDBlobExtractor(BlobParams const &blobParams);
         ~SBDBlobExtractor();
         LedMeasurementVec const &extractBlobs(cv::Mat const &grayImage);
 
         cv::Mat const &getDebugThresholdImage();
 
         cv::Mat const &getDebugBlobImage();
+#if 0
         cv::Mat const &getDebugExtraImage();
-
+#endif
       private:
         void getKeypoints(cv::Mat const &grayImage);
         cv::Mat generateDebugThresholdImage() const;
         cv::Mat generateDebugBlobImage() const;
 
-        ConfigParams m_params;
+        BlobParams m_params;
         cv::SimpleBlobDetector::Params m_sbdParams;
         LedMeasurementVec m_latestMeasurements;
 
         std::vector<cv::KeyPoint> m_keyPoints;
 
+#if 0
         std::unique_ptr<KeypointDetailer> m_keypointDetailer;
+#endif
         cv::Mat m_lastGrayImage;
 
         bool m_debugThresholdImageDirty = true;
@@ -71,8 +73,9 @@ namespace vbtracker {
 
         bool m_debugBlobImageDirty = true;
         cv::Mat m_debugBlobImage;
-
+#if 0
         cv::Mat m_extraImage;
+#endif
     };
 } // namespace vbtracker
 } // namespace osvr

@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "Types.h"
+#include "LedMeasurement.h"
 #include "BeaconIdTypes.h"
 #include "BodyIdTypes.h"
 #include "BeaconSetupData.h"
