@@ -40,7 +40,8 @@ if(WIN32)
     target_link_libraries(${LIBNAME_FULL}
         PRIVATE
         wbemuuid
-        com_smart_pointer)
+        com_smart_pointer
+        comutils)
 endif()
 if(APPLE)
     # find_library must be used for OS X frameworks
