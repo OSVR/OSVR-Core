@@ -33,13 +33,16 @@
 // - none
 
 // Standard includes
-// - none
+#include <vector>
+#include <string>
 
 namespace osvr {
 namespace common {
     /// @brief Traverse the given path tree, resolving all aliases found to
     /// fully populate any generated sensor targets.
-    OSVR_COMMON_EXPORT void resolveFullTree(PathTree &tree);
+    ///
+    /// @return A vector of paths that are aliases that could not be resolved.
+    OSVR_COMMON_EXPORT std::vector<std::string> resolveFullTree(PathTree &tree);
 } // namespace common
 } // namespace osvr
 

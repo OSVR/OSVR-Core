@@ -30,17 +30,30 @@
 #include <osvr/Util/TreeTraversalVisitor.h>
 
 // Library/third-party includes
-// - none
+#include <boost/variant.hpp>
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace common {
-    void resolveFullTree(PathTree &tree) {
-        osvr::util::traverseWith(tree.getRoot(), [&tree](PathNode const &node) {
-            resolveTreeNode(tree, getFullPath(node));
-        });
+    inline bool isNodeAnAlias(PathNode const &node) {
+        return boost::get<elements::AliasElement>(&node.value()) != nullptr;
+    }
+
+    std::vector<std::string> resolveFullTree(PathTree &tree) {
+        std::vector<std::string> badPaths;
+        osvr::util::traverseWith(
+            tree.getRoot(), [&tree, &badPaths](PathNode const &node) {
+                auto fullPath = getFullPath(node);
+                auto result = resolveTreeNode(tree, fullPath);
+                if (!result && isNodeAnAlias(node)) {
+                    // OK, so this is an alias (it should have resolved) and yet
+                    // it didn't. Add the path to the list of bad paths.
+                    badPaths.emplace_back(std::move(fullPath));
+                }
+            });
+        return badPaths;
     }
 } // namespace common
 } // namespace osvr
