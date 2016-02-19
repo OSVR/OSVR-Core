@@ -78,7 +78,7 @@ namespace vbtracker {
         return Eigen::Vector2d(point.x, point.y);
     }
 
-    inline Eigen::Vector3d cvToVector3d(cv::InputArray const &vec) {
+    inline Eigen::Vector3d cvToVector3d(cv::InputArray vec) {
         cv::Mat src = vec.getMat();
         CV_Assert(src.type() == CV_64FC1);
         Eigen::Vector3d ret;
