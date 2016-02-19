@@ -45,6 +45,9 @@
 #include <iomanip>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <string>
+#include <unordered_set>
 
 struct Options {
     bool showAliasSource;
@@ -67,10 +70,11 @@ namespace elements = osvr::common::elements;
 class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
   public:
     /// @brief Constructor
-    TreeNodePrinter(Options opts)
+    TreeNodePrinter(Options opts, std::vector<std::string> const &badAliases)
         : boost::static_visitor<>(), m_opts(opts),
           m_maxTypeLen(elements::getMaxTypeNameLength()), m_os(std::cout),
-          m_indentStream{m_maxTypeLen + 2 + 1 + 2, m_os} {
+          m_indentStream(m_maxTypeLen + 2 + 1 + 2, m_os),
+          m_badAliases(begin(badAliases), end(badAliases)) {
         // Computation for initializing the indent stream above:
         // Indents type name size, +2 for the brackets, +1 for the space, and +2
         // so it doesn't line up with the path.
@@ -92,6 +96,14 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
     /// @brief Print aliases
     void operator()(PathNode const &node, elements::AliasElement const &elt) {
         outputBasics(node, elt) << std::endl;
+
+        /// Check to see if this alias fully resolved, and warn if it didn't.
+        auto fullPath = osvr::common::getFullPath(node);
+        if (m_badAliases.find(fullPath) != m_badAliases.end()) {
+            m_indentStream << "WARNING: this alias does not fully resolve to a "
+                              "device/sensor!\n";
+        }
+
         if (m_opts.showAliasSource) {
             m_indentStream << "-> " << elt.getSource() << std::endl;
         }
@@ -141,6 +153,9 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
     size_t m_maxTypeLen;
     std::ostream &m_os;
     osvr::util::IndentingStream m_indentStream;
+
+    /// The set of paths that are aliases that don't completely resolve.
+    std::unordered_set<std::string> m_badAliases;
 };
 
 int main(int argc, char *argv[]) {
@@ -185,6 +200,8 @@ int main(int argc, char *argv[]) {
     }
 
     osvr::common::PathTree pathTree;
+    std::vector<std::string> badAliases;
+
     {
         /// We only actually need the client open for long enough to get the
         /// path tree and clone it.
@@ -202,11 +219,12 @@ int main(int argc, char *argv[]) {
         }
         /// Get a non-const copy of the path tree.
         osvr::common::clonePathTree(context.get()->getPathTree(), pathTree);
-        /// Resolve all aliases
-        osvr::common::resolveFullTree(pathTree);
+        /// Resolve all aliases, keeping track of those that don't fully
+        /// resolve.
+        badAliases = osvr::common::resolveFullTree(pathTree);
     }
 
-    TreeNodePrinter printer{opts};
+    TreeNodePrinter printer{opts, badAliases};
     /// Now traverse for output - traverse every node in the path tree and apply
     /// the node visitor to get the type-safe variant data out of the nodes. The
     /// lambda will be called (and thus the TreeNodePrinter applied) at every
