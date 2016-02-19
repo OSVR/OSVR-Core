@@ -107,7 +107,7 @@ inline Vector3d vecFromQuatlib(QuatlibQuatArray const &arr) {
 /// @}
 
 inline std::string formatAngleAxis(double angle, Eigen::Vector3d const &axis) {
-    auto os = std::ostringstream{};
+    std::ostringstream os;
     os << "Angle " << angle << ", Axis " << axis.transpose();
     return os.str();
 }
