@@ -49,7 +49,7 @@ namespace usbserial {
         /// @brief RAII wrapper for initializing/uninitializing COM.
         class ComRAII : boost::noncopyable {
           public:
-            ComRAII() : m_failed(false) {
+            ComRAII() {
                 auto result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
                 if (FAILED(result)) {
                     m_failed = true;
@@ -62,7 +62,7 @@ namespace usbserial {
             bool failed() const { return m_failed; }
 
           private:
-            bool m_failed;
+            bool m_failed = false;
         };
     } // namespace
 
