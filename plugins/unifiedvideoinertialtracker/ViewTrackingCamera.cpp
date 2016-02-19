@@ -90,8 +90,9 @@ int main(int argc, char *argv[]) {
     }
     auto FRAME_DISPLAY_STRIDE = 3u;
     if (argc > 1) {
-        auto is = std::istringstream{argv[1]};
-        if (is >> FRAME_DISPLAY_STRIDE) {
+        std::stringstream ss;
+        ss << argv[1];
+        if (ss >> FRAME_DISPLAY_STRIDE) {
             std::cout << "Custom display stride passed: "
                       << FRAME_DISPLAY_STRIDE << std::endl;
         } else {
