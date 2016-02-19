@@ -56,9 +56,8 @@ namespace usbserial {
                 }
             }
             ~ComRAII() {
-                if (!m_failed) {
-                    CoUninitialize();
-                }
+                // Must call, even if it failed.
+                CoUninitialize();
             }
             bool failed() const { return m_failed; }
 
