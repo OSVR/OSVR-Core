@@ -9,6 +9,7 @@
 */
 
 /** @page TopicTools Included tools
+  - @subpage OSVRResetYaw
   - @subpage OSVRPrintTree
   - @subpage PathTreeExport
   - @subpage OSVRListUSBSerial
