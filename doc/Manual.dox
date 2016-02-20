@@ -11,6 +11,7 @@
 /** @page TopicTools Included tools
   - @subpage OSVRPrintTree
   - @subpage PathTreeExport
+  - @subpage OSVRListUSBSerial
 */
 
 /** @page PathTreeExport Path Tree Export tool for visualizing the OSVR system
