@@ -73,55 +73,42 @@ namespace usbserial {
             bool m_failed = false;
         };
 
-        /// Convert hex, such as that found in a VID:PID string, to the
-        /// corresponding 16-bit unsigned int.
-        inline uint16_t hexToInt(std::string const &str) {
-            uint16_t ret;
-            std::stringstream ss;
-            ss << std::hex << str;
-            ss >> ret;
-            return ret;
-        }
-
-        class VidPidExtractor {
+        /// Class to contain the workings of extracting VID and PID from a
+        /// hardware ID, which are similar and repetitive.
+        ///
+        /// Can be (intended to be) used for multiple hardware ID strings.
+        class USBVidPidExtractor {
           public:
-            VidPidExtractor()
-                : m_vidRegex("VID_([[:xdigit:]]{4})"),
-                  m_pidRegex("PID_([[:xdigit:]]{4})") {}
-            static const uint16_t INVALID_ID = 0xffff;
-            uint16_t getVid(std::string const &hardwareId) {
-                return m_implementation(hardwareId, m_vidRegex);
-            }
-            uint16_t getPid(std::string const &hardwareId) {
-                return m_implementation(hardwareId, m_pidRegex);
+            USBVidPidExtractor()
+                : m_vidPidRegex(
+                      "USB.VID_([[:xdigit:]]{4})&PID_([[:xdigit:]]{4})") {}
+
+            boost::optional<std::pair<uint16_t, uint16_t>>
+            getVidPid(std::string const &hardwareId) {
+                std::smatch m;
+                if (!std::regex_search(hardwareId, m, m_vidPidRegex)) {
+                    // Couldn't find it - that's weird.
+                    // Might not be a USB serial port (could be a "regular" one)
+                    return boost::none;
+                }
+                // first submatch is vid, second submatch is pid.
+                return std::make_pair(m_hexToInt(m.str(1)),
+                                      m_hexToInt(m.str(2)));
             }
 
           private:
-            uint16_t m_implementation(std::string const &hardwareId,
-                                      std::regex const &pattern) {
-                std::smatch m;
-                auto found = std::regex_search(hardwareId, m, pattern);
-                if (!found) {
-                    return INVALID_ID;
-                }
-                // the first sub-match is the hex we want
-                return m_hexToInt(m[1].str());
-            }
             /// Convert hex, such as that found in a VID:PID string, to the
             /// corresponding 16-bit unsigned int.
             uint16_t m_hexToInt(std::string const &str) {
                 m_ss.clear();
-                uint16_t ret = INVALID_ID;
+                uint16_t ret;
                 m_ss << std::hex << str;
                 m_ss >> ret;
                 return ret;
             }
 
-            /// @name Regexes to extract the hex VID and PID from a string.
-            /// @{
-            std::regex m_vidRegex;
-            std::regex m_pidRegex;
-            /// @}
+            /// @name Regex to extract the hex VID and PID from a string.
+            std::regex m_vidPidRegex;
 
             /// String stream used to convert the hex string to an int.
             std::stringstream m_ss;
@@ -231,7 +218,7 @@ namespace usbserial {
             return devices;
         }
 
-        VidPidExtractor vidPidExtractor;
+        USBVidPidExtractor vidPidExtractor;
 
         intrusive_ptr<IWbemClassObject> wbemClassObj;
         ULONG numObjRet = 0;
@@ -270,13 +257,17 @@ namespace usbserial {
                 }
             }
 
+            auto vidPid = vidPidExtractor.getVidPid(hardwareID);
+            if (!vidPid) {
+                /// Couldn't parse the VID/PID - may not be a USB serial port.
+                continue;
+            }
+
             /// On Windows (NT-based), the "full path" to a serial port with a
             /// COM port name is \\.\COMx (where x is a number)
             std::string path = "\\\\.\\" + port;
 
-            devices.emplace_back(vidPidExtractor.getVid(hardwareID),
-                                 vidPidExtractor.getPid(hardwareID),
-                                 path, port);
+            devices.emplace_back(vidPid->first, vidPid->second, path, port);
         }
 
         return devices;

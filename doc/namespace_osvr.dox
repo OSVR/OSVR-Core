@@ -1,0 +1,5 @@
+/** @brief The main namespace for all C++ elements of the framework, internal and external.
+*/
+namespace osvr {
+
+}
