@@ -57,6 +57,12 @@ namespace pluginhost {
         }
     }
 
+    template <typename MapType>
+    static inline bool isPluginLoaded(MapType const &regMap,
+                                      std::string const &pluginName) {
+        return (regMap.find(pluginName) != end(regMap));
+    }
+
     static inline bool tryLoadingPlugin(libfunc::PluginHandle &plugin,
                                         std::string const &name,
                                         OSVR_PluginRegContext ctx,
@@ -77,6 +83,11 @@ namespace pluginhost {
     }
 
     void RegistrationContext::loadPlugin(std::string const &pluginName) {
+        if (isPluginLoaded(m_regMap, pluginName)) {
+            throw std::runtime_error("Already loaded a plugin named " +
+                                     pluginName);
+        }
+
         const std::string pluginPathName = pluginhost::findPlugin(pluginName);
         if (pluginPathName.empty()) {
             throw std::runtime_error("Could not find plugin named " +
