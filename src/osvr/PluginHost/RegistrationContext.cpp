@@ -105,9 +105,10 @@ namespace pluginhost {
                                      pluginName);
         }
 
-        const std::string pluginPathNameNoExt =
-            (boost::filesystem::path(pluginPathName).parent_path() /
-             boost::filesystem::path(pluginPathName).stem()).generic_string();
+        const auto pluginPathNameNoExt =
+            (fs::path(pluginPathName).parent_path() /
+             fs::path(pluginPathName).stem())
+                .generic_string();
         PluginRegPtr pluginReg(
             PluginSpecificRegistrationContext::create(pluginName));
         pluginReg->setParent(*this);
@@ -135,10 +136,8 @@ namespace pluginhost {
         // Load all of the non-.manualload plugins
         for (const auto &plugin : pluginPathNames) {
             OSVR_DEV_VERBOSE("Examining plugin '" << plugin << "'...");
-            const std::string pluginBaseName = boost::filesystem::path(plugin)
-                                                   .filename()
-                                                   .stem()
-                                                   .generic_string();
+            const auto pluginBaseName =
+                fs::path(plugin).filename().stem().generic_string();
             if (boost::iends_with(pluginBaseName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
                 OSVR_DEV_VERBOSE(
                     "Ignoring manual-load plugin: " << pluginBaseName);
