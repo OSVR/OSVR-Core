@@ -120,7 +120,7 @@ namespace pluginhost {
         return paths;
     }
 
-    FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext) {
+    FileList getAllFilesWithExt(SearchPath const& dirPath, const std::string &ext) {
         FileList filesPaths;
 
         for (const auto &path : dirPath) {
@@ -146,8 +146,7 @@ namespace pluginhost {
         return filesPaths;
     }
 
-    std::string findPlugin(const std::string &pluginName) {
-        auto searchPaths = getPluginSearchPath();
+    std::string findPlugin(SearchPath const &searchPaths, const std::string &pluginName) {
         for (const auto &searchPath : searchPaths) {
             if (!fs::exists(searchPath))
                 continue;

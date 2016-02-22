@@ -37,6 +37,7 @@
 // Library/third-party includes
 #include <libfunctionality/LoadPlugin.h>
 #include <boost/filesystem.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -47,7 +48,16 @@
 
 namespace osvr {
 namespace pluginhost {
-    RegistrationContext::RegistrationContext() {}
+
+    namespace fs = boost::filesystem;
+
+    struct RegistrationContext::Impl : private boost::noncopyable {
+        /// constructor - creates and caches the plugin search path
+        Impl() : pluginPaths(pluginhost::getPluginSearchPath()) {}
+
+        const std::vector<std::string> pluginPaths;
+    };
+    RegistrationContext::RegistrationContext() : m_impl(new Impl) {}
 
     RegistrationContext::~RegistrationContext() {
         // Reset the plugins in reverse order.
@@ -88,7 +98,8 @@ namespace pluginhost {
                                      pluginName);
         }
 
-        const std::string pluginPathName = pluginhost::findPlugin(pluginName);
+        const std::string pluginPathName =
+            pluginhost::findPlugin(m_impl->pluginPaths, pluginName);
         if (pluginPathName.empty()) {
             throw std::runtime_error("Could not find plugin named " +
                                      pluginName);
@@ -118,9 +129,8 @@ namespace pluginhost {
 
     void RegistrationContext::loadPlugins() {
         // Build a list of all the plugins we can find
-        auto pluginPaths = pluginhost::getPluginSearchPath();
-        auto pluginPathNames =
-            pluginhost::getAllFilesWithExt(pluginPaths, OSVR_PLUGIN_EXTENSION);
+        auto pluginPathNames = pluginhost::getAllFilesWithExt(
+            m_impl->pluginPaths, OSVR_PLUGIN_EXTENSION);
 
         // Load all of the non-.manualload plugins
         for (const auto &plugin : pluginPathNames) {
