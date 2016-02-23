@@ -38,7 +38,7 @@
 
 int main(int argc, char* argv[])
 {
-    for (auto dev : osvr::usbserial::Enumerator()) {
+    for (auto &&dev : osvr::usbserial::Enumerator()) {
         std::cout << std::setfill('0') << std::setw(4) << std::hex << dev->getVID()
             << ":" << std::setfill('0') << std::setw(4) << std::hex << dev->getPID()
             << " " << dev->getPlatformSpecificPath() << std::endl;
