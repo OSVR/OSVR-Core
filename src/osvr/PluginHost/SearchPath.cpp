@@ -34,12 +34,18 @@
 
 // Standard includes
 #include <vector>
+#include <string>
+#include <algorithm>
 
 namespace osvr {
 namespace pluginhost {
+
+    using boost::filesystem::directory_iterator;
+    using boost::make_iterator_range;
+    namespace fs = boost::filesystem;
+
     SearchPath getPluginSearchPath() {
-        using boost::filesystem::path;
-        auto exeLocation = path{getBinaryLocation()};
+        auto exeLocation = fs::path{getBinaryLocation()};
 #ifdef __ANDROID__
         OSVR_DEV_VERBOSE("Binary location: " << exeLocation);
 #endif
@@ -60,21 +66,32 @@ namespace pluginhost {
 
         // binDir now normalized to PREFIX/bin
 
+        /// This will become our return value.
         SearchPath paths;
+
+        // Lambda to add a path, if it's not already in the list.
+        auto addUniquePath = [&paths](fs::path const &path) {
+            OSVR_DEV_VERBOSE("Adding search path " << path);
+            auto pathString = path.generic_string();
+            if (std::find(begin(paths), end(paths), pathString) == end(paths)) {
+                // if we didn't already add this path, add it now.
+                paths.emplace_back(std::move(pathString));
+            }
+        };
 
 #ifdef OSVR_PLUGINS_UNDER_BINDIR
         // If the plugin directory is a subdirectory of where the binaries are,
         // no need to go up a level before searching.
-        paths.push_back((binDir / OSVR_PLUGIN_SUBDIR).string());
+        addUniquePath(binDir / OSVR_PLUGIN_SUBDIR);
 #endif
 
         // For each component of the compiled-in binary directory, we lop off a
         // component from the binary location we've detected, and add it to the
         // list of possible roots.
         auto root = binDir.parent_path();
-        std::vector<path> rootDirCandidates;
+        std::vector<fs::path> rootDirCandidates;
         {
-            auto compiledBinDir = path{OSVR_BINDIR};
+            auto compiledBinDir = fs::path{OSVR_BINDIR};
             do {
                 rootDirCandidates.push_back(root);
                 root = root.parent_path();
@@ -86,18 +103,16 @@ namespace pluginhost {
         // current working directory, if different from root
         auto currentWorkingDirectory = boost::filesystem::current_path();
         if (currentWorkingDirectory != root) {
-            paths.push_back(
-                (currentWorkingDirectory / OSVR_PLUGIN_DIR).string());
+            addUniquePath(currentWorkingDirectory / OSVR_PLUGIN_DIR);
         }
 #endif
 
         for (auto const &possibleRoot : rootDirCandidates) {
 
 #if defined(_MSC_VER) && defined(CMAKE_INTDIR)
-            paths.push_back(
-                (possibleRoot / OSVR_PLUGIN_DIR / CMAKE_INTDIR).string());
+            addUniquePath(possibleRoot / OSVR_PLUGIN_DIR / CMAKE_INTDIR);
 #endif
-            paths.push_back((possibleRoot / OSVR_PLUGIN_DIR).string());
+            addUniquePath(possibleRoot / OSVR_PLUGIN_DIR);
         }
 
         /// @todo add user's home directory to search path
@@ -105,25 +120,24 @@ namespace pluginhost {
         return paths;
     }
 
-    FileList getAllFilesWithExt(SearchPath dirPath, const std::string &ext) {
+    FileList getAllFilesWithExt(SearchPath const& dirPath, const std::string &ext) {
         FileList filesPaths;
 
         for (const auto &path : dirPath) {
-            using boost::filesystem::directory_iterator;
-            using boost::make_iterator_range;
-            boost::filesystem::path directoryPath(path);
+            fs::path directoryPath(path);
 
             // Make sure that directory exists
-            if (!boost::filesystem::exists(directoryPath)) {
+            if (!fs::exists(directoryPath)) {
                 continue;
             }
 
             // Get a list of files inside the dir that match the extension
             for (const auto &pathName : make_iterator_range(
                      directory_iterator(directoryPath), directory_iterator())) {
-                if (!boost::filesystem::is_regular_file(pathName) ||
-                    pathName.path().extension() != ext)
+                if (!fs::is_regular_file(pathName) ||
+                    pathName.path().extension() != ext) {
                     continue;
+                }
 
                 filesPaths.push_back(pathName.path().generic_string());
             }
@@ -132,24 +146,19 @@ namespace pluginhost {
         return filesPaths;
     }
 
-    std::string findPlugin(const std::string &pluginName) {
-        auto searchPaths = getPluginSearchPath();
+    std::string findPlugin(SearchPath const &searchPaths, const std::string &pluginName) {
         for (const auto &searchPath : searchPaths) {
-            if (!boost::filesystem::exists(searchPath))
+            if (!fs::exists(searchPath))
                 continue;
-
-            using boost::filesystem::directory_iterator;
-            using boost::make_iterator_range;
 
             for (const auto &pluginPathName : make_iterator_range(
                      directory_iterator(searchPath), directory_iterator())) {
                 /// Must be a regular file
                 /// @todo does this mean symlinks get excluded?
-                if (!boost::filesystem::is_regular_file(pluginPathName))
+                if (!fs::is_regular_file(pluginPathName))
                     continue;
 
-                const auto pluginCandidate =
-                    boost::filesystem::path(pluginPathName);
+                const auto pluginCandidate = fs::path(pluginPathName);
 
                 /// Needs right extension
                 if (pluginCandidate.extension().generic_string() !=

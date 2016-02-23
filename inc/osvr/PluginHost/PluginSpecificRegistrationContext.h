@@ -53,14 +53,11 @@ namespace pluginhost {
         /// context. Ownership is transferred to the caller.
         ///
         /// Typically called by a RegistrationContext in the loadPlugin method,
-        /// this
-        /// may also be used for statically-linked "plugins" whether in
-        /// deployment
-        /// or testing.
+        /// this may also be used for statically-linked "plugins" whether in
+        /// deployment or testing.
         ///
         /// @param name The plugin name, conventionally in an
-        /// underscore-delimited
-        /// reverse DNS format.
+        /// underscore-delimited reverse DNS format.
         OSVR_PLUGINHOST_EXPORT static PluginRegPtr
         create(std::string const &name);
 
