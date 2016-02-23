@@ -26,7 +26,6 @@
 // Internal Includes
 #include "USBSerialDevInfo.h"
 
-
 // System includes
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>

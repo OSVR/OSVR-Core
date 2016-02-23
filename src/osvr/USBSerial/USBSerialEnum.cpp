@@ -35,30 +35,35 @@
 namespace osvr {
 namespace usbserial {
 
-    EnumeratorIterator::EnumeratorIterator(DeviceList *devices, int posn)
-        : devs(devices), pos(posn){};
+    EnumeratorIterator::EnumeratorIterator(DeviceList const &devices,
+                                           std::size_t posn)
+        : devs(&devices), pos(posn){};
 
-    EnumeratorIterator EnumeratorIterator::operator++() {
-        ++pos;
+    EnumeratorIterator &EnumeratorIterator::operator++() {
+        if (pos < devs->size()) {
+            // range protection
+            ++pos;
+        }
         return *this;
     }
-    USBSerialDevice *EnumeratorIterator::operator*() { return &devs->at(pos); }
-
-    bool EnumeratorIterator::operator!=(const EnumeratorIterator &other) {
-        return pos != other.pos;
+    USBSerialDevice const &EnumeratorIterator::operator*() const {
+        return devs->at(pos);
     }
 
-    EnumeratorIterator::~EnumeratorIterator() {}
+    bool EnumeratorIterator::operator!=(const EnumeratorIterator &other) const {
+        return pos != other.pos || devs != other.devs;
+    }
 
     Enumerator::Enumerator(uint16_t vendorID, uint16_t productID)
         : m_impl(new EnumeratorImpl(vendorID, productID)){};
 
     Enumerator::Enumerator() : m_impl(new EnumeratorImpl()){};
-
+    Enumerator::Enumerator(Enumerator &&other)
+        : m_impl(std::move(other.m_impl)) {}
     Enumerator::~Enumerator() {}
 
     EnumeratorIterator Enumerator::begin() { return m_impl->begin(); }
-    EnumeratorIterator Enumerator::end() { return (m_impl->end()); }
+    EnumeratorIterator Enumerator::end() { return m_impl->end(); }
 
 } // namespace usbserial
 } // namespace osvr

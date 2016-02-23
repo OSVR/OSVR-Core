@@ -44,11 +44,11 @@ namespace usbserial {
     EnumeratorImpl::~EnumeratorImpl() {}
 
     EnumeratorIterator EnumeratorImpl::begin() {
-        return EnumeratorIterator(&devices, 0);
+        return EnumeratorIterator(devices, 0);
     }
 
     EnumeratorIterator EnumeratorImpl::end() {
-        return EnumeratorIterator(&devices, devices.size());
+        return EnumeratorIterator(devices, devices.size());
     }
 
 } // namespace usbserial
