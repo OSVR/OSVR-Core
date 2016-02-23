@@ -126,9 +126,8 @@ namespace connection {
                 typedef FilterAndGenerate<NextIter, Result> NextWithout;
                 if (ShouldInclude<CurrentType>::predicate(init)) {
                     return NextWith::run(init);
-                } else {
-                    return NextWithout::run(init);
                 }
+                return NextWithout::run(init);
             }
         };
 

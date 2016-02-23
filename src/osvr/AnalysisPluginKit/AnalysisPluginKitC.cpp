@@ -42,7 +42,7 @@
 /// @todo move this into a shared header between here and ClientKit/DisplayC.cpp
 #define OSVR_VALIDATE_OUTPUT_PTR(X, DESC)                                      \
     OSVR_UTIL_MULTILINE_BEGIN                                                  \
-    if (nullptr == X) {                                                        \
+    if (nullptr == (X)) {                                                      \
         OSVR_DEV_VERBOSE("Passed a null pointer for output parameter " #X      \
                          ", " DESC "!");                                       \
         return OSVR_RETURN_FAILURE;                                            \

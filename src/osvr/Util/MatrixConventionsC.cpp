@@ -59,7 +59,7 @@ OSVR_ReturnCode osvrPose3ToMatrixf(OSVR_Pose3 const *pose,
 }
 
 namespace {
-static_assert(Eigen::Matrix4d::IsRowMajor == false,
+static_assert(!static_cast<bool>(Eigen::Matrix4d::IsRowMajor),
               "This and related code in MatrixConventions assume Eigen is "
               "still column-major by default.");
 
@@ -84,4 +84,4 @@ static_assert(
         CompactMatrixFlags::NeedsTranspose, CompactMatrixFlags::LeftHandInput,
         CompactMatrixFlags::UnsignedZ>::value == (1 + 2 + 4),
     "Metafunction test");
-}
+} // namespace

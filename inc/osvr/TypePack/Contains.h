@@ -39,7 +39,7 @@ namespace typepack {
         template <typename T> struct is_ {
             template <typename Elt> using apply = std::is_same<T, Elt>;
         };
-    }
+    } // namespace detail
 
     /// @brief Determines if type @p Needle is in the list @p Haystack
     template <typename Haystack, typename Needle>

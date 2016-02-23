@@ -45,10 +45,9 @@ OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
         OSVR_DEV_VERBOSE("Connecting to non-default host " << *host);
         return ::osvr::client::createContext(applicationIdentifier,
                                              host->c_str());
-    } else {
-        OSVR_DEV_VERBOSE("Connecting to default (local) host");
-        return ::osvr::client::createContext(applicationIdentifier);
     }
+    OSVR_DEV_VERBOSE("Connecting to default (local) host");
+    return ::osvr::client::createContext(applicationIdentifier);
 }
 OSVR_ReturnCode osvrClientCheckStatus(OSVR_ClientContext ctx) {
     if (!ctx) {
