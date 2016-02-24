@@ -278,6 +278,7 @@ class TrackerCalibrationApp {
                 outfile << osvr::common::jsonToStyledString(calib);
                 outfile.close();
             }
+            closeWindow();
             out << "Done! Press enter to exit." << endl;
             std::cin.ignore();
         }
@@ -311,6 +312,8 @@ class TrackerCalibrationApp {
         }
         return key;
     }
+
+    void closeWindow() { cv::destroyWindow(windowNameAndInstructions); }
 
   private:
     ImageSourcePtr m_src;
