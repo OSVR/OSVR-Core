@@ -31,6 +31,8 @@
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
 
+#include "CVTwoStepProgressBar.h"
+
 #include <osvr/Common/JSONHelpers.h>
 #include <osvr/Common/JSONEigen.h>
 
@@ -56,7 +58,7 @@ static osvr::server::detail::StreamPrefixer
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
 /// make this global for a simpler demo.
 static const std::string windowNameAndInstructions(
-    "OSVR tracking camera preview | q or esc to quit");
+    "OSVR Video Tracker Pre-Calibration | q or esc to quit without saving");
 
 static int withAnError() {
     err << "\n";
@@ -188,6 +190,9 @@ class TrackerCalibrationApp {
                                 cv::Point(30, 50), cv::FONT_HERSHEY_SIMPLEX,
                                 0.45, cv::Scalar(255, 100, 100));
                 }
+                auto numGreen = std::size_t{0};
+                auto numYellow = std::size_t{0};
+                auto numUnimproved = std::size_t{0};
 
                 {
                     /// Reproject (almost) all beacons
@@ -209,16 +214,31 @@ class TrackerCalibrationApp {
                                 .all()) {
                             /// Green - good!
                             color = cv::Scalar{0, 255, 0};
+                            numGreen++;
                         } else if ((autocalibVariance.array() <
                                     Eigen::Array3d::Constant(m_firstNotch))
                                        .all()) {
                             /// Yellow - better than where you started
                             color = cv::Scalar{0, 255, 255};
+                            numYellow++;
+                        } else {
+                            numUnimproved++;
                         }
+
                         cv::putText(m_display, std::to_string(i + 1),
                                     reprojections[i] + cv::Point2f(1, 1),
                                     cv::FONT_HERSHEY_SIMPLEX, 0.45, color);
                     }
+                }
+
+                {
+                    /// Draw progress bar along bottom of window.
+                    static const auto PROGRESS_HEIGHT = 5;
+                    drawTwoStepProgressBar(
+                        m_display,
+                        cv::Point(0, m_display.rows - PROGRESS_HEIGHT),
+                        cv::Size(m_display.cols, PROGRESS_HEIGHT), numGreen,
+                        numYellow, numUnimproved);
                 }
 
                 auto key = updateDisplay();

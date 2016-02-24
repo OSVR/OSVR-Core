@@ -122,6 +122,7 @@ if(WIN32)
     set(CALIB_SOURCES
         VideoTrackerCalibrationUtility.cpp
         ConfigurationParser.h
+        CVTwoStepProgressBar.h
         ImageSource.cpp
         ImageSource.h
         ImageSourceFactories.h
