@@ -132,11 +132,10 @@ class TrackerCalibrationApp {
         m_frame.copyTo(m_display);
         updateDisplay();
 
-        /// these are beacon IDs we disabled (1-based)
-        static const auto IDS_TO_SKIP = std::unordered_set<std::size_t>{
-            1,  2,  10, 12, 13,
-            14, 21, 35, 38, /* plus the rest of the back */ 36,
-            37, 39, 40};
+        // Only show the front-panel beacons - we do not want to encourage
+        // attempts to calibrate the back panel, since it's not rigidly attached
+        // to the front panel.
+        static const int MAX_BEACONS_TO_SHOW = 34;
 
         while (!m_quit) {
             bool gotDebugData = false;
@@ -195,12 +194,11 @@ class TrackerCalibrationApp {
                     std::vector<cv::Point2f> reprojections;
                     vbtracker().getFirstEstimator().ProjectBeaconsToImage(
                         reprojections);
-                    std::size_t nBeacons = reprojections.size();
+                    const auto nBeacons = reprojections.size();
                     m_nBeacons = nBeacons;
-                    for (std::size_t i = 0; i < nBeacons; ++i) {
-                        if (IDS_TO_SKIP.find(i + 1) != end(IDS_TO_SKIP)) {
-                            continue; // skip this one.
-                        }
+                    const auto beaconsToDisplay = std::min(
+                        MAX_BEACONS_TO_SHOW, static_cast<int>(nBeacons));
+                    for (std::size_t i = 0; i < beaconsToDisplay; ++i) {
                         Eigen::Vector3d autocalibVariance =
                             vbtracker()
                                 .getFirstEstimator()
@@ -231,10 +229,9 @@ class TrackerCalibrationApp {
             }
         }
 
-        for (std::size_t i = 0; i < m_nBeacons; ++i) {
-            if (IDS_TO_SKIP.find(i + 1) != end(IDS_TO_SKIP)) {
-                continue; // skip this one.
-            }
+        int beaconsToOutput =
+            std::min(MAX_BEACONS_TO_SHOW, static_cast<int>(m_nBeacons));
+        for (int i = 0; i < beaconsToOutput; ++i) {
             std::cout << "Beacon " << i + 1 << " autocalib variance ratio: "
                       << vbtracker()
                                  .getFirstEstimator()
