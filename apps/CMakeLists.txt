@@ -244,8 +244,9 @@ if(BUILD_SERVER_APP)
 endif()
 
 # Simple application to list detected USB serial devices
-if(NOT ANDROID)
+if(BUILD_USBSERIALENUM AND NOT ANDROID)
     add_executable(osvr_list_usbserial osvr_list_usbserial.cpp)
+    target_include_directories(osvr_list_usbserial PRIVATE osvr::osvrUSBSerial)
     target_link_libraries(osvr_list_usbserial osvrUSBSerial)
     install(TARGETS osvr_list_usbserial
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
