@@ -127,6 +127,7 @@ if(WIN32)
         ImageSource.cpp
         ImageSource.h
         ImageSourceFactories.h
+        SetupSensors.h
         DirectShowHDKCameraFactory.h
         DirectShowImageSource.cpp
         DirectShowToCV.h

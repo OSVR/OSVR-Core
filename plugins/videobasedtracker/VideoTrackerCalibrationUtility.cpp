@@ -30,6 +30,7 @@
 #include "HDKData.h"
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
+#include "SetupSensors.h"
 
 #include "CVTwoStepProgressBar.h"
 
@@ -399,50 +400,18 @@ int main(int argc, char *argv[]) {
 
     /// Fourth step: Add the sensors to the tracker.
     {
-        auto backPanelFixedBeacon = [](int) { return true; };
-        auto frontPanelFixedBeacon = [](int id) {
-            return (id == 16) || (id == 17) || (id == 19) || (id == 20);
-        };
-
         auto camParams = getHDKCameraParameters();
         if (params.includeRearPanel) {
-            // distance between front and back panel target origins, in mm.
-            auto distanceBetweenPanels = params.headCircumference / M_PI * 10. +
-                                         params.headToFrontBeaconOriginDistance;
-            Point3Vector locations = OsvrHdkLedLocations_SENSOR0;
-            Vec3Vector directions = OsvrHdkLedDirections_SENSOR0;
-            std::vector<double> variances = OsvrHdkLedVariances_SENSOR0;
 
-            // For the back panel beacons: have to rotate 180 degrees
-            // about Y, which is the same as flipping sign on X and Z
-            // then we must translate along Z by head diameter +
-            // distance from head to front beacon origins
-            for (auto &pt : OsvrHdkLedLocations_SENSOR1) {
-                locations.emplace_back(-pt.x, pt.y,
-                                       -pt.z - distanceBetweenPanels);
-                variances.push_back(params.backPanelMeasurementError);
-            }
-            // Similarly, rotate the directions.
-            for (auto &vec : OsvrHdkLedDirections_SENSOR1) {
-                directions.emplace_back(-vec[0], vec[1], -vec[2]);
-            }
-            trackerApp.vbtracker().addSensor(
-                createHDKUnifiedLedIdentifier(), camParams, locations,
-                directions, variances, frontPanelFixedBeacon, 4, 0);
+            /// Setup sensor just as in tracker app, but don't try to load
+            /// calibration.
+            setupSensorsIncludeRearPanel(trackerApp.vbtracker(), params, false);
         } else {
+
             err << "WARNING: only calibrating the first sensor is currently "
                    "supported!"
                 << endl;
-            // OK, so if we don't have to include the rear panel as part of the
-            // single sensor, that's easy.
-            trackerApp.vbtracker().addSensor(
-                createHDKLedIdentifier(0), camParams,
-                OsvrHdkLedLocations_SENSOR0, OsvrHdkLedDirections_SENSOR0,
-                OsvrHdkLedVariances_SENSOR0, frontPanelFixedBeacon, 6, 0);
-            trackerApp.vbtracker().addSensor(
-                createHDKLedIdentifier(1), camParams,
-                OsvrHdkLedLocations_SENSOR1, OsvrHdkLedDirections_SENSOR1,
-                backPanelFixedBeacon, 4, 0);
+            setupSensorsWithoutRearPanel(trackerApp.vbtracker(), params, false);
         }
     }
 
