@@ -78,6 +78,7 @@ set(PLUGIN_SOURCES
     ImageSource.cpp
     ImageSource.h
     ImageSourceFactories.h
+    SetupSensors.h
     FakeImageSource.cpp
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
 if(WIN32)
