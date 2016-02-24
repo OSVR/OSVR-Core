@@ -125,8 +125,9 @@ namespace vbtracker {
                          "filename "
                       << config.calibrationFile
                       << " was specified, but not found or could not "
-                         "be loaded. This may just mean you have not yet run "
-                         "the optional pre-calibration step."
+                         "be loaded. This is not an error: This may just mean "
+                         "you have not yet run the optional beacon "
+                         "pre-calibration step."
                       << std::endl;
         }
     } // namespace messages
