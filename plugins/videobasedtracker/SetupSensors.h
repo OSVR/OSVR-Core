@@ -119,13 +119,28 @@ namespace vbtracker {
                       << std::endl;
         }
     } // namespace messages
+
     using BeaconPredicate = std::function<bool(int)>;
 
-    inline void addRearPanelBeaconLocations(ConfigParams const &config,
+    inline std::size_t getNumHDKFrontPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR0.size();
+    }
+
+    inline std::size_t getNumHDKRearPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR1.size();
+    }
+    /// distance between front and back panel target origins, in mm.
+    inline double
+    computeDistanceBetweenPanels(double headCircumference,
+                                 double headToFrontBeaconOriginDistance) {
+        return headCircumference / M_PI * 10. + headToFrontBeaconOriginDistance;
+    }
+    inline double computeDistanceBetweenPanels(ConfigParams const &config) {
+        return computeDistanceBetweenPanels(
+            config.headCircumference, config.headToFrontBeaconOriginDistance);
+    }
+    inline void addRearPanelBeaconLocations(double distanceBetweenPanels,
                                             Point3Vector &locations) {
-        // distance between front and back panel target origins, in mm.
-        auto distanceBetweenPanels = config.headCircumference / M_PI * 10. +
-                                     config.headToFrontBeaconOriginDistance;
         // For the back panel beacons: have to rotate 180 degrees
         // about Y, which is the same as flipping sign on X and Z
         // then we must translate along Z by head diameter +
@@ -133,6 +148,12 @@ namespace vbtracker {
         for (auto &pt : OsvrHdkLedLocations_SENSOR1) {
             locations.emplace_back(-pt.x, pt.y, -pt.z - distanceBetweenPanels);
         }
+    }
+
+    inline void addRearPanelBeaconLocations(ConfigParams const &config,
+                                            Point3Vector &locations) {
+        addRearPanelBeaconLocations(computeDistanceBetweenPanels(config),
+                                    locations);
     }
 
     inline void setupSensorsIncludeRearPanel(

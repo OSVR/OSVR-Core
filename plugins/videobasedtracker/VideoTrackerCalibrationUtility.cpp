@@ -84,7 +84,8 @@ class TrackerCalibrationApp {
   public:
     TrackerCalibrationApp(ImageSourcePtr &&src,
                           osvr::vbtracker::ConfigParams params)
-        : m_src(std::move(src)), m_params(params), m_vbtracker(params) {
+        : m_src(std::move(src)), m_params(params), m_vbtracker(params),
+          m_distanceBetweenPanels(computeDistanceBetweenPanels(params)) {
         m_firstNotch = m_params.initialBeaconError * 0.9;
         m_secondNotch = m_params.initialBeaconError * 0.8;
         cv::namedWindow(windowNameAndInstructions);
@@ -267,9 +268,26 @@ class TrackerCalibrationApp {
             Json::Value calib(Json::arrayValue);
             out << "Saving your calibration data..." << endl;
             auto &estimator = vbtracker().getFirstEstimator();
-            for (std::size_t i = 0; i < m_nBeacons; ++i) {
+            auto numBeaconsFromAutocalib =
+                std::min(m_nBeacons, getNumHDKFrontPanelBeacons());
+
+            for (std::size_t i = 0; i < numBeaconsFromAutocalib; ++i) {
                 calib.append(osvr::common::toJson(
                     estimator.getBeaconAutocalibPosition(i)));
+            }
+            if (m_nBeacons > numBeaconsFromAutocalib) {
+                // This means they wanted rear panel beacons too. We will write
+                // un-calibrated beacon locations for those, so they don't get
+                // "less-neutral" starting positions.
+                Point3Vector locations;
+                addRearPanelBeaconLocations(m_distanceBetweenPanels, locations);
+                for (auto const &beacon : locations) {
+                    Json::Value val(Json::arrayValue);
+                    val.append(beacon.x);
+                    val.append(beacon.y);
+                    val.append(beacon.z);
+                    calib.append(val);
+                }
             }
             std::cout << "\n" << osvr::common::jsonToCompactString(calib)
                       << "\n" << endl;
@@ -319,6 +337,7 @@ class TrackerCalibrationApp {
   private:
     ImageSourcePtr m_src;
     osvr::vbtracker::ConfigParams m_params;
+    const double m_distanceBetweenPanels;
     double m_firstNotch;
     double m_secondNotch;
     osvr::vbtracker::VideoBasedTracker m_vbtracker;
