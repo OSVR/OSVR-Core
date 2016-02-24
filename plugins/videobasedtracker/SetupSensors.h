@@ -132,27 +132,34 @@ namespace vbtracker {
     } // namespace messages
     using BeaconPredicate = std::function<bool(int)>;
 
-    inline void setupSensorsIncludeRearPanel(
-        VideoBasedTracker &vbtracker, ConfigParams const &config,
-        bool attemptToLoadCalib = true,
-        BeaconPredicate &&beaconFixedPredicate = &frontPanelFixedBeaconShared) {
-
+    inline void addRearPanelBeaconLocations(ConfigParams const &config,
+                                            Point3Vector &locations) {
         // distance between front and back panel target origins, in mm.
         auto distanceBetweenPanels = config.headCircumference / M_PI * 10. +
                                      config.headToFrontBeaconOriginDistance;
-
-        Point3Vector locations = OsvrHdkLedLocations_SENSOR0;
-        Vec3Vector directions = OsvrHdkLedDirections_SENSOR0;
-        std::vector<double> variances = OsvrHdkLedVariances_SENSOR0;
-
         // For the back panel beacons: have to rotate 180 degrees
         // about Y, which is the same as flipping sign on X and Z
         // then we must translate along Z by head diameter +
         // distance from head to front beacon origins
         for (auto &pt : OsvrHdkLedLocations_SENSOR1) {
             locations.emplace_back(-pt.x, pt.y, -pt.z - distanceBetweenPanels);
-            variances.push_back(config.backPanelMeasurementError);
         }
+    }
+
+    inline void setupSensorsIncludeRearPanel(
+        VideoBasedTracker &vbtracker, ConfigParams const &config,
+        bool attemptToLoadCalib = true,
+        BeaconPredicate &&beaconFixedPredicate = &frontPanelFixedBeaconShared) {
+
+        Point3Vector locations = OsvrHdkLedLocations_SENSOR0;
+        Vec3Vector directions = OsvrHdkLedDirections_SENSOR0;
+        std::vector<double> variances = OsvrHdkLedVariances_SENSOR0;
+
+        // Have to rotate and translate the rear beacons
+        addRearPanelBeaconLocations(config, locations);
+        // Add variance for each location
+        variances.insert(end(variances), OsvrHdkLedLocations_SENSOR1.size(),
+                         config.backPanelMeasurementError);
         // Similarly, rotate the directions.
         for (auto &vec : OsvrHdkLedDirections_SENSOR1) {
             directions.emplace_back(-vec[0], vec[1], -vec[2]);
