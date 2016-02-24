@@ -71,7 +71,7 @@ namespace pluginhost {
 
         // Lambda to add a path, if it's not already in the list.
         auto addUniquePath = [&paths](fs::path const &path) {
-            OSVR_DEV_VERBOSE("Adding search path " << path);
+            //OSVR_DEV_VERBOSE("Adding search path " << path);
             auto pathString = path.generic_string();
             if (std::find(begin(paths), end(paths), pathString) == end(paths)) {
                 // if we didn't already add this path, add it now.
