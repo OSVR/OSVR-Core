@@ -178,10 +178,24 @@ namespace vbtracker {
         if (attemptToLoadCalib) {
             auto calibLocations =
                 tryLoadingArrayOfPointsFromFile(config.calibrationFile);
+            bool gotCalib = false;
             if (calibLocations.size() == locations.size()) {
+                /// This is the right size already, just take it as it is.
+                gotCalib = true;
+            } else if (calibLocations.size() == getNumHDKFrontPanelBeacons()) {
+                // just need to add the rear beacons to the calibration file.
+                // This is actually ideal, since we can use the
+                // currently-configured head size, instead of calibration-time
+                // head size, to estimate the rear panel location.
+                addRearPanelBeaconLocations(config, calibLocations);
+                gotCalib = true;
+            }
+
+            if (gotCalib) {
                 messages::loadedCalibFileSuccessfully(config);
                 locations = calibLocations;
                 autocalibScale = BEACON_AUTOCALIB_ERROR_SCALE_IF_CALIBRATED;
+
             } else if (!config.calibrationFile.empty()) {
                 messages::calibFileSpecifiedButNotLoaded(config);
             }
@@ -208,7 +222,12 @@ namespace vbtracker {
         if (attemptToLoadCalib) {
             auto calibLocations =
                 tryLoadingArrayOfPointsFromFile(config.calibrationFile);
-            if (calibLocations.size() == OsvrHdkLedLocations_SENSOR0.size()) {
+            if (calibLocations.size() == getNumHDKFrontPanelBeacons() ||
+                calibLocations.size() ==
+                    getNumHDKFrontPanelBeacons() +
+                        getNumHDKRearPanelBeacons()) {
+                // Remove any extra (rear panel) "calibrated" locations
+                calibLocations.resize(getNumHDKFrontPanelBeacons());
                 messages::loadedCalibFileSuccessfully(config);
                 needFrontSensor = false;
                 vbtracker.addSensor(
