@@ -95,24 +95,12 @@ namespace vbtracker {
     /// known than we might otherwise expect.
     static const double BEACON_AUTOCALIB_ERROR_SCALE_IF_CALIBRATED = 0.1;
 
-#if 1
     static bool frontPanelFixedBeaconShared(int id) {
         return (id == 16) || (id == 17) || (id == 19) || (id == 20);
     }
 
-    // to be used by calibration app, to avoid calibrating rear beacons.
-    static bool frontPanelFixedBeaconWithFixedBackPanel(int id) {
-        return (id == 16) || (id == 17) || (id == 19) || (id == 20) ||
-               (id > 34);
-    }
-
     static bool backPanelFixedBeaconShared(int) { return true; }
-#else
-    static const auto frontPanelFixedBeacon = [](int id) {
-        return (id == 16) || (id == 17) || (id == 19) || (id == 20);
-    };
-    static const auto backPanelFixedBeacon = [](int) { return true; };
-#endif
+
     namespace messages {
         inline void loadedCalibFileSuccessfully(ConfigParams const &config) {
             std::cout << "Video-based tracker: Successfully loaded "
