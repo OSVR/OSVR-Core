@@ -63,7 +63,7 @@ namespace connection {
                          "object lifetime");
         {
             m_lock.lock();
-            if (true == m_sharedRts &&
+            if (m_sharedRts &&
                 m_control.m_currentRequestThread ==
                     boost::this_thread::get_id()) {
                 /// OK, so we're recursive here. Make a note and don't add

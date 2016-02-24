@@ -134,8 +134,8 @@ void createYEI(VRPNMultiserverData &data, OSVR_PluginRegContext ctx,
     } else {
         static const uint16_t vID = 0x9AC;
         static const uint16_t pID = 0x3F2;
-        for (auto dev : osvr::usbserial::Enumerator(vID, pID)) {
-            createYEIImpl(data, ctx, root, dev->getPort());
+        for (auto &&dev : osvr::usbserial::enumerate(vID, pID)) {
+            createYEIImpl(data, ctx, root, dev.getPort());
         }
     }
 #else  // !OSVR_HAVE_USBSERIALENUM

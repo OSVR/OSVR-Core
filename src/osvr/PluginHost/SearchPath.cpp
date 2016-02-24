@@ -71,7 +71,7 @@ namespace pluginhost {
 
         // Lambda to add a path, if it's not already in the list.
         auto addUniquePath = [&paths](fs::path const &path) {
-            OSVR_DEV_VERBOSE("Adding search path " << path);
+            //OSVR_DEV_VERBOSE("Adding search path " << path);
             auto pathString = path.generic_string();
             if (std::find(begin(paths), end(paths), pathString) == end(paths)) {
                 // if we didn't already add this path, add it now.
@@ -148,15 +148,17 @@ namespace pluginhost {
 
     std::string findPlugin(SearchPath const &searchPaths, const std::string &pluginName) {
         for (const auto &searchPath : searchPaths) {
-            if (!fs::exists(searchPath))
+            if (!fs::exists(searchPath)) {
                 continue;
+            }
 
             for (const auto &pluginPathName : make_iterator_range(
                      directory_iterator(searchPath), directory_iterator())) {
                 /// Must be a regular file
                 /// @todo does this mean symlinks get excluded?
-                if (!fs::is_regular_file(pluginPathName))
+                if (!fs::is_regular_file(pluginPathName)) {
                     continue;
+                }
 
                 const auto pluginCandidate = fs::path(pluginPathName);
 

@@ -47,22 +47,31 @@ namespace usbserial {
     class EnumeratorIterator {
 
       public:
-        OSVR_USBSERIAL_EXPORT EnumeratorIterator(DeviceList *devs, int posn);
-        OSVR_USBSERIAL_EXPORT ~EnumeratorIterator();
-        OSVR_USBSERIAL_EXPORT EnumeratorIterator operator++();
-        OSVR_USBSERIAL_EXPORT USBSerialDevice *operator*();
-        OSVR_USBSERIAL_EXPORT bool operator!=(const EnumeratorIterator &other);
+        OSVR_USBSERIAL_EXPORT EnumeratorIterator(DeviceList const &devs,
+                                                 std::size_t posn);
+        OSVR_USBSERIAL_EXPORT EnumeratorIterator &operator++();
+        OSVR_USBSERIAL_EXPORT USBSerialDevice const &operator*() const;
+        OSVR_USBSERIAL_EXPORT bool
+        operator!=(const EnumeratorIterator &other) const;
 
       private:
-        DeviceList *devs;
-        int pos;
+        DeviceList const *devs = nullptr;
+        std::size_t pos;
     };
     class Enumerator {
         class Impl;
 
-      public:
         OSVR_USBSERIAL_EXPORT Enumerator(uint16_t vID, uint16_t pID);
         OSVR_USBSERIAL_EXPORT Enumerator();
+        friend Enumerator enumerate();
+        friend Enumerator enumerate(uint16_t vID, uint16_t pID);
+
+      public:
+        Enumerator(Enumerator const &) = delete;
+        Enumerator &operator=(Enumerator const &) = delete;
+
+        /// move constructor
+        OSVR_USBSERIAL_EXPORT Enumerator(Enumerator &&other);
         OSVR_USBSERIAL_EXPORT ~Enumerator();
 
         OSVR_USBSERIAL_EXPORT EnumeratorIterator begin();
@@ -71,6 +80,11 @@ namespace usbserial {
       private:
         std::unique_ptr<EnumeratorImpl> m_impl;
     };
+
+    inline Enumerator enumerate() { return Enumerator{}; }
+    inline Enumerator enumerate(uint16_t vID, uint16_t pID) {
+        return Enumerator{vID, pID};
+    }
 
 } // namespace usbserial
 } // namespace osvr

@@ -107,5 +107,5 @@ namespace common {
                 m_local.getStringID(peerEntries[i]).value());
         }
     }
-}
-}
+} // namespace common
+} // namespace osvr

@@ -1,5 +1,4 @@
 ---
-Checks:          '*,-clang-analyzer-alpha*,-llvm-include-order,-google-*,-llvm-header-guard,-misc-use-override'
+Checks:          '*,-clang-analyzer-alpha*,-llvm-include-order,-google-*,-llvm-header-guard,-misc-use-override,-readability-named-parameter'
 HeaderFilterRegex: '.*'
 ...
-

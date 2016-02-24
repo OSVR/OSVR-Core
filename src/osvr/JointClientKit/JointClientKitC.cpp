@@ -82,7 +82,7 @@ OSVR_JointClientOpts osvrJointClientCreateOptions() {
 
 #define OSVR_OPTS_CHECK_STRING(PARAM, DESC)                                    \
     OSVR_UTIL_MULTILINE_BEGIN                                                  \
-    if (nullptr == PARAM || '\0' == PARAM[0]) {                                \
+    if (nullptr == (PARAM) || '\0' == (PARAM)[0]) {                            \
         OSVR_DEV_VERBOSE("Invalid string passed for  " DESC                    \
                          " -- can't be null or empty!");                       \
         return OSVR_RETURN_FAILURE;                                            \

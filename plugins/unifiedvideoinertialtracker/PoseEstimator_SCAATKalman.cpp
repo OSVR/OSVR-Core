@@ -361,7 +361,8 @@ namespace vbtracker {
                     /// against ourselves?
                     numBad++;
                     return false;
-                } else if (zComponent > m_maxZComponent) {
+                }
+                if (zComponent > m_maxZComponent) {
                     /// LED is too askew of the camera to provide reliable data,
                     /// so skip it.
                     return false;

@@ -93,9 +93,8 @@ namespace common {
         }
         if (styled) {
             return routes.toStyledString();
-        } else {
-            return toFastString(routes);
         }
+        return toFastString(routes);
     }
 
     std::string

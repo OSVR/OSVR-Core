@@ -1,5 +1,5 @@
 /** @file
-    @brief A sinple application that lists all detected USB serial devices.
+    @brief A simple application that lists all detected USB serial devices.
 
     @date 2015
 
@@ -31,19 +31,18 @@
 // - none
 
 // Standard includes
-#include <cstdlib>      // for EXIT_SUCCESS
-#include <iostream>     // for std::cout
-#include <ios>          // for std::hex
-#include <iomanip>      // for std::setfill, std::setw
+#include <cstdlib>  // for EXIT_SUCCESS
+#include <iostream> // for cout
+#include <ios>      // for hex
+#include <iomanip>  // for setfill, setw
 
-int main(int argc, char* argv[])
-{
-    for (auto dev : osvr::usbserial::Enumerator()) {
-        std::cout << std::setfill('0') << std::setw(4) << std::hex << dev->getVID()
-            << ":" << std::setfill('0') << std::setw(4) << std::hex << dev->getPID()
-            << " " << dev->getPlatformSpecificPath() << std::endl;
+int main(int argc, char *argv[]) {
+    using namespace std;
+    for (auto &&dev : osvr::usbserial::enumerate()) {
+        cout << setfill('0') << setw(4) << hex << dev.getVID() << ":"
+             << setfill('0') << setw(4) << hex << dev.getPID() << " "
+             << dev.getPlatformSpecificPath() << endl;
     }
 
     return EXIT_SUCCESS;
 }
-
