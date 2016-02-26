@@ -101,8 +101,32 @@ class VRPNHardwareDetect : boost::noncopyable {
                 }
                 // Razer Hydra
                 if (dev->vendor_id == 0x1532 && dev->product_id == 0x0300) {
+                    // OK, found one half of device, let's find the other half.
+                    auto dataDev = dev;
+                    auto ctrlDev = dev->next;
+                    while (ctrlDev != nullptr &&
+                           !(ctrlDev->vendor_id == 0x1532 &&
+                             ctrlDev->product_id == 0x0300)) {
+                        ctrlDev = ctrlDev->next;
+                    }
+                    if (!ctrlDev) {
+                        std::cout
+                            << "com_osvr_Multiserver warning: could only find "
+                               "one of two interfaces for the Razer Hydra!"
+                            << std::endl;
+                        continue;
+                    }
+                    if (dataDev->interface_number == 1 && ctrlDev->interface_number == 0) {
+                        // If we found these reversed, swap them: the data
+                        // device should be interface 0, control is interface 1
+                        // (if the interface numbers are valid at all)
+                        std::swap(dataDev, ctrlDev);
+                    }
+
                     gotDevice = true;
-                    m_handlePath(dev->path);
+                    m_handlePath(dataDev->path);
+                    m_handlePath(ctrlDev->path);
+
                     auto hydraJsonString = osvr::util::makeString(
                         com_osvr_Multiserver_RazerHydra_json);
                     Json::Value hydraJson;
@@ -119,7 +143,8 @@ class VRPNHardwareDetect : boost::noncopyable {
                         name =
                             reg.useDecoratedName(m_data.getName("RazerHydra"));
                         reg.registerDevice(new vrpn_Tracker_RazerHydra(
-                            name.c_str(), reg.getVRPNConnection()));
+                            name.c_str(), ctrlDev->path, dataDev->path,
+                            reg.getVRPNConnection()));
                         reg.setDeviceDescriptor(hydraJsonString);
                     }
                     std::string localName = "*" + name;
