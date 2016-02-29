@@ -47,6 +47,8 @@
 // of silently enumerating and early-exiting when we find one we like.
 //#define VERBOSE_ENUM
 
+#undef DXCAMSERVER_VERBOSE
+
 //#define HACK_TO_REOPEN
 //#define	DEBUG
 
@@ -289,11 +291,13 @@ inline comutils::Ptr<IMoniker> find_first_capture_device_where(F &&f) {
            "enumeration.\n\n");
 #endif
 
+#ifdef DXCAMSERVER_VERBOSE
     if (!ret) {
         fprintf(stderr,
                 "directx_camera_server find_first_capture_device_where(): "
                 "No device satisfied the predicate.\n");
     }
+#endif
     return ret;
 }
 
@@ -354,9 +358,11 @@ bool directx_camera_server::open_and_find_parameters(
         });
 
     if (!pMoniker) {
+#ifdef DXCAMSERVER_VERBOSE
         fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
                         "Could not get the device requested - not enough "
                         "cameras?\n");
+#endif
         return false;
     }
 
@@ -594,8 +600,10 @@ directx_camera_server::directx_camera_server(int which, unsigned width,
                                              unsigned height) {
     //---------------------------------------------------------------------
     if (!open_and_find_parameters(which, width, height)) {
+#ifdef DXCAMSERVER_VERBOSE
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
                         "Cannot open camera\n");
+#endif
         _status = false;
         return;
     }
@@ -614,8 +622,11 @@ directx_camera_server::directx_camera_server(std::string const &pathPrefix,
     //---------------------------------------------------------------------
     if (!open_and_find_parameters(pathPrefix, FilterOperation{}, width,
                                   height)) {
+
+#ifdef DXCAMSERVER_VERBOSE
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
                         "Cannot open camera\n");
+#endif
         _status = false;
         return;
     }
@@ -631,8 +642,11 @@ directx_camera_server::directx_camera_server(std::string const &pathPrefix,
 directx_camera_server::directx_camera_server(
     std::string const &pathPrefix, FilterOperation const &sourceConfig) {
     if (!open_and_find_parameters(pathPrefix, sourceConfig)) {
+
+#ifdef DXCAMSERVER_VERBOSE
         fprintf(stderr, "directx_camera_server::directx_camera_server(): "
                         "Cannot open camera\n");
+#endif
         _status = false;
         return;
     }
