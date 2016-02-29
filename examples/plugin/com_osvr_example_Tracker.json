@@ -1,0 +1,21 @@
+{
+  "deviceVendor": "Sensics",
+  "deviceName": "Sample HMDTracker",
+  "author": "Jeremy Bell jeremy@sensics.com",
+  "version": 2,
+  "lastModified": "",
+  "interfaces": {
+    "tracker": {
+      "count": 1,
+      "bounded": true,
+      "position": false,
+      "orientation": true
+    }
+  },
+  "semantic": {
+    "hmd": "tracker/0"
+  },
+  "automaticAliases": {
+    "/me/head": "semantic/hmd"
+  }
+ }
