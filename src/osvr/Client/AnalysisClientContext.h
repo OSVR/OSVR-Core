@@ -105,6 +105,11 @@ namespace client {
         /// @brief Manager of client interface objects and their interaction
         /// with the path tree.
         ClientInterfaceObjectManager m_ifaceMgr;
+
+        /// @brief Gets set to true once we actually get called to update and it
+        /// becomes more socially acceptable to be verbose about things like our
+        /// interfaces not resolving to a source.
+        bool m_started = false;
     };
 } // namespace client
 } // namespace osvr

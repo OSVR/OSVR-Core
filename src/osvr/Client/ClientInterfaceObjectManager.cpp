@@ -54,11 +54,11 @@ namespace client {
     }
 
     void ClientInterfaceObjectManager::addInterface(
-        common::ClientInterfacePtr const &iface) {
+        common::ClientInterfacePtr const &iface, bool verboseFailure) {
         auto pin = iface;
         const auto isNew = m_interfaces.addInterface(pin);
         if (isNew) {
-            m_connectCallbacksOnPath(pin->getPath());
+            m_connectCallbacksOnPath(pin->getPath(), verboseFailure);
         }
     }
     void ClientInterfaceObjectManager::releaseInterface(
@@ -75,7 +75,7 @@ namespace client {
     }
 
     bool ClientInterfaceObjectManager::m_connectCallbacksOnPath(
-        std::string const &path) {
+        std::string const &path, bool verboseFailure) {
         /// Start by removing handler from interface tree and handler container
         /// for this path, if found. Ensures that if we early-out (fail to set
         /// up a handler) we don't have a leftover one still active.
@@ -83,7 +83,9 @@ namespace client {
 
         auto source = common::resolveTreeNode(m_pathTree, path);
         if (!source.is_initialized()) {
-            OSVR_DEV_VERBOSE("Could not resolve source for " << path);
+            if (verboseFailure) {
+                OSVR_DEV_VERBOSE("Could not resolve source for " << path);
+            }
             return false;
         }
 

@@ -63,8 +63,13 @@ namespace client {
         ClientInterfaceObjectManager &
         operator=(ClientInterfaceObjectManager const &) = delete;
 
+        /// @param verboseFailure Whether we should allow verbose printing of
+        /// messages in case this interface doesn't immediately resolve to a
+        /// source. For instance, you'd want this to be "false" when setting up
+        /// an analysis plugin context ahead of its autodetected sources.
         OSVR_CLIENT_EXPORT void
-        addInterface(common::ClientInterfacePtr const &iface);
+        addInterface(common::ClientInterfacePtr const &iface,
+                     bool verboseFailure = true);
         OSVR_CLIENT_EXPORT void
         releaseInterface(common::ClientInterfacePtr const &iface);
 
@@ -77,7 +82,8 @@ namespace client {
         /// handler for it.
         ///
         /// @return true if we were able to connect the path.
-        bool m_connectCallbacksOnPath(std::string const &path);
+        bool m_connectCallbacksOnPath(std::string const &path,
+                                      bool verboseFailure = true);
 
         /// @brief Given a path, remove any existing handler for that path from
         /// both the handler container and the interface tree.

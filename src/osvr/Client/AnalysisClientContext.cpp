@@ -86,7 +86,7 @@ namespace client {
     AnalysisClientContext::~AnalysisClientContext() {}
 
     void AnalysisClientContext::m_update() {
-
+        m_started = true;
         /// Update system device
         m_systemDevice->update();
         /// Update handlers.
@@ -100,7 +100,7 @@ namespace client {
 
     void AnalysisClientContext::m_handleNewInterface(
         common::ClientInterfacePtr const &iface) {
-        m_ifaceMgr.addInterface(iface);
+        m_ifaceMgr.addInterface(iface, m_started);
     }
 
     void AnalysisClientContext::m_handleReleasingInterface(
