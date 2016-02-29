@@ -78,6 +78,7 @@ set(PLUGIN_SOURCES
     ImageSource.cpp
     ImageSource.h
     ImageSourceFactories.h
+    SetupSensors.h
     FakeImageSource.cpp
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
 if(WIN32)
@@ -122,9 +123,11 @@ if(WIN32)
     set(CALIB_SOURCES
         VideoTrackerCalibrationUtility.cpp
         ConfigurationParser.h
+        CVTwoStepProgressBar.h
         ImageSource.cpp
         ImageSource.h
         ImageSourceFactories.h
+        SetupSensors.h
         DirectShowHDKCameraFactory.h
         DirectShowImageSource.cpp
         DirectShowToCV.h

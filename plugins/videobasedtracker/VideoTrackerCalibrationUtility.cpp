@@ -30,6 +30,9 @@
 #include "HDKData.h"
 #include "HDKLedIdentifierFactory.h"
 #include "CameraParameters.h"
+#include "SetupSensors.h"
+
+#include "CVTwoStepProgressBar.h"
 
 #include <osvr/Common/JSONHelpers.h>
 #include <osvr/Common/JSONEigen.h>
@@ -56,7 +59,7 @@ static osvr::server::detail::StreamPrefixer
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
 /// make this global for a simpler demo.
 static const std::string windowNameAndInstructions(
-    "OSVR tracking camera preview | q or esc to quit");
+    "OSVR Video Tracker Pre-Calibration | q or esc to quit without saving");
 
 static int withAnError() {
     err << "\n";
@@ -81,7 +84,8 @@ class TrackerCalibrationApp {
   public:
     TrackerCalibrationApp(ImageSourcePtr &&src,
                           osvr::vbtracker::ConfigParams params)
-        : m_src(std::move(src)), m_params(params), m_vbtracker(params) {
+        : m_src(std::move(src)), m_params(params), m_vbtracker(params),
+          m_distanceBetweenPanels(computeDistanceBetweenPanels(params)) {
         m_firstNotch = m_params.initialBeaconError * 0.9;
         m_secondNotch = m_params.initialBeaconError * 0.8;
         cv::namedWindow(windowNameAndInstructions);
@@ -132,11 +136,10 @@ class TrackerCalibrationApp {
         m_frame.copyTo(m_display);
         updateDisplay();
 
-        /// these are beacon IDs we disabled (1-based)
-        static const auto IDS_TO_SKIP = std::unordered_set<std::size_t>{
-            1,  2,  10, 12, 13,
-            14, 21, 35, 38, /* plus the rest of the back */ 36,
-            37, 39, 40};
+        // Only show the front-panel beacons - we do not want to encourage
+        // attempts to calibrate the back panel, since it's not rigidly attached
+        // to the front panel.
+        static const int MAX_BEACONS_TO_SHOW = 34;
 
         while (!m_quit) {
             bool gotDebugData = false;
@@ -189,18 +192,20 @@ class TrackerCalibrationApp {
                                 cv::Point(30, 50), cv::FONT_HERSHEY_SIMPLEX,
                                 0.45, cv::Scalar(255, 100, 100));
                 }
+                auto numGreen = std::size_t{0};
+                auto numYellow = std::size_t{0};
+                auto numUnimproved = std::size_t{0};
 
                 {
                     /// Reproject (almost) all beacons
                     std::vector<cv::Point2f> reprojections;
                     vbtracker().getFirstEstimator().ProjectBeaconsToImage(
                         reprojections);
-                    std::size_t nBeacons = reprojections.size();
+                    const auto nBeacons = reprojections.size();
                     m_nBeacons = nBeacons;
-                    for (std::size_t i = 0; i < nBeacons; ++i) {
-                        if (IDS_TO_SKIP.find(i + 1) != end(IDS_TO_SKIP)) {
-                            continue; // skip this one.
-                        }
+                    const auto beaconsToDisplay = std::min(
+                        MAX_BEACONS_TO_SHOW, static_cast<int>(nBeacons));
+                    for (std::size_t i = 0; i < beaconsToDisplay; ++i) {
                         Eigen::Vector3d autocalibVariance =
                             vbtracker()
                                 .getFirstEstimator()
@@ -211,16 +216,31 @@ class TrackerCalibrationApp {
                                 .all()) {
                             /// Green - good!
                             color = cv::Scalar{0, 255, 0};
+                            numGreen++;
                         } else if ((autocalibVariance.array() <
                                     Eigen::Array3d::Constant(m_firstNotch))
                                        .all()) {
                             /// Yellow - better than where you started
                             color = cv::Scalar{0, 255, 255};
+                            numYellow++;
+                        } else {
+                            numUnimproved++;
                         }
+
                         cv::putText(m_display, std::to_string(i + 1),
                                     reprojections[i] + cv::Point2f(1, 1),
                                     cv::FONT_HERSHEY_SIMPLEX, 0.45, color);
                     }
+                }
+
+                {
+                    /// Draw progress bar along bottom of window.
+                    static const auto PROGRESS_HEIGHT = 5;
+                    drawTwoStepProgressBar(
+                        m_display,
+                        cv::Point(0, m_display.rows - PROGRESS_HEIGHT),
+                        cv::Size(m_display.cols, PROGRESS_HEIGHT), numGreen,
+                        numYellow, numUnimproved);
                 }
 
                 auto key = updateDisplay();
@@ -231,10 +251,9 @@ class TrackerCalibrationApp {
             }
         }
 
-        for (std::size_t i = 0; i < m_nBeacons; ++i) {
-            if (IDS_TO_SKIP.find(i + 1) != end(IDS_TO_SKIP)) {
-                continue; // skip this one.
-            }
+        int beaconsToOutput =
+            std::min(MAX_BEACONS_TO_SHOW, static_cast<int>(m_nBeacons));
+        for (int i = 0; i < beaconsToOutput; ++i) {
             std::cout << "Beacon " << i + 1 << " autocalib variance ratio: "
                       << vbtracker()
                                  .getFirstEstimator()
@@ -249,9 +268,26 @@ class TrackerCalibrationApp {
             Json::Value calib(Json::arrayValue);
             out << "Saving your calibration data..." << endl;
             auto &estimator = vbtracker().getFirstEstimator();
-            for (std::size_t i = 0; i < m_nBeacons; ++i) {
+            auto numBeaconsFromAutocalib =
+                std::min(m_nBeacons, getNumHDKFrontPanelBeacons());
+
+            for (std::size_t i = 0; i < numBeaconsFromAutocalib; ++i) {
                 calib.append(osvr::common::toJson(
                     estimator.getBeaconAutocalibPosition(i)));
+            }
+            if (m_nBeacons > numBeaconsFromAutocalib) {
+                // This means they wanted rear panel beacons too. We will write
+                // un-calibrated beacon locations for those, so they don't get
+                // "less-neutral" starting positions.
+                Point3Vector locations;
+                addRearPanelBeaconLocations(m_distanceBetweenPanels, locations);
+                for (auto const &beacon : locations) {
+                    Json::Value val(Json::arrayValue);
+                    val.append(beacon.x);
+                    val.append(beacon.y);
+                    val.append(beacon.z);
+                    calib.append(val);
+                }
             }
             std::cout << "\n" << osvr::common::jsonToCompactString(calib)
                       << "\n" << endl;
@@ -261,6 +297,7 @@ class TrackerCalibrationApp {
                 outfile << osvr::common::jsonToStyledString(calib);
                 outfile.close();
             }
+            closeWindow();
             out << "Done! Press enter to exit." << endl;
             std::cin.ignore();
         }
@@ -295,9 +332,12 @@ class TrackerCalibrationApp {
         return key;
     }
 
+    void closeWindow() { cv::destroyWindow(windowNameAndInstructions); }
+
   private:
     ImageSourcePtr m_src;
     osvr::vbtracker::ConfigParams m_params;
+    const double m_distanceBetweenPanels;
     double m_firstNotch;
     double m_secondNotch;
     osvr::vbtracker::VideoBasedTracker m_vbtracker;
@@ -379,50 +419,18 @@ int main(int argc, char *argv[]) {
 
     /// Fourth step: Add the sensors to the tracker.
     {
-        auto backPanelFixedBeacon = [](int) { return true; };
-        auto frontPanelFixedBeacon = [](int id) {
-            return (id == 16) || (id == 17) || (id == 19) || (id == 20);
-        };
-
         auto camParams = getHDKCameraParameters();
         if (params.includeRearPanel) {
-            // distance between front and back panel target origins, in mm.
-            auto distanceBetweenPanels = params.headCircumference / M_PI * 10. +
-                                         params.headToFrontBeaconOriginDistance;
-            Point3Vector locations = OsvrHdkLedLocations_SENSOR0;
-            Vec3Vector directions = OsvrHdkLedDirections_SENSOR0;
-            std::vector<double> variances = OsvrHdkLedVariances_SENSOR0;
 
-            // For the back panel beacons: have to rotate 180 degrees
-            // about Y, which is the same as flipping sign on X and Z
-            // then we must translate along Z by head diameter +
-            // distance from head to front beacon origins
-            for (auto &pt : OsvrHdkLedLocations_SENSOR1) {
-                locations.emplace_back(-pt.x, pt.y,
-                                       -pt.z - distanceBetweenPanels);
-                variances.push_back(params.backPanelMeasurementError);
-            }
-            // Similarly, rotate the directions.
-            for (auto &vec : OsvrHdkLedDirections_SENSOR1) {
-                directions.emplace_back(-vec[0], vec[1], -vec[2]);
-            }
-            trackerApp.vbtracker().addSensor(
-                createHDKUnifiedLedIdentifier(), camParams, locations,
-                directions, variances, frontPanelFixedBeacon, 4, 0);
+            /// Setup sensor just as in tracker app, but don't try to load
+            /// calibration.
+            setupSensorsIncludeRearPanel(trackerApp.vbtracker(), params, false);
         } else {
+
             err << "WARNING: only calibrating the first sensor is currently "
                    "supported!"
                 << endl;
-            // OK, so if we don't have to include the rear panel as part of the
-            // single sensor, that's easy.
-            trackerApp.vbtracker().addSensor(
-                createHDKLedIdentifier(0), camParams,
-                OsvrHdkLedLocations_SENSOR0, OsvrHdkLedDirections_SENSOR0,
-                OsvrHdkLedVariances_SENSOR0, frontPanelFixedBeacon, 6, 0);
-            trackerApp.vbtracker().addSensor(
-                createHDKLedIdentifier(1), camParams,
-                OsvrHdkLedLocations_SENSOR1, OsvrHdkLedDirections_SENSOR1,
-                backPanelFixedBeacon, 4, 0);
+            setupSensorsWithoutRearPanel(trackerApp.vbtracker(), params, false);
         }
     }
 
