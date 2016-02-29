@@ -1,7 +1,9 @@
-# - Find jsoncpp - stopgap find module
-# This is a stopgap find module to find older jsoncpp versions and those sadly built
-# without JSONCPP_WITH_CMAKE_PACKAGE=ON. It also wraps the different versions of the module.
+# - Find jsoncpp - Overarching find module
+# This is a over-arching find module to find older jsoncpp versions and those sadly built
+# without JSONCPP_WITH_CMAKE_PACKAGE=ON, as well as those built with the cmake config file.
+# It also wraps the different versions of the module.
 #
+# On CMake 3.0 and newer:
 #  JsonCpp::JsonCpp - Imported target (possibly an interface/alias) to use:
 #  if anything is populated, this is. If both shared and static are found, then
 #  this will be the static version on DLL platforms and shared on non-DLL platforms.
@@ -9,6 +11,14 @@
 #  shared library version.
 #  JsonCpp::JsonCppStatic - Imported target (possibly an interface/alias) for a
 #  static library version.
+#
+# On all CMake versions: (Note that on CMake 2.8.10 and earlier, you may need to use JSONCPP_INCLUDE_DIRS)
+#  JSONCPP_LIBRARY - wraps JsonCpp::JsonCpp or equiv.
+#  JSONCPP_LIBRARY_IS_SHARED - if we know for sure JSONCPP_LIBRARY is shared, this is true-ish. We try to "un-set" it if we don't know one way or another.
+#  JSONCPP_LIBRARY_SHARED - wraps JsonCpp::JsonCppShared or equiv.
+#  JSONCPP_LIBRARY_STATIC - wraps JsonCpp::JsonCppStatic or equiv.
+#  JSONCPP_INCLUDE_DIRS - Include directories - should (generally?) not needed if you require CMake 2.8.11+ since it handles target include directories.
+#
 #  JSONCPP_FOUND - True if JsonCpp was found.
 #
 # Original Author:
@@ -22,38 +32,102 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-# We will always try to produce at least one imported target, and e haven't found an imported target.
-if(NOT TARGET JsonCpp::JsonCpp AND NOT TARGET jsoncpp_lib AND NOT TARGET jsoncpp_lib_static)
+set(__jsoncpp_have_namespaced_targets OFF)
+set(__jsoncpp_have_interface_support OFF)
+if(NOT ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 3.0))
+	set(__jsoncpp_have_namespaced_targets ON)
+	set(__jsoncpp_have_interface_support ON)
+elseif(("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" EQUAL 2.8) AND "${CMAKE_PATCH_VERSION}" GREATER 10)
+	set(__jsoncpp_have_interface_support ON)
+endif()
+
+# sets __jsoncpp_have_jsoncpplib based on whether or not we have a real imported jsoncpp_lib target.
+macro(_jsoncpp_check_for_real_jsoncpplib)
+	set(__jsoncpp_have_jsoncpplib FALSE)
+	if(TARGET jsoncpp_lib)
+		get_property(__jsoncpp_lib_type TARGET jsoncpp_lib PROPERTY TYPE)
+		# We make interface libraries. If an actual config module made it, it would be an imported library.
+		if(NOT __jsoncpp_lib_type STREQUAL "INTERFACE_LIBRARY")
+			set(__jsoncpp_have_jsoncpplib TRUE)
+		endif()
+	endif()
+endmacro()
+
+# We will always try first to get a config file.
+if(NOT JSONCPP_IMPORTED_LIBRARY)
 	# See if we find a CMake config file.
 	find_package(jsoncpp QUIET NO_MODULE)
 	if(jsoncpp_FOUND)
 		# OK, so we found something.
-		add_library(JsonCpp::JsonCpp INTERFACE IMPORTED)
-		if(TARGET jsoncpp_lib AND TARGET jsoncpp_lib_static)
+		unset(JSONCPP_IMPORTED_LIBRARY_IS_SHARED)
+		_jsoncpp_check_for_real_jsoncpplib()
+		if(__jsoncpp_have_jsoncpplib AND TARGET jsoncpp_lib_static)
 			# A veritable cache of riches - we have both shared and static!
-			add_library(JsonCpp::JsonCppShared INTERFACE IMPORTED)
-			set_property(TARGET JsonCpp::JsonCppShared PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib)
-
-			add_library(JsonCpp::JsonCppStatic INTERFACE IMPORTED)
-			set_property(TARGET JsonCpp::JsonCppStatic PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib_static)
-
+			set(JSONCPP_IMPORTED_LIBRARY_SHARED jsoncpp_lib CACHE INTERNAL "" FORCE)
+			set(JSONCPP_IMPORTED_LIBRARY_STATIC jsoncpp_lib_static CACHE INTERNAL "" FORCE)
 			if(WIN32 OR CYGWIN OR MINGW)
 				# DLL platforms: static library should be default
-				set_property(TARGET JsonCpp::JsonCpp PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib_static)
+				set(JSONCPP_IMPORTED_LIBRARY ${JSONCPP_IMPORTED_LIBRARY_STATIC} CACHE INTERNAL "" FORCE)
+				set(JSONCPP_IMPORTED_LIBRARY_IS_SHARED FALSE CACHE INTERNAL "" FORCE)
 			else()
 				# Other platforms - might require PIC to be linked into shared libraries, so safest to prefer shared.
-				set_property(TARGET JsonCpp::JsonCpp PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib)
+				set(JSONCPP_IMPORTED_LIBRARY ${JSONCPP_IMPORTED_LIBRARY_SHARED} CACHE INTERNAL "" FORCE)
+				set(JSONCPP_IMPORTED_LIBRARY_IS_SHARED TRUE CACHE INTERNAL "" FORCE)
 			endif()
 		elseif(TARGET jsoncpp_lib_static)
 			# Well, only one variant, but we know for sure that it's static.
-			add_library(JsonCpp::JsonCppStatic INTERFACE IMPORTED)
-			set_property(TARGET JsonCpp::JsonCppStatic PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib_static)
-			set_property(TARGET JsonCpp::JsonCpp PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib_static)
+			set(JSONCPP_IMPORTED_LIBRARY_STATIC jsoncpp_lib_static CACHE INTERNAL "" FORCE)
+			set(JSONCPP_IMPORTED_LIBRARY ${JSONCPP_IMPORTED_LIBRARY_STATIC} CACHE INTERNAL "" FORCE)
+			set(JSONCPP_IMPORTED_LIBRARY_IS_SHARED FALSE CACHE INTERNAL "" FORCE)
 		else() #elseif(TARGET jsoncpp_lib)
 			# One variant, and we have no idea if this is just an old version or if
 			# this is shared based on the target name alone. Hmm.
 			# TODO figure out if this is shared or static?
-			set_property(TARGET JsonCpp::JsonCpp PROPERTY INTERFACE_LINK_LIBRARIES jsoncpp_lib)
+			set(JSONCPP_IMPORTED_LIBRARY jsoncpp_lib CACHE INTERNAL "" FORCE)
+		endif()
+
+		# Now, we need include directories. Can't just limit this to old CMakes, since
+		# new CMakes might be used to build projects designed to support older ones.
+		if(__jsoncpp_have_jsoncpplib)
+			get_property(__jsoncpp_interface_include_dirs TARGET jsoncpp_lib PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+			if(__jsoncpp_interface_include_dirs)
+				set(JSONCPP_IMPORTED_INCLUDE_DIRS "${__jsoncpp_interface_include_dirs}" CACHE INTERNAL "" FORCE)
+			endif()
+		endif()
+		if(TARGET jsoncpp_lib_static AND NOT JSONCPP_IMPORTED_INCLUDE_DIRS)
+			get_property(__jsoncpp_interface_include_dirs TARGET jsoncpp_lib_static PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+			if(__jsoncpp_interface_include_dirs)
+				set(JSONCPP_IMPORTED_INCLUDE_DIRS "${__jsoncpp_interface_include_dirs}" CACHE INTERNAL "" FORCE)
+			endif()
+		endif()
+		if(NOT JSONCPP_IMPORTED_INCLUDE_DIRS)
+			# OK, so we couldn't get it from the target... maybe we can figure it out from jsoncpp_DIR.
+
+			# take off the jsoncpp component
+			get_filename_component(__jsoncpp_import_root "${jsoncpp_DIR}/.." ABSOLUTE)
+			set(__jsoncpp_hints "${__jsoncpp_import_root}")
+			# take off the cmake component
+			get_filename_component(__jsoncpp_import_root "${__jsoncpp_import_root}/.." ABSOLUTE)
+			list(APPEND __jsoncpp_hints "${__jsoncpp_import_root}")
+			# take off the lib component
+			get_filename_component(__jsoncpp_import_root "${__jsoncpp_import_root}/.." ABSOLUTE)
+			list(APPEND __jsoncpp_hints "${__jsoncpp_import_root}")
+			# take off one more component in case of multiarch lib
+			get_filename_component(__jsoncpp_import_root "${__jsoncpp_import_root}/.." ABSOLUTE)
+			list(APPEND __jsoncpp_hints "${__jsoncpp_import_root}")
+
+			# Now, search.
+			find_path(JsonCpp_INCLUDE_DIR
+				NAMES
+				json/json.h
+				PATH_SUFFIXES include jsoncpp include/jsoncpp
+				HINTS ${__jsoncpp_hints})
+
+			if(JsonCpp_INCLUDE_DIR)
+				mark_as_advanced(JsonCpp_INCLUDE_DIR)
+				# Note - this does not set it in the cache, in case we find it better at some point in the future!
+				set(JSONCPP_IMPORTED_INCLUDE_DIRS ${JsonCpp_INCLUDE_DIR})
+			endif()
 		endif()
 
 		# As a convenience...
@@ -62,18 +136,55 @@ if(NOT TARGET JsonCpp::JsonCpp AND NOT TARGET jsoncpp_lib AND NOT TARGET jsoncpp
 			target_link_libraries(jsoncpp_lib INTERFACE jsoncpp_lib_static)
 		endif()
 
-		set(JSONCPP_LIBRARY JsonCpp::JsonCpp)
-
+		# OK, finish this up.
 		include(FindPackageHandleStandardArgs)
 		find_package_handle_standard_args(JsonCpp
 			DEFAULT_MSG
-			JSONCPP_LIBRARY)
+			JSONCPP_IMPORTED_LIBRARY
+			JSONCPP_IMPORTED_INCLUDE_DIRS)
 	endif()
 endif()
 
-# Still nothing after looking for the config file.
-if(NOT TARGET JsonCpp::JsonCpp)
+# Create any missing namespaced targets from the config module.
+if(__jsoncpp_have_namespaced_targets)
+	if(JSONCPP_IMPORTED_LIBRARY AND NOT TARGET JsonCpp::JsonCpp)
+		add_library(JsonCpp::JsonCpp INTERFACE IMPORTED)
+		set_property(TARGET JsonCpp::JsonCpp PROPERTY INTERFACE_LINK_LIBRARIES ${JSONCPP_IMPORTED_LIBRARY})
+	endif()
 
+	if(JSONCPP_IMPORTED_LIBRARY_SHARED AND NOT TARGET JsonCpp::JsonCppShared)
+		add_library(JsonCpp::JsonCppShared INTERFACE IMPORTED)
+		set_property(TARGET JsonCpp::JsonCppShared PROPERTY INTERFACE_LINK_LIBRARIES ${JSONCPP_IMPORTED_LIBRARY_SHARED})
+	endif()
+
+	if(JSONCPP_IMPORTED_LIBRARY_STATIC AND NOT TARGET JsonCpp::JsonCppStatic)
+		add_library(JsonCpp::JsonCppStatic INTERFACE IMPORTED)
+		set_property(TARGET JsonCpp::JsonCppStatic PROPERTY INTERFACE_LINK_LIBRARIES ${JSONCPP_IMPORTED_LIBRARY_STATIC})
+	endif()
+endif()
+
+# Set any non-cache variables from cache variables set by a config module parsed above.
+if(JSONCPP_FOUND AND JSONCPP_IMPORTED_LIBRARY)
+	set(JSONCPP_LIBRARY ${JSONCPP_IMPORTED_LIBRARY})
+	set(JSONCPP_INCLUDE_DIRS ${JSONCPP_IMPORTED_INCLUDE_DIRS})
+	if(DEFINED JSONCPP_IMPORTED_LIBRARY_IS_SHARED)
+		set(JSONCPP_LIBRARY_IS_SHARED ${JSONCPP_IMPORTED_LIBRARY_IS_SHARED})
+	else()
+		unset(JSONCPP_LIBRARY_IS_SHARED)
+	endif()
+endif()
+
+if(JSONCPP_IMPORTED_LIBRARY_SHARED)
+	set(JSONCPP_LIBRARY_SHARED ${JSONCPP_IMPORTED_LIBRARY_SHARED})
+endif()
+
+if(JSONCPP_IMPORTED_LIBRARY_STATIC)
+	set(JSONCPP_LIBRARY_STATIC ${JSONCPP_IMPORTED_LIBRARY_STATIC})
+endif()
+
+
+# Still nothing after looking for the config file: must go "old-school"
+if(NOT JSONCPP_FOUND OR NOT JSONCPP_IMPORTED_LIBRARY)
 	# Invoke pkgconfig for hints
 	find_package(PkgConfig QUIET)
 	set(_JSONCPP_INCLUDE_HINTS)
@@ -173,11 +284,21 @@ if(NOT TARGET JsonCpp::JsonCpp)
 		#	INTERFACE_INCLUDE_DIRECTORIES "${JsonCpp_INCLUDE_DIR}"
 		#	IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
 
-		add_library(jsoncpp_interface INTERFACE)
-		set_target_properties(jsoncpp_interface PROPERTIES
-			INTERFACE_LINK_LIBRARIES "${JsonCpp_LIBRARY}"
-			INTERFACE_INCLUDE_DIRECTORIES "${JsonCpp_INCLUDE_DIR}")
-		add_library(JsonCpp::JsonCpp ALIAS jsoncpp_interface)
+		set(JSONCPP_LIBRARY "${JsonCpp_LIBRARY}")
+		set(JSONCPP_INCLUDE_DIRS "${JsonCpp_INCLUDE_DIR}")
+		unset(JSONCPP_LIBRARY_IS_SHARED)
+
+		if(__jsoncpp_have_interface_support AND NOT TARGET jsoncpp_interface)
+			add_library(jsoncpp_interface INTERFACE)
+			set_target_properties(jsoncpp_interface PROPERTIES
+				INTERFACE_LINK_LIBRARIES "${JsonCpp_LIBRARY}"
+				INTERFACE_INCLUDE_DIRECTORIES "${JsonCpp_INCLUDE_DIR}")
+		endif()
+		if(__jsoncpp_have_namespaced_targets)
+			if(NOT TARGET JsonCpp::JsonCpp)
+				add_library(JsonCpp::JsonCpp ALIAS jsoncpp_interface)
+			endif()
+		endif()
 		mark_as_advanced(JsonCpp_INCLUDE_DIR JsonCpp_LIBRARY)
 	endif()
 endif()
