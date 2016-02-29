@@ -239,8 +239,32 @@ class HardwareDetection {
         }
         auto src = m_cameraFactory();
         if (!src || !src->ok()) {
+            if (!m_reportedNoCamera) {
+                m_reportedNoCamera = true;
+                std::cout
+                    << "\nVideo-based tracker: Could not open the tracking "
+                       "camera. If you intend to use it, make sure that "
+                       "all cables to it are plugged in firmly.\n";
+
+#ifdef _WIN32
+                /// @todo this is a strange quirk of the video capture backend,
+                /// as well as others like it, including Microsoft's own AMCap
+                /// You get a "can't start the filter graph" if you have, e.g.,
+                /// Skype or a webcam-using page in Chrome accessing any camera
+                /// on your system when you try to start the tracker. Once you
+                /// get it started, then you can use those things just fine.
+                std::cout << "Video-based tracker: Windows users may need to "
+                             "exit other camera-using applications or "
+                             "activities until after the tracking camera is "
+                             "turned on by this plugin. (This is the most "
+                             "common cause of messages regarding the 'filter "
+                             "graph')\n";
+#endif
+                std::cout << std::endl;
+            }
             return OSVR_RETURN_FAILURE;
         }
+        std::cout << "Video-based tracker: Camera turned on!" << std::endl;
         m_found = true;
 
         /// Create our device object, passing the context and moving the camera.
@@ -256,6 +280,7 @@ class HardwareDetection {
     /// @brief Have we found our device yet? (this limits the plugin to one
     /// instance, so that only one tracker will use this camera.)
     bool m_found = false;
+    bool m_reportedNoCamera = false;
 
     CameraFactoryType m_cameraFactory;
     SensorSetupType m_sensorSetup;
