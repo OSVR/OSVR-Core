@@ -1,10 +1,10 @@
-/** @date 2015
+/** @date 2016
     @author
     Sensics, Inc.
     <http://sensics.com/osvr>
 */
 
-// Copyright 2015 Sensics Inc.
+// Copyright 2016 Sensics Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,16 +23,13 @@
 #include <osvr/PluginKit/TrackerInterfaceC.h>
 
 // Generated JSON header file
-#include "com_osvr_example_Tracker_json.h"
+#include "org_osvr_example_Tracker_json.h"
 
 // Library/third-party includes
 
 // Standard includes
-#include <iostream>
 #include <chrono>
 #include <thread>
-#include <random>
-#include <ctime>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -50,13 +47,10 @@ class TrackerDevice {
         m_dev.initAsync(ctx, "Tracker", opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(com_osvr_example_Tracker_json);
+        m_dev.sendJsonDescriptor(org_osvr_example_Tracker_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
-
-        /// Seed pseudo random generator.
-        std::srand(std::time(0));
     }
 
     OSVR_ReturnCode update() {
@@ -93,13 +87,9 @@ class HardwareDetection {
             return OSVR_RETURN_SUCCESS;
         }
 
-        std::cout << "PLUGIN: Got a hardware detection request" << std::endl;
-
         /// we always detect device in sample plugin
         m_found = true;
 
-        std::cout << "PLUGIN: We have detected Tracker device! "
-                  << std::endl;
         /// Create our device object
         osvr::pluginkit::registerObjectForDeletion(ctx, new TrackerDevice(ctx));
 
@@ -111,7 +101,7 @@ class HardwareDetection {
 };
 } // namespace
 
-OSVR_PLUGIN(com_osvr_example_Tracker) {
+OSVR_PLUGIN(org_osvr_example_Tracker) {
 
     osvr::pluginkit::PluginContext context(ctx);
 
