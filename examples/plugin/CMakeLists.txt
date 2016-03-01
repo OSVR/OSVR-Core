@@ -40,6 +40,7 @@ foreach(pluginname
     com_osvr_example_Configured
     com_osvr_example_EyeTracker
     com_osvr_example_Locomotion
+	com_osvr_example_Tracker
     com_osvr_example_MultipleAsync)
     target_link_libraries(${pluginname} osvr_cxx11_flags)
 endforeach()
