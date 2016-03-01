@@ -64,9 +64,16 @@ class TrackerDevice {
         std::this_thread::sleep_for(std::chrono::milliseconds(
             5)); // Simulate waiting a quarter second for data.
 
+        OSVR_TimeValue now;
+        osvrTimeValueGetNow(&now);
+        double t = 5.0 * ((double)now.seconds + ((double)now.microseconds / 1000000.0));
+
         /// Report the identity pose for sensor 0
         OSVR_PoseState pose;
         osvrPose3SetIdentity(&pose);
+        pose.translation.data[0] = std::sin(t) * 0.25;
+        pose.translation.data[1] = std::cos(t + 0.5) * 0.25;
+        pose.translation.data[2] = std::sin(t + 0.25) * 0.25;
         osvrDeviceTrackerSendPose(m_dev, m_tracker, &pose, 0);
 
         return OSVR_RETURN_SUCCESS;
