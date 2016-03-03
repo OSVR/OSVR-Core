@@ -1,0 +1,39 @@
+{
+    /*
+    This configuration supports video (so-called "positional") and IMU fusion tracking,
+    in addition to orientation-only tracking, with the OSVR HDK.
+    It is configured for RenderManager applications in
+    direct mode (portrait) on HDK 1.3 optics.
+    */
+    "display": "displays/OSVR_HDK_1_3_with_mesh.json",
+    "renderManagerConfig": "sample-configs/renderManager.direct.portrait.json",
+    "drivers": [{
+        "plugin": "com_osvr_VideoBasedHMDTracker",
+        "driver": "VideoBasedHMDTracker",
+        "params": {
+            "showDebug": false,
+            "includeRearPanel": true,
+            "headCircumference": 55.75,
+            "calibrationFile": "videotrackerCombinedCalibrationFile13.json"
+        }
+    }, {
+        "plugin": "org_osvr_filter_videoimufusion",
+        "driver": "VideoIMUFusion",
+        "params": {
+            "name": "HeadFusion",
+            "input": {
+                "imu": "/com_osvr_Multiserver/OSVRHackerDevKitPrediction0/semantic/hmd",
+                "faceplate": "/com_osvr_VideoBasedHMDTracker/TrackedCamera0_0/semantic/hmd/front"
+            },
+            "eyeHeight": 0,
+            "cameraIsForward": true
+        }
+    }],
+    "aliases": {
+        "/headSpace": {
+            "translate": [0.0, 0.0, 0.04141],
+            "child": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
+        },
+        "/me/head": "/headSpace"
+    }
+}

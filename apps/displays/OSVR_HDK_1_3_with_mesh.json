@@ -1,0 +1,44 @@
+{
+    "meta": {
+        "schemaVersion": 1
+    },
+    "hmd": {
+        "device": {
+            "vendor": "OSVR",
+            "model": "HDK",
+            "num_displays": 1,
+            "Version": "1.3",
+            "Note": "Specific to the optics of 1.3, with a specialized distortion correction requiring apps to use RenderManager 0.6.40 or newer."
+        },
+        "field_of_view": {
+            "monocular_horizontal": 92,
+            "monocular_vertical": 92,
+            "overlap_percent": 100,
+            "pitch_tilt": 0
+        },
+        "resolutions": [{
+            "width": 1920,
+            "height": 1080,
+            "video_inputs": 1,
+            "display_mode": "horz_side_by_side",
+            "swap_eyes": 0
+        }],
+        "distortion": {
+            "type": "mono_point_samples",
+            "mono_point_samples_built_in": "OSVR_HDK_13_V1"
+        },
+        "rendering": {
+            "right_roll": 0,
+            "left_roll": 0
+        },
+        "eyes": [{
+            "center_proj_x": 0.5,
+            "center_proj_y": 0.5,
+            "rotate_180": 0
+        }, {
+            "center_proj_x": 0.5,
+            "center_proj_y": 0.5,
+            "rotate_180": 0
+        }]
+    }
+}
