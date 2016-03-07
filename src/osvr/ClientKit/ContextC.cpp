@@ -29,12 +29,80 @@
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes
-// - none
+#if !defined(OSVR_ANDROID)
+#if defined(OSVR_WINDOWS)
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+#endif
 
 // Standard includes
 // - none
+
+static const char SERVER_ENV_VAR[] = "OSVR_SERVER";
+
+OSVR_ReturnCode osvrServerInit()
+{
+    // @todo start the server.
+#if defined(OSVR_ANDROID)
+    // @todo implement auto-start for android
+#else
+    auto server = osvr::common::getEnvironmentVariable(SERVER_ENV_VAR);
+    if (server.is_initialized()) {
+        OSVR_DEV_VERBOSE("Attempting to auto-start OSVR server from path " << *server);
+
+#if defined(OSVR_WINDOWS)
+        std::string serverPath = *server;
+        std::string exePath = serverPath + "\\osvr_server.exe";
+        STARTUPINFO startupInfo;
+        PROCESS_INFORMATION processInfo;
+        memset(&startupInfo, 0, sizeof(startupInfo));
+        memset(&processInfo, 0, sizeof(processInfo));
+        startupInfo.dwFlags |= STARTF_USESHOWWINDOW;
+        startupInfo.wShowWindow = SW_SHOW;
+        if (!CreateProcess(exePath.c_str(), NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL,
+            server->c_str(), &startupInfo, &processInfo)) {
+            OSVR_DEV_VERBOSE("Could not auto-start OSVR server.");
+            return OSVR_RETURN_FAILURE;
+        }
+        return OSVR_RETURN_SUCCESS;
+#else
+        // UNTESTED (or even compiled)
+        //std::string serverPath = *server;
+        //std::string exePath = serverPath + "/osvr_server";
+        //pid_t pid = fork();
+        //if (pid == -1) {
+        //    OSVR_DEV_VERBOSE("Could not fork the OSVR server process.");
+        //    return OSVR_RETURN_FAILURE;
+        //} else if (pid == 0) {
+        //    // @todo set the current working directory to serverPath here
+        //    execl(exePath.c_str(), NULL);
+        //    OSVR_DEV_VERBOSE("Could not start OSVR server process.");
+        //    return OSVR_RETURN_FAILURE;
+        //} else {
+        //    OSVR_DEV_VERBOSE("Started OSVR server process successfully.");
+        //    return OSVR_RETURN_SUCCESS;
+        //}
+#endif
+    } else {
+        OSVR_DEV_VERBOSE("Environment variable " << SERVER_ENV_VAR << " not defined. Assuming server is already running.");
+    }
+#endif
+}
+
+OSVR_ReturnCode osvrServerRelease()
+{
+#if defined(OSVR_ANDROID)
+    // @todo cleanup server thread
+#else
+    // no-op. Leave the server running.
+#endif
+    return OSVR_RETURN_SUCCESS;
+}
 
 static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
