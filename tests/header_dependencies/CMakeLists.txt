@@ -9,6 +9,15 @@ if(NOT BUILD_USBSERIALENUM)
         osvr/USBSerial/USBSerialEnum.h)
 endif()
 
+if(BUILD_WITH_OPENCV)
+    set(LIBRARIES_osvr_Util_OpenCVTypeDispatch opencv_core)
+    set(LIBRARIES_osvr_PluginKit_ImagingInterface opencv_core)
+else()
+    list(APPEND IGNORED_HEADERS
+        osvr/Util/OpenCVTypeDispatch.h
+        osvr/PluginKit/ImagingInterface.h)
+endif()
+
 set(LIBRARIES_PluginKit libfunctionality::functionality)
 set(LIBRARIES_VRPNServer libfunctionality::functionality)
 set(LIBRARIES_TypePack osvrTypePack)
