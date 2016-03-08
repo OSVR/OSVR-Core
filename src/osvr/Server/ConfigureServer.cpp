@@ -43,6 +43,8 @@
 #include <iostream>
 #include <vector>
 
+#undef OSVR_JSON_RESOLUTION_VERBOSE
+
 namespace osvr {
 namespace server {
     namespace detail {
@@ -370,7 +372,9 @@ namespace server {
             return success;
         }
 
+#ifdef OSVR_JSON_RESOLUTION_VERBOSE
         printJsonReferenceResolutionAttempts(refReturn);
+#endif
 
         // OK, got it.
         /// @todo don't style this string!
@@ -397,7 +401,9 @@ namespace server {
             return success;
         }
 
+#ifdef OSVR_JSON_RESOLUTION_VERBOSE
         printJsonReferenceResolutionAttempts(refReturn);
+#endif
 
         // OK, got it
         /// @todo don't style this string!
