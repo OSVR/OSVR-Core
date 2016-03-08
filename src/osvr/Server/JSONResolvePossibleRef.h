@@ -37,6 +37,27 @@
 
 namespace osvr {
 namespace server {
+    enum class FileLoadStatus {
+        CouldNotOpenFile,
+        CouldNotParseFile,
+        FileOpenedAndParsed
+    };
+    enum class ValueHandledAs { Filename, String, JsonRefToFile, Other };
+    struct FileLoadAttempt {
+        std::string path;
+        FileLoadStatus status;
+        std::string details;
+    };
+    using FileLoadAttempts = std::vector<FileLoadAttempt>;
+
+    struct ResolveRefResult {
+        Json::Value result;
+        bool resolved = false;
+        ValueHandledAs handledAs = ValueHandledAs::Other;
+        FileLoadAttempts fileAttempts;
+    };
+
+    const char *fileLoadStatusToString(FileLoadStatus status);
 
     /// @brief Given an input that might be a filename, might be a JSON
     /// Pointer-style $ref object, and might just directly be an object, return
@@ -55,6 +76,12 @@ namespace server {
                                    bool stringAcceptableResult = false,
                                    std::vector<std::string> const &searchPath =
                                        std::vector<std::string>());
+
+    ResolveRefResult
+    resolvePossibleRefWithDetails(Json::Value const &input,
+                                  bool stringAcceptableResult = false,
+                                  std::vector<std::string> const &searchPath =
+                                      std::vector<std::string>());
 
 } // namespace server
 } // namespace osvr
