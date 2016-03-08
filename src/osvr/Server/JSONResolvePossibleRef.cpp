@@ -32,6 +32,8 @@
 // Standard includes
 #include <fstream>
 #include <string>
+#include <utility>
+#include <tuple>
 
 using std::make_pair;
 using std::tie;
@@ -41,21 +43,8 @@ namespace server {
 
     /// @brief Helper function to load a JSON file given a full path to the
     /// file.
-    /// @returns a null json value if load failed.
-    static inline Json::Value attemptLoad(std::string fullFn) {
-        Json::Value ret{Json::nullValue};
-        std::ifstream file{fullFn};
-        if (!file) {
-            return ret;
-        }
-        Json::Reader reader;
-        if (!reader.parse(file, ret)) {
-            ret = Json::nullValue;
-            return ret;
-        }
-        return ret;
-    }
-
+    /// @returns a file load attempt description and the JSON value - null if
+    /// load failed.
     static inline std::pair<FileLoadAttempt, Json::Value>
     attemptFileLoad(std::string const &fullFn) {
 
@@ -82,24 +71,9 @@ namespace server {
     }
 
     /// @brief Helper function to load a JSON file by name in a search path.
-    /// @return Json::nullValue if could not load, otherwise parsed contents of
-    /// file.
-    static inline Json::Value
-    loadFromFile(std::string fn, std::vector<std::string> const &searchPath) {
-        Json::Value ret{Json::nullValue};
-        for (auto const &path : searchPath) {
-            auto fullFn = boost::filesystem::path(path) / fn;
-            ret = attemptLoad(fullFn.string());
-            if (!ret.isNull()) {
-                return ret;
-            }
-        }
-        // Last ditch effort, or only attempt if no search path provided
-        // This effectively uses the current working directory.
-        ret = attemptLoad(fn);
-        return ret;
-    }
-
+    /// @return pair of false, Json::nullValue if could not load, otherwise true
+    /// and parsed contents of file. (All attempted loads are added to the
+    /// attempts output parameter)
     static inline std::pair<bool, Json::Value>
     loadFromFile(FileLoadAttempts &attempts, std::string const &fn,
                  std::vector<std::string> const &searchPath) {
@@ -113,14 +87,14 @@ namespace server {
                 return make_pair(true, ret);
             }
         }
+
         // Last ditch effort, or only attempt if no search path provided
         // This effectively uses the current working directory.
-
         FileLoadAttempt attempt;
         tie(attempt, ret) = attemptFileLoad(fn);
         attempts.push_back(attempt);
-        return std::make_pair(
-            attempt.status == FileLoadStatus::FileOpenedAndParsed, ret);
+        return make_pair(FileLoadStatus::FileOpenedAndParsed == attempt.status,
+                         ret);
     }
 
     ResolveRefResult
@@ -146,6 +120,7 @@ namespace server {
             return ret;
         }
 
+        // Rough parsing of some json ref
         if (input.isObject() && input.isMember("$ref")) {
             /// @todo remove things after the filename in the ref.
             tie(ret.resolved, ret.result) = loadFromFile(
@@ -163,23 +138,10 @@ namespace server {
     Json::Value resolvePossibleRef(Json::Value const &input,
                                    bool stringAcceptableResult,
                                    std::vector<std::string> const &searchPath) {
-        Json::Value ret{Json::nullValue};
-        if (input.isString()) {
-            ret = loadFromFile(input.asString(), searchPath);
-            if (ret.isNull() && stringAcceptableResult) {
-                ret = input;
-            }
-            return ret;
-        }
-        if (input.isObject() && input.isMember("$ref")) {
-            /// @todo remove things after the filename in the ref.
-            ret = loadFromFile(input["$ref"].asString(), searchPath);
-            if (!ret.isNull()) {
-                return ret;
-            }
-        }
-        ret = input;
-        return ret;
+        /// This function is the same as "withDetails", just less rich.
+        auto ret = resolvePossibleRefWithDetails(input, stringAcceptableResult,
+                                                 searchPath);
+        return ret.result;
     }
 
     const char *fileLoadStatusToString(FileLoadStatus status) {
