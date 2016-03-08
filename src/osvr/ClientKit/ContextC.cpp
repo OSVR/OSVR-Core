@@ -31,6 +31,7 @@
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/PlatformConfig.h>
+#include <osvr/Util/ProcessUtils.h>
 
 // Library/third-party includes
 #if !defined(OSVR_ANDROID)
@@ -44,8 +45,6 @@
 // Standard includes
 // - none
 
-static const char SERVER_ENV_VAR[] = "OSVR_SERVER";
-
 OSVR_ReturnCode osvrServerAutoStart()
 {
     // @todo start the server.
@@ -55,47 +54,18 @@ OSVR_ReturnCode osvrServerAutoStart()
     auto server = osvr::client::getServerBinaryDirectoryPath();
     if (server.is_initialized()) {
         OSVR_DEV_VERBOSE("Attempting to auto-start OSVR server from path " << *server);
-
-#if defined(OSVR_WINDOWS)
-        std::string serverPath = *server;
         auto exePath = osvr::client::getServerLauncherBinaryPath();
         if (!exePath.is_initialized()) {
             OSVR_DEV_VERBOSE("No server launcher binary available.");
             return OSVR_RETURN_FAILURE;
         }
 
-        STARTUPINFO startupInfo;
-        PROCESS_INFORMATION processInfo;
-        memset(&startupInfo, 0, sizeof(startupInfo));
-        memset(&processInfo, 0, sizeof(processInfo));
-        startupInfo.dwFlags |= STARTF_USESHOWWINDOW;
-        startupInfo.wShowWindow = SW_SHOW;
-        if (!CreateProcess(exePath->c_str(), NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL,
-            server->c_str(), &startupInfo, &processInfo)) {
-            OSVR_DEV_VERBOSE("Could not auto-start OSVR server.");
+        if (osvrStartProcess(exePath->c_str(), server->c_str()) == OSVR_RETURN_FAILURE) {
+            OSVR_DEV_VERBOSE("Could not auto-start server process.");
             return OSVR_RETURN_FAILURE;
         }
-        return OSVR_RETURN_SUCCESS;
-#else
-        // UNTESTED (or even compiled)
-        //std::string serverPath = *server;
-        //std::string exePath = serverPath + "/osvr_server";
-        //pid_t pid = fork();
-        //if (pid == -1) {
-        //    OSVR_DEV_VERBOSE("Could not fork the OSVR server process.");
-        //    return OSVR_RETURN_FAILURE;
-        //} else if (pid == 0) {
-        //    // @todo set the current working directory to serverPath here
-        //    execl(exePath.c_str(), NULL);
-        //    OSVR_DEV_VERBOSE("Could not start OSVR server process.");
-        //    return OSVR_RETURN_FAILURE;
-        //} else {
-        //    OSVR_DEV_VERBOSE("Started OSVR server process successfully.");
-        //    return OSVR_RETURN_SUCCESS;
-        //}
-#endif
     } else {
-        OSVR_DEV_VERBOSE("Environment variable " << SERVER_ENV_VAR << " not defined. Assuming server is already running.");
+        OSVR_DEV_VERBOSE("The current server location is currently unknown. Assuming server is already running.");
     }
 #endif
     return OSVR_RETURN_FAILURE;
