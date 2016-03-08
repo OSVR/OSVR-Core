@@ -155,6 +155,7 @@ namespace server {
         case FileLoadStatus::FileOpenedAndParsed:
             return "File opened and parsed";
         }
+        return "";
     }
 } // namespace server
 } // namespace osvr
