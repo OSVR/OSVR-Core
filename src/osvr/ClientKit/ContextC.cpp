@@ -26,6 +26,7 @@
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
+#include <osvr/Client/LocateServer.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
@@ -45,26 +46,31 @@
 
 static const char SERVER_ENV_VAR[] = "OSVR_SERVER";
 
-OSVR_ReturnCode osvrServerInit()
+OSVR_ReturnCode osvrServerAutoStart()
 {
     // @todo start the server.
 #if defined(OSVR_ANDROID)
     // @todo implement auto-start for android
 #else
-    auto server = osvr::common::getEnvironmentVariable(SERVER_ENV_VAR);
+    auto server = osvr::client::getServerBinaryDirectoryPath();
     if (server.is_initialized()) {
         OSVR_DEV_VERBOSE("Attempting to auto-start OSVR server from path " << *server);
 
 #if defined(OSVR_WINDOWS)
         std::string serverPath = *server;
-        std::string exePath = serverPath + "\\osvr_server.exe";
+        auto exePath = osvr::client::getServerLauncherBinaryPath();
+        if (!exePath.is_initialized()) {
+            OSVR_DEV_VERBOSE("No server launcher binary available.");
+            return OSVR_RETURN_FAILURE;
+        }
+
         STARTUPINFO startupInfo;
         PROCESS_INFORMATION processInfo;
         memset(&startupInfo, 0, sizeof(startupInfo));
         memset(&processInfo, 0, sizeof(processInfo));
         startupInfo.dwFlags |= STARTF_USESHOWWINDOW;
         startupInfo.wShowWindow = SW_SHOW;
-        if (!CreateProcess(exePath.c_str(), NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL,
+        if (!CreateProcess(exePath->c_str(), NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL,
             server->c_str(), &startupInfo, &processInfo)) {
             OSVR_DEV_VERBOSE("Could not auto-start OSVR server.");
             return OSVR_RETURN_FAILURE;
@@ -92,6 +98,7 @@ OSVR_ReturnCode osvrServerInit()
         OSVR_DEV_VERBOSE("Environment variable " << SERVER_ENV_VAR << " not defined. Assuming server is already running.");
     }
 #endif
+    return OSVR_RETURN_FAILURE;
 }
 
 OSVR_ReturnCode osvrServerRelease()

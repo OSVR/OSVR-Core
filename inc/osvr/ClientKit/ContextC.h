@@ -67,7 +67,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrServerRelease();
 
     @returns Client context - will be needed for subsequent calls
 */
-OSVR_CLIENTKIT_EXPORT OSVR_ClientContext osvrClientInit(
+OSVR_CLIENTKIT_EXPORT OSVR_ClientContext osvrClientAutoStart(
     const char applicationIdentifier[], uint32_t flags OSVR_CPP_ONLY(= 0));
 
 /** @brief Updates the state of the context - call regularly in your mainloop.
