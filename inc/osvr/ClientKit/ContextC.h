@@ -53,7 +53,7 @@ OSVR_EXTERN_C_BEGIN
 
 /** @brief Ensures the OSVR server process/thread is running. Call once per process.
  */
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrServerInit();
+ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrServerAutoStart();
 
 /** @brief Ensures any OSVR server-related resources in the client are released. Call once per process.
  */
@@ -67,7 +67,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrServerRelease();
 
     @returns Client context - will be needed for subsequent calls
 */
-OSVR_CLIENTKIT_EXPORT OSVR_ClientContext osvrClientAutoStart(
+OSVR_CLIENTKIT_EXPORT OSVR_ClientContext osvrClientInit(
     const char applicationIdentifier[], uint32_t flags OSVR_CPP_ONLY(= 0));
 
 /** @brief Updates the state of the context - call regularly in your mainloop.
