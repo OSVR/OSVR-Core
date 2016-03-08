@@ -64,8 +64,13 @@ namespace server {
         }
         return ret;
     }
-    ServerImpl::ServerImpl(connection::ConnectionPtr const &conn)
-        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()) {
+    ServerImpl::ServerImpl(connection::ConnectionPtr const &conn,
+                           boost::optional<std::string> const &host,
+                           boost::optional<int> const &port)
+        : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
+          m_host(host.get_value_or("localhost")),
+          m_port(port.get_value_or(
+              common::elements::DeviceElement::DEFAULT_PORT)) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
@@ -278,8 +283,10 @@ namespace server {
             /// Get the node
             auto &node = m_tree.getNodeByPath(path);
 
-            /// Create the DeviceElement and set it as the node value
-            auto elt = common::elements::DeviceElement{deviceName, server};
+            /// Create the DeviceElement and set it as the node value - assume
+            /// it's a VRPN device by default.
+            auto elt = common::elements::DeviceElement::createVRPNDeviceElement(
+                deviceName, server);
             elt.getDescriptor() = descriptorVal;
             node.value() = elt;
             m_treeDirty.set();
@@ -371,7 +378,7 @@ namespace server {
                                  << dev->getName());
             } else {
                 m_treeDirty += common::processDeviceDescriptorForPathTree(
-                    m_tree, dev->getName(), descriptor);
+                    m_tree, dev->getName(), descriptor, m_port, m_host);
             }
         }
     }

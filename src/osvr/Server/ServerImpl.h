@@ -36,6 +36,7 @@
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Util/Flag.h>
 
 // Library/third-party includes
@@ -44,9 +45,10 @@
 #include <boost/thread.hpp>
 #include <vrpn_Connection.h>
 #include <json/value.h>
+#include <boost/optional.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace osvr {
 namespace server {
@@ -55,7 +57,9 @@ namespace server {
     class ServerImpl : boost::noncopyable {
       public:
         /// @brief Constructor
-        ServerImpl(connection::ConnectionPtr const &conn);
+        ServerImpl(connection::ConnectionPtr const &conn,
+                   boost::optional<std::string> const &host,
+                   boost::optional<int> const &port);
 
         /// @brief Destructor (stops the thread first)
         ~ServerImpl();
@@ -240,6 +244,12 @@ namespace server {
         /// @brief Number of microseconds to sleep after each loop iteration
         /// right now. 0 = no sleeping.
         int m_currentSleepTime = IDLE_SLEEP_TIME;
+
+        /// The host/interface we're listening on, if any.
+        std::string m_host;
+
+        /// The port we're listening on, if any.
+        int m_port;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable

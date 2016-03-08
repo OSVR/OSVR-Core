@@ -121,6 +121,13 @@ namespace common {
             createVRPNDeviceElement(std::string const &deviceName,
                                     std::string const &server);
 
+            static const int OMIT_ADDED_PORT_SPECIFICATION = -2;
+            static const int DEFAULT_PORT = -1;
+            OSVR_COMMON_EXPORT static DeviceElement
+            createDeviceElement(std::string const &deviceName,
+                                std::string const &server,
+                                int port = DEFAULT_PORT);
+
             OSVR_COMMON_EXPORT std::string &getDeviceName();
             OSVR_COMMON_EXPORT std::string const &getDeviceName() const;
             OSVR_COMMON_EXPORT std::string &getServer();

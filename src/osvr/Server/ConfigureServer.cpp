@@ -150,7 +150,11 @@ namespace server {
         } else {
             connection::ConnectionPtr connPtr(
                 connection::Connection::createSharedConnection(iface, port));
-            m_server = Server::create(connPtr);
+            boost::optional<std::string> host;
+            if (!iface.empty()) {
+                host = iface;
+            }
+            m_server = Server::create(connPtr, host, port);
         }
 
         if (sleepTime > 0.0) {
