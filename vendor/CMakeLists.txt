@@ -63,14 +63,29 @@ add_library(com_smart_pointer INTERFACE)
 target_include_directories(com_smart_pointer INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/com_smart_pointer" ${Boost_INCLUDE_DIRS})
 
 if(WIN32)
-    add_library(comutils STATIC
+    add_library(comutils-interface INTERFACE)
+    target_link_libraries(comutils-interface INTERFACE com_smart_pointer)
+    target_include_directories(comutils-interface INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_compile_options(comutils-interface INTERFACE "${OSVR_CXX11_FLAGS}")
+
+    # Add an "OBJECT" library type, to include directly in
+    # static libraries. Note that if you use $<TARGET_OBJECTS:comutils-obj>
+    # in your source list, you'll also want to link to comutils-interface to
+    # get the includes and flags right.
+    add_library(comutils-obj OBJECT
         comutils/ComInit.cpp
         comutils/ComInit.h
         comutils/ComPtr.h
         comutils/ComVariant.h)
-    target_link_libraries(comutils PUBLIC com_smart_pointer)
-    target_include_directories(comutils PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-    target_compile_options(comutils PUBLIC "${OSVR_CXX11_FLAGS}")
+    target_include_directories(comutils-obj PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_compile_options(comutils-obj PUBLIC "${OSVR_CXX11_FLAGS}")
+
+    # Make a static library, for those who can just link it in privately.
+    # Simpler usage for the immediate consumer as long as they're a DLL or EXE
+    add_library(comutils STATIC
+        $<TARGET_OBJECTS:comutils-obj>)
+    target_link_libraries(comutils PUBLIC comutils-interface)
+
 endif()
 
 if(WIN32 AND NOT OSVR_OFFICIAL)
