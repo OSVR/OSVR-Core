@@ -221,6 +221,14 @@ if(JSONCPP_FOUND)
 				INTERFACE_INCLUDE_DIRECTORIES "${JSONCPP_IMPORTED_INCLUDE_DIRS}"
 				INTERFACE_LINK_LIBRARIES "${JSONCPP_IMPORTED_LIBRARY_STATIC}")
 		endif()
+
+		# Hide the stuff we didn't, and no longer, need.
+		if(NOT JsonCpp_LIBRARY)
+			unset(JsonCpp_LIBRARY CACHE)
+		endif()
+		if(NOT JsonCpp_INCLUDE_DIR)
+			unset(JsonCpp_INCLUDE_DIR CACHE)
+		endif()
 	endif()
 
 	set(JSONCPP_LIBRARY ${JSONCPP_IMPORTED_LIBRARY})
