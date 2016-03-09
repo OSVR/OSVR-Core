@@ -68,7 +68,7 @@ namespace client {
         BOOST_ASSERT(!m_vrpnConns.empty());
 
         /// Get the OSVR connection out and use it to make a server.
-        m_server = server::Server::create(std::get<1>(conn));
+        m_server = server::Server::createNonListening(std::get<1>(conn));
 
         std::string sysDeviceName =
             std::string(common::SystemComponent::deviceName()) + "@" + HOST;

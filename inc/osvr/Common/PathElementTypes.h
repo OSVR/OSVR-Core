@@ -37,6 +37,7 @@
 // Internal Includes
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathElementTypes_fwd.h> // IWYU pragma: export
+#include <osvr/Util/PortFlags.h>
 
 // Library/third-party includes
 #include <boost/variant/variant.hpp>
@@ -120,6 +121,13 @@ namespace common {
             OSVR_COMMON_EXPORT static DeviceElement
             createVRPNDeviceElement(std::string const &deviceName,
                                     std::string const &server);
+
+            /// Can also pass util::OmitAppendingPort as a special port
+            /// value.
+            OSVR_COMMON_EXPORT static DeviceElement
+            createDeviceElement(std::string const &deviceName,
+                                std::string const &server,
+                                int port = util::UseDefaultPort);
 
             OSVR_COMMON_EXPORT std::string &getDeviceName();
             OSVR_COMMON_EXPORT std::string const &getDeviceName() const;

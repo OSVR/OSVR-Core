@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/Util/PortFlags.h>
 #include "ServerImpl.h"
 
 // Library/third-party includes
@@ -39,12 +40,33 @@ namespace server {
     ServerPtr Server::createLocal() {
         connection::ConnectionPtr conn(
             connection::Connection::createLocalConnection());
-        ServerPtr ret(make_shared<Server>(conn, private_constructor{}));
+        ServerPtr ret(std::make_shared<Server>(conn, boost::none, boost::none,
+                                               private_constructor{}));
+
         return ret;
     }
 
     ServerPtr Server::create(connection::ConnectionPtr const &conn) {
-        ServerPtr ret(make_shared<Server>(conn, private_constructor{}));
+        ServerPtr ret(std::make_shared<Server>(conn, boost::none, boost::none,
+                                               private_constructor{}));
+
+        return ret;
+    }
+
+    ServerPtr Server::create(connection::ConnectionPtr const &conn,
+                             boost::optional<std::string> const &host,
+                             boost::optional<int> const &port) {
+        ServerPtr ret(
+            std::make_shared<Server>(conn, host, port, private_constructor{}));
+        return ret;
+    }
+
+    ServerPtr
+    Server::createNonListening(connection::ConnectionPtr const &conn) {
+        ServerPtr ret(std::make_shared<Server>(
+            conn, boost::optional<std::string>{},
+            util::OmitAppendingPort,
+            private_constructor{}));
         return ret;
     }
 
@@ -113,9 +135,12 @@ namespace server {
 #if 0
     int Server::getSleepTime() const { return m_impl->getSleepTime(); }
 #endif
+
     Server::Server(connection::ConnectionPtr const &conn,
+                   boost::optional<std::string> const &host,
+                   boost::optional<int> const &port,
                    private_constructor const &)
-        : m_impl(new ServerImpl(conn)) {}
+        : m_impl(new ServerImpl(conn, host, port)) {}
 
     Server::~Server() {}
 

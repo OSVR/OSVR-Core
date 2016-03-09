@@ -45,7 +45,8 @@ namespace common {
     OSVR_COMMON_EXPORT bool
     processDeviceDescriptorForPathTree(PathTree &tree,
                                        std::string const &deviceName,
-                                       std::string const &jsonDescriptor);
+                                       std::string const &jsonDescriptor,
+                                       int listenPort, std::string const &host);
 
     /// @brief Set up a path tree based on a device descriptor from an existing
     /// DeviceElement node
