@@ -174,6 +174,7 @@ if(JSONCPP_IMPORTED_LIBRARY)
 
 	find_package_handle_standard_args(JsonCpp
 		DEFAULT_MSG
+		jsoncpp_DIR
 		JSONCPP_IMPORTED_LIBRARY
 		JSONCPP_IMPORTED_INCLUDE_DIRS)
 endif()
