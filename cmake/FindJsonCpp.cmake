@@ -69,7 +69,7 @@ if(jsoncpp_FOUND AND NOT "[${jsoncpp_DIR}]" STREQUAL "${JSONCPP_CACHED_JSONCPP_D
 	# If we found something, and it's not the exact same as what we've found before...
 	# NOTE: The contents of this "if" block update only (internal) cache variables!
 	# (since this will only get run the first CMake pass that finds jsoncpp or that finds a different install)
-	message("Updating jsoncpp cache variables!")
+	#message("Updating jsoncpp cache variables!")
 	set(JSONCPP_CACHED_JSONCPP_DIR_DETAILS "[${jsoncpp_DIR}]" CACHE INTERNAL "" FORCE)
 	unset(JSONCPP_IMPORTED_LIBRARY_SHARED)
 	unset(JSONCPP_IMPORTED_LIBRARY_STATIC)
