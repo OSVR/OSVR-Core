@@ -25,6 +25,7 @@
 // Internal Includes
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/Util/PortFlags.h>
 #include "ServerImpl.h"
 
 // Library/third-party includes
@@ -64,7 +65,7 @@ namespace server {
     Server::createNonListening(connection::ConnectionPtr const &conn) {
         ServerPtr ret(std::make_shared<Server>(
             conn, boost::optional<std::string>{},
-            common::elements::DeviceElement::OMIT_ADDED_PORT_SPECIFICATION,
+            util::OmitAppendingPort,
             private_constructor{}));
         return ret;
     }

@@ -35,11 +35,11 @@
 #include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/CommonComponent.h>
 #include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
 #include <osvr/Common/AliasProcessor.h>
 #include <osvr/Util/StringLiteralFileToString.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Util/PortFlags.h>
 
 #include "osvr/Server/display_json.h" /// Fallback display descriptor.
 
@@ -69,8 +69,7 @@ namespace server {
                            boost::optional<int> const &port)
         : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
           m_host(host.get_value_or("localhost")),
-          m_port(port.get_value_or(
-              common::elements::DeviceElement::DEFAULT_PORT)) {
+          m_port(port.get_value_or(util::UseDefaultPort)) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");

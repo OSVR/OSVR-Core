@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include <osvr/Common/PathElementTypes.h>
+#include <osvr/Util/DefaultPort.h>
 
 // Library/third-party includes
 // - none
@@ -35,10 +36,6 @@
 namespace osvr {
 namespace common {
     namespace elements {
-        static const int VRPN_DEFAULT_PORT = 3883;
-        /// @todo Update this!
-        static const int OSVR_DEFAULT_PORT = 3883;
-
         /// This chunk of code checks at compile time that:
         ///
         /// - All the types in our PathElement variant are derived from
@@ -119,7 +116,7 @@ namespace common {
             ret.m_devName = deviceName;
             // explicitly specify VRPN port
             ret.m_server =
-                attachPortToServerIfNoneSpecified(server, VRPN_DEFAULT_PORT);
+                attachPortToServerIfNoneSpecified(server, util::DefaultVRPNPort);
 
             return ret;
         }
@@ -131,13 +128,13 @@ namespace common {
             DeviceElement ret;
             ret.m_devName = deviceName;
             switch (port) {
-            case OMIT_ADDED_PORT_SPECIFICATION:
+            case util::OmitAppendingPort:
                 ret.m_server = server;
                 break;
-            case DEFAULT_PORT:
+            case util::UseDefaultPort:
                 // explicitly specify OSVR port
                 ret.m_server = attachPortToServerIfNoneSpecified(
-                    server, OSVR_DEFAULT_PORT);
+                    server, util::DefaultOSVRPort);
                 break;
             default:
                 // explicitly specify the user's port

@@ -36,7 +36,6 @@
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Util/Flag.h>
 
 // Library/third-party includes
