@@ -108,10 +108,15 @@ if(jsoncpp_FOUND AND NOT "[${jsoncpp_DIR}]" STREQUAL "${JSONCPP_CACHED_JSONCPP_D
 		set(JSONCPP_IMPORTED_LIBRARY jsoncpp_lib CACHE INTERNAL "" FORCE)
 		set(JSONCPP_IMPORTED_LIBRARY_IS_SHARED FALSE CACHE INTERNAL "" FORCE)
 
+	elseif(__jsoncpp_have_jsoncpplib AND __jsoncpp_lib_type STREQUAL "SHARED_LIBRARY")
+		# We were able to figure out the mystery library is shared!
+		set(JSONCPP_IMPORTED_LIBRARY_SHARED jsoncpp_lib CACHE INTERNAL "" FORCE)
+		set(JSONCPP_IMPORTED_LIBRARY jsoncpp_lib CACHE INTERNAL "" FORCE)
+		set(JSONCPP_IMPORTED_LIBRARY_IS_SHARED TRUE CACHE INTERNAL "" FORCE)
+
 	elseif(__jsoncpp_have_jsoncpplib)
 		# One variant, and we have no idea if this is just an old version or if
 		# this is shared based on the target name alone. Hmm.
-		# TODO figure out if this is shared or static?
 		set(JSONCPP_IMPORTED_LIBRARY jsoncpp_lib CACHE INTERNAL "" FORCE)
 	endif()
 
