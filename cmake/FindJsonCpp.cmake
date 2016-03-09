@@ -63,20 +63,39 @@ set(JSONCPP_FOUND FALSE)
 # and we need to call it at least once every CMake invocation to create the original
 # imported targets, since those don't stick around like cache variables.
 find_package(jsoncpp QUIET NO_MODULE)
-#message("Searching for config file result: jsoncpp_FOUND ${jsoncpp_FOUND}")
 
-if(jsoncpp_FOUND AND NOT "[${jsoncpp_DIR}]" STREQUAL "${JSONCPP_CACHED_JSONCPP_DIR_DETAILS}")
-	# If we found something, and it's not the exact same as what we've found before...
-	# NOTE: The contents of this "if" block update only (internal) cache variables!
-	# (since this will only get run the first CMake pass that finds jsoncpp or that finds a different install)
-	#message("Updating jsoncpp cache variables!")
-	set(JSONCPP_CACHED_JSONCPP_DIR_DETAILS "[${jsoncpp_DIR}]" CACHE INTERNAL "" FORCE)
+if(jsoncpp_FOUND)
+	# Build a string to help us figure out when to invalidate our cache variables.
+	# start with where we found jsoncpp
+	set(__jsoncpp_info_string "[${jsoncpp_DIR}]")
+
+	# part of the string to indicate if we found a real jsoncpp_lib (and what kind)
+	_jsoncpp_check_for_real_jsoncpplib()
+	if(__jsoncpp_have_jsoncpplib)
+		list(APPEND __jsoncpp_info_string "[${__jsoncpp_lib_type}]")
+	else()
+		list(APPEND __jsoncpp_info_string "[]")
+	endif()
+	# part of the string to indicate if we found jsoncpp_lib_static
+	if(TARGET jsoncpp_lib_static)
+		list(APPEND __jsoncpp_info_string "[T]")
+	else()
+		list(APPEND __jsoncpp_info_string "[]")
+	endif()
+endif()
+
+
+# If we found something, and it's not the exact same as what we've found before...
+# NOTE: The contents of this "if" block update only (internal) cache variables!
+# (since this will only get run the first CMake pass that finds jsoncpp or that finds a different/updated install)
+if(jsoncpp_FOUND AND NOT __jsoncpp_info_string STREQUAL "${JSONCPP_CACHED_JSONCPP_DIR_DETAILS}")
+	#message("Updating jsoncpp cache variables! ${__jsoncpp_info_string}")
+	set(JSONCPP_CACHED_JSONCPP_DIR_DETAILS "${__jsoncpp_info_string}" CACHE INTERNAL "" FORCE)
 	unset(JSONCPP_IMPORTED_LIBRARY_SHARED)
 	unset(JSONCPP_IMPORTED_LIBRARY_STATIC)
 	unset(JSONCPP_IMPORTED_LIBRARY)
 	unset(JSONCPP_IMPORTED_INCLUDE_DIRS)
 	unset(JSONCPP_IMPORTED_LIBRARY_IS_SHARED)
-	_jsoncpp_check_for_real_jsoncpplib()
 
 	# if(__jsoncpp_have_jsoncpplib) is equivalent to if(TARGET jsoncpp_lib) except it excludes our
 	# "invented" jsoncpp_lib interface targets, made for convenience purposes after this block.
