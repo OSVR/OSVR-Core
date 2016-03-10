@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include "GestureRemoteFactory.h"
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
@@ -55,7 +56,7 @@ namespace client {
                              common::InterfaceList &ifaces,
                              common::ClientContext *ctx)
             : m_dev(common::createClientDevice(deviceName, conn)),
-              m_interfaces(ifaces), m_all(!sensor.is_initialized()),
+              m_internals(ifaces), m_all(!sensor.is_initialized()),
               m_sensor(sensor), m_ctx(ctx) {
 
             m_sysComponent = m_ctx->getSystemComponent();
@@ -92,8 +93,8 @@ namespace client {
             }
 
             OSVR_GestureReport report;
-            util::StringID id =
-                m_gestureNameMap->corrMap.convertPeerToLocalID(util::PeerStringID(data.gestureID.value()));
+            util::StringID id = m_gestureNameMap->corrMap.convertPeerToLocalID(
+                util::PeerStringID(data.gestureID.value()));
             if (id.empty()) {
                 // could not find a peer to local mapping, discarding report
                 return;
@@ -102,13 +103,11 @@ namespace client {
             report.sensor = data.sensor;
             report.state = data.gestureState;
             report.gestureID = id.value();
-            for (auto &iface : m_interfaces) {
-                iface->triggerCallbacks(timestamp, report);
-            }
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
         }
 
         common::BaseDevicePtr m_dev;
-        common::InterfaceList &m_interfaces;
+        RemoteHandlerInternals m_internals;
         bool m_all;
         boost::optional<OSVR_ChannelCount> m_sensor;
         // map to keep track of gesture map and server to local ID map
