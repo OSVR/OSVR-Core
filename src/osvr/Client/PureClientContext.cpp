@@ -209,12 +209,9 @@ namespace client {
     common::Transform const &
     PureClientContext::m_getRoomToWorldTransform() const {
         return m_roomToWorld;
-
-    common::SystemComponent *PureClientContext::m_getSystemComponent() {
-        return m_systemComponent;
     }
 
-    shared_ptr<common::SystemComponent> PureClientContext::m_getSystemComponent() {
+    common::SystemComponent *PureClientContext::m_getSystemComponent() {
         return m_systemComponent;
     }
 

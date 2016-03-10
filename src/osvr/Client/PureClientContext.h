@@ -38,7 +38,7 @@
 #include <osvr/Client/RemoteHandlerFactory.h>
 #include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Common/PathTreeOwner.h>
-#include "RemoteHandlerFactory.h"
+#include <osvr/Client/RemoteHandlerFactory.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -75,7 +75,7 @@ namespace client {
 
         common::PathTree const &m_getPathTree() const override;
 
-        virtual common::SystemComponent *m_getSystemComponent();
+        common::SystemComponent *m_getSystemComponent() override;
 
         common::Transform const &m_getRoomToWorldTransform() const override;
 
