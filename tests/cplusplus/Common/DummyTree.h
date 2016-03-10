@@ -48,7 +48,7 @@ inline std::string getDevice() { return getPlugin() + "/YEI_3Space_Sensor0"; }
 
 inline std::string getDevicePath() { return "/" + getDevice(); }
 
-inline std::string getHost() { return "localhost"; }
+inline std::string getHost() { return "localhost:3883"; }
 inline std::string getInterface() { return "tracker"; }
 
 inline std::string getInterfacePath() {
