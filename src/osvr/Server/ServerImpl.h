@@ -29,6 +29,7 @@
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
+#include <osvr/Util/UniquePtr.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
 #include <osvr/Connection/MessageTypePtr.h>
 #include <osvr/Connection/DeviceToken.h>
@@ -36,6 +37,7 @@
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Common/LowLatency.h>
 #include <osvr/Util/Flag.h>
 
 // Library/third-party includes
@@ -249,6 +251,9 @@ namespace server {
 
         /// The port we're listening on, if any.
         int m_port;
+
+        /// Latency reduction RAII object
+        unique_ptr<common::LowLatency> m_lowLatency;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable
