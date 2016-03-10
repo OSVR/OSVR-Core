@@ -84,20 +84,20 @@ namespace osvr {
                     m_windowYPosition = window["yPosition"].asInt();
                 }
 
-                    // display
-                    {
-                        auto display = params["display"];
-                        m_displayRotation = display["rotation"].asUInt();
-                        m_bitsPerColor = display["bitsPerColor"].asUInt();
-                    }
+                // display
+                {
+                    auto display = params["display"];
+                    m_displayRotation = display["rotation"].asUInt();
+                    m_bitsPerColor = display["bitsPerColor"].asUInt();
+                }
 
-                    // time warp
-                    {
-                        auto &timeWarp = params["timeWarp"];
-                        m_enableTimeWarp = timeWarp["enabled"].asBool();
-                        m_asynchronousTimeWarp = timeWarp["asynchronous"].asBool();
-                        m_maxMSBeforeVsyncTimeWarp = timeWarp["maxMsBeforeVSync"].asFloat();
-                    }
+                // time warp
+                {
+                    auto &timeWarp = params["timeWarp"];
+                    m_enableTimeWarp = timeWarp["enabled"].asBool();
+                    m_asynchronousTimeWarp = timeWarp["asynchronous"].asBool();
+                    m_maxMSBeforeVsyncTimeWarp = timeWarp["maxMsBeforeVSync"].asFloat();
+                }
             }
 
             inline void print() const
