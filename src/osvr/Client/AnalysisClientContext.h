@@ -80,6 +80,8 @@ namespace client {
         }
         bool m_getStatus() const override;
 
+        common::SystemComponent *m_getSystemComponent() override;
+
         /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;
 
