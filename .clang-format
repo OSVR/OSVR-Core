@@ -7,6 +7,11 @@ TabWidth:        4
 UseTab:          Never
 NamespaceIndentation: Inner
 
+# Turning this off - not because I don't think it's a good idea, but because
+# it's distracting to have it sorting includes on a feature branch. We can turn
+# it on and sort includes in their own step.
+SortIncludes: false
+
 # AccessModifierOffset: -2
 # ConstructorInitializerIndentWidth: 4
 # AlignEscapedNewlinesLeft: false
