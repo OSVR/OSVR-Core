@@ -36,8 +36,7 @@ namespace server {
     ConnectionWarning::ConnectionWarning(unsigned short port,
                                          std::string const &iface)
         : m_udpSocket(m_context, asio::ip::udp::v4()),
-          m_tcpAcceptor(m_context, asio::ip::tcp::v4()),
-          m_tcpSocket(m_context, asio::ip::tcp::v4()) {
+          m_tcpAcceptor(m_context, asio::ip::tcp::v4()) {
         auto addr = asio::ip::make_address(iface);
         std::cout << "*** Creating ConnectionWarning on " << addr.to_string()
                   << " port " << port << std::endl;
@@ -57,18 +56,21 @@ namespace server {
 
     inline void ConnectionWarning::initUdp(unsigned short port,
                                            asio::ip::address const &addr) {
-        asio::error_code ec;
         using asio::ip::udp;
-#if 0
-        m_udpSocket.open(asio::ip::udp::v4(), ec);
-        if (ec) {
-            displayError("opening UDP socket", ec);
-            return;
-        }
-#endif
-        m_udpSocket.bind(udp::endpoint(udp::v4(), port), ec);
-        if (ec) {
+        asio::error_code ec;
 
+        /// local only
+        m_udpSocket.set_option(udp::socket::do_not_route(true));
+
+        /// reuse address
+        /// Don't really care about errors in setting this option, which is why
+        /// we're just passing the error code and ignoring it.
+        m_udpSocket.set_option(udp::socket::reuse_address(true), ec);
+
+        /// Bind to address and port. This we at least want to know if we
+        /// succeeded at.
+        m_udpSocket.bind(udp::endpoint(addr, port), ec);
+        if (ec) {
             displayError("binding UDP socket to port", ec);
             return;
         }
@@ -79,23 +81,21 @@ namespace server {
 
     inline void ConnectionWarning::initTcp(unsigned short port,
                                            asio::ip::address const &addr) {
-        // using namespace asio::ip;
         using asio::ip::tcp;
         asio::error_code ec;
-#if 0
-        m_tcpAcceptor.open(asio::ip::tcp::v4(), ec);
-        if (ec) {
-            displayError("opening TCP acceptor", ec);
-            return;
-        }
-#endif
+
+        /// local only
         m_tcpAcceptor.set_option(tcp::acceptor::do_not_route(true));
-#if 0
-        m_tcpAcceptor.set_option(
-            asio::ip::tcp::acceptor::reuse_address(true));
-#endif
-        // m_tcpAcceptor.bind(tcp::endpoint(addr, port), ec);
-        m_tcpAcceptor.bind(tcp::endpoint(tcp::v4(), port), ec);
+
+        /// reuse address
+        /// Don't really care about errors in setting this option, which is why
+        /// we're just passing the error code and ignoring it.
+        m_tcpAcceptor.set_option(asio::ip::tcp::acceptor::reuse_address(true),
+                                 ec);
+
+        /// Bind to address and port. This we at least want to know if we
+        /// succeeded at.
+        m_tcpAcceptor.bind(tcp::endpoint(addr, port), ec);
 
         if (ec) {
             displayError("binding the TCP acceptor", ec);
@@ -121,19 +121,23 @@ namespace server {
         using asio::ip::tcp;
         m_tcpAcceptor.async_accept([&](std::error_code ec, tcp::socket socket) {
             if (!ec) {
+                /// Log the connection.
                 std::ostringstream os;
                 os << "Got TCP connection attempt";
                 addEndpointInfoToStream(os, socket.remote_endpoint());
                 std::cout << "***" << os.str() << std::endl;
                 m_attempts.emplace_back(os.str());
+
+                /// Shut down the socket, both ends.
                 asio::error_code error;
                 socket.shutdown(tcp::socket::shutdown_both, error);
                 if (error) {
                     displayError("shut down TCP socket", error);
                 }
-
-                startTcpAccept();
             }
+
+            // Start listening again!
+            startTcpAccept();
         });
     }
 
@@ -146,24 +150,6 @@ namespace server {
             m_attempts.emplace_back(os.str());
         }
         startUdpReceive();
-    }
-
-    inline void ConnectionWarning::acceptTcp(const asio::error_code &error) {
-        if (error) {
-            displayError("acceptTcp", error);
-        }
-        if (!error) {
-
-            std::ostringstream os;
-            os << "Got TCP connection attempt";
-            addEndpointInfoToStream(os, m_tcpRemoteEndpoint);
-            std::cout << "***" << os.str() << std::endl;
-            m_attempts.emplace_back(os.str());
-
-            // Unceremoniously dump the client. Sorry.
-            m_tcpSocket.close();
-        }
-        startTcpAccept();
     }
 
 } // namespace server

@@ -51,16 +51,14 @@ namespace server {
     class ConnectionWarning : boost::noncopyable {
       public:
         ConnectionWarning(unsigned short port,
-            std::string const &iface = std::string("127.0.0.1"));
+                          std::string const &iface = std::string("127.0.0.1"));
 
         bool openedUdp() const { return m_openedUdp; }
         bool openedTcp() const { return m_openedTcp; }
 
         std::vector<std::string> const &process();
 
-        void stop() {
-            m_context.stop();
-        }
+        void stop() { m_context.stop(); }
 
       private:
         static void displayError(const char *action,
@@ -70,9 +68,9 @@ namespace server {
                           << ec.message() << std::endl;
             }
         }
-        void initUdp(unsigned short port, asio::ip::address const& addr);
+        void initUdp(unsigned short port, asio::ip::address const &addr);
 
-        void initTcp(unsigned short port, asio::ip::address const& addr);
+        void initTcp(unsigned short port, asio::ip::address const &addr);
 
         void startUdpReceive();
 
@@ -90,20 +88,15 @@ namespace server {
 
         void receiveUdp(const asio::error_code &error);
 
-        void acceptTcp(const asio::error_code &error);
-
         asio::io_context m_context;
 
         bool m_openedUdp = false;
         asio::ip::udp::socket m_udpSocket;
         asio::ip::udp::endpoint m_udpRemoteEndpoint;
         std::array<char, 1700> m_udpBuf;
-        //char m_udpBuf[1];
 
         bool m_openedTcp = false;
         asio::ip::tcp::acceptor m_tcpAcceptor;
-        asio::ip::tcp::socket m_tcpSocket;
-        asio::ip::tcp::endpoint m_tcpRemoteEndpoint;
 
         std::vector<std::string> m_attempts;
         bool m_gotConnectAttempt = false;
