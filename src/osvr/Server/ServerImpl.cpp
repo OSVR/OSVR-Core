@@ -174,6 +174,9 @@ namespace server {
     void ServerImpl::signalStop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         m_run.signalShutdown();
+        if (m_connectionWarning) {
+            m_connectionWarning->stop();
+        }
     }
 
     void ServerImpl::loadPlugin(std::string const &pluginName) {

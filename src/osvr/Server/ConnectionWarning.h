@@ -42,6 +42,7 @@
 #include <array>
 #include <iostream>
 #include <sstream>
+#include <exception>
 
 namespace osvr {
 namespace server {
@@ -49,62 +50,34 @@ namespace server {
     /// datagram, lets the owning object know.
     class ConnectionWarning : boost::noncopyable {
       public:
-        ConnectionWarning(unsigned short port)
-            : m_udpSocket(m_context), m_tcpAcceptor(m_context),
-              m_tcpSocket(m_context) {
-            asio::error_code ec;
-
-            m_udpSocket.open(asio::ip::udp::v4());
-            m_udpSocket.bind(asio::ip::udp::endpoint(
-                                 asio::ip::make_address("localhost"), port),
-                             ec);
-            if (!ec) {
-                // successfully bound the UDP socket
-                m_openedUdp = true;
-                startUdpReceive();
-            }
-
-            m_tcpAcceptor.open(asio::ip::tcp::v4());
-            m_tcpAcceptor.set_option(
-                asio::ip::tcp::acceptor::reuse_address(true));
-            m_tcpAcceptor.bind(asio::ip::tcp::endpoint(
-                                   asio::ip::make_address("localhost"), port),
-                               ec);
-            if (!ec) {
-                // successfully bound the TCP acceptor
-                m_openedTcp = true;
-                startTcpAccept();
-            }
-        }
+        ConnectionWarning(unsigned short port,
+            std::string const &iface = std::string("127.0.0.1"));
 
         bool openedUdp() const { return m_openedUdp; }
         bool openedTcp() const { return m_openedTcp; }
 
-        std::vector<std::string> const &process() {
-            m_attempts.clear();
-            /// Like .run(), but doesn't block
-            asio::error_code ec;
-            m_context.poll(ec);
-            if (ec) {
-                std::cout << "Got error trying to poll the ASIO context: "
-                          << ec.message() << std::endl;
-            }
-            return m_attempts;
+        std::vector<std::string> const &process();
+
+        void stop() {
+            m_context.stop();
         }
 
       private:
-        void startUdpReceive() {
-            m_udpSocket.async_receive_from(
-                asio::buffer(m_udpBuf), m_udpRemoteEndpoint,
-                [&](const asio::error_code &error, std::size_t) {
-                    receiveUdp(error);
-                });
+        static void displayError(const char *action,
+                                 asio::error_code const &ec) {
+            if (ec) {
+                std::cerr << "***Got an error " << action << ": "
+                          << ec.message() << std::endl;
+            }
         }
-        void startTcpAccept() {
-            m_tcpAcceptor.async_accept(
-                m_tcpSocket, m_tcpRemoteEndpoint,
-                [&](const asio::error_code &error) { acceptTcp(error); });
-        }
+        void initUdp(unsigned short port, asio::ip::address const& addr);
+
+        void initTcp(unsigned short port, asio::ip::address const& addr);
+
+        void startUdpReceive();
+
+        void startTcpAccept();
+
         template <typename Endpoint>
         void addEndpointInfoToStream(std::ostream &os, Endpoint &endpoint) {
             if (endpoint.address().is_loopback()) {
@@ -113,30 +86,10 @@ namespace server {
                 os << " from an app on " << endpoint.address().to_string();
             }
         }
-        void receiveUdp(const asio::error_code &error) {
-            if (!error || error == asio::error::message_size) {
-                std::ostringstream os;
-                os << "Got UDP connection attempt";
-                addEndpointInfoToStream(os, m_udpRemoteEndpoint);
-                std::cout << "***" << os.str() << std::endl;
-                m_attempts.emplace_back(os.str());
-            }
-            startUdpReceive();
-        }
-        void acceptTcp(const asio::error_code &error) {
-            if (!error) {
 
-                std::ostringstream os;
-                os << "Got TCP connection attempt";
-                addEndpointInfoToStream(os, m_tcpRemoteEndpoint);
-                std::cout << "***" << os.str() << std::endl;
-                m_attempts.emplace_back(os.str());
+        void receiveUdp(const asio::error_code &error);
 
-                // Unceremoniously dump the client. Sorry.
-                m_tcpSocket.close();
-            }
-            startTcpAccept();
-        }
+        void acceptTcp(const asio::error_code &error);
 
         asio::io_context m_context;
 
