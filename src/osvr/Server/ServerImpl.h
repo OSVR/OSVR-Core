@@ -26,6 +26,7 @@
 #define INCLUDED_ServerImpl_h_GUID_BA15589C_D1AD_4BBE_4F93_8AC87043A982
 
 // Internal Includes
+#include "ConnectionWarning.h"
 #include <osvr/Server/Server.h>
 #include <osvr/Connection/ConnectionPtr.h>
 #include <osvr/Util/SharedPtr.h>
@@ -37,6 +38,7 @@
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Util/Flag.h>
+#include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -136,6 +138,12 @@ namespace server {
 
         /// @brief The actual guts of the update
         void m_update();
+
+        /// @brief Tries to set up the connection warning object to open the
+        /// given port (tcp and udp), so that the server can print a
+        /// warning/error when someone tries to connect (presumably with an old
+        /// client)
+        void m_setupConnectionWarning(unsigned short port);
 
         /// @brief Internal function to call a callable if the thread isn't
         /// running, or to queue up the callable if it is running.
@@ -249,6 +257,10 @@ namespace server {
 
         /// The port we're listening on, if any.
         int m_port;
+
+        /// The object in charge of saying mean things about apps connecting to
+        /// the wrong port.
+        unique_ptr<ConnectionWarning> m_connectionWarning;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable

@@ -10,6 +10,8 @@ set(API
     "${HEADER_LOCATION}/RegisterShutdownHandlerWin32.h")
 
 set(SOURCE
+    ConnectionWarning.cpp
+    ConnectionWarning.h
     ConfigureServer.cpp
     JSONResolvePossibleRef.h
     JSONResolvePossibleRef.cpp
@@ -50,4 +52,5 @@ target_link_libraries(${LIBNAME_FULL}
     boost_filesystem
     vendored-vrpn
     JsonCpp::JsonCpp
-    util-runloopmanager)
+    util-runloopmanager
+    vendored-asio)

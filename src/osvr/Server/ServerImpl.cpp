@@ -133,6 +133,9 @@ namespace server {
         m_everStarted = true;
         m_running = true;
 
+        /// @todo REPLACE WITH REAL CODE!
+        m_setupConnectionWarning(3884);
+
         // Use a lambda to run the loop.
         m_thread = boost::thread([&] {
             bool keepRunning = true;
@@ -140,6 +143,9 @@ namespace server {
             ::util::LoopGuard guard(m_run);
             do {
                 keepRunning = this->m_loop();
+                if (m_connectionWarning) {
+                    m_connectionWarning->process();
+                }
             } while (keepRunning);
             m_orderedDestruction();
             m_running = false;
@@ -224,6 +230,32 @@ namespace server {
             OSVR_DEV_VERBOSE("Path tree updated or connection detected");
             m_sendTree();
             m_treeDirty.reset();
+        }
+    }
+
+    void ServerImpl::m_setupConnectionWarning(unsigned short port) {
+        try {
+            /// @todo REPLACE WITH REAL CODE!
+            m_connectionWarning.reset(new ConnectionWarning(port));
+
+            if (m_connectionWarning->openedTcp()) {
+                std::cout << "***Opened TCP warning port" << std::endl;
+            }
+            if (m_connectionWarning->openedUdp()) {
+                std::cout << "***Opened UDP warning port" << std::endl;
+            }
+            if (!m_connectionWarning->openedTcp() &&
+                !m_connectionWarning->openedUdp()) {
+                std::cout
+                    << "***Could open neither the TCP nor UDP warning ports, "
+                       "destroying the connection warning object"
+                    << std::endl;
+                m_connectionWarning.reset();
+            }
+        } catch (std::exception const &e) {
+            std::cout
+                << "***Caught exception setting up the connection warning: "
+                << e.what() << std::endl;
         }
     }
 
