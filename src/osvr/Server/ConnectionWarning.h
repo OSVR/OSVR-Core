@@ -79,7 +79,8 @@ namespace server {
         void startTcpAccept();
 
         template <typename Endpoint>
-        void addEndpointInfoToStream(std::ostream &os, Endpoint &endpoint) {
+        void addEndpointInfoToStream(std::ostream &os,
+                                     Endpoint const &endpoint) {
             if (endpoint.address().is_loopback()) {
                 os << " from an app on this computer";
             } else {
@@ -96,8 +97,8 @@ namespace server {
         bool m_openedUdp = false;
         asio::ip::udp::socket m_udpSocket;
         asio::ip::udp::endpoint m_udpRemoteEndpoint;
-        // std::array<char, 1> m_udpBuf;
-        char m_udpBuf[1];
+        std::array<char, 1700> m_udpBuf;
+        //char m_udpBuf[1];
 
         bool m_openedTcp = false;
         asio::ip::tcp::acceptor m_tcpAcceptor;

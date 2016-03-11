@@ -108,21 +108,36 @@ namespace server {
     }
 
     inline void ConnectionWarning::startUdpReceive() {
-        m_udpSocket.async_receive_from(asio::buffer(m_udpBuf),
-                                       m_udpRemoteEndpoint,
-                                       [&](const asio::error_code &error,
-                                           std::size_t) { receiveUdp(error); });
+        /// @todo Asio needs std::array support in their asio::buffer
+        /// constructor - adjust this when that's available.
+        m_udpSocket.async_receive_from(
+            asio::buffer(m_udpBuf.data(), m_udpBuf.size()), m_udpRemoteEndpoint,
+            [&](const asio::error_code &error, std::size_t) {
+                receiveUdp(error);
+            });
     }
 
     inline void ConnectionWarning::startTcpAccept() {
-        m_tcpAcceptor.async_accept(
-            m_tcpSocket, m_tcpRemoteEndpoint,
-            [&](const asio::error_code &error) { acceptTcp(error); });
+        using asio::ip::tcp;
+        m_tcpAcceptor.async_accept([&](std::error_code ec, tcp::socket socket) {
+            if (!ec) {
+                std::ostringstream os;
+                os << "Got TCP connection attempt";
+                addEndpointInfoToStream(os, socket.remote_endpoint());
+                std::cout << "***" << os.str() << std::endl;
+                m_attempts.emplace_back(os.str());
+                asio::error_code error;
+                socket.shutdown(tcp::socket::shutdown_both, error);
+                if (error) {
+                    displayError("shut down TCP socket", error);
+                }
+
+                startTcpAccept();
+            }
+        });
     }
 
     inline void ConnectionWarning::receiveUdp(const asio::error_code &error) {
-
-        std::cout << "*** in receiveUdp" << std::endl;
         if (!error || error == asio::error::message_size) {
             std::ostringstream os;
             os << "Got UDP connection attempt";
