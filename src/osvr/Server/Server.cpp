@@ -64,10 +64,14 @@ namespace server {
     ServerPtr
     Server::createNonListening(connection::ConnectionPtr const &conn) {
         ServerPtr ret(std::make_shared<Server>(
-            conn, boost::optional<std::string>{},
-            util::OmitAppendingPort,
+            conn, boost::optional<std::string>{}, util::OmitAppendingPort,
             private_constructor{}));
         return ret;
+    }
+
+    OSVR_SERVER_EXPORT bool
+    Server::warnOnConnectionsToPort(unsigned short port) {
+        return m_impl->warnOnConnectionsToPort(port);
     }
 
     void Server::update() { m_impl->update(); }

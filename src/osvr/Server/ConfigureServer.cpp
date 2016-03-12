@@ -121,6 +121,7 @@ namespace server {
     static const char LOCAL_KEY[] = "local";
     static const char PORT_KEY[] = "port"; // not the triwizard cup.
     static const char SLEEP_KEY[] = "sleep";
+    static const char WARNING_PORT_KEY[] = "warningPort";
 
     ServerPtr ConfigureServer::constructServer() {
         Json::Value const &root(m_data->root);
@@ -133,6 +134,7 @@ namespace server {
         int sleepTime = 1000; // microseconds
 #endif
 
+        bool shouldWarnPort = false;
         /// Extract data from the JSON structure.
         if (root.isMember(SERVER_KEY)) {
             /// @todo Detect/report invalid or contradictory options here.
@@ -163,6 +165,8 @@ namespace server {
                 // Convert to microseconds for internal use.
                 sleepTime = static_cast<int>(jsonSleepTime.asDouble() * 1000.0);
             }
+
+            shouldWarnPort = jsonServer[WARNING_PORT_KEY].isInt();
         }
 
         /// Construct a server, or a connection then a server, based on the
@@ -184,6 +188,11 @@ namespace server {
         }
 
         m_server->setHardwareDetectOnConnection();
+
+        if (shouldWarnPort) {
+            m_server->warnOnConnectionsToPort(
+                root[SERVER_KEY][WARNING_PORT_KEY].asUInt());
+        }
 
         return m_server;
     }

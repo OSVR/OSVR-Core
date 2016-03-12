@@ -133,9 +133,6 @@ namespace server {
         m_everStarted = true;
         m_running = true;
 
-        /// @todo REPLACE WITH REAL CODE!
-        m_setupConnectionWarning(3884);
-
         // Use a lambda to run the loop.
         m_thread = boost::thread([&] {
             bool keepRunning = true;
@@ -143,9 +140,6 @@ namespace server {
             ::util::LoopGuard guard(m_run);
             do {
                 keepRunning = this->m_loop();
-                if (m_connectionWarning) {
-                    m_connectionWarning->process();
-                }
             } while (keepRunning);
             m_orderedDestruction();
             m_running = false;
@@ -162,6 +156,9 @@ namespace server {
 
     void ServerImpl::stop() {
         boost::unique_lock<boost::mutex> lock(m_runControl);
+        if (m_connectionWarning) {
+            m_connectionWarning->stop();
+        }
         if (m_everStarted) {
             m_run.signalAndWaitForShutdown();
             m_thread.join();
@@ -236,17 +233,18 @@ namespace server {
         }
     }
 
-    void ServerImpl::m_setupConnectionWarning(unsigned short port) {
+    bool ServerImpl::warnOnConnectionsToPort(unsigned short port) {
+        bool alreadyRegisteredMainloop = static_cast<bool>(m_connectionWarning);
         try {
-            /// @todo REPLACE WITH REAL CODE!
             m_connectionWarning.reset(new ConnectionWarning(port));
-
+#if 0
             if (m_connectionWarning->openedTcp()) {
                 std::cout << "***Opened TCP warning port" << std::endl;
             }
             if (m_connectionWarning->openedUdp()) {
                 std::cout << "***Opened UDP warning port" << std::endl;
             }
+#endif
             if (!m_connectionWarning->openedTcp() &&
                 !m_connectionWarning->openedUdp()) {
                 std::cout
@@ -254,11 +252,20 @@ namespace server {
                        "destroying the connection warning object"
                     << std::endl;
                 m_connectionWarning.reset();
+                return false;
             }
         } catch (std::exception const &e) {
             std::cout
                 << "***Caught exception setting up the connection warning: "
                 << e.what() << std::endl;
+            return false;
+        }
+        if (!alreadyRegisteredMainloop) {
+            registerMainloopMethod([&] {
+                if (m_connectionWarning) {
+                    m_connectionWarning->process();
+                }
+            });
         }
     }
 

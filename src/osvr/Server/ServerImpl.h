@@ -131,6 +131,12 @@ namespace server {
         /// @brief The method to just do the update stuff, not in a thread.
         void update();
 
+        /// @brief Tries to set up the connection warning object to open the
+        /// given port (tcp and udp), so that the server can print a
+        /// warning/error when someone tries to connect (presumably with an old
+        /// client)
+        bool warnOnConnectionsToPort(unsigned short port);
+
       private:
         /// @brief The method called from the server thread repeatedly.
         /// @returns true if the loop should continue running
@@ -138,12 +144,6 @@ namespace server {
 
         /// @brief The actual guts of the update
         void m_update();
-
-        /// @brief Tries to set up the connection warning object to open the
-        /// given port (tcp and udp), so that the server can print a
-        /// warning/error when someone tries to connect (presumably with an old
-        /// client)
-        void m_setupConnectionWarning(unsigned short port);
 
         /// @brief Internal function to call a callable if the thread isn't
         /// running, or to queue up the callable if it is running.

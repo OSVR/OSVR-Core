@@ -114,6 +114,15 @@ namespace server {
         OSVR_SERVER_EXPORT static ServerPtr
         createNonListening(connection::ConnectionPtr const &conn);
 
+        /// @brief For use in migrating the server port: calling this will cause
+        /// the server to log messages whenever an application tries to
+        /// connect/send to the specified port. This should not be the port used
+        /// by OSVR!
+        ///
+        /// @return true if it was able to open at least one of {UDP, TCP} on
+        /// the specified port.
+        OSVR_SERVER_EXPORT bool warnOnConnectionsToPort(unsigned short port);
+
         /// @brief If you aren't using a separate thread for the server, this
         /// method will run a single update of the server.
         OSVR_SERVER_EXPORT void update();
