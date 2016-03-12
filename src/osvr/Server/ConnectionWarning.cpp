@@ -33,6 +33,20 @@
 
 namespace osvr {
 namespace server {
+
+    /// Create a ConnectionAttempt object from a Protocol enumeration and some
+    /// Endpoint.
+    template <typename Endpoint>
+    inline ConnectionAttempt
+    attemptFromEndpoint(ConnectionAttempt::Protocol proto,
+                        Endpoint const &endpoint) {
+        ConnectionAttempt ret{proto, endpoint.port()};
+        if (!endpoint.address().is_loopback()) {
+            ret.address = endpoint.address().to_string();
+        }
+        return ret;
+    }
+
     ConnectionWarning::ConnectionWarning(unsigned short port,
                                          std::string const &iface)
         : m_udpSocket(m_context, asio::ip::udp::v4()),
@@ -43,15 +57,16 @@ namespace server {
         initUdp(port, addr);
         initTcp(port, addr);
     }
-    std::vector<std::string> const &osvr::server::ConnectionWarning::process() {
+    bool osvr::server::ConnectionWarning::process() {
         m_attempts.clear();
+        m_newAttempts.clear();
         /// Like .run(), but doesn't block
         asio::error_code ec;
         m_context.poll(ec);
         if (ec) {
             displayError("trying to poll the ASIO context", ec);
         }
-        return m_attempts;
+        return !m_newAttempts.empty();
     }
 
     inline void ConnectionWarning::initUdp(unsigned short port,
@@ -122,11 +137,8 @@ namespace server {
         m_tcpAcceptor.async_accept([&](std::error_code ec, tcp::socket socket) {
             if (!ec) {
                 /// Log the connection.
-                std::ostringstream os;
-                os << "Got TCP connection attempt";
-                addEndpointInfoToStream(os, socket.remote_endpoint());
-                std::cout << "***" << os.str() << std::endl;
-                m_attempts.emplace_back(os.str());
+                logAttempt(attemptFromEndpoint(ConnectionAttempt::Protocol::TCP,
+                                               socket.remote_endpoint()));
 
                 /// Shut down the socket, both ends.
                 asio::error_code error;
@@ -143,13 +155,30 @@ namespace server {
 
     inline void ConnectionWarning::receiveUdp(const asio::error_code &error) {
         if (!error || error == asio::error::message_size) {
-            std::ostringstream os;
-            os << "Got UDP connection attempt";
-            addEndpointInfoToStream(os, m_udpRemoteEndpoint);
-            std::cout << "***" << os.str() << std::endl;
-            m_attempts.emplace_back(os.str());
+            logAttempt(attemptFromEndpoint(ConnectionAttempt::Protocol::UDP,
+                                           m_udpRemoteEndpoint));
         }
         startUdpReceive();
+    }
+
+    void ConnectionWarning::logAttempt(ConnectionAttempt const &attempt) {
+        m_attempts.push_back(attempt);
+        auto it = m_knownAttempts.find(attempt);
+        if (end(m_knownAttempts) == it) {
+            std::cout << "*** Got a new attempt to connect over "
+                      << (attempt.protocol == ConnectionAttempt::Protocol::TCP
+                              ? "TCP"
+                              : "UDP");
+            if (attempt.address.empty()) {
+                std::cout << " from the local machine";
+            } else {
+                std::cout << " from " << attempt.address;
+            }
+            std::cout << " via remote port " << attempt.port << std::endl;
+
+            m_newAttempts.push_back(attempt);
+            m_knownAttempts.insert(attempt);
+        }
     }
 
 } // namespace server

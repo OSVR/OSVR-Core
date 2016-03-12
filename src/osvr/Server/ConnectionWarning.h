@@ -40,12 +40,53 @@
 
 // Standard includes
 #include <array>
+#include <exception>
 #include <iostream>
 #include <sstream>
-#include <exception>
+#include <string>
+#include <vector>
+#include <set>
 
 namespace osvr {
 namespace server {
+
+    struct ConnectionAttempt {
+        enum class Protocol { TCP, UDP };
+        Protocol protocol;
+        unsigned short port;
+        /// An empty string means a loopback - localhost - address.
+        std::string address;
+    };
+
+    inline bool operator<(ConnectionAttempt const &lhs,
+                          ConnectionAttempt const &rhs) {
+        /// first compare protocol
+        if (lhs.protocol == ConnectionAttempt::Protocol::TCP &&
+            rhs.protocol == ConnectionAttempt::Protocol::UDP) {
+            return true;
+        }
+        if (lhs.protocol != rhs.protocol) {
+            // order is reversed, then.
+            return false;
+        }
+        /// then compare port
+        if (lhs.port < rhs.port) {
+            return true;
+        }
+        if (lhs.port != rhs.port) {
+            // order is reversed, then.
+            return false;
+        }
+        /// Finally, compare the address: save the expensive for last.
+        return (lhs.address < rhs.address);
+    }
+
+    inline bool operator==(ConnectionAttempt const &lhs,
+                           ConnectionAttempt const &rhs) {
+        return (lhs.protocol == rhs.protocol) && (lhs.port == rhs.port) &&
+               (lhs.address == rhs.address);
+    }
+
     /// Opens a port for TCP and UDP, and on attempts to connect or receipt of a
     /// datagram, lets the owning object know.
     class ConnectionWarning : boost::noncopyable {
@@ -56,7 +97,20 @@ namespace server {
         bool openedUdp() const { return m_openedUdp; }
         bool openedTcp() const { return m_openedTcp; }
 
-        std::vector<std::string> const &process();
+        /// returns true if one or more apparently new attempts to connect were
+        /// detected.
+        bool process();
+        /// Gets a list of all connection attempts processed during the last
+        /// cycle.
+        std::vector<ConnectionAttempt> const &getAllAttempts() const {
+            return m_attempts;
+        }
+
+        /// Gets a list of connection attempts processed during the last cycle
+        /// that came from a unique host, port, and protocol
+        std::vector<ConnectionAttempt> const &getNewAttempts() const {
+            return m_newAttempts;
+        }
 
         void stop() { m_context.stop(); }
 
@@ -75,6 +129,8 @@ namespace server {
         void startUdpReceive();
 
         void startTcpAccept();
+
+        void logAttempt(ConnectionAttempt const &attempt);
 
         template <typename Endpoint>
         void addEndpointInfoToStream(std::ostream &os,
@@ -98,8 +154,12 @@ namespace server {
         bool m_openedTcp = false;
         asio::ip::tcp::acceptor m_tcpAcceptor;
 
-        std::vector<std::string> m_attempts;
-        bool m_gotConnectAttempt = false;
+        std::vector<ConnectionAttempt> m_attempts;
+        std::vector<ConnectionAttempt> m_newAttempts;
+
+        /// @todo may need to clear this periodically to avoid continually
+        /// growing!
+        std::set<ConnectionAttempt> m_knownAttempts;
     };
 
 } // namespace server
