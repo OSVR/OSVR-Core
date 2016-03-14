@@ -31,64 +31,131 @@
 
 // Standard includes
 #include <fstream>
+#include <string>
+#include <utility>
+#include <tuple>
+
+using std::make_pair;
+using std::tie;
 
 namespace osvr {
 namespace server {
+
     /// @brief Helper function to load a JSON file given a full path to the
     /// file.
-    /// @returns a null json value if load failed.
-    static inline Json::Value attemptLoad(std::string fullFn) {
+    /// @returns a file load attempt description and the JSON value - null if
+    /// load failed.
+    static inline std::pair<FileLoadAttempt, Json::Value>
+    attemptFileLoad(std::string const &fullFn) {
+
         Json::Value ret{Json::nullValue};
+        auto attempt = FileLoadAttempt{fullFn};
+
         std::ifstream file{fullFn};
         if (!file) {
-            return ret;
+            attempt.status = FileLoadStatus::CouldNotOpenFile;
+            return make_pair(attempt, ret);
         }
+
         Json::Reader reader;
         if (!reader.parse(file, ret)) {
+            attempt.status = FileLoadStatus::CouldNotParseFile;
+            attempt.details = reader.getFormattedErrorMessages();
+
             ret = Json::nullValue;
-            return ret;
+            return make_pair(attempt, ret);
         }
-        return ret;
+
+        attempt.status = FileLoadStatus::FileOpenedAndParsed;
+        return make_pair(attempt, ret);
     }
+
     /// @brief Helper function to load a JSON file by name in a search path.
-    /// @return Json::nullValue if could not load, otherwise parsed contents of
-    /// file.
-    static inline Json::Value
-    loadFromFile(std::string fn, std::vector<std::string> const &searchPath) {
+    /// @return pair of false, Json::nullValue if could not load, otherwise true
+    /// and parsed contents of file. (All attempted loads are added to the
+    /// attempts output parameter)
+    static inline std::pair<bool, Json::Value>
+    loadFromFile(FileLoadAttempts &attempts, std::string const &fn,
+                 std::vector<std::string> const &searchPath) {
         Json::Value ret{Json::nullValue};
         for (auto const &path : searchPath) {
             auto fullFn = boost::filesystem::path(path) / fn;
-            ret = attemptLoad(fullFn.string());
-            if (!ret.isNull()) {
+            FileLoadAttempt attempt;
+            tie(attempt, ret) = attemptFileLoad(fullFn.string());
+            attempts.push_back(attempt);
+            if (attempt.status == FileLoadStatus::FileOpenedAndParsed) {
+                return make_pair(true, ret);
+            }
+        }
+
+        // Last ditch effort, or only attempt if no search path provided
+        // This effectively uses the current working directory.
+        FileLoadAttempt attempt;
+        tie(attempt, ret) = attemptFileLoad(fn);
+        attempts.push_back(attempt);
+        return make_pair(FileLoadStatus::FileOpenedAndParsed == attempt.status,
+                         ret);
+    }
+
+    ResolveRefResult
+    resolvePossibleRefWithDetails(Json::Value const &input,
+                                  bool stringAcceptableResult,
+                                  std::vector<std::string> const &searchPath) {
+        ResolveRefResult ret;
+        ret.result = Json::nullValue;
+
+        if (input.isString()) {
+            tie(ret.resolved, ret.result) =
+                loadFromFile(ret.fileAttempts, input.asString(), searchPath);
+            if (ret.resolved) {
+                ret.handledAs = ValueHandledAs::Filename;
+                return ret;
+            }
+            if (stringAcceptableResult) {
+                ret.result = input;
+                ret.handledAs = ValueHandledAs::String;
+            }
+            // If given a string, whether or not that's acceptable, we'll be
+            // done at the end here.
+            return ret;
+        }
+
+        // Rough parsing of some json ref
+        if (input.isObject() && input.isMember("$ref")) {
+            /// @todo remove things after the filename in the ref.
+            tie(ret.resolved, ret.result) = loadFromFile(
+                ret.fileAttempts, input["$ref"].asString(), searchPath);
+            if (ret.resolved) {
+                ret.handledAs = ValueHandledAs::JsonRefToFile;
                 return ret;
             }
         }
-        // Last ditch effort, or only attempt if no search path provided
-        // This effectively uses the current working directory.
-        ret = attemptLoad(fn);
+
+        ret.result = input;
         return ret;
     }
 
     Json::Value resolvePossibleRef(Json::Value const &input,
                                    bool stringAcceptableResult,
                                    std::vector<std::string> const &searchPath) {
-        Json::Value ret{Json::nullValue};
-        if (input.isString()) {
-            ret = loadFromFile(input.asString(), searchPath);
-            if (ret.isNull() && stringAcceptableResult) {
-                ret = input;
-            }
-            return ret;
+        /// This function is the same as "withDetails", just less rich.
+        auto ret = resolvePossibleRefWithDetails(input, stringAcceptableResult,
+                                                 searchPath);
+        return ret.result;
+    }
+
+    const char *fileLoadStatusToString(FileLoadStatus status) {
+        switch (status) {
+        case FileLoadStatus::CouldNotOpenFile:
+            return "Could not open file";
+
+        case FileLoadStatus::CouldNotParseFile:
+            return "Could not parse file, ";
+
+        case FileLoadStatus::FileOpenedAndParsed:
+            return "File opened and parsed";
         }
-        if (input.isObject() && input.isMember("$ref")) {
-            /// @todo remove things after the filename in the ref.
-            ret = loadFromFile(input["$ref"].asString(), searchPath);
-            if (!ret.isNull()) {
-                return ret;
-            }
-        }
-        ret = input;
-        return ret;
+        return "";
     }
 } // namespace server
 } // namespace osvr

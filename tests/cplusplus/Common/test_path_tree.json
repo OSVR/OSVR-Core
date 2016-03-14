@@ -7,7 +7,7 @@
       "descriptor" : null,
       "device_name" : "com_osvr_Multiserver/YEI_3Space_Sensor0",
       "path" : "/com_osvr_Multiserver/YEI_3Space_Sensor0",
-      "server" : "localhost",
+      "server" : "localhost:3883",
       "type" : "DeviceElement"
    },
    {

@@ -34,6 +34,7 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 
 // Standard includes
 #include <string>
@@ -78,12 +79,14 @@ namespace server {
         ///
         /// @throws std::logic_error if a null connection is passed.
         Server(connection::ConnectionPtr const &conn,
-               private_constructor const &);
+               boost::optional<std::string> const &host,
+               boost::optional<int> const &port, private_constructor const &);
 
         /// @brief Destructor - stops the loop and blocks until it's done.
         OSVR_SERVER_EXPORT ~Server();
 
-        /// @brief Create a server object with a local-only connection.
+        /// @brief Create a server object with a local-only (but still IP-based)
+        /// connection.
         OSVR_SERVER_EXPORT static ServerPtr createLocal();
 
         /// @brief Create a server object with a provided connection.
@@ -95,6 +98,21 @@ namespace server {
         /// @throws std::logic_error if a null connection is passed.
         OSVR_SERVER_EXPORT static ServerPtr
         create(connection::ConnectionPtr const &conn);
+
+        /// @overload
+        ///
+        /// Parameters left unspecified/as boost::none will be filled with
+        /// default values.
+        OSVR_SERVER_EXPORT static ServerPtr
+        create(connection::ConnectionPtr const &conn,
+               boost::optional<std::string> const &host,
+               boost::optional<int> const &port);
+
+        /// @brief Create a server object with a provided connection with a
+        /// provided connection that has been asserted to not listen at all to
+        /// outside processes.
+        OSVR_SERVER_EXPORT static ServerPtr
+        createNonListening(connection::ConnectionPtr const &conn);
 
         /// @brief If you aren't using a separate thread for the server, this
         /// method will run a single update of the server.

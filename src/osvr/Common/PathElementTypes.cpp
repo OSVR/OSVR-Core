@@ -24,17 +24,18 @@
 
 // Internal Includes
 #include <osvr/Common/PathElementTypes.h>
+#include <osvr/Util/DefaultPort.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <regex>
+#include <sstream>
 
 namespace osvr {
 namespace common {
     namespace elements {
-
         /// This chunk of code checks at compile time that:
         ///
         /// - All the types in our PathElement variant are derived from
@@ -84,12 +85,62 @@ namespace common {
 
         std::string const &StringElement::getString() const { return m_val; }
 
+        /// Helper function to augment a VRPN-style server specification with a
+        /// port if one isn't already specified.
+        static inline std::string
+        attachPortToServerIfNoneSpecified(std::string const &server, int port) {
+            auto endsWithPort = std::regex{".*:[[:digit:]]+$"};
+            if (std::regex_match(server, endsWithPort)) {
+                return server;
+            }
+            // OK, didn't end with a port
+            if (server.find(":") != std::string::npos &&
+                server.find("tcp://") == std::string::npos) {
+                // Ah, but it's got a weird protocol specification or something,
+                // more complicated than sticking tcp:// on the front, so we
+                // should just leave it alone.
+                return server;
+            }
+            // Now, we may append the port.
+            std::ostringstream os;
+            os << server;
+            os << ":";
+            os << port;
+            return os.str();
+        }
+
         DeviceElement
         DeviceElement::createVRPNDeviceElement(std::string const &deviceName,
                                                std::string const &server) {
             DeviceElement ret;
             ret.m_devName = deviceName;
-            ret.m_server = server;
+            // explicitly specify VRPN port
+            ret.m_server =
+                attachPortToServerIfNoneSpecified(server, util::DefaultVRPNPort);
+
+            return ret;
+        }
+
+        DeviceElement
+        DeviceElement::createDeviceElement(std::string const &deviceName,
+                                           std::string const &server,
+                                           int port) {
+            DeviceElement ret;
+            ret.m_devName = deviceName;
+            switch (port) {
+            case util::OmitAppendingPort:
+                ret.m_server = server;
+                break;
+            case util::UseDefaultPort:
+                // explicitly specify OSVR port
+                ret.m_server = attachPortToServerIfNoneSpecified(
+                    server, util::DefaultOSVRPort);
+                break;
+            default:
+                // explicitly specify the user's port
+                ret.m_server = attachPortToServerIfNoneSpecified(server, port);
+                break;
+            }
             return ret;
         }
 

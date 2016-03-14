@@ -47,7 +47,8 @@
 #include <boost/algorithm/string/erase.hpp>
 
 // Standard includes
-// - none
+#include <utility>
+#include <tuple>
 
 namespace osvr {
 namespace common {
@@ -149,9 +150,29 @@ namespace common {
             .enableWildcard()
             .process(devNode, automatic);
     }
+
+    /// Given a device name, which may or may not include a host, as well as a
+    /// fallback host and port, return a (dev, host) string pair.
+    static inline std::pair<std::string, std::string>
+    getDevHost(std::string const &deviceName, std::string const &host) {
+
+        auto atLocation = deviceName.find('@');
+        if (std::string::npos == atLocation) {
+            // No at-symbol - we append our hostname.
+            return std::make_pair(deviceName, host);
+        }
+
+        // Split host from device
+        std::string devName(deviceName);
+        devName.resize(atLocation);
+        return std::make_pair(devName, devName.substr(atLocation + 1));
+    }
+
     bool processDeviceDescriptorForPathTree(PathTree &tree,
                                             std::string const &deviceName,
-                                            std::string const &jsonDescriptor) {
+                                            std::string const &jsonDescriptor,
+                                            int listenPort,
+                                            std::string const &host) {
         std::string devName{deviceName};
         if (getPathSeparatorCharacter() == devName.at(0)) {
             // Leading slash, which we'll need to drop from the device name
@@ -163,15 +184,13 @@ namespace common {
         auto &devNode = tree.getNodeByPath(getPathSeparator() + devName);
         auto devElt = boost::get<elements::DeviceElement>(&devNode.value());
         if (nullptr == devElt) {
-            std::string host{"localhost"};
-            auto atLocation = devName.find('@');
-            if (std::string::npos != atLocation) {
-                // Split host from device
-                host = devName.substr(atLocation + 1);
-                devName.resize(atLocation);
-            }
+            std::string dev;
+            std::string devHost;
+
+            // Split host from device, or use the default host and port.
+            std::tie(dev, devHost) = getDevHost(devName, host);
             devNode.value() =
-                elements::DeviceElement::createVRPNDeviceElement(devName, host);
+                elements::DeviceElement::createDeviceElement(dev, devHost, listenPort);
             devElt = boost::get<elements::DeviceElement>(&devNode.value());
             changed.set();
         }

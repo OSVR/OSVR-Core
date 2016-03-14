@@ -43,6 +43,8 @@
 #include <iostream>
 #include <vector>
 
+#undef OSVR_JSON_RESOLUTION_VERBOSE
+
 namespace osvr {
 namespace server {
     namespace detail {
@@ -62,6 +64,26 @@ namespace server {
         static detail::StreamPrefixer out("[OSVR Server] ", std::cout);
         static detail::StreamPrefixer err("[OSVR Server] ", std::cerr);
     } // namespace detail
+
+    inline void
+    printJsonReferenceResolutionAttempts(ResolveRefResult const &refReturn) {
+        for (auto &attempt : refReturn.fileAttempts) {
+            OSVR_DEV_VERBOSE("Tried loading "
+                             << attempt.path << ": "
+                             << fileLoadStatusToString(attempt.status)
+                             << attempt.details);
+        }
+    }
+
+    inline void
+    reportErrorInJsonReferenceParsing(const char *description,
+                                      Json::Value const &input,
+                                      ResolveRefResult const &refReturn) {
+        OSVR_DEV_VERBOSE("ERROR: Could not load "
+                         << description
+                         << " specified by: " << input.toStyledString());
+        printJsonReferenceResolutionAttempts(refReturn);
+    }
 
     class ConfigureServerData : boost::noncopyable {
       public:
@@ -150,7 +172,11 @@ namespace server {
         } else {
             connection::ConnectionPtr connPtr(
                 connection::Connection::createSharedConnection(iface, port));
-            m_server = Server::create(connPtr);
+            boost::optional<std::string> host;
+            if (!iface.empty()) {
+                host = iface;
+            }
+            m_server = Server::create(connPtr, host, port);
         }
 
         if (sleepTime > 0.0) {
@@ -342,17 +368,22 @@ namespace server {
             return success;
         }
 
-        auto result = resolvePossibleRef(display);
-        if (result.isNull()) {
-            OSVR_DEV_VERBOSE(
-                "ERROR: Could not load an object or display descriptor "
-                "file specified by: "
-                << display.toStyledString());
+        auto refReturn = resolvePossibleRefWithDetails(display);
+
+        if (refReturn.result.isNull()) {
+            reportErrorInJsonReferenceParsing(
+                "an object or display descriptor file", display, refReturn);
             return success;
         }
 
+#ifdef OSVR_JSON_RESOLUTION_VERBOSE
+        printJsonReferenceResolutionAttempts(refReturn);
+#endif
+
         // OK, got it.
-        success = m_server->addString(DISPLAY_PATH, result.toStyledString());
+        /// @todo don't style this string!
+        success = m_server->addString(DISPLAY_PATH,
+                                      refReturn.result.toStyledString());
         return success;
     }
 
@@ -365,17 +396,23 @@ namespace server {
             return success;
         }
 
-        auto result = resolvePossibleRef(renderManager);
-        if (result.isNull()) {
-            OSVR_DEV_VERBOSE(
-                "ERROR: Could not load an object or render manager config "
-                "file specified by: "
-                << renderManager.toStyledString());
+        auto refReturn = resolvePossibleRefWithDetails(renderManager);
+
+        if (refReturn.result.isNull()) {
+            reportErrorInJsonReferenceParsing(
+                "an object or RenderManager config file", renderManager,
+                refReturn);
             return success;
         }
 
+#ifdef OSVR_JSON_RESOLUTION_VERBOSE
+        printJsonReferenceResolutionAttempts(refReturn);
+#endif
+
         // OK, got it
-        success = m_server->addString(RENDERMANAGER_PATH, result.toStyledString());
+        /// @todo don't style this string!
+        success = m_server->addString(RENDERMANAGER_PATH,
+                                      refReturn.result.toStyledString());
         return success;
     }
 
