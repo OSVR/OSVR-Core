@@ -30,7 +30,6 @@
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
 
-
 // Library/third-party includes
 // - none
 
