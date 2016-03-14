@@ -1,5 +1,5 @@
 /** @file
-    @brief Header
+    @brief API to attempt OSVR server auto-start.
 
     Must be c-safe!
 
