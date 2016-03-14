@@ -29,17 +29,10 @@
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Util/PlatformConfig.h>
 
 
 // Library/third-party includes
-#if !defined(OSVR_ANDROID)
-#if defined(OSVR_WINDOWS)
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
-#endif
+// - none
 
 // Standard includes
 // - none
