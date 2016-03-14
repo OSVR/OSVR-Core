@@ -26,12 +26,11 @@
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
-#include <osvr/Client/LocateServer.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Util/PlatformConfig.h>
-#include <osvr/Util/ProcessUtils.h>
+
 
 // Library/third-party includes
 #if !defined(OSVR_ANDROID)
@@ -44,42 +43,6 @@
 
 // Standard includes
 // - none
-
-OSVR_ReturnCode osvrServerAutoStart()
-{
-    // @todo start the server.
-#if defined(OSVR_ANDROID)
-    // @todo implement auto-start for android
-#else
-    auto server = osvr::client::getServerBinaryDirectoryPath();
-    if (server.is_initialized()) {
-        OSVR_DEV_VERBOSE("Attempting to auto-start OSVR server from path " << *server);
-        auto exePath = osvr::client::getServerLauncherBinaryPath();
-        if (!exePath.is_initialized()) {
-            OSVR_DEV_VERBOSE("No server launcher binary available.");
-            return OSVR_RETURN_FAILURE;
-        }
-
-        if (osvrStartProcess(exePath->c_str(), server->c_str()) == OSVR_RETURN_FAILURE) {
-            OSVR_DEV_VERBOSE("Could not auto-start server process.");
-            return OSVR_RETURN_FAILURE;
-        }
-    } else {
-        OSVR_DEV_VERBOSE("The current server location is currently unknown. Assuming server is already running.");
-    }
-#endif
-    return OSVR_RETURN_FAILURE;
-}
-
-OSVR_ReturnCode osvrServerRelease()
-{
-#if defined(OSVR_ANDROID)
-    // @todo cleanup server thread
-#else
-    // no-op. Leave the server running.
-#endif
-    return OSVR_RETURN_SUCCESS;
-}
 
 static const char HOST_ENV_VAR[] = "OSVR_HOST";
 

@@ -1,11 +1,11 @@
 /** @file
-@brief Header
+    @brief Platform agnostic process utilities.
 
-@date 2016
+    @date 2016
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2016 Sensics, Inc.

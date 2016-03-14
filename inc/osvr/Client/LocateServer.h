@@ -1,11 +1,11 @@
 /** @file
-@brief Header
+    @brief Internal API to locate the current OSVR Server on the file system.
 
-@date 2016
+    @date 2016
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
 // Copyright 2016 Sensics, Inc.
@@ -29,7 +29,6 @@ Sensics, Inc.
 // Internal Includes
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Util/PlatformConfig.h>
-#include <osvr/Util/APIBaseC.h>
 
 // Library/third-party includes
 // - none
@@ -41,15 +40,15 @@ namespace osvr {
     namespace client {
 
         /** @brief INTERNAL ONLY - get the current server directory, if available. */
-        OSVR_INLINE boost::optional<std::string> getServerBinaryDirectoryPath() {
-            auto server = osvr::common::getEnvironmentVariable("OSVR_SERVER");
+        inline boost::optional<std::string> getServerBinaryDirectoryPath() {
+            auto server = osvr::common::getEnvironmentVariable("OSVR_SERVER_ROOT");
             return server;
         }
 
         /** @brief INTERNAL ONLY - get the path to the server executable, if available. */
-        OSVR_INLINE boost::optional<std::string> getServerBinaryPath() {
+        inline boost::optional<std::string> getServerBinaryPath() {
             auto binPath = getServerBinaryDirectoryPath();
-            if (binPath.is_initialized()) {
+            if (binPath) {
 #if defined(OSVR_WINDOWS)
                 return *binPath + "\\osvr_server.exe";
 #else
@@ -60,7 +59,7 @@ namespace osvr {
         }
 
         /** @brief INTERNAL ONLY - get the path to the server launcher executable, if available. */
-        OSVR_INLINE boost::optional<std::string> getServerLauncherBinaryPath() {
+        inline boost::optional<std::string> getServerLauncherBinaryPath() {
             return getServerBinaryPath();
         }
     }

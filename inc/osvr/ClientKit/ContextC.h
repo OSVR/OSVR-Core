@@ -49,15 +49,7 @@ OSVR_EXTERN_C_BEGIN
 
 /** @addtogroup ClientKit
     @{
-    */
-
-/** @brief Ensures the OSVR server process/thread is running. Call once per process.
- */
- OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrServerAutoStart();
-
-/** @brief Ensures any OSVR server-related resources in the client are released. Call once per process.
- */
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrServerRelease();
+*/
 
 /** @brief Initialize the library.
 

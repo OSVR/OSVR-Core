@@ -7,7 +7,7 @@ set(API
     "${HEADER_LOCATION}/DisplayInput.h"
     "${HEADER_LOCATION}/HandlerContainer.h"
     "${HEADER_LOCATION}/InternalInterfaceOwner.h"
-	"${HEADER_LOCATION}/LocateServer.h"
+    "${HEADER_LOCATION}/LocateServer.h"
     "${HEADER_LOCATION}/InterfaceTree.h"
     "${HEADER_LOCATION}/RemoteHandler.h"
     "${HEADER_LOCATION}/RemoteHandlerFactory.h"

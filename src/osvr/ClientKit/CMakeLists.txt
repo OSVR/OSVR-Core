@@ -19,6 +19,7 @@ set(API
     "${HEADER_LOCATION}/InterfaceStateC.h"
     "${HEADER_LOCATION}/Parameters.h"
     "${HEADER_LOCATION}/ParametersC.h"
+    "${HEADER_LOCATION}/ServerAutoStartC.h"
     "${HEADER_LOCATION}/SystemCallbackC.h"
     "${HEADER_LOCATION}/TransformsC.h")
 
@@ -31,6 +32,7 @@ set(SOURCE
     InterfaceCallbackC.cpp
     InterfaceStateC.cpp
     ParametersC.cpp
+    ServerAutoStartC.cpp
     SystemCallbackC.cpp
     TransformsC.cpp)
 
