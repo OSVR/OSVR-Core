@@ -103,6 +103,7 @@ namespace osvr {
                 {
                   auto prediction = params["prediction"];
                   m_predictEnabled = prediction["enabled"].asBool();
+                  m_predictStaticDelayMS = prediction["staticDelayMS"].asFloat();
                   m_predictLeftEyeDelayMS = prediction["leftEyeDelayMS"].asFloat();
                   m_predictRightEyeDelayMS = prediction["rightEyeDelayMS"].asFloat();
                   m_predictLocalTimeOverride = prediction["localTimeOverride"].asBool();
@@ -123,6 +124,7 @@ namespace osvr {
                 std::cout << "Display rotation: " << m_displayRotation << std::endl;
                 std::cout << "Bits per color: " << m_bitsPerColor << std::endl;
                 std::cout << "Prediction enabled: " << m_predictEnabled << std::endl;
+                std::cout << "Static delay (ms): " << m_predictStaticDelayMS << std::endl;
                 std::cout << "Left eye delay (ms): " << m_predictLeftEyeDelayMS << std::endl;
                 std::cout << "Right eye delay (ms): " << m_predictRightEyeDelayMS << std::endl;
                 std::cout << "Prediction local time override: " << m_predictLocalTimeOverride << std::endl;
@@ -224,6 +226,11 @@ namespace osvr {
               return m_predictEnabled;
             }
 
+            inline float getStaticDelayMS() const
+            {
+              return m_predictStaticDelayMS;
+            }
+
             inline float getLeftEyeDelayMS() const
             {
               return m_predictLeftEyeDelayMS;
@@ -254,6 +261,7 @@ namespace osvr {
             uint32_t m_displayRotation;
             uint32_t m_bitsPerColor;
             bool m_predictEnabled;
+            float m_predictStaticDelayMS;
             float m_predictLeftEyeDelayMS;
             float m_predictRightEyeDelayMS;
             bool m_predictLocalTimeOverride;
