@@ -238,7 +238,7 @@ namespace osvr {
 
             inline float getRightEyeDelayMS() const
             {
-              return m_predictLeftEyeDelayMS;
+              return m_predictRightEyeDelayMS;
             }
 
             inline bool getclientPredictionLocalTimeOverride() const
