@@ -51,8 +51,7 @@ OSVR_INLINE OSVR_ReturnCode osvrStartProcess(const char* executablePath, const c
     // @todo: can we just use the *nix implementation for android?
     OSVR_DEV_VERBOSE("osvrStartProces not yet implemented for Android");
     return OSVR_RETURN_FAILURE;
-#else
-#if defined(OSVR_WINDOWS)
+#elif defined(OSVR_WINDOWS)
     STARTUPINFO startupInfo = { 0 };
     PROCESS_INFORMATION processInfo = { 0 };
 
@@ -81,7 +80,6 @@ OSVR_INLINE OSVR_ReturnCode osvrStartProcess(const char* executablePath, const c
     //    //OSVR_DEV_VERBOSE("Started OSVR server process successfully.");
     //    return OSVR_RETURN_SUCCESS;
     //}
-#endif
 #endif
     return OSVR_RETURN_SUCCESS;
 }
