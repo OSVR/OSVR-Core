@@ -42,10 +42,10 @@ void osvrClientAttemptServerAutoStart()
     // @todo implement auto-start for android
 #else
     auto server = osvr::client::getServerBinaryDirectoryPath();
-    if (server.is_initialized()) {
+    if (server) {
         OSVR_DEV_VERBOSE("Attempting to auto-start OSVR server from path " << *server);
         auto exePath = osvr::client::getServerLauncherBinaryPath();
-        if (!exePath.is_initialized()) {
+        if (!exePath) {
             OSVR_DEV_VERBOSE("No server launcher binary available.");
             return;
         }

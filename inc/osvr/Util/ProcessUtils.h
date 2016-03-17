@@ -53,19 +53,18 @@ OSVR_INLINE OSVR_ReturnCode osvrStartProcess(const char* executablePath, const c
     return OSVR_RETURN_FAILURE;
 #else
 #if defined(OSVR_WINDOWS)
-    STARTUPINFO startupInfo;
-    PROCESS_INFORMATION processInfo;
-    memset(&startupInfo, 0, sizeof(startupInfo));
-    memset(&processInfo, 0, sizeof(processInfo));
+    STARTUPINFO startupInfo = { 0 };
+    PROCESS_INFORMATION processInfo = { 0 };
+
     startupInfo.dwFlags |= STARTF_USESHOWWINDOW;
     startupInfo.wShowWindow = SW_SHOW;
-    if (!CreateProcess(executablePath, NULL, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL,
+    if (!CreateProcess(executablePath, nullptr, nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE, nullptr,
         workingDirectory, &startupInfo, &processInfo)) {
         OSVR_DEV_VERBOSE("Could not start process.");
         return OSVR_RETURN_FAILURE;
     }
 #else
-    OSVR_DEV_VERBOSE("osvrStartProces not yet implemented for non-Windows platforms");
+    OSVR_DEV_VERBOSE("osvrStartProcess not yet implemented for non-Windows platforms");
     return OSVR_RETURN_FAILURE;
     // UNTESTED (or even compiled)
     //pid_t pid = fork();
