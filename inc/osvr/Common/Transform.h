@@ -82,16 +82,20 @@ namespace common {
         /// @brief Apply only the rotation/basis change (not the translation) to
         /// a quaternion, typically representing a velocity or acceleration
         Eigen::Quaterniond transformLinear(Eigen::Quaterniond const &quat) {
-            ///  @todo figure out the right way to do this. The if-0 section is
-            ///  closer but not quite.
-            return quat;
-#if 0
-            Eigen::Quaterniond transformedQuat = Eigen::Quaterniond(
-                reorientIsometry(Eigen::Isometry3d(quat)).rotation());
-            Eigen::Quaterniond transformedIdentity = Eigen::Quaterniond(
-                reorientIsometry(Eigen::Isometry3d::Identity()).rotation());
-            return transformedQuat * transformedIdentity.conjugate();
-#endif
+
+            // Because this is a differential transform, it is both to and
+            // from the same space.  That is to say that its left and right
+            // sides both represent its "to" space, and it has no "from"
+            // space.  Thus, we can ignore its pre-transforms.  But we want
+            // a differential transform in world space, the space on the other
+            // side of its pre transform.  So we end up inverting the post-
+            // transform and applying it where the pre-transform would
+            // normally go.  This makes the resulting matrix be world space
+            // on both sides.
+            Eigen::Isometry3d post =
+              Eigen::Isometry3d(m_post.topLeftCorner<3, 3>());
+            Eigen::Isometry3d total = post * quat * post.inverse();
+            return Eigen::Quaterniond(total.rotation());
         }
 
         Eigen::Matrix4d const &getPre() const { return m_pre; }
