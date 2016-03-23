@@ -1,5 +1,5 @@
-/* This is for the HDK v1 - roughly around CES 2015 - must manually override the alias to get a different transform */
 {
+  "description": "This is for the HDK v1 - roughly around CES 2015 - must manually override the alias to get a different transform",
   "aliases": {
     "/me/head": {
       "rotate": {

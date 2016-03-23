@@ -1,4 +1,5 @@
 /* The default config file, as used with the HDK, is fully auto-detected, so no configuration required. */
 /* See the JSON-Schema for server config or other samples to see possible options. */
 {
+    "description": "The default config file, as used with the HDK, is fully auto-detected, so no configuration required. See the JSON-Schema for server config or other samples to see possible options."
 }

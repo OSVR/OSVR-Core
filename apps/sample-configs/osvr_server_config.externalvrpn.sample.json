@@ -3,12 +3,13 @@
     "/myExternalDevice": {
       "deviceName": "Tracker0",
       "server": "localhost:3884",
-      "descriptor": { /* can also provide a file path here, or this is the minimal */
+      "descriptor": {
         "interfaces": {
           "tracker": {},
           "button": {},
           "analog": {}
-        }
+        },
+        "Note": "can also provide a file path here, or this is the minimal"
       }
     }
   },

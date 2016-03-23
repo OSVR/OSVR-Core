@@ -2,7 +2,7 @@
   "server": {
     "local": false
   },
-  "plugins": [], /* only need to list manual-load plugins */
+  "plugins": [],
   "drivers": [
     {
       "plugin": "com_osvr_Multiserver",

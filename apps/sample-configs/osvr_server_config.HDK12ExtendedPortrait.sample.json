@@ -1,10 +1,5 @@
 {
-    /*
-    This configuration supports video (so-called "positional") and IMU fusion tracking,
-    in addition to orientation-only tracking, with the OSVR HDK.
-    It is configured for RenderManager applications in
-    non-direct extended-display portrait mode on HDK 1.0-1.2 optics.
-    */
+    "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK. It is configured for RenderManager applications in non-direct extended-display portrait mode on HDK 1.0-1.2 optics.",
     "display": "displays/OSVR_HDK_1_1.json",
     "renderManagerConfig": "sample-configs/renderManager.extended.portrait.json",
     "drivers": [{

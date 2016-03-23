@@ -1,5 +1,6 @@
 {
+  "description": "OpenCV Camera is a manual-load plugin, so we must explicitly list it.",
   "plugins": [
-    "com_osvr_VideoCapture_OpenCV" /* OpenCV Camera is a manual-load plugin, so we must explicitly list it */
+    "com_osvr_VideoCapture_OpenCV"
   ]
 }

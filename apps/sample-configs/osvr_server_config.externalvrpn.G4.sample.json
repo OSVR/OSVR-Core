@@ -1,5 +1,5 @@
-/* Configuration file for Polhemus G4 system with two trackers and PowerTrak 360 buttons through an external VRPN server. */
 {
+	"description": "Configuration file for Polhemus G4 system with two trackers and PowerTrak 360 buttons through an external VRPN server.",
 	"externalDevices": {
 		"/myG4Device": {
 			"deviceName": "G4",
