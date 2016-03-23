@@ -138,7 +138,7 @@ class TreeNodePrinter : public boost::static_visitor<>, boost::noncopyable {
 
     void operator()(osvr::common::PathNode const &node,
                     osvr::common::elements::ArticulationElement const &elt) {
-        m_outputBasics(node, elt) << std::endl;
+        outputBasics(node, elt) << std::endl;
         // if (m_opts.showStringData) {
         m_indentStream << "- Contained value: Articulation Type = " << elt.getArticulationType()
             << "; Tracker path = " << elt.getTrackerPath() << "; Bone Name = " << elt.getBoneName() << std::endl;
