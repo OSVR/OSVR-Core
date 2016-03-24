@@ -18,6 +18,7 @@ set(CLIENTS
     Locomotion
     MinimalInit
     TrackerState
+    ServerAutoStart
     ViewerEyeSurfaces)
 
 set(LIB_c osvrClientKit)
