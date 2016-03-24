@@ -3,9 +3,9 @@
         "plugin": "com_osvr_VideoBasedHMDTracker",
         "driver": "VideoBasedHMDTracker",
         "params": {
+            "Note": "for additional documentation of most of these advanced parameters, please see Types.h in the video based tracker plugin source",
             "cameraID": 0,
             "showDebug": false,
-            /* for additional documentation of most of these advanced parameters, please see Types.h in the video based tracker plugin source */
             "streamBeaconDebugInfo": false,
             "extraVerbose": false,
             "blobParams": {

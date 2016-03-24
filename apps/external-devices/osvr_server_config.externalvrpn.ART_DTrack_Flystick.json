@@ -1,6 +1,5 @@
-/* Note, that you will need to add a tracker alias for every body/flystick that you configure through VRPN. This descriptor is configured for one Flystick */
-/* Powerwall` coordinate system is what the system expects and if you use a different system, then you will need to apply transforms (see below)*/
 {
+  "description": "Note, that you will need to add a tracker alias for every body/flystick that you configure through VRPN. This descriptor is configured for one Flystick Powerwall` coordinate system is what the system expects and if you use a different system, then you will need to apply transforms (see below)",
   "externalDevices": {
     "/DTrackDevice": {
       "deviceName": "DTrack",
