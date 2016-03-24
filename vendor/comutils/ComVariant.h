@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <memory>
 #include <utility>
+#include <cassert>
 
 namespace comutils {
 namespace variant {
@@ -84,11 +85,108 @@ template <> struct VariantTypeTraits<const char *> {
             }
         };
 
+        /// Possible ways to handle the HRESULT from VariantClear in the
+        /// destructor of our wrapper.
+        namespace DestructionPolicies {
+            /// Default policy
+            struct SilentAndAssert {
+                static void handle(HRESULT hr) {
+                    switch (hr) {
+                    case S_OK:
+                        break;
+                    case DISP_E_ARRAYISLOCKED:
+                        /*
+                            OutputDebugStringA("VariantClear failed on variant "
+                                "destruction: Variant "
+                                "contains an array that is locked");
+                                */
+                        break;
+                    case DISP_E_BADVARTYPE:
+                        /*
+                            OutputDebugStringA("VariantClear failed on variant "
+                                "destruction: Variant is "
+                                "not a valid type");
+                                */
+                        break;
+                    case E_INVALIDARG:
+                        assert(hr != E_INVALIDARG &&
+                               // shouldn't happen.
+                               "VariantClear failed on variant "
+                               "destruction: invalid "
+                               "argument.");
+                        break;
+                    }
+                }
+            };
+
+/// If the user has already included windows.h, we'll offer this one.
+#ifdef _INC_WINDOWS
+            struct DebugStringAndAssert {
+                static void handle(HRESULT hr) {
+                    switch (hr) {
+                    case S_OK:
+                        break;
+                    case DISP_E_ARRAYISLOCKED:
+                        OutputDebugStringA("VariantClear failed on variant "
+                                           "destruction: Variant "
+                                           "contains an array that is locked");
+                        break;
+                    case DISP_E_BADVARTYPE:
+                        OutputDebugStringA("VariantClear failed on variant "
+                                           "destruction: Variant is "
+                                           "not a valid type");
+                        break;
+                    case E_INVALIDARG:
+                        assert(hr != E_INVALIDARG &&
+                               // shouldn't happen.
+                               "VariantClear failed on variant "
+                               "destruction: invalid "
+                               "argument.");
+                        break;
+                    }
+                }
+            };
+#endif
+
+            /// Technically illegal since destructors are implicitly noexcept.
+            struct ThrowAndAssert {
+                static void handle(HRESULT hr) {
+                    switch (hr) {
+                    case S_OK:
+                        break;
+                    case DISP_E_ARRAYISLOCKED:
+                        throw std::runtime_error(
+                            "VariantClear failed on variant "
+                            "destruction: Variant "
+                            "contains an array that is locked");
+                        break;
+                    case DISP_E_BADVARTYPE:
+                        throw std::runtime_error(
+                            "VariantClear failed on variant "
+                            "destruction: Variant is "
+                            "not a valid type");
+                        break;
+                    case E_INVALIDARG:
+                        assert(hr != E_INVALIDARG &&
+                               // shouldn't happen.
+                               "VariantClear failed on variant "
+                               "destruction: invalid "
+                               "argument.");
+                        break;
+                    }
+                }
+            };
+
+            using Default = SilentAndAssert;
+        } // namespace DestructionPolicies
+
         /// @brief Low-level variant holder: just handles creation and
         /// destruction.
         ///
         /// Could be used by itself on the stack, but not terribly likely.
-        template <typename T = VARIANT> struct VariantHolder {
+        template <typename T = VARIANT,
+                  typename DestructionPolicy = DestructionPolicies::Default>
+        struct VariantHolder {
           public:
             static_assert(
                 is_variant_type<T>::value,
@@ -102,28 +200,7 @@ template <> struct VariantTypeTraits<const char *> {
             VariantHolder() { VariantInit(getPtr()); }
             ~VariantHolder() {
                 auto hr = VariantClear(getPtr());
-                switch (hr) {
-                case S_OK:
-                    break;
-                case DISP_E_ARRAYISLOCKED:
-                    throw std::runtime_error(
-                        "VariantClear failed on variant "
-                        "destruction: Variant "
-                        "contains an array that is locked");
-                    break;
-                case DISP_E_BADVARTYPE:
-                    throw std::runtime_error("VariantClear failed on variant "
-                                             "destruction: Variant is "
-                                             "not a valid type");
-                    break;
-                case E_INVALIDARG:
-                    // shouldn't happen.
-                    throw std::invalid_argument(
-                        "VariantClear failed on variant "
-                        "destruction: invalid "
-                        "argument.");
-                    break;
-                }
+                DestructionPolicy::handle(hr);
             }
             /// non-copyable
             VariantHolder(VariantHolder const &) = delete;
@@ -143,14 +220,17 @@ template <> struct VariantTypeTraits<const char *> {
     /// @brief A wrapper for VARIANT/VARIANTARG on Windows that is both copy and
     /// move aware, and does not require any Visual Studio libraries (unlike
     /// comutil.h)
-    template <typename T = VARIANT> class VariantWrapper {
+    template <typename T = VARIANT,
+              typename DestructionPolicy = detail::DestructionPolicies::Default>
+    class VariantWrapper {
 
       public:
         static_assert(detail::is_variant_type<T>::value,
                       "Only valid type parameters are VARIANT or VARIANTARG");
         using variant_type = T;
-        using type = VariantWrapper<T>;
-        using holder_type = detail::VariantHolder<T>;
+        using destruction_policy = DestructionPolicy;
+        using type = VariantWrapper<T, DestructionPolicy>;
+        using holder_type = detail::VariantHolder<T, DestructionPolicy>;
         using holder_unique_ptr = typename holder_type::unique_type;
 
         /// @brief Default constructor - sets up an empty variant
@@ -226,8 +306,7 @@ template <> struct VariantTypeTraits<const char *> {
         }
 
         /// @brief Checks to see if this variant is in a valid state: not
-        /// moved-from
-        /// or initialized with nullptr.
+        /// moved-from or initialized with nullptr.
         explicit operator bool() const { return bool(data_); }
 
         /// @brief Ensures the variant is initialized.
@@ -323,6 +402,7 @@ template <> struct VariantTypeTraits<const char *> {
         return get<Dest>(v.get());
     }
 } // namespace variant
+
 using namespace variant;
 
 } // namespace comutils

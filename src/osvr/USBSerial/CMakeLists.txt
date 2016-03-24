@@ -11,6 +11,11 @@ set(SOURCE
     USBSerialEnum.cpp
     USBSerialEnumImpl.h
     USBSerialEnumImpl.cpp)
+if(WIN32)
+    # use the comutils objects - link them directly in so we can be a static
+    # library easily at some point.
+    list(APPEND SOURCE $<TARGET_OBJECTS:comutils-obj>)
+endif()
 
 osvr_add_library()
 
@@ -40,8 +45,7 @@ if(WIN32)
     target_link_libraries(${LIBNAME_FULL}
         PRIVATE
         wbemuuid
-        com_smart_pointer
-        comutils)
+        comutils-interface)
 endif()
 if(APPLE)
     # find_library must be used for OS X frameworks
