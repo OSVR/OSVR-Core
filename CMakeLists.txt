@@ -129,9 +129,14 @@ endif()
 set(EXTRA_SAMPLE_BINDIR ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/extra-sample-apps)
 if(WIN32)
     # On Windows, install sample configs, etc. to a subdirectory of bin.
-    set(SAMPLE_CONFIGS_DIR "${CMAKE_INSTALL_BINDIR}")
+    set(OSVR_CONFIG_ROOT "${CMAKE_INSTALL_BINDIR}")
+
+    # In a build tree, we use the generator expression to put it alongside the server.
+    set(OSVR_CACHED_CONFIG_ROOT "$<TARGET_FILE_DIR:osvr_server>" CACHE INTERNAL "")
 else()
-    set(SAMPLE_CONFIGS_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+    set(OSVR_CONFIG_ROOT "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
+    # In build tree, put in similar location as we would in the install
+    set(OSVR_CACHED_CONFIG_ROOT "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}" CACHE INTERNAL "")
 endif()
 
 # Shared modules from rpavlik/cmake-modules

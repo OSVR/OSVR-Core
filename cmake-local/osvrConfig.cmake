@@ -23,6 +23,9 @@ set(OSVR_CACHED_PLUGIN_DIR "@OSVR_PLUGIN_DIR@" CACHE INTERNAL
 set(OSVR_PLUGIN_IGNORE_SUFFIX "@OSVR_PLUGIN_IGNORE_SUFFIX@" CACHE INTERNAL
     "The additional suffix for OSVR plugins that are not to be auto-loaded" FORCE)
 
+set(OSVR_CACHED_CONFIG_ROOT "@OSVR_CONFIG_ROOT@" CACHE INTERNAL
+    "The OSVR_CONFIG_ROOT variable for OSVR, for use in installing plugins' sample configs, display descriptors, etc." FORCE)
+
 # Hook for a super-build to optionally inject configuration after target import.
 include("${CMAKE_CURRENT_LIST_DIR}/osvrConfigSuperBuildSuffix.cmake" OPTIONAL)
 
