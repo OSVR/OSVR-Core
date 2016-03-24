@@ -44,37 +44,35 @@
 namespace osvr {
 namespace pluginhost {
 
+    namespace fs = boost::filesystem;
+    static inline std::string getCanonicalGenericString(const char path[]) {
+        return fs::canonical(path).generic_string();
+    }
 #if defined(OSVR_WINDOWS)
     std::string getBinaryLocation() {
         char buf[512] = {0};
-        DWORD len = GetModuleFileName(nullptr, buf, sizeof(buf));
+        DWORD len = GetModuleFileNameA(nullptr, buf, sizeof(buf));
         std::string ret;
         if (0 != len) {
             ret.assign(buf, len);
         }
         return ret;
     }
-#elif defined(OSVR_LINUX)
+#elif defined(OSVR_LINUX) || defined(OSVR_ANDROID)
     std::string getBinaryLocation() {
-        return boost::filesystem::canonical("/proc/self/exe").generic_string();
+        return getCanonicalGenericString("/proc/self/exe");
     }
 #elif defined(OSVR_NETBSD)
     std::string getBinaryLocation() {
-        return boost::filesystem::canonical("/proc/curproc/exe")
-            .generic_string();
+        return getCanonicalGenericString("/proc/curproc/exe");
     }
 #elif defined(OSVR_FREEBSD)
     std::string getBinaryLocation() {
-        if (boost::filesystem::exists("proc/curproc/file")) {
-            return boost::filesystem::canonical("/proc/curproc/file")
-                .generic_string();
-        } else {
-            // sysctl CTL_KERN KERN_PROC KERN_PROC_PATHNAME -1
+        if (fs::exists("proc/curproc/file")) {
+            return getCanonicalGenericString("/proc/curproc/file");
         }
-    }
-#elif defined(OSVR_ANDROID)
-    std::string getBinaryLocation() {
-        return boost::filesystem::canonical("/proc/self/exe").generic_string();
+        return std::string{};
+        /// @todo sysctl CTL_KERN KERN_PROC KERN_PROC_PATHNAME -1
     }
 #elif defined(OSVR_MACOSX)
     std::string getBinaryLocation() {
@@ -88,10 +86,9 @@ namespace pluginhost {
     }
 #else
 #error "getBinaryLocation() not yet implemented for this platform!"
-    std::string getBinaryLocation() { return ""; }
+    std::string getBinaryLocation() { return std::string{}; }
 
-// TODO Mac OS X: _NSGetExecutablePath() (man 3 dyld)
-// TODO Solaris: getexecname()
+/// @todo Solaris: getexecname()
 #endif
 
 } // namespace pluginhost
