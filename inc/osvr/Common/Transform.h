@@ -74,15 +74,25 @@ namespace common {
         /// @brief Apply only the rotation/basis change (not the translation) to
         /// a vector representing a velocity or acceleration
         Eigen::Vector3d
-        transformLinear(Eigen::Ref<Eigen::Vector3d const> const &vec) {
-            return m_post.topLeftCorner<3, 3>() *
-                   (vec.transpose() * m_pre.topLeftCorner<3, 3>()).transpose();
+        transformDerivative(Eigen::Ref<Eigen::Vector3d const> const &vec) {
+            return transformDerivativeImpl(Eigen::Translation3d(vec))
+                .translation();
         }
 
-        /// @brief Apply only the rotation/basis change (not the translation) to
-        /// a quaternion, typically representing a velocity or acceleration
-        Eigen::Quaterniond transformLinear(Eigen::Quaterniond const &quat) {
+        /// @brief Transform a rotational derivative: angular velocity or
+        /// acceleration.
+        Eigen::Quaterniond transformDerivative(Eigen::Quaterniond const &quat) {
+            return Eigen::Quaterniond(transformDerivativeImpl(quat).rotation());
+        }
 
+        Eigen::Matrix4d const &getPre() const { return m_pre; }
+
+        Eigen::Matrix4d const &getPost() const { return m_post; }
+
+      private:
+        ///  Transform a derivative: velocity or acceleration.
+        template <typename T>
+        Eigen::Isometry3d transformDerivativeImpl(T const &input) const {
             // Because this is a differential transform, it is both to and
             // from the same space.  That is to say that its left and right
             // sides both represent its "to" space, and it has no "from"
@@ -93,22 +103,8 @@ namespace common {
             // normally go.  This makes the resulting matrix be world space
             // on both sides.
             Eigen::Isometry3d post =
-              Eigen::Isometry3d(m_post.topLeftCorner<3, 3>());
-            Eigen::Isometry3d total = post * quat * post.inverse();
-            return Eigen::Quaterniond(total.rotation());
-        }
-
-        Eigen::Matrix4d const &getPre() const { return m_pre; }
-
-        Eigen::Matrix4d const &getPost() const { return m_post; }
-
-      private:
-        Eigen::Isometry3d
-        reorientIsometry(Eigen::Isometry3d const &input) const {
-            Eigen::Isometry3d ret =
-                Eigen::Isometry3d(m_post.topLeftCorner<3, 3>()) * input *
-                Eigen::Isometry3d(m_pre.topLeftCorner<3, 3>());
-            return ret;
+                Eigen::Isometry3d(m_post.topLeftCorner<3, 3>());
+            return Eigen::Isometry3d(post * input * post.inverse());
         }
         Eigen::Matrix4d m_pre;
         Eigen::Matrix4d m_post;

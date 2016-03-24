@@ -189,7 +189,7 @@ namespace client {
                 OSVR_LinearVelocityState vel;
                 osvrVec3FromQuatlib(&(vel), info.vel);
 
-                ei::map(vel) = xform.transformLinear(ei::map(vel));
+                ei::map(vel) = xform.transformDerivative(ei::map(vel));
 
                 overallReport.state.linearVelocity = vel;
                 OSVR_LinearVelocityReport report;
@@ -206,8 +206,8 @@ namespace client {
                                     info.vel_quat);
                 state.dt = info.vel_quat_dt;
 
-                ei::map(state.incrementalRotation) =
-                    xform.transformLinear(ei::map(state.incrementalRotation));
+                ei::map(state.incrementalRotation) = xform.transformDerivative(
+                    ei::map(state.incrementalRotation));
 
                 overallReport.state.angularVelocity = state;
                 OSVR_AngularVelocityReport report;
@@ -237,7 +237,7 @@ namespace client {
                 OSVR_LinearAccelerationState accel;
                 osvrVec3FromQuatlib(&(accel), info.acc);
 
-                ei::map(accel) = xform.transformLinear(ei::map(accel));
+                ei::map(accel) = xform.transformDerivative(ei::map(accel));
 
                 overallReport.state.linearAcceleration = accel;
                 OSVR_LinearAccelerationReport report;
@@ -254,8 +254,8 @@ namespace client {
                                     info.acc_quat);
                 state.dt = info.acc_quat_dt;
 
-                ei::map(state.incrementalRotation) =
-                    xform.transformLinear(ei::map(state.incrementalRotation));
+                ei::map(state.incrementalRotation) = xform.transformDerivative(
+                    ei::map(state.incrementalRotation));
 
                 overallReport.state.angularAcceleration = state;
                 OSVR_AngularAccelerationReport report;
