@@ -51,7 +51,7 @@ namespace pluginhost {
 #if defined(OSVR_WINDOWS)
     std::string getBinaryLocation() {
         char buf[512] = {0};
-        DWORD len = GetModuleFileName(nullptr, buf, sizeof(buf));
+        DWORD len = GetModuleFileNameA(nullptr, buf, sizeof(buf));
         std::string ret;
         if (0 != len) {
             ret.assign(buf, len);
