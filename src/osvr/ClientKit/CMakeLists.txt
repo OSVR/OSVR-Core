@@ -34,6 +34,7 @@ set(SOURCE
     InterfaceStateC.cpp
     ParametersC.cpp
     ServerAutoStartC.cpp
+    SkeletonC.cpp
     SystemCallbackC.cpp
     TransformsC.cpp)
 
