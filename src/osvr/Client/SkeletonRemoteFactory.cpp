@@ -38,7 +38,6 @@
 #include <osvr/Common/JSONTransformVisitor.h>
 #include <osvr/Common/CreateDevice.h>
 
-
 #include <osvr/Util/TreeNode.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathNode.h>
@@ -70,8 +69,8 @@ namespace client {
           m_internals(ifaces), m_sensor(sensor), m_ctx(ctx),
           m_deviceName(deviceName) {
 
-        auto skeleton = common::SkeletonComponent::create("");
-        m_skeleton = m_dev->addComponent(skeleton);
+        auto m_skeleton = common::SkeletonComponent::create("");
+        m_dev->addComponent(m_skeleton);
 
         m_skeleton->registerSkeletonHandler(
             [&](common::SkeletonNotification const &data,

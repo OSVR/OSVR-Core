@@ -34,6 +34,7 @@
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/SkeletonComponent.h>
 #include "RemoteHandlerInternals.h"
+#include <osvr/Client/Export.h>
 
 // Library/third-party includes
 // - none
@@ -54,7 +55,7 @@ namespace client {
 
         /// @brief Deleted assignment operator.
         SkeletonRemoteHandler &
-            operator=(SkeletonRemoteHandler const &) = delete;
+        operator=(SkeletonRemoteHandler const &) = delete;
 
         virtual ~SkeletonRemoteHandler() {
             /// @todo do we need to unregister?
@@ -62,17 +63,23 @@ namespace client {
 
         virtual void update() { m_dev->update(); }
 
+        OSVR_CLIENT_EXPORT common::SkeletonComponentPtr
+        SkeletonRemoteHandler::getSkeletonComponent() {
+            return m_skeleton;
+        }
+
       private:
-          void m_handleSkeleton(common::SkeletonNotification const &data,
-                         util::time::TimeValue const &timestamp);
-          void m_handleSkeletonSpec(common::SkeletonSpec const &data,
-              util::time::TimeValue const &timestamp);
-          common::BaseDevicePtr m_dev;
-          common::ClientContext *m_ctx;
-          common::SkeletonComponent *m_skeleton;
-          RemoteHandlerInternals m_internals;
-          boost::optional<OSVR_ChannelCount> m_sensor;
-          std::string m_deviceName;
+        void m_handleSkeleton(common::SkeletonNotification const &data,
+                              util::time::TimeValue const &timestamp);
+        void m_handleSkeletonSpec(common::SkeletonSpec const &data,
+                                  util::time::TimeValue const &timestamp);
+
+        common::BaseDevicePtr m_dev;
+        common::ClientContext *m_ctx;
+        common::SkeletonComponentPtr m_skeleton;
+        RemoteHandlerInternals m_internals;
+        boost::optional<OSVR_ChannelCount> m_sensor;
+        std::string m_deviceName;
     };
 
     class SkeletonRemoteFactory {
