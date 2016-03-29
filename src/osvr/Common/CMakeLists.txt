@@ -117,6 +117,7 @@ set(API
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
     "${HEADER_LOCATION}/SkeletonComponent.h"
+    "${HEADER_LOCATION}/SkeletonComponentPtr.h"
     "${HEADER_LOCATION}/StateType.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
