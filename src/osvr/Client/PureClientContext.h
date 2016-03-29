@@ -32,6 +32,7 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/Transform.h>
 #include <osvr/Common/NetworkingSupport.h>
+#include <osvr/Common/DeviceComponentPtr.h>
 #include <osvr/Util/TimeValue_fwd.h>
 #include "VRPNConnectionCollection.h"
 #include <osvr/Client/InterfaceTree.h>
@@ -81,6 +82,10 @@ namespace client {
         bool m_getStatus() const override;
 
         RemoteHandlerPtr m_getRemoteHandler(std::string const &path);
+
+        /// @brief Articulation Tree corresponding to path
+        common::PathTree const &
+        m_getArticulationTree(std::string const &path) override;
 
         /// @brief The main OSVR server host: usually localhost
         std::string m_host;

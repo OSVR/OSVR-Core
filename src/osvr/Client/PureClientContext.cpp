@@ -25,6 +25,7 @@
 // Internal Includes
 #include "PureClientContext.h"
 #include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/SkeletonComponent.h>
 #include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathElementTools.h>
@@ -32,7 +33,7 @@
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
-
+#include "SkeletonRemoteFactory.h"
 #include <boost/algorithm/string.hpp>
 
 // Library/third-party includes
@@ -217,6 +218,19 @@ namespace client {
     RemoteHandlerPtr
     PureClientContext::m_getRemoteHandler(std::string const &path) {
         return m_ifaceMgr.getRemoteHandlerForPath(path);
+    }
+
+    /// @brief Articulation Tree corresponding to path
+    common::PathTree const &PureClientContext::m_getArticulationTree(
+        std::string const &path) {
+        // get a handler for path, should be skeleton handler
+        auto handler = m_getRemoteHandler(path);
+        // cast it to skeleton handler
+        std::shared_ptr<SkeletonRemoteHandler> skeletonHandler =
+            std::dynamic_pointer_cast<SkeletonRemoteHandler>(handler);
+        auto skeletonComp = skeletonHandler->getSkeletonComponent();
+
+        return skeletonComp->getArticulationTree();
     }
 } // namespace client
 } // namespace osvr
