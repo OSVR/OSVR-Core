@@ -24,7 +24,7 @@
 
 // Internal Includes
 #include "SkeletonRemoteFactory.h"
-#include "RemoteHandlerInternals.h"
+
 #include "VRPNConnectionCollection.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
@@ -37,7 +37,7 @@
 #include <osvr/Common/Transform.h>
 #include <osvr/Common/JSONTransformVisitor.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/SkeletonComponent.h>
+
 
 #include <osvr/Util/TreeNode.h>
 #include <osvr/Common/PathTree.h>
@@ -62,82 +62,62 @@
 namespace osvr {
 namespace client {
 
-    class SkeletonRemoteHandler : public RemoteHandler {
-      public:
-        SkeletonRemoteHandler(vrpn_ConnectionPtr const &conn,
-                              std::string const &deviceName,
-                              boost::optional<OSVR_ChannelCount> sensor,
-                              common::InterfaceList &ifaces,
-                              common::ClientContext *ctx)
-            : m_dev(common::createClientDevice(deviceName, conn)),
-              m_internals(ifaces), m_sensor(sensor), m_ctx(ctx),
-              m_deviceName(deviceName) {
+    SkeletonRemoteHandler::SkeletonRemoteHandler(
+        vrpn_ConnectionPtr const &conn, std::string const &deviceName,
+        boost::optional<OSVR_ChannelCount> sensor,
+        common::InterfaceList &ifaces, common::ClientContext *ctx)
+        : m_dev(common::createClientDevice(deviceName, conn)),
+          m_internals(ifaces), m_sensor(sensor), m_ctx(ctx),
+          m_deviceName(deviceName) {
 
-            auto skeleton = common::SkeletonComponent::create("");
-            m_skeleton = m_dev->addComponent(skeleton);
+        auto skeleton = common::SkeletonComponent::create("");
+        m_skeleton = m_dev->addComponent(skeleton);
 
-            m_skeleton->registerSkeletonHandler(
-                [&](common::SkeletonNotification const &data,
-                    util::time::TimeValue const &timestamp) {
-                    m_handleSkeleton(data, timestamp);
-                });
-            m_skeleton->registerSkeletonSpecHandler(
-                [&](common::SkeletonSpec const &data,
-                    util::time::TimeValue const &timestamp) {
-                    m_handleSkeletonSpec(data, timestamp);
-                });
+        m_skeleton->registerSkeletonHandler(
+            [&](common::SkeletonNotification const &data,
+                util::time::TimeValue const &timestamp) {
+                m_handleSkeleton(data, timestamp);
+            });
+        m_skeleton->registerSkeletonSpecHandler(
+            [&](common::SkeletonSpec const &data,
+                util::time::TimeValue const &timestamp) {
+                m_handleSkeletonSpec(data, timestamp);
+            });
 
-            /**/
-            OSVR_DEV_VERBOSE("Constructed a Skeleton Handler for "
-                             << deviceName);
+        /**/
+        OSVR_DEV_VERBOSE("Constructed a Skeleton Handler for " << deviceName);
+    }
+
+    void SkeletonRemoteHandler::m_handleSkeleton(
+        common::SkeletonNotification const &data,
+        util::time::TimeValue const &timestamp) {
+        if (*m_sensor != data.sensor) {
+            /// doesn't match our filter.
+            return;
         }
 
-        /// @brief Deleted assignment operator.
-        SkeletonRemoteHandler &
-        operator=(SkeletonRemoteHandler const &) = delete;
+        // send skeleton update callback
+        OSVR_SkeletonReport report;
+        report.sensor = data.sensor;
+        report.state.dataAvailable = 1;
+        m_internals.setStateAndTriggerCallbacks(timestamp, report);
+    }
 
-        virtual ~SkeletonRemoteHandler() {
-            /// @todo do we need to unregister?
+    void SkeletonRemoteHandler::m_handleSkeletonSpec(
+        common::SkeletonSpec const &data,
+        util::time::TimeValue const &timestamp) {
+        // need to verify that sensor id and spec exist,
+        // otherwise don't get anything
+        if (!data.spec) {
+            return;
         }
-
-        virtual void update() { m_dev->update(); }
-
-      private:
-        void m_handleSkeleton(common::SkeletonNotification const &data,
-                              util::time::TimeValue const &timestamp) {
-            if (*m_sensor != data.sensor) {
-                /// doesn't match our filter.
-                return;
-            }
-
-            // send skeleton update callback
-            OSVR_SkeletonReport report;
-            report.sensor = data.sensor;
-            report.state.dataAvailable = 1;
-            m_internals.setStateAndTriggerCallbacks(timestamp, report);
-        }
-
-        void m_handleSkeletonSpec(common::SkeletonSpec const &data,
-                                  util::time::TimeValue const &timestamp) {
-            // need to verify that sensor id and spec exist,
-            // otherwise don't get anything
-            if (!data.spec) {
-                return;
-            }
-            // get the articulation spec for specified skeleton sensor
-            Json::Value articSpec = data.spec[m_sensor.value()];
-            // update articulationSpec of skeleton component
-            Json::FastWriter fastWriter;
-            std::string strSpec = fastWriter.write(articSpec);
-            m_skeleton->setArticulationSpec(strSpec, m_deviceName);
-        }
-        common::BaseDevicePtr m_dev;
-        common::ClientContext *m_ctx;
-        common::SkeletonComponent *m_skeleton;
-        RemoteHandlerInternals m_internals;
-        boost::optional<OSVR_ChannelCount> m_sensor;
-        std::string m_deviceName;
-    };
+        // get the articulation spec for specified skeleton sensor
+        Json::Value articSpec = data.spec[m_sensor.value()];
+        // update articulationSpec of skeleton component
+        Json::FastWriter fastWriter;
+        std::string strSpec = fastWriter.write(articSpec);
+        m_skeleton->setArticulationSpec(strSpec, m_deviceName);
+    }
 
     SkeletonRemoteFactory::SkeletonRemoteFactory(
         VRPNConnectionCollection const &conns)

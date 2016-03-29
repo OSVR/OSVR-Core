@@ -32,6 +32,8 @@
 #include <osvr/Util/SharedPtr.h>
 #include <osvr/Client/RemoteHandler.h>
 #include <osvr/Common/ClientContext.h>
+#include <osvr/Common/SkeletonComponent.h>
+#include "RemoteHandlerInternals.h"
 
 // Library/third-party includes
 // - none
@@ -41,6 +43,37 @@
 
 namespace osvr {
 namespace client {
+
+    class SkeletonRemoteHandler : public RemoteHandler {
+      public:
+        SkeletonRemoteHandler(vrpn_ConnectionPtr const &conn,
+                              std::string const &deviceName,
+                              boost::optional<OSVR_ChannelCount> sensor,
+                              common::InterfaceList &ifaces,
+                              common::ClientContext *ctx);
+
+        /// @brief Deleted assignment operator.
+        SkeletonRemoteHandler &
+            operator=(SkeletonRemoteHandler const &) = delete;
+
+        virtual ~SkeletonRemoteHandler() {
+            /// @todo do we need to unregister?
+        }
+
+        virtual void update() { m_dev->update(); }
+
+      private:
+          void m_handleSkeleton(common::SkeletonNotification const &data,
+                         util::time::TimeValue const &timestamp);
+          void m_handleSkeletonSpec(common::SkeletonSpec const &data,
+              util::time::TimeValue const &timestamp);
+          common::BaseDevicePtr m_dev;
+          common::ClientContext *m_ctx;
+          common::SkeletonComponent *m_skeleton;
+          RemoteHandlerInternals m_internals;
+          boost::optional<OSVR_ChannelCount> m_sensor;
+          std::string m_deviceName;
+    };
 
     class SkeletonRemoteFactory {
       public:
