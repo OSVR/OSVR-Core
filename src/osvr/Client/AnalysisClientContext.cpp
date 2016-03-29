@@ -32,6 +32,7 @@
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
 #include <osvr/Common/DeduplicatingFunctionWrapper.h>
+#include "SkeletonRemoteFactory.h"
 
 // Library/third-party includes
 #include <json/value.h>
@@ -114,6 +115,24 @@ namespace client {
 
     common::PathTree const &AnalysisClientContext::m_getPathTree() const {
         return m_pathTreeOwner.get();
+    }
+
+    RemoteHandlerPtr
+    AnalysisClientContext::m_getRemoteHandler(std::string const &path) {
+        return m_ifaceMgr.getRemoteHandlerForPath(path);
+    }
+
+    /// @brief Articulation Tree corresponding to path
+    common::PathTree const &AnalysisClientContext::m_getArticulationTree(
+        std::string const &path) /*override */ {
+        // get a handler for path, should be skeleton handler
+        auto handler = m_getRemoteHandler(path);
+        // cast it to skeleton handler
+        std::shared_ptr<SkeletonRemoteHandler> skeletonHandler =
+            std::dynamic_pointer_cast<SkeletonRemoteHandler>(handler);
+        auto skeletonComp = skeletonHandler->getSkeletonComponent();
+
+        return skeletonComp->getArticulationTree();
     }
 } // namespace client
 } // namespace osvr

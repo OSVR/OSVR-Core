@@ -78,7 +78,14 @@ namespace client {
         m_setRoomToWorldTransform(common::Transform const &xform) override {
             m_roomToWorld = xform;
         }
+
         bool m_getStatus() const override;
+
+        RemoteHandlerPtr m_getRemoteHandler(std::string const &path);
+
+        /// @brief Articulation Tree corresponding to path
+        common::PathTree const &
+        m_getArticulationTree(std::string const &path) override ;
 
         /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;
