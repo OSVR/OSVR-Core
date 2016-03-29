@@ -60,7 +60,9 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     osvrCommon
     spdlog
-    eigen-headers)
+    eigen-headers
+    JsonCpp::JsonCpp
+    vendored-vrpn)
 
 if(ANDROID)
     target_link_libraries(${LIBNAME_FULL}
