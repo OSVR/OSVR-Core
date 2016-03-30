@@ -63,7 +63,7 @@ namespace client {
 
         virtual void update() { m_dev->update(); }
 
-        OSVR_CLIENT_EXPORT common::SkeletonComponentPtr
+        OSVR_CLIENT_EXPORT common::SkeletonComponent *
         SkeletonRemoteHandler::getSkeletonComponent() {
             return m_skeleton;
         }
@@ -76,7 +76,7 @@ namespace client {
 
         common::BaseDevicePtr m_dev;
         common::ClientContext *m_ctx;
-        common::SkeletonComponentPtr m_skeleton;
+        common::SkeletonComponent *m_skeleton;
         RemoteHandlerInternals m_internals;
         boost::optional<OSVR_ChannelCount> m_sensor;
         std::string m_deviceName;

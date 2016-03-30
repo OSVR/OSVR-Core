@@ -69,8 +69,8 @@ namespace client {
           m_internals(ifaces), m_sensor(sensor), m_ctx(ctx),
           m_deviceName(deviceName) {
 
-        auto m_skeleton = common::SkeletonComponent::create("");
-        m_dev->addComponent(m_skeleton);
+        auto skeleton = common::SkeletonComponent::create("");
+        m_skeleton = m_dev->addComponent(skeleton);
 
         m_skeleton->registerSkeletonHandler(
             [&](common::SkeletonNotification const &data,
