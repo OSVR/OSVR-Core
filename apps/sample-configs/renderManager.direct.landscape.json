@@ -6,8 +6,8 @@
         "directModeEnabled": true,
         "directDisplayIndex": 0,
         "directHighPriorityEnabled": true,
-        "numBuffers": 1,
-        "verticalSyncEnabled": false,
+        "numBuffers": 2,
+        "verticalSyncEnabled": true,
         "verticalSyncBlockRenderingEnabled": true,
         "renderOverfillFactor": 1.5,
 
