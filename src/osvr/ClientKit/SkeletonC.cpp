@@ -24,6 +24,11 @@
 
 // Internal Includes
 #include <osvr/ClientKit/SkeletonC.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/SkeletonComponent.h>
+#include <osvr/Common/SkeletonComponentPtr.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 // - none
@@ -31,50 +36,57 @@
 // Standard includes
 // - none
 
-OSVR_ReturnCode osvrClientGetSkeletonBoneId(
-    OSVR_ClientInterface skeletonIface, const char *boneName,
-    OSVR_SkeletonBoneCount *boneId){
+OSVR_ReturnCode osvrClientGetSkeletonBoneId(OSVR_ClientInterface skeletonIface,
+                                            const char *boneName,
+                                            OSVR_SkeletonBoneCount *boneId) {
+    //osvr::common::ClientContext &m_ctx = skeletonIface->getContext();
+    //osvr::common::PathTree articulationTree;
+    //osvr::common::clonePathTree(
+    //    m_ctx.getArticulationTree(skeletonIface->getPath()), articulationTree);
 
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetSkeletonBoneState(
-    OSVR_ClientInterface skeletonIface, OSVR_SkeletonBoneCount boneId,
-    OSVR_SkeletonBoneState *state){
+OSVR_ReturnCode
+osvrClientGetSkeletonBoneState(OSVR_ClientInterface skeletonIface,
+                               OSVR_SkeletonBoneCount boneId,
+                               OSVR_SkeletonBoneState *state) {
 
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetSkeletonJointId(
-    OSVR_ClientInterface skeletonIface, const char *jointName,
-    OSVR_SkeletonJointCount *jointId){
+OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_ClientInterface skeletonIface,
+                                             const char *jointName,
+                                             OSVR_SkeletonJointCount *jointId) {
 
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetSkeletonJointState(
-    OSVR_ClientInterface skeletonIface, OSVR_SkeletonJointCount jointId,
-    OSVR_SkeletonJointState *state){
+OSVR_ReturnCode
+osvrClientGetSkeletonJointState(OSVR_ClientInterface skeletonIface,
+                                OSVR_SkeletonJointCount jointId,
+                                OSVR_SkeletonJointState *state) {
 
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetSkeletonNumBones(
-    OSVR_ClientInterface skeletonIface, OSVR_SkeletonBoneCount *numBones){
+OSVR_ReturnCode
+osvrClientGetSkeletonNumBones(OSVR_ClientInterface skeletonIface,
+                              OSVR_SkeletonBoneCount *numBones) {
 
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientGetSkeletonNumJoints(
-    OSVR_ClientInterface skeletonIface, OSVR_SkeletonJointCount *numJoints){
+OSVR_ReturnCode
+osvrClientGetSkeletonNumJoints(OSVR_ClientInterface skeletonIface,
+                               OSVR_SkeletonJointCount *numJoints) {
 
     return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode osvrClientGetChildJointId(
     OSVR_ClientInterface skeletonIface, OSVR_SkeletonJointCount jointId,
-    OSVR_SkeletonJointCount childNum, OSVR_SkeletonJointCount *childJointId){
+    OSVR_SkeletonJointCount childNum, OSVR_SkeletonJointCount *childJointId) {
 
     return OSVR_RETURN_SUCCESS;
 }
-
