@@ -29,6 +29,8 @@
 #include <vrpn_Shared.h>
 
 // Standard includes
+#include <ratio>
+
 #if defined(OSVR_HAVE_STRUCT_TIMEVAL_IN_SYS_TIME_H)
 #include <sys/time.h>
 typedef time_t tv_seconds_type;
@@ -39,7 +41,7 @@ typedef long tv_seconds_type;
 typedef long tv_microseconds_type;
 #endif
 
-#define OSVR_USEC_PER_SEC 1000000;
+#define OSVR_USEC_PER_SEC std::micro::den;
 
 void osvrTimeValueNormalize(OSVR_INOUT_PTR OSVR_TimeValue *tv) {
     if (!tv) {
