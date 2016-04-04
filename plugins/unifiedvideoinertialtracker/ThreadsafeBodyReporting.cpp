@@ -46,9 +46,10 @@ namespace vbtracker {
         using USecondsDuration =
             duration<OSVR_TimeValue_Microseconds, std::micro>;
         auto ret = tv;
-        ret.seconds += duration_cast<SecondsDuration>(additionalTime).count();
+        auto seconds = duration_cast<SecondsDuration>(additionalTime);
+        ret.seconds += seconds.count();
         ret.microseconds +=
-            duration_cast<USecondsDuration>(additionalTime).count();
+            duration_cast<USecondsDuration>(additionalTime - seconds).count();
         osvrTimeValueNormalize(&ret);
         return ret;
     }
