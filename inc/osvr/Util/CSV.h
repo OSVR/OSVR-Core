@@ -32,11 +32,11 @@
 // - none
 
 // Standard includes
-#include <unordered_map>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <cassert>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace osvr {
 namespace util {
@@ -87,7 +87,16 @@ namespace util {
             RowProxy &operator=(RowProxy const &) = delete;
             /// move constructible
             RowProxy(RowProxy &&other)
-                : csv_(other.csv_), addedRow_(other.addedRow_) {}
+                : csv_(other.csv_), preparedRow_(other.preparedRow_),
+                  active_(other.active_) {
+                other.active_ = false;
+            }
+
+            ~RowProxy() {
+                if (active_) {
+                    csv_.finalizeLatestRow();
+                }
+            }
 
             /// Main function, used by the operator<< to add your cell to the
             /// row in progress. All the non-type-dependent stuff is pulled out
@@ -103,9 +112,9 @@ namespace util {
             /// non-template-parameter-dependent things we do before
             /// type-dependent stuff in add()
             void commonPreAdd() {
-                if (!addedRow_) {
-                    csv_.pushRow();
-                    addedRow_ = true;
+                if (!preparedRow_) {
+                    csv_.prepareForRow();
+                    preparedRow_ = true;
                 } else {
                     os_ = std::ostringstream{};
                 }
@@ -113,13 +122,16 @@ namespace util {
             /// non-template-parameter-dependent things we do after
             /// type-dependent stuff in add()
             void commonPostAdd(std::string const &header) {
-                csv_.insertInLastRow(header, os_.str());
+                csv_.dataForLatestRow(header, os_.str());
             }
 
             CSV &csv_;
             std::ostringstream os_;
-            bool addedRow_ = false;
+            bool preparedRow_ = false;
+            bool active_ = true;
         };
+
+        friend class RowProxy;
 
         using column_id = std::size_t;
 
@@ -149,40 +161,50 @@ namespace util {
 
         /// Outputs all the stored rows and columns, with the union of all
         /// headers in the first row, quoted, to the std::ostream given.
-        void output(std::ostream &os) const {
+        void output(std::ostream &os) const { outputStoredData(os); }
+
+      private:
+        void prepareForRow() { latestRow().clear(); }
+
+        void dataForLatestRow(std::string const &heading,
+                              std::string const &data) {
+            auto col = getColumn(heading);
+            ensureLatestRowCanHoldColId(col);
+            latestRow()[col] = data;
+        }
+        void finalizeLatestRow() { data_.emplace_back(std::move(latestRow())); }
+        using DataRow = std::vector<std::string>;
+        void ensureLatestRowCanHoldColId(column_id id) {
+            if (id >= latestRow().size()) {
+                latestRow().resize(id + 1);
+            }
+        }
+        DataRow &latestRow() { return latestRow_; }
+
+        void outputHeaders(std::ostream &os) const {
             for (auto &colName : columns_) {
                 os << "\"" << colName << "\",";
             }
             os << "\n";
+        }
+
+        void outputRow(std::ostream &os, DataRow const &row) const {
+            for (auto &cell : row) {
+                os << cell << ",";
+            }
+            os << "\n";
+        }
+        void outputStoredData(std::ostream &os) const {
+            outputHeaders(os);
             for (auto &row : data_) {
-                for (auto &cell : row) {
-                    os << cell << ",";
-                }
-                os << "\n";
+                outputRow(os, row);
             }
         }
-
-        void pushRow() { data_.emplace_back(); }
-
-        void insertInLastRow(std::string const &heading,
-                             std::string const &data) {
-            auto col = getColumn(heading);
-            ensureLastRowCanHoldColId(col);
-            lastRow()[col] = data;
-        }
-
-      private:
-        using DataRow = std::vector<std::string>;
-        void ensureLastRowCanHoldColId(column_id id) {
-            if (id >= lastRow().size()) {
-                lastRow().resize(id + 1);
-            }
-        }
-        DataRow &lastRow() { return data_.back(); }
 
         std::vector<std::string> columns_;
         std::unordered_map<std::string, column_id> columnsMap_;
         std::vector<DataRow> data_;
+        DataRow latestRow_;
     };
 
     /// Helper function to make a CSV cell
@@ -203,6 +225,14 @@ namespace util {
                                       detail::Cell<T> const &cell) {
         row.add(cell);
         return std::move(row);
+    }
+
+    /// Left-shift/redirection operator to add a cell to a row proxy object
+    template <typename T>
+    inline CSV::RowProxy &operator<<(CSV::RowProxy &row,
+                                     detail::Cell<T> const &cell) {
+        row.add(cell);
+        return row;
     }
 } // namespace util
 } // namespace osvr
