@@ -72,9 +72,15 @@ namespace util {
         template <typename Derived> class CSVRowProxy {
           public:
             using BaseCSVType = CSVBase<Derived>;
+            friend class CSVBase<Derived>;
             using CSV = Derived;
             using type = CSVRowProxy<Derived>;
+
+          private:
+            /// Constructor - called by CSVBase<Derived>.row()
             explicit CSVRowProxy(BaseCSVType &csv) : csv_(csv) {}
+
+          public:
             /// non-copyable
             CSVRowProxy(CSVRowProxy const &) = delete;
             /// non-assignable
@@ -83,11 +89,17 @@ namespace util {
             CSVRowProxy(CSVRowProxy &&other)
                 : csv_(other.csv_), preparedRow_(other.preparedRow_),
                   active_(other.active_) {
+                /// When moving, don't let the moved-from proxy perform
+                /// finalization of this row.
                 other.active_ = false;
             }
 
+            /// Destructor - finalizes the row in the CSV object if we've got
+            /// some data and haven't been moved-from.
             ~CSVRowProxy() {
-                if (active_) {
+                /// @todo Does it make sense to skip finalizing if we haven't
+                /// had any data added? Think so...
+                if (active_ && preparedRow_) {
                     csv_.finalizeLatestRow();
                 }
             }
@@ -201,23 +213,41 @@ namespace util {
         /// table.
         RowProxy row() { return RowProxy(*this); }
 
+        /// Gets the number of rows in the internal data storage. Note that if
+        /// the particular specialized CSV class you're using doesn't put all
+        /// rows in the data storage (such as StreamCSV), this won't necessarily
+        /// be equal to the number of rows that have been added.
         std::size_t numDataRows() const { return data_.size(); }
 
+        /// Gets the total number of rows that have been streamed/added to this
+        /// CSV object, whether or not they're in the internal data storage.
+        /// That is, `numRows() >= numDataRows()`
+        std::size_t numRows() const { return rows_; }
+
       protected:
-        /// Called by CSVRowProxy life cycle
+        /// Called by CSVRowProxy life cycle, on row creation.
         void prepareForRow() { latestRow().clear(); }
-        /// Called by CSVRowProxy life cycle
+        /// Called by CSVRowProxy life cycle, on cell addition.
         void dataForLatestRow(std::string const &heading,
                               std::string const &data) {
             auto col = getColumn(heading);
             ensureLatestRowCanHoldColId(col);
             latestRow()[col] = data;
         }
-        /// Called by CSVRowProxy life cycle
-        void finalizeLatestRow() { derived().finalizeLatestRow(); }
+        /// Called by CSVRowProxy life cycle, on destruction of active row
+        /// proxy. Delegates to derived classes, since this is a variance
+        /// between them.
+        void finalizeLatestRow() {
+            rows_++;
+            derived().finalizeLatestRow();
+        }
 
+        /// Called internally and potentially by derived classes for access to
+        /// the "latest row" temporary storage.
         DataRow &latestRow() { return latestRow_; }
 
+        /// Called by outputData() and by derived classes to format individual
+        /// rows.
         void outputRow(std::ostream &os, DataRow const &row) const {
             for (auto &cell : row) {
                 os << cell << detail::csv::COMMA;
@@ -225,6 +255,7 @@ namespace util {
             os << detail::csv::NEWLINE;
         }
 
+        /// Called by derived classes to output stored data rows.
         void outputData(std::ostream &os) const {
             for (auto &row : data_) {
                 outputRow(os, row);
@@ -237,6 +268,7 @@ namespace util {
         }
 
       private:
+        /// Internal utility used by dataForLatestRow.
         void ensureLatestRowCanHoldColId(column_id id) {
             if (id >= latestRow().size()) {
                 latestRow().resize(id + 1);
@@ -249,6 +281,7 @@ namespace util {
         }
         /// CRTP derived class accessor (const)
         Derived &derived() { return *static_cast<Derived *>(this); }
+        std::size_t rows_ = 0;
         std::vector<DataRow> data_;
         DataRow latestRow_;
     };
@@ -269,6 +302,7 @@ namespace util {
         }
 
       private:
+        /// This class always moves rows into the data storage.
         void finalizeLatestRow() { Base::moveLatestRowToData(); }
     };
 
@@ -285,6 +319,9 @@ namespace util {
         friend class CSVBase<StreamCSV>;
 
       public:
+        /// Constructor
+        /// @param os Reference to the desired output stream, which must remain
+        /// valid for the lifetime of this object.
         explicit StreamCSV(std::ostream &os) : m_stream(os) {}
 
         /// Outputs all the stored rows and columns, with the union of all
@@ -297,8 +334,17 @@ namespace util {
         }
 
       private:
+        /// Reference to a stream, which must remain valid for the lifetime of
+        /// this object.
         std::ostream &m_stream;
+
+        /// Flag indicating whether we received a startOutput() call and should
+        /// direct all new finalized rows directly to output, rather than data
+        /// storage.
         bool m_streaming = false;
+
+        /// This class outputs a row to the stream if we've already started
+        /// streaming, otherwsie it moves the row into data storage
         void finalizeLatestRow() {
             if (m_streaming) {
                 /// Output it directly
@@ -309,13 +355,13 @@ namespace util {
         }
     };
 
-    /// Helper function to make a CSV cell
+    /// Helper free function to make a CSV cell
     template <typename T>
     inline detail::Cell<T> cell(const char *header, T const &data) {
         return detail::Cell<T>{header, data};
     }
 
-    /// Helper function to make a CSV cell
+    /// Helper free function to make a CSV cell
     template <typename T>
     inline detail::Cell<T> cell(std::string const &header, T const &data) {
         return detail::Cell<T>{header, data};
