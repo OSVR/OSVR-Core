@@ -31,8 +31,8 @@
 #include <osvr/Util/QuatlibInteropC.h>
 
 // Library/third-party includes
-#include <vrpn_Tracker.h>
 #include <quat.h>
+#include <vrpn_Tracker.h>
 
 // Standard includes
 // - none
@@ -59,80 +59,80 @@ namespace connection {
 
         virtual void sendReport(OSVR_PositionState const &val,
                                 OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &timestamp) {
+                                util::time::TimeValue const &tv) {
             m_resetQuat();
             osvrVec3ToQuatlib(Base::pos, &val);
-            m_sendPose(sensor, timestamp);
+            m_sendPose(sensor, tv);
         }
 
         virtual void sendReport(OSVR_OrientationState const &val,
                                 OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &timestamp) {
+                                util::time::TimeValue const &tv) {
             m_resetPos();
             osvrQuatToQuatlib(Base::d_quat, &val);
-            m_sendPose(sensor, timestamp);
+            m_sendPose(sensor, tv);
         }
 
         virtual void sendReport(OSVR_PoseState const &val,
                                 OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &timestamp) {
+                                util::time::TimeValue const &tv) {
             osvrVec3ToQuatlib(Base::pos, &(val.translation));
             osvrQuatToQuatlib(Base::d_quat, &(val.rotation));
-            m_sendPose(sensor, timestamp);
+            m_sendPose(sensor, tv);
         }
 
         void sendVelReport(OSVR_VelocityState const &val,
                            OSVR_ChannelCount sensor,
-                           util::time::TimeValue const &timestamp) override {
+                           util::time::TimeValue const &tv) override {
             osvrVec3ToQuatlib(Base::vel, &(val.linearVelocity));
             osvrQuatToQuatlib(Base::vel_quat,
                               &(val.angularVelocity.incrementalRotation));
             Base::vel_quat_dt = val.angularVelocity.dt;
-            m_sendVelocity(sensor, timestamp);
+            m_sendVelocity(sensor, tv);
         }
         void sendVelReport(OSVR_LinearVelocityState const &val,
                            OSVR_ChannelCount sensor,
-                           util::time::TimeValue const &timestamp) override {
+                           util::time::TimeValue const &tv) override {
             m_resetVel();
 
             osvrVec3ToQuatlib(Base::vel, &val);
-            m_sendVelocity(sensor, timestamp);
+            m_sendVelocity(sensor, tv);
         }
         void sendVelReport(OSVR_AngularVelocityState const &val,
                            OSVR_ChannelCount sensor,
-                           util::time::TimeValue const &timestamp) override {
+                           util::time::TimeValue const &tv) override {
             m_resetVel();
 
             osvrQuatToQuatlib(Base::vel_quat, &(val.incrementalRotation));
             Base::vel_quat_dt = val.dt;
-            m_sendVelocity(sensor, timestamp);
+            m_sendVelocity(sensor, tv);
         }
 
         void sendAccelReport(OSVR_AccelerationState const &val,
                              OSVR_ChannelCount sensor,
-                             util::time::TimeValue const &timestamp) override {
+                             util::time::TimeValue const &tv) override {
             osvrVec3ToQuatlib(Base::acc, &(val.linearAcceleration));
             osvrQuatToQuatlib(Base::acc_quat,
                               &(val.angularAcceleration.incrementalRotation));
             Base::acc_quat_dt = val.angularAcceleration.dt;
-            m_sendAccel(sensor, timestamp);
+            m_sendAccel(sensor, tv);
         }
         void sendAccelReport(OSVR_LinearAccelerationState const &val,
                              OSVR_ChannelCount sensor,
-                             util::time::TimeValue const &timestamp) override {
+                             util::time::TimeValue const &tv) override {
             m_resetAccel();
 
             osvrVec3ToQuatlib(Base::acc, &val);
-            m_sendAccel(sensor, timestamp);
+            m_sendAccel(sensor, tv);
         }
         void sendAccelReport(OSVR_AngularAccelerationState const &val,
                              OSVR_ChannelCount sensor,
-                             util::time::TimeValue const &timestamp) override {
+                             util::time::TimeValue const &tv) override {
             m_resetVel();
 
             osvrQuatToQuatlib(Base::acc_quat, &(val.incrementalRotation));
             Base::acc_quat_dt = val.dt;
-            m_sendAccel(sensor, timestamp);
+            m_sendAccel(sensor, tv);
         }
 
       private:

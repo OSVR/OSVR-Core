@@ -275,7 +275,7 @@ namespace server {
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            boost::unique_lock<boost::mutex> lock2(m_mainThreadMutex);
             TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
@@ -287,7 +287,7 @@ namespace server {
     inline void ServerImpl::m_callControlled(Callable f) const {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            boost::unique_lock<boost::mutex> lock2(m_mainThreadMutex);
             TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
