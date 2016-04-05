@@ -40,7 +40,7 @@
 
 namespace osvr {
 namespace util {
-
+    template <typename Derived> class CSVBase;
     namespace detail {
         /// Utility class used in conjunction with osvr::util::CSV, to store a
         /// single table cell's column header and data value temporarily until
@@ -62,37 +62,31 @@ namespace util {
             std::string header_;
             T const &data_;
         };
-    } // namespace detail
 
-    /// Class for easily outputting CSV files. Just call the .row() method and
-    /// feed it << cell("header", yourdata) << cell("anotherheader", moredata);
-    /// for as many rows as you want (one row call per row, of course).
-    ///
-    /// When you're ready to get your output, hand an ostream (like std::cout or
-    /// your favorite std::ofstream) to .output()
-    class CSV {
-      public:
         /// Returned by calls to .row() on a CSV object (you'll never need
         /// instantiate manually), and only really interacted with using the
         /// operator<< and cell() calls.
         ///
         /// Intended only to survive a single statement, and for only one to be
         /// alive (for a given CSV object) at a time. You have been warned.
-        class RowProxy {
+        template <typename Derived> class CSVRowProxy {
           public:
-            explicit RowProxy(CSV &csv) : csv_(csv) {}
+            using BaseCSVType = CSVBase<Derived>;
+            using CSV = Derived;
+            using type = CSVRowProxy<Derived>;
+            explicit CSVRowProxy(BaseCSVType &csv) : csv_(csv) {}
             /// non-copyable
-            RowProxy(RowProxy const &) = delete;
+            CSVRowProxy(CSVRowProxy const &) = delete;
             /// non-assignable
-            RowProxy &operator=(RowProxy const &) = delete;
+            CSVRowProxy &operator=(CSVRowProxy const &) = delete;
             /// move constructible
-            RowProxy(RowProxy &&other)
+            CSVRowProxy(CSVRowProxy &&other)
                 : csv_(other.csv_), preparedRow_(other.preparedRow_),
                   active_(other.active_) {
                 other.active_ = false;
             }
 
-            ~RowProxy() {
+            ~CSVRowProxy() {
                 if (active_) {
                     csv_.finalizeLatestRow();
                 }
@@ -102,7 +96,7 @@ namespace util {
             /// row in progress. All the non-type-dependent stuff is pulled out
             /// into separate methods to let the compiler optionally reduce code
             /// size.
-            template <typename T> void add(detail::Cell<T> const &c) {
+            template <typename T> void add(Cell<T> const &c) {
                 commonPreAdd();
                 os_ << c.getData();
                 commonPostAdd(c.getHeader());
@@ -125,30 +119,82 @@ namespace util {
                 csv_.dataForLatestRow(header, os_.str());
             }
 
-            CSV &csv_;
+            BaseCSVType &csv_;
             std::ostringstream os_;
             bool preparedRow_ = false;
             bool active_ = true;
         };
 
-        friend class RowProxy;
+        namespace csv {
+            static const char COMMA[] = ",";
+            static const char DOUBLEQUOTE[] = "\"";
+            static const char DOUBLEQUOTE_COMMA[] = "\",";
+            static const char NEWLINE[] = "\n";
+        } // namespace csv
 
-        using column_id = std::size_t;
-
-        column_id getColumn(std::string const &heading) {
-            auto it = columnsMap_.find(heading);
-            // If we don't find it, this is where it will be.
-            column_id ret = columns_.size();
-            if (end(columnsMap_) != it) {
-                // OK, found it somewhere already.
-                ret = it->second;
+        /// Truly shared base class for all CSV implementations.
+        class CSVCommonBase {
+          public:
+            using DataRow = std::vector<std::string>;
+            using column_id = std::size_t;
+            column_id getColumn(std::string const &heading) {
+                auto it = columnsMap_.find(heading);
+                // If we don't find it, this is where it will be.
+                column_id ret = columns_.size();
+                if (end(columnsMap_) != it) {
+                    // OK, found it somewhere already.
+                    ret = it->second;
+                    return ret;
+                }
+                // didn't find it, add it.
+                columns_.push_back(heading);
+                columnsMap_.insert(std::make_pair(heading, ret));
                 return ret;
             }
-            // didn't find it, add it.
-            columns_.push_back(heading);
-            columnsMap_.insert(std::make_pair(heading, ret));
-            return ret;
+            column_id numColumns() const { return columns_.size(); }
+
+          protected:
+            void outputHeaders(std::ostream &os) const {
+                for (auto &colName : columns_) {
+                    os << csv::DOUBLEQUOTE << colName << csv::DOUBLEQUOTE_COMMA;
+                }
+                os << csv::NEWLINE;
+            }
+
+          private:
+            std::vector<std::string> columns_;
+            std::unordered_map<std::string, column_id> columnsMap_;
+        };
+
+        /// Left-shift/redirection operator to add a cell to a row proxy object
+        template <typename Derived, typename T>
+        inline CSVRowProxy<Derived> &&operator<<(CSVRowProxy<Derived> &&row,
+                                                 Cell<T> const &cell) {
+            row.add(cell);
+            return std::move(row);
         }
+
+        /// Left-shift/redirection operator to add a cell to a row proxy object
+        template <typename Derived, typename T>
+        inline CSVRowProxy<Derived> &operator<<(CSVRowProxy<Derived> &row,
+                                                Cell<T> const &cell) {
+            row.add(cell);
+            return row;
+        }
+    } // namespace detail
+
+    /// (Base) Class for easily outputting CSV files. Just call the .row()
+    /// method and feed it
+    /// << cell("header", yourdata) << cell("anotherheader", moredata);
+    /// for as many rows as you want (one row call per row, of course).
+    ///
+    /// Methods of outputting the CSV data to an ostream vary between
+    /// subclasses.  This is a "curiously-recurring template pattern" base class
+    /// for compile-time polymorphism.
+    template <typename Derived> class CSVBase : public detail::CSVCommonBase {
+      public:
+        friend class detail::CSVRowProxy<Derived>;
+        using RowProxy = detail::CSVRowProxy<Derived>;
 
         /// Main call for the CSV object: returns a proxy object that you can
         /// redirect "cells" into, in order to add them to a new row in the CSV
@@ -157,54 +203,110 @@ namespace util {
 
         std::size_t numDataRows() const { return data_.size(); }
 
-        column_id numColumns() const { return columns_.size(); }
-
-        /// Outputs all the stored rows and columns, with the union of all
-        /// headers in the first row, quoted, to the std::ostream given.
-        void output(std::ostream &os) const { outputStoredData(os); }
-
-      private:
+      protected:
+        /// Called by CSVRowProxy life cycle
         void prepareForRow() { latestRow().clear(); }
-
+        /// Called by CSVRowProxy life cycle
         void dataForLatestRow(std::string const &heading,
                               std::string const &data) {
             auto col = getColumn(heading);
             ensureLatestRowCanHoldColId(col);
             latestRow()[col] = data;
         }
-        void finalizeLatestRow() { data_.emplace_back(std::move(latestRow())); }
-        using DataRow = std::vector<std::string>;
-        void ensureLatestRowCanHoldColId(column_id id) {
-            if (id >= latestRow().size()) {
-                latestRow().resize(id + 1);
-            }
-        }
-        DataRow &latestRow() { return latestRow_; }
+        /// Called by CSVRowProxy life cycle
+        void finalizeLatestRow() { derived().finalizeLatestRow(); }
 
-        void outputHeaders(std::ostream &os) const {
-            for (auto &colName : columns_) {
-                os << "\"" << colName << "\",";
-            }
-            os << "\n";
-        }
+        DataRow &latestRow() { return latestRow_; }
 
         void outputRow(std::ostream &os, DataRow const &row) const {
             for (auto &cell : row) {
-                os << cell << ",";
+                os << cell << detail::csv::COMMA;
             }
-            os << "\n";
+            os << detail::csv::NEWLINE;
         }
-        void outputStoredData(std::ostream &os) const {
-            outputHeaders(os);
+
+        void outputData(std::ostream &os) const {
             for (auto &row : data_) {
                 outputRow(os, row);
             }
         }
 
-        std::vector<std::string> columns_;
-        std::unordered_map<std::string, column_id> columnsMap_;
+        /// utility function for use in derived finalizeLatestRow()
+        void moveLatestRowToData() {
+            data_.emplace_back(std::move(latestRow()));
+        }
+
+      private:
+        void ensureLatestRowCanHoldColId(column_id id) {
+            if (id >= latestRow().size()) {
+                latestRow().resize(id + 1);
+            }
+        }
+
+        /// CRTP derived class accessor
+        Derived const &derived() const {
+            return *static_cast<Derived const *>(this);
+        }
+        /// CRTP derived class accessor (const)
+        Derived &derived() { return *static_cast<Derived *>(this); }
         std::vector<DataRow> data_;
         DataRow latestRow_;
+    };
+
+    /// The "traditional" CSV class: get all your data set up ahead of time.
+    /// When you're ready to get your output, hand an ostream (like std::cout or
+    /// your favorite std::ofstream) to .output()
+    class CSV : public CSVBase<CSV> {
+        using Base = CSVBase<CSV>;
+        friend class CSVBase<CSV>;
+
+      public:
+        /// Outputs all the stored rows and columns, with the union of all
+        /// headers in the first row, quoted, to the std::ostream given.
+        void output(std::ostream &os) const {
+            Base::outputHeaders(os);
+            Base::outputData(os);
+        }
+
+      private:
+        void finalizeLatestRow() { Base::moveLatestRowToData(); }
+    };
+
+    /// A CSV object taking a reference to an ostream that should remain valid
+    /// throughout the entire lifetime of this object.
+    ///
+    /// Once you start output, it will output the headers and any existing rows,
+    /// and from then on, it will will output each row as it is finalized. Of
+    /// course, any additional headers acquired after you start streaming can't
+    /// be added to the first row retroactively, but they will be consistent
+    /// (leaving blanks if appropriate, etc.)
+    class StreamCSV : public CSVBase<StreamCSV> {
+        using Base = CSVBase<StreamCSV>;
+        friend class CSVBase<StreamCSV>;
+
+      public:
+        explicit StreamCSV(std::ostream &os) : m_stream(os) {}
+
+        /// Outputs all the stored rows and columns, with the union of all
+        /// headers in the first row, quoted, to the std::ostream given at
+        /// construction, and starts streaming any additional rows.
+        void startOutput() {
+            Base::outputHeaders(m_stream);
+            outputData(m_stream);
+            m_streaming = true;
+        }
+
+      private:
+        std::ostream &m_stream;
+        bool m_streaming = false;
+        void finalizeLatestRow() {
+            if (m_streaming) {
+                /// Output it directly
+                Base::outputRow(m_stream, Base::latestRow());
+            } else {
+                Base::moveLatestRowToData();
+            }
+        }
     };
 
     /// Helper function to make a CSV cell
@@ -219,21 +321,6 @@ namespace util {
         return detail::Cell<T>{header, data};
     }
 
-    /// Left-shift/redirection operator to add a cell to a row proxy object
-    template <typename T>
-    inline CSV::RowProxy &&operator<<(CSV::RowProxy &&row,
-                                      detail::Cell<T> const &cell) {
-        row.add(cell);
-        return std::move(row);
-    }
-
-    /// Left-shift/redirection operator to add a cell to a row proxy object
-    template <typename T>
-    inline CSV::RowProxy &operator<<(CSV::RowProxy &row,
-                                     detail::Cell<T> const &cell) {
-        row.add(cell);
-        return row;
-    }
 } // namespace util
 } // namespace osvr
 
