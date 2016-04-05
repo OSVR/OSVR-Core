@@ -107,7 +107,7 @@ namespace util {
                     csv_.pushRow();
                     addedRow_ = true;
                 } else {
-                    os_.clear();
+                    os_ = std::ostringstream{};
                 }
             }
             /// non-template-parameter-dependent things we do after
