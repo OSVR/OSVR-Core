@@ -42,25 +42,37 @@ namespace osvr {
 namespace util {
     template <typename Derived> class CSVBase;
     namespace detail {
+        template <typename T> class CellBase {
+          protected:
+            explicit CellBase(T const &data) : data_(data) {}
+
+          public:
+            T const &getData() const { return data_; }
+
+          private:
+            T const &data_;
+        };
         /// Utility class used in conjunction with osvr::util::CSV, to store a
         /// single table cell's column header and data value temporarily until
         /// it is added to the row. Construct with the `cell()` helper
         /// functions.
-        template <typename T> class Cell {
+        template <typename T, typename HeaderType = std::string> class Cell;
+        template <typename T>
+        class Cell<T, std::string> : public CellBase<T> {
           public:
+            using Base = CellBase<T>;
             Cell(std::string const &header, T const &data)
-                : header_(header), data_(data){};
+                : Base(data), header_(header) {}
 
+            Cell(const char *header, T const &data)
+                : Base(data), header_(header) {}
             Cell(std::string &&header, T const &data)
-                : header_(std::move(header)), data_(data){};
+                : Base(data), header_(std::move(header)) {}
 
             std::string const &getHeader() const { return header_; }
 
-            T const &getData() const { return data_; }
-
           private:
             std::string header_;
-            T const &data_;
         };
 
         /// Returned by calls to .row() on a CSV object (you'll never need
@@ -108,10 +120,12 @@ namespace util {
             /// row in progress. All the non-type-dependent stuff is pulled out
             /// into separate methods to let the compiler optionally reduce code
             /// size.
-            template <typename T> void add(Cell<T> const &c) {
+            template <typename... CellArgs>
+            void add(Cell<CellArgs...> const &c) {
                 commonPreAdd();
-                os_ << c.getData();
-                commonPostAdd(c.getHeader());
+                std::ostringstream os;
+                os << c.getData();
+                commonPostAdd(c.getHeader(), os.str());
             }
 
           private:
@@ -121,18 +135,16 @@ namespace util {
                 if (!preparedRow_) {
                     csv_.prepareForRow();
                     preparedRow_ = true;
-                } else {
-                    os_ = std::ostringstream{};
                 }
             }
             /// non-template-parameter-dependent things we do after
             /// type-dependent stuff in add()
-            void commonPostAdd(std::string const &header) {
-                csv_.dataForLatestRow(header, os_.str());
+            void commonPostAdd(std::string const &header,
+                               std::string const &value) {
+                csv_.dataForLatestRow(header, value);
             }
 
             BaseCSVType &csv_;
-            std::ostringstream os_;
             bool preparedRow_ = false;
             bool active_ = true;
         };
@@ -179,17 +191,17 @@ namespace util {
         };
 
         /// Left-shift/redirection operator to add a cell to a row proxy object
-        template <typename Derived, typename T>
-        inline CSVRowProxy<Derived> &&operator<<(CSVRowProxy<Derived> &&row,
-                                                 Cell<T> const &cell) {
+        template <typename Derived, typename... CellArgs>
+        inline CSVRowProxy<Derived> &&
+        operator<<(CSVRowProxy<Derived> &&row, Cell<CellArgs...> const &cell) {
             row.add(cell);
             return std::move(row);
         }
 
         /// Left-shift/redirection operator to add a cell to a row proxy object
-        template <typename Derived, typename T>
+        template <typename Derived, typename... CellArgs>
         inline CSVRowProxy<Derived> &operator<<(CSVRowProxy<Derived> &row,
-                                                Cell<T> const &cell) {
+                                                Cell<CellArgs...> const &cell) {
             row.add(cell);
             return row;
         }
