@@ -118,6 +118,7 @@ set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
 
 if(BUILD_ADVANCED_DEV_TOOLS)
     add_executable(TrackerParameterFinder
+        CSVTools.h
         MakeHDKTrackingSystem.h
         ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA}
         TrackerParameterFinder.cpp)
