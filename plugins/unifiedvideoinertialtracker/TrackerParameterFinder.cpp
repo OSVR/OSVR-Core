@@ -29,6 +29,7 @@
 #include "MakeHDKTrackingSystem.h"
 #include "TrackedBodyTarget.h"
 #include "newuoa.h"
+#include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
@@ -101,10 +102,11 @@ namespace vbtracker {
             }
         }
         bool operator()(std::string const &line, std::size_t beginPos,
-                        std::size_t endPos) {          
+                        std::size_t endPos) {
             field_++;
             csvtools::StringField strField(line, beginPos, endPos);
-            //std::cout << strField.beginPos() << ":" << strField.virtualEndPos() << std::endl;
+            // std::cout << strField.beginPos() << ":" <<
+            // strField.virtualEndPos() << std::endl;
             if (field_ <= 3) {
                 // refx/y/z
                 bool success = false;
@@ -204,9 +206,10 @@ namespace vbtracker {
             std::unique_ptr<TimestampedMeasurements> newRow(
                 new TimestampedMeasurements);
             csvtools::iterateFields(LoadRow(helper, *newRow), dataLine);
-            //std::cout << "Done with iterate fields" << std::endl;
+            // std::cout << "Done with iterate fields" << std::endl;
             if (newRow->ok) {
-                std::cout << "Row has " << newRow->measurements.size() << " blobs" << std::endl;
+                std::cout << "Row has " << newRow->measurements.size()
+                          << " blobs" << std::endl;
                 ret.emplace_back(std::move(newRow));
             } else {
                 std::cerr << "Something went wrong parsing that row: "
@@ -216,6 +219,16 @@ namespace vbtracker {
             dataLine = csvtools::getCleanLine(csvFile);
         }
         std::cout << "Total of " << ret.size() << " rows" << std::endl;
+        return ret;
+    }
+
+    ImageOutputDataPtr
+    makeImageOutputDataFromRow(TimestampedMeasurements const &row,
+                               CameraParameters const &camParams) {
+        ImageOutputDataPtr ret(new ImageProcessingOutput);
+        ret->tv = row.tv;
+        ret->ledMeasurements = row.measurements;
+        ret->camParams = camParams;
         return ret;
     }
 
@@ -243,12 +256,121 @@ namespace vbtracker {
         std::cout << x.transpose() << std::endl;
         return x;
     }
+
+    class PoseFilter {
+      public:
+        PoseFilter(util::filters::one_euro::Params const &positionFilterParams =
+                       util::filters::one_euro::Params{},
+                   util::filters::one_euro::Params const &oriFilterParams =
+                       util::filters::one_euro::Params{})
+            : m_positionFilter(positionFilterParams),
+              m_orientationFilter(oriFilterParams){};
+
+        void filter(double dt, Eigen::Vector3d const &position,
+                    Eigen::Quaterniond const &orientation) {
+            if (dt <= 0) {
+                /// Avoid div by 0
+                dt = 1;
+            }
+            m_positionFilter.filter(dt, position);
+            m_orientationFilter.filter(dt, orientation);
+        }
+
+        Eigen::Vector3d const &getPosition() const {
+            return m_positionFilter.getState();
+        }
+
+        Eigen::Quaterniond const &getOrientation() const {
+            return m_orientationFilter.getState();
+        }
+
+        Eigen::Isometry3d getIsometry() const {
+            return Eigen::Translation3d(getPosition()) *
+                   Eigen::Isometry3d(getOrientation());
+        }
+
+      private:
+        util::filters::OneEuroFilter<Eigen::Vector3d> m_positionFilter;
+        util::filters::OneEuroFilter<Eigen::Quaterniond> m_orientationFilter;
+    };
+    class MainAlgoUnderStudy {
+      public:
+        void operator()(CameraParameters const &camParams,
+                        TrackingSystem &system, TrackedBodyTarget &target,
+                        TimestampedMeasurements const &row) {
+            auto indices = system.updateBodiesFromVideoData(
+                std::move(makeImageOutputDataFromRow(row, camParams)));
+            gotPose = target.getBody().hasPoseEstimate();
+            if (gotPose) {
+                pose = target.getBody().getState().getIsometry();
+            }
+        }
+        bool havePose() const { return gotPose; }
+        Eigen::Isometry3d const &getPose() const { return pose; }
+
+      private:
+        bool gotPose = false;
+        Eigen::Isometry3d pose;
+    };
+    class RansacOneEuro {
+      public:
+        void operator()(CameraParameters const &camParams,
+                        TrackingSystem &system, TrackedBodyTarget &target,
+                        TimestampedMeasurements const &row) {
+            gotPose = false;
+            Eigen::Vector3d pos;
+            Eigen::Quaterniond quat;
+            auto gotRansac = target.uncalibratedRANSACPoseEstimateFromLeds(
+                camParams, pos, quat);
+            if (gotRansac) {
+                double dt = 1;
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    dt = osvrTimeValueDurationSeconds(&row.tv, &last);
+                }
+                ransacPoseFilter.filter(dt, pos, quat);
+                std::cout << ransacPoseFilter.getPosition().transpose()
+                          << std::endl;
+                last = row.tv;
+                gotPose = true;
+            }
+        }
+        bool havePose() const { return gotPose; }
+        Eigen::Isometry3d const &getPose() const {
+            return ransacPoseFilter.getIsometry();
+        }
+
+      private:
+        PoseFilter ransacPoseFilter;
+        TimeValue last;
+        bool isFirst = true;
+        bool gotPose = false;
+    };
 }
 }
 
 int main() {
-    //osvr::vbtracker::runOptimizer("augmented-blobs.csv");
-    osvr::vbtracker::loadData("augmented-blobs.csv");
+    // osvr::vbtracker::runOptimizer("augmented-blobs.csv");
+    auto data = osvr::vbtracker::loadData("augmented-blobs.csv");
+    const auto camParams =
+        osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
+    {
+        using namespace osvr::vbtracker;
+        ConfigParams params;
+        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
+        updateConfigFromVec(params, x);
+        auto system = makeHDKTrackingSystem(params);
+        auto &target = *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
+
+        MainAlgoUnderStudy mainAlgo;
+        RansacOneEuro ransacOneEuro;
+        for (auto const &rowPtr : data) {
+            mainAlgo(camParams, *system, target, *rowPtr);
+            ransacOneEuro(camParams, *system, target, *rowPtr);
+        }
+    }
+    std::cout << "Press enter to exit." << std::endl;
     std::cin.ignore();
     return 0;
 }
