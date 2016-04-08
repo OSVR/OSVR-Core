@@ -356,32 +356,6 @@ namespace vbtracker {
         }
         return accum / 3.;
     }
-#if 0
-    ParamVec runOptimizer(std::string const &fn) {
-        // initial values.
-        ParamVec x = { 4.14e-6, 1e-2, 0, 5e-2 };
-        auto npt = x.size() * 2; // who knows?
-
-        auto ret = ei_newuoa(
-            npt, x, { 1e-8, 1e-4 }, 10, [&](long n, double *x) -> double {
-            using namespace osvr::vbtracker;
-            ConfigParams params;
-            updateConfigFromVec(params, ParamVec::Map(x));
-            auto system = makeHDKTrackingSystem(params);
-            auto &target =
-                *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
-
-            /// @todo
-
-            return 0;
-        });
-
-        std::cout << "Optimizer returned " << ret
-            << " and these parameter values:" << std::endl;
-        std::cout << x.transpose() << std::endl;
-        return x;
-    }
-#endif
     ParamVec runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         CameraParameters const &camParams,
@@ -424,9 +398,19 @@ namespace vbtracker {
             return REALLY_BIG;
         };
 
-        ParamVec x = { 4.14e-6, 1e-2, 0, 5e-2 };
+        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
+#if 0
         /// @todo call optimizer here instead.
         func(x.size(), x.data());
+#else
+
+        auto npt = x.size() * 2; // who knows?
+
+        auto ret = ei_newuoa(npt, x, {1e-8, 1e-4}, 10, func);
+        std::cout << "Optimizer returned " << ret
+                  << " and these parameter values:" << std::endl;
+        std::cout << x.transpose() << std::endl;
+#endif
 
         return x;
     }
@@ -437,7 +421,6 @@ int main() {
     auto data = osvr::vbtracker::loadData("augmented-blobs.csv");
     g_gray.create(IMAGE_SIZE, CV_8UC1);
     g_color.create(IMAGE_SIZE, CV_8UC3);
-
     const auto camParams =
         osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
 
@@ -451,6 +434,7 @@ int main() {
         params.manualBeaconOffset[2] = 0;
     params.linearVelocityDecayCoefficient = 1;
     params.angularVelocityDecayCoefficient = 1;
+    params.debug = false;
     params.imu.path = "";
 
     osvr::vbtracker::runOptimizer(data, camParams, params);
