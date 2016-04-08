@@ -280,11 +280,22 @@ namespace vbtracker {
         void operator()(CameraParameters const &camParams,
                         TrackingSystem &system, TrackedBodyTarget &target,
                         TimestampedMeasurements const &row) {
-            auto indices = system.updateBodiesFromVideoData(
-                std::move(makeImageOutputDataFromRow(row, camParams)));
+            auto inputData = makeImageOutputDataFromRow(row, camParams);
+            auto indices =
+                system.updateBodiesFromVideoData(std::move(inputData));
+#if 0
+            bool updated = false;
+            for (auto &index : indices) {
+                if (index == BodyId(0)) {
+                    updated = true;
+                    break;
+                }
+            }
+#endif
             gotPose = target.getBody().hasPoseEstimate();
+            // gotPose = updated;
             if (gotPose) {
-                std::cout << "Got a pose from the main algo!" << std::endl;
+                // std::cout << "Got a pose from the main algo!" << std::endl;
                 pose = target.getBody().getState().getIsometry();
             }
         }
@@ -376,12 +387,14 @@ namespace vbtracker {
         CameraParameters const &camParams,
         ConfigParams const &initialConfigParams) {
         const double REALLY_BIG = 1000.;
-        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
 
         auto func = [&](long n, double *x) -> double {
             ConfigParams params = initialConfigParams;
             updateConfigFromVec(params, ParamVec::Map(x));
             auto system = makeHDKTrackingSystem(params);
+            /// @todo this shouldn't be required if we don't have an IMU?
+            system->setCameraPose(Eigen::Isometry3d::Identity());
+
             auto &target = *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
 
             MainAlgoUnderStudy mainAlgo;
@@ -395,14 +408,15 @@ namespace vbtracker {
                 if (mainAlgo.havePose() && ransacOneEuro.havePose()) {
                     auto cost = costMeasurement(ransacOneEuro.getPose(),
                                                 mainAlgo.getPose());
-                    std::cout << "Cost this frame: " << cost << std::endl;
+                    // std::cout << "Cost this frame: " << cost << std::endl;
                     accum += cost;
                     samples++;
                 }
             }
             if (samples > 0) {
                 auto avgCost = (accum / static_cast<double>(samples));
-                std::cout << "Overall average cost: " << avgCost << std::endl;
+                std::cout << "Overall average cost: " << avgCost << " over "
+                          << samples << " eligible frames " << std::endl;
                 return avgCost;
             }
             std::cout << "No samples with pose for both algorithms?"
@@ -410,6 +424,7 @@ namespace vbtracker {
             return REALLY_BIG;
         };
 
+        ParamVec x = { 4.14e-6, 1e-2, 0, 5e-2 };
         /// @todo call optimizer here instead.
         func(x.size(), x.data());
 
