@@ -43,6 +43,9 @@
 using osvr::util::time::TimeValue;
 static const cv::Size IMAGE_SIZE = {640, 480};
 
+cv::Mat g_gray;
+cv::Mat g_color;
+
 /// Friendlier wrapper around newuoa
 template <typename Function, typename Vec>
 inline double ei_newuoa(long npt, Vec &x, std::pair<double, double> rho,
@@ -231,32 +234,9 @@ namespace vbtracker {
         ret->tv = row.tv;
         ret->ledMeasurements = row.measurements;
         ret->camParams = camParams;
+        ret->frame = g_color;
+        ret->frameGray = g_gray;
         return ret;
-    }
-
-    ParamVec runOptimizer(std::string const &fn) {
-        // initial values.
-        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
-        auto npt = x.size() * 2; // who knows?
-
-        auto ret = ei_newuoa(
-            npt, x, {1e-8, 1e-4}, 10, [&](long n, double *x) -> double {
-                using namespace osvr::vbtracker;
-                ConfigParams params;
-                updateConfigFromVec(params, ParamVec::Map(x));
-                auto system = makeHDKTrackingSystem(params);
-                auto &target =
-                    *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
-
-                /// @todo
-
-                return 0;
-            });
-
-        std::cout << "Optimizer returned " << ret
-                  << " and these parameter values:" << std::endl;
-        std::cout << x.transpose() << std::endl;
-        return x;
     }
 
     class PoseFilter {
@@ -365,58 +345,101 @@ namespace vbtracker {
         }
         return accum / 3.;
     }
-}
-}
+#if 0
+    ParamVec runOptimizer(std::string const &fn) {
+        // initial values.
+        ParamVec x = { 4.14e-6, 1e-2, 0, 5e-2 };
+        auto npt = x.size() * 2; // who knows?
 
+        auto ret = ei_newuoa(
+            npt, x, { 1e-8, 1e-4 }, 10, [&](long n, double *x) -> double {
+            using namespace osvr::vbtracker;
+            ConfigParams params;
+            updateConfigFromVec(params, ParamVec::Map(x));
+            auto system = makeHDKTrackingSystem(params);
+            auto &target =
+                *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
+
+            /// @todo
+
+            return 0;
+        });
+
+        std::cout << "Optimizer returned " << ret
+            << " and these parameter values:" << std::endl;
+        std::cout << x.transpose() << std::endl;
+        return x;
+    }
+#endif
+    ParamVec runOptimizer(
+        std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
+        CameraParameters const &camParams,
+        ConfigParams const &initialConfigParams) {
+        const double REALLY_BIG = 1000.;
+        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
+
+        auto func = [&](long n, double *x) -> double {
+            ConfigParams params = initialConfigParams;
+            updateConfigFromVec(params, ParamVec::Map(x));
+            auto system = makeHDKTrackingSystem(params);
+            auto &target = *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
+
+            MainAlgoUnderStudy mainAlgo;
+            RansacOneEuro ransacOneEuro;
+            std::size_t samples = 0;
+            double accum = 0;
+            std::cout << "Starting processing data rows..." << std::endl;
+            for (auto const &rowPtr : data) {
+                mainAlgo(camParams, *system, target, *rowPtr);
+                ransacOneEuro(camParams, *system, target, *rowPtr);
+                if (mainAlgo.havePose() && ransacOneEuro.havePose()) {
+                    auto cost = costMeasurement(ransacOneEuro.getPose(),
+                                                mainAlgo.getPose());
+                    std::cout << "Cost this frame: " << cost << std::endl;
+                    accum += cost;
+                    samples++;
+                }
+            }
+            if (samples > 0) {
+                auto avgCost = (accum / static_cast<double>(samples));
+                std::cout << "Overall average cost: " << avgCost << std::endl;
+                return avgCost;
+            }
+            std::cout << "No samples with pose for both algorithms?"
+                      << std::endl;
+            return REALLY_BIG;
+        };
+
+        /// @todo call optimizer here instead.
+        func(x.size(), x.data());
+
+        return x;
+    }
+}
+}
 int main() {
     // osvr::vbtracker::runOptimizer("augmented-blobs.csv");
     auto data = osvr::vbtracker::loadData("augmented-blobs.csv");
+    g_gray.create(IMAGE_SIZE, CV_8UC1);
+    g_color.create(IMAGE_SIZE, CV_8UC3);
+
     const auto camParams =
         osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
-    {
-        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
 
-        using namespace osvr::vbtracker;
-        ConfigParams params;
-        params.highResidualVariancePenalty = 15;
-        params.initialBeaconError = 1e-16;
-        params.shouldSkipBrightLeds = true;
-        params.brightLedVariancePenalty = 16;
-        params.offsetToCentroid = false;
-        params.manualBeaconOffset[0] = params.manualBeaconOffset[1] =
-            params.manualBeaconOffset[2] = 0;
-        params.linearVelocityDecayCoefficient = 1;
-        params.angularVelocityDecayCoefficient = 1;
-        params.imu.path = "";
+    osvr::vbtracker::ConfigParams params;
+    params.highResidualVariancePenalty = 15;
+    params.initialBeaconError = 1e-16;
+    params.shouldSkipBrightLeds = true;
+    params.brightLedVariancePenalty = 16;
+    params.offsetToCentroid = false;
+    params.manualBeaconOffset[0] = params.manualBeaconOffset[1] =
+        params.manualBeaconOffset[2] = 0;
+    params.linearVelocityDecayCoefficient = 1;
+    params.angularVelocityDecayCoefficient = 1;
+    params.imu.path = "";
 
-        updateConfigFromVec(params, x);
+    osvr::vbtracker::runOptimizer(data, camParams, params);
 
-        auto system = makeHDKTrackingSystem(params);
-        auto &target = *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
-
-        MainAlgoUnderStudy mainAlgo;
-        RansacOneEuro ransacOneEuro;
-        std::size_t samples = 0;
-        double accum = 0;
-        for (auto const &rowPtr : data) {
-            mainAlgo(camParams, *system, target, *rowPtr);
-            ransacOneEuro(camParams, *system, target, *rowPtr);
-            if (mainAlgo.havePose() && ransacOneEuro.havePose()) {
-                auto cost = costMeasurement(ransacOneEuro.getPose(),
-                                            mainAlgo.getPose());
-                std::cout << "Cost this frame: " << cost << std::endl;
-                accum += cost;
-                samples++;
-            }
-        }
-        if (samples > 0) {
-            std::cout << "Overall average cost: "
-                      << (accum / static_cast<double>(samples)) << std::endl;
-        } else {
-            std::cout << "No samples with pose for both algorithms?"
-                      << std::endl;
-        }
-    }
     std::cout << "Press enter to exit." << std::endl;
     std::cin.ignore();
     return 0;
