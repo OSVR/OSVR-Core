@@ -208,8 +208,10 @@ namespace vbtracker {
             csvtools::iterateFields(LoadRow(helper, *newRow), dataLine);
             // std::cout << "Done with iterate fields" << std::endl;
             if (newRow->ok) {
+#if 0
                 std::cout << "Row has " << newRow->measurements.size()
                           << " blobs" << std::endl;
+#endif
                 ret.emplace_back(std::move(newRow));
             } else {
                 std::cerr << "Something went wrong parsing that row: "
@@ -302,6 +304,7 @@ namespace vbtracker {
                 std::move(makeImageOutputDataFromRow(row, camParams)));
             gotPose = target.getBody().hasPoseEstimate();
             if (gotPose) {
+                std::cout << "Got a pose from the main algo!" << std::endl;
                 pose = target.getBody().getState().getIsometry();
             }
         }
@@ -330,23 +333,38 @@ namespace vbtracker {
                     dt = osvrTimeValueDurationSeconds(&row.tv, &last);
                 }
                 ransacPoseFilter.filter(dt, pos, quat);
-                std::cout << ransacPoseFilter.getPosition().transpose()
-                          << std::endl;
                 last = row.tv;
                 gotPose = true;
+                pose = ransacPoseFilter.getIsometry();
             }
         }
         bool havePose() const { return gotPose; }
-        Eigen::Isometry3d const &getPose() const {
-            return ransacPoseFilter.getIsometry();
-        }
+        Eigen::Isometry3d const &getPose() const { return pose; }
 
       private:
         PoseFilter ransacPoseFilter;
         TimeValue last;
         bool isFirst = true;
         bool gotPose = false;
+        Eigen::Isometry3d pose;
     };
+
+    double costMeasurement(Eigen::Isometry3d const &refPose,
+                           Eigen::Isometry3d const &expPose) {
+        auto distanceAway = -1.;
+        /// Arbitrary triangle facing the tracked object, point up, 1 meter
+        /// away, per Welch appendix E
+        using Point = std::array<double, 3>;
+        auto corners = {Point{.2, -.2, distanceAway},
+                        Point{-.2, -.2, distanceAway},
+                        Point{0, .4, distanceAway}};
+        double accum = 0;
+        for (auto &corner : corners) {
+            Eigen::Vector3d pt = Eigen::Vector3d::Map(corner.data());
+            accum += ((refPose * pt) - (expPose * pt)).norm();
+        }
+        return accum / 3.;
+    }
 }
 }
 
@@ -356,18 +374,47 @@ int main() {
     const auto camParams =
         osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
     {
+        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
+
         using namespace osvr::vbtracker;
         ConfigParams params;
-        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
+        params.highResidualVariancePenalty = 15;
+        params.initialBeaconError = 1e-16;
+        params.shouldSkipBrightLeds = true;
+        params.brightLedVariancePenalty = 16;
+        params.offsetToCentroid = false;
+        params.manualBeaconOffset[0] = params.manualBeaconOffset[1] =
+            params.manualBeaconOffset[2] = 0;
+        params.linearVelocityDecayCoefficient = 1;
+        params.angularVelocityDecayCoefficient = 1;
+        params.imu.path = "";
+
         updateConfigFromVec(params, x);
+
         auto system = makeHDKTrackingSystem(params);
         auto &target = *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
 
         MainAlgoUnderStudy mainAlgo;
         RansacOneEuro ransacOneEuro;
+        std::size_t samples = 0;
+        double accum = 0;
         for (auto const &rowPtr : data) {
             mainAlgo(camParams, *system, target, *rowPtr);
             ransacOneEuro(camParams, *system, target, *rowPtr);
+            if (mainAlgo.havePose() && ransacOneEuro.havePose()) {
+                auto cost = costMeasurement(ransacOneEuro.getPose(),
+                                            mainAlgo.getPose());
+                std::cout << "Cost this frame: " << cost << std::endl;
+                accum += cost;
+                samples++;
+            }
+        }
+        if (samples > 0) {
+            std::cout << "Overall average cost: "
+                      << (accum / static_cast<double>(samples)) << std::endl;
+        } else {
+            std::cout << "No samples with pose for both algorithms?"
+                      << std::endl;
         }
     }
     std::cout << "Press enter to exit." << std::endl;
