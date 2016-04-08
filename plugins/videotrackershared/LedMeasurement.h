@@ -44,6 +44,13 @@ namespace vbtracker {
                                      (diameter / 2) * (diameter / 2) * CV_PI)) {
         }
 
+        /// Constructor primarily used by replay for calibration/optimization
+        /// purposes.
+        LedMeasurement(float x, float y, float diam, cv::Size imgSize)
+            : loc(cv::Point2f(x, y)), imageSize(imgSize), brightness(diam),
+              diameter(diam), area(static_cast<float>(
+                                  (diameter / 2) * (diameter / 2) * CV_PI)) {}
+
         /// Location in image space - should be undistorted when passed to the
         /// Led class.
         cv::Point2f loc;
