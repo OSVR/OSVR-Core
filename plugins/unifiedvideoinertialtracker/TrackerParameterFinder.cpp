@@ -63,25 +63,8 @@ inline double ei_newuoa(long npt, Vec &x, std::pair<double, double> rho,
                   maxfun, workingSpace.data());
 }
 
-using ParamVec = Eigen::Vector4d;
-
 namespace osvr {
 namespace vbtracker {
-
-    void updateConfigFromVec(ConfigParams &params, ParamVec const &paramVec) {
-        /// positional noise
-        params.processNoiseAutocorrelation[0] =
-            params.processNoiseAutocorrelation[1] =
-                params.processNoiseAutocorrelation[2] = paramVec[0];
-        /// rotational noise
-        params.processNoiseAutocorrelation[3] =
-            params.processNoiseAutocorrelation[4] =
-                params.processNoiseAutocorrelation[5] = paramVec[1];
-
-        params.beaconProcessNoise = paramVec[2];
-
-        params.measurementVarianceScaleFactor = paramVec[3];
-    }
 
     struct TimestampedMeasurements {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -356,6 +339,25 @@ namespace vbtracker {
         }
         return accum / 3.;
     }
+} // namespace vbtracker
+} // namespace osvr
+
+using ParamVec = Eigen::Vector3d;
+namespace osvr {
+namespace vbtracker {
+    void updateConfigFromVec(ConfigParams &params, ParamVec const &paramVec) {
+        /// positional noise
+        params.processNoiseAutocorrelation[0] =
+            params.processNoiseAutocorrelation[1] =
+                params.processNoiseAutocorrelation[2] = paramVec[0];
+        /// rotational noise
+        params.processNoiseAutocorrelation[3] =
+            params.processNoiseAutocorrelation[4] =
+                params.processNoiseAutocorrelation[5] = paramVec[1];
+
+        params.measurementVarianceScaleFactor = paramVec[2];
+
+    }
     ParamVec runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         CameraParameters const &camParams,
@@ -374,42 +376,64 @@ namespace vbtracker {
             MainAlgoUnderStudy mainAlgo;
             RansacOneEuro ransacOneEuro;
             std::size_t samples = 0;
+            std::size_t numRansac = 0;
+            std::size_t numRansacButNotMain = 0;
             double accum = 0;
             std::cout << "Starting processing data rows..." << std::endl;
             for (auto const &rowPtr : data) {
                 mainAlgo(camParams, *system, target, *rowPtr);
                 ransacOneEuro(camParams, *system, target, *rowPtr);
-                if (mainAlgo.havePose() && ransacOneEuro.havePose()) {
-                    auto cost = costMeasurement(ransacOneEuro.getPose(),
-                                                mainAlgo.getPose());
-                    // std::cout << "Cost this frame: " << cost << std::endl;
-                    accum += cost;
-                    samples++;
+                if (ransacOneEuro.havePose()) {
+                    numRansac++;
+                    if (mainAlgo.havePose()) {
+                        auto cost = costMeasurement(ransacOneEuro.getPose(),
+                                                    mainAlgo.getPose());
+                        // std::cout << "Cost this frame: " << cost <<
+                        // std::endl;
+                        accum += cost;
+                        samples++;
+                    } else {
+                        numRansacButNotMain++;
+                    }
                 }
             }
             if (samples > 0) {
                 auto avgCost = (accum / static_cast<double>(samples));
                 std::cout << "Overall average cost: " << avgCost << " over "
                           << samples << " eligible frames " << std::endl;
-                return avgCost;
+                auto missedFrameCostFactor =
+                    std::pow(2, static_cast<double>(numRansacButNotMain * 10.) /
+                                    numRansac);
+                std::cout << numRansacButNotMain << " frames out of "
+                          << numRansac
+                          << " total the brute-force algorithm could acquire a "
+                             "pose but the desireable algo couldn't so "
+                             "applying cost multiplier: "
+                          << missedFrameCostFactor << " for effective cost of "
+                          << avgCost * missedFrameCostFactor << std::endl;
+                return avgCost * missedFrameCostFactor;
             }
             std::cout << "No samples with pose for both algorithms?"
                       << std::endl;
             return REALLY_BIG;
         };
 
-        ParamVec x = {4.14e-6, 1e-2, 0, 5e-2};
+        ParamVec x = {4.14e-6, 1e-2, 5e-2};
 #if 0
         /// @todo call optimizer here instead.
         func(x.size(), x.data());
 #else
+        static const auto n = x.size();
+        /// Per Powell 2004, m = 2n+1 should be good for efficiency.
+        auto npt = n * 2 + 1;
 
-        auto npt = x.size() * 2; // who knows?
-
-        auto ret = ei_newuoa(npt, x, {1e-8, 1e-4}, 10, func);
+        auto ret = ei_newuoa(npt, x, {1e-16, 1e-1}, 25, func);
         std::cout << "Optimizer returned " << ret
                   << " and these parameter values:" << std::endl;
-        std::cout << x.transpose() << std::endl;
+        Eigen::IOFormat format;
+        format.precision = Eigen::FullPrecision;
+
+        std::cout << x.transpose().format(format) << std::endl;
 #endif
 
         return x;
@@ -427,6 +451,7 @@ int main() {
     osvr::vbtracker::ConfigParams params;
     params.highResidualVariancePenalty = 15;
     params.initialBeaconError = 1e-16;
+    params.beaconProcessNoise = 0;
     params.shouldSkipBrightLeds = true;
     params.brightLedVariancePenalty = 16;
     params.offsetToCentroid = false;
