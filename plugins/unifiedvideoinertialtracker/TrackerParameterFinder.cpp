@@ -356,7 +356,6 @@ namespace vbtracker {
                 params.processNoiseAutocorrelation[5] = paramVec[1];
 
         params.measurementVarianceScaleFactor = paramVec[2];
-
     }
     ParamVec runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
@@ -380,6 +379,8 @@ namespace vbtracker {
             std::size_t numRansacButNotMain = 0;
             double accum = 0;
             std::cout << "Starting processing data rows..." << std::endl;
+
+            /// Main algorithm loop
             for (auto const &rowPtr : data) {
                 mainAlgo(camParams, *system, target, *rowPtr);
                 ransacOneEuro(camParams, *system, target, *rowPtr);
@@ -397,10 +398,14 @@ namespace vbtracker {
                     }
                 }
             }
+
+            /// Cost accumulation/post-processing.
             if (samples > 0) {
                 auto avgCost = (accum / static_cast<double>(samples));
                 std::cout << "Overall average cost: " << avgCost << " over "
                           << samples << " eligible frames " << std::endl;
+
+#if 0
                 auto missedFrameCostFactor =
                     std::pow(2, static_cast<double>(numRansacButNotMain * 10.) /
                                     numRansac);
@@ -411,7 +416,15 @@ namespace vbtracker {
                              "applying cost multiplier: "
                           << missedFrameCostFactor << " for effective cost of "
                           << avgCost * missedFrameCostFactor << std::endl;
-                return avgCost * missedFrameCostFactor;
+#endif
+                /// Sometimes gets stuck in parameter ditches where we get very
+                /// few tracked frames, and for some reason the above adjustment
+                /// isn't working.
+                auto effectiveCost = avgCost / samples;
+                std::cout << "Dividing cost by number of tracked frames gives "
+                             "effective cost of "
+                          << effectiveCost << std::endl;
+                return effectiveCost;
             }
             std::cout << "No samples with pose for both algorithms?"
                       << std::endl;
@@ -438,8 +451,9 @@ namespace vbtracker {
 
         return x;
     }
-}
-}
+
+} // namespace vbtracker
+} // namespace osvr
 int main() {
     // osvr::vbtracker::runOptimizer("augmented-blobs.csv");
     auto data = osvr::vbtracker::loadData("augmented-blobs.csv");
