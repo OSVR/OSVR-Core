@@ -24,11 +24,11 @@
 
 // Internal Includes
 #include "TrackingDebugDisplay.h"
+#include "CameraParameters.h"
 #include "SBDBlobExtractor.h"
-#include "TrackingSystem.h"
 #include "TrackedBody.h"
 #include "TrackedBodyTarget.h"
-#include "CameraParameters.h"
+#include "TrackingSystem.h"
 #include "cvToEigen.h"
 
 // Library/third-party includes
@@ -47,32 +47,35 @@ namespace vbtracker {
     static const auto CVCOLOR_BLUE = cv::Vec3b(255, 0, 0);
     static const auto CVCOLOR_GRAY = cv::Vec3b(127, 127, 127);
     static const auto CVCOLOR_BLACK = cv::Vec3b(0, 0, 0);
+    static const auto CVCOLOR_WHITE = cv::Vec3b(255, 255, 255);
 
     static const auto DEBUG_WINDOW_NAME = "OSVR Tracker Debug Window";
     static const auto DEBUG_FRAME_STRIDE = 11;
     TrackingDebugDisplay::TrackingDebugDisplay(ConfigParams const &params)
         : m_enabled(params.debug), m_windowName(DEBUG_WINDOW_NAME),
-          m_debugStride(DEBUG_FRAME_STRIDE) {
+          m_debugStride(DEBUG_FRAME_STRIDE),
+          m_performingOptimization(params.performingOptimization) {
         if (!m_enabled) {
             return;
         }
         // cv::namedWindow(m_windowName);
-
-        std::cout << "\nVideo-based tracking debug windows help:\n";
-        std::cout
-            << "  - press 's' to show the detected blobs and the status of "
-               "recognized beacons (default)\n"
-            << "  - press 'b' to show the labeled blobs and the "
-               "reprojected beacons\n"
-            << "  - press 'i' to show the raw input image\n"
-            << "  - press 't' to show the blob-detecting threshold image\n"
+        if (!m_performingOptimization) {
+            std::cout << "\nVideo-based tracking debug windows help:\n";
+            std::cout
+                << "  - press 's' to show the detected blobs and the status of "
+                   "recognized beacons (default)\n"
+                << "  - press 'b' to show the labeled blobs and the "
+                   "reprojected beacons\n"
+                << "  - press 'i' to show the raw input image\n"
+                << "  - press 't' to show the blob-detecting threshold image\n"
 #if 0
         << "  - press 'p' to dump the current auto-calibrated beacon "
            "positions to a CSV file\n"
 #endif
-            << "  - press 'q' to quit the debug windows (tracker will "
-               "continue operation)\n"
-            << std::endl;
+                << "  - press 'q' to quit the debug windows (tracker will "
+                   "continue operation)\n"
+                << std::endl;
+        }
     }
 
     void TrackingDebugDisplay::showDebugImage(cv::Mat const &image,
@@ -299,7 +302,8 @@ namespace vbtracker {
 
         const auto textSize = 0.25;
         const auto mainBeaconLabelColor = CVCOLOR_BLUE;
-        const auto baseBeaconLabelColor = CVCOLOR_BLACK;
+        const auto baseBeaconLabelColor =
+            m_performingOptimization ? CVCOLOR_WHITE : CVCOLOR_BLACK;
 
         auto gotPose = targetPtr->hasPoseEstimate();
         auto numBeacons = targetPtr->getNumBeacons();
@@ -395,6 +399,12 @@ namespace vbtracker {
 
         /// Run the event loop briefly to see if there were keyboard presses.
         int key = cv::waitKey(1);
+        if (m_performingOptimization) {
+            // Don't handle any key presses - only the status window is safe if
+            // we're not using the blob extractor.
+            return;
+        }
+
         switch (key) {
 
         case 's':

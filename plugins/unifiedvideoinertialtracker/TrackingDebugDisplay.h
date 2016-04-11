@@ -27,8 +27,8 @@
 
 // Internal Includes
 #include "ConfigParams.h"
-#include "TrackingSystem_Impl.h"
 #include "LED.h"
+#include "TrackingSystem_Impl.h"
 
 // Library/third-party includes
 #include <util/Stride.h>
@@ -36,8 +36,8 @@
 #include <opencv2/core/core.hpp>
 
 // Standard includes
-#include <string>
 #include <iosfwd>
+#include <string>
 
 namespace osvr {
 namespace vbtracker {
@@ -73,6 +73,7 @@ namespace vbtracker {
         std::string m_windowName;
         cv::Mat m_displayedFrame;
         ::util::Stride m_debugStride;
+        const bool m_performingOptimization;
     };
 } // namespace vbtracker
 } // namespace osvr
