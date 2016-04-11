@@ -116,6 +116,8 @@ bool OSVR_DeviceTokenObject::releaseObject(void *obj) {
 
 void OSVR_DeviceTokenObject::setDeviceDescriptor(
     std::string const &jsonString) {
+    auto guard = getSendGuard();
+    guard->lock();
     m_getConnectionDevice()->setDeviceDescriptor(jsonString);
     m_getConnection()->triggerDescriptorHandlers();
 }
