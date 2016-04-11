@@ -22,9 +22,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <util/Stride.h>
 #include <iostream>
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <util/Stride.h>
 static ::util::Stride debugStride{401};
 
 #if 0
@@ -41,25 +41,25 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #endif
 
 // Internal Includes
-#include "PoseEstimator_SCAATKalman.h"
 #include "ImagePointMeasurement.h"
 #include "LED.h"
+#include "PoseEstimator_SCAATKalman.h"
 #include "cvToEigen.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/AugmentedProcessModel.h>
 #include <osvr/Kalman/AugmentedState.h>
 #include <osvr/Kalman/ConstantProcess.h>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 
 #include <util/Stride.h>
 
 // Standard includes
 #include <algorithm>
-#include <iostream>
-#include <random> // std::default_random_engine
 #include <chrono> // std::chrono::system_clock
+#include <iostream>
 #include <iterator> // back_inserter
+#include <random>   // std::default_random_engine
 
 #undef DEBUG_MEASUREMENT_RESIDUALS
 
@@ -227,7 +227,8 @@ namespace vbtracker {
 
             /// subtracting from image size to flip signs of x and y, aka 180
             /// degree rotation about z axis.
-            meas.setMeasurement(cvToVector(led.getLocationForTracking()).cast<double>());
+            meas.setMeasurement(
+                cvToVector(led.getLocationForTracking()).cast<double>());
 
             led.markAsUsed();
             auto state =
@@ -345,6 +346,22 @@ namespace vbtracker {
                 // easily introduce substantial error.
                 double zComponent =
                     (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
+#if 0
+
+                    /// Beacon 32 is right on the front, should be facing nice and forward.
+                if (makeOneBased(id) == OneBasedBeaconId(32)) {
+                    static ::util::Stride s(20);
+                    if (s) {
+                        std::cout
+                            << "Beacon 32: beacon emission direction is "
+                            << (rotate *
+                                cvToVector(p.beaconEmissionDirection[index]))
+                                   .transpose()
+                            << std::endl;
+                    }
+                    s.advance();
+                }
+#endif
                 if (zComponent > 0.) {
                     if (m_extraVerbose) {
                         std::cout << "Rejecting an LED at "
