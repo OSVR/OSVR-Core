@@ -37,7 +37,9 @@
 #include <opencv2/imgproc/imgproc.hpp> // for drawing capabilities
 
 // Standard includes
+#include <algorithm>
 #include <iostream>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
@@ -48,6 +50,7 @@ namespace vbtracker {
     static const auto CVCOLOR_GRAY = cv::Vec3b(127, 127, 127);
     static const auto CVCOLOR_BLACK = cv::Vec3b(0, 0, 0);
     static const auto CVCOLOR_WHITE = cv::Vec3b(255, 255, 255);
+    static const auto CVCOLOR_VIOLET = cv::Vec3b(127, 0, 255);
 
     static const auto DEBUG_WINDOW_NAME = "OSVR Tracker Debug Window";
     static const auto DEBUG_FRAME_STRIDE = 11;
@@ -59,19 +62,20 @@ namespace vbtracker {
             return;
         }
         // cv::namedWindow(m_windowName);
-        if (!m_performingOptimization) {
+        if (m_performingOptimization) {
+            m_mode = DebugDisplayMode::StatusWithAllReprojections;
+        } else {
             std::cout << "\nVideo-based tracking debug windows help:\n";
             std::cout
                 << "  - press 's' to show the detected blobs and the status of "
                    "recognized beacons (default)\n"
+                << "  - press 'p' to show the same status view as above, but "
+                   "with the (re)projected locations of even non-detected beacons "
+                   "drawn\n"
                 << "  - press 'b' to show the labeled blobs and the "
                    "reprojected beacons\n"
                 << "  - press 'i' to show the raw input image\n"
                 << "  - press 't' to show the blob-detecting threshold image\n"
-#if 0
-        << "  - press 'p' to dump the current auto-calibrated beacon "
-           "positions to a CSV file\n"
-#endif
                 << "  - press 'q' to quit the debug windows (tracker will "
                    "continue operation)\n"
                 << std::endl;
@@ -131,6 +135,7 @@ namespace vbtracker {
                            led.getMeasurement().diameter / 2.,
                            cv::Scalar(color), filled ? -1 : 1);
             }
+
             /// Utility function to label an LED with its 1-based beacon ID (in
             /// window space)
             void drawLedLabel(OneBasedBeaconId id, WindowCoordsPoint const &loc,
@@ -266,10 +271,9 @@ namespace vbtracker {
         return output;
     }
 
-    cv::Mat
-    TrackingDebugDisplay::createStatusImage(TrackingSystem const &tracking,
-                                            CameraParameters const &camParams,
-                                            cv::Mat const &baseImage) {
+    cv::Mat TrackingDebugDisplay::createStatusImage(
+        TrackingSystem const &tracking, CameraParameters const &camParams,
+        cv::Mat const &baseImage, bool reprojectUnseenBeacons) {
         cv::Mat output;
 
         DebugImage img(output);
@@ -308,6 +312,13 @@ namespace vbtracker {
         auto gotPose = targetPtr->hasPoseEstimate();
         auto numBeacons = targetPtr->getNumBeacons();
 
+        using BeaconIdContainer = std::vector<ZeroBasedBeaconId>;
+
+        auto drawnBeaconIds = BeaconIdContainer{};
+        auto recordBeaconAsDrawn = [&](ZeroBasedBeaconId id) {
+            drawnBeaconIds.push_back(id);
+        };
+
         /// Unidentified blobs look the same whether or not we have a pose, so
         /// we make a little lambda here to avoid repeating ourselves too much.
         auto drawUnidentifiedBlob = [&img](Led const &led) {
@@ -323,6 +334,7 @@ namespace vbtracker {
                     /// Identified, and we have a pose
 
                     auto beaconId = led.getID();
+                    recordBeaconAsDrawn(beaconId);
 
                     // Color-code identified beacons based on
                     // whether or not we used their data.
@@ -348,6 +360,36 @@ namespace vbtracker {
                     drawUnidentifiedBlob(led);
                 }
             }
+            if (reprojectUnseenBeacons) {
+                /// Sort so we can use binary_search.
+                auto comparator = [](ZeroBasedBeaconId const &a,
+                                     ZeroBasedBeaconId const &b) {
+                    return a.value() < b.value();
+                };
+                std::sort(begin(drawnBeaconIds), end(drawnBeaconIds),
+                          comparator);
+                auto haveDrawnBeaconAlready = [&](ZeroBasedBeaconId id) {
+                    return std::binary_search(begin(drawnBeaconIds),
+                                              end(drawnBeaconIds), id,
+                                              comparator);
+                };
+                /// Now, we must draw reprojections of the unseen beacons.
+                auto numBeacons = targetPtr->getNumBeacons();
+                for (UnderlyingBeaconIdType i = 0; i < numBeacons; ++i) {
+                    auto beaconId = ZeroBasedBeaconId(i);
+                    if (haveDrawnBeaconAlready(beaconId)) {
+                        /// already drawn - so skip it.
+                        continue;
+                    }
+                    /// label at reprojection
+                    Eigen::Vector2d imagePoint = reproject(
+                        targetPtr->getBeaconAutocalibPosition(beaconId));
+                    auto windowPoint =
+                        WindowCoordsPoint{eigenVecToPoint(imagePoint)};
+                    img.drawLedLabel(makeOneBased(beaconId), imagePoint,
+                                     CVCOLOR_VIOLET, textSize);
+                }
+            }
         } else {
             /// If we don't have a pose...
             for (auto const &led : targetPtr->leds()) {
@@ -364,6 +406,7 @@ namespace vbtracker {
 
         return output;
     }
+
     void
     TrackingDebugDisplay::triggerDisplay(TrackingSystem &tracking,
                                          TrackingSystem::Impl const &impl) {
@@ -395,13 +438,19 @@ namespace vbtracker {
         case DebugDisplayMode::Status:
             showDebugImage(
                 createStatusImage(tracking, impl.camParams, impl.frame), false);
+            break;
+        case DebugDisplayMode::StatusWithAllReprojections:
+            showDebugImage(
+                createStatusImage(tracking, impl.camParams, impl.frame, true),
+                false);
+            break;
         }
 
         /// Run the event loop briefly to see if there were keyboard presses.
         int key = cv::waitKey(1);
         if (m_performingOptimization) {
-            // Don't handle any key presses - only the status window is safe if
-            // we're not using the blob extractor.
+            // Don't handle any key presses - not safe to switch if running the
+            // optimizer.
             return;
         }
 
@@ -443,13 +492,13 @@ namespace vbtracker {
             m_mode = DebugDisplayMode::Thresholding;
             break;
 
-#if 0
         case 'p':
         case 'P':
-            // Dump the beacon positions to file.
-            /// @todo
+            msg() << "'p' pressed - Switching to the status image with all "
+                     "reprojections in the debug window."
+                  << std::endl;
+            m_mode = DebugDisplayMode::StatusWithAllReprojections;
             break;
-#endif
 
         case 'q':
         case 'Q':

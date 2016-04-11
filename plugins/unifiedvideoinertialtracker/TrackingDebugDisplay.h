@@ -41,7 +41,13 @@
 
 namespace osvr {
 namespace vbtracker {
-    enum class DebugDisplayMode { InputImage, Thresholding, Blobs, Status };
+    enum class DebugDisplayMode {
+        InputImage,
+        Thresholding,
+        Blobs,
+        Status,
+        StatusWithAllReprojections
+    };
     class TrackingSystem;
     class TrackedBodyTarget;
     struct CameraParameters;
@@ -66,7 +72,8 @@ namespace vbtracker {
                                          cv::Mat const &blobImage);
         cv::Mat createStatusImage(TrackingSystem const &tracking,
                                   CameraParameters const &camParams,
-                                  cv::Mat const &baseImage);
+                                  cv::Mat const &baseImage,
+                                  bool reprojectUnseenBeacons = false);
 
         bool m_enabled;
         DebugDisplayMode m_mode = DebugDisplayMode::Status;
