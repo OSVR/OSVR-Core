@@ -56,6 +56,11 @@ namespace vbtracker {
 
     /// General configuration parameters
     struct ConfigParams {
+        /// Not intended to be manually configurable - enabled when doing things
+        /// like running an optimization algorithm so some things like a debug
+        /// view might need to change.
+        bool performingOptimization = false;
+
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
 

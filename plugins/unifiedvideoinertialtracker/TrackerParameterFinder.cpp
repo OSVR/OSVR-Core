@@ -449,6 +449,7 @@ int main() {
         osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
 
     osvr::vbtracker::ConfigParams params;
+    params.performingOptimization = true;
     params.highResidualVariancePenalty = 15;
     params.initialBeaconError = 1e-16;
     params.beaconProcessNoise = 0;
