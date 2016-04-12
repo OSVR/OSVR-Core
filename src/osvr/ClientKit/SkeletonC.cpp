@@ -24,63 +24,273 @@
 
 // Internal Includes
 #include <osvr/ClientKit/SkeletonC.h>
+#include <osvr/Client/SkeletonConfig.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
-#include <osvr/Common/SkeletonComponent.h>
-#include <osvr/Common/SkeletonComponentPtr.h>
-#include <osvr/Util/SharedPtr.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-// - none
+#include <boost/assert.hpp>
 
-// Standard includes
-// - none
+struct OSVR_SkeletonObject {
+    OSVR_SkeletonObject(OSVR_ClientContext ctx,
+                        OSVR_ClientInterface skeletonIface)
+        : m_ctx(ctx), m_iface(skeletonIface),
+          cfg(osvr::client::SkeletonConfigFactory::create(ctx, skeletonIface)) {
+        /// OSVR_DEV_VERBOSE("Created OSVR_SkeletonObject!");
+    }
+    ~OSVR_SkeletonObject() {
+        /// OSVR_DEV_VERBOSE("Destroyed OSVR_SkeletonObject!");
+    }
 
-OSVR_ReturnCode osvrClientGetSkeletonBoneId(OSVR_ClientInterface skeletonIface,
+    OSVR_ClientContext m_ctx;
+    OSVR_ClientInterface m_iface;
+    osvr::client::SkeletonConfigPtr cfg;
+};
+
+#define OSVR_VALIDATE_OUTPUT_PTR(X, DESC)                                      \
+    OSVR_UTIL_MULTILINE_BEGIN                                                  \
+    if (nullptr == X) {                                                        \
+        OSVR_DEV_VERBOSE("Passed a null pointer for output parameter " #X      \
+                         ", " DESC "!");                                       \
+        return OSVR_RETURN_FAILURE;                                            \
+    }                                                                          \
+    OSVR_UTIL_MULTILINE_END
+
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientGetSkeleton(OSVR_ClientContext ctx,
+                      OSVR_ClientInterface skeletonIface, OSVR_Skeleton *skel) {
+
+    OSVR_VALIDATE_OUTPUT_PTR(skel, "skeleton");
+    if (ctx == nullptr) {
+        OSVR_DEV_VERBOSE("Pass a null client context!");
+        *skel = nullptr;
+        return OSVR_RETURN_FAILURE;
+    }
+    std::shared_ptr<OSVR_SkeletonObject> skeleton;
+
+    try {
+        skeleton = std::make_shared<OSVR_SkeletonObject>(ctx, skeletonIface);
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE(
+            "Error creating skeleton object : constructor threw exception :"
+            << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
+    if (!skeleton) {
+        /// OSVR_DEV_VERBOSE("Error creating skeleton object - null skeleton
+        /// config returned");
+        return OSVR_RETURN_FAILURE;
+    }
+    if (!skeleton->cfg) {
+        /// OSVR_DEV_VERBOSE("Error creating skeleton config - null internal
+        /// skeleton config object returned");
+        return OSVR_RETURN_FAILURE;
+    }
+    ctx->acquireObject(skeleton);
+    *skel = skeleton.get();
+    return OSVR_RETURN_SUCCESS;
+}
+
+#define OSVR_VALIDATE_SKELETON_CONFIG                                          \
+    OSVR_UTIL_MULTILINE_BEGIN                                                  \
+    if (nullptr == skel) {                                                     \
+        OSVR_DEV_VERBOSE("Passed a null skeleton object!");                    \
+        return OSVR_RETURN_FAILURE;                                            \
+    }                                                                          \
+    OSVR_UTIL_MULTILINE_END
+
+#define OSVR_VALIDATE_JOINT_ID                                                 \
+    BOOST_ASSERT_MSG(jointId == 0, "Must pass a valid joint ID.")
+
+#define OSVR_VALIDATE_BONE_ID                                                  \
+    BOOST_ASSERT_MSG(boneId == 0, "Must pass a valid bone ID.")
+
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
+osvrClientFreeSkeleton(OSVR_Skeleton skel) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_ClientContext ctx = skel->m_ctx;
+    BOOST_ASSERT_MSG(
+        ctx != nullptr,
+        "Should never get a skeleton object with a null context in it.");
+    if (nullptr == ctx) {
+        return OSVR_RETURN_FAILURE;
+    }
+    auto freed = ctx->releaseObject(skel);
+    return freed ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
+}
+
+OSVR_ReturnCode osvrClientGetSkeletonBoneId(OSVR_Skeleton skel,
                                             const char *boneName,
                                             OSVR_SkeletonBoneCount *boneId) {
-    //osvr::common::ClientContext &m_ctx = skeletonIface->getContext();
-    //osvr::common::PathTree articulationTree;
-    //osvr::common::clonePathTree(
-    //    m_ctx.getArticulationTree(skeletonIface->getPath()), articulationTree);
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(boneId, "bone Id");
+    if (!skel->cfg->getBoneId(boneName, boneId)) {
+        OSVR_DEV_VERBOSE("Error getting boneId for " << boneName);
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetSkeletonStringBoneNameLength(
+    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, size_t *len) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(len, "name length");
+    try {
+        auto boneName = skel->cfg->getBoneName(boneId);
+        *len = boneName.empty() ? 0 : (boneName.size() + 1);
+    } catch (osvr::client::IdNotFound &) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided boneId : Id not found");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided boneId : " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetSkeletonBoneName(OSVR_Skeleton skel,
+                                              OSVR_SkeletonBoneCount boneId,
+                                              char *boneName, size_t len) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(boneName, "bone name");
+    try {
+        auto name = skel->cfg->getBoneName(boneId);
+        if (name.size() + 1 > len) {
+            /// buffer too small
+            return OSVR_RETURN_FAILURE;
+        }
+        name.copy(boneName, name.size());
+        name[name.size()] = '\0';
+    } catch (osvr::client::IdNotFound &) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided boneId : Id not found");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided boneId : " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetSkeletonBoneState(OSVR_Skeleton skel,
+                                               OSVR_SkeletonBoneCount boneId,
+                                               OSVR_SkeletonBoneState *state) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_BONE_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(state, "bone state");
+    try {
+        OSVR_Pose3 pose = skel->cfg->getBoneState(boneId);
+        state->boneId = boneId;
+        state->pose = pose;
+    } catch (osvr::client::NoPoseYet &) {
+        OSVR_DEV_VERBOSE(
+            "Error getting pose for bone id: no pose yet available");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE("Error getting bone pose - exception: " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
 
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode
-osvrClientGetSkeletonBoneState(OSVR_ClientInterface skeletonIface,
-                               OSVR_SkeletonBoneCount boneId,
-                               OSVR_SkeletonBoneState *state) {
-
-    return OSVR_RETURN_SUCCESS;
-}
-
-OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_ClientInterface skeletonIface,
+OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_Skeleton skel,
                                              const char *jointName,
                                              OSVR_SkeletonJointCount *jointId) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(jointId, "joint Id");
+    if (!skel->cfg->getBoneId(jointName, jointId)) {
+        OSVR_DEV_VERBOSE("Error getting jointId for " << jointId);
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
 
+OSVR_ReturnCode osvrClientGetSkeletonStringJointNameLength(
+    OSVR_Skeleton skel, OSVR_SkeletonJointCount jointId, size_t *len) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(len, "name length");
+    try {
+        auto jointName = skel->cfg->getBoneName(jointId);
+        *len = jointName.empty() ? 0 : (jointName.size() + 1);
+    } catch (osvr::client::IdNotFound &) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided jointId : Id not found");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided jointId : " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetSkeletonJointName(OSVR_Skeleton skel,
+                                               OSVR_SkeletonBoneCount jointId,
+                                               char *jointName, size_t len) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(jointName, "joint name");
+    try {
+        auto name = skel->cfg->getJointName(jointId);
+        if (name.size() + 1 > len) {
+            /// buffer too small
+            return OSVR_RETURN_FAILURE;
+        }
+        name.copy(jointName, name.size());
+        name[name.size()] = '\0';
+    } catch (osvr::client::IdNotFound &) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided jointId : Id not found");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE(
+            "Error getting name for provided jointId : " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
     return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode
-osvrClientGetSkeletonJointState(OSVR_ClientInterface skeletonIface,
+osvrClientGetSkeletonJointState(OSVR_Skeleton skel,
                                 OSVR_SkeletonJointCount jointId,
                                 OSVR_SkeletonJointState *state) {
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_JOINT_ID;
+    OSVR_VALIDATE_OUTPUT_PTR(state, "joint state");
+    try {
+        OSVR_Pose3 pose = skel->cfg->getJointState(jointId);
+        state->jointId = jointId;
+        state->pose = pose;
+    } catch (osvr::client::NoPoseYet &) {
+        OSVR_DEV_VERBOSE("Error getting pose for joint: no pose yet available");
+        return OSVR_RETURN_FAILURE;
+    } catch (std::exception &e) {
+        OSVR_DEV_VERBOSE("Error getting joint pose - exception: " << e.what());
+        return OSVR_RETURN_FAILURE;
+    }
 
     return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode
-osvrClientGetSkeletonNumBones(OSVR_ClientInterface skeletonIface,
+osvrClientGetSkeletonNumBones(OSVR_Skeleton skel,
                               OSVR_SkeletonBoneCount *numBones) {
-
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(numBones, "number of bones");
+    *numBones = skel->cfg->getNumBones();
     return OSVR_RETURN_SUCCESS;
 }
 
 OSVR_ReturnCode
-osvrClientGetSkeletonNumJoints(OSVR_ClientInterface skeletonIface,
+osvrClientGetSkeletonNumJoints(OSVR_Skeleton skel,
                                OSVR_SkeletonJointCount *numJoints) {
-
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(numJoints, "number of joints");
+    *numJoints = skel->cfg->getNumJoints();
     return OSVR_RETURN_SUCCESS;
 }
 
