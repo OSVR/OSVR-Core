@@ -252,7 +252,7 @@ namespace vbtracker {
     {
         const int vendor_id = 0x0bda;
         const int product_id = 0x57e8;
-        return openUVCCamera(product_id, vendor_id);
+        return openUVCCamera(vendor_id, product_id);
     }
 
 } // namespace vbtracker
