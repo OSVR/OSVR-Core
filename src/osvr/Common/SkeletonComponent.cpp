@@ -27,32 +27,17 @@
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
-#include <osvr/Util/Verbosity.h>
 #include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/CommonComponent.h>
-#include <osvr/Connection/Connection.h>
-
 #include <osvr/Common/ProcessArticulationSpec.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <json/reader.h>
 
 // Standard includes
 // - none
-
-#include <osvr/Util/TreeNode.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ProcessArticulationSpec.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
-// Library/third-party includes
-#include <boost/variant/get.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/erase.hpp>
 
 namespace osvr {
 namespace common {
@@ -105,33 +90,6 @@ namespace common {
         }
     } // namespace messages
 
-    class SkeletonTraverser : public boost::static_visitor<> {
-    public:
-        /// @brief Constructor
-        SkeletonTraverser() : boost::static_visitor<>() {}
-
-        /// @brief ignore null element
-        void operator()(osvr::common::PathNode const &,
-            osvr::common::elements::NullElement const &) {}
-
-        /// @brief We might print something for a sensor element.
-        void
-            operator()(osvr::common::PathNode const &node,
-            osvr::common::elements::ArticulationElement const &elt) {
-            std::cout << "Contained values: fullPath = "
-                << osvr::common::getFullPath(node)
-                << " Articulation Type = " << elt.getArticulationType()
-                << "; Tracker path = " << elt.getTrackerPath()
-                << "; Bone Name = " << elt.getBoneName() << std::endl;
-        }
-
-        /// @brief Catch-all for other element types.
-        template <typename T>
-        void operator()(osvr::common::PathNode const &node, T const &elt) {}
-
-    private:
-    };
-
     shared_ptr<SkeletonComponent>
     SkeletonComponent::create(std::string const &jsonSpec,
                               OSVR_ChannelCount numChan) {
@@ -155,17 +113,12 @@ namespace common {
     SkeletonComponent::setArticulationSpec(std::string const &jsonDescriptor,
                                            std::string const &deviceName) {
         m_spec = jsonDescriptor;
+        Json::Reader reader;
+        Json::Value articSpec;
+        reader.parse(jsonDescriptor, articSpec);
         m_articulationTree.reset();
-        osvr::common::processArticulationSpecForPathTree(
-            m_articulationTree, deviceName, jsonDescriptor);
-
-        /// Now traverse for output
-        SkeletonTraverser printer{};
-        osvr::util::traverseWith(
-            m_articulationTree.getRoot(),
-            [&printer](osvr::common::PathNode const &node) {
-            osvr::common::applyPathNodeVisitor(printer, node);
-        });
+        osvr::common::processArticulationSpecForPathTree(m_articulationTree,
+                                                         deviceName, articSpec);
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -194,7 +147,7 @@ namespace common {
         messages::SkeletonSpecRecord::MessageSerialization msg(articSpec);
 
         serialize(buf, msg);
- 
+
         OSVR_TimeValue timestamp;
         osvrTimeValueGetNow(&timestamp);
         m_getParent().packMessage(buf, skeletonSpecRecord.getMessageType(),
@@ -245,7 +198,6 @@ namespace common {
         if (m_cb_spec.empty()) {
             m_registerHandler(&SkeletonComponent::m_handleSkeletonSpecRecord,
                               this, skeletonSpecRecord.getMessageType());
-                              
         }
         m_cb_spec.push_back(handler);
     }

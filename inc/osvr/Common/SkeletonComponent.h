@@ -26,15 +26,14 @@
 #define INCLUDED_SkeletonComponent_h_GUID_53FA481D_05BD_4CA5_3A50_FE01B600476E
 
 // Internal Includes
-#include <osvr/Common/Export.h>
+#include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/DeviceComponent.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/PathTree.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/ReturnCodesC.h>
-#include <osvr/Common/PathTree.h>
-
-#include <osvr/Common/CommonComponent_fwd.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -100,11 +99,15 @@ namespace common {
         /// client. Used by plugins and internally when client first connects
         OSVR_COMMON_EXPORT void sendArticulationSpec(std::string const &spec);
 
-        /// @brief Sets the articultion specification. Should be used during the creation of skeleton component.
-        OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(std::string const &jsonDescriptor);
+        /// @brief Sets the articultion specification. Should be used during the
+        /// creation of skeleton component.
+        OSVR_COMMON_EXPORT OSVR_ReturnCode
+        setArticulationSpec(std::string const &jsonDescriptor);
 
-        /// @brief Sets the articultion specification. This will auto-update the articulation tree
-        OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(std::string const &jsonDescriptor, std::string const &deviceName);
+        /// @brief Sets the articultion specification. This will auto-update the
+        /// articulation tree
+        OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(
+            std::string const &jsonDescriptor, std::string const &deviceName);
 
         typedef std::function<void(SkeletonNotification const &,
                                    util::time::TimeValue const &)>
@@ -120,7 +123,8 @@ namespace common {
         OSVR_COMMON_EXPORT PathTree &getArticulationTree();
 
       private:
-        SkeletonComponent(std::string const &jsonSpec, OSVR_ChannelCount numChan);
+        SkeletonComponent(std::string const &jsonSpec,
+                          OSVR_ChannelCount numChan);
         virtual void m_parentSet();
 
         static int VRPN_CALLBACK m_handleSkeletonRecord(void *userdata,
