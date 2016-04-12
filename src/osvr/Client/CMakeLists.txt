@@ -12,6 +12,7 @@ set(API
     "${HEADER_LOCATION}/RemoteHandler.h"
     "${HEADER_LOCATION}/RemoteHandlerFactory.h"
     "${HEADER_LOCATION}/RenderManagerConfig.h"
+    "${HEADER_LOCATION}/SkeletonConfig.h"
     "${HEADER_LOCATION}/Viewer.h"
     "${HEADER_LOCATION}/Viewers.h"
     "${HEADER_LOCATION}/ViewerEye.h"
@@ -46,6 +47,7 @@ set(SOURCE
     RemoteHandler.cpp
     RemoteHandlerFactory.cpp
     RemoteHandlerInternals.h
+    SkeletonConfig.cpp
     SkeletonRemoteFactory.cpp
     SkeletonRemoteFactory.h
     TrackerRemoteFactory.cpp
