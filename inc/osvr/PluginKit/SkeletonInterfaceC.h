@@ -98,9 +98,9 @@ osvrDeviceSkeletonComplete(OSVR_IN_PTR OSVR_SkeletonDeviceInterface iface,
                            OSVR_IN_PTR OSVR_TimeValue const *timestamp)
     OSVR_FUNC_NONNULL((1, 3));
 
-/** @brief If device detects another skeleton and/or change in existing articulation
-specification, then it needs to update the spec with the client as well. 
-During the skeleton interface initialization this is performed once using
+/** @brief If device detects another skeleton and/or change in existing
+articulation specification, then it needs to update the spec with the client as
+well. During the skeleton interface initialization this is performed once using
 the spec provided in the device descriptor. This should be used for unbounded
 skeletons where the articulation spec may change over time. Devices with bounded
 skeletons don't need to use this method because the articulation spec remains
@@ -113,7 +113,7 @@ the same throughout plugin runtime
 OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceSkeletonUpdateSpec(OSVR_IN_PTR OSVR_SkeletonDeviceInterface iface,
-                            OSVR_IN_READS(len) const char *spec)
+                             OSVR_IN_READS(len) const char *spec)
     OSVR_FUNC_NONNULL((1, 2));
 
 /**@} */ /* end of group */

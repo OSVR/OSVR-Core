@@ -25,7 +25,6 @@
 #ifndef INCLUDED_SkeletonComponentPtr_h_GUID_2541CE47_561F_47BD_9D5D_35D8F60C824F
 #define INCLUDED_SkeletonComponentPtr_h_GUID_2541CE47_561F_47BD_9D5D_35D8F60C824F
 
-
 // Internal Includes
 #include <osvr/Util/SharedPtr.h>
 
@@ -35,11 +34,10 @@
 // Standard includes
 
 namespace osvr {
-    namespace common {
-        class SkeletonComponent;
-        typedef shared_ptr<SkeletonComponent> SkeletonComponentPtr;
-    } // namespace common
+namespace common {
+    class SkeletonComponent;
+    typedef shared_ptr<SkeletonComponent> SkeletonComponentPtr;
+} // namespace common
 } // namespace osvr
 
 #endif // INCLUDED_SkeletonComponentPtr_h_GUID_2541CE47_561F_47BD_9D5D_35D8F60C824F
-

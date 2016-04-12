@@ -136,7 +136,8 @@ namespace client {
         return m_ctx->logger();
     }
 
-    RemoteHandlerPtr ClientInterfaceObjectManager::getRemoteHandlerForPath(std::string const &path){
+    RemoteHandlerPtr ClientInterfaceObjectManager::getRemoteHandlerForPath(
+        std::string const &path) {
         return m_interfaces.getHandlerForPath(path);
     }
 } // namespace client

@@ -52,8 +52,8 @@ namespace client {
         Location2DRemoteFactory(conns).registerWith(factory);
         LocomotionRemoteFactory(conns).registerWith(factory);
         DirectionRemoteFactory(conns).registerWith(factory);
-		SkeletonRemoteFactory(conns).registerWith(factory);
-		TrackerRemoteFactory(conns).registerWith(factory);
+        SkeletonRemoteFactory(conns).registerWith(factory);
+        TrackerRemoteFactory(conns).registerWith(factory);
     }
 
 } // namespace client

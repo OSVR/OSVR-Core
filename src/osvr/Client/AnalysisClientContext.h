@@ -85,7 +85,7 @@ namespace client {
 
         /// @brief Articulation Tree corresponding to path
         common::PathTree const &
-        m_getArticulationTree(std::string const &path) override ;
+        m_getArticulationTree(std::string const &path) override;
 
         /// @brief the vrpn_Connection corresponding to m_host
         vrpn_ConnectionPtr m_mainConn;

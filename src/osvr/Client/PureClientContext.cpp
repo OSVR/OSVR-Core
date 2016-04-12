@@ -221,8 +221,8 @@ namespace client {
     }
 
     /// @brief Articulation Tree corresponding to path
-    common::PathTree const &PureClientContext::m_getArticulationTree(
-        std::string const &path) {
+    common::PathTree const &
+    PureClientContext::m_getArticulationTree(std::string const &path) {
         // get a handler for path, should be skeleton handler
         auto handler = m_getRemoteHandler(path);
         // cast it to skeleton handler
