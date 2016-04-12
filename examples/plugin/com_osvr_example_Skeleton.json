@@ -60,7 +60,8 @@
         {
             "rightWrist": {
                 "$data": {
-                    "data": "tracker/6"
+                    "data": "tracker/6",
+                    "type": "joint"
                 },
                 "thumbMetacarpal": {
                     "$data": {
