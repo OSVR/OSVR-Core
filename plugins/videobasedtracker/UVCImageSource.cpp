@@ -40,6 +40,8 @@
 #include <string>
 #include <iostream>
 #include <cstdio>
+#include <unistd.h>
+#include <mutex>
 
 namespace osvr {
 namespace vbtracker {
@@ -86,13 +88,14 @@ namespace vbtracker {
 
         cv::Size resolution_;       //< resolution of camera
         uvc_frame_t* frame_;        //< raw UVC frame
-        bool keepNext_;             //< keep next frame?
+
+        std::mutex mutex_;          //< to protect frame_
     };
 
     using UVCImageSourcePtr = std::unique_ptr<UVCImageSource>;
 
     UVCImageSource::UVCImageSource(int vendor_id, int product_id, const char* serial_number) :
-        uvcContext_{nullptr}, camera_{nullptr}, cameraHandle_{nullptr}, streamControl_{}, resolution_{0, 0}, frame_{nullptr}, keepNext_{false}
+        uvcContext_{nullptr}, camera_{nullptr}, cameraHandle_{nullptr}, streamControl_{}, resolution_{0, 0}, frame_{nullptr}
     {
         // TODO
 
@@ -174,11 +177,8 @@ namespace vbtracker {
         // Instead, grab() will set a flag to alert the callback function that
         // we wish to store the next frame and retrieve() will return that
         // frame.
-        keepNext_ = true;
-
-        // TODO Also ensure that the camera is available, active, and streaming,
-        // etc.
-        return true;
+        std::lock_guard<std::mutex> guard(mutex_);
+        return (frame_ != nullptr);
     }
 
     cv::Size UVCImageSource::resolution() const
@@ -193,25 +193,35 @@ namespace vbtracker {
         // we wish to store the next frame and retrieve() will return that
         // frame.
 
-        // We'll convert the image from YUV/JPEG to BGR, so allocate space
-        auto bgr = uvc_allocate_frame(frame_->width * frame_->height * 3);
-        if (!bgr) {
-            throw std::runtime_error("Error: Unable to allocate the BGR frame.");
+        std::lock_guard<std::mutex> guard(mutex_);
+
+        if (!frame_) {
+            throw std::runtime_error("Error: There's no frame available.");
         }
 
-        // Do the BGR conversion
-        auto convert_ret = uvc_any2bgr(frame_, bgr);
+        // We'll convert the image from YUV/JPEG to rgb, so allocate space
+        auto rgb = uvc_allocate_frame(frame_->width * frame_->height * 3);
+        if (!rgb) {
+            throw std::runtime_error("Error: Unable to allocate the rgb frame.");
+        }
+
+        // Do the rgb conversion
+        auto convert_ret = uvc_mjpeg2rgb(frame_, rgb);
         if (UVC_SUCCESS != convert_ret) {
-            uvc_free_frame(bgr);
-            throw std::runtime_error("Error: Unable to convert frame to BGR: " + std::string(uvc_strerror(convert_ret)));
+            // Try any2rgb() instead
+            auto any_ret = uvc_any2rgb(frame_, rgb);
+            if (UVC_SUCCESS != any_ret) {
+                uvc_free_frame(rgb);
+                throw std::runtime_error("Error: Unable to convert frame to rgb: " + std::string(uvc_strerror(convert_ret)));
+            }
         }
 
         // Convert the image to at cv::Mat
-        auto img = cvCreateImageHeader(cvSize(bgr->width, bgr->height), IPL_DEPTH_8U, 3);
-        cvSetData(img, bgr->data, bgr->width * 3);
+        auto img = cvCreateImageHeader(cvSize(rgb->width, rgb->height), IPL_DEPTH_8U, 3);
+        cvSetData(img, rgb->data, rgb->width * 3);
         color = cv::cvarrToMat(img);
 
-        uvc_free_frame(bgr);
+        uvc_free_frame(rgb);
     }
 
     void UVCImageSource::callback(uvc_frame_t *frame, void *ptr)
@@ -222,15 +232,13 @@ namespace vbtracker {
 
     void UVCImageSource::callback(uvc_frame_t *frame)
     {
-        // If grab() hasn't been called yet, then we'll ignore this frame.
-        if (!keepNext_)
-            return;
-
         // Just copy the UVC frame to keep things quick. We'll do any conversion
         // upon request in the retrieveColor() method.
+        std::lock_guard<std::mutex> guard(mutex_);
+        if (frame_)
+            uvc_free_frame(frame_);
+        frame_ = uvc_allocate_frame(frame->data_bytes);
         uvc_duplicate_frame(frame, frame_);
-
-        keepNext_ = false;
     }
 
     /// Factory method to open a USB video class (UVC) device as an image
