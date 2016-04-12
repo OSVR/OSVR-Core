@@ -64,6 +64,11 @@ set_target_properties(vbtracker-core PROPERTIES
 if(WIN32)
     add_subdirectory(DirectShowCameraLib)
 endif()
+
+if(NOT WIN32)
+    find_package(libuvc REQUIRED)
+endif()
+
 ###
 # Build the plugin
 ###
@@ -86,6 +91,9 @@ if(WIN32)
         DirectShowHDKCameraFactory.h
         DirectShowImageSource.cpp
         DirectShowToCV.h)
+else()
+    list(APPEND PLUGIN_SOURCES
+        UVCImageSource.cpp)
 endif()
 
 osvr_add_plugin(NAME com_osvr_VideoBasedHMDTracker
@@ -111,6 +119,9 @@ if(WIN32)
         directshow-camera)
     set_target_properties(ViewTrackingCamera PROPERTIES
         FOLDER "OSVR Plugins/Video-Based Tracker")
+else()
+    target_link_libraries(com_osvr_VideoBasedHMDTracker ${libuvc_LIBRARIES})
+    target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE ${libuvc_INCLUDE_DIRS})
 endif()
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
@@ -180,3 +191,4 @@ if(WIN32 AND OSVR_FPE)
         endif()
     endforeach()
 endif()
+

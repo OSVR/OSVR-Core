@@ -361,9 +361,11 @@ class ConfiguredDeviceConstructor {
         /// camera firmware v7 and up). Presumably eventually use libuvc on
         /// other platforms instead, at least for the HDK IR camera.
 
-        auto cameraFactory = [=] {
-            return osvr::vbtracker::openOpenCVCamera(cameraID);
-        };
+        //auto cameraFactory = [=] {
+        //    return osvr::vbtracker::openOpenCVCamera(cameraID);
+        //};
+
+        auto cameraFactory = &osvr::vbtracker::openHDKCameraUVC;
 #endif
 
         /// Function to execute after the device is created, to add the sensors.
