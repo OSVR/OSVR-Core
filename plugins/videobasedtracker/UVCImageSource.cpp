@@ -119,7 +119,7 @@ namespace vbtracker {
             uvc_exit(uvcContext_);
             throw std::runtime_error("Error opening camera: " + std::string(uvc_strerror(open_res)));
         }
-        uvc_print_diag(cameraHandle_, stdout);
+        //uvc_print_diag(cameraHandle_, stdout);
 
         // Setup streaming parameters
         const int resolution_x = 640; // pixels
@@ -132,7 +132,7 @@ namespace vbtracker {
                                                                resolution_x,
                                                                resolution_y,
                                                                frame_rate);
-        uvc_print_stream_ctrl(&streamControl_, stdout);
+        //uvc_print_stream_ctrl(&streamControl_, stdout);
         if (UVC_SUCCESS != setup_res) {
             std::cerr << "Error setting up requested stream format. "
                 + std::string(uvc_strerror(setup_res));
@@ -217,9 +217,7 @@ namespace vbtracker {
         }
 
         // Convert the image to at cv::Mat
-        auto img = cvCreateImageHeader(cvSize(rgb->width, rgb->height), IPL_DEPTH_8U, 3);
-        cvSetData(img, rgb->data, rgb->width * 3);
-        color = cv::cvarrToMat(img);
+        color = cv::Mat(rgb->height, rgb->width, CV_8UC3, rgb->data).clone();
 
         uvc_free_frame(rgb);
     }
@@ -267,3 +265,4 @@ namespace vbtracker {
 } // namespace osvr
 
 #endif // INCLUDED_UVCImageSource_cpp_GUID_2563F019_11B6_4F61_9E8C_C3ED2A573AF6
+
