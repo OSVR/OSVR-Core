@@ -346,15 +346,19 @@ typedef uint32_t OSVR_SkeletonJointCount;
 /** @brief integer type specifying bone count/index(Id) */
 typedef uint32_t OSVR_SkeletonBoneCount;
 
-/** @brief A state of a single skeleton joint (joint/bone) */
+/** @brief A state of a single skeleton joint */
 typedef struct OSVR_SkeletonJointState {
-  OSVR_SkeletonJointCount jointId;
-  /** @brief A tracker pose state */
-  OSVR_Pose3 pose;
+    OSVR_SkeletonJointCount jointId;
+    /** @brief A tracker pose state */
+    OSVR_Pose3 pose;
 } OSVR_SkeletonJointState;
 
-/** @brief bone contains same attributes as does the joint */
-typedef OSVR_SkeletonJointState OSVR_SkeletonBoneState;
+/** @brief A state of a single skeleton bone*/
+typedef struct OSVR_SkeletonBonetState {
+    OSVR_SkeletonBoneCount boneId;
+    /** @brief A tracker pose state */
+    OSVR_Pose3 pose;
+} OSVR_SkeletonBoneState;
 
 /** @brief Type of Skeleton state */
 typedef struct OSVR_SkeletonState {
