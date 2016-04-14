@@ -28,7 +28,7 @@
 #endif
 
 // Internal Includes
-#include <osvr/Common/GetEnvironmentVariable.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
 #include <osvr/Util/WindowsVariantC.h>
 
 // Library/third-party includes
@@ -38,7 +38,7 @@
 #include <cstdlib>
 
 namespace osvr {
-namespace common {
+namespace util {
 #if defined(OSVR_WINDOWS) && !defined(OSVR_WINDOWS_DESKTOP)
     /// On Windows, only desktop apps actually have the getenv function
     /// available to them, so this implementation just always returns not
@@ -68,5 +68,5 @@ namespace common {
         return ret;
     }
 #endif // end of if windows non-desktop
-} // namespace common
+} // namespace util
 } // namespace osvr

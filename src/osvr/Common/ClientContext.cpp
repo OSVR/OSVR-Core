@@ -53,7 +53,7 @@ OSVR_ClientContextObject::OSVR_ClientContextObject(
     osvr::common::ClientInterfaceFactory const &interfaceFactory,
     osvr::common::ClientContextDeleter del)
     : m_appId(appId), m_clientInterfaceFactory(interfaceFactory),
-      m_deleter(del) {
+      m_deleter(del), m_logger(osvr::util::log::make_logger(m_appId)) {
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
 }
 
@@ -145,6 +145,11 @@ ClientContextDeleter OSVR_ClientContextObject::getDeleter() const {
 }
 
 bool OSVR_ClientContextObject::getStatus() const { return m_getStatus(); }
+
+void OSVR_ClientContextObject::log(osvr::util::log::LogLevel severity,
+                                   const char *message) {
+    m_logger->log(severity, message);
+}
 
 bool OSVR_ClientContextObject::m_getStatus() const {
     // by default, assume we are started up.

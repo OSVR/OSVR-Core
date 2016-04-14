@@ -59,7 +59,7 @@ int main() {
         osvrClientUpdate(ctx);
     }
 
+    osvrClientLog(ctx, OSVR_LOGLEVEL_NOTICE, "Library shut down, exiting.");
     osvrClientShutdown(ctx);
-    printf("Library shut down, exiting.\n");
     return 0;
 }

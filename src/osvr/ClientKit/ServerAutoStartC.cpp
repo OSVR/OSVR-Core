@@ -27,7 +27,7 @@
 #include <osvr/Util/ProcessUtils.h>
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Client/LocateServer.h>
-#include <osvr/Common/GetEnvironmentVariable.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
 
 // Library/third-party includes
 // - none

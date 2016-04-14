@@ -42,6 +42,7 @@ target_link_libraries(${LIBNAME_FULL}
     libfunctionality::functionality
     osvrUtilCpp
     PRIVATE
+    spdlog
     boost_filesystem)
 
 ###

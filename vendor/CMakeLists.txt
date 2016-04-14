@@ -1,3 +1,10 @@
+
+# Interface target for spdlog
+add_library(spdlog INTERFACE)
+set(OSVR_VENDORED_SPDLOG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/spdlog" CACHE INTERNAL "" FORCE)
+target_include_directories(spdlog INTERFACE "${OSVR_VENDORED_SPDLOG_ROOT}/include")
+#target_compile_definitions(spdlog INTERFACE SPDLOG_DEFINITIONS)
+
 if(BUILD_TESTING)
     if(WIN32)
         set(gtest_force_shared_crt ON)

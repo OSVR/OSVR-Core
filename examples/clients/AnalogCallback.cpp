@@ -54,6 +54,6 @@ int main() {
         context.update();
     }
 
-    std::cout << "Library shut down, exiting." << std::endl;
+    context.log(OSVR_LOGLEVEL_NOTICE, "Library shut down, exiting.");
     return 0;
 }

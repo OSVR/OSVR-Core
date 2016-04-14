@@ -33,6 +33,7 @@
 #include <osvr/PluginHost/PathConfig.h>
 #include "PluginSpecificRegistrationContextImpl.h"
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/Log.h>
 
 // Library/third-party includes
 #include <libfunctionality/LoadPlugin.h>
@@ -57,7 +58,9 @@ namespace pluginhost {
 
         const std::vector<std::string> pluginPaths;
     };
-    RegistrationContext::RegistrationContext() : m_impl(new Impl) {}
+
+    RegistrationContext::RegistrationContext()
+        : m_impl(new Impl), m_logger(util::log::make_logger("PluginHost")) {}
 
     RegistrationContext::~RegistrationContext() {
         // Reset the plugins in reverse order.
@@ -77,12 +80,13 @@ namespace pluginhost {
                                         std::string const &name,
                                         OSVR_PluginRegContext ctx,
                                         bool shouldRethrow = false) {
-        OSVR_DEV_VERBOSE("Trying to load a plugin with the name " << name);
+        auto log = util::log::make_logger("PluginHost");
+        log->debug() << "Trying to load a plugin with the name " << name;
         try {
             plugin = libfunc::loadPluginByName(name, ctx);
             return true;
         } catch (std::runtime_error const &e) {
-            OSVR_DEV_VERBOSE("Failed: " << e.what());
+            log->debug() << "Failed: " << e.what();
             if (shouldRethrow) {
                 throw;
             }
@@ -135,25 +139,25 @@ namespace pluginhost {
 
         // Load all of the non-.manualload plugins
         for (const auto &plugin : pluginPathNames) {
-            OSVR_DEV_VERBOSE("Examining plugin '" << plugin << "'...");
+            m_logger->debug() << "Examining plugin '" << plugin << "'...";
             const auto pluginBaseName =
                 fs::path(plugin).filename().stem().generic_string();
             if (boost::iends_with(pluginBaseName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
-                OSVR_DEV_VERBOSE(
-                    "Ignoring manual-load plugin: " << pluginBaseName);
+                m_logger->debug()
+                    << "Ignoring manual-load plugin: " << pluginBaseName;
                 continue;
             }
 
             try {
                 loadPlugin(pluginBaseName);
-                OSVR_DEV_VERBOSE(
-                    "Successfully loaded plugin: " << pluginBaseName);
+                m_logger->info()
+                    << "Successfully loaded plugin: " << pluginBaseName;
             } catch (const std::exception &e) {
-                OSVR_DEV_VERBOSE("Failed to load plugin " << pluginBaseName
-                                                          << ": " << e.what());
+                m_logger->warn() << "Failed to load plugin " << pluginBaseName
+                                 << ": " << e.what();
             } catch (...) {
-                OSVR_DEV_VERBOSE("Failed to load plugin "
-                                 << pluginBaseName << ": Unknown error.");
+                m_logger->warn() << "Failed to load plugin " << pluginBaseName
+                                 << ": Unknown error.";
             }
         }
     }

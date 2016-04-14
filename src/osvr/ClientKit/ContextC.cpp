@@ -26,9 +26,10 @@
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
-#include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
 #include <osvr/Util/Verbosity.h>
+#include <osvr/Util/Log.h>
 
 // Library/third-party includes
 // - none
@@ -40,7 +41,7 @@ static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
 OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
                                   uint32_t /*flags*/) {
-    auto host = osvr::common::getEnvironmentVariable(HOST_ENV_VAR);
+    auto host = osvr::util::getEnvironmentVariable(HOST_ENV_VAR);
     if (host.is_initialized()) {
         OSVR_DEV_VERBOSE("Connecting to non-default host " << *host);
         return ::osvr::client::createContext(applicationIdentifier,
@@ -69,3 +70,14 @@ OSVR_ReturnCode osvrClientShutdown(OSVR_ClientContext ctx) {
     osvr::common::deleteContext(ctx);
     return OSVR_RETURN_SUCCESS;
 }
+
+OSVR_ReturnCode osvrClientLog(OSVR_ClientContext ctx, OSVR_LogLevel severity,
+                              const char *message) {
+    if (!ctx) {
+        return OSVR_RETURN_FAILURE;
+    }
+    const auto s = static_cast<osvr::util::log::LogLevel>(severity);
+    ctx->log(s, message);
+    return OSVR_RETURN_SUCCESS;
+}
+
