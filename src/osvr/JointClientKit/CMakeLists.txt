@@ -33,6 +33,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrServer
     JsonCpp::JsonCpp
     vendored-vrpn
+    spdlog
     eigen-headers)
 
 ###

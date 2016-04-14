@@ -35,6 +35,7 @@
 #include <osvr/PluginKit/CommonC.h>
 #include <osvr/Util/PluginCallbackTypesC.h>
 #include <osvr/Util/AnnotationMacrosC.h>
+#include <osvr/Util/LogLevelC.h>
 
 /* Library/third-party includes */
 #include <libfunctionality/PluginInterface.h>
@@ -142,6 +143,18 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrPluginRegisterDataWithDeleteCallback(
     OSVR_IN OSVR_PluginDataDeleteCallback deleteCallback,
     OSVR_INOUT_PTR void *pluginData) OSVR_FUNC_NONNULL((1, 2, 3));
 /** @} */
+
+/**
+ * @brief Log a message to the plugin's log channel.
+ *
+ * @param ctx The registration context passed to your entry point.
+ * @param severity The severity of the log message.
+ * @param message The message to be logged.
+ */
+OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
+    osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                  OSVR_IN OSVR_LogLevel severity,
+                  OSVR_IN const char *message) OSVR_FUNC_NONNULL((1, 3));
 
 OSVR_EXTERN_C_END
 

@@ -38,6 +38,7 @@
 #include <osvr/Util/AnnotationMacrosC.h>
 #include <osvr/Util/StdInt.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
+#include <osvr/Util/LogLevelC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -89,6 +90,12 @@ osvrClientCheckStatus(OSVR_ClientContext ctx);
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientShutdown(OSVR_ClientContext ctx);
+
+/** @brief Log a message from the client.
+ */
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientLog(OSVR_ClientContext ctx,
+                                                    OSVR_LogLevel severity,
+                                                    const char *message);
 
 /** @} */
 OSVR_EXTERN_C_END

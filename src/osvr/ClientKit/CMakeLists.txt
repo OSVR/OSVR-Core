@@ -57,6 +57,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrClient
     osvrUtilCpp
     osvrCommon
+    spdlog
     eigen-headers)
 
 if(ANDROID)

@@ -76,6 +76,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrCommon
     JsonCpp::JsonCpp
     vendored-vrpn
+    spdlog
     eigen-headers)
 
 install(FILES

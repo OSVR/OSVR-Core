@@ -35,6 +35,8 @@
 #include <osvr/Util/KeyedOwnershipContainer.h>
 #include <osvr/Util/UniquePtr.h>
 #include <osvr/Util/SharedPtr.h>
+#include <osvr/Util/LogLevel.h>
+#include <osvr/Util/Logger.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -114,6 +116,10 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     /// received, etc.)
     OSVR_COMMON_EXPORT bool getStatus() const;
 
+    /// @brief Logs a message from the client.
+    OSVR_COMMON_EXPORT void log(osvr::util::log::LogLevel severity,
+                                const char *message);
+
   protected:
     /// @brief Constructor for derived class use only.
     OSVR_COMMON_EXPORT
@@ -159,6 +165,7 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
     osvr::common::ClientContextDeleter m_deleter;
+    osvr::util::log::LoggerPtr m_logger;
 };
 
 namespace osvr {

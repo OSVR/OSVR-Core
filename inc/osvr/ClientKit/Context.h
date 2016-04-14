@@ -112,6 +112,10 @@ namespace clientkit {
         return osvrClientCheckStatus(m_context) == OSVR_RETURN_SUCCESS;
     }
 
+    inline void ClientContext::log(OSVR_LogLevel severity, const char* message) {
+        osvrClientLog(m_context, severity, message);
+    }
+
 } // end namespace clientkit
 
 } // end namespace osvr

@@ -36,6 +36,7 @@
 
 // Internal Includes
 #include <osvr/ClientKit/ContextC.h>
+#include <osvr/Util/LogLevelC.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -97,6 +98,12 @@ namespace clientkit {
 
         /// @brief Gets the bare OSVR_ClientContext.
         OSVR_ClientContext get();
+
+        /// @brief Log a message to the plugin-specific channel.
+        ///
+        /// @param severity The severity of the log message.
+        /// @param message The message to be logged.
+        void log(OSVR_LogLevel severity, const char* message);
 
       private:
         OSVR_ClientContext m_context;

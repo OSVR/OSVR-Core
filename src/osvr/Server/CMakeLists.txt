@@ -50,4 +50,5 @@ target_link_libraries(${LIBNAME_FULL}
     boost_filesystem
     vendored-vrpn
     JsonCpp::JsonCpp
+    spdlog
     util-runloopmanager)

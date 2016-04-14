@@ -79,3 +79,14 @@ OSVR_ReturnCode osvrPluginRegisterDataWithDeleteCallback(
     context->registerDataWithDeleteCallback(deleteCallback, pluginData);
     return OSVR_RETURN_SUCCESS;
 }
+
+OSVR_ReturnCode osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                              OSVR_IN OSVR_LogLevel severity,
+                              OSVR_IN const char *message) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrPluginLog", ctx);
+    osvr::pluginhost::PluginSpecificRegistrationContext *context =
+        static_cast<osvr::pluginhost::PluginSpecificRegistrationContext *>(ctx);
+    auto s = static_cast<osvr::util::log::LogLevel>(severity);
+    context->log(s, message);
+    return OSVR_RETURN_SUCCESS;
+}
