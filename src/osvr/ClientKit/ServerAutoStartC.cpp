@@ -28,7 +28,9 @@
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Client/LocateServer.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
+#if defined(OSVR_ANDROID)
 #include <osvr/Server/ConfigureServerFromFile.h>
+#endif
 
 // Library/third-party includes
 // - none
@@ -36,7 +38,9 @@
 // Standard includes
 // - none
 
+#if defined(OSVR_ANDROID)
 static osvr::server::ServerPtr gServer;
+#endif
 
 void osvrClientAttemptServerAutoStart()
 {
