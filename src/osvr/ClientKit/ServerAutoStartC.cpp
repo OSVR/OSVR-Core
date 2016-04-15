@@ -38,6 +38,7 @@
 // Standard includes
 // - none
 
+// @todo use a thread-safe lazy-initialized singleton pattern
 #if defined(OSVR_ANDROID)
 static osvr::server::ServerPtr gServer;
 #endif
