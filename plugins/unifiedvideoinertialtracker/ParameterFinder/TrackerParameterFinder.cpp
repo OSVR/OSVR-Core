@@ -38,7 +38,9 @@
 #include <Eigen/Geometry>
 
 // Standard includes
+#include <algorithm>
 #include <iostream>
+#include <numeric>
 
 template <std::size_t N> using Vec = Eigen::Matrix<double, N, 1>;
 
@@ -168,29 +170,11 @@ namespace vbtracker {
 
 namespace osvr {
 namespace vbtracker {
-    template <typename Vec>
-    inline Eigen::Quaterniond yawPitchRoll(Vec const &v) {
-        Eigen::Quaterniond rotation =
-            Eigen::AngleAxisd(v[2], Eigen::Vector3d::UnitZ()) *
-            Eigen::AngleAxisd(v[1], Eigen::Vector3d::UnitX()) *
-            Eigen::AngleAxisd(v[0], Eigen::Vector3d::UnitY());
-        return rotation.normalized();
-    }
 
-    template <typename Vec> inline Eigen::Quaterniond euler(Vec const &v) {
-        Eigen::Quaterniond rotation =
-            Eigen::AngleAxisd(v[2], Eigen::Vector3d::UnitZ()) *
-            Eigen::AngleAxisd(v[1], Eigen::Vector3d::UnitY()) *
-            Eigen::AngleAxisd(v[0], Eigen::Vector3d::UnitZ());
-        return rotation.normalized();
-    }
-
-    inline Eigen::Quaterniond yawPitchRoll(double y, double p, double r) {
-        Eigen::Quaterniond rotation =
-            Eigen::AngleAxisd(r, Eigen::Vector3d::UnitZ()) *
-            Eigen::AngleAxisd(p, Eigen::Vector3d::UnitX()) *
-            Eigen::AngleAxisd(y, Eigen::Vector3d::UnitY());
-        return rotation.normalized();
+    template <typename VecType>
+    inline Eigen::Quaterniond rot_exp(VecType const &v) {
+        Eigen::Vector3d vec = v;
+        return util::quat_exp_map(vec).exp();
     }
 
     inline Eigen::Isometry3d makeIsometry(Eigen::Vector3d const &xlate,
@@ -198,35 +182,46 @@ namespace vbtracker {
         return Eigen::Isometry3d(Eigen::Translation3d(xlate)) *
                Eigen::Isometry3d(quat);
     }
+
     inline Eigen::Isometry3d makeIsometry(Eigen::Translation3d const &xlate,
                                           Eigen::Quaterniond const &quat) {
         return Eigen::Isometry3d(xlate) * Eigen::Isometry3d(quat);
     }
-#if 0
-    inline Eigen::Isometry3d
-    makeIsometry(Eigen::Ref<Eigen::Vector3d const> const &xlate,
-                 Eigen::Quaterniond const &quat) {
-        return Eigen::Isometry3d(Eigen::Translation3d(xlate)) *
-               Eigen::Isometry3d(quat);
-    }
+
     inline Eigen::Isometry3d
     makeIsometry(Eigen::Ref<Eigen::Vector3d const> const &xlate) {
         return Eigen::Isometry3d(Eigen::Translation3d(xlate));
     }
-#endif
+
+    struct TrackedData {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        Eigen::Isometry3d videoPose;
+        Eigen::Isometry3d refPose;
+    };
+    using TrackedDataPtr = std::unique_ptr<TrackedData>;
+    using TrackedSamples = std::vector<TrackedDataPtr>;
+
+    inline void outputTransformedSample(Eigen::Isometry3d const &baseXform,
+                                        Eigen::Isometry3d const &innerXform,
+                                        TrackedData const &sample) {
+        std::cout << "HDK to VideoBase: "
+                  << (sample.videoPose).translation().transpose() << std::endl;
+        std::cout << "Vive to VideoBase: "
+                  << (baseXform * sample.refPose).translation().transpose()
+                  << std::endl;
+        std::cout << "Ref to VideoBase: "
+                  << (baseXform * sample.refPose * innerXform)
+                         .translation()
+                         .transpose()
+                  << std::endl;
+        std::cout << "---------" << std::endl;
+    }
     void computeRefTrackerTransform(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         OptimCommonData const &commonData) {
 
         /// Just run the tracking algo once - we can re-run the transform and
         /// comparison quicker for the optimizer.
-        struct TrackedData {
-            EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-            Eigen::Isometry3d videoPose;
-            Eigen::Isometry3d refPose;
-        };
-        using TrackedDataPtr = std::unique_ptr<TrackedData>;
-        using TrackedSamples = std::vector<TrackedDataPtr>;
 
         TrackedSamples samples;
         {
@@ -260,139 +255,144 @@ namespace vbtracker {
             return;
         }
 
-        using ParamVec = Vec<12>;
         const auto numSamples = samples.size();
         const double numSamplesDouble = static_cast<double>(numSamples);
         static const double LARGE_VALUE = 100000;
 
-        /// Indices into the array.
-        enum {
-            BaseXlate = 0,
-            BaseRot = BaseXlate + 3,
-            InnerXlate = BaseRot + 3,
-            InnerRot = InnerXlate + 3
-            // InnerRot = BaseRot + 3
-        };
-
-        ParamVec x = ParamVec::Zero();
-        x.head<3>() << -0.316523, -0.740873, -2.0701;
-        // x.segment<3>(InnerXlate) << 0, .2, .2;
-
-        auto getBaseTranslation = [](ParamVec const &vec) {
-            return Eigen::Translation3d(vec.head<3>());
-        };
-        auto getBaseRotation = [](ParamVec const &vec) {
-            // return yawPitchRoll(vec[BaseRot], 0, 0);
-            // return euler(vec.segment<3>(BaseRot));
-            Eigen::Vector3d v = vec.segment<3>(BaseRot);
-            return util::quat_exp_map(v).exp();
-        };
-#if 1
-        auto getInnerTranslation = [](ParamVec const &vec) {
-            return Eigen::Translation3d(vec.segment<3>(InnerXlate));
-        };
-#else
-
-        auto getInnerTranslation = [](ParamVec const &vec) {
-            return Eigen::Translation3d(Eigen::Vector3d(0, 0.2, 0.2));
-        };
-#endif
-        auto getInnerRotation = [](ParamVec const &vec) {
-            Eigen::Vector3d v = vec.segment<3>(InnerRot);
-            return util::quat_exp_map(v).exp();
-            // return euler(vec.segment<3>(InnerRot));
-            // return yawPitchRoll(0, vec[InnerRot], vec[InnerRot + 1]);
-        };
-
         auto simpleCost = [](Eigen::Isometry3d const &a,
-                             Eigen::Isometry3d const &b) {
+                             Eigen::Isometry3d const &b,
+                             double angleScale = 1) {
             auto angDistance =
                 Eigen::Quaterniond(a.rotation())
                     .angularDistance(Eigen::Quaterniond(b.rotation()));
             auto linearDistance = (a.translation() - b.translation()).norm();
-            return linearDistance + 10 * angDistance;
+            return linearDistance + angleScale * angDistance;
         };
 
+        Eigen::IOFormat format;
+        format.precision = Eigen::FullPrecision;
+
         auto maxRuns = 30000;
-        std::cout << "Starting actual optimization procedure, max runs = "
-                  << maxRuns << std::endl;
-        auto ret = ei_newuoa_wrapped(
-            x, {1e-8, 1e-2}, maxRuns, [&](ParamVec const &paramVec) -> double {
+        std::cout << "Starting actual optimization procedures..." << std::endl;
+        Vec<3> baseXlate = -Vec<3>(-0.316523, -0.740873, -2.0701);
 
-                auto baseRot = getBaseRotation(paramVec);
-                auto baseXlate = getBaseTranslation(paramVec);
+        {
+            std::cout << "Optimizing base translation" << std::endl;
+            auto ret = ei_newuoa_wrapped(
+                baseXlate, {1e-8, 1e-2}, 10000,
+                [&](Vec<3> const &vec) -> double {
+                    Eigen::Isometry3d baseXform = makeIsometry(vec);
+                    /// Accumulate the cost of all the samples
+                    return std::accumulate(
+                        samples.begin(), samples.end(), 0.0,
+                        [&](double prev, TrackedDataPtr const &s) {
+                            /// Don't include angular cost.
+                            auto cost = simpleCost(s->videoPose,
+                                                   baseXform * s->refPose, 0);
+                            return prev + (cost / numSamplesDouble);
+                        });
+                });
 
-                auto innerRot = getInnerRotation(paramVec);
+            std::cout << "Result: cost " << ret << std::endl;
+            std::cout << baseXlate.format(format) << "\n" << std::endl;
+            std::cout << "First sample:\n";
+            outputTransformedSample(makeIsometry(baseXlate),
+                                    Eigen::Isometry3d::Identity(),
+                                    *(samples[0]));
+        }
+        Vec<6> baseXlateRot = Vec<6>::Zero();
+        baseXlateRot.head<3>() = baseXlate;
+        {
+            std::cout << "\nOptimizing base transform, max runs = " << maxRuns
+                      << std::endl;
+            auto ret = ei_newuoa_wrapped(
+                baseXlateRot, {1e-8, 1e-2}, 10000,
+                [&](Vec<6> const &vec) -> double {
+                    Eigen::Isometry3d baseXform =
+                        makeIsometry(vec.head<3>(), rot_exp(vec.tail<3>()));
+                    /// Accumulate the cost of all the samples
+                    return std::accumulate(
+                        samples.begin(), samples.end(), 0.0,
+                        [&](double prev, TrackedDataPtr const &s) {
+                            auto cost = simpleCost(s->videoPose,
+                                                   baseXform * s->refPose);
+                            return prev + (cost / numSamplesDouble);
+                        });
+                });
+            std::cout << "Result: cost " << ret << std::endl;
+            std::cout << baseXlateRot.format(format) << "\n" << std::endl;
+            std::cout << "First sample:\n";
+            outputTransformedSample(
+                makeIsometry(baseXlateRot.head<3>(),
+                             rot_exp(baseXlateRot.tail<3>())),
+                Eigen::Isometry3d::Identity(), *(samples[0]));
+        }
 
-                auto innerXlate = getInnerTranslation(paramVec);
-#if 0
-				/// angles for base - should not wrap.
-				if (std::abs(Eigen::AngleAxisd(baseRot).angle()) >= (M_PI)) {
-					return LARGE_VALUE;
-				}
-				/// angles for head - should be small.
-				if (std::abs(Eigen::AngleAxisd(innerRot).angle()) >=
-					(M_PI / 2)) {
-					return LARGE_VALUE;
-				}
-				/// distances for head - should be on the order of 30cm.
-				if ((innerXlate.vector().array().abs() > Eigen::Array3d::Constant(0.3)).any()) {
+        {
+            /// Indices into the array.
+            enum {
+                BaseXlate = 0,
+                BaseRot = BaseXlate + 3,
+                InnerXlate = BaseRot + 3,
+                InnerRot = InnerXlate + 3
+            };
 
-					return LARGE_VALUE;
-				}
-#endif
+            using ParamVec = Vec<12>;
+            ParamVec x = ParamVec::Zero();
+            x.head<3>() = baseXlateRot.head<3>();
+            x.segment<3>(BaseRot) = baseXlateRot.tail<3>();
 
-                // std::cout << x.transpose();
+            auto getBaseTranslation = [](ParamVec const &vec) {
+                return Eigen::Translation3d(vec.head<3>());
+            };
+            auto getBaseRotation = [](ParamVec const &vec) {
+                return rot_exp(vec.segment<3>(BaseRot));
+            };
+            auto getInnerTranslation = [](ParamVec const &vec) {
+                return Eigen::Translation3d(vec.segment<3>(InnerXlate));
+            };
+            auto getInnerRotation = [](ParamVec const &vec) {
+                return rot_exp(vec.segment<3>(InnerRot));
+            };
+
+            std::cout << "Starting optimization procedure for full transform, "
+                         "max runs = "
+                      << maxRuns << std::endl;
+            auto ret = ei_newuoa_wrapped(
+                x, {1e-8, 1e-2}, maxRuns,
+                [&](ParamVec const &paramVec) -> double {
+                    Eigen::Isometry3d baseXform =
+                        makeIsometry(getBaseTranslation(paramVec),
+                                     getBaseRotation(paramVec));
+                    Eigen::Isometry3d innerXform =
+                        makeIsometry(getInnerTranslation(paramVec),
+                                     getInnerRotation(paramVec));
+                    /// Accumulate the cost of all the samples
+                    return std::accumulate(
+                        samples.begin(), samples.end(), 0.0,
+                        [&](double prev, TrackedDataPtr const &s) {
+                            auto cost = costMeasurement(s->videoPose,
+                                                        baseXform * s->refPose *
+                                                            innerXform);
+                            return prev + (cost / numSamplesDouble);
+                        });
+                });
+            {
+                std::cout << "Optimizer returned " << ret
+                          << " and these parameter values:" << std::endl;
+                std::cout << x.format(format) << std::endl;
+                auto baseRot = getBaseRotation(x);
+                auto baseXlate = getBaseTranslation(x);
+                auto innerRot = getInnerRotation(x);
+                auto innerXlate = getInnerTranslation(x);
 
                 Eigen::Isometry3d baseXform = makeIsometry(baseXlate, baseRot);
                 Eigen::Isometry3d innerXform =
                     makeIsometry(innerXlate, innerRot);
-                double accum = 0;
-                for (auto const &samplePtr : samples) {
-                    auto cost = simpleCost(samplePtr->videoPose * innerXform,
-                                           baseXform * samplePtr->refPose);
-                    accum += (cost / numSamplesDouble);
+                for (std::size_t i = 0; i < 3; ++i) {
+                    outputTransformedSample(baseXform, innerXform,
+                                            *(samples[i]));
                 }
-
-                /// Cost accumulation/post-processing.
-                // std::cout << " =  " << accum << std::endl;
-                return accum;
-            });
-        std::cout << "Optimizer returned " << ret
-                  << " and these parameter values:" << std::endl;
-        Eigen::IOFormat format;
-        format.precision = Eigen::FullPrecision;
-        std::cout << x.format(format) << std::endl;
-        {
-            auto baseRot = getBaseRotation(x);
-            auto baseXlate = getBaseTranslation(x);
-            auto innerRot = getInnerRotation(x);
-            auto innerXlate = getInnerTranslation(x);
-
-            Eigen::Isometry3d baseXform = makeIsometry(baseXlate, baseRot);
-            Eigen::Isometry3d innerXform = makeIsometry(innerXlate, innerRot);
-            Eigen::Isometry3d invInner = innerXform.inverse();
-            for (std::size_t i = 0; i < 3; ++i) {
-                auto const &samplePtr = samples[i];
-                std::cout << "HDK to VideoBase: "
-                          << (samplePtr->videoPose).translation().transpose()
-                          << std::endl;
-                std::cout << "Vive to VideoBase: "
-                          << (baseXform * samplePtr->refPose)
-                                 .translation()
-                                 .transpose()
-                          << std::endl;
-                std::cout << "HDK in Vive to VideoBase: "
-                          << (samplePtr->videoPose * innerXform)
-                                 .translation()
-                                 .transpose()
-                          << std::endl;
-                std::cout << "Ref to VideoBase: "
-                          << (baseXform * samplePtr->refPose * invInner)
-                                 .translation()
-                                 .transpose()
-                          << std::endl;
-                std::cout << "---------" << std::endl;
             }
         }
     }
@@ -492,14 +492,14 @@ int main() {
 #if 0
     osvr::vbtracker::runOptimizer(
         data, osvr::vbtracker::OptimCommonData{camParams, params});
-#endif
+#else
 
     /// Use optimizer to compute the transforms for the reference tracker, which
     /// is mounted effectively rigidly to the desired tracker, but in an unknown
     /// relative pose (and a different base coordinate system)
     osvr::vbtracker::computeRefTrackerTransform(
         data, osvr::vbtracker::OptimCommonData{camParams, params});
-
+#endif
     std::cout << "Press enter to exit." << std::endl;
     std::cin.ignore();
     return 0;
