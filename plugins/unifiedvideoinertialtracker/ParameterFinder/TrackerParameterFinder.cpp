@@ -86,6 +86,14 @@ namespace vbtracker {
         TrackedBodyTarget *target_ = nullptr;
     };
 
+    class FeedDataWithoutProcessing {
+      public:
+        void operator()(OptimData &optim, TimestampedMeasurements const &row) {
+            auto inputData =
+                makeImageOutputDataFromRow(row, optim.getCamParams());
+            optim.getSystem().updateLedsFromVideoData(std::move(inputData));
+        }
+    };
     class MainAlgoUnderStudy {
       public:
         void operator()(OptimData &optim, TimestampedMeasurements const &row) {
@@ -225,7 +233,7 @@ namespace vbtracker {
 
             std::cout << "Starting processing tracking..." << std::endl;
             auto optim = OptimData::make(commonData);
-            MainAlgoUnderStudy mainAlgo;
+            FeedDataWithoutProcessing mainAlgo;
             RansacOneEuro ransacOneEuro;
 
             /// Main algorithm loop
