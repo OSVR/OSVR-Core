@@ -1126,7 +1126,8 @@ double newuob(long n, long npt, double *x, double rhobeg, double rhoend,
                       vquad, tempq, rhosq, detrat, crvmin = 0.0, distsq, xoptsq;
 
     /* Parameter adjustments */
-    diffc = ratio = dnorm = nfsav = diffa = diffb = xoptsq = f = 0.0;
+    diffc = ratio = dnorm = diffa = diffb = xoptsq = f = 0.0;
+    nfsav = 0;
     rho = fbeg = fopt = xjpt = xipt = 0.0;
     itest = ipt = jpt = 0;
     alpha = dstep = 0.0;
@@ -1270,7 +1271,10 @@ L70:
     rho = rhobeg;
     delta = rho;
     idz = 1;
-    diffa = diffb = itest = xoptsq = 0;
+    diffa = 0;
+    diffb = 0;
+    itest = 0;
+    xoptsq = 0;
     i__1 = n;
     for (i__ = 1; i__ <= i__1; ++i__) {
         xopt[i__] = xpt[kopt + i__ * xpt_dim1];
@@ -1567,7 +1571,8 @@ L310:
     /* Computing 2nd power */
     d__1 = fmax(d__2, rho);
     rhosq = d__1 * d__1;
-    ktemp = detrat = 0;
+    ktemp = 0;
+    detrat = 0;
     if (f >= fsave) {
         ktemp = kopt;
         detrat = 1.0;
