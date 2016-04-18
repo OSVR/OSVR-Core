@@ -5,6 +5,7 @@ add_executable(TrackerParameterFinder
     CSVTools.h
     LoadRows.h
     newuoa.h
+    PoseFilter.h
     TrackerParameterFinder.cpp)
 set_target_properties(TrackerParameterFinder PROPERTIES
     FOLDER "${PROJ_FOLDER}")

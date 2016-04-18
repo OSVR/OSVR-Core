@@ -24,65 +24,24 @@
 
 // Internal Includes
 #include "LoadRows.h"
+#include "PoseFilter.h"
 #include "newuoa.h"
 
 #include <ConfigParams.h>
-#include <LedMeasurement.h>
 #include <MakeHDKTrackingSystem.h>
 #include <TrackedBodyTarget.h>
-
-#include <osvr/Util/EigenFilters.h>
-#include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
 // Standard includes
-#include <fstream>
-#include <sstream>
+#include <iostream>
 
-using osvr::util::time::TimeValue;
 template <std::size_t N> using Vec = Eigen::Matrix<double, N, 1>;
 
 namespace osvr {
 namespace vbtracker {
-    class PoseFilter {
-      public:
-        PoseFilter(util::filters::one_euro::Params const &positionFilterParams =
-                       util::filters::one_euro::Params{},
-                   util::filters::one_euro::Params const &oriFilterParams =
-                       util::filters::one_euro::Params{})
-            : m_positionFilter(positionFilterParams),
-              m_orientationFilter(oriFilterParams){};
-
-        void filter(double dt, Eigen::Vector3d const &position,
-                    Eigen::Quaterniond const &orientation) {
-            if (dt <= 0) {
-                /// Avoid div by 0
-                dt = 1;
-            }
-            m_positionFilter.filter(dt, position);
-            m_orientationFilter.filter(dt, orientation);
-        }
-
-        Eigen::Vector3d const &getPosition() const {
-            return m_positionFilter.getState();
-        }
-
-        Eigen::Quaterniond const &getOrientation() const {
-            return m_orientationFilter.getState();
-        }
-
-        Eigen::Isometry3d getIsometry() const {
-            return Eigen::Translation3d(getPosition()) *
-                   Eigen::Isometry3d(getOrientation());
-        }
-
-      private:
-        util::filters::OneEuroFilter<Eigen::Vector3d> m_positionFilter;
-        util::filters::OneEuroFilter<Eigen::Quaterniond> m_orientationFilter;
-    };
     class MainAlgoUnderStudy {
       public:
         void operator()(CameraParameters const &camParams,
@@ -91,19 +50,8 @@ namespace vbtracker {
             auto inputData = makeImageOutputDataFromRow(row, camParams);
             auto indices =
                 system.updateBodiesFromVideoData(std::move(inputData));
-#if 0
-            bool updated = false;
-            for (auto &index : indices) {
-                if (index == BodyId(0)) {
-                    updated = true;
-                    break;
-                }
-            }
-#endif
             gotPose = target.getBody().hasPoseEstimate();
-            // gotPose = updated;
             if (gotPose) {
-                // std::cout << "Got a pose from the main algo!" << std::endl;
                 pose = target.getBody().getState().getIsometry();
             }
         }
@@ -114,6 +62,7 @@ namespace vbtracker {
         bool gotPose = false;
         Eigen::Isometry3d pose;
     };
+
     class RansacOneEuro {
       public:
         void operator()(CameraParameters const &camParams,
@@ -254,6 +203,7 @@ namespace vbtracker {
 
 } // namespace vbtracker
 } // namespace osvr
+
 int main() {
     // osvr::vbtracker::runOptimizer("augmented-blobs.csv");
     auto data = osvr::vbtracker::loadData("augmented-blobs.csv");
