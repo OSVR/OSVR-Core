@@ -65,9 +65,17 @@
 #ifndef INCLUDED_newuoa_h_GUID_F9E56CF3_7B12_41A0_4A09_E2A02B48FAC1
 #define INCLUDED_newuoa_h_GUID_F9E56CF3_7B12_41A0_4A09_E2A02B48FAC1
 
+#include <Eigen/Core>
+
+#include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 #define DEBUG_LOG(what)
 #if 0
@@ -1873,6 +1881,91 @@ inline double newuoa(Function &&function, long n, long npt, double *x,
                      double rhobeg, double rhoend, long maxfun, double *w) {
     return newuoa_detail::newuoa_impl(std::forward<Function>(function), n, npt,
                                       x, rhobeg, rhoend, maxfun, w);
+}
+
+namespace detail {
+/// Checks shared static assertions about vectors to be optimized by NEWUOA
+template <typename Derived>
+inline void checkStaticAssertions(Eigen::MatrixBase<Derived> &) {
+
+    static_assert(
+        std::is_same<typename Derived::Scalar, double>::value,
+        "NEWUOA operates only on doubles, and you passed a different type.");
+    static_assert(Derived::IsVectorAtCompileTime, "NEWUOA must be passed x "
+                                                  "which is known to be a "
+                                                  "vector at compile time.");
+    static_assert(Derived::SizeAtCompileTime != Eigen::Dynamic,
+                  "Vector passed to NEWUOA must be fixed-size at compile "
+                  "time.");
+}
+template <typename Derived>
+inline long computeReasonableNPT(Eigen::MatrixBase<Derived> &) {
+    return static_cast<long>(2 * Derived::SizeAtCompileTime + 1);
+}
+} // namespace detail
+/// Friendly wrapper around newuoa: takes a vector for x. The function
+/// still takes a pointer to double * and a long n.
+template <typename Function, typename Derived>
+inline double ei_newuoa(long npt, Eigen::MatrixBase<Derived> &x,
+                        std::pair<double, double> rho, long maxfun,
+                        Function &&f) {
+    detail::checkStaticAssertions(x);
+
+    double rhoBeg, rhoEnd;
+    std::tie(rhoBeg, rhoEnd) = rho;
+    if (rhoEnd > rhoBeg) {
+        std::swap(rhoBeg, rhoEnd);
+    }
+    const auto n = Derived::SizeAtCompileTime;
+    auto workingSpaceNeeded = (npt + 13) * (npt + n) + 3 * n * (n + 3) / 2;
+    Eigen::VectorXd workingSpace(workingSpaceNeeded);
+
+    return newuoa(std::forward<Function>(f), n, npt, x.derived().data(), rhoBeg,
+                  rhoEnd, maxfun, workingSpace.data());
+}
+
+/// Overload - default value for npt = 2n + 1
+/// Per Powell 2004, m = 2n+1 should be good for efficiency.
+template <typename Function, typename Derived>
+inline double ei_newuoa(Eigen::MatrixBase<Derived> &x,
+                        std::pair<double, double> rho, long maxfun,
+                        Function &&f) {
+    detail::checkStaticAssertions(x);
+    return ei_newuoa(detail::computeReasonableNPT(x), x, rho, maxfun,
+                     std::forward<Function>(f));
+}
+
+/// Friendlier wrapper around newuoa: takes a vector for x, and the function
+/// takes a reference to const vec
+template <typename Function, typename Derived>
+inline double ei_newuoa_wrapped(long npt, Eigen::MatrixBase<Derived> &x,
+                                std::pair<double, double> rho, long maxfun,
+                                Function &&f) {
+    detail::checkStaticAssertions(x);
+
+    using Vec = Eigen::Matrix<double, Derived::SizeAtCompileTime, 1>;
+    Vec xCopy = Vec::Zero();
+    auto wrappedFunc = [&f, &xCopy](long n, const double *x) {
+        assert(n == Derived::SizeAtCompileTime &&
+               "Should always be getting back the same size");
+        /// Making a copy so that functors passed can take in just a normal
+        /// vector const ref, instead of having to accept a ref, etc (since
+        /// generic lambdas aren't widespread)
+        xCopy = Vec::Map(x);
+        return std::forward<Function>(f)(const_cast<const Vec &>(xCopy));
+    };
+    return ei_newuoa(npt, x, rho, maxfun, wrappedFunc);
+}
+
+/// Overload - default value for npt = 2n + 1
+/// Per Powell 2004, m = 2n+1 should be good for efficiency.
+template <typename Function, typename Derived>
+inline double ei_newuoa_wrapped(Eigen::MatrixBase<Derived> &x,
+                                std::pair<double, double> rho, long maxfun,
+                                Function &&f) {
+    detail::checkStaticAssertions(x);
+    return ei_newuoa_wrapped(detail::computeReasonableNPT(x), x, rho, maxfun,
+                             std::forward<Function>(f));
 }
 
 #endif // INCLUDED_newuoa_h_GUID_F9E56CF3_7B12_41A0_4A09_E2A02B48FAC1
