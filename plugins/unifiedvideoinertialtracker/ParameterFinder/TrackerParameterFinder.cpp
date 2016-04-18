@@ -42,17 +42,58 @@ template <std::size_t N> using Vec = Eigen::Matrix<double, N, 1>;
 
 namespace osvr {
 namespace vbtracker {
+    struct OptimCommonData {
+        CameraParameters const &camParams;
+        ConfigParams const &initialParams;
+    };
+    class OptimData {
+      public:
+        OptimData(OptimData const &) = delete;
+        OptimData(OptimData &&) = default;
+        OptimData &operator=(OptimData const &) = delete;
+
+        static OptimData make(ConfigParams const &params,
+                              OptimCommonData const &commonData) {
+
+            auto system = makeHDKTrackingSystem(params);
+            /// @todo this shouldn't be required if we don't have an IMU?
+            system->setCameraPose(Eigen::Isometry3d::Identity());
+            auto &body = system->getBody(BodyId(0));
+            auto &target = *(body.getTarget(TargetId(0)));
+            return OptimData(std::move(system), body, target,
+                             commonData.camParams);
+        }
+        static OptimData make(OptimCommonData const &commonData) {
+            return OptimData::make(commonData.initialParams, commonData);
+        }
+
+        TrackingSystem &getSystem() { return *system_; }
+        TrackedBody &getBody() { return *body_; }
+        TrackedBodyTarget &getTarget() { return *target_; }
+        CameraParameters const &getCamParams() { return camParams_; }
+
+      private:
+        OptimData(std::unique_ptr<TrackingSystem> &&system, TrackedBody &body,
+                  TrackedBodyTarget &target, CameraParameters const &camParams)
+            : camParams_(camParams), system_(std::move(system)), body_(&body),
+              target_(&target) {}
+
+        CameraParameters const &camParams_;
+        std::unique_ptr<TrackingSystem> system_;
+        TrackedBody *body_ = nullptr;
+        TrackedBodyTarget *target_ = nullptr;
+    };
+
     class MainAlgoUnderStudy {
       public:
-        void operator()(CameraParameters const &camParams,
-                        TrackingSystem &system, TrackedBodyTarget &target,
-                        TimestampedMeasurements const &row) {
-            auto inputData = makeImageOutputDataFromRow(row, camParams);
-            auto indices =
-                system.updateBodiesFromVideoData(std::move(inputData));
-            gotPose = target.getBody().hasPoseEstimate();
+        void operator()(OptimData &optim, TimestampedMeasurements const &row) {
+            auto inputData =
+                makeImageOutputDataFromRow(row, optim.getCamParams());
+            auto indices = optim.getSystem().updateBodiesFromVideoData(
+                std::move(inputData));
+            gotPose = optim.getBody().hasPoseEstimate();
             if (gotPose) {
-                pose = target.getBody().getState().getIsometry();
+                pose = optim.getBody().getState().getIsometry();
             }
         }
         bool havePose() const { return gotPose; }
@@ -65,14 +106,13 @@ namespace vbtracker {
 
     class RansacOneEuro {
       public:
-        void operator()(CameraParameters const &camParams,
-                        TrackingSystem &system, TrackedBodyTarget &target,
-                        TimestampedMeasurements const &row) {
+        void operator()(OptimData &optim, TimestampedMeasurements const &row) {
             gotPose = false;
             Eigen::Vector3d pos;
             Eigen::Quaterniond quat;
-            auto gotRansac = target.uncalibratedRANSACPoseEstimateFromLeds(
-                camParams, pos, quat);
+            auto gotRansac =
+                optim.getTarget().uncalibratedRANSACPoseEstimateFromLeds(
+                    optim.getCamParams(), pos, quat);
             if (gotRansac) {
                 double dt = 1;
                 if (isFirst) {
@@ -120,13 +160,12 @@ namespace osvr {
 namespace vbtracker {
     void runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
-        CameraParameters const &camParams,
-        ConfigParams const &initialConfigParams) {
+        OptimCommonData const &commonData) {
         using ParamVec = Vec<3>;
         const double REALLY_BIG = 1000.;
 
         auto func = [&](ParamVec const &paramVec) -> double {
-            ConfigParams params = initialConfigParams;
+            ConfigParams params = commonData.initialParams;
 
             /// Update config from provided param vec
             /// positional noise
@@ -140,36 +179,23 @@ namespace vbtracker {
 
             params.measurementVarianceScaleFactor = paramVec[2];
 
-            auto system = makeHDKTrackingSystem(params);
-            /// @todo this shouldn't be required if we don't have an IMU?
-            system->setCameraPose(Eigen::Isometry3d::Identity());
-
-            auto &target = *(system->getBody(BodyId(0)).getTarget(TargetId(0)));
+            auto optim = OptimData::make(params, commonData);
 
             MainAlgoUnderStudy mainAlgo;
             RansacOneEuro ransacOneEuro;
             std::size_t samples = 0;
-            std::size_t numRansac = 0;
-            std::size_t numRansacButNotMain = 0;
             double accum = 0;
             std::cout << "Starting processing data rows..." << std::endl;
 
             /// Main algorithm loop
             for (auto const &rowPtr : data) {
-                mainAlgo(camParams, *system, target, *rowPtr);
-                ransacOneEuro(camParams, *system, target, *rowPtr);
-                if (ransacOneEuro.havePose()) {
-                    numRansac++;
-                    if (mainAlgo.havePose()) {
-                        auto cost = costMeasurement(ransacOneEuro.getPose(),
-                                                    mainAlgo.getPose());
-                        // std::cout << "Cost this frame: " << cost <<
-                        // std::endl;
-                        accum += cost;
-                        samples++;
-                    } else {
-                        numRansacButNotMain++;
-                    }
+                mainAlgo(optim, *rowPtr);
+                ransacOneEuro(optim, *rowPtr);
+                if (ransacOneEuro.havePose() && mainAlgo.havePose()) {
+                    auto cost = costMeasurement(ransacOneEuro.getPose(),
+                                                mainAlgo.getPose());
+                    accum += cost;
+                    samples++;
                 }
             }
 
@@ -225,7 +251,8 @@ int main() {
     params.debug = false;
     params.imu.path = "";
 
-    osvr::vbtracker::runOptimizer(data, camParams, params);
+    osvr::vbtracker::runOptimizer(
+        data, osvr::vbtracker::OptimCommonData{camParams, params});
 
     std::cout << "Press enter to exit." << std::endl;
     std::cin.ignore();
