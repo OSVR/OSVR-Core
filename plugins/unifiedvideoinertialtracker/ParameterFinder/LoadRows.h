@@ -32,6 +32,7 @@
 #include <MakeHDKTrackingSystem.h>
 
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/Finally.h>
 
 // Library/third-party includes
 #include <Eigen/Core>
@@ -86,11 +87,11 @@ namespace vbtracker {
         }
         bool operator()(std::string const &line, std::size_t beginPos,
                         std::size_t endPos) {
-            field_++;
+            auto advanceFieldAfterProcessing = util::finally([&] { field_++; });
             csvtools::StringField strField(line, beginPos, endPos);
             // std::cout << strField.beginPos() << ":" <<
             // strField.virtualEndPos() << std::endl;
-            if (field_ <= 3) {
+            if (field_ < 3) {
                 // refx/y/z
                 bool success = false;
                 double val;
@@ -101,7 +102,7 @@ namespace vbtracker {
                 row_.xlate[field_] = val;
                 return true;
             }
-            if (field_ <= 7) {
+            if (field_ < 7) {
                 // refqw/qx/qy/qz
                 bool success = false;
                 double val;
@@ -110,27 +111,27 @@ namespace vbtracker {
                     return false;
                 }
                 switch (field_) {
-                case 4:
+                case 3:
                     row_.rot.w() = val;
                     break;
-                case 5:
+                case 4:
                     row_.rot.x() = val;
                     break;
-                case 6:
+                case 5:
                     row_.rot.y() = val;
                     break;
-                case 7:
+                case 6:
                     row_.rot.z() = val;
                     break;
                 }
                 return true;
             }
-            if (field_ == 8) {
+            if (field_ == 7) {
                 // sec
                 auto success = helper_.getField(strField, row_.tv.seconds);
                 return success;
             }
-            if (field_ == 9) {
+            if (field_ == 8) {
                 // usec
                 auto success = helper_.getField(strField, row_.tv.microseconds);
                 if (success) {
