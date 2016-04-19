@@ -41,70 +41,70 @@
 // Standard includes
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 
 #undef OSVR_UVBI_DISABLE_AUTOCALIB
+#undef OSVR_UVBI_DEBUG_EMISSION_DIRECTION
+#undef DEBUG_REAR_BEACON_TRANSFORM
 
 namespace osvr {
 namespace vbtracker {
     namespace {
-        // clang-format off
-    /// @brief Determines the LED IDs for the OSVR HDK sensor 0 (face plate)
-    /// These are from the as-built measurements.
-    /// First number in comments is overall LED ID, second is LED ID in the
-    /// sensor it was in
-    static const std::vector<std::string>
-        OsvrHdkLedIdentifier_SENSOR0_PATTERNS = {
-            ".**....*........"    //  5
-          , "....**...*......"    //  6
-          , ".*...**........."    //  3
-          , ".........*....**"    //  4
-          , "..*.....**......"    //  1
-          , "*......**......."    //  2
-          , "....*.*..*......"    // 10
-          , ".*.*.*.........."    //  8
-          , ".........*.**..."    //  9
-          , "**...........*.."    //  7
-          , "....*.*......*.."    // 11
-          , "*.......*.*....."    // 28
-          , ".*........*.*..."    // 27
-          , ".*.........*.*.."    // 25
-          , "..*..*.*........"    // 15
-          , "....*...*.*....."    // 16
-          , "...*.*........*."    // 17
-          , "...*.....*.*...."    // 18
-          , "....*......*..*."    // 19
-          , "....*..*....*..."    // 20
-          , "..*...*........*"    // 21
-          , "........*..*..*."    // 22
-          , ".......*...*...*"    // 23
-          , "......*...*..*.."    // 24
-          , ".......*....*..*"    // 14
-          , "..*.....*..*...."    // 26
-          , "*....*....*....."    // 13
-          , "...*....*...*..."    // 12
-          , "..*.....*...*..."    // 29
-          , "...*......*...*."    // 30
-          , "***...*........*"    // 31
-          , "...****..*......"    // 32
-          , "*.*..........***"    // 33
-          , "**...........***"    // 34
-    };
+        /// @brief Determines the LED IDs for the OSVR HDK sensor 0 (face plate)
+        /// These are from the as-built measurements.
+        /// First number in comments is overall LED ID, second is LED ID in the
+        /// sensor it was in
+        static const std::vector<std::string>
+            OsvrHdkLedIdentifier_SENSOR0_PATTERNS = {
+                ".**....*........", //  5
+                "....**...*......", //  6
+                ".*...**.........", //  3
+                ".........*....**", //  4
+                "..*.....**......", //  1
+                "*......**.......", //  2
+                "....*.*..*......", // 10
+                ".*.*.*..........", //  8
+                ".........*.**...", //  9
+                "**...........*..", //  7
+                "....*.*......*..", // 11
+                "*.......*.*.....", // 28
+                ".*........*.*...", // 27
+                ".*.........*.*..", // 25
+                "..*..*.*........", // 15
+                "....*...*.*.....", // 16
+                "...*.*........*.", // 17
+                "...*.....*.*....", // 18
+                "....*......*..*.", // 19
+                "....*..*....*...", // 20
+                "..*...*........*", // 21
+                "........*..*..*.", // 22
+                ".......*...*...*", // 23
+                "......*...*..*..", // 24
+                ".......*....*..*", // 14
+                "..*.....*..*....", // 26
+                "*....*....*.....", // 13
+                "...*....*...*...", // 12
+                "..*.....*...*...", // 29
+                "...*......*...*.", // 30
+                "***...*........*", // 31
+                "...****..*......", // 32
+                "*.*..........***", // 33
+                "**...........***"  // 34
+        };
 
-    /// @brief Determines the LED IDs for the OSVR HDK sensor 1 (back plate)
-    /// These are from the as-built measurements.
-    static const std::vector<std::string>
-        OsvrHdkLedIdentifier_SENSOR1_PATTERNS = {
-            "X............**.."    // 37 31 // never actually turns on in production
-          , "......**.*......"    // 38 32
-          , ".............***"    // 39 33
-          , "X..........*....."    // 40 34 // never actually turns on in production
-          , "...*.......**..."    // 33 27
-          , "...**.....*....."    // 34 28
-    };
-        // clang-format on
-
-        static const auto SCALE_FACTOR = 0.001; // mm to m
+        /// @brief Determines the LED IDs for the OSVR HDK sensor 1 (back plate)
+        /// These are from the as-built measurements.
+        static const std::vector<std::string>
+            OsvrHdkLedIdentifier_SENSOR1_PATTERNS = {
+                "X............**..", // 37 31 // unused in production
+                "......**.*......",  // 38 32
+                ".............***",  // 39 33
+                "X..........*.....", // 40 34 // unused in production
+                "...*.......**...",  // 33 27
+                "...**.....*....."   // 34 28
+        };
+        static const auto SCALE_FACTOR = std::milli::den; // mm to m
 
         template <typename Scalar> using cvMatx33 = cv::Matx<Scalar, 3, 3>;
 
@@ -134,7 +134,7 @@ namespace vbtracker {
         /// Add the scaling part.
         template <typename Scalar>
         inline cvMatx33<Scalar> getTransformAndScale() {
-            return getTransform<Scalar>() * SCALE_FACTOR;
+            return getTransform<Scalar>() * (Scalar(1) / Scalar(SCALE_FACTOR));
         }
 
         /// Transform points: we scale in addition to rotation/basis change
@@ -223,6 +223,15 @@ namespace vbtracker {
                 };
             range_transform(OsvrHdkLedLocations_SENSOR1, locationsEnd,
                             transformBackPoints);
+#ifdef DEBUG_REAR_BEACON_TRANSFORM
+            std::cout << "Front beacon position (id 32): "
+                      << data.locations[32 - 1] << " (originally "
+                      << OsvrHdkLedLocations_SENSOR0[32 - 1] << ")"
+                      << std::endl;
+            std::cout << "Back beacon position (id 40): "
+                      << data.locations[40 - 1] << " (originally "
+                      << OsvrHdkLedLocations_SENSOR1.back() << ")" << std::endl;
+#endif
         }
 
         /// Put the emission directions on.
