@@ -113,7 +113,7 @@ namespace vbtracker {
             markBeaconFixed(makeZeroBased(beacon));
         }
 
-        TargetDataSummary cleanAndValidate();
+        TargetDataSummary cleanAndValidate(bool silent = false);
     };
 
     /// Output operator for a target data summary.
