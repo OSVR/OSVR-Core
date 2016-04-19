@@ -120,12 +120,21 @@ namespace vbtracker {
       public:
         void operator()(OptimData &optim, TimestampedMeasurements const &row) {
             gotPose = false;
+            flippedPose_ = false;
             Eigen::Vector3d pos;
             Eigen::Quaterniond quat;
             auto gotRansac =
                 optim.getTarget().uncalibratedRANSACPoseEstimateFromLeds(
                     optim.getCamParams(), pos, quat);
             if (gotRansac) {
+                /// I kept my head upright, but sometimes RANSAC is doing the
+                /// wrong thing and picking a pose rotated by 180 about z
+                double yAxisYComponent = (quat * Eigen::Vector3d::UnitY()).y();
+                if (yAxisYComponent < 0) {
+                    // std::cout << "RANSAC picked upside-down!" << std::endl;
+                    flippedPose_ = true;
+                    return;
+                }
                 double dt = 1;
                 if (isFirst) {
                     isFirst = false;
@@ -138,6 +147,7 @@ namespace vbtracker {
                 pose = ransacPoseFilter.getIsometry();
             }
         }
+        bool flippedPose() const { return flippedPose_; }
         bool havePose() const { return gotPose; }
         Eigen::Isometry3d const &getPose() const { return pose; }
 
@@ -146,6 +156,7 @@ namespace vbtracker {
         TimeValue last;
         bool isFirst = true;
         bool gotPose = false;
+        bool flippedPose_ = false;
         Eigen::Isometry3d pose;
     };
 
@@ -230,7 +241,7 @@ namespace vbtracker {
             auto optim = OptimData::make(commonData);
             FeedDataWithoutProcessing mainAlgo;
             RansacOneEuro ransacOneEuro;
-
+            std::size_t flipped = 0;
             /// Main algorithm loop
             for (auto const &rowPtr : data) {
                 // even though we aren't using the results, we have to
@@ -243,10 +254,14 @@ namespace vbtracker {
                     newSample->refPose =
                         makeIsometry(rowPtr->xlate, rowPtr->rot);
                     samples.emplace_back(std::move(newSample));
+                } else if (ransacOneEuro.flippedPose()) {
+                    ++flipped;
                 }
             }
 
-            std::cout << "Initial tracking complete." << std::endl;
+            std::cout << "Initial tracking complete: " << samples.size()
+                      << " valid samples, " << flipped << " flipped."
+                      << std::endl;
         }
 
         if (samples.empty()) {
