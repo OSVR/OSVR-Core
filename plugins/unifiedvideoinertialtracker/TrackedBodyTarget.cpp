@@ -24,15 +24,15 @@
 
 // Internal Includes
 #include "TrackedBodyTarget.h"
-#include "TrackedBody.h"
-#include "LED.h"
-#include "cvToEigen.h"
+#include "BodyTargetInterface.h"
 #include "HDKLedIdentifier.h"
+#include "LED.h"
 #include "PoseEstimatorTypes.h"
 #include "PoseEstimator_RANSAC.h"
-#include "PoseEstimator_SCAATKalman.h"
 #include "PoseEstimator_RANSACKalman.h"
-#include "BodyTargetInterface.h"
+#include "PoseEstimator_SCAATKalman.h"
+#include "TrackedBody.h"
+#include "cvToEigen.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
