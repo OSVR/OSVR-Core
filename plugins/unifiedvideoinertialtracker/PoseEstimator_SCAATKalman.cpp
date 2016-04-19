@@ -325,6 +325,8 @@ namespace vbtracker {
         /// correction step? The order we filter them in is rather arbitrary...
         const Eigen::Matrix3d rotate =
             Eigen::Matrix3d(p.state.getCombinedQuaternion());
+        /// @todo use this for more speed?
+        // Eigen::RowVector3d zRotate = rotate.row(2);
 
         std::copy_if(
             begin(leds), end(leds), std::back_inserter(ret), [&](Led *ledPtr) {
@@ -348,12 +350,25 @@ namespace vbtracker {
                     (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
 #if 0
 
-                    /// Beacon 32 is right on the front, should be facing nice and forward.
-                if (makeOneBased(id) == OneBasedBeaconId(32)) {
+                /// Beacon 32 is right on the front, should be facing nice and
+                /// forward.
+                // static const auto beaconInspected = OneBasedBeaconId(32);
+                /// Beacon 10 is on the right side
+                // static const auto beaconInspected = OneBasedBeaconId(10);
+                /// Beacon 5 on on the left side
+                static const auto beaconInspected = OneBasedBeaconId(5);
+                /// Beacon 9 is on the top
+
+                if (makeOneBased(id) == beaconInspected) {
                     static ::util::Stride s(20);
                     if (s) {
+                        auto altZ =
+                            zRotate *
+                            cvToVector(p.beaconEmissionDirection[index]);
                         std::cout
-                            << "Beacon 32: beacon emission direction is "
+                            << "Beacon " << beaconInspected.value()
+                            << ": alternate z component is " << altZ
+                            << " and beacon emission direction is "
                             << (rotate *
                                 cvToVector(p.beaconEmissionDirection[index]))
                                    .transpose()
@@ -364,10 +379,15 @@ namespace vbtracker {
 #endif
                 if (zComponent > 0.) {
                     if (m_extraVerbose) {
-                        std::cout << "Rejecting an LED at "
-                                  << led.getLocationForTracking()
-                                  << " claiming ID "
-                                  << led.getOneBasedID().value() << std::endl;
+                        std::cout
+                            << "Rejecting an LED at "
+                            << led.getLocationForTracking() << " claiming ID "
+                            << led.getOneBasedID().value()
+                            << " thus emission vec "
+                            << (rotate *
+                                cvToVector(p.beaconEmissionDirection[index]))
+                                   .transpose()
+                            << std::endl;
                     }
                     /// This means the LED is pointed away from us - so we
                     /// shouldn't be able to see it.
@@ -375,8 +395,7 @@ namespace vbtracker {
 
                     /// @todo This could be a mis-identification, or it could
                     /// mean we're in a totally messed up state. Do we count
-                    /// this
-                    /// against ourselves?
+                    /// this against ourselves?
                     numBad++;
                     return false;
                 }
