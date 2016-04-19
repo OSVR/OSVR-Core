@@ -218,9 +218,26 @@ namespace vbtracker {
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction, if the input
         // points are not inverted.
-
+        bool flipped = false;
+        if (tvec.at<double>(2) < 0) {
+// -z means the wrong side of the pinhole
+/// @todo find out why OpenCV is now returning these values sometimes
+#if 0
+            std::cout << "On the wrong side of the looking glass:" << tvec
+                      << std::endl;
+#endif
+            // So, we invert translation, and apply 180 rotation (to rotation)
+            // about z.
+            tvec *= -1;
+            flipped = true;
+        }
         outXlate = cvToVector3d(tvec);
         outQuat = cvRotVecToQuat(rvec);
+        if (flipped) {
+            outQuat = Eigen::Quaterniond(
+                          Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ())) *
+                      outQuat;
+        }
         return true;
     }
 
