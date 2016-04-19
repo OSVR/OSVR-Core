@@ -46,6 +46,12 @@ template <std::size_t N> using Vec = Eigen::Matrix<double, N, 1>;
 
 namespace osvr {
 namespace vbtracker {
+
+    template<typename T>
+    inline T clamp(T minVal, T maxVal, T v) {
+        return std::max(minVal, std::min(maxVal, v));
+    }
+
     struct OptimCommonData {
         CameraParameters const &camParams;
         ConfigParams const &initialParams;
@@ -399,12 +405,12 @@ namespace vbtracker {
     void runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         OptimCommonData const &commonData) {
-        using ParamVec = Vec<3>;
+        using ParamVec = Vec<2>;
         const double REALLY_BIG = 1000.;
 
-        ParamVec x = {4.14e-6, 1e-2, 5e-2};
+        ParamVec x = {0.04348175147568786, 0.07100278320909659};
         auto ret = ei_newuoa_wrapped(
-            x, {1e-16, 1e-1}, 100, [&](ParamVec const &paramVec) -> double {
+            x, {1e-16, 1e-1}, 10, [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
 
                 /// Update config from provided param vec
@@ -417,7 +423,8 @@ namespace vbtracker {
                     params.processNoiseAutocorrelation[4] =
                         params.processNoiseAutocorrelation[5] = paramVec[1];
 
-                params.measurementVarianceScaleFactor = paramVec[2];
+                //params.beaconProcessNoise = paramVec[2];
+                //params.measurementVarianceScaleFactor = paramVec[2];
 
                 auto optim = OptimData::make(params, commonData);
 
@@ -485,14 +492,15 @@ int main() {
 
     params.highResidualVariancePenalty = 15;
     params.initialBeaconError = 1e-16;
-    params.beaconProcessNoise = 0;
+    params.beaconProcessNoise = 1.e-21;
     params.shouldSkipBrightLeds = true;
-    params.brightLedVariancePenalty = 16;
+    params.measurementVarianceScaleFactor = 0.03020921164465682;
+    //params.brightLedVariancePenalty = 16;
     params.offsetToCentroid = false;
     params.manualBeaconOffset[0] = params.manualBeaconOffset[1] =
         params.manualBeaconOffset[2] = 0;
-    params.linearVelocityDecayCoefficient = 1;
-    params.angularVelocityDecayCoefficient = 1;
+    //params.linearVelocityDecayCoefficient = 0.9;
+    //params.angularVelocityDecayCoefficient = 1;
     params.debug = false;
     params.imu.path = "";
 
