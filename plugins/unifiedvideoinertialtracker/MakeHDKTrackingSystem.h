@@ -268,7 +268,7 @@ namespace vbtracker {
                   begin(data.baseMeasurementVariances));
 
         /// Clean and validate the data.
-        auto summary = data.cleanAndValidate();
+        auto summary = data.cleanAndValidate(params.silent);
 
         auto opticalTarget = hmd->createTarget(
 #if 0
