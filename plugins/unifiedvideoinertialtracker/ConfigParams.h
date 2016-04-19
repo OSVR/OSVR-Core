@@ -37,6 +37,8 @@
 namespace osvr {
 namespace vbtracker {
 
+    static const double BaseMeasurementVariance = 3.0;
+
     struct IMUInputParams {
         std::string path =
             "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
@@ -140,7 +142,7 @@ namespace vbtracker {
 
         /// This used to be different than the other beacons, but now it's
         /// mostly the same.
-        double backPanelMeasurementError = 3.0; // 3.0e-6;
+        double backPanelMeasurementError = BaseMeasurementVariance;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
@@ -150,7 +152,7 @@ namespace vbtracker {
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
-        double highResidualVariancePenalty = 10.;
+        double highResidualVariancePenalty = 15.;
 
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
@@ -171,7 +173,7 @@ namespace vbtracker {
 
         /// Should we attempt to skip bright-mode LEDs? The alternative is to
         /// just give them slightly higher variance.
-        bool shouldSkipBrightLeds = false;
+        bool shouldSkipBrightLeds = true;
 
         /// If shouldSkipBrightLeds is false, we use this value as a factor to
         /// increase the measurement variance of bright LEDs, to account for the
