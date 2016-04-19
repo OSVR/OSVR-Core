@@ -39,6 +39,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <numeric>
 
@@ -415,12 +416,14 @@ namespace vbtracker {
     void runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         OptimCommonData const &commonData) {
-        using ParamVec = Vec<3>;
+        using ParamVec = Vec<5>;
         const double REALLY_BIG = 1000.;
 
-        ParamVec x = {0.04348175147568786, 0.07100278320909659, 0.03020921164465682};
+        ParamVec x;
+        x << 0.1102492565694375, 0.07597454541652442, 0.03940958213762528, 0.9,
+            0.9;
         auto ret = ei_newuoa_wrapped(
-            x, {1e-16, 1e-1}, 30, [&](ParamVec const &paramVec) -> double {
+            x, {1e-16, 1e-1}, 300, [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
 
                 /// Update config from provided param vec
@@ -435,6 +438,9 @@ namespace vbtracker {
 
                 // params.beaconProcessNoise = paramVec[2];
                 params.measurementVarianceScaleFactor = paramVec[2];
+
+                params.linearVelocityDecayCoefficient = paramVec[3];
+                params.angularVelocityDecayCoefficient = paramVec[4];
 
                 auto optim = OptimData::make(params, commonData);
 
@@ -459,9 +465,10 @@ namespace vbtracker {
                 /// Cost accumulation/post-processing.
                 if (samples > 0) {
                     auto avgCost = (accum / static_cast<double>(samples));
+                    auto numResets = optim.getTarget().numTrackingResets();
                     /// Sometimes gets stuck in parameter ditches where we get
                     /// very few tracked frames
-                    auto effectiveCost = avgCost / samples;
+                    auto effectiveCost = avgCost * numResets / samples;
 #if 0
                     std::cout << "Overall average cost: " << avgCost << " over "
                               << samples << " eligible frames, " << std::endl;
@@ -470,10 +477,12 @@ namespace vbtracker {
                            "effective cost of "
                         << effectiveCost << std::endl;
 #else
-                    std::cout << effectiveCost
-                              << "\t effective cost (average cost of "
-                              << avgCost << " over " << samples
-                              << " eligible frames)\n";
+                    std::cout
+                        << std::setw(15) << std::to_string(effectiveCost)
+                        << " effective cost (average cost of " << std::setw(9)
+                        << avgCost << " over " << std::setw(4) << samples
+                        << " eligible frames with " << std::setw(2) << numResets
+                        << " resets)\n";
 #endif
                     return effectiveCost;
                 }
@@ -485,7 +494,7 @@ namespace vbtracker {
                   << " and these parameter values:" << std::endl;
         Eigen::IOFormat format;
         format.precision = Eigen::FullPrecision;
-        std::cout << x.transpose().format(format) << std::endl;
+        std::cout << x.format(format) << std::endl;
     }
 
 } // namespace vbtracker
