@@ -32,6 +32,8 @@
 #include "TrackedBody.h"
 #include "TrackingSystem.h"
 
+#include <cvToEigen.h>
+
 // Library/third-party includes
 // - none
 
@@ -105,35 +107,27 @@ namespace vbtracker {
 
         template <typename Scalar> using cvMatx33 = cv::Matx<Scalar, 3, 3>;
 
-        /// Map a cv::Matx matrix with Eigen
-        template <typename Scalar, size_t Rows, size_t Cols>
-        inline Eigen::Map<Eigen::Matrix<Scalar, Rows, Cols, 0>>
-        map(cv::Matx<Scalar, Rows, Cols> &cvMatx) {
-            return Eigen::Matrix<Scalar, Rows, Cols>::Map(cvMatx.val);
-        }
-
-        /// @overload
-        /// for const argument
-        template <typename Scalar, size_t Rows, size_t Cols>
-        inline Eigen::Map<const Eigen::Matrix<Scalar, Rows, Cols, 0>>
-        map(cv::Matx<Scalar, Rows, Cols> const &cvMatx) {
-            return Eigen::Matrix<Scalar, Rows, Cols>::Map(cvMatx.val);
-        }
-
         /// Rotation/basis-change part.
-        template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
+        template <typename Scalar> inline cvMatx33<Scalar> get180AboutY() {
+#if 0
             cvMatx33<Scalar> ret;
             map(ret) = Eigen::AngleAxis<Scalar>(
                            Scalar(M_PI), Eigen::Matrix<Scalar, 3, 1>::UnitY())
                            .toRotationMatrix();
-#if 0
-			ret = cvMatx33<Scalar>::eye();
+#else
+            auto ret = cvMatx33<Scalar>::eye();
             // flip sign of x and z axes to make the HDK coordinate system match
-            // our desired one.
+            // our desired one: this is equivalent to 180 degree rotation about
+            // y.
             ret(0, 0) = -1;
             ret(2, 2) = -1;
 #endif
             return ret;
+        }
+
+        /// Rotation/basis-change part.
+        template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
+            return get180AboutY<Scalar>();
         }
 
         /// Add the scaling part.
@@ -158,6 +152,12 @@ namespace vbtracker {
             static const cvMatx33<Scalar> xformMatrix = getTransform<Scalar>();
             return xformMatrix * input;
         }
+
+        inline LocationPoint rotatePoint180AboutY(LocationPoint pt) {
+            pt.x *= -1;
+            pt.z *= -1;
+            return pt;
+        }
     } // namespace
 
     inline std::unique_ptr<TrackingSystem>
@@ -178,10 +178,11 @@ namespace vbtracker {
                 "Could not create a tracked body for the HMD!");
         }
 
-        auto numFrontBeacons = OsvrHdkLedLocations_SENSOR0.size();
-        auto numRearBeacons = OsvrHdkLedLocations_SENSOR1.size();
-        auto const useRear = params.includeRearPanel;
-        auto numBeacons = numFrontBeacons + (useRear ? numRearBeacons : 0);
+        const auto numFrontBeacons = OsvrHdkLedLocations_SENSOR0.size();
+        const auto numRearBeacons = OsvrHdkLedLocations_SENSOR1.size();
+        const auto useRear = params.includeRearPanel;
+        const auto numBeacons =
+            numFrontBeacons + (useRear ? numRearBeacons : 0);
 
         /// Start setting up the data.
         TargetSetupData data;
@@ -208,23 +209,21 @@ namespace vbtracker {
         if (useRear) {
             // distance between front and back panel target origins, in mm,
             // because we'll apply this before converting coordinate systems.
-            auto distanceBetweenPanels =
+            // Yes, all these transformations have been checked.
+            const auto distanceBetweenPanels =
                 static_cast<float>(params.headCircumference / M_PI * 10.f +
                                    params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
-            auto rotate180aboutY = [](LocationPoint pt) {
-                return LocationPoint(-pt.x, pt.y, -pt.z);
-            };
-            auto transformBackPoints = [distanceBetweenPanels,
-                                        &rotate180aboutY](LocationPoint pt) {
-                auto p = rotate180aboutY(pt) -
-                         LocationPoint(0, 0, distanceBetweenPanels);
-                return transformFromHDKData(p);
-            };
             std::transform(begin(OsvrHdkLedLocations_SENSOR1),
                            end(OsvrHdkLedLocations_SENSOR1), locationsEnd,
                            transformBackPoints);
+            auto transformBackPoints =
+                [distanceBetweenPanels](LocationPoint pt) {
+                    auto p = rotatePoint180AboutY(pt) -
+                             LocationPoint(0, 0, distanceBetweenPanels);
+                    return transformFromHDKData(p);
+                };
         }
 
         std::transform(
