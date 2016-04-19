@@ -109,6 +109,7 @@ namespace vbtracker {
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
+        std::size_t trackingResets = 0;
         std::ostringstream outputSink;
     };
 
@@ -480,6 +481,7 @@ namespace vbtracker {
 #error                                                                         \
     "We may not be able/willing to run right over the body velocity just because this target lost its fix"
 #endif
+        m_impl->trackingResets++;
         // Zero out velocities if we're coming from Kalman.
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSACWhenBlobDetected:
@@ -500,6 +502,10 @@ namespace vbtracker {
 
     LedPtrList const &TrackedBodyTarget::usableLeds() const {
         return m_impl->usableLeds;
+    }
+
+    std::size_t TrackedBodyTarget::numTrackingResets() const {
+        return m_impl->trackingResets;
     }
 
     LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }

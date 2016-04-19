@@ -145,6 +145,10 @@ namespace vbtracker {
         /// Get a list of pointers to all recognized, in-range beacons/leds
         LedPtrList const &usableLeds() const;
 
+        /// Get the number of times tracking has reset - for
+        /// debugging/optimization.
+        std::size_t numTrackingResets() const;
+
       private:
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
