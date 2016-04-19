@@ -27,6 +27,7 @@ add_library(uvbi-core STATIC
     BeaconSetupData.h
     BodyTargetInterface.h
     CannedIMUMeasurement.h
+    Clamp.h
     ConfigParams.cpp
     ConfigParams.h
     ForEachTracked.h

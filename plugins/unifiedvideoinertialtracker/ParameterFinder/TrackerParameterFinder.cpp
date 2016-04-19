@@ -47,11 +47,6 @@ template <std::size_t N> using Vec = Eigen::Matrix<double, N, 1>;
 namespace osvr {
 namespace vbtracker {
 
-    template<typename T>
-    inline T clamp(T minVal, T maxVal, T v) {
-        return std::max(minVal, std::min(maxVal, v));
-    }
-
     struct OptimCommonData {
         CameraParameters const &camParams;
         ConfigParams const &initialParams;
