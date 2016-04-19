@@ -280,6 +280,27 @@ namespace vbtracker {
                 0.5 * p.state.errorCovariance() +
                 0.5 * p.state.errorCovariance().transpose();
             p.state.errorCovariance() = cov;
+
+#ifdef DEBUG_VELOCITY
+            {
+                static ::util::Stride s(77);
+                if (++s) {
+                    if (p.state.velocity().squaredNorm() > 0.01) {
+                        // fast enough to say something about
+                        std::cout
+                            << "Velocity: " << p.state.velocity().transpose()
+                            << "\n";
+                    }
+                    double angSpeed = p.state.angularVelocity().norm();
+                    if (angSpeed > 0.1) {
+                        std::cout << "AngVel: " << angSpeed << " about "
+                                  << (p.state.angularVelocity() / angSpeed)
+                                         .transpose()
+                                  << "\n";
+                    }
+                }
+            }
+#endif
         }
 
         /// Probation: Dealing with ratios of bad to good residuals

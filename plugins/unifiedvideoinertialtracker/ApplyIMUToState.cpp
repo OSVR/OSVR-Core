@@ -27,13 +27,14 @@
 #include "SpaceTransformations.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
 #include <osvr/Kalman/AngularVelocityMeasurement.h>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Util/EigenQuatExponentialMap.h>
+#include <util/Stride.h>
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -51,6 +52,21 @@ namespace vbtracker {
         /// @todo transform variance?
 
         kalman::AbsoluteOrientationMeasurement<BodyState> kalmanMeas{quat, var};
+#if 0
+        {
+            static ::util::Stride s(201);
+            if (++s) {
+                Eigen::AngleAxisd pred(state.getCombinedQuaternion());
+                Eigen::AngleAxisd meas(quat);
+                std::cout << "Predicted: " << pred.angle() << " about "
+                          << pred.axis().transpose() << "\n";
+                std::cout << "Measured: " << meas.angle() << " about "
+                          << meas.axis().transpose() << "\n";
+                std::cout << "Residual: "
+                          << kalmanMeas.getResidual(state).transpose() << "\n";
+            }
+        }
+#endif
         kalman::correct(state, processModel, kalmanMeas);
     }
 
@@ -66,9 +82,9 @@ namespace vbtracker {
         /// Rotate it into camera space - it's bTb and we want cTc
         /// @todo do this without rotating into camera space?
         Eigen::Quaterniond cTb = state.getQuaternion();
-        //Eigen::Matrix3d bTc(state.getQuaternion().conjugate());
-        Eigen::Quaterniond incrementalQuat = cTb * util::quat_exp_map(angVel).exp() *
-            cTb.conjugate();
+        // Eigen::Matrix3d bTc(state.getQuaternion().conjugate());
+        Eigen::Quaterniond incrementalQuat =
+            cTb * util::quat_exp_map(angVel).exp() * cTb.conjugate();
         angVel = util::quat_exp_map(incrementalQuat).ln();
         // angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
         /// @todo transform variance?
