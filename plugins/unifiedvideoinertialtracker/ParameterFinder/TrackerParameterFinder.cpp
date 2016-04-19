@@ -60,8 +60,6 @@ namespace vbtracker {
                               OptimCommonData const &commonData) {
 
             auto system = makeHDKTrackingSystem(params);
-            /// @todo this shouldn't be required if we don't have an IMU?
-            system->setCameraPose(Eigen::Isometry3d::Identity());
             auto &body = system->getBody(BodyId(0));
             auto &target = *(body.getTarget(TargetId(0)));
             return OptimData(std::move(system), body, target,
@@ -96,6 +94,7 @@ namespace vbtracker {
             optim.getSystem().updateLedsFromVideoData(std::move(inputData));
         }
     };
+
     class MainAlgoUnderStudy {
       public:
         void operator()(OptimData &optim, TimestampedMeasurements const &row) {
@@ -405,7 +404,7 @@ namespace vbtracker {
 
         ParamVec x = {4.14e-6, 1e-2, 5e-2};
         auto ret = ei_newuoa_wrapped(
-            x, {1e-16, 1e-1}, 25, [&](ParamVec const &paramVec) -> double {
+            x, {1e-16, 1e-1}, 100, [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
 
                 /// Update config from provided param vec
@@ -426,7 +425,7 @@ namespace vbtracker {
                 RansacOneEuro ransacOneEuro;
                 std::size_t samples = 0;
                 double accum = 0;
-                std::cout << "Starting processing data rows..." << std::endl;
+                // std::cout << "Starting processing data rows..." << std::endl;
 
                 /// Main algorithm loop
                 for (auto const &rowPtr : data) {
@@ -443,16 +442,22 @@ namespace vbtracker {
                 /// Cost accumulation/post-processing.
                 if (samples > 0) {
                     auto avgCost = (accum / static_cast<double>(samples));
-                    std::cout << "Overall average cost: " << avgCost << " over "
-                              << samples << " eligible frames " << std::endl;
                     /// Sometimes gets stuck in parameter ditches where we get
-                    /// very few tracked frames, and for some reason the above
-                    /// adjustment isn't working.
+                    /// very few tracked frames
                     auto effectiveCost = avgCost / samples;
+#if 0
+                    std::cout << "Overall average cost: " << avgCost << " over "
+                              << samples << " eligible frames, " << std::endl;
                     std::cout
                         << "Dividing cost by number of tracked frames gives "
                            "effective cost of "
                         << effectiveCost << std::endl;
+#else
+                    std::cout << effectiveCost
+                              << "\t effective cost (average cost of "
+                              << avgCost << " over " << samples
+                              << " eligible frames)\n";
+#endif
                     return effectiveCost;
                 }
                 std::cout << "No samples with pose for both algorithms?"
@@ -476,6 +481,8 @@ int main() {
 
     osvr::vbtracker::ConfigParams params;
     params.performingOptimization = true;
+    params.silent = true;
+
     params.highResidualVariancePenalty = 15;
     params.initialBeaconError = 1e-16;
     params.beaconProcessNoise = 0;
@@ -489,7 +496,7 @@ int main() {
     params.debug = false;
     params.imu.path = "";
 
-#if 0
+#if 1
     osvr::vbtracker::runOptimizer(
         data, osvr::vbtracker::OptimCommonData{camParams, params});
 #else
