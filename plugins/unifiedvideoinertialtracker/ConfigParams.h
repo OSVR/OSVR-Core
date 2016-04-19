@@ -61,6 +61,9 @@ namespace vbtracker {
         /// view might need to change.
         bool performingOptimization = false;
 
+        /// For optimization usage.
+        bool silent = false;
+
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
 

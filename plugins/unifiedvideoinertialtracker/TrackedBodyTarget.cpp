@@ -109,6 +109,7 @@ namespace vbtracker {
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
+        std::ostringstream outputSink;
     };
 
     inline BeaconStateVec createBeaconStateVec(ConfigParams const &params,
@@ -461,6 +462,10 @@ namespace vbtracker {
         return m_body.getParams();
     }
     std::ostream &TrackedBodyTarget::msg() const {
+        if (getParams().silent) {
+            m_impl->outputSink.str("");
+            return m_impl->outputSink;
+        }
         return std::cout << "[Tracker Target " << getQualifiedId() << "] ";
     }
     void TrackedBodyTarget::enterKalmanMode() {
