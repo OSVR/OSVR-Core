@@ -415,12 +415,12 @@ namespace vbtracker {
     void runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         OptimCommonData const &commonData) {
-        using ParamVec = Vec<2>;
+        using ParamVec = Vec<3>;
         const double REALLY_BIG = 1000.;
 
-        ParamVec x = {0.04348175147568786, 0.07100278320909659};
+        ParamVec x = {0.04348175147568786, 0.07100278320909659, 0.03020921164465682};
         auto ret = ei_newuoa_wrapped(
-            x, {1e-16, 1e-1}, 10, [&](ParamVec const &paramVec) -> double {
+            x, {1e-16, 1e-1}, 30, [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
 
                 /// Update config from provided param vec
@@ -433,8 +433,8 @@ namespace vbtracker {
                     params.processNoiseAutocorrelation[4] =
                         params.processNoiseAutocorrelation[5] = paramVec[1];
 
-                //params.beaconProcessNoise = paramVec[2];
-                //params.measurementVarianceScaleFactor = paramVec[2];
+                // params.beaconProcessNoise = paramVec[2];
+                params.measurementVarianceScaleFactor = paramVec[2];
 
                 auto optim = OptimData::make(params, commonData);
 
@@ -505,14 +505,17 @@ int main() {
     params.beaconProcessNoise = 1.e-21;
     params.shouldSkipBrightLeds = true;
     params.measurementVarianceScaleFactor = 0.03020921164465682;
-    //params.brightLedVariancePenalty = 16;
+    // params.brightLedVariancePenalty = 16;
     params.offsetToCentroid = false;
     params.manualBeaconOffset[0] = params.manualBeaconOffset[1] =
         params.manualBeaconOffset[2] = 0;
-    //params.linearVelocityDecayCoefficient = 0.9;
-    //params.angularVelocityDecayCoefficient = 1;
+    // params.linearVelocityDecayCoefficient = 0.9;
+    // params.angularVelocityDecayCoefficient = 1;
     params.debug = false;
+    params.includeRearPanel = true;
     params.imu.path = "";
+    params.imu.useOrientation = false;
+    params.imu.useAngularVelocity = false;
 
 #if 1
     osvr::vbtracker::runOptimizer(
