@@ -84,6 +84,7 @@ namespace vbtracker {
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
         int iterationsCount = 5;
+        float maxReprojectionError = 6.f;
         cv::Mat inlierIndices;
 
         cv::Mat rvec;
@@ -92,7 +93,7 @@ namespace vbtracker {
         cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            iterationsCount, 8.0f,
+            iterationsCount, maxReprojectionError,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 #elif CV_MAJOR_VERSION == 3
@@ -104,7 +105,7 @@ namespace vbtracker {
         auto ransacResult = cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            iterationsCount, 8.0f, confidence, inlierIndices);
+            iterationsCount, maxReprojectionError, confidence, inlierIndices);
         if (!ransacResult) {
             return false;
         }
