@@ -81,8 +81,10 @@ namespace vbtracker {
 
         size_type numBeacons() const { return locations.size(); }
 
+        /// This is both an entirely unlikely out of bounds value and a
+        /// specific sentinel value.
         static LocationPoint getBogusLocation() {
-            return LocationPoint(-10000, -10000, -314159);
+            return LocationPoint(-10000.f, -10000.f, -87314159.f);
         }
         /// Resizes all arrays to the numBeacons.
         /// Only populates baseMeasurementVariances,
