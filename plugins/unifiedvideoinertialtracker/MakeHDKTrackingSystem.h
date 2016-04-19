@@ -185,7 +185,8 @@ namespace vbtracker {
 
         /// Start setting up the data.
         TargetSetupData data;
-        data.setBeaconCount(numBeacons);
+        data.setBeaconCount(numBeacons, BaseMeasurementVariance,
+                            params.initialBeaconError);
 
         /// Fill in the patterns.
         data.patterns = OsvrHdkLedIdentifier_SENSOR0_PATTERNS;

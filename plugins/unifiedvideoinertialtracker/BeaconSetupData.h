@@ -89,8 +89,8 @@ namespace vbtracker {
         /// initialAutocalibrationErrors, and isFixed
         /// with semi-reasonable default values (no beacons fixed)
         void setBeaconCount(std::size_t numBeacons,
-                            double baseMeasurementVariance = 0.003,
-                            double initialAutocalibrationError = 0.001) {
+                            double baseMeasurementVariance,
+                            double initialAutocalibrationError) {
             patterns.resize(numBeacons);
             locations.resize(numBeacons, getBogusLocation());
             // these are invalid directions and must be populated!
