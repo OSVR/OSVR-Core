@@ -49,6 +49,7 @@ add_library(uvbi-core STATIC
     PoseEstimator_SCAATKalman.cpp
     PoseEstimator_SCAATKalman.h
     PoseEstimatorTypes.h
+    RangeTransform.h
     RoomCalibration.cpp
     RoomCalibration.h
     SpaceTransformations.h

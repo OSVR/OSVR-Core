@@ -29,6 +29,7 @@
 #include "BeaconSetupData.h"
 #include "ConfigParams.h"
 #include "HDKData.h"
+#include "RangeTransform.h"
 #include "TrackedBody.h"
 #include "TrackingSystem.h"
 
@@ -201,9 +202,8 @@ namespace vbtracker {
 
         /// Scale from millimeters to meters, and make the coordinate system
         /// what we want.
-        auto locationsEnd = std::transform(
-            begin(OsvrHdkLedLocations_SENSOR0),
-            end(OsvrHdkLedLocations_SENSOR0), begin(data.locations),
+        auto locationsEnd = range_transform(
+            OsvrHdkLedLocations_SENSOR0, begin(data.locations),
             [](LocationPoint pt) { return transformFromHDKData(pt); });
 
         if (useRear) {
@@ -215,21 +215,21 @@ namespace vbtracker {
                                    params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
-            std::transform(begin(OsvrHdkLedLocations_SENSOR1),
-                           end(OsvrHdkLedLocations_SENSOR1), locationsEnd,
-                           transformBackPoints);
             auto transformBackPoints =
                 [distanceBetweenPanels](LocationPoint pt) {
                     auto p = rotatePoint180AboutY(pt) -
                              LocationPoint(0, 0, distanceBetweenPanels);
                     return transformFromHDKData(p);
                 };
+            range_transform(OsvrHdkLedLocations_SENSOR1, locationsEnd,
+                            transformBackPoints);
         }
 
-        std::transform(
-            begin(OsvrHdkLedDirections_SENSOR0),
-            end(OsvrHdkLedDirections_SENSOR0), begin(data.emissionDirections),
+        /// Put the emission directions on.
+        range_transform(
+            OsvrHdkLedDirections_SENSOR0, begin(data.emissionDirections),
             [](EmissionDirectionVec v) { return transformFromHDKData(v); });
+
         if (useRear) {
             // Resize down - so we can resize up to fill
             // those last elements with constant values.
