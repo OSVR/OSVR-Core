@@ -26,19 +26,19 @@
 #define INCLUDED_MakeHDKTrackingSystem_h_GUID_B7C07A08_2BF8_45B2_4545_39979BA637E5
 
 // Internal Includes
-#include "TrackingSystem.h"
-#include "TrackedBody.h"
 #include "BeaconSetupData.h"
 #include "ConfigParams.h"
 #include "HDKData.h"
+#include "TrackedBody.h"
+#include "TrackingSystem.h"
 
 // Library/third-party includes
 // - none
 
 // Standard includes
+#include <iostream>
 #include <memory>
 #include <stdexcept>
-#include <iostream>
 
 #undef OSVR_UVBI_DISABLE_AUTOCALIB
 
@@ -105,21 +105,41 @@ namespace vbtracker {
 
         template <typename Scalar> using cvMatx33 = cv::Matx<Scalar, 3, 3>;
 
+        /// Map a cv::Matx matrix with Eigen
+        template <typename Scalar, size_t Rows, size_t Cols>
+        inline Eigen::Map<Eigen::Matrix<Scalar, Rows, Cols, 0>>
+        map(cv::Matx<Scalar, Rows, Cols> &cvMatx) {
+            return Eigen::Matrix<Scalar, Rows, Cols>::Map(cvMatx.val);
+        }
+
+        /// @overload
+        /// for const argument
+        template <typename Scalar, size_t Rows, size_t Cols>
+        inline Eigen::Map<const Eigen::Matrix<Scalar, Rows, Cols, 0>>
+        map(cv::Matx<Scalar, Rows, Cols> const &cvMatx) {
+            return Eigen::Matrix<Scalar, Rows, Cols>::Map(cvMatx.val);
+        }
+
         /// Rotation/basis-change part.
         template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
-            auto ret = cvMatx33<Scalar>::eye();
+            cvMatx33<Scalar> ret;
+            map(ret) = Eigen::AngleAxis<Scalar>(
+                           Scalar(M_PI), Eigen::Matrix<Scalar, 3, 1>::UnitY())
+                           .toRotationMatrix();
+#if 0
+			ret = cvMatx33<Scalar>::eye();
             // flip sign of x and z axes to make the HDK coordinate system match
             // our desired one.
             ret(0, 0) = -1;
             ret(2, 2) = -1;
+#endif
             return ret;
         }
 
         /// Add the scaling part.
         template <typename Scalar>
         inline cvMatx33<Scalar> getTransformAndScale() {
-            return getTransform<Scalar>() *
-                   (cvMatx33<Scalar>::eye() * SCALE_FACTOR);
+            return getTransform<Scalar>() * SCALE_FACTOR;
         }
 
         /// Transform points: we scale in addition to rotation/basis change
@@ -143,6 +163,14 @@ namespace vbtracker {
     inline std::unique_ptr<TrackingSystem>
     makeHDKTrackingSystem(ConfigParams const &params) {
         std::unique_ptr<TrackingSystem> sys(new TrackingSystem(params));
+#ifdef OSVR_UVBI_DEBUG_EMISSION_DIRECTION
+        {
+            auto xform = getTransform<float>();
+            std::cout << "Transform matrix:\n" << xform << std::endl;
+        }
+        /// Left, forward, top, right
+        auto sampleBeacons = {5, 32, 9, 10};
+#endif
 
         auto hmd = sys->createTrackedBody();
         if (!hmd) {
@@ -210,6 +238,14 @@ namespace vbtracker {
                 numBeacons,
                 transformFromHDKData(EmissionDirectionVec(0, 0, -1)));
         }
+#ifdef OSVR_UVBI_DEBUG_EMISSION_DIRECTION
+        for (auto &beaconOneBased : sampleBeacons) {
+            std::cout << "Beacon ID " << beaconOneBased
+                      << " emission direction "
+                      << data.emissionDirections[beaconOneBased - 1]
+                      << std::endl;
+        }
+#endif
 /// Set up autocalib.
 /// Set the ones that are fixed.
 
@@ -230,10 +266,8 @@ namespace vbtracker {
                   end(OsvrHdkLedVariances_SENSOR0),
                   begin(data.baseMeasurementVariances));
 
-        /// Clean, validate, and print a summary of the data.
+        /// Clean and validate the data.
         auto summary = data.cleanAndValidate();
-
-        std::cout << summary << std::endl;
 
         auto opticalTarget = hmd->createTarget(
 #if 0
@@ -248,7 +282,10 @@ namespace vbtracker {
                 "Could not create a tracked target for the HMD!");
         }
 
-        if (!params.imu.path.empty()) {
+        auto wantIMU =
+            !params.imu.path.empty() &&
+            (params.imu.useAngularVelocity || params.imu.useOrientation);
+        if (wantIMU) {
             auto imu =
                 hmd->createIntegratedIMU(params.imu.orientationVariance,
                                          params.imu.angularVelocityVariance);
@@ -256,6 +293,13 @@ namespace vbtracker {
                 throw std::runtime_error(
                     "Could not create an integrated IMU object for the HMD!");
             }
+        } else {
+#if 1
+            sys->setCameraPose(Eigen::Isometry3d(Eigen::Translation3d(
+                Eigen::Vector3d::Map(params.cameraPosition))));
+#else
+            sys->setCameraPose(Eigen::Isometry3d::Identity());
+#endif
         }
         return sys;
     }
