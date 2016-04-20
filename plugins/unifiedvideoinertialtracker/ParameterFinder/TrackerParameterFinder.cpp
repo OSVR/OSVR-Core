@@ -36,6 +36,7 @@
 // Library/third-party includes
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <boost/algorithm/string/predicate.hpp> // for argument handling
 
 // Standard includes
 #include <algorithm>
@@ -43,10 +44,17 @@
 #include <iostream>
 #include <numeric>
 
+/// Define to add a "press enter to exit" thing at the end.
+#undef PAUSE_BEFORE_EXIT
+
 template <std::size_t N> using Vec = Eigen::Matrix<double, N, 1>;
 
 namespace osvr {
 namespace vbtracker {
+
+    /// Use for outputt
+    static const Eigen::IOFormat FullFormat =
+        Eigen::IOFormat(Eigen::FullPrecision, 0, ",");
 
     struct OptimCommonData {
         CameraParameters const &camParams;
@@ -218,13 +226,13 @@ namespace vbtracker {
                                         TrackedData const &sample) {
         std::cout << "HDK to VideoBase: "
                   << (sample.videoPose).translation().transpose() << std::endl;
-        std::cout << "Vive to VideoBase: "
-                  << (baseXform * sample.refPose).translation().transpose()
-                  << std::endl;
         std::cout << "Ref to VideoBase: "
                   << (baseXform * sample.refPose * innerXform)
                          .translation()
                          .transpose()
+                  << std::endl;
+        std::cout << "Vive to VideoBase: "
+                  << (baseXform * sample.refPose).translation().transpose()
                   << std::endl;
         std::cout << "---------" << std::endl;
     }
@@ -285,9 +293,6 @@ namespace vbtracker {
             return linearDistance + angleScale * angDistance;
         };
 
-        Eigen::IOFormat format;
-        format.precision = Eigen::FullPrecision;
-
         auto maxRuns = 30000;
         std::cout << "Starting actual optimization procedures..." << std::endl;
         Vec<3> baseXlate = -Vec<3>(-0.316523, -0.740873, -2.0701);
@@ -310,7 +315,7 @@ namespace vbtracker {
                 });
 
             std::cout << "Result: cost " << ret << std::endl;
-            std::cout << baseXlate.format(format) << "\n" << std::endl;
+            std::cout << baseXlate.format(FullFormat) << "\n" << std::endl;
             std::cout << "First sample:\n";
             outputTransformedSample(makeIsometry(baseXlate),
                                     Eigen::Isometry3d::Identity(),
@@ -336,7 +341,7 @@ namespace vbtracker {
                         });
                 });
             std::cout << "Result: cost " << ret << std::endl;
-            std::cout << baseXlateRot.format(format) << "\n" << std::endl;
+            std::cout << baseXlateRot.format(FullFormat) << "\n" << std::endl;
             std::cout << "First sample:\n";
             outputTransformedSample(
                 makeIsometry(baseXlateRot.head<3>(),
@@ -396,7 +401,7 @@ namespace vbtracker {
             {
                 std::cout << "Optimizer returned " << ret
                           << " and these parameter values:" << std::endl;
-                std::cout << x.format(format) << std::endl;
+                std::cout << x.format(FullFormat) << std::endl;
                 auto baseRot = getBaseRotation(x);
                 auto baseXlate = getBaseTranslation(x);
                 auto innerRot = getInnerRotation(x);
@@ -405,6 +410,8 @@ namespace vbtracker {
                 Eigen::Isometry3d baseXform = makeIsometry(baseXlate, baseRot);
                 Eigen::Isometry3d innerXform =
                     makeIsometry(innerXlate, innerRot);
+                std::cout << "The first three samples, transformed for your "
+                             "viewing pleasure:\n";
                 for (std::size_t i = 0; i < 3; ++i) {
                     outputTransformedSample(baseXform, innerXform,
                                             *(samples[i]));
@@ -419,9 +426,22 @@ namespace vbtracker {
         using ParamVec = Vec<5>;
         const double REALLY_BIG = 1000.;
 
+        /// Set up initial values for the vector we'll optimize - load them from
+        /// the config params.
         ParamVec x;
-        x << 0.1102492565694375, 0.07597454541652442, 0.03940958213762528, 0.9,
-            0.9;
+        {
+            const auto &p = commonData.initialParams;
+            const auto posProcessNoise = p.processNoiseAutocorrelation[0];
+            const auto oriProcessNoise = p.processNoiseAutocorrelation[3];
+
+            x << posProcessNoise, oriProcessNoise,
+                p.measurementVarianceScaleFactor,
+                p.linearVelocityDecayCoefficient,
+                p.angularVelocityDecayCoefficient;
+        }
+
+        std::cout << "Initial vector:\n" << x.format(FullFormat) << std::endl;
+
         auto ret = ei_newuoa_wrapped(
             x, {1e-16, 1e-1}, 300, [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
@@ -469,21 +489,12 @@ namespace vbtracker {
                     /// Sometimes gets stuck in parameter ditches where we get
                     /// very few tracked frames
                     auto effectiveCost = avgCost * numResets / samples;
-#if 0
-                    std::cout << "Overall average cost: " << avgCost << " over "
-                              << samples << " eligible frames, " << std::endl;
-                    std::cout
-                        << "Dividing cost by number of tracked frames gives "
-                           "effective cost of "
-                        << effectiveCost << std::endl;
-#else
                     std::cout
                         << std::setw(15) << std::to_string(effectiveCost)
                         << " effective cost (average cost of " << std::setw(9)
                         << avgCost << " over " << std::setw(4) << samples
                         << " eligible frames with " << std::setw(2) << numResets
                         << " resets)\n";
-#endif
                     return effectiveCost;
                 }
                 std::cout << "No samples with pose for both algorithms?"
@@ -492,16 +503,98 @@ namespace vbtracker {
             });
         std::cout << "Optimizer returned " << ret
                   << " and these parameter values:" << std::endl;
-        Eigen::IOFormat format;
-        format.precision = Eigen::FullPrecision;
-        std::cout << x.format(format) << std::endl;
+        std::cout << x.format(FullFormat) << std::endl;
     }
 
 } // namespace vbtracker
 } // namespace osvr
 
-int main() {
-    auto data = osvr::vbtracker::loadData("augmented-blobs.csv");
+enum class OptimizationRoutine {
+    ReferenceTracker,
+    ParameterViaRansac,
+    Unrecognized = -1
+};
+
+static const auto DEFAULT_ROUTINE = OptimizationRoutine::ReferenceTracker;
+
+static const auto RECOGNIZED_ROUTINES = {
+    OptimizationRoutine::ReferenceTracker,
+    OptimizationRoutine::ParameterViaRansac};
+
+const char *routineToString(OptimizationRoutine routine) {
+    switch (routine) {
+    case OptimizationRoutine::ReferenceTracker:
+        return "ReferenceTracker";
+        break;
+    case OptimizationRoutine::ParameterViaRansac:
+        return "ParameterViaRansac";
+        break;
+    case OptimizationRoutine::Unrecognized:
+    default:
+        return "ERROR - UNRECOGNIZED";
+        break;
+    }
+}
+
+OptimizationRoutine stringToRoutine(const char *routineName) {
+    for (auto &routine : RECOGNIZED_ROUTINES) {
+        if (boost::iequals(routineToString(routine), routineName)) {
+            return routine;
+        }
+    }
+    return OptimizationRoutine::Unrecognized;
+}
+
+int usage(const char *argv0) {
+    std::cerr << "Usage: " << argv0 << "[<routine>]\n" << std::endl;
+    std::cerr
+        << "where <routine> is one of the following (case insensitive): \n";
+    for (auto &routine : RECOGNIZED_ROUTINES) {
+        std::cerr << "   " << routineToString(routine) << "\n";
+    }
+    std::cerr
+        << "\nIf no routine is explicitly specified, the default routine is "
+        << routineToString(DEFAULT_ROUTINE) << "\n";
+    // std::cout << "Too many arguments, an unrecognized routine parameter, or
+    // anything that is recognized as vaguely 'help-ish', will trigger this
+    // message." << std::endl;
+    std::cerr << "Too many arguments, or an unrecognized routine parameter "
+                 "(including anything vaguely 'help-ish') will trigger this "
+                 "message."
+              << std::endl;
+    return 1;
+}
+
+int main(int argc, char *argv[]) {
+    OptimizationRoutine routine = DEFAULT_ROUTINE;
+    static const auto DATAFILE = "augmented-blobs.csv";
+
+    if (argc > 2) {
+        /// Passed too many args: show help.
+        return usage(argv[0]);
+    }
+
+    if (argc == 2) {
+        routine = stringToRoutine(argv[1]);
+        if (OptimizationRoutine::Unrecognized == routine) {
+            std::cerr << "Didn't recognize '" << argv[1]
+                      << "' as an optimization routine.\n"
+                      << std::endl;
+            /// Didn't recognize that.
+            return usage(argv[0]);
+        }
+        /// Hey, we did recognize that!
+        std::cout << "Will execute optimization routine "
+                  << routineToString(routine)
+                  << " as specified on the command line." << std::endl;
+    } else {
+        std::cout << "No optimization routine specified on the command line, "
+                     "will execute "
+                  << routineToString(routine) << " by default." << std::endl;
+    }
+
+    std::cout << "Loading and parsing data from " << DATAFILE << std::endl;
+    auto data = osvr::vbtracker::loadData(DATAFILE);
     const auto camParams =
         osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
 
@@ -509,15 +602,13 @@ int main() {
     params.performingOptimization = true;
     params.silent = true;
 
-    params.highResidualVariancePenalty = 15;
-    params.initialBeaconError = 1e-16;
-    params.beaconProcessNoise = 1.e-21;
-    params.shouldSkipBrightLeds = true;
-    params.measurementVarianceScaleFactor = 0.03020921164465682;
+    // params.highResidualVariancePenalty = 15;
+    // params.initialBeaconError = 1e-16;
+    // params.beaconProcessNoise = 1.e-21;
+    // params.shouldSkipBrightLeds = true;
+    // params.measurementVarianceScaleFactor = 0.03020921164465682;
     // params.brightLedVariancePenalty = 16;
     params.offsetToCentroid = false;
-    params.manualBeaconOffset[0] = params.manualBeaconOffset[1] =
-        params.manualBeaconOffset[2] = 0;
     // params.linearVelocityDecayCoefficient = 0.9;
     // params.angularVelocityDecayCoefficient = 1;
     params.debug = false;
@@ -526,18 +617,30 @@ int main() {
     params.imu.useOrientation = false;
     params.imu.useAngularVelocity = false;
 
-#if 1
-    osvr::vbtracker::runOptimizer(
-        data, osvr::vbtracker::OptimCommonData{camParams, params});
-#else
+    std::cout << "Starting optimization routine " << routineToString(routine)
+              << std::endl;
+    switch (routine) {
+    case OptimizationRoutine::ReferenceTracker:
+        /// Use optimizer to compute the transforms for the reference tracker,
+        /// which is mounted effectively rigidly to the desired tracker, but in
+        /// an
+        /// unknown relative pose (and a different base coordinate system)
+        osvr::vbtracker::computeRefTrackerTransform(
+            data, osvr::vbtracker::OptimCommonData{camParams, params});
+        break;
 
-    /// Use optimizer to compute the transforms for the reference tracker, which
-    /// is mounted effectively rigidly to the desired tracker, but in an unknown
-    /// relative pose (and a different base coordinate system)
-    osvr::vbtracker::computeRefTrackerTransform(
-        data, osvr::vbtracker::OptimCommonData{camParams, params});
-#endif
+    case OptimizationRoutine::ParameterViaRansac:
+        osvr::vbtracker::runOptimizer(
+            data, osvr::vbtracker::OptimCommonData{camParams, params});
+        break;
+    default:
+        assert(false && "Should not happen - only recognized routines should "
+                        "make it this far!");
+    }
+
+#ifdef PAUSE_BEFORE_EXIT
     std::cout << "Press enter to exit." << std::endl;
     std::cin.ignore();
+#endif
     return 0;
 }
