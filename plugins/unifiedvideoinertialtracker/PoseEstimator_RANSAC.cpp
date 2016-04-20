@@ -27,6 +27,7 @@
 #include "CameraParameters.h"
 #include "LED.h"
 #include "cvToEigen.h"
+#include "UsefulQuaternions.h"
 
 // Library/third-party includes
 #include <opencv2/calib3d/calib3d.hpp>
@@ -234,9 +235,7 @@ namespace vbtracker {
         outXlate = cvToVector3d(tvec);
         outQuat = cvRotVecToQuat(rvec);
         if (flipped) {
-            outQuat = Eigen::Quaterniond(
-                          Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ())) *
-                      outQuat;
+            outQuat = get180aboutZ() * outQuat;
         }
         return true;
     }
