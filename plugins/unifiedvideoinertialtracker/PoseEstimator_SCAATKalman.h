@@ -78,6 +78,7 @@ namespace vbtracker {
         float m_maxBoxRatio;
         float m_minBoxRatio;
         const bool m_shouldSkipBright;
+        const double m_maxResidual;
         const double m_maxSquaredResidual;
         const double m_maxZComponent;
         const double m_highResidualVariancePenalty;
