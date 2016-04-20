@@ -6,26 +6,14 @@
         "plugin": "org_osvr_unifiedvideoinertial",
         "driver": "UnifiedTrackingSystem",
         "params": {
-            "showDebug": true,
+            "showDebug": false,
             "includeRearPanel": true,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
-            "measurementVarianceScaleFactor": 0.03020921164465682,
-            "highResidualVariancePenalty": 15.0,
-            /*"processNoiseAutocorrelation": [0.04348175147568786, 0.04348175147568786, 0.04348175147568786, 0.07100278320909659, 0.07100278320909659, 0.07100278320909659],*/
-            "beaconProcessNoise": 4.270925332800335e-10,
-            "initialBeaconError": 1e-16,
-            "cameraPosition": [0, 1.2, -0.5],
-            "shouldSkipBrightLeds": true,
-            "brightLedVariancePenalty": 16,
             "offsetToCentroid": false,
-            "manualBeaconOffset": [0,0,0],
-            "linearVelocityDecayCoefficient": 0.9,
-            "angularVelocityDecayCoefficient": 0.9,
             "extraVerbose": false,
             "imu": {
-                /*"path": "",*/
                 "useOrientation": false,
                 "orientationVariance": 5e-1,
                 "useAngularVelocity": false,
