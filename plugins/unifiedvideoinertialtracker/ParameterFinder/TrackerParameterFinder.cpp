@@ -494,6 +494,13 @@ namespace vbtracker {
                 p.angularVelocityDecayCoefficient;
         }
 
+        std::cout << "Optimizing, respectively: "
+                     "position process noise autocorrelation, "
+                     "orientation process noise autocorrelation, "
+                     "video tracker measurement variance scale factor, "
+                     "linear velocity decay coefficient, "
+                     "angular velocity decay coefficient "
+                     "\n";
         std::cout << "Initial vector:\n" << x.format(FullFormat) << std::endl;
 
         auto ret = ei_newuoa_wrapped(
@@ -523,7 +530,6 @@ namespace vbtracker {
                 TrackingReferenceType ref;
                 std::size_t samples = 0;
                 double accum = 0;
-                // std::cout << "Starting processing data rows..." << std::endl;
 
                 /// Main algorithm loop
                 for (auto const &rowPtr : data) {
@@ -567,29 +573,28 @@ namespace vbtracker {
 /// Adding a new entry here means you must also add it to RECOGNIZED_ROUTINES,
 /// routineToString, and the switch in main().
 enum class OptimizationRoutine {
-    ReferenceTracker,
-    ParameterViaRansac,
-    ParameterViaRefTracker,
+    RefTracker,
+    ParamViaRansac,
+    ParamViaRefTracker,
     Unrecognized = -1
 };
 
-static const auto DEFAULT_ROUTINE = OptimizationRoutine::ReferenceTracker;
+static const auto DEFAULT_ROUTINE = OptimizationRoutine::RefTracker;
 
 static const auto RECOGNIZED_ROUTINES = {
-    OptimizationRoutine::ReferenceTracker,
-    OptimizationRoutine::ParameterViaRansac,
-    OptimizationRoutine::ParameterViaRefTracker};
+    OptimizationRoutine::RefTracker, OptimizationRoutine::ParamViaRansac,
+    OptimizationRoutine::ParamViaRefTracker};
 
 const char *routineToString(OptimizationRoutine routine) {
     switch (routine) {
-    case OptimizationRoutine::ReferenceTracker:
-        return "ReferenceTracker";
+    case OptimizationRoutine::RefTracker:
+        return "RefTracker";
         break;
-    case OptimizationRoutine::ParameterViaRansac:
-        return "ParameterViaRansac";
+    case OptimizationRoutine::ParamViaRansac:
+        return "ParamViaRansac";
         break;
-    case OptimizationRoutine::ParameterViaRefTracker:
-        return "ParameterViaRefTracker";
+    case OptimizationRoutine::ParamViaRefTracker:
+        return "ParamViaRefTracker";
         break;
     case OptimizationRoutine::Unrecognized:
     default:
@@ -617,9 +622,6 @@ int usage(const char *argv0) {
     std::cerr
         << "\nIf no routine is explicitly specified, the default routine is "
         << routineToString(DEFAULT_ROUTINE) << "\n";
-    // std::cout << "Too many arguments, an unrecognized routine parameter, or
-    // anything that is recognized as vaguely 'help-ish', will trigger this
-    // message." << std::endl;
     std::cerr << "Too many arguments, or an unrecognized routine parameter "
                  "(including anything vaguely 'help-ish') will trigger this "
                  "message."
@@ -656,25 +658,19 @@ int main(int argc, char *argv[]) {
                   << routineToString(routine) << " by default." << std::endl;
     }
 
-    std::cout << "Loading and parsing data from " << DATAFILE << std::endl;
+    std::cout << "Loading and parsing data from " << DATAFILE << "    ";
     auto data = osvr::vbtracker::loadData(DATAFILE);
+    std::cout << "\n";
+
     const auto camParams =
         osvr::vbtracker::getHDKCameraParameters().createUndistortedVariant();
 
     osvr::vbtracker::ConfigParams params;
     params.performingOptimization = true;
     params.silent = true;
-
-    // params.highResidualVariancePenalty = 15;
-    // params.initialBeaconError = 1e-16;
-    // params.beaconProcessNoise = 1.e-21;
-    // params.shouldSkipBrightLeds = true;
-    // params.measurementVarianceScaleFactor = 0.03020921164465682;
-    // params.brightLedVariancePenalty = 16;
-    params.offsetToCentroid = false;
-    // params.linearVelocityDecayCoefficient = 0.9;
-    // params.angularVelocityDecayCoefficient = 1;
     params.debug = false;
+
+    params.offsetToCentroid = false;
     params.includeRearPanel = false;
     params.imu.path = "";
     params.imu.useOrientation = false;
@@ -683,22 +679,21 @@ int main(int argc, char *argv[]) {
     std::cout << "Starting optimization routine " << routineToString(routine)
               << std::endl;
     switch (routine) {
-    case OptimizationRoutine::ReferenceTracker:
+    case OptimizationRoutine::RefTracker:
         /// Use optimizer to compute the transforms for the reference tracker,
         /// which is mounted effectively rigidly to the desired tracker, but in
-        /// an
-        /// unknown relative pose (and a different base coordinate system)
+        /// an unknown relative pose (and a different base coordinate system)
         osvr::vbtracker::computeRefTrackerTransform(
             data, osvr::vbtracker::OptimCommonData{camParams, params});
         break;
 
-    case OptimizationRoutine::ParameterViaRansac:
+    case OptimizationRoutine::ParamViaRansac:
         osvr::vbtracker::runOptimizer<osvr::vbtracker::RansacOneEuro>(
             data, osvr::vbtracker::OptimCommonData{camParams, params},
             MAX_RUNS);
         break;
 
-    case OptimizationRoutine::ParameterViaRefTracker:
+    case OptimizationRoutine::ParamViaRefTracker:
         osvr::vbtracker::runOptimizer<osvr::vbtracker::ReferenceTracker>(
             data, osvr::vbtracker::OptimCommonData{camParams, params},
             MAX_RUNS);
