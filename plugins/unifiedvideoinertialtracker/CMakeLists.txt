@@ -69,6 +69,7 @@ add_library(uvbi-core STATIC
     TrackingSystem.cpp
     TrackingSystem.h
     Types.h
+    UsefulQuaternions.h
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_CORE})
 target_compile_options(uvbi-core
     PUBLIC
