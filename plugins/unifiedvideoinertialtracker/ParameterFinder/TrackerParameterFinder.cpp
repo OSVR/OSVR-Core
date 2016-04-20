@@ -125,9 +125,90 @@ namespace vbtracker {
         Eigen::Isometry3d pose;
     };
 
-    class RansacOneEuro {
+    template <typename VecType>
+    inline Eigen::Quaterniond rot_exp(VecType const &v) {
+        Eigen::Vector3d vec = v;
+        return util::quat_exp_map(vec).exp();
+    }
+
+    inline Eigen::Isometry3d makeIsometry(Eigen::Vector3d const &xlate,
+                                          Eigen::Quaterniond const &quat) {
+        return Eigen::Isometry3d(Eigen::Translation3d(xlate)) *
+               Eigen::Isometry3d(quat);
+    }
+
+    inline Eigen::Isometry3d makeIsometry(Eigen::Translation3d const &xlate,
+                                          Eigen::Quaterniond const &quat) {
+        return Eigen::Isometry3d(xlate) * Eigen::Isometry3d(quat);
+    }
+
+    inline Eigen::Isometry3d
+    makeIsometry(Eigen::Ref<Eigen::Vector3d const> const &xlate) {
+        return Eigen::Isometry3d(Eigen::Translation3d(xlate));
+    }
+
+    namespace reftracker {
+        using TransformParams = Vec<12>;
+        /// where we can store results from a run of
+        /// computeRefTrackerTransform()
+        /// for use later/elsewhere.
+        TransformParams const &getRefTrackerTransformParams() {
+            static const TransformParams data =
+                (TransformParams() << -0.784279819996699, 0.5366959149054978,
+                 2.875217220618106, 0.05491254139447894, -0.2160783271567548,
+                 0.02682823763491078, 0.06807108476730465, -0.115693455929497,
+                 -0.1595428852952166, -0.05042439619765038,
+                 -0.08944802515619116, -0.0004848434226332274)
+                    .finished();
+            return data;
+        }
+        /// Indices into the array.
+        enum {
+            BaseXlate = 0,
+            BaseRot = BaseXlate + 3,
+            InnerXlate = BaseRot + 3,
+            InnerRot = InnerXlate + 3
+        };
+
+        inline Eigen::Translation3d
+        getBaseTranslation(TransformParams const &vec) {
+            return Eigen::Translation3d(vec.head<3>());
+        }
+        inline Eigen::Quaterniond getBaseRotation(TransformParams const &vec) {
+            return rot_exp(vec.segment<3>(BaseRot));
+        }
+        inline Eigen::Isometry3d getBaseTransform(TransformParams const &vec) {
+            return makeIsometry(getBaseTranslation(vec), getBaseRotation(vec));
+        }
+        inline Eigen::Translation3d
+        getInnerTranslation(TransformParams const &vec) {
+            return Eigen::Translation3d(vec.segment<3>(InnerXlate));
+        }
+        inline Eigen::Quaterniond getInnerRotation(TransformParams const &vec) {
+            return rot_exp(vec.segment<3>(InnerRot));
+        }
+        inline Eigen::Isometry3d getInnerTransform(TransformParams const &vec) {
+            return makeIsometry(getInnerTranslation(vec),
+                                getInnerRotation(vec));
+        }
+    } // namespace reftracker
+
+    /// Interface for tracking references as used in optimization.
+    class TrackingReference {
       public:
-        void operator()(OptimData &optim, TimestampedMeasurements const &row) {
+        virtual void operator()(OptimData &optim,
+                                TimestampedMeasurements const &row) = 0;
+        virtual bool havePose() const = 0;
+        virtual Eigen::Isometry3d const &getPose() const = 0;
+
+      protected:
+        TrackingReference() = default;
+    };
+
+    class RansacOneEuro : public TrackingReference {
+      public:
+        void operator()(OptimData &optim,
+                        TimestampedMeasurements const &row) override {
             gotPose = false;
             flippedPose_ = false;
             Eigen::Vector3d pos;
@@ -157,8 +238,8 @@ namespace vbtracker {
             }
         }
         bool flippedPose() const { return flippedPose_; }
-        bool havePose() const { return gotPose; }
-        Eigen::Isometry3d const &getPose() const { return pose; }
+        bool havePose() const override { return gotPose; }
+        Eigen::Isometry3d const &getPose() const override { return pose; }
 
       private:
         PoseFilter ransacPoseFilter;
@@ -191,28 +272,6 @@ namespace vbtracker {
 namespace osvr {
 namespace vbtracker {
 
-    template <typename VecType>
-    inline Eigen::Quaterniond rot_exp(VecType const &v) {
-        Eigen::Vector3d vec = v;
-        return util::quat_exp_map(vec).exp();
-    }
-
-    inline Eigen::Isometry3d makeIsometry(Eigen::Vector3d const &xlate,
-                                          Eigen::Quaterniond const &quat) {
-        return Eigen::Isometry3d(Eigen::Translation3d(xlate)) *
-               Eigen::Isometry3d(quat);
-    }
-
-    inline Eigen::Isometry3d makeIsometry(Eigen::Translation3d const &xlate,
-                                          Eigen::Quaterniond const &quat) {
-        return Eigen::Isometry3d(xlate) * Eigen::Isometry3d(quat);
-    }
-
-    inline Eigen::Isometry3d
-    makeIsometry(Eigen::Ref<Eigen::Vector3d const> const &xlate) {
-        return Eigen::Isometry3d(Eigen::Translation3d(xlate));
-    }
-
     struct TrackedData {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         Eigen::Isometry3d videoPose;
@@ -236,6 +295,9 @@ namespace vbtracker {
                   << std::endl;
         std::cout << "---------" << std::endl;
     }
+
+    /// Optimization routine: compute the transform between the smoothed RANSAC
+    /// results and the reference tracker.
     void computeRefTrackerTransform(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         OptimCommonData const &commonData) {
@@ -350,44 +412,19 @@ namespace vbtracker {
         }
 
         {
-            /// Indices into the array.
-            enum {
-                BaseXlate = 0,
-                BaseRot = BaseXlate + 3,
-                InnerXlate = BaseRot + 3,
-                InnerRot = InnerXlate + 3
-            };
-
-            using ParamVec = Vec<12>;
-            ParamVec x = ParamVec::Zero();
+            using namespace reftracker;
+            TransformParams x = TransformParams::Zero();
             x.head<3>() = baseXlateRot.head<3>();
             x.segment<3>(BaseRot) = baseXlateRot.tail<3>();
-
-            auto getBaseTranslation = [](ParamVec const &vec) {
-                return Eigen::Translation3d(vec.head<3>());
-            };
-            auto getBaseRotation = [](ParamVec const &vec) {
-                return rot_exp(vec.segment<3>(BaseRot));
-            };
-            auto getInnerTranslation = [](ParamVec const &vec) {
-                return Eigen::Translation3d(vec.segment<3>(InnerXlate));
-            };
-            auto getInnerRotation = [](ParamVec const &vec) {
-                return rot_exp(vec.segment<3>(InnerRot));
-            };
 
             std::cout << "Starting optimization procedure for full transform, "
                          "max runs = "
                       << maxRuns << std::endl;
             auto ret = ei_newuoa_wrapped(
                 x, {1e-8, 1e-2}, maxRuns,
-                [&](ParamVec const &paramVec) -> double {
-                    Eigen::Isometry3d baseXform =
-                        makeIsometry(getBaseTranslation(paramVec),
-                                     getBaseRotation(paramVec));
-                    Eigen::Isometry3d innerXform =
-                        makeIsometry(getInnerTranslation(paramVec),
-                                     getInnerRotation(paramVec));
+                [&](TransformParams const &paramVec) -> double {
+                    Eigen::Isometry3d baseXform = getBaseTransform(paramVec);
+                    Eigen::Isometry3d innerXform = getInnerTransform(paramVec);
                     /// Accumulate the cost of all the samples
                     return std::accumulate(
                         samples.begin(), samples.end(), 0.0,
@@ -402,14 +439,9 @@ namespace vbtracker {
                 std::cout << "Optimizer returned " << ret
                           << " and these parameter values:" << std::endl;
                 std::cout << x.format(FullFormat) << std::endl;
-                auto baseRot = getBaseRotation(x);
-                auto baseXlate = getBaseTranslation(x);
-                auto innerRot = getInnerRotation(x);
-                auto innerXlate = getInnerTranslation(x);
 
-                Eigen::Isometry3d baseXform = makeIsometry(baseXlate, baseRot);
-                Eigen::Isometry3d innerXform =
-                    makeIsometry(innerXlate, innerRot);
+                Eigen::Isometry3d baseXform = getBaseTransform(x);
+                Eigen::Isometry3d innerXform = getInnerTransform(x);
                 std::cout << "The first three samples, transformed for your "
                              "viewing pleasure:\n";
                 for (std::size_t i = 0; i < 3; ++i) {
@@ -420,9 +452,10 @@ namespace vbtracker {
         }
     }
 
+    template <typename TrackingReferenceType>
     void runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
-        OptimCommonData const &commonData) {
+        OptimCommonData const &commonData, std::size_t maxRuns) {
         using ParamVec = Vec<5>;
         const double REALLY_BIG = 1000.;
 
@@ -443,7 +476,8 @@ namespace vbtracker {
         std::cout << "Initial vector:\n" << x.format(FullFormat) << std::endl;
 
         auto ret = ei_newuoa_wrapped(
-            x, {1e-16, 1e-1}, 300, [&](ParamVec const &paramVec) -> double {
+            x, {1e-16, 1e-1}, static_cast<long>(maxRuns),
+            [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
 
                 /// Update config from provided param vec
@@ -465,7 +499,7 @@ namespace vbtracker {
                 auto optim = OptimData::make(params, commonData);
 
                 MainAlgoUnderStudy mainAlgo;
-                RansacOneEuro ransacOneEuro;
+                TrackingReferenceType ref;
                 std::size_t samples = 0;
                 double accum = 0;
                 // std::cout << "Starting processing data rows..." << std::endl;
@@ -473,10 +507,10 @@ namespace vbtracker {
                 /// Main algorithm loop
                 for (auto const &rowPtr : data) {
                     mainAlgo(optim, *rowPtr);
-                    ransacOneEuro(optim, *rowPtr);
-                    if (ransacOneEuro.havePose() && mainAlgo.havePose()) {
-                        auto cost = costMeasurement(ransacOneEuro.getPose(),
-                                                    mainAlgo.getPose());
+                    ref(optim, *rowPtr);
+                    if (ref.havePose() && mainAlgo.havePose()) {
+                        auto cost =
+                            costMeasurement(ref.getPose(), mainAlgo.getPose());
                         accum += cost;
                         samples++;
                     }
@@ -568,7 +602,8 @@ int usage(const char *argv0) {
 int main(int argc, char *argv[]) {
     OptimizationRoutine routine = DEFAULT_ROUTINE;
     static const auto DATAFILE = "augmented-blobs.csv";
-
+    /// max runs for the parameter optimizer
+    static const std::size_t MAX_RUNS = 30;
     if (argc > 2) {
         /// Passed too many args: show help.
         return usage(argv[0]);
@@ -612,7 +647,7 @@ int main(int argc, char *argv[]) {
     // params.linearVelocityDecayCoefficient = 0.9;
     // params.angularVelocityDecayCoefficient = 1;
     params.debug = false;
-    params.includeRearPanel = true;
+    params.includeRearPanel = false;
     params.imu.path = "";
     params.imu.useOrientation = false;
     params.imu.useAngularVelocity = false;
@@ -630,8 +665,9 @@ int main(int argc, char *argv[]) {
         break;
 
     case OptimizationRoutine::ParameterViaRansac:
-        osvr::vbtracker::runOptimizer(
-            data, osvr::vbtracker::OptimCommonData{camParams, params});
+        osvr::vbtracker::runOptimizer<osvr::vbtracker::RansacOneEuro>(
+            data, osvr::vbtracker::OptimCommonData{camParams, params},
+            MAX_RUNS);
         break;
     default:
         assert(false && "Should not happen - only recognized routines should "
