@@ -44,6 +44,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include "ImagePointMeasurement.h"
 #include "LED.h"
 #include "PoseEstimator_SCAATKalman.h"
+#include "UsefulQuaternions.h"
 #include "cvToEigen.h"
 
 // Library/third-party includes
@@ -334,6 +335,21 @@ namespace vbtracker {
             }
         }
 
+        if (p.state.position().z() < 0) {
+            std::cout << "Wrong side of the looking glass!" << std::endl;
+            /// We're on the wrong side of the camera #fail
+            /// invert position and velocity
+            /// rotate orientation/angvel 180 about z.
+            p.state.position() *= -1;
+            p.state.velocity() *= -1;
+#if 0
+            p.state.position() = get180aboutZ() * p.state.position();
+            p.state.velocity() = get180aboutZ() * p.state.velocity();
+#endif
+            p.state.angularVelocity() =
+                get180aboutZ() * p.state.angularVelocity();
+            p.state.setQuaternion(get180aboutZ() * p.state.getQuaternion());
+        }
         return true;
     }
 
@@ -345,7 +361,7 @@ namespace vbtracker {
         /// @todo should we be recalculating this for each beacon after each
         /// correction step? The order we filter them in is rather arbitrary...
         const Eigen::Matrix3d rotate =
-            Eigen::Matrix3d(p.state.getCombinedQuaternion());
+            p.state.getCombinedQuaternion().toRotationMatrix();
         /// @todo use this for more speed?
         // Eigen::RowVector3d zRotate = rotate.row(2);
 
