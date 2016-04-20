@@ -477,11 +477,13 @@ namespace vbtracker {
     void runOptimizer(
         std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
         OptimCommonData const &commonData, std::size_t maxRuns) {
-        using ParamVec = Vec<5>;
         const double REALLY_BIG = 1000.;
+
+        std::cout << "Max runs: " << maxRuns << std::endl;
 
         /// Set up initial values for the vector we'll optimize - load them from
         /// the config params.
+        using ParamVec = Vec<5>;
         ParamVec x;
         {
             const auto &p = commonData.initialParams;
@@ -632,8 +634,7 @@ int usage(const char *argv0) {
 int main(int argc, char *argv[]) {
     OptimizationRoutine routine = DEFAULT_ROUTINE;
     static const auto DATAFILE = "augmented-blobs.csv";
-    /// max runs for the parameter optimizer
-    static const std::size_t MAX_RUNS = 30;
+
     if (argc > 2) {
         /// Passed too many args: show help.
         return usage(argv[0]);
@@ -689,14 +690,12 @@ int main(int argc, char *argv[]) {
 
     case OptimizationRoutine::ParamViaRansac:
         osvr::vbtracker::runOptimizer<osvr::vbtracker::RansacOneEuro>(
-            data, osvr::vbtracker::OptimCommonData{camParams, params},
-            MAX_RUNS);
+            data, osvr::vbtracker::OptimCommonData{camParams, params}, 30);
         break;
 
     case OptimizationRoutine::ParamViaRefTracker:
         osvr::vbtracker::runOptimizer<osvr::vbtracker::ReferenceTracker>(
-            data, osvr::vbtracker::OptimCommonData{camParams, params},
-            MAX_RUNS);
+            data, osvr::vbtracker::OptimCommonData{camParams, params}, 300);
         break;
 
     default:
