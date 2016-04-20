@@ -7,7 +7,7 @@
         "driver": "UnifiedTrackingSystem",
         "params": {
             "showDebug": false,
-            "includeRearPanel": true,
+            "includeRearPanel": false,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
