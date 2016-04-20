@@ -527,7 +527,7 @@ namespace vbtracker {
             }
         };
 
-        struct VariancePenaltiesAndEmissionAngles {
+        struct VariancePenalties {
             /// required part of interface
             static const size_t Dimension = 3;
 
@@ -536,31 +536,31 @@ namespace vbtracker {
 
             /// required part of interface
             static ParamVec getInitialVec(OptimCommonData const &commonData) {
-
                 ParamVec x;
                 const auto &p = commonData.initialParams;
-                x << p.highResidualVariancePenalty, p.brightLedVariancePenalty,
-                    p.maxZComponent;
+                x << p.maxResidual, p.highResidualVariancePenalty,
+                    p.brightLedVariancePenalty;
                 return x;
             }
 
             /// required part of interface
-            static std::pair<double, double> getRho() { return {1e-5, 1e1}; }
+            static std::pair<double, double> getRho() { return {1e-3, 1e2}; }
 
             /// required part of interface
             static void updateParamsFromVec(ConfigParams &p,
                                             ParamVec const &x) {
                 // Update config from provided param vec
-                p.highResidualVariancePenalty = x[0];
-                p.brightLedVariancePenalty = x[1];
-                p.maxZComponent = x[2];
+                p.maxResidual = x[0];
+                p.highResidualVariancePenalty = x[1];
+                p.brightLedVariancePenalty = x[2];
+                p.shouldSkipBrightLeds = false;
             }
 
             /// required part of interface
             static const char *getVecElementNames() {
-                return "high residual variance penalty, "
-                       "bright LED variance penalty, "
-                       "max Z component";
+                return "max residual,\n"
+                       "high residual variance penalty,\n"
+                       "bright LED variance penalty";
             }
         };
     } // namespace optimization_param_sets
@@ -635,6 +635,8 @@ namespace vbtracker {
         std::cout << "Optimizer returned " << ret
                   << " and these parameter values:" << std::endl;
         std::cout << x.format(FullFormat) << std::endl;
+        std::cout << "for parameters described as, respectively,\n"
+                  << ParamSet::getVecElementNames() << std::endl;
     }
 
 } // namespace vbtracker
@@ -748,11 +750,11 @@ int main(int argc, char *argv[]) {
     /// Which parameter set do we want to optimize in the main optimization
     /// routines?
     namespace param_sets = osvr::vbtracker::optimization_param_sets;
-#if 0
+#if 1
     using ParamSet =
         param_sets::ProcessNoiseVarianceAndDecay;
 #else
-    using ParamSet = param_sets::VariancePenaltiesAndEmissionAngles;
+    using ParamSet = param_sets::VariancePenalties;
 #endif
 
     std::cout << "Starting optimization routine " << routineToString(routine)
