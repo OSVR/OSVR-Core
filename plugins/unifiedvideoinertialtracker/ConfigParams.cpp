@@ -34,10 +34,8 @@
 namespace osvr {
 namespace vbtracker {
     ConfigParams::ConfigParams() {
-        // Apparently I can't non-static-data-initializer initialize an
-        // array member. Sad. GCC almost let me. MSVC said no way.
-        const double positionNoise = 0.2027408200827765;
-        const double rotationNoise = 0.07870668067316963;
+        const double positionNoise = 0.102842306274152;
+        const double rotationNoise = 0.07819254452471297;
         processNoiseAutocorrelation[0] = positionNoise;
         processNoiseAutocorrelation[1] = positionNoise;
         processNoiseAutocorrelation[2] = positionNoise;
