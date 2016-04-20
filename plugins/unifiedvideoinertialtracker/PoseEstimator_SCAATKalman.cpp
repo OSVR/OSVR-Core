@@ -375,6 +375,9 @@ namespace vbtracker {
                 auto &debug = p.beaconDebug[index];
                 debug.seen = true;
                 debug.measurement = led.getLocationForTracking();
+                if (skipAll) {
+                    return false;
+                }
 
                 // Angle of emission checking
                 // If we transform the emission vector into camera space, an LED
@@ -443,10 +446,6 @@ namespace vbtracker {
                 }
 
                 if (skipBright && led.isBright()) {
-                    return false;
-                }
-
-                if (skipAll) {
                     return false;
                 }
 
