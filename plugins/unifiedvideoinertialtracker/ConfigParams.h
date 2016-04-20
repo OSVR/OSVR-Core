@@ -72,9 +72,10 @@ namespace vbtracker {
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
 
-        /// Max residual (pixel units) for a beacon before applying a variance
-        /// penalty.
-        double maxResidual = 75;
+        /// Max residual, in meters at the expected XY plane of the beacon in
+        /// space, for a beacon before applying a variance penalty.
+        double maxResidual = 0.03631354168383816;
+
         /// Initial beacon error for autocalibration (units: m^2).
         /// 0 effectively turns off beacon auto-calib.
         /// This is a variance number, so std deviation squared, but it's
@@ -84,7 +85,7 @@ namespace vbtracker {
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
-        double blobMoveThreshold = 4.;
+        double blobMoveThreshold = 5.;
 
         /// Whether to show the debug windows and debug messages.
         bool debug = false;
@@ -152,7 +153,7 @@ namespace vbtracker {
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
-        double highResidualVariancePenalty = 15.;
+        double highResidualVariancePenalty = 7.553771505971281;
 
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
@@ -173,13 +174,13 @@ namespace vbtracker {
 
         /// Should we attempt to skip bright-mode LEDs? The alternative is to
         /// just give them slightly higher variance.
-        bool shouldSkipBrightLeds = true;
+        bool shouldSkipBrightLeds = false;
 
         /// If shouldSkipBrightLeds is false, we use this value as a factor to
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty = 16;
+        double brightLedVariancePenalty = 15.78192556964968;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the
