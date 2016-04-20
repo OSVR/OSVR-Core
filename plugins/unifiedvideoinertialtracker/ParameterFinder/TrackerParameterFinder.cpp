@@ -319,9 +319,8 @@ namespace vbtracker {
 
     /// Optimization routine: compute the transform between the smoothed RANSAC
     /// results and the reference tracker.
-    void computeRefTrackerTransform(
-        std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
-        OptimCommonData const &commonData) {
+    void computeRefTrackerTransform(MeasurementsRows const &data,
+                                    OptimCommonData const &commonData) {
 
         /// Just run the tracking algo once - we can re-run the transform and
         /// comparison quicker for the optimizer.
@@ -473,58 +472,127 @@ namespace vbtracker {
         }
     }
 
-    template <typename TrackingReferenceType>
-    void runOptimizer(
-        std::vector<std::unique_ptr<TimestampedMeasurements>> const &data,
-        OptimCommonData const &commonData, std::size_t maxRuns) {
+    namespace optimization_param_sets {
+        struct ProcessNoiseVarianceAndDecay {
+            /// required part of interface
+            static const size_t Dimension = 5;
+
+            /// Internal for convenience use.
+            using ParamVec = Vec<Dimension>;
+
+            /// required part of interface
+            static ParamVec getInitialVec(OptimCommonData const &commonData) {
+
+                ParamVec x;
+                const auto &p = commonData.initialParams;
+                const auto posProcessNoise = p.processNoiseAutocorrelation[0];
+                const auto oriProcessNoise = p.processNoiseAutocorrelation[3];
+
+                x << posProcessNoise, oriProcessNoise,
+                    p.measurementVarianceScaleFactor,
+                    p.linearVelocityDecayCoefficient,
+                    p.angularVelocityDecayCoefficient;
+                return x;
+            }
+
+            /// required part of interface
+            static std::pair<double, double> getRho() { return {1e-16, 1e-1}; }
+
+            /// required part of interface
+            static void updateParamsFromVec(ConfigParams &params,
+                                            ParamVec const &x) {
+                // Update config from provided param vec
+                /// positional noise
+                params.processNoiseAutocorrelation[0] =
+                    params.processNoiseAutocorrelation[1] =
+                        params.processNoiseAutocorrelation[2] = x[0];
+                /// rotational noise
+                params.processNoiseAutocorrelation[3] =
+                    params.processNoiseAutocorrelation[4] =
+                        params.processNoiseAutocorrelation[5] = x[1];
+
+                params.measurementVarianceScaleFactor = x[2];
+
+                params.linearVelocityDecayCoefficient = x[3];
+                params.angularVelocityDecayCoefficient = x[4];
+            }
+
+            /// required part of interface
+            static const char *getVecElementNames() {
+                return "position process noise autocorrelation, "
+                       "orientation process noise autocorrelation, "
+                       "video tracker measurement variance scale factor, "
+                       "linear velocity decay coefficient, "
+                       "angular velocity decay coefficient";
+            }
+        };
+
+        struct VariancePenaltiesAndEmissionAngles {
+            /// required part of interface
+            static const size_t Dimension = 3;
+
+            /// Internal for convenience use.
+            using ParamVec = Vec<Dimension>;
+
+            /// required part of interface
+            static ParamVec getInitialVec(OptimCommonData const &commonData) {
+
+                ParamVec x;
+                const auto &p = commonData.initialParams;
+                x << p.highResidualVariancePenalty, p.brightLedVariancePenalty,
+                    p.maxZComponent;
+                return x;
+            }
+
+            /// required part of interface
+            static std::pair<double, double> getRho() { return {1e-5, 1e1}; }
+
+            /// required part of interface
+            static void updateParamsFromVec(ConfigParams &p,
+                                            ParamVec const &x) {
+                // Update config from provided param vec
+                p.highResidualVariancePenalty = x[0];
+                p.brightLedVariancePenalty = x[1];
+                p.maxZComponent = x[2];
+            }
+
+            /// required part of interface
+            static const char *getVecElementNames() {
+                return "high residual variance penalty, "
+                       "bright LED variance penalty, "
+                       "max Z component";
+            }
+        };
+    } // namespace optimization_param_sets
+
+    /// The main optimization routine, in which we run the tracker repeatedly
+    /// with different parameters and compare its results at each step to some
+    /// source of reference data.
+    template <typename TrackingReferenceType,
+              typename ParamSet =
+                  optimization_param_sets::ProcessNoiseVarianceAndDecay>
+    void runOptimizer(MeasurementsRows const &data,
+                      OptimCommonData const &commonData, std::size_t maxRuns) {
         const double REALLY_BIG = 1000.;
 
         std::cout << "Max runs: " << maxRuns << std::endl;
 
         /// Set up initial values for the vector we'll optimize - load them from
         /// the config params.
-        using ParamVec = Vec<5>;
-        ParamVec x;
-        {
-            const auto &p = commonData.initialParams;
-            const auto posProcessNoise = p.processNoiseAutocorrelation[0];
-            const auto oriProcessNoise = p.processNoiseAutocorrelation[3];
-
-            x << posProcessNoise, oriProcessNoise,
-                p.measurementVarianceScaleFactor,
-                p.linearVelocityDecayCoefficient,
-                p.angularVelocityDecayCoefficient;
-        }
+        using ParamVec = Vec<ParamSet::Dimension>;
+        ParamVec x = ParamSet::getInitialVec(commonData);
 
         std::cout << "Optimizing, respectively: "
-                     "position process noise autocorrelation, "
-                     "orientation process noise autocorrelation, "
-                     "video tracker measurement variance scale factor, "
-                     "linear velocity decay coefficient, "
-                     "angular velocity decay coefficient "
-                     "\n";
+                  << ParamSet::getVecElementNames() << "\n";
         std::cout << "Initial vector:\n" << x.format(FullFormat) << std::endl;
 
         auto ret = ei_newuoa_wrapped(
-            x, {1e-16, 1e-1}, static_cast<long>(maxRuns),
+            x, ParamSet::getRho(), static_cast<long>(maxRuns),
             [&](ParamVec const &paramVec) -> double {
                 ConfigParams params = commonData.initialParams;
 
                 /// Update config from provided param vec
-                /// positional noise
-                params.processNoiseAutocorrelation[0] =
-                    params.processNoiseAutocorrelation[1] =
-                        params.processNoiseAutocorrelation[2] = paramVec[0];
-                /// rotational noise
-                params.processNoiseAutocorrelation[3] =
-                    params.processNoiseAutocorrelation[4] =
-                        params.processNoiseAutocorrelation[5] = paramVec[1];
-
-                // params.beaconProcessNoise = paramVec[2];
-                params.measurementVarianceScaleFactor = paramVec[2];
-
-                params.linearVelocityDecayCoefficient = paramVec[3];
-                params.angularVelocityDecayCoefficient = paramVec[4];
+                ParamSet::updateParamsFromVec(params, paramVec);
 
                 auto optim = OptimData::make(params, commonData);
 
@@ -677,6 +745,16 @@ int main(int argc, char *argv[]) {
     params.imu.useOrientation = false;
     params.imu.useAngularVelocity = false;
 
+    /// Which parameter set do we want to optimize in the main optimization
+    /// routines?
+    namespace param_sets = osvr::vbtracker::optimization_param_sets;
+#if 0
+    using ParamSet =
+        param_sets::ProcessNoiseVarianceAndDecay;
+#else
+    using ParamSet = param_sets::VariancePenaltiesAndEmissionAngles;
+#endif
+
     std::cout << "Starting optimization routine " << routineToString(routine)
               << std::endl;
     switch (routine) {
@@ -689,12 +767,13 @@ int main(int argc, char *argv[]) {
         break;
 
     case OptimizationRoutine::ParamViaRansac:
-        osvr::vbtracker::runOptimizer<osvr::vbtracker::RansacOneEuro>(
+        osvr::vbtracker::runOptimizer<osvr::vbtracker::RansacOneEuro, ParamSet>(
             data, osvr::vbtracker::OptimCommonData{camParams, params}, 30);
         break;
 
     case OptimizationRoutine::ParamViaRefTracker:
-        osvr::vbtracker::runOptimizer<osvr::vbtracker::ReferenceTracker>(
+        osvr::vbtracker::runOptimizer<osvr::vbtracker::ReferenceTracker,
+                                      ParamSet>(
             data, osvr::vbtracker::OptimCommonData{camParams, params}, 300);
         break;
 

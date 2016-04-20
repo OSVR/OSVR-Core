@@ -31,8 +31,8 @@
 #include <LedMeasurement.h>
 #include <MakeHDKTrackingSystem.h>
 
-#include <osvr/Util/TimeValue.h>
 #include <osvr/Util/Finally.h>
+#include <osvr/Util/TimeValue.h>
 
 // Library/third-party includes
 #include <Eigen/Core>
@@ -72,6 +72,8 @@ namespace vbtracker {
         LedMeasurementVec measurements;
         bool ok = false;
     };
+    using TimestampedMeasurementsPtr = std::unique_ptr<TimestampedMeasurements>;
+    using MeasurementsRows = std::vector<TimestampedMeasurementsPtr>;
 
     class LoadRow {
       public:
@@ -165,9 +167,8 @@ namespace vbtracker {
         std::vector<float> measurementPieces_;
     };
 
-    inline std::vector<std::unique_ptr<TimestampedMeasurements>>
-    loadData(std::string const &fn) {
-        std::vector<std::unique_ptr<TimestampedMeasurements>> ret;
+    inline MeasurementsRows loadData(std::string const &fn) {
+        MeasurementsRows ret;
         std::ifstream csvFile(fn);
         if (!csvFile) {
             std::cerr << "Could not open csvFile " << fn << std::endl;
@@ -187,8 +188,7 @@ namespace vbtracker {
 
         std::string dataLine = csvtools::getCleanLine(csvFile);
         while (csvFile) {
-            std::unique_ptr<TimestampedMeasurements> newRow(
-                new TimestampedMeasurements);
+            TimestampedMeasurementsPtr newRow(new TimestampedMeasurements);
             csvtools::iterateFields(LoadRow(helper, *newRow), dataLine);
             // std::cout << "Done with iterate fields" << std::endl;
             if (newRow->ok) {
