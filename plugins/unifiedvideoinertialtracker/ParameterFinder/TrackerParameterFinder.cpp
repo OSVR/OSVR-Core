@@ -250,6 +250,27 @@ namespace vbtracker {
         Eigen::Isometry3d pose;
     };
 
+    class ReferenceTracker {
+      public:
+        ReferenceTracker()
+            : base_(reftracker::getBaseTransform(
+                  reftracker::getRefTrackerTransformParams())),
+              inner_(reftracker::getInnerTransform(
+                  reftracker::getRefTrackerTransformParams())) {}
+
+        void operator()(OptimData &optim, TimestampedMeasurements const &row) {
+            // Update our pose by the reference pose transformed.
+            pose_ = base_ * makeIsometry(row.xlate, row.rot) * inner_;
+        }
+        bool havePose() const { return true; }
+        Eigen::Isometry3d const &getPose() const { return pose_; }
+
+      private:
+        Eigen::Isometry3d base_;
+        Eigen::Isometry3d inner_;
+        Eigen::Isometry3d pose_;
+    };
+
     double costMeasurement(Eigen::Isometry3d const &refPose,
                            Eigen::Isometry3d const &expPose) {
         auto distanceAway = -1.;
@@ -543,9 +564,12 @@ namespace vbtracker {
 } // namespace vbtracker
 } // namespace osvr
 
+/// Adding a new entry here means you must also add it to RECOGNIZED_ROUTINES,
+/// routineToString, and the switch in main().
 enum class OptimizationRoutine {
     ReferenceTracker,
     ParameterViaRansac,
+    ParameterViaRefTracker,
     Unrecognized = -1
 };
 
@@ -553,7 +577,8 @@ static const auto DEFAULT_ROUTINE = OptimizationRoutine::ReferenceTracker;
 
 static const auto RECOGNIZED_ROUTINES = {
     OptimizationRoutine::ReferenceTracker,
-    OptimizationRoutine::ParameterViaRansac};
+    OptimizationRoutine::ParameterViaRansac,
+    OptimizationRoutine::ParameterViaRefTracker};
 
 const char *routineToString(OptimizationRoutine routine) {
     switch (routine) {
@@ -562,6 +587,9 @@ const char *routineToString(OptimizationRoutine routine) {
         break;
     case OptimizationRoutine::ParameterViaRansac:
         return "ParameterViaRansac";
+        break;
+    case OptimizationRoutine::ParameterViaRefTracker:
+        return "ParameterViaRefTracker";
         break;
     case OptimizationRoutine::Unrecognized:
     default:
@@ -669,6 +697,13 @@ int main(int argc, char *argv[]) {
             data, osvr::vbtracker::OptimCommonData{camParams, params},
             MAX_RUNS);
         break;
+
+    case OptimizationRoutine::ParameterViaRefTracker:
+        osvr::vbtracker::runOptimizer<osvr::vbtracker::ReferenceTracker>(
+            data, osvr::vbtracker::OptimCommonData{camParams, params},
+            MAX_RUNS);
+        break;
+
     default:
         assert(false && "Should not happen - only recognized routines should "
                         "make it this far!");
