@@ -1,0 +1,13 @@
+{
+    "deviceVendor": "Polhemus",
+    "deviceName": "PowerTRAK 360",
+    "author": "Kevin M. Godby <kevin@godby.org>",
+    "version": 1,
+    "lastModified": "2016-04-20T13:43:58Z",
+    "interfaces": {
+        "button": {
+            "count": 4
+        }
+    }
+}
+
