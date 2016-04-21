@@ -36,6 +36,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <iostream>
 
 /// This was enabled/primarily useful to reduce jitter when RANSAC was the only
 /// tracking method, for culling a little tighter than the RANSAC PNP itself
