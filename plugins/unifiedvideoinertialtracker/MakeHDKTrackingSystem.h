@@ -258,11 +258,12 @@ namespace vbtracker {
 
         if (useRear) {
             // distance between front and back panel target origins, in mm,
-            // because we'll apply this before converting coordinate systems.
+            // because we'll apply this before converting coordinate
+            // systems.
             // Yes, all these transformations have been checked.
-            const auto distanceBetweenPanels =
-                static_cast<float>(params.headCircumference / M_PI * 10.f +
-                                   params.headToFrontBeaconOriginDistance);
+            const auto distanceBetweenPanels = computeDistanceBetweenPanels(
+                params.headCircumference,
+                params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
             auto transformBackPoints =
@@ -350,8 +351,8 @@ namespace vbtracker {
                 hmd->createIntegratedIMU(params.imu.orientationVariance,
                                          params.imu.angularVelocityVariance);
             if (!imu) {
-                throw std::runtime_error(
-                    "Could not create an integrated IMU object for the HMD!");
+                throw std::runtime_error("Could not create an integrated "
+                                         "IMU object for the HMD!");
             }
         } else {
 #if 1
