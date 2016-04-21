@@ -68,6 +68,7 @@ class VideoIMUFusionDevice {
                                 const OSVR_PoseReport &report);
 
     void sendMainPoseReport();
+    void sendVelocityReport();
 
     OSVR_TrackerDeviceInterface m_trackerOut;
     osvr::pluginkit::DeviceToken m_dev;

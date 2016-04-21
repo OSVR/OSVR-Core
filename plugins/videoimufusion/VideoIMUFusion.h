@@ -80,6 +80,13 @@ class VideoIMUFusion {
         return m_lastTime;
     }
 
+    OSVR_VelocityState const &getLatestVelocity() const {
+        return m_lastVelocity;
+    }
+    osvr::util::time::TimeValue const &getLatestVelocityTime() const {
+        return m_lastVelTime;
+    }
+
     /// Returns the latest video-tracker pose, re-oriented to be in room space.
     /// Only valid once running state is entered!
     OSVR_PoseState const &getLatestReorientedVideoPose() const {
@@ -125,6 +132,8 @@ class VideoIMUFusion {
     OSVR_PoseState m_reorientedVideo;
     OSVR_PoseState m_lastPose;
     osvr::util::time::TimeValue m_lastTime;
+    OSVR_VelocityState m_lastVelocity;
+    osvr::util::time::TimeValue m_lastVelTime;
     VideoIMUFusionParams m_params;
     Eigen::Isometry3d m_roomCalib;
 };

@@ -27,6 +27,7 @@
 #include "RunningData.h"
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/EigenQuatExponentialMap.h>
 #include <osvr/Util/ExtractYaw.h>
 
 // Library/third-party includes
@@ -116,7 +117,20 @@ void VideoIMUFusion::handleIMUData(const OSVR_TimeValue &timestamp,
 }
 void VideoIMUFusion::handleIMUVelocity(const OSVR_TimeValue &timestamp,
                                        const Eigen::Vector3d &angVel) {
+    /// Arbitrary, chosen to avoid aliasing
+    static const auto DT = 1. / 50.;
+    /// @todo Do we need a factor of 0.5 to turn angular velocity vector into
+    /// quaternion derivative?
+    ei::map(m_lastVelocity.angularVelocity.incrementalRotation) =
+        osvr::util::quat_exp_map((angVel * DT).eval()).exp();
+    m_lastVelocity.angularVelocity.dt = DT;
+
+    ei::map(m_lastVelocity.linearVelocity) = Eigen::Vector3d::Zero();
+    m_lastVelocity.linearVelocityValid = false;
+    m_lastVelTime = timestamp;
+
     if (m_state != State::Running) {
+        /// Just report the angular velocity
         return;
     }
     m_runningData->handleIMUVelocity(timestamp, angVel);
