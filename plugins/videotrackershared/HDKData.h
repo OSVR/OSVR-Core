@@ -32,7 +32,8 @@
 // - none
 
 // Standard includes
-// - none
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace osvr {
 namespace vbtracker {
