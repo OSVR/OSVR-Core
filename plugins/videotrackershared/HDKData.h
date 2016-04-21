@@ -51,6 +51,21 @@ namespace vbtracker {
 
     extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
 
+    inline std::size_t getNumHDKFrontPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR0.size();
+    }
+
+    inline std::size_t getNumHDKRearPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR1.size();
+    }
+
+    /// distance between front and back panel target origins, in mm.
+    inline double
+    computeDistanceBetweenPanels(double headCircumference,
+                                 double headToFrontBeaconOriginDistance) {
+        return headCircumference / M_PI * 10. + headToFrontBeaconOriginDistance;
+    }
+
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_HDKData_h_GUID_89F92BAC_AB45_44B8_1402_D4F4D5E3A9B9
