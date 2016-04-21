@@ -24,13 +24,14 @@
 
 // Internal Includes
 #include "BeaconBasedPoseEstimator.h"
-#include "cvToEigen.h"
 #include "ImagePointMeasurement.h" // for projectPoint
+#include <cvToEigen.h>
 
 // Library/third-party includes
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/core/affine.hpp>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenInterop.h>
-#include <opencv2/calib3d/calib3d.hpp>
 
 // Standard includes
 #include <iostream>
@@ -289,7 +290,7 @@ namespace vbtracker {
         // We tried using the previous guess to reduce the amount of computation
         // being done, but this got us stuck in infinite locations.  We seem to
         // do okay without using it, so leaving it out.
-        // @todo Make number of iterations into a parameter.
+        const float MaxReprojectionErrorForInlier = 87.0f;
         bool usePreviousGuess = false;
         int iterationsCount = 5;
         cv::Mat inlierIndices;
@@ -298,7 +299,7 @@ namespace vbtracker {
         cv::solvePnPRansac(
             objectPoints, imagePoints, m_camParams.cameraMatrix,
             m_camParams.distortionParameters, m_rvec, m_tvec, usePreviousGuess,
-            iterationsCount, 8.0f,
+            iterationsCount, MaxReprojectionErrorForInlier,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 #elif CV_MAJOR_VERSION == 3
@@ -378,6 +379,27 @@ namespace vbtracker {
         // down, and Z pointing along the camera viewing direction.
 
         m_gotMeasurement = true;
+
+        if (m_tvec.at<double>(2) < 0) {
+// -z means the wrong side of the pinhole
+/// @todo find out why OpenCV is now returning these values sometimes
+#if 0
+            std::cout << "On the wrong side of the looking glass:" << m_tvec
+                      << std::endl;
+#endif
+            // So, we invert translation, and apply 180 rotation (to rotation)
+            // about z.
+            m_tvec *= -1;
+
+            /// Make a rotation matrix for 180 about z
+            auto rotMat = cv::Affine3d::Mat3::eye();
+            rotMat(0, 0) = -1;
+            rotMat(1, 1) = -1;
+            /// Apply the transform and get the rvec out again.
+            m_rvec =
+                cv::Mat(cv::Affine3d(m_rvec) * (cv::Affine3d(rotMat)).rvec());
+        }
+
         m_resetState(cvToVector3d(m_tvec), cvRotVecToQuat(m_rvec));
         return true;
     }
