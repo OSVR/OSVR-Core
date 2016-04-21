@@ -91,6 +91,14 @@ target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources)
 set_target_properties(uvbi-view-camera PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
+# "object library" for the HDK data files.
+add_library(uvbi-hdkdata OBJECT ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA})
+target_compile_options(uvbi-hdkdata
+    PUBLIC
+    ${OSVR_CXX11_FLAGS})
+set_target_properties(uvbi-hdkdata PROPERTIES
+    FOLDER "${PROJ_FOLDER}")
+
 osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
@@ -102,7 +110,7 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     ThreadsafeBodyReporting.h
     TrackerThread.cpp
     TrackerThread.h
-    ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA}
+    $<TARGET_OBJECTS:uvbi-hdkdata>
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
 
 target_link_libraries(org_osvr_unifiedvideoinertial
@@ -117,14 +125,5 @@ set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
 
 
 if(BUILD_ADVANCED_DEV_TOOLS)
-    add_executable(TrackerParameterFinder
-        CSVTools.h
-        MakeHDKTrackingSystem.h
-        ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA}
-        TrackerParameterFinder.cpp)
-    set_target_properties(TrackerParameterFinder PROPERTIES
-        FOLDER "${PROJ_FOLDER}")
-    target_link_libraries(TrackerParameterFinder
-        PRIVATE
-        uvbi-core)
+    add_subdirectory(ParameterFinder)
 endif()
