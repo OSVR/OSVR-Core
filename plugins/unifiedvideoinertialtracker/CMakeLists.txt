@@ -114,3 +114,16 @@ target_link_libraries(org_osvr_unifiedvideoinertial
 
 set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
     FOLDER "${PROJ_FOLDER}")
+
+
+if(BUILD_ADVANCED_DEV_TOOLS)
+    add_executable(TrackerParameterFinder
+        MakeHDKTrackingSystem.h
+        ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA}
+        TrackerParameterFinder.cpp)
+    set_target_properties(TrackerParameterFinder PROPERTIES
+        FOLDER "${PROJ_FOLDER}")
+    target_link_libraries(TrackerParameterFinder
+        PRIVATE
+        uvbi-core)
+endif()
