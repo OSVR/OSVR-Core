@@ -14,6 +14,8 @@
     https://opensource.org/licenses/MIT also known as the "Expat" license.
 */
 
+/* SPDX-License-Identifier: MIT */
+
 /* NOTE: Original header comments from attractivechaos newuoa.hh follows: */
 /*
   This is NEWUOA for unconstrained minimization. The codes were written
