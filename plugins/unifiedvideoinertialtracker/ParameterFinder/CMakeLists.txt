@@ -11,4 +11,5 @@ set_target_properties(TrackerParameterFinder PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 target_link_libraries(TrackerParameterFinder
     PRIVATE
-    uvbi-core)
+    uvbi-core
+    JsonCpp::JsonCpp)

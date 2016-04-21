@@ -33,6 +33,7 @@
 #include "TrackedBody.h"
 #include "TrackingSystem.h"
 
+#include <LoadCalibration.h>
 #include <cvToEigen.h>
 
 // Library/third-party includes
@@ -161,8 +162,43 @@ namespace vbtracker {
         }
     } // namespace
 
+    /// returns true if it actually did load one.
+    inline bool tryLoadingCalibration(std::string const &filename,
+                                      TargetSetupData &data) {
+
+        /// Try loading a calibration file.
+        /// For compatibility, these will also be millimeters in the twisted
+        /// coordinate system, so if we succeed, we transform them below.
+        auto calibratedLocations = tryLoadingArrayOfPointsFromFile(filename);
+
+        auto n = calibratedLocations.size();
+        const auto numFrontBeacons = getNumHDKFrontPanelBeacons();
+        const auto numRearBeacons = getNumHDKRearPanelBeacons();
+        /// If we got the calibrated number of front beacons or all
+        /// beacons, this is the right file.
+        if (n == numFrontBeacons || n == (numFrontBeacons + numRearBeacons)) {
+
+            /// Trim off any accidentally-calibrated rear beacons. Those
+            /// need autocalib for now at least.
+            calibratedLocations.resize(numFrontBeacons);
+            range_transform(
+                calibratedLocations, begin(data.locations),
+                [](LocationPoint pt) { return transformFromHDKData(pt); });
+            /// Scale the autocalib error for the beacons we loaded
+            /// calibration on.
+            for (std::size_t i = 0; i < numFrontBeacons; ++i) {
+                data.initialAutocalibrationErrors[i] *=
+                    BEACON_AUTOCALIB_ERROR_SCALE_IF_CALIBRATED;
+            }
+            return true;
+        }
+        return false;
+    }
+
     inline std::unique_ptr<TrackingSystem>
     makeHDKTrackingSystem(ConfigParams const &params) {
+        auto silent = params.silent;
+
         std::unique_ptr<TrackingSystem> sys(new TrackingSystem(params));
 #ifdef OSVR_UVBI_DEBUG_EMISSION_DIRECTION
         {
@@ -179,8 +215,8 @@ namespace vbtracker {
                 "Could not create a tracked body for the HMD!");
         }
 
-        const auto numFrontBeacons = OsvrHdkLedLocations_SENSOR0.size();
-        const auto numRearBeacons = OsvrHdkLedLocations_SENSOR1.size();
+        const auto numFrontBeacons = getNumHDKFrontPanelBeacons();
+        const auto numRearBeacons = getNumHDKRearPanelBeacons();
         const auto useRear = params.includeRearPanel;
         const auto numBeacons =
             numFrontBeacons + (useRear ? numRearBeacons : 0);
@@ -201,10 +237,24 @@ namespace vbtracker {
         }
 
         /// Scale from millimeters to meters, and make the coordinate system
-        /// what we want.
+        /// what we want: loading the front beacons
         auto locationsEnd = range_transform(
             OsvrHdkLedLocations_SENSOR0, begin(data.locations),
             [](LocationPoint pt) { return transformFromHDKData(pt); });
+
+        /// Replace them with calibrated versions if we have them.
+        if (!params.calibrationFile.empty()) {
+            auto success = tryLoadingCalibration(params.calibrationFile, data);
+            if (!silent) {
+                if (success) {
+                    messages::loadedCalibFileSuccessfully(
+                        params.calibrationFile);
+                } else {
+                    messages::calibFileSpecifiedButNotLoaded(
+                        params.calibrationFile);
+                }
+            }
+        }
 
         if (useRear) {
             // distance between front and back panel target origins, in mm,

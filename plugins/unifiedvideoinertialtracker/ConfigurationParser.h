@@ -26,9 +26,9 @@
 #define INCLUDED_ConfigurationParser_h_GUID_933C79EE_3392_4C8D_74D5_D9A72580DA6A
 
 // Internal Includes
-#include "Types.h"
 #include "GetOptionalParameter.h"
 #include "OptionalStream.h"
+#include "Types.h"
 
 // Library/third-party includes
 #include <json/value.h>
@@ -61,13 +61,7 @@ namespace vbtracker {
 
         /// General parameters
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
-#if 0
         getOptionalParameter(config.calibrationFile, root, "calibrationFile");
-#else
-        outputUnless(std::cout, root["calibrationFile"].isNull())
-            << MESSAGE_PREFIX << PARAMNAME("calibrationFile")
-            << " not yet implemented in the new tracker";
-#endif
 
         getOptionalParameter(config.additionalPrediction, root,
                              "additionalPrediction");
