@@ -26,11 +26,12 @@
 #include "PoseEstimator_RANSAC.h"
 #include "CameraParameters.h"
 #include "LED.h"
-#include "cvToEigen.h"
 #include "UsefulQuaternions.h"
+#include "cvToEigen.h"
 
 // Library/third-party includes
 #include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/core/affine.hpp>
 #include <opencv2/core/core.hpp>
 
 // Standard includes
@@ -139,7 +140,6 @@ namespace vbtracker {
             for (int i = 0; i < inlierIndices.rows; i++) {
                 inlierObjectPoints.push_back(objectPoints[i]);
                 inlierImagePoints.push_back(imagePoints[i]);
-                inlierBeaconIds.push_back(beaconIds[i]);
             }
             std::vector<cv::Point2f> reprojectedPoints;
             cv::projectPoints(
@@ -219,7 +219,7 @@ namespace vbtracker {
         // towards the right from the camera center of projection, Y pointing
         // down, and Z pointing along the camera viewing direction, if the input
         // points are not inverted.
-        bool flipped = false;
+
         if (tvec.at<double>(2) < 0) {
 // -z means the wrong side of the pinhole
 /// @todo find out why OpenCV is now returning these values sometimes
@@ -230,13 +230,15 @@ namespace vbtracker {
             // So, we invert translation, and apply 180 rotation (to rotation)
             // about z.
             tvec *= -1;
-            flipped = true;
+            /// Make a rotation matrix for 180 about z
+            auto rotMat = cv::Affine3d::Mat3::eye();
+            rotMat(0, 0) = -1;
+            rotMat(1, 1) = -1;
+            /// Apply the transform and get the rvec out again.
+            rvec = cv::Mat(cv::Affine3d(rvec) * (cv::Affine3d(rotMat)).rvec());
         }
         outXlate = cvToVector3d(tvec);
         outQuat = cvRotVecToQuat(rvec);
-        if (flipped) {
-            outQuat = get180aboutZ() * outQuat;
-        }
         return true;
     }
 
