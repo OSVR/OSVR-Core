@@ -28,6 +28,10 @@
 #include "ParameterSets.h"
 #include "TransformFindingRoutine.h"
 
+#include <osvr/TypePack/ForEachType.h>
+#include <osvr/TypePack/Head.h>
+#include <osvr/TypePack/List.h>
+
 // Library/third-party includes
 #include <boost/algorithm/string/predicate.hpp> // for argument handling
 
@@ -36,6 +40,14 @@
 
 /// Define to add a "press enter to exit" thing at the end.
 #undef PAUSE_BEFORE_EXIT
+
+/// Parameter sets for the routines that start with "Param"
+namespace ps {
+using namespace osvr::vbtracker::optimization_param_sets;
+using ParamSets = osvr::typepack::list<ProcessNoiseVarianceAndDecay,
+                                       BrightAndNew, HighResidual>;
+using DefaultParamSet = osvr::typepack::head<ps::ParamSets>;
+} // namespace ps
 
 /// Adding a new entry here means you must also add it to RECOGNIZED_ROUTINES,
 /// routineToString, and the switch in main().
@@ -79,13 +91,30 @@ OptimizationRoutine stringToRoutine(const char *routineName) {
     return OptimizationRoutine::Unrecognized;
 }
 
+struct PrintParamSetOptions {
+    template <typename T> void operator()(T const &) {
+        std::cerr
+            << "   "
+            << osvr::vbtracker::optimization_param_sets::ParamSetName<T>::get()
+            << "\n";
+    }
+};
+
 int usage(const char *argv0) {
-    std::cerr << "Usage: " << argv0 << "[<routine>]\n" << std::endl;
+    std::cerr << "Usage: " << argv0 << "[<routine> [<paramset>]]\n"
+              << std::endl;
     std::cerr
         << "where <routine> is one of the following (case insensitive): \n";
     for (auto &routine : RECOGNIZED_ROUTINES) {
         std::cerr << "   " << routineToString(routine) << "\n";
     }
+    std::cerr
+        << "\nThe various ParamViaX routines take an optional additional "
+           "argument specifying the parameter set that they optimize, one "
+           "of:\n";
+
+    osvr::typepack::for_each_type<ps::ParamSets>(PrintParamSetOptions{});
+
     std::cerr
         << "\nIf no routine is explicitly specified, the default routine is "
         << routineToString(DEFAULT_ROUTINE) << "\n";
@@ -96,23 +125,78 @@ int usage(const char *argv0) {
     return 1;
 }
 
+template <typename RefSource> class ParseArgumentAsParamSet {
+  public:
+    ParseArgumentAsParamSet(osvr::vbtracker::ParamOptimizerFunc &outFunc,
+                            std::string &paramSetName)
+        : outFunc_(outFunc), paramSetName_(paramSetName) {}
+    template <typename T> void operator()(T const &, const char *arg) {
+        using osvr::vbtracker::optimization_param_sets::ParamSetName;
+        if (boost::iequals(ParamSetName<T>::get(), arg)) {
+            // we've got a match!
+            outFunc_ = &osvr::vbtracker::runOptimizer<RefSource, T>;
+            paramSetName_ = ParamSetName<T>::get();
+        }
+    }
+
+  private:
+    osvr::vbtracker::ParamOptimizerFunc &outFunc_;
+    std::string &paramSetName_;
+};
+
+template <typename RefSource>
+int parseParamSetForParamOptimizer(osvr::vbtracker::ParamOptimizerFunc &func,
+                                   int argc, char *argv[]) {
+    if (argc > 3) {
+        std::cerr << "Too many command line arguments!" << std::endl;
+        return usage(argv[0]);
+    }
+    if (argc == 2) {
+        // specified routine only, no param set
+        std::cout << "Will process default parameter set "
+                  << osvr::vbtracker::optimization_param_sets::ParamSetName<
+                         ps::DefaultParamSet>::get()
+                  << "\n";
+        func = &osvr::vbtracker::runOptimizer<RefSource, ps::DefaultParamSet>;
+        return 0;
+    }
+    // OK, they specified a param set.
+    osvr::vbtracker::ParamOptimizerFunc result;
+    std::string paramSetName;
+    ParseArgumentAsParamSet<RefSource> functor(result, paramSetName);
+    osvr::typepack::for_each_type<ps::ParamSets>(functor, argv[2]);
+    if (result) {
+        std::cout << "Will process parameter set " << paramSetName
+                  << " as specified on the command line.\n";
+        func = result;
+        return 0;
+    }
+
+    std::cerr << "Did not recognize " << argv[2]
+              << " as one of the known parameter sets to optimize!"
+              << std::endl;
+
+    return usage(argv[0]);
+}
+
 int main(int argc, char *argv[]) {
     OptimizationRoutine routine = DEFAULT_ROUTINE;
     static const auto DATAFILE = "augmented-blobs.csv";
 
-    if (argc > 2) {
-        /// Passed too many args: show help.
-        return usage(argv[0]);
-    }
+    auto withUsage = [&] { return usage(argv[0]); };
+    auto tooManyArguments = [&] {
+        std::cerr << "Too many command line arguments!" << std::endl;
+        return withUsage();
+    };
 
-    if (argc == 2) {
+    if (argc > 1) {
         routine = stringToRoutine(argv[1]);
         if (OptimizationRoutine::Unrecognized == routine) {
             std::cerr << "Didn't recognize '" << argv[1]
                       << "' as an optimization routine.\n"
                       << std::endl;
             /// Didn't recognize that.
-            return usage(argv[0]);
+            return withUsage();
         }
         /// Hey, we did recognize that!
         std::cout << "Will execute optimization routine "
@@ -122,6 +206,43 @@ int main(int argc, char *argv[]) {
         std::cout << "No optimization routine specified on the command line, "
                      "will execute "
                   << routineToString(routine) << " by default." << std::endl;
+    }
+
+    osvr::vbtracker::ParamOptimizerFunc paramOptFunc;
+    {
+        int ret = 0;
+        switch (routine) {
+        case OptimizationRoutine::ParamViaRansac:
+            ret =
+                parseParamSetForParamOptimizer<osvr::vbtracker::RansacOneEuro>(
+                    paramOptFunc, argc, argv);
+            if (ret != 0) {
+                /// There was an error, and the function already told the user
+                /// about it.
+                return ret;
+            }
+            break;
+
+        case OptimizationRoutine::ParamViaRefTracker:
+
+            ret = parseParamSetForParamOptimizer<
+                osvr::vbtracker::ReferenceTracker>(paramOptFunc, argc, argv);
+            if (ret != 0) {
+                /// There was an error, and the function already told the user
+                /// about it.
+                return ret;
+            }
+            break;
+
+        case OptimizationRoutine::RefTracker:
+        /// no param set here
+        default:
+            if (argc > 2) {
+
+                std::cerr << "Too many command line arguments!" << std::endl;
+                return withUsage();
+            }
+        }
     }
 
     std::cout << "Loading and parsing data from " << DATAFILE << "    ";
@@ -142,14 +263,6 @@ int main(int argc, char *argv[]) {
     params.imu.useOrientation = false;
     params.imu.useAngularVelocity = false;
 
-    /// Which parameter set do we want to optimize in the main optimization
-    /// routines?
-    namespace ps = osvr::vbtracker::optimization_param_sets;
-
-    using ParamSet = ps::ProcessNoiseVarianceAndDecay;
-    // using ParamSet = ps::BrightAndNew;
-    // using ParamSet = ps::HighResidual;
-
     std::cout << "Starting optimization routine " << routineToString(routine)
               << std::endl;
     switch (routine) {
@@ -163,17 +276,14 @@ int main(int argc, char *argv[]) {
 
     case OptimizationRoutine::ParamViaRansac:
 
-        osvr::vbtracker::runOptimizer<osvr::vbtracker::RansacOneEuro, ParamSet>(
-            data, osvr::vbtracker::OptimCommonData{camParams, params}, 30);
-
+        paramOptFunc(data, osvr::vbtracker::OptimCommonData{camParams, params},
+                     30);
         break;
 
     case OptimizationRoutine::ParamViaRefTracker:
 
-        osvr::vbtracker::runOptimizer<osvr::vbtracker::ReferenceTracker,
-                                      ParamSet>(
-            data, osvr::vbtracker::OptimCommonData{camParams, params}, 300);
-
+        paramOptFunc(data, osvr::vbtracker::OptimCommonData{camParams, params},
+                     300);
         break;
 
     default:

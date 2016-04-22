@@ -34,6 +34,7 @@
 // - none
 
 // Standard includes
+#include <functional>
 #include <iomanip>
 
 namespace osvr {
@@ -110,6 +111,8 @@ namespace vbtracker {
         std::cout << "for parameters described as, respectively,\n"
                   << ParamSet::getVecElementNames() << std::endl;
     }
+    using ParamOptimizerFunc = std::function<void(
+        MeasurementsRows const &, OptimCommonData const &, std::size_t)>;
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_ParamFindingRoutine_h_GUID_C2088279_D54B_4D8B_562E_5748C748DAD0
