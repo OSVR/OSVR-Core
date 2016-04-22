@@ -237,7 +237,7 @@ namespace vbtracker {
 
         auto opticalTarget = hmd->createTarget(
 #if 0
-            Eigen::Vector3d(0, 0, 0.04141),
+            Eigen::Vector3d(0, 0, -0.04141),
 #else
             Eigen::Vector3d::Zero(),
 #endif
