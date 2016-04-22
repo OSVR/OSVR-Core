@@ -34,8 +34,8 @@
 namespace osvr {
 namespace vbtracker {
     ConfigParams::ConfigParams() {
-        const double positionNoise = 0.1528422821930635;
-        const double rotationNoise = 0.07823867973083772;
+        const double positionNoise = 0.1481103307425256;
+        const double rotationNoise = 0.1092169892572299;
         processNoiseAutocorrelation[0] = positionNoise;
         processNoiseAutocorrelation[1] = positionNoise;
         processNoiseAutocorrelation[2] = positionNoise;
