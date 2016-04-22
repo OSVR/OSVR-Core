@@ -38,6 +38,9 @@ namespace osvr {
 namespace vbtracker {
 
     namespace optimization_param_sets {
+        /// Trait for param set name.
+        template <typename T> struct ParamSetName;
+
         struct ProcessNoiseVarianceAndDecay {
             /// required part of interface
             static const size_t Dimension = 5;
@@ -92,6 +95,10 @@ namespace vbtracker {
             }
         };
 
+        template <> struct ParamSetName<ProcessNoiseVarianceAndDecay> {
+            static const char *get() { return "ProcessNoiseVarianceAndDecay"; }
+        };
+
         struct BrightAndNew {
             /// required part of interface
             static const size_t Dimension = 2;
@@ -126,6 +133,10 @@ namespace vbtracker {
             }
         };
 
+        template <> struct ParamSetName<BrightAndNew> {
+            static const char *get() { return "BrightAndNew"; }
+        };
+
         struct HighResidual {
             /// required part of interface
             static const size_t Dimension = 2;
@@ -157,6 +168,10 @@ namespace vbtracker {
                 return "max residual,\n"
                        "high residual variance penalty";
             }
+        };
+
+        template <> struct ParamSetName<HighResidual> {
+            static const char *get() { return "HighResidual"; }
         };
     } // namespace optimization_param_sets
 } // namespace vbtracker
