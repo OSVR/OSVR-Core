@@ -496,7 +496,7 @@ namespace vbtracker {
             }
 
             /// required part of interface
-            static std::pair<double, double> getRho() { return {1e-16, 1e-1}; }
+            static std::pair<double, double> getRho() { return {1e-10, 1e0}; }
 
             /// required part of interface
             static void updateParamsFromVec(ConfigParams &params,
@@ -527,9 +527,9 @@ namespace vbtracker {
             }
         };
 
-        struct VariancePenalties {
+        struct BrightAndNew {
             /// required part of interface
-            static const size_t Dimension = 3;
+            static const size_t Dimension = 2;
 
             /// Internal for convenience use.
             using ParamVec = Vec<Dimension>;
@@ -538,29 +538,59 @@ namespace vbtracker {
             static ParamVec getInitialVec(OptimCommonData const &commonData) {
                 ParamVec x;
                 const auto &p = commonData.initialParams;
-                x << p.maxResidual, p.highResidualVariancePenalty,
-                    p.brightLedVariancePenalty;
+                x << p.brightLedVariancePenalty, p.tuning.noveltyPenaltyBase;
                 return x;
             }
 
             /// required part of interface
-            static std::pair<double, double> getRho() { return {1e-3, 1e2}; }
+            static std::pair<double, double> getRho() { return {1e-5, 1e1}; }
+
+            /// required part of interface
+            static void updateParamsFromVec(ConfigParams &p,
+                                            ParamVec const &x) {
+                // Update config from provided param vec
+                p.brightLedVariancePenalty = x[0];
+                p.shouldSkipBrightLeds = false;
+                p.tuning.noveltyPenaltyBase = x[1];
+            }
+
+            /// required part of interface
+            static const char *getVecElementNames() {
+                return "bright LED variance penalty,\n"
+                       "novelty penalty base";
+            }
+        };
+
+        struct HighResidual {
+            /// required part of interface
+            static const size_t Dimension = 2;
+
+            /// Internal for convenience use.
+            using ParamVec = Vec<Dimension>;
+
+            /// required part of interface
+            static ParamVec getInitialVec(OptimCommonData const &commonData) {
+                ParamVec x;
+                const auto &p = commonData.initialParams;
+                x << p.maxResidual, p.highResidualVariancePenalty;
+                return x;
+            }
+
+            /// required part of interface
+            static std::pair<double, double> getRho() { return {1e-4, 1e1}; }
 
             /// required part of interface
             static void updateParamsFromVec(ConfigParams &p,
                                             ParamVec const &x) {
                 // Update config from provided param vec
                 p.maxResidual = x[0];
-                p.highResidualVariancePenalty = x[1];
-                p.brightLedVariancePenalty = x[2];
-                p.shouldSkipBrightLeds = false;
+                p.highResidualVariancePenalty = x[2];
             }
 
             /// required part of interface
             static const char *getVecElementNames() {
                 return "max residual,\n"
-                       "high residual variance penalty,\n"
-                       "bright LED variance penalty";
+                       "high residual variance penalty";
             }
         };
     } // namespace optimization_param_sets
@@ -749,13 +779,11 @@ int main(int argc, char *argv[]) {
 
     /// Which parameter set do we want to optimize in the main optimization
     /// routines?
-    namespace param_sets = osvr::vbtracker::optimization_param_sets;
-#if 1
-    using ParamSet =
-        param_sets::ProcessNoiseVarianceAndDecay;
-#else
-    using ParamSet = param_sets::VariancePenalties;
-#endif
+    namespace ps = osvr::vbtracker::optimization_param_sets;
+
+    //using ParamSet = ps::ProcessNoiseVarianceAndDecay;
+    //using ParamSet = ps::BrightAndNew;
+    using ParamSet = ps::HighResidual;
 
     std::cout << "Starting optimization routine " << routineToString(routine)
               << std::endl;
