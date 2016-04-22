@@ -29,11 +29,10 @@
 #include "Types.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/core/core.hpp>
 
 // Standard includes
-#define _USE_MATH_DEFINES
-#include <math.h>
+// - none
 
 namespace osvr {
 namespace vbtracker {
@@ -64,7 +63,8 @@ namespace vbtracker {
     inline double
     computeDistanceBetweenPanels(double headCircumference,
                                  double headToFrontBeaconOriginDistance) {
-        return headCircumference / M_PI * 10. + headToFrontBeaconOriginDistance;
+        return headCircumference / CV_PI * 10. +
+               headToFrontBeaconOriginDistance;
     }
 
 } // namespace vbtracker

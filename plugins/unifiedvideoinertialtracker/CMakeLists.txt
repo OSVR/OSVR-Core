@@ -99,6 +99,9 @@ add_library(uvbi-hdkdata OBJECT ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA})
 target_compile_options(uvbi-hdkdata
     PUBLIC
     ${OSVR_CXX11_FLAGS})
+target_include_directories(uvbi-hdkdata
+    PUBLIC
+    ${OpenCV_INCLUDE_DIRS})
 set_target_properties(uvbi-hdkdata PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
