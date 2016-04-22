@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "CSVTools.h"
+#include "UtilityFunctions.h"
 #include <ImageProcessing.h>
 #include <LedMeasurement.h>
 #include <MakeHDKTrackingSystem.h>
@@ -51,7 +52,6 @@
 namespace osvr {
 namespace vbtracker {
 
-    using osvr::util::time::TimeValue;
     static const cv::Size IMAGE_SIZE = {640, 480};
 
     inline cv::Mat const &getGray() {
@@ -63,17 +63,6 @@ namespace vbtracker {
         static const cv::Mat instance = cv::Mat(IMAGE_SIZE, CV_8UC3);
         return instance;
     }
-
-    struct TimestampedMeasurements {
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        TimeValue tv;
-        Eigen::Vector3d xlate;
-        Eigen::Quaterniond rot;
-        LedMeasurementVec measurements;
-        bool ok = false;
-    };
-    using TimestampedMeasurementsPtr = std::unique_ptr<TimestampedMeasurements>;
-    using MeasurementsRows = std::vector<TimestampedMeasurementsPtr>;
 
     class LoadRow {
       public:

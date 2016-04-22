@@ -5,8 +5,13 @@ add_executable(TrackerParameterFinder
     CSVTools.h
     LoadRows.h
     newuoa.h
+    OptimizationBase.h
+    ParameterSets.h
+    ParamFindingRoutine.h
     PoseFilter.h
-    TrackerParameterFinder.cpp)
+    TrackerParameterFinder.cpp
+    TransformFindingRoutine.h
+    UtilityFunctions.h)
 set_target_properties(TrackerParameterFinder PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 target_link_libraries(TrackerParameterFinder
