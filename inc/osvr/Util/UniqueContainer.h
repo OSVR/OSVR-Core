@@ -127,12 +127,42 @@ namespace util {
                 using const_reference = typename Container::const_reference;
                 using comparator = Comparison<value_type>;
 
-                /// @brief Time complexity: O(std::binary_search) = O(lg n)
-                static bool contains(Container const &c, const_reference v) {
-                    return std::binary_search(begin(c), end(c), v);
+                /// @brief Helper function to avoid vexing parse
+                static comparator get_comparator() { return comparator{}; }
+
+                /// @brief Helper function. Wraps both the range aspects and the
+                /// comparator for easier use of the underlying
+                /// std::lower_bound.
+                /// For non-const containers.
+                /// O(lg n) comparisons performed
+                static auto lower_bound(Container &c, const_reference v)
+                    -> decltype(std::lower_bound(begin(c), end(c), v,
+                                                 policy::get_comparator())) {
+                    return std::lower_bound(begin(c), end(c), v,
+                                            policy::get_comparator());
                 }
 
-                /// @brief Time complexity: O(find) + O(member erase), which is
+                /// @brief Helper function. Wraps both the range aspects and the
+                /// comparator for easier use of the underlying
+                /// std::lower_bound.
+                /// For const containers.
+                /// O(lg n) comparisons performed
+                static auto lower_bound(Container const &c, const_reference v)
+                    -> decltype(std::lower_bound(begin(c), end(c), v,
+                                                 policy::get_comparator())) {
+                    return std::lower_bound(begin(c), end(c), v,
+                                            policy::get_comparator());
+                }
+
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Time complexity: O(std::binary_search) = O(lg n)
+                static bool contains(Container const &c, const_reference v) {
+                    return std::binary_search(begin(c), end(c), v,
+                                              policy::get_comparator());
+                }
+
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Time complexity: O(find) + O(member erase), which is
                 /// O(n) (+ amortized constant time) for a std::vector
                 static bool remove(Container &c, const_reference v) {
                     auto it = policy::find(c, v);
@@ -143,7 +173,8 @@ namespace util {
                     return false;
                 }
 
-                /// @brief Insert from a const reference. Time complexity:
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Insert from a const reference. Time complexity:
                 /// O(lower_bound) + O(insert), which is O(lg n) +
                 /// O(n), so O(n) (for sliding things out of the way) for a
                 /// std::vector
@@ -156,7 +187,8 @@ namespace util {
                     return false;
                 }
 
-                /// @brief Insert from an rvalue-reference (move-insert). Time
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Insert from an rvalue-reference (move-insert). Time
                 /// complexity: O(lower_bound) + O(insert), which is O(lg n) +
                 /// O(n), so O(n) (for sliding things out of the way) for a
                 /// std::vector
@@ -169,7 +201,8 @@ namespace util {
                     return false;
                 }
 
-                /// @brief Time complexity: O(std::lower_bound) = O(lg n)
+                /// @brief Helper function. Time complexity: O(std::lower_bound)
+                /// = O(lg n)
                 /// Based on lower_bound with an additional check for
                 /// equivalence.
                 static auto find(Container const &c, const_reference v)
@@ -179,7 +212,8 @@ namespace util {
                                                                      : end(c);
                 }
 
-                /// @brief Time complexity: O(std::lower_bound) = O(lg n)
+                /// @brief Helper function. Time complexity: O(std::lower_bound)
+                /// = O(lg n)
                 /// Based on lower_bound with an additional check for
                 /// equivalence.
                 static auto find(Container &c, const_reference v)
@@ -189,30 +223,17 @@ namespace util {
                                                                      : end(c);
                 }
 
-              private:
-                /// !(A < B) && !(B < A) is used to imply A == B
+                /// @brief Helper function. !(A < B) && !(B < A) is used to
+                /// imply A == B
                 /// O(1) comparisons performed
                 static bool check_equiv(const_reference a, const_reference b) {
-                    comparator comp();
+                    auto comp = policy::get_comparator();
                     return !(comp(a, b)) && !(comp(b, a));
                 }
 
-                /// O(lg n) comparisons performed
-                static auto lower_bound(Container &c, const_reference v)
-                    -> decltype(std::lower_bound(begin(c), end(c), v,
-                                                 comparator())) {
-                    return std::lower_bound(begin(c), end(c), v, comparator());
-                }
-
-                /// O(lg n) comparisons performed
-                static auto lower_bound(Container const &c, const_reference v)
-                    -> decltype(std::lower_bound(begin(c), end(c), v,
-                                                 comparator())) {
-                    return std::lower_bound(begin(c), end(c), v, comparator());
-                }
-                /// Look at an iterator, for instance, from lower_bound, and
-                /// determine if it implies the container contains the value
-                /// provided.
+                /// @brief Helper function. Look at an iterator, for instance,
+                /// from lower_bound, and determine if it implies the container
+                /// contains the value provided.
                 template <typename IteratorType>
                 static bool iter_indicates_contains(Container const &c,
                                                     IteratorType const &it,
@@ -223,8 +244,9 @@ namespace util {
                     return check_equiv(*it, v);
                 }
 
+                /// @brief Helper function.
                 static void sort(Container &c) {
-                    std::sort(begin(c), end(c), comparator());
+                    std::sort(begin(c), end(c), policy::get_comparator());
                 }
             };
         };
