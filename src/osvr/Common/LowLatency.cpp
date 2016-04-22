@@ -65,7 +65,7 @@ namespace common {
     // Fallback no-op implementations
     struct LowLatency::Impl {};
     LowLatency::LowLatency() {}
-    ~LowLatency() {}
+    LowLatency::~LowLatency() {}
 #endif
 
 } // namespace common
