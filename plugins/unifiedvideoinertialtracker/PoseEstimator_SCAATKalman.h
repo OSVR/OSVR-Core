@@ -27,8 +27,8 @@
 
 // Internal Includes
 #include "ConfigParams.h"
-#include "PoseEstimatorTypes.h"
 #include "ModelTypes.h"
+#include "PoseEstimatorTypes.h"
 #include "TrackedBodyTarget.h"
 
 // Library/third-party includes
@@ -83,6 +83,7 @@ namespace vbtracker {
         const double m_maxZComponent;
         const double m_highResidualVariancePenalty;
         const double m_beaconProcessNoise;
+        const double m_noveltyPenaltyBase;
         const double m_measurementVarianceScaleFactor;
         const double m_brightLedVariancePenalty;
         const bool m_extraVerbose;

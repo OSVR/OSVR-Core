@@ -56,6 +56,11 @@ namespace vbtracker {
         double angularVelocityVariance = 1.0e-8;
     };
 
+    struct TuningParams {
+        TuningParams();
+        double noveltyPenaltyBase;
+    };
+
     /// General configuration parameters
     struct ConfigParams {
         /// Not intended to be manually configurable - enabled when doing things
@@ -65,6 +70,8 @@ namespace vbtracker {
 
         /// For optimization usage.
         bool silent = false;
+
+        TuningParams tuning;
 
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;

@@ -165,6 +165,7 @@ namespace vbtracker {
           m_maxZComponent(params.maxZComponent),
           m_highResidualVariancePenalty(params.highResidualVariancePenalty),
           m_beaconProcessNoise(params.beaconProcessNoise),
+          m_noveltyPenaltyBase(params.tuning.noveltyPenaltyBase),
           m_brightLedVariancePenalty(params.brightLedVariancePenalty),
           m_measurementVarianceScaleFactor(
               params.measurementVarianceScaleFactor),
@@ -300,7 +301,7 @@ namespace vbtracker {
 
             auto localVarianceFactor = varianceFactor;
             auto newIdentificationVariancePenalty =
-                std::pow(2.0, led.novelty());
+                std::pow(m_noveltyPenaltyBase, led.novelty());
 
             /// Stick a little bit of process model uncertainty in the beacon,
             /// if it's meant to have some

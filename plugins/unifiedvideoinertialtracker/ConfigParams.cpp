@@ -57,5 +57,7 @@ namespace vbtracker {
         /// @todo this is just an estimate of how to not break most apps.
         cameraPosition[2] = -0.5;
     }
+
+    TuningParams::TuningParams() : noveltyPenaltyBase(2.173520922781369) {}
 } // namespace vbtracker
 } // namespace osvr
