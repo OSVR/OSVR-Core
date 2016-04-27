@@ -28,25 +28,44 @@
 #include "cvUtils.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/highgui/highgui.hpp>
 
 // Standard includes
 #include <iostream>
 #include <utility>
 
+#undef OSVR_SKIP_BLUR
+
 namespace osvr {
 namespace vbtracker {
-
+    static inline void showImage(std::string const &title, cv::Mat const &img,
+                                 bool showImages = true) {
+        if (showImages) {
+            cv::namedWindow(title);
+            cv::imshow(title, img);
+        }
+    }
+    EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor()
+        : laplacianKSize_(5), laplacianScale_(1.3), edgeDetectionBlurSize_(3),
+          edgeDetectionBlurThresh_(40.) {}
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
                bool verboseBlobOutput) {
         reset();
 
+        verbose_ = verboseBlobOutput;
+
         gray_ = gray.clone();
 
         /// Set up the threshold parameters
         baseThreshVal_ = p.absoluteMinThreshold;
-        auto thresholdInfo = ImageThresholdInfo(gray_, p);
+        auto rangeInfo = ImageRangeInfo(gray_);
+        if (rangeInfo.maxVal < p.absoluteMinThreshold) {
+            /// Early out - empty image!
+            return measurements_;
+        }
+
+        auto thresholdInfo = ImageThresholdInfo(rangeInfo, p);
         minBeaconCenterVal_ =
             static_cast<std::uint8_t>(thresholdInfo.minThreshold);
 
@@ -54,20 +73,30 @@ namespace vbtracker {
         cv::threshold(gray_, thresh_, baseThreshVal_, 255, cv::THRESH_TOZERO);
 
         /// Edge detection
-        cv::Laplacian(thresh_, edge_, CV_8U, LaplacianKSize);
-
+        cv::Laplacian(thresh_, edge_, CV_8U, laplacianKSize_, laplacianScale_);
+#ifdef OSVR_SKIP_BLUR
+        edgeBinary_ = edge_ > edgeDetectionBlurThresh_;
+#else
         /// Extract beacons from the edge detection image
         // turn the edge detection into a binary image.
-        cv::Mat edgeTemp = edge_ > 0;
+        // cv::Mat edgeTemp = edge_ > 0;
+        cv::Mat edgeTemp; // = edge_.clone();
+        cv::GaussianBlur(
+            edge_, edgeTemp,
+            cv::Size(edgeDetectionBlurSize_, edgeDetectionBlurSize_), 0, 0);
+        // showImage("Blurred", edgeTemp);
+        cv::threshold(edgeTemp, edgeBinary_, edgeDetectionBlurThresh_, 255,
+                      cv::THRESH_BINARY);
+#endif
 
         // The lambda ("continuation") is called with each "hole" in the edge
         // detection image, it's up to us what to do with the contour we're
         // given. We examine it for suitability as an LED, and if it passes our
         // checks, add a derived measurement to our measurement vector and the
         // contour itself to our list of contours for debugging display.
-        consumeHolesOfConnectedComponents(edgeTemp, [&](ContourType &&contour) {
-            checkBlob(std::move(contour), p);
-        });
+        consumeHolesOfConnectedComponents(
+            edgeBinary_,
+            [&](ContourType &&contour) { checkBlob(std::move(contour), p); });
         return measurements_;
     }
     void EdgeHoleBasedLedExtractor::checkBlob(ContourType &&contour,
@@ -89,7 +118,10 @@ namespace vbtracker {
         debugStream() << " - bounding box size: " << data.bounds.size();
         if (data.area < p.minArea) {
             debugStream() << "Reject based on area: " << data.area << " < "
-                          << p.minArea << "\n";
+                          << p.minArea << " (not added to reject list)"
+                                          "\n";
+
+            // addToRejectedCenters(data);
             return;
         }
 
@@ -103,7 +135,10 @@ namespace vbtracker {
             if (centerPointValue < minBeaconCenterVal_) {
                 debugStream() << "Reject based on center point value: "
                               << int(centerPointValue) << " < "
-                              << int(minBeaconCenterVal_) << "\n";
+                              << int(minBeaconCenterVal_)
+                              << " (not added to reject list)"
+                                 "\n";
+                // addToRejectedCenters(data);
                 return;
             }
         }
@@ -113,6 +148,7 @@ namespace vbtracker {
                 debugStream()
                     << "Reject based on circularity: " << data.circularity
                     << " < " << p.minCircularity << "\n";
+                addToRejectedCenters(data);
                 return;
             }
         }
@@ -122,6 +158,7 @@ namespace vbtracker {
             if (convexity < p.minConvexity) {
                 debugStream() << "Reject based on convexity: " << convexity
                               << " < " << p.minConvexity << "\n";
+                addToRejectedCenters(data);
 
                 return;
             }

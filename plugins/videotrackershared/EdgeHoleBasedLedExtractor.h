@@ -41,6 +41,7 @@ namespace osvr {
 namespace vbtracker {
     class EdgeHoleBasedLedExtractor {
       public:
+        EdgeHoleBasedLedExtractor();
         LedMeasurementVec const &operator()(cv::Mat const &gray,
                                             BlobParams const &p,
                                             bool verboseBlobOutput = false);
@@ -48,29 +49,46 @@ namespace vbtracker {
         void reset() {
             contours_.clear();
             measurements_.clear();
+            rejectedCenters_.clear();
         }
 
         cv::Mat const &getInputGrayImage() const { return gray_; }
         cv::Mat const &getThresholdedImage() const { return thresh_; }
         cv::Mat const &getEdgeDetectedImage() const { return edge_; }
+        cv::Mat const &getEdgeDetectedBinarizedImage() const {
+            return edgeBinary_;
+        }
         std::vector<ContourType> const &getContours() const {
             return contours_;
         }
         LedMeasurementVec const &getMeasurements() const {
             return measurements_;
         }
+        std::vector<cv::Point2d> const &getRejectedCenters() const {
+            return rejectedCenters_;
+        }
 
       private:
         void checkBlob(ContourType &&contour, BlobParams const &p);
+        void addToRejectedCenters(BlobData const &data) {
+            rejectedCenters_.push_back(data.center);
+        }
         double baseThreshVal_ = 75;
         std::uint8_t minBeaconCenterVal_ = 127;
         cv::Mat gray_;
         cv::Mat thresh_;
         cv::Mat edge_;
+        cv::Mat edgeBinary_;
         std::vector<ContourType> contours_;
         LedMeasurementVec measurements_;
+        std::vector<cv::Point2d> rejectedCenters_;
         bool verbose_ = false;
-        static const int LaplacianKSize = 5;
+
+        /// parameters
+        const int laplacianKSize_;
+        const double laplacianScale_;
+        const int edgeDetectionBlurSize_;
+        const double edgeDetectionBlurThresh_;
     };
 } // namespace vbtracker
 } // namespace osvr
