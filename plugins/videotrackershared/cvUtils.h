@@ -51,6 +51,52 @@ namespace vbtracker {
     }
 
     /// Draw contours on a copy of the base image (converted to BGR, if
+    /// required), with each contour a potentially a unique color thanks to
+    /// functors! If you choose not to fill the contours, the center of each
+    /// will have a subpixel-accurate circle plotted at it.
+    ///
+    /// @param baseImage Image to have the contours drawn on top of - will not
+    /// be modified - just cloned.
+    /// @param contours The contours you'd like drawn.
+    /// @param colorFunc a callable taking ContourType const &, std::size_t
+    /// (index) and returning a cv::Scalar color.
+    /// @param fillContours Whether contours should be drawn filled, or just as
+    /// outlines with a center point plotted (default)
+    /// @param centerDotRadius Radius, in pixels, of the center dot to plot if
+    /// fillContours is false.
+    /// @param colorCenterDot Whether the center dots drawn if fillContours is
+    /// false should match the corresponding contour color (default), or if they
+    /// should all be black.
+    template <typename F>
+    inline cv::Mat drawFunctorColoredContours(
+        cv::Mat const &baseImage, std::vector<ContourType> const &contours,
+        F &&colorFunc, bool fillContours = false, double centerDotRadius = 1.2,
+        bool colorCenterDot = true) {
+        cv::Mat highlightedContours;
+        if (baseImage.depth() > 1) {
+            highlightedContours = baseImage.clone();
+        } else {
+            cv::cvtColor(baseImage, highlightedContours, cv::COLOR_GRAY2BGR);
+        }
+        const cv::Scalar black(0, 0, 0);
+        const std::size_t n = contours.size();
+        for (std::size_t i = 0; i < n; ++i) {
+            cv::Scalar color = std::forward<F>(colorFunc)(contours[i], i);
+            cv::drawContours(highlightedContours, contours, i, color,
+                             fillContours ? -1 : 1);
+
+            if (!fillContours) {
+                /// Draw a subpixel-accurate dot in the middle.
+                auto data = getContourBasicDetails(contours[i]);
+                drawSubpixelPoint(highlightedContours, data.center,
+                                  colorCenterDot ? color : black,
+                                  centerDotRadius);
+            }
+        }
+        return highlightedContours;
+    }
+
+    /// Draw contours on a copy of the base image (converted to BGR, if
     /// required), with each contour a unique color thanks to a cheap hack with
     /// std::rand(). If you choose not to fill the contours, the center of each
     /// will have a subpixel-accurate circle plotted at it.
@@ -70,31 +116,39 @@ namespace vbtracker {
                                        bool fillContours = false,
                                        double centerDotRadius = 1.2,
                                        bool colorCenterDot = true) {
-        cv::Mat highlightedContours;
-        if (baseImage.depth() > 1) {
-            highlightedContours = baseImage.clone();
-        } else {
-            cv::cvtColor(baseImage, highlightedContours, cv::COLOR_GRAY2BGR);
-        }
-        const cv::Scalar black(0, 0, 0);
-        const std::size_t n = contours.size();
-        for (std::size_t i = 0; i < n; ++i) {
+        return drawFunctorColoredContours(
+            baseImage, contours,
+            [](ContourType const &, std::size_t) {
+                return cv::Scalar((std::rand() & 255), (std::rand() & 255),
+                                  (std::rand() & 255));
+            },
+            fillContours, centerDotRadius, colorCenterDot);
+    }
 
-            cv::Scalar color((std::rand() & 255), (std::rand() & 255),
-                             (std::rand() & 255));
-            cv::drawContours(highlightedContours, contours, i,
-                             /*cv::Scalar(0, 0, 255)*/ color,
-                             fillContours ? -1 : 1);
-
-            if (!fillContours) {
-                /// Draw a subpixel-accurate dot in the middle.
-                auto data = getContourBasicDetails(contours[i]);
-                drawSubpixelPoint(highlightedContours, data.center,
-                                  colorCenterDot ? color : black,
-                                  centerDotRadius);
-            }
-        }
-        return highlightedContours;
+    /// Draw contours on a copy of the base image (converted to BGR, if
+    /// required), with all contours the same color. If you choose not to fill
+    /// the contours, the center of each will have a subpixel-accurate circle
+    /// plotted at it.
+    ///
+    /// @param baseImage Image to have the contours drawn on top of - will not
+    /// be modified - just cloned.
+    /// @param contours The contours you'd like drawn.
+    /// @param color The color you want the contour drawn.
+    /// @param fillContours Whether contours should be drawn filled, or just as
+    /// outlines with a center point plotted (default)
+    /// @param centerDotRadius Radius, in pixels, of the center dot to plot if
+    /// fillContours is false.
+    /// @param colorCenterDot Whether the center dots drawn if fillContours is
+    /// false should match the corresponding contour color (default), or if they
+    /// should all be black.
+    inline cv::Mat drawSingleColoredContours(
+        cv::Mat const &baseImage, std::vector<ContourType> const &contours,
+        cv::Scalar color, bool fillContours = false,
+        double centerDotRadius = 1.2, bool colorCenterDot = true) {
+        return drawFunctorColoredContours(
+            baseImage, contours,
+            [&color](ContourType const &, std::size_t) { return color; },
+            fillContours, centerDotRadius, colorCenterDot);
     }
     /// Names for the indices in the hierarchy structure from findContours, so
     /// we don't have constants floating around
