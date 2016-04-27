@@ -598,9 +598,10 @@ namespace vbtracker {
 
     SCAATKalmanPoseEstimator::TriBool
     SCAATKalmanPoseEstimator::inBoundingBoxRatioRange(Led const &led) {
-        if (led.getMeasurement().knowBoundingBox) {
-            auto boundingBoxRatio = led.getMeasurement().boundingBox.height /
-                                    led.getMeasurement().boundingBox.width;
+        if (led.getMeasurement().knowBoundingBox()) {
+            auto boundingBoxRatio =
+                led.getMeasurement().boundingBoxSize().height /
+                led.getMeasurement().boundingBoxSize().width;
             if (boundingBoxRatio > m_minBoxRatio &&
                 boundingBoxRatio < m_maxBoxRatio) {
                 return TriBool::True;

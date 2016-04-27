@@ -167,8 +167,7 @@ namespace vbtracker {
                 auto newMeas = LedMeasurement(data.center.x, data.center.y,
                                               data.diameter, gray.size());
                 newMeas.circularity = data.circularity;
-                newMeas.knowBoundingBox = true;
-                newMeas.boundingBox = data.bounds.size();
+                newMeas.setBoundingBox(data.bounds);
                 measurements.emplace_back(std::move(newMeas));
             }
             contours.emplace_back(std::move(contour));

@@ -89,10 +89,10 @@ namespace vbtracker {
                     inBoundsBright++;
                 }
 
-                if (led.getMeasurement().knowBoundingBox) {
+                if (led.getMeasurement().knowBoundingBox()) {
                     auto boundingBoxRatio =
-                        led.getMeasurement().boundingBox.height /
-                        led.getMeasurement().boundingBox.width;
+                        led.getMeasurement().boundingBoxSize().height /
+                        led.getMeasurement().boundingBoxSize().width;
                     if (boundingBoxRatio > minBoxRatio &&
                         boundingBoxRatio < maxBoxRatio) {
                         inBoundsRound++;

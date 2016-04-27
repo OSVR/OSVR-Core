@@ -29,9 +29,11 @@
 #include "BasicTypes.h"
 
 // Library/third-party includes
+#include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
 // Standard includes
+#include <cassert>
 #include <vector>
 
 namespace osvr {
@@ -72,11 +74,36 @@ namespace vbtracker {
 
         /// Do we know an upright bounding box? (that is, is the next member
         /// valid?)
-        bool knowBoundingBox = false;
+        bool knowBoundingBox() const { return knowBoundingBox_; }
 
         /// Dimensions of the upright bounding box.
-        cv::Size2f boundingBox;
+        /// only valid if knowBoundingBox();
+        cv::Size2f boundingBoxSize() const {
+            assert(knowBoundingBox() && "call to boundingBoxSize() invalid if "
+                                        "knowBoundingBox() is false");
+            return boundingBox_;
+        }
+
+        /// Set the upright bounding box (from a size)
+        void setBoundingBox(cv::Size2f size) {
+            knowBoundingBox_ = true;
+            boundingBox_ = size;
+        }
+
+        /// Set the upright bounding box (from a Rect)
+        void setBoundingBox(cv::Rect const &box) {
+            knowBoundingBox_ = true;
+            boundingBox_ = box.size();
+        }
+
+      private:
+        /// Do we know an upright bounding box? (that is, is the next member
+        /// valid?)
+        bool knowBoundingBox_ = false;
+        /// Dimensions of the upright bounding box.
+        cv::Size2f boundingBox_;
     };
+
     typedef std::vector<LedMeasurement> LedMeasurementVec;
     typedef LedMeasurementVec::iterator LedMeasurementVecIterator;
 
