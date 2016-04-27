@@ -79,10 +79,12 @@ namespace vbtracker {
     struct ImageThresholdInfo {
 
         ImageThresholdInfo(ImageRangeInfo const &rangeInfo, BlobParams const &p)
+            /// lerp between min and max, but don't let really dim frames
+            /// confuse us.
             : minThreshold(std::max(rangeInfo.lerp(p.minThresholdAlpha),
                                     p.absoluteMinThreshold)),
-              maxThreshold(
-                  std::max(rangeInfo.lerp(0.8), p.absoluteMinThreshold)),
+              maxThreshold(std::max(rangeInfo.lerp(0.8),
+                                    p.absoluteMinThreshold)),
               thresholdStep((maxThreshold - minThreshold) / p.thresholdSteps) {}
 
         ImageThresholdInfo(cv::Mat const &img, BlobParams const &p)
