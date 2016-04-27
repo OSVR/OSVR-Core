@@ -10,6 +10,7 @@ set(OSVR_VIDEOTRACKERSHARED_SOURCES_CORE
     "${CMAKE_CURRENT_SOURCE_DIR}/CameraDistortionModel.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/CameraParameters.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cvToEigen.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cvUtils.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/IdentifierHelpers.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/LedMeasurement.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ProjectPoint.h"

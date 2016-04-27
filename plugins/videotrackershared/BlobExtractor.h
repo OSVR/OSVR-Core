@@ -26,12 +26,14 @@
 #define INCLUDED_BlobExtractor_h_GUID_E11BAD60_5C84_4581_C859_6E1FEF0838F5
 
 // Internal Includes
+#include <BlobParams.h>
 #include <LedMeasurement.h>
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
 
 // Standard includes
+#include <algorithm> // for std::max
 #include <vector>
 
 namespace osvr {
@@ -61,7 +63,35 @@ namespace vbtracker {
 
     /// Returns a value in [0, 1] that is the ratio of the contour's area as
     /// provided to the area of the contour's convex hull.
-    double getConvexity(ContourType const& contour, const double area);
+    double getConvexity(ContourType const &contour, const double area);
+
+    struct ImageRangeInfo {
+        explicit ImageRangeInfo(cv::Mat const &img) {
+            cv::minMaxIdx(img, &minVal, &maxVal);
+        }
+        double minVal;
+        double maxVal;
+        double lerp(double alpha) const {
+            return minVal + (maxVal - minVal) * alpha;
+        }
+    };
+
+    struct ImageThresholdInfo {
+
+        ImageThresholdInfo(ImageRangeInfo const &rangeInfo, BlobParams const &p)
+            : minThreshold(std::max(rangeInfo.lerp(p.minThresholdAlpha),
+                                    p.absoluteMinThreshold)),
+              maxThreshold(
+                  std::max(rangeInfo.lerp(0.8), p.absoluteMinThreshold)),
+              thresholdStep((maxThreshold - minThreshold) / p.thresholdSteps) {}
+
+        ImageThresholdInfo(cv::Mat const &img, BlobParams const &p)
+            : ImageThresholdInfo(ImageRangeInfo(img), p) {}
+
+        double minThreshold = 0;
+        double maxThreshold = 255;
+        double thresholdStep = 255;
+    };
 
     class BlobDetector {
       public:
@@ -77,6 +107,11 @@ namespace vbtracker {
         cv::Mat grayImage_;
         cv::Mat floodFillMask_;
         cv::Rect origBoundsInFloodFill_;
+    };
+
+    class HoleBasedLedExtractor {
+      public:
+        LedMeasurementVec operator()(cv::Mat const &gray, BlobParams const &p);
     };
 } // namespace vbtracker
 } // namespace osvr
