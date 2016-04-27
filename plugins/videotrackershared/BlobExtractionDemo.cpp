@@ -96,14 +96,12 @@ namespace vbtracker {
     }
 
     template <typename F>
-    std::vector<ContourType>
-    getHolesOfConnectedComponents(cv::Mat input, F &&additionalPredicate) {
+    void consumeHolesOfConnectedComponents(cv::Mat input, F &&continuation) {
         std::vector<ContourType> contours;
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP,
                          cv::CHAIN_APPROX_NONE);
         auto n = contours.size();
-        std::vector<ContourType> ret;
         /// Loop through the outside connected components.
         for (std::size_t outsides = 0; outsides >= 0 && outsides < n;
              outsides = hierarchy[outsides][HIERARCHY_NEXT_SIBLING_CONTOUR]) {
@@ -112,76 +110,72 @@ namespace vbtracker {
                  idx >= 0 && idx < n;
                  idx = hierarchy[idx][HIERARCHY_NEXT_SIBLING_CONTOUR])
                 /// We want all first-level children of connected components.
-                if (std::forward<F>(additionalPredicate)(contours[idx])) {
-                    ret.emplace_back(std::move(contours[idx]));
-                }
+                std::forward<F>(continuation)(std::move(contours[idx]));
         }
-        return ret;
     }
 
     void processImageAndEdges(std::string const &fn, cv::Mat color,
                               cv::Mat gray, cv::Mat edge, BlobParams const &p) {
         std::vector<ContourType> contours;
-        {
+        LedMeasurementVec measurements;
 
-#ifdef USE_CANNY
-            cv::Mat edgeTemp = edge.clone();
-#else
-            cv::Mat edgeTemp = edge > 0;
-// cv::threshold(edge, edgeTemp, 5, 255, cv::THRESH_BINARY);
-#endif
-            auto contourPredicate = [&p, &gray](ContourType const &contour) {
-                auto data = getBlobDataFromContour(contour);
-                if (data.area < p.minArea) {
-                    std::cout << "Reject based on area: " << data.area << " < "
-                              << p.minArea << std::endl;
-                    return false;
-                }
+        // turn the edge detection into a binary image.
+        cv::Mat edgeTemp = edge > 0;
 
-                {
-                    /// Check to see if we accidentally picked up a non-LED
-                    /// stuck between a few bright ones.
-                    cv::Mat patch;
-                    cv::getRectSubPix(gray, cv::Size(1, 1),
-                                      cv::Point2f(data.center), patch);
-                    auto centerPointValue = patch.at<unsigned char>(0, 0);
-                    if (centerPointValue < p.absoluteMinThreshold) {
-                        std::cout << "Reject based on center point value: "
-                                  << int(centerPointValue) << " < "
-                                  << p.absoluteMinThreshold << std::endl;
-                        return false;
-                    }
-                }
+        auto contourContinuation = [&](ContourType &&contour) {
+            auto data = getBlobDataFromContour(contour);
+            if (data.area < p.minArea) {
+                std::cout << "Reject based on area: " << data.area << " < "
+                          << p.minArea << std::endl;
+                return;
+            }
 
-                if (p.filterByCircularity) {
-                    if (data.circularity < p.minCircularity) {
-                        std::cout << "Reject based on circularity: "
-                                  << data.circularity << " < "
-                                  << p.minCircularity << std::endl;
-                        return false;
-                    }
+            {
+                /// Check to see if we accidentally picked up a non-LED
+                /// stuck between a few bright ones.
+                cv::Mat patch;
+                cv::getRectSubPix(gray, cv::Size(1, 1),
+                                  cv::Point2f(data.center), patch);
+                auto centerPointValue = patch.at<unsigned char>(0, 0);
+                if (centerPointValue < p.absoluteMinThreshold) {
+                    std::cout << "Reject based on center point value: "
+                              << int(centerPointValue) << " < "
+                              << p.absoluteMinThreshold << std::endl;
+                    return;
                 }
-                if (p.filterByConvexity) {
-                    auto convexity = getConvexity(contour, data.area);
-                    if (convexity < p.minConvexity) {
-                        std::cout << "Reject based on convexity: " << convexity
-                                  << " < " << p.minConvexity << std::endl;
-                        return false;
-                    }
-                }
-                std::cout << "Accept contour with center at " << data.center
-                          << std::endl;
-                return true;
-            };
-#ifdef USE_CANNY
-            contours =
-                getOutsidesOfConnectedComponents(edgeTemp, contourPredicate);
-#else
-            contours =
-                getHolesOfConnectedComponents(edgeTemp, contourPredicate);
+            }
 
-#endif
-        }
+            if (p.filterByCircularity) {
+                if (data.circularity < p.minCircularity) {
+                    std::cout
+                        << "Reject based on circularity: " << data.circularity
+                        << " < " << p.minCircularity << std::endl;
+                    return;
+                }
+            }
+            if (p.filterByConvexity) {
+                auto convexity = getConvexity(contour, data.area);
+                if (convexity < p.minConvexity) {
+                    std::cout << "Reject based on convexity: " << convexity
+                              << " < " << p.minConvexity << std::endl;
+                    return;
+                }
+            }
+            std::cout << "Accept contour with center at " << data.center
+                      << std::endl;
+            {
+                auto newMeas = LedMeasurement(data.center.x, data.center.y,
+                                              data.diameter, gray.size());
+                newMeas.circularity = data.circularity;
+                newMeas.knowBoundingBox = true;
+                newMeas.boundingBox = data.bounds.size();
+                measurements.emplace_back(std::move(newMeas));
+            }
+            contours.emplace_back(std::move(contour));
+        };
+
+        consumeHolesOfConnectedComponents(edgeTemp, contourContinuation);
+
         cv::Mat highlightedContours = color.clone();
         const std::size_t n = contours.size();
         for (std::size_t i = 0; i < n; ++i) {
@@ -214,16 +208,9 @@ namespace vbtracker {
         cv::threshold(gray, thresholded, p.absoluteMinThreshold, 255,
                       cv::THRESH_TOZERO);
         showImage("Cleaned", thresholded);
-#ifdef USE_CANNY
-        int edgeThresh = 1;
-        cv::Mat edge;
-        cv::Canny(thresholded, edge, edgeThresh, edgeThresh * 3, 3, false);
-#else
         cv::Mat edge;
         cv::Laplacian(thresholded, edge, CV_8U, 5);
-#endif
         showImage("Edges", edge);
-        cv::waitKey();
         processImageAndEdges(fn, color, gray, edge, p);
     }
 } // namespace vbtracker
