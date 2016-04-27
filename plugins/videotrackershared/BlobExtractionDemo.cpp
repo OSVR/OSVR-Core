@@ -25,6 +25,7 @@
 // Internal Includes
 #include "BlobExtractor.h"
 #include "BlobParams.h"
+#include <OptionalStream.h>
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
@@ -34,6 +35,8 @@
 // Standard includes
 #include <cmath>
 #include <iostream>
+
+#define OSVR_DEBUG_CONTOUR_CONDITIONS
 
 namespace osvr {
 namespace vbtracker {
@@ -114,19 +117,128 @@ namespace vbtracker {
         }
     }
 
-    void processImageAndEdges(std::string const &fn, cv::Mat color,
-                              cv::Mat gray, cv::Mat edge, BlobParams const &p) {
+    void drawSubpixelPoint(cv::Mat image, cv::Point2d point,
+                           cv::Scalar color = cv::Scalar(0, 0, 0),
+                           double radius = 1.,
+                           std::uint8_t fractionalBits = 3) {
+        const auto SHIFT = std::pow(2, fractionalBits);
+        auto intPoint = cv::Point(static_cast<int>(point.x * SHIFT),
+                                  static_cast<int>(point.y * SHIFT));
+        cv::circle(image, intPoint, static_cast<int>(radius * SHIFT), color, -1,
+                   8, fractionalBits);
+    }
+
+    /// Either convert to gray from BGR, or clone.
+    cv::Mat makeGray(cv::Mat const &input) {
+        cv::Mat ret;
+        if (input.channels() > 1) {
+            cv::cvtColor(input, ret, cv::COLOR_BGR2GRAY);
+        } else {
+            ret = input.clone();
+        }
+        return ret;
+    }
+
+    /// Draw contours on a copy of the base image (converted to BGR, if
+    /// required), with each contour a unique color thanks to a cheap hack with
+    /// std::rand(). If you choose not to fill the contours, the center of each
+    /// will have a subpixel-accurate circle plotted at it.
+    ///
+    /// @param baseImage Image to have the contours drawn on top of - will not
+    /// be modified - just cloned.
+    /// @param contours The contours you'd like drawn.
+    /// @param fillContours Whether contours should be drawn filled, or just as
+    /// outlines with a center point plotted (default)
+    /// @param centerDotRadius Radius, in pixels, of the center dot to plot if
+    /// fillContours is false.
+    /// @param colorCenterDot Whether the center dots drawn if fillContours is
+    /// false should match the corresponding contour color (default), or if they
+    /// should all be black.
+    cv::Mat drawColoredContours(cv::Mat const &baseImage,
+                                std::vector<ContourType> const &contours,
+                                bool fillContours = false,
+                                double centerDotRadius = 1.2,
+                                bool colorCenterDot = true) {
+        cv::Mat highlightedContours;
+        if (baseImage.depth() > 1) {
+            highlightedContours = baseImage.clone();
+        } else {
+            cv::cvtColor(baseImage, highlightedContours, cv::COLOR_GRAY2BGR);
+        }
+        const cv::Scalar black(0, 0, 0);
+        const std::size_t n = contours.size();
+        for (std::size_t i = 0; i < n; ++i) {
+
+            cv::Scalar color((std::rand() & 255), (std::rand() & 255),
+                             (std::rand() & 255));
+            cv::drawContours(highlightedContours, contours, i,
+                             /*cv::Scalar(0, 0, 255)*/ color,
+                             fillContours ? -1 : 1);
+
+            if (!fillContours) {
+                /// Draw a subpixel-accurate dot in the middle.
+                auto data = getContourBasicDetails(contours[i]);
+                drawSubpixelPoint(highlightedContours, data.center,
+                                  colorCenterDot ? color : black,
+                                  centerDotRadius);
+            }
+        }
+        return highlightedContours;
+    }
+    void handleImage(std::string const &fn, bool pause) {
+        BlobParams p;
+        p.minCircularity = 0.75;
+
+        /// Initial image loading
+        std::cout << "Handling image " << fn << std::endl;
+        cv::Mat color = cv::imread(fn, cv::IMREAD_COLOR);
+        cv::Mat gray = makeGray(color);
+        // showImage("Original", gray);
+
+        /// Basic thresholding to reduce background noise
+        auto thresholdInfo = ImageThresholdInfo(ImageRangeInfo(gray), p);
+        cv::Mat thresholded;
+        cv::threshold(gray, thresholded, p.absoluteMinThreshold, 255,
+                      cv::THRESH_TOZERO);
+        showImage("Cleaned", thresholded);
+        cv::imwrite(fn + ".thresh.png", thresholded);
+
+        /// Edge detection
+        cv::Mat edge;
+        cv::Laplacian(thresholded, edge, CV_8U, 5);
+        cv::imwrite(fn + ".edge.png", edge);
+        showImage("Edges", edge);
+
+        /// Extract beacons from the edge detection image
         std::vector<ContourType> contours;
         LedMeasurementVec measurements;
 
         // turn the edge detection into a binary image.
         cv::Mat edgeTemp = edge > 0;
 
-        auto contourContinuation = [&](ContourType &&contour) {
+        // The lambda ("continuation") is called with each "hole" in the edge
+        // detection image, it's up to us what to do with the contour we're
+        // given. We examine it for suitability as an LED, and if it passes our
+        // checks, add a derived measurement to our measurement vector and the
+        // contour itself to our list of contours for debugging display.
+        consumeHolesOfConnectedComponents(edgeTemp, [&](ContourType &&contour) {
             auto data = getBlobDataFromContour(contour);
+            auto debugStream = [] {
+#ifdef OSVR_DEBUG_CONTOUR_CONDITIONS
+                return outputIf(std::cout, true);
+#else
+				return outputIf(std::cout, false);
+#endif
+            };
+
+            debugStream() << "\nContour centered at " << data.center;
+            debugStream() << " - diameter: " << data.diameter;
+            debugStream() << " - area: " << data.area;
+            debugStream() << " - circularity: " << data.circularity;
+            debugStream() << " - bounding box size: " << data.bounds.size();
             if (data.area < p.minArea) {
-                std::cout << "Reject based on area: " << data.area << " < "
-                          << p.minArea << std::endl;
+                debugStream() << "Reject based on area: " << data.area << " < "
+                              << p.minArea << "\n";
                 return;
             }
 
@@ -138,85 +250,62 @@ namespace vbtracker {
                                   cv::Point2f(data.center), patch);
                 auto centerPointValue = patch.at<unsigned char>(0, 0);
                 if (centerPointValue < p.absoluteMinThreshold) {
-                    std::cout << "Reject based on center point value: "
-                              << int(centerPointValue) << " < "
-                              << p.absoluteMinThreshold << std::endl;
+                    debugStream() << "Reject based on center point value: "
+                                  << int(centerPointValue) << " < "
+                                  << p.absoluteMinThreshold << "\n";
                     return;
                 }
             }
 
             if (p.filterByCircularity) {
                 if (data.circularity < p.minCircularity) {
-                    std::cout
+                    debugStream()
                         << "Reject based on circularity: " << data.circularity
-                        << " < " << p.minCircularity << std::endl;
+                        << " < " << p.minCircularity << "\n";
                     return;
                 }
             }
             if (p.filterByConvexity) {
                 auto convexity = getConvexity(contour, data.area);
+                debugStream() << " - convexity: " << convexity;
                 if (convexity < p.minConvexity) {
-                    std::cout << "Reject based on convexity: " << convexity
-                              << " < " << p.minConvexity << std::endl;
+                    debugStream() << "Reject based on convexity: " << convexity
+                                  << " < " << p.minConvexity << "\n";
+
                     return;
                 }
             }
-            std::cout << "Accept contour with center at " << data.center
-                      << std::endl;
+
+            debugStream() << "Accepted!\n";
             {
-                auto newMeas = LedMeasurement(data.center.x, data.center.y,
-                                              data.diameter, gray.size());
-                newMeas.circularity = data.circularity;
+                auto newMeas = LedMeasurement(
+                    cv::Point2f(data.center), static_cast<float>(data.diameter),
+                    gray.size(), static_cast<float>(data.area));
+                newMeas.circularity = static_cast<float>(data.circularity);
                 newMeas.setBoundingBox(data.bounds);
+
                 measurements.emplace_back(std::move(newMeas));
             }
             contours.emplace_back(std::move(contour));
-        };
+        });
 
-        consumeHolesOfConnectedComponents(edgeTemp, contourContinuation);
-
-        cv::Mat highlightedContours = color.clone();
-        const std::size_t n = contours.size();
-        for (std::size_t i = 0; i < n; ++i) {
-
-            cv::Scalar color((std::rand() & 255), (std::rand() & 255),
-                             (std::rand() & 255));
-            cv::drawContours(highlightedContours, contours, i,
-                             /*cv::Scalar(0, 0, 255)*/ color);
-        }
+        /// Produce a colored debug image where each accepted contour is
+        /// encircled with a different color.
+        cv::Mat highlightedContours = drawColoredContours(gray, contours);
         showImage("Selected contours", highlightedContours);
         cv::imwrite(fn + ".contours.png", highlightedContours);
-        cv::waitKey();
-    }
-
-    void handleImage(std::string const &fn) {
-        BlobParams p;
-
-        std::cout << "Handling image " << fn << std::endl;
-        cv::Mat color = cv::imread(fn, cv::IMREAD_COLOR);
-        cv::Mat gray;
-        if (color.channels() > 1) {
-            cv::cvtColor(color, gray, cv::COLOR_BGR2GRAY);
-        } else {
-            gray = color.clone();
+        if (pause) {
+            cv::waitKey();
         }
-        // showImage("Original", gray);
-
-        auto thresholdInfo = ImageThresholdInfo(ImageRangeInfo(gray), p);
-        cv::Mat thresholded;
-        cv::threshold(gray, thresholded, p.absoluteMinThreshold, 255,
-                      cv::THRESH_TOZERO);
-        showImage("Cleaned", thresholded);
-        cv::Mat edge;
-        cv::Laplacian(thresholded, edge, CV_8U, 5);
-        showImage("Edges", edge);
-        processImageAndEdges(fn, color, gray, edge, p);
     }
+
 } // namespace vbtracker
 } // namespace osvr
 int main(int argc, char *argv[]) {
+    /// Don't stop before exiting if we've got multiple to process.
+    bool pause = (argc < 3);
     for (int arg = 1; arg < argc; ++arg) {
-        osvr::vbtracker::handleImage(argv[arg]);
+        osvr::vbtracker::handleImage(argv[arg], true);
     }
     return 0;
 }
