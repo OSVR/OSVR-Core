@@ -93,7 +93,7 @@ namespace vbtracker {
         return area / hullArea;
     }
 
-    LedMeasurementVec BlobDetector::
+    LedMeasurementVec BasicThresholdBlobDetector::
     operator()(cv::Mat const &gray,
                cv::SimpleBlobDetector::Params const &params) {
         grayImage_ = gray.clone();
@@ -118,7 +118,7 @@ namespace vbtracker {
         return ret;
     }
     std::vector<ContourType>
-    BlobDetector::binarizeAndGetSolidComponents(int thresh) {
+    BasicThresholdBlobDetector::binarizeAndGetSolidComponents(int thresh) {
         cv::Mat binarized;
         cv::threshold(grayImage_, binarized, thresh, 255, cv::THRESH_BINARY);
         std::vector<ContourType> contours;
@@ -137,13 +137,14 @@ namespace vbtracker {
         return ret;
     }
 
-    void BlobDetector::makeFloodFillMask(cv::Mat const &gray) {
+    void BasicThresholdBlobDetector::makeFloodFillMask(cv::Mat const &gray) {
         floodFillMask_.create(gray.rows + 2, gray.cols + 2, CV_8UC1);
         origBoundsInFloodFill_ =
             cv::Rect(1, 1, floodFillMask_.cols - 2, floodFillMask_.rows - 2);
     }
-    void BlobDetector::augmentPoint(cv::Point peakCenter, const int loDiff,
-                                    const int upDiff) {
+    void BasicThresholdBlobDetector::augmentPoint(cv::Point peakCenter,
+                                                  const int loDiff,
+                                                  const int upDiff) {
         // Saving this now before we monkey with floodFillMask_
         cv::Mat scratchNot = ~floodFillMask_;
         cv::Mat grayClone = grayImage_.clone();

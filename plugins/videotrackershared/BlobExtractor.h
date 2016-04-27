@@ -93,7 +93,7 @@ namespace vbtracker {
         double thresholdStep = 255;
     };
 
-    class BlobDetector {
+    class BasicThresholdBlobDetector {
       public:
         LedMeasurementVec
         operator()(cv::Mat const &gray,
@@ -109,10 +109,6 @@ namespace vbtracker {
         cv::Rect origBoundsInFloodFill_;
     };
 
-    class HoleBasedLedExtractor {
-      public:
-        LedMeasurementVec operator()(cv::Mat const &gray, BlobParams const &p);
-    };
 } // namespace vbtracker
 } // namespace osvr
 
