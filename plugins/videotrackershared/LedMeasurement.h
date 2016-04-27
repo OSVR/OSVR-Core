@@ -39,19 +39,38 @@
 namespace osvr {
 namespace vbtracker {
     struct LedMeasurement {
+      private:
+        static float estimateArea(float diameter) {
+            return static_cast<float>((diameter / 2) * (diameter / 2) * CV_PI);
+        }
+
+      public:
         LedMeasurement() = default;
-        LedMeasurement(cv::KeyPoint const &kp, cv::Size imgSize)
-            : loc(kp.pt), imageSize(imgSize), brightness(kp.size),
-              diameter(kp.size), area(static_cast<float>(
-                                     (diameter / 2) * (diameter / 2) * CV_PI)) {
+        /// Constructor for a measurement
+        /// @param beaconArea measured area: if <= 0, will be estimated based on
+        /// an assumption of circularity and the diameter.
+        LedMeasurement(cv::Point2f location, float diam, cv::Size imgSize,
+                       float beaconArea = -1)
+            : loc(location), imageSize(imgSize), brightness(diam),
+              diameter(diam),
+              area(beaconArea <= 0 ? estimateArea(diameter) : beaconArea) {}
+
+        /// Constructor for a measurement from a KeyPoint and image size.
+        /// @param beaconArea measured area: if <= 0, will be estimated based on
+        /// an assumption of circularity and the diameter.
+        LedMeasurement(cv::KeyPoint const &kp, cv::Size imgSize,
+                       float beaconArea = -1)
+            : LedMeasurement(kp.pt, kp.size, imgSize, beaconArea) {
+            /// Delegates to the constructor taking Point2f.
         }
 
         /// Constructor primarily used by replay for calibration/optimization
         /// purposes.
-        LedMeasurement(float x, float y, float diam, cv::Size imgSize)
-            : loc(cv::Point2f(x, y)), imageSize(imgSize), brightness(diam),
-              diameter(diam), area(static_cast<float>(
-                                  (diameter / 2) * (diameter / 2) * CV_PI)) {}
+        LedMeasurement(float x, float y, float diam, cv::Size imgSize,
+                       float beaconArea = -1)
+            : LedMeasurement(cv::Point2f(x, y), diam, imgSize, beaconArea) {
+            /// Delegates to the constructor taking Point2f.
+        }
 
         /// Location in image space - should be undistorted when passed to the
         /// Led class.
@@ -60,7 +79,7 @@ namespace vbtracker {
         /// Size of the image the measurement came from.
         cv::Size imageSize;
 
-        /// "Brightness" - currently actually diameter or radius.
+        /// "Brightness" - currently actually diameter.
         Brightness brightness;
 
         /// Blob diameter in pixels.
