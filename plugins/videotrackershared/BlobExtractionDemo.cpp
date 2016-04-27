@@ -37,7 +37,6 @@
 
 namespace osvr {
 namespace vbtracker {
-    int edgeThresh = 8;
 
     struct ImageRangeInfo {
         explicit ImageRangeInfo(cv::Mat const &img) {
@@ -67,6 +66,15 @@ namespace vbtracker {
         cv::imshow(title, img);
     }
 
+    /// Names for the indices in the hierarchy structure from findContours, so
+    /// we don't have constants floating around
+    enum {
+        HIERARCHY_NEXT_SIBLING_CONTOUR = 0,
+        HIERARCHY_PREV_SIBLING_CONTOUR = 1,
+        HIERARCHY_FIRST_CHILD_CONTOUR = 2,
+        HIERARCHY_PARENT_CONTOUR = 3,
+    };
+
     template <typename F>
     std::vector<ContourType>
     getOutsidesOfConnectedComponents(cv::Mat input, F &&additionalPredicate) {
@@ -79,7 +87,7 @@ namespace vbtracker {
         for (std::size_t i = 0; i < n; ++i) {
             // If this contour has no parent, then it's the outer contour of a
             // connected component
-            if (hierarchy[i][3] < 0 &&
+            if (hierarchy[i][HIERARCHY_PARENT_CONTOUR] < 0 &&
                 std::forward<F>(additionalPredicate)(contours[i])) {
                 ret.emplace_back(std::move(contours[i]));
             }
@@ -87,30 +95,104 @@ namespace vbtracker {
         return ret;
     }
 
-    void processImageAndEdges(cv::Mat color, cv::Mat gray, cv::Mat edge,
-                              BlobParams const &p) {
+    template <typename F>
+    std::vector<ContourType>
+    getHolesOfConnectedComponents(cv::Mat input, F &&additionalPredicate) {
+        std::vector<ContourType> contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP,
+                         cv::CHAIN_APPROX_NONE);
+        auto n = contours.size();
+        std::vector<ContourType> ret;
+        /// Loop through the outside connected components.
+        for (std::size_t outsides = 0; outsides >= 0 && outsides < n;
+             outsides = hierarchy[outsides][HIERARCHY_NEXT_SIBLING_CONTOUR]) {
+            for (std::size_t idx =
+                     hierarchy[outsides][HIERARCHY_FIRST_CHILD_CONTOUR];
+                 idx >= 0 && idx < n;
+                 idx = hierarchy[idx][HIERARCHY_NEXT_SIBLING_CONTOUR])
+                /// We want all first-level children of connected components.
+                if (std::forward<F>(additionalPredicate)(contours[idx])) {
+                    ret.emplace_back(std::move(contours[idx]));
+                }
+        }
+        return ret;
+    }
+
+    void processImageAndEdges(std::string const &fn, cv::Mat color,
+                              cv::Mat gray, cv::Mat edge, BlobParams const &p) {
         std::vector<ContourType> contours;
         {
+
+#ifdef USE_CANNY
             cv::Mat edgeTemp = edge.clone();
-            auto contourPredicate = [&p](ContourType const &contour) {
+#else
+            cv::Mat edgeTemp = edge > 0;
+// cv::threshold(edge, edgeTemp, 5, 255, cv::THRESH_BINARY);
+#endif
+            auto contourPredicate = [&p, &gray](ContourType const &contour) {
                 auto data = getBlobDataFromContour(contour);
-                if (p.filterByCircularity) {
-                    if (data.circularity < p.minCircularity) {
+                if (data.area < p.minArea) {
+                    std::cout << "Reject based on area: " << data.area << " < "
+                              << p.minArea << std::endl;
+                    return false;
+                }
+
+                {
+                    /// Check to see if we accidentally picked up a non-LED
+                    /// stuck between a few bright ones.
+                    cv::Mat patch;
+                    cv::getRectSubPix(gray, cv::Size(1, 1),
+                                      cv::Point2f(data.center), patch);
+                    auto centerPointValue = patch.at<unsigned char>(0, 0);
+                    if (centerPointValue < p.absoluteMinThreshold) {
+                        std::cout << "Reject based on center point value: "
+                                  << int(centerPointValue) << " < "
+                                  << p.absoluteMinThreshold << std::endl;
                         return false;
                     }
                 }
-                if (data.area < p.minArea) {
-                    return false;
+
+                if (p.filterByCircularity) {
+                    if (data.circularity < p.minCircularity) {
+                        std::cout << "Reject based on circularity: "
+                                  << data.circularity << " < "
+                                  << p.minCircularity << std::endl;
+                        return false;
+                    }
                 }
+                if (p.filterByConvexity) {
+                    auto convexity = getConvexity(contour, data.area);
+                    if (convexity < p.minConvexity) {
+                        std::cout << "Reject based on convexity: " << convexity
+                                  << " < " << p.minConvexity << std::endl;
+                        return false;
+                    }
+                }
+                std::cout << "Accept contour with center at " << data.center
+                          << std::endl;
                 return true;
             };
+#ifdef USE_CANNY
             contours =
                 getOutsidesOfConnectedComponents(edgeTemp, contourPredicate);
+#else
+            contours =
+                getHolesOfConnectedComponents(edgeTemp, contourPredicate);
+
+#endif
         }
         cv::Mat highlightedContours = color.clone();
-        cv::drawContours(highlightedContours, contours, -1,
-                         cv::Scalar(0, 0, 255));
+        const std::size_t n = contours.size();
+        for (std::size_t i = 0; i < n; ++i) {
+
+            cv::Scalar color((std::rand() & 255), (std::rand() & 255),
+                             (std::rand() & 255));
+            cv::drawContours(highlightedContours, contours, i,
+                             /*cv::Scalar(0, 0, 255)*/ color);
+        }
         showImage("Selected contours", highlightedContours);
+        cv::imwrite(fn + ".contours.png", highlightedContours);
         cv::waitKey();
     }
 
@@ -120,7 +202,11 @@ namespace vbtracker {
         std::cout << "Handling image " << fn << std::endl;
         cv::Mat color = cv::imread(fn, cv::IMREAD_COLOR);
         cv::Mat gray;
-        cv::cvtColor(color, gray, cv::COLOR_BGR2GRAY);
+        if (color.channels() > 1) {
+            cv::cvtColor(color, gray, cv::COLOR_BGR2GRAY);
+        } else {
+            gray = color.clone();
+        }
         // showImage("Original", gray);
 
         auto thresholdInfo = ImageThresholdInfo(ImageRangeInfo(gray), p);
@@ -128,11 +214,17 @@ namespace vbtracker {
         cv::threshold(gray, thresholded, p.absoluteMinThreshold, 255,
                       cv::THRESH_TOZERO);
         showImage("Cleaned", thresholded);
-
+#ifdef USE_CANNY
+        int edgeThresh = 1;
         cv::Mat edge;
-        cv::Canny(thresholded, edge, edgeThresh, edgeThresh * 3, 3);
+        cv::Canny(thresholded, edge, edgeThresh, edgeThresh * 3, 3, false);
+#else
+        cv::Mat edge;
+        cv::Laplacian(thresholded, edge, CV_8U, 5);
+#endif
         showImage("Edges", edge);
-        processImageAndEdges(color, gray, edge, p);
+        cv::waitKey();
+        processImageAndEdges(fn, color, gray, edge, p);
     }
 } // namespace vbtracker
 } // namespace osvr

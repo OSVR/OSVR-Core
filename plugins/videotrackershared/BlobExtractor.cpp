@@ -86,6 +86,13 @@ namespace vbtracker {
                           contourDetails.boundingRectangle()};
     }
 
+    double getConvexity(ContourType const &contour, const double area) {
+        ContourType hull;
+        cv::convexHull(contour, hull);
+        auto hullArea = cv::contourArea(hull);
+        return area / hullArea;
+    }
+
     LedMeasurementVec BlobDetector::
     operator()(cv::Mat const &gray,
                cv::SimpleBlobDetector::Params const &params) {

@@ -59,6 +59,10 @@ namespace vbtracker {
 
     BlobBasics getContourBasicDetails(ContourType const &contour);
 
+    /// Returns a value in [0, 1] that is the ratio of the contour's area as
+    /// provided to the area of the contour's convex hull.
+    double getConvexity(ContourType const& contour, const double area);
+
     class BlobDetector {
       public:
         LedMeasurementVec
