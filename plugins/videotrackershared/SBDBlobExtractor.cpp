@@ -34,8 +34,150 @@
 
 #include <iostream>
 
+#define NOT_TESTING_NEW_IMAGE_CODE
+
 namespace osvr {
 namespace vbtracker {
+    using ContourType = std::vector<cv::Point2i>;
+    class ContourInterrogation {
+      public:
+        explicit ContourInterrogation(ContourType const &contour)
+            : m_contour(contour), m_moms(cv::moments(m_contour)),
+              m_area(m_moms.m00),
+              m_center(m_moms.m10 / m_moms.m00, m_moms.m01 / m_moms.m00),
+              m_rect(cv::boundingRect(m_contour)) {}
+
+        double area() const { return m_area; }
+
+        /// Approximation of a diameter based on assumption of circularity.
+        double diameter() const { return 2 * std::sqrt(area() / CV_PI); }
+
+        /// Gets perimeter - requires contour
+        double perimeter() const { return cv::arcLength(m_contour, true); }
+
+        /// As used by OpenCV, return value in [0, 1] - requires contour
+        double circularity() const {
+            auto perim = perimeter();
+            return 4 * CV_PI * area() / (perim * perim);
+        }
+        cv::Point2d center() const { return m_center; }
+        cv::Rect boundingRectangle() const { return m_rect; }
+
+		ContourType && moveOutContour() { return std::move(m_contour); }
+
+      private:
+        ContourType m_contour;
+        cv::Moments m_moms;
+        double m_area;
+        cv::Point2d m_center;
+        cv::Rect m_rect;
+    };
+
+	/// Data structure with a lot of info about a contour.
+    struct BlobData {
+        cv::Point2d center;
+        double area;
+        double circularity;
+        double diameter;
+        cv::Rect bounds;
+		ContourType contour;
+    };
+
+    inline BlobData getBlobDataFromContour(ContourType const &contour) {
+        ContourInterrogation contourDetails(contour);
+        auto ret = BlobData{contourDetails.center(), contourDetails.area(),
+                        contourDetails.circularity(), contourDetails.diameter(),
+                        contourDetails.boundingRectangle()};
+		/// because argument evaluation order is not defined.
+		ret.contour = std::move(contourDetails.moveOutContour());
+		return ret;
+    }
+
+	/// Data structure with just a few bare facts about a contour.
+    struct BlobBasics {
+        cv::Point2d center;
+        double area;
+        cv::Rect bounds;
+    };
+
+    inline BlobBasics getContourBasicDetails(ContourType const &contour) {
+        ContourInterrogation contourDetails(contour);
+        return BlobBasics{contourDetails.center(), contourDetails.area(),
+                          contourDetails.boundingRectangle()};
+    }
+
+    class BlobDetector {
+      public:
+		  
+        LedMeasurementVec
+        operator()(cv::Mat const &gray,
+                   cv::SimpleBlobDetector::Params const &params) {
+			grayImage_ = gray.clone();
+			auto thresh = static_cast<int>((params.minThreshold + params.maxThreshold) / 2);
+			LedMeasurementVec ret;
+			for (auto &contour : binarizeAndGetSolidComponents(thresh)) {
+				auto data = getBlobDataFromContour(contour);
+				if (params.filterByArea) {
+					if (data.area < params.minArea || data.area > params.maxArea) {
+						continue;
+					}
+				}
+				if (params.filterByCircularity) {
+					if (data.circularity < params.minCircularity) {
+						continue;
+					}
+				}
+                ret.push_back(LedMeasurement(data.center.x, data.center.y,
+                                             data.diameter, grayImage_.size()));
+            }
+			return ret;
+        }
+        std::vector<ContourType> binarizeAndGetSolidComponents(int thresh) {
+            cv::Mat binarized;
+            cv::threshold(grayImage_, binarized, thresh, 255,
+                          cv::THRESH_BINARY);
+            std::vector<ContourType> contours;
+			std::vector<cv::Vec4i> hierarchy;
+            cv::findContours(binarized, contours, hierarchy, CV_RETR_CCOMP,
+                             CV_CHAIN_APPROX_NONE);
+			auto n = contours.size();
+			std::vector<ContourType> ret;
+			for (std::size_t i = 0; i < n; ++i) {
+                // If this contour has no first child, then it's solid (no
+                // holes).
+                if (hierarchy[i][2] < 0) {
+					ret.emplace_back(std::move(contours[i]));
+				}
+			}
+            return ret;
+        }
+
+      private:
+        void makeFloodFillMask(cv::Mat const &gray) {
+            floodFillMask_.create(gray.rows + 2, gray.cols + 2, CV_8UC1);
+            origBoundsInFloodFill_ = cv::Rect(1, 1, floodFillMask_.cols - 2,
+                                              floodFillMask_.rows - 2);
+        }
+		void augmentPoint(cv::Point peakCenter, const int loDiff = 2, const int upDiff = 2) {
+			// Saving this now before we monkey with floodFillMask_
+			cv::Mat scratchNot = ~floodFillMask_;
+			cv::Mat grayClone = grayImage_.clone();
+			cv::Rect filledBounds;
+            auto m_area = cv::floodFill(
+                grayClone, floodFillMask_, peakCenter, 255,
+                &filledBounds, loDiff, upDiff,
+                CV_FLOODFILL_MASK_ONLY | (/* connectivity 4 or 8 */ 4) |
+                    (/* value to write in to mask */ 255 << 8));
+            // Now floodFillMask_ contains the mask with both our point
+            // and all other points so far. We need to split them by ANDing with
+            // the NOT of the old flood-fill mask we saved earlier.
+			cv::Mat thisPointResults = scratchNot & floodFillMask_;
+		}
+        cv::Mat grayImage_;
+        cv::Mat floodFillMask_;
+        cv::Rect origBoundsInFloodFill_;
+    };
+
 #if 0
     /// This class used to be the "keypoint enhancer" - it now is used to
     /// after-the-fact extract additional data per keypoint.
@@ -226,7 +368,6 @@ namespace vbtracker {
         m_lastGrayImage = grayImage.clone();
         m_debugThresholdImageDirty = true;
         m_debugBlobImageDirty = true;
-
         getKeypoints(grayImage);
 
 #if 0
@@ -242,6 +383,7 @@ namespace vbtracker {
             m_keypointDetailer->augmentKeypoints(thresholded, m_keyPoints);
 #endif
         cv::Size sz = grayImage.size();
+#ifdef NOT_TESTING_NEW_IMAGE_CODE
         /// Use the LedMeasurement constructor to do the conversion from
         /// keypoint to measurement right now.
         m_latestMeasurements.resize(m_keyPoints.size());
@@ -250,7 +392,7 @@ namespace vbtracker {
                        [sz](cv::KeyPoint const &kp) {
                            return LedMeasurement{kp, sz};
                        });
-
+#endif
         return m_latestMeasurements;
     }
 
@@ -280,6 +422,9 @@ namespace vbtracker {
         m_sbdParams.thresholdStep =
             (m_sbdParams.maxThreshold - m_sbdParams.minThreshold) /
             p.thresholdSteps;
+		
+			
+#ifdef NOT_TESTING_NEW_IMAGE_CODE
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
 /// @todo: Determine the maximum size of a trackable blob by seeing
@@ -304,6 +449,11 @@ namespace vbtracker {
         // detect when they are getting brighter and dimmer.  Pass this as
         // the brightness parameter to the Led class when adding a new one
         // or augmenting with a new frame.
+#else
+		
+		BlobDetector detector;
+		m_latestMeasurements = detector(grayImage, m_sbdParams);
+#endif
     }
 
     cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {
