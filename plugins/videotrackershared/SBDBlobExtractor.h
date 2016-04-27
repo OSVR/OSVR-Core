@@ -26,8 +26,9 @@
 #define INCLUDED_SBDBlobExtractor_h_GUID_E67E1F86_F827_48A3_5FA2_F9F241BA79AF
 
 // Internal Includes
-#include "LedMeasurement.h"
 #include "BlobParams.h"
+#include "EdgeHoleBasedLedExtractor.h"
+#include "LedMeasurement.h"
 
 // Library/third-party includes
 #include <opencv2/features2d/features2d.hpp>
@@ -58,6 +59,7 @@ namespace vbtracker {
         cv::Mat generateDebugBlobImage() const;
 
         BlobParams m_params;
+        EdgeHoleBasedLedExtractor m_extractor;
         cv::SimpleBlobDetector::Params m_sbdParams;
         LedMeasurementVec m_latestMeasurements;
 

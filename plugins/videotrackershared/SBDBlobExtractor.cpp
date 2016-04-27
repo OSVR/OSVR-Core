@@ -25,6 +25,7 @@
 // Internal Includes
 #include "SBDBlobExtractor.h"
 #include "BlobExtractor.h"
+#include "cvUtils.h"
 
 // Library/third-party includes
 #include <opencv2/features2d/features2d.hpp>
@@ -35,7 +36,7 @@
 
 #include <iostream>
 
-#define NOT_TESTING_NEW_IMAGE_CODE
+#define OSVR_NEW_BLOB_CODE
 
 namespace osvr {
 namespace vbtracker {
@@ -245,7 +246,7 @@ namespace vbtracker {
             m_keypointDetailer->augmentKeypoints(thresholded, m_keyPoints);
 #endif
         cv::Size sz = grayImage.size();
-#ifdef NOT_TESTING_NEW_IMAGE_CODE
+#ifndef OSVR_NEW_BLOB_CODE
         /// Use the LedMeasurement constructor to do the conversion from
         /// keypoint to measurement right now.
         m_latestMeasurements.resize(m_keyPoints.size());
@@ -259,33 +260,30 @@ namespace vbtracker {
     }
 
     void SBDBlobExtractor::getKeypoints(cv::Mat const &grayImage) {
+#ifdef OSVR_NEW_BLOB_CODE
+
+		m_latestMeasurements = m_extractor(m_lastGrayImage, m_params);
+
+#else
         m_keyPoints.clear();
         //================================================================
         // Tracking the points
 
         // Construct a blob detector and find the blobs in the image.
-        double minVal, maxVal;
-        cv::minMaxIdx(grayImage, &minVal, &maxVal);
         auto &p = m_params;
-        if (maxVal < p.absoluteMinThreshold) {
+		auto rangeInfo = ImageRangeInfo(grayImage);
+        if (rangeInfo.maxVal < p.absoluteMinThreshold) {
             /// empty image, early out!
             return;
         }
+		auto thresholdInfo = ImageThresholdInfo(rangeInfo, p);
 
-        auto imageRangeLerp = [=](double alpha) {
-            return minVal + (maxVal - minVal) * alpha;
-        };
         // 0.3 LERP between min and max as the min threshold, but
         // don't let really dim frames confuse us.
-        m_sbdParams.minThreshold = std::max(imageRangeLerp(p.minThresholdAlpha),
-                                            p.absoluteMinThreshold);
-        m_sbdParams.maxThreshold =
-            std::max(imageRangeLerp(0.8), p.absoluteMinThreshold);
-        m_sbdParams.thresholdStep =
-            (m_sbdParams.maxThreshold - m_sbdParams.minThreshold) /
-            p.thresholdSteps;
+        m_sbdParams.minThreshold = thresholdInfo.minThreshold;
+        m_sbdParams.maxThreshold = thresholdInfo.maxThreshold;
+		m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
 
-#ifdef NOT_TESTING_NEW_IMAGE_CODE
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
 /// @todo: Determine the maximum size of a trackable blob by seeing
@@ -310,15 +308,13 @@ namespace vbtracker {
 // detect when they are getting brighter and dimmer.  Pass this as
 // the brightness parameter to the Led class when adding a new one
 // or augmenting with a new frame.
-#else
-
-        BlobDetector detector;
-        m_latestMeasurements = detector(grayImage, m_sbdParams);
 #endif
     }
 
-    cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {
-
+    cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {	
+#ifdef OSVR_NEW_BLOB_CODE
+		return m_extractor.getThresholdedImage().clone();
+#else
         // Fake the thresholded image to give an idea of what the
         // blob detector is doing.
         auto getCurrentThresh = [&](int i) {
@@ -336,7 +332,9 @@ namespace vbtracker {
             cv::addWeighted(ret, 0.5, temp, 0.5, 0, tempOut);
             ret = tempOut;
         }
+		
         return ret;
+#endif
     }
     cv::Mat const &SBDBlobExtractor::getDebugThresholdImage() {
         if (m_debugThresholdImageDirty) {
@@ -349,11 +347,19 @@ namespace vbtracker {
     cv::Mat SBDBlobExtractor::generateDebugBlobImage() const {
         cv::Mat ret;
         cv::Mat tempColor;
+		//tempColor.create(m_lastGrayImage.size(), CV_8UC3);
+        std::cout << "depth: " << m_lastGrayImage.depth()
+                  << " channels: " << m_lastGrayImage.channels() << std::endl;
         cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
+#ifdef OSVR_NEW_BLOB_CODE
+		// Draw outlines and centers of detected LEDs in blue.
+        ret = drawSingleColoredContours(tempColor, m_extractor.getContours(),
+                                        cv::Scalar(255, 0, 0));
+#else
         // Draw detected blobs as blue circles.
         cv::drawKeypoints(tempColor, m_keyPoints, ret, cv::Scalar(255, 0, 0),
                           cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
+#endif
         return ret;
     }
     cv::Mat const &SBDBlobExtractor::getDebugBlobImage() {
