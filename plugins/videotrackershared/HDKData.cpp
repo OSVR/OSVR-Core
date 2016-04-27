@@ -33,6 +33,12 @@
 
 namespace osvr {
 namespace vbtracker {
+#ifdef _MSC_VER
+#pragma warning(push)
+/// Suppress truncation warning so we don't have to put f after every number
+/// below.
+#pragma warning(disable : 4305)
+#endif
 
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
@@ -85,7 +91,11 @@ namespace vbtracker {
         cv::Point3f( -9, -23.8, 0 ),
         cv::Point3f( -12, 5.8, 0 )
     };
-    // clang-format on
+// clang-format on
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
     const Vec3Vector OsvrHdkLedDirections_SENSOR0 = {
         cv::Vec3d{-1, 0, 0},
