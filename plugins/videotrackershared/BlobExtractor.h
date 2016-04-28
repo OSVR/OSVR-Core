@@ -39,6 +39,7 @@
 namespace osvr {
 namespace vbtracker {
     using ContourType = std::vector<cv::Point2i>;
+    using ContourList = std::vector<ContourType>;
 
     /// Data structure with a lot of info about a contour.
     struct BlobData {
@@ -100,7 +101,7 @@ namespace vbtracker {
         LedMeasurementVec
         operator()(cv::Mat const &gray,
                    cv::SimpleBlobDetector::Params const &params);
-        std::vector<ContourType> binarizeAndGetSolidComponents(int thresh);
+        ContourList binarizeAndGetSolidComponents(int thresh);
 
       private:
         void makeFloodFillMask(cv::Mat const &gray);
