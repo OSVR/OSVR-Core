@@ -28,25 +28,16 @@
 #include "cvUtils.h"
 
 // Library/third-party includes
-#include <opencv2/highgui/highgui.hpp>
+// - none
 
 // Standard includes
 #include <iostream>
 #include <utility>
 
-#define OSVR_SKIP_BLUR
-
 namespace osvr {
 namespace vbtracker {
-    static inline void showImage(std::string const &title, cv::Mat const &img,
-                                 bool showImages = true) {
-        if (showImages) {
-            cv::namedWindow(title);
-            cv::imshow(title, img);
-        }
-    }
     EdgeHoleBasedLedExtractor::Params::Params()
-        : preEdgeDetectionBlurSize(3), laplacianKSize(5), laplacianScale(1.3),
+        : preEdgeDetectionBlurSize(3), laplacianKSize(5), laplacianScale(1.5),
           postEdgeDetectionBlur(false), postEdgeDetectionBlurSize(3),
           postEdgeDetectionBlurThreshold(40) {}
 
@@ -64,7 +55,6 @@ namespace vbtracker {
         gray_ = gray.clone();
 
         /// Set up the threshold parameters
-        baseThreshVal_ = p.absoluteMinThreshold;
         auto rangeInfo = ImageRangeInfo(gray_);
         if (rangeInfo.maxVal < p.absoluteMinThreshold) {
             /// Early out - empty image!
@@ -75,15 +65,19 @@ namespace vbtracker {
         minBeaconCenterVal_ =
             static_cast<std::uint8_t>(thresholdInfo.minThreshold);
 
-        /// Basic thresholding to reduce background noise
-        cv::threshold(gray_, thresh_, baseThreshVal_, 255, cv::THRESH_TOZERO);
-        cv::GaussianBlur(thresh_, thresh_,
+        /// Used to do basic thresholding here first to reduce background noise,
+        /// but
+        /// turns out that actually produced worse results at the end of the
+        /// process (presumably by producing very sharp edges)
+        cv::Mat blurred;
+
+        cv::GaussianBlur(gray_, blurred,
                          cv::Size(extParams_.preEdgeDetectionBlurSize,
                                   extParams_.preEdgeDetectionBlurSize),
                          0, 0);
 
         /// Edge detection
-        cv::Laplacian(thresh_, edge_, CV_8U, extParams_.laplacianKSize,
+        cv::Laplacian(blurred, edge_, CV_8U, extParams_.laplacianKSize,
                       extParams_.laplacianScale);
 
         // turn the edge detection into a binary image.
@@ -93,12 +87,13 @@ namespace vbtracker {
                              cv::Size(extParams_.postEdgeDetectionBlurSize,
                                       extParams_.postEdgeDetectionBlurSize),
                              0, 0);
-            // showImage("Blurred", edgeTemp);
             cv::threshold(edgeTemp, edgeBinary_,
                           extParams_.postEdgeDetectionBlurThreshold, 255,
                           cv::THRESH_BINARY);
         } else {
-            edgeBinary_ = edge_ > extParams_.postEdgeDetectionBlurThreshold;
+            cv::threshold(edge_, edgeBinary_,
+                          extParams_.postEdgeDetectionBlurThreshold, 255,
+                          cv::THRESH_BINARY);
         }
 
         /// Extract beacons from the edge detection image
@@ -108,6 +103,7 @@ namespace vbtracker {
         // given. We examine it for suitability as an LED, and if it passes our
         // checks, add a derived measurement to our measurement vector and the
         // contour itself to our list of contours for debugging display.
+        cv::Mat binTemp = edgeBinary_.clone();
         consumeHolesOfConnectedComponents(
             edgeBinary_,
             [&](ContourType &&contour) { checkBlob(std::move(contour), p); });

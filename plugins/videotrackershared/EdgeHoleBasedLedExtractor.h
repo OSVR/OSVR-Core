@@ -70,7 +70,6 @@ namespace vbtracker {
         }
 
         cv::Mat const &getInputGrayImage() const { return gray_; }
-        cv::Mat const &getThresholdedImage() const { return thresh_; }
         cv::Mat const &getEdgeDetectedImage() const { return edge_; }
         cv::Mat const &getEdgeDetectedBinarizedImage() const {
             return edgeBinary_;
@@ -87,10 +86,8 @@ namespace vbtracker {
                              BlobData const &data) {
             rejectList_.emplace_back(id, reason, data.center);
         }
-        double baseThreshVal_ = 75;
         std::uint8_t minBeaconCenterVal_ = 127;
         cv::Mat gray_;
-        cv::Mat thresh_;
         cv::Mat edge_;
         cv::Mat edgeBinary_;
         ContourList contours_;

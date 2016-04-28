@@ -69,10 +69,6 @@ namespace vbtracker {
         EdgeHoleBasedLedExtractor extractor{g_holeExtractorParams};
         extractor(gray, p, pause);
 
-        /// Basic thresholding to reduce background noise
-        showImage("Cleaned", extractor.getThresholdedImage(), showImages);
-        cv::imwrite(fn + ".thresh.png", extractor.getThresholdedImage());
-
         /// Edge detection
         showImage("Edges", extractor.getEdgeDetectedImage(), showImages);
         cv::imwrite(fn + ".edge.png", extractor.getEdgeDetectedImage());

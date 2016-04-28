@@ -313,7 +313,7 @@ namespace vbtracker {
 
     cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {	
 #ifdef OSVR_NEW_BLOB_CODE
-		return m_extractor.getThresholdedImage().clone();
+		return m_extractor.getEdgeDetectedImage().clone();
 #else
         // Fake the thresholded image to give an idea of what the
         // blob detector is doing.
