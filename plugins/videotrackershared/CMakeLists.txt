@@ -39,7 +39,8 @@ if(BUILD_ADVANCED_DEV_TOOLS)
     target_include_directories(blob_extraction_demo
         PRIVATE
         ${OSVR_VIDEOTRACKERSHARED_INCLUDE_DIR}
-        ${OpenCV_INCLUDE_DIRS})
+        ${OpenCV_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS})
     target_compile_options(blob_extraction_demo
         PUBLIC
         ${OSVR_CXX11_FLAGS})
