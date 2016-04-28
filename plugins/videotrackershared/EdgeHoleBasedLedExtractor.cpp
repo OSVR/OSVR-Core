@@ -45,9 +45,15 @@ namespace vbtracker {
             cv::imshow(title, img);
         }
     }
-    EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor()
-        : laplacianKSize_(5), laplacianScale_(1.3), edgeDetectionBlurSize_(3),
-          edgeDetectionBlurThresh_(40.) {}
+    EdgeHoleBasedLedExtractor::Params::Params()
+        : preEdgeDetectionBlurSize(3), laplacianKSize(5), laplacianScale(1.3),
+          postEdgeDetectionBlur(false), postEdgeDetectionBlurSize(3),
+          postEdgeDetectionBlurThreshold(40) {}
+
+    EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
+        Params const &extractorParams)
+        : extParams_(extractorParams) {}
+
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
                bool verboseBlobOutput) {
@@ -71,26 +77,31 @@ namespace vbtracker {
 
         /// Basic thresholding to reduce background noise
         cv::threshold(gray_, thresh_, baseThreshVal_, 255, cv::THRESH_TOZERO);
-        cv::GaussianBlur(
-            thresh_, thresh_,
-            cv::Size(edgeDetectionBlurSize_, edgeDetectionBlurSize_), 0, 0);
+        cv::GaussianBlur(thresh_, thresh_,
+                         cv::Size(extParams_.preEdgeDetectionBlurSize,
+                                  extParams_.preEdgeDetectionBlurSize),
+                         0, 0);
 
         /// Edge detection
-        cv::Laplacian(thresh_, edge_, CV_8U, laplacianKSize_, laplacianScale_);
-#ifdef OSVR_SKIP_BLUR
-        edgeBinary_ = edge_ > edgeDetectionBlurThresh_;
-#else
-        /// Extract beacons from the edge detection image
+        cv::Laplacian(thresh_, edge_, CV_8U, extParams_.laplacianKSize,
+                      extParams_.laplacianScale);
+
         // turn the edge detection into a binary image.
-        // cv::Mat edgeTemp = edge_ > 0;
-        cv::Mat edgeTemp; // = edge_.clone();
-        cv::GaussianBlur(
-            edge_, edgeTemp,
-            cv::Size(edgeDetectionBlurSize_, edgeDetectionBlurSize_), 0, 0);
-        // showImage("Blurred", edgeTemp);
-        cv::threshold(edgeTemp, edgeBinary_, edgeDetectionBlurThresh_, 255,
-                      cv::THRESH_BINARY);
-#endif
+        if (extParams_.postEdgeDetectionBlur) {
+            cv::Mat edgeTemp;
+            cv::GaussianBlur(edge_, edgeTemp,
+                             cv::Size(extParams_.postEdgeDetectionBlurSize,
+                                      extParams_.postEdgeDetectionBlurSize),
+                             0, 0);
+            // showImage("Blurred", edgeTemp);
+            cv::threshold(edgeTemp, edgeBinary_,
+                          extParams_.postEdgeDetectionBlurThreshold, 255,
+                          cv::THRESH_BINARY);
+        } else {
+            edgeBinary_ = edge_ > extParams_.postEdgeDetectionBlurThreshold;
+        }
+
+        /// Extract beacons from the edge detection image
 
         // The lambda ("continuation") is called with each "hole" in the edge
         // detection image, it's up to us what to do with the contour we're

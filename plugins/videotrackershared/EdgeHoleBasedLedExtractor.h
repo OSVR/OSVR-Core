@@ -43,7 +43,17 @@ namespace vbtracker {
     enum class RejectReason { Area, CenterPointValue, Circularity, Convexity };
     class EdgeHoleBasedLedExtractor {
       public:
-        EdgeHoleBasedLedExtractor();
+        struct Params {
+            Params();
+            int preEdgeDetectionBlurSize;
+            int laplacianKSize;
+            double laplacianScale;
+            bool postEdgeDetectionBlur;
+            int postEdgeDetectionBlurSize;
+            int postEdgeDetectionBlurThreshold;
+        };
+        explicit EdgeHoleBasedLedExtractor(
+            Params const &extractorParams = Params());
         LedMeasurementVec const &operator()(cv::Mat const &gray,
                                             BlobParams const &p,
                                             bool verboseBlobOutput = false);
@@ -91,10 +101,7 @@ namespace vbtracker {
         ContourId contourId_ = 0;
 
         /// parameters
-        const int laplacianKSize_;
-        const double laplacianScale_;
-        const int edgeDetectionBlurSize_;
-        const double edgeDetectionBlurThresh_;
+        const Params extParams_;
     };
 } // namespace vbtracker
 } // namespace osvr
