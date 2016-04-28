@@ -27,16 +27,20 @@
 #include <BlobParams.h>
 #include <EdgeHoleBasedLedExtractor.h>
 #include <OptionalStream.h>
+#include <ParseBlobParams.h>
 #include <cvUtils.h>
 
 // Library/third-party includes
 #include <boost/algorithm/string/case_conv.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 // Standard includes
 #include <cmath>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -44,7 +48,8 @@
 
 namespace osvr {
 namespace vbtracker {
-
+    static EdgeHoleBasedLedExtractor::Params g_holeExtractorParams{};
+    static BlobParams g_blobParams{};
     void showImage(std::string const &title, cv::Mat const &img,
                    bool showImages = true) {
         if (showImages) {
@@ -55,15 +60,13 @@ namespace vbtracker {
 
     void handleImage(std::string const &fn, cv::Mat color, cv::Mat gray,
                      bool pause, bool showImages = true) {
-        BlobParams p;
-        p.filterByCircularity = true;
-        p.minCircularity = 0.75;
+        BlobParams &p = g_blobParams;
 
         /// Initial image loading
         std::cout << "Handling image " << fn << std::endl;
 
         // showImage("Original", gray);
-        EdgeHoleBasedLedExtractor extractor;
+        EdgeHoleBasedLedExtractor extractor{g_holeExtractorParams};
         extractor(gray, p, true);
 
         /// Basic thresholding to reduce background noise
@@ -210,7 +213,42 @@ void processAVI(std::string const &fn) {
     }
 }
 
+void tryLoadingConfigFile() {
+    Json::Value root;
+    static const auto FN = "blobDemoConfig.json";
+    {
+        std::ifstream configStream{"blobDemoConfig.json"};
+        if (!configStream) {
+            std::cout << "Note: Did not find or could not open config file "
+                      << FN << ", just using defaults..." << std::endl;
+            return;
+        }
+        Json::Reader reader;
+        if (!reader.parse(configStream, root)) {
+            std::cout << "Note: Opened, but could not parse as valid JSON ["
+                      << reader.getFormattedErrorMessages()
+                      << "], the config file " << FN
+                      << ", just using the defaults..." << std::endl;
+            return;
+        }
+    }
+    std::cout << "Opened config file " << FN << " and parsed as JSON..."
+              << std::endl;
+    using namespace osvr::vbtracker;
+    if (root.isMember("blobParams")) {
+        std::cout << "Found \"blobParams\" element, parsing..." << std::endl;
+        parseBlobParams(root["blobParams"], g_blobParams);
+    }
+    if (root.isMember("extractParams")) {
+        std::cout << "Found \"extractParams\" element, parsing..." << std::endl;
+        parseEdgeHoleExtractorParams(root["extractParams"],
+                                     g_holeExtractorParams);
+    }
+}
+
 int main(int argc, char *argv[]) {
+    /// Look for a config file (optional)
+    tryLoadingConfigFile();
     /// Don't stop before exiting if we've got multiple to process.
     if (argc == 2) {
         auto fn = std::string{argv[1]};

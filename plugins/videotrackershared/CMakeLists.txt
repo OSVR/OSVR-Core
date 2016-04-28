@@ -36,7 +36,8 @@ set(OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA
 if(BUILD_ADVANCED_DEV_TOOLS)
     add_executable(blob_extraction_demo
         BlobExtractionDemo.cpp
-        ${OSVR_VIDEOTRACKERSHARED_SOURCES_CORE})
+        ${OSVR_VIDEOTRACKERSHARED_SOURCES_CORE}
+        ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
     target_include_directories(blob_extraction_demo
         PRIVATE
         ${OSVR_VIDEOTRACKERSHARED_INCLUDE_DIR}
@@ -48,5 +49,6 @@ if(BUILD_ADVANCED_DEV_TOOLS)
     target_link_libraries(blob_extraction_demo
         PUBLIC
         ${VIDEOTRACKER_EXTRA_LIBS}
-        opencv_core)
+        opencv_core
+        JsonCpp::JsonCpp)
 endif()
