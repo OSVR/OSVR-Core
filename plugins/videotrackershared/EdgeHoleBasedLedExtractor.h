@@ -35,21 +35,28 @@
 
 // Standard includes
 #include <cstdint>
+#include <tuple>
 #include <vector>
 
 namespace osvr {
 namespace vbtracker {
+    enum class RejectReason { Area, CenterPointValue, Circularity, Convexity };
     class EdgeHoleBasedLedExtractor {
       public:
         EdgeHoleBasedLedExtractor();
         LedMeasurementVec const &operator()(cv::Mat const &gray,
                                             BlobParams const &p,
                                             bool verboseBlobOutput = false);
+        using ContourId = std::size_t;
+        // Contour ID and center.
+        using RejectType = std::tuple<ContourId, RejectReason, cv::Point2d>;
+        using RejectList = std::vector<RejectType>;
 
         void reset() {
             contours_.clear();
             measurements_.clear();
-            rejectedCenters_.clear();
+            rejectList_.clear();
+            contourId_ = 0;
         }
 
         cv::Mat const &getInputGrayImage() const { return gray_; }
@@ -58,20 +65,17 @@ namespace vbtracker {
         cv::Mat const &getEdgeDetectedBinarizedImage() const {
             return edgeBinary_;
         }
-        std::vector<ContourType> const &getContours() const {
-            return contours_;
-        }
+        ContourList const &getContours() const { return contours_; }
         LedMeasurementVec const &getMeasurements() const {
             return measurements_;
         }
-        std::vector<cv::Point2d> const &getRejectedCenters() const {
-            return rejectedCenters_;
-        }
+        RejectList const &getRejectList() const { return rejectList_; }
 
       private:
         void checkBlob(ContourType &&contour, BlobParams const &p);
-        void addToRejectedCenters(BlobData const &data) {
-            rejectedCenters_.push_back(data.center);
+        void addToRejectList(ContourId id, RejectReason reason,
+                             BlobData const &data) {
+            rejectList_.emplace_back(id, reason, data.center);
         }
         double baseThreshVal_ = 75;
         std::uint8_t minBeaconCenterVal_ = 127;
@@ -79,10 +83,12 @@ namespace vbtracker {
         cv::Mat thresh_;
         cv::Mat edge_;
         cv::Mat edgeBinary_;
-        std::vector<ContourType> contours_;
+        ContourList contours_;
         LedMeasurementVec measurements_;
-        std::vector<cv::Point2d> rejectedCenters_;
+        RejectList rejectList_;
         bool verbose_ = false;
+
+        ContourId contourId_ = 0;
 
         /// parameters
         const int laplacianKSize_;

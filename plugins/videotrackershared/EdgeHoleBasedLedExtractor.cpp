@@ -34,7 +34,7 @@
 #include <iostream>
 #include <utility>
 
-#undef OSVR_SKIP_BLUR
+#define OSVR_SKIP_BLUR
 
 namespace osvr {
 namespace vbtracker {
@@ -71,6 +71,9 @@ namespace vbtracker {
 
         /// Basic thresholding to reduce background noise
         cv::threshold(gray_, thresh_, baseThreshVal_, 255, cv::THRESH_TOZERO);
+        cv::GaussianBlur(
+            thresh_, thresh_,
+            cv::Size(edgeDetectionBlurSize_, edgeDetectionBlurSize_), 0, 0);
 
         /// Edge detection
         cv::Laplacian(thresh_, edge_, CV_8U, laplacianKSize_, laplacianScale_);
@@ -110,18 +113,19 @@ namespace vbtracker {
             return outputIf(std::cout, verbose_);
 #endif
         };
-
-        debugStream() << "\nContour centered at " << data.center;
+        auto myId = contourId_;
+        contourId_++;
+        debugStream() << "\nContour ID " << myId << " centered at "
+                      << data.center;
         debugStream() << " - diameter: " << data.diameter;
         debugStream() << " - area: " << data.area;
         debugStream() << " - circularity: " << data.circularity;
         debugStream() << " - bounding box size: " << data.bounds.size();
         if (data.area < p.minArea) {
             debugStream() << "Reject based on area: " << data.area << " < "
-                          << p.minArea << " (not added to reject list)"
-                                          "\n";
+                          << p.minArea << "\n";
 
-            // addToRejectedCenters(data);
+            addToRejectList(myId, RejectReason::Area, data);
             return;
         }
 
@@ -135,10 +139,8 @@ namespace vbtracker {
             if (centerPointValue < minBeaconCenterVal_) {
                 debugStream() << "Reject based on center point value: "
                               << int(centerPointValue) << " < "
-                              << int(minBeaconCenterVal_)
-                              << " (not added to reject list)"
-                                 "\n";
-                // addToRejectedCenters(data);
+                              << int(minBeaconCenterVal_) << "\n";
+                addToRejectList(myId, RejectReason::CenterPointValue, data);
                 return;
             }
         }
@@ -148,7 +150,7 @@ namespace vbtracker {
                 debugStream()
                     << "Reject based on circularity: " << data.circularity
                     << " < " << p.minCircularity << "\n";
-                addToRejectedCenters(data);
+                addToRejectList(myId, RejectReason::Circularity, data);
                 return;
             }
         }
@@ -158,7 +160,7 @@ namespace vbtracker {
             if (convexity < p.minConvexity) {
                 debugStream() << "Reject based on convexity: " << convexity
                               << " < " << p.minConvexity << "\n";
-                addToRejectedCenters(data);
+                addToRejectList(myId, RejectReason::Convexity, data);
 
                 return;
             }
