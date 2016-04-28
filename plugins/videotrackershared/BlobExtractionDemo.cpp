@@ -79,7 +79,8 @@ namespace vbtracker {
 
         showImage("Binarized Contour Input",
                   extractor.getEdgeDetectedBinarizedImage(), showImages);
-        cv::imwrite(fn + ".binarized.png", extractor.getEdgeDetectedImage());
+        cv::imwrite(fn + ".binarized.png",
+                    extractor.getEdgeDetectedBinarizedImage());
 
         /// Extract beacons from the edge detection image
 
