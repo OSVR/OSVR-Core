@@ -67,7 +67,7 @@ namespace vbtracker {
 
         // showImage("Original", gray);
         EdgeHoleBasedLedExtractor extractor{g_holeExtractorParams};
-        extractor(gray, p, true);
+        extractor(gray, p, pause);
 
         /// Basic thresholding to reduce background noise
         showImage("Cleaned", extractor.getThresholdedImage(), showImages);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
     }
     bool pause = (argc < 3);
     for (int arg = 1; arg < argc; ++arg) {
-        osvr::vbtracker::handleImage(argv[arg], true);
+        osvr::vbtracker::handleImage(argv[arg], pause);
     }
     return 0;
 }
