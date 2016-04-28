@@ -34,6 +34,7 @@
 
 // Standard includes
 #include <cstdint>
+#include <random>
 #include <utility>
 #include <vector>
 
@@ -97,13 +98,14 @@ namespace vbtracker {
     }
 
     /// Draw contours on a copy of the base image (converted to BGR, if
-    /// required), with each contour a unique color thanks to a cheap hack with
-    /// std::rand(). If you choose not to fill the contours, the center of each
+    /// required), with each contour a unique color thanks to a Mersenne
+    /// Twister! If you choose not to fill the contours, the center of each
     /// will have a subpixel-accurate circle plotted at it.
     ///
     /// @param baseImage Image to have the contours drawn on top of - will not
     /// be modified - just cloned.
     /// @param contours The contours you'd like drawn.
+    /// @param deterministic Should we use a deterministic seed?
     /// @param fillContours Whether contours should be drawn filled, or just as
     /// outlines with a center point plotted (default)
     /// @param centerDotRadius Radius, in pixels, of the center dot to plot if
@@ -113,14 +115,27 @@ namespace vbtracker {
     /// should all be black.
     inline cv::Mat drawColoredContours(cv::Mat const &baseImage,
                                        std::vector<ContourType> const &contours,
+                                       bool deterministic = true,
                                        bool fillContours = false,
                                        double centerDotRadius = 1.2,
                                        bool colorCenterDot = true) {
+        // Using a deterministic 32-bit seed here, so we get the same colors in
+        // each call - by default.
+        std::mt19937 mt(31415);
+        if (!deterministic) {
+            // If you didn't want deterministic, ok, we'll go get the random
+            // device and seed it.
+            std::random_device rd;
+            mt.seed(rd());
+        }
+
+        //std::uniform_int_distribution<int> colorDist(0, 255);
+		/// Our desired range is a power of two, so we can just mask.
+        auto colorDist = [](std::mt19937 &mt) { return mt() & 0xff; };
         return drawFunctorColoredContours(
             baseImage, contours,
-            [](ContourType const &, std::size_t) {
-                return cv::Scalar((std::rand() & 255), (std::rand() & 255),
-                                  (std::rand() & 255));
+            [&](ContourType const &, std::size_t) {
+                return cv::Scalar(colorDist(mt), colorDist(mt), colorDist(mt));
             },
             fillContours, centerDotRadius, colorCenterDot);
     }
