@@ -74,8 +74,9 @@ namespace vbtracker {
         showImage("Edges", extractor.getEdgeDetectedImage(), showImages);
         cv::imwrite(fn + ".edge.png", extractor.getEdgeDetectedImage());
 
-        showImage("Binarized Blurred Edges",
+        showImage("Binarized Contour Input",
                   extractor.getEdgeDetectedBinarizedImage(), showImages);
+        cv::imwrite(fn + ".binarized.png", extractor.getEdgeDetectedImage());
 
         /// Extract beacons from the edge detection image
 
@@ -208,6 +209,7 @@ void processAVI(std::string const &fn) {
         i++;
     }
 }
+
 int main(int argc, char *argv[]) {
     /// Don't stop before exiting if we've got multiple to process.
     if (argc == 2) {
