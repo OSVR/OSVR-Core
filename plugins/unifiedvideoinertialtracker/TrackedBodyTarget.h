@@ -26,21 +26,21 @@
 #define INCLUDED_TrackedBodyTarget_h_GUID_E4315530_5C4F_4DB4_2497_11686F0F6E0E
 
 // Internal Includes
-#include "Types.h"
-#include "LedMeasurement.h"
 #include "BeaconIdTypes.h"
-#include "BodyIdTypes.h"
 #include "BeaconSetupData.h"
+#include "BodyIdTypes.h"
+#include "LedMeasurement.h"
 #include "ModelTypes.h"
+#include "Types.h"
 
 // Library/third-party includes
+#include <boost/assert.hpp>
 #include <osvr/Kalman/PureVectorState.h>
 #include <osvr/Util/TimeValue.h>
-#include <boost/assert.hpp>
 
 // Standard includes
-#include <vector>
 #include <iosfwd>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
