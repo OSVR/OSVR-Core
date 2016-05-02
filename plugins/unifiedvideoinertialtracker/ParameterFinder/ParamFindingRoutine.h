@@ -44,7 +44,7 @@ namespace vbtracker {
     /// with different parameters and compare its results at each step to some
     /// source of reference data.
     template <typename TrackingReferenceType, typename ParamSet>
-    void runOptimizer(MeasurementsRows const &data,
+    void runOptimizer(MeasurementsRows const &data, bool costOnly,
                       OptimCommonData const &commonData, std::size_t maxRuns) {
 
         std::cout << "Max runs: " << maxRuns << std::endl;
@@ -58,53 +58,59 @@ namespace vbtracker {
                   << ParamSet::getVecElementNames() << "\n";
         std::cout << "Initial vector:\n"
                   << x.format(getFullFormat()) << std::endl;
+        auto functor = [&](ParamVec const &paramVec) -> double {
+            ConfigParams params = commonData.initialParams;
 
-        auto ret = ei_newuoa_wrapped(
-            x, ParamSet::getRho(), static_cast<long>(maxRuns),
-            [&](ParamVec const &paramVec) -> double {
-                ConfigParams params = commonData.initialParams;
+            /// Update config from provided param vec
+            ParamSet::updateParamsFromVec(params, paramVec);
 
-                /// Update config from provided param vec
-                ParamSet::updateParamsFromVec(params, paramVec);
+            auto optim = OptimData::make(params, commonData);
 
-                auto optim = OptimData::make(params, commonData);
+            MainAlgoUnderStudy mainAlgo;
+            TrackingReferenceType ref;
+            std::size_t samples = 0;
+            double accum = 0;
 
-                MainAlgoUnderStudy mainAlgo;
-                TrackingReferenceType ref;
-                std::size_t samples = 0;
-                double accum = 0;
-
-                /// Main algorithm loop
-                for (auto const &rowPtr : data) {
-                    mainAlgo(optim, *rowPtr);
-                    ref(optim, *rowPtr);
-                    if (ref.havePose() && mainAlgo.havePose()) {
-                        auto cost =
-                            costMeasurement(ref.getPose(), mainAlgo.getPose());
-                        accum += cost;
-                        samples++;
-                    }
+            /// Main algorithm loop
+            for (auto const &rowPtr : data) {
+                mainAlgo(optim, *rowPtr);
+                ref(optim, *rowPtr);
+                if (ref.havePose() && mainAlgo.havePose()) {
+                    auto cost =
+                        costMeasurement(ref.getPose(), mainAlgo.getPose());
+                    accum += cost;
+                    samples++;
                 }
+            }
 
-                /// Cost accumulation/post-processing.
-                if (samples > 0) {
-                    auto avgCost = (accum / static_cast<double>(samples));
-                    auto numResets = mainAlgo.getNumResets(optim);
-                    /// Sometimes gets stuck in parameter ditches where we get
-                    /// very few tracked frames
-                    auto effectiveCost = avgCost * numResets / samples;
-                    std::cout
-                        << std::setw(15) << std::to_string(effectiveCost)
-                        << " effective cost (average cost of " << std::setw(9)
-                        << avgCost << " over " << std::setw(4) << samples
-                        << " eligible frames with " << std::setw(2) << numResets
-                        << " resets)\n";
-                    return effectiveCost;
-                }
-                std::cout << "No samples with pose for both algorithms?"
-                          << std::endl;
-                return getReallyBigCost();
-            });
+            /// Cost accumulation/post-processing.
+            if (samples > 0) {
+                auto avgCost = (accum / static_cast<double>(samples));
+                auto numResets = mainAlgo.getNumResets(optim);
+                /// Sometimes gets stuck in parameter ditches where we get
+                /// very few tracked frames
+                auto effectiveCost = avgCost * numResets / samples;
+                std::cout << std::setw(15) << std::to_string(effectiveCost)
+                          << " effective cost (average cost of " << std::setw(9)
+                          << avgCost << " over " << std::setw(4) << samples
+                          << " eligible frames with " << std::setw(2)
+                          << numResets << " resets)\n";
+                return effectiveCost;
+            }
+            std::cout << "No samples with pose for both algorithms?"
+                      << std::endl;
+            return getReallyBigCost();
+        };
+
+        if (costOnly) {
+            auto cost = functor(x);
+            std::cout
+                << "The computed cost of these initial parameter values is "
+                << cost << std::endl;
+            return;
+        }
+        auto ret = ei_newuoa_wrapped(x, ParamSet::getRho(),
+                                     static_cast<long>(maxRuns), functor);
         std::cout << "Optimizer returned " << ret
                   << " and these parameter values:" << std::endl;
         std::cout << x.format(getFullFormat()) << std::endl;
@@ -112,7 +118,7 @@ namespace vbtracker {
                   << ParamSet::getVecElementNames() << std::endl;
     }
     using ParamOptimizerFunc = std::function<void(
-        MeasurementsRows const &, OptimCommonData const &, std::size_t)>;
+        MeasurementsRows const &, bool, OptimCommonData const &, std::size_t)>;
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_ParamFindingRoutine_h_GUID_C2088279_D54B_4D8B_562E_5748C748DAD0

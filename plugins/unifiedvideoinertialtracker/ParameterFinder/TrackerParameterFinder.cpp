@@ -101,7 +101,7 @@ struct PrintParamSetOptions {
 };
 
 int usage(const char *argv0) {
-    std::cerr << "Usage: " << argv0 << "[<routine> [<paramset>]]\n"
+    std::cerr << "Usage: " << argv0 << "[<routine> [<paramset> [--cost]]]\n"
               << std::endl;
     std::cerr
         << "where <routine> is one of the following (case insensitive): \n";
@@ -114,7 +114,9 @@ int usage(const char *argv0) {
            "of:\n";
 
     osvr::typepack::for_each_type<ps::ParamSets>(PrintParamSetOptions{});
-
+    std::cerr << "as well as an additional optional switch, --cost, if you'd "
+                 "like to just run the current parameters through and compute "
+                 "the cost, rather than optimize.\n\n";
     std::cerr
         << "\nIf no routine is explicitly specified, the default routine is "
         << routineToString(DEFAULT_ROUTINE) << "\n";
@@ -146,10 +148,21 @@ template <typename RefSource> class ParseArgumentAsParamSet {
 
 template <typename RefSource>
 int parseParamSetForParamOptimizer(osvr::vbtracker::ParamOptimizerFunc &func,
-                                   int argc, char *argv[]) {
-    if (argc > 3) {
+                                   bool &costOnly, int argc, char *argv[]) {
+    if (argc > 4) {
         std::cerr << "Too many command line arguments!" << std::endl;
         return usage(argv[0]);
+    }
+    if (argc == 3) {
+        if (std::string(argv[3]) == "--cost") {
+            std::cout << "Will run for just cost-only." << std::endl;
+            costOnly = true;
+        } else {
+            std::cerr << "Too many command line arguments - didn't recognize "
+                         "the last one!"
+                      << std::endl;
+            return usage(argv[0]);
+        }
     }
     if (argc == 2) {
         // specified routine only, no param set
@@ -158,6 +171,7 @@ int parseParamSetForParamOptimizer(osvr::vbtracker::ParamOptimizerFunc &func,
                          ps::DefaultParamSet>::get()
                   << "\n";
         func = &osvr::vbtracker::runOptimizer<RefSource, ps::DefaultParamSet>;
+        costOnly = false;
         return 0;
     }
     // OK, they specified a param set.
@@ -208,6 +222,7 @@ int main(int argc, char *argv[]) {
                   << routineToString(routine) << " by default." << std::endl;
     }
 
+    bool costOnly = false;
     osvr::vbtracker::ParamOptimizerFunc paramOptFunc;
     {
         int ret = 0;
@@ -215,7 +230,7 @@ int main(int argc, char *argv[]) {
         case OptimizationRoutine::ParamViaRansac:
             ret =
                 parseParamSetForParamOptimizer<osvr::vbtracker::RansacOneEuro>(
-                    paramOptFunc, argc, argv);
+                    paramOptFunc, costOnly, argc, argv);
             if (ret != 0) {
                 /// There was an error, and the function already told the user
                 /// about it.
@@ -226,7 +241,8 @@ int main(int argc, char *argv[]) {
         case OptimizationRoutine::ParamViaRefTracker:
 
             ret = parseParamSetForParamOptimizer<
-                osvr::vbtracker::ReferenceTracker>(paramOptFunc, argc, argv);
+                osvr::vbtracker::ReferenceTracker>(paramOptFunc, costOnly, argc,
+                                                   argv);
             if (ret != 0) {
                 /// There was an error, and the function already told the user
                 /// about it.
@@ -276,14 +292,14 @@ int main(int argc, char *argv[]) {
 
     case OptimizationRoutine::ParamViaRansac:
 
-        paramOptFunc(data, osvr::vbtracker::OptimCommonData{camParams, params},
-                     30);
+        paramOptFunc(data, costOnly,
+                     osvr::vbtracker::OptimCommonData{camParams, params}, 30);
         break;
 
     case OptimizationRoutine::ParamViaRefTracker:
 
-        paramOptFunc(data, osvr::vbtracker::OptimCommonData{camParams, params},
-                     300);
+        paramOptFunc(data, costOnly,
+                     osvr::vbtracker::OptimCommonData{camParams, params}, 300);
         break;
 
     default:
