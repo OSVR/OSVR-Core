@@ -66,7 +66,7 @@ LineLogger& LineLogger::operator<<(const char* what)
     return *this;
 }
 
-LineLogger& LineLogger::operator<<(const std::string& what)
+LineLogger& LineLogger::operator<<(const std::string what)
 {
     lineLogger_->operator<<(what);
     return *this;
@@ -129,13 +129,6 @@ LineLogger& LineLogger::operator<<(float what)
 LineLogger& LineLogger::operator<<(char what)
 {
     lineLogger_->operator<<(what);
-    return *this;
-}
-
-template<typename T>
-LineLogger& LineLogger::operator<<(T&& what)
-{
-    lineLogger_->operator<<(std::forward<T>(what));
     return *this;
 }
 
