@@ -28,6 +28,7 @@
 // Internal Includes
 #include "BlobParams.h"
 #include "EdgeHoleBasedLedExtractor.h"
+#include "GenericBlobExtractor.h"
 #include "LedMeasurement.h"
 
 // Library/third-party includes
@@ -91,6 +92,25 @@ namespace vbtracker {
         cv::Mat m_extraImage;
 #endif
     };
+
+    class SBDGenericBlobExtractor : public GenericBlobExtractor {
+      public:
+        SBDGenericBlobExtractor(BlobParams const &blobParams);
+        ~SBDGenericBlobExtractor() override = default;
+
+      protected:
+        cv::Mat generateDebugThresholdImage_() const override;
+        cv::Mat generateDebugBlobImage_() const override;
+        LedMeasurementVec extractBlobs_() override;
+
+      private:
+        void getKeypoints(cv::Mat const &grayImage);
+        BlobParams m_params;
+        std::vector<cv::KeyPoint> m_keyPoints;
+        cv::SimpleBlobDetector::Params m_sbdParams;
+    };
+
+	BlobExtractorPtr makeBlobExtractor(BlobParams const &blobParams);
 } // namespace vbtracker
 } // namespace osvr
 
