@@ -52,8 +52,9 @@ namespace vbtracker {
         return m_extractor(getLatestGrayImage(), m_params);
     }
 
-    BlobExtractorPtr makeBlobExtractor(BlobParams const &blobParams,
-                                       EdgeHoleParams const &extParams) {
+    BlobExtractorPtr
+    makeEdgeHoleBlobExtractor(BlobParams const &blobParams,
+                              EdgeHoleParams const &extParams) {
         auto extractor =
             std::make_shared<EdgeHoleBlobExtractor>(blobParams, extParams);
         return extractor;

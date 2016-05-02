@@ -26,16 +26,17 @@
 #define INCLUDED_TrackingSystem_Impl_h_GUID_9EC4CAF8_58AA_45A5_59A0_6B1FB4B86BE7
 
 // Internal Includes
-#include "TrackingSystem.h"
-#include "CameraParameters.h"
 #include "ConfigParams.h"
 #include "RoomCalibration.h"
+#include "TrackingSystem.h"
+#include <CameraParameters.h>
+#include <GenericBlobExtractor.h>
 
 // Library/third-party includes
-#include <osvr/Util/TimeValue.h>
-#include <osvr/Util/EigenCoreGeometry.h>
-#include <opencv2/core/core.hpp>
 #include <boost/noncopyable.hpp>
+#include <opencv2/core/core.hpp>
+#include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
 #include <memory>
@@ -43,7 +44,7 @@
 namespace osvr {
 namespace vbtracker {
     class TrackingDebugDisplay;
-    class SBDBlobExtractor;
+
     /// Private implementation structure for TrackingSystem
     struct TrackingSystem::Impl : private boost::noncopyable {
         Impl(ConfigParams const &params);
@@ -70,7 +71,7 @@ namespace vbtracker {
         RoomCalibration calib;
 
         LedUpdateCount updateCount;
-        std::unique_ptr<SBDBlobExtractor> blobExtractor;
+        BlobExtractorPtr blobExtractor;
         std::unique_ptr<TrackingDebugDisplay> debugDisplay;
     };
 

@@ -55,8 +55,16 @@ namespace vbtracker {
         EdgeHoleBasedLedExtractor m_extractor;
     };
 
-    BlobExtractorPtr makeBlobExtractor(BlobParams const &blobParams,
-                                       EdgeHoleParams const &extParams);
+    /// Factory for EdgeHoleBlobExtractor objects.
+    BlobExtractorPtr makeEdgeHoleBlobExtractor(BlobParams const &blobParams,
+                                               EdgeHoleParams const &extParams);
+
+    /// If passing an EdgeHoleParams object, then call the EdgeHoldBlobExtractor
+    /// factory.
+    inline BlobExtractorPtr makeBlobExtractor(BlobParams const &blobParams,
+                                              EdgeHoleParams const &extParams) {
+        return makeEdgeHoleBlobExtractor(blobParams, extParams);
+    }
 } // namespace vbtracker
 } // namespace osvr
 #endif // INCLUDED_EdgeHoleBlobExtractor_h_GUID_31496B1F_52D8_4BBC_A7FA_3F81E68C2A47
