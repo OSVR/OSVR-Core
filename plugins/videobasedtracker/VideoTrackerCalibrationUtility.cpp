@@ -51,9 +51,25 @@
 using std::endl;
 using namespace osvr::vbtracker;
 
-static osvr::server::detail::StreamPrefixer
+namespace myDetail {
+  class StreamPrefixer {
+  public:
+    StreamPrefixer(const char *prefix, std::ostream &os)
+      : m_prefix(prefix), m_os(&os) {}
+    template <typename T> std::ostream &operator<<(T val) {
+      return (*m_os) << m_prefix << val;
+    }
+
+  private:
+    const char *m_prefix;
+    std::ostream *m_os;
+  };
+
+} // namespace myDetail
+
+static myDetail::StreamPrefixer
     out("[OSVR Video Tracker Calibration] ", std::cout);
-static osvr::server::detail::StreamPrefixer
+static myDetail::StreamPrefixer
     err("[OSVR Video Tracker Calibration] ", std::cerr);
 
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
