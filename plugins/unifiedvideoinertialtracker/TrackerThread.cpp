@@ -24,17 +24,17 @@
 
 // Internal Includes
 #include "TrackerThread.h"
+#include "SpaceTransformations.h"
 #include "TrackedBody.h"
 #include "TrackedBodyIMU.h"
-#include "SpaceTransformations.h"
 
 // Library/third-party includes
-#include <osvr/Util/Finally.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/Finally.h>
 
 // Standard includes
-#include <iostream>
 #include <future>
+#include <iostream>
 
 #define OSVR_TRACKER_THREAD_WRAP_WITH_TRY
 
@@ -65,9 +65,7 @@ namespace vbtracker {
         }
     }
 
-    void TrackerThread::permitStart() {
-        m_startupSignal.set_value();
-    }
+    void TrackerThread::permitStart() { m_startupSignal.set_value(); }
 
     void TrackerThread::threadAction() {
         /// The thread internally is organized around processing video frames,
@@ -76,9 +74,11 @@ namespace vbtracker {
         /// doing what we can asynchronously to also process incoming IMU
         /// messages.
 
-        msg() << "Tracker thread object invoked, waiting for permitStart()." << std::endl;
+        msg() << "Tracker thread object invoked, waiting for permitStart()."
+              << std::endl;
         m_startupSignal.get_future().wait();
-        /// sleep an extra half a second to give everyone else time to get off the starting blocks.
+        /// sleep an extra half a second to give everyone else time to get off
+        /// the starting blocks.
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         msg() << "Tracker thread object entering its main execution loop."
               << std::endl;

@@ -26,9 +26,9 @@
 #define INCLUDED_TrackerThread_h_GUID_6544B03C_4EB4_4B82_77F1_16EF83578C64
 
 // Internal Includes
-#include "TrackingSystem.h"
-#include "ThreadsafeBodyReporting.h"
 #include "CameraParameters.h"
+#include "ThreadsafeBodyReporting.h"
+#include "TrackingSystem.h"
 
 #include "ImageSources/ImageSource.h"
 
@@ -41,15 +41,15 @@
 #include <boost/variant.hpp>
 
 // Standard includes
+#include <chrono>
+#include <condition_variable>
 #include <fstream>
+#include <future>
 #include <iosfwd>
+#include <mutex>
 #include <queue>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <tuple>
-#include <chrono>
-#include <future>
 
 namespace osvr {
 namespace vbtracker {
