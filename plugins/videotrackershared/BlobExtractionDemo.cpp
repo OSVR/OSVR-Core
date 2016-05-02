@@ -48,7 +48,7 @@
 
 namespace osvr {
 namespace vbtracker {
-    static EdgeHoleBasedLedExtractor::Params g_holeExtractorParams{};
+    static EdgeHoleParams g_holeExtractorParams{};
     static BlobParams g_blobParams{};
     void showImage(std::string const &title, cv::Mat const &img,
                    bool showImages = true) {

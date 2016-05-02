@@ -27,7 +27,6 @@
 
 // Internal Includes
 #include "BlobParams.h"
-#include <EdgeHoleBasedLedExtractor.h>
 
 // Library/third-party includes
 // - none
@@ -78,7 +77,7 @@ namespace vbtracker {
         BlobParams blobParams;
 
         /// Parameters specific to the edge hole based LED extraction algorithm.
-        EdgeHoleBasedLedExtractor::Params extractParams;
+        EdgeHoleParams extractParams;
 
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;

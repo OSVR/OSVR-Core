@@ -223,9 +223,8 @@ namespace vbtracker {
         m_sbdParams.minConvexity = p.minConvexity;
     }
 
-    SBDBlobExtractor::SBDBlobExtractor(
-        BlobParams const &blobParams,
-        EdgeHoleBasedLedExtractor::Params const &extParams)
+    SBDBlobExtractor::SBDBlobExtractor(BlobParams const &blobParams,
+                                       EdgeHoleParams const &extParams)
         : m_algo(Algo::EdgeHoleExtractor), m_params(blobParams),
           m_extractor(extParams) {}
 

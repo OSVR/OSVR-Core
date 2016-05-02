@@ -75,6 +75,16 @@ namespace vbtracker {
         int thresholdSteps = 4;
     };
 
+    struct EdgeHoleParams {
+        EdgeHoleParams();
+        int preEdgeDetectionBlurSize;
+        int laplacianKSize;
+        double laplacianScale;
+        bool postEdgeDetectionBlur;
+        int postEdgeDetectionBlurSize;
+        int postEdgeDetectionBlurThreshold;
+    };
+
 } // namespace vbtracker
 } // namespace osvr
 

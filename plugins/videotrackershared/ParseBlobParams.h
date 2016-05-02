@@ -27,7 +27,6 @@
 
 // Internal Includes
 #include <BlobParams.h>
-#include <EdgeHoleBasedLedExtractor.h>
 #include <GetOptionalParameter.h>
 
 // Library/third-party includes
@@ -54,9 +53,8 @@ namespace vbtracker {
         getOptionalParameter(p.thresholdSteps, blob, "thresholdSteps");
     }
 
-    inline void
-    parseEdgeHoleExtractorParams(Json::Value const &config,
-                                 EdgeHoleBasedLedExtractor::Params &p) {
+    inline void parseEdgeHoleExtractorParams(Json::Value const &config,
+                                             EdgeHoleParams &p) {
         getOptionalParameter(p.preEdgeDetectionBlurSize, config,
                              "preEdgeDetectionBlurSize");
         getOptionalParameter(p.laplacianKSize, config, "laplacianKSize");

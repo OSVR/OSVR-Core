@@ -48,7 +48,7 @@ namespace vbtracker {
         /// Construct with BlobParams and EdgeHoleBasedLedExtractor::Params:
         /// uses EdgeHoleBasedLedExtractor.
         SBDBlobExtractor(BlobParams const &blobParams,
-                         EdgeHoleBasedLedExtractor::Params const &extParams);
+                         EdgeHoleParams const &extParams);
         ~SBDBlobExtractor();
         LedMeasurementVec const &extractBlobs(cv::Mat const &grayImage);
 
