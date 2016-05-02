@@ -71,6 +71,14 @@ namespace vbtracker {
         /// For optimization usage.
         bool silent = false;
 
+        /// For recording tuning data - whether we should record the raw blob
+        /// data.
+        bool logRawBlobs = false;
+
+        /// For recording tuning data - whether we should record the data from
+        /// just the usable LEDs each frame after they're associated.
+        bool logUsableLeds = false;
+
         TuningParams tuning;
 
         /// Parameters specific to the blob-detection step of the algorithm

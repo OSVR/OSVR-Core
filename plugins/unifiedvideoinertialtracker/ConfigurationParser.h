@@ -61,6 +61,23 @@ namespace vbtracker {
         }
 
         /// General parameters
+        getOptionalParameter(config.logRawBlobs, root, "logRawBlobs");
+        if (config.logRawBlobs) {
+            std::cout << MESSAGE_PREFIX << PARAMNAME("logRawBlobs")
+                      << " is enabled - existing raw blob data file will be "
+                         "overwritten, and there is a slight chance of "
+                         "performance impacts."
+                      << std::endl;
+        }
+        getOptionalParameter(config.logUsableLeds, root, "logUsableLeds");
+        if (config.logUsableLeds) {
+            std::cout << MESSAGE_PREFIX << PARAMNAME("logUsableLeds")
+                      << " is enabled - existing 'usable LED' data file will "
+                         "be overwritten, and there is a slight chance of "
+                         "performance impacts."
+                      << std::endl;
+        }
+
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
         getOptionalParameter(config.calibrationFile, root, "calibrationFile");
 
