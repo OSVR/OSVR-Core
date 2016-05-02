@@ -221,6 +221,11 @@ namespace vbtracker {
         /// the YZ plane in the +Z direction.
         bool cameraIsForward = true;
 
+        /// Should we permit the whole system to enter Kalman mode? Not doing so
+        /// is usually a bad idea, unless you're doing something special like
+        /// development on the tracker itself...
+        bool permitKalman = true;
+
         ConfigParams();
     };
 } // namespace vbtracker

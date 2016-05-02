@@ -101,6 +101,14 @@ namespace vbtracker {
         std::size_t
         processLedMeasurements(LedMeasurementVec const &undistortedLeds);
 
+        /// Override configured setting, disabling Kalman (normal) operating
+        /// mode.
+        void disableKalman();
+
+        /// Override configured setting, permitting Kalman (normal) operating
+        /// mode.
+        void permitKalman();
+
         /// Update the pose estimate using the updated LEDs - part of the third
         /// phase of tracking.
         bool updatePoseEstimateFromLeds(

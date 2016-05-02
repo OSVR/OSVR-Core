@@ -98,6 +98,7 @@ namespace vbtracker {
                "effects with this plugin.";
 
         /// Kalman-related parameters
+        getOptionalParameter(config.permitKalman, root, "permitKalman");
         getOptionalParameter(config.beaconProcessNoise, root,
                              "beaconProcessNoise");
         getOptionalParameter(config.processNoiseAutocorrelation, root,

@@ -93,7 +93,8 @@ namespace vbtracker {
     };
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
-            : bodyInterface(bodyIface), kalmanEstimator(params) {}
+            : bodyInterface(bodyIface), kalmanEstimator(params),
+              permitKalman(params.permitKalman) {}
         BodyTargetInterface bodyInterface;
         LedGroup leds;
         LedPtrList usableLeds;
@@ -107,6 +108,8 @@ namespace vbtracker {
         TargetHealthEvaluator healthEval;
 
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
+        /// Permit as a purely policy measure
+        bool permitKalman = true;
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
         std::size_t trackingResets = 0;
@@ -295,6 +298,10 @@ namespace vbtracker {
         return usedMeasurements;
     }
 
+    void TrackedBodyTarget::disableKalman() { m_impl->permitKalman = false; }
+
+    void TrackedBodyTarget::permitKalman() { m_impl->permitKalman = true; }
+
     bool TrackedBodyTarget::updatePoseEstimateFromLeds(
         CameraParameters const &camParams,
         osvr::util::time::TimeValue const &tv, BodyState &bodyState,
@@ -309,8 +316,8 @@ namespace vbtracker {
         /// @todo make this state correction less hacky.
         bodyState.position() += getStateCorrection();
 
-        /// @todo put this in the class
-        bool permitKalman = true && validStateAndTime;
+        /// Will we permit Kalman this estimation?
+        bool permitKalman = m_impl->permitKalman && validStateAndTime;
 
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo move state machine logic elsewhere
