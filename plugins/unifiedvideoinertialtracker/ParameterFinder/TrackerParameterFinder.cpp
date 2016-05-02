@@ -153,7 +153,7 @@ int parseParamSetForParamOptimizer(osvr::vbtracker::ParamOptimizerFunc &func,
         std::cerr << "Too many command line arguments!" << std::endl;
         return usage(argv[0]);
     }
-    if (argc == 3) {
+    if (argc > 3) {
         if (std::string(argv[3]) == "--cost") {
             std::cout << "Will run for just cost-only." << std::endl;
             costOnly = true;
