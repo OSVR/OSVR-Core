@@ -43,7 +43,10 @@ namespace vbtracker {
     /// A class performing blob-extraction duties on incoming frames.
     class SBDBlobExtractor {
       public:
-        explicit SBDBlobExtractor(BlobParams const &blobParams);
+        explicit SBDBlobExtractor(
+            BlobParams const &blobParams,
+            EdgeHoleBasedLedExtractor::Params const &extParams =
+                EdgeHoleBasedLedExtractor::Params());
         ~SBDBlobExtractor();
         LedMeasurementVec const &extractBlobs(cv::Mat const &grayImage);
 

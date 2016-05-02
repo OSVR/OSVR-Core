@@ -24,8 +24,8 @@
 
 // Internal Includes
 #include "TrackingSystem_Impl.h"
-#include "TrackingDebugDisplay.h"
 #include "SBDBlobExtractor.h"
+#include "TrackingDebugDisplay.h"
 
 // Library/third-party includes
 // - none
@@ -37,7 +37,8 @@ namespace osvr {
 namespace vbtracker {
 
     TrackingSystem::Impl::Impl(ConfigParams const &params)
-        : blobExtractor(new SBDBlobExtractor(params.blobParams)),
+        : blobExtractor(
+              new SBDBlobExtractor(params.blobParams, params.extractParams)),
           debugDisplay(new TrackingDebugDisplay(params)),
           calib(Eigen::Vector3d(params.cameraPosition), params.cameraIsForward),
           cameraPose(Eigen::Isometry3d::Identity()),

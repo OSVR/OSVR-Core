@@ -193,8 +193,10 @@ namespace vbtracker {
     };
 #endif
 
-    SBDBlobExtractor::SBDBlobExtractor(BlobParams const &blobParams)
-        : m_params(blobParams) {
+    SBDBlobExtractor::SBDBlobExtractor(
+        BlobParams const &blobParams,
+        EdgeHoleBasedLedExtractor::Params const &extParams)
+        : m_params(blobParams), m_extractor(extParams) {
         auto &p = m_params;
         /// Set up blob params
         m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
@@ -262,7 +264,7 @@ namespace vbtracker {
     void SBDBlobExtractor::getKeypoints(cv::Mat const &grayImage) {
 #ifdef OSVR_NEW_BLOB_CODE
 
-		m_latestMeasurements = m_extractor(m_lastGrayImage, m_params);
+        m_latestMeasurements = m_extractor(m_lastGrayImage, m_params);
 
 #else
         m_keyPoints.clear();
@@ -271,18 +273,18 @@ namespace vbtracker {
 
         // Construct a blob detector and find the blobs in the image.
         auto &p = m_params;
-		auto rangeInfo = ImageRangeInfo(grayImage);
+        auto rangeInfo = ImageRangeInfo(grayImage);
         if (rangeInfo.maxVal < p.absoluteMinThreshold) {
             /// empty image, early out!
             return;
         }
-		auto thresholdInfo = ImageThresholdInfo(rangeInfo, p);
+        auto thresholdInfo = ImageThresholdInfo(rangeInfo, p);
 
         // 0.3 LERP between min and max as the min threshold, but
         // don't let really dim frames confuse us.
         m_sbdParams.minThreshold = thresholdInfo.minThreshold;
         m_sbdParams.maxThreshold = thresholdInfo.maxThreshold;
-		m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
+        m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
 
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
@@ -311,9 +313,9 @@ namespace vbtracker {
 #endif
     }
 
-    cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {	
+    cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {
 #ifdef OSVR_NEW_BLOB_CODE
-		return m_extractor.getEdgeDetectedImage().clone();
+        return m_extractor.getEdgeDetectedImage().clone();
 #else
         // Fake the thresholded image to give an idea of what the
         // blob detector is doing.
@@ -332,7 +334,7 @@ namespace vbtracker {
             cv::addWeighted(ret, 0.5, temp, 0.5, 0, tempOut);
             ret = tempOut;
         }
-		
+
         return ret;
 #endif
     }
@@ -346,16 +348,13 @@ namespace vbtracker {
 
     cv::Mat SBDBlobExtractor::generateDebugBlobImage() const {
         cv::Mat ret;
-        cv::Mat tempColor;
-		//tempColor.create(m_lastGrayImage.size(), CV_8UC3);
-        std::cout << "depth: " << m_lastGrayImage.depth()
-                  << " channels: " << m_lastGrayImage.channels() << std::endl;
-        cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
 #ifdef OSVR_NEW_BLOB_CODE
-		// Draw outlines and centers of detected LEDs in blue.
-        ret = drawSingleColoredContours(tempColor, m_extractor.getContours(),
-                                        cv::Scalar(255, 0, 0));
+        // Draw outlines and centers of detected LEDs in blue.
+        ret = drawSingleColoredContours(
+            m_lastGrayImage, m_extractor.getContours(), cv::Scalar(255, 0, 0));
 #else
+        cv::Mat tempColor;
+		cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
         // Draw detected blobs as blue circles.
         cv::drawKeypoints(tempColor, m_keyPoints, ret, cv::Scalar(255, 0, 0),
                           cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);

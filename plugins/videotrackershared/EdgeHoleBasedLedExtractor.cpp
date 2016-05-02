@@ -36,14 +36,20 @@
 
 namespace osvr {
 namespace vbtracker {
+    static const auto PREFIX = "[EdgeHoleBasedLedExtractor] ";
     EdgeHoleBasedLedExtractor::Params::Params()
-        : preEdgeDetectionBlurSize(3), laplacianKSize(5), laplacianScale(1.5),
-          postEdgeDetectionBlur(false), postEdgeDetectionBlurSize(3),
-          postEdgeDetectionBlurThreshold(40) {}
+        : preEdgeDetectionBlurSize(3), laplacianKSize(3), laplacianScale(5),
+          postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(3),
+          postEdgeDetectionBlurThreshold(32) {}
 
     EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
         Params const &extractorParams)
-        : extParams_(extractorParams) {}
+        : extParams_(extractorParams) {
+#if 0
+        std::cout << PREFIX << "laplacianKSize: " << extParams_.laplacianKSize
+                  << std::endl;
+#endif
+    }
 
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
