@@ -28,6 +28,7 @@
 #include "cvUtils.h"
 
 // Library/third-party includes
+#include <boost/assert.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -193,10 +194,9 @@ namespace vbtracker {
     };
 #endif
 
-    SBDBlobExtractor::SBDBlobExtractor(
-        BlobParams const &blobParams,
-        EdgeHoleBasedLedExtractor::Params const &extParams)
-        : m_params(blobParams), m_extractor(extParams) {
+    SBDBlobExtractor::SBDBlobExtractor(BlobParams const &blobParams)
+        : m_algo(Algo::SimpleBlobDetector), m_params(blobParams) {
+
         auto &p = m_params;
         /// Set up blob params
         m_sbdParams.minDistBetweenBlobs = p.minDistBetweenBlobs;
@@ -223,6 +223,12 @@ namespace vbtracker {
         m_sbdParams.minConvexity = p.minConvexity;
     }
 
+    SBDBlobExtractor::SBDBlobExtractor(
+        BlobParams const &blobParams,
+        EdgeHoleBasedLedExtractor::Params const &extParams)
+        : m_algo(Algo::EdgeHoleExtractor), m_params(blobParams),
+          m_extractor(extParams) {}
+
     SBDBlobExtractor::~SBDBlobExtractor() {
         /// Needed here where KeypointDetailer is defined.
     }
@@ -248,43 +254,42 @@ namespace vbtracker {
             m_keypointDetailer->augmentKeypoints(thresholded, m_keyPoints);
 #endif
         cv::Size sz = grayImage.size();
-#ifndef OSVR_NEW_BLOB_CODE
-        /// Use the LedMeasurement constructor to do the conversion from
-        /// keypoint to measurement right now.
-        m_latestMeasurements.resize(m_keyPoints.size());
-        std::transform(begin(m_keyPoints), end(m_keyPoints),
-                       begin(m_latestMeasurements),
-                       [sz](cv::KeyPoint const &kp) {
-                           return LedMeasurement{kp, sz};
-                       });
-#endif
+        if (Algo::SimpleBlobDetector == m_algo) {
+            /// Use the LedMeasurement constructor to do the conversion from
+            /// keypoint to measurement right now.
+            m_latestMeasurements.resize(m_keyPoints.size());
+            std::transform(begin(m_keyPoints), end(m_keyPoints),
+                           begin(m_latestMeasurements),
+                           [sz](cv::KeyPoint const &kp) {
+                               return LedMeasurement{kp, sz};
+                           });
+        }
         return m_latestMeasurements;
     }
 
     void SBDBlobExtractor::getKeypoints(cv::Mat const &grayImage) {
-#ifdef OSVR_NEW_BLOB_CODE
+        if (Algo::EdgeHoleExtractor == m_algo) {
+            m_latestMeasurements = m_extractor(m_lastGrayImage, m_params);
 
-        m_latestMeasurements = m_extractor(m_lastGrayImage, m_params);
+        } else if (Algo::SimpleBlobDetector == m_algo) {
+            m_keyPoints.clear();
+            //================================================================
+            // Tracking the points
 
-#else
-        m_keyPoints.clear();
-        //================================================================
-        // Tracking the points
+            // Construct a blob detector and find the blobs in the image.
+            auto &p = m_params;
+            auto rangeInfo = ImageRangeInfo(grayImage);
+            if (rangeInfo.maxVal < p.absoluteMinThreshold) {
+                /// empty image, early out!
+                return;
+            }
+            auto thresholdInfo = ImageThresholdInfo(rangeInfo, p);
 
-        // Construct a blob detector and find the blobs in the image.
-        auto &p = m_params;
-        auto rangeInfo = ImageRangeInfo(grayImage);
-        if (rangeInfo.maxVal < p.absoluteMinThreshold) {
-            /// empty image, early out!
-            return;
-        }
-        auto thresholdInfo = ImageThresholdInfo(rangeInfo, p);
-
-        // 0.3 LERP between min and max as the min threshold, but
-        // don't let really dim frames confuse us.
-        m_sbdParams.minThreshold = thresholdInfo.minThreshold;
-        m_sbdParams.maxThreshold = thresholdInfo.maxThreshold;
-        m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
+            // 0.3 LERP between min and max as the min threshold, but
+            // don't let really dim frames confuse us.
+            m_sbdParams.minThreshold = thresholdInfo.minThreshold;
+            m_sbdParams.maxThreshold = thresholdInfo.maxThreshold;
+            m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
 
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
@@ -292,31 +297,33 @@ namespace vbtracker {
 /// when we're so close that we can't view at least four in the
 /// camera.
 #if CV_MAJOR_VERSION == 2
-        cv::Ptr<cv::SimpleBlobDetector> detector =
-            new cv::SimpleBlobDetector(m_sbdParams);
+            cv::Ptr<cv::SimpleBlobDetector> detector =
+                new cv::SimpleBlobDetector(m_sbdParams);
 #elif CV_MAJOR_VERSION == 3
-        auto detector = cv::SimpleBlobDetector::create(m_sbdParams);
+            auto detector = cv::SimpleBlobDetector::create(m_sbdParams);
 #else
 #error "Unrecognized OpenCV version!"
 #endif
-        detector->detect(grayImage, m_keyPoints);
+            detector->detect(grayImage, m_keyPoints);
 
-// @todo: Consider computing the center of mass of a dilated bounding
-// rectangle around each keypoint to produce a more precise subpixel
-// localization of each LED.  The moments() function may be helpful
-// with this.
+            // @todo: Consider computing the center of mass of a dilated
+            // bounding
+            // rectangle around each keypoint to produce a more precise subpixel
+            // localization of each LED.  The moments() function may be helpful
+            // with this.
 
-// @todo: Estimate the summed brightness of each blob so that we can
-// detect when they are getting brighter and dimmer.  Pass this as
-// the brightness parameter to the Led class when adding a new one
-// or augmenting with a new frame.
-#endif
+            // @todo: Estimate the summed brightness of each blob so that we can
+            // detect when they are getting brighter and dimmer.  Pass this as
+            // the brightness parameter to the Led class when adding a new one
+            // or augmenting with a new frame.
+        }
     }
 
     cv::Mat SBDBlobExtractor::generateDebugThresholdImage() const {
-#ifdef OSVR_NEW_BLOB_CODE
-        return m_extractor.getEdgeDetectedImage().clone();
-#else
+        if (Algo::EdgeHoleExtractor == m_algo) {
+            return m_extractor.getEdgeDetectedImage().clone();
+        }
+        BOOST_ASSERT(Algo::SimpleBlobDetector == m_algo);
         // Fake the thresholded image to give an idea of what the
         // blob detector is doing.
         auto getCurrentThresh = [&](int i) {
@@ -336,7 +343,6 @@ namespace vbtracker {
         }
 
         return ret;
-#endif
     }
     cv::Mat const &SBDBlobExtractor::getDebugThresholdImage() {
         if (m_debugThresholdImageDirty) {
@@ -348,17 +354,20 @@ namespace vbtracker {
 
     cv::Mat SBDBlobExtractor::generateDebugBlobImage() const {
         cv::Mat ret;
-#ifdef OSVR_NEW_BLOB_CODE
-        // Draw outlines and centers of detected LEDs in blue.
-        ret = drawSingleColoredContours(
-            m_lastGrayImage, m_extractor.getContours(), cv::Scalar(255, 0, 0));
-#else
-        cv::Mat tempColor;
-		cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
-        // Draw detected blobs as blue circles.
-        cv::drawKeypoints(tempColor, m_keyPoints, ret, cv::Scalar(255, 0, 0),
-                          cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-#endif
+        if (Algo::EdgeHoleExtractor == m_algo) {
+            // Draw outlines and centers of detected LEDs in blue.
+            ret = drawSingleColoredContours(m_lastGrayImage,
+                                            m_extractor.getContours(),
+                                            cv::Scalar(255, 0, 0));
+
+        } else if (Algo::SimpleBlobDetector == m_algo) {
+            cv::Mat tempColor;
+            cv::cvtColor(m_lastGrayImage, tempColor, CV_GRAY2BGR);
+            // Draw detected blobs as blue circles.
+            cv::drawKeypoints(tempColor, m_keyPoints, ret,
+                              cv::Scalar(255, 0, 0),
+                              cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+        }
         return ret;
     }
     cv::Mat const &SBDBlobExtractor::getDebugBlobImage() {

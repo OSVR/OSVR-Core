@@ -43,13 +43,21 @@ namespace vbtracker {
     /// A class performing blob-extraction duties on incoming frames.
     class SBDBlobExtractor {
       public:
-        explicit SBDBlobExtractor(
-            BlobParams const &blobParams,
-            EdgeHoleBasedLedExtractor::Params const &extParams =
-                EdgeHoleBasedLedExtractor::Params());
+        /// Construct with just BlobParams: uses simple blob detector.
+        explicit SBDBlobExtractor(BlobParams const &blobParams);
+        /// Construct with BlobParams and EdgeHoleBasedLedExtractor::Params:
+        /// uses EdgeHoleBasedLedExtractor.
+        SBDBlobExtractor(BlobParams const &blobParams,
+                         EdgeHoleBasedLedExtractor::Params const &extParams);
         ~SBDBlobExtractor();
         LedMeasurementVec const &extractBlobs(cv::Mat const &grayImage);
 
+        enum class Algo { SimpleBlobDetector, EdgeHoleExtractor };
+
+        Algo getAlgo() const { return m_algo; }
+
+        /// In the case of the EdgeHoleExtractor, this is actually the edge
+        /// detection image.
         cv::Mat const &getDebugThresholdImage();
 
         cv::Mat const &getDebugBlobImage();
@@ -61,6 +69,7 @@ namespace vbtracker {
         cv::Mat generateDebugThresholdImage() const;
         cv::Mat generateDebugBlobImage() const;
 
+        Algo m_algo;
         BlobParams m_params;
         EdgeHoleBasedLedExtractor m_extractor;
         cv::SimpleBlobDetector::Params m_sbdParams;
