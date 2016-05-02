@@ -127,6 +127,10 @@ namespace vbtracker {
         /// Blob-detection parameters
         if (root.isMember("blobParams")) {
             parseBlobParams(root["blobParams"], config.blobParams);
+
+            // We'll just combine them into one JSON object here.
+            parseEdgeHoleExtractorParams(root["blobParams"],
+                                         config.extractParams);
         }
 
         /// IMU-related parameters
