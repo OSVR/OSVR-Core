@@ -105,7 +105,7 @@ namespace detail {
         OSVR_UTIL_EXPORT LineLogger &operator<<(char what);
 
         template <typename T>
-        OSVR_UTIL_EXPORT LineLogger &operator<<(T &&what)
+        LineLogger &operator<<(T &&what)
         {
             std::ostringstream ss;
             ss.operator<<(std::forward<T>(what));
