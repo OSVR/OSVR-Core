@@ -65,35 +65,58 @@ namespace log {
         OSVR_UTIL_EXPORT LogLevel getLogLevel() const;
         OSVR_UTIL_EXPORT void setLogLevel(LogLevel);
 
-        // logger.info(cppformat_string, arg1, arg2, arg3, ...) call style
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger trace(const char *fmt,
-                                                  Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger debug(const char *fmt,
-                                                  Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger info(const char *fmt,
-                                                 Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger notice(const char *fmt,
-                                                   Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger warn(const char *fmt,
-                                                 Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger error(const char *fmt,
-                                                  Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger critical(const char *fmt,
-                                                     Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger alert(const char *fmt,
-                                                  Args &&... args);
-        template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger emerg(const char *fmt,
-                                                  Args &&... args);
+#if 0
+        // These functions are not yet implemented because they expose the
+        // underlying spdlog classes.
 
+        // Logger.info(cppformat_string, arg1, arg2, arg3, ...) call style
+        template <typename... Args> detail::LineLogger Logger::trace(const char* fmt, Args&&... args)
+        {
+            return logger_->trace(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::debug(const char* fmt, Args&&... args)
+        {
+            return logger_->debug(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::info(const char* fmt, Args&&... args)
+        {
+            return logger_->info(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::notice(const char* fmt, Args&&... args)
+        {
+            return logger_->notice(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::warn(const char* fmt, Args&&... args)
+        {
+            return logger_->warn(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::error(const char* fmt, Args&&... args)
+        {
+            return logger_->error(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::critical(const char* fmt, Args&&... args)
+        {
+            return logger_->critical(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::alert(const char* fmt, Args&&... args)
+        {
+            return logger_->alert(fmt, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args> detail::LineLogger Logger::emerg(const char* fmt, Args&&... args)
+        {
+            return logger_->emerg(fmt, std::forward<Args>(args)...);
+        }
+#endif
+
+        // logger.info(msg) ".." call style
         OSVR_UTIL_EXPORT detail::LineLogger trace(const char *fmt);
         OSVR_UTIL_EXPORT detail::LineLogger debug(const char *fmt);
         OSVR_UTIL_EXPORT detail::LineLogger info(const char *fmt);
@@ -104,23 +127,56 @@ namespace log {
         OSVR_UTIL_EXPORT detail::LineLogger alert(const char *fmt);
         OSVR_UTIL_EXPORT detail::LineLogger emerg(const char *fmt);
 
+#if 0
+        // These functions are not yet implemented because they expose the
+        // underlying spdlog classes.
+
         // logger.info(msg) << ".." call style
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger trace(T &&msg);
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger debug(T &&msg);
-        template <typename T> OSVR_UTIL_EXPORT detail::LineLogger info(T &&msg);
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger notice(T &&msg);
-        template <typename T> OSVR_UTIL_EXPORT detail::LineLogger warn(T &&msg);
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger error(T &&msg);
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger critical(T &&msg);
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger alert(T &&msg);
-        template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger emerg(T &&msg);
+        template <typename T> detail::LineLogger trace(T&& msg)
+        {
+            return logger_->trace(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger debug(T&& msg)
+        {
+            return logger_->debug(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger info(T&& msg)
+        {
+            return logger_->info(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger notice(T&& msg)
+        {
+            return logger_->notice(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger warn(T&& msg)
+        {
+            return logger_->warn(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger error(T&& msg)
+        {
+            return logger_->error(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger critical(T&& msg)
+        {
+            return logger_->critical(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger alert(T&& msg)
+        {
+            return logger_->alert(std::forward<T>(msg));
+        }
+
+        template <typename T> detail::LineLogger emerg(T&& msg)
+        {
+            return logger_->emerg(std::forward<T>(msg));
+        }
+#endif
 
         // logger.info() << ".." call  style
         OSVR_UTIL_EXPORT detail::LineLogger trace();
@@ -137,7 +193,29 @@ namespace log {
         // style
         template <typename... Args>
         OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level, const char *fmt,
-                                                Args &&... args);
+                                                Args &&... args)
+        {
+            switch (level) {
+            case LogLevel::trace:
+                return trace(fmt, std::forward<Args>(args)...);
+            case LogLevel::debug:
+                return debug(fmt, std::forward<Args>(args)...);
+            case LogLevel::info:
+                return info(fmt, std::forward<Args>(args)...);
+            case LogLevel::notice:
+                return notice(fmt, std::forward<Args>(args)...);
+            case LogLevel::warn:
+                return warn(fmt, std::forward<Args>(args)...);
+            case LogLevel::err:
+                return error(fmt, std::forward<Args>(args)...);
+            case LogLevel::critical:
+                return critical(fmt, std::forward<Args>(args)...);
+            case LogLevel::alert:
+                return alert(fmt, std::forward<Args>(args)...);
+            case LogLevel::emerg:
+                return emerg(fmt, std::forward<Args>(args)...);
+            }
+        }
 
         // logger.log(log_level, msg) << ".." call style
         OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level,
@@ -145,16 +223,48 @@ namespace log {
 
         // logger.log(log_level, msg) << ".." call style
         template <typename T>
-        OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level, T &&msg);
+        detail::LineLogger log(LogLevel level, T&& msg)
+        {
+            switch (level) {
+            case LogLevel::trace:
+                return trace(std::forward<T>(msg));
+            case LogLevel::debug:
+                return debug(std::forward<T>(msg));
+            case LogLevel::info:
+                return info(std::forward<T>(msg));
+            case LogLevel::notice:
+                return notice(std::forward<T>(msg));
+            case LogLevel::warn:
+                return warn(std::forward<T>(msg));
+            case LogLevel::err:
+                return error(std::forward<T>(msg));
+            case LogLevel::critical:
+                return critical(std::forward<T>(msg));
+            case LogLevel::alert:
+                return alert(std::forward<T>(msg));
+            case LogLevel::emerg:
+                return emerg(std::forward<T>(msg));
+            }
+
+            return info(std::forward<T>(msg));
+        }
 
         // logger.log(log_level) << ".." call  style
         OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level);
 
+#if 0
+        // These functions are not yet implemented because they expose the
+        // underlying spdlog classes.
+
         // Create log message with the given level, no matter what is the actual
         // logger's level
         template <typename... Args>
-        OSVR_UTIL_EXPORT detail::LineLogger
-        force_log(LogLevel level, const char *fmt, Args &&... args);
+        detail::LineLogger force_log(LogLevel level, const char* fmt, Args&&... args)
+        {
+            auto lvl = static_cast<spdlog::level::level_enum>(level);
+            return logger_->force_log(lvl, fmt, std::forward<Args>(args)...);
+        }
+#endif
 
         OSVR_UTIL_EXPORT virtual void flush();
 
