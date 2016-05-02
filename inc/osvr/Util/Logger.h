@@ -189,6 +189,10 @@ namespace log {
         OSVR_UTIL_EXPORT detail::LineLogger alert();
         OSVR_UTIL_EXPORT detail::LineLogger emerg();
 
+#if 0
+        // These functions are not yet implemented because they expose the
+        // underlying spdlog classes.
+
         // Logger.log(log_level, cppformat_string, arg1, arg2, arg3, ...) call
         // style
         template <typename... Args>
@@ -216,10 +220,15 @@ namespace log {
                 return emerg(fmt, std::forward<Args>(args)...);
             }
         }
+#endif
 
         // logger.log(log_level, msg) << ".." call style
         OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level,
                                                 const char *msg);
+
+#if 0
+        // These functions are not yet implemented because they expose the
+        // underlying spdlog classes.
 
         // logger.log(log_level, msg) << ".." call style
         template <typename T>
@@ -248,6 +257,7 @@ namespace log {
 
             return info(std::forward<T>(msg));
         }
+#endif
 
         // logger.log(log_level) << ".." call  style
         OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level);
