@@ -36,6 +36,7 @@
 // Standard includes
 #include <memory>       // for std::unique_ptr
 #include <string>       // for std::string
+#include <sstream>      // for std::ostringstream
 
 // Forward declaration
 namespace spdlog {
@@ -91,7 +92,7 @@ namespace detail {
          */
         //@{
         OSVR_UTIL_EXPORT LineLogger &operator<<(const char *what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(const std::string &what);
+        OSVR_UTIL_EXPORT LineLogger &operator<<(const std::string what);
         OSVR_UTIL_EXPORT LineLogger &operator<<(int what);
         OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned int what);
         OSVR_UTIL_EXPORT LineLogger &operator<<(long what);
@@ -103,7 +104,15 @@ namespace detail {
         OSVR_UTIL_EXPORT LineLogger &operator<<(float what);
         OSVR_UTIL_EXPORT LineLogger &operator<<(char what);
 
-        template <typename T> OSVR_UTIL_EXPORT LineLogger &operator<<(T &&what);
+        template <typename T>
+        OSVR_UTIL_EXPORT LineLogger &operator<<(T &&what)
+        {
+            std::ostringstream ss;
+            ss.operator<<(std::forward<T>(what));
+            this->operator<<(ss.str());
+            return *this;
+        }
+
         //@}
 
         OSVR_UTIL_EXPORT void disable();
