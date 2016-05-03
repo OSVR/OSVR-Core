@@ -82,7 +82,8 @@ namespace vbtracker {
                                  const std::size_t numBeacons,
                                  float blobMoveThresh)
             : leds_(leds), measurements_(measurements), ledsEnd_(end(leds_)),
-              numBeacons_(numBeacons_), blobMoveThreshFactor_(blobMoveThresh) {}
+              numBeacons_(numBeacons_), blobMoveThreshFactor_(blobMoveThresh),
+              maxMatches_(std::min(leds_.size(), measurements_.size())) {}
 
         using LedAndMeasurement = std::pair<Led &, LedMeasurement const &>;
 
@@ -198,6 +199,9 @@ namespace vbtracker {
                           << std::endl;
                 return false;
             }
+            /// Un-count the match.
+            numMatches_--;
+            /// Restore the entry in the refs table.
             measRefs_[idx] = &(*it);
             return true;
         }
@@ -207,6 +211,11 @@ namespace vbtracker {
         /// runs out of entries.
         bool hasMoreMatches() {
             checkAndThrowNotPopulated("hasMoreMatches()");
+            if (numMatches_ == maxMatches_) {
+                /// Early out:
+                /// We've already matched up all of one type or another.
+                return false;
+            }
             discardInvalidEntries();
             if (empty()) {
                 return false;
@@ -233,6 +242,8 @@ namespace vbtracker {
             markTopConsumed();
             /// Now, remove this entry from the heap.
             popHeap();
+            /// Count it
+            numMatches_++;
             /// and return the reward.
             return LedAndMeasurement(topLed, topMeas);
         }
@@ -474,10 +485,12 @@ namespace vbtracker {
         const LedIter ledsEnd_;
         const std::size_t numBeacons_;
         const float blobMoveThreshFactor_;
+        const size_type maxMatches_;
         bool populated_ = false;
         std::vector<LedIter> ledRefs_;
         std::vector<MeasPtr> measRefs_;
         HeapType distanceHeap_;
+        size_type numMatches_ = 0;
     };
 
 } // namespace vbtracker
