@@ -249,6 +249,7 @@ namespace vbtracker {
         static const auto HEAP_PREFIX = "[ASSIGN HEAP] ";
         bool verbose = false;
         if (getParams().extraVerbose) {
+            // if (getParams().debug) {
             static ::util::Stride assignStride(157);
             assignStride++;
             if (assignStride) {
