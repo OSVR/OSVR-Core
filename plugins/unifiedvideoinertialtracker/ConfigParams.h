@@ -202,7 +202,8 @@ namespace vbtracker {
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty = 25.86138871170531;
+        double brightLedVariancePenalty =
+            26.31624913488417; // 35.86138871170531;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the

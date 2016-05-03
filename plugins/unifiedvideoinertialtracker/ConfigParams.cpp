@@ -58,6 +58,6 @@ namespace vbtracker {
         cameraPosition[2] = -0.5;
     }
 
-    TuningParams::TuningParams() : noveltyPenaltyBase(2.173520922781369) {}
+    TuningParams::TuningParams() : noveltyPenaltyBase(1.282636090487287) {}
 } // namespace vbtracker
 } // namespace osvr
