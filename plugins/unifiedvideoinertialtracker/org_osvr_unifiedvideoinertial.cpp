@@ -92,7 +92,10 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
                                 TrackingSystemPtr &&trackingSystem)
         : m_source(std::move(source)),
           m_trackingSystem(std::move(trackingSystem)),
-          m_additionalPrediction(params.additionalPrediction) {
+          m_additionalPrediction(params.additionalPrediction),
+          m_camUsecOffset(params.cameraMicrosecondsOffset),
+          m_oriUsecOffset(params.imu.orientationMicrosecondsOffset),
+          m_angvelUsecOffset(params.imu.angularVelocityMicrosecondsOffset) {
         if (params.numThreads > 0) {
             // Set the number of threads for OpenCV to use.
             cv::setNumThreads(params.numThreads);
@@ -157,11 +160,23 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     static void oriCallback(void *userdata, const OSVR_TimeValue *timestamp,
                             const OSVR_OrientationReport *report) {
         auto &self = *static_cast<UnifiedVideoInertialTracker *>(userdata);
-        self.handleData(*timestamp, *report);
+        OSVR_TimeValue tv = *timestamp;
+        if (self.m_oriUsecOffset != 0) {
+            // apply offset, if non-zero.
+            const OSVR_TimeValue offset{0, self.m_oriUsecOffset};
+            osvrTimeValueSum(&tv, &offset);
+        }
+        self.handleData(tv, *report);
     }
     static void angVelCallback(void *userdata, const OSVR_TimeValue *timestamp,
                                const OSVR_AngularVelocityReport *report) {
         auto &self = *static_cast<UnifiedVideoInertialTracker *>(userdata);
+        OSVR_TimeValue tv = *timestamp;
+        if (self.m_angvelUsecOffset != 0) {
+            // apply offset, if non-zero.
+            const OSVR_TimeValue offset{0, self.m_angvelUsecOffset};
+            osvrTimeValueSum(&tv, &offset);
+        }
         self.handleData(*timestamp, *report);
     }
 
@@ -190,7 +205,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         std::cout << "Starting the tracker thread..." << std::endl;
         m_trackerThreadManager.reset(new TrackerThread(
             *m_trackingSystem, *m_source, m_bodyReportingVector,
-            osvr::vbtracker::getHDKCameraParameters()));
+            osvr::vbtracker::getHDKCameraParameters(), m_camUsecOffset));
 
         /// This will start the thread, but it won't enter its full main loop
         /// until we call permitStart()
@@ -226,6 +241,9 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     /// @todo kind-of assumes there's only one body.
     TrackedBodyIMU *m_imu = nullptr;
     const double m_additionalPrediction;
+    const std::int32_t m_camUsecOffset = 0;
+    const std::int32_t m_oriUsecOffset = 0;
+    const std::int32_t m_angvelUsecOffset = 0;
     BodyReportingVector m_bodyReportingVector;
     std::unique_ptr<TrackerThread> m_trackerThreadManager;
     bool m_threadLoopStarted = false;

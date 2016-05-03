@@ -35,7 +35,7 @@
 #include <json/value.h>
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -91,6 +91,8 @@ namespace vbtracker {
         getOptionalParameter(config.blobsKeepIdentity, root,
                              "blobsKeepIdentity");
         getOptionalParameter(config.numThreads, root, "numThreads");
+        getOptionalParameter(config.cameraMicrosecondsOffset, root,
+                             "cameraMicrosecondsOffset");
 #if 0
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
@@ -159,10 +161,14 @@ namespace vbtracker {
                                  "useOrientation");
             getOptionalParameter(config.imu.orientationVariance, imu,
                                  "orientationVariance");
+            getOptionalParameter(config.imu.orientationMicrosecondsOffset, imu,
+                                 "orientationMicrosecondsOffset");
             getOptionalParameter(config.imu.useAngularVelocity, imu,
                                  "useAngularVelocity");
             getOptionalParameter(config.imu.angularVelocityVariance, imu,
                                  "angularVelocityVariance");
+            getOptionalParameter(config.imu.angularVelocityMicrosecondsOffset,
+                                 imu, "angularVelocityMicrosecondsOffset");
         }
 
         return config;

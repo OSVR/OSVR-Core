@@ -49,11 +49,15 @@ namespace vbtracker {
         /// units: rad^2
         double orientationVariance = 1.0e-6;
 
+        std::int32_t orientationMicrosecondsOffset = 0;
+
         /// Should angular velocity reports be used once calibration completes?
         bool useAngularVelocity = true;
 
         /// units: (rad/sec)^2
         double angularVelocityVariance = 1.0e-2;
+
+        std::int32_t angularVelocityMicrosecondsOffset = 0;
     };
 
     struct TuningParams {
@@ -232,6 +236,9 @@ namespace vbtracker {
         /// is usually a bad idea, unless you're doing something special like
         /// development on the tracker itself...
         bool permitKalman = true;
+
+        /// Time offset for the camera timestamp, in microseconds.
+        std::int32_t cameraMicrosecondsOffset = 0;
 
         ConfigParams();
     };

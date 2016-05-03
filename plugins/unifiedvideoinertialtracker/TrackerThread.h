@@ -43,6 +43,7 @@
 // Standard includes
 #include <chrono>
 #include <condition_variable>
+#include <cstdint>
 #include <fstream>
 #include <future>
 #include <iosfwd>
@@ -68,7 +69,8 @@ namespace vbtracker {
       public:
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
                       BodyReportingVector &reportingVec,
-                      CameraParameters const &camParams);
+                      CameraParameters const &camParams,
+                      std::int32_t cameraUsecOffset = 0);
         ~TrackerThread();
         /// Thread function-call operator: should be invoked by a lambda in a
         /// dedicated thread.
@@ -121,6 +123,7 @@ namespace vbtracker {
         ImageSource &m_cam;
         BodyReportingVector &m_reportingVec;
         CameraParameters m_camParams;
+        const std::int32_t m_cameraUsecOffset = 0;
 
         using our_clock = std::chrono::steady_clock;
         boost::optional<our_clock::time_point> m_nextCameraPoseReport;

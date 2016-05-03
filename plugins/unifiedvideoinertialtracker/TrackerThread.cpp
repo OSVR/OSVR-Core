@@ -43,9 +43,11 @@ namespace vbtracker {
     TrackerThread::TrackerThread(TrackingSystem &trackingSystem,
                                  ImageSource &imageSource,
                                  BodyReportingVector &reportingVec,
-                                 CameraParameters const &camParams)
+                                 CameraParameters const &camParams,
+                                 std::int32_t cameraUsecOffset)
         : m_trackingSystem(trackingSystem), m_cam(imageSource),
           m_reportingVec(reportingVec), m_camParams(camParams),
+          m_cameraUsecOffset(cameraUsecOffset),
           m_logBlobs(m_trackingSystem.getParams().logRawBlobs) {
         msg() << "Tracker thread object created." << std::endl;
 
@@ -164,6 +166,11 @@ namespace vbtracker {
         /// @todo backdate to account for image transfer image, exposure
         /// time, etc.
         m_triggerTime = util::time::getNow();
+        if (m_cameraUsecOffset != 0) {
+            // apply offset, if non-zero.
+            const util::time::TimeValue offset{0, m_cameraUsecOffset};
+            osvrTimeValueSum(&m_triggerTime, &offset);
+        }
 
         /// Launch an asynchronous task to perform the image retrieval and
         /// initial image processing.
