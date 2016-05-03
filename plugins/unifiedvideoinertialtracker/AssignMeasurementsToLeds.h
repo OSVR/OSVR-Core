@@ -347,7 +347,7 @@ namespace vbtracker {
             if (squaredDist < distThreshSquared) {
                 // If we're within the threshold, let's push this candidate on
                 // the vector that will be turned into a heap.
-                distanceHeap_.emplace_back(ledIdx, measIdx, distThreshSquared);
+                distanceHeap_.emplace_back(ledIdx, measIdx, squaredDist);
             }
         }
         LedIter getTopLed() const {
