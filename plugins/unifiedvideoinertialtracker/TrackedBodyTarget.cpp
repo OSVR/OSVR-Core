@@ -248,7 +248,7 @@ namespace vbtracker {
         assignment.populateStructures();
         static const auto HEAP_PREFIX = "[ASSIGN HEAP] ";
         bool verbose = false;
-        if (getParams().debug) {
+        if (getParams().extraVerbose) {
             static ::util::Stride assignStride(157);
             assignStride++;
             if (assignStride) {
@@ -262,11 +262,15 @@ namespace vbtracker {
                       << assignment.heapSizeFraction() << ")" << std::endl;
         }
         while (assignment.hasMoreMatches()) {
-            auto ledAndMeasurement = assignment.getMatch(false);
+            auto ledAndMeasurement = assignment.getMatch();
             auto &led = ledAndMeasurement.first;
             auto &meas = ledAndMeasurement.second;
             led.addMeasurement(meas, blobsKeepIdentity);
             if (handleOutOfRangeIds(led, m_numBeacons)) {
+                /// For some reason, filtering in that measurement caused an LED
+                /// object to go bad. The above function wiped the LED object,
+                /// but let's undo the match and usage of the measurement in
+                /// case it was someone else's.
                 auto success = assignment.resumbitMeasurement(meas);
                 std::cerr << "ERROR: We just got a faulty one: filtering in "
                              "measurement from "
@@ -275,23 +279,31 @@ namespace vbtracker {
                           << (success ? "could" : "could NOT")
                           << " be resubmitted successfully\n";
             }
-#if 0
-            auto discarded = assignment.discardInvalidEntries();
-            if (false) {
-                std::cout << HEAP_PREFIX << "Discarded " << discarded
-                          << " entries to get to the next valid one."
-                          << std::endl;
+        }
+        if (verbose) {
+            const auto numUnclaimedLedObjects =
+                assignment.numUnclaimedLedObjects();
+            const auto numUnclaimedMeasurements =
+                assignment.numUnclaimedMeasurements();
+            const auto usedMeasurements =
+                numMeasurements - numUnclaimedMeasurements;
+            if (usedMeasurements != assignment.numCompletedMatches()) {
+                std::cout
+                    << HEAP_PREFIX
+                    << "Error: numMeasurements - numUnclaimedMeasurements = "
+                    << usedMeasurements << " but object reports "
+                    << assignment.numCompletedMatches() << " matches!\n";
             }
-#endif
+            std::cout
+                << HEAP_PREFIX
+                << "Matched: " << assignment.numCompletedMatches()
+                << "\tUnclaimed Meas: " << assignment.numUnclaimedMeasurements()
+                << "\tUnclaimed LED: " << assignment.numUnclaimedLedObjects()
+                /// this is how many elements the match-count early-out saved us
+                << "\tRemaining: " << assignment.size() << "\n";
         }
 
-        const auto numUnclaimedLedObjects = assignment.numUnclaimedLedObjects();
         assignment.eraseUnclaimedLedObjects(verbose);
-
-        const auto numUnclaimedMeasurements =
-            assignment.numUnclaimedMeasurements();
-        const auto usedMeasurements =
-            numMeasurements - numUnclaimedMeasurements;
 
         // If we have any blobs that have not been associated with an
         // LED, then we add a new LED for each of them.
@@ -300,12 +312,7 @@ namespace vbtracker {
         assignment.forEachUnclaimedMeasurement([&](LedMeasurement const &meas) {
             myLeds.emplace_back(m_impl->identifier.get(), meas);
         });
-        if (verbose) {
-            std::cout << HEAP_PREFIX << "Matched: " << usedMeasurements
-                      << "\tUnclaimed Meas: " << numUnclaimedMeasurements
-                      << "\tUnclaimed LED: " << numUnclaimedLedObjects << "\n";
-        }
-        return usedMeasurements;
+        return assignment.numCompletedMatches();
     }
 
     void TrackedBodyTarget::disableKalman() { m_impl->permitKalman = false; }

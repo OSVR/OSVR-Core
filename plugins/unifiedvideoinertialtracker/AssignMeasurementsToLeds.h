@@ -328,6 +328,8 @@ namespace vbtracker {
             }
         }
 
+        size_type numCompletedMatches() const { return numMatches_; }
+
       private:
         using LedIter = LedGroup::iterator;
         using LedPtr = Led *;
