@@ -53,9 +53,8 @@ namespace vbtracker {
     /// routine.
     inline bool handleOutOfRangeIds(Led &led, const std::size_t numBeacons) {
         if (led.identified() &&
-            /// cast to unsigned safe since identified implies non-negative
-            static_cast<std::size_t>(makeZeroBased(led.getID()).value()) >
-                numBeacons) {
+            makeZeroBased(led.getID()).value() >
+                static_cast<UnderlyingBeaconIdType>(numBeacons)) {
             std::cerr << "Got a beacon claiming to be "
                       << led.getOneBasedID().value() << " when we only have "
                       << numBeacons << " beacons" << std::endl;
@@ -102,7 +101,16 @@ namespace vbtracker {
                 auto led = begin(leds_);
                 while (led != end(leds_)) {
                     led->resetUsed();
-                    handleOutOfRangeIds(*led, numBeacons_);
+#if 0
+                    /// This was giving us faulty data - was saying that the ID
+                    /// was greater than numbeacons 0
+                    if (handleOutOfRangeIds(*led, numBeacons_)) {
+                        std::cerr << getPrefix()
+                                  << "Proceeding with above-warned LED, after "
+                                     "removing its ID..."
+                                  << std::endl;
+                    }
+#endif
                     ledRefs_.push_back(led);
                     ++led;
                 }
