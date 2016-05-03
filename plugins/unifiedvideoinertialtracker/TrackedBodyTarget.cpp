@@ -275,12 +275,14 @@ namespace vbtracker {
                           << (success ? "could" : "could NOT")
                           << " be resubmitted successfully\n";
             }
+#if 0
             auto discarded = assignment.discardInvalidEntries();
             if (false) {
                 std::cout << HEAP_PREFIX << "Discarded " << discarded
                           << " entries to get to the next valid one."
                           << std::endl;
             }
+#endif
         }
 
         const auto numUnclaimedLedObjects = assignment.numUnclaimedLedObjects();

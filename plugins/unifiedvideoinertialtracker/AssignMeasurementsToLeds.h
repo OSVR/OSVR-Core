@@ -408,6 +408,7 @@ namespace vbtracker {
             std::make_heap(begin(distanceHeap_), end(distanceHeap_),
                            Comparator());
         }
+#if 0
         class HeapUsage {
           public:
             HeapUsage(HeapType &heap) : heap_(heap), n_(heap.size()) {}
@@ -438,6 +439,7 @@ namespace vbtracker {
             std::size_t numPopped_ = 0;
         };
 
+
         /// does not resize for you!
         void rawPopHeap() {
             BOOST_ASSERT_MSG(!distanceHeap_.empty(),
@@ -445,6 +447,7 @@ namespace vbtracker {
             std::pop_heap(begin(distanceHeap_), end(distanceHeap_),
                           Comparator());
         }
+#endif
 
         /// Resizes for you too.
         void popHeap() {
@@ -454,7 +457,7 @@ namespace vbtracker {
                           Comparator());
             distanceHeap_.pop_back();
         }
-
+#if 0
         void dropLastEntries(size_type numEntries) {
             if (numEntries == 0) {
                 return;
@@ -465,7 +468,7 @@ namespace vbtracker {
                 "Cannot drop more entries from heap than exist in it.");
             distanceHeap_.resize(n - numEntries);
         }
-
+#endif
         LedGroup &leds_;
         LedMeasurementVec const &measurements_;
         const LedIter ledsEnd_;
