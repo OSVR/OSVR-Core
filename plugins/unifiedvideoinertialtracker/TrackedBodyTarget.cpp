@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "TrackedBodyTarget.h"
+#include "AssignMeasurementsToLeds.h"
 #include "BodyTargetInterface.h"
 #include "HDKLedIdentifier.h"
 #include "LED.h"
@@ -240,7 +241,7 @@ namespace vbtracker {
         auto &myLeds = m_impl->leds;
 
         const auto numBeacons = getNumBeacons();
-
+#if 0
         /// In theory this shouldn't happen, but there are checks
         /// scattered all over the code. Now we can say that it doesn't
         /// happen because we won't let any bad values escape this
@@ -259,11 +260,12 @@ namespace vbtracker {
             }
             return false;
         };
+#endif
 
         auto led = begin(myLeds);
         while (led != end(myLeds)) {
             led->resetUsed();
-            handleOutOfRangeIds(*led);
+            handleOutOfRangeIds(*led, numBeacons);
             auto threshold = blobMoveThreshold * led->getMeasurement().diameter;
             auto nearest = led->nearest(measurements, threshold);
             if (nearest == end(measurements)) {
@@ -275,7 +277,7 @@ namespace vbtracker {
                 // next one. Remove this blob from the list of
                 // potential matches.
                 led->addMeasurement(*nearest, blobsKeepIdentity);
-                if (!handleOutOfRangeIds(*led)) {
+                if (!handleOutOfRangeIds(*led, numBeacons)) {
                     /// If that measurement didn't cause this beacon to go awry,
                     /// then we'll actually handle the measurement and increment
                     /// used measurements.
