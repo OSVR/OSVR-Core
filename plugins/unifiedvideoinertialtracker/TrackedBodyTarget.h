@@ -74,7 +74,7 @@ namespace vbtracker {
         }
 
         UnderlyingBeaconIdType getNumBeacons() const {
-            return m_beacons.size();
+            return static_cast<UnderlyingBeaconIdType>(m_numBeacons);
         }
 
         TrackedBody &getBody() { return m_body; }
@@ -201,6 +201,7 @@ namespace vbtracker {
         /// frame.
         Eigen::Vector3d m_targetToBody;
 
+        const std::size_t m_numBeacons;
         /// @name Parallel vectors, one entry per beacon
         /// @brief All should have the same number of values at all times.
         /// @{

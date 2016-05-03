@@ -163,6 +163,7 @@ namespace vbtracker {
                                          TargetSetupData const &setupData,
                                          TargetId id)
         : m_body(body), m_id(id), m_targetToBody(targetToBody),
+          m_numBeacons(setupData.numBeacons()),
           m_beaconMeasurementVariance(setupData.baseMeasurementVariances),
           m_beaconFixed(setupData.isFixed),
           m_beaconEmissionDirection(setupData.emissionDirections),
@@ -239,11 +240,10 @@ namespace vbtracker {
         const auto blobsKeepIdentity = getParams().blobsKeepIdentity;
         auto &myLeds = m_impl->leds;
 
-        const auto numBeacons = m_beacons.size();
         const auto numMeasurements = measurements.size();
 
-        AssignMeasurementsToLeds assignment(myLeds, undistortedLeds, numBeacons,
-                                            blobMoveThreshold);
+        AssignMeasurementsToLeds assignment(myLeds, undistortedLeds,
+                                            m_numBeacons, blobMoveThreshold);
 
         assignment.populateStructures();
         static const auto HEAP_PREFIX = "[ASSIGN HEAP] ";
@@ -266,7 +266,7 @@ namespace vbtracker {
             auto &led = ledAndMeasurement.first;
             auto &meas = ledAndMeasurement.second;
             led.addMeasurement(meas, blobsKeepIdentity);
-            if (handleOutOfRangeIds(led, numBeacons)) {
+            if (handleOutOfRangeIds(led, m_numBeacons)) {
                 auto success = assignment.resumbitMeasurement(meas);
                 std::cerr << "ERROR: We just got a faulty one: filtering in "
                              "measurement from "
