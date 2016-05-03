@@ -89,7 +89,8 @@ namespace vbtracker {
                 auto numResets = mainAlgo.getNumResets(optim);
                 /// Sometimes gets stuck in parameter ditches where we get
                 /// very few tracked frames
-                auto effectiveCost = avgCost * numResets / samples;
+                auto effectiveCost =
+                    avgCost * (numResets + 1) * (numResets + 1) / samples;
                 std::cout << std::setw(15) << std::to_string(effectiveCost)
                           << " effective cost (average cost of " << std::setw(9)
                           << avgCost << " over " << std::setw(4) << samples
