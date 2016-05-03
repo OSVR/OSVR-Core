@@ -53,7 +53,9 @@ namespace vbtracker {
     /// routine.
     inline bool handleOutOfRangeIds(Led &led, const std::size_t numBeacons) {
         if (led.identified() &&
-            makeZeroBased(led.getID()).value() > numBeacons) {
+            /// cast to unsigned safe since identified implies non-negative
+            static_cast<std::size_t>(makeZeroBased(led.getID()).value()) >
+                numBeacons) {
             std::cerr << "Got a beacon claiming to be "
                       << led.getOneBasedID().value() << " when we only have "
                       << numBeacons << " beacons" << std::endl;
