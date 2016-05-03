@@ -115,6 +115,18 @@ namespace vbtracker {
             boundingBox_ = box.size();
         }
 
+        bool operator==(LedMeasurement const &other) const {
+            return loc == other.loc && brightness == other.brightness &&
+                   circularity == other.circularity &&
+                   knowBoundingBox_ == other.knowBoundingBox_ &&
+                   (knowBoundingBox_ ? boundingBox_ == other.boundingBox_
+                                     : true) &&
+                   // less likely to differ
+                   imageSize == other.imageSize &&
+                   // technically equivalent or derived from other properties
+                   diameter == other.diameter && area == other.area;
+        }
+
       private:
         /// Do we know an upright bounding box? (that is, is the next member
         /// valid?)
