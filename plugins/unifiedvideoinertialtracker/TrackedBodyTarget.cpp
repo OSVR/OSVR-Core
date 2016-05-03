@@ -235,67 +235,73 @@ namespace vbtracker {
             }
         }
 
-        auto usedMeasurements = std::size_t{0};
         const auto blobMoveThreshold = getParams().blobMoveThreshold;
         const auto blobsKeepIdentity = getParams().blobsKeepIdentity;
         auto &myLeds = m_impl->leds;
 
-        const auto numBeacons = getNumBeacons();
-#if 0
-        /// In theory this shouldn't happen, but there are checks
-        /// scattered all over the code. Now we can say that it doesn't
-        /// happen because we won't let any bad values escape this
-        /// routine.
-        auto handleOutOfRangeIds = [numBeacons](Led &led) {
-            if (led.identified() &&
-                makeZeroBased(led.getID()).value() > numBeacons) {
-                std::cerr << "Got a beacon claiming to be "
-                          << led.getOneBasedID().value()
-                          << " when we only have " << numBeacons << " beacons"
-                          << std::endl;
-                /// @todo a kinder way of doing this? Right now this blows away
-                /// the measurement history
-                led.markMisidentified();
-                return true;
-            }
-            return false;
-        };
-#endif
+        const auto numBeacons = m_beacons.size();
+        const auto numMeasurements = measurements.size();
 
-        auto led = begin(myLeds);
-        while (led != end(myLeds)) {
-            led->resetUsed();
-            handleOutOfRangeIds(*led, numBeacons);
-            auto threshold = blobMoveThreshold * led->getMeasurement().diameter;
-            auto nearest = led->nearest(measurements, threshold);
-            if (nearest == end(measurements)) {
-                // We have no blob corresponding to this LED, so we need
-                // to delete this LED.
-                led = myLeds.erase(led);
-            } else {
-                // Update the values in this LED and then go on to the
-                // next one. Remove this blob from the list of
-                // potential matches.
-                led->addMeasurement(*nearest, blobsKeepIdentity);
-                if (!handleOutOfRangeIds(*led, numBeacons)) {
-                    /// If that measurement didn't cause this beacon to go awry,
-                    /// then we'll actually handle the measurement and increment
-                    /// used measurements.
-                    measurements.erase(nearest);
-                    /// @todo do we increment this only if the LED is
-                    /// recognized?
-                    usedMeasurements++;
-                }
-                ++led;
+        AssignMeasurementsToLeds assignment(myLeds, undistortedLeds, numBeacons,
+                                            blobMoveThreshold);
+
+        assignment.populateStructures();
+        static const auto HEAP_PREFIX = "[ASSIGN HEAP] ";
+        bool verbose = false;
+        if (getParams().debug) {
+            static ::util::Stride assignStride(157);
+            assignStride++;
+            if (assignStride) {
+                verbose = true;
             }
         }
+        if (verbose) {
+            std::cout << HEAP_PREFIX << "Heap contains " << assignment.size()
+                      << " elts, of possible "
+                      << assignment.theoreticalMaxSize() << " (ratio "
+                      << assignment.heapSizeFraction() << ")" << std::endl;
+        }
+        while (assignment.hasMoreMatches()) {
+            auto ledAndMeasurement = assignment.getMatch(false);
+            auto &led = ledAndMeasurement.first;
+            auto &meas = ledAndMeasurement.second;
+            led.addMeasurement(meas, blobsKeepIdentity);
+            if (handleOutOfRangeIds(led, numBeacons)) {
+                auto success = assignment.resumbitMeasurement(meas);
+                std::cerr << "ERROR: We just got a faulty one: filtering in "
+                             "measurement from "
+                          << meas.loc
+                          << " made an LED go invalid. The measurement "
+                          << (success ? "could" : "could NOT")
+                          << " be resubmitted successfully\n";
+            }
+            auto discarded = assignment.discardInvalidEntries();
+            if (false) {
+                std::cout << HEAP_PREFIX << "Discarded " << discarded
+                          << " entries to get to the next valid one."
+                          << std::endl;
+            }
+        }
+
+        const auto numUnclaimedLedObjects = assignment.numUnclaimedLedObjects();
+        assignment.eraseUnclaimedLedObjects(verbose);
+
+        const auto numUnclaimedMeasurements =
+            assignment.numUnclaimedMeasurements();
+        const auto usedMeasurements =
+            numMeasurements - numUnclaimedMeasurements;
 
         // If we have any blobs that have not been associated with an
         // LED, then we add a new LED for each of them.
         // std::cout << "Had " << Leds.size() << " LEDs, " <<
         // keyPoints.size() << " new ones available" << std::endl;
-        for (auto &remainingLed : measurements) {
-            myLeds.emplace_back(m_impl->identifier.get(), remainingLed);
+        assignment.forEachUnclaimedMeasurement([&](LedMeasurement const &meas) {
+            myLeds.emplace_back(m_impl->identifier.get(), meas);
+        });
+        if (verbose) {
+            std::cout << HEAP_PREFIX << "Matched: " << usedMeasurements
+                      << "\tUnclaimed Meas: " << numUnclaimedMeasurements
+                      << "\tUnclaimed LED: " << numUnclaimedLedObjects << "\n";
         }
         return usedMeasurements;
     }

@@ -72,15 +72,17 @@ namespace vbtracker {
     }
 
     class AssignMeasurementsToLeds {
+        static const char *getPrefix() { return "[AssignMeasurements] "; }
+
       public:
         AssignMeasurementsToLeds(LedGroup &leds,
-                                 LedMeasurementVec &measurements,
+                                 LedMeasurementVec const &measurements,
                                  const std::size_t numBeacons,
                                  float blobMoveThresh)
             : leds_(leds), measurements_(measurements), ledsEnd_(end(leds_)),
               numBeacons_(numBeacons_), blobMoveThreshFactor_(blobMoveThresh) {}
 
-        using LedAndMeasurement = std::pair<Led &, LedMeasurement &>;
+        using LedAndMeasurement = std::pair<Led &, LedMeasurement const &>;
 
         using LedMeasDistance = std::tuple<std::size_t, std::size_t, float>;
         using HeapValueType = LedMeasDistance;
@@ -128,22 +130,43 @@ namespace vbtracker {
         /// Discards invalid entries (those where either the LED or the
         /// measurement, or both, have already been assigned) from the heap, and
         /// returns the count of entries so discarded.
-        size_type discardInvalidEntries() {
+        size_type discardInvalidEntries(bool verbose = false) {
             checkAndThrowNotPopulated("discardInvalidEntries()");
             size_type discarded = 0;
             if (empty()) {
                 return discarded;
             }
 
-            /// This class deals with avoiding popping too much and also with
-            /// erasing in bulk at end of scope.
-            HeapUsage heap(distanceHeap_);
-            while (!heap.empty()) {
+            while (!empty()) {
+                if (verbose) {
+                    auto top = distanceHeap_.front();
+                    std::cout << getPrefix() << "top: led index "
+                              << ledIndex(top) << "\tmeas index "
+                              << measIndex(top) << "\tsq dist "
+                              << squaredDistance(top);
+                    auto ledValid = (ledRefs_[ledIndex(top)] != ledsEnd_);
+                    auto measValid = (measRefs_[measIndex(top)] != nullptr);
+                    if (ledValid && measValid) {
+                        std::cout << " both valid: ";
+                    } else if (ledValid) {
+                        std::cout << " only LED  valid: ";
+                    } else if (measValid) {
+                        std::cout << " only measurement valid: ";
+                    } else {
+                        std::cout << " neither valid: ";
+                    }
+                }
                 if (isTopValid()) {
+                    if (verbose) {
+                        std::cout << "isTopValid() says keep!\n";
+                    }
                     /// Great, we found one!
                     return discarded;
                 }
-                heap.pop();
+                if (verbose) {
+                    std::cout << "isTopValid() says discard!\n";
+                }
+                popHeap();
                 discarded++;
             }
             return discarded;
@@ -189,7 +212,7 @@ namespace vbtracker {
                                        "getting success from hasMoreMatches()");
             }
             if (verbose) {
-                std::cout << "AssignMeasurements: Led Index "
+                std::cout << getPrefix() << "Led Index "
                           << ledIndex(distanceHeap_.front()) << "\tMeas Index "
                           << measIndex(distanceHeap_.front()) << std::endl;
             }
@@ -286,7 +309,7 @@ namespace vbtracker {
       private:
         using LedIter = LedGroup::iterator;
         using LedPtr = Led *;
-        using MeasPtr = LedMeasurement *;
+        using MeasPtr = LedMeasurement const *;
         void checkAndThrowNotPopulated(const char *functionName) const {
             if (!populated_) {
                 throw std::logic_error(
@@ -417,7 +440,7 @@ namespace vbtracker {
                              "Cannot pop from an empty heap");
             std::pop_heap(begin(distanceHeap_), end(distanceHeap_),
                           Comparator());
-            distanceHeap_.resize(distanceHeap_.size() - 1);
+            distanceHeap_.pop_back();
         }
 
         void dropLastEntries(size_type numEntries) {
@@ -431,9 +454,8 @@ namespace vbtracker {
             distanceHeap_.resize(n - numEntries);
         }
 
-        // LedIter getEmptyLed() const { return end(leds_); }
         LedGroup &leds_;
-        LedMeasurementVec &measurements_;
+        LedMeasurementVec const &measurements_;
         const LedIter ledsEnd_;
         const std::size_t numBeacons_;
         const float blobMoveThreshFactor_;
