@@ -29,13 +29,13 @@
 #include "ModelTypes.h"
 
 // Library/third-party includes
-#include <osvr/Util/TimeValue.h>
-#include <osvr/Util/ClientReportTypesC.h>
 #include <boost/optional.hpp>
+#include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
-#include <mutex>
 #include <memory>
+#include <mutex>
 
 namespace osvr {
 namespace vbtracker {
@@ -108,6 +108,7 @@ namespace vbtracker {
         std::mutex m_mutex;
         /// @name Protected by mutex
         /// @{
+        bool m_updated = false;
         bool m_shouldReport = false;
         util::time::TimeValue m_dataTime;
         BodyState m_state;

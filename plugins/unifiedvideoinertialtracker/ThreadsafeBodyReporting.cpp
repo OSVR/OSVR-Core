@@ -87,14 +87,9 @@ namespace vbtracker {
         util::time::TimeValue dataTime;
         Eigen::Isometry3d trackerToRoom;
         {
-            std::unique_lock<std::mutex> lock{m_mutex, std::try_to_lock};
-            if (!lock.owns_lock()) {
-                // Didn't get the lock.
-                return BodyReport::makeReportWithStatus(
-                    ReportStatus::MutexLocked);
-            }
+            std::lock_guard<std::mutex> lock{m_mutex};
             // OK, we got the lock.
-            if (!m_shouldReport) {
+            if (!m_shouldReport || !m_updated) {
                 // Told we shouldn't report, OK.
                 return BodyReport::makeReportWithStatus(
                     ReportStatus::NoReportAvailable);
@@ -110,6 +105,7 @@ namespace vbtracker {
             }
             dataTime = m_dataTime;
             trackerToRoom = m_trackerToRoom;
+            m_updated = false;
         } // unlock
 
         auto ret = BodyReport::makeReportWithStatus();
@@ -152,6 +148,7 @@ namespace vbtracker {
 
         std::lock_guard<std::mutex> lock(m_mutex);
         m_shouldReport = true;
+        m_updated = true;
         m_dataTime = tv;
         m_state = state;
         m_process = process;
@@ -161,6 +158,7 @@ namespace vbtracker {
                                     BodyState const &state) {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_shouldReport = true;
+        m_updated = true;
         m_dataTime = tv;
         m_state = state;
     }
