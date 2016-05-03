@@ -87,7 +87,7 @@ namespace vbtracker {
         const double m_measurementVarianceScaleFactor;
         const double m_brightLedVariancePenalty;
         const bool m_extraVerbose;
-        std::default_random_engine m_randEngine;
+        std::mt19937 m_randEngine;
         static const int SIGNAL_HAVE_NOT_SEEN_BEACONS_YET = -1;
         int m_lastUsableBeaconsSeen = SIGNAL_HAVE_NOT_SEEN_BEACONS_YET;
         std::size_t m_framesInProbation = 0;

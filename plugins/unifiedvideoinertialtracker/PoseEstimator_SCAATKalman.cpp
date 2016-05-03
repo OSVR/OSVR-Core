@@ -170,8 +170,7 @@ namespace vbtracker {
           m_measurementVarianceScaleFactor(
               params.measurementVarianceScaleFactor),
           m_extraVerbose(params.extraVerbose),
-          m_randEngine(
-              std::chrono::system_clock::now().time_since_epoch().count()) {
+          m_randEngine(std::random_device()()) {
         std::tie(m_minBoxRatio, m_maxBoxRatio) =
             std::minmax({params.boundingBoxFilterRatio,
                          1.f / params.boundingBoxFilterRatio});
