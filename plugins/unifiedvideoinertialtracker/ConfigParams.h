@@ -47,13 +47,13 @@ namespace vbtracker {
         bool useOrientation = false;
 
         /// units: rad^2
-        double orientationVariance = 1.0e-5;
+        double orientationVariance = 1.0e-6;
 
         /// Should angular velocity reports be used once calibration completes?
         bool useAngularVelocity = true;
 
         /// units: (rad/sec)^2
-        double angularVelocityVariance = 1.0e-8;
+        double angularVelocityVariance = 1.0e-2;
     };
 
     struct TuningParams {
@@ -103,7 +103,7 @@ namespace vbtracker {
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
-        double blobMoveThreshold = 5.;
+        double blobMoveThreshold = 3.;
 
         /// Whether to show the debug windows and debug messages.
         bool debug = false;
@@ -132,7 +132,7 @@ namespace vbtracker {
         /// with higher variance than others, due to known difficulties in
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 0.04947884967073536;
+        double measurementVarianceScaleFactor = 1.055673430082431;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
