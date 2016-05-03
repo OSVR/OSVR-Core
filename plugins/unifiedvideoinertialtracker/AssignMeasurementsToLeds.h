@@ -80,7 +80,18 @@ namespace vbtracker {
             : leds_(leds), measurements_(measurements), ledsEnd_(end(leds_)),
               numBeacons_(numBeacons_), blobMoveThreshFactor_(blobMoveThresh) {}
 
+        using LedAndMeasurement = std::pair<Led &, LedMeasurement &>;
+
+        using LedMeasDistance = std::tuple<std::size_t, std::size_t, float>;
+        using HeapValueType = LedMeasDistance;
+        using HeapType = std::vector<HeapValueType>;
+        using size_type = HeapType::size_type;
+
+        /// Must call first, and only once.
         void populateStructures() {
+            BOOST_ASSERT_MSG(!populated_,
+                             "Can only call populateStructures() once.");
+            populated_ = true;
             {
                 /// Clean up LEDs and populate their ref vector.
                 auto led = begin(leds_);
@@ -114,14 +125,14 @@ namespace vbtracker {
             makeHeap();
         }
 
-        using LedAndMeasurement = std::pair<Led &, LedMeasurement &>;
-
-        /// Searches the heap, discarding now-invalid entries, until it finds an
-        /// entry where both the LED and the measurement are unclaimed, or it
-        /// runs out of entries.
-        bool hasMoreMatches() {
-            if (distanceHeap_.empty()) {
-                return false;
+        /// Discards invalid entries (those where either the LED or the
+        /// measurement, or both, have already been assigned) from the heap, and
+        /// returns the count of entries so discarded.
+        size_type discardInvalidEntries() {
+            checkAndThrowNotPopulated("discardInvalidEntries()");
+            size_type discarded = 0;
+            if (empty()) {
+                return discarded;
             }
 
             /// This class deals with avoiding popping too much and also with
@@ -130,19 +141,57 @@ namespace vbtracker {
             while (!heap.empty()) {
                 if (isTopValid()) {
                     /// Great, we found one!
-                    return true;
+                    return discarded;
                 }
                 heap.pop();
+                discarded++;
             }
-            return false;
+            return discarded;
+        }
+
+        /// In case a measurement update goes bad, we can try to "un-mark" a
+        /// measurement as consumed.
+        bool resumbitMeasurement(LedMeasurement const &meas) {
+            auto it = std::find(begin(measurements_), end(measurements_), meas);
+            if (it == end(measurements_)) {
+                // sorry, can't help...
+                return false;
+            }
+            auto idx = std::distance(begin(measurements_), it);
+            if (measRefs_[idx] != nullptr) {
+                std::cerr << "Trying to resubmit, but the measurement wasn't "
+                             "marked as consumed!"
+                          << std::endl;
+                return false;
+            }
+            measRefs_[idx] = &(*it);
+            return true;
+        }
+
+        /// Searches the heap, discarding now-invalid entries, until it finds an
+        /// entry where both the LED and the measurement are unclaimed, or it
+        /// runs out of entries.
+        bool hasMoreMatches() {
+            checkAndThrowNotPopulated("hasMoreMatches()");
+            discardInvalidEntries();
+            if (empty()) {
+                return false;
+            }
+            return isTopValid();
         }
 
         /// Requires that hasMoreMatches() has been run and returns true.
-        LedAndMeasurement getMatch() {
+        LedAndMeasurement getMatch(bool verbose = false) {
+            checkAndThrowNotPopulated("getMatch()");
             auto hasMatch = hasMoreMatches();
             if (!hasMatch) {
                 throw std::logic_error("Can't call getMatch() without first "
                                        "getting success from hasMoreMatches()");
+            }
+            if (verbose) {
+                std::cout << "AssignMeasurements: Led Index "
+                          << ledIndex(distanceHeap_.front()) << "\tMeas Index "
+                          << measIndex(distanceHeap_.front()) << std::endl;
             }
             auto &topLed = *getTopLed();
             auto &topMeas = *getTopMeasurement();
@@ -154,11 +203,97 @@ namespace vbtracker {
             return LedAndMeasurement(topLed, topMeas);
         }
 
+        bool empty() const {
+            /// Not terribly harmful here, just illogical, so assert instead of
+            /// unconditional check and throw.
+            BOOST_ASSERT_MSG(populated_, "Must have called "
+                                         "populateStructures() before calling "
+                                         "empty().");
+            return distanceHeap_.empty();
+        }
+
+        /// Entries in the heap.
+        size_type size() const {
+            /// Not terribly harmful here, just illogical, so assert instead of
+            /// unconditional check and throw.
+            BOOST_ASSERT_MSG(
+                populated_,
+                "Must have called populateStructures() before calling size().");
+            return distanceHeap_.size();
+        }
+
+        /// This is the size it could have potentially been, had all LEDs been
+        /// within the distance threshold. (O(n m))
+        size_type theoreticalMaxSize() const {
+            return leds_.size() * measurements_.size();
+        }
+
+        /// The fraction of the theoretical max that the size is.
+        double heapSizeFraction() const {
+            /// Not terribly harmful here, just illogical, so assert instead of
+            /// unconditional check and throw.
+            BOOST_ASSERT_MSG(populated_, "Must have called "
+                                         "populateStructures() before calling "
+                                         "heapSizeFraction().");
+            return static_cast<double>(size()) /
+                   static_cast<double>(theoreticalMaxSize());
+        }
+
+        size_type numUnclaimedLedObjects() const {
+            return std::count_if(
+                begin(ledRefs_), end(ledRefs_),
+                [&](LedIter const &it) { return it != ledsEnd_; });
+        }
+
+        void eraseUnclaimedLedObjects(bool verbose = false) {
+            for (auto &ledIter : ledRefs_) {
+                if (ledIter == ledsEnd_) {
+                    /// already used
+                    continue;
+                }
+                if (verbose) {
+                    if (ledIter->identified()) {
+                        std::cout << "Erasing identified LED "
+                                  << ledIter->getOneBasedID().value()
+                                  << " because of a lack of updated data.\n";
+                    } else {
+                        std::cout << "Erasing unidentified LED at "
+                                  << ledIter->getLocation()
+                                  << " because of a lack of updated data.\n";
+                    }
+                }
+                leds_.erase(ledIter);
+            }
+        }
+
+        size_type numUnclaimedMeasurements() const {
+            return std::count_if(
+                begin(measRefs_), end(measRefs_),
+                [&](MeasPtr const &ptr) { return ptr != nullptr; });
+        }
+
+        template <typename F> void forEachUnclaimedMeasurement(F &&op) {
+            for (auto &measRef : measRefs_) {
+                if (!measRef) {
+                    /// already used
+                    continue;
+                }
+                /// Apply the operation.
+                std::forward<F>(op)(*measRef);
+            }
+        }
+
       private:
         using LedIter = LedGroup::iterator;
         using LedPtr = Led *;
         using MeasPtr = LedMeasurement *;
-        using LedMeasDistance = std::tuple<std::size_t, std::size_t, float>;
+        void checkAndThrowNotPopulated(const char *functionName) const {
+            if (!populated_) {
+                throw std::logic_error(
+                    "Must have called populateStructures() before calling " +
+                    std::string(functionName));
+            }
+        }
 
         /// @name Accessors for tuple elements.
         /// @{
@@ -179,7 +314,6 @@ namespace vbtracker {
         }
         /// @}
 
-        using size_type = std::vector<LedMeasDistance>::size_type;
         void possiblyPushLedMeasurement(std::size_t ledIdx, std::size_t measIdx,
                                         float distThreshSquared) {
             auto meas = measRefs_[measIdx];
@@ -223,9 +357,6 @@ namespace vbtracker {
             auto thresh = blobMoveThreshFactor_ * meas.diameter;
             return thresh * thresh;
         }
-
-        using HeapValueType = LedMeasDistance;
-        using HeapType = std::vector<HeapValueType>;
 
         /// min heap comparator needs greater-than, want to compare on third
         /// tuple element.
@@ -306,6 +437,7 @@ namespace vbtracker {
         const LedIter ledsEnd_;
         const std::size_t numBeacons_;
         const float blobMoveThreshFactor_;
+        bool populated_ = false;
         std::vector<LedIter> ledRefs_;
         std::vector<MeasPtr> measRefs_;
         HeapType distanceHeap_;
