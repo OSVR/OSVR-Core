@@ -109,7 +109,7 @@ namespace vbtracker {
             rot = Eigen::Vector3d::Zero();
         } else {
             auto angle = std::acos(deltaquat.w());
-            rot = deltaquat.vec().normalized() * angle * 2 / dt;
+            rot = deltaquat.vec().normalized() * angle / dt;
             /// @todo without transformations being applied to vel quats, this
             /// is needed.
             rot.x() *= -1.;
