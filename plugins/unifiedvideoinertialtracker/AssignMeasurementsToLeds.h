@@ -126,6 +126,15 @@ namespace vbtracker {
                 }
             }
             /// Turn that vector into our min-heap.
+
+            /// More efficient to do this one-time 3N=O(n) operation, than
+            /// repeatedly push_heap (2log(N)=O(log n)) as we go, because:
+            ///   - we don't need the heap property until we've completed
+            ///   processing all the input (so push_heap gives us no benefit
+            ///   there)
+            ///   - the max number of comparisons, by the requirements of the
+            ///   standard, are lower (and linear) and stay lower for the
+            ///   make_heap approach for a heap size of > 5.
             makeHeap();
         }
 
@@ -395,6 +404,7 @@ namespace vbtracker {
 
         void makeHeap() {
             /// cost of 3 * len, which is O(n m)
+            /// Paid once, at the end of populateStructures()
             std::make_heap(begin(distanceHeap_), end(distanceHeap_),
                            Comparator());
         }
