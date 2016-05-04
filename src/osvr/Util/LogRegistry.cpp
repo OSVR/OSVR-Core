@@ -61,7 +61,7 @@ LoggerPtr LogRegistry::getOrCreateLogger(const std::string& logger_name)
 
     spd_logger->set_pattern("%b %d %T.%e %l [%n]: %v");
     spd_logger->set_level(spdlog::level::trace);
-    spd_logger->flush_on(spdlog::level::error);
+    spd_logger->flush_on(spdlog::level::err);
 
     return std::make_shared<Logger>(spd_logger);
 }
