@@ -42,6 +42,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 // Internal Includes
 #include "ImagePointMeasurement.h"
+#include "KalmanCorrect.h"
 #include "LED.h"
 #include "PoseEstimator_SCAATKalman.h"
 #include "UsefulQuaternions.h"
@@ -65,95 +66,6 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #undef DEBUG_MEASUREMENT_RESIDUALS
 
 namespace osvr {
-namespace kalman {
-    template <typename StateType, typename MeasurementType>
-    struct CorrectionInProgress {
-        /// Dimension of measurement
-        static const types::DimensionType m =
-            types::Dimension<MeasurementType>::value;
-        /// Dimension of state
-        static const types::DimensionType n =
-            types::Dimension<StateType>::value;
-
-        CorrectionInProgress(StateType &state, MeasurementType &meas,
-                             types::SquareMatrix<n> const &P_,
-                             types::Matrix<n, m> const &PHt_,
-                             types::SquareMatrix<m> const &S)
-            : P(P_), PHt(PHt_), denom(S), deltaz(meas.getResidual(state)),
-              stateCorrection(PHt * denom.solve(deltaz)), state_(state) {}
-
-        /// State error covariance
-        types::SquareMatrix<n> P;
-
-        /// The kalman gain stuff to not invert (called P12 in TAG)
-        types::Matrix<n, m> PHt;
-
-        /// Decomposition of S
-        Eigen::LDLT<types::SquareMatrix<m>> denom;
-
-        /// Measurement residual or delta z
-        types::Vector<m> deltaz;
-
-        /// Corresponding state change to apply.
-        types::Vector<n> stateCorrection;
-
-        /// That's as far as we go here before you choose to continue.
-
-        /// Finish computing the rest and correct the state.
-        void finishCorrection() {
-            // Correct the state estimate
-            state_.setStateVector(state_.stateVector() + stateCorrection);
-
-            // Correct the error covariance
-            // differs from the (I-KH)P form by not factoring out the P (since
-            // we already have PHt computed).
-            types::SquareMatrix<n> newP =
-                P - (PHt * denom.solve(PHt.transpose()));
-            state_.setErrorCovariance(newP);
-
-            // Let the state do any cleanup it has to (like fixing externalized
-            // quaternions)
-            state_.postCorrect();
-        }
-
-      private:
-        StateType &state_;
-    };
-
-    template <typename StateType, typename ProcessModelType,
-              typename MeasurementType>
-    inline CorrectionInProgress<StateType, MeasurementType>
-    beginCorrection(StateType &state, ProcessModelType &processModel,
-                    MeasurementType &meas) {
-
-        /// Dimension of measurement
-        static const auto m = types::Dimension<MeasurementType>::value;
-        /// Dimension of state
-        static const auto n = types::Dimension<StateType>::value;
-
-        /// Measurement Jacobian
-        types::Matrix<m, n> H = meas.getJacobian(state);
-
-        /// Measurement covariance
-        types::SquareMatrix<m> R = meas.getCovariance(state);
-
-        /// State error covariance
-        types::SquareMatrix<n> P = state.errorCovariance();
-
-        /// The kalman gain stuff to not invert (called P12 in TAG)
-        types::Matrix<n, m> PHt = P * H.transpose();
-
-        /// the stuff to invert for the kalman gain
-        /// also sometimes called S or the "Innovation Covariance"
-        types::SquareMatrix<m> S = H * PHt + R;
-
-        /// More computation is done in initializers/constructor
-        return CorrectionInProgress<StateType, MeasurementType>(state, meas, P,
-                                                                PHt, S);
-    }
-
-} // namespace kalman
-
 namespace vbtracker {
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
