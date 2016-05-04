@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ApplyIMUToState.h"
+#include "KalmanCorrect.h"
 #include "SpaceTransformations.h"
 
 // Library/third-party includes
@@ -67,7 +68,26 @@ namespace vbtracker {
             }
         }
 #endif
-        kalman::correct(state, processModel, kalmanMeas);
+        auto correctionInProgress =
+            kalman::beginCorrection(state, processModel, kalmanMeas);
+        auto outputMeas = [&] {
+            std::cout << "state: " << state.getQuaternion().coeffs().transpose()
+                      << " and measurement: " << quat.coeffs().transpose();
+        };
+        if (!correctionInProgress.stateCorrectionFinite) {
+            std::cout
+                << "Non-finite state correction in applying orientation: ";
+            outputMeas();
+            std::cout << "\n";
+            return;
+        }
+        if (!correctionInProgress.finishCorrection(true)) {
+            std::cout
+                << "Non-finite error covariance after applying orientation: ";
+            outputMeas();
+            std::cout << "\n";
+        }
+        // kalman::correct(state, processModel, kalmanMeas);
     }
 
     inline void applyAngVelToState(TrackingSystem const &sys, BodyState &state,
