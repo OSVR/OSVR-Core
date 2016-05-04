@@ -75,6 +75,11 @@ void Logger::setLogLevel(LogLevel level)
     logger_->set_level(static_cast<spdlog::level::level_enum>(level));
 }
 
+void flush_on(LogLevel level)
+{
+    logger_->flush_on(static_cast<spdlog::level::level_enum>(level));
+}
+
 detail::LineLogger Logger::trace(const char* fmt)
 {
     return logger_->trace(fmt);
