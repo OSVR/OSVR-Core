@@ -28,6 +28,9 @@
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Client/LocateServer.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
+#if defined(OSVR_ANDROID)
+#include <osvr/Server/ConfigureServerFromFile.h>
+#endif
 
 // Library/third-party includes
 // - none
@@ -35,11 +38,20 @@
 // Standard includes
 // - none
 
+// @todo use a thread-safe lazy-initialized singleton pattern
+#if defined(OSVR_ANDROID)
+static osvr::server::ServerPtr gServer;
+#endif
+
 void osvrClientAttemptServerAutoStart()
 {
     // @todo start the server.
 #if defined(OSVR_ANDROID)
-    // @todo implement auto-start for android
+    if(!gServer) {
+        std::string configName(osvr::server::getDefaultConfigFilename());
+        gServer = osvr::server::configureServerFromFile(configName);
+        gServer->start();
+    }
 #else
     auto server = osvr::client::getServerBinaryDirectoryPath();
     if (server) {
@@ -64,7 +76,10 @@ void osvrClientAttemptServerAutoStart()
 void osvrClientReleaseAutoStartedServer()
 {
 #if defined(OSVR_ANDROID)
-    // @todo cleanup server thread
+    if(gServer) {
+        gServer->stop();
+        gServer = nullptr;
+    }
 #else
     // no-op. Leave the server running.
 #endif

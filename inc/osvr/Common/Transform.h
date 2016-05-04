@@ -74,24 +74,15 @@ namespace common {
         /// @brief Apply only the rotation/basis change (not the translation) to
         /// a vector representing a velocity or acceleration
         Eigen::Vector3d
-        transformLinear(Eigen::Ref<Eigen::Vector3d const> const &vec) {
-            return m_post.topLeftCorner<3, 3>() *
-                   (vec.transpose() * m_pre.topLeftCorner<3, 3>()).transpose();
+        transformDerivative(Eigen::Ref<Eigen::Vector3d const> const &vec) {
+            return transformDerivativeImpl(Eigen::Translation3d(vec))
+                .translation();
         }
 
-        /// @brief Apply only the rotation/basis change (not the translation) to
-        /// a quaternion, typically representing a velocity or acceleration
-        Eigen::Quaterniond transformLinear(Eigen::Quaterniond const &quat) {
-            ///  @todo figure out the right way to do this. The if-0 section is
-            ///  closer but not quite.
-            return quat;
-#if 0
-            Eigen::Quaterniond transformedQuat = Eigen::Quaterniond(
-                reorientIsometry(Eigen::Isometry3d(quat)).rotation());
-            Eigen::Quaterniond transformedIdentity = Eigen::Quaterniond(
-                reorientIsometry(Eigen::Isometry3d::Identity()).rotation());
-            return transformedQuat * transformedIdentity.conjugate();
-#endif
+        /// @brief Transform a rotational derivative: angular velocity or
+        /// acceleration.
+        Eigen::Quaterniond transformDerivative(Eigen::Quaterniond const &quat) {
+            return Eigen::Quaterniond(transformDerivativeImpl(quat).rotation());
         }
 
         Eigen::Matrix4d const &getPre() const { return m_pre; }
@@ -99,12 +90,21 @@ namespace common {
         Eigen::Matrix4d const &getPost() const { return m_post; }
 
       private:
-        Eigen::Isometry3d
-        reorientIsometry(Eigen::Isometry3d const &input) const {
-            Eigen::Isometry3d ret =
-                Eigen::Isometry3d(m_post.topLeftCorner<3, 3>()) * input *
-                Eigen::Isometry3d(m_pre.topLeftCorner<3, 3>());
-            return ret;
+        ///  Transform a derivative: velocity or acceleration.
+        template <typename T>
+        Eigen::Isometry3d transformDerivativeImpl(T const &input) const {
+            // Because this is a differential transform, it is both to and
+            // from the same space.  That is to say that its left and right
+            // sides both represent its "to" space, and it has no "from"
+            // space.  Thus, we can ignore its pre-transforms.  But we want
+            // a differential transform in world space, the space on the other
+            // side of its pre transform.  So we end up inverting the post-
+            // transform and applying it where the pre-transform would
+            // normally go.  This makes the resulting matrix be world space
+            // on both sides.
+            Eigen::Isometry3d post =
+                Eigen::Isometry3d(m_post.topLeftCorner<3, 3>());
+            return Eigen::Isometry3d(post * input * post.inverse());
         }
         Eigen::Matrix4d m_pre;
         Eigen::Matrix4d m_post;

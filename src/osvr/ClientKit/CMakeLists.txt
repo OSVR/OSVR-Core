@@ -59,6 +59,12 @@ target_link_libraries(${LIBNAME_FULL}
     osvrCommon
     eigen-headers)
 
+if(ANDROID)
+    target_link_libraries(${LIBNAME_FULL}
+        PRIVATE
+        osvrServer)
+endif()
+        
 ###
 # C++ (header-only) interface
 ###

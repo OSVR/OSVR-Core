@@ -110,13 +110,9 @@ namespace vbtracker {
         } else {
             auto angle = std::acos(deltaquat.w());
             rot = deltaquat.vec().normalized() * angle / dt;
-            /// @todo without transformations being applied to vel quats, this
-            /// is needed.
-            rot.x() *= -1.;
         }
-        Eigen::Vector3d newRot(rot.x(), rot.z(), rot.y());
         auto ret = CannedIMUMeasurement{};
-        ret.setAngVel(newRot,
+        ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
         return ret;
     }

@@ -98,32 +98,39 @@ namespace pluginhost {
                                      pluginName);
         }
 
-        const std::string pluginPathName =
-            pluginhost::findPlugin(m_impl->pluginPaths, pluginName);
-        if (pluginPathName.empty()) {
-            throw std::runtime_error("Could not find plugin named " +
-                                     pluginName);
-        }
-
-        const auto pluginPathNameNoExt =
-            (fs::path(pluginPathName).parent_path() /
-             fs::path(pluginPathName).stem())
-                .generic_string();
         PluginRegPtr pluginReg(
             PluginSpecificRegistrationContext::create(pluginName));
         pluginReg->setParent(*this);
 
+        bool success = false;
         libfunc::PluginHandle plugin;
         auto ctx = pluginReg->extractOpaquePointer();
 
-        bool success = tryLoadingPlugin(plugin, pluginPathName, ctx) ||
-                       tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
-        if (!success) {
-            throw std::runtime_error(
-                "Unusual error occurred trying to load plugin named " +
-                pluginName);
+        const std::string pluginPathName =
+            pluginhost::findPlugin(m_impl->pluginPaths, pluginName);
+        if (pluginPathName.empty()) {
+            // was the plugin pre-loaded or statically linked? Try loading
+            // it by name.
+            success = tryLoadingPlugin(plugin, pluginName, ctx);
+            if(!success) {
+                throw std::runtime_error("Could not find plugin named " + pluginName);
+            }
         }
 
+        if(!success) {
+            const auto pluginPathNameNoExt =
+                (fs::path(pluginPathName).parent_path() /
+                 fs::path(pluginPathName).stem())
+                    .generic_string();
+
+            success = tryLoadingPlugin(plugin, pluginPathName, ctx) ||
+                           tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
+            if (!success) {
+                throw std::runtime_error(
+                    "Unusual error occurred trying to load plugin named " +
+                    pluginName);
+            }
+        }
         pluginReg->takePluginHandle(plugin);
         adoptPluginRegistrationContext(pluginReg);
     }
