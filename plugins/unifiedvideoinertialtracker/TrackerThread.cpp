@@ -291,6 +291,14 @@ namespace vbtracker {
             auto &body = m_trackingSystem.getBody(bodyId);
             m_reportingVec[bodyId.value()]->updateState(
                 body.getStateTime(), body.getState(), body.getProcessModel());
+#define OSVR_EXTRA_HMD_REPORT
+#ifdef OSVR_EXTRA_HMD_REPORT
+            if (bodyId == BodyId(0)) {
+                m_reportingVec[m_trackingSystem.getNumBodies() + 3]
+                    ->updateState(body.getStateTime(), body.getState(),
+                                  body.getProcessModel());
+            }
+#endif
         }
 
         // Extra reports
@@ -304,6 +312,7 @@ namespace vbtracker {
         auto &cameraPoseReporting = *m_reportingVec[numBodies];
         auto &imuAlignedReporting = *m_reportingVec[numBodies + 1];
         auto &imuCameraSpaceReporting = *m_reportingVec[numBodies + 2];
+        auto &hmdCameraSpaceReporting = *m_reportingVec[numBodies + 3];
 
         if (!m_setCameraPose) {
             m_setCameraPose = true;
@@ -312,7 +321,8 @@ namespace vbtracker {
             for (auto &reporting : m_reportingVec) {
                 if (reporting.get() == &cameraPoseReporting ||
                     reporting.get() == &imuAlignedReporting ||
-                    reporting.get() == &imuCameraSpaceReporting) {
+                    reporting.get() == &imuCameraSpaceReporting ||
+                    reporting.get() == &hmdCameraSpaceReporting) {
                     /// Skip these special ones, leave them with an identity
                     /// transform.
                     continue;

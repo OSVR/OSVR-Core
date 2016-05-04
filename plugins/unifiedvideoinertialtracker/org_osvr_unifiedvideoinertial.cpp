@@ -185,7 +185,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     /// Create a "BodyReporting" interchange structure for each body we track.
     void setupBodyReporting() {
         m_bodyReportingVector.clear();
-        static const auto EXTRA_TRACKING_SENSORS = 3;
+        static const auto EXTRA_TRACKING_SENSORS = 4;
         // Add three extra sensors: one for camera, one for corrected imu, and
         // one for imu in camera space.
         auto n = m_trackingSystem->getNumBodies() + EXTRA_TRACKING_SENSORS;
