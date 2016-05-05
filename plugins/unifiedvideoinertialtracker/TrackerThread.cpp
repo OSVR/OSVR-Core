@@ -37,6 +37,7 @@
 // Standard includes
 #include <future>
 #include <iostream>
+#include <type_traits>
 
 #define OSVR_TRACKER_THREAD_WRAP_WITH_TRY
 
@@ -299,10 +300,12 @@ namespace vbtracker {
         updateReportingVector(bodyIds);
     }
 
-    template<typename Report>
-	using enable_if_timestamped_report_t = typename std::enable_if<
-		typepack::contains<TimestampedReports, Report>::value>::type;
+    /// Alias to determine if a class is in fact a "Timestamped Report" type.
+    template <typename Report>
+    using is_timestamped_report =
+        typepack::contains<TimestampedReports, Report>;
 
+    /// Implementation detail of unpacking and handling the IMU messages.
     class IMUMessageProcessor : public boost::static_visitor<> {
       public:
         BodyId body;
@@ -311,7 +314,7 @@ namespace vbtracker {
         }
 
         template <typename Report>
-        enable_if_timestamped_report_t<Report>
+        typename std::enable_if<is_timestamped_report<Report>::value>::type
         operator()(Report const &report) {
             /// templated overload to handle real messages since they're
             /// identical except for the final element of the tuple.
