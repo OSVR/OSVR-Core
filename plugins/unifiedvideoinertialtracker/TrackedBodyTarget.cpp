@@ -78,7 +78,7 @@ namespace vbtracker {
         /// coefficient A hand-picked based on original fit, to move this
         /// function above the normal data with a good margin of error.
         static const double A = 5.4116155459;
-        static const double B = 6e-6;
+        static const double B = 7e-6;
         return B * std::exp(A * distance);
     }
 
