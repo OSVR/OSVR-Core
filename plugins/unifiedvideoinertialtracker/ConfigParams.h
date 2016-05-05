@@ -32,6 +32,7 @@
 // - none
 
 // Standard includes
+#include <cstdint>
 #include <string>
 
 namespace osvr {
