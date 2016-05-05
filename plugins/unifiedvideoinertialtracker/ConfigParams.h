@@ -48,7 +48,7 @@ namespace vbtracker {
         bool useOrientation = true;
 
         /// units: rad^2
-        double orientationVariance = 1.0e-6;
+        double orientationVariance = 1.0e-8;
 
         std::int32_t orientationMicrosecondsOffset = 0;
 
@@ -56,7 +56,7 @@ namespace vbtracker {
         bool useAngularVelocity = true;
 
         /// units: (rad/sec)^2
-        double angularVelocityVariance = 1.0e-2;
+        double angularVelocityVariance = 1.0e-6;
 
         std::int32_t angularVelocityMicrosecondsOffset = 0;
     };
