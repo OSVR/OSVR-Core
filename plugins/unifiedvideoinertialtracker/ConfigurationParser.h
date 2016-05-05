@@ -78,6 +78,8 @@ namespace vbtracker {
                       << std::endl;
         }
 
+        getOptionalParameter(config.continuousReporting, root,
+                             "continuousReporting");
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
         getOptionalParameter(config.calibrationFile, root, "calibrationFile");
 

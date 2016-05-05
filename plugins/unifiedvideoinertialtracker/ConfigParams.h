@@ -91,6 +91,10 @@ namespace vbtracker {
         /// Parameters specific to the edge hole based LED extraction algorithm.
         EdgeHoleParams extractParams;
 
+        /// Should we report continuously once we get data for a sensor that
+        /// lets us predict, or wait for actual updates of data?
+        bool continuousReporting = false;
+
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
 
