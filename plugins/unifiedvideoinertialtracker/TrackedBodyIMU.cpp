@@ -103,7 +103,6 @@ namespace vbtracker {
         double dt) {
         /// @todo handle transform for off-center velocity!
 
-        /// @todo This has HDK-specific transforms in it!
         Eigen::Vector3d rot;
         if (deltaquat.w() >= 1. || deltaquat.vec().isZero(1e-10)) {
             rot = Eigen::Vector3d::Zero();
