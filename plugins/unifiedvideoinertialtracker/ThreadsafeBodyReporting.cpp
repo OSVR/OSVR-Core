@@ -80,7 +80,8 @@ namespace vbtracker {
         return ret;
     }
 
-    BodyReport BodyReporting::getReport(double additionalPrediction) {
+    BodyReport BodyReporting::getReport(double additionalPrediction,
+                                        bool continuousReporting) {
         BodyState state;
         bool doingPrediction = false;
         BodyProcessModel process;
@@ -89,7 +90,7 @@ namespace vbtracker {
         {
             std::lock_guard<std::mutex> lock{m_mutex};
             // OK, we got the lock.
-            if (!m_shouldReport || !m_updated) {
+            if (!m_shouldReport || (!continuousReporting && !m_updated)) {
                 // Told we shouldn't report, OK.
                 return BodyReport::makeReportWithStatus(
                     ReportStatus::NoReportAvailable);

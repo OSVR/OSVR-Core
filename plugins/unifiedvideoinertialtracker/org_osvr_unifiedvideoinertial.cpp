@@ -95,7 +95,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
           m_additionalPrediction(params.additionalPrediction),
           m_camUsecOffset(params.cameraMicrosecondsOffset),
           m_oriUsecOffset(params.imu.orientationMicrosecondsOffset),
-          m_angvelUsecOffset(params.imu.angularVelocityMicrosecondsOffset) {
+          m_angvelUsecOffset(params.imu.angularVelocityMicrosecondsOffset),
+          m_continuousReporting(params.continuousReporting) {
         if (params.numThreads > 0) {
             // Set the number of threads for OpenCV to use.
             cv::setNumThreads(params.numThreads);
@@ -244,6 +245,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     const std::int32_t m_camUsecOffset = 0;
     const std::int32_t m_oriUsecOffset = 0;
     const std::int32_t m_angvelUsecOffset = 0;
+    const bool m_continuousReporting;
     BodyReportingVector m_bodyReportingVector;
     std::unique_ptr<TrackerThread> m_trackerThreadManager;
     bool m_threadLoopStarted = false;
@@ -262,8 +264,8 @@ inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
     /// On each update pass, we go through and attempt to report for every body,
     /// at the current time + additional prediction as requested.
     for (std::size_t i = 0; i < numSensors; ++i) {
-        auto report =
-            m_bodyReportingVector[i]->getReport(m_additionalPrediction);
+        auto report = m_bodyReportingVector[i]->getReport(
+            m_additionalPrediction, m_continuousReporting);
         if (!report) {
             /// couldn't get a report for this sensor for one reason or another.
             // std::cout << "Couldn't get report for " << i << std::endl;

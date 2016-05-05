@@ -78,7 +78,8 @@ namespace vbtracker {
         /// Otherwise either the mutex was locked (you're in a
         /// fast-spinning loop, just get it next time), or there's nothing worth
         /// reporting - in both cases, the other fields are not initialized!
-        BodyReport getReport(double additionalPrediction);
+        BodyReport getReport(double additionalPrediction,
+                             bool continuousReporting);
         /// @}
 
         /// @name processing-thread methods
