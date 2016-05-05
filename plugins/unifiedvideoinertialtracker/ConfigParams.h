@@ -112,7 +112,7 @@ namespace vbtracker {
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
-        double blobMoveThreshold = 3.;
+        double blobMoveThreshold = 3.5;
 
         /// Whether to show the debug windows and debug messages.
         bool debug = false;
