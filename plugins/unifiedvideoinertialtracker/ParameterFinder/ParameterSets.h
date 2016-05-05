@@ -41,6 +41,64 @@ namespace vbtracker {
         /// Trait for param set name.
         template <typename T> struct ParamSetName;
 
+        struct ProcessNoiseAndDecay {
+            /// required part of interface
+            static const size_t Dimension = 5;
+
+            /// Internal for convenience use.
+            using ParamVec = Vec<Dimension>;
+
+            /// required part of interface
+            static ParamVec getInitialVec(OptimCommonData const &commonData) {
+
+                ParamVec x;
+                const auto &p = commonData.initialParams;
+                const auto posProcessNoise = p.processNoiseAutocorrelation[0];
+                const auto oriProcessNoise = p.processNoiseAutocorrelation[3];
+
+                x << posProcessNoise, oriProcessNoise,
+                    p.linearVelocityDecayCoefficient,
+                    p.angularVelocityDecayCoefficient,
+                    p.noBeaconLinearVelocityDecayCoefficient;
+                return x;
+            }
+
+            /// required part of interface
+            static std::pair<double, double> getRho() { return {1e-10, 1e0}; }
+
+            /// required part of interface
+            static void updateParamsFromVec(ConfigParams &params,
+                                            ParamVec const &x) {
+                // Update config from provided param vec
+                /// positional noise
+                params.processNoiseAutocorrelation[0] =
+                    params.processNoiseAutocorrelation[1] =
+                        params.processNoiseAutocorrelation[2] = x[0];
+                /// rotational noise
+                params.processNoiseAutocorrelation[3] =
+                    params.processNoiseAutocorrelation[4] =
+                        params.processNoiseAutocorrelation[5] = x[1];
+
+                params.linearVelocityDecayCoefficient = x[2];
+                params.angularVelocityDecayCoefficient = x[3];
+                params.noBeaconLinearVelocityDecayCoefficient = x[4];
+            }
+
+            /// required part of interface
+            static const char *getVecElementNames() {
+                return "position process noise autocorrelation, "
+                       "orientation process noise autocorrelation, "
+                       "linear velocity decay coefficient, "
+                       "angular velocity decay coefficient, "
+                       "no-beacon linear velocity decay coefficient";
+            }
+        };
+
+        /// Required part of interface for each parameter set struct
+        template <> struct ParamSetName<ProcessNoiseAndDecay> {
+            static const char *get() { return "ProcessNoiseAndDecay"; }
+        };
+
         struct ProcessNoiseVarianceAndDecay {
             /// required part of interface
             static const size_t Dimension = 5;
@@ -95,6 +153,7 @@ namespace vbtracker {
             }
         };
 
+        /// Required part of interface for each parameter set struct
         template <> struct ParamSetName<ProcessNoiseVarianceAndDecay> {
             static const char *get() { return "ProcessNoiseVarianceAndDecay"; }
         };
@@ -172,6 +231,52 @@ namespace vbtracker {
 
         template <> struct ParamSetName<HighResidual> {
             static const char *get() { return "HighResidual"; }
+        };
+
+        struct VariancePenalties {
+            /// required part of interface
+            static const size_t Dimension = 5;
+
+            /// Internal for convenience use.
+            using ParamVec = Vec<Dimension>;
+
+            /// required part of interface
+            static ParamVec getInitialVec(OptimCommonData const &commonData) {
+                ParamVec x;
+                const auto &p = commonData.initialParams;
+                x << p.brightLedVariancePenalty, p.tuning.noveltyPenaltyBase,
+                    p.maxResidual, p.highResidualVariancePenalty,
+                    p.measurementVarianceScaleFactor;
+                return x;
+            }
+
+            /// required part of interface
+            static std::pair<double, double> getRho() { return {1e-5, 1e1}; }
+
+            /// required part of interface
+            static void updateParamsFromVec(ConfigParams &p,
+                                            ParamVec const &x) {
+                // Update config from provided param vec
+                p.brightLedVariancePenalty = x[0];
+                p.shouldSkipBrightLeds = false;
+                p.tuning.noveltyPenaltyBase = x[1];
+                p.maxResidual = x[2];
+                p.highResidualVariancePenalty = x[3];
+                p.measurementVarianceScaleFactor = x[4];
+            }
+
+            /// required part of interface
+            static const char *getVecElementNames() {
+                return "bright LED variance penalty,\n"
+                       "novelty penalty base,\n"
+                       "max residual,\n"
+                       "high residual variance penalty,\n"
+                       "measurement variance scale factor";
+            }
+        };
+
+        template <> struct ParamSetName<VariancePenalties> {
+            static const char *get() { return "VariancePenalties"; }
         };
     } // namespace optimization_param_sets
 } // namespace vbtracker

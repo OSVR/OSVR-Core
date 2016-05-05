@@ -44,8 +44,9 @@
 /// Parameter sets for the routines that start with "Param"
 namespace ps {
 using namespace osvr::vbtracker::optimization_param_sets;
-using ParamSets = osvr::typepack::list<ProcessNoiseVarianceAndDecay,
-                                       BrightAndNew, HighResidual>;
+using ParamSets =
+    osvr::typepack::list<ProcessNoiseAndDecay, ProcessNoiseVarianceAndDecay,
+                         BrightAndNew, HighResidual, VariancePenalties>;
 using DefaultParamSet = osvr::typepack::head<ps::ParamSets>;
 } // namespace ps
 
