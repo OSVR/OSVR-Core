@@ -140,14 +140,14 @@ namespace vbtracker {
         /// when we've lost sight of all beacons, to quickly attenuate coasting.
         /// it's the proportion of that velocity remaining at the end of 1
         /// second. Thus, smaller = faster decay/higher damping. In range [0, 1]
-        double noBeaconLinearVelocityDecayCoefficient = 0.1;
+        double noBeaconLinearVelocityDecayCoefficient = 0.005878868009089861;
 
         /// The measurement variance (units: m^2) is included in the plugin
         /// along with the coordinates of the beacons. Some beacons are
         /// observed with higher variance than others, due to known difficulties
         /// in tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.055673430082431;
+        double measurementVarianceScaleFactor = 10.90699629355032;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
@@ -186,7 +186,7 @@ namespace vbtracker {
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
-        double highResidualVariancePenalty = 7.553771505971281;
+        double highResidualVariancePenalty = 7.513691210865344;
 
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
@@ -213,7 +213,7 @@ namespace vbtracker {
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty = 26.31624913488417;
+        double brightLedVariancePenalty = 25.32749811268542;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the
