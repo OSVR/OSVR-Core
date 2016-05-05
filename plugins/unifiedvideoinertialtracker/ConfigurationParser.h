@@ -128,6 +128,8 @@ namespace vbtracker {
                              "linearVelocityDecayCoefficient");
         getOptionalParameter(config.angularVelocityDecayCoefficient, root,
                              "angularVelocityDecayCoefficient");
+        getOptionalParameter(config.noBeaconLinearVelocityDecayCoefficient,
+                             root, "noBeaconLinearVelocityDecayCoefficient");
         getOptionalParameter(config.measurementVarianceScaleFactor, root,
                              "measurementVarianceScaleFactor");
         getOptionalParameter(config.highResidualVariancePenalty, root,

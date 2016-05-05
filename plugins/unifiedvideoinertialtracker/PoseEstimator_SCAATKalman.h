@@ -84,6 +84,7 @@ namespace vbtracker {
         const double m_highResidualVariancePenalty;
         const double m_beaconProcessNoise;
         const double m_noveltyPenaltyBase;
+        const double m_noBeaconLinearVelocityDecayCoefficient;
         const double m_measurementVarianceScaleFactor;
         const double m_brightLedVariancePenalty;
         const bool m_extraVerbose;

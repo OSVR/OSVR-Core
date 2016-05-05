@@ -135,10 +135,16 @@ namespace vbtracker {
         /// smaller = faster decay/higher damping. In range [0, 1]
         double angularVelocityDecayCoefficient = 0.8945437897688864;
 
+        /// The value used in an additional exponential decay of linear velocity
+        /// when we've lost sight of all beacons, to quickly attenuate coasting.
+        /// it's the proportion of that velocity remaining at the end of 1
+        /// second. Thus, smaller = faster decay/higher damping. In range [0, 1]
+        double noBeaconLinearVelocityDecayCoefficient = 0.1;
+
         /// The measurement variance (units: m^2) is included in the plugin
-        /// along with the coordinates of the beacons. Some beacons are observed
-        /// with higher variance than others, due to known difficulties in
-        /// tracking them, etc. However, for testing you may fine-tine the
+        /// along with the coordinates of the beacons. Some beacons are
+        /// observed with higher variance than others, due to known difficulties
+        /// in tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
         double measurementVarianceScaleFactor = 1.055673430082431;
 

@@ -66,7 +66,6 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 namespace osvr {
 namespace vbtracker {
-    static const auto NO_BEACON_LIN_VEL_ATTENUATION = 0.2;
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
     SCAATKalmanPoseEstimator::SCAATKalmanPoseEstimator(
         ConfigParams const &params)
@@ -77,6 +76,8 @@ namespace vbtracker {
           m_highResidualVariancePenalty(params.highResidualVariancePenalty),
           m_beaconProcessNoise(params.beaconProcessNoise),
           m_noveltyPenaltyBase(params.tuning.noveltyPenaltyBase),
+          m_noBeaconLinearVelocityDecayCoefficient(
+              params.noBeaconLinearVelocityDecayCoefficient),
           m_brightLedVariancePenalty(params.brightLedVariancePenalty),
           m_measurementVarianceScaleFactor(
               params.measurementVarianceScaleFactor),
@@ -173,14 +174,9 @@ namespace vbtracker {
 
         if (goodLeds.empty() && p.startingTime != frameTime) {
             /// If we have no good LEDs, let's attenuate the linear velocity
-            /// quickly.
-            static bool msgd = false;
-            if (!msgd) {
-                std::cout << "doing the no-led damping" << std::endl;
-                msgd = true;
-            }
+            /// quickly: avoid coasting/gliding.
             auto dt = util::time::duration(frameTime, p.startingTime);
-            auto atten = std::pow(NO_BEACON_LIN_VEL_ATTENUATION, dt);
+            auto atten = std::pow(m_noBeaconLinearVelocityDecayCoefficient, dt);
             p.state.velocity() *= atten;
         }
 
