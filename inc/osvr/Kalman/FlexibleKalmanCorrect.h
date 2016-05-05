@@ -22,14 +22,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDED_KalmanCorrect_h_GUID_354B7B5B_CF4F_49AF_7F71_A4279BD8DA8C
-#define INCLUDED_KalmanCorrect_h_GUID_354B7B5B_CF4F_49AF_7F71_A4279BD8DA8C
+#ifndef INCLUDED_FlexibleKalmanCorrect_h_GUID_354B7B5B_CF4F_49AF_7F71_A4279BD8DA8C
+#define INCLUDED_FlexibleKalmanCorrect_h_GUID_354B7B5B_CF4F_49AF_7F71_A4279BD8DA8C
 
 // Internal Includes
-// - none
+#include "FlexibleKalmanBase.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
+// - none
 
 // Standard includes
 // - none
@@ -51,8 +51,7 @@ namespace kalman {
                              types::SquareMatrix<m> const &S)
             : P(P_), PHt(PHt_), denom(S), deltaz(meas.getResidual(state)),
               stateCorrection(PHt * denom.solve(deltaz)), state_(state),
-              stateCorrectionFinite(stateCorrection.array().allFinite()) {
-		}
+              stateCorrectionFinite(stateCorrection.array().allFinite()) {}
 
         /// State error covariance
         types::SquareMatrix<n> P;
@@ -61,21 +60,31 @@ namespace kalman {
         types::Matrix<n, m> PHt;
 
         /// Decomposition of S
+        ///
+        /// Not going to directly compute Kalman gain K = PHt (S^-1)
+        /// Instead, decomposed S to solve things of the form (S^-1)x
+        /// repeatedly later, by using the substitution
+        /// Kx = PHt denom.solve(x)
+        /// @todo Figure out if this is the best decomp to use
+        // TooN/TAG use this one, and others online seem to suggest it.
         Eigen::LDLT<types::SquareMatrix<m>> denom;
 
-        /// Measurement residual or delta z
+        /// Measurement residual/delta z/innovation
         types::Vector<m> deltaz;
 
         /// Corresponding state change to apply.
         types::Vector<n> stateCorrection;
 
-		/// Is the state correction free of NaNs and +- infs?
-		bool stateCorrectionFinite;
+        /// Is the state correction free of NaNs and +- infs?
+        bool stateCorrectionFinite;
 
         /// That's as far as we go here before you choose to continue.
 
         /// Finish computing the rest and correct the state.
-		/// @return true if correction completed
+        /// @param cancelIfNotFinite If the new error covariance is detected to
+        /// contain non-finite values, should we cancel the correction and not
+        /// apply it?
+        /// @return true if correction completed
         bool finishCorrection(bool cancelIfNotFinite = true) {
             // Compute the new error covariance
             // differs from the (I-KH)P form by not factoring out the P (since
@@ -83,20 +92,37 @@ namespace kalman {
             types::SquareMatrix<n> newP =
                 P - (PHt * denom.solve(PHt.transpose()));
 
-			if (!newP.array().allFinite()) {
-				return false;
-			}
+#if 0
+            // Test fails with this one:
+            // VariedProcessModelStability/1.AbsolutePoseMeasurementXlate111,
+            // where TypeParam =
+            // osvr::kalman::PoseDampedConstantVelocityProcessModel
+            OSVR_KALMAN_DEBUG_OUTPUT(
+                "error covariance scale",
+                (types::SquareMatrix<n>::Identity() - PHt * denom.solve(H)));
+            types::SquareMatrix<n> newP =
+                (types::SquareMatrix<n>::Identity() - PHt * denom.solve(H)) * P;
+#endif
+
+            if (!newP.array().allFinite()) {
+                return false;
+            }
 
             // Correct the state estimate
             state_.setStateVector(state_.stateVector() + stateCorrection);
 
-			// Correct the error covariance
+            // Correct the error covariance
             state_.setErrorCovariance(newP);
+
+#if 0
+            // Doesn't seem necessary to re-symmetrize the covariance matrix.
+            state_.setErrorCovariance((newP + newP.transpose()) / 2.);
+#endif
 
             // Let the state do any cleanup it has to (like fixing externalized
             // quaternions)
             state_.postCorrect();
-			return true;
+            return true;
         }
 
       private:
@@ -138,4 +164,4 @@ namespace kalman {
 } // namespace kalman
 } // namespace osvr
 
-#endif // INCLUDED_KalmanCorrect_h_GUID_354B7B5B_CF4F_49AF_7F71_A4279BD8DA8C
+#endif // INCLUDED_FlexibleKalmanCorrect_h_GUID_354B7B5B_CF4F_49AF_7F71_A4279BD8DA8C

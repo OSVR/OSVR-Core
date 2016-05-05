@@ -24,7 +24,6 @@
 
 // Internal Includes
 #include "ApplyIMUToState.h"
-#include "KalmanCorrect.h"
 #include "SpaceTransformations.h"
 
 // Library/third-party includes

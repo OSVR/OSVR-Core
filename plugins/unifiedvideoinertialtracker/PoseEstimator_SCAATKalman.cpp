@@ -42,7 +42,6 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 // Internal Includes
 #include "ImagePointMeasurement.h"
-#include "KalmanCorrect.h"
 #include "LED.h"
 #include "PoseEstimator_SCAATKalman.h"
 #include "UsefulQuaternions.h"
