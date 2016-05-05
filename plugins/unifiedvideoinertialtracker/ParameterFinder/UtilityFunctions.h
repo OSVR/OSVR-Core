@@ -60,7 +60,7 @@ namespace vbtracker {
     /// Use for output of parameters
     inline Eigen::IOFormat const &getFullFormat() {
         static const Eigen::IOFormat FullFormat =
-            Eigen::IOFormat(Eigen::FullPrecision, 0, ",");
+            Eigen::IOFormat(Eigen::FullPrecision, 0, ",", ",\n");
         return FullFormat;
     }
 
