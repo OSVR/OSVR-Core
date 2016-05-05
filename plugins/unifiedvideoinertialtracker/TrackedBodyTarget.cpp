@@ -97,7 +97,8 @@ namespace vbtracker {
                 m_framesWithoutValidBeacons = 0;
             }
 
-            if (trackingState != TargetTrackingState::RANSAC) {
+            if (trackingState != TargetTrackingState::RANSAC &&
+                m_framesWithoutValidBeacons != 0) {
                 auto maxPositionalError =
                     getMaxPositionalErrorVariance(bodyState);
                 auto distance = bodyState.position().z();
