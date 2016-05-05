@@ -261,6 +261,10 @@ namespace vbtracker {
             if (squaredResidual > maxSquaredResidual) {
                 // OK, it's bad, but is it really bad?
 
+                /// Have to still count it as bad, in case it's our model, not
+                /// the beacon, that's actually bad.
+                numBad++;
+
                 // Let's see if it's really bad and thus likely actually some
                 // other object that we've mis-recognized as a beacon, like a
                 // lighthouse base station.
@@ -276,7 +280,6 @@ namespace vbtracker {
 
                 // OK, it's just probably a low-quality measurement but
                 // not a measurement of something else.
-                numBad++;
                 localVarianceFactor *= m_highResidualVariancePenalty;
             } else {
                 // It's reasonable!
