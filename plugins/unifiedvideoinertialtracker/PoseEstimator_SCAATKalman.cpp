@@ -69,6 +69,10 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 namespace osvr {
 namespace vbtracker {
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
+
+    /// 4, so that if the residual itself is 2x the max residual, we reject the
+    /// identification.
+    static const auto SQUARED_MAX_RESIDUAL_FACTOR_FOR_ID_REJECT = 4;
     SCAATKalmanPoseEstimator::SCAATKalmanPoseEstimator(
         ConfigParams const &params)
         : m_shouldSkipBright(params.shouldSkipBrightLeds),
@@ -232,7 +236,6 @@ namespace vbtracker {
             meas.setMeasurement(
                 cvToVector(led.getLocationForTracking()).cast<double>());
 
-            led.markAsUsed();
             auto state =
                 kalman::makeAugmentedState(p.state, *(p.beacons[index]));
             meas.updateFromState(state);
@@ -241,13 +244,28 @@ namespace vbtracker {
             // Only tolerate a residual of 0.15m at the beacon depth.
             auto maxSquaredResidual =
                 squaredXyDistanceFromMetersToPixels(m_maxResidual, depth, cam);
-            if (residual.squaredNorm() > maxSquaredResidual) {
-                // probably bad
+            auto squaredResidual = residual.squaredNorm();
+            if (squaredResidual > maxSquaredResidual) {
+                // Let's see if it's actually some other object that we've
+                // mis-recognized as a beacon, like a lighthouse base station.
+                if (squaredResidual >
+                    squaredXyDistanceFromMetersToPixels(
+                        SQUARED_MAX_RESIDUAL_FACTOR_FOR_ID_REJECT *
+                            m_maxResidual,
+                        depth, cam)) {
+                    // throw it out!
+                    led.markMisidentified();
+                    continue;
+                }
+                // Otherwise, it's just probably a "bad" measurement but not a
+                // measurement of something else.
                 numBad++;
                 localVarianceFactor *= m_highResidualVariancePenalty;
             } else {
                 numGood++;
             }
+
+            led.markAsUsed();
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
             auto effectiveVariance =
