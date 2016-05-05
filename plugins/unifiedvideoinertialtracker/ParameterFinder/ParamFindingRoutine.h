@@ -91,6 +91,9 @@ namespace vbtracker {
                 /// very few tracked frames
                 auto effectiveCost =
                     avgCost * (numResets + 1) * (numResets + 1) / samples;
+                if (std::isnan(effectiveCost)) {
+                    effectiveCost = getReallyBigCost();
+                }
                 std::cout << std::setw(15) << std::to_string(effectiveCost)
                           << " effective cost (average cost of " << std::setw(9)
                           << avgCost << " over " << std::setw(4) << samples
