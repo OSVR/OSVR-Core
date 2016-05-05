@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
-#include "MakeHDKTrackingSystem.h"
-#include "HDKData.h"
 #include "ConfigurationParser.h"
+#include "HDKData.h"
+#include "MakeHDKTrackingSystem.h"
 #include "TrackerThread.h"
 
 // ImageSources mini-library
@@ -33,16 +33,16 @@
 #include "ImageSources/ImageSourceFactories.h"
 
 // uvbi-core mini-library
-#include "TrackingSystem.h"
-#include "ThreadsafeBodyReporting.h"
 #include "CameraParameters.h"
+#include "ThreadsafeBodyReporting.h"
+#include "TrackingSystem.h"
 
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
-#include <osvr/PluginKit/PluginKit.h>
-#include <osvr/PluginKit/TrackerInterfaceC.h>
-#include <osvr/PluginKit/AnalogInterfaceC.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
+#include <osvr/PluginKit/AnalogInterfaceC.h>
+#include <osvr/PluginKit/PluginKit.h>
+#include <osvr/PluginKit/TrackerInterfaceC.h>
 
 #include <osvr/Util/EigenInterop.h>
 
@@ -50,12 +50,12 @@
 #include "org_osvr_unifiedvideoinertial_json.h"
 
 // Library/third-party includes
+#include <json/reader.h>
+#include <json/value.h>
 #include <opencv2/core/core.hpp> // for basic OpenCV types
 #include <opencv2/core/operations.hpp>
 #include <opencv2/highgui/highgui.hpp> // for image capture
 #include <opencv2/imgproc/imgproc.hpp> // for image scaling
-#include <json/value.h>
-#include <json/reader.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
@@ -63,11 +63,11 @@
 #include <util/Stride.h>
 
 // Standard includes
-#include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <sstream>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 
 // Anonymous namespace to avoid symbol collision
