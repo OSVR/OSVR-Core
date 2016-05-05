@@ -62,7 +62,9 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <iterator> // back_inserter
 #include <random>   // std::default_random_engine
 
-#undef DEBUG_MEASUREMENT_RESIDUALS
+#undef DEBUG_VELOCITY
+#undef VARIANCE_PENALTY_FOR_FIXED_BEACONS
+#undef OSVR_CHECK_BOUNDING_BOXES
 
 namespace osvr {
 namespace vbtracker {
@@ -184,23 +186,11 @@ namespace vbtracker {
         std::shuffle(begin(goodLeds), end(goodLeds), m_randEngine);
 
 #if 0
-        /// Limit the number of measurements filtered in each time.
-        static const auto MAX_MEASUREMENTS = 15;
-        if (goodLeds.size() > MAX_MEASUREMENTS) {
-            goodLeds.resize(MAX_MEASUREMENTS);
-        }
-#endif
-
-#if 0
         static ::util::Stride varianceStride{ 809 };
         if (++varianceStride) {
             std::cout << p.state.errorCovariance().diagonal().transpose()
                 << std::endl;
         }
-#endif
-#ifdef DEBUG_MEASUREMENT_RESIDUALS
-        static ::util::Stride s{203};
-        s.advance();
 #endif
 
         CameraModel cam;
@@ -272,9 +262,6 @@ namespace vbtracker {
             auto model = kalman::makeAugmentedProcessModel(p.processModel,
                                                            beaconProcess);
 
-#if 0
-			kalman::correct(state, model, meas);
-#else
             auto correction = kalman::beginCorrection(state, model, meas);
 #if 0
 			/// this is the velocity correction:
@@ -298,22 +285,10 @@ namespace vbtracker {
             }
 #endif
             correction.finishCorrection();
-#endif
 
             gotMeasurement = true;
-#ifdef DEBUG_MEASUREMENT_RESIDUALS
-            if (s) {
-                std::cout << "M: " << debug.measurement
-                          << "  R: " << debug.residual
-                          << "  s2: " << debug.variance << "\n";
-            }
-#endif
         }
-#ifdef DEBUG_MEASUREMENT_RESIDUALS
-        if (s) {
-            std::cout << std::endl;
-        }
-#endif
+
         if (gotMeasurement) {
             // Re-symmetrize error covariance.
             kalman::types::DimSquareMatrix<BodyState> cov =
@@ -498,7 +473,7 @@ namespace vbtracker {
                     return false;
                 }
 
-#if 0
+#ifdef OSVR_CHECK_BOUNDING_BOXES
                 /// @todo For right now, if we don't have a bounding box, we're
                 /// assuming it's square enough (and only testing for
                 /// non-squareness on those who actually do have bounding
