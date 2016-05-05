@@ -44,12 +44,7 @@ namespace vbtracker {
 
     EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
         EdgeHoleParams const &extractorParams)
-        : extParams_(extractorParams) {
-#if 0
-        std::cout << PREFIX << "laplacianKSize: " << extParams_.laplacianKSize
-                  << std::endl;
-#endif
-    }
+        : extParams_(extractorParams) {}
 
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
