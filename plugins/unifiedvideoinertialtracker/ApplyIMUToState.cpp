@@ -37,7 +37,6 @@
 // Standard includes
 #include <iostream>
 
-
 namespace osvr {
 namespace kalman {
     /// The measurement here has been split into a base and derived type, so
@@ -67,19 +66,26 @@ namespace kalman {
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
-            const Eigen::Quaterniond residual = m_quat * prediction.inverse();
+            const Eigen::Quaterniond residualq = m_quat * prediction.inverse();
+#if 0
             // Use the dot product to choose which of the two equivalent
             // quaternions to get the log of for the residual.
             const Eigen::Quaterniond equivalentResidual =
                 Eigen::Quaterniond(-(residual.coeffs()));
             auto dot = prediction.dot(residual);
-#if 0
             return dot >= 0 ? util::quat_exp_map(residual).ln()
                             : util::quat_exp_map(equivalentResidual).ln();
-#else
             return dot < 0 ? util::quat_exp_map(residual).ln()
                             : util::quat_exp_map(equivalentResidual).ln();
 
+#else
+            MeasurementVector residual = util::quat_exp_map(residualq).ln();
+            MeasurementVector equivResidual =
+                util::quat_exp_map(Eigen::Quaterniond(-(residualq.coeffs())))
+                    .ln();
+            return residual.squaredNorm() < equivResidual.squaredNorm()
+                       ? residual
+                       : equivResidual;
 #endif
         }
         /// Convenience method to be able to store and re-use measurements.
