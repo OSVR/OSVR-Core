@@ -46,13 +46,11 @@ namespace vbtracker {
             auto const oldId = m_id;
             m_id = m_identifier->getId(m_id, m_brightnessHistory, m_lastBright,
                                        blobsKeepId);
-			using Id = ZeroBasedBeaconId;
+            using Id = ZeroBasedBeaconId;
             if (Id(SENTINEL_MARKED_MISIDENTIFIED) == oldId &&
-                (Id(
-                     SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA) ==
+                (Id(SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA) ==
                      m_id ||
-                 Id(
-                     SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA) ==
+                 Id(SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA) ==
                      m_id)) {
                 /// Make the "misidentified" sentinel a little stickier than
                 /// "insufficient data" or "no pattern recognized" so we can see
