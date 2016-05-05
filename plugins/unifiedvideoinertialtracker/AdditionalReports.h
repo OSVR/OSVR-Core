@@ -36,9 +36,9 @@
 
 // configuration section - define or undefine here.
 #define OSVR_OUTPUT_CAMERA_POSE
-#define OSVR_OUTPUT_IMU
-#define OSVR_OUTPUT_IMU_CAM
-#define OSVR_OUTPUT_HMD_CAM
+#undef OSVR_OUTPUT_IMU
+#undef OSVR_OUTPUT_IMU_CAM
+#undef OSVR_OUTPUT_HMD_CAM
 
 // Past this point, we consume those definitions.
 
