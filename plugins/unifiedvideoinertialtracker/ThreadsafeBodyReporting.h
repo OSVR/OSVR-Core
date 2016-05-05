@@ -90,6 +90,14 @@ namespace vbtracker {
         /// other members since they're unusuable by definition if you should
         /// not report.
         void markShouldNotReport();
+
+        /// Sets the flag that the mainloop should not report if the mainloop
+        /// has already retrieved the latest update. Doesn't touch the
+        /// other members since they're unusuable by definition if you should
+        /// not report. If the mainloop hasn't retrieved the latest update,
+        /// changes no state.
+        void markShouldNotReportIfRetrieved();
+
         /// Updates the state, implicitly setting the flag that the mainloop
         /// should report.
         void updateState(util::time::TimeValue const &tv,

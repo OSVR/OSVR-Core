@@ -141,6 +141,15 @@ namespace vbtracker {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_shouldReport = false;
     }
+
+    void BodyReporting::markShouldNotReportIfRetrieved() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_updated) {
+            // mainloop has retrieved the latest report.
+            m_shouldReport = false;
+        }
+    }
+
     /// Updates the state, implicitly setting the flag that the mainloop
     /// should report.
     void BodyReporting::updateState(util::time::TimeValue const &tv,
