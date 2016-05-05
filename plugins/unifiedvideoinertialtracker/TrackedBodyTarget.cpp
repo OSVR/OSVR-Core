@@ -46,6 +46,11 @@
 /// Kalman, primarily for troubleshooting purposes.
 #undef OSVR_RANSACKALMAN
 
+#undef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
+#undef OSVR_DEBUG_ERROR_VARIANCE
+
+#define OSVR_VERBOSE_ERROR_BOUNDS
+
 namespace osvr {
 namespace vbtracker {
     enum class TargetTrackingState {
@@ -60,8 +65,27 @@ namespace vbtracker {
         StopTrackingErrorBoundsExceeded,
         StopTrackingLostSight
     };
+
     static const auto MAX_FRAMES_WITHOUT_BEACONS = 150;
-    static const double MAX_POSITIONAL_ERROR_VARIANCE = 15.;
+
+    inline double getLimitOnMaxPositionalErrorVariance(double distance) {
+        /// An exponential function was fit to recorded data of max positional
+        /// error variances and distances during normal tracking operation,
+        /// using libreoffice calc. R^2 = 0.95, and on a plot with a log-scale
+        /// for y, the data looked fairly linear.
+
+        /// log-plot slope B is used directly from that regression.
+        /// coefficient A hand-picked based on original fit, to move this
+        /// function above the normal data with a good margin of error.
+        static const double A = 5.4116155459;
+        static const double B = 6e-6;
+        return B * std::exp(A * distance);
+    }
+
+    inline double getMaxPositionalErrorVariance(BodyState const &bodyState) {
+        return bodyState.errorCovariance().diagonal().head<3>().maxCoeff();
+    }
+
     class TargetHealthEvaluator {
       public:
         TargetHealthState operator()(BodyState const &bodyState,
@@ -73,12 +97,13 @@ namespace vbtracker {
                 m_framesWithoutValidBeacons = 0;
             }
 
-            // Eigen::Vector3d positionalError =
-            // bodyState.errorCovariance().diagonal().head<3>();
             if (trackingState != TargetTrackingState::RANSAC) {
-                double maxPositionalError =
-                    bodyState.errorCovariance().diagonal().head<3>().maxCoeff();
-                if (maxPositionalError > MAX_POSITIONAL_ERROR_VARIANCE) {
+                auto maxPositionalError =
+                    getMaxPositionalErrorVariance(bodyState);
+                auto distance = bodyState.position().z();
+                auto errorLimit =
+                    getLimitOnMaxPositionalErrorVariance(distance);
+                if (maxPositionalError > errorLimit) {
                     return TargetHealthState::StopTrackingErrorBoundsExceeded;
                 }
             }
@@ -349,10 +374,20 @@ namespace vbtracker {
         /// pre-estimation transitions based on overall health
         switch (m_impl->healthEval(bodyState, usableLeds(),
                                    m_impl->trackingState)) {
-        case TargetHealthState::StopTrackingErrorBoundsExceeded:
-            msg() << "In flight reset - error bounds exceeded..." << std::endl;
+        case TargetHealthState::StopTrackingErrorBoundsExceeded: {
+            msg() << "In flight reset - error bounds exceeded...";
+#ifdef OSVR_VERBOSE_ERROR_BOUNDS
+            auto maxPositionalError =
+                getMaxPositionalErrorVariance(getBody().getState());
+            auto distance = getBody().getState().position().z();
+            auto errorLimit = getLimitOnMaxPositionalErrorVariance(distance);
+            std::cout << " [" << maxPositionalError << "\t > " << errorLimit
+                      << "\t (@ " << distance << "m)]";
+#endif
+            std::cout << std::endl;
             enterRANSACMode();
             break;
+        }
         case TargetHealthState::StopTrackingLostSight:
 #if 0
             msg() << "Lost sight of beacons for too long, awaiting their "
@@ -414,6 +449,17 @@ namespace vbtracker {
         }
         }
 
+#ifdef OSVR_DEBUG_ERROR_VARIANCE
+
+        static ::util::Stride varianceStride(101);
+        if (++varianceStride) {
+            msg() << "Max positional error variance: "
+                  << getMaxPositionalErrorVariance(getBody().getState())
+                  << "   Distance: " << getBody().getState().position().z()
+                  << std::endl;
+        }
+#endif
+
         /// post-estimation transitions (based on state)
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
@@ -435,6 +481,11 @@ namespace vbtracker {
                 enterRANSACMode();
                 break;
             case SCAATKalmanPoseEstimator::TrackingHealth::ResetWhenBeaconsSeen:
+#ifdef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
+                msg() << "Max positional error variance: "
+                      << getMaxPositionalErrorVariance(getBody().getState())
+                      << std::endl;
+#endif
                 m_impl->trackingState =
                     TargetTrackingState::RANSACWhenBlobDetected;
                 break;
@@ -505,6 +556,11 @@ namespace vbtracker {
 #ifndef OSVR_UVBI_ASSUME_SINGLE_TARGET_PER_BODY
 #error                                                                         \
     "We may not be able/willing to run right over the body velocity just because this target lost its fix"
+#endif
+#ifdef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
+        msg() << "Max positional error variance: "
+              << getMaxPositionalErrorVariance(getBody().getState())
+              << std::endl;
 #endif
         m_impl->trackingResets++;
         // Zero out velocities if we're coming from Kalman.

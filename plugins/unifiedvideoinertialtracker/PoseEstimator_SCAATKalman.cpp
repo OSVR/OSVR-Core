@@ -547,16 +547,19 @@ namespace vbtracker {
     // before RANSAC takes over again.
     static const std::size_t MAX_PROBATION_FRAMES = 10;
 
-    static const std::size_t MAX_FRAMES_WITHOUT_MEASUREMENTS = 50;
+    // static const std::size_t MAX_FRAMES_WITHOUT_MEASUREMENTS = 100;
 
-    static const std::size_t MAX_FRAMES_WITHOUT_ID_BLOBS = 10;
+    static const std::size_t MAX_FRAMES_WITHOUT_ID_BLOBS = 25;
 
     SCAATKalmanPoseEstimator::TrackingHealth
     SCAATKalmanPoseEstimator::getTrackingHealth() {
 
-        auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES) ||
+        auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES);
+#if 0
+			||
                           (m_framesWithoutUtilizedMeasurements >
                            MAX_FRAMES_WITHOUT_MEASUREMENTS);
+#endif
         if (needsReset) {
             return TrackingHealth::NeedsResetNow;
         }
