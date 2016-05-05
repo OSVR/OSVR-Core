@@ -39,6 +39,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
+#include <osvr/TypePack/List.h>
 
 // Standard includes
 #include <chrono>
@@ -62,9 +63,12 @@ namespace vbtracker {
     using TimestampedAngVel =
         std::tuple<TrackedBodyIMU *, util::time::TimeValue,
                    OSVR_AngularVelocityReport>;
+
+    using TimestampedReports =
+        typepack::list<TimestampedOrientation, TimestampedAngVel>;
     using MessageEntry = boost::variant<boost::none_t, TimestampedOrientation,
                                         TimestampedAngVel>;
-
+    static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{5};
     class TrackerThread : boost::noncopyable {
       public:
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
@@ -117,7 +121,7 @@ namespace vbtracker {
         /// asynchronously by launchTimeConsumingImageStep()
         void timeConsumingImageStep();
 
-        void processIMUMessage(MessageEntry const &m);
+        BodyId processIMUMessage(MessageEntry const &m);
 
         TrackingSystem &m_trackingSystem;
         ImageSource &m_cam;
@@ -126,6 +130,18 @@ namespace vbtracker {
         const std::int32_t m_cameraUsecOffset = 0;
 
         using our_clock = std::chrono::steady_clock;
+        bool shouldSendImuReport() {
+            auto now = our_clock::now();
+            if (now > m_nextImuOverrideReport) {
+                m_nextImuOverrideReport = now + IMU_OVERRIDE_SPACING;
+                return true;
+            }
+            return false;
+        }
+        void setImuOverrideClock() {
+            m_nextImuOverrideReport = our_clock::now() + IMU_OVERRIDE_SPACING;
+        }
+        our_clock::time_point m_nextImuOverrideReport;
         boost::optional<our_clock::time_point> m_nextCameraPoseReport;
 
         /// Time that the last camera grab was triggered.

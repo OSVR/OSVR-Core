@@ -29,6 +29,7 @@
 #include "TrackedBodyIMU.h"
 
 // Library/third-party includes
+#include <osvr/TypePack/Contains.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/Finally.h>
 
@@ -146,6 +147,34 @@ namespace vbtracker {
     std::ostream &TrackerThread::msg() const {
         return std::cout << "[UnifiedTracker] ";
     }
+
+    namespace {
+        struct BodyIdOrdering {
+            bool operator()(BodyId const &lhs, BodyId const &rhs) const {
+                return lhs.value() < rhs.value();
+            }
+        };
+    } // namespace
+
+    /// Insert a value into a sorted vector only if it isn't in there already
+    template <typename T, typename PredType>
+    inline void insert_unique_sorted(std::vector<T> &vec, T const &item,
+                                     PredType &&pred) {
+        if (std::binary_search(begin(vec), end(vec), item,
+                               std::forward<PredType>(pred))) {
+            /// already there.
+            return;
+        }
+        vec.insert(std::upper_bound(begin(vec), end(vec), item,
+                                    std::forward<PredType>(pred)),
+                   item);
+    }
+
+    template <typename T>
+    inline void insert_unique_sorted(std::vector<T> &vec, T const &item) {
+        insert_unique_sorted(vec, item, std::less<T>());
+    }
+
     std::ostream &TrackerThread::warn() const { return msg() << "Warning: "; }
     void TrackerThread::doFrame() {
         // Check camera status.
@@ -176,6 +205,9 @@ namespace vbtracker {
         /// initial image processing.
         launchTimeConsumingImageStep();
 
+        setImuOverrideClock();
+        BodyIndices imuIndices;
+
         bool finishedImage = false;
         do {
 
@@ -202,7 +234,14 @@ namespace vbtracker {
             } // unlock
 
             if (!message.empty()) {
-                processIMUMessage(message);
+                auto id = processIMUMessage(message);
+                if (!id.empty()) {
+                    insert_unique_sorted(imuIndices, id, BodyIdOrdering{});
+                    if (shouldSendImuReport()) {
+                        updateReportingVector(imuIndices);
+                        imuIndices.clear();
+                    }
+                }
             }
         } while (!finishedImage);
 
@@ -241,20 +280,37 @@ namespace vbtracker {
                 }
             }
         } // unlock
+
+        // Sort those body IDs so we can merge them with the body IDs from any
+        // IMU messages we're about to process.
+        std::sort(begin(bodyIds), end(bodyIds), BodyIdOrdering{});
+
+        // process those IMU messages and add any unique IDs to the vector
+        // returned by the image tracker.
         for (auto const &msg : imuMessages) {
-            processIMUMessage(msg);
+            auto id = processIMUMessage(msg);
+            if (!id.empty()) {
+                insert_unique_sorted(bodyIds, id, BodyIdOrdering{});
+            }
         }
 
         updateReportingVector(bodyIds);
     }
+
+    template<typename Report>
+	using enable_if_timestamped_report_t = typename std::enable_if<
+		typepack::contains<TimestampedReports, Report>::value>::type;
+
     class IMUMessageProcessor : public boost::static_visitor<> {
       public:
+        BodyId body;
         void operator()(boost::none_t const &) const {
             /// dummy overload to handle empty messages
         }
 
-        template <typename TimestampedReport>
-        void operator()(TimestampedReport const &report) const {
+        template <typename Report>
+        enable_if_timestamped_report_t<Report>
+        operator()(Report const &report) {
             /// templated overload to handle real messages since they're
             /// identical except for the final element of the tuple.
             auto &imu = *std::get<0>(report);
@@ -263,17 +319,18 @@ namespace vbtracker {
             updatePose(imu, timestamp, std::get<2>(report));
         }
 
-        static void updatePose(TrackedBodyIMU &imu,
-                               util::time::TimeValue const &timestamp,
-                               OSVR_OrientationReport const &ori) {
+        void updatePose(TrackedBodyIMU &imu,
+                        util::time::TimeValue const &timestamp,
+                        OSVR_OrientationReport const &ori) {
+            body = imu.getBody().getId();
             imu.updatePoseFromOrientation(
                 timestamp, util::eigen_interop::map(ori.rotation).quat());
         }
 
-        static void updatePose(TrackedBodyIMU &imu,
-                               util::time::TimeValue const &timestamp,
-                               OSVR_AngularVelocityReport const &angVel) {
-
+        void updatePose(TrackedBodyIMU &imu,
+                        util::time::TimeValue const &timestamp,
+                        OSVR_AngularVelocityReport const &angVel) {
+            body = imu.getBody().getId();
             imu.updatePoseFromAngularVelocity(
                 timestamp,
                 util::eigen_interop::map(angVel.state.incrementalRotation)
@@ -282,8 +339,10 @@ namespace vbtracker {
         }
     };
 
-    void TrackerThread::processIMUMessage(MessageEntry const &m) {
-        boost::apply_visitor(IMUMessageProcessor{}, m);
+    BodyId TrackerThread::processIMUMessage(MessageEntry const &m) {
+        IMUMessageProcessor processor;
+        boost::apply_visitor(processor, m);
+        return processor.body;
     }
 
     void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {
