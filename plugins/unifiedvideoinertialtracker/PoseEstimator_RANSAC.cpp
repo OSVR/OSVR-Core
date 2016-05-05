@@ -240,6 +240,18 @@ namespace vbtracker {
         }
         outXlate = cvToVector3d(tvec);
         outQuat = cvRotVecToQuat(rvec);
+        if (!outXlate.array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite position with "
+                         "RANSAC."
+                      << std::endl;
+            return false;
+        }
+        if (!outQuat.coeffs().array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite orientation "
+                         "with RANSAC."
+                      << std::endl;
+            return false;
+        }
         return true;
     }
 
