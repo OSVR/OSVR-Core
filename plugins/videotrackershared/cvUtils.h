@@ -40,6 +40,10 @@
 
 namespace osvr {
 namespace vbtracker {
+    inline cv::Point2f castPointToFloat(cv::Point2d const &p) {
+        return cv::Point2f(static_cast<float>(p.x), static_cast<float>(p.y));
+    }
+
     inline void drawSubpixelPoint(cv::Mat image, cv::Point2d point,
                                   cv::Scalar color = cv::Scalar(0, 0, 0),
                                   double radius = 1.,

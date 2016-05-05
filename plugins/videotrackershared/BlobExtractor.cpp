@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "BlobExtractor.h"
+#include "cvUtils.h"
 
 // Library/third-party includes
 #include <opencv2/imgproc/imgproc.hpp> // for moments, boundingRect, arcLength...
@@ -112,7 +113,7 @@ namespace vbtracker {
                     continue;
                 }
             }
-            ret.push_back(LedMeasurement(data.center.x, data.center.y,
+            ret.push_back(LedMeasurement(castPointToFloat(data.center),
                                          data.diameter, grayImage_.size()));
         }
         return ret;
