@@ -108,7 +108,7 @@ namespace vbtracker {
         /// This is a variance number, so std deviation squared, but it's
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
-        double initialBeaconError = 1e-9; // 0.001;
+        double initialBeaconError = 1e-5; // 0.001;
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
