@@ -26,9 +26,9 @@
 #define INCLUDED_AbsoluteOrientationMeasurement_h_GUID_71285DD8_A6F1_47A8_4B2E_B10171C91248
 
 // Internal Includes
+#include "ExternalQuaternion.h"
 #include "FlexibleKalmanBase.h"
 #include "PoseState.h"
-#include "ExternalQuaternion.h"
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenQuatExponentialMap.h>
 
@@ -67,7 +67,8 @@ namespace kalman {
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
             const Eigen::Quaterniond prediction = s.getCombinedQuaternion();
-            const Eigen::Quaterniond residual = m_quat * prediction.inverse();
+            const Eigen::Quaterniond residualq = m_quat * prediction.inverse();
+#if 0
             // Use the dot product to choose which of the two equivalent
             // quaternions to get the log of for the residual.
             const Eigen::Quaterniond equivalentResidual =
@@ -75,6 +76,18 @@ namespace kalman {
             auto dot = prediction.dot(residual);
             return dot >= 0 ? util::quat_exp_map(residual).ln()
                             : util::quat_exp_map(equivalentResidual).ln();
+            return dot < 0 ? util::quat_exp_map(residual).ln()
+                            : util::quat_exp_map(equivalentResidual).ln();
+
+#else
+            MeasurementVector residual = util::quat_exp_map(residualq).ln();
+            MeasurementVector equivResidual =
+                util::quat_exp_map(Eigen::Quaterniond(-(residualq.coeffs())))
+                    .ln();
+            return residual.squaredNorm() < equivResidual.squaredNorm()
+                       ? residual
+                       : equivResidual;
+#endif
         }
         /// Convenience method to be able to store and re-use measurements.
         void setMeasurement(Eigen::Quaterniond const &quat) { m_quat = quat; }
