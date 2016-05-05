@@ -129,8 +129,8 @@ namespace vbtracker {
             mt.seed(rd());
         }
 
-        //std::uniform_int_distribution<int> colorDist(0, 255);
-		/// Our desired range is a power of two, so we can just mask.
+        // std::uniform_int_distribution<int> colorDist(0, 255);
+        /// Our desired range is a power of two, so we can just mask.
         auto colorDist = [](std::mt19937 &mt) { return mt() & 0xff; };
         return drawFunctorColoredContours(
             baseImage, contours,
@@ -181,7 +181,9 @@ namespace vbtracker {
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP,
                          cv::CHAIN_APPROX_NONE);
-        auto n = contours.size();
+        // intentionally storing in int, instead of auto, since we'll compare
+        // against int.
+        int n = contours.size();
         std::vector<ContourType> ret;
         for (std::size_t i = 0; i < n; ++i) {
             // If this contour has no parent, then it's the outer contour of a
@@ -200,7 +202,9 @@ namespace vbtracker {
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP,
                          cv::CHAIN_APPROX_NONE);
-        auto n = contours.size();
+        // intentionally storing in int, instead of auto, since we'll compare
+        // against int.
+        int n = contours.size();
         /// Loop through the outside connected components.
         for (int outsides = 0; outsides >= 0 && outsides < n;
              outsides = hierarchy[outsides][HIERARCHY_NEXT_SIBLING_CONTOUR]) {
