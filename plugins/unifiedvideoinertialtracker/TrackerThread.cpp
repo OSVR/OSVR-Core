@@ -510,6 +510,8 @@ namespace vbtracker {
         /// Our thread would be the only one reading or writing this flag at
         /// this point, so it's OK now to write this without protection.
         m_timeConsumingImageStepComplete = false;
+        /// @todo How to re-use this thread instead of launching a new one each
+        /// frame?
         m_imageThread = std::thread{[&] { timeConsumingImageStep(); }};
     }
     void TrackerThread::timeConsumingImageStep() {
