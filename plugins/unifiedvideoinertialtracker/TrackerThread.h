@@ -122,11 +122,18 @@ namespace vbtracker {
         void timeConsumingImageStep();
 
         BodyId processIMUMessage(MessageEntry const &m);
+        BodyReporting *getCamPoseReporting() const;
+        BodyReporting *getIMUReporting() const;
+        BodyReporting *getIMUCamReporting() const;
+        BodyReporting *getHMDCamReporting() const;
+        void updateExtraCameraReport();
+        void updateExtraIMUReports();
 
         TrackingSystem &m_trackingSystem;
         ImageSource &m_cam;
         BodyReportingVector &m_reportingVec;
         CameraParameters m_camParams;
+        std::size_t m_numBodies = 0; //< initialized when loop started.
         const std::int32_t m_cameraUsecOffset = 0;
 
         using our_clock = std::chrono::steady_clock;

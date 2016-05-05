@@ -23,6 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
+#include "AdditionalReports.h"
 #include "ConfigurationParser.h"
 #include "HDKData.h"
 #include "MakeHDKTrackingSystem.h"
@@ -186,9 +187,9 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     /// Create a "BodyReporting" interchange structure for each body we track.
     void setupBodyReporting() {
         m_bodyReportingVector.clear();
-        static const auto EXTRA_TRACKING_SENSORS = 4;
-        // Add three extra sensors: one for camera, one for corrected imu, and
-        // one for imu in camera space.
+        static const auto EXTRA_TRACKING_SENSORS =
+            osvr::vbtracker::extra_outputs::numExtraOutputs;
+        // Add the extra sensors as configured in AdditionalReports.h
         auto n = m_trackingSystem->getNumBodies() + EXTRA_TRACKING_SENSORS;
         for (size_type i = 0; i < n; ++i) {
             m_bodyReportingVector.emplace_back(

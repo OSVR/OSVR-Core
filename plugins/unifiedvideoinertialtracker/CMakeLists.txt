@@ -111,6 +111,7 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     SOURCES
     org_osvr_unifiedvideoinertial.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_unifiedvideoinertial_json.h"
+    AdditionalReports.h
     ConfigurationParser.h
     MakeHDKTrackingSystem.h
     ThreadsafeBodyReporting.cpp
