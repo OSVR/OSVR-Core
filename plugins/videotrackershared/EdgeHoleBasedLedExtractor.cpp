@@ -51,6 +51,10 @@ namespace vbtracker {
 #endif
     }
 
+    inline cv::Point2f pointDoubleToFloat(cv::Point2d const &p) {
+        return cv::Point2f(p.x, p.y);
+    }
+
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
                bool verboseBlobOutput) {
@@ -146,8 +150,8 @@ namespace vbtracker {
             /// Check to see if we accidentally picked up a non-LED
             /// stuck between a few bright ones.
             cv::Mat patch;
-            cv::getRectSubPix(gray_, cv::Size(1, 1), cv::Point2f(data.center),
-                              patch);
+            cv::getRectSubPix(gray_, cv::Size(1, 1),
+                              pointDoubleToFloat(data.center), patch);
             auto centerPointValue = patch.at<unsigned char>(0, 0);
             if (centerPointValue < minBeaconCenterVal_) {
                 debugStream() << "Reject based on center point value: "
@@ -181,9 +185,10 @@ namespace vbtracker {
 
         debugStream() << "Accepted!\n";
         {
-            auto newMeas = LedMeasurement(
-                cv::Point2f(data.center), static_cast<float>(data.diameter),
-                gray_.size(), static_cast<float>(data.area));
+            auto newMeas =
+                LedMeasurement(pointDoubleToFloat(data.center),
+                               static_cast<float>(data.diameter), gray_.size(),
+                               static_cast<float>(data.area));
             newMeas.circularity = static_cast<float>(data.circularity);
             newMeas.setBoundingBox(data.bounds);
 
