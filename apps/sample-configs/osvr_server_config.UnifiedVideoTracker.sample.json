@@ -1,5 +1,5 @@
 {
-    "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK. It is configured for RenderManager applications in direct mode (portrait) on HDK 1.3 optics.",
+    "description": "This configuration supports the unified (single-filter) IMU and video-based position and orientation tracking with the OSVR HDK. It is configured for RenderManager applications in direct mode (portrait) on HDK 1.3 optics.",
     "display": "displays/OSVR_HDK_1_3.json",
     "renderManagerConfig": "sample-configs/renderManager.direct.portrait.json",
     "drivers": [{
@@ -7,29 +7,15 @@
         "driver": "UnifiedTrackingSystem",
         "params": {
             "showDebug": false,
-            "includeRearPanel": false,
+            "includeRearPanel": true,
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
             "offsetToCentroid": false,
-            "extraVerbose": false,
-            "imu": {
-                "useOrientation": false,
-                "orientationVariance": 5e-1,
-                "useAngularVelocity": false,
-                "angularVelocityVariance": 1e-1
-            }
+            "extraVerbose": false
         }
     }],
     "aliases": {
-        "/headSpace": {
-            "translate": [0.0, 0.0, 0.04141],
-            "child": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd"
-        },
-        "/me/head": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd",
-        "/hmd": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/0",
-        "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/1",
-        "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/2",
-        "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/3"
+        "/me/head": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd"
     }
 }
