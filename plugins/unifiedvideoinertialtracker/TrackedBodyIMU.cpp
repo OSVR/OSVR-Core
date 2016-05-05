@@ -103,12 +103,17 @@ namespace vbtracker {
         double dt) {
         /// @todo handle transform for off-center velocity!
 
+        /// Transform for yaw correction.
+        Eigen::Quaterniond correctedDeltaQuat =
+            m_yawCorrection * deltaquat * m_yawCorrection.inverse();
+
         Eigen::Vector3d rot;
-        if (deltaquat.w() >= 1. || deltaquat.vec().isZero(1e-10)) {
+        if (correctedDeltaQuat.w() >= 1. ||
+            correctedDeltaQuat.vec().isZero(1e-10)) {
             rot = Eigen::Vector3d::Zero();
         } else {
-            auto angle = std::acos(deltaquat.w());
-            rot = deltaquat.vec().normalized() * angle / dt;
+            auto angle = std::acos(correctedDeltaQuat.w());
+            rot = correctedDeltaQuat.vec().normalized() * angle / dt;
         }
         auto ret = CannedIMUMeasurement{};
         ret.setAngVel(rot,
