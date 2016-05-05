@@ -221,9 +221,9 @@ namespace vbtracker {
         // down, and Z pointing along the camera viewing direction, if the input
         // points are not inverted.
 
+        // -z means the wrong side of the pinhole
+        /// @todo find out why OpenCV is now returning these values sometimes
         if (tvec.at<double>(2) < 0) {
-// -z means the wrong side of the pinhole
-/// @todo find out why OpenCV is now returning these values sometimes
 #if 0
             std::cout << "On the wrong side of the looking glass:" << tvec
                       << std::endl;

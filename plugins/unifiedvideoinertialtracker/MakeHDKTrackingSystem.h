@@ -111,24 +111,19 @@ namespace vbtracker {
 
         /// Rotation/basis-change part.
         template <typename Scalar> inline cvMatx33<Scalar> get180AboutY() {
-#if 0
-            cvMatx33<Scalar> ret;
-            map(ret) = Eigen::AngleAxis<Scalar>(
-                           Scalar(M_PI), Eigen::Matrix<Scalar, 3, 1>::UnitY())
-                           .toRotationMatrix();
-#else
             auto ret = cvMatx33<Scalar>::eye();
-            // flip sign of x and z axes to make the HDK coordinate system match
-            // our desired one: this is equivalent to 180 degree rotation about
-            // y.
+            // flip sign of x and z axes to get equivalent to exact 180 degree
+            // rotation about y.
             ret(0, 0) = -1;
             ret(2, 2) = -1;
-#endif
             return ret;
         }
 
         /// Rotation/basis-change part.
         template <typename Scalar> inline cvMatx33<Scalar> getTransform() {
+            // flip sign of x and z axes to make the HDK coordinate system match
+            // our desired one: this is equivalent to 180 degree rotation about
+            // y.
             return get180AboutY<Scalar>();
         }
 
@@ -266,12 +261,12 @@ namespace vbtracker {
                 params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
-            auto transformBackPoints =
-                [distanceBetweenPanels](LocationPoint pt) {
-                    auto p = rotatePoint180AboutY(pt) -
-                             LocationPoint(0, 0, distanceBetweenPanels);
-                    return transformFromHDKData(p);
-                };
+            auto transformBackPoints = [distanceBetweenPanels](
+                LocationPoint pt) {
+                auto p = rotatePoint180AboutY(pt) -
+                         LocationPoint(0, 0, distanceBetweenPanels);
+                return transformFromHDKData(p);
+            };
             range_transform(OsvrHdkLedLocations_SENSOR1, locationsEnd,
                             transformBackPoints);
 #ifdef DEBUG_REAR_BEACON_TRANSFORM
@@ -306,8 +301,6 @@ namespace vbtracker {
                       << std::endl;
         }
 #endif
-/// Set up autocalib.
-/// Set the ones that are fixed.
 
 #ifdef OSVR_UVBI_DISABLE_AUTOCALIB
         for (decltype(numBeacons) i = 0; i < numBeacons; ++i) {
@@ -315,8 +308,8 @@ namespace vbtracker {
             data.markBeaconFixed(makeOneBased(ZeroBasedBeaconId(i)));
         }
 #else
-        // for (auto idx : {16, 17, 34}) {
-        // for (auto idx : {17, 34}) {
+        /// Set up autocalib.
+        /// Set the ones that are fixed.
         for (auto idx : {16, 17, 19, 20}) {
             data.markBeaconFixed(OneBasedBeaconId(idx));
         }
@@ -355,12 +348,10 @@ namespace vbtracker {
                                          "IMU object for the HMD!");
             }
         } else {
-#if 1
+            /// If not using IMU, load the camera position from config, with no
+            /// rotation, as camera pose.
             sys->setCameraPose(Eigen::Isometry3d(Eigen::Translation3d(
                 Eigen::Vector3d::Map(params.cameraPosition))));
-#else
-            sys->setCameraPose(Eigen::Isometry3d::Identity());
-#endif
         }
         return sys;
     }

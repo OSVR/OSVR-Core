@@ -57,14 +57,15 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 // Standard includes
 #include <algorithm>
-#include <chrono> // std::chrono::system_clock
 #include <iostream>
 #include <iterator> // back_inserter
-#include <random>   // std::default_random_engine
+#include <random>
 
-#undef DEBUG_VELOCITY
-#undef VARIANCE_PENALTY_FOR_FIXED_BEACONS
+#undef OSVR_DEBUG_VELOCITY
+#undef OSVR_VARIANCE_PENALTY_FOR_FIXED_BEACONS
 #undef OSVR_CHECK_BOUNDING_BOXES
+#undef OSVR_TRY_LIMITING_ANGULAR_VELOCITY_CHANGE
+#undef OSVR_DEBUG_EMISSION_DIRECTION
 
 namespace osvr {
 namespace vbtracker {
@@ -220,7 +221,7 @@ namespace vbtracker {
             /// if it's meant to have some
             if (p.beaconFixed[index]) {
                 beaconProcess.setNoiseAutocorrelation(0);
-#ifdef VARIANCE_PENALTY_FOR_FIXED_BEACONS
+#ifdef OSVR_VARIANCE_PENALTY_FOR_FIXED_BEACONS
                 /// Add a bit of variance to the fixed ones, since the lack of
                 /// beacon autocalib otherwise make them seem
                 /// super-authoritative.
@@ -239,32 +240,51 @@ namespace vbtracker {
             auto state =
                 kalman::makeAugmentedState(p.state, *(p.beacons[index]));
             meas.updateFromState(state);
+
+            /// Investigate measurement variance here (difference in measurement
+            /// space from expected measurement based on the model) to decide if
+            ///
+            /// - it's a reasonable measurement
+            /// - it's a little unreasonable (and should get some extra variance
+            ///   to indicate we think it's a poor-quality measurement)
+            /// - it's totally unreasonable and should be de-identified and
+            ///   skipped (because we've probably mis-identified something in
+            ///   the environment as a beacon)
             Eigen::Vector2d residual = meas.getResidual(state);
+            auto squaredResidual = residual.squaredNorm();
+            // Compute what the squared, pixel-space residual would be for the
+            // configured, max-tolerable residual in meters at the beacon depth
+            // before applying the penalty
             auto depth = meas.getBeaconInCameraSpace().z();
-            // Only tolerate a residual of 0.15m at the beacon depth.
             auto maxSquaredResidual =
                 squaredXyDistanceFromMetersToPixels(m_maxResidual, depth, cam);
-            auto squaredResidual = residual.squaredNorm();
             if (squaredResidual > maxSquaredResidual) {
-                // Let's see if it's actually some other object that we've
-                // mis-recognized as a beacon, like a lighthouse base station.
+                // OK, it's bad, but is it really bad?
+
+                // Let's see if it's really bad and thus likely actually some
+                // other object that we've mis-recognized as a beacon, like a
+                // lighthouse base station.
                 if (squaredResidual >
                     squaredXyDistanceFromMetersToPixels(
                         SQUARED_MAX_RESIDUAL_FACTOR_FOR_ID_REJECT *
                             m_maxResidual,
                         depth, cam)) {
-                    // throw it out!
+                    // Yeah, it's really bad, throw it out!
                     led.markMisidentified();
                     continue;
                 }
-                // Otherwise, it's just probably a "bad" measurement but not a
-                // measurement of something else.
+
+                // OK, it's just probably a low-quality measurement but
+                // not a measurement of something else.
                 numBad++;
                 localVarianceFactor *= m_highResidualVariancePenalty;
             } else {
+                // It's reasonable!
                 numGood++;
             }
 
+            /// That was the last place we'd reject an LED, so now we can say
+            /// for sure we're using this one.
             led.markAsUsed();
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
@@ -281,14 +301,14 @@ namespace vbtracker {
                                                            beaconProcess);
 
             auto correction = kalman::beginCorrection(state, model, meas);
-#if 0
-			/// this is the velocity correction:
-			/// correction.stateCorrection.segment<3>(6)
-			/// this is the angular velocity correction:
-			/// correction.stateCorrection.segment<3>(9)
+#ifdef OSVR_TRY_LIMITING_ANGULAR_VELOCITY_CHANGE
+            /// this is the velocity correction:
+            /// correction.stateCorrection.segment<3>(6)
+            /// this is the angular velocity correction:
+            /// correction.stateCorrection.segment<3>(9)
 
-			/// These are, in practice, surprisingly high...
-			/// as well as dependent on the variances...
+            /// These are, in practice, surprisingly high...
+            /// as well as dependent on the variances...
             static const auto MaxAngVelChangeFromOneBeacon = 3 * M_PI;
             static const auto MaxAnglVelChangeSquared =
                 MaxAngVelChangeFromOneBeacon * MaxAngVelChangeFromOneBeacon;
@@ -314,7 +334,7 @@ namespace vbtracker {
                 0.5 * p.state.errorCovariance().transpose();
             p.state.errorCovariance() = cov;
 
-#ifdef DEBUG_VELOCITY
+#ifdef OSVR_DEBUG_VELOCITY
             {
                 static ::util::Stride s(77);
                 if (++s) {
@@ -425,7 +445,7 @@ namespace vbtracker {
                 // easily introduce substantial error.
                 double zComponent =
                     (rotate * cvToVector(p.beaconEmissionDirection[index])).z();
-#if 0
+#if OSVR_DEBUG_EMISSION_DIRECTION
 
                 /// Beacon 32 is right on the front, should be facing nice and
                 /// forward.

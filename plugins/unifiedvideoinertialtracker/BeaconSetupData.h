@@ -40,27 +40,7 @@ namespace osvr {
 namespace vbtracker {
     using EmissionDirectionVec = ::cv::Vec3d;
     using LocationPoint = ::cv::Point3f;
-#if 0
-    /// Data for a single beacon, swizzled into a format suitable for
-    /// "Vector of structs" usage. It is unswizzled/reswizzled as needed in
-    /// setup.
-    struct BeaconSetupData {
-        /// The pattern of bright and dim, represented by * and . respectively,
-        /// identifying this beacon.
-        std::string pattern;
-        /// The location of this beacon in the target coordinate system.
-        LocationPoint location;
-        /// The direction that the beacon emits, in the target coordinate system
-        EmissionDirectionVec emissionDirection;
-        /// Initial measurement variance before applying observation-based
-        /// modifiers.
-        double baseMeasurementVariance = 3.e-6;
-        /// Initial error in the beacon position state.
-        double initialAutocalibrationError = 1e-9;
-        /// Is this beacon fixed, that is, not subject to autocalibration?
-        bool isFixed = false;
-    };
-#endif
+
     struct TargetDataSummary {
         std::vector<OneBasedBeaconId> disabledByPattern;
         std::vector<OneBasedBeaconId> disabledByEmptyPattern;
