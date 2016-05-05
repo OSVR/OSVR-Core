@@ -67,7 +67,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 
 namespace osvr {
 namespace vbtracker {
-
+    static const auto NO_BEACON_LIN_VEL_ATTENUATION = 0.2;
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
     SCAATKalmanPoseEstimator::SCAATKalmanPoseEstimator(
         ConfigParams const &params)
@@ -170,6 +170,19 @@ namespace vbtracker {
         if (!skipAll) {
             // if we were in skipAll mode, we set this above.
             m_lastUsableBeaconsSeen = goodLeds.size();
+        }
+
+        if (goodLeds.empty() && p.startingTime != frameTime) {
+            /// If we have no good LEDs, let's attenuate the linear velocity
+            /// quickly.
+            static bool msgd = false;
+            if (!msgd) {
+                std::cout << "doing the no-led damping" << std::endl;
+                msgd = true;
+            }
+            auto dt = util::time::duration(frameTime, p.startingTime);
+            auto atten = std::pow(NO_BEACON_LIN_VEL_ATTENUATION, dt);
+            p.state.velocity() *= atten;
         }
 
         /// Shuffle the order of the good LEDS
