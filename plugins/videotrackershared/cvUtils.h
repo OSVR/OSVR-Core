@@ -202,10 +202,9 @@ namespace vbtracker {
                          cv::CHAIN_APPROX_NONE);
         auto n = contours.size();
         /// Loop through the outside connected components.
-        for (std::size_t outsides = 0; outsides >= 0 && outsides < n;
+        for (int outsides = 0; outsides >= 0 && outsides < n;
              outsides = hierarchy[outsides][HIERARCHY_NEXT_SIBLING_CONTOUR]) {
-            for (std::size_t idx =
-                     hierarchy[outsides][HIERARCHY_FIRST_CHILD_CONTOUR];
+            for (int idx = hierarchy[outsides][HIERARCHY_FIRST_CHILD_CONTOUR];
                  idx >= 0 && idx < n;
                  idx = hierarchy[idx][HIERARCHY_NEXT_SIBLING_CONTOUR])
                 /// We want all first-level children of connected components.
