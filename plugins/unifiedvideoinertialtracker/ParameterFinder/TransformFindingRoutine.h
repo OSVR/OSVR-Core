@@ -100,7 +100,7 @@ namespace vbtracker {
         {
             std::cout << "Optimizing base translation" << std::endl;
             auto ret = ei_newuoa_wrapped(
-                baseXlate, {1e-8, 1e-2}, 10000,
+                baseXlate, {1e-6, 1e-1}, 10000,
                 [&](Vec<3> const &vec) -> double {
                     Eigen::Isometry3d baseXform = makeIsometry(vec);
                     /// Accumulate the cost of all the samples
@@ -127,7 +127,7 @@ namespace vbtracker {
             std::cout << "\nOptimizing base transform, max runs = " << maxRuns
                       << std::endl;
             auto ret = ei_newuoa_wrapped(
-                baseXlateRot, {1e-8, 1e-2}, 10000,
+                baseXlateRot, {1e-6, 1e-1}, 10000,
                 [&](Vec<6> const &vec) -> double {
                     Eigen::Isometry3d baseXform =
                         makeIsometry(vec.head<3>(), rot_exp(vec.tail<3>()));
@@ -160,7 +160,7 @@ namespace vbtracker {
                          "max runs = "
                       << maxRuns << std::endl;
             auto ret = ei_newuoa_wrapped(
-                x, {1e-8, 1e-2}, maxRuns,
+                x, {1e-6, 1e-1}, maxRuns,
                 [&](TransformParams const &paramVec) -> double {
                     Eigen::Isometry3d baseXform = getBaseTransform(paramVec);
                     Eigen::Isometry3d innerXform = getInnerTransform(paramVec);
