@@ -12,6 +12,8 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}"
 # Make sure we can link these upcoming static libraries into a shared lib
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+add_definitions(-DOSVR_USING_EDGE_HOLE_EXTRACTOR)
+
 add_subdirectory(ImageSources)
 
 ###

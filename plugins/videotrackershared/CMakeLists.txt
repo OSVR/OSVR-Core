@@ -55,4 +55,7 @@ if(BUILD_ADVANCED_DEV_TOOLS)
         ${VIDEOTRACKER_EXTRA_LIBS}
         opencv_core
         JsonCpp::JsonCpp)
+    target_compile_definitions(blob_extraction_demo
+		PRIVATE
+		OSVR_USING_EDGE_HOLE_EXTRACTOR)
 endif()

@@ -39,8 +39,8 @@ namespace vbtracker {
     static const auto PREFIX = "[EdgeHoleBasedLedExtractor] ";
     EdgeHoleParams::EdgeHoleParams()
         : preEdgeDetectionBlurSize(3), laplacianKSize(3), laplacianScale(5),
-          postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(3),
-          postEdgeDetectionBlurThreshold(32) {}
+          postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(5),
+          postEdgeDetectionBlurThreshold(30) {}
 
     EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
         EdgeHoleParams const &extractorParams)

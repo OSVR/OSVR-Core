@@ -45,7 +45,7 @@ namespace vbtracker {
             "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
 
         /// Should orientation reports be used once calibration completes?
-        bool useOrientation = false;
+        bool useOrientation = true;
 
         /// units: rad^2
         double orientationVariance = 1.0e-6;
@@ -151,7 +151,7 @@ namespace vbtracker {
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
-        bool offsetToCentroid = true;
+        bool offsetToCentroid = false;
 
         /// Manual beacon offset (in m) - only really sensible if you only have
         /// one target, only used if offsetToCentroid is false.
@@ -213,8 +213,7 @@ namespace vbtracker {
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty =
-            26.31624913488417; // 35.86138871170531;
+        double brightLedVariancePenalty = 26.31624913488417;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the
@@ -225,9 +224,7 @@ namespace vbtracker {
         /// Defaulting to off because it adds some jitter for some reason.
         bool blobsKeepIdentity = false;
 
-        /// Extra verbose developer debugging messages (right now just "hey, you
-        /// can't possibly be that beacon, I shouldn't be able to see you"
-        /// messages)
+        /// Extra verbose developer debugging messages
         bool extraVerbose = false;
 
         /// If non-empty, the file to load (or save to) for calibration data.
