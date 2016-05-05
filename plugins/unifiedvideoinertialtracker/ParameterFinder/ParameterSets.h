@@ -235,7 +235,7 @@ namespace vbtracker {
 
         struct VariancePenalties {
             /// required part of interface
-            static const size_t Dimension = 5;
+            static const size_t Dimension = 3;
 
             /// Internal for convenience use.
             using ParamVec = Vec<Dimension>;
@@ -244,8 +244,7 @@ namespace vbtracker {
             static ParamVec getInitialVec(OptimCommonData const &commonData) {
                 ParamVec x;
                 const auto &p = commonData.initialParams;
-                x << p.brightLedVariancePenalty, p.tuning.noveltyPenaltyBase,
-                    p.maxResidual, p.highResidualVariancePenalty,
+                x << p.brightLedVariancePenalty, p.highResidualVariancePenalty,
                     p.measurementVarianceScaleFactor;
                 return x;
             }
@@ -259,17 +258,13 @@ namespace vbtracker {
                 // Update config from provided param vec
                 p.brightLedVariancePenalty = x[0];
                 p.shouldSkipBrightLeds = false;
-                p.tuning.noveltyPenaltyBase = x[1];
-                p.maxResidual = x[2];
-                p.highResidualVariancePenalty = x[3];
-                p.measurementVarianceScaleFactor = x[4];
+                p.highResidualVariancePenalty = x[1];
+                p.measurementVarianceScaleFactor = x[2];
             }
 
             /// required part of interface
             static const char *getVecElementNames() {
                 return "bright LED variance penalty,\n"
-                       "novelty penalty base,\n"
-                       "max residual,\n"
                        "high residual variance penalty,\n"
                        "measurement variance scale factor";
             }
