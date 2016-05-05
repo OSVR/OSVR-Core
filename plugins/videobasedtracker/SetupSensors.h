@@ -65,11 +65,11 @@ namespace vbtracker {
     using BeaconPredicate = std::function<bool(int)>;
 
     /// distance between front and back panel target origins, in mm.
-    inline double computeDistanceBetweenPanels(ConfigParams const &config) {
-        return computeDistanceBetweenPanels(
-            config.headCircumference, config.headToFrontBeaconOriginDistance);
+    inline float computeDistanceBetweenPanels(ConfigParams const &config) {
+        return static_cast<float>(computeDistanceBetweenPanels(
+            config.headCircumference, config.headToFrontBeaconOriginDistance));
     }
-    inline void addRearPanelBeaconLocations(double distanceBetweenPanels,
+    inline void addRearPanelBeaconLocations(float distanceBetweenPanels,
                                             Point3Vector &locations) {
         // For the back panel beacons: have to rotate 180 degrees
         // about Y, which is the same as flipping sign on X and Z

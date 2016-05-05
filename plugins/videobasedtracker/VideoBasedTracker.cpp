@@ -279,9 +279,10 @@ namespace vbtracker {
 
                                 // Draw a filled circle at the keypoint.
                                 drawLedCircleOnStatusImage(led, true, color);
-                                if (led.getID() < n) {
-                                    auto reprojection =
-                                        imagePoints[led.getID()];
+                                // identified -> id is non-negative
+                                auto id = static_cast<size_t>(led.getID());
+                                if (id < n) {
+                                    auto reprojection = imagePoints[id];
 
                                     drawRecognizedLedIdOnStatusImage(led);
                                     cv::putText(

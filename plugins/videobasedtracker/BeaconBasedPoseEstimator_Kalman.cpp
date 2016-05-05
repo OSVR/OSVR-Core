@@ -60,7 +60,7 @@ namespace vbtracker {
     static const auto BRIGHT_PENALTY = 8.;
     bool BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
                                                               double dt) {
-        auto const beaconsSize = m_beacons.size();
+        int const beaconsSize = m_beacons.size();
         // Default measurement variance (for now, factor) per axis.
         double varianceFactor = 1;
 

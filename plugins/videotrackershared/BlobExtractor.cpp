@@ -114,7 +114,8 @@ namespace vbtracker {
                 }
             }
             ret.push_back(LedMeasurement(castPointToFloat(data.center),
-                                         data.diameter, grayImage_.size()));
+                                         static_cast<float>(data.diameter),
+                                         grayImage_.size()));
         }
         return ret;
     }

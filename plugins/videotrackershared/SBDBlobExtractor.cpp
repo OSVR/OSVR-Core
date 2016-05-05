@@ -286,9 +286,12 @@ namespace vbtracker {
 
             // 0.3 LERP between min and max as the min threshold, but
             // don't let really dim frames confuse us.
-            m_sbdParams.minThreshold = thresholdInfo.minThreshold;
-            m_sbdParams.maxThreshold = thresholdInfo.maxThreshold;
-            m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
+            m_sbdParams.minThreshold =
+                static_cast<float>(thresholdInfo.minThreshold);
+            m_sbdParams.maxThreshold =
+                static_cast<float>(thresholdInfo.maxThreshold);
+            m_sbdParams.thresholdStep =
+                static_cast<float>(thresholdInfo.thresholdStep);
 
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
@@ -474,9 +477,12 @@ namespace vbtracker {
 
         // 0.3 LERP between min and max as the min threshold, but
         // don't let really dim frames confuse us.
-        m_sbdParams.minThreshold = thresholdInfo.minThreshold;
-        m_sbdParams.maxThreshold = thresholdInfo.maxThreshold;
-        m_sbdParams.thresholdStep = thresholdInfo.thresholdStep;
+        m_sbdParams.minThreshold =
+            static_cast<float>(thresholdInfo.minThreshold);
+        m_sbdParams.maxThreshold =
+            static_cast<float>(thresholdInfo.maxThreshold);
+        m_sbdParams.thresholdStep =
+            static_cast<float>(thresholdInfo.thresholdStep);
 
 /// @todo: Make a different set of parameters optimized for the
 /// Oculus Dk2.
