@@ -52,7 +52,7 @@ namespace vbtracker {
     }
 
     inline cv::Point2f pointDoubleToFloat(cv::Point2d const &p) {
-        return cv::Point2f(p.x, p.y);
+        return cv::Point2f(static_cast<float>(p.x), static_cast<float>(p.y));
     }
 
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
