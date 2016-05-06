@@ -46,6 +46,7 @@ add_library(uvbi-core STATIC
     LedIdentifier.cpp
     LedIdentifier.h
     ModelTypes.h
+    PinholeCameraFlip.h
     PoseEstimator_RANSAC.cpp
     PoseEstimator_RANSAC.h
     PoseEstimator_RANSACKalman.cpp

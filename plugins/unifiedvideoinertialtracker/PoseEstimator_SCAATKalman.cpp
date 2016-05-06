@@ -43,6 +43,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 // Internal Includes
 #include "ImagePointMeasurement.h"
 #include "LED.h"
+#include "PinholeCameraFlip.h"
 #include "PoseEstimator_SCAATKalman.h"
 #include "UsefulQuaternions.h"
 #include "cvToEigen.h"
@@ -409,7 +410,13 @@ namespace vbtracker {
             /// We're on the wrong side of the camera #fail
             /// This is a fix-up after the fact, rather than a prevention: if we
             /// get here, we goofed up earlier - but better late than never.
+            Eigen::Quaterniond quat = p.state.getQuaternion();
+            pinholeCameraFlipPose(p.state.position(), quat);
+            p.state.setQuaternion(quat);
 
+            pinholeCameraFlipVelocities(p.state.velocity(),
+                                        p.state.angularVelocity());
+#if 0
             /// invert position and velocity
             p.state.position() *= -1;
             p.state.velocity() *= -1;
@@ -418,6 +425,7 @@ namespace vbtracker {
             p.state.angularVelocity() =
                 get180aboutZ() * p.state.angularVelocity();
             p.state.setQuaternion(get180aboutZ() * p.state.getQuaternion());
+#endif
         }
         return true;
     }
