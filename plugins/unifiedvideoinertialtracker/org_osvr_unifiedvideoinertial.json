@@ -14,19 +14,14 @@
     "semantic": {
         "hmd": {
             "$target": {
-                "postrotate": {
-                    "axis": "z",
-                    "degrees": 0
-                },
-                "child": {
-                    "changeBasis": {
-                        "x": "x",
-                        "y": "y",
-                        "z": "z"
-                    },
-                    "child": "tracker/0"
-                }
+                "translate": [0.0, 0.0, 0.04141],
+                "child": "tracker/0"
             }
         }
-    }
+    },
+  "automaticAliases": {
+    /* greater than default auto-alias so we override IMU-only auto-detects. */
+    "$priority": 130,
+    "/me/head": "semantic/hmd"
+  }
 }
