@@ -43,6 +43,9 @@
 /// did.
 #undef OSVR_UVBI_TEST_RANSAC_REPROJECTION
 
+static const int RANSAC_ITERATIONS_COUNT = 5;
+static const float MAX_REPROJECTION_ERROR = 4.f;
+
 namespace osvr {
 namespace vbtracker {
     bool RANSACPoseEstimator::
@@ -105,8 +108,6 @@ namespace vbtracker {
         // do okay without using it, so leaving it out.
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
-        int iterationsCount = 5;
-        float maxReprojectionError = 6.f;
         cv::Mat inlierIndices;
 
         cv::Mat rvec;
@@ -115,7 +116,7 @@ namespace vbtracker {
         cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            iterationsCount, maxReprojectionError,
+            RANSAC_ITERATIONS_COUNT, MAX_REPROJECTION_ERROR,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 #elif CV_MAJOR_VERSION == 3
@@ -127,7 +128,8 @@ namespace vbtracker {
         auto ransacResult = cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            iterationsCount, maxReprojectionError, confidence, inlierIndices);
+            RANSAC_ITERATIONS_COUNT, MAX_REPROJECTION_ERROR, confidence,
+            inlierIndices);
         if (!ransacResult) {
             return false;
         }
