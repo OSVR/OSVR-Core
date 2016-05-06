@@ -216,10 +216,35 @@ namespace vbtracker {
         }
         msg() << "Room calibration process complete." << std::endl;
 
+        /// Coordinate systems involved here:
+        /// i: IMU
+        /// c: Camera
+        /// r: Room
+        /// Keep in mind the right to left convention: iTc is a transform that
+        /// takes points from camera space to IMU space. Matching coordinate
+        /// systems cancel: rTi * iTc = rTc
+
+        /// We'll start by saying that the camera space orientation is unknown
+        /// and that the IMU space orientation is aligned with the room, so we
+        /// want that transformation. (That's what we've kept track of in a
+        /// running fashion using the filter all along: iTc)
+        ///
+        /// We discard the positional component of iTc because that varies
+        /// depending on where the device is held during calibration.
+        ///
+        /// If the user has set "camera is forward", we'll then extract the yaw
+        /// component and create another transform so that the camera is always
+        /// looking down the z axis of our room space: this will provide a
+        /// rotation component of rTi.
+        ///
+        /// Finally, we will set the position of the camera based on the
+        /// configuration.
+
         Eigen::Isometry3d iTc = getCameraToIMUCalibrationPoint();
         m_imuYaw = 0 * util::radians;
-        m_cameraPose = iTc;
         m_rTi = Eigen::Isometry3d::Identity();
+        iTc.translation() = Eigen::Vector3d::Zero();
+        // Eigen::Isometry3d temp_rTc = iTc;
 
         Eigen::AngleAxisd rTi_rotation(0, Eigen::Vector3d::UnitY());
         if (m_cameraIsForward) {
@@ -227,16 +252,17 @@ namespace vbtracker {
             auto yaw = util::extractYaw(Eigen::Quaterniond(iTc.rotation()));
             m_imuYaw = -yaw * util::radians;
             rTi_rotation = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY());
-            m_cameraPose = Eigen::Isometry3d(rTi_rotation) * iTc;
+            // temp_rTc = rTi_rotation * iTc;
         }
 
-        // Account for the supplied camera pose.
-        Eigen::Vector3d cameraOffset =
-            m_suppliedCamPosition - m_cameraPose.translation();
-        Eigen::Translation3d rTi_translation(cameraOffset);
-        m_rTi = Eigen::Isometry3d(rTi_translation) *
-                Eigen::Isometry3d(rTi_rotation);
-        m_cameraPose = Eigen::Isometry3d(rTi_translation) * m_cameraPose;
+        // Account for the supplied camera position: m_suppliedCamPosition is
+        // rTi translation.
+        // Eigen::Vector3d cameraOffset =
+        //    m_suppliedCamPosition - temp_rTc.translation();
+        m_rTi = util::makeIsometry(m_suppliedCamPosition, rTi_rotation);
+
+        // cameraPose is rTc
+        m_cameraPose = m_rTi * iTc;
 
         m_calibComplete = true;
 
