@@ -71,6 +71,12 @@ namespace osvr {
 namespace vbtracker {
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
 
+    /// If we have more that this number of supposedly misidentifieds per their
+    /// residual, and more misidentifieds than used, then we don't actually mark
+    /// them misidentified, just skip them and count them as bad (which will
+    /// tend to cause us to reset the model)
+    static const auto MISIDENTIFIED_BEACON_CUTOFF = 3;
+
     /// 4, so that if the residual itself is 2x the max residual, we reject the
     /// identification.
     static const auto SQUARED_MAX_RESIDUAL_FACTOR_FOR_ID_REJECT = 4;
@@ -204,7 +210,8 @@ namespace vbtracker {
         ImagePointMeasurement meas{cam, p.targetToBody};
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
-
+        LedPtrList misidentifiedBeacons;
+        auto usedBeacons = std::size_t{0};
         for (auto &ledPtr : goodLeds) {
             auto &led = *ledPtr;
 
@@ -274,7 +281,7 @@ namespace vbtracker {
                             m_maxResidual,
                         depth, cam)) {
                     // Yeah, it's really bad, throw it out!
-                    led.markMisidentified();
+                    misidentifiedBeacons.push_back(&led);
                     continue;
                 }
 
@@ -289,6 +296,7 @@ namespace vbtracker {
             /// That was the last place we'd reject an LED, so now we can say
             /// for sure we're using this one.
             led.markAsUsed();
+            usedBeacons++;
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
             auto effectiveVariance =
@@ -328,6 +336,18 @@ namespace vbtracker {
             correction.finishCorrection();
 
             gotMeasurement = true;
+        }
+
+        if (misidentifiedBeacons.size() > usedBeacons &&
+            misidentifiedBeacons.size() > MISIDENTIFIED_BEACON_CUTOFF) {
+            std::cout << "Think our model is wrong: considered "
+                      << misidentifiedBeacons.size()
+                      << " beacons misidentified, while only used "
+                      << usedBeacons << std::endl;
+        } else {
+            for (auto &ledPtr : misidentifiedBeacons) {
+                ledPtr->markMisidentified();
+            }
         }
 
         if (gotMeasurement) {
