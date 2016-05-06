@@ -26,6 +26,7 @@
 #include "PoseEstimator_RANSAC.h"
 #include "CameraParameters.h"
 #include "LED.h"
+#include "PinholeCameraFlip.h"
 #include "UsefulQuaternions.h"
 #include "cvToEigen.h"
 
@@ -236,37 +237,36 @@ namespace vbtracker {
         // down, and Z pointing along the camera viewing direction, if the input
         // points are not inverted.
 
-        // -z means the wrong side of the pinhole
-        /// @todo find out why OpenCV is now returning these values sometimes
-        if (tvec.at<double>(2) < 0) {
-#if 0
-            std::cout << "On the wrong side of the looking glass:" << tvec
-                      << std::endl;
-#endif
-            // So, we invert translation, and apply 180 rotation (to rotation)
-            // about z.
-            tvec *= -1;
-            /// Make a rotation matrix for 180 about z
-            auto rotMat = cv::Affine3d::Mat3::eye();
-            rotMat(0, 0) = -1;
-            rotMat(1, 1) = -1;
-            /// Apply the transform and get the rvec out again.
-            rvec = cv::Mat(cv::Affine3d(rvec) * (cv::Affine3d(rotMat)).rvec());
-        }
-        outXlate = cvToVector3d(tvec);
-        outQuat = cvRotVecToQuat(rvec);
-        if (!outXlate.array().allFinite()) {
+        /// Get to Eigen via OpenCV's Affine transform class.
+        Eigen::Affine3d xform = Eigen::Affine3d(cv::Affine3d(rvec, tvec));
+        Eigen::Vector3d xlate(xform.translation());
+        Eigen::Quaterniond quat(xform.rotation());
+        if (!xlate.array().allFinite()) {
             std::cout << "[UnifiedTracker] Computed a non-finite position with "
                          "RANSAC."
                       << std::endl;
             return false;
         }
-        if (!outQuat.coeffs().array().allFinite()) {
+        if (!quat.coeffs().array().allFinite()) {
             std::cout << "[UnifiedTracker] Computed a non-finite orientation "
                          "with RANSAC."
                       << std::endl;
             return false;
         }
+
+        // -z means the wrong side of the pinhole
+        /// @todo find out why OpenCV is now returning these values sometimes
+        if (xlate.z() < 0) {
+
+#if 0
+            std::cout << "On the wrong side of the looking glass:"
+                      << xlate.transpose() << std::endl;
+#endif
+            pinholeCameraFlipPose(xlate, quat);
+        }
+
+        outXlate = xlate;
+        outQuat = quat;
         return true;
     }
 
