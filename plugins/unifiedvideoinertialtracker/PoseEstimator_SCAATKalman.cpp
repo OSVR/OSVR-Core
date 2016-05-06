@@ -210,8 +210,7 @@ namespace vbtracker {
         ImagePointMeasurement meas{cam, p.targetToBody};
 
         kalman::ConstantProcess<kalman::PureVectorState<>> beaconProcess;
-        LedPtrList misidentifiedBeacons;
-        auto usedBeacons = std::size_t{0};
+
         for (auto &ledPtr : goodLeds) {
             auto &led = *ledPtr;
 
@@ -281,7 +280,7 @@ namespace vbtracker {
                             m_maxResidual,
                         depth, cam)) {
                     // Yeah, it's really bad, throw it out!
-                    misidentifiedBeacons.push_back(&led);
+                    markAsPossiblyMisidentified(led);
                     continue;
                 }
 
@@ -295,8 +294,8 @@ namespace vbtracker {
 
             /// That was the last place we'd reject an LED, so now we can say
             /// for sure we're using this one.
-            led.markAsUsed();
-            usedBeacons++;
+            markAsUsed(led);
+
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
             auto effectiveVariance =
@@ -338,17 +337,7 @@ namespace vbtracker {
             gotMeasurement = true;
         }
 
-        if (misidentifiedBeacons.size() > usedBeacons &&
-            misidentifiedBeacons.size() > MISIDENTIFIED_BEACON_CUTOFF) {
-            std::cout << "Think our model is wrong: considered "
-                      << misidentifiedBeacons.size()
-                      << " beacons misidentified, while only used "
-                      << usedBeacons << std::endl;
-        } else {
-            for (auto &ledPtr : misidentifiedBeacons) {
-                ledPtr->markMisidentified();
-            }
-        }
+        handlePossiblyMisidentifiedLeds();
 
         if (gotMeasurement) {
             // Re-symmetrize error covariance.
@@ -511,7 +500,7 @@ namespace vbtracker {
                     }
                     /// This means the LED is pointed away from us - so we
                     /// shouldn't be able to see it.
-                    led.markMisidentified();
+                    markAsPossiblyMisidentified(led);
 
                     /// @todo This could be a mis-identification, or it could
                     /// mean we're in a totally messed up state. Do we count
@@ -566,6 +555,38 @@ namespace vbtracker {
         return TriBool::Unknown;
     }
 
+    void SCAATKalmanPoseEstimator::markAsPossiblyMisidentified(Led &led) {
+        m_possiblyMisidentified.push_back(&led);
+    }
+
+    void SCAATKalmanPoseEstimator::markAsUsed(Led &led) {
+        led.markAsUsed();
+        m_ledsUsed++;
+    }
+
+    void SCAATKalmanPoseEstimator::handlePossiblyMisidentifiedLeds() {
+        m_ledsConsideredMisidentifiedLastFrame = m_possiblyMisidentified.size();
+        if (m_ledsConsideredMisidentifiedLastFrame > m_ledsUsed &&
+            m_ledsConsideredMisidentifiedLastFrame >
+                MISIDENTIFIED_BEACON_CUTOFF) {
+            std::cout << "Think our model is wrong: considered "
+                      << m_ledsConsideredMisidentifiedLastFrame
+                      << " beacons misidentified, while only used "
+                      << m_ledsUsed << std::endl;
+            m_misIDConsideredOurFault = true;
+        } else {
+            m_misIDConsideredOurFault = false;
+            for (auto &ledPtr : m_possiblyMisidentified) {
+                ledPtr->markMisidentified();
+            }
+        }
+
+        // Get ready for the next frame.
+        m_ledsUsedLastFrame = m_ledsUsed;
+        m_ledsUsed = 0;
+        m_possiblyMisidentified.clear();
+    }
+
     // The total number of frames that we can have dodgy Kalman tracking for
     // before RANSAC takes over again.
     static const std::size_t MAX_PROBATION_FRAMES = 10;
@@ -576,6 +597,11 @@ namespace vbtracker {
 
     SCAATKalmanPoseEstimator::TrackingHealth
     SCAATKalmanPoseEstimator::getTrackingHealth() {
+        // Reset immediately if we have a large number of mis-identified beacons
+        // that we decided were a model error, not a recognition error.
+        if (m_misIDConsideredOurFault) {
+            return TrackingHealth::NeedsResetNow;
+        }
 
         auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES);
 #if 0

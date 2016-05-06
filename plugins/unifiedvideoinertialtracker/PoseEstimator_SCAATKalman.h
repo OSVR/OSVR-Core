@@ -65,6 +65,10 @@ namespace vbtracker {
             m_framesWithoutIdentifiedBlobs = 0;
             m_framesWithoutUtilizedMeasurements = 0;
             m_lastUsableBeaconsSeen = SIGNAL_HAVE_NOT_SEEN_BEACONS_YET;
+            m_ledsUsed = 0;
+            m_ledsConsideredMisidentifiedLastFrame = 0;
+            m_ledsUsedLastFrame = 0;
+            m_misIDConsideredOurFault = false;
         }
 
         /// Determines whether the Kalman filter is in good working condition,
@@ -75,6 +79,11 @@ namespace vbtracker {
 
       private:
         TriBool inBoundingBoxRatioRange(Led const &led);
+
+        void markAsPossiblyMisidentified(Led &led);
+        void markAsUsed(Led &led);
+        void handlePossiblyMisidentifiedLeds();
+
         float m_maxBoxRatio;
         float m_minBoxRatio;
         const bool m_shouldSkipBright;
@@ -94,6 +103,11 @@ namespace vbtracker {
         std::size_t m_framesInProbation = 0;
         std::size_t m_framesWithoutIdentifiedBlobs = 0;
         std::size_t m_framesWithoutUtilizedMeasurements = 0;
+        std::vector<Led *> m_possiblyMisidentified;
+        std::size_t m_ledsUsed = 0;
+        std::size_t m_ledsConsideredMisidentifiedLastFrame = 0;
+        std::size_t m_ledsUsedLastFrame = 0;
+        bool m_misIDConsideredOurFault = false;
     };
 } // namespace vbtracker
 } // namespace osvr
