@@ -26,7 +26,6 @@
 #define INCLUDED_OptimizationBase_h_GUID_C3489E14_63D4_4290_45C0_225AC84A8BF5
 
 // Internal Includes
-#include "PoseFilter.h"
 #include "UtilityFunctions.h"
 
 #include <ConfigParams.h>
@@ -35,6 +34,7 @@
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/EigenFilters.h>
 
 // Standard includes
 #include <memory>
@@ -177,7 +177,7 @@ namespace vbtracker {
         Eigen::Isometry3d const &getPose() const { return pose; }
 
       private:
-        PoseFilter ransacPoseFilter;
+        util::filters::PoseOneEuroFilterd ransacPoseFilter;
         TimeValue last;
         bool isFirst = true;
         bool gotPose = false;

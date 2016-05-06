@@ -8,7 +8,6 @@ add_executable(TrackerParameterFinder
     OptimizationBase.h
     ParameterSets.h
     ParamFindingRoutine.h
-    PoseFilter.h
     TrackerParameterFinder.cpp
     TransformFindingRoutine.h
     UtilityFunctions.h)

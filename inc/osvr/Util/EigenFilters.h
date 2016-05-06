@@ -216,8 +216,65 @@ namespace util {
                 low_pass::LowPassFilter<T> m_xFilter;
                 low_pass::LowPassFilter<T> m_dxFilter;
             };
+
+            /// Combines a one-euro filter for position and a one-euro filter
+            /// for orientation for the common use case of wanting to filter a
+            /// full pose.
+            template <typename Scalar> class PoseOneEuroFilter {
+              public:
+                using scalar = Scalar;
+                using Vec3 = Eigen::Matrix<scalar, 3, 1>;
+                using Quat = Eigen::Quaternion<scalar>;
+                using Translation = Eigen::Translation<scalar, 3>;
+                using Isometry = Eigen::Transform<scalar, 3, Eigen::Isometry>;
+
+                PoseOneEuroFilter(Params const &positionFilterParams = Params{},
+                                  Params const &oriFilterParams = Params{})
+                    : m_positionFilter(positionFilterParams),
+                      m_orientationFilter(oriFilterParams){};
+
+                void filter(scalar dt, Vec3 const &position,
+                            Quat const &orientation) {
+                    if (dt <= scalar(0)) {
+                        /// Avoid div by 0
+                        dt = scalar(1);
+                    }
+                    m_positionFilter.filter(dt, position);
+                    m_orientationFilter.filter(dt, orientation);
+                }
+
+                Vec3 const &getPosition() const {
+                    return m_positionFilter.getState();
+                }
+
+                scalar getLinearVelocityMagnitude() const {
+                    return m_positionFilter.getDerivativeMagnitude();
+                }
+
+                Quat const &getOrientation() const {
+                    return m_orientationFilter.getState();
+                }
+
+                scalar getAngularVelocityMagnitude() const {
+                    return m_orientationFilter.getDerivativeMagnitude();
+                }
+
+                Isometry getIsometry() const {
+                    return Translation(getPosition()) *
+                           Isometry(getOrientation());
+                }
+
+              private:
+                OneEuroFilter<Vec3> m_positionFilter;
+                OneEuroFilter<Quat> m_orientationFilter;
+            };
+
         } // namespace one_euro
+
         using one_euro::OneEuroFilter;
+        using one_euro::PoseOneEuroFilter;
+		
+        using PoseOneEuroFilterd = one_euro::PoseOneEuroFilter<double>;
     } // namespace filters
 
 } // namespace util
