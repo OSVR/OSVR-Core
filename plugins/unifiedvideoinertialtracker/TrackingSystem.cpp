@@ -44,6 +44,8 @@
 #include <string>
 #include <stdexcept>
 
+static const auto ROOM_CALIBRATION_SKIP_BRIGHTS_CUTOFF = 4;
+
 namespace osvr {
 namespace vbtracker {
 
@@ -186,7 +188,8 @@ namespace vbtracker {
             Eigen::Vector3d xlate;
             Eigen::Quaterniond quat;
             auto gotPose = target.uncalibratedRANSACPoseEstimateFromLeds(
-                m_impl->camParams, xlate, quat);
+                m_impl->camParams, xlate, quat,
+                ROOM_CALIBRATION_SKIP_BRIGHTS_CUTOFF);
             if (gotPose) {
                 m_impl->calib.processVideoData(*this, bodyTargetId,
                                                m_impl->lastFrame, xlate, quat);
