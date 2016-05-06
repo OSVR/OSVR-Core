@@ -23,22 +23,26 @@
 // limitations under the License.
 
 // Internal Includes
-#include "ImageSources/ImageSourceFactories.h"
 #include "ImageSources/ImageSource.h"
+#include "ImageSources/ImageSourceFactories.h"
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp>
 
 // Standard includes
-#include <memory>
-#include <iostream>
 #include <chrono>
+#include <iostream>
+#include <memory>
 #include <sstream>
+
+#undef OSVR_ENABLE_RECORDING
 
 /// @brief OpenCV's simple highgui module refers to windows by their name, so we
 /// make this global for a simpler demo.
 static const std::string windowNameAndInstructions(
     "OSVR tracking camera preview | q or esc to quit");
+
+static const auto VIDEO_FILENAME = "capture.avi";
 
 static const auto FPS_MEASUREMENT_PERIOD = std::chrono::seconds(3);
 class FrameCounter {
@@ -119,10 +123,29 @@ int main(int argc, char *argv[]) {
     auto captures = std::size_t{0};
     FrameCounter counter;
 
+#ifdef OSVR_ENABLE_RECORDING
+    std::cout << "\nThis build is also video capture enabled: continuously "
+                 "recording to "
+              << VIDEO_FILENAME << std::endl;
+    cv::VideoWriter outputVideo{"capture.avi",
+                                CV_FOURCC_MACRO('M', 'J', 'P', 'G'), 100,
+                                cv::Size(640, 480), true};
+    if (!outputVideo.isOpened()) {
+        std::cerr << "Could not open the output video for writing!"
+                  << std::endl;
+        return -1;
+    }
+#endif
+
     cv::namedWindow(windowNameAndInstructions);
     auto frameCount = std::size_t{0};
     do {
         cam->retrieve(frame, grayFrame);
+
+#ifdef OSVR_ENABLE_RECORDING
+        outputVideo.write(frame);
+#endif
+
         counter.gotFrame();
         ++frameCount;
         if (frameCount % FRAME_DISPLAY_STRIDE == 0) {
