@@ -54,7 +54,7 @@ namespace vbtracker {
     /// The distance from the camera that we want to encourage users to move
     /// within for best initial startup. Provides the best view of beacons for
     /// initial start of autocalibration.
-    static const auto NEAR_MESSAGE_CUTOFF = 0.3;
+    static const auto NEAR_MESSAGE_CUTOFF = 0.4;
 
     RoomCalibration::RoomCalibration(Eigen::Vector3d const &camPosition,
                                      bool cameraIsForward)
