@@ -32,7 +32,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <type_traits>
 
 namespace osvr {
 namespace util {
@@ -43,6 +43,11 @@ namespace util {
     using RowMatrix44d = Eigen::Matrix<double, 4, 4, Eigen::RowMajor>;
     using Eigen::RowVector3d;
     using Eigen::RowVector4d;
+
+    template <typename Scalar>
+    using Isometry3 = Eigen::Transform<Scalar, 3, Eigen::Isometry>;
+    template <typename Scalar>
+    using Translation3 = Eigen::Translation<Scalar, 3>;
 
     namespace detail {
         template <int Size, typename PrototypeVector>
@@ -79,6 +84,21 @@ namespace util {
         return homogenous[3] == 0
                    ? homogenous.template head<3>().eval()
                    : (homogenous.template head<3>() / homogenous[3]).eval();
+    }
+
+    /// @brief A simpler, functional-style alternative to
+    /// `.fromPositionOrientationScale` when no scaling is performed.
+    template <typename Derived1, typename Derived2>
+    inline Isometry3<typename Derived1::Scalar>
+    makeIsometry(Eigen::MatrixBase<Derived1> const &translation,
+                 Eigen::RotationBase<Derived2, 3> const &rotation) {
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived1, 3);
+        static_assert(
+            std::is_same<typename Derived1::Scalar,
+                         typename Derived2::Scalar>::value,
+            "Translation and rotation do not have the same scalar type.");
+        using Scalar = typename Derived1::Scalar;
+        return Translation3<Scalar>(translation) * Isometry3<Scalar>(rotation);
     }
 
 } // namespace util

@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include <osvr/Util/EigenCoreGeometry.h>
+#include <osvr/Util/EigenExtras.h>
 
 // Library/third-party includes
 // - none
@@ -117,7 +118,7 @@ namespace util {
             ///   until lag is reduced to the desired level.
             struct Params {
                 Params() : minCutoff(1), beta(0), derivativeCutoff(1) {}
-                Params(double minCut, double b, double dCut = 1)
+                Params(double minCut, double b = 0.5, double dCut = 1)
                     : minCutoff(minCut), beta(b), derivativeCutoff(dCut) {}
 
                 /// Minimum cutoff frequency (in Hz) at "0" speed.
@@ -225,8 +226,8 @@ namespace util {
                 using scalar = Scalar;
                 using Vec3 = Eigen::Matrix<scalar, 3, 1>;
                 using Quat = Eigen::Quaternion<scalar>;
-                using Translation = Eigen::Translation<scalar, 3>;
-                using Isometry = Eigen::Transform<scalar, 3, Eigen::Isometry>;
+                using Translation = Translation3<scalar>;
+                using Isometry = Isometry3<scalar>;
 
                 PoseOneEuroFilter(Params const &positionFilterParams = Params{},
                                   Params const &oriFilterParams = Params{})
@@ -260,8 +261,7 @@ namespace util {
                 }
 
                 Isometry getIsometry() const {
-                    return Translation(getPosition()) *
-                           Isometry(getOrientation());
+                    return makeIsometry(getPosition(), getOrientation());
                 }
 
               private:
@@ -273,7 +273,7 @@ namespace util {
 
         using one_euro::OneEuroFilter;
         using one_euro::PoseOneEuroFilter;
-		
+
         using PoseOneEuroFilterd = one_euro::PoseOneEuroFilter<double>;
     } // namespace filters
 
