@@ -47,7 +47,8 @@ namespace vbtracker {
     /// the pose of the camera in space and the yaw offset of the IMU.
     class RoomCalibration {
       public:
-        RoomCalibration(Eigen::Vector3d const& camPosition, bool cameraIsForward = true);
+        RoomCalibration(Eigen::Vector3d const &camPosition,
+                        bool cameraIsForward = true);
 
         /// Since during startup, we only want video data on a single target, we
         /// can save processing power by asking before we compute.
@@ -68,9 +69,7 @@ namespace vbtracker {
         /// calibration has finished and perform updates accordingly.
         bool postCalibrationUpdate(TrackingSystem &sys);
 
-        bool calibrationComplete() const {
-            return m_calibComplete;
-        }
+        bool calibrationComplete() const { return m_calibComplete; }
 
         /// @name Accessors only valid once postCalibrationUpdate() has returned
         /// true!

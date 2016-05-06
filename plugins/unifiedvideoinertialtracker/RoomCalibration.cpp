@@ -24,17 +24,18 @@
 
 // Internal Includes
 #include "RoomCalibration.h"
+#include "Assumptions.h"
 #include "ForEachTracked.h"
 #include "TrackedBodyIMU.h"
-#include "Assumptions.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
+#include <osvr/Util/EigenExtras.h>
 #include <osvr/Util/ExtractYaw.h>
 
 // Standard includes
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 namespace osvr {
 namespace vbtracker {
@@ -106,9 +107,7 @@ namespace vbtracker {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
 
-        Eigen::Isometry3d targetPose;
-        targetPose.fromPositionOrientationScale(xlate, quat,
-                                                Eigen::Vector3d::Ones());
+        Eigen::Isometry3d targetPose = util::makeIsometry(xlate, quat);
 
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
