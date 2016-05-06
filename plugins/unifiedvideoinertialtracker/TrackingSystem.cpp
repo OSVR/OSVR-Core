@@ -24,13 +24,13 @@
 
 // Internal Includes
 #include "TrackingSystem.h"
+#include "ForEachTracked.h"
+#include "RoomCalibration.h"
+#include "SBDBlobExtractor.h"
 #include "TrackedBody.h"
 #include "TrackedBodyTarget.h"
-#include "UndistortMeasurements.h"
-#include "ForEachTracked.h"
 #include "TrackingSystem_Impl.h"
-#include "SBDBlobExtractor.h"
-#include "RoomCalibration.h"
+#include "UndistortMeasurements.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -39,10 +39,10 @@
 
 // Standard includes
 #include <algorithm>
-#include <iterator>
 #include <iostream>
-#include <string>
+#include <iterator>
 #include <stdexcept>
+#include <string>
 
 static const auto ROOM_CALIBRATION_SKIP_BRIGHTS_CUTOFF = 4;
 
