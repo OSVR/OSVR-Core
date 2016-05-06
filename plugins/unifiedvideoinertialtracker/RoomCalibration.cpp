@@ -164,8 +164,9 @@ namespace vbtracker {
             break;
         case InstructionState::ToldToMoveCloser:
             if (zTranslation < (0.9 * NEAR_MESSAGE_CUTOFF)) {
-                instructions()
-                    << "That distance looks good, hold it right there.";
+                instructions() << "That distance looks good, rotate the device "
+                                  "gently until you get a 'Hold still' "
+                                  "message.";
                 endInstructions();
                 m_instructionState = InstructionState::ToldDistanceIsGood;
             }
