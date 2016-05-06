@@ -22,6 +22,10 @@ Like the plugin interface items above, these don't require changes to the tracke
 
 - Port the pre-calibration tool to this tracker tracker core, along with a new JSON file format for calibrated beacons.
 
+### Video Tracker Shared (blob detection, etc)
+
+- Option for "max area" as a blob filter parameter: the new "edge hole extractor" is much better at not recognizing random splotches of sunlight as blobs, but a max area filter would be cheap and easy and save computation down the line by reducing `n`...
+
 ### Tracker Core (`uvbi-core`)
 
 In general, the things that sound like large design changes are actually stubbed in or theoretically functional, but not tested/used in the current limited plugin interface that just sets up the core to track the HDK.
@@ -29,7 +33,7 @@ In general, the things that sound like large design changes are actually stubbed
 - General: See `Assumptions.h` and `@todo` in code
 - Be able to operate in IMU-only mode (as VideoIMUFusion did), essentially just passing through the IMU data.
 - Multiple optical targets per body.
-- Figure out why room calibration sometimes (seemingly randomly) is a rather prolonged struggle.
+- Figure out why room calibration sometimes (seemingly randomly) is a rather prolonged struggle. (Seems to be better since changing to use more RANSAC iterations, converting the OpenCV poses to Eigen poses differently, and thus doing the pinhole flip differently, but it's again, seemingly randomly...)
 - Slide-joint target (the rear target of the HDK) - modeling a target with one linear (or one linear and one rotational) degree of freedom from the body.
 - Update IMU code to have IMU hold a yaw drift state variable that is autocalibrated (like the beacon positions are)
 - Multi-camera tracking.
