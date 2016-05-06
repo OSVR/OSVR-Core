@@ -136,7 +136,8 @@ namespace vbtracker {
         /// modified.
         bool uncalibratedRANSACPoseEstimateFromLeds(
             CameraParameters const &camParams, Eigen::Vector3d &xlate,
-            Eigen::Quaterniond &quat, int skipBrightsCutoff = -1);
+            Eigen::Quaterniond &quat, int skipBrightsCutoff = -1,
+            std::size_t iterations = 5);
 
         /// Did this target yet, or last time it was asked to, compute a
         /// pose estimate?

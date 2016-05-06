@@ -513,7 +513,8 @@ namespace vbtracker {
 
     bool TrackedBodyTarget::uncalibratedRANSACPoseEstimateFromLeds(
         CameraParameters const &camParams, Eigen::Vector3d &xlate,
-        Eigen::Quaterniond &quat, int skipBrightsCutoff) {
+        Eigen::Quaterniond &quat, int skipBrightsCutoff,
+        std::size_t iterations) {
 
         /// Do the initial filtering of the LED group to just the identified
         /// ones before we pass it to an estimator.
@@ -522,7 +523,7 @@ namespace vbtracker {
         Eigen::Quaterniond outQuat;
         auto gotPose = m_impl->ransacEstimator(
             camParams, usableLeds(), m_beacons, m_beaconDebugData, outXlate,
-            outQuat, skipBrightsCutoff);
+            outQuat, skipBrightsCutoff, iterations);
         if (gotPose) {
             // Post-correct the state
             xlate = outXlate - outQuat * m_beaconOffset;

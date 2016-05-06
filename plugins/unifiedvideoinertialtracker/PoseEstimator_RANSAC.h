@@ -51,7 +51,7 @@ namespace vbtracker {
                         LedPtrList const &leds, BeaconStateVec const &beacons,
                         std::vector<BeaconData> &beaconDebug,
                         Eigen::Vector3d &outXlate, Eigen::Quaterniond &outQuat,
-                        int skipBrightsCutoff = -1);
+                        int skipBrightsCutoff = -1, std::size_t iterations = 5);
 
         /// Perform RANSAC-based pose estimation and use it to update a body
         /// state (state vector and error covariance)

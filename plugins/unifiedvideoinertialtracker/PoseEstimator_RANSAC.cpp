@@ -43,7 +43,6 @@
 /// did.
 #undef OSVR_UVBI_TEST_RANSAC_REPROJECTION
 
-static const int RANSAC_ITERATIONS_COUNT = 5;
 static const float MAX_REPROJECTION_ERROR = 4.f;
 
 namespace osvr {
@@ -52,7 +51,8 @@ namespace vbtracker {
     operator()(CameraParameters const &camParams, LedPtrList const &leds,
                BeaconStateVec const &beacons,
                std::vector<BeaconData> &beaconDebug, Eigen::Vector3d &outXlate,
-               Eigen::Quaterniond &outQuat, int skipBrightsCutoff) {
+               Eigen::Quaterniond &outQuat, int skipBrightsCutoff,
+               std::size_t iterations) {
 
         bool skipBrights = false;
 
@@ -116,7 +116,7 @@ namespace vbtracker {
         cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            RANSAC_ITERATIONS_COUNT, MAX_REPROJECTION_ERROR,
+            iterations, MAX_REPROJECTION_ERROR,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 #elif CV_MAJOR_VERSION == 3
@@ -128,8 +128,7 @@ namespace vbtracker {
         auto ransacResult = cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            RANSAC_ITERATIONS_COUNT, MAX_REPROJECTION_ERROR, confidence,
-            inlierIndices);
+            iterations, MAX_REPROJECTION_ERROR, confidence, inlierIndices);
         if (!ransacResult) {
             return false;
         }
