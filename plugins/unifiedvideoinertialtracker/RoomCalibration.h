@@ -29,10 +29,10 @@
 #include "BodyIdTypes.h"
 
 // Library/third-party includes
+#include <osvr/Util/Angles.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/TimeValue.h>
-#include <osvr/Util/Angles.h>
 
 #include <boost/optional.hpp>
 
@@ -120,11 +120,8 @@ namespace vbtracker {
         util::time::TimeValue m_lastVideoData;
         /// @}
 
-        /// @name Input filters on camera in room/IMU space
-        /// @{
-        util::filters::OneEuroFilter<Eigen::Vector3d> m_positionFilter;
-        util::filters::OneEuroFilter<Eigen::Quaterniond> m_orientationFilter;
-        /// @}
+        /// Input filter on camera in room/IMU space
+        util::filters::PoseOneEuroFilterd m_poseFilter;
 
         BodyId m_imuBody;
         Eigen::Quaterniond m_imuOrientation;

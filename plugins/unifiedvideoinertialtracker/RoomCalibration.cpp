@@ -59,8 +59,8 @@ namespace vbtracker {
     RoomCalibration::RoomCalibration(Eigen::Vector3d const &camPosition,
                                      bool cameraIsForward)
         : m_lastVideoData(util::time::getNow()),
-          m_positionFilter(filters::one_euro::Params{}),
-          m_orientationFilter(filters::one_euro::Params{}),
+          m_poseFilter(filters::one_euro::Params{0.5},
+                       filters::one_euro::Params{0.5}),
           m_suppliedCamPosition(camPosition),
           m_cameraIsForward(cameraIsForward) {}
 
@@ -119,12 +119,12 @@ namespace vbtracker {
         Eigen::Isometry3d rTc = m_imuOrientation * targetPose.inverse();
 
         // Feed this into the filters...
-        m_positionFilter.filter(dt, rTc.translation());
-        m_orientationFilter.filter(dt, Eigen::Quaterniond(rTc.rotation()));
+        m_poseFilter.filter(dt, rTc.translation(),
+                            Eigen::Quaterniond(rTc.rotation()));
 
         // Look at the velocity to see if the user was holding still enough.
-        auto linearVel = m_positionFilter.getDerivativeMagnitude();
-        auto angVel = m_orientationFilter.getDerivativeMagnitude();
+        auto linearVel = m_poseFilter.getLinearVelocityMagnitude();
+        auto angVel = m_poseFilter.getAngularVelocityMagnitude();
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
         if (linearVel < LINEAR_VELOCITY_CUTOFF &&
@@ -280,12 +280,9 @@ namespace vbtracker {
     }
 
     Eigen::Isometry3d RoomCalibration::getCameraToIMUCalibrationPoint() const {
-        Eigen::Isometry3d ret;
-        ret.fromPositionOrientationScale(m_positionFilter.getState(),
-                                         m_orientationFilter.getState(),
-                                         Eigen::Vector3d::Ones());
-        return ret;
+        return m_poseFilter.getIsometry();
     }
+
     std::ostream &RoomCalibration::msgStream() const { return std::cout; }
     std::ostream &RoomCalibration::msg() const {
         return msgStream() << "[Unified Tracker: Room Calibration] ";
