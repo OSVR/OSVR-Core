@@ -129,11 +129,14 @@ namespace vbtracker {
         /// modified if return value is true.
         /// @param [out] quat Pose estimate: rotation. Only modified if return
         /// value is true.
+        /// @param skipBrightsCutoff If positive, the number of non-bright LEDs
+        /// seen that will trigger us to skip using bright LEDs in pose
+        /// estimation.
         /// @return true if a pose was estimated and the out parameters were
         /// modified.
         bool uncalibratedRANSACPoseEstimateFromLeds(
             CameraParameters const &camParams, Eigen::Vector3d &xlate,
-            Eigen::Quaterniond &quat);
+            Eigen::Quaterniond &quat, int skipBrightsCutoff = -1);
 
         /// Did this target yet, or last time it was asked to, compute a
         /// pose estimate?

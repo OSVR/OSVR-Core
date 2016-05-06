@@ -43,11 +43,15 @@ namespace vbtracker {
         ///
         /// @param[out] outXlate translation output parameter
         /// @param[out] outQuat rotation output parameter
+        /// @param skipBrightsCutoff If positive, the number of non-bright LEDs
+        /// seen that will trigger us to skip using bright LEDs in pose
+        /// estimation.
         /// @return true if a pose was estimated.
         bool operator()(CameraParameters const &camParams,
                         LedPtrList const &leds, BeaconStateVec const &beacons,
                         std::vector<BeaconData> &beaconDebug,
-                        Eigen::Vector3d &outXlate, Eigen::Quaterniond &outQuat);
+                        Eigen::Vector3d &outXlate, Eigen::Quaterniond &outQuat,
+                        int skipBrightsCutoff = -1);
 
         /// Perform RANSAC-based pose estimation and use it to update a body
         /// state (state vector and error covariance)

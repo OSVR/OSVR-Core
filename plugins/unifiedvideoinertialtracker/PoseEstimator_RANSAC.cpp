@@ -45,12 +45,23 @@
 
 namespace osvr {
 namespace vbtracker {
-    bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList const &leds,
-                                         BeaconStateVec const &beacons,
-                                         std::vector<BeaconData> &beaconDebug,
-                                         Eigen::Vector3d &outXlate,
-                                         Eigen::Quaterniond &outQuat) {
+    bool RANSACPoseEstimator::
+    operator()(CameraParameters const &camParams, LedPtrList const &leds,
+               BeaconStateVec const &beacons,
+               std::vector<BeaconData> &beaconDebug, Eigen::Vector3d &outXlate,
+               Eigen::Quaterniond &outQuat, int skipBrightsCutoff) {
+
+        bool skipBrights = false;
+
+        if (skipBrightsCutoff > 0) {
+            int nonBrights =
+                std::count_if(begin(leds), end(leds),
+                              [](Led *ledPtr) { return !ledPtr->isBright(); });
+            if (nonBrights >= skipBrightsCutoff) {
+                skipBrights = true;
+                // std::cout << "will be skipping brights!" << std::endl;
+            }
+        }
 
         // We need to get a pair of matched vectors of points: 2D locations
         // with in the image and 3D locations in model space.  There needs to
@@ -63,6 +74,9 @@ namespace vbtracker {
         std::vector<cv::Point2f> imagePoints;
         std::vector<ZeroBasedBeaconId> beaconIds;
         for (auto const &led : leds) {
+            if (skipBrights && led->isBright()) {
+                continue;
+            }
             auto id = makeZeroBased(led->getID());
             auto index = asIndex(id);
             beaconDebug[index].variance = -1;
