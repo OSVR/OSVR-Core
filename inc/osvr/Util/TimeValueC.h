@@ -217,6 +217,10 @@ inline bool osvrTimeValueIsNormalized(const OSVR_TimeValue &tv) {
 #else
     return std::abs(tv.microseconds) < 1000000 &&
 #endif
+               // zeros can be paired with a positive or negative
+               (tv.seconds == 0) ||
+           (tv.microseconds == 0) ||
+           // if both non-zero, then both must have same sign.
            ((tv.seconds > 0) == (tv.microseconds > 0));
 }
 
