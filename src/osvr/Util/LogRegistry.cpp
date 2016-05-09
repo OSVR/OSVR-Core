@@ -90,7 +90,7 @@ LogRegistry::LogRegistry() : sinks_()
 #if defined(OSVR_LINUX) || defined(OSVR_MACOSX)
     sinks_.push_back(color_sink);
 #elif defined(OSVR_ANDROID)
-    auto android_sink = spdlog::sinks::android_sink_mt();
+    auto android_sink = spdlog::sinks::android_sink_mt("OSVR");
     sinks_.push_back(android_sink);
 #else
     // No color for Windows yet (and not tested on other platforms)
