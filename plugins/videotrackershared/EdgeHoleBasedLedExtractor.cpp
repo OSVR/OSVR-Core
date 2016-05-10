@@ -53,7 +53,7 @@ namespace vbtracker {
 
         verbose_ = verboseBlobOutput;
 
-        gray_ = gray.clone();
+        gray.copyTo(gray_);
 
         /// Set up the threshold parameters
         auto rangeInfo = ImageRangeInfo(gray_);
@@ -67,10 +67,9 @@ namespace vbtracker {
             static_cast<std::uint8_t>(thresholdInfo.minThreshold);
 
         /// Used to do basic thresholding here first to reduce background noise,
-        /// but
-        /// turns out that actually produced worse results at the end of the
+        /// but turns out that actually produced worse results at the end of the
         /// process (presumably by producing very sharp edges)
-        cv::Mat blurred;
+        MatType blurred;
 
         cv::GaussianBlur(gray_, blurred,
                          cv::Size(extParams_.preEdgeDetectionBlurSize,
@@ -83,7 +82,7 @@ namespace vbtracker {
 
         // turn the edge detection into a binary image.
         if (extParams_.postEdgeDetectionBlur) {
-            cv::Mat edgeTemp;
+            MatType edgeTemp;
             cv::GaussianBlur(edge_, edgeTemp,
                              cv::Size(extParams_.postEdgeDetectionBlurSize,
                                       extParams_.postEdgeDetectionBlurSize),
@@ -104,11 +103,17 @@ namespace vbtracker {
         // given. We examine it for suitability as an LED, and if it passes our
         // checks, add a derived measurement to our measurement vector and the
         // contour itself to our list of contours for debugging display.
-        cv::Mat binTemp = edgeBinary_.clone();
+        MatType binTemp = edgeBinary_.clone();
         consumeHolesOfConnectedComponents(
             edgeBinary_,
             [&](ContourType &&contour) { checkBlob(std::move(contour), p); });
         return measurements_;
+    }
+    void EdgeHoleBasedLedExtractor::reset() {
+        contours_.clear();
+        measurements_.clear();
+        rejectList_.clear();
+        contourId_ = 0;
     }
     void EdgeHoleBasedLedExtractor::checkBlob(ContourType &&contour,
                                               BlobParams const &p) {
