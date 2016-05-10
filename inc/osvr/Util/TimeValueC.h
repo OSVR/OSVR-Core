@@ -31,12 +31,12 @@
 #define INCLUDED_TimeValueC_h_GUID_A02C6917_124D_4CB3_E63E_07F2DA7144E9
 
 /* Internal Includes */
-#include <osvr/Util/Export.h>
 #include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/AnnotationMacrosC.h>
+#include <osvr/Util/BoolC.h>
+#include <osvr/Util/Export.h>
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Util/StdInt.h>
-#include <osvr/Util/BoolC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -206,8 +206,8 @@ osvrTimeValueGreater(OSVR_IN_PTR const OSVR_TimeValue *tvA,
 
 #ifdef __cplusplus
 
-#include <cmath>
 #include <cassert>
+#include <cmath>
 
 /// Returns true if the time value is normalized. Typically used in assertions.
 inline bool osvrTimeValueIsNormalized(const OSVR_TimeValue &tv) {
