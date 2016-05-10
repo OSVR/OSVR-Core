@@ -67,7 +67,7 @@ namespace vbtracker {
     double getConvexity(ContourType const &contour, const double area);
 
     struct ImageRangeInfo {
-        explicit ImageRangeInfo(cv::Mat const &img) {
+        explicit ImageRangeInfo(cv::InputArray img) {
             cv::minMaxIdx(img, &minVal, &maxVal);
         }
         double minVal;

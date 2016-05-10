@@ -201,7 +201,8 @@ namespace vbtracker {
     }
 
     template <typename F>
-    void consumeHolesOfConnectedComponents(cv::Mat input, F &&continuation) {
+    void consumeHolesOfConnectedComponents(cv::InputOutputArray input,
+                                           F &&continuation) {
         std::vector<ContourType> contours;
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP,
