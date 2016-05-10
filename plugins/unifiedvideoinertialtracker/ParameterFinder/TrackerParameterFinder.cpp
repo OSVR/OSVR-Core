@@ -102,7 +102,7 @@ struct PrintParamSetOptions {
 };
 
 int usage(const char *argv0) {
-    std::cerr << "Usage: " << argv0 << "[<routine> [<paramset> [--cost]]]\n"
+    std::cerr << "Usage: " << argv0 << " [<routine> [<paramset> [--cost]]]\n"
               << std::endl;
     std::cerr
         << "where <routine> is one of the following (case insensitive): \n";
