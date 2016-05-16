@@ -11,8 +11,7 @@
             "headCircumference": 55.75,
             "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
             "cameraIsForward": true,
-            "cameraPosition": [0, 1.2, -0.5],
-            "additionalPrediction": 0.024
+            "cameraPosition": [0, 1.2, -0.5]
         }
     }]
 }
