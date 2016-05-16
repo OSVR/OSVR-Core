@@ -24,13 +24,13 @@
             "bitsPerColor": 8
         },
 
-		"prediction": {
-				"enabled": true,
-				"staticDelayMS": 48,
-				"leftEyeDelayMS": 7.5,
-				"rightEyeDelayMS": 0,
-				"localTimeOverride": true
-		},
+        "prediction": {
+                "enabled": false,
+                "staticDelayMS": 48,
+                "leftEyeDelayMS": 7.5,
+                "rightEyeDelayMS": 0,
+                "localTimeOverride": true
+        },
 
         "timeWarp": {
             "enabled": true,
