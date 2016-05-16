@@ -155,7 +155,7 @@ int parseParamSetForParamOptimizer(osvr::vbtracker::ParamOptimizerFunc &func,
         return usage(argv[0]);
     }
     if (argc > 3) {
-        if (std::string(argv[3]) == "--cost") {
+        if (boost::iequals(argv[3], "--cost")) {
             std::cout << "Will run for just cost-only." << std::endl;
             costOnly = true;
         } else {
