@@ -33,8 +33,11 @@
 
 // Standard includes
 #include <cassert>
+#include <iomanip>
+#include <limits>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -57,8 +60,7 @@ namespace util {
         /// it is added to the row. Construct with the `cell()` helper
         /// functions.
         template <typename T, typename HeaderType = std::string> class Cell;
-        template <typename T>
-        class Cell<T, std::string> : public CellBase<T> {
+        template <typename T> class Cell<T, std::string> : public CellBase<T> {
           public:
             using Base = CellBase<T>;
             Cell(std::string const &header, T const &data)
@@ -74,6 +76,32 @@ namespace util {
           private:
             std::string header_;
         };
+
+        template <typename T, typename Dummy = void> struct CellStreamPrep {
+            static void prepareStream(std::ostream &) {
+                /// Generic values: nothing needed here.
+            }
+        };
+
+        template <typename T>
+        struct CellStreamPrep<T, typename std::enable_if<
+                                     std::is_floating_point<T>::value>::type> {
+            static void prepareStream(std::ostream &os) {
+                // Floating point values: please set precision to maximum.
+                os << std::setprecision(std::numeric_limits<T>::digits10 + 1);
+            }
+        };
+
+        /// Invokes the trait to prepare a stream for a data type.
+        template <typename T>
+        inline void prepareStream(std::ostream &os, T const &cell) {
+            using DataValueConstType =
+                typename std::remove_reference<decltype(cell.getData())>::type;
+            using DataValueType =
+                typename std::remove_const<DataValueConstType>::type;
+            using PrepType = CellStreamPrep<DataValueType>;
+            PrepType::prepareStream(os);
+        }
 
         /// Returned by calls to .row() on a CSV object (you'll never need
         /// instantiate manually), and only really interacted with using the
@@ -124,6 +152,7 @@ namespace util {
             void add(Cell<CellArgs...> const &c) {
                 commonPreAdd();
                 std::ostringstream os;
+                prepareStream(os, c);
                 os << c.getData();
                 commonPostAdd(c.getHeader(), os.str());
             }
