@@ -24,24 +24,24 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
+#include "ConnectTwoFilters.h"
+#include "NullRenderFilter.h"
+#include "PropertyBagHelper.h"
 #include "dibsize.h"
 #include "directx_samplegrabber_callback.h"
-#include "ConnectTwoFilters.h"
-#include "PropertyBagHelper.h"
-#include "NullRenderFilter.h"
+#include <osvr/Util/WideToUTF8.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <chrono>
 #include <cmath>
 #include <iostream>
-#include <chrono>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Uncomment to get a full device name and path listing in enumeration, instead
 // of silently enumerating and early-exiting when we find one we like.

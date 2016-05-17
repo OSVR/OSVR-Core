@@ -28,19 +28,19 @@
 #define INCLUDED_directx_camera_server_h_GUID_9322F126_0DA4_4DB9_11F3_DDBF76A6D9D9
 
 // Internal Includes
-#include "base_camera_server.h"
 #include "MediaSampleExchange.h"
 #include "SampleGrabberWrapper.h"
-#include "comutils/ComPtr.h"
+#include "base_camera_server.h"
 #include "comutils/ComInit.h"
+#include "comutils/ComPtr.h"
 
 // Library/third-party includes
 
 // Standard includes
-#include <stdexcept>
-#include <memory>
-#include <vector>
 #include <functional>
+#include <memory>
+#include <stdexcept>
+#include <vector>
 
 // Include files for DirectShow video input
 #include <dshow.h>

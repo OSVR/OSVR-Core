@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
-#include "ImageSourceFactories.h"
 #include "DirectShowHDKCameraFactory.h"
 #include "DirectShowToCV.h"
+#include "ImageSourceFactories.h"
 
 // Library/third-party includes
 // - none
