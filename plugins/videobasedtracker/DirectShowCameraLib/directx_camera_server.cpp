@@ -172,7 +172,6 @@ inline std::string getDeviceHumanDesc(PropertyBagHelper &prop) {
 }
 
 bool directx_camera_server::start_com_and_graphbuilder() {
-    HRESULT hr;
 //-------------------------------------------------------------------
 // Create COM and DirectX objects needed to access a video stream.
 
