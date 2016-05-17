@@ -23,6 +23,7 @@
 // limitations under the License.
 
 // Internal Includes
+#include "CheckFirmwareVersion.h"
 #include "DirectShowHDKCameraFactory.h"
 #include "DirectShowToCV.h"
 #include "ImageSourceFactories.h"
@@ -31,7 +32,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -61,16 +62,69 @@ namespace vbtracker {
         bool m_gotRes = false;
         cv::Size m_res;
     };
-    ImageSourcePtr openHDKCameraDirectShow() {
 
+    ImageSourcePtr openHDKCameraDirectShow() {
         auto ret = ImageSourcePtr{};
         auto cam = getDirectShowHDKCamera();
         if (!cam) {
             return ret;
         }
+
+        // Check firmware version
+        {
+            static const auto UPDATER_URL = "osvr.github.io";
+            auto firmwareStatus = checkCameraFirmwareRevision(cam->getPath());
+            switch (firmwareStatus) {
+            case osvr::vbtracker::FirmwareStatus::Good:
+                break;
+            case FirmwareStatus::Future:
+                std::cerr
+                    << "\n[Video-based Tracking] Note: Camera firmware "
+                       "version detected was newer than recognized latest "
+                       "version, assuming OK. You may want to update your "
+                       "OSVR server or plugin!\n"
+                    << std::endl;
+                break;
+            case osvr::vbtracker::FirmwareStatus::UpgradeRequired:
+            case osvr::vbtracker::FirmwareStatus::UpgradeUseful:
+                std::cerr
+                    << "\n[Video-based Tracking] WARNING - Your HDK infrared "
+                       "tracking camera was detected to have outdated "
+                       "firmware in need of updating, and may not function "
+                       "properly. Please visit "
+                    << UPDATER_URL << " to get the "
+                                      "camera firmware updater.\n\n"
+                    << std::endl;
+                /// @todo do we allow the tracker to run with outdated firmware
+                /// versions?
+                break;
+            case osvr::vbtracker::FirmwareStatus::Unknown:
+                std::cerr
+                    << "\n[Video-based Tracking] Note: Could not detect the "
+                       "firmware version on your HDK infrared "
+                       "tracking camera. You may need to update it: see "
+                    << UPDATER_URL << " to get the camera firmware updater.\n\n"
+                    << std::endl;
+                break;
+            default:
+                break;
+            }
+
+            if (firmwareStatus ==
+                osvr::vbtracker::FirmwareStatus::UpgradeRequired) {
+                /// this enum value is reserved for versions so old that they
+                /// don't sync correctly with the LED pulses...
+                std::cerr << "\n[Video-based Tracking] The video tracking "
+                             "plugin cannot run with your camera until the "
+                             "firmware has been updated.\n\n"
+                          << std::endl;
+                return ret;
+            }
+        }
         ret.reset(new DirectShowImageSource{std::move(cam)});
         return ret;
     }
+
     bool DirectShowImageSource::grab() {
         return m_camera->read_image_to_memory();
     }

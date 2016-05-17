@@ -12,6 +12,7 @@ set(SOURCES
     Oculus_DK2.h)
 if(WIN32)
     list(APPEND SOURCES
+        CheckFirmwareVersion.h
         DirectShowHDKCameraFactory.h
         DirectShowImageSource.cpp
         DirectShowToCV.h)
@@ -33,5 +34,8 @@ target_link_libraries(uvbi-image-sources PUBLIC
     PRIVATE
     vendored-vrpn)
 if(WIN32)
-    target_link_libraries(uvbi-image-sources PUBLIC directshow-camera)
+    target_link_libraries(uvbi-image-sources PUBLIC
+        directshow-camera
+        osvr_codecvt
+        wbemuuid)
 endif()
