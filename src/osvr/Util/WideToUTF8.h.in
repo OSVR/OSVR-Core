@@ -27,7 +27,9 @@
 #ifndef INCLUDED_WideToUTF8_h_GUID_A2C0AD0B_9DEB_4E84_5A3A_8517ED03AA32
 #define INCLUDED_WideToUTF8_h_GUID_A2C0AD0B_9DEB_4E84_5A3A_8517ED03AA32
 
+#ifndef OSVR_HAVE_CODECVT
 #cmakedefine OSVR_HAVE_CODECVT
+#endif
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -54,14 +56,26 @@ namespace util {
         return boost::locale::conv::utf_to_utf<char>(input);
 #endif // OSVR_HAVE_CODECVT
     }
+
+    template <typename T> inline std::wstring utf8ToWideString(T input) {
+#ifdef OSVR_HAVE_CODECVT
+        std::wstring_convert<std::codecvt_utf8<wchar_t> > strCvt;
+        return strCvt.from_bytes(input);
+#else  // !OSVR_HAVE_CODECVT
+        return boost::locale::conv::utf_to_utf<wchar_t>(input);
+#endif // OSVR_HAVE_CODECVT
+    }
+
 #ifdef _UNICODE
     inline std::string tcharToUTF8String(TCHAR buf[]) {
-        static_assert(std::is_same<TCHAR, wchar_t>::value, "This code path relies on TCHAR being a wchar_t!");
+        static_assert(std::is_same<TCHAR, wchar_t>::value,
+                      "This code path relies on TCHAR being a wchar_t!");
         return wideToUTF8String(buf);
     }
 #else  // !_UNICODE
     inline std::string tcharToUTF8String(TCHAR buf[]) {
-        static_assert(std::is_same<TCHAR, char>::value, "This code path relies on TCHAR being a single byte!");
+        static_assert(std::is_same<TCHAR, char>::value,
+                      "This code path relies on TCHAR being a single byte!");
         return std::string(buf);
     }
 #endif // _UNICODE
