@@ -128,6 +128,8 @@ class directx_camera_server : public base_camera_server {
     /// existing code.
     bool isOpened(void) const { return _started_graph; }
 
+    std::string const &getPath() const { return devicePath_; }
+
   protected:
     bool start_com_and_graphbuilder();
     bool open_moniker_and_finish_setup(comutils::Ptr<IMoniker> pMoniker,
@@ -174,6 +176,7 @@ class directx_camera_server : public base_camera_server {
 
   private:
     void allocate_buffer();
+    std::string devicePath_;
 };
 
 #endif // INCLUDED_directx_camera_server_h_GUID_9322F126_0DA4_4DB9_11F3_DDBF76A6D9D9

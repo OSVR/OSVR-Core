@@ -365,6 +365,13 @@ bool directx_camera_server::open_and_find_parameters(
 #endif
         return false;
     }
+    {
+        /// Try to get and save the device path for later usage.
+        auto props = PropertyBagHelper{*pMoniker};
+        if (props) {
+            devicePath_ = getDevicePath(props);
+        }
+    }
 
 #ifdef DEBUG
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
