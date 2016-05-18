@@ -40,12 +40,14 @@ namespace vbtracker {
     inline void pinholeCameraFlipPose(Eigen::Ref<Eigen::Vector3d> xlate,
                                       Eigen::Quaterniond &rot) {
 #endif
-    template <typename Derived>
-    inline void pinholeCameraFlipPose(Eigen::DenseBase<Derived> &xlate,
+    template <typename VecType>
+    inline void pinholeCameraFlipPose(VecType &&xlate,
                                       Eigen::Quaterniond &rot) {
+#if 0
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
         static_assert(std::is_same<double, typename Derived::Scalar>::value,
                       "Translation scalar type must also be double.");
+#endif
 
         /// invert position
         xlate *= -1;
@@ -58,15 +60,15 @@ namespace vbtracker {
     pinholeCameraFlipVelocities(Eigen::Ref<Eigen::Vector3d> &linVel,
                                 Eigen::Ref<Eigen::Vector3d> &angVel) {
 #endif
-    template <typename Derived1, typename Derived2>
-    inline void
-    pinholeCameraFlipVelocities(Eigen::DenseBase<Derived1> &linVel,
-                                Eigen::DenseBase<Derived2> &angVel) {
+    template <typename Vec1, typename Vec2>
+    inline void pinholeCameraFlipVelocities(Vec1 &&linVel, Vec2 &&angVel) {
+#if 0
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived1, 3);
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived2, 3);
         static_assert(std::is_same<typename Derived1::Scalar,
                                    typename Derived2::Scalar>::value,
                       "Velocities must have the same scalar type.");
+#endif
 
         /// invert velocity
         linVel *= -1;
