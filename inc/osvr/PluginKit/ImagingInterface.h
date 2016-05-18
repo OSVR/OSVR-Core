@@ -124,7 +124,7 @@ namespace pluginkit {
                 util::opencvNumberTypeData(frame.type());
             OSVR_ImagingMetadata metadata;
             metadata.channels = frame.channels();
-            metadata.depth = typedata.getSize();
+            metadata.depth = static_cast<OSVR_ImageDepth>(typedata.getSize());
             metadata.width = frame.cols;
             metadata.height = frame.rows;
             metadata.type = typedata.isFloatingPoint()

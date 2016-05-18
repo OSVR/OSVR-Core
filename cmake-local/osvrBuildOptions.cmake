@@ -37,6 +37,8 @@ option(BUILD_WITH_OPENCV "Should we build the stock and example plugins and apps
 
 option(BUILD_HEADER_DEPENDENCY_TESTS "Should we add targets to ensure that every public header compiles cleanly on its own? Increases number of targets greatly..." ${OSVR_ON_UNLESS_SUBPROJECT})
 
+option(BUILD_ADVANCED_DEV_TOOLS "Should we build tools designed for core developers?" OFF)
+
 # Consistency: can't build the examples, apps, etc if you don't have the library
 set(dependent_options
     BUILD_SERVER_EXAMPLES

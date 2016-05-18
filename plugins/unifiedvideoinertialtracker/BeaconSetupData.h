@@ -40,6 +40,7 @@ namespace osvr {
 namespace vbtracker {
     using EmissionDirectionVec = ::cv::Vec3d;
     using LocationPoint = ::cv::Point3f;
+#if 0
     /// Data for a single beacon, swizzled into a format suitable for
     /// "Vector of structs" usage. It is unswizzled/reswizzled as needed in
     /// setup.
@@ -59,7 +60,7 @@ namespace vbtracker {
         /// Is this beacon fixed, that is, not subject to autocalibration?
         bool isFixed = false;
     };
-
+#endif
     struct TargetDataSummary {
         std::vector<OneBasedBeaconId> disabledByPattern;
         std::vector<OneBasedBeaconId> disabledByEmptyPattern;
@@ -81,16 +82,18 @@ namespace vbtracker {
 
         size_type numBeacons() const { return locations.size(); }
 
+        /// This is both an entirely unlikely out of bounds value and a
+        /// specific sentinel value.
         static LocationPoint getBogusLocation() {
-            return LocationPoint(-10000, -10000, -314159);
+            return LocationPoint(-10000.f, -10000.f, -87314159.f);
         }
         /// Resizes all arrays to the numBeacons.
         /// Only populates baseMeasurementVariances,
         /// initialAutocalibrationErrors, and isFixed
         /// with semi-reasonable default values (no beacons fixed)
         void setBeaconCount(std::size_t numBeacons,
-                            double baseMeasurementVariance = 0.003,
-                            double initialAutocalibrationError = 0.001) {
+                            double baseMeasurementVariance,
+                            double initialAutocalibrationError) {
             patterns.resize(numBeacons);
             locations.resize(numBeacons, getBogusLocation());
             // these are invalid directions and must be populated!
@@ -113,7 +116,7 @@ namespace vbtracker {
             markBeaconFixed(makeZeroBased(beacon));
         }
 
-        TargetDataSummary cleanAndValidate();
+        TargetDataSummary cleanAndValidate(bool silent = false);
     };
 
     /// Output operator for a target data summary.

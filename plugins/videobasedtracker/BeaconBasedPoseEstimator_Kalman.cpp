@@ -40,10 +40,10 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include "cvToEigen.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/AugmentedProcessModel.h>
 #include <osvr/Kalman/AugmentedState.h>
 #include <osvr/Kalman/ConstantProcess.h>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 
 #include <osvr/Util/EigenInterop.h>
 
@@ -57,7 +57,7 @@ namespace vbtracker {
     static const auto LOW_BEACON_CUTOFF = 5;
 
     static const auto DIM_BEACON_CUTOFF_TO_SKIP_BRIGHTS = 4;
-    static const auto BRIGHT_PENALTY = 8.;
+    static const auto BRIGHT_PENALTY = 15.78192556964968;
     bool BeaconBasedPoseEstimator::m_kalmanAutocalibEstimator(LedGroup &leds,
                                                               double dt) {
         auto const beaconsSize = m_beacons.size();

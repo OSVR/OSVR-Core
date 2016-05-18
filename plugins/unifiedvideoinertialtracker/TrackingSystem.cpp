@@ -53,7 +53,7 @@ namespace vbtracker {
     TrackingSystem::~TrackingSystem() {}
 
     TrackedBody *TrackingSystem::createTrackedBody() {
-        auto newId = BodyId(m_bodies.size());
+        auto newId = BodyId(static_cast<BodyId::wrapped_type>(m_bodies.size()));
         BodyPtr newBody(new TrackedBody(*this, newId));
         m_bodies.emplace_back(std::move(newBody));
         return m_bodies.back().get();

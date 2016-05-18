@@ -55,24 +55,24 @@ namespace connection {
         }
 
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
-                              util::time::TimeValue const &timestamp) {
+                              util::time::TimeValue const &tv) {
             if (chan >= m_getNumChannels()) {
                 return false;
             }
             Base::buttons[chan] = val;
-            m_reportChanges(timestamp);
+            m_reportChanges(tv);
             return true;
         }
 
         virtual void setValues(value_type val[], OSVR_ChannelCount chans,
-                               util::time::TimeValue const &timestamp) {
+                               util::time::TimeValue const &tv) {
             if (chans > m_getNumChannels()) {
                 chans = m_getNumChannels();
             }
             for (OSVR_ChannelCount i = 0; i < chans; ++i) {
                 Base::buttons[i] = val[i];
             }
-            m_reportChanges(timestamp);
+            m_reportChanges(tv);
         }
 
       private:
@@ -82,8 +82,8 @@ namespace connection {
         void m_setNumChannels(OSVR_ChannelCount chans) {
             Base::num_buttons = chans;
         }
-        void m_reportChanges(util::time::TimeValue const &timestamp) {
-            util::time::toStructTimeval(Base::timestamp, timestamp);
+        void m_reportChanges(util::time::TimeValue const &tv) {
+            util::time::toStructTimeval(Base::timestamp, tv);
             Base::report_changes();
         }
     };

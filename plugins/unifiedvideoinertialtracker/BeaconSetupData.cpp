@@ -58,9 +58,10 @@ namespace vbtracker {
             TargetDataChecker(TargetSetupData &data, TargetDataSummary &summary)
                 : d(data), m_summary(summary),
                   m_sizes(getMinMaxSetupDataSizes(data)) {}
+
             /// Main function - contains two loops (one for
             /// all-vectors-populated, another for uneven tails)
-            void process() {
+            void process(bool silent) {
                 /// Only iterate through the min at first
                 for (size_type i = 0; i < m_sizes.minSize; ++i) {
                     if (disabledBeacon(i)) {
@@ -70,8 +71,11 @@ namespace vbtracker {
                         /// Initialize pattern length if it hasn't been
                         /// initialized already.
                         m_patternLength = d.patterns[i].size();
-                        OSVR_DEV_VERBOSE("Determined that patterns are "
-                                         << m_patternLength << " bits long.");
+                        if (!silent) {
+                            OSVR_DEV_VERBOSE("Determined that patterns are "
+                                             << m_patternLength
+                                             << " bits long.");
+                        }
                     }
                     bool gotError = false;
                     checkPatternLength(i, gotError);
@@ -149,6 +153,7 @@ namespace vbtracker {
                 }
                 return false;
             }
+
             void checkPatternLength(size_type i, bool &gotError) {
                 /// Check pattern length.
                 if (d.patterns[i].size() != m_patternLength) {
@@ -237,10 +242,12 @@ namespace vbtracker {
             size_type m_maxSize = 0;
         };
     } // namespace
-    TargetDataSummary TargetSetupData::cleanAndValidate() {
+
+    // Implementation of method in BeaconSetupData.h
+    TargetDataSummary TargetSetupData::cleanAndValidate(bool silent) {
         TargetDataSummary ret;
         TargetDataChecker checker(*this, ret);
-        checker.process();
+        checker.process(silent);
         return ret;
     }
 } // namespace vbtracker

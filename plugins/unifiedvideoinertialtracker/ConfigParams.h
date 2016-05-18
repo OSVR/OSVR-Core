@@ -37,6 +37,8 @@
 namespace osvr {
 namespace vbtracker {
 
+    static const double BaseMeasurementVariance = 3.0;
+
     struct IMUInputParams {
         std::string path =
             "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
@@ -54,17 +56,33 @@ namespace vbtracker {
         double angularVelocityVariance = 1.0e-8;
     };
 
+    struct TuningParams {
+        TuningParams();
+        double noveltyPenaltyBase;
+    };
+
     /// General configuration parameters
     struct ConfigParams {
+        /// Not intended to be manually configurable - enabled when doing things
+        /// like running an optimization algorithm so some things like a debug
+        /// view might need to change.
+        bool performingOptimization = false;
+
+        /// For optimization usage.
+        bool silent = false;
+
+        TuningParams tuning;
+
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
 
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
 
-        /// Max residual (pixel units) for a beacon before applying a variance
-        /// penalty.
-        double maxResidual = 75;
+        /// Max residual, in meters at the expected XY plane of the beacon in
+        /// space, for a beacon before applying a variance penalty.
+        double maxResidual = 0.03631354168383816;
+
         /// Initial beacon error for autocalibration (units: m^2).
         /// 0 effectively turns off beacon auto-calib.
         /// This is a variance number, so std deviation squared, but it's
@@ -74,7 +92,7 @@ namespace vbtracker {
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
-        double blobMoveThreshold = 4.;
+        double blobMoveThreshold = 5.;
 
         /// Whether to show the debug windows and debug messages.
         bool debug = false;
@@ -91,19 +109,19 @@ namespace vbtracker {
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double linearVelocityDecayCoefficient = 0.8;
+        double linearVelocityDecayCoefficient = 0.9040551503451977;
 
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double angularVelocityDecayCoefficient = 0.9;
+        double angularVelocityDecayCoefficient = 0.8945437897688864;
 
         /// The measurement variance (units: m^2) is included in the plugin
         /// along with the coordinates of the beacons. Some beacons are observed
         /// with higher variance than others, due to known difficulties in
         /// tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.;
+        double measurementVarianceScaleFactor = 0.04947884967073536;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
@@ -132,17 +150,17 @@ namespace vbtracker {
 
         /// This used to be different than the other beacons, but now it's
         /// mostly the same.
-        double backPanelMeasurementError = 3.0; // 3.0e-6;
+        double backPanelMeasurementError = BaseMeasurementVariance;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
         /// gets used for a measurement, but it should be enough to keep beacons
         /// from converging in a bad local minimum.
-        double beaconProcessNoise = 1e-13;
+        double beaconProcessNoise = 1.e-19;
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
-        double highResidualVariancePenalty = 10.;
+        double highResidualVariancePenalty = 7.553771505971281;
 
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
@@ -169,7 +187,7 @@ namespace vbtracker {
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty = 16;
+        double brightLedVariancePenalty = 25.86138871170531;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the

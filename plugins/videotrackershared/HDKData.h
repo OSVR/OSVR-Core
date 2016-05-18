@@ -29,7 +29,7 @@
 #include "Types.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 // - none
@@ -50,6 +50,22 @@ namespace vbtracker {
     /// @}
 
     extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
+
+    inline std::size_t getNumHDKFrontPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR0.size();
+    }
+
+    inline std::size_t getNumHDKRearPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR1.size();
+    }
+
+    /// distance between front and back panel target origins, in mm.
+    inline double
+    computeDistanceBetweenPanels(double headCircumference,
+                                 double headToFrontBeaconOriginDistance) {
+        return headCircumference / CV_PI * 10. +
+               headToFrontBeaconOriginDistance;
+    }
 
 } // namespace vbtracker
 } // namespace osvr

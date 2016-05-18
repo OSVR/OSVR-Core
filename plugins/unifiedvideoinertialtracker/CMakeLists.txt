@@ -27,6 +27,7 @@ add_library(uvbi-core STATIC
     BeaconSetupData.h
     BodyTargetInterface.h
     CannedIMUMeasurement.h
+    Clamp.h
     ConfigParams.cpp
     ConfigParams.h
     ForEachTracked.h
@@ -49,6 +50,7 @@ add_library(uvbi-core STATIC
     PoseEstimator_SCAATKalman.cpp
     PoseEstimator_SCAATKalman.h
     PoseEstimatorTypes.h
+    RangeTransform.h
     RoomCalibration.cpp
     RoomCalibration.h
     SpaceTransformations.h
@@ -67,6 +69,7 @@ add_library(uvbi-core STATIC
     TrackingSystem.cpp
     TrackingSystem.h
     Types.h
+    UsefulQuaternions.h
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_CORE})
 target_compile_options(uvbi-core
     PUBLIC
@@ -91,6 +94,17 @@ target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources)
 set_target_properties(uvbi-view-camera PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
+# "object library" for the HDK data files.
+add_library(uvbi-hdkdata OBJECT ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA})
+target_compile_options(uvbi-hdkdata
+    PUBLIC
+    ${OSVR_CXX11_FLAGS})
+target_include_directories(uvbi-hdkdata
+    PUBLIC
+    ${OpenCV_INCLUDE_DIRS})
+set_target_properties(uvbi-hdkdata PROPERTIES
+    FOLDER "${PROJ_FOLDER}")
+
 osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     CPP # indicates we'd like to use the C++ wrapper
     SOURCES
@@ -102,7 +116,7 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     ThreadsafeBodyReporting.h
     TrackerThread.cpp
     TrackerThread.h
-    ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA}
+    $<TARGET_OBJECTS:uvbi-hdkdata>
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
 
 target_link_libraries(org_osvr_unifiedvideoinertial
@@ -114,3 +128,8 @@ target_link_libraries(org_osvr_unifiedvideoinertial
 
 set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
     FOLDER "${PROJ_FOLDER}")
+
+
+if(BUILD_ADVANCED_DEV_TOOLS)
+    add_subdirectory(ParameterFinder)
+endif()

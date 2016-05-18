@@ -24,15 +24,15 @@
 
 // Internal Includes
 #include "TrackedBodyTarget.h"
-#include "TrackedBody.h"
-#include "LED.h"
-#include "cvToEigen.h"
+#include "BodyTargetInterface.h"
 #include "HDKLedIdentifier.h"
+#include "LED.h"
 #include "PoseEstimatorTypes.h"
 #include "PoseEstimator_RANSAC.h"
-#include "PoseEstimator_SCAATKalman.h"
 #include "PoseEstimator_RANSACKalman.h"
-#include "BodyTargetInterface.h"
+#include "PoseEstimator_SCAATKalman.h"
+#include "TrackedBody.h"
+#include "cvToEigen.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -109,6 +109,8 @@ namespace vbtracker {
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
+        std::size_t trackingResets = 0;
+        std::ostringstream outputSink;
     };
 
     inline BeaconStateVec createBeaconStateVec(ConfigParams const &params,
@@ -461,6 +463,10 @@ namespace vbtracker {
         return m_body.getParams();
     }
     std::ostream &TrackedBodyTarget::msg() const {
+        if (getParams().silent) {
+            m_impl->outputSink.str("");
+            return m_impl->outputSink;
+        }
         return std::cout << "[Tracker Target " << getQualifiedId() << "] ";
     }
     void TrackedBodyTarget::enterKalmanMode() {
@@ -475,6 +481,7 @@ namespace vbtracker {
 #error                                                                         \
     "We may not be able/willing to run right over the body velocity just because this target lost its fix"
 #endif
+        m_impl->trackingResets++;
         // Zero out velocities if we're coming from Kalman.
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSACWhenBlobDetected:
@@ -495,6 +502,10 @@ namespace vbtracker {
 
     LedPtrList const &TrackedBodyTarget::usableLeds() const {
         return m_impl->usableLeds;
+    }
+
+    std::size_t TrackedBodyTarget::numTrackingResets() const {
+        return m_impl->trackingResets;
     }
 
     LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }
