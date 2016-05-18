@@ -36,26 +36,38 @@
 
 namespace osvr {
 namespace vbtracker {
+#if 0
+    inline void pinholeCameraFlipPose(Eigen::Ref<Eigen::Vector3d> xlate,
+                                      Eigen::Quaterniond &rot) {
+#endif
     template <typename Derived>
-    void pinholeCameraFlipPose(Eigen::MatrixBase<Derived> &xlate,
-                               Eigen::Quaterniond &rot) {
+    inline void pinholeCameraFlipPose(Eigen::DenseBase<Derived> &xlate,
+                                      Eigen::Quaterniond &rot) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
         static_assert(std::is_same<double, typename Derived::Scalar>::value,
                       "Translation scalar type must also be double.");
+
         /// invert position
         xlate *= -1;
         /// Rotate orientation 180 about Z.
         rot = get180aboutZ() * rot;
     }
 
+#if 0
+    inline void
+    pinholeCameraFlipVelocities(Eigen::Ref<Eigen::Vector3d> &linVel,
+                                Eigen::Ref<Eigen::Vector3d> &angVel) {
+#endif
     template <typename Derived1, typename Derived2>
-    void pinholeCameraFlipVelocities(Eigen::MatrixBase<Derived1> &linVel,
-                                     Eigen::MatrixBase<Derived2> &angVel) {
+    inline void
+    pinholeCameraFlipVelocities(Eigen::DenseBase<Derived1> &linVel,
+                                Eigen::DenseBase<Derived2> &angVel) {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived1, 3);
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived2, 3);
         static_assert(std::is_same<typename Derived1::Scalar,
                                    typename Derived2::Scalar>::value,
                       "Velocities must have the same scalar type.");
+
         /// invert velocity
         linVel *= -1;
         /// Rotate angular velocity 180 about Z.
