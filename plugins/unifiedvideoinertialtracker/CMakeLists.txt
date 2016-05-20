@@ -137,4 +137,5 @@ set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
 
 if(BUILD_ADVANCED_DEV_TOOLS)
     add_subdirectory(ParameterFinder)
+    add_subdirectory(OfflineProcessing)
 endif()
