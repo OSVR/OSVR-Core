@@ -79,6 +79,7 @@ set(API
     "${HEADER_LOCATION}/MessageKeys.h"
     "${HEADER_LOCATION}/MSStdIntC.h"
     "${HEADER_LOCATION}/MacroToolsC.h"
+    "${HEADER_LOCATION}/MiniArgsHandling.h"
     "${HEADER_LOCATION}/Microsleep.h"
     "${HEADER_LOCATION}/NumberTypeManipulation.h"
     "${HEADER_LOCATION}/OpenCVTypeDispatch.h"
