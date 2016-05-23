@@ -78,7 +78,7 @@ namespace vbtracker {
         F &&colorFunc, bool fillContours = false, double centerDotRadius = 1.2,
         bool colorCenterDot = true) {
         cv::Mat highlightedContours;
-        if (baseImage.depth() > 1) {
+        if (baseImage.channels() > 1) {
             highlightedContours = baseImage.clone();
         } else {
             cv::cvtColor(baseImage, highlightedContours, cv::COLOR_GRAY2BGR);
