@@ -133,6 +133,7 @@ namespace vbtracker {
         LedMeasurementVec undistortedMeasurements_;
         util::CSV csv_;
         std::size_t frame_ = 0;
+        bool everHadPose_ = false;
     };
 
     void TrackerOfflineProcessing::processFrame(cv::Mat const &frame) {
@@ -171,9 +172,17 @@ namespace vbtracker {
     void TrackerOfflineProcessing::logRow() {
         using namespace osvr::util;
         auto row = csv_.row();
-        row << cellGroup(currentTime_)
-            << cell("TrackerDropped", body_->hasPoseEstimate() ? "" : "0");
-        if (body_->hasPoseEstimate()) {
+        // time as the two-part time value
+        row << cellGroup(currentTime_);
+        // time as a pristinely-formatted decimal number of seconds
+        row << cell("Time", carefullyFormatElapsedTime());
+
+        auto hasPose = body_->hasPoseEstimate();
+        everHadPose_ |= hasPose;
+
+        row << cell("TrackerDropped", hasPose ? "" : "0");
+
+        if (hasPose) {
             Eigen::Quaterniond quat = body_->getState().getQuaternion();
             Eigen::Vector3d xlate = body_->getState().position();
             row << cellGroup(xlate) << cellGroup(quat)
@@ -214,11 +223,15 @@ namespace vbtracker {
             << cell("Rejects.Circularity", numCircularity)
             << cell("Rejects.Convexity", numConvexity)
             << cell("Leds", getStatus(TargetStatusMeasurement::NumUsableLeds))
-            << cell("UsedLeds", getStatus(TargetStatusMeasurement::NumUsedLeds))
-            << cell("PosErrorVariance",
-                    getStatus(TargetStatusMeasurement::MaxPosErrorVariance))
-            << cell("PosErrorVarianceBound",
-                    getStatus(TargetStatusMeasurement::PosErrorVarianceLimit));
+            << cell("UsedLeds",
+                    getStatus(TargetStatusMeasurement::NumUsedLeds));
+        if (everHadPose_) {
+            row << cell("PosErrorVariance",
+                        getStatus(TargetStatusMeasurement::MaxPosErrorVariance))
+                << cell("PosErrorVarianceBound",
+                        getStatus(
+                            TargetStatusMeasurement::PosErrorVarianceLimit));
+        }
     }
 
     /// Takes a std::ratio like std::micro and counts the number of digits to
