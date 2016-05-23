@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
 
     bool gotParams = false;
     osvr::vbtracker::ConfigParams params;
-    std::string videoName;
+    std::vector<std::string> videoNames;
     auto args = makeArgList(argc, argv);
     try {
         /// parse json file arguments.
@@ -254,12 +254,12 @@ int main(int argc, char *argv[]) {
         auto numVideoNames = handle_arg(args, [&](std::string const &arg) {
             auto ret = boost::iends_with(arg, ".avi");
             if (ret) {
-                videoName = arg;
+                videoNames.push_back(arg);
             }
             return ret;
         });
-        if (numVideoNames != 1) {
-            std::cerr << "Must pass exactly one video filename to this app!"
+        if (numVideoNames < 1) {
+            std::cerr << "Must pass at least one video filename to this app!"
                       << std::endl;
             return -1;
         }
@@ -275,14 +275,19 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    osvr::vbtracker::TrackerOfflineProcessing app(params);
-    osvr::vbtracker::processAVI(videoName, app);
+    for (auto &videoName : videoNames) {
+        std::cout << "Processing input video " << videoName << std::endl;
+        osvr::vbtracker::TrackerOfflineProcessing app(params);
+        osvr::vbtracker::processAVI(videoName, app);
 
-    {
-        auto outname = videoName + ".csv";
-        std::cout << "Writing output data to: " << outname << std::endl;
-        std::ofstream of(outname);
-        app.outputCSV(of);
+        {
+            auto outname = videoName + ".csv";
+            std::cout << "Writing output data to: " << outname << std::endl;
+            std::ofstream of(outname);
+            app.outputCSV(of);
+        }
+        std::cout << "File finished!\n\n" << std::endl;
     }
+
     return 0;
 }
