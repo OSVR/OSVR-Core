@@ -30,6 +30,7 @@
 #include "../MakeHDKTrackingSystem.h"
 #include "../TrackedBodyTarget.h"
 #include "CSVCellGroup.h"
+#include "QuatToEuler.h"
 #include <CameraParameters.h>
 #include <EdgeHoleBasedLedExtractor.h>
 #include <UndistortMeasurements.h>
@@ -154,11 +155,12 @@ namespace vbtracker {
         using namespace osvr::util;
         auto row = csv_.row();
         row << cellGroup(currentTime_)
-            << cell("hasPose", body_->hasPoseEstimate() ? "TRUE" : "FALSE");
+            << cell("trackerFix", body_->hasPoseEstimate() ? "0" : "");
         if (body_->hasPoseEstimate()) {
             Eigen::Quaterniond quat = body_->getState().getQuaternion();
             Eigen::Vector3d xlate = body_->getState().position();
-            row << cellGroup(xlate) << cellGroup(quat);
+            row << cellGroup(xlate) << cellGroup(quat)
+                << cellGroup<QuatAsEulerTag>(quat);
         }
         row << cell("Measurements", rawMeasurements_.size());
 

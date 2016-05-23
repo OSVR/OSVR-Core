@@ -2,6 +2,8 @@
 add_executable(uvbi-offline-processing
     $<TARGET_OBJECTS:uvbi-hdkdata>
     OfflineProcessing.cpp
+    CSVCellGroup.h
+    QuatToEuler.h
     ../MakeHDKTrackingSystem.h
     ${OSVR_VIDEOTRACKERSHARED_SOURCES_IO})
 
@@ -10,4 +12,5 @@ set_target_properties(uvbi-offline-processing PROPERTIES
 target_link_libraries(uvbi-offline-processing
     PRIVATE
     uvbi-core
-    JsonCpp::JsonCpp)
+    JsonCpp::JsonCpp
+    vendored-quatlib)
