@@ -172,8 +172,11 @@ namespace vbtracker {
     void TrackerOfflineProcessing::logRow() {
         using namespace osvr::util;
         auto row = csv_.row();
+#if 0
         // time as the two-part time value
         row << cellGroup(currentTime_);
+#endif
+
         // time as a pristinely-formatted decimal number of seconds
         row << cell("Time", carefullyFormatElapsedTime());
 
