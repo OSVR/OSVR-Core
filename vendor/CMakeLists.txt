@@ -46,6 +46,10 @@ else()
 endif()
 target_include_directories(vendored-vrpn INTERFACE ${VRPN_INCLUDE_DIRS})
 target_compile_definitions(vendored-vrpn INTERFACE ${VRPN_DEFINITIONS})
+# Same for quatlib.
+add_library(vendored-quatlib INTERFACE)
+target_include_directories(vendored-quatlib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/quat")
+target_link_libraries(vendored-quatlib INTERFACE quat)
 
 # Interface target for hidapi compiled as part of VRPN.
 add_library(vendored-hidapi INTERFACE)
