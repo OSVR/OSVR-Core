@@ -276,8 +276,9 @@ int main(int argc, char *argv[]) {
     osvr::vbtracker::processAVI(videoName, app);
 
     {
-        std::cout << "Writing output data" << std::endl;
-        std::ofstream of("outdata.csv");
+        auto outname = videoName + ".csv";
+        std::cout << "Writing output data to: " << outname << std::endl;
+        std::ofstream of(outname);
         app.outputCSV(of);
     }
     return 0;
