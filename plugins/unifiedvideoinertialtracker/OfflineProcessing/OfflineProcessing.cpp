@@ -155,7 +155,7 @@ namespace vbtracker {
         using namespace osvr::util;
         auto row = csv_.row();
         row << cellGroup(currentTime_)
-            << cell("trackerFix", body_->hasPoseEstimate() ? "0" : "");
+            << cell("TrackerDropped", body_->hasPoseEstimate() ? "" : "0");
         if (body_->hasPoseEstimate()) {
             Eigen::Quaterniond quat = body_->getState().getQuaternion();
             Eigen::Vector3d xlate = body_->getState().position();
