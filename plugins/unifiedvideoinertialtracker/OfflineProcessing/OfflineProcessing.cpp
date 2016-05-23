@@ -70,6 +70,7 @@ namespace vbtracker {
             params_.performingOptimization = true;
             params_.silent = true;
             params_.debug = false;
+            params_.streamBeaconDebugInfo = true;
 
             params_.offsetToCentroid = false;
             params_.includeRearPanel = false;
