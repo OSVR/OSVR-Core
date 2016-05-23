@@ -136,6 +136,7 @@ namespace vbtracker {
         TargetHealthEvaluator healthEval;
 
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
+        TargetTrackingState lastFrameAlgorithm = TargetTrackingState::RANSAC;
         /// Permit as a purely policy measure
         bool permitKalman = true;
         bool hasPrev = false;
@@ -432,6 +433,7 @@ namespace vbtracker {
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
             m_hasPoseEstimate = m_impl->ransacEstimator(params, usableLeds());
+            m_impl->lastFrameAlgorithm = TargetTrackingState::RANSAC;
             break;
         }
 
@@ -446,6 +448,7 @@ namespace vbtracker {
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
             m_hasPoseEstimate =
                 m_impl->kalmanEstimator(params, usableLeds(), tv, videoDt);
+            m_impl->lastFrameAlgorithm = TargetTrackingState::Kalman;
 #endif
             break;
         }
