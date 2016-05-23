@@ -40,6 +40,7 @@
 #include <util/Stride.h>
 
 // Standard includes
+#include <algorithm>
 #include <iostream>
 
 /// Define this to use the RANSAC Kalman instead of the autocalibrating SCAAT
@@ -589,6 +590,32 @@ namespace vbtracker {
 
     std::size_t TrackedBodyTarget::numTrackingResets() const {
         return m_impl->trackingResets;
+    }
+
+    inline std::ptrdiff_t getNumUsedLeds(LedPtrList const &usableLeds) {
+        return std::count_if(
+            usableLeds.begin(), usableLeds.end(),
+            [](Led const *ledPtr) { return ledPtr->wasUsedLastFrame(); });
+    }
+
+    double TrackedBodyTarget::getInternalStatusMeasurement(
+        TargetStatusMeasurement measurement) const {
+        switch (measurement) {
+        case TargetStatusMeasurement::MaxPosErrorVariance:
+            return getMaxPositionalErrorVariance(getBody().getState());
+        case TargetStatusMeasurement::PosErrorVarianceLimit: {
+            auto distance = getBody().getState().position().z();
+            return getLimitOnMaxPositionalErrorVariance(distance);
+        }
+        case TargetStatusMeasurement::NumUsableLeds:
+            return static_cast<double>(usableLeds().size());
+        case TargetStatusMeasurement::NumUsedLeds:
+            return static_cast<double>(getNumUsedLeds(usableLeds()));
+
+        default:
+            break;
+        }
+        return 0.0;
     }
 
     LedGroup &TrackedBodyTarget::leds() { return m_impl->leds; }

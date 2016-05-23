@@ -58,6 +58,20 @@ namespace vbtracker {
 
     class TrackedBody;
     struct BodyTargetInterface;
+
+    enum class TargetStatusMeasurement {
+        /// The current maximum coefficient in the positional error variance
+        /// vector (diagonal of the covariance matrix).
+        MaxPosErrorVariance,
+        /// The distance-dependent limit on the positional error variance that
+        /// would trigger an error-bounds-based reset.
+        PosErrorVarianceLimit,
+        /// A count of the number of usable (recognized, etc) LEDs this frame.
+        NumUsableLeds,
+        /// A count of the number of LEDs used last frame
+        NumUsedLeds
+    };
+
     /// Corresponds to a rigid arrangements of discrete beacons detected by
     /// video-based tracking - typically IR LEDs.
     class TrackedBodyTarget {
@@ -160,6 +174,11 @@ namespace vbtracker {
         /// Get the number of times tracking has reset - for
         /// debugging/optimization.
         std::size_t numTrackingResets() const;
+
+        /// A way for tuning and debugging applications to peer inside the
+        /// implementation.
+        double
+        getInternalStatusMeasurement(TargetStatusMeasurement measurement) const;
 
       private:
         /// Get the beacon offset transformed into world space
