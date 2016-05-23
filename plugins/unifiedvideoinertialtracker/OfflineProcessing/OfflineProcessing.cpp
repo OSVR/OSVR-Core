@@ -49,6 +49,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 namespace osvr {
@@ -86,6 +87,11 @@ namespace vbtracker {
 
         void outputCSV(std::ostream &os) { csv_.output(os); }
 
+        /// To get a time that matches the timestamp
+        std::size_t getFrameCount() const { return frame_ + 1; }
+
+        using FrameTimeUnit = std::chrono::microseconds;
+
       private:
         /// Substitute for performInitialImageProcessing that lets us get more
         /// of the innards: sets rawMeasurements_, undistortedMeasurements_, and
@@ -96,14 +102,24 @@ namespace vbtracker {
         /// @name Constants
         /// @{
         const int fps_ = 100;
-        const std::chrono::microseconds frameTime_ =
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                std::chrono::seconds(1)) /
+        const FrameTimeUnit frameTime_ =
+            std::chrono::duration_cast<FrameTimeUnit>(std::chrono::seconds(1)) /
             fps_;
 
         const BodyId bodyIdOfInterest = BodyId(0);
         const TargetId targetIdOfInterest = TargetId(0);
         /// @}
+
+        /// Return a string with decimal seconds in it, that has never touched
+        /// floating point.
+        std::string carefullyFormatElapsedTime() const;
+
+        /// Get the whole number of seconds passed in the simulation.
+        std::chrono::seconds getSeconds() const;
+
+        /// Get whatever time passed that's left after subtracting all whole
+        /// seconds (value will be less than a second).
+        FrameTimeUnit getFractionalRemainder() const;
 
         const CameraParameters camParamsDistorted_;
         const CameraParameters camParams_;
@@ -205,6 +221,44 @@ namespace vbtracker {
                     getStatus(TargetStatusMeasurement::PosErrorVarianceLimit));
     }
 
+    /// Takes a std::ratio like std::micro and counts the number of digits to
+    /// the right of the decimal point we need to use.
+    template <typename Rat> inline std::size_t countDigits() {
+        auto denom = Rat::den;
+        auto ret = std::size_t{0};
+        while (denom > 1) {
+            denom /= 10;
+            ret++;
+        }
+        return ret;
+    }
+
+    inline std::string
+    TrackerOfflineProcessing::carefullyFormatElapsedTime() const {
+        std::ostringstream os;
+        os << getSeconds().count() << ".";
+        using FractionalType = decltype(getFractionalRemainder());
+        using FractionalPeriod = FractionalType::period;
+        static const auto numDigits = countDigits<FractionalPeriod>();
+        os << std::setw(numDigits) << std::setfill('0')
+           << getFractionalRemainder().count();
+        return os.str();
+    }
+
+    inline std::chrono::seconds TrackerOfflineProcessing::getSeconds() const {
+        return std::chrono::seconds(getFrameCount() / fps_);
+    }
+
+    inline TrackerOfflineProcessing::FrameTimeUnit
+    TrackerOfflineProcessing::getFractionalRemainder() const {
+        auto remainderFrames = getFrameCount() % fps_;
+        auto ret = remainderFrames * frameTime_;
+        BOOST_ASSERT_MSG(
+            ret < std::chrono::seconds(1),
+            "This is a remainder - it must be less than a second!");
+        return ret;
+    }
+
     void processAVI(std::string const &fn, TrackerOfflineProcessing &app) {
         cv::VideoCapture capture;
         capture.open(fn);
@@ -291,6 +345,8 @@ int main(int argc, char *argv[]) {
         osvr::vbtracker::processAVI(videoName, app);
 
         {
+            std::cout << "Processed a total of " << app.getFrameCount()
+                      << " frames." << std::endl;
             auto outname = videoName + ".csv";
             std::cout << "Writing output data to: " << outname << std::endl;
             std::ofstream of(outname);
