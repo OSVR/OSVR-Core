@@ -45,9 +45,11 @@ namespace osvr {
 namespace pluginhost {
 
     namespace fs = boost::filesystem;
+
     static inline std::string getCanonicalGenericString(const char path[]) {
         return fs::canonical(path).generic_string();
     }
+
 #if defined(OSVR_WINDOWS)
     std::string getBinaryLocation() {
         char buf[512] = {0};
@@ -78,11 +80,10 @@ namespace pluginhost {
     std::string getBinaryLocation() {
         char buf[1024] = {0};
         uint32_t len = sizeof(buf);
-        std::string ret;
         if (0 == _NSGetExecutablePath(buf, &len)) {
-            ret.assign(buf, len);
+            return getCanonicalGenericString(buf);
         }
-        return ret;
+        return std::string{};
     }
 #else
 #error "getBinaryLocation() not yet implemented for this platform!"
