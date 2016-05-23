@@ -118,7 +118,9 @@ namespace vbtracker {
     };
 
     void TrackerOfflineProcessing::processFrame(cv::Mat const &frame) {
-        std::cout << "Processing frame " << frame_ << "\n";
+        if ((frame_ % 100) == 0) {
+            std::cout << "Processing frame " << frame_ << std::endl;
+        }
         /// Advance the clock
         currentTime_.microseconds += frameTime_.count();
         osvrTimeValueNormalize(&currentTime_);
