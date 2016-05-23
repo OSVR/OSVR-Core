@@ -30,10 +30,12 @@
 #include "../MakeHDKTrackingSystem.h"
 #include "../TrackedBodyTarget.h"
 #include "CSVCellGroup.h"
+#include "GenerateBlobDebugImage.h"
 #include "QuatToEuler.h"
 #include <CameraParameters.h>
 #include <EdgeHoleBasedLedExtractor.h>
 #include <UndistortMeasurements.h>
+#include <cvUtils.h>
 #include <osvr/Util/CSV.h>
 #include <osvr/Util/MiniArgsHandling.h>
 #include <osvr/Util/TimeValue.h>
@@ -62,6 +64,7 @@ namespace vbtracker {
             }
         };
     } // namespace
+
     class TrackerOfflineProcessing {
       public:
         TrackerOfflineProcessing(ConfigParams const &initialParams)
@@ -85,10 +88,19 @@ namespace vbtracker {
 
         void processFrame(cv::Mat const &frame);
 
+        bool everHadPose() const { return everHadPose_; }
+        bool hasPose() const { return hasPose_; }
+
+        cv::Mat getDebugImage();
+
         void outputCSV(std::ostream &os) { csv_.output(os); }
 
         /// To get a time that matches the timestamp
         std::size_t getFrameCount() const { return frame_ + 1; }
+
+        /// Return a string with decimal seconds in it, that has never touched
+        /// floating point.
+        std::string carefullyFormatElapsedTime() const;
 
         using FrameTimeUnit = std::chrono::microseconds;
 
@@ -110,10 +122,6 @@ namespace vbtracker {
         const TargetId targetIdOfInterest = TargetId(0);
         /// @}
 
-        /// Return a string with decimal seconds in it, that has never touched
-        /// floating point.
-        std::string carefullyFormatElapsedTime() const;
-
         /// Get the whole number of seconds passed in the simulation.
         std::chrono::seconds getSeconds() const;
 
@@ -131,8 +139,10 @@ namespace vbtracker {
         util::time::TimeValue currentTime_ = {};
         LedMeasurementVec rawMeasurements_;
         LedMeasurementVec undistortedMeasurements_;
+        cv::Mat lastFrame_;
         util::CSV csv_;
         std::size_t frame_ = 0;
+        bool hasPose_ = false;
         bool everHadPose_ = false;
     };
 
@@ -153,8 +163,13 @@ namespace vbtracker {
         frame_++;
     }
 
+    cv::Mat TrackerOfflineProcessing::getDebugImage() {
+        return generateBlobDebugImage(lastFrame_, extractor_);
+    }
+
     ImageOutputDataPtr
     TrackerOfflineProcessing::imageProc(cv::Mat const &frame) {
+        lastFrame_ = frame.clone();
         ImageOutputDataPtr ret(new ImageProcessingOutput);
         ret->tv = currentTime_;
         ret->frame = frame;
@@ -180,12 +195,12 @@ namespace vbtracker {
         // time as a pristinely-formatted decimal number of seconds
         row << cell("Time", carefullyFormatElapsedTime());
 
-        auto hasPose = body_->hasPoseEstimate();
-        everHadPose_ |= hasPose;
+        hasPose_ = body_->hasPoseEstimate();
+        everHadPose_ |= hasPose_;
 
-        row << cell("TrackerDropped", hasPose ? "" : "0");
+        row << cell("TrackerDropped", hasPose_ ? "" : "0");
 
-        if (hasPose) {
+        if (hasPose_) {
             Eigen::Quaterniond quat = body_->getState().getQuaternion();
             Eigen::Vector3d xlate = body_->getState().position();
             row << cellGroup(xlate) << cellGroup(quat)
@@ -275,6 +290,8 @@ namespace vbtracker {
         return ret;
     }
 
+    static bool g_saveFramesLostFix = false;
+
     bool processAVI(std::string const &fn, TrackerOfflineProcessing &app) {
         cv::VideoCapture capture;
         capture.open(fn);
@@ -286,12 +303,21 @@ namespace vbtracker {
         capture >> frame;
         while (capture.read(frame)) {
             app.processFrame(frame);
+            if (g_saveFramesLostFix && !app.hasPose() && app.everHadPose()) {
+                // we had pose but lost it
+                std::ostringstream os;
+                os << fn << "." << app.carefullyFormatElapsedTime() << ".png";
+                cv::Mat image = app.getDebugImage();
+                cv::imwrite(os.str(), image);
+            }
         }
         return true;
     }
 
 } // namespace vbtracker
 } // namespace osvr
+
+static const auto DEBUG_FRAMES_SWITCH = "--save-debug-frames";
 
 using namespace osvr::util::args;
 int main(int argc, char *argv[]) {
@@ -343,6 +369,13 @@ int main(int argc, char *argv[]) {
             std::cerr << "Must pass at least one video filename to this app!"
                       << std::endl;
             return -1;
+        }
+
+        osvr::vbtracker::g_saveFramesLostFix =
+            handle_has_iswitch(args, DEBUG_FRAMES_SWITCH);
+        if (osvr::vbtracker::g_saveFramesLostFix) {
+            std::cout << "Will save debug frames when tracker loses fix"
+                      << std::endl;
         }
 
         if (!args.empty()) {
