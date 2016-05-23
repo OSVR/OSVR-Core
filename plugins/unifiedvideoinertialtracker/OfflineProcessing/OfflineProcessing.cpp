@@ -272,18 +272,19 @@ namespace vbtracker {
         return ret;
     }
 
-    void processAVI(std::string const &fn, TrackerOfflineProcessing &app) {
+    bool processAVI(std::string const &fn, TrackerOfflineProcessing &app) {
         cv::VideoCapture capture;
         capture.open(fn);
         if (!capture.isOpened()) {
             std::cerr << "Could not open video file " << fn << std::endl;
-            return;
+            return false;
         }
         cv::Mat frame;
         capture >> frame;
         while (capture.read(frame)) {
             app.processFrame(frame);
         }
+        return true;
     }
 
 } // namespace vbtracker
@@ -352,21 +353,38 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    /// 0 is everything successful - each error, we increment...
+    int returnValue = 0;
     for (auto &videoName : videoNames) {
         std::cout << "Processing input video " << videoName << std::endl;
         osvr::vbtracker::TrackerOfflineProcessing app(params);
-        osvr::vbtracker::processAVI(videoName, app);
+        auto success = osvr::vbtracker::processAVI(videoName, app);
 
-        {
+        if (success) {
             std::cout << "Processed a total of " << app.getFrameCount()
                       << " frames." << std::endl;
             auto outname = videoName + ".csv";
             std::cout << "Writing output data to: " << outname << std::endl;
             std::ofstream of(outname);
-            app.outputCSV(of);
+            if (!of) {
+                std::cout << "Can't write to that file!" << std::endl;
+                returnValue++;
+            } else {
+                app.outputCSV(of);
+            }
+            std::cout << "File finished!\n\n" << std::endl;
+        } else {
+            std::cout << "File skipped!\n\n" << std::endl;
+            returnValue++;
         }
-        std::cout << "File finished!\n\n" << std::endl;
     }
 
-    return 0;
+    if (returnValue != 0) {
+        std::cerr << "One or more errors! Press enter to exit after reviewing "
+                     "the errors."
+                  << std::endl;
+        std::cin.ignore();
+    }
+
+    return returnValue;
 }
