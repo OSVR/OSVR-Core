@@ -52,12 +52,10 @@ LoggerPtr LogRegistry::getOrCreateLogger(const std::string& logger_name)
 {
     // If logger already exists, return a copy of it
     auto spd_logger = spdlog::get(logger_name);
-    if (spd_logger)
-        return std::make_shared<Logger>(spd_logger);
-
-    // Bummer, it didn't exist. We'll create one from scratch.
-
-    spd_logger = spdlog::details::registry::instance().create(logger_name, begin(sinks_), end(sinks_));
+    if (!spd_logger) {
+        // Bummer, it didn't exist. We'll create one from scratch.
+        spd_logger = spdlog::details::registry::instance().create(logger_name, begin(sinks_), end(sinks_));
+    }
 
     spd_logger->set_pattern("%b %d %T.%e %l [%n]: %v");
     spd_logger->set_level(spdlog::level::trace);
