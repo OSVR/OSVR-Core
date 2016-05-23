@@ -189,10 +189,20 @@ namespace vbtracker {
                 break;
             }
         }
+
+        auto getStatus = [&](TargetStatusMeasurement meas) {
+            return target_->getInternalStatusMeasurement(meas);
+        };
         row << cell("Rejects.Area", numArea)
             << cell("Rejects.CenterPointValue", numCenterPointValue)
             << cell("Rejects.Circularity", numCircularity)
-            << cell("Rejects.Convexity", numConvexity);
+            << cell("Rejects.Convexity", numConvexity)
+            << cell("Leds", getStatus(TargetStatusMeasurement::NumUsableLeds))
+            << cell("UsedLeds", getStatus(TargetStatusMeasurement::NumUsedLeds))
+            << cell("PosErrorVariance",
+                    getStatus(TargetStatusMeasurement::MaxPosErrorVariance))
+            << cell("PosErrorVarianceBound",
+                    getStatus(TargetStatusMeasurement::PosErrorVarianceLimit));
     }
 
     void processAVI(std::string const &fn, TrackerOfflineProcessing &app) {
