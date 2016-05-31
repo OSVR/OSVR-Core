@@ -96,7 +96,6 @@ VideoIMUFusionDevice::~VideoIMUFusionDevice() {
     }
 }
 
-
 OSVR_ReturnCode VideoIMUFusionDevice::update() {
     if (m_shouldReportCamera()) {
         m_nextCameraReport = our_clock::now() + INTERVAL_BETWEEN_CAMERA_REPORTS;
@@ -154,19 +153,9 @@ void VideoIMUFusionDevice::handleIMUVelocity(
         auto magnitude = q.vec().blueNorm();
         rot = (q.vec() / magnitude * (2. * std::atan2(magnitude, q.w()))) /
               report.state.dt;
-        /// @todo without transformations being applied to vel quats, this
-        /// is needed.
-        // std::swap(rot[0], rot[1]);
-        rot[1] *= -1.;
-        rot[2] *= -1.;
 #else
         auto angle = std::acos(q.w());
         rot = q.vec().normalized() * angle * 2 / report.state.dt;
-
-        /// @todo without transformations being applied to vel quats, this
-        /// is needed.
-        rot[1] *= -1.;
-        rot[2] *= -1.;
 #endif
     }
 
@@ -174,7 +163,9 @@ void VideoIMUFusionDevice::handleIMUVelocity(
     if (m_fusion.running()) {
         sendMainPoseReport();
     }
+    sendVelocityReport();
 }
+
 void VideoIMUFusionDevice::handleVideoTrackerData(
     const OSVR_TimeValue &timestamp, const OSVR_PoseReport &report) {
     if (!m_fusion.running()) {
@@ -210,4 +201,10 @@ void VideoIMUFusionDevice::sendMainPoseReport() {
     osvrDeviceTrackerSendPoseTimestamped(
         m_dev, m_trackerOut, &m_fusion.getLatestPose(), FUSED_SENSOR_ID,
         &m_fusion.getLatestTime());
+}
+
+void VideoIMUFusionDevice::sendVelocityReport() {
+    osvrDeviceTrackerSendVelocityTimestamped(
+        m_dev, m_trackerOut, &m_fusion.getLatestVelocity(), FUSED_SENSOR_ID,
+        &m_fusion.getLatestVelocityTime());
 }

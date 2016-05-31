@@ -10,6 +10,7 @@
         "verticalSyncEnabled": true,
         "verticalSyncBlockRenderingEnabled": true,
         "renderOverfillFactor": 1.5,
+        "renderOversampleFactor": 1.0,
 
         "window": {
             "title": "OSVR",
@@ -22,6 +23,14 @@
             "rotation": 0,
             "bitsPerColor": 8
         },
+
+		"prediction": {
+				"enabled": true,
+				"staticDelayMS": 48,
+				"leftEyeDelayMS": 7.5,
+				"rightEyeDelayMS": 0,
+				"localTimeOverride": true
+		},
 
         "timeWarp": {
             "enabled": true,

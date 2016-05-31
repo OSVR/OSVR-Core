@@ -11,8 +11,8 @@
       "Note": ""
     },
     "field_of_view": {
-      "monocular_horizontal": 93.2798,
-      "monocular_vertical": 100.0,
+      "monocular_horizontal": 83,
+      "monocular_vertical": 92,
       "overlap_percent": 100,
       "pitch_tilt": 0
     },
@@ -26,9 +26,11 @@
       }
     ],
     "distortion": {
-      "k1_red": 1.01999,
-      "k1_green": 1.248,
-      "k1_blue": 1.48601
+				"distance_scale_x": 1,
+				"distance_scale_y": 1,
+				"polynomial_coeffs_red": [ 0, 1, 0.2 ],
+				"polynomial_coeffs_green": [ 0, 1, 0.24 ],
+				"polynomial_coeffs_blue": [ 0, 1, 0.32 ]
     },
     "rendering": {
       "right_roll": 0,

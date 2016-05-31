@@ -104,8 +104,7 @@ namespace common {
 
             template <typename T>
             using my_offset_ptr =
-                boost::interprocess::offset_ptr<T, my_ptrdiff, my_uintptr,
-                                                sizeof(my_ptrdiff)>;
+                boost::interprocess::offset_ptr<T, my_ptrdiff, my_uintptr>;
 
         } // namespace detail
         template <typename T> using ipc_offset_ptr = detail::my_offset_ptr<T>;
