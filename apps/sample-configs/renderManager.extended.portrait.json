@@ -5,11 +5,11 @@
     "renderManagerConfig": {
         "directModeEnabled": false,
         "directDisplayIndex": 0,
-        "directHighPriorityEnabled": true,
+        "directHighPriorityEnabled": false,
         "numBuffers": 2,
-        "verticalSyncEnabled": true,
-        "verticalSyncBlockRenderingEnabled": true,
-        "renderOverfillFactor": 1.5,
+        "verticalSyncEnabled": false,
+        "verticalSyncBlockRenderingEnabled": false,
+        "renderOverfillFactor": 1.2,
         "renderOversampleFactor": 1.0,
 
         "window": {
