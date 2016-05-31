@@ -1,4 +1,5 @@
 {
+	"description" : "Combined RenderManager config with HDK 1.3 display and client-side prediction. Disabled server-side prediction.",
 	"renderManagerConfig": {
 		"meta": {
 			"schemaVersion": 1
@@ -8,11 +9,11 @@
 			"directDisplayIndex": 0,
 			"directHighPriorityEnabled": true,
 			"numBuffers": 2,
-			"verticalSyncEnabled": false,
+			"verticalSyncEnabled": true,
 			"verticalSyncBlockRenderingEnabled": true,
-			"renderOverfillFactor": 2.0,
+			"renderOverfillFactor": 1.2,
 			"renderOversampleFactor": 1.0,
-			
+
 			"window": {
 				"title": "OSVR",
 				"fullScreenEnabled": true,
@@ -23,6 +24,14 @@
 			"display": {
 				"rotation": 90,
 				"bitsPerColor": 8
+			},
+
+			"prediction": {
+					"enabled": true,
+					"staticDelayMS": 29,
+					"leftEyeDelayMS": 7.5,
+					"rightEyeDelayMS": 0,
+					"localTimeOverride": true
 			},
 
 			"timeWarp": {
@@ -42,49 +51,49 @@
 				"properties": {
 					"vendor": "OSVR",
 					"model": "HDK",
-					"num_displays": 1,
+					"num_displays": 2,
 					"Version": "1.3",
-					"Note": "OSVR HDK portrait mode"
+					"Note": "OSVR HDK 1.3 in DirectMode"
 				}
 			},
 			"field_of_view": {
-				"monocular_horizontal": 90,
-				"monocular_vertical": 96.73,
+				"monocular_horizontal": 87.2628,
+				"monocular_vertical": 87.2628,
 				"overlap_percent": 100,
-				"pitch_tilt": 0
+			    "pitch_tilt": 0
 			},
 			"resolutions": [
 				{
 				"width": 1920,
 				"height": 1080,
-				"video_inputs": 1,
+				"video_inputs": 2,
 				"display_mode": "horz_side_by_side",
 				"swap_eyes": 0
 				}
 			],
-			"distortion": {
-				"distance_scale_x": 1,
-				"distance_scale_y": 1,
-				"polynomial_coeffs_red": [ 0, 1 ],
-				"polynomial_coeffs_green": [ 0, 1 ],
-				"polynomial_coeffs_blue": [ 0, 1 ]
-			},
+		   "distortion": {
+				"type": "mono_point_samples",
+				"mono_point_samples_built_in": "OSVR_HDK_13_V2"
+		   },
 			"rendering": {
 				"right_roll": 0,
 				"left_roll": 0
 			},
-			"eyes": [
-				{
-				"center_proj_x": 0.5,
-				"center_proj_y": 0.5,
-				"rotate_180": 0
-				},
-				{
-				"center_proj_x": 0.5,
-				"center_proj_y": 0.5,
-				"rotate_180": 0
-				}
-			]
+			"eyes": [{
+            "center_proj_x": 0.5574,
+            "center_proj_y": 0.5,
+            "rotate_180": 0
+        }, {
+            "center_proj_x": 0.4426,
+            "center_proj_y": 0.5,
+            "rotate_180": 0
+        }]
 			}
-		}
+		},
+		  "aliases": {
+	    	"/me/head": {
+		        "translate": [0.0, 0.0, -0.06],
+		        "child": "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd"
+	    	}
+  	}
 }
