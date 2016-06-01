@@ -36,7 +36,7 @@
 #include <boost/filesystem.hpp>
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace util {
@@ -96,14 +96,20 @@ LogRegistry::LogRegistry() : sinks_()
 #endif
 
     // File sink - rotates daily
-    size_t q_size = 1048576; // queue size must be power of 2
-    spdlog::set_async_mode(q_size);
-    namespace fs = boost::filesystem;
-    auto base_name = fs::path(getLoggingDirectory(true));
-    if (!base_name.empty()) {
-        base_name /= "osvr";
-        auto daily_file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(base_name.string().c_str(), "log", 0, 0, false);
-        sinks_.push_back(daily_file_sink);
+    try {
+        size_t q_size = 1048576; // queue size must be power of 2
+        spdlog::set_async_mode(q_size);
+        namespace fs = boost::filesystem;
+        auto base_name = fs::path(getLoggingDirectory(true));
+        if (!base_name.empty()) {
+            base_name /= "osvr";
+            auto daily_file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(base_name.string().c_str(), "log", 0, 0, false);
+            sinks_.push_back(daily_file_sink);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[OSVR] Error creating log file sink: " << e.what() << ". Will log to console only." << std::endl;
+    } catch (...) {
+        std::cerr << "[OSVR] Error creating log file sink. Will log to console only." << std::endl;
     }
 }
 
