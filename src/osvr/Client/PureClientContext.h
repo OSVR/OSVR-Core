@@ -58,8 +58,8 @@ namespace client {
         virtual ~PureClientContext();
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       private:
-        virtual void m_update();
-        virtual void m_sendRoute(std::string const &route);
+        void m_update() override;
+        void m_sendRoute(std::string const &route) override;
 
         /// @brief Called with each new interface object before it is returned
         /// to the client.
