@@ -8,7 +8,7 @@
       "model": "HDK",
       "num_displays": 2,
       "Version": "2.0",
-      "Note": "OSVR HDK 2.0 in DirectMode"
+      "Note": "OSVR HDK 2.0"
     },
     "field_of_view": {
       "monocular_horizontal": 92,
