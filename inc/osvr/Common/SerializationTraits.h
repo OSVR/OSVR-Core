@@ -487,7 +487,7 @@ namespace common {
             /// alignment padding if applicable) to be appended to a buffer of
             /// the supplied existing size.
             template <typename DataType>
-            static size_t spaceRequired(size_t existingBytes, DataType *val,
+            static size_t spaceRequired(size_t existingBytes, DataType *,
                                         tag_type const &tag) {
                 return computeAlignmentPadding(tag.alignment(), existingBytes) +
                        tag.length();

@@ -48,7 +48,7 @@ namespace connection {
         void m_setUpdateCallback(
             osvr::connection::DeviceUpdateCallback const &) override;
         void m_sendData(util::time::TimeValue const &timestamp,
-                        MessageType *type, const char *bytestream, size_t len);
+                        MessageType *type, const char *bytestream, size_t len) override;
         util::GuardPtr m_getSendGuard() override;
         void m_connectionInteract() override;
     };
