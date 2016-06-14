@@ -157,8 +157,11 @@ namespace util {
                               Eigen::Quaterniond const &curr, double dt) {
                 // slerp, based on dt, between the identity and our difference
                 // rotation.
+                Eigen::Quaterniond closestCurrent =
+                    curr.dot(prev) < 0 ? Eigen::Quaterniond(-curr.coeffs())
+                                       : curr;
                 return Eigen::Quaterniond::Identity()
-                    .slerp(dt, curr * prev.inverse())
+                    .slerp(dt, closestCurrent * prev.inverse())
                     .normalized();
             }
             inline double
