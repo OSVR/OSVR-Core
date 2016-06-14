@@ -131,9 +131,7 @@ namespace vbtracker {
         auto linearVel = m_cameraFilter.getLinearVelocityMagnitude();
         auto angVel = m_cameraFilter.getAngularVelocityMagnitude();
 
-        // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
-        if (linearVel < LINEAR_VELOCITY_CUTOFF &&
-            angVel < ANGULAR_VELOCITY_CUTOFF) {
+        if (angVel < ANGULAR_VELOCITY_CUTOFF) {
             // OK, velocity within bounds
             if (m_steadyVideoReports == 0) {
                 msg() << "Hold still, performing room calibration";
