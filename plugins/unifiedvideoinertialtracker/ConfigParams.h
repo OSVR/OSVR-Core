@@ -96,6 +96,9 @@ namespace vbtracker {
         /// lets us predict, or wait for actual updates of data?
         bool continuousReporting = false;
 
+        /// Should we open the camera in high-gain mode?
+        bool highGain = true;
+
         /// Seconds beyond the current time to predict, using the Kalman state.
         double additionalPrediction = 24. / 1000.;
 

@@ -81,6 +81,7 @@ namespace vbtracker {
         getOptionalParameter(config.continuousReporting, root,
                              "continuousReporting");
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
+        getOptionalParameter(config.highGain, root, "highGain");
         getOptionalParameter(config.calibrationFile, root, "calibrationFile");
 
         getOptionalParameter(config.additionalPrediction, root,

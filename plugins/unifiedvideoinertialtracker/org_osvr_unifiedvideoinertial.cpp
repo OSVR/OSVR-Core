@@ -310,7 +310,7 @@ class ConfiguredDeviceConstructor {
         auto config = osvr::vbtracker::parseConfigParams(root);
 
 #ifdef _WIN32
-        auto cam = osvr::vbtracker::openHDKCameraDirectShow();
+        auto cam = osvr::vbtracker::openHDKCameraDirectShow(config.highGain);
 #else // !_WIN32
         /// @todo This is rather crude, as we can't select the exact camera we
         /// want, nor set the "50Hz" high-gain mode (and only works with HDK

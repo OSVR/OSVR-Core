@@ -63,9 +63,9 @@ namespace vbtracker {
         cv::Size m_res;
     };
 
-    ImageSourcePtr openHDKCameraDirectShow() {
+    ImageSourcePtr openHDKCameraDirectShow(bool highGain) {
         auto ret = ImageSourcePtr{};
-        auto cam = getDirectShowHDKCamera();
+        auto cam = getDirectShowHDKCamera(highGain);
         if (!cam) {
             return ret;
         }
