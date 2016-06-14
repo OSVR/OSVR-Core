@@ -78,8 +78,8 @@ namespace vbtracker {
         /// log-plot slope B is used directly from that regression.
         /// coefficient A hand-picked based on original fit, to move this
         /// function above the normal data with a good margin of error.
-        static const double A = 5.4116155459;
-        static const double B = 1e-5;
+        static const double A = 6.4116155459;
+        static const double B = 8e-5;
         return B * std::exp(A * distance);
     }
 
