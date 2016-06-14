@@ -164,7 +164,34 @@ namespace vbtracker {
     }
 
     cv::Mat TrackerOfflineProcessing::getDebugImage() {
-        return generateBlobDebugImage(lastFrame_, extractor_);
+        cv::Mat input = extractor_.getInputGrayImage();
+        const cv::Size sz = input.size();
+        /// Returns a rect for a ROI allowing us to build up our debug image
+        /// from blocks.
+        auto getRect = [&](std::size_t i) {
+            return cv::Rect(cv::Point2i(i * sz.width, 0), sz);
+        };
+
+        const cv::Size largerSize{sz.width * 4, sz.height};
+        cv::Mat composite{};
+        composite.create(largerSize, CV_8UC3);
+        /// Copies a block into our debug image.
+        auto copyToComposite = [&](cv::Mat const &mat, std::size_t i) {
+            cv::Mat colorSrc;
+            if (mat.channels() == 1) {
+                cv::cvtColor(mat, colorSrc, cv::COLOR_GRAY2BGR);
+            } else {
+                colorSrc = mat;
+            }
+            colorSrc.copyTo(composite(getRect(i)));
+        };
+
+        copyToComposite(input, 0);
+        copyToComposite(extractor_.getEdgeDetectedImage(), 1);
+        copyToComposite(extractor_.getEdgeDetectedBinarizedImage(), 2);
+        copyToComposite(generateBlobDebugImage(lastFrame_, extractor_), 3);
+
+        return composite;
     }
 
     ImageOutputDataPtr
