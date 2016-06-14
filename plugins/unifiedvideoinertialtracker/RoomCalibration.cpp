@@ -60,8 +60,10 @@ namespace vbtracker {
     RoomCalibration::RoomCalibration(Eigen::Vector3d const &camPosition,
                                      bool cameraIsForward)
         : m_lastVideoData(util::time::getNow()),
-          m_poseFilter(filters::one_euro::Params{0.5},
-                       filters::one_euro::Params{0.5}),
+          m_poseFilter(filters::one_euro::Params{1, 0.1},
+                       filters::one_euro::Params{1}),
+          m_cameraFilter(filters::one_euro::Params{1, 0.1},
+                         filters::one_euro::Params{1}),
           m_suppliedCamPosition(camPosition),
           m_cameraIsForward(cameraIsForward) {}
 
@@ -107,7 +109,9 @@ namespace vbtracker {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
 
-        Eigen::Isometry3d targetPose = util::makeIsometry(xlate, quat);
+        // Pre-filter the camera data in case it's noisy (quite possible since
+        // it's RANSAC)
+        m_poseFilter.filter(dt, xlate, quat);
 
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
@@ -115,15 +119,17 @@ namespace vbtracker {
         // rTc is camera in room space (what we want to find), so we can take
         // camera-reported cTd, perform rTc * cTd, and end up with rTd with
         // position...
-        Eigen::Isometry3d rTc = m_imuOrientation * targetPose.inverse();
+        // Eigen::Isometry3d rTc = m_imuOrientation * targetPose.inverse();
+        Eigen::Isometry3d rTc =
+            m_imuOrientation * m_poseFilter.getIsometry().inverse();
 
-        // Feed this into the filters...
-        m_poseFilter.filter(dt, rTc.translation(),
-                            Eigen::Quaterniond(rTc.rotation()));
+        // Feed this into the filter...
+        m_cameraFilter.filter(dt, rTc.translation(),
+                              Eigen::Quaterniond(rTc.rotation()));
 
         // Look at the velocity to see if the user was holding still enough.
-        auto linearVel = m_poseFilter.getLinearVelocityMagnitude();
-        auto angVel = m_poseFilter.getAngularVelocityMagnitude();
+        auto linearVel = m_cameraFilter.getLinearVelocityMagnitude();
+        auto angVel = m_cameraFilter.getAngularVelocityMagnitude();
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
         if (linearVel < LINEAR_VELOCITY_CUTOFF &&
@@ -306,7 +312,7 @@ namespace vbtracker {
     }
 
     Eigen::Isometry3d RoomCalibration::getCameraToIMUCalibrationPoint() const {
-        return m_poseFilter.getIsometry();
+        return m_cameraFilter.getIsometry();
     }
 
     std::ostream &RoomCalibration::msgStream() const { return std::cout; }

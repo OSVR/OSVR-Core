@@ -119,8 +119,11 @@ namespace vbtracker {
         util::time::TimeValue m_lastVideoData;
         /// @}
 
-        /// Input filter on camera in room/IMU space
+        /// Filter on pose in camera space
         util::filters::PoseOneEuroFilterd m_poseFilter;
+
+        /// Input filter on camera in room/IMU space
+        util::filters::PoseOneEuroFilterd m_cameraFilter;
 
         BodyId m_imuBody;
         Eigen::Quaterniond m_imuOrientation;
