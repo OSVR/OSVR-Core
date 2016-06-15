@@ -24,10 +24,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/PluginRegistrationC.h>
 #include "HandleNullContext.h"
-#include <osvr/Util/Verbosity.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/PluginKit/PluginRegistrationC.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -47,7 +47,8 @@ OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
             .registerHardwareDetectCallback(detectCallback, userData);
     } catch (std::exception &e) {
         std::cerr << "Error in osvrPluginRegisterHardwareDetectCallback - "
-                     "caught exception reporting: " << e.what() << std::endl;
+                     "caught exception reporting: "
+                  << e.what() << std::endl;
         return OSVR_RETURN_FAILURE;
     }
     return OSVR_RETURN_SUCCESS;
@@ -62,7 +63,8 @@ OSVR_ReturnCode osvrRegisterDriverInstantiationCallback(
             .registerDriverInstantiationCallback(name, cb, userData);
     } catch (std::exception &e) {
         std::cerr << "Error in osvrRegisterDriverInstantiationCallback - "
-                     "caught exception reporting: " << e.what() << std::endl;
+                     "caught exception reporting: "
+                  << e.what() << std::endl;
         return OSVR_RETURN_FAILURE;
     }
     return OSVR_RETURN_SUCCESS;

@@ -31,8 +31,8 @@
 #include <osvr/Util/QuatlibInteropC.h>
 
 // Library/third-party includes
-#include <vrpn_Tracker.h>
 #include <quat.h>
+#include <vrpn_Tracker.h>
 
 // Standard includes
 // - none
@@ -57,25 +57,23 @@ namespace connection {
         }
         static const vrpn_uint32 CLASS_OF_SERVICE = vrpn_CONNECTION_LOW_LATENCY;
 
-        void sendReport(OSVR_PositionState const &val,
-                                OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &timestamp) override {
+        void sendReport(OSVR_PositionState const &val, OSVR_ChannelCount sensor,
+                        util::time::TimeValue const &timestamp) override {
             m_resetQuat();
             osvrVec3ToQuatlib(Base::pos, &val);
             m_sendPose(sensor, timestamp);
         }
 
         void sendReport(OSVR_OrientationState const &val,
-                                OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &timestamp) override {
+                        OSVR_ChannelCount sensor,
+                        util::time::TimeValue const &timestamp) override {
             m_resetPos();
             osvrQuatToQuatlib(Base::d_quat, &val);
             m_sendPose(sensor, timestamp);
         }
 
-        void sendReport(OSVR_PoseState const &val,
-                                OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &timestamp) override {
+        void sendReport(OSVR_PoseState const &val, OSVR_ChannelCount sensor,
+                        util::time::TimeValue const &timestamp) override {
             osvrVec3ToQuatlib(Base::pos, &(val.translation));
             osvrQuatToQuatlib(Base::d_quat, &(val.rotation));
             m_sendPose(sensor, timestamp);

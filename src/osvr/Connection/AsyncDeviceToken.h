@@ -26,9 +26,9 @@
 #define INCLUDED_AsyncDeviceToken_h_GUID_654218B0_3900_4B89_E86F_D314EB6C0ABF
 
 // Internal Includes
+#include "AsyncAccessControl.h"
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/Util/CallbackWrapper.h>
-#include "AsyncAccessControl.h"
 
 // Library/third-party includes
 #include <boost/thread.hpp>

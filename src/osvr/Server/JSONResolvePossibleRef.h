@@ -32,8 +32,8 @@
 #include <json/value.h>
 
 // Standard includes
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace osvr {
 namespace server {

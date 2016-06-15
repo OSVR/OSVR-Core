@@ -24,8 +24,8 @@
 
 // Internal Includes
 #include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/ClientContext.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/Tracing.h>
 
 // Library/third-party includes

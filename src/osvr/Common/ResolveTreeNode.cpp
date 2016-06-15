@@ -23,20 +23,20 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ResolveTreeNode.h>
+#include <osvr/Common/OriginalSource.h>
+#include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/OriginalSource.h>
-#include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <boost/variant.hpp>
 #include <boost/lexical_cast.hpp>
-#include <json/value.h>
+#include <boost/variant.hpp>
 #include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
 #include <sstream>

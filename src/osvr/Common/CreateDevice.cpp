@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/CreateDevice.h>
 #include "DeviceWrapper.h"
+#include <osvr/Common/CreateDevice.h>
 
 // Library/third-party includes
 // - none

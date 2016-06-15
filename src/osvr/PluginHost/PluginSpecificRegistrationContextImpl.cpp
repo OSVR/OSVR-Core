@@ -156,10 +156,10 @@ namespace pluginhost {
                                    "registered!");
         }
         auto opaque = extractOpaquePointer();
-        m_driverInstantiationCallbacks[name] =
-            [constructor, opaque, userData](const char *params) {
-                return constructor(opaque, params, userData);
-            };
+        m_driverInstantiationCallbacks[name] = [constructor, opaque,
+                                                userData](const char *params) {
+            return constructor(opaque, params, userData);
+        };
     }
 
     util::AnyMap &PluginSpecificRegistrationContextImpl::data() {

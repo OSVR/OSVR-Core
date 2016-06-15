@@ -26,8 +26,8 @@
 #define INCLUDED_RemoteHandlerInternals_h_GUID_20139712_D173_4D91_A995_2552DF68354A
 
 // Internal Includes
-#include <osvr/Common/InterfaceList.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/InterfaceList.h>
 
 // Library/third-party includes
 // - none

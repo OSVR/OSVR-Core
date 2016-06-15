@@ -26,11 +26,11 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/PathTreeObserver.h>
 #include <osvr/Common/PathTreeOwner.h>
-#include <osvr/Common/ClientInterface.h>
-#include <osvr/Util/Verbosity.h>
 #include <osvr/Common/ResolveTreeNode.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>

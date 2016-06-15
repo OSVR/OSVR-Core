@@ -23,13 +23,13 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Connection/DeviceToken.h>
 #include "AsyncDeviceToken.h"
 #include "SyncDeviceToken.h"
 #include "VirtualDeviceToken.h"
-#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/ConnectionDevice.h>
+#include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceToken.h>
 
 // Library/third-party includes
 // - none

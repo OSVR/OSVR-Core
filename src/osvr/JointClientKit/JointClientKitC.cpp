@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/JointClientKit/JointClientKitC.h>
 #include "JointClientContext.h"
+#include <osvr/JointClientKit/JointClientKitC.h>
 #include <osvr/Server/Server.h>
 #include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/Verbosity.h>
@@ -34,9 +34,9 @@
 
 // Standard includes
 #include <functional>
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
 using osvr::server::Server;
 

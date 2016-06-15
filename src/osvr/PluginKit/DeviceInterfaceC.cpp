@@ -25,15 +25,15 @@
 #define OSVR_DEV_VERBOSE_DISABLE
 
 // Internal Includes
-#include <osvr/PluginKit/DeviceInterfaceC.h>
-#include <osvr/PluginKit/PluginRegistration.h>
-#include <osvr/PluginHost/RegistrationContext.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Connection/MessageType.h>
+#include "HandleNullContext.h"
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/MessageType.h>
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/PluginKit/DeviceInterfaceC.h>
+#include <osvr/PluginKit/PluginRegistration.h>
 #include <osvr/Util/Verbosity.h>
-#include "HandleNullContext.h"
 
 // Library/third-party includes
 #include <boost/thread.hpp>
@@ -178,11 +178,10 @@ osvrDeviceSyncInitWithOptions(OSVR_IN_PTR OSVR_PluginRegContext,
                                  OSVR_DeviceTokenObject::createSyncDevice);
 }
 
-OSVR_ReturnCode
-osvrDeviceRegisterUpdateCallback(OSVR_IN_PTR OSVR_DeviceToken dev,
-                                 OSVR_IN OSVR_DeviceUpdateCallback
-                                     updateCallback,
-                                 OSVR_IN_OPT void *userData) {
+OSVR_ReturnCode osvrDeviceRegisterUpdateCallback(
+    OSVR_IN_PTR OSVR_DeviceToken dev,
+    OSVR_IN OSVR_DeviceUpdateCallback updateCallback,
+    OSVR_IN_OPT void *userData) {
     OSVR_DEV_VERBOSE("In osvrDeviceRegisterUpdateCallback");
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT(
         "osvrDeviceRegisterUpdateCallback device token", dev);

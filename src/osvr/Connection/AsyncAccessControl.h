@@ -30,8 +30,8 @@
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
-#include <boost/thread.hpp>
 #include <boost/optional/optional.hpp>
+#include <boost/thread.hpp>
 
 // Standard includes
 // - none

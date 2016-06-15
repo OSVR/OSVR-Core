@@ -32,9 +32,9 @@
 #include <json/value.h>
 
 // Standard includes
-#include <string>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace osvr {

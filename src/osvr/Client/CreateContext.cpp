@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Client/CreateContext.h>
-#include "PureClientContext.h"
 #include "AnalysisClientContext.h"
+#include "PureClientContext.h"
+#include <osvr/Client/CreateContext.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes

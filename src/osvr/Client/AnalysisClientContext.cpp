@@ -24,28 +24,28 @@
 
 // Internal Includes
 #include "AnalysisClientContext.h"
-#include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 
 // Library/third-party includes
 #include <json/value.h>
 
 // Standard includes
-#include <unordered_set>
 #include <thread>
+#include <unordered_set>
 
 namespace osvr {
 namespace client {
 
-    //static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
-    //static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
-    //static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
+    // static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
+    // static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
+    // static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
     AnalysisClientContext::AnalysisClientContext(
         const char appId[], const char host[], vrpn_ConnectionPtr const &conn,

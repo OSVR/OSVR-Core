@@ -26,8 +26,8 @@
 #define INCLUDED_HandleNullContext_h_GUID_3951FC65_BC2E_49BD_CACD_978BD4D8F337
 
 // Internal Includes
-#include <osvr/Util/MacroToolsC.h>
 #include <osvr/PluginKit/CommonC.h>
+#include <osvr/Util/MacroToolsC.h>
 
 // Library/third-party includes
 // - none

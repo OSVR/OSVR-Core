@@ -23,14 +23,14 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/ImagingInterfaceC.h>
 #include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/PluginKit/ImagingInterfaceC.h>
 //#include <osvr/Connection/ImagingServerInterface.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Connection/DeviceInterfaceBase.h>
-#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Common/ImagingComponent.h>
 #include "HandleNullContext.h"
+#include <osvr/Common/ImagingComponent.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -49,12 +49,12 @@ OSVR_ImageBufferElement *gLastFrameBuffer = NULL;
 OSVR_ImagingMetadata gLastFrameMetadata;
 
 extern "C" {
-    JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
-      jbyteArray data, jlong width, jlong height);
+JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(
+    JNIEnv *env, jclass clazz, jbyteArray data, jlong width, jlong height);
 }
 
-JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
-    jbyteArray data, jlong width, jlong height) {
+JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(
+    JNIEnv *env, jclass clazz, jbyteArray data, jlong width, jlong height) {
 
     gLastFrameMetadata.height = (OSVR_ImageDimension)height;
     gLastFrameMetadata.width = (OSVR_ImageDimension)width;
@@ -62,16 +62,18 @@ JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * 
     gLastFrameMetadata.depth = (OSVR_ImageDepth)1;
 
     // @todo determine whether the current metadata matches the last metadata,
-    // and if so, reuse the last frame buffer instead of deleting and recreating.
+    // and if so, reuse the last frame buffer instead of deleting and
+    // recreating.
     // better yet, use a ring buffer so that image reports aren't lost if update
     // isn't called frequently enough.
     int size = env->GetArrayLength(data);
 
-    if(gLastFrameBuffer == NULL) {
+    if (gLastFrameBuffer == NULL) {
         gLastFrameBuffer = new OSVR_ImageBufferElement[size];
     }
     gLastFrame = gLastFrameBuffer;
-    env->GetByteArrayRegion(data, 0, size, reinterpret_cast<jbyte*>(gLastFrameBuffer));
+    env->GetByteArrayRegion(data, 0, size,
+                            reinterpret_cast<jbyte *>(gLastFrameBuffer));
 }
 #endif
 

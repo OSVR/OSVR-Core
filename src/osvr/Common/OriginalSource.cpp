@@ -23,17 +23,17 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/PathNode.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/RoutingExceptions.h>
 
 // Library/third-party includes
-#include <boost/variant/static_visitor.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
-#include <boost/optional.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 // Standard includes
 #include <string>

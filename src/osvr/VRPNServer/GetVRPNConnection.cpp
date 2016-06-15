@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/VRPNServer/GetVRPNConnection.h>
 #include "../Connection/VrpnConnectionKind.h" // Internal header!
+#include <osvr/VRPNServer/GetVRPNConnection.h>
 
 // Library/third-party includes
 #include <osvr/Connection/Connection.h>

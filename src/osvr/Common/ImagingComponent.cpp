@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ImagingComponent.h>
 #include <osvr/Common/BaseDevice.h>
-#include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
+#include <osvr/Common/ImagingComponent.h>
+#include <osvr/Common/Serialization.h>
 #include <osvr/Util/AlignedMemoryUniquePtr.h>
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Verbosity.h>

@@ -26,9 +26,9 @@
 #define INCLUDED_IPCRingBufferResults_h_GUID_324D713B_59B5_478A_4FA4_81851E72E83E
 
 // Internal Includes
-#include <osvr/Common/IPCRingBuffer.h>
 #include "SharedMemory.h"
 #include "SharedMemoryObjectWithMutex.h"
+#include <osvr/Common/IPCRingBuffer.h>
 
 // Library/third-party includes
 // - none

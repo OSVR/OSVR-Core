@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/LocomotionComponent.h>
 #include <osvr/Common/BaseDevice.h>
-#include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
+#include <osvr/Common/LocomotionComponent.h>
+#include <osvr/Common/Serialization.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -130,9 +130,8 @@ namespace common {
                                   timestamp);
     }
 
-    int VRPN_CALLBACK
-    LocomotionComponent::m_handleNaviVelocityRecord(void *userdata,
-                                                    vrpn_HANDLERPARAM p) {
+    int VRPN_CALLBACK LocomotionComponent::m_handleNaviVelocityRecord(
+        void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<LocomotionComponent *>(userdata);
         auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 
@@ -147,9 +146,8 @@ namespace common {
         return 0;
     }
 
-    int VRPN_CALLBACK
-    LocomotionComponent::m_handleNaviPositionRecord(void *userdata,
-                                                    vrpn_HANDLERPARAM p) {
+    int VRPN_CALLBACK LocomotionComponent::m_handleNaviPositionRecord(
+        void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<LocomotionComponent *>(userdata);
         auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 

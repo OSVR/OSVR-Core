@@ -25,17 +25,17 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/JSONTransformVisitor.h>
-#include <osvr/Common/Transform.h>
 #include <osvr/Common/ChangeOfBasis.h>
 #include <osvr/Common/DegreesToRadians.h>
+#include <osvr/Common/JSONTransformVisitor.h>
+#include <osvr/Common/Transform.h>
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
-#include <json/value.h>
-#include <json/reader.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/count_if.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
 #include <string>
@@ -57,8 +57,8 @@ namespace common {
             using boost::is_any_of;
             std::string val(boost::to_upper_copy(inVal));
             if ((!boost::algorithm::all(
-                     val, is_any_of(AXIS_NAMES) || is_any_of(MINUS) ||
-                              boost::algorithm::is_space())) ||
+                    val, is_any_of(AXIS_NAMES) || is_any_of(MINUS) ||
+                             boost::algorithm::is_space())) ||
                 boost::count_if(val, is_any_of(AXIS_NAMES)) != 1 ||
                 boost::count_if(val, is_any_of(MINUS)) > 1) {
                 throw std::runtime_error(

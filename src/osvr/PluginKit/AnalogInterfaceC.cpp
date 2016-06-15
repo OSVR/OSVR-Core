@@ -23,14 +23,14 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/AnalogInterfaceC.h>
-#include <osvr/Connection/DeviceInitObject.h>
-#include <osvr/Connection/AnalogServerInterface.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Connection/DeviceInterfaceBase.h>
-#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
+#include <osvr/Connection/AnalogServerInterface.h>
+#include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/PluginKit/AnalogInterfaceC.h>
+#include <osvr/Util/PointerWrapper.h>
 
 // Library/third-party includes
 // - none

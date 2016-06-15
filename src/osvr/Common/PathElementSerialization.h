@@ -27,20 +27,20 @@
 #define INCLUDED_PathElementSerialization_h_GUID_5DA3C116_3537_4084_F45A_3FCC20B1AAC1
 
 // Internal Includes
-#include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/PathElementTools.h>
 #include "PathElementSerializationDescriptions.h"
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
-#include <json/value.h>
-#include <json/reader.h>
-#include <boost/variant.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/variant.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
-#include <type_traits>
 #include <stdexcept>
+#include <type_traits>
 
 namespace osvr {
 namespace common {

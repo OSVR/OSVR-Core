@@ -23,16 +23,16 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Client/DisplayConfig.h>
 #include <osvr/ClientKit/DisplayC.h>
 #include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/Util/Verbosity.h>
 #include <osvr/Common/ClientContext.h>
-#include <osvr/Client/DisplayConfig.h>
-#include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/EigenExtras.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/MatrixConventions.h>
 #include <osvr/Util/MatrixEigenAssign.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -253,15 +253,19 @@ static inline OSVR_ReturnCode getViewMatrixImpl(OSVR_DisplayConfig disp,
     }
 }
 
-OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(
-    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_MatrixConventions flags, double *mat) {
+OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixd(OSVR_DisplayConfig disp,
+                                                  OSVR_ViewerCount viewer,
+                                                  OSVR_EyeCount eye,
+                                                  OSVR_MatrixConventions flags,
+                                                  double *mat) {
     return getViewMatrixImpl(disp, viewer, eye, mat, flags);
 }
 
-OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(
-    OSVR_DisplayConfig disp, OSVR_ViewerCount viewer, OSVR_EyeCount eye,
-    OSVR_MatrixConventions flags, float *mat) {
+OSVR_ReturnCode osvrClientGetViewerEyeViewMatrixf(OSVR_DisplayConfig disp,
+                                                  OSVR_ViewerCount viewer,
+                                                  OSVR_EyeCount eye,
+                                                  OSVR_MatrixConventions flags,
+                                                  float *mat) {
     return getViewMatrixImpl(disp, viewer, eye, mat, flags);
 }
 

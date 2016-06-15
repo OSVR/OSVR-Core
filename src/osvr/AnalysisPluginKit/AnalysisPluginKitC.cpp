@@ -23,15 +23,15 @@
 // limitations under the License.
 
 // Internal Includes
+#include "../Connection/VrpnConnectionKind.h" /// @todo Internal header!
 #include <osvr/AnalysisPluginKit/AnalysisPluginKitC.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Connection/Connection.h>
-#include <osvr/PluginHost/RegistrationContext.h>
-#include <osvr/Common/ClientContext.h>
 #include <osvr/Client/CreateContext.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/Util/MacroToolsC.h>
 #include <osvr/Util/Verbosity.h>
-#include "../Connection/VrpnConnectionKind.h" /// @todo Internal header!
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>

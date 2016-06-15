@@ -26,8 +26,8 @@
 #define INCLUDED_VrpnBasedConnection_h_GUID_49F2C30F_D807_43B1_A754_9B645D3A1809
 
 // Internal Includes
-#include <osvr/Connection/Connection.h>
 #include <osvr/Common/NetworkingSupport.h>
+#include <osvr/Connection/Connection.h>
 
 // Library/third-party includes
 #include <vrpn_Connection.h>

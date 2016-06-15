@@ -24,15 +24,15 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/LocomotionInterfaceC.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Connection/DeviceInitObject.h>
-#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
-#include <osvr/Util/PointerWrapper.h>
 #include <osvr/Common/LocomotionComponent.h>
-#include <osvr/Util/Verbosity.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/PluginKit/LocomotionInterfaceC.h>
+#include <osvr/Util/PointerWrapper.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none

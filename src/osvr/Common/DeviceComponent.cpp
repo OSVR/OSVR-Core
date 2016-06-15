@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/BaseDevice.h>
+#include <osvr/Common/DeviceComponent.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>

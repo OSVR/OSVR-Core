@@ -23,12 +23,12 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Client/InternalInterfaceOwner.h>
+#include <osvr/ClientKit/InterfaceStateC.h>
+#include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/ClientKit/TransformsC.h>
-#include <osvr/ClientKit/InterfaceStateC.h>
-#include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/Transform.h>
-#include <osvr/Client/InternalInterfaceOwner.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/ExtractYaw.h>
 

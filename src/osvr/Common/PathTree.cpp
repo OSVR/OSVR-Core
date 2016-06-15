@@ -23,17 +23,17 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/RouteContainer.h>
-#include <osvr/Common/ParseAlias.h>
-#include <osvr/Common/RoutingConstants.h>
-#include <osvr/Common/PathTreeSerialization.h>
-#include <osvr/Util/Verbosity.h>
-#include <osvr/Common/JSONHelpers.h>
-#include <osvr/Common/AliasProcessor.h>
 #include "PathParseAndRetrieve.h"
+#include <osvr/Common/AliasProcessor.h>
+#include <osvr/Common/JSONHelpers.h>
+#include <osvr/Common/ParseAlias.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/PathTreeSerialization.h>
+#include <osvr/Common/RouteContainer.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <boost/variant/get.hpp>

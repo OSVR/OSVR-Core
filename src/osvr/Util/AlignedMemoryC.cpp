@@ -30,8 +30,8 @@
 // - none
 
 // Standard includes
-#include <stdlib.h>
 #include <cassert>
+#include <stdlib.h>
 
 void *osvrAlignedAlloc(size_t bytes, size_t alignment) {
     // Allocate a memory buffer with enough space to store a pointer to the
