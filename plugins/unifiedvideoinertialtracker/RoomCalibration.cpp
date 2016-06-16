@@ -97,6 +97,10 @@ namespace vbtracker {
             // yet.
             return;
         }
+        if (!xlate.array().allFinite() || !quat.coeffs().array().allFinite()) {
+            // non-finite camera pose
+            return;
+        }
         if (!haveVideoData()) {
             msg() << "Got first video report from target " << target
                   << std::endl;
@@ -195,6 +199,10 @@ namespace vbtracker {
             return;
         }
 
+        if (!quat.coeffs().array().allFinite()) {
+            // non-finite quat
+            return;
+        }
         if (!haveIMUData()) {
             auto &trackedBody = sys.getBody(body);
             if (trackedBody.getNumTargets() == 0) {

@@ -78,8 +78,9 @@ namespace util {
                         m_hatx = x;
                         return m_hatx;
                     }
-
-                    m_hatx = computeStep(hatx(), x, alpha);
+                    if (std::isfinite(alpha)) {
+                        m_hatx = computeStep(hatx(), x, alpha);
+                    }
                     return m_hatx;
                 }
 
