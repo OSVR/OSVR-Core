@@ -60,10 +60,6 @@ namespace vbtracker {
     RoomCalibration::RoomCalibration(Eigen::Vector3d const &camPosition,
                                      bool cameraIsForward)
         : m_lastVideoData(util::time::getNow()),
-          m_poseFilter(filters::one_euro::Params{1, 0.1},
-                       filters::one_euro::Params{1}),
-          m_cameraFilter(filters::one_euro::Params{1, 0.1},
-                         filters::one_euro::Params{1}),
           m_suppliedCamPosition(camPosition),
           m_cameraIsForward(cameraIsForward) {}
 
@@ -203,6 +199,7 @@ namespace vbtracker {
 
         if (!quat.coeffs().array().allFinite()) {
             // non-finite quat
+            msg() << "Non-finite quat" << std::endl;
             return;
         }
         if (!haveIMUData()) {
@@ -257,8 +254,16 @@ namespace vbtracker {
         /// configuration.
 
         Eigen::Isometry3d iTc = getCameraToIMUCalibrationPoint();
+        msg() << "Camera to calibration point: "
+              << iTc.translation().transpose() << " rotation: "
+              << Eigen::Quaterniond(iTc.rotation()).coeffs().transpose()
+              << std::endl;
+
+#if 0
         m_imuYaw = 0 * util::radians;
         m_rTi = Eigen::Isometry3d::Identity();
+#endif
+
         iTc.translation() = Eigen::Vector3d::Zero();
         // Eigen::Isometry3d temp_rTc = iTc;
 
@@ -271,14 +276,27 @@ namespace vbtracker {
             // temp_rTc = rTi_rotation * iTc;
         }
 
+        msg() << "rTi rotation: "
+              << Eigen::Quaterniond(rTi_rotation).coeffs().transpose()
+              << std::endl;
         // Account for the supplied camera position: m_suppliedCamPosition is
         // rTi translation.
         // Eigen::Vector3d cameraOffset =
         //    m_suppliedCamPosition - temp_rTc.translation();
         m_rTi = util::makeIsometry(m_suppliedCamPosition, rTi_rotation);
 
+        msg() << "rTi: translation: " << m_rTi.translation().transpose()
+              << "rotation: "
+              << Eigen::Quaterniond(m_rTi.rotation()).coeffs().transpose()
+              << std::endl;
+
         // cameraPose is rTc
         m_cameraPose = m_rTi * iTc;
+        msg()
+            << "camera pose AKA rTc: translation: "
+            << m_cameraPose.translation().transpose() << "rotation: "
+            << Eigen::Quaterniond(m_cameraPose.rotation()).coeffs().transpose()
+            << std::endl;
 
         m_calibComplete = true;
 
@@ -303,6 +321,7 @@ namespace vbtracker {
         }
         return boost::none;
     }
+
     Eigen::Isometry3d RoomCalibration::getCameraPose() const {
         BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
                                                 "getCameraPose() unless "

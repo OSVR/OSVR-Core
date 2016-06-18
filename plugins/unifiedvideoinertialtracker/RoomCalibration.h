@@ -120,13 +120,19 @@ namespace vbtracker {
         /// @}
 
         /// Filter on pose in camera space
-        util::filters::PoseOneEuroFilterd m_poseFilter;
+        util::filters::PoseOneEuroFilterd m_poseFilter =
+            util::filters::PoseOneEuroFilterd{
+                util::filters::one_euro::Params{1, 0.1},
+                util::filters::one_euro::Params{1}};
 
         /// Input filter on camera in room/IMU space
-        util::filters::PoseOneEuroFilterd m_cameraFilter;
+        util::filters::PoseOneEuroFilterd m_cameraFilter =
+            util::filters::PoseOneEuroFilterd{
+                util::filters::one_euro::Params{1, 0.1},
+                util::filters::one_euro::Params{1}};
 
         BodyId m_imuBody;
-        Eigen::Quaterniond m_imuOrientation;
+        Eigen::Quaterniond m_imuOrientation = Eigen::Quaterniond::Identity();
 
         /// @name Supplied config
         /// @{
@@ -137,9 +143,9 @@ namespace vbtracker {
         bool m_calibComplete = false;
         /// @name Output
         /// @{
-        util::Angle m_imuYaw;
+        util::Angle m_imuYaw = 0 * util::radians;
         Eigen::Isometry3d m_cameraPose;
-        Eigen::Isometry3d m_rTi;
+        Eigen::Isometry3d m_rTi = Eigen::Isometry3d::Identity();
         /// @}
     };
 
