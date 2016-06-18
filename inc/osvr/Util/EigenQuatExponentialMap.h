@@ -67,10 +67,12 @@ namespace util {
             return ret;
         }
 
-        /// fully-templated free function for quaternion expontiation, intended
-        /// for implementation use within the class.
-        template <typename Scalar, typename InputVec>
-        inline Eigen::Quaternion<Scalar> quat_exp(InputVec &&vec) {
+        /// fully-templated free function for quaternion expontiation
+        template <typename Derived>
+        inline Eigen::Quaternion<typename Derived::Scalar>
+        quat_exp(Eigen::MatrixBase<Derived> const &vec) {
+            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+            using Scalar = typename Derived::Scalar;
             /// Implementation inspired by
             /// Grassia, F. S. (1998). Practical Parameterization of Rotations
             /// Using the Exponential Map. Journal of Graphics Tools, 3(3),
@@ -146,9 +148,7 @@ namespace util {
         template <typename Derived_> class QuatExpMapBase {
           public:
             using Derived = Derived_;
-            QuatType<Derived> exp() const {
-                return quat_exp<ScalarType<Derived>>(derived().vec());
-            }
+            QuatType<Derived> exp() const { return quat_exp(derived().vec()); }
 
             Derived const &derived() const {
                 return *static_cast<Derived const *>(this);
@@ -239,6 +239,8 @@ namespace util {
             return VecWrapper<Scalar>(v);
         }
     } // namespace ei_quat_exp_map
+    using ei_quat_exp_map::quat_exp;
+    using ei_quat_exp_map::quat_ln;
     using ei_quat_exp_map::quat_exp_map;
 } // namespace util
 } // namespace osvr
