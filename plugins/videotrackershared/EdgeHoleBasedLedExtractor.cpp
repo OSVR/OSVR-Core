@@ -104,9 +104,9 @@ namespace vbtracker {
         // checks, add a derived measurement to our measurement vector and the
         // contour itself to our list of contours for debugging display.
         MatType binTemp = edgeBinary_.clone();
-        consumeHolesOfConnectedComponents(
-            edgeBinary_,
-            [&](ContourType &&contour) { checkBlob(std::move(contour), p); });
+        consumeHolesOfConnectedComponents(binTemp, [&](ContourType &&contour) {
+            checkBlob(std::move(contour), p);
+        });
         return measurements_;
     }
     void EdgeHoleBasedLedExtractor::reset() {
