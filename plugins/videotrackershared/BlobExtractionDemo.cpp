@@ -31,7 +31,6 @@
 #include <cvUtils.h>
 
 // Library/third-party includes
-#include <boost/algorithm/string/case_conv.hpp>
 #include <json/reader.h>
 #include <json/value.h>
 #include <opencv2/core/core.hpp>
@@ -48,6 +47,7 @@
 
 namespace osvr {
 namespace vbtracker {
+    static bool g_showAllRejects = false;
     static EdgeHoleParams g_holeExtractorParams{};
     static BlobParams g_blobParams{};
     void showImage(std::string const &title, cv::Mat const &img,
@@ -124,11 +124,13 @@ namespace vbtracker {
                 cv::Point2d center;
                 std::tie(contourId, reason, center) = reject;
 
-                if (osvr::vbtracker::RejectReason::Area == reason ||
-                    RejectReason::CenterPointValue == reason) {
+                if (!g_showAllRejects &&
+                    (osvr::vbtracker::RejectReason::Area == reason ||
+                     RejectReason::CenterPointValue == reason)) {
                     // Skip drawing these, they clutter the display
                     continue;
                 }
+
                 drawSubpixelPoint(highlightedContours, center,
                                   cv::Scalar(0, 0, 0), 1.2);
                 std::ostringstream os;
@@ -136,22 +138,22 @@ namespace vbtracker {
                 os << contourId;
                 switch (reason) {
                 case RejectReason::Area:
-                    os << ":Area";
+                    os << ":A";
                     break;
                 case RejectReason::CenterPointValue:
-                    os << ":Value";
+                    os << ":V";
                     break;
                 case RejectReason::Circularity:
-                    os << ":Circ";
+                    os << ":CIRC";
                     break;
                 case RejectReason::Convexity:
-                    os << ":Conv";
+                    os << ":CONV";
                     break;
                 default:
                     break;
                 }
                 // os << "]";
-                auto text = boost::algorithm::to_upper_copy(os.str());
+                auto text = os.str();
                 cv::putText(highlightedContours, text,
                             computeTextLocation(center, text), FONT_FACE,
                             FONT_SCALE, cv::Scalar(0, 0, 255), FONT_THICKNESS);
@@ -241,6 +243,7 @@ void tryLoadingConfigFile() {
         parseEdgeHoleExtractorParams(root["extractParams"],
                                      g_holeExtractorParams);
     }
+    getOptionalParameter(g_showAllRejects, root, "showAllRejects");
 }
 
 int main(int argc, char *argv[]) {
