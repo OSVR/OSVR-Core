@@ -28,13 +28,14 @@
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/EigenQuatExponentialMap.h>
 
 // Standard includes
 // - none
 
 namespace osvr {
 namespace vbtracker {
-
+    static const double VELOCITY_DT = 0.02;
     /// Add a util::time::TimeValue and a std::chrono::duration
     /// @todo put this in a TimeValue C++11-safe header
     template <typename Rep, typename Period>
@@ -63,16 +64,44 @@ namespace vbtracker {
         return tv + additionalTime;
     }
 
+    /// Turn a body-space angular velocity vector into a room-space incremental
+    /// rotation quaternion.
+    ///
+    /// Orientation is assumed to be normalized. dt must be chosen such that the
+    /// velocity will not alias.
+    template <typename Derived>
+    inline Eigen::Quaterniond
+    angVelVecToQuat(Eigen::Quaterniond const &orientation, double dt,
+                    Eigen::MatrixBase<Derived> const &vec) {
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+
+        Eigen::Quaterniond result =
+            orientation * util::quat_exp(vec * dt * 0.5).normalized() *
+            orientation.conjugate();
+        return result;
+    }
+
     /// Helper function to assign from a Kalman state to a body report, whether
     /// we predicted or not.
     inline void
     assignStateToBodyReport(BodyState const &state, BodyReport &report,
                             Eigen::Isometry3d const &trackerToRoom) {
         Eigen::Isometry3d output = trackerToRoom * state.getIsometry();
-        util::eigen_interop::map(report.pose).rotation() =
-            Eigen::Quaterniond(output.rotation());
+        Eigen::Quaterniond orientation =
+            Eigen::Quaterniond(output.rotation()).normalized();
+        util::eigen_interop::map(report.pose).rotation() = orientation;
         util::eigen_interop::map(report.pose).translation() =
             output.translation();
+
+        util::eigen_interop::map(
+            report.vel.angularVelocity.incrementalRotation) =
+            angVelVecToQuat(orientation, VELOCITY_DT, state.angularVelocity());
+        report.vel.angularVelocity.dt = VELOCITY_DT;
+        report.vel.angularVelocityValid = OSVR_TRUE;
+
+        util::eigen_interop::map(report.vel.linearVelocity) =
+            trackerToRoom * state.velocity();
+        report.vel.linearVelocityValid = OSVR_TRUE;
     }
 
     std::unique_ptr<BodyReporting> BodyReporting::make() {

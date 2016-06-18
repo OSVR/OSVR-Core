@@ -56,8 +56,7 @@ namespace vbtracker {
         ReportStatus status;
         util::time::TimeValue timestamp;
         OSVR_PoseState pose;
-        // OSVR_VelocityState vel;
-        // OSVR_AngularVelocityState angVel;
+        OSVR_VelocityState vel;
     };
 
     /// A per-body class intended to marshall data coming from the

@@ -274,6 +274,11 @@ inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
         }
         osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &report.pose, i,
                                              &report.timestamp);
+        if (OSVR_TRUE == report.vel.angularVelocityValid ||
+            OSVR_TRUE == report.vel.linearVelocityValid) {
+            osvrDeviceTrackerSendVelocityTimestamped(
+                m_dev, m_tracker, &report.vel, i, &report.timestamp);
+        }
     }
     return OSVR_RETURN_SUCCESS;
 }
