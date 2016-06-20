@@ -5,7 +5,7 @@
 #ifndef MEDIA_VIDEO_CAPTURE_VIDEO_CAPTURE_TYPES_H_
 #define MEDIA_VIDEO_CAPTURE_VIDEO_CAPTURE_TYPES_H_
 
-#include "media/base/video_frame.h"
+//#include "media/base/video_frame.h"
 
 namespace media {
 
