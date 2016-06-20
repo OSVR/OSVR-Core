@@ -14,13 +14,15 @@
 
 #include <list>
 #include <string>
+#include <cstdint>
+#include <osvr/Util/TimeValue.h>
 
-#include "base/time.h"
+//#include "base/time.h"
 #include "media/base/media_export.h"
 #include "media/video/capture/video_capture_types.h"
 
 namespace media {
-
+using uint8 = std::uint8_t;
 class MEDIA_EXPORT VideoCaptureDevice {
  public:
 
@@ -39,7 +41,7 @@ class MEDIA_EXPORT VideoCaptureDevice {
     // Captured a new video frame.
     virtual void OnIncomingCapturedFrame(const uint8* data,
                                          int length,
-                                         base::Time timestamp) = 0;
+                                         osvr::util::time::TimeValue timestamp) = 0;
     // An error has occurred that can not be handled
     // and VideoCaptureDevice must be DeAllocated.
     virtual void OnError() = 0;
