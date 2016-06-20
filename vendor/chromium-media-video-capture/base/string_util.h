@@ -146,7 +146,7 @@ template<typename Char> struct CaseInsensitiveCompareASCII {
 }  // namespace base
 
 #if defined(OS_WIN)
-#include "base/string_util_win.h"
+//#include "base/string_util_win.h"
 #elif defined(OS_POSIX)
 #include "base/string_util_posix.h"
 #else

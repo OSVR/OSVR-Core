@@ -17,7 +17,7 @@
 #include <string>
 
 #include "base/threading/non_thread_safe.h"
-#include "base/threading/thread.h"
+//#include "base/threading/thread.h"
 #include "base/win/scoped_comptr.h"
 #include "media/video/capture/video_capture_device.h"
 #include "media/video/capture/video_capture_types.h"

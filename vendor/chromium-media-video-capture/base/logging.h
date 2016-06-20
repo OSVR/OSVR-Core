@@ -349,7 +349,7 @@ const LogSeverity LOG_0 = LOG_ERROR;
 // in debug mode.  In particular, CHECK()s will always fire if they
 // fail.
 #define LOG_IS_ON(severity) \
-  ((::logging::LOG_ ## severity) >= ERROR_REPORT)
+  ((::logging::LOG_ ## severity) >= FATAL)
 
 // We can't do any caching tricks with VLOG_IS_ON() like the
 // google-glog version since it requires GCC extensions.  This means
@@ -447,15 +447,9 @@ const LogSeverity LOG_0 = LOG_ERROR;
 #define PLOG_IF(severity, condition) \
   LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity) && (condition))
 
-// http://crbug.com/16512 is open for a real fix for this.  For now, Windows
-// uses OFFICIAL_BUILD and other platforms use the branding flag when NDEBUG is
-// defined.
-#if ( defined(OS_WIN) && defined(OFFICIAL_BUILD)) || \
-    (!defined(OS_WIN) && defined(NDEBUG) && defined(GOOGLE_CHROME_BUILD))
+// Turn off much logging with this flag.
 #define LOGGING_IS_OFFICIAL_BUILD 1
-#else
-#define LOGGING_IS_OFFICIAL_BUILD 0
-#endif
+
 
 // The actual stream used isn't important.
 #define EAT_STREAM_PARAMETERS                                           \

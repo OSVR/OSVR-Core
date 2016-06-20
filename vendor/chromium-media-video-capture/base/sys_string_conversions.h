@@ -13,8 +13,8 @@
 
 #include "base/base_export.h"
 #include "base/basictypes.h"
-#include "base/string16.h"
-#include "base/string_piece.h"
+//#include "base/string16.h"
+//#include "base/string_piece.h"
 
 #if defined(OS_MACOSX)
 #include <CoreFoundation/CoreFoundation.h>
@@ -30,13 +30,13 @@ namespace base {
 // Converts between wide and UTF-8 representations of a string. On error, the
 // result is system-dependent.
 BASE_EXPORT std::string SysWideToUTF8(const std::wstring& wide);
-BASE_EXPORT std::wstring SysUTF8ToWide(const StringPiece& utf8);
+//BASE_EXPORT std::wstring SysUTF8ToWide(const StringPiece& utf8);
 
 // Converts between wide and the system multi-byte representations of a string.
 // DANGER: This will lose information and can change (on Windows, this can
 // change between reboots).
 BASE_EXPORT std::string SysWideToNativeMB(const std::wstring& wide);
-BASE_EXPORT std::wstring SysNativeMBToWide(const StringPiece& native_mb);
+//BASE_EXPORT std::wstring SysNativeMBToWide(const StringPiece& native_mb);
 
 // Windows-specific ------------------------------------------------------------
 
@@ -45,8 +45,10 @@ BASE_EXPORT std::wstring SysNativeMBToWide(const StringPiece& native_mb);
 // Converts between 8-bit and wide strings, using the given code page. The
 // code page identifier is one accepted by the Windows function
 // MultiByteToWideChar().
+#if 0
 BASE_EXPORT std::wstring SysMultiByteToWide(const StringPiece& mb,
                                             uint32 code_page);
+#endif
 BASE_EXPORT std::string SysWideToMultiByte(const std::wstring& wide,
                                            uint32 code_page);
 

@@ -6,7 +6,7 @@
 
 #include <windows.h>
 
-#include "base/string_piece.h"
+//#include "base/string_piece.h"
 
 namespace base {
 
@@ -14,16 +14,18 @@ namespace base {
 std::string SysWideToUTF8(const std::wstring& wide) {
   return SysWideToMultiByte(wide, CP_UTF8);
 }
-
+#if 0
 // Do not assert in this function since it is used by the asssertion code!
 std::wstring SysUTF8ToWide(const StringPiece& utf8) {
   return SysMultiByteToWide(utf8, CP_UTF8);
 }
+#endif
 
 std::string SysWideToNativeMB(const std::wstring& wide) {
   return SysWideToMultiByte(wide, CP_ACP);
 }
 
+#if 0
 std::wstring SysNativeMBToWide(const StringPiece& native_mb) {
   return SysMultiByteToWide(native_mb, CP_ACP);
 }
@@ -46,6 +48,7 @@ std::wstring SysMultiByteToWide(const StringPiece& mb, uint32 code_page) {
 
   return wide;
 }
+#endif
 
 // Do not assert in this function since it is used by the asssertion code!
 std::string SysWideToMultiByte(const std::wstring& wide, uint32 code_page) {
