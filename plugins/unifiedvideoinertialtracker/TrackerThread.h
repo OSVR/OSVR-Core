@@ -165,9 +165,6 @@ namespace vbtracker {
         our_clock::time_point m_nextImuOverrideReport;
         boost::optional<our_clock::time_point> m_nextCameraPoseReport;
 
-        /// Time that the last camera grab was triggered.
-        util::time::TimeValue m_triggerTime;
-
         /// a void promise, as suggested by Scott Meyers, to hold the thread
         /// operation at the beginning until we want it to really start running.
         std::promise<void> m_startupSignal;

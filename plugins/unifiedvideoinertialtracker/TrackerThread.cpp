@@ -171,16 +171,9 @@ namespace vbtracker {
             warn() << "Camera grab failed." << std::endl;
             return;
         }
-        // When we triggered the grab is our current best guess of the time
-        // for the image
-        /// @todo backdate to account for image transfer image, exposure
-        /// time, etc.
-        m_triggerTime = util::time::getNow();
-        if (m_cameraUsecOffset != 0) {
-            // apply offset, if non-zero.
-            const util::time::TimeValue offset{0, m_cameraUsecOffset};
-            osvrTimeValueSum(&m_triggerTime, &offset);
-        }
+        // When we triggered the grab was a good guess of the time
+        // for the image before that got moved upstream into the ImageSource
+        // library.
 
         /// Launch an asynchronous task to perform the image retrieval and
         /// initial image processing.
@@ -516,17 +509,29 @@ namespace vbtracker {
         });
 
         // Pull the image into an OpenCV matrix named m_frame.
-        m_cam.retrieve(m_frame, m_frameGray);
+        util::time::TimeValue frameTime;
+        m_cam.retrieve(m_frame, m_frameGray, frameTime);
         if (!m_frame.data || !m_frameGray.data) {
             // let the tracker thread warn if it wants to, we'll just get
             // out.
             return;
         }
 
+        /// We retrieved a timestamp with that frame...
+
+        /// @todo backdate to account for image transfer image, exposure
+        /// time, etc.
+
+        if (m_cameraUsecOffset != 0) {
+            // apply offset, if non-zero.
+            const util::time::TimeValue offset{0, m_cameraUsecOffset};
+            osvrTimeValueSum(&frameTime, &offset);
+        }
+
         // Do the slow, but intentionally async-able part of the image
         // processing.
         m_imageData = m_trackingSystem.performInitialImageProcessing(
-            m_triggerTime, m_frame, m_frameGray, m_camParams);
+            frameTime, m_frame, m_frameGray, m_camParams);
 
         if (m_logBlobs) {
             if (!m_blobFile) {
