@@ -47,13 +47,11 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
-#include <fstream>
 #include <future>
 #include <iosfwd>
 #include <mutex>
 #include <queue>
 #include <thread>
-#include <tuple>
 
 namespace osvr {
 namespace vbtracker {
@@ -129,14 +127,9 @@ namespace vbtracker {
         /// Copy updated body state into the reporting vector.
         void updateReportingVector(UpdatedBodyIndices const &bodyIds);
 
-        /// This function is responsible for launching the descriptively-named
-        /// timeConsumingImageStep() asynchronously.
+        /// This function is responsible for triggering the image capture and
+        /// processing asynchronously in a separate thread.
         void launchTimeConsumingImageStep();
-
-        /// The "time consuming image step" - specifically, retrieving the image
-        /// and performing the initial blob detection on it. This gets launched
-        /// asynchronously by launchTimeConsumingImageStep()
-        void timeConsumingImageStep();
 
         BodyId processIMUMessage(IMUMessage const &m);
         BodyReporting *getCamPoseReporting() const;
@@ -199,7 +192,7 @@ namespace vbtracker {
         folly::ProducerConsumerQueue<IMUMessage> m_imuMessages;
         /// @}
 
-		ImageProcessingThread * imageProcThreadObj_ = nullptr;
+        ImageProcessingThread *imageProcThreadObj_ = nullptr;
 
         /// The thread used by timeConsumingImageStep()
         std::thread m_imageThread;

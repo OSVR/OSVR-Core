@@ -57,18 +57,6 @@ namespace vbtracker {
           m_cameraUsecOffset(cameraUsecOffset),
           m_imuMessages(IMU_MESSAGE_QUEUE_SIZE) {
         msg() << "Tracker thread object created." << std::endl;
-
-#if 0
-        if (m_logBlobs) {
-            m_blobFile.open("blobs.csv");
-            if (m_blobFile) {
-                m_blobFile << "sec,usec,x,y,size" << std::endl;
-            } else {
-                warn() << "Could not open blob file!" << std::endl;
-                m_logBlobs = false;
-            }
-        }
-#endif
     }
 
     TrackerThread::~TrackerThread() {
@@ -500,78 +488,12 @@ namespace vbtracker {
     }
 
     void TrackerThread::launchTimeConsumingImageStep() {
-#if 0
-        if (m_imageThread.joinable()) {
-            m_imageThread.join();
-        }
-        /// Our thread would be the only one reading or writing this flag at
-        /// this point, so it's OK now to write this without protection.
-        m_timeConsumingImageStepComplete = false;
-        /// @todo How to re-use this thread instead of launching a new one each
-        /// frame?
-        m_imageThread = std::thread{[&] { timeConsumingImageStep(); }};
-#else
         /// Our thread would be the only one reading or writing this flag at
         /// this point, so it's OK now to write this without protection.
         m_timeConsumingImageStepComplete = false;
 
         /// Release the thread from waiting.
         imageProcThreadObj_->signalDoFrame();
-#endif
     }
-#if 0
-    void TrackerThread::timeConsumingImageStep() {
-        /// When we return from this function, set a flag indicating we're done
-        /// and notify on the condition variable.
-
-        auto signalCompletion = util::finally([&] {
-            {
-                std::lock_guard<std::mutex> lock{m_messageMutex};
-                m_timeConsumingImageStepComplete = true;
-            }
-            m_messageCondVar.notify_one();
-        });
-
-        // Pull the image into an OpenCV matrix named m_frame.
-        util::time::TimeValue frameTime;
-        m_cam.retrieve(m_frame, m_frameGray, frameTime);
-        if (!m_frame.data || !m_frameGray.data) {
-            // let the tracker thread warn if it wants to, we'll just get
-            // out.
-            return;
-        }
-
-        /// We retrieved a timestamp with that frame...
-
-        /// @todo backdate to account for image transfer image, exposure
-        /// time, etc.
-
-        if (m_cameraUsecOffset != 0) {
-            // apply offset, if non-zero.
-            const util::time::TimeValue offset{0, m_cameraUsecOffset};
-            osvrTimeValueSum(&frameTime, &offset);
-        }
-
-        // Do the slow, but intentionally async-able part of the image
-        // processing.
-        m_imageData = m_trackingSystem.performInitialImageProcessing(
-            frameTime, m_frame, m_frameGray, m_camParams);
-
-        if (m_logBlobs) {
-            if (!m_blobFile) {
-                // Oh dear, the file went bad.
-                m_logBlobs = false;
-                return;
-            }
-            m_blobFile << m_imageData->tv.seconds << ","
-                       << m_imageData->tv.microseconds;
-            for (auto &measurement : m_imageData->ledMeasurements) {
-                m_blobFile << "," << measurement.loc.x << ","
-                           << measurement.loc.y << "," << measurement.diameter;
-            }
-            m_blobFile << "\n";
-        }
-    }
-#endif
 } // namespace vbtracker
 } // namespace osvr
