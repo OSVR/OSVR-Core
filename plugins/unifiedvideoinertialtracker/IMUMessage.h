@@ -29,6 +29,7 @@
 // - none
 
 // Library/third-party includes
+#include <boost/none_t.hpp>
 #include <boost/variant.hpp>
 #include <osvr/TypePack/List.h>
 #include <osvr/Util/ClientReportTypesC.h>
