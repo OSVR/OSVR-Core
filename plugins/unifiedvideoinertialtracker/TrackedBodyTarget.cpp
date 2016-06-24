@@ -341,6 +341,11 @@ namespace vbtracker {
         assignment.forEachUnclaimedMeasurement([&](LedMeasurement const &meas) {
             myLeds.emplace_back(m_impl->identifier.get(), meas);
         });
+
+        /// Do the initial filtering of the LED group to just the identified
+        /// ones before we pass it to an estimator.
+        updateUsableLeds();
+
         return assignment.numCompletedMatches();
     }
 
@@ -353,10 +358,6 @@ namespace vbtracker {
         osvr::util::time::TimeValue const &tv, BodyState &bodyState,
         osvr::util::time::TimeValue const &startingTime,
         bool validStateAndTime) {
-
-        /// Do the initial filtering of the LED group to just the identified
-        /// ones before we pass it to an estimator.
-        updateUsableLeds();
 
         /// Must pre/post correct the state by our offset :-/
         /// @todo make this state correction less hacky.
