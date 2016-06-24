@@ -69,6 +69,10 @@ add_library(util-runloopmanager INTERFACE)
 target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers")
 target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 
+# Interface target for the header-only functionality in Folly
+add_library(folly-headers INTERFACE)
+target_include_directories(folly-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/folly")
+
 # Interface target for the C++11/14 headers backported from libc++
 add_library(libcxx_backports INTERFACE)
 target_include_directories(libcxx_backports INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/libcxx-backports")
