@@ -117,6 +117,7 @@ osvr_add_plugin(NAME org_osvr_unifiedvideoinertial
     AdditionalReports.h
     ConfigurationParser.h
     MakeHDKTrackingSystem.h
+    ImageProcessingThread.cpp
     ImageProcessingThread.h
     IMUMessage.h
     ProcessIMUMessage.h

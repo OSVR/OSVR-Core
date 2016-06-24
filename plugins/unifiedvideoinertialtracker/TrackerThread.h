@@ -27,9 +27,9 @@
 
 // Internal Includes
 #include "CameraParameters.h"
+#include "IMUMessage.h"
 #include "ThreadsafeBodyReporting.h"
 #include "TrackingSystem.h"
-#include "IMUMessage.h"
 
 #include "ImageSources/ImageSource.h"
 
@@ -67,6 +67,8 @@ namespace vbtracker {
 
     using UpdatedBodyIndices = folly::sorted_vector_set<BodyId, BodyIdOrdering>;
 
+    class ImageProcessingThread;
+
     class TrackerThread : boost::noncopyable {
       public:
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
@@ -74,6 +76,7 @@ namespace vbtracker {
                       CameraParameters const &camParams,
                       std::int32_t cameraUsecOffset = 0);
         ~TrackerThread();
+
         /// Thread function-call operator: should be invoked by a lambda in a
         /// dedicated thread.
         void threadAction();
@@ -99,6 +102,12 @@ namespace vbtracker {
                              util::time::TimeValue const &tv,
                              OSVR_AngularVelocityReport const &report);
         /// @}
+
+        /// Call from image processing thread to signal completion of frame
+        /// processing.
+        void signalImageProcessingComplete(ImageOutputDataPtr &&imageData,
+                                           cv::Mat const &frame,
+                                           cv::Mat const &frameGray);
 
       private:
         /// Helper providing a prefixed output stream for normal messages.
@@ -190,9 +199,7 @@ namespace vbtracker {
         folly::ProducerConsumerQueue<IMUMessage> m_imuMessages;
         /// @}
 
-        /// Output file we stream data on the blobs to.
-        bool m_logBlobs = false;
-        std::ofstream m_blobFile;
+		ImageProcessingThread * imageProcThreadObj_ = nullptr;
 
         /// The thread used by timeConsumingImageStep()
         std::thread m_imageThread;

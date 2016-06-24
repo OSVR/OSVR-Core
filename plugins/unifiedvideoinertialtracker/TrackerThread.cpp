@@ -55,10 +55,10 @@ namespace vbtracker {
         : m_trackingSystem(trackingSystem), m_cam(imageSource),
           m_reportingVec(reportingVec), m_camParams(camParams),
           m_cameraUsecOffset(cameraUsecOffset),
-          m_imuMessages(IMU_MESSAGE_QUEUE_SIZE),
-          m_logBlobs(m_trackingSystem.getParams().logRawBlobs) {
+          m_imuMessages(IMU_MESSAGE_QUEUE_SIZE) {
         msg() << "Tracker thread object created." << std::endl;
 
+#if 0
         if (m_logBlobs) {
             m_blobFile.open("blobs.csv");
             if (m_blobFile) {
@@ -68,6 +68,7 @@ namespace vbtracker {
                 m_logBlobs = false;
             }
         }
+#endif
     }
 
     TrackerThread::~TrackerThread() {
@@ -91,8 +92,18 @@ namespace vbtracker {
         /// sleep an extra half a second to give everyone else time to get off
         /// the starting blocks.
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        /// Initialize reporting vector, as far as we can.
         m_numBodies = m_trackingSystem.getNumBodies();
         setupReportingVectorProcessModels();
+
+        /// Launch the image proc thread in a waiting state.
+
+        ImageProcessingThread imageProcThreadObj{
+            m_trackingSystem, m_cam, *this, m_camParams, m_cameraUsecOffset};
+        imageProcThreadObj_ = &imageProcThreadObj;
+        m_imageThread = std::thread{[&] { imageProcThreadObj.threadAction(); }};
+
         msg() << "Tracker thread object entering its main execution loop."
               << std::endl;
 
@@ -125,6 +136,15 @@ namespace vbtracker {
         }
 #endif
         msg() << "Tracker thread object: functor exiting." << std::endl;
+
+        if (!imageProcThreadObj.exiting()) {
+            msg() << "Telling image processing thread to exit." << std::endl;
+            imageProcThreadObj.signalExit();
+        }
+        imageProcThreadObj_ = nullptr;
+        if (m_imageThread.joinable()) {
+            m_imageThread.join();
+        }
     }
 
     void TrackerThread::triggerStop() {
@@ -158,6 +178,20 @@ namespace vbtracker {
         }
         m_messageCondVar.notify_one();
         return true;
+    }
+
+    void
+    TrackerThread::signalImageProcessingComplete(ImageOutputDataPtr &&imageData,
+                                                 cv::Mat const &frame,
+                                                 cv::Mat const &frameGray) {
+        m_imageData = std::move(imageData);
+        m_frame = frame;
+        m_frameGray = frameGray;
+        {
+            std::lock_guard<std::mutex> lock{m_messageMutex};
+            m_timeConsumingImageStepComplete = true;
+        }
+        m_messageCondVar.notify_one();
     }
 
     std::ostream &TrackerThread::msg() const {
@@ -299,7 +333,7 @@ namespace vbtracker {
         return m_reportingVec[m_numBodies + extra_outputs::outputCamIndex]
             .get();
 #else
-            return nullptr;
+        return nullptr;
 #endif
     }
 
@@ -308,7 +342,7 @@ namespace vbtracker {
         return m_reportingVec[m_numBodies + extra_outputs::outputImuIndex]
             .get();
 #else
-            return nullptr;
+        return nullptr;
 #endif
     }
 
@@ -317,7 +351,7 @@ namespace vbtracker {
         return m_reportingVec[m_numBodies + extra_outputs::outputImuCamIndex]
             .get();
 #else
-            return nullptr;
+        return nullptr;
 #endif
     }
 
@@ -327,7 +361,7 @@ namespace vbtracker {
         return m_reportingVec[m_numBodies + extra_outputs::outputHMDCamIndex]
             .get();
 #else
-            return nullptr;
+        return nullptr;
 #endif
     }
 
@@ -466,6 +500,7 @@ namespace vbtracker {
     }
 
     void TrackerThread::launchTimeConsumingImageStep() {
+#if 0
         if (m_imageThread.joinable()) {
             m_imageThread.join();
         }
@@ -475,7 +510,16 @@ namespace vbtracker {
         /// @todo How to re-use this thread instead of launching a new one each
         /// frame?
         m_imageThread = std::thread{[&] { timeConsumingImageStep(); }};
+#else
+        /// Our thread would be the only one reading or writing this flag at
+        /// this point, so it's OK now to write this without protection.
+        m_timeConsumingImageStepComplete = false;
+
+        /// Release the thread from waiting.
+        imageProcThreadObj_->signalDoFrame();
+#endif
     }
+#if 0
     void TrackerThread::timeConsumingImageStep() {
         /// When we return from this function, set a flag indicating we're done
         /// and notify on the condition variable.
@@ -528,5 +572,6 @@ namespace vbtracker {
             m_blobFile << "\n";
         }
     }
+#endif
 } // namespace vbtracker
 } // namespace osvr
