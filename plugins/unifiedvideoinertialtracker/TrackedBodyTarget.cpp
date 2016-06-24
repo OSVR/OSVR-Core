@@ -50,6 +50,8 @@
 #undef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
 #undef OSVR_DEBUG_ERROR_VARIANCE
 
+#undef OSVR_UVBI_FRAMEDROP_HEURISTIC_WARNING
+
 #define OSVR_VERBOSE_ERROR_BOUNDS
 
 namespace osvr {
@@ -251,7 +253,7 @@ namespace vbtracker {
         // std::list<LedMeasurement> measurements{begin(undistortedLeds),
         // end(undistortedLeds)};
         LedMeasurementVec measurements{undistortedLeds};
-
+        const auto prevUsableLedCount = usableLeds().size();
         /// Clear the "usableLeds" that will be populated in a later step, if we
         /// get that far.
         usableLeds().clear();
@@ -267,6 +269,8 @@ namespace vbtracker {
         const auto blobMoveThreshold = getParams().blobMoveThreshold;
         const auto blobsKeepIdentity = getParams().blobsKeepIdentity;
         auto &myLeds = m_impl->leds;
+
+        const auto prevLedCount = myLeds.size();
 
         const auto numMeasurements = measurements.size();
 
@@ -345,6 +349,20 @@ namespace vbtracker {
         /// Do the initial filtering of the LED group to just the identified
         /// ones before we pass it to an estimator.
         updateUsableLeds();
+
+#ifdef OSVR_UVBI_FRAMEDROP_HEURISTIC_WARNING
+        if (usableLeds().empty() && prevUsableLedCount > 3 &&
+            assignment.numCompletedMatches() > prevUsableLedCount / 2) {
+            // if we don't have any usable LEDs, last time we had more than 3
+            // (possibly not turning away), and this time we've got blobs that
+            // match at least half of the blobs from last time.
+            msg() << "WARNING: Likely dropped camera frame (reduce CPU load!): "
+                     "no usable (identified) LEDs this frame out of "
+                  << numMeasurements
+                  << " detected likely beacons, while last frame contained "
+                  << prevUsableLedCount << " usable LEDs." << std::endl;
+        }
+#endif
 
         return assignment.numCompletedMatches();
     }
