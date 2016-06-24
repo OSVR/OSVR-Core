@@ -29,13 +29,13 @@
 // - none
 
 // Library/third-party includes
-// - none
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
-#include <memory>
-#include <chrono>
-#include <utility>
 #include <cassert>
+#include <chrono>
+#include <memory>
+#include <utility>
 
 struct IMediaSample;
 class MediaSampleExchange;
@@ -48,9 +48,11 @@ class Sample {
     /// Move constructor
     Sample(Sample &&other)
         : sampleExchange_(other.sampleExchange_), sample_(other.sample_),
-          owning_(false) {
+          timestamp_(other.timestamp_), owning_(false) {
         std::swap(owning_, other.owning_);
     }
+    Sample &operator=(Sample const &) = delete;
+
     /// Access the contained sample.
     /// Do not retain pointers to this or any sub-object after this Sample
     /// object goes out of scope!
@@ -60,12 +62,21 @@ class Sample {
         return sample_;
     }
 
+    osvr::util::time::TimeValue const &getTimestamp() const {
+        assert(owning_ && "Shouldn't try to get the contained timestamp from a "
+                          "moved-from wrapper!");
+        return timestamp_;
+    }
+
   private:
-    Sample(MediaSampleExchange &exchange, IMediaSample &sample)
-        : sampleExchange_(exchange), sample_(sample), owning_(true) {}
+    Sample(MediaSampleExchange &exchange, IMediaSample &sample,
+           osvr::util::time::TimeValue const &timestamp)
+        : sampleExchange_(exchange), sample_(sample), timestamp_(timestamp),
+          owning_(true) {}
     friend class MediaSampleExchange;
     MediaSampleExchange &sampleExchange_;
     IMediaSample &sample_;
+    osvr::util::time::TimeValue timestamp_;
     bool owning_;
 };
 
@@ -82,6 +93,8 @@ class MediaSampleExchange {
     /// Signals that a sample (passed in) was produced. The producer should not
     /// return from its callback (that is, not release that sample) until the
     /// sample has been consumed or some other event has taken place (shutdown).
+    void signalSampleProduced(IMediaSample *sample,
+                              osvr::util::time::TimeValue const &timestamp);
     void signalSampleProduced(IMediaSample *sample);
 
     /// @returns true if sample was made available, false if it timed out.
@@ -91,7 +104,7 @@ class MediaSampleExchange {
     /// consumption is automatic when the sample object goes out of scope.
     Sample get() {
         IMediaSample *pin{sample_};
-        return Sample{*this, *pin};
+        return Sample{*this, *pin, timestamp_};
     }
 
     /// @returns true if sample was consumed, false if it timed out.
@@ -102,7 +115,8 @@ class MediaSampleExchange {
     void signalSampleConsumed();
     friend class Sample;
     struct Impl;
-    IMediaSample *volatile sample_ = nullptr;
+    IMediaSample *sample_ = nullptr;
+    osvr::util::time::TimeValue timestamp_ = {};
     std::unique_ptr<Impl> impl_;
 };
 

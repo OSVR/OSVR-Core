@@ -42,14 +42,21 @@ MediaSampleExchange::MediaSampleExchange()
 MediaSampleExchange::~MediaSampleExchange() {
     // Required for unique_ptr pimpl - see http://herbsutter.com/gotw/_100/
 }
-void MediaSampleExchange::signalSampleProduced(IMediaSample *sample) {
+
+void MediaSampleExchange::signalSampleProduced(
+    IMediaSample *sample, osvr::util::time::TimeValue const &timestamp) {
     BOOST_ASSERT_MSG(
         sample != nullptr,
         "Should not be signalling that there is a null sample available!");
     BOOST_ASSERT_MSG(sample_ == nullptr,
                      "Sample should be consumed before the next one produced!");
     sample_ = sample;
+    timestamp_ = timestamp;
     impl_->produced.set();
+}
+
+void MediaSampleExchange::signalSampleProduced(IMediaSample *sample) {
+    signalSampleProduced(sample, osvr::util::time::getNow());
 }
 
 bool MediaSampleExchange::waitForSample(std::chrono::milliseconds timeout) {

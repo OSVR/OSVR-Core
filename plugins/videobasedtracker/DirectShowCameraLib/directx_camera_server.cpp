@@ -145,6 +145,10 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         _status = false;
         return false;
     }
+
+    // Store the timestamp
+    ts_ = sampleWrapper.getTimestamp();
+
     // Step through each line of the video and copy it into the buffer.  We
     // do one line at a time here because there can be padding at the end of
     // each line on some video formats.
