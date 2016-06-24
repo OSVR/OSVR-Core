@@ -12,8 +12,6 @@ Items here are just in the plugin interface to the tracker core - there is far m
 
 
 - Configuration: be able to instantiate an arbitrary set of bodies/targets.
-- Image processing threading: Don't spawn a new thread every frame, re-use the same thread (or use a higher-level parallelism primitive) to do the "time consuming image proc".
-- State reporting: Use a single mutex, and possibly double-buffering, for all bodies - one mutex per body is too granular and visibly impacts performance at around 5 bodies.
 - Report status of each body in an analog.
 
 
