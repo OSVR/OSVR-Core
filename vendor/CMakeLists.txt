@@ -72,6 +72,7 @@ target_link_libraries(util-runloopmanager INTERFACE boost_thread)
 # Interface target for the header-only functionality in Folly
 add_library(folly-headers INTERFACE)
 target_include_directories(folly-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/folly")
+target_compile_definitions(folly-headers INTERFACE FOLLY_NO_CONFIG) # we don't build a folly/folly-config.h
 
 # Interface target for the C++11/14 headers backported from libc++
 add_library(libcxx_backports INTERFACE)
