@@ -29,6 +29,7 @@
 #include "CameraParameters.h"
 #include "ThreadsafeBodyReporting.h"
 #include "TrackingSystem.h"
+#include "IMUMessage.h"
 
 #include "ImageSources/ImageSource.h"
 
@@ -38,7 +39,6 @@
 #include <opencv2/core/core.hpp> // for basic OpenCV types
 
 #include <boost/noncopyable.hpp>
-#include <boost/variant.hpp>
 #include <folly/ProducerConsumerQueue.h>
 #include <folly/sorted_vector_types.h>
 #include <osvr/TypePack/List.h>
@@ -57,19 +57,6 @@
 
 namespace osvr {
 namespace vbtracker {
-    class TrackedBodyIMU;
-
-    using TimestampedOrientation =
-        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
-                   OSVR_OrientationReport>;
-    using TimestampedAngVel =
-        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
-                   OSVR_AngularVelocityReport>;
-
-    using TimestampedReports =
-        typepack::list<TimestampedOrientation, TimestampedAngVel>;
-    using MessageEntry = boost::variant<boost::none_t, TimestampedOrientation,
-                                        TimestampedAngVel>;
     static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{5};
 
     struct BodyIdOrdering {
@@ -142,7 +129,7 @@ namespace vbtracker {
         /// asynchronously by launchTimeConsumingImageStep()
         void timeConsumingImageStep();
 
-        BodyId processIMUMessage(MessageEntry const &m);
+        BodyId processIMUMessage(IMUMessage const &m);
         BodyReporting *getCamPoseReporting() const;
         BodyReporting *getIMUReporting() const;
         BodyReporting *getIMUCamReporting() const;
@@ -200,7 +187,7 @@ namespace vbtracker {
         std::condition_variable m_messageCondVar;
         std::mutex m_messageMutex;
         bool m_timeConsumingImageStepComplete = false;
-        folly::ProducerConsumerQueue<MessageEntry> m_imuMessages;
+        folly::ProducerConsumerQueue<IMUMessage> m_imuMessages;
         /// @}
 
         /// Output file we stream data on the blobs to.

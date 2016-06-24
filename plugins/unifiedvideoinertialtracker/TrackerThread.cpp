@@ -25,12 +25,13 @@
 // Internal Includes
 #include "TrackerThread.h"
 #include "AdditionalReports.h"
+#include "ImageProcessingThread.h"
+#include "ProcessIMUMessage.h"
 #include "SpaceTransformations.h"
 #include "TrackedBody.h"
 #include "TrackedBodyIMU.h"
 
 // Library/third-party includes
-#include <osvr/TypePack/Contains.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/Finally.h>
 
@@ -45,6 +46,7 @@ namespace osvr {
 namespace vbtracker {
     // 16 and even 32 was too small - we were dropping messages.
     static const uint32_t IMU_MESSAGE_QUEUE_SIZE = 64 + 1;
+
     TrackerThread::TrackerThread(TrackingSystem &trackingSystem,
                                  ImageSource &imageSource,
                                  BodyReportingVector &reportingVec,
@@ -67,6 +69,7 @@ namespace vbtracker {
             }
         }
     }
+
     TrackerThread::~TrackerThread() {
         if (m_imageThread.joinable()) {
             m_imageThread.join();
@@ -98,6 +101,8 @@ namespace vbtracker {
 #endif
             bool keepGoing = true;
             while (keepGoing) {
+                /// Call the doFrame() method to perform one video frame's worth
+                /// of processing.
                 doFrame();
 
                 {
@@ -160,6 +165,7 @@ namespace vbtracker {
     }
 
     std::ostream &TrackerThread::warn() const { return msg() << "Warning: "; }
+
     void TrackerThread::doFrame() {
         // Check camera status.
         if (!m_cam.ok()) {
@@ -209,7 +215,7 @@ namespace vbtracker {
                 /// This means we got out of waiting on the condition variable
                 /// because of an IMU message. Handle one.
 
-                MessageEntry message = boost::none;
+                IMUMessage message = boost::none;
                 if (!m_imuMessages.read(message) || message.empty()) {
                     // couldn't read a message, or read an empty message
                     continue;
@@ -268,7 +274,7 @@ namespace vbtracker {
         // stuck here in a loop without servicing the camera.
         std::size_t numMessages = m_imuMessages.sizeGuess();
         {
-            MessageEntry message = boost::none;
+            IMUMessage message = boost::none;
             for (std::size_t i = 0; i < numMessages; ++i) {
                 if (!m_imuMessages.read(message)) {
                     // ran out of messages earlier than expected.
@@ -284,54 +290,8 @@ namespace vbtracker {
         updateReportingVector(sortedBodyIds);
     }
 
-    /// Alias to determine if a class is in fact a "Timestamped Report" type.
-    template <typename Report>
-    using is_timestamped_report =
-        typepack::contains<TimestampedReports, Report>;
-
-    /// Implementation detail of unpacking and handling the IMU messages.
-    class IMUMessageProcessor : public boost::static_visitor<> {
-      public:
-        BodyId body;
-        void operator()(boost::none_t const &) const {
-            /// dummy overload to handle empty messages
-        }
-
-        template <typename Report>
-        typename std::enable_if<is_timestamped_report<Report>::value>::type
-        operator()(Report const &report) {
-            /// templated overload to handle real messages since they're
-            /// identical except for the final element of the tuple.
-            auto &imu = *std::get<0>(report);
-            auto timestamp = std::get<1>(report);
-            /// Go off to individual methods for the last argument.
-            updatePose(imu, timestamp, std::get<2>(report));
-        }
-
-        void updatePose(TrackedBodyIMU &imu,
-                        util::time::TimeValue const &timestamp,
-                        OSVR_OrientationReport const &ori) {
-            body = imu.getBody().getId();
-            imu.updatePoseFromOrientation(
-                timestamp, util::eigen_interop::map(ori.rotation).quat());
-        }
-
-        void updatePose(TrackedBodyIMU &imu,
-                        util::time::TimeValue const &timestamp,
-                        OSVR_AngularVelocityReport const &angVel) {
-            body = imu.getBody().getId();
-            imu.updatePoseFromAngularVelocity(
-                timestamp,
-                util::eigen_interop::map(angVel.state.incrementalRotation)
-                    .quat(),
-                angVel.state.dt);
-        }
-    };
-
-    BodyId TrackerThread::processIMUMessage(MessageEntry const &m) {
-        IMUMessageProcessor processor;
-        boost::apply_visitor(processor, m);
-        return processor.body;
+    BodyId TrackerThread::processIMUMessage(IMUMessage const &m) {
+        return osvr::vbtracker::processImuMessage(m);
     }
 
     BodyReporting *TrackerThread::getCamPoseReporting() const {
@@ -504,6 +464,7 @@ namespace vbtracker {
         updateExtraCameraReport();
         updateExtraIMUReports();
     }
+
     void TrackerThread::launchTimeConsumingImageStep() {
         if (m_imageThread.joinable()) {
             m_imageThread.join();
