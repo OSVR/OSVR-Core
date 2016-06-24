@@ -192,10 +192,9 @@ namespace vbtracker {
         /// @{
         std::condition_variable m_messageCondVar;
         std::mutex m_messageMutex;
-        std::queue<MessageEntry> m_messages;
         bool m_timeConsumingImageStepComplete = false;
-        /// @}
         folly::ProducerConsumerQueue<MessageEntry> m_imuMessages;
+        /// @}
 
         /// Output file we stream data on the blobs to.
         bool m_logBlobs = false;

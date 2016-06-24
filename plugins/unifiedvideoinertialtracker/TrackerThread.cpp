@@ -131,65 +131,29 @@ namespace vbtracker {
     void TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
                                         util::time::TimeValue const &tv,
                                         OSVR_OrientationReport const &report) {
-/// Main thread method!
-#if 0
-        {
-            std::lock_guard<std::mutex> lock(m_messageMutex);
-            m_messages.push();
+        /// Main thread method!
+        if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
+            // no room for IMU message!
+            msg() << "Dropped IMU orientation message!\n";
+            return;
         }
         m_messageCondVar.notify_one();
-#else
-
-            if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
-                // no room for IMU message!
-                msg() << "Dropped IMU orientation message!\n";
-                return;
-            }
-            m_messageCondVar.notify_one();
-#endif
     }
     void
     TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
                                    util::time::TimeValue const &tv,
                                    OSVR_AngularVelocityReport const &report) {
-/// Main thread method!
-#if 0
-        {
-            std::lock_guard<std::mutex> lock(m_messageMutex);
-            m_messages.push(std::make_tuple(&imu, tv, report));
+        /// Main thread method!
+        if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
+            // no room for IMU message!
+            msg() << "Dropped IMU velocity message!\n";
+            return;
         }
         m_messageCondVar.notify_one();
-#else
-            if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
-                // no room for IMU message!
-                msg() << "Dropped IMU velocity message!\n";
-                return;
-            }
-            m_messageCondVar.notify_one();
-#endif
     }
 
     std::ostream &TrackerThread::msg() const {
         return std::cout << "[UnifiedTracker] ";
-    }
-
-    /// Insert a value into a sorted vector only if it isn't in there already
-    template <typename T, typename PredType>
-    inline void insert_unique_sorted(std::vector<T> &vec, T const &item,
-                                     PredType &&pred) {
-        if (std::binary_search(begin(vec), end(vec), item,
-                               std::forward<PredType>(pred))) {
-            /// already there.
-            return;
-        }
-        vec.insert(std::upper_bound(begin(vec), end(vec), item,
-                                    std::forward<PredType>(pred)),
-                   item);
-    }
-
-    template <typename T>
-    inline void insert_unique_sorted(std::vector<T> &vec, T const &item) {
-        insert_unique_sorted(vec, item, std::less<T>());
     }
 
     std::ostream &TrackerThread::warn() const { return msg() << "Warning: "; }
@@ -246,17 +210,30 @@ namespace vbtracker {
             } // unlock
 
             if (!finishedImage) {
+                /// This means we got out of waiting on the condition variable
+                /// because of an IMU message. Handle one.
+
                 MessageEntry message = boost::none;
-                if (m_imuMessages.read(message) && !message.empty()) {
-                    // if we read a message and it was non-empty
-                    auto id = processIMUMessage(message);
-                    if (!id.empty()) {
-                        imuIndices.insert(id);
-                        if (shouldSendImuReport()) {
-                            updateReportingVector(imuIndices);
-                            imuIndices.clear();
-                        }
-                    }
+                if (!m_imuMessages.read(message) || message.empty()) {
+                    // couldn't read a message, or read an empty message
+                    continue;
+                }
+
+                // process it.
+                auto id = processIMUMessage(message);
+                if (id.empty()) {
+                    // processed but got an empty body ID
+                    continue;
+                }
+
+                // insert index into the list
+                imuIndices.insert(id);
+
+                // if it's time, send a report even if we haven't gotten a video
+                // frame with useful things in it yet.
+                if (shouldSendImuReport()) {
+                    updateReportingVector(imuIndices);
+                    imuIndices.clear();
                 }
             }
         } while (!finishedImage);
@@ -281,27 +258,9 @@ namespace vbtracker {
             m_trackingSystem.updateBodiesFromVideoData(std::move(m_imageData));
         m_imageData.reset();
 
-        // Process any accumulated IMU messages so we don't get backed up.
-        std::vector<MessageEntry> imuMessages;
-        {
-            // Copy out messages inside the mutex.
-            std::lock_guard<std::mutex> lock(m_messageMutex);
-            if (!m_messages.empty()) {
-                auto size = m_messages.size();
-                using size_type = decltype(size);
-                imuMessages.reserve(size);
-                for (size_type i = 0; i < size; ++i) {
-                    imuMessages.emplace_back(m_messages.front());
-                    m_messages.pop();
-                }
-            }
-        } // unlock
-
         // Sort those body IDs so we can merge them with the body IDs from any
         // IMU messages we're about to process.
-
         UpdatedBodyIndices sortedBodyIds{begin(bodyIds), end(bodyIds)};
-        // std::sort(begin(bodyIds), end(bodyIds), BodyIdOrdering{});
         for (auto &id : imuIndices) {
             sortedBodyIds.insert(id);
         }
@@ -314,15 +273,15 @@ namespace vbtracker {
         std::size_t numMessages = m_imuMessages.sizeGuess();
         {
             MessageEntry message = boost::none;
-            std::size_t i = 0;
-            while (m_imuMessages.read(message) && i < numMessages) {
+            for (std::size_t i = 0; i < numMessages; ++i) {
+                if (!m_imuMessages.read(message)) {
+                    // ran out of messages earlier than expected.
+                    break;
+                }
                 auto id = processIMUMessage(message);
                 if (!id.empty()) {
-                    // insert_unique_sorted(bodyIds, id, BodyIdOrdering{});
                     sortedBodyIds.insert(id);
                 }
-
-                ++i;
             }
         }
 
