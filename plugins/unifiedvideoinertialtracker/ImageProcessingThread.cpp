@@ -98,19 +98,18 @@ namespace vbtracker {
     }
 
     void ImageProcessingThread::doFrame() {
-        cv::Mat frame, gray;
         ImageOutputDataPtr data;
         /// On scope exit, no matter how, signal to the tracker thread that
         /// we're done.
         auto signalCompletion = util::finally([&] {
             trackerThreadObj_.signalImageProcessingComplete(std::move(data),
-                                                            frame, gray);
+                                                            frame_, gray_);
         });
 
         // Pull the image into an OpenCV matrix named m_frame.
         util::time::TimeValue frameTime;
-        cam_.retrieve(frame, gray, frameTime);
-        if (!frame.data || !gray.data) {
+        cam_.retrieve(frame_, gray_, frameTime);
+        if (!frame_.data || !gray_.data) {
             // let the tracker thread warn if it wants to, we'll just get
             // out.
             return;
@@ -129,8 +128,8 @@ namespace vbtracker {
 
         // Do the slow, but intentionally async-able part of the image
         // processing.
-        data = trackingSystem_.performInitialImageProcessing(frameTime, frame,
-                                                             gray, camParams_);
+        data = trackingSystem_.performInitialImageProcessing(frameTime, frame_,
+                                                             gray_, camParams_);
         // Log blobs, if applicable
         if (logBlobs_) {
             if (!blobFile_) {

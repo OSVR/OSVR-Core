@@ -29,7 +29,7 @@
 #include <CameraParameters.h>
 
 // Library/third-party includes
-// - none
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <cstdint>
@@ -88,6 +88,9 @@ namespace vbtracker {
         std::mutex stateMutex_;
         std::condition_variable stateCondVar_;
         NextOp next_ = NextOp::Waiting;
+
+        cv::Mat frame_;
+        cv::Mat gray_;
 
         bool exiting_ = false;
     };
