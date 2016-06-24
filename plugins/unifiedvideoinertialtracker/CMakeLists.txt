@@ -129,7 +129,8 @@ target_link_libraries(org_osvr_unifiedvideoinertial
     uvbi-core
     uvbi-image-sources
     JsonCpp::JsonCpp
-    util-headers)
+    util-headers
+    folly-headers)
 
 set_target_properties(org_osvr_unifiedvideoinertial PROPERTIES
     FOLDER "${PROJ_FOLDER}")
