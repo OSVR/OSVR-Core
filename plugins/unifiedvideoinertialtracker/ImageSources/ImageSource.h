@@ -30,6 +30,7 @@
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
 #include <memory>
@@ -55,7 +56,15 @@ namespace vbtracker {
         virtual bool grab() = 0;
 
         /// Call after grab() to get the actual image data.
-        virtual void retrieve(cv::Mat &color, cv::Mat &gray);
+        virtual void retrieve(cv::Mat &color, cv::Mat &gray,
+                              osvr::util::time::TimeValue &timestamp);
+
+        /// @overload
+        /// discards timestamp.
+        inline void retrieve(cv::Mat &color, cv::Mat &gray) {
+            osvr::util::time::TimeValue ts;
+            retrieve(color, gray, ts);
+        }
 
         /// Get resolution of the images from this source.
         virtual cv::Size resolution() const = 0;
@@ -63,7 +72,14 @@ namespace vbtracker {
         /// For those devices that naturally read a non-corrupt color image,
         /// overriding just this method will let the default implementation of
         /// retrieve() do the RGB to Gray for you.
-        virtual void retrieveColor(cv::Mat &color) = 0;
+        virtual void retrieveColor(cv::Mat &color,
+                                   osvr::util::time::TimeValue &timestamp) = 0;
+        /// @overload
+        /// discards timestamp.
+        inline void retrieveColor(cv::Mat &color) {
+            osvr::util::time::TimeValue ts;
+            retrieveColor(color, ts);
+        }
 
       protected:
         ImageSource() = default;

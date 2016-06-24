@@ -53,7 +53,8 @@ namespace vbtracker {
                    m_camera->isOpened();
         }
         bool grab() override;
-        void retrieveColor(cv::Mat &color) override;
+        void retrieveColor(cv::Mat &color,
+                           osvr::util::time::TimeValue &timestamp) override;
         cv::Size resolution() const override;
 
       private:
@@ -128,8 +129,10 @@ namespace vbtracker {
     bool DirectShowImageSource::grab() {
         return m_camera->read_image_to_memory();
     }
-    void DirectShowImageSource::retrieveColor(cv::Mat &color) {
+    void DirectShowImageSource::retrieveColor(
+        cv::Mat &color, osvr::util::time::TimeValue &timestamp) {
         color = ::retrieve(*m_camera);
+        timestamp = m_camera->get_buffer_timestamp();
     }
     cv::Size DirectShowImageSource::resolution() const { return m_res; }
 

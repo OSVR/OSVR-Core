@@ -31,6 +31,7 @@ target_link_libraries(uvbi-image-sources PUBLIC
     opencv_core
     opencv_highgui
     ${VIDEOTRACKER_EXTRA_LIBS}
+    osvrUtil
     PRIVATE
     vendored-vrpn)
 if(WIN32)
