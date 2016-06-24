@@ -43,6 +43,8 @@
 
 namespace osvr {
 namespace vbtracker {
+    // 16 and even 32 was too small - we were dropping messages.
+    static const uint32_t IMU_MESSAGE_QUEUE_SIZE = 64 + 1;
     TrackerThread::TrackerThread(TrackingSystem &trackingSystem,
                                  ImageSource &imageSource,
                                  BodyReportingVector &reportingVec,
@@ -51,6 +53,7 @@ namespace vbtracker {
         : m_trackingSystem(trackingSystem), m_cam(imageSource),
           m_reportingVec(reportingVec), m_camParams(camParams),
           m_cameraUsecOffset(cameraUsecOffset),
+          m_imuMessages(IMU_MESSAGE_QUEUE_SIZE),
           m_logBlobs(m_trackingSystem.getParams().logRawBlobs) {
         msg() << "Tracker thread object created." << std::endl;
 
@@ -128,36 +131,47 @@ namespace vbtracker {
     void TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
                                         util::time::TimeValue const &tv,
                                         OSVR_OrientationReport const &report) {
-        /// Main thread method!
+/// Main thread method!
+#if 0
         {
             std::lock_guard<std::mutex> lock(m_messageMutex);
-            m_messages.push(std::make_tuple(&imu, tv, report));
+            m_messages.push();
         }
         m_messageCondVar.notify_one();
+#else
+
+            if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
+                // no room for IMU message!
+                msg() << "Dropped IMU orientation message!\n";
+                return;
+            }
+            m_messageCondVar.notify_one();
+#endif
     }
     void
     TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
                                    util::time::TimeValue const &tv,
                                    OSVR_AngularVelocityReport const &report) {
-        /// Main thread method!
+/// Main thread method!
+#if 0
         {
             std::lock_guard<std::mutex> lock(m_messageMutex);
             m_messages.push(std::make_tuple(&imu, tv, report));
         }
         m_messageCondVar.notify_one();
+#else
+            if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
+                // no room for IMU message!
+                msg() << "Dropped IMU velocity message!\n";
+                return;
+            }
+            m_messageCondVar.notify_one();
+#endif
     }
 
     std::ostream &TrackerThread::msg() const {
         return std::cout << "[UnifiedTracker] ";
     }
-
-    namespace {
-        struct BodyIdOrdering {
-            bool operator()(BodyId const &lhs, BodyId const &rhs) const {
-                return lhs.value() < rhs.value();
-            }
-        };
-    } // namespace
 
     /// Insert a value into a sorted vector only if it isn't in there already
     template <typename T, typename PredType>
@@ -209,40 +223,39 @@ namespace vbtracker {
         launchTimeConsumingImageStep();
 
         setImuOverrideClock();
-        BodyIndices imuIndices;
+        UpdatedBodyIndices imuIndices;
 
         bool finishedImage = false;
         do {
 
-            MessageEntry message = boost::none;
             {
                 /// Wait for something to do (Completion of image, IMU reports)
                 std::unique_lock<std::mutex> lock(m_messageMutex);
                 m_messageCondVar.wait(lock, [&] {
                     return m_timeConsumingImageStepComplete ||
-                           !m_messages.empty();
+                           !m_imuMessages.isEmpty();
                 });
                 if (m_timeConsumingImageStepComplete) {
                     /// Set a flag to get us out of this innermost loop - we'll
                     /// finish up processing this frame and trigger another grab
                     /// before we look at more IMU data.
                     finishedImage = true;
-                } else {
-                    // OK, we have some IMU reports to keep us busy in the
-                    // meantime. Grab the first one and we'll process it while
-                    // not holding the mutex.
-                    message = m_messages.front();
-                    m_messages.pop();
                 }
+                // Otherwise we have some IMU reports to keep us busy in the
+                // meantime.
             } // unlock
 
-            if (!message.empty()) {
-                auto id = processIMUMessage(message);
-                if (!id.empty()) {
-                    insert_unique_sorted(imuIndices, id, BodyIdOrdering{});
-                    if (shouldSendImuReport()) {
-                        updateReportingVector(imuIndices);
-                        imuIndices.clear();
+            if (!finishedImage) {
+                MessageEntry message = boost::none;
+                if (m_imuMessages.read(message) && !message.empty()) {
+                    // if we read a message and it was non-empty
+                    auto id = processIMUMessage(message);
+                    if (!id.empty()) {
+                        imuIndices.insert(id);
+                        if (shouldSendImuReport()) {
+                            updateReportingVector(imuIndices);
+                            imuIndices.clear();
+                        }
                     }
                 }
             }
@@ -286,18 +299,34 @@ namespace vbtracker {
 
         // Sort those body IDs so we can merge them with the body IDs from any
         // IMU messages we're about to process.
-        std::sort(begin(bodyIds), end(bodyIds), BodyIdOrdering{});
+
+        UpdatedBodyIndices sortedBodyIds{begin(bodyIds), end(bodyIds)};
+        // std::sort(begin(bodyIds), end(bodyIds), BodyIdOrdering{});
+        for (auto &id : imuIndices) {
+            sortedBodyIds.insert(id);
+        }
+        imuIndices.clear();
 
         // process those IMU messages and add any unique IDs to the vector
         // returned by the image tracker.
-        for (auto const &msg : imuMessages) {
-            auto id = processIMUMessage(msg);
-            if (!id.empty()) {
-                insert_unique_sorted(bodyIds, id, BodyIdOrdering{});
+        // We only want to process a fixed number of messages so we don't get
+        // stuck here in a loop without servicing the camera.
+        std::size_t numMessages = m_imuMessages.sizeGuess();
+        {
+            MessageEntry message = boost::none;
+            std::size_t i = 0;
+            while (m_imuMessages.read(message) && i < numMessages) {
+                auto id = processIMUMessage(message);
+                if (!id.empty()) {
+                    // insert_unique_sorted(bodyIds, id, BodyIdOrdering{});
+                    sortedBodyIds.insert(id);
+                }
+
+                ++i;
             }
         }
 
-        updateReportingVector(bodyIds);
+        updateReportingVector(sortedBodyIds);
     }
 
     /// Alias to determine if a class is in fact a "Timestamped Report" type.
@@ -449,7 +478,8 @@ namespace vbtracker {
 #endif
     }
 
-    void TrackerThread::updateReportingVector(BodyIndices const &bodyIds) {
+    void
+    TrackerThread::updateReportingVector(UpdatedBodyIndices const &bodyIds) {
         for (auto const &bodyId : bodyIds) {
             auto &body = m_trackingSystem.getBody(bodyId);
             m_reportingVec[bodyId.value()]->updateState(

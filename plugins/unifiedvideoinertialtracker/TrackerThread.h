@@ -39,6 +39,8 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
+#include <folly/ProducerConsumerQueue.h>
+#include <folly/sorted_vector_types.h>
 #include <osvr/TypePack/List.h>
 
 // Standard includes
@@ -69,6 +71,15 @@ namespace vbtracker {
     using MessageEntry = boost::variant<boost::none_t, TimestampedOrientation,
                                         TimestampedAngVel>;
     static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{5};
+
+    struct BodyIdOrdering {
+        bool operator()(BodyId const &lhs, BodyId const &rhs) const {
+            return lhs.value() < rhs.value();
+        }
+    };
+
+    using UpdatedBodyIndices = folly::sorted_vector_set<BodyId, BodyIdOrdering>;
+
     class TrackerThread : boost::noncopyable {
       public:
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
@@ -110,7 +121,7 @@ namespace vbtracker {
         void doFrame();
 
         /// Copy updated body state into the reporting vector.
-        void updateReportingVector(BodyIndices const &bodyIds);
+        void updateReportingVector(UpdatedBodyIndices const &bodyIds);
 
         /// This function is responsible for launching the descriptively-named
         /// timeConsumingImageStep() asynchronously.
@@ -137,6 +148,7 @@ namespace vbtracker {
         const std::int32_t m_cameraUsecOffset = 0;
 
         using our_clock = std::chrono::steady_clock;
+
         bool shouldSendImuReport() {
             auto now = our_clock::now();
             if (now > m_nextImuOverrideReport) {
@@ -145,9 +157,11 @@ namespace vbtracker {
             }
             return false;
         }
+
         void setImuOverrideClock() {
             m_nextImuOverrideReport = our_clock::now() + IMU_OVERRIDE_SPACING;
         }
+
         our_clock::time_point m_nextImuOverrideReport;
         boost::optional<our_clock::time_point> m_nextCameraPoseReport;
 
@@ -181,6 +195,7 @@ namespace vbtracker {
         std::queue<MessageEntry> m_messages;
         bool m_timeConsumingImageStepComplete = false;
         /// @}
+        folly::ProducerConsumerQueue<MessageEntry> m_imuMessages;
 
         /// Output file we stream data on the blobs to.
         bool m_logBlobs = false;
