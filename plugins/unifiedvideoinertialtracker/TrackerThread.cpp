@@ -128,28 +128,30 @@ namespace vbtracker {
         m_run = false;
     }
 
-    void TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
+    bool TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
                                         util::time::TimeValue const &tv,
                                         OSVR_OrientationReport const &report) {
         /// Main thread method!
         if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
             // no room for IMU message!
             msg() << "Dropped IMU orientation message!\n";
-            return;
+            return false;
         }
         m_messageCondVar.notify_one();
+        return true;
     }
-    void
+
+    bool
     TrackerThread::submitIMUReport(TrackedBodyIMU &imu,
                                    util::time::TimeValue const &tv,
                                    OSVR_AngularVelocityReport const &report) {
         /// Main thread method!
         if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
             // no room for IMU message!
-            msg() << "Dropped IMU velocity message!\n";
-            return;
+            return false;
         }
         m_messageCondVar.notify_one();
+        return true;
     }
 
     std::ostream &TrackerThread::msg() const {

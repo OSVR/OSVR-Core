@@ -102,10 +102,13 @@ namespace vbtracker {
         void triggerStop();
 
         /// Submit an orientation report for an IMU
-        void submitIMUReport(TrackedBodyIMU &imu,
+        /// @return false if there is no room in the queue for the message
+        bool submitIMUReport(TrackedBodyIMU &imu,
                              util::time::TimeValue const &tv,
                              OSVR_OrientationReport const &report);
-        void submitIMUReport(TrackedBodyIMU &imu,
+        /// @overload
+        /// for angular velocity
+        bool submitIMUReport(TrackedBodyIMU &imu,
                              util::time::TimeValue const &tv,
                              OSVR_AngularVelocityReport const &report);
         /// @}
