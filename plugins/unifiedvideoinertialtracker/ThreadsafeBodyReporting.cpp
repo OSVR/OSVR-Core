@@ -29,6 +29,7 @@
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenInterop.h>
 #include <osvr/Util/EigenQuatExponentialMap.h>
+#include <osvr/Util/TimeValueChrono.h>
 
 // Standard includes
 // - none
@@ -36,33 +37,7 @@
 namespace osvr {
 namespace vbtracker {
     static const double VELOCITY_DT = 0.02;
-    /// Add a util::time::TimeValue and a std::chrono::duration
-    /// @todo put this in a TimeValue C++11-safe header
-    template <typename Rep, typename Period>
-    inline util::time::TimeValue
-    operator+(util::time::TimeValue const &tv,
-              std::chrono::duration<Rep, Period> additionalTime) {
-        using namespace std::chrono;
-        using SecondsDuration = duration<OSVR_TimeValue_Seconds>;
-        using USecondsDuration =
-            duration<OSVR_TimeValue_Microseconds, std::micro>;
-        auto ret = tv;
-        auto seconds = duration_cast<SecondsDuration>(additionalTime);
-        ret.seconds += seconds.count();
-        ret.microseconds +=
-            duration_cast<USecondsDuration>(additionalTime - seconds).count();
-        osvrTimeValueNormalize(&ret);
-        return ret;
-    }
-
-    /// Add a util::time::TimeValue and a std::chrono::duration
-    /// @todo put this in a TimeValue C++11-safe header
-    template <typename Rep, typename Period>
-    inline util::time::TimeValue
-    operator+(std::chrono::duration<Rep, Period> additionalTime,
-              util::time::TimeValue const &tv) {
-        return tv + additionalTime;
-    }
+    static const std::size_t REPORT_QUEUE_SIZE = 16;
 
     /// Turn a body-space angular velocity vector into a room-space incremental
     /// rotation quaternion.
@@ -109,107 +84,84 @@ namespace vbtracker {
         return ret;
     }
 
-    BodyReport BodyReporting::getReport(double additionalPrediction,
-                                        bool continuousReporting) {
-        BodyState state;
-        bool doingPrediction = false;
-        BodyProcessModel process;
-        util::time::TimeValue dataTime;
-        Eigen::Isometry3d trackerToRoom;
-        {
-            std::lock_guard<std::mutex> lock{m_mutex};
-            // OK, we got the lock.
-            if (!m_shouldReport || (!continuousReporting && !m_updated)) {
-                // Told we shouldn't report, OK.
-                return BodyReport::makeReportWithStatus(
-                    ReportStatus::NoReportAvailable);
-            }
-            /// If we got here, then we're reporting something.
-            state = m_state;
-            if (state.stateVector().tail<6>() !=
-                kalman::types::Vector<6>::Zero()) {
-                // If we have non-zero velocity, then we can do some prediction,
-                // which we'll need the process for.
-                doingPrediction = true;
-                process = m_process;
-            }
-            dataTime = m_dataTime;
-            trackerToRoom = m_trackerToRoom;
-            m_updated = false;
-        } // unlock
+    bool BodyReporting::getReport(double additionalPrediction,
+                                  BodyReport &report) {
 
-        auto ret = BodyReport::makeReportWithStatus();
+        QueueValueType queueVal;
+        bool gotOne = false;
+        // Read all the queued-up states, but only keep the most recent one.
+        while (m_queue.read(queueVal)) {
+            gotOne = true;
+        }
+        if (!gotOne) {
+            return false;
+        }
+
+        /// Thaw out the frozen state.
+        m_dataTime = queueVal.timestamp;
+        Eigen::Map<QueueValueVec> valMap(queueVal.stateData.data());
+        m_state.incrementalOrientation() = Eigen::Vector3d::Zero();
+        m_state.position() = valMap.head<3>();
+        m_state.setQuaternion(Eigen::Quaterniond(valMap.segment<4>(3)));
+        m_state.velocity() = valMap.segment<3>(7);
+        m_state.angularVelocity() = valMap.tail<3>();
+
+        // If we have a process model, and have non-zero velocity, then we can
+        // do some prediction.
+        bool doingPrediction =
+            m_hasProcessModel && (m_state.stateVector().tail<6>() !=
+                                  kalman::types::Vector<6>::Zero());
+
         if (doingPrediction) {
             // If we have non-zero velocity, then we can do some prediction.
             auto currentTime = util::time::getNow();
             /// Difference between measurement time and now.
-            auto dt = osvrTimeValueDurationSeconds(&currentTime, &dataTime);
+            auto dt = osvrTimeValueDurationSeconds(&currentTime, &m_dataTime);
             /// and the additional time into the future we'd like to predict.
             dt += additionalPrediction;
+
             /// Using computeEstimate instead of the normal prediction saves us
             /// the unneeded prediction of the error covariance.
-            state.setStateVector(process.computeEstimate(state, dt));
+            m_state.setStateVector(m_process.computeEstimate(m_state, dt));
             /// Be sure to post-correct.
-            state.postCorrect();
+            m_state.postCorrect();
 
             /// OK, now set a proper timestamp for our prediction.
-            ret.timestamp = currentTime +
-                            std::chrono::duration<double>(additionalPrediction);
-            assignStateToBodyReport(state, ret, trackerToRoom);
+            report.timestamp = currentTime + std::chrono::duration<double>(
+                                                 additionalPrediction);
         } else {
-            ret.timestamp = dataTime;
-            assignStateToBodyReport(state, ret, trackerToRoom);
-            /// @todo should we set the "don't report" flag here once we report
-            /// a can't-predict state once?
+            report.timestamp = m_dataTime;
         }
-
-        return ret;
+        assignStateToBodyReport(m_state, report, m_trackerToRoom);
+        report.status = ReportStatus::Valid;
+        return true;
     }
 
-    void BodyReporting::markShouldNotReport() {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_shouldReport = false;
-    }
-
-    void BodyReporting::markShouldNotReportIfRetrieved() {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_updated) {
-            // mainloop has retrieved the latest report.
-            m_shouldReport = false;
-        }
-    }
-
-    /// Updates the state, implicitly setting the flag that the mainloop
-    /// should report.
-    void BodyReporting::updateState(util::time::TimeValue const &tv,
-                                    BodyState const &state,
-                                    BodyProcessModel const &process) {
-
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_shouldReport = true;
-        m_updated = true;
-        m_dataTime = tv;
-        m_state = state;
-        m_process = process;
-    }
-
-    void BodyReporting::updateState(util::time::TimeValue const &tv,
+    bool BodyReporting::updateState(util::time::TimeValue const &tv,
                                     BodyState const &state) {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_shouldReport = true;
-        m_updated = true;
-        m_dataTime = tv;
-        m_state = state;
+        QueueValueType val;
+        /// Initialize the array inside the queue value
+        QueueValueVec::Map(val.stateData.data()) << state.position(),
+            state.getQuaternion().coeffs(), state.velocity(),
+            state.angularVelocity();
+
+        val.timestamp = tv;
+        return m_queue.write(std::move(val));
+    }
+
+    void BodyReporting::initProcessModel(BodyProcessModel const &process) {
+        m_process = process;
+        m_hasProcessModel = true;
     }
 
     void
     BodyReporting::setTrackerToRoomTransform(Eigen::Isometry3d const &xform) {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_trackerToRoom = xform;
     }
 
     BodyReporting::BodyReporting()
-        : m_trackerToRoom(Eigen::Isometry3d::Identity()) {}
+        : m_trackerToRoom(Eigen::Isometry3d::Identity()),
+          m_queue(REPORT_QUEUE_SIZE) {}
 
 } // namespace vbtracker
 } // namespace osvr

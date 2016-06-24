@@ -265,9 +265,10 @@ inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
     /// On each update pass, we go through and attempt to report for every body,
     /// at the current time + additional prediction as requested.
     for (std::size_t i = 0; i < numSensors; ++i) {
-        auto report = m_bodyReportingVector[i]->getReport(
-            m_additionalPrediction, m_continuousReporting);
-        if (!report) {
+        osvr::vbtracker::BodyReport report;
+        auto gotReport =
+            m_bodyReportingVector[i]->getReport(m_additionalPrediction, report);
+        if (!gotReport) {
             /// couldn't get a report for this sensor for one reason or another.
             // std::cout << "Couldn't get report for " << i << std::endl;
             continue;

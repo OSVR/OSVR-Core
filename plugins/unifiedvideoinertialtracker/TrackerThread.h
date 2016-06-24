@@ -123,6 +123,13 @@ namespace vbtracker {
         /// video.
         void doFrame();
 
+        /// Can call as soon as the loop starts (as soon as m_numBodies is
+        /// known)
+        void setupReportingVectorProcessModels();
+
+        /// Should call only once room calibration is completed.
+        bool setupReportingVectorRoomTransforms();
+
         /// Copy updated body state into the reporting vector.
         void updateReportingVector(UpdatedBodyIndices const &bodyIds);
 

@@ -89,6 +89,7 @@ namespace vbtracker {
         /// the starting blocks.
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         m_numBodies = m_trackingSystem.getNumBodies();
+        setupReportingVectorProcessModels();
         msg() << "Tracker thread object entering its main execution loop."
               << std::endl;
 
@@ -378,18 +379,14 @@ namespace vbtracker {
         using namespace Eigen;
         using namespace std::chrono;
         /// Are we due to report on the camera pose?
-        if (!m_nextCameraPoseReport ||
-            our_clock::now() > *m_nextCameraPoseReport) {
-            m_nextCameraPoseReport = our_clock::now() + seconds(1);
+        auto rightNow = our_clock::now();
+        if (!m_nextCameraPoseReport || rightNow > *m_nextCameraPoseReport) {
+            m_nextCameraPoseReport = rightNow + seconds(1);
             BodyState state;
             state.position() = m_trackingSystem.getCameraPose().translation();
             state.setQuaternion(
                 Quaterniond(m_trackingSystem.getCameraPose().rotation()));
             getCamPoseReporting()->updateState(util::time::getNow(), state);
-        } else {
-            /// Not due to report - make sure they know that. No need to spew a
-            /// stationary pose constantly.
-            getCamPoseReporting()->markShouldNotReportIfRetrieved();
         }
     }
 
@@ -432,27 +429,31 @@ namespace vbtracker {
 #endif
     }
 
-    void
-    TrackerThread::updateReportingVector(UpdatedBodyIndices const &bodyIds) {
-        for (auto const &bodyId : bodyIds) {
+    void TrackerThread::setupReportingVectorProcessModels() {
+        for (BodyId::wrapped_type i = 0; i < m_numBodies; ++i) {
+            auto bodyId = BodyId{i};
             auto &body = m_trackingSystem.getBody(bodyId);
-            m_reportingVec[bodyId.value()]->updateState(
-                body.getStateTime(), body.getState(), body.getProcessModel());
+            m_reportingVec[i]->initProcessModel(body.getProcessModel());
 #ifdef OSVR_OUTPUT_HMD_CAM
             if (bodyId == BodyId(0)) {
-                getCamPoseReporting()->updateState(body.getStateTime(),
-                                                   body.getState(),
-                                                   body.getProcessModel());
+                getCamPoseReporting()->initProcessModel(body.getProcessModel());
             }
 #endif
         }
+    }
 
-        // Extra reports and setting tracker to room (calibration) transform
+    bool TrackerThread::setupReportingVectorRoomTransforms() {
         if (!m_trackingSystem.haveCameraPose()) {
-            // if we don't have camera pose, we can't be calibrated, so none of
-            // the extra reports will have data, and we can't set calibration.
-            return;
+            /// can't do this if we haven't got the transform yet...
+            return false;
         }
+        if (m_setCameraPose) {
+            /// It's already been done.
+            return true;
+        }
+
+        /// Just set the room transform once.
+        m_setCameraPose = true;
 
         /// These functions all return pointers.
         /// If any of these reports are not enabled, they'll return nullptr.
@@ -460,27 +461,43 @@ namespace vbtracker {
         auto imuAlignedReporting = getIMUReporting();
         auto imuCameraSpaceReporting = getIMUCamReporting();
         auto hmdCameraSpaceReporting = getHMDCamReporting();
+        Eigen::Isometry3d trackerToRoomXform = m_trackingSystem.getCameraPose();
+        for (auto &reporting : m_reportingVec) {
 
-        if (!m_setCameraPose) {
-            m_setCameraPose = true;
-            Eigen::Isometry3d trackerToRoomXform =
-                m_trackingSystem.getCameraPose();
-            for (auto &reporting : m_reportingVec) {
-
-                /// Skip these special ones, leave them with an identity
-                /// transform as their "camera to room" transform
-                auto reportingRaw = reporting.get();
-                if (reportingRaw == cameraPoseReporting ||
-                    reportingRaw == imuAlignedReporting ||
-                    reportingRaw == imuCameraSpaceReporting ||
-                    reportingRaw == hmdCameraSpaceReporting) {
-                    continue;
-                }
-
-                /// Every other tracker report, set the tracker to room
-                /// transform.
-                reporting->setTrackerToRoomTransform(trackerToRoomXform);
+            /// Skip these special ones, leave them with an identity
+            /// transform as their "camera to room" transform
+            auto reportingRaw = reporting.get();
+            if (reportingRaw == cameraPoseReporting ||
+                reportingRaw == imuAlignedReporting ||
+                reportingRaw == imuCameraSpaceReporting ||
+                reportingRaw == hmdCameraSpaceReporting) {
+                continue;
             }
+
+            /// All other tracker reports, set the tracker to room
+            /// transform.
+            reporting->setTrackerToRoomTransform(trackerToRoomXform);
+        }
+        return true;
+    }
+
+    void
+    TrackerThread::updateReportingVector(UpdatedBodyIndices const &bodyIds) {
+        if (!setupReportingVectorRoomTransforms()) {
+            // false return means that we don't have calibration data yet, so no
+            // sense in reporting the other things.
+            return;
+        }
+        for (auto const &bodyId : bodyIds) {
+            auto &body = m_trackingSystem.getBody(bodyId);
+            m_reportingVec[bodyId.value()]->updateState(body.getStateTime(),
+                                                        body.getState());
+#ifdef OSVR_OUTPUT_HMD_CAM
+            if (bodyId == BodyId(0)) {
+                getCamPoseReporting()->updateState(body.getStateTime(),
+                                                   body.getState());
+            }
+#endif
         }
 
         /// Update the extra reports (if applicable)
