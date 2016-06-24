@@ -138,7 +138,7 @@ namespace vbtracker {
                                         util::time::TimeValue const &tv,
                                         OSVR_OrientationReport const &report) {
         /// Main thread method!
-        if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
+        if (!m_imuMessages.write(makeImuReport(imu, tv, report))) {
             // no room for IMU message!
             msg() << "Dropped IMU orientation message!\n";
             return false;
@@ -152,7 +152,7 @@ namespace vbtracker {
                                    util::time::TimeValue const &tv,
                                    OSVR_AngularVelocityReport const &report) {
         /// Main thread method!
-        if (!m_imuMessages.write(std::make_tuple(&imu, tv, report))) {
+        if (!m_imuMessages.write(makeImuReport(imu, tv, report))) {
             // no room for IMU message!
             return false;
         }

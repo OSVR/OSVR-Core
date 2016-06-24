@@ -27,8 +27,8 @@
 
 // Internal Includes
 #include "IMUMessage.h"
-#include "TrackedBodyIMU.h"
 #include "TrackedBody.h"
+#include "TrackedBodyIMU.h"
 
 // Library/third-party includes
 #include <osvr/TypePack/Contains.h>
@@ -59,17 +59,16 @@ namespace vbtracker {
             typename std::enable_if<is_timestamped_report<Report>::value>::type
             operator()(Report const &report) {
                 /// templated overload to handle real messages since they're
-                /// identical except for the final element of the tuple.
-                auto &imu = *std::get<0>(report);
-                auto timestamp = std::get<1>(report);
+                /// identical except for the final data member.
+                body = report.imu().getBody().getId();
+
                 /// Go off to individual methods for the last argument.
-                updatePose(imu, timestamp, std::get<2>(report));
+                updatePose(report.imu(), report.timestamp, report.data);
             }
 
             void updatePose(TrackedBodyIMU &imu,
                             util::time::TimeValue const &timestamp,
                             OSVR_OrientationReport const &ori) {
-                body = imu.getBody().getId();
                 imu.updatePoseFromOrientation(
                     timestamp, util::eigen_interop::map(ori.rotation).quat());
             }
@@ -77,7 +76,6 @@ namespace vbtracker {
             void updatePose(TrackedBodyIMU &imu,
                             util::time::TimeValue const &timestamp,
                             OSVR_AngularVelocityReport const &angVel) {
-                body = imu.getBody().getId();
                 imu.updatePoseFromAngularVelocity(
                     timestamp,
                     util::eigen_interop::map(angVel.state.incrementalRotation)

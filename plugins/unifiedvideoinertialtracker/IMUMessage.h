@@ -35,7 +35,7 @@
 #include <osvr/Util/TimeValue.h>
 
 // Standard includes
-#include <tuple>
+// - none
 
 namespace osvr {
 namespace vbtracker {
@@ -43,17 +43,40 @@ namespace vbtracker {
     // Forward declaration
     class TrackedBodyIMU;
 
+    /// An IMU report data structure, along with the report time
+    /// and the internal tracking system's pointer to IMU object.
+    template <typename ReportType> class TimestampedImuReport {
+      public:
+        TimestampedImuReport(TrackedBodyIMU &myImu,
+                             util::time::TimeValue const &tv,
+                             ReportType const &d)
+            : imuPtr(&myImu), timestamp(tv), data(d) {}
+
+      private:
+        TrackedBodyIMU *imuPtr;
+
+      public:
+        TrackedBodyIMU &imu() const { return *imuPtr; }
+
+        util::time::TimeValue timestamp;
+        ReportType data;
+    };
+
+    /// Generic constructor/factory function
+    template <typename ReportType>
+    inline TimestampedImuReport<ReportType>
+    makeImuReport(TrackedBodyIMU &myImu, util::time::TimeValue const &tv,
+                  ReportType const &d) {
+        return TimestampedImuReport<ReportType>{myImu, tv, d};
+    }
+
     /// An orientation report data structure, along with the report time
     /// and the internal tracking system's pointer to IMU object.
-    using TimestampedOrientation =
-        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
-                   OSVR_OrientationReport>;
+    using TimestampedOrientation = TimestampedImuReport<OSVR_OrientationReport>;
 
     /// An angular velocity report data structure, along with the report time
     /// and the internal tracking system's pointer to IMU object.
-    using TimestampedAngVel =
-        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
-                   OSVR_AngularVelocityReport>;
+    using TimestampedAngVel = TimestampedImuReport<OSVR_AngularVelocityReport>;
 
     /// Typelist containing only the member types of the MessageEntry variant
     /// type that actually constitute valid report types.
