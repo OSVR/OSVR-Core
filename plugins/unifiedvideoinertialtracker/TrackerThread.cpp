@@ -209,9 +209,10 @@ namespace vbtracker {
         /// Launch an asynchronous task to perform the image retrieval and
         /// initial image processing.
         launchTimeConsumingImageStep();
-
+#ifdef OSVR_BUFFER_IMU
         setImuOverrideClock();
         UpdatedBodyIndices imuIndices;
+#endif
 
         bool finishedImage = false;
         do {
@@ -250,6 +251,7 @@ namespace vbtracker {
                     continue;
                 }
 
+#ifdef OSVR_BUFFER_IMU
                 // insert index into the list
                 imuIndices.insert(id);
 
@@ -259,6 +261,10 @@ namespace vbtracker {
                     updateReportingVector(imuIndices);
                     imuIndices.clear();
                 }
+#else
+                /// Immediately update the reporting vector for that body.
+                updateReportingVector(id);
+#endif
             }
         } while (!finishedImage);
 
@@ -285,10 +291,12 @@ namespace vbtracker {
         // Sort those body IDs so we can merge them with the body IDs from any
         // IMU messages we're about to process.
         UpdatedBodyIndices sortedBodyIds{begin(bodyIds), end(bodyIds)};
+#ifdef OSVR_BUFFER_IMU
         for (auto &id : imuIndices) {
             sortedBodyIds.insert(id);
         }
         imuIndices.clear();
+#endif
 
         // process those IMU messages and add any unique IDs to the vector
         // returned by the image tracker.
