@@ -53,6 +53,7 @@ set(API
     "${HEADER_LOCATION}/ClientOpaqueTypesC.h"
     "${HEADER_LOCATION}/ClientReportTypesC.h"
     "${HEADER_LOCATION}/CSV.h"
+    "${HEADER_LOCATION}/CSVCellGroup.h"
     "${HEADER_LOCATION}/DefaultBool.h"
     "${HEADER_LOCATION}/DefaultPort.h"
     "${HEADER_LOCATION}/Deletable.h"
