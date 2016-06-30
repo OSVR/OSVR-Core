@@ -50,7 +50,9 @@ namespace vbtracker {
         /// Implementation detail of unpacking and handling the IMU messages.
         class IMUMessageProcessor : public boost::static_visitor<> {
           public:
-            BodyId body;
+            BodyId bodyId;
+            ImuMessageCategory messageType = ImuMessageCategory::Empty;
+
             void operator()(boost::none_t const &) const {
                 /// dummy overload to handle empty messages
             }
@@ -60,7 +62,7 @@ namespace vbtracker {
             operator()(Report const &report) {
                 /// templated overload to handle real messages since they're
                 /// identical except for the final data member.
-                body = report.imu().getBody().getId();
+                bodyId = report.imu().getBody().getId();
 
                 /// Go off to individual methods for the last argument.
                 updatePose(report.imu(), report.timestamp, report.data);
@@ -69,6 +71,7 @@ namespace vbtracker {
             void updatePose(TrackedBodyIMU &imu,
                             util::time::TimeValue const &timestamp,
                             OSVR_OrientationReport const &ori) {
+                messageType = ImuMessageCategory::Orientation;
                 imu.updatePoseFromOrientation(
                     timestamp, util::eigen_interop::map(ori.rotation).quat());
             }
@@ -76,6 +79,7 @@ namespace vbtracker {
             void updatePose(TrackedBodyIMU &imu,
                             util::time::TimeValue const &timestamp,
                             OSVR_AngularVelocityReport const &angVel) {
+                messageType = ImuMessageCategory::AngularVelocity;
                 imu.updatePoseFromAngularVelocity(
                     timestamp,
                     util::eigen_interop::map(angVel.state.incrementalRotation)
@@ -84,11 +88,12 @@ namespace vbtracker {
             }
         };
     } // namespace detail
-    inline BodyId processImuMessage(IMUMessage const &m) {
+    inline std::pair<BodyId, ImuMessageCategory>
+    processImuMessage(IMUMessage const &m) {
 
         detail::IMUMessageProcessor processor;
         boost::apply_visitor(processor, m);
-        return processor.body;
+        return std::make_pair(processor.bodyId, processor.messageType);
     }
 } // namespace vbtracker
 } // namespace osvr

@@ -136,7 +136,8 @@ namespace vbtracker {
         /// processing asynchronously in a separate thread.
         void launchTimeConsumingImageStep();
 
-        BodyId processIMUMessage(IMUMessage const &m);
+        std::pair<BodyId, ImuMessageCategory>
+        processIMUMessage(IMUMessage const &m);
         BodyReporting *getCamPoseReporting() const;
         BodyReporting *getIMUReporting() const;
         BodyReporting *getIMUCamReporting() const;

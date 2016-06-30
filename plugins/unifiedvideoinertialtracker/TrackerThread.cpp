@@ -245,7 +245,9 @@ namespace vbtracker {
                 }
 
                 // process it.
-                auto id = processIMUMessage(message);
+                BodyId id;
+                ImuMessageCategory cat;
+                std::tie(id, cat) = processIMUMessage(message);
                 if (id.empty()) {
                     // processed but got an empty body ID
                     continue;
@@ -310,7 +312,8 @@ namespace vbtracker {
                     // ran out of messages earlier than expected.
                     break;
                 }
-                auto id = processIMUMessage(message);
+
+                auto id = processIMUMessage(message).first;
                 if (!id.empty()) {
                     sortedBodyIds.insert(id);
                 }
@@ -320,7 +323,8 @@ namespace vbtracker {
         updateReportingVector(sortedBodyIds);
     }
 
-    BodyId TrackerThread::processIMUMessage(IMUMessage const &m) {
+    std::pair<BodyId, ImuMessageCategory>
+    TrackerThread::processIMUMessage(IMUMessage const &m) {
         return osvr::vbtracker::processImuMessage(m);
     }
 

@@ -44,6 +44,8 @@ namespace vbtracker {
     // Forward declaration
     class TrackedBodyIMU;
 
+    enum class ImuMessageCategory { Empty, Orientation, AngularVelocity };
+
     /// An IMU report data structure, along with the report time
     /// and the internal tracking system's pointer to IMU object.
     template <typename ReportType> class TimestampedImuReport {
