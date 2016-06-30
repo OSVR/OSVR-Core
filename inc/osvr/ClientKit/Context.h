@@ -59,15 +59,15 @@ namespace clientkit {
     }
 
     inline Interface ClientContext::getInterface(const std::string &path) {
-        OSVR_ClientInterface interface = NULL;
+        OSVR_ClientInterface iface = NULL;
         OSVR_ReturnCode ret =
-            osvrClientGetInterface(m_context, path.c_str(), &interface);
+            osvrClientGetInterface(m_context, path.c_str(), &iface);
         if (OSVR_RETURN_SUCCESS != ret) {
             throw std::runtime_error(
                 "Couldn't create interface because the path was invalid.");
         }
 
-        return Interface(*this, interface);
+        return Interface(*this, iface);
     }
 
     inline std::string
