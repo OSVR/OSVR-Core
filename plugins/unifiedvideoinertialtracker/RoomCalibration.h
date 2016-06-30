@@ -144,7 +144,7 @@ namespace vbtracker {
         /// @name Output
         /// @{
         util::Angle m_imuYaw = 0 * util::radians;
-        Eigen::Isometry3d m_cameraPose;
+        Eigen::Isometry3d m_cameraPose = Eigen::Isometry3d::Identity();
         Eigen::Isometry3d m_rTi = Eigen::Isometry3d::Identity();
         /// @}
     };

@@ -226,8 +226,7 @@ namespace vbtracker {
         if (!finished()) {
             return false;
         }
-        msg() << "Room calibration process complete: "
-              << getCameraPose().translation().transpose() << std::endl;
+        msg() << "Room calibration process complete." << std::endl;
 
         /// Coordinate systems involved here:
         /// i: IMU
