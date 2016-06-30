@@ -127,6 +127,11 @@ namespace vbtracker {
         /// Copy updated body state into the reporting vector.
         void updateReportingVector(UpdatedBodyIndices const &bodyIds);
 
+        /// Copy a single body's updated state into the reporting vector. Does
+        /// not handle additional derived reports (like HMD in IMU space, etc.)
+        /// - just reports the single body.
+        void updateReportingVector(BodyId const bodyId);
+
         /// This function is responsible for triggering the image capture and
         /// processing asynchronously in a separate thread.
         void launchTimeConsumingImageStep();

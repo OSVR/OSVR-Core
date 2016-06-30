@@ -471,11 +471,10 @@ namespace vbtracker {
             return;
         }
         for (auto const &bodyId : bodyIds) {
-            auto &body = m_trackingSystem.getBody(bodyId);
-            m_reportingVec[bodyId.value()]->updateState(body.getStateTime(),
-                                                        body.getState());
+            updateReportingVector(bodyId);
 #ifdef OSVR_OUTPUT_HMD_CAM
             if (bodyId == BodyId(0)) {
+                auto &body = m_trackingSystem.getBody(bodyId);
                 getCamPoseReporting()->updateState(body.getStateTime(),
                                                    body.getState());
             }
@@ -485,6 +484,12 @@ namespace vbtracker {
         /// Update the extra reports (if applicable)
         updateExtraCameraReport();
         updateExtraIMUReports();
+    }
+
+    void TrackerThread::updateReportingVector(BodyId const bodyId) {
+        auto &body = m_trackingSystem.getBody(bodyId);
+        m_reportingVec[bodyId.value()]->updateState(body.getStateTime(),
+                                                    body.getState());
     }
 
     void TrackerThread::launchTimeConsumingImageStep() {
