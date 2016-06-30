@@ -312,6 +312,11 @@ namespace vbtracker {
                                                            beaconProcess);
 
             auto correction = kalman::beginCorrection(state, model, meas);
+            if (!correction.stateCorrectionFinite) {
+                std::cout << "Non-finite state correction processing beacon "
+                          << led.getOneBasedID().value() << std::endl;
+                continue;
+            }
 #ifdef OSVR_TRY_LIMITING_ANGULAR_VELOCITY_CHANGE
             /// this is the velocity correction:
             /// correction.stateCorrection.segment<3>(6)

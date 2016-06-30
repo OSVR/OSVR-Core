@@ -265,6 +265,18 @@ namespace vbtracker {
             pinholeCameraFlipPose(xlate, quat);
         }
 
+        if (!xlate.array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite position with "
+                         "RANSAC post-pinhole-flip."
+                      << std::endl;
+            return false;
+        }
+        if (!quat.coeffs().array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite orientation "
+                         "with RANSAC post-pinhole-flip."
+                      << std::endl;
+            return false;
+        }
         outXlate = xlate;
         outQuat = quat;
         return true;
