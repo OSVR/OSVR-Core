@@ -133,6 +133,7 @@ namespace vbtracker {
       private:
         std::size_t m_framesWithoutValidBeacons = 0;
     };
+
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
             : bodyInterface(bodyIface), kalmanEstimator(params),
@@ -152,13 +153,19 @@ namespace vbtracker {
 
         TargetTrackingState trackingState = TargetTrackingState::RANSAC;
         TargetTrackingState lastFrameAlgorithm = TargetTrackingState::RANSAC;
+
         /// Permit as a purely policy measure
         bool permitKalman = true;
+
         /// whether to use RANSAC Kalman when we don't need a hard reset of
         /// state.
         const bool softResets = false;
+
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
+
+        /// Number of times we've lost or otherwise had to reset tracking, "soft
+        /// resets" included.
         std::size_t trackingResets = 0;
         std::ostringstream outputSink;
     };
@@ -228,17 +235,9 @@ namespace vbtracker {
             m_impl->identifier = std::move(identifier);
         }
         m_verifyInvariants();
-#if 0
-        /// Dump the beacon locations to console
-        dumpBeaconsToConsole();
-#endif
     }
 
-    TrackedBodyTarget::~TrackedBodyTarget() {
-#if 0
-    dumpBeaconsToConsole();
-#endif
-    }
+    TrackedBodyTarget::~TrackedBodyTarget() {}
 
     BodyTargetId TrackedBodyTarget::getQualifiedId() const {
         return BodyTargetId(getBody().getId(), getId());
@@ -401,7 +400,7 @@ namespace vbtracker {
         bool permitKalman = m_impl->permitKalman && validStateAndTime;
 
         /// OK, now must decide who we talk to for pose estimation.
-        /// @todo move state machine logic elsewhere
+        /// @todo move state machine logic elsewhere?
 
         if (!m_hasPoseEstimate && isStateSCAAT(m_impl->trackingState)) {
             /// Lost tracking somehow and we're in a SCAAT state.
