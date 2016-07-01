@@ -43,18 +43,24 @@
 /// state.
 #undef OSVR_PERMIT_OPENCL
 
+#if ((defined(CV_VERSION_EPOCH) && CV_VERSION_EPOCH >= 3) ||                   \
+     (!defined(CV_VERSION_EPOCH) && defined(CV_VERSION_MAJOR) &&               \
+      CV_VERSION_MAJOR >= 3)) &&                                               \
+    defined(OSVR_PERMIT_OPENCL)
+#define OSVR_EDGEHOLE_UMAT 1
+#else
+#define OSVR_EDGEHOLE_UMAT 0
+#endif
+
 namespace osvr {
 namespace vbtracker {
     enum class RejectReason { Area, CenterPointValue, Circularity, Convexity };
     class EdgeHoleBasedLedExtractor {
       public:
-#if defined(CV_VERSION_MAJOR) && CV_VERSION_MAJOR >= 3 &&                      \
-    defined(OSVR_PERMIT_OPENCL)
-#define OSVR_EDGEHOLE_UMAT 1
+#if OSVR_EDGEHOLE_UMAT
         using MatType = cv::UMat;
         using ExternalMatGetterReturn = cv::Mat;
 #else
-#define OSVR_EDGEHOLE_UMAT 0
         using MatType = cv::Mat;
         using ExternalMatGetterReturn = cv::Mat const &;
 #endif
