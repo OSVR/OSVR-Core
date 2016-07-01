@@ -148,7 +148,7 @@ namespace vbtracker {
         /// Main thread method!
         if (!m_imuMessages.write(makeImuReport(imu, tv, report))) {
             // no room for IMU message!
-            msg() << "Dropped IMU orientation message!\n";
+            // msg() << "Dropped IMU orientation message!\n";
             return false;
         }
         m_messageCondVar.notify_one();
