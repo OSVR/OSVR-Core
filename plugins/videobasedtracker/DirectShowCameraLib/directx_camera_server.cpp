@@ -383,6 +383,33 @@ bool directx_camera_server::open_and_find_parameters(
     return open_moniker_and_finish_setup(pMoniker, sourceConfig, width, height);
 }
 
+inline bool setBufferLatency(ICaptureGraphBuilder2 &builder,
+                             IBaseFilter &filter, std::size_t numBuffers) {
+    using namespace comutils;
+    auto negotiation =
+        GetVideoCapturePinInterface<IAMBufferNegotiation>(builder, filter);
+
+    // outPin->QueryInterface(__uuidof(IAMBufferNegotiation),
+    // AttachPtr(negotiation));
+    if (!negotiation) {
+        // failure
+        std::cerr << "Could not get IAMBufferNegotiation" << std::endl;
+        return false;
+    }
+
+    ALLOCATOR_PROPERTIES props;
+    props.cbBuffer = -1;
+    props.cBuffers = numBuffers;
+    props.cbAlign = -1;
+    props.cbPrefix = -1;
+    auto hr = negotiation->SuggestAllocatorProperties(&props);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to suggest allocator properties." << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool directx_camera_server::open_moniker_and_finish_setup(
     comutils::Ptr<IMoniker> pMoniker, FilterOperation const &sourceConfig,
     unsigned width, unsigned height) {
@@ -400,6 +427,13 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // Bind the chosen moniker to a filter object.
     auto pSrc = comutils::Ptr<IBaseFilter>{};
     pMoniker->BindToObject(nullptr, nullptr, IID_IBaseFilter, AttachPtr(pSrc));
+
+    // Try to set it up with minimal latency by reducing buffers.
+    if (setBufferLatency(*_pBuilder, *pSrc, 1)) {
+        std::cout << "Call to set buffer latency succeeded..." << std::endl;
+    } else {
+        std::cout << "Call to set buffer latency failed." << std::endl;
+    }
 
     //-------------------------------------------------------------------
     // Construct the sample grabber that will be used to snatch images from
