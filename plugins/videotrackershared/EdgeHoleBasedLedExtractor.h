@@ -36,6 +36,7 @@
 
 // Standard includes
 #include <cstdint>
+#include <memory>
 #include <tuple>
 #include <vector>
 
@@ -55,6 +56,9 @@
 
 namespace osvr {
 namespace vbtracker {
+    /// forward declaration
+    class RealtimeLaplacian;
+
     enum class RejectReason { Area, CenterPointValue, Circularity, Convexity };
     class EdgeHoleBasedLedExtractor {
       public:
@@ -133,6 +137,8 @@ namespace vbtracker {
         /// Erosion filter to remove spurious edges pointing out the camera gave
         /// us an mjpeg-compressed stream.
         cv::Ptr<cv::FilterEngine> compressionArtifactRemoval_;
+
+        std::unique_ptr<RealtimeLaplacian> laplacianImpl_;
 
         ContourList contours_;
         LedMeasurementVec measurements_;

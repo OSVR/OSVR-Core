@@ -25,6 +25,7 @@
 // Internal Includes
 #include "EdgeHoleBasedLedExtractor.h"
 #include "OptionalStream.h"
+#include "RealtimeLaplacian.h"
 #include "cvUtils.h"
 
 // Library/third-party includes
@@ -33,6 +34,8 @@
 // Standard includes
 #include <iostream>
 #include <utility>
+
+#undef OSVR_USE_REALTIME_LAPLACIAN
 
 namespace osvr {
 namespace vbtracker {
@@ -45,9 +48,14 @@ namespace vbtracker {
           postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(5),
           postEdgeDetectionBlurThreshold(30) {}
 
+    static const int EDGE_DETECT_DEST_DEPTH = CV_8U;
+
     EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
         EdgeHoleParams const &extractorParams)
-        : extParams_(extractorParams) {
+        : extParams_(extractorParams),
+          laplacianImpl_(new RealtimeLaplacian(EDGE_DETECT_DEST_DEPTH,
+                                               extParams_.laplacianKSize,
+                                               extParams_.laplacianScale)) {
         cv::Mat kernel =
             cv::Mat::ones(cv::Size(3, 3), CV_8U) *
             static_cast<std::uint8_t>(extractorParams.erosionKernelValue);
@@ -85,9 +93,16 @@ namespace vbtracker {
                                   extParams_.preEdgeDetectionBlurSize),
                          0, 0);
 
-        /// Edge detection
+#ifdef OSVR_USE_REALTIME_LAPLACIAN
+        /// Edge detection: re-apply our partially prepared laplacian to this
+        /// frame now.
+        laplacianImpl_->apply(blurred_, edge_);
+#else
+        /// Edge detection: apply a laplacian filter to this frame
         cv::Laplacian(blurred_, edge_, CV_8U, extParams_.laplacianKSize,
                       extParams_.laplacianScale);
+#endif
+
         /// removal of mjpeg artifacts.
         if (extParams_.edgeDetectErosion) {
             compressionArtifactRemoval_->apply(edge_, edge_);

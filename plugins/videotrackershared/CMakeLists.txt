@@ -20,6 +20,7 @@ set(OSVR_VIDEOTRACKERSHARED_SOURCES_CORE
     "${CMAKE_CURRENT_SOURCE_DIR}/IdentifierHelpers.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/LedMeasurement.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ProjectPoint.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RealtimeLaplacian.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/SBDBlobExtractor.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/SBDBlobExtractor.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/UndistortMeasurements.h"
