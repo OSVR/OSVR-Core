@@ -12,6 +12,9 @@ matrix:
   exclude:
   - os: osx
     compiler: gcc
+  # temporary until llvm gets their apt together
+  - os: linux
+    compiler: clang
 cache:
   directories:
     $HOME/deps-rel
@@ -99,7 +102,7 @@ addons:
     - boost-latest
     - george-edison55-precise-backports
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.7
+    #- llvm-toolchain-precise-3.7
     packages:
     - libusb-1.0-0-dev
     - libboost-thread1.55-dev
@@ -112,4 +115,4 @@ addons:
     - cmake
     - gcc-5
     - g++-5
-    - clang-3.7
+    #- clang-3.7
