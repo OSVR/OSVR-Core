@@ -59,6 +59,9 @@ namespace vbtracker {
                              "preEdgeDetectionBlurSize");
         getOptionalParameter(p.laplacianKSize, config, "laplacianKSize");
         getOptionalParameter(p.laplacianScale, config, "laplacianScale");
+        getOptionalParameter(p.edgeDetectErosion, config, "edgeDetectErosion");
+        getOptionalParameter(p.erosionKernelValue, config,
+                             "erosionKernelValue");
         getOptionalParameter(p.postEdgeDetectionBlur, config,
                              "postEdgeDetectionBlur");
         getOptionalParameter(p.postEdgeDetectionBlurSize, config,

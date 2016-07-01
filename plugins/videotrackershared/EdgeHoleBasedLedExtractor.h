@@ -32,6 +32,7 @@
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // Standard includes
 #include <cstdint>
@@ -70,6 +71,8 @@ namespace vbtracker {
         LedMeasurementVec const &operator()(cv::Mat const &gray,
                                             BlobParams const &p,
                                             bool verboseBlobOutput = false);
+        ~EdgeHoleBasedLedExtractor();
+
         using ContourId = std::size_t;
         // Contour ID and center.
         using RejectType = std::tuple<ContourId, RejectReason, cv::Point2d>;
@@ -126,6 +129,11 @@ namespace vbtracker {
         /// copy of edgeBinary_ consumed destructively by findContours
         MatType binTemp_;
         /// @}
+
+        /// Erosion filter to remove spurious edges pointing out the camera gave
+        /// us an mjpeg-compressed stream.
+        cv::Ptr<cv::FilterEngine> compressionArtifactRemoval_;
+
         ContourList contours_;
         LedMeasurementVec measurements_;
         RejectList rejectList_;

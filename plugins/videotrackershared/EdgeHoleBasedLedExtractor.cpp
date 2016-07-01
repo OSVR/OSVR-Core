@@ -36,15 +36,24 @@
 
 namespace osvr {
 namespace vbtracker {
+    static const std::uint8_t MAX_JPG_EDGEDETECT_NOISE = 20;
     static const auto PREFIX = "[EdgeHoleBasedLedExtractor] ";
     EdgeHoleParams::EdgeHoleParams()
         : preEdgeDetectionBlurSize(3), laplacianKSize(3), laplacianScale(5),
+          edgeDetectErosion(false),
+          erosionKernelValue(MAX_JPG_EDGEDETECT_NOISE),
           postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(5),
           postEdgeDetectionBlurThreshold(30) {}
 
     EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
         EdgeHoleParams const &extractorParams)
-        : extParams_(extractorParams) {}
+        : extParams_(extractorParams) {
+        cv::Mat kernel =
+            cv::Mat::ones(cv::Size(3, 3), CV_8U) *
+            static_cast<std::uint8_t>(extractorParams.erosionKernelValue);
+        compressionArtifactRemoval_ =
+            cv::createMorphologyFilter(cv::MORPH_ERODE, CV_8U, kernel);
+    }
 
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
@@ -79,6 +88,10 @@ namespace vbtracker {
         /// Edge detection
         cv::Laplacian(blurred_, edge_, CV_8U, extParams_.laplacianKSize,
                       extParams_.laplacianScale);
+        /// removal of mjpeg artifacts.
+        if (extParams_.edgeDetectErosion) {
+            compressionArtifactRemoval_->apply(edge_, edge_);
+        }
 
         // turn the edge detection into a binary image.
         if (extParams_.postEdgeDetectionBlur) {
@@ -108,6 +121,9 @@ namespace vbtracker {
         });
         return measurements_;
     }
+    /// out of line for unique_ptr-based pimpl.
+    EdgeHoleBasedLedExtractor::~EdgeHoleBasedLedExtractor() = default;
+
     void EdgeHoleBasedLedExtractor::reset() {
         contours_.clear();
         measurements_.clear();

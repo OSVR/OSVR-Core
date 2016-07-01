@@ -104,6 +104,13 @@ namespace vbtracker {
         /// Laplacian function.
         double laplacianScale;
 
+        /// Should we do an erode step after edge detection, primarily for
+        /// removing mjpeg compression artifacts?
+        bool edgeDetectErosion;
+
+        /// The value in the erosion kernel.
+        int erosionKernelValue;
+
         /// Whether we perform a blur and threshold step after the edge
         /// detection (in an attempt to smooth and join gaps in the edge
         /// detection results).
