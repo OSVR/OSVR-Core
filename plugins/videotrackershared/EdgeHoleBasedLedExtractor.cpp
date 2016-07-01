@@ -29,7 +29,10 @@
 #include "cvUtils.h"
 
 // Library/third-party includes
-// - none
+#ifdef OSVR_UVBI_CORE
+/// Only trace when building the uvbi-core library.
+#include <osvr/Common/Tracing.h>
+#endif
 
 // Standard includes
 #include <iostream>
@@ -62,11 +65,25 @@ namespace vbtracker {
         compressionArtifactRemoval_ =
             cv::createMorphologyFilter(cv::MORPH_ERODE, CV_8U, kernel);
     }
+#ifdef OSVR_UVBI_CORE
+    namespace tracing = ::osvr::common::tracing;
+    class BlobExtraction
+        : public tracing::TracingRegion<tracing::MainTracePolicy> {
+      public:
+        BlobExtraction()
+            : tracing::TracingRegion<tracing::MainTracePolicy>(
+                  "BlobExtraction") {}
+    };
+#endif
 
     LedMeasurementVec const &EdgeHoleBasedLedExtractor::
     operator()(cv::Mat const &gray, BlobParams const &p,
                bool verboseBlobOutput) {
         reset();
+
+#ifdef OSVR_UVBI_CORE
+        BlobExtraction trace;
+#endif
 
         verbose_ = verboseBlobOutput;
 

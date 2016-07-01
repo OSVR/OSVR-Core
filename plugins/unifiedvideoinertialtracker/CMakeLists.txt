@@ -86,10 +86,12 @@ target_link_libraries(uvbi-core
     osvrUtilCpp # for typedefs and boost headers
     osvrKalman
     eigen-headers
+    osvrCommon # for tracing
     PRIVATE
     util-headers)
 set_target_properties(uvbi-core PROPERTIES
     FOLDER "${PROJ_FOLDER}")
+target_compile_definitions(uvbi-core PRIVATE OSVR_UVBI_CORE)
 
 ###
 # Convenience tool to view the tracker camera using the same pipeline as the tracker plugin.
