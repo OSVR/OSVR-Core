@@ -203,6 +203,11 @@ namespace vbtracker {
             return;
         }
         if (!haveIMUData()) {
+
+            if (!sys.isValidBodyId(body)) {
+                msg() << "Invalid body ID" << std::endl;
+                return;
+            }
             auto &trackedBody = sys.getBody(body);
             if (trackedBody.getNumTargets() == 0) {
                 // Can't use an IMU on a body with no video-based targets for
