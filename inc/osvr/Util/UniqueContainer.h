@@ -33,6 +33,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <functional>
 
 namespace osvr {
 namespace util {
