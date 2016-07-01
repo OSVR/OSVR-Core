@@ -114,6 +114,10 @@ namespace vbtracker {
                              BlobData const &data) {
             rejectList_.emplace_back(id, reason, data.center);
         }
+
+        /// parameters
+        const EdgeHoleParams extParams_;
+
         std::uint8_t minBeaconCenterVal_ = 127;
 
         /// @name Frames/intermediates someone might care about
@@ -146,9 +150,6 @@ namespace vbtracker {
         bool verbose_ = false;
 
         ContourId contourId_ = 0;
-
-        /// parameters
-        const EdgeHoleParams extParams_;
     };
 } // namespace vbtracker
 } // namespace osvr
