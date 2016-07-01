@@ -517,7 +517,12 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding NullRenderer filter to graph");
 
     // Connect the output of the video reader to the sample grabber input
-    ConnectTwoFilters(*_pGraph, *pSrc, *sampleGrabberFilter);
+    // ConnectTwoFilters(*_pGraph, *pSrc, *sampleGrabberFilter);
+    auto capturePin = GetVideoCapturePinInterface<IPin>(*_pBuilder, *pSrc);
+    {
+        auto pIn = GetPin(*sampleGrabberFilter, PINDIR_INPUT);
+        _pGraph->Connect(capturePin.get(), pIn.get());
+    }
 
     // Connect the output of the sample grabber to the null renderer input
     ConnectTwoFilters(*_pGraph, *sampleGrabberFilter, *pNullRender);
