@@ -25,17 +25,17 @@
 // Internal Includes
 #include "TrackedBody.h"
 #include "ApplyIMUToState.h"
+#include "BodyTargetInterface.h"
+#include "CannedIMUMeasurement.h"
+#include "HistoryContainer.h"
+#include "StateHistory.h"
 #include "TrackedBodyIMU.h"
 #include "TrackedBodyTarget.h"
 #include "TrackingSystem.h"
-#include "BodyTargetInterface.h"
-#include "StateHistory.h"
-#include "HistoryContainer.h"
-#include "CannedIMUMeasurement.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <boost/optional.hpp>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 
 #include <util/Stride.h>
 
@@ -175,7 +175,7 @@ namespace vbtracker {
         /// Clear off the state we're about to invalidate.
         auto numPopped = m_impl->stateHistory.pop_after(origTime);
         /// @todo number popped should be the same (or very nearly) as the
-        /// number of IMU measurements we replay.
+        /// number of IMU measurements we replay - except at startup.
 
         /// Put on the new state estimate we just computed.
         m_state = newState;
@@ -190,15 +190,6 @@ namespace vbtracker {
              m_impl->imuMeasurements.get_range_newer_than(newTime)) {
             applyIMUMeasurement(imuHist.first, imuHist.second);
             ++numReplayed;
-        }
-#if 0
-        static ::util::Stride s{43};
-        if (++s) {
-#else
-        if (numPopped != numReplayed) {
-#endif
-            std::cout << "Popped " << numPopped << ", replayed " << numReplayed
-                      << "\n";
         }
     }
 
@@ -227,7 +218,12 @@ namespace vbtracker {
             throw std::runtime_error("Got out of order timestamps from IMU!");
         }
 
-        applyIMUMeasurement(tv, meas);
+        /// If we have a pose estimate, we can apply this IMU measurement.
+        /// If we haven't yet got a pose from video, toss this or we'll end up
+        /// getting NaNs.
+        if (hasPoseEstimate()) {
+            applyIMUMeasurement(tv, meas);
+        }
 
         m_impl->imuMeasurements.push_newest(tv, meas);
     }
