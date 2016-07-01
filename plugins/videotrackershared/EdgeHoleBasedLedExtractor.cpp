@@ -69,25 +69,24 @@ namespace vbtracker {
         /// Used to do basic thresholding here first to reduce background noise,
         /// but turns out that actually produced worse results at the end of the
         /// process (presumably by producing very sharp edges)
-        MatType blurred;
+        // MatType blurred;
 
-        cv::GaussianBlur(gray_, blurred,
+        cv::GaussianBlur(gray_, blurred_,
                          cv::Size(extParams_.preEdgeDetectionBlurSize,
                                   extParams_.preEdgeDetectionBlurSize),
                          0, 0);
 
         /// Edge detection
-        cv::Laplacian(blurred, edge_, CV_8U, extParams_.laplacianKSize,
+        cv::Laplacian(blurred_, edge_, CV_8U, extParams_.laplacianKSize,
                       extParams_.laplacianScale);
 
         // turn the edge detection into a binary image.
         if (extParams_.postEdgeDetectionBlur) {
-            MatType edgeTemp;
-            cv::GaussianBlur(edge_, edgeTemp,
+            cv::GaussianBlur(edge_, edgeTemp_,
                              cv::Size(extParams_.postEdgeDetectionBlurSize,
                                       extParams_.postEdgeDetectionBlurSize),
                              0, 0);
-            cv::threshold(edgeTemp, edgeBinary_,
+            cv::threshold(edgeTemp_, edgeBinary_,
                           extParams_.postEdgeDetectionBlurThreshold, 255,
                           cv::THRESH_BINARY);
         } else {
@@ -103,8 +102,8 @@ namespace vbtracker {
         // given. We examine it for suitability as an LED, and if it passes our
         // checks, add a derived measurement to our measurement vector and the
         // contour itself to our list of contours for debugging display.
-        MatType binTemp = edgeBinary_.clone();
-        consumeHolesOfConnectedComponents(binTemp, [&](ContourType &&contour) {
+        edgeBinary_.copyTo(binTemp_);
+        consumeHolesOfConnectedComponents(binTemp_, [&](ContourType &&contour) {
             checkBlob(std::move(contour), p);
         });
         return measurements_;

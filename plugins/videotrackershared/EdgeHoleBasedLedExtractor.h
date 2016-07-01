@@ -109,9 +109,23 @@ namespace vbtracker {
         }
         std::uint8_t minBeaconCenterVal_ = 127;
 
+        /// @name Frames/intermediates someone might care about
+        /// @{
         MatType gray_;
         MatType edge_;
         MatType edgeBinary_;
+        /// @}
+
+        /// @name Temporary intermediate frames
+        /// @brief kept around to avoid allocation in OpenCV each frame
+        /// @{
+        /// Copy of gray_ for blurring before edge detection
+        MatType blurred_;
+        /// Copy of edge_ for post-edge detection blurring prior to threshold
+        MatType edgeTemp_;
+        /// copy of edgeBinary_ consumed destructively by findContours
+        MatType binTemp_;
+        /// @}
         ContourList contours_;
         LedMeasurementVec measurements_;
         RejectList rejectList_;
