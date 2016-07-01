@@ -35,8 +35,11 @@
 
 namespace osvr {
 namespace vbtracker {
-    static const auto POSITION_VARIANCE_SCALE = 1.e-1;
-    static const auto ORIENTATION_VARIANCE = 1.e0;
+    RANSACKalmanPoseEstimator::RANSACKalmanPoseEstimator(
+        double positionVarianceScale, double orientationVariance)
+        : m_positionVarianceScale(positionVarianceScale),
+          m_orientationVariance(orientationVariance) {}
+
     bool RANSACKalmanPoseEstimator::
     operator()(EstimatorInOutParams const &p, LedPtrList const &leds,
                osvr::util::time::TimeValue const &frameTime) {
@@ -57,21 +60,20 @@ namespace vbtracker {
         if (p.startingTime != frameTime) {
             /// Predict first if appropriate.
             auto dt = util::time::duration(frameTime, p.startingTime);
-            //auto dt = osvrTimeValueDurationSeconds(&frameTime, &p.startingTime);
             kalman::predict(p.state, p.processModel, dt);
         }
 
         /// Filter in the orientation
         {
             kalman::AbsoluteOrientationMeasurement<BodyState> meas(
-                quat, Eigen::Vector3d::Constant(ORIENTATION_VARIANCE));
+                quat, Eigen::Vector3d::Constant(m_orientationVariance));
             kalman::correct(p.state, p.processModel, meas);
         }
         /// Filter in the orientation
         {
             /// we'll say variance goes up with distance squared.
             kalman::AbsolutePositionMeasurement<BodyState> meas(
-                xlate, Eigen::Vector3d::Constant(POSITION_VARIANCE_SCALE *
+                xlate, Eigen::Vector3d::Constant(m_positionVarianceScale *
                                                  xlate.z() * xlate.z()));
             kalman::correct(p.state, p.processModel, meas);
         }

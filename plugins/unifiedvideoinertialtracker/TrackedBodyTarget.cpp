@@ -136,6 +136,8 @@ namespace vbtracker {
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
             : bodyInterface(bodyIface), kalmanEstimator(params),
+              ransacKalmanEstimator(params.softResetPositionVarianceScale,
+                                    params.softResetOrientationVariance),
               permitKalman(params.permitKalman), softResets(params.softResets) {
         }
         BodyTargetInterface bodyInterface;

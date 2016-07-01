@@ -121,7 +121,6 @@ namespace vbtracker {
 
         /// Kalman-related parameters
         getOptionalParameter(config.permitKalman, root, "permitKalman");
-        getOptionalParameter(config.softResets, root, "softResets");
         getOptionalParameter(config.beaconProcessNoise, root,
                              "beaconProcessNoise");
         getOptionalParameter(config.processNoiseAutocorrelation, root,
@@ -149,6 +148,13 @@ namespace vbtracker {
                              "shouldSkipBrightLeds");
         getOptionalParameter(config.brightLedVariancePenalty, root,
                              "brightLedVariancePenalty");
+
+        /// "Soft Reset" (RANSAC Kalman) parameters
+        getOptionalParameter(config.softResets, root, "softResets");
+        getOptionalParameter(config.softResetPositionVarianceScale, root,
+                             "softResetPositionVarianceScale");
+        getOptionalParameter(config.softResetOrientationVariance, root,
+                             "softResetOrientationVariance");
 
         /// Blob-detection parameters
         if (root.isMember("blobParams")) {

@@ -257,6 +257,13 @@ namespace vbtracker {
         /// the Unified tracker.
         bool softResets = false;
 
+        /// Soft reset data incorporation parameter: Positional variance scale -
+        /// multiplied by the square of the distance from the camera.
+        double softResetPositionVarianceScale = 1.e-1;
+
+        /// Soft reset data incorporation parameter: Orientation variance
+        double softResetOrientationVariance = 1.e0;
+
         ConfigParams();
     };
 } // namespace vbtracker

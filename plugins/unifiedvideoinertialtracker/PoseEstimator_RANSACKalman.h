@@ -40,6 +40,8 @@ namespace osvr {
 namespace vbtracker {
     class RANSACKalmanPoseEstimator {
       public:
+        RANSACKalmanPoseEstimator(double positionVarianceScale = 1.e-1,
+                                  double orientationVariance = 1.e0);
         /// Perform RANSAC-based pose estimation but filter results in via an
         /// EKF to the body state.
         ///
@@ -49,6 +51,8 @@ namespace vbtracker {
 
       private:
         RANSACPoseEstimator m_ransac;
+        const double m_positionVarianceScale;
+        const double m_orientationVariance;
     };
 } // namespace vbtracker
 } // namespace osvr
