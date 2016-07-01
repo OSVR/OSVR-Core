@@ -50,6 +50,7 @@ namespace vbtracker {
 
         HistoryContainer<BodyStateHistoryEntry> stateHistory;
         HistoryContainer<CannedIMUMeasurement> imuMeasurements;
+        bool everHadPose = false;
     };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
         : m_system(system), m_id(id), m_impl(new Impl) {
@@ -218,10 +219,11 @@ namespace vbtracker {
             throw std::runtime_error("Got out of order timestamps from IMU!");
         }
 
-        /// If we have a pose estimate, we can apply this IMU measurement.
+        /// If we have ever had a pose estimate, we can apply this IMU
+        /// measurement.
         /// If we haven't yet got a pose from video, toss this or we'll end up
         /// getting NaNs.
-        if (hasPoseEstimate()) {
+        if (hasEverHadPoseEstimate()) {
             applyIMUMeasurement(tv, meas);
         }
 
@@ -245,6 +247,19 @@ namespace vbtracker {
         forEachTarget([&ret](TrackedBodyTarget &target) {
             ret = ret || target.hasPoseEstimate();
         });
+        return ret;
+    }
+
+    bool TrackedBody::hasEverHadPoseEstimate() const {
+        if (m_impl->everHadPose) {
+            return true;
+        }
+        auto ret = false;
+        forEachTarget([&ret](TrackedBodyTarget &target) {
+            ret = ret || target.hasPoseEstimate();
+        });
+        m_impl->everHadPose = ret;
+
         return ret;
     }
 

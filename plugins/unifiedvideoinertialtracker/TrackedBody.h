@@ -154,6 +154,8 @@ namespace vbtracker {
         /// Do we have a pose estimate for this body in general?
         bool hasPoseEstimate() const;
 
+        bool hasEverHadPoseEstimate() const;
+
         /// Requests a copy of (a possibly historical snapshot of) body state,
         /// as close to desiredTime without being later than it. If no such
         /// state is available (primarily because no valid state has been set
