@@ -38,6 +38,8 @@
 #include <iostream>
 #include <utility>
 
+/// @todo Disabled for now because in one testing/timing run with ETW, measured
+/// to increase average blob extraction time from 2.17ms to 2.53ms...
 #undef OSVR_USE_REALTIME_LAPLACIAN
 
 namespace osvr {
