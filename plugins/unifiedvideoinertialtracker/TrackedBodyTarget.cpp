@@ -66,7 +66,8 @@ namespace vbtracker {
     enum class TargetHealthState {
         OK,
         StopTrackingErrorBoundsExceeded,
-        StopTrackingLostSight
+        StopTrackingLostSight,
+        HardResetNonFiniteState
     };
 
     static const auto MAX_FRAMES_WITHOUT_BEACONS = 150;
@@ -94,6 +95,12 @@ namespace vbtracker {
         TargetHealthState operator()(BodyState const &bodyState,
                                      LedPtrList const &leds,
                                      TargetTrackingState trackingState) {
+            if (!bodyState.stateVector().array().allFinite()) {
+                return TargetHealthState::HardResetNonFiniteState;
+            }
+            if (!bodyState.getQuaternion().coeffs().array().allFinite()) {
+                return TargetHealthState::HardResetNonFiniteState;
+            }
             if (leds.empty()) {
                 m_framesWithoutValidBeacons++;
             } else {
@@ -416,6 +423,10 @@ namespace vbtracker {
                      "return..."
                   << std::endl;
 #endif
+            enterRANSACMode();
+            break;
+        case TargetHealthState::HardResetNonFiniteState:
+            msg() << "Hard reset - non-finite target state." << std::endl;
             enterRANSACMode();
             break;
         case TargetHealthState::OK:
