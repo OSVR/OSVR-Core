@@ -252,6 +252,11 @@ namespace vbtracker {
         /// Time offset for the camera timestamp, in microseconds.
         std::int32_t cameraMicrosecondsOffset = 0;
 
+        /// Should we permit a reset to be "soft" (blended by a Kalman) rather
+        /// than a hard state setting, in certain conditions? Only available in
+        /// the Unified tracker.
+        bool softResets = false;
+
         ConfigParams();
     };
 } // namespace vbtracker

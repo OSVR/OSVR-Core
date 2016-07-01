@@ -45,8 +45,8 @@ namespace vbtracker {
         enum class TriBool { False, True, Unknown };
         enum class TrackingHealth {
             Functioning,
-            NeedsResetNow,
-            ResetWhenBeaconsSeen
+            NeedsHardResetNow,
+            SoftResetWhenBeaconsSeen
         };
         SCAATKalmanPoseEstimator(ConfigParams const &params);
         bool operator()(EstimatorInOutParams const &p, LedPtrList const &leds,

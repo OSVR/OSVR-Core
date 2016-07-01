@@ -121,6 +121,7 @@ namespace vbtracker {
 
         /// Kalman-related parameters
         getOptionalParameter(config.permitKalman, root, "permitKalman");
+        getOptionalParameter(config.softResets, root, "softResets");
         getOptionalParameter(config.beaconProcessNoise, root,
                              "beaconProcessNoise");
         getOptionalParameter(config.processNoiseAutocorrelation, root,

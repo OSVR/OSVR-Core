@@ -43,10 +43,6 @@
 #include <algorithm>
 #include <iostream>
 
-/// Define this to use the RANSAC Kalman instead of the autocalibrating SCAAT
-/// Kalman, primarily for troubleshooting purposes.
-#undef OSVR_RANSACKALMAN
-
 #undef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
 #undef OSVR_DEBUG_ERROR_VARIANCE
 
@@ -58,9 +54,11 @@ namespace osvr {
 namespace vbtracker {
     enum class TargetTrackingState {
         RANSAC,
+        RANSACKalman,
         EnteringKalman,
         Kalman,
-        RANSACWhenBlobDetected
+        RANSACWhenBlobDetected,
+        RANSACKalmanWhenBlobDetected
     };
 
     enum class TargetHealthState {
@@ -90,6 +88,13 @@ namespace vbtracker {
         return bodyState.errorCovariance().diagonal().head<3>().maxCoeff();
     }
 
+    /// Predicate to check simply if the state corresponds to running the SCAAT
+    /// Kalman filter mode, centralized and named.
+    inline bool isStateSCAAT(TargetTrackingState trackingState) {
+        return !(trackingState == TargetTrackingState::RANSAC ||
+                 trackingState == TargetTrackingState::RANSACKalman);
+    }
+
     class TargetHealthEvaluator {
       public:
         TargetHealthState operator()(BodyState const &bodyState,
@@ -107,7 +112,7 @@ namespace vbtracker {
                 m_framesWithoutValidBeacons = 0;
             }
 
-            if (trackingState != TargetTrackingState::RANSAC &&
+            if (isStateSCAAT(trackingState) &&
                 m_framesWithoutValidBeacons != 0) {
                 auto maxPositionalError =
                     getMaxPositionalErrorVariance(bodyState);
@@ -131,16 +136,15 @@ namespace vbtracker {
     struct TrackedBodyTarget::Impl {
         Impl(ConfigParams const &params, BodyTargetInterface const &bodyIface)
             : bodyInterface(bodyIface), kalmanEstimator(params),
-              permitKalman(params.permitKalman) {}
+              permitKalman(params.permitKalman), softResets(params.softResets) {
+        }
         BodyTargetInterface bodyInterface;
         LedGroup leds;
         LedPtrList usableLeds;
         LedIdentifierPtr identifier;
         RANSACPoseEstimator ransacEstimator;
         SCAATKalmanPoseEstimator kalmanEstimator;
-#ifdef OSVR_RANSACKALMAN
         RANSACKalmanPoseEstimator ransacKalmanEstimator;
-#endif
 
         TargetHealthEvaluator healthEval;
 
@@ -148,6 +152,9 @@ namespace vbtracker {
         TargetTrackingState lastFrameAlgorithm = TargetTrackingState::RANSAC;
         /// Permit as a purely policy measure
         bool permitKalman = true;
+        /// whether to use RANSAC Kalman when we don't need a hard reset of
+        /// state.
+        const bool softResets = false;
         bool hasPrev = false;
         osvr::util::time::TimeValue lastEstimate;
         std::size_t trackingResets = 0;
@@ -394,9 +401,8 @@ namespace vbtracker {
         /// OK, now must decide who we talk to for pose estimation.
         /// @todo move state machine logic elsewhere
 
-        if (!m_hasPoseEstimate &&
-            m_impl->trackingState != TargetTrackingState::RANSAC) {
-            /// Lost tracking.
+        if (!m_hasPoseEstimate && isStateSCAAT(m_impl->trackingState)) {
+            /// Lost tracking somehow and we're in a SCAAT state.
             enterRANSACMode();
         }
 
@@ -414,7 +420,13 @@ namespace vbtracker {
                       << "\t (@ " << distance << "m)]";
 #endif
             std::cout << std::endl;
-            enterRANSACMode();
+
+            if (m_impl->softResets) {
+                /// Smooth RANSAC here - we haven't lost all sight.
+                enterRANSACKalmanMode();
+            } else {
+                enterRANSACMode();
+            }
             break;
         }
         case TargetHealthState::StopTrackingLostSight:
@@ -444,6 +456,16 @@ namespace vbtracker {
             }
             break;
         }
+
+        case TargetTrackingState::RANSACKalmanWhenBlobDetected: {
+            if (!usableLeds().empty()) {
+                msg()
+                    << "In flight reset - beacons detected, re-acquiring fix..."
+                    << std::endl;
+                enterRANSACKalmanMode();
+            }
+            break;
+        }
         default:
             // other states don't have pre-estimation transitions.
             break;
@@ -467,22 +489,26 @@ namespace vbtracker {
             break;
         }
 
+        case TargetTrackingState::RANSACKalman: {
+            m_hasPoseEstimate =
+                m_impl->ransacKalmanEstimator(params, usableLeds(), tv);
+            m_impl->lastFrameAlgorithm = TargetTrackingState::RANSACKalman;
+            break;
+        }
+
         case TargetTrackingState::RANSACWhenBlobDetected:
         case TargetTrackingState::EnteringKalman:
         case TargetTrackingState::Kalman: {
-#ifdef OSVR_RANSACKALMAN
-            m_hasPoseEstimate =
-                m_impl->ransacKalmanEstimator(params, usableLeds(), tv);
-#else
             auto videoDt =
                 osvrTimeValueDurationSeconds(&tv, &m_impl->lastEstimate);
             m_hasPoseEstimate =
                 m_impl->kalmanEstimator(params, usableLeds(), tv, videoDt);
             m_impl->lastFrameAlgorithm = TargetTrackingState::Kalman;
-#endif
             break;
         }
         }
+
+/// End of main estimation dispatch
 
 #ifdef OSVR_DEBUG_ERROR_VARIANCE
 
@@ -497,6 +523,7 @@ namespace vbtracker {
 
         /// post-estimation transitions (based on state)
         switch (m_impl->trackingState) {
+        case TargetTrackingState::RANSACKalman:
         case TargetTrackingState::RANSAC: {
             if (m_hasPoseEstimate && permitKalman) {
                 enterKalmanMode();
@@ -511,18 +538,24 @@ namespace vbtracker {
 #ifndef OSVR_RANSACKALMAN
             auto health = m_impl->kalmanEstimator.getTrackingHealth();
             switch (health) {
-            case SCAATKalmanPoseEstimator::TrackingHealth::NeedsResetNow:
+            case SCAATKalmanPoseEstimator::TrackingHealth::NeedsHardResetNow:
                 msg() << "In flight reset - lost fix..." << std::endl;
                 enterRANSACMode();
                 break;
-            case SCAATKalmanPoseEstimator::TrackingHealth::ResetWhenBeaconsSeen:
+            case SCAATKalmanPoseEstimator::TrackingHealth::
+                SoftResetWhenBeaconsSeen:
 #ifdef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
                 msg() << "Max positional error variance: "
                       << getMaxPositionalErrorVariance(getBody().getState())
                       << std::endl;
 #endif
-                m_impl->trackingState =
-                    TargetTrackingState::RANSACWhenBlobDetected;
+                if (m_impl->softResets) {
+                    m_impl->trackingState =
+                        TargetTrackingState::RANSACKalmanWhenBlobDetected;
+                } else {
+                    m_impl->trackingState =
+                        TargetTrackingState::RANSACWhenBlobDetected;
+                }
                 break;
             case SCAATKalmanPoseEstimator::TrackingHealth::Functioning:
                 // OK!
@@ -613,6 +646,28 @@ namespace vbtracker {
             break;
         }
         m_impl->trackingState = TargetTrackingState::RANSAC;
+    }
+
+    void TrackedBodyTarget::enterRANSACKalmanMode() {
+        /// Still counts as a reset.
+        m_impl->trackingResets++;
+#if 0
+        // Zero out velocities if we're coming from Kalman.
+        switch (m_impl->trackingState) {
+        case TargetTrackingState::RANSACWhenBlobDetected:
+        case TargetTrackingState::Kalman:
+            getBody().getState().angularVelocity() = Eigen::Vector3d::Zero();
+            getBody().getState().velocity() = Eigen::Vector3d::Zero();
+            break;
+        case TargetTrackingState::EnteringKalman:
+            /// unlikely to have messed up velocity in one step. let it be.
+            break;
+        default:
+            break;
+        }
+#endif
+        msg() << "Soft reset as configured..." << std::endl;
+        m_impl->trackingState = TargetTrackingState::RANSACKalman;
     }
 
     LedGroup const &TrackedBodyTarget::leds() const { return m_impl->leds; }

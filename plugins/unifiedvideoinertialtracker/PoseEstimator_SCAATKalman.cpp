@@ -613,7 +613,7 @@ namespace vbtracker {
         // Reset immediately if we have a large number of mis-identified beacons
         // that we decided were a model error, not a recognition error.
         if (m_misIDConsideredOurFault) {
-            return TrackingHealth::NeedsResetNow;
+            return TrackingHealth::NeedsHardResetNow;
         }
 
         auto needsReset = (m_framesInProbation > MAX_PROBATION_FRAMES);
@@ -623,12 +623,12 @@ namespace vbtracker {
                            MAX_FRAMES_WITHOUT_MEASUREMENTS);
 #endif
         if (needsReset) {
-            return TrackingHealth::NeedsResetNow;
+            return TrackingHealth::NeedsHardResetNow;
         }
         /// Additional case: We've been a while without blobs...
         if (m_framesWithoutIdentifiedBlobs > MAX_FRAMES_WITHOUT_ID_BLOBS) {
             // In this case, we force ransac once we get blobs once again.
-            return TrackingHealth::ResetWhenBeaconsSeen;
+            return TrackingHealth::SoftResetWhenBeaconsSeen;
         }
         /// Otherwise, we're doing OK!
         return TrackingHealth::Functioning;

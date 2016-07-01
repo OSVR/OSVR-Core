@@ -187,6 +187,7 @@ namespace vbtracker {
         std::ostream &msg() const;
         void enterKalmanMode();
         void enterRANSACMode();
+        void enterRANSACKalmanMode();
 
         void dumpBeaconsToConsole() const;
 
