@@ -92,8 +92,9 @@ namespace vbtracker {
         /// Parameters specific to the edge hole based LED extraction algorithm.
         EdgeHoleParams extractParams;
 
-        /// Should we report continuously once we get data for a sensor that
-        /// lets us predict, or wait for actual updates of data?
+        /// Should we have the tracking thread update the reporting vector for
+        /// every (IMU) message, instead of waiting/buffering for a few
+        /// milliseconds between updates?
         bool continuousReporting = false;
 
         /// Should we open the camera in high-gain mode?

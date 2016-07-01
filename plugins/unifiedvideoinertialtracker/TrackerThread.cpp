@@ -51,10 +51,10 @@ namespace vbtracker {
                                  ImageSource &imageSource,
                                  BodyReportingVector &reportingVec,
                                  CameraParameters const &camParams,
-                                 std::int32_t cameraUsecOffset)
+                                 std::int32_t cameraUsecOffset, bool bufferImu)
         : m_trackingSystem(trackingSystem), m_cam(imageSource),
           m_reportingVec(reportingVec), m_camParams(camParams),
-          m_cameraUsecOffset(cameraUsecOffset),
+          m_cameraUsecOffset(cameraUsecOffset), m_bufferImu(bufferImu),
           m_imuMessages(IMU_MESSAGE_QUEUE_SIZE) {
         msg() << "Tracker thread object created." << std::endl;
     }
@@ -209,10 +209,11 @@ namespace vbtracker {
         /// Launch an asynchronous task to perform the image retrieval and
         /// initial image processing.
         launchTimeConsumingImageStep();
-#ifdef OSVR_BUFFER_IMU
-        setImuOverrideClock();
+        if (m_bufferImu) {
+            setImuOverrideClock();
+        }
+        /// only used if m_bufferImu
         UpdatedBodyIndices imuIndices;
-#endif
 
         bool finishedImage = false;
         do {
@@ -253,20 +254,22 @@ namespace vbtracker {
                     continue;
                 }
 
-#ifdef OSVR_BUFFER_IMU
-                // insert index into the list
-                imuIndices.insert(id);
+                if (m_bufferImu) {
+                    // insert index into the list
+                    imuIndices.insert(id);
 
-                // if it's time, send a report even if we haven't gotten a video
-                // frame with useful things in it yet.
-                if (shouldSendImuReport()) {
-                    updateReportingVector(imuIndices);
-                    imuIndices.clear();
+                    // if it's time, send a report even if we haven't gotten a
+                    // video
+                    // frame with useful things in it yet.
+                    if (shouldSendImuReport()) {
+                        updateReportingVector(imuIndices);
+                        imuIndices.clear();
+                    }
+                } else {
+
+                    /// Immediately update the reporting vector for that body.
+                    updateReportingVector(id);
                 }
-#else
-                /// Immediately update the reporting vector for that body.
-                updateReportingVector(id);
-#endif
             }
         } while (!finishedImage);
 
@@ -293,12 +296,12 @@ namespace vbtracker {
         // Sort those body IDs so we can merge them with the body IDs from any
         // IMU messages we're about to process.
         UpdatedBodyIndices sortedBodyIds{begin(bodyIds), end(bodyIds)};
-#ifdef OSVR_BUFFER_IMU
-        for (auto &id : imuIndices) {
-            sortedBodyIds.insert(id);
+        if (m_bufferImu) {
+            for (auto &id : imuIndices) {
+                sortedBodyIds.insert(id);
+            }
+            imuIndices.clear();
         }
-        imuIndices.clear();
-#endif
 
         // process those IMU messages and add any unique IDs to the vector
         // returned by the image tracker.

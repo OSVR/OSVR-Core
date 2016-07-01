@@ -290,7 +290,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         std::cout << "Starting the tracker thread..." << std::endl;
         m_trackerThreadManager.reset(new TrackerThread(
             *m_trackingSystem, *m_source, m_bodyReportingVector,
-            osvr::vbtracker::getHDKCameraParameters(), m_camUsecOffset));
+            osvr::vbtracker::getHDKCameraParameters(), m_camUsecOffset,
+            !m_continuousReporting));
 
         /// This will start the thread, but it won't enter its full main loop
         /// until we call permitStart()

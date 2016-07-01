@@ -72,7 +72,8 @@ namespace vbtracker {
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
                       BodyReportingVector &reportingVec,
                       CameraParameters const &camParams,
-                      std::int32_t cameraUsecOffset = 0);
+                      std::int32_t cameraUsecOffset = 0,
+                      bool bufferImu = false);
         ~TrackerThread();
 
         /// Thread function-call operator: should be invoked by a lambda in a
@@ -151,6 +152,11 @@ namespace vbtracker {
         CameraParameters m_camParams;
         std::size_t m_numBodies = 0; //< initialized when loop started.
         const std::int32_t m_cameraUsecOffset = 0;
+
+        /// Whether we should wait a period of time before updating the
+        /// reporting vector with just IMU reports (compared to updating
+        /// reporting vector with all new data)
+        const bool m_bufferImu = false;
 
         using our_clock = std::chrono::steady_clock;
 
