@@ -553,80 +553,88 @@ bool directx_camera_server::open_moniker_and_finish_setup(
         }
     }
 
-    //-------------------------------------------------------------------
-    // Find _num_rows and _num_columns in the video stream.
-    AM_MEDIA_TYPE mt = {0};
-    _pSampleGrabberWrapper->getConnectedMediaType(mt);
-    VIDEOINFOHEADER *pVih;
-    if (mt.formattype == FORMAT_VideoInfo ||
-        mt.formattype == FORMAT_VideoInfo2) {
-        pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
-    } else {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't get video header type\n");
-        fprintf(stderr, "  (Expected %x or %x, got %x)\n", FORMAT_VideoInfo,
-                FORMAT_VideoInfo2, mt.formattype);
-        fprintf(stderr, "  (GetConnectedMediaType is not valid for DirectX "
-                        "headers later than version 7)\n");
-        fprintf(stderr, "  (We need to re-implement reading video in some "
-                        "other interface)\n");
-        return false;
-    }
+    {
+        //-------------------------------------------------------------------
+        // Find _num_rows and _num_columns in the video stream.
+        AM_MEDIA_TYPE mt = {0};
+        _pSampleGrabberWrapper->getConnectedMediaType(mt);
+        VIDEOINFOHEADER *pVih;
+        if (mt.formattype == FORMAT_VideoInfo ||
+            mt.formattype == FORMAT_VideoInfo2) {
+            pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
+        } else {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Can't get video header type\n");
+            fprintf(stderr, "  (Expected %x or %x, got %x)\n", FORMAT_VideoInfo,
+                    FORMAT_VideoInfo2, mt.formattype);
+            fprintf(stderr, "  (GetConnectedMediaType is not valid for DirectX "
+                            "headers later than version 7)\n");
+            fprintf(stderr, "  (We need to re-implement reading video in some "
+                            "other interface)\n");
+            return false;
+        }
 
-    // Number of rows and columns.  This is different if we are using a target
-    // rectangle (rcTarget) than if we are not.
-    if (IsRectEmpty(&pVih->rcTarget)) {
-        _num_columns = pVih->bmiHeader.biWidth;
-        _num_rows = pVih->bmiHeader.biHeight;
-    } else {
-        _num_columns = pVih->rcTarget.right;
-        _num_rows = pVih->bmiHeader.biHeight;
-        printf("XXX directx_camera_server::open_and_find_parameters(): "
-               "Warning: may not work correctly with target rectangle\n");
-    }
+        // Number of rows and columns.  This is different if we are using a
+        // target
+        // rectangle (rcTarget) than if we are not.
+        if (IsRectEmpty(&pVih->rcTarget)) {
+            _num_columns = pVih->bmiHeader.biWidth;
+            _num_rows = pVih->bmiHeader.biHeight;
+        } else {
+            _num_columns = pVih->rcTarget.right;
+            _num_rows = pVih->bmiHeader.biHeight;
+            printf("XXX directx_camera_server::open_and_find_parameters(): "
+                   "Warning: may not work correctly with target rectangle\n");
+        }
 #ifdef DEBUG
-    printf("Got %dx%d video\n", _num_columns, _num_rows);
+        printf("Got %dx%d video\n", _num_columns, _num_rows);
 #endif
 
-    // Make sure that the image is not compressed and that we have 8 bits
-    // per pixel.
-    if (pVih->bmiHeader.biCompression != BI_RGB) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Compression not RGB\n");
-        switch (pVih->bmiHeader.biCompression) {
-        case BI_RLE8:
-            fprintf(stderr, "  (It is BI_RLE8)\n");
-            break;
-        case BI_RLE4:
-            fprintf(stderr, "  (It is BI_RLE4)\n");
-        case BI_BITFIELDS:
-            fprintf(stderr, "  (It is BI_BITFIELDS)\n");
-            break;
-        default:
-            fprintf(stderr, "  (Unknown compression type)\n");
+        // Make sure that the image is not compressed and that we have 8 bits
+        // per pixel.
+        if (pVih->bmiHeader.biCompression != BI_RGB) {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Compression not RGB\n");
+            switch (pVih->bmiHeader.biCompression) {
+            case BI_RLE8:
+                fprintf(stderr, "  (It is BI_RLE8)\n");
+                break;
+            case BI_RLE4:
+                fprintf(stderr, "  (It is BI_RLE4)\n");
+            case BI_BITFIELDS:
+                fprintf(stderr, "  (It is BI_BITFIELDS)\n");
+                break;
+            default:
+                fprintf(stderr, "  (Unknown compression type)\n");
+            }
+            return false;
         }
-        return false;
-    }
-    int BytesPerPixel = pVih->bmiHeader.biBitCount / 8;
-    if (BytesPerPixel != 3) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Not 3 bytes per pixel (%d)\n",
-                pVih->bmiHeader.biBitCount);
-        return false;
-    }
+        int BytesPerPixel = pVih->bmiHeader.biBitCount / 8;
+        if (BytesPerPixel != 3) {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Not 3 bytes per pixel (%d)\n",
+                    pVih->bmiHeader.biBitCount);
+            return false;
+        }
 
-    // A negative height indicates that the images are stored non-inverted in Y
-    // Not sure what to do with images that have negative height -- need to
-    // read the book some more to find out.
-    if (_num_rows < 0) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Num Rows is negative (internal error)\n");
-        return false;
-    }
+        // A negative height indicates that the images are stored non-inverted
+        // in Y
+        // Not sure what to do with images that have negative height -- need to
+        // read the book some more to find out.
+        if (_num_rows < 0) {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Num Rows is negative (internal error)\n");
+            return false;
+        }
 
-    // Find the stride to take when moving from one row of video to the
-    // next.  This is rounded up to the nearest DWORD.
-    _stride = (_num_columns * BytesPerPixel + 3) & ~3;
+        // Find the stride to take when moving from one row of video to the
+        // next.  This is rounded up to the nearest DWORD.
+        _stride = (_num_columns * BytesPerPixel + 3) & ~3;
+    }
 
     return true;
 }
