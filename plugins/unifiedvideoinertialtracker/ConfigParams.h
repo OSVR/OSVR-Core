@@ -48,7 +48,7 @@ namespace vbtracker {
         bool useOrientation = true;
 
         /// units: rad^2
-        double orientationVariance = 1.0e-8;
+        double orientationVariance = 1.0e-10;
 
         std::int32_t orientationMicrosecondsOffset = 0;
 
@@ -56,7 +56,7 @@ namespace vbtracker {
         bool useAngularVelocity = true;
 
         /// units: (rad/sec)^2
-        double angularVelocityVariance = 1.0e-6;
+        double angularVelocityVariance = 1.0e-8;
 
         std::int32_t angularVelocityMicrosecondsOffset = 0;
     };
@@ -101,7 +101,7 @@ namespace vbtracker {
         bool highGain = true;
 
         /// Seconds beyond the current time to predict, using the Kalman state.
-        double additionalPrediction = 24. / 1000.;
+        double additionalPrediction = 0.;
 
         /// Max residual, in meters at the expected XY plane of the beacon in
         /// space, for a beacon before applying a variance penalty.
@@ -217,7 +217,7 @@ namespace vbtracker {
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty = 25.32749811268542;
+        double brightLedVariancePenalty = 28.32749811268542;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the

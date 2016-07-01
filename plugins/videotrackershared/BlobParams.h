@@ -45,7 +45,7 @@ namespace vbtracker {
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
         /// square pixel units. Edge hole extractor detects larger blobs, so the
         /// min area is correspondingly larger by default.
-        float minArea = 4.0f;
+        float minArea = 3.0f;
 #else
         /// Same meaning as the parameter to OpenCV's SimpleBlobDetector - in
         /// square pixel units.
@@ -69,13 +69,13 @@ namespace vbtracker {
         /// This is the absolute minimum pixel value that will be considered as
         /// a possible signal. Images that contain only values below this will
         /// be totally discarded as containing zero keypoints.
-        double absoluteMinThreshold = 75.;
+        double absoluteMinThreshold = 50.;
 
         /// This value, in the range (0, 1), is the linear interpolation factor
         /// between the minimum and maximum value pixel in a frame that will be
         /// the *minimum* threshold value used by the simple blob detector (if
         /// it does not drop below absoluteMinThreshold)
-        double minThresholdAlpha = 0.5;
+        double minThresholdAlpha = 0.3;
 
         /// This value, in the range (0, 1), is the linear interpolation factor
         /// between the minimum and maximum value pixel in a frame that will be

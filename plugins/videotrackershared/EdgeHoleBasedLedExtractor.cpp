@@ -50,8 +50,8 @@ namespace vbtracker {
         : preEdgeDetectionBlurSize(3), laplacianKSize(3), laplacianScale(5),
           edgeDetectErosion(false),
           erosionKernelValue(MAX_JPG_EDGEDETECT_NOISE),
-          postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(5),
-          postEdgeDetectionBlurThreshold(30) {}
+          postEdgeDetectionBlur(true), postEdgeDetectionBlurSize(3),
+          postEdgeDetectionBlurThreshold(80) {}
 
     static const int EDGE_DETECT_DEST_DEPTH = CV_8U;
 
