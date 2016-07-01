@@ -53,11 +53,13 @@
 // Library/third-party includes
 #include <json/reader.h>
 #include <json/value.h>
+#include <json/writer.h>
 #include <opencv2/core/core.hpp> // for basic OpenCV types
 #include <opencv2/core/operations.hpp>
 #include <opencv2/highgui/highgui.hpp> // for image capture
 #include <opencv2/imgproc/imgproc.hpp> // for image scaling
 
+#include <boost/assert.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
 
@@ -70,6 +72,7 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -121,8 +124,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         }
         m_dev = osvr::pluginkit::DeviceToken(dev);
 
-        /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(org_osvr_unifiedvideoinertial_json);
+        /// Create/update and send JSON descriptor
+        m_dev.sendJsonDescriptor(createDeviceDescriptor());
 
         m_mainBody = &(m_trackingSystem->getBody(BodyId(0)));
         if (m_mainBody->hasIMU()) {
@@ -170,6 +173,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         }
         self.handleData(tv, *report);
     }
+
     static void angVelCallback(void *userdata, const OSVR_TimeValue *timestamp,
                                const OSVR_AngularVelocityReport *report) {
         auto &self = *static_cast<UnifiedVideoInertialTracker *>(userdata);
@@ -187,14 +191,93 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
     /// Create a "BodyReporting" interchange structure for each body we track.
     void setupBodyReporting() {
         m_bodyReportingVector.clear();
-        static const auto EXTRA_TRACKING_SENSORS =
-            osvr::vbtracker::extra_outputs::numExtraOutputs;
-        // Add the extra sensors as configured in AdditionalReports.h
-        auto n = m_trackingSystem->getNumBodies() + EXTRA_TRACKING_SENSORS;
-        for (size_type i = 0; i < n; ++i) {
+        auto n = totalNumBodies();
+        for (decltype(n) i = 0; i < n; ++i) {
             m_bodyReportingVector.emplace_back(
                 osvr::vbtracker::BodyReporting::make());
         }
+    }
+
+    size_type numTrackedBodies() const {
+        return m_trackingSystem->getNumBodies();
+    }
+
+    int totalNumBodies() const {
+        static const auto EXTRA_TRACKING_SENSORS =
+            osvr::vbtracker::extra_outputs::numExtraOutputs;
+        // Add the extra sensors as configured in AdditionalReports.h
+        return static_cast<int>(numTrackedBodies()) + EXTRA_TRACKING_SENSORS;
+    }
+
+    static std::string getTrackerPath(int sensor) {
+        std::ostringstream os;
+        os << "tracker/" << sensor;
+        return os.str();
+    }
+
+    /// Augment the static JSON device descriptor with individual
+    /// "semi-semantic" paths for real bodies, as well as the semantic paths for
+    /// the "extra" outputs (like the camera pose)
+    std::string createDeviceDescriptor() const {
+        auto n = numTrackedBodies();
+        auto origJson = std::string{org_osvr_unifiedvideoinertial_json};
+        Json::Value root;
+        {
+            Json::Reader reader;
+            /// This call can't fail, but...
+            if (!reader.parse(origJson, root)) {
+                BOOST_ASSERT_MSG(false,
+                                 "Not possible for parsing to fail: loading "
+                                 "a file that was parsed before "
+                                 "transformation into string literal!");
+                return origJson;
+            }
+        }
+        auto &semantic = root["semantic"];
+        auto &body = semantic["body"];
+        body = Json::Value(Json::objectValue);
+        /// Set up a (minimally) semantic path (numbered) for each body under
+        /// bodies
+        for (decltype(n) i = 0; i < n; ++i) {
+            body[std::to_string(i)] = getTrackerPath(i);
+        }
+
+        /// Set up semantic paths for extra outputs.
+        namespace extra_outputs = osvr::vbtracker::extra_outputs;
+        if (extra_outputs::outputCam) {
+            semantic["camera"] =
+                getTrackerPath(n + extra_outputs::outputCamIndex);
+        }
+
+        if (n > 0 && extra_outputs::haveHMDExtraOutputs) {
+            /// Re-shuffle body 0 so it is both an alias and a group
+            auto &body0 = body["0"];
+            std::string oldTarget = body0.asString();
+            body0 = Json::Value(Json::objectValue);
+            body0["$target"] = oldTarget;
+
+            if (extra_outputs::outputImu) {
+                body0["imu"] =
+                    getTrackerPath(n + extra_outputs::outputImuIndex);
+            }
+            if (extra_outputs::haveHMDCameraSpaceExtraOutputs) {
+                auto &cameraSpace = body0["cameraSpace"];
+                cameraSpace = Json::Value(Json::objectValue);
+
+                if (extra_outputs::outputImuCam) {
+                    cameraSpace["imu"] =
+                        getTrackerPath(n + extra_outputs::outputImuCamIndex);
+                }
+                if (extra_outputs::outputHMDCam) {
+                    cameraSpace["body"] =
+                        getTrackerPath(n + extra_outputs::outputHMDCamIndex);
+                }
+            }
+        }
+
+        /// Now, serialize back to a string.
+        Json::FastWriter writer;
+        return writer.write(root);
     }
 
     OSVR_ReturnCode update();

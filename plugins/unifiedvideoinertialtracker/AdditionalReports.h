@@ -83,6 +83,14 @@ namespace vbtracker {
         static const std::size_t numExtraOutputs =
             static_cast<std::size_t>(outputHMDCamIndex - outputIndexBase);
 
+        /// Do we have extra outputs related to the HMD (presumably body 0)?
+        static const bool haveHMDExtraOutputs =
+            outputImu || outputImuCam || outputHMDCam;
+
+        /// Do we have extra reports that are in camera space, as opposed to
+        /// room space?
+        static const bool haveHMDCameraSpaceExtraOutputs =
+            outputImuCam || outputHMDCam;
     } // namespace extra_outputs
 } // namespace vbtracker
 } // namespace osvr
