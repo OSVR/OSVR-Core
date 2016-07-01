@@ -33,26 +33,24 @@
 // - none
 
 // Standard includes
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace osvr {
 namespace common {
     namespace tracing {
         typedef std::int64_t TraceBeginStamp;
 #ifdef OSVR_COMMON_TRACING_ENABLED
-        struct MainTracePolicy {
-            OSVR_COMMON_EXPORT static TraceBeginStamp begin(const char *text);
-            OSVR_COMMON_EXPORT static void end(const char *text,
-                                               TraceBeginStamp stamp);
-            OSVR_COMMON_EXPORT static void mark(const char *text);
+        struct OSVR_COMMON_EXPORT MainTracePolicy {
+            static TraceBeginStamp begin(const char *text);
+            static void end(const char *text, TraceBeginStamp stamp);
+            static void mark(const char *text);
         };
 
-        struct WorkerTracePolicy {
-            OSVR_COMMON_EXPORT static TraceBeginStamp begin(const char *text);
-            OSVR_COMMON_EXPORT static void end(const char *text,
-                                               TraceBeginStamp stamp);
-            OSVR_COMMON_EXPORT static void mark(const char *text);
+        struct OSVR_COMMON_EXPORT WorkerTracePolicy {
+            static TraceBeginStamp begin(const char *text);
+            static void end(const char *text, TraceBeginStamp stamp);
+            static void mark(const char *text);
         };
         /// @brief Class template base for "region" tracing.
         template <typename TracePolicy> class TracingRegion {
