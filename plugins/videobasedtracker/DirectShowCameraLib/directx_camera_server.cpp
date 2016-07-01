@@ -530,9 +530,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
-    auto pTuner = comutils::Ptr<IAMTVTuner>{};
-    hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(), IID_IAMTVTuner,
-                                  AttachPtr(pTuner));
+    auto pTuner = GetPinInterface<IAMTVTuner>(*_pBuilder, *pSrc);
     if (pTuner) {
 #ifdef DEBUG
         printf("directx_camera_server::open_and_find_parameters(): Found a TV "
