@@ -20,6 +20,7 @@ add_subdirectory(ImageSources)
 # Static library with core of the tracker
 ###
 add_library(uvbi-core STATIC
+    AngVelTools.h
     ApplyIMUToState.cpp
     ApplyIMUToState.h
     AssignMeasurementsToLeds.h

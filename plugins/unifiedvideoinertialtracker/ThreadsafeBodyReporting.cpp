@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ThreadsafeBodyReporting.h"
+#include "AngVelTools.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenCoreGeometry.h>
@@ -51,8 +52,7 @@ namespace vbtracker {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
 
         Eigen::Quaterniond result =
-            orientation * util::quat_exp(vec * dt * 0.5).normalized() *
-            orientation.conjugate();
+            orientation * angVelVecToIncRot(vec, dt) * orientation.conjugate();
         return result;
     }
 

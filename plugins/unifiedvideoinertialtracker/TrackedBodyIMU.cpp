@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "TrackedBodyIMU.h"
+#include "AngVelTools.h"
 #include "TrackedBody.h"
 #include "TrackingSystem.h"
 
@@ -107,14 +108,7 @@ namespace vbtracker {
         Eigen::Quaterniond correctedDeltaQuat =
             m_yawCorrection * deltaquat * m_yawCorrection.inverse();
 
-        Eigen::Vector3d rot;
-        if (correctedDeltaQuat.w() >= 1. ||
-            correctedDeltaQuat.vec().isZero(1e-10)) {
-            rot = Eigen::Vector3d::Zero();
-        } else {
-            auto angle = std::acos(correctedDeltaQuat.w());
-            rot = correctedDeltaQuat.vec().normalized() * angle / dt;
-        }
+        Eigen::Vector3d rot = incRotToAngVelVec(deltaquat, dt);
         auto ret = CannedIMUMeasurement{};
         ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));

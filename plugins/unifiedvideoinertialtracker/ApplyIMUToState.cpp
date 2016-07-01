@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ApplyIMUToState.h"
+#include "AngVelTools.h"
 #include "SpaceTransformations.h"
 
 // Library/third-party includes
@@ -96,14 +97,16 @@ namespace vbtracker {
         meas.restoreAngVel(angVel);
         Eigen::Vector3d var;
         meas.restoreAngVelVariance(var);
-
+        static const double dt = 0.02;
         /// Rotate it into camera space - it's bTb and we want cTc
         /// @todo do this without rotating into camera space?
         Eigen::Quaterniond cTb = state.getQuaternion();
         // Eigen::Matrix3d bTc(state.getQuaternion().conjugate());
+        /// Turn it into an incremental quat to do the space transformation
         Eigen::Quaterniond incrementalQuat =
-            cTb * util::quat_exp_map(angVel).exp() * cTb.conjugate();
-        angVel = util::quat_exp_map(incrementalQuat).ln();
+            cTb * angVelVecToIncRot(angVel, dt) * cTb.conjugate();
+        /// Then turn it back into an angular velocity vector
+        angVel = incRotToAngVelVec(incrementalQuat, dt);
         // angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
         /// @todo transform variance?
 
