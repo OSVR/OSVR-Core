@@ -55,7 +55,7 @@
 
 namespace osvr {
 namespace vbtracker {
-    static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{5};
+    static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{2};
 
     struct BodyIdOrdering {
         bool operator()(BodyId const &lhs, BodyId const &rhs) const {
