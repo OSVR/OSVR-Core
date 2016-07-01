@@ -117,6 +117,9 @@ namespace vbtracker {
         /// @name Accessors
         /// @{
         std::size_t getNumBodies() const { return m_bodies.size(); }
+        bool isValidBodyId(BodyId i) const {
+            return (!i.empty()) && (i.value() < m_bodies.size());
+        }
         TrackedBody &getBody(BodyId i) { return *m_bodies.at(i.value()); }
         TrackedBody const &getBody(BodyId i) const {
             return *m_bodies.at(i.value());
