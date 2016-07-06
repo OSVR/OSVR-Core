@@ -27,9 +27,9 @@
 
 // Internal Includes
 #include <osvr/Util/CSV.h>
+#include <osvr/Util/QuaternionC.h>
 #include <osvr/Util/TimeValue.h>
 #include <osvr/Util/Vec3C.h>
-#include <osvr/Util/QuaternionC.h>
 
 // Library/third-party includes
 // - none
@@ -217,21 +217,8 @@ namespace util {
     template <typename T>
     inline void operator<<(CellGroupProxy<T, DecimalTimeFieldTag> &group,
                            time::TimeValue const &tv) {
-        std::ostringstream os;
-        auto timestamp = tv;
-        osvrTimeValueNormalize(&timestamp);
-        // move any negative to the front.
-        int signFlip = 1;
-        if (timestamp.microseconds < 0 && !(timestamp.seconds < 0)) {
-            signFlip = -1;
-        }
-        os << signFlip * timestamp.seconds << ".";
-        // set up decimal padding
-        os << std::setw(6) << std::setfill('0');
-        os << (timestamp.microseconds < 0 ? -timestamp.microseconds
-                                          : timestamp.microseconds);
 
-        group << cell("seconds", os.str());
+        group << cell("seconds", time::toDecimalString(tv));
     }
 
     template <typename T>
