@@ -187,6 +187,13 @@ namespace vbtracker {
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
 
+        static Eigen::Vector3d
+        computeTranslationCorrection(Eigen::Vector3d const &bodyFrameOffset,
+                                     Eigen::Quaterniond const &orientation);
+
+        Eigen::Vector3d computeTranslationCorrectionToBody(
+            Eigen::Quaterniond const &orientation) const;
+
       private:
         std::ostream &msg() const;
         void enterKalmanMode();

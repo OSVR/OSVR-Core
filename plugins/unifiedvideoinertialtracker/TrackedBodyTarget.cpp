@@ -394,7 +394,7 @@ namespace vbtracker {
 
         /// Must pre/post correct the state by our offset :-/
         /// @todo make this state correction less hacky.
-        bodyState.position() += getStateCorrection();
+        bodyState.position() -= getStateCorrection();
 
         /// Will we permit Kalman this estimation?
         bool permitKalman = m_impl->permitKalman && validStateAndTime;
@@ -473,16 +473,12 @@ namespace vbtracker {
         }
 
         /// main estimation dispatch
-        auto params = EstimatorInOutParams{camParams,
-                                           m_beacons,
-                                           m_beaconMeasurementVariance,
-                                           m_beaconFixed,
-                                           m_beaconEmissionDirection,
-                                           startingTime,
-                                           bodyState,
-                                           getBody().getProcessModel(),
-                                           m_beaconDebugData,
-                                           m_targetToBody};
+        auto params = EstimatorInOutParams{
+            camParams, m_beacons, m_beaconMeasurementVariance, m_beaconFixed,
+            m_beaconEmissionDirection, startingTime, bodyState,
+            getBody().getProcessModel(), m_beaconDebugData,
+            /*m_targetToBody*/
+            Eigen::Vector3d::Zero()};
         switch (m_impl->trackingState) {
         case TargetTrackingState::RANSAC: {
             m_hasPoseEstimate = m_impl->ransacEstimator(params, usableLeds());
@@ -574,7 +570,7 @@ namespace vbtracker {
         m_impl->lastEstimate = tv;
 
         /// Corresponding post-correction.
-        bodyState.position() -= getStateCorrection();
+        bodyState.position() += getStateCorrection();
 
         return m_hasPoseEstimate;
     }
@@ -594,7 +590,7 @@ namespace vbtracker {
             outQuat, skipBrightsCutoff, iterations);
         if (gotPose) {
             // Post-correct the state
-            xlate = outXlate - outQuat * m_beaconOffset;
+            xlate = outXlate + computeTranslationCorrectionToBody(outQuat);
             // copy the quat
             quat = outQuat;
         }
@@ -602,7 +598,29 @@ namespace vbtracker {
     }
 
     Eigen::Vector3d TrackedBodyTarget::getStateCorrection() const {
-        return m_impl->bodyInterface.state.getQuaternion() * m_beaconOffset;
+// return m_impl->bodyInterface.state.getQuaternion().conjugate() *
+// m_beaconOffset;
+#if 0
+        return computeTranslationCorrection(
+            m_beaconOffset, m_impl->bodyInterface.state.getQuaternion());
+#endif
+        return computeTranslationCorrectionToBody(
+            m_impl->bodyInterface.state.getQuaternion());
+    }
+
+    Eigen::Vector3d TrackedBodyTarget::computeTranslationCorrection(
+        Eigen::Vector3d const &bodyFrameOffset,
+        Eigen::Quaterniond const &orientation) {
+        Eigen::Vector3d ret = (Eigen::Isometry3d(orientation) *
+                               Eigen::Translation3d(bodyFrameOffset))
+                                  .translation();
+        return ret;
+    }
+
+    Eigen::Vector3d TrackedBodyTarget::computeTranslationCorrectionToBody(
+        Eigen::Quaterniond const &orientation) const {
+        return computeTranslationCorrection(m_beaconOffset + m_targetToBody,
+                                            orientation);
     }
 
     ConfigParams const &TrackedBodyTarget::getParams() const {
