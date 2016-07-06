@@ -30,6 +30,7 @@
 #include "SpaceTransformations.h"
 #include "TrackedBody.h"
 #include "TrackedBodyIMU.h"
+#include "TrackedBodyTarget.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenInterop.h>
@@ -51,11 +52,13 @@ namespace vbtracker {
                                  ImageSource &imageSource,
                                  BodyReportingVector &reportingVec,
                                  CameraParameters const &camParams,
-                                 std::int32_t cameraUsecOffset, bool bufferImu)
+                                 std::int32_t cameraUsecOffset, bool bufferImu,
+                                 bool debugData)
         : m_trackingSystem(trackingSystem), m_cam(imageSource),
           m_reportingVec(reportingVec), m_camParams(camParams),
           m_cameraUsecOffset(cameraUsecOffset), m_bufferImu(bufferImu),
-          m_imuMessages(IMU_MESSAGE_QUEUE_SIZE) {
+          m_debugData(debugData), m_imuMessages(IMU_MESSAGE_QUEUE_SIZE),
+          m_debugDataMessages(32) {
         msg() << "Tracker thread object created." << std::endl;
     }
 
@@ -166,6 +169,10 @@ namespace vbtracker {
         }
         m_messageCondVar.notify_one();
         return true;
+    }
+
+    bool TrackerThread::checkForDebugData(DebugArray &data) {
+        return m_debugDataMessages.read(data);
     }
 
     void
@@ -505,6 +512,21 @@ namespace vbtracker {
         auto &body = m_trackingSystem.getBody(bodyId);
         m_reportingVec[bodyId.value()]->updateState(body.getStateTime(),
                                                     body.getState());
+        if (m_debugData && bodyId == BodyId(0)) {
+            DebugArray newDebugArray = {};
+            auto &target = *body.getTarget(TargetId(0));
+            auto &debugData = target.getBeaconDebugData();
+            for (int i = 0; i < MAX_DEBUG_BEACONS; ++i) {
+                auto baseIdx = i * DEBUG_ANALOGS_PER_BEACON;
+                auto &thisBeacon = debugData[i];
+                newDebugArray[baseIdx] = thisBeacon.variance;
+                newDebugArray[baseIdx + 1] = thisBeacon.measurement.x;
+                newDebugArray[baseIdx + 2] = thisBeacon.measurement.y;
+                newDebugArray[baseIdx + 3] = thisBeacon.residual.x;
+                newDebugArray[baseIdx + 4] = thisBeacon.residual.y;
+            }
+            m_debugDataMessages.write(newDebugArray);
+        }
     }
 
     void TrackerThread::launchTimeConsumingImageStep() {

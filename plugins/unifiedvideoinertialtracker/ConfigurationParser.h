@@ -96,14 +96,8 @@ namespace vbtracker {
         getOptionalParameter(config.numThreads, root, "numThreads");
         getOptionalParameter(config.cameraMicrosecondsOffset, root,
                              "cameraMicrosecondsOffset");
-#if 0
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
-#else
-        outputUnless(std::cout, root["streamBeaconDebugInfo"].isNull())
-            << MESSAGE_PREFIX << PARAMNAME("streamBeaconDebugInfo")
-            << " not yet implemented in the new tracker";
-#endif
 
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
         if (!config.offsetToCentroid) {

@@ -90,6 +90,33 @@ using osvr::vbtracker::BodyId;
 class UnifiedVideoInertialTracker : boost::noncopyable {
   public:
     using size_type = std::size_t;
+
+  private:
+    osvr::pluginkit::DeviceToken m_dev;
+    OSVR_ClientContext m_clientCtx;
+    OSVR_ClientInterface m_clientInterface;
+    OSVR_TrackerDeviceInterface m_tracker;
+    OSVR_AnalogDeviceInterface m_analog;
+    osvr::vbtracker::ImageSourcePtr m_source;
+    cv::Mat m_frame;
+    cv::Mat m_imageGray;
+    TrackingSystemPtr m_trackingSystem;
+    /// @todo kind-of assumes there's only one body.
+    TrackedBody *m_mainBody = nullptr;
+    /// @todo kind-of assumes there's only one body.
+    TrackedBodyIMU *m_imu = nullptr;
+    const double m_additionalPrediction;
+    const std::int32_t m_camUsecOffset = 0;
+    const std::int32_t m_oriUsecOffset = 0;
+    const std::int32_t m_angvelUsecOffset = 0;
+    const bool m_continuousReporting;
+    const bool m_debugData;
+    BodyReportingVector m_bodyReportingVector;
+    std::unique_ptr<TrackerThread> m_trackerThreadManager;
+    bool m_threadLoopStarted = false;
+    std::thread m_trackerThread;
+
+  public:
     UnifiedVideoInertialTracker(OSVR_PluginRegContext ctx,
                                 osvr::vbtracker::ImageSourcePtr &&source,
                                 osvr::vbtracker::ConfigParams params,
@@ -100,7 +127,8 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
           m_camUsecOffset(params.cameraMicrosecondsOffset),
           m_oriUsecOffset(params.imu.orientationMicrosecondsOffset),
           m_angvelUsecOffset(params.imu.angularVelocityMicrosecondsOffset),
-          m_continuousReporting(params.continuousReporting) {
+          m_continuousReporting(params.continuousReporting),
+          m_debugData(params.streamBeaconDebugInfo) {
         if (params.numThreads > 0) {
             // Set the number of threads for OpenCV to use.
             cv::setNumThreads(params.numThreads);
@@ -111,10 +139,10 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
 
         // Configure the tracker interface.
         osvrDeviceTrackerConfigure(opts, &m_tracker);
-#if 0
-        osvrDeviceAnalogConfigure(opts, &m_analog,
-                                  DEBUGGABLE_BEACONS * DATAPOINTS_PER_BEACON);
-#endif
+        if (m_debugData) {
+            osvrDeviceAnalogConfigure(opts, &m_analog,
+                                      osvr::vbtracker::DEBUG_ANALOGS_REQUIRED);
+        }
 
         /// Create the analysis device token with the options
         OSVR_DeviceToken dev;
@@ -291,7 +319,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
         m_trackerThreadManager.reset(new TrackerThread(
             *m_trackingSystem, *m_source, m_bodyReportingVector,
             osvr::vbtracker::getHDKCameraParameters(), m_camUsecOffset,
-            !m_continuousReporting));
+            !m_continuousReporting, m_debugData));
 
         /// This will start the thread, but it won't enter its full main loop
         /// until we call permitStart()
@@ -309,32 +337,6 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
             m_trackerThread = std::thread();
         }
     }
-
-  private:
-    osvr::pluginkit::DeviceToken m_dev;
-    OSVR_ClientContext m_clientCtx;
-    OSVR_ClientInterface m_clientInterface;
-    OSVR_TrackerDeviceInterface m_tracker;
-#if 0
-    OSVR_AnalogDeviceInterface m_analog;
-#endif
-    osvr::vbtracker::ImageSourcePtr m_source;
-    cv::Mat m_frame;
-    cv::Mat m_imageGray;
-    TrackingSystemPtr m_trackingSystem;
-    /// @todo kind-of assumes there's only one body.
-    TrackedBody *m_mainBody = nullptr;
-    /// @todo kind-of assumes there's only one body.
-    TrackedBodyIMU *m_imu = nullptr;
-    const double m_additionalPrediction;
-    const std::int32_t m_camUsecOffset = 0;
-    const std::int32_t m_oriUsecOffset = 0;
-    const std::int32_t m_angvelUsecOffset = 0;
-    const bool m_continuousReporting;
-    BodyReportingVector m_bodyReportingVector;
-    std::unique_ptr<TrackerThread> m_trackerThreadManager;
-    bool m_threadLoopStarted = false;
-    std::thread m_trackerThread;
 };
 
 inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
@@ -363,6 +365,13 @@ inline OSVR_ReturnCode UnifiedVideoInertialTracker::update() {
             OSVR_TRUE == report.vel.linearVelocityValid) {
             osvrDeviceTrackerSendVelocityTimestamped(
                 m_dev, m_tracker, &report.vel, i, &report.timestamp);
+        }
+    }
+    if (m_debugData) {
+        osvr::vbtracker::DebugArray arr;
+        /// send each debug report that has been queued.
+        while (m_trackerThreadManager->checkForDebugData(arr)) {
+            osvrDeviceAnalogSetValues(m_dev, m_analog, arr.data(), arr.size());
         }
     }
     return OSVR_RETURN_SUCCESS;

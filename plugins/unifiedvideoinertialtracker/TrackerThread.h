@@ -44,6 +44,7 @@
 #include <osvr/TypePack/List.h>
 
 // Standard includes
+#include <array>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
@@ -57,6 +58,12 @@ namespace osvr {
 namespace vbtracker {
     static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{2};
 
+    static const auto MAX_DEBUG_BEACONS = 34;
+    static const auto DEBUG_ANALOGS_PER_BEACON = 6;
+    static const auto DEBUG_ANALOGS_REQUIRED =
+        MAX_DEBUG_BEACONS * DEBUG_ANALOGS_PER_BEACON;
+
+    using DebugArray = std::array<double, DEBUG_ANALOGS_REQUIRED>;
     struct BodyIdOrdering {
         bool operator()(BodyId const &lhs, BodyId const &rhs) const {
             return lhs.value() < rhs.value();
@@ -72,8 +79,8 @@ namespace vbtracker {
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
                       BodyReportingVector &reportingVec,
                       CameraParameters const &camParams,
-                      std::int32_t cameraUsecOffset = 0,
-                      bool bufferImu = false);
+                      std::int32_t cameraUsecOffset = 0, bool bufferImu = false,
+                      bool debugData = false);
         ~TrackerThread();
 
         /// Thread function-call operator: should be invoked by a lambda in a
@@ -100,6 +107,8 @@ namespace vbtracker {
         bool submitIMUReport(TrackedBodyIMU &imu,
                              util::time::TimeValue const &tv,
                              OSVR_AngularVelocityReport const &report);
+
+        bool checkForDebugData(DebugArray &data);
         /// @}
 
         /// Call from image processing thread to signal completion of frame
@@ -158,6 +167,8 @@ namespace vbtracker {
         /// reporting vector with all new data)
         const bool m_bufferImu = false;
 
+        const bool m_debugData = false;
+
         using our_clock = std::chrono::steady_clock;
 
         bool shouldSendImuReport() {
@@ -203,6 +214,8 @@ namespace vbtracker {
         bool m_timeConsumingImageStepComplete = false;
         folly::ProducerConsumerQueue<IMUMessage> m_imuMessages;
         /// @}
+
+        folly::ProducerConsumerQueue<DebugArray> m_debugDataMessages;
 
         ImageProcessingThread *imageProcThreadObj_ = nullptr;
 
