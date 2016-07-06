@@ -84,6 +84,7 @@ set(API
     "${HEADER_LOCATION}/Microsleep.h"
     "${HEADER_LOCATION}/NumberTypeManipulation.h"
     "${HEADER_LOCATION}/OpenCVTypeDispatch.h"
+    "${HEADER_LOCATION}/OpenCVVersion.h"
     "${HEADER_LOCATION}/PluginCallbackTypesC.h"
     "${HEADER_LOCATION}/PluginRegContextC.h"
     "${HEADER_LOCATION}/PointerWrapper.h"
