@@ -55,6 +55,7 @@ if(BUILD_ADVANCED_DEV_TOOLS)
         PUBLIC
         ${VIDEOTRACKER_EXTRA_LIBS}
         opencv_core
+        osvrUtil
         JsonCpp::JsonCpp)
     target_compile_definitions(blob_extraction_demo
         PRIVATE

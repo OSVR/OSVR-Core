@@ -25,10 +25,15 @@
 #ifndef INCLUDED_EdgeHoleBasedLedExtractor_h_GUID_225A962F_C636_4CA5_2D16_964D63A0571A
 #define INCLUDED_EdgeHoleBasedLedExtractor_h_GUID_225A962F_C636_4CA5_2D16_964D63A0571A
 
+/// @todo Disabled for now because in one testing/timing run with ETW, measured
+/// to increase average blob extraction time from 2.17ms to 2.53ms...
+#undef OSVR_USE_REALTIME_LAPLACIAN
+
 // Internal Includes
 #include <BlobExtractor.h>
 #include <BlobParams.h>
 #include <LedMeasurement.h>
+#include <osvr/Util/OpenCVVersion.h>
 
 // Library/third-party includes
 #include <opencv2/core/core.hpp>
@@ -40,15 +45,17 @@
 #include <tuple>
 #include <vector>
 
+#if defined(OSVR_OPENCV_3PLUS) && defined(OSVR_USE_REALTIME_LAPLACIAN)
+/// @todo Realtime Laplacian currently not ported to OpenCV 3+
+#undef OSVR_USE_REALTIME_LAPLACIAN
+#endif
+
 /// @todo Sadly can't enable this until we have a persistent thread for image
 /// processing, since thread-local storage is used by OpenCV for its OpenCL
 /// state.
 #undef OSVR_PERMIT_OPENCL
 
-#if ((defined(CV_VERSION_EPOCH) && CV_VERSION_EPOCH >= 3) ||                   \
-     (!defined(CV_VERSION_EPOCH) && defined(CV_VERSION_MAJOR) &&               \
-      CV_VERSION_MAJOR >= 3)) &&                                               \
-    defined(OSVR_PERMIT_OPENCL)
+#if defined(OSVR_OPENCV_3PLUS) && defined(OSVR_PERMIT_OPENCL)
 #define OSVR_EDGEHOLE_UMAT 1
 #else
 #define OSVR_EDGEHOLE_UMAT 0
@@ -140,9 +147,14 @@ namespace vbtracker {
 
         /// Erosion filter to remove spurious edges pointing out the camera gave
         /// us an mjpeg-compressed stream.
+        cv::Mat compressionArtifactRemovalKernel_;
+#ifdef OSVR_OPENCV_2
         cv::Ptr<cv::FilterEngine> compressionArtifactRemoval_;
+#endif
 
+#ifdef OSVR_USE_REALTIME_LAPLACIAN
         std::unique_ptr<RealtimeLaplacian> laplacianImpl_;
+#endif
 
         ContourList contours_;
         LedMeasurementVec measurements_;

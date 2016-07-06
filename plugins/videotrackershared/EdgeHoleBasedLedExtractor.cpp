@@ -25,8 +25,11 @@
 // Internal Includes
 #include "EdgeHoleBasedLedExtractor.h"
 #include "OptionalStream.h"
-#include "RealtimeLaplacian.h"
 #include "cvUtils.h"
+
+#ifdef OSVR_USE_REALTIME_LAPLACIAN
+#include "RealtimeLaplacian.h"
+#endif
 
 // Library/third-party includes
 #ifdef OSVR_UVBI_CORE
@@ -37,10 +40,6 @@
 // Standard includes
 #include <iostream>
 #include <utility>
-
-/// @todo Disabled for now because in one testing/timing run with ETW, measured
-/// to increase average blob extraction time from 2.17ms to 2.53ms...
-#undef OSVR_USE_REALTIME_LAPLACIAN
 
 namespace osvr {
 namespace vbtracker {
@@ -57,15 +56,22 @@ namespace vbtracker {
 
     EdgeHoleBasedLedExtractor::EdgeHoleBasedLedExtractor(
         EdgeHoleParams const &extractorParams)
-        : extParams_(extractorParams),
+        : extParams_(extractorParams)
+#ifdef OSVR_USE_REALTIME_LAPLACIAN
+          ,
           laplacianImpl_(new RealtimeLaplacian(EDGE_DETECT_DEST_DEPTH,
                                                extParams_.laplacianKSize,
-                                               extParams_.laplacianScale)) {
-        cv::Mat kernel =
+                                               extParams_.laplacianScale))
+#endif
+    {
+
+        compressionArtifactRemovalKernel_ =
             cv::Mat::ones(cv::Size(3, 3), CV_8U) *
             static_cast<std::uint8_t>(extractorParams.erosionKernelValue);
-        compressionArtifactRemoval_ =
-            cv::createMorphologyFilter(cv::MORPH_ERODE, CV_8U, kernel);
+#ifdef OSVR_OPENCV_2
+        compressionArtifactRemoval_ = cv::createMorphologyFilter(
+            cv::MORPH_ERODE, CV_8U, compressionArtifactRemovalKernel_);
+#endif
     }
 #ifdef OSVR_UVBI_CORE
     namespace tracing = ::osvr::common::tracing;
@@ -124,7 +130,11 @@ namespace vbtracker {
 
         /// removal of mjpeg artifacts.
         if (extParams_.edgeDetectErosion) {
+#ifdef OSVR_OPENCV_2
             compressionArtifactRemoval_->apply(edge_, edge_);
+#else
+            cv::erode(edge_, edge_, compressionArtifactRemovalKernel_);
+#endif
         }
 
         // turn the edge detection into a binary image.
