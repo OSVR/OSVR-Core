@@ -44,6 +44,7 @@
 #include <vector>
 
 // Include files for DirectShow video input
+#define NO_DSHOW_STRSAFE
 #include <dshow.h>
 
 // All we need from the "deprecated" qedit.h header file are these few lousy
