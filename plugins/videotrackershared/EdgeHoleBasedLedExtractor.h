@@ -50,9 +50,9 @@
 #undef OSVR_USE_REALTIME_LAPLACIAN
 #endif
 
-/// @todo Sadly can't enable this until we have a persistent thread for image
-/// processing, since thread-local storage is used by OpenCV for its OpenCL
-/// state.
+/// @todo Can't enable this even though we now have a persistent thread, because
+/// we don't have a timing guarantee on the operations and it may actually be
+/// slower (as it was in initial testing for me on an Intel Core i7-4600)
 #undef OSVR_PERMIT_OPENCL
 
 #if defined(OSVR_OPENCV_3PLUS) && defined(OSVR_PERMIT_OPENCL)
