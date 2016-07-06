@@ -70,8 +70,8 @@ namespace vbtracker {
                 << "  - press 's' to show the detected blobs and the status of "
                    "recognized beacons (default)\n"
                 << "  - press 'p' to show the same status view as above, but "
-                   "with the (re)projected locations of even non-detected beacons "
-                   "drawn\n"
+                   "with the (re)projected locations of even non-detected "
+                   "beacons drawn\n"
                 << "  - press 'b' to show the labeled blobs and the "
                    "reprojected beacons\n"
                 << "  - press 'i' to show the raw input image\n"
@@ -124,14 +124,14 @@ namespace vbtracker {
         /// easily do things to it.
         class DebugImage {
           public:
-            explicit DebugImage(cv::Mat &im) : image(im) {}
+            explicit DebugImage(cv::Mat &im) : image_(im) {}
             DebugImage(DebugImage const &) = delete;
             DebugImage &operator=(DebugImage const &) = delete;
 
             /// Utility function to draw a keypoint-sized circle on the image at
             /// the LED location.
             void drawLedCircle(Led const &led, bool filled, cv::Vec3b color) {
-                cv::circle(image, led.getLocation(),
+                cv::circle(image_, led.getLocation(),
                            led.getMeasurement().diameter / 2.,
                            cv::Scalar(color), filled ? -1 : 1);
             }
@@ -142,7 +142,7 @@ namespace vbtracker {
                               cv::Vec3b color = CVCOLOR_GRAY, double size = 0.5,
                               cv::Point2f offset = cv::Point2f(0, 0)) {
                 auto label = std::to_string(id.value());
-                cv::putText(image, label, loc.point + offset,
+                cv::putText(image_, label, loc.point + offset,
                             cv::FONT_HERSHEY_SIMPLEX, size, cv::Scalar(color));
             }
 
@@ -175,18 +175,26 @@ namespace vbtracker {
                                    cv::Vec3b color = CVCOLOR_GREEN,
                                    std::int16_t line = 1) {
                 static const auto LINE_OFFSET = 20.f;
-                cv::putText(image, message, cv::Point2f(0, line * LINE_OFFSET),
+                cv::putText(image_, message, cv::Point2f(0, line * LINE_OFFSET),
                             cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(color));
             }
 
-          private:
             WindowCoordsPoint toWindowCoords(cv::Point2f loc) const {
                 return USING_INVERTED_LED_POSITION
-                           ? WindowCoordsPoint{cv::Point2f(image.cols - loc.x,
-                                                           image.rows - loc.y)}
+                           ? WindowCoordsPoint{cv::Point2f(image_.cols - loc.x,
+                                                           image_.rows - loc.y)}
                            : WindowCoordsPoint{loc};
             }
-            cv::Mat &image;
+
+            WindowCoordsPoint
+            vecToWindowCoords(Eigen::Vector2d const &loc) const {
+                return toWindowCoords(eigenVecToPoint(loc));
+            }
+
+            cv::Mat &image() { return image_; }
+
+          private:
+            cv::Mat &image_;
         };
     } // namespace
     namespace {
@@ -198,23 +206,55 @@ namespace vbtracker {
                          CameraParameters const &camParams)
                 : m_body(target.getBody()),
                   m_xform3d(m_body.getState().getIsometry()),
+                  m_offset(target.getTargetToBody()),
                   m_fl(camParams.focalLength()),
                   m_pp(camParams.eiPrincipalPoint()) {}
 
             /// Function call operator - takes in a 3d vector in body space and
             /// projects it into 2d.
             Eigen::Vector2d operator()(Eigen::Vector3d const &bodyPoint) {
-                Eigen::Vector3d camPoints = m_xform3d * bodyPoint;
+                Eigen::Vector3d camPoints = m_xform3d * (bodyPoint + m_offset);
                 return (camPoints.head<2>() / camPoints[2]) * m_fl + m_pp;
             }
 
           private:
             TrackedBody const &m_body;
             Eigen::Isometry3d m_xform3d;
+            Eigen::Vector3d m_offset;
             double m_fl;
             Eigen::Vector2d m_pp;
         };
     } // namespace
+    inline void drawOriginAxes(Reprojection &reproject, DebugImage &dbgImg,
+                               double size = 0.02) {
+        auto drawLine = [&](Eigen::Vector3d const &axis, cv::Vec3b color) {
+            auto beginWindowPoint =
+                dbgImg.vecToWindowCoords(reproject(axis * 0.5 * size));
+            auto endWindowPoint =
+                dbgImg.vecToWindowCoords(reproject(axis * -0.5 * size));
+            cv::line(dbgImg.image(), beginWindowPoint.point,
+                     endWindowPoint.point, cv::Scalar(color));
+        };
+
+        drawLine(Eigen::Vector3d::UnitX(), CVCOLOR_RED);
+        drawLine(Eigen::Vector3d::UnitY(), CVCOLOR_GREEN);
+        drawLine(Eigen::Vector3d::UnitZ(), CVCOLOR_BLUE);
+    }
+
+    inline Eigen::Vector2d
+    getBeaconReprojection(Reprojection &reprojection,
+                          TrackedBodyTarget const &target,
+                          ZeroBasedBeaconId beaconId) {
+
+#if 0
+        // We want to un-compensate for the beacon offset here.
+        return reprojection(target.getBeaconAutocalibPosition(beaconId) -
+                            target.getBeaconOffset());
+#else
+        return reprojection(target.getBeaconAutocalibPosition(beaconId));
+#endif
+    }
+
     cv::Mat TrackingDebugDisplay::createAnnotatedBlobImage(
         TrackingSystem const &tracking, CameraParameters const &camParams,
         cv::Mat const &blobImage) {
@@ -258,7 +298,7 @@ namespace vbtracker {
             for (size_type i = 0; i < numBeacons; ++i) {
                 auto beaconId = ZeroBasedBeaconId(i);
                 Eigen::Vector2d imagePoint =
-                    reproject(targetPtr->getBeaconAutocalibPosition(beaconId));
+                    getBeaconReprojection(reproject, *targetPtr, beaconId);
                 img.drawLedLabel(makeOneBased(beaconId), imagePoint,
                                  CVCOLOR_GREEN, textSize, labelOffset);
             }
@@ -329,6 +369,10 @@ namespace vbtracker {
         if (gotPose) {
             /// We have a pose - so we'll reproject identified beacons.
             Reprojection reproject{*targetPtr, camParams};
+
+            /// Draw axes.
+            drawOriginAxes(reproject, img);
+
             for (auto const &led : targetPtr->leds()) {
                 if (led.identified()) {
                     /// Identified, and we have a pose
@@ -350,8 +394,8 @@ namespace vbtracker {
                     img.drawLedLabel(led, baseBeaconLabelColor, textSize);
 
                     /// label at reprojection
-                    Eigen::Vector2d imagePoint = reproject(
-                        targetPtr->getBeaconAutocalibPosition(beaconId));
+                    Eigen::Vector2d imagePoint =
+                        getBeaconReprojection(reproject, *targetPtr, beaconId);
                     auto windowPoint =
                         WindowCoordsPoint{eigenVecToPoint(imagePoint)};
                     img.drawLedLabel(makeOneBased(beaconId), imagePoint,
@@ -382,8 +426,8 @@ namespace vbtracker {
                         continue;
                     }
                     /// label at reprojection
-                    Eigen::Vector2d imagePoint = reproject(
-                        targetPtr->getBeaconAutocalibPosition(beaconId));
+                    Eigen::Vector2d imagePoint =
+                        getBeaconReprojection(reproject, *targetPtr, beaconId);
                     auto windowPoint =
                         WindowCoordsPoint{eigenVecToPoint(imagePoint)};
                     img.drawLedLabel(makeOneBased(beaconId), imagePoint,

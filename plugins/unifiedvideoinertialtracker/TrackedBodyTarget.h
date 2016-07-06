@@ -180,10 +180,14 @@ namespace vbtracker {
         double
         getInternalStatusMeasurement(TargetStatusMeasurement measurement) const;
 
-      private:
+        Eigen::Vector3d const &getTargetToBody() const {
+            return m_targetToBody;
+        }
+
         /// Get the beacon offset transformed into world space
         Eigen::Vector3d getStateCorrection() const;
 
+      private:
         std::ostream &msg() const;
         void enterKalmanMode();
         void enterRANSACMode();
