@@ -32,6 +32,7 @@
 #include <opencv2/core/core.hpp>
 
 // Standard includes
+#include <condition_variable>
 #include <cstdint>
 #include <fstream>
 #include <iosfwd>
