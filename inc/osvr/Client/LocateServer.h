@@ -42,14 +42,12 @@ namespace osvr {
         /** @brief INTERNAL ONLY - get the current server directory, if available. */
         inline boost::optional<std::string> getServerBinaryDirectoryPath() {
             auto server = osvr::common::getEnvironmentVariable("OSVR_SERVER_ROOT");
-            if (server) {
-                std::string pathSep;
-                if (server->size() > 0) {
-                    char lastChar = server->at(server->size() - 1);
-                    if (lastChar == '/' || lastChar == '\\') {
-                        return server->substr(0, server->size() - 1);
-                    }
-                }
+            if (!server || server->empty()) {
+                return server;
+            };
+            char lastChar = server->back();
+            if (lastChar == '/' || lastChar == '\\') {
+                server->pop_back();
             }
             return server;
         }
@@ -59,11 +57,11 @@ namespace osvr {
             auto binPath = getServerBinaryDirectoryPath();
             if (binPath) {
 #if defined(OSVR_WINDOWS)
-                std::string pathExtension = ".exe";
-                std::string pathSep = "\\";
+                static const std::string pathExtension = ".exe";
+                static const std::string pathSep = "\\";
 #else
-                std::string pathExtension = "";
-                std::string pathSEp = '/';
+                static const std::string pathExtension = "";
+                static const std::string pathSEp = "/";
 #endif
                 return *binPath + pathSep + "osvr_server" + pathExtension;
             }
