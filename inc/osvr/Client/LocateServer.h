@@ -44,8 +44,8 @@ namespace osvr {
             auto server = osvr::common::getEnvironmentVariable("OSVR_SERVER_ROOT");
             if (!server || server->empty()) {
                 return server;
-            };
-            char lastChar = server->back();
+            }
+            const char lastChar = server->back();
             if (lastChar == '/' || lastChar == '\\') {
                 server->pop_back();
             }
@@ -54,7 +54,7 @@ namespace osvr {
 
         /** @brief INTERNAL ONLY - get the path to the server executable, if available. */
         inline boost::optional<std::string> getServerBinaryPath() {
-            auto binPath = getServerBinaryDirectoryPath();
+            const auto binPath = getServerBinaryDirectoryPath();
             if (binPath) {
 #if defined(OSVR_WINDOWS)
                 static const std::string pathExtension = ".exe";
