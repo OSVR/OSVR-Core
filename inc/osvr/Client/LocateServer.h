@@ -61,7 +61,7 @@ namespace osvr {
                 static const std::string pathSep = "\\";
 #else
                 static const std::string pathExtension = "";
-                static const std::string pathSEp = "/";
+                static const std::string pathSep = "/";
 #endif
                 return *binPath + pathSep + "osvr_server" + pathExtension;
             }
