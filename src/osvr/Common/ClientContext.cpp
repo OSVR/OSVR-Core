@@ -122,6 +122,10 @@ osvr::common::PathTree const &OSVR_ClientContextObject::getPathTree() const {
     return m_getPathTree();
 }
 
+osvr::common::SystemComponent *OSVR_ClientContextObject::getSystemComponent() {
+    return m_getSystemComponent();
+}
+
 void OSVR_ClientContextObject::sendRoute(std::string const &route) {
     m_sendRoute(route);
 }

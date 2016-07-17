@@ -112,6 +112,31 @@ namespace clientkit {
         return osvrClientCheckStatus(m_context) == OSVR_RETURN_SUCCESS;
     }
 
+    inline std::string ClientContext::getGestureNamefromID(util::StringID id) {
+
+        size_t length = 0;
+        OSVR_ReturnCode ret =
+            osvrClientGetGestureNameLength(m_context, id.value(), &length);
+        if (OSVR_RETURN_SUCCESS != ret) {
+            throw std::runtime_error(
+                "Invalid context or null reference to length variable.");
+        }
+
+        if (0 == length) {
+            return std::string();
+        }
+
+        util::StringBufferBuilder buf;
+
+        ret = osvrClientGetGestureNameFromID(
+            m_context, id.value(), buf.getBufferOfSize(length), length);
+        if (OSVR_RETURN_SUCCESS != ret) {
+            throw std::runtime_error("Invalid context, null reference to "
+                                     "buffer, or buffer is too small.");
+        }
+        return buf.str();
+    }
+
 } // end namespace clientkit
 
 } // end namespace osvr

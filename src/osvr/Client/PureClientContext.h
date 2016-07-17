@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/BaseDevicePtr.h>
-#include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/Transform.h>
 #include <osvr/Common/NetworkingSupport.h>
@@ -38,6 +38,7 @@
 #include <osvr/Client/RemoteHandlerFactory.h>
 #include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Common/PathTreeOwner.h>
+#include <osvr/Client/RemoteHandlerFactory.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -73,6 +74,8 @@ namespace client {
             common::ClientInterfacePtr const &iface) override;
 
         common::PathTree const &m_getPathTree() const override;
+
+        common::SystemComponent *m_getSystemComponent() override;
 
         common::Transform const &m_getRoomToWorldTransform() const override;
 
@@ -114,6 +117,9 @@ namespace client {
         /// @brief Manager of client interface objects and their interaction
         /// with the path tree.
         ClientInterfaceObjectManager m_ifaceMgr;
+
+        /// @brief Called whenever an updated string to ID map is available
+        void m_handleRegStringMap(common::GestureMapData const &data);
     };
 } // namespace client
 } // namespace osvr

@@ -4,6 +4,7 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
     com_osvr_example_Configured
     com_osvr_example_DummyDetectAndCreateAsync
     com_osvr_example_EyeTracker
+    com_osvr_example_Gesture
     com_osvr_example_Locomotion
     com_osvr_example_MultipleAsync
     org_osvr_example_Tracker)
@@ -39,6 +40,7 @@ endforeach()
 foreach(pluginname
     com_osvr_example_Configured
     com_osvr_example_EyeTracker
+    com_osvr_example_Gesture
     com_osvr_example_Locomotion
     org_osvr_example_Tracker
     com_osvr_example_MultipleAsync)

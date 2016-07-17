@@ -86,9 +86,8 @@ namespace common {
                                   timestamp);
     }
 
-    int VRPN_CALLBACK
-    DirectionComponent::m_handleDirectionRecord(void *userdata,
-                                                vrpn_HANDLERPARAM p) {
+    int VRPN_CALLBACK DirectionComponent::m_handleDirectionRecord(
+        void *userdata, vrpn_HANDLERPARAM p) {
         auto self = static_cast<DirectionComponent *>(userdata);
         auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
 

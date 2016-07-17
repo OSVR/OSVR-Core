@@ -26,16 +26,8 @@
 #define INCLUDED_ClientContext_decl_h_GUID_1EFFF79A_3D9F_4794_9F98_37010949F386
 
 // Internal Includes
-// - none
-
-// Library/third-party includes
-// - none
-
-// Standard includes
-// - none
-
-// Internal Includes
 #include <osvr/ClientKit/ContextC.h>
+#include <osvr/Util/StringIds.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -94,6 +86,11 @@ namespace clientkit {
         /// be taking longer than usual to connect. The result will not change
         /// from false to true without calling update() - consider a loop.
         bool checkStatus() const;
+
+        /// @brief converts gesture ID to string name. Not for frequent use -
+        /// typical usage is to get a gesture ID from a string, and use that for
+        /// comparison.
+        std::string getGestureNamefromID(util::StringID id);
 
         /// @brief Gets the bare OSVR_ClientContext.
         OSVR_ClientContext get();

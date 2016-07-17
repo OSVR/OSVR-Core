@@ -107,6 +107,15 @@ namespace common {
             }
         };
 
+        // Template specialization to handle OSVR_GestureReport
+        template <> struct ReportStateGetter<OSVR_GestureReport> {
+            static OSVR_GestureState const &apply(OSVR_GestureReport const &r) {
+                return r.state;
+            }
+            static OSVR_GestureState apply(OSVR_GestureReport &r) {
+                return r.state;
+            }
+        };
     } // namespace traits
 
     /// @brief Generic const accessor for the "state" member of a report.

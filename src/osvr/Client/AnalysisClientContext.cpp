@@ -115,5 +115,9 @@ namespace client {
     common::PathTree const &AnalysisClientContext::m_getPathTree() const {
         return m_pathTreeOwner.get();
     }
+
+    common::SystemComponent *AnalysisClientContext::m_getSystemComponent() {
+        return m_systemComponent;
+    }
 } // namespace client
 } // namespace osvr

@@ -31,15 +31,21 @@
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Common/PathTree_fwd.h>
+#include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Common/RegisteredStringMap.h>
+#include <osvr/Common/CommonComponent_fwd.h>
 
 // Library/third-party includes
 #include <json/value.h>
+#include <vrpn_BaseClass.h>
 
 // Standard includes
-// - none
+#include <vector>
+#include <string>
 
 namespace osvr {
 namespace common {
+
     namespace messages {
         class RoutesFromServer : public MessageRegistration<RoutesFromServer> {
           public:
@@ -69,7 +75,26 @@ namespace common {
             class MessageSerialization;
             static const char *identifier();
         };
+
+        /// message to send serialized name to ID map
+        class RegisteredStringMapRecord
+            : public MessageRegistration<RegisteredStringMapRecord> {
+          public:
+            class MessageSerialization;
+
+            static const char *identifier();
+        };
+
     } // namespace messages
+
+    struct RegStringMapData {
+        RegisteredStringMap map;
+        CorrelatedStringMap corrMap;
+    };
+
+    using GestureMapData = std::vector<std::string>;
+    using GestureDataPtr = shared_ptr<RegStringMapData>;
+    typedef shared_ptr<SystemComponent> SystemComponentPtr;
 
     /// @brief BaseDevice component, to be used only with the "OSVR" special
     /// device.
@@ -108,17 +133,40 @@ namespace common {
 
         typedef std::function<void(Json::Value const &,
                                    util::time::TimeValue const &)> JsonHandler;
-        OSVR_COMMON_EXPORT void registerReplaceTreeHandler(JsonHandler cb);
+        OSVR_COMMON_EXPORT void
+        registerReplaceTreeHandler(JsonHandler const &cb);
 
         OSVR_COMMON_EXPORT void sendReplacementTree(PathTree &tree);
+
+        /// @brief Get shared ownership of the gesture map data structures
+        OSVR_COMMON_EXPORT GestureDataPtr getGestureMap();
+
+        /// @brief Message from server to client, containing registeredStringMap
+        messages::RegisteredStringMapRecord gestureStringMap;
+
+        OSVR_COMMON_EXPORT void sendGestureMap();
+
+        typedef std::function<void(GestureMapData const &)> GestureMapHandler;
+        OSVR_COMMON_EXPORT void
+        registerGestureMapHandler(GestureMapHandler const &cb);
 
       private:
         SystemComponent();
         virtual void m_parentSet();
-        static int VRPN_CALLBACK
-        m_handleReplaceTree(void *userdata, vrpn_HANDLERPARAM p);
 
+        static int VRPN_CALLBACK m_handleReplaceTree(void *userdata,
+                                                     vrpn_HANDLERPARAM p);
         std::vector<JsonHandler> m_replaceTreeHandlers;
+
+        static int VRPN_CALLBACK m_handleRegStringMap(void *userdata,
+                                                      vrpn_HANDLERPARAM p);
+        std::vector<GestureMapHandler> m_cb_map;
+
+        // name to ID map used by the gesture interface class
+        GestureDataPtr m_nameToIDMap;
+
+        /// @brief Common component for system device
+        common::CommonComponent *m_commonComponent;
     };
 } // namespace common
 } // namespace osvr

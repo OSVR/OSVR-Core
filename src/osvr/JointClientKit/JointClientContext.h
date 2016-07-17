@@ -78,6 +78,8 @@ namespace client {
 
         common::PathTree const &m_getPathTree() const override;
 
+        virtual osvr::common::SystemComponent *m_getSystemComponent();
+
         common::Transform const &m_getRoomToWorldTransform() const override {
             return m_roomToWorld;
         }

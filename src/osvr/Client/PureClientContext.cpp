@@ -106,6 +106,12 @@ namespace client {
         m_systemDevice = common::createClientDevice(sysDeviceName, m_mainConn);
         m_systemComponent =
             m_systemDevice->addComponent(common::SystemComponent::create());
+
+        /// Receive string map data whenever it comes
+        m_systemComponent->registerGestureMapHandler(
+            [&](common::GestureMapData const &dataMap) {
+                m_handleRegStringMap(dataMap);
+            });
         using DedupJsonFunction =
             common::DeduplicatingFunctionWrapper<Json::Value const &>;
         m_systemComponent->registerReplaceTreeHandler(
@@ -205,9 +211,19 @@ namespace client {
         return m_roomToWorld;
     }
 
+    common::SystemComponent *PureClientContext::m_getSystemComponent() {
+        return m_systemComponent;
+    }
+
     void PureClientContext::m_setRoomToWorldTransform(
         common::Transform const &xform) {
         m_roomToWorld = xform;
+    }
+
+    void PureClientContext::m_handleRegStringMap(
+        common::GestureMapData const &data) {
+        auto map = m_systemComponent->getGestureMap();
+        map->corrMap.setupPeerMappings(data);
     }
 } // namespace client
 } // namespace osvr

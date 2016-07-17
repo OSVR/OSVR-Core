@@ -27,6 +27,8 @@
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Common/SystemComponent.h>
+#include <osvr/Util/StringIds.h>
 
 // Library/third-party includes
 // - none
@@ -69,5 +71,51 @@ OSVR_ReturnCode osvrClientFreeInterface(OSVR_ClientContext ctx,
         /// interface.
         return OSVR_RETURN_FAILURE;
     }
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetGestureNameLength(
+    OSVR_ClientContext ctx, uint32_t id, size_t *len) {
+
+    if (ctx == nullptr) {
+        return OSVR_RETURN_FAILURE;
+    }
+    if (len == nullptr) {
+        return OSVR_RETURN_FAILURE;
+    }
+    /// @todo Shouldn't be hardcoded as the only registered string map - this
+    /// should be accessible as "interface-class-level" data for Gesture.
+    std::string entryName =
+        ctx->getSystemComponent()->getGestureMap()->corrMap.getStringFromId(
+            osvr::util::StringID(id));
+    *len = entryName.empty() ? 0 : (entryName.size() + 1);
+    return OSVR_RETURN_SUCCESS;
+}
+
+OSVR_ReturnCode osvrClientGetGestureNameFromID(OSVR_ClientContext ctx,
+                                               uint32_t id, char *buf,
+                                               size_t len) {
+
+    if (ctx == nullptr) {
+        return OSVR_RETURN_FAILURE;
+    }
+    if (buf == nullptr) {
+        return OSVR_RETURN_FAILURE;
+    }
+
+    /// @todo Shouldn't be hardcoded as the only registered string map - this
+    /// should be accessible as "interface-class-level" data for Gesture.
+    std::string entryName =
+        ctx->getSystemComponent()->getGestureMap()->corrMap.getStringFromId(
+            osvr::util::StringID(id));
+
+    if (entryName.size() + 1 > len) {
+        /// buffer too small.
+        return OSVR_RETURN_FAILURE;
+    }
+
+    /// @todo refactor to eliminate duplication
+    entryName.copy(buf, entryName.size());
+    buf[entryName.size()] = '\0';
     return OSVR_RETURN_SUCCESS;
 }

@@ -122,6 +122,10 @@ namespace client {
         common::ClientInterfacePtr const &iface) {
         m_ifaceMgr.releaseInterface(iface);
     }
+    
+    common::SystemComponent *JointClientContext::m_getSystemComponent() {
+        return m_systemComponent;
+    }
 
     bool JointClientContext::m_getStatus() const {
         /// Always connected, but don't always have a path tree.

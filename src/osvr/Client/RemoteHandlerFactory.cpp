@@ -28,6 +28,7 @@
 #include "ButtonRemoteFactory.h"
 #include "DirectionRemoteFactory.h"
 #include "EyeTrackerRemoteFactory.h"
+#include "GestureRemoteFactory.h"
 #include "ImagingRemoteFactory.h"
 #include "Location2DRemoteFactory.h"
 #include "LocomotionRemoteFactory.h"
@@ -49,6 +50,7 @@ namespace client {
         ButtonRemoteFactory(conns).registerWith(factory);
         ImagingRemoteFactory(conns).registerWith(factory);
         EyeTrackerRemoteFactory(conns).registerWith(factory);
+        GestureRemoteFactory(conns).registerWith(factory);
         Location2DRemoteFactory(conns).registerWith(factory);
         LocomotionRemoteFactory(conns).registerWith(factory);
         DirectionRemoteFactory(conns).registerWith(factory);

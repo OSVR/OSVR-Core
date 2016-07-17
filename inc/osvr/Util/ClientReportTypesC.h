@@ -38,6 +38,7 @@
 #include <osvr/Util/Vec3C.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/BoolC.h>
+#include <osvr/Util/PredefinedGesturesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -339,6 +340,31 @@ typedef struct OSVR_NaviPositionReport {
      * starting position */
     OSVR_NaviPositionState state;
 } OSVR_NaviPositionReport;
+
+/** @brief Type of int to identify gestures */
+typedef uint32_t OSVR_GestureID;
+
+/** @brief Type of string to identify gesture name */
+typedef char const *OSVR_GestureName;
+
+/** @brief Type of Gesture state */
+typedef uint8_t OSVR_GestureState;
+
+/** @brief OSVR_GestureState value indicating "gesture started/currently in
+   progress (occurring)"
+    (should be used for continuous gestures, since discrete start and complete
+   at the same time) */
+#define OSVR_GESTURE_IN_PROGRESS (1)
+
+/** @brief OSVR_GestureState value indicating "gesture is finished" */
+#define OSVR_GESTURE_COMPLETE (0)
+
+/** @brief Report type for a gesture event */
+typedef struct OSVR_GestureReport {
+    OSVR_GestureID gestureID;
+    OSVR_GestureState state;
+    OSVR_ChannelCount sensor;
+} OSVR_GestureReport;
 
 /** @} */
 

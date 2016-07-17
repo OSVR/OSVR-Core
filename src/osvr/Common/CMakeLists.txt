@@ -62,6 +62,7 @@ set(API
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${HEADER_LOCATION}/GeneralizedTransform.h"
+    "${HEADER_LOCATION}/GestureComponent.h"
     "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ImagingComponentConfig.h"
@@ -105,6 +106,7 @@ set(API
     "${HEADER_LOCATION}/ReportStateTraits.h"
     "${HEADER_LOCATION}/ReportTraits.h"
     "${HEADER_LOCATION}/ReportTypes.h"
+    "${HEADER_LOCATION}/RegisteredStringMap.h"
     "${HEADER_LOCATION}/ResolveFullTree.h"
     "${HEADER_LOCATION}/ResolveTreeNode.h"
     "${HEADER_LOCATION}/RouteContainer.h"
@@ -141,6 +143,7 @@ set(SOURCE
     DirectionComponent.cpp
     EyeTrackerComponent.cpp
     GeneralizedTransform.cpp
+    GestureComponent.cpp
     GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
