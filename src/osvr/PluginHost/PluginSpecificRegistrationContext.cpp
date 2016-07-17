@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "PluginSpecificRegistrationContextImpl.h"
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 
 // Library/third-party includes
 // - none

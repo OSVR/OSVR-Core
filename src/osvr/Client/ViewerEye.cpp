@@ -24,11 +24,11 @@
 
 // Internal Includes
 #include <osvr/Client/ViewerEye.h>
-#include <osvr/Common/ReportTypes.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/ReportTypes.h>
 #include <osvr/Util/EigenInterop.h>
-#include <osvr/Util/ProjectionMatrix.h>
 #include <osvr/Util/MatrixConventions.h>
+#include <osvr/Util/ProjectionMatrix.h>
 
 // Library/third-party includes
 // - none

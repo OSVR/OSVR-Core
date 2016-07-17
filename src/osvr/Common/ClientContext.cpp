@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
+#include "GetJSONStringFromTree.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
-#include "GetJSONStringFromTree.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>

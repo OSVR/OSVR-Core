@@ -24,13 +24,13 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/DirectionInterfaceC.h>
+#include "HandleNullContext.h"
+#include <osvr/Common/DirectionComponent.h>
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Common/DirectionComponent.h>
-#include "HandleNullContext.h"
+#include <osvr/PluginKit/DirectionInterfaceC.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes

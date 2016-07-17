@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ClientInterfaceFactory.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/ClientInterfaceFactory.h>
 
 // Library/third-party includes
 // - none

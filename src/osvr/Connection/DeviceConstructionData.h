@@ -29,8 +29,8 @@
 #include <osvr/Connection/DeviceInitObject.h>
 
 // Library/third-party includes
-#include <vrpn_Connection.h>
 #include <boost/noncopyable.hpp>
+#include <vrpn_Connection.h>
 
 // Standard includes
 // - none

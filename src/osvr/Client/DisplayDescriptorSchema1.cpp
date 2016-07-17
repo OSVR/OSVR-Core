@@ -28,8 +28,8 @@
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <boost/units/io.hpp>
 #include <boost/assert.hpp>
+#include <boost/units/io.hpp>
 
 // Standard includes
 #include <sstream>
@@ -119,7 +119,7 @@ namespace client {
                     e.m_CenterProjX = eye.get("center_proj_x", 0.5).asDouble();
                     e.m_CenterProjY = eye.get("center_proj_y", 0.5).asDouble();
                     if (eye.isMember("rotate_180")) {
-                        auto const& rot = eye["rotate_180"];
+                        auto const &rot = eye["rotate_180"];
                         if (rot.isBool()) {
                             e.m_rotate180 = rot.asBool();
                         } else {

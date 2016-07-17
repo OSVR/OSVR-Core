@@ -23,13 +23,13 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/BaseDevice.h>
-#include <osvr/Util/MessageKeys.h>
-#include <osvr/Common/Serialization.h>
-#include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/Buffer.h>
+#include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/PathTreeSerialization.h>
+#include <osvr/Common/Serialization.h>
+#include <osvr/Common/SystemComponent.h>
+#include <osvr/Util/MessageKeys.h>
 
 // Library/third-party includes
 #include <json/value.h>

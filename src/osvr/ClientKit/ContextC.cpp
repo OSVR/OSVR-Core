@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Client/CreateContext.h>
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Common/ClientContext.h>
-#include <osvr/Client/CreateContext.h>
 #include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
 #include <osvr/Util/Verbosity.h>

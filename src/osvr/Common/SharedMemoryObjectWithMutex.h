@@ -31,8 +31,8 @@
 // Library/third-party includes
 #include <boost/interprocess/interprocess_fwd.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
-#include <boost/interprocess/sync/sharable_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/sharable_lock.hpp>
 
 // Standard includes
 // - none

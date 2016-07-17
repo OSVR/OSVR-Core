@@ -24,19 +24,19 @@
 
 // Internal Includes
 #include "GenerateVrpnDynamicServer.h"
-#include "VrpnBaseFlexServer.h"
+#include "GenerateCompoundServer.h"
 #include "VrpnAnalogServer.h"
+#include "VrpnBaseFlexServer.h"
 #include "VrpnButtonServer.h"
 #include "VrpnTrackerServer.h"
-#include "GenerateCompoundServer.h"
 
 // Library/third-party includes
-#include <boost/mpl/vector.hpp>
 #include <boost/mpl/begin_end.hpp>
-#include <boost/mpl/next.hpp>
 #include <boost/mpl/deref.hpp>
-#include <boost/mpl/push_back.hpp>
 #include <boost/mpl/empty.hpp>
+#include <boost/mpl/next.hpp>
+#include <boost/mpl/push_back.hpp>
+#include <boost/mpl/vector.hpp>
 #include <boost/utility.hpp>
 
 // Standard includes
@@ -47,8 +47,8 @@ namespace connection {
 
     namespace server_generation {
         typedef boost::mpl::vector<vrpn_BaseFlexServer, VrpnAnalogServer,
-                                   VrpnButtonServer,
-                                   VrpnTrackerServer> ServerTypes;
+                                   VrpnButtonServer, VrpnTrackerServer>
+            ServerTypes;
         template <typename T> struct ShouldInclude {
             static bool predicate(DeviceConstructionData &);
         };

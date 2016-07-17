@@ -23,13 +23,13 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/ButtonInterfaceC.h>
-#include <osvr/Connection/DeviceInitObject.h>
-#include <osvr/Connection/ButtonServerInterface.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Connection/DeviceInterfaceBase.h>
-#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
 #include "HandleNullContext.h"
+#include <osvr/Connection/ButtonServerInterface.h>
+#include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/PluginKit/ButtonInterfaceC.h>
 #include <osvr/Util/PointerWrapper.h>
 
 // Library/third-party includes
@@ -38,7 +38,8 @@
 // Standard includes
 // - none
 
-struct OSVR_ButtonDeviceInterfaceObject : public osvr::connection::DeviceInterfaceBase {
+struct OSVR_ButtonDeviceInterfaceObject
+    : public osvr::connection::DeviceInterfaceBase {
     osvr::util::PointerWrapper<osvr::connection::ButtonServerInterface> button;
 };
 
@@ -55,11 +56,11 @@ osvrDeviceButtonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrDeviceButtonSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
-                                         OSVR_IN_PTR OSVR_ButtonDeviceInterface
-                                         iface,
-                                         OSVR_IN OSVR_ButtonState val,
-                                         OSVR_IN OSVR_ChannelCount chan) {
+OSVR_ReturnCode
+osvrDeviceButtonSetValue(OSVR_IN_PTR OSVR_DeviceToken dev,
+                         OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
+                         OSVR_IN OSVR_ButtonState val,
+                         OSVR_IN OSVR_ChannelCount chan) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
     return osvrDeviceButtonSetValueTimestamped(dev, iface, val, chan, &now);
@@ -83,11 +84,11 @@ OSVR_ReturnCode osvrDeviceButtonSetValueTimestamped(
     return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode osvrDeviceButtonSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
-                                          OSVR_IN_PTR OSVR_ButtonDeviceInterface
-                                              iface,
-                                          OSVR_IN_PTR OSVR_ButtonState val[],
-                                          OSVR_IN OSVR_ChannelCount chans) {
+OSVR_ReturnCode
+osvrDeviceButtonSetValues(OSVR_INOUT_PTR OSVR_DeviceToken dev,
+                          OSVR_IN_PTR OSVR_ButtonDeviceInterface iface,
+                          OSVR_IN_PTR OSVR_ButtonState val[],
+                          OSVR_IN OSVR_ChannelCount chans) {
     OSVR_TimeValue now;
     osvrTimeValueGetNow(&now);
     return osvrDeviceButtonSetValuesTimestamped(dev, iface, val, chans, &now);

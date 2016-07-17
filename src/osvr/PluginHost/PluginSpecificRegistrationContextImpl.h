@@ -26,18 +26,18 @@
 #define INCLUDED_PluginSpecificRegistrationContextImpl_h_GUID_E8A348C1_28DC_4691_6214_32F75A6665F0
 
 // Internal Includes
-#include <osvr/PluginKit/PluginKitC.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Util/UniquePtr.h>
-#include <osvr/Util/CallbackWrapper.h>
+#include <osvr/PluginKit/PluginKitC.h>
 #include <osvr/Util/AnyMap.h>
+#include <osvr/Util/CallbackWrapper.h>
+#include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include <libfunctionality/PluginHandle.h>
 
 // Standard includes
-#include <vector>
 #include <functional>
+#include <vector>
 
 namespace osvr {
 

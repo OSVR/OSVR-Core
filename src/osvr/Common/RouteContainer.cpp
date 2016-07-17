@@ -27,14 +27,14 @@
 #include <osvr/Common/RoutingKeys.h>
 
 // Library/third-party includes
-#include <json/value.h>
 #include <json/reader.h>
+#include <json/value.h>
 #include <json/writer.h>
 
 // Standard includes
-#include <stdexcept>
-#include <functional>
 #include <algorithm>
+#include <functional>
+#include <stdexcept>
 
 namespace osvr {
 namespace common {
@@ -144,15 +144,16 @@ namespace common {
         /// If a route already exists with the same destination, replace it
         /// with this new one.
         std::replace_if(
-            begin(m_routingDirectives),
-            end(m_routingDirectives), [&](std::string const &directive) {
+            begin(m_routingDirectives), end(m_routingDirectives),
+            [&](std::string const &directive) {
                 Json::Value candidate = parseRoutingDirective(directive);
                 bool match = (getDestinationFromJson(candidate) == destination);
                 if (match) {
                     replaced = true;
                 }
                 return match;
-            }, routingDirective);
+            },
+            routingDirective);
 
         /// If we didn't replace an existing route, just add this one.
         if (!replaced) {

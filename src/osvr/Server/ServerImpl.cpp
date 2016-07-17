@@ -24,33 +24,33 @@
 
 // Internal Includes
 #include "ServerImpl.h"
-#include <osvr/Connection/Connection.h>
-#include <osvr/Connection/ConnectionDevice.h>
-#include <osvr/PluginHost/RegistrationContext.h>
-#include <osvr/Util/MessageKeys.h>
-#include <osvr/Connection/MessageType.h>
-#include <osvr/Util/Verbosity.h>
 #include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
-#include <osvr/Util/Microsleep.h>
-#include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Common/CommonComponent.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
-#include <osvr/Common/AliasProcessor.h>
-#include <osvr/Util/StringLiteralFileToString.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/Connection/ConnectionDevice.h>
+#include <osvr/Connection/MessageType.h>
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Util/MessageKeys.h>
+#include <osvr/Util/Microsleep.h>
 #include <osvr/Util/PortFlags.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+#include <osvr/Util/Verbosity.h>
 
 #include "osvr/Server/display_json.h" /// Fallback display descriptor.
 
 // Library/third-party includes
-#include <vrpn_ConnectionPtr.h>
 #include <boost/variant.hpp>
 #include <json/reader.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
-#include <stdexcept>
 #include <functional>
+#include <stdexcept>
 
 namespace osvr {
 namespace server {

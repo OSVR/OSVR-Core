@@ -23,11 +23,11 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/IPCRingBuffer.h>
 #include "IPCRingBufferResults.h"
 #include "IPCRingBufferSharedObjects.h"
 #include "SharedMemory.h"
 #include "SharedMemoryObjectWithMutex.h"
+#include <osvr/Common/IPCRingBuffer.h>
 #include <osvr/Util/ImagingReportTypesC.h>
 #include <osvr/Util/Verbosity.h>
 
@@ -36,8 +36,8 @@
 
 // Standard includes
 #include <stdexcept>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 namespace osvr {
 namespace common {

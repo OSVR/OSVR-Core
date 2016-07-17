@@ -26,9 +26,9 @@
 #define INCLUDED_VRPNConnectionCollection_h_GUID_AB4B5310_43DF_4E9A_2EAF_CF512F979288
 
 // Internal Includes
-#include <osvr/Util/SharedPtr.h>
-#include <osvr/Common/PathElementTypes.h>
 #include <osvr/Client/Export.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <vrpn_ConnectionPtr.h>
@@ -51,9 +51,7 @@ namespace client {
         vrpn_ConnectionPtr
         getConnection(common::elements::DeviceElement const &elt);
         OSVR_CLIENT_EXPORT void updateAll();
-        bool empty() const {
-            return m_connMap->empty();
-        }
+        bool empty() const { return m_connMap->empty(); }
 
       private:
         typedef std::unordered_map<std::string, vrpn_ConnectionPtr>

@@ -27,10 +27,10 @@
 
 // Internal Includes
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/RemoteHandler.h>
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Common/OriginalSource.h>
 #include <osvr/Util/SharedPtr.h>
-#include <osvr/Client/RemoteHandler.h>
 
 #include <osvr/Common/ClientContext.h>
 

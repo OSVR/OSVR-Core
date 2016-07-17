@@ -31,13 +31,13 @@
 // - none
 
 // Standard includes
-#include <json/value.h>
-#include <json/reader.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/variant/get.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/algorithm/string.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 
 #include <iostream>
 

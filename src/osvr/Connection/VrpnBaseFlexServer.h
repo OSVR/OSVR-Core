@@ -28,8 +28,8 @@
 // Internal Includes
 #include "DeviceConstructionData.h"
 #include <osvr/Common/BaseDevice.h>
-#include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TimeValue.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>

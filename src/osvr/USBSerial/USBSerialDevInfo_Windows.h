@@ -25,14 +25,14 @@
 
 // Internal Includes
 #include "USBSerialDevInfo.h"
-#include <osvr/Util/WideToUTF8.h>
 #include <osvr/Util/StdInt.h>
+#include <osvr/Util/WideToUTF8.h>
 
 // Library/third-party includes
 #define _WIN32_DCOM
-#include <string>
-#include <comdef.h>
 #include <Wbemidl.h>
+#include <comdef.h>
+#include <string>
 #include <tchar.h>
 #include <windows.h>
 
@@ -43,11 +43,11 @@
 #include <boost/noncopyable.hpp>
 
 // Standard includes
-#include <regex>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
 #include <algorithm> // for std::transform
+#include <iomanip>
+#include <iostream>
+#include <regex>
+#include <sstream>
 #include <string>
 
 namespace osvr {

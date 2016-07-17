@@ -115,8 +115,8 @@ namespace common {
             DeviceElement ret;
             ret.m_devName = deviceName;
             // explicitly specify VRPN port
-            ret.m_server =
-                attachPortToServerIfNoneSpecified(server, util::DefaultVRPNPort);
+            ret.m_server = attachPortToServerIfNoneSpecified(
+                server, util::DefaultVRPNPort);
 
             return ret;
         }

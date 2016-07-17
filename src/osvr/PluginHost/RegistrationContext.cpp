@@ -28,19 +28,19 @@
 #endif
 
 // Internal Includes
+#include "PluginSpecificRegistrationContextImpl.h"
+#include <osvr/PluginHost/PathConfig.h>
 #include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/PluginHost/SearchPath.h>
-#include <osvr/PluginHost/PathConfig.h>
-#include "PluginSpecificRegistrationContextImpl.h"
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <libfunctionality/LoadPlugin.h>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#include <libfunctionality/LoadPlugin.h>
 
 // Standard includes
 #include <algorithm>
@@ -112,19 +112,20 @@ namespace pluginhost {
             // was the plugin pre-loaded or statically linked? Try loading
             // it by name.
             success = tryLoadingPlugin(plugin, pluginName, ctx);
-            if(!success) {
-                throw std::runtime_error("Could not find plugin named " + pluginName);
+            if (!success) {
+                throw std::runtime_error("Could not find plugin named " +
+                                         pluginName);
             }
         }
 
-        if(!success) {
+        if (!success) {
             const auto pluginPathNameNoExt =
                 (fs::path(pluginPathName).parent_path() /
                  fs::path(pluginPathName).stem())
                     .generic_string();
 
             success = tryLoadingPlugin(plugin, pluginPathName, ctx) ||
-                           tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
+                      tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
             if (!success) {
                 throw std::runtime_error(
                     "Unusual error occurred trying to load plugin named " +

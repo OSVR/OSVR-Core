@@ -23,12 +23,12 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/PathTreeSerialization.h>
 #include "PathElementSerialization.h"
-#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathNode.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/PathTreeSerialization.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes

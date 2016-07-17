@@ -23,7 +23,6 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Client/RemoteHandlerFactory.h>
 #include "AnalogRemoteFactory.h"
 #include "ButtonRemoteFactory.h"
 #include "DirectionRemoteFactory.h"
@@ -32,6 +31,7 @@
 #include "Location2DRemoteFactory.h"
 #include "LocomotionRemoteFactory.h"
 #include "TrackerRemoteFactory.h"
+#include <osvr/Client/RemoteHandlerFactory.h>
 
 // Library/third-party includes
 // - none

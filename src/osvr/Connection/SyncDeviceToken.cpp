@@ -27,8 +27,8 @@
 // Internal Includes
 #include "SyncDeviceToken.h"
 #include <osvr/Connection/ConnectionDevice.h>
-#include <osvr/Util/Verbosity.h>
 #include <osvr/Util/GuardInterfaceDummy.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none

@@ -23,24 +23,24 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Server/ConfigureServer.h>
-#include <osvr/Server/Server.h>
+#include "JSONResolvePossibleRef.h"
 #include <osvr/Connection/Connection.h>
 #include <osvr/PluginHost/SearchPath.h>
+#include <osvr/Server/ConfigureServer.h>
+#include <osvr/Server/Server.h>
 #include <osvr/Util/Verbosity.h>
-#include "JSONResolvePossibleRef.h"
 
 // Library/third-party includes
-#include <json/value.h>
-#include <json/reader.h>
-#include <boost/optional.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>                 // for stem()
 #include <boost/algorithm/string/predicate.hpp> // for iends_with()
+#include <boost/filesystem.hpp>                 // for stem()
+#include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 #undef OSVR_JSON_RESOLUTION_VERBOSE

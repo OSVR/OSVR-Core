@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
+#include "DisplayDescriptorSchema1.h"
 #include <osvr/Client/DisplayConfig.h>
 #include <osvr/Util/ProjectionMatrixFromFOV.h>
 #include <osvr/Util/Verbosity.h>
-#include "DisplayDescriptorSchema1.h"
 
 // Library/third-party includes
 #include <osvr/Util/EigenExtras.h>

@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ResolveFullTree.h>
-#include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/ResolveFullTree.h>
+#include <osvr/Common/ResolveTreeNode.h>
 #include <osvr/Util/TreeTraversalVisitor.h>
 
 // Library/third-party includes

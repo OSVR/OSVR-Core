@@ -24,14 +24,14 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/Location2DInterfaceC.h>
+#include "HandleNullContext.h"
+#include <osvr/Common/Location2DComponent.h>
 #include <osvr/Connection/DeviceInitObject.h>
+#include <osvr/Connection/DeviceInterfaceBase.h>
 #include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Common/Location2DComponent.h>
-#include "HandleNullContext.h"
+#include <osvr/PluginKit/Location2DInterfaceC.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Connection/DeviceInterfaceBase.h>
 
 // Library/third-party includes
 // - none

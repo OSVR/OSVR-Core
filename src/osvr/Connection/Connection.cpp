@@ -23,18 +23,18 @@
 // limitations under the License.
 
 // Internal Includes
+#include "GenericConnectionDevice.h"
+#include "VrpnBasedConnection.h"
 #include <osvr/Connection/Connection.h>
 #include <osvr/Connection/ConnectionDevice.h>
-#include <osvr/Util/SharedPtr.h>
-#include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/Connection/MessageType.h>
-#include "VrpnBasedConnection.h"
-#include "GenericConnectionDevice.h"
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Util/SharedPtr.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <boost/range/algorithm.hpp>
 #include <boost/assert.hpp>
+#include <boost/range/algorithm.hpp>
 
 // Standard includes
 // - none

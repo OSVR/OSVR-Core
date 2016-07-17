@@ -31,9 +31,9 @@
 #include <osvr/Util/TreeNode.h>
 
 // Library/third-party includes
-#include <boost/assert.hpp>
 #include <boost/algorithm/string/find_iterator.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/assert.hpp>
 #include <boost/range/adaptor/sliced.hpp>
 
 // Standard includes

@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Util/MatrixConventionsC.h>
-#include <osvr/Util/MatrixConventions.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenInterop.h>
+#include <osvr/Util/MatrixConventions.h>
+#include <osvr/Util/MatrixConventionsC.h>
 #include <osvr/Util/MatrixEigenAssign.h>
 
 // Library/third-party includes

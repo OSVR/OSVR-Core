@@ -24,19 +24,19 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginKit/EyeTrackerInterfaceC.h>
-#include <osvr/Connection/DeviceInitObject.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Util/PointerWrapper.h>
 #include "HandleNullContext.h"
-#include <osvr/Util/Verbosity.h>
+#include <osvr/Common/DirectionComponent.h>
 #include <osvr/Common/EyeTrackerComponent.h>
 #include <osvr/Common/Location2DComponent.h>
-#include <osvr/Common/DirectionComponent.h>
-#include <osvr/Connection/TrackerServerInterface.h>
 #include <osvr/Connection/ButtonServerInterface.h>
+#include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/DeviceInterfaceBase.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/TrackerServerInterface.h>
+#include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/PluginKit/EyeTrackerInterfaceC.h>
+#include <osvr/Util/PointerWrapper.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
@@ -133,14 +133,13 @@ OSVR_ReturnCode osvrDeviceEyeTrackerReport3DGazeDirection(
     return OSVR_RETURN_FAILURE;
 }
 
-OSVR_ReturnCode
-osvrDeviceEyeTrackerReportGaze(OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
-                               OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
-                               OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
-                               OSVR_IN OSVR_EyeGazeBasePoint3DState
-                                   gazeBasePoint,
-                               OSVR_IN OSVR_ChannelCount sensor,
-                               OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
+OSVR_ReturnCode osvrDeviceEyeTrackerReportGaze(
+    OSVR_IN_PTR OSVR_EyeTrackerDeviceInterface iface,
+    OSVR_IN OSVR_EyeGazePosition2DState gazePosition,
+    OSVR_IN OSVR_EyeGazeDirectionState gazeDirection,
+    OSVR_IN OSVR_EyeGazeBasePoint3DState gazeBasePoint,
+    OSVR_IN OSVR_ChannelCount sensor,
+    OSVR_IN_PTR OSVR_TimeValue const *timestamp) {
 
     auto guard = iface->getSendGuard();
     if (guard->lock()) {

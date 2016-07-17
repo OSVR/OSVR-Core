@@ -27,15 +27,15 @@
 #include "USBSerialDevInfo.h"
 
 // Library/third-party includes
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/string.hpp>
 
 // Standard includes
-#include <iostream>
-#include <vector>
-#include <string>
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include <fcntl.h>        // for O_NONBLOCK
 #include <linux/serial.h> // for serial_info

@@ -26,22 +26,22 @@
 #define INCLUDED_PureClientContext_h_GUID_0A40DCCB_0451_4DB0_855B_7ECE66C52D07
 
 // Internal Includes
-#include <osvr/Common/ClientContext.h>
-#include <osvr/Common/BaseDevicePtr.h>
-#include <osvr/Common/SystemComponent_fwd.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/Transform.h>
-#include <osvr/Common/NetworkingSupport.h>
-#include <osvr/Util/TimeValue_fwd.h>
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
-#include <osvr/Client/ClientInterfaceObjectManager.h>
+#include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/NetworkingSupport.h>
+#include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathTreeOwner.h>
+#include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/Transform.h>
+#include <osvr/Util/TimeValue_fwd.h>
 
 // Library/third-party includes
-#include <vrpn_ConnectionPtr.h>
 #include <json/value.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
 #include <string>

@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathNode.h>
 #include <osvr/Common/RoutingConstants.h>
-#include <osvr/Common/PathElementTools.h>
 #include <osvr/Util/TreeNodeFullPath.h>
 
 // Library/third-party includes

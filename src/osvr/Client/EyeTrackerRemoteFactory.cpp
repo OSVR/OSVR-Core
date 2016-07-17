@@ -26,29 +26,29 @@
 #include "EyeTrackerRemoteFactory.h"
 #include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Common/OriginalSource.h>
-#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/CreateDevice.h>
 
-#include <osvr/Common/EyeTrackerComponent.h>
-#include <osvr/Common/Location2DComponent.h>
 #include <osvr/Common/DirectionComponent.h>
-#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Common/EyeTrackerComponent.h>
 #include <osvr/Common/InterfaceState.h>
+#include <osvr/Common/Location2DComponent.h>
+#include <osvr/Common/RoutingConstants.h>
 
 // Library/third-party includes
-#include <boost/lexical_cast.hpp>
 #include <boost/any.hpp>
-#include <boost/variant/get.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
-#include <json/value.h>
+#include <boost/variant/get.hpp>
 #include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
 #include <iostream>

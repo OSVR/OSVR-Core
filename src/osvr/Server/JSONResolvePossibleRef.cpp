@@ -26,14 +26,14 @@
 #include "JSONResolvePossibleRef.h"
 
 // Library/third-party includes
-#include <json/reader.h>
 #include <boost/filesystem.hpp>
+#include <json/reader.h>
 
 // Standard includes
 #include <fstream>
 #include <string>
-#include <utility>
 #include <tuple>
+#include <utility>
 
 using std::make_pair;
 using std::tie;

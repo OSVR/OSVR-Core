@@ -26,22 +26,22 @@
 #include "ButtonRemoteFactory.h"
 #include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Common/OriginalSource.h>
-#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/ValueOrRange.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <vrpn_Button.h>
-#include <boost/lexical_cast.hpp>
 #include <boost/any.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/variant/get.hpp>
-#include <json/value.h>
 #include <json/reader.h>
+#include <json/value.h>
+#include <vrpn_Button.h>
 
 // Standard includes
 // - none

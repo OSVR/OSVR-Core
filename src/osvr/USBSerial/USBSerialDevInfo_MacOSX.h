@@ -28,8 +28,8 @@
 
 // System includes
 #include <CoreFoundation/CoreFoundation.h>
-#include <IOKit/IOKitLib.h>
 #include <IOKit/IOKitKeys.h>
+#include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
 
 namespace osvr {

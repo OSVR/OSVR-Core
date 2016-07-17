@@ -28,8 +28,8 @@
 #ifdef OSVR_COMMON_TRACING_ENABLED
 // Library/third-party includes
 #if OSVR_COMMON_TRACING_ETW
-#include <vrpn_WindowsH.h>
 #include <ETWProviders/etwprof.h>
+#include <vrpn_WindowsH.h>
 #endif
 
 // Standard includes

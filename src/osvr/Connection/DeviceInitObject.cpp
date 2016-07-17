@@ -23,9 +23,9 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Connection/Connection.h>
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
-#include <osvr/Connection/Connection.h>
 
 // Library/third-party includes
 // - none

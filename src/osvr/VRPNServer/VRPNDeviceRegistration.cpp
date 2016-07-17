@@ -23,11 +23,11 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/VRPNServer/VRPNDeviceRegistration.h>
-#include <osvr/VRPNServer/GetVRPNConnection.h>
-#include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/Connection/Connection.h>
+#include <osvr/Connection/ConnectionDevice.h>
 #include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/VRPNServer/GetVRPNConnection.h>
+#include <osvr/VRPNServer/VRPNDeviceRegistration.h>
 
 // Library/third-party includes
 // - none

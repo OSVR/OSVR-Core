@@ -26,16 +26,16 @@
 #include "ImagingRemoteFactory.h"
 #include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/ImagingComponent.h>
+#include <osvr/Common/OriginalSource.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
-#include <osvr/Common/OriginalSource.h>
-#include <osvr/Client/InterfaceTree.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/ImagingComponent.h>
 
 // Library/third-party includes
 // - none

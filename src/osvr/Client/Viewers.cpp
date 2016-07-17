@@ -24,8 +24,8 @@
 
 // Internal Includes
 #include <osvr/Client/Viewers.h>
-#include <osvr/Common/ReportTypes.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/ReportTypes.h>
 
 // Library/third-party includes
 // - none

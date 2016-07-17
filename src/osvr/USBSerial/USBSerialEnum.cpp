@@ -23,14 +23,14 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/USBSerial/USBSerialEnum.h>
 #include "USBSerialEnumImpl.h"
+#include <osvr/USBSerial/USBSerialEnum.h>
 
 // Library/third-party includes
 
 // Standard includes
-#include <memory>
 #include <iostream>
+#include <memory>
 
 namespace osvr {
 namespace usbserial {

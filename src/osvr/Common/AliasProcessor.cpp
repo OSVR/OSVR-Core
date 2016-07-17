@@ -24,21 +24,21 @@
 
 // Internal Includes
 #include <osvr/Common/AliasProcessor.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathNode.h>
+#include <osvr/Common/ParseAlias.h>
 #include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/RoutingKeys.h>
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/ParseAlias.h>
-#include <osvr/Common/RoutingKeys.h>
 
 #include "PathParseAndRetrieve.h"
 
 // Library/third-party includes
-#include <boost/noncopyable.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/noncopyable.hpp>
 
 // Standard includes
 // - none
