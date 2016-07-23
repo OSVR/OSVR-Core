@@ -66,7 +66,15 @@ namespace log {
 
         LoggerPtr getOrCreateLogger(const std::string &logger_name);
 
+        /**
+         * @brief Sets the output pattern on all registered loggers.
+         */
         void setPattern(const std::string &pattern);
+
+        /**
+         * @brief Sets the minimum level of messages to be logged on all
+         * registered loggers.
+         */
         void setLevel(LogLevel severity);
 
       protected:
