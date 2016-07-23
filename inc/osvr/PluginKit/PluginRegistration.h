@@ -201,10 +201,7 @@ namespace pluginkit {
 
     inline void log(OSVR_PluginRegContext ctx, OSVR_LogLevel severity,
              const char *message) {
-        OSVR_ReturnCode ret = osvrPluginLog(ctx, severity, message);
-        if (ret != OSVR_RETURN_SUCCESS) {
-            throw std::runtime_error("pluginkit::log() failed!");
-        }
+        osvrPluginLog(ctx, severity, message);
     }
 
 } // namespace pluginkit

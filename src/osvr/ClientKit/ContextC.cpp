@@ -35,7 +35,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
 static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
@@ -71,13 +71,13 @@ OSVR_ReturnCode osvrClientShutdown(OSVR_ClientContext ctx) {
     return OSVR_RETURN_SUCCESS;
 }
 
-OSVR_ReturnCode osvrClientLog(OSVR_ClientContext ctx, OSVR_LogLevel severity,
-                              const char *message) {
+void osvrClientLog(OSVR_ClientContext ctx, OSVR_LogLevel severity,
+                   const char *message) {
     if (!ctx) {
-        return OSVR_RETURN_FAILURE;
+        std::cerr << "[OSVR] " << message << std::endl;
+        return;
     }
+
     const auto s = static_cast<osvr::util::log::LogLevel>(severity);
     ctx->log(s, message);
-    return OSVR_RETURN_SUCCESS;
 }
-

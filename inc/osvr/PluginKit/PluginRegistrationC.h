@@ -151,10 +151,10 @@ OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode osvrPluginRegisterDataWithDeleteCallback(
  * @param severity The severity of the log message.
  * @param message The message to be logged.
  */
-OSVR_PLUGINKIT_EXPORT OSVR_ReturnCode
-    osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
-                  OSVR_IN OSVR_LogLevel severity,
-                  OSVR_IN const char *message) OSVR_FUNC_NONNULL((1, 3));
+OSVR_PLUGINKIT_EXPORT void
+osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+              OSVR_IN OSVR_LogLevel severity, OSVR_IN const char *message)
+    OSVR_FUNC_NONNULL((1, 3));
 
 OSVR_EXTERN_C_END
 
