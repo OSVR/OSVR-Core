@@ -62,9 +62,9 @@ namespace log {
         OSVR_UTIL_EXPORT Logger &operator=(const Logger &) = delete;
 
         OSVR_UTIL_EXPORT LogLevel getLogLevel() const;
-        OSVR_UTIL_EXPORT void setLogLevel(LogLevel);
+        OSVR_UTIL_EXPORT void setLogLevel(LogLevel level);
 
-        OSVR_UTIL_EXPORT void flush_on(LogLevel);
+        OSVR_UTIL_EXPORT void flushOn(LogLevel level);
 #if 0
         // These functions are not yet implemented because they expose the
         // underlying spdlog classes.
