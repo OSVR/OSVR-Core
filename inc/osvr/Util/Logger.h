@@ -55,7 +55,6 @@ namespace log {
     class Logger {
       public:
         OSVR_UTIL_EXPORT Logger(const std::string &logger_name);
-        OSVR_UTIL_EXPORT Logger(spdlog::logger *logger);
         OSVR_UTIL_EXPORT Logger(std::shared_ptr<spdlog::logger> logger);
 
         OSVR_UTIL_EXPORT virtual ~Logger();

@@ -43,11 +43,6 @@ Logger::Logger(const std::string& logger_name)
     logger_ = spdlog::get(logger_name);
 }
 
-Logger::Logger(spdlog::logger* logger) : logger_(logger)
-{
-    // do nothing
-}
-
 Logger::Logger(std::shared_ptr<spdlog::logger> logger) : logger_(logger)
 {
     // do nothing
