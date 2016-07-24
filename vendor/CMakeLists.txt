@@ -12,6 +12,9 @@ endif()
 
 # Build VRPN as subproject
 set(VRPN_GPL_SERVER FALSE CACHE INTERNAL "" FORCE)
+if(WIN32)
+    set(VRPN_USE_WINSOCK2 TRUE CACHE INTERNAL "" FORCE)
+endif()
 if(BUILD_CLIENT AND NOT BUILD_SERVER)
     set(VRPN_BUILD_SERVER_LIBRARY FALSE CACHE INTERNAL "" FORCE)
     set(VRPN_BUILD_CLIENT_LIBRARY TRUE CACHE INTERNAL "" FORCE)
@@ -43,6 +46,18 @@ if(VRPN_HIDAPI_SOURCE_ROOT)
     target_include_directories(vendored-hidapi INTERFACE "${VRPN_HIDAPI_SOURCE_ROOT}")
 else()
     target_include_directories(vendored-hidapi INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/submodules/hidapi")
+endif()
+
+# Interface target for ASIO headers
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/asio/asio/include/asio.hpp")
+    message(FATAL_ERROR "You are missing the ASIO git submodule: you must have not done a recursive clone or updated without updating submodules. You can get it now by running git submodule update --init vendor/asio from the root source directory.")
+endif()
+add_library(vendored-asio INTERFACE)
+target_include_directories(vendored-asio INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/asio/asio/include")
+target_compile_definitions(vendored-asio INTERFACE ASIO_STANDALONE)
+target_compile_options(vendored-asio INTERFACE "${OSVR_CXX11_FLAGS}")
+if(WIN32)
+    target_link_libraries(vendored-asio INTERFACE ws2_32 mswsock)
 endif()
 
 # Interface target for util headers
