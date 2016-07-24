@@ -14,7 +14,7 @@ option(BUILD_LOG_SINGLETON "Enable or disable the logging singleton." TRUE)
 if(BUILD_LOG_SINGLETON)
     set(OSVR_UTIL_LOG_SINGLETON TRUE)
 endif()
-configure_file(Log.cpp.in "${CMAKE_CURRENT_BINARY_DIR}/Log.cpp")
+configure_file(LogConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/LogConfig.h")
 
 ###
 # Platform Config Header (and other external and internal configured headers)
@@ -150,7 +150,8 @@ set(SOURCE
     GuardInterface.cpp
     TimeValueC.cpp
     LineLogger.cpp
-    Log.cpp.in
+    LogConfig.h.in
+    Log.cpp
     Logger.cpp
     LogRegistry.cpp
     MatrixConventionsC.cpp
@@ -160,7 +161,7 @@ set(SOURCE
     ClientCallbackTypesC.h.in
     ClientCallbackTypesCSnippet.h.in
     WideToUTF8.h.in
-    "${CMAKE_CURRENT_BINARY_DIR}/Log.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/LogConfig.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ClientCallbackTypesC.h"
     "${CMAKE_CURRENT_BINARY_DIR}/StdAlignWrapper.h"
     "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h"

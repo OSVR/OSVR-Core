@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include <osvr/Util/Log.h>
+#include <osvr/Util/LogConfig.h>    // for OSVR_UTIL_LOG_SINGLETON
 #include <osvr/Util/LogSinks.h>
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Util/GetEnvironmentVariable.h>
@@ -36,8 +37,6 @@
 // Standard includes
 #include <memory>           // for std::make_shared, std::shared_ptr
 #include <string>           // for std::string
-
-#cmakedefine OSVR_UTIL_LOG_SINGLETON
 
 #ifdef OSVR_UTIL_LOG_SINGLETON
 #include <osvr/Util/LogRegistry.h>
