@@ -37,14 +37,15 @@
 #include <memory>  // for std::unique_ptr
 #include <sstream> // for std::ostringstream
 #include <string>  // for std::string
+#include <utility> // for std::forward
 
 // Forward declaration
 namespace spdlog {
 namespace details {
     struct log_msg;
     class line_logger;
-} // end namespace details
-} // end namespace spdlog
+} // namespace details
+} // namespace spdlog
 
 namespace osvr {
 namespace util {
@@ -124,9 +125,11 @@ namespace util {
                 std::unique_ptr<spdlog::details::line_logger> lineLogger_;
             };
 
-        } // end namespace detail
-    }     // end namespace log
-} // end namespace util
-} // end namespace osvr
+        } // namespace detail
+
+    } // namespace log
+
+} // namespace util
+} // namespace osvr
 
 #endif // INCLUDED_LineLogger_h_GUID_743865A8_E989_4A87_82D9_9BBF3E4C199D
