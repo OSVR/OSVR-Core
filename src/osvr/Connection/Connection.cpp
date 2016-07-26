@@ -130,11 +130,11 @@ namespace connection {
         BOOST_ASSERT_MSG(device, "Device must be non-null!");
         auto const &names = device->getNames();
         if (names.size() == 1) {
-            m_log->alert() << "Added device: " << names.front();
+            m_log->notice() << "Added device: " << names.front();
         } else {
-            m_log->alert() << "Added device with names:";
+            m_log->notice() << "Added device with names:";
             for (auto const &name : names) {
-                m_log->alert() << " - " << name;
+                m_log->notice() << " - " << name;
             }
         }
         m_devices.push_back(device);
