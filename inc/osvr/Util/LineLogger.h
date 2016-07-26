@@ -27,105 +27,106 @@
 #define INCLUDED_LineLogger_h_GUID_743865A8_E989_4A87_82D9_9BBF3E4C199D
 
 // Internal Includes
-#include <osvr/Util/LogLevel.h>
 #include <osvr/Util/Export.h>
+#include <osvr/Util/LogLevel.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <memory>       // for std::unique_ptr
-#include <string>       // for std::string
-#include <sstream>      // for std::ostringstream
+#include <memory>  // for std::unique_ptr
+#include <sstream> // for std::ostringstream
+#include <string>  // for std::string
 
 // Forward declaration
 namespace spdlog {
 namespace details {
-struct log_msg;
-class line_logger;
+    struct log_msg;
+    class line_logger;
 } // end namespace details
 } // end namespace spdlog
 
 namespace osvr {
 namespace util {
-namespace log {
+    namespace log {
 
-// Forward declaration
-class Logger;
+        // Forward declaration
+        class Logger;
 
-namespace detail {
+        namespace detail {
 
-    /**
-     * @brief A wrapper class for spdlog::details::line_logger.
-     */
-    class LineLogger {
-      public:
-        OSVR_UTIL_EXPORT LineLogger(spdlog::details::line_logger &&line_logger);
+            /**
+             * @brief A wrapper class for spdlog::details::line_logger.
+             */
+            class LineLogger {
+              public:
+                OSVR_UTIL_EXPORT
+                LineLogger(spdlog::details::line_logger &&line_logger);
 
-        /**
-         * @brief Move-only.
-         */
-        //@{
-        OSVR_UTIL_EXPORT LineLogger(const LineLogger &other) = delete;
-        OSVR_UTIL_EXPORT LineLogger &operator=(const LineLogger &) = delete;
-        OSVR_UTIL_EXPORT LineLogger &operator=(LineLogger &&) = delete;
-        OSVR_UTIL_EXPORT LineLogger(LineLogger &&other);
-        //@}
+                /**
+                 * @brief Move-only.
+                 */
+                //@{
+                OSVR_UTIL_EXPORT LineLogger(const LineLogger &other) = delete;
+                OSVR_UTIL_EXPORT LineLogger &
+                operator=(const LineLogger &) = delete;
+                OSVR_UTIL_EXPORT LineLogger &operator=(LineLogger &&) = delete;
+                OSVR_UTIL_EXPORT LineLogger(LineLogger &&other);
+                //@}
 
-        /**
-         * @brief Log the message using the callback logger.
-         */
-        OSVR_UTIL_EXPORT ~LineLogger();
+                /**
+                 * @brief Log the message using the callback logger.
+                 */
+                OSVR_UTIL_EXPORT ~LineLogger();
 
-        /**
-         * @brief Support for format string with variadic args.
-         */
-        OSVR_UTIL_EXPORT void write(const char *what);
+                /**
+                 * @brief Support for format string with variadic args.
+                 */
+                OSVR_UTIL_EXPORT void write(const char *what);
 
-        template <typename... Args>
-        OSVR_UTIL_EXPORT void write(const char *fmt, Args &&... args);
+                template <typename... Args>
+                OSVR_UTIL_EXPORT void write(const char *fmt, Args &&... args);
 
-        /**
-         * @brief Support for operator<<
-         *
-         * \name Stream operators
-         */
-        //@{
-        OSVR_UTIL_EXPORT LineLogger &operator<<(const char *what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(const std::string what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(int what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned int what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(long what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned long what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(long long what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned long long what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(double what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(long double what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(float what);
-        OSVR_UTIL_EXPORT LineLogger &operator<<(char what);
+                /**
+                 * @brief Support for operator<<
+                 *
+                 * \name Stream operators
+                 */
+                //@{
+                OSVR_UTIL_EXPORT LineLogger &operator<<(const char *what);
+                OSVR_UTIL_EXPORT LineLogger &
+                operator<<(const std::string &what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(int what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned int what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(long what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned long what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(long long what);
+                OSVR_UTIL_EXPORT LineLogger &
+                operator<<(unsigned long long what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(double what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(long double what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(float what);
+                OSVR_UTIL_EXPORT LineLogger &operator<<(char what);
 
-        template <typename T>
-        LineLogger &operator<<(T &&what)
-        {
-            std::ostringstream ss;
-            ss.operator<<(std::forward<T>(what));
-            this->operator<<(ss.str());
-            return *this;
-        }
+                template <typename T> LineLogger &operator<<(T &&what) {
+                    std::ostringstream ss;
+                    ss.operator<<(std::forward<T>(what));
+                    this->operator<<(ss.str());
+                    return *this;
+                }
 
-        //@}
+                //@}
 
-        OSVR_UTIL_EXPORT void disable();
-        OSVR_UTIL_EXPORT bool is_enabled() const;
+                OSVR_UTIL_EXPORT void disable();
+                OSVR_UTIL_EXPORT bool is_enabled() const;
 
-      private:
-        std::unique_ptr<spdlog::details::line_logger> lineLogger_;
-    };
+              private:
+                std::unique_ptr<spdlog::details::line_logger> lineLogger_;
+            };
 
-} // end namespace detail
-} // end namespace log
+        } // end namespace detail
+    }     // end namespace log
 } // end namespace util
 } // end namespace osvr
 
 #endif // INCLUDED_LineLogger_h_GUID_743865A8_E989_4A87_82D9_9BBF3E4C199D
-
