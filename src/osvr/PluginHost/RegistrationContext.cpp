@@ -49,7 +49,7 @@
 
 namespace osvr {
 namespace pluginhost {
-
+    static const auto PLUGIN_HOST_LOGGER_NAME = "PluginHost";
     namespace fs = boost::filesystem;
 
     struct RegistrationContext::Impl : private boost::noncopyable {
@@ -60,7 +60,8 @@ namespace pluginhost {
     };
 
     RegistrationContext::RegistrationContext()
-        : m_impl(new Impl), m_logger(util::log::make_logger("PluginHost")) {}
+        : m_impl(new Impl),
+          m_logger(util::log::make_logger(PLUGIN_HOST_LOGGER_NAME)) {}
 
     RegistrationContext::~RegistrationContext() {
         // Reset the plugins in reverse order.
@@ -80,7 +81,7 @@ namespace pluginhost {
                                         std::string const &name,
                                         OSVR_PluginRegContext ctx,
                                         bool shouldRethrow = false) {
-        auto log = util::log::make_logger("PluginHost");
+        auto log = util::log::make_logger(PLUGIN_HOST_LOGGER_NAME);
         log->debug() << "Trying to load a plugin with the name " << name;
         try {
             plugin = libfunc::loadPluginByName(name, ctx);
