@@ -102,6 +102,12 @@ namespace util {
             return std::make_shared<Logger>(spd_logger);
         }
 
+        void LogRegistry::flush() {
+            for (auto &sink : sinks_) {
+                sink->flush();
+            }
+        }
+
         void LogRegistry::setPattern(const std::string &pattern) {
             spdlog::set_pattern(pattern.c_str());
         }
@@ -174,7 +180,8 @@ namespace util {
         }
 
         LogRegistry::~LogRegistry() {
-            // do nothing
+            // do nothing but flush
+            flush();
         }
 
     } // end namespace log

@@ -67,6 +67,9 @@ namespace util {
 
             LoggerPtr getOrCreateLogger(const std::string &logger_name);
 
+            /// @brief Flush all sinks manually.
+            void flush();
+
             /**
              * @brief Sets the output pattern on all registered loggers.
              */

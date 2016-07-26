@@ -27,28 +27,32 @@
 #define INCLUDED_Log_h_GUID_B6053E2B_593D_4ECA_8C3B_2C55D0FE6A49
 
 // Internal Includes
-#include <osvr/Util/LogLevel.h>
-#include <osvr/Util/LineLogger.h>
-#include <osvr/Util/Logger.h>
 #include <osvr/Util/Export.h>
+#include <osvr/Util/LineLogger.h>
+#include <osvr/Util/LogLevel.h>
+#include <osvr/Util/Logger.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace osvr {
 namespace util {
-namespace log {
+    namespace log {
 
-    OSVR_UTIL_EXPORT LoggerPtr make_logger(const std::string &logger_name);
+        OSVR_UTIL_EXPORT LoggerPtr make_logger(const std::string &logger_name);
 
-    OSVR_UTIL_EXPORT std::string getLoggingDirectory(bool make_dir = false);
+        /// @brief For implementations with a centralized logger registry, flush
+        /// all logger sinks.
+        OSVR_UTIL_EXPORT void flush();
 
-} // end namespace log
+        OSVR_UTIL_EXPORT std::string getLoggingDirectory(bool make_dir = false);
+
+    } // end namespace log
 } // end namespace util
 } // end namespace osvr
 
@@ -69,4 +73,3 @@ namespace log {
 #endif
 
 #endif // INCLUDED_Log_h_GUID_B6053E2B_593D_4ECA_8C3B_2C55D0FE6A49
-

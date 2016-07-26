@@ -52,6 +52,8 @@ namespace util {
         LoggerPtr make_logger(const std::string &logger_name) {
             return LogRegistry::instance().getOrCreateLogger(logger_name);
         }
+
+        void flush() { LogRegistry::instance().flush(); }
 #else
         /*
          * This implementation avoids using a singleton.  The downside is that
@@ -70,6 +72,10 @@ namespace util {
                 std::make_shared< ::spdlog::logger>(logger_name, sink);
             spd_logger->set_pattern("%b %d %T.%e %l %n: %v");
             return std::make_shared<Logger>(spd_logger);
+        }
+
+        void flush() {
+            // no-op in the absence of a logger registry.
         }
 #endif
 
