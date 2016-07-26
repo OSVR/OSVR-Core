@@ -60,7 +60,7 @@ namespace util {
             void LineLogger::write(const char *fmt, Args &&... args) {
                 lineLogger_->write(fmt, std::forward<Args>(args)...);
             }
-
+#if 0
             LineLogger &LineLogger::operator<<(const char *what) {
                 lineLogger_->operator<<(what);
                 return *this;
@@ -70,7 +70,6 @@ namespace util {
                 lineLogger_->operator<<(what);
                 return *this;
             }
-
             LineLogger &LineLogger::operator<<(int what) {
                 lineLogger_->operator<<(what);
                 return *this;
@@ -117,6 +116,12 @@ namespace util {
             }
 
             LineLogger &LineLogger::operator<<(char what) {
+                lineLogger_->operator<<(what);
+                return *this;
+            }
+
+#endif
+            LineLogger &LineLogger::append(const std::string &what) {
                 lineLogger_->operator<<(what);
                 return *this;
             }

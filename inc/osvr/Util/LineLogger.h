@@ -88,12 +88,13 @@ namespace util {
                 template <typename... Args>
                 OSVR_UTIL_EXPORT void write(const char *fmt, Args &&... args);
 
-                /**
-                 * @brief Support for operator<<
-                 *
-                 * \name Stream operators
-                 */
-                //@{
+/**
+ * @brief Support for operator<<
+ *
+ * \name Stream operators
+ */
+//@{
+#if 0
                 OSVR_UTIL_EXPORT LineLogger &operator<<(const char *what);
                 OSVR_UTIL_EXPORT LineLogger &
                 operator<<(const std::string &what);
@@ -115,8 +116,52 @@ namespace util {
                     this->operator<<(ss.str());
                     return *this;
                 }
-
+#endif
                 //@}
+
+                /// Same as the operator<< with equivalent params, but doesn't
+                /// participate in that overload resolution nor will it be
+                /// captured by the perfect forwarder.
+                OSVR_UTIL_EXPORT LineLogger &append(const std::string &what);
+
+                class StreamProxy {
+                  public:
+                    StreamProxy(LineLogger &lineLogger)
+                        : lineLogger_(lineLogger) {}
+                    /// destructor appends the finished stringstream at the end
+                    /// of the expression.
+                    ~StreamProxy() {
+                        if (active_) {
+                            lineLogger_.append(os_.str());
+                        }
+                    }
+                    /// move construction
+                    StreamProxy(StreamProxy &&other)
+                        : lineLogger_(other.lineLogger_),
+                          os_(std::move(other.os_)), active_(other.active_) {
+                        other.active_ = false;
+                    }
+
+                    StreamProxy(StreamProxy const &) = delete;
+                    StreamProxy &operator=(StreamProxy const &) = delete;
+
+                    operator std::ostream &() { return os_; }
+                    template <typename T> std::ostream &operator<<(T &&what) {
+                        os_ << std::forward<T>(what);
+                        return os_;
+                    }
+
+                  private:
+                    LineLogger &lineLogger_;
+                    std::ostringstream os_;
+                    bool active_ = true;
+                };
+
+                template <typename T> StreamProxy operator<<(T &&what) {
+                    StreamProxy proxy(*this);
+                    proxy << std::forward<T>(what);
+                    return proxy;
+                }
 
                 OSVR_UTIL_EXPORT void disable();
                 OSVR_UTIL_EXPORT bool is_enabled() const;
