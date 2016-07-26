@@ -117,19 +117,20 @@ namespace pluginhost {
             // was the plugin pre-loaded or statically linked? Try loading
             // it by name.
             success = tryLoadingPlugin(plugin, pluginName, ctx);
-            if(!success) {
-                throw std::runtime_error("Could not find plugin named " + pluginName);
+            if (!success) {
+                throw std::runtime_error("Could not find plugin named " +
+                                         pluginName);
             }
         }
 
-        if(!success) {
+        if (!success) {
             const auto pluginPathNameNoExt =
                 (fs::path(pluginPathName).parent_path() /
                  fs::path(pluginPathName).stem())
                     .generic_string();
 
             success = tryLoadingPlugin(plugin, pluginPathName, ctx) ||
-                           tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
+                      tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
             if (!success) {
                 throw std::runtime_error(
                     "Unusual error occurred trying to load plugin named " +
@@ -151,15 +152,15 @@ namespace pluginhost {
             const auto pluginBaseName =
                 fs::path(plugin).filename().stem().generic_string();
             if (boost::iends_with(pluginBaseName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
-                m_logger->debug()
-                    << "Ignoring manual-load plugin: " << pluginBaseName;
+                m_logger->debug() << "Ignoring manual-load plugin: "
+                                  << pluginBaseName;
                 continue;
             }
 
             try {
                 loadPlugin(pluginBaseName);
-                m_logger->info()
-                    << "Successfully loaded plugin: " << pluginBaseName;
+                m_logger->info() << "Successfully loaded plugin: "
+                                 << pluginBaseName;
             } catch (const std::exception &e) {
                 m_logger->warn() << "Failed to load plugin " << pluginBaseName
                                  << ": " << e.what();
