@@ -23,25 +23,30 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/IPCRingBuffer.h>
 #include "IPCRingBufferResults.h"
 #include "IPCRingBufferSharedObjects.h"
 #include "SharedMemory.h"
 #include "SharedMemoryObjectWithMutex.h"
+#include <osvr/Common/IPCRingBuffer.h>
 #include <osvr/Util/ImagingReportTypesC.h>
-#include <osvr/Util/Verbosity.h>
+#include <osvr/Util/Log.h>
 
 // Library/third-party includes
 #include <boost/version.hpp>
 
 // Standard includes
 #include <stdexcept>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 namespace osvr {
 namespace common {
-#define OSVR_SHM_VERBOSE(X) OSVR_DEV_VERBOSE("IPCRingBuffer: " << X)
+    /// Grab a logger for IPCRingBuffer verbosity and errors.
+    static util::log::Logger &getIPCRingBufferLogger() {
+        static util::log::LoggerPtr logger =
+            util::log::make_logger("IPCRingBuffer");
+        return *logger;
+    }
 
     /// @brief the ABI level: this must be bumped if the layout of any
     /// shared-memory objects (Bookkeeping, ElementData) changes, if Boost
@@ -145,9 +150,9 @@ namespace common {
             typedef SegmentHolderBase<ManagedMemory> Base;
             ServerSharedMemorySegmentHolder(IPCRingBuffer::Options const &opts)
                 : m_name(opts.getName()) {
-                OSVR_SHM_VERBOSE("Creating segment, name "
-                                 << opts.getName() << ", size "
-                                 << computeRequiredSpace(opts));
+                getIPCRingBufferLogger().debug() << "Creating segment, name "
+                                                 << opts.getName() << ", size "
+                                                 << computeRequiredSpace(opts);
                 try {
                     removeSharedMemory();
                     /// @todo Some shared memory types (specifically, Windows),
@@ -156,9 +161,9 @@ namespace common {
                         bip::create_only, opts.getName().c_str(),
                         computeRequiredSpace(opts)));
                 } catch (bip::interprocess_exception &e) {
-                    OSVR_SHM_VERBOSE("Failed to create shared memory segment "
-                                     << opts.getName()
-                                     << " with exception: " << e.what());
+                    getIPCRingBufferLogger().error()
+                        << "Failed to create shared memory segment "
+                        << opts.getName() << " with exception: " << e.what();
                     return;
                 }
                 // detail::Bookkeeping::destroy(*Base::m_shm);
@@ -186,14 +191,15 @@ namespace common {
             typedef SegmentHolderBase<ManagedMemory> Base;
             ClientSharedMemorySegmentHolder(
                 IPCRingBuffer::Options const &opts) {
-                OSVR_SHM_VERBOSE("Finding segment, name " << opts.getName());
+                getIPCRingBufferLogger().debug() << "Finding segment, name "
+                                                 << opts.getName();
                 try {
                     Base::m_shm.reset(new ManagedMemory(
                         bip::open_only, opts.getName().c_str()));
                 } catch (bip::interprocess_exception &e) {
-                    OSVR_SHM_VERBOSE("Failed to open shared memory segment "
-                                     << opts.getName()
-                                     << " with exception: " << e.what());
+                    getIPCRingBufferLogger().error()
+                        << "Failed to open shared memory segment "
+                        << opts.getName() << " with exception: " << e.what();
                     return;
                 }
                 Base::m_bookkeeping = detail::Bookkeeping::find(*Base::m_shm);
@@ -220,8 +226,9 @@ namespace common {
             if (nullptr == ret->getBookkeeping()) {
                 ret.reset();
             } else {
-                OSVR_SHM_VERBOSE("size: " << ret->getSize() << ", free: "
-                                          << ret->getFreeMemory());
+                getIPCRingBufferLogger().debug()
+                    << "size: " << ret->getSize()
+                    << ", free: " << ret->getFreeMemory();
             }
             return ret;
         }
@@ -367,8 +374,9 @@ namespace common {
 #endif
 
         default:
-            OSVR_SHM_VERBOSE("Unsupported/unrecognized shared memory backend: "
-                             << int(opts.getBackend()));
+            getIPCRingBufferLogger().error()
+                << "Unsupported/unrecognized shared memory backend: "
+                << int(opts.getBackend());
             break;
         }
 
