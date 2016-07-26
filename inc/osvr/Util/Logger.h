@@ -27,17 +27,17 @@
 #define INCLUDED_Logger_h_GUID_D8ADC0E7_A358_4FF2_960F_10F098A22F4E
 
 // Internal Includes
-#include <osvr/Util/LogLevel.h>
-#include <osvr/Util/LineLogger.h>
 #include <osvr/Util/Export.h>
+#include <osvr/Util/LineLogger.h>
+#include <osvr/Util/LogLevel.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <string>           // for std::string
-#include <memory>           // for std::shared_ptr
-#include <vector>           // for std::vector
+#include <memory> // for std::shared_ptr
+#include <string> // for std::string
+#include <vector> // for std::vector
 
 // Forward declarations
 
@@ -47,24 +47,28 @@ class logger;
 
 namespace osvr {
 namespace util {
-namespace log {
+    namespace log {
+        class Logger;
 
-    /**
-     * @brief A wrapper around the spdlog::logger class.
-     */
-    class Logger {
-      public:
-        OSVR_UTIL_EXPORT Logger(const std::string &logger_name);
-        OSVR_UTIL_EXPORT Logger(std::shared_ptr<spdlog::logger> logger);
+        typedef std::shared_ptr<Logger> LoggerPtr;
 
-        OSVR_UTIL_EXPORT virtual ~Logger();
-        OSVR_UTIL_EXPORT Logger(const Logger &) = delete;
-        OSVR_UTIL_EXPORT Logger &operator=(const Logger &) = delete;
+        /**
+         * @brief A wrapper around the spdlog::logger class.
+         */
+        class Logger {
+          public:
+            OSVR_UTIL_EXPORT static LoggerPtr
+            getFromSpdlogByName(const std::string &logger_name);
 
-        OSVR_UTIL_EXPORT LogLevel getLogLevel() const;
-        OSVR_UTIL_EXPORT void setLogLevel(LogLevel level);
+            OSVR_UTIL_EXPORT Logger(std::shared_ptr<spdlog::logger> logger);
 
-        OSVR_UTIL_EXPORT void flushOn(LogLevel level);
+            OSVR_UTIL_EXPORT Logger(const Logger &) = delete;
+            OSVR_UTIL_EXPORT Logger &operator=(const Logger &) = delete;
+
+            OSVR_UTIL_EXPORT LogLevel getLogLevel() const;
+            OSVR_UTIL_EXPORT void setLogLevel(LogLevel level);
+
+            OSVR_UTIL_EXPORT void flushOn(LogLevel level);
 #if 0
         // These functions are not yet implemented because they expose the
         // underlying spdlog classes.
@@ -104,28 +108,16 @@ namespace log {
         {
             return logger_->critical(fmt, std::forward<Args>(args)...);
         }
-
-        template <typename... Args> detail::LineLogger Logger::alert(const char* fmt, Args&&... args)
-        {
-            return logger_->alert(fmt, std::forward<Args>(args)...);
-        }
-
-        template <typename... Args> detail::LineLogger Logger::emerg(const char* fmt, Args&&... args)
-        {
-            return logger_->emerg(fmt, std::forward<Args>(args)...);
-        }
 #endif
 
-        // logger.info(msg) ".." call style
-        OSVR_UTIL_EXPORT detail::LineLogger trace(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger debug(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger info(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger notice(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger warn(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger error(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger critical(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger alert(const char *fmt);
-        OSVR_UTIL_EXPORT detail::LineLogger emerg(const char *fmt);
+            // logger.info(msg) ".." call style
+            OSVR_UTIL_EXPORT detail::LineLogger trace(const char *fmt);
+            OSVR_UTIL_EXPORT detail::LineLogger debug(const char *fmt);
+            OSVR_UTIL_EXPORT detail::LineLogger info(const char *fmt);
+            OSVR_UTIL_EXPORT detail::LineLogger notice(const char *fmt);
+            OSVR_UTIL_EXPORT detail::LineLogger warn(const char *fmt);
+            OSVR_UTIL_EXPORT detail::LineLogger error(const char *fmt);
+            OSVR_UTIL_EXPORT detail::LineLogger critical(const char *fmt);
 
 #if 0
         // These functions are not yet implemented because they expose the
@@ -166,28 +158,16 @@ namespace log {
         {
             return logger_->critical(std::forward<T>(msg));
         }
-
-        template <typename T> detail::LineLogger alert(T&& msg)
-        {
-            return logger_->alert(std::forward<T>(msg));
-        }
-
-        template <typename T> detail::LineLogger emerg(T&& msg)
-        {
-            return logger_->emerg(std::forward<T>(msg));
-        }
 #endif
 
-        // logger.info() << ".." call  style
-        OSVR_UTIL_EXPORT detail::LineLogger trace();
-        OSVR_UTIL_EXPORT detail::LineLogger debug();
-        OSVR_UTIL_EXPORT detail::LineLogger info();
-        OSVR_UTIL_EXPORT detail::LineLogger notice();
-        OSVR_UTIL_EXPORT detail::LineLogger warn();
-        OSVR_UTIL_EXPORT detail::LineLogger error();
-        OSVR_UTIL_EXPORT detail::LineLogger critical();
-        OSVR_UTIL_EXPORT detail::LineLogger alert();
-        OSVR_UTIL_EXPORT detail::LineLogger emerg();
+            // logger.info() << ".." call  style
+            OSVR_UTIL_EXPORT detail::LineLogger trace();
+            OSVR_UTIL_EXPORT detail::LineLogger debug();
+            OSVR_UTIL_EXPORT detail::LineLogger info();
+            OSVR_UTIL_EXPORT detail::LineLogger notice();
+            OSVR_UTIL_EXPORT detail::LineLogger warn();
+            OSVR_UTIL_EXPORT detail::LineLogger error();
+            OSVR_UTIL_EXPORT detail::LineLogger critical();
 
 #if 0
         // These functions are not yet implemented because they expose the
@@ -214,17 +194,13 @@ namespace log {
                 return error(fmt, std::forward<Args>(args)...);
             case LogLevel::critical:
                 return critical(fmt, std::forward<Args>(args)...);
-            case LogLevel::alert:
-                return alert(fmt, std::forward<Args>(args)...);
-            case LogLevel::emerg:
-                return emerg(fmt, std::forward<Args>(args)...);
             }
         }
 #endif
 
-        // logger.log(log_level, msg) << ".." call style
-        OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level,
-                                                const char *msg);
+            // logger.log(log_level, msg) << ".." call style
+            OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level,
+                                                    const char *msg);
 
 #if 0
         // These functions are not yet implemented because they expose the
@@ -249,18 +225,14 @@ namespace log {
                 return error(std::forward<T>(msg));
             case LogLevel::critical:
                 return critical(std::forward<T>(msg));
-            case LogLevel::alert:
-                return alert(std::forward<T>(msg));
-            case LogLevel::emerg:
-                return emerg(std::forward<T>(msg));
             }
 
             return info(std::forward<T>(msg));
         }
 #endif
 
-        // logger.log(log_level) << ".." call  style
-        OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level);
+            // logger.log(log_level) << ".." call  style
+            OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level);
 
 #if 0
         // These functions are not yet implemented because they expose the
@@ -276,15 +248,13 @@ namespace log {
         }
 #endif
 
-        OSVR_UTIL_EXPORT virtual void flush();
+            OSVR_UTIL_EXPORT void flush();
 
-      protected:
-        std::shared_ptr<spdlog::logger> logger_;
-    };
+          private:
+            std::shared_ptr<spdlog::logger> logger_;
+        };
 
-    typedef std::shared_ptr<Logger> LoggerPtr;
-
-} // end namespace log
+    } // end namespace log
 } // end namespace util
 } // end namespace osvr
 

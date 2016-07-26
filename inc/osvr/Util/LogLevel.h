@@ -37,26 +37,24 @@
 
 namespace osvr {
 namespace util {
-namespace log {
+    namespace log {
 
-    /**
-     * @brief Log message severity levels.
-     */
-    enum class LogLevel {
-        trace    = OSVR_LOGLEVEL_TRACE,    //< function entry and exit, control flow.
-        debug    = OSVR_LOGLEVEL_DEBUG,    //< developer-facing messages.
-        info     = OSVR_LOGLEVEL_INFO,     //< user-facing messages.
-        notice   = OSVR_LOGLEVEL_NOTICE,   //< normal but significant condition.
-        warn     = OSVR_LOGLEVEL_WARN,     //< warning conditions.
-        err      = OSVR_LOGLEVEL_ERR,      //< error messages.
-        critical = OSVR_LOGLEVEL_CRITICAL, //< critical conditions.
-        alert    = OSVR_LOGLEVEL_ALERT,    //< action must be taken immediately.
-        emerg    = OSVR_LOGLEVEL_EMERG,    //< system is unusable.
-    };
+        /**
+         * @brief Log message severity levels.
+         */
+        enum class LogLevel {
+            trace =
+                OSVR_LOGLEVEL_TRACE, //< function entry and exit, control flow.
+            debug = OSVR_LOGLEVEL_DEBUG,   //< developer-facing messages.
+            info = OSVR_LOGLEVEL_INFO,     //< user-facing messages.
+            notice = OSVR_LOGLEVEL_NOTICE, //< normal but significant condition.
+            warn = OSVR_LOGLEVEL_WARN,     //< warning conditions.
+            err = OSVR_LOGLEVEL_ERR,       //< error messages.
+            critical = OSVR_LOGLEVEL_CRITICAL, //< critical conditions.
+        };
 
-} // end namespace log
-} // end namespace util
-} // end namespace osvr
+    } // namespace log
+} // namespace util
+} // namespace osvr
 
 #endif // INCLUDED_LogLevel_h_GUID_721FFB5D_B4A7_416A_B11E_982C1A21795B
-

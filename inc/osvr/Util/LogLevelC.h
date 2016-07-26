@@ -38,20 +38,18 @@
 // Standard includes
 // - none
 
-    /**
-     * @brief Log message severity levels.
-     */
-    typedef enum OSVR_LogLevel {
-        OSVR_LOGLEVEL_TRACE    = 0, //< function entry and exit, control flow.
-        OSVR_LOGLEVEL_DEBUG    = 1, //< debug-level messages.
-        OSVR_LOGLEVEL_INFO     = 2, //< informational messages.
-        OSVR_LOGLEVEL_NOTICE   = 3, //< normal but significant condition.
-        OSVR_LOGLEVEL_WARN     = 4, //< warning conditions.
-        OSVR_LOGLEVEL_ERR      = 5, //< error messages.
-        OSVR_LOGLEVEL_CRITICAL = 6, //< critical conditions.
-        OSVR_LOGLEVEL_ALERT    = 7, //< action must be taken immediately.
-        OSVR_LOGLEVEL_EMERG    = 8, //< system is unusable.
-    } OSVR_LogLevel;
+/**
+ * @brief Log message severity levels.
+ */
+typedef enum OSVR_LogLevel {
+    OSVR_LOGLEVEL_TRACE = 0,     //< function entry and exit, control flow.
+    OSVR_LOGLEVEL_DEBUG = 10,    //< debug-level messages.
+    OSVR_LOGLEVEL_INFO = 20,     //< informational messages.
+    OSVR_LOGLEVEL_NOTICE = 30,   //< normal but significant condition.
+    OSVR_LOGLEVEL_WARN = 40,     //< warning conditions.
+    OSVR_LOGLEVEL_ERR = 50,      //< error messages.
+    OSVR_LOGLEVEL_CRITICAL = 60, //< critical conditions.
+} OSVR_LogLevel;
 
 #endif // INCLUDED_LogLevelC_h_GUID_FF2DBB1E_A452_44B9_AE54_491C87D061D6
 
