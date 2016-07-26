@@ -24,9 +24,12 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Util/LogRegistry.h>
+
+#include "LogLevelTranslate.h"
+
 #include <osvr/Util/Log.h>
 #include <osvr/Util/LogLevel.h>
-#include <osvr/Util/LogRegistry.h>
 #include <osvr/Util/Logger.h>
 #include <osvr/Util/PlatformConfig.h>
 
@@ -78,8 +81,9 @@ namespace osvr {
 namespace util {
     namespace log {
         static const auto DEFAULT_PATTERN = "%b %d %T.%e %l [%n]: %v";
-        static const auto DEFAULT_LEVEL = spdlog::level::trace;
-        static const auto DEFAULT_FLUSH_LEVEL = spdlog::level::err;
+        static const auto DEFAULT_LEVEL = LogLevel::trace;
+        static const auto DEFAULT_CONSOLE_LEVEL = LogLevel::info;
+        static const auto DEFAULT_FLUSH_LEVEL = LogLevel::err;
         LogRegistry &LogRegistry::instance() {
             static LogRegistry instance_;
             return instance_;
@@ -96,8 +100,8 @@ namespace util {
             }
 
             spd_logger->set_pattern(DEFAULT_PATTERN);
-            spd_logger->set_level(DEFAULT_LEVEL);
-            spd_logger->flush_on(DEFAULT_FLUSH_LEVEL);
+            spd_logger->set_level(convertToLevelEnum(DEFAULT_LEVEL));
+            spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
 
             return std::make_shared<Logger>(spd_logger);
         }
@@ -113,7 +117,7 @@ namespace util {
         }
 
         void LogRegistry::setLevel(LogLevel severity) {
-            spdlog::set_level(static_cast<spdlog::level::level_enum>(severity));
+            spdlog::set_level(convertToLevelEnum(severity));
         }
 
         static inline spdlog::sink_ptr getConsoleSink() {
@@ -131,16 +135,14 @@ namespace util {
 
         void LogRegistry::setConsoleLevel(LogLevel severity) {
             if (console_filter_) {
-                console_filter_->set_level(
-                    static_cast<spdlog::level::level_enum>(severity));
+                console_filter_->set_level(convertToLevelEnum(severity));
             }
         }
 
         LogRegistry::LogRegistry() : sinks_() {
             // Set default pattern and level
             spdlog::set_pattern(DEFAULT_PATTERN);
-            spdlog::set_level(
-                static_cast<spdlog::level::level_enum>(LogLevel::info));
+            spdlog::set_level(convertToLevelEnum(DEFAULT_LEVEL));
 
 // Instantiate console and file sinks
 
@@ -152,7 +154,7 @@ namespace util {
             // Console sink
             auto console_sink = getConsoleSink();
             console_filter_ = std::make_shared<spdlog::sinks::filter_sink>(
-                console_sink, spdlog::level::info);
+                console_sink, convertToLevelEnum(DEFAULT_CONSOLE_LEVEL));
             sinks_.push_back(console_filter_);
 #endif
 
