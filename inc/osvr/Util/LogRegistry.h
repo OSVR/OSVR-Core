@@ -33,60 +33,67 @@
 // - none
 
 // Standard includes
-#include <memory>           // for std::shared_ptr
-#include <string>           // for std::string
-#include <vector>           // for std::vector
+#include <memory> // for std::shared_ptr
+#include <string> // for std::string
+#include <vector> // for std::vector
 
 // Forward declarations
 namespace spdlog {
 
-    namespace sinks {
-        class sink;
-    } // namespace sinks
+namespace sinks {
+    class sink;
+    class filter_sink;
+} // namespace sinks
 
-    using sink_ptr = std::shared_ptr<spdlog::sinks::sink>;
+using sink_ptr = std::shared_ptr<spdlog::sinks::sink>;
 
 } // namespace spdlog
 
 namespace osvr {
 namespace util {
-namespace log {
+    namespace log {
 
-    class Logger;
-    using LoggerPtr = std::shared_ptr<Logger>;
+        class Logger;
+        using LoggerPtr = std::shared_ptr<Logger>;
 
-    class LogRegistry {
-      public:
-        LogRegistry(LogRegistry const &) = delete;            // copy construct
-        LogRegistry(LogRegistry &&) = delete;                 // move construct
-        LogRegistry &operator=(LogRegistry const &) = delete; // copy assign
-        LogRegistry &operator=(LogRegistry &&) = delete;      // move assign
+        class LogRegistry {
+          public:
+            LogRegistry(LogRegistry const &) = delete; // copy construct
+            LogRegistry(LogRegistry &&) = delete;      // move construct
+            LogRegistry &operator=(LogRegistry const &) = delete; // copy assign
+            LogRegistry &operator=(LogRegistry &&) = delete;      // move assign
 
-        static LogRegistry &instance();
+            static LogRegistry &instance();
 
-        LoggerPtr getOrCreateLogger(const std::string &logger_name);
+            LoggerPtr getOrCreateLogger(const std::string &logger_name);
 
-        /**
-         * @brief Sets the output pattern on all registered loggers.
-         */
-        void setPattern(const std::string &pattern);
+            /**
+             * @brief Sets the output pattern on all registered loggers.
+             */
+            void setPattern(const std::string &pattern);
 
-        /**
-         * @brief Sets the minimum level of messages to be logged on all
-         * registered loggers.
-         */
-        void setLevel(LogLevel severity);
+            /**
+             * @brief Sets the minimum level of messages to be logged on all
+             * registered loggers.
+             */
+            void setLevel(LogLevel severity);
 
-      protected:
-        LogRegistry();
-        ~LogRegistry();
+            /**
+             * @brief Sets the minimum level of messages to be logged to the
+             * console.
+             */
+            void setConsoleLevel(LogLevel severity);
 
-        std::vector<spdlog::sink_ptr> sinks_;
-    };
+          protected:
+            LogRegistry();
+            ~LogRegistry();
 
-} // namespace log
+            std::vector<spdlog::sink_ptr> sinks_;
+            std::shared_ptr<spdlog::sinks::filter_sink> console_filter_;
+        };
+
+    } // namespace log
 } // namespace util
 } // namespace osvr
 
 #endif // INCLUDED_LogRegistry_h_GUID_09DDD840_389E_430C_8CBD_9AC4EE3F93FE
-
