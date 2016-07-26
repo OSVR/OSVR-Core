@@ -29,6 +29,7 @@
 #include <osvr/Server/Server.h>
 #include <osvr/Server/ConfigureServer.h>
 #include <osvr/Util/Log.h>
+#include <osvr/Util/LogNames.h>
 
 // Library/third-party includes
 // - none
@@ -48,7 +49,8 @@ namespace server {
     /// of the main server app to make alternate server-acting apps simpler to
     /// develop.
     inline ServerPtr configureServerFromFile(std::string const &configName) {
-        auto log = ::osvr::util::log::make_logger("OSVR Server");
+        auto log =
+            ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
 
         ServerPtr ret;
         log->info() << "Using config file '" << configName << "'.";
