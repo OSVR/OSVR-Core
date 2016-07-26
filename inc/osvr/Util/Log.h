@@ -56,20 +56,4 @@ namespace util {
 } // end namespace util
 } // end namespace osvr
 
-#ifdef BUILD_DEV_VERBOSE
-#define OSVR_TRACE(...)                                                        \
-    ::osvr::util::log::make_logger("OSVR")->trace()                            \
-        << __FILE__ << ":" << __LINE__ << ": " << __VA_ARGS__;
-#else
-#define OSVR_TRACE(...)
-#endif
-
-#ifdef BUILD_DEV_VERBOSE
-#define OSVR_DEBUG(...)                                                        \
-    ::osvr::util::log::make_logger("OSVR")->debug()                            \
-        << __FILE__ << ":" << __LINE__ << ": " << __VA_ARGS__;
-#else
-#define OSVR_DEBUG(...)
-#endif
-
 #endif // INCLUDED_Log_h_GUID_B6053E2B_593D_4ECA_8C3B_2C55D0FE6A49
