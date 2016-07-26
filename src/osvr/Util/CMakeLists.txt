@@ -154,6 +154,7 @@ set(SOURCE
     LogConfig.h.in
     Log.cpp
     Logger.cpp
+    LogLevelTranslate.h
     LogRegistry.cpp
     MatrixConventionsC.cpp
     MessageKeys.cpp
