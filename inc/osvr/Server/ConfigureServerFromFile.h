@@ -26,8 +26,8 @@
 #define INCLUDED_ConfigureServerFromFile_h_GUID_9DA4C152_2AE4_4394_E19E_C0B7EA41804F
 
 // Internal Includes
-#include <osvr/Server/Server.h>
 #include <osvr/Server/ConfigureServer.h>
+#include <osvr/Server/Server.h>
 #include <osvr/Util/Log.h>
 #include <osvr/Util/LogNames.h>
 
@@ -35,9 +35,9 @@
 // - none
 
 // Standard includes
-#include <iostream>
-#include <fstream>
 #include <exception>
+#include <fstream>
+#include <iostream>
 
 namespace osvr {
 namespace server {
@@ -58,7 +58,7 @@ namespace server {
         if (!config.good()) {
             log->error() << "Could not open config file!";
             log->error() << "Searched in the current directory; file may be "
-                   "misspelled, missing, or in a different directory.";
+                            "misspelled, missing, or in a different directory.";
             return nullptr;
         }
 
@@ -70,7 +70,8 @@ namespace server {
         } catch (std::exception &e) {
             log->error()
                 << "Caught exception constructing server from JSON config "
-                   "file: " << e.what();
+                   "file: "
+                << e.what();
             return nullptr;
         }
 
@@ -92,7 +93,7 @@ namespace server {
                 log->warn() << "Failed to load the following plugins:";
                 for (auto const &pluginError : srvConfig.getFailedPlugins()) {
                     log->warn() << " - " << pluginError.first << "\t"
-                        << pluginError.second;
+                                << pluginError.second;
                 }
             }
         }
@@ -110,13 +111,15 @@ namespace server {
             if (!srvConfig.getFailedInstantiations().empty()) {
                 log->error() << "Errors:";
                 for (auto const &error : srvConfig.getFailedInstantiations()) {
-                    log->error() << " - " << error.first << "\t" << error.second;
+                    log->error() << " - " << error.first << "\t"
+                                 << error.second;
                 }
             }
         }
 
         if (srvConfig.processExternalDevices()) {
-            log->info() << "External devices found and parsed from config file.";
+            log->info()
+                << "External devices found and parsed from config file.";
         }
 
         if (srvConfig.processRoutes()) {
@@ -128,15 +131,18 @@ namespace server {
         }
 
         if (srvConfig.processDisplay()) {
-            log->info() << "Display descriptor found and parsed from config file.";
+            log->info()
+                << "Display descriptor found and parsed from config file.";
         } else {
-            log->info() << "Using OSVR HDK for display configuration. "
+            log->info()
+                << "Using OSVR HDK for display configuration. "
                    "Did not find an alternate valid 'display' object in config "
                    "file.";
         }
 
         if (srvConfig.processRenderManagerParameters()) {
-            log->info() << "RenderManager config found and parsed from the config file.";
+            log->info() << "RenderManager config found and parsed from the "
+                           "config file.";
         }
 
         log->info() << "Triggering automatic hardware detection...";
@@ -149,4 +155,3 @@ namespace server {
 } // namespace osvr
 
 #endif // INCLUDED_ConfigureServerFromFile_h_GUID_9DA4C152_2AE4_4394_E19E_C0B7EA41804F
-
