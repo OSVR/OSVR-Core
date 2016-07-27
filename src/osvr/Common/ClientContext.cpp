@@ -55,6 +55,9 @@ OSVR_ClientContextObject::OSVR_ClientContextObject(
     : m_appId(appId), m_clientInterfaceFactory(interfaceFactory),
       m_deleter(del), m_logger(osvr::util::log::make_logger(m_appId)) {
     OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
+
+osvr::util::log::LoggerPtr const &OSVR_ClientContextObject::logger() const {
+    return m_logger;
 }
 
 OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[],

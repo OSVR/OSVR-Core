@@ -120,6 +120,9 @@ struct OSVR_ClientContextObject : boost::noncopyable {
     OSVR_COMMON_EXPORT void log(osvr::util::log::LogLevel severity,
                                 const char *message);
 
+    /// @brief Provides logger access for related internal classes.
+    OSVR_COMMON_EXPORT osvr::util::log::LoggerPtr const &logger() const;
+
   protected:
     /// @brief Constructor for derived class use only.
     OSVR_COMMON_EXPORT
