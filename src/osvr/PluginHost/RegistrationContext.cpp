@@ -159,7 +159,7 @@ namespace pluginhost {
 
             try {
                 loadPlugin(pluginBaseName);
-                m_logger->info() << "Successfully loaded plugin: "
+                m_logger->debug() << "Successfully loaded plugin: "
                                  << pluginBaseName;
             } catch (const std::exception &e) {
                 m_logger->warn() << "Failed to load plugin " << pluginBaseName
