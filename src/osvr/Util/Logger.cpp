@@ -115,7 +115,7 @@ namespace util {
                 return notice(msg);
             case LogLevel::warn:
                 return warn(msg);
-            case LogLevel::err:
+            case LogLevel::error:
                 return error(msg);
             case LogLevel::critical:
                 return critical(msg);
@@ -137,7 +137,7 @@ namespace util {
                 return notice();
             case LogLevel::warn:
                 return warn();
-            case LogLevel::err:
+            case LogLevel::error:
                 return error();
             case LogLevel::critical:
                 return critical();

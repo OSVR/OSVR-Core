@@ -56,7 +56,7 @@ namespace util {
             if (level <= OSVR_LOGLEVEL_WARN) {
                 return spdlog::level::warn;
             }
-            if (level <= OSVR_LOGLEVEL_ERR) {
+            if (level <= OSVR_LOGLEVEL_ERROR) {
                 return spdlog::level::err;
             }
             return spdlog::level::critical;
@@ -81,7 +81,7 @@ namespace util {
             case spdlog::level::warn:
                 return LogLevel::warn;
             case spdlog::level::err:
-                return LogLevel::err;
+                return LogLevel::error;
             case spdlog::level::critical:
             case spdlog::level::alert:
             case spdlog::level::emerg:

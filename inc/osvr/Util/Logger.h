@@ -190,7 +190,7 @@ namespace util {
                 return notice(fmt, std::forward<Args>(args)...);
             case LogLevel::warn:
                 return warn(fmt, std::forward<Args>(args)...);
-            case LogLevel::err:
+            case LogLevel::error:
                 return error(fmt, std::forward<Args>(args)...);
             case LogLevel::critical:
                 return critical(fmt, std::forward<Args>(args)...);
@@ -221,7 +221,7 @@ namespace util {
                 return notice(std::forward<T>(msg));
             case LogLevel::warn:
                 return warn(std::forward<T>(msg));
-            case LogLevel::err:
+            case LogLevel::error:
                 return error(std::forward<T>(msg));
             case LogLevel::critical:
                 return critical(std::forward<T>(msg));

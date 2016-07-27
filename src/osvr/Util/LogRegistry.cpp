@@ -83,7 +83,7 @@ namespace util {
         static const auto DEFAULT_PATTERN = "%b %d %T.%e %l [%n]: %v";
         static const auto DEFAULT_LEVEL = LogLevel::trace;
         static const auto DEFAULT_CONSOLE_LEVEL = LogLevel::info;
-        static const auto DEFAULT_FLUSH_LEVEL = LogLevel::err;
+        static const auto DEFAULT_FLUSH_LEVEL = LogLevel::error;
         LogRegistry &LogRegistry::instance() {
             static LogRegistry instance_;
             return instance_;

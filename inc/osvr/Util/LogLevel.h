@@ -49,7 +49,7 @@ namespace util {
             info = OSVR_LOGLEVEL_INFO,     //< user-facing messages.
             notice = OSVR_LOGLEVEL_NOTICE, //< normal but significant condition.
             warn = OSVR_LOGLEVEL_WARN,     //< warning conditions.
-            err = OSVR_LOGLEVEL_ERR,       //< error messages.
+            error = OSVR_LOGLEVEL_ERROR,       //< error messages.
             critical = OSVR_LOGLEVEL_CRITICAL, //< critical conditions.
         };
 

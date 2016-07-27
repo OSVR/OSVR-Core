@@ -47,7 +47,7 @@ typedef enum OSVR_LogLevel {
     OSVR_LOGLEVEL_INFO = 20,     //< informational messages.
     OSVR_LOGLEVEL_NOTICE = 30,   //< normal but significant condition.
     OSVR_LOGLEVEL_WARN = 40,     //< warning conditions.
-    OSVR_LOGLEVEL_ERR = 50,      //< error messages.
+    OSVR_LOGLEVEL_ERROR = 50,      //< error messages.
     OSVR_LOGLEVEL_CRITICAL = 60, //< critical conditions.
 } OSVR_LogLevel;
 
