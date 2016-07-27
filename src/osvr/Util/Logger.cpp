@@ -26,6 +26,7 @@
 // Internal Includes
 #include <osvr/Util/Logger.h>
 
+#include "LogDefaults.h"
 #include "LogLevelTranslate.h"
 
 // Library/third-party includes
@@ -39,13 +40,40 @@
 namespace osvr {
 namespace util {
     namespace log {
-
+#if 0
         LoggerPtr Logger::getFromSpdlogByName(const std::string &logger_name) {
-            return std::make_shared<Logger>(spdlog::get(logger_name));
+			auto spdlogPtr = spdlog::get(logger_name);
+			if (!spdlogPtr) {
+				return LoggerPtr();
+			}
+            return std::make_shared<Logger>(spdlogPtr);
         }
+#endif
 
         Logger::Logger(std::shared_ptr<spdlog::logger> logger)
             : logger_(logger) {}
+
+        LoggerPtr Logger::makeWithSink(std::string const &name,
+                                       spdlog::sink_ptr sink) {
+            if (!sink) {
+				// bad sink!
+                return LoggerPtr();
+            }
+            auto spdlogPtr = std::make_shared<spdlog::logger>(name, sink);
+            return std::make_shared<Logger>(spdlogPtr);
+        }
+
+        LoggerPtr Logger::makeWithSinks(std::string const &name,
+                                        spdlog::sinks_init_list sinks) {
+            for (auto & sink : sinks) {
+				if (!sink) {
+					// got a bad sink
+					return LoggerPtr();
+				}
+			}
+            auto spdlogPtr = std::make_shared<spdlog::logger>(name, sinks);
+            return std::make_shared<Logger>(spdlogPtr);
+		}
 
         LogLevel Logger::getLogLevel() const {
             return convertFromLevelEnum(logger_->level());

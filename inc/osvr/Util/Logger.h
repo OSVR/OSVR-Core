@@ -35,6 +35,7 @@
 // - none
 
 // Standard includes
+#include <initializer_list>
 #include <memory> // for std::shared_ptr
 #include <string> // for std::string
 #include <vector> // for std::vector
@@ -43,6 +44,12 @@
 
 namespace spdlog {
 class logger;
+namespace sinks {
+    class sink;
+} // namespace sinks
+
+using sink_ptr = std::shared_ptr<spdlog::sinks::sink>;
+using sinks_init_list = std::initializer_list<sink_ptr>;
 } // end namespace spdlog
 
 namespace osvr {
@@ -57,12 +64,26 @@ namespace util {
          */
         class Logger {
           public:
+#if 0
             /// Factory function: retrieves from the spdlog registry by name.
             OSVR_UTIL_EXPORT static LoggerPtr
             getFromSpdlogByName(const std::string &logger_name);
+#endif
 
             /// Construct from an existing spdlog logger
             OSVR_UTIL_EXPORT Logger(std::shared_ptr<spdlog::logger> logger);
+
+            /// Construct with a name and an existing, single spdlog sink. (Does
+            /// not use any logger registry.)
+            OSVR_UTIL_EXPORT static LoggerPtr
+            makeWithSink(std::string const &name, spdlog::sink_ptr sink);
+
+            /// Construct with a name and an initializer list of existing spdlog
+            /// sinks. (Does
+            /// not use any logger registry.)
+            OSVR_UTIL_EXPORT static LoggerPtr
+            makeWithSinks(std::string const &name,
+                          spdlog::sinks_init_list sinks);
 
             /// Non-copyable
             OSVR_UTIL_EXPORT Logger(const Logger &) = delete;
