@@ -24,10 +24,10 @@
 // limitations under the License.
 
 // Internal Includes
+#include "LogSinks.h"
 #include <osvr/Util/GetEnvironmentVariable.h>
 #include <osvr/Util/Log.h>
 #include <osvr/Util/LogConfig.h> // for OSVR_UTIL_LOG_SINGLETON
-#include <osvr/Util/LogSinks.h>
 #include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes

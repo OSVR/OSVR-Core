@@ -24,7 +24,7 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Util/LogSinks.h>
+#include "LogSinks.h"
 
 // Library/third-party includes
 #include <spdlog/spdlog.h>
@@ -34,23 +34,24 @@
 
 namespace osvr {
 namespace util {
-namespace log {
+    namespace log {
 
-/*
-template <typename Mutex>
-stdout_sink<Mutex>::stdout_sink() : ::spdlog::sinks::ostream_sink<Mutex>(std::cout, true)
-{
-    // do nothing
-}
+        /*
+        template <typename Mutex>
+        stdout_sink<Mutex>::stdout_sink() :
+        ::spdlog::sinks::ostream_sink<Mutex>(std::cout, true)
+        {
+            // do nothing
+        }
 
-template <typename Mutex>
-stderr_sink<Mutex>::stderr_sink() : ::spdlog::sinks::ostream_sink<Mutex>(std::cerr, true)
-{
-    // do nothing
-}
-*/
+        template <typename Mutex>
+        stderr_sink<Mutex>::stderr_sink() :
+        ::spdlog::sinks::ostream_sink<Mutex>(std::cerr, true)
+        {
+            // do nothing
+        }
+        */
 
-} // end namespace log
+    } // end namespace log
 } // end namespace util
 } // end namespace osvr
-
