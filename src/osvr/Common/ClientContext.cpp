@@ -49,8 +49,8 @@ namespace common {
 } // namespace osvr
 
 static const auto CLIENT_LOG_PREFIX = "Client: ";
-static const auto OSVR_LIBS_CLIENT_LOG_PREFIX = "OSVR (client: ";
-static const auto OSVR_LIBS_CLIENT_LOG_SUFFIX = ")";
+static const auto OSVR_LIBS_CLIENT_LOG_PREFIX = "OSVR: ";
+static const auto OSVR_LIBS_CLIENT_LOG_SUFFIX = "";
 
 OSVR_ClientContextObject::OSVR_ClientContextObject(
     const char appId[],
