@@ -26,7 +26,7 @@
 #define INCLUDED_GetEnvironmentVariable_h_GUID_500031B7_31FB_45A1_B1E9_8E61905A4E0F
 
 // Internal Includes
-#include <osvr/Common/Export.h>
+#include <osvr/Util/Export.h>
 
 // Library/third-party includes
 #include <boost/optional.hpp>
@@ -35,13 +35,17 @@
 #include <string>
 
 namespace osvr {
-namespace common {
+namespace util {
+
     /// @brief Gets an environment variable's value. On systems that don't
     /// distinguish between having a variable defined and having it non-empty
     /// (like Windows), empty will imply not defined and thus an empty
     /// boost::optional return value.
-    OSVR_COMMON_EXPORT boost::optional<std::string>
+    OSVR_UTIL_EXPORT boost::optional<std::string>
     getEnvironmentVariable(std::string const &var);
-} // namespace common
+
+} // namespace util
 } // namespace osvr
+
 #endif // INCLUDED_GetEnvironmentVariable_h_GUID_500031B7_31FB_45A1_B1E9_8E61905A4E0F
+

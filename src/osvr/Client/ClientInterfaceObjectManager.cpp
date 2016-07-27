@@ -26,6 +26,7 @@
 #include <osvr/Common/PathTree.h>
 #include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/Common/PathTreeObserver.h>
 #include <osvr/Common/PathTreeOwner.h>
 #include <osvr/Common/ClientInterface.h>
@@ -84,7 +85,7 @@ namespace client {
         auto source = common::resolveTreeNode(m_pathTree, path);
         if (!source.is_initialized()) {
             if (verboseFailure) {
-                OSVR_DEV_VERBOSE("Could not resolve source for " << path);
+                logger()->info() << "Could not resolve source for " << path;
             }
             return false;
         }
@@ -93,7 +94,7 @@ namespace client {
             *source, m_interfaces.getInterfacesForPath(path), *m_ctx);
 
         if (handler) {
-            OSVR_DEV_VERBOSE("Successfully produced handler for " << path);
+            logger()->info() << "Successfully produced handler for " << path;
             // Store the new handler in the interface tree
             auto oldHandler = m_interfaces.replaceHandlerForPath(path, handler);
             BOOST_ASSERT_MSG(
@@ -102,7 +103,7 @@ namespace client {
             return true;
         }
 
-        OSVR_DEV_VERBOSE("Could not produce handler for " << path);
+        logger()->info() << "Could not produce handler for " << path;
         return false;
     }
 
@@ -126,9 +127,13 @@ namespace client {
                 failedPaths.insert(path);
             }
         });
-        OSVR_DEV_VERBOSE("Connected " << successfulPaths << " of "
-                                      << successfulPaths + failedPaths.size()
-                                      << " unconnected paths successfully");
+        logger()->info() << "Connected " << successfulPaths << " of "
+                         << successfulPaths + failedPaths.size()
+                         << " unconnected paths successfully";
+    }
+
+    util::log::LoggerPtr const &ClientInterfaceObjectManager::logger() const {
+        return m_ctx->logger();
     }
 } // namespace client
 } // namespace osvr

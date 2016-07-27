@@ -22,7 +22,7 @@ set(LIBRARIES_PluginKit libfunctionality::functionality)
 set(LIBRARIES_VRPNServer libfunctionality::functionality)
 set(LIBRARIES_TypePack osvrTypePack)
 
-set(COMMON_TEST_LIBRARIES eigen-headers vendored-vrpn)
+set(COMMON_TEST_LIBRARIES eigen-headers vendored-vrpn spdlog)
 if(TARGET JsonCpp::JsonCpp)
     list(APPEND COMMON_TEST_LIBRARIES JsonCpp::JsonCpp)
 endif()

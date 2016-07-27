@@ -29,6 +29,7 @@
 #include <osvr/Client/Export.h>
 #include <osvr/Common/ClientInterfacePtr.h>
 #include <osvr/Common/PathTreeObserverPtr.h>
+#include <osvr/Util/Logger.h>
 #include <osvr/Common/PathTree_fwd.h>
 #include <osvr/Common/ClientContext_fwd.h>
 #include <osvr/Client/InterfaceTree.h>
@@ -41,6 +42,7 @@
 
 namespace osvr {
 namespace common {
+    class PathTree;
     class PathTreeOwner;
 } // namespace common
 namespace client {
@@ -92,6 +94,9 @@ namespace client {
         /// @brief Calls m_connectCallbacksOnPath() for every path that has one
         /// or more interface objects but no remote handler.
         void m_connectNeededCallbacks();
+
+        /// @brief Access the client context's logger.
+        util::log::LoggerPtr const &logger() const;
 
         /// @brief Tree parallel to path tree for holding interface objects and
         /// remote handlers.

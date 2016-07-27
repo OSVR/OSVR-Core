@@ -26,25 +26,26 @@
 #define INCLUDED_ServerImpl_h_GUID_BA15589C_D1AD_4BBE_4F93_8AC87043A982
 
 // Internal Includes
-#include <osvr/Server/Server.h>
-#include <osvr/Connection/ConnectionPtr.h>
-#include <osvr/Util/SharedPtr.h>
-#include <osvr/PluginHost/RegistrationContext_fwd.h>
-#include <osvr/Connection/MessageTypePtr.h>
-#include <osvr/Connection/DeviceToken.h>
-#include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Common/CommonComponent_fwd.h>
+#include <osvr/Common/CreateDevice.h>
 #include <osvr/Common/PathTree.h>
+#include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Connection/ConnectionPtr.h>
+#include <osvr/Connection/DeviceToken.h>
+#include <osvr/Connection/MessageTypePtr.h>
+#include <osvr/PluginHost/RegistrationContext_fwd.h>
+#include <osvr/Server/Server.h>
 #include <osvr/Util/Flag.h>
+#include <osvr/Util/Log.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
-#include <util/RunLoopManagerBoost.h>
-#include <boost/thread.hpp>
-#include <vrpn_Connection.h>
-#include <json/value.h>
 #include <boost/optional.hpp>
+#include <boost/thread.hpp>
+#include <json/value.h>
+#include <util/RunLoopManagerBoost.h>
+#include <vrpn_Connection.h>
 
 // Standard includes
 #include <string>
@@ -249,6 +250,9 @@ namespace server {
 
         /// The port we're listening on, if any.
         int m_port;
+
+        /// The logger.
+        util::log::LoggerPtr m_log;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable
@@ -275,7 +279,7 @@ namespace server {
     inline void ServerImpl::m_callControlled(Callable f) {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            boost::unique_lock<boost::mutex> innerLock(m_mainThreadMutex);
             TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {
@@ -287,7 +291,7 @@ namespace server {
     inline void ServerImpl::m_callControlled(Callable f) const {
         boost::unique_lock<boost::mutex> lock(m_runControl);
         if (m_running && boost::this_thread::get_id() != m_thread.get_id()) {
-            boost::unique_lock<boost::mutex> lock(m_mainThreadMutex);
+            boost::unique_lock<boost::mutex> innerLock(m_mainThreadMutex);
             TemporaryThreadIDChanger changer(m_mainThreadId);
             f();
         } else {

@@ -33,6 +33,7 @@
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Util/DeviceCallbackTypesC.h>
 #include <osvr/PluginHost/RegistrationContext_fwd.h>
+#include <osvr/Util/Log.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -202,6 +203,7 @@ namespace connection {
       private:
         DeviceList m_devices;
         std::vector<std::function<void()> > m_descriptorHandlers;
+        util::log::LoggerPtr m_log;
     };
 } // namespace connection
 } // namespace osvr

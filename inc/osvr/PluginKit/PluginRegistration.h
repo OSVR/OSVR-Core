@@ -198,6 +198,12 @@ namespace pluginkit {
         }
     }
     /// @}
+
+    inline void log(OSVR_PluginRegContext ctx, OSVR_LogLevel severity,
+             const char *message) {
+        osvrPluginLog(ctx, severity, message);
+    }
+
 } // namespace pluginkit
 } // namespace osvr
 

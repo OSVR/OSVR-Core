@@ -27,7 +27,7 @@
 
 
 // Internal Includes
-#include <osvr/Common/GetEnvironmentVariable.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
 #include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes
@@ -41,7 +41,7 @@ namespace osvr {
 
         /** @brief INTERNAL ONLY - get the current server directory, if available. */
         inline boost::optional<std::string> getServerBinaryDirectoryPath() {
-            auto server = osvr::common::getEnvironmentVariable("OSVR_SERVER_ROOT");
+            auto server = osvr::util::getEnvironmentVariable("OSVR_SERVER_ROOT");
             if (!server || server->empty()) {
                 return server;
             }

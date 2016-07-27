@@ -26,6 +26,8 @@
 // Internal Includes
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
+#include <osvr/Util/Log.h>
+#include <osvr/Util/LogNames.h>
 
 // Library/third-party includes
 // - none
@@ -35,26 +37,26 @@
 #include <fstream>
 #include <exception>
 
-using osvr::server::detail::out;
-using osvr::server::detail::err;
-using std::endl;
-
 static osvr::server::ServerPtr server;
+using ::osvr::util::log::OSVR_SERVER_LOG;
 
 /// @brief Shutdown handler function - forcing the server pointer to be global.
 void handleShutdown() {
-    out << "Received shutdown signal..." << endl;
+    auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
+    log->info() << "Received shutdown signal...";
     server->signalStop();
 }
 
 int main(int argc, char *argv[]) {
+    auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
+
     std::string configName(osvr::server::getDefaultConfigFilename());
     if (argc > 1) {
         configName = argv[1];
     } else {
-        out << "Using default config file - pass a filename on the command "
-               "line to use a different one."
-            << endl;
+        log->info()
+            << "Using default config file - pass a filename on the command "
+               "line to use a different one.";
     }
 
     server = osvr::server::configureServerFromFile(configName);
@@ -62,13 +64,13 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    out << "Registering shutdown handler..." << endl;
+    log->info() << "Registering shutdown handler...";
     osvr::server::registerShutdownHandler<&handleShutdown>();
 
-    out << "Starting server mainloop: OSVR Server is ready to go!" << endl;
+    log->info() << "Starting server mainloop: OSVR Server is ready to go!";
     server->startAndAwaitShutdown();
 
-    out << "OSVR Server exited." << endl;
+    log->info() << "OSVR Server exited.";
 
     return 0;
 }
