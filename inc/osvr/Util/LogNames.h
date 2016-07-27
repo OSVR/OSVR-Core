@@ -39,6 +39,8 @@ namespace util {
     namespace log {
 
         static const auto OSVR_SERVER_LOG = "OSVR Server";
+        static const auto OSVR_GENERAL_LOG_NAME = "OSVR";
+        static const auto OSVR_CLIENTKIT_LOG_NAME = "OSVR ClientKit";
 
     } // end namespace log
 } // end namespace util

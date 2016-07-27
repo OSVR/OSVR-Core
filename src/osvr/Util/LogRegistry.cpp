@@ -31,6 +31,7 @@
 
 #include <osvr/Util/Log.h>
 #include <osvr/Util/LogLevel.h>
+#include <osvr/Util/LogNames.h>
 #include <osvr/Util/Logger.h>
 #include <osvr/Util/PlatformConfig.h>
 
@@ -97,7 +98,8 @@ namespace util {
             }
 
             spd_logger->set_pattern(DEFAULT_PATTERN);
-            spd_logger->set_level(convertToLevelEnum(DEFAULT_LEVEL));
+            /// @todo should this level be different than other levels?
+            spd_logger->set_level(convertToLevelEnum(minLevel_));
             spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
 
             return std::make_shared<Logger>(spd_logger);
@@ -114,7 +116,11 @@ namespace util {
         }
 
         void LogRegistry::setLevel(LogLevel severity) {
-            spdlog::set_level(convertToLevelEnum(severity));
+            if (severity > consoleLevel_) {
+                // our min level is going above our previous console level...
+                /// @todo right now this means the filtering is a harmless no-op
+            }
+            setLevelImpl(severity);
         }
 
         static inline spdlog::sink_ptr getConsoleSink() {
@@ -131,15 +137,20 @@ namespace util {
         }
 
         void LogRegistry::setConsoleLevel(LogLevel severity) {
-            if (console_filter_) {
-                console_filter_->set_level(convertToLevelEnum(severity));
+            if (severity < minLevel_) {
+                /// @todo Does it make sense that we must adjust overall level
+                /// as well in this case?
+                setLevelImpl(severity);
             }
+            setConsoleLevelImpl(severity);
         }
 
-        LogRegistry::LogRegistry() : sinks_() {
+        LogRegistry::LogRegistry()
+            : minLevel_(std::min(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)),
+              consoleLevel_(std::max(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)) {
             // Set default pattern and level
             spdlog::set_pattern(DEFAULT_PATTERN);
-            spdlog::set_level(convertToLevelEnum(DEFAULT_LEVEL));
+            spdlog::set_level(convertToLevelEnum(minLevel_));
 
 // Instantiate console and file sinks
 
@@ -147,40 +158,96 @@ namespace util {
             // Android doesn't have a console, it has logcat.
             auto android_sink = spdlog::sinks::android_sink_mt("OSVR");
             sinks_.push_back(android_sink);
+            auto &main_sink = android_sink;
 #else
             // Console sink
             auto console_sink = getConsoleSink();
             console_filter_ = std::make_shared<spdlog::sinks::filter_sink>(
-                console_sink, convertToLevelEnum(DEFAULT_CONSOLE_LEVEL));
+                console_sink, convertToLevelEnum(consoleLevel_));
             sinks_.push_back(console_filter_);
+            auto &main_sink = console_filter_;
 #endif
+            consoleOnlyLog_ =
+                Logger::makeWithSink(OSVR_GENERAL_LOG_NAME, main_sink);
+            createFileSink();
+        }
 
+        LogRegistry::~LogRegistry() {
+            // do nothing but flush
+            flush();
+        }
+
+        void LogRegistry::setLevelImpl(LogLevel severity) {
+            spdlog::set_level(convertToLevelEnum(severity));
+            minLevel_ = severity;
+        }
+
+        void LogRegistry::setConsoleLevelImpl(LogLevel severity) {
+            consoleLevel_ = severity;
+            if (console_filter_) {
+                console_filter_->set_level(convertToLevelEnum(severity));
+            }
+        }
+
+        static const auto LOG_FILE_EXTENSION = "log";
+
+        static const auto LOG_FILE_BASENAME = "osvr";
+        void LogRegistry::createFileSink() {
             // File sink - rotates daily
+            std::string logDir;
             try {
                 size_t q_size = 1048576; // queue size must be power of 2
                 spdlog::set_async_mode(q_size);
                 namespace fs = boost::filesystem;
                 auto base_name = fs::path(getLoggingDirectory(true));
                 if (!base_name.empty()) {
-                    base_name /= "osvr";
+                    logDir = base_name.string();
+                    base_name /= LOG_FILE_BASENAME;
                     auto daily_file_sink =
                         std::make_shared<spdlog::sinks::daily_file_sink_mt>(
-                            base_name.string().c_str(), "log", 0, 0, false);
+                            base_name.string().c_str(), LOG_FILE_EXTENSION, 0,
+                            0, false);
                     sinks_.push_back(daily_file_sink);
                 }
             } catch (const std::exception &e) {
-                std::cerr << "[OSVR] Error creating log file sink: " << e.what()
-                          << ". Will log to console only." << std::endl;
+                if (consoleOnlyLog_) {
+                    consoleOnlyLog_->error()
+                        << "Error creating log file sink: " << e.what()
+                        << ". Will log to console only.";
+                } else {
+                    std::cerr
+                        << "[OSVR] Error creating log file sink: " << e.what()
+                        << ". Will log to console only." << std::endl;
+                }
+                return;
             } catch (...) {
-                std::cerr << "[OSVR] Error creating log file sink. Will log to "
-                             "console only."
-                          << std::endl;
+                if (consoleOnlyLog_) {
+                    consoleOnlyLog_->error(
+                        "Error creating log file sink. Will log to "
+                        "console only.");
+                } else {
+                    std::cerr
+                        << "[OSVR] Error creating log file sink. Will log to "
+                           "console only."
+                        << std::endl;
+                }
+                return;
             }
-        }
 
-        LogRegistry::~LogRegistry() {
-            // do nothing but flush
-            flush();
+            // If we succeeded in making a file sink, make a general logger that
+            // uses both sinks, then announce as much as useful about the log
+            // file location to it.
+            generalLog_ = Logger::makeWithSinks(OSVR_GENERAL_LOG_NAME,
+                                                {sinks_[0], sinks_[1]});
+            if (!generalLog_) {
+                consoleOnlyLog_->error(
+                    "Could not make a general log with both sinks!");
+                generalLog_ = consoleOnlyLog_;
+            }
+
+            generalLog_->notice() << "Logging started to directory " << logDir
+                                  << ", to a file with base name "
+                                  << LOG_FILE_BASENAME << ".";
         }
 
     } // end namespace log

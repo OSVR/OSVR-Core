@@ -91,8 +91,17 @@ namespace util {
             LogRegistry();
             ~LogRegistry();
 
+          private:
+            void setLevelImpl(LogLevel severity);
+            void setConsoleLevelImpl(LogLevel severity);
+            void createFileSink();
+            LogLevel minLevel_;
+            LogLevel consoleLevel_;
+
             std::vector<spdlog::sink_ptr> sinks_;
             std::shared_ptr<spdlog::sinks::filter_sink> console_filter_;
+            LoggerPtr consoleOnlyLog_;
+            LoggerPtr generalLog_;
         };
 
     } // namespace log
