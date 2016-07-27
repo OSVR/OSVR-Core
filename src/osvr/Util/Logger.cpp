@@ -56,24 +56,28 @@ namespace util {
         LoggerPtr Logger::makeWithSink(std::string const &name,
                                        spdlog::sink_ptr sink) {
             if (!sink) {
-				// bad sink!
+                // bad sink!
                 return LoggerPtr();
             }
-            auto spdlogPtr = std::make_shared<spdlog::logger>(name, sink);
-            return std::make_shared<Logger>(spdlogPtr);
+            auto spd_logger = std::make_shared<spdlog::logger>(name, sink);
+            spd_logger->set_pattern(DEFAULT_PATTERN);
+            spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
+            return std::make_shared<Logger>(spd_logger);
         }
 
         LoggerPtr Logger::makeWithSinks(std::string const &name,
                                         spdlog::sinks_init_list sinks) {
-            for (auto & sink : sinks) {
-				if (!sink) {
-					// got a bad sink
-					return LoggerPtr();
-				}
-			}
-            auto spdlogPtr = std::make_shared<spdlog::logger>(name, sinks);
-            return std::make_shared<Logger>(spdlogPtr);
-		}
+            for (auto &sink : sinks) {
+                if (!sink) {
+                    // got a bad sink
+                    return LoggerPtr();
+                }
+            }
+            auto spd_logger = std::make_shared<spdlog::logger>(name, sinks);
+            spd_logger->set_pattern(DEFAULT_PATTERN);
+            spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
+            return std::make_shared<Logger>(spd_logger);
+        }
 
         LogLevel Logger::getLogLevel() const {
             return convertFromLevelEnum(logger_->level());
