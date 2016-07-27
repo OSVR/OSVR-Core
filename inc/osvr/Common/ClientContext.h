@@ -168,7 +168,11 @@ struct OSVR_ClientContextObject : boost::noncopyable {
 
     osvr::util::MultipleKeyedOwnershipContainer m_ownedObjects;
     osvr::common::ClientContextDeleter m_deleter;
+
+    /// Logger for the use of OSVR libraries on behalf of the client
     osvr::util::log::LoggerPtr m_logger;
+    /// Logger for the client's exclusive use
+    osvr::util::log::LoggerPtr m_clientLogger;
 };
 
 namespace osvr {

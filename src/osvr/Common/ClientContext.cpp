@@ -23,10 +23,10 @@
 // limitations under the License.
 
 // Internal Includes
+#include "GetJSONStringFromTree.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
 #include <osvr/Util/Verbosity.h>
-#include "GetJSONStringFromTree.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -48,13 +48,23 @@ namespace common {
 } // namespace common
 } // namespace osvr
 
+static const auto CLIENT_LOG_PREFIX = "Client: ";
+static const auto OSVR_LIBS_CLIENT_LOG_PREFIX = "OSVR (client: ";
+static const auto OSVR_LIBS_CLIENT_LOG_SUFFIX = ")";
+
 OSVR_ClientContextObject::OSVR_ClientContextObject(
     const char appId[],
     osvr::common::ClientInterfaceFactory const &interfaceFactory,
     osvr::common::ClientContextDeleter del)
     : m_appId(appId), m_clientInterfaceFactory(interfaceFactory),
-      m_deleter(del), m_logger(osvr::util::log::make_logger(m_appId)) {
-    OSVR_DEV_VERBOSE("Client context initialized for " << m_appId);
+      m_deleter(del),
+      m_logger(osvr::util::log::make_logger(
+          OSVR_LIBS_CLIENT_LOG_PREFIX + m_appId + OSVR_LIBS_CLIENT_LOG_SUFFIX)),
+      m_clientLogger(
+          osvr::util::log::make_logger(CLIENT_LOG_PREFIX + m_appId)) {
+    m_logger->info() << "OSVR client context initialized for " << m_appId;
+    m_logger->flush();
+}
 
 osvr::util::log::LoggerPtr const &OSVR_ClientContextObject::logger() const {
     return m_logger;
@@ -66,7 +76,8 @@ OSVR_ClientContextObject::OSVR_ClientContextObject(const char appId[],
           appId, osvr::common::getStandardClientInterfaceFactory(), del) {}
 
 OSVR_ClientContextObject::~OSVR_ClientContextObject() {
-    OSVR_DEV_VERBOSE("Client context shut down for " << m_appId);
+    m_logger->info() << "OSVR client context shut down for " << m_appId;
+    m_logger->flush();
 }
 
 std::string const &OSVR_ClientContextObject::getAppId() const {
@@ -151,7 +162,7 @@ bool OSVR_ClientContextObject::getStatus() const { return m_getStatus(); }
 
 void OSVR_ClientContextObject::log(osvr::util::log::LogLevel severity,
                                    const char *message) {
-    m_logger->log(severity, message);
+    m_clientLogger->log(severity, message);
 }
 
 bool OSVR_ClientContextObject::m_getStatus() const {
