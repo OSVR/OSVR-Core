@@ -37,6 +37,7 @@
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Util/Flag.h>
+#include <osvr/Util/Log.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -249,6 +250,9 @@ namespace server {
 
         /// The port we're listening on, if any.
         int m_port;
+
+        /// The logger.
+        util::log::LoggerPtr m_log;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable
