@@ -152,6 +152,7 @@ set(SOURCE
     TimeValueC.cpp
     LineLogger.cpp
     LogConfig.h.in
+    LogDefaults.h
     Log.cpp
     Logger.cpp
     LogLevelTranslate.h

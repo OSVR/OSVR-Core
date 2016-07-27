@@ -26,6 +26,7 @@
 // Internal Includes
 #include <osvr/Util/LogRegistry.h>
 
+#include "LogDefaults.h"
 #include "LogLevelTranslate.h"
 
 #include <osvr/Util/Log.h>
@@ -80,10 +81,6 @@ namespace sinks {
 namespace osvr {
 namespace util {
     namespace log {
-        static const auto DEFAULT_PATTERN = "%b %d %T.%e %l [%n]: %v";
-        static const auto DEFAULT_LEVEL = LogLevel::trace;
-        static const auto DEFAULT_CONSOLE_LEVEL = LogLevel::info;
-        static const auto DEFAULT_FLUSH_LEVEL = LogLevel::error;
         LogRegistry &LogRegistry::instance() {
             static LogRegistry instance_;
             return instance_;
