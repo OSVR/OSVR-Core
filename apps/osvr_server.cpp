@@ -33,9 +33,9 @@
 // - none
 
 // Standard includes
-#include <iostream>
-#include <fstream>
 #include <exception>
+#include <fstream>
+#include <iostream>
 
 static osvr::server::ServerPtr server;
 using ::osvr::util::log::OSVR_SERVER_LOG;
@@ -48,6 +48,7 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
+    ::osvr::util::log::tryInitializingLoggingWithBaseName("osvr_server");
     auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
 
     std::string configName(osvr::server::getDefaultConfigFilename());
