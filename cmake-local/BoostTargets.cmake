@@ -34,12 +34,12 @@ if(NEED_BOOST_THREAD)
     add_library(boost_thread INTERFACE)
     target_link_libraries(boost_thread
         INTERFACE
-        ${Boost_THREAD_LIBRARIES}
-        ${Boost_SYSTEM_LIBRARIES}
-        ${Boost_DATE_TIME_LIBRARIES}
-        ${Boost_CHRONO_LIBRARIES}
+        ${Boost_THREAD_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_DATE_TIME_LIBRARY}
+        ${Boost_CHRONO_LIBRARY}
         ${CMAKE_THREAD_LIBS_INIT})
-    target_include_directories(boost_thread INTERFACE ${Boost_INCLUDE_DIRS})
+    target_include_directories(boost_thread INTERFACE ${Boost_INCLUDE_DIR})
     if(WIN32 AND NOT MSVC AND Boost_USE_STATIC_LIBS)
         # Work around a foolish insistence to use DLLs on MXE that don't exist.
         target_compile_definitions(boost_thread
@@ -52,9 +52,9 @@ if(NEED_BOOST_FILESYSTEM)
     add_library(boost_filesystem INTERFACE)
     target_link_libraries(boost_filesystem
         INTERFACE
-        ${Boost_FILESYSTEM_LIBRARIES}
-        ${Boost_SYSTEM_LIBRARIES})
-    target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIRS})
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY})
+    target_include_directories(boost_filesystem INTERFACE ${Boost_INCLUDE_DIR})
     target_compile_definitions(boost_filesystem INTERFACE BOOST_FILESYSTEM_VERSION=3)
 endif()
 
@@ -62,14 +62,14 @@ if(NEED_BOOST_PROGRAM_OPTIONS)
     add_library(boost_program_options INTERFACE)
     target_link_libraries(boost_program_options
         INTERFACE
-        ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-    target_include_directories(boost_program_options INTERFACE ${Boost_INCLUDE_DIRS})
+        ${Boost_PROGRAM_OPTIONS_LIBRARY})
+    target_include_directories(boost_program_options INTERFACE ${Boost_INCLUDE_DIR})
 endif()
 
 if(NEED_BOOST_LOCALE)
     add_library(boost_locale INTERFACE)
     target_link_libraries(boost_locale
         INTERFACE
-    ${Boost_LOCALE_LIBRARIES})
-    target_include_directories(boost_locale INTERFACE ${Boost_INCLUDE_DIRS})
+        ${Boost_LOCALE_LIBRARY})
+    target_include_directories(boost_locale INTERFACE ${Boost_INCLUDE_DIR})
 endif()
