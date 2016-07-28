@@ -26,6 +26,7 @@
 #include "GetJSONStringFromTree.h"
 #include <osvr/Common/ClientContext.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Util/Log.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
