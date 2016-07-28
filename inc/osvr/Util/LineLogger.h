@@ -133,7 +133,7 @@ namespace util {
                     /// destructor appends the finished stringstream at the end
                     /// of the expression.
                     ~StreamProxy() {
-                        if (active_) {
+                        if (active_ && os_) {
                             lineLogger_.append(os_->str());
                         }
                     }
@@ -148,11 +148,11 @@ namespace util {
                     StreamProxy(StreamProxy const &) = delete;
                     StreamProxy &operator=(StreamProxy const &) = delete;
 
-                    operator std::ostream &() { return *os_.get(); }
+                    operator std::ostream &() { return (*os_); }
 
                     template <typename T> std::ostream &operator<<(T &&what) {
-                        *os_.get() << std::forward<T>(what);
-                        return *os_.get();
+                        (*os_) << std::forward<T>(what);
+                        return (*os_);
                     }
 
                   private:
