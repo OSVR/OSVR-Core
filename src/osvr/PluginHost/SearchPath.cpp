@@ -25,7 +25,7 @@
 // Internal Includes
 #include <osvr/PluginHost/SearchPath.h>
 #include <osvr/PluginHost/PathConfig.h>
-#include "BinaryLocation.h"
+#include <osvr/Util/BinaryLocation.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -45,7 +45,7 @@ namespace pluginhost {
     namespace fs = boost::filesystem;
 
     SearchPath getPluginSearchPath() {
-        auto exeLocation = fs::path{getBinaryLocation()};
+        auto exeLocation = fs::path{util::getBinaryLocation()};
 #ifdef __ANDROID__
         OSVR_DEV_VERBOSE("Binary location: " << exeLocation);
 #endif
@@ -71,7 +71,7 @@ namespace pluginhost {
 
         // Lambda to add a path, if it's not already in the list.
         auto addUniquePath = [&paths](fs::path const &path) {
-            //OSVR_DEV_VERBOSE("Adding search path " << path);
+            // OSVR_DEV_VERBOSE("Adding search path " << path);
             auto pathString = path.generic_string();
             if (std::find(begin(paths), end(paths), pathString) == end(paths)) {
                 // if we didn't already add this path, add it now.
@@ -120,7 +120,8 @@ namespace pluginhost {
         return paths;
     }
 
-    FileList getAllFilesWithExt(SearchPath const& dirPath, const std::string &ext) {
+    FileList getAllFilesWithExt(SearchPath const &dirPath,
+                                const std::string &ext) {
         FileList filesPaths;
 
         for (const auto &path : dirPath) {
@@ -146,7 +147,8 @@ namespace pluginhost {
         return filesPaths;
     }
 
-    std::string findPlugin(SearchPath const &searchPaths, const std::string &pluginName) {
+    std::string findPlugin(SearchPath const &searchPaths,
+                           const std::string &pluginName) {
         for (const auto &searchPath : searchPaths) {
             if (!fs::exists(searchPath)) {
                 continue;

@@ -23,7 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include "BinaryLocation.h"
+#include <osvr/Util/BinaryLocation.h>
+
 #include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes
@@ -42,7 +43,7 @@
 // - none
 
 namespace osvr {
-namespace pluginhost {
+namespace util {
 
     namespace fs = boost::filesystem;
 
@@ -92,5 +93,5 @@ namespace pluginhost {
 /// @todo Solaris: getexecname()
 #endif
 
-} // namespace pluginhost
+} // namespace util
 } // namespace osvr
