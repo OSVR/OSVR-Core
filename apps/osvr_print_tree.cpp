@@ -24,30 +24,30 @@
 
 // Internal Includes
 #include <osvr/ClientKit/Context.h>
+#include <osvr/Common/ApplyPathNodeVisitor.h>
 #include <osvr/Common/ClientContext.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/PathNode.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/ResolveFullTree.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
-#include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/ApplyPathNodeVisitor.h>
-#include <osvr/Common/PathNode.h>
 #include <osvr/Util/IndentingStream.h>
 #include <osvr/Util/ProgramOptionsToggleFlags.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
 
 // Library/third-party includes
-#include <boost/program_options.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/program_options.hpp>
 #include <boost/variant.hpp>
 
 // Standard includes
-#include <iostream>
-#include <iomanip>
-#include <thread>
 #include <chrono>
-#include <vector>
+#include <iomanip>
+#include <iostream>
 #include <string>
+#include <thread>
 #include <unordered_set>
+#include <vector>
 
 struct Options {
     bool showAliasSource;
@@ -208,14 +208,15 @@ int main(int argc, char *argv[]) {
         osvr::clientkit::ClientContext context("org.osvr.tools.printtree");
 
         if (!context.checkStatus()) {
-            std::cerr << "Client context has not yet started up - waiting. "
-                         "Make sure the server is running."
-                      << std::endl;
+            context.log(OSVR_LOGLEVEL_NOTICE,
+                        "Client context has not yet started up - waiting. "
+                        "Make sure the server is running.");
             do {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 context.update();
             } while (!context.checkStatus());
-            std::cerr << "OK, client context ready. Proceeding." << std::endl;
+            context.log(OSVR_LOGLEVEL_NOTICE,
+                        "OK, client context ready. Proceeding.");
         }
         /// Get a non-const copy of the path tree.
         osvr::common::clonePathTree(context.get()->getPathTree(), pathTree);
@@ -223,6 +224,10 @@ int main(int argc, char *argv[]) {
         /// resolve.
         badAliases = osvr::common::resolveFullTree(pathTree);
     }
+
+    /// Before we print anything, we should flush the logger so it doesn't
+    /// intermix with our output.
+    osvr::util::log::flush();
 
     TreeNodePrinter printer{opts, badAliases};
     /// Now traverse for output - traverse every node in the path tree and apply
