@@ -48,6 +48,10 @@ namespace util {
         /// base filename (will be stripped of all characters outside of
         /// [a-zA-Z0-9_]). If it succeeds (because you called it before any
         /// logging calls occurred), it returns true.
+        ///
+        /// Not typically needed, since the log file will usually be named using
+        /// a sanitized version of the executable file name's stem, but provided
+        /// just in case that's not a reasonable default.
         OSVR_UTIL_EXPORT bool
         tryInitializingLoggingWithBaseName(std::string const &baseName);
 

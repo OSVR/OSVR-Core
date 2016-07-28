@@ -100,7 +100,7 @@ namespace util {
           private:
             void setLevelImpl(LogLevel severity);
             void setConsoleLevelImpl(LogLevel severity);
-            void createFileSink(std::string const &logFileBaseName);
+            void createFileSink();
             LogLevel minLevel_;
             LogLevel consoleLevel_;
 

@@ -28,7 +28,9 @@
 
 #include "LogDefaults.h"
 #include "LogLevelTranslate.h"
+#include "LogUtils.h"
 
+#include <osvr/Util/BinaryLocation.h>
 #include <osvr/Util/Log.h>
 #include <osvr/Util/LogLevel.h>
 #include <osvr/Util/LogNames.h>
@@ -84,9 +86,32 @@ namespace util {
     namespace log {
 
         static const auto LOG_FILE_BASENAME = "osvr";
+
+        static const auto LOG_FILE_EXTENSION = "log";
+
+        /// Tries to compute a sanitized version of the executable's
+        /// basename/stem, falling back to the hardcoded one above if it
+        /// encounters difficulties.
+        static inline std::string computeDefaultBasename() {
+            namespace fs = boost::filesystem;
+            auto binLoc = getBinaryLocation();
+            if (binLoc.empty()) {
+                return LOG_FILE_BASENAME;
+            }
+            auto exePath = fs::path{binLoc};
+            auto fn = exePath.filename().stem().string();
+
+            auto sanitized = sanitizeFilenamePiece(fn);
+            if (sanitized.empty()) {
+                return LOG_FILE_BASENAME;
+            }
+
+            return sanitized;
+        }
+
         LogRegistry &LogRegistry::instance(std::string const *baseNamePtr) {
-            static LogRegistry instance_{baseNamePtr ? *baseNamePtr
-                                                     : LOG_FILE_BASENAME};
+            static LogRegistry instance_{
+                baseNamePtr ? *baseNamePtr : computeDefaultBasename()};
             return instance_;
         }
 
@@ -150,7 +175,8 @@ namespace util {
 
         LogRegistry::LogRegistry(std::string const &logFileBaseName)
             : minLevel_(std::min(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)),
-              consoleLevel_(std::max(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)) {
+              consoleLevel_(std::max(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)),
+              logFileBaseName_(logFileBaseName) {
             // Set default pattern and level
             spdlog::set_pattern(DEFAULT_PATTERN);
             spdlog::set_level(convertToLevelEnum(minLevel_));
@@ -172,7 +198,15 @@ namespace util {
 #endif
             consoleOnlyLog_ =
                 Logger::makeWithSink(OSVR_GENERAL_LOG_NAME, main_sink);
-            createFileSink(logFileBaseName);
+
+            createFileSink();
+            if (!generalLog_) {
+                generalLog_ = consoleOnlyLog_;
+            }
+            auto binLoc = getBinaryLocation();
+            if (!binLoc.empty()) {
+                generalLog_->notice("Logging for ") << binLoc;
+            }
         }
 
         LogRegistry::~LogRegistry() {
@@ -192,9 +226,7 @@ namespace util {
             }
         }
 
-        static const auto LOG_FILE_EXTENSION = "log";
-
-        void LogRegistry::createFileSink(std::string const &logFileBaseName) {
+        void LogRegistry::createFileSink() {
             // File sink - rotates daily
             std::string logDir;
             try {
@@ -204,7 +236,7 @@ namespace util {
                 auto base_name = fs::path(getLoggingDirectory(true));
                 if (!base_name.empty()) {
                     logDir = base_name.string();
-                    base_name /= logFileBaseName;
+                    base_name /= logFileBaseName_;
                     auto daily_file_sink =
                         std::make_shared<spdlog::sinks::daily_file_sink_mt>(
                             base_name.string().c_str(), LOG_FILE_EXTENSION, 0,
@@ -247,9 +279,9 @@ namespace util {
                 generalLog_ = consoleOnlyLog_;
             }
 
-            generalLog_->notice() << "Logging started to directory " << logDir
-                                  << ", to a file with a name starting with \""
-                                  << logFileBaseName << "\".";
+            generalLog_->notice() << "Log file created in " << logDir;
+            generalLog_->notice() << "Log file name starts with \""
+                                  << logFileBaseName_ << "\"";
         }
 
     } // end namespace log

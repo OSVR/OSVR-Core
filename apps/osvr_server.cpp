@@ -48,7 +48,6 @@ void handleShutdown() {
 }
 
 int main(int argc, char *argv[]) {
-    ::osvr::util::log::tryInitializingLoggingWithBaseName("osvr_server");
     auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
 
     std::string configName(osvr::server::getDefaultConfigFilename());
