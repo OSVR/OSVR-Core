@@ -397,6 +397,8 @@ namespace server {
                 "Got first client connection, exiting idle mode.");
             self->m_currentSleepTime = self->m_sleepTime;
         }
+        /// Create the low-latency behavior object.
+        self->m_lowLatency.reset(new common::LowLatency);
         return 0;
     }
 
@@ -410,6 +412,9 @@ namespace server {
                 "Dropped last client connection, entering idle mode.");
             self->m_currentSleepTime = IDLE_SLEEP_TIME;
         }
+
+        /// Destroy the low-latency behavior object
+        self->m_lowLatency.reset();
         return 0;
     }
 

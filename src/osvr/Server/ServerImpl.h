@@ -28,6 +28,7 @@
 // Internal Includes
 #include <osvr/Common/CommonComponent_fwd.h>
 #include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/LowLatency.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/SystemComponent_fwd.h>
 #include <osvr/Connection/ConnectionPtr.h>
@@ -38,11 +39,13 @@
 #include <osvr/Util/Flag.h>
 #include <osvr/Util/Log.h>
 #include <osvr/Util/SharedPtr.h>
+#include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
+
 #include <json/value.h>
 #include <util/RunLoopManagerBoost.h>
 #include <vrpn_Connection.h>
@@ -253,6 +256,9 @@ namespace server {
 
         /// The logger.
         util::log::LoggerPtr m_log;
+
+        /// Latency reduction RAII object
+        unique_ptr<common::LowLatency> m_lowLatency;
     };
 
     /// @brief Class to temporarily (in RAII style) change a thread ID variable
