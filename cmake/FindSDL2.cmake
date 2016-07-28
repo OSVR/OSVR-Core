@@ -16,18 +16,25 @@
 
 # Set up architectures (for windows) and prefixes (for mingw builds)
 if(WIN32)
+	if(MINGW)
+		include(MinGWSearchPathExtras OPTIONAL)
+		if(MINGWSEARCH_TARGET_TRIPLE)
+			set(SDL2_PREFIX ${MINGWSEARCH_TARGET_TRIPLE})
+		endif()
+	endif()
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set(SDL2_LIB_PATH_SUFFIX lib/x64)
-		if(NOT MSVC)
+		if(NOT MSVC AND NOT SDL2_PREFIX)
 			set(SDL2_PREFIX x86_64-w64-mingw32)
 		endif()
 	else()
 		set(SDL2_LIB_PATH_SUFFIX lib/x86)
-		if(NOT MSVC)
+		if(NOT MSVC AND NOT SDL2_PREFIX)
 			set(SDL2_PREFIX i686-w64-mingw32)
 		endif()
 	endif()
 endif()
+
 if(SDL2_PREFIX)
 	set(SDL2_ORIGPREFIXPATH ${CMAKE_PREFIX_PATH})
 	if(SDL2_ROOT_DIR)
@@ -37,6 +44,9 @@ if(SDL2_PREFIX)
 		foreach(_prefix ${CMAKE_PREFIX_PATH})
 			list(APPEND CMAKE_PREFIX_PATH "${_prefix}/${SDL2_PREFIX}")
 		endforeach()
+	endif()
+	if(MINGWSEARCH_PREFIXES)
+		list(APPEND CMAKE_PREFIX_PATH ${MINGWSEARCH_PREFIXES})
 	endif()
 endif()
 
@@ -182,15 +192,15 @@ if(SDL2_FOUND)
 			)
 		endif()
 
-        if(APPLE)
-            # Need Cocoa here, is always a framework
-            find_library(SDL2_COCOA_LIBRARY Cocoa)
-            list(APPEND SDL2_EXTRA_REQUIRED SDL2_COCOA_LIBRARY)
-            if(SDL2_COCOA_LIBRARY)
-                set_target_properties(SDL2::SDL2 PROPERTIES
-                        IMPORTED_LINK_INTERFACE_LIBRARIES ${SDL2_COCOA_LIBRARY})
-            endif()
-        endif()
+		if(APPLE)
+			# Need Cocoa here, is always a framework
+			find_library(SDL2_COCOA_LIBRARY Cocoa)
+			list(APPEND SDL2_EXTRA_REQUIRED SDL2_COCOA_LIBRARY)
+			if(SDL2_COCOA_LIBRARY)
+				set_target_properties(SDL2::SDL2 PROPERTIES
+						IMPORTED_LINK_INTERFACE_LIBRARIES ${SDL2_COCOA_LIBRARY})
+			endif()
+		endif()
 
 
 		# Compute what to do with SDL2main
@@ -201,7 +211,7 @@ if(SDL2_FOUND)
 			set_target_properties(SDL2::SDL2main_real
 				PROPERTIES
 				IMPORTED_LOCATION "${SDL2_SDLMAIN_LIBRARY}")
-			list(APPEND SDL2MAIN_LIBRARIES SDL2::SDL2main_real)
+			set(SDL2MAIN_LIBRARIES SDL2::SDL2main_real ${SDL2MAIN_LIBRARIES})
 		endif()
 		if(MINGW)
 			# MinGW requires some additional libraries to appear earlier in the link line.
