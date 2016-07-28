@@ -127,14 +127,17 @@ namespace util {
                 class StreamProxy {
                   public:
                     StreamProxy(LineLogger &lineLogger)
-                        : lineLogger_(lineLogger) {}
+                        : lineLogger_(lineLogger), os_(new std::ostringstream) {
+                    }
+
                     /// destructor appends the finished stringstream at the end
                     /// of the expression.
                     ~StreamProxy() {
-                        if (active_) {
-                            lineLogger_.append(os_.str());
+                        if (active_ && os_) {
+                            lineLogger_.append(os_->str());
                         }
                     }
+
                     /// move construction
                     StreamProxy(StreamProxy &&other)
                         : lineLogger_(other.lineLogger_),
@@ -145,15 +148,16 @@ namespace util {
                     StreamProxy(StreamProxy const &) = delete;
                     StreamProxy &operator=(StreamProxy const &) = delete;
 
-                    operator std::ostream &() { return os_; }
+                    operator std::ostream &() { return (*os_); }
+
                     template <typename T> std::ostream &operator<<(T &&what) {
-                        os_ << std::forward<T>(what);
-                        return os_;
+                        (*os_) << std::forward<T>(what);
+                        return (*os_);
                     }
 
                   private:
                     LineLogger &lineLogger_;
-                    std::ostringstream os_;
+                    std::unique_ptr<std::ostringstream> os_;
                     bool active_ = true;
                 };
 
