@@ -1,5 +1,7 @@
 /** @file
-    @brief Header
+    @brief Header to include for OSVR-internal usage of the logging mechanism:
+   provides the needed definition of Logger (and includes its dependencies)
+   that is only forward-declared in <osvr/Util/Log.h>
 
     @date 2016
 
@@ -28,6 +30,7 @@
 
 // Internal Includes
 #include <osvr/Util/Export.h>
+#include <osvr/Util/Log.h> // for LoggerPtr
 #include <osvr/Util/LineLogger.h>
 #include <osvr/Util/LogLevel.h>
 
@@ -38,7 +41,6 @@
 #include <initializer_list>
 #include <memory> // for std::shared_ptr
 #include <string> // for std::string
-#include <vector> // for std::vector
 
 // Forward declarations
 
@@ -50,17 +52,17 @@ namespace sinks {
 
 using sink_ptr = std::shared_ptr<spdlog::sinks::sink>;
 using sinks_init_list = std::initializer_list<sink_ptr>;
-} // end namespace spdlog
+} // namespace spdlog
 
 namespace osvr {
 namespace util {
     namespace log {
-        class Logger;
-
-        typedef std::shared_ptr<Logger> LoggerPtr;
 
         /**
-         * @brief A wrapper around the spdlog::logger class.
+         * @brief An object allowing you to log messages with a given log source
+         * name.
+         *
+         * Implemented as a wrapper around the spdlog::logger class.
          */
         class Logger {
           public:
@@ -79,8 +81,7 @@ namespace util {
             makeWithSink(std::string const &name, spdlog::sink_ptr sink);
 
             /// Construct with a name and an initializer list of existing spdlog
-            /// sinks. (Does
-            /// not use any logger registry.)
+            /// sinks. (Does not use any logger registry.)
             OSVR_UTIL_EXPORT static LoggerPtr
             makeWithSinks(std::string const &name,
                           spdlog::sinks_init_list sinks);
@@ -136,8 +137,8 @@ namespace util {
             std::shared_ptr<spdlog::logger> logger_;
         };
 
-    } // end namespace log
-} // end namespace util
-} // end namespace osvr
+    } // namespace log
+} // namespace util
+} // namespace osvr
 
 #endif // INCLUDED_Logger_h_GUID_D8ADC0E7_A358_4FF2_960F_10F098A22F4E

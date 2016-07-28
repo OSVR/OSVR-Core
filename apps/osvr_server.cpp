@@ -26,7 +26,7 @@
 // Internal Includes
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
-#include <osvr/Util/Log.h>
+#include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
 
 // Library/third-party includes

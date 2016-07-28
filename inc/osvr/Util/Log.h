@@ -1,5 +1,6 @@
 /** @file
-    @brief Header
+    @brief Header for basic internal log reference. To actually log to the
+   produced loggers, include <osvr/Util/Logger.h>
 
     @date 2016
 
@@ -28,21 +29,20 @@
 
 // Internal Includes
 #include <osvr/Util/Export.h>
-#include <osvr/Util/LineLogger.h>
-#include <osvr/Util/LogLevel.h>
-#include <osvr/Util/Logger.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <memory>
 #include <string>
-#include <vector>
 
 namespace osvr {
 namespace util {
     namespace log {
+        class Logger;
+
+        typedef shared_ptr<Logger> LoggerPtr;
 
         /// @brief Attempt to initialize the logging system with the indicated
         /// base filename (will be stripped of all characters outside of

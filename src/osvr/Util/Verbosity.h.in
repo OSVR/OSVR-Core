@@ -40,6 +40,7 @@
 #if defined(OSVR_UTIL_DEV_VERBOSE) && !defined(OSVR_DEV_VERBOSE_DISABLE)
 
 #include <osvr/Util/Log.h>
+#include <osvr/Util/Logger.h>
 
 #define OSVR_TRACE(...)                                                        \
     OSVR_UTIL_MULTILINE_BEGIN::osvr::util::log::make_logger("OSVR")->trace()   \

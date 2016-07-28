@@ -62,7 +62,7 @@ namespace util {
             auto spd_logger = std::make_shared<spdlog::logger>(name, sink);
             spd_logger->set_pattern(DEFAULT_PATTERN);
             spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
-            return std::make_shared<Logger>(spd_logger);
+            return make_shared<Logger>(spd_logger);
         }
 
         LoggerPtr Logger::makeWithSinks(std::string const &name,
@@ -76,7 +76,7 @@ namespace util {
             auto spd_logger = std::make_shared<spdlog::logger>(name, sinks);
             spd_logger->set_pattern(DEFAULT_PATTERN);
             spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
-            return std::make_shared<Logger>(spd_logger);
+            return make_shared<Logger>(spd_logger);
         }
 
         LogLevel Logger::getLogLevel() const {

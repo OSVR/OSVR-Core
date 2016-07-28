@@ -28,7 +28,7 @@
 // Internal Includes
 #include <osvr/Server/ConfigureServer.h>
 #include <osvr/Server/Server.h>
-#include <osvr/Util/Log.h>
+#include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
 
 // Library/third-party includes

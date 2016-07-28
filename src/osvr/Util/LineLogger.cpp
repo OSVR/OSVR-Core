@@ -48,79 +48,12 @@ namespace util {
             LineLogger::LineLogger(LineLogger &&other)
                 : lineLogger_(std::move(other.lineLogger_)) {}
 
-            LineLogger::~LineLogger() {
-                // TODO
-            }
+            LineLogger::~LineLogger() {}
 
             void LineLogger::write(const char *what) {
                 lineLogger_->write(what);
             }
 
-            template <typename... Args>
-            void LineLogger::write(const char *fmt, Args &&... args) {
-                lineLogger_->write(fmt, std::forward<Args>(args)...);
-            }
-#if 0
-            LineLogger &LineLogger::operator<<(const char *what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(const std::string &what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-            LineLogger &LineLogger::operator<<(int what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(unsigned int what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(long what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(unsigned long what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(long long what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(unsigned long long what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(double what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(long double what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(float what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-            LineLogger &LineLogger::operator<<(char what) {
-                lineLogger_->operator<<(what);
-                return *this;
-            }
-
-#endif
             LineLogger &LineLogger::append(const std::string &what) {
                 lineLogger_->operator<<(what);
                 return *this;

@@ -57,10 +57,13 @@ namespace util {
         namespace detail {
 
             /**
-             * @brief A wrapper class for spdlog::details::line_logger.
+             * @brief Handles the mechanics of a single log line/message -
+             * implemented as a wrapper class for spdlog::details::line_logger.
              */
             class LineLogger {
               public:
+                /// Construct from rvalue-reference to a spdlog (implementation)
+                /// line logger.
                 OSVR_UTIL_EXPORT
                 LineLogger(spdlog::details::line_logger &&line_logger);
 
@@ -68,11 +71,11 @@ namespace util {
                  * @brief Move-only.
                  */
                 //@{
+                OSVR_UTIL_EXPORT LineLogger(LineLogger &&other);
                 OSVR_UTIL_EXPORT LineLogger(const LineLogger &other) = delete;
                 OSVR_UTIL_EXPORT LineLogger &
                 operator=(const LineLogger &) = delete;
                 OSVR_UTIL_EXPORT LineLogger &operator=(LineLogger &&) = delete;
-                OSVR_UTIL_EXPORT LineLogger(LineLogger &&other);
                 //@}
 
                 /**
@@ -80,50 +83,17 @@ namespace util {
                  */
                 OSVR_UTIL_EXPORT ~LineLogger();
 
-                /**
-                 * @brief Support for format string with variadic args.
-                 */
                 OSVR_UTIL_EXPORT void write(const char *what);
-
-                template <typename... Args>
-                OSVR_UTIL_EXPORT void write(const char *fmt, Args &&... args);
-
-/**
- * @brief Support for operator<<
- *
- * \name Stream operators
- */
-//@{
-#if 0
-                OSVR_UTIL_EXPORT LineLogger &operator<<(const char *what);
-                OSVR_UTIL_EXPORT LineLogger &
-                operator<<(const std::string &what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(int what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned int what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(long what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(unsigned long what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(long long what);
-                OSVR_UTIL_EXPORT LineLogger &
-                operator<<(unsigned long long what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(double what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(long double what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(float what);
-                OSVR_UTIL_EXPORT LineLogger &operator<<(char what);
-
-                template <typename T> LineLogger &operator<<(T &&what) {
-                    std::ostringstream ss;
-                    ss.operator<<(std::forward<T>(what));
-                    this->operator<<(ss.str());
-                    return *this;
-                }
-#endif
-                //@}
 
                 /// Same as the operator<< with equivalent params, but doesn't
                 /// participate in that overload resolution nor will it be
                 /// captured by the perfect forwarder.
                 OSVR_UTIL_EXPORT LineLogger &append(const std::string &what);
 
+                /// An object returned by operator<< on a LineLogger, serves to
+                /// accumulate streamed output in a single ostringstream then
+                /// write it to the linelogger at the end of the expression's
+                /// lifetime.
                 class StreamProxy {
                   public:
                     StreamProxy(LineLogger &lineLogger)
