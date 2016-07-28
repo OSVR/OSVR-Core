@@ -63,7 +63,7 @@ namespace util {
             LogRegistry &operator=(LogRegistry const &) = delete; // copy assign
             LogRegistry &operator=(LogRegistry &&) = delete;      // move assign
 
-            static LogRegistry &instance();
+            static LogRegistry &instance(std::string const * = nullptr);
 
             LoggerPtr getOrCreateLogger(const std::string &logger_name);
 
@@ -87,14 +87,20 @@ namespace util {
              */
             void setConsoleLevel(LogLevel severity);
 
+            std::string const &getLogFileBaseName() const {
+                return logFileBaseName_;
+            }
+
+            bool couldOpenLogFile() const { return sinks_.size() > 1; }
+
           protected:
-            LogRegistry();
+            LogRegistry(std::string const &logFileBaseName);
             ~LogRegistry();
 
           private:
             void setLevelImpl(LogLevel severity);
             void setConsoleLevelImpl(LogLevel severity);
-            void createFileSink();
+            void createFileSink(std::string const &logFileBaseName);
             LogLevel minLevel_;
             LogLevel consoleLevel_;
 
@@ -102,6 +108,7 @@ namespace util {
             std::shared_ptr<spdlog::sinks::filter_sink> console_filter_;
             LoggerPtr consoleOnlyLog_;
             LoggerPtr generalLog_;
+            std::string logFileBaseName_;
         };
 
     } // namespace log

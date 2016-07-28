@@ -30,6 +30,11 @@
 #include <osvr/Util/LogConfig.h> // for OSVR_UTIL_LOG_SINGLETON
 #include <osvr/Util/PlatformConfig.h>
 
+#ifdef OSVR_UTIL_LOG_SINGLETON
+#include "LogUtils.h"
+#include <osvr/Util/LogRegistry.h>
+#endif
+
 // Library/third-party includes
 #include <boost/filesystem.hpp>
 #include <spdlog/spdlog.h>
@@ -38,10 +43,6 @@
 #include <memory> // for std::make_shared, std::shared_ptr
 #include <string> // for std::string
 
-#ifdef OSVR_UTIL_LOG_SINGLETON
-#include <osvr/Util/LogRegistry.h>
-#endif
-
 namespace osvr {
 namespace util {
     namespace log {
@@ -49,6 +50,13 @@ namespace util {
 // TODO if OSVR_ANDROID, use android sink
 
 #ifdef OSVR_UTIL_LOG_SINGLETON
+        bool tryInitializingLoggingWithBaseName(std::string const &baseName) {
+            auto sanitized = sanitizeFilenamePiece(baseName);
+            // try initialization
+            auto &inst = LogRegistry::instance(&sanitized);
+            // test for success
+            return (inst.getLogFileBaseName() == sanitized);
+        }
         LoggerPtr make_logger(const std::string &logger_name) {
             return LogRegistry::instance().getOrCreateLogger(logger_name);
         }
@@ -76,6 +84,11 @@ namespace util {
 
         void flush() {
             // no-op in the absence of a logger registry.
+        }
+
+        bool tryInitializingLoggingWithBaseName(std::string const &) {
+            // no singleton, no file sink.
+            return false;
         }
 #endif
 

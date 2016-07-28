@@ -44,6 +44,13 @@ namespace osvr {
 namespace util {
     namespace log {
 
+        /// @brief Attempt to initialize the logging system with the indicated
+        /// base filename (will be stripped of all characters outside of
+        /// [a-zA-Z0-9_]). If it succeeds (because you called it before any
+        /// logging calls occurred), it returns true.
+        OSVR_UTIL_EXPORT bool
+        tryInitializingLoggingWithBaseName(std::string const &baseName);
+
         OSVR_UTIL_EXPORT LoggerPtr make_logger(const std::string &logger_name);
 
         /// @brief For implementations with a centralized logger registry, flush

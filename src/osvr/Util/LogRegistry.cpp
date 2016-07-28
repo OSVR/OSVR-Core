@@ -82,8 +82,11 @@ namespace sinks {
 namespace osvr {
 namespace util {
     namespace log {
-        LogRegistry &LogRegistry::instance() {
-            static LogRegistry instance_;
+
+        static const auto LOG_FILE_BASENAME = "osvr";
+        LogRegistry &LogRegistry::instance(std::string const *baseNamePtr) {
+            static LogRegistry instance_{baseNamePtr ? *baseNamePtr
+                                                     : LOG_FILE_BASENAME};
             return instance_;
         }
 
@@ -145,7 +148,7 @@ namespace util {
             setConsoleLevelImpl(severity);
         }
 
-        LogRegistry::LogRegistry()
+        LogRegistry::LogRegistry(std::string const &logFileBaseName)
             : minLevel_(std::min(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)),
               consoleLevel_(std::max(DEFAULT_LEVEL, DEFAULT_CONSOLE_LEVEL)) {
             // Set default pattern and level
@@ -169,7 +172,7 @@ namespace util {
 #endif
             consoleOnlyLog_ =
                 Logger::makeWithSink(OSVR_GENERAL_LOG_NAME, main_sink);
-            createFileSink();
+            createFileSink(logFileBaseName);
         }
 
         LogRegistry::~LogRegistry() {
@@ -191,8 +194,7 @@ namespace util {
 
         static const auto LOG_FILE_EXTENSION = "log";
 
-        static const auto LOG_FILE_BASENAME = "osvr";
-        void LogRegistry::createFileSink() {
+        void LogRegistry::createFileSink(std::string const &logFileBaseName) {
             // File sink - rotates daily
             std::string logDir;
             try {
@@ -202,7 +204,7 @@ namespace util {
                 auto base_name = fs::path(getLoggingDirectory(true));
                 if (!base_name.empty()) {
                     logDir = base_name.string();
-                    base_name /= LOG_FILE_BASENAME;
+                    base_name /= logFileBaseName;
                     auto daily_file_sink =
                         std::make_shared<spdlog::sinks::daily_file_sink_mt>(
                             base_name.string().c_str(), LOG_FILE_EXTENSION, 0,
@@ -246,8 +248,8 @@ namespace util {
             }
 
             generalLog_->notice() << "Logging started to directory " << logDir
-                                  << ", to a file with base name "
-                                  << LOG_FILE_BASENAME << ".";
+                                  << ", to a file with a name starting with \""
+                                  << logFileBaseName << "\".";
         }
 
     } // end namespace log
