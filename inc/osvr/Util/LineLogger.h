@@ -127,7 +127,8 @@ namespace util {
                 class StreamProxy {
                   public:
                     StreamProxy(LineLogger &lineLogger)
-                        : lineLogger_(lineLogger) {}
+                        : lineLogger_(lineLogger), os_(new std::ostringstream) {
+                    }
 
                     /// destructor appends the finished stringstream at the end
                     /// of the expression.
