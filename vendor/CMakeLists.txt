@@ -1,9 +1,15 @@
 
+
 # Interface target for spdlog
 add_library(spdlog INTERFACE)
 set(OSVR_VENDORED_SPDLOG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/spdlog" CACHE INTERNAL "" FORCE)
 target_include_directories(spdlog INTERFACE "${OSVR_VENDORED_SPDLOG_ROOT}/include")
-#target_compile_definitions(spdlog INTERFACE SPDLOG_DEFINITIONS)
+if(BUILD_WITH_LOGGING_COARSE_TIMESTAMPS)
+    target_compile_definitions(spdlog INTERFACE SPDLOG_CLOCK_COARSE)
+endif()
+if(NOT BUILD_WITH_LOGGING_THREAD_ID_SUPPORT)
+    target_compile_definitions(spdlog INTERFACE SPDLOG_NO_THREAD_ID)
+endif()
 
 if(BUILD_TESTING)
     if(WIN32)

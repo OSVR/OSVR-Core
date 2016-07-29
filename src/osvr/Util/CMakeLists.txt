@@ -6,12 +6,7 @@ if(BUILD_DEV_VERBOSE)
 endif()
 configure_file(Verbosity.h.in "${CMAKE_CURRENT_BINARY_DIR}/Verbosity.h")
 
-###
-# The logger singleton may be disabled if necessary.
-# It may result in degraded performance or disabled logging.
-###
-option(BUILD_LOG_SINGLETON "Enable or disable the logging singleton." TRUE)
-if(BUILD_LOG_SINGLETON)
+if(BUILD_WITH_LOGGING_SINGLETON)
     set(OSVR_UTIL_LOG_SINGLETON TRUE)
 endif()
 configure_file(LogConfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/LogConfig.h")
