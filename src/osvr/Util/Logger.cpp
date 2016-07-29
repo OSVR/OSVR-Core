@@ -47,15 +47,18 @@ namespace util {
                            std::shared_ptr<spdlog::logger> const &logger) {
 
 #ifdef OSVR_USE_UNIQUEPTR_FOR_LOGGER
-            auto ret = LoggerPtr{new Logger{name, logger}};
+            auto ret = LoggerPtr{new Logger{
+                name, logger, static_cast<PrivateConstructor *>(nullptr)}};
 #else
-            auto ret = std::make_shared<Logger>(name, logger);
+            auto ret = std::make_shared<Logger>(
+                name, logger, static_cast<PrivateConstructor *>(nullptr));
 #endif
             return ret;
         }
 
         Logger::Logger(std::string const &name,
-                       std::shared_ptr<spdlog::logger> logger)
+                       std::shared_ptr<spdlog::logger> logger,
+                       PrivateConstructor *)
             : name_(name), logger_(std::move(logger)) {}
 
         Logger::~Logger() {}

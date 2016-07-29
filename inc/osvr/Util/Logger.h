@@ -65,7 +65,16 @@ namespace util {
          * Implemented as a wrapper around the spdlog::logger class.
          */
         class Logger {
+          private:
+            struct PrivateConstructor;
+
           public:
+            /// Internal-use constructor - please used a factory/named
+            /// constructor.
+            Logger(std::string const &name,
+                   std::shared_ptr<spdlog::logger> logger,
+                   PrivateConstructor *);
+
             /// Create from existing spdlog (implementation) logger.
             ///
             /// Always returns a valid pointer even on invalid input, though it
@@ -149,11 +158,6 @@ namespace util {
             std::string const &getName() const { return name_; }
 
           private:
-            /// Internal-use constructor - please used a factory/named
-            /// constructor.
-            Logger(std::string const &name,
-                   std::shared_ptr<spdlog::logger> logger);
-
             static LoggerPtr
             makeLogger(std::string const &name,
                        std::shared_ptr<spdlog::logger> const &logger);
