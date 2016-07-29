@@ -28,6 +28,7 @@
 
 #include "LogDefaults.h"
 #include "LogLevelTranslate.h"
+#include "LogSinks.h"
 #include "LogUtils.h"
 
 #include <osvr/Util/BinaryLocation.h>
@@ -40,46 +41,11 @@
 // Library/third-party includes
 #include <boost/filesystem.hpp>
 #include <spdlog/common.h>
-#include <spdlog/sinks/ansicolor_sink.h>
-#include <spdlog/sinks/base_sink.h>
 #include <spdlog/spdlog.h>
 
 // Standard includes
 #include <iostream>
 #include <utility>
-
-namespace spdlog {
-namespace sinks {
-    /// A decorator around another sink that applies a custom log level filter.
-    class filter_sink : public sink {
-      public:
-        filter_sink(sink_ptr wrapped_sink, level::level_enum filter_level);
-        virtual ~filter_sink() {}
-        void log(const details::log_msg &msg) override;
-        void flush() override { sink_->flush(); }
-        void set_level(level::level_enum filter_level);
-
-      private:
-        sink_ptr sink_;
-        level::level_enum level_;
-    };
-    inline filter_sink::filter_sink(sink_ptr wrapped_sink,
-                                    level::level_enum filter_level)
-        : sink_(std::move(wrapped_sink)), level_(filter_level) {}
-
-    inline void filter_sink::log(const details::log_msg &msg) {
-        if (msg.level < level_) {
-            return;
-        }
-        sink_->log(msg);
-    }
-
-    void filter_sink::set_level(level::level_enum filter_level) {
-        level_ = filter_level;
-    }
-
-} // namespace sinks
-} // namespace spdlog
 
 namespace osvr {
 namespace util {
@@ -152,19 +118,6 @@ namespace util {
             setLevelImpl(severity);
         }
 
-        static inline spdlog::sink_ptr getConsoleSink() {
-            // Console sink
-            auto console_out = spdlog::sinks::stderr_sink_mt::instance();
-#if defined(OSVR_LINUX) || defined(OSVR_MACOSX)
-            auto color_sink = std::make_shared<spdlog::sinks::ansicolor_sink>(
-                console_out); // taste the rainbow!
-            return color_sink;
-#else
-            // No color for Windows yet (and not tested on other platforms)
-            return console_out;
-#endif
-        }
-
         void LogRegistry::setConsoleLevel(LogLevel severity) {
             if (severity < minLevel_) {
                 /// @todo Does it make sense that we must adjust overall level
@@ -186,14 +139,14 @@ namespace util {
 
 #if defined(OSVR_ANDROID)
             // Android doesn't have a console, it has logcat.
-            auto android_sink = spdlog::sinks::android_sink_mt("OSVR");
+            // We won't filter because we won't log to file on Android.
+            auto android_sink = getDefaultUnfilteredSink();
             sinks_.push_back(android_sink);
             auto &main_sink = android_sink;
 #else
             // Console sink
-            auto console_sink = getConsoleSink();
-            console_filter_ = std::make_shared<spdlog::sinks::filter_sink>(
-                console_sink, convertToLevelEnum(consoleLevel_));
+            console_filter_ =
+                getDefaultFilteredSink(convertToLevelEnum(consoleLevel_));
             sinks_.push_back(console_filter_);
             auto &main_sink = console_filter_;
 #endif
@@ -227,6 +180,10 @@ namespace util {
         }
 
         void LogRegistry::createFileSink() {
+#if defined(OSVR_ANDROID)
+            // Not logging to file on Android.
+            return;
+#else
             // File sink - rotates daily
             std::string logDir;
             try {
@@ -284,6 +241,7 @@ namespace util {
             generalPurposeLog_->notice() << "Log file created in " << logDir;
             generalPurposeLog_->notice() << "Log file name starts with \""
                                          << logFileBaseName_ << "\"";
+#endif // OSVR_ANDROID
         }
 
     } // end namespace log

@@ -53,6 +53,7 @@ using sink_ptr = std::shared_ptr<spdlog::sinks::sink>;
 namespace osvr {
 namespace util {
     namespace log {
+        class filter_sink;
 
         class LogRegistry {
           public:
@@ -103,7 +104,7 @@ namespace util {
             LogLevel consoleLevel_;
 
             std::vector<spdlog::sink_ptr> sinks_;
-            std::shared_ptr<spdlog::sinks::filter_sink> console_filter_;
+            std::shared_ptr<filter_sink> console_filter_;
             LoggerPtr consoleOnlyLog_;
             LoggerPtr generalLog_;
             Logger *generalPurposeLog_ = nullptr;
