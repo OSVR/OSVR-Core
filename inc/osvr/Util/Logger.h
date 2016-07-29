@@ -30,8 +30,8 @@
 
 // Internal Includes
 #include <osvr/Util/Export.h>
-#include <osvr/Util/Log.h> // for LoggerPtr
 #include <osvr/Util/LineLogger.h>
+#include <osvr/Util/Log.h> // for LoggerPtr
 #include <osvr/Util/LogLevel.h>
 
 // Library/third-party includes
@@ -66,22 +66,27 @@ namespace util {
          */
         class Logger {
           public:
-#if 0
-            /// Factory function: retrieves from the spdlog registry by name.
-            OSVR_UTIL_EXPORT static LoggerPtr
-            getFromSpdlogByName(const std::string &logger_name);
-#endif
-
-            /// Construct from an existing spdlog logger
-            OSVR_UTIL_EXPORT Logger(std::shared_ptr<spdlog::logger> logger);
+            /// Create from existing spdlog (implementation) logger.
+            ///
+            /// Always returns a valid pointer even on invalid input, though it
+            /// may be a "fallback" logger.
+            OSVR_UTIL_EXPORT static LoggerPtr makeFromExistingImplementation(
+                std::string const &name,
+                std::shared_ptr<spdlog::logger> logger);
 
             /// Construct with a name and an existing, single spdlog sink. (Does
             /// not use any logger registry.)
+            ///
+            /// Always returns a valid pointer even on invalid input, though it
+            /// may be a "fallback" logger.
             OSVR_UTIL_EXPORT static LoggerPtr
             makeWithSink(std::string const &name, spdlog::sink_ptr sink);
 
             /// Construct with a name and an initializer list of existing spdlog
             /// sinks. (Does not use any logger registry.)
+            ///
+            /// Always returns a valid pointer even on invalid input, though it
+            /// may be a "fallback" logger.
             OSVR_UTIL_EXPORT static LoggerPtr
             makeWithSinks(std::string const &name,
                           spdlog::sinks_init_list sinks);
@@ -92,9 +97,13 @@ namespace util {
             /// Non-copy-assignable
             OSVR_UTIL_EXPORT Logger &operator=(const Logger &) = delete;
 
+            /// Destructor
+            OSVR_UTIL_EXPORT ~Logger();
+
             /// Get the minimum level at which this logger will actually forward
             /// messages on to the sinks.
             OSVR_UTIL_EXPORT LogLevel getLogLevel() const;
+
             /// Set the minimum level at which this logger will actually forward
             /// messages on to the sinks.
             OSVR_UTIL_EXPORT void setLogLevel(LogLevel level);
@@ -102,8 +111,9 @@ namespace util {
             /// Set the log level at which this logger will trigger a flush.
             OSVR_UTIL_EXPORT void flushOn(LogLevel level);
 
-            /// @name logger->info(msg) (with optional << "more message") call style
-			/// @{
+            /// @name logger->info(msg) (with optional << "more message") call
+            /// style
+            /// @{
             OSVR_UTIL_EXPORT detail::LineLogger trace(const char *msg);
             OSVR_UTIL_EXPORT detail::LineLogger debug(const char *msg);
             OSVR_UTIL_EXPORT detail::LineLogger info(const char *msg);
@@ -111,10 +121,10 @@ namespace util {
             OSVR_UTIL_EXPORT detail::LineLogger warn(const char *msg);
             OSVR_UTIL_EXPORT detail::LineLogger error(const char *msg);
             OSVR_UTIL_EXPORT detail::LineLogger critical(const char *msg);
-			/// @}
+            /// @}
 
             /// @name logger->info() << "msg" call style
-			/// @{
+            /// @{
             OSVR_UTIL_EXPORT detail::LineLogger trace();
             OSVR_UTIL_EXPORT detail::LineLogger debug();
             OSVR_UTIL_EXPORT detail::LineLogger info();
@@ -122,18 +132,36 @@ namespace util {
             OSVR_UTIL_EXPORT detail::LineLogger warn();
             OSVR_UTIL_EXPORT detail::LineLogger error();
             OSVR_UTIL_EXPORT detail::LineLogger critical();
-			/// @}
+            /// @}
 
-            /// logger.log(log_level, msg) << ".." call style
+            /// logger.log(log_level, msg) (with optional << "more message")
+            /// call style
             OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level,
                                                     const char *msg);
 
             /// logger.log(log_level) << "msg" call  style
             OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level);
 
+            /// Make sure this logger has written out its data.
             OSVR_UTIL_EXPORT void flush();
 
+            /// Get the logger name
+            std::string const &getName() const { return name_; }
+
           private:
+            /// Internal-use constructor - please used a factory/named
+            /// constructor.
+            Logger(std::string const &name,
+                   std::shared_ptr<spdlog::logger> logger);
+
+            static LoggerPtr
+            makeLogger(std::string const &name,
+                       std::shared_ptr<spdlog::logger> const &logger);
+            /// In case a spdlog logger is not available, this will create a
+            /// fallback logger instance using just ostream.
+            static LoggerPtr makeFallback(std::string const &name);
+
+            const std::string name_;
             std::shared_ptr<spdlog::logger> logger_;
         };
 

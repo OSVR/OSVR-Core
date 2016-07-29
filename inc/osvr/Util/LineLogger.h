@@ -62,11 +62,6 @@ namespace util {
              */
             class LineLogger {
               public:
-                /// Construct from rvalue-reference to a spdlog (implementation)
-                /// line logger.
-                OSVR_UTIL_EXPORT
-                LineLogger(spdlog::details::line_logger &&line_logger);
-
                 /**
                  * @brief Move-only.
                  */
@@ -83,12 +78,12 @@ namespace util {
                  */
                 OSVR_UTIL_EXPORT ~LineLogger();
 
+                /// Outputs the given string.
                 OSVR_UTIL_EXPORT void write(const char *what);
 
-                /// Same as the operator<< with equivalent params, but doesn't
-                /// participate in that overload resolution nor will it be
-                /// captured by the perfect forwarder.
-                OSVR_UTIL_EXPORT LineLogger &append(const std::string &what);
+                /// Outputs the given string - usually composed by a
+                /// StreamProxy.
+                OSVR_UTIL_EXPORT void write(const std::string &what);
 
                 /// An object returned by operator<< on a LineLogger, serves to
                 /// accumulate streamed output in a single ostringstream then
@@ -104,7 +99,7 @@ namespace util {
                     /// of the expression.
                     ~StreamProxy() {
                         if (active_ && os_) {
-                            lineLogger_.append(os_->str());
+                            lineLogger_.write(os_->str());
                         }
                     }
 
@@ -141,7 +136,38 @@ namespace util {
                 OSVR_UTIL_EXPORT bool is_enabled() const;
 
               private:
+                /// Construct from rvalue-reference to a spdlog (implementation)
+                /// line logger.
+                OSVR_UTIL_EXPORT
+                LineLogger(spdlog::details::line_logger &&line_logger);
+
+                /// Construct fallback line-logger (when spdlog wasn't
+                /// available) from logger name and level.
+                OSVR_UTIL_EXPORT
+                LineLogger(std::string const &name, LogLevel level);
+
+                /// Construct fallback line-logger (when spdlog wasn't
+                /// available) from logger name and level, and immediately start
+                /// with a message.
+                OSVR_UTIL_EXPORT
+                LineLogger(std::string const &name, LogLevel level,
+                           const char *msg);
+
+                /// So logger may construct line-loggers. Nobody else needs to,
+                /// and assumptions may be violated if others do.
+                friend class ::osvr::util::log::Logger;
+
+                bool fallbackEnabled() const { return name_ != nullptr; }
+                std::ostream &startFallbackMessaging();
+                std::ostream &getFallbackStream() const;
                 std::unique_ptr<spdlog::details::line_logger> lineLogger_;
+                /// @name Members used in case of fallback operation: null
+                /// spdlog lineLogger
+                /// @{
+                std::string const *name_ = nullptr;
+                LogLevel level_ = LogLevel::trace;
+                bool startedFallback_ = false;
+                /// @}
             };
 
         } // namespace detail

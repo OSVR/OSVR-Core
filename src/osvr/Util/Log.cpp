@@ -27,6 +27,7 @@
 #include "LogSinks.h"
 #include <osvr/Util/GetEnvironmentVariable.h>
 #include <osvr/Util/Log.h>
+#include <osvr/Util/Logger.h>
 #include <osvr/Util/LogConfig.h> // for OSVR_UTIL_LOG_SINGLETON
 #include <osvr/Util/PlatformConfig.h>
 
@@ -79,7 +80,8 @@ namespace util {
             auto spd_logger =
                 std::make_shared< ::spdlog::logger>(logger_name, sink);
             spd_logger->set_pattern("%b %d %T.%e %l %n: %v");
-            return std::make_shared<Logger>(spd_logger);
+            return Logger::makeFromExistingImplementation(logger_name,
+                                                          spd_logger);
         }
 
         void flush() {

@@ -27,6 +27,7 @@
 #define INCLUDED_LogRegistry_h_GUID_09DDD840_389E_430C_8CBD_9AC4EE3F93FE
 
 // Internal Includes
+#include <osvr/Util/Log.h> // for LoggerPtr forward declaration
 #include <osvr/Util/LogLevel.h>
 
 // Library/third-party includes
@@ -52,9 +53,6 @@ using sink_ptr = std::shared_ptr<spdlog::sinks::sink>;
 namespace osvr {
 namespace util {
     namespace log {
-
-        class Logger;
-        using LoggerPtr = std::shared_ptr<Logger>;
 
         class LogRegistry {
           public:
@@ -108,6 +106,7 @@ namespace util {
             std::shared_ptr<spdlog::sinks::filter_sink> console_filter_;
             LoggerPtr consoleOnlyLog_;
             LoggerPtr generalLog_;
+            Logger *generalPurposeLog_ = nullptr;
             std::string logFileBaseName_;
         };
 

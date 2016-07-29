@@ -30,6 +30,7 @@
 // Internal Includes
 #include <osvr/Util/Export.h>
 #include <osvr/Util/SharedPtr.h>
+#include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 // - none
@@ -37,12 +38,20 @@
 // Standard includes
 #include <string>
 
+/// @todo try this out - it does build, and I think it makes logical sense as
+/// well.
+#undef OSVR_USE_UNIQUEPTR_FOR_LOGGER
+
 namespace osvr {
 namespace util {
     namespace log {
         class Logger;
-
+#ifdef OSVR_USE_UNIQUEPTR_FOR_LOGGER
+        typedef unique_ptr<Logger> LoggerPtr;
+        typedef shared_ptr<Logger> LoggerSharedPtr;
+#else
         typedef shared_ptr<Logger> LoggerPtr;
+#endif
 
         /// @brief Attempt to initialize the logging system with the indicated
         /// base filename (will be stripped of all characters outside of
@@ -55,6 +64,10 @@ namespace util {
         OSVR_UTIL_EXPORT bool
         tryInitializingLoggingWithBaseName(std::string const &baseName);
 
+        /// Make (or get from the registry) a logger by name.
+        ///
+        /// Always returns a valid pointer even on invalid input or state,
+        /// though it may be a "fallback" logger.
         OSVR_UTIL_EXPORT LoggerPtr make_logger(const std::string &logger_name);
 
         /// @brief For implementations with a centralized logger registry, flush

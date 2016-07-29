@@ -130,7 +130,8 @@ namespace util {
             spd_logger->set_level(convertToLevelEnum(minLevel_));
             spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
 
-            return std::make_shared<Logger>(spd_logger);
+            return Logger::makeFromExistingImplementation(logger_name,
+                                                          spd_logger);
         }
 
         void LogRegistry::flush() {
@@ -198,14 +199,13 @@ namespace util {
 #endif
             consoleOnlyLog_ =
                 Logger::makeWithSink(OSVR_GENERAL_LOG_NAME, main_sink);
+            generalPurposeLog_ = consoleOnlyLog_.get();
 
             createFileSink();
-            if (!generalLog_) {
-                generalLog_ = consoleOnlyLog_;
-            }
+
             auto binLoc = getBinaryLocation();
             if (!binLoc.empty()) {
-                generalLog_->notice("Logging for ") << binLoc;
+                generalPurposeLog_->notice("Logging for ") << binLoc;
             }
         }
 
@@ -273,15 +273,17 @@ namespace util {
             // file location to it.
             generalLog_ = Logger::makeWithSinks(OSVR_GENERAL_LOG_NAME,
                                                 {sinks_[0], sinks_[1]});
-            if (!generalLog_) {
+            if (generalLog_) {
+                generalPurposeLog_ = generalLog_.get();
+            } else {
+                // this shouldn't happen...
                 consoleOnlyLog_->error(
                     "Could not make a general log with both sinks!");
-                generalLog_ = consoleOnlyLog_;
             }
 
-            generalLog_->notice() << "Log file created in " << logDir;
-            generalLog_->notice() << "Log file name starts with \""
-                                  << logFileBaseName_ << "\"";
+            generalPurposeLog_->notice() << "Log file created in " << logDir;
+            generalPurposeLog_->notice() << "Log file name starts with \""
+                                         << logFileBaseName_ << "\"";
         }
 
     } // end namespace log
