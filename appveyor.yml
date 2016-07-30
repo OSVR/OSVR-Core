@@ -1,0 +1,68 @@
+#
+# Builds project on Appveyor <http://www.appveyor.com/>
+#
+
+environment:
+  matrix:
+    - GENERATOR: "Visual Studio 12"
+      CONFIG: Debug
+    - GENERATOR: "Visual Studio 12"
+      CONFIG: Release
+    - GENERATOR: "Visual Studio 12 Win64"
+      CONFIG: Debug
+    - GENERATOR: "Visual Studio 12 Win64"
+      CONFIG: Release
+    - GENERATOR: "Visual Studio 14"
+      CONFIG: Debug
+    - GENERATOR: "Visual Studio 14"
+      CONFIG: Release
+    - GENERATOR: "Visual Studio 14 Win64"
+      CONFIG: Debug
+    - GENERATOR: "Visual Studio 14 Win64"
+      CONFIG: Release
+
+install:
+  - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
+  - ps: choco install -y OpenCV -version 2.4.10.20150209
+  - ps: choco pin add -name OpenCV
+# jsoncpp
+# libfunctionality
+# boost
+
+# TODO set up cache for dependencies
+
+# build dependencies
+before_build:
+  - mkdir deps
+  - cd deps
+
+  - git clone --recursive https://github.com/open-source-parsers/jsoncpp.git
+  - cd jsoncpp
+  - mkdir build
+  - cd build
+  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DJSONCPP_WITH_CMAKE_PACKAGE=ON
+  - cmake --build . --config "%CONFIG%" --target install
+  - cd ..
+  - cd ..
+
+  - git clone --recursive https://github.com/OSVR/libfunctionality.git
+  - cd libfunctionality
+  - mkdir build
+  - cd build
+  - cmake .. -G "%GENERATOR%"
+  - cmake --build . --config "%CONFIG%" --target install
+  - cd ..
+  - cd ..
+
+  - cd ..
+
+
+build:
+  parallel: true
+
+build_script:
+  - mkdir build
+  - cd build
+  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX="c:\osvr" -DCMAKE_PREFIX_PATH="c:\osvr" -DBUILD_HEADER_DEPENDENCY_TESTS=1  -DBUILD_CLIENT_APPS=1 -DBUILD_CLIENT_EXAMPLES=1  -DBUILD_SERVER_APP=1 -DBUILD_SERVER_EXAMPLES=1 -DBUILD_SERVER_PLUGINS=1 -DBUILD_TESTING=1
+  - cmake --build . --config "%CONFIG%"
+
