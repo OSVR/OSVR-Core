@@ -33,8 +33,7 @@ install:
 
 # build dependencies
 before_build:
-  - mkdir deps
-  - cd deps
+  - cd ..
 
   - git clone --recursive https://github.com/open-source-parsers/jsoncpp.git
   - cd jsoncpp
@@ -49,20 +48,21 @@ before_build:
   - cd libfunctionality
   - mkdir build
   - cd build
-  - cmake .. -G "%GENERATOR%"
+  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr
   - cmake --build . --config "%CONFIG%" --target install
   - cd ..
   - cd ..
 
-  - cd ..
+  - cd osvr-core
 
 
 build:
   parallel: true
 
 build_script:
+  - submodule update --init --recursive
   - mkdir build
   - cd build
-  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX="c:\osvr" -DCMAKE_PREFIX_PATH="c:\osvr" -DBUILD_HEADER_DEPENDENCY_TESTS=1  -DBUILD_CLIENT_APPS=1 -DBUILD_CLIENT_EXAMPLES=1  -DBUILD_SERVER_APP=1 -DBUILD_SERVER_EXAMPLES=1 -DBUILD_SERVER_PLUGINS=1 -DBUILD_TESTING=1
+  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX="c:\osvr" -DCMAKE_PREFIX_PATH="c:\osvr" -DBUILD_HEADER_DEPENDENCY_TESTS=1  -DBUILD_CLIENT_APPS=1 -DBUILD_CLIENT_EXAMPLES=1  -DBUILD_SERVER_APP=1 -DBUILD_SERVER_EXAMPLES=1 -DBUILD_SERVER_PLUGINS=1 -DBUILD_TESTING=1 -DBOOST_ROOT=C:\Libraries\boost_1_60_0
   - cmake --build . --config "%CONFIG%"
 
