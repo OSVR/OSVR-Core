@@ -30,7 +30,8 @@ environment:
       BOOST: boost_1_60_0
 
 install:
-  - ps: dir c:\libraries\%BOOST%
+  - ps: dir c:\libraries\boost_1_58_0
+  - ps: dir c:\libraries\boost_1_60_0
 #  - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
 #  - ps: choco install -y OpenCV -version 2.4.10.20150209
 #  - ps: choco pin add -name OpenCV
