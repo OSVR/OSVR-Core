@@ -21,48 +21,49 @@ environment:
     - GENERATOR: "Visual Studio 14 Win64"
       CONFIG: Release
 
+# XXX get listing of Boost files
 install:
-  - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
-  - ps: choco install -y OpenCV -version 2.4.10.20150209
-  - ps: choco pin add -name OpenCV
-# jsoncpp
-# libfunctionality
-# boost
+  - tree C:\Libraries
 
-# TODO set up cache for dependencies
-
-# build dependencies
-before_build:
-  - cd ..
-
-  - git clone --recursive https://github.com/open-source-parsers/jsoncpp.git
-  - cd jsoncpp
-  - mkdir build
-  - cd build
-  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DJSONCPP_WITH_CMAKE_PACKAGE=ON
-  - cmake --build . --config "%CONFIG%" --target install
-  - cd ..
-  - cd ..
-
-  - git clone --recursive https://github.com/OSVR/libfunctionality.git
-  - cd libfunctionality
-  - mkdir build
-  - cd build
-  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr
-  - cmake --build . --config "%CONFIG%" --target install
-  - cd ..
-  - cd ..
-
-  - cd osvr-core
-
-
-build:
-  parallel: true
-
-build_script:
-  - git submodule update --init --recursive
-  - mkdir build
-  - cd build
-  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX="c:\osvr" -DCMAKE_PREFIX_PATH="c:\osvr" -DBUILD_HEADER_DEPENDENCY_TESTS=1  -DBUILD_CLIENT_APPS=1 -DBUILD_CLIENT_EXAMPLES=1  -DBUILD_SERVER_APP=1 -DBUILD_SERVER_EXAMPLES=1 -DBUILD_SERVER_PLUGINS=1 -DBUILD_TESTING=1 -DBOOST_ROOT=C:\Libraries\boost_1_60_0
-  - cmake --build . --config "%CONFIG%"
+#install:
+#  - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
+#  - ps: choco install -y OpenCV -version 2.4.10.20150209
+#  - ps: choco pin add -name OpenCV
+#
+## TODO set up cache for dependencies
+#
+## build dependencies
+#before_build:
+#  - cd ..
+#
+#  - git clone --recursive https://github.com/open-source-parsers/jsoncpp.git
+#  - cd jsoncpp
+#  - mkdir build
+#  - cd build
+#  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DJSONCPP_WITH_CMAKE_PACKAGE=ON
+#  - cmake --build . --config "%CONFIG%" --target install
+#  - cd ..
+#  - cd ..
+#
+#  - git clone --recursive https://github.com/OSVR/libfunctionality.git
+#  - cd libfunctionality
+#  - mkdir build
+#  - cd build
+#  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr
+#  - cmake --build . --config "%CONFIG%" --target install
+#  - cd ..
+#  - cd ..
+#
+#  - cd osvr-core
+#
+#
+#build:
+#  parallel: true
+#
+#build_script:
+#  - git submodule update --init --recursive
+#  - mkdir build
+#  - cd build
+#  - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX="c:\osvr" -DCMAKE_PREFIX_PATH="c:\osvr" -DBUILD_HEADER_DEPENDENCY_TESTS=1  -DBUILD_CLIENT_APPS=1 -DBUILD_CLIENT_EXAMPLES=1  -DBUILD_SERVER_APP=1 -DBUILD_SERVER_EXAMPLES=1 -DBUILD_SERVER_PLUGINS=1 -DBUILD_TESTING=1 -DBOOST_ROOT=C:\Libraries\boost_1_60_0
+#  - cmake --build . --config "%CONFIG%"
 
