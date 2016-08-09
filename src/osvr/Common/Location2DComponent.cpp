@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include <osvr/Common/Location2DComponent.h>
+
 #include <osvr/Common/BaseDevice.h>
 #include <osvr/Common/Buffer.h>
 #include <osvr/Common/Serialization.h>
@@ -57,7 +58,8 @@ namespace common {
     }
 
     Location2DComponent::Location2DComponent(OSVR_ChannelCount numChan)
-        : m_numSensor(numChan) {}
+        : locationRecord(), m_numSensor(numChan),
+          m_locationMsgs(locationRecord) {}
 
     void
     Location2DComponent::sendLocationData(OSVR_Location2DState location,
@@ -71,28 +73,10 @@ namespace common {
                                   timestamp);
     }
 
-    int VRPN_CALLBACK
-    Location2DComponent::m_handleLocationRecord(void *userdata,
-                                                vrpn_HANDLERPARAM p) {
-        auto self = static_cast<Location2DComponent *>(userdata);
-        auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
-
-        LocationData data;
-        serialization::deserializeRaw(bufReader, data);
-        auto timestamp = util::time::fromStructTimeval(p.msg_time);
-
-        for (auto const &cb : self->m_cb) {
-            cb(data, timestamp);
-        }
-        return 0;
-    }
-
     void Location2DComponent::registerLocationHandler(LocationHandler handler) {
-        if (m_cb.empty()) {
-            m_registerHandler(&Location2DComponent::m_handleLocationRecord,
-                              this, locationRecord.getMessageType());
+        if (m_locationMsgs.registerSubordinateHandler(std::move(handler))) {
+            m_registerHandler(m_locationMsgs.getRawHandlerRegistrationArgs());
         }
-        m_cb.push_back(handler);
     }
     void Location2DComponent::m_parentSet() {
         m_getParent().registerMessageType(locationRecord);

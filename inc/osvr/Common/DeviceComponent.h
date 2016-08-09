@@ -27,18 +27,22 @@
 
 // Internal Includes
 #include <osvr/Common/DeviceComponentPtr.h>
+
 #include <osvr/Common/BaseDevicePtr.h>
-#include <osvr/Common/MessageHandler.h>
 #include <osvr/Common/BaseMessageTraits.h>
+#include <osvr/Common/MessageHandler.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <tuple>
 
 namespace osvr {
 namespace common {
+
+    using HandlerRegistrationArgs =
+        std::tuple<vrpn_MESSAGEHANDLER, void *, RawMessageType>;
     class DeviceComponent {
       public:
         typedef BaseDevice Parent;
@@ -69,6 +73,12 @@ namespace common {
         void m_registerHandler(vrpn_MESSAGEHANDLER handler, void *userdata,
                                RawMessageType const &msgType);
 
+        /// @overload
+        void m_registerHandler(HandlerRegistrationArgs args) {
+            m_registerHandler(std::get<0>(args), std::get<1>(args),
+                              std::get<2>(args));
+        }
+
         /// @brief Called once when we have a parent
         virtual void m_parentSet() = 0;
 
@@ -80,6 +90,7 @@ namespace common {
         Parent *m_parent;
         MessageHandlerList<BaseDeviceMessageHandleTraits> m_messageHandlers;
     };
+
 } // namespace common
 } // namespace osvr
 #endif // INCLUDED_DeviceComponent_h_GUID_FC172255_F4F1_41A2_ABA5_E5E33F8BD005

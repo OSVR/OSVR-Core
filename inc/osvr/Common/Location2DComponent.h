@@ -28,6 +28,7 @@
 
 // Internal Includes
 #include <osvr/Common/Export.h>
+
 #include <osvr/Common/DeviceComponent.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
@@ -37,11 +38,65 @@
 #include <vrpn_BaseClass.h>
 
 // Standard includes
-// - none
+#include <functional>
+#include <tuple>
+#include <vector>
 
 namespace osvr {
 namespace common {
 
+    /// Just forward deserialized messages on to a simple list of handlers.
+    template <typename MessageRegistrationType> class SimpleMessageHandler {
+      public:
+        SimpleMessageHandler(MessageRegistrationType &reg)
+            : reg_(std::ref(reg)) {}
+
+        using type = SimpleMessageHandler<MessageRegistrationType>;
+
+        using MessageType = typename MessageRegistrationType::MessageType;
+
+        using IndividualHandler = std::function<void(
+            MessageType const &, util::time::TimeValue const &)>;
+
+        /// @brief to pass to m_registerHandler()
+        HandlerRegistrationArgs getRawHandlerRegistrationArgs() {
+            return HandlerRegistrationArgs{&type::m_handleReportTrampoline,
+                                           this, reg_.get().getMessageType()};
+        }
+
+        /// @brief Returns true exactly once, when you need to call
+        /// m_registerHandler with getRawRegistrationArgs()
+        bool registerSubordinateHandler(IndividualHandler &&handler) {
+            bool ret = needsRegister_;
+            needsRegister_ = false;
+            m_cb.emplace_back(std::move(handler));
+            return ret;
+        }
+
+      private:
+        static int VRPN_CALLBACK m_handleReportTrampoline(void *userdata,
+                                                          vrpn_HANDLERPARAM p) {
+            static_cast<type *>(userdata)->m_handleReport(p);
+            return 0;
+        }
+        void m_handleReport(vrpn_HANDLERPARAM const &p) {
+            if (m_cb.empty()) {
+                // early out if it's empty.
+                return;
+            }
+            auto bufReader = readExternalBuffer(p.buffer, p.payload_len);
+
+            MessageData data;
+            serialization::deserializeRaw(bufReader, data);
+            auto timestamp = util::time::fromStructTimeval(p.msg_time);
+
+            for (auto const &cb : m_cb) {
+                cb(data, timestamp);
+            }
+        }
+        std::vector<IndividualHandler> m_cb;
+        bool needsRegister_ = true;
+        std::reference_wrapper<MessageRegistrationType> reg_;
     };
 
     using LocationData = OSVR_Location2DReport;
@@ -73,23 +128,16 @@ namespace common {
         sendLocationData(OSVR_Location2DState location,
                          OSVR_ChannelCount sensor,
                          OSVR_TimeValue const &timestamp);
-
-        typedef std::function<void(LocationData const &,
-                                   util::time::TimeValue const &)>
-            LocationHandler;
+        using LocationHandler =
+            SimpleMessageHandler<messages::LocationRecord>::IndividualHandler;
         OSVR_COMMON_EXPORT void registerLocationHandler(LocationHandler cb);
 
       private:
         Location2DComponent(OSVR_ChannelCount numChan);
-        virtual void m_parentSet();
-
-        static int VRPN_CALLBACK
-        m_handleLocationRecord(void *userdata, vrpn_HANDLERPARAM p);
-
-        void m_checkFirst(OSVR_Location2DState const &location);
+        void m_parentSet() override;
 
         OSVR_ChannelCount m_numSensor;
-        std::vector<LocationHandler> m_cb;
+        SimpleMessageHandler<messages::LocationRecord> m_locationMsgs;
         bool m_gotOne;
     };
 
