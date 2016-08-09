@@ -42,16 +42,15 @@
 namespace osvr {
 namespace common {
 
-    struct LocationData {
-        OSVR_ChannelCount sensor;
-        OSVR_Location2DState location;
     };
+
+    using LocationData = OSVR_Location2DReport;
 
     namespace messages {
         class LocationRecord : public MessageRegistration<LocationRecord> {
-          public:
-            class MessageSerialization;
 
+          public:
+            using MessageType = LocationData;
             static const char *identifier();
         };
 
