@@ -1,3 +1,5 @@
+include(InstallDebugSymbols)
+
 set(LIB_FOLDER "OSVR Libraries")
 
 set(OSVR_BUILDTREE_TARGETS "" CACHE INTERNAL "" FORCE)
@@ -71,6 +73,9 @@ macro(osvr_add_library)
         DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/osvr/${LIBNAME}
         COMPONENT Devel)
+
+    osvr_install_symbols_for_target(${LIBNAME_FULL})
+
     osvr_append_target(BUILDTREE ${LIBNAME_FULL})
 endmacro()
 
