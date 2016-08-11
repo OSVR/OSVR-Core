@@ -148,10 +148,16 @@ namespace vbtracker {
 
         std::pair<BodyId, ImuMessageCategory>
         processIMUMessage(IMUMessage const &m);
+
+        /// pointer to body reporting object for camera pose in "room" space
         BodyReporting *getCamPoseReporting() const;
+        /// pointer to body reporting object for IMU
         BodyReporting *getIMUReporting() const;
+        /// pointer to body reporting object for IMU in camera space
         BodyReporting *getIMUCamReporting() const;
+        /// pointer to body reporting for HMD in camera space
         BodyReporting *getHMDCamReporting() const;
+
         void updateExtraCameraReport();
         void updateExtraIMUReports();
 

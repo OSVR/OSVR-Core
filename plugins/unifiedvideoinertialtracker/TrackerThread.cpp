@@ -440,7 +440,7 @@ namespace vbtracker {
             m_reportingVec[i]->initProcessModel(body.getProcessModel());
 #ifdef OSVR_OUTPUT_HMD_CAM
             if (bodyId == BodyId(0)) {
-                getCamPoseReporting()->initProcessModel(body.getProcessModel());
+                getHMDCamReporting()->initProcessModel(body.getProcessModel());
             }
 #endif
         }
@@ -497,8 +497,8 @@ namespace vbtracker {
 #ifdef OSVR_OUTPUT_HMD_CAM
             if (bodyId == BodyId(0)) {
                 auto &body = m_trackingSystem.getBody(bodyId);
-                getCamPoseReporting()->updateState(body.getStateTime(),
-                                                   body.getState());
+                getHMDCamReporting()->updateState(body.getStateTime(),
+                                                  body.getState());
             }
 #endif
         }
