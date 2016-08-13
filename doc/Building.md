@@ -28,6 +28,7 @@ You'll need:
 - CMake, fairly recent (3.0 or newer, 3.0.2 most tested, that or the latest preferred.) Depending on your Linux distribution, package manager may or may not have version 3.0+, so you can get it from <http://CMake.org> or backports/PPA.
 - [libfunctionality][] is standalone, so you will need to build it first
 - [jsoncpp][] - the version in your distribution is probably OK, but if you build it from source, you will need to compile it with `-DJSONCPP_WITH_CMAKE_PACKAGE=ON` in order to generate CMake project config files. Optionally you can make it a static library with ` -DJSONCPP_LIB_BUILD_SHARED=OFF -DCMAKE_CXX_FLAGS=-fPIC` flags (don't forget to `make install` after building)
+  - The system-provided (apt-get) Jsoncpp developer library on many Linux installations is configured differently and causes a failure during building, so we recommend building Jsoncpp from source.
 - OpenCV 2.4.x
 - Boost libraries (1.44 or newer - as mentioned above, Boost 1.58 was considered buggy but is now thought to be just fine), which you can get through package manager. You don't need all of them but you'll need at least : `libboost1.xx-dev, libboost-thread1.xx-dev (includes required system, date-time and chrono), libboost-program-options1.xx-dev, libboost-filesystem1.xx-dev)`
 - `libusb1` - this is the Debian package `libusb-1.0-0-dev`. Do not confuse it with `libusb` aka `libusb0`: those packages are frozen in the past and incompatible with `libusb1`.
