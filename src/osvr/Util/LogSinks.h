@@ -41,6 +41,7 @@
 #endif
 #include <spdlog/common.h>
 #include <spdlog/sinks/base_sink.h>
+#include <spdlog/sinks/android_sink.h>
 #include <spdlog/spdlog.h>
 
 // Standard includes
