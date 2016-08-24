@@ -361,7 +361,8 @@ if(NOT WIN32) # Have not set this up for Windows yet
 endif()
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 set(BUILDTREE_HEADER_BASE "${CMAKE_CURRENT_BINARY_DIR}/src")
-if(WIN32)
+if(WIN32 AND NOT DEFINED CMAKE_DEBUG_POSTFIX)
+    set(OSVR_SET_DEBUG_POSTFIX TRUE)
     set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
@@ -371,7 +372,7 @@ add_subdirectory(devtools)
 # Core libraries
 add_subdirectory(src/osvr)
 
-if(WIN32)
+if(WIN32 AND OSVR_SET_DEBUG_POSTFIX)
     set(CMAKE_DEBUG_POSTFIX "")
 endif()
 
