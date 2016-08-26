@@ -26,9 +26,9 @@
 #include <osvr/Util/EigenQuatExponentialMap.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
 #include "../EigenTestHelpers.h"
 #include "quat.h"
+#include "gtest/gtest.h"
 
 // Standard includes
 #include <array>
@@ -37,6 +37,12 @@ using osvr::util::quat_exp_map;
 
 static const double SMALL = 0.1;
 static const double SMALLER = 1.0e-5;
+
+#if !defined(_WIN32) || defined(NDEBUG)
+/// @todo These cause link failures in Windows/DLL debug builds. For now,
+/// just assume they're tested enough in release mode.
+#define OSVR_CAN_USE_PARAMETERIZED_TESTS
+#endif
 
 namespace quat_array {
 
@@ -163,6 +169,8 @@ class UnitQuatInput : public ::testing::TestWithParam<QuatCreator> {
     Eigen::Quaterniond getQuat() const { return GetParam().get(); }
 };
 
+#ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
+
 TEST_P(UnitQuatInput, BasicRunLn) {
     ASSERT_NO_THROW(quat_exp_map(getQuat()).ln());
     if (getQuat().vec().norm() > 0) {
@@ -212,6 +220,8 @@ INSTANTIATE_TEST_CASE_P(
                       QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitX()),
                       QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitY()),
                       QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitZ())));
+
+#endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
 #if 0
 QuatCreator::AngleAxis(M_PI, Vector3d::UnitX()),
 QuatCreator::AngleAxis(M_PI, Vector3d::UnitY()),
@@ -221,6 +231,7 @@ QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitY()),
 QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitZ()),
 #endif
 
+#ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
 class ExpMapVecInput : public ::testing::TestWithParam<Eigen::Vector3d> {
   public:
     // You can implement all the usual fixture class members here.
@@ -269,6 +280,8 @@ INSTANTIATE_TEST_CASE_P(
                       Vector3d(0, 0, -SMALL), Vector3d(-SMALLER, 0, 0),
                       Vector3d(0, -SMALLER, 0), Vector3d(0, 0, -SMALLER)));
 
+#endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
+
 inline Quaterniond makeQuat(double angle, Vector3d const &axis) {
     return Quaterniond(AngleAxisd(angle, axis));
 }
@@ -283,6 +296,7 @@ TEST(SimpleEquivalencies, Exp) {
                           quat_exp_map(Vector3d::Zero().eval()).exp());
 }
 
+#ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
 class EquivalentInput : public ::testing::TestWithParam<QuatVecPair> {
   public:
     // Gets the first part of theparameter and converts it to a real Eigen quat.
@@ -352,3 +366,5 @@ INSTANTIATE_TEST_CASE_P(
                       makePairFromAngleAxis(-SMALLER, Vector3d::UnitX()),
                       makePairFromAngleAxis(-SMALLER, Vector3d::UnitY()),
                       makePairFromAngleAxis(-SMALLER, Vector3d::UnitZ())));
+
+#endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
