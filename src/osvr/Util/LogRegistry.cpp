@@ -87,21 +87,27 @@ namespace util {
             auto spd_logger = spdlog::get(logger_name);
             if (!spd_logger) {
                 // Bummer, it didn't exist. We'll create one from scratch.
-                // FIXME wrap in try..catch
                 try {
-                    spd_logger = spdlog::details::registry::instance().create(logger_name, begin(sinks_), end(sinks_));
-                } catch (const std::exception& e) {
-                    std::cerr << "Caught exception attempting to create logger: " << e.what() << std::endl;
-                    std::cerr << "Error creating logger. Will only log to the console." << std::endl;
+                    spd_logger = spdlog::details::registry::instance().create(
+                        logger_name, begin(sinks_), end(sinks_));
+                    spd_logger->set_pattern(DEFAULT_PATTERN);
+                    /// @todo should this level be different than other levels?
+                    spd_logger->set_level(convertToLevelEnum(minLevel_));
+                    spd_logger->flush_on(
+                        convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
+                } catch (const std::exception &e) {
+                    generalPurposeLog_->error()
+                        << "Caught exception attempting to create logger: "
+                        << e.what();
+                    generalPurposeLog_->error() << "Error creating logger. "
+                                                   "Will only log to the "
+                                                   "console.";
                 } catch (...) {
-                    std::cerr << "Error creating logger. Will only log to the console." << std::endl;
+                    generalPurposeLog_->error() << "Error creating logger. "
+                                                   "Will only log to the "
+                                                   "console.";
                 }
             }
-
-            spd_logger->set_pattern(DEFAULT_PATTERN);
-            /// @todo should this level be different than other levels?
-            spd_logger->set_level(convertToLevelEnum(minLevel_));
-            spd_logger->flush_on(convertToLevelEnum(DEFAULT_FLUSH_LEVEL));
 
             return Logger::makeFromExistingImplementation(logger_name,
                                                           spd_logger);
@@ -242,6 +248,7 @@ namespace util {
             // file location to it.
             generalLog_ = Logger::makeWithSinks(OSVR_GENERAL_LOG_NAME,
                                                 {sinks_[0], sinks_[1]});
+
             if (generalLog_) {
                 generalPurposeLog_ = generalLog_.get();
             } else {

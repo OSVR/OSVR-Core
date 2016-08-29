@@ -133,7 +133,7 @@ namespace util {
                 /// of the expression.
                 ~StreamProxy() {
                     if (active_ && os_) {
-                        logger_.log(level_, os_->str().c_str());
+                        logger_.write(level_, os_->str().c_str());
                     }
                 }
 
@@ -205,6 +205,9 @@ namespace util {
             /// In case a spdlog logger is not available, this will create a
             /// fallback logger instance using just ostream.
             static LoggerPtr makeFallback(std::string const &name);
+
+            /// Pass the constructed message along to the underlying logger.
+            void write(LogLevel level, const char* msg);
 
             const std::string name_;
             std::shared_ptr<spdlog::logger> logger_;

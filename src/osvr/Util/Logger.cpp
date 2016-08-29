@@ -31,6 +31,7 @@
 
 // Library/third-party includes
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/null_sink.h>
 
 // Standard includes
 #include <iostream>
@@ -64,24 +65,34 @@ namespace util {
         Logger::~Logger() {}
 
         LoggerPtr Logger::makeFallback(std::string const &name) {
-            /// Passes an empty spdlog pointer.
-            std::cerr << "WARNING: logger created for '" << name
-                      << "' is a \"fallback\" logger - an internal error has "
+            // First, we'll attempt to create a console logger to use as a
+            // fallback. If that fails, we'll create a do-nothing logger
+            // instead.
+            std::cerr << "WARNING: Logger created for '" << name
+                      << "' is a 'fallback' logger -- an internal error has "
                          "prevented a standard logger from being created. "
                          "Please report this issue in OSVR-Core on GitHub."
                       << std::endl;
-            return makeLogger(name, std::shared_ptr<spdlog::logger>{});
+            try {
+                auto console_logger = spdlog::stderr_logger_mt(name, false);
+                return makeLogger(name, console_logger);
+            } catch (...) {
+                std::cerr << "Failed to create a console logger to use as a "
+                             "fallback. Logging will be disabled entirely."
+                          << std::endl;
+                auto null_sink = std::make_shared<spdlog::sinks::null_sink_st>();
+                auto null_logger = std::make_shared<spdlog::logger>(name, null_sink);
+                return makeLogger(name, null_logger);
+            }
         }
 
         LoggerPtr Logger::makeFromExistingImplementation(
             std::string const &name, std::shared_ptr<spdlog::logger> logger) {
             if (!logger) {
-                std::cerr << "WARNING: "
-                             "Logger::makeFromExistingImplementation(\""
-                          << name << "\", logger) called "
-                                     "with a null logger pointer! Will result "
-                                     "in a fallback logger!"
-                          << std::endl;
+                std::cerr
+                    << "WARNING: Logger::makeFromExistingImplementation(\""
+                    << name << "\", logger) called with a null logger pointer! "
+                    << "Will result in a fallback logger!" << std::endl;
                 return makeFallback(name);
             }
             return makeLogger(name, logger);
@@ -91,13 +102,10 @@ namespace util {
                                        spdlog::sink_ptr sink) {
             if (!sink) {
                 // bad sink!
-                std::cerr
-                    << "WARNING: "
-                       "Logger::makeWithSink(\""
-                    << name
-                    << "\", sink) called "
-                       "with a null sink! Will result in a fallback logger!"
-                    << std::endl;
+                std::cerr << "WARNING: Logger::makeWithSink(\"" << name
+                          << "\", sink) called with a null sink! Will result "
+                             "in a fallback logger!"
+                          << std::endl;
                 return makeFallback(name);
             }
             auto spd_logger = std::make_shared<spdlog::logger>(name, sink);
@@ -131,20 +139,15 @@ namespace util {
         }
 
         LogLevel Logger::getLogLevel() const {
-            return logger_ ? convertFromLevelEnum(logger_->level())
-                           : DEFAULT_LEVEL;
+            return convertFromLevelEnum(logger_->level());
         }
 
         void Logger::setLogLevel(LogLevel level) {
-            if (logger_) {
-                logger_->set_level(convertToLevelEnum(level));
-            }
+            logger_->set_level(convertToLevelEnum(level));
         }
 
         void Logger::flushOn(LogLevel level) {
-            if (logger_) {
-                logger_->flush_on(convertToLevelEnum(level));
-            }
+            logger_->flush_on(convertToLevelEnum(level));
         }
 
         Logger::StreamProxy Logger::trace(const char *msg) {
@@ -263,12 +266,12 @@ namespace util {
         }
 
         void Logger::flush() {
-            if (logger_) {
-                logger_->flush();
-            } else {
-                std::cout << std::flush;
-                std::cerr << std::flush;
-            }
+            logger_->flush();
+        }
+
+        void Logger::write(LogLevel level, const char* msg)
+        {
+            logger_->log(convertToLevelEnum(level), msg);
         }
 
     } // namespace log
