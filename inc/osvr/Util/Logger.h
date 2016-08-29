@@ -195,7 +195,9 @@ namespace util {
             OSVR_UTIL_EXPORT void flush();
 
             /// Get the logger name
-            std::string const &getName() const { return name_; }
+            OSVR_UTIL_EXPORT std::string const &getName() const {
+                return name_;
+            }
 
           private:
             static LoggerPtr
@@ -207,7 +209,7 @@ namespace util {
             static LoggerPtr makeFallback(std::string const &name);
 
             /// Pass the constructed message along to the underlying logger.
-            void write(LogLevel level, const char* msg);
+            OSVR_UTIL_EXPORT void write(LogLevel level, const char* msg);
 
             const std::string name_;
             std::shared_ptr<spdlog::logger> logger_;
