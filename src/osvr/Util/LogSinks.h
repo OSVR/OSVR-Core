@@ -135,6 +135,7 @@ namespace util {
             return console_out;
 #endif
         }
+
         static inline spdlog::sink_ptr getDefaultUnfilteredSink() {
 #if defined(OSVR_ANDROID)
             // Android doesn't have a console, it has logcat.

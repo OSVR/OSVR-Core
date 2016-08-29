@@ -79,7 +79,6 @@ set(API
     "${HEADER_LOCATION}/ImagingReportTypesC.h"
     "${HEADER_LOCATION}/IndentingStream.h"
     "${HEADER_LOCATION}/KeyedOwnershipContainer.h"
-    "${HEADER_LOCATION}/LineLogger.h"
     "${HEADER_LOCATION}/Logger.h"
     "${HEADER_LOCATION}/Log.h"
     "${HEADER_LOCATION}/LogLevel.h"
@@ -146,7 +145,6 @@ set(SOURCE
     GetEnvironmentVariable.cpp
     GuardInterface.cpp
     TimeValueC.cpp
-    LineLogger.cpp
     LogConfig.h.in
     LogDefaults.h
     Log.cpp

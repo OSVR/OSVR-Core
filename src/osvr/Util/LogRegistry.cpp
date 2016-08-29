@@ -87,8 +87,15 @@ namespace util {
             auto spd_logger = spdlog::get(logger_name);
             if (!spd_logger) {
                 // Bummer, it didn't exist. We'll create one from scratch.
-                spd_logger = spdlog::details::registry::instance().create(
-                    logger_name, begin(sinks_), end(sinks_));
+                // FIXME wrap in try..catch
+                try {
+                    spd_logger = spdlog::details::registry::instance().create(logger_name, begin(sinks_), end(sinks_));
+                } catch (const std::exception& e) {
+                    std::cerr << "Caught exception attempting to create logger: " << e.what() << std::endl;
+                    std::cerr << "Error creating logger. Will only log to the console." << std::endl;
+                } catch (...) {
+                    std::cerr << "Error creating logger. Will only log to the console." << std::endl;
+                }
             }
 
             spd_logger->set_pattern(DEFAULT_PATTERN);
@@ -102,7 +109,11 @@ namespace util {
 
         void LogRegistry::flush() {
             for (auto &sink : sinks_) {
-                sink->flush();
+                try {
+                    sink->flush();
+                } catch (...) {
+                    // fail silently
+                }
             }
         }
 
@@ -135,7 +146,8 @@ namespace util {
             spdlog::set_pattern(DEFAULT_PATTERN);
             spdlog::set_level(convertToLevelEnum(minLevel_));
 
-// Instantiate console and file sinks
+            // Instantiate console and file sinks. These sinks will be used with
+            // each logger that is created via the registry.
 
 #if defined(OSVR_ANDROID)
             // Android doesn't have a console, it has logcat.
@@ -187,7 +199,7 @@ namespace util {
             // File sink - rotates daily
             std::string logDir;
             try {
-                size_t q_size = 1048576; // queue size must be power of 2
+                size_t q_size = 65536; // queue size must be power of 2
                 spdlog::set_async_mode(q_size);
                 namespace fs = boost::filesystem;
                 auto base_name = fs::path(getLoggingDirectory(true));

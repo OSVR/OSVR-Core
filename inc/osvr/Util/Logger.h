@@ -30,7 +30,6 @@
 
 // Internal Includes
 #include <osvr/Util/Export.h>
-#include <osvr/Util/LineLogger.h>
 #include <osvr/Util/Log.h> // for LoggerPtr
 #include <osvr/Util/LogLevel.h>
 
@@ -39,8 +38,9 @@
 
 // Standard includes
 #include <initializer_list>
-#include <memory> // for std::shared_ptr
-#include <string> // for std::string
+#include <memory>  // for std::shared_ptr
+#include <sstream> // for std::ostringstream
+#include <string>  // for std::string
 
 // Forward declarations
 
@@ -120,36 +120,76 @@ namespace util {
             /// Set the log level at which this logger will trigger a flush.
             OSVR_UTIL_EXPORT void flushOn(LogLevel level);
 
+            /// An object returned the logging functions (including operator<<),
+            /// serves to accumulate streamed output in a single ostringstream
+            /// then write it to the logger at the end of the expression's
+            /// lifetime.
+            class StreamProxy {
+              public:
+                StreamProxy(Logger &logger, LogLevel level)
+                    : logger_(logger), level_(level), os_(new std::ostringstream) {}
+
+                /// destructor appends the finished stringstream at the end
+                /// of the expression.
+                ~StreamProxy() {
+                    if (active_ && os_) {
+                        logger_.log(level_, os_->str().c_str());
+                    }
+                }
+
+                /// move construction
+                StreamProxy(StreamProxy &&other)
+                    : logger_(other.logger_), level_(other.level_), os_(std::move(other.os_)),
+                      active_(other.active_) {
+                    other.active_ = false;
+                }
+
+                StreamProxy(StreamProxy const &) = delete;
+                StreamProxy &operator=(StreamProxy const &) = delete;
+
+                operator std::ostream &() { return (*os_); }
+
+                template <typename T> std::ostream &operator<<(T &&what) {
+                    (*os_) << std::forward<T>(what);
+                    return (*os_);
+                }
+
+              private:
+                Logger &logger_;
+                LogLevel level_;
+                std::unique_ptr<std::ostringstream> os_;
+                bool active_ = true;
+            };
+
             /// @name logger->info(msg) (with optional << "more message") call
             /// style
             /// @{
-            OSVR_UTIL_EXPORT detail::LineLogger trace(const char *msg);
-            OSVR_UTIL_EXPORT detail::LineLogger debug(const char *msg);
-            OSVR_UTIL_EXPORT detail::LineLogger info(const char *msg);
-            OSVR_UTIL_EXPORT detail::LineLogger notice(const char *msg);
-            OSVR_UTIL_EXPORT detail::LineLogger warn(const char *msg);
-            OSVR_UTIL_EXPORT detail::LineLogger error(const char *msg);
-            OSVR_UTIL_EXPORT detail::LineLogger critical(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy trace(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy debug(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy info(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy notice(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy warn(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy error(const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy critical(const char *msg);
             /// @}
 
             /// @name logger->info() << "msg" call style
             /// @{
-            OSVR_UTIL_EXPORT detail::LineLogger trace();
-            OSVR_UTIL_EXPORT detail::LineLogger debug();
-            OSVR_UTIL_EXPORT detail::LineLogger info();
-            OSVR_UTIL_EXPORT detail::LineLogger notice();
-            OSVR_UTIL_EXPORT detail::LineLogger warn();
-            OSVR_UTIL_EXPORT detail::LineLogger error();
-            OSVR_UTIL_EXPORT detail::LineLogger critical();
+            OSVR_UTIL_EXPORT StreamProxy trace();
+            OSVR_UTIL_EXPORT StreamProxy debug();
+            OSVR_UTIL_EXPORT StreamProxy info();
+            OSVR_UTIL_EXPORT StreamProxy notice();
+            OSVR_UTIL_EXPORT StreamProxy warn();
+            OSVR_UTIL_EXPORT StreamProxy error();
+            OSVR_UTIL_EXPORT StreamProxy critical();
             /// @}
 
             /// logger.log(log_level, msg) (with optional << "more message")
             /// call style
-            OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level,
-                                                    const char *msg);
+            OSVR_UTIL_EXPORT StreamProxy log(LogLevel level, const char *msg);
 
             /// logger.log(log_level) << "msg" call  style
-            OSVR_UTIL_EXPORT detail::LineLogger log(LogLevel level);
+            OSVR_UTIL_EXPORT StreamProxy log(LogLevel level);
 
             /// Make sure this logger has written out its data.
             OSVR_UTIL_EXPORT void flush();
@@ -161,6 +201,7 @@ namespace util {
             static LoggerPtr
             makeLogger(std::string const &name,
                        std::shared_ptr<spdlog::logger> const &logger);
+
             /// In case a spdlog logger is not available, this will create a
             /// fallback logger instance using just ostream.
             static LoggerPtr makeFallback(std::string const &name);

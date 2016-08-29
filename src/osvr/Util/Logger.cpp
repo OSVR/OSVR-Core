@@ -147,79 +147,79 @@ namespace util {
             }
         }
 
-        detail::LineLogger Logger::trace(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->trace(msg)}
-                           : detail::LineLogger{name_, LogLevel::trace, msg};
+        Logger::StreamProxy Logger::trace(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
-        detail::LineLogger Logger::debug(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->debug(msg)}
-                           : detail::LineLogger{name_, LogLevel::debug, msg};
+        Logger::StreamProxy Logger::debug(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
-        detail::LineLogger Logger::info(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->info(msg)}
-                           : detail::LineLogger{name_, LogLevel::info, msg};
+        Logger::StreamProxy Logger::info(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
-        detail::LineLogger Logger::notice(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->notice(msg)}
-                           : detail::LineLogger{name_, LogLevel::notice, msg};
+        Logger::StreamProxy Logger::notice(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
-        detail::LineLogger Logger::warn(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->warn(msg)}
-                           : detail::LineLogger{name_, LogLevel::warn, msg};
+        Logger::StreamProxy Logger::warn(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
-        detail::LineLogger Logger::error(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->error(msg)}
-                           : detail::LineLogger{name_, LogLevel::error, msg};
+        Logger::StreamProxy Logger::error(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
-        detail::LineLogger Logger::critical(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->critical(msg)}
-                           : detail::LineLogger{name_, LogLevel::critical, msg};
+        Logger::StreamProxy Logger::critical(const char *msg) {
+            StreamProxy proxy(*this, LogLevel::trace);
+            proxy << msg;
+            return proxy;
         }
 
         // logger.info() << ".." call  style
-        detail::LineLogger Logger::trace() {
-            return logger_ ? detail::LineLogger{logger_->trace()}
-                           : detail::LineLogger{name_, LogLevel::trace};
+        Logger::StreamProxy Logger::trace() {
+            return { *this, LogLevel::trace };
         }
 
-        detail::LineLogger Logger::debug() {
-            return logger_ ? detail::LineLogger{logger_->debug()}
-                           : detail::LineLogger{name_, LogLevel::debug};
+        Logger::StreamProxy Logger::debug() {
+            return { *this, LogLevel::debug };
         }
 
-        detail::LineLogger Logger::info() {
-            return logger_ ? detail::LineLogger{logger_->info()}
-                           : detail::LineLogger{name_, LogLevel::info};
+        Logger::StreamProxy Logger::info() {
+            return { *this, LogLevel::info };
         }
 
-        detail::LineLogger Logger::notice() {
-            return logger_ ? detail::LineLogger{logger_->notice()}
-                           : detail::LineLogger{name_, LogLevel::notice};
+        Logger::StreamProxy Logger::notice() {
+            return { *this, LogLevel::notice };
         }
 
-        detail::LineLogger Logger::warn() {
-            return logger_ ? detail::LineLogger{logger_->warn()}
-                           : detail::LineLogger{name_, LogLevel::warn};
+        Logger::StreamProxy Logger::warn() {
+            return { *this, LogLevel::warn };
         }
 
-        detail::LineLogger Logger::error() {
-            return logger_ ? detail::LineLogger{logger_->error()}
-                           : detail::LineLogger{name_, LogLevel::error};
+        Logger::StreamProxy Logger::error() {
+            return { *this, LogLevel::error };
         }
 
-        detail::LineLogger Logger::critical() {
-            return logger_ ? detail::LineLogger{logger_->critical()}
-                           : detail::LineLogger{name_, LogLevel::critical};
+        Logger::StreamProxy Logger::critical() {
+            return { *this, LogLevel::critical };
         }
 
         // logger.log(log_level, msg) << ".." call style
-        detail::LineLogger Logger::log(LogLevel level, const char *msg) {
+        Logger::StreamProxy Logger::log(LogLevel level, const char *msg) {
             switch (level) {
             case LogLevel::trace:
                 return trace(msg);
@@ -241,7 +241,7 @@ namespace util {
         }
 
         // logger.log(log_level) << ".." call  style
-        detail::LineLogger Logger::log(LogLevel level) {
+        Logger::StreamProxy Logger::log(LogLevel level) {
             switch (level) {
             case LogLevel::trace:
                 return trace();

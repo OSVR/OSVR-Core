@@ -58,6 +58,7 @@ namespace util {
             // test for success
             return (inst.getLogFileBaseName() == sanitized);
         }
+
         LoggerPtr make_logger(const std::string &logger_name) {
             return LogRegistry::instance().getOrCreateLogger(logger_name);
         }
