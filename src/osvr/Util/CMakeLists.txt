@@ -194,6 +194,12 @@ target_link_libraries(${LIBNAME_FULL}
     boost_filesystem
     osvrTypePack)
 
+if(ANDROID)
+    target_link_libraries(${LIBNAME_FULL}
+        PRIVATE
+        log)
+endif()
+
 if(NOT OSVR_HAVE_STDALIGN)
     target_link_libraries(${LIBNAME_FULL}
         PRIVATE
