@@ -151,45 +151,31 @@ namespace util {
         }
 
         Logger::StreamProxy Logger::trace(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::trace, msg };
         }
 
         Logger::StreamProxy Logger::debug(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::debug, msg };
         }
 
         Logger::StreamProxy Logger::info(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::info, msg };
         }
 
         Logger::StreamProxy Logger::notice(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::notice, msg };
         }
 
         Logger::StreamProxy Logger::warn(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::warn, msg };
         }
 
         Logger::StreamProxy Logger::error(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::error, msg };
         }
 
         Logger::StreamProxy Logger::critical(const char *msg) {
-            StreamProxy proxy(*this, LogLevel::trace);
-            proxy << msg;
-            return proxy;
+            return { *this, LogLevel::critical, msg };
         }
 
         // logger.info() << ".." call  style

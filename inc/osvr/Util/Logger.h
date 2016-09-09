@@ -127,7 +127,14 @@ namespace util {
             class StreamProxy {
               public:
                 StreamProxy(Logger &logger, LogLevel level)
-                    : logger_(logger), level_(level), os_(new std::ostringstream) {}
+                    : logger_(logger), level_(level),
+                      os_(new std::ostringstream) {}
+
+                StreamProxy(Logger &logger, LogLevel level, const char *msg)
+                    : logger_(logger), level_(level),
+                      os_(new std::ostringstream) {
+                    os_->operator<<(msg);
+                }
 
                 /// destructor appends the finished stringstream at the end
                 /// of the expression.
@@ -139,8 +146,8 @@ namespace util {
 
                 /// move construction
                 StreamProxy(StreamProxy &&other)
-                    : logger_(other.logger_), level_(other.level_), os_(std::move(other.os_)),
-                      active_(other.active_) {
+                    : logger_(other.logger_), level_(other.level_),
+                      os_(std::move(other.os_)), active_(other.active_) {
                     other.active_ = false;
                 }
 
