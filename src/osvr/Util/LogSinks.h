@@ -41,6 +41,7 @@
 #endif
 #include <spdlog/common.h>
 #include <spdlog/sinks/base_sink.h>
+#include <spdlog/sinks/android_sink.h>
 #include <spdlog/spdlog.h>
 
 // Standard includes
@@ -134,6 +135,7 @@ namespace util {
             return console_out;
 #endif
         }
+
         static inline spdlog::sink_ptr getDefaultUnfilteredSink() {
 #if defined(OSVR_ANDROID)
             // Android doesn't have a console, it has logcat.

@@ -31,6 +31,7 @@
 
 // Library/third-party includes
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/null_sink.h>
 
 // Standard includes
 #include <iostream>
@@ -64,24 +65,34 @@ namespace util {
         Logger::~Logger() {}
 
         LoggerPtr Logger::makeFallback(std::string const &name) {
-            /// Passes an empty spdlog pointer.
-            std::cerr << "WARNING: logger created for '" << name
-                      << "' is a \"fallback\" logger - an internal error has "
+            // First, we'll attempt to create a console logger to use as a
+            // fallback. If that fails, we'll create a do-nothing logger
+            // instead.
+            std::cerr << "WARNING: Logger created for '" << name
+                      << "' is a 'fallback' logger -- an internal error has "
                          "prevented a standard logger from being created. "
                          "Please report this issue in OSVR-Core on GitHub."
                       << std::endl;
-            return makeLogger(name, std::shared_ptr<spdlog::logger>{});
+            try {
+                auto console_logger = spdlog::stderr_logger_mt(name, false);
+                return makeLogger(name, console_logger);
+            } catch (...) {
+                std::cerr << "Failed to create a console logger to use as a "
+                             "fallback. Logging will be disabled entirely."
+                          << std::endl;
+                auto null_sink = std::make_shared<spdlog::sinks::null_sink_st>();
+                auto null_logger = std::make_shared<spdlog::logger>(name, null_sink);
+                return makeLogger(name, null_logger);
+            }
         }
 
         LoggerPtr Logger::makeFromExistingImplementation(
             std::string const &name, std::shared_ptr<spdlog::logger> logger) {
             if (!logger) {
-                std::cerr << "WARNING: "
-                             "Logger::makeFromExistingImplementation(\""
-                          << name << "\", logger) called "
-                                     "with a null logger pointer! Will result "
-                                     "in a fallback logger!"
-                          << std::endl;
+                std::cerr
+                    << "WARNING: Logger::makeFromExistingImplementation(\""
+                    << name << "\", logger) called with a null logger pointer! "
+                    << "Will result in a fallback logger!" << std::endl;
                 return makeFallback(name);
             }
             return makeLogger(name, logger);
@@ -91,13 +102,10 @@ namespace util {
                                        spdlog::sink_ptr sink) {
             if (!sink) {
                 // bad sink!
-                std::cerr
-                    << "WARNING: "
-                       "Logger::makeWithSink(\""
-                    << name
-                    << "\", sink) called "
-                       "with a null sink! Will result in a fallback logger!"
-                    << std::endl;
+                std::cerr << "WARNING: Logger::makeWithSink(\"" << name
+                          << "\", sink) called with a null sink! Will result "
+                             "in a fallback logger!"
+                          << std::endl;
                 return makeFallback(name);
             }
             auto spd_logger = std::make_shared<spdlog::logger>(name, sink);
@@ -131,95 +139,76 @@ namespace util {
         }
 
         LogLevel Logger::getLogLevel() const {
-            return logger_ ? convertFromLevelEnum(logger_->level())
-                           : DEFAULT_LEVEL;
+            return convertFromLevelEnum(logger_->level());
         }
 
         void Logger::setLogLevel(LogLevel level) {
-            if (logger_) {
-                logger_->set_level(convertToLevelEnum(level));
-            }
+            logger_->set_level(convertToLevelEnum(level));
         }
 
         void Logger::flushOn(LogLevel level) {
-            if (logger_) {
-                logger_->flush_on(convertToLevelEnum(level));
-            }
+            logger_->flush_on(convertToLevelEnum(level));
         }
 
-        detail::LineLogger Logger::trace(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->trace(msg)}
-                           : detail::LineLogger{name_, LogLevel::trace, msg};
+        Logger::StreamProxy Logger::trace(const char *msg) {
+            return { *this, LogLevel::trace, msg };
         }
 
-        detail::LineLogger Logger::debug(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->debug(msg)}
-                           : detail::LineLogger{name_, LogLevel::debug, msg};
+        Logger::StreamProxy Logger::debug(const char *msg) {
+            return { *this, LogLevel::debug, msg };
         }
 
-        detail::LineLogger Logger::info(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->info(msg)}
-                           : detail::LineLogger{name_, LogLevel::info, msg};
+        Logger::StreamProxy Logger::info(const char *msg) {
+            return { *this, LogLevel::info, msg };
         }
 
-        detail::LineLogger Logger::notice(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->notice(msg)}
-                           : detail::LineLogger{name_, LogLevel::notice, msg};
+        Logger::StreamProxy Logger::notice(const char *msg) {
+            return { *this, LogLevel::notice, msg };
         }
 
-        detail::LineLogger Logger::warn(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->warn(msg)}
-                           : detail::LineLogger{name_, LogLevel::warn, msg};
+        Logger::StreamProxy Logger::warn(const char *msg) {
+            return { *this, LogLevel::warn, msg };
         }
 
-        detail::LineLogger Logger::error(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->error(msg)}
-                           : detail::LineLogger{name_, LogLevel::error, msg};
+        Logger::StreamProxy Logger::error(const char *msg) {
+            return { *this, LogLevel::error, msg };
         }
 
-        detail::LineLogger Logger::critical(const char *msg) {
-            return logger_ ? detail::LineLogger{logger_->critical(msg)}
-                           : detail::LineLogger{name_, LogLevel::critical, msg};
+        Logger::StreamProxy Logger::critical(const char *msg) {
+            return { *this, LogLevel::critical, msg };
         }
 
         // logger.info() << ".." call  style
-        detail::LineLogger Logger::trace() {
-            return logger_ ? detail::LineLogger{logger_->trace()}
-                           : detail::LineLogger{name_, LogLevel::trace};
+        Logger::StreamProxy Logger::trace() {
+            return { *this, LogLevel::trace };
         }
 
-        detail::LineLogger Logger::debug() {
-            return logger_ ? detail::LineLogger{logger_->debug()}
-                           : detail::LineLogger{name_, LogLevel::debug};
+        Logger::StreamProxy Logger::debug() {
+            return { *this, LogLevel::debug };
         }
 
-        detail::LineLogger Logger::info() {
-            return logger_ ? detail::LineLogger{logger_->info()}
-                           : detail::LineLogger{name_, LogLevel::info};
+        Logger::StreamProxy Logger::info() {
+            return { *this, LogLevel::info };
         }
 
-        detail::LineLogger Logger::notice() {
-            return logger_ ? detail::LineLogger{logger_->notice()}
-                           : detail::LineLogger{name_, LogLevel::notice};
+        Logger::StreamProxy Logger::notice() {
+            return { *this, LogLevel::notice };
         }
 
-        detail::LineLogger Logger::warn() {
-            return logger_ ? detail::LineLogger{logger_->warn()}
-                           : detail::LineLogger{name_, LogLevel::warn};
+        Logger::StreamProxy Logger::warn() {
+            return { *this, LogLevel::warn };
         }
 
-        detail::LineLogger Logger::error() {
-            return logger_ ? detail::LineLogger{logger_->error()}
-                           : detail::LineLogger{name_, LogLevel::error};
+        Logger::StreamProxy Logger::error() {
+            return { *this, LogLevel::error };
         }
 
-        detail::LineLogger Logger::critical() {
-            return logger_ ? detail::LineLogger{logger_->critical()}
-                           : detail::LineLogger{name_, LogLevel::critical};
+        Logger::StreamProxy Logger::critical() {
+            return { *this, LogLevel::critical };
         }
 
         // logger.log(log_level, msg) << ".." call style
-        detail::LineLogger Logger::log(LogLevel level, const char *msg) {
+        Logger::StreamProxy Logger::log(LogLevel level, const char *msg) {
             switch (level) {
             case LogLevel::trace:
                 return trace(msg);
@@ -241,7 +230,7 @@ namespace util {
         }
 
         // logger.log(log_level) << ".." call  style
-        detail::LineLogger Logger::log(LogLevel level) {
+        Logger::StreamProxy Logger::log(LogLevel level) {
             switch (level) {
             case LogLevel::trace:
                 return trace();
@@ -263,12 +252,12 @@ namespace util {
         }
 
         void Logger::flush() {
-            if (logger_) {
-                logger_->flush();
-            } else {
-                std::cout << std::flush;
-                std::cerr << std::flush;
-            }
+            logger_->flush();
+        }
+
+        void Logger::write(LogLevel level, const char* msg)
+        {
+            logger_->log(convertToLevelEnum(level), msg);
         }
 
     } // namespace log
