@@ -108,7 +108,7 @@ namespace vbtracker {
         Eigen::Quaterniond correctedDeltaQuat =
             m_yawCorrection * deltaquat * m_yawCorrection.inverse();
 
-        Eigen::Vector3d rot = incRotToAngVelVec(deltaquat, dt);
+        Eigen::Vector3d rot = incRotToAngVelVec(correctedDeltaQuat, dt);
         auto ret = CannedIMUMeasurement{};
         ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
