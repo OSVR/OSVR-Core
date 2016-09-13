@@ -105,7 +105,8 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         }
         if ((hr != S_OK) && (hr != S_FALSE)) {
             fprintf(stderr, "directx_camera_server::read_one_frame(): Can't "
-                            "run filter graph\n");
+                            "run filter graph, got %#010x\n",
+                    static_cast<uint32_t>(hr));
             _status = false;
             return false;
         }
