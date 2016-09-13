@@ -262,12 +262,20 @@ namespace vbtracker {
               << iTc.translation().transpose() << " rotation: "
               << Eigen::Quaterniond(iTc.rotation()).coeffs().transpose()
               << std::endl;
+        Eigen::Quaterniond iRc = Eigen::Quaterniond(iTc.rotation());
 
+        if (m_cameraIsForward) {
+            auto yaw = util::extractYaw(iRc);
+            m_imuYaw = -yaw * util::radians;
+            iRc = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY()) * iRc;
+        } else {
+            m_imuYaw = 0;
+        }
 #if 0
         m_imuYaw = 0 * util::radians;
         m_rTi = Eigen::Isometry3d::Identity();
 #endif
-
+#if 0
         iTc.translation() = Eigen::Vector3d::Zero();
         // Eigen::Isometry3d temp_rTc = iTc;
 
@@ -296,6 +304,8 @@ namespace vbtracker {
 
         // cameraPose is rTc
         m_cameraPose = m_rTi * iTc;
+#endif
+        m_cameraPose = util::makeIsometry(m_suppliedCamPosition, iRc);
         msg()
             << "camera pose AKA rTc: translation: "
             << m_cameraPose.translation().transpose() << "rotation: "
