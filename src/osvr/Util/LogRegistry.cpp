@@ -113,6 +113,12 @@ namespace util {
                                                           spd_logger);
         }
 
+        void LogRegistry::drop(const std::string &logger_name) {
+            spdlog::drop(logger_name);
+        }
+
+        void LogRegistry::dropAll() { spdlog::drop_all(); }
+
         void LogRegistry::flush() {
             for (auto &sink : sinks_) {
                 try {

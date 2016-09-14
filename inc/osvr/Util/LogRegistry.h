@@ -64,9 +64,37 @@ namespace util {
 
             static LogRegistry &instance(std::string const * = nullptr);
 
+            /**
+             * @brief Gets or creates a logger named @c logger_name.
+             *
+             * If the logger named @c logger_name already exists, return
+             * it, otherwise create a new logger of that name.
+             *
+             * @param logger_name The name of the logger.
+             *
+             */
             LoggerPtr getOrCreateLogger(const std::string &logger_name);
 
-            /// @brief Flush all sinks manually.
+            /**
+             * @brief Drops a logger from the registry.
+             *
+             * The logger will survive until the last copy of it is destroyed
+             * (e.g., goes out of scope). This function is useful if you want to
+             * destroy a logger before the program terminates.
+             */
+            void drop(const std::string &name);
+
+            /**
+             * @brief Removes all the registered loggers from the registry.
+             *
+             * Each logger will survive until the last copy of it is destroyed
+             * (e.g., goes out of scope).
+             */
+            void dropAll();
+
+            /**
+             * @brief Flush all sinks manually.
+             */
             void flush();
 
             /**

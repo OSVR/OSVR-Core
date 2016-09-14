@@ -48,8 +48,6 @@ namespace osvr {
 namespace util {
     namespace log {
 
-// TODO if OSVR_ANDROID, use android sink
-
 #ifdef OSVR_UTIL_LOG_SINGLETON
         bool tryInitializingLoggingWithBaseName(std::string const &baseName) {
             auto sanitized = sanitizeFilenamePiece(baseName);
@@ -62,6 +60,12 @@ namespace util {
         LoggerPtr make_logger(const std::string &logger_name) {
             return LogRegistry::instance().getOrCreateLogger(logger_name);
         }
+
+        void drop(const std::string &logger_name) {
+            LogRegistry::instance().drop(logger_name);
+        }
+
+        void dropAll() { LogRegistry::instance().dropAll(); }
 
         void flush() { LogRegistry::instance().flush(); }
 #else
@@ -83,6 +87,14 @@ namespace util {
             spd_logger->set_pattern("%b %d %T.%e %l %n: %v");
             return Logger::makeFromExistingImplementation(logger_name,
                                                           spd_logger);
+        }
+
+        void drop(const std::string &logger_name) {
+            // no-op in the absence of a logger registry.
+        }
+
+        void dropAll() {
+            // no-op in the absence of a logger registry.
         }
 
         void flush() {

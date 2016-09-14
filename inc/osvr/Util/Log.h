@@ -70,6 +70,19 @@ namespace util {
         /// though it may be a "fallback" logger.
         OSVR_UTIL_EXPORT LoggerPtr make_logger(const std::string &logger_name);
 
+        /// @brief Drops a logger from the registry.
+        ///
+        /// The logger will survive until the last copy of it is destroyed
+        /// (e.g., goes out of scope). This function is useful if you want to
+        /// destroy a logger before the program terminates.
+        void drop(const std::string &logger_name);
+
+        /// @brief Removes all the registered loggers from the registry.
+        ///
+        /// Each logger will survive until the last copy of it is destroyed
+        /// (e.g., goes out of scope).
+        void dropAll();
+
         /// @brief For implementations with a centralized logger registry, flush
         /// all logger sinks.
         OSVR_UTIL_EXPORT void flush();
