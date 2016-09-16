@@ -17,7 +17,7 @@ environment:
       GEN: vc12
       BOOST: boost_1_58_0
     - GENERATOR: "Visual Studio 14"
-      GEN: vc12
+      GEN: vc14
       BOOST: boost_1_60_0
 
 install:
