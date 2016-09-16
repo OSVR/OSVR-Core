@@ -101,6 +101,16 @@ namespace util {
         return Translation3<Scalar>(translation) * Isometry3<Scalar>(rotation);
     }
 
+    inline Eigen::Quaterniond
+    flipQuatSignToMatch(Eigen::Quaterniond const &refQ,
+                        Eigen::Quaterniond const &q) {
+        if (refQ.dot(q) < 0) {
+            return Eigen::Quaterniond(-q.coeffs());
+        } else {
+            return q;
+        }
+    }
+
 } // namespace util
 } // namespace osvr
 
