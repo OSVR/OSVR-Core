@@ -42,6 +42,7 @@ install:
 
 # build dependencies
 before_build:
+  - set PATH=%PATH%:c:\libraries\%BOOST%
   - cd ..
 
   - git clone --recursive https://github.com/open-source-parsers/jsoncpp.git
