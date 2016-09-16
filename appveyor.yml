@@ -2,47 +2,44 @@
 # Builds project on Appveyor <http://www.appveyor.com/>
 #
 
+platform:
+  - x86
+  - x64
+
+configuration:
+  - Debug
+  - Release
+  - RelWithDebInfo
+
 environment:
   matrix:
-#    - GENERATOR: "Visual Studio 12"
-#      CONFIG: Debug
-#      BOOST: boost_1_58_0
     - GENERATOR: "Visual Studio 12"
-      CONFIG: Release
+      GEN: vc12
       BOOST: boost_1_58_0
-#    - GENERATOR: "Visual Studio 12 Win64"
-#      CONFIG: Debug
-#      BOOST: boost_1_58_0
-    - GENERATOR: "Visual Studio 12 Win64"
-      CONFIG: Release
-      BOOST: boost_1_58_0
-#    - GENERATOR: "Visual Studio 14"
-#      CONFIG: Debug
-#      BOOST: boost_1_60_0
     - GENERATOR: "Visual Studio 14"
-      CONFIG: Release
-      BOOST: boost_1_60_0
-#    - GENERATOR: "Visual Studio 14 Win64"
-#      CONFIG: Debug
-#      BOOST: boost_1_60_0
-    - GENERATOR: "Visual Studio 14 Win64"
-      CONFIG: Release
+      GEN: vc12
       BOOST: boost_1_60_0
 
 install:
-  - ps: dir c:\libraries\boost_1_58_0
-  - ps: dir c:\libraries\boost_1_60_0
-  - ps: dir c:\libraries\boost_1_58_0\lib32-msvc-12.0
-  - ps: dir c:\libraries\boost_1_60_0\lib32-msvc-14.0
+  #- ps: dir c:\libraries\boost_1_58_0
+  #- ps: dir c:\libraries\boost_1_60_0
+  #- ps: dir c:\libraries\boost_1_58_0\lib32-msvc-12.0
+  #- ps: dir c:\libraries\boost_1_60_0\lib32-msvc-14.0
+  - set
   - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
   - ps: choco install -y OpenCV -version 2.4.13
   - ps: choco pin add -name OpenCV
+  - tree c:\tools
+  - set OPENCV_DIR=c:\tools\opencv\build\%PLATFORM%\%GEN%
+  - set PATH=%PATH%;%OPENCV_DIR%\bin
+  - set PATH=%PATH%:c:\libraries\%BOOST%
+  - if "%PLATFORM%"=="x64" (set GENERATOR_SUFFIX=" Win64") else (set GENERATOR_SUFFIX="")
+  - set GENERATOR="%GENERATOR%%GENERATOR_SUFFIX%"
 
 # TODO set up cache for dependencies
 
 # build dependencies
 before_build:
-  - set PATH=%PATH%:c:\libraries\%BOOST%
   - cd ..
 
   - git clone --recursive https://github.com/open-source-parsers/jsoncpp.git
@@ -50,7 +47,7 @@ before_build:
   - mkdir build
   - cd build
   - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DJSONCPP_WITH_CMAKE_PACKAGE=ON
-  - cmake --build . --config "%CONFIG%" --target install
+  - cmake --build . --config "%CONFIGURATION%" --target install
   - cd ..
   - cd ..
 
@@ -59,7 +56,7 @@ before_build:
   - mkdir build
   - cd build
   - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=c:\osvr
-  - cmake --build . --config "%CONFIG%" --target install
+  - cmake --build . --config "%CONFIGURATION%" --target install
   - cd ..
   - cd ..
 
@@ -74,5 +71,5 @@ build_script:
   - mkdir build
   - cd build
   - cmake .. -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX="c:\osvr" -DCMAKE_PREFIX_PATH="c:\osvr" -DBUILD_HEADER_DEPENDENCY_TESTS=1  -DBUILD_CLIENT_APPS=1 -DBUILD_CLIENT_EXAMPLES=1  -DBUILD_SERVER_APP=1 -DBUILD_SERVER_EXAMPLES=1 -DBUILD_SERVER_PLUGINS=1 -DBUILD_TESTING=1 -DBOOST_ROOT=C:\Libraries\%BOOST% -DBoost_DEBUG=1 -DBoost_DETAILED_FAILURE_MSG=1
-  - cmake --build . --config "%CONFIG%"
+  - cmake --build . --config "%CONFIGURATION%"
 
