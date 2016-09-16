@@ -35,7 +35,7 @@ install:
   - ps: dir c:\libraries\boost_1_58_0\lib32-msvc-12.0
   - ps: dir c:\libraries\boost_1_60_0\lib32-msvc-14.0
   - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
-  - ps: choco install -y OpenCV -version 2.4.10.20150209
+  - ps: choco install -y OpenCV -version 2.4.13
   - ps: choco pin add -name OpenCV
 
 # TODO set up cache for dependencies
