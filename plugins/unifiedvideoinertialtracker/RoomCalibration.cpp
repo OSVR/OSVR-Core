@@ -111,7 +111,9 @@ namespace vbtracker {
 
         // Pre-filter the camera data in case it's noisy (quite possible since
         // it's RANSAC)
-        m_poseFilter.filter(dt, xlate, quat);
+        m_poseFilter.filter(
+            dt, xlate,
+            util::flipQuatSignToMatch(m_poseFilter.getOrientation(), quat));
 
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
@@ -202,6 +204,7 @@ namespace vbtracker {
             msg() << "Non-finite quat" << std::endl;
             return;
         }
+        bool first = false;
         if (!haveIMUData()) {
 
             if (!sys.isValidBodyId(body)) {
@@ -218,13 +221,21 @@ namespace vbtracker {
             msg() << "Got first IMU report from body " << body.value()
                   << std::endl;
             m_imuBody = body;
+            first = true;
         }
         BOOST_ASSERT_MSG(m_imuBody == body, "BodyID for incoming data and "
                                             "known IMU must be identical at "
                                             "this point");
 
         /// @todo something more elegant than just copying a quat?
-        m_imuOrientation = quat;
+        if (first) {
+            // for setup purposes, we'll constrain w to be positive.
+            m_imuOrientation =
+                quat.w() >= 0. ? quat : Eigen::Quaterniond(-quat.coeffs());
+        } else {
+            m_imuOrientation =
+                util::flipQuatSignToMatch(m_imuOrientation, quat);
+        }
     }
 
     bool RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
