@@ -21,7 +21,8 @@ environment:
       BOOST_ROOT: C:\Libraries\boost_1_60_0
 
 install:
-  - ps: dir %BOOST_ROOT%
+  - set
+  - dir %BOOST_ROOT%
   - set BOOST_LIBRARYDIR=%BOOST_ROOT%
     if "%PLATFORM%=="x86" (
       set BOOST_LIBRARYDIR=%BOOST_LIBRARYDIR%\lib32
