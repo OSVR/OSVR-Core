@@ -21,16 +21,8 @@ environment:
       BOOST_ROOT: C:\Libraries\boost_1_60_0
 
 install:
-  - if "%PLATFORM%"=="x86" (
-      set BOOST_ARCH=lib32
-    ) else (
-      set BOOST_ARCH=lib64
-    )
-  - if "%GEN%"=="vc12" (
-      set BOOST_COMPILER=msvc-12.0
-    ) else (
-      set BOOST_COMPILER=msvc-14.0
-    )
+  - if "%PLATFORM%"=="x86" (set BOOST_ARCH=lib32) else (set BOOST_ARCH=lib64)
+  - if "%GEN%"=="vc12" (set BOOST_COMPILER=msvc-12.0) else (set BOOST_COMPILER=msvc-14.0)
   - set BOOST_LIBRARYDIR=%BOOST_ROOT%\%BOOST_ARCH%-%BOOST_COMPILER%
   - set PATH=%PATH%;%BOOST_ROOT%
   - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
