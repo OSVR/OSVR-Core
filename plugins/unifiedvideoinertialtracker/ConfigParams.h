@@ -44,6 +44,10 @@ namespace vbtracker {
         std::string path =
             "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
 
+        /// Should we use the IMU orientation data for calibration even if
+        /// useOrientation is false?
+        bool calibrateAnyway = false;
+
         /// Should orientation reports be used once calibration completes?
         bool useOrientation = true;
 

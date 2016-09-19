@@ -338,7 +338,8 @@ namespace vbtracker {
 
         auto wantIMU =
             !params.imu.path.empty() &&
-            (params.imu.useAngularVelocity || params.imu.useOrientation);
+            (params.imu.useAngularVelocity || params.imu.useOrientation ||
+             params.imu.calibrateAnyway);
         if (wantIMU) {
             auto imu =
                 hmd->createIntegratedIMU(params.imu.orientationVariance,
