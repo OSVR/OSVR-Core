@@ -423,8 +423,8 @@ namespace vbtracker {
 
         {
             BodyState state;
-            state.setQuaternion(getQuatToCameraSpace(m_trackingSystem) *
-                                imuQuat);
+            /// @todo missing the yaw correction factor.
+            state.setQuaternion(getCameraRotation(m_trackingSystem) * imuQuat);
             // Put this one up in the air a little so we can tell the
             // difference.
             state.position() = Eigen::Vector3d(0, 0.5, 0);
