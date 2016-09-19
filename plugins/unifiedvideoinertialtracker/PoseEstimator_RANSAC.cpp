@@ -277,6 +277,10 @@ namespace vbtracker {
                       << std::endl;
             return false;
         }
+        if (quat.w() < 0) {
+            // arbitrarily choose w to be positive.
+            quat = Eigen::Quaterniond(-quat.coeffs());
+        }
         outXlate = xlate;
         outQuat = quat;
         return true;
