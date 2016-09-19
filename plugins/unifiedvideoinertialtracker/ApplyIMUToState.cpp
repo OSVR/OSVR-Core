@@ -41,7 +41,7 @@
 namespace osvr {
 
 namespace kalman {
-#undef OSVR_Q_LAST
+#define OSVR_Q_LAST
     /// The measurement here has been split into a base and derived type, so
     /// that the derived type only contains the little bit that depends on a
     /// particular state type.
@@ -71,15 +71,14 @@ namespace kalman {
         MeasurementSquareMatrix const &getCovariance(State const &) {
             return m_covariance;
         }
-
         /// convenience function for shared implementation between getResidual
         /// and getJacobianBlock
         Eigen::Quaterniond
         getInnovationQuat(Eigen::Quaterniond const &cRb) const {
-/// m_quat is iRbm - the body (modified) frame
-
+/// m_quat is iRbm - the body (measured) frame
+/// cRb is "current" (predicted) state - body in camera space
 #ifdef OSVR_Q_LAST
-            return (m_iRc * cRb).conjugate() * m_quat;
+            return cRb.inverse() * m_cRi * m_quat;
 #else
             return util::flipQuatSignToMatch(cRb, m_quat.conjugate() * m_iRc) *
                    cRb;
@@ -219,14 +218,13 @@ namespace vbtracker {
         meas.restoreQuatVariance(var);
         util::Angle yawCorrection = meas.getYawCorrection();
 
-        /// Rotate it into camera space
+        /// Measurement class will rotate it into camera space
         /// @todo do this without rotating into camera space?
-        // quat = getQuatToCameraSpace(sys) * quat;
+
         /// @todo transform variance?
 
         kalman::IMUOrientationMeasurement<BodyState> kalmanMeas{
-            Eigen::Quaterniond(sys.getCameraPose().rotation()), yawCorrection,
-            quat, var};
+            getCameraRotation(sys), yawCorrection, quat, var};
 #if 0
         {
             static ::util::Stride s(201);
