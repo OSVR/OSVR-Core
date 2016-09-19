@@ -88,11 +88,24 @@ namespace vbtracker {
         return m_yawCorrection * input;
     }
 
+    Eigen::Quaterniond TrackedBodyIMU::transformRawIMUAngularVelocity(
+        Eigen::Quaterniond const &deltaquat) const {
+        BOOST_ASSERT_MSG(
+            calibrationYawKnown(),
+            "transform called before calibration transform known!");
+        /// @todo handle transform for off-center velocity!
+
+        /// Transform for yaw correction.
+        /// @todo are the transforms in the right order?
+        return m_yawCorrection.inverse() * deltaquat * m_yawCorrection;
+    }
+
     CannedIMUMeasurement
     TrackedBodyIMU::preprocessOrientation(util::time::TimeValue const &tv,
                                           Eigen::Quaterniond const &quat) {
 
         auto ret = CannedIMUMeasurement{};
+        // ret.setYawCorrection(m_yaw);
         ret.setOrientation(transformRawIMUOrientation(quat),
                            Eigen::Vector3d::Constant(m_orientationVariance));
         return ret;
@@ -102,13 +115,8 @@ namespace vbtracker {
     CannedIMUMeasurement TrackedBodyIMU::preprocessAngularVelocity(
         util::time::TimeValue const &tv, Eigen::Quaterniond const &deltaquat,
         double dt) {
-        /// @todo handle transform for off-center velocity!
-
-        /// Transform for yaw correction.
-        Eigen::Quaterniond correctedDeltaQuat =
-            m_yawCorrection * deltaquat * m_yawCorrection.inverse();
-
-        Eigen::Vector3d rot = incRotToAngVelVec(correctedDeltaQuat, dt);
+        Eigen::Vector3d rot =
+            incRotToAngVelVec(transformRawIMUAngularVelocity(deltaquat), dt);
         auto ret = CannedIMUMeasurement{};
         ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
