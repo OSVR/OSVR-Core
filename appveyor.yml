@@ -38,8 +38,9 @@ install:
   - ps: choco source add --name="osvr-deps" -s="https://www.myget.org/F/osvr-deps/"
   - ps: choco install -y OpenCV -version 2.4.13
   - ps: choco pin add -name OpenCV
-  - set OPENCV_DIR=c:\tools\opencv\build\%PLATFORM%\%GEN%
-  - set PATH=%PATH%;%OPENCV_DIR%\bin
+  #- set OPENCV_DIR=c:\tools\opencv\build\%PLATFORM%\%GEN%
+  - set OPENCV_DIR=c:\tools\opencv
+  #- set PATH=%PATH%;%OPENCV_DIR%\bin
   - if "%PLATFORM%"=="x64" (set GENERATOR=%GENERATOR% Win64)
   - set
 
