@@ -2,6 +2,16 @@
 # Builds project on Appveyor <http://www.appveyor.com/>
 #
 
+# Display Remote Desktop connection details
+#init:
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+# Keep an RDP connection available until either 60 minutes expires
+# or the lock file on the desktop is deleted
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+
 platform:
   - x86
   - x64
@@ -19,16 +29,6 @@ environment:
     - GENERATOR: Visual Studio 14
       GEN: vc14
       BOOST_ROOT: C:\Libraries\boost_1_60_0
-
-# Display Remote Desktop connection details
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-# Keep an RDP connection available until either 60 minutes expires
-# or the lock file on the desktop is deleted
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 
 install:
   - if "%PLATFORM%"=="x86" (set BOOST_ARCH=lib32) else (set BOOST_ARCH=lib64)
