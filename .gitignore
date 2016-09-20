@@ -1,3 +1,6 @@
+# VS Code
+.vscode/
+
 # Generated config files for editors
 /.clang_complete
 /.linter-clang-flags

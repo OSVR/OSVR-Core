@@ -25,6 +25,7 @@
 
 // Internal Includes
 #include <osvr/Util/LogRegistry.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
 
 #include "LogDefaults.h"
 #include "LogLevelTranslate.h"
@@ -197,11 +198,24 @@ namespace util {
             }
         }
 
+        static inline bool shouldLogToFile() {
+            using osvr::util::getEnvironmentVariable;
+            auto fileLoggingEnabled = getEnvironmentVariable("OSVR_FILE_LOGGING_ENABLED");
+            if (!fileLoggingEnabled || *fileLoggingEnabled == "0") {
+                return false;
+            }
+            return true;
+        }
+
         void LogRegistry::createFileSink() {
 #if defined(OSVR_ANDROID)
             // Not logging to file on Android.
             return;
 #else
+            if (!shouldLogToFile()) {
+                return;
+            }
+
             // File sink - rotates daily
             std::string logDir;
             try {
