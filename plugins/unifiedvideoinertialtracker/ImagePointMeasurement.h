@@ -250,7 +250,8 @@ namespace vbtracker {
             ret <<
                 // with respect to change in x or y
                 Eigen::Matrix2d::Identity() *
-                    (m_cam.focalLength / m_rotatedTranslatedPoint.z()),
+                    (m_cam.focalLength /
+                     std::abs(m_rotatedTranslatedPoint.z())),
                 // with respect to change in z
                 -m_rotatedTranslatedPoint.head<2>() * m_cam.focalLength /
                     (m_rotatedTranslatedPoint.z() *
