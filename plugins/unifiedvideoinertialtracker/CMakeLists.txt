@@ -34,6 +34,7 @@ add_library(uvbi-core STATIC
     Clamp.h
     ConfigParams.cpp
     ConfigParams.h
+    CrossProductMatrix.h
     ForEachTracked.h
     HDKLedIdentifier.cpp
     HDKLedIdentifier.h
