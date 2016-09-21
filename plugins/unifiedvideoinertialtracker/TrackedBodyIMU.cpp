@@ -86,6 +86,7 @@ namespace vbtracker {
             calibrationYawKnown(),
             "transform called before calibration transform known!");
         return m_yawCorrection * input;
+        // return input;
     }
 
     Eigen::Quaterniond TrackedBodyIMU::transformRawIMUAngularVelocity(
@@ -97,7 +98,10 @@ namespace vbtracker {
 
         /// Transform for yaw correction.
         /// @todo are the transforms in the right order?
-        return m_yawCorrection.inverse() * deltaquat * m_yawCorrection;
+        /// @todo are transforms for yaw correction even needed here? not clear,
+        /// since the deltaquat is already in the body coordinate system...
+        // return m_yawCorrection.inverse() * deltaquat * m_yawCorrection;
+        return deltaquat;
     }
 
     CannedIMUMeasurement
@@ -105,7 +109,7 @@ namespace vbtracker {
                                           Eigen::Quaterniond const &quat) {
 
         auto ret = CannedIMUMeasurement{};
-        // ret.setYawCorrection(m_yaw);
+        ret.setYawCorrection(m_yaw);
         ret.setOrientation(transformRawIMUOrientation(quat),
                            Eigen::Vector3d::Constant(m_orientationVariance));
         return ret;
@@ -118,6 +122,7 @@ namespace vbtracker {
         Eigen::Vector3d rot =
             incRotToAngVelVec(transformRawIMUAngularVelocity(deltaquat), dt);
         auto ret = CannedIMUMeasurement{};
+        ret.setYawCorrection(m_yaw);
         ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
         return ret;

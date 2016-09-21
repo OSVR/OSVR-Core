@@ -75,6 +75,11 @@ namespace vbtracker {
             m_yawKnown = true;
         }
 
+        /// Gets the transform based on the calibration yaw
+        Eigen::Quaterniond const &getIMUToRoom() const {
+            return m_yawCorrection;
+        }
+
       private:
         /// Apply the yaw transform required for "cameraIsForward"
         Eigen::Quaterniond
@@ -109,6 +114,7 @@ namespace vbtracker {
         TrackedBody &m_body;
         bool m_yawKnown = false;
         util::Angle m_yaw;
+        /// this is rRi
         Eigen::Quaterniond m_yawCorrection;
 
         bool m_useOrientation;
