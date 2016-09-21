@@ -110,9 +110,13 @@ namespace kalman {
             MeasurementVector residual = util::quat_ln(residualq);
             MeasurementVector equivResidual =
                 util::quat_ln(Eigen::Quaterniond(-(residualq.coeffs())));
+#ifdef OSVR_FLIP_QUATS
             return residual.squaredNorm() < equivResidual.squaredNorm()
                        ? residual
                        : equivResidual;
+#else
+            return residual;
+#endif
         }
         /// Convenience method to be able to store and re-use measurements.
         void setMeasurement(Eigen::Quaterniond const &quat) { m_quat = quat; }

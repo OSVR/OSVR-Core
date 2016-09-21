@@ -111,9 +111,13 @@ namespace vbtracker {
 
         // Pre-filter the camera data in case it's noisy (quite possible since
         // it's RANSAC)
-        m_poseFilter.filter(
-            dt, xlate,
-            util::flipQuatSignToMatch(m_poseFilter.getOrientation(), quat));
+        m_poseFilter.filter(dt, xlate,
+#ifdef OSVR_FLIP_QUATS
+            util::flipQuatSignToMatch(m_poseFilter.getOrientation(), quat)
+#else
+                            quat
+#endif
+                            );
 
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
@@ -242,6 +246,7 @@ namespace vbtracker {
                                             "this point");
 
         /// @todo something more elegant than just copying a quat?
+#ifdef OSVR_FLIP_QUATS
         if (first) {
             // for setup purposes, we'll constrain w to be positive.
             m_imuOrientation =
@@ -250,6 +255,9 @@ namespace vbtracker {
             m_imuOrientation =
                 util::flipQuatSignToMatch(m_imuOrientation, quat);
         }
+#else
+        m_imuOrientation = quat;
+#endif
     }
 
     bool RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
