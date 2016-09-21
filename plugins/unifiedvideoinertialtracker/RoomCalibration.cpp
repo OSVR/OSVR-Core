@@ -339,11 +339,11 @@ namespace vbtracker {
         m_cameraPose = m_rTi * iTc;
 #endif
         m_cameraPose = util::makeIsometry(m_suppliedCamPosition, iRc);
-        msg()
-            << "camera pose AKA rTc: translation: "
-            << m_cameraPose.translation().transpose() << "rotation: "
-            << Eigen::Quaterniond(m_cameraPose.rotation()).coeffs().transpose()
-            << std::endl;
+        msg() << "camera pose AKA rTc: translation: "
+              << m_cameraPose.translation().transpose() << " rotation: ";
+        Eigen::AngleAxisd rot(m_cameraPose.rotation());
+        msgStream() << rot.angle() << " radians about "
+                    << rot.axis().transpose() << std::endl;
 
         m_calibComplete = true;
 
