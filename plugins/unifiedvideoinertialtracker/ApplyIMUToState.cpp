@@ -25,6 +25,7 @@
 // Internal Includes
 #include "ApplyIMUToState.h"
 #include "AngVelTools.h"
+#include "CrossProductMatrix.h"
 #include "SpaceTransformations.h"
 
 // Library/third-party includes
@@ -41,7 +42,7 @@
 namespace osvr {
 
 namespace kalman {
-#define OSVR_Q_LAST
+#undef OSVR_Q_LAST
     /// The measurement here has been split into a base and derived type, so
     /// that the derived type only contains the little bit that depends on a
     /// particular state type.
@@ -71,6 +72,7 @@ namespace kalman {
         MeasurementSquareMatrix const &getCovariance(State const &) {
             return m_covariance;
         }
+
         /// convenience function for shared implementation between getResidual
         /// and getJacobianBlock
         Eigen::Quaterniond
@@ -80,11 +82,13 @@ namespace kalman {
 #ifdef OSVR_Q_LAST
             return cRb.inverse() * m_cRi * m_quat;
 #else
-            return util::flipQuatSignToMatch(cRb, m_quat.conjugate() * m_iRc) *
-                   cRb;
+            // this is the logical one.
+            // return m_quat.conjugate() * m_iRc * cRb;
+            // this is the one that matches the original measurement class
+            // closer.
+            return m_cRi * m_quat * cRb.inverse();
 #endif
         }
-
         /// Gets the measurement residual, also known as innovation: predicts
         /// the measurement from the predicted state, and returns the
         /// difference.
@@ -127,11 +131,11 @@ namespace kalman {
         types::Matrix<DIMENSION, 3> getJacobianBlock(State const &s) const {
             /// Compute the innovation quat again.
             Eigen::Quaterniond q = getInnovationQuat(s.getCombinedQuaternion());
+#ifdef OSVR_USE_CODEGEN
             /// pre-compute the manually-extracted subexpressions.
             Eigen::Vector3d q2(q.vec().cwiseProduct(q.vec()));
             auto qvecnorm = std::sqrt(q2.sum());
-/// codegen follows
-#ifdef OSVR_Q_LAST
+            /// codegen follows
             // Quat.QuatToRotVec(g(x) * q)
             auto tmp0 = (1. / 2.) / qvecnorm;
             auto tmp1 = -q.w() * tmp0;
@@ -144,34 +148,53 @@ namespace kalman {
             auto tmp8 = q.z() * tmp5;
             auto tmp9 = q.x() * tmp0;
             auto tmp10 = q.y() * q.z() * tmp3;
-            Eigen::Matrix3d ret;
-            ret << q2.x() * tmp3 + tmp1, -tmp4 + tmp6, tmp7 + tmp8, tmp4 + tmp6,
-                q2.y() * tmp3 + tmp1, tmp10 - tmp9, -tmp7 + tmp8, tmp10 + tmp9,
-                q2.z() * tmp3 + tmp1;
-#else
-            // Quat.QuatToRotVec(q * g(x))
-            auto tmp0 = (1. / 2.) / qvecnorm;
-            auto tmp1 = -q.w() * tmp0;
-            auto tmp2 = std::pow(qvecnorm, -3);
-            auto tmp3 = (1. / 2.) * q.w() * tmp2;
-            auto tmp4 = q.z() * tmp0;
-            auto tmp5 = (1. / 2.) * q.w() * q.x() * tmp2;
-            auto tmp6 = q.y() * tmp5;
-            auto tmp7 = q.y() * tmp0;
-            auto tmp8 = q.z() * tmp5;
-            auto tmp9 = q.x() * tmp0;
-            auto tmp10 = q.y() * q.z() * tmp3;
-            Eigen::Matrix3d ret;
+            Eigen::Matrix<double, 3, 3> ret;
             ret << q2.x() * tmp3 + tmp1, tmp4 + tmp6, -tmp7 + tmp8,
                 -tmp4 + tmp6, q2.y() * tmp3 + tmp1, tmp10 + tmp9, tmp7 + tmp8,
                 tmp10 - tmp9, q2.z() * tmp3 + tmp1;
-#endif
+#else
+            auto qvecnorm = q.vec().norm();
+
+            if (qvecnorm < 1e-4) {
+                // effectively 0 - must avoid divide by zero.
+                // All numerators also go to 0 in this case, so we'll just
+                // eliminate them.
+                // The exception is the second term of the main diagonal:
+                // nominally -qw/2*vecnorm.
+                // qw would be 1, but in this form at least, the math goes to
+                // -infinity.
+
+                // When the jacobian is computed symbolically specifically for
+                // the case that q is the identity quaternion, a zero matrix is
+                // returned.
+                return Eigen::Matrix3d::Zero();
+            }
+            Eigen::Matrix3d ret =
+                // first term: qw * (qvec outer product with itself), over 2 *
+                // vecnorm^3
+                (q.w() * q.vec() * q.vec().transpose() /
+                 (2 * qvecnorm * qvecnorm * qvecnorm)) +
+                // second term of each element: cross-product matrix of the
+                // negative vector part of quaternion over 2*vecnorm, minus the
+                // identity matrix * qw/2*vecnorm
+                ((vbtracker::skewSymmetricCrossProductMatrix3(-q.vec()) -
+                  Eigen::Matrix3d::Identity() * q.w()) /
+                 (2 * qvecnorm));
             static bool printedJacobian = false;
             if (!printedJacobian) {
                 printedJacobian = true;
                 std::cout << ret << std::endl;
             }
+#endif
+
+#ifdef OSVR_Q_LAST
             return ret;
+#else
+            // Quat.QuatToRotVec(q * g(x))
+            // turns out the output is the same as the above, just transposed,
+            // even after the conversion to a rotation vector. (given a fixed q)
+            return ret.transpose();
+#endif
         }
 
       private:
