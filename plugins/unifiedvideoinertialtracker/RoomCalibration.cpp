@@ -155,6 +155,20 @@ namespace vbtracker {
         if (m_steadyVideoReports > 0) {
             /// put an end to the dots
             msgStream() << std::endl;
+
+            // Look at the velocity to see if the user was holding still enough.
+            auto linearVel = m_cameraFilter.getLinearVelocityMagnitude();
+            msg() << "Restarting ";
+            if (linearVel >= LINEAR_VELOCITY_CUTOFF) {
+                msgStream() << " - Linear velocity too high (" << linearVel
+                            << ")";
+            }
+            auto angVel = m_cameraFilter.getAngularVelocityMagnitude();
+            if (angVel >= ANGULAR_VELOCITY_CUTOFF) {
+                msgStream() << " - Angular velocity too high (" << angVel
+                            << ")";
+            }
+            msgStream() << "\n";
         }
         m_steadyVideoReports = 0;
         switch (m_instructionState) {
