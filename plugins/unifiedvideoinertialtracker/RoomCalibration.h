@@ -122,14 +122,14 @@ namespace vbtracker {
         /// Filter on pose in camera space
         util::filters::PoseOneEuroFilterd m_poseFilter =
             util::filters::PoseOneEuroFilterd{
-                util::filters::one_euro::Params{1, 0.1},
-                util::filters::one_euro::Params{1}};
+                util::filters::one_euro::Params{3, 0.1},
+                util::filters::one_euro::Params{3}};
 
         /// Input filter on camera in room/IMU space
         util::filters::PoseOneEuroFilterd m_cameraFilter =
             util::filters::PoseOneEuroFilterd{
-                util::filters::one_euro::Params{1, 0.1},
-                util::filters::one_euro::Params{1}};
+                util::filters::one_euro::Params{3, 0.1},
+                util::filters::one_euro::Params{3}};
 
         BodyId m_imuBody;
         Eigen::Quaterniond m_imuOrientation = Eigen::Quaterniond::Identity();
