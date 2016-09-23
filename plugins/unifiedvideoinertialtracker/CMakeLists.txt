@@ -102,6 +102,14 @@ target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources)
 set_target_properties(uvbi-view-camera PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
+###
+# Utility to measure capture latency of the IR camera, USB stack, etc.
+###
+add_executable(uvbi-measure-camera-latency MeasureTrackingCameraLatency.cpp)
+target_link_libraries(uvbi-measure-camera-latency PRIVATE uvbi-image-sources)
+set_target_properties(uvbi-measure-camera-latency PROPERTIES
+    FOLDER "${PROJ_FOLDER}")
+
 # "object library" for the HDK data files.
 add_library(uvbi-hdkdata OBJECT ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA})
 target_compile_options(uvbi-hdkdata
