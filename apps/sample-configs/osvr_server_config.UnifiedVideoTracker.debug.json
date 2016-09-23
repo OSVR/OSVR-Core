@@ -20,7 +20,7 @@
         */
 
         "manualBeaconOffset": [ 0, 0, 0 ],
-        "initialBeaconError": 1.0e-3,
+        "initialBeaconError": 1.0e-5,
         "logRawBlobs": false,
         "showDebug": true,
         /*"streamBeaconDebugInfo": true,*/
@@ -28,7 +28,7 @@
         "includeRearPanel": true,
         "headCircumference": 58.42,
         "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
-        "cameraIsForward": false,
+        "cameraIsForward": true,
 
         /*
         "blobs": {
@@ -51,13 +51,15 @@
         /*"offsetToCentroid": false,*/
         /*"extraVerbose": false,*/
         /*"permitKalman": true,*/
+        /*"measurementVarianceScaleFactor": 20,*/
 
         "cameraPosition": [ 0, 0, 0 ],
 
         "imu": {
+          "calibrateAnyway": true,
           "useOrientation": true,
           /*"orientationVariance": 1e-10,*/
-          "orientationVariance": 1e-4,
+          "orientationVariance": 1e-10,
           "orientationMicrosecondsOffset": 0,
           "useAngularVelocity": false,
           "angularVelocityVariance": 1e-1,
