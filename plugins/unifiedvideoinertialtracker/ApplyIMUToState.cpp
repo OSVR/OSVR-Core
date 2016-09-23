@@ -39,6 +39,8 @@
 // Standard includes
 #include <iostream>
 
+#define OSVR_USE_OLD_MEASUREMENT_CLASS
+
 namespace osvr {
 
 namespace kalman {
@@ -246,13 +248,20 @@ namespace vbtracker {
         meas.restoreQuatVariance(var);
         util::Angle yawCorrection = meas.getYawCorrection();
 
-        /// Measurement class will rotate it into camera space
-        /// @todo do this without rotating into camera space?
+/// Measurement class will rotate it into camera space
+/// @todo do this without rotating into camera space?
 
-        /// @todo transform variance?
+/// @todo transform variance?
 
+#ifdef OSVR_USE_OLD_MEASUREMENT_CLASS
+
+        kalman::AbsoluteOrientationMeasurement<BodyState> kalmanMeas(
+            getCameraRotation(sys).inverse() * quat, var);
+#else
         kalman::IMUOrientationMeasurement<BodyState> kalmanMeas{
             getCameraRotation(sys), yawCorrection, quat, var};
+#endif
+
 #if 0
         {
             static ::util::Stride s(201);
