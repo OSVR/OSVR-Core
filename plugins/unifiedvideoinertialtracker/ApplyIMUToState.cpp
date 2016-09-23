@@ -281,6 +281,17 @@ namespace vbtracker {
             std::cout << "\n";
             return;
         }
+#if 0
+        static ::util::Stride s(401);
+        if (++s) {
+
+            std::cout << "delta z\t "
+                      << correctionInProgress.deltaz.transpose();
+            std::cout << "\t state correction "
+                      << correctionInProgress.stateCorrection.transpose()
+                      << "\n";
+        }
+#endif
         if (!correctionInProgress.finishCorrection(true)) {
             std::cout
                 << "Non-finite error covariance after applying orientation: ";
