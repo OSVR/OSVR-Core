@@ -80,6 +80,22 @@ OSVR_ReturnCode osvrPluginRegisterDataWithDeleteCallback(
     return OSVR_RETURN_SUCCESS;
 }
 
+OSVR_ReturnCode
+osvrPluginTriggerHardwareDetect(OSVR_INOUT_PTR OSVR_PluginRegContext ctx) {
+    OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrPluginTriggerHardwareDetect", ctx);
+
+    try {
+        osvr::pluginhost::PluginSpecificRegistrationContext::get(ctx)
+            .triggerHardwareDetect();
+    } catch (const std::exception &e) {
+        std::cerr << "Error in osvrPluginTriggerHardwareDetectCallback - "
+                     "caught exception reporting: "
+                  << e.what() << std::endl;
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
 void osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
                    OSVR_IN OSVR_LogLevel severity,
                    OSVR_IN const char *message) {
@@ -93,4 +109,3 @@ void osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
     auto s = static_cast<osvr::util::log::LogLevel>(severity);
     context->log(s, message);
 }
-

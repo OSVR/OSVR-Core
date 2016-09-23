@@ -94,6 +94,12 @@ namespace pluginkit {
             return ::osvr::pluginkit::registerObjectForDeletion(m_ctx, obj);
         }
 
+        /// @brief Triggers system-wide hardware detection.
+        /// @sa ::osvr::pluginkit::triggerHardwareDetect.
+        void triggerHardwareDetect() {
+            ::osvr::pluginkit::triggerHardwareDetect(m_ctx);
+        }
+
         /// @brief Log a message to the plugin-specific channel.
         ///
         /// @param severity The severity of the log message.

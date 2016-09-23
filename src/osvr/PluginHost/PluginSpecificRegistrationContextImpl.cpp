@@ -26,6 +26,7 @@
 
 // Internal Includes
 #include "PluginSpecificRegistrationContextImpl.h"
+#include <osvr/PluginHost/RegistrationContext.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -169,5 +170,14 @@ namespace pluginhost {
     util::AnyMap const &PluginSpecificRegistrationContextImpl::data() const {
         return m_data;
     }
+
+    void PluginSpecificRegistrationContextImpl::triggerHardwareDetect() {
+        if (m_parent == nullptr) {
+            throw std::logic_error(
+                "Can't access the registration context parent - it is null!");
+        }
+        m_parent->triggerHardwareDetect();
+    }
+
 } // namespace pluginhost
 } // namespace osvr

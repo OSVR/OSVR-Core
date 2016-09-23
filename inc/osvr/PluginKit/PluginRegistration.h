@@ -197,12 +197,24 @@ namespace pluginkit {
                 "registerDriverInstantiationCallback failed!");
         }
     }
-    /// @}
+
+    /// @brief Triggers system-wide hardware detection.
+    ///
+    /// @param ctx The registration context passed to your entry point.
+    ///
+    /// @sa PluginContext::triggerHardwareDetect
+    inline void triggerHardwareDetect(OSVR_PluginRegContext ctx) {
+        const OSVR_ReturnCode ret = osvrPluginTriggerHardwareDetect(ctx);
+        if (ret != OSVR_RETURN_SUCCESS) {
+            throw std::runtime_error("triggerHardwareDetect failed!");
+        }
+    }
 
     inline void log(OSVR_PluginRegContext ctx, OSVR_LogLevel severity,
              const char *message) {
         osvrPluginLog(ctx, severity, message);
     }
+    /// @}
 
 } // namespace pluginkit
 } // namespace osvr
