@@ -43,6 +43,15 @@ namespace osvr {
 
 namespace kalman {
 #undef OSVR_Q_LAST
+
+    inline Eigen::Quaterniond
+    computeEffectiveIMUToCam(Eigen::Quaterniond const &cameraPose,
+                             util::Angle yawCorrection) {
+        return Eigen::Quaterniond(
+            Eigen::AngleAxisd(util::getRadians(yawCorrection),
+                              Eigen::Vector3d::UnitY()) *
+            cameraPose);
+    }
     /// The measurement here has been split into a base and derived type, so
     /// that the derived type only contains the little bit that depends on a
     /// particular state type.
@@ -52,14 +61,6 @@ namespace kalman {
         static const types::DimensionType DIMENSION = 3;
         using MeasurementVector = types::Vector<DIMENSION>;
         using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
-        static Eigen::Quaterniond
-        computeEffectiveIMUToCam(Eigen::Quaterniond const &cameraPose,
-                                 util::Angle yawCorrection) {
-            return Eigen::Quaterniond(
-                Eigen::AngleAxisd(util::getRadians(yawCorrection),
-                                  Eigen::Vector3d::UnitY()) *
-                cameraPose);
-        }
         IMUOrientationMeasBase(Eigen::Quaterniond const &cameraPose,
                                util::Angle yawCorrection,
                                Eigen::Quaterniond const &quat,
