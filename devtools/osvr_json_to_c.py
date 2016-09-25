@@ -14,6 +14,36 @@
 
 import argparse
 import sys
+import re
+
+
+# http://stackoverflow.com/questions/2319019/using-regex-to-remove-comments-from-source-files
+# http://stackoverflow.com/a/18381470
+def remove_comments(string):
+    pattern = r"(\".*?\"|\'.*?\')|(/\*.*?\*/|//[^\r\n]*$)"
+    # first group captures quoted strings (double or single)
+    # second group captures comments (//single-line or /* multi-line */)
+    regex = re.compile(pattern, re.MULTILINE | re.DOTALL)
+
+    def _replacer(match):
+        # if the 2nd group (capturing comments) is not None,
+        # it means we have captured a non-quoted (real) comment string.
+        if match.group(2) is not None:
+            return ""
+        else:  # otherwise, we will return the 1st group
+            return match.group(1)  # captured quoted-string
+    return regex.sub(_replacer, string)
+
+
+# http://stackoverflow.com/questions/3609596/python-regular-expression-must-strip-whitespace-except-between-quotes
+# http://stackoverflow.com/a/3609802
+def stripwhite(text):
+    # Remove whitespace characters not found in between double-quotes
+    lst = text.split('"')
+    for i, item in enumerate(lst):
+        if not i % 2:
+            lst[i] = re.sub("\s+", "", item)
+    return '"'.join(lst)
 
 
 def migrate_file_data(json_filename, variable_name, output_filename):
@@ -32,21 +62,26 @@ def migrate_file_data(json_filename, variable_name, output_filename):
                 cpp_output.write('static const char {}[] = {{'.format(variable_name))
                 line = json_input.readline()
                 while line != end_of_file:
-                    # TODO: Remove comments not found in key/value of JSON
-                    # TODO: Strip whitespace characters not found in key/value of JSON
-                    # TODO: Handle the End of File newline separately. Keep it instead?
-                    json_file_contents = list(line)
-                    cpp_file_contents = [hex(ord(char)) for char in json_file_contents]
-                    write_to_file = ", ".join(cpp_file_contents)
-                    line = json_input.readline()
-                    if line != end_of_file:
+                    # TODO: Are comments allowed in JSON outside of data?
+                    # http://www.json.org/
+                    # https://plus.google.com/+DouglasCrockfordEsq/posts/RK8qyGVaGSr
+                    # https://groups.yahoo.com/neo/groups/json/conversations/topics/156
+                    uncommented_line = remove_comments(line)
+                    stripped_line = stripwhite(uncommented_line)
+                    if stripped_line != '':
+                        # Don't write (now) empty line contents to the file
+                        json_file_contents = list(stripped_line)
+                        cpp_file_contents = [hex(ord(char)) for char in json_file_contents]
+                        write_to_file = ", ".join(cpp_file_contents)
                         # Add the extra trailing comma to connect data from multiple lines
                         write_to_file = "{}, ".format(write_to_file)
-                    cpp_output.write(write_to_file)
-
+                        cpp_output.write(write_to_file)
+                    line = json_input.readline()
+                # TODO: Handle the End of File newline separately. Keep it instead?
+                cpp_output.write(hex(ord('\n')))
                 cpp_output.write('};\n')
     except IOError:
-        print "Could not read file:", json_file
+        print "Could not read file:", json_filename
 
 
 def main(argv):
