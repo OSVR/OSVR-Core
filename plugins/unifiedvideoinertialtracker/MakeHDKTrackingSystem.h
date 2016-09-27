@@ -316,9 +316,11 @@ namespace vbtracker {
 #endif
 
         /// Put in the measurement variances.
+#if 0
         std::copy(begin(OsvrHdkLedVariances_SENSOR0),
                   end(OsvrHdkLedVariances_SENSOR0),
                   begin(data.baseMeasurementVariances));
+#endif
 
         /// Clean and validate the data.
         auto summary = data.cleanAndValidate(params.silent);

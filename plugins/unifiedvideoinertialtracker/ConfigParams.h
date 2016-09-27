@@ -158,7 +158,7 @@ namespace vbtracker {
         /// observed with higher variance than others, due to known difficulties
         /// in tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 10.90699629355032;
+        double measurementVarianceScaleFactor = 1.0;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.

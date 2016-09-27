@@ -302,11 +302,26 @@ namespace vbtracker {
 
             debug.residual.x = residual.x();
             debug.residual.y = residual.y();
+#if 0
+            /// ad-hoc estimated variance computation from experimentation,
+            /// tuned with optimizer and m_measurementVarianceScaleFactor
             auto effectiveVariance =
                 localVarianceFactor * m_measurementVarianceScaleFactor *
                 newIdentificationVariancePenalty *
                 (led.isBright() ? m_brightLedVariancePenalty : 1.) *
                 p.beaconMeasurementVariance[index] / led.getMeasurement().area;
+#else
+            /// Typically, all of these will be 1 except for the variance from
+            /// beacon depth.
+            /// At some distance past 55cm, bright LEDs actually have lower than
+            /// average variances instead of higher, but the overall mean
+            /// variance follows an exponential decay trend with distance.
+            auto effectiveVariance = localVarianceFactor *
+                                     m_measurementVarianceScaleFactor *
+                                     newIdentificationVariancePenalty *
+                                     p.beaconMeasurementVariance[index] *
+                                     getVarianceFromBeaconDepth(depth);
+#endif
             debug.variance = effectiveVariance;
             meas.setVariance(effectiveVariance);
 
