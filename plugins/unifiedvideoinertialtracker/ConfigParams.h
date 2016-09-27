@@ -68,6 +68,9 @@ namespace vbtracker {
     struct TuningParams {
         TuningParams();
         double noveltyPenaltyBase;
+
+        double distanceMeasVarianceBase;
+        double distanceMeasVarianceIntercept;
     };
 
     /// General configuration parameters
