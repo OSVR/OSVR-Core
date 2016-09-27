@@ -83,6 +83,7 @@ namespace vbtracker {
         void markAsPossiblyMisidentified(Led &led);
         void markAsUsed(Led &led);
         void handlePossiblyMisidentifiedLeds();
+        double getVarianceFromBeaconDepth(double depth);
 
         float m_maxBoxRatio;
         float m_minBoxRatio;
@@ -96,6 +97,8 @@ namespace vbtracker {
         const double m_noBeaconLinearVelocityDecayCoefficient;
         const double m_measurementVarianceScaleFactor;
         const double m_brightLedVariancePenalty;
+        const double m_distanceMeasVarianceBase;
+        const double m_distanceMeasVarianceIntercept;
         const bool m_extraVerbose;
         std::mt19937 m_randEngine;
         static const int SIGNAL_HAVE_NOT_SEEN_BEACONS_YET = -1;

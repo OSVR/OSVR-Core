@@ -95,6 +95,9 @@ namespace vbtracker {
           m_brightLedVariancePenalty(params.brightLedVariancePenalty),
           m_measurementVarianceScaleFactor(
               params.measurementVarianceScaleFactor),
+          m_distanceMeasVarianceBase(params.tuning.distanceMeasVarianceBase),
+          m_distanceMeasVarianceIntercept(
+              params.tuning.distanceMeasVarianceIntercept),
           m_extraVerbose(params.extraVerbose),
           m_randEngine(std::random_device()()) {
         std::tie(m_minBoxRatio, m_maxBoxRatio) =
@@ -575,6 +578,11 @@ namespace vbtracker {
     void SCAATKalmanPoseEstimator::markAsUsed(Led &led) {
         led.markAsUsed();
         m_ledsUsed++;
+    }
+
+    double SCAATKalmanPoseEstimator::getVarianceFromBeaconDepth(double depth) {
+        return std::pow(m_distanceMeasVarianceBase, depth * 100.) *
+               m_distanceMeasVarianceIntercept;
     }
 
     void SCAATKalmanPoseEstimator::handlePossiblyMisidentifiedLeds() {
