@@ -225,6 +225,12 @@ namespace vbtracker {
         /// Create the beacon state objects and initialize the beacon offset.
         m_beacons =
             createBeaconStateVec(getParams(), setupData, m_beaconOffset);
+
+        /// Make a copy of those beacons.
+        for (auto &beacon : m_beacons) {
+            m_origBeacons.emplace_back(new BeaconState(*beacon));
+        }
+
         /// Create the beacon debug data
         m_beaconDebugData.resize(m_beacons.size());
 
@@ -261,6 +267,13 @@ namespace vbtracker {
         BOOST_ASSERT_MSG(i.value() >= 0,
                          "Beacon ID must not be a sentinel value!");
         return m_beacons.at(i.value())->errorCovariance().diagonal();
+    }
+
+    void TrackedBodyTarget::resetBeaconAutocalib() {
+        m_beacons.clear();
+        for (auto &beacon : m_origBeacons) {
+            m_beacons.emplace_back(new BeaconState(*beacon));
+        }
     }
 
     std::size_t TrackedBodyTarget::processLedMeasurements(

@@ -107,6 +107,9 @@ namespace vbtracker {
         /// app
         Eigen::Vector3d getBeaconAutocalibVariance(ZeroBasedBeaconId i) const;
 
+        /// Reset beacon autocalibration position and variance.
+        void resetBeaconAutocalib();
+
         /// Called each frame with the results of the blob finding and
         /// undistortion (part of the first phase of the tracking system)
         ///
@@ -249,6 +252,8 @@ namespace vbtracker {
         ///@}
         /// @todo will this always have the same number of entries?
         std::vector<BeaconData> m_beaconDebugData;
+
+        BeaconStateVec m_origBeacons;
 
         Eigen::Vector3d m_beaconOffset;
 
