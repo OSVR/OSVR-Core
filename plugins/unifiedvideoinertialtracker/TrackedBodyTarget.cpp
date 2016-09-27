@@ -34,6 +34,8 @@
 #include "PoseEstimator_SCAATKalman.h"
 #include "TrackedBody.h"
 #include "cvToEigen.h"
+#include <osvr/Util/CSV.h>
+#include <osvr/Util/CSVCellGroup.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -41,6 +43,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 
 #undef OSVR_DEBUG_ERROR_VARIANCE_WHEN_TRACKING_LOST
@@ -49,6 +52,9 @@
 #undef OSVR_UVBI_FRAMEDROP_HEURISTIC_WARNING
 
 #define OSVR_VERBOSE_ERROR_BOUNDS
+
+/// make blobs.csv for determining variance.
+#undef OSVR_UVBI_DUMP_BLOB_CSV
 
 namespace osvr {
 namespace vbtracker {
@@ -139,7 +145,13 @@ namespace vbtracker {
             : bodyInterface(bodyIface), kalmanEstimator(params),
               ransacKalmanEstimator(params.softResetPositionVarianceScale,
                                     params.softResetOrientationVariance),
-              permitKalman(params.permitKalman), softResets(params.softResets) {
+              permitKalman(params.permitKalman), softResets(params.softResets)
+
+#ifdef OSVR_UVBI_DUMP_BLOB_CSV
+              ,
+              blobFile("blobs.csv"), csv(blobFile)
+#endif // OSVR_UVBI_DUMP_BLOB_CSV
+        {
         }
         BodyTargetInterface bodyInterface;
         LedGroup leds;
@@ -168,6 +180,11 @@ namespace vbtracker {
         /// resets" included.
         std::size_t trackingResets = 0;
         std::ostringstream outputSink;
+
+#ifdef OSVR_UVBI_DUMP_BLOB_CSV
+        std::ofstream blobFile;
+        util::StreamCSV csv;
+#endif // OSVR_UVBI_DUMP_BLOB_CSV
     };
 
     inline BeaconStateVec createBeaconStateVec(ConfigParams const &params,
@@ -234,6 +251,21 @@ namespace vbtracker {
         /// Create the beacon debug data
         m_beaconDebugData.resize(m_beacons.size());
 
+#ifdef OSVR_UVBI_DUMP_BLOB_CSV
+        {
+            /// Pre-generate all the known beacon ID columns so they are in
+            /// order and so we can start streaming the CSV right away.
+            for (std::size_t i = 0; i < m_numBeacons; ++i) {
+                auto prefix = std::to_string(i + 1) + ".";
+                m_impl->csv.getColumn(prefix + "x");
+                m_impl->csv.getColumn(prefix + "y");
+                m_impl->csv.getColumn(prefix + "diameter");
+                m_impl->csv.getColumn(prefix + "area");
+                m_impl->csv.getColumn(prefix + "bright");
+            }
+            m_impl->csv.startOutput();
+        }
+#endif // OSVR_UVBI_DUMP_BLOB_CSV
         {
             /// Create the LED identifier
             std::unique_ptr<OsvrHdkLedIdentifier> identifier(
@@ -377,6 +409,27 @@ namespace vbtracker {
         /// Do the initial filtering of the LED group to just the identified
         /// ones before we pass it to an estimator.
         updateUsableLeds();
+
+#ifdef OSVR_UVBI_DUMP_BLOB_CSV
+        {
+            static bool first = true;
+            if (first) {
+                first = false;
+                std::cout << "Dumping first row of blob data." << std::endl;
+            }
+            auto &row = m_impl->csv.row();
+            for (auto &led : usableLeds()) {
+                auto prefix =
+                    std::to_string(led->getOneBasedID().value()) + ".";
+                row << util::cellGroup(
+                           prefix, cvToVector(led->getLocationForTracking()))
+                    << util::cell(prefix + "diameter",
+                                  led->getMeasurement().diameter)
+                    << util::cell(prefix + "area", led->getMeasurement().area)
+                    << util::cell(prefix + "bright", led->isBright());
+            }
+        }
+#endif // OSVR_UVBI_DUMP_BLOB_CSV
 
 #ifdef OSVR_UVBI_FRAMEDROP_HEURISTIC_WARNING
         if (usableLeds().empty() && prevUsableLedCount > 3 &&
