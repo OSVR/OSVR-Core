@@ -62,7 +62,8 @@ namespace vbtracker {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         explicit ImagePointMeasurement(CameraModel const &cam,
                                        Eigen::Vector3d const &targetFromBody)
-            : m_variance(2.0), m_cam(cam), m_targetFromBody(targetFromBody) {}
+            : m_variance(SquareMatrix::Identity()), m_cam(cam),
+              m_targetFromBody(targetFromBody) {}
 
         /// Updates some internal cached partial solutions.
         void updateFromState(State const &state) {
@@ -267,16 +268,17 @@ namespace vbtracker {
 
         void setVariance(double s) {
             if (s > 0) {
-                m_variance = s;
+                static const auto VARIANCE_Y_FACTOR = 3.;
+                m_variance << s, 0, 0, (s / VARIANCE_Y_FACTOR);
             }
         }
-        SquareMatrix getCovariance(State &state) const {
+        SquareMatrix const &getCovariance(State &state) const {
             /// @todo make this better, perhaps state dependent?
-            return Vector::Constant(m_variance).asDiagonal();
+            return m_variance;
         }
 
       private:
-        double m_variance;
+        SquareMatrix m_variance;
         Vector m_measurement;
         CameraModel m_cam;
         Eigen::Vector3d m_targetFromBody;
