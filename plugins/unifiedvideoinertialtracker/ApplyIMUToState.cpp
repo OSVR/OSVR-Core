@@ -39,7 +39,7 @@
 // Standard includes
 #include <iostream>
 
-#define OSVR_USE_OLD_MEASUREMENT_CLASS
+#undef OSVR_USE_OLD_MEASUREMENT_CLASS
 
 namespace osvr {
 
@@ -117,7 +117,7 @@ namespace kalman {
             MeasurementVector residual = util::quat_ln(residualq);
             MeasurementVector equivResidual =
                 util::quat_ln(Eigen::Quaterniond(-(residualq.coeffs())));
-#ifdef OSVR_FLIP_QUATS
+#if 1
             return residual.squaredNorm() < equivResidual.squaredNorm()
                        ? residual
                        : equivResidual;
@@ -260,22 +260,6 @@ namespace vbtracker {
 #else
         kalman::IMUOrientationMeasurement<BodyState> kalmanMeas{
             getCameraRotation(sys), yawCorrection, quat, var};
-#endif
-
-#if 0
-        {
-            static ::util::Stride s(201);
-            if (++s) {
-                Eigen::AngleAxisd pred(state.getCombinedQuaternion());
-                Eigen::AngleAxisd meas(quat);
-                std::cout << "Predicted: " << pred.angle() << " about "
-                          << pred.axis().transpose() << "\n";
-                std::cout << "Measured: " << meas.angle() << " about "
-                          << meas.axis().transpose() << "\n";
-                std::cout << "Residual: "
-                          << kalmanMeas.getResidual(state).transpose() << "\n";
-            }
-        }
 #endif
         auto correctionInProgress =
             kalman::beginCorrection(state, processModel, kalmanMeas);
