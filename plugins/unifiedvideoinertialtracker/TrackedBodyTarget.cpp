@@ -646,9 +646,6 @@ namespace vbtracker {
         Eigen::Quaterniond &quat, int skipBrightsCutoff,
         std::size_t iterations) {
 
-        /// Do the initial filtering of the LED group to just the identified
-        /// ones before we pass it to an estimator.
-        updateUsableLeds();
         Eigen::Vector3d outXlate;
         Eigen::Quaterniond outQuat;
         auto gotPose = m_impl->ransacEstimator(
