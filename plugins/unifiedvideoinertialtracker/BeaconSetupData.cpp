@@ -183,6 +183,9 @@ namespace vbtracker {
             }
 
             void checkMeasVariance(size_type i, bool &gotError) {
+                if (d.baseMeasurementVariances.size() <= i) {
+                    d.baseMeasurementVariances.resize(i + 1, 1.);
+                }
                 if (d.baseMeasurementVariances[i] <= 0) {
                     gotError = true;
                     recordError(
