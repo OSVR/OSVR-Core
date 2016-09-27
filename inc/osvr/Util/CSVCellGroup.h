@@ -236,6 +236,12 @@ namespace util {
     }
 
 #ifdef EIGEN_WORLD_VERSION
+    template <typename T, typename Scalar>
+    inline void operator<<(CellGroupProxy<T, DefaultGroupTag> &group,
+                           Eigen::Matrix<Scalar, 2, 1> const &v) {
+        group << cell("x", v.x()) << cell("y", v.y());
+    }
+
     template <typename T>
     inline void operator<<(CellGroupProxy<T, DefaultGroupTag> &group,
                            Eigen::Vector3d const &v) {
