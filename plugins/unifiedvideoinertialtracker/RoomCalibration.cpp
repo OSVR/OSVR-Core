@@ -369,9 +369,8 @@ namespace vbtracker {
         if (m_cameraIsForward) {
             auto yaw = util::extractYaw(iRc);
             iRc = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY()) * iRc;
-            /// the IMUs need to know the positive yaw so they can un-reverse
-            /// it.
-            m_imuYaw = yaw * util::radians;
+            /// the IMUs need to know the yaw so they can un-reverse it.
+            m_imuYaw = -yaw * util::radians;
         } else {
             m_imuYaw = 0;
         }
