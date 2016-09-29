@@ -181,6 +181,8 @@ namespace vbtracker {
             const_iterator end() const { return m_history.cend(); }
             const_iterator cend() const { return m_history.cend(); }
 
+            void clear() { m_history.clear(); }
+
           private:
             /// Needed due to some pre-modern-C++ library differences (like
             /// containter_type::erase)
