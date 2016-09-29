@@ -40,8 +40,6 @@
 #include <cstddef>
 #include <iosfwd>
 
-#undef OSVR_USE_SECOND_EURO_FILTER
-
 namespace osvr {
 namespace vbtracker {
     class TrackingSystem;
@@ -89,11 +87,6 @@ namespace vbtracker {
       private:
         bool finished() const;
 
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-        /// This gets a live transform from camera space to IMU space.
-        Eigen::Isometry3d getCameraToIMUCalibrationPoint() const;
-#endif
-
         /// The stream used by msg() and friends
         std::ostream &msgStream() const;
         /// A nicely prefixed stream
@@ -124,26 +117,13 @@ namespace vbtracker {
         util::time::TimeValue m_lastVideoData;
         /// @}
 
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-        /// Filter on pose in camera space
-        util::filters::PoseOneEuroFilterd m_poseFilter =
-            util::filters::PoseOneEuroFilterd{
-                util::filters::one_euro::Params{1, 0.05},
-                util::filters::one_euro::Params{1}};
-
-        /// Input filter on camera in room/IMU space
-        util::filters::PoseOneEuroFilterd m_cameraFilter =
-            util::filters::PoseOneEuroFilterd{
-                util::filters::one_euro::Params{3, 0.1},
-                util::filters::one_euro::Params{3}};
-#else
-        /// Filter on pose in camera space
+        /// Filter on pose in camera space (video data)
         util::filters::PoseOneEuroFilterd m_poseFilter =
             util::filters::PoseOneEuroFilterd{
                 util::filters::one_euro::Params{3, 0.03},
                 util::filters::one_euro::Params{1, 0.01}};
         Eigen::Vector3d m_rTc_ln_accum = Eigen::Vector3d::Zero();
-#endif
+
         BodyId m_imuBody;
         Eigen::Quaterniond m_imuOrientation = Eigen::Quaterniond::Identity();
 

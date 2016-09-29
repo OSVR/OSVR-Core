@@ -56,26 +56,15 @@ namespace vbtracker {
 
     using osvr::util::time::duration;
 
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-    /// These are the levels that the velocity must remain below for a given
-    /// number of consecutive frames before we accept a correlation between the
-    /// IMU and video as truth.
-    static const auto LINEAR_VELOCITY_CUTOFF = 0.2;
-    static const auto ANGULAR_VELOCITY_CUTOFF = 1.e-4;
-    /// The number of low-velocity frames required
-    static const std::size_t REQUIRED_SAMPLES = 10;
-#else
     /// These are the levels that the velocity must remain below for a given
     /// number of consecutive frames before we accept a correlation between the
     /// IMU and video as truth.
 
-    /// @todo why do we get such high linear velocities in this step? is RANSAC
-    /// really just that noisy?
+    /// @todo why do we get such high velocities in this step? is RANSAC
+    /// really just that noisy? At least part of it is timing jitter...
     static const auto LINEAR_VELOCITY_CUTOFF = 0.75;
     static const auto ANGULAR_VELOCITY_CUTOFF = .75;
     static const std::size_t REQUIRED_SAMPLES = 15;
-
-#endif
 
     /// The distance from the camera that we want to encourage users to move
     /// within for best initial startup. Provides the best view of beacons for
@@ -139,14 +128,7 @@ namespace vbtracker {
 
         // Pre-filter the camera data in case it's noisy (quite possible since
         // it's RANSAC)
-        m_poseFilter.filter(
-            dt, xlate,
-#ifdef OSVR_FLIP_QUATS
-            util::flipQuatSignToMatch(m_poseFilter.getOrientation(), quat)
-#else
-            quat
-#endif
-                );
+        m_poseFilter.filter(dt, xlate, quat);
 
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
@@ -157,14 +139,7 @@ namespace vbtracker {
         Eigen::Quaterniond rTc =
             m_imuOrientation * m_poseFilter.getOrientation().inverse();
         Eigen::Vector3d rTcln = util::quat_ln(rTc);
-// Look at the velocity to see if the user was holding still enough.
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-        // Feed this into the filter...
-        m_cameraFilter.filter(dt, rTc.translation(),
-                              Eigen::Quaterniond(rTc.rotation()));
-        m_linVel = m_cameraFilter.getLinearVelocityMagnitude();
-        m_angVel = m_cameraFilter.getAngularVelocityMagnitude();
-#else
+        // Look at the velocity to see if the user was holding still enough.
         if (!firstData) {
             using XlateDeriv =
                 util::filters::one_euro::DerivativeTraits<Eigen::Vector3d>;
@@ -177,7 +152,6 @@ namespace vbtracker {
             m_angVel = QuatDeriv::computeMagnitude(
                 QuatDeriv::compute(prevRot, m_poseFilter.getOrientation(), dt));
         }
-#endif
 
 #ifdef OSVR_UVBI_DUMP_CALIB_LOG
         {
@@ -210,9 +184,7 @@ namespace vbtracker {
                 msg() << "Hold still, performing room calibration";
             }
             msgStream() << "." << std::flush;
-#ifndef OSVR_USE_SECOND_EURO_FILTER
             m_rTc_ln_accum += rTcln;
-#endif // !OSVR_USE_SECOND_EURO_FILTER
             ++m_steadyVideoReports;
             if (finished()) {
                 /// put an end to the dots
@@ -240,9 +212,7 @@ namespace vbtracker {
             msgStream() << "\n";
         }
         m_steadyVideoReports = 0;
-#ifndef OSVR_USE_SECOND_EURO_FILTER
         m_rTc_ln_accum = Eigen::Vector3d::Zero();
-#endif // !OSVR_USE_SECOND_EURO_FILTER
 
         switch (m_instructionState) {
         case InstructionState::Uninstructed:
@@ -332,40 +302,33 @@ namespace vbtracker {
         }
         msg() << "Room calibration process complete." << std::endl;
 
-/// Coordinate systems involved here:
-/// i: IMU
-/// c: Camera
-/// r: Room
-/// Keep in mind the right to left convention: iTc is a transform that
-/// takes points from camera space to IMU space. Matching coordinate
-/// systems cancel: rTi * iTc = rTc
+        /// Coordinate systems involved here:
+        /// i: IMU
+        /// c: Camera
+        /// r: Room
+        /// Keep in mind the right to left convention: iTc is a transform that
+        /// takes points from camera space to IMU space. Matching coordinate
+        /// systems cancel: rTi * iTc = rTc
 
-/// We'll start by saying that the camera space orientation is unknown
-/// and that the IMU space orientation is aligned with the room, so we
-/// want that transformation. (That's what we've kept track of in a
-/// running fashion using the filter all along: iTc)
-///
-/// We discard the positional component of iTc because that varies
-/// depending on where the device is held during calibration.
-///
-/// If the user has set "camera is forward", we'll then extract the yaw
-/// component and create another transform so that the camera is always
-/// looking down the z axis of our room space: this will provide a
-/// rotation component of rTi.
-///
-/// Finally, we will set the position of the camera based on the
-/// configuration.
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-        Eigen::Isometry3d iTc = getCameraToIMUCalibrationPoint();
-        msg() << "Camera to calibration point: "
-              << iTc.translation().transpose() << " rotation: "
-              << Eigen::Quaterniond(iTc.rotation()).coeffs().transpose()
-              << std::endl;
-        Eigen::Quaterniond iRc = Eigen::Quaterniond(iTc.rotation());
-#else
+        /// We'll start by saying that the camera space orientation is unknown
+        /// and that the IMU space orientation is aligned with the room, so we
+        /// want that transformation. (That's what we've kept track of in a
+        /// running fashion using the filter all along: iTc)
+        ///
+        /// We discard the positional component of iTc because that varies
+        /// depending on where the device is held during calibration.
+        ///
+        /// If the user has set "camera is forward", we'll then extract the yaw
+        /// component and create another transform so that the camera is always
+        /// looking down the z axis of our room space: this will provide a
+        /// rotation component of rTi.
+        ///
+        /// Finally, we will set the position of the camera based on the
+        /// configuration.
+
         Eigen::Quaterniond iRc =
             util::quat_exp(m_rTc_ln_accum / m_steadyVideoReports);
-#endif
+
         if (m_cameraIsForward) {
             auto yaw = util::extractYaw(iRc);
             iRc = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY()) * iRc;
@@ -416,11 +379,6 @@ namespace vbtracker {
         return m_steadyVideoReports >= REQUIRED_SAMPLES;
     }
 
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-    Eigen::Isometry3d RoomCalibration::getCameraToIMUCalibrationPoint() const {
-        return m_cameraFilter.getIsometry();
-    }
-#endif
     std::ostream &RoomCalibration::msgStream() const { return std::cout; }
     std::ostream &RoomCalibration::msg() const {
         return msgStream() << "[Unified Tracker: Room Calibration] ";
