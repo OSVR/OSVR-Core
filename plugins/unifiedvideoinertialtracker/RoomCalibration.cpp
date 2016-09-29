@@ -152,8 +152,18 @@ namespace vbtracker {
         m_linVel = m_cameraFilter.getLinearVelocityMagnitude();
         m_angVel = m_cameraFilter.getAngularVelocityMagnitude();
 #else
-        m_linVel = m_poseFilter.getLinearVelocityMagnitude();
-        m_angVel = m_poseFilter.getAngularVelocityMagnitude();
+        if (!firstData) {
+            using XlateDeriv =
+                util::filters::one_euro::DerivativeTraits<Eigen::Vector3d>;
+            using QuatDeriv =
+                util::filters::one_euro::DerivativeTraits<Eigen::Quaterniond>;
+            // We want the velocity of the filtered output, not the noisy input
+            // velocity the one-euro filter itself would provide.
+            m_linVel = XlateDeriv::computeMagnitude(
+                XlateDeriv::compute(prevXlate, m_poseFilter.getPosition(), dt));
+            m_angVel = QuatDeriv::computeMagnitude(
+                QuatDeriv::compute(prevRot, m_poseFilter.getOrientation(), dt));
+        }
 #endif
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
