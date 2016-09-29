@@ -378,40 +378,6 @@ namespace vbtracker {
         } else {
             m_imuYaw = 0;
         }
-#if 0
-        m_imuYaw = 0 * util::radians;
-        m_rTi = Eigen::Isometry3d::Identity();
-#endif
-#if 0
-        iTc.translation() = Eigen::Vector3d::Zero();
-        // Eigen::Isometry3d temp_rTc = iTc;
-
-        Eigen::AngleAxisd rTi_rotation(0, Eigen::Vector3d::UnitY());
-        if (m_cameraIsForward) {
-            // "Reset Yaw" - the camera looks along the YZ plane.
-            auto yaw = util::extractYaw(Eigen::Quaterniond(iTc.rotation()));
-            m_imuYaw = -yaw * util::radians;
-            rTi_rotation = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY());
-            // temp_rTc = rTi_rotation * iTc;
-        }
-
-        msg() << "rTi rotation: "
-              << Eigen::Quaterniond(rTi_rotation).coeffs().transpose()
-              << std::endl;
-        // Account for the supplied camera position: m_suppliedCamPosition is
-        // rTi translation.
-        // Eigen::Vector3d cameraOffset =
-        //    m_suppliedCamPosition - temp_rTc.translation();
-        m_rTi = util::makeIsometry(m_suppliedCamPosition, rTi_rotation);
-
-        msg() << "rTi: translation: " << m_rTi.translation().transpose()
-              << "rotation: "
-              << Eigen::Quaterniond(m_rTi.rotation()).coeffs().transpose()
-              << std::endl;
-
-        // cameraPose is rTc
-        m_cameraPose = m_rTi * iTc;
-#endif
         m_cameraPose = util::makeIsometry(m_suppliedCamPosition, iRc);
         msg() << "camera pose AKA rTc: translation: "
               << m_cameraPose.translation().transpose() << " rotation: ";
@@ -448,12 +414,6 @@ namespace vbtracker {
                                                 "getCameraPose() unless "
                                                 "calibration is complete!");
         return m_cameraPose;
-    }
-    Eigen::Isometry3d RoomCalibration::getIMUToRoom() const {
-        BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
-                                                "getIMUToRoom() unless "
-                                                "calibration is complete!");
-        return m_rTi;
     }
 
     bool RoomCalibration::finished() const {

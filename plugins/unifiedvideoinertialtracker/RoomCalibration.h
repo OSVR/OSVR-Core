@@ -84,9 +84,6 @@ namespace vbtracker {
         /// Gets the pose of the camera in the room (the transform from camera
         /// space to room space)
         Eigen::Isometry3d getCameraPose() const;
-        /// Gets the transform from the IMU to the room/pose of the IMU in the
-        /// room - translation components are at the time of room calibration.
-        Eigen::Isometry3d getIMUToRoom() const;
         /// @}
 
       private:
