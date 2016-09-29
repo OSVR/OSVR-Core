@@ -66,6 +66,11 @@ namespace vbtracker {
         return getBody(target.first).getTarget(target.second);
     }
 
+    TrackedBodyTarget const *
+    TrackingSystem::getTarget(BodyTargetId target) const {
+        return getBody(target.first).getTarget(target.second);
+    }
+
     ImageOutputDataPtr TrackingSystem::performInitialImageProcessing(
         util::time::TimeValue const &tv, cv::Mat const &frame,
         cv::Mat const &frameGray, CameraParameters const &camParams) {

@@ -125,6 +125,7 @@ namespace vbtracker {
             return *m_bodies.at(i.value());
         }
         TrackedBodyTarget *getTarget(BodyTargetId target);
+        TrackedBodyTarget const *getTarget(BodyTargetId target) const;
         /// @}
 
         /// @todo refactor;
