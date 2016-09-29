@@ -65,8 +65,8 @@ namespace vbtracker {
         bool roomCalibCompleteCached = false;
 
         bool haveCameraPose = false;
-        Eigen::Isometry3d cameraPose;
-        Eigen::Isometry3d cameraPoseInv;
+        Eigen::Isometry3d cameraPose = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3d cameraPoseInv = Eigen::Isometry3d::Identity();
 
         RoomCalibration calib;
 
