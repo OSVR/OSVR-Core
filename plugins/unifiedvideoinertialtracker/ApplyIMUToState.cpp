@@ -44,7 +44,182 @@
 namespace osvr {
 
 namespace kalman {
-#undef OSVR_Q_LAST
+    namespace {
+        struct QLast {
+            /// The guts of QLast and QFirst's jacobian are the same - they
+            /// differ by the innovation quat they take in, and by a transpose
+            /// on the output.
+            static Eigen::Matrix3d
+            getCommonSingleQJacobian(Eigen::Quaterniond const &innovationQuat) {
+                auto &q = innovationQuat;
+#ifdef OSVR_USE_CODEGEN
+                /// pre-compute the manually-extracted subexpressions.
+                Eigen::Vector3d q2(q.vec().cwiseProduct(q.vec()));
+                auto qvecnorm = std::sqrt(q2.sum());
+                /// codegen follows
+                // Quat.QuatToRotVec(g(x) * q)
+                auto tmp0 = (1. / 2.) / qvecnorm;
+                auto tmp1 = -q.w() * tmp0;
+                auto tmp2 = std::pow(qvecnorm, -3);
+                auto tmp3 = (1. / 2.) * q.w() * tmp2;
+                auto tmp4 = q.z() * tmp0;
+                auto tmp5 = (1. / 2.) * q.w() * q.x() * tmp2;
+                auto tmp6 = q.y() * tmp5;
+                auto tmp7 = q.y() * tmp0;
+                auto tmp8 = q.z() * tmp5;
+                auto tmp9 = q.x() * tmp0;
+                auto tmp10 = q.y() * q.z() * tmp3;
+                Eigen::Matrix<double, 3, 3> ret;
+                ret << q2.x() * tmp3 + tmp1, tmp4 + tmp6, -tmp7 + tmp8,
+                    -tmp4 + tmp6, q2.y() * tmp3 + tmp1, tmp10 + tmp9,
+                    tmp7 + tmp8, tmp10 - tmp9, q2.z() * tmp3 + tmp1;
+#else
+                auto qvecnorm = q.vec().norm();
+
+                if (qvecnorm < 1e-4) {
+                    // effectively 0 - must avoid divide by zero.
+                    // All numerators also go to 0 in this case, so we'll just
+                    // eliminate them.
+                    // The exception is the second term of the main diagonal:
+                    // nominally -qw/2*vecnorm.
+                    // qw would be 1, but in this form at least, the math goes
+                    // to
+                    // -infinity.
+
+                    // When the jacobian is computed symbolically specifically
+                    // for
+                    // the case that q is the identity quaternion, a zero matrix
+                    // is
+                    // returned.
+                    return Eigen::Matrix3d::Zero();
+                }
+                Eigen::Matrix3d ret =
+                    // first term: qw * (qvec outer product with itself), over 2
+                    // *
+                    // vecnorm^3
+                    (q.w() * q.vec() * q.vec().transpose() /
+                     (2 * qvecnorm * qvecnorm * qvecnorm)) +
+                    // second term of each element: cross-product matrix of the
+                    // negative vector part of quaternion over 2*vecnorm, minus
+                    // the
+                    // identity matrix * qw/2*vecnorm
+                    ((vbtracker::skewSymmetricCrossProductMatrix3(-q.vec()) -
+                      Eigen::Matrix3d::Identity() * q.w()) /
+                     (2 * qvecnorm));
+#endif
+                return ret;
+            }
+            static Eigen::Quaterniond
+            getInnovationQuat(Eigen::Quaterniond const &measInCamSpace,
+                              Eigen::Quaterniond const &cRb) {
+                return cRb.inverse() * measInCamSpace;
+            }
+            static Eigen::Matrix3d
+            getJacobian(Eigen::Quaterniond const &measInCamSpace,
+                        Eigen::Quaterniond const &cRb) {
+                Eigen::Quaterniond q = getInnovationQuat(measInCamSpace, cRb);
+                return getCommonSingleQJacobian(q);
+            }
+        };
+        struct QFirst {
+            static Eigen::Quaterniond
+            getInnovationQuat(Eigen::Quaterniond const &measInCamSpace,
+                              Eigen::Quaterniond const &cRb) {
+                return measInCamSpace.conjugate() * cRb;
+            }
+            static Eigen::Matrix3d
+            getJacobian(Eigen::Quaterniond const &measInCamSpace,
+                        Eigen::Quaterniond const &cRb) {
+                Eigen::Quaterniond q = getInnovationQuat(measInCamSpace, cRb);
+                return QLast::getCommonSingleQJacobian(q).transpose();
+            }
+        };
+
+        struct SplitQ {
+            static Eigen::Quaterniond
+            getInnovationQuat(Eigen::Quaterniond const &measInCamSpace,
+                              Eigen::Quaterniond const &cRb) {
+
+                // this is the one that matches the original measurement class
+                // closest, despite the coordinate systems not making 100%
+                // sense.
+                return measInCamSpace * cRb.inverse();
+            }
+            static Eigen::Matrix3d
+            getJacobian(Eigen::Quaterniond const &measInCamSpace,
+                        Eigen::Quaterniond const &cRb) {
+
+                Eigen::Quaterniond const &q = measInCamSpace;
+                Eigen::Quaterniond state_inv = cRb.inverse();
+
+#ifdef OSVR_USE_CODEGEN
+                auto tmp0 = (1. / 2.) * state_inv.w();
+                auto tmp1 = -q.w() * tmp0;
+                auto tmp2 = (1. / 2.) * state_inv.x();
+                auto tmp3 = q.x() * tmp2;
+                auto tmp4 = (1. / 2.) * state_inv.y();
+                auto tmp5 = q.y() * tmp4;
+                auto tmp6 = -tmp5;
+                auto tmp7 = (1. / 2.) * state_inv.z();
+                auto tmp8 = q.z() * tmp7;
+                auto tmp9 = -tmp8;
+                auto tmp10 = q.z() * tmp0;
+                auto tmp11 = q.w() * tmp7;
+                auto tmp12 = q.x() * tmp4 + q.y() * tmp2;
+                auto tmp13 = q.y() * tmp0;
+                auto tmp14 = q.w() * tmp4;
+                auto tmp15 = q.x() * tmp7 + q.z() * tmp2;
+                auto tmp16 = tmp1 - tmp3;
+                auto tmp17 = q.x() * tmp0;
+                auto tmp18 = q.w() * tmp2;
+                auto tmp19 = q.y() * tmp7 + q.z() * tmp4;
+                Eigen::Matrix<double, 3, 3> ret;
+                ret << tmp1 + tmp3 + tmp6 + tmp9, -tmp10 + tmp11 + tmp12,
+                    tmp13 - tmp14 + tmp15, tmp10 - tmp11 + tmp12,
+                    tmp16 + tmp5 + tmp9, -tmp17 + tmp18 + tmp19,
+                    -tmp13 + tmp14 + tmp15, tmp17 - tmp18 + tmp19,
+                    tmp16 + tmp6 + tmp8;
+                return ret.transpose();
+#else
+                auto qvecnorm2 = q.vec().squaredNorm();
+
+                if (qvecnorm2 < 1e-4) {
+                    // effectively 0 - so identity quat.
+                    // Can simplify here.
+
+                    Eigen::Matrix3d ret;
+                    ret << -state_inv.w(), state_inv.z(),
+                        -state_inv.y(),                                //
+                        -state_inv.z(), -state_inv.w(), state_inv.x(), //
+                        state_inv.y(), -state_inv.x(), -state_inv.w();
+                    return ret / 2.;
+                }
+                Eigen::Matrix<double, 3, 4> A;
+                A << -q.w(), q.x(), -q.y(),
+                    -q.z(), //
+                    q.z(), q.y(), q.x(),
+                    -q.w(), // row 2
+                    -q.y(), q.z(), q.w(), q.x();
+                Eigen::Matrix<double, 4, 3> B;
+                B << state_inv.w(), -state_inv.z(),
+                    state_inv.y(), //
+                    state_inv.x(), state_inv.y(),
+                    state_inv.z(), //
+                    state_inv.y(), -state_inv.x(),
+                    -state_inv.w(), //
+                    state_inv.z(), state_inv.w(), -state_inv.x();
+                Eigen::Matrix3d ret = A * B / 2.;
+#if 0
+				/// rotate a quarter turn ccw
+				ret << initialret.rightCols<1>().transpose(),
+					initialret.col(1).transpose(),
+					initialret.leftCols<1>().transpose();
+#endif
+                return ret;
+#endif // OSVR_USE_CODEGEN
+            }
+        };
+    } // namespace
 
     inline Eigen::Quaterniond
     computeEffectiveIMUToCam(Eigen::Quaterniond const &cameraPose,
@@ -63,35 +238,21 @@ namespace kalman {
         static const types::DimensionType DIMENSION = 3;
         using MeasurementVector = types::Vector<DIMENSION>;
         using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
-        IMUOrientationMeasBase(Eigen::Quaterniond const &cameraPose,
-                               util::Angle yawCorrection,
-                               Eigen::Quaterniond const &quat,
+        /// Quat should already by in camera space!
+        IMUOrientationMeasBase(Eigen::Quaterniond const &quat,
                                types::Vector<3> const &emVariance)
-            : m_iRc(computeEffectiveIMUToCam(cameraPose, yawCorrection)),
-              m_cRi(m_iRc.inverse()), m_quat(quat),
-              m_covariance(emVariance.asDiagonal()) {}
+            : m_quat(quat), m_covariance(emVariance.asDiagonal()) {}
 
         template <typename State>
         MeasurementSquareMatrix const &getCovariance(State const &) {
             return m_covariance;
         }
 
-        /// convenience function for shared implementation between getResidual
-        /// and getJacobianBlock
-        Eigen::Quaterniond
-        getInnovationQuat(Eigen::Quaterniond const &cRb) const {
-/// m_quat is iRbm - the body (measured) frame
-/// cRb is "current" (predicted) state - body in camera space
-#ifdef OSVR_Q_LAST
-            return cRb.inverse() * m_cRi * m_quat;
-#else
-            // this is the logical one.
-            // return m_quat.conjugate() * m_iRc * cRb;
-            // this is the one that matches the original measurement class
-            // closer.
-            return m_cRi * m_quat * cRb.inverse();
-#endif
-        }
+        /// Specifies which innovation computation and jacobian to use.
+        using Policy = SplitQ;
+        // using Policy = QLast;
+        // using Policy = QFirst;
+
         /// Gets the measurement residual, also known as innovation: predicts
         /// the measurement from the predicted state, and returns the
         /// difference.
@@ -100,17 +261,9 @@ namespace kalman {
         /// `.getCombinedQuaternion()`
         template <typename State>
         MeasurementVector getResidual(State const &s) const {
-#if 0
-            const Eigen::Quaterniond predictionInIMUSpace =
-                m_iRc * s.getCombinedQuaternion();
-
-            const Eigen::Quaterniond residualqInIMUSpace = m_quat * predictionInIMUSpace.inverse();
-			const Eigen::Quaterniond residualqInCamSpace = m_cRi * residualqInIMUSpace;
-#else
-
             const Eigen::Quaterniond residualq =
-                getInnovationQuat(s.getCombinedQuaternion());
-#endif
+                Policy::getInnovationQuat(m_quat, s.getCombinedQuaternion());
+
             // Two equivalent quaternions: but their logs are typically
             // different: one is the "short way" and the other is the "long
             // way". We'll compute both and pick the "short way".
@@ -132,72 +285,7 @@ namespace kalman {
         /// to put it where it belongs for each particular state type.
         template <typename State>
         types::Matrix<DIMENSION, 3> getJacobianBlock(State const &s) const {
-            /// Compute the innovation quat again.
-            Eigen::Quaterniond q = getInnovationQuat(s.getCombinedQuaternion());
-#ifdef OSVR_USE_CODEGEN
-            /// pre-compute the manually-extracted subexpressions.
-            Eigen::Vector3d q2(q.vec().cwiseProduct(q.vec()));
-            auto qvecnorm = std::sqrt(q2.sum());
-            /// codegen follows
-            // Quat.QuatToRotVec(g(x) * q)
-            auto tmp0 = (1. / 2.) / qvecnorm;
-            auto tmp1 = -q.w() * tmp0;
-            auto tmp2 = std::pow(qvecnorm, -3);
-            auto tmp3 = (1. / 2.) * q.w() * tmp2;
-            auto tmp4 = q.z() * tmp0;
-            auto tmp5 = (1. / 2.) * q.w() * q.x() * tmp2;
-            auto tmp6 = q.y() * tmp5;
-            auto tmp7 = q.y() * tmp0;
-            auto tmp8 = q.z() * tmp5;
-            auto tmp9 = q.x() * tmp0;
-            auto tmp10 = q.y() * q.z() * tmp3;
-            Eigen::Matrix<double, 3, 3> ret;
-            ret << q2.x() * tmp3 + tmp1, tmp4 + tmp6, -tmp7 + tmp8,
-                -tmp4 + tmp6, q2.y() * tmp3 + tmp1, tmp10 + tmp9, tmp7 + tmp8,
-                tmp10 - tmp9, q2.z() * tmp3 + tmp1;
-#else
-            auto qvecnorm = q.vec().norm();
-
-            if (qvecnorm < 1e-4) {
-                // effectively 0 - must avoid divide by zero.
-                // All numerators also go to 0 in this case, so we'll just
-                // eliminate them.
-                // The exception is the second term of the main diagonal:
-                // nominally -qw/2*vecnorm.
-                // qw would be 1, but in this form at least, the math goes to
-                // -infinity.
-
-                // When the jacobian is computed symbolically specifically for
-                // the case that q is the identity quaternion, a zero matrix is
-                // returned.
-                return Eigen::Matrix3d::Zero();
-            }
-            Eigen::Matrix3d ret =
-                // first term: qw * (qvec outer product with itself), over 2 *
-                // vecnorm^3
-                (q.w() * q.vec() * q.vec().transpose() /
-                 (2 * qvecnorm * qvecnorm * qvecnorm)) +
-                // second term of each element: cross-product matrix of the
-                // negative vector part of quaternion over 2*vecnorm, minus the
-                // identity matrix * qw/2*vecnorm
-                ((vbtracker::skewSymmetricCrossProductMatrix3(-q.vec()) -
-                  Eigen::Matrix3d::Identity() * q.w()) /
-                 (2 * qvecnorm));
-            static bool printedJacobian = false;
-            if (!printedJacobian) {
-                printedJacobian = true;
-                std::cout << ret << std::endl;
-            }
-#endif
-
-#ifdef OSVR_Q_LAST
-            return ret;
-#else
-            // Quat.QuatToRotVec(q * g(x))
-            // turns out the output is the same as the above, just transposed,
-            // even after the conversion to a rotation vector. (given a fixed q)
-            return ret.transpose();
-#endif
+            return Policy::getJacobian(m_quat, s.getCombinedQuaternion());
         }
 
       private:
@@ -222,11 +310,10 @@ namespace kalman {
             types::Dimension<State>::value;
         using Base = IMUOrientationMeasBase;
 
-        IMUOrientationMeasurement(Eigen::Quaterniond const &cameraPose,
-                                  util::Angle yawCorrection,
-                                  Eigen::Quaterniond const &quat,
+        /// Quat should already be rotated into camera space.
+        IMUOrientationMeasurement(Eigen::Quaterniond const &quat,
                                   types::Vector<3> const &emVariance)
-            : Base(cameraPose, yawCorrection, quat, emVariance) {}
+            : Base(quat, emVariance) {}
 
         types::Matrix<DIMENSION, STATE_DIMENSION>
         getJacobian(State const &s) const {
@@ -258,8 +345,10 @@ namespace vbtracker {
         kalman::AbsoluteOrientationMeasurement<BodyState> kalmanMeas(
             getCameraRotation(sys).inverse() * quat, var);
 #else
-        kalman::IMUOrientationMeasurement<BodyState> kalmanMeas{
-            getCameraRotation(sys), yawCorrection, quat, var};
+        Eigen::Quaterniond measInCamSpace =
+            Eigen::Quaterniond(sys.getRoomToCamera().rotation()) * quat;
+        kalman::IMUOrientationMeasurement<BodyState> kalmanMeas{measInCamSpace,
+                                                                var};
 #endif
         auto correctionInProgress =
             kalman::beginCorrection(state, processModel, kalmanMeas);
