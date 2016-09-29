@@ -149,16 +149,16 @@ namespace vbtracker {
         // Feed this into the filter...
         m_cameraFilter.filter(dt, rTc.translation(),
                               Eigen::Quaterniond(rTc.rotation()));
-        auto linearVel = m_cameraFilter.getLinearVelocityMagnitude();
-        auto angVel = m_cameraFilter.getAngularVelocityMagnitude();
+        m_linVel = m_cameraFilter.getLinearVelocityMagnitude();
+        m_angVel = m_cameraFilter.getAngularVelocityMagnitude();
 #else
         auto linearVel = m_poseFilter.getLinearVelocityMagnitude();
         auto angVel = m_poseFilter.getAngularVelocityMagnitude();
 #endif
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
-        if (linearVel < LINEAR_VELOCITY_CUTOFF &&
-            angVel < ANGULAR_VELOCITY_CUTOFF) {
+        if (m_linVel < LINEAR_VELOCITY_CUTOFF &&
+            m_angVel < ANGULAR_VELOCITY_CUTOFF) {
             // OK, velocity within bounds
             if (m_steadyVideoReports == 0) {
                 msg() << "Hold still, performing room calibration";
@@ -182,25 +182,13 @@ namespace vbtracker {
             /// put an end to the dots
             msgStream() << std::endl;
 
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-            // Look at the velocity to see if the user was holding still enough.
-            auto linearVel = m_cameraFilter.getLinearVelocityMagnitude();
-#else
-            auto linearVel = m_poseFilter.getLinearVelocityMagnitude();
-
-#endif
             msg() << "Restarting ";
-            if (linearVel >= LINEAR_VELOCITY_CUTOFF) {
-                msgStream() << " - Linear velocity too high (" << linearVel
+            if (m_linVel >= LINEAR_VELOCITY_CUTOFF) {
+                msgStream() << " - Linear velocity too high (" << m_linVel
                             << ")";
             }
-#ifdef OSVR_USE_SECOND_EURO_FILTER
-            auto angVel = m_cameraFilter.getAngularVelocityMagnitude();
-#else
-            auto angVel = m_poseFilter.getAngularVelocityMagnitude();
-#endif
-            if (angVel >= ANGULAR_VELOCITY_CUTOFF) {
-                msgStream() << " - Angular velocity too high (" << angVel
+            if (m_angVel >= ANGULAR_VELOCITY_CUTOFF) {
+                msgStream() << " - Angular velocity too high (" << m_angVel
                             << ")";
             }
             msgStream() << "\n";

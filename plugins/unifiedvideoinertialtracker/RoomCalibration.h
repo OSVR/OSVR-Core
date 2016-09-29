@@ -111,6 +111,8 @@ namespace vbtracker {
         bool haveIMUData() const { return !m_imuBody.empty(); }
         std::size_t m_steadyVideoReports = 0;
 
+        double m_linVel;
+        double m_angVel;
         void handleExcessVelocity(double zTranslation);
         enum class InstructionState {
             Uninstructed,
