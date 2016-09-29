@@ -71,8 +71,8 @@ namespace vbtracker {
 
     /// @todo why do we get such high linear velocities in this step? is RANSAC
     /// really just that noisy?
-    static const auto LINEAR_VELOCITY_CUTOFF = 0.3;
-    static const auto ANGULAR_VELOCITY_CUTOFF = 1.e-2;
+    static const auto LINEAR_VELOCITY_CUTOFF = 0.75;
+    static const auto ANGULAR_VELOCITY_CUTOFF = .75;
     static const std::size_t REQUIRED_SAMPLES = 15;
 
 #endif
