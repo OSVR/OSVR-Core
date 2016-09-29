@@ -143,8 +143,8 @@ namespace vbtracker {
         /// Filter on pose in camera space
         util::filters::PoseOneEuroFilterd m_poseFilter =
             util::filters::PoseOneEuroFilterd{
-                util::filters::one_euro::Params{1, 0.03},
-                util::filters::one_euro::Params{1, 0.1}};
+                util::filters::one_euro::Params{3, 0.03},
+                util::filters::one_euro::Params{1, 0.01}};
         Eigen::Vector3d m_rTc_ln_accum = Eigen::Vector3d::Zero();
 #endif
         BodyId m_imuBody;
