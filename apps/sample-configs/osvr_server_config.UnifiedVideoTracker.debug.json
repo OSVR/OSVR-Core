@@ -30,6 +30,8 @@
         "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
         "cameraIsForward": true,
 
+        "measurementVarianceScaleFactor": 1,
+
         /*
         "blobs": {
         "preEdgeDetectionBlurSize": 3,
