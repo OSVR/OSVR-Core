@@ -314,19 +314,16 @@ namespace vbtracker {
                                             "known IMU must be identical at "
                                             "this point");
 
-/// @todo something more elegant than just copying a quat?
-#ifdef OSVR_FLIP_QUATS
         if (first) {
             // for setup purposes, we'll constrain w to be positive.
             m_imuOrientation =
                 quat.w() >= 0. ? quat : Eigen::Quaterniond(-quat.coeffs());
         } else {
+            // Keep the quaternions continuous with the previous ones, so our
+            // average of quat logs doesn't give us a bogus result.
             m_imuOrientation =
                 util::flipQuatSignToMatch(m_imuOrientation, quat);
         }
-#else
-        m_imuOrientation = quat;
-#endif
     }
 
     bool RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
