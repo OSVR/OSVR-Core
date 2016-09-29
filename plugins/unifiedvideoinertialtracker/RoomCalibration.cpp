@@ -138,15 +138,12 @@ namespace vbtracker {
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
         // space, modulo yaw)
-        // rTc is camera in room space (what we want to find), so we can take
-        // camera-reported cTd, perform rTc * cTd, and end up with rTd with
+        // rTc is camera in room space (what we want to find), so later we can
+        // take camera-reported cTb, perform rTc * cTb, and end up with rTb with
         // position...
-        // Eigen::Isometry3d rTc = m_imuOrientation * targetPose.inverse();
-        Eigen::Isometry3d rTc =
-            m_imuOrientation * m_poseFilter.getIsometry().inverse();
-        Eigen::Vector3d rTcln =
-            util::quat_ln(Eigen::Quaterniond(rTc.rotation()));
-
+        Eigen::Quaterniond rTc =
+            m_imuOrientation * m_poseFilter.getOrientation().inverse();
+        Eigen::Vector3d rTcln = util::quat_ln(rTc);
 // Look at the velocity to see if the user was holding still enough.
 #ifdef OSVR_USE_SECOND_EURO_FILTER
         // Feed this into the filter...
