@@ -22,6 +22,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// Define to enable dumping to CSV the first several frames of tracked data to
+/// help analyze the progression of room calibration.
+#undef OSVR_UVBI_DUMP_CALIB_LOG
+
 // Internal Includes
 #include "RoomCalibration.h"
 #include "Assumptions.h"
@@ -33,9 +37,18 @@
 #include <osvr/Util/EigenExtras.h>
 #include <osvr/Util/ExtractYaw.h>
 
+#ifdef OSVR_UVBI_DUMP_CALIB_LOG
+#include <osvr/Util/CSV.h>
+#include <osvr/Util/CSVCellGroup.h>
+#endif
+
 // Standard includes
 #include <iostream>
 #include <stdexcept>
+
+#ifdef OSVR_UVBI_DUMP_CALIB_LOG
+#include <fstream>
+#endif
 
 namespace osvr {
 namespace vbtracker {
@@ -165,6 +178,29 @@ namespace vbtracker {
                 QuatDeriv::compute(prevRot, m_poseFilter.getOrientation(), dt));
         }
 #endif
+
+#ifdef OSVR_UVBI_DUMP_CALIB_LOG
+        {
+            static util::CSV csv;
+            static bool output = false;
+            if (csv.numDataRows() < 400) {
+                csv.row() << util::cell("dt", dt) << util::cellGroup(xlate)
+                          << util::cellGroup(quat)
+                          << util::cellGroup("filtered.",
+                                             m_poseFilter.getPosition())
+                          << util::cellGroup("filtered.",
+                                             m_poseFilter.getOrientation())
+                          << util::cellGroup("rTc_ln.", rTcln)
+                          << util::cell("linVel", m_linVel)
+                          << util::cell("angVel", m_angVel);
+            } else if (!output) {
+                output = true;
+                std::ofstream os("calib.csv");
+                csv.output(os);
+                msg() << "Done writing calibration log data." << std::endl;
+            }
+        }
+#endif // OSVR_UVBI_DUMP_CALIB_LOG
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
         if (m_linVel < LINEAR_VELOCITY_CUTOFF &&
