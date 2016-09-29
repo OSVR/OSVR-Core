@@ -152,8 +152,8 @@ namespace vbtracker {
         m_linVel = m_cameraFilter.getLinearVelocityMagnitude();
         m_angVel = m_cameraFilter.getAngularVelocityMagnitude();
 #else
-        auto linearVel = m_poseFilter.getLinearVelocityMagnitude();
-        auto angVel = m_poseFilter.getAngularVelocityMagnitude();
+        m_linVel = m_poseFilter.getLinearVelocityMagnitude();
+        m_angVel = m_poseFilter.getAngularVelocityMagnitude();
 #endif
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
