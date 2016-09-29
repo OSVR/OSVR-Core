@@ -121,6 +121,9 @@ namespace vbtracker {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
 
+        Eigen::Quaterniond prevRot = m_poseFilter.getOrientation();
+        Eigen::Vector3d prevXlate = m_poseFilter.getPosition();
+
         // Pre-filter the camera data in case it's noisy (quite possible since
         // it's RANSAC)
         m_poseFilter.filter(

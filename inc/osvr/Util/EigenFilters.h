@@ -28,6 +28,7 @@
 // Internal Includes
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenExtras.h>
+#include <osvr/Util/EigenQuatExponentialMap.h>
 
 // Library/third-party includes
 // - none
@@ -132,40 +133,39 @@ namespace util {
                 double derivativeCutoff;
             };
 
-            /// @name One-Euro Filter required functions for Eigen::Vector3d
-            /// @{
-            inline void setDerivativeIdentity(Eigen::Vector3d &dx) {
-                dx = Eigen::Vector3d::Zero();
-            }
-            inline Eigen::Vector3d
-            computeDerivative(Eigen::Vector3d const &prev,
-                              Eigen::Vector3d const &curr, double dt) {
-                return (curr - prev) / dt;
-            }
-            inline double
-            computeDerivativeMagnitude(Eigen::Vector3d const &dx) {
-                return dx.norm();
-            }
-            /// @}
+            /// Default derivative traits: assumes derivative is same datatype
+            /// as main data, identity is zeros, and magnitude is l2 norm.
+            template <typename T> struct DerivativeTraits {
+                using DerivativeType = T;
+                static void setIdentity(DerivativeType &dx) {
+                    dx = DerivativeType::Zero();
+                }
+                static DerivativeType compute(T const &prev, T const &curr,
+                                              double dt) {
+                    return (curr - prev) / dt;
+                }
+                static double computeMagnitude(DerivativeType const &dx) {
+                    return dx.norm();
+                }
+            };
 
             /// @name One-Euro Filter required functions for Eigen::Quaterniond
             /// @{
-            inline void setDerivativeIdentity(Eigen::Quaterniond &dx) {
-                dx = Eigen::Quaterniond::Identity();
-            }
-            inline Eigen::Quaterniond
-            computeDerivative(Eigen::Quaterniond const &prev,
-                              Eigen::Quaterniond const &curr, double dt) {
-                // slerp, based on dt, between the identity and our difference
-                // rotation.
-                return Eigen::Quaterniond::Identity()
-                    .slerp(dt, curr * prev.inverse())
-                    .normalized();
-            }
-            inline double
-            computeDerivativeMagnitude(Eigen::Quaterniond const &quat) {
-                return 2.0 * std::acos(quat.w());
-            }
+            template <> struct DerivativeTraits<Eigen::Quaterniond> {
+                using DerivativeType = Eigen::Vector3d;
+                static void setIdentity(DerivativeType &dx) {
+                    dx = DerivativeType::Zero();
+                }
+                static DerivativeType compute(Eigen::Quaterniond const &prev,
+                                              Eigen::Quaterniond const &curr,
+                                              double dt) {
+                    return util::quat_ln(curr * prev.conjugate()) / dt;
+                }
+                static double computeMagnitude(DerivativeType const &dx) {
+                    return dx.norm();
+                }
+            };
+
             /// @}
 
             /// A simple filter designed for human input sources: high accuracy
@@ -181,24 +181,25 @@ namespace util {
               public:
                 using value_type = T;
                 using scalar = typename T::Scalar;
-
+                using deriv = DerivativeTraits<T>;
+                using deriv_type = typename deriv::DerivativeType;
                 EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
                 explicit OneEuroFilter(Params const &p) : m_params(p) {}
 
                 value_type const &filter(scalar dt, value_type const &x) {
-                    auto dx = value_type{};
+                    auto dx = deriv_type{};
                     if (m_firstTime) {
                         m_firstTime = false;
-                        setDerivativeIdentity(dx);
+                        deriv::setIdentity(dx);
                     } else {
-                        dx = computeDerivative(m_xFilter.hatx(), x, dt);
+                        dx = deriv::compute(m_xFilter.hatx(), x, dt);
                     }
                     // Low-pass-filter the derivative.
                     m_dxFilter.filter(dx, detail::computeAlpha<scalar>(
                                               dt, m_params.derivativeCutoff));
                     // Get the magnitude of the (filtered) derivative
-                    auto dxMag = computeDerivativeMagnitude(m_dxFilter.hatx());
+                    auto dxMag = deriv::computeMagnitude(m_dxFilter.hatx());
                     // Compute the cutoff to use for the x filter
                     auto cutoff = m_params.minCutoff + m_params.beta * dxMag;
 
@@ -209,14 +210,14 @@ namespace util {
 
                 value_type const &getState() const { return m_xFilter.hatx(); }
                 scalar getDerivativeMagnitude() const {
-                    return computeDerivativeMagnitude(m_dxFilter.hatx());
+                    return deriv::computeMagnitude(m_dxFilter.hatx());
                 }
 
               private:
                 bool m_firstTime = true;
                 const Params m_params;
                 low_pass::LowPassFilter<T> m_xFilter;
-                low_pass::LowPassFilter<T> m_dxFilter;
+                low_pass::LowPassFilter<deriv_type> m_dxFilter;
             };
 
             /// Combines a one-euro filter for position and a one-euro filter
