@@ -91,7 +91,8 @@ namespace kalman {
             // eq. 4.5 in Welch 1996 - except we have all the velocities at the
             // end
             StateSquareMatrix A = StateSquareMatrix::Identity();
-            A.topRightCorner<6, 6>() = types::SquareMatrix<6>::Identity() * dt;
+            A.topRightCorner<6, 6>() =
+                types::SquareMatrix<6>::Identity() * dt / 2.;
 
             return A;
         }
@@ -136,8 +137,8 @@ namespace kalman {
             /// calcuations are faster than the matrix ones.
 
             StateVector ret = state;
-            position(ret) += velocity(state) * dt;
-            incrementalOrientation(ret) += angularVelocity(state) * dt;
+            position(ret) += velocity(state) * dt / 2.;
+            incrementalOrientation(ret) += angularVelocity(state) * dt / 2.;
             return ret;
         }
 
