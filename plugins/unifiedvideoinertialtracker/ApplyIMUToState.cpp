@@ -239,199 +239,135 @@ namespace kalman {
                 auto tmp67 = q.x() * state_inv.w() * tmp17 * tmp64;
                 auto tmp68 = q.z() * state_inv.y() * tmp17 * tmp64;
                 auto tmp69 = q.y() * state_inv.z() * tmp17 * tmp64;
-                auto tmp70 = state_inv.x() * tmp26 + state_inv.y() * tmp24;
-                auto tmp71 = state_inv.z() * tmp19;
-                auto tmp72 = state_inv.w() * tmp21;
-                auto tmp73 = state_inv.w() * tmp31;
-                auto tmp74 = state_inv.x() * tmp35;
-                auto tmp75 = state_inv.y() * tmp33;
-                auto tmp76 = state_inv.z() * tmp29;
-                auto tmp77 = state_inv.z() * tmp5;
-                auto tmp78 = q.w() * q.x() * state_inv.x();
-                auto tmp79 = state_inv.y() * tmp78;
-                auto tmp80 = state_inv.y() * tmp40;
-                auto tmp81 = state_inv.x() * tmp42;
-                auto tmp82 = q.y() * q.z() * state_inv.w();
-                auto tmp83 = state_inv.z() * tmp82;
-                auto tmp84 = q.y() * q.z() * state_inv.x();
-                auto tmp85 = state_inv.y() * tmp84;
-                auto tmp86 = q.w() * q.y();
-                auto tmp87 = tmp1 * tmp86;
-                auto tmp88 = q.x() * q.z();
-                auto tmp89 = tmp0 * tmp88;
-                auto tmp90 = state_inv.x() * tmp10;
-                auto tmp91 = state_inv.y() * tmp44;
-                auto tmp92 = tmp3 * tmp86;
-                auto tmp93 = tmp2 * tmp88;
-                auto tmp94 =
-                    tmp57 * (tmp73 + tmp74 - tmp75 - tmp76 + tmp77 + tmp79 +
-                             tmp80 + tmp81 + tmp83 + tmp85 + tmp87 + tmp89 -
-                             tmp90 - tmp91 - tmp92 - tmp93);
+                auto tmp70 = tmp23 + tmp25 + tmp28 - tmp58 * tmp60 -
+                             tmp58 * tmp61 + tmp58 * tmp62 - tmp58 * tmp63 +
+                             tmp65 * tmp66 + tmp66 * tmp67 + tmp66 * tmp68 -
+                             tmp66 * tmp69;
+                auto tmp71 = state_inv.x() * tmp26 + state_inv.y() * tmp24;
+                auto tmp72 = state_inv.z() * tmp19;
+                auto tmp73 = state_inv.w() * tmp21;
+                auto tmp74 = state_inv.w() * tmp31;
+                auto tmp75 = state_inv.x() * tmp35;
+                auto tmp76 = state_inv.y() * tmp33;
+                auto tmp77 = state_inv.z() * tmp29;
+                auto tmp78 = state_inv.z() * tmp5;
+                auto tmp79 = q.w() * q.x() * state_inv.x();
+                auto tmp80 = state_inv.y() * tmp79;
+                auto tmp81 = state_inv.y() * tmp40;
+                auto tmp82 = state_inv.x() * tmp42;
+                auto tmp83 = q.y() * q.z() * state_inv.w();
+                auto tmp84 = state_inv.z() * tmp83;
+                auto tmp85 = q.y() * q.z() * state_inv.x();
+                auto tmp86 = state_inv.y() * tmp85;
+                auto tmp87 = q.w() * q.y();
+                auto tmp88 = tmp1 * tmp87;
+                auto tmp89 = q.x() * q.z();
+                auto tmp90 = tmp0 * tmp89;
+                auto tmp91 = state_inv.x() * tmp10;
+                auto tmp92 = state_inv.y() * tmp44;
+                auto tmp93 = tmp3 * tmp87;
+                auto tmp94 = tmp2 * tmp89;
                 auto tmp95 =
-                    -1. / 2. * tmp73 - 1. / 2. * tmp74 + (1. / 2.) * tmp75 +
-                    (1. / 2.) * tmp76 - 1. / 2. * tmp77 - 1. / 2. * tmp79 -
-                    1. / 2. * tmp80 - 1. / 2. * tmp81 - 1. / 2. * tmp83 -
-                    1. / 2. * tmp85 - 1. / 2. * tmp87 - 1. / 2. * tmp89 +
-                    (1. / 2.) * tmp90 + (1. / 2.) * tmp91 + (1. / 2.) * tmp92 +
-                    (1. / 2.) * tmp93 + tmp94;
-                auto tmp96 = state_inv.x() * tmp21 + state_inv.z() * tmp24;
-                auto tmp97 = state_inv.y() * tmp19;
-                auto tmp98 = state_inv.w() * tmp26;
-                auto tmp99 = state_inv.y() * tmp29;
-                auto tmp100 = state_inv.w() * tmp35;
-                auto tmp101 = state_inv.z() * tmp33;
-                auto tmp102 = state_inv.x() * tmp31;
-                auto tmp103 = state_inv.z() * tmp78;
-                auto tmp104 = state_inv.x() * tmp8;
-                auto tmp105 = state_inv.z() * tmp37;
-                auto tmp106 = state_inv.x() * tmp46;
-                auto tmp107 = state_inv.z() * tmp53;
-                auto tmp108 = state_inv.y() * tmp82;
-                auto tmp109 = q.w() * q.z();
-                auto tmp110 = tmp109 * tmp2;
-                auto tmp111 = q.x() * q.y();
-                auto tmp112 = tmp1 * tmp111;
-                auto tmp113 = state_inv.y() * tmp5;
-                auto tmp114 = state_inv.z() * tmp84;
-                auto tmp115 = tmp109 * tmp3;
-                auto tmp116 = tmp0 * tmp111;
-                auto tmp117 = tmp57 * (tmp100 - tmp101 - tmp102 + tmp103 +
-                                       tmp104 + tmp105 + tmp106 + tmp107 +
-                                       tmp108 + tmp110 + tmp112 - tmp113 -
-                                       tmp114 - tmp115 - tmp116 + tmp99);
-                auto tmp118 = -1. / 2. * tmp100 + (1. / 2.) * tmp101 +
-                              (1. / 2.) * tmp102 - 1. / 2. * tmp103 -
-                              1. / 2. * tmp104 - 1. / 2. * tmp105 -
-                              1. / 2. * tmp106 - 1. / 2. * tmp107 -
-                              1. / 2. * tmp108 - 1. / 2. * tmp110 -
-                              1. / 2. * tmp112 + (1. / 2.) * tmp113 +
-                              (1. / 2.) * tmp114 + (1. / 2.) * tmp115 +
-                              (1. / 2.) * tmp116 + tmp117 - 1. / 2. * tmp99;
-                auto tmp119 = q.w() * state_inv.y() * tmp18 * tmp59;
-                auto tmp120 = q.x() * state_inv.z() * tmp18 * tmp59;
-                auto tmp121 = q.y() * state_inv.w() * tmp18 * tmp59;
-                auto tmp122 = q.z() * state_inv.x() * tmp18 * tmp59;
-                auto tmp123 = q.w() * state_inv.y() * tmp17 * tmp64;
-                auto tmp124 = q.x() * state_inv.z() * tmp17 * tmp64;
-                auto tmp125 = q.y() * state_inv.w() * tmp17 * tmp64;
-                auto tmp126 = q.z() * state_inv.x() * tmp17 * tmp64;
-                auto tmp127 = -tmp25;
-                auto tmp128 = state_inv.y() * tmp21 + state_inv.z() * tmp26;
-                auto tmp129 = state_inv.x() * tmp19;
-                auto tmp130 = state_inv.w() * tmp24;
-                auto tmp131 = q.w() * state_inv.z() * tmp18 * tmp59;
-                auto tmp132 = q.x() * state_inv.y() * tmp18 * tmp59;
-                auto tmp133 = q.y() * state_inv.x() * tmp18 * tmp59;
-                auto tmp134 = q.z() * state_inv.w() * tmp18 * tmp59;
-                auto tmp135 = q.w() * state_inv.z() * tmp17 * tmp64;
-                auto tmp136 = q.y() * state_inv.x() * tmp17 * tmp64;
-                auto tmp137 = q.z() * state_inv.w() * tmp17 * tmp64;
-                auto tmp138 = q.x() * state_inv.y() * tmp17 * tmp64;
+                    tmp57 * (tmp74 + tmp75 - tmp76 - tmp77 + tmp78 + tmp80 +
+                             tmp81 + tmp82 + tmp84 + tmp86 + tmp88 + tmp90 -
+                             tmp91 - tmp92 - tmp93 - tmp94);
+                auto tmp96 =
+                    -1. / 2. * tmp74 - 1. / 2. * tmp75 + (1. / 2.) * tmp76 +
+                    (1. / 2.) * tmp77 - 1. / 2. * tmp78 - 1. / 2. * tmp80 -
+                    1. / 2. * tmp81 - 1. / 2. * tmp82 - 1. / 2. * tmp84 -
+                    1. / 2. * tmp86 - 1. / 2. * tmp88 - 1. / 2. * tmp90 +
+                    (1. / 2.) * tmp91 + (1. / 2.) * tmp92 + (1. / 2.) * tmp93 +
+                    (1. / 2.) * tmp94 + tmp95;
+                auto tmp97 = -tmp60 * tmp95 - tmp61 * tmp95 + tmp62 * tmp95 -
+                             tmp63 * tmp95 + tmp65 * tmp96 + tmp67 * tmp96 +
+                             tmp68 * tmp96 - tmp69 * tmp96 + tmp71 + tmp72 -
+                             tmp73;
+                auto tmp98 = state_inv.x() * tmp21 + state_inv.z() * tmp24;
+                auto tmp99 = state_inv.y() * tmp19;
+                auto tmp100 = state_inv.w() * tmp26;
+                auto tmp101 = state_inv.y() * tmp29;
+                auto tmp102 = state_inv.w() * tmp35;
+                auto tmp103 = state_inv.z() * tmp33;
+                auto tmp104 = state_inv.x() * tmp31;
+                auto tmp105 = state_inv.z() * tmp79;
+                auto tmp106 = state_inv.x() * tmp8;
+                auto tmp107 = state_inv.z() * tmp37;
+                auto tmp108 = state_inv.x() * tmp46;
+                auto tmp109 = state_inv.z() * tmp53;
+                auto tmp110 = state_inv.y() * tmp83;
+                auto tmp111 = q.w() * q.z();
+                auto tmp112 = tmp111 * tmp2;
+                auto tmp113 = q.x() * q.y();
+                auto tmp114 = tmp1 * tmp113;
+                auto tmp115 = state_inv.y() * tmp5;
+                auto tmp116 = state_inv.z() * tmp85;
+                auto tmp117 = tmp111 * tmp3;
+                auto tmp118 = tmp0 * tmp113;
+                auto tmp119 = tmp57 * (tmp101 + tmp102 - tmp103 - tmp104 +
+                                       tmp105 + tmp106 + tmp107 + tmp108 +
+                                       tmp109 + tmp110 + tmp112 + tmp114 -
+                                       tmp115 - tmp116 - tmp117 - tmp118);
+                auto tmp120 =
+                    -1. / 2. * tmp101 - 1. / 2. * tmp102 + (1. / 2.) * tmp103 +
+                    (1. / 2.) * tmp104 - 1. / 2. * tmp105 - 1. / 2. * tmp106 -
+                    1. / 2. * tmp107 - 1. / 2. * tmp108 - 1. / 2. * tmp109 -
+                    1. / 2. * tmp110 - 1. / 2. * tmp112 - 1. / 2. * tmp114 +
+                    (1. / 2.) * tmp115 + (1. / 2.) * tmp116 +
+                    (1. / 2.) * tmp117 + (1. / 2.) * tmp118 + tmp119;
+                auto tmp121 = tmp100 - tmp119 * tmp60 - tmp119 * tmp61 +
+                              tmp119 * tmp62 - tmp119 * tmp63 + tmp120 * tmp65 +
+                              tmp120 * tmp67 + tmp120 * tmp68 - tmp120 * tmp69 +
+                              tmp98 - tmp99;
+                auto tmp122 = q.w() * state_inv.y() * tmp18 * tmp59;
+                auto tmp123 = q.x() * state_inv.z() * tmp18 * tmp59;
+                auto tmp124 = q.y() * state_inv.w() * tmp18 * tmp59;
+                auto tmp125 = q.z() * state_inv.x() * tmp18 * tmp59;
+                auto tmp126 = q.w() * state_inv.y() * tmp17 * tmp64;
+                auto tmp127 = q.x() * state_inv.z() * tmp17 * tmp64;
+                auto tmp128 = q.y() * state_inv.w() * tmp17 * tmp64;
+                auto tmp129 = q.z() * state_inv.x() * tmp17 * tmp64;
+                auto tmp130 = -tmp122 * tmp58 - tmp123 * tmp58 -
+                              tmp124 * tmp58 + tmp125 * tmp58 + tmp126 * tmp66 +
+                              tmp127 * tmp66 + tmp128 * tmp66 - tmp129 * tmp66 +
+                              tmp71 - tmp72 + tmp73;
+                auto tmp131 = -tmp25;
+                auto tmp132 = -tmp122 * tmp95 - tmp123 * tmp95 -
+                              tmp124 * tmp95 + tmp125 * tmp95 + tmp126 * tmp96 +
+                              tmp127 * tmp96 + tmp128 * tmp96 - tmp129 * tmp96 +
+                              tmp131 + tmp23 + tmp27;
+                auto tmp133 = state_inv.y() * tmp21 + state_inv.z() * tmp26;
+                auto tmp134 = state_inv.x() * tmp19;
+                auto tmp135 = state_inv.w() * tmp24;
+                auto tmp136 = -tmp119 * tmp122 - tmp119 * tmp123 -
+                              tmp119 * tmp124 + tmp119 * tmp125 +
+                              tmp120 * tmp126 + tmp120 * tmp127 +
+                              tmp120 * tmp128 - tmp120 * tmp129 + tmp133 +
+                              tmp134 - tmp135;
+                auto tmp137 = q.w() * state_inv.z() * tmp18 * tmp59;
+                auto tmp138 = q.x() * state_inv.y() * tmp18 * tmp59;
+                auto tmp139 = q.y() * state_inv.x() * tmp18 * tmp59;
+                auto tmp140 = q.z() * state_inv.w() * tmp18 * tmp59;
+                auto tmp141 = q.w() * state_inv.z() * tmp17 * tmp64;
+                auto tmp142 = q.y() * state_inv.x() * tmp17 * tmp64;
+                auto tmp143 = q.z() * state_inv.w() * tmp17 * tmp64;
+                auto tmp144 = q.x() * state_inv.y() * tmp17 * tmp64;
+                auto tmp145 = -tmp100 - tmp137 * tmp58 + tmp138 * tmp58 -
+                              tmp139 * tmp58 - tmp140 * tmp58 + tmp141 * tmp66 +
+                              tmp142 * tmp66 + tmp143 * tmp66 - tmp144 * tmp66 +
+                              tmp98 + tmp99;
+                auto tmp146 = tmp133 - tmp134 + tmp135 - tmp137 * tmp95 +
+                              tmp138 * tmp95 - tmp139 * tmp95 - tmp140 * tmp95 +
+                              tmp141 * tmp96 + tmp142 * tmp96 + tmp143 * tmp96 -
+                              tmp144 * tmp96;
+                auto tmp147 = -tmp119 * tmp137 + tmp119 * tmp138 -
+                              tmp119 * tmp139 - tmp119 * tmp140 +
+                              tmp120 * tmp141 + tmp120 * tmp142 +
+                              tmp120 * tmp143 - tmp120 * tmp144 + tmp131 +
+                              tmp20 + tmp22 + tmp28;
                 Eigen::Matrix<double, 3, 3> ret;
-                ret << tmp23 + tmp25 + tmp28 - tmp58 * tmp60 - tmp58 * tmp61 +
-                           tmp58 * tmp62 - tmp58 * tmp63 + tmp65 * tmp66 +
-                           tmp66 * tmp67 + tmp66 * tmp68 - tmp66 * tmp69,
-                    -tmp60 * tmp94 - tmp61 * tmp94 + tmp62 * tmp94 -
-                        tmp63 * tmp94 + tmp65 * tmp95 + tmp67 * tmp95 +
-                        tmp68 * tmp95 - tmp69 * tmp95 + tmp70 + tmp71 - tmp72,
-                    -tmp117 * tmp60 - tmp117 * tmp61 + tmp117 * tmp62 -
-                        tmp117 * tmp63 + tmp118 * tmp65 + tmp118 * tmp67 +
-                        tmp118 * tmp68 - tmp118 * tmp69 + tmp96 - tmp97 + tmp98,
-                    -tmp119 * tmp58 - tmp120 * tmp58 - tmp121 * tmp58 +
-                        tmp122 * tmp58 + tmp123 * tmp66 + tmp124 * tmp66 +
-                        tmp125 * tmp66 - tmp126 * tmp66 + tmp70 - tmp71 + tmp72,
-                    -tmp119 * tmp94 - tmp120 * tmp94 - tmp121 * tmp94 +
-                        tmp122 * tmp94 + tmp123 * tmp95 + tmp124 * tmp95 +
-                        tmp125 * tmp95 - tmp126 * tmp95 + tmp127 + tmp23 +
-                        tmp27,
-                    -tmp117 * tmp119 - tmp117 * tmp120 - tmp117 * tmp121 +
-                        tmp117 * tmp122 + tmp118 * tmp123 + tmp118 * tmp124 +
-                        tmp118 * tmp125 - tmp118 * tmp126 + tmp128 + tmp129 -
-                        tmp130,
-                    -tmp131 * tmp58 + tmp132 * tmp58 - tmp133 * tmp58 -
-                        tmp134 * tmp58 + tmp135 * tmp66 + tmp136 * tmp66 +
-                        tmp137 * tmp66 - tmp138 * tmp66 + tmp96 + tmp97 - tmp98,
-                    tmp128 - tmp129 + tmp130 - tmp131 * tmp94 + tmp132 * tmp94 -
-                        tmp133 * tmp94 - tmp134 * tmp94 + tmp135 * tmp95 +
-                        tmp136 * tmp95 + tmp137 * tmp95 - tmp138 * tmp95,
-                    -tmp117 * tmp131 + tmp117 * tmp132 - tmp117 * tmp133 -
-                        tmp117 * tmp134 + tmp118 * tmp135 + tmp118 * tmp136 +
-                        tmp118 * tmp137 - tmp118 * tmp138 + tmp127 + tmp20 +
-                        tmp22 + tmp28;
+                ret << tmp70, tmp97, tmp121, tmp130, tmp132, tmp136, tmp145,
+                    tmp146, tmp147;
                 return ret;
-            }
-            static Eigen::Matrix3d
-            getBadJacobian(Eigen::Quaterniond const &measInCamSpace,
-                           Eigen::Quaterniond const &cRb) {
-
-                Eigen::Quaterniond const &q = measInCamSpace;
-                Eigen::Quaterniond state_inv = cRb.inverse();
-
-#ifdef OSVR_USE_CODEGEN
-                auto tmp0 = (1. / 2.) * state_inv.w();
-                auto tmp1 = -q.w() * tmp0;
-                auto tmp2 = (1. / 2.) * state_inv.x();
-                auto tmp3 = q.x() * tmp2;
-                auto tmp4 = (1. / 2.) * state_inv.y();
-                auto tmp5 = q.y() * tmp4;
-                auto tmp6 = -tmp5;
-                auto tmp7 = (1. / 2.) * state_inv.z();
-                auto tmp8 = q.z() * tmp7;
-                auto tmp9 = -tmp8;
-                auto tmp10 = q.z() * tmp0;
-                auto tmp11 = q.w() * tmp7;
-                auto tmp12 = q.x() * tmp4 + q.y() * tmp2;
-                auto tmp13 = q.y() * tmp0;
-                auto tmp14 = q.w() * tmp4;
-                auto tmp15 = q.x() * tmp7 + q.z() * tmp2;
-                auto tmp16 = tmp1 - tmp3;
-                auto tmp17 = q.x() * tmp0;
-                auto tmp18 = q.w() * tmp2;
-                auto tmp19 = q.y() * tmp7 + q.z() * tmp4;
-                Eigen::Matrix<double, 3, 3> ret;
-                ret << tmp1 + tmp3 + tmp6 + tmp9, -tmp10 + tmp11 + tmp12,
-                    tmp13 - tmp14 + tmp15, tmp10 - tmp11 + tmp12,
-                    tmp16 + tmp5 + tmp9, -tmp17 + tmp18 + tmp19,
-                    -tmp13 + tmp14 + tmp15, tmp17 - tmp18 + tmp19,
-                    tmp16 + tmp6 + tmp8;
-                return ret.transpose();
-#else
-                auto qvecnorm2 = q.vec().squaredNorm();
-
-                if (qvecnorm2 < 1e-4) {
-                    // effectively 0 - so identity quat.
-                    // Can simplify here.
-
-                    Eigen::Matrix3d ret;
-                    ret << -state_inv.w(), state_inv.z(),
-                        -state_inv.y(),                                //
-                        -state_inv.z(), -state_inv.w(), state_inv.x(), //
-                        state_inv.y(), -state_inv.x(), -state_inv.w();
-                    return ret / 2.;
-                }
-                Eigen::Matrix<double, 3, 4> A;
-                A << -q.w(), q.x(), -q.y(),
-                    -q.z(), //
-                    q.z(), q.y(), q.x(),
-                    -q.w(), // row 2
-                    -q.y(), q.z(), q.w(), q.x();
-                Eigen::Matrix<double, 4, 3> B;
-                B << state_inv.w(), -state_inv.z(),
-                    state_inv.y(), //
-                    state_inv.x(), state_inv.y(),
-                    state_inv.z(), //
-                    state_inv.y(), -state_inv.x(),
-                    -state_inv.w(), //
-                    state_inv.z(), state_inv.w(), -state_inv.x();
-                Eigen::Matrix3d ret = A * B / 2.;
-#if 0
-				/// rotate a quarter turn ccw
-				ret << initialret.rightCols<1>().transpose(),
-					initialret.col(1).transpose(),
-					initialret.leftCols<1>().transpose();
-#endif
-                return ret;
-#endif // OSVR_USE_CODEGEN
             }
         };
     } // namespace
