@@ -27,10 +27,10 @@
 
 // Internal Includes
 #include "ProjectPoint.h"
-#include <osvr/Kalman/FlexibleKalmanBase.h>
-#include <osvr/Kalman/PureVectorState.h>
 #include <osvr/Kalman/AugmentedState.h>
+#include <osvr/Kalman/FlexibleKalmanBase.h>
 #include <osvr/Kalman/PoseState.h>
+#include <osvr/Kalman/PureVectorState.h>
 
 // Library/third-party includes
 // - none
@@ -268,8 +268,12 @@ namespace vbtracker {
 
         void setVariance(double s) {
             if (s > 0) {
+#if 0
                 static const auto VARIANCE_Y_FACTOR = 3.;
                 m_variance << s, 0, 0, (s / VARIANCE_Y_FACTOR);
+#else
+                m_variance = SquareMatrix::Identity() * s;
+#endif
             }
         }
         SquareMatrix const &getCovariance(State &state) const {
