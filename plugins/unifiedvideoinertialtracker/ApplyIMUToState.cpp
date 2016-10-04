@@ -394,14 +394,6 @@ namespace kalman {
         };
     } // namespace
 
-    inline Eigen::Quaterniond
-    computeEffectiveIMUToCam(Eigen::Quaterniond const &cameraPose,
-                             util::Angle yawCorrection) {
-        return Eigen::Quaterniond(
-            Eigen::AngleAxisd(util::getRadians(yawCorrection),
-                              Eigen::Vector3d::UnitY()) *
-            cameraPose);
-    }
     /// The measurement here has been split into a base and derived type, so
     /// that the derived type only contains the little bit that depends on a
     /// particular state type.
