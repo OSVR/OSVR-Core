@@ -122,7 +122,12 @@ namespace vbtracker {
         bool m_useAngularVelocity;
         double m_angularVelocityVariance;
 
+        bool m_hasRawQuat = false;
+        /// without yaw correction
+        Eigen::Quaterniond m_rawQuat;
+
         bool m_hasOrientation = false;
+        /// measurement in room space (corrected for yaw)
         Eigen::Quaterniond m_quat;
         util::time::TimeValue m_last;
     };

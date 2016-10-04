@@ -27,6 +27,7 @@
 #include "AngVelTools.h"
 #include "TrackedBody.h"
 #include "TrackingSystem.h"
+#include <osvr/Util/EigenExtras.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -47,14 +48,28 @@ namespace vbtracker {
     void
     TrackedBodyIMU::updatePoseFromOrientation(util::time::TimeValue const &tv,
                                               Eigen::Quaterniond const &quat) {
+        // Choose the equivalent quaternion to the input that makes the data
+        // smooth with previous quaternions.
+        Eigen::Quaterniond rawSmoothQuat = quat;
+        if (m_hasRawQuat) {
+            util::flipQuatSignToMatch(rawSmoothQuat, m_rawQuat);
+        } else {
+            // first report: we'll arbitrarily choose w to be positive.
+            if (quat.w() < 0) {
+                rawSmoothQuat = Eigen::Quaterniond(-quat.coeffs());
+            }
+            m_hasRawQuat = true;
+        }
+        m_rawQuat = rawSmoothQuat;
+
         if (!m_yawKnown) {
             // This needs to go to calibration instead of to our own pose.
             getBody().getSystem().calibrationHandleIMUData(getBody().getId(),
-                                                           tv, quat);
+                                                           tv, rawSmoothQuat);
             return;
         }
         // Save some local state: we do have orientation ourselves now.
-        m_quat = transformRawIMUOrientation(quat);
+        m_quat = transformRawIMUOrientation(rawSmoothQuat);
         m_hasOrientation = true;
         m_last = tv;
 
@@ -62,7 +77,7 @@ namespace vbtracker {
             return;
         }
         // Can it and update the pose with it.
-        updatePoseFromMeasurement(tv, preprocessOrientation(tv, quat));
+        updatePoseFromMeasurement(tv, preprocessOrientation(tv, rawSmoothQuat));
     }
     void TrackedBodyIMU::updatePoseFromAngularVelocity(
         util::time::TimeValue const &tv, Eigen::Quaterniond const &deltaquat,
