@@ -55,24 +55,46 @@ namespace kalman {
 #ifdef OSVR_USE_CODEGEN
                 /// pre-compute the manually-extracted subexpressions.
                 Eigen::Vector3d q2(q.vec().cwiseProduct(q.vec()));
-                auto qvecnorm = std::sqrt(q2.sum());
+                auto q_vecnorm = std::sqrt(q2.sum());
+                if (q_vecnorm < 1e-4) {
+                    // effectively 0 - must avoid divide by zero.
+                    // All numerators also go to 0 in this case, so we'll just
+                    // eliminate them.
+                    // The exception is the second term of the main diagonal:
+                    // nominally -qw/2*vecnorm.
+                    // qw would be 1, but in this form at least, the math goes
+                    // to -infinity.
+
+                    // When the jacobian is computed symbolically specifically
+                    // for the case that q is the identity quaternion, a zero matrix
+                    // is returned.
+                    return Eigen::Matrix3d::Zero();
+                }
                 /// codegen follows
                 // Quat.QuatToRotVec(g(x) * q)
-                auto tmp0 = (1. / 2.) / qvecnorm;
+                auto tmp0 = (1. / 2.) / q_vecnorm;
                 auto tmp1 = -q.w() * tmp0;
-                auto tmp2 = std::pow(qvecnorm, -3);
+                auto tmp2 = std::pow(q_vecnorm, -3);
                 auto tmp3 = (1. / 2.) * q.w() * tmp2;
-                auto tmp4 = q.z() * tmp0;
-                auto tmp5 = (1. / 2.) * q.w() * q.x() * tmp2;
-                auto tmp6 = q.y() * tmp5;
-                auto tmp7 = q.y() * tmp0;
-                auto tmp8 = q.z() * tmp5;
-                auto tmp9 = q.x() * tmp0;
-                auto tmp10 = q.y() * q.z() * tmp3;
+                auto tmp4 = q2.x() * tmp3 + tmp1;
+                auto tmp5 = q.z() * tmp0;
+                auto tmp6 = (1. / 2.) * q.w() * q.x() * tmp2;
+                auto tmp7 = q.y() * tmp6;
+                auto tmp8 = tmp5 + tmp7;
+                auto tmp9 = q.y() * tmp0;
+                auto tmp10 = q.z() * tmp6;
+                auto tmp11 = tmp10 - tmp9;
+                auto tmp12 = -tmp5 + tmp7;
+                auto tmp13 = q2.y() * tmp3 + tmp1;
+                auto tmp14 = q.x() * tmp0;
+                auto tmp15 = q.y() * q.z() * tmp3;
+                auto tmp16 = tmp14 + tmp15;
+                auto tmp17 = tmp10 + tmp9;
+                auto tmp18 = -tmp14 + tmp15;
+                auto tmp19 = q2.z() * tmp3 + tmp1;
                 Eigen::Matrix<double, 3, 3> ret;
-                ret << q2.x() * tmp3 + tmp1, tmp4 + tmp6, -tmp7 + tmp8,
-                    -tmp4 + tmp6, q2.y() * tmp3 + tmp1, tmp10 + tmp9,
-                    tmp7 + tmp8, tmp10 - tmp9, q2.z() * tmp3 + tmp1;
+                ret << tmp4, tmp8, tmp11, tmp12, tmp13, tmp16, tmp17, tmp18,
+                    tmp19;
 #else
                 auto qvecnorm = q.vec().norm();
 
