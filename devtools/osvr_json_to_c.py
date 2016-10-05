@@ -71,14 +71,14 @@ def migrate_file_data(json_filename, variable_name, output_filename):
                     if stripped_line != '':
                         # Don't write (now) empty line contents to the file
                         json_file_contents = list(stripped_line)
-                        cpp_file_contents = [hex(ord(char)) for char in json_file_contents]
+                        cpp_file_contents = ["0x{}".format(char.encode("hex")) for char in json_file_contents]
                         write_to_file = ", ".join(cpp_file_contents)
                         # Add the extra trailing comma to connect data from multiple lines
                         write_to_file = "{}, ".format(write_to_file)
                         cpp_output.write(write_to_file)
                     line = json_input.readline()
-                # TODO: Handle the End of File newline separately. Keep it instead?
-                cpp_output.write(hex(ord('\n')))
+                # The End of File newline would have been removed in the while loop above. Re-add it.
+                cpp_output.write("0x{}".format('\n'.encode("hex")))
                 cpp_output.write('};\n')
     except IOError:
         print "Could not read file:", json_filename
