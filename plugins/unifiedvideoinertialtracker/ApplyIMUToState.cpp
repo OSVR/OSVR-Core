@@ -59,16 +59,10 @@ namespace kalman {
                 auto q_vecnorm = std::sqrt(q2.sum());
                 if (q_vecnorm < 1e-4) {
                     // effectively 0 - must avoid divide by zero.
-                    // All numerators also go to 0 in this case, so we'll just
-                    // eliminate them.
-                    // The exception is the second term of the main diagonal:
-                    // nominally -qw/2*vecnorm.
-                    // qw would be 1, but in this form at least, the math goes
-                    // to -infinity.
 
                     // When the jacobian is computed symbolically specifically
-                    // for the case that q is the identity quaternion, a zero matrix
-                    // is returned.
+                    // for the case that q is the identity quaternion, a zero
+                    // matrix is returned.
                     return Eigen::Matrix3d::Zero();
                 }
                 /// codegen follows
@@ -85,10 +79,12 @@ namespace kalman {
                 auto tmp9 = q.x() * tmp0;
                 auto tmp10 = q.y() * q.z() * tmp3;
                 Eigen::Matrix<double, 3, 3> ret;
-                ret << q2.x() * tmp3 + tmp1, tmp4 + tmp6, -tmp7 + tmp8,
-                    -tmp4 + tmp6, q2.y() * tmp3 + tmp1, tmp10 + tmp9,
-                    tmp7 + tmp8, tmp10 - tmp9, q2.z() * tmp3 + tmp1;
+                ret << q2.x() * tmp3 + tmp1, -tmp4 + tmp6, tmp7 + tmp8,
+                    tmp4 + tmp6, q2.y() * tmp3 + tmp1, tmp10 - tmp9,
+                    -tmp7 + tmp8, tmp10 + tmp9, q2.z() * tmp3 + tmp1;
 #else
+                /// @todo must be updated based on revised matrices (some sign
+                /// changes primarily)
                 auto qvecnorm = q.vec().norm();
 
                 if (qvecnorm < 1e-4) {
@@ -98,26 +94,21 @@ namespace kalman {
                     // The exception is the second term of the main diagonal:
                     // nominally -qw/2*vecnorm.
                     // qw would be 1, but in this form at least, the math goes
-                    // to
-                    // -infinity.
+                    // to -infinity.
 
                     // When the jacobian is computed symbolically specifically
-                    // for
-                    // the case that q is the identity quaternion, a zero matrix
-                    // is
-                    // returned.
+                    // for the case that q is the identity quaternion, a zero matrix
+                    // is returned.
                     return Eigen::Matrix3d::Zero();
                 }
                 Eigen::Matrix3d ret =
                     // first term: qw * (qvec outer product with itself), over 2
-                    // *
-                    // vecnorm^3
+                    // * vecnorm^3
                     (q.w() * q.vec() * q.vec().transpose() /
                      (2 * qvecnorm * qvecnorm * qvecnorm)) +
                     // second term of each element: cross-product matrix of the
                     // negative vector part of quaternion over 2*vecnorm, minus
-                    // the
-                    // identity matrix * qw/2*vecnorm
+                    // the identity matrix * qw/2*vecnorm
                     ((vbtracker::skewSymmetricCrossProductMatrix3(-q.vec()) -
                       Eigen::Matrix3d::Identity() * q.w()) /
                      (2 * qvecnorm));
@@ -206,47 +197,47 @@ namespace kalman {
                 auto tmp28 = -tmp27;
                 auto tmp29 = q2.x() * state_inv.x();
                 auto tmp30 = state_inv.w() * tmp29;
-                auto tmp31 = q2.y() * state_inv.y();
-                auto tmp32 = state_inv.z() * tmp31;
+                auto tmp31 = q2.z() * state_inv.z();
+                auto tmp32 = state_inv.y() * tmp31;
                 auto tmp33 = q2.w() * state_inv.w();
                 auto tmp34 = state_inv.x() * tmp33;
-                auto tmp35 = q2.z() * state_inv.z();
-                auto tmp36 = state_inv.y() * tmp35;
-                auto tmp37 = q.w() * q.y() * state_inv.y();
-                auto tmp38 = state_inv.x() * tmp37;
-                auto tmp39 = state_inv.y() * tmp10;
+                auto tmp35 = q2.y() * state_inv.y();
+                auto tmp36 = state_inv.z() * tmp35;
+                auto tmp37 = state_inv.z() * tmp8;
+                auto tmp38 = q.w() * q.y() * state_inv.y();
+                auto tmp39 = state_inv.x() * tmp38;
                 auto tmp40 = q.w() * q.z() * state_inv.z();
                 auto tmp41 = state_inv.x() * tmp40;
                 auto tmp42 = q.x() * q.y() * state_inv.w();
                 auto tmp43 = state_inv.y() * tmp42;
-                auto tmp44 = q.x() * q.y() * state_inv.z();
-                auto tmp45 = state_inv.x() * tmp44;
-                auto tmp46 = q.x() * q.z() * state_inv.w();
-                auto tmp47 = state_inv.z() * tmp46;
+                auto tmp44 = q.x() * q.z() * state_inv.w();
+                auto tmp45 = state_inv.z() * tmp44;
+                auto tmp46 = q.x() * q.z() * state_inv.y();
+                auto tmp47 = state_inv.x() * tmp46;
                 auto tmp48 = q.w() * q.x();
                 auto tmp49 = tmp0 * tmp48;
                 auto tmp50 = q.y() * q.z();
-                auto tmp51 = tmp2 * tmp50;
-                auto tmp52 = state_inv.z() * tmp8;
-                auto tmp53 = q.x() * q.z() * state_inv.y();
+                auto tmp51 = tmp1 * tmp50;
+                auto tmp52 = state_inv.y() * tmp10;
+                auto tmp53 = q.x() * q.y() * state_inv.z();
                 auto tmp54 = state_inv.x() * tmp53;
                 auto tmp55 = tmp3 * tmp48;
-                auto tmp56 = tmp1 * tmp50;
-                auto tmp57 = tmp30 + tmp32 - tmp34 - tmp36 + tmp38 + tmp39 +
+                auto tmp56 = tmp2 * tmp50;
+                auto tmp57 = tmp30 + tmp32 - tmp34 - tmp36 + tmp37 + tmp39 +
                              tmp41 + tmp43 + tmp45 + tmp47 + tmp49 + tmp51 -
                              tmp52 - tmp54 - tmp55 - tmp56;
                 auto tmp58 = (((tmp15) > 0) - ((tmp15) < 0));
                 auto tmp59 = std::pow(tmp16, -3. / 2.);
-                auto tmp60 = q.y() * state_inv.z() * tmp18 * tmp58 * tmp59;
+                auto tmp60 = q.z() * state_inv.y() * tmp18 * tmp58 * tmp59;
                 auto tmp61 = q.w() * state_inv.x() * tmp18 * tmp58 * tmp59;
                 auto tmp62 = q.x() * state_inv.w() * tmp18 * tmp58 * tmp59;
-                auto tmp63 = q.z() * state_inv.y() * tmp18 * tmp58 * tmp59;
+                auto tmp63 = q.y() * state_inv.z() * tmp18 * tmp58 * tmp59;
                 auto tmp64 = 1.0 / tmp18;
                 auto tmp65 = 2 * q.w() * state_inv.x() * tmp17 * tmp64;
                 auto tmp66 = (1. / 2.) * tmp58;
                 auto tmp67 =
                     -1. / 2. * tmp30 - 1. / 2. * tmp32 + (1. / 2.) * tmp34 +
-                    (1. / 2.) * tmp36 - 1. / 2. * tmp38 - 1. / 2. * tmp39 -
+                    (1. / 2.) * tmp36 - 1. / 2. * tmp37 - 1. / 2. * tmp39 -
                     1. / 2. * tmp41 - 1. / 2. * tmp43 - 1. / 2. * tmp45 -
                     1. / 2. * tmp47 - 1. / 2. * tmp49 - 1. / 2. * tmp51 +
                     (1. / 2.) * tmp52 + (1. / 2.) * tmp54 + (1. / 2.) * tmp55 +
@@ -255,60 +246,60 @@ namespace kalman {
                 auto tmp69 = 2 * q.y() * state_inv.z() * tmp17 * tmp64;
                 auto tmp70 = 2 * q.z() * state_inv.y() * tmp17 * tmp64;
                 auto tmp71 = state_inv.x() * tmp26 + state_inv.y() * tmp24;
-                auto tmp72 = state_inv.z() * tmp19;
-                auto tmp73 = state_inv.w() * tmp21;
-                auto tmp74 = state_inv.w() * tmp31;
-                auto tmp75 = state_inv.x() * tmp35;
+                auto tmp72 = state_inv.w() * tmp21;
+                auto tmp73 = state_inv.z() * tmp19;
+                auto tmp74 = state_inv.z() * tmp29;
+                auto tmp75 = state_inv.w() * tmp35;
                 auto tmp76 = state_inv.y() * tmp33;
-                auto tmp77 = state_inv.z() * tmp29;
-                auto tmp78 = state_inv.z() * tmp5;
-                auto tmp79 = q.w() * q.x() * state_inv.x();
-                auto tmp80 = state_inv.y() * tmp79;
+                auto tmp77 = state_inv.x() * tmp31;
+                auto tmp78 = q.w() * q.x() * state_inv.x();
+                auto tmp79 = state_inv.y() * tmp78;
+                auto tmp80 = state_inv.x() * tmp10;
                 auto tmp81 = state_inv.y() * tmp40;
                 auto tmp82 = state_inv.x() * tmp42;
-                auto tmp83 = q.y() * q.z() * state_inv.w();
-                auto tmp84 = state_inv.z() * tmp83;
-                auto tmp85 = q.y() * q.z() * state_inv.x();
-                auto tmp86 = state_inv.y() * tmp85;
-                auto tmp87 = q.w() * q.y();
-                auto tmp88 = tmp1 * tmp87;
-                auto tmp89 = q.x() * q.z();
-                auto tmp90 = tmp0 * tmp89;
-                auto tmp91 = state_inv.x() * tmp10;
-                auto tmp92 = state_inv.y() * tmp44;
-                auto tmp93 = tmp3 * tmp87;
-                auto tmp94 = tmp2 * tmp89;
-                auto tmp95 = tmp74 + tmp75 - tmp76 - tmp77 + tmp78 + tmp80 +
-                             tmp81 + tmp82 + tmp84 + tmp86 + tmp88 + tmp90 -
-                             tmp91 - tmp92 - tmp93 - tmp94;
+                auto tmp83 = state_inv.y() * tmp53;
+                auto tmp84 = q.y() * q.z() * state_inv.w();
+                auto tmp85 = state_inv.z() * tmp84;
+                auto tmp86 = q.w() * q.y();
+                auto tmp87 = tmp1 * tmp86;
+                auto tmp88 = q.x() * q.z();
+                auto tmp89 = tmp2 * tmp88;
+                auto tmp90 = state_inv.z() * tmp5;
+                auto tmp91 = q.y() * q.z() * state_inv.x();
+                auto tmp92 = state_inv.y() * tmp91;
+                auto tmp93 = tmp3 * tmp86;
+                auto tmp94 = tmp0 * tmp88;
+                auto tmp95 = tmp74 + tmp75 - tmp76 - tmp77 + tmp79 + tmp80 +
+                             tmp81 + tmp82 + tmp83 + tmp85 + tmp87 + tmp89 -
+                             tmp90 - tmp92 - tmp93 - tmp94;
                 auto tmp96 =
                     tmp66 * tmp95 - 1. / 2. * tmp74 - 1. / 2. * tmp75 +
-                    (1. / 2.) * tmp76 + (1. / 2.) * tmp77 - 1. / 2. * tmp78 -
+                    (1. / 2.) * tmp76 + (1. / 2.) * tmp77 - 1. / 2. * tmp79 -
                     1. / 2. * tmp80 - 1. / 2. * tmp81 - 1. / 2. * tmp82 -
-                    1. / 2. * tmp84 - 1. / 2. * tmp86 - 1. / 2. * tmp88 -
-                    1. / 2. * tmp90 + (1. / 2.) * tmp91 + (1. / 2.) * tmp92 +
+                    1. / 2. * tmp83 - 1. / 2. * tmp85 - 1. / 2. * tmp87 -
+                    1. / 2. * tmp89 + (1. / 2.) * tmp90 + (1. / 2.) * tmp92 +
                     (1. / 2.) * tmp93 + (1. / 2.) * tmp94;
                 auto tmp97 = state_inv.x() * tmp21 + state_inv.z() * tmp24;
-                auto tmp98 = state_inv.w() * tmp26;
-                auto tmp99 = state_inv.y() * tmp19;
-                auto tmp100 = state_inv.y() * tmp29;
-                auto tmp101 = state_inv.w() * tmp35;
+                auto tmp98 = state_inv.y() * tmp19;
+                auto tmp99 = state_inv.w() * tmp26;
+                auto tmp100 = state_inv.x() * tmp35;
+                auto tmp101 = state_inv.w() * tmp31;
                 auto tmp102 = state_inv.z() * tmp33;
-                auto tmp103 = state_inv.x() * tmp31;
-                auto tmp104 = state_inv.z() * tmp79;
-                auto tmp105 = state_inv.x() * tmp8;
-                auto tmp106 = state_inv.z() * tmp37;
-                auto tmp107 = state_inv.x() * tmp46;
-                auto tmp108 = state_inv.z() * tmp53;
-                auto tmp109 = state_inv.y() * tmp83;
+                auto tmp103 = state_inv.y() * tmp29;
+                auto tmp104 = state_inv.y() * tmp5;
+                auto tmp105 = state_inv.z() * tmp78;
+                auto tmp106 = state_inv.z() * tmp38;
+                auto tmp107 = state_inv.x() * tmp44;
+                auto tmp108 = state_inv.y() * tmp84;
+                auto tmp109 = state_inv.z() * tmp91;
                 auto tmp110 = q.w() * q.z();
                 auto tmp111 = tmp110 * tmp2;
                 auto tmp112 = q.x() * q.y();
-                auto tmp113 = tmp1 * tmp112;
-                auto tmp114 = state_inv.y() * tmp5;
-                auto tmp115 = state_inv.z() * tmp85;
+                auto tmp113 = tmp0 * tmp112;
+                auto tmp114 = state_inv.x() * tmp8;
+                auto tmp115 = state_inv.z() * tmp46;
                 auto tmp116 = tmp110 * tmp3;
-                auto tmp117 = tmp0 * tmp112;
+                auto tmp117 = tmp1 * tmp112;
                 auto tmp118 = tmp100 + tmp101 - tmp102 - tmp103 + tmp104 +
                               tmp105 + tmp106 + tmp107 + tmp108 + tmp109 +
                               tmp111 + tmp113 - tmp114 - tmp115 - tmp116 -
@@ -320,21 +311,21 @@ namespace kalman {
                     1. / 2. * tmp109 - 1. / 2. * tmp111 - 1. / 2. * tmp113 +
                     (1. / 2.) * tmp114 + (1. / 2.) * tmp115 +
                     (1. / 2.) * tmp116 + (1. / 2.) * tmp117 + tmp118 * tmp66;
-                auto tmp120 = q.z() * state_inv.x() * tmp18 * tmp58 * tmp59;
+                auto tmp120 = q.x() * state_inv.z() * tmp18 * tmp58 * tmp59;
                 auto tmp121 = q.w() * state_inv.y() * tmp18 * tmp58 * tmp59;
-                auto tmp122 = q.x() * state_inv.z() * tmp18 * tmp58 * tmp59;
-                auto tmp123 = q.y() * state_inv.w() * tmp18 * tmp58 * tmp59;
+                auto tmp122 = q.y() * state_inv.w() * tmp18 * tmp58 * tmp59;
+                auto tmp123 = q.z() * state_inv.x() * tmp18 * tmp58 * tmp59;
                 auto tmp124 = 2 * q.w() * state_inv.y() * tmp17 * tmp64;
                 auto tmp125 = 2 * q.x() * state_inv.z() * tmp17 * tmp64;
                 auto tmp126 = 2 * q.y() * state_inv.w() * tmp17 * tmp64;
                 auto tmp127 = 2 * q.z() * state_inv.x() * tmp17 * tmp64;
                 auto tmp128 = -tmp25;
                 auto tmp129 = state_inv.y() * tmp21 + state_inv.z() * tmp26;
-                auto tmp130 = state_inv.x() * tmp19;
-                auto tmp131 = state_inv.w() * tmp24;
-                auto tmp132 = q.x() * state_inv.y() * tmp18 * tmp58 * tmp59;
+                auto tmp130 = state_inv.w() * tmp24;
+                auto tmp131 = state_inv.x() * tmp19;
+                auto tmp132 = q.y() * state_inv.x() * tmp18 * tmp58 * tmp59;
                 auto tmp133 = q.w() * state_inv.z() * tmp18 * tmp58 * tmp59;
-                auto tmp134 = q.y() * state_inv.x() * tmp18 * tmp58 * tmp59;
+                auto tmp134 = q.x() * state_inv.y() * tmp18 * tmp58 * tmp59;
                 auto tmp135 = q.z() * state_inv.w() * tmp18 * tmp58 * tmp59;
                 auto tmp136 = 2 * q.w() * state_inv.z() * tmp17 * tmp64;
                 auto tmp137 = 2 * q.x() * state_inv.y() * tmp17 * tmp64;
@@ -343,32 +334,32 @@ namespace kalman {
                 Eigen::Matrix<double, 3, 3> ret;
                 ret << tmp23 + tmp25 + tmp28 + tmp57 * tmp60 - tmp57 * tmp61 -
                            tmp57 * tmp62 - tmp57 * tmp63 + tmp65 * tmp67 +
-                           tmp67 * tmp68 - tmp67 * tmp69 + tmp67 * tmp70,
+                           tmp67 * tmp68 + tmp67 * tmp69 - tmp67 * tmp70,
                     tmp60 * tmp95 - tmp61 * tmp95 - tmp62 * tmp95 -
-                        tmp63 * tmp95 + tmp65 * tmp96 + tmp68 * tmp96 -
-                        tmp69 * tmp96 + tmp70 * tmp96 + tmp71 + tmp72 - tmp73,
+                        tmp63 * tmp95 + tmp65 * tmp96 + tmp68 * tmp96 +
+                        tmp69 * tmp96 - tmp70 * tmp96 + tmp71 + tmp72 - tmp73,
                     tmp118 * tmp60 - tmp118 * tmp61 - tmp118 * tmp62 -
-                        tmp118 * tmp63 + tmp119 * tmp65 + tmp119 * tmp68 -
-                        tmp119 * tmp69 + tmp119 * tmp70 + tmp97 + tmp98 - tmp99,
+                        tmp118 * tmp63 + tmp119 * tmp65 + tmp119 * tmp68 +
+                        tmp119 * tmp69 - tmp119 * tmp70 + tmp97 + tmp98 - tmp99,
                     tmp120 * tmp57 - tmp121 * tmp57 - tmp122 * tmp57 -
-                        tmp123 * tmp57 + tmp124 * tmp67 + tmp125 * tmp67 +
-                        tmp126 * tmp67 - tmp127 * tmp67 + tmp71 - tmp72 + tmp73,
+                        tmp123 * tmp57 + tmp124 * tmp67 - tmp125 * tmp67 +
+                        tmp126 * tmp67 + tmp127 * tmp67 + tmp71 - tmp72 + tmp73,
                     tmp120 * tmp95 - tmp121 * tmp95 - tmp122 * tmp95 -
-                        tmp123 * tmp95 + tmp124 * tmp96 + tmp125 * tmp96 +
-                        tmp126 * tmp96 - tmp127 * tmp96 + tmp128 + tmp23 +
+                        tmp123 * tmp95 + tmp124 * tmp96 - tmp125 * tmp96 +
+                        tmp126 * tmp96 + tmp127 * tmp96 + tmp128 + tmp23 +
                         tmp27,
                     tmp118 * tmp120 - tmp118 * tmp121 - tmp118 * tmp122 -
-                        tmp118 * tmp123 + tmp119 * tmp124 + tmp119 * tmp125 +
-                        tmp119 * tmp126 - tmp119 * tmp127 + tmp129 + tmp130 -
+                        tmp118 * tmp123 + tmp119 * tmp124 - tmp119 * tmp125 +
+                        tmp119 * tmp126 + tmp119 * tmp127 + tmp129 + tmp130 -
                         tmp131,
                     tmp132 * tmp57 - tmp133 * tmp57 - tmp134 * tmp57 -
-                        tmp135 * tmp57 + tmp136 * tmp67 - tmp137 * tmp67 +
+                        tmp135 * tmp57 + tmp136 * tmp67 + tmp137 * tmp67 -
                         tmp138 * tmp67 + tmp139 * tmp67 + tmp97 - tmp98 + tmp99,
                     tmp129 - tmp130 + tmp131 + tmp132 * tmp95 - tmp133 * tmp95 -
-                        tmp134 * tmp95 - tmp135 * tmp95 + tmp136 * tmp96 -
-                        tmp137 * tmp96 + tmp138 * tmp96 + tmp139 * tmp96,
+                        tmp134 * tmp95 - tmp135 * tmp95 + tmp136 * tmp96 +
+                        tmp137 * tmp96 - tmp138 * tmp96 + tmp139 * tmp96,
                     tmp118 * tmp132 - tmp118 * tmp133 - tmp118 * tmp134 -
-                        tmp118 * tmp135 + tmp119 * tmp136 - tmp119 * tmp137 +
+                        tmp118 * tmp135 + tmp119 * tmp136 + tmp119 * tmp137 -
                         tmp119 * tmp138 + tmp119 * tmp139 + tmp128 + tmp20 +
                         tmp22 + tmp28;
                 return ret;
