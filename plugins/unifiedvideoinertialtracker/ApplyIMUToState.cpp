@@ -405,10 +405,12 @@ namespace kalman {
             // Two equivalent quaternions: but their logs are typically
             // different: one is the "short way" and the other is the "long
             // way". We'll compute both and pick the "short way".
-            MeasurementVector residual = util::quat_ln(residualq);
+            // Multiplication of the log by 2 is the way to convert from a quat
+            // to a rotation vector.
+            MeasurementVector residual = 2 * util::quat_ln(residualq);
+#if 0
             MeasurementVector equivResidual =
-                util::quat_ln(Eigen::Quaterniond(-(residualq.coeffs())));
-#if 1
+                2 * util::quat_ln(Eigen::Quaterniond(-(residualq.coeffs())));
             return residual.squaredNorm() < equivResidual.squaredNorm()
                        ? residual
                        : equivResidual;
