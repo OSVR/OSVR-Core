@@ -131,6 +131,9 @@ namespace vbtracker {
         /// @todo refactor;
         ConfigParams const &getParams() const { return m_params; }
 
+        /// @todo just for debugging
+        void setUseIMU(bool useIMU) { m_params.imu.useOrientation = useIMU; }
+
         bool haveCameraPose() const;
         void setCameraPose(Eigen::Isometry3d const &camPose);
 

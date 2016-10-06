@@ -73,7 +73,7 @@ namespace vbtracker {
         m_hasOrientation = true;
         m_last = tv;
 
-        if (!m_useOrientation) {
+        if (!getParams().imu.useOrientation) {
             return;
         }
         // Can it and update the pose with it.

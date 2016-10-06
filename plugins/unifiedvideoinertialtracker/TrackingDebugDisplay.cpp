@@ -551,6 +551,17 @@ namespace vbtracker {
             quitDebug();
             break;
 
+        case 'o':
+        case 'O':
+            // toggle orientation from IMU
+            /// @todo TEMPORARY DEBUGGING CODE - REMOVE!
+            {
+                auto newState = !tracking.getParams().imu.useOrientation;
+                msg() << "Toggling orientation usage to " << std::boolalpha
+                      << newState << std::endl;
+                tracking.setUseIMU(newState);
+                break;
+            }
         default:
             // something else or nothing at all, no worries.
             break;
