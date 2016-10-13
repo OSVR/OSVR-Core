@@ -117,25 +117,27 @@ namespace vbtracker {
 
         /// This version assumes incrot == 0
         Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrot() const {
-            auto v1 = m_rotatedObjPoint[0] + m_xlate[0];
-            auto v2 = m_rotatedObjPoint[2] + m_xlate[2];
-            auto v3 = 1 / (v2 * v2);
-            auto v4 = 1 / v2;
-            auto v5 = m_rotatedObjPoint[1] + m_xlate[1];
+            auto fl = m_cam.focalLength;
+            auto tmp0 = fl / (m_rotatedTranslatedPoint.z() *
+                              m_rotatedTranslatedPoint.z());
+            auto tmp1 = 1.0 / m_rotatedTranslatedPoint.z();
+            auto tmp2 = fl * tmp1;
             Eigen::Matrix<double, 2, 3> ret;
-            ret << -v1 * m_rotatedObjPoint[1] * v3 * m_cam.focalLength,
-                m_rotatedObjPoint[2] * v4 * m_cam.focalLength +
-                    m_rotatedObjPoint[0] * v1 * v3 * m_cam.focalLength,
-                -m_rotatedObjPoint[1] * v4 * m_cam.focalLength,
-                (-m_rotatedObjPoint[2] * v4 * m_cam.focalLength) -
-                    m_rotatedObjPoint[1] * v5 * v3 * m_cam.focalLength,
-                m_rotatedObjPoint[0] * v5 * v3 * m_cam.focalLength,
-                m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
+            ret << -m_rotatedObjPoint.y() * tmp0 * m_rotatedTranslatedPoint.x(),
+                tmp2 * (m_rotatedObjPoint.x() * tmp1 *
+                            m_rotatedTranslatedPoint.x() +
+                        m_rotatedObjPoint.z()),
+                -m_rotatedObjPoint.y() * tmp2,
+                -tmp2 * (m_rotatedObjPoint.y() * tmp1 *
+                             m_rotatedTranslatedPoint.y() +
+                         m_rotatedObjPoint.z()),
+                m_rotatedObjPoint.x() * tmp0 * m_rotatedTranslatedPoint.y(),
+                m_rotatedObjPoint.x() * tmp2;
             return ret;
         }
 
         /// This version also assumes incrot == 0 but does the computation in a
-        /// much more elegant way.
+        /// more elegant (manually factored) way.
         Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrotElegant() const {
             // just grabbing x and y as an array for component-wise manip right
             // now.
