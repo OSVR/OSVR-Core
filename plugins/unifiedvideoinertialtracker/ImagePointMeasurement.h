@@ -245,7 +245,8 @@ namespace vbtracker {
 #endif
 
         Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
-            return getRotationJacobianNoIncrotElegant();
+            // return getRotationJacobianNoIncrotElegant();
+            return getRotationJacobianNoIncrot();
         }
 
         Jacobian getJacobian(State const &state) const {
