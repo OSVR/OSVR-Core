@@ -35,6 +35,8 @@
 
 // Standard includes
 #include <chrono>
+#include <cstddef> // for std::size_t
+#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -392,16 +394,14 @@ int main(int argc, char *argv[]) {
                 if (tv.microseconds > 0) {
                     // we got it
                     s = State::SawFlash;
-                    std::cout
-                        << "   Current: "
-                        << maxVal << "\n";
+                    std::cout << "   Current: " << maxVal << "\n";
                     std::cout << "Latency from trigger to sample time: "
                               << tv.microseconds << "us\n";
                     std::cout << "Latency from trigger to retrieval time: "
                               << now.microseconds << "us\n";
                     cv::imwrite("triggered.png", frame);
                     samples++;
-					os << tv.microseconds << std::endl;
+                    os << tv.microseconds << std::endl;
                 } else {
                     std::cout << "Got a spurious flash, negative trigger to "
                                  "sample duration"
