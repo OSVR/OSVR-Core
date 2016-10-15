@@ -32,16 +32,26 @@
 #include <opencv2/core/core.hpp>
 
 // Standard includes
-// - none
+#include <cstddef>
+#include <initializer_list>
 
 namespace osvr {
 namespace vbtracker {
-    /// @name Default 3D locations for the beacons on an OSVR HDK, in
-    /// millimeters
+    /// @name Default 3D locations for the beacons on an OSVR HDK 1.x chassis,
+    /// in millimeters
     /// @{
     extern const Point3Vector OsvrHdkLedLocations_SENSOR0;
     extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
     /// @}
+
+    /// @name Default 3D locations for the beacons on an OSVR HDK2 chassis, in
+    /// millimeters
+    /// @{
+    extern const Point3Vector OsvrHdk2LedLocations_SENSOR0;
+    extern const Point3Vector OsvrHdk2LedLocations_SENSOR1;
+    /// @}
+
+    std::initializer_list<std::size_t> getOneBasedIDsOfMissingBeaconsHDK2();
 
     /// @name Emission directions for the beacons on an OSVR HDK
     /// @{
