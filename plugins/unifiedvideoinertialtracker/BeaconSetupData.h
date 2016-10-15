@@ -96,6 +96,14 @@ namespace vbtracker {
             markBeaconFixed(makeZeroBased(beacon));
         }
 
+        /// Is the beacon active?
+        bool isBeaconActive(OneBasedBeaconId beacon);
+
+        void markBeaconInactive(ZeroBasedBeaconId beacon);
+        void markBeaconInactive(OneBasedBeaconId beacon) {
+            markBeaconInactive(makeZeroBased(beacon));
+        }
+
         TargetDataSummary cleanAndValidate(bool silent = false);
     };
 
