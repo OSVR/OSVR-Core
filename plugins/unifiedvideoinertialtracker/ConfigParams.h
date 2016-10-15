@@ -73,6 +73,11 @@ namespace vbtracker {
         double distanceMeasVarianceIntercept;
     };
 
+    /// If you add an entry here, must also update both
+    /// getConfigStringForTargetSet and AllBuiltInTargetSets in
+    /// ConfigurationParser.h
+    enum class BuiltInTargetSets { HDK1xChassis, HDK2Chassis };
+
     /// General configuration parameters
     struct ConfigParams {
         /// Not intended to be manually configurable - enabled when doing things
@@ -98,6 +103,9 @@ namespace vbtracker {
 
         /// Parameters specific to the edge hole based LED extraction algorithm.
         EdgeHoleParams extractParams;
+
+        /// When using hard-coded target sets, which one to use.
+        BuiltInTargetSets targetSet = BuiltInTargetSets::HDK1xChassis;
 
         /// Should we have the tracking thread update the reporting vector for
         /// every (IMU) message, instead of waiting/buffering for a few

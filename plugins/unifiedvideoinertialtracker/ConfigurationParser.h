@@ -32,19 +32,83 @@
 #include <ParseBlobParams.h>
 
 // Library/third-party includes
+#include <boost/optional.hpp>
 #include <json/value.h>
 
 // Standard includes
+#include <initializer_list>
 #include <iostream>
 
 namespace osvr {
 namespace vbtracker {
+    inline const char *getConfigStringForTargetSet(BuiltInTargetSets target) {
+        switch (target) {
+        case osvr::vbtracker::BuiltInTargetSets::HDK1xChassis:
+            return "HDK1x";
+            break;
+        case osvr::vbtracker::BuiltInTargetSets::HDK2Chassis:
+            return "HDK2";
+            break;
+        }
+    }
+    static const std::initializer_list<BuiltInTargetSets> AllBuiltInTargetSets =
+        {BuiltInTargetSets::HDK1xChassis, BuiltInTargetSets::HDK2Chassis};
+    template <typename EnumType, typename StringifyFunctor>
+    inline std::pair<boost::optional<EnumType>, boost::optional<std::string>>
+    getEnumFromStringParameter(
+        Json::Value const &root, const char memberName[],
+        StringifyFunctor &&stringifyEnum,
+        std::initializer_list<EnumType> const &possibleValues) {
+        using ReturnType =
+            std::pair<boost::optional<EnumType>, boost::optional<std::string>>;
+        ReturnType ret;
+        if (!root.isMember(memberName)) {
+            return ret;
+        }
+        auto &member = root[memberName];
+        if (!member.isString()) {
+            return ret;
+        }
+        std::string str = member.asString();
+        ret.second = str;
+        for (auto enumVal : possibleValues) {
+            if (str == stringifyEnum(enumVal)) {
+                /// found it!
+                ret.first = enumVal;
+                return ret;
+            }
+        }
+        // didn't find it. But, they get a string back anyway.
+        return ret;
+    }
+
     static const auto MESSAGE_PREFIX =
         "[Unified Tracker] Configuration Parsing WARNING: ";
 #define PARAMNAME(X) "'" << X << "'"
     inline ConfigParams parseConfigParams(Json::Value const &root) {
         ConfigParams config;
         config.debug = root.get("showDebug", false).asBool();
+
+        // Target set, first and foremost.
+        auto targetSet = getEnumFromStringParameter(root, "targetSet",
+                                                    getConfigStringForTargetSet,
+                                                    AllBuiltInTargetSets);
+        if (targetSet.first) {
+            config.targetSet = *targetSet.first;
+        } else if (targetSet.second) {
+            // some string that we couldn't turn into an enum
+            /// @todo maybe load a file based on this, in the future
+            // right now, we just warn
+            std::cout << MESSAGE_PREFIX << PARAMNAME("targetSet")
+                      << " contained a string, \"" << *(targetSet.second)
+                      << "\", that was not recognized as a known target set. "
+                         "Using the default instead."
+                      << std::endl;
+        }
+
+        getOptionalParameter(config.backPanelMeasurementError, root,
+                             "backPanelMeasurementError");
+
         /// Rear panel stuff
         getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
         getOptionalParameter(config.headCircumference, root,

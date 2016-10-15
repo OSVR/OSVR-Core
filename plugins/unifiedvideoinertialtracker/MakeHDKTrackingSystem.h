@@ -190,6 +190,28 @@ namespace vbtracker {
         return false;
     }
 
+    inline Point3Vector const &getTarget0Locations(BuiltInTargetSets target) {
+        switch (target) {
+        case BuiltInTargetSets::HDK1xChassis:
+            return OsvrHdkLedLocations_SENSOR0;
+            break;
+        case BuiltInTargetSets::HDK2Chassis:
+            return OsvrHdk2LedLocations_SENSOR0;
+            break;
+        }
+    }
+
+    inline Point3Vector const &getTarget1Locations(BuiltInTargetSets target) {
+        switch (target) {
+        case BuiltInTargetSets::HDK1xChassis:
+            return OsvrHdkLedLocations_SENSOR1;
+            break;
+        case BuiltInTargetSets::HDK2Chassis:
+            return OsvrHdk2LedLocations_SENSOR1;
+            break;
+        }
+    }
+
     inline std::unique_ptr<TrackingSystem>
     makeHDKTrackingSystem(ConfigParams const &params) {
         auto silent = params.silent;
@@ -234,7 +256,7 @@ namespace vbtracker {
         /// Scale from millimeters to meters, and make the coordinate system
         /// what we want: loading the front beacons
         auto locationsEnd = range_transform(
-            OsvrHdkLedLocations_SENSOR0, begin(data.locations),
+            getTarget0Locations(params.targetSet), begin(data.locations),
             [](LocationPoint pt) { return transformFromHDKData(pt); });
 
         /// Replace them with calibrated versions if we have them.
@@ -261,13 +283,13 @@ namespace vbtracker {
                 params.headToFrontBeaconOriginDistance);
 
             /// Put on the back points too.
-            auto transformBackPoints = [distanceBetweenPanels](
-                LocationPoint pt) {
-                auto p = rotatePoint180AboutY(pt) -
-                         LocationPoint(0, 0, distanceBetweenPanels);
-                return transformFromHDKData(p);
-            };
-            range_transform(OsvrHdkLedLocations_SENSOR1, locationsEnd,
+            auto transformBackPoints =
+                [distanceBetweenPanels](LocationPoint pt) {
+                    auto p = rotatePoint180AboutY(pt) -
+                             LocationPoint(0, 0, distanceBetweenPanels);
+                    return transformFromHDKData(p);
+                };
+            range_transform(getTarget1Locations(params.targetSet), locationsEnd,
                             transformBackPoints);
 #ifdef DEBUG_REAR_BEACON_TRANSFORM
             std::cout << "Front beacon position (id 32): "
@@ -321,6 +343,13 @@ namespace vbtracker {
                   end(OsvrHdkLedVariances_SENSOR0),
                   begin(data.baseMeasurementVariances));
 #endif
+
+        /// Disable the HDK2-removed beacons
+        if (params.targetSet == BuiltInTargetSets::HDK2Chassis) {
+            for (auto id : getOneBasedIDsOfMissingBeaconsHDK2()) {
+                data.markBeaconInactive(OneBasedBeaconId(id));
+            }
+        }
 
         /// Clean and validate the data.
         auto summary = data.cleanAndValidate(params.silent);
