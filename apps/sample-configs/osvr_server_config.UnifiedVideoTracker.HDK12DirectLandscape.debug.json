@@ -63,7 +63,7 @@
         "processNoiseAutocorrelation": [ 0.1661102065530816, 0.1661102065530816, 0.1661102065530816, 1.3e-1, 1.3e-1, 1.3e-1 ],
         "imu": {
           "calibrateAnyway": true,
-          "useOrientation": false,
+          "useOrientation": true,
           /*"orientationVariance": 1e-10,*/
           "orientationVariance": 1e-7,
           "orientationMicrosecondsOffset": 0,

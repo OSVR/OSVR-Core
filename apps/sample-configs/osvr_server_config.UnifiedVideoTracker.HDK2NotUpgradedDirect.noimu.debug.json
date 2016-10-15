@@ -1,11 +1,15 @@
 {
-    "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK. It is configured for RenderManager applications in direct mode (portrait) on HDK 1.1/1.2 optics.",
-    "display": "displays/OSVR_HDK_1_1.json",
-    "renderManagerConfig": "sample-configs/renderManager.direct.landscape.json",
-    "drivers": [{
+  "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK 2, for units that were manufactured as HDK2 (NOT UPGRADED FROM HDK 1.x!). It is configured for RenderManager applications in direct mode (portrait) on HDK2 optics.",
+  "display": "displays/OSVR_HDK_2_0.json",
+  "renderManagerConfig": "sample-configs/renderManager.direct.landscape.HDKv2.0.json",
+  "drivers": [
+    {
         "plugin": "org_osvr_unifiedvideoinertial",
         "driver": "UnifiedTrackingSystem",
       "params": {
+        /* For devices with an HDK2 chassis/mechanicals only! 1.x units upgraded to HDK2 display specs do not use this line, your IR target remains the same */
+        "targetSet": "HDK2",
+
         "cameraMicrosecondsOffset": -27000,
         /* changing to true might ease "snap" of tracking loss/regain - default settings are below
         "softResets": false,
@@ -27,7 +31,7 @@
         "additionalPrediction": 0,
         "includeRearPanel": true,
         "headCircumference": 58.42,
-        "calibrationFile": "videotrackerCombinedCalibrationFile12.json",
+        "calibrationFile": "videotrackerCombinedCalibrationFile2.json",
         "cameraIsForward": false,
 
         "streamBeaconDebugInfo": false,
@@ -72,7 +76,8 @@
           "angularVelocityMicrosecondsOffset": 0
         }
       }
-    }],
+    }
+  ],
     "aliases": {
         "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/1",
         "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/2",
