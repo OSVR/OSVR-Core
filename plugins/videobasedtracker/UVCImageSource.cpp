@@ -42,6 +42,8 @@
 #include <cstdio>
 #include <unistd.h>
 #include <mutex>
+#include <condition_variable>
+#include <queue>
 
 namespace osvr {
 namespace vbtracker {
@@ -87,15 +89,16 @@ namespace vbtracker {
         uvc_stream_ctrl_t streamControl_;
 
         cv::Size resolution_;       //< resolution of camera
-        uvc_frame_t* frame_;        //< raw UVC frame
+        std::queue<uvc_frame_t*> frames_; //< raw UVC frames
 
-        std::mutex mutex_;          //< to protect frame_
+        std::mutex mutex_;          //< to protect frames_
+        std::condition_variable frames_available_; //< To allo grab() to wait for frames to become available
     };
 
     using UVCImageSourcePtr = std::unique_ptr<UVCImageSource>;
 
     UVCImageSource::UVCImageSource(int vendor_id, int product_id, const char* serial_number) :
-        uvcContext_{nullptr}, camera_{nullptr}, cameraHandle_{nullptr}, streamControl_{}, resolution_{0, 0}, frame_{nullptr}
+        uvcContext_{nullptr}, camera_{nullptr}, cameraHandle_{nullptr}, streamControl_{}, resolution_{0, 0}
     {
         // TODO
 
@@ -173,12 +176,16 @@ namespace vbtracker {
 
     bool UVCImageSource::grab()
     {
-        // libuvc doesn't provide for separate grab() and retrieve() operations.
-        // Instead, grab() will set a flag to alert the callback function that
-        // we wish to store the next frame and retrieve() will return that
-        // frame.
-        std::lock_guard<std::mutex> guard(mutex_);
-        return (frame_ != nullptr);
+      //Gain access to frames_ queue
+      std::unique_lock<std::mutex> lock(mutex_);
+
+      //Check if there are any frames available
+      if (frames_.empty())
+	//Wait for some frames to become available
+	frames_available_.wait(lock);
+
+      //Good to go!
+      return !frames_.empty();
     }
 
     cv::Size UVCImageSource::resolution() const
@@ -188,28 +195,31 @@ namespace vbtracker {
 
     void UVCImageSource::retrieveColor(cv::Mat &color)
     {
-        // libuvc doesn't provide for separate grab() and retrieve() operations.
-        // Instead, grab() will set a flag to alert the callback function that
-        // we wish to store the next frame and retrieve() will return that
-        // frame.
-
-        std::lock_guard<std::mutex> guard(mutex_);
-
-        if (!frame_) {
-            throw std::runtime_error("Error: There's no frame available.");
-        }
-
+        uvc_frame_t* current_frame;
+        
+        {
+	    //Grab a frame from the queue, but don't keep the queue locked!
+	    std::lock_guard<std::mutex> lock(mutex_);
+	    
+	    if (frames_.empty()) {
+	      throw std::runtime_error("Error: There's no frames available.");
+	    }
+	    
+	    current_frame = frames_.front();
+	    frames_.pop();
+        };
+	
         // We'll convert the image from YUV/JPEG to rgb, so allocate space
-        auto rgb = uvc_allocate_frame(frame_->width * frame_->height * 3);
+        auto rgb = uvc_allocate_frame(current_frame->width * current_frame->height * 3);
         if (!rgb) {
             throw std::runtime_error("Error: Unable to allocate the rgb frame.");
         }
 
         // Do the rgb conversion
-        auto convert_ret = uvc_mjpeg2rgb(frame_, rgb);
+        auto convert_ret = uvc_mjpeg2rgb(current_frame, rgb);
         if (UVC_SUCCESS != convert_ret) {
             // Try any2rgb() instead
-            auto any_ret = uvc_any2rgb(frame_, rgb);
+            auto any_ret = uvc_any2rgb(current_frame, rgb);
             if (UVC_SUCCESS != any_ret) {
                 uvc_free_frame(rgb);
                 throw std::runtime_error("Error: Unable to convert frame to rgb: " + std::string(uvc_strerror(convert_ret)));
@@ -219,6 +229,7 @@ namespace vbtracker {
         // Convert the image to at cv::Mat
         color = cv::Mat(rgb->height, rgb->width, CV_8UC3, rgb->data).clone();
 
+        uvc_free_frame(current_frame);
         uvc_free_frame(rgb);
     }
 
@@ -230,13 +241,24 @@ namespace vbtracker {
 
     void UVCImageSource::callback(uvc_frame_t *frame)
     {
-        // Just copy the UVC frame to keep things quick. We'll do any conversion
+        // Just copy the UVC frame to keep things quick (cannot drop
+        // frames or we'll lose tracking!). We'll do any conversion
         // upon request in the retrieveColor() method.
-        std::lock_guard<std::mutex> guard(mutex_);
-        if (frame_)
-            uvc_free_frame(frame_);
-        frame_ = uvc_allocate_frame(frame->data_bytes);
-        uvc_duplicate_frame(frame, frame_);
+
+        //Copy the frame, then look for the lock
+        uvc_frame_t* copied_frame = uvc_allocate_frame(frame->data_bytes);
+        uvc_duplicate_frame(frame, copied_frame);
+
+        std::lock_guard<std::mutex> lock(mutex_);
+	frames_.push(copied_frame);
+	if (frames_.size() > 100) {
+	  std::cerr << "WARNING! Dropping frames from video tracker as they are not being processed fast enough! This will disrupt tracking.";
+	  while (!frames_.empty()) {
+	    uvc_free_frame(frames_.front());
+	    frames_.pop();
+	  }
+	}
+	frames_available_.notify_one();
     }
 
     /// Factory method to open a USB video class (UVC) device as an image
