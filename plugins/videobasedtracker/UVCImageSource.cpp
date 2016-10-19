@@ -182,11 +182,8 @@ namespace vbtracker {
         // Gain access to frames_ queue
         std::unique_lock<std::mutex> lock(mutex_);
 
-        // Check if there are any frames available
-        if (frames_.empty()) {
-            // Wait for some frames to become available
-            frames_available_.wait(lock);
-        }
+        // Wait until there are any frames available
+        frames_available_.wait(lock, [this]() { return !frames_.empty(); });
 
         // Good to go!
         return !frames_.empty();
