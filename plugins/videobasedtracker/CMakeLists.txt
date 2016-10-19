@@ -67,6 +67,8 @@ endif()
 
 if(NOT WIN32)
     find_package(libuvc REQUIRED)
+    find_package(PkgConfig)
+    pkg_check_modules(LIBUSB libusb-1.0)
 endif()
 
 ###
@@ -120,8 +122,8 @@ if(WIN32)
     set_target_properties(ViewTrackingCamera PROPERTIES
         FOLDER "OSVR Plugins/Video-Based Tracker")
 else()
-    target_link_libraries(com_osvr_VideoBasedHMDTracker ${libuvc_LIBRARIES})
-    target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE ${libuvc_INCLUDE_DIRS})
+    target_link_libraries(com_osvr_VideoBasedHMDTracker ${libuvc_LIBRARIES} ${LIBUSB_LIBRARIES})
+    target_include_directories(com_osvr_VideoBasedHMDTracker PRIVATE ${libuvc_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIRS})
 endif()
 
 set_target_properties(com_osvr_VideoBasedHMDTracker PROPERTIES
