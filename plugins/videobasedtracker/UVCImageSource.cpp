@@ -144,7 +144,7 @@ namespace vbtracker {
                                          std::string(uvc_strerror(open_res)));
             }
             cameraHandle_.reset(device_handle);
-            // uvc_print_diag(cameraHandle_, stdout);
+            //uvc_print_diag(cameraHandle_.get(), stdout);
         }
 
         // Setup streaming parameters
@@ -208,29 +208,8 @@ namespace vbtracker {
             frames_.pop();
         }
 
-        // We'll convert the image from YUV/JPEG to rgb, so allocate space
-        Frame_ptr rgb(uvc_allocate_frame(current_frame->width *
-                                         current_frame->height * 3));
-
-        if (!rgb) {
-            throw std::runtime_error(
-                "Error: Unable to allocate the rgb frame.");
-        }
-
-        // Do the rgb conversion
-        auto convert_ret = uvc_mjpeg2rgb(current_frame.get(), rgb.get());
-        if (UVC_SUCCESS != convert_ret) {
-            // Try any2rgb() instead
-            auto any_ret = uvc_any2rgb(current_frame.get(), rgb.get());
-            if (UVC_SUCCESS != any_ret) {
-                throw std::runtime_error(
-                    "Error: Unable to convert frame to rgb: " +
-                    std::string(uvc_strerror(convert_ret)));
-            }
-        }
-
         // Convert the image to at cv::Mat
-        color = cv::Mat(rgb->height, rgb->width, CV_8UC3, rgb->data).clone();
+        color = cv::Mat(current_frame->height, current_frame->width, CV_8UC3, current_frame->data).clone();
     }
 
     void UVCImageSource::callback(uvc_frame_t *frame, void *ptr) {
@@ -239,16 +218,32 @@ namespace vbtracker {
     }
 
     void UVCImageSource::callback(uvc_frame_t *frame) {
-        // Just copy the UVC frame to keep things quick (cannot drop
-        // frames or we'll lose tracking!). We'll do any conversion
-        // upon request in the retrieveColor() method.
+      //Must be quick here, cannot delay the callback or it will fail to respond to usb events
 
-        // Copy the frame, then look for the lock
-        Frame_ptr copied_frame(uvc_allocate_frame(frame->data_bytes));
-        uvc_duplicate_frame(frame, copied_frame.get());
+      //We can either copy the frame, and convert to rgb later, or
+      //just convert and save one copy (and allocation) in the server
+      //thread. As the conversion can't be much more expensive than a
+      //copy, we perform it here.
+      
+        Frame_ptr rgb_frame(uvc_allocate_frame(frame->width * frame->height * 3));
+        if (!rgb_frame) {
+            throw std::runtime_error(
+                "Error: Unable to allocate the rgb frame.");
+        }
+
+	auto convert_ret = uvc_mjpeg2rgb(frame, rgb_frame.get());
+	if (UVC_SUCCESS != convert_ret) {
+            // Try any2rgb() instead
+            auto any_ret = uvc_any2rgb(frame, rgb_frame.get());
+            if (UVC_SUCCESS != any_ret) {
+	      throw std::runtime_error(
+				       "Error: Unable to convert frame to rgb: " +
+				       std::string(uvc_strerror(convert_ret)));
+            }
+        }
 
         std::lock_guard<std::mutex> lock(mutex_);
-        frames_.emplace(copied_frame.release());
+        frames_.emplace(rgb_frame.release());
         if (frames_.size() > 100) {
             std::cerr << "WARNING! Dropping frames from video tracker as they "
                          "are not being processed fast enough! This will "
