@@ -84,13 +84,25 @@ namespace vbtracker {
         //@}
 
       private:
-        uvc_context_t *uvcContext_;
-        uvc_device_t *camera_;
-        uvc_device_handle_t *cameraHandle_;
+        typedef std::unique_ptr<uvc_frame_t, decltype(&uvc_free_frame)>
+            Frame_ptr;
+        typedef std::unique_ptr<uvc_context_t,
+                                std::function<void(uvc_context_t *)>>
+            Context_ptr;
+        typedef std::unique_ptr<uvc_device_t,
+                                std::function<void(uvc_device_t *)>>
+            Device_ptr;
+        typedef std::unique_ptr<uvc_device_handle_t,
+                                std::function<void(uvc_device_handle_t *)>>
+            Device_handle_ptr;
+
+        Context_ptr uvcContext_;
+        Device_ptr camera_;
+        Device_handle_ptr cameraHandle_;
         uvc_stream_ctrl_t streamControl_;
 
-        cv::Size resolution_;              //< resolution of camera
-        std::queue<uvc_frame_t *> frames_; //< raw UVC frames
+        cv::Size resolution_;          //< resolution of camera
+        std::queue<Frame_ptr> frames_; //< raw UVC frames
 
         std::mutex mutex_;                         //< to protect frames_
         std::condition_variable frames_available_; //< To allo grab() to wait
@@ -102,35 +114,40 @@ namespace vbtracker {
 
     UVCImageSource::UVCImageSource(int vendor_id, int product_id,
                                    const char *serial_number)
-        : uvcContext_{nullptr}, camera_{nullptr}, cameraHandle_{nullptr},
-          streamControl_{}, resolution_{0, 0} {
-        // TODO
+        : streamControl_{}, resolution_{0, 0} {
 
-        // Initialize the libuvc context
-        const auto init_res = uvc_init(&uvcContext_, nullptr);
-        if (UVC_SUCCESS != init_res) {
-            throw std::runtime_error("Error initializing UVC context: " +
-                                     std::string(uvc_strerror(init_res)));
+        { // Initialize the libuvc context
+            uvc_context_t *context;
+            const auto init_res = uvc_init(&context, nullptr);
+            if (UVC_SUCCESS != init_res) {
+                throw std::runtime_error("Error initializing UVC context: " +
+                                         std::string(uvc_strerror(init_res)));
+            }
+            uvcContext_ = Context_ptr(context, &uvc_exit);
         }
 
-        // Find the requested camera
-        const auto find_res = uvc_find_device(uvcContext_, &camera_, vendor_id,
-                                              product_id, serial_number);
-        if (UVC_SUCCESS != find_res) {
-            uvc_exit(uvcContext_);
-            throw std::runtime_error("Error finding requested camera: " +
-                                     std::string(uvc_strerror(find_res)));
+        { // Find the requested camera
+            uvc_device_t *device;
+            const auto find_res =
+                uvc_find_device(uvcContext_.get(), &device, vendor_id,
+                                product_id, serial_number);
+            if (UVC_SUCCESS != find_res) {
+                throw std::runtime_error("Error finding requested camera: " +
+                                         std::string(uvc_strerror(find_res)));
+            }
+            camera_ = Device_ptr(device, uvc_unref_device);
         }
 
-        // Try to open the device -- requires exclusive access
-        const auto open_res = uvc_open(camera_, &cameraHandle_);
-        if (UVC_SUCCESS != open_res) {
-            uvc_unref_device(camera_);
-            uvc_exit(uvcContext_);
-            throw std::runtime_error("Error opening camera: " +
-                                     std::string(uvc_strerror(open_res)));
+        { // Try to open the device -- requires exclusive access
+            uvc_device_handle_t *device_handle;
+            const auto open_res = uvc_open(camera_.get(), &device_handle);
+            if (UVC_SUCCESS != open_res) {
+                throw std::runtime_error("Error opening camera: " +
+                                         std::string(uvc_strerror(open_res)));
+            }
+            cameraHandle_ = Device_handle_ptr(device_handle, uvc_close);
+            // uvc_print_diag(cameraHandle_, stdout);
         }
-        // uvc_print_diag(cameraHandle_, stdout);
 
         // Setup streaming parameters
         const int resolution_x = 640; // pixels
@@ -138,7 +155,7 @@ namespace vbtracker {
         resolution_ = cvSize(resolution_x, resolution_y);
         const int frame_rate = 100; // fps
         const auto setup_res = uvc_get_stream_ctrl_format_size(
-            cameraHandle_, &streamControl_, UVC_FRAME_FORMAT_MJPEG,
+            cameraHandle_.get(), &streamControl_, UVC_FRAME_FORMAT_MJPEG,
             resolution_x, resolution_y, frame_rate);
         // uvc_print_stream_ctrl(&streamControl_, stdout);
         if (UVC_SUCCESS != setup_res) {
@@ -147,30 +164,20 @@ namespace vbtracker {
         }
 
         // Start streaming video.
-        const auto stream_res = uvc_start_streaming(
-            cameraHandle_, &streamControl_, &UVCImageSource::callback, this, 0);
+        const auto stream_res =
+            uvc_start_streaming(cameraHandle_.get(), &streamControl_,
+                                &UVCImageSource::callback, this, 0);
         if (UVC_SUCCESS != stream_res) {
-            uvc_close(cameraHandle_);
-            uvc_unref_device(camera_);
-            uvc_exit(uvcContext_);
             throw std::runtime_error("Error streaming from camera: " +
                                      std::string(uvc_strerror(stream_res)));
         }
     }
 
     UVCImageSource::~UVCImageSource() {
-        // Stop streaming video
-        uvc_stop_streaming(cameraHandle_);
-
-        // Release our handle on the camera
-        uvc_close(cameraHandle_);
-
-        // Release the device descriptor
-        uvc_unref_device(camera_);
-
-        // Close the UVC context. This closes and cleans up any existing device
-        // handles, and it closes the libusb context if one was not provided
-        uvc_exit(uvcContext_);
+        // Stop streaming video (if required)
+        if (cameraHandle_) {
+            uvc_stop_streaming(cameraHandle_.get());
+        }
     }
 
     bool UVCImageSource::ok() const {
@@ -192,35 +199,31 @@ namespace vbtracker {
     cv::Size UVCImageSource::resolution() const { return resolution_; }
 
     void UVCImageSource::retrieveColor(cv::Mat &color) {
-        uvc_frame_t *current_frame;
-
-        {
-            // Grab a frame from the queue, but don't keep the queue locked!
-            std::lock_guard<std::mutex> lock(mutex_);
-
-            if (frames_.empty()) {
-                throw std::runtime_error("Error: There's no frames available.");
-            }
-
-            current_frame = frames_.front();
-            frames_.pop();
+        // Grab a frame from the queue, but don't keep the queue locked!
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (frames_.empty()) {
+            throw std::runtime_error("Error: There's no frames available.");
         }
+        Frame_ptr current_frame(frames_.front().release(), &uvc_free_frame);
+        frames_.pop();
+        lock.unlock();
 
         // We'll convert the image from YUV/JPEG to rgb, so allocate space
-        auto rgb = uvc_allocate_frame(current_frame->width *
-                                      current_frame->height * 3);
+        Frame_ptr rgb(uvc_allocate_frame(current_frame->width *
+                                         current_frame->height * 3),
+                      &uvc_free_frame);
+
         if (!rgb) {
             throw std::runtime_error(
                 "Error: Unable to allocate the rgb frame.");
         }
 
         // Do the rgb conversion
-        auto convert_ret = uvc_mjpeg2rgb(current_frame, rgb);
+        auto convert_ret = uvc_mjpeg2rgb(current_frame.get(), rgb.get());
         if (UVC_SUCCESS != convert_ret) {
             // Try any2rgb() instead
-            auto any_ret = uvc_any2rgb(current_frame, rgb);
+            auto any_ret = uvc_any2rgb(current_frame.get(), rgb.get());
             if (UVC_SUCCESS != any_ret) {
-                uvc_free_frame(rgb);
                 throw std::runtime_error(
                     "Error: Unable to convert frame to rgb: " +
                     std::string(uvc_strerror(convert_ret)));
@@ -229,9 +232,6 @@ namespace vbtracker {
 
         // Convert the image to at cv::Mat
         color = cv::Mat(rgb->height, rgb->width, CV_8UC3, rgb->data).clone();
-
-        uvc_free_frame(current_frame);
-        uvc_free_frame(rgb);
     }
 
     void UVCImageSource::callback(uvc_frame_t *frame, void *ptr) {
@@ -245,20 +245,20 @@ namespace vbtracker {
         // upon request in the retrieveColor() method.
 
         // Copy the frame, then look for the lock
-        uvc_frame_t *copied_frame = uvc_allocate_frame(frame->data_bytes);
-        uvc_duplicate_frame(frame, copied_frame);
+        Frame_ptr copied_frame(uvc_allocate_frame(frame->data_bytes),
+                               &uvc_free_frame);
+        uvc_duplicate_frame(frame, copied_frame.get());
 
         std::lock_guard<std::mutex> lock(mutex_);
-        frames_.push(copied_frame);
+        frames_.emplace(copied_frame.release(), &uvc_free_frame);
         if (frames_.size() > 100) {
             std::cerr << "WARNING! Dropping frames from video tracker as they "
                          "are not being processed fast enough! This will "
-                         "disrupt tracking.";
-            while (!frames_.empty()) {
-                uvc_free_frame(frames_.front());
-                frames_.pop();
-            }
+                         "disrupt tracking."
+                      << std::endl;
+            frames_ = std::queue<Frame_ptr>(); //< clear the queue
         }
+
         frames_available_.notify_one();
     }
 
