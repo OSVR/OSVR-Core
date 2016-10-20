@@ -84,21 +84,19 @@ namespace vbtracker {
         //@}
 
       private:
-        typedef std::unique_ptr<uvc_frame_t, decltype(&uvc_free_frame)>
-            Frame_ptr;
-        typedef std::unique_ptr<uvc_context_t,
-                                std::function<void(uvc_context_t *)>>
-            Context_ptr;
-        typedef std::unique_ptr<uvc_device_t,
-                                std::function<void(uvc_device_t *)>>
-            Device_ptr;
-        typedef std::unique_ptr<uvc_device_handle_t,
-                                std::function<void(uvc_device_handle_t *)>>
-            Device_handle_ptr;
+        template <class T, void (*del_implementation)(T *)> struct SmartPtr {
+            struct Del_op {
+                void operator()(T *ptr) const { del_implementation(ptr); }
+            };
 
-        Context_ptr uvcContext_;
-        Device_ptr camera_;
-        Device_handle_ptr cameraHandle_;
+            using type = std::unique_ptr<T, Del_op>;
+        };
+
+        using Frame_ptr = typename SmartPtr<uvc_frame_t, &uvc_free_frame>::type;
+        typename SmartPtr<uvc_context_t, &uvc_exit>::type uvcContext_;
+        typename SmartPtr<uvc_device_t, &uvc_unref_device>::type camera_;
+        typename SmartPtr<uvc_device_handle_t, &uvc_close>::type cameraHandle_;
+
         uvc_stream_ctrl_t streamControl_;
 
         cv::Size resolution_;          //< resolution of camera
@@ -123,7 +121,7 @@ namespace vbtracker {
                 throw std::runtime_error("Error initializing UVC context: " +
                                          std::string(uvc_strerror(init_res)));
             }
-            uvcContext_ = Context_ptr(context, &uvc_exit);
+            uvcContext_.reset(context);
         }
 
         { // Find the requested camera
@@ -135,7 +133,7 @@ namespace vbtracker {
                 throw std::runtime_error("Error finding requested camera: " +
                                          std::string(uvc_strerror(find_res)));
             }
-            camera_ = Device_ptr(device, uvc_unref_device);
+            camera_.reset(device);
         }
 
         { // Try to open the device -- requires exclusive access
@@ -145,7 +143,7 @@ namespace vbtracker {
                 throw std::runtime_error("Error opening camera: " +
                                          std::string(uvc_strerror(open_res)));
             }
-            cameraHandle_ = Device_handle_ptr(device_handle, uvc_close);
+            cameraHandle_.reset(device_handle);
             // uvc_print_diag(cameraHandle_, stdout);
         }
 
@@ -200,18 +198,19 @@ namespace vbtracker {
 
     void UVCImageSource::retrieveColor(cv::Mat &color) {
         // Grab a frame from the queue, but don't keep the queue locked!
-        std::unique_lock<std::mutex> lock(mutex_);
-        if (frames_.empty()) {
-            throw std::runtime_error("Error: There's no frames available.");
+        Frame_ptr current_frame;
+        {
+            std::unique_lock<std::mutex> lock(mutex_);
+            if (frames_.empty()) {
+                throw std::runtime_error("Error: There's no frames available.");
+            }
+            current_frame.reset(frames_.front().release());
+            frames_.pop();
         }
-        Frame_ptr current_frame(frames_.front().release(), &uvc_free_frame);
-        frames_.pop();
-        lock.unlock();
 
         // We'll convert the image from YUV/JPEG to rgb, so allocate space
         Frame_ptr rgb(uvc_allocate_frame(current_frame->width *
-                                         current_frame->height * 3),
-                      &uvc_free_frame);
+                                         current_frame->height * 3));
 
         if (!rgb) {
             throw std::runtime_error(
@@ -245,12 +244,11 @@ namespace vbtracker {
         // upon request in the retrieveColor() method.
 
         // Copy the frame, then look for the lock
-        Frame_ptr copied_frame(uvc_allocate_frame(frame->data_bytes),
-                               &uvc_free_frame);
+        Frame_ptr copied_frame(uvc_allocate_frame(frame->data_bytes));
         uvc_duplicate_frame(frame, copied_frame.get());
 
         std::lock_guard<std::mutex> lock(mutex_);
-        frames_.emplace(copied_frame.release(), &uvc_free_frame);
+        frames_.emplace(copied_frame.release());
         if (frames_.size() > 100) {
             std::cerr << "WARNING! Dropping frames from video tracker as they "
                          "are not being processed fast enough! This will "
