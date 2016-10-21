@@ -81,7 +81,7 @@ install:
         popd;
         mkdir -p libuvc/build;
 	pushd libuvc/build;
-	  cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG};
+	  cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DINSTALL_CMAKE_DIR=$INSTPRF/lib/cmake/libuvc;
 	  make -j2 install;
 	popd;
         mkdir -p opencv-${OPENCV_VER}/build;
