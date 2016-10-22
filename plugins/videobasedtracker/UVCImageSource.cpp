@@ -32,6 +32,7 @@
 
 // Library/third-party includes
 #include <libuvc/libuvc.h>
+#include <libuvc/libuvc.h>
 #include <opencv2/core/core_c.h>
 
 // Standard includes
@@ -75,6 +76,21 @@ namespace vbtracker {
         /// retrieve() do the RGB to Gray for you.
         virtual void retrieveColor(cv::Mat &color) override;
 
+        float getDeviceVersion() const {
+            // This libusb handle and device objects are managed by
+            // libuvc/libusb and are valid while the device is open, so don't
+            // try to free them!
+            libusb_device_handle *deviceHandle =
+                uvc_get_libusb_handle(cameraHandle_.get());
+            libusb_device *device = libusb_get_device(deviceHandle);
+
+            libusb_device_descriptor desc;
+            libusb_get_device_descriptor(device, &desc);
+
+            // This is a binary coded decimal!
+            return (desc.bcdDevice >> 8) + 0.01 * (desc.bcdDevice & 0xFF);
+        }
+
       protected:
         /// This callback function is called each time a new frame is received
         /// from the video stream.
@@ -111,8 +127,8 @@ namespace vbtracker {
 
         std::mutex mutex_;                         //< to protect frames_
         std::condition_variable frames_available_; //< To allow grab() to wait
-                                                   //for frames to become
-                                                   //available
+                                                   // for frames to become
+        // available
     };
 
     using UVCImageSourcePtr = std::unique_ptr<UVCImageSource>;
@@ -283,11 +299,33 @@ namespace vbtracker {
         return ret;
     }
 
-    /// Factory method to open the HDK camera as an image source via libuvc.
-    ImageSourcePtr openHDKCameraUVC() {
+    /// Factory method to open the HDK camera as an image source via
+    /// libuvc. with a nullptr serial number, just opens the "first"
+    /// HDK camera device
+    ImageSourcePtr openHDKCameraUVC(const char *serial_number) {
         const int vendor_id = 0x0bda;
         const int product_id = 0x57e8;
-        return openUVCCamera(vendor_id, product_id);
+
+        auto ret = ImageSourcePtr{};
+        try {
+            auto source = new UVCImageSource(vendor_id, product_id, nullptr);
+            ret.reset(source);
+
+            // Before returning, check the IR camera firmware is sufficiently up
+            // to date.
+            if (source->getDeviceVersion() < 0.07)
+                std::cerr << "Warning! Your camera has firmware v"
+                          << source->getDeviceVersion()
+                          << ", you will need to upgrade to the latest version "
+                             "(using the windows camera firmware update tool), "
+                             "this may completely fail."
+                          << std::endl;
+        } catch (const std::exception &e) {
+            std::cerr
+                << "Caught exception initializing UVC camera image source: "
+                << e.what() << std::endl;
+        }
+        return ret;
     }
 
 } // namespace vbtracker

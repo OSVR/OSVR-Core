@@ -364,8 +364,8 @@ class ConfiguredDeviceConstructor {
         //auto cameraFactory = [=] {
         //    return osvr::vbtracker::openOpenCVCamera(cameraID);
         //};
-
-        auto cameraFactory = &osvr::vbtracker::openHDKCameraUVC;
+	const char* camera_serial = nullptr;
+        auto cameraFactory = [=] { return osvr::vbtracker::openHDKCameraUVC(camera_serial); };
 #endif
 
         /// Function to execute after the device is created, to add the sensors.

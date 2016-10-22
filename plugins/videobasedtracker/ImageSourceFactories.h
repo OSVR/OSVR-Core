@@ -48,7 +48,7 @@ namespace vbtracker {
     ImageSourcePtr openUVCCamera(int vendor_id = 0, int product_id = 0, const char* serial_number = nullptr);
 
     /// Factory method to open the HDK camera as an image source via libuvc.
-    ImageSourcePtr openHDKCameraUVC();
+    ImageSourcePtr openHDKCameraUVC(const char* serial_number = nullptr);
 #endif
 
     /// Factory method to open a directory of tif files named 0001.tif and
