@@ -58,7 +58,7 @@ namespace common {
 /// number.
 /// The base boost version test has been moved exclusively to CMake, to error
 /// out earlier.
-#if (BOOST_VERSION > 106100)
+#if (BOOST_VERSION > 106200)
 #error                                                                         \
     "Using an untested Boost version - inspect the Boost Interprocess release notes/changelog to see if any ABI breaks affect us."
 #endif
