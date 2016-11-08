@@ -34,13 +34,17 @@ function(osvr_add_plugin)
     else()
         set(OSVR_PLUGIN_PREFIX "")
     endif()
-    
+
     set_target_properties(${OSVR_ADD_PLUGIN_NAME} PROPERTIES
         PREFIX "${OSVR_PLUGIN_PREFIX}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OSVR_CACHED_PLUGIN_DIR}"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${OSVR_CACHED_PLUGIN_DIR}")
     if(OSVR_ADD_PLUGIN_MANUAL_LOAD)
         set_property(TARGET ${OSVR_ADD_PLUGIN_NAME} PROPERTY SUFFIX "${OSVR_PLUGIN_IGNORE_SUFFIX}${CMAKE_SHARED_MODULE_SUFFIX}")
+    endif()
+    if(MSVC)
+        # Must distinguish plugins built against debug runtime
+        set_property(TARGET ${OSVR_ADD_PLUGIN_NAME} PROPERTY DEBUG_POSTFIX ".debug")
     endif()
     if(NOT OSVR_ADD_PLUGIN_NO_INSTALL)
         install(TARGETS ${OSVR_ADD_PLUGIN_NAME}

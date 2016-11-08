@@ -394,7 +394,7 @@ namespace vbtracker {
         }
 
         /// Run the event loop briefly to see if there were keyboard presses.
-        int key = cv::waitKey(1);
+        int key = cv::waitKey(1) & 0xff;
         switch (key) {
 
         case 's':

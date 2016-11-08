@@ -24,21 +24,76 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/USBSerial/USBSerialEnum.h>
 #include <osvr/USBSerial/USBSerialDevice.h>
+#include <osvr/USBSerial/USBSerialEnum.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <cstdlib>  // for EXIT_SUCCESS
-#include <iostream> // for cout
-#include <ios>      // for hex
+#include <cstdint>
+#include <cstdlib> // for EXIT_SUCCESS
+#include <functional>
 #include <iomanip>  // for setfill, setw
+#include <ios>      // for hex
+#include <iostream> // for cout
+#include <sstream>
+
+/// Returns a hex value always padded out to 4 digits.
+std::string padHex(std::uint16_t v) {
+    std::ostringstream os;
+    os << std::setfill('0') << std::setw(4) << std::hex << v;
+    return os.str();
+}
 
 int main(int argc, char *argv[]) {
     using namespace std;
-    for (auto &&dev : osvr::usbserial::enumerate()) {
+
+    function<osvr::usbserial::Enumerator()> enumerate = [] {
+        return osvr::usbserial::enumerate();
+    };
+
+    if (argc == 3) {
+
+        uint16_t vID;
+        {
+            stringstream ss;
+            ss << hex << argv[1];
+            if (!(ss >> vID)) {
+                cerr << "Could not parse first command line argument as a "
+                        "hex vendor ID!"
+                     << endl;
+                return -1;
+            }
+        }
+        uint16_t pID;
+        {
+            stringstream ss;
+            ss << hex << argv[2];
+            if (!(ss >> pID)) {
+                cerr << "Could not parse second command line argument as "
+                        "a hex product ID!"
+                     << endl;
+                return -1;
+            }
+        }
+        cout << "Will enumerate USB Serial devices with hex VID:PID "
+             << padHex(vID) << ":" << padHex(pID) << "\n"
+             << endl;
+        enumerate = [vID, pID] { return osvr::usbserial::enumerate(vID, pID); };
+
+    } else if (argc != 1) {
+        cerr << "Usage: either pass no arguments to enumerate all USB "
+                "Serial devices, or pass two arguments: a hex VID and PID "
+                "to search for."
+             << endl;
+        return -1;
+
+    } else {
+        cout << "Will enumerate all USB Serial devices.\n" << endl;
+    }
+
+    for (auto &&dev : enumerate()) {
         cout << setfill('0') << setw(4) << hex << dev.getVID() << ":"
              << setfill('0') << setw(4) << hex << dev.getPID() << " "
              << dev.getPlatformSpecificPath() << endl;
