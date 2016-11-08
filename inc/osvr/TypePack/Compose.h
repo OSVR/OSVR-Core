@@ -44,7 +44,7 @@ namespace typepack {
     template <typename... Fs> struct compose {};
 
     template <typename F0> struct compose<F0> {
-        template <typename... Ts> using apply = apply<F0, Ts...>;
+        template <typename... Ts> using apply = typepack::apply<F0, Ts...>;
     };
 
     template <typename F0, typename... Fs> struct compose<F0, Fs...> {
