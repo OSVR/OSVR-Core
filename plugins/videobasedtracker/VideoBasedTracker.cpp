@@ -319,7 +319,7 @@ namespace vbtracker {
                         std::ostringstream windowName;
                         windowName << "Sensor" << sensor;
                         cv::imshow(windowName.str(), *m_shownImage);
-                        int key = cv::waitKey(1);
+                        int key = cv::waitKey(1) & 0xff;
                         switch (key) {
                         case 's':
                             // Show the concise "status" image (default)
