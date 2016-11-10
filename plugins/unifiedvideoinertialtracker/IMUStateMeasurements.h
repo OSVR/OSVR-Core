@@ -502,17 +502,15 @@ namespace kalman {
         static const types::DimensionType STATE_DIMENSION =
             types::Dimension<State>::value;
         using Base = IMUOrientationMeasBase;
+        using JacobianType = types::Matrix<DIMENSION, STATE_DIMENSION>;
 
         /// Quat should already be rotated into camera space.
         IMUOrientationMeasurement(Eigen::Quaterniond const &quat,
                                   types::Vector<3> const &emVariance)
             : Base(quat, emVariance) {}
-
-        types::Matrix<DIMENSION, STATE_DIMENSION>
-        getJacobian(State const &s) const {
+        JacobianType getJacobian(State const &s) const {
             using namespace pose_externalized_rotation;
-            using Jacobian = types::Matrix<DIMENSION, STATE_DIMENSION>;
-            Jacobian ret = Jacobian::Zero();
+            JacobianType ret = JacobianType::Zero();
             ret.block<DIMENSION, 3>(0, 3) = Base::getJacobianBlock(s);
             return ret;
         }
