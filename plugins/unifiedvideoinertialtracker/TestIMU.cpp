@@ -45,6 +45,10 @@ struct TestData {
     TestData() {
         /// Set up from a default configuration.
         ConfigParams params;
+#if 0
+        state.setErrorCovariance(
+            kalman::types::DimVector<BodyState>::Constant(100).asDiagonal());
+#endif
 
         /// configure the process model
         processModel.setDamping(params.linearVelocityDecayCoefficient,
@@ -98,41 +102,130 @@ template <> struct TypelistTypeNameTrait<kalman::SplitQ> {
 };
 } // namespace Catch
 
+static const double SMALL_VALUE = 0.1;
+template <typename MeasurementType>
+inline void smallPositiveYChecks(TestData *data, MeasurementType &kalmanMeas) {
+    using JacobianType = typename MeasurementType::JacobianType;
+    Vector3d residual = kalmanMeas.getResidual(data->state);
+    AND_THEN("residual should be 0, SMALL_VALUE, 0") {
+        CAPTURE(residual.transpose());
+        CHECK(residual.isApprox(Vector3d(0, SMALL_VALUE, 0)));
+    }
+
+    JacobianType jacobian = kalmanMeas.getJacobian(data->state);
+    AND_THEN("the jacobian should be finite") {
+        INFO("jacobian\n" << jacobian);
+        REQUIRE(jacobian.allFinite());
+    }
+
+    auto correctionInProgress =
+        kalman::beginCorrection(data->state, data->processModel, kalmanMeas);
+    AND_THEN("computed deltaz should equal residual") {
+        CAPTURE(residual.transpose());
+        CAPTURE(correctionInProgress.deltaz.transpose());
+        CHECK(residual.isApprox(correctionInProgress.deltaz));
+    }
+    CAPTURE(correctionInProgress.stateCorrection.transpose());
+    AND_THEN("state correction should be finite") {
+        REQUIRE(correctionInProgress.stateCorrectionFinite);
+        AND_THEN("state correction should have a rotation component with small "
+                 "positive y") {
+            REQUIRE(correctionInProgress.stateCorrection[3] == Approx(0.));
+            REQUIRE(correctionInProgress.stateCorrection[4] > 0);
+            REQUIRE(correctionInProgress.stateCorrection[5] == Approx(0.));
+        }
+        AND_THEN("state correction should have an angular velocity component "
+                 "with zero or small positive y") {
+            REQUIRE(correctionInProgress.stateCorrection[9] == Approx(0.));
+            REQUIRE(correctionInProgress.stateCorrection[10] >= 0.);
+            REQUIRE(correctionInProgress.stateCorrection[11] == Approx(0.));
+        }
+        AND_THEN("state correction should not contain any translational/linear "
+                 "velocity components") {
+            REQUIRE(correctionInProgress.stateCorrection.head<3>()
+                        .isApproxToConstant(0.));
+            REQUIRE(correctionInProgress.stateCorrection.segment<3>(6)
+                        .isApproxToConstant(0.));
+        }
+    }
+}
+
 CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
                         kalman::QLast, kalman::SplitQ) {
     using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
     using JacobianType = typename MeasurementType::JacobianType;
     unique_ptr<TestData> data(new TestData);
-    SECTION("identity state") {
-        SECTION("identity measurement") {
+    GIVEN("an identity state") {
+        WHEN("filtering in an identity measurement") {
             Quaterniond xformedMeas = data->xform(Quaterniond::Identity());
-            CAPTURE(xformedMeas);
-            REQUIRE(xformedMeas.isApprox(Quaterniond::Identity()));
-            MeasurementType meas{xformedMeas, data->imuVariance};
-            CAPTURE(meas.getResidual(data->state));
-            REQUIRE(meas.getResidual(data->state).isApproxToConstant(0.));
 
-            JacobianType jacobian = meas.getJacobian(data->state);
-            INFO("jacobian\n" << jacobian);
-            REQUIRE(jacobian.allFinite());
+            THEN("the transformed measurement should equal the measurement") {
+                CAPTURE(xformedMeas);
+                REQUIRE(xformedMeas.isApprox(Quaterniond::Identity()));
+
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                AND_THEN("residual should be zero") {
+                    CAPTURE(kalmanMeas.getResidual(data->state));
+                    REQUIRE(kalmanMeas.getResidual(data->state)
+                                .isApproxToConstant(0.));
+                }
+
+                JacobianType jacobian = kalmanMeas.getJacobian(data->state);
+                AND_THEN("the jacobian should be finite") {
+                    INFO("jacobian\n" << jacobian);
+                    REQUIRE(jacobian.allFinite());
+                    auto correctionInProgress = kalman::beginCorrection(
+                        data->state, data->processModel, kalmanMeas);
+                    AND_THEN("computed deltaz should be zero") {
+                        CAPTURE(correctionInProgress.deltaz.transpose());
+                        REQUIRE(
+                            correctionInProgress.deltaz.isApproxToConstant(0.));
+                    }
+                    CAPTURE(correctionInProgress.stateCorrection.transpose());
+                    AND_THEN("state correction should be finite") {
+                        REQUIRE(correctionInProgress.stateCorrectionFinite);
+                        AND_THEN("state correction should be zero") {
+                            REQUIRE(correctionInProgress.stateCorrection
+                                        .isApproxToConstant(0.));
+                        }
+                    }
+                }
+            }
         }
-
-        SECTION("measure small positive rotation about y") {
+        WHEN("filtering in a small positive rotation about y") {
             Quaterniond smallPositiveRotationAboutY(
                 AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
             CAPTURE(SMALL_VALUE);
             CAPTURE(smallPositiveRotationAboutY);
             Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
             CAPTURE(xformedMeas);
-            REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
 
-            MeasurementType meas{xformedMeas, data->imuVariance};
-            Vector3d residual = meas.getResidual(data->state);
-            CAPTURE(residual.transpose());
-            CHECK(residual.isApprox(Vector3d(0, SMALL_VALUE, 0)));
-            JacobianType jacobian = meas.getJacobian(data->state);
-            INFO("jacobian\n" << jacobian);
-            REQUIRE(jacobian.allFinite());
+            THEN("the transformed measurement should equal the measurement") {
+                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                smallPositiveYChecks(data.get(), kalmanMeas);
+            }
+        }
+    }
+    GIVEN("a state rotated about y") {
+        Quaterniond stateRotation(AngleAxisd(M_PI / 2., Vector3d::UnitY()));
+        data->state.setQuaternion(stateRotation);
+        WHEN("filtering in a small positive rotation about y") {
+            Quaterniond smallPositiveRotationAboutY =
+                stateRotation *
+                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            CAPTURE(SMALL_VALUE);
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+
+            THEN("the transformed measurement should equal the measurement") {
+                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                smallPositiveYChecks(data.get(), kalmanMeas);
+            }
         }
     }
 }
