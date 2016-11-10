@@ -111,6 +111,16 @@ target_link_libraries(uvbi-measure-camera-latency PRIVATE uvbi-image-sources ven
 set_target_properties(uvbi-measure-camera-latency PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
+if(BUILD_TESTING)
+    ###
+    # Synthetic-data verification of usage of room calibration in IMU code and IMU filtering
+    ###
+    add_executable(uvbi-test-imu TestIMU.cpp)
+    target_link_libraries(uvbi-test-imu PRIVATE uvbi-core vendored-catch)
+    set_target_properties(uvbi-test-imu PROPERTIES
+        FOLDER "${PROJ_FOLDER}")
+endif()
+
 # "object library" for the HDK data files.
 add_library(uvbi-hdkdata OBJECT ${OSVR_VIDEOTRACKERSHARED_SOURCES_HDKDATA})
 target_compile_options(uvbi-hdkdata
