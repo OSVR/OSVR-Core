@@ -43,6 +43,7 @@ add_library(uvbi-core STATIC
     HistoryContainer.h
     ImageProcessing.h
     ImagePointMeasurement.h
+    IMUStateMeasurements.h
     LED.cpp
     LED.h
     LedIdentifier.cpp
