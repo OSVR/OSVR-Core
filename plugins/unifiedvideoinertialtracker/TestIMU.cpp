@@ -84,38 +84,68 @@ std::ostream &operator<<(std::ostream &os, Quaterniond const &q) {
 }
 } // namespace Eigen
 
-template<typename MeasurementType>
-inline void identityMeas(TestData & data, Eigen::Quaterniond const& xformedMeas) {
-	
+struct IdentityMeasurementAndState {
+    template <typename MeasurementType>
+    static void tests(TestData &data, Eigen::Quaterniond const &xformedMeas) {
+
         MeasurementType meas{xformedMeas, data.imuVariance};
-        REQUIRE(meas.getResidual(data.state).isApproxToConstant(0));
+        REQUIRE(meas.getResidual(data.state).isApproxToConstant(0.));
         std::cout << meas.getJacobian(data.state) << std::endl;
-		REQUIRE(meas.getJacobian(data.state).allFinite());
+        REQUIRE(meas.getJacobian(data.state).allFinite());
+    }
+};
+
+static const auto SMALL_VALUE = 0.001;
+struct IdentityStateSmallPosYMeasurement {
+    template <typename MeasurementType>
+    static void tests(TestData &data, Eigen::Quaterniond const &xformedMeas) {
+
+        MeasurementType meas{xformedMeas, data.imuVariance};
+        Eigen::Vector3d residual = meas.getResidual(data.state);
+        std::cout << residual.transpose() << std::endl;
+        REQUIRE(residual.isApprox(Eigen::Vector3d(0, SMALL_VALUE, 0)));
+        std::cout << meas.getJacobian(data.state) << std::endl;
+        REQUIRE(meas.getJacobian(data.state).allFinite());
+    }
+};
+
+template <typename F>
+inline void performTestsForEachPolicy(TestData &data,
+                                      Eigen::Quaterniond const &xformedMeas) {
+    SECTION("QFirst") {
+        F::tests<OrientationMeasurementUsingPolicy<kalman::QFirst>>(
+            data, xformedMeas);
+    }
+    SECTION("QLast") {
+        F::tests<OrientationMeasurementUsingPolicy<kalman::QLast>>(data,
+                                                                   xformedMeas);
+    }
+    SECTION("SplitQ") {
+        F::tests<OrientationMeasurementUsingPolicy<kalman::SplitQ>>(
+            data, xformedMeas);
+    }
 }
 TEST_CASE("identity calibration output") {
     unique_ptr<TestData> data(new TestData);
-    SECTION("identity measurement") {
+    SECTION("identity state") {
+        SECTION("identity measurement") {
 
-        REQUIRE(data->xform(Eigen::Quaterniond::Identity())
-                    .isApprox(Eigen::Quaterniond::Identity()));
-        auto xformedMeas = data->xform(Eigen::Quaterniond::Identity());
-        OrientationMeasurement meas{xformedMeas, data->imuVariance};
-        REQUIRE(meas.getResidual(data->state).isApproxToConstant(0));
-        //std::cout << meas.getJacobian(data->state) << std::endl;
-		SECTION("QFirst") {
-            identityMeas<OrientationMeasurementUsingPolicy<kalman::QFirst>>(
+            REQUIRE(data->xform(Eigen::Quaterniond::Identity())
+                        .isApprox(Eigen::Quaterniond::Identity()));
+            auto xformedMeas = data->xform(Eigen::Quaterniond::Identity());
+            performTestsForEachPolicy<IdentityMeasurementAndState>(*data,
+                                                                   xformedMeas);
+        }
+
+        SECTION("measure small positive rotation about y") {
+            Eigen::Quaterniond smallPositiveRotationAboutY(
+                Eigen::AngleAxisd(SMALL_VALUE, Eigen::Vector3d::UnitY()));
+            REQUIRE(data->xform(smallPositiveRotationAboutY)
+                        .isApprox(smallPositiveRotationAboutY));
+            auto xformedMeas = data->xform(smallPositiveRotationAboutY);
+            performTestsForEachPolicy<IdentityStateSmallPosYMeasurement>(
                 *data, xformedMeas);
         }
-#if 1
-		SECTION("QLast") {
-            identityMeas<OrientationMeasurementUsingPolicy<kalman::QLast>>(
-                *data, xformedMeas);
-        }
-		SECTION("SplitQ") {
-            identityMeas<OrientationMeasurementUsingPolicy<kalman::SplitQ>>(
-                *data, xformedMeas);
-        }
-#endif	
     }
 }
 #if 0
