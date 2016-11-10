@@ -34,11 +34,13 @@
 #include <memory>
 
 #define CATCH_CONFIG_MAIN
+#include "catch_typelist.h"
 #include <catch.hpp>
 
 using std::unique_ptr;
 using namespace osvr;
 using namespace vbtracker;
+using namespace Eigen;
 struct TestData {
     TestData() {
         /// Set up from a default configuration.
@@ -84,70 +86,53 @@ std::ostream &operator<<(std::ostream &os, Quaterniond const &q) {
 }
 } // namespace Eigen
 
-struct IdentityMeasurementAndState {
-    template <typename MeasurementType>
-    static void tests(TestData &data, Eigen::Quaterniond const &xformedMeas) {
-
-        MeasurementType meas{xformedMeas, data.imuVariance};
-        REQUIRE(meas.getResidual(data.state).isApproxToConstant(0.));
-        std::cout << meas.getJacobian(data.state) << std::endl;
-        REQUIRE(meas.getJacobian(data.state).allFinite());
-    }
+namespace Catch {
+template <> struct TypelistTypeNameTrait<kalman::QFirst> {
+    static const char *get() { return "kalman::QFirst"; }
 };
-
-static const auto SMALL_VALUE = 0.001;
-struct IdentityStateSmallPosYMeasurement {
-    template <typename MeasurementType>
-    static void tests(TestData &data, Eigen::Quaterniond const &xformedMeas) {
-
-        MeasurementType meas{xformedMeas, data.imuVariance};
-        Eigen::Vector3d residual = meas.getResidual(data.state);
-        std::cout << residual.transpose() << std::endl;
-        REQUIRE(residual.isApprox(Eigen::Vector3d(0, SMALL_VALUE, 0)));
-        std::cout << meas.getJacobian(data.state) << std::endl;
-        REQUIRE(meas.getJacobian(data.state).allFinite());
-    }
+template <> struct TypelistTypeNameTrait<kalman::QLast> {
+    static const char *get() { return "kalman::QLast"; }
 };
+template <> struct TypelistTypeNameTrait<kalman::SplitQ> {
+    static const char *get() { return "kalman::SplitQ"; }
+};
+} // namespace Catch
 
-template <typename F>
-inline void performTestsForEachPolicy(TestData &data,
-                                      Eigen::Quaterniond const &xformedMeas) {
-    SECTION("QFirst") {
-        F::tests<OrientationMeasurementUsingPolicy<kalman::QFirst>>(
-            data, xformedMeas);
-    }
-    SECTION("QLast") {
-        F::tests<OrientationMeasurementUsingPolicy<kalman::QLast>>(data,
-                                                                   xformedMeas);
-    }
-    SECTION("SplitQ") {
-        F::tests<OrientationMeasurementUsingPolicy<kalman::SplitQ>>(
-            data, xformedMeas);
-    }
-}
-TEST_CASE("identity calibration output") {
+CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
+                        kalman::QLast, kalman::SplitQ) {
+    using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
+    using JacobianType = typename MeasurementType::JacobianType;
     unique_ptr<TestData> data(new TestData);
     SECTION("identity state") {
         SECTION("identity measurement") {
+            Quaterniond xformedMeas = data->xform(Quaterniond::Identity());
+            CAPTURE(xformedMeas);
+            REQUIRE(xformedMeas.isApprox(Quaterniond::Identity()));
+            MeasurementType meas{xformedMeas, data->imuVariance};
+            CAPTURE(meas.getResidual(data->state));
+            REQUIRE(meas.getResidual(data->state).isApproxToConstant(0.));
 
-            REQUIRE(data->xform(Eigen::Quaterniond::Identity())
-                        .isApprox(Eigen::Quaterniond::Identity()));
-            auto xformedMeas = data->xform(Eigen::Quaterniond::Identity());
-            performTestsForEachPolicy<IdentityMeasurementAndState>(*data,
-                                                                   xformedMeas);
+            JacobianType jacobian = meas.getJacobian(data->state);
+            INFO("jacobian\n" << jacobian);
+            REQUIRE(jacobian.allFinite());
         }
 
         SECTION("measure small positive rotation about y") {
-            Eigen::Quaterniond smallPositiveRotationAboutY(
-                Eigen::AngleAxisd(SMALL_VALUE, Eigen::Vector3d::UnitY()));
-            REQUIRE(data->xform(smallPositiveRotationAboutY)
-                        .isApprox(smallPositiveRotationAboutY));
-            auto xformedMeas = data->xform(smallPositiveRotationAboutY);
-            performTestsForEachPolicy<IdentityStateSmallPosYMeasurement>(
-                *data, xformedMeas);
+            Quaterniond smallPositiveRotationAboutY(
+                AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            CAPTURE(SMALL_VALUE);
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+            REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+
+            MeasurementType meas{xformedMeas, data->imuVariance};
+            Vector3d residual = meas.getResidual(data->state);
+            CAPTURE(residual.transpose());
+            CHECK(residual.isApprox(Vector3d(0, SMALL_VALUE, 0)));
+            JacobianType jacobian = meas.getJacobian(data->state);
+            INFO("jacobian\n" << jacobian);
+            REQUIRE(jacobian.allFinite());
         }
     }
 }
-#if 0
-int main() { return osvr::vbtracker::doTests(); }
-#endif
