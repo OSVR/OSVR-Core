@@ -40,6 +40,7 @@ namespace client {
     class DisplayConfigFactory;
     class DisplayInput {
       public:
+        DisplayInput();
         DisplayInput(OSVR_DisplayDimension width, OSVR_DisplayDimension height);
 
         OSVR_CLIENT_EXPORT OSVR_DisplayDimension getDisplayWidth() const;

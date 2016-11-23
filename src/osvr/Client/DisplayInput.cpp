@@ -33,6 +33,9 @@
 
 namespace osvr {
 namespace client {
+    DisplayInput::DisplayInput() {
+        // do nothing
+    }
     DisplayInput::DisplayInput(OSVR_DisplayDimension width,
                                OSVR_DisplayDimension height)
         : m_width(width), m_height(height) {}
