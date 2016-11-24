@@ -29,6 +29,7 @@
 #include "AngVelTools.h"
 #include "CrossProductMatrix.h"
 #include "ModelTypes.h"
+#include "SigmaPointGenerator.h"
 #include "SpaceTransformations.h"
 
 // Library/third-party includes
@@ -515,6 +516,79 @@ namespace kalman {
             return ret;
         }
     };
+
+    class IMUOrientationMeasForUnscented {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        static const types::DimensionType DIMENSION = 3;
+        using MeasurementVector = types::Vector<DIMENSION>;
+        using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
+        /// Quat should already by in camera space!
+        IMUOrientationMeasForUnscented(Eigen::Quaterniond const &quat,
+                                       types::Vector<3> const &emVariance)
+            : m_quat(quat), m_covariance(emVariance.asDiagonal()) {}
+
+        template <typename State>
+        MeasurementSquareMatrix const &getCovariance(State const &) {
+            return m_covariance;
+        }
+
+        /// Specifies which innovation computation and jacobian to use.
+        // using Policy = PolicyT;
+        // using Policy = SplitQ;
+        using Policy = QLast;
+        // using Policy = QFirst;
+
+        /// Gets the measurement residual, also known as innovation: predicts
+        /// the measurement from the predicted state, and returns the
+        /// difference.
+        ///
+        /// State type doesn't matter as long as we can
+        /// `.getCombinedQuaternion()`
+        template <typename State>
+        MeasurementVector getResidual(State const &s) {
+            const Eigen::Quaterniond residualq =
+                Policy::getInnovationQuat(m_quat, s.getCombinedQuaternion());
+
+            // Two equivalent quaternions: but their logs are typically
+            // different: one is the "short way" and the other is the "long
+            // way". We'll compute both and pick the "short way".
+            // Multiplication of the log by 2 is the way to convert from a quat
+            // to a rotation vector.
+            MeasurementVector residual = 2 * util::quat_ln(residualq);
+#if 0
+            MeasurementVector equivResidual =
+                2 * util::quat_ln(Eigen::Quaterniond(-(residualq.coeffs())));
+            return residual.squaredNorm() < equivResidual.squaredNorm()
+                       ? residual
+                       : equivResidual;
+#else
+            return residual;
+#endif
+        }
+        template <typename State, typename SigmaPointsType>
+        inline typename SigmaPointsType::template TransformedSigmaPointsMat<State::DIMENSION>
+        transformSigmaPoints(State const &s,
+                             SigmaPointsType const &sigmaPoints) const {
+            State tempS = s;
+            typename SigmaPointsType::TransformedSigmaPointsMat<
+                State::DIMENSION>
+                output;
+            for (std::size_t i = 0; i < SigmaPointsType::NumSigmaPoints; ++i) {
+                tempS.stateVector() = sigmaPoints.getSigmaPoints().cols<1>(i);
+                output.cols<1>(i) = getResidual(tempS);
+            }
+            return output;
+        }
+        /// Convenience method to be able to store and re-use measurements.
+        void setMeasurement(Eigen::Quaterniond const &quat) { m_quat = quat; }
+      private:
+        Eigen::Quaterniond m_iRc;
+        Eigen::Quaterniond m_cRi;
+        Eigen::Quaterniond m_quat;
+        MeasurementSquareMatrix m_covariance;
+    };
+
 } // namespace kalman
 namespace vbtracker {
     inline Eigen::Quaterniond
