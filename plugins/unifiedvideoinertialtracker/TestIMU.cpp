@@ -116,6 +116,9 @@ inline void smallPositiveYChecks(TestData *data, MeasurementType &kalmanMeas) {
     AND_THEN("the jacobian should be finite") {
         INFO("jacobian\n" << jacobian);
         REQUIRE(jacobian.allFinite());
+        AND_THEN("the jacobian should not be zero") {
+            REQUIRE_FALSE(jacobian.isApproxToConstant(0));
+        }
     }
 
     auto correctionInProgress =
@@ -174,6 +177,9 @@ CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
                 AND_THEN("the jacobian should be finite") {
                     INFO("jacobian\n" << jacobian);
                     REQUIRE(jacobian.allFinite());
+                    AND_THEN("the jacobian should not be zero") {
+                        REQUIRE_FALSE(jacobian.isApproxToConstant(0));
+                    }
                     auto correctionInProgress = kalman::beginCorrection(
                         data->state, data->processModel, kalmanMeas);
                     AND_THEN("computed deltaz should be zero") {
@@ -202,14 +208,14 @@ CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
 
             THEN("the transformed measurement should equal the measurement") {
                 REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
-
+                /// Do the rest of the checks for a small rotation about y
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
                 smallPositiveYChecks(data.get(), kalmanMeas);
             }
         }
     }
     GIVEN("a state rotated about y") {
-        Quaterniond stateRotation(AngleAxisd(M_PI / 2., Vector3d::UnitY()));
+        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitY()));
         data->state.setQuaternion(stateRotation);
         WHEN("filtering in a small positive rotation about y") {
             Quaterniond smallPositiveRotationAboutY =
@@ -223,9 +229,32 @@ CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
             THEN("the transformed measurement should equal the measurement") {
                 REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
 
+                /// Do the rest of the checks for a small rotation about y
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
                 smallPositiveYChecks(data.get(), kalmanMeas);
             }
         }
     }
+    GIVEN("a state rotated about x") {
+        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitX()));
+        data->state.setQuaternion(stateRotation);
+        WHEN("filtering in a small positive rotation about y") {
+            Quaterniond smallPositiveRotationAboutY =
+                stateRotation *
+                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            CAPTURE(SMALL_VALUE);
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+
+            THEN("the transformed measurement should equal the measurement") {
+                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+
+                /// Do the rest of the checks for a small rotation about y
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                smallPositiveYChecks(data.get(), kalmanMeas);
+            }
+        }
+    }
+}
 }
