@@ -257,4 +257,24 @@ CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
         }
     }
 }
+
+TEST_CASE("Sigma point reconstruction validity") {
+    using namespace osvr::kalman;
+    Matrix3d cov(Vector3d::Constant(10).asDiagonal());
+    using Generator = SigmaPointGenerator<3>;
+    using Reconstructor = ReconstructedDistributionFromSigmaPoints<3, 3>;
+    const auto params = SigmaPointParameters(3);
+    WHEN("Starting with a zero mean") {
+        Vector3d mean = Vector3d::Zero();
+        auto gen = Generator(mean, cov, params);
+        auto recon = Reconstructor(gen, gen.getSigmaPoints());
+        THEN("the reconstructed distribution should be approximately equal to "
+             "the input") {
+            CAPTURE(gen.getSigmaPoints());
+            CAPTURE(recon.getMean());
+            REQUIRE(recon.getMean().isApproxToConstant(0));
+            CAPTURE(recon.getCov());
+            REQUIRE(recon.getCov().isApprox(cov));
+        }
+    }
 }
