@@ -73,7 +73,7 @@ namespace util {
             struct StringEqualityComparisonPolicy {
                 template <typename T>
                 static bool apply(T &&a, std::string const &b) {
-                    return (std::forward<T>(a) == b)
+                    return (std::forward<T>(a) == b);
                 }
             };
 #ifdef OSVR_HAVE_BOOST
