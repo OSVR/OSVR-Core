@@ -84,18 +84,25 @@ namespace vbtracker {
         //@}
 
       private:
-        template <class T, void (*del_implementation)(T *)> struct SmartPtr {
-            struct Del_op {
-                void operator()(T *ptr) const { del_implementation(ptr); }
-            };
-
-            using type = std::unique_ptr<T, Del_op>;
+        template <class T, void (*func_addr)(T *)> struct StatelessDeleter {
+            void operator()(T *ptr) const { func_addr(ptr); }
         };
 
-        using Frame_ptr = typename SmartPtr<uvc_frame_t, &uvc_free_frame>::type;
-        typename SmartPtr<uvc_context_t, &uvc_exit>::type uvcContext_;
-        typename SmartPtr<uvc_device_t, &uvc_unref_device>::type camera_;
-        typename SmartPtr<uvc_device_handle_t, &uvc_close>::type cameraHandle_;
+        using Frame_ptr =
+            std::unique_ptr<uvc_frame_t,
+                            StatelessDeleter<uvc_frame_t, &uvc_free_frame> >;
+
+        std::unique_ptr<uvc_context_t,
+                        StatelessDeleter<uvc_context_t, &uvc_exit> >
+            uvcContext_;
+
+        std::unique_ptr<uvc_device_t,
+                        StatelessDeleter<uvc_device_t, &uvc_unref_device> >
+            camera_;
+
+        std::unique_ptr<uvc_device_handle_t,
+                        StatelessDeleter<uvc_device_handle_t, &uvc_close> >
+            cameraHandle_;
 
         uvc_stream_ctrl_t streamControl_;
         osvr::util::time::TimeValue m_timestamp = {};
@@ -103,9 +110,9 @@ namespace vbtracker {
         std::queue<Frame_ptr> frames_; //< raw UVC frames
 
         std::mutex mutex_;                         //< to protect frames_
-        std::condition_variable frames_available_; //< To allo grab() to wait
-                                                   // for frames to become
-        // available
+        std::condition_variable frames_available_; //< To allow grab() to wait
+                                                   //for frames to become
+                                                   //available
     };
 
     using UVCImageSourcePtr = std::unique_ptr<UVCImageSource>;
@@ -216,8 +223,9 @@ namespace vbtracker {
 		timestamp = m_timestamp;
 
         // Convert the image to at cv::Mat
-        color = cv::Mat(current_frame->height, current_frame->width, CV_8UC3, current_frame->data).clone();
-    }
+        color = cv::Mat(current_frame->height, current_frame->width, CV_8UC3,
+                        current_frame->data)
+                    .clone();    }
 
     void UVCImageSource::callback(uvc_frame_t *frame, void *ptr) {
         auto me = static_cast<UVCImageSource *>(ptr);
@@ -225,14 +233,16 @@ namespace vbtracker {
     }
 
     void UVCImageSource::callback(uvc_frame_t *frame) {
-      //Must be quick here, cannot delay the callback or it will fail to respond to usb events
+        // Must be quick here, cannot delay the callback or it will fail to
+        // respond to usb events
 
-      //We can either copy the frame, and convert to rgb later, or
-      //just convert and save one copy (and allocation) in the server
-      //thread. As the conversion can't be much more expensive than a
-      //copy, we perform it here.
+        // We can either copy the frame, and convert to rgb later, or
+        // just convert and save one copy (and allocation) in the server
+        // thread. As the conversion can't be much more expensive than a
+        // copy, we perform it here.
 
-        Frame_ptr rgb_frame(uvc_allocate_frame(frame->width * frame->height * 3));
+        Frame_ptr rgb_frame(
+            uvc_allocate_frame(frame->width * frame->height * 3));
         if (!rgb_frame) {
             throw std::runtime_error(
                 "Error: Unable to allocate the rgb frame.");
