@@ -113,6 +113,8 @@ namespace kalman {
             return weightsForCov_;
         }
 
+        MeanVec const &getMean() const { return mean_; }
+
       private:
         MeanVec mean_;
         CovMatrix covariance_;
@@ -139,30 +141,38 @@ namespace kalman {
             typename SigmaPointsGen::template TransformedSigmaPointsMat<
                 XformedDim>;
 
+        using CrossCovMatrix = types::Matrix<OrigDim, DIMENSION>;
+
         using MeanVec = types::Vector<XformedDim>;
         using CovMat = types::SquareMatrix<XformedDim>;
         ReconstructedDistributionFromSigmaPoints(
             SigmaPointsGen const &sigmaPoints,
             TransformedSigmaPointsMat const &xformedPointsMat)
-            : xformedCov_(CovMat::Zero()) {
+            : xformedCov_(CovMat::Zero()), crossCov_(CrossCovMatrix::Zero()) {
             /// weighted average
             xformedMean_ = xformedPointsMat * sigmaPoints.getWeightsForMean();
             TransformedSigmaPointsMat zeroMeanPoints =
                 xformedPointsMat.colwise() - xformedMean_;
 
             for (std::size_t i = 0; i < NumSigmaPoints; ++i) {
-                xformedCov_ += sigmaPoints.getWeightsForCov()[i] *
-                               zeroMeanPoints.col(i) *
+                auto weight = sigmaPoints.getWeightsForCov()[i];
+                xformedCov_ += weight * zeroMeanPoints.col(i) *
                                zeroMeanPoints.col(i).transpose();
+                crossCov_ += weight * sigmaPoints.getSigmaPoints().col(i) *
+                             zeroMeanPoints.col(i).transpose();
             }
         }
 
         MeanVec const &getMean() const { return xformedMean_; }
         CovMat const &getCov() const { return xformedCov_; }
+        // matrix of cross-covariance between original and transformed (such as
+        // state and measurement)
+        CrossCovMatrix const &getCrossCov() const { return crossCov_; }
 
       private:
         MeanVec xformedMean_;
         CovMat xformedCov_;
+        CrossCovMatrix crossCov_;
     };
 } // namespace kalman
 } // namespace osvr
