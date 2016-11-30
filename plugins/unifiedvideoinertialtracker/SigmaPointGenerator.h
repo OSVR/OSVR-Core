@@ -80,21 +80,26 @@ namespace kalman {
             gamma = std::sqrt(L + lambda);
         }
     };
-    template <std::size_t Dim> class SigmaPointGenerator {
+
+    template <std::size_t Dim, std::size_t OrigDim = Dim>
+    class AugmentedSigmaPointGenerator {
       public:
+        static_assert(OrigDim <= Dim, "Original, non-augmented dimension must "
+                                      "be equal or less than the full "
+                                      "dimension");
         static const std::size_t L = Dim;
+        static const std::size_t OriginalDimension = OrigDim;
         static const std::size_t NumSigmaPoints = L * 2 + 1;
         using MeanVec = types::Vector<Dim>;
         using CovMatrix = types::SquareMatrix<Dim>;
         using SigmaPointsMat = types::Matrix<Dim, NumSigmaPoints>;
-        template <std::size_t OutputDimension>
-        using TransformedSigmaPointsMat =
-            types::Matrix<OutputDimension, NumSigmaPoints>;
-        SigmaPointGenerator(MeanVec const &mean, CovMatrix const &cov,
-                            SigmaPointParameters params)
+        using SigmaPointWeightVec = types::Vector<NumSigmaPoints>;
+
+        AugmentedSigmaPointGenerator(MeanVec const &mean, CovMatrix const &cov,
+                                     SigmaPointParameters params)
             : mean_(mean), covariance_(cov) {
-            weights_ = types::Vector<NumSigmaPoints>::Constant(
-                params.getOtherEltWeights());
+            weights_ =
+                SigmaPointWeightVec::Constant(params.getOtherEltWeights());
             weightsForCov_ = weights_;
             weights_[0] = params.getElt0MeanWeight();
             weightsForCov_[0] = params.getElt0CovWeight();
@@ -103,13 +108,21 @@ namespace kalman {
             sigmaPoints_ << mean, scaledMatrixSqrt_.colwise() + mean,
                 (-scaledMatrixSqrt_).colwise() + mean;
         }
-        types::Matrix<Dim, NumSigmaPoints> const &getSigmaPoints() const {
-            return sigmaPoints_;
+
+        SigmaPointsMat const &getSigmaPoints() const { return sigmaPoints_; }
+
+        using SigmaPointBlock = Eigen::Block<SigmaPointsMat, OrigDim, 1>;
+        using ConstSigmaPointBlock =
+            Eigen::Block<const SigmaPointsMat, OrigDim, 1>;
+
+        ConstSigmaPointBlock getSigmaPoint(std::size_t i) const {
+            return sigmaPoints_.block<OrigDim, 1>(0, i);
         }
-        types::Vector<NumSigmaPoints> const &getWeightsForMean() const {
+
+        SigmaPointWeightVec const &getWeightsForMean() const {
             return weights_;
         }
-        types::Vector<NumSigmaPoints> const &getWeightsForCov() const {
+        SigmaPointWeightVec const &getWeightsForCov() const {
             return weightsForCov_;
         }
 
@@ -118,30 +131,29 @@ namespace kalman {
       private:
         MeanVec mean_;
         CovMatrix covariance_;
-#if 0
-        SigmaPointParameters params_;
-        const double kappa_;
-            double lambda_;
-            double nu_
-#endif
         CovMatrix scaledMatrixSqrt_;
         SigmaPointsMat sigmaPoints_;
-        types::Vector<NumSigmaPoints> weights_;
-        types::Vector<NumSigmaPoints> weightsForCov_;
+        SigmaPointWeightVec weights_;
+        SigmaPointWeightVec weightsForCov_;
     };
 
-    template <std::size_t XformedDim, std::size_t OrigDim>
+    template <std::size_t Dim>
+    using SigmaPointGenerator = AugmentedSigmaPointGenerator<Dim, Dim>;
+
+    template <std::size_t XformedDim, typename SigmaPointsGenType>
     class ReconstructedDistributionFromSigmaPoints {
       public:
         static const std::size_t DIMENSION = XformedDim;
-        using SigmaPointsGen = SigmaPointGenerator<OrigDim>;
+        using SigmaPointsGen = SigmaPointsGenType;
         static const std::size_t NumSigmaPoints =
             SigmaPointsGen::NumSigmaPoints;
-        using TransformedSigmaPointsMat =
-            typename SigmaPointsGen::template TransformedSigmaPointsMat<
-                XformedDim>;
 
-        using CrossCovMatrix = types::Matrix<OrigDim, DIMENSION>;
+        static const types::DimensionType OriginalDimension =
+            SigmaPointsGen::OriginalDimension;
+        using TransformedSigmaPointsMat =
+            types::Matrix<XformedDim, NumSigmaPoints>;
+
+        using CrossCovMatrix = types::Matrix<OriginalDimension, DIMENSION>;
 
         using MeanVec = types::Vector<XformedDim>;
         using CovMat = types::SquareMatrix<XformedDim>;
@@ -158,7 +170,7 @@ namespace kalman {
                 auto weight = sigmaPoints.getWeightsForCov()[i];
                 xformedCov_ += weight * zeroMeanPoints.col(i) *
                                zeroMeanPoints.col(i).transpose();
-                crossCov_ += weight * sigmaPoints.getSigmaPoints().col(i) *
+                crossCov_ += weight * sigmaPoints.getSigmaPoint(i) *
                              zeroMeanPoints.col(i).transpose();
             }
         }
@@ -166,7 +178,7 @@ namespace kalman {
         MeanVec const &getMean() const { return xformedMean_; }
         CovMat const &getCov() const { return xformedCov_; }
         // matrix of cross-covariance between original and transformed (such as
-        // state and measurement)
+        // state and measurement residuals)
         CrossCovMatrix const &getCrossCov() const { return crossCov_; }
 
       private:

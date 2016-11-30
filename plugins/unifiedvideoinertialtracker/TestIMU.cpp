@@ -24,6 +24,7 @@
 
 // Internal Includes
 #include "ConfigParams.h"
+#include "FlexibleUnscentedCorrect.h"
 #include "IMUStateMeasurements.h"
 
 // Library/third-party includes
@@ -50,6 +51,7 @@ struct TestData {
             kalman::types::DimVector<BodyState>::Constant(100).asDiagonal());
 #endif
 
+        originalStateError = state.errorCovariance();
         /// configure the process model
         processModel.setDamping(params.linearVelocityDecayCoefficient,
                                 params.angularVelocityDecayCoefficient);
@@ -76,6 +78,7 @@ struct TestData {
     /// Default constructor is no translation, identity rotation, 10 along
     /// main diagonal as the state covariance matrix.
     BodyState state;
+    kalman::types::DimSquareMatrix<BodyState> originalStateError;
 
     BodyProcessModel processModel;
     Eigen::Vector3d imuVariance;
@@ -262,7 +265,8 @@ TEST_CASE("Sigma point reconstruction validity") {
     using namespace osvr::kalman;
     Matrix3d cov(Vector3d::Constant(10).asDiagonal());
     using Generator = SigmaPointGenerator<3>;
-    using Reconstructor = ReconstructedDistributionFromSigmaPoints<3, 3>;
+    using Reconstructor =
+        ReconstructedDistributionFromSigmaPoints<3, Generator>;
     const auto params = SigmaPointParameters(3);
     WHEN("Starting with a zero mean") {
         Vector3d mean = Vector3d::Zero();
@@ -293,237 +297,6 @@ TEST_CASE("Sigma point reconstruction validity") {
     }
 }
 
-namespace osvr {
-namespace kalman {
-
-    template <std::size_t Dim, std::size_t OrigDim = Dim>
-    class AugmentedSigmaPointGenerator {
-      public:
-        static_assert(OrigDim <= Dim, "Original, non-augmented dimension must "
-                                      "be equal or less than the full "
-                                      "dimension");
-        static const std::size_t L = Dim;
-        static const std::size_t OriginalDimension = OrigDim;
-        static const std::size_t NumSigmaPoints = L * 2 + 1;
-        using MeanVec = types::Vector<Dim>;
-        using CovMatrix = types::SquareMatrix<Dim>;
-        using SigmaPointsMat = types::Matrix<Dim, NumSigmaPoints>;
-        using SigmaPointWeightVec = types::Vector<NumSigmaPoints>;
-        template <std::size_t OutputDimension>
-        using TransformedSigmaPointsMat =
-            types::Matrix<OutputDimension, NumSigmaPoints>;
-        AugmentedSigmaPointGenerator(MeanVec const &mean, CovMatrix const &cov,
-                                     SigmaPointParameters params)
-            : mean_(mean), covariance_(cov) {
-            weights_ =
-                SigmaPointWeightVec::Constant(params.getOtherEltWeights());
-            weightsForCov_ = weights_;
-            weights_[0] = params.getElt0MeanWeight();
-            weightsForCov_[0] = params.getElt0CovWeight();
-            scaledMatrixSqrt_ = cov.llt().matrixL();
-            scaledMatrixSqrt_ *= params.gamma;
-            sigmaPoints_ << mean, scaledMatrixSqrt_.colwise() + mean,
-                (-scaledMatrixSqrt_).colwise() + mean;
-        }
-
-        SigmaPointsMat const &getSigmaPoints() const { return sigmaPoints_; }
-
-        using SigmaPointBlock = Eigen::Block<SigmaPointsMat, OrigDim, 1>;
-        using ConstSigmaPointBlock =
-            Eigen::Block<const SigmaPointsMat, OrigDim, 1>;
-
-        ConstSigmaPointBlock getSigmaPoint(std::size_t i) const {
-            return sigmaPoints_.block<OrigDim, 1>(0, i);
-        }
-
-        SigmaPointWeightVec const &getWeightsForMean() const {
-            return weights_;
-        }
-        SigmaPointWeightVec const &getWeightsForCov() const {
-            return weightsForCov_;
-        }
-
-        MeanVec const &getMean() const { return mean_; }
-
-      private:
-        MeanVec mean_;
-        CovMatrix covariance_;
-        CovMatrix scaledMatrixSqrt_;
-        SigmaPointsMat sigmaPoints_;
-        SigmaPointWeightVec weights_;
-        SigmaPointWeightVec weightsForCov_;
-    };
-
-    template <std::size_t XformedDim, typename SigmaPointsGenType>
-    class SigmaDistributionReconstruction {
-      public:
-        static const std::size_t DIMENSION = XformedDim;
-        using SigmaPointsGen = SigmaPointsGenType;
-        static const std::size_t NumSigmaPoints =
-            SigmaPointsGen::NumSigmaPoints;
-
-        static const types::DimensionType OriginalDimension =
-            SigmaPointsGen::OriginalDimension;
-        using TransformedSigmaPointsMat =
-            typename SigmaPointsGen::template TransformedSigmaPointsMat<
-                XformedDim>;
-
-        using CrossCovMatrix = types::Matrix<OriginalDimension, DIMENSION>;
-
-        using MeanVec = types::Vector<XformedDim>;
-        using CovMat = types::SquareMatrix<XformedDim>;
-        SigmaDistributionReconstruction(
-            SigmaPointsGen const &sigmaPoints,
-            TransformedSigmaPointsMat const &xformedPointsMat)
-            : xformedCov_(CovMat::Zero()), crossCov_(CrossCovMatrix::Zero()) {
-            /// weighted average
-            xformedMean_ = xformedPointsMat * sigmaPoints.getWeightsForMean();
-            TransformedSigmaPointsMat zeroMeanPoints =
-                xformedPointsMat.colwise() - xformedMean_;
-
-            for (std::size_t i = 0; i < NumSigmaPoints; ++i) {
-                auto weight = sigmaPoints.getWeightsForCov()[i];
-                xformedCov_ += weight * zeroMeanPoints.col(i) *
-                               zeroMeanPoints.col(i).transpose();
-                crossCov_ += weight * sigmaPoints.getSigmaPoint(i) *
-                             zeroMeanPoints.col(i).transpose();
-            }
-        }
-
-        MeanVec const &getMean() const { return xformedMean_; }
-        CovMat const &getCov() const { return xformedCov_; }
-        // matrix of cross-covariance between original and transformed (such as
-        // state and measurement)
-        CrossCovMatrix const &getCrossCov() const { return crossCov_; }
-
-      private:
-        MeanVec xformedMean_;
-        CovMat xformedCov_;
-        CrossCovMatrix crossCov_;
-    };
-
-    template <typename State, typename Measurement>
-    class SigmaPointCorrectionApplication {
-      public:
-        static const types::DimensionType StateDim =
-            types::Dimension<State>::value;
-        static const types::DimensionType MeasurementDim =
-            types::Dimension<Measurement>::value;
-        /// state augmented with measurement noise mean
-        static const types::DimensionType AugmentedStateDim =
-            StateDim + MeasurementDim;
-        using StateVec = types::DimVector<State>;
-        using StateSquareMatrix = types::DimSquareMatrix<State>;
-        using MeasurementSquareMatrix = types::DimSquareMatrix<Measurement>;
-        using AugmentedStateVec = types::Vector<AugmentedStateDim>;
-        using AugmentedStateCovMatrix = types::SquareMatrix<AugmentedStateDim>;
-        using SigmaPointsGen =
-            AugmentedSigmaPointGenerator<AugmentedStateDim, StateDim>;
-        static const types::DimensionType NumSigmaPoints =
-            SigmaPointsGen::NumSigmaPoints;
-
-        using TransformedSigmaPointMat =
-            types::Matrix<MeasurementDim, NumSigmaPoints>;
-
-        using Reconstruction =
-            SigmaDistributionReconstruction<MeasurementDim, SigmaPointsGen>;
-
-        using GainMatrix = types::Matrix<StateDim, MeasurementDim>;
-
-        SigmaPointCorrectionApplication(State &s, Measurement &m,
-                                        SigmaPointParameters params)
-            : state(s), measurement(m),
-              sigmaPoints(getAugmentedStateVec(s, m),
-                          getAugmentedStateCov(s, m), params),
-              transformedPoints(
-                  transformSigmaPoints(state, measurement, sigmaPoints)),
-              reconstruction(sigmaPoints, transformedPoints),
-              innovationCovariance(computeInnovationCovariance(
-                  state, measurement, reconstruction)),
-              K(computeKalmanGain(innovationCovariance, reconstruction)),
-              stateCorrection(K * reconstruction.getMean()) {}
-
-        static AugmentedStateVec getAugmentedStateVec(State const &s,
-                                                      Measurement const &m) {
-            AugmentedStateVec ret;
-            /// assuming measurement noise is zero mean
-            ret << s.stateVector(), types::DimVector<Measurement>::Zero();
-            return ret;
-        }
-
-        static AugmentedStateCovMatrix getAugmentedStateCov(State const &s,
-                                                            Measurement &m) {
-            AugmentedStateCovMatrix ret;
-            ret << s.errorCovariance(),
-                types::Matrix<StateDim, MeasurementDim>::Zero(),
-                types::Matrix<MeasurementDim, StateDim>::Zero(),
-                m.getCovariance(s);
-            return ret;
-        }
-
-        /// Transforms sigma points by having the measurement compute the
-        /// residual for a state whose state vector we update to each of the
-        /// sigma points in turn.
-        static TransformedSigmaPointMat
-        transformSigmaPoints(State const &s, Measurement &m,
-                             SigmaPointsGen const &sigmaPoints) {
-            TransformedSigmaPointMat ret;
-            State tempS = s;
-            for (std::size_t i = 0; i < NumSigmaPoints; ++i) {
-                tempS.setStateVector(sigmaPoints.getSigmaPoint(i));
-                ret.col(i) = m.getResidual(tempS);
-            }
-            return ret;
-        }
-
-        static MeasurementSquareMatrix
-        computeInnovationCovariance(State const &s, Measurement &m,
-                                    Reconstruction const &recon) {
-            return recon.getCov() + m.getCovariance(s);
-        }
-
-        static GainMatrix computeKalmanGain(MeasurementSquareMatrix const &Pvv,
-                                            Reconstruction const &recon) {
-
-            // Solve for K in K=Pxy Pvv^-1
-            // where the cross-covariance matrix from the reconstruction is
-            // transpose(Pxy) and Pvv is the reconstructed covariance plus the
-            // measurement covariance
-            // (Actually solves with transpose(Pvv) * transpose(K) =
-            // transpose(Pxy) )
-            GainMatrix ret = Pvv.transpose().ldlt().solve(recon.getCrossCov());
-            return ret;
-        }
-
-        void finishCorrection() {
-            state.setStateVector(state.stateVector() + stateCorrection);
-
-            StateSquareMatrix newP = state.errorCovariance() -
-                                     K * innovationCovariance * K.transpose();
-            state.setErrorCovariance(newP);
-            // Let the state do any cleanup it has to (like fixing externalized
-            // quaternions)
-            state.postCorrect();
-        }
-
-        State &state;
-        Measurement &measurement;
-        SigmaPointsGen sigmaPoints;
-        TransformedSigmaPointMat transformedPoints;
-        Reconstruction reconstruction;
-        MeasurementSquareMatrix innovationCovariance;
-        GainMatrix K;
-        StateVec stateCorrection;
-    };
-    template <typename State, typename Measurement>
-    inline SigmaPointCorrectionApplication<State, Measurement>
-    beginUnscentedCorrection(State &s, Measurement &m,
-                             SigmaPointParameters params) {
-        return SigmaPointCorrectionApplication<State, Measurement>(s, m,
-                                                                   params);
-    }
-} // namespace kalman
-} // namespace osvr
 #if 0
 CATCH_TYPELIST_TESTCASE("unscented with identity calibration output",
                         kalman::IMUOrientationMeasForUnscented) {
@@ -549,12 +322,6 @@ TEST_CASE("unscented with identity calibration output") {
                     REQUIRE(kalmanMeas.getResidual(data->state)
                                 .isApproxToConstant(0.));
                 }
-                using StateDim =
-                    kalman::types::Dimension<decltype(data->state)>;
-                using MeasurementDim =
-                    kalman::types::Dimension<MeasurementType>;
-                static const auto m = MeasurementDim::value;
-                static const auto n = StateDim::value;
                 auto inProgress = kalman::beginUnscentedCorrection(
                     data->state, kalmanMeas, params);
 
