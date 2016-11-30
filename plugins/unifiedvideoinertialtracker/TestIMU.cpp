@@ -342,6 +342,22 @@ TEST_CASE("unscented with identity calibration output") {
                     REQUIRE(inProgress.stateCorrection.array().allFinite());
                     REQUIRE(inProgress.stateCorrection.isApproxToConstant(0));
                 }
+                AND_WHEN("the correction is applied") {
+                    inProgress.finishCorrection();
+                    THEN("state should be 0 - unchanged") {
+                        CAPTURE(data->state.stateVector().transpose());
+                        REQUIRE(
+                            data->state.stateVector().isApproxToConstant(0));
+                        CAPTURE(data->state.getQuaternion());
+                        REQUIRE(data->state.getQuaternion().coeffs().isApprox(
+                            Quaterniond::Identity().coeffs()));
+                    }
+                    THEN("State error should have decreased") {
+                        REQUIRE((data->state.errorCovariance().array() <=
+                                 data->originalStateError.array())
+                                    .all());
+                    }
+                }
             }
         }
     }
