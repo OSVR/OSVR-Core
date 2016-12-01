@@ -378,6 +378,49 @@ inline void unscentedSmallPositiveYChecks(TestData *data,
     commonSmallPositiveYChecks(data, kalmanMeas, inProgress);
 }
 
+template <typename MeasurementType>
+inline void checkEffectiveIdentityMeasurement(TestData *data,
+                                              MeasurementType &kalmanMeas) {
+    AND_THEN("residual should be zero") {
+        CAPTURE(kalmanMeas.getResidual(data->state));
+        REQUIRE(kalmanMeas.getResidual(data->state).isApproxToConstant(0.));
+    }
+    auto inProgress = kalman::beginUnscentedCorrection(data->state, kalmanMeas);
+
+    andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
+    AND_THEN("transformed sigma points should not all equal 0") {
+        REQUIRE_FALSE(inProgress.transformedPoints.isApproxToConstant(0.));
+    }
+    auto &recon = inProgress.reconstruction;
+    AND_THEN("propagated predicted measurement mean should be zero") {
+        CAPTURE(recon.getMean().transpose());
+        REQUIRE(recon.getMean().isApproxToConstant(0.));
+    }
+    AND_THEN("state correction should be finite - specifically, zero") {
+        CAPTURE(inProgress.stateCorrection.transpose());
+        REQUIRE(inProgress.stateCorrection.array().allFinite());
+        REQUIRE(inProgress.stateCorrection.isApproxToConstant(0));
+    }
+
+    const Quaterniond origQuat = data->state.getQuaternion();
+    AND_WHEN("the correction is applied") {
+        inProgress.finishCorrection();
+        THEN("state should be unchanged") {
+            CAPTURE(data->state.stateVector().transpose());
+            REQUIRE(data->state.stateVector().isApproxToConstant(0));
+            CAPTURE(origQuat);
+            CAPTURE(data->state.getQuaternion());
+            REQUIRE(data->state.getQuaternion().coeffs().isApprox(
+                origQuat.coeffs()));
+        }
+        THEN("State error should have decreased") {
+            REQUIRE((data->state.errorCovariance().array() <=
+                     data->originalStateError.array())
+                        .all());
+        }
+    }
+}
+
 CATCH_TYPELIST_TESTCASE("unscented with identity calibration output",
                         /*kalman::QFirst, kalman::QLast,*/ kalman::SplitQ) {
 
@@ -399,46 +442,7 @@ TEST_CASE("unscented with identity calibration output") {
                 REQUIRE(xformedMeas.isApprox(Quaterniond::Identity()));
 
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
-                AND_THEN("residual should be zero") {
-                    CAPTURE(kalmanMeas.getResidual(data->state));
-                    REQUIRE(kalmanMeas.getResidual(data->state)
-                                .isApproxToConstant(0.));
-                }
-                auto inProgress = kalman::beginUnscentedCorrection(
-                    data->state, kalmanMeas, params);
-
-                andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
-                AND_THEN("transformed sigma points should not all equal 0") {
-                    REQUIRE_FALSE(
-                        inProgress.transformedPoints.isApproxToConstant(0.));
-                }
-                auto &recon = inProgress.reconstruction;
-                AND_THEN("propagated mean residual should be zero") {
-                    CAPTURE(recon.getMean().transpose());
-                    REQUIRE(recon.getMean().isApproxToConstant(0.));
-                }
-                AND_THEN(
-                    "state correction should be finite - specifically, zero") {
-                    CAPTURE(inProgress.stateCorrection.transpose());
-                    REQUIRE(inProgress.stateCorrection.array().allFinite());
-                    REQUIRE(inProgress.stateCorrection.isApproxToConstant(0));
-                }
-                AND_WHEN("the correction is applied") {
-                    inProgress.finishCorrection();
-                    THEN("state should be 0 - unchanged") {
-                        CAPTURE(data->state.stateVector().transpose());
-                        REQUIRE(
-                            data->state.stateVector().isApproxToConstant(0));
-                        CAPTURE(data->state.getQuaternion());
-                        REQUIRE(data->state.getQuaternion().coeffs().isApprox(
-                            Quaterniond::Identity().coeffs()));
-                    }
-                    THEN("State error should have decreased") {
-                        REQUIRE((data->state.errorCovariance().array() <=
-                                 data->originalStateError.array())
-                                    .all());
-                    }
-                }
+                checkEffectiveIdentityMeasurement(data.get(), kalmanMeas);
             }
         }
 
@@ -498,6 +502,49 @@ TEST_CASE("unscented with identity calibration output") {
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
                 CAPTURE(kalmanMeas.getResidual(data->state));
                 unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
+            }
+        }
+    }
+}
+
+TEST_CASE("unscented with small x rotation calibration output") {
+    using MeasurementType = OrientationMeasurementUsingPolicy<kalman::SplitQ>;
+    unique_ptr<TestData> data(new TestData);
+    CAPTURE(SMALL_VALUE);
+    data->roomToCameraRotation =
+        Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitX()));
+    CAPTURE(data->roomToCameraRotation);
+    GIVEN("an identity state in camera space") {
+        CAPTURE(data->state.getQuaternion());
+        WHEN("filtering in a measurement that's the inverse of the room to "
+             "camera rotation (a measurement matching state)") {
+            Quaterniond xformedMeas =
+                data->xform(data->roomToCameraRotation.inverse());
+
+            THEN("the transformed measurement should be approximately the "
+                 "identity") {
+                CAPTURE(xformedMeas);
+                REQUIRE(xformedMeas.isApprox(Quaterniond::Identity()));
+
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                checkEffectiveIdentityMeasurement(data.get(), kalmanMeas);
+            }
+        }
+    }
+    GIVEN("an identity state in room space") {
+        data->state.setQuaternion(data->roomToCameraRotation);
+        CAPTURE(data->state.getQuaternion());
+        WHEN("filtering in an identity measurement (a measurement matching "
+             "state)") {
+            Quaterniond xformedMeas = data->xform(Quaterniond::Identity());
+
+            THEN("the transformed measurement should be approximately the "
+                 "room to camera rotation") {
+                CAPTURE(xformedMeas);
+                REQUIRE(xformedMeas.isApprox(data->roomToCameraRotation));
+
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                checkEffectiveIdentityMeasurement(data.get(), kalmanMeas);
             }
         }
     }
