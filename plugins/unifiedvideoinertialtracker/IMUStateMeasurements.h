@@ -555,7 +555,7 @@ namespace vbtracker {
     getTransformedOrientation(Eigen::Quaterniond const &imuQuat,
                               Eigen::Quaterniond const &roomToCameraRotation,
                               util::Angle /*yawCorrection*/) {
-        return roomToCameraRotation * imuQuat;
+        return imuQuat * roomToCameraRotation;
     }
 #ifdef OSVR_USE_OLD_MEASUREMENT_CLASS
     using OrientationMeasurement =
