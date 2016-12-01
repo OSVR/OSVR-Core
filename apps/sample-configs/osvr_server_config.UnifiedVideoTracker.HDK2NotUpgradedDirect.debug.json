@@ -79,9 +79,9 @@
     }
   ],
   "aliases": {
-    "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/1",
-    "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/2",
-    "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/3",
-    "/hmdInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/4"
+      "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera",
+      "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/imu",
+      "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/cameraSpace/imu",
+      "/hmdInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/semantic/body/0/cameraSpace/body"
   }
 }
