@@ -35,6 +35,7 @@
 #include <memory>
 
 #define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_CONSOLE_WIDTH 120
 #include "catch_typelist.h"
 #include <catch.hpp>
 
@@ -106,14 +107,72 @@ template <> struct TypelistTypeNameTrait<kalman::SplitQ> {
 } // namespace Catch
 
 static const double SMALL_VALUE = 0.1;
+
+template <typename MeasurementType, typename InProgressType>
+inline void commonSmallPositiveYChecks(TestData *data,
+                                       MeasurementType &kalmanMeas,
+                                       InProgressType &inProgress) {
+
+    Vector3d residual = kalmanMeas.getResidual(data->state);
+
+    CAPTURE(residual.transpose());
+    AND_THEN("residual directly computed by measurement should be 0, "
+             "SMALL_VALUE, 0") {
+        CHECK(residual.isApprox(Vector3d(0, SMALL_VALUE, 0)));
+    }
+
+    CAPTURE(inProgress.deltaz.transpose());
+    AND_THEN("computed deltaz should equal residual") {
+        CHECK(residual.isApprox(inProgress.deltaz));
+    }
+
+    AND_THEN("delta z (residual/propagated mean residual) should be "
+             "approximately 0, SMALL_VALUE, 0") {
+        REQUIRE(inProgress.deltaz[0] == Approx(0.));
+        REQUIRE(inProgress.deltaz[1] == Approx(SMALL_VALUE));
+        REQUIRE(inProgress.deltaz[2] == Approx(0.));
+    }
+
+    CAPTURE(inProgress.stateCorrection.transpose());
+    AND_THEN("state correction should have a rotation component with small "
+             "positive y") {
+        REQUIRE(inProgress.stateCorrectionFinite);
+        REQUIRE(inProgress.stateCorrection[3] == Approx(0.));
+        REQUIRE(inProgress.stateCorrection[4] > 0);
+        REQUIRE(inProgress.stateCorrection[4] < SMALL_VALUE);
+        REQUIRE(inProgress.stateCorrection[5] == Approx(0.));
+    }
+
+    AND_THEN("state correction should have an angular velocity component "
+             "with zero or small positive y") {
+        REQUIRE(inProgress.stateCorrection[9] == Approx(0.));
+        REQUIRE(inProgress.stateCorrection[10] >= 0.);
+        REQUIRE(inProgress.stateCorrection[11] == Approx(0.));
+    }
+    AND_THEN("state correction should not contain any translational/linear "
+             "velocity components") {
+        REQUIRE(inProgress.stateCorrection.head<3>().isApproxToConstant(0.));
+        REQUIRE(
+            inProgress.stateCorrection.segment<3>(6).isApproxToConstant(0.));
+    }
+    AND_WHEN("the correction is applied") {
+        auto errorCovarianceCorrectionWasFinite = inProgress.finishCorrection();
+        THEN("the new error covariance should be finite") {
+            REQUIRE(errorCovarianceCorrectionWasFinite);
+            AND_THEN("State error should have decreased") {
+                REQUIRE((data->state.errorCovariance().array() <=
+                         data->originalStateError.array())
+                            .all());
+            }
+        }
+    }
+}
+
+#if 1
+
 template <typename MeasurementType>
 inline void smallPositiveYChecks(TestData *data, MeasurementType &kalmanMeas) {
     using JacobianType = typename MeasurementType::JacobianType;
-    Vector3d residual = kalmanMeas.getResidual(data->state);
-    AND_THEN("residual should be 0, SMALL_VALUE, 0") {
-        CAPTURE(residual.transpose());
-        CHECK(residual.isApprox(Vector3d(0, SMALL_VALUE, 0)));
-    }
 
     JacobianType jacobian = kalmanMeas.getJacobian(data->state);
     AND_THEN("the jacobian should be finite") {
@@ -122,37 +181,9 @@ inline void smallPositiveYChecks(TestData *data, MeasurementType &kalmanMeas) {
         AND_THEN("the jacobian should not be zero") {
             REQUIRE_FALSE(jacobian.isApproxToConstant(0));
         }
-    }
-
-    auto correctionInProgress =
-        kalman::beginCorrection(data->state, data->processModel, kalmanMeas);
-    AND_THEN("computed deltaz should equal residual") {
-        CAPTURE(residual.transpose());
-        CAPTURE(correctionInProgress.deltaz.transpose());
-        CHECK(residual.isApprox(correctionInProgress.deltaz));
-    }
-    CAPTURE(correctionInProgress.stateCorrection.transpose());
-    AND_THEN("state correction should be finite") {
-        REQUIRE(correctionInProgress.stateCorrectionFinite);
-        AND_THEN("state correction should have a rotation component with small "
-                 "positive y") {
-            REQUIRE(correctionInProgress.stateCorrection[3] == Approx(0.));
-            REQUIRE(correctionInProgress.stateCorrection[4] > 0);
-            REQUIRE(correctionInProgress.stateCorrection[5] == Approx(0.));
-        }
-        AND_THEN("state correction should have an angular velocity component "
-                 "with zero or small positive y") {
-            REQUIRE(correctionInProgress.stateCorrection[9] == Approx(0.));
-            REQUIRE(correctionInProgress.stateCorrection[10] >= 0.);
-            REQUIRE(correctionInProgress.stateCorrection[11] == Approx(0.));
-        }
-        AND_THEN("state correction should not contain any translational/linear "
-                 "velocity components") {
-            REQUIRE(correctionInProgress.stateCorrection.head<3>()
-                        .isApproxToConstant(0.));
-            REQUIRE(correctionInProgress.stateCorrection.segment<3>(6)
-                        .isApproxToConstant(0.));
-        }
+        auto inProgress = kalman::beginCorrection(
+            data->state, data->processModel, kalmanMeas);
+        commonSmallPositiveYChecks(data, kalmanMeas, inProgress);
     }
 }
 
@@ -261,52 +292,101 @@ CATCH_TYPELIST_TESTCASE("identity calibration output", kalman::QFirst,
     }
 }
 
-TEST_CASE("Sigma point reconstruction validity") {
-    using namespace osvr::kalman;
-    Matrix3d cov(Vector3d::Constant(10).asDiagonal());
-    using Generator = SigmaPointGenerator<3>;
-    using Reconstructor =
-        ReconstructedDistributionFromSigmaPoints<3, Generator>;
-    const auto params = SigmaPointParameters(3);
-    WHEN("Starting with a zero mean") {
-        Vector3d mean = Vector3d::Zero();
-        auto gen = Generator(mean, cov, params);
-        auto recon = Reconstructor(gen, gen.getSigmaPoints());
-        THEN("the reconstructed distribution should be approximately equal to "
-             "the input") {
-            CAPTURE(gen.getSigmaPoints());
-            CAPTURE(recon.getMean());
-            REQUIRE(recon.getMean().isApproxToConstant(0));
-            CAPTURE(recon.getCov());
-            REQUIRE(recon.getCov().isApprox(cov));
-        }
-    }
+#endif
+template <typename GeneratorType>
+inline void nonNegativeWeights(GeneratorType const &gen) {
+    CAPTURE(gen.getWeightsForMean().transpose());
+    // CHECK((gen.getWeightsForMean().array() >= 0.).all());
 
-    WHEN("Starting with a non-zero mean") {
-        Vector3d mean = Vector3d(1, 2, 3);
-        auto gen = Generator(mean, cov, params);
+    CAPTURE(gen.getWeightsForCov().transpose());
+    // CHECK((gen.getWeightsForCov().array() >= 0.).all());
+}
+
+template <typename GeneratorType>
+inline void thenRequireNonNegativeWeights(GeneratorType const &gen) {
+    THEN("Weights should be non-negative") { nonNegativeWeights(gen); }
+}
+template <typename GeneratorType>
+inline void andThenRequireNonNegativeWeights(GeneratorType const &gen) {
+    AND_THEN("Weights should be non-negative") { nonNegativeWeights(gen); }
+}
+
+inline void checkReconstruction(Vector3d const &mean, Matrix3d const &cov) {
+    static const auto DIM = 3;
+    using namespace osvr::kalman;
+    using Generator = SigmaPointGenerator<DIM>;
+    using Reconstructor =
+        ReconstructedDistributionFromSigmaPoints<DIM, Generator>;
+    const auto params = SigmaPointParameters();
+    CAPTURE(mean);
+    CAPTURE(cov);
+    auto gen = Generator(mean, cov, params);
+    thenRequireNonNegativeWeights(gen);
+#if 0
+	static const auto numSigmaPoints = Generator::NumSigmaPoints;
+	for (std::size_t i = 0; i < numSigmaPoints; ++i) {
+		CAPTURE(gen.getSigmaPoint(i));
+		CHECK(false);
+	}
+#endif
+    AND_WHEN("reconstructed from the sigma points") {
         auto recon = Reconstructor(gen, gen.getSigmaPoints());
-        THEN("the reconstructed distribution should be approximately equal to "
-             "the input") {
+        THEN("the reconstructed distribution should be approximately equal "
+             "to the input") {
             CAPTURE(gen.getSigmaPoints());
             CAPTURE(recon.getMean());
-            REQUIRE(recon.getMean().isApprox(mean));
+            for (std::size_t i = 0; i < DIM; ++i) {
+                CAPTURE(i);
+                REQUIRE(recon.getMean()[i] == Approx(mean[i]));
+            }
             CAPTURE(recon.getCov());
             REQUIRE(recon.getCov().isApprox(cov));
         }
     }
 }
 
-#if 0
+TEST_CASE("Sigma point reconstruction validity") {
+    using namespace osvr::kalman;
+    Matrix3d cov(Vector3d::Constant(10).asDiagonal());
+    WHEN("Starting with a zero mean") {
+        checkReconstruction(Vector3d::Zero(), cov);
+    }
+
+    WHEN("Starting with a non-zero mean") {
+        checkReconstruction(Vector3d(1, 2, 3), cov);
+    }
+    WHEN("Starting with a small non-zero mean") {
+        checkReconstruction(Vector3d(0.1, 0.2, 0.3), cov);
+    }
+}
+
+template <typename MeasurementType>
+inline void unscentedSmallPositiveYChecks(TestData *data,
+                                          MeasurementType &kalmanMeas) {
+    const auto params = kalman::SigmaPointParameters();
+    auto inProgress =
+        kalman::beginUnscentedCorrection(data->state, kalmanMeas, params);
+
+    AND_THEN("transformed sigma points should not all equal 0") {
+        CAPTURE(inProgress.transformedPoints.transpose());
+        REQUIRE_FALSE(inProgress.transformedPoints.isApproxToConstant(0.));
+    }
+    andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
+
+    commonSmallPositiveYChecks(data, kalmanMeas, inProgress);
+}
+
 CATCH_TYPELIST_TESTCASE("unscented with identity calibration output",
-                        kalman::IMUOrientationMeasForUnscented) {
-#endif
+                        /*kalman::QFirst,*/ kalman::QLast, kalman::SplitQ) {
+
+#if 0
 TEST_CASE("unscented with identity calibration output") {
     using TypeParam = kalman::IMUOrientationMeasForUnscented;
+#endif
 
-    const auto params = kalman::SigmaPointParameters(3);
-    // using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
-    using MeasurementType = TypeParam;
+    const auto params = kalman::SigmaPointParameters();
+    using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
+    // using MeasurementType = TypeParam;
     unique_ptr<TestData> data(new TestData);
     GIVEN("an identity state") {
         WHEN("filtering in an identity measurement") {
@@ -325,12 +405,11 @@ TEST_CASE("unscented with identity calibration output") {
                 auto inProgress = kalman::beginUnscentedCorrection(
                     data->state, kalmanMeas, params);
 
+                andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
                 AND_THEN("transformed sigma points should not all equal 0") {
                     REQUIRE_FALSE(
                         inProgress.transformedPoints.isApproxToConstant(0.));
                 }
-                // kalman::SigmaDistributionReconstruction<MeasurementDim::value,
-                // typename decltype(inProgress)::SigmaPointsGen>
                 auto &recon = inProgress.reconstruction;
                 AND_THEN("propagated mean residual should be zero") {
                     CAPTURE(recon.getMean().transpose());
@@ -358,6 +437,64 @@ TEST_CASE("unscented with identity calibration output") {
                                     .all());
                     }
                 }
+            }
+        }
+
+        WHEN("filtering in a small positive rotation about y") {
+            Quaterniond smallPositiveRotationAboutY(
+                AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            CAPTURE(SMALL_VALUE);
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+
+            THEN("the transformed measurement should equal the measurement") {
+                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+                /// Do the rest of the checks for a small rotation about y
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
+            }
+        }
+    }
+    GIVEN("a state rotated about y") {
+        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitY()));
+        data->state.setQuaternion(stateRotation);
+        WHEN("filtering in a small positive rotation about y") {
+            Quaterniond smallPositiveRotationAboutY =
+                stateRotation *
+                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            CAPTURE(SMALL_VALUE);
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+
+            THEN("the transformed measurement should equal the measurement") {
+                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+
+                /// Do the rest of the checks for a small rotation about y
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
+            }
+        }
+    }
+    GIVEN("a state rotated about x") {
+        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitX()));
+        data->state.setQuaternion(stateRotation);
+        WHEN("filtering in a small positive rotation about y") {
+            Quaterniond smallPositiveRotationAboutY =
+                stateRotation *
+                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            CAPTURE(SMALL_VALUE);
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+
+            THEN("the transformed measurement should equal the measurement") {
+                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+
+                /// Do the rest of the checks for a small rotation about y
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
             }
         }
     }
