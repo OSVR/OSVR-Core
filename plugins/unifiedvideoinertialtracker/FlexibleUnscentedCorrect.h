@@ -80,8 +80,9 @@ namespace kalman {
 
         using GainMatrix = types::Matrix<n, m>;
 
-        SigmaPointCorrectionApplication(State &s, Measurement &m,
-                                        SigmaPointParameters params)
+        SigmaPointCorrectionApplication(
+            State &s, Measurement &m,
+            SigmaPointParameters const &params = SigmaPointParameters())
             : state(s), measurement(m),
               sigmaPoints(getAugmentedStateVec(s, m),
                           getAugmentedStateCov(s, m), params),
@@ -91,7 +92,8 @@ namespace kalman {
               innovationCovariance(computeInnovationCovariance(
                   state, measurement, reconstruction)),
               K(computeKalmanGain(innovationCovariance, reconstruction)),
-              deltaz(reconstruction.getMean()), stateCorrection(K * deltaz),
+              deltaz(measurement.getResidual(reconstruction.getMean(), state)),
+              stateCorrection(K * deltaz),
               stateCorrectionFinite(stateCorrection.array().allFinite()) {}
 
         static AugmentedStateVec getAugmentedStateVec(State const &s,
@@ -110,9 +112,9 @@ namespace kalman {
             return ret;
         }
 
-        /// Transforms sigma points by having the measurement compute the
-        /// residual for a state whose state vector we update to each of the
-        /// sigma points in turn.
+        /// Transforms sigma points by having the measurement class compute the
+        /// estimated measurement for a state whose state vector we update to
+        /// each of the sigma points in turn.
         static TransformedSigmaPointsMat
         transformSigmaPoints(State const &s, Measurement &meas,
                              SigmaPointsGen const &sigmaPoints) {
@@ -120,7 +122,7 @@ namespace kalman {
             State tempS = s;
             for (std::size_t i = 0; i < NumSigmaPoints; ++i) {
                 tempS.setStateVector(sigmaPoints.getSigmaPoint(i));
-                ret.col(i) = meas.getResidual(tempS);
+                ret.col(i) = meas.predictMeasurement(tempS);
             }
             return ret;
         }
@@ -181,8 +183,9 @@ namespace kalman {
     };
     template <typename State, typename Measurement>
     inline SigmaPointCorrectionApplication<State, Measurement>
-    beginUnscentedCorrection(State &s, Measurement &m,
-                             SigmaPointParameters params) {
+    beginUnscentedCorrection(
+        State &s, Measurement &m,
+        SigmaPointParameters const &params = SigmaPointParameters()) {
         return SigmaPointCorrectionApplication<State, Measurement>(s, m,
                                                                    params);
     }

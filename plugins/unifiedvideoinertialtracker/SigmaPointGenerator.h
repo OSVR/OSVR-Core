@@ -47,18 +47,18 @@ namespace kalman {
     /// http://doi.org/10.1109/JPROC.2003.823141
     /// Appendix V (for alpha), Appendix VI (for beta)
     struct SigmaPointParameters {
-        SigmaPointParameters(double alpha_ = 0.01, double beta_ = 2.,
+        SigmaPointParameters(double alpha_ = 0.001, double beta_ = 2.,
                              double kappa_ = 0.)
             : alpha(alpha_), beta(beta_), kappa(kappa_) {}
         /// double L;
-        /// Primary scaling factor, typically in the range [1e-3, 1]
-        double alpha = 0.01;
+        /// Primary scaling factor, typically in the range [1e-4, 1]
+        double alpha;
         /// Secondary scaling to emphasize the 0th sigma point in covariance
         /// weighting - 2 is optimal for gaussian distributions
-        double beta = 2;
+        double beta;
         /// Tertiary scaling factor, typically 0.
         /// Some authors recommend parameter estimation to use L - 3
-        double kappa = 0;
+		double kappa;
     };
     struct SigmaPointParameterDerivedQuantities {
         SigmaPointParameterDerivedQuantities(SigmaPointParameters const &p,

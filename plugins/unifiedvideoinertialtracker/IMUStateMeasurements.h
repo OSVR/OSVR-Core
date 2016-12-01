@@ -470,6 +470,34 @@ namespace kalman {
             return residual;
 #endif
         }
+
+        template <typename State>
+        MeasurementVector
+        getResidual(MeasurementVector const &predictedMeasurement,
+                    State const &s) const {
+            const Eigen::Quaterniond fullPredictedOrientation =
+                external_quat::vecToQuat(predictedMeasurement).normalized() *
+                s.getQuaternion();
+            const Eigen::Quaterniond residualq =
+                Policy::getInnovationQuat(m_quat, fullPredictedOrientation);
+
+            // Two equivalent quaternions: but their logs are typically
+            // different: one is the "short way" and the other is the "long
+            // way". We'll compute both and pick the "short way".
+            // Multiplication of the log by 2 is the way to convert from a quat
+            // to a rotation vector.
+            MeasurementVector residual = 2 * util::quat_ln(residualq);
+#if 0
+            MeasurementVector equivResidual =
+                2 * util::quat_ln(Eigen::Quaterniond(-(residualq.coeffs())));
+            return residual.squaredNorm() < equivResidual.squaredNorm()
+                       ? residual
+                       : equivResidual;
+#else
+            return residual;
+#endif
+        }
+
         /// Convenience method to be able to store and re-use measurements.
         void setMeasurement(Eigen::Quaterniond const &quat) { m_quat = quat; }
 
@@ -515,6 +543,10 @@ namespace kalman {
             ret.block<DIMENSION, 3>(0, 3) = Base::getJacobianBlock(s);
             return ret;
         }
+
+		types::Vector<3> predictMeasurement(State const& s) const {
+			return s.incrementalOrientation();
+		}
     };
 
 } // namespace kalman

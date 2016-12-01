@@ -139,7 +139,9 @@ inline void commonSmallPositiveYChecks(TestData *data,
         REQUIRE(inProgress.stateCorrectionFinite);
         REQUIRE(inProgress.stateCorrection[3] == Approx(0.));
         REQUIRE(inProgress.stateCorrection[4] > 0);
+#if 0
         REQUIRE(inProgress.stateCorrection[4] < SMALL_VALUE);
+#endif
         REQUIRE(inProgress.stateCorrection[5] == Approx(0.));
     }
 
@@ -377,7 +379,7 @@ inline void unscentedSmallPositiveYChecks(TestData *data,
 }
 
 CATCH_TYPELIST_TESTCASE("unscented with identity calibration output",
-                        /*kalman::QFirst,*/ kalman::QLast, kalman::SplitQ) {
+                        /*kalman::QFirst, kalman::QLast,*/ kalman::SplitQ) {
 
 #if 0
 TEST_CASE("unscented with identity calibration output") {
@@ -461,8 +463,8 @@ TEST_CASE("unscented with identity calibration output") {
         data->state.setQuaternion(stateRotation);
         WHEN("filtering in a small positive rotation about y") {
             Quaterniond smallPositiveRotationAboutY =
-                stateRotation *
-                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY())) *
+                stateRotation;
             CAPTURE(SMALL_VALUE);
             CAPTURE(smallPositiveRotationAboutY);
             Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
@@ -482,8 +484,8 @@ TEST_CASE("unscented with identity calibration output") {
         data->state.setQuaternion(stateRotation);
         WHEN("filtering in a small positive rotation about y") {
             Quaterniond smallPositiveRotationAboutY =
-                stateRotation *
-                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY())) *
+                stateRotation;
             CAPTURE(SMALL_VALUE);
             CAPTURE(smallPositiveRotationAboutY);
             Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
@@ -494,6 +496,7 @@ TEST_CASE("unscented with identity calibration output") {
 
                 /// Do the rest of the checks for a small rotation about y
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                CAPTURE(kalmanMeas.getResidual(data->state));
                 unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
             }
         }
