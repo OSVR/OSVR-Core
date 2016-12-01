@@ -28,40 +28,106 @@
 #include "FlexibleUnscentedCorrect.h"
 
 // Library/third-party includes
-// - none
+#include <Eigen/Eigenvalues>
 
 // Standard includes
 // - none
 
+template <typename Derived>
+inline bool isPositiveDefinite(MatrixBase<Derived> const &m) {
+    Derived const &mat = m.derived();
+    if (mat.rows() != mat.cols()) {
+        /// not square!
+        return false;
+    }
+    if (!mat.isApprox(mat.transpose())) {
+        /// Not symmetric!
+        return false;
+    }
+    // Having all positive eigenvalues is equivalent to being positive definite.
+    return (mat.eigenvalues().real().array() > 0.).all();
+}
+
+template <typename Derived>
+inline void checkSigmaPoints(MatrixBase<Derived> const &m) {
+    SECTION("Sigma points") {
+        Derived const &mat = m.derived();
+        {
+            INFO("Checking that there are at least two unique sigma points in "
+                 "the collection of sigma points.");
+            REQUIRE_FALSE((mat.rowwise().minCoeff().array() ==
+                           mat.rowwise().maxCoeff().array())
+                              .all());
+        }
+    }
+}
+
+template <typename Derived>
+inline void thenCheckCovariance(MatrixBase<Derived> const &c) {
+    Derived const &cov = c.derived();
+    THEN("Covariance should be symmetric") {
+        REQUIRE(cov.isApprox(cov.transpose()));
+        AND_THEN("Covariance should be positive-definite") {
+            REQUIRE(isPositiveDefinite(cov));
+        }
+    }
+}
+
+template <typename Reconstruction>
+inline void thenCheckReconstruction(Reconstruction const &recon) {
+    THEN("Reconstructed covariance should satisfy its invariants") {
+        thenCheckCovariance(recon.getCov());
+    }
+}
+template <typename Reconstruction>
+inline void andThenCheckReconstruction(Reconstruction const &recon) {
+    AND_THEN("Reconstructed covariance should satisfy its invariants") {
+        thenCheckCovariance(recon.getCov());
+    }
+}
+template <typename GeneratorType>
+inline void generatorChecks(GeneratorType const &gen) {
+    static const auto epsilon = NumTraits<double>::dummy_precision();
+
+    SECTION("Weights") {
+        CAPTURE(gen.getWeightsForMean().transpose());
+        {
+            INFO("Weights should be non-zero");
+            REQUIRE(((gen.getWeightsForMean().array() > epsilon) ||
+                     (gen.getWeightsForMean().array() < -epsilon))
+                        .all());
+        }
 #ifdef DEMAND_NONNEGATIVE_WEIGHTS
-template <typename GeneratorType>
-inline void nonNegativeWeights(GeneratorType const &gen) {
-    CAPTURE(gen.getWeightsForMean().transpose());
-    CHECK((gen.getWeightsForMean().array() >= 0.).all());
-
-    CAPTURE(gen.getWeightsForCov().transpose());
-    CHECK((gen.getWeightsForCov().array() >= 0.).all());
-}
-
-template <typename GeneratorType>
-inline void thenRequireNonNegativeWeights(GeneratorType const &gen) {
-    THEN("Weights should be non-negative") { nonNegativeWeights(gen); }
-}
-template <typename GeneratorType>
-inline void andThenRequireNonNegativeWeights(GeneratorType const &gen) {
-    AND_THEN("Weights should be non-negative") { nonNegativeWeights(gen); }
-}
-#else
-template <typename GeneratorType>
-inline void thenRequireNonNegativeWeights(GeneratorType const &gen) {
-    // not actually a requirement, or even common, it turns out.
-}
-template <typename GeneratorType>
-inline void andThenRequireNonNegativeWeights(GeneratorType const &gen) {
-    // not actually a requirement, or even common, it turns out.
-}
+        CHECK((gen.getWeightsForMean().array() >= 0.).all());
 #endif
 
+        CAPTURE(gen.getWeightsForCov().transpose());
+        {
+            INFO("Weights should be non-zero");
+            REQUIRE(((gen.getWeightsForCov().array() > epsilon) ||
+                     (gen.getWeightsForCov().array() < -epsilon))
+                        .all());
+        }
+#ifdef DEMAND_NONNEGATIVE_WEIGHTS
+        CHECK((gen.getWeightsForCov().array() >= 0.).all());
+#endif
+    }
+
+    checkSigmaPoints(gen.getSigmaPoints());
+}
+
+template <typename GeneratorType>
+inline void thenCheckSigmaPointGenerator(GeneratorType const &gen) {
+    THEN("Sigma point generator should have reasonable output") {
+        generatorChecks(gen);
+    }
+}
+template <typename GeneratorType>
+inline void andThenCheckSigmaPointGenerator(GeneratorType const &gen) {
+    AND_THEN("Sigma point generator should have reasonable output") {
+        generatorChecks(gen);
+    }
+}
 
 TEST_CASE("Sigma point reconstruction validity") {
 
@@ -78,7 +144,7 @@ TEST_CASE("Sigma point reconstruction validity") {
         CAPTURE(mean);
         CAPTURE(cov);
         auto gen = Generator(mean, cov, params);
-        thenRequireNonNegativeWeights(gen);
+        thenCheckSigmaPointGenerator(gen);
 #if 0
         static const auto numSigmaPoints = Generator::NumSigmaPoints;
         for (std::size_t i = 0; i < numSigmaPoints; ++i) {
@@ -88,6 +154,7 @@ TEST_CASE("Sigma point reconstruction validity") {
 #endif
         AND_WHEN("reconstructed from the sigma points") {
             auto recon = Reconstructor(gen, gen.getSigmaPoints());
+            thenCheckReconstruction(recon);
             THEN("the reconstructed distribution should be approximately equal "
                  "to the input") {
                 CAPTURE(gen.getSigmaPoints());
@@ -208,9 +275,8 @@ commonSmallSingleAxisChecks(TestData *data, MeasurementType &kalmanMeas,
     }
     AND_THEN("state correction should not contain any translational/linear "
              "velocity components") {
-        REQUIRE(inProgress.stateCorrection.head<3>().isApproxToConstant(0.));
-        REQUIRE(
-            inProgress.stateCorrection.segment<3>(6).isApproxToConstant(0.));
+        REQUIRE(inProgress.stateCorrection.head<3>().isZero());
+        REQUIRE(inProgress.stateCorrection.segment<3>(6).isZero());
     }
     AND_WHEN("the correction is applied") {
         auto errorCovarianceCorrectionWasFinite = inProgress.finishCorrection();
@@ -221,6 +287,7 @@ commonSmallSingleAxisChecks(TestData *data, MeasurementType &kalmanMeas,
                          data->originalStateError.array())
                             .all());
             }
+            thenCheckCovariance(data->state.errorCovariance());
         }
     }
 }
@@ -233,11 +300,13 @@ unscentedSmallSingleAxisChecks(TestData *data, MeasurementType &kalmanMeas,
     auto inProgress =
         kalman::beginUnscentedCorrection(data->state, kalmanMeas, params);
 
+    andThenCheckSigmaPointGenerator(inProgress.sigmaPoints);
     AND_THEN("transformed sigma points should not all equal 0") {
         CAPTURE(inProgress.transformedPoints.transpose());
-        REQUIRE_FALSE(inProgress.transformedPoints.isApproxToConstant(0.));
+        REQUIRE_FALSE(inProgress.transformedPoints.isZero());
     }
-    andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
+    checkSigmaPoints(inProgress.transformedPoints);
+    andThenCheckReconstruction(inProgress.reconstruction);
 
     commonSmallSingleAxisChecks(data, kalmanMeas, inProgress, rotationAxis,
                                 positive);
@@ -248,23 +317,25 @@ inline void checkEffectiveIdentityMeasurement(TestData *data,
                                               MeasurementType &kalmanMeas) {
     AND_THEN("residual should be zero") {
         CAPTURE(kalmanMeas.getResidual(data->state));
-        REQUIRE(kalmanMeas.getResidual(data->state).isApproxToConstant(0.));
+        REQUIRE(kalmanMeas.getResidual(data->state).isZero());
     }
     auto inProgress = kalman::beginUnscentedCorrection(data->state, kalmanMeas);
 
-    andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
+    andThenCheckSigmaPointGenerator(inProgress.sigmaPoints);
     AND_THEN("transformed sigma points should not all equal 0") {
-        REQUIRE_FALSE(inProgress.transformedPoints.isApproxToConstant(0.));
+        REQUIRE_FALSE(inProgress.transformedPoints.isZero());
     }
+    checkSigmaPoints(inProgress.transformedPoints);
+
     auto &recon = inProgress.reconstruction;
     AND_THEN("propagated predicted measurement mean should be zero") {
         CAPTURE(recon.getMean().transpose());
-        REQUIRE(recon.getMean().isApproxToConstant(0.));
+        REQUIRE(recon.getMean().isZero());
     }
     AND_THEN("state correction should be finite - specifically, zero") {
         CAPTURE(inProgress.stateCorrection.transpose());
         REQUIRE(inProgress.stateCorrection.array().allFinite());
-        REQUIRE(inProgress.stateCorrection.isApproxToConstant(0));
+        REQUIRE(inProgress.stateCorrection.isZero());
     }
 
     const Quaterniond origQuat = data->state.getQuaternion();
@@ -272,7 +343,7 @@ inline void checkEffectiveIdentityMeasurement(TestData *data,
         inProgress.finishCorrection();
         THEN("state should be unchanged") {
             CAPTURE(data->state.stateVector().transpose());
-            REQUIRE(data->state.stateVector().isApproxToConstant(0));
+            REQUIRE(data->state.stateVector().isZero());
             CAPTURE(origQuat);
             CAPTURE(data->state.getQuaternion());
             REQUIRE(data->state.getQuaternion().coeffs().isApprox(
