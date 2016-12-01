@@ -503,6 +503,7 @@ namespace kalman {
         static const types::DimensionType STATE_DIMENSION =
             types::Dimension<State>::value;
         using Base = IMUOrientationMeasBase;
+        using Base::DIMENSION;
         using JacobianType = types::Matrix<DIMENSION, STATE_DIMENSION>;
 
         /// Quat should already be rotated into camera space.
