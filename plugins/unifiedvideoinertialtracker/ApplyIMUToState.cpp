@@ -26,6 +26,7 @@
 #include "ApplyIMUToState.h"
 #include "AngVelTools.h"
 #include "CrossProductMatrix.h"
+#include "FlexibleUnscentedCorrect.h"
 #include "IMUStateMeasurements.h"
 #include "SpaceTransformations.h"
 
@@ -55,12 +56,21 @@ namespace vbtracker {
             quat, Eigen::Quaterniond(sys.getRoomToCamera().rotation()),
             yawCorrection);
         OrientationMeasurement kalmanMeas{quatInCamSpace, var};
-
+#if 0
         auto correctionInProgress =
             kalman::beginCorrection(state, processModel, kalmanMeas);
+#else
+        auto correctionInProgress =
+            kalman::beginUnscentedCorrection(state, kalmanMeas);
+#endif
         auto outputMeas = [&] {
             std::cout << "state: " << state.getQuaternion().coeffs().transpose()
-                      << " and measurement: " << quat.coeffs().transpose();
+                      << " and measurement: "
+#if 0
+                      << quat.coeffs().transpose();
+#else
+                      << quatInCamSpace.coeffs().transpose();
+#endif
         };
         if (!correctionInProgress.stateCorrectionFinite) {
             std::cout
