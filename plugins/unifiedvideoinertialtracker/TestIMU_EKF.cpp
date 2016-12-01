@@ -33,10 +33,10 @@
 
 #if 0
 /// Turns out that QFirst and QLast are likely wrong.
-CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[ekf]", kalman::QFirst,
+CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[.][ekf]", kalman::QFirst,
                         kalman::QLast, kalman::SplitQ) {
 #endif
-CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[ekf]",
+CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[.][ekf]",
                                   kalman::SplitQ,
                                   kalman::QLastWithSplitInnovation) {
     using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
