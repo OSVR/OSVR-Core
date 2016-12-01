@@ -416,6 +416,23 @@ namespace kalman {
                 return ret;
             }
         };
+
+        struct QLastWithSplitInnovation {
+            static Eigen::Quaterniond
+            getInnovationQuat(Eigen::Quaterniond const &measInCamSpace,
+                              Eigen::Quaterniond const &cRb) {
+                /// Assumption here is that quaternion multiplication order
+                /// conventions differ between Eigen and the construct created
+                /// in SymPy for Jacobian codegen.
+                return SplitQ::getInnovationQuat(measInCamSpace, cRb);
+            }
+
+            static Eigen::Matrix3d
+            getJacobian(Eigen::Quaterniond const &measInCamSpace,
+                        Eigen::Quaterniond const &cRb) {
+                return QLast::getJacobian(measInCamSpace, cRb);
+            }
+        };
     } // namespace
 
     /// The measurement here has been split into a base and derived type, so

@@ -37,7 +37,8 @@ CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[ekf]", kalman
                         kalman::QLast, kalman::SplitQ) {
 #endif
 CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[ekf]",
-                                  kalman::SplitQ) {
+                                  kalman::SplitQ,
+                                  kalman::QLastWithSplitInnovation) {
     using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
     using JacobianType = typename MeasurementType::JacobianType;
     unique_ptr<TestData> data(new TestData);
