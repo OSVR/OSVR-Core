@@ -547,5 +547,27 @@ TEST_CASE("unscented with small x rotation calibration output") {
                 checkEffectiveIdentityMeasurement(data.get(), kalmanMeas);
             }
         }
+
+        WHEN("filtering in a small positive rotation about y") {
+			Quaterniond smallPositiveRotationAboutY =
+				Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
+            Quaterniond expectedXformedSmallPositiveRotationAboutY(
+                (Isometry3d(smallPositiveRotationAboutY) *
+                 Isometry3d(data->state.getQuaternion()))
+                    .rotation());
+            CAPTURE(smallPositiveRotationAboutY);
+            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(xformedMeas);
+
+            THEN("the transformed measurement should equal a manually transformed "
+                 "measurement") {
+                REQUIRE(xformedMeas.isApprox(
+                    expectedXformedSmallPositiveRotationAboutY));
+                /// Do the rest of the checks for a small rotation about y
+                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+                CAPTURE(kalmanMeas.getResidual(data->state));
+                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
+            }
+        }
     }
 }
