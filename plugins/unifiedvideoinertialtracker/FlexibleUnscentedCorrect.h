@@ -91,10 +91,19 @@ namespace kalman {
               reconstruction(sigmaPoints, transformedPoints),
               innovationCovariance(computeInnovationCovariance(
                   state, measurement, reconstruction)),
+              PvvDecomp(innovationCovariance.ldlt()),
+#if 0
               K(computeKalmanGain(innovationCovariance, reconstruction)),
+#endif
               deltaz(measurement.getResidual(reconstruction.getMean(), state)),
+#if 0
               stateCorrection(K * deltaz),
-              stateCorrectionFinite(stateCorrection.array().allFinite()) {}
+#else
+              stateCorrection(
+                  computeStateCorrection(reconstruction, deltaz, PvvDecomp)),
+#endif
+              stateCorrectionFinite(stateCorrection.array().allFinite()) {
+        }
 
         static AugmentedStateVec getAugmentedStateVec(State const &s,
                                                       Measurement const &m) {
@@ -133,16 +142,23 @@ namespace kalman {
             return recon.getCov() + meas.getCovariance(s);
         }
 
+#if 0
+        // Solve for K in K=Pxy Pvv^-1
+        // where the cross-covariance matrix from the reconstruction is
+        // transpose(Pxy) and Pvv is the reconstructed covariance plus the
+        // measurement covariance
         static GainMatrix computeKalmanGain(MeasurementSquareMatrix const &Pvv,
                                             Reconstruction const &recon) {
-
-            // Solve for K in K=Pxy Pvv^-1
-            // where the cross-covariance matrix from the reconstruction is
-            // transpose(Pxy) and Pvv is the reconstructed covariance plus the
-            // measurement covariance
             // (Actually solves with transpose(Pvv) * transpose(K) =
             // transpose(Pxy) )
             GainMatrix ret = Pvv.transpose().ldlt().solve(recon.getCrossCov());
+            return ret;
+        }
+#endif
+        static StateVec computeStateCorrection(
+            Reconstruction const &recon, MeasurementVec const &deltaz,
+            Eigen::LDLT<MeasurementSquareMatrix> const &pvvDecomp) {
+            StateVec ret = recon.getCrossCov() * pvvDecomp.solve(deltaz);
             return ret;
         }
 
@@ -152,9 +168,30 @@ namespace kalman {
         /// apply it?
         /// @return true if correction completed
         bool finishCorrection(bool cancelIfNotFinite = true) {
-
+#if 0
             StateSquareMatrix newP = state.errorCovariance() -
                                      K * innovationCovariance * K.transpose();
+#else
+            /// Logically state.errorCovariance() - K * Pvv * K.transpose(),
+            /// but considering just the second term, we can
+            /// replace K with its definition (Pxv Pvv^-1), distribute the
+            /// transpose on the right over the product, then pull out
+            /// Pvv^-1 * Pvv * (Pvv^-1).transpose()
+            /// as "B", leaving Pxv B Pxv.transpose()
+            ///
+            /// Since innovationCovariance aka Pvv is symmetric,
+            /// (Pvv^-1).transpose() = Pvv^-1.
+            /// Left multiplication gives
+            /// Pvv B = Pvv * Pvv^-1 * Pvv * Pvv^-1
+            /// whose right hand side is the Pvv-sized identity, and that is in
+            /// a form that allows us to use our existing LDLT decomp of Pvv to
+            /// solve for B then evaluate the full original expression.
+            StateSquareMatrix newP =
+                state.errorCovariance() -
+                reconstruction.getCrossCov() *
+                    PvvDecomp.solve(MeasurementSquareMatrix::Identity()) *
+                    reconstruction.getCrossCov().transpose();
+#endif
             bool finite = newP.array().allFinite();
             if (cancelIfNotFinite && !finite) {
                 return false;
@@ -174,8 +211,12 @@ namespace kalman {
         SigmaPointsGen sigmaPoints;
         TransformedSigmaPointsMat transformedPoints;
         Reconstruction reconstruction;
+        /// aka Pvv
         MeasurementSquareMatrix innovationCovariance;
+        Eigen::LDLT<MeasurementSquareMatrix> PvvDecomp;
+#if 0
         GainMatrix K;
+#endif
         /// reconstructed mean measurement residual/delta z/innovation
         types::Vector<m> deltaz;
         StateVec stateCorrection;
