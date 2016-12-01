@@ -1,5 +1,13 @@
 /** @file
-    @brief Header
+    @brief Header for a flexible Unscented-style Kalman filter correction from a
+    measurement.
+
+    Conventions generally are based on the following publication:
+    van der Merwe, R., Wan, E. A., & Julier, S. J. (2004). "Sigma-Point Kalman
+    Filters for Nonlinear Estimation and Sensor-Fusion: Applications to
+    Integrated Navigation." In AIAA Guidance, Navigation, and Control Conference
+    and Exhibit (pp. 1–30). Reston, Virigina: American Institute of Aeronautics
+    and Astronautics. http://doi.org/10.2514/6.2004-5120
 
     @date 2016
 
@@ -40,33 +48,37 @@ namespace kalman {
     template <typename State, typename Measurement>
     class SigmaPointCorrectionApplication {
       public:
+#if 0
         static const types::DimensionType StateDim =
             types::Dimension<State>::value;
         static const types::DimensionType MeasurementDim =
             types::Dimension<Measurement>::value;
+#endif
+        static const types::DimensionType n = types::Dimension<State>::value;
+        static const types::DimensionType m =
+            types::Dimension<Measurement>::value;
 
         using StateVec = types::DimVector<State>;
         using StateSquareMatrix = types::DimSquareMatrix<State>;
+        using MeasurementVec = types::DimVector<Measurement>;
         using MeasurementSquareMatrix = types::DimSquareMatrix<Measurement>;
 
         /// state augmented with measurement noise mean
-        static const types::DimensionType AugmentedStateDim =
-            StateDim + MeasurementDim;
+        static const types::DimensionType AugmentedStateDim = n + m;
         using AugmentedStateVec = types::Vector<AugmentedStateDim>;
         using AugmentedStateCovMatrix = types::SquareMatrix<AugmentedStateDim>;
         using SigmaPointsGen =
-            AugmentedSigmaPointGenerator<AugmentedStateDim, StateDim>;
+            AugmentedSigmaPointGenerator<AugmentedStateDim, n>;
 
         static const types::DimensionType NumSigmaPoints =
             SigmaPointsGen::NumSigmaPoints;
 
         using Reconstruction =
-            ReconstructedDistributionFromSigmaPoints<MeasurementDim,
-                                                     SigmaPointsGen>;
+            ReconstructedDistributionFromSigmaPoints<m, SigmaPointsGen>;
         using TransformedSigmaPointsMat =
             typename Reconstruction::TransformedSigmaPointsMat;
 
-        using GainMatrix = types::Matrix<StateDim, MeasurementDim>;
+        using GainMatrix = types::Matrix<n, m>;
 
         SigmaPointCorrectionApplication(State &s, Measurement &m,
                                         SigmaPointParameters params)
@@ -79,23 +91,22 @@ namespace kalman {
               innovationCovariance(computeInnovationCovariance(
                   state, measurement, reconstruction)),
               K(computeKalmanGain(innovationCovariance, reconstruction)),
-              stateCorrection(K * reconstruction.getMean()) {}
+              deltaz(reconstruction.getMean()), stateCorrection(K * deltaz),
+              stateCorrectionFinite(stateCorrection.array().allFinite()) {}
 
         static AugmentedStateVec getAugmentedStateVec(State const &s,
                                                       Measurement const &m) {
             AugmentedStateVec ret;
             /// assuming measurement noise is zero mean
-            ret << s.stateVector(), types::DimVector<Measurement>::Zero();
+            ret << s.stateVector(), MeasurementVec::Zero();
             return ret;
         }
 
         static AugmentedStateCovMatrix getAugmentedStateCov(State const &s,
-                                                            Measurement &m) {
+                                                            Measurement &meas) {
             AugmentedStateCovMatrix ret;
-            ret << s.errorCovariance(),
-                types::Matrix<StateDim, MeasurementDim>::Zero(),
-                types::Matrix<MeasurementDim, StateDim>::Zero(),
-                m.getCovariance(s);
+            ret << s.errorCovariance(), types::Matrix<n, m>::Zero(),
+                types::Matrix<m, n>::Zero(), meas.getCovariance(s);
             return ret;
         }
 
@@ -103,21 +114,21 @@ namespace kalman {
         /// residual for a state whose state vector we update to each of the
         /// sigma points in turn.
         static TransformedSigmaPointsMat
-        transformSigmaPoints(State const &s, Measurement &m,
+        transformSigmaPoints(State const &s, Measurement &meas,
                              SigmaPointsGen const &sigmaPoints) {
             TransformedSigmaPointsMat ret;
             State tempS = s;
             for (std::size_t i = 0; i < NumSigmaPoints; ++i) {
                 tempS.setStateVector(sigmaPoints.getSigmaPoint(i));
-                ret.col(i) = m.getResidual(tempS);
+                ret.col(i) = meas.getResidual(tempS);
             }
             return ret;
         }
 
         static MeasurementSquareMatrix
-        computeInnovationCovariance(State const &s, Measurement &m,
+        computeInnovationCovariance(State const &s, Measurement &meas,
                                     Reconstruction const &recon) {
-            return recon.getCov() + m.getCovariance(s);
+            return recon.getCov() + meas.getCovariance(s);
         }
 
         static GainMatrix computeKalmanGain(MeasurementSquareMatrix const &Pvv,
@@ -133,15 +144,27 @@ namespace kalman {
             return ret;
         }
 
-        void finishCorrection() {
-            state.setStateVector(state.stateVector() + stateCorrection);
+        /// Finish computing the rest and correct the state.
+        /// @param cancelIfNotFinite If the new error covariance is detected to
+        /// contain non-finite values, should we cancel the correction and not
+        /// apply it?
+        /// @return true if correction completed
+        bool finishCorrection(bool cancelIfNotFinite = true) {
 
             StateSquareMatrix newP = state.errorCovariance() -
                                      K * innovationCovariance * K.transpose();
+            bool finite = newP.array().allFinite();
+            if (cancelIfNotFinite && !finite) {
+                return false;
+            }
+
+            state.setStateVector(state.stateVector() + stateCorrection);
+
             state.setErrorCovariance(newP);
             // Let the state do any cleanup it has to (like fixing externalized
             // quaternions)
             state.postCorrect();
+            return finite;
         }
 
         State &state;
@@ -151,7 +174,10 @@ namespace kalman {
         Reconstruction reconstruction;
         MeasurementSquareMatrix innovationCovariance;
         GainMatrix K;
+        /// reconstructed mean measurement residual/delta z/innovation
+        types::Vector<m> deltaz;
         StateVec stateCorrection;
+        bool stateCorrectionFinite;
     };
     template <typename State, typename Measurement>
     inline SigmaPointCorrectionApplication<State, Measurement>
