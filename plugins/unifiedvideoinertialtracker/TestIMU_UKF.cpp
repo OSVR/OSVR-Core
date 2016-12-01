@@ -170,11 +170,12 @@ inline void checkEffectiveIdentityMeasurement(TestData *data,
     }
 }
 
-CATCH_TYPELIST_TESTCASE("unscented with identity calibration output",
-                        /*kalman::QFirst, kalman::QLast,*/ kalman::SplitQ) {
+CATCH_TYPELIST_DESCRIBED_TESTCASE(
+    "unscented with identity calibration output", "[ukf]",
+    /*kalman::QFirst, kalman::QLast,*/ kalman::SplitQ) {
 
 #if 0
-TEST_CASE("unscented with identity calibration output") {
+TEST_CASE("unscented with identity calibration output", "[ukf]") {
     using TypeParam = kalman::IMUOrientationMeasForUnscented;
 #endif
 
@@ -256,7 +257,7 @@ TEST_CASE("unscented with identity calibration output") {
     }
 }
 
-TEST_CASE("unscented with small x rotation calibration output") {
+TEST_CASE("unscented with small x rotation calibration output", "[ukf]") {
     using MeasurementType = OrientationMeasurementUsingPolicy<kalman::SplitQ>;
     unique_ptr<TestData> data(new TestData);
     CAPTURE(SMALL_VALUE);
