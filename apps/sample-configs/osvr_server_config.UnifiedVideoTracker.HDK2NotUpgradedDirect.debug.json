@@ -32,7 +32,7 @@
         "includeRearPanel": true,
         "headCircumference": 58.42,
         "calibrationFile": "videotrackerCombinedCalibrationFile2.json",
-        "cameraIsForward": false,
+        "cameraIsForward": true,
 
         "streamBeaconDebugInfo": false,
 
