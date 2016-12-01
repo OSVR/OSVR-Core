@@ -41,44 +41,49 @@ namespace kalman {
         auto nu = std::sqrt(L + lambda);
         return nu;
     }
+    /// For further details on the scaling factors, refer to:
+    /// Julier, S. J., & Uhlmann, J. K. (2004). Unscented filtering and
+    /// nonlinear estimation. Proceedings of the IEEE, 92(3), 401–422.
+    /// http://doi.org/10.1109/JPROC.2003.823141
+    /// Appendix V (for alpha), Appendix VI (for beta)
     struct SigmaPointParameters {
-        SigmaPointParameters(std::size_t L_, double alpha_ = 0.01,
-                             double beta_ = 2., double kappa_ = 0.)
-            : L(L_), alpha(alpha_), beta(beta_), kappa(kappa_) {
-            computeLambda();
-            computeGamma();
-        }
-        double L;
+        SigmaPointParameters(double alpha_ = 0.01, double beta_ = 2.,
+                             double kappa_ = 0.)
+            : alpha(alpha_), beta(beta_), kappa(kappa_) {}
+        /// double L;
+        /// Primary scaling factor, typically in the range [1e-3, 1]
         double alpha = 0.01;
-        double beta = 2; // optimal for gaussian distributions
-        double kappa =
-            0; // for state estimation - parameter estimation recommend L - 3
-
-#if 0
-            bool haveLambda = false;
-#endif
-        double lambda;
-        double gamma; // aka nu
-
-        double getElt0MeanWeight() const { return lambda / (L + lambda); }
-
-        double getElt0CovWeight() const {
-            return lambda / (L + lambda) + (1 - (alpha * alpha) + beta);
-        }
-        double getOtherEltWeights() const { return 1. / (2. * (L + lambda)); }
+        /// Secondary scaling to emphasize the 0th sigma point in covariance
+        /// weighting - 2 is optimal for gaussian distributions
+        double beta = 2;
+        /// Tertiary scaling factor, typically 0.
+        /// Some authors recommend parameter estimation to use L - 3
+        double kappa = 0;
+    };
+    struct SigmaPointParameterDerivedQuantities {
+        SigmaPointParameterDerivedQuantities(SigmaPointParameters const &p,
+                                             std::size_t L)
+            : alphaSquared(p.alpha * p.alpha),
+              lambda(alphaSquared * (L + p.kappa) - L),
+              gamma(std::sqrt(L + lambda)), weightMean0(lambda / (L + lambda)),
+              weightCov0(weightMean0 + p.beta + 1 - alphaSquared),
+              weight(1. / (2. * (L + lambda))) {}
 
       private:
-        /// Requires L, alpha, beta, and kappa
-        void computeLambda() { lambda = alpha * alpha * (L + kappa) - L; }
-        /// Requires L and lambda.
-        void computeGamma() {
-#if 0
-                if (!haveLambda) {
-                    computeLambda();
-                }
-#endif
-            gamma = std::sqrt(L + lambda);
-        }
+        double alphaSquared;
+
+      public:
+        /// "Compound scaling factor"
+        double lambda;
+        /// Scales the matrix square root in computing sigma points
+        double gamma;
+
+        /// Element 0 of weight vector for computing means
+        double weightMean0;
+        /// Element 0 of weight vector for computing covariance
+        double weightCov0;
+        /// Other elements of weight vector
+        double weight;
     };
 
     template <std::size_t Dim, std::size_t OrigDim = Dim>
@@ -97,16 +102,16 @@ namespace kalman {
 
         AugmentedSigmaPointGenerator(MeanVec const &mean, CovMatrix const &cov,
                                      SigmaPointParameters params)
-            : mean_(mean), covariance_(cov) {
-            weights_ =
-                SigmaPointWeightVec::Constant(params.getOtherEltWeights());
+            : p_(params, L), mean_(mean), covariance_(cov) {
+            weights_ = SigmaPointWeightVec::Constant(p_.weight);
             weightsForCov_ = weights_;
-            weights_[0] = params.getElt0MeanWeight();
-            weightsForCov_[0] = params.getElt0CovWeight();
+            weights_[0] = p_.weightMean0;
+            weightsForCov_[0] = p_.weightCov0;
             scaledMatrixSqrt_ = cov.llt().matrixL();
-            scaledMatrixSqrt_ *= params.gamma;
-            sigmaPoints_ << mean, scaledMatrixSqrt_.colwise() + mean,
-                (-scaledMatrixSqrt_).colwise() + mean;
+            /// scaledMatrixSqrt_ *= p_.gamma;
+            sigmaPoints_ << mean,
+                (p_.gamma * scaledMatrixSqrt_).colwise() + mean,
+                (-p_.gamma * scaledMatrixSqrt_).colwise() + mean;
         }
 
         SigmaPointsMat const &getSigmaPoints() const { return sigmaPoints_; }
@@ -128,7 +133,13 @@ namespace kalman {
 
         MeanVec const &getMean() const { return mean_; }
 
+        using ConstOrigMeanVec = Eigen::VectorBlock<const MeanVec, OrigDim>;
+
+        /// Get the "un-augmented" mean
+        ConstOrigMeanVec getOrigMean() const { return mean_.head<OrigDim>(); }
+
       private:
+        SigmaPointParameterDerivedQuantities p_;
         MeanVec mean_;
         CovMatrix covariance_;
         CovMatrix scaledMatrixSqrt_;
@@ -161,8 +172,17 @@ namespace kalman {
             SigmaPointsGen const &sigmaPoints,
             TransformedSigmaPointsMat const &xformedPointsMat)
             : xformedCov_(CovMat::Zero()), crossCov_(CrossCovMatrix::Zero()) {
-            /// weighted average
-            xformedMean_ = xformedPointsMat * sigmaPoints.getWeightsForMean();
+/// weighted average
+#if 1
+            xformedMean_ = MeanVec::Zero();
+            for (std::size_t i = 0; i < NumSigmaPoints; ++i) {
+                auto weight = sigmaPoints.getWeightsForMean()[i];
+                xformedMean_ += weight * xformedPointsMat.col(i);
+            }
+#else
+            xformedMean_ =
+                xformedPointsMat.rowwise() * sigmaPoints.getWeightsForMean();
+#endif
             TransformedSigmaPointsMat zeroMeanPoints =
                 xformedPointsMat.colwise() - xformedMean_;
 
@@ -170,7 +190,8 @@ namespace kalman {
                 auto weight = sigmaPoints.getWeightsForCov()[i];
                 xformedCov_ += weight * zeroMeanPoints.col(i) *
                                zeroMeanPoints.col(i).transpose();
-                crossCov_ += weight * sigmaPoints.getSigmaPoint(i) *
+                crossCov_ += weight * (sigmaPoints.getSigmaPoint(i) -
+                                       sigmaPoints.getOrigMean()) *
                              zeroMeanPoints.col(i).transpose();
             }
         }
