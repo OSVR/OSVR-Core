@@ -139,9 +139,7 @@ inline void commonSmallPositiveYChecks(TestData *data,
         REQUIRE(inProgress.stateCorrectionFinite);
         REQUIRE(inProgress.stateCorrection[3] == Approx(0.));
         REQUIRE(inProgress.stateCorrection[4] > 0);
-#if 0
         REQUIRE(inProgress.stateCorrection[4] < SMALL_VALUE);
-#endif
         REQUIRE(inProgress.stateCorrection[5] == Approx(0.));
     }
 
