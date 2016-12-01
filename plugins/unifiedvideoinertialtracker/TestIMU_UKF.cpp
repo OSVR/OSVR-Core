@@ -62,58 +62,173 @@ inline void andThenRequireNonNegativeWeights(GeneratorType const &gen) {
 }
 #endif
 
-inline void checkReconstruction(Vector3d const &mean, Matrix3d const &cov) {
+
+TEST_CASE("Sigma point reconstruction validity") {
+
     static const auto DIM = 3;
     using namespace osvr::kalman;
-    using Generator = SigmaPointGenerator<DIM>;
-    using Reconstructor =
-        ReconstructedDistributionFromSigmaPoints<DIM, Generator>;
-    const auto params = SigmaPointParameters();
-    CAPTURE(mean);
-    CAPTURE(cov);
-    auto gen = Generator(mean, cov, params);
-    thenRequireNonNegativeWeights(gen);
+    Matrix3d cov(Vector3d::Constant(10).asDiagonal());
+
+    auto checkReconstruction = [&](Eigen::Vector3d const &mean) {
+        using namespace osvr::kalman;
+        using Generator = SigmaPointGenerator<DIM>;
+        using Reconstructor =
+            ReconstructedDistributionFromSigmaPoints<DIM, Generator>;
+        const auto params = SigmaPointParameters();
+        CAPTURE(mean);
+        CAPTURE(cov);
+        auto gen = Generator(mean, cov, params);
+        thenRequireNonNegativeWeights(gen);
 #if 0
-	static const auto numSigmaPoints = Generator::NumSigmaPoints;
-	for (std::size_t i = 0; i < numSigmaPoints; ++i) {
-		CAPTURE(gen.getSigmaPoint(i));
-		CHECK(false);
-	}
+        static const auto numSigmaPoints = Generator::NumSigmaPoints;
+        for (std::size_t i = 0; i < numSigmaPoints; ++i) {
+            CAPTURE(gen.getSigmaPoint(i));
+            CHECK(false);
+        }
 #endif
-    AND_WHEN("reconstructed from the sigma points") {
-        auto recon = Reconstructor(gen, gen.getSigmaPoints());
-        THEN("the reconstructed distribution should be approximately equal "
-             "to the input") {
-            CAPTURE(gen.getSigmaPoints());
-            CAPTURE(recon.getMean());
-            for (std::size_t i = 0; i < DIM; ++i) {
-                CAPTURE(i);
-                REQUIRE(recon.getMean()[i] == Approx(mean[i]));
+        AND_WHEN("reconstructed from the sigma points") {
+            auto recon = Reconstructor(gen, gen.getSigmaPoints());
+            THEN("the reconstructed distribution should be approximately equal "
+                 "to the input") {
+                CAPTURE(gen.getSigmaPoints());
+                CAPTURE(recon.getMean());
+                for (std::size_t i = 0; i < DIM; ++i) {
+                    CAPTURE(i);
+                    REQUIRE(recon.getMean()[i] == Approx(mean[i]));
+                }
+                CAPTURE(recon.getCov());
+                REQUIRE(recon.getCov().isApprox(cov));
             }
-            CAPTURE(recon.getCov());
-            REQUIRE(recon.getCov().isApprox(cov));
+        }
+    };
+
+    WHEN("Starting with a zero mean") { checkReconstruction(Vector3d::Zero()); }
+
+    WHEN("Starting with a non-zero mean") {
+        checkReconstruction(Vector3d(1, 2, 3));
+    }
+    WHEN("Starting with a small non-zero mean") {
+        checkReconstruction(Vector3d(0.1, 0.2, 0.3));
+    }
+}
+
+enum class Axis : std::size_t { X = 0, Y = 1, Z = 2 };
+
+inline double zeroOrValueForAxis(Axis rotationAxis, Axis currentAxis,
+                                 double value) {
+    return ((rotationAxis == currentAxis) ? value : 0.);
+}
+
+inline Vector3d ZeroVec3dExceptAtAxis(Axis rotationAxis, double value) {
+    return Vector3d(zeroOrValueForAxis(rotationAxis, Axis::X, value),
+                    zeroOrValueForAxis(rotationAxis, Axis::Y, value),
+                    zeroOrValueForAxis(rotationAxis, Axis::Z, value));
+}
+
+inline Vector3d Vec3dSmallValueAt(Axis rotationAxis) {
+    return ZeroVec3dExceptAtAxis(rotationAxis, SMALL_VALUE);
+}
+
+inline Vector3d Vec3dUnit(Axis rotationAxis) {
+    return ZeroVec3dExceptAtAxis(rotationAxis, 1.);
+}
+
+inline double getSignCorrect(bool positive) { return (positive ? 1. : -1.); }
+
+template <typename MeasurementType, typename InProgressType>
+inline void
+commonSmallSingleAxisChecks(TestData *data, MeasurementType &kalmanMeas,
+                            InProgressType &inProgress, Axis const rotationAxis,
+                            bool const positive = true) {
+    const double signCorrect = getSignCorrect(positive);
+    Vector3d rotationVector = Vec3dSmallValueAt(rotationAxis) * signCorrect;
+    CAPTURE(rotationVector.transpose());
+
+    Vector3d residual = kalmanMeas.getResidual(data->state);
+    CAPTURE(residual.transpose());
+
+    AND_THEN("residual directly computed by measurement should be zero, except "
+             "for the single axis of rotation, which should be of magnitude "
+             "SMALL_VALUE") {
+        CHECK(residual.isApprox(rotationVector));
+    }
+
+    CAPTURE(inProgress.deltaz);
+    AND_THEN("computed deltaz should equal residual") {
+        CHECK(residual.isApprox(inProgress.deltaz));
+    }
+
+    AND_THEN("delta z (residual/propagated mean residual) should be "
+             "approximately 0, except for the single axis of rotation, which "
+             "should be magnitude SMALL_VALUE") {
+        REQUIRE(inProgress.deltaz[0] == Approx(rotationVector[0]));
+        REQUIRE(inProgress.deltaz[1] == Approx(rotationVector[1]));
+        REQUIRE(inProgress.deltaz[2] == Approx(rotationVector[2]));
+    }
+
+    CAPTURE(inProgress.stateCorrection.transpose());
+    REQUIRE(inProgress.stateCorrectionFinite);
+    AND_THEN("state correction should have a rotation component with small "
+             "absolute element (sign matching rotation vector) corresponding "
+             "to rotation axis") {
+        for (std::size_t i = 0; i < 3; ++i) {
+            const auto stateIndex = i + 3;
+            CAPTURE(stateIndex);
+            if (static_cast<std::size_t>(rotationAxis) == i) {
+                /// This is our rotation axis - correction should be in (0,
+                /// SMALL_VALUE)
+                REQUIRE((signCorrect * inProgress.stateCorrection[stateIndex]) >
+                        0);
+                REQUIRE((signCorrect * inProgress.stateCorrection[stateIndex]) <
+                        SMALL_VALUE);
+            } else {
+                /// Not our rotation axis, correction should be approx 0.
+                REQUIRE(inProgress.stateCorrection[stateIndex] == Approx(0.));
+            }
+        }
+    }
+
+    AND_THEN("state correction should have an angular velocity component "
+             "with zero or small abs (sign matching rotation) corresponding to "
+             "rotation axis") {
+
+        for (std::size_t i = 0; i < 3; ++i) {
+            const auto stateIndex = i + 9;
+            CAPTURE(stateIndex);
+            if (static_cast<std::size_t>(rotationAxis) == i) {
+                /// This is our rotation axis - correction should be >= 0 if
+                /// positive rotation.
+                REQUIRE(signCorrect * inProgress.stateCorrection[stateIndex] >=
+                        0.);
+            } else {
+                /// Not our rotation axis, correction should be approx 0.
+                REQUIRE(inProgress.stateCorrection[stateIndex] == Approx(0.));
+            }
+        }
+    }
+    AND_THEN("state correction should not contain any translational/linear "
+             "velocity components") {
+        REQUIRE(inProgress.stateCorrection.head<3>().isApproxToConstant(0.));
+        REQUIRE(
+            inProgress.stateCorrection.segment<3>(6).isApproxToConstant(0.));
+    }
+    AND_WHEN("the correction is applied") {
+        auto errorCovarianceCorrectionWasFinite = inProgress.finishCorrection();
+        THEN("the new error covariance should be finite") {
+            REQUIRE(errorCovarianceCorrectionWasFinite);
+            AND_THEN("State error should have decreased") {
+                REQUIRE((data->state.errorCovariance().array() <=
+                         data->originalStateError.array())
+                            .all());
+            }
         }
     }
 }
 
-TEST_CASE("Sigma point reconstruction validity") {
-    using namespace osvr::kalman;
-    Matrix3d cov(Vector3d::Constant(10).asDiagonal());
-    WHEN("Starting with a zero mean") {
-        checkReconstruction(Vector3d::Zero(), cov);
-    }
-
-    WHEN("Starting with a non-zero mean") {
-        checkReconstruction(Vector3d(1, 2, 3), cov);
-    }
-    WHEN("Starting with a small non-zero mean") {
-        checkReconstruction(Vector3d(0.1, 0.2, 0.3), cov);
-    }
-}
-
 template <typename MeasurementType>
-inline void unscentedSmallPositiveYChecks(TestData *data,
-                                          MeasurementType &kalmanMeas) {
+inline void
+unscentedSmallSingleAxisChecks(TestData *data, MeasurementType &kalmanMeas,
+                               Axis rotationAxis, bool positive = true) {
     const auto params = kalman::SigmaPointParameters();
     auto inProgress =
         kalman::beginUnscentedCorrection(data->state, kalmanMeas, params);
@@ -124,7 +239,8 @@ inline void unscentedSmallPositiveYChecks(TestData *data,
     }
     andThenRequireNonNegativeWeights(inProgress.sigmaPoints);
 
-    commonSmallPositiveYChecks(data, kalmanMeas, inProgress);
+    commonSmallSingleAxisChecks(data, kalmanMeas, inProgress, rotationAxis,
+                                positive);
 }
 
 template <typename MeasurementType>
@@ -170,14 +286,40 @@ inline void checkEffectiveIdentityMeasurement(TestData *data,
     }
 }
 
+template <typename F, typename... Args>
+inline void allSmallSingleAxisRotations(F &&f, Args &&... args) {
+    WHEN("filtering in a small positive rotation about x") {
+        std::forward<F>(f)(std::forward<Args>(args)..., Axis::X, true);
+    }
+
+    WHEN("filtering in a small positive rotation about y") {
+        std::forward<F>(f)(std::forward<Args>(args)..., Axis::Y, true);
+    }
+
+    WHEN("filtering in a small positive rotation about z") {
+        std::forward<F>(f)(std::forward<Args>(args)..., Axis::Z, true);
+    }
+
+    WHEN("filtering in a small negative rotation about x") {
+        std::forward<F>(f)(std::forward<Args>(args)..., Axis::X, false);
+    }
+    WHEN("filtering in a small negative rotation about y") {
+        std::forward<F>(f)(std::forward<Args>(args)..., Axis::Y, false);
+    }
+
+    WHEN("filtering in a small negative rotation about z") {
+        std::forward<F>(f)(std::forward<Args>(args)..., Axis::Z, false);
+    }
+}
+
+#if 0
 CATCH_TYPELIST_DESCRIBED_TESTCASE(
     "unscented with identity calibration output", "[ukf]",
     /*kalman::QFirst, kalman::QLast,*/ kalman::SplitQ) {
 
-#if 0
-TEST_CASE("unscented with identity calibration output", "[ukf]") {
-    using TypeParam = kalman::IMUOrientationMeasForUnscented;
 #endif
+TEST_CASE("unscented with identity calibration output", "[ukf]") {
+    using TypeParam = kalman::SplitQ;
 
     const auto params = kalman::SigmaPointParameters();
     using MeasurementType = OrientationMeasurementUsingPolicy<TypeParam>;
@@ -187,7 +329,8 @@ TEST_CASE("unscented with identity calibration output", "[ukf]") {
         WHEN("filtering in an identity measurement") {
             Quaterniond xformedMeas = data->xform(Quaterniond::Identity());
 
-            THEN("the transformed measurement should equal the measurement") {
+            THEN("the transformed measurement should equal the "
+                 "measurement") {
                 CAPTURE(xformedMeas);
                 REQUIRE(xformedMeas.isApprox(Quaterniond::Identity()));
 
@@ -195,65 +338,64 @@ TEST_CASE("unscented with identity calibration output", "[ukf]") {
                 checkEffectiveIdentityMeasurement(data.get(), kalmanMeas);
             }
         }
+        allSmallSingleAxisRotations([&](Axis rotationAxis, bool positive) {
+            const double signCorrect = getSignCorrect(positive);
+            auto radians = signCorrect * SMALL_VALUE;
+            CAPTURE(radians);
+            auto axisVec = Vec3dUnit(rotationAxis);
+            CAPTURE(axisVec.transpose());
+            Quaterniond smallRotation =
+                Quaterniond(AngleAxisd(radians, axisVec));
 
-        WHEN("filtering in a small positive rotation about y") {
-            Quaterniond smallPositiveRotationAboutY(
-                AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
-            CAPTURE(SMALL_VALUE);
-            CAPTURE(smallPositiveRotationAboutY);
-            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
+            CAPTURE(smallRotation);
+            Quaterniond xformedMeas = data->xform(smallRotation);
             CAPTURE(xformedMeas);
 
-            THEN("the transformed measurement should equal the measurement") {
-                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
+            THEN("the transformed measurement should equal the "
+                 "measurement") {
+                REQUIRE(xformedMeas.isApprox(smallRotation));
                 /// Do the rest of the checks for a small rotation about y
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
-                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
+                unscentedSmallSingleAxisChecks(data.get(), kalmanMeas,
+                                               rotationAxis, positive);
             }
-        }
+        });
     }
+
+    auto runIncrementalSmallRotChecksNonIdentityState = [&](Axis rotationAxis,
+                                                            bool positive) {
+        const double signCorrect = getSignCorrect(positive);
+        auto radians = signCorrect * SMALL_VALUE;
+        CAPTURE(radians);
+        auto axisVec = Vec3dUnit(rotationAxis);
+        CAPTURE(axisVec.transpose());
+        Quaterniond smallRotation = Quaterniond(AngleAxisd(radians, axisVec)) *
+                                    data->state.getQuaternion();
+
+        CAPTURE(smallRotation);
+        Quaterniond xformedMeas = data->xform(smallRotation);
+        CAPTURE(xformedMeas);
+
+        THEN("the transformed measurement should equal the "
+             "measurement") {
+            REQUIRE(xformedMeas.isApprox(smallRotation));
+            /// Do the rest of the checks for a small rotation about y
+            MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
+            unscentedSmallSingleAxisChecks(data.get(), kalmanMeas, rotationAxis,
+                                           positive);
+        }
+    };
     GIVEN("a state rotated about y") {
         Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitY()));
         data->state.setQuaternion(stateRotation);
-        WHEN("filtering in a small positive rotation about y") {
-            Quaterniond smallPositiveRotationAboutY =
-                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY())) *
-                stateRotation;
-            CAPTURE(SMALL_VALUE);
-            CAPTURE(smallPositiveRotationAboutY);
-            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
-            CAPTURE(xformedMeas);
-
-            THEN("the transformed measurement should equal the measurement") {
-                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
-
-                /// Do the rest of the checks for a small rotation about y
-                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
-                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
-            }
-        }
+        allSmallSingleAxisRotations(
+            runIncrementalSmallRotChecksNonIdentityState);
     }
     GIVEN("a state rotated about x") {
         Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitX()));
         data->state.setQuaternion(stateRotation);
-        WHEN("filtering in a small positive rotation about y") {
-            Quaterniond smallPositiveRotationAboutY =
-                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY())) *
-                stateRotation;
-            CAPTURE(SMALL_VALUE);
-            CAPTURE(smallPositiveRotationAboutY);
-            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
-            CAPTURE(xformedMeas);
-
-            THEN("the transformed measurement should equal the measurement") {
-                REQUIRE(xformedMeas.isApprox(smallPositiveRotationAboutY));
-
-                /// Do the rest of the checks for a small rotation about y
-                MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
-                CAPTURE(kalmanMeas.getResidual(data->state));
-                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
-            }
-        }
+        allSmallSingleAxisRotations(
+            runIncrementalSmallRotChecksNonIdentityState);
     }
 }
 
@@ -264,12 +406,17 @@ TEST_CASE("unscented with small x rotation calibration output", "[ukf]") {
     data->roomToCameraRotation =
         Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitX()));
     CAPTURE(data->roomToCameraRotation);
+    INFO("This calibration value means that the camera is rotated negative "
+         "about its x wrt. the IMU/room");
+    INFO("Equivalently, that quaternion calibration value takes "
+         "points/orientations in room space and moves them to camera space");
     GIVEN("an identity state in camera space") {
         CAPTURE(data->state.getQuaternion());
         WHEN("filtering in a measurement that's the inverse of the room to "
              "camera rotation (a measurement matching state)") {
-            Quaterniond xformedMeas =
-                data->xform(data->roomToCameraRotation.inverse());
+            Quaterniond meas = data->roomToCameraRotation.inverse();
+            CAPTURE(meas);
+            Quaterniond xformedMeas = data->xform(meas);
 
             THEN("the transformed measurement should be approximately the "
                  "identity") {
@@ -297,28 +444,52 @@ TEST_CASE("unscented with small x rotation calibration output", "[ukf]") {
                 checkEffectiveIdentityMeasurement(data.get(), kalmanMeas);
             }
         }
+        allSmallSingleAxisRotations([&](Axis rotationAxis, bool positive) {
+            const double signCorrect = getSignCorrect(positive);
+            auto radians = signCorrect * SMALL_VALUE;
+            CAPTURE(radians);
+            auto axisVec = Vec3dUnit(rotationAxis);
+            CAPTURE(axisVec.transpose());
+            Quaterniond smallRelRotationInCameraSpace =
+                Quaterniond(AngleAxisd(radians, axisVec)) *
+                data->state.getQuaternion();
+            CAPTURE(smallRelRotationInCameraSpace);
+            Quaterniond smallRotation = data->roomToCameraRotation.inverse() *
+                                        smallRelRotationInCameraSpace;
+            CAPTURE(smallRotation);
+            THEN("the transformed measurement should equal the original "
+                 "measurement as computed in camera space") {
+                Quaterniond xformedMeas = data->xform(smallRotation);
+                CAPTURE(xformedMeas);
+                REQUIRE(xformedMeas.isApprox(smallRelRotationInCameraSpace));
 
-        WHEN("filtering in a small positive rotation about y") {
-            Quaterniond smallPositiveRotationAboutY =
-                Quaterniond(AngleAxisd(SMALL_VALUE, Vector3d::UnitY()));
-            Quaterniond expectedXformedSmallPositiveRotationAboutY(
-                (Isometry3d(smallPositiveRotationAboutY) *
-                 Isometry3d(data->state.getQuaternion()))
-                    .rotation());
-            CAPTURE(smallPositiveRotationAboutY);
-            Quaterniond xformedMeas = data->xform(smallPositiveRotationAboutY);
-            CAPTURE(xformedMeas);
-
-            THEN("the transformed measurement should equal a manually "
-                 "transformed "
-                 "measurement") {
-                REQUIRE(xformedMeas.isApprox(
-                    expectedXformedSmallPositiveRotationAboutY));
-                /// Do the rest of the checks for a small rotation about y
+                /// Do the rest of the checks for a small rotation about a
+                /// single axis
                 MeasurementType kalmanMeas{xformedMeas, data->imuVariance};
                 CAPTURE(kalmanMeas.getResidual(data->state));
-                unscentedSmallPositiveYChecks(data.get(), kalmanMeas);
+                unscentedSmallSingleAxisChecks(data.get(), kalmanMeas,
+                                               rotationAxis, positive);
             }
-        }
+        });
+    }
+}
+
+TEST_CASE("conceptual transformation orders") {
+    Quaterniond positiveX(AngleAxisd(0.5, Vector3d::UnitX()));
+    Quaterniond positiveY(AngleAxisd(0.5, Vector3d::UnitY()));
+    Vector3d yVec = Vector3d::UnitY();
+    SECTION(
+        "Quaternion composition/multiplication order matches "
+        "transformation order (transformation and quat mult are associative)") {
+        CAPTURE((positiveX * (positiveY * yVec)).transpose());
+        CAPTURE(((positiveX * positiveY) * yVec).transpose());
+        REQUIRE((positiveX * (positiveY * yVec))
+                    .isApprox((positiveX * positiveY) * yVec));
+    }
+    SECTION("Behavior of rotations") {
+        INFO("positive X is a transformation taking points from a coordinate "
+             "system pitched up, to a level coordinate system.");
+        CAPTURE((positiveX * yVec).transpose());
+        REQUIRE((positiveX * yVec).z() > 0.);
     }
 }
