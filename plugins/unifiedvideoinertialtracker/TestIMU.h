@@ -1,5 +1,5 @@
 /** @file
-    @brief Implementation
+    @brief Header
 
     @date 2016
 
@@ -22,16 +22,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define CATCH_CONFIG_MAIN
+#ifndef INCLUDED_TestIMU_h_GUID_955733BE_EFEE_4C8E_6D9B_F1A8FDBC8F6C
+#define INCLUDED_TestIMU_h_GUID_955733BE_EFEE_4C8E_6D9B_F1A8FDBC8F6C
+
+/// Widen the console output wrapping so our matrices don't get so mangled in
+/// messages.
+#define CATCH_CONFIG_CONSOLE_WIDTH 120
 
 // Internal Includes
-#include "TestIMU.h"
+#include "catch_typelist.h" // internally-developed extension to Catch.
 
 // Library/third-party includes
-// - none
+#include <catch.hpp>
 
 // Standard includes
 // - none
 
-/// Compilation unit exists to separately compile the Catch test runner main
-/// function.
+#endif // INCLUDED_TestIMU_h_GUID_955733BE_EFEE_4C8E_6D9B_F1A8FDBC8F6C

@@ -115,7 +115,12 @@ if(BUILD_TESTING)
     ###
     # Synthetic-data verification of usage of room calibration in IMU code and IMU filtering
     ###
-    add_executable(uvbi-test-imu TestIMU.cpp)
+    add_executable(uvbi-test-imu
+        TestIMU.h
+        TestIMU.cpp
+        TestIMU_Common.h
+        TestIMU_EKF.cpp
+        TestIMU_UKF.cpp)
     target_link_libraries(uvbi-test-imu PRIVATE uvbi-core vendored-catch)
     set_target_properties(uvbi-test-imu PROPERTIES
         FOLDER "${PROJ_FOLDER}")
