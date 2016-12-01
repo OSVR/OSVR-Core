@@ -544,9 +544,9 @@ namespace kalman {
             return ret;
         }
 
-		types::Vector<3> predictMeasurement(State const& s) const {
-			return s.incrementalOrientation();
-		}
+        types::Vector<3> predictMeasurement(State const &s) const {
+            return s.incrementalOrientation();
+        }
     };
 
 } // namespace kalman
