@@ -66,20 +66,17 @@ class OSVRJsonToCTestCase(unittest.TestCase):
         :return:
         """
         output_filename = 'test_output'
-        migrate_file_data(json_filename=self.test_json_filepath, output_filename=output_filename)
         output_filepath = path.join(self.test_dir, '{}.cpp'.format(output_filename))
-        print "input_filepath: {}".format(self.test_json_filepath)
-        print "output_filepath: {}".format(output_filepath)
-        # TODO: This assertion fails. Fix it.
+        migrate_file_data(json_filename=self.test_json_filepath, output_filename=output_filepath)
         self.assertTrue(path.isfile(output_filepath))
 
     def test_file_read_error(self):
         """
-        Does migrate_file_data() return an IOError as expected if the input file is unreadable?
+        Does migrate_file_data() return an error message as expected if the input file is unreadable?
         :return:
         """
-        # TODO: Intentionally break this unit test as a placeholder until it can be properly implemented
-        self.assertTrue(False)
+        error_message = migrate_file_data(json_filename='')
+        self.assertTrue('Could not read file:' in error_message)
 
 if __name__ == '__main__':
     unittest.main()

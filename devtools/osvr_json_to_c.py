@@ -97,7 +97,7 @@ def migrate_file_data(json_filename, variable_name='json', output_filename=None)
                 cpp_output.write("0x{}".format('\n'.encode("hex")))
                 cpp_output.write('};\n')
     except IOError:
-        print "Could not read file:", json_filename
+        return "Could not read file: {}".format(json_filename)
 
 
 def main(argv):
