@@ -20,6 +20,11 @@ import re
 # http://stackoverflow.com/questions/2319019/using-regex-to-remove-comments-from-source-files
 # http://stackoverflow.com/a/18381470
 def remove_comments(string):
+    """
+
+    :param string:
+    :return: string
+    """
     pattern = r"(\".*?\"|\'.*?\')|(/\*.*?\*/|//[^\r\n]*$)"
     # first group captures quoted strings (double or single)
     # second group captures comments (//single-line or /* multi-line */)
@@ -38,6 +43,11 @@ def remove_comments(string):
 # http://stackoverflow.com/questions/3609596/python-regular-expression-must-strip-whitespace-except-between-quotes
 # http://stackoverflow.com/a/3609802
 def stripwhite(text):
+    """
+
+    :param text:
+    :return: string
+    """
     # Remove whitespace characters not found in between double-quotes
     lst = text.split('"')
     for i, item in enumerate(lst):
@@ -46,15 +56,21 @@ def stripwhite(text):
     return '"'.join(lst)
 
 
-def migrate_file_data(json_filename, variable_name, output_filename):
+def migrate_file_data(json_filename, variable_name='json', output_filename=None):
     """
-    Provide a JSON filename, a variable name, and an (optional) output filename.
+    Provide a JSON filename, an (optional) variable name, and an (optional) output filename.
     It reads in the JSON file (discarding comments, turns it back into a string in "compressed" format - that is,
     without unneeded whitespaces, etc. It then writes out a file that basically is a C/C++ source file defining a
     string array by converting every character to hex.
     :return:
     """
     try:
+        # Generate a default output filename based on the input filename if output filename is not provided
+        if output_filename is None:
+            filename_parts = json_filename.split('.')[:-1]
+            filename_parts.append('cpp')
+            output_filename = '.'.join(filename_parts)
+
         # 'with' keyword will handle closing the files
         with open(json_filename, 'rb') as json_input:
             with open(output_filename, 'w') as cpp_output:
@@ -93,12 +109,6 @@ def main(argv):
     input_filename = args.input
     output_filename = args.output
     symbol = args.symbol
-
-    # Generate a default output filename based on the input filename if output filename is not provided
-    if output_filename is None:
-        filename_parts = input_filename.split('.')[:-1]
-        filename_parts.append('cpp')
-        output_filename = '.'.join(filename_parts)
 
     migrate_file_data(json_filename=input_filename, variable_name=symbol, output_filename=output_filename)
 
