@@ -71,7 +71,7 @@ def migrate_file_data(json_filename, variable_name='json', output_filename=None)
             filename_parts.append('cpp')
             output_filename = '.'.join(filename_parts)
 
-        # 'with' keyword will handle closing the files
+        # 'with' keyword will handle the closing of files
         with open(json_filename, 'rb') as json_input:
             with open(output_filename, 'w') as cpp_output:
                 end_of_file = ''
