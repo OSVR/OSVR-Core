@@ -566,6 +566,44 @@ namespace kalman {
         }
     };
 
+    class IMUAngVelMeasurement {
+      public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        static const types::DimensionType DIMENSION = 3;
+        using MeasurementVector = types::Vector<DIMENSION>;
+        using MeasurementSquareMatrix = types::SquareMatrix<DIMENSION>;
+
+        IMUAngVelMeasurement(types::Vector<3> const &angVelVec,
+                             types::Vector<3> const &variance)
+            : m_angVel(angVelVec), m_covariance(variance.asDiagonal()) {}
+
+        template <typename State>
+        MeasurementSquareMatrix const &getCovariance(State const &) {
+            return m_covariance;
+        }
+
+        template <typename State>
+        MeasurementVector
+        getResidual(MeasurementVector const &predictedMeasurement,
+                    State const &s) const {
+            return m_angVel - predictedMeasurement;
+        }
+
+        template <typename State>
+        types::Vector<3> predictMeasurement(State const &s) const {
+            return s.angularVelocity();
+        }
+
+        /// Convenience method to be able to store and re-use measurements.
+        void setMeasurement(types::Vector<3> const &angVelVec) {
+            m_angVel = angVelVec;
+        }
+
+      private:
+        types::Vector<3> m_angVel;
+        MeasurementSquareMatrix m_covariance;
+    };
+
 } // namespace kalman
 namespace vbtracker {
     inline Eigen::Quaterniond
