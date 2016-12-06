@@ -546,7 +546,7 @@ namespace kalman {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const types::DimensionType STATE_DIMENSION =
             types::Dimension<State>::value;
-        using Base = IMUOrientationMeasBase;
+        using Base = IMUOrientationMeasBase<PolicyT>;
         using Base::DIMENSION;
         using JacobianType = types::Matrix<DIMENSION, STATE_DIMENSION>;
 
