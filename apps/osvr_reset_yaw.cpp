@@ -96,12 +96,15 @@ int main(int argc, char *argv[]) {
     desc.add_options()
         ("help", "produce help message")
         ("path", po::value<std::string>()->default_value("/me/head"), "path to reset-yaw on")
+        ("no-wait", "headless mode - immediately resets yaw without waiting")
         ;
     // clang-format on
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
     po::notify(vm);
+
+    const bool noWait = vm.count("no-wait");
 
     {
         /// Deal with command line errors or requests for help
@@ -165,9 +168,11 @@ int main(int argc, char *argv[]) {
         client.start();
         boost::this_thread::sleep(SETTLE_TIME);
 
-        cout << "\n\nPlease place your device for " << path
-             << " in its 'zero' orientation and press enter." << endl;
-        std::cin.ignore();
+        if (!noWait) {
+            cout << "\n\nPlease place your device for " << path
+                << " in its 'zero' orientation and press enter." << endl;
+            std::cin.ignore();
+        }
 
         OSVR_OrientationState state;
         OSVR_TimeValue timestamp;
@@ -182,7 +187,9 @@ int main(int argc, char *argv[]) {
                         "are you sure you have a device plugged in and your "
                         "path correct?"
                      << endl;
-                std::cin.ignore();
+                if (!noWait) {
+                    std::cin.ignore();
+                }
                 return -1;
             }
             auto q = osvr::util::eigen_interop::map(state);
@@ -205,8 +212,10 @@ int main(int argc, char *argv[]) {
 
         boost::this_thread::sleep(SETTLE_TIME);
 
-        cout << "Press enter to exit.";
-        std::cin.ignore();
+        if (!noWait) {
+            cout << "Press enter to exit.";
+            std::cin.ignore();
+        }
     }
     return 0;
 }
