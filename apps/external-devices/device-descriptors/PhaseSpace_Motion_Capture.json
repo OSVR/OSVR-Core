@@ -5,15 +5,7 @@
     "version": 1,
     "lastModified": "2016-12-06T22:17:44Z",
     "interfaces": {
-        "analog": {
-            "count": 0
-        },
-        "button": {
-            "count": 0
-        },
-        "tracker": {
-            "count": 1
-        }
+        "tracker": { }
     }
 }
 
