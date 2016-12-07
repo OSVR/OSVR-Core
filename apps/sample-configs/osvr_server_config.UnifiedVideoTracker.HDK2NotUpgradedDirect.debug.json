@@ -38,6 +38,7 @@
 
         "blobsKeepIdentity": false,
         "measurementVarianceScaleFactor": 1.5,
+        "continuousReporting": true,
 
         /*
         "blobs": {
@@ -71,7 +72,7 @@
           /*"orientationVariance": 1e-10,*/
           "orientationVariance": 1e-7,
           "orientationMicrosecondsOffset": 0,
-          "useAngularVelocity": false,
+          "useAngularVelocity": true,
           "angularVelocityVariance": 1e-1,
           "angularVelocityMicrosecondsOffset": 0
         }
