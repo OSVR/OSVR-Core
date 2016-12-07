@@ -30,6 +30,7 @@
 #include <osvr/Common/IPCRingBuffer.h>
 #include <osvr/Util/ImagingReportTypesC.h>
 #include <osvr/Util/Log.h>
+#include <osvr/Util/Logger.h>
 
 // Library/third-party includes
 #include <boost/version.hpp>
