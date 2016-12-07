@@ -328,11 +328,6 @@ int main(int argc, char *argv[]) {
     auto FRAME_DISPLAY_STRIDE = 3u;
     cam->grab();
 
-    std::cout << "Will display 1 out of every " << FRAME_DISPLAY_STRIDE
-              << " frames captured." << std::endl;
-    std::cout << "\nPress q or esc to quit, c to capture a frame to file.\n"
-              << std::endl;
-
     auto frame = cv::Mat{};
     auto grayFrame = cv::Mat{};
 
