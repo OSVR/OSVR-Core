@@ -26,8 +26,8 @@
 #define INCLUDED_PoseState_h_GUID_57A246BA_940D_4386_ECA4_4C4172D97F5A
 
 // Internal Includes
-#include "FlexibleKalmanBase.h"
 #include "ExternalQuaternion.h"
+#include "FlexibleKalmanBase.h"
 
 // Library/third-party includes
 #include <Eigen/Core>
@@ -91,8 +91,7 @@ namespace kalman {
             // eq. 4.5 in Welch 1996 - except we have all the velocities at the
             // end
             StateSquareMatrix A = StateSquareMatrix::Identity();
-            A.topRightCorner<6, 6>() =
-                types::SquareMatrix<6>::Identity() * dt / 2.;
+            A.topRightCorner<6, 6>() = types::SquareMatrix<6>::Identity() * dt;
 
             return A;
         }
@@ -137,8 +136,8 @@ namespace kalman {
             /// calcuations are faster than the matrix ones.
 
             StateVector ret = state;
-            position(ret) += velocity(state) * dt / 2.;
-            incrementalOrientation(ret) += angularVelocity(state) * dt / 2.;
+            position(ret) += velocity(state) * dt;
+            incrementalOrientation(ret) += angularVelocity(state) * dt;
             return ret;
         }
 
