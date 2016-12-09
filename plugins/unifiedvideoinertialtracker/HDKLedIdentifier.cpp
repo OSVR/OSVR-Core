@@ -90,7 +90,7 @@ namespace vbtracker {
 
     ZeroBasedBeaconId
     OsvrHdkLedIdentifier::getId(ZeroBasedBeaconId currentId,
-                                std::list<float> &brightnesses,
+                                BrightnessList &brightnesses,
                                 bool &lastBright, bool blobsKeepId) const {
         // If we don't have at least the required number of frames of data, we
         // don't know anything.
