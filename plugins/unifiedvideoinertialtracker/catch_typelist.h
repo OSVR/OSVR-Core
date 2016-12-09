@@ -18,7 +18,7 @@
 #ifndef INCLUDED_catch_typelist_h_GUID_B8BF6209_253A_478E_0B05_37796B95C0DE
 #define INCLUDED_catch_typelist_h_GUID_B8BF6209_253A_478E_0B05_37796B95C0DE
 
-#include "Catch.hpp"
+#include "catch.hpp"
 
 namespace Catch {
 /// Can specialize to get better names.
