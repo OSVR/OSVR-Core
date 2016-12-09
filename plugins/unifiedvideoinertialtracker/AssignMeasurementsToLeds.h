@@ -81,7 +81,7 @@ namespace vbtracker {
                                  const std::size_t numBeacons,
                                  float blobMoveThresh, bool verbose = false)
             : leds_(leds), measurements_(measurements), ledsEnd_(end(leds_)),
-              numBeacons_(numBeacons_), blobMoveThreshFactor_(blobMoveThresh),
+              numBeacons_(numBeacons), blobMoveThreshFactor_(blobMoveThresh),
               maxMatches_(std::min(leds_.size(), measurements_.size())),
               verbose_(verbose) {}
 
