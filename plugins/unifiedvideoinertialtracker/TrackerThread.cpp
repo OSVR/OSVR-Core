@@ -266,8 +266,7 @@ namespace vbtracker {
                     imuIndices.insert(id);
 
                     // if it's time, send a report even if we haven't gotten a
-                    // video
-                    // frame with useful things in it yet.
+                    // video frame with useful things in it yet.
                     if (shouldSendImuReport()) {
                         updateReportingVector(imuIndices);
                         imuIndices.clear();
