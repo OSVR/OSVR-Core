@@ -6,7 +6,7 @@
     van der Merwe, R., Wan, E. A., & Julier, S. J. (2004). "Sigma-Point Kalman
     Filters for Nonlinear Estimation and Sensor-Fusion: Applications to
     Integrated Navigation." In AIAA Guidance, Navigation, and Control Conference
-    and Exhibit (pp. 1–30). Reston, Virigina: American Institute of Aeronautics
+    and Exhibit (pp. 1--30). Reston, Virigina: American Institute of Aeronautics
     and Astronautics. http://doi.org/10.2514/6.2004-5120
 
     @date 2016
