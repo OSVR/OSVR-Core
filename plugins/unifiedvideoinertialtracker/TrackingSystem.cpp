@@ -175,7 +175,10 @@ namespace vbtracker {
         }
         /// Prune history after video update.
         for (auto &body : m_bodies) {
-            body->pruneHistory();
+            /// Need to pass the frame time so that we can keep the size of
+            /// stateHistory and imuMeasurements bounded even if no LEDs are
+            /// seen for a given body.
+            body->pruneHistory(m_impl->lastFrame);
         }
     }
 

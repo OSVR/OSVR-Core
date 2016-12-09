@@ -205,7 +205,7 @@ namespace vbtracker {
 
         /// Clean histories of no-longer-needed historical state and
         /// measurements.
-        void pruneHistory();
+        void pruneHistory(OSVR_TimeValue const &videoTime);
 
         /// Get timestamp associated with current state.
         osvr::util::time::TimeValue getStateTime() const;

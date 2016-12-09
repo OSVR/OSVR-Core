@@ -115,42 +115,39 @@ namespace vbtracker {
         return true;
     }
 
-    inline boost::optional<osvr::util::time::TimeValue>
-    getOldestPossibleMeasurementSource(TrackedBody const &body) {
-        boost::optional<osvr::util::time::TimeValue> oldest;
-        /// Little lambda to set `oldest` if we haven't recorded a timestamp or
-        /// if the given timestamp is older.
-        auto updateOldest = [&oldest](util::time::TimeValue const &timestamp) {
-            if (!oldest || timestamp < *oldest) {
-                oldest = timestamp;
-            }
-        };
-
-        body.forEachTarget([&updateOldest](TrackedBodyTarget const &target) {
-            /// If we haven't recorded a timestamp or the current target has
-            /// an older timestamp
-            updateOldest(target.getLastUpdate());
-        });
-
+    inline osvr::util::time::TimeValue
+    getOldestPossibleMeasurementSource(TrackedBody const &body,
+                                       OSVR_TimeValue const &videoTime) {
+        /// @todo assumes a single camera, or that "videoTime" is the timestamp
+        /// of the "oldest" camera data.
+        osvr::util::time::TimeValue oldest = videoTime;
         if (body.hasIMU()) {
-            /// If we haven't recorded a timestamp or the IMU has an older
-            /// timestamp
-            updateOldest(body.getIMU().getLastUpdate());
+            /// If the IMU has an older timestamp
+            auto imuTimestamp = body.getIMU().getLastUpdate();
+            if (imuTimestamp < oldest) {
+                oldest = imuTimestamp;
+            }
         }
         return oldest;
     }
 
-    void TrackedBody::pruneHistory() {
+    void TrackedBody::pruneHistory(OSVR_TimeValue const &videoTime) {
+#if 0
+        static ::util::Stride s(100);
+        if (++s) {
+            std::cout << "stateHistory High water mark: "
+                      << m_impl->stateHistory.highWaterMark() << std::endl;
+            std::cout << "imuMeasurements High water mark: "
+                      << m_impl->imuMeasurements.highWaterMark() << std::endl;
+        }
+#endif
+
         if (m_impl->stateHistory.empty()) {
             // can't prune an empty structure
             return;
         }
-        auto oldestOptional = getOldestPossibleMeasurementSource(*this);
-        if (!oldestOptional) {
-            // No timestamp yet - don't prune anything out yet.
-            return;
-        }
-        auto oldest = *oldestOptional;
+        auto oldest = getOldestPossibleMeasurementSource(*this, videoTime);
+
         if (m_impl->stateHistory.newest_timestamp() < oldest) {
             // It would be a strange set of circumstances to bring this about,
             // but we don't want to go from a non-empty history to an empty one.
