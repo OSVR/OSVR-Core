@@ -160,9 +160,9 @@ namespace vbtracker {
         // checks, add a derived measurement to our measurement vector and the
         // contour itself to our list of contours for debugging display.
         edgeBinary_.copyTo(binTemp_);
-        consumeHolesOfConnectedComponents(binTemp_, [&](ContourType &&contour) {
-            checkBlob(std::move(contour), p);
-        });
+        consumeHolesOfConnectedComponents(
+            binTemp_, contoursTempStorage_, hierarchyTempStorage_,
+            [&](ContourType &&contour) { checkBlob(std::move(contour), p); });
         return measurements_;
     }
     /// out of line for unique_ptr-based pimpl.

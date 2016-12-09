@@ -145,6 +145,12 @@ namespace vbtracker {
         MatType binTemp_;
         /// @}
 
+        /// @name Temporaries for consumeHolesOfConnectedComponents
+        /// @{
+        std::vector<ContourType> contoursTempStorage_;
+        std::vector<cv::Vec4i> hierarchyTempStorage_;
+        /// @}
+
         /// Erosion filter to remove spurious edges pointing out the camera gave
         /// us an mjpeg-compressed stream.
         cv::Mat compressionArtifactRemovalKernel_;

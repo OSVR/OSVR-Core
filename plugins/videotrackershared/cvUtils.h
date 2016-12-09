@@ -200,25 +200,42 @@ namespace vbtracker {
         return ret;
     }
 
+    /// Calls a continuation on every hole of a connected component.
+    ///
+    /// This version lets you pass your own temporary vectors to reduce/re-use
+    /// allocations during operation
     template <typename F>
-    void consumeHolesOfConnectedComponents(cv::InputOutputArray input,
-                                           F &&continuation) {
-        std::vector<ContourType> contours;
-        std::vector<cv::Vec4i> hierarchy;
-        cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP,
-                         cv::CHAIN_APPROX_NONE);
+    inline void consumeHolesOfConnectedComponents(
+        cv::InputOutputArray input,
+        std::vector<ContourType> &contoursTempStorage,
+        std::vector<cv::Vec4i> &hierarchyTempStorage, F &&continuation) {
+        cv::findContours(input, contoursTempStorage, hierarchyTempStorage,
+                         cv::RETR_CCOMP, cv::CHAIN_APPROX_NONE);
         // intentionally storing in int, instead of auto, since we'll compare
         // against int.
-        int n = static_cast<int>(contours.size());
+        int n = static_cast<int>(contoursTempStorage.size());
         /// Loop through the outside connected components.
         for (int outsides = 0; outsides >= 0 && outsides < n;
-             outsides = hierarchy[outsides][HIERARCHY_NEXT_SIBLING_CONTOUR]) {
-            for (int idx = hierarchy[outsides][HIERARCHY_FIRST_CHILD_CONTOUR];
+             outsides = hierarchyTempStorage[outsides]
+                                            [HIERARCHY_NEXT_SIBLING_CONTOUR]) {
+            for (int idx = hierarchyTempStorage[outsides]
+                                               [HIERARCHY_FIRST_CHILD_CONTOUR];
                  idx >= 0 && idx < n;
-                 idx = hierarchy[idx][HIERARCHY_NEXT_SIBLING_CONTOUR])
+                 idx =
+                     hierarchyTempStorage[idx][HIERARCHY_NEXT_SIBLING_CONTOUR])
                 /// We want all first-level children of connected components.
-                std::forward<F>(continuation)(std::move(contours[idx]));
+                std::forward<F>(continuation)(
+                    std::move(contoursTempStorage[idx]));
         }
+    }
+    /// Calls a continuation on every hole of a connected component.
+    template <typename F>
+    inline void consumeHolesOfConnectedComponents(cv::InputOutputArray input,
+                                                  F &&continuation) {
+        std::vector<ContourType> contours;
+        std::vector<cv::Vec4i> hierarchy;
+        consumeHolesOfConnectedComponents(input, contours, hierarchy,
+                                          std::forward<F>(continuation));
     }
 } // namespace vbtracker
 } // namespace osvr
