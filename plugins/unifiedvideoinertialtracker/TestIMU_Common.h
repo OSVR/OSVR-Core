@@ -151,9 +151,9 @@ inline void commonSmallPositiveYChecks(TestData *data,
     }
     AND_THEN("state correction should not contain any translational/linear "
              "velocity components") {
-        REQUIRE(inProgress.stateCorrection.head<3>().isApproxToConstant(0.));
+        REQUIRE(inProgress.stateCorrection.template head<3>().isApproxToConstant(0.));
         REQUIRE(
-            inProgress.stateCorrection.segment<3>(6).isApproxToConstant(0.));
+            inProgress.stateCorrection.template segment<3>(6).isApproxToConstant(0.));
     }
     AND_WHEN("the correction is applied") {
         auto errorCovarianceCorrectionWasFinite = inProgress.finishCorrection();

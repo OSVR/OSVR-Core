@@ -121,7 +121,7 @@ namespace kalman {
             Eigen::Block<const SigmaPointsMat, OrigDim, 1>;
 
         ConstSigmaPointBlock getSigmaPoint(std::size_t i) const {
-            return sigmaPoints_.block<OrigDim, 1>(0, i);
+            return sigmaPoints_.template block<OrigDim, 1>(0, i);
         }
 
         SigmaPointWeightVec const &getWeightsForMean() const {
@@ -136,7 +136,7 @@ namespace kalman {
         using ConstOrigMeanVec = Eigen::VectorBlock<const MeanVec, OrigDim>;
 
         /// Get the "un-augmented" mean
-        ConstOrigMeanVec getOrigMean() const { return mean_.head<OrigDim>(); }
+        ConstOrigMeanVec getOrigMean() const { return mean_.template head<OrigDim>(); }
 
       private:
         SigmaPointParameterDerivedQuantities p_;

@@ -557,7 +557,7 @@ namespace kalman {
         JacobianType getJacobian(State const &s) const {
             using namespace pose_externalized_rotation;
             JacobianType ret = JacobianType::Zero();
-            ret.block<DIMENSION, 3>(0, 3) = Base::getJacobianBlock(s);
+            ret.template block<DIMENSION, 3>(0, 3) = Base::getJacobianBlock(s);
             return ret;
         }
 

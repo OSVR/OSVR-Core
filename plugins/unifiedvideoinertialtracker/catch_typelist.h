@@ -34,7 +34,7 @@ class TypeParameterizedTestCase : public Catch::SharedImpl<Catch::ITestCase> {
 
     virtual void invoke() const {
         C obj;
-        obj.test<T>();
+        obj.template test<T>();
     }
 
   private:
