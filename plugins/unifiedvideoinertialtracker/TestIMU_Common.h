@@ -151,9 +151,9 @@ inline void commonSmallPositiveYChecks(TestData *data,
     }
     AND_THEN("state correction should not contain any translational/linear "
              "velocity components") {
-        REQUIRE(inProgress.stateCorrection.template head<3>().isApproxToConstant(0.));
+        REQUIRE(inProgress.stateCorrection.template head<3>().isZero());
         REQUIRE(
-            inProgress.stateCorrection.template segment<3>(6).isApproxToConstant(0.));
+            inProgress.stateCorrection.template segment<3>(6).isZero());
     }
     AND_WHEN("the correction is applied") {
         auto errorCovarianceCorrectionWasFinite = inProgress.finishCorrection();
@@ -177,7 +177,7 @@ inline void smallPositiveYChecks(TestData *data, MeasurementType &kalmanMeas) {
         INFO("jacobian\n" << jacobian);
         REQUIRE(jacobian.allFinite());
         AND_THEN("the jacobian should not be zero") {
-            REQUIRE_FALSE(jacobian.isApproxToConstant(0));
+            REQUIRE_FALSE(jacobian.isZero());
         }
         auto inProgress = kalman::beginCorrection(
             data->state, data->processModel, kalmanMeas);
