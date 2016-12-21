@@ -256,7 +256,7 @@ namespace server {
 
             const std::string plugin = thisDriver[PLUGIN_KEY].asString();
 
-            if (!hasPlugin) {
+            if (!hasDriver) {
                 success = false;
                 m_failedInstances.push_back(std::make_pair(
                     plugin + "/?", "Entry present in drivers with a plugin "
