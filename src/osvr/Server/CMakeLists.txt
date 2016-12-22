@@ -19,7 +19,7 @@ set(SOURCE
     "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 # Fallback display descriptor
-set(DISPLAY_JSON ../../../apps/displays/OSVR_HDK_1_1.json)
+set(DISPLAY_JSON ../../../apps/displays/OSVR_HDK_2_0.json)
 osvr_convert_json(display_json ${DISPLAY_JSON} "${CMAKE_CURRENT_BINARY_DIR}/display_json.h")
 
 osvr_add_library()
