@@ -136,8 +136,8 @@ namespace util {
                 console_out); // taste the rainbow!
             return color_sink;
 #elif defined(OSVR_GET_WINCOLOR_SINK)
-            auto color-sink = std::make_shared<spdlog::sinks::wincolor_stderr_sink_mt>();
-            return color-sink;
+            auto color_sink = std::make_shared<spdlog::sinks::wincolor_stderr_sink_mt>();
+            return color_sink;
 #else
             // Assumes color not supported on platforms other than Windows,
             // Linux, and OS X.
