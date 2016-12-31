@@ -32,12 +32,17 @@
 
 #if defined(OSVR_LINUX) || defined(OSVR_MACOSX)
 #define OSVR_GET_ANSICOLOR_SINK
+#elif defined(OSVR_WINDOWS)
+#define OSVR_GET_WINCOLOR_SINK
 #endif
 
 // Library/third-party includes
 #include <spdlog/sinks/ostream_sink.h>
 #ifdef OSVR_GET_ANSICOLOR_SINK
 #include <spdlog/sinks/ansicolor_sink.h>
+#endif
+#ifdef OSVR_GET_WINCOLOR_SINK
+#include <spdlog/sinks/wincolor_sink.h>
 #endif
 #include <spdlog/common.h>
 #include <spdlog/sinks/base_sink.h>
@@ -130,8 +135,12 @@ namespace util {
             auto color_sink = std::make_shared<spdlog::sinks::ansicolor_sink>(
                 console_out); // taste the rainbow!
             return color_sink;
+#elif defined(OSVR_GET_WINCOLOR_SINK)
+            auto color-sink = std::make_shared<spdlog::sinks::wincolor_stderr_sink_mt>();
+            return color-sink;
 #else
-            // No color for Windows yet (and not tested on other platforms)
+            // Assumes color not supported on platforms other than Windows,
+            // Linux, and OS X.
             return console_out;
 #endif
         }

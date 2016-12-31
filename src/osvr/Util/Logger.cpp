@@ -74,7 +74,7 @@ namespace util {
                          "Please report this issue in OSVR-Core on GitHub."
                       << std::endl;
             try {
-                auto console_logger = spdlog::stderr_logger_mt(name, false);
+                auto console_logger = spdlog::stderr_logger_mt(name);
                 return makeLogger(name, console_logger);
             } catch (...) {
                 std::cerr << "Failed to create a console logger to use as a "

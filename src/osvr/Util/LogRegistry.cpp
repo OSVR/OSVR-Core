@@ -235,7 +235,7 @@ namespace util {
                     auto daily_file_sink =
                         std::make_shared<spdlog::sinks::daily_file_sink_mt>(
                             base_name.string().c_str(), LOG_FILE_EXTENSION, 0,
-                            0, false);
+                            0);
                     sinks_.push_back(daily_file_sink);
                 }
             } catch (const std::exception &e) {
