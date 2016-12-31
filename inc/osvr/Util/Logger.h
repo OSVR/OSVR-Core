@@ -130,10 +130,11 @@ namespace util {
                     : logger_(logger), level_(level),
                       os_(new std::ostringstream) {}
 
-                StreamProxy(Logger &logger, LogLevel level, const char *msg)
+                StreamProxy(Logger &logger, LogLevel level,
+                            const std::string &msg)
                     : logger_(logger), level_(level),
                       os_(new std::ostringstream) {
-                    os_->operator<<(msg);
+                    (*os_) << msg;
                 }
 
                 /// destructor appends the finished stringstream at the end

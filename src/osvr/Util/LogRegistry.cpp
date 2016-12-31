@@ -114,6 +114,12 @@ namespace util {
                                                           spd_logger);
         }
 
+        void LogRegistry::drop(const std::string &logger_name) {
+            spdlog::drop(logger_name);
+        }
+
+        void LogRegistry::dropAll() { spdlog::drop_all(); }
+
         void LogRegistry::flush() {
             for (auto &sink : sinks_) {
                 try {
@@ -219,7 +225,7 @@ namespace util {
             // File sink - rotates daily
             std::string logDir;
             try {
-                size_t q_size = 65536; // queue size must be power of 2
+                size_t q_size = 64; // queue size must be power of 2
                 spdlog::set_async_mode(q_size);
                 namespace fs = boost::filesystem;
                 auto base_name = fs::path(getLoggingDirectory(true));
