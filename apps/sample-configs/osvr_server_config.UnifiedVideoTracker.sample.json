@@ -33,7 +33,7 @@
     }],
     "aliases": {
         "/headSpace": {
-            "translate": [0.0, 0.0, 0.04141],
+            "translate": [0.0, 0.0, -0.04141],
             "child": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd"
         },
         "/me/head": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/hmd",
