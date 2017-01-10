@@ -7,7 +7,8 @@
 			"x_of_axis_to_spin_around": 0.0,
 			"y_of_axis_to_spin_around": 1.0,
 			"z_of_axis_to_spin_around": 0.0,
-			"rotation_rate_around_axis_in_Hz": 0.1
+			"rotation_rate_around_axis_in_Hz": 0.1,
+            "name": "TrackerSpin"
 		}
 	}]
 }

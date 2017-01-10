@@ -127,13 +127,20 @@ class TrackerSpinDevice {
 
 class TrackerSpinCreate {
   public:
-    TrackerSpinCreate() {}
+    TrackerSpinCreate() : m_found(false) {}
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
+
+        if (m_found) {
+            return OSVR_RETURN_SUCCESS;
+        }
+
+        m_found = true;
+
         Json::Value root;
         {
             Json::Reader reader;
             if (!reader.parse(params, root)) {
-                std::cerr << "Couldn't parse JSON for tracker blendor!"
+                std::cerr << "Couldn't parse JSON for tracker spin!"
                           << std::endl;
                 return OSVR_RETURN_FAILURE;
             }
@@ -161,6 +168,9 @@ class TrackerSpinCreate {
                                   zAxisSpin, updateRate, spinRate));
         return OSVR_RETURN_SUCCESS;
     }
+
+  private:
+    bool m_found;
 };
 } // namespace
 
