@@ -1,0 +1,22 @@
+{
+	"deviceVendor": "OSVR",
+	"deviceName": "Tracker Spin",
+	"author": "Georgiy Frolov <georgiy@sensics.com>",
+	"version": 1,
+	"lastModified": "2017-01-09T21:13:07.585Z",
+	"interfaces": {
+		"tracker": {
+			"position": false,
+			"orientation": true,
+			"cout": 1
+		}
+	},
+	"semantic": {
+		"head": {
+			"$target": "tracker/0"
+		}
+	},
+	"automaticAliases": {
+		"/me/head": "semantic/head"
+	}
+}
