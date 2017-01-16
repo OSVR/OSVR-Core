@@ -23,7 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include "BinaryLocation.h"
+#include <osvr/Util/BinaryLocation.h>
+
 #include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes
@@ -42,12 +43,14 @@
 // - none
 
 namespace osvr {
-namespace pluginhost {
+namespace util {
 
     namespace fs = boost::filesystem;
+
     static inline std::string getCanonicalGenericString(const char path[]) {
         return fs::canonical(path).generic_string();
     }
+
 #if defined(OSVR_WINDOWS)
     std::string getBinaryLocation() {
         char buf[512] = {0};
@@ -78,11 +81,10 @@ namespace pluginhost {
     std::string getBinaryLocation() {
         char buf[1024] = {0};
         uint32_t len = sizeof(buf);
-        std::string ret;
         if (0 == _NSGetExecutablePath(buf, &len)) {
-            ret.assign(buf, len);
+            return getCanonicalGenericString(buf);
         }
-        return ret;
+        return std::string{};
     }
 #else
 #error "getBinaryLocation() not yet implemented for this platform!"
@@ -91,5 +93,5 @@ namespace pluginhost {
 /// @todo Solaris: getexecname()
 #endif
 
-} // namespace pluginhost
+} // namespace util
 } // namespace osvr

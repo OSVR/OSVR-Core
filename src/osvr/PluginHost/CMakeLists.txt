@@ -9,8 +9,6 @@ set(API
     "${HEADER_LOCATION}/SearchPath.h")
 
 set(SOURCE
-    BinaryLocation.cpp
-    BinaryLocation.h
     PluginSpecificRegistrationContext.cpp
     PluginSpecificRegistrationContextImpl.cpp
     PluginSpecificRegistrationContextImpl.h
@@ -42,6 +40,7 @@ target_link_libraries(${LIBNAME_FULL}
     libfunctionality::functionality
     osvrUtilCpp
     PRIVATE
+    spdlog
     boost_filesystem)
 
 ###

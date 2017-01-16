@@ -57,25 +57,25 @@ namespace connection {
         }
         static const vrpn_uint32 CLASS_OF_SERVICE = vrpn_CONNECTION_LOW_LATENCY;
 
-        virtual void sendReport(OSVR_PositionState const &val,
+        void sendReport(OSVR_PositionState const &val,
                                 OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &tv) {
+                                util::time::TimeValue const &tv) override {
             m_resetQuat();
             osvrVec3ToQuatlib(Base::pos, &val);
             m_sendPose(sensor, tv);
         }
 
-        virtual void sendReport(OSVR_OrientationState const &val,
+        void sendReport(OSVR_OrientationState const &val,
                                 OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &tv) {
+                                util::time::TimeValue const &tv) override {
             m_resetPos();
             osvrQuatToQuatlib(Base::d_quat, &val);
             m_sendPose(sensor, tv);
         }
 
-        virtual void sendReport(OSVR_PoseState const &val,
+        void sendReport(OSVR_PoseState const &val,
                                 OSVR_ChannelCount sensor,
-                                util::time::TimeValue const &tv) {
+                                util::time::TimeValue const &tv) override {
             osvrVec3ToQuatlib(Base::pos, &(val.translation));
             osvrQuatToQuatlib(Base::d_quat, &(val.rotation));
             m_sendPose(sensor, tv);

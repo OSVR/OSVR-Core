@@ -27,7 +27,7 @@
 
 
 // Internal Includes
-#include <osvr/Common/GetEnvironmentVariable.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
 #include <osvr/Util/PlatformConfig.h>
 
 // Library/third-party includes
@@ -41,19 +41,29 @@ namespace osvr {
 
         /** @brief INTERNAL ONLY - get the current server directory, if available. */
         inline boost::optional<std::string> getServerBinaryDirectoryPath() {
-            auto server = osvr::common::getEnvironmentVariable("OSVR_SERVER_ROOT");
+            auto server = osvr::util::getEnvironmentVariable("OSVR_SERVER_ROOT");
+            if (!server || server->empty()) {
+                return server;
+            }
+            const char lastChar = server->back();
+            if (lastChar == '/' || lastChar == '\\') {
+                server->pop_back();
+            }
             return server;
         }
 
         /** @brief INTERNAL ONLY - get the path to the server executable, if available. */
         inline boost::optional<std::string> getServerBinaryPath() {
-            auto binPath = getServerBinaryDirectoryPath();
+            const auto binPath = getServerBinaryDirectoryPath();
             if (binPath) {
 #if defined(OSVR_WINDOWS)
-                return *binPath + "\\osvr_server.exe";
+                static const std::string pathExtension = ".exe";
+                static const std::string pathSep = "\\";
 #else
-                return *binPath + "/osvr_server";
+                static const std::string pathExtension = "";
+                static const std::string pathSep = "/";
 #endif
+                return *binPath + pathSep + "osvr_server" + pathExtension;
             }
             return boost::none;
         }

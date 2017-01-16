@@ -26,9 +26,12 @@
       }
     ],
     "distortion": {
-      "k1_red": 0,
-      "k1_green": 0,
-      "k1_blue": 0
+      /* Requires up to 27% overfill */
+      "distance_scale_x": 1,
+      "distance_scale_y": 1,
+      "polynomial_coeffs_red": [0, 1, 0, 0.5, 0, -1.15, 0, 9.25, 0, -5 ],
+      "polynomial_coeffs_green": [0, 1, 0, 0.5, 0, -1.15, 0, 9.25, 0, -5 ],
+      "polynomial_coeffs_blue": [0, 1, 0, 0.5, 0, -1.15, 0, 9.25, 0, -5 ]
     },
     "rendering": {
       "right_roll": 0,

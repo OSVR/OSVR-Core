@@ -1,29 +1,27 @@
 /** @file
-    @brief Header
+    @brief Compile-time logging configuration
 
-    @date 2015
+    @date 2016
 
     @author
     Sensics, Inc.
-    <http://sensics.com/osvr>
+    <http://sensics.com>
+
 */
 
-// Copyright 2015 Sensics, Inc.
+// Copyright 2016 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// 	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#ifndef INCLUDED_BinaryLocation_h_GUID_B0594B7B_B7B8_489B_DF0D_5B3D1998D3AB
-#define INCLUDED_BinaryLocation_h_GUID_B0594B7B_B7B8_489B_DF0D_5B3D1998D3AB
 
 // Internal Includes
 // - none
@@ -32,14 +30,12 @@
 // - none
 
 // Standard includes
-#include <string>
+// - none
 
-namespace osvr {
-namespace pluginhost {
-    /// Get this binary's location, as a step in finding the "root" and search
-    /// paths.
-    std::string getBinaryLocation();
-} // namespace pluginhost
-} // namespace osvr
+#ifndef INCLUDED_LogConfig_h_in_GUID_55FF1F50_4D07_44A3_AEFA_945419E803C6
+#define INCLUDED_LogConfig_h_in_GUID_55FF1F50_4D07_44A3_AEFA_945419E803C6
 
-#endif // INCLUDED_BinaryLocation_h_GUID_B0594B7B_B7B8_489B_DF0D_5B3D1998D3AB
+#cmakedefine OSVR_UTIL_LOG_SINGLETON
+
+#endif // INCLUDED_LogConfig_h_in_GUID_55FF1F50_4D07_44A3_AEFA_945419E803C6
+

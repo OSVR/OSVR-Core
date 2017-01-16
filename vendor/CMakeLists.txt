@@ -1,3 +1,16 @@
+
+
+# Interface target for spdlog
+add_library(spdlog INTERFACE)
+set(OSVR_VENDORED_SPDLOG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/spdlog" CACHE INTERNAL "" FORCE)
+target_include_directories(spdlog INTERFACE "${OSVR_VENDORED_SPDLOG_ROOT}/include")
+if(BUILD_WITH_LOGGING_COARSE_TIMESTAMPS)
+    target_compile_definitions(spdlog INTERFACE SPDLOG_CLOCK_COARSE)
+endif()
+if(NOT BUILD_WITH_LOGGING_THREAD_ID_SUPPORT)
+    target_compile_definitions(spdlog INTERFACE SPDLOG_NO_THREAD_ID)
+endif()
+
 if(BUILD_TESTING)
     if(BUILD_SHARED_LIBS)
         set(OSVR_GTEST_SHARED_LIB ON)
@@ -8,7 +21,14 @@ if(BUILD_TESTING)
     if(WIN32)
         set(gtest_force_shared_crt ON)
     endif()
+    if(ANDROID)
+        set(ORIG_FLAGS "${CMAKE_CXX_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_HAS_CLONE=0")
+    endif()
     add_subdirectory(gtest-1.7.0)
+    if(ANDROID)
+        set(CMAKE_CXX_FLAGS "${ORIG_FLAGS}")
+    endif()
 
     # Create an interface target to consume Catch
     add_library(vendored-catch INTERFACE)

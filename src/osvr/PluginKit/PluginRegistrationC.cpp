@@ -33,7 +33,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
 OSVR_ReturnCode osvrPluginRegisterHardwareDetectCallback(
     OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
@@ -79,3 +79,18 @@ OSVR_ReturnCode osvrPluginRegisterDataWithDeleteCallback(
     context->registerDataWithDeleteCallback(deleteCallback, pluginData);
     return OSVR_RETURN_SUCCESS;
 }
+
+void osvrPluginLog(OSVR_INOUT_PTR OSVR_PluginRegContext ctx,
+                   OSVR_IN OSVR_LogLevel severity,
+                   OSVR_IN const char *message) {
+    if (!ctx) {
+        std::cerr << "[OSVR] " << message << std::endl;
+        return;
+    }
+
+    osvr::pluginhost::PluginSpecificRegistrationContext *context =
+        static_cast<osvr::pluginhost::PluginSpecificRegistrationContext *>(ctx);
+    auto s = static_cast<osvr::util::log::LogLevel>(severity);
+    context->log(s, message);
+}
+

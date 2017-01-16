@@ -62,7 +62,6 @@ set(API
     "${HEADER_LOCATION}/Endianness.h"
     "${HEADER_LOCATION}/EyeTrackerComponent.h"
     "${HEADER_LOCATION}/GeneralizedTransform.h"
-    "${HEADER_LOCATION}/GetEnvironmentVariable.h"
     "${HEADER_LOCATION}/ImagingComponent.h"
     "${CMAKE_CURRENT_BINARY_DIR}/ImagingComponentConfig.h"
     "${HEADER_LOCATION}/IntegerByteSwap.h"
@@ -77,6 +76,7 @@ set(API
     "${HEADER_LOCATION}/JSONTransformVisitor.h"
     "${HEADER_LOCATION}/Location2DComponent.h"
     "${HEADER_LOCATION}/LocomotionComponent.h"
+    "${HEADER_LOCATION}/LowLatency.h"
     "${HEADER_LOCATION}/MessageHandler.h"
     "${HEADER_LOCATION}/MessageRegistration.h"
     "${HEADER_LOCATION}/NetworkClassOfService.h"
@@ -141,7 +141,6 @@ set(SOURCE
     DirectionComponent.cpp
     EyeTrackerComponent.cpp
     GeneralizedTransform.cpp
-    GetEnvironmentVariable.cpp
     GetJSONStringFromTree.h
     ImagingComponent.cpp
     IPCRingBuffer.cpp
@@ -150,6 +149,7 @@ set(SOURCE
     JSONTransformVisitor.cpp
     Location2DComponent.cpp
     LocomotionComponent.cpp
+    LowLatency.cpp
     MessageHandler.cpp
     MessageRegistration.cpp
     NetworkClassOfService.cpp
@@ -203,6 +203,7 @@ target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     JsonCpp::JsonCpp
     vendored-vrpn
+    spdlog
     eigen-headers
     osvr_cxx11_flags
     ${OSVR_CODECVT_LIBRARIES})

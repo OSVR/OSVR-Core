@@ -28,6 +28,7 @@
 // Internal Includes
 #include <osvr/PluginKit/DeviceInterface.h>
 #include <osvr/PluginKit/PluginRegistration.h>
+#include <osvr/Util/LogLevelC.h>
 
 // Library/third-party includes
 // - none
@@ -91,6 +92,14 @@ namespace pluginkit {
         /// @sa ::osvr::pluginkit::registerObjectForDeletion
         template <typename T> T *registerObjectForDeletion(T *obj) {
             return ::osvr::pluginkit::registerObjectForDeletion(m_ctx, obj);
+        }
+
+        /// @brief Log a message to the plugin-specific channel.
+        ///
+        /// @param severity The severity of the log message.
+        /// @param message The message to be logged.
+        void log(OSVR_LogLevel severity, const char* message) {
+            ::osvr::pluginkit::log(m_ctx, severity, message);
         }
 
       private:

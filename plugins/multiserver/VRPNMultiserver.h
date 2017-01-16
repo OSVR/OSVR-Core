@@ -41,7 +41,6 @@ class VRPNMultiserverData {
 
   private:
     typedef std::map<std::string, size_t> NameCountMap;
-    std::string assignName(std::string const &nameStem);
     size_t assignNumber(std::string const &nameStem);
 
     NameCountMap m_nameCount;

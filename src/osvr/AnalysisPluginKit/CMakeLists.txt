@@ -31,6 +31,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     osvrCommon
     osvrClient
+    spdlog
     vendored-vrpn)
 
 # Add library alias to allow use of the same osvr_add_plugin script within this

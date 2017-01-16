@@ -211,9 +211,10 @@ osvrTimeValueGreater(OSVR_IN_PTR const OSVR_TimeValue *tvA,
 
 /// Returns true if the time value is normalized. Typically used in assertions.
 inline bool osvrTimeValueIsNormalized(const OSVR_TimeValue &tv) {
-#ifdef __APPLE__
-    // apparently standard library used on mac only has floating-point abs?
-    return (std::abs(double(tv.microseconds)) < 1000000) &&
+#ifdef _LIBCPP_VERSION
+    // libcxx has only floating-point abs and has several, so it makes this
+    // ambiguous otherwise
+    return std::abs(double(tv.microseconds)) < 1000000 &&
 #else
     return (std::abs(tv.microseconds) < 1000000) &&
 #endif

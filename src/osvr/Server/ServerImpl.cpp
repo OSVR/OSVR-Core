@@ -24,33 +24,35 @@
 
 // Internal Includes
 #include "ServerImpl.h"
-#include <osvr/Connection/Connection.h>
-#include <osvr/Connection/ConnectionDevice.h>
-#include <osvr/PluginHost/RegistrationContext.h>
-#include <osvr/Util/MessageKeys.h>
-#include <osvr/Connection/MessageType.h>
-#include <osvr/Util/Verbosity.h>
 #include "../Connection/VrpnConnectionKind.h" /// @todo warning - cross-library internal header!
-#include <osvr/Util/Microsleep.h>
-#include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/AliasProcessor.h>
 #include <osvr/Common/CommonComponent.h>
 #include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/ProcessDeviceDescriptor.h>
-#include <osvr/Common/AliasProcessor.h>
-#include <osvr/Util/StringLiteralFileToString.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Connection/Connection.h>
+#include <osvr/Connection/ConnectionDevice.h>
+#include <osvr/Connection/MessageType.h>
+#include <osvr/PluginHost/RegistrationContext.h>
+#include <osvr/Util/LogNames.h>
+#include <osvr/Util/Logger.h>
+#include <osvr/Util/MessageKeys.h>
+#include <osvr/Util/Microsleep.h>
 #include <osvr/Util/PortFlags.h>
+#include <osvr/Util/StringLiteralFileToString.h>
+#include <osvr/Util/Verbosity.h>
 
 #include "osvr/Server/display_json.h" /// Fallback display descriptor.
 
 // Library/third-party includes
-#include <vrpn_ConnectionPtr.h>
 #include <boost/variant.hpp>
 #include <json/reader.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
-#include <stdexcept>
 #include <functional>
+#include <stdexcept>
 
 namespace osvr {
 namespace server {
@@ -69,7 +71,8 @@ namespace server {
                            boost::optional<int> const &port)
         : m_conn(conn), m_ctx(make_shared<pluginhost::RegistrationContext>()),
           m_host(host.get_value_or("localhost")),
-          m_port(port.get_value_or(util::UseDefaultPort)) {
+          m_port(port.get_value_or(util::UseDefaultPort)),
+          m_log(util::log::make_logger(util::log::OSVR_SERVER_LOG)) {
         if (!m_conn) {
             throw std::logic_error(
                 "Can't pass a null ConnectionPtr into Server constructor!");
@@ -215,13 +218,13 @@ namespace server {
             f();
         }
         if (m_triggeredDetect) {
-            OSVR_DEV_VERBOSE("Performing hardware auto-detection.");
+            m_log->info() << "Performing hardware auto-detection.";
             common::tracing::markHardwareDetect();
             m_ctx->triggerHardwareDetect();
             m_triggeredDetect = false;
         }
         if (m_treeDirty) {
-            OSVR_DEV_VERBOSE("Path tree updated or connection detected");
+            m_log->debug() << "Path tree updated or connection detected";
             m_sendTree();
             m_treeDirty.reset();
         }
@@ -323,7 +326,8 @@ namespace server {
         BOOST_ASSERT_MSG(
             self->m_inServerThread(),
             "This callback should never happen outside the server thread!");
-        OSVR_DEV_VERBOSE("Got an updated route from a client.");
+
+        self->m_log->info() << "Got an updated route from a client.";
         self->m_addRoute(std::string(p.buffer, p.payload_len));
         return 0;
     }
@@ -358,9 +362,10 @@ namespace server {
         m_callControlled([&] { m_treeDirty += true; });
     }
     void ServerImpl::m_sendTree() {
-        OSVR_DEV_VERBOSE("Sending path tree to clients.");
+
         common::tracing::markPathTreeBroadcast();
         m_systemComponent->sendReplacementTree(m_tree);
+        m_log->info() << "Sent path tree to clients.";
     }
 
     void ServerImpl::setSleepTime(int microseconds) {
@@ -373,8 +378,8 @@ namespace server {
         for (auto const &dev : m_conn->getDevices()) {
             auto const &descriptor = dev->getDeviceDescriptor();
             if (descriptor.empty()) {
-                OSVR_DEV_VERBOSE("Developer Warning: No device descriptor for "
-                                 << dev->getName());
+                m_log->warn() << "Developer Warning: No device descriptor for "
+                              << dev->getName();
             } else {
                 m_treeDirty += common::processDeviceDescriptorForPathTree(
                     m_tree, dev->getName(), descriptor, m_port, m_host);
@@ -387,9 +392,13 @@ namespace server {
         /// Conditional ensures that we don't "idle" faster than we run: Make
         /// sure we're sleeping longer now than we will be once we exit idle.
         if (self->m_currentSleepTime > self->m_sleepTime) {
-            OSVR_DEV_VERBOSE("Got first client connection, exiting idle mode.");
+
+            self->m_log->debug(
+                "Got first client connection, exiting idle mode.");
             self->m_currentSleepTime = self->m_sleepTime;
         }
+        /// Create the low-latency behavior object.
+        self->m_lowLatency.reset(new common::LowLatency);
         return 0;
     }
 
@@ -399,10 +408,13 @@ namespace server {
         /// Conditional ensures that we don't "idle" faster than we run: Make
         /// sure we're sleeping shorter now than we will be once we enter idle.
         if (self->m_currentSleepTime < IDLE_SLEEP_TIME) {
-            OSVR_DEV_VERBOSE(
+            self->m_log->debug(
                 "Dropped last client connection, entering idle mode.");
             self->m_currentSleepTime = IDLE_SLEEP_TIME;
         }
+
+        /// Destroy the low-latency behavior object
+        self->m_lowLatency.reset();
         return 0;
     }
 

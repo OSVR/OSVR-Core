@@ -30,6 +30,7 @@
 #include <osvr/Connection/MessageType.h>
 #include "VrpnBasedConnection.h"
 #include "GenericConnectionDevice.h"
+#include <osvr/Util/LogNames.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
@@ -129,11 +130,11 @@ namespace connection {
         BOOST_ASSERT_MSG(device, "Device must be non-null!");
         auto const &names = device->getNames();
         if (names.size() == 1) {
-            OSVR_DEV_VERBOSE("Added device: " << names.front());
+            m_log->notice() << "Added device: " << names.front();
         } else {
-            OSVR_DEV_VERBOSE("Added device with names:");
+            m_log->notice() << "Added device with names:";
             for (auto const &name : names) {
-                OSVR_DEV_VERBOSE(" - " << name);
+                m_log->notice() << " - " << name;
             }
         }
         m_devices.push_back(device);
@@ -161,7 +162,8 @@ namespace connection {
         }
     }
 
-    Connection::Connection() {}
+    Connection::Connection()
+        : m_log(util::log::make_logger(util::log::OSVR_SERVER_LOG)) {}
 
     Connection::~Connection() {}
 

@@ -23,38 +23,52 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Client/CreateContext.h>
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/Common/ClientContext.h>
-#include <osvr/Client/CreateContext.h>
-#include <osvr/Common/GetEnvironmentVariable.h>
 #include <osvr/Common/Tracing.h>
+#include <osvr/Util/GetEnvironmentVariable.h>
+#include <osvr/Util/Log.h>
+#include <osvr/Util/LogNames.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-// - none
+#include <iostream>
 
 static const char HOST_ENV_VAR[] = "OSVR_HOST";
 
+static inline osvr::util::log::LoggerPtr make_clientkit_logger() {
+    namespace log = osvr::util::log;
+    return log::make_logger(log::OSVR_CLIENTKIT_LOG_NAME);
+}
+
 OSVR_ClientContext osvrClientInit(const char applicationIdentifier[],
                                   uint32_t /*flags*/) {
-    auto host = osvr::common::getEnvironmentVariable(HOST_ENV_VAR);
+    auto host = osvr::util::getEnvironmentVariable(HOST_ENV_VAR);
     if (host.is_initialized()) {
-        OSVR_DEV_VERBOSE("Connecting to non-default host " << *host);
+
+        make_clientkit_logger()->notice() << "App " << applicationIdentifier
+                                          << ": Connecting to non-default host "
+                                          << *host;
         return ::osvr::client::createContext(applicationIdentifier,
                                              host->c_str());
     }
-    OSVR_DEV_VERBOSE("Connecting to default (local) host");
+    make_clientkit_logger()->debug("Connecting to default (local) host");
     return ::osvr::client::createContext(applicationIdentifier);
 }
+
 OSVR_ReturnCode osvrClientCheckStatus(OSVR_ClientContext ctx) {
     if (!ctx) {
+        make_clientkit_logger()->error(
+            "Can't check status of a null Client Context!");
         return OSVR_RETURN_FAILURE;
     }
     return ctx->getStatus() ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
 }
+
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
     osvr::common::tracing::ClientUpdate region;
     ctx->update();
@@ -63,9 +77,21 @@ OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
 
 OSVR_ReturnCode osvrClientShutdown(OSVR_ClientContext ctx) {
     if (nullptr == ctx) {
-        OSVR_DEV_VERBOSE("Can't delete a null Client Context!");
+        make_clientkit_logger()->error("Can't delete a null Client Context!");
         return OSVR_RETURN_FAILURE;
     }
     osvr::common::deleteContext(ctx);
     return OSVR_RETURN_SUCCESS;
+}
+
+void osvrClientLog(OSVR_ClientContext ctx, OSVR_LogLevel severity,
+                   const char *message) {
+    const auto s = static_cast<osvr::util::log::LogLevel>(severity);
+    if (!ctx) {
+        make_clientkit_logger()->log(s)
+            << "Message from app (no client context): " << message;
+        return;
+    }
+
+    ctx->log(s, message);
 }

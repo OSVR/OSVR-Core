@@ -39,6 +39,12 @@ option(BUILD_HEADER_DEPENDENCY_TESTS "Should we add targets to ensure that every
 
 option(BUILD_ADVANCED_DEV_TOOLS "Should we build tools designed for core developers?" OFF)
 
+# Logging options
+option(BUILD_WITH_LOGGING_SINGLETON "Enable the logging singleton - required for optimal logging performance and logging to file." TRUE)
+mark_as_advanced(BUILD_WITH_LOGGING_SINGLETON)
+#TODO: consider BUILD_WITH_LOGGING_COARSE_TIMESTAMPS on Linux only
+#TODO: consider BUILD_WITH_LOGGING_THREAD_ID_SUPPORT if we add thread (%t) to our pattern.
+
 # Consistency: can't build the examples, apps, etc if you don't have the library
 set(dependent_options
     BUILD_SERVER_EXAMPLES

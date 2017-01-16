@@ -26,7 +26,7 @@
 
 			"prediction": {
 				"enabled": true,
-				"staticDelayMS": 16,
+				"staticDelayMS": 26,
 				"leftEyeDelayMS": 0,
 				"rightEyeDelayMS": 0,
 				"localTimeOverride": true

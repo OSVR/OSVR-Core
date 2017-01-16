@@ -108,10 +108,10 @@ namespace client {
             m_systemDevice->addComponent(common::SystemComponent::create());
         using DedupJsonFunction =
             common::DeduplicatingFunctionWrapper<Json::Value const &>;
+
         m_systemComponent->registerReplaceTreeHandler(
             DedupJsonFunction([&](Json::Value nodes) {
-
-                OSVR_DEV_VERBOSE("Got updated path tree, processing");
+                logger()->debug("Got updated path tree, processing");
                 // Replace localhost before we even convert the json to a tree.
                 // replace the @localhost with the correct host name
                 // in case we are a remote client, otherwise the connection
@@ -133,13 +133,13 @@ namespace client {
             std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
         }
         if (!m_gotConnection) {
-            OSVR_DEV_VERBOSE(
-                "Could not connect to OSVR server in the timeout period "
-                "allotted of "
+            logger()->notice()
+                << "Could not connect to OSVR server in the timeout period "
+                   "allotted of "
                 << std::chrono::duration_cast<std::chrono::milliseconds>(
                        STARTUP_CONNECT_TIMEOUT)
                        .count()
-                << "ms");
+                << "ms";
             return; // Bail early if we don't even have a connection
         }
 
@@ -150,14 +150,18 @@ namespace client {
             std::this_thread::sleep_for(STARTUP_LOOP_SLEEP);
         }
         auto timeToStartup = (clock::now() - begin);
-        OSVR_DEV_VERBOSE(
-            "Connection process took "
+
+        // this message is just "info" if we're all good, but "notice" if we
+        // aren't fully set up yet.
+        logger()->log(m_pathTreeOwner ? util::log::LogLevel::info
+                                      : util::log::LogLevel::notice)
+            << "Connection process took "
             << std::chrono::duration_cast<std::chrono::milliseconds>(
                    timeToStartup)
                    .count()
             << "ms: " << (m_gotConnection ? "have connection to server, "
                                           : "don't have connection to server, ")
-            << (m_pathTreeOwner ? "have path tree" : "don't have path tree"));
+            << (m_pathTreeOwner ? "have path tree" : "don't have path tree");
     }
 
     PureClientContext::~PureClientContext() {}
@@ -167,7 +171,7 @@ namespace client {
         m_vrpnConns.updateAll();
 
         if (!m_gotConnection && m_mainConn->connected()) {
-            OSVR_DEV_VERBOSE("Got connection to main OSVR server");
+            logger()->info("Got connection to main OSVR server");
             m_gotConnection = true;
         }
 

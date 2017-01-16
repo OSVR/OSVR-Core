@@ -77,5 +77,6 @@ target_link_libraries(${LIBNAME_FULL}
     PRIVATE
     osvrUtilCpp
     osvrCommon
+    spdlog
     vendored-vrpn
     util-runloopmanager)

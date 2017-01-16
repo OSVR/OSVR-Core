@@ -30,7 +30,6 @@
 // - none
 
 // Standard includes
-#include <regex>
 #include <sstream>
 
 namespace osvr {
@@ -89,9 +88,18 @@ namespace common {
         /// port if one isn't already specified.
         static inline std::string
         attachPortToServerIfNoneSpecified(std::string const &server, int port) {
-            auto endsWithPort = std::regex{".*:[[:digit:]]+$"};
-            if (std::regex_match(server, endsWithPort)) {
-                return server;
+            // See if the string ends with a colon (:) followed by only digits.
+            // If so, it ends with a port number so we don't need to add one and
+            // can just return it.
+            size_t lastColon = server.find_last_of(':');
+            if (lastColon != std::string::npos) {
+                bool nonDigit = false;
+                for (size_t i = lastColon + 1; i < server.size(); i++) {
+                    if (!isdigit(server[i])) {
+                        nonDigit = true;
+                    }
+                }
+                if (!nonDigit) { return server; }
             }
             // OK, didn't end with a port
             if (server.find(":") != std::string::npos &&

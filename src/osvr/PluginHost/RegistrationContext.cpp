@@ -29,18 +29,20 @@
 
 // Internal Includes
 #include <osvr/PluginHost/RegistrationContext.h>
-#include <osvr/PluginHost/SearchPath.h>
-#include <osvr/PluginHost/PathConfig.h>
+
 #include "PluginSpecificRegistrationContextImpl.h"
+#include <osvr/PluginHost/PathConfig.h>
+#include <osvr/PluginHost/SearchPath.h>
+#include <osvr/Util/Log.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <libfunctionality/LoadPlugin.h>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#include <libfunctionality/LoadPlugin.h>
 
 // Standard includes
 #include <algorithm>
@@ -48,7 +50,10 @@
 
 namespace osvr {
 namespace pluginhost {
-
+    static const auto PLUGIN_HOST_LOGGER_NAME = "PluginHost";
+#ifdef _MSC_VER
+    static const auto PLUGIN_HOST_DEBUG_SUFFIX = ".debug";
+#endif
     namespace fs = boost::filesystem;
 
     struct RegistrationContext::Impl : private boost::noncopyable {
@@ -57,7 +62,10 @@ namespace pluginhost {
 
         const std::vector<std::string> pluginPaths;
     };
-    RegistrationContext::RegistrationContext() : m_impl(new Impl) {}
+
+    RegistrationContext::RegistrationContext()
+        : m_impl(new Impl),
+          m_logger(util::log::make_logger(PLUGIN_HOST_LOGGER_NAME)) {}
 
     RegistrationContext::~RegistrationContext() {
         // Reset the plugins in reverse order.
@@ -73,16 +81,26 @@ namespace pluginhost {
         return (regMap.find(pluginName) != end(regMap));
     }
 
-    static inline bool tryLoadingPlugin(libfunc::PluginHandle &plugin,
+    /// Only called by manually-named plugins to load: the plugins that are
+    /// loaded automatically don't go through this function.
+    static inline bool tryLoadingPlugin(util::log::Logger &log,
+                                        libfunc::PluginHandle &plugin,
                                         std::string const &name,
                                         OSVR_PluginRegContext ctx,
                                         bool shouldRethrow = false) {
-        OSVR_DEV_VERBOSE("Trying to load a plugin with the name " << name);
+#if defined(_MSC_VER) && !defined(NDEBUG)
+        // Visual C++ debug runtime: we append to the plugin name.
+        const std::string decoratedPluginName = name + PLUGIN_HOST_DEBUG_SUFFIX;
+#else
+        const std::string &decoratedPluginName = name;
+#endif
+        log.debug() << "Trying to load a plugin with the name "
+                    << decoratedPluginName;
         try {
-            plugin = libfunc::loadPluginByName(name, ctx);
+            plugin = libfunc::loadPluginByName(decoratedPluginName, ctx);
             return true;
         } catch (std::runtime_error const &e) {
-            OSVR_DEV_VERBOSE("Failed: " << e.what());
+            log.debug() << "Failed: " << e.what();
             if (shouldRethrow) {
                 throw;
             }
@@ -105,26 +123,28 @@ namespace pluginhost {
         bool success = false;
         libfunc::PluginHandle plugin;
         auto ctx = pluginReg->extractOpaquePointer();
-
         const std::string pluginPathName =
             pluginhost::findPlugin(m_impl->pluginPaths, pluginName);
         if (pluginPathName.empty()) {
             // was the plugin pre-loaded or statically linked? Try loading
             // it by name.
-            success = tryLoadingPlugin(plugin, pluginName, ctx);
-            if(!success) {
-                throw std::runtime_error("Could not find plugin named " + pluginName);
+            success = tryLoadingPlugin(*m_logger, plugin, pluginName, ctx);
+            if (!success) {
+                throw std::runtime_error("Could not find plugin named " +
+                                         pluginName);
             }
         }
 
-        if(!success) {
+        if (!success) {
             const auto pluginPathNameNoExt =
                 (fs::path(pluginPathName).parent_path() /
                  fs::path(pluginPathName).stem())
                     .generic_string();
 
-            success = tryLoadingPlugin(plugin, pluginPathName, ctx) ||
-                           tryLoadingPlugin(plugin, pluginPathNameNoExt, ctx, true);
+            success =
+                tryLoadingPlugin(*m_logger, plugin, pluginPathName, ctx) ||
+                tryLoadingPlugin(*m_logger, plugin, pluginPathNameNoExt, ctx,
+                                 true);
             if (!success) {
                 throw std::runtime_error(
                     "Unusual error occurred trying to load plugin named " +
@@ -142,25 +162,47 @@ namespace pluginhost {
 
         // Load all of the non-.manualload plugins
         for (const auto &plugin : pluginPathNames) {
-            OSVR_DEV_VERBOSE("Examining plugin '" << plugin << "'...");
+            m_logger->debug() << "Examining plugin '" << plugin << "'...";
             const auto pluginBaseName =
                 fs::path(plugin).filename().stem().generic_string();
             if (boost::iends_with(pluginBaseName, OSVR_PLUGIN_IGNORE_SUFFIX)) {
-                OSVR_DEV_VERBOSE(
-                    "Ignoring manual-load plugin: " << pluginBaseName);
+                m_logger->debug() << "Ignoring manual-load plugin: "
+                                  << pluginBaseName;
                 continue;
             }
 
+#if defined(_MSC_VER)
+            // Visual C++ debug runtime: we append to the plugin name. Must only
+            // load debug plugins iff we're a debug server
+            const auto isDebugRuntimePlugin =
+                boost::iends_with(pluginBaseName, PLUGIN_HOST_DEBUG_SUFFIX);
+#if defined(NDEBUG)
+            /// This is a non-debug build.
+            if (isDebugRuntimePlugin) {
+                m_logger->debug() << "Ignoring debug-runtime plugin: "
+                                  << pluginBaseName;
+                continue;
+            }
+#else
+            /// This is a debug build
+            if (!isDebugRuntimePlugin) {
+                m_logger->debug() << "Ignoring non-debug-runtime plugin: "
+                                  << pluginBaseName;
+                continue;
+            }
+#endif // NDEBUG
+#endif // _MSC_VER
+
             try {
                 loadPlugin(pluginBaseName);
-                OSVR_DEV_VERBOSE(
-                    "Successfully loaded plugin: " << pluginBaseName);
+                m_logger->debug() << "Successfully loaded plugin: "
+                                  << pluginBaseName;
             } catch (const std::exception &e) {
-                OSVR_DEV_VERBOSE("Failed to load plugin " << pluginBaseName
-                                                          << ": " << e.what());
+                m_logger->warn() << "Failed to load plugin " << pluginBaseName
+                                 << ": " << e.what();
             } catch (...) {
-                OSVR_DEV_VERBOSE("Failed to load plugin "
-                                 << pluginBaseName << ": Unknown error.");
+                m_logger->warn() << "Failed to load plugin " << pluginBaseName
+                                 << ": Unknown error.";
             }
         }
     }
