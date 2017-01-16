@@ -1,4 +1,13 @@
 # Help CMake find recent Boost MSVC binaries without manual configuration.
+#
+# Original Author:
+# 2014-2016 Ryan Pavlik <ryan.pavlik@gmail.com>
+#
+# Copyright Sensics, Inc. 2014-2016.
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
 if(MSVC)
     if(NOT DEFINED Boost_USE_MULTITHREADED)
         set(Boost_USE_MULTITHREADED ON) # Most common ABI
