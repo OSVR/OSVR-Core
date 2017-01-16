@@ -1,88 +1,88 @@
 {
-  "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK 2, for units that were manufactured as HDK2 (NOT UPGRADED FROM HDK 1.x!). It is configured for RenderManager applications in direct mode (portrait) on HDK2 optics.",
-  "display": "displays/OSVR_HDK_2_0.json",
-  "renderManagerConfig": "sample-configs/renderManager.direct.landscape.HDKv2.0.json",
-  "drivers": [
-    {
-      "plugin": "org_osvr_unifiedvideoinertial",
-      "driver": "UnifiedTrackingSystem",
-      "params": {
-        /* For devices with an HDK2 chassis/mechanicals only! 1.x units upgraded to HDK2 display specs do not use this line, your IR target remains the same */
-        "targetSet": "HDK2",
+    "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK 2, for units that were manufactured as HDK2 (NOT UPGRADED FROM HDK 1.x!). It is configured for RenderManager applications in direct mode (portrait) on HDK2 optics.",
+    "display": "displays/OSVR_HDK_2_0.json",
+    "renderManagerConfig": "sample-configs/renderManager.direct.landscape.HDKv2.0.newtracker.json",
+    "drivers": [
+        {
+            "plugin": "org_osvr_unifiedvideoinertial",
+            "driver": "UnifiedTrackingSystem",
+            "params": {
+                /* For devices with an HDK2 chassis/mechanicals only! 1.x units upgraded to HDK2 display specs do not use this line, your IR target remains the same */
+                "targetSet": "HDK2",
 
-        "cameraMicrosecondsOffset": -27000,
-        /* changing to true might ease "snap" of tracking loss/regain - default settings are below
-        "softResets": false,
-        "softResetPositionVarianceScale": 1.0e-1,
-        "softResetOrientationVariance": 1.0e0,
-        */
+                "cameraMicrosecondsOffset": -27000,
+                /* changing to true might ease "snap" of tracking loss/regain - default settings are below
+                "softResets": false,
+                "softResetPositionVarianceScale": 1.0e-1,
+                "softResetOrientationVariance": 1.0e0,
+                */
 
 
-        /* This setting now controls whether we wait for 2ms worth of IMU reports before updating/reporting (default - value of false)
-        or if we update on every report
-        "continuousReporting": false,
-        */
+                /* This setting now controls whether we wait for 2ms worth of IMU reports before updating/reporting (default - value of false)
+                or if we update on every report
+                "continuousReporting": false,
+                */
 
-        "manualBeaconOffset": [ 0, 0, 0 ],
-        "initialBeaconError": 1.0e-7,
-        "logRawBlobs": false,
-        "showDebug": true,
-        /*"streamBeaconDebugInfo": true,*/
-        "additionalPrediction": 0,
-        "includeRearPanel": true,
-        "headCircumference": 58.42,
-        "calibrationFile": "videotrackerCombinedCalibrationFile2.json",
-        "cameraIsForward": true,
+                "manualBeaconOffset": [ 0, 0, 0 ],
+                "initialBeaconError": 1.0e-7,
+                "logRawBlobs": false,
+                "showDebug": true,
+                /*"streamBeaconDebugInfo": true,*/
+                "additionalPrediction": 0,
+                "includeRearPanel": true,
+                "headCircumference": 58.42,
+                "calibrationFile": "videotrackerCombinedCalibrationFile2.json",
+                "cameraIsForward": true,
 
-        "streamBeaconDebugInfo": false,
+                "streamBeaconDebugInfo": false,
 
-        "blobsKeepIdentity": false,
-        "measurementVarianceScaleFactor": 1.5,
-        "continuousReporting": true,
+                "blobsKeepIdentity": false,
+                "measurementVarianceScaleFactor": 1.5,
+                "continuousReporting": true,
 
-        /*
-        "blobs": {
-        "preEdgeDetectionBlurSize": 3,
-        "minArea": 3,
-        "absoluteMinThreshold": 50,
-        "minThresholdAlpha": 0.3,
-        "preEdgeDetectionBlurSize": 3,
-        "postEdgeDetectionBlurSize": 3,
-        "postEdgeDetectionBlurThreshold": 80
-        },
-        */
-        /*"noBeaconLinearVelocityDecayCoefficient": 0.005878868009089861,*/
-        /*"blobMoveThreshold": 3.5,*/
-        /*"maxZComponent": 0.08103322425541985,*/
-        /*"measurementVarianceScaleFactor": 10.90699629355032,*/
-        /*"brightLedVariancePenalty": 28.32749811268542,*/
-        /*"highResidualVariancePenalty":7.513691210865344,*/
-        /*"shouldSkipBrightLeds": false,*/
-        /*"offsetToCentroid": false,*/
-        /*"extraVerbose": false,*/
-        /*"permitKalman": true,*/
-        /*"measurementVarianceScaleFactor": 20,*/
+                /*
+                "blobs": {
+                "preEdgeDetectionBlurSize": 3,
+                "minArea": 3,
+                "absoluteMinThreshold": 50,
+                "minThresholdAlpha": 0.3,
+                "preEdgeDetectionBlurSize": 3,
+                "postEdgeDetectionBlurSize": 3,
+                "postEdgeDetectionBlurThreshold": 80
+                },
+                */
+                /*"noBeaconLinearVelocityDecayCoefficient": 0.005878868009089861,*/
+                /*"blobMoveThreshold": 3.5,*/
+                /*"maxZComponent": 0.08103322425541985,*/
+                /*"measurementVarianceScaleFactor": 10.90699629355032,*/
+                /*"brightLedVariancePenalty": 28.32749811268542,*/
+                /*"highResidualVariancePenalty":7.513691210865344,*/
+                /*"shouldSkipBrightLeds": false,*/
+                /*"offsetToCentroid": false,*/
+                /*"extraVerbose": false,*/
+                /*"permitKalman": true,*/
+                /*"measurementVarianceScaleFactor": 20,*/
 
-        /*"cameraPosition": [ 0, 0, 0 ],*/
+                /*"cameraPosition": [ 0, 0, 0 ],*/
 
-        "processNoiseAutocorrelation": [ 0.1661102065530816, 0.1661102065530816, 0.1661102065530816, 1.3e-1, 1.3e-1, 1.3e-1 ],
-        "imu": {
-          "calibrateAnyway": true,
-          "useOrientation": true,
-          /*"orientationVariance": 1e-10,*/
-          "orientationVariance": 1e-7,
-          "orientationMicrosecondsOffset": 0,
-          "useAngularVelocity": true,
-          "angularVelocityVariance": 1e-1,
-          "angularVelocityMicrosecondsOffset": 0
+                "processNoiseAutocorrelation": [ 0.1661102065530816, 0.1661102065530816, 0.1661102065530816, 1.3e-1, 1.3e-1, 1.3e-1 ],
+                "imu": {
+                    "calibrateAnyway": true,
+                    "useOrientation": true,
+                    /*"orientationVariance": 1e-10,*/
+                    "orientationVariance": 1e-7,
+                    "orientationMicrosecondsOffset": 0,
+                    "useAngularVelocity": true,
+                    "angularVelocityVariance": 1e-1,
+                    "angularVelocityMicrosecondsOffset": 0
+                }
+            }
         }
-      }
+    ],
+    "aliases": {
+        "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera",
+        "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/imu",
+        "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/cameraSpace/imu",
+        "/hmdInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/semantic/body/0/cameraSpace/body"
     }
-  ],
-  "aliases": {
-      "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera",
-      "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/imu",
-      "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/cameraSpace/imu",
-      "/hmdInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/semantic/body/0/cameraSpace/body"
-  }
 }
