@@ -25,13 +25,10 @@
 // Internal Includes
 #include <osvr/PluginKit/PluginKit.h>
 #include <osvr/PluginKit/TrackerInterfaceC.h>
-#include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/ClientKit/InterfaceCallbackC.h>
-#include <osvr/ClientKit/InterfaceStateC.h>
 #include <quat/quat.h>
 
 // Generated JSON header file
-#include "com_Sensics_Tracker_Spin_json.h"
+#include "com_osvr_example_TrackerSpin_json.h"
 
 // Library/third-party includes
 #include <json/reader.h>
@@ -86,7 +83,7 @@ class TrackerSpinDevice {
         m_dev.initAsync(ctx, name, opts);
 
         /// Send JSON descriptor
-        m_dev.sendJsonDescriptor(com_Sensics_Tracker_Spin_json);
+        m_dev.sendJsonDescriptor(com_osvr_example_TrackerSpin_json);
 
         /// Register update callback
         m_dev.registerUpdateCallback(this);
@@ -174,7 +171,7 @@ class TrackerSpinCreate {
 };
 } // namespace
 
-OSVR_PLUGIN(com_Sensics_Tracker_Spin) {
+OSVR_PLUGIN(com_osvr_example_TrackerSpin) {
     osvr::pluginkit::PluginContext context(ctx);
 
     /// Register a detection callback function object.

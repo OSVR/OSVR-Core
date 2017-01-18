@@ -1,5 +1,4 @@
 add_subdirectory(multiserver)
-add_subdirectory(trackerspin)
 if(BUILD_OPENCV_CAMERA_PLUGIN)
 	add_subdirectory(opencv)
 endif()
