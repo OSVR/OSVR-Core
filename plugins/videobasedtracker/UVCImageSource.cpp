@@ -32,7 +32,7 @@
 
 // Library/third-party includes
 #include <libuvc/libuvc.h>
-#include <libuvc/libuvc.h>
+#include <libusb.h>
 #include <opencv2/core/core_c.h>
 
 // Standard includes
