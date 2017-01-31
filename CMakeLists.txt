@@ -147,6 +147,12 @@ find_package(SDL2)
 
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # disable ignored-attributes warning on gcc because far too many are generated
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6)
+        add_definitions(-Wno-ignored-attributes)
+    endif()
+endif()
 include(CopyImportedTarget)
 if(BUILD_IN_PARALLEL)
     include(MSVCMultipleProcessCompile)
