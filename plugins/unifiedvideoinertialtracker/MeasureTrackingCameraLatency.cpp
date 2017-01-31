@@ -141,7 +141,7 @@ class BusPirateAuxLED : public SerialIRLED {
     }
 
     virtual ~BusPirateAuxLED() {
-        const std::uint8_t resetToTerminal[] = {RESET_TO_TERMINAL};
+        const uint8_t resetToTerminal[] = {RESET_TO_TERMINAL};
         writeBinaryArray(getPort(), resetToTerminal);
         getPort().drain_output_buffer();
     }
@@ -163,24 +163,24 @@ class BusPirateAuxLED : public SerialIRLED {
                                      "it.");
         }
 
-        const std::uint8_t configPortModes[] = {PORT_MODE, ONLY_POWER_ON};
+        const uint8_t configPortModes[] = {PORT_MODE, ONLY_POWER_ON};
         writeBinaryArray(port, configPortModes);
         // wait until everything has been sent.
         port.drain_output_buffer();
         // throw away replies.
         port.flush_input_buffer();
     }
-    static const std::uint8_t ONE = 0x01;
-    static const std::uint8_t ZERO = 0x00;
+    static const uint8_t ONE = 0x01;
+    static const uint8_t ZERO = 0x00;
 
     // 01001111: aka 0x4f configure everything except AUX as input.
-    static const std::uint8_t PORT_MODE = 0x4f;
+    static const uint8_t PORT_MODE = 0x4f;
     // 11000000: aka 0xc0 turn on the power only
-    static const std::uint8_t ONLY_POWER_ON = 0xc0;
+    static const uint8_t ONLY_POWER_ON = 0xc0;
     // 11010000: aka 0xd0 turn on the power and AUX
-    static const std::uint8_t POWER_AND_AUX_ON = 0xd0;
+    static const uint8_t POWER_AND_AUX_ON = 0xd0;
     // 00001111: aka 0x0f reset bus pirate to terminal mode.
-    static const std::uint8_t RESET_TO_TERMINAL = 0x0f;
+    static const uint8_t RESET_TO_TERMINAL = 0x0f;
     bool enterBitBangMode(vrpn_SerialPort &port) {
 
         SerialBufType enter[] = "\n";
@@ -198,7 +198,7 @@ class BusPirateAuxLED : public SerialIRLED {
         port.flush_input_buffer();
 
         bool success = false;
-        const std::uint8_t bitBangReset[] = {ZERO};
+        const uint8_t bitBangReset[] = {ZERO};
         static const auto desiredReply = "BBIO1";
         writeBinaryArray(port, bitBangReset, 10);
         for (int i = 0; i < 40; ++i) {
@@ -217,7 +217,7 @@ class BusPirateAuxLED : public SerialIRLED {
     }
     void handle_trigger(vrpn_SerialPort &port) override {
 
-        const std::uint8_t turnOn[] = {POWER_AND_AUX_ON};
+        const uint8_t turnOn[] = {POWER_AND_AUX_ON};
 
         writeBinaryArray(port, turnOn);
         // wait until everything has been sent.
@@ -227,7 +227,7 @@ class BusPirateAuxLED : public SerialIRLED {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-        const std::uint8_t turnOff[] = {ONLY_POWER_ON};
+        const uint8_t turnOff[] = {ONLY_POWER_ON};
 
         writeBinaryArray(port, turnOff);
         // wait until everything has been sent.
@@ -253,8 +253,8 @@ static const double CUTOFF_VALUE = 200.;
 struct Config {
     SerialLEDControllerFactory controllerFactory;
     std::string device = DEFAULT_DEVICE;
-    std::uint32_t rate = DEFAULT_RATE;
-    std::uint32_t measurements = DEFAULT_MEASUREMENTS;
+    uint32_t rate = DEFAULT_RATE;
+    uint32_t measurements = DEFAULT_MEASUREMENTS;
 } g_config;
 
 int main(int argc, char *argv[]) {
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
         handle_value_arg(
             args, [](std::string const &a) { return a == RATE_ARG; },
             [&](std::string const &val) {
-                g_config.rate = boost::lexical_cast<std::uint32_t>(val);
+                g_config.rate = boost::lexical_cast<uint32_t>(val);
                 std::cout << "Setting serial rate to " << g_config.rate
                           << std::endl;
             });
@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
         handle_value_arg(
             args, [](std::string const &a) { return a == MEASUREMENTS_ARG; },
             [&](std::string const &val) {
-                g_config.measurements = boost::lexical_cast<std::uint32_t>(val);
+                g_config.measurements = boost::lexical_cast<uint32_t>(val);
                 std::cout << "Setting number of measurements to "
                           << g_config.measurements << std::endl;
             });
@@ -360,7 +360,7 @@ int main(int argc, char *argv[]) {
     auto generateNewCountdown = [&mt, &dist] { return dist(mt); };
     int countdownToTrigger = generateNewCountdown();
 
-    std::uint32_t samples = 0;
+    uint32_t samples = 0;
     std::ofstream os("latency.csv");
     do {
         TimeValue tv;
