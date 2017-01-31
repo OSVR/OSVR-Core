@@ -11,8 +11,8 @@
             "Note": "Specific to the optics of 1.3, with a specialized distortion correction requiring apps to use RenderManager 0.6.40 or newer."
         },
         "field_of_view": {
-            "monocular_horizontal": 92,
-            "monocular_vertical": 92,
+            "monocular_horizontal": 87.2628,
+            "monocular_vertical": 87.2628,
             "overlap_percent": 100,
             "pitch_tilt": 0
         },
@@ -25,7 +25,7 @@
         }],
         "distortion": {
             "type": "mono_point_samples",
-            "mono_point_samples_built_in": "OSVR_HDK_13_V1"
+            "mono_point_samples_built_in": "OSVR_HDK_13_V2"
         },
         "rendering": {
             "right_roll": 0,
