@@ -25,17 +25,17 @@
 // Internal Includes
 #include "TrackedBody.h"
 #include "ApplyIMUToState.h"
+#include "BodyTargetInterface.h"
+#include "CannedIMUMeasurement.h"
+#include "HistoryContainer.h"
+#include "StateHistory.h"
 #include "TrackedBodyIMU.h"
 #include "TrackedBodyTarget.h"
 #include "TrackingSystem.h"
-#include "BodyTargetInterface.h"
-#include "StateHistory.h"
-#include "HistoryContainer.h"
-#include "CannedIMUMeasurement.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <boost/optional.hpp>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
 
 #include <util/Stride.h>
 
@@ -50,6 +50,7 @@ namespace vbtracker {
 
         HistoryContainer<BodyStateHistoryEntry> stateHistory;
         HistoryContainer<CannedIMUMeasurement> imuMeasurements;
+        bool everHadPose = false;
     };
     TrackedBody::TrackedBody(TrackingSystem &system, BodyId id)
         : m_system(system), m_id(id), m_impl(new Impl) {
@@ -114,42 +115,39 @@ namespace vbtracker {
         return true;
     }
 
-    inline boost::optional<osvr::util::time::TimeValue>
-    getOldestPossibleMeasurementSource(TrackedBody const &body) {
-        boost::optional<osvr::util::time::TimeValue> oldest;
-        /// Little lambda to set `oldest` if we haven't recorded a timestamp or
-        /// if the given timestamp is older.
-        auto updateOldest = [&oldest](util::time::TimeValue const &timestamp) {
-            if (!oldest || timestamp < *oldest) {
-                oldest = timestamp;
-            }
-        };
-
-        body.forEachTarget([&updateOldest](TrackedBodyTarget const &target) {
-            /// If we haven't recorded a timestamp or the current target has
-            /// an older timestamp
-            updateOldest(target.getLastUpdate());
-        });
-
+    inline osvr::util::time::TimeValue
+    getOldestPossibleMeasurementSource(TrackedBody const &body,
+                                       OSVR_TimeValue const &videoTime) {
+        /// @todo assumes a single camera, or that "videoTime" is the timestamp
+        /// of the "oldest" camera data.
+        osvr::util::time::TimeValue oldest = videoTime;
         if (body.hasIMU()) {
-            /// If we haven't recorded a timestamp or the IMU has an older
-            /// timestamp
-            updateOldest(body.getIMU().getLastUpdate());
+            /// If the IMU has an older timestamp
+            auto imuTimestamp = body.getIMU().getLastUpdate();
+            if (imuTimestamp < oldest) {
+                oldest = imuTimestamp;
+            }
         }
         return oldest;
     }
 
-    void TrackedBody::pruneHistory() {
+    void TrackedBody::pruneHistory(OSVR_TimeValue const &videoTime) {
+#if 0
+        static ::util::Stride s(100);
+        if (++s) {
+            std::cout << "stateHistory High water mark: "
+                      << m_impl->stateHistory.highWaterMark() << std::endl;
+            std::cout << "imuMeasurements High water mark: "
+                      << m_impl->imuMeasurements.highWaterMark() << std::endl;
+        }
+#endif
+
         if (m_impl->stateHistory.empty()) {
             // can't prune an empty structure
             return;
         }
-        auto oldestOptional = getOldestPossibleMeasurementSource(*this);
-        if (!oldestOptional) {
-            // No timestamp yet - don't prune anything out yet.
-            return;
-        }
-        auto oldest = *oldestOptional;
+        auto oldest = getOldestPossibleMeasurementSource(*this, videoTime);
+
         if (m_impl->stateHistory.newest_timestamp() < oldest) {
             // It would be a strange set of circumstances to bring this about,
             // but we don't want to go from a non-empty history to an empty one.
@@ -175,7 +173,7 @@ namespace vbtracker {
         /// Clear off the state we're about to invalidate.
         auto numPopped = m_impl->stateHistory.pop_after(origTime);
         /// @todo number popped should be the same (or very nearly) as the
-        /// number of IMU measurements we replay.
+        /// number of IMU measurements we replay - except at startup.
 
         /// Put on the new state estimate we just computed.
         m_state = newState;
@@ -190,15 +188,6 @@ namespace vbtracker {
              m_impl->imuMeasurements.get_range_newer_than(newTime)) {
             applyIMUMeasurement(imuHist.first, imuHist.second);
             ++numReplayed;
-        }
-#if 0
-        static ::util::Stride s{43};
-        if (++s) {
-#else
-        if (numPopped != numReplayed) {
-#endif
-            std::cout << "Popped " << numPopped << ", replayed " << numReplayed
-                      << "\n";
         }
     }
 
@@ -227,7 +216,13 @@ namespace vbtracker {
             throw std::runtime_error("Got out of order timestamps from IMU!");
         }
 
-        applyIMUMeasurement(tv, meas);
+        /// If we have ever had a pose estimate, we can apply this IMU
+        /// measurement.
+        /// If we haven't yet got a pose from video, toss this or we'll end up
+        /// getting NaNs.
+        if (hasEverHadPoseEstimate()) {
+            applyIMUMeasurement(tv, meas);
+        }
 
         m_impl->imuMeasurements.push_newest(tv, meas);
     }
@@ -249,6 +244,19 @@ namespace vbtracker {
         forEachTarget([&ret](TrackedBodyTarget &target) {
             ret = ret || target.hasPoseEstimate();
         });
+        return ret;
+    }
+
+    bool TrackedBody::hasEverHadPoseEstimate() const {
+        if (m_impl->everHadPose) {
+            return true;
+        }
+        auto ret = false;
+        forEachTarget([&ret](TrackedBodyTarget &target) {
+            ret = ret || target.hasPoseEstimate();
+        });
+        m_impl->everHadPose = ret;
+
         return ret;
     }
 

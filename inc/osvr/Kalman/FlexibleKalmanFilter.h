@@ -27,6 +27,7 @@
 
 // Internal Includes
 #include "FlexibleKalmanBase.h"
+#include "FlexibleKalmanCorrect.h"
 
 // Library/third-party includes
 // - none
@@ -47,93 +48,22 @@ namespace kalman {
                                  state.errorCovariance());
     }
 
+    /// @param cancelIfNotFinite If the state correction or new error covariance
+    /// is detected to contain non-finite values, should we cancel the
+    /// correction and not apply it?
+    ///
+    /// @return true if correction completed
     template <typename StateType, typename ProcessModelType,
               typename MeasurementType>
-    inline void correct(StateType &state, ProcessModelType &processModel,
-                        MeasurementType &meas) {
-        /// Dimension of measurement
-        static const auto m = types::Dimension<MeasurementType>::value;
-        /// Dimension of state
-        static const auto n = types::Dimension<StateType>::value;
+    inline bool correct(StateType &state, ProcessModelType &processModel,
+                        MeasurementType &meas, bool cancelIfNotFinite = true) {
 
-        types::Matrix<m, n> H = meas.getJacobian(state);
-        // OSVR_KALMAN_DEBUG_OUTPUT("Measurement jacobian", H);
+        auto inProgress = beginCorrection(state, processModel, meas);
+        if (cancelIfNotFinite && !inProgress.stateCorrectionFinite) {
+            return false;
+        }
 
-        types::SquareMatrix<m> R = meas.getCovariance(state);
-        // OSVR_KALMAN_DEBUG_OUTPUT("Measurement covariance", R);
-
-        types::SquareMatrix<n> P = state.errorCovariance();
-
-        // The kalman gain stuff to not invert (called P12 in TAG)
-        types::Matrix<n, m> PHt = P * H.transpose();
-        // OSVR_KALMAN_DEBUG_OUTPUT("PHt/numerator", P * H.transpose());
-
-        // the stuff to invert for the kalman gain
-        // also sometimes called S or the "Innovation Covariance"
-        types::SquareMatrix<m> S = H * PHt + R;
-        // OSVR_KALMAN_DEBUG_OUTPUT("Transformed covariance", H * PHt);
-        // OSVR_KALMAN_DEBUG_OUTPUT("S: Innovation covariance", H * PHt + R);
-
-        // Not going to directly compute Kalman gain K = PHt (S^-1)
-        // Instead, decomposed S to solve things of the form (S^-1)x
-        // repeatedly later, by using the substitution
-        // Kx = PHt denom.solve(x)
-
-        // Eigen::ColPivHouseholderQR<types::SquareMatrix<m>> denom(S);
-        /// @todo Figure out if this is the best decomp to use
-        // TooN/TAG use this one, and others online seem to suggest it.
-        Eigen::LDLT<types::SquareMatrix<m>> denom(S);
-#if 0
-        // Solve for the Kalman gain
-        types::Matrix<n, m> K = denom.solve(PHt);
-        // types::Matrix<n, m> K = denom.ldlt().solve(numer);
-        // types::Matrix<n, m> K = numer * denom.inverse(); // this one
-        // creates lots of nans.
-        OSVR_KALMAN_DEBUG_OUTPUT("Kalman gain K", K);
-#endif
-
-        // Residual/innovation
-        auto deltaz = meas.getResidual(state);
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(decltype(deltaz), m);
-        OSVR_KALMAN_DEBUG_OUTPUT("deltaz", deltaz.transpose());
-
-        types::Vector<n> stateCorrection = PHt * denom.solve(deltaz);
-        OSVR_KALMAN_DEBUG_OUTPUT("state correction",
-                                 (PHt * denom.solve(deltaz)).transpose());
-
-        // Correct the state estimate
-        state.setStateVector(state.stateVector() + stateCorrection);
-
-#if 1
-        // Correct the error covariance
-        // differs from the (I-KH)P form by not factoring out the P (since
-        // we already have PHt computed).
-        OSVR_KALMAN_DEBUG_OUTPUT("error covariance difference",
-                                 (PHt * denom.solve(PHt.transpose())));
-        types::SquareMatrix<n> newP = P - (PHt * denom.solve(PHt.transpose()));
-#else
-        // Test fails with this one:
-        // VariedProcessModelStability/1.AbsolutePoseMeasurementXlate111,
-        // where TypeParam =
-        // osvr::kalman::PoseDampedConstantVelocityProcessModel
-        OSVR_KALMAN_DEBUG_OUTPUT(
-            "error covariance scale",
-            (types::SquareMatrix<n>::Identity() - PHt * denom.solve(H)));
-        types::SquareMatrix<n> newP =
-            (types::SquareMatrix<n>::Identity() - PHt * denom.solve(H)) * P;
-
-#endif
-
-#if 0
-        // doesn't seem to be necessary to re-symmetrize the covariance matrix.
-        state.setErrorCovariance((newP + newP.transpose()) / 2.);
-#else
-        state.setErrorCovariance(newP);
-#endif
-
-        // Let the state do any cleanup it has to (like fixing externalized
-        // quaternions)
-        state.postCorrect();
+        return inProgress.finishCorrection(cancelIfNotFinite);
     }
 
     /// The main class implementing the common components of the Kalman family

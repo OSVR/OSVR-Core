@@ -26,8 +26,8 @@
 #define INCLUDED_PoseState_h_GUID_57A246BA_940D_4386_ECA4_4C4172D97F5A
 
 // Internal Includes
-#include "FlexibleKalmanBase.h"
 #include "ExternalQuaternion.h"
+#include "FlexibleKalmanBase.h"
 
 // Library/third-party includes
 #include <Eigen/Core>

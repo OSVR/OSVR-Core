@@ -96,10 +96,16 @@ script:
 sudo: false
 addons:
   apt:
+    # Details and approved sources are
+    # from https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
     sources:
+    # they have a strange definition of latest that stops at 1.55, but that's enough.
     - boost-latest
+    # provides CMake 3.2.3 (quite useful) and Doxygen 1.8.3 (meh)
     - george-edison55-precise-backports
+    # GCC toolchain backports (needed for both GCC and Clang (libstdc++))
     - ubuntu-toolchain-r-test
+    # Clang 3.7
     - llvm-toolchain-precise-3.7
     packages:
     - libusb-1.0-0-dev

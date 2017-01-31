@@ -2,31 +2,30 @@
     "deviceVendor": "OSVR",
     "deviceName": "Unified Video-Based and Inertial Tracker",
     "author": "Ryan Pavlik <ryan@sensics.com>",
-    "version": 1,
-    "lastModified": "2016-01-22T00:26:46.255Z",
+    "version": 2,
+    "lastModified": "2016-06-30T13:58:45.079Z",
     "interfaces": {
         "tracker": {
             "position": true,
             "orientation": true,
-            "count": 1
+            "linearVelocity": true,
+            "angularVelocity": true
+        },
+        "analog": {
+            "count": 170
         }
     },
     "semantic": {
         "hmd": {
             "$target": {
-                "postrotate": {
-                    "axis": "z",
-                    "degrees": 0
-                },
-                "child": {
-                    "changeBasis": {
-                        "x": "x",
-                        "y": "y",
-                        "z": "z"
-                    },
-                    "child": "tracker/0"
-                }
+                "translate": [0.0, 0.0, 0.04141],
+                "child": "tracker/0"
             }
         }
-    }
+    },
+  "automaticAliases": {
+    /* greater than default auto-alias so we override IMU-only auto-detects. */
+    "$priority": 130,
+    "/me/head": "semantic/hmd"
+  }
 }

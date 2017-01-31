@@ -26,74 +26,25 @@
 #define INCLUDED_SetupSensors_h_GUID_7F0F52BD_57B4_4ABB_0834_C61DB7C22132
 
 // Internal Includes
+#include "HDKLedIdentifierFactory.h"
 #include "Types.h"
 #include "VideoBasedTracker.h"
-#include "HDKData.h"
-#include "CameraParameters.h"
-#include "HDKLedIdentifierFactory.h"
+
+#include <CameraParameters.h>
+#include <HDKData.h>
+#include <LoadCalibration.h>
 
 // Library/third-party includes
-#include <json/value.h>
 #include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
-#include <vector>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
-
-    /// @name Helper functions for loading calibration files
-    /// @{
-    inline cv::Point3f parsePoint(Json::Value const &jsonArray) {
-        return cv::Point3f(jsonArray[0].asFloat(), jsonArray[1].asFloat(),
-                           jsonArray[2].asFloat());
-    }
-
-    inline std::vector<cv::Point3f>
-    parseArrayOfPoints(Json::Value const &jsonArray) {
-        /// in case of error, we just return an empty array.
-        std::vector<cv::Point3f> ret;
-        if (!jsonArray.isArray()) {
-            return ret;
-        }
-        for (auto &entry : jsonArray) {
-
-            if (!entry.isArray() || entry.size() != 3) {
-                ret.clear();
-                return ret;
-            }
-            ret.emplace_back(parsePoint(entry));
-        }
-        return ret;
-    }
-
-    inline std::vector<cv::Point3f>
-    tryLoadingArrayOfPointsFromFile(std::string const &filename) {
-        std::vector<cv::Point3f> ret;
-        if (filename.empty()) {
-            return ret;
-        }
-        Json::Value root;
-        {
-            std::ifstream calibfile(filename);
-            if (!calibfile.good()) {
-                return ret;
-            }
-            Json::Reader reader;
-            if (!reader.parse(calibfile, root)) {
-                return ret;
-            }
-        }
-        ret = parseArrayOfPoints(root);
-        return ret;
-    }
-    /// @}
-
-    /// Loading a calibration file means our beacon locations are better
-    /// known than we might otherwise expect.
-    static const double BEACON_AUTOCALIB_ERROR_SCALE_IF_CALIBRATED = 0.1;
 
     static bool frontPanelFixedBeaconShared(int id) {
         return (id == 16) || (id == 17) || (id == 19) || (id == 20);
@@ -103,43 +54,22 @@ namespace vbtracker {
 
     namespace messages {
         inline void loadedCalibFileSuccessfully(ConfigParams const &config) {
-            std::cout << "Video-based tracker: Successfully loaded "
-                         "beacon calibration file "
-                      << config.calibrationFile << std::endl;
+            loadedCalibFileSuccessfully(config.calibrationFile);
         }
 
         inline void calibFileSpecifiedButNotLoaded(ConfigParams const &config) {
-            std::cout << "Video-based tracker: NOTE: Beacon calibration "
-                         "filename "
-                      << config.calibrationFile
-                      << " was specified, but not found or could not "
-                         "be loaded. This is not an error: This may just mean "
-                         "you have not yet run the optional beacon "
-                         "pre-calibration step."
-                      << std::endl;
+            calibFileSpecifiedButNotLoaded(config.calibrationFile);
         }
     } // namespace messages
 
     using BeaconPredicate = std::function<bool(int)>;
 
-    inline std::size_t getNumHDKFrontPanelBeacons() {
-        return OsvrHdkLedLocations_SENSOR0.size();
-    }
-
-    inline std::size_t getNumHDKRearPanelBeacons() {
-        return OsvrHdkLedLocations_SENSOR1.size();
-    }
     /// distance between front and back panel target origins, in mm.
-    inline double
-    computeDistanceBetweenPanels(double headCircumference,
-                                 double headToFrontBeaconOriginDistance) {
-        return headCircumference / M_PI * 10. + headToFrontBeaconOriginDistance;
+    inline float computeDistanceBetweenPanels(ConfigParams const &config) {
+        return static_cast<float>(computeDistanceBetweenPanels(
+            config.headCircumference, config.headToFrontBeaconOriginDistance));
     }
-    inline double computeDistanceBetweenPanels(ConfigParams const &config) {
-        return computeDistanceBetweenPanels(
-            config.headCircumference, config.headToFrontBeaconOriginDistance);
-    }
-    inline void addRearPanelBeaconLocations(double distanceBetweenPanels,
+    inline void addRearPanelBeaconLocations(float distanceBetweenPanels,
                                             Point3Vector &locations) {
         // For the back panel beacons: have to rotate 180 degrees
         // about Y, which is the same as flipping sign on X and Z
@@ -251,4 +181,5 @@ namespace vbtracker {
     }
 } // namespace vbtracker
 } // namespace osvr
+
 #endif // INCLUDED_SetupSensors_h_GUID_7F0F52BD_57B4_4ABB_0834_C61DB7C22132

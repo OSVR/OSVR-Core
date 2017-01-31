@@ -294,6 +294,14 @@ endif()
 # interface targets for the requested libraries
 include(BoostTargets)
 
+add_library(osvr_codecvt INTERFACE)
+if(WIN32)
+    if(OSVR_HAVE_CODECVT)
+        target_compile_definitions(osvr_codecvt INTERFACE OSVR_HAVE_CODECVT)
+    else()
+        target_link_libraries(osvr_codecvt INTERFACE boost_locale)
+    endif()
+endif()
 ###
 # Set up build directories
 ###

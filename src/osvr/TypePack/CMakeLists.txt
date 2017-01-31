@@ -13,6 +13,7 @@ set(API
     "${HEADER_LOCATION}/Defer.h"
     "${HEADER_LOCATION}/FindFirst.h"
     "${HEADER_LOCATION}/Fold.h"
+    "${HEADER_LOCATION}/ForEachType.h"
     "${HEADER_LOCATION}/HasType.h"
     "${HEADER_LOCATION}/Head.h"
     "${HEADER_LOCATION}/If.h"

@@ -32,7 +32,7 @@
 // - none
 
 // Standard includes
-#include <iosfwd>
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {

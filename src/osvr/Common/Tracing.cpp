@@ -33,7 +33,7 @@
 #endif
 
 // Standard includes
-#include <sstream>
+// - none
 
 namespace osvr {
 namespace common {

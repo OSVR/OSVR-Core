@@ -26,8 +26,9 @@
 #define INCLUDED_ConfigurationParser_h_GUID_933C79EE_3392_4C8D_74D5_D9A72580DA6A
 
 // Internal Includes
-#include "Types.h"
 #include "GetOptionalParameter.h"
+#include "Types.h"
+#include <ParseBlobParams.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -98,27 +99,7 @@ namespace vbtracker {
 
         /// Blob-detection parameters
         if (root.isMember("blobParams")) {
-            Json::Value const &blob = root["blobParams"];
-
-            getOptionalParameter(config.blobParams.absoluteMinThreshold, blob,
-                                 "absoluteMinThreshold");
-            getOptionalParameter(config.blobParams.minDistBetweenBlobs, blob,
-                                 "minDistBetweenBlobs");
-            getOptionalParameter(config.blobParams.minArea, blob, "minArea");
-            getOptionalParameter(config.blobParams.filterByCircularity, blob,
-                                 "filterByCircularity");
-            getOptionalParameter(config.blobParams.minCircularity, blob,
-                                 "minCircularity");
-            getOptionalParameter(config.blobParams.filterByConvexity, blob,
-                                 "filterByConvexity");
-            getOptionalParameter(config.blobParams.minConvexity, blob,
-                                 "minConvexity");
-            getOptionalParameter(config.blobParams.minThresholdAlpha, blob,
-                                 "minThresholdAlpha");
-            getOptionalParameter(config.blobParams.maxThresholdAlpha, blob,
-                                 "maxThresholdAlpha");
-            getOptionalParameter(config.blobParams.thresholdSteps, blob,
-                                 "thresholdSteps");
+            parseBlobParams(root["blobParams"], config.blobParams);
         }
 
         return config;

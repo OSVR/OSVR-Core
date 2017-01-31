@@ -24,20 +24,20 @@
 
 // Internal Includes
 #include "VideoBasedTracker.h"
-#include "cvToEigen.h"
-#include "CameraDistortionModel.h"
-#include "UndistortMeasurements.h"
-#include <osvr/Util/EigenCoreGeometry.h>
+#include <CameraDistortionModel.h>
+#include <UndistortMeasurements.h>
+#include <cvToEigen.h>
 #include <osvr/Util/CSV.h>
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Library/third-party includes
 #include <opencv2/core/version.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // Standard includes
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 
 namespace osvr {
@@ -279,9 +279,10 @@ namespace vbtracker {
 
                                 // Draw a filled circle at the keypoint.
                                 drawLedCircleOnStatusImage(led, true, color);
-                                if (led.getID() < n) {
-                                    auto reprojection =
-                                        imagePoints[led.getID()];
+                                // identified -> id is non-negative
+                                auto id = static_cast<size_t>(led.getID());
+                                if (id < n) {
+                                    auto reprojection = imagePoints[id];
 
                                     drawRecognizedLedIdOnStatusImage(led);
                                     cv::putText(

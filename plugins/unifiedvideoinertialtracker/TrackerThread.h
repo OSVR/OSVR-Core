@@ -26,9 +26,10 @@
 #define INCLUDED_TrackerThread_h_GUID_6544B03C_4EB4_4B82_77F1_16EF83578C64
 
 // Internal Includes
-#include "TrackingSystem.h"
-#include "ThreadsafeBodyReporting.h"
 #include "CameraParameters.h"
+#include "IMUMessage.h"
+#include "ThreadsafeBodyReporting.h"
+#include "TrackingSystem.h"
 
 #include "ImageSources/ImageSource.h"
 
@@ -38,37 +39,50 @@
 #include <opencv2/core/core.hpp> // for basic OpenCV types
 
 #include <boost/noncopyable.hpp>
-#include <boost/variant.hpp>
+#include <folly/ProducerConsumerQueue.h>
+#include <folly/sorted_vector_types.h>
+#include <osvr/TypePack/List.h>
 
 // Standard includes
+#include <array>
+#include <chrono>
+#include <condition_variable>
+#include <cstdint>
+#include <future>
 #include <iosfwd>
+#include <mutex>
 #include <queue>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <tuple>
-#include <chrono>
-#include <future>
 
 namespace osvr {
 namespace vbtracker {
-    class TrackedBodyIMU;
+    static const std::chrono::milliseconds IMU_OVERRIDE_SPACING{2};
 
-    using TimestampedOrientation =
-        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
-                   OSVR_OrientationReport>;
-    using TimestampedAngVel =
-        std::tuple<TrackedBodyIMU *, util::time::TimeValue,
-                   OSVR_AngularVelocityReport>;
-    using MessageEntry = boost::variant<boost::none_t, TimestampedOrientation,
-                                        TimestampedAngVel>;
+    static const auto MAX_DEBUG_BEACONS = 34;
+    static const auto DEBUG_ANALOGS_PER_BEACON = 6;
+    static const auto DEBUG_ANALOGS_REQUIRED =
+        MAX_DEBUG_BEACONS * DEBUG_ANALOGS_PER_BEACON;
+
+    using DebugArray = std::array<double, DEBUG_ANALOGS_REQUIRED>;
+    struct BodyIdOrdering {
+        bool operator()(BodyId const &lhs, BodyId const &rhs) const {
+            return lhs.value() < rhs.value();
+        }
+    };
+
+    using UpdatedBodyIndices = folly::sorted_vector_set<BodyId, BodyIdOrdering>;
+
+    class ImageProcessingThread;
 
     class TrackerThread : boost::noncopyable {
       public:
         TrackerThread(TrackingSystem &trackingSystem, ImageSource &imageSource,
                       BodyReportingVector &reportingVec,
-                      CameraParameters const &camParams);
+                      CameraParameters const &camParams,
+                      std::int32_t cameraUsecOffset = 0, bool bufferImu = false,
+                      bool debugData = false);
         ~TrackerThread();
+
         /// Thread function-call operator: should be invoked by a lambda in a
         /// dedicated thread.
         void threadAction();
@@ -84,13 +98,24 @@ namespace vbtracker {
         void triggerStop();
 
         /// Submit an orientation report for an IMU
-        void submitIMUReport(TrackedBodyIMU &imu,
+        /// @return false if there is no room in the queue for the message
+        bool submitIMUReport(TrackedBodyIMU &imu,
                              util::time::TimeValue const &tv,
                              OSVR_OrientationReport const &report);
-        void submitIMUReport(TrackedBodyIMU &imu,
+        /// @overload
+        /// for angular velocity
+        bool submitIMUReport(TrackedBodyIMU &imu,
                              util::time::TimeValue const &tv,
                              OSVR_AngularVelocityReport const &report);
+
+        bool checkForDebugData(DebugArray &data);
         /// @}
+
+        /// Call from image processing thread to signal completion of frame
+        /// processing.
+        void signalImageProcessingComplete(ImageOutputDataPtr &&imageData,
+                                           cv::Mat const &frame,
+                                           cv::Mat const &frameGray);
 
       private:
         /// Helper providing a prefixed output stream for normal messages.
@@ -102,30 +127,71 @@ namespace vbtracker {
         /// video.
         void doFrame();
 
-        /// Copy updated body state into the reporting vector.
-        void updateReportingVector(BodyIndices const &bodyIds);
+        /// Can call as soon as the loop starts (as soon as m_numBodies is
+        /// known)
+        void setupReportingVectorProcessModels();
 
-        /// This function is responsible for launching the descriptively-named
-        /// timeConsumingImageStep() asynchronously.
+        /// Should call only once room calibration is completed.
+        bool setupReportingVectorRoomTransforms();
+
+        /// Copy updated body state into the reporting vector.
+        void updateReportingVector(UpdatedBodyIndices const &bodyIds);
+
+        /// Copy a single body's updated state into the reporting vector. Does
+        /// not handle additional derived reports (like HMD in IMU space, etc.)
+        /// - just reports the single body.
+        void updateReportingVector(BodyId const bodyId);
+
+        /// This function is responsible for triggering the image capture and
+        /// processing asynchronously in a separate thread.
         void launchTimeConsumingImageStep();
 
-        /// The "time consuming image step" - specifically, retrieving the image
-        /// and performing the initial blob detection on it. This gets launched
-        /// asynchronously by launchTimeConsumingImageStep()
-        void timeConsumingImageStep();
+        std::pair<BodyId, ImuMessageCategory>
+        processIMUMessage(IMUMessage const &m);
 
-        void processIMUMessage(MessageEntry const &m);
+        /// pointer to body reporting object for camera pose in "room" space
+        BodyReporting *getCamPoseReporting() const;
+        /// pointer to body reporting object for IMU
+        BodyReporting *getIMUReporting() const;
+        /// pointer to body reporting object for IMU in camera space
+        BodyReporting *getIMUCamReporting() const;
+        /// pointer to body reporting for HMD in camera space
+        BodyReporting *getHMDCamReporting() const;
+
+        void updateExtraCameraReport();
+        void updateExtraIMUReports();
 
         TrackingSystem &m_trackingSystem;
         ImageSource &m_cam;
         BodyReportingVector &m_reportingVec;
         CameraParameters m_camParams;
+        std::size_t m_numBodies = 0; //< initialized when loop started.
+        const std::int32_t m_cameraUsecOffset = 0;
+
+        /// Whether we should wait a period of time before updating the
+        /// reporting vector with just IMU reports (compared to updating
+        /// reporting vector with all new data)
+        const bool m_bufferImu = false;
+
+        const bool m_debugData = false;
 
         using our_clock = std::chrono::steady_clock;
-        boost::optional<our_clock::time_point> m_nextCameraPoseReport;
 
-        /// Time that the last camera grab was triggered.
-        util::time::TimeValue m_triggerTime;
+        bool shouldSendImuReport() {
+            auto now = our_clock::now();
+            if (now > m_nextImuOverrideReport) {
+                m_nextImuOverrideReport = now + IMU_OVERRIDE_SPACING;
+                return true;
+            }
+            return false;
+        }
+
+        void setImuOverrideClock() {
+            m_nextImuOverrideReport = our_clock::now() + IMU_OVERRIDE_SPACING;
+        }
+
+        our_clock::time_point m_nextImuOverrideReport;
+        boost::optional<our_clock::time_point> m_nextCameraPoseReport;
 
         /// a void promise, as suggested by Scott Meyers, to hold the thread
         /// operation at the beginning until we want it to really start running.
@@ -151,9 +217,13 @@ namespace vbtracker {
         /// @{
         std::condition_variable m_messageCondVar;
         std::mutex m_messageMutex;
-        std::queue<MessageEntry> m_messages;
         bool m_timeConsumingImageStepComplete = false;
+        folly::ProducerConsumerQueue<IMUMessage> m_imuMessages;
         /// @}
+
+        folly::ProducerConsumerQueue<DebugArray> m_debugDataMessages;
+
+        ImageProcessingThread *imageProcThreadObj_ = nullptr;
 
         /// The thread used by timeConsumingImageStep()
         std::thread m_imageThread;

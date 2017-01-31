@@ -43,7 +43,7 @@ namespace kalman {
         ///
         /// Performs exponentiation from a vector to a quaternion.
         inline Eigen::Quaterniond vecToQuat(types::Vector<3> const &incRotVec) {
-            return util::quat_exp_map(incRotVec).exp();
+            return util::quat_exp(incRotVec / 2.);
         }
 /// Computes what is effectively the Jacobian matrix of partial
 /// derivatives of incrementalOrientationToQuat()

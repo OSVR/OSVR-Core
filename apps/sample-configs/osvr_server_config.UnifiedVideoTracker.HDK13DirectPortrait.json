@@ -1,0 +1,46 @@
+{
+    "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK 1.x. It is configured for RenderManager applications in direct mode (portrait) on HDK 1.3/1.4 optics.",
+    "display": "displays/OSVR_HDK_1_3_with_mesh.json",
+    "renderManagerConfig": "sample-configs/renderManager.direct.portrait.newtracker.json",
+    "drivers": [
+        {
+            "plugin": "org_osvr_unifiedvideoinertial",
+            "driver": "UnifiedTrackingSystem",
+            "params": {
+                "cameraMicrosecondsOffset": -27000,
+                "continuousReporting": true,
+
+                "manualBeaconOffset": [ 0, 0, 0 ],
+                "initialBeaconError": 1.0e-7,
+                "showDebug": false,
+                "additionalPrediction": 0,
+                "includeRearPanel": true,
+                "headCircumference": 58.42,
+                "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
+                "cameraIsForward": true,
+
+                "streamBeaconDebugInfo": false,
+
+                "blobsKeepIdentity": false,
+                "measurementVarianceScaleFactor": 1.5,
+
+                "processNoiseAutocorrelation": [ 0.1661102065530816, 0.1661102065530816, 0.1661102065530816, 1.3e-1, 1.3e-1, 1.3e-1 ],
+                "imu": {
+                    "calibrateAnyway": true,
+                    "useOrientation": true,
+                    "orientationVariance": 1e-7,
+                    "orientationMicrosecondsOffset": 0,
+                    "useAngularVelocity": true,
+                    "angularVelocityVariance": 1e-1,
+                    "angularVelocityMicrosecondsOffset": 0
+                }
+            }
+        }
+    ],
+    "aliases": {
+        "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera",
+        "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/imu",
+        "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/cameraSpace/imu",
+        "/hmdInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/semantic/body/0/cameraSpace/body"
+    }
+}

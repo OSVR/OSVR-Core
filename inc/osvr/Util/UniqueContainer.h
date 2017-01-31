@@ -33,6 +33,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <functional>
 
 namespace osvr {
 namespace util {
@@ -104,6 +105,159 @@ namespace util {
                 }
             };
         };
+
+        /// @brief A basic policy for use with a vector or similar container,
+        /// where you have a comparison operator and thus can keep it sorted,
+        /// for much faster testing.
+        ///
+        /// Comparison operator defaults to and is described as <.
+        /// Note that !(A < B) && !(B < A) is used to imply A == B
+        ///
+        /// lower_bound and member .insert is used for insertion, lower_bound
+        /// and member .erase is used for removal, and binary_search is used for
+        /// presence detection
+        template <template <class X> class Comparison = std::less>
+        struct SortedInsert {
+            template <typename Container> struct Specialized {
+                using policy = Specialized<Container>;
+                using iterator = typename Container::iterator;
+                using const_iterator = typename Container::const_iterator;
+                using value_type = typename Container::value_type;
+                using reference = typename Container::reference;
+                using rv_reference = typename Container::value_type &&;
+                using const_reference = typename Container::const_reference;
+                using comparator = Comparison<value_type>;
+
+                /// @brief Helper function to avoid vexing parse
+                static comparator get_comparator() { return comparator{}; }
+
+                /// @brief Helper function. Wraps both the range aspects and the
+                /// comparator for easier use of the underlying
+                /// std::lower_bound.
+                /// For non-const containers.
+                /// O(lg n) comparisons performed
+                static auto lower_bound(Container &c, const_reference v)
+                    -> decltype(std::lower_bound(begin(c), end(c), v,
+                                                 policy::get_comparator())) {
+                    return std::lower_bound(begin(c), end(c), v,
+                                            policy::get_comparator());
+                }
+
+                /// @brief Helper function. Wraps both the range aspects and the
+                /// comparator for easier use of the underlying
+                /// std::lower_bound.
+                /// For const containers.
+                /// O(lg n) comparisons performed
+                static auto lower_bound(Container const &c, const_reference v)
+                    -> decltype(std::lower_bound(begin(c), end(c), v,
+                                                 policy::get_comparator())) {
+                    return std::lower_bound(begin(c), end(c), v,
+                                            policy::get_comparator());
+                }
+
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Time complexity: O(std::binary_search) = O(lg n)
+                static bool contains(Container const &c, const_reference v) {
+                    return std::binary_search(begin(c), end(c), v,
+                                              policy::get_comparator());
+                }
+
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Time complexity: O(find) + O(member erase), which is
+                /// O(n) (+ amortized constant time) for a std::vector
+                static bool remove(Container &c, const_reference v) {
+                    auto it = policy::find(c, v);
+                    if (end(c) != it) {
+                        c.erase(it);
+                        return true;
+                    }
+                    return false;
+                }
+
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Insert from a const reference. Time complexity:
+                /// O(lower_bound) + O(insert), which is O(lg n) +
+                /// O(n), so O(n) (for sliding things out of the way) for a
+                /// std::vector
+                static bool insert(Container &c, const_reference v) {
+                    auto it = policy::lower_bound(c, v);
+                    if (!policy::iter_indicates_contains(c, it, v)) {
+                        c.insert(it, v);
+                        return true;
+                    }
+                    return false;
+                }
+
+                /// @brief Part of the interface expected by UniqueContainer.
+                /// Insert from an rvalue-reference (move-insert). Time
+                /// complexity: O(lower_bound) + O(insert), which is O(lg n) +
+                /// O(n), so O(n) (for sliding things out of the way) for a
+                /// std::vector
+                static bool insert(Container &c, rv_reference v) {
+                    auto it = policy::lower_bound(c, v);
+                    if (!policy::iter_indicates_contains(c, it, v)) {
+                        c.emplace(it, v); // move-construct
+                        return true;
+                    }
+                    return false;
+                }
+
+                /// @brief Helper function. Time complexity: O(std::lower_bound)
+                /// = O(lg n)
+                /// Based on lower_bound with an additional check for
+                /// equivalence.
+                static auto find(Container const &c, const_reference v)
+                    -> decltype(policy::lower_bound(c, v)) {
+                    auto it = policy::lower_bound(c, v);
+                    return policy::iter_indicates_contains(c, it, v) ? it
+                                                                     : end(c);
+                }
+
+                /// @brief Helper function. Time complexity: O(std::lower_bound)
+                /// = O(lg n)
+                /// Based on lower_bound with an additional check for
+                /// equivalence.
+                static auto find(Container &c, const_reference v)
+                    -> decltype(policy::lower_bound(c, v)) {
+                    auto it = policy::lower_bound(c, v);
+                    return policy::iter_indicates_contains(c, it, v) ? it
+                                                                     : end(c);
+                }
+
+                /// @brief Helper function. !(A < B) && !(B < A) is used to
+                /// imply A == B
+                /// O(1) comparisons performed
+                static bool check_equiv(const_reference a, const_reference b) {
+                    auto comp = policy::get_comparator();
+                    return !(comp(a, b)) && !(comp(b, a));
+                }
+
+                /// @brief Helper function. Look at an iterator, for instance,
+                /// from lower_bound, and determine if it implies the container
+                /// contains the value provided.
+                template <typename IteratorType>
+                static bool iter_indicates_contains(Container const &c,
+                                                    IteratorType const &it,
+                                                    const_reference v) {
+                    if (end(c) == it) {
+                        return false;
+                    }
+                    return check_equiv(*it, v);
+                }
+
+                /// @brief Helper function.
+                static void sort(Container &c) {
+                    std::sort(begin(c), end(c), policy::get_comparator());
+                }
+            };
+        };
+#if 0
+        struct SortedInsert {
+            template <typename Container>
+            using Specialized = SortedInsertCustomCompare<
+                std::less>::template Specialized<Container>;
+        };
+#endif
     } // namespace unique_container_policies
 
     /// @brief A policy-based generic "Unique Container", that wraps

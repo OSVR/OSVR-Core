@@ -122,7 +122,10 @@ namespace connection {
         }
         return 0;
     }
-    void VrpnBasedConnection::m_process() { m_vrpnConnection->mainloop(); }
+    void VrpnBasedConnection::m_process() {
+        /// @todo there's an optional timeout here - see that we use it properly
+        m_vrpnConnection->mainloop();
+    }
 
     VrpnBasedConnection::~VrpnBasedConnection() {
         /// @todo wait until all async threads are done

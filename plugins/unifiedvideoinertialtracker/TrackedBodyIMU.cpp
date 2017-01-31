@@ -24,8 +24,10 @@
 
 // Internal Includes
 #include "TrackedBodyIMU.h"
+#include "AngVelTools.h"
 #include "TrackedBody.h"
 #include "TrackingSystem.h"
+#include <osvr/Util/EigenExtras.h>
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -46,22 +48,36 @@ namespace vbtracker {
     void
     TrackedBodyIMU::updatePoseFromOrientation(util::time::TimeValue const &tv,
                                               Eigen::Quaterniond const &quat) {
+        // Choose the equivalent quaternion to the input that makes the data
+        // smooth with previous quaternions.
+        Eigen::Quaterniond rawSmoothQuat = quat;
+        if (m_hasRawQuat) {
+            util::flipQuatSignToMatch(rawSmoothQuat, m_rawQuat);
+        } else {
+            // first report: we'll arbitrarily choose w to be positive.
+            if (quat.w() < 0) {
+                rawSmoothQuat = Eigen::Quaterniond(-quat.coeffs());
+            }
+            m_hasRawQuat = true;
+        }
+        m_rawQuat = rawSmoothQuat;
+
         if (!m_yawKnown) {
             // This needs to go to calibration instead of to our own pose.
             getBody().getSystem().calibrationHandleIMUData(getBody().getId(),
-                                                           tv, quat);
+                                                           tv, rawSmoothQuat);
             return;
         }
         // Save some local state: we do have orientation ourselves now.
-        m_quat = transformRawIMUOrientation(quat);
+        m_quat = transformRawIMUOrientation(rawSmoothQuat);
         m_hasOrientation = true;
         m_last = tv;
 
-        if (!m_useOrientation) {
+        if (!getParams().imu.useOrientation) {
             return;
         }
         // Can it and update the pose with it.
-        updatePoseFromMeasurement(tv, preprocessOrientation(tv, quat));
+        updatePoseFromMeasurement(tv, preprocessOrientation(tv, rawSmoothQuat));
     }
     void TrackedBodyIMU::updatePoseFromAngularVelocity(
         util::time::TimeValue const &tv, Eigen::Quaterniond const &deltaquat,
@@ -85,6 +101,22 @@ namespace vbtracker {
             calibrationYawKnown(),
             "transform called before calibration transform known!");
         return m_yawCorrection * input;
+        // return input;
+    }
+
+    Eigen::Quaterniond TrackedBodyIMU::transformRawIMUAngularVelocity(
+        Eigen::Quaterniond const &deltaquat) const {
+        BOOST_ASSERT_MSG(
+            calibrationYawKnown(),
+            "transform called before calibration transform known!");
+        /// @todo handle transform for off-center velocity!
+
+        /// Transform for yaw correction.
+        /// @todo are the transforms in the right order?
+        /// @todo are transforms for yaw correction even needed here? not clear,
+        /// since the deltaquat is already in the body coordinate system...
+        // return m_yawCorrection.inverse() * deltaquat * m_yawCorrection;
+        return deltaquat;
     }
 
     CannedIMUMeasurement
@@ -92,6 +124,7 @@ namespace vbtracker {
                                           Eigen::Quaterniond const &quat) {
 
         auto ret = CannedIMUMeasurement{};
+        ret.setYawCorrection(m_yaw);
         ret.setOrientation(transformRawIMUOrientation(quat),
                            Eigen::Vector3d::Constant(m_orientationVariance));
         return ret;
@@ -101,17 +134,10 @@ namespace vbtracker {
     CannedIMUMeasurement TrackedBodyIMU::preprocessAngularVelocity(
         util::time::TimeValue const &tv, Eigen::Quaterniond const &deltaquat,
         double dt) {
-        /// @todo handle transform for off-center velocity!
-
-        /// @todo This has HDK-specific transforms in it!
-        Eigen::Vector3d rot;
-        if (deltaquat.w() >= 1. || deltaquat.vec().isZero(1e-10)) {
-            rot = Eigen::Vector3d::Zero();
-        } else {
-            auto angle = std::acos(deltaquat.w());
-            rot = deltaquat.vec().normalized() * angle * 2 / dt;
-        }
+        Eigen::Vector3d rot =
+            incRotToAngVelVec(transformRawIMUAngularVelocity(deltaquat), dt);
         auto ret = CannedIMUMeasurement{};
+        ret.setYawCorrection(m_yaw);
         ret.setAngVel(rot,
                       Eigen::Vector3d::Constant(m_angularVelocityVariance));
         return ret;

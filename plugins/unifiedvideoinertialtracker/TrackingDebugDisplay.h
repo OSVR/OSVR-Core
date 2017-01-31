@@ -27,8 +27,8 @@
 
 // Internal Includes
 #include "ConfigParams.h"
-#include "TrackingSystem_Impl.h"
 #include "LED.h"
+#include "TrackingSystem_Impl.h"
 
 // Library/third-party includes
 #include <util/Stride.h>
@@ -36,12 +36,18 @@
 #include <opencv2/core/core.hpp>
 
 // Standard includes
-#include <string>
 #include <iosfwd>
+#include <string>
 
 namespace osvr {
 namespace vbtracker {
-    enum class DebugDisplayMode { InputImage, Thresholding, Blobs, Status };
+    enum class DebugDisplayMode {
+        InputImage,
+        Thresholding,
+        Blobs,
+        Status,
+        StatusWithAllReprojections
+    };
     class TrackingSystem;
     class TrackedBodyTarget;
     struct CameraParameters;
@@ -66,13 +72,15 @@ namespace vbtracker {
                                          cv::Mat const &blobImage);
         cv::Mat createStatusImage(TrackingSystem const &tracking,
                                   CameraParameters const &camParams,
-                                  cv::Mat const &baseImage);
+                                  cv::Mat const &baseImage,
+                                  bool reprojectUnseenBeacons = false);
 
         bool m_enabled;
         DebugDisplayMode m_mode = DebugDisplayMode::Status;
         std::string m_windowName;
         cv::Mat m_displayedFrame;
         ::util::Stride m_debugStride;
+        const bool m_performingOptimization;
     };
 } // namespace vbtracker
 } // namespace osvr

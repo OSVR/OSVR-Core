@@ -29,19 +29,47 @@
 #include "BasicTypes.h"
 
 // Library/third-party includes
+#include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
 // Standard includes
+#include <cassert>
 #include <vector>
 
 namespace osvr {
 namespace vbtracker {
     struct LedMeasurement {
+      private:
+        static float estimateArea(float diameter) {
+            return static_cast<float>((diameter / 2) * (diameter / 2) * CV_PI);
+        }
+
+      public:
         LedMeasurement() = default;
-        LedMeasurement(cv::KeyPoint const &kp, cv::Size imgSize)
-            : loc(kp.pt), imageSize(imgSize), brightness(kp.size),
-              diameter(kp.size), area(static_cast<float>(
-                                     (diameter / 2) * (diameter / 2) * CV_PI)) {
+        /// Constructor for a measurement
+        /// @param beaconArea measured area: if <= 0, will be estimated based on
+        /// an assumption of circularity and the diameter.
+        LedMeasurement(cv::Point2f location, float diam, cv::Size imgSize,
+                       float beaconArea = -1)
+            : loc(location), imageSize(imgSize), brightness(diam),
+              diameter(diam),
+              area(beaconArea <= 0 ? estimateArea(diameter) : beaconArea) {}
+
+        /// Constructor for a measurement from a KeyPoint and image size.
+        /// @param beaconArea measured area: if <= 0, will be estimated based on
+        /// an assumption of circularity and the diameter.
+        LedMeasurement(cv::KeyPoint const &kp, cv::Size imgSize,
+                       float beaconArea = -1)
+            : LedMeasurement(kp.pt, kp.size, imgSize, beaconArea) {
+            /// Delegates to the constructor taking Point2f.
+        }
+
+        /// Constructor primarily used by replay for calibration/optimization
+        /// purposes.
+        LedMeasurement(float x, float y, float diam, cv::Size imgSize,
+                       float beaconArea = -1)
+            : LedMeasurement(cv::Point2f(x, y), diam, imgSize, beaconArea) {
+            /// Delegates to the constructor taking Point2f.
         }
 
         /// Location in image space - should be undistorted when passed to the
@@ -51,7 +79,7 @@ namespace vbtracker {
         /// Size of the image the measurement came from.
         cv::Size imageSize;
 
-        /// "Brightness" - currently actually diameter or radius.
+        /// "Brightness" - currently actually diameter.
         Brightness brightness;
 
         /// Blob diameter in pixels.
@@ -65,11 +93,48 @@ namespace vbtracker {
 
         /// Do we know an upright bounding box? (that is, is the next member
         /// valid?)
-        bool knowBoundingBox = false;
+        bool knowBoundingBox() const { return knowBoundingBox_; }
 
         /// Dimensions of the upright bounding box.
-        cv::Size2f boundingBox;
+        /// only valid if knowBoundingBox();
+        cv::Size2f boundingBoxSize() const {
+            assert(knowBoundingBox() && "call to boundingBoxSize() invalid if "
+                                        "knowBoundingBox() is false");
+            return boundingBox_;
+        }
+
+        /// Set the upright bounding box (from a size)
+        void setBoundingBox(cv::Size2f size) {
+            knowBoundingBox_ = true;
+            boundingBox_ = size;
+        }
+
+        /// Set the upright bounding box (from a Rect)
+        void setBoundingBox(cv::Rect const &box) {
+            knowBoundingBox_ = true;
+            boundingBox_ = box.size();
+        }
+
+        bool operator==(LedMeasurement const &other) const {
+            return loc == other.loc && brightness == other.brightness &&
+                   circularity == other.circularity &&
+                   knowBoundingBox_ == other.knowBoundingBox_ &&
+                   (knowBoundingBox_ ? boundingBox_ == other.boundingBox_
+                                     : true) &&
+                   // less likely to differ
+                   imageSize == other.imageSize &&
+                   // technically equivalent or derived from other properties
+                   diameter == other.diameter && area == other.area;
+        }
+
+      private:
+        /// Do we know an upright bounding box? (that is, is the next member
+        /// valid?)
+        bool knowBoundingBox_ = false;
+        /// Dimensions of the upright bounding box.
+        cv::Size2f boundingBox_;
     };
+
     typedef std::vector<LedMeasurement> LedMeasurementVec;
     typedef LedMeasurementVec::iterator LedMeasurementVecIterator;
 

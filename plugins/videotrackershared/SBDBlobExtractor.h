@@ -26,8 +26,10 @@
 #define INCLUDED_SBDBlobExtractor_h_GUID_E67E1F86_F827_48A3_5FA2_F9F241BA79AF
 
 // Internal Includes
-#include "LedMeasurement.h"
 #include "BlobParams.h"
+#include "EdgeHoleBasedLedExtractor.h"
+#include "GenericBlobExtractor.h"
+#include "LedMeasurement.h"
 
 // Library/third-party includes
 #include <opencv2/features2d/features2d.hpp>
@@ -42,10 +44,21 @@ namespace vbtracker {
     /// A class performing blob-extraction duties on incoming frames.
     class SBDBlobExtractor {
       public:
+        /// Construct with just BlobParams: uses simple blob detector.
         explicit SBDBlobExtractor(BlobParams const &blobParams);
+        /// Construct with BlobParams and EdgeHoleBasedLedExtractor::Params:
+        /// uses EdgeHoleBasedLedExtractor.
+        SBDBlobExtractor(BlobParams const &blobParams,
+                         EdgeHoleParams const &extParams);
         ~SBDBlobExtractor();
         LedMeasurementVec const &extractBlobs(cv::Mat const &grayImage);
 
+        enum class Algo { SimpleBlobDetector, EdgeHoleExtractor };
+
+        Algo getAlgo() const { return m_algo; }
+
+        /// In the case of the EdgeHoleExtractor, this is actually the edge
+        /// detection image.
         cv::Mat const &getDebugThresholdImage();
 
         cv::Mat const &getDebugBlobImage();
@@ -57,7 +70,9 @@ namespace vbtracker {
         cv::Mat generateDebugThresholdImage() const;
         cv::Mat generateDebugBlobImage() const;
 
+        Algo m_algo;
         BlobParams m_params;
+        EdgeHoleBasedLedExtractor m_extractor;
         cv::SimpleBlobDetector::Params m_sbdParams;
         LedMeasurementVec m_latestMeasurements;
 
@@ -77,6 +92,25 @@ namespace vbtracker {
         cv::Mat m_extraImage;
 #endif
     };
+
+    class SBDGenericBlobExtractor : public GenericBlobExtractor {
+      public:
+        SBDGenericBlobExtractor(BlobParams const &blobParams);
+        ~SBDGenericBlobExtractor() override = default;
+
+      protected:
+        cv::Mat generateDebugThresholdImage_() const override;
+        cv::Mat generateDebugBlobImage_() const override;
+        LedMeasurementVec extractBlobs_() override;
+
+      private:
+        void getKeypoints(cv::Mat const &grayImage);
+        BlobParams m_params;
+        std::vector<cv::KeyPoint> m_keyPoints;
+        cv::SimpleBlobDetector::Params m_sbdParams;
+    };
+
+	BlobExtractorPtr makeBlobExtractor(BlobParams const &blobParams);
 } // namespace vbtracker
 } // namespace osvr
 

@@ -22,19 +22,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// Define to enable dumping to CSV the first several frames of tracked data to
+/// help analyze the progression of room calibration.
+#undef OSVR_UVBI_DUMP_CALIB_LOG
+
 // Internal Includes
 #include "RoomCalibration.h"
+#include "Assumptions.h"
 #include "ForEachTracked.h"
 #include "TrackedBodyIMU.h"
-#include "Assumptions.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
+#include <osvr/Util/EigenExtras.h>
 #include <osvr/Util/ExtractYaw.h>
 
+#ifdef OSVR_UVBI_DUMP_CALIB_LOG
+#include <osvr/Util/CSV.h>
+#include <osvr/Util/CSVCellGroup.h>
+#endif
+
 // Standard includes
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+
+#ifdef OSVR_UVBI_DUMP_CALIB_LOG
+#include <fstream>
+#endif
 
 namespace osvr {
 namespace vbtracker {
@@ -45,22 +59,21 @@ namespace vbtracker {
     /// These are the levels that the velocity must remain below for a given
     /// number of consecutive frames before we accept a correlation between the
     /// IMU and video as truth.
-    static const auto LINEAR_VELOCITY_CUTOFF = 0.2;
-    static const auto ANGULAR_VELOCITY_CUTOFF = 1.e-4;
 
-    /// The number of low-velocity frames required
-    static const std::size_t REQUIRED_SAMPLES = 10;
+    /// @todo why do we get such high velocities in this step? is RANSAC
+    /// really just that noisy? At least part of it is timing jitter...
+    static const auto LINEAR_VELOCITY_CUTOFF = 0.75;
+    static const auto ANGULAR_VELOCITY_CUTOFF = .75;
+    static const std::size_t REQUIRED_SAMPLES = 15;
 
     /// The distance from the camera that we want to encourage users to move
     /// within for best initial startup. Provides the best view of beacons for
     /// initial start of autocalibration.
-    static const auto NEAR_MESSAGE_CUTOFF = 0.3;
+    static const auto NEAR_MESSAGE_CUTOFF = 0.4;
 
     RoomCalibration::RoomCalibration(Eigen::Vector3d const &camPosition,
                                      bool cameraIsForward)
         : m_lastVideoData(util::time::getNow()),
-          m_positionFilter(filters::one_euro::Params{}),
-          m_orientationFilter(filters::one_euro::Params{}),
           m_suppliedCamPosition(camPosition),
           m_cameraIsForward(cameraIsForward) {}
 
@@ -94,6 +107,10 @@ namespace vbtracker {
             // yet.
             return;
         }
+        if (!xlate.array().allFinite() || !quat.coeffs().array().allFinite()) {
+            // non-finite camera pose
+            return;
+        }
         if (!haveVideoData()) {
             msg() << "Got first video report from target " << target
                   << std::endl;
@@ -106,34 +123,68 @@ namespace vbtracker {
             dt = 1; // in case of weirdness, avoid divide by zero.
         }
 
-        Eigen::Isometry3d targetPose;
-        targetPose.fromPositionOrientationScale(xlate, quat,
-                                                Eigen::Vector3d::Ones());
+        Eigen::Quaterniond prevRot = m_poseFilter.getOrientation();
+        Eigen::Vector3d prevXlate = m_poseFilter.getPosition();
+
+        // Pre-filter the camera data in case it's noisy (quite possible since
+        // it's RANSAC)
+        m_poseFilter.filter(dt, xlate, quat);
 
         // Pose of tracked device (in camera space) is cTd
         // orientation is rTd or iTd: tracked device in IMU space (aka room
         // space, modulo yaw)
-        // rTc is camera in room space (what we want to find), so we can take
-        // camera-reported cTd, perform rTc * cTd, and end up with rTd with
+        // rTc is camera in room space (what we want to find), so later we can
+        // take camera-reported cTb, perform rTc * cTb, and end up with rTb with
         // position...
-        Eigen::Isometry3d rTc = m_imuOrientation * targetPose.inverse();
-
-        // Feed this into the filters...
-        m_positionFilter.filter(dt, rTc.translation());
-        m_orientationFilter.filter(dt, Eigen::Quaterniond(rTc.rotation()));
-
+        Eigen::Quaterniond rTc =
+            m_imuOrientation * m_poseFilter.getOrientation().inverse();
+        Eigen::Vector3d rTcln = util::quat_ln(rTc);
         // Look at the velocity to see if the user was holding still enough.
-        auto linearVel = m_positionFilter.getDerivativeMagnitude();
-        auto angVel = m_orientationFilter.getDerivativeMagnitude();
+        if (!firstData) {
+            using XlateDeriv =
+                util::filters::one_euro::DerivativeTraits<Eigen::Vector3d>;
+            using QuatDeriv =
+                util::filters::one_euro::DerivativeTraits<Eigen::Quaterniond>;
+            // We want the velocity of the filtered output, not the noisy input
+            // velocity the one-euro filter itself would provide.
+            m_linVel = XlateDeriv::computeMagnitude(
+                XlateDeriv::compute(prevXlate, m_poseFilter.getPosition(), dt));
+            m_angVel = QuatDeriv::computeMagnitude(
+                QuatDeriv::compute(prevRot, m_poseFilter.getOrientation(), dt));
+        }
+
+#ifdef OSVR_UVBI_DUMP_CALIB_LOG
+        {
+            static util::CSV csv;
+            static bool output = false;
+            if (csv.numDataRows() < 400) {
+                csv.row() << util::cell("dt", dt) << util::cellGroup(xlate)
+                          << util::cellGroup(quat)
+                          << util::cellGroup("filtered.",
+                                             m_poseFilter.getPosition())
+                          << util::cellGroup("filtered.",
+                                             m_poseFilter.getOrientation())
+                          << util::cellGroup("rTc_ln.", rTcln)
+                          << util::cell("linVel", m_linVel)
+                          << util::cell("angVel", m_angVel);
+            } else if (!output) {
+                output = true;
+                std::ofstream os("calib.csv");
+                csv.output(os);
+                msg() << "Done writing calibration log data." << std::endl;
+            }
+        }
+#endif // OSVR_UVBI_DUMP_CALIB_LOG
 
         // std::cout << "linear " << linearVel << " ang " << angVel << "\n";
-        if (linearVel < LINEAR_VELOCITY_CUTOFF &&
-            angVel < ANGULAR_VELOCITY_CUTOFF) {
+        if (m_linVel < LINEAR_VELOCITY_CUTOFF &&
+            m_angVel < ANGULAR_VELOCITY_CUTOFF) {
             // OK, velocity within bounds
             if (m_steadyVideoReports == 0) {
                 msg() << "Hold still, performing room calibration";
             }
             msgStream() << "." << std::flush;
+            m_rTc_ln_accum += rTcln;
             ++m_steadyVideoReports;
             if (finished()) {
                 /// put an end to the dots
@@ -148,8 +199,21 @@ namespace vbtracker {
         if (m_steadyVideoReports > 0) {
             /// put an end to the dots
             msgStream() << std::endl;
+
+            msg() << "Restarting ";
+            if (m_linVel >= LINEAR_VELOCITY_CUTOFF) {
+                msgStream() << " - Linear velocity too high (" << m_linVel
+                            << ")";
+            }
+            if (m_angVel >= ANGULAR_VELOCITY_CUTOFF) {
+                msgStream() << " - Angular velocity too high (" << m_angVel
+                            << ")";
+            }
+            msgStream() << "\n";
         }
         m_steadyVideoReports = 0;
+        m_rTc_ln_accum = Eigen::Vector3d::Zero();
+
         switch (m_instructionState) {
         case InstructionState::Uninstructed:
             if (zTranslation > NEAR_MESSAGE_CUTOFF) {
@@ -165,8 +229,9 @@ namespace vbtracker {
             break;
         case InstructionState::ToldToMoveCloser:
             if (zTranslation < (0.9 * NEAR_MESSAGE_CUTOFF)) {
-                instructions()
-                    << "That distance looks good, hold it right there.";
+                instructions() << "That distance looks good, rotate the device "
+                                  "gently until you get a 'Hold still' "
+                                  "message.";
                 endInstructions();
                 m_instructionState = InstructionState::ToldDistanceIsGood;
             }
@@ -191,7 +256,18 @@ namespace vbtracker {
             return;
         }
 
+        if (!quat.coeffs().array().allFinite()) {
+            // non-finite quat
+            msg() << "Non-finite quat" << std::endl;
+            return;
+        }
+        bool first = false;
         if (!haveIMUData()) {
+
+            if (!sys.isValidBodyId(body)) {
+                msg() << "Invalid body ID" << std::endl;
+                return;
+            }
             auto &trackedBody = sys.getBody(body);
             if (trackedBody.getNumTargets() == 0) {
                 // Can't use an IMU on a body with no video-based targets for
@@ -202,13 +278,22 @@ namespace vbtracker {
             msg() << "Got first IMU report from body " << body.value()
                   << std::endl;
             m_imuBody = body;
+            first = true;
         }
         BOOST_ASSERT_MSG(m_imuBody == body, "BodyID for incoming data and "
                                             "known IMU must be identical at "
                                             "this point");
 
-        /// @todo something more elegant than just copying a quat?
-        m_imuOrientation = quat;
+        if (first) {
+            // for setup purposes, we'll constrain w to be positive.
+            m_imuOrientation =
+                quat.w() >= 0. ? quat : Eigen::Quaterniond(-quat.coeffs());
+        } else {
+            // Keep the quaternions continuous with the previous ones, so our
+            // average of quat logs doesn't give us a bogus result.
+            m_imuOrientation =
+                util::flipQuatSignToMatch(m_imuOrientation, quat);
+        }
     }
 
     bool RoomCalibration::postCalibrationUpdate(TrackingSystem &sys) {
@@ -217,27 +302,47 @@ namespace vbtracker {
         }
         msg() << "Room calibration process complete." << std::endl;
 
-        Eigen::Isometry3d iTc = getCameraToIMUCalibrationPoint();
-        m_imuYaw = 0 * util::radians;
-        m_cameraPose = iTc;
-        m_rTi = Eigen::Isometry3d::Identity();
+        /// Coordinate systems involved here:
+        /// i: IMU
+        /// c: Camera
+        /// r: Room
+        /// Keep in mind the right to left convention: iTc is a transform that
+        /// takes points from camera space to IMU space. Matching coordinate
+        /// systems cancel: rTi * iTc = rTc
 
-        Eigen::AngleAxisd rTi_rotation(0, Eigen::Vector3d::UnitY());
+        /// We'll start by saying that the camera space orientation is unknown
+        /// and that the IMU space orientation is aligned with the room, so we
+        /// want that transformation. (That's what we've kept track of in a
+        /// running fashion using the filter all along: iTc)
+        ///
+        /// We discard the positional component of iTc because that varies
+        /// depending on where the device is held during calibration.
+        ///
+        /// If the user has set "camera is forward", we'll then extract the yaw
+        /// component and create another transform so that the camera is always
+        /// looking down the z axis of our room space: this will provide a
+        /// rotation component of rTi.
+        ///
+        /// Finally, we will set the position of the camera based on the
+        /// configuration.
+
+        Eigen::Quaterniond iRc =
+            util::quat_exp(m_rTc_ln_accum / m_steadyVideoReports);
+
         if (m_cameraIsForward) {
-            // "Reset Yaw" - the camera looks along the YZ plane.
-            auto yaw = util::extractYaw(Eigen::Quaterniond(iTc.rotation()));
+            auto yaw = util::extractYaw(iRc);
+            iRc = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY()) * iRc;
+            /// the IMUs need to know the yaw so they can un-reverse it.
             m_imuYaw = -yaw * util::radians;
-            rTi_rotation = Eigen::AngleAxisd(-yaw, Eigen::Vector3d::UnitY());
-            m_cameraPose = Eigen::Isometry3d(rTi_rotation) * iTc;
+        } else {
+            m_imuYaw = 0;
         }
-
-        // Account for the supplied camera pose.
-        Eigen::Vector3d cameraOffset =
-            m_suppliedCamPosition - m_cameraPose.translation();
-        Eigen::Translation3d rTi_translation(cameraOffset);
-        m_rTi = Eigen::Isometry3d(rTi_translation) *
-                Eigen::Isometry3d(rTi_rotation);
-        m_cameraPose = Eigen::Isometry3d(rTi_translation) * m_cameraPose;
+        m_cameraPose = util::makeIsometry(m_suppliedCamPosition, iRc);
+        msg() << "camera pose AKA rTc: translation: "
+              << m_cameraPose.translation().transpose() << " rotation: ";
+        Eigen::AngleAxisd rot(m_cameraPose.rotation());
+        msgStream() << rot.angle() << " radians about "
+                    << rot.axis().transpose() << std::endl;
 
         m_calibComplete = true;
 
@@ -262,30 +367,18 @@ namespace vbtracker {
         }
         return boost::none;
     }
+
     Eigen::Isometry3d RoomCalibration::getCameraPose() const {
         BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
                                                 "getCameraPose() unless "
                                                 "calibration is complete!");
         return m_cameraPose;
     }
-    Eigen::Isometry3d RoomCalibration::getIMUToRoom() const {
-        BOOST_ASSERT_MSG(calibrationComplete(), "Not valid to call "
-                                                "getIMUToRoom() unless "
-                                                "calibration is complete!");
-        return m_rTi;
-    }
 
     bool RoomCalibration::finished() const {
         return m_steadyVideoReports >= REQUIRED_SAMPLES;
     }
 
-    Eigen::Isometry3d RoomCalibration::getCameraToIMUCalibrationPoint() const {
-        Eigen::Isometry3d ret;
-        ret.fromPositionOrientationScale(m_positionFilter.getState(),
-                                         m_orientationFilter.getState(),
-                                         Eigen::Vector3d::Ones());
-        return ret;
-    }
     std::ostream &RoomCalibration::msgStream() const { return std::cout; }
     std::ostream &RoomCalibration::msg() const {
         return msgStream() << "[Unified Tracker: Room Calibration] ";

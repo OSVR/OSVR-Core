@@ -24,16 +24,22 @@
 
 // Internal Includes
 #include "ApplyIMUToState.h"
+#include "AngVelTools.h"
+#include "CrossProductMatrix.h"
+#include "FlexibleUnscentedCorrect.h"
+#include "IMUStateMeasurements.h"
 #include "SpaceTransformations.h"
 
 // Library/third-party includes
-#include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/AbsoluteOrientationMeasurement.h>
 #include <osvr/Kalman/AngularVelocityMeasurement.h>
+#include <osvr/Kalman/FlexibleKalmanFilter.h>
+#include <osvr/Util/EigenExtras.h>
 #include <osvr/Util/EigenQuatExponentialMap.h>
+#include <util/Stride.h>
 
 // Standard includes
-// - none
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
@@ -44,14 +50,52 @@ namespace vbtracker {
         meas.restoreQuat(quat);
         Eigen::Vector3d var;
         meas.restoreQuatVariance(var);
+        util::Angle yawCorrection = meas.getYawCorrection();
 
-        /// Rotate it into camera space
-        /// @todo do this without rotating into camera space?
-        quat = getQuatToCameraSpace(sys) * quat;
-        /// @todo transform variance?
+        Eigen::Quaterniond quatInCamSpace = getTransformedOrientation(
+            quat, Eigen::Quaterniond(sys.getRoomToCamera().rotation()),
+            yawCorrection);
+        OrientationMeasurement kalmanMeas{quatInCamSpace, var};
+#if 0
+        auto correctionInProgress =
+            kalman::beginCorrection(state, processModel, kalmanMeas);
+#else
+        auto correctionInProgress =
+            kalman::beginUnscentedCorrection(state, kalmanMeas);
+#endif
+        auto outputMeas = [&] {
+            std::cout << "state: " << state.getQuaternion().coeffs().transpose()
+                      << " and measurement: "
+#if 0
+                      << quat.coeffs().transpose();
+#else
+                      << quatInCamSpace.coeffs().transpose();
+#endif
+        };
+        if (!correctionInProgress.stateCorrectionFinite) {
+            std::cout
+                << "Non-finite state correction in applying orientation: ";
+            outputMeas();
+            std::cout << "\n";
+            return;
+        }
+#if 0
+        static ::util::Stride s(401);
+        if (++s) {
 
-        kalman::AbsoluteOrientationMeasurement<BodyState> kalmanMeas{quat, var};
-        kalman::correct(state, processModel, kalmanMeas);
+            std::cout << "delta z\t "
+                      << correctionInProgress.deltaz.transpose();
+            std::cout << "\t state correction "
+                      << correctionInProgress.stateCorrection.transpose()
+                      << "\n";
+        }
+#endif
+        if (!correctionInProgress.finishCorrection(true)) {
+            std::cout
+                << "Non-finite error covariance after applying orientation: ";
+            outputMeas();
+            std::cout << "\n";
+        }
     }
 
     inline void applyAngVelToState(TrackingSystem const &sys, BodyState &state,
@@ -62,19 +106,44 @@ namespace vbtracker {
         meas.restoreAngVel(angVel);
         Eigen::Vector3d var;
         meas.restoreAngVelVariance(var);
-
+#if 0
+        static const double dt = 0.02;
         /// Rotate it into camera space - it's bTb and we want cTc
         /// @todo do this without rotating into camera space?
         Eigen::Quaterniond cTb = state.getQuaternion();
-        //Eigen::Matrix3d bTc(state.getQuaternion().conjugate());
-        Eigen::Quaterniond incrementalQuat = cTb * util::quat_exp_map(angVel).exp() *
-            cTb.conjugate();
-        angVel = util::quat_exp_map(incrementalQuat).ln();
+        // Eigen::Matrix3d bTc(state.getQuaternion().conjugate());
+        /// Turn it into an incremental quat to do the space transformation
+        Eigen::Quaterniond incrementalQuat =
+            cTb * angVelVecToIncRot(angVel, dt) * cTb.conjugate();
+        /// Then turn it back into an angular velocity vector
+        angVel = incRotToAngVelVec(incrementalQuat, dt);
         // angVel = (getRotationMatrixToCameraSpace(sys) * angVel).eval();
         /// @todo transform variance?
 
         kalman::AngularVelocityMeasurement<BodyState> kalmanMeas{angVel, var};
         kalman::correct(state, processModel, kalmanMeas);
+#else
+        kalman::IMUAngVelMeasurement kalmanMeas{angVel, var};
+        auto correctionInProgress =
+            kalman::beginUnscentedCorrection(state, kalmanMeas);
+        auto outputMeas = [&] {
+            std::cout << "state: " << state.angularVelocity().transpose()
+                      << " and measurement: " << angVel.transpose();
+        };
+        if (!correctionInProgress.stateCorrectionFinite) {
+            std::cout
+                << "Non-finite state correction in applying angular velocity: ";
+            outputMeas();
+            std::cout << "\n";
+            return;
+        }
+        if (!correctionInProgress.finishCorrection(true)) {
+            std::cout << "Non-finite error covariance after applying angular "
+                         "velocity: ";
+            outputMeas();
+            std::cout << "\n";
+        }
+#endif
     }
 
     void applyIMUToState(TrackingSystem const &sys,
@@ -85,13 +154,14 @@ namespace vbtracker {
         if (newTime != initialTime) {
             auto dt = osvrTimeValueDurationSeconds(&newTime, &initialTime);
             kalman::predict(state, processModel, dt);
+#if 0
             state.externalizeRotation();
+#endif
         }
         if (meas.orientationValid()) {
             applyOriToState(sys, state, processModel, meas);
         } else if (meas.angVelValid()) {
             applyAngVelToState(sys, state, processModel, meas);
-
         } else {
             // unusually, the measurement is totally invalid. Just normalize and
             // go on.

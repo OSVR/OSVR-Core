@@ -36,8 +36,12 @@
 
 namespace osvr {
 namespace vbtracker {
+    inline Eigen::Quaterniond getCameraRotation(TrackingSystem const &sys) {
+        return Eigen::Quaterniond(sys.getCameraPose().rotation());
+    }
+
     inline Eigen::Quaterniond getQuatToCameraSpace(TrackingSystem const &sys) {
-        return Eigen::Quaterniond(sys.getCameraPose().rotation()).inverse();
+        return getCameraRotation(sys).inverse();
     }
 
     inline Eigen::Matrix3d

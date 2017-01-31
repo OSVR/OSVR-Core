@@ -26,8 +26,8 @@
 #define INCLUDED_TrackedBodyIMU_h_GUID_65A86547_8C4C_43B5_906C_361178DCCE06
 
 // Internal Includes
-#include "ModelTypes.h"
 #include "CannedIMUMeasurement.h"
+#include "ModelTypes.h"
 
 // Library/third-party includes
 #include <osvr/Util/Angles.h>
@@ -63,7 +63,7 @@ namespace vbtracker {
         bool hasPoseEstimate() const { return m_hasOrientation; }
         util::time::TimeValue const &getLastUpdate() const { return m_last; }
         /// This estimate incorporates the calibration yaw correction.
-        Eigen::Quaterniond const& getPoseEstimate() const { return m_quat; }
+        Eigen::Quaterniond const &getPoseEstimate() const { return m_quat; }
 
         bool calibrationYawKnown() const { return m_yawKnown; }
         void setCalibrationYaw(util::Angle yaw) {
@@ -75,10 +75,18 @@ namespace vbtracker {
             m_yawKnown = true;
         }
 
+        /// Gets the transform based on the calibration yaw
+        Eigen::Quaterniond const &getIMUToRoom() const {
+            return m_yawCorrection;
+        }
+
       private:
         /// Apply the yaw transform required for "cameraIsForward"
         Eigen::Quaterniond
         transformRawIMUOrientation(Eigen::Quaterniond const &input) const;
+        /// Apply the yaw transform required for "cameraIsForward"
+        Eigen::Quaterniond transformRawIMUAngularVelocity(
+            Eigen::Quaterniond const &deltaquat) const;
 
         /// Takes in raw delta quats, dt, and timestamps, transforms them, and
         /// spits out a "canned" measurement that can be stored and incorporated
@@ -106,6 +114,7 @@ namespace vbtracker {
         TrackedBody &m_body;
         bool m_yawKnown = false;
         util::Angle m_yaw;
+        /// this is rRi
         Eigen::Quaterniond m_yawCorrection;
 
         bool m_useOrientation;
@@ -113,7 +122,12 @@ namespace vbtracker {
         bool m_useAngularVelocity;
         double m_angularVelocityVariance;
 
+        bool m_hasRawQuat = false;
+        /// without yaw correction
+        Eigen::Quaterniond m_rawQuat;
+
         bool m_hasOrientation = false;
+        /// measurement in room space (corrected for yaw)
         Eigen::Quaterniond m_quat;
         util::time::TimeValue m_last;
     };

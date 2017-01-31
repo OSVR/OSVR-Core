@@ -26,24 +26,89 @@
 #define INCLUDED_ConfigurationParser_h_GUID_933C79EE_3392_4C8D_74D5_D9A72580DA6A
 
 // Internal Includes
-#include "Types.h"
 #include "GetOptionalParameter.h"
 #include "OptionalStream.h"
+#include "Types.h"
+#include <ParseBlobParams.h>
 
 // Library/third-party includes
+#include <boost/optional.hpp>
 #include <json/value.h>
 
 // Standard includes
-// - none
+#include <initializer_list>
+#include <iostream>
 
 namespace osvr {
 namespace vbtracker {
+    inline const char *getConfigStringForTargetSet(BuiltInTargetSets target) {
+        switch (target) {
+        case osvr::vbtracker::BuiltInTargetSets::HDK1xChassis:
+            return "HDK1x";
+            break;
+        case osvr::vbtracker::BuiltInTargetSets::HDK2Chassis:
+            return "HDK2";
+            break;
+        }
+    }
+    static const std::initializer_list<BuiltInTargetSets> AllBuiltInTargetSets =
+        {BuiltInTargetSets::HDK1xChassis, BuiltInTargetSets::HDK2Chassis};
+    template <typename EnumType, typename StringifyFunctor>
+    inline std::pair<boost::optional<EnumType>, boost::optional<std::string>>
+    getEnumFromStringParameter(
+        Json::Value const &root, const char memberName[],
+        StringifyFunctor &&stringifyEnum,
+        std::initializer_list<EnumType> const &possibleValues) {
+        using ReturnType =
+            std::pair<boost::optional<EnumType>, boost::optional<std::string>>;
+        ReturnType ret;
+        if (!root.isMember(memberName)) {
+            return ret;
+        }
+        auto &member = root[memberName];
+        if (!member.isString()) {
+            return ret;
+        }
+        std::string str = member.asString();
+        ret.second = str;
+        for (auto enumVal : possibleValues) {
+            if (str == stringifyEnum(enumVal)) {
+                /// found it!
+                ret.first = enumVal;
+                return ret;
+            }
+        }
+        // didn't find it. But, they get a string back anyway.
+        return ret;
+    }
+
     static const auto MESSAGE_PREFIX =
         "[Unified Tracker] Configuration Parsing WARNING: ";
 #define PARAMNAME(X) "'" << X << "'"
     inline ConfigParams parseConfigParams(Json::Value const &root) {
         ConfigParams config;
         config.debug = root.get("showDebug", false).asBool();
+
+        // Target set, first and foremost.
+        auto targetSet = getEnumFromStringParameter(root, "targetSet",
+                                                    getConfigStringForTargetSet,
+                                                    AllBuiltInTargetSets);
+        if (targetSet.first) {
+            config.targetSet = *targetSet.first;
+        } else if (targetSet.second) {
+            // some string that we couldn't turn into an enum
+            /// @todo maybe load a file based on this, in the future
+            // right now, we just warn
+            std::cout << MESSAGE_PREFIX << PARAMNAME("targetSet")
+                      << " contained a string, \"" << *(targetSet.second)
+                      << "\", that was not recognized as a known target set. "
+                         "Using the default instead."
+                      << std::endl;
+        }
+
+        getOptionalParameter(config.backPanelMeasurementError, root,
+                             "backPanelMeasurementError");
+
         /// Rear panel stuff
         getOptionalParameter(config.includeRearPanel, root, "includeRearPanel");
         getOptionalParameter(config.headCircumference, root,
@@ -60,14 +125,28 @@ namespace vbtracker {
         }
 
         /// General parameters
+        getOptionalParameter(config.logRawBlobs, root, "logRawBlobs");
+        if (config.logRawBlobs) {
+            std::cout << MESSAGE_PREFIX << PARAMNAME("logRawBlobs")
+                      << " is enabled - existing raw blob data file will be "
+                         "overwritten, and there is a slight chance of "
+                         "performance impacts."
+                      << std::endl;
+        }
+        getOptionalParameter(config.logUsableLeds, root, "logUsableLeds");
+        if (config.logUsableLeds) {
+            std::cout << MESSAGE_PREFIX << PARAMNAME("logUsableLeds")
+                      << " is enabled - existing 'usable LED' data file will "
+                         "be overwritten, and there is a slight chance of "
+                         "performance impacts."
+                      << std::endl;
+        }
+
+        getOptionalParameter(config.continuousReporting, root,
+                             "continuousReporting");
         getOptionalParameter(config.extraVerbose, root, "extraVerbose");
-#if 0
+        getOptionalParameter(config.highGain, root, "highGain");
         getOptionalParameter(config.calibrationFile, root, "calibrationFile");
-#else
-        outputUnless(std::cout, root["calibrationFile"].isNull())
-            << MESSAGE_PREFIX << PARAMNAME("calibrationFile")
-            << " not yet implemented in the new tracker";
-#endif
 
         getOptionalParameter(config.additionalPrediction, root,
                              "additionalPrediction");
@@ -79,14 +158,10 @@ namespace vbtracker {
         getOptionalParameter(config.blobsKeepIdentity, root,
                              "blobsKeepIdentity");
         getOptionalParameter(config.numThreads, root, "numThreads");
-#if 0
+        getOptionalParameter(config.cameraMicrosecondsOffset, root,
+                             "cameraMicrosecondsOffset");
         getOptionalParameter(config.streamBeaconDebugInfo, root,
                              "streamBeaconDebugInfo");
-#else
-        outputUnless(std::cout, root["streamBeaconDebugInfo"].isNull())
-            << MESSAGE_PREFIX << PARAMNAME("streamBeaconDebugInfo")
-            << " not yet implemented in the new tracker";
-#endif
 
         getOptionalParameter(config.offsetToCentroid, root, "offsetToCentroid");
         if (!config.offsetToCentroid) {
@@ -103,6 +178,7 @@ namespace vbtracker {
                "effects with this plugin.";
 
         /// Kalman-related parameters
+        getOptionalParameter(config.permitKalman, root, "permitKalman");
         getOptionalParameter(config.beaconProcessNoise, root,
                              "beaconProcessNoise");
         getOptionalParameter(config.processNoiseAutocorrelation, root,
@@ -111,6 +187,8 @@ namespace vbtracker {
                              "linearVelocityDecayCoefficient");
         getOptionalParameter(config.angularVelocityDecayCoefficient, root,
                              "angularVelocityDecayCoefficient");
+        getOptionalParameter(config.noBeaconLinearVelocityDecayCoefficient,
+                             root, "noBeaconLinearVelocityDecayCoefficient");
         getOptionalParameter(config.measurementVarianceScaleFactor, root,
                              "measurementVarianceScaleFactor");
         getOptionalParameter(config.highResidualVariancePenalty, root,
@@ -129,43 +207,40 @@ namespace vbtracker {
         getOptionalParameter(config.brightLedVariancePenalty, root,
                              "brightLedVariancePenalty");
 
+        /// "Soft Reset" (RANSAC Kalman) parameters
+        getOptionalParameter(config.softResets, root, "softResets");
+        getOptionalParameter(config.softResetPositionVarianceScale, root,
+                             "softResetPositionVarianceScale");
+        getOptionalParameter(config.softResetOrientationVariance, root,
+                             "softResetOrientationVariance");
+
         /// Blob-detection parameters
         if (root.isMember("blobParams")) {
-            Json::Value const &blob = root["blobParams"];
+            parseBlobParams(root["blobParams"], config.blobParams);
 
-            getOptionalParameter(config.blobParams.absoluteMinThreshold, blob,
-                                 "absoluteMinThreshold");
-            getOptionalParameter(config.blobParams.minDistBetweenBlobs, blob,
-                                 "minDistBetweenBlobs");
-            getOptionalParameter(config.blobParams.minArea, blob, "minArea");
-            getOptionalParameter(config.blobParams.filterByCircularity, blob,
-                                 "filterByCircularity");
-            getOptionalParameter(config.blobParams.minCircularity, blob,
-                                 "minCircularity");
-            getOptionalParameter(config.blobParams.filterByConvexity, blob,
-                                 "filterByConvexity");
-            getOptionalParameter(config.blobParams.minConvexity, blob,
-                                 "minConvexity");
-            getOptionalParameter(config.blobParams.minThresholdAlpha, blob,
-                                 "minThresholdAlpha");
-            getOptionalParameter(config.blobParams.maxThresholdAlpha, blob,
-                                 "maxThresholdAlpha");
-            getOptionalParameter(config.blobParams.thresholdSteps, blob,
-                                 "thresholdSteps");
+            // We'll just combine them into one JSON object here.
+            parseEdgeHoleExtractorParams(root["blobParams"],
+                                         config.extractParams);
         }
 
         /// IMU-related parameters
         if (root.isMember("imu")) {
             Json::Value const &imu = root["imu"];
             getOptionalParameter(config.imu.path, imu, "path");
+            getOptionalParameter(config.imu.calibrateAnyway, imu,
+                                 "calibrateAnyway");
             getOptionalParameter(config.imu.useOrientation, imu,
                                  "useOrientation");
             getOptionalParameter(config.imu.orientationVariance, imu,
                                  "orientationVariance");
+            getOptionalParameter(config.imu.orientationMicrosecondsOffset, imu,
+                                 "orientationMicrosecondsOffset");
             getOptionalParameter(config.imu.useAngularVelocity, imu,
                                  "useAngularVelocity");
             getOptionalParameter(config.imu.angularVelocityVariance, imu,
                                  "angularVelocityVariance");
+            getOptionalParameter(config.imu.angularVelocityMicrosecondsOffset,
+                                 imu, "angularVelocityMicrosecondsOffset");
         }
 
         return config;

@@ -40,25 +40,6 @@ namespace osvr {
 namespace vbtracker {
     using EmissionDirectionVec = ::cv::Vec3d;
     using LocationPoint = ::cv::Point3f;
-    /// Data for a single beacon, swizzled into a format suitable for
-    /// "Vector of structs" usage. It is unswizzled/reswizzled as needed in
-    /// setup.
-    struct BeaconSetupData {
-        /// The pattern of bright and dim, represented by * and . respectively,
-        /// identifying this beacon.
-        std::string pattern;
-        /// The location of this beacon in the target coordinate system.
-        LocationPoint location;
-        /// The direction that the beacon emits, in the target coordinate system
-        EmissionDirectionVec emissionDirection;
-        /// Initial measurement variance before applying observation-based
-        /// modifiers.
-        double baseMeasurementVariance = 3.e-6;
-        /// Initial error in the beacon position state.
-        double initialAutocalibrationError = 1e-9;
-        /// Is this beacon fixed, that is, not subject to autocalibration?
-        bool isFixed = false;
-    };
 
     struct TargetDataSummary {
         std::vector<OneBasedBeaconId> disabledByPattern;
@@ -81,16 +62,18 @@ namespace vbtracker {
 
         size_type numBeacons() const { return locations.size(); }
 
+        /// This is both an entirely unlikely out of bounds value and a
+        /// specific sentinel value.
         static LocationPoint getBogusLocation() {
-            return LocationPoint(-10000, -10000, -314159);
+            return LocationPoint(-10000.f, -10000.f, -87314159.f);
         }
         /// Resizes all arrays to the numBeacons.
         /// Only populates baseMeasurementVariances,
         /// initialAutocalibrationErrors, and isFixed
         /// with semi-reasonable default values (no beacons fixed)
         void setBeaconCount(std::size_t numBeacons,
-                            double baseMeasurementVariance = 0.003,
-                            double initialAutocalibrationError = 0.001) {
+                            double baseMeasurementVariance,
+                            double initialAutocalibrationError) {
             patterns.resize(numBeacons);
             locations.resize(numBeacons, getBogusLocation());
             // these are invalid directions and must be populated!
@@ -113,7 +96,15 @@ namespace vbtracker {
             markBeaconFixed(makeZeroBased(beacon));
         }
 
-        TargetDataSummary cleanAndValidate();
+        /// Is the beacon active?
+        bool isBeaconActive(OneBasedBeaconId beacon);
+
+        void markBeaconInactive(ZeroBasedBeaconId beacon);
+        void markBeaconInactive(OneBasedBeaconId beacon) {
+            markBeaconInactive(makeZeroBased(beacon));
+        }
+
+        TargetDataSummary cleanAndValidate(bool silent = false);
     };
 
     /// Output operator for a target data summary.

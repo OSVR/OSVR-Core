@@ -41,7 +41,7 @@
 
 // On the HDK IR camera, this actually puts the camera into the correct
 // high-gain mode and has apparently nothing to do with powerline frequency.
-inline void setPowerlineFrequencyTo50(IBaseFilter &filter) {
+inline void setGainMode(IBaseFilter &filter, bool highGain) {
     auto ksPropSet = comutils::Ptr<IKsPropertySet>{};
     filter.QueryInterface(__uuidof(IKsPropertySet), AttachPtr(ksPropSet));
     if (!ksPropSet) {
@@ -69,7 +69,7 @@ inline void setPowerlineFrequencyTo50(IBaseFilter &filter) {
         propData.Property = prop;
         propData.Property.Flags = KSPROPERTY_TYPE_SET;
 
-        propData.Value = POWERLINE_50HZ;
+        propData.Value = highGain ? POWERLINE_50HZ : POWERLINE_60HZ;
         propData.Flags = KSPROPERTY_VIDEOPROCAMP_FLAGS_MANUAL;
 
         hr = ksPropSet->Set(prop.Set, prop.Id, &propData, sizeof(propData),
@@ -77,19 +77,20 @@ inline void setPowerlineFrequencyTo50(IBaseFilter &filter) {
 
         if (FAILED(hr)) {
             std::cout
-                << "Tried but failed to put the camera in high gain mode..."
+                << "Tried but failed to put the camera in desired gain mode..."
                 << std::endl;
         }
     }
 }
 
-inline std::unique_ptr<directx_camera_server> getDirectShowHDKCamera() {
+inline std::unique_ptr<directx_camera_server> getDirectShowHDKCamera(bool highGain = true) {
     // This string begins the DevicePath provided by Windows for the HDK's
     // camera.
     static const auto HDK_CAMERA_PATH_PREFIX =
         "\\\\?\\usb#vid_0bda&pid_57e8&mi_00";
     auto ret = std::unique_ptr<directx_camera_server>{new directx_camera_server(
-        HDK_CAMERA_PATH_PREFIX, &setPowerlineFrequencyTo50)};
+        HDK_CAMERA_PATH_PREFIX,
+        [highGain](IBaseFilter &filter) { setGainMode(filter, highGain); })};
 
     if (!ret->working()) {
         // If it didn't start up right, just ditch it now.

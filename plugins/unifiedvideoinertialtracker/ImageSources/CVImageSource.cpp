@@ -46,13 +46,15 @@ namespace vbtracker {
 
         bool ok() const override { return m_camera && m_camera->isOpened(); }
         bool grab() override;
-        void retrieveColor(cv::Mat &color) override;
+        void retrieveColor(cv::Mat &color,
+                           osvr::util::time::TimeValue &timestamp) override;
         cv::Size resolution() const override;
 
       private:
         void storeRes();
         CVCapturePtr m_camera;
         cv::Size m_res;
+        osvr::util::time::TimeValue m_timestamp = {};
     };
 
     ImageSourcePtr openOpenCVCamera(int which) {
@@ -66,10 +68,19 @@ namespace vbtracker {
         return ret;
     }
 
-    bool OpenCVImageSource::grab() { return m_camera->grab(); }
+    bool OpenCVImageSource::grab() {
+        bool ret = m_camera->grab();
+        if (ret) {
+            m_timestamp = util::time::getNow();
+        }
+        return ret;
+    }
 
-    void OpenCVImageSource::retrieveColor(cv::Mat &color) {
+    void
+    OpenCVImageSource::retrieveColor(cv::Mat &color,
+                                     osvr::util::time::TimeValue &timestamp) {
         m_camera->retrieve(color);
+        timestamp = m_timestamp;
     }
 
     cv::Size OpenCVImageSource::resolution() const { return m_res; }

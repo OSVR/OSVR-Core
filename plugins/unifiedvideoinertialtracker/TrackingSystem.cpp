@@ -24,13 +24,13 @@
 
 // Internal Includes
 #include "TrackingSystem.h"
+#include "ForEachTracked.h"
+#include "RoomCalibration.h"
+#include "SBDBlobExtractor.h"
 #include "TrackedBody.h"
 #include "TrackedBodyTarget.h"
-#include "UndistortMeasurements.h"
-#include "ForEachTracked.h"
 #include "TrackingSystem_Impl.h"
-#include "SBDBlobExtractor.h"
-#include "RoomCalibration.h"
+#include "UndistortMeasurements.h"
 
 // Library/third-party includes
 #include <boost/assert.hpp>
@@ -39,10 +39,13 @@
 
 // Standard includes
 #include <algorithm>
-#include <iterator>
 #include <iostream>
-#include <string>
+#include <iterator>
 #include <stdexcept>
+#include <string>
+
+static const auto ROOM_CALIBRATION_SKIP_BRIGHTS_CUTOFF = 4;
+static const auto CALIBRATION_RANSAC_ITERATIONS = 8;
 
 namespace osvr {
 namespace vbtracker {
@@ -53,13 +56,18 @@ namespace vbtracker {
     TrackingSystem::~TrackingSystem() {}
 
     TrackedBody *TrackingSystem::createTrackedBody() {
-        auto newId = BodyId(m_bodies.size());
+        auto newId = BodyId(static_cast<BodyId::wrapped_type>(m_bodies.size()));
         BodyPtr newBody(new TrackedBody(*this, newId));
         m_bodies.emplace_back(std::move(newBody));
         return m_bodies.back().get();
     }
 
     TrackedBodyTarget *TrackingSystem::getTarget(BodyTargetId target) {
+        return getBody(target.first).getTarget(target.second);
+    }
+
+    TrackedBodyTarget const *
+    TrackingSystem::getTarget(BodyTargetId target) const {
         return getBody(target.first).getTarget(target.second);
     }
 
@@ -167,7 +175,10 @@ namespace vbtracker {
         }
         /// Prune history after video update.
         for (auto &body : m_bodies) {
-            body->pruneHistory();
+            /// Need to pass the frame time so that we can keep the size of
+            /// stateHistory and imuMeasurements bounded even if no LEDs are
+            /// seen for a given body.
+            body->pruneHistory(m_impl->lastFrame);
         }
     }
 
@@ -186,7 +197,8 @@ namespace vbtracker {
             Eigen::Vector3d xlate;
             Eigen::Quaterniond quat;
             auto gotPose = target.uncalibratedRANSACPoseEstimateFromLeds(
-                m_impl->camParams, xlate, quat);
+                m_impl->camParams, xlate, quat,
+                ROOM_CALIBRATION_SKIP_BRIGHTS_CUTOFF, CALIBRATION_RANSAC_ITERATIONS);
             if (gotPose) {
                 m_impl->calib.processVideoData(*this, bodyTargetId,
                                                m_impl->lastFrame, xlate, quat);

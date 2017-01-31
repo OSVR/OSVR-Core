@@ -28,8 +28,7 @@ namespace osvr {
 namespace vbtracker {
 
     Led::Led(LedIdentifier *identifier, LedMeasurement const &meas)
-        : m_id(SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA),
-          m_identifier(identifier) {
+        : m_identifier(identifier) {
         /// Doesn't matter what the blobs keep ID pref is here, because this is
         /// a new blob so there's no ID to keep.
         addMeasurement(meas, false);
@@ -42,23 +41,25 @@ namespace vbtracker {
         // If we don't have an identifier, then our ID is unknown.
         // Otherwise, try and find it.
         if (!m_identifier) {
-            m_id = ZeroBasedBeaconId(
-                SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA);
+            m_id = ZeroBasedBeaconId(SENTINEL_NO_IDENTIFIER_OBJECT);
         } else {
-            auto oldId = m_id;
+            auto const oldId = m_id;
             m_id = m_identifier->getId(m_id, m_brightnessHistory, m_lastBright,
                                        blobsKeepId);
-#if 0
-            m_newlyRecognized = oldId < 0 && m_id >= 0;
-            auto lostRecognition = m_id < 0 && oldId >= 0;
-            if (!m_newlyRecognized && !lostRecognition && oldId != m_id) {
-                std::cout << "Identity theft detected!" << std::endl;
+            using Id = ZeroBasedBeaconId;
+            if (Id(SENTINEL_MARKED_MISIDENTIFIED) == oldId &&
+                (Id(SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA) ==
+                     m_id ||
+                 Id(SENTINEL_NO_PATTERN_RECOGNIZED_DESPITE_SUFFICIENT_DATA) ==
+                     m_id)) {
+                /// Make the "misidentified" sentinel a little stickier than
+                /// "insufficient data" or "no pattern recognized" so we can see
+                /// it on the debug view.
+                m_id = Id(SENTINEL_MARKED_MISIDENTIFIED);
             }
-#endif
 
-            /// @todo it seems like LEDs are re-recognized every frame? so
-            /// presumably it's possible that oldId != m_id without one being a
-            /// sentinel.
+            /// @todo Identify "theft" is possible and takes place - right now
+            /// it's handled just the same as any other change in ID.
 
             /// Right now, any change in ID is considered being "newly
             /// recognized".
@@ -72,87 +73,8 @@ namespace vbtracker {
         }
     }
 
-    KeyPointIterator Led::nearest(KeyPointList &keypoints,
-                                  double threshold) const {
-        // If we have no elements in the vector, return the end().
-        if (keypoints.empty()) {
-            return end(keypoints);
-        }
-
-        // Squaring the threshold to avoid doing a square-root in a tight loop.
-        auto thresholdSquared = threshold * threshold;
-        auto location = getLocation();
-
-        auto computeDistSquared = [location](KeyPointIterator it) {
-            auto diff = (location - it->pt);
-            return diff.dot(diff);
-        };
-
-        // Find the distance to the first point and record it as the
-        // current minimum distance;
-        auto ret = begin(keypoints);
-        auto minDistSq = computeDistSquared(ret);
-
-        // Search the rest of the elements to see if we can find a
-        // better one.
-        for (auto it = begin(keypoints), e = end(keypoints); it != e; ++it) {
-            auto distSq = computeDistSquared(it);
-            if (distSq < minDistSq) {
-                minDistSq = distSq;
-                ret = it;
-            }
-        }
-
-        // If the closest is within the threshold, return it.  Otherwise,
-        // return the end.
-        if (minDistSq <= thresholdSquared) {
-            return ret;
-        }
-        return end(keypoints);
-    }
-
-    LedMeasurementVecIterator Led::nearest(LedMeasurementVec &meas,
-                                           double threshold) const {
-        // If we have no elements in the vector, return the end().
-        if (meas.empty()) {
-            return end(meas);
-        }
-
-        // Squaring the threshold to avoid doing a square-root in a tight loop.
-        auto thresholdSquared = threshold * threshold;
-        auto location = getLocation();
-
-        auto computeDistSquared = [location](LedMeasurementVecIterator it) {
-            auto diff = (location - it->loc);
-            return diff.dot(diff);
-        };
-
-        // Find the distance to the first point and record it as the
-        // current minimum distance;
-        auto ret = begin(meas);
-        auto minDistSq = computeDistSquared(ret);
-
-        // Search the rest of the elements to see if we can find a
-        // better one.
-        for (auto it = begin(meas), e = end(meas); it != e; ++it) {
-            auto distSq = computeDistSquared(it);
-            if (distSq < minDistSq) {
-                minDistSq = distSq;
-                ret = it;
-            }
-        }
-
-        // If the closest is within the threshold, return it.  Otherwise,
-        // return the end.
-        if (minDistSq <= thresholdSquared) {
-            return ret;
-        }
-        return end(meas);
-    }
-
     void Led::markMisidentified() {
-        m_id = ZeroBasedBeaconId(
-            SENTINEL_NO_IDENTIFIER_OBJECT_OR_INSUFFICIENT_DATA);
+        m_id = ZeroBasedBeaconId(SENTINEL_MARKED_MISIDENTIFIED);
         if (!m_brightnessHistory.empty()) {
             m_brightnessHistory.clear();
             m_brightnessHistory.push_back(getMeasurement().brightness);

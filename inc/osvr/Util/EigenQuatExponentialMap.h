@@ -55,7 +55,7 @@ namespace util {
             /// series expansion vs. direct computation per
             /// Grassia, F. S. (1998). Practical Parameterization of Rotations
             /// Using the Exponential Map. Journal of Graphics Tools, 3(3),
-            /// 29–48. http://doi.org/10.1080/10867651.1998.10487493
+            /// 29-48. http://doi.org/10.1080/10867651.1998.10487493
             Scalar ret;
             if (theta < FourthRootMachineEps<Scalar>::get()) {
                 // taylor series expansion.
@@ -67,10 +67,12 @@ namespace util {
             return ret;
         }
 
-        /// fully-templated free function for quaternion expontiation, intended
-        /// for implementation use within the class.
-        template <typename Scalar, typename InputVec>
-        inline Eigen::Quaternion<Scalar> quat_exp(InputVec &&vec) {
+        /// fully-templated free function for quaternion expontiation
+        template <typename Derived>
+        inline Eigen::Quaternion<typename Derived::Scalar>
+        quat_exp(Eigen::MatrixBase<Derived> const &vec) {
+            EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+            using Scalar = typename Derived::Scalar;
             /// Implementation inspired by
             /// Grassia, F. S. (1998). Practical Parameterization of Rotations
             /// Using the Exponential Map. Journal of Graphics Tools, 3(3),
@@ -89,8 +91,10 @@ namespace util {
             return ret.normalized();
         }
 
+        /// Taylor series expansion of theta over sin(theta), aka cosecant, for
+        /// use near 0 when you want continuity and validity at 0.
         template <typename Scalar>
-        inline Scalar thetaOverSinThetaTaylorExpansion(Scalar theta) {
+        inline Scalar cscTaylorExpansion(Scalar theta) {
             return Scalar(1) +
                    // theta ^ 2 / 6
                    (theta * theta) / Scalar(6) +
@@ -117,7 +121,7 @@ namespace util {
             // result (i.e., ln(qv, qw) = (phi/sin(phi)) * qv )
             Scalar vecnorm = quat.vec().norm();
 
-            // "best for numerical stability" vs asin or acon
+            // "best for numerical stability" vs asin or acos
             Scalar phi = std::atan2(vecnorm, quat.w());
 
             // Here is where we compute the coefficient to scale the vector part
@@ -126,7 +130,7 @@ namespace util {
             // differently, since it gets a bit like sinc in that we want it
             // continuous but 0 is undefined.
             Scalar phiOverSin =
-                vecnorm < 1e-4 ? thetaOverSinThetaTaylorExpansion<Scalar>(phi)
+                vecnorm < 1e-4 ? cscTaylorExpansion<Scalar>(phi)
                                : (phi / std::sin(phi));
             return quat.vec() * phiOverSin;
         }
@@ -146,9 +150,7 @@ namespace util {
         template <typename Derived_> class QuatExpMapBase {
           public:
             using Derived = Derived_;
-            QuatType<Derived> exp() const {
-                return quat_exp<ScalarType<Derived>>(derived().vec());
-            }
+            QuatType<Derived> exp() const { return quat_exp(derived().vec()); }
 
             Derived const &derived() const {
                 return *static_cast<Derived const *>(this);
@@ -239,6 +241,8 @@ namespace util {
             return VecWrapper<Scalar>(v);
         }
     } // namespace ei_quat_exp_map
+    using ei_quat_exp_map::quat_exp;
+    using ei_quat_exp_map::quat_ln;
     using ei_quat_exp_map::quat_exp_map;
 } // namespace util
 } // namespace osvr

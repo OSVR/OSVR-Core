@@ -40,9 +40,8 @@ namespace osvr {
 namespace vbtracker {
     /// For each body in a tracking system
     template <typename F> inline void forEachBody(TrackingSystem &sys, F &&f) {
-        auto n = sys.getNumBodies();
-        using size_type = decltype(n);
-        for (size_type i = 0; i < n; ++i) {
+        auto n = static_cast<BodyId::wrapped_type>(sys.getNumBodies());
+        for (BodyId::wrapped_type i = 0; i < n; ++i) {
             f(sys.getBody(BodyId(i)));
         }
     }
@@ -50,9 +49,8 @@ namespace vbtracker {
     /// For each body in a tracking system - const overload.
     template <typename F>
     inline void forEachBody(TrackingSystem const &sys, F &&f) {
-        auto n = sys.getNumBodies();
-        using size_type = decltype(n);
-        for (size_type i = 0; i < n; ++i) {
+        auto n = static_cast<BodyId::wrapped_type>(sys.getNumBodies());
+        for (BodyId::wrapped_type i = 0; i < n; ++i) {
             f(sys.getBody(BodyId(i)));
         }
     }

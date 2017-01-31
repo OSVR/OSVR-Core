@@ -34,10 +34,8 @@
 namespace osvr {
 namespace vbtracker {
     ConfigParams::ConfigParams() {
-        // Apparently I can't non-static-data-initializer initialize an
-        // array member. Sad. GCC almost let me. MSVC said no way.
-        const double positionNoise = 3e-2;
-        const double rotationNoise = 1e+0;
+        const double positionNoise = 0.1661102065530816;
+        const double rotationNoise = 0.07814149202850287;
         processNoiseAutocorrelation[0] = positionNoise;
         processNoiseAutocorrelation[1] = positionNoise;
         processNoiseAutocorrelation[2] = positionNoise;
@@ -59,5 +57,10 @@ namespace vbtracker {
         /// @todo this is just an estimate of how to not break most apps.
         cameraPosition[2] = -0.5;
     }
+
+    TuningParams::TuningParams()
+        : noveltyPenaltyBase(1.282636090487287),
+          distanceMeasVarianceBase(0.9163785097),
+          distanceMeasVarianceIntercept(308.2142264) {}
 } // namespace vbtracker
 } // namespace osvr

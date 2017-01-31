@@ -29,10 +29,10 @@
 // - none
 
 // Library/third-party includes
-#include <osvr/Util/EigenCoreGeometry.h>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/eigen.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Standard includes
 // - none
@@ -93,6 +93,20 @@ namespace vbtracker {
         return cv::Point2f(vec.x(), vec.y());
     }
 
+    /// Map a cv::Matx matrix with Eigen
+    template <typename Scalar, size_t Rows, size_t Cols>
+    inline Eigen::Map<Eigen::Matrix<Scalar, Rows, Cols, 0>>
+    map(cv::Matx<Scalar, Rows, Cols> &cvMatx) {
+        return Eigen::Matrix<Scalar, Rows, Cols>::Map(cvMatx.val);
+    }
+
+    /// @overload
+    /// for const argument
+    template <typename Scalar, size_t Rows, size_t Cols>
+    inline Eigen::Map<const Eigen::Matrix<Scalar, Rows, Cols, 0>>
+    map(cv::Matx<Scalar, Rows, Cols> const &cvMatx) {
+        return Eigen::Matrix<Scalar, Rows, Cols>::Map(cvMatx.val);
+    }
 } // namespace vbtracker
 } // namespace osvr
 

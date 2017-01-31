@@ -24,17 +24,18 @@
 
 // Internal Includes
 #include "ImageSourceFactories.h"
+#include <osvr/Util/TimeValueChrono.h>
 
 // Library/third-party includes
 #include <opencv2/highgui/highgui.hpp> // for image capture
 
 // Standard includes
-#include <vector>
-#include <sstream>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <thread>
-#include <chrono>
+#include <vector>
 
 namespace osvr {
 namespace vbtracker {
@@ -45,13 +46,15 @@ namespace vbtracker {
 
         bool ok() const override { return !m_images.empty(); }
         bool grab() override;
-        void retrieveColor(cv::Mat &color) override;
+        void retrieveColor(cv::Mat &color,
+                           osvr::util::time::TimeValue &timestamp) override;
         cv::Size resolution() const override;
 
       private:
         std::vector<cv::Mat> m_images;
         size_t m_currentImage = 0;
         cv::Size m_res;
+        osvr::util::time::TimeValue m_timestamp = {};
     };
 
     ImageSourcePtr openImageFileSequence(std::string const &dir) {
@@ -82,12 +85,16 @@ namespace vbtracker {
     }
     bool FakeImageSource::grab() {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        m_timestamp = m_timestamp + std::chrono::milliseconds(10);
         m_currentImage = (m_currentImage + 1) % m_images.size();
         return ok();
     }
 
-    void FakeImageSource::retrieveColor(cv::Mat &color) {
+    void
+    FakeImageSource::retrieveColor(cv::Mat &color,
+                                   osvr::util::time::TimeValue &timestamp) {
         m_images[m_currentImage].copyTo(color);
+        timestamp = m_timestamp;
     }
 
     cv::Size FakeImageSource::resolution() const {

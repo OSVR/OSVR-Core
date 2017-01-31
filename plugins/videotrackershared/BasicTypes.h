@@ -32,16 +32,16 @@
 #include <opencv2/core/core.hpp>
 
 // Standard includes
-#include <list>
-#include <utility>
+#include <deque>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace osvr {
 namespace vbtracker {
 
     typedef float Brightness;
-    typedef std::list<Brightness> BrightnessList;
+    typedef std::deque<Brightness> BrightnessList;
     typedef std::pair<Brightness, Brightness> BrightnessMinMax;
 
     /// Pattern repeated almost twice
