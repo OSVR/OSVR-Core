@@ -211,7 +211,7 @@ class UnifiedVideoInertialTracker : boost::noncopyable {
             const OSVR_TimeValue offset{0, self.m_angvelUsecOffset};
             osvrTimeValueSum(&tv, &offset);
         }
-        self.handleData(*timestamp, *report);
+        self.handleData(tv, *report);
     }
 
     ~UnifiedVideoInertialTracker() { stopTrackerThread(); }
