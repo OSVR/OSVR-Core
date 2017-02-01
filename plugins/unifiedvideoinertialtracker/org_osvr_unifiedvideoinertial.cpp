@@ -383,16 +383,6 @@ class ConfiguredDeviceConstructor {
     /// callback.
     OSVR_ReturnCode operator()(OSVR_PluginRegContext ctx, const char *params) {
 
-        std::cerr << "\n\nWARNING: The 'unifiedvideoinertial' tracking plugin "
-                     "is highly experimental and\n"
-                  << "NOT currently recommended for use except by those "
-                     "working on its development!\n"
-                  << "Users should instead use the combination of the "
-                     "'VideoBasedHMDTracker' and\n"
-                  << "the 'VideoIMUFusion' plugins, as found in the HDK13 "
-                     "config files.\n\n"
-                  << std::endl;
-
         // Read the JSON data from parameters.
         Json::Value root;
         if (params) {
