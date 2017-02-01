@@ -14,7 +14,7 @@
                     "useOrientation": true,
                     "orientationMicrosecondsOffset": -5000,
                     "useAngularVelocity": true,
-                    "angularVelocityMicrosecondsOffset": -15000
+                    "angularVelocityMicrosecondsOffset": -5000
                 }
             }
         }
