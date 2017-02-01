@@ -52,7 +52,7 @@ namespace vbtracker {
         bool useOrientation = true;
 
         /// units: rad^2
-        double orientationVariance = 1.0e-10;
+        double orientationVariance = 1.0e-7;
 
         std::int32_t orientationMicrosecondsOffset = 0;
 
@@ -60,7 +60,7 @@ namespace vbtracker {
         bool useAngularVelocity = true;
 
         /// units: (rad/sec)^2
-        double angularVelocityVariance = 1.0e-8;
+        double angularVelocityVariance = 1.0e-1;
 
         std::int32_t angularVelocityMicrosecondsOffset = 0;
     };
@@ -110,7 +110,7 @@ namespace vbtracker {
         /// Should we have the tracking thread update the reporting vector for
         /// every (IMU) message, instead of waiting/buffering for a few
         /// milliseconds between updates?
-        bool continuousReporting = false;
+        bool continuousReporting = true;
 
         /// Should we open the camera in high-gain mode?
         bool highGain = true;
@@ -127,7 +127,7 @@ namespace vbtracker {
         /// This is a variance number, so std deviation squared, but it's
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
-        double initialBeaconError = 1e-5; // 0.001;
+        double initialBeaconError = 1e-7; // 0.001;
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
@@ -166,7 +166,7 @@ namespace vbtracker {
         /// observed with higher variance than others, due to known difficulties
         /// in tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.0;
+        double measurementVarianceScaleFactor = 1.5;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
@@ -180,7 +180,7 @@ namespace vbtracker {
         /// including the beacons at the back of the head "rigidly" as a part of
         /// it. If true, recommend offsetToCentroid = false, and
         /// manualBeaconOffset to be 0, 0, -75.
-        bool includeRearPanel = false;
+        bool includeRearPanel = true;
 
         /// Head circumference at the head strap, in cm - 55.75 is our estimate
         /// for an average based on some hat sizing guidelines. Only matters if
@@ -266,7 +266,8 @@ namespace vbtracker {
         bool permitKalman = true;
 
         /// Time offset for the camera timestamp, in microseconds.
-        std::int32_t cameraMicrosecondsOffset = 0;
+        /// Default is measured on Windows 10 version 1511.
+        std::int32_t cameraMicrosecondsOffset = -27000;
 
         /// Should we permit a reset to be "soft" (blended by a Kalman) rather
         /// than a hard state setting, in certain conditions? Only available in
