@@ -12,9 +12,9 @@
 
                 "imu": {
                     "useOrientation": true,
-                    "orientationMicrosecondsOffset": 0,
+                    "orientationMicrosecondsOffset": -5000,
                     "useAngularVelocity": true,
-                    "angularVelocityMicrosecondsOffset": 0
+                    "angularVelocityMicrosecondsOffset": -15000
                 }
             }
         }
