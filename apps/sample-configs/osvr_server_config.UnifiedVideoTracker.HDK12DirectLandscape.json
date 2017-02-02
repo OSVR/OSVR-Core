@@ -7,40 +7,19 @@
             "plugin": "org_osvr_unifiedvideoinertial",
             "driver": "UnifiedTrackingSystem",
             "params": {
-                "cameraMicrosecondsOffset": -27000,
-                "continuousReporting": true,
-
-                "manualBeaconOffset": [ 0, 0, 0 ],
-                "initialBeaconError": 1.0e-7,
                 "showDebug": false,
-                "additionalPrediction": 0,
-                "includeRearPanel": true,
                 "headCircumference": 58.42,
-                "calibrationFile": "videotrackerCombinedCalibrationFile12.json",
-                "cameraIsForward": true,
 
-                "streamBeaconDebugInfo": false,
-
-                "blobsKeepIdentity": false,
-                "measurementVarianceScaleFactor": 1.5,
-
-                "processNoiseAutocorrelation": [ 0.1661102065530816, 0.1661102065530816, 0.1661102065530816, 1.3e-1, 1.3e-1, 1.3e-1 ],
                 "imu": {
-                    "calibrateAnyway": true,
                     "useOrientation": true,
-                    "orientationVariance": 1e-7,
-                    "orientationMicrosecondsOffset": 0,
+                    "orientationMicrosecondsOffset": -5000,
                     "useAngularVelocity": true,
-                    "angularVelocityVariance": 1e-1,
-                    "angularVelocityMicrosecondsOffset": 0
+                    "angularVelocityMicrosecondsOffset": -5000
                 }
             }
         }
     ],
     "aliases": {
-        "/cam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera",
-        "/imu": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/imu",
-        "/imuInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/body/0/cameraSpace/imu",
-        "/hmdInCam": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/tracker/semantic/body/0/cameraSpace/body"
+        "/trackingCamera": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera"
     }
 }

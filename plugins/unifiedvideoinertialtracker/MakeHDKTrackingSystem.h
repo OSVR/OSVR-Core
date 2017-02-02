@@ -266,9 +266,6 @@ namespace vbtracker {
                 if (success) {
                     messages::loadedCalibFileSuccessfully(
                         params.calibrationFile);
-                } else {
-                    messages::calibFileSpecifiedButNotLoaded(
-                        params.calibrationFile);
                 }
             }
         }

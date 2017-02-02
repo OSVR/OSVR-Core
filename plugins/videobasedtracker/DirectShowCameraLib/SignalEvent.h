@@ -66,7 +66,7 @@ class SignalEvent {
     /// Wait for the event, with a timeout.
     /// Returns true if we were, in fact, signalled (false if we hit our
     /// timeout)
-    bool wait(int milliseconds) {
+    bool wait(DWORD milliseconds) {
         return WAIT_OBJECT_0 == WaitForSingleObject(h_, milliseconds);
     }
     SignalEvent(SignalEvent const &) = delete;
