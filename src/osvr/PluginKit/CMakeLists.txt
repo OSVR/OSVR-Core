@@ -56,7 +56,7 @@ target_link_libraries(${LIBNAME_FULL}
     osvrConnection
     osvrUtilCpp
     osvrCommon
-    jsoncpp_lib
+    JsonCpp::JsonCpp
     vendored-vrpn
     spdlog
     boost_thread)

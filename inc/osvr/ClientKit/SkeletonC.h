@@ -31,7 +31,6 @@
 #include <osvr/Util/ReturnCodesC.h>
 #include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientReportTypesC.h>
-#include <osvr/Util/StringIds.h>
 
 /* Library/third-party includes */
 /* none */
