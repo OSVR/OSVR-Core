@@ -136,7 +136,8 @@ namespace client {
     SkeletonConfig::getJointState(OSVR_SkeletonJointCount jointId) {
 
         OSVR_TimeValue timestamp;
-        OSVR_Pose3 pose;
+        OSVR_Pose3 pose = { 0 };
+        osvrPose3SetIdentity(&pose);
 
         // find an interface for given jointId
         for (auto val : m_jointInterfaces) {
@@ -147,17 +148,19 @@ namespace client {
                 if (!hasState) {
                     throw NoPoseYet();
                 }
+                return pose;
             }
         }
 
-        return pose;
+        throw NoPoseYet();
     }
 
     inline OSVR_Pose3
     SkeletonConfig::getBoneState(OSVR_SkeletonBoneCount boneId) {
 
         OSVR_TimeValue timestamp;
-        OSVR_Pose3 pose;
+        OSVR_Pose3 pose = { 0 };
+        osvrPose3SetIdentity(&pose);
 
         // find an interface for given boneId
         for (auto val : m_boneInterfaces) {
@@ -168,18 +171,19 @@ namespace client {
                 if (!hasState) {
                     throw NoPoseYet();
                 }
+                return pose;
             }
         }
 
-        return pose;
+        throw NoPoseYet();
     }
 
     inline OSVR_SkeletonBoneCount SkeletonConfig::getNumBones() {
-        return m_boneMap.getEntries().size();
+        return static_cast<OSVR_SkeletonBoneCount>(m_boneMap.getEntries().size());
     }
 
     inline OSVR_SkeletonBoneCount SkeletonConfig::getNumJoints() {
-        return m_jointMap.getEntries().size();
+        return static_cast<OSVR_SkeletonBoneCount>(m_jointMap.getEntries().size());
     }
 
     inline std::string const

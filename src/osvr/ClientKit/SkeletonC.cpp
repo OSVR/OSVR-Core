@@ -32,6 +32,9 @@
 // Library/third-party includes
 #include <boost/assert.hpp>
 
+// disables warning about potentially unsafe string copy function usage.
+#pragma warning( disable : 4996 )
+
 struct OSVR_SkeletonObject {
     OSVR_SkeletonObject(OSVR_ClientContext ctx,
                         OSVR_ClientInterface skeletonIface)
@@ -162,8 +165,9 @@ OSVR_ReturnCode osvrClientGetSkeletonBoneName(OSVR_Skeleton skel,
             /// buffer too small
             return OSVR_RETURN_FAILURE;
         }
+        // this line pops warning 4996 on VS compiler, disabled above
         name.copy(boneName, name.size());
-        name[name.size()] = '\0';
+        boneName[name.size()] = '\0';
     } catch (osvr::client::IdNotFound &) {
         OSVR_DEV_VERBOSE(
             "Error getting name for provided boneId : Id not found");
@@ -240,8 +244,9 @@ OSVR_ReturnCode osvrClientGetSkeletonJointName(OSVR_Skeleton skel,
             /// buffer too small
             return OSVR_RETURN_FAILURE;
         }
+        // this line pops warning 4996 on VS compiler, disabled above
         name.copy(jointName, name.size());
-        name[name.size()] = '\0';
+        jointName[name.size()] = '\0';
     } catch (osvr::client::IdNotFound &) {
         OSVR_DEV_VERBOSE(
             "Error getting name for provided jointId : Id not found");
@@ -297,6 +302,6 @@ osvrClientGetSkeletonNumJoints(OSVR_Skeleton skel,
 OSVR_ReturnCode osvrClientGetChildJointId(
     OSVR_ClientInterface skeletonIface, OSVR_SkeletonJointCount jointId,
     OSVR_SkeletonJointCount childNum, OSVR_SkeletonJointCount *childJointId) {
-
+    OSVR_VALIDATE_OUTPUT_PTR(childJointId, "child joint id");
     return OSVR_RETURN_SUCCESS;
 }
