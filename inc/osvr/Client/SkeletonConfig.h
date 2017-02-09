@@ -182,7 +182,7 @@ namespace client {
         return m_jointMap.getEntries().size();
     }
 
-    std::string const
+    inline std::string const
     SkeletonConfig::getBoneName(OSVR_SkeletonBoneCount boneId) {
         auto boneName = m_boneMap.getStringFromId(util::StringID(boneId));
         if (boneName.empty()) {
@@ -190,7 +190,7 @@ namespace client {
         }
         return boneName;
     }
-    std::string const
+    inline std::string const
     SkeletonConfig::getJointName(OSVR_SkeletonJointCount jointId) {
         auto jointName = m_jointMap.getStringFromId(util::StringID(jointId));
         if (jointName.empty()) {
