@@ -81,8 +81,13 @@ namespace client {
         SkeletonConfig &operator=(SkeletonConfig const &) = delete;
 
         bool getBoneId(const char *boneName, OSVR_SkeletonBoneCount *boneId);
-        bool getJointId(const char *jointName,
-                        OSVR_SkeletonJointCount *jointId);
+        bool getJointId(const char *jointName, OSVR_SkeletonJointCount *jointId);
+
+        bool SkeletonConfig::getAvailableJointId(
+            OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId);
+
+        bool SkeletonConfig::getAvailableBoneId(
+            OSVR_SkeletonBoneCount boneIndex, OSVR_SkeletonBoneCount *boneId);
 
         std::string const getBoneName(OSVR_SkeletonBoneCount boneId);
         std::string const getJointName(OSVR_SkeletonJointCount jointId);
@@ -118,6 +123,27 @@ namespace client {
             *boneId = id.value();
             return true;
         }
+    }
+
+    inline bool SkeletonConfig::getAvailableJointId(
+        OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId)
+    {
+        *jointId = 0;
+        if (jointIndex < 0 || jointIndex >= m_jointInterfaces.size()) {
+            return false;
+        }
+        
+        // m_jointInterfaces[jointIndex].first.value() is the return value,
+        // but we need to make sure we actually allocate an entry for it
+        
+        // get the string id
+        auto stringId = m_jointMap.getStringFromId(m_jointInterfaces[jointIndex].first);
+
+        // then get the joint id
+        auto ret = getJointId(stringId.c_str(), jointId);
+
+        OSVR_SkeletonJointCount ifaceJointId = m_jointInterfaces[jointIndex].first.value();
+        return ret;
     }
 
     inline bool SkeletonConfig::getJointId(const char *jointName,

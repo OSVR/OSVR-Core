@@ -104,10 +104,10 @@ osvrClientGetSkeleton(OSVR_ClientContext ctx,
     OSVR_UTIL_MULTILINE_END
 
 #define OSVR_VALIDATE_JOINT_ID                                                 \
-    BOOST_ASSERT_MSG(jointId == 0, "Must pass a valid joint ID.")
+    BOOST_ASSERT_MSG(jointId >= 0, "Must pass a valid joint ID.")
 
 #define OSVR_VALIDATE_BONE_ID                                                  \
-    BOOST_ASSERT_MSG(boneId == 0, "Must pass a valid bone ID.")
+    BOOST_ASSERT_MSG(boneId >= 0, "Must pass a valid bone ID.")
 
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeSkeleton(OSVR_Skeleton skel) {
@@ -202,6 +202,19 @@ OSVR_ReturnCode osvrClientGetSkeletonBoneState(OSVR_Skeleton skel,
     return OSVR_RETURN_SUCCESS;
 }
 
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonAvailableJointId(
+    OSVR_Skeleton skel, OSVR_SkeletonJointCount jointIndex,
+    OSVR_SkeletonJointCount *jointId)
+{
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(jointId, "joint Id");
+    if (!skel->cfg->getAvailableJointId(jointIndex, jointId)) {
+        OSVR_DEV_VERBOSE("ERROR getting the jointId for jointIndex " << jointIndex);
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
 OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_Skeleton skel,
                                              const char *jointName,
                                              OSVR_SkeletonJointCount *jointId) {
@@ -219,7 +232,7 @@ OSVR_ReturnCode osvrClientGetSkeletonStringJointNameLength(
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(len, "name length");
     try {
-        auto jointName = skel->cfg->getBoneName(jointId);
+        auto jointName = skel->cfg->getJointName(jointId);
         *len = jointName.empty() ? 0 : (jointName.size() + 1);
     } catch (osvr::client::IdNotFound &) {
         OSVR_DEV_VERBOSE(

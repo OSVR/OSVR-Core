@@ -107,6 +107,16 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonBoneState(
     OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId,
     OSVR_SkeletonBoneState *state);
 
+/** @brief Get the jointId for a given available joint.
+@param skel skeleton object
+@param jointIndex an index between 0 and numJoints as reported 
+by osvrClientGetSkeletonNumJoints
+@param jointId the jointId of the given joint.
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonAvailableJointId(
+    OSVR_Skeleton skel, OSVR_SkeletonJointCount jointIndex,
+    OSVR_SkeletonJointCount *jointId);
+
 /** @brief Convert a given jointName to the jointId
 @param skel skeleton object
 @param jointName string containing boneName
