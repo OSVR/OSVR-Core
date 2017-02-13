@@ -34,6 +34,7 @@
 #include <thread>
 #include <random>
 #include <ctime>
+#include <cmath>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -61,35 +62,29 @@ class SkeletonDevice {
     OSVR_ReturnCode update() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(
-            500)); // Simulate waiting half a second for data.
+            5)); // Simulate waiting half a second for data.
 
         // add reporting of pre-recorded finger positions to send
         // sensible tracker reports
 
+        double newVal = std::sin(mVal) * 0.25;
         OSVR_Pose3 samplePose;
-        samplePose.rotation.data[0] = mVal;
-        samplePose.rotation.data[1] = mVal;
-        samplePose.rotation.data[2] = mVal;
-        samplePose.rotation.data[3] = mVal;
+        samplePose.rotation.data[0] = newVal;
+        samplePose.rotation.data[1] = newVal;
+        samplePose.rotation.data[2] = newVal;
+        samplePose.rotation.data[3] = newVal;
 
-        samplePose.translation.data[0] = mVal;
-        samplePose.translation.data[1] = mVal;
-        samplePose.translation.data[2] = mVal;
+        samplePose.translation.data[0] = 0.0;
+        samplePose.translation.data[1] = newVal;
+        samplePose.translation.data[2] = 0.0;
 
         OSVR_TimeValue timestamp;
         osvrTimeValueGetNow(&timestamp);
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 0,
-                                             &timestamp);
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 1,
-                                             &timestamp);
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 2,
-                                             &timestamp);
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 3,
-                                             &timestamp);
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 4,
-                                             &timestamp);
-        osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &samplePose, 5,
-                                             &timestamp);
+        for (OSVR_ChannelCount channel = 0; channel < 6; channel++) {
+            OSVR_Pose3 channelPose = GetChannelPose(samplePose, channel);
+            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &channelPose, channel,
+                                                 &timestamp);
+        }
         osvrDeviceSkeletonComplete(m_skeleton, 0, &timestamp);
 
         mVal += mIncr;
@@ -102,6 +97,13 @@ class SkeletonDevice {
     osvr::pluginkit::DeviceToken m_dev;
     OSVR_SkeletonDeviceInterface m_skeleton;
     OSVR_TrackerDeviceInterface m_tracker;
+
+    inline OSVR_Pose3 GetChannelPose(OSVR_Pose3 basePose, OSVR_ChannelCount channel) {
+        double offset = channel * 0.05;
+        OSVR_Pose3 ret = basePose;
+        ret.translation.data[0] += offset;
+        return ret;
+    }
 };
 
 class HardwareDetection {
