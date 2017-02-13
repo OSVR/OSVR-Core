@@ -142,7 +142,26 @@ namespace client {
         // then get the joint id
         auto ret = getJointId(stringId.c_str(), jointId);
 
-        OSVR_SkeletonJointCount ifaceJointId = m_jointInterfaces[jointIndex].first.value();
+        return ret;
+    }
+
+    inline bool SkeletonConfig::getAvailableBoneId(
+        OSVR_SkeletonBoneCount boneIndex, OSVR_SkeletonBoneCount *boneId)
+    {
+        *boneId = 0;
+        if (boneIndex < 0 || boneIndex >= m_boneInterfaces.size()) {
+            return false;
+        }
+
+        // m_boneInterfaces[boneIndex].first.value() is the return value,
+        // but we need to make sure we actually allocate an entry for it
+
+        // get the string id
+        auto stringId = m_boneMap.getStringFromId(m_boneInterfaces[boneIndex].first);
+
+        // then get the bone id
+        auto ret = getBoneId(stringId.c_str(), boneId);
+
         return ret;
     }
 

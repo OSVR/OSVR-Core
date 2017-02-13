@@ -34,7 +34,7 @@
 // Standard includes
 #include <stdio.h>
 
-#define JOINT_NAME_BUFFER_SIZE 10000
+#define NAME_BUFFER_SIZE 10000
 
 void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const OSVR_SkeletonReport *report) {
     OSVR_ReturnCode rc;
@@ -71,8 +71,8 @@ void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const O
                 continue;
             }
 
-            char jointName[JOINT_NAME_BUFFER_SIZE];
-            rc = osvrClientGetSkeletonJointName(skel, jointId, jointName, JOINT_NAME_BUFFER_SIZE);
+            char jointName[NAME_BUFFER_SIZE];
+            rc = osvrClientGetSkeletonJointName(skel, jointId, jointName, NAME_BUFFER_SIZE);
             if (rc == OSVR_RETURN_FAILURE) {
                 printf("\tjoint %d: osvrClientGetSkeletonJointName call failed. Perhaps the joint name is greater than our buffer size?\n", joint);
                 continue;
@@ -94,6 +94,46 @@ void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const O
                 osvrQuatGetY(&jointState.pose.rotation),
                 osvrQuatGetZ(&jointState.pose.rotation),
                 osvrQuatGetW(&jointState.pose.rotation));
+        }
+
+        for (OSVR_SkeletonBoneCount bone = 0; bone < numBones; bone++) {
+            size_t len = 0;
+            OSVR_SkeletonBoneCount boneId = 0;
+            rc = osvrClientGetSkeletonAvailableBoneId(skel, bone, &boneId);
+            if (rc == OSVR_RETURN_FAILURE) {
+                printf("\tcouldn't get the bone id for bone index %d\n", bone);
+                continue;
+            }
+
+            rc = osvrClientGetSkeletonStringBoneNameLength(skel, boneId, &len);
+            if (rc == OSVR_RETURN_FAILURE) {
+                printf("\tbone %d: call to osvrClientGetSkeletonStringBoneNameLength failed", bone);
+                continue;
+            }
+
+            char boneName[NAME_BUFFER_SIZE];
+            rc = osvrClientGetSkeletonBoneName(skel, boneId, boneName, NAME_BUFFER_SIZE);
+            if (rc == OSVR_RETURN_FAILURE) {
+                printf("\tbone %d: osvrClientGetSkeletonBoneName call failed. Perhaps the bone name is greater than our buffer size?\n", bone);
+                continue;
+            }
+
+            OSVR_SkeletonBoneState boneState = { 0 };
+            rc = osvrClientGetSkeletonBoneState(skel, boneId, &boneState);
+            if (rc == OSVR_RETURN_FAILURE) {
+                printf("\tbone %d: osvrClientGetSkeletonBoneState call failed.\n", bone);
+                continue;
+            }
+
+            printf("\tbone %d: name: %s,\n\t\ttranslation: (x: %f, y: %f, z: %f)\n\t\torientation: (x: %f, y: %f, z: %f, w: %f)\n",
+                bone, boneName,
+                osvrVec3GetX(&boneState.pose.translation),
+                osvrVec3GetY(&boneState.pose.translation),
+                osvrVec3GetZ(&boneState.pose.translation),
+                osvrQuatGetX(&boneState.pose.rotation),
+                osvrQuatGetY(&boneState.pose.rotation),
+                osvrQuatGetZ(&boneState.pose.rotation),
+                osvrQuatGetW(&boneState.pose.rotation));
         }
 
         OSVR_SkeletonJointCount leftWristJointId = 0;

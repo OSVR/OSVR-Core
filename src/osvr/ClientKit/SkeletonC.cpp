@@ -215,12 +215,25 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonAvailableJointId(
     return OSVR_RETURN_SUCCESS;
 }
 
+OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonAvailableBoneId(
+    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneIndex,
+    OSVR_SkeletonBoneCount *boneId)
+{
+    OSVR_VALIDATE_SKELETON_CONFIG;
+    OSVR_VALIDATE_OUTPUT_PTR(boneId, "bone Id");
+    if (!skel->cfg->getAvailableBoneId(boneIndex, boneId)) {
+        OSVR_DEV_VERBOSE("ERROR getting the boneId for boneIndex " << boneIndex);
+        return OSVR_RETURN_FAILURE;
+    }
+    return OSVR_RETURN_SUCCESS;
+}
+
 OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_Skeleton skel,
                                              const char *jointName,
                                              OSVR_SkeletonJointCount *jointId) {
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(jointId, "joint Id");
-    if (!skel->cfg->getBoneId(jointName, jointId)) {
+    if (!skel->cfg->getJointId(jointName, jointId)) {
         OSVR_DEV_VERBOSE("Error getting jointId for " << jointId);
         return OSVR_RETURN_FAILURE;
     }
