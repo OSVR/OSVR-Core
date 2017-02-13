@@ -82,7 +82,7 @@ boneId.
 if the parameter does not exist or is not a string.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonStringBoneNameLength(
-    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, size_t *len);
+    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, uint32_t *len);
 
 /** @brief Convert the boneId to the bone name
 @param skel skeleton object
@@ -96,7 +96,7 @@ short, an error is returned and the buffer is unchanged.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetSkeletonBoneName(OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId,
-                              char *boneName, size_t len);
+                              char *boneName, uint32_t len);
 
 /** @brief Get skeleton bone state for given boneId
 @param skeletonIface skeleton interface
@@ -148,7 +148,7 @@ if the parameter does not exist or is not a string.
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientGetSkeletonStringJointNameLength(OSVR_Skeleton skel,
                                            OSVR_SkeletonJointCount jointId,
-                                           size_t *len);
+                                           uint32_t *len);
 
 /** @brief Convert the jointId to the joint name
 @param skel skeleton object
@@ -162,7 +162,7 @@ short, an error is returned and the buffer is unchanged.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonJointName(
     OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, char *jointName,
-    size_t len);
+    uint32_t len);
 
 /** @brief Get skeleton joint state for given joint Id
 @param skel skeleton object

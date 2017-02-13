@@ -136,12 +136,12 @@ OSVR_ReturnCode osvrClientGetSkeletonBoneId(OSVR_Skeleton skel,
 }
 
 OSVR_ReturnCode osvrClientGetSkeletonStringBoneNameLength(
-    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, size_t *len) {
+    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, uint32_t *len) {
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(len, "name length");
     try {
         auto boneName = skel->cfg->getBoneName(boneId);
-        *len = boneName.empty() ? 0 : (boneName.size() + 1);
+        *len = static_cast<uint32_t>(boneName.empty() ? 0 : (boneName.size() + 1));
     } catch (osvr::client::IdNotFound &) {
         OSVR_DEV_VERBOSE(
             "Error getting name for provided boneId : Id not found");
@@ -156,7 +156,7 @@ OSVR_ReturnCode osvrClientGetSkeletonStringBoneNameLength(
 
 OSVR_ReturnCode osvrClientGetSkeletonBoneName(OSVR_Skeleton skel,
                                               OSVR_SkeletonBoneCount boneId,
-                                              char *boneName, size_t len) {
+                                              char *boneName, uint32_t len) {
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(boneName, "bone name");
     try {
@@ -241,12 +241,12 @@ OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_Skeleton skel,
 }
 
 OSVR_ReturnCode osvrClientGetSkeletonStringJointNameLength(
-    OSVR_Skeleton skel, OSVR_SkeletonJointCount jointId, size_t *len) {
+    OSVR_Skeleton skel, OSVR_SkeletonJointCount jointId, uint32_t *len) {
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(len, "name length");
     try {
         auto jointName = skel->cfg->getJointName(jointId);
-        *len = jointName.empty() ? 0 : (jointName.size() + 1);
+        *len = static_cast<uint32_t>(jointName.empty() ? 0 : (jointName.size() + 1));
     } catch (osvr::client::IdNotFound &) {
         OSVR_DEV_VERBOSE(
             "Error getting name for provided jointId : Id not found");
@@ -261,7 +261,7 @@ OSVR_ReturnCode osvrClientGetSkeletonStringJointNameLength(
 
 OSVR_ReturnCode osvrClientGetSkeletonJointName(OSVR_Skeleton skel,
                                                OSVR_SkeletonBoneCount jointId,
-                                               char *jointName, size_t len) {
+                                               char *jointName, uint32_t len) {
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(jointName, "joint name");
     try {
