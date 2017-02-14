@@ -260,7 +260,7 @@ OSVR_ReturnCode osvrClientGetSkeletonStringJointNameLength(
 }
 
 OSVR_ReturnCode osvrClientGetSkeletonJointName(OSVR_Skeleton skel,
-                                               OSVR_SkeletonBoneCount jointId,
+                                               OSVR_SkeletonJointCount jointId,
                                                char *jointName, uint32_t len) {
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(jointName, "joint name");

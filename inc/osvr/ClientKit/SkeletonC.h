@@ -161,7 +161,7 @@ Will contain the null-terminated string name of the boneId.
 short, an error is returned and the buffer is unchanged.
 */
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonJointName(
-    OSVR_Skeleton skel, OSVR_SkeletonBoneCount boneId, char *jointName,
+    OSVR_Skeleton skel, OSVR_SkeletonJointCount boneId, char *jointName,
     uint32_t len);
 
 /** @brief Get skeleton joint state for given joint Id
