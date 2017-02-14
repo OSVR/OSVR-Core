@@ -181,7 +181,7 @@ namespace client {
     SkeletonConfig::getJointState(OSVR_SkeletonJointCount jointId) {
 
         OSVR_TimeValue timestamp;
-        OSVR_Pose3 pose = { 0 };
+        OSVR_Pose3 pose;
         osvrPose3SetIdentity(&pose);
 
         // find an interface for given jointId
@@ -204,7 +204,7 @@ namespace client {
     SkeletonConfig::getBoneState(OSVR_SkeletonBoneCount boneId) {
 
         OSVR_TimeValue timestamp;
-        OSVR_Pose3 pose = { 0 };
+        OSVR_Pose3 pose;
         osvrPose3SetIdentity(&pose);
 
         // find an interface for given boneId

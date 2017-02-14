@@ -50,6 +50,8 @@
 #include <boost/variant/get.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/optional.hpp>
+
 #include <json/writer.h>
 
 // Standard includes
@@ -64,9 +66,9 @@ namespace client {
     SkeletonRemoteHandler::SkeletonRemoteHandler(
         vrpn_ConnectionPtr const &conn, std::string const &deviceName,
         boost::optional<OSVR_ChannelCount> sensor,
-        common::InterfaceList &ifaces, common::ClientContext *ctx)
+        common::InterfaceList &ifaces/*, common::ClientContext *ctx*/)
         : m_dev(common::createClientDevice(deviceName, conn)),
-          m_internals(ifaces), m_sensor(sensor), m_ctx(ctx),
+          m_internals(ifaces), /*m_ctx(ctx),*/ m_sensor(sensor),
           m_deviceName(deviceName) {
 
         auto skeleton = common::SkeletonComponent::create("");
@@ -133,7 +135,7 @@ namespace client {
         /// @todo find out why make_shared causes a crash here
         ret.reset(new SkeletonRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(),
-            source.getSensorNumberAsChannelCount(), ifaces, &ctx));
+            source.getSensorNumberAsChannelCount(), ifaces/*, &ctx*/));
         return ret;
     }
 

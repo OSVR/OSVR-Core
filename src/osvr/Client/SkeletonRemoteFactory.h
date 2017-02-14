@@ -50,8 +50,8 @@ namespace client {
         SkeletonRemoteHandler(vrpn_ConnectionPtr const &conn,
                               std::string const &deviceName,
                               boost::optional<OSVR_ChannelCount> sensor,
-                              common::InterfaceList &ifaces,
-                              common::ClientContext *ctx);
+                              common::InterfaceList &ifaces/*,
+                              common::ClientContext *ctx*/);
 
         /// @brief Deleted assignment operator.
         SkeletonRemoteHandler &
@@ -75,7 +75,7 @@ namespace client {
                                   util::time::TimeValue const &timestamp);
 
         common::BaseDevicePtr m_dev;
-        common::ClientContext *m_ctx;
+        //common::ClientContext *m_ctx;
         common::SkeletonComponent *m_skeleton;
         RemoteHandlerInternals m_internals;
         boost::optional<OSVR_ChannelCount> m_sensor;
