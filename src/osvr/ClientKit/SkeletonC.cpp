@@ -103,12 +103,6 @@ osvrClientGetSkeleton(OSVR_ClientContext ctx,
     }                                                                          \
     OSVR_UTIL_MULTILINE_END
 
-#define OSVR_VALIDATE_JOINT_ID                                                 \
-    BOOST_ASSERT_MSG(jointId >= 0, "Must pass a valid joint ID.")
-
-#define OSVR_VALIDATE_BONE_ID                                                  \
-    BOOST_ASSERT_MSG(boneId >= 0, "Must pass a valid bone ID.")
-
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
 osvrClientFreeSkeleton(OSVR_Skeleton skel) {
     OSVR_VALIDATE_SKELETON_CONFIG;
@@ -184,7 +178,6 @@ OSVR_ReturnCode osvrClientGetSkeletonBoneState(OSVR_Skeleton skel,
                                                OSVR_SkeletonBoneCount boneId,
                                                OSVR_SkeletonBoneState *state) {
     OSVR_VALIDATE_SKELETON_CONFIG;
-    OSVR_VALIDATE_BONE_ID;
     OSVR_VALIDATE_OUTPUT_PTR(state, "bone state");
     try {
         OSVR_Pose3 pose = skel->cfg->getBoneState(boneId);
@@ -290,7 +283,6 @@ osvrClientGetSkeletonJointState(OSVR_Skeleton skel,
                                 OSVR_SkeletonJointCount jointId,
                                 OSVR_SkeletonJointState *state) {
     OSVR_VALIDATE_SKELETON_CONFIG;
-    OSVR_VALIDATE_JOINT_ID;
     OSVR_VALIDATE_OUTPUT_PTR(state, "joint state");
     try {
         OSVR_Pose3 pose = skel->cfg->getJointState(jointId);
