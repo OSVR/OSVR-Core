@@ -83,10 +83,10 @@ namespace client {
         bool getBoneId(const char *boneName, OSVR_SkeletonBoneCount *boneId);
         bool getJointId(const char *jointName, OSVR_SkeletonJointCount *jointId);
 
-        bool SkeletonConfig::getAvailableJointId(
+        bool getAvailableJointId(
             OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId);
 
-        bool SkeletonConfig::getAvailableBoneId(
+        bool getAvailableBoneId(
             OSVR_SkeletonBoneCount boneIndex, OSVR_SkeletonBoneCount *boneId);
 
         std::string const getBoneName(OSVR_SkeletonBoneCount boneId);
@@ -129,7 +129,7 @@ namespace client {
         OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId)
     {
         *jointId = 0;
-        if (jointIndex < 0 || jointIndex >= m_jointInterfaces.size()) {
+        if (jointIndex >= m_jointInterfaces.size()) {
             return false;
         }
         
@@ -149,7 +149,7 @@ namespace client {
         OSVR_SkeletonBoneCount boneIndex, OSVR_SkeletonBoneCount *boneId)
     {
         *boneId = 0;
-        if (boneIndex < 0 || boneIndex >= m_boneInterfaces.size()) {
+        if (boneIndex >= m_boneInterfaces.size()) {
             return false;
         }
 
