@@ -64,7 +64,7 @@ namespace client {
         virtual void update() { m_dev->update(); }
 
         OSVR_CLIENT_EXPORT common::SkeletonComponent *
-        SkeletonRemoteHandler::getSkeletonComponent() {
+        getSkeletonComponent() {
             return m_skeleton;
         }
 
