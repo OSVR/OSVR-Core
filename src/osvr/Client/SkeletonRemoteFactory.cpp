@@ -113,7 +113,7 @@ namespace client {
             return;
         }
         // get the articulation spec for specified skeleton sensor
-        Json::Value articSpec = data.spec[m_sensor.value()];
+        Json::Value articSpec = data.spec[(*m_sensor)];
         // update articulationSpec of skeleton component
         Json::FastWriter fastWriter;
         std::string strSpec = fastWriter.write(articSpec);
