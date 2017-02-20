@@ -35,8 +35,13 @@
 #include <stdio.h>
 
 #define NAME_BUFFER_SIZE 10000
+#define MAX_CALLBACKS_TO_REPORT 10
+
+static int numCallbacks = 0;
 
 void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const OSVR_SkeletonReport *report) {
+    numCallbacks++;
+
     OSVR_ReturnCode rc;
     OSVR_Skeleton skel = (OSVR_Skeleton)userdata;
     printf("-----------\n");
@@ -169,7 +174,7 @@ int main() {
     CHECK_RC(rc);
 
     // Pretend that this is your application's mainloop.
-    while (1) {
+    while (numCallbacks < MAX_CALLBACKS_TO_REPORT) {
         rc = osvrClientUpdate(ctx);
         CHECK_RC(rc);
         // get some skeleton Reports

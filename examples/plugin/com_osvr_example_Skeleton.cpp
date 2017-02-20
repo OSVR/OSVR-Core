@@ -62,7 +62,7 @@ class SkeletonDevice {
     OSVR_ReturnCode update() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(
-            5)); // Simulate waiting half a second for data.
+            500)); // Simulate waiting half a second for data.
 
         // add reporting of pre-recorded finger positions to send
         // sensible tracker reports
