@@ -142,8 +142,8 @@ void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const O
         }
 
         OSVR_SkeletonJointCount leftWristJointId = 0;
-        rc = osvrClientGetSkeletonJointId(skel, "leftWrist", &leftWristJointId);
-        printf("\tasking for 'leftWrist' joint id by name: %s, jointId = %d\n",
+        rc = osvrClientGetSkeletonJointId(skel, "l_wrist", &leftWristJointId);
+        printf("\tasking for 'l_wrist' joint id by name: %s, jointId = %d\n",
             rc == OSVR_RETURN_SUCCESS ? "suceeded" : "failed", leftWristJointId);
     }
 }
