@@ -227,7 +227,7 @@ OSVR_ReturnCode osvrClientGetSkeletonJointId(OSVR_Skeleton skel,
     OSVR_VALIDATE_SKELETON_CONFIG;
     OSVR_VALIDATE_OUTPUT_PTR(jointId, "joint Id");
     if (!skel->cfg->getJointId(jointName, jointId)) {
-        OSVR_DEV_VERBOSE("Error getting jointId for " << jointId);
+        OSVR_DEV_VERBOSE("Error getting jointId for " << jointName);
         return OSVR_RETURN_FAILURE;
     }
     return OSVR_RETURN_SUCCESS;
