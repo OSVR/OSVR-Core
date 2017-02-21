@@ -55,11 +55,10 @@ namespace client {
         ArticulationTreeTraverser(osvr::common::RegisteredStringMap *jointMap,
                                   osvr::common::RegisteredStringMap *boneMap,
                                   InterfaceMap *jointInterfaces,
-                                  InterfaceMap *boneInterfaces,
                                   OSVR_ClientContext &ctx)
             : boost::static_visitor<>(), m_jointMap(jointMap),
               m_boneMap(boneMap), m_jointInterfaces(jointInterfaces),
-              m_boneInterfaces(boneInterfaces), m_ctx(ctx) {}
+              m_ctx(ctx) {}
 
         /// @brief ignore null element
         void operator()(osvr::common::PathNode const &,
@@ -71,26 +70,23 @@ namespace client {
 
             /// register joints
             if (elt.getArticulationType() == "joint") {
+
                 /// register joint ID
                 util::StringID jointID =
-                    m_jointMap->getStringID(node.getName());
+                    m_jointMap->registerStringID(node.getName());
                 /// get an interface for tracker path
                 common::ClientInterfacePtr iface =
                     m_ctx->getInterface(elt.getTrackerPath().c_str());
                 /// store the id, interface association
                 m_jointInterfaces->push_back(std::make_pair(jointID, iface));
+
+                /// Specifying bone name for each joint is optional
+                if (!elt.getBoneName().empty()) {
+                    /// register boneId
+                    util::StringID boneId =
+                        m_boneMap->registerStringID(elt.getBoneName());
+                }
             }
-            /// register bones
-            else if (elt.getArticulationType() == "bone") {
-                /// register boneId
-                util::StringID boneId = m_boneMap->getStringID(node.getName());
-                /// get an interface for tracker path
-                common::ClientInterfacePtr iface =
-                    m_ctx->getInterface(elt.getTrackerPath().c_str());
-                /// store the id, interface association
-                m_boneInterfaces->push_back(std::make_pair(boneId, iface));
-            }
-            /// @todo Add additional type of articulation here, if needed
         }
 
         /// @brief Catch-all for other element types.
@@ -101,7 +97,6 @@ namespace client {
         osvr::common::RegisteredStringMap *m_jointMap;
         osvr::common::RegisteredStringMap *m_boneMap;
         InterfaceMap *m_jointInterfaces;
-        InterfaceMap *m_boneInterfaces;
         OSVR_ClientContext m_ctx;
     };
 
@@ -152,7 +147,7 @@ namespace client {
 
                 ArticulationTreeTraverser traverser(
                     &cfg->m_jointMap, &cfg->m_boneMap, &cfg->m_jointInterfaces,
-                    &cfg->m_boneInterfaces, cfg->m_ctx);
+                    cfg->m_ctx);
                 osvr::util::traverseWith(
                     articulationTree.getRoot(),
                     [&traverser](osvr::common::PathNode const &node) {
