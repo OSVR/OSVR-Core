@@ -46,15 +46,15 @@ TEST(RegisteredStringMap, create) {
 TEST(RegisteredStringMap, addNewValues) {
     RegisteredStringMap regMap;
 
-    StringID regID0 = regMap.getStringID("RegVal0");
+    StringID regID0 = regMap.registerStringID("RegVal0");
     ASSERT_TRUE(regMap.isModified());
     ASSERT_EQ(1, regMap.getEntries().size());
 
-    StringID regID1 = regMap.getStringID("RegVal1");
+    StringID regID1 = regMap.registerStringID("RegVal1");
     ASSERT_TRUE(regMap.isModified());
     ASSERT_EQ(2, regMap.getEntries().size());
 
-    StringID regID2 = regMap.getStringID("RegVal2");
+    StringID regID2 = regMap.registerStringID("RegVal2");
     ASSERT_TRUE(regMap.isModified());
     ASSERT_EQ(3, regMap.getEntries().size());
 }
@@ -62,13 +62,13 @@ TEST(RegisteredStringMap, addNewValues) {
 class RegisteredStringMapTest : public ::testing::Test {
   public:
     RegisteredStringMapTest() {
-        regID0 = regMap.getStringID("RegVal0");
-        regID1 = regMap.getStringID("RegVal1");
-        regID2 = regMap.getStringID("RegVal2");
+        regID0 = regMap.registerStringID("RegVal0");
+        regID1 = regMap.registerStringID("RegVal1");
+        regID2 = regMap.registerStringID("RegVal2");
 
-        corID0 = corMap.getStringID("CorVal0");
-        corID1 = corMap.getStringID("CorVal1");
-        corID2 = corMap.getStringID("CorVal2");
+        corID0 = corMap.registerStringID("CorVal0");
+        corID1 = corMap.registerStringID("CorVal1");
+        corID2 = corMap.registerStringID("CorVal2");
     }
 
     RegisteredStringMap regMap;
@@ -82,17 +82,17 @@ TEST_F(RegisteredStringMapTest, checkExistingValues) {
 
     regMap.clearModifiedFlag();
 
-    StringID regID = regMap.getStringID("RegVal0");
+    StringID regID = regMap.registerStringID("RegVal0");
     ASSERT_FALSE(regMap.isModified());
     ASSERT_EQ(3, regMap.getEntries().size());
     ASSERT_EQ(0, regID.value());
 
-    regID = regMap.getStringID("RegVal1");
+    regID = regMap.registerStringID("RegVal1");
     ASSERT_FALSE(regMap.isModified());
     ASSERT_EQ(3, regMap.getEntries().size());
     ASSERT_EQ(1, regID.value());
 
-    regID = regMap.getStringID("RegVal2");
+    regID = regMap.registerStringID("RegVal2");
     ASSERT_FALSE(regMap.isModified());
     ASSERT_EQ(3, regMap.getEntries().size());
     ASSERT_EQ(2, regID.value());
