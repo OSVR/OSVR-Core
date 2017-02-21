@@ -81,13 +81,14 @@ namespace client {
         SkeletonConfig &operator=(SkeletonConfig const &) = delete;
 
         bool getBoneId(const char *boneName, OSVR_SkeletonBoneCount *boneId);
-        bool getJointId(const char *jointName, OSVR_SkeletonJointCount *jointId);
+        bool getJointId(const char *jointName,
+                        OSVR_SkeletonJointCount *jointId);
 
-        bool getAvailableJointId(
-            OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId);
+        bool getAvailableJointId(OSVR_SkeletonJointCount jointIndex,
+                                 OSVR_SkeletonJointCount *jointId);
 
-        bool getAvailableBoneId(
-            OSVR_SkeletonBoneCount boneIndex, OSVR_SkeletonBoneCount *boneId);
+        bool getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
+                                OSVR_SkeletonBoneCount *boneId);
 
         std::string const getBoneName(OSVR_SkeletonBoneCount boneId);
         std::string const getJointName(OSVR_SkeletonJointCount jointId);
@@ -125,19 +126,20 @@ namespace client {
         }
     }
 
-    inline bool SkeletonConfig::getAvailableJointId(
-        OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId)
-    {
+    inline bool
+    SkeletonConfig::getAvailableJointId(OSVR_SkeletonJointCount jointIndex,
+                                        OSVR_SkeletonJointCount *jointId) {
         *jointId = 0;
         if (jointIndex >= m_jointInterfaces.size()) {
             return false;
         }
-        
+
         // m_jointInterfaces[jointIndex].first.value() is the return value,
         // but we need to make sure we actually allocate an entry for it
-        
+
         // get the string id
-        auto stringId = m_jointMap.getStringFromId(m_jointInterfaces[jointIndex].first);
+        auto stringId =
+            m_jointMap.getStringFromId(m_jointInterfaces[jointIndex].first);
 
         // then get the joint id
         auto ret = getJointId(stringId.c_str(), jointId);
@@ -145,22 +147,18 @@ namespace client {
         return ret;
     }
 
-    inline bool SkeletonConfig::getAvailableBoneId(
-        OSVR_SkeletonBoneCount boneIndex, OSVR_SkeletonBoneCount *boneId)
-    {
+    inline bool
+    SkeletonConfig::getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
+                                       OSVR_SkeletonBoneCount *boneId) {
         *boneId = 0;
-        if (boneIndex >= m_boneInterfaces.size()) {
+
+        if (boneIndex >= m_boneMap.getEntries().size()) {
             return false;
         }
 
-        // m_boneInterfaces[boneIndex].first.value() is the return value,
-        // but we need to make sure we actually allocate an entry for it
+        auto boneName = m_boneMap.getEntries().at(boneIndex);
 
-        // get the string id
-        auto stringId = m_boneMap.getStringFromId(m_boneInterfaces[boneIndex].first);
-
-        // then get the bone id
-        auto ret = getBoneId(stringId.c_str(), boneId);
+        auto ret = getBoneId(boneName.c_str(), boneId);
 
         return ret;
     }
@@ -202,7 +200,7 @@ namespace client {
 
     inline OSVR_Pose3
     SkeletonConfig::getBoneState(OSVR_SkeletonBoneCount boneId) {
-
+        /// @todo should be returning derived pose
         OSVR_TimeValue timestamp;
         OSVR_Pose3 pose;
         osvrPose3SetIdentity(&pose);
@@ -224,11 +222,13 @@ namespace client {
     }
 
     inline OSVR_SkeletonBoneCount SkeletonConfig::getNumBones() {
-        return static_cast<OSVR_SkeletonBoneCount>(m_boneMap.getEntries().size());
+        return static_cast<OSVR_SkeletonBoneCount>(
+            m_boneMap.getEntries().size());
     }
 
     inline OSVR_SkeletonBoneCount SkeletonConfig::getNumJoints() {
-        return static_cast<OSVR_SkeletonBoneCount>(m_jointMap.getEntries().size());
+        return static_cast<OSVR_SkeletonJointCount>(
+            m_jointMap.getEntries().size());
     }
 
     inline std::string const
