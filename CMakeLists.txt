@@ -144,6 +144,9 @@ endif()
 # Must be before MapImportedReleaseVariants
 find_package(OpenGL)
 find_package(SDL2)
+if(BUILD_WITH_OPENCV)
+    find_package(OpenCV)
+endif()
 
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
