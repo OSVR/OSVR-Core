@@ -28,6 +28,7 @@
 #include <osvr/Server/RegisterShutdownHandler.h>
 #include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
+#include <osvr/Util/LogRegistry.h>
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
@@ -56,22 +57,22 @@ void handleShutdown() {
 int main(int argc, char *argv[]) {
     auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
 
-    const std::string helpOpt("help");
-    const std::string configOpt("option");
-
-    std::string configName;
+    std::string configName; // server configuration filename
 
     opt::options_description optionsAll("All Options");
     opt::options_description optionsVisible("Command Line Options");
     opt::positional_options_description optionsPositional;
 
-    optionsPositional.add(configOpt.c_str(), -1);
+    optionsPositional.add("config", -1);
     optionsAll.add_options()(
-        configOpt.c_str(),
+        "config",
         opt::value<std::string>(&configName)
             ->default_value(osvr::server::getDefaultConfigFilename()),
-        "override config filename");
-    optionsVisible.add_options()(helpOpt.c_str(), "display this help message");
+        "server configuration filename");
+    optionsVisible.add_options()
+        ("help", "display this help message")
+        ("verbose,v", "enable verbose logging")
+        ("debug,d", "enable debug logging");
     optionsAll.add(optionsVisible);
 
     opt::variables_map values;
@@ -90,12 +91,22 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (values.count(helpOpt)) {
+    if (values.count("help")) {
         std::cout << optionsVisible << std::endl;
         return 0;
     }
 
-    configName = values[configOpt].as<std::string>();
+    if (values.count("debug")) {
+        osvr::util::log::LogRegistry::instance().setLevel(osvr::util::log::LogLevel::trace);
+        osvr::util::log::LogRegistry::instance().setConsoleLevel(osvr::util::log::LogLevel::trace);
+        log->trace("Debug logging enabled.");
+    } else if (values.count("verbose")) {
+        osvr::util::log::LogRegistry::instance().setLevel(osvr::util::log::LogLevel::debug);
+        osvr::util::log::LogRegistry::instance().setConsoleLevel(osvr::util::log::LogLevel::debug);
+        log->debug("Verbose logging enabled.");
+    }
+
+    configName = values["config"].as<std::string>();
 
     boost::optional<fs::path> configPath(configName);
     try {
@@ -138,4 +149,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
