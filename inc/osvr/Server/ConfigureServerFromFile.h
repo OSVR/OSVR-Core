@@ -49,9 +49,8 @@ namespace server {
     /// of the main server app to make alternate server-acting apps simpler to
     /// develop.
     inline ServerPtr configureServerFromString(std::string const &json) {
-        using detail::out;
-        using detail::err;
-        using std::endl;
+        auto log =
+            ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
 
         ServerPtr ret;
         osvr::server::ConfigureServer srvConfig;
