@@ -38,6 +38,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace osvr {
 namespace server {
@@ -157,8 +158,9 @@ namespace server {
             return nullptr;
         }
 
-        std::string json(std::istreambuf_iterator<char>(config), {});
-        return configureServerFromString(json);
+        std::stringstream sstr;
+        sstr << config.rdbuf();
+        return configureServerFromString(sstr.str());
     }
 
 } // namespace server
