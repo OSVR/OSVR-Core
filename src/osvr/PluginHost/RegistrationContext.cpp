@@ -88,12 +88,12 @@ namespace pluginhost {
                                         std::string const &name,
                                         OSVR_PluginRegContext ctx,
                                         bool shouldRethrow = false) {
-#if defined(_MSC_VER) && !defined(NDEBUG)
-        // Visual C++ debug runtime: we append to the plugin name.
-        const std::string decoratedPluginName = name + PLUGIN_HOST_DEBUG_SUFFIX;
-#else
+//#if defined(_MSC_VER) && !defined(NDEBUG)
+//        // Visual C++ debug runtime: we append to the plugin name.
+//        const std::string decoratedPluginName = name + PLUGIN_HOST_DEBUG_SUFFIX;
+//#else
         const std::string &decoratedPluginName = name;
-#endif
+//#endif
         log.debug() << "Trying to load a plugin with the name "
                     << decoratedPluginName;
         try {

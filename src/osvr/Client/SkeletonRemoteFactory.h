@@ -80,6 +80,7 @@ namespace client {
         RemoteHandlerInternals m_internals;
         boost::optional<OSVR_ChannelCount> m_sensor;
         std::string m_deviceName;
+        //common::ClientInterfacePtr trackerIface;
     };
 
     class SkeletonRemoteFactory {

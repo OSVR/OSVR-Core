@@ -45,7 +45,7 @@ void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const O
     OSVR_ReturnCode rc;
     OSVR_Skeleton skel = (OSVR_Skeleton)userdata;
     printf("-----------\n");
-    printf("\tGot report: channel is %d, dataAvailable is %s\n", report->sensor, report->state.dataAvailable ? "true" : "false");
+    printf("\tGot report: channel is %d, timestamp: %d:%d, dataAvailable is %s\n", report->sensor, timestamp->seconds, timestamp->microseconds, report->state.dataAvailable ? "true" : "false");
     if (report->state.dataAvailable) {
         OSVR_SkeletonJointCount numJoints = 0;
         rc = osvrClientGetSkeletonNumJoints(skel, &numJoints);

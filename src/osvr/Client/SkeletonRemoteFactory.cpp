@@ -97,6 +97,12 @@ namespace client {
             return;
         }
 
+        //check if tracker reports are available
+        //if (!trackerIface->hasStateForReportType<OSVR_PositionReport>()){
+        //    std::cout << "No OSVR_Position Report is available";
+        //    return;
+        //}
+
         // send skeleton update callback
         OSVR_SkeletonReport report;
         report.sensor = data.sensor;
