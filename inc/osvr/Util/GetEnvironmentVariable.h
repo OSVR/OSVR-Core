@@ -44,8 +44,12 @@ namespace util {
     OSVR_UTIL_EXPORT boost::optional<std::string>
     getEnvironmentVariable(std::string const &var);
 
+    /// @brief Gets an environment variable's value. If the environment
+    /// variable is not set or is empty, the fallback value will be returned.
+    OSVR_UTIL_EXPORT std::string
+    getEnvironmentVariable(std::string const &var, std::string const &fallback);
+
 } // namespace util
 } // namespace osvr
 
 #endif // INCLUDED_GetEnvironmentVariable_h_GUID_500031B7_31FB_45A1_B1E9_8E61905A4E0F
-
