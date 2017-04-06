@@ -47,23 +47,6 @@
 
 namespace osvr {
 namespace server {
-    namespace detail {
-        class StreamPrefixer {
-          public:
-            StreamPrefixer(const char *prefix, std::ostream &os)
-                : m_prefix(prefix), m_os(&os) {}
-            template <typename T> std::ostream &operator<<(T val) {
-                return (*m_os) << m_prefix << val;
-            }
-
-          private:
-            const char *m_prefix;
-            std::ostream *m_os;
-        };
-
-        static detail::StreamPrefixer out("[OSVR Server] ", std::cout);
-        static detail::StreamPrefixer err("[OSVR Server] ", std::cerr);
-    } // namespace detail
 
     inline void
     printJsonReferenceResolutionAttempts(ResolveRefResult const &refReturn) {

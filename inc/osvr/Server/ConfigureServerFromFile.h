@@ -38,118 +38,28 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 namespace osvr {
 namespace server {
+
     inline const char *getDefaultConfigFilename() {
         return "osvr_server_config.json";
     }
 
-    /// @brief This is the basic common code of a server app's setup, ripped out
+    /// @brief This uses a file name to attempt to configure the server with
+    /// that config file.
+    /// Pass an empty string to use the default config.
+    /// This is the basic common code of a server app's setup, ripped out
     /// of the main server app to make alternate server-acting apps simpler to
     /// develop.
-    inline ServerPtr configureServerFromFile(std::string const &configName) {
-        auto log =
-            ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
+    OSVR_SERVER_EXPORT ServerPtr configureServerFromFile(std::string const &configName);
 
-        ServerPtr ret;
-        log->info() << "Using config file '" << configName << "'.";
-        std::ifstream config(configName);
-        if (!config.good()) {
-            log->error() << "Could not open config file!";
-            log->error() << "Searched in the current directory; file may be "
-                            "misspelled, missing, or in a different directory.";
-            return nullptr;
-        }
-
-        osvr::server::ConfigureServer srvConfig;
-        log->info() << "Constructing server as configured...";
-        try {
-            srvConfig.loadConfig(config);
-            ret = srvConfig.constructServer();
-        } catch (std::exception &e) {
-            log->error()
-                << "Caught exception constructing server from JSON config "
-                   "file: "
-                << e.what();
-            return nullptr;
-        }
-
-        {
-            log->info() << "Loading auto-loadable plugins...";
-            srvConfig.loadAutoPlugins();
-        }
-
-        {
-            log->info() << "Loading plugins...";
-            srvConfig.loadPlugins();
-            if (!srvConfig.getSuccessfulPlugins().empty()) {
-                log->info() << "Successfully loaded the following plugins:";
-                for (auto const &plugin : srvConfig.getSuccessfulPlugins()) {
-                    log->info() << " - " << plugin;
-                }
-            }
-            if (!srvConfig.getFailedPlugins().empty()) {
-                log->warn() << "Failed to load the following plugins:";
-                for (auto const &pluginError : srvConfig.getFailedPlugins()) {
-                    log->warn() << " - " << pluginError.first << "\t"
-                                << pluginError.second;
-                }
-            }
-        }
-
-        {
-            log->info() << "Instantiating configured drivers...";
-            bool success = srvConfig.instantiateDrivers();
-            if (!srvConfig.getSuccessfulInstantiations().empty()) {
-                log->info() << "Successes:";
-                for (auto const &driver :
-                     srvConfig.getSuccessfulInstantiations()) {
-                    log->info() << " - " << driver;
-                }
-            }
-            if (!srvConfig.getFailedInstantiations().empty()) {
-                log->error() << "Errors:";
-                for (auto const &error : srvConfig.getFailedInstantiations()) {
-                    log->error() << " - " << error.first << "\t"
-                                 << error.second;
-                }
-            }
-        }
-
-        if (srvConfig.processExternalDevices()) {
-            log->info()
-                << "External devices found and parsed from config file.";
-        }
-
-        if (srvConfig.processRoutes()) {
-            log->info() << "Routes found and parsed from config file.";
-        }
-
-        if (srvConfig.processAliases()) {
-            log->info() << "Aliases found and parsed from config file.";
-        }
-
-        if (srvConfig.processDisplay()) {
-            log->info()
-                << "Display descriptor found and parsed from config file.";
-        } else {
-            log->info()
-                << "Using OSVR HDK for display configuration. "
-                   "Did not find an alternate valid 'display' object in config "
-                   "file.";
-        }
-
-        if (srvConfig.processRenderManagerParameters()) {
-            log->info() << "RenderManager config found and parsed from the "
-                           "config file.";
-        }
-
-        log->info() << "Triggering automatic hardware detection...";
-        ret->triggerHardwareDetect();
-
-        return ret;
-    }
+    /// @brief This iterates over a vector that contains a list of potential
+    /// config files, and uses the first working one to create the server
+    /// instance.
+    OSVR_SERVER_EXPORT ServerPtr configureServerFromFirstFileInList(
+        std::vector<std::string> const &configNames);
 
 } // namespace server
 } // namespace osvr

@@ -28,6 +28,7 @@
 #include <osvr/Server/RegisterShutdownHandler.h>
 #include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
+#include <osvr/Server/ConfigFilePaths.h>
 
 // Library/third-party includes
 // - none
@@ -36,6 +37,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 static osvr::server::ServerPtr server;
 using ::osvr::util::log::OSVR_SERVER_LOG;
@@ -49,17 +51,20 @@ void handleShutdown() {
 
 int main(int argc, char *argv[]) {
     auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
-
-    std::string configName(osvr::server::getDefaultConfigFilename());
+    std::vector<std::string> configPaths;
     if (argc > 1) {
-        configName = argv[1];
+        configPaths = {std::string(argv[1])};
     } else {
-        log->info()
-            << "Using default config file - pass a filename on the command "
-               "line to use a different one.";
+        log->info() << "Using default config files - pass a filename on the command "
+            "line to use a different one.";
+        configPaths = osvr::server::getDefaultConfigFilePaths();
     }
 
-    server = osvr::server::configureServerFromFile(configName);
+    server = osvr::server::configureServerFromFirstFileInList(configPaths);
+    if (!server) {
+        log->info() << "Using default config data.";
+        server = osvr::server::configureServerFromFile("");
+    }
     if (!server) {
         return -1;
     }
