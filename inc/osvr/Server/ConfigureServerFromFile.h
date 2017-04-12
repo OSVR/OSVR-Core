@@ -38,6 +38,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace osvr {
 namespace server {
@@ -48,24 +49,15 @@ namespace server {
     /// @brief This is the basic common code of a server app's setup, ripped out
     /// of the main server app to make alternate server-acting apps simpler to
     /// develop.
-    inline ServerPtr configureServerFromFile(std::string const &configName) {
+    inline ServerPtr configureServerFromString(std::string const &json) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
 
         ServerPtr ret;
-        log->info() << "Using config file '" << configName << "'.";
-        std::ifstream config(configName);
-        if (!config.good()) {
-            log->error() << "Could not open config file!";
-            log->error() << "Searched in the current directory; file may be "
-                            "misspelled, missing, or in a different directory.";
-            return nullptr;
-        }
-
         osvr::server::ConfigureServer srvConfig;
         log->info() << "Constructing server as configured...";
         try {
-            srvConfig.loadConfig(config);
+            srvConfig.loadConfig(json);
             ret = srvConfig.constructServer();
         } catch (std::exception &e) {
             log->error()
@@ -149,6 +141,26 @@ namespace server {
         ret->triggerHardwareDetect();
 
         return ret;
+    }
+
+    /// @Brief Convenience wrapper for configureServerFromString().
+    inline ServerPtr configureServerFromFile(std::string const &configName) {
+        auto log =
+            ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
+
+        ServerPtr ret;
+        log->info() << "Using config file '" << configName << "'.";
+        std::ifstream config(configName);
+        if (!config.good()) {
+            log->error() << "Could not open config file!";
+            log->error() << "Searched in the current directory; file may be "
+                            "misspelled, missing, or in a different directory.";
+            return nullptr;
+        }
+
+        std::stringstream sstr;
+        sstr << config.rdbuf();
+        return configureServerFromString(sstr.str());
     }
 
 } // namespace server
