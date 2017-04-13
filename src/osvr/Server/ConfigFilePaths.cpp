@@ -21,13 +21,7 @@ namespace osvr {
             std::string configSubpath = "config";
 
 #if defined(OSVR_LINUX)
-            // There's currently no great location for storing log files in the
-            // XDG system. (See the STATE proposal by Debian
-            // <https://wiki.debian.org/XDGBaseDirectorySpecification#Proposal:_STATE_directory>.)
-            // So for now, we'll store our log files in the $XDG_CACHE_HOME
-            // directory.
-            //
-            // $XDG_CACHE_HOME defines the base directory relative to which user
+            // $XDG_CONFIG_HOME defines the base directory relative to which user
             // specific non-essential data files should be stored. If
             // $XDG_CACHE_HOME is either not set or empty, a default equal to
             // $HOME/.cache should be used.
