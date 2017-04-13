@@ -55,6 +55,8 @@ namespace server {
     /// develop.
     OSVR_SERVER_EXPORT ServerPtr configureServerFromFile(std::string const &configName);
 
+    OSVR_SERVER_EXPORT ServerPtr configureServerFromString(std::string const &json);
+
     /// @brief This iterates over a vector that contains a list of potential
     /// config files, and uses the first working one to create the server
     /// instance.

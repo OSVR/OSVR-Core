@@ -28,16 +28,16 @@
 #include <osvr/Server/RegisterShutdownHandler.h>
 #include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
+#include <osvr/Util/LogRegistry.h>
 #include <osvr/Server/ConfigFilePaths.h>
 
 // Library/third-party includes
-// - none
+#include <boost/program_options.hpp>
 
 // Standard includes
-#include <exception>
-#include <fstream>
-#include <iostream>
 #include <vector>
+
+namespace opt = boost::program_options;
 
 static osvr::server::ServerPtr server;
 using ::osvr::util::log::OSVR_SERVER_LOG;
@@ -51,9 +51,56 @@ void handleShutdown() {
 
 int main(int argc, char *argv[]) {
     auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
+
     std::vector<std::string> configPaths;
-    if (argc > 1) {
-        configPaths = {std::string(argv[1])};
+
+    opt::options_description optionsAll("All Options");
+    opt::options_description optionsVisible("Command Line Options");
+    opt::positional_options_description optionsPositional;
+
+    optionsPositional.add("config", -1);
+    optionsVisible.add_options()
+        ("config", "server configuration filename")
+        ("help", "display this help message")
+        ("verbose,v", "enable verbose logging")
+        ("debug,d", "enable debug logging");
+    optionsAll.add(optionsVisible);
+
+    opt::variables_map values;
+    try {
+        opt::store(opt::command_line_parser(argc, argv)
+                       .options(optionsAll)
+                       .positional(optionsPositional)
+                       .run(),
+                   values);
+        opt::notify(values);
+    } catch (opt::invalid_command_line_syntax &e) {
+        log->error() << e.what();
+        return 1;
+    } catch (opt::unknown_option &e) {
+        log->error() << e.what(); // may want to replace boost msg
+        return 1;
+    }
+
+    if (values.count("help")) {
+        std::cout << optionsVisible << std::endl;
+        return 0;
+    }
+
+    if (values.count("debug")) {
+        osvr::util::log::LogRegistry::instance().setLevel(osvr::util::log::LogLevel::trace);
+        osvr::util::log::LogRegistry::instance().setConsoleLevel(osvr::util::log::LogLevel::trace);
+        log->trace("Debug logging enabled.");
+    } else if (values.count("verbose")) {
+        osvr::util::log::LogRegistry::instance().setLevel(osvr::util::log::LogLevel::debug);
+        osvr::util::log::LogRegistry::instance().setConsoleLevel(osvr::util::log::LogLevel::debug);
+        log->debug("Verbose logging enabled.");
+    }
+
+    if (values.count("config")) {
+        std::string configFileArgument = values["config"].as<std::string>();
+        log->info() << "Using config file " << configFileArgument << " from command line argument.";
+        configPaths = { configFileArgument };
     } else {
         log->info() << "Using default config files - pass a filename on the command "
             "line to use a different one.";
@@ -61,11 +108,19 @@ int main(int argc, char *argv[]) {
     }
 
     server = osvr::server::configureServerFromFirstFileInList(configPaths);
-    if (!server) {
-        log->info() << "Using default config data.";
-        server = osvr::server::configureServerFromFile("");
+    if (!server) {        
+        // only attempt to load the empty config if no arguments are passed.
+        if (!values.count("config")) {
+            log->info() << "Could not find config file. Using default config object.";
+            server = osvr::server::configureServerFromString("{ }");
+        } else {
+            log->error() << "Could not find specified config file.";
+            return -1;
+        }
     }
+
     if (!server) {
+        log->error() << "Unknown error while creating server.";
         return -1;
     }
 

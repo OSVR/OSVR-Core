@@ -39,40 +39,23 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 namespace osvr {
 namespace server {
 
-    ServerPtr configureServerFromFile(std::string const &configName) {
+    ServerPtr configureServerFromString(std::string const &json) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
+
         ServerPtr ret;
         osvr::server::ConfigureServer srvConfig;
-
-        if (!configName.empty()) {
-            log->info() << "Using config file '" << configName << "'.";
-            std::ifstream config(configName);
-            if (!config.good()) {
-                log->error() << "Could not open config file!";
-                log->error() << "Searched in the current directory; file may be "
-                    "misspelled, missing, or in a different directory.";
-                return nullptr;
-            }
-            try {
-                srvConfig.loadConfig(config);
-            } catch (std::exception &e) {
-                log->error()
-                    << "Caught exception constructing server from JSON config "
-                    "file: "
-                    << e.what();
-                return nullptr;
-            }
-        } else {
-            srvConfig.loadConfig("{}");
-        }
+        log->info() << "Constructing server as configured...";
         try {
+            srvConfig.loadConfig(json);
             ret = srvConfig.constructServer();
-        } catch (std::exception &e) {
+        }
+        catch (std::exception &e) {
             log->error()
                 << "Caught exception constructing server from JSON config "
                 "file: "
@@ -109,7 +92,7 @@ namespace server {
             if (!srvConfig.getSuccessfulInstantiations().empty()) {
                 log->info() << "Successes:";
                 for (auto const &driver :
-                     srvConfig.getSuccessfulInstantiations()) {
+                    srvConfig.getSuccessfulInstantiations()) {
                     log->info() << " - " << driver;
                 }
             }
@@ -154,6 +137,25 @@ namespace server {
         ret->triggerHardwareDetect();
 
         return ret;
+    }
+
+    ServerPtr configureServerFromFile(std::string const &configName) {
+        auto log =
+            ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
+
+        ServerPtr ret;
+        log->info() << "Using config file '" << configName << "'.";
+        std::ifstream config(configName);
+        if (!config.good()) {
+            log->error() << "Could not open config file!";
+            log->error() << "Searched in the current directory; file may be "
+                "misspelled, missing, or in a different directory.";
+            return nullptr;
+        }
+
+        std::stringstream sstr;
+        sstr << config.rdbuf();
+        return configureServerFromString(sstr.str());
     }
 
     ServerPtr configureServerFromFirstFileInList(
