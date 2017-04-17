@@ -23,8 +23,8 @@ namespace osvr {
 #if defined(OSVR_LINUX)
             // $XDG_CONFIG_HOME defines the base directory relative to which user
             // specific non-essential data files should be stored. If
-            // $XDG_CACHE_HOME is either not set or empty, a default equal to
-            // $HOME/.cache should be used.
+            // $XDG_CONFIG_HOME is either not set or empty, a default equal to
+            // $HOME/.config should be used.
             auto xdg_cache_dir = getEnvironmentVariable("XDG_CONFIG_HOME");
             if (xdg_cache_dir) {
                 configDir = *xdg_cache_dir;

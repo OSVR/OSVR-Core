@@ -33,6 +33,7 @@
 
 // Standard includes
 #include <vector>
+#include <string>
 
 namespace osvr {
 namespace server {

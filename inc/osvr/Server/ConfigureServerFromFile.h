@@ -35,10 +35,8 @@
 // - none
 
 // Standard includes
-#include <exception>
-#include <fstream>
-#include <iostream>
 #include <vector>
+#include <string>
 
 namespace osvr {
 namespace server {

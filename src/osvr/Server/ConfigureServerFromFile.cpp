@@ -144,12 +144,10 @@ namespace server {
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
 
         ServerPtr ret;
-        log->info() << "Using config file '" << configName << "'.";
+        log->info() << "Attempting to load config file '" << configName << "'.";
         std::ifstream config(configName);
         if (!config.good()) {
-            log->error() << "Could not open config file!";
-            log->error() << "Searched in the current directory; file may be "
-                "misspelled, missing, or in a different directory.";
+            log->error() << "Config file '" << configName << "' not found";
             return nullptr;
         }
 
@@ -169,11 +167,7 @@ namespace server {
                 return configureServerFromFile(name);
             }
         }
-        log->error() << "Could not open config file!";
-        log->error() << "Attempted the following files:";
-        for (auto i = configNames.begin(); i != configNames.end(); i++) {
-            log->error() << *i;
-        }
+        log->error() << "Could not find a valid config file!";
         return nullptr;
     }
 
