@@ -1,15 +1,14 @@
 /** @file
-@brief Platform dependent search paths for osvr server config files.
+    @brief Platform specific search paths for osvr server config files.
 
-@date 2017
+    @date 2017
 
-@author
-Sensics, Inc.
-<http://sensics.com/osvr>
-
+    @author
+    Sensics, Inc.
+    <http://sensics.com/osvr>
 */
 
-// Copyright 2014 Sensics, Inc.
+// Copyright 2017 Sensics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

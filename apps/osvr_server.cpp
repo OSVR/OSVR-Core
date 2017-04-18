@@ -109,10 +109,10 @@ int main(int argc, char *argv[]) {
     }
 
     server = osvr::server::configureServerFromFirstFileInList(configPaths);
-    if (!server) {        
+    if (!server) {
         // only attempt to load the empty config if no arguments are passed.
         if (!values.count("config")) {
-            log->info() << "Could not find a valid config file. Using default config object.";
+            log->info() << "Could not find a valid config file in the default search paths. Using default config object.";
             server = osvr::server::configureServerFromString("{ }");
         } else {
             return -1;
