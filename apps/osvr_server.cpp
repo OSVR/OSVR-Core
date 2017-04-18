@@ -36,6 +36,7 @@
 
 // Standard includes
 #include <vector>
+#include <iostream>
 
 namespace opt = boost::program_options;
 
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (values.count("help")) {
-        log->info() << optionsVisible << std::endl;
+        std::cout << optionsVisible << std::endl;
         return 0;
     }
 

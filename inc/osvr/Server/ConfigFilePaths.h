@@ -1,7 +1,7 @@
 /** @file
-    @brief Auto-generated configuration header - do not edit!
+    @brief Platform specific search paths for osvr server config files.
 
-    @date 2015
+    @date 2017
 
     @author
     Sensics, Inc.
