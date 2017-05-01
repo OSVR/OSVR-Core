@@ -225,6 +225,9 @@ namespace client {
     PureClientContext::m_getArticulationTree(std::string const &path) {
         // get a handler for path, should be skeleton handler
         auto handler = m_getRemoteHandler(path);
+        if (!handler) {
+            throw std::exception("no remote handler for the given path");
+        }
         // cast it to skeleton handler
         std::shared_ptr<SkeletonRemoteHandler> skeletonHandler =
             std::dynamic_pointer_cast<SkeletonRemoteHandler>(handler);

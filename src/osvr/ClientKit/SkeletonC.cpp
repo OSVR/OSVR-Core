@@ -46,9 +46,9 @@ struct OSVR_SkeletonObject {
         /// OSVR_DEV_VERBOSE("Destroyed OSVR_SkeletonObject!");
     }
 
-    OSVR_ClientContext m_ctx;
-    OSVR_ClientInterface m_iface;
-    osvr::client::SkeletonConfigPtr cfg;
+    OSVR_ClientContext m_ctx = nullptr;
+    OSVR_ClientInterface m_iface = nullptr;
+    osvr::client::SkeletonConfigPtr cfg = nullptr;
 };
 
 #define OSVR_VALIDATE_OUTPUT_PTR(X, DESC)                                      \

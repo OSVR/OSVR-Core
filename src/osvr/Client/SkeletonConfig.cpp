@@ -156,8 +156,9 @@ namespace client {
 
                 return cfg;
             } catch (std::exception &e) {
-                OSVR_DEV_VERBOSE(
-                    "Error getting skeleton tree - exception :" << e.what());
+                // no log here, because this is common when the articulation
+                // isn't available *yet* or if developer doesn't know if it's
+                // available on the client machine.
                 return SkeletonConfigPtr{};
             } catch (...) {
                 OSVR_DEV_VERBOSE(
