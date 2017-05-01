@@ -29,20 +29,16 @@
 #include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
 #include <osvr/Util/LogRegistry.h>
+#include <osvr/Server/ConfigFilePaths.h>
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/optional.hpp>
 
 // Standard includes
-#include <exception>
-#include <fstream>
+#include <vector>
 #include <iostream>
 
 namespace opt = boost::program_options;
-namespace fs = boost::filesystem;
 
 static osvr::server::ServerPtr server;
 using ::osvr::util::log::OSVR_SERVER_LOG;
@@ -57,19 +53,15 @@ void handleShutdown() {
 int main(int argc, char *argv[]) {
     auto log = ::osvr::util::log::make_logger(OSVR_SERVER_LOG);
 
-    std::string configName; // server configuration filename
+    std::vector<std::string> configPaths;
 
     opt::options_description optionsAll("All Options");
     opt::options_description optionsVisible("Command Line Options");
     opt::positional_options_description optionsPositional;
 
     optionsPositional.add("config", -1);
-    optionsAll.add_options()(
-        "config",
-        opt::value<std::string>(&configName)
-            ->default_value(osvr::server::getDefaultConfigFilename()),
-        "server configuration filename");
     optionsVisible.add_options()
+        ("config", "server configuration filename")
         ("help", "display this help message")
         ("verbose,v", "enable verbose logging")
         ("debug,d", "enable debug logging");
@@ -106,36 +98,29 @@ int main(int argc, char *argv[]) {
         log->debug("Verbose logging enabled.");
     }
 
-    configName = values["config"].as<std::string>();
-
-    boost::optional<fs::path> configPath(configName);
-    try {
-        if (!fs::exists(*configPath)) {
-            log->warn() << "File '" << configName
-                << "' not found.  Using empty configuration.";
-            configPath = boost::none;
-        } else {
-            if (fs::is_directory(*configPath)) {
-                log->error() << "'" << configName << "' is a directory.";
-                return -1;
-            } else if (!fs::is_regular_file(*configPath)) {
-                log->error() << "'" << configName << "' is special file.";
-                return -1;
-            }
-        }
-    } catch (fs::filesystem_error &e) {
-        log->error() << "Could not open config file at '" << configName << "'.";
-        log->error() << "Reason " << e.what() << ".";
-        configPath = boost::none;
+    if (values.count("config")) {
+        std::string configFileArgument = values["config"].as<std::string>();
+        log->info() << "Using config file " << configFileArgument << " from command line argument.";
+        configPaths = { configFileArgument };
+    } else {
+        log->info() << "Using default config file - pass a filename on the command "
+            "line to use a different one.";
+        configPaths = osvr::server::getDefaultConfigFilePaths();
     }
 
-    if (configPath) {
-        server = osvr::server::configureServerFromFile(configName);
-    } else {
-        server = osvr::server::configureServerFromString("{ }");
+    server = osvr::server::configureServerFromFirstFileInList(configPaths);
+    if (!server) {
+        // only attempt to load the empty config if no arguments are passed.
+        if (!values.count("config")) {
+            log->info() << "Could not find a valid config file in the default search paths. Using default config object.";
+            server = osvr::server::configureServerFromString("{ }");
+        } else {
+            return -1;
+        }
     }
 
     if (!server) {
+        log->error() << "Unknown error while creating server.";
         return -1;
     }
 
