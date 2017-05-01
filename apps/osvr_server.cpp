@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
         log->info() << "Using config file " << configFileArgument << " from command line argument.";
         configPaths = { configFileArgument };
     } else {
-        log->info() << "Using default config files - pass a filename on the command "
+        log->info() << "Using default config file - pass a filename on the command "
             "line to use a different one.";
         configPaths = osvr::server::getDefaultConfigFilePaths();
     }
