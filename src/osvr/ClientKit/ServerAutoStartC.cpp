@@ -50,8 +50,6 @@ void osvrClientAttemptServerAutoStart()
     // @todo start the server.
 #if defined(OSVR_ANDROID)
     if(!gServer) {
-        //std::string configName(osvr::server::getDefaultConfigFilename());
-        //gServer = osvr::server::configureServerFromFile(configName);
         OSVR_DEV_VERBOSE("Creating android auto-start server. Looking at config file paths:");
         std::vector<std::string> configPaths = osvr::server::getDefaultConfigFilePaths();
         for(size_t i = 0; i < configPaths.size(); i++) {
