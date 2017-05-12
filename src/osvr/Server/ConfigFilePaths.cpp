@@ -44,7 +44,7 @@ namespace osvr {
             fs::path configDir;
             std::string configSubpath = "config";
 
-#if defined(OSVR_LINUX)
+#if defined(OSVR_LINUX) && !defined(OSVR_ANDROID)
             // $XDG_CONFIG_HOME defines the base directory relative to which user
             // specific non-essential data files should be stored. If
             // $XDG_CONFIG_HOME is either not set or empty, a default equal to
@@ -77,20 +77,26 @@ namespace osvr {
             configDir /= fs::path("OSVR") / configSubpath;
 #endif
 
-            return configDir.string();
+#if defined(OSVR_ANDROID)
+            configDir = fs::path("/sdcard/osvr");
+#endif
+            auto ret = configDir.string();
+            return ret;
         }
 
         std::vector<std::string> getDefaultConfigFilePaths() {
             namespace fs = boost::filesystem;
+            
             std::vector<std::string> names;
             std::string configFileName = getDefaultConfigFilename();
 
-            fs::path userConfigDirectory(getUserConfigDirectory());
+            auto userConfigDirectoryStr = getUserConfigDirectory();
+            fs::path userConfigDirectory(userConfigDirectoryStr);
+
             auto userConfig = userConfigDirectory / configFileName;
 
             names.push_back(userConfig.string());
             names.push_back(configFileName);
-
             return names;
         }
     }

@@ -29,6 +29,7 @@
 #include <osvr/Client/LocateServer.h>
 #include <osvr/Util/GetEnvironmentVariable.h>
 #if defined(OSVR_ANDROID)
+#include <osvr/Server/ConfigFilePaths.h>
 #include <osvr/Server/ConfigureServerFromFile.h>
 #endif
 
@@ -36,7 +37,8 @@
 // - none
 
 // Standard includes
-// - none
+#include <string>
+#include <vector>
 
 // @todo use a thread-safe lazy-initialized singleton pattern
 #if defined(OSVR_ANDROID)
@@ -48,9 +50,17 @@ void osvrClientAttemptServerAutoStart()
     // @todo start the server.
 #if defined(OSVR_ANDROID)
     if(!gServer) {
-        std::string configName(osvr::server::getDefaultConfigFilename());
-        gServer = osvr::server::configureServerFromFile(configName);
+        OSVR_DEV_VERBOSE("Creating android auto-start server. Looking at config file paths:");
+        std::vector<std::string> configPaths = osvr::server::getDefaultConfigFilePaths();
+        for(size_t i = 0; i < configPaths.size(); i++) {
+            OSVR_DEV_VERBOSE(configPaths[i]);
+        }
+        
+        gServer = osvr::server::configureServerFromFirstFileInList(configPaths);
+        OSVR_DEV_VERBOSE("Android-auto-start server created. Starting server thread...");
+
         gServer->start();
+        OSVR_DEV_VERBOSE("Android server thread started...");
     }
 #else
     auto server = osvr::client::getServerBinaryDirectoryPath();
