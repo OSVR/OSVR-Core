@@ -115,6 +115,9 @@ namespace pluginhost {
             void *userData);
         /// @}
 
+        /// @brief Trigger system-wide hardware detection.
+        virtual void triggerHardwareDetect();
+
       private:
         /// @brief Pointer with ownership semantics for deletion of plugin data.
         typedef unique_ptr<void, OSVR_PluginDataDeleteCallback> PluginDataPtr;

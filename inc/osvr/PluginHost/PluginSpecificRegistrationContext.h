@@ -132,6 +132,9 @@ namespace pluginhost {
         /// @brief Accessor for plugin name.
         OSVR_PLUGINHOST_EXPORT const std::string &getName() const;
 
+        /// @brief Trigger system-wide hardware detection.
+        OSVR_PLUGINHOST_EXPORT virtual void triggerHardwareDetect() = 0;
+
         /// @brief Log a message to the plugin-specific channel.
         ///
         /// @param severity The severity of the message.

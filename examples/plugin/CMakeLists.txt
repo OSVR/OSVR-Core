@@ -6,7 +6,8 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
     com_osvr_example_EyeTracker
     com_osvr_example_Locomotion
     com_osvr_example_MultipleAsync
-    org_osvr_example_Tracker)
+    org_osvr_example_Tracker
+    org_osvr_example_TriggerHardwareDetect)
 
 # These are all the plugin targets: one listed only here need more careful configuration.
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
@@ -41,6 +42,7 @@ foreach(pluginname
     com_osvr_example_EyeTracker
     com_osvr_example_Locomotion
     org_osvr_example_Tracker
+    org_osvr_example_TriggerHardwareDetect
     com_osvr_example_MultipleAsync)
     target_link_libraries(${pluginname} osvr_cxx11_flags)
 endforeach()
