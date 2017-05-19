@@ -99,7 +99,9 @@ namespace common {
                         nonDigit = true;
                     }
                 }
-                if (!nonDigit) { return server; }
+                if (!nonDigit) {
+                    return server;
+                }
             }
             // OK, didn't end with a port
             if (server.find(":") != std::string::npos &&
@@ -123,8 +125,8 @@ namespace common {
             DeviceElement ret;
             ret.m_devName = deviceName;
             // explicitly specify VRPN port
-            ret.m_server =
-                attachPortToServerIfNoneSpecified(server, util::DefaultVRPNPort);
+            ret.m_server = attachPortToServerIfNoneSpecified(
+                server, util::DefaultVRPNPort);
 
             return ret;
         }
@@ -177,7 +179,8 @@ namespace common {
             m_boneName = boneName;
         }
 
-        void ArticulationElement::setTrackerPath(std::string const &trackerPath) {
+        void
+        ArticulationElement::setTrackerPath(std::string const &trackerPath) {
             m_trackerPath = trackerPath;
         }
 
@@ -192,10 +195,10 @@ namespace common {
             return m_boneName;
         }
 
-        std::string &ArticulationElement::getTrackerPath(){
+        std::string &ArticulationElement::getTrackerPath() {
             return m_trackerPath;
         }
-        std::string const &ArticulationElement::getTrackerPath() const{
+        std::string const &ArticulationElement::getTrackerPath() const {
             return m_trackerPath;
         }
 

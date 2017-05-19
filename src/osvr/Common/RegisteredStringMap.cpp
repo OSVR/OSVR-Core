@@ -46,7 +46,8 @@ namespace common {
         }
     }
 
-    util::StringID RegisteredStringMap::registerStringID(std::string const &str) {
+    util::StringID
+    RegisteredStringMap::registerStringID(std::string const &str) {
         auto entry = std::find(begin(m_regEntries), end(m_regEntries), str);
         if (end(m_regEntries) != entry) {
             // we found it.
@@ -61,7 +62,7 @@ namespace common {
         return ret;
     }
 
-    util::StringID RegisteredStringMap::getStringID(std::string const &str){
+    util::StringID RegisteredStringMap::getStringID(std::string const &str) {
 
         auto entry = std::find(begin(m_regEntries), end(m_regEntries), str);
         if (end(m_regEntries) != entry) {
@@ -90,11 +91,12 @@ namespace common {
         return m_regEntries;
     }
 
-    util::StringID CorrelatedStringMap::registerStringID(std::string const &str) {
+    util::StringID
+    CorrelatedStringMap::registerStringID(std::string const &str) {
         return m_local.registerStringID(str);
     }
 
-    util::StringID CorrelatedStringMap::getStringID(std::string const &str){
+    util::StringID CorrelatedStringMap::getStringID(std::string const &str) {
         return m_local.getStringID(str);
     }
 

@@ -27,10 +27,10 @@
 #include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
-#include <boost/variant/static_visitor.hpp>
+#include <boost/mpl/for_each.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
-#include <boost/mpl/for_each.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 // Standard includes
 #include <algorithm>

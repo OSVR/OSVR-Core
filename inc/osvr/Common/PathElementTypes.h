@@ -40,9 +40,9 @@
 #include <osvr/Util/PortFlags.h>
 
 // Library/third-party includes
-#include <boost/variant/variant.hpp>
 #include <boost/mpl/contains.hpp>
 #include <boost/operators.hpp>
+#include <boost/variant/variant.hpp>
 #include <json/value.h>
 
 // Standard includes

@@ -69,7 +69,8 @@ namespace common {
 #endif
         typedef boost::variant<NullElement, AliasElement, ArticulationElement,
                                SensorElement, InterfaceElement, DeviceElement,
-                               PluginElement, StringElement> PathElement;
+                               PluginElement, StringElement>
+            PathElement;
     } // namespace elements
 
     using elements::PathElement;

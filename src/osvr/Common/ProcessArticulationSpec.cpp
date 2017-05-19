@@ -23,24 +23,24 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/ProcessArticulationSpec.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/RoutingConstants.h>
-#include <osvr/Util/Flag.h>
-#include <osvr/Util/Verbosity.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
 #include <osvr/Common/AliasProcessor.h>
 #include <osvr/Common/NormalizeDeviceDescriptor.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTree.h>
+#include <osvr/Common/ProcessArticulationSpec.h>
+#include <osvr/Common/RoutingConstants.h>
+#include <osvr/Util/Flag.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <json/value.h>
-#include <json/reader.h>
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/variant/get.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/erase.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 
 // Standard includes
 // - none
