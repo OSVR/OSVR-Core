@@ -24,8 +24,10 @@ function(osvr_add_plugin)
     endif()
     
     if(ANDROID)
-        # Android loads plugins as if they were shared libraries, and
-        # additionally, requires SONAME to be set.
+        # @TODO temporary workaround for Android plugins. Our toolchain file
+        # seems to build Android MODULE libraries without a SONAME, but the SONAME
+        # is required on the latest Android dynamic linker, so we build them as
+        # SHARED for now.
         add_library(${OSVR_ADD_PLUGIN_NAME} SHARED ${OSVR_ADD_PLUGIN_SOURCES})
     else()
         add_library(${OSVR_ADD_PLUGIN_NAME} MODULE ${OSVR_ADD_PLUGIN_SOURCES})
