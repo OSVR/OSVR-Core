@@ -23,18 +23,16 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/SkeletonComponent.h>
 #include <osvr/Common/BaseDevice.h>
-#include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
-#include <osvr/Common/JSONSerializationTags.h>
 #include <osvr/Common/CommonComponent.h>
-#include <osvr/Common/ProcessArticulationSpec.h>
+#include <osvr/Common/JSONSerializationTags.h>
+#include <osvr/Common/Serialization.h>
+#include <osvr/Common/SkeletonComponent.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <json/reader.h>
 
 // Standard includes
 // - none
@@ -106,19 +104,6 @@ namespace common {
     SkeletonComponent::setArticulationSpec(std::string const &jsonDescriptor) {
         /// @todo add validation to make sure that articulation spec is provided
         m_spec = jsonDescriptor;
-        return OSVR_RETURN_SUCCESS;
-    }
-
-    OSVR_ReturnCode
-    SkeletonComponent::setArticulationSpec(std::string const &jsonDescriptor,
-                                           std::string const &deviceName) {
-        m_spec = jsonDescriptor;
-        Json::Reader reader;
-        Json::Value articSpec;
-        reader.parse(jsonDescriptor, articSpec);
-        m_articulationTree.reset();
-        osvr::common::processArticulationSpecForPathTree(m_articulationTree,
-                                                         deviceName, articSpec);
         return OSVR_RETURN_SUCCESS;
     }
 
@@ -207,21 +192,12 @@ namespace common {
         // connection(ping) occurs
         m_commonComponent =
             m_getParent().addComponent(osvr::common::CommonComponent::create());
-        OSVR_TimeValue now;
-        osvrTimeValueGetNow(&now);
+
         m_commonComponent->registerPingHandler(
             [&] { sendArticulationSpec(m_spec); });
 
         m_getParent().registerMessageType(skeletonRecord);
         m_getParent().registerMessageType(skeletonSpecRecord);
-    }
-
-    PathTree const &SkeletonComponent::getArticulationTree() const {
-        return m_articulationTree;
-    }
-
-    PathTree &SkeletonComponent::getArticulationTree() {
-        return m_articulationTree;
     }
 
 } // namespace common

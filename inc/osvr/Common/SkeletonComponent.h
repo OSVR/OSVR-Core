@@ -36,8 +36,8 @@
 #include <osvr/Util/ReturnCodesC.h>
 
 // Library/third-party includes
-#include <vrpn_BaseClass.h>
 #include <json/value.h>
+#include <vrpn_BaseClass.h>
 
 // Standard includes
 // - none
@@ -104,11 +104,6 @@ namespace common {
         OSVR_COMMON_EXPORT OSVR_ReturnCode
         setArticulationSpec(std::string const &jsonDescriptor);
 
-        /// @brief Sets the articultion specification. This will auto-update the
-        /// articulation tree
-        OSVR_COMMON_EXPORT OSVR_ReturnCode setArticulationSpec(
-            std::string const &jsonDescriptor, std::string const &deviceName);
-
         typedef std::function<void(SkeletonNotification const &,
                                    util::time::TimeValue const &)>
             SkeletonHandler;
@@ -118,9 +113,6 @@ namespace common {
         OSVR_COMMON_EXPORT void registerSkeletonHandler(SkeletonHandler cb);
         OSVR_COMMON_EXPORT void
         registerSkeletonSpecHandler(SkeletonSpecHandler cb);
-
-        OSVR_COMMON_EXPORT PathTree const &getArticulationTree() const;
-        OSVR_COMMON_EXPORT PathTree &getArticulationTree();
 
       private:
         SkeletonComponent(std::string const &jsonSpec,
@@ -136,11 +128,8 @@ namespace common {
         std::string m_spec;
         std::vector<SkeletonHandler> m_cb;
         std::vector<SkeletonSpecHandler> m_cb_spec;
-
         /// @brief Common component for system device
         common::CommonComponent *m_commonComponent;
-
-        common::PathTree m_articulationTree;
     };
 
 } // namespace common

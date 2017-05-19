@@ -26,18 +26,19 @@
 #define INCLUDED_SkeletonRemoteFactory_h_GUID_FFA967D3_4A04_44AF_841E_BF0866185E22
 
 // Internal Includes
+#include "RemoteHandlerInternals.h"
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/Export.h>
+#include <osvr/Client/RemoteHandler.h>
+#include <osvr/Client/Skeleton.h>
+#include <osvr/Common/ClientContext.h>
 #include <osvr/Common/InterfaceList.h>
 #include <osvr/Common/OriginalSource.h>
-#include <osvr/Util/SharedPtr.h>
-#include <osvr/Client/RemoteHandler.h>
-#include <osvr/Common/ClientContext.h>
 #include <osvr/Common/SkeletonComponent.h>
-#include "RemoteHandlerInternals.h"
-#include <osvr/Client/Export.h>
+#include <osvr/Util/SharedPtr.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
 
 // Standard includes
 // - none
@@ -50,8 +51,8 @@ namespace client {
         SkeletonRemoteHandler(vrpn_ConnectionPtr const &conn,
                               std::string const &deviceName,
                               boost::optional<OSVR_ChannelCount> sensor,
-                              common::InterfaceList &ifaces/*,
-                              common::ClientContext *ctx*/);
+                              common::InterfaceList &ifaces,
+                              common::ClientContext *ctx);
 
         /// @brief Deleted assignment operator.
         SkeletonRemoteHandler &
@@ -63,11 +64,6 @@ namespace client {
 
         virtual void update() { m_dev->update(); }
 
-        OSVR_CLIENT_EXPORT common::SkeletonComponent *
-        getSkeletonComponent() {
-            return m_skeleton;
-        }
-
       private:
         void m_handleSkeleton(common::SkeletonNotification const &data,
                               util::time::TimeValue const &timestamp);
@@ -75,12 +71,13 @@ namespace client {
                                   util::time::TimeValue const &timestamp);
 
         common::BaseDevicePtr m_dev;
-        //common::ClientContext *m_ctx;
+        common::ClientContext *m_ctx;
         common::SkeletonComponent *m_skeleton;
         RemoteHandlerInternals m_internals;
         boost::optional<OSVR_ChannelCount> m_sensor;
         std::string m_deviceName;
-        //common::ClientInterfacePtr trackerIface;
+        std::unique_ptr<OSVR_SkeletonObject> m_skeletonConf;
+        Json::Value m_articulationSpec;
     };
 
     class SkeletonRemoteFactory {

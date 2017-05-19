@@ -24,27 +24,23 @@
 
 // Internal Includes
 #include <osvr/Client/SkeletonConfig.h>
-#include <osvr/Common/SkeletonComponent.h>
-#include <osvr/Common/SkeletonComponentPtr.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ProcessArticulationSpec.h>
 #include <osvr/Common/ApplyPathNodeVisitor.h>
-#include <osvr/Util/TreeTraversalVisitor.h>
+#include <osvr/Common/PathElementTools.h>
+#include <osvr/Common/PathElementTypes.h>
+#include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/ProcessArticulationSpec.h>
 #include <osvr/Util/SharedPtr.h>
-#include <osvr/Util/Verbosity.h>
 #include <osvr/Util/TreeNode.h>
+#include <osvr/Util/TreeTraversalVisitor.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
-#include <boost/variant/get.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/variant/get.hpp>
 
 // Standard includes
-#include <string>
 
 namespace osvr {
 namespace client {
@@ -75,10 +71,11 @@ namespace client {
                 util::StringID jointID =
                     m_jointMap->registerStringID(node.getName());
                 /// get an interface for tracker path
-                common::ClientInterfacePtr iface =
-                    m_ctx->getInterface(elt.getTrackerPath().c_str());
+
                 /// store the id, interface association
-                m_jointInterfaces->push_back(std::make_pair(jointID, iface));
+                m_jointInterfaces->push_back(std::make_pair(
+                    jointID, InternalInterfaceOwner(
+                                 m_ctx, elt.getTrackerPath().c_str())));
 
                 /// Specifying bone name for each joint is optional
                 if (!elt.getBoneName().empty()) {
@@ -119,63 +116,53 @@ namespace client {
         }
     };
 
-    SkeletonConfigPtr
-    SkeletonConfigFactory::create(OSVR_ClientContext ctx,
-                                  OSVR_ClientInterface iface) {
+    SkeletonConfigPtr SkeletonConfigFactory::create(
+        OSVR_ClientContext ctx,
+        osvr::common::PathTree const &articulationTree) {
 
         if (ctx->getStatus()) {
-            try {
-                /// setup the path tree from the skeleton component
-                osvr::common::PathTree articulationTree;
-                osvr::common::clonePathTree(
-                    ctx->getArticulationTree(iface->getPath()),
-                    articulationTree);
+            /// Client context is ready
+            SkeletonConfigPtr cfg(new SkeletonConfig(ctx));
+            /// get the path tree
+            osvr::common::clonePathTree(articulationTree,
+                                        cfg->m_articulationTree);
 
-                /// Articulation tree is still empty (not receiveed yet)
-                /// Spin the wheels until we get there
-                if (!articulationTree.getRoot().hasChildren()) {
-                   /* OSVR_DEV_VERBOSE(
-                        "Have the articulation tree but it's empty!");*/
-                    return SkeletonConfigPtr{};
-                }
+            ArticulationTreeTraverser traverser(
+                &cfg->m_jointMap, &cfg->m_boneMap, &cfg->m_jointInterfaces,
+                cfg->m_ctx);
+            osvr::util::traverseWith(
+                articulationTree.getRoot(),
+                [&traverser](osvr::common::PathNode const &node) {
+                    osvr::common::applyPathNodeVisitor(traverser, node);
+                });
 
-                /// Client context is ready and articulation tree received
-                SkeletonConfigPtr cfg(new SkeletonConfig(ctx, iface));
-                /// get the path tree
-                osvr::common::clonePathTree(articulationTree,
-                                            cfg->m_articulationTree);
-
-                ArticulationTreeTraverser traverser(
-                    &cfg->m_jointMap, &cfg->m_boneMap, &cfg->m_jointInterfaces,
-                    cfg->m_ctx);
-                osvr::util::traverseWith(
-                    articulationTree.getRoot(),
-                    [&traverser](osvr::common::PathNode const &node) {
-                        osvr::common::applyPathNodeVisitor(traverser, node);
-                    });
-
-                return cfg;
-            } catch (std::exception &e) {
-                // no log here, because this is common when the articulation
-                // isn't available *yet* or if developer doesn't know if it's
-                // available on the client machine.
-                return SkeletonConfigPtr{};
-            } catch (...) {
-                OSVR_DEV_VERBOSE(
-                    "Couldn't create a skeleton config internally! "
-                    "Unknown exception!");
-                return SkeletonConfigPtr{};
-            }
+            return cfg;
         } else {
             OSVR_DEV_VERBOSE("Couldn't create a skeleton config! "
                              "Client context is not yet initialized!!");
-            return SkeletonConfigPtr{};
+            throw NoCtxYet();
         }
     }
 
-    SkeletonConfig::SkeletonConfig(OSVR_ClientContext ctx,
-                                   OSVR_ClientInterface iface)
-        : m_ctx(ctx), m_iface(iface) {}
+    SkeletonConfig::SkeletonConfig(OSVR_ClientContext ctx) : m_ctx(ctx) {}
+
+    void SkeletonConfig::updateArticulationTree(
+        osvr::common::PathTree const &articulationTree) {
+
+        /// release previous interfaces
+        m_jointInterfaces.clear();
+        m_boneInterfaces.clear();
+
+        /// get the path tree
+        osvr::common::clonePathTree(articulationTree, m_articulationTree);
+        ArticulationTreeTraverser traverser(&m_jointMap, &m_boneMap,
+                                            &m_jointInterfaces, m_ctx);
+        osvr::util::traverseWith(
+            m_articulationTree.getRoot(),
+            [&traverser](osvr::common::PathNode const &node) {
+                osvr::common::applyPathNodeVisitor(traverser, node);
+            });
+    }
 
 } // namespace client
 } // namespace osvr

@@ -24,41 +24,25 @@
 
 // Internal Includes
 #include "SkeletonRemoteFactory.h"
-
-#include "VRPNConnectionCollection.h"
-#include <osvr/Common/ClientContext.h>
-#include <osvr/Common/ClientInterface.h>
-#include <osvr/Common/PathTreeFull.h>
-#include <osvr/Util/ChannelCountC.h>
-#include <osvr/Util/UniquePtr.h>
-#include <osvr/Common/OriginalSource.h>
-#include <osvr/Client/InterfaceTree.h>
-#include <osvr/Util/Verbosity.h>
-#include <osvr/Common/Transform.h>
-#include <osvr/Common/JSONTransformVisitor.h>
-#include <osvr/Common/CreateDevice.h>
-
-#include <osvr/Util/TreeNode.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/PathNode.h>
-#include <osvr/Common/PathElementTools.h>
-#include <osvr/Common/PathTreeFull.h>
-#include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ProcessArticulationSpec.h>
 #include <osvr/Common/ApplyPathNodeVisitor.h>
-// Library/third-party includes
-#include <boost/variant/get.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/optional.hpp>
+#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/CreateDevice.h>
+#include <osvr/Common/JSONTransformVisitor.h>
+#include <osvr/Common/OriginalSource.h>
+#include <osvr/Common/ProcessArticulationSpec.h>
+#include <osvr/Common/Transform.h>
+#include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/TreeNode.h>
+#include <osvr/Util/Verbosity.h>
 
-#include <json/writer.h>
+// Library/third-party includes
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/optional.hpp>
+#include <boost/variant/get.hpp>
+#include <json/value.h>
 
 // Standard includes
-
-#include <string>
-#include <ostream>
-#include <iostream>
 
 namespace osvr {
 namespace client {
@@ -66,10 +50,11 @@ namespace client {
     SkeletonRemoteHandler::SkeletonRemoteHandler(
         vrpn_ConnectionPtr const &conn, std::string const &deviceName,
         boost::optional<OSVR_ChannelCount> sensor,
-        common::InterfaceList &ifaces/*, common::ClientContext *ctx*/)
+        common::InterfaceList &ifaces, common::ClientContext *ctx)
         : m_dev(common::createClientDevice(deviceName, conn)),
-          m_internals(ifaces), /*m_ctx(ctx),*/ m_sensor(sensor),
-          m_deviceName(deviceName) {
+          m_internals(ifaces), m_ctx(ctx), m_sensor(sensor),
+          m_deviceName(deviceName), m_skeletonConf(nullptr),
+          m_articulationSpec(Json::objectValue) {
 
         auto skeleton = common::SkeletonComponent::create("");
         m_skeleton = m_dev->addComponent(skeleton);
@@ -85,7 +70,6 @@ namespace client {
                 m_handleSkeletonSpec(data, timestamp);
             });
 
-        /**/
         OSVR_DEV_VERBOSE("Constructed a Skeleton Handler for " << deviceName);
     }
 
@@ -97,17 +81,15 @@ namespace client {
             return;
         }
 
-        //check if tracker reports are available
-        //if (!trackerIface->hasStateForReportType<OSVR_PositionReport>()){
-        //    std::cout << "No OSVR_Position Report is available";
-        //    return;
-        //}
-
-        // send skeleton update callback
-        OSVR_SkeletonReport report;
-        report.sensor = data.sensor;
-        report.state.dataAvailable = 1;
-        m_internals.setStateAndTriggerCallbacks(timestamp, report);
+        if (m_skeletonConf) {
+            // get the latest joint and bone states
+            m_skeletonConf->updateSkeletonPoses();
+            // send skeleton report
+            OSVR_SkeletonReport report;
+            report.sensor = data.sensor;
+            report.state.skeleton = m_skeletonConf.get();
+            m_internals.setStateAndTriggerCallbacks(timestamp, report);
+        }
     }
 
     void SkeletonRemoteHandler::m_handleSkeletonSpec(
@@ -120,10 +102,31 @@ namespace client {
         }
         // get the articulation spec for specified skeleton sensor
         Json::Value articSpec = data.spec[(*m_sensor)];
-        // update articulationSpec of skeleton component
-        Json::FastWriter fastWriter;
-        std::string strSpec = fastWriter.write(articSpec);
-        m_skeleton->setArticulationSpec(strSpec, m_deviceName);
+        // update only if there are changes to articulation spec
+        if (m_articulationSpec != articSpec) {
+            m_articulationSpec = data.spec[(*m_sensor)];
+            osvr::common::PathTree articulationTree;
+            articulationTree.reset();
+            osvr::common::processArticulationSpecForPathTree(
+                articulationTree, m_deviceName, articSpec);
+            // skeleton config exists and needs to be updated
+            if (m_skeletonConf) {
+                m_skeletonConf->updateArticulationSpec(articulationTree);
+            } else {
+                try {
+                    m_skeletonConf.reset(
+                        new OSVR_SkeletonObject(m_ctx, articulationTree));
+                } catch (std::exception &e) {
+                    OSVR_DEV_VERBOSE(
+                        "Error creating skeleton object : constructor "
+                        "threw exception :"
+                        << e.what());
+                } catch (...) {
+                    OSVR_DEV_VERBOSE(
+                        "Error creating skeleton object : unknown exception");
+                }
+            }
+        }
     }
 
     SkeletonRemoteFactory::SkeletonRemoteFactory(
@@ -141,7 +144,7 @@ namespace client {
         /// @todo find out why make_shared causes a crash here
         ret.reset(new SkeletonRemoteHandler(
             m_conns.getConnection(devElt), devElt.getFullDeviceName(),
-            source.getSensorNumberAsChannelCount(), ifaces/*, &ctx*/));
+            source.getSensorNumberAsChannelCount(), ifaces, &ctx));
         return ret;
     }
 

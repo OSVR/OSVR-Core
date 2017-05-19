@@ -27,33 +27,31 @@
 
 // Internal Includes
 #include <osvr/Client/Export.h>
-#include <osvr/Client/DisplayInput.h>
-#include <osvr/Client/Viewer.h>
-#include <osvr/Client/Viewers.h>
 #include <osvr/Client/InternalInterfaceOwner.h>
+#include <osvr/Client/ViewerEye.h>
 #include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/ClientInterfacePtr.h>
 #include <osvr/Common/PathTree.h>
 #include <osvr/Common/RegisteredStringMap.h>
-#include <osvr/Common/ClientInterfacePtr.h>
+#include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/ClientOpaqueTypesC.h>
+#include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/ContainerWrapper.h>
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/TimeValue.h>
-#include <osvr/Util/ClientReportTypesC.h>
-#include <osvr/Util/ClientOpaqueTypesC.h>
-#include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/UniquePtr.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <vector>
 
 namespace osvr {
 namespace client {
 
-    typedef std::vector<std::pair<util::StringID, common::ClientInterfacePtr>>
+    typedef std::vector<std::pair<util::StringID, InternalInterfaceOwner>>
         InterfaceMap;
+    typedef std::vector<std::pair<util::StringID, OSVR_Pose3>> PoseMap;
 
     struct NoCtxYet : std::runtime_error {
         NoCtxYet()
@@ -71,7 +69,8 @@ namespace client {
     class SkeletonConfigFactory {
       public:
         OSVR_CLIENT_EXPORT static SkeletonConfigPtr
-        create(OSVR_ClientContext ctx, OSVR_ClientInterface iface);
+        create(OSVR_ClientContext ctx,
+               osvr::common::PathTree const &articulationTree);
     };
 
     class SkeletonConfig {
@@ -98,20 +97,26 @@ namespace client {
 
         OSVR_SkeletonBoneCount getNumBones();
         OSVR_SkeletonJointCount getNumJoints();
+        void
+        updateArticulationTree(osvr::common::PathTree const &articulationTree);
+        /* @brief Go thru the joint and bone interfaces and set the poses
+         */
+        void updateSkeletonPoses();
 
       private:
         friend class SkeletonConfigFactory;
-        SkeletonConfig(OSVR_ClientContext ctx, OSVR_ClientInterface iface);
+        SkeletonConfig(OSVR_ClientContext ctx);
         /// @brief check if the articulation tree has been updated, then we need
         /// to traverse the articulation tree again, and update values
         bool isSkeletonTreeUpdated() const;
         OSVR_ClientContext m_ctx;
-        OSVR_ClientInterface m_iface;
         osvr::common::PathTree m_articulationTree;
         osvr::common::RegisteredStringMap m_jointMap;
         osvr::common::RegisteredStringMap m_boneMap;
         InterfaceMap m_jointInterfaces;
         InterfaceMap m_boneInterfaces;
+        PoseMap m_jointPoses;
+        PoseMap m_bonePoses;
     };
 
     inline bool SkeletonConfig::getBoneId(const char *boneName,
@@ -164,7 +169,7 @@ namespace client {
     }
 
     inline bool SkeletonConfig::getJointId(const char *jointName,
-                                           OSVR_SkeletonBoneCount *jointId) {
+                                           OSVR_SkeletonJointCount *jointId) {
 
         osvr::util::StringID id = m_jointMap.getStringID(jointName);
         if (id.empty()) {
@@ -178,46 +183,34 @@ namespace client {
     inline OSVR_Pose3
     SkeletonConfig::getJointState(OSVR_SkeletonJointCount jointId) {
 
-        OSVR_TimeValue timestamp;
         OSVR_Pose3 pose;
         osvrPose3SetIdentity(&pose);
 
         // find an interface for given jointId
-        for (auto val : m_jointInterfaces) {
+        for (auto val : m_jointPoses) {
             if (val.first.value() == jointId) {
-                // try to get state, if available
-                bool hasState =
-                    val.second->getState<OSVR_PoseReport>(timestamp, pose);
-                if (!hasState) {
-                    throw NoPoseYet();
-                }
-                return pose;
+                // return the joint state
+                return val.second;
             }
         }
-
+        // pose not available for this frame
         throw NoPoseYet();
     }
 
     inline OSVR_Pose3
     SkeletonConfig::getBoneState(OSVR_SkeletonBoneCount boneId) {
         /// @todo should be returning derived pose
-        OSVR_TimeValue timestamp;
         OSVR_Pose3 pose;
         osvrPose3SetIdentity(&pose);
 
         // find an interface for given boneId
-        for (auto val : m_boneInterfaces) {
+        for (auto val : m_bonePoses) {
             if (val.first.value() == boneId) {
-                // try to get state, if available
-                bool hasState =
-                    val.second->getState<OSVR_PoseReport>(timestamp, pose);
-                if (!hasState) {
-                    throw NoPoseYet();
-                }
-                return pose;
+                // return the bone state
+                return val.second;
             }
         }
-
+        // pose not available for this frame
         throw NoPoseYet();
     }
 
@@ -226,7 +219,7 @@ namespace client {
             m_boneMap.getEntries().size());
     }
 
-    inline OSVR_SkeletonBoneCount SkeletonConfig::getNumJoints() {
+    inline OSVR_SkeletonJointCount SkeletonConfig::getNumJoints() {
         return static_cast<OSVR_SkeletonJointCount>(
             m_jointMap.getEntries().size());
     }
@@ -246,6 +239,30 @@ namespace client {
             throw IdNotFound();
         }
         return jointName;
+    }
+    inline void SkeletonConfig::updateSkeletonPoses() {
+
+        // clear old values
+        m_jointPoses.clear();
+        m_bonePoses.clear();
+
+        for (auto &val : m_jointInterfaces) {
+            OSVR_TimeValue timestamp;
+            OSVR_Pose3 pose;
+            osvrPose3SetIdentity(&pose);
+            if (val.second->getState<OSVR_PoseReport>(timestamp, pose)) {
+                m_jointPoses.push_back(std::make_pair(val.first, pose));
+            }
+        }
+        auto vecSize = m_jointPoses.size();
+        for (auto &val : m_boneInterfaces) {
+            OSVR_TimeValue timestamp;
+            OSVR_Pose3 pose;
+            osvrPose3SetIdentity(&pose);
+            if (val.second->getState<OSVR_PoseReport>(timestamp, pose)) {
+                m_bonePoses.push_back(std::make_pair(val.first, pose));
+            }
+        }
     }
 
 } // namespace client
