@@ -25,8 +25,8 @@
 // Internal Includes
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/ClientKit/InterfaceC.h>
-#include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
+#include <osvr/ClientKit/InterfaceStateC.h>
 #include <osvr/ClientKit/SkeletonC.h>
 
 // Library/third-party includes
@@ -39,116 +39,140 @@
 
 static int numCallbacks = 0;
 
-void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp, const OSVR_SkeletonReport *report) {
+void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp,
+                        const OSVR_SkeletonReport *report) {
     numCallbacks++;
 
     OSVR_ReturnCode rc;
-    OSVR_Skeleton skel = (OSVR_Skeleton)userdata;
+
+    OSVR_Skeleton skel = report->state.skeleton;
     printf("-----------\n");
-    printf("\tGot report: channel is %d, timestamp: %d:%d, dataAvailable is %s\n", report->sensor, timestamp->seconds, timestamp->microseconds, report->state.dataAvailable ? "true" : "false");
-    if (report->state.dataAvailable) {
-        OSVR_SkeletonJointCount numJoints = 0;
-        rc = osvrClientGetSkeletonNumJoints(skel, &numJoints);
-        if (rc == OSVR_RETURN_FAILURE) {
-            printf("\tcall to osvrClientGetSkeletonNumJoints failed\n");
-        }
+    printf("\tGot report: channel is %d, timestamp: %d:%d\n", report->sensor,
+           timestamp->seconds, timestamp->microseconds);
 
-        OSVR_SkeletonBoneCount numBones = 0;
-        rc = osvrClientGetSkeletonNumBones(skel, &numBones);
-        if (rc == OSVR_RETURN_FAILURE) {
-            printf("\tcall to osvrClientGetSkeletonNumJoints failed\n");
-        }
-
-        printf("\tnumJoints: %d, numBones: %d\n", numJoints, numBones);
-
-        for (OSVR_SkeletonJointCount joint = 0; joint < numJoints; joint++) {
-            uint32_t len = 0;
-            OSVR_SkeletonJointCount jointId = 0;
-            rc = osvrClientGetSkeletonAvailableJointId(skel, joint, &jointId);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tcouldn't get the joint id for joint index %d\n", joint);
-                return;
-            }
-
-            rc = osvrClientGetSkeletonStringJointNameLength(skel, jointId, &len);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tjoint %d: call to osvrClientGetSkeletonStringJointNameLength failed", joint);
-                return;
-            }
-
-            char jointName[NAME_BUFFER_SIZE];
-            rc = osvrClientGetSkeletonJointName(skel, jointId, jointName, NAME_BUFFER_SIZE);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tjoint %d: osvrClientGetSkeletonJointName call failed. Perhaps the joint name is greater than our buffer size?\n", joint);
-                return;
-            }
-
-            OSVR_SkeletonJointState jointState = { 0 };
-            rc = osvrClientGetSkeletonJointState(skel, jointId, &jointState);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tjoint %d: osvrClientGetSkeletonJointState call failed.\n", joint);
-                return;
-            }
-
-            printf("\tjoint %d: name: %s,\n\t\ttranslation: (x: %f, y: %f, z: %f)\n\t\torientation: (x: %f, y: %f, z: %f, w: %f)\n",
-                joint, jointName,
-                osvrVec3GetX(&jointState.pose.translation),
-                osvrVec3GetY(&jointState.pose.translation),
-                osvrVec3GetZ(&jointState.pose.translation),
-                osvrQuatGetX(&jointState.pose.rotation),
-                osvrQuatGetY(&jointState.pose.rotation),
-                osvrQuatGetZ(&jointState.pose.rotation),
-                osvrQuatGetW(&jointState.pose.rotation));
-        }
-
-        for (OSVR_SkeletonBoneCount bone = 0; bone < numBones; bone++) {
-            uint32_t len = 0;
-            OSVR_SkeletonBoneCount boneId = 0;
-            rc = osvrClientGetSkeletonAvailableBoneId(skel, bone, &boneId);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tcouldn't get the bone id for bone index %d\n", bone);
-                return;
-            }
-
-            rc = osvrClientGetSkeletonStringBoneNameLength(skel, boneId, &len);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tbone %d: call to osvrClientGetSkeletonStringBoneNameLength failed", bone);
-                continue;
-            }
-
-            char boneName[NAME_BUFFER_SIZE];
-            rc = osvrClientGetSkeletonBoneName(skel, boneId, boneName, NAME_BUFFER_SIZE);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tbone %d: osvrClientGetSkeletonBoneName call failed. Perhaps the bone name is greater than our buffer size?\n", bone);
-                return;
-            }
-
-            OSVR_SkeletonBoneState boneState = { 0 };
-            rc = osvrClientGetSkeletonBoneState(skel, boneId, &boneState);
-            if (rc == OSVR_RETURN_FAILURE) {
-                printf("\tbone %d: osvrClientGetSkeletonBoneState call failed.\n", bone);
-                return;
-            }
-
-            printf("\tbone %d: name: %s,\n\t\ttranslation: (x: %f, y: %f, z: %f)\n\t\torientation: (x: %f, y: %f, z: %f, w: %f)\n",
-                bone, boneName,
-                osvrVec3GetX(&boneState.pose.translation),
-                osvrVec3GetY(&boneState.pose.translation),
-                osvrVec3GetZ(&boneState.pose.translation),
-                osvrQuatGetX(&boneState.pose.rotation),
-                osvrQuatGetY(&boneState.pose.rotation),
-                osvrQuatGetZ(&boneState.pose.rotation),
-                osvrQuatGetW(&boneState.pose.rotation));
-        }
-
-        OSVR_SkeletonJointCount leftWristJointId = 0;
-        rc = osvrClientGetSkeletonJointId(skel, "l_wrist", &leftWristJointId);
-        printf("\tasking for 'l_wrist' joint id by name: %s, jointId = %d\n",
-            rc == OSVR_RETURN_SUCCESS ? "suceeded" : "failed", leftWristJointId);
+    OSVR_SkeletonJointCount numJoints = 0;
+    rc = osvrClientGetSkeletonNumJoints(skel, &numJoints);
+    if (rc == OSVR_RETURN_FAILURE) {
+        printf("\tcall to osvrClientGetSkeletonNumJoints failed\n");
     }
+
+    OSVR_SkeletonBoneCount numBones = 0;
+    rc = osvrClientGetSkeletonNumBones(skel, &numBones);
+    if (rc == OSVR_RETURN_FAILURE) {
+        printf("\tcall to osvrClientGetSkeletonNumJoints failed\n");
+    }
+
+    printf("\tnumJoints: %d, numBones: %d\n", numJoints, numBones);
+
+    for (OSVR_SkeletonJointCount joint = 0; joint < numJoints; joint++) {
+        uint32_t len = 0;
+        OSVR_SkeletonJointCount jointId = 0;
+        rc = osvrClientGetSkeletonAvailableJointId(skel, joint, &jointId);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tcouldn't get the joint id for joint index %d\n", joint);
+            return;
+        }
+
+        rc = osvrClientGetSkeletonStringJointNameLength(skel, jointId, &len);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tjoint %d: call to "
+                   "osvrClientGetSkeletonStringJointNameLength failed",
+                   joint);
+            return;
+        }
+
+        char jointName[NAME_BUFFER_SIZE];
+        rc = osvrClientGetSkeletonJointName(skel, jointId, jointName,
+                                            NAME_BUFFER_SIZE);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tjoint %d: osvrClientGetSkeletonJointName call "
+                   "failed. Perhaps the joint name is greater than our "
+                   "buffer size?\n",
+                   joint);
+            return;
+        }
+
+        OSVR_SkeletonJointState jointState = {0};
+        rc = osvrClientGetSkeletonJointState(skel, jointId, &jointState);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tjoint %d: osvrClientGetSkeletonJointState call "
+                   "failed.\n",
+                   joint);
+            return;
+        }
+
+        printf("\tjoint %d: name: %s,\n\t\ttranslation: (x: %f, y: %f, z: "
+               "%f)\n\t\torientation: (x: %f, y: %f, z: %f, w: %f)\n",
+               joint, jointName, osvrVec3GetX(&jointState.pose.translation),
+               osvrVec3GetY(&jointState.pose.translation),
+               osvrVec3GetZ(&jointState.pose.translation),
+               osvrQuatGetX(&jointState.pose.rotation),
+               osvrQuatGetY(&jointState.pose.rotation),
+               osvrQuatGetZ(&jointState.pose.rotation),
+               osvrQuatGetW(&jointState.pose.rotation));
+    }
+
+    for (OSVR_SkeletonBoneCount bone = 0; bone < numBones; bone++) {
+        uint32_t len = 0;
+        OSVR_SkeletonBoneCount boneId = 0;
+        rc = osvrClientGetSkeletonAvailableBoneId(skel, bone, &boneId);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tcouldn't get the bone id for bone index %d\n", bone);
+            return;
+        }
+
+        rc = osvrClientGetSkeletonStringBoneNameLength(skel, boneId, &len);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tbone %d: call to "
+                   "osvrClientGetSkeletonStringBoneNameLength failed",
+                   bone);
+            continue;
+        }
+
+        char boneName[NAME_BUFFER_SIZE];
+        rc = osvrClientGetSkeletonBoneName(skel, boneId, boneName,
+                                           NAME_BUFFER_SIZE);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tbone %d: osvrClientGetSkeletonBoneName call failed. "
+                   "Perhaps the bone name is greater than our buffer "
+                   "size?\n",
+                   bone);
+            return;
+        }
+
+        OSVR_SkeletonBoneState boneState = {0};
+        rc = osvrClientGetSkeletonBoneState(skel, boneId, &boneState);
+        if (rc == OSVR_RETURN_FAILURE) {
+            printf("\tbone %d: osvrClientGetSkeletonBoneState call failed.\n",
+                   bone);
+            return;
+        }
+
+        printf("\tbone %d: name: %s,\n\t\ttranslation: (x: %f, y: %f, z: "
+               "%f)\n\t\torientation: (x: %f, y: %f, z: %f, w: %f)\n",
+               bone, boneName, osvrVec3GetX(&boneState.pose.translation),
+               osvrVec3GetY(&boneState.pose.translation),
+               osvrVec3GetZ(&boneState.pose.translation),
+               osvrQuatGetX(&boneState.pose.rotation),
+               osvrQuatGetY(&boneState.pose.rotation),
+               osvrQuatGetZ(&boneState.pose.rotation),
+               osvrQuatGetW(&boneState.pose.rotation));
+    }
+
+    OSVR_SkeletonJointCount leftWristJointId = 0;
+    rc = osvrClientGetSkeletonJointId(skel, "l_wrist", &leftWristJointId);
+    printf("\tasking for 'l_wrist' joint id by name: %s, jointId = %d\n",
+           rc == OSVR_RETURN_SUCCESS ? "suceeded" : "failed", leftWristJointId);
 }
 
-#define CHECK_RC(rc) if(rc == OSVR_RETURN_FAILURE) { printf("OSVR call failed"); if(skel) { osvrClientFreeSkeleton(skel); } if(ctx) { osvrClientShutdown(ctx); } return -1; }
+#define CHECK_RC(rc)                                                           \
+    if (rc == OSVR_RETURN_FAILURE) {                                           \
+        printf("OSVR call failed");                                            \
+        if (ctx) {                                                             \
+            osvrClientShutdown(ctx);                                           \
+        }                                                                      \
+        return -1;                                                             \
+    }
 
 int main() {
     OSVR_ReturnCode rc;
@@ -156,31 +180,27 @@ int main() {
         osvrClientInit("com.osvr.exampleclients.SkeletonCallback", 0);
 
     OSVR_ClientInterface leftHand = NULL;
+    OSVR_ClientInterface rightHand = NULL;
+#if 0
     OSVR_Skeleton skel = NULL;
-
+#endif
     rc = osvrClientGetInterface(
         ctx, "/com_osvr_example_Skeleton/Skeleton/skeleton/0", &leftHand);
     CHECK_RC(rc);
 
-    while (!skel) {
-        osvrClientUpdate(ctx);
-        rc = osvrClientGetSkeleton(ctx, leftHand, &skel);
-        if (rc == OSVR_RETURN_SUCCESS) {
-            break;
-        }
-    }
+    rc = osvrClientGetInterface(
+        ctx, "/com_osvr_example_Skeleton/Skeleton/skeleton/1", &rightHand);
+    CHECK_RC(rc);
 
-    rc = osvrRegisterSkeletonCallback(leftHand, mySkeletonCallback, skel);
+    rc = osvrRegisterSkeletonCallback(leftHand, mySkeletonCallback, NULL);
+    CHECK_RC(rc);
+    rc = osvrRegisterSkeletonCallback(rightHand, mySkeletonCallback, NULL);
     CHECK_RC(rc);
 
     // Pretend that this is your application's mainloop.
     while (numCallbacks < MAX_CALLBACKS_TO_REPORT) {
         rc = osvrClientUpdate(ctx);
         CHECK_RC(rc);
-    }
-
-    if (skel) {
-        osvrClientFreeSkeleton(skel);
     }
 
     osvrClientShutdown(ctx);
