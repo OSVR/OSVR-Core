@@ -29,12 +29,12 @@
 // Library/third-party includes
 
 // Standard includes
-#include <iostream>
 #include <chrono>
-#include <thread>
-#include <random>
-#include <ctime>
 #include <cmath>
+#include <ctime>
+#include <iostream>
+#include <random>
+#include <thread>
 
 // Anonymous namespace to avoid symbol collision
 namespace {
@@ -82,10 +82,17 @@ class SkeletonDevice {
         osvrTimeValueGetNow(&timestamp);
         for (OSVR_ChannelCount channel = 0; channel < 6; channel++) {
             OSVR_Pose3 channelPose = GetChannelPose(samplePose, channel);
-            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &channelPose, channel,
-                                                 &timestamp);
+            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &channelPose,
+                                                 channel, &timestamp);
         }
         osvrDeviceSkeletonComplete(m_skeleton, 0, &timestamp);
+
+        for (OSVR_ChannelCount channel = 6; channel < 12; channel++) {
+            OSVR_Pose3 channelPose = GetChannelPose(samplePose, channel);
+            osvrDeviceTrackerSendPoseTimestamped(m_dev, m_tracker, &channelPose,
+                                                 channel, &timestamp);
+        }
+        osvrDeviceSkeletonComplete(m_skeleton, 1, &timestamp);
 
         mVal += mIncr;
         return OSVR_RETURN_SUCCESS;
@@ -98,7 +105,8 @@ class SkeletonDevice {
     OSVR_SkeletonDeviceInterface m_skeleton;
     OSVR_TrackerDeviceInterface m_tracker;
 
-    inline OSVR_Pose3 GetChannelPose(OSVR_Pose3 basePose, OSVR_ChannelCount channel) {
+    inline OSVR_Pose3 GetChannelPose(OSVR_Pose3 basePose,
+                                     OSVR_ChannelCount channel) {
         double offset = channel * 0.05;
         OSVR_Pose3 ret = basePose;
         ret.translation.data[0] += offset;
