@@ -28,9 +28,8 @@
 /* Internal Includes */
 #include <osvr/ClientKit/Export.h>
 #include <osvr/Util/APIBaseC.h>
-#include <osvr/Util/ReturnCodesC.h>
-#include <osvr/Util/ClientOpaqueTypesC.h>
 #include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/ReturnCodesC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -46,23 +45,13 @@ OSVR_EXTERN_C_BEGIN
 @{
 */
 
-/** @brief Opaque type of a display configuration. */
-typedef struct OSVR_SkeletonObject *OSVR_Skeleton;
-
-/** @brief Allocates a skeleton object that manages Articulation Spec and
-   Joint/Bone Ids
-    mappings
-*/
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientGetSkeleton(OSVR_ClientContext ctx,
-                      OSVR_ClientInterface skeletonIface, OSVR_Skeleton *skel);
-
-/** @brief Releases the Skeleton object. The corresponding client context must
-   still be
-    opened
-*/
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode
-osvrClientFreeSkeleton(OSVR_Skeleton skel);
+/** @brief OSVR_Skeleton provides an API to iterate over articulation tree and
+ * get skeleton related information such as joint, bone states, get number of
+ * joints, etc. The lifetime of OSVR_SkeletonObject is maintained internally
+ * since it requires access to articulation spec, so client app will not be
+ * responsible for initialization and/or cleanup after. OSVR_Skeleton is part of
+ * the OSVR_SkeletonState and is included in OSVR_SkeletonReport.
+ */
 
 /** @brief Convert a given boneName to the boneId
 @param skel skeleton object
@@ -109,7 +98,7 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonBoneState(
 
 /** @brief Get the jointId for a given available joint.
 @param skel skeleton object
-@param jointIndex an index between 0 and numJoints as reported 
+@param jointIndex an index between 0 and numJoints as reported
 by osvrClientGetSkeletonNumJoints
 @param jointId the jointId of the given joint.
 */
@@ -187,16 +176,8 @@ OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonNumBones(
 OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetSkeletonNumJoints(
     OSVR_Skeleton skel, OSVR_SkeletonJointCount *numJoints);
 
-/** @brief For a given joint Id, get the Id of its child
-@param skel skeleton object
-@param jointId parent joint Id
-@param childNum
-@param childJointId on return contains the joint Id of the child specified by
-parent joint Id
-*/
-OSVR_CLIENTKIT_EXPORT OSVR_ReturnCode osvrClientGetChildJointId(
-    OSVR_Skeleton skel, OSVR_SkeletonJointCount jointId,
-    OSVR_SkeletonJointCount childNum, OSVR_SkeletonJointCount *childJointId);
+/** @} */
+/** @} */
 
 OSVR_EXTERN_C_END
 
