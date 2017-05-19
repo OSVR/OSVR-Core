@@ -34,10 +34,11 @@
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/StdInt.h>
 
+#include <osvr/Util/BoolC.h>
+#include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/SkeletonC.h>
 #include <osvr/Util/Vec2C.h>
 #include <osvr/Util/Vec3C.h>
-#include <osvr/Util/ChannelCountC.h>
-#include <osvr/Util/BoolC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -99,7 +100,7 @@ typedef struct OSVR_VelocityState {
 typedef OSVR_Vec3 OSVR_LinearAccelerationState;
 
 /** @brief Type of angular acceleration state
-*/
+ */
 typedef OSVR_IncrementalQuaternion OSVR_AngularAccelerationState;
 
 /** @brief Struct for combined acceleration state */
@@ -173,7 +174,7 @@ typedef struct OSVR_VelocityReport {
 } OSVR_VelocityReport;
 
 /** @brief Report type for a linear velocity callback on a tracker interface
-*/
+ */
 typedef struct OSVR_LinearVelocityReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
@@ -182,7 +183,7 @@ typedef struct OSVR_LinearVelocityReport {
 } OSVR_LinearVelocityReport;
 
 /** @brief Report type for an angular velocity callback on a tracker interface
-*/
+ */
 typedef struct OSVR_AngularVelocityReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
@@ -203,7 +204,7 @@ typedef struct OSVR_AccelerationReport {
 } OSVR_AccelerationReport;
 
 /** @brief Report type for a linear acceleration callback on a tracker interface
-*/
+ */
 typedef struct OSVR_LinearAccelerationReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
@@ -362,7 +363,7 @@ typedef struct OSVR_SkeletonBonetState {
 
 /** @brief Type of Skeleton state */
 typedef struct OSVR_SkeletonState {
-    OSVR_CBool dataAvailable;
+    OSVR_Skeleton skeleton;
 } OSVR_SkeletonState;
 
 /** @brief Report type for a skeleton callback. Provided whenever skeleton data

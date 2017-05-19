@@ -117,6 +117,7 @@ set(API
     "${HEADER_LOCATION}/ReturnCodesC.h"
     "${HEADER_LOCATION}/SharedPtr.h"
     "${HEADER_LOCATION}/SizedInt.h"
+    "${HEADER_LOCATION}/SkeletonC.h"
     "${HEADER_LOCATION}/StdDeletable.h"
     "${HEADER_LOCATION}/StdInt.h"
     "${HEADER_LOCATION}/StringBufferBuilder.h"
