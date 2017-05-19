@@ -135,10 +135,5 @@ namespace client {
     util::log::LoggerPtr const &ClientInterfaceObjectManager::logger() const {
         return m_ctx->logger();
     }
-
-    RemoteHandlerPtr ClientInterfaceObjectManager::getRemoteHandlerForPath(
-        std::string const &path) {
-        return m_interfaces.getHandlerForPath(path);
-    }
 } // namespace client
 } // namespace osvr

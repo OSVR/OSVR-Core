@@ -26,23 +26,22 @@
 #define INCLUDED_PureClientContext_h_GUID_0A40DCCB_0451_4DB0_855B_7ECE66C52D07
 
 // Internal Includes
-#include <osvr/Common/ClientContext.h>
-#include <osvr/Common/BaseDevicePtr.h>
-#include <osvr/Common/SystemComponent_fwd.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Common/Transform.h>
-#include <osvr/Common/NetworkingSupport.h>
-#include <osvr/Common/DeviceComponentPtr.h>
-#include <osvr/Util/TimeValue_fwd.h>
 #include "VRPNConnectionCollection.h"
+#include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
-#include <osvr/Client/ClientInterfaceObjectManager.h>
+#include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/NetworkingSupport.h>
+#include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathTreeOwner.h>
+#include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/Transform.h>
+#include <osvr/Util/TimeValue_fwd.h>
 
 // Library/third-party includes
-#include <vrpn_ConnectionPtr.h>
 #include <json/value.h>
+#include <vrpn_ConnectionPtr.h>
 
 // Standard includes
 #include <string>
@@ -80,12 +79,6 @@ namespace client {
         void m_setRoomToWorldTransform(common::Transform const &xform) override;
 
         bool m_getStatus() const override;
-
-        RemoteHandlerPtr m_getRemoteHandler(std::string const &path);
-
-        /// @brief Articulation Tree corresponding to path
-        common::PathTree const &
-        m_getArticulationTree(std::string const &path) override;
 
         /// @brief The main OSVR server host: usually localhost
         std::string m_host;

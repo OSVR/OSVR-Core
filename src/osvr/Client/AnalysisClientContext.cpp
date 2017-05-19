@@ -24,29 +24,28 @@
 
 // Internal Includes
 #include "AnalysisClientContext.h"
-#include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/DeduplicatingFunctionWrapper.h>
-#include "SkeletonRemoteFactory.h"
 
 // Library/third-party includes
 #include <json/value.h>
 
 // Standard includes
-#include <unordered_set>
 #include <thread>
+#include <unordered_set>
 
 namespace osvr {
 namespace client {
 
-    //static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
-    //static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
-    //static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
+    // static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
+    // static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
+    // static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
     AnalysisClientContext::AnalysisClientContext(
         const char appId[], const char host[], vrpn_ConnectionPtr const &conn,
@@ -115,24 +114,6 @@ namespace client {
 
     common::PathTree const &AnalysisClientContext::m_getPathTree() const {
         return m_pathTreeOwner.get();
-    }
-
-    RemoteHandlerPtr
-    AnalysisClientContext::m_getRemoteHandler(std::string const &path) {
-        return m_ifaceMgr.getRemoteHandlerForPath(path);
-    }
-
-    /// @brief Articulation Tree corresponding to path
-    common::PathTree const &AnalysisClientContext::m_getArticulationTree(
-        std::string const &path) /*override */ {
-        // get a handler for path, should be skeleton handler
-        auto handler = m_getRemoteHandler(path);
-        // cast it to skeleton handler
-        std::shared_ptr<SkeletonRemoteHandler> skeletonHandler =
-            std::dynamic_pointer_cast<SkeletonRemoteHandler>(handler);
-        auto skeletonComp = skeletonHandler->getSkeletonComponent();
-
-        return skeletonComp->getArticulationTree();
     }
 } // namespace client
 } // namespace osvr

@@ -24,24 +24,22 @@
 
 // Internal Includes
 #include "PureClientContext.h"
-#include <osvr/Common/SystemComponent.h>
-#include <osvr/Common/SkeletonComponent.h>
+#include <boost/algorithm/string.hpp>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/DeduplicatingFunctionWrapper.h>
-#include "SkeletonRemoteFactory.h"
-#include <boost/algorithm/string.hpp>
 
 // Library/third-party includes
 #include <json/value.h>
 
 // Standard includes
-#include <unordered_set>
 #include <thread>
+#include <unordered_set>
 
 namespace osvr {
 namespace client {
@@ -160,8 +158,9 @@ namespace client {
             << std::chrono::duration_cast<std::chrono::milliseconds>(
                    timeToStartup)
                    .count()
-            << "ms: " << (m_gotConnection ? "have connection to server, "
-                                          : "don't have connection to server, ")
+            << "ms: "
+            << (m_gotConnection ? "have connection to server, "
+                                : "don't have connection to server, ")
             << (m_pathTreeOwner ? "have path tree" : "don't have path tree");
     }
 
@@ -213,27 +212,6 @@ namespace client {
     void PureClientContext::m_setRoomToWorldTransform(
         common::Transform const &xform) {
         m_roomToWorld = xform;
-    }
-
-    RemoteHandlerPtr
-    PureClientContext::m_getRemoteHandler(std::string const &path) {
-        return m_ifaceMgr.getRemoteHandlerForPath(path);
-    }
-
-    /// @brief Articulation Tree corresponding to path
-    common::PathTree const &
-    PureClientContext::m_getArticulationTree(std::string const &path) {
-        // get a handler for path, should be skeleton handler
-        auto handler = m_getRemoteHandler(path);
-        if (!handler) {
-            throw std::exception("no remote handler for the given path");
-        }
-        // cast it to skeleton handler
-        std::shared_ptr<SkeletonRemoteHandler> skeletonHandler =
-            std::dynamic_pointer_cast<SkeletonRemoteHandler>(handler);
-        auto skeletonComp = skeletonHandler->getSkeletonComponent();
-
-        return skeletonComp->getArticulationTree();
     }
 } // namespace client
 } // namespace osvr
