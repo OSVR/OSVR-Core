@@ -22,7 +22,15 @@ function(osvr_add_plugin)
     if(NOT OSVR_ADD_PLUGIN_SOURCES)
         set(OSVR_ADD_PLUGIN_SOURCES ${OSVR_ADD_PLUGIN_UNPARSED_ARGUMENTS})
     endif()
-    add_library(${OSVR_ADD_PLUGIN_NAME} MODULE ${OSVR_ADD_PLUGIN_SOURCES})
+    
+    if(ANDROID)
+        # Android loads plugins as if they were shared libraries, and
+        # additionally, requires SONAME to be set.
+        add_library(${OSVR_ADD_PLUGIN_NAME} SHARED ${OSVR_ADD_PLUGIN_SOURCES})
+    else()
+        add_library(${OSVR_ADD_PLUGIN_NAME} MODULE ${OSVR_ADD_PLUGIN_SOURCES})
+    endif()
+
     if(OSVR_ADD_PLUGIN_CPP)
         target_link_libraries(${OSVR_ADD_PLUGIN_NAME} osvr::osvrPluginKitCpp)
     else()
@@ -31,6 +39,7 @@ function(osvr_add_plugin)
 
     if(ANDROID)
         set(OSVR_PLUGIN_PREFIX "lib")
+        target_link_libraries(${OSVR_ADD_PLUGIN_NAME} "-z global")
     else()
         set(OSVR_PLUGIN_PREFIX "")
     endif()
