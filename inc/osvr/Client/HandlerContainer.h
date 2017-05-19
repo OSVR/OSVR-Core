@@ -41,7 +41,9 @@ namespace client {
     class HandlerContainer {
       public:
         void update() {
-            for (auto const &handler : m_handlers) {
+            // temp copy to avoid invalidated iterators
+            auto m_handlersTemp = m_handlers;
+            for (auto const &handler : m_handlersTemp) {
                 handler->update();
             }
         }
