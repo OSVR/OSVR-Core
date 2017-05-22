@@ -45,6 +45,7 @@ namespace client {
     void populateRemoteHandlerFactory(RemoteHandlerFactory &factory,
                                       VRPNConnectionCollection const &conns) {
         /// Register all the factories.
+        TrackerRemoteFactory(conns).registerWith(factory);
         AnalogRemoteFactory(conns).registerWith(factory);
         ButtonRemoteFactory(conns).registerWith(factory);
         EyeTrackerRemoteFactory(conns).registerWith(factory);
@@ -53,7 +54,6 @@ namespace client {
         LocomotionRemoteFactory(conns).registerWith(factory);
         DirectionRemoteFactory(conns).registerWith(factory);
         SkeletonRemoteFactory(conns).registerWith(factory);
-        TrackerRemoteFactory(conns).registerWith(factory);
     }
 
 } // namespace client
