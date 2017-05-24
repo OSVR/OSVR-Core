@@ -85,17 +85,9 @@ namespace common {
             return;
         }
         if (val.isObject()) {
-
-            m_trackerPath = (val[DATA_KEY].isNull() && val[DATA_KEY].isString())
-                                ? std::string()
-                                : val[DATA_KEY].asString();
-            m_boneName =
-                (val[BONE_NAME_KEY].isNull() && val[BONE_NAME_KEY].isString())
-                    ? std::string()
-                    : val[BONE_NAME_KEY].asString();
-            m_articulationType = (val[ARTIC_TYPE_KEY].isNull() && val[ARTIC_TYPE_KEY].isString())
-                                ? std::string()
-                                : val[ARTIC_TYPE_KEY].asString();
+            m_trackerPath = val.get(DATA_KEY, "").asString();
+            m_boneName = val.get(BONE_NAME_KEY, "").asString();
+            m_articulationType = val.get(ARTIC_TYPE_KEY, "").asString();
             return;
         }
     }
