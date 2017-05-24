@@ -40,7 +40,7 @@
 #include <vrpn_BaseClass.h>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace osvr {
 namespace common {
@@ -78,7 +78,7 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<SkeletonComponent>
-        create(std::string const &jsonSpec, OSVR_ChannelCount numSensor = 1);
+        create(std::string const &jsonSpec);
 
         /// @brief Message from server to client, containing skeleton
         /// notification.
@@ -115,15 +115,13 @@ namespace common {
         registerSkeletonSpecHandler(SkeletonSpecHandler cb);
 
       private:
-        SkeletonComponent(std::string const &jsonSpec,
-                          OSVR_ChannelCount numChan);
+        SkeletonComponent(std::string const &jsonSpec);
         virtual void m_parentSet();
 
         static int VRPN_CALLBACK m_handleSkeletonRecord(void *userdata,
                                                         vrpn_HANDLERPARAM p);
         static int VRPN_CALLBACK
         m_handleSkeletonSpecRecord(void *userdata, vrpn_HANDLERPARAM p);
-        OSVR_ChannelCount m_numSensor;
         /// @brief Articulation specs
         std::string m_spec;
         std::vector<SkeletonHandler> m_cb;

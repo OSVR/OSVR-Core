@@ -23,15 +23,15 @@
 // limitations under the License.
 
 // Internal Includes
+#include "HandleNullContext.h"
 #include <osvr/Common/SkeletonComponent.h>
-#include <osvr/Connection/DeviceToken.h>
 #include <osvr/Connection/DeviceInitObject.h>
 #include <osvr/Connection/DeviceInterfaceBase.h>
-#include <osvr/PluginKit/SkeletonInterfaceC.h>
+#include <osvr/Connection/DeviceToken.h>
 #include <osvr/PluginHost/PluginSpecificRegistrationContext.h>
+#include <osvr/PluginKit/SkeletonInterfaceC.h>
 #include <osvr/Util/PointerWrapper.h>
 #include <osvr/Util/Verbosity.h>
-#include "HandleNullContext.h"
 
 // Library/third-party includes
 // - none
@@ -47,16 +47,14 @@ struct OSVR_SkeletonDeviceInterfaceObject
 OSVR_ReturnCode
 osvrDeviceSkeletonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                             OSVR_OUT_PTR OSVR_SkeletonDeviceInterface *iface,
-                            OSVR_IN_READS(len) const char *jsonDescriptor,
-                            OSVR_IN OSVR_ChannelCount numSensors) {
+                            OSVR_IN_READS(len) const char *jsonDescriptor) {
 
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSkeletonConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceSkeletonConfigure", iface);
     OSVR_SkeletonDeviceInterface ifaceObj =
         opts->makeInterfaceObject<OSVR_SkeletonDeviceInterfaceObject>();
     *iface = ifaceObj;
-    auto skeleton =
-        osvr::common::SkeletonComponent::create(jsonDescriptor, numSensors);
+    auto skeleton = osvr::common::SkeletonComponent::create(jsonDescriptor);
     ifaceObj->skeleton = skeleton.get();
     opts->addComponent(skeleton);
     return OSVR_RETURN_SUCCESS;

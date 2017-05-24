@@ -46,7 +46,7 @@ class SkeletonDevice {
         OSVR_DeviceInitOptions opts = osvrDeviceCreateInitOptions(ctx);
 
         osvrDeviceSkeletonConfigure(opts, &m_skeleton,
-                                    com_osvr_example_Skeleton_json, 2);
+                                    com_osvr_example_Skeleton_json);
         osvrDeviceTrackerConfigure(opts, &m_tracker);
 
         /// Create the device token with the options

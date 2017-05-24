@@ -89,16 +89,13 @@ namespace common {
     } // namespace messages
 
     shared_ptr<SkeletonComponent>
-    SkeletonComponent::create(std::string const &jsonSpec,
-                              OSVR_ChannelCount numChan) {
-        shared_ptr<SkeletonComponent> ret(
-            new SkeletonComponent(jsonSpec, numChan));
+    SkeletonComponent::create(std::string const &jsonSpec) {
+        shared_ptr<SkeletonComponent> ret(new SkeletonComponent(jsonSpec));
         return ret;
     }
 
-    SkeletonComponent::SkeletonComponent(std::string const &jsonSpec,
-                                         OSVR_ChannelCount numChan)
-        : m_numSensor(numChan), m_spec(jsonSpec) {}
+    SkeletonComponent::SkeletonComponent(std::string const &jsonSpec)
+        : m_spec(jsonSpec) {}
 
     OSVR_ReturnCode
     SkeletonComponent::setArticulationSpec(std::string const &jsonDescriptor) {

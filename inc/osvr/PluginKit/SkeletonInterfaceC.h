@@ -63,8 +63,7 @@ typedef struct OSVR_SkeletonDeviceInterfaceObject *OSVR_SkeletonDeviceInterface;
     lifetime as the device token in order to send messages conforming to a
    Skeleton interface.
    @param jsonDescriptor A device descriptor json that contains skeleton spec
-    @param numSensors The number of non-connected skeletons you will be
-   reporting. Note that the number of skeleton sensors is not the same as number
+    Note that the number of skeleton sensors is not the same as number
    of skeleton elements. For example if plugin device reports two hands that
    will be 2 separate skeleton sensors because hands are not connected via
    common parent. If device can report an entire skeleton then it should only
@@ -74,8 +73,7 @@ OSVR_PLUGINKIT_EXPORT
 OSVR_ReturnCode
 osvrDeviceSkeletonConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                             OSVR_OUT_PTR OSVR_SkeletonDeviceInterface *iface,
-                            OSVR_IN_READS(len) const char *jsonDescriptor,
-                            OSVR_IN OSVR_ChannelCount numSensors)
+                            OSVR_IN_READS(len) const char *jsonDescriptor)
     OSVR_FUNC_NONNULL((1, 2));
 
 /** @brief Report that transmission of tracker reports for given skeleton sensor
