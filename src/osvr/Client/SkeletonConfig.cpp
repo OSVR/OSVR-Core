@@ -41,6 +41,8 @@
 #include <boost/variant/get.hpp>
 
 // Standard includes
+#include <string>
+#include <utility>
 
 namespace osvr {
 namespace client {
@@ -80,8 +82,7 @@ namespace client {
                 /// Specifying bone name for each joint is optional
                 if (!elt.getBoneName().empty()) {
                     /// register boneId
-                    util::StringID boneId =
-                        m_boneMap->registerStringID(elt.getBoneName());
+                    m_boneMap->registerStringID(elt.getBoneName());
                 }
             }
         }
@@ -102,7 +103,7 @@ namespace client {
         /// @brief Constructor
         NodeToTrackerPathVisitor() : boost::static_visitor<std::string>() {}
 
-        std::string const
+        std::string
         operator()(osvr::common::PathNode const &node,
                    osvr::common::elements::ArticulationElement const &elt) {
             return elt.getTrackerPath();
@@ -110,8 +111,8 @@ namespace client {
 
         /// @brief Catch-all for other element types.
         template <typename T>
-        std::string const operator()(osvr::common::PathNode const &node,
-                                     T const &elt) {
+        std::string operator()(osvr::common::PathNode const &node,
+                               T const &elt) {
             return std::string();
         }
     };
@@ -120,28 +121,33 @@ namespace client {
         OSVR_ClientContext ctx,
         osvr::common::PathTree const &articulationTree) {
 
-        if (ctx->getStatus()) {
-            /// Client context is ready
-            SkeletonConfigPtr cfg(new SkeletonConfig(ctx));
-            /// get the path tree
-            osvr::common::clonePathTree(articulationTree,
-                                        cfg->m_articulationTree);
+        if (ctx == nullptr) {
+            OSVR_DEV_VERBOSE(
+                "Couldn't create a skeleton config! Client context is null");
+            throw std::runtime_error(
+                "Couldn't create a skeleton config! Client context is null");
+        }
 
-            ArticulationTreeTraverser traverser(
-                &cfg->m_jointMap, &cfg->m_boneMap, &cfg->m_jointInterfaces,
-                cfg->m_ctx);
-            osvr::util::traverseWith(
-                articulationTree.getRoot(),
-                [&traverser](osvr::common::PathNode const &node) {
-                    osvr::common::applyPathNodeVisitor(traverser, node);
-                });
-
-            return cfg;
-        } else {
+        if (!ctx->getStatus()) {
             OSVR_DEV_VERBOSE("Couldn't create a skeleton config! "
-                             "Client context is not yet initialized!!");
+                             "Client context is not yet initialized!");
             throw NoCtxYet();
         }
+        /// Client context is ready
+        SkeletonConfigPtr cfg(new SkeletonConfig(ctx));
+        /// get the path tree
+        osvr::common::clonePathTree(articulationTree, cfg->m_articulationTree);
+
+        ArticulationTreeTraverser traverser(&cfg->m_jointMap, &cfg->m_boneMap,
+                                            &cfg->m_jointInterfaces,
+                                            cfg->m_ctx);
+        osvr::util::traverseWith(
+            articulationTree.getRoot(),
+            [&traverser](osvr::common::PathNode const &node) {
+                osvr::common::applyPathNodeVisitor(traverser, node);
+            });
+
+        return cfg;
     }
 
     SkeletonConfig::SkeletonConfig(OSVR_ClientContext ctx) : m_ctx(ctx) {}

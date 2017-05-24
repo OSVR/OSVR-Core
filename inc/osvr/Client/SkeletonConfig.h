@@ -45,6 +45,10 @@
 // - none
 
 // Standard includes
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace osvr {
 namespace client {
@@ -79,24 +83,25 @@ namespace client {
         SkeletonConfig(SkeletonConfig const &) = delete;
         SkeletonConfig &operator=(SkeletonConfig const &) = delete;
 
-        bool getBoneId(const char *boneName, OSVR_SkeletonBoneCount *boneId);
+        bool getBoneId(const char *boneName,
+                       OSVR_SkeletonBoneCount *boneId) const;
         bool getJointId(const char *jointName,
-                        OSVR_SkeletonJointCount *jointId);
+                        OSVR_SkeletonJointCount *jointId) const;
 
         bool getAvailableJointId(OSVR_SkeletonJointCount jointIndex,
-                                 OSVR_SkeletonJointCount *jointId);
+                                 OSVR_SkeletonJointCount *jointId) const;
 
         bool getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
-                                OSVR_SkeletonBoneCount *boneId);
+                                OSVR_SkeletonBoneCount *boneId) const;
 
-        std::string const getBoneName(OSVR_SkeletonBoneCount boneId);
-        std::string const getJointName(OSVR_SkeletonJointCount jointId);
+        std::string getBoneName(OSVR_SkeletonBoneCount boneId) const;
+        std::string getJointName(OSVR_SkeletonJointCount jointId) const;
 
-        OSVR_Pose3 getBoneState(OSVR_SkeletonBoneCount boneId);
-        OSVR_Pose3 getJointState(OSVR_SkeletonJointCount jointId);
+        OSVR_Pose3 getBoneState(OSVR_SkeletonBoneCount boneId) const;
+        OSVR_Pose3 getJointState(OSVR_SkeletonJointCount jointId) const;
 
-        OSVR_SkeletonBoneCount getNumBones();
-        OSVR_SkeletonJointCount getNumJoints();
+        OSVR_SkeletonBoneCount getNumBones() const;
+        OSVR_SkeletonJointCount getNumJoints() const;
         void
         updateArticulationTree(osvr::common::PathTree const &articulationTree);
         /* @brief Go thru the joint and bone interfaces and set the poses
@@ -119,21 +124,26 @@ namespace client {
         PoseMap m_bonePoses;
     };
 
-    inline bool SkeletonConfig::getBoneId(const char *boneName,
-                                          OSVR_SkeletonBoneCount *boneId) {
-
+    inline bool
+    SkeletonConfig::getBoneId(const char *boneName,
+                              OSVR_SkeletonBoneCount *boneId) const {
+        if (boneId == nullptr) {
+            return false;
+        }
         osvr::util::StringID id = m_boneMap.getStringID(boneName);
         if (id.empty()) {
             return false;
-        } else {
-            *boneId = id.value();
-            return true;
         }
+        *boneId = id.value();
+        return true;
     }
 
-    inline bool
-    SkeletonConfig::getAvailableJointId(OSVR_SkeletonJointCount jointIndex,
-                                        OSVR_SkeletonJointCount *jointId) {
+    inline bool SkeletonConfig::getAvailableJointId(
+        OSVR_SkeletonJointCount jointIndex,
+        OSVR_SkeletonJointCount *jointId) const {
+        if (jointId == nullptr) {
+            return false;
+        }
         *jointId = 0;
         if (jointIndex >= m_jointInterfaces.size()) {
             return false;
@@ -154,9 +164,11 @@ namespace client {
 
     inline bool
     SkeletonConfig::getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
-                                       OSVR_SkeletonBoneCount *boneId) {
+                                       OSVR_SkeletonBoneCount *boneId) const {
+        if (boneId == nullptr) {
+            return false;
+        }
         *boneId = 0;
-
         if (boneIndex >= m_boneMap.getEntries().size()) {
             return false;
         }
@@ -168,23 +180,22 @@ namespace client {
         return ret;
     }
 
-    inline bool SkeletonConfig::getJointId(const char *jointName,
-                                           OSVR_SkeletonJointCount *jointId) {
-
+    inline bool
+    SkeletonConfig::getJointId(const char *jointName,
+                               OSVR_SkeletonJointCount *jointId) const {
+        if (jointId == nullptr) {
+            return false;
+        }
         osvr::util::StringID id = m_jointMap.getStringID(jointName);
         if (id.empty()) {
             return false;
-        } else {
-            *jointId = id.value();
-            return true;
         }
+        *jointId = id.value();
+        return true;
     }
 
     inline OSVR_Pose3
-    SkeletonConfig::getJointState(OSVR_SkeletonJointCount jointId) {
-
-        OSVR_Pose3 pose;
-        osvrPose3SetIdentity(&pose);
+    SkeletonConfig::getJointState(OSVR_SkeletonJointCount jointId) const {
 
         // find an interface for given jointId
         for (auto val : m_jointPoses) {
@@ -198,10 +209,8 @@ namespace client {
     }
 
     inline OSVR_Pose3
-    SkeletonConfig::getBoneState(OSVR_SkeletonBoneCount boneId) {
+    SkeletonConfig::getBoneState(OSVR_SkeletonBoneCount boneId) const {
         /// @todo should be returning derived pose
-        OSVR_Pose3 pose;
-        osvrPose3SetIdentity(&pose);
 
         // find an interface for given boneId
         for (auto val : m_bonePoses) {
@@ -214,26 +223,26 @@ namespace client {
         throw NoPoseYet();
     }
 
-    inline OSVR_SkeletonBoneCount SkeletonConfig::getNumBones() {
+    inline OSVR_SkeletonBoneCount SkeletonConfig::getNumBones() const {
         return static_cast<OSVR_SkeletonBoneCount>(
             m_boneMap.getEntries().size());
     }
 
-    inline OSVR_SkeletonJointCount SkeletonConfig::getNumJoints() {
+    inline OSVR_SkeletonJointCount SkeletonConfig::getNumJoints() const {
         return static_cast<OSVR_SkeletonJointCount>(
             m_jointMap.getEntries().size());
     }
 
-    inline std::string const
-    SkeletonConfig::getBoneName(OSVR_SkeletonBoneCount boneId) {
+    inline std::string
+    SkeletonConfig::getBoneName(OSVR_SkeletonBoneCount boneId) const {
         auto boneName = m_boneMap.getStringFromId(util::StringID(boneId));
         if (boneName.empty()) {
             throw IdNotFound();
         }
         return boneName;
     }
-    inline std::string const
-    SkeletonConfig::getJointName(OSVR_SkeletonJointCount jointId) {
+    inline std::string
+    SkeletonConfig::getJointName(OSVR_SkeletonJointCount jointId) const {
         auto jointName = m_jointMap.getStringFromId(util::StringID(jointId));
         if (jointName.empty()) {
             throw IdNotFound();
@@ -254,7 +263,6 @@ namespace client {
                 m_jointPoses.push_back(std::make_pair(val.first, pose));
             }
         }
-        auto vecSize = m_jointPoses.size();
         for (auto &val : m_boneInterfaces) {
             OSVR_TimeValue timestamp;
             OSVR_Pose3 pose;

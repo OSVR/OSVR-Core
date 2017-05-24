@@ -62,7 +62,8 @@ namespace common {
         return ret;
     }
 
-    util::StringID RegisteredStringMap::getStringID(std::string const &str) {
+    util::StringID
+    RegisteredStringMap::getStringID(std::string const &str) const {
 
         auto entry = std::find(begin(m_regEntries), end(m_regEntries), str);
         if (end(m_regEntries) != entry) {
@@ -96,7 +97,7 @@ namespace common {
         return m_local.registerStringID(str);
     }
 
-    util::StringID CorrelatedStringMap::getStringID(std::string const &str) {
+    util::StringID CorrelatedStringMap::getStringID(std::string const &str) const{
         return m_local.getStringID(str);
     }
 
