@@ -42,8 +42,8 @@ namespace client {
       public:
         void update() {
             // temp copy to avoid invalidated iterators
-            auto m_handlersTemp = m_handlers;
-            for (auto const &handler : m_handlersTemp) {
+            auto handlersTemp = m_handlers;
+            for (auto const &handler : handlersTemp) {
                 handler->update();
             }
         }

@@ -30,12 +30,13 @@
 #include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/ClientReportTypesC.h>
 #include <osvr/Util/ReturnCodesC.h>
+#include <osvr/Util/SkeletonC.h>
 
 /* Library/third-party includes */
 /* none */
 
 /* Standard includes */
-/* none */
+#include <stdint.h>
 
 OSVR_EXTERN_C_BEGIN
 

@@ -27,22 +27,19 @@
 
 // Internal Includes
 #include <osvr/Common/Export.h>
-#include <osvr/Common/PathTree_fwd.h>
-#include <osvr/Common/PathNode_fwd.h>
 #include <osvr/Common/PathElementTypes_fwd.h>
+#include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathTree_fwd.h>
 
 // Library/third-party includes
-// - none
+#include <json/value.h>
 
 // Standard includes
 #include <string>
-#include <json/value.h>
 
 namespace osvr {
 namespace common {
     /// @brief Set up a path tree based on articulationSpec
-    ///
-    /// @return true if changes were made
     void processArticulationSpec(PathNode &devNode, Json::Value const &desc);
 
     OSVR_COMMON_EXPORT void

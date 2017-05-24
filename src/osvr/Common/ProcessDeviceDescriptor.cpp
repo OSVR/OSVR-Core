@@ -82,8 +82,6 @@ namespace common {
     static const char TARGET_KEY[] = "$target";
     static const char SEMANTIC_KEY[] = "semantic";
     static const char AUTOMATIC_KEY[] = "automaticAliases";
-    static const char ARTICULATION_KEY[] = "articulationSpec";
-    static const char DATA_KEY[] = "$data";
     namespace {
         class SemanticRecursion : boost::noncopyable {
           public:

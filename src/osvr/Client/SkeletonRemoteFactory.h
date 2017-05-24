@@ -41,7 +41,8 @@
 #include <json/value.h>
 
 // Standard includes
-// - none
+#include <memory>
+#include <string>
 
 namespace osvr {
 namespace client {

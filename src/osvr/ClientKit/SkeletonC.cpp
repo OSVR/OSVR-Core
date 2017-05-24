@@ -30,6 +30,9 @@
 // Library/third-party includes
 #include <boost/assert.hpp>
 
+// Standard includes
+#include <exception>
+
 // disables warning about potentially unsafe string copy function usage.
 #pragma warning(disable : 4996)
 

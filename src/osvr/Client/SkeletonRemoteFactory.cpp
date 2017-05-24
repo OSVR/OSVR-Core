@@ -43,6 +43,7 @@
 #include <json/value.h>
 
 // Standard includes
+#include <exception>
 
 namespace osvr {
 namespace client {
@@ -51,10 +52,9 @@ namespace client {
         vrpn_ConnectionPtr const &conn, std::string const &deviceName,
         boost::optional<OSVR_ChannelCount> sensor,
         common::InterfaceList &ifaces, common::ClientContext *ctx)
-        : m_dev(common::createClientDevice(deviceName, conn)),
-          m_internals(ifaces), m_ctx(ctx), m_sensor(sensor),
-          m_deviceName(deviceName), m_skeletonConf(nullptr),
-          m_articulationSpec(Json::objectValue) {
+        : m_dev(common::createClientDevice(deviceName, conn)), m_ctx(ctx),
+          m_internals(ifaces), m_sensor(sensor), m_deviceName(deviceName),
+          m_skeletonConf(nullptr), m_articulationSpec(Json::objectValue) {
 
         auto skeleton = common::SkeletonComponent::create("");
         m_skeleton = m_dev->addComponent(skeleton);
