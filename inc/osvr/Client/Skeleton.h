@@ -32,7 +32,7 @@
 // - none
 
 // Standard includes
-// - none
+#include <string>
 
 struct OSVR_SkeletonObject {
   public:
@@ -41,30 +41,28 @@ struct OSVR_SkeletonObject {
                         osvr::common::PathTree const &articulationTree);
     OSVR_CLIENT_EXPORT ~OSVR_SkeletonObject();
 
-    OSVR_CLIENT_EXPORT bool getBoneId(const char *boneName,
-                                      OSVR_SkeletonBoneCount *boneId);
-    OSVR_CLIENT_EXPORT bool getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
-                                               OSVR_SkeletonBoneCount *boneId);
-    OSVR_CLIENT_EXPORT bool
+    OSVR_CLIENT_EXPORT const bool getBoneId(const char *boneName,
+                                            OSVR_SkeletonBoneCount *boneId);
+    OSVR_CLIENT_EXPORT const bool
+    getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
+                       OSVR_SkeletonBoneCount *boneId);
+    OSVR_CLIENT_EXPORT const bool
     getAvailableJointId(OSVR_SkeletonJointCount jointIndex,
                         OSVR_SkeletonJointCount *jointId);
-    OSVR_CLIENT_EXPORT bool getJointId(const char *jointName,
-                                       OSVR_SkeletonJointCount *jointId);
+    OSVR_CLIENT_EXPORT const bool getJointId(const char *jointName,
+                                             OSVR_SkeletonJointCount *jointId);
     OSVR_CLIENT_EXPORT OSVR_Pose3
     getJointState(OSVR_SkeletonJointCount jointId);
     OSVR_CLIENT_EXPORT OSVR_Pose3 getBoneState(OSVR_SkeletonBoneCount boneId);
-    OSVR_CLIENT_EXPORT OSVR_SkeletonBoneCount getNumBones();
-    OSVR_CLIENT_EXPORT OSVR_SkeletonJointCount getNumJoints();
-    OSVR_CLIENT_EXPORT std::string const
-    getBoneName(OSVR_SkeletonBoneCount boneId);
-    OSVR_CLIENT_EXPORT std::string const
-    getJointName(OSVR_SkeletonBoneCount boneId);
+    OSVR_CLIENT_EXPORT const OSVR_SkeletonBoneCount getNumBones();
+    OSVR_CLIENT_EXPORT const OSVR_SkeletonJointCount getNumJoints();
+    OSVR_CLIENT_EXPORT std::string getBoneName(OSVR_SkeletonBoneCount boneId);
+    OSVR_CLIENT_EXPORT std::string getJointName(OSVR_SkeletonBoneCount boneId);
     OSVR_CLIENT_EXPORT void
     updateArticulationSpec(osvr::common::PathTree const &articulationTree);
     OSVR_CLIENT_EXPORT void updateSkeletonPoses();
 
   private:
-    OSVR_ClientContext m_ctx = nullptr;
     osvr::client::SkeletonConfigPtr m_cfg = nullptr;
 };
 

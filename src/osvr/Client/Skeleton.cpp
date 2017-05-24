@@ -33,7 +33,7 @@
 
 OSVR_SkeletonObject::OSVR_SkeletonObject(
     OSVR_ClientContext ctx, osvr::common::PathTree const &articulationTree)
-    : m_ctx(ctx), m_cfg(osvr::client::SkeletonConfigFactory::create(
+    : m_cfg(osvr::client::SkeletonConfigFactory::create(
                       ctx, articulationTree)) {
     OSVR_DEV_VERBOSE("Created OSVR_SkeletonObject!");
 }
@@ -42,48 +42,48 @@ OSVR_SkeletonObject::~OSVR_SkeletonObject() {
     OSVR_DEV_VERBOSE("Destroyed OSVR_SkeletonObject!");
 }
 
-bool OSVR_SkeletonObject::getBoneId(const char *boneName,
+inline const bool OSVR_SkeletonObject::getBoneId(const char *boneName,
                                     OSVR_SkeletonBoneCount *boneId) {
     return m_cfg->getBoneId(boneName, boneId);
 }
 
-bool OSVR_SkeletonObject::getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
+inline const bool OSVR_SkeletonObject::getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
                                              OSVR_SkeletonBoneCount *boneId) {
     return m_cfg->getAvailableBoneId(boneIndex, boneId);
 }
-bool OSVR_SkeletonObject::getAvailableJointId(
+inline const bool OSVR_SkeletonObject::getAvailableJointId(
     OSVR_SkeletonJointCount jointIndex, OSVR_SkeletonJointCount *jointId) {
 
     return m_cfg->getAvailableJointId(jointIndex, jointId);
 }
-bool OSVR_SkeletonObject::getJointId(const char *jointName,
+inline const bool OSVR_SkeletonObject::getJointId(const char *jointName,
                                      OSVR_SkeletonJointCount *jointId) {
     return m_cfg->getJointId(jointName, jointId);
 }
-OSVR_Pose3 OSVR_SkeletonObject::getJointState(OSVR_SkeletonJointCount jointId) {
+inline OSVR_Pose3 OSVR_SkeletonObject::getJointState(OSVR_SkeletonJointCount jointId) {
     return m_cfg->getJointState(jointId);
 }
-OSVR_Pose3 OSVR_SkeletonObject::getBoneState(OSVR_SkeletonBoneCount boneId) {
+inline OSVR_Pose3 OSVR_SkeletonObject::getBoneState(OSVR_SkeletonBoneCount boneId) {
     return m_cfg->getBoneState(boneId);
 }
-OSVR_SkeletonBoneCount OSVR_SkeletonObject::getNumBones() {
+inline const OSVR_SkeletonBoneCount OSVR_SkeletonObject::getNumBones() {
     return m_cfg->getNumBones();
 }
-OSVR_SkeletonJointCount OSVR_SkeletonObject::getNumJoints() {
+inline const OSVR_SkeletonJointCount OSVR_SkeletonObject::getNumJoints() {
     return m_cfg->getNumJoints();
 }
-std::string const
+inline std::string
 OSVR_SkeletonObject::getBoneName(OSVR_SkeletonBoneCount boneId) {
     return m_cfg->getBoneName(boneId);
 }
-std::string const
+inline std::string
 OSVR_SkeletonObject::getJointName(OSVR_SkeletonBoneCount boneId) {
     return m_cfg->getJointName(boneId);
 }
-void OSVR_SkeletonObject::updateArticulationSpec(
+inline void OSVR_SkeletonObject::updateArticulationSpec(
     osvr::common::PathTree const &articulationTree) {
     m_cfg->updateArticulationTree(articulationTree);
 }
-void OSVR_SkeletonObject::updateSkeletonPoses() {
+inline void OSVR_SkeletonObject::updateSkeletonPoses() {
     m_cfg->updateSkeletonPoses();
 }
