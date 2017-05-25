@@ -56,7 +56,6 @@ OSVR_SkeletonObject::getAvailableBoneId(OSVR_SkeletonBoneCount boneIndex,
 inline bool OSVR_SkeletonObject::getAvailableJointId(
     OSVR_SkeletonJointCount jointIndex,
     OSVR_SkeletonJointCount *jointId) const {
-
     return m_cfg->getAvailableJointId(jointIndex, jointId);
 }
 inline bool
