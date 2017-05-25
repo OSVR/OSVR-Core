@@ -84,6 +84,7 @@ set(API
     "${HEADER_LOCATION}/NormalizeDeviceDescriptor.h"
     "${HEADER_LOCATION}/OriginalSource.h"
     "${HEADER_LOCATION}/ParseAlias.h"
+    "${HEADER_LOCATION}/ParseArticulation.h"
     "${HEADER_LOCATION}/PathElementTools.h"
     "${HEADER_LOCATION}/PathElementTypes.h"
     "${HEADER_LOCATION}/PathElementTypes_fwd.h"
@@ -96,6 +97,7 @@ set(API
     "${HEADER_LOCATION}/PathTreeOwner.h"
     "${HEADER_LOCATION}/PathTreeSerialization.h"
     "${HEADER_LOCATION}/PathTree_fwd.h"
+    "${HEADER_LOCATION}/ProcessArticulationSpec.h"
     "${HEADER_LOCATION}/ProcessDeviceDescriptor.h"
     "${HEADER_LOCATION}/RawMessageType.h"
     "${HEADER_LOCATION}/RawSenderType.h"
@@ -114,6 +116,8 @@ set(API
     "${HEADER_LOCATION}/Serialization.h"
     "${HEADER_LOCATION}/SerializationTags.h"
     "${HEADER_LOCATION}/SerializationTraits.h"
+    "${HEADER_LOCATION}/SkeletonComponent.h"
+    "${HEADER_LOCATION}/SkeletonComponentPtr.h"
     "${HEADER_LOCATION}/StateType.h"
     "${HEADER_LOCATION}/SystemComponent.h"
     "${HEADER_LOCATION}/SystemComponent_fwd.h"
@@ -157,6 +161,7 @@ set(SOURCE
     NormalizeDeviceDescriptor.cpp
     OriginalSource.cpp
     ParseAlias.cpp
+    ParseArticulation.cpp
     PathElementSerialization.h
     PathElementSerializationDescriptions.h
     PathElementTools.cpp
@@ -167,6 +172,7 @@ set(SOURCE
     PathTreeObserver.cpp
     PathTreeOwner.cpp
     PathTreeSerialization.cpp
+    ProcessArticulationSpec.cpp
     ProcessDeviceDescriptor.cpp
     RawMessageType.cpp
     RawSenderType.cpp
@@ -178,6 +184,7 @@ set(SOURCE
     RoutingKeys.cpp
     SharedMemory.h
     SharedMemoryObjectWithMutex.h
+    SkeletonComponent.cpp
     SystemComponent.cpp
     Tracing.cpp)
 
