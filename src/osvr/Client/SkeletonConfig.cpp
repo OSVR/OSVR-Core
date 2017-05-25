@@ -170,5 +170,28 @@ namespace client {
             });
     }
 
+    void SkeletonConfig::updateSkeletonPoses() {
+
+        // clear old values
+        m_jointPoses.clear();
+        m_bonePoses.clear();
+
+        for (auto &val : m_jointInterfaces) {
+            OSVR_TimeValue timestamp;
+            OSVR_Pose3 pose;
+            osvrPose3SetIdentity(&pose);
+            if (val.second->getState<OSVR_PoseReport>(timestamp, pose)) {
+                m_jointPoses.push_back(std::make_pair(val.first, pose));
+            }
+        }
+        for (auto &val : m_boneInterfaces) {
+            OSVR_TimeValue timestamp;
+            OSVR_Pose3 pose;
+            osvrPose3SetIdentity(&pose);
+            if (val.second->getState<OSVR_PoseReport>(timestamp, pose)) {
+                m_bonePoses.push_back(std::make_pair(val.first, pose));
+            }
+        }
+    }
 } // namespace client
 } // namespace osvr
