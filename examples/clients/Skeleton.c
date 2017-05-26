@@ -64,7 +64,8 @@ void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp,
 
     printf("\tnumJoints: %d, numBones: %d\n", numJoints, numBones);
 
-    for (OSVR_SkeletonJointCount joint = 0; joint < numJoints; joint++) {
+    OSVR_SkeletonJointCount joint;
+    for (joint = 0; joint < numJoints; joint++) {
         uint32_t len = 0;
         OSVR_SkeletonJointCount jointId = 0;
         rc = osvrClientGetSkeletonAvailableJointId(skel, joint, &jointId);
@@ -112,7 +113,8 @@ void mySkeletonCallback(void *userdata, const OSVR_TimeValue *timestamp,
                osvrQuatGetW(&jointState.pose.rotation));
     }
 
-    for (OSVR_SkeletonBoneCount bone = 0; bone < numBones; bone++) {
+    OSVR_SkeletonBoneCount bone;
+    for (bone = 0; bone < numBones; bone++) {
         uint32_t len = 0;
         OSVR_SkeletonBoneCount boneId = 0;
         rc = osvrClientGetSkeletonAvailableBoneId(skel, bone, &boneId);
