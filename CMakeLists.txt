@@ -607,6 +607,19 @@ if(ANDROID AND "${ANDROID_STL}" STREQUAL "gnustl_shared")
     endif()
 endif()
 
+IF("${CMAKE_SYSTEM}" MATCHES "Linux")
+  if(EXISTS "/lib/udev/rules.d/")
+    install(FILES
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/99-sensics-usb.rules"
+      DESTINATION
+      "/lib/udev/rules.d/"
+      COMPONENT
+      Runtime)
+  else()
+    message(WARNING "Could not find udev rules directory (/lib/udev/rules.d/), skipping installation of udev rules (needed to run osvr_server as non-root user).")
+  endif()
+endif()
+
 ###
 # Install dependencies
 ###

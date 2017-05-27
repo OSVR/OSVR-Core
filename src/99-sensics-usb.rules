@@ -1,0 +1,22 @@
+# udev file for USB interfaces on Sensics-based HMDs and emulated devices
+
+###
+# Section to permit access to HID streaming
+###
+
+# OSVR HDK (via HIDAPI/libusb)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", MODE="0660", GROUP="plugdev" #Enable access from plugdev group
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", ENV{ID_MM_DEVICE_IGNORE}="1" #Ask modemmanager to ignore this
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", SYMLINK+="ttyUSB.OSVRHDK" #Add a friendly device alias
+# OSVR HDK (via HIDAPI/hidraw)
+KERNEL=="hidraw*", ATTRS{busnum}=="1", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", MODE="0660", GROUP="plugdev"
+
+# OSVR audio access
+SUBSYSTEM=="usb", ATTR{idVendor}=="0572", ATTR{idProduct}=="1806", MODE="0666", GROUP="plugdev" 
+
+# OSVR HDK tracker camera access
+SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="57e8", MODE="0666", GROUP="plugdev"
+
+# Sensics zSight
+SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0515", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0515", SYMLINK+="ttyUSB.zSight"
