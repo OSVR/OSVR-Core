@@ -50,26 +50,21 @@ void osvrClientAttemptServerAutoStart()
     // @todo start the server.
 #if defined(OSVR_ANDROID)
     if(!gServer) {
-        try {
-            OSVR_DEV_VERBOSE("Creating android auto-start server. Looking at config file paths:");
-            std::vector<std::string> configPaths = osvr::server::getDefaultConfigFilePaths();
-            for(size_t i = 0; i < configPaths.size(); i++) {
-                OSVR_DEV_VERBOSE(configPaths[i]);
-            }
-            
-            gServer = osvr::server::configureServerFromFirstFileInList(configPaths);
-            if(!gServer) {
-                OSVR_DEV_VERBOSE("Failed to create Android-auto-start server. Most likely the server is already running.");
-                return;
-            }
-            OSVR_DEV_VERBOSE("Android-auto-start server created. Starting server thread...");
-
-            gServer->start();
-            OSVR_DEV_VERBOSE("Android server thread started...");
-        } catch(...) {
-            OSVR_DEV_VERBOSE("Android server auto-start failed to start. Most likely the server is already running.");
-            gServer = nullptr;
+        OSVR_DEV_VERBOSE("Creating android auto-start server. Looking at config file paths:");
+        std::vector<std::string> configPaths = osvr::server::getDefaultConfigFilePaths();
+        for(size_t i = 0; i < configPaths.size(); i++) {
+            OSVR_DEV_VERBOSE(configPaths[i]);
         }
+        
+        gServer = osvr::server::configureServerFromFirstFileInList(configPaths);
+        if(!gServer) {
+            OSVR_DEV_VERBOSE("Failed to create Android-auto-start server. Most likely the server is already running.");
+            return;
+        }
+        OSVR_DEV_VERBOSE("Android-auto-start server created. Starting server thread...");
+
+        gServer->start();
+        OSVR_DEV_VERBOSE("Android server thread started...");
     }
 #else
     auto server = osvr::client::getServerBinaryDirectoryPath();
