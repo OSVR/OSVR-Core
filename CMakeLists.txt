@@ -143,7 +143,7 @@ endif()
 
 # Must be before MapImportedReleaseVariants
 find_package(OpenGL)
-find_package(SDL2)
+find_package(SDL2 REQUIRED)
 
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
