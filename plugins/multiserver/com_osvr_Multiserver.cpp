@@ -143,7 +143,7 @@ class VRPNHardwareDetect : boost::noncopyable {
                         name =
                             reg.useDecoratedName(m_data.getName("RazerHydra"));
                         reg.registerDevice(new vrpn_Tracker_RazerHydra(
-                            name.c_str(), ctrlDev->path, dataDev->path,
+                            name.c_str(), // ctrlDev->path, dataDev->path,
                             reg.getVRPNConnection()));
                         reg.setDeviceDescriptor(hydraJsonString);
                     }
