@@ -23,8 +23,8 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/PluginHost/SearchPath.h>
 #include <osvr/PluginHost/PathConfig.h>
+#include <osvr/PluginHost/SearchPath.h>
 #include <osvr/Util/BinaryLocation.h>
 #include <osvr/Util/Verbosity.h>
 
@@ -33,9 +33,9 @@
 #include <boost/range/iterator_range.hpp>
 
 // Standard includes
-#include <vector>
-#include <string>
 #include <algorithm>
+#include <string>
+#include <vector>
 
 namespace osvr {
 namespace pluginhost {
@@ -172,11 +172,20 @@ namespace pluginhost {
                 }
                 const auto pluginBaseName =
                     pluginCandidate.filename().stem().generic_string();
+
+#if defined(_MSC_VER) && !defined(NDEBUG)
+                // Visual C++ debug runtime: we append to the plugin name.
+                const std::string decoratedPluginName =
+                    pluginName + OSVR_PLUGIN_DEBUG_SUFFIX;
+#else
+                const std::string &decoratedPluginName = pluginName;
+#endif
+
                 /// If the name is right or has the manual load suffix, this is
                 /// a good one.
                 if ((pluginBaseName == pluginName) ||
                     (pluginBaseName ==
-                     pluginName + OSVR_PLUGIN_IGNORE_SUFFIX)) {
+                     decoratedPluginName + OSVR_PLUGIN_IGNORE_SUFFIX)) {
                     return pluginPathName.path().generic_string();
                 }
             }

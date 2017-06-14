@@ -45,6 +45,7 @@ endif()
 
 # Shouldn't be changed without being fully aware of the consequences.
 set(OSVR_PLUGIN_IGNORE_SUFFIX ".manualload")
+set(OSVR_PLUGIN_DEBUG_SUFFIX ".debug")
 
 # Figure out what to do with osvr_json_to_c
 if(CMAKE_CROSSCOMPILING OR ANDROID)
