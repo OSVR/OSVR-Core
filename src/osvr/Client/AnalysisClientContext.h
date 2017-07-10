@@ -26,17 +26,17 @@
 #define INCLUDED_AnalysisClientContext_h_GUID_6B2A41C3_C718_45AD_223E_4271ABBA8427
 
 // Internal Includes
-#include <osvr/Common/ClientContext.h>
-#include <osvr/Common/BaseDevicePtr.h>
-#include <osvr/Common/Transform.h>
-#include <osvr/Common/SystemComponent_fwd.h>
-#include <osvr/Common/PathTree.h>
-#include <osvr/Util/TimeValue_fwd.h>
+#include "VRPNConnectionCollection.h"
+#include <osvr/Client/ClientInterfaceObjectManager.h>
 #include <osvr/Client/InterfaceTree.h>
 #include <osvr/Client/RemoteHandlerFactory.h>
-#include <osvr/Client/ClientInterfaceObjectManager.h>
+#include <osvr/Common/BaseDevicePtr.h>
+#include <osvr/Common/ClientContext.h>
+#include <osvr/Common/PathTree.h>
 #include <osvr/Common/PathTreeOwner.h>
-#include "VRPNConnectionCollection.h"
+#include <osvr/Common/SystemComponent_fwd.h>
+#include <osvr/Common/Transform.h>
+#include <osvr/Util/TimeValue_fwd.h>
 
 // Library/third-party includes
 // - none
@@ -78,6 +78,7 @@ namespace client {
         m_setRoomToWorldTransform(common::Transform const &xform) override {
             m_roomToWorld = xform;
         }
+
         bool m_getStatus() const override;
 
         /// @brief the vrpn_Connection corresponding to m_host

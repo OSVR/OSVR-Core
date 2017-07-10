@@ -1,0 +1,147 @@
+{
+    "deviceVendor": "Sensics",
+    "deviceName": "Gesture",
+    "author": "Georgiy Frolov georgiy@sensics.com",
+    "version": 1,
+    "lastModified": "",
+    "interfaces": {
+        "skeleton": {
+            "count": 2,
+            "bounded": true
+        },
+        "tracker": {
+            "count": 12
+        }
+    },
+    "articulationSpec": [
+        {
+            "l_wrist": {
+                "$data": {
+                    "data": "tracker/0",
+                    "boneName": "l_hand",
+                    "type": "joint"
+                },
+                "l_thumb1": {
+                    "$data": {
+                        "data": "tracker/1",
+                        "boneName": "l_thumb_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "l_index0": {
+                    "$data": {
+                        "data": "tracker/2",
+                        "boneName": "l_index_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "l_middle0": {
+                    "$data": {
+                        "data": "tracker/3",
+                        "boneName": "l_middle_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "l_ring0": {
+                    "$data": {
+                        "data": "tracker/4",
+                        "boneName": "l_ring_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "l_pinky0": {
+                    "$data": {
+                        "data": "tracker/5",
+                        "boneName": "l_pinky_metacarpal",
+                        "type": "joint"
+                    }
+                }
+            }
+        },
+        {
+            "r_wrist": {
+                "$data": {
+                    "data": "tracker/6",
+                    "boneName": "r_hand",
+                    "type": "joint"
+                },
+                "r_thumb1": {
+                    "$data": {
+                        "data": "tracker/7",
+                        "boneName": "r_thumb_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "r_index0": {
+                    "$data": {
+                        "data": "tracker/8",
+                        "boneName": "r_index_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "r_middle0": {
+                    "$data": {
+                        "data": "tracker/9",
+                        "boneName": "r_middle_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "r_ring0": {
+                    "$data": {
+                        "data": "tracker/10",
+                        "boneName": "r_ring_metacarpal",
+                        "type": "joint"
+                    }
+                },
+                "r_pinky0": {
+                    "$data": {
+                        "data": "tracker/11",
+                        "boneName": "r_pinky_metacarpal",
+                        "type": "joint"
+                    }
+                }
+            }
+        }
+    ],
+    "semantic": {
+        "hands": {
+            "left": {
+                "$target": "tracker/0",
+                "thumb": {
+                    "distal": "tracker/1"
+                },
+                "index": {
+                    "distal": "tracker/2"
+                },
+                "middle": {
+                    "distal": "tracker/3"
+                },
+                "ring": {
+                    "distal": "tracker/4"
+                },
+                "pinky": {
+                    "distal": "tracker/5"
+                }
+            },
+            "right": {
+                "$target": "tracker/6",
+                "thumb": {
+                    "distal": "tracker/7"
+                },
+                "index": {
+                    "distal": "tracker/8"
+                },
+                "middle": {
+                    "distal": "tracker/9"
+                },
+                "ring": {
+                    "distal": "tracker/10"
+                },
+                "pinky": {
+                    "distal": "tracker/11"
+                }
+            }
+        }
+    },
+    "automaticAliases": {}
+}

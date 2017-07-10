@@ -46,7 +46,8 @@ namespace common {
         }
     }
 
-    util::StringID RegisteredStringMap::getStringID(std::string const &str) {
+    util::StringID
+    RegisteredStringMap::registerStringID(std::string const &str) {
         auto entry = std::find(begin(m_regEntries), end(m_regEntries), str);
         if (end(m_regEntries) != entry) {
             // we found it.
@@ -59,6 +60,18 @@ namespace common {
         m_regEntries.push_back(str);
         m_modified = true;
         return ret;
+    }
+
+    util::StringID
+    RegisteredStringMap::getStringID(std::string const &str) const {
+
+        auto entry = std::find(begin(m_regEntries), end(m_regEntries), str);
+        if (end(m_regEntries) != entry) {
+            // we found it.
+            return util::StringID(std::distance(begin(m_regEntries), entry));
+        }
+        // we did not find an entry with given string
+        return util::StringID();
     }
 
     std::string RegisteredStringMap::getStringFromId(util::StringID id) const {
@@ -79,7 +92,12 @@ namespace common {
         return m_regEntries;
     }
 
-    util::StringID CorrelatedStringMap::getStringID(std::string const &str) {
+    util::StringID
+    CorrelatedStringMap::registerStringID(std::string const &str) {
+        return m_local.registerStringID(str);
+    }
+
+    util::StringID CorrelatedStringMap::getStringID(std::string const &str) const{
         return m_local.getStringID(str);
     }
 
@@ -104,7 +122,7 @@ namespace common {
         auto n = peerEntries.size();
         for (uint32_t i = 0; i < n; ++i) {
             m_remoteToLocal.push_back(
-                m_local.getStringID(peerEntries[i]).value());
+                m_local.registerStringID(peerEntries[i]).value());
         }
     }
 } // namespace common

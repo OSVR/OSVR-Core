@@ -31,6 +31,7 @@
 #include "ImagingRemoteFactory.h"
 #include "Location2DRemoteFactory.h"
 #include "LocomotionRemoteFactory.h"
+#include "SkeletonRemoteFactory.h"
 #include "TrackerRemoteFactory.h"
 
 // Library/third-party includes
@@ -47,11 +48,12 @@ namespace client {
         TrackerRemoteFactory(conns).registerWith(factory);
         AnalogRemoteFactory(conns).registerWith(factory);
         ButtonRemoteFactory(conns).registerWith(factory);
-        ImagingRemoteFactory(conns).registerWith(factory);
         EyeTrackerRemoteFactory(conns).registerWith(factory);
+        ImagingRemoteFactory(conns).registerWith(factory);
         Location2DRemoteFactory(conns).registerWith(factory);
         LocomotionRemoteFactory(conns).registerWith(factory);
         DirectionRemoteFactory(conns).registerWith(factory);
+        SkeletonRemoteFactory(conns).registerWith(factory);
     }
 
 } // namespace client
