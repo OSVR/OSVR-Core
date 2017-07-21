@@ -55,15 +55,6 @@ namespace common {
     /// that would interfere with communication.
     static IPCRingBuffer::abi_level_type SHM_SOURCE_ABI_LEVEL = 0;
 
-/// Some tests that can be automated for ensuring validity of the ABI level
-/// number.
-/// The base boost version test has been moved exclusively to CMake, to error
-/// out earlier.
-#if (BOOST_VERSION > 106300)
-#error                                                                         \
-    "Using an untested Boost version - inspect the Boost Interprocess release notes/changelog to see if any ABI breaks affect us."
-#endif
-
 #ifdef _WIN32
 #if (BOOST_VERSION < 105400)
 #error                                                                         \

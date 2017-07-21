@@ -20,6 +20,7 @@ set(API
     "${HEADER_LOCATION}/Parameters.h"
     "${HEADER_LOCATION}/ParametersC.h"
     "${HEADER_LOCATION}/ServerAutoStartC.h"
+    "${HEADER_LOCATION}/SkeletonC.h"
     "${HEADER_LOCATION}/SystemCallbackC.h"
     "${HEADER_LOCATION}/TransformsC.h")
 
@@ -33,6 +34,7 @@ set(SOURCE
     InterfaceStateC.cpp
     ParametersC.cpp
     ServerAutoStartC.cpp
+    SkeletonC.cpp
     SystemCallbackC.cpp
     TransformsC.cpp)
 
@@ -58,7 +60,9 @@ target_link_libraries(${LIBNAME_FULL}
     osvrUtilCpp
     osvrCommon
     spdlog
-    eigen-headers)
+    eigen-headers
+    JsonCpp::JsonCpp
+    vendored-vrpn)
 
 if(ANDROID)
     target_link_libraries(${LIBNAME_FULL}

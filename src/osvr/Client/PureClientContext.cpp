@@ -24,23 +24,22 @@
 
 // Internal Includes
 #include "PureClientContext.h"
-#include <osvr/Common/SystemComponent.h>
+#include <boost/algorithm/string.hpp>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ClientInterface.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Util/Verbosity.h>
-#include <osvr/Common/DeduplicatingFunctionWrapper.h>
-
-#include <boost/algorithm/string.hpp>
 
 // Library/third-party includes
 #include <json/value.h>
 
 // Standard includes
-#include <unordered_set>
 #include <thread>
+#include <unordered_set>
 
 namespace osvr {
 namespace client {
@@ -159,8 +158,9 @@ namespace client {
             << std::chrono::duration_cast<std::chrono::milliseconds>(
                    timeToStartup)
                    .count()
-            << "ms: " << (m_gotConnection ? "have connection to server, "
-                                          : "don't have connection to server, ")
+            << "ms: "
+            << (m_gotConnection ? "have connection to server, "
+                                : "don't have connection to server, ")
             << (m_pathTreeOwner ? "have path tree" : "don't have path tree");
     }
 

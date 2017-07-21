@@ -56,7 +56,7 @@ before_install:
       popd;
     fi"
 install:
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall json-c; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall --ignore-dependencies json-c; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then /usr/bin/yes | pip uninstall numpy; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libusb opencv; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp; fi"

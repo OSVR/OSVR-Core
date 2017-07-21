@@ -105,6 +105,7 @@ namespace pluginhost {
         if (currentWorkingDirectory != root) {
             addUniquePath(currentWorkingDirectory / OSVR_PLUGIN_DIR);
         }
+
 #endif
 
         for (auto const &possibleRoot : rootDirCandidates) {

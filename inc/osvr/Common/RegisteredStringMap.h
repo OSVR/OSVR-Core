@@ -42,9 +42,15 @@ namespace common {
     /// of the client side internals.
     class RegisteredStringMap {
       public:
-        /// retrieve the ID for the current name or register new ID and return
-        /// that
-        OSVR_COMMON_EXPORT util::StringID getStringID(std::string const &str);
+        /// register new ID with given string and returns StringID.
+        /// If string already exists, then it returns existing StringID
+        OSVR_COMMON_EXPORT util::StringID
+        registerStringID(std::string const &str);
+
+        /// retrieve the StringID associated with the given string
+        /// returns an empty util::StringID if it was not found
+        OSVR_COMMON_EXPORT util::StringID
+        getStringID(std::string const &str) const;
 
         /// retrieve the name of the string given the ID
         /// returns empty string if nothing found
@@ -72,9 +78,14 @@ namespace common {
     /// they are separate entities
     class CorrelatedStringMap {
       public:
-        /// retrieve the ID for the current name or register new ID and return
-        /// that
-        OSVR_COMMON_EXPORT util::StringID getStringID(std::string const &str);
+        /// register new ID with given string and returns StringID.
+        /// If string already exists, then it returns existing StringID
+        OSVR_COMMON_EXPORT util::StringID
+        registerStringID(std::string const &str);
+
+        /// retrieve the StringID associated with the given string
+        /// returns an empty util::StringID if it's not found
+        OSVR_COMMON_EXPORT util::StringID getStringID(std::string const &str) const;
 
         /// retrieve the name of the string given the ID
         /// returns empty string if nothing found
