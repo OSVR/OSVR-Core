@@ -40,6 +40,10 @@ namespace common {
         using namespace boost::math::double_constants;
         return degrees * pi / 180.0;
     }
+    inline double radiansToDegrees(double degrees) {
+      using namespace boost::math::double_constants;
+      return degrees * 180.0 / pi;
+    }
 } // namespace common
 } // namespace osvr
 #endif // INCLUDED_DegreesToRadians_h_GUID_8354A4E2_30FF_429C_2569_E83EEF10E13A
