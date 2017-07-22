@@ -57,6 +57,10 @@ void osvrClientAttemptServerAutoStart()
         }
         
         gServer = osvr::server::configureServerFromFirstFileInList(configPaths);
+        if(!gServer) {
+            OSVR_DEV_VERBOSE("Failed to create Android-auto-start server. Most likely the server is already running.");
+            return;
+        }
         OSVR_DEV_VERBOSE("Android-auto-start server created. Starting server thread...");
 
         gServer->start();
