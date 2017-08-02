@@ -96,7 +96,6 @@ namespace osvr {
                     auto &timeWarp = params["timeWarp"];
                     m_enableTimeWarp = timeWarp["enabled"].asBool();
                     m_justInTimeWarp = timeWarp["justInTime"].asBool();
-                    m_justInTimeWarpRotation = timeWarp["justInTimeRotation"].asFloat();
                     m_asynchronousTimeWarp = timeWarp["asynchronous"].asBool();
                     m_maxMSBeforeVsyncTimeWarp = timeWarp["maxMsBeforeVSync"].asFloat();
                 }
@@ -166,11 +165,6 @@ namespace osvr {
             inline bool getJustInTimeWarp() const
             {
               return m_justInTimeWarp;
-            }
-
-            inline float getJustInTimeWarpRotation() const
-            {
-              return m_justInTimeWarpRotation;
             }
 
             inline float getMaxMSBeforeVsyncTimeWarp() const
@@ -280,7 +274,6 @@ namespace osvr {
 
             bool m_enableTimeWarp;
             bool m_justInTimeWarp;
-            float m_justInTimeWarpRotation;
             bool m_asynchronousTimeWarp;
             float m_maxMSBeforeVsyncTimeWarp;
             float m_renderOverfillFactor;
