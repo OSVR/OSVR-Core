@@ -60,7 +60,7 @@ void MediaSampleExchange::signalSampleProduced(IMediaSample *sample) {
 }
 
 bool MediaSampleExchange::waitForSample(std::chrono::milliseconds timeout) {
-    return impl_->produced.wait(timeout.count());
+    return impl_->produced.wait(static_cast<DWORD>(timeout.count()));
 }
 
 void MediaSampleExchange::signalSampleConsumed() {
@@ -75,5 +75,5 @@ bool MediaSampleExchange::waitForSampleConsumed(
     BOOST_ASSERT_MSG(
         sample_ != nullptr,
         "Sample pointer should not be null when waiting for consumer!");
-    return impl_->consumed.wait(timeout.count());
+    return impl_->consumed.wait(static_cast<DWORD>(timeout.count()));
 }
