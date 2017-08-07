@@ -26,9 +26,9 @@
 #define INCLUDED_PathTree_h_GUID_8C6C691A_AAB1_4586_64DD_BD3F870C9071
 
 // Internal Includes
-#include <osvr/Common/PathTree_fwd.h> // IWYU pragma: export
 #include <osvr/Common/Export.h>
 #include <osvr/Common/PathNode_fwd.h>
+#include <osvr/Common/PathTree_fwd.h> // IWYU pragma: export
 
 // Library/third-party includes
 #include <boost/noncopyable.hpp>
@@ -117,6 +117,9 @@ namespace common {
     bool addAliasFromSourceAndRelativeDest(
         PathNode &node, std::string const &source, std::string const &dest,
         AliasPriority priority = ALIASPRIORITY_MANUAL);
+
+    bool addArticulation(PathNode &node, std::string const &source,
+                         std::string const &dest);
 
     bool isPathAbsolute(std::string const &source);
 

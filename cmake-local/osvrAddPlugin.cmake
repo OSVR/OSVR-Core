@@ -22,7 +22,17 @@ function(osvr_add_plugin)
     if(NOT OSVR_ADD_PLUGIN_SOURCES)
         set(OSVR_ADD_PLUGIN_SOURCES ${OSVR_ADD_PLUGIN_UNPARSED_ARGUMENTS})
     endif()
-    add_library(${OSVR_ADD_PLUGIN_NAME} MODULE ${OSVR_ADD_PLUGIN_SOURCES})
+    
+    if(ANDROID)
+        # @TODO temporary workaround for Android plugins. Our toolchain file
+        # seems to build Android MODULE libraries without a SONAME, but the SONAME
+        # is required on the latest Android dynamic linker, so we build them as
+        # SHARED for now.
+        add_library(${OSVR_ADD_PLUGIN_NAME} SHARED ${OSVR_ADD_PLUGIN_SOURCES})
+    else()
+        add_library(${OSVR_ADD_PLUGIN_NAME} MODULE ${OSVR_ADD_PLUGIN_SOURCES})
+    endif()
+
     if(OSVR_ADD_PLUGIN_CPP)
         target_link_libraries(${OSVR_ADD_PLUGIN_NAME} osvr::osvrPluginKitCpp)
     else()
@@ -31,6 +41,7 @@ function(osvr_add_plugin)
 
     if(ANDROID)
         set(OSVR_PLUGIN_PREFIX "lib")
+        target_link_libraries(${OSVR_ADD_PLUGIN_NAME} "-z global")
     else()
         set(OSVR_PLUGIN_PREFIX "")
     endif()

@@ -99,7 +99,9 @@ namespace common {
                         nonDigit = true;
                     }
                 }
-                if (!nonDigit) { return server; }
+                if (!nonDigit) {
+                    return server;
+                }
             }
             // OK, didn't end with a port
             if (server.find(":") != std::string::npos &&
@@ -123,8 +125,8 @@ namespace common {
             DeviceElement ret;
             ret.m_devName = deviceName;
             // explicitly specify VRPN port
-            ret.m_server =
-                attachPortToServerIfNoneSpecified(server, util::DefaultVRPNPort);
+            ret.m_server = attachPortToServerIfNoneSpecified(
+                server, util::DefaultVRPNPort);
 
             return ret;
         }
@@ -167,6 +169,39 @@ namespace common {
         Json::Value const &DeviceElement::getDescriptor() const {
             return m_descriptor;
         }
+
+        void ArticulationElement::setArticulationType(
+            std::string const &articulationType) {
+            m_articulationType = articulationType;
+        }
+
+        void ArticulationElement::setBoneName(std::string const &boneName) {
+            m_boneName = boneName;
+        }
+
+        void
+        ArticulationElement::setTrackerPath(std::string const &trackerPath) {
+            m_trackerPath = trackerPath;
+        }
+
+        std::string &ArticulationElement::getArticulationType() {
+            return m_articulationType;
+        }
+        std::string const &ArticulationElement::getArticulationType() const {
+            return m_articulationType;
+        }
+        std::string &ArticulationElement::getBoneName() { return m_boneName; }
+        std::string const &ArticulationElement::getBoneName() const {
+            return m_boneName;
+        }
+
+        std::string &ArticulationElement::getTrackerPath() {
+            return m_trackerPath;
+        }
+        std::string const &ArticulationElement::getTrackerPath() const {
+            return m_trackerPath;
+        }
+
     } // namespace elements
 } // namespace common
 } // namespace osvr

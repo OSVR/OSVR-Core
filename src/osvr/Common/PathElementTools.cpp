@@ -27,10 +27,10 @@
 #include <osvr/Common/PathElementTypes.h>
 
 // Library/third-party includes
-#include <boost/variant/static_visitor.hpp>
+#include <boost/mpl/for_each.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
-#include <boost/mpl/for_each.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 // Standard includes
 #include <algorithm>
@@ -55,6 +55,7 @@ namespace common {
             /// All types included in the bounded typelist of PathElement must
             /// be in this list. It's kept sorted for ease of maintenance.
             OSVR_ROUTING_TYPENAME_HANDLER(AliasElement)
+            OSVR_ROUTING_TYPENAME_HANDLER(ArticulationElement)
             OSVR_ROUTING_TYPENAME_HANDLER(DeviceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(InterfaceElement)
             OSVR_ROUTING_TYPENAME_HANDLER(NullElement)

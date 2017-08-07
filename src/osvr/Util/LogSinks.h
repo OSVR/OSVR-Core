@@ -149,7 +149,7 @@ namespace util {
 #if defined(OSVR_ANDROID)
             // Android doesn't have a console, it has logcat.
             auto android_sink =
-                std::make_shared<spdlog::sinks::android_sink_mt>(
+                std::make_shared<spdlog::sinks::android_sink>(
                     ANDROID_LOG_TAG);
             return android_sink;
 #else

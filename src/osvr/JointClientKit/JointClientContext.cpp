@@ -24,31 +24,31 @@
 
 // Internal Includes
 #include "JointClientContext.h"
-#include <osvr/Common/SystemComponent.h>
+#include <osvr/Common/ClientInterface.h>
 #include <osvr/Common/CreateDevice.h>
-#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/DeduplicatingFunctionWrapper.h>
 #include <osvr/Common/PathElementTools.h>
 #include <osvr/Common/PathElementTypes.h>
-#include <osvr/Common/ClientInterface.h>
-#include <osvr/Util/Verbosity.h>
-#include <osvr/Common/DeduplicatingFunctionWrapper.h>
+#include <osvr/Common/PathTreeFull.h>
+#include <osvr/Common/SystemComponent.h>
 #include <osvr/Connection/Connection.h>
 #include <osvr/Server/Server.h>
+#include <osvr/Util/Verbosity.h>
 
 // Library/third-party includes
 #include <json/value.h>
 
 // Standard includes
-#include <unordered_set>
 #include <thread>
+#include <unordered_set>
 
 namespace osvr {
 namespace client {
 
     static const auto HOST = "localhost";
-    //static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
-    //static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
-    //static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
+    // static const std::chrono::milliseconds STARTUP_CONNECT_TIMEOUT(200);
+    // static const std::chrono::milliseconds STARTUP_TREE_TIMEOUT(1000);
+    // static const std::chrono::milliseconds STARTUP_LOOP_SLEEP(1);
 
     JointClientContext::JointClientContext(const char appId[],
                                            common::ClientContextDeleter del)
