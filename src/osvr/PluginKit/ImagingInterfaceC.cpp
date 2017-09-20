@@ -49,11 +49,11 @@ OSVR_ImageBufferElement *gLastFrameBuffer = NULL;
 OSVR_ImagingMetadata gLastFrameMetadata;
 
 extern "C" {
-    JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
+    JNIEXPORT void JNICALL Java_com_osvr_common_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
       jbyteArray data, jlong width, jlong height);
 }
 
-JNIEXPORT void JNICALL Java_com_osvr_android_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
+JNIEXPORT void JNICALL Java_com_osvr_common_jni_JNIBridge_reportFrame(JNIEnv * env, jclass clazz,
     jbyteArray data, jlong width, jlong height) {
 
     gLastFrameMetadata.height = (OSVR_ImageDimension)height;
