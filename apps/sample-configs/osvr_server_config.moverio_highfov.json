@@ -1,0 +1,98 @@
+{
+  "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK 2, for units that were manufactured as HDK2 (NOT UPGRADED FROM HDK 1.x!). It is configured for RenderManager applications in direct mode on HDK2 optics.",
+  "display": {
+  "meta": {
+    "schemaVersion": 1
+  },
+  "hmd": {
+    "device": {
+      "vendor": "OSVR",
+      "model": "HDK",
+      "num_displays": 1,
+      "Version": "1.3",
+      "Note": "Specific to the optics of 1.3, with Render Manager compatible distortion parameters"
+    },
+    "field_of_view": {
+      "monocular_horizontal": 90,
+      "monocular_vertical": 50.98299243,
+      "overlap_percent": 100,
+      "pitch_tilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 1280,
+        "height": 720,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side",
+        "swap_eyes": 0
+      }
+    ],
+    "distortion": {
+	  "k1_red": 0,
+      "k1_green": 0,
+      "k1_blue": 0
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
+      },
+      {
+        "center_proj_x": 0.5,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
+      }
+    ]
+  }
+},
+  "renderManagerConfig": {
+    "meta": {
+        "schemaVersion": 1
+    },
+    "renderManagerConfig": {
+        "directModeEnabled": false,
+        "directDisplayIndex": 0,
+        "directHighPriorityEnabled": false,
+        "numBuffers": 2,
+        "verticalSyncEnabled": false,
+        "verticalSyncBlockRenderingEnabled": false,
+        "renderOverfillFactor": 1.0,
+        "renderOversampleFactor": 1.0,
+
+        "window": {
+            "title": "OSVR",
+            "fullScreenEnabled": true,
+            "xPosition": 0,
+            "yPosition": 0
+        },
+
+        "display": {
+            "rotation": 0,
+            "bitsPerColor": 8
+        },
+
+        "prediction": {
+            "enabled": false,
+            "staticDelayMS": 26,
+            "leftEyeDelayMS": 0,
+            "rightEyeDelayMS": 0,
+            "localTimeOverride": true
+        },
+
+        "timeWarp": {
+            "enabled": false,
+            "asynchronous": false,
+            "maxMsBeforeVSync": 4
+        }
+    }
+  },
+  "plugins": [
+    "org_osvr_android_moverio", "com_osvr_android_jniImaging"
+  ]
+}
+
