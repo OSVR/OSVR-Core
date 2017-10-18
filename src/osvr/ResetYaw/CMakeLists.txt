@@ -1,9 +1,6 @@
 osvr_setup_lib_vars(ResetYaw)
 
-set(API
-    "${HEADER_LOCATION}/ClientMainloop.h"
-    "${HEADER_LOCATION}/ClientMainloopThread.h"
-    "${HEADER_LOCATION}/ResetYaw.h")
+set(API "${HEADER_LOCATION}/ResetYaw.h")
 
 set(SOURCE
     ResetYaw.cpp
@@ -25,12 +22,11 @@ target_include_directories(${LIBNAME_FULL}
     ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${LIBNAME_FULL}
-    PUBLIC
+    PRIVATE
     JsonCpp::JsonCpp
     osvrClientKitCpp
     osvrClient
     osvrCommon
     eigen-headers
     boost_thread)
-
-
+    
