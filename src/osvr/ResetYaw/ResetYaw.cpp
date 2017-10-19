@@ -97,10 +97,10 @@ OSVR_ReturnCode osvrResetYaw() {
 	{
 		ClientMainloopThread client(ctx);
 
-		cout << "Running client mainloop briefly to start up..." << endl;
+		/*cout << "Running client mainloop briefly to start up..." << endl;
 		client.loopForDuration(boost::chrono::seconds(2));
 		cout << "Removing any previous yaw-reset transforms..." << endl;
-
+		*/
 		// Get the alias element corresponding to the desired path, if possible.
 		auto elt = getAliasElement(ctx, path);
 		if (!elt) {
@@ -120,23 +120,23 @@ OSVR_ReturnCode osvrResetYaw() {
 			cerr << "Couldn't parse the alias!" << endl;
 			return OSVR_RETURN_FAILURE;
 		}
-		cout << "Original transform: "
-			<< origAlias.getAliasValue().toStyledString() << "\n" << endl;
+		//cout << "Original transform: "
+			//<< origAlias.getAliasValue().toStyledString() << "\n" << endl;
 		osvr::common::GeneralizedTransform xforms{ origAlias.getAliasValue() };
 		osvr::common::remove_if(xforms, [](Json::Value const &current) {
 			return current.isMember(FLAG_KEY) && current[FLAG_KEY].isBool() &&
 				current[FLAG_KEY].asBool();
 		});
-		cout << "Cleaned transform: "
+	/*	cout << "Cleaned transform: "
 			<< xforms.get(origAlias.getLeaf()).toStyledString() << "\n"
-			<< endl;
+			<< endl;*/
 		elt->setSource(
 			osvr::common::jsonToCompactString(xforms.get(origAlias.getLeaf())));
 		ctx.get()->sendRoute(createJSONAlias(path, *elt));
 
-		cout << "Sent cleaned transform, starting again and waiting a few "
+		/*cout << "Sent cleaned transform, starting again and waiting a few "
 			"seconds for startup..."
-			<< endl;
+			<< endl;*/
 		client.start();
 		boost::this_thread::sleep(SETTLE_TIME);
 
@@ -157,15 +157,15 @@ OSVR_ReturnCode osvrResetYaw() {
 			}
 			auto q = osvr::util::eigen_interop::map(state);
 			auto yaw = osvr::util::extractYaw(q);
-			cout << "Correction: " << -yaw << " radians about Y" << endl;
+			//cout << "Correction: " << -yaw << " radians about Y" << endl;
 
 			Json::Value newLayer(Json::objectValue);
 			newLayer["postrotate"]["radians"] = -yaw;
 			newLayer["postrotate"]["axis"] = "y";
 			newLayer[FLAG_KEY] = true;
 			xforms.wrap(newLayer);
-			cout << "New source: "
-				<< xforms.get(origAlias.getLeaf()).toStyledString() << endl;
+			//cout << "New source: "
+				//<< xforms.get(origAlias.getLeaf()).toStyledString() << endl;
 
 			elt->setSource(osvr::common::jsonToCompactString(
 				xforms.get(origAlias.getLeaf())));
