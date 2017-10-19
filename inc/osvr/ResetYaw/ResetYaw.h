@@ -40,7 +40,7 @@
 
 OSVR_EXTERN_C_BEGIN
 
-OSVR_RESETYAW_EXPORT OSVR_ReturnCode osvrResetYaw(OSVR_ClientContext ctx);
+OSVR_RESETYAW_EXPORT OSVR_ReturnCode osvrResetYaw();
 
 OSVR_EXTERN_C_END
 
