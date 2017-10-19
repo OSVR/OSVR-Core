@@ -19,14 +19,17 @@ set_property(TARGET ${LIBNAME_FULL} APPEND PROPERTY
 
 target_include_directories(${LIBNAME_FULL}
     PRIVATE
-    ${Boost_INCLUDE_DIRS})
+    ${Boost_INCLUDE_DIRS}
+     INTERFACE
+    $<BUILD_INTERFACE:${HEADER_BASE}>
+    $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(${LIBNAME_FULL}
     PRIVATE
+    osvrUtil
     JsonCpp::JsonCpp
     osvrClientKitCpp
     osvrClient
     osvrCommon
     eigen-headers
     boost_thread)
-    
