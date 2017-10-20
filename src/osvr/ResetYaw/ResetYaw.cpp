@@ -82,25 +82,53 @@ getAliasElement(osvr::clientkit::ClientContext &ctx, std::string const &path) {
     return *elt;
 }
 
-auto SETTLE_TIME = boost::posix_time::seconds(2);
+auto SETTLE_TIME = boost::posix_time::seconds(0.005);
 
 /// @brief A flag we set in transform levels we create.
 static const char FLAG_KEY[] = "resetYaw";
+static bool gotNewPose = false;
+static bool gotFirstPose = false;
 
+static OSVR_TimeValue firstPoseTime;
+static OSVR_TimeValue newPoseTime;
+static OSVR_TimeValue timeNow;
+static OSVR_TimeValue lastResetTime;
+static const double DELAY_TIME = 0.5;
+
+
+void headOrientationCallback(void* userdata, const OSVR_TimeValue* timestamp, const OSVR_OrientationReport *report)
+{
+	if (!gotFirstPose && osvrTimeValueDurationSeconds(timestamp, &newPoseTime) > 0.1)
+	{
+		gotFirstPose = true;
+		firstPoseTime = *(timestamp);
+	}
+	else if (gotFirstPose && !gotNewPose && firstPoseTime != *(timestamp))
+	{
+		gotNewPose = true;
+		newPoseTime = *(timestamp);
+	}
+}
 
 OSVR_ReturnCode osvrResetYaw() {
+	//avoid spamming calls
+	if (lastResetTime.seconds != 0)
+	{
+		osvrTimeValueGetNow(&timeNow);
+		float duration = osvrTimeValueDurationSeconds(&timeNow, &lastResetTime);
+		if (duration <= DELAY_TIME) return OSVR_RETURN_FAILURE;
+	}	
+
 	osvr::clientkit::ClientContext ctx("com.osvr.bundled.resetyaw");
 	std::string const path = "/me/head";
 	// Get the interface associated with the destination route we
 	// are looking for.
 	osvr::clientkit::Interface iface = ctx.getInterface(path);
 	{
+		iface.registerCallback(&headOrientationCallback, NULL);
+
 		ClientMainloopThread client(ctx);
 
-		/*cout << "Running client mainloop briefly to start up..." << endl;
-		client.loopForDuration(boost::chrono::seconds(2));
-		cout << "Removing any previous yaw-reset transforms..." << endl;
-		*/
 		// Get the alias element corresponding to the desired path, if possible.
 		auto elt = getAliasElement(ctx, path);
 		if (!elt) {
@@ -120,25 +148,23 @@ OSVR_ReturnCode osvrResetYaw() {
 			cerr << "Couldn't parse the alias!" << endl;
 			return OSVR_RETURN_FAILURE;
 		}
-		//cout << "Original transform: "
-			//<< origAlias.getAliasValue().toStyledString() << "\n" << endl;
+
 		osvr::common::GeneralizedTransform xforms{ origAlias.getAliasValue() };
 		osvr::common::remove_if(xforms, [](Json::Value const &current) {
 			return current.isMember(FLAG_KEY) && current[FLAG_KEY].isBool() &&
 				current[FLAG_KEY].asBool();
 		});
-	/*	cout << "Cleaned transform: "
-			<< xforms.get(origAlias.getLeaf()).toStyledString() << "\n"
-			<< endl;*/
+
 		elt->setSource(
 			osvr::common::jsonToCompactString(xforms.get(origAlias.getLeaf())));
 		ctx.get()->sendRoute(createJSONAlias(path, *elt));
 
-		/*cout << "Sent cleaned transform, starting again and waiting a few "
-			"seconds for startup..."
-			<< endl;*/
+		
 		client.start();
-		boost::this_thread::sleep(SETTLE_TIME);
+		while (!gotFirstPose)
+		{
+			boost::this_thread::sleep(SETTLE_TIME);
+		}
 
 		OSVR_OrientationState state;
 		OSVR_TimeValue timestamp;
@@ -157,24 +183,33 @@ OSVR_ReturnCode osvrResetYaw() {
 			}
 			auto q = osvr::util::eigen_interop::map(state);
 			auto yaw = osvr::util::extractYaw(q);
-			//cout << "Correction: " << -yaw << " radians about Y" << endl;
-
+			cout << "Correction: " << -yaw << " radians about Y" << endl;
+		
 			Json::Value newLayer(Json::objectValue);
 			newLayer["postrotate"]["radians"] = -yaw;
 			newLayer["postrotate"]["axis"] = "y";
 			newLayer[FLAG_KEY] = true;
 			xforms.wrap(newLayer);
-			//cout << "New source: "
-				//<< xforms.get(origAlias.getLeaf()).toStyledString() << endl;
+			cout << "New source: "
+				<< xforms.get(origAlias.getLeaf()).toStyledString() << endl;
 
 			elt->setSource(osvr::common::jsonToCompactString(
 				xforms.get(origAlias.getLeaf())));
 			ctx.get()->sendRoute(createJSONAlias(path, *elt));
-			boost::this_thread::sleep(SETTLE_TIME / 2);
-		}
 
-		boost::this_thread::sleep(SETTLE_TIME);
+			gotNewPose = false;
+			gotFirstPose = false;	
+		}
+		while (!gotNewPose)
+		{
+			boost::this_thread::sleep(SETTLE_TIME);
+		}
+		gotNewPose = false;
+		gotFirstPose = false;
+		osvrTimeValueGetNow(&lastResetTime);
 	}
+
+	
 
 	return OSVR_RETURN_SUCCESS;
 }
