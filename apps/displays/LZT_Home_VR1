@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "schemaVersion": 1
+  },
+  "hmd": {
+    "device": {
+      "vendor": "LZT",
+      "model": "Home",
+      "num_displays": 1,
+      "Version": "VR1",
+      "Note": ""
+    },
+    "field_of_view": {
+      "monocular_horizontal": 83,
+      "monocular_vertical": 92,
+      "overlap_percent": 93,
+      "pitch_tilt": 0
+    },
+    "resolutions": [
+      {
+        "width": 2560,
+        "height": 1440,
+        "video_inputs": 1,
+        "display_mode": "horz_side_by_side",
+        "swap_eyes": 0
+      }
+    ],
+    "distortion": {
+		"distance_scale_x": 1,
+		"distance_scale_y": 1,
+		"polynomial_coeffs_red": [ 0, 1, 0.22, 0.24 ],
+		"polynomial_coeffs_green": [ 0, 1, 0.22, 0.24 ],
+		"polynomial_coeffs_blue": [ 0, 1, 0.22, 0.24 ]
+    },
+    "rendering": {
+      "right_roll": 0,
+      "left_roll": 0
+    },
+    "eyes": [
+      {
+        "center_proj_x": 0.576,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
+      },
+	  {
+        "center_proj_x": 0.424,
+        "center_proj_y": 0.5,
+        "rotate_180": 0
+      }
+    ]
+  }
+}
