@@ -82,7 +82,7 @@ getAliasElement(osvr::clientkit::ClientContext &ctx, std::string const &path) {
     return *elt;
 }
 
-auto SETTLE_TIME = boost::posix_time::seconds(0.005);
+auto SETTLE_TIME = boost::posix_time::microseconds(1);
 
 /// @brief A flag we set in transform levels we create.
 static const char FLAG_KEY[] = "resetYaw";
