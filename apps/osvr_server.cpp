@@ -61,14 +61,14 @@ int main(int argc, char *argv[]) {
 
     optionsPositional.add("config", -1);
     optionsVisible.add_options()
-        ("config", "server configuration filename")
+        ("config", opt::value< std::vector<std::string> >(), "server configuration filename")
         ("help", "display this help message")
         ("verbose,v", "enable verbose logging")
         ("debug,d", "enable debug logging");
     optionsAll.add(optionsVisible);
 
     opt::variables_map values;
-    try {
+    try {        
         opt::store(opt::command_line_parser(argc, argv)
                        .options(optionsAll)
                        .positional(optionsPositional)
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (values.count("config")) {
-        std::string configFileArgument = values["config"].as<std::string>();
+        std::string configFileArgument = values["config"].as<std::vector<std::string> >().front();
         log->info() << "Using config file " << configFileArgument << " from command line argument.";
         configPaths = { configFileArgument };
     } else {
