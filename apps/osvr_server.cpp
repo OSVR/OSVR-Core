@@ -101,12 +101,15 @@ int main(int argc, char *argv[]) {
     }
 
     if (values.count("config")) {
-        std::string configFileArgument = values["config"].as<std::vector<std::string> >().front();
-        log->info() << "Using config file " << configFileArgument << " from command line argument.";
-        configPaths = { configFileArgument };
+        std::string configFileArgument =
+            values["config"].as<std::vector<std::string> >().front();
+        log->info() << "Using config file " << configFileArgument
+                    << " from command line argument.";
+        configPaths = {configFileArgument};
     } else {
-        log->info() << "Using default config file - pass a filename on the command "
-            "line to use a different one.";
+        log->info()
+            << "Using default config file - pass a filename on the command "
+               "line to use a different one.";
         configPaths = osvr::server::getDefaultConfigFilePaths();
     }
 
