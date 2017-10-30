@@ -24,19 +24,19 @@
 // limitations under the License.
 
 // Internal Includes
+#include <osvr/Server/ConfigFilePaths.h>
 #include <osvr/Server/ConfigureServerFromFile.h>
 #include <osvr/Server/RegisterShutdownHandler.h>
-#include <osvr/Util/Logger.h>
 #include <osvr/Util/LogNames.h>
 #include <osvr/Util/LogRegistry.h>
-#include <osvr/Server/ConfigFilePaths.h>
+#include <osvr/Util/Logger.h>
 
 // Library/third-party includes
 #include <boost/program_options.hpp>
 
 // Standard includes
-#include <vector>
 #include <iostream>
+#include <vector>
 
 namespace opt = boost::program_options;
 
@@ -89,15 +89,17 @@ int main(int argc, char *argv[]) {
         std::cout << optionsVisible << std::endl;
         return 0;
     }
-
-    if (values.count("debug")) {
-        osvr::util::log::LogRegistry::instance().setLevel(osvr::util::log::LogLevel::trace);
-        osvr::util::log::LogRegistry::instance().setConsoleLevel(osvr::util::log::LogLevel::trace);
-        log->trace("Debug logging enabled.");
-    } else if (values.count("verbose")) {
-        osvr::util::log::LogRegistry::instance().setLevel(osvr::util::log::LogLevel::debug);
-        osvr::util::log::LogRegistry::instance().setConsoleLevel(osvr::util::log::LogLevel::debug);
-        log->debug("Verbose logging enabled.");
+    {
+        using namespace osvr::util::log;
+        if (values.count("debug")) {
+            LogRegistry::instance().setLevel(LogLevel::trace);
+            LogRegistry::instance().setConsoleLevel(LogLevel::trace);
+            log->trace("Debug logging enabled.");
+        } else if (values.count("verbose")) {
+            LogRegistry::instance().setLevel(LogLevel::debug);
+            LogRegistry::instance().setConsoleLevel(LogLevel::debug);
+            log->debug("Verbose logging enabled.");
+        }
     }
 
     if (values.count("config")) {
@@ -117,7 +119,8 @@ int main(int argc, char *argv[]) {
     if (!server) {
         // only attempt to load the empty config if no arguments are passed.
         if (!values.count("config")) {
-            log->info() << "Could not find a valid config file in the default search paths. Using default config object.";
+            log->info() << "Could not find a valid config file in the default "
+                           "search paths. Using default config object.";
             server = osvr::server::configureServerFromString("{ }");
         } else {
             return -1;
