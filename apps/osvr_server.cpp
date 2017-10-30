@@ -60,11 +60,13 @@ int main(int argc, char *argv[]) {
     opt::positional_options_description optionsPositional;
 
     optionsPositional.add("config", -1);
+    // clang-format off
     optionsVisible.add_options()
-        ("config", opt::value< std::vector<std::string> >(), "server configuration filename")
+        ("config", opt::value<std::vector<std::string> >(), "server configuration filename")
         ("help", "display this help message")
         ("verbose,v", "enable verbose logging")
         ("debug,d", "enable debug logging");
+    // clang-format on
     optionsAll.add(optionsVisible);
 
     opt::variables_map values;
