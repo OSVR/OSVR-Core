@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     optionsAll.add(optionsVisible);
 
     opt::variables_map values;
-    try {        
+    try {
         opt::store(opt::command_line_parser(argc, argv)
                        .options(optionsAll)
                        .positional(optionsPositional)
