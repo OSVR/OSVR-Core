@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     // clang-format off
     optionsVisible.add_options()
         ("config", opt::value<std::vector<std::string> >(), "server configuration filename")
-        ("help", "display this help message")
+        ("help,h", "display this help message")
         ("verbose,v", "enable verbose logging")
         ("debug,d", "enable debug logging");
     // clang-format on
